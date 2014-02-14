@@ -1,0 +1,1268 @@
+ObjectDomain_Shared_Package 15
+{-yk94ms_-e3s_e41656c6_-hn7 4 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "ccp" objectdomain.uml.mechanisms.UmlPackage-owns "general" objectdomain.uml.mechanisms.UmlPackage-owns "Instrument" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.core.TypeExpression $17
+objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Generalization-owns $9
+objectdomain.uml.core.Dependency-owns $12
+objectdomain.uml.core.Projection $15
+objectdomain.uml.core.UmlAttribute-features $7
+objectdomain.uml.core.UmlAssociationEnd-connections $11
+objectdomain.uml.view.style.BaseViewElementStyle-owns $14
+objectdomain.uml.view.ClassView-owns $3
+objectdomain.uml.core.UmlTaggedValue-taggedValues $8
+objectdomain.uml.core.UmlConstraint-constraints $13
+objectdomain.uml.core.UmlAssociation-owns $10
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.view.GeneralizationView-owns $4
+objectdomain.uml.core.UmlMultiplicity $16
+objectdomain.uml.core.UmlClass-owns $6
+objectdomain.uml.view.AssociationView-owns $5
+objectdomain.uml.core.Stereotype-owns $18
+]
+($1 1 > -yk94ms_-e3s_e41656c6_-hn7 4 "Logical" $1 "ccp" $1 "general" $1 "Instrument" $1
+(name "Instrument"
+)
+(uid "-yk94ms_-e3s_e41656c6_-hn7"))
+($2 2 < 0_-fvi_hrnjywg5_-o0k "_Instrument-details" 1
+(name "_Instrument-details"
+)
+(width 5000)
+(uid "0_-fvi_hrnjywg5_-o0k")
+(height 5000)
+(diagramType "class"))
+($3 3 < 0_-fvi_hrnjywg5_-o0j "AbstractInstrument" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o0j")
+(bbx 370 130 140 140))
+($3 4 < 0_-fvi_hrnjywg5_-o0i "NmrSpectrometer" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o0i")
+(bbx 160 330 260 90))
+($4 5 < 0_-fvi_hrnjywg5_-o0h "" 2
+(uid "0_-fvi_hrnjywg5_-o0h")
+(points 270 330 270 310 435 310 435 270))
+($3 6 < 0_-fvi_hrnjywg5_-o0g "NmrProbe" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o0g")
+(bbx 450 330 220 90))
+($4 7 < 0_-fvi_hrnjywg5_-o0f "" 2
+(uid "0_-fvi_hrnjywg5_-o0f")
+(points 560 330 560 310 435 310 435 270))
+($3 8 < 0_-fvi_hrnjywg5_-o0e "Instrument" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o0e")
+(bbx 700 400 140 60))
+($4 9 < 0_-fvi_hrnjywg5_-o0d "" 2
+(uid "0_-fvi_hrnjywg5_-o0d")
+(points 730 400 730 310 435 310 435 270))
+($3 10 < 0_-fvi_hrnjywg5_-o0c "Experiment" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o0c")
+(bbx 70 10 190 250))
+($5 11 < 0_-fvi_hrnjywg5_-o0b "" 2
+(toRolePosition 565 425)
+(uid "0_-fvi_hrnjywg5_-o0b")
+(points 115 260 115 660 560 660 560 420)
+(fromMultiplicityPosition 125 270))
+($5 12 < 0_-fvi_hrnjywg5_-o0a "" 2
+(toRolePosition 190 305)
+(uid "0_-fvi_hrnjywg5_-o0a")
+(points 235 260 235 330)
+(fromMultiplicityPosition 225 270))
+($3 13 < 0_-fvi_hrnjywg5_-o09 "NmrProbeType" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o09")
+(bbx 670 840 100 60))
+($3 14 < 0_-fvi_hrnjywg5_-o08 "SpectrometerFreq" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o08")
+(bbx 790 770 120 60))
+($3 15 < 0_-fvi_hrnjywg5_-o07 "Organisation" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o07")
+(bbx 640 0 230 240))
+($5 16 < 0_-fvi_hrnjywg5_-o06 "" 2
+(toRolePosition 545 140)
+(uid "0_-fvi_hrnjywg5_-o06")
+(points 510 165 640 165)
+(fromMultiplicityPosition 425 290))
+($3 17 < 0_-fvi_hrnjywg5_-o05 "Method" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o05")
+(bbx 960 360 180 130))
+($5 18 < 0_-fvi_hrnjywg5_-o04 "" 2
+(uid "0_-fvi_hrnjywg5_-o04")
+(points 960 435 840 435)
+(fromMultiplicityPosition 950 440))
+($3 19 < 0_-fvi_hrnjywg5_-o03 "Column" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-o03")
+(bbx 700 510 170 90))
+($4 20 < 0_-fvi_hrnjywg5_-o02 "" 2
+(uid "0_-fvi_hrnjywg5_-o02")
+(points 745 510 745 460))
+($5 21 < 0_-fvi_hrnjywg5_-o01 "" 2
+(toRolePosition 935 500)
+(uid "0_-fvi_hrnjywg5_-o01")
+(points 870 565 1035 565 1035 490)
+(fromMultiplicityPosition 880 545))
+($3 22 < 0_-fvi_hrnjywg5_-o00 "InstrumentStore" 2
+(uid "0_-fvi_hrnjywg5_-o00")
+(bbx 370 10 120 60))
+($5 23 < 0_-fvi_hrnjywg5_-nzz "" 2
+(toMultiplicityPosition 415 110)
+(toRolePosition 435 110)
+(uid "0_-fvi_hrnjywg5_-nzz")
+(points 430 70 430 130)
+(fromMultiplicityPosition 440 75))
+($5 24 < 0_-fvi_hrnjywg5_-nzy "" 2
+(toMultiplicityPosition 275 235)
+(toRolePosition 245 265)
+(uid "0_-fvi_hrnjywg5_-nzy")
+(points 260 115 300 115 300 255 260 255)
+(fromRolePosition 265 125)
+(fromMultiplicityPosition 265 90))
+($5 25 < 0_-fvi_hrnjywg5_-nzx "" 2
+(toRolePosition 1070 500)
+(uid "0_-fvi_hrnjywg5_-nzx")
+(points 85 260 85 675 1100 675 1100 490)
+(fromRolePosition 85 685)
+(fromMultiplicityPosition 90 265))
+($3 26 < 0_-fvi_hrnjywg5_-nzw "Entry" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nzw")
+(bbx 130 450 210 190))
+($5 27 < 0_-fvi_hrnjywg5_-nzv "" 2
+(toMultiplicityPosition 140 430)
+(toRolePosition 160 430)
+(uid "0_-fvi_hrnjywg5_-nzv")
+(points 155 260 155 450)
+(fromMultiplicityPosition 165 265))
+($5 28 < 0_-fvi_hrnjywg5_-nzu "" 2
+(toMultiplicityPosition 415 435)
+(uid "0_-fvi_hrnjywg5_-nzu")
+(points 340 490 400 490 400 420))
+($5 29 < 0_-fvi_hrnjywg5_-nzt "" 2
+(toMultiplicityPosition 480 435)
+(uid "0_-fvi_hrnjywg5_-nzt")
+(points 340 540 465 540 465 420))
+($2 30 < 0_-fvi_hrnjywg5_-nzs "_Instrument" 1
+(name "_Instrument"
+)
+(uid "0_-fvi_hrnjywg5_-nzs")
+(diagramType "class"))
+($3 31 < 0_-fvi_hrnjywg5_-nzr "AbstractInstrument" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nzr")
+(bbx 720 120 130 30))
+($3 32 < 0_-fvi_hrnjywg5_-nzq "NmrSpectrometer" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nzq")
+(bbx 90 30 120 30))
+($4 33 < 0_-fvi_hrnjywg5_-nzp "" 30
+(uid "0_-fvi_hrnjywg5_-nzp")
+(points 155 60 155 180 745 180 745 150))
+($3 34 < 0_-fvi_hrnjywg5_-nzo "NmrProbe" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nzo")
+(bbx 180 200 70 30))
+($4 35 < 0_-fvi_hrnjywg5_-nzn "" 30
+(uid "0_-fvi_hrnjywg5_-nzn")
+(points 215 200 215 180 745 180 745 150))
+($3 36 < 0_-fvi_hrnjywg5_-nzm "Instrument" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nzm")
+(bbx 270 200 80 30))
+($4 37 < 0_-fvi_hrnjywg5_-nzl "" 30
+(uid "0_-fvi_hrnjywg5_-nzl")
+(points 305 200 305 180 745 180 745 150))
+($3 38 < 0_-fvi_hrnjywg5_-nzk "Experiment" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nzk")
+(bbx 80 120 160 30))
+($5 39 < 0_-fvi_hrnjywg5_-nzj "" 30
+(toRolePosition 165 180)
+(uid "0_-fvi_hrnjywg5_-nzj")
+(points 190 150 190 200)
+(fromMultiplicityPosition 195 155))
+($5 40 < 0_-fvi_hrnjywg5_-nzi "" 30
+(toRolePosition 60 70)
+(uid "0_-fvi_hrnjywg5_-nzi")
+(points 110 120 110 60)
+(fromMultiplicityPosition 115 100))
+($3 41 < 0_-fvi_hrnjywg5_-nzh "Organisation" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nzh")
+(bbx 440 120 230 30))
+($5 42 < 0_-fvi_hrnjywg5_-nzg "" 30
+(toRolePosition 650 100)
+(uid "0_-fvi_hrnjywg5_-nzg")
+(points 720 130 670 130)
+(fromMultiplicityPosition 355 130))
+($3 43 < 0_-fvi_hrnjywg5_-nzf "Method" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nzf")
+(bbx 330 280 180 30))
+($5 44 < 0_-fvi_hrnjywg5_-nze "" 30
+(uid "0_-fvi_hrnjywg5_-nze")
+(points 345 280 345 230)
+(fromMultiplicityPosition 335 255))
+($3 45 < 0_-fvi_hrnjywg5_-nzd "Column" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nzd")
+(bbx 220 280 60 30))
+($5 46 < 0_-fvi_hrnjywg5_-nzc "" 30
+(toRolePosition 295 320)
+(uid "0_-fvi_hrnjywg5_-nzc")
+(points 280 310 330 310)
+(fromMultiplicityPosition 285 290))
+($4 47 < 0_-fvi_hrnjywg5_-nzb "" 30
+(uid "0_-fvi_hrnjywg5_-nzb")
+(points 275 280 275 230))
+($3 48 < 0_-fvi_hrnjywg5_-nza "InstrumentStore" 30
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nza")
+(bbx 730 20 110 30))
+($5 49 < 0_-fvi_hrnjywg5_-nz9 "" 30
+(toMultiplicityPosition 770 100)
+(toRolePosition 805 90)
+(uid "0_-fvi_hrnjywg5_-nz9")
+(points 765 50 765 120)
+(fromMultiplicityPosition 780 60))
+($5 50 < 0_-fvi_hrnjywg5_-nz8 "" 30
+(toMultiplicityPosition 250 105)
+(toRolePosition 245 130)
+(uid "0_-fvi_hrnjywg5_-nz8")
+(points 225 120 225 85 270 85 270 125 240 125)
+(fromRolePosition 135 100)
+(fromMultiplicityPosition 235 100))
+($5 51 < 0_-fvi_hrnjywg5_-nz7 "" 30
+(toRolePosition 475 320)
+(uid "0_-fvi_hrnjywg5_-nz7")
+(points 135 150 135 350 455 350 455 310)
+(fromRolePosition 5 190)
+(fromMultiplicityPosition 140 155))
+($6 52 < -yk94ms_85r_eqyymv3f_-om1 "AbstractInstrument" 1
+(name "AbstractInstrument"
+)
+(uid "-yk94ms_85r_eqyymv3f_-om1")
+(isAbstract true))
+($7 53 < 0_-fvi_hrnjywg5_-nz5 "serial" 52
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-nz5")
+(multiplicity "1"))
+($8 54 < 0_-fvi_hrnjywg5_-nz4 "isAutomatic" 53
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-nz4"))
+($8 55 < 0_-fvi_hrnjywg5_-nz3 "guid" 53
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:02_00003"
+)
+(uid "0_-fvi_hrnjywg5_-nz3"))
+($7 56 < 0_-fvi_hrnjywg5_-nz2 "name" 52
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-nz2")
+(multiplicity "1"))
+($8 57 < 0_-fvi_hrnjywg5_-nz1 "documentation" 56
+(name "documentation"
+)
+(value "The name of the instrument."
+)
+(uid "0_-fvi_hrnjywg5_-nz1"))
+($8 58 < 0_-fvi_hrnjywg5_-nz0 "guid" 56
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nz0"))
+($7 59 < 0_-fvi_hrnjywg5_-nyz "model" 52
+(name "model"
+)
+(uid "0_-fvi_hrnjywg5_-nyz"))
+($8 60 < 0_-fvi_hrnjywg5_-nyy "documentation" 59
+(name "documentation"
+)
+(value "The model of the instrument."
+)
+(uid "0_-fvi_hrnjywg5_-nyy"))
+($8 61 < 0_-fvi_hrnjywg5_-nyx "guid" 59
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00002"
+)
+(uid "0_-fvi_hrnjywg5_-nyx"))
+($7 62 < 0_-fvi_hrnjywg5_-nyw "instrumentType" 52
+(name "instrumentType"
+)
+(uid "0_-fvi_hrnjywg5_-nyw"))
+($8 63 < 0_-fvi_hrnjywg5_-nyv "documentation" 62
+(name "documentation"
+)
+(value "The type of the instrument. Should be an open enumeration."
+)
+(uid "0_-fvi_hrnjywg5_-nyv"))
+($8 64 < 0_-fvi_hrnjywg5_-nyu "guid" 62
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00003"
+)
+(uid "0_-fvi_hrnjywg5_-nyu"))
+($8 65 < 0_-fvi_hrnjywg5_-nyt "isAbstract" 62
+(name "isAbstract"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-nyt"))
+($7 66 < 0_-fvi_hrnjywg5_-nys "serialNumber" 52
+(name "serialNumber"
+)
+(uid "0_-fvi_hrnjywg5_-nys"))
+($8 67 < 0_-fvi_hrnjywg5_-nyr "documentation" 66
+(name "documentation"
+)
+(value "Instrument 'serial number'. A string that uniquely identifies a given instrument."
+)
+(uid "0_-fvi_hrnjywg5_-nyr"))
+($8 68 < 0_-fvi_hrnjywg5_-nyq "guid" 66
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00004"
+)
+(uid "0_-fvi_hrnjywg5_-nyq"))
+($7 69 < 0_-fvi_hrnjywg5_-nyp "details" 52
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-nyp"))
+($8 70 < 0_-fvi_hrnjywg5_-nyo "guid" 69
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00005"
+)
+(uid "0_-fvi_hrnjywg5_-nyo"))
+($9 71 < 0_-fvi_hrnjywg5_-nyn "#<anon> (AbstractInstrument, DataObject)" 52
+(uid "0_-fvi_hrnjywg5_-nyn"))
+($10 72 < -yk94ms_85r_eqyymv3f_-oli "#<anon> (AbstractInstrument, Person)##,contactPerson" 52
+(name "")
+(uid "-yk94ms_85r_eqyymv3f_-oli"))
+($11 73 < 0_-fvi_hrnjywg5_-nyl "#0" 72
+(uid "0_-fvi_hrnjywg5_-nyl")
+(isNavigable false))
+($11 74 < 0_-fvi_hrnjywg5_-nyk "contactPerson#1" 72
+(name "contactPerson"
+)
+(uid "0_-fvi_hrnjywg5_-nyk"))
+($8 75 < 0_-fvi_hrnjywg5_-nyj "documentation" 74
+(name "documentation"
+)
+(value "This is the contact person in the company."
+)
+(uid "0_-fvi_hrnjywg5_-nyj"))
+($8 76 < 0_-fvi_hrnjywg5_-nyi "guid" 74
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:02_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nyi"))
+($10 77 < -yk94ms_85r_eqyymv3f_-old "#<anon> (AbstractInstrument, Organisation)##,manufacturer" 52
+(name "")
+(uid "-yk94ms_85r_eqyymv3f_-old"))
+($11 78 < 0_-fvi_hrnjywg5_-nyg "#0" 77
+(uid "0_-fvi_hrnjywg5_-nyg")
+(isNavigable false))
+($11 79 < 0_-fvi_hrnjywg5_-nyf "manufacturer#1" 77
+(name "manufacturer"
+)
+(uid "0_-fvi_hrnjywg5_-nyf"))
+($8 80 < 0_-fvi_hrnjywg5_-nye "documentation" 79
+(name "documentation"
+)
+(value "The name of the manufacturer of the instrument."
+)
+(uid "0_-fvi_hrnjywg5_-nye"))
+($8 81 < 0_-fvi_hrnjywg5_-nyd "guid" 79
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:02_00002"
+)
+(uid "0_-fvi_hrnjywg5_-nyd"))
+($8 82 < 0_-fvi_hrnjywg5_-nyc "documentation" 52
+(name "documentation"
+)
+(value "The details about the instrument system used to collect data for this experiment."
+)
+(uid "0_-fvi_hrnjywg5_-nyc"))
+($8 83 < 0_-fvi_hrnjywg5_-nyb "guid" 52
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00039"
+)
+(uid "0_-fvi_hrnjywg5_-nyb"))
+($8 84 < 0_-fvi_hrnjywg5_-nya "keyNames" 52
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-nya"))
+($12 85 < -yk94ms_85r_eqyymv3f_-ol5 "#<anon> (Instrument, Affiliation)" 1
+(uid "-yk94ms_85r_eqyymv3f_-ol5"))
+($6 86 < 0_-fvi_hrnjywg5_-ny8 "NmrSpectrometer" 1
+(name "NmrSpectrometer"
+)
+(uid "0_-fvi_hrnjywg5_-ny8"))
+($7 87 < 0_-fvi_hrnjywg5_-ny7 "instrumentType" 86
+(initialValue "NmrSpectrometer"
+)
+(changeability "frozen")
+(name "instrumentType"
+)
+(uid "0_-fvi_hrnjywg5_-ny7")
+(multiplicity "1"))
+($8 88 < 0_-fvi_hrnjywg5_-ny6 "documentation" 87
+(name "documentation"
+)
+(value "Instrument type - must be left as the default 'NmrSpectrometer'"
+)
+(uid "0_-fvi_hrnjywg5_-ny6"))
+($8 89 < 0_-fvi_hrnjywg5_-ny5 "guid" 87
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00008"
+)
+(uid "0_-fvi_hrnjywg5_-ny5"))
+($13 90 < 0_-fvi_hrnjywg5_-ny4 "instrumentType_is_NmrSpectrometer" 87
+(name "instrumentType_is_NmrSpectrometer"
+)
+(uid "0_-fvi_hrnjywg5_-ny4")
+(body "code:python"
+"_"
+"value == 'NmrSpectrometer'"
+"_"
+"code:java"
+"_"
+"\"NmrSpectrometer\".equals(value)"
+))
+($8 91 < 0_-fvi_hrnjywg5_-ny3 "guid" 90
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-08-10:15:19_00002"
+)
+(uid "0_-fvi_hrnjywg5_-ny3"))
+($7 92 < 0_-fvi_hrnjywg5_-ny2 "protonFreq" 86
+(name "protonFreq"
+)
+(uid "0_-fvi_hrnjywg5_-ny2"))
+($8 93 < 0_-fvi_hrnjywg5_-ny1 "documentation" 92
+(name "documentation"
+)
+(value "Actual magnet field strength expressed as the proton resonance frequency in MHz. e.g. '500.013'."
+)
+(uid "0_-fvi_hrnjywg5_-ny1"))
+($8 94 < 0_-fvi_hrnjywg5_-ny0 "guid" 92
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00009"
+)
+(uid "0_-fvi_hrnjywg5_-ny0"))
+($7 95 < 0_-fvi_hrnjywg5_-nxz "nominalFreq" 86
+(name "nominalFreq"
+)
+(uid "0_-fvi_hrnjywg5_-nxz"))
+($8 96 < 0_-fvi_hrnjywg5_-nxy "documentation" 95
+(name "documentation"
+)
+(value "Nominal rounded-off spectrometer frequency in MHz protons, given as a string. "
+)
+(uid "0_-fvi_hrnjywg5_-nxy"))
+($8 97 < 0_-fvi_hrnjywg5_-nxx "guid" 95
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00010"
+)
+(uid "0_-fvi_hrnjywg5_-nxx"))
+($10 98 < 0_-fvi_hrnjywg5_-nxw "#<anon> (NmrSpectrometer, Citation)##," 86
+(name "")
+(uid "0_-fvi_hrnjywg5_-nxw"))
+($11 99 < 0_-fvi_hrnjywg5_-nxv "#0" 98
+(uid "0_-fvi_hrnjywg5_-nxv")
+(multiplicity "*"))
+($8 100 < 0_-fvi_hrnjywg5_-nxu "documentation" 99
+(name "documentation"
+)
+(value "Nmr Spectrometers citing this Citation"
+)
+(uid "0_-fvi_hrnjywg5_-nxu"))
+($8 101 < 0_-fvi_hrnjywg5_-nxt "guid" 99
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00006"
+)
+(uid "0_-fvi_hrnjywg5_-nxt"))
+($11 102 < 0_-fvi_hrnjywg5_-nxs "#1" 98
+(changeability "frozen")
+(uid "0_-fvi_hrnjywg5_-nxs")
+(multiplicity "*"))
+($8 103 < 0_-fvi_hrnjywg5_-nxr "documentation" 102
+(name "documentation"
+)
+(value "Citations describing Nmr Spectrometer."
+)
+(uid "0_-fvi_hrnjywg5_-nxr"))
+($8 104 < 0_-fvi_hrnjywg5_-nxq "guid" 102
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00007"
+)
+(uid "0_-fvi_hrnjywg5_-nxq"))
+($9 105 < 0_-fvi_hrnjywg5_-nxp "#<anon> (NmrSpectrometer, AbstractInstrument)" 86
+(uid "0_-fvi_hrnjywg5_-nxp"))
+($8 106 < 0_-fvi_hrnjywg5_-nxo "documentation" 86
+(name "documentation"
+)
+(value "Nmr Spectrometer used for data acquisition during a Project. "
+)
+(uid "0_-fvi_hrnjywg5_-nxo"))
+($8 107 < 0_-fvi_hrnjywg5_-nxn "guid" 86
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00040"
+)
+(uid "0_-fvi_hrnjywg5_-nxn"))
+($8 108 < 0_-fvi_hrnjywg5_-nxm "keyNames" 86
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-nxm"))
+($6 109 < 0_-fvi_hrnjywg5_-nxl "Instrument" 1
+(name "Instrument"
+)
+(uid "0_-fvi_hrnjywg5_-nxl"))
+($7 110 < 0_-fvi_hrnjywg5_-nxk "instrumentType" 109
+(name "instrumentType"
+)
+(uid "0_-fvi_hrnjywg5_-nxk"))
+($8 111 < 0_-fvi_hrnjywg5_-nxj "documentation" 110
+(name "documentation"
+)
+(value "The type of the instrument. Should be an open enumeration."
+)
+(uid "0_-fvi_hrnjywg5_-nxj"))
+($8 112 < 0_-fvi_hrnjywg5_-nxi "guid" 110
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-08-10:15:19_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nxi"))
+($9 113 < 0_-fvi_hrnjywg5_-nxh "#<anon> (Instrument, AbstractInstrument)" 109
+(uid "0_-fvi_hrnjywg5_-nxh"))
+($8 114 < 0_-fvi_hrnjywg5_-nxg "documentation" 109
+(name "documentation"
+)
+(value "Instrument used."
+)
+(uid "0_-fvi_hrnjywg5_-nxg"))
+($8 115 < 0_-fvi_hrnjywg5_-nxf "guid" 109
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:46_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nxf"))
+($12 116 < 0_-fvi_hrnjywg5_-nxe "#<anon> (Instrument, Citation)" 1
+(uid "0_-fvi_hrnjywg5_-nxe"))
+($6 117 < 0_-fvi_hrnjywg5_-nxd "NmrProbeType" 1
+(name "NmrProbeType"
+)
+(uid "0_-fvi_hrnjywg5_-nxd"))
+($9 118 < 0_-fvi_hrnjywg5_-nxc "#<anon> (NmrProbeType, Line)" 117
+(uid "0_-fvi_hrnjywg5_-nxc"))
+($8 119 < 0_-fvi_hrnjywg5_-nxb "documentation" 117
+(name "documentation"
+)
+(value "Type of NmrProbe"
+)
+(uid "0_-fvi_hrnjywg5_-nxb"))
+($8 120 < 0_-fvi_hrnjywg5_-nxa "isOpen" 117
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-nxa"))
+($8 121 < 0_-fvi_hrnjywg5_-nx9 "enumeration" 117
+(name "enumeration"
+)
+(value "('liquid','solid','nano','flow','MAS')"
+)
+(uid "0_-fvi_hrnjywg5_-nx9"))
+($8 122 < 0_-fvi_hrnjywg5_-nx8 "guid" 117
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:46_00002"
+)
+(uid "0_-fvi_hrnjywg5_-nx8"))
+($6 123 < 0_-fvi_hrnjywg5_-nx7 "SpectrometerFreq" 1
+(name "SpectrometerFreq"
+)
+(uid "0_-fvi_hrnjywg5_-nx7"))
+($9 124 < 0_-fvi_hrnjywg5_-nx6 "#<anon> (SpectrometerFreq, Word)" 123
+(uid "0_-fvi_hrnjywg5_-nx6"))
+($8 125 < 0_-fvi_hrnjywg5_-nx5 "documentation" 123
+(name "documentation"
+)
+(value "Nominal spectrometer frequency."
+)
+(uid "0_-fvi_hrnjywg5_-nx5"))
+($8 126 < 0_-fvi_hrnjywg5_-nx4 "isOpen" 123
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-nx4"))
+($8 127 < 0_-fvi_hrnjywg5_-nx3 "enumeration" 123
+(name "enumeration"
+)
+(value "('360','400','500','600','750','800','900')"
+)
+(uid "0_-fvi_hrnjywg5_-nx3"))
+($8 128 < 0_-fvi_hrnjywg5_-nx2 "guid" 123
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:46_00003"
+)
+(uid "0_-fvi_hrnjywg5_-nx2"))
+($6 129 < 0_-fvi_hrnjywg5_-nx1 "Column" 1
+(name "Column"
+)
+(uid "0_-fvi_hrnjywg5_-nx1"))
+($7 130 < 0_-fvi_hrnjywg5_-nx0 "columnType" 129
+(name "columnType"
+)
+(uid "0_-fvi_hrnjywg5_-nx0"))
+($8 131 < 0_-fvi_hrnjywg5_-nwz "documentation" 130
+(name "documentation"
+)
+(value "The type of the column."
+)
+(uid "0_-fvi_hrnjywg5_-nwz"))
+($8 132 < 0_-fvi_hrnjywg5_-nwy "guid" 130
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00009"
+)
+(uid "0_-fvi_hrnjywg5_-nwy"))
+($7 133 < 0_-fvi_hrnjywg5_-nwx "volume" 129
+(name "volume"
+)
+(uid "0_-fvi_hrnjywg5_-nwx"))
+($8 134 < 0_-fvi_hrnjywg5_-nww "documentation" 133
+(name "documentation"
+)
+(value "The volume of the column in m3."
+)
+(uid "0_-fvi_hrnjywg5_-nww"))
+($8 135 < 0_-fvi_hrnjywg5_-nwv "guid" 133
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00010"
+)
+(uid "0_-fvi_hrnjywg5_-nwv"))
+($7 136 < 0_-fvi_hrnjywg5_-nwu "volumeDisplayUnit" 129
+(name "volumeDisplayUnit"
+)
+(uid "0_-fvi_hrnjywg5_-nwu"))
+($8 137 < 0_-fvi_hrnjywg5_-nwt "documentation" 136
+(name "documentation"
+)
+(value "This is the unit entered by user and used for display."
+)
+(uid "0_-fvi_hrnjywg5_-nwt"))
+($8 138 < 0_-fvi_hrnjywg5_-nws "guid" 136
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00011"
+)
+(uid "0_-fvi_hrnjywg5_-nws"))
+($9 139 < 0_-fvi_hrnjywg5_-nwr "#<anon> (Column, Instrument)" 129
+(uid "0_-fvi_hrnjywg5_-nwr"))
+($10 140 < 0_-fvi_hrnjywg5_-nwq "#<anon> (Column, Method)##,loadingMethod" 129
+(name "")
+(uid "0_-fvi_hrnjywg5_-nwq"))
+($11 141 < 0_-fvi_hrnjywg5_-nwp "#0" 140
+(uid "0_-fvi_hrnjywg5_-nwp")
+(multiplicity "*"))
+($8 142 < 0_-fvi_hrnjywg5_-nwo "documentation" 141
+(name "documentation"
+)
+(value "Columns that use this loading method."
+)
+(uid "0_-fvi_hrnjywg5_-nwo"))
+($8 143 < 0_-fvi_hrnjywg5_-nwn "guid" 141
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00007"
+)
+(uid "0_-fvi_hrnjywg5_-nwn"))
+($11 144 < 0_-fvi_hrnjywg5_-nwm "loadingMethod#1" 140
+(name "loadingMethod"
+)
+(uid "0_-fvi_hrnjywg5_-nwm"))
+($8 145 < 0_-fvi_hrnjywg5_-nwl "documentation" 144
+(name "documentation"
+)
+(value "The method used to load the sample into the column e.g. injected (HPLC), gravity, ..."
+)
+(uid "0_-fvi_hrnjywg5_-nwl"))
+($8 146 < 0_-fvi_hrnjywg5_-nwk "guid" 144
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00008"
+)
+(uid "0_-fvi_hrnjywg5_-nwk"))
+($8 147 < 0_-fvi_hrnjywg5_-nwj "documentation" 129
+(name "documentation"
+)
+(value "The column instrument."
+)
+(uid "0_-fvi_hrnjywg5_-nwj"))
+($8 148 < 0_-fvi_hrnjywg5_-nwi "guid" 129
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:46_00004"
+)
+(uid "0_-fvi_hrnjywg5_-nwi"))
+($6 149 < 0_-fvi_hrnjywg5_-nwh "InstrumentStore" 1
+(name "InstrumentStore"
+)
+(uid "0_-fvi_hrnjywg5_-nwh"))
+($7 150 < 0_-fvi_hrnjywg5_-nwg "name" 149
+(changeability "frozen")
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-nwg")
+(multiplicity "1"))
+($8 151 < 0_-fvi_hrnjywg5_-nwf "documentation" 150
+(name "documentation"
+)
+(value "name of InstrumentGroup"
+)
+(uid "0_-fvi_hrnjywg5_-nwf"))
+($8 152 < 0_-fvi_hrnjywg5_-nwe "guid" 150
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:05_00004"
+)
+(uid "0_-fvi_hrnjywg5_-nwe"))
+($10 153 < 0_-fvi_hrnjywg5_-nwd "#<anon> (InstrumentStore, AbstractInstrument)##,instruments" 149
+(name "")
+(uid "0_-fvi_hrnjywg5_-nwd"))
+($11 154 < 0_-fvi_hrnjywg5_-nwc "#0" 153
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-nwc")
+(multiplicity "1"))
+($8 155 < 0_-fvi_hrnjywg5_-nwb "guid" 154
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00017"
+)
+(uid "0_-fvi_hrnjywg5_-nwb"))
+($11 156 < 0_-fvi_hrnjywg5_-nwa "instruments#1" 153
+(name "instruments"
+)
+(uid "0_-fvi_hrnjywg5_-nwa")
+(multiplicity "*"))
+($8 157 < 0_-fvi_hrnjywg5_-nw9 "baseName" 156
+(name "baseName"
+)
+(value "instrument"
+)
+(uid "0_-fvi_hrnjywg5_-nw9"))
+($8 158 < 0_-fvi_hrnjywg5_-nw8 "guid" 156
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:05_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nw8"))
+($9 159 < 0_-fvi_hrnjywg5_-nw7 "#<anon> (InstrumentStore, TopObject)" 149
+(uid "0_-fvi_hrnjywg5_-nw7"))
+($8 160 < 0_-fvi_hrnjywg5_-nw6 "documentation" 149
+(name "documentation"
+)
+(value "grouping for Instrument data"
+)
+(uid "0_-fvi_hrnjywg5_-nw6"))
+($8 161 < 0_-fvi_hrnjywg5_-nw5 "guid" 149
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:19:49_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nw5"))
+($8 162 < 0_-fvi_hrnjywg5_-nw4 "keyNames" 149
+(name "keyNames"
+)
+(value "name"
+)
+(uid "0_-fvi_hrnjywg5_-nw4"))
+($6 163 < 0_-fvi_hrnjywg5_-nw3 "NmrProbe" 1
+(name "NmrProbe"
+)
+(uid "0_-fvi_hrnjywg5_-nw3"))
+($7 164 < 0_-fvi_hrnjywg5_-nw2 "instrumentType" 163
+(initialValue "NmrProbe"
+)
+(changeability "frozen")
+(name "instrumentType"
+)
+(uid "0_-fvi_hrnjywg5_-nw2")
+(multiplicity "1"))
+($8 165 < 0_-fvi_hrnjywg5_-nw1 "documentation" 164
+(name "documentation"
+)
+(value "Instrument type - must be left as the default 'NmrProbe'"
+)
+(uid "0_-fvi_hrnjywg5_-nw1"))
+($8 166 < 0_-fvi_hrnjywg5_-nw0 "guid" 164
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00002"
+)
+(uid "0_-fvi_hrnjywg5_-nw0"))
+($13 167 < 0_-fvi_hrnjywg5_-nvz "instrumentType_is_NmrProbe" 164
+(name "instrumentType_is_NmrProbe"
+)
+(uid "0_-fvi_hrnjywg5_-nvz")
+(body "code:python"
+"_"
+"value == 'NmrProbe'"
+"_"
+"code:java"
+"_"
+"\"NmrProbe\".equals(value)"
+))
+($8 168 < 0_-fvi_hrnjywg5_-nvy "guid" 167
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-08-10:15:18_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nvy"))
+($7 169 < 0_-fvi_hrnjywg5_-nvx "probeType" 163
+(name "probeType"
+)
+(uid "0_-fvi_hrnjywg5_-nvx"))
+($8 170 < 0_-fvi_hrnjywg5_-nvw "documentation" 169
+(name "documentation"
+)
+(value "Probe type. "
+)
+(uid "0_-fvi_hrnjywg5_-nvw"))
+($8 171 < 0_-fvi_hrnjywg5_-nvv "guid" 169
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00003"
+)
+(uid "0_-fvi_hrnjywg5_-nvv"))
+($7 172 < 0_-fvi_hrnjywg5_-nvu "diameter" 163
+(name "diameter"
+)
+(uid "0_-fvi_hrnjywg5_-nvu"))
+($8 173 < 0_-fvi_hrnjywg5_-nvt "documentation" 172
+(name "documentation"
+)
+(value "Probe diameter in cm."
+)
+(uid "0_-fvi_hrnjywg5_-nvt"))
+($8 174 < 0_-fvi_hrnjywg5_-nvs "guid" 172
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00004"
+)
+(uid "0_-fvi_hrnjywg5_-nvs"))
+($10 175 < 0_-fvi_hrnjywg5_-nvr "#<anon> (NmrProbe, Citation)##," 163
+(name "")
+(uid "0_-fvi_hrnjywg5_-nvr"))
+($11 176 < 0_-fvi_hrnjywg5_-nvq "#0" 175
+(uid "0_-fvi_hrnjywg5_-nvq")
+(multiplicity "*"))
+($8 177 < 0_-fvi_hrnjywg5_-nvp "documentation" 176
+(name "documentation"
+)
+(value "Nmr probes that use this Citation"
+)
+(uid "0_-fvi_hrnjywg5_-nvp"))
+($8 178 < 0_-fvi_hrnjywg5_-nvo "guid" 176
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:03_00011"
+)
+(uid "0_-fvi_hrnjywg5_-nvo"))
+($11 179 < 0_-fvi_hrnjywg5_-nvn "#1" 175
+(changeability "frozen")
+(uid "0_-fvi_hrnjywg5_-nvn")
+(multiplicity "*"))
+($8 180 < 0_-fvi_hrnjywg5_-nvm "documentation" 179
+(name "documentation"
+)
+(value "Citations describing Nmr Probe"
+)
+(uid "0_-fvi_hrnjywg5_-nvm"))
+($8 181 < 0_-fvi_hrnjywg5_-nvl "guid" 179
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:04_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nvl"))
+($9 182 < 0_-fvi_hrnjywg5_-nvk "#<anon> (NmrProbe, AbstractInstrument)" 163
+(uid "0_-fvi_hrnjywg5_-nvk"))
+($8 183 < 0_-fvi_hrnjywg5_-nvj "documentation" 163
+(name "documentation"
+)
+(value "NMR probe used. "
+)
+(uid "0_-fvi_hrnjywg5_-nvj"))
+($8 184 < 0_-fvi_hrnjywg5_-nvi "guid" 163
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00041"
+)
+(uid "0_-fvi_hrnjywg5_-nvi"))
+($8 185 < 0_-fvi_hrnjywg5_-nvh "keyNames" 163
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-nvh"))
+($8 186 < 0_-fvi_hrnjywg5_-nvg "shortName" 1
+(name "shortName"
+)
+(value "INST"
+)
+(uid "0_-fvi_hrnjywg5_-nvg"))
+($8 187 < 0_-fvi_hrnjywg5_-nvf "documentation" 1
+(name "documentation"
+)
+(value "Laboratory instruments, robots, spectrometers, and similar machinery."
+)
+(uid "0_-fvi_hrnjywg5_-nvf"))
+($8 188 < 0_-fvi_hrnjywg5_-nve "isDraft" 1
+(name "isDraft"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-nve"))
+($8 189 < 0_-fvi_hrnjywg5_-nvd "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00038"
+)
+(uid "0_-fvi_hrnjywg5_-nvd"))
+($15 191)
+($17 194)
+($17 196)
+($17 197)
+($15 201)
+($17 203)
+($17 206)
+($15 208)
+($15 209)
+($17 210)
+($15 211)
+($15 212)
+($17 213)
+($15 214)
+($15 216)
+($15 218)
+($15 220)
+($15 222)
+($15 223)
+($15 225)
+($15 226)
+($15 228)
+($15 230)
+($15 232)
+($17 233)
+($15 234)
+($15 235)
+($15 236)
+($17 238)
+($15 239)
+($15 240)
+($15 242)
+($15 245)
+($15 247)
+($15 249)
+($15 251)
+($15 253)
+($15 254)
+($15 255)
+($15 256)
+($15 257)
+($15 258)
+($15 259)
+($15 260)
+($15 261)
+($15 262)
+($15 263)
+($15 264)
+($15 265)
+($15 266)
+($15 267)
+($15 268)
+($15 269)
+($15 270)
+($15 271)
+($15 272)
+($15 273)
+($14 190 @ -yk94ms_-e3s_e41656c6_-fvx 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Instrument" $14)
+($6 192 @ 0_-fvi_hrnjywg5_-d9g 4 "Logical" $1 "memops" $1 "Implementation" $1 "DataObject" $6)
+($6 193 @ 0_-fvi_hrnjywg5_-dl3 4 "Logical" $1 "memops" $1 "Implementation" $1 "Int" $6)
+($6 195 @ 0_-fvi_hrnjywg5_-dkx 4 "Logical" $1 "memops" $1 "Implementation" $1 "Line" $6)
+($6 198 @ 0_-fvi_hrnjywg5_-dkm 4 "Logical" $1 "memops" $1 "Implementation" $1 "String" $6)
+($6 199 @ 0_-fvi_hrnjywg5_-orf 5 "Logical" $1 "ccp" $1 "general" $1 "Affiliation" $1 "Person" $6)
+($6 200 @ 0_-fvi_hrnjywg5_-ops 5 "Logical" $1 "ccp" $1 "general" $1 "Affiliation" $1 "Organisation" $6)
+($6 202 @ 0_-fvi_hrnjywg5_-dlb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Float" $6)
+($18 204 @ -yk94ms_-e3s_e41656c6_-fw7 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "DataType" $18)
+($6 205 @ 0_-fvi_hrnjywg5_-dkb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Word" $6)
+($6 207 @ 0_-fvi_hrnjywg5_-ogh 5 "Logical" $1 "ccp" $1 "general" $1 "Citation" $1 "Citation" $6)
+($14 215 @ -yk94ms_-e3s_e41656c6_-fvm 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Nmr" $14)
+($6 217 @ 0_-fvi_hrnjywg5_-ob2 5 "Logical" $1 "ccp" $1 "nmr" $1 "Nmr" $1 "Experiment" $6)
+($10 219 @ 0_-fvi_hrnjywg5_-i40 6 "Logical" $1 "ccp" $1 "nmr" $1 "Nmr" $1 "Experiment" $6 "#<anon> (Experiment, NmrProbe)##,probe" $10)
+($10 221 @ 0_-fvi_hrnjywg5_-i2u 6 "Logical" $1 "ccp" $1 "nmr" $1 "Nmr" $1 "Experiment" $6 "#<anon> (Experiment, NmrSpectrometer)##,spectrometer" $10)
+($14 224 @ -yk94ms_-e3s_e41656c6_-fw4 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "People" $14)
+($14 227 @ -yk94ms_-e3s_e41656c6_-fvo 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Method" $14)
+($6 229 @ 0_-fvi_hrnjywg5_-nqr 5 "Logical" $1 "ccp" $1 "general" $1 "Method" $1 "Method" $6)
+($10 231 @ 0_-fvi_hrnjywg5_-npr 6 "Logical" $1 "ccp" $1 "general" $1 "Method" $1 "Method" $6 "#<anon> (Method, Instrument)##," $10)
+($6 237 @ 0_-fvi_hrnjywg5_-dbb 4 "Logical" $1 "memops" $1 "Implementation" $1 "TopObject" $6)
+($10 241 @ 0_-fvi_hrnjywg5_-i29 6 "Logical" $1 "ccp" $1 "nmr" $1 "Nmr" $1 "Experiment" $6 "#<anon> (Experiment, )##derivedFrom,derivedTo" $10)
+($10 243 @ 0_-fvi_hrnjywg5_-i20 6 "Logical" $1 "ccp" $1 "nmr" $1 "Nmr" $1 "Experiment" $6 "#<anon> (Experiment, Method)##derivedNmrExperiments,derivationMethod" $10)
+($14 244 @ -yk94ms_-e3s_e41656c6_-fvq 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Entry" $14)
+($6 246 @ -yk94ms_85r_eqyymv3f_-fjc 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrEntry" $1 "Entry" $6)
+($10 248 @ 0_-fvi_hrnjywg5_-i38 6 "Logical" $1 "ccp" $1 "nmr" $1 "Nmr" $1 "Experiment" $6 "#<anon> (Experiment, Entry)##,entries" $10)
+($10 250 @ 0_-fvi_hrnjywg5_-eu3 6 "Logical" $1 "ccp" $1 "nmr" $1 "NmrEntry" $1 "Entry" $6 "#<anon> (Entry, NmrSpectrometer)##," $10)
+($10 252 @ 0_-fvi_hrnjywg5_-etx 6 "Logical" $1 "ccp" $1 "nmr" $1 "NmrEntry" $1 "Entry" $6 "#<anon> (Entry, NmrProbe)##," $10)
+($18 274 @ -yk94ms_-e3s_e41656c6_-fwy 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "import" $18)
+($1 275 @ -yk94ms_-e3s_e41656c6_-jc4 4 "Logical" $1 "ccp" $1 "general" $1 "Affiliation" $1)
+($1 276 @ -yk94ms_-e3s_e41656c6_-iio 4 "Logical" $1 "ccp" $1 "general" $1 "Citation" $1)
+(styleAssn 3 190)
+(typeAssn 73 52)
+(assocEndAssn 52 73)
+(typeAssn 78 52)
+(assocEndAssn 52 78)
+(typeAssn 156 52)
+(assocEndAssn 52 156)
+(subtypeAssn 71 52)
+(supertypeAssn 71 192)
+(generalizationAssn 52 71)
+(typeRefAssn 53 193)
+(typeExpression 53 194)
+(typeRefAssn 56 195)
+(typeExpression 56 196)
+(typeRefAssn 59 195)
+(typeExpression 59 194)
+(typeRefAssn 62 195)
+(typeExpression 62 194)
+(typeRefAssn 66 195)
+(typeExpression 66 197)
+(typeRefAssn 69 198)
+(typeExpression 69 194)
+(typeAssn 74 199)
+(typeAssn 79 200)
+(projectionAssn 3 52 191)
+(styleAssn 4 190)
+(typeAssn 99 86)
+(assocEndAssn 86 99)
+(subtypeAssn 105 86)
+(supertypeAssn 105 52)
+(generalizationAssn 86 105)
+(typeRefAssn 87 195)
+(typeExpression 87 197)
+(typeRefAssn 92 202)
+(typeExpression 92 203)
+(stereotypeAssn 123 204)
+(subtypeAssn 124 123)
+(supertypeAssn 124 205)
+(generalizationAssn 123 124)
+(typeRefAssn 95 123)
+(typeExpression 95 206)
+(typeAssn 102 207)
+(projectionAssn 4 86 201)
+(to 5 3)
+(from 5 4)
+(projectionAssn 5 105 208)
+(styleAssn 6 190)
+(typeAssn 176 163)
+(assocEndAssn 163 176)
+(subtypeAssn 182 163)
+(supertypeAssn 182 52)
+(generalizationAssn 163 182)
+(typeRefAssn 164 195)
+(typeExpression 164 197)
+(stereotypeAssn 117 204)
+(subtypeAssn 118 117)
+(supertypeAssn 118 195)
+(generalizationAssn 117 118)
+(typeRefAssn 169 117)
+(typeExpression 169 210)
+(typeRefAssn 172 202)
+(typeExpression 172 210)
+(typeAssn 179 207)
+(projectionAssn 6 163 209)
+(to 7 3)
+(from 7 6)
+(projectionAssn 7 182 211)
+(styleAssn 8 190)
+(subtypeAssn 113 109)
+(supertypeAssn 113 52)
+(generalizationAssn 109 113)
+(typeRefAssn 110 195)
+(typeExpression 110 213)
+(projectionAssn 8 109 212)
+(to 9 3)
+(from 9 8)
+(projectionAssn 9 113 214)
+(styleAssn 10 215)
+(projectionAssn 10 217 216)
+(to 11 6)
+(from 11 10)
+(projectionAssn 11 219 218)
+(to 12 4)
+(from 12 10)
+(projectionAssn 12 221 220)
+(styleAssn 13 190)
+(projectionAssn 13 117 222)
+(styleAssn 14 190)
+(projectionAssn 14 123 223)
+(styleAssn 15 224)
+(projectionAssn 15 200 225)
+(to 16 15)
+(from 16 3)
+(projectionAssn 16 77 226)
+(styleAssn 17 227)
+(projectionAssn 17 229 228)
+(to 18 8)
+(from 18 17)
+(projectionAssn 18 231 230)
+(styleAssn 19 190)
+(typeAssn 141 129)
+(assocEndAssn 129 141)
+(subtypeAssn 139 129)
+(supertypeAssn 139 109)
+(generalizationAssn 129 139)
+(typeRefAssn 130 195)
+(typeExpression 130 233)
+(typeRefAssn 133 202)
+(typeExpression 133 233)
+(typeRefAssn 136 205)
+(typeExpression 136 233)
+(typeAssn 144 229)
+(projectionAssn 19 129 232)
+(to 20 8)
+(from 20 19)
+(projectionAssn 20 139 234)
+(to 21 17)
+(from 21 19)
+(projectionAssn 21 140 235)
+(styleAssn 22 190)
+(typeAssn 154 149)
+(assocEndAssn 149 154)
+(subtypeAssn 159 149)
+(supertypeAssn 159 237)
+(generalizationAssn 149 159)
+(typeRefAssn 150 195)
+(typeExpression 150 238)
+(projectionAssn 22 149 236)
+(to 23 3)
+(from 23 22)
+(projectionAssn 23 153 239)
+(to 24 10)
+(from 24 10)
+(projectionAssn 24 241 240)
+(to 25 17)
+(from 25 10)
+(projectionAssn 25 243 242)
+(styleAssn 26 244)
+(projectionAssn 26 246 245)
+(to 27 26)
+(from 27 10)
+(projectionAssn 27 248 247)
+(to 28 4)
+(from 28 26)
+(projectionAssn 28 250 249)
+(to 29 6)
+(from 29 26)
+(projectionAssn 29 252 251)
+(styleAssn 31 190)
+(projectionAssn 31 52 253)
+(styleAssn 32 190)
+(projectionAssn 32 86 254)
+(to 33 31)
+(from 33 32)
+(projectionAssn 33 105 255)
+(styleAssn 34 190)
+(projectionAssn 34 163 256)
+(to 35 31)
+(from 35 34)
+(projectionAssn 35 182 257)
+(styleAssn 36 190)
+(projectionAssn 36 109 258)
+(to 37 31)
+(from 37 36)
+(projectionAssn 37 113 259)
+(styleAssn 38 215)
+(projectionAssn 38 217 260)
+(to 39 34)
+(from 39 38)
+(projectionAssn 39 219 261)
+(to 40 32)
+(from 40 38)
+(projectionAssn 40 221 262)
+(styleAssn 41 224)
+(projectionAssn 41 200 263)
+(to 42 41)
+(from 42 31)
+(projectionAssn 42 77 264)
+(styleAssn 43 227)
+(projectionAssn 43 229 265)
+(to 44 36)
+(from 44 43)
+(projectionAssn 44 231 266)
+(styleAssn 45 190)
+(projectionAssn 45 129 267)
+(to 46 43)
+(from 46 45)
+(projectionAssn 46 140 268)
+(to 47 36)
+(from 47 45)
+(projectionAssn 47 139 269)
+(styleAssn 48 190)
+(projectionAssn 48 149 270)
+(to 49 31)
+(from 49 48)
+(projectionAssn 49 153 271)
+(to 50 38)
+(from 50 38)
+(projectionAssn 50 241 272)
+(to 51 43)
+(from 51 38)
+(projectionAssn 51 243 273)
+(stereotypeAssn 85 274)
+(clientAssn 85 1)
+(supplierAssn 85 275)
+(stereotypeAssn 116 274)
+(clientAssn 116 1)
+(supplierAssn 116 276)

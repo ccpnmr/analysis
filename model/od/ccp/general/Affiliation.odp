@@ -1,0 +1,1727 @@
+ObjectDomain_Shared_Package 15
+{-yk94ms_-e3s_e41656c6_-jc4 4 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "ccp" objectdomain.uml.mechanisms.UmlPackage-owns "general" objectdomain.uml.mechanisms.UmlPackage-owns "Affiliation" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.core.TypeExpression $17
+objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Generalization-owns $9
+objectdomain.uml.core.Dependency-owns $13
+objectdomain.uml.core.Projection $15
+objectdomain.uml.core.UmlAttribute-features $6
+objectdomain.uml.core.UmlAssociationEnd-connections $11
+objectdomain.uml.view.style.BaseViewElementStyle-owns $14
+objectdomain.uml.view.ClassView-owns $3
+objectdomain.uml.core.UmlTaggedValue-taggedValues $7
+objectdomain.uml.core.UmlConstraint-constraints $12
+objectdomain.uml.core.UmlAssociation-owns $10
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.core.UmlOperation-features $8
+objectdomain.uml.core.UmlMultiplicity $16
+objectdomain.uml.core.UmlClass-owns $5
+objectdomain.uml.view.AssociationView-owns $4
+objectdomain.uml.core.Stereotype-owns $18
+]
+($1 1 > -yk94ms_-e3s_e41656c6_-jc4 4 "Logical" $1 "ccp" $1 "general" $1 "Affiliation" $1
+(name "Affiliation"
+)
+(uid "-yk94ms_-e3s_e41656c6_-jc4"))
+($2 2 < 0_-fvi_hrnjywg5_-osv "_Affiliation-details" 1
+(name "_Affiliation-details"
+)
+(uid "0_-fvi_hrnjywg5_-osv")
+(diagramType "class"))
+($3 3 < 0_-fvi_hrnjywg5_-osu "Person" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-osu")
+(bbx 490 200 150 170))
+($3 4 < 0_-fvi_hrnjywg5_-ost "Organisation" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-ost")
+(bbx 900 520 150 240))
+($3 5 < 0_-fvi_hrnjywg5_-oss "Citation" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-oss")
+(bbx 900 60 190 240))
+($4 6 < 0_-fvi_hrnjywg5_-osr "" 2
+(toMultiplicityPosition 645 275)
+(toRolePosition 655 275)
+(uid "0_-fvi_hrnjywg5_-osr")
+(points 900 270 640 270)
+(fromRolePosition 790 275)
+(toOrderedPosition 655 290)
+(fromMultiplicityPosition 890 275))
+($3 7 < 0_-fvi_hrnjywg5_-osq "Entry" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-osq")
+(bbx 140 130 210 190))
+($3 8 < 0_-fvi_hrnjywg5_-osp "AbstractInstrument" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-osp")
+(bbx 820 340 280 140))
+($4 9 < 0_-fvi_hrnjywg5_-oso "" 2
+(toMultiplicityPosition 545 255)
+(toRolePosition 650 340)
+(uid "0_-fvi_hrnjywg5_-oso")
+(points 820 360 640 360)
+(fromMultiplicityPosition 725 1150))
+($4 10 < 0_-fvi_hrnjywg5_-osn "" 2
+(toMultiplicityPosition 645 205)
+(toRolePosition 655 205)
+(uid "0_-fvi_hrnjywg5_-osn")
+(points 900 200 640 200)
+(fromRolePosition 790 205)
+(toOrderedPosition 655 220)
+(fromMultiplicityPosition 890 205))
+($4 11 < 0_-fvi_hrnjywg5_-osm "" 2
+(toMultiplicityPosition 600 180)
+(toRolePosition 560 165)
+(uid "0_-fvi_hrnjywg5_-osm")
+(points 350 135 610 135 610 200)
+(fromRolePosition 370 105)
+(fromMultiplicityPosition 355 110))
+($4 12 < 0_-fvi_hrnjywg5_-osl "" 2
+(toMultiplicityPosition 480 180)
+(toRolePosition 470 160)
+(uid "0_-fvi_hrnjywg5_-osl")
+(points 350 155 490 155 490 200)
+(fromRolePosition 355 160)
+(toOrderedPosition 425 190)
+(fromMultiplicityPosition 355 130))
+($3 13 < 0_-fvi_hrnjywg5_-osk "PersonTitle" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-osk")
+(bbx 1120 140 80 60))
+($3 14 < 0_-fvi_hrnjywg5_-osj "FamilyTitle" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-osj")
+(bbx 1120 30 80 60))
+($3 15 < 0_-fvi_hrnjywg5_-osi "PersonInGroup" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-osi")
+(bbx 290 350 150 170))
+($4 16 < 0_-fvi_hrnjywg5_-osh "" 2
+(toMultiplicityPosition 445 345)
+(uid "0_-fvi_hrnjywg5_-osh")
+(points 490 365 440 365)
+(fromMultiplicityPosition 475 370))
+($3 17 < 0_-fvi_hrnjywg5_-osg "Group" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-osg")
+(bbx 400 610 90 90))
+($4 18 < 0_-fvi_hrnjywg5_-osf "" 2
+(toMultiplicityPosition 495 660)
+(uid "0_-fvi_hrnjywg5_-osf")
+(points 900 685 490 685)
+(fromMultiplicityPosition 875 700))
+($4 19 < 0_-fvi_hrnjywg5_-ose "" 2
+(toMultiplicityPosition 450 535)
+(uid "0_-fvi_hrnjywg5_-ose")
+(points 435 610 435 520)
+(fromMultiplicityPosition 415 585))
+($4 20 < 0_-fvi_hrnjywg5_-osd "" 2
+(toRolePosition 985 500)
+(uid "0_-fvi_hrnjywg5_-osd")
+(points 975 480 975 520)
+(fromMultiplicityPosition 720 1260))
+($4 21 < 0_-fvi_hrnjywg5_-osc "" 2
+(toMultiplicityPosition 380 675)
+(toRolePosition 305 635)
+(uid "0_-fvi_hrnjywg5_-osc")
+(points 140 320 40 320 40 660 400 660)
+(fromRolePosition 70 300)
+(fromMultiplicityPosition 130 325))
+($4 22 < 0_-fvi_hrnjywg5_-osb "" 2
+(toMultiplicityPosition 125 165)
+(toRolePosition 20 190)
+(uid "0_-fvi_hrnjywg5_-osb")
+(points 940 60 940 35 80 35 80 185 140 185)
+(fromRolePosition 830 40)
+(toOrderedPosition 55 165))
+($4 23 < 0_-fvi_hrnjywg5_-osa "" 2
+(toMultiplicityPosition 180 105)
+(toRolePosition 90 95)
+(uid "0_-fvi_hrnjywg5_-osa")
+(points 900 80 170 80 170 130)
+(fromRolePosition 775 85)
+(fromMultiplicityPosition 885 85))
+($3 24 < 0_-fvi_hrnjywg5_-os9 "AffiliationStore" 2
+(uid "0_-fvi_hrnjywg5_-os9")
+(bbx 1120 300 110 60))
+($4 25 < 0_-fvi_hrnjywg5_-os8 "" 2
+(toMultiplicityPosition 1055 550)
+(uid "0_-fvi_hrnjywg5_-os8")
+(points 1140 360 1140 545 1050 545)
+(fromMultiplicityPosition 1155 375))
+($4 26 < 0_-fvi_hrnjywg5_-os7 "" 2
+(toMultiplicityPosition 645 320)
+(uid "0_-fvi_hrnjywg5_-os7")
+(points 1120 320 640 320)
+(fromMultiplicityPosition 1105 335))
+($4 27 < 0_-fvi_hrnjywg5_-os6 "" 2
+(toRolePosition 445 475)
+(uid "0_-fvi_hrnjywg5_-os6")
+(points 510 370 510 470 440 470))
+($3 28 < 0_-fvi_hrnjywg5_-os5 "MimeTypeDataStore" 2
+(uid "0_-fvi_hrnjywg5_-os5")
+(bbx 60 540 290 60))
+($4 29 < 0_-fvi_hrnjywg5_-os4 "" 2
+(toRolePosition 140 520)
+(uid "0_-fvi_hrnjywg5_-os4")
+(points 290 485 190 485 190 540)
+(fromRolePosition 185 455)
+(fromMultiplicityPosition 280 490))
+($2 30 < 0_-fvi_hrnjywg5_-os3 "_Affiliation" 1
+(name "_Affiliation"
+)
+(uid "0_-fvi_hrnjywg5_-os3")
+(diagramType "class"))
+($3 31 < 0_-fvi_hrnjywg5_-os2 "Person" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-os2")
+(bbx 430 210 50 30))
+($3 32 < 0_-fvi_hrnjywg5_-os1 "Organisation" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-os1")
+(bbx 350 410 90 30))
+($3 33 < 0_-fvi_hrnjywg5_-os0 "Citation" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-os0")
+(bbx 710 130 190 30))
+($4 34 < 0_-fvi_hrnjywg5_-orz "" 30
+(toMultiplicityPosition 465 185)
+(toRolePosition 480 175)
+(uid "0_-fvi_hrnjywg5_-orz")
+(points 710 160 710 170 475 170 475 210)
+(fromRolePosition 725 165)
+(toOrderedPosition 540 175)
+(fromMultiplicityPosition 700 150))
+($4 35 < 0_-fvi_hrnjywg5_-ory "" 30
+(toMultiplicityPosition 440 185)
+(toRolePosition 460 120)
+(uid "0_-fvi_hrnjywg5_-ory")
+(points 710 130 710 115 450 115 450 210)
+(fromRolePosition 725 105)
+(toOrderedPosition 455 90)
+(fromMultiplicityPosition 700 120))
+($3 36 < 0_-fvi_hrnjywg5_-orx "Entry" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-orx")
+(bbx 140 140 160 30))
+($4 37 < 0_-fvi_hrnjywg5_-orw "" 30
+(toMultiplicityPosition 415 215)
+(toRolePosition 310 190)
+(uid "0_-fvi_hrnjywg5_-orw")
+(points 295 170 295 215 430 215)
+(fromRolePosition 215 175)
+(fromMultiplicityPosition 300 155))
+($4 38 < 0_-fvi_hrnjywg5_-orv "" 30
+(toMultiplicityPosition 420 180)
+(toRolePosition 365 125)
+(uid "0_-fvi_hrnjywg5_-orv")
+(points 295 140 295 120 430 120 430 210)
+(fromRolePosition 260 100)
+(toOrderedPosition 365 145)
+(fromMultiplicityPosition 300 140))
+($3 39 < 0_-fvi_hrnjywg5_-oru "AbstractInstrument" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-oru")
+(bbx 610 380 280 30))
+($4 40 < 0_-fvi_hrnjywg5_-ort "" 30
+(toMultiplicityPosition 385 140)
+(toRolePosition 595 235)
+(uid "0_-fvi_hrnjywg5_-ort")
+(points 660 380 660 230 480 230)
+(fromMultiplicityPosition 590 300))
+($4 41 < 0_-fvi_hrnjywg5_-ors "" 30
+(toRolePosition 455 415)
+(uid "0_-fvi_hrnjywg5_-ors")
+(points 610 410 440 410)
+(fromMultiplicityPosition 735 315))
+($3 42 < 0_-fvi_hrnjywg5_-orr "Group" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-orr")
+(bbx 250 310 50 30))
+($4 43 < 0_-fvi_hrnjywg5_-orq "" 30
+(toMultiplicityPosition 255 345)
+(uid "0_-fvi_hrnjywg5_-orq")
+(points 350 415 265 415 265 340)
+(fromMultiplicityPosition 335 385))
+($3 44 < 0_-fvi_hrnjywg5_-orp "PersonInGroup" 30
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-orp")
+(bbx 190 250 100 30))
+($4 45 < 0_-fvi_hrnjywg5_-oro "" 30
+(toMultiplicityPosition 220 230)
+(uid "0_-fvi_hrnjywg5_-oro")
+(points 430 235 235 235 235 250)
+(fromMultiplicityPosition 415 245))
+($4 46 < 0_-fvi_hrnjywg5_-orn "" 30
+(toMultiplicityPosition 265 285)
+(uid "0_-fvi_hrnjywg5_-orn")
+(points 260 310 260 280)
+(fromMultiplicityPosition 245 295))
+($4 47 < 0_-fvi_hrnjywg5_-orm "" 30
+(toMultiplicityPosition 235 315)
+(toRolePosition 150 340)
+(uid "0_-fvi_hrnjywg5_-orm")
+(points 160 170 160 335 250 335)
+(fromRolePosition 125 200)
+(fromMultiplicityPosition 165 175))
+($4 48 < 0_-fvi_hrnjywg5_-orl "" 30
+(toMultiplicityPosition 55 130)
+(toRolePosition 10 155)
+(uid "0_-fvi_hrnjywg5_-orl")
+(points 900 145 970 145 970 45 45 45 45 150 140 150)
+(fromRolePosition 910 150)
+(toOrderedPosition 45 105))
+($4 49 < 0_-fvi_hrnjywg5_-ork "" 30
+(toMultiplicityPosition 190 120)
+(toRolePosition 145 105)
+(uid "0_-fvi_hrnjywg5_-ork")
+(points 835 130 835 85 200 85 200 140)
+(fromRolePosition 840 95)
+(fromMultiplicityPosition 845 110))
+($3 50 < 0_-fvi_hrnjywg5_-orj "AffiliationStore" 30
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-orj")
+(bbx 810 210 110 30))
+($4 51 < 0_-fvi_hrnjywg5_-ori "" 30
+(toMultiplicityPosition 445 450)
+(uid "0_-fvi_hrnjywg5_-ori")
+(points 865 240 865 440 440 440)
+(fromMultiplicityPosition 845 245))
+($4 52 < 0_-fvi_hrnjywg5_-orh "" 30
+(toMultiplicityPosition 490 200)
+(uid "0_-fvi_hrnjywg5_-orh")
+(points 810 220 480 220)
+(fromMultiplicityPosition 790 235))
+($4 53 < 0_-fvi_hrnjywg5_-org "" 30
+(toRolePosition 295 280)
+(uid "0_-fvi_hrnjywg5_-org")
+(points 430 240 430 275 290 275))
+($5 54 < 0_-fvi_hrnjywg5_-orf "Person" 1
+(name "Person"
+)
+(uid "0_-fvi_hrnjywg5_-orf"))
+($6 55 < 0_-fvi_hrnjywg5_-ore "serial" 54
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-ore")
+(multiplicity "1"))
+($7 56 < 0_-fvi_hrnjywg5_-ord "isAutomatic" 55
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-ord"))
+($7 57 < 0_-fvi_hrnjywg5_-orc "guid" 55
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00010"
+)
+(uid "0_-fvi_hrnjywg5_-orc"))
+($6 58 < 0_-fvi_hrnjywg5_-orb "familyName" 54
+(name "familyName"
+)
+(uid "0_-fvi_hrnjywg5_-orb")
+(multiplicity "1"))
+($7 59 < 0_-fvi_hrnjywg5_-ora "documentation" 58
+(name "documentation"
+)
+(value "Family name ('last name' for western names)."
+)
+(uid "0_-fvi_hrnjywg5_-ora"))
+($7 60 < 0_-fvi_hrnjywg5_-or9 "guid" 58
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00011"
+)
+(uid "0_-fvi_hrnjywg5_-or9"))
+($6 61 < 0_-fvi_hrnjywg5_-or8 "givenName" 54
+(name "givenName"
+)
+(uid "0_-fvi_hrnjywg5_-or8"))
+($7 62 < 0_-fvi_hrnjywg5_-or7 "documentation" 61
+(name "documentation"
+)
+(value "Given name ('first name' for western names)."
+)
+(uid "0_-fvi_hrnjywg5_-or7"))
+($7 63 < 0_-fvi_hrnjywg5_-or6 "guid" 61
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00012"
+)
+(uid "0_-fvi_hrnjywg5_-or6"))
+($6 64 < 0_-fvi_hrnjywg5_-or5 "firstInitial" 54
+(changeability "frozen")
+(name "firstInitial"
+)
+(uid "0_-fvi_hrnjywg5_-or5"))
+($7 65 < 0_-fvi_hrnjywg5_-or4 "documentation" 64
+(name "documentation"
+)
+(value "First initial."
+)
+(uid "0_-fvi_hrnjywg5_-or4"))
+($7 66 < 0_-fvi_hrnjywg5_-or3 "isDerived" 64
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-or3"))
+($7 67 < 0_-fvi_hrnjywg5_-or2 "guid" 64
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00013"
+)
+(uid "0_-fvi_hrnjywg5_-or2"))
+($6 68 < 0_-fvi_hrnjywg5_-or1 "middleInitials" 54
+(name "middleInitials"
+)
+(uid "0_-fvi_hrnjywg5_-or1")
+(multiplicity "*"))
+($7 69 < 0_-fvi_hrnjywg5_-or0 "baseName" 68
+(name "baseName"
+)
+(value "middleInitial"
+)
+(uid "0_-fvi_hrnjywg5_-or0"))
+($7 70 < 0_-fvi_hrnjywg5_-oqz "documentation" 68
+(name "documentation"
+)
+(value "Middle initials (including first one)."
+)
+(uid "0_-fvi_hrnjywg5_-oqz"))
+($7 71 < 0_-fvi_hrnjywg5_-oqy "guid" 68
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00014"
+)
+(uid "0_-fvi_hrnjywg5_-oqy"))
+($6 72 < 0_-fvi_hrnjywg5_-oqx "familyTitle" 54
+(name "familyTitle"
+)
+(uid "0_-fvi_hrnjywg5_-oqx"))
+($7 73 < 0_-fvi_hrnjywg5_-oqw "documentation" 72
+(name "documentation"
+)
+(value "Family title (e.g. Jr.)"
+)
+(uid "0_-fvi_hrnjywg5_-oqw"))
+($7 74 < 0_-fvi_hrnjywg5_-oqv "guid" 72
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00015"
+)
+(uid "0_-fvi_hrnjywg5_-oqv"))
+($6 75 < 0_-fvi_hrnjywg5_-oqu "title" 54
+(name "title"
+)
+(uid "0_-fvi_hrnjywg5_-oqu"))
+($7 76 < 0_-fvi_hrnjywg5_-oqt "documentation" 75
+(name "documentation"
+)
+(value "Title, 'Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Professor',..."
+)
+(uid "0_-fvi_hrnjywg5_-oqt"))
+($7 77 < 0_-fvi_hrnjywg5_-oqs "guid" 75
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00016"
+)
+(uid "0_-fvi_hrnjywg5_-oqs"))
+($8 78 < 0_-fvi_hrnjywg5_-oqr "getFirstInitial" 54
+(name "getFirstInitial"
+)
+(uid "0_-fvi_hrnjywg5_-oqr")
+(isQuery true))
+($7 79 < 0_-fvi_hrnjywg5_-oqq "documentation" 78
+(name "documentation"
+)
+(value "getter for derived attribute firstInitial"
+)
+(uid "0_-fvi_hrnjywg5_-oqq"))
+($7 80 < 0_-fvi_hrnjywg5_-oqp "opType" 78
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-oqp"))
+($7 81 < 0_-fvi_hrnjywg5_-oqo "guid" 78
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00017"
+)
+(uid "0_-fvi_hrnjywg5_-oqo"))
+($7 82 < 0_-fvi_hrnjywg5_-oqn "code:java" 78
+(name "code:java"
+)
+(value "java.util.List<java.lang.String> middleInitials = getMiddleInitials();"
+"if (!middleInitials.isEmpty())"
+"  result = middleInitials.iterator().next();"
+"else"
+"  result = null;"
+)
+(uid "0_-fvi_hrnjywg5_-oqn"))
+($7 83 < 0_-fvi_hrnjywg5_-oqm "code:python" 78
+(name "code:python"
+)
+(value "if self.middleInitials:"
+"  result = self.middleInitials[0]"
+"else:"
+"  result = None"
+)
+(uid "0_-fvi_hrnjywg5_-oqm"))
+($9 84 < 0_-fvi_hrnjywg5_-oql "#<anon> (Person, DataObject)" 54
+(uid "0_-fvi_hrnjywg5_-oql"))
+($10 85 < 0_-fvi_hrnjywg5_-oqk "#<anon> (Person, Annotation)##author," 54
+(name "")
+(uid "0_-fvi_hrnjywg5_-oqk"))
+($11 86 < 0_-fvi_hrnjywg5_-oqj "author#0" 85
+(name "author"
+)
+(uid "0_-fvi_hrnjywg5_-oqj"))
+($7 87 < 0_-fvi_hrnjywg5_-oqi "documentation" 86
+(name "documentation"
+)
+(value "Author of annotation"
+)
+(uid "0_-fvi_hrnjywg5_-oqi"))
+($7 88 < 0_-fvi_hrnjywg5_-oqh "guid" 86
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00003"
+)
+(uid "0_-fvi_hrnjywg5_-oqh"))
+($11 89 < 0_-fvi_hrnjywg5_-oqg "#1" 85
+(uid "0_-fvi_hrnjywg5_-oqg")
+(isNavigable false))
+($10 90 < 0_-fvi_hrnjywg5_-oqf "#<anon> (Person, PersonInGroup)##," 54
+(name "")
+(uid "0_-fvi_hrnjywg5_-oqf"))
+($11 91 < 0_-fvi_hrnjywg5_-oqe "#0" 90
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-oqe")
+(multiplicity "1"))
+($7 92 < 0_-fvi_hrnjywg5_-oqd "guid" 91
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00004"
+)
+(uid "0_-fvi_hrnjywg5_-oqd"))
+($11 93 < 0_-fvi_hrnjywg5_-oqc "#1" 90
+(uid "0_-fvi_hrnjywg5_-oqc")
+(multiplicity "*"))
+($7 94 < 0_-fvi_hrnjywg5_-oqb "guid" 93
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00005"
+)
+(uid "0_-fvi_hrnjywg5_-oqb"))
+($10 95 < 0_-fvi_hrnjywg5_-oqa "#<anon> (Person, PersonInGroup)##,currentPersonInGroup" 54
+(name "")
+(uid "0_-fvi_hrnjywg5_-oqa"))
+($11 96 < 0_-fvi_hrnjywg5_-oq9 "#0" 95
+(uid "0_-fvi_hrnjywg5_-oq9")
+(isNavigable false))
+($11 97 < 0_-fvi_hrnjywg5_-oq8 "currentPersonInGroup#1" 95
+(name "currentPersonInGroup"
+)
+(uid "0_-fvi_hrnjywg5_-oq8"))
+($7 98 < 0_-fvi_hrnjywg5_-oq7 "documentation" 97
+(name "documentation"
+)
+(value "PersonInGroup record describing where the person is currently located. To get the current group, do self.currentPersonInGroup.group"
+)
+(uid "0_-fvi_hrnjywg5_-oq7"))
+($7 99 < 0_-fvi_hrnjywg5_-oq6 "guid" 97
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-10-25-12:14:19_00001"
+)
+(uid "0_-fvi_hrnjywg5_-oq6"))
+($12 100 < 0_-fvi_hrnjywg5_-oq5 "currentPersonInGroup_must_refer_to_same_Person" 97
+(name "currentPersonInGroup_must_refer_to_same_Person"
+)
+(uid "0_-fvi_hrnjywg5_-oq5")
+(body "code:python"
+"_"
+"value.parent is self"
+"_"
+"code:java"
+"_"
+"other.getParent() == this"
+))
+($7 101 < 0_-fvi_hrnjywg5_-oq4 "guid" 100
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-10-25-12:14:19_00002"
+)
+(uid "0_-fvi_hrnjywg5_-oq4"))
+($10 102 < 0_-fvi_hrnjywg5_-oq3 "#<anon> (Person, Run)##operator," 54
+(name "")
+(uid "0_-fvi_hrnjywg5_-oq3"))
+($11 103 < 0_-fvi_hrnjywg5_-oq2 "operator#0" 102
+(name "operator"
+)
+(uid "0_-fvi_hrnjywg5_-oq2"))
+($7 104 < 0_-fvi_hrnjywg5_-oq1 "guid" 103
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-04-16-16:24:04_00041"
+)
+(uid "0_-fvi_hrnjywg5_-oq1"))
+($7 105 < 0_-fvi_hrnjywg5_-oq0 "documentation" 103
+(name "documentation"
+)
+(value "Person submitting the calculation"
+)
+(uid "0_-fvi_hrnjywg5_-oq0"))
+($11 106 < 0_-fvi_hrnjywg5_-opz "#1" 102
+(uid "0_-fvi_hrnjywg5_-opz")
+(isNavigable false))
+($7 107 < 0_-fvi_hrnjywg5_-opy "guid" 106
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-04-16-16:24:04_00042"
+)
+(uid "0_-fvi_hrnjywg5_-opy"))
+($7 108 < 0_-fvi_hrnjywg5_-opx "documentation" 106
+(name "documentation"
+)
+(uid "0_-fvi_hrnjywg5_-opx"))
+($7 109 < 0_-fvi_hrnjywg5_-opw "baseName" 106
+(name "baseName"
+)
+(value "nmrCalcRun"
+)
+(uid "0_-fvi_hrnjywg5_-opw"))
+($7 110 < 0_-fvi_hrnjywg5_-opv "documentation" 54
+(name "documentation"
+)
+(value "An individual person."
+)
+(uid "0_-fvi_hrnjywg5_-opv"))
+($7 111 < 0_-fvi_hrnjywg5_-opu "guid" 54
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00018"
+)
+(uid "0_-fvi_hrnjywg5_-opu"))
+($7 112 < 0_-fvi_hrnjywg5_-opt "keyNames" 54
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-opt"))
+($5 113 < 0_-fvi_hrnjywg5_-ops "Organisation" 1
+(name "Organisation"
+)
+(uid "0_-fvi_hrnjywg5_-ops"))
+($6 114 < 0_-fvi_hrnjywg5_-opr "serial" 113
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-opr")
+(multiplicity "1"))
+($7 115 < 0_-fvi_hrnjywg5_-opq "isAutomatic" 114
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-opq"))
+($7 116 < 0_-fvi_hrnjywg5_-opp "guid" 114
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00021"
+)
+(uid "0_-fvi_hrnjywg5_-opp"))
+($6 117 < 0_-fvi_hrnjywg5_-opo "name" 113
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-opo")
+(multiplicity "1"))
+($7 118 < 0_-fvi_hrnjywg5_-opn "documentation" 117
+(name "documentation"
+)
+(value "The name of organisation."
+)
+(uid "0_-fvi_hrnjywg5_-opn"))
+($7 119 < 0_-fvi_hrnjywg5_-opm "guid" 117
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00022"
+)
+(uid "0_-fvi_hrnjywg5_-opm"))
+($6 120 < 0_-fvi_hrnjywg5_-opl "organisationType" 113
+(name "organisationType"
+)
+(uid "0_-fvi_hrnjywg5_-opl"))
+($7 121 < 0_-fvi_hrnjywg5_-opk "documentation" 120
+(name "documentation"
+)
+(value "The type of organisation, can be 'home laboratory', 'other laboratory', 'reagent supplier', 'instrument supplier',..."
+)
+(uid "0_-fvi_hrnjywg5_-opk"))
+($7 122 < 0_-fvi_hrnjywg5_-opj "guid" 120
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00023"
+)
+(uid "0_-fvi_hrnjywg5_-opj"))
+($6 123 < 0_-fvi_hrnjywg5_-opi "addresses" 113
+(name "addresses"
+)
+(uid "0_-fvi_hrnjywg5_-opi")
+(multiplicity "*"))
+($7 124 < 0_-fvi_hrnjywg5_-oph "documentation" 123
+(name "documentation"
+)
+(value "The address of the organisation. e.g. '80 Tennis Court Road'. It can be stored as a list for multiple line address."
+)
+(uid "0_-fvi_hrnjywg5_-oph"))
+($7 125 < 0_-fvi_hrnjywg5_-opg "baseName" 123
+(name "baseName"
+)
+(value "address"
+)
+(uid "0_-fvi_hrnjywg5_-opg"))
+($7 126 < 0_-fvi_hrnjywg5_-opf "guid" 123
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00024"
+)
+(uid "0_-fvi_hrnjywg5_-opf"))
+($6 127 < 0_-fvi_hrnjywg5_-ope "city" 113
+(name "city"
+)
+(uid "0_-fvi_hrnjywg5_-ope"))
+($7 128 < 0_-fvi_hrnjywg5_-opd "documentation" 127
+(name "documentation"
+)
+(value "The city of the organisation. e.g. 'Cambridge'."
+)
+(uid "0_-fvi_hrnjywg5_-opd"))
+($7 129 < 0_-fvi_hrnjywg5_-opc "guid" 127
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00025"
+)
+(uid "0_-fvi_hrnjywg5_-opc"))
+($6 130 < 0_-fvi_hrnjywg5_-opb "postalCode" 113
+(name "postalCode"
+)
+(uid "0_-fvi_hrnjywg5_-opb"))
+($7 131 < 0_-fvi_hrnjywg5_-opa "documentation" 130
+(name "documentation"
+)
+(value "The postal code  e.g. 'CB2 1GA'."
+)
+(uid "0_-fvi_hrnjywg5_-opa"))
+($7 132 < 0_-fvi_hrnjywg5_-op9 "guid" 130
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00026"
+)
+(uid "0_-fvi_hrnjywg5_-op9"))
+($6 133 < 0_-fvi_hrnjywg5_-op8 "province" 113
+(name "province"
+)
+(uid "0_-fvi_hrnjywg5_-op8"))
+($7 134 < 0_-fvi_hrnjywg5_-op7 "documentation" 133
+(name "documentation"
+)
+(value "State or province (e.g. Utah, Manitoba, Lincolnshire)."
+)
+(uid "0_-fvi_hrnjywg5_-op7"))
+($7 135 < 0_-fvi_hrnjywg5_-op6 "guid" 133
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-01-19-14:21:00_00001"
+)
+(uid "0_-fvi_hrnjywg5_-op6"))
+($6 136 < 0_-fvi_hrnjywg5_-op5 "country" 113
+(name "country"
+)
+(uid "0_-fvi_hrnjywg5_-op5"))
+($7 137 < 0_-fvi_hrnjywg5_-op4 "documentation" 136
+(name "documentation"
+)
+(value "The country of the organisation. e.g. 'UK'."
+)
+(uid "0_-fvi_hrnjywg5_-op4"))
+($7 138 < 0_-fvi_hrnjywg5_-op3 "guid" 136
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00027"
+)
+(uid "0_-fvi_hrnjywg5_-op3"))
+($6 139 < 0_-fvi_hrnjywg5_-op2 "phoneNumber" 113
+(name "phoneNumber"
+)
+(uid "0_-fvi_hrnjywg5_-op2"))
+($7 140 < 0_-fvi_hrnjywg5_-op1 "documentation" 139
+(name "documentation"
+)
+(value "The telephone number."
+)
+(uid "0_-fvi_hrnjywg5_-op1"))
+($7 141 < 0_-fvi_hrnjywg5_-op0 "guid" 139
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00028"
+)
+(uid "0_-fvi_hrnjywg5_-op0"))
+($6 142 < 0_-fvi_hrnjywg5_-ooz "faxNumber" 113
+(name "faxNumber"
+)
+(uid "0_-fvi_hrnjywg5_-ooz"))
+($7 143 < 0_-fvi_hrnjywg5_-ooy "documentation" 142
+(name "documentation"
+)
+(value "The fax number."
+)
+(uid "0_-fvi_hrnjywg5_-ooy"))
+($7 144 < 0_-fvi_hrnjywg5_-oox "guid" 142
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00029"
+)
+(uid "0_-fvi_hrnjywg5_-oox"))
+($6 145 < 0_-fvi_hrnjywg5_-oow "emailAddress" 113
+(name "emailAddress"
+)
+(uid "0_-fvi_hrnjywg5_-oow"))
+($7 146 < 0_-fvi_hrnjywg5_-oov "documentation" 145
+(name "documentation"
+)
+(value "Email address of the organisation."
+)
+(uid "0_-fvi_hrnjywg5_-oov"))
+($7 147 < 0_-fvi_hrnjywg5_-oou "guid" 145
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00030"
+)
+(uid "0_-fvi_hrnjywg5_-oou"))
+($6 148 < 0_-fvi_hrnjywg5_-oot "url" 113
+(name "url"
+)
+(uid "0_-fvi_hrnjywg5_-oot"))
+($7 149 < 0_-fvi_hrnjywg5_-oos "documentation" 148
+(name "documentation"
+)
+(value "The url of the organisation web site."
+)
+(uid "0_-fvi_hrnjywg5_-oos"))
+($7 150 < 0_-fvi_hrnjywg5_-oor "guid" 148
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00031"
+)
+(uid "0_-fvi_hrnjywg5_-oor"))
+($9 151 < 0_-fvi_hrnjywg5_-ooq "#<anon> (Organisation, DataObject)" 113
+(uid "0_-fvi_hrnjywg5_-ooq"))
+($10 152 < 0_-fvi_hrnjywg5_-oop "#<anon> (Organisation, Group)##," 113
+(name "")
+(uid "0_-fvi_hrnjywg5_-oop"))
+($11 153 < 0_-fvi_hrnjywg5_-ooo "#0" 152
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-ooo")
+(multiplicity "1"))
+($7 154 < 0_-fvi_hrnjywg5_-oon "documentation" 153
+(name "documentation"
+)
+(value "The organisation to which the group belongs. e.g. 'University of Cambridge'."
+)
+(uid "0_-fvi_hrnjywg5_-oon"))
+($7 155 < 0_-fvi_hrnjywg5_-oom "guid" 153
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00019"
+)
+(uid "0_-fvi_hrnjywg5_-oom"))
+($11 156 < 0_-fvi_hrnjywg5_-ool "#1" 152
+(uid "0_-fvi_hrnjywg5_-ool")
+(multiplicity "*"))
+($7 157 < 0_-fvi_hrnjywg5_-ook "guid" 156
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00020"
+)
+(uid "0_-fvi_hrnjywg5_-ook"))
+($7 158 < 0_-fvi_hrnjywg5_-ooj "documentation" 113
+(name "documentation"
+)
+(value "Organisation, public institute or private company."
+)
+(uid "0_-fvi_hrnjywg5_-ooj"))
+($7 159 < 0_-fvi_hrnjywg5_-ooi "guid" 113
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00019"
+)
+(uid "0_-fvi_hrnjywg5_-ooi"))
+($7 160 < 0_-fvi_hrnjywg5_-ooh "keyNames" 113
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-ooh"))
+($5 161 < 0_-fvi_hrnjywg5_-oog "PersonTitle" 1
+(name "PersonTitle"
+)
+(uid "0_-fvi_hrnjywg5_-oog"))
+($9 162 < 0_-fvi_hrnjywg5_-oof "#<anon> (PersonTitle, Line)" 161
+(uid "0_-fvi_hrnjywg5_-oof"))
+($7 163 < 0_-fvi_hrnjywg5_-ooe "documentation" 161
+(name "documentation"
+)
+(value "Person titles."
+)
+(uid "0_-fvi_hrnjywg5_-ooe"))
+($7 164 < 0_-fvi_hrnjywg5_-ood "isOpen" 161
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-ood"))
+($7 165 < 0_-fvi_hrnjywg5_-ooc "enumeration" 161
+(name "enumeration"
+)
+(value "('Mr','Ms','Mrs','Miss','Dr','Prof','Sir','Dame')"
+)
+(uid "0_-fvi_hrnjywg5_-ooc"))
+($7 166 < 0_-fvi_hrnjywg5_-oob "guid" 161
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00020"
+)
+(uid "0_-fvi_hrnjywg5_-oob"))
+($5 167 < 0_-fvi_hrnjywg5_-ooa "FamilyTitle" 1
+(name "FamilyTitle"
+)
+(uid "0_-fvi_hrnjywg5_-ooa"))
+($9 168 < 0_-fvi_hrnjywg5_-oo9 "#<anon> (FamilyTitle, Word)" 167
+(uid "0_-fvi_hrnjywg5_-oo9"))
+($7 169 < 0_-fvi_hrnjywg5_-oo8 "documentation" 167
+(name "documentation"
+)
+(value "Family Titles"
+)
+(uid "0_-fvi_hrnjywg5_-oo8"))
+($7 170 < 0_-fvi_hrnjywg5_-oo7 "isOpen" 167
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-oo7"))
+($7 171 < 0_-fvi_hrnjywg5_-oo6 "enumeration" 167
+(name "enumeration"
+)
+(value "('Jr.','Sr.','III','IV','V')"
+)
+(uid "0_-fvi_hrnjywg5_-oo6"))
+($7 172 < 0_-fvi_hrnjywg5_-oo5 "guid" 167
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00021"
+)
+(uid "0_-fvi_hrnjywg5_-oo5"))
+($5 173 < 0_-fvi_hrnjywg5_-oo4 "PersonInGroup" 1
+(name "PersonInGroup"
+)
+(uid "0_-fvi_hrnjywg5_-oo4"))
+($6 174 < 0_-fvi_hrnjywg5_-oo3 "serial" 173
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-oo3")
+(multiplicity "1"))
+($7 175 < 0_-fvi_hrnjywg5_-oo2 "isAutomatic" 174
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-oo2"))
+($7 176 < 0_-fvi_hrnjywg5_-oo1 "documentation" 174
+(name "documentation"
+)
+(uid "0_-fvi_hrnjywg5_-oo1"))
+($7 177 < 0_-fvi_hrnjywg5_-oo0 "guid" 174
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00032"
+)
+(uid "0_-fvi_hrnjywg5_-oo0"))
+($6 178 < 0_-fvi_hrnjywg5_-onz "position" 173
+(name "position"
+)
+(uid "0_-fvi_hrnjywg5_-onz"))
+($7 179 < 0_-fvi_hrnjywg5_-ony "documentation" 178
+(name "documentation"
+)
+(value "Job position."
+)
+(uid "0_-fvi_hrnjywg5_-ony"))
+($7 180 < 0_-fvi_hrnjywg5_-onx "guid" 178
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00033"
+)
+(uid "0_-fvi_hrnjywg5_-onx"))
+($6 181 < 0_-fvi_hrnjywg5_-onw "mailingAddress" 173
+(name "mailingAddress"
+)
+(uid "0_-fvi_hrnjywg5_-onw"))
+($7 182 < 0_-fvi_hrnjywg5_-onv "documentation" 181
+(name "documentation"
+)
+(value "Mailing address of the person within a certain group."
+)
+(uid "0_-fvi_hrnjywg5_-onv"))
+($7 183 < 0_-fvi_hrnjywg5_-onu "guid" 181
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00034"
+)
+(uid "0_-fvi_hrnjywg5_-onu"))
+($6 184 < 0_-fvi_hrnjywg5_-ont "deliveryAddress" 173
+(name "deliveryAddress"
+)
+(uid "0_-fvi_hrnjywg5_-ont"))
+($7 185 < 0_-fvi_hrnjywg5_-ons "documentation" 184
+(name "documentation"
+)
+(value "Delivery address of the person within a certain group."
+)
+(uid "0_-fvi_hrnjywg5_-ons"))
+($7 186 < 0_-fvi_hrnjywg5_-onr "guid" 184
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00035"
+)
+(uid "0_-fvi_hrnjywg5_-onr"))
+($6 187 < 0_-fvi_hrnjywg5_-onq "emailAddress" 173
+(name "emailAddress"
+)
+(uid "0_-fvi_hrnjywg5_-onq"))
+($7 188 < 0_-fvi_hrnjywg5_-onp "documentation" 187
+(name "documentation"
+)
+(value "Email address of the person within a certain group."
+)
+(uid "0_-fvi_hrnjywg5_-onp"))
+($7 189 < 0_-fvi_hrnjywg5_-ono "guid" 187
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00036"
+)
+(uid "0_-fvi_hrnjywg5_-ono"))
+($6 190 < 0_-fvi_hrnjywg5_-onn "phoneNumbers" 173
+(name "phoneNumbers"
+)
+(uid "0_-fvi_hrnjywg5_-onn")
+(multiplicity "*"))
+($7 191 < 0_-fvi_hrnjywg5_-onm "baseName" 190
+(name "baseName"
+)
+(value "phoneNumber"
+)
+(uid "0_-fvi_hrnjywg5_-onm"))
+($7 192 < 0_-fvi_hrnjywg5_-onl "documentation" 190
+(name "documentation"
+)
+(value "List of telephone numbers of the person within a certain group."
+)
+(uid "0_-fvi_hrnjywg5_-onl"))
+($7 193 < 0_-fvi_hrnjywg5_-onk "guid" 190
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00037"
+)
+(uid "0_-fvi_hrnjywg5_-onk"))
+($6 194 < 0_-fvi_hrnjywg5_-onj "faxNumber" 173
+(name "faxNumber"
+)
+(uid "0_-fvi_hrnjywg5_-onj"))
+($7 195 < 0_-fvi_hrnjywg5_-oni "documentation" 194
+(name "documentation"
+)
+(value "Fax number of the person within a certain group."
+)
+(uid "0_-fvi_hrnjywg5_-oni"))
+($7 196 < 0_-fvi_hrnjywg5_-onh "guid" 194
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00038"
+)
+(uid "0_-fvi_hrnjywg5_-onh"))
+($6 197 < 0_-fvi_hrnjywg5_-ong "endDate" 173
+(name "endDate"
+)
+(uid "0_-fvi_hrnjywg5_-ong"))
+($7 198 < 0_-fvi_hrnjywg5_-onf "documentation" 197
+(name "documentation"
+)
+(value "The date from which the contact data is not valid."
+)
+(uid "0_-fvi_hrnjywg5_-onf"))
+($7 199 < 0_-fvi_hrnjywg5_-one "guid" 197
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00039"
+)
+(uid "0_-fvi_hrnjywg5_-one"))
+($9 200 < 0_-fvi_hrnjywg5_-ond "#<anon> (PersonInGroup, DataObject)" 173
+(uid "0_-fvi_hrnjywg5_-ond"))
+($10 201 < 0_-fvi_hrnjywg5_-onc "#<anon> (PersonInGroup, MimeTypeDataStore)##photoPersons,photo" 173
+(name "")
+(uid "0_-fvi_hrnjywg5_-onc"))
+($11 202 < 0_-fvi_hrnjywg5_-onb "photoPersons#0" 201
+(name "photoPersons"
+)
+(uid "0_-fvi_hrnjywg5_-onb")
+(multiplicity "*"))
+($7 203 < 0_-fvi_hrnjywg5_-ona "baseName" 202
+(name "baseName"
+)
+(value "photoPerson"
+)
+(uid "0_-fvi_hrnjywg5_-ona"))
+($7 204 < 0_-fvi_hrnjywg5_-on9 "documentation" 202
+(name "documentation"
+)
+(value "PersonInGroup records using photograph"
+)
+(uid "0_-fvi_hrnjywg5_-on9"))
+($7 205 < 0_-fvi_hrnjywg5_-on8 "guid" 202
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-06-13:30:19_00001"
+)
+(uid "0_-fvi_hrnjywg5_-on8"))
+($11 206 < 0_-fvi_hrnjywg5_-on7 "photo#1" 201
+(name "photo"
+)
+(uid "0_-fvi_hrnjywg5_-on7"))
+($7 207 < 0_-fvi_hrnjywg5_-on6 "documentation" 206
+(name "documentation"
+)
+(value "Photograph of PersonInGroup"
+)
+(uid "0_-fvi_hrnjywg5_-on6"))
+($7 208 < 0_-fvi_hrnjywg5_-on5 "guid" 206
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-06-13:30:20_00001"
+)
+(uid "0_-fvi_hrnjywg5_-on5"))
+($7 209 < 0_-fvi_hrnjywg5_-on4 "documentation" 173
+(name "documentation"
+)
+(value "The person as member of a group includes position and contact information."
+)
+(uid "0_-fvi_hrnjywg5_-on4"))
+($7 210 < 0_-fvi_hrnjywg5_-on3 "guid" 173
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00022"
+)
+(uid "0_-fvi_hrnjywg5_-on3"))
+($7 211 < 0_-fvi_hrnjywg5_-on2 "keyNames" 173
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-on2"))
+($7 212 < 0_-fvi_hrnjywg5_-on1 "destructorCode:python" 173
+(name "destructorCode:python"
+)
+(value "if self is self.person.currentPersonInGroup:"
+"  self.person.currentPersonInGroup = None"
+)
+(uid "0_-fvi_hrnjywg5_-on1"))
+($7 213 < 0_-fvi_hrnjywg5_-on0 "destructorCode:java" 173
+(name "destructorCode:java"
+)
+(value "if (this == getPerson().getCurrentPersonInGroup())"
+"  getPerson().setCurrentPersonInGroup(null);"
+)
+(uid "0_-fvi_hrnjywg5_-on0"))
+($5 214 < 0_-fvi_hrnjywg5_-omz "Group" 1
+(name "Group"
+)
+(uid "0_-fvi_hrnjywg5_-omz"))
+($6 215 < 0_-fvi_hrnjywg5_-omy "serial" 214
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-omy")
+(multiplicity "1"))
+($7 216 < 0_-fvi_hrnjywg5_-omx "documentation" 215
+(name "documentation"
+)
+(value "Unique identifier."
+)
+(uid "0_-fvi_hrnjywg5_-omx"))
+($7 217 < 0_-fvi_hrnjywg5_-omw "isAutomatic" 215
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-omw"))
+($7 218 < 0_-fvi_hrnjywg5_-omv "guid" 215
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:15_00002"
+)
+(uid "0_-fvi_hrnjywg5_-omv"))
+($6 219 < 0_-fvi_hrnjywg5_-omu "name" 214
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-omu"))
+($7 220 < 0_-fvi_hrnjywg5_-omt "documentation" 219
+(name "documentation"
+)
+(value "The name of the group."
+)
+(uid "0_-fvi_hrnjywg5_-omt"))
+($7 221 < 0_-fvi_hrnjywg5_-oms "guid" 219
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:15_00003"
+)
+(uid "0_-fvi_hrnjywg5_-oms"))
+($6 222 < 0_-fvi_hrnjywg5_-omr "url" 214
+(name "url"
+)
+(uid "0_-fvi_hrnjywg5_-omr"))
+($7 223 < 0_-fvi_hrnjywg5_-omq "documentation" 222
+(name "documentation"
+)
+(value "The url of the group. e.g. 'www.ccpn.ac.uk'."
+)
+(uid "0_-fvi_hrnjywg5_-omq"))
+($7 224 < 0_-fvi_hrnjywg5_-omp "guid" 222
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:15_00004"
+)
+(uid "0_-fvi_hrnjywg5_-omp"))
+($9 225 < 0_-fvi_hrnjywg5_-omo "#<anon> (Group, DataObject)" 214
+(uid "0_-fvi_hrnjywg5_-omo"))
+($10 226 < 0_-fvi_hrnjywg5_-omn "#<anon> (Group, PersonInGroup)##," 214
+(name "")
+(uid "0_-fvi_hrnjywg5_-omn"))
+($11 227 < 0_-fvi_hrnjywg5_-omm "#0" 226
+(uid "0_-fvi_hrnjywg5_-omm")
+(multiplicity "1"))
+($7 228 < 0_-fvi_hrnjywg5_-oml "documentation" 227
+(name "documentation"
+)
+(value "Group that the PersonInGroup belongs to."
+)
+(uid "0_-fvi_hrnjywg5_-oml"))
+($7 229 < 0_-fvi_hrnjywg5_-omk "guid" 227
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00040"
+)
+(uid "0_-fvi_hrnjywg5_-omk"))
+($11 230 < 0_-fvi_hrnjywg5_-omj "#1" 226
+(uid "0_-fvi_hrnjywg5_-omj")
+(multiplicity "*"))
+($7 231 < 0_-fvi_hrnjywg5_-omi "documentation" 230
+(name "documentation"
+)
+(value "Persons in group, with address information etc."
+)
+(uid "0_-fvi_hrnjywg5_-omi"))
+($7 232 < 0_-fvi_hrnjywg5_-omh "guid" 230
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:14_00041"
+)
+(uid "0_-fvi_hrnjywg5_-omh"))
+($7 233 < 0_-fvi_hrnjywg5_-omg "documentation" 214
+(name "documentation"
+)
+(value "A group of persons within an organisation."
+)
+(uid "0_-fvi_hrnjywg5_-omg"))
+($7 234 < 0_-fvi_hrnjywg5_-omf "guid" 214
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00023"
+)
+(uid "0_-fvi_hrnjywg5_-omf"))
+($7 235 < 0_-fvi_hrnjywg5_-ome "keyNames" 214
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-ome"))
+($5 236 < 0_-fvi_hrnjywg5_-omd "AffiliationStore" 1
+(name "AffiliationStore"
+)
+(uid "0_-fvi_hrnjywg5_-omd"))
+($6 237 < 0_-fvi_hrnjywg5_-omc "name" 236
+(changeability "frozen")
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-omc")
+(multiplicity "1"))
+($7 238 < 0_-fvi_hrnjywg5_-omb "documentation" 237
+(name "documentation"
+)
+(value "name of AffiliationGroup"
+)
+(uid "0_-fvi_hrnjywg5_-omb"))
+($7 239 < 0_-fvi_hrnjywg5_-oma "guid" 237
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:15_00009"
+)
+(uid "0_-fvi_hrnjywg5_-oma"))
+($10 240 < 0_-fvi_hrnjywg5_-om9 "#<anon> (AffiliationStore, Organisation)##," 236
+(name "")
+(uid "0_-fvi_hrnjywg5_-om9"))
+($11 241 < 0_-fvi_hrnjywg5_-om8 "#0" 240
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-om8")
+(multiplicity "1"))
+($7 242 < 0_-fvi_hrnjywg5_-om7 "guid" 241
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:15_00005"
+)
+(uid "0_-fvi_hrnjywg5_-om7"))
+($11 243 < 0_-fvi_hrnjywg5_-om6 "#1" 240
+(uid "0_-fvi_hrnjywg5_-om6")
+(multiplicity "*"))
+($7 244 < 0_-fvi_hrnjywg5_-om5 "guid" 243
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:15_00006"
+)
+(uid "0_-fvi_hrnjywg5_-om5"))
+($10 245 < 0_-fvi_hrnjywg5_-om4 "#<anon> (AffiliationStore, Person)##," 236
+(name "")
+(uid "0_-fvi_hrnjywg5_-om4"))
+($11 246 < 0_-fvi_hrnjywg5_-om3 "#0" 245
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-om3")
+(multiplicity "1"))
+($7 247 < 0_-fvi_hrnjywg5_-om2 "guid" 246
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:15_00007"
+)
+(uid "0_-fvi_hrnjywg5_-om2"))
+($11 248 < 0_-fvi_hrnjywg5_-om1 "#1" 245
+(uid "0_-fvi_hrnjywg5_-om1")
+(multiplicity "*"))
+($7 249 < 0_-fvi_hrnjywg5_-om0 "guid" 248
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:15_00008"
+)
+(uid "0_-fvi_hrnjywg5_-om0"))
+($9 250 < 0_-fvi_hrnjywg5_-olz "#<anon> (AffiliationStore, TopObject)" 236
+(uid "0_-fvi_hrnjywg5_-olz"))
+($7 251 < 0_-fvi_hrnjywg5_-oly "documentation" 236
+(name "documentation"
+)
+(value "grouping of Affiliations (People and the organisations they work in)."
+)
+(uid "0_-fvi_hrnjywg5_-oly"))
+($7 252 < 0_-fvi_hrnjywg5_-olx "guid" 236
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:19:49_00006"
+)
+(uid "0_-fvi_hrnjywg5_-olx"))
+($7 253 < 0_-fvi_hrnjywg5_-olw "keyNames" 236
+(name "keyNames"
+)
+(value "name"
+)
+(uid "0_-fvi_hrnjywg5_-olw"))
+($13 254 < 0_-fvi_hrnjywg5_-olv "#<anon> (Affiliation, DataLocation)" 1
+(uid "0_-fvi_hrnjywg5_-olv"))
+($7 255 < 0_-fvi_hrnjywg5_-olu "shortName" 1
+(name "shortName"
+)
+(value "AFFI"
+)
+(uid "0_-fvi_hrnjywg5_-olu"))
+($7 256 < 0_-fvi_hrnjywg5_-olt "documentation" 1
+(name "documentation"
+)
+(value "Individual people and organisations."
+)
+(uid "0_-fvi_hrnjywg5_-olt"))
+($7 257 < 0_-fvi_hrnjywg5_-ols "isDraft" 1
+(name "isDraft"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-ols"))
+($7 258 < 0_-fvi_hrnjywg5_-olr "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00017"
+)
+(uid "0_-fvi_hrnjywg5_-olr"))
+($15 260)
+($17 263)
+($17 267)
+($17 269)
+($17 270)
+($15 275)
+($17 276)
+($17 277)
+($17 278)
+($15 280)
+($15 282)
+($15 285)
+($15 288)
+($15 290)
+($15 292)
+($15 294)
+($15 296)
+($15 298)
+($15 299)
+($15 300)
+($15 301)
+($15 302)
+($15 303)
+($15 304)
+($15 305)
+($15 307)
+($15 309)
+($15 311)
+($15 313)
+($17 315)
+($15 316)
+($15 317)
+($15 318)
+($15 319)
+($15 320)
+($15 321)
+($15 322)
+($15 323)
+($15 324)
+($15 325)
+($15 326)
+($15 327)
+($15 328)
+($15 329)
+($15 330)
+($15 331)
+($15 332)
+($15 333)
+($15 334)
+($15 335)
+($15 336)
+($15 337)
+($15 338)
+($15 339)
+($15 340)
+($15 341)
+($15 342)
+($15 343)
+($14 259 @ -yk94ms_-e3s_e41656c6_-fw4 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "People" $14)
+($5 261 @ 0_-fvi_hrnjywg5_-d9g 4 "Logical" $1 "memops" $1 "Implementation" $1 "DataObject" $5)
+($5 262 @ 0_-fvi_hrnjywg5_-dl3 4 "Logical" $1 "memops" $1 "Implementation" $1 "Int" $5)
+($5 264 @ 0_-fvi_hrnjywg5_-dkx 4 "Logical" $1 "memops" $1 "Implementation" $1 "Line" $5)
+($5 265 @ 0_-fvi_hrnjywg5_-dkb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Word" $5)
+($18 266 @ -yk94ms_-e3s_e41656c6_-fw7 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "DataType" $18)
+($5 268 @ 0_-fvi_hrnjywg5_-okb 5 "Logical" $1 "ccp" $1 "general" $1 "Annotation" $1 "Annotation" $5)
+($5 271 @ 0_-fvi_hrnjywg5_-dkg 4 "Logical" $1 "memops" $1 "Implementation" $1 "Text" $5)
+($5 272 @ 0_-fvi_hrnjywg5_-dln 4 "Logical" $1 "memops" $1 "Implementation" $1 "DateTime" $5)
+($5 273 @ 0_-fvi_hrnjywg5_-o81 5 "Logical" $1 "ccp" $1 "general" $1 "DataLocation" $1 "MimeTypeDataStore" $5)
+($5 274 @ 0_-fvi_hrnjywg5_-gjn 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1 "Run" $5)
+($14 279 @ -yk94ms_-e3s_e41656c6_-fvt 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Citation" $14)
+($5 281 @ 0_-fvi_hrnjywg5_-ogh 5 "Logical" $1 "ccp" $1 "general" $1 "Citation" $1 "Citation" $5)
+($10 283 @ -yk94ms_85r_eqyymv3f_-ouj 6 "Logical" $1 "ccp" $1 "general" $1 "Citation" $1 "Citation" $5 "#<anon> (Citation, Person)##authorCitations,authors" $10)
+($14 284 @ -yk94ms_-e3s_e41656c6_-fvq 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Entry" $14)
+($5 286 @ -yk94ms_85r_eqyymv3f_-fjc 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrEntry" $1 "Entry" $5)
+($14 287 @ -yk94ms_-e3s_e41656c6_-fvx 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Instrument" $14)
+($5 289 @ -yk94ms_85r_eqyymv3f_-om1 5 "Logical" $1 "ccp" $1 "general" $1 "Instrument" $1 "AbstractInstrument" $5)
+($10 291 @ -yk94ms_85r_eqyymv3f_-oli 6 "Logical" $1 "ccp" $1 "general" $1 "Instrument" $1 "AbstractInstrument" $5 "#<anon> (AbstractInstrument, Person)##,contactPerson" $10)
+($10 293 @ -yk94ms_85r_eqyymv3f_-oua 6 "Logical" $1 "ccp" $1 "general" $1 "Citation" $1 "Citation" $5 "#<anon> (Citation, Person)##editorCitations,editors" $10)
+($10 295 @ 0_-fvi_hrnjywg5_-ew4 6 "Logical" $1 "ccp" $1 "nmr" $1 "NmrEntry" $1 "Entry" $5 "#<anon> (Entry, Person)##contactEntries,contactPersons" $10)
+($10 297 @ 0_-fvi_hrnjywg5_-evv 6 "Logical" $1 "ccp" $1 "nmr" $1 "NmrEntry" $1 "Entry" $5 "#<anon> (Entry, Person)##authoredEntries,authors" $10)
+($10 306 @ -yk94ms_85r_eqyymv3f_-old 6 "Logical" $1 "ccp" $1 "general" $1 "Instrument" $1 "AbstractInstrument" $5 "#<anon> (AbstractInstrument, Organisation)##,manufacturer" $10)
+($10 308 @ 0_-fvi_hrnjywg5_-euq 6 "Logical" $1 "ccp" $1 "nmr" $1 "NmrEntry" $1 "Entry" $5 "#<anon> (Entry, Group)##nmrEntries,laboratories" $10)
+($10 310 @ 0_-fvi_hrnjywg5_-oex 6 "Logical" $1 "ccp" $1 "general" $1 "Citation" $1 "Citation" $5 "#<anon> (Citation, Entry)##primaryCitation,nmrEntriesPrimary" $10)
+($10 312 @ 0_-fvi_hrnjywg5_-oep 6 "Logical" $1 "ccp" $1 "general" $1 "Citation" $1 "Citation" $5 "#<anon> (Citation, Entry)##otherCitations,nmrEntries" $10)
+($5 314 @ 0_-fvi_hrnjywg5_-dbb 4 "Logical" $1 "memops" $1 "Implementation" $1 "TopObject" $5)
+($18 344 @ -yk94ms_-e3s_e41656c6_-fwy 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "import" $18)
+($1 345 @ -yk94ms_jd_f02m0kiw_-p98 4 "Logical" $1 "ccp" $1 "general" $1 "DataLocation" $1)
+(styleAssn 3 259)
+(typeAssn 86 54)
+(assocEndAssn 54 86)
+(typeAssn 91 54)
+(assocEndAssn 54 91)
+(typeAssn 248 54)
+(assocEndAssn 54 248)
+(typeAssn 96 54)
+(assocEndAssn 54 96)
+(typeAssn 103 54)
+(assocEndAssn 54 103)
+(subtypeAssn 84 54)
+(supertypeAssn 84 261)
+(generalizationAssn 54 84)
+(typeRefAssn 55 262)
+(typeExpression 55 263)
+(typeRefAssn 58 264)
+(typeExpression 58 263)
+(typeRefAssn 61 264)
+(typeExpression 61 263)
+(typeRefAssn 64 265)
+(typeExpression 64 263)
+(typeRefAssn 68 265)
+(typeExpression 68 263)
+(stereotypeAssn 167 266)
+(subtypeAssn 168 167)
+(supertypeAssn 168 265)
+(generalizationAssn 167 168)
+(typeRefAssn 72 167)
+(typeExpression 72 263)
+(stereotypeAssn 161 266)
+(subtypeAssn 162 161)
+(supertypeAssn 162 264)
+(generalizationAssn 161 162)
+(typeRefAssn 75 161)
+(typeExpression 75 267)
+(typeAssn 89 268)
+(assocEndAssn 173 93)
+(typeAssn 230 173)
+(assocEndAssn 173 230)
+(typeAssn 97 173)
+(assocEndAssn 173 97)
+(typeAssn 202 173)
+(assocEndAssn 173 202)
+(subtypeAssn 200 173)
+(supertypeAssn 200 261)
+(generalizationAssn 173 200)
+(typeRefAssn 174 262)
+(typeExpression 174 269)
+(typeRefAssn 178 264)
+(typeExpression 178 270)
+(typeRefAssn 181 271)
+(typeExpression 181 270)
+(typeRefAssn 184 271)
+(typeExpression 184 270)
+(typeRefAssn 187 264)
+(typeExpression 187 270)
+(typeRefAssn 190 264)
+(typeExpression 190 270)
+(typeRefAssn 194 264)
+(typeExpression 194 270)
+(typeRefAssn 197 272)
+(typeExpression 197 270)
+(typeAssn 206 273)
+(typeAssn 93 173)
+(typeAssn 106 274)
+(projectionAssn 3 54 260)
+(styleAssn 4 259)
+(typeAssn 153 113)
+(assocEndAssn 113 153)
+(typeAssn 243 113)
+(assocEndAssn 113 243)
+(subtypeAssn 151 113)
+(supertypeAssn 151 261)
+(generalizationAssn 113 151)
+(typeRefAssn 114 262)
+(typeExpression 114 267)
+(typeRefAssn 117 264)
+(typeExpression 117 267)
+(typeRefAssn 120 264)
+(typeExpression 120 276)
+(typeRefAssn 123 271)
+(typeExpression 123 267)
+(typeRefAssn 127 264)
+(typeExpression 127 267)
+(typeRefAssn 130 264)
+(typeExpression 130 276)
+(typeRefAssn 133 264)
+(typeExpression 133 277)
+(typeRefAssn 136 264)
+(typeExpression 136 267)
+(typeRefAssn 139 264)
+(typeExpression 139 276)
+(typeRefAssn 142 264)
+(typeExpression 142 276)
+(typeRefAssn 145 264)
+(typeExpression 145 270)
+(typeRefAssn 148 271)
+(typeExpression 148 278)
+(assocEndAssn 214 156)
+(typeAssn 227 214)
+(assocEndAssn 214 227)
+(subtypeAssn 225 214)
+(supertypeAssn 225 261)
+(generalizationAssn 214 225)
+(typeRefAssn 215 262)
+(typeExpression 215 270)
+(typeRefAssn 219 264)
+(typeExpression 219 270)
+(typeRefAssn 222 271)
+(typeExpression 222 270)
+(typeAssn 156 214)
+(projectionAssn 4 113 275)
+(styleAssn 5 279)
+(projectionAssn 5 281 280)
+(to 6 3)
+(from 6 5)
+(projectionAssn 6 283 282)
+(styleAssn 7 284)
+(projectionAssn 7 286 285)
+(styleAssn 8 287)
+(projectionAssn 8 289 288)
+(to 9 3)
+(from 9 8)
+(projectionAssn 9 291 290)
+(to 10 3)
+(from 10 5)
+(projectionAssn 10 293 292)
+(to 11 3)
+(from 11 7)
+(projectionAssn 11 295 294)
+(to 12 3)
+(from 12 7)
+(projectionAssn 12 297 296)
+(styleAssn 13 259)
+(projectionAssn 13 161 298)
+(styleAssn 14 259)
+(projectionAssn 14 167 299)
+(styleAssn 15 259)
+(projectionAssn 15 173 300)
+(to 16 15)
+(from 16 3)
+(projectionAssn 16 90 301)
+(styleAssn 17 259)
+(projectionAssn 17 214 302)
+(to 18 17)
+(from 18 4)
+(projectionAssn 18 152 303)
+(to 19 15)
+(from 19 17)
+(projectionAssn 19 226 304)
+(to 20 4)
+(from 20 8)
+(projectionAssn 20 306 305)
+(to 21 17)
+(from 21 7)
+(projectionAssn 21 308 307)
+(to 22 7)
+(from 22 5)
+(projectionAssn 22 310 309)
+(to 23 7)
+(from 23 5)
+(projectionAssn 23 312 311)
+(styleAssn 24 259)
+(typeAssn 241 236)
+(assocEndAssn 236 241)
+(typeAssn 246 236)
+(assocEndAssn 236 246)
+(subtypeAssn 250 236)
+(supertypeAssn 250 314)
+(generalizationAssn 236 250)
+(typeRefAssn 237 264)
+(typeExpression 237 315)
+(projectionAssn 24 236 313)
+(to 25 4)
+(from 25 24)
+(projectionAssn 25 240 316)
+(to 26 3)
+(from 26 24)
+(projectionAssn 26 245 317)
+(to 27 15)
+(from 27 3)
+(projectionAssn 27 95 318)
+(projectionAssn 28 273 319)
+(to 29 28)
+(from 29 15)
+(projectionAssn 29 201 320)
+(styleAssn 31 259)
+(projectionAssn 31 54 321)
+(styleAssn 32 259)
+(projectionAssn 32 113 322)
+(styleAssn 33 279)
+(projectionAssn 33 281 323)
+(to 34 31)
+(from 34 33)
+(projectionAssn 34 283 324)
+(to 35 31)
+(from 35 33)
+(projectionAssn 35 293 325)
+(styleAssn 36 284)
+(projectionAssn 36 286 326)
+(to 37 31)
+(from 37 36)
+(projectionAssn 37 295 327)
+(to 38 31)
+(from 38 36)
+(projectionAssn 38 297 328)
+(styleAssn 39 287)
+(projectionAssn 39 289 329)
+(to 40 31)
+(from 40 39)
+(projectionAssn 40 291 330)
+(to 41 32)
+(from 41 39)
+(projectionAssn 41 306 331)
+(styleAssn 42 259)
+(projectionAssn 42 214 332)
+(to 43 42)
+(from 43 32)
+(projectionAssn 43 152 333)
+(styleAssn 44 259)
+(projectionAssn 44 173 334)
+(to 45 44)
+(from 45 31)
+(projectionAssn 45 90 335)
+(to 46 44)
+(from 46 42)
+(projectionAssn 46 226 336)
+(to 47 42)
+(from 47 36)
+(projectionAssn 47 308 337)
+(to 48 36)
+(from 48 33)
+(projectionAssn 48 310 338)
+(to 49 36)
+(from 49 33)
+(projectionAssn 49 312 339)
+(styleAssn 50 259)
+(projectionAssn 50 236 340)
+(to 51 32)
+(from 51 50)
+(projectionAssn 51 240 341)
+(to 52 31)
+(from 52 50)
+(projectionAssn 52 245 342)
+(to 53 44)
+(from 53 31)
+(projectionAssn 53 95 343)
+(stereotypeAssn 254 344)
+(clientAssn 254 1)
+(supplierAssn 254 345)

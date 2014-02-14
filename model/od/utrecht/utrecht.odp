@@ -1,0 +1,162 @@
+ObjectDomain_Shared_Package 15
+{z8kflu_om1_et67ge31_-p98 2 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "utrecht" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Dependency-owns $8
+objectdomain.uml.core.Projection $6
+objectdomain.uml.view.style.BaseViewElementStyle-owns $7
+objectdomain.uml.view.DependencyView-owns $4
+objectdomain.uml.core.UmlTaggedValue-taggedValues $5
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.view.PackageView-owns $3
+]
+($1 1 > z8kflu_om1_et67ge31_-p98 2 "Logical" $1 "utrecht" $1
+(name "utrecht"
+)
+(uid "z8kflu_om1_et67ge31_-p98"))
+($2 2 < z8kflu_om1_et67ge31_-p7u "HaddockImport" 1
+(name "HaddockImport"
+)
+(uid "z8kflu_om1_et67ge31_-p7u")
+(diagramType "class"))
+($3 3 < z8kflu_om1_et67ge31_-p78 "Haddock" 2
+(uid "z8kflu_om1_et67ge31_-p78")
+(bbx 230 40 110 80))
+($3 4 < z8kflu_om1_et67ge31_-p77 "MolStructure" 2
+(uid "z8kflu_om1_et67ge31_-p77")
+(bbx 490 180 180 80))
+($3 5 < z8kflu_om1_et67ge31_-p76 "MolSystem" 2
+(uid "z8kflu_om1_et67ge31_-p76")
+(bbx 360 330 160 80))
+($4 6 < z8kflu_om1_et67ge31_-p75 "" 2
+(showStereotypeLabel false)
+(stereotypePosition 560 310)
+(uid "z8kflu_om1_et67ge31_-p75")
+(points 500 260 500 330))
+($4 7 < z8kflu_om1_et67ge31_-p74 "" 2
+(showStereotypeLabel false)
+(stereotypePosition 415 240)
+(uid "z8kflu_om1_et67ge31_-p74")
+(points 340 105 520 105 520 180))
+($4 8 < z8kflu_om1_et67ge31_-p7v "" 2
+(showStereotypeLabel false)
+(stereotypePosition 405 330)
+(uid "z8kflu_om1_et67ge31_-p7v")
+(points 340 80 710 80 710 375 520 375))
+($3 9 < -yk94ms_jd_etoak3fa_-p7c "NmrConstraint" 2
+(uid "-yk94ms_jd_etoak3fa_-p7c")
+(bbx 240 180 160 80))
+($4 10 < -yk94ms_jd_etoak3fa_-p7d "" 2
+(showStereotypeLabel false)
+(stereotypePosition 405 425)
+(uid "-yk94ms_jd_etoak3fa_-p7d")
+(points 395 260 395 330))
+($4 11 < -yk94ms_jd_etoak3fa_-p7e "" 2
+(showStereotypeLabel false)
+(uid "-yk94ms_jd_etoak3fa_-p7e")
+(points 265 120 265 180))
+($4 12 < -hkpzxr_-nsb_f41h2b0b_-p8c "" 2
+(showStereotypeLabel false)
+(stereotypePosition 435 245)
+(uid "-hkpzxr_-nsb_f41h2b0b_-p8c")
+(points 400 235 490 235))
+($3 13 < -hkpzxr_-li2_fcvq0su4_-p6m "AnnealProtocol" 2
+(uid "-hkpzxr_-li2_fcvq0su4_-p6m")
+(bbx 60 180 140 80))
+($4 14 < -hkpzxr_-li2_fcvq0su4_-p6n "" 2
+(showStereotypeLabel false)
+(uid "-hkpzxr_-li2_fcvq0su4_-p6n")
+(points 230 90 90 90 90 180))
+($3 15 < -hkpzxr_-li2_fcvq0su4_-p22 "Symmetry" 2
+(uid "-hkpzxr_-li2_fcvq0su4_-p22")
+(bbx 10 330 120 80))
+($4 16 < -hkpzxr_-li2_fcvq0su4_-p21 "" 2
+(showStereotypeLabel false)
+(stereotypePosition 245 385)
+(uid "-hkpzxr_-li2_fcvq0su4_-p21")
+(points 130 370 360 370)
+(lineStyle "oblique"))
+($4 17 < -hkpzxr_-li2_fcvq0su4_-p23 "" 2
+(showStereotypeLabel false)
+(uid "-hkpzxr_-li2_fcvq0su4_-p23")
+(points 230 55 30 55 30 330))
+($5 18 < z8kflu_om1_et67ge31_-p97 "documentation" 1
+(name "documentation"
+)
+(value "Programs from Utrecht University"
+)
+(uid "z8kflu_om1_et67ge31_-p97"))
+($5 19 < z8kflu_om1_et67ge31_-p4i "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-10-11-22:58:43_00001"
+)
+(uid "z8kflu_om1_et67ge31_-p4i"))
+($6 20)
+($6 23)
+($6 26)
+($6 28)
+($6 30)
+($6 32)
+($6 35)
+($6 37)
+($6 39)
+($6 41)
+($6 43)
+($6 45)
+($6 47)
+($6 49)
+($6 51)
+($1 21 @ 0_-fvi_hrnjywg5_-cp1 3 "Logical" $1 "utrecht" $1 "Haddock" $1)
+($7 22 @ -yk94ms_-e3s_e41656c6_-fvs 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Coordinates" $7)
+($1 24 @ -yk94ms_-e3s_e41656c6_-j6m 4 "Logical" $1 "ccp" $1 "molecule" $1 "MolStructure" $1)
+($7 25 @ -yk94ms_-e3s_e41656c6_-fvn 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "MolSystem" $7)
+($1 27 @ -yk94ms_-e3s_e41656c6_-ibf 4 "Logical" $1 "ccp" $1 "molecule" $1 "MolSystem" $1)
+($8 29 @ -yk94ms_85r_eqyymv3f_-jxk 5 "Logical" $1 "ccp" $1 "molecule" $1 "MolStructure" $1 "#<anon> (MolStructure, MolSystem)" $8)
+($8 31 @ 0_-fvi_hrnjywg5_-cn2 4 "Logical" $1 "utrecht" $1 "Haddock" $1 "#<anon> (Haddock, MolStructure)" $8)
+($8 33 @ 0_-fvi_hrnjywg5_-cn1 4 "Logical" $1 "utrecht" $1 "Haddock" $1 "#<anon> (Haddock, MolSystem)" $8)
+($7 34 @ -yk94ms_-e3s_e41656c6_-fvf 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "NmrConstraints" $7)
+($1 36 @ -yk94ms_-e3s_e41656c6_-lll 4 "Logical" $1 "ccp" $1 "nmr" $1 "NmrConstraint" $1)
+($8 38 @ 0_-fvi_hrnjywg5_-f4c 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrConstraint" $1 "#<anon> (NmrConstraint, MolSystem)" $8)
+($8 40 @ 0_-fvi_hrnjywg5_-cgj 4 "Logical" $1 "utrecht" $1 "Haddock" $1 "#<anon> (Haddock, NmrConstraint)" $8)
+($8 42 @ 0_-fvi_hrnjywg5_-f11 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrConstraint" $1 "#<anon> (NmrConstraint, MolStructure)" $8)
+($1 44 @ -hkpzxr_-cvb_f2ixo80k_-p97 3 "Logical" $1 "molsim" $1 "AnnealProtocol" $1)
+($8 46 @ 0_-fvi_hrnjywg5_-cds 4 "Logical" $1 "utrecht" $1 "Haddock" $1 "#<anon> (Haddock, AnnealProtocol)" $8)
+($1 48 @ -hkpzxr_-li2_fcvq0su4_-p5d 3 "Logical" $1 "molsim" $1 "Symmetry" $1)
+($8 50 @ -hkpzxr_-li2_fcvq0su4_-p26 4 "Logical" $1 "molsim" $1 "Symmetry" $1 "#<anon> (Symmetry, MolSystem)" $8)
+($8 52 @ 0_-fvi_hrnjywg5_-cdr 4 "Logical" $1 "utrecht" $1 "Haddock" $1 "#<anon> (Haddock, Symmetry)" $8)
+(projectionAssn 3 21 20)
+(styleAssn 4 22)
+(projectionAssn 4 24 23)
+(styleAssn 5 25)
+(projectionAssn 5 27 26)
+(to 6 5)
+(from 6 4)
+(projectionAssn 6 29 28)
+(to 7 4)
+(from 7 3)
+(projectionAssn 7 31 30)
+(to 8 5)
+(from 8 3)
+(projectionAssn 8 33 32)
+(styleAssn 9 34)
+(projectionAssn 9 36 35)
+(to 10 5)
+(from 10 9)
+(projectionAssn 10 38 37)
+(to 11 9)
+(from 11 3)
+(projectionAssn 11 40 39)
+(to 12 4)
+(from 12 9)
+(projectionAssn 12 42 41)
+(projectionAssn 13 44 43)
+(to 14 13)
+(from 14 3)
+(projectionAssn 14 46 45)
+(projectionAssn 15 48 47)
+(to 16 5)
+(from 16 15)
+(projectionAssn 16 50 49)
+(to 17 15)
+(from 17 3)
+(projectionAssn 17 52 51)

@@ -1,0 +1,258 @@
+ObjectDomain_Shared_Package 15
+{-hkpzxr_v5_f8zng6fd_-p3m 4 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "ccp" objectdomain.uml.mechanisms.UmlPackage-owns "general" objectdomain.uml.mechanisms.UmlPackage-owns "KeywordDefinition" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.core.TypeExpression $13
+objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Generalization-owns $8
+objectdomain.uml.core.Projection $11
+objectdomain.uml.core.UmlAttribute-features $6
+objectdomain.uml.core.UmlAssociationEnd-connections $10
+objectdomain.uml.view.ClassView-owns $3
+objectdomain.uml.core.UmlTaggedValue-taggedValues $7
+objectdomain.uml.core.UmlAssociation-owns $9
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.core.UmlMultiplicity $12
+objectdomain.uml.core.UmlClass-owns $5
+objectdomain.uml.view.AssociationView-owns $4
+]
+($1 1 > -hkpzxr_v5_f8zng6fd_-p3m 4 "Logical" $1 "ccp" $1 "general" $1 "KeywordDefinition" $1
+(name "KeywordDefinition"
+)
+(uid "-hkpzxr_v5_f8zng6fd_-p3m"))
+($2 2 < 0_-fvi_hrnjywg5_-nvb "_KeywordDefinition" 1
+(name "_KeywordDefinition"
+)
+(uid "0_-fvi_hrnjywg5_-nvb")
+(diagramType "class"))
+($3 3 < 0_-fvi_hrnjywg5_-nva "KeywordDefinition" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nva")
+(bbx 60 400 130 130))
+($3 4 < 0_-fvi_hrnjywg5_-nv9 "KeywordDefinitionStore" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nv9")
+(bbx 50 250 160 70))
+($4 5 < 0_-fvi_hrnjywg5_-nv8 "" 2
+(toMultiplicityPosition 120 380)
+(uid "0_-fvi_hrnjywg5_-nv8")
+(points 130 320 130 400)
+(fromMultiplicityPosition 140 325))
+($5 6 < 0_-fvi_hrnjywg5_-nv7 "KeywordDefinition" 1
+(name "KeywordDefinition"
+)
+(uid "0_-fvi_hrnjywg5_-nv7"))
+($6 7 < 0_-fvi_hrnjywg5_-nv6 "keyword" 6
+(changeability "frozen")
+(name "keyword"
+)
+(uid "0_-fvi_hrnjywg5_-nv6")
+(multiplicity "1"))
+($7 8 < 0_-fvi_hrnjywg5_-nv5 "guid" 7
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:03:00_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nv5"))
+($6 9 < 0_-fvi_hrnjywg5_-nv4 "name" 6
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-nv4"))
+($7 10 < 0_-fvi_hrnjywg5_-nv3 "documentation" 9
+(name "documentation"
+)
+(value "A user-friendly synonym for the keyword"
+)
+(uid "0_-fvi_hrnjywg5_-nv3"))
+($7 11 < 0_-fvi_hrnjywg5_-nv2 "guid" 9
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:03:00_00002"
+)
+(uid "0_-fvi_hrnjywg5_-nv2"))
+($6 12 < 0_-fvi_hrnjywg5_-nv1 "explanation" 6
+(name "explanation"
+)
+(uid "0_-fvi_hrnjywg5_-nv1"))
+($7 13 < 0_-fvi_hrnjywg5_-nv0 "documentation" 12
+(name "documentation"
+)
+(value "Definition, examples, etc. to explain the parameter defined by the keyword."
+)
+(uid "0_-fvi_hrnjywg5_-nv0"))
+($7 14 < 0_-fvi_hrnjywg5_-nuz "guid" 12
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:03:00_00003"
+)
+(uid "0_-fvi_hrnjywg5_-nuz"))
+($6 15 < 0_-fvi_hrnjywg5_-nuy "targetNames" 6
+(name "targetNames"
+)
+(uid "0_-fvi_hrnjywg5_-nuy")
+(multiplicity "*"))
+($7 16 < 0_-fvi_hrnjywg5_-nux "documentation" 15
+(name "documentation"
+)
+(value "qualified names for the CCPN classes that the keyword may be used to describe. If empty there are no limitations. Typically keywords are used as part of a keyword-value-object combination. targetNames refer to the allowed type for the object being described (*not* the object that contains the desctription)"
+)
+(uid "0_-fvi_hrnjywg5_-nux"))
+($7 17 < 0_-fvi_hrnjywg5_-nuw "isUnique" 15
+(name "isUnique"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-nuw"))
+($7 18 < 0_-fvi_hrnjywg5_-nuv "isOrdered" 15
+(name "isOrdered"
+)
+(value "False"
+)
+(uid "0_-fvi_hrnjywg5_-nuv"))
+($7 19 < 0_-fvi_hrnjywg5_-nuu "baseName" 15
+(name "baseName"
+)
+(value "targetName"
+)
+(uid "0_-fvi_hrnjywg5_-nuu"))
+($7 20 < 0_-fvi_hrnjywg5_-nut "guid" 15
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:03:00_00004"
+)
+(uid "0_-fvi_hrnjywg5_-nut"))
+($8 21 < 0_-fvi_hrnjywg5_-nus "#<anon> (KeywordDefinition, DataObject)" 6
+(uid "0_-fvi_hrnjywg5_-nus"))
+($7 22 < 0_-fvi_hrnjywg5_-nur "keyNames" 6
+(name "keyNames"
+)
+(value "keyword"
+)
+(uid "0_-fvi_hrnjywg5_-nur"))
+($7 23 < 0_-fvi_hrnjywg5_-nuq "guid" 6
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:02:54_00002"
+)
+(uid "0_-fvi_hrnjywg5_-nuq"))
+($5 24 < 0_-fvi_hrnjywg5_-nup "KeywordDefinitionStore" 1
+(name "KeywordDefinitionStore"
+)
+(uid "0_-fvi_hrnjywg5_-nup"))
+($6 25 < 0_-fvi_hrnjywg5_-nuo "context" 24
+(changeability "frozen")
+(name "context"
+)
+(uid "0_-fvi_hrnjywg5_-nuo")
+(multiplicity "1"))
+($7 26 < 0_-fvi_hrnjywg5_-nun "documentation" 25
+(name "documentation"
+)
+(value "context within which keywords are defined. Typically the name of teh program or standard that defines them."
+)
+(uid "0_-fvi_hrnjywg5_-nun"))
+($7 27 < 0_-fvi_hrnjywg5_-num "guid" 25
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:03:00_00007"
+)
+(uid "0_-fvi_hrnjywg5_-num"))
+($9 28 < 0_-fvi_hrnjywg5_-nul "#<anon> (KeywordDefinitionStore, KeywordDefinition)##," 24
+(name "")
+(uid "0_-fvi_hrnjywg5_-nul"))
+($10 29 < 0_-fvi_hrnjywg5_-nuk "#0" 28
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-nuk")
+(multiplicity "1"))
+($7 30 < 0_-fvi_hrnjywg5_-nuj "guid" 29
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:03:00_00005"
+)
+(uid "0_-fvi_hrnjywg5_-nuj"))
+($10 31 < 0_-fvi_hrnjywg5_-nui "#1" 28
+(uid "0_-fvi_hrnjywg5_-nui")
+(multiplicity "*"))
+($7 32 < 0_-fvi_hrnjywg5_-nuh "guid" 31
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:03:00_00006"
+)
+(uid "0_-fvi_hrnjywg5_-nuh"))
+($8 33 < 0_-fvi_hrnjywg5_-nug "#<anon> (KeywordDefinitionStore, TopObject)" 24
+(uid "0_-fvi_hrnjywg5_-nug"))
+($7 34 < 0_-fvi_hrnjywg5_-nuf "documentation" 24
+(name "documentation"
+)
+(value "Store for keyword definitions for a given context (e.g. a particular program or standard). "
+)
+(uid "0_-fvi_hrnjywg5_-nuf"))
+($7 35 < 0_-fvi_hrnjywg5_-nue "keyNames" 24
+(name "keyNames"
+)
+(value "context"
+)
+(uid "0_-fvi_hrnjywg5_-nue"))
+($7 36 < 0_-fvi_hrnjywg5_-nud "guid" 24
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:02:54_00003"
+)
+(uid "0_-fvi_hrnjywg5_-nud"))
+($7 37 < 0_-fvi_hrnjywg5_-nuc "documentation" 1
+(name "documentation"
+)
+(value "Storage of keyword definitions - reference data."
+)
+(uid "0_-fvi_hrnjywg5_-nuc"))
+($7 38 < 0_-fvi_hrnjywg5_-nub "isReferenceData" 1
+(name "isReferenceData"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-nub"))
+($7 39 < 0_-fvi_hrnjywg5_-nua "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-14-17:02:54_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nua"))
+($7 40 < 0_-fvi_hrnjywg5_-nu9 "shortName" 1
+(name "shortName"
+)
+(value "KWDF"
+)
+(uid "0_-fvi_hrnjywg5_-nu9"))
+($11 41)
+($13 44)
+($11 47)
+($11 49)
+($5 42 @ 0_-fvi_hrnjywg5_-d9g 4 "Logical" $1 "memops" $1 "Implementation" $1 "DataObject" $5)
+($5 43 @ 0_-fvi_hrnjywg5_-dkb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Word" $5)
+($5 45 @ 0_-fvi_hrnjywg5_-dkx 4 "Logical" $1 "memops" $1 "Implementation" $1 "Line" $5)
+($5 46 @ 0_-fvi_hrnjywg5_-dkm 4 "Logical" $1 "memops" $1 "Implementation" $1 "String" $5)
+($5 48 @ 0_-fvi_hrnjywg5_-dbb 4 "Logical" $1 "memops" $1 "Implementation" $1 "TopObject" $5)
+(typeAssn 31 6)
+(assocEndAssn 6 31)
+(subtypeAssn 21 6)
+(supertypeAssn 21 42)
+(generalizationAssn 6 21)
+(typeRefAssn 7 43)
+(typeExpression 7 44)
+(typeRefAssn 9 45)
+(typeExpression 9 44)
+(typeRefAssn 12 46)
+(typeExpression 12 44)
+(typeRefAssn 15 43)
+(typeExpression 15 44)
+(projectionAssn 3 6 41)
+(typeAssn 29 24)
+(assocEndAssn 24 29)
+(subtypeAssn 33 24)
+(supertypeAssn 33 48)
+(generalizationAssn 24 33)
+(typeRefAssn 25 43)
+(typeExpression 25 44)
+(projectionAssn 4 24 47)
+(to 5 3)
+(from 5 4)
+(projectionAssn 5 28 49)

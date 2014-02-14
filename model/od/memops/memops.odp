@@ -1,0 +1,21 @@
+ObjectDomain_Shared_Package 15
+{-yk94ms_-e3s_e41656c6_-ow3 2 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "memops" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.UmlTaggedValue-taggedValues $2
+]
+($1 1 > -yk94ms_-e3s_e41656c6_-ow3 2 "Logical" $1 "memops" $1
+(name "memops"
+)
+(uid "-yk94ms_-e3s_e41656c6_-ow3"))
+($2 2 < -yk94ms_-e3s_e41656c6_-gjs "documentation" 1
+(name "documentation"
+)
+(value "Modelling for the memops framework, generally applicable to any data model from any field."
+)
+(uid "-yk94ms_-e3s_e41656c6_-gjs"))
+($2 3 < -yk94ms_15v_eqxp59vz_-oun "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00024"
+)
+(uid "-yk94ms_15v_eqxp59vz_-oun"))

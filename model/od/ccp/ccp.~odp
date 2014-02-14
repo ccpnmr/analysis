@@ -1,0 +1,21 @@
+ObjectDomain_Shared_Package 15
+{-yk94ms_-e3s_e41656c6_-p96 2 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "ccp" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.UmlTaggedValue-taggedValues $2
+]
+($1 1 > -yk94ms_-e3s_e41656c6_-p96 2 "Logical" $1 "ccp" $1
+(name "ccp"
+)
+(uid "-yk94ms_-e3s_e41656c6_-p96"))
+($2 2 < -yk94ms_-e3s_e41656c6_-h9y "documentation" 1
+(name "documentation"
+)
+(value "CCP Data Model for biochemistry, macromolecular structure and bioinformatics."
+)
+(uid "-yk94ms_-e3s_e41656c6_-h9y"))
+($2 3 < -yk94ms_15v_eqxp59vz_-ow5 "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:43_00001"
+)
+(uid "-yk94ms_15v_eqxp59vz_-ow5"))

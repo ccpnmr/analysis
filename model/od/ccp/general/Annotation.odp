@@ -1,0 +1,677 @@
+ObjectDomain_Shared_Package 15
+{0_-fvi_hrnjywg5_-oto 4 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "ccp" objectdomain.uml.mechanisms.UmlPackage-owns "general" objectdomain.uml.mechanisms.UmlPackage-owns "Annotation" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.core.TypeExpression $16
+objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Generalization-owns $9
+objectdomain.uml.core.Dependency-owns $10
+objectdomain.uml.core.Projection $14
+objectdomain.uml.core.UmlAttribute-features $6
+objectdomain.uml.core.UmlAssociationEnd-connections $12
+objectdomain.uml.view.style.BaseViewElementStyle-owns $13
+objectdomain.uml.view.ClassView-owns $3
+objectdomain.uml.core.UmlTaggedValue-taggedValues $7
+objectdomain.uml.core.UmlAssociation-owns $11
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.core.UmlOperation-features $8
+objectdomain.uml.core.UmlMultiplicity $15
+objectdomain.uml.core.UmlClass-owns $5
+objectdomain.uml.view.AssociationView-owns $4
+objectdomain.uml.core.Stereotype-owns $17
+]
+($1 1 > 0_-fvi_hrnjywg5_-oto 4 "Logical" $1 "ccp" $1 "general" $1 "Annotation" $1
+(name "Annotation"
+)
+(uid "0_-fvi_hrnjywg5_-oto"))
+($2 2 < 0_-fvi_hrnjywg5_-olp "_Annotation-details" 1
+(name "_Annotation-details"
+)
+(uid "0_-fvi_hrnjywg5_-olp")
+(diagramType "class"))
+($3 3 < 0_-fvi_hrnjywg5_-olo "MolFeature" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-olo")
+(bbx 320 210 130 150))
+($3 4 < 0_-fvi_hrnjywg5_-oln "Molecule" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-oln")
+(bbx 0 20 210 830))
+($3 5 < 0_-fvi_hrnjywg5_-olm "MolResidue" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-olm")
+(bbx 260 420 220 270))
+($4 6 < 0_-fvi_hrnjywg5_-oll "" 2
+(toMultiplicityPosition 250 480)
+(uid "0_-fvi_hrnjywg5_-oll")
+(points 210 470 260 470)
+(fromMultiplicityPosition 215 440))
+($3 7 < 0_-fvi_hrnjywg5_-olk "Annotation" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-olk")
+(bbx 680 210 120 170))
+($3 8 < 0_-fvi_hrnjywg5_-olj "Person" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-olj")
+(bbx 510 420 190 210))
+($4 9 < 0_-fvi_hrnjywg5_-oli "" 2
+(toMultiplicityPosition 380 370)
+(uid "0_-fvi_hrnjywg5_-oli")
+(points 375 420 375 360)
+(fromMultiplicityPosition 350 400))
+($4 10 < 0_-fvi_hrnjywg5_-olh "" 2
+(uid "0_-fvi_hrnjywg5_-olh")
+(points 635 420 635 330 680 330)
+(fromRolePosition 585 390))
+($3 11 < 0_-fvi_hrnjywg5_-olg "AnnotationStore" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-olg")
+(bbx 470 100 110 70))
+($4 12 < 0_-fvi_hrnjywg5_-olf "" 2
+(toMultiplicityPosition 455 245)
+(uid "0_-fvi_hrnjywg5_-olf")
+(points 520 170 520 240 450 240)
+(fromMultiplicityPosition 535 185))
+($4 13 < 0_-fvi_hrnjywg5_-ole "" 2
+(toMultiplicityPosition 670 245)
+(uid "0_-fvi_hrnjywg5_-ole")
+(points 520 170 520 240 680 240)
+(fromMultiplicityPosition 535 185))
+($2 14 < 0_-fvi_hrnjywg5_-old "_Annotation" 1
+(name "_Annotation"
+)
+(uid "0_-fvi_hrnjywg5_-old")
+(diagramType "class"))
+($3 15 < 0_-fvi_hrnjywg5_-olc "MolFeature" 14
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-olc")
+(bbx 210 200 80 30))
+($3 16 < 0_-fvi_hrnjywg5_-olb "Molecule" 14
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-olb")
+(bbx 20 260 210 30))
+($3 17 < 0_-fvi_hrnjywg5_-ola "MolResidue" 14
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-ola")
+(bbx 90 350 220 30))
+($4 18 < 0_-fvi_hrnjywg5_-ol9 "" 14
+(toMultiplicityPosition 260 240)
+(uid "0_-fvi_hrnjywg5_-ol9")
+(points 250 350 250 230)
+(fromMultiplicityPosition 230 325))
+($4 19 < 0_-fvi_hrnjywg5_-ol8 "" 14
+(toMultiplicityPosition 120 330)
+(uid "0_-fvi_hrnjywg5_-ol8")
+(points 130 290 130 350)
+(fromMultiplicityPosition 140 295))
+($3 20 < 0_-fvi_hrnjywg5_-ol7 "Annotation" 14
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-ol7")
+(bbx 370 200 80 30))
+($3 21 < 0_-fvi_hrnjywg5_-ol6 "Person" 14
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-ol6")
+(bbx 660 200 190 30))
+($4 22 < 0_-fvi_hrnjywg5_-ol5 "" 14
+(toMultiplicityPosition 455 135)
+(uid "0_-fvi_hrnjywg5_-ol5")
+(points 660 215 450 215)
+(fromRolePosition 610 190)
+(fromMultiplicityPosition 550 140))
+($3 23 < 0_-fvi_hrnjywg5_-ol4 "AnnotationStore" 14
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-ol4")
+(bbx 270 120 110 30))
+($4 24 < 0_-fvi_hrnjywg5_-ol3 "" 14
+(toMultiplicityPosition 280 180)
+(uid "0_-fvi_hrnjywg5_-ol3")
+(points 275 150 275 200)
+(fromMultiplicityPosition 255 150))
+($4 25 < 0_-fvi_hrnjywg5_-ol2 "" 14
+(toMultiplicityPosition 380 180)
+(uid "0_-fvi_hrnjywg5_-ol2")
+(points 375 150 375 200)
+(fromMultiplicityPosition 360 155))
+($5 26 < 0_-fvi_hrnjywg5_-ol1 "MolFeature" 1
+(name "MolFeature"
+)
+(uid "0_-fvi_hrnjywg5_-ol1"))
+($6 27 < 0_-fvi_hrnjywg5_-ol0 "serial" 26
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-ol0")
+(multiplicity "1"))
+($7 28 < 0_-fvi_hrnjywg5_-okz "documentation" 27
+(name "documentation"
+)
+(value "Unique identifier."
+)
+(uid "0_-fvi_hrnjywg5_-okz"))
+($7 29 < 0_-fvi_hrnjywg5_-oky "isAutomatic" 27
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-oky"))
+($7 30 < 0_-fvi_hrnjywg5_-okx "guid" 27
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00096"
+)
+(uid "0_-fvi_hrnjywg5_-okx"))
+($6 31 < 0_-fvi_hrnjywg5_-okw "position" 26
+(changeability "frozen")
+(name "position"
+)
+(uid "0_-fvi_hrnjywg5_-okw")
+(multiplicity "1"))
+($7 32 < 0_-fvi_hrnjywg5_-okv "documentation" 31
+(name "documentation"
+)
+(value "Position of the feature in sequence."
+)
+(uid "0_-fvi_hrnjywg5_-okv"))
+($7 33 < 0_-fvi_hrnjywg5_-oku "isDerived" 31
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-oku"))
+($7 34 < 0_-fvi_hrnjywg5_-okt "guid" 31
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00097"
+)
+(uid "0_-fvi_hrnjywg5_-okt"))
+($6 35 < 0_-fvi_hrnjywg5_-oks "featureType" 26
+(name "featureType"
+)
+(uid "0_-fvi_hrnjywg5_-oks")
+(multiplicity "1"))
+($7 36 < 0_-fvi_hrnjywg5_-okr "documentation" 35
+(name "documentation"
+)
+(value "The type of the feature. e.g. 'Selenomethionated', 'Oxidised', 'Reduced', 'Phosphorylated', 'Methylated', 'Glycosylated', 'Ubiquitinated', 'Hydroxyprolinated', 'Gammacarboxybutylated', 'Myristolated', 'Sulfonated'."
+)
+(uid "0_-fvi_hrnjywg5_-okr"))
+($7 37 < 0_-fvi_hrnjywg5_-okq "guid" 35
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00098"
+)
+(uid "0_-fvi_hrnjywg5_-okq"))
+($6 38 < 0_-fvi_hrnjywg5_-okp "details" 26
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-okp"))
+($7 39 < 0_-fvi_hrnjywg5_-oko "documentation" 38
+(name "documentation"
+)
+(value "Detail field for comments."
+)
+(uid "0_-fvi_hrnjywg5_-oko"))
+($7 40 < 0_-fvi_hrnjywg5_-okn "guid" 38
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00099"
+)
+(uid "0_-fvi_hrnjywg5_-okn"))
+($8 41 < 0_-fvi_hrnjywg5_-okm "getPosition" 26
+(name "getPosition"
+)
+(uid "0_-fvi_hrnjywg5_-okm")
+(isQuery true))
+($7 42 < 0_-fvi_hrnjywg5_-okl "documentation" 41
+(name "documentation"
+)
+(value "getter for position attribute."
+)
+(uid "0_-fvi_hrnjywg5_-okl"))
+($7 43 < 0_-fvi_hrnjywg5_-okk "opType" 41
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-okk"))
+($7 44 < 0_-fvi_hrnjywg5_-okj "guid" 41
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00100"
+)
+(uid "0_-fvi_hrnjywg5_-okj"))
+($7 45 < 0_-fvi_hrnjywg5_-oki "code:java" 41
+(name "code:java"
+)
+(value "result = getMolResidue().getSerial();"
+)
+(uid "0_-fvi_hrnjywg5_-oki"))
+($7 46 < 0_-fvi_hrnjywg5_-okh "code:python" 41
+(name "code:python"
+)
+(value "result = self.molResidue.serial"
+)
+(uid "0_-fvi_hrnjywg5_-okh"))
+($9 47 < 0_-fvi_hrnjywg5_-okg "#<anon> (MolFeature, DataObject)" 26
+(uid "0_-fvi_hrnjywg5_-okg"))
+($7 48 < 0_-fvi_hrnjywg5_-okf "documentation" 26
+(name "documentation"
+)
+(value "The feature is an annotation on a residue. The feature is a modification, a mutation,... made in comparison to the wild type sequence, or a simple comment for a particular residue."
+)
+(uid "0_-fvi_hrnjywg5_-okf"))
+($7 49 < 0_-fvi_hrnjywg5_-oke "guid" 26
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:25:09_00025"
+)
+(uid "0_-fvi_hrnjywg5_-oke"))
+($7 50 < 0_-fvi_hrnjywg5_-okd "keyNames" 26
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-okd"))
+($10 51 < 0_-fvi_hrnjywg5_-otl "#<anon> (Annotation, Molecule)" 1
+(uid "0_-fvi_hrnjywg5_-otl"))
+($5 52 < 0_-fvi_hrnjywg5_-okb "Annotation" 1
+(name "Annotation"
+)
+(uid "0_-fvi_hrnjywg5_-okb"))
+($6 53 < 0_-fvi_hrnjywg5_-oka "serial" 52
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-oka")
+(multiplicity "1"))
+($7 54 < 0_-fvi_hrnjywg5_-ok9 "documentation" 53
+(name "documentation"
+)
+(value "Unique identidier."
+)
+(uid "0_-fvi_hrnjywg5_-ok9"))
+($7 55 < 0_-fvi_hrnjywg5_-ok8 "isAutomatic" 53
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-ok8"))
+($7 56 < 0_-fvi_hrnjywg5_-ok7 "guid" 53
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00108"
+)
+(uid "0_-fvi_hrnjywg5_-ok7"))
+($6 57 < 0_-fvi_hrnjywg5_-ok6 "name" 52
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-ok6"))
+($7 58 < 0_-fvi_hrnjywg5_-ok5 "documentation" 57
+(name "documentation"
+)
+(value "The name of the annotation."
+)
+(uid "0_-fvi_hrnjywg5_-ok5"))
+($7 59 < 0_-fvi_hrnjywg5_-ok4 "guid" 57
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00109"
+)
+(uid "0_-fvi_hrnjywg5_-ok4"))
+($6 60 < 0_-fvi_hrnjywg5_-ok3 "description" 52
+(name "description"
+)
+(uid "0_-fvi_hrnjywg5_-ok3"))
+($7 61 < 0_-fvi_hrnjywg5_-ok2 "documentation" 60
+(name "documentation"
+)
+(value "The description of the annotation."
+)
+(uid "0_-fvi_hrnjywg5_-ok2"))
+($7 62 < 0_-fvi_hrnjywg5_-ok1 "guid" 60
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00110"
+)
+(uid "0_-fvi_hrnjywg5_-ok1"))
+($6 63 < 0_-fvi_hrnjywg5_-ok0 "path" 52
+(name "path"
+)
+(uid "0_-fvi_hrnjywg5_-ok0")
+(multiplicity "1"))
+($7 64 < 0_-fvi_hrnjywg5_-ojz "documentation" 63
+(name "documentation"
+)
+(value "File name, relative to dataUrl, of data."
+)
+(uid "0_-fvi_hrnjywg5_-ojz"))
+($7 65 < 0_-fvi_hrnjywg5_-ojy "guid" 63
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00111"
+)
+(uid "0_-fvi_hrnjywg5_-ojy"))
+($6 66 < 0_-fvi_hrnjywg5_-ojx "date" 52
+(name "date"
+)
+(uid "0_-fvi_hrnjywg5_-ojx"))
+($7 67 < 0_-fvi_hrnjywg5_-ojw "documentation" 66
+(name "documentation"
+)
+(value "The date at which the annotation is created."
+)
+(uid "0_-fvi_hrnjywg5_-ojw"))
+($7 68 < 0_-fvi_hrnjywg5_-ojv "guid" 66
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00112"
+)
+(uid "0_-fvi_hrnjywg5_-ojv"))
+($6 69 < 0_-fvi_hrnjywg5_-oju "details" 52
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-oju"))
+($7 70 < 0_-fvi_hrnjywg5_-ojt "documentation" 69
+(name "documentation"
+)
+(value "Details field for comments."
+)
+(uid "0_-fvi_hrnjywg5_-ojt"))
+($7 71 < 0_-fvi_hrnjywg5_-ojs "guid" 69
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:37_00113"
+)
+(uid "0_-fvi_hrnjywg5_-ojs"))
+($9 72 < 0_-fvi_hrnjywg5_-ojr "#<anon> (Annotation, DataObject)" 52
+(uid "0_-fvi_hrnjywg5_-ojr"))
+($7 73 < 0_-fvi_hrnjywg5_-ojq "documentation" 52
+(name "documentation"
+)
+(value "Annotation to store file and a description associate to it."
+)
+(uid "0_-fvi_hrnjywg5_-ojq"))
+($7 74 < 0_-fvi_hrnjywg5_-ojp "guid" 52
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:25:09_00026"
+)
+(uid "0_-fvi_hrnjywg5_-ojp"))
+($7 75 < 0_-fvi_hrnjywg5_-ojo "keyNames" 52
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-ojo"))
+($10 76 < 0_-fvi_hrnjywg5_-otn "#<anon> (Annotation, Affiliation)" 1
+(uid "0_-fvi_hrnjywg5_-otn"))
+($5 77 < 0_-fvi_hrnjywg5_-ojm "AnnotationStore" 1
+(name "AnnotationStore"
+)
+(uid "0_-fvi_hrnjywg5_-ojm"))
+($6 78 < 0_-fvi_hrnjywg5_-ojl "name" 77
+(changeability "frozen")
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-ojl")
+(multiplicity "1"))
+($7 79 < 0_-fvi_hrnjywg5_-ojk "documentation" 78
+(name "documentation"
+)
+(value "name of AnnotationStore"
+)
+(uid "0_-fvi_hrnjywg5_-ojk"))
+($7 80 < 0_-fvi_hrnjywg5_-ojj "guid" 78
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:55:44_00004"
+)
+(uid "0_-fvi_hrnjywg5_-ojj"))
+($11 81 < 0_-fvi_hrnjywg5_-oji "#<anon> (AnnotationStore, MolFeature)##," 77
+(name "")
+(uid "0_-fvi_hrnjywg5_-oji"))
+($12 82 < 0_-fvi_hrnjywg5_-ojh "#0" 81
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-ojh")
+(multiplicity "1"))
+($7 83 < 0_-fvi_hrnjywg5_-ojg "guid" 82
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:55:43_00001"
+)
+(uid "0_-fvi_hrnjywg5_-ojg"))
+($12 84 < 0_-fvi_hrnjywg5_-ojf "#1" 81
+(uid "0_-fvi_hrnjywg5_-ojf")
+(multiplicity "*"))
+($7 85 < 0_-fvi_hrnjywg5_-oje "guid" 84
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:55:44_00001"
+)
+(uid "0_-fvi_hrnjywg5_-oje"))
+($11 86 < 0_-fvi_hrnjywg5_-ojd "#<anon> (AnnotationStore, Annotation)##," 77
+(name "")
+(uid "0_-fvi_hrnjywg5_-ojd"))
+($12 87 < 0_-fvi_hrnjywg5_-ojc "#0" 86
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-ojc")
+(multiplicity "1"))
+($7 88 < 0_-fvi_hrnjywg5_-ojb "guid" 87
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:55:44_00002"
+)
+(uid "0_-fvi_hrnjywg5_-ojb"))
+($12 89 < 0_-fvi_hrnjywg5_-oja "#1" 86
+(uid "0_-fvi_hrnjywg5_-oja")
+(multiplicity "*"))
+($7 90 < 0_-fvi_hrnjywg5_-oj9 "guid" 89
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:55:44_00003"
+)
+(uid "0_-fvi_hrnjywg5_-oj9"))
+($9 91 < 0_-fvi_hrnjywg5_-oj8 "#<anon> (AnnotationStore, TopObject)" 77
+(uid "0_-fvi_hrnjywg5_-oj8"))
+($7 92 < 0_-fvi_hrnjywg5_-oj7 "documentation" 77
+(name "documentation"
+)
+(value "TopObject for Annotation package"
+)
+(uid "0_-fvi_hrnjywg5_-oj7"))
+($7 93 < 0_-fvi_hrnjywg5_-oj6 "guid" 77
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:55:15_00001"
+)
+(uid "0_-fvi_hrnjywg5_-oj6"))
+($7 94 < 0_-fvi_hrnjywg5_-oj5 "keyNames" 77
+(name "keyNames"
+)
+(value "name"
+)
+(uid "0_-fvi_hrnjywg5_-oj5"))
+($10 95 < 0_-fvi_hrnjywg5_-oj4 "#<anon> (Annotation, DataLocation)" 1
+(uid "0_-fvi_hrnjywg5_-oj4"))
+($7 96 < 0_-fvi_hrnjywg5_-oj3 "shortName" 1
+(name "shortName"
+)
+(value "ANNO"
+)
+(uid "0_-fvi_hrnjywg5_-oj3"))
+($7 97 < 0_-fvi_hrnjywg5_-oj2 "documentation" 1
+(name "documentation"
+)
+(value "Annotation and additional information of (biopolymer) molecules at the residue level."
+)
+(uid "0_-fvi_hrnjywg5_-oj2"))
+($7 98 < 0_-fvi_hrnjywg5_-oj1 "isDraft" 1
+(name "isDraft"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-oj1"))
+($7 99 < 0_-fvi_hrnjywg5_-oj0 "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:25:09_00024"
+)
+(uid "0_-fvi_hrnjywg5_-oj0"))
+($14 101)
+($16 104)
+($16 105)
+($14 109)
+($14 111)
+($14 113)
+($14 115)
+($16 117)
+($14 122)
+($14 124)
+($14 126)
+($14 128)
+($16 130)
+($14 131)
+($14 132)
+($14 133)
+($14 134)
+($14 135)
+($14 136)
+($14 137)
+($14 138)
+($14 139)
+($14 140)
+($14 141)
+($14 142)
+($14 143)
+($13 100 @ -yk94ms_-e3s_e41656c6_-fvv 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Annotation" $13)
+($5 102 @ 0_-fvi_hrnjywg5_-d9g 4 "Logical" $1 "memops" $1 "Implementation" $1 "DataObject" $5)
+($5 103 @ 0_-fvi_hrnjywg5_-dl3 4 "Logical" $1 "memops" $1 "Implementation" $1 "Int" $5)
+($5 106 @ 0_-fvi_hrnjywg5_-dkb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Word" $5)
+($5 107 @ 0_-fvi_hrnjywg5_-dkm 4 "Logical" $1 "memops" $1 "Implementation" $1 "String" $5)
+($13 108 @ -yk94ms_-e3s_e41656c6_-fvz 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Molecule" $13)
+($5 110 @ -yk94ms_-e3s_e41656c6_-lyc 5 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "Molecule" $5)
+($5 112 @ -yk94ms_-e3s_e41656c6_-lsj 5 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "MolResidue" $5)
+($11 114 @ -yk94ms_-e3s_e41656c6_-lua 6 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "Molecule" $5 "#<anon> (Molecule, MolResidue)##," $11)
+($5 116 @ 0_-fvi_hrnjywg5_-dkx 4 "Logical" $1 "memops" $1 "Implementation" $1 "Line" $5)
+($5 118 @ 0_-fvi_hrnjywg5_-dkg 4 "Logical" $1 "memops" $1 "Implementation" $1 "Text" $5)
+($5 119 @ 0_-fvi_hrnjywg5_-dcf 4 "Logical" $1 "memops" $1 "Implementation" $1 "PathString" $5)
+($5 120 @ 0_-fvi_hrnjywg5_-dln 4 "Logical" $1 "memops" $1 "Implementation" $1 "DateTime" $5)
+($13 121 @ -yk94ms_-e3s_e41656c6_-fw4 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "People" $13)
+($5 123 @ 0_-fvi_hrnjywg5_-orf 5 "Logical" $1 "ccp" $1 "general" $1 "Affiliation" $1 "Person" $5)
+($11 125 @ -yk94ms_-e3s_e41656c6_-lqt 6 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "MolResidue" $5 "#<anon> (MolResidue, MolFeature)##," $11)
+($11 127 @ 0_-fvi_hrnjywg5_-oqk 6 "Logical" $1 "ccp" $1 "general" $1 "Affiliation" $1 "Person" $5 "#<anon> (Person, Annotation)##author," $11)
+($5 129 @ 0_-fvi_hrnjywg5_-dbb 4 "Logical" $1 "memops" $1 "Implementation" $1 "TopObject" $5)
+($17 144 @ -yk94ms_-e3s_e41656c6_-fwy 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "import" $17)
+($1 145 @ -yk94ms_-e3s_e41656c6_-m0p 4 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1)
+($1 146 @ -yk94ms_-e3s_e41656c6_-jc4 4 "Logical" $1 "ccp" $1 "general" $1 "Affiliation" $1)
+($1 147 @ -yk94ms_jd_f02m0kiw_-p98 4 "Logical" $1 "ccp" $1 "general" $1 "DataLocation" $1)
+(styleAssn 3 100)
+(typeAssn 84 26)
+(assocEndAssn 26 84)
+(subtypeAssn 47 26)
+(supertypeAssn 47 102)
+(generalizationAssn 26 47)
+(typeRefAssn 27 103)
+(typeExpression 27 104)
+(typeRefAssn 31 103)
+(typeExpression 31 105)
+(typeRefAssn 35 106)
+(typeExpression 35 104)
+(typeRefAssn 38 107)
+(typeExpression 38 104)
+(projectionAssn 3 26 101)
+(styleAssn 4 108)
+(projectionAssn 4 110 109)
+(styleAssn 5 108)
+(projectionAssn 5 112 111)
+(to 6 5)
+(from 6 4)
+(projectionAssn 6 114 113)
+(styleAssn 7 100)
+(typeAssn 89 52)
+(assocEndAssn 52 89)
+(subtypeAssn 72 52)
+(supertypeAssn 72 102)
+(generalizationAssn 52 72)
+(typeRefAssn 53 103)
+(typeExpression 53 105)
+(typeRefAssn 57 116)
+(typeExpression 57 117)
+(typeRefAssn 60 118)
+(typeExpression 60 105)
+(typeRefAssn 63 119)
+(typeExpression 63 105)
+(typeRefAssn 66 120)
+(typeExpression 66 105)
+(typeRefAssn 69 107)
+(typeExpression 69 105)
+(projectionAssn 7 52 115)
+(styleAssn 8 121)
+(projectionAssn 8 123 122)
+(to 9 3)
+(from 9 5)
+(projectionAssn 9 125 124)
+(to 10 7)
+(from 10 8)
+(projectionAssn 10 127 126)
+(styleAssn 11 100)
+(typeAssn 82 77)
+(assocEndAssn 77 82)
+(typeAssn 87 77)
+(assocEndAssn 77 87)
+(subtypeAssn 91 77)
+(supertypeAssn 91 129)
+(generalizationAssn 77 91)
+(typeRefAssn 78 116)
+(typeExpression 78 130)
+(projectionAssn 11 77 128)
+(to 12 3)
+(from 12 11)
+(projectionAssn 12 81 131)
+(to 13 7)
+(from 13 11)
+(projectionAssn 13 86 132)
+(styleAssn 15 100)
+(projectionAssn 15 26 133)
+(styleAssn 16 108)
+(projectionAssn 16 110 134)
+(styleAssn 17 108)
+(projectionAssn 17 112 135)
+(to 18 15)
+(from 18 17)
+(projectionAssn 18 125 136)
+(to 19 17)
+(from 19 16)
+(projectionAssn 19 114 137)
+(styleAssn 20 100)
+(projectionAssn 20 52 138)
+(styleAssn 21 121)
+(projectionAssn 21 123 139)
+(to 22 20)
+(from 22 21)
+(projectionAssn 22 127 140)
+(styleAssn 23 100)
+(projectionAssn 23 77 141)
+(to 24 15)
+(from 24 23)
+(projectionAssn 24 81 142)
+(to 25 20)
+(from 25 23)
+(projectionAssn 25 86 143)
+(stereotypeAssn 51 144)
+(clientAssn 51 1)
+(supplierAssn 51 145)
+(stereotypeAssn 76 144)
+(clientAssn 76 1)
+(supplierAssn 76 146)
+(stereotypeAssn 95 144)
+(clientAssn 95 1)
+(supplierAssn 95 147)

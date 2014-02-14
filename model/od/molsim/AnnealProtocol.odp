@@ -1,0 +1,1800 @@
+ObjectDomain_Shared_Package 15
+{-hkpzxr_-cvb_f2ixo80k_-p97 3 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "molsim" objectdomain.uml.mechanisms.UmlPackage-owns "AnnealProtocol" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.core.TypeExpression $15
+objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Generalization-owns $8
+objectdomain.uml.core.Dependency-owns $12
+objectdomain.uml.core.Projection $13
+objectdomain.uml.core.UmlAttribute-features $6
+objectdomain.uml.core.UmlAssociationEnd-connections $10
+objectdomain.uml.view.style.BaseViewElementStyle-owns $17
+objectdomain.uml.view.ClassView-owns $3
+objectdomain.uml.core.UmlTaggedValue-taggedValues $7
+objectdomain.uml.core.UmlAssociation-owns $9
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.core.UmlOperation-features $11
+objectdomain.uml.core.UmlMultiplicity $14
+objectdomain.uml.core.UmlClass-owns $5
+objectdomain.uml.view.AssociationView-owns $4
+objectdomain.uml.core.Stereotype-owns $16
+]
+($1 1 > -hkpzxr_-cvb_f2ixo80k_-p97 3 "Logical" $1 "molsim" $1 "AnnealProtocol" $1
+(name "AnnealProtocol"
+)
+(uid "-hkpzxr_-cvb_f2ixo80k_-p97"))
+($2 2 < 0_-fvi_hrnjywg5_-czf "_AnnealProtocol-details" 1
+(name "_AnnealProtocol-details"
+)
+(uid "0_-fvi_hrnjywg5_-czf")
+(diagramType "class"))
+($3 3 < 0_-fvi_hrnjywg5_-cze "AnnealProtocolStore" 2
+(uid "0_-fvi_hrnjywg5_-cze")
+(bbx 640 60 140 60))
+($3 4 < 0_-fvi_hrnjywg5_-czd "AnnealProtocol" 2
+(uid "0_-fvi_hrnjywg5_-czd")
+(bbx 430 50 160 190))
+($4 5 < 0_-fvi_hrnjywg5_-czc "" 2
+(toMultiplicityPosition 595 45)
+(uid "0_-fvi_hrnjywg5_-czc")
+(points 640 65 590 65)
+(fromMultiplicityPosition 615 40))
+($3 6 < 0_-fvi_hrnjywg5_-czb "AnnealStage" 2
+(uid "0_-fvi_hrnjywg5_-czb")
+(bbx 600 380 230 210))
+($3 7 < 0_-fvi_hrnjywg5_-cza "EnergyTerm" 2
+(uid "0_-fvi_hrnjywg5_-cza")
+(bbx 420 330 170 130))
+($4 8 < 0_-fvi_hrnjywg5_-cz9 "" 2
+(toMultiplicityPosition 480 305)
+(uid "0_-fvi_hrnjywg5_-cz9")
+(points 490 240 490 330)
+(fromMultiplicityPosition 500 245))
+($3 9 < 0_-fvi_hrnjywg5_-cz8 "PotentialScale" 2
+(uid "0_-fvi_hrnjywg5_-cz8")
+(bbx 350 530 200 130))
+($4 10 < 0_-fvi_hrnjywg5_-cz7 "" 2
+(toMultiplicityPosition 420 510)
+(uid "0_-fvi_hrnjywg5_-cz7")
+(points 430 460 430 530)
+(fromMultiplicityPosition 440 465))
+($4 11 < 0_-fvi_hrnjywg5_-cz6 "" 2
+(toMultiplicityPosition 590 590)
+(uid "0_-fvi_hrnjywg5_-cz6")
+(points 550 585 600 585)
+(fromMultiplicityPosition 555 565))
+($3 12 < 0_-fvi_hrnjywg5_-cz5 "ScaleFunction" 2
+(uid "0_-fvi_hrnjywg5_-cz5")
+(bbx 30 40 100 60))
+($3 13 < 0_-fvi_hrnjywg5_-cz4 "RefPotentialTerm" 2
+(uid "0_-fvi_hrnjywg5_-cz4")
+(bbx 700 220 180 130))
+($4 14 < 0_-fvi_hrnjywg5_-cz3 "" 2
+(toMultiplicityPosition 725 200)
+(toRolePosition 795 160)
+(uid "0_-fvi_hrnjywg5_-cz3")
+(points 740 120 740 220)
+(fromMultiplicityPosition 720 125))
+($4 15 < 0_-fvi_hrnjywg5_-cz2 "" 2
+(toMultiplicityPosition 860 360)
+(toRolePosition 815 305)
+(uid "0_-fvi_hrnjywg5_-cz2")
+(points 550 615 855 615 855 350)
+(fromMultiplicityPosition 555 620))
+($3 16 < 0_-fvi_hrnjywg5_-cz1 "EnergyTerm" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-cz1")
+(bbx 100 210 190 90))
+($4 17 < 0_-fvi_hrnjywg5_-cz0 "" 2
+(toMultiplicityPosition 300 240)
+(toRolePosition 295 265)
+(uid "0_-fvi_hrnjywg5_-cz0")
+(points 420 360 395 360 395 260 290 260)
+(fromRolePosition 295 340))
+($3 18 < 0_-fvi_hrnjywg5_-cyz "StructureEnsemble" 2
+(uid "0_-fvi_hrnjywg5_-cyz")
+(bbx 830 10 290 190))
+($3 19 < 0_-fvi_hrnjywg5_-cyy "NmrConstraintStore" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-cyy")
+(bbx 20 130 280 60))
+($3 20 < 0_-fvi_hrnjywg5_-cyx "Model" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-cyx")
+(bbx 910 400 210 250))
+($4 21 < 0_-fvi_hrnjywg5_-cyw "" 2
+(toMultiplicityPosition 1120 380)
+(uid "0_-fvi_hrnjywg5_-cyw")
+(points 1115 200 1115 400)
+(fromMultiplicityPosition 1095 195))
+($3 22 < 0_-fvi_hrnjywg5_-cyv "AbstractConstraintList" 2
+(uid "0_-fvi_hrnjywg5_-cyv")
+(bbx 20 390 300 290))
+($4 23 < 0_-fvi_hrnjywg5_-cyu "" 2
+(toMultiplicityPosition 55 350)
+(toRolePosition 20 370)
+(uid "0_-fvi_hrnjywg5_-cyu")
+(points 50 190 50 390)
+(fromMultiplicityPosition 30 195))
+($4 24 < 0_-fvi_hrnjywg5_-cyt "" 2
+(toMultiplicityPosition 640 360)
+(uid "0_-fvi_hrnjywg5_-cyt")
+(points 590 230 635 230 635 380)
+(fromMultiplicityPosition 595 205))
+($3 25 < 0_-fvi_hrnjywg5_-cys "RefTermParameter" 2
+(uid "0_-fvi_hrnjywg5_-cys")
+(bbx 950 240 130 110))
+($4 26 < 0_-fvi_hrnjywg5_-cyr "" 2
+(toMultiplicityPosition 935 320)
+(uid "0_-fvi_hrnjywg5_-cyr")
+(points 880 315 950 315)
+(fromMultiplicityPosition 890 285))
+($5 27 < 0_-fvi_hrnjywg5_-cyq "AnnealProtocolStore" 1
+(name "AnnealProtocolStore"
+)
+(uid "0_-fvi_hrnjywg5_-cyq"))
+($6 28 < 0_-fvi_hrnjywg5_-cyp "name" 27
+(changeability "frozen")
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-cyp")
+(multiplicity "1"))
+($7 29 < 0_-fvi_hrnjywg5_-cyo "documentation" 28
+(name "documentation"
+)
+(value "AnnealProtocol name."
+)
+(uid "0_-fvi_hrnjywg5_-cyo"))
+($7 30 < 0_-fvi_hrnjywg5_-cyn "guid" 28
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00009"
+)
+(uid "0_-fvi_hrnjywg5_-cyn"))
+($8 31 < 0_-fvi_hrnjywg5_-cym "#<anon> (AnnealProtocolStore, TopObject)" 27
+(uid "0_-fvi_hrnjywg5_-cym"))
+($9 32 < 0_-fvi_hrnjywg5_-cyl "#<anon> (AnnealProtocolStore, AnnealProtocol)##," 27
+(name "")
+(uid "0_-fvi_hrnjywg5_-cyl"))
+($10 33 < 0_-fvi_hrnjywg5_-cyk "#0" 32
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-cyk")
+(multiplicity "1"))
+($7 34 < 0_-fvi_hrnjywg5_-cyj "guid" 33
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00003"
+)
+(uid "0_-fvi_hrnjywg5_-cyj"))
+($10 35 < 0_-fvi_hrnjywg5_-cyi "#1" 32
+(uid "0_-fvi_hrnjywg5_-cyi")
+(multiplicity "*"))
+($7 36 < 0_-fvi_hrnjywg5_-cyh "guid" 35
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00004"
+)
+(uid "0_-fvi_hrnjywg5_-cyh"))
+($9 37 < 0_-fvi_hrnjywg5_-cyg "#<anon> (AnnealProtocolStore, RefPotentialTerm)##," 27
+(name "")
+(uid "0_-fvi_hrnjywg5_-cyg"))
+($10 38 < 0_-fvi_hrnjywg5_-cyf "#0" 37
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-cyf")
+(multiplicity "1"))
+($7 39 < 0_-fvi_hrnjywg5_-cye "guid" 38
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00007"
+)
+(uid "0_-fvi_hrnjywg5_-cye"))
+($10 40 < 0_-fvi_hrnjywg5_-cyd "#1" 37
+(uid "0_-fvi_hrnjywg5_-cyd")
+(multiplicity "*"))
+($7 41 < 0_-fvi_hrnjywg5_-cyc "guid" 40
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00008"
+)
+(uid "0_-fvi_hrnjywg5_-cyc"))
+($7 42 < 0_-fvi_hrnjywg5_-cyb "documentation" 27
+(name "documentation"
+)
+(value "Grouping of AnnealProtocols"
+)
+(uid "0_-fvi_hrnjywg5_-cyb"))
+($7 43 < 0_-fvi_hrnjywg5_-cya "keyNames" 27
+(name "keyNames"
+)
+(value "name"
+)
+(uid "0_-fvi_hrnjywg5_-cya"))
+($7 44 < 0_-fvi_hrnjywg5_-cy9 "guid" 27
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00003"
+)
+(uid "0_-fvi_hrnjywg5_-cy9"))
+($5 45 < -hkpzxr_-cvb_f2ixo80k_-p87 "AnnealProtocol" 1
+(name "AnnealProtocol"
+)
+(uid "-hkpzxr_-cvb_f2ixo80k_-p87"))
+($6 46 < 0_-fvi_hrnjywg5_-cy7 "application" 45
+(changeability "frozen")
+(name "application"
+)
+(uid "0_-fvi_hrnjywg5_-cy7")
+(multiplicity "1"))
+($7 47 < 0_-fvi_hrnjywg5_-cy6 "documentation" 46
+(name "documentation"
+)
+(value "Name of application that uses the protocol. Part of Object key. Part of key for derived link 'software'"
+)
+(uid "0_-fvi_hrnjywg5_-cy6"))
+($7 48 < 0_-fvi_hrnjywg5_-cy5 "guid" 46
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:33:00_00003"
+)
+(uid "0_-fvi_hrnjywg5_-cy5"))
+($6 49 < 0_-fvi_hrnjywg5_-cy4 "code" 45
+(changeability "frozen")
+(name "code"
+)
+(uid "0_-fvi_hrnjywg5_-cy4")
+(multiplicity "1"))
+($7 50 < 0_-fvi_hrnjywg5_-cy3 "documentation" 49
+(name "documentation"
+)
+(value "Application-specific name for the protocol. Part of class key."
+)
+(uid "0_-fvi_hrnjywg5_-cy3"))
+($7 51 < 0_-fvi_hrnjywg5_-cy2 "guid" 49
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:33:00_00004"
+)
+(uid "0_-fvi_hrnjywg5_-cy2"))
+($6 52 < 0_-fvi_hrnjywg5_-cy1 "name" 45
+(changeability "frozen")
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-cy1")
+(multiplicity "1"))
+($7 53 < 0_-fvi_hrnjywg5_-cy0 "documentation" 52
+(name "documentation"
+)
+(value "name of AnnealProtocol. in human-readable form"
+)
+(uid "0_-fvi_hrnjywg5_-cy0"))
+($7 54 < 0_-fvi_hrnjywg5_-cxz "guid" 52
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00002"
+)
+(uid "0_-fvi_hrnjywg5_-cxz"))
+($6 55 < 0_-fvi_hrnjywg5_-cxy "details" 45
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-cxy"))
+($7 56 < 0_-fvi_hrnjywg5_-cxx "guid" 55
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-06-13:18:31_00003"
+)
+(uid "0_-fvi_hrnjywg5_-cxx"))
+($11 57 < 0_-fvi_hrnjywg5_-cxw "getNmrCalcRuns" 45
+(name "getNmrCalcRuns"
+)
+(uid "0_-fvi_hrnjywg5_-cxw")
+(isQuery true))
+($7 58 < 0_-fvi_hrnjywg5_-cxv "documentation" 57
+(name "documentation"
+)
+(value "getter for derived link nmrCalcRums"
+)
+(uid "0_-fvi_hrnjywg5_-cxv"))
+($7 59 < 0_-fvi_hrnjywg5_-cxu "opType" 57
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-cxu"))
+($7 60 < 0_-fvi_hrnjywg5_-cxt "code:python" 57
+(name "code:python"
+)
+(value "app = self.application"
+"code = self.code"
+"ll = [x.findFirstRun(annealProtocolApp=app, annealProtocolCode=code) for x in  self.root.nmrCalcStores]"
+"result = frozenset(x for x in ll if x is not None)"
+)
+(uid "0_-fvi_hrnjywg5_-cxt"))
+($7 61 < 0_-fvi_hrnjywg5_-cxs "code:java" 57
+(name "code:java"
+)
+(value "result = null /* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-cxs"))
+($7 62 < 0_-fvi_hrnjywg5_-cxr "guid" 57
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-11-15:25:58_00003"
+)
+(uid "0_-fvi_hrnjywg5_-cxr"))
+($6 63 < 0_-fvi_hrnjywg5_-cxq "methodStoreName" 45
+(name "methodStoreName"
+)
+(uid "0_-fvi_hrnjywg5_-cxq"))
+($7 64 < 0_-fvi_hrnjywg5_-cxp "documentation" 63
+(name "documentation"
+)
+(value "Name of MethodStore used to store Software. Part of key for derived link software"
+)
+(uid "0_-fvi_hrnjywg5_-cxp"))
+($7 65 < 0_-fvi_hrnjywg5_-cxo "guid" 63
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-18-10:52:09_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cxo"))
+($6 66 < 0_-fvi_hrnjywg5_-cxn "applicationVersion" 45
+(name "applicationVersion"
+)
+(uid "0_-fvi_hrnjywg5_-cxn"))
+($7 67 < 0_-fvi_hrnjywg5_-cxm "documentation" 66
+(name "documentation"
+)
+(value "Version of application used. part of key for derived link software"
+)
+(uid "0_-fvi_hrnjywg5_-cxm"))
+($7 68 < 0_-fvi_hrnjywg5_-cxl "guid" 66
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-18-10:52:09_00002"
+)
+(uid "0_-fvi_hrnjywg5_-cxl"))
+($11 69 < 0_-fvi_hrnjywg5_-cxk "getSoftware" 45
+(name "getSoftware"
+)
+(uid "0_-fvi_hrnjywg5_-cxk")
+(isQuery true))
+($7 70 < 0_-fvi_hrnjywg5_-cxj "documentation" 69
+(name "documentation"
+)
+(value "getter for derived link 'software'"
+)
+(uid "0_-fvi_hrnjywg5_-cxj"))
+($7 71 < 0_-fvi_hrnjywg5_-cxi "opType" 69
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-cxi"))
+($7 72 < 0_-fvi_hrnjywg5_-cxh "code:python" 69
+(name "code:python"
+)
+(value "result = ccp.api.general.Method.Software.getByKey(self.root, (self.methodStoreName, self.application, self.applicationVersion))"
+)
+(uid "0_-fvi_hrnjywg5_-cxh"))
+($7 73 < 0_-fvi_hrnjywg5_-cxg "code:java" 69
+(name "code:java"
+)
+(value "ccp.api.general.Method.MethodStore methodStore = getRoot().findFirstMethodStore(\"name\", getMethodStoreName());"
+"result = null;"
+"if (methodStore != null){"
+"  result = methodStore.findFirstSoftware(\"name\", getApplication(), \"version\", getApplicationVersion())"
+"}"
+)
+(uid "0_-fvi_hrnjywg5_-cxg"))
+($7 74 < 0_-fvi_hrnjywg5_-cxf "guid" 69
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-18-10:52:09_00003"
+)
+(uid "0_-fvi_hrnjywg5_-cxf"))
+($11 75 < 0_-fvi_hrnjywg5_-cxe "setSoftware" 45
+(name "setSoftware"
+)
+(uid "0_-fvi_hrnjywg5_-cxe"))
+($7 76 < 0_-fvi_hrnjywg5_-cxd "documentation" 75
+(name "documentation"
+)
+(value "setter for derived link 'software'"
+)
+(uid "0_-fvi_hrnjywg5_-cxd"))
+($7 77 < 0_-fvi_hrnjywg5_-cxc "opType" 75
+(name "opType"
+)
+(value "set"
+)
+(uid "0_-fvi_hrnjywg5_-cxc"))
+($7 78 < 0_-fvi_hrnjywg5_-cxb "code:python" 75
+(name "code:python"
+)
+(value "if value is None:"
+"  self.methodStoreName = None"
+"  self.applicationVersion = None"
+"elif value.name == self.application:"
+"  self.methodStoreName = value.methodStore.name"
+"  self.softwareVersion = value.version"
+"else:"
+"  raise ApiError(\"Software %s not compatible with AnnealProtocol %s\" % (value, self))"
+)
+(uid "0_-fvi_hrnjywg5_-cxb"))
+($7 79 < 0_-fvi_hrnjywg5_-cxa "code:java" 75
+(name "code:java"
+)
+(value "if (value == null){"
+"  setMethodStoreName(null);"
+"  setApplicationVersion(null);"
+"} else if (value.getName() == getApplication()) {"
+"  setMethodStoreName(value.getMethodStore().getName());"
+"  setSoftwareVersion(value.getVersion());"
+"} else {"
+"  throw new memops.general.ApiException(value + \" is not compatible with AnnealProtocol \" + this);"
+"}"
+)
+(uid "0_-fvi_hrnjywg5_-cxa"))
+($7 80 < 0_-fvi_hrnjywg5_-cx9 "guid" 75
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-18-10:52:09_00004"
+)
+(uid "0_-fvi_hrnjywg5_-cx9"))
+($8 81 < 0_-fvi_hrnjywg5_-cx8 "#<anon> (AnnealProtocol, DataObject)" 45
+(uid "0_-fvi_hrnjywg5_-cx8"))
+($9 82 < -hkpzxr_-iih_f2izokhh_-p8f "#<anon> (AnnealProtocol, EnergyTerm)##," 45
+(name "")
+(uid "-hkpzxr_-iih_f2izokhh_-p8f"))
+($10 83 < 0_-fvi_hrnjywg5_-cx6 "#0" 82
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-cx6")
+(multiplicity "1"))
+($7 84 < 0_-fvi_hrnjywg5_-cx5 "guid" 83
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:08_00002"
+)
+(uid "0_-fvi_hrnjywg5_-cx5"))
+($10 85 < 0_-fvi_hrnjywg5_-cx4 "#1" 82
+(uid "0_-fvi_hrnjywg5_-cx4")
+(multiplicity "*"))
+($7 86 < 0_-fvi_hrnjywg5_-cx3 "guid" 85
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:08_00003"
+)
+(uid "0_-fvi_hrnjywg5_-cx3"))
+($9 87 < 0_-fvi_hrnjywg5_-cx2 "#<anon> (AnnealProtocol, AnnealStage)##," 45
+(name "")
+(uid "0_-fvi_hrnjywg5_-cx2"))
+($10 88 < 0_-fvi_hrnjywg5_-cx1 "#0" 87
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-cx1")
+(multiplicity "1"))
+($7 89 < 0_-fvi_hrnjywg5_-cx0 "guid" 88
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:33:00_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cx0"))
+($10 90 < 0_-fvi_hrnjywg5_-cwz "#1" 87
+(uid "0_-fvi_hrnjywg5_-cwz")
+(multiplicity "*"))
+($7 91 < 0_-fvi_hrnjywg5_-cwy "guid" 90
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:33:00_00002"
+)
+(uid "0_-fvi_hrnjywg5_-cwy"))
+($9 92 < z8kfsx_8ju_g92hw0x6_-p98 "#<anon> (AnnealProtocol, Run)##,nmrCalcRuns" 45
+(name "")
+(uid "z8kfsx_8ju_g92hw0x6_-p98"))
+($10 93 < 0_-fvi_hrnjywg5_-cww "#0" 92
+(uid "0_-fvi_hrnjywg5_-cww"))
+($7 94 < 0_-fvi_hrnjywg5_-cwv "documentation" 93
+(name "documentation"
+)
+(value "AnnealProtocol used for run"
+)
+(uid "0_-fvi_hrnjywg5_-cwv"))
+($7 95 < 0_-fvi_hrnjywg5_-cwu "guid" 93
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-11-15:25:58_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cwu"))
+($10 96 < 0_-fvi_hrnjywg5_-cwt "nmrCalcRuns#1" 92
+(changeability "frozen")
+(name "nmrCalcRuns"
+)
+(uid "0_-fvi_hrnjywg5_-cwt")
+(multiplicity "*"))
+($7 97 < 0_-fvi_hrnjywg5_-cws "documentation" 96
+(name "documentation"
+)
+(value "NmrCalc.Runs carried out with AnnealProtocol"
+)
+(uid "0_-fvi_hrnjywg5_-cws"))
+($7 98 < 0_-fvi_hrnjywg5_-cwr "baseName" 96
+(name "baseName"
+)
+(value "nmrCalcRun"
+)
+(uid "0_-fvi_hrnjywg5_-cwr"))
+($7 99 < 0_-fvi_hrnjywg5_-cwq "guid" 96
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-11-15:25:58_00002"
+)
+(uid "0_-fvi_hrnjywg5_-cwq"))
+($7 100 < 0_-fvi_hrnjywg5_-cwp "isDerived" 92
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-cwp"))
+($7 101 < 0_-fvi_hrnjywg5_-cwo "documentation" 45
+(name "documentation"
+)
+(value "Annealing protocol - describes an annealing / dynamics simulation in general terms."
+)
+(uid "0_-fvi_hrnjywg5_-cwo"))
+($7 102 < 0_-fvi_hrnjywg5_-cwn "keyNames" 45
+(name "keyNames"
+)
+(value "application,code"
+)
+(uid "0_-fvi_hrnjywg5_-cwn"))
+($7 103 < 0_-fvi_hrnjywg5_-cwm "guid" 45
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00004"
+)
+(uid "0_-fvi_hrnjywg5_-cwm"))
+($5 104 < 0_-fvi_hrnjywg5_-cwl "AnnealStage" 1
+(name "AnnealStage"
+)
+(uid "0_-fvi_hrnjywg5_-cwl"))
+($6 105 < 0_-fvi_hrnjywg5_-cwk "serial" 104
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-cwk")
+(multiplicity "1"))
+($7 106 < 0_-fvi_hrnjywg5_-cwj "isAutomatic" 105
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-cwj"))
+($7 107 < 0_-fvi_hrnjywg5_-cwi "documentation" 105
+(name "documentation"
+)
+(value "Serial number of stage. Set autoamtically. Defines temporal order of stages."
+)
+(uid "0_-fvi_hrnjywg5_-cwi"))
+($7 108 < 0_-fvi_hrnjywg5_-cwh "guid" 105
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00010"
+)
+(uid "0_-fvi_hrnjywg5_-cwh"))
+($6 109 < 0_-fvi_hrnjywg5_-cwg "name" 104
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-cwg"))
+($7 110 < 0_-fvi_hrnjywg5_-cwf "documentation" 109
+(name "documentation"
+)
+(value "name of stage"
+)
+(uid "0_-fvi_hrnjywg5_-cwf"))
+($7 111 < 0_-fvi_hrnjywg5_-cwe "guid" 109
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00011"
+)
+(uid "0_-fvi_hrnjywg5_-cwe"))
+($6 112 < 0_-fvi_hrnjywg5_-cwd "timeStep" 104
+(name "timeStep"
+)
+(uid "0_-fvi_hrnjywg5_-cwd"))
+($7 113 < 0_-fvi_hrnjywg5_-cwc "documentation" 112
+(name "documentation"
+)
+(value "Time step in seconds"
+)
+(uid "0_-fvi_hrnjywg5_-cwc"))
+($7 114 < 0_-fvi_hrnjywg5_-cwb "guid" 112
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-14:33:51_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cwb"))
+($6 115 < 0_-fvi_hrnjywg5_-cwa "timeStepScaling" 104
+(name "timeStepScaling"
+)
+(uid "0_-fvi_hrnjywg5_-cwa"))
+($7 116 < 0_-fvi_hrnjywg5_-cw9 "documentation" 115
+(name "documentation"
+)
+(value "Scling factor aplied to time step. Used in certain protocols such as CNS torsion angle dynamics. The actual timestep is self.timestep*seld.timeStepScaling. Default value is 1.0."
+)
+(uid "0_-fvi_hrnjywg5_-cw9"))
+($7 117 < 0_-fvi_hrnjywg5_-cw8 "guid" 115
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-14:47:43_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cw8"))
+($6 118 < 0_-fvi_hrnjywg5_-cw7 "numSteps" 104
+(name "numSteps"
+)
+(uid "0_-fvi_hrnjywg5_-cw7")
+(multiplicity "1"))
+($7 119 < 0_-fvi_hrnjywg5_-cw6 "documentation" 118
+(name "documentation"
+)
+(value "Number of annealing steps"
+)
+(uid "0_-fvi_hrnjywg5_-cw6"))
+($7 120 < 0_-fvi_hrnjywg5_-cw5 "guid" 118
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00012"
+)
+(uid "0_-fvi_hrnjywg5_-cw5"))
+($6 121 < 0_-fvi_hrnjywg5_-cw4 "numSubSteps" 104
+(name "numSubSteps"
+)
+(uid "0_-fvi_hrnjywg5_-cw4"))
+($7 122 < 0_-fvi_hrnjywg5_-cw3 "documentation" 121
+(name "documentation"
+)
+(value "Number of substeps (e.g. Molecular dynamics steps) for each main step"
+)
+(uid "0_-fvi_hrnjywg5_-cw3"))
+($7 123 < 0_-fvi_hrnjywg5_-cw2 "guid" 121
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-06-13:18:31_00004"
+)
+(uid "0_-fvi_hrnjywg5_-cw2"))
+($6 124 < 0_-fvi_hrnjywg5_-cw1 "initialTemp" 104
+(name "initialTemp"
+)
+(uid "0_-fvi_hrnjywg5_-cw1"))
+($7 125 < 0_-fvi_hrnjywg5_-cw0 "documentation" 124
+(name "documentation"
+)
+(value "Initial temperature in degrees K."
+)
+(uid "0_-fvi_hrnjywg5_-cw0"))
+($7 126 < 0_-fvi_hrnjywg5_-cvz "guid" 124
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00013"
+)
+(uid "0_-fvi_hrnjywg5_-cvz"))
+($6 127 < 0_-fvi_hrnjywg5_-cvy "finalTemp" 104
+(name "finalTemp"
+)
+(uid "0_-fvi_hrnjywg5_-cvy"))
+($7 128 < 0_-fvi_hrnjywg5_-cvx "documentation" 127
+(name "documentation"
+)
+(value "Final temperature in degrees K."
+)
+(uid "0_-fvi_hrnjywg5_-cvx"))
+($7 129 < 0_-fvi_hrnjywg5_-cvw "guid" 127
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00014"
+)
+(uid "0_-fvi_hrnjywg5_-cvw"))
+($6 130 < 0_-fvi_hrnjywg5_-cvv "function" 104
+(initialValue "linear"
+)
+(name "function"
+)
+(uid "0_-fvi_hrnjywg5_-cvv")
+(multiplicity "1"))
+($7 131 < 0_-fvi_hrnjywg5_-cvu "documentation" 130
+(name "documentation"
+)
+(value "Function used for varying temperature. See ScaleFunction data type for details."
+)
+(uid "0_-fvi_hrnjywg5_-cvu"))
+($7 132 < 0_-fvi_hrnjywg5_-cvt "guid" 130
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-06-13:18:31_00005"
+)
+(uid "0_-fvi_hrnjywg5_-cvt"))
+($6 133 < 0_-fvi_hrnjywg5_-cvs "functionParams" 104
+(name "functionParams"
+)
+(uid "0_-fvi_hrnjywg5_-cvs")
+(multiplicity "*"))
+($7 134 < 0_-fvi_hrnjywg5_-cvr "documentation" 133
+(name "documentation"
+)
+(value "Parameters for the temperature varying function. Their number and meaning depends on the value of 'function'."
+)
+(uid "0_-fvi_hrnjywg5_-cvr"))
+($7 135 < 0_-fvi_hrnjywg5_-cvq "baseName" 133
+(name "baseName"
+)
+(value "functionParam"
+)
+(uid "0_-fvi_hrnjywg5_-cvq"))
+($7 136 < 0_-fvi_hrnjywg5_-cvp "guid" 133
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-06-13:18:31_00006"
+)
+(uid "0_-fvi_hrnjywg5_-cvp"))
+($8 137 < 0_-fvi_hrnjywg5_-cvo "#<anon> (AnnealStage, DataObject)" 104
+(uid "0_-fvi_hrnjywg5_-cvo"))
+($7 138 < 0_-fvi_hrnjywg5_-cvn "documentation" 104
+(name "documentation"
+)
+(value "Annealing stage - one of several consecutive stges."
+)
+(uid "0_-fvi_hrnjywg5_-cvn"))
+($7 139 < 0_-fvi_hrnjywg5_-cvm "keyNames" 104
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-cvm"))
+($7 140 < 0_-fvi_hrnjywg5_-cvl "guid" 104
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00005"
+)
+(uid "0_-fvi_hrnjywg5_-cvl"))
+($5 141 < -hkpzxr_-iih_f2izokhh_-p8n "EnergyTerm" 1
+(name "EnergyTerm"
+)
+(uid "-hkpzxr_-iih_f2izokhh_-p8n"))
+($6 142 < 0_-fvi_hrnjywg5_-cvj "serial" 141
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-cvj")
+(multiplicity "1"))
+($7 143 < 0_-fvi_hrnjywg5_-cvi "isAutomatic" 142
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-cvi"))
+($7 144 < 0_-fvi_hrnjywg5_-cvh "guid" 142
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:43:08_00005"
+)
+(uid "0_-fvi_hrnjywg5_-cvh"))
+($6 145 < 0_-fvi_hrnjywg5_-cvg "code" 141
+(name "code"
+)
+(uid "0_-fvi_hrnjywg5_-cvg"))
+($7 146 < 0_-fvi_hrnjywg5_-cvf "documentation" 145
+(name "documentation"
+)
+(value "Name identifying EnergyTerm in the context of the application using the protocol"
+)
+(uid "0_-fvi_hrnjywg5_-cvf"))
+($7 147 < 0_-fvi_hrnjywg5_-cve "guid" 145
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cve"))
+($6 148 < 0_-fvi_hrnjywg5_-cvd "name" 141
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-cvd"))
+($7 149 < 0_-fvi_hrnjywg5_-cvc "documentation" 148
+(name "documentation"
+)
+(value "User-intelligible name of EnergyTerm"
+)
+(uid "0_-fvi_hrnjywg5_-cvc"))
+($7 150 < 0_-fvi_hrnjywg5_-cvb "guid" 148
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:43:08_00006"
+)
+(uid "0_-fvi_hrnjywg5_-cvb"))
+($6 151 < 0_-fvi_hrnjywg5_-cva "details" 141
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-cva"))
+($7 152 < 0_-fvi_hrnjywg5_-cv9 "guid" 151
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-06-13:18:31_00011"
+)
+(uid "0_-fvi_hrnjywg5_-cv9"))
+($11 153 < 0_-fvi_hrnjywg5_-cv8 "getNmrCalcEnergyTerms" 141
+(name "getNmrCalcEnergyTerms"
+)
+(uid "0_-fvi_hrnjywg5_-cv8")
+(isQuery true))
+($7 154 < 0_-fvi_hrnjywg5_-cv7 "documentation" 153
+(name "documentation"
+)
+(value "getter for derived link nmrCalcEnergyTerms"
+)
+(uid "0_-fvi_hrnjywg5_-cv7"))
+($7 155 < 0_-fvi_hrnjywg5_-cv6 "opType" 153
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-cv6"))
+($7 156 < 0_-fvi_hrnjywg5_-cv5 "code:python" 153
+(name "code:python"
+)
+(value "ll = [x.findFirstEnergyTerm(annealEnergyTermSerial=self.serial) for x in self.annealProtocol.nmrCalcRuns]"
+"result = frozenset(x for x in ll if x is not None)"
+)
+(uid "0_-fvi_hrnjywg5_-cv5"))
+($7 157 < 0_-fvi_hrnjywg5_-cv4 "code:java" 153
+(name "code:java"
+)
+(value "result = null; /* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-cv4"))
+($7 158 < 0_-fvi_hrnjywg5_-cv3 "guid" 153
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-11-18:03:19_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cv3"))
+($8 159 < 0_-fvi_hrnjywg5_-cv2 "#<anon> (EnergyTerm, DataObject)" 141
+(uid "0_-fvi_hrnjywg5_-cv2"))
+($9 160 < 0_-fvi_hrnjywg5_-cv1 "#<anon> (EnergyTerm, PotentialScale)##," 141
+(name "")
+(uid "0_-fvi_hrnjywg5_-cv1"))
+($10 161 < 0_-fvi_hrnjywg5_-cv0 "#0" 160
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-cv0")
+(multiplicity "1"))
+($7 162 < 0_-fvi_hrnjywg5_-cuz "guid" 161
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:43:08_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cuz"))
+($10 163 < 0_-fvi_hrnjywg5_-cuy "#1" 160
+(uid "0_-fvi_hrnjywg5_-cuy")
+(multiplicity "*"))
+($7 164 < 0_-fvi_hrnjywg5_-cux "guid" 163
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:43:08_00002"
+)
+(uid "0_-fvi_hrnjywg5_-cux"))
+($9 165 < -hkpzxr_v5_f2k5j2z5_-p7r "#<anon> (EnergyTerm, EnergyTerm)##annealEnergyTerm,nmrCalcEnergyTerms" 141
+(name "")
+(uid "-hkpzxr_v5_f2k5j2z5_-p7r"))
+($10 166 < 0_-fvi_hrnjywg5_-cuv "annealEnergyTerm#0" 165
+(name "annealEnergyTerm"
+)
+(uid "0_-fvi_hrnjywg5_-cuv"))
+($7 167 < 0_-fvi_hrnjywg5_-cuu "documentation" 166
+(name "documentation"
+)
+(value "AnnealProtocol.EnergyTerm that corresponds to EnergyTerm"
+)
+(uid "0_-fvi_hrnjywg5_-cuu"))
+($7 168 < 0_-fvi_hrnjywg5_-cut "guid" 166
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-18-17:35:47_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cut"))
+($10 169 < 0_-fvi_hrnjywg5_-cus "nmrCalcEnergyTerms#1" 165
+(changeability "frozen")
+(name "nmrCalcEnergyTerms"
+)
+(uid "0_-fvi_hrnjywg5_-cus")
+(multiplicity "*"))
+($7 170 < 0_-fvi_hrnjywg5_-cur "documentation" 169
+(name "documentation"
+)
+(value "NmrCalc.EnergyTerms that correspond to EnergyTerm"
+)
+(uid "0_-fvi_hrnjywg5_-cur"))
+($7 171 < 0_-fvi_hrnjywg5_-cuq "baseName" 169
+(name "baseName"
+)
+(value "nmrCalcEnergyTerm"
+)
+(uid "0_-fvi_hrnjywg5_-cuq"))
+($7 172 < 0_-fvi_hrnjywg5_-cup "guid" 169
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2010-05-18-17:35:47_00002"
+)
+(uid "0_-fvi_hrnjywg5_-cup"))
+($7 173 < 0_-fvi_hrnjywg5_-cuo "isDerived" 165
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-cuo"))
+($7 174 < 0_-fvi_hrnjywg5_-cun "documentation" 141
+(name "documentation"
+)
+(value "Energy term used in a protocol,  with successive scaling factors, refPotentialTerms"
+)
+(uid "0_-fvi_hrnjywg5_-cun"))
+($7 175 < 0_-fvi_hrnjywg5_-cum "keyNames" 141
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-cum"))
+($7 176 < 0_-fvi_hrnjywg5_-cul "guid" 141
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00006"
+)
+(uid "0_-fvi_hrnjywg5_-cul"))
+($5 177 < 0_-fvi_hrnjywg5_-cuk "PotentialScale" 1
+(name "PotentialScale"
+)
+(uid "0_-fvi_hrnjywg5_-cuk"))
+($6 178 < 0_-fvi_hrnjywg5_-cuj "code" 177
+(initialValue "std"
+)
+(changeability "frozen")
+(name "code"
+)
+(uid "0_-fvi_hrnjywg5_-cuj")
+(multiplicity "1"))
+($7 179 < 0_-fvi_hrnjywg5_-cui "documentation" 178
+(name "documentation"
+)
+(value "Code identifying teh relevant potential scale in the context of the application using the protocol. INtended for potential terms that have more than one defining parameter being contnuopusly varied, like Haddock RDC angle projections restraints. For terms that have only one scaling constant (the normal case) this should be left to its default value 'std'."
+)
+(uid "0_-fvi_hrnjywg5_-cui"))
+($7 180 < 0_-fvi_hrnjywg5_-cuh "guid" 178
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-14:31:19_00011"
+)
+(uid "0_-fvi_hrnjywg5_-cuh"))
+($6 181 < 0_-fvi_hrnjywg5_-cug "initialScale" 177
+(name "initialScale"
+)
+(uid "0_-fvi_hrnjywg5_-cug")
+(multiplicity "1"))
+($7 182 < 0_-fvi_hrnjywg5_-cuf "documentation" 181
+(name "documentation"
+)
+(value "Scale at the start of the stage"
+)
+(uid "0_-fvi_hrnjywg5_-cuf"))
+($7 183 < 0_-fvi_hrnjywg5_-cue "guid" 181
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00017"
+)
+(uid "0_-fvi_hrnjywg5_-cue"))
+($6 184 < 0_-fvi_hrnjywg5_-cud "finalScale" 177
+(name "finalScale"
+)
+(uid "0_-fvi_hrnjywg5_-cud")
+(multiplicity "1"))
+($7 185 < 0_-fvi_hrnjywg5_-cuc "documentation" 184
+(name "documentation"
+)
+(value "Scale at the end of the stage."
+)
+(uid "0_-fvi_hrnjywg5_-cuc"))
+($7 186 < 0_-fvi_hrnjywg5_-cub "guid" 184
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00018"
+)
+(uid "0_-fvi_hrnjywg5_-cub"))
+($6 187 < 0_-fvi_hrnjywg5_-cua "function" 177
+(initialValue "linear"
+)
+(name "function"
+)
+(uid "0_-fvi_hrnjywg5_-cua")
+(multiplicity "1"))
+($7 188 < 0_-fvi_hrnjywg5_-cu9 "documentation" 187
+(name "documentation"
+)
+(value "Function used for scaling. See ScaleFunction data type for details"
+)
+(uid "0_-fvi_hrnjywg5_-cu9"))
+($7 189 < 0_-fvi_hrnjywg5_-cu8 "guid" 187
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00019"
+)
+(uid "0_-fvi_hrnjywg5_-cu8"))
+($6 190 < 0_-fvi_hrnjywg5_-cu7 "functionParams" 177
+(name "functionParams"
+)
+(uid "0_-fvi_hrnjywg5_-cu7")
+(multiplicity "*"))
+($7 191 < 0_-fvi_hrnjywg5_-cu6 "documentation" 190
+(name "documentation"
+)
+(value "Parameters for the scaling function. Their number and meaning depends on the value of 'function'."
+)
+(uid "0_-fvi_hrnjywg5_-cu6"))
+($7 192 < 0_-fvi_hrnjywg5_-cu5 "guid" 190
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00020"
+)
+(uid "0_-fvi_hrnjywg5_-cu5"))
+($7 193 < 0_-fvi_hrnjywg5_-cu4 "baseName" 190
+(name "baseName"
+)
+(value "functionParam"
+)
+(uid "0_-fvi_hrnjywg5_-cu4"))
+($8 194 < 0_-fvi_hrnjywg5_-cu3 "#<anon> (PotentialScale, DataObject)" 177
+(uid "0_-fvi_hrnjywg5_-cu3"))
+($9 195 < 0_-fvi_hrnjywg5_-cu2 "#<anon> (PotentialScale, AnnealStage)##," 177
+(name "")
+(uid "0_-fvi_hrnjywg5_-cu2"))
+($10 196 < 0_-fvi_hrnjywg5_-cu1 "#0" 195
+(uid "0_-fvi_hrnjywg5_-cu1")
+(multiplicity "*"))
+($7 197 < 0_-fvi_hrnjywg5_-cu0 "documentation" 196
+(name "documentation"
+)
+(value "PotentialScales in use at this AnnealStage"
+)
+(uid "0_-fvi_hrnjywg5_-cu0"))
+($7 198 < 0_-fvi_hrnjywg5_-ctz "guid" 196
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00015"
+)
+(uid "0_-fvi_hrnjywg5_-ctz"))
+($10 199 < 0_-fvi_hrnjywg5_-cty "#1" 195
+(changeability "frozen")
+(uid "0_-fvi_hrnjywg5_-cty")
+(multiplicity "1"))
+($7 200 < 0_-fvi_hrnjywg5_-ctx "documentation" 199
+(name "documentation"
+)
+(value "AnnealStage to which Potential scale refers"
+)
+(uid "0_-fvi_hrnjywg5_-ctx"))
+($7 201 < 0_-fvi_hrnjywg5_-ctw "guid" 199
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:09_00016"
+)
+(uid "0_-fvi_hrnjywg5_-ctw"))
+($9 202 < 0_-fvi_hrnjywg5_-ctv "#<anon> (PotentialScale, RefPotentialTerm)##," 177
+(name "")
+(uid "0_-fvi_hrnjywg5_-ctv"))
+($10 203 < 0_-fvi_hrnjywg5_-ctu "#0" 202
+(uid "0_-fvi_hrnjywg5_-ctu")
+(multiplicity "*"))
+($7 204 < 0_-fvi_hrnjywg5_-ctt "guid" 203
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-06-13:18:31_00009"
+)
+(uid "0_-fvi_hrnjywg5_-ctt"))
+($7 205 < 0_-fvi_hrnjywg5_-cts "documentation" 203
+(name "documentation"
+)
+(value "PotentialScales using RefPotentialTerm"
+)
+(uid "0_-fvi_hrnjywg5_-cts"))
+($10 206 < 0_-fvi_hrnjywg5_-ctr "#1" 202
+(uid "0_-fvi_hrnjywg5_-ctr")
+(multiplicity "1"))
+($7 207 < 0_-fvi_hrnjywg5_-ctq "documentation" 206
+(name "documentation"
+)
+(value "Potential term applied "
+)
+(uid "0_-fvi_hrnjywg5_-ctq"))
+($7 208 < 0_-fvi_hrnjywg5_-ctp "guid" 206
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-06-13:18:31_00010"
+)
+(uid "0_-fvi_hrnjywg5_-ctp"))
+($7 209 < 0_-fvi_hrnjywg5_-cto "documentation" 177
+(name "documentation"
+)
+(value "Restraint potential scaling"
+)
+(uid "0_-fvi_hrnjywg5_-cto"))
+($7 210 < 0_-fvi_hrnjywg5_-ctn "keyNames" 177
+(name "keyNames"
+)
+(value "annealStage, code"
+)
+(uid "0_-fvi_hrnjywg5_-ctn"))
+($7 211 < 0_-fvi_hrnjywg5_-ctm "guid" 177
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00007"
+)
+(uid "0_-fvi_hrnjywg5_-ctm"))
+($5 212 < 0_-fvi_hrnjywg5_-ctl "ScaleFunction" 1
+(name "ScaleFunction"
+)
+(uid "0_-fvi_hrnjywg5_-ctl"))
+($8 213 < 0_-fvi_hrnjywg5_-ctk "#<anon> (ScaleFunction, Word)" 212
+(uid "0_-fvi_hrnjywg5_-ctk"))
+($7 214 < 0_-fvi_hrnjywg5_-ctj "documentation" 212
+(name "documentation"
+)
+(value "Sttring indicating the function used for scaling. "
+""
+"'linear' means a linear change from intial to final value, with no extra parameters."
+" 'exp' means the function k(n) = K * exp(-n/t) + b"
+"t is given as a shape parameter, while K and b are calculated from the initial and final values."
+"'power' means the function k(n) = b+ 1/(n + n0)**a"
+"a is given as a shape parameter, and b and n0 are calculated from the initial and final values."
+)
+(uid "0_-fvi_hrnjywg5_-ctj"))
+($7 215 < 0_-fvi_hrnjywg5_-cti "isopen" 212
+(name "isopen"
+)
+(value "False"
+)
+(uid "0_-fvi_hrnjywg5_-cti"))
+($7 216 < 0_-fvi_hrnjywg5_-cth "enumeration" 212
+(name "enumeration"
+)
+(value "'linear','exp','power'"
+)
+(uid "0_-fvi_hrnjywg5_-cth"))
+($7 217 < 0_-fvi_hrnjywg5_-ctg "guid" 212
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00008"
+)
+(uid "0_-fvi_hrnjywg5_-ctg"))
+($5 218 < 0_-fvi_hrnjywg5_-ctf "RefPotentialTerm" 1
+(name "RefPotentialTerm"
+)
+(uid "0_-fvi_hrnjywg5_-ctf"))
+($6 219 < 0_-fvi_hrnjywg5_-cte "application" 218
+(initialValue "general"
+)
+(changeability "frozen")
+(name "application"
+)
+(uid "0_-fvi_hrnjywg5_-cte")
+(multiplicity "1"))
+($7 220 < 0_-fvi_hrnjywg5_-ctd "documentation" 219
+(name "documentation"
+)
+(value "Name of application that uses the RefPotentialTerm. Part of Object key. RefPotentialTerm not limited to a single application should have application 'general'."
+)
+(uid "0_-fvi_hrnjywg5_-ctd"))
+($7 221 < 0_-fvi_hrnjywg5_-ctc "guid" 219
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00004"
+)
+(uid "0_-fvi_hrnjywg5_-ctc"))
+($6 222 < 0_-fvi_hrnjywg5_-ctb "code" 218
+(changeability "frozen")
+(name "code"
+)
+(uid "0_-fvi_hrnjywg5_-ctb")
+(multiplicity "1"))
+($7 223 < 0_-fvi_hrnjywg5_-cta "documentation" 222
+(name "documentation"
+)
+(value "Application-specific name for the RefPotentialTerm. Part of class key. "
+)
+(uid "0_-fvi_hrnjywg5_-cta"))
+($7 224 < 0_-fvi_hrnjywg5_-ct9 "guid" 222
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00005"
+)
+(uid "0_-fvi_hrnjywg5_-ct9"))
+($6 225 < 0_-fvi_hrnjywg5_-ct8 "index" 218
+(changeability "frozen")
+(name "index"
+)
+(uid "0_-fvi_hrnjywg5_-ct8")
+(multiplicity "1"))
+($7 226 < 0_-fvi_hrnjywg5_-ct7 "documentation" 225
+(name "documentation"
+)
+(value "Hand-entered serial number of RefPotentialTerm. Part of class key. To distinguish versions with same application and code but e.g. different parameters."
+)
+(uid "0_-fvi_hrnjywg5_-ct7"))
+($7 227 < 0_-fvi_hrnjywg5_-ct6 "guid" 225
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00006"
+)
+(uid "0_-fvi_hrnjywg5_-ct6"))
+($6 228 < 0_-fvi_hrnjywg5_-ct5 "name" 218
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-ct5"))
+($7 229 < 0_-fvi_hrnjywg5_-ct4 "documentation" 228
+(name "documentation"
+)
+(value "name of RefPotentialTerm"
+)
+(uid "0_-fvi_hrnjywg5_-ct4"))
+($7 230 < 0_-fvi_hrnjywg5_-ct3 "guid" 228
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-06-13:18:31_00001"
+)
+(uid "0_-fvi_hrnjywg5_-ct3"))
+($6 231 < 0_-fvi_hrnjywg5_-ct2 "details" 218
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-ct2"))
+($7 232 < 0_-fvi_hrnjywg5_-ct1 "guid" 231
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-06-13:18:31_00002"
+)
+(uid "0_-fvi_hrnjywg5_-ct1"))
+($8 233 < 0_-fvi_hrnjywg5_-ct0 "#<anon> (RefPotentialTerm, DataObject)" 218
+(uid "0_-fvi_hrnjywg5_-ct0"))
+($9 234 < 0_-fvi_hrnjywg5_-csz "#<anon> (RefPotentialTerm, RefTermParameter)##," 218
+(name "")
+(uid "0_-fvi_hrnjywg5_-csz"))
+($10 235 < 0_-fvi_hrnjywg5_-csy "#0" 234
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-csy")
+(multiplicity "1"))
+($7 236 < 0_-fvi_hrnjywg5_-csx "guid" 235
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00002"
+)
+(uid "0_-fvi_hrnjywg5_-csx"))
+($10 237 < 0_-fvi_hrnjywg5_-csw "#1" 234
+(uid "0_-fvi_hrnjywg5_-csw")
+(multiplicity "*"))
+($7 238 < 0_-fvi_hrnjywg5_-csv "guid" 237
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00003"
+)
+(uid "0_-fvi_hrnjywg5_-csv"))
+($7 239 < 0_-fvi_hrnjywg5_-csu "documentation" 218
+(name "documentation"
+)
+(value "Reference Energy Potential term. Defines the shape of the potential function. May be a term in an existing potential function, or a restraint energy term. May be characterised by parameters. The precise interpretation generally requires reference to the application."
+)
+(uid "0_-fvi_hrnjywg5_-csu"))
+($7 240 < 0_-fvi_hrnjywg5_-cst "guid" 218
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00009"
+)
+(uid "0_-fvi_hrnjywg5_-cst"))
+($7 241 < 0_-fvi_hrnjywg5_-css "keyNames" 218
+(name "keyNames"
+)
+(value "application, code, index"
+)
+(uid "0_-fvi_hrnjywg5_-css"))
+($2 242 < 0_-fvi_hrnjywg5_-csr "_AnnealProtocol" 1
+(name "_AnnealProtocol"
+)
+(width 5000)
+(uid "0_-fvi_hrnjywg5_-csr")
+(height 5000)
+(diagramType "class"))
+($3 243 < 0_-fvi_hrnjywg5_-csq "AnnealProtocolStore" 242
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-csq")
+(bbx 380 40 140 30))
+($3 244 < 0_-fvi_hrnjywg5_-csp "AnnealProtocol" 242
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-csp")
+(bbx 300 130 110 30))
+($4 245 < 0_-fvi_hrnjywg5_-cso "" 242
+(toMultiplicityPosition 390 115)
+(uid "0_-fvi_hrnjywg5_-cso")
+(points 400 70 400 130)
+(fromMultiplicityPosition 385 75))
+($3 246 < 0_-fvi_hrnjywg5_-csn "AnnealStage" 242
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-csn")
+(bbx 380 220 90 30))
+($3 247 < 0_-fvi_hrnjywg5_-csm "RefPotentialTerm" 242
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-csm")
+(bbx 440 130 120 30))
+($4 248 < 0_-fvi_hrnjywg5_-csl "" 242
+(toMultiplicityPosition 480 115)
+(toRolePosition 585 200)
+(uid "0_-fvi_hrnjywg5_-csl")
+(points 490 70 490 130)
+(fromMultiplicityPosition 495 75))
+($3 249 < 0_-fvi_hrnjywg5_-csk "EnergyTerm" 242
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-csk")
+(bbx 270 220 90 30))
+($4 250 < 0_-fvi_hrnjywg5_-csj "" 242
+(toMultiplicityPosition 350 205)
+(uid "0_-fvi_hrnjywg5_-csj")
+(points 345 160 345 220)
+(fromMultiplicityPosition 330 165))
+($3 251 < 0_-fvi_hrnjywg5_-csi "PotentialScale" 242
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-csi")
+(bbx 280 310 100 30))
+($4 252 < 0_-fvi_hrnjywg5_-csh "" 242
+(toMultiplicityPosition 425 260)
+(uid "0_-fvi_hrnjywg5_-csh")
+(points 380 315 420 315 420 250)
+(fromMultiplicityPosition 385 295))
+($4 253 < 0_-fvi_hrnjywg5_-csg "" 242
+(toMultiplicityPosition 335 290)
+(uid "0_-fvi_hrnjywg5_-csg")
+(points 330 250 330 310)
+(fromMultiplicityPosition 315 255))
+($4 254 < 0_-fvi_hrnjywg5_-csf "" 242
+(toMultiplicityPosition 475 165)
+(toRolePosition 490 255)
+(uid "0_-fvi_hrnjywg5_-csf")
+(points 380 335 495 335 495 160)
+(fromMultiplicityPosition 380 340))
+($3 255 < 0_-fvi_hrnjywg5_-cse "RefTermParameter" 242
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-cse")
+(bbx 510 210 130 30))
+($4 256 < 0_-fvi_hrnjywg5_-csd "" 242
+(toMultiplicityPosition 515 190)
+(uid "0_-fvi_hrnjywg5_-csd")
+(points 525 160 525 210)
+(fromMultiplicityPosition 540 165))
+($3 257 < 0_-fvi_hrnjywg5_-csc "EnergyTerm" 242
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-csc")
+(bbx 30 270 240 30))
+($4 258 < 0_-fvi_hrnjywg5_-csb "" 242
+(toMultiplicityPosition 185 250)
+(uid "0_-fvi_hrnjywg5_-csb")
+(points 270 240 195 240 195 270))
+($4 259 < 0_-fvi_hrnjywg5_-csa "" 242
+(toMultiplicityPosition 405 200)
+(uid "0_-fvi_hrnjywg5_-csa")
+(points 400 160 400 220)
+(fromMultiplicityPosition 385 165))
+($5 260 < 0_-fvi_hrnjywg5_-cs9 "RefTermParameter" 1
+(name "RefTermParameter"
+)
+(uid "0_-fvi_hrnjywg5_-cs9"))
+($6 261 < 0_-fvi_hrnjywg5_-cs8 "code" 260
+(changeability "frozen")
+(name "code"
+)
+(uid "0_-fvi_hrnjywg5_-cs8")
+(multiplicity "1"))
+($7 262 < 0_-fvi_hrnjywg5_-cs7 "documentation" 261
+(name "documentation"
+)
+(value "code identifying the parameter in the context of the parent RefPotentialTerrm"
+)
+(uid "0_-fvi_hrnjywg5_-cs7"))
+($7 263 < 0_-fvi_hrnjywg5_-cs6 "guid" 261
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00007"
+)
+(uid "0_-fvi_hrnjywg5_-cs6"))
+($6 264 < 0_-fvi_hrnjywg5_-cs5 "value" 260
+(name "value"
+)
+(uid "0_-fvi_hrnjywg5_-cs5")
+(multiplicity "1"))
+($7 265 < 0_-fvi_hrnjywg5_-cs4 "documentation" 264
+(name "documentation"
+)
+(value "Value of RefTermParameter"
+)
+(uid "0_-fvi_hrnjywg5_-cs4"))
+($7 266 < 0_-fvi_hrnjywg5_-cs3 "guid" 264
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00008"
+)
+(uid "0_-fvi_hrnjywg5_-cs3"))
+($6 267 < 0_-fvi_hrnjywg5_-cs2 "name" 260
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-cs2"))
+($7 268 < 0_-fvi_hrnjywg5_-cs1 "documentation" 267
+(name "documentation"
+)
+(value "User-intelligible name for parameter"
+)
+(uid "0_-fvi_hrnjywg5_-cs1"))
+($7 269 < 0_-fvi_hrnjywg5_-cs0 "guid" 267
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00009"
+)
+(uid "0_-fvi_hrnjywg5_-cs0"))
+($6 270 < 0_-fvi_hrnjywg5_-crz "details" 260
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-crz"))
+($7 271 < 0_-fvi_hrnjywg5_-cry "guid" 270
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:49:37_00010"
+)
+(uid "0_-fvi_hrnjywg5_-cry"))
+($8 272 < 0_-fvi_hrnjywg5_-crx "#<anon> (RefTermParameter, DataObject)" 260
+(uid "0_-fvi_hrnjywg5_-crx"))
+($7 273 < 0_-fvi_hrnjywg5_-crw "documentation" 260
+(name "documentation"
+)
+(value "Parameter that characterises a RefPotentialTerm"
+)
+(uid "0_-fvi_hrnjywg5_-crw"))
+($7 274 < 0_-fvi_hrnjywg5_-crv "keyNames" 260
+(name "keyNames"
+)
+(value "code"
+)
+(uid "0_-fvi_hrnjywg5_-crv"))
+($7 275 < 0_-fvi_hrnjywg5_-cru "guid" 260
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-20-13:32:58_00001"
+)
+(uid "0_-fvi_hrnjywg5_-cru"))
+($12 276 < z8kfsx_-9el_g9chy1du_-p8o "#<anon> (AnnealProtocol, Method)" 1
+(uid "z8kfsx_-9el_g9chy1du_-p8o"))
+($7 277 < 0_-fvi_hrnjywg5_-crs "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00002"
+)
+(uid "0_-fvi_hrnjywg5_-crs"))
+($7 278 < 0_-fvi_hrnjywg5_-crr "shortName" 1
+(name "shortName"
+)
+(value "ANPR"
+)
+(uid "0_-fvi_hrnjywg5_-crr"))
+($7 279 < 0_-fvi_hrnjywg5_-crq "documentation" 1
+(name "documentation"
+)
+(value "Data model for annealing protocols"
+)
+(uid "0_-fvi_hrnjywg5_-crq"))
+($13 280)
+($15 283)
+($15 285)
+($15 287)
+($15 288)
+($15 290)
+($13 299)
+($13 300)
+($13 301)
+($13 302)
+($13 303)
+($13 304)
+($13 305)
+($13 306)
+($13 307)
+($13 308)
+($13 309)
+($13 310)
+($13 311)
+($13 312)
+($13 314)
+($13 317)
+($13 319)
+($13 321)
+($13 323)
+($13 325)
+($13 327)
+($13 328)
+($13 329)
+($13 330)
+($13 331)
+($13 332)
+($13 333)
+($13 334)
+($13 335)
+($13 336)
+($13 337)
+($13 338)
+($13 339)
+($13 340)
+($13 341)
+($13 342)
+($13 343)
+($13 344)
+($13 345)
+($13 346)
+($5 281 @ 0_-fvi_hrnjywg5_-dbb 4 "Logical" $1 "memops" $1 "Implementation" $1 "TopObject" $5)
+($5 282 @ 0_-fvi_hrnjywg5_-dkx 4 "Logical" $1 "memops" $1 "Implementation" $1 "Line" $5)
+($5 284 @ 0_-fvi_hrnjywg5_-d9g 4 "Logical" $1 "memops" $1 "Implementation" $1 "DataObject" $5)
+($5 286 @ 0_-fvi_hrnjywg5_-dkg 4 "Logical" $1 "memops" $1 "Implementation" $1 "Text" $5)
+($5 289 @ 0_-fvi_hrnjywg5_-dl3 4 "Logical" $1 "memops" $1 "Implementation" $1 "Int" $5)
+($5 291 @ 0_-fvi_hrnjywg5_-dbx 4 "Logical" $1 "memops" $1 "Implementation" $1 "NonNegativeFloat" $5)
+($16 292 @ -yk94ms_-e3s_e41656c6_-fw7 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "DataType" $16)
+($5 293 @ 0_-fvi_hrnjywg5_-dkb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Word" $5)
+($5 294 @ 0_-fvi_hrnjywg5_-dlb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Float" $5)
+($5 295 @ 0_-fvi_hrnjywg5_-dc3 4 "Logical" $1 "memops" $1 "Implementation" $1 "PositiveFloat" $5)
+($5 296 @ 0_-fvi_hrnjywg5_-dcl 4 "Logical" $1 "memops" $1 "Implementation" $1 "PositiveInt" $5)
+($5 297 @ 0_-fvi_hrnjywg5_-g1c 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1 "EnergyTerm" $5)
+($5 298 @ 0_-fvi_hrnjywg5_-gjn 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1 "Run" $5)
+($17 313 @ -yk94ms_-e3s_e41656c6_-fvs 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Coordinates" $17)
+($5 315 @ 0_-fvi_hrnjywg5_-khd 5 "Logical" $1 "ccp" $1 "molecule" $1 "MolStructure" $1 "StructureEnsemble" $5)
+($17 316 @ -yk94ms_-e3s_e41656c6_-fvf 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "NmrConstraints" $17)
+($5 318 @ -yk94ms_85r_eqyymv3f_-guo 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrConstraint" $1 "NmrConstraintStore" $5)
+($5 320 @ 0_-fvi_hrnjywg5_-kev 5 "Logical" $1 "ccp" $1 "molecule" $1 "MolStructure" $1 "Model" $5)
+($9 322 @ 0_-fvi_hrnjywg5_-kg5 6 "Logical" $1 "ccp" $1 "molecule" $1 "MolStructure" $1 "StructureEnsemble" $5 "#<anon> (StructureEnsemble, Model)##," $9)
+($5 324 @ -yk94ms_-e3s_e41656c6_-l73 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrConstraint" $1 "AbstractConstraintList" $5)
+($9 326 @ -yk94ms_85r_eqyymv3f_-gui 6 "Logical" $1 "ccp" $1 "nmr" $1 "NmrConstraint" $1 "NmrConstraintStore" $5 "#<anon> (NmrConstraintStore, AbstractConstraintList)##,constraintLists" $9)
+($16 347 @ -yk94ms_-e3s_e41656c6_-fwy 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "import" $16)
+($1 348 @ -yk94ms_-e3s_e41656c6_-kyd 4 "Logical" $1 "ccp" $1 "general" $1 "Method" $1)
+(typeAssn 33 27)
+(assocEndAssn 27 33)
+(typeAssn 38 27)
+(assocEndAssn 27 38)
+(subtypeAssn 31 27)
+(supertypeAssn 31 281)
+(generalizationAssn 27 31)
+(typeRefAssn 28 282)
+(typeExpression 28 283)
+(assocEndAssn 45 35)
+(typeAssn 83 45)
+(assocEndAssn 45 83)
+(typeAssn 88 45)
+(assocEndAssn 45 88)
+(typeAssn 93 45)
+(assocEndAssn 45 93)
+(subtypeAssn 81 45)
+(supertypeAssn 81 284)
+(generalizationAssn 45 81)
+(typeRefAssn 46 282)
+(typeExpression 46 285)
+(typeRefAssn 49 282)
+(typeExpression 49 285)
+(typeRefAssn 52 282)
+(typeExpression 52 283)
+(typeRefAssn 55 286)
+(typeExpression 55 287)
+(typeRefAssn 63 282)
+(typeExpression 63 288)
+(typeRefAssn 66 282)
+(typeExpression 66 288)
+(assocEndAssn 141 85)
+(typeAssn 161 141)
+(assocEndAssn 141 161)
+(typeAssn 166 141)
+(assocEndAssn 141 166)
+(subtypeAssn 159 141)
+(supertypeAssn 159 284)
+(generalizationAssn 141 159)
+(typeRefAssn 142 289)
+(typeExpression 142 290)
+(typeRefAssn 145 282)
+(typeExpression 145 285)
+(typeRefAssn 148 282)
+(typeExpression 148 290)
+(typeRefAssn 151 286)
+(typeExpression 151 287)
+(assocEndAssn 177 163)
+(typeAssn 196 177)
+(assocEndAssn 177 196)
+(typeAssn 203 177)
+(assocEndAssn 177 203)
+(subtypeAssn 194 177)
+(supertypeAssn 194 284)
+(generalizationAssn 177 194)
+(typeRefAssn 178 282)
+(typeExpression 178 285)
+(typeRefAssn 181 291)
+(typeExpression 181 290)
+(typeRefAssn 184 291)
+(typeExpression 184 290)
+(stereotypeAssn 212 292)
+(subtypeAssn 213 212)
+(supertypeAssn 213 293)
+(generalizationAssn 212 213)
+(typeRefAssn 187 212)
+(typeExpression 187 290)
+(typeRefAssn 190 294)
+(typeExpression 190 290)
+(assocEndAssn 104 199)
+(typeAssn 90 104)
+(assocEndAssn 104 90)
+(subtypeAssn 137 104)
+(supertypeAssn 137 284)
+(generalizationAssn 104 137)
+(typeRefAssn 105 289)
+(typeExpression 105 290)
+(typeRefAssn 109 282)
+(typeExpression 109 290)
+(typeRefAssn 112 295)
+(typeExpression 112 285)
+(typeRefAssn 115 295)
+(typeExpression 115 285)
+(typeRefAssn 118 296)
+(typeExpression 118 290)
+(typeRefAssn 121 296)
+(typeExpression 121 287)
+(typeRefAssn 124 291)
+(typeExpression 124 290)
+(typeRefAssn 127 291)
+(typeExpression 127 290)
+(typeRefAssn 130 212)
+(typeExpression 130 287)
+(typeRefAssn 133 294)
+(typeExpression 133 287)
+(typeAssn 199 104)
+(typeAssn 40 218)
+(assocEndAssn 218 40)
+(assocEndAssn 218 206)
+(typeAssn 235 218)
+(assocEndAssn 218 235)
+(subtypeAssn 233 218)
+(supertypeAssn 233 284)
+(generalizationAssn 218 233)
+(typeRefAssn 219 282)
+(typeExpression 219 285)
+(typeRefAssn 222 282)
+(typeExpression 222 285)
+(typeRefAssn 225 296)
+(typeExpression 225 285)
+(typeRefAssn 228 282)
+(typeExpression 228 287)
+(typeRefAssn 231 286)
+(typeExpression 231 287)
+(assocEndAssn 260 237)
+(subtypeAssn 272 260)
+(supertypeAssn 272 284)
+(generalizationAssn 260 272)
+(typeRefAssn 261 282)
+(typeExpression 261 285)
+(typeRefAssn 264 294)
+(typeExpression 264 285)
+(typeRefAssn 267 282)
+(typeExpression 267 285)
+(typeRefAssn 270 286)
+(typeExpression 270 285)
+(typeAssn 237 260)
+(typeAssn 206 218)
+(typeAssn 163 177)
+(typeAssn 169 297)
+(typeAssn 85 141)
+(typeAssn 96 298)
+(typeAssn 35 45)
+(projectionAssn 3 27 280)
+(projectionAssn 4 45 299)
+(to 5 4)
+(from 5 3)
+(projectionAssn 5 32 300)
+(projectionAssn 6 104 301)
+(projectionAssn 7 141 302)
+(to 8 7)
+(from 8 4)
+(projectionAssn 8 82 303)
+(projectionAssn 9 177 304)
+(to 10 9)
+(from 10 7)
+(projectionAssn 10 160 305)
+(to 11 6)
+(from 11 9)
+(projectionAssn 11 195 306)
+(projectionAssn 12 212 307)
+(projectionAssn 13 218 308)
+(to 14 13)
+(from 14 3)
+(projectionAssn 14 37 309)
+(to 15 13)
+(from 15 9)
+(projectionAssn 15 202 310)
+(projectionAssn 16 297 311)
+(to 17 16)
+(from 17 7)
+(projectionAssn 17 165 312)
+(styleAssn 18 313)
+(projectionAssn 18 315 314)
+(styleAssn 19 316)
+(projectionAssn 19 318 317)
+(styleAssn 20 313)
+(projectionAssn 20 320 319)
+(to 21 20)
+(from 21 18)
+(projectionAssn 21 322 321)
+(styleAssn 22 316)
+(projectionAssn 22 324 323)
+(to 23 22)
+(from 23 19)
+(projectionAssn 23 326 325)
+(to 24 6)
+(from 24 4)
+(projectionAssn 24 87 327)
+(projectionAssn 25 260 328)
+(to 26 25)
+(from 26 13)
+(projectionAssn 26 234 329)
+(projectionAssn 243 27 330)
+(projectionAssn 244 45 331)
+(to 245 244)
+(from 245 243)
+(projectionAssn 245 32 332)
+(projectionAssn 246 104 333)
+(projectionAssn 247 218 334)
+(to 248 247)
+(from 248 243)
+(projectionAssn 248 37 335)
+(projectionAssn 249 141 336)
+(to 250 249)
+(from 250 244)
+(projectionAssn 250 82 337)
+(projectionAssn 251 177 338)
+(to 252 246)
+(from 252 251)
+(projectionAssn 252 195 339)
+(to 253 251)
+(from 253 249)
+(projectionAssn 253 160 340)
+(to 254 247)
+(from 254 251)
+(projectionAssn 254 202 341)
+(projectionAssn 255 260 342)
+(to 256 255)
+(from 256 247)
+(projectionAssn 256 234 343)
+(projectionAssn 257 297 344)
+(to 258 257)
+(from 258 249)
+(projectionAssn 258 165 345)
+(to 259 246)
+(from 259 244)
+(projectionAssn 259 87 346)
+(stereotypeAssn 276 347)
+(clientAssn 276 1)
+(supplierAssn 276 348)

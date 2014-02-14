@@ -1,0 +1,1896 @@
+ObjectDomain_Shared_Package 15
+{-yk94ms_jd_f02m0kiw_-p98 4 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "ccp" objectdomain.uml.mechanisms.UmlPackage-owns "general" objectdomain.uml.mechanisms.UmlPackage-owns "DataLocation" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.core.TypeExpression $16
+objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Generalization-owns $9
+objectdomain.uml.core.Projection $14
+objectdomain.uml.core.UmlAttribute-features $7
+objectdomain.uml.core.UmlAssociationEnd-connections $11
+objectdomain.uml.view.style.BaseViewElementStyle-owns $18
+objectdomain.uml.view.ClassView-owns $3
+objectdomain.uml.core.UmlTaggedValue-taggedValues $8
+objectdomain.uml.core.UmlConstraint-constraints $13
+objectdomain.uml.core.UmlAssociation-owns $10
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.core.UmlOperation-features $12
+objectdomain.uml.view.GeneralizationView-owns $5
+objectdomain.uml.core.UmlMultiplicity $15
+objectdomain.uml.core.UmlClass-owns $6
+objectdomain.uml.view.AssociationView-owns $4
+objectdomain.uml.core.Stereotype-owns $17
+]
+($1 1 > -yk94ms_jd_f02m0kiw_-p98 4 "Logical" $1 "ccp" $1 "general" $1 "DataLocation" $1
+(name "DataLocation"
+)
+(uid "-yk94ms_jd_f02m0kiw_-p98"))
+($2 2 < 0_-fvi_hrnjywg5_-oaq "_DataLocation-details" 1
+(name "_DataLocation-details"
+)
+(uid "0_-fvi_hrnjywg5_-oaq")
+(diagramType "class"))
+($3 3 < 0_-fvi_hrnjywg5_-oap "DataLocationStore" 2
+(uid "0_-fvi_hrnjywg5_-oap")
+(bbx 360 20 130 60))
+($3 4 < 0_-fvi_hrnjywg5_-oao "DataUrl" 2
+(uid "0_-fvi_hrnjywg5_-oao")
+(bbx 580 20 100 90))
+($4 5 < 0_-fvi_hrnjywg5_-oan "" 2
+(toMultiplicityPosition 570 55)
+(uid "0_-fvi_hrnjywg5_-oan")
+(points 490 50 580 50)
+(fromMultiplicityPosition 495 25))
+($3 6 < 0_-fvi_hrnjywg5_-oam "AbstractDataStore" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-oam")
+(bbx 360 170 130 130))
+($4 7 < 0_-fvi_hrnjywg5_-oal "" 2
+(toMultiplicityPosition 430 150)
+(toRolePosition 350 150)
+(uid "0_-fvi_hrnjywg5_-oal")
+(points 425 80 425 170)
+(fromMultiplicityPosition 440 95))
+($3 8 < 0_-fvi_hrnjywg5_-oak "MimeTypeDataStore" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-oak")
+(bbx 90 180 140 60))
+($5 9 < 0_-fvi_hrnjywg5_-oaj "" 2
+(uid "0_-fvi_hrnjywg5_-oaj")
+(points 230 205 360 205))
+($3 10 < 0_-fvi_hrnjywg5_-oai "NumericMatrix" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-oai")
+(bbx 290 340 300 220))
+($5 11 < 0_-fvi_hrnjywg5_-oah "" 2
+(uid "0_-fvi_hrnjywg5_-oah")
+(points 430 340 430 300))
+($3 12 < 0_-fvi_hrnjywg5_-oag "ComplexStorage" 2
+(uid "0_-fvi_hrnjywg5_-oag")
+(bbx 1000 490 110 60))
+($3 13 < 0_-fvi_hrnjywg5_-oaf "NumberType" 2
+(uid "0_-fvi_hrnjywg5_-oaf")
+(bbx 1000 400 100 60))
+($3 14 < 0_-fvi_hrnjywg5_-oae "BlockedBinaryMatrix" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-oae")
+(bbx 10 340 240 130))
+($5 15 < 0_-fvi_hrnjywg5_-oad "" 2
+(uid "0_-fvi_hrnjywg5_-oad")
+(points 250 370 290 370))
+($3 16 < 0_-fvi_hrnjywg5_-oac "ShapeMatrix" 2
+(uid "0_-fvi_hrnjywg5_-oac")
+(bbx 690 340 230 130))
+($5 17 < 0_-fvi_hrnjywg5_-oab "" 2
+(uid "0_-fvi_hrnjywg5_-oab")
+(points 690 370 590 370))
+($3 18 < 0_-fvi_hrnjywg5_-oaa "DataEncoding" 2
+(uid "0_-fvi_hrnjywg5_-oaa")
+(bbx 1000 300 100 60))
+($3 19 < 0_-fvi_hrnjywg5_-oa9 "ComponentShape" 2
+(uid "0_-fvi_hrnjywg5_-oa9")
+(bbx 610 550 120 80))
+($4 20 < 0_-fvi_hrnjywg5_-oa8 "" 2
+(toMultiplicityPosition 690 530)
+(uid "0_-fvi_hrnjywg5_-oa8")
+(points 700 470 700 550)
+(fromMultiplicityPosition 715 480))
+($4 21 < 0_-fvi_hrnjywg5_-oa7 "" 2
+(toMultiplicityPosition 495 155)
+(toRolePosition 495 180)
+(uid "0_-fvi_hrnjywg5_-oa7")
+(points 630 110 630 175 490 175)
+(fromMultiplicityPosition 635 115))
+($3 22 < 0_-fvi_hrnjywg5_-oa6 "Annotation" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-oa6")
+(bbx 800 70 230 140))
+($4 23 < 0_-fvi_hrnjywg5_-oa5 "" 2
+(toMultiplicityPosition 780 115)
+(uid "0_-fvi_hrnjywg5_-oa5")
+(points 680 100 800 100)
+(fromMultiplicityPosition 695 70))
+($3 24 < 0_-fvi_hrnjywg5_-oa4 "MatrixFileType" 2
+(uid "0_-fvi_hrnjywg5_-oa4")
+(bbx 1010 580 100 60))
+($3 25 < 0_-fvi_hrnjywg5_-oa3 "Component" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-oa3")
+(bbx 760 520 230 130))
+($4 26 < 0_-fvi_hrnjywg5_-oa2 "" 2
+(toMultiplicityPosition 845 500)
+(uid "0_-fvi_hrnjywg5_-oa2")
+(points 860 470 860 520)
+(fromMultiplicityPosition 870 480))
+($3 27 < 0_-fvi_hrnjywg5_-oa1 "ComponentStatus" 2
+(uid "0_-fvi_hrnjywg5_-oa1")
+(bbx 1000 680 120 60))
+($6 28 < 0_-fvi_hrnjywg5_-oa0 "DataLocationStore" 1
+(name "DataLocationStore"
+)
+(uid "0_-fvi_hrnjywg5_-oa0"))
+($7 29 < 0_-fvi_hrnjywg5_-o9z "name" 28
+(changeability "frozen")
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-o9z")
+(multiplicity "1"))
+($8 30 < 0_-fvi_hrnjywg5_-o9y "guid" 29
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00010"
+)
+(uid "0_-fvi_hrnjywg5_-o9y"))
+($8 31 < 0_-fvi_hrnjywg5_-o9x "documentation" 29
+(name "documentation"
+)
+(value "name of DataLocationStore - serves as key"
+)
+(uid "0_-fvi_hrnjywg5_-o9x"))
+($9 32 < 0_-fvi_hrnjywg5_-o9w "#<anon> (DataLocationStore, TopObject)" 28
+(uid "0_-fvi_hrnjywg5_-o9w"))
+($10 33 < 0_-fvi_hrnjywg5_-o9v "#<anon> (DataLocationStore, DataUrl)##," 28
+(name "")
+(uid "0_-fvi_hrnjywg5_-o9v"))
+($11 34 < 0_-fvi_hrnjywg5_-o9u "#0" 33
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-o9u")
+(multiplicity "1"))
+($8 35 < 0_-fvi_hrnjywg5_-o9t "guid" 34
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00006"
+)
+(uid "0_-fvi_hrnjywg5_-o9t"))
+($11 36 < 0_-fvi_hrnjywg5_-o9s "#1" 33
+(uid "0_-fvi_hrnjywg5_-o9s")
+(multiplicity "*"))
+($8 37 < 0_-fvi_hrnjywg5_-o9r "guid" 36
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00007"
+)
+(uid "0_-fvi_hrnjywg5_-o9r"))
+($10 38 < 0_-fvi_hrnjywg5_-o9q "#<anon> (DataLocationStore, AbstractDataStore)##,dataStores" 28
+(name "")
+(uid "0_-fvi_hrnjywg5_-o9q"))
+($11 39 < 0_-fvi_hrnjywg5_-o9p "#0" 38
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-o9p")
+(multiplicity "1"))
+($8 40 < 0_-fvi_hrnjywg5_-o9o "guid" 39
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00008"
+)
+(uid "0_-fvi_hrnjywg5_-o9o"))
+($11 41 < 0_-fvi_hrnjywg5_-o9n "dataStores#1" 38
+(name "dataStores"
+)
+(uid "0_-fvi_hrnjywg5_-o9n")
+(multiplicity "*"))
+($8 42 < 0_-fvi_hrnjywg5_-o9m "baseName" 41
+(name "baseName"
+)
+(value "dataStore"
+)
+(uid "0_-fvi_hrnjywg5_-o9m"))
+($8 43 < 0_-fvi_hrnjywg5_-o9l "guid" 41
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00009"
+)
+(uid "0_-fvi_hrnjywg5_-o9l"))
+($8 44 < 0_-fvi_hrnjywg5_-o9k "keyNames" 28
+(name "keyNames"
+)
+(value "name"
+)
+(uid "0_-fvi_hrnjywg5_-o9k"))
+($8 45 < 0_-fvi_hrnjywg5_-o9j "documentation" 28
+(name "documentation"
+)
+(value "grouping of data locaations and file descriptors"
+)
+(uid "0_-fvi_hrnjywg5_-o9j"))
+($8 46 < 0_-fvi_hrnjywg5_-o9i "guid" 28
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:08:10_00002"
+)
+(uid "0_-fvi_hrnjywg5_-o9i"))
+($6 47 < 0_-fvi_hrnjywg5_-o9h "DataUrl" 1
+(name "DataUrl"
+)
+(uid "0_-fvi_hrnjywg5_-o9h"))
+($7 48 < 0_-fvi_hrnjywg5_-o9g "serial" 47
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-o9g")
+(multiplicity "1"))
+($8 49 < 0_-fvi_hrnjywg5_-o9f "isAutomatic" 48
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-o9f"))
+($8 50 < 0_-fvi_hrnjywg5_-o9e "guid" 48
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00013"
+)
+(uid "0_-fvi_hrnjywg5_-o9e"))
+($7 51 < 0_-fvi_hrnjywg5_-o9d "name" 47
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-o9d"))
+($8 52 < 0_-fvi_hrnjywg5_-o9c "documentation" 51
+(name "documentation"
+)
+(value "Name of DataUrl, to help distinguish to users"
+)
+(uid "0_-fvi_hrnjywg5_-o9c"))
+($8 53 < 0_-fvi_hrnjywg5_-o9b "guid" 51
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00014"
+)
+(uid "0_-fvi_hrnjywg5_-o9b"))
+($7 54 < 0_-fvi_hrnjywg5_-o9a "url" 47
+(name "url"
+)
+(uid "0_-fvi_hrnjywg5_-o9a")
+(multiplicity "1"))
+($8 55 < 0_-fvi_hrnjywg5_-o99 "documentation" 54
+(name "documentation"
+)
+(value "Description of url."
+)
+(uid "0_-fvi_hrnjywg5_-o99"))
+($8 56 < 0_-fvi_hrnjywg5_-o98 "guid" 54
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00015"
+)
+(uid "0_-fvi_hrnjywg5_-o98"))
+($9 57 < 0_-fvi_hrnjywg5_-o97 "#<anon> (DataUrl, DataObject)" 47
+(uid "0_-fvi_hrnjywg5_-o97"))
+($10 58 < 0_-fvi_hrnjywg5_-o96 "#<anon> (DataUrl, AbstractDataStore)##,dataStores" 47
+(name "")
+(uid "0_-fvi_hrnjywg5_-o96"))
+($11 59 < 0_-fvi_hrnjywg5_-o95 "#0" 58
+(uid "0_-fvi_hrnjywg5_-o95")
+(multiplicity "1"))
+($8 60 < 0_-fvi_hrnjywg5_-o94 "documentation" 59
+(name "documentation"
+)
+(value "DataUrl under which AbstractDataStore is stored"
+)
+(uid "0_-fvi_hrnjywg5_-o94"))
+($8 61 < 0_-fvi_hrnjywg5_-o93 "guid" 59
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-09-10:09:29_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o93"))
+($11 62 < 0_-fvi_hrnjywg5_-o92 "dataStores#1" 58
+(name "dataStores"
+)
+(uid "0_-fvi_hrnjywg5_-o92")
+(multiplicity "*"))
+($8 63 < 0_-fvi_hrnjywg5_-o91 "documentation" 62
+(name "documentation"
+)
+(value "AbstractDataStores stored at this Url"
+)
+(uid "0_-fvi_hrnjywg5_-o91"))
+($8 64 < 0_-fvi_hrnjywg5_-o90 "baseName" 62
+(name "baseName"
+)
+(value "dataStore"
+)
+(uid "0_-fvi_hrnjywg5_-o90"))
+($8 65 < 0_-fvi_hrnjywg5_-o8z "guid" 62
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-09-10:09:29_00002"
+)
+(uid "0_-fvi_hrnjywg5_-o8z"))
+($10 66 < 0_-fvi_hrnjywg5_-o8y "#<anon> (DataUrl, Annotation)##," 47
+(name "")
+(uid "0_-fvi_hrnjywg5_-o8y"))
+($11 67 < 0_-fvi_hrnjywg5_-o8x "#0" 66
+(uid "0_-fvi_hrnjywg5_-o8x")
+(multiplicity "1"))
+($8 68 < 0_-fvi_hrnjywg5_-o8w "documentation" 67
+(name "documentation"
+)
+(value "DataUrl under which Annotation is stored"
+)
+(uid "0_-fvi_hrnjywg5_-o8w"))
+($8 69 < 0_-fvi_hrnjywg5_-o8v "guid" 67
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-09-10:09:29_00003"
+)
+(uid "0_-fvi_hrnjywg5_-o8v"))
+($11 70 < 0_-fvi_hrnjywg5_-o8u "#1" 66
+(uid "0_-fvi_hrnjywg5_-o8u")
+(multiplicity "*"))
+($8 71 < 0_-fvi_hrnjywg5_-o8t "documentation" 70
+(name "documentation"
+)
+(value "Annotations stored at this Url"
+)
+(uid "0_-fvi_hrnjywg5_-o8t"))
+($8 72 < 0_-fvi_hrnjywg5_-o8s "guid" 70
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-09-10:09:29_00004"
+)
+(uid "0_-fvi_hrnjywg5_-o8s"))
+($8 73 < 0_-fvi_hrnjywg5_-o8r "documentation" 47
+(name "documentation"
+)
+(value "Url descriptor for an absolute data location"
+)
+(uid "0_-fvi_hrnjywg5_-o8r"))
+($8 74 < 0_-fvi_hrnjywg5_-o8q "keyNames" 47
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-o8q"))
+($8 75 < 0_-fvi_hrnjywg5_-o8p "guid" 47
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:08:10_00003"
+)
+(uid "0_-fvi_hrnjywg5_-o8p"))
+($6 76 < 0_-fvi_hrnjywg5_-o8o "AbstractDataStore" 1
+(name "AbstractDataStore"
+)
+(uid "0_-fvi_hrnjywg5_-o8o")
+(isAbstract true))
+($7 77 < 0_-fvi_hrnjywg5_-o8n "serial" 76
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-o8n")
+(multiplicity "1"))
+($8 78 < 0_-fvi_hrnjywg5_-o8m "isAutomatic" 77
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-o8m"))
+($8 79 < 0_-fvi_hrnjywg5_-o8l "guid" 77
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00004"
+)
+(uid "0_-fvi_hrnjywg5_-o8l"))
+($7 80 < 0_-fvi_hrnjywg5_-o8k "path" 76
+(name "path"
+)
+(uid "0_-fvi_hrnjywg5_-o8k")
+(multiplicity "1"))
+($8 81 < 0_-fvi_hrnjywg5_-o8j "documentation" 80
+(name "documentation"
+)
+(value "Path relative to dataUrl.url."
+)
+(uid "0_-fvi_hrnjywg5_-o8j"))
+($8 82 < 0_-fvi_hrnjywg5_-o8i "guid" 80
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-09-10:08:29_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o8i"))
+($7 83 < 0_-fvi_hrnjywg5_-o8h "details" 76
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-o8h"))
+($8 84 < 0_-fvi_hrnjywg5_-o8g "guid" 83
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-07-17:54:39_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o8g"))
+($7 85 < 0_-fvi_hrnjywg5_-o8f "fullPath" 76
+(changeability "frozen")
+(name "fullPath"
+)
+(uid "0_-fvi_hrnjywg5_-o8f")
+(multiplicity "1"))
+($8 86 < 0_-fvi_hrnjywg5_-o8e "documentation" 85
+(name "documentation"
+)
+(value "Full path to data"
+)
+(uid "0_-fvi_hrnjywg5_-o8e"))
+($8 87 < 0_-fvi_hrnjywg5_-o8d "isDerived" 85
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-o8d"))
+($8 88 < 0_-fvi_hrnjywg5_-o8c "guid" 85
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-03-26-14:04:47_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o8c"))
+($12 89 < 0_-fvi_hrnjywg5_-o8b "getFullPath" 76
+(name "getFullPath"
+)
+(uid "0_-fvi_hrnjywg5_-o8b")
+(isQuery true))
+($8 90 < 0_-fvi_hrnjywg5_-o8a "opType" 89
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-o8a"))
+($8 91 < 0_-fvi_hrnjywg5_-o89 "documentation" 89
+(name "documentation"
+)
+(value "getter for derived attribute fullPath"
+)
+(uid "0_-fvi_hrnjywg5_-o89"))
+($8 92 < 0_-fvi_hrnjywg5_-o88 "code:python" 89
+(name "code:python"
+)
+(value "from memops.universal.Io import joinPath"
+"result = joinPath(self.dataUrl.url.dataLocation, self.path)"
+)
+(uid "0_-fvi_hrnjywg5_-o88"))
+($8 93 < 0_-fvi_hrnjywg5_-o87 "code:java" 89
+(name "code:java"
+)
+(value "result = memops.universal.Io.joinPath(getDataUrl().getUrl().getDataLocation(), getPath());"
+)
+(uid "0_-fvi_hrnjywg5_-o87"))
+($8 94 < 0_-fvi_hrnjywg5_-o86 "guid" 89
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-03-26-14:04:47_00002"
+)
+(uid "0_-fvi_hrnjywg5_-o86"))
+($9 95 < 0_-fvi_hrnjywg5_-o85 "#<anon> (AbstractDataStore, DataObject)" 76
+(uid "0_-fvi_hrnjywg5_-o85"))
+($8 96 < 0_-fvi_hrnjywg5_-o84 "documentation" 76
+(name "documentation"
+)
+(value "Data store descriptor"
+)
+(uid "0_-fvi_hrnjywg5_-o84"))
+($8 97 < 0_-fvi_hrnjywg5_-o83 "guid" 76
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:08:10_00005"
+)
+(uid "0_-fvi_hrnjywg5_-o83"))
+($8 98 < 0_-fvi_hrnjywg5_-o82 "keyNames" 76
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-o82"))
+($6 99 < 0_-fvi_hrnjywg5_-o81 "MimeTypeDataStore" 1
+(name "MimeTypeDataStore"
+)
+(uid "0_-fvi_hrnjywg5_-o81"))
+($7 100 < 0_-fvi_hrnjywg5_-o80 "mimeType" 99
+(name "mimeType"
+)
+(uid "0_-fvi_hrnjywg5_-o80")
+(multiplicity "1"))
+($8 101 < 0_-fvi_hrnjywg5_-o7z "documentation" 100
+(name "documentation"
+)
+(value "mime type of datasource"
+)
+(uid "0_-fvi_hrnjywg5_-o7z"))
+($8 102 < 0_-fvi_hrnjywg5_-o7y "guid" 100
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00007"
+)
+(uid "0_-fvi_hrnjywg5_-o7y"))
+($9 103 < 0_-fvi_hrnjywg5_-o7x "#<anon> (MimeTypeDataStore, AbstractDataStore)" 99
+(uid "0_-fvi_hrnjywg5_-o7x"))
+($8 104 < 0_-fvi_hrnjywg5_-o7w "guid" 99
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:43:15_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o7w"))
+($8 105 < 0_-fvi_hrnjywg5_-o7v "documentation" 99
+(name "documentation"
+)
+(value "Data storage pointer for anything with a MimeType (e.g. JPEG or GIF) "
+)
+(uid "0_-fvi_hrnjywg5_-o7v"))
+($6 106 < 0_-fvi_hrnjywg5_-o7u "NumericMatrix" 1
+(name "NumericMatrix"
+)
+(uid "0_-fvi_hrnjywg5_-o7u")
+(isAbstract true))
+($7 107 < 0_-fvi_hrnjywg5_-o7t "numPoints" 106
+(name "numPoints"
+)
+(uid "0_-fvi_hrnjywg5_-o7t")
+(multiplicity "*"))
+($8 108 < 0_-fvi_hrnjywg5_-o7s "documentation" 107
+(name "documentation"
+)
+(value "number of points for each matrix dimension - also defines dimensionality of matrix. The number of points is the same for real or complex data, in the sense that n complex points require 2n real numbers for storage. Dimensions are in storage order, fastest varying first."
+)
+(uid "0_-fvi_hrnjywg5_-o7s"))
+($8 109 < 0_-fvi_hrnjywg5_-o7r "baseName" 107
+(name "baseName"
+)
+(value "numPoints"
+)
+(uid "0_-fvi_hrnjywg5_-o7r"))
+($8 110 < 0_-fvi_hrnjywg5_-o7q "guid" 107
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00008"
+)
+(uid "0_-fvi_hrnjywg5_-o7q"))
+($7 111 < 0_-fvi_hrnjywg5_-o7p "numDims" 106
+(changeability "frozen")
+(name "numDims"
+)
+(uid "0_-fvi_hrnjywg5_-o7p")
+(multiplicity "1"))
+($8 112 < 0_-fvi_hrnjywg5_-o7o "documentation" 111
+(name "documentation"
+)
+(value "Number of dimensions."
+)
+(uid "0_-fvi_hrnjywg5_-o7o"))
+($8 113 < 0_-fvi_hrnjywg5_-o7n "isDerived" 111
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-o7n"))
+($8 114 < 0_-fvi_hrnjywg5_-o7m "guid" 111
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00009"
+)
+(uid "0_-fvi_hrnjywg5_-o7m"))
+($12 115 < 0_-fvi_hrnjywg5_-o7l "getNumDims" 106
+(name "getNumDims"
+)
+(uid "0_-fvi_hrnjywg5_-o7l")
+(isQuery true))
+($8 116 < 0_-fvi_hrnjywg5_-o7k "documentation" 115
+(name "documentation"
+)
+(value "getter for derived attribute numDims"
+)
+(uid "0_-fvi_hrnjywg5_-o7k"))
+($8 117 < 0_-fvi_hrnjywg5_-o7j "opType" 115
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-o7j"))
+($8 118 < 0_-fvi_hrnjywg5_-o7i "code:python" 115
+(name "code:python"
+)
+(value "result = len(self.numPoints)"
+)
+(uid "0_-fvi_hrnjywg5_-o7i"))
+($8 119 < 0_-fvi_hrnjywg5_-o7h "code:java" 115
+(name "code:java"
+)
+(value "result = getNumPoints().size();"
+)
+(uid "0_-fvi_hrnjywg5_-o7h"))
+($8 120 < 0_-fvi_hrnjywg5_-o7g "guid" 115
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00016"
+)
+(uid "0_-fvi_hrnjywg5_-o7g"))
+($7 121 < 0_-fvi_hrnjywg5_-o7f "numRecords" 106
+(initialValue "1"
+)
+(name "numRecords"
+)
+(uid "0_-fvi_hrnjywg5_-o7f")
+(multiplicity "1"))
+($8 122 < 0_-fvi_hrnjywg5_-o7e "documentation" 121
+(name "documentation"
+)
+(value "Number of matrix records in file. All other information in the object describes a single record."
+)
+(uid "0_-fvi_hrnjywg5_-o7e"))
+($8 123 < 0_-fvi_hrnjywg5_-o7d "guid" 121
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00010"
+)
+(uid "0_-fvi_hrnjywg5_-o7d"))
+($7 124 < 0_-fvi_hrnjywg5_-o7c "numberType" 106
+(initialValue "float"
+)
+(name "numberType"
+)
+(uid "0_-fvi_hrnjywg5_-o7c")
+(multiplicity "1"))
+($8 125 < 0_-fvi_hrnjywg5_-o7b "documentation" 124
+(name "documentation"
+)
+(value "Type of numbers held in matrix"
+)
+(uid "0_-fvi_hrnjywg5_-o7b"))
+($8 126 < 0_-fvi_hrnjywg5_-o7a "guid" 124
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00011"
+)
+(uid "0_-fvi_hrnjywg5_-o7a"))
+($7 127 < 0_-fvi_hrnjywg5_-o79 "isComplex" 106
+(name "isComplex"
+)
+(uid "0_-fvi_hrnjywg5_-o79")
+(multiplicity "*"))
+($8 128 < 0_-fvi_hrnjywg5_-o78 "baseName" 127
+(name "baseName"
+)
+(value "isComplex"
+)
+(uid "0_-fvi_hrnjywg5_-o78"))
+($8 129 < 0_-fvi_hrnjywg5_-o77 "documentation" 127
+(name "documentation"
+)
+(value "Are numbers complex (if True) or real/integer (if False)."
+)
+(uid "0_-fvi_hrnjywg5_-o77"))
+($8 130 < 0_-fvi_hrnjywg5_-o76 "guid" 127
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00012"
+)
+(uid "0_-fvi_hrnjywg5_-o76"))
+($7 131 < 0_-fvi_hrnjywg5_-o75 "complexStoredBy" 106
+(initialValue "dimension"
+)
+(name "complexStoredBy"
+)
+(uid "0_-fvi_hrnjywg5_-o75")
+(multiplicity "1"))
+($8 132 < 0_-fvi_hrnjywg5_-o74 "guid" 131
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00014"
+)
+(uid "0_-fvi_hrnjywg5_-o74"))
+($8 133 < 0_-fvi_hrnjywg5_-o73 "documentation" 131
+(name "documentation"
+)
+(value "The ordering of real and imaginary parts of hypercomplex numbers in the data matrix. See ComplexStorage type for details "
+)
+(uid "0_-fvi_hrnjywg5_-o73"))
+($7 134 < 0_-fvi_hrnjywg5_-o72 "headerSize" 106
+(initialValue "0"
+)
+(name "headerSize"
+)
+(uid "0_-fvi_hrnjywg5_-o72")
+(multiplicity "1"))
+($8 135 < 0_-fvi_hrnjywg5_-o71 "documentation" 134
+(name "documentation"
+)
+(value "Size of record header. The unit is different for different subtypes"
+)
+(uid "0_-fvi_hrnjywg5_-o71"))
+($8 136 < 0_-fvi_hrnjywg5_-o70 "isAbstract" 134
+(name "isAbstract"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-o70"))
+($8 137 < 0_-fvi_hrnjywg5_-o6z "guid" 134
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00015"
+)
+(uid "0_-fvi_hrnjywg5_-o6z"))
+($7 138 < 0_-fvi_hrnjywg5_-o6y "scaleFactor" 106
+(initialValue "1.0"
+)
+(name "scaleFactor"
+)
+(uid "0_-fvi_hrnjywg5_-o6y")
+(multiplicity "1"))
+($8 139 < 0_-fvi_hrnjywg5_-o6x "documentation" 138
+(name "documentation"
+)
+(value "Scale factor for data stored in matrix. The numbers as stored must be multiplied by the scaleFactor before being used. E.g. a stored value of 2 (int) with a scaling factor of 1.6 means the number to use in calculations would be 3.2."
+)
+(uid "0_-fvi_hrnjywg5_-o6x"))
+($8 140 < 0_-fvi_hrnjywg5_-o6w "guid" 138
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-02-12-16:37:31_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o6w"))
+($7 141 < 0_-fvi_hrnjywg5_-o6v "isBigEndian" 106
+(initialValue "True"
+)
+(name "isBigEndian"
+)
+(uid "0_-fvi_hrnjywg5_-o6v")
+(multiplicity "1"))
+($8 142 < 0_-fvi_hrnjywg5_-o6u "documentation" 141
+(name "documentation"
+)
+(value "Are data big-endian (alternative little-endian)? Irrelevant for ascii data."
+)
+(uid "0_-fvi_hrnjywg5_-o6u"))
+($8 143 < 0_-fvi_hrnjywg5_-o6t "guid" 141
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00002"
+)
+(uid "0_-fvi_hrnjywg5_-o6t"))
+($7 144 < 0_-fvi_hrnjywg5_-o6s "fileType" 106
+(name "fileType"
+)
+(uid "0_-fvi_hrnjywg5_-o6s"))
+($8 145 < 0_-fvi_hrnjywg5_-o6r "documentation" 144
+(name "documentation"
+)
+(value "Data file type."
+)
+(uid "0_-fvi_hrnjywg5_-o6r"))
+($8 146 < 0_-fvi_hrnjywg5_-o6q "guid" 144
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-11-15:00:26_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o6q"))
+($9 147 < 0_-fvi_hrnjywg5_-o6p "#<anon> (NumericMatrix, AbstractDataStore)" 106
+(uid "0_-fvi_hrnjywg5_-o6p"))
+($8 148 < 0_-fvi_hrnjywg5_-o6o "documentation" 106
+(name "documentation"
+)
+(value "DataSource containing one or more N-dimensional numerical matrix records, which may be real or (hyper)complex"
+)
+(uid "0_-fvi_hrnjywg5_-o6o"))
+($8 149 < 0_-fvi_hrnjywg5_-o6n "guid" 106
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:43:15_00002"
+)
+(uid "0_-fvi_hrnjywg5_-o6n"))
+($13 150 < 0_-fvi_hrnjywg5_-o6m "isComplex_same_length_as_numPoints" 106
+(name "isComplex_same_length_as_numPoints"
+)
+(uid "0_-fvi_hrnjywg5_-o6m")
+(body "code:python"
+"_"
+"len(self.numPoints) == len(self.isComplex)"
+"_"
+"code:java"
+"_"
+"getNumPoints().size() == getIsComplex().size()"
+))
+($8 151 < 0_-fvi_hrnjywg5_-o6l "guid" 150
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-10-02-16:44:44_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o6l"))
+($6 152 < 0_-fvi_hrnjywg5_-o6k "ComplexStorage" 1
+(name "ComplexStorage"
+)
+(uid "0_-fvi_hrnjywg5_-o6k"))
+($9 153 < 0_-fvi_hrnjywg5_-o6j "#<anon> (ComplexStorage, Word)" 152
+(uid "0_-fvi_hrnjywg5_-o6j"))
+($8 154 < 0_-fvi_hrnjywg5_-o6i "documentation" 152
+(name "documentation"
+)
+(value "Storage types for storing (hyper)complex numbers. For a hypercomplex 2D matrix, possibilities are:"
+""
+"'timepoint':"
+"r1r1, i1r1, r1i1, i1i1, r2r1, ..."
+"..."
+"r1r2, ..."
+"..."
+""
+"'quadrant':"
+"r1r1, r2r1, r3r1, ..."
+"r1r2, r2r2, ..."
+"..."
+"i1r1, i2r1, i3r1, ..."
+"..."
+"r1i1, r2i1, r3i1, ..."
+"..."
+"i1i1, i2i1, i3i1,"
+"..."
+""
+"'dimension':"
+"r1r1, i1r1, r2r1, i2r1, ..."
+"r1i1, i1i1, r2i1, i2i1, ..."
+"r1r2, i1r2, r2r2, i2r2, ..."
+"...  "
+)
+(uid "0_-fvi_hrnjywg5_-o6i"))
+($8 155 < 0_-fvi_hrnjywg5_-o6h "isOpen" 152
+(name "isOpen"
+)
+(value "False"
+)
+(uid "0_-fvi_hrnjywg5_-o6h"))
+($8 156 < 0_-fvi_hrnjywg5_-o6g "enumeration" 152
+(name "enumeration"
+)
+(value "('timepoint', 'quadrant', 'dimension')"
+)
+(uid "0_-fvi_hrnjywg5_-o6g"))
+($8 157 < 0_-fvi_hrnjywg5_-o6f "guid" 152
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:43:15_00003"
+)
+(uid "0_-fvi_hrnjywg5_-o6f"))
+($6 158 < 0_-fvi_hrnjywg5_-o6e "NumberType" 1
+(name "NumberType"
+)
+(uid "0_-fvi_hrnjywg5_-o6e"))
+($9 159 < 0_-fvi_hrnjywg5_-o6d "#<anon> (NumberType, Token)" 158
+(uid "0_-fvi_hrnjywg5_-o6d"))
+($8 160 < 0_-fvi_hrnjywg5_-o6c "isOpen" 158
+(name "isOpen"
+)
+(value "False"
+)
+(uid "0_-fvi_hrnjywg5_-o6c"))
+($8 161 < 0_-fvi_hrnjywg5_-o6b "enumeration" 158
+(name "enumeration"
+)
+(value "('int','float')"
+)
+(uid "0_-fvi_hrnjywg5_-o6b"))
+($8 162 < 0_-fvi_hrnjywg5_-o6a "documentation" 158
+(name "documentation"
+)
+(value "Allowed values for NumericMatrix.numberType. Currently 'int' and 'float'."
+)
+(uid "0_-fvi_hrnjywg5_-o6a"))
+($8 163 < 0_-fvi_hrnjywg5_-o69 "guid" 158
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034"
+)
+(uid "0_-fvi_hrnjywg5_-o69"))
+($6 164 < 0_-fvi_hrnjywg5_-o68 "BlockedBinaryMatrix" 1
+(name "BlockedBinaryMatrix"
+)
+(uid "0_-fvi_hrnjywg5_-o68"))
+($7 165 < 0_-fvi_hrnjywg5_-o67 "nByte" 164
+(initialValue "4"
+)
+(name "nByte"
+)
+(uid "0_-fvi_hrnjywg5_-o67")
+(multiplicity "1"))
+($8 166 < 0_-fvi_hrnjywg5_-o66 "documentation" 165
+(name "documentation"
+)
+(value "Number of bytes per number"
+)
+(uid "0_-fvi_hrnjywg5_-o66"))
+($8 167 < 0_-fvi_hrnjywg5_-o65 "guid" 165
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:45:25_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o65"))
+($7 168 < 0_-fvi_hrnjywg5_-o64 "blockSizes" 164
+(name "blockSizes"
+)
+(uid "0_-fvi_hrnjywg5_-o64")
+(multiplicity "*"))
+($8 169 < 0_-fvi_hrnjywg5_-o63 "documentation" 168
+(name "documentation"
+)
+(value "Block sizes in dimension order"
+)
+(uid "0_-fvi_hrnjywg5_-o63"))
+($8 170 < 0_-fvi_hrnjywg5_-o62 "guid" 168
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:45:25_00002"
+)
+(uid "0_-fvi_hrnjywg5_-o62"))
+($8 171 < 0_-fvi_hrnjywg5_-o61 "baseName" 168
+(name "baseName"
+)
+(value "blockSize"
+)
+(uid "0_-fvi_hrnjywg5_-o61"))
+($7 172 < 0_-fvi_hrnjywg5_-o60 "hasBlockPadding" 164
+(initialValue "True"
+)
+(name "hasBlockPadding"
+)
+(uid "0_-fvi_hrnjywg5_-o60")
+(multiplicity "1"))
+($8 173 < 0_-fvi_hrnjywg5_-o5z "documentation" 172
+(name "documentation"
+)
+(value "Are data padded to fill all blocks completely? Alternatively incomplete blocks store only the actual data."
+)
+(uid "0_-fvi_hrnjywg5_-o5z"))
+($8 174 < 0_-fvi_hrnjywg5_-o5y "guid" 172
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00003"
+)
+(uid "0_-fvi_hrnjywg5_-o5y"))
+($7 175 < 0_-fvi_hrnjywg5_-o5x "headerSize" 164
+(initialValue "0"
+)
+(name "headerSize"
+)
+(uid "0_-fvi_hrnjywg5_-o5x")
+(multiplicity "1"))
+($8 176 < 0_-fvi_hrnjywg5_-o5w "documentation" 175
+(name "documentation"
+)
+(value "File header size in bytes"
+)
+(uid "0_-fvi_hrnjywg5_-o5w"))
+($8 177 < 0_-fvi_hrnjywg5_-o5v "guid" 175
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00004"
+)
+(uid "0_-fvi_hrnjywg5_-o5v"))
+($7 178 < 0_-fvi_hrnjywg5_-o5u "blockHeaderSize" 164
+(initialValue "0"
+)
+(name "blockHeaderSize"
+)
+(uid "0_-fvi_hrnjywg5_-o5u")
+(multiplicity "1"))
+($8 179 < 0_-fvi_hrnjywg5_-o5t "documentation" 178
+(name "documentation"
+)
+(value "Block header size in bytes"
+)
+(uid "0_-fvi_hrnjywg5_-o5t"))
+($8 180 < 0_-fvi_hrnjywg5_-o5s "guid" 178
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-04-23-15:13:31_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o5s"))
+($9 181 < 0_-fvi_hrnjywg5_-o5r "#<anon> (BlockedBinaryMatrix, NumericMatrix)" 164
+(uid "0_-fvi_hrnjywg5_-o5r"))
+($8 182 < 0_-fvi_hrnjywg5_-o5q "documentation" 164
+(name "documentation"
+)
+(value "NumericMatrix stored in blocked binary format"
+)
+(uid "0_-fvi_hrnjywg5_-o5q"))
+($8 183 < 0_-fvi_hrnjywg5_-o5p "guid" 164
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:43:15_00004"
+)
+(uid "0_-fvi_hrnjywg5_-o5p"))
+($13 184 < 0_-fvi_hrnjywg5_-o5o "blockSizes_same_length_as_numPoints" 164
+(name "blockSizes_same_length_as_numPoints"
+)
+(uid "0_-fvi_hrnjywg5_-o5o")
+(body "code:python"
+"_"
+"len(self.numPoints) == len(self.blockSizes)"
+"_"
+"code:java"
+"_"
+"getNumPoints().size() == getBlockSizes().size()"
+))
+($8 185 < 0_-fvi_hrnjywg5_-o5n "guid" 184
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-10-02-16:44:44_00002"
+)
+(uid "0_-fvi_hrnjywg5_-o5n"))
+($6 186 < 0_-fvi_hrnjywg5_-o5m "ShapeMatrix" 1
+(name "ShapeMatrix"
+)
+(uid "0_-fvi_hrnjywg5_-o5m"))
+($7 187 < 0_-fvi_hrnjywg5_-o5l "numShapes" 186
+(name "numShapes"
+)
+(uid "0_-fvi_hrnjywg5_-o5l")
+(multiplicity "1"))
+($8 188 < 0_-fvi_hrnjywg5_-o5k "documentation" 187
+(name "documentation"
+)
+(value "Number of shapes per component. Differs from numDims only if some shapes are 2D or higher"
+)
+(uid "0_-fvi_hrnjywg5_-o5k"))
+($8 189 < 0_-fvi_hrnjywg5_-o5j "guid" 187
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00008"
+)
+(uid "0_-fvi_hrnjywg5_-o5j"))
+($7 190 < 0_-fvi_hrnjywg5_-o5i "dataEncoding" 186
+(initialValue "ascii"
+)
+(name "dataEncoding"
+)
+(uid "0_-fvi_hrnjywg5_-o5i")
+(multiplicity "1"))
+($8 191 < 0_-fvi_hrnjywg5_-o5h "documentation" 190
+(name "documentation"
+)
+(value "Data Encoding"
+)
+(uid "0_-fvi_hrnjywg5_-o5h"))
+($8 192 < 0_-fvi_hrnjywg5_-o5g "guid" 190
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00019"
+)
+(uid "0_-fvi_hrnjywg5_-o5g"))
+($7 193 < 0_-fvi_hrnjywg5_-o5f "headerSize" 186
+(initialValue "0"
+)
+(name "headerSize"
+)
+(uid "0_-fvi_hrnjywg5_-o5f")
+(multiplicity "1"))
+($8 194 < 0_-fvi_hrnjywg5_-o5e "documentation" 193
+(name "documentation"
+)
+(value "Header size. May be either in bytes (for binary encoding) or lines (for ascii encoding)."
+)
+(uid "0_-fvi_hrnjywg5_-o5e"))
+($8 195 < 0_-fvi_hrnjywg5_-o5d "guid" 193
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00020"
+)
+(uid "0_-fvi_hrnjywg5_-o5d"))
+($7 196 < 0_-fvi_hrnjywg5_-o5c "isReconstructable" 186
+(initialValue "False"
+)
+(name "isReconstructable"
+)
+(uid "0_-fvi_hrnjywg5_-o5c")
+(multiplicity "1"))
+($8 197 < 0_-fvi_hrnjywg5_-o5b "documentation" 196
+(name "documentation"
+)
+(value "Is spectrum reconstructable? If true all components can be summed to give a representation of the entire spectrum."
+)
+(uid "0_-fvi_hrnjywg5_-o5b"))
+($8 198 < 0_-fvi_hrnjywg5_-o5a "guid" 196
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00009"
+)
+(uid "0_-fvi_hrnjywg5_-o5a"))
+($7 199 < 0_-fvi_hrnjywg5_-o59 "isResolved" 186
+(changeability "frozen")
+(name "isResolved"
+)
+(uid "0_-fvi_hrnjywg5_-o59")
+(multiplicity "1"))
+($8 200 < 0_-fvi_hrnjywg5_-o58 "documentation" 199
+(name "documentation"
+)
+(value "Is spectrum resolved? If True all components marked 'clean' can be summed to give a correct representation of all significant signal in the spectrum. A spectrum without raw components should be set to resolved."
+)
+(uid "0_-fvi_hrnjywg5_-o58"))
+($8 201 < 0_-fvi_hrnjywg5_-o57 "guid" 199
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00010"
+)
+(uid "0_-fvi_hrnjywg5_-o57"))
+($9 202 < 0_-fvi_hrnjywg5_-o56 "#<anon> (ShapeMatrix, NumericMatrix)" 186
+(uid "0_-fvi_hrnjywg5_-o56"))
+($10 203 < 0_-fvi_hrnjywg5_-o55 "#<anon> (ShapeMatrix, ComponentShape)##," 186
+(name "")
+(uid "0_-fvi_hrnjywg5_-o55"))
+($11 204 < 0_-fvi_hrnjywg5_-o54 "#0" 203
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-o54")
+(multiplicity "1"))
+($8 205 < 0_-fvi_hrnjywg5_-o53 "guid" 204
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00017"
+)
+(uid "0_-fvi_hrnjywg5_-o53"))
+($11 206 < 0_-fvi_hrnjywg5_-o52 "#1" 203
+(uid "0_-fvi_hrnjywg5_-o52")
+(multiplicity "*"))
+($8 207 < 0_-fvi_hrnjywg5_-o51 "guid" 206
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00018"
+)
+(uid "0_-fvi_hrnjywg5_-o51"))
+($10 208 < 0_-fvi_hrnjywg5_-o50 "#<anon> (ShapeMatrix, Component)##," 186
+(name "")
+(uid "0_-fvi_hrnjywg5_-o50"))
+($11 209 < 0_-fvi_hrnjywg5_-o4z "#0" 208
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-o4z")
+(multiplicity "1"))
+($8 210 < 0_-fvi_hrnjywg5_-o4y "guid" 209
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00006"
+)
+(uid "0_-fvi_hrnjywg5_-o4y"))
+($11 211 < 0_-fvi_hrnjywg5_-o4x "#1" 208
+(uid "0_-fvi_hrnjywg5_-o4x")
+(multiplicity "*"))
+($8 212 < 0_-fvi_hrnjywg5_-o4w "guid" 211
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00007"
+)
+(uid "0_-fvi_hrnjywg5_-o4w"))
+($8 213 < 0_-fvi_hrnjywg5_-o4v "documentation" 186
+(name "documentation"
+)
+(value "NumericMatrix stored in decomposed form, as a sum of components, each an outer product of lower-dimensionality shapes. The number of components is given by numRecords. Individual records do not have headers, and the header size refers to the header of the entire dataasource."
+)
+(uid "0_-fvi_hrnjywg5_-o4v"))
+($8 214 < 0_-fvi_hrnjywg5_-o4u "guid" 186
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:43:15_00005"
+)
+(uid "0_-fvi_hrnjywg5_-o4u"))
+($6 215 < 0_-fvi_hrnjywg5_-o4t "DataEncoding" 1
+(name "DataEncoding"
+)
+(uid "0_-fvi_hrnjywg5_-o4t"))
+($9 216 < 0_-fvi_hrnjywg5_-o4s "#<anon> (DataEncoding, Word)" 215
+(uid "0_-fvi_hrnjywg5_-o4s"))
+($8 217 < 0_-fvi_hrnjywg5_-o4r "documentation" 215
+(name "documentation"
+)
+(value "Encoding of data. Currently binary, ascii."
+)
+(uid "0_-fvi_hrnjywg5_-o4r"))
+($8 218 < 0_-fvi_hrnjywg5_-o4q "isOpen" 215
+(name "isOpen"
+)
+(value "False"
+)
+(uid "0_-fvi_hrnjywg5_-o4q"))
+($8 219 < 0_-fvi_hrnjywg5_-o4p "enumeration" 215
+(name "enumeration"
+)
+(value "('binary', 'ascii')"
+)
+(uid "0_-fvi_hrnjywg5_-o4p"))
+($8 220 < 0_-fvi_hrnjywg5_-o4o "guid" 215
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:43:15_00006"
+)
+(uid "0_-fvi_hrnjywg5_-o4o"))
+($6 221 < 0_-fvi_hrnjywg5_-o4n "ComponentShape" 1
+(name "ComponentShape"
+)
+(uid "0_-fvi_hrnjywg5_-o4n"))
+($7 222 < 0_-fvi_hrnjywg5_-o4m "serial" 221
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-o4m")
+(multiplicity "1"))
+($8 223 < 0_-fvi_hrnjywg5_-o4l "isAutomatic" 222
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-o4l"))
+($8 224 < 0_-fvi_hrnjywg5_-o4k "guid" 222
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00005"
+)
+(uid "0_-fvi_hrnjywg5_-o4k"))
+($7 225 < 0_-fvi_hrnjywg5_-o4j "dims" 221
+(changeability "frozen")
+(name "dims"
+)
+(uid "0_-fvi_hrnjywg5_-o4j")
+(multiplicity "*"))
+($8 226 < 0_-fvi_hrnjywg5_-o4i "documentation" 225
+(name "documentation"
+)
+(value "Dimension indices (starting at zero) for dimensions described by shape. If there is more than one dim, the first in the array is the fastest varying index in the shape."
+)
+(uid "0_-fvi_hrnjywg5_-o4i"))
+($8 227 < 0_-fvi_hrnjywg5_-o4h "baseName" 225
+(name "baseName"
+)
+(value "dim"
+)
+(uid "0_-fvi_hrnjywg5_-o4h"))
+($8 228 < 0_-fvi_hrnjywg5_-o4g "guid" 225
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:46:36_00006"
+)
+(uid "0_-fvi_hrnjywg5_-o4g"))
+($9 229 < 0_-fvi_hrnjywg5_-o4f "#<anon> (ComponentShape, DataObject)" 221
+(uid "0_-fvi_hrnjywg5_-o4f"))
+($8 230 < 0_-fvi_hrnjywg5_-o4e "documentation" 221
+(name "documentation"
+)
+(value "Descriptor for the individual shapes that are multiplied together to reconstruct a component."
+)
+(uid "0_-fvi_hrnjywg5_-o4e"))
+($8 231 < 0_-fvi_hrnjywg5_-o4d "keyNames" 221
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-o4d"))
+($8 232 < 0_-fvi_hrnjywg5_-o4c "guid" 221
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:43:15_00007"
+)
+(uid "0_-fvi_hrnjywg5_-o4c"))
+($13 233 < 0_-fvi_hrnjywg5_-o4b "dims_not_empty" 221
+(name "dims_not_empty"
+)
+(uid "0_-fvi_hrnjywg5_-o4b")
+(body "code:python"
+"_"
+"self.dims"
+"_"
+"code:java"
+"_"
+"!getDims().isEmpty()"
+))
+($8 234 < 0_-fvi_hrnjywg5_-o4a "guid" 233
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-04-17:43:15_00008"
+)
+(uid "0_-fvi_hrnjywg5_-o4a"))
+($2 235 < 0_-fvi_hrnjywg5_-o49 "_DataLocation" 1
+(name "_DataLocation"
+)
+(uid "0_-fvi_hrnjywg5_-o49")
+(diagramType "class"))
+($3 236 < 0_-fvi_hrnjywg5_-o48 "AbstractDataStore" 235
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-o48")
+(bbx 10 160 130 30))
+($3 237 < 0_-fvi_hrnjywg5_-o47 "BlockedBinaryMatrix" 235
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-o47")
+(bbx 10 350 140 30))
+($3 238 < 0_-fvi_hrnjywg5_-o46 "ComponentShape" 235
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-o46")
+(bbx 240 350 120 30))
+($3 239 < 0_-fvi_hrnjywg5_-o45 "DataLocationStore" 235
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-o45")
+(bbx 10 30 130 30))
+($4 240 < 0_-fvi_hrnjywg5_-o44 "" 235
+(toMultiplicityPosition 55 130)
+(toRolePosition 90 130)
+(uid "0_-fvi_hrnjywg5_-o44")
+(points 75 60 75 160)
+(fromMultiplicityPosition 90 75)
+(lineStyle "bezier"))
+($3 241 < 0_-fvi_hrnjywg5_-o43 "DataUrl" 235
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-o43")
+(bbx 260 30 60 30))
+($4 242 < 0_-fvi_hrnjywg5_-o42 "" 235
+(toMultiplicityPosition 250 50)
+(uid "0_-fvi_hrnjywg5_-o42")
+(points 140 45 260 45)
+(fromMultiplicityPosition 155 15))
+($3 243 < 0_-fvi_hrnjywg5_-o41 "MimeTypeDataStore" 235
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-o41")
+(bbx 420 250 140 30))
+($5 244 < 0_-fvi_hrnjywg5_-o40 "" 235
+(uid "0_-fvi_hrnjywg5_-o40")
+(points 480 250 480 215 60 215 60 190))
+($3 245 < 0_-fvi_hrnjywg5_-o3z "NumericMatrix" 235
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-o3z")
+(bbx 10 260 100 30))
+($5 246 < 0_-fvi_hrnjywg5_-o3y "" 235
+(uid "0_-fvi_hrnjywg5_-o3y")
+(points 60 260 60 190))
+($5 247 < 0_-fvi_hrnjywg5_-o3x "" 235
+(uid "0_-fvi_hrnjywg5_-o3x")
+(points 60 350 60 290))
+($3 248 < 0_-fvi_hrnjywg5_-o3w "ShapeMatrix" 235
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-o3w")
+(bbx 250 260 90 30))
+($4 249 < 0_-fvi_hrnjywg5_-o3v "" 235
+(toMultiplicityPosition 285 330)
+(uid "0_-fvi_hrnjywg5_-o3v")
+(points 295 290 295 350)
+(fromMultiplicityPosition 305 295))
+($5 250 < 0_-fvi_hrnjywg5_-o3u "" 235
+(uid "0_-fvi_hrnjywg5_-o3u")
+(points 250 275 110 275))
+($4 251 < 0_-fvi_hrnjywg5_-o3t "" 235
+(toMultiplicityPosition 145 165)
+(toRolePosition 120 190)
+(uid "0_-fvi_hrnjywg5_-o3t")
+(points 285 60 285 185 140 185)
+(fromMultiplicityPosition 290 65))
+($3 252 < 0_-fvi_hrnjywg5_-o3s "Annotation" 235
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-o3s")
+(bbx 410 30 230 30))
+($4 253 < 0_-fvi_hrnjywg5_-o3r "" 235
+(toMultiplicityPosition 400 20)
+(uid "0_-fvi_hrnjywg5_-o3r")
+(points 320 40 410 40)
+(fromMultiplicityPosition 325 20))
+($6 254 < 0_-fvi_hrnjywg5_-o3q "MatrixFileType" 1
+(name "MatrixFileType"
+)
+(uid "0_-fvi_hrnjywg5_-o3q"))
+($9 255 < 0_-fvi_hrnjywg5_-o3p "#<anon> (MatrixFileType, Word)" 254
+(uid "0_-fvi_hrnjywg5_-o3p"))
+($8 256 < 0_-fvi_hrnjywg5_-o3o "documentation" 254
+(name "documentation"
+)
+(value "File type for NumericMatrix objects "
+)
+(uid "0_-fvi_hrnjywg5_-o3o"))
+($8 257 < 0_-fvi_hrnjywg5_-o3n "isOpen" 254
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-o3n"))
+($8 258 < 0_-fvi_hrnjywg5_-o3m "enumeration" 254
+(name "enumeration"
+)
+(value "('Azara', 'Bruker', 'Felix', 'NMRPipe', 'NMRView', 'UCSF', 'Varian', 'Factorised')"
+)
+(uid "0_-fvi_hrnjywg5_-o3m"))
+($8 259 < 0_-fvi_hrnjywg5_-o3l "guid" 254
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-11-15:00:22_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o3l"))
+($6 260 < 0_-fvi_hrnjywg5_-o3k "Component" 1
+(name "Component"
+)
+(uid "0_-fvi_hrnjywg5_-o3k"))
+($7 261 < 0_-fvi_hrnjywg5_-o3j "serial" 260
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-o3j")
+(multiplicity "1"))
+($8 262 < 0_-fvi_hrnjywg5_-o3i "isAutomatic" 261
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-o3i"))
+($8 263 < 0_-fvi_hrnjywg5_-o3h "guid" 261
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o3h"))
+($7 264 < 0_-fvi_hrnjywg5_-o3g "amplitude" 260
+(initialValue "1.0"
+)
+(name "amplitude"
+)
+(uid "0_-fvi_hrnjywg5_-o3g")
+(multiplicity "1"))
+($8 265 < 0_-fvi_hrnjywg5_-o3f "documentation" 264
+(name "documentation"
+)
+(value "Amplitude of the component. "
+)
+(uid "0_-fvi_hrnjywg5_-o3f"))
+($8 266 < 0_-fvi_hrnjywg5_-o3e "guid" 264
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00002"
+)
+(uid "0_-fvi_hrnjywg5_-o3e"))
+($7 267 < 0_-fvi_hrnjywg5_-o3d "regionId" 260
+(name "regionId"
+)
+(uid "0_-fvi_hrnjywg5_-o3d"))
+($8 268 < 0_-fvi_hrnjywg5_-o3c "documentation" 267
+(name "documentation"
+)
+(value "Region ID for Component. Components that share the same regionId are generally calculated together and refer to teh same region of teh spectrum. They can be summed to give a correct representation of the spectrum for the region in question. "
+)
+(uid "0_-fvi_hrnjywg5_-o3c"))
+($8 269 < 0_-fvi_hrnjywg5_-o3b "guid" 267
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00003"
+)
+(uid "0_-fvi_hrnjywg5_-o3b"))
+($7 270 < 0_-fvi_hrnjywg5_-o3a "status" 260
+(initialValue "raw"
+)
+(name "status"
+)
+(uid "0_-fvi_hrnjywg5_-o3a")
+(multiplicity "1"))
+($8 271 < 0_-fvi_hrnjywg5_-o39 "documentation" 270
+(name "documentation"
+)
+(value "Status of teh component: "
+)
+(uid "0_-fvi_hrnjywg5_-o39"))
+($8 272 < 0_-fvi_hrnjywg5_-o38 "guid" 270
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00004"
+)
+(uid "0_-fvi_hrnjywg5_-o38"))
+($7 273 < 0_-fvi_hrnjywg5_-o37 "annotation" 260
+(name "annotation"
+)
+(uid "0_-fvi_hrnjywg5_-o37"))
+($8 274 < 0_-fvi_hrnjywg5_-o36 "documentation" 273
+(name "documentation"
+)
+(value "Component annotation. Used to further characterise the nature of the component, e.g. to distinguish between backbone NH and side chain NH2 components for NH based protein experiments. "
+)
+(uid "0_-fvi_hrnjywg5_-o36"))
+($8 275 < 0_-fvi_hrnjywg5_-o35 "guid" 273
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:42:00_00005"
+)
+(uid "0_-fvi_hrnjywg5_-o35"))
+($9 276 < 0_-fvi_hrnjywg5_-o34 "#<anon> (Component, DataObject)" 260
+(uid "0_-fvi_hrnjywg5_-o34"))
+($8 277 < 0_-fvi_hrnjywg5_-o33 "documentation" 260
+(name "documentation"
+)
+(value "Component of the decomposition"
+)
+(uid "0_-fvi_hrnjywg5_-o33"))
+($8 278 < 0_-fvi_hrnjywg5_-o32 "keyNames" 260
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-o32"))
+($8 279 < 0_-fvi_hrnjywg5_-o31 "guid" 260
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:41:34_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o31"))
+($6 280 < 0_-fvi_hrnjywg5_-o30 "ComponentStatus" 1
+(name "ComponentStatus"
+)
+(uid "0_-fvi_hrnjywg5_-o30"))
+($9 281 < 0_-fvi_hrnjywg5_-o2z "#<anon> (ComponentStatus, Word)" 280
+(uid "0_-fvi_hrnjywg5_-o2z"))
+($8 282 < 0_-fvi_hrnjywg5_-o2y "documentation" 280
+(name "documentation"
+)
+(value "Analysis status of a ShapeMatrix Component. The following alues are allowed:"
+"    * 'clean' is a component that represents a signal in the spectrum."
+"      All clean components in a ShapeMatrix must be independent (i.e. no duplicates) so that the sum of all clean components represent all known signals in the ShapeMatrix."
+"    * 'noise' is a component that represents noise or artifacts. It serves for reconstructing the full spectrum but does not contain signal information."
+"    * 'border' is a component that contains signal that corresponds to one or more clean components elsewhere. Border components could be shoulders of Components from another region, or duplicates of one or more components present elsewhere."
+"    * 'raw' is a component that has not yet been analyzed and assigned to one of the other categories. A ShapeMatrix containing raw components should be classed as not resolved."
+)
+(uid "0_-fvi_hrnjywg5_-o2y"))
+($8 283 < 0_-fvi_hrnjywg5_-o2x "isOpen" 280
+(name "isOpen"
+)
+(value "False"
+)
+(uid "0_-fvi_hrnjywg5_-o2x"))
+($8 284 < 0_-fvi_hrnjywg5_-o2w "enumeration" 280
+(name "enumeration"
+)
+(value "('clean', 'noise', 'border', 'raw')"
+)
+(uid "0_-fvi_hrnjywg5_-o2w"))
+($8 285 < 0_-fvi_hrnjywg5_-o2v "guid" 280
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2009-06-19-17:41:34_00002"
+)
+(uid "0_-fvi_hrnjywg5_-o2v"))
+($8 286 < 0_-fvi_hrnjywg5_-o2u "shortName" 1
+(name "shortName"
+)
+(value "DLOC"
+)
+(uid "0_-fvi_hrnjywg5_-o2u"))
+($8 287 < 0_-fvi_hrnjywg5_-o2t "documentation" 1
+(name "documentation"
+)
+(value "Package for storing file descriptors, file pointers and similar for external data files, such as iamges, binary data matrices, ..."
+)
+(uid "0_-fvi_hrnjywg5_-o2t"))
+($8 288 < 0_-fvi_hrnjywg5_-o2s "isDraft" 1
+(name "isDraft"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-o2s"))
+($8 289 < 0_-fvi_hrnjywg5_-o2r "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-04-03-19:08:10_00001"
+)
+(uid "0_-fvi_hrnjywg5_-o2r"))
+($14 290)
+($16 293)
+($16 298)
+($16 300)
+($16 301)
+($14 303)
+($14 304)
+($14 305)
+($14 306)
+($14 307)
+($16 308)
+($14 309)
+($14 310)
+($16 316)
+($16 317)
+($16 318)
+($14 319)
+($14 320)
+($14 321)
+($14 322)
+($16 324)
+($14 325)
+($14 326)
+($16 328)
+($14 330)
+($14 331)
+($14 332)
+($14 333)
+($14 334)
+($14 336)
+($14 337)
+($14 338)
+($14 339)
+($14 340)
+($14 341)
+($14 342)
+($14 343)
+($14 344)
+($14 345)
+($14 346)
+($14 347)
+($14 348)
+($14 349)
+($14 350)
+($14 351)
+($14 352)
+($14 353)
+($14 354)
+($14 355)
+($14 356)
+($14 357)
+($14 358)
+($14 359)
+($6 291 @ 0_-fvi_hrnjywg5_-dbb 4 "Logical" $1 "memops" $1 "Implementation" $1 "TopObject" $6)
+($6 292 @ 0_-fvi_hrnjywg5_-dkx 4 "Logical" $1 "memops" $1 "Implementation" $1 "Line" $6)
+($6 294 @ 0_-fvi_hrnjywg5_-d9g 4 "Logical" $1 "memops" $1 "Implementation" $1 "DataObject" $6)
+($6 295 @ 0_-fvi_hrnjywg5_-dl3 4 "Logical" $1 "memops" $1 "Implementation" $1 "Int" $6)
+($6 296 @ 0_-fvi_hrnjywg5_-de8 4 "Logical" $1 "memops" $1 "Implementation" $1 "Url" $6)
+($6 297 @ 0_-fvi_hrnjywg5_-dcf 4 "Logical" $1 "memops" $1 "Implementation" $1 "PathString" $6)
+($6 299 @ 0_-fvi_hrnjywg5_-dkg 4 "Logical" $1 "memops" $1 "Implementation" $1 "Text" $6)
+($6 302 @ 0_-fvi_hrnjywg5_-okb 5 "Logical" $1 "ccp" $1 "general" $1 "Annotation" $1 "Annotation" $6)
+($17 311 @ -yk94ms_-e3s_e41656c6_-fw7 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "DataType" $17)
+($6 312 @ 0_-fvi_hrnjywg5_-dd0 4 "Logical" $1 "memops" $1 "Implementation" $1 "Token" $6)
+($6 313 @ 0_-fvi_hrnjywg5_-dlv 4 "Logical" $1 "memops" $1 "Implementation" $1 "Boolean" $6)
+($6 314 @ 0_-fvi_hrnjywg5_-dkb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Word" $6)
+($6 315 @ 0_-fvi_hrnjywg5_-dc3 4 "Logical" $1 "memops" $1 "Implementation" $1 "PositiveFloat" $6)
+($6 323 @ 0_-fvi_hrnjywg5_-dbr 4 "Logical" $1 "memops" $1 "Implementation" $1 "NonNegativeInt" $6)
+($6 327 @ 0_-fvi_hrnjywg5_-dcl 4 "Logical" $1 "memops" $1 "Implementation" $1 "PositiveInt" $6)
+($6 329 @ 0_-fvi_hrnjywg5_-dbx 4 "Logical" $1 "memops" $1 "Implementation" $1 "NonNegativeFloat" $6)
+($18 335 @ -yk94ms_-e3s_e41656c6_-fvv 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Annotation" $18)
+(typeAssn 34 28)
+(assocEndAssn 28 34)
+(typeAssn 39 28)
+(assocEndAssn 28 39)
+(subtypeAssn 32 28)
+(supertypeAssn 32 291)
+(generalizationAssn 28 32)
+(typeRefAssn 29 292)
+(typeExpression 29 293)
+(assocEndAssn 47 36)
+(typeAssn 59 47)
+(assocEndAssn 47 59)
+(typeAssn 67 47)
+(assocEndAssn 47 67)
+(subtypeAssn 57 47)
+(supertypeAssn 57 294)
+(generalizationAssn 47 57)
+(typeRefAssn 48 295)
+(typeExpression 48 293)
+(typeRefAssn 51 292)
+(typeExpression 51 293)
+(typeRefAssn 54 296)
+(typeExpression 54 293)
+(typeAssn 41 76)
+(assocEndAssn 76 41)
+(assocEndAssn 76 62)
+(subtypeAssn 95 76)
+(supertypeAssn 95 294)
+(generalizationAssn 76 95)
+(typeRefAssn 77 295)
+(typeExpression 77 293)
+(typeRefAssn 80 297)
+(typeExpression 80 298)
+(typeRefAssn 83 299)
+(typeExpression 83 300)
+(typeRefAssn 85 297)
+(typeExpression 85 301)
+(typeAssn 62 76)
+(typeAssn 70 302)
+(typeAssn 36 47)
+(projectionAssn 3 28 290)
+(projectionAssn 4 47 303)
+(to 5 4)
+(from 5 3)
+(projectionAssn 5 33 304)
+(projectionAssn 6 76 305)
+(to 7 6)
+(from 7 3)
+(projectionAssn 7 38 306)
+(subtypeAssn 103 99)
+(supertypeAssn 103 76)
+(generalizationAssn 99 103)
+(typeRefAssn 100 292)
+(typeExpression 100 308)
+(projectionAssn 8 99 307)
+(to 9 6)
+(from 9 8)
+(projectionAssn 9 103 309)
+(subtypeAssn 147 106)
+(supertypeAssn 147 76)
+(generalizationAssn 106 147)
+(typeRefAssn 107 295)
+(typeExpression 107 308)
+(typeRefAssn 111 295)
+(typeExpression 111 308)
+(typeRefAssn 121 295)
+(typeExpression 121 308)
+(stereotypeAssn 158 311)
+(subtypeAssn 159 158)
+(supertypeAssn 159 312)
+(generalizationAssn 158 159)
+(typeRefAssn 124 158)
+(typeExpression 124 308)
+(typeRefAssn 127 313)
+(typeExpression 127 308)
+(stereotypeAssn 152 311)
+(subtypeAssn 153 152)
+(supertypeAssn 153 314)
+(generalizationAssn 152 153)
+(typeRefAssn 131 152)
+(typeExpression 131 308)
+(typeRefAssn 134 295)
+(typeExpression 134 308)
+(typeRefAssn 138 315)
+(typeExpression 138 316)
+(typeRefAssn 141 313)
+(typeExpression 141 317)
+(stereotypeAssn 254 311)
+(subtypeAssn 255 254)
+(supertypeAssn 255 314)
+(generalizationAssn 254 255)
+(typeRefAssn 144 254)
+(typeExpression 144 318)
+(projectionAssn 10 106 310)
+(to 11 6)
+(from 11 10)
+(projectionAssn 11 147 319)
+(projectionAssn 12 152 320)
+(projectionAssn 13 158 321)
+(subtypeAssn 181 164)
+(supertypeAssn 181 106)
+(generalizationAssn 164 181)
+(typeRefAssn 165 295)
+(typeExpression 165 308)
+(typeRefAssn 168 295)
+(typeExpression 168 308)
+(typeRefAssn 172 313)
+(typeExpression 172 308)
+(typeRefAssn 175 295)
+(typeExpression 175 308)
+(typeRefAssn 178 323)
+(typeExpression 178 324)
+(projectionAssn 14 164 322)
+(to 15 10)
+(from 15 14)
+(projectionAssn 15 181 325)
+(typeAssn 204 186)
+(assocEndAssn 186 204)
+(typeAssn 209 186)
+(assocEndAssn 186 209)
+(subtypeAssn 202 186)
+(supertypeAssn 202 106)
+(generalizationAssn 186 202)
+(typeRefAssn 187 327)
+(typeExpression 187 328)
+(stereotypeAssn 215 311)
+(subtypeAssn 216 215)
+(supertypeAssn 216 314)
+(generalizationAssn 215 216)
+(typeRefAssn 190 215)
+(typeExpression 190 308)
+(typeRefAssn 193 295)
+(typeExpression 193 308)
+(typeRefAssn 196 313)
+(typeExpression 196 328)
+(typeRefAssn 199 313)
+(typeExpression 199 328)
+(assocEndAssn 221 206)
+(subtypeAssn 229 221)
+(supertypeAssn 229 294)
+(generalizationAssn 221 229)
+(typeRefAssn 222 295)
+(typeExpression 222 308)
+(typeRefAssn 225 295)
+(typeExpression 225 308)
+(typeAssn 206 221)
+(assocEndAssn 260 211)
+(subtypeAssn 276 260)
+(supertypeAssn 276 294)
+(generalizationAssn 260 276)
+(typeRefAssn 261 295)
+(typeExpression 261 328)
+(typeRefAssn 264 329)
+(typeExpression 264 328)
+(typeRefAssn 267 323)
+(typeExpression 267 328)
+(stereotypeAssn 280 311)
+(subtypeAssn 281 280)
+(supertypeAssn 281 314)
+(generalizationAssn 280 281)
+(typeRefAssn 270 280)
+(typeExpression 270 328)
+(typeRefAssn 273 292)
+(typeExpression 273 328)
+(typeAssn 211 260)
+(projectionAssn 16 186 326)
+(to 17 10)
+(from 17 16)
+(projectionAssn 17 202 330)
+(projectionAssn 18 215 331)
+(projectionAssn 19 221 332)
+(to 20 19)
+(from 20 16)
+(projectionAssn 20 203 333)
+(to 21 6)
+(from 21 4)
+(projectionAssn 21 58 334)
+(styleAssn 22 335)
+(projectionAssn 22 302 336)
+(to 23 22)
+(from 23 4)
+(projectionAssn 23 66 337)
+(projectionAssn 24 254 338)
+(projectionAssn 25 260 339)
+(to 26 25)
+(from 26 16)
+(projectionAssn 26 208 340)
+(projectionAssn 27 280 341)
+(projectionAssn 236 76 342)
+(projectionAssn 237 164 343)
+(projectionAssn 238 221 344)
+(projectionAssn 239 28 345)
+(to 240 236)
+(from 240 239)
+(projectionAssn 240 38 346)
+(projectionAssn 241 47 347)
+(to 242 241)
+(from 242 239)
+(projectionAssn 242 33 348)
+(projectionAssn 243 99 349)
+(to 244 236)
+(from 244 243)
+(projectionAssn 244 103 350)
+(projectionAssn 245 106 351)
+(to 246 236)
+(from 246 245)
+(projectionAssn 246 147 352)
+(to 247 245)
+(from 247 237)
+(projectionAssn 247 181 353)
+(projectionAssn 248 186 354)
+(to 249 238)
+(from 249 248)
+(projectionAssn 249 203 355)
+(to 250 245)
+(from 250 248)
+(projectionAssn 250 202 356)
+(to 251 236)
+(from 251 241)
+(projectionAssn 251 58 357)
+(styleAssn 252 335)
+(projectionAssn 252 302 358)
+(to 253 252)
+(from 253 241)
+(projectionAssn 253 66 359)

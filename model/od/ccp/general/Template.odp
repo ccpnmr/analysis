@@ -1,0 +1,1224 @@
+ObjectDomain_Shared_Package 15
+{-yk94ms_-e3s_e41656c6_-jt9 4 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "ccp" objectdomain.uml.mechanisms.UmlPackage-owns "general" objectdomain.uml.mechanisms.UmlPackage-owns "Template" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.core.TypeExpression $13
+objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Generalization-owns $8
+objectdomain.uml.core.Projection $12
+objectdomain.uml.core.UmlAttribute-features $6
+objectdomain.uml.view.style.BaseViewElementStyle-owns $15
+objectdomain.uml.view.ClassView-owns $3
+objectdomain.uml.core.UmlTaggedValue-taggedValues $7
+objectdomain.uml.core.UmlConstraint-constraints $9
+objectdomain.uml.core.UmlParameter-parameters $11
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.core.UmlOperation-features $10
+objectdomain.uml.view.GeneralizationView-owns $4
+objectdomain.uml.core.UmlMultiplicity $14
+objectdomain.uml.core.UmlClass-owns $5
+]
+($1 1 > -yk94ms_-e3s_e41656c6_-jt9 4 "Logical" $1 "ccp" $1 "general" $1 "Template" $1
+(name "Template"
+)
+(uid "-yk94ms_-e3s_e41656c6_-jt9"))
+($2 2 < 0_-fvi_hrnjywg5_-ni6 "_Template" 1
+(name "_Template"
+)
+(uid "0_-fvi_hrnjywg5_-ni6")
+(diagramType "class"))
+($3 3 < 0_-fvi_hrnjywg5_-ni5 "AbstractProbability" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-ni5")
+(bbx 20 30 130 70))
+($3 4 < 0_-fvi_hrnjywg5_-ni4 "DataObject" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-ni4")
+(bbx 240 30 240 90))
+($4 5 < 0_-fvi_hrnjywg5_-ni3 "" 2
+(uid "0_-fvi_hrnjywg5_-ni3")
+(points 150 60 240 60))
+($3 6 < 0_-fvi_hrnjywg5_-ni2 "MultiTypeValue" 2
+(uid "0_-fvi_hrnjywg5_-ni2")
+(bbx 190 150 150 130))
+($4 7 < 0_-fvi_hrnjywg5_-ni1 "" 2
+(uid "0_-fvi_hrnjywg5_-ni1")
+(points 260 150 260 120))
+($3 8 < 0_-fvi_hrnjywg5_-ni0 "FloatMatrixObject" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-ni0")
+(bbx 570 30 210 370))
+($5 9 < 0_-fvi_hrnjywg5_-nhz "AbstractProbability" 1
+(name "AbstractProbability"
+)
+(uid "0_-fvi_hrnjywg5_-nhz")
+(isAbstract true))
+($6 10 < 0_-fvi_hrnjywg5_-nhy "weight" 9
+(initialValue "1.0"
+)
+(name "weight"
+)
+(uid "0_-fvi_hrnjywg5_-nhy")
+(multiplicity "1"))
+($7 11 < 0_-fvi_hrnjywg5_-nhx "documentation" 10
+(name "documentation"
+)
+(value "weight (= non-normalised probability) that the parent is associated with this particular possibility. "
+)
+(uid "0_-fvi_hrnjywg5_-nhx"))
+($7 12 < 0_-fvi_hrnjywg5_-nhw "guid" 10
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:38_00025"
+)
+(uid "0_-fvi_hrnjywg5_-nhw"))
+($8 13 < 0_-fvi_hrnjywg5_-nhv "#<anon> (AbstractProbability, DataObject)" 9
+(uid "0_-fvi_hrnjywg5_-nhv"))
+($7 14 < 0_-fvi_hrnjywg5_-nhu "documentation" 9
+(name "documentation"
+)
+(value "Abstract class defining classes used for probability lists. AbstractProbability objects have a parent that is the object that has the probability (e.g. a ResonanceGroup), a link 'possibility' to various possibilities (e.g. a ChemComp), and a weight to determine their relative probability. Probabilities are calculated by taking the weight of each AbstractProbability object and dividing by the sum of the weights in the (appropriate subset of) AbstractProbability objects linked to a given parent. "
+""
+"Implementation note: The presence of the 'possibility' link must be enforced by the data modeller, as it is not checked by the software. "
+)
+(uid "0_-fvi_hrnjywg5_-nhu"))
+($7 15 < 0_-fvi_hrnjywg5_-nht "guid" 9
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:19:50_00005"
+)
+(uid "0_-fvi_hrnjywg5_-nht"))
+($5 16 < 0_-fvi_hrnjywg5_-nhs "MultiTypeValue" 1
+(name "MultiTypeValue"
+)
+(uid "0_-fvi_hrnjywg5_-nhs")
+(isAbstract true))
+($6 17 < 0_-fvi_hrnjywg5_-nhr "textValue" 16
+(name "textValue"
+)
+(uid "0_-fvi_hrnjywg5_-nhr"))
+($7 18 < 0_-fvi_hrnjywg5_-nhq "documentation" 17
+(name "documentation"
+)
+(value "Text type value"
+)
+(uid "0_-fvi_hrnjywg5_-nhq"))
+($7 19 < 0_-fvi_hrnjywg5_-nhp "guid" 17
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-13-15:55:55_00005"
+)
+(uid "0_-fvi_hrnjywg5_-nhp"))
+($6 20 < 0_-fvi_hrnjywg5_-nho "intValue" 16
+(name "intValue"
+)
+(uid "0_-fvi_hrnjywg5_-nho"))
+($7 21 < 0_-fvi_hrnjywg5_-nhn "documentation" 20
+(name "documentation"
+)
+(value "Integer type value"
+)
+(uid "0_-fvi_hrnjywg5_-nhn"))
+($7 22 < 0_-fvi_hrnjywg5_-nhm "guid" 20
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-13-15:55:55_00006"
+)
+(uid "0_-fvi_hrnjywg5_-nhm"))
+($6 23 < 0_-fvi_hrnjywg5_-nhl "floatValue" 16
+(name "floatValue"
+)
+(uid "0_-fvi_hrnjywg5_-nhl"))
+($7 24 < 0_-fvi_hrnjywg5_-nhk "documentation" 23
+(name "documentation"
+)
+(value "Float type value"
+)
+(uid "0_-fvi_hrnjywg5_-nhk"))
+($7 25 < 0_-fvi_hrnjywg5_-nhj "guid" 23
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-13-15:55:55_00007"
+)
+(uid "0_-fvi_hrnjywg5_-nhj"))
+($6 26 < 0_-fvi_hrnjywg5_-nhi "booleanValue" 16
+(name "booleanValue"
+)
+(uid "0_-fvi_hrnjywg5_-nhi"))
+($7 27 < 0_-fvi_hrnjywg5_-nhh "documentation" 26
+(name "documentation"
+)
+(value "Boolean type value"
+)
+(uid "0_-fvi_hrnjywg5_-nhh"))
+($7 28 < 0_-fvi_hrnjywg5_-nhg "guid" 26
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-13-15:55:55_00008"
+)
+(uid "0_-fvi_hrnjywg5_-nhg"))
+($8 29 < 0_-fvi_hrnjywg5_-nhf "#<anon> (MultiTypeValue, DataObject)" 16
+(uid "0_-fvi_hrnjywg5_-nhf"))
+($7 30 < 0_-fvi_hrnjywg5_-nhe "documentation" 16
+(name "documentation"
+)
+(value "Typed value data"
+)
+(uid "0_-fvi_hrnjywg5_-nhe"))
+($7 31 < 0_-fvi_hrnjywg5_-nhd "guid" 16
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2007-11-13-15:55:49_00003"
+)
+(uid "0_-fvi_hrnjywg5_-nhd"))
+($5 32 < 0_-fvi_hrnjywg5_-nhc "FloatMatrixObject" 1
+(name "FloatMatrixObject"
+)
+(uid "0_-fvi_hrnjywg5_-nhc")
+(isAbstract true))
+($6 33 < 0_-fvi_hrnjywg5_-nhb "shape" 32
+(changeability "frozen")
+(name "shape"
+)
+(uid "0_-fvi_hrnjywg5_-nhb")
+(multiplicity "1..*"))
+($7 34 < 0_-fvi_hrnjywg5_-nha "documentation" 33
+(name "documentation"
+)
+(value "Matrix shape, slowest moving index first. SIze in first dimension (only) may be zero."
+)
+(uid "0_-fvi_hrnjywg5_-nha"))
+($7 35 < 0_-fvi_hrnjywg5_-nh9 "guid" 33
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:02:26_00016"
+)
+(uid "0_-fvi_hrnjywg5_-nh9"))
+($7 36 < 0_-fvi_hrnjywg5_-nh8 "baseName" 33
+(name "baseName"
+)
+(value "dimension"
+)
+(uid "0_-fvi_hrnjywg5_-nh8"))
+($6 37 < 0_-fvi_hrnjywg5_-nh7 "data" 32
+(changeability "frozen")
+(name "data"
+)
+(uid "0_-fvi_hrnjywg5_-nh7")
+(multiplicity "*"))
+($7 38 < 0_-fvi_hrnjywg5_-nh6 "documentation" 37
+(name "documentation"
+)
+(value "Matrix data as packed list."
+)
+(uid "0_-fvi_hrnjywg5_-nh6"))
+($7 39 < 0_-fvi_hrnjywg5_-nh5 "baseName" 37
+(name "baseName"
+)
+(value "data"
+)
+(uid "0_-fvi_hrnjywg5_-nh5"))
+($7 40 < 0_-fvi_hrnjywg5_-nh4 "guid" 37
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:03:29_00002"
+)
+(uid "0_-fvi_hrnjywg5_-nh4"))
+($9 41 < 0_-fvi_hrnjywg5_-nh3 "data_empty_or_equal_to_size" 37
+(name "data_empty_or_equal_to_size"
+)
+(uid "0_-fvi_hrnjywg5_-nh3")
+(body "code:python"
+"_"
+"len(values) in (0,self.size)"
+"_"
+"code:java"
+"_"
+"true /* NBNB TBD */"
+))
+($7 42 < 0_-fvi_hrnjywg5_-nh2 "guid" 41
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nh2"))
+($6 43 < 0_-fvi_hrnjywg5_-nh1 "defaultValue" 32
+(initialValue "0.0"
+)
+(changeability "frozen")
+(name "defaultValue"
+)
+(uid "0_-fvi_hrnjywg5_-nh1")
+(multiplicity "1"))
+($7 44 < 0_-fvi_hrnjywg5_-nh0 "documentation" 43
+(name "documentation"
+)
+(value "default value of data in matrix. Used instead of values that are not explicitly set."
+)
+(uid "0_-fvi_hrnjywg5_-nh0"))
+($7 45 < 0_-fvi_hrnjywg5_-ngz "guid" 43
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:03:29_00001"
+)
+(uid "0_-fvi_hrnjywg5_-ngz"))
+($6 46 < 0_-fvi_hrnjywg5_-ngy "size" 32
+(changeability "frozen")
+(name "size"
+)
+(uid "0_-fvi_hrnjywg5_-ngy")
+(multiplicity "1"))
+($7 47 < 0_-fvi_hrnjywg5_-ngx "documentation" 46
+(name "documentation"
+)
+(value "Matrix size - product of dimensions sizes"
+)
+(uid "0_-fvi_hrnjywg5_-ngx"))
+($7 48 < 0_-fvi_hrnjywg5_-ngw "isDerived" 46
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-ngw"))
+($7 49 < 0_-fvi_hrnjywg5_-ngv "guid" 46
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00002"
+)
+(uid "0_-fvi_hrnjywg5_-ngv"))
+($6 50 < 0_-fvi_hrnjywg5_-ngu "ndim" 32
+(changeability "frozen")
+(name "ndim"
+)
+(uid "0_-fvi_hrnjywg5_-ngu")
+(multiplicity "1"))
+($7 51 < 0_-fvi_hrnjywg5_-ngt "documentation" 50
+(name "documentation"
+)
+(value "Number of matrix dimensions"
+)
+(uid "0_-fvi_hrnjywg5_-ngt"))
+($7 52 < 0_-fvi_hrnjywg5_-ngs "isDerived" 50
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-ngs"))
+($7 53 < 0_-fvi_hrnjywg5_-ngr "guid" 50
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00003"
+)
+(uid "0_-fvi_hrnjywg5_-ngr"))
+($10 54 < 0_-fvi_hrnjywg5_-ngq "getSize" 32
+(name "getSize"
+)
+(uid "0_-fvi_hrnjywg5_-ngq")
+(isQuery true))
+($7 55 < 0_-fvi_hrnjywg5_-ngp "opType" 54
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-ngp"))
+($7 56 < 0_-fvi_hrnjywg5_-ngo "documentation" 54
+(name "documentation"
+)
+(value "getter for derived attribute size"
+)
+(uid "0_-fvi_hrnjywg5_-ngo"))
+($7 57 < 0_-fvi_hrnjywg5_-ngn "code:python" 54
+(name "code:python"
+)
+(value "import operator, functools"
+"result = functools.reduce(operator.mul, self.shape)"
+)
+(uid "0_-fvi_hrnjywg5_-ngn"))
+($7 58 < 0_-fvi_hrnjywg5_-ngm "code:java" 54
+(name "code:java"
+)
+(value "result = null; /* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-ngm"))
+($7 59 < 0_-fvi_hrnjywg5_-ngl "guid" 54
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00004"
+)
+(uid "0_-fvi_hrnjywg5_-ngl"))
+($10 60 < 0_-fvi_hrnjywg5_-ngk "getNdim" 32
+(name "getNdim"
+)
+(uid "0_-fvi_hrnjywg5_-ngk")
+(isQuery true))
+($7 61 < 0_-fvi_hrnjywg5_-ngj "documentation" 60
+(name "documentation"
+)
+(value "getter for derived attribute ndim"
+)
+(uid "0_-fvi_hrnjywg5_-ngj"))
+($7 62 < 0_-fvi_hrnjywg5_-ngi "opType" 60
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-ngi"))
+($7 63 < 0_-fvi_hrnjywg5_-ngh "code:java" 60
+(name "code:java"
+)
+(value "result = null; /* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-ngh"))
+($7 64 < 0_-fvi_hrnjywg5_-ngg "code:python" 60
+(name "code:python"
+)
+(value "result = len(self.shape)"
+)
+(uid "0_-fvi_hrnjywg5_-ngg"))
+($7 65 < 0_-fvi_hrnjywg5_-ngf "guid" 60
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00005"
+)
+(uid "0_-fvi_hrnjywg5_-ngf"))
+($10 66 < 0_-fvi_hrnjywg5_-nge "pointToIndex#Int*##Int" 32
+(name "pointToIndex"
+)
+(uid "0_-fvi_hrnjywg5_-nge")
+(isQuery true))
+($11 67 < 0_-fvi_hrnjywg5_-ngd "point" 66
+(name "point"
+)
+(uid "0_-fvi_hrnjywg5_-ngd"))
+($7 68 < 0_-fvi_hrnjywg5_-ngc "guid" 67
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00007"
+)
+(uid "0_-fvi_hrnjywg5_-ngc"))
+($11 69 < 0_-fvi_hrnjywg5_-ngb "result" 66
+(name "result"
+)
+(kind "return")
+(uid "0_-fvi_hrnjywg5_-ngb"))
+($7 70 < 0_-fvi_hrnjywg5_-nga "guid" 69
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00008"
+)
+(uid "0_-fvi_hrnjywg5_-nga"))
+($7 71 < 0_-fvi_hrnjywg5_-ng9 "documentation" 66
+(name "documentation"
+)
+(value "converts point to equivalent array index. Point is padded to matrix dimension with zeros. negative index values -i in point are treated as eqal to (size-i)."
+)
+(uid "0_-fvi_hrnjywg5_-ng9"))
+($7 72 < 0_-fvi_hrnjywg5_-ng8 "code:python" 66
+(name "code:python"
+)
+(value "shape = self.shape"
+"lendiff = len(shape) -  len(point)"
+"if lendiff < 0:"
+"  raise ApiError(\"Point %s incompatible with %s-dimensional matrix\" "
+"                 % (point,len(shape)))"
+"elif lendiff:"
+"  point = list(point) + lendiff*[0]"
+""
+"result = 0"
+"factor = 1"
+"for ii in range(len(shape)-1,0,-1):   # loop over dimensions in reverse order"
+"  # skipping the first one"
+"  size = shape[ii]"
+"  num,indx = divmod(point[ii],size) # convert -n to width-n"
+"  if num not in (0,-1):"
+"    raise ApiError(\"Point %s out of range for dimension %s\" % (point,ii))"
+"  result += factor * indx"
+"  factor *= size"
+"    "
+"# treat first dimension differently, because locations beyond the end of"
+"# the data may be relevant and are certainly defined"
+"indx = point[0]"
+"if indx < 0:"
+"  indx += shape[0]"
+"if indx < 0:"
+"  raise ApiError(\"Point %s out of range for dimension %s\" % (point,0))"
+"result += factor * indx"
+)
+(uid "0_-fvi_hrnjywg5_-ng8"))
+($7 73 < 0_-fvi_hrnjywg5_-ng7 "code:java" 66
+(name "code:java"
+)
+(value "result = null; /* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-ng7"))
+($7 74 < 0_-fvi_hrnjywg5_-ng6 "opType" 66
+(name "opType"
+)
+(value "otherQuery"
+)
+(uid "0_-fvi_hrnjywg5_-ng6"))
+($7 75 < 0_-fvi_hrnjywg5_-ng5 "guid" 66
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00006"
+)
+(uid "0_-fvi_hrnjywg5_-ng5"))
+($10 76 < 0_-fvi_hrnjywg5_-ng4 "indexToPoint#Int##Int*" 32
+(name "indexToPoint"
+)
+(uid "0_-fvi_hrnjywg5_-ng4")
+(isQuery true))
+($11 77 < 0_-fvi_hrnjywg5_-ng3 "index" 76
+(name "index"
+)
+(uid "0_-fvi_hrnjywg5_-ng3"))
+($7 78 < 0_-fvi_hrnjywg5_-ng2 "guid" 77
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00010"
+)
+(uid "0_-fvi_hrnjywg5_-ng2"))
+($11 79 < 0_-fvi_hrnjywg5_-ng1 "result" 76
+(name "result"
+)
+(kind "return")
+(uid "0_-fvi_hrnjywg5_-ng1"))
+($7 80 < 0_-fvi_hrnjywg5_-ng0 "guid" 79
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00011"
+)
+(uid "0_-fvi_hrnjywg5_-ng0"))
+($7 81 < 0_-fvi_hrnjywg5_-nfz "documentation" 76
+(name "documentation"
+)
+(value "Converts array index to equivalent point"
+)
+(uid "0_-fvi_hrnjywg5_-nfz"))
+($7 82 < 0_-fvi_hrnjywg5_-nfy "opType" 76
+(name "opType"
+)
+(value "otherQuery"
+)
+(uid "0_-fvi_hrnjywg5_-nfy"))
+($7 83 < 0_-fvi_hrnjywg5_-nfx "code:java" 76
+(name "code:java"
+)
+(value "result = null; /* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-nfx"))
+($7 84 < 0_-fvi_hrnjywg5_-nfw "code:python" 76
+(name "code:python"
+)
+(value "import operator, functools"
+"shape = self.shape"
+"if index >= functools.reduce(operator.mul, shape):"
+"  raise ApiError(\"value %s of index to large for matrix of size %s\" % (index, shape))"
+"if index < 0:"
+"  raise ApiError(\"Negative value %s of index not allowed\" % index)"
+"result = len(shape) * [None]"
+"for ii in range(len(shape)-1,-1,-1):"
+"  index,result[ii] = divmod(index,shape[ii])"
+"result = tuple(result)"
+)
+(uid "0_-fvi_hrnjywg5_-nfw"))
+($7 85 < 0_-fvi_hrnjywg5_-nfv "guid" 76
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00009"
+)
+(uid "0_-fvi_hrnjywg5_-nfv"))
+($10 86 < 0_-fvi_hrnjywg5_-nfu "sizeFirstDim#Int" 32
+(name "sizeFirstDim"
+)
+(uid "0_-fvi_hrnjywg5_-nfu"))
+($11 87 < 0_-fvi_hrnjywg5_-nft "value" 86
+(name "value"
+)
+(uid "0_-fvi_hrnjywg5_-nft"))
+($7 88 < 0_-fvi_hrnjywg5_-nfs "guid" 87
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-06-27-14:29:37_00001"
+)
+(uid "0_-fvi_hrnjywg5_-nfs"))
+($7 89 < 0_-fvi_hrnjywg5_-nfr "documentation" 86
+(name "documentation"
+)
+(value "Change size in first (slowest) dimension, truncating or padding with self.defaultValue as necessary."
+)
+(uid "0_-fvi_hrnjywg5_-nfr"))
+($7 90 < 0_-fvi_hrnjywg5_-nfq "opType" 86
+(name "opType"
+)
+(value "otherModify"
+)
+(uid "0_-fvi_hrnjywg5_-nfq"))
+($7 91 < 0_-fvi_hrnjywg5_-nfp "code:java" 86
+(name "code:java"
+)
+(value "/* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-nfp"))
+($7 92 < 0_-fvi_hrnjywg5_-nfo "code:python" 86
+(name "code:python"
+)
+(value "if value < 0:"
+"  raise ApiError(\"Dimension size must be non-negative: %s\" % value)"
+""
+"shapeList = self.__dict__['shape'] # must bypass API"
+"lendiff = value - shapeList[0]"
+"if lendiff:"
+"  data = self.__dict__['data'] # must bypass API"
+"  if data:"
+"    # if data array is empty we have an all-default matrix"
+"    if lendiff > 0:"
+"      data.extend([self.defaultValue]*self.pointToIndex((lendiff,)))"
+"    else:"
+"      # lendiff < 0"
+"      del data[self.pointToIndex((lendiff,)):]"
+"  shapeList[0] = value"
+)
+(uid "0_-fvi_hrnjywg5_-nfo"))
+($7 93 < 0_-fvi_hrnjywg5_-nfn "guid" 86
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00012"
+)
+(uid "0_-fvi_hrnjywg5_-nfn"))
+($10 94 < 0_-fvi_hrnjywg5_-nfm "getPointValue#Int*##Float" 32
+(name "getPointValue"
+)
+(uid "0_-fvi_hrnjywg5_-nfm")
+(isQuery true))
+($11 95 < 0_-fvi_hrnjywg5_-nfl "point" 94
+(name "point"
+)
+(uid "0_-fvi_hrnjywg5_-nfl"))
+($7 96 < 0_-fvi_hrnjywg5_-nfk "guid" 95
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00014"
+)
+(uid "0_-fvi_hrnjywg5_-nfk"))
+($11 97 < 0_-fvi_hrnjywg5_-nfj "result" 94
+(name "result"
+)
+(kind "return")
+(uid "0_-fvi_hrnjywg5_-nfj"))
+($7 98 < 0_-fvi_hrnjywg5_-nfi "guid" 97
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00015"
+)
+(uid "0_-fvi_hrnjywg5_-nfi"))
+($7 99 < 0_-fvi_hrnjywg5_-nfh "opType" 94
+(name "opType"
+)
+(value "otherQuery"
+)
+(uid "0_-fvi_hrnjywg5_-nfh"))
+($7 100 < 0_-fvi_hrnjywg5_-nfg "documentation" 94
+(name "documentation"
+)
+(value "get value of matrix at position 'point'. Point is converted as for self.pointToIndex."
+)
+(uid "0_-fvi_hrnjywg5_-nfg"))
+($7 101 < 0_-fvi_hrnjywg5_-nff "code:python" 94
+(name "code:python"
+)
+(value "data = self.__dict__['data']"
+"if data:"
+"  result = data[self.pointToIndex(point)]"
+"else:"
+"  result = self.defaultValue"
+)
+(uid "0_-fvi_hrnjywg5_-nff"))
+($7 102 < 0_-fvi_hrnjywg5_-nfe "guid" 94
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00013"
+)
+(uid "0_-fvi_hrnjywg5_-nfe"))
+($7 103 < 0_-fvi_hrnjywg5_-nfd "code:java" 94
+(name "code:java"
+)
+(value "/* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-nfd"))
+($10 104 < 0_-fvi_hrnjywg5_-nfc "setPointValue#Int*#Float" 32
+(name "setPointValue"
+)
+(uid "0_-fvi_hrnjywg5_-nfc"))
+($11 105 < 0_-fvi_hrnjywg5_-nfb "point" 104
+(name "point"
+)
+(uid "0_-fvi_hrnjywg5_-nfb"))
+($7 106 < 0_-fvi_hrnjywg5_-nfa "guid" 105
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00017"
+)
+(uid "0_-fvi_hrnjywg5_-nfa"))
+($11 107 < 0_-fvi_hrnjywg5_-nf9 "value" 104
+(name "value"
+)
+(uid "0_-fvi_hrnjywg5_-nf9"))
+($7 108 < 0_-fvi_hrnjywg5_-nf8 "guid" 107
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00018"
+)
+(uid "0_-fvi_hrnjywg5_-nf8"))
+($7 109 < 0_-fvi_hrnjywg5_-nf7 "opType" 104
+(name "opType"
+)
+(value "otherModify"
+)
+(uid "0_-fvi_hrnjywg5_-nf7"))
+($7 110 < 0_-fvi_hrnjywg5_-nf6 "code:python" 104
+(name "code:python"
+)
+(value "if not isinstance(value, (float, int)):"
+"  raise ApiError(\"parameter value %s is not a float\" % value)"
+"data = self.__dict__['data']"
+"if data:"
+"  data[self.pointToIndex(point)] = value"
+"elif value != self.defaultValue:"
+"    data.extend(self.size*[self.defaultValue])"
+"    data[self.pointToIndex(point)] = value"
+)
+(uid "0_-fvi_hrnjywg5_-nf6"))
+($7 111 < 0_-fvi_hrnjywg5_-nf5 "documentation" 104
+(name "documentation"
+)
+(value "set value of matrix at position 'point'. Point is converted as for self.pointToIndex."
+)
+(uid "0_-fvi_hrnjywg5_-nf5"))
+($7 112 < 0_-fvi_hrnjywg5_-nf4 "guid" 104
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00016"
+)
+(uid "0_-fvi_hrnjywg5_-nf4"))
+($7 113 < 0_-fvi_hrnjywg5_-nf3 "code:java" 104
+(name "code:java"
+)
+(value "/* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-nf3"))
+($10 114 < 0_-fvi_hrnjywg5_-nf2 "getSubmatrixData#Int*#Int*##Float*" 32
+(name "getSubmatrixData"
+)
+(uid "0_-fvi_hrnjywg5_-nf2")
+(isQuery true))
+($11 115 < 0_-fvi_hrnjywg5_-nf1 "point" 114
+(name "point"
+)
+(uid "0_-fvi_hrnjywg5_-nf1"))
+($7 116 < 0_-fvi_hrnjywg5_-nf0 "guid" 115
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00020"
+)
+(uid "0_-fvi_hrnjywg5_-nf0"))
+($11 117 < 0_-fvi_hrnjywg5_-nez "shape" 114
+(name "shape"
+)
+(uid "0_-fvi_hrnjywg5_-nez"))
+($7 118 < 0_-fvi_hrnjywg5_-ney "guid" 117
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00021"
+)
+(uid "0_-fvi_hrnjywg5_-ney"))
+($11 119 < 0_-fvi_hrnjywg5_-nex "result" 114
+(name "result"
+)
+(kind "return")
+(uid "0_-fvi_hrnjywg5_-nex"))
+($7 120 < 0_-fvi_hrnjywg5_-new "guid" 119
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00022"
+)
+(uid "0_-fvi_hrnjywg5_-new"))
+($7 121 < 0_-fvi_hrnjywg5_-nev "documentation" 114
+(name "documentation"
+)
+(value "get data (packed linear array)  for submatrix of shape 'shape' with 'point' as the corner with the smallest index values. point is convered as for self.pointToIndex. 'shape values that are omitted or set to zero are reset to the (rest of the) dimension size."
+)
+(uid "0_-fvi_hrnjywg5_-nev"))
+($7 122 < 0_-fvi_hrnjywg5_-neu "opType" 114
+(name "opType"
+)
+(value "otherQuery"
+)
+(uid "0_-fvi_hrnjywg5_-neu"))
+($7 123 < 0_-fvi_hrnjywg5_-net "code:python" 114
+(name "code:python"
+)
+(value "# get starting offset and normalise point -"
+"# padding with zero and converting to positive indices"
+"offset = self.pointToIndex(point)"
+"point = self.indexToPoint(offset)"
+""
+"# set up internal params"
+"ndim = self.ndim"
+"sizes = self.shape"
+""
+"# set widths and check"
+"shape = list(shape)"
+"if len(shape) > ndim:"
+"  raise ApiError(\"Number of dimensions %s exceeds ndim %s\" % (shape,ndim))"
+"for ii,width in enumerate(shape):"
+"  if not width:"
+"    shape[ii] = sizes[ii] - point[ii]"
+"  elif width < 0 or width > sizes[ii] - point[ii]:"
+"    raise ApiError(\"Width %s in dim %s out of permitted range\" % (width,ii))"
+"# Extend shape, padding to dimension sizes."
+"shape.extend(sizes[ii] - point[ii] for ii in range(len(shape),ndim))"
+""
+"# set up strides list and lowest dim with continuous data."
+"strides = ndim*[0]"
+"factor = 1"
+"dodim = 0"
+"for ii in range(ndim-1,-1,-1):"
+"  strides[ii] = factor"
+"  factor *= shape[ii]"
+"  if not dodim and shape[ii] != sizes[ii]:"
+"    dodim = ii"
+"size = factor"
+""
+"# length of contiguous stretch"
+"stretch = strides[dodim] * shape[dodim]"
+""
+"# get hold of data (must bypass API for speed)"
+"data = self.__dict__['data'] "
+""
+"if not data:"
+"  # default-only matrix"
+"  result = size*(self.defaultValue,)"
+""
+"else:"
+""
+"  if dodim <= 0:"
+"    # take single stretch from 1D array"
+"    result = data[offset:offset+stretch]"
+"  "
+"  else:"
+"    # do work for ndim array"
+"  "
+"    # set up result list (optimisation - could be done with extend instead)"
+"    import operator, functools"
+"    subsize = functools.reduce(operator.mul, shape)"
+"    result = subsize*[None]"
+"  "
+"    # set up multidimensional loop"
+"    vector = (dodim)*[0]"
+"    dim = dim0 = dodim - 1"
+"    target = 0"
+"    while dim >= 0:"
+"    "
+"      # do actual work"
+"      next = target+stretch"
+"      result[target:next] = data[offset:offset+stretch]"
+"      target = next"
+"    "
+"      # update reading offset"
+"      vector[dim] += 1"
+"      if vector[dim] < shape[dim]:"
+"        offset += strides[dim]"
+"        if dim < dim0:"
+"          dim += 1"
+"      else:"
+"        vector[dim] = 0"
+"        dim -=1"
+"  #"
+"  result = tuple(result)"
+)
+(uid "0_-fvi_hrnjywg5_-net"))
+($7 124 < 0_-fvi_hrnjywg5_-nes "guid" 114
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00019"
+)
+(uid "0_-fvi_hrnjywg5_-nes"))
+($7 125 < 0_-fvi_hrnjywg5_-ner "code:java" 114
+(name "code:java"
+)
+(value "/* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-ner"))
+($10 126 < 0_-fvi_hrnjywg5_-neq "setSubmatrixData#Int*#Int*#Float*" 32
+(name "setSubmatrixData"
+)
+(uid "0_-fvi_hrnjywg5_-neq"))
+($11 127 < 0_-fvi_hrnjywg5_-nep "point" 126
+(name "point"
+)
+(uid "0_-fvi_hrnjywg5_-nep"))
+($7 128 < 0_-fvi_hrnjywg5_-neo "guid" 127
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00024"
+)
+(uid "0_-fvi_hrnjywg5_-neo"))
+($11 129 < 0_-fvi_hrnjywg5_-nen "shape" 126
+(name "shape"
+)
+(uid "0_-fvi_hrnjywg5_-nen"))
+($7 130 < 0_-fvi_hrnjywg5_-nem "guid" 129
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00025"
+)
+(uid "0_-fvi_hrnjywg5_-nem"))
+($11 131 < 0_-fvi_hrnjywg5_-nel "values" 126
+(name "values"
+)
+(uid "0_-fvi_hrnjywg5_-nel"))
+($7 132 < 0_-fvi_hrnjywg5_-nek "guid" 131
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00026"
+)
+(uid "0_-fvi_hrnjywg5_-nek"))
+($7 133 < 0_-fvi_hrnjywg5_-nej "documentation" 126
+(name "documentation"
+)
+(value "set data for submatrix of shape 'shape' with 'point' as the corner with the smallest index values to 'values' (packed linear array). Point is converted as for self.pointToIndex.  shape values that are omitted or set to zero are reset to the (rest of the) dimension size."
+)
+(uid "0_-fvi_hrnjywg5_-nej"))
+($7 134 < 0_-fvi_hrnjywg5_-nei "opType" 126
+(name "opType"
+)
+(value "otherModify"
+)
+(uid "0_-fvi_hrnjywg5_-nei"))
+($7 135 < 0_-fvi_hrnjywg5_-neh "code:python" 126
+(name "code:python"
+)
+(value "# get starting offset and normalise point -"
+"# padding with zero and converting to positive indices"
+"offset = self.pointToIndex(point)"
+"point = self.indexToPoint(offset)"
+""
+"# set up internal params"
+"ndim = self.ndim"
+"sizes = self.shape"
+""
+"# set widths and check"
+"shape = list(shape)"
+"if len(shape) > ndim:"
+"  raise ApiError(\"Number of submatrix dimensions %s exceeds ndim %s\" % (shape,ndim))"
+"for ii,width in enumerate(shape):"
+"  if not width:"
+"    shape[ii] = sizes[ii] - point[ii]"
+"  elif width < 0 or width > sizes[ii] - point[ii]:"
+"    raise ApiError(\"Size %s in dim %s out of permitted range\" % (width,ii))"
+"# Extend shape, padding to dimension sizes."
+"shape.extend(sizes[ii] - point[ii] for ii in range(len(shape),ndim))"
+""
+"# set up strides list and lowest dim with continuous data."
+"strides = ndim*[0]"
+"factor = 1"
+"dodim = 0"
+"for ii in range(ndim-1,-1,-1):"
+"  strides[ii] = factor"
+"  factor *= sizes[ii]"
+"  if not dodim and shape[ii] != sizes[ii]:"
+"    dodim = ii"
+""
+"# length of contiguous stretch"
+"stretch = strides[dodim] * shape[dodim]"
+""
+"# get hold of data (must bypass API for speed)"
+"data = self.__dict__['data'] "
+"if not data:"
+"  data.extend(self.size*[self.defaultValue])"
+""
+"# check value types"
+"if [x for x in values if not isinstance(x,(float,int))]:"
+"  raise ApiError(\"Non-numeric values passed to setSubmatrixData: %s\" %  list(set(x for x in values if not isinstance(x,(float,int)))))"
+""
+"if dodim <= 0:"
+"  # set single stretch from 1D array"
+"  data[offset:offset+stretch] =values"
+"  "
+"else:"
+"  # do work for ndim array"
+"  "
+"  # check length and type of values"
+"  import operator, functools"
+"  subsize = functools.reduce(operator.mul, shape)"
+"  if len(values) != subsize:"
+"    raise ApiError(\"Number of values %s do not fit submatrix shape %s\" % (subsize, shape))"
+"  "
+"  # set up multidimensional loop"
+"  vector = (dodim)*[0]"
+"  dim = dim0 = dodim - 1"
+"  target = 0"
+"  while dim >= 0:"
+"    "
+"    # do actual work"
+"    next = target+stretch"
+"    data[offset:offset+stretch] = values[target:next] "
+"    target = next"
+"    "
+"    # update reading offset"
+"    vector[dim] += 1"
+"    if vector[dim] < shape[dim]:"
+"      offset += strides[dim]"
+"      if dim < dim0:"
+"        dim += 1"
+"    else:"
+"      vector[dim] = 0"
+"      dim -=1"
+)
+(uid "0_-fvi_hrnjywg5_-neh"))
+($7 136 < 0_-fvi_hrnjywg5_-neg "guid" 126
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-18:05:06_00023"
+)
+(uid "0_-fvi_hrnjywg5_-neg"))
+($7 137 < 0_-fvi_hrnjywg5_-nef "code:java" 126
+(name "code:java"
+)
+(value "/* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-nef"))
+($10 138 < 0_-fvi_hrnjywg5_-nee "resetData" 32
+(name "resetData"
+)
+(uid "0_-fvi_hrnjywg5_-nee"))
+($7 139 < 0_-fvi_hrnjywg5_-ned "documentation" 138
+(name "documentation"
+)
+(value "Reset data to default values and free memory used."
+)
+(uid "0_-fvi_hrnjywg5_-ned"))
+($7 140 < 0_-fvi_hrnjywg5_-nec "opType" 138
+(name "opType"
+)
+(value "otherModify"
+)
+(uid "0_-fvi_hrnjywg5_-nec"))
+($7 141 < 0_-fvi_hrnjywg5_-neb "code:python" 138
+(name "code:python"
+)
+(value "del self.__dict__['data'][:]"
+)
+(uid "0_-fvi_hrnjywg5_-neb"))
+($7 142 < 0_-fvi_hrnjywg5_-nea "code:java" 138
+(name "code:java"
+)
+(value "/* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-nea"))
+($7 143 < 0_-fvi_hrnjywg5_-ne9 "guid" 138
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-04-06-10:33:07_00001"
+)
+(uid "0_-fvi_hrnjywg5_-ne9"))
+($10 144 < 0_-fvi_hrnjywg5_-ne8 "removeSlice#Int" 32
+(name "removeSlice"
+)
+(uid "0_-fvi_hrnjywg5_-ne8"))
+($11 145 < 0_-fvi_hrnjywg5_-ne7 "index" 144
+(name "index"
+)
+(uid "0_-fvi_hrnjywg5_-ne7"))
+($7 146 < 0_-fvi_hrnjywg5_-ne6 "guid" 145
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-07-08-13:22:19_00001"
+)
+(uid "0_-fvi_hrnjywg5_-ne6"))
+($7 147 < 0_-fvi_hrnjywg5_-ne5 "documentation" 144
+(name "documentation"
+)
+(value "Remove slice of matrix in slowest verying dimension at offset index."
+)
+(uid "0_-fvi_hrnjywg5_-ne5"))
+($7 148 < 0_-fvi_hrnjywg5_-ne4 "opType" 144
+(name "opType"
+)
+(value "otherModify"
+)
+(uid "0_-fvi_hrnjywg5_-ne4"))
+($7 149 < 0_-fvi_hrnjywg5_-ne3 "code:java" 144
+(name "code:java"
+)
+(value "/* NBNB TBD */"
+)
+(uid "0_-fvi_hrnjywg5_-ne3"))
+($7 150 < 0_-fvi_hrnjywg5_-ne2 "code:python" 144
+(name "code:python"
+)
+(value "data = self.__dict__['data']"
+"if data:"
+"  start = self.pointToIndex((index,))"
+"  end = self.pointToIndex((index+1,))"
+"  del data[start:end]"
+"self.__dict__['shape'][0] -= 1"
+)
+(uid "0_-fvi_hrnjywg5_-ne2"))
+($7 151 < 0_-fvi_hrnjywg5_-ne1 "guid" 144
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-04-07-12:26:00_00001"
+)
+(uid "0_-fvi_hrnjywg5_-ne1"))
+($7 152 < 0_-fvi_hrnjywg5_-ne0 "documentation" 32
+(name "documentation"
+)
+(value "Numeric matrix, two or more dimensions."
+"Data are stored (and passed in and out) as a packed  linear array."
+"Dimensions are given with the slowest moving index first. The first (slowest moving) dimension size can be modified, the others are frozen. Data and the first dimension size are adapted when the other is modified. Data consisting entirely of the default value are not stored, saving space. "
+)
+(uid "0_-fvi_hrnjywg5_-ne0"))
+($7 153 < 0_-fvi_hrnjywg5_-ndz "guid" 32
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2011-03-30-17:55:17_00001"
+)
+(uid "0_-fvi_hrnjywg5_-ndz"))
+($7 154 < 0_-fvi_hrnjywg5_-ndy "shortName" 1
+(name "shortName"
+)
+(value "TEMP"
+)
+(uid "0_-fvi_hrnjywg5_-ndy"))
+($7 155 < 0_-fvi_hrnjywg5_-ndx "documentation" 1
+(name "documentation"
+)
+(value "Templates, i.e. abstract classes for general use in other parts of the data model."
+)
+(uid "0_-fvi_hrnjywg5_-ndx"))
+($7 156 < 0_-fvi_hrnjywg5_-ndw "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:19:50_00004"
+)
+(uid "0_-fvi_hrnjywg5_-ndw"))
+($12 157)
+($13 160)
+($12 162)
+($12 163)
+($12 164)
+($13 166)
+($12 169)
+($12 170)
+($13 172)
+($13 174
+(body "*"
+))
+($13 175)
+($13 176
+(body "*"
+))
+($13 177)
+($13 178
+(body "*"
+))
+($13 179)
+($13 180
+(body "*"
+))
+($13 181
+(body "*"
+))
+($13 182
+(body "*"
+))
+($13 183
+(body "*"
+))
+($13 184
+(body "*"
+))
+($13 185
+(body "*"
+))
+($13 186
+(body "*"
+))
+($13 187)
+($5 158 @ 0_-fvi_hrnjywg5_-d9g 4 "Logical" $1 "memops" $1 "Implementation" $1 "DataObject" $5)
+($5 159 @ 0_-fvi_hrnjywg5_-dlb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Float" $5)
+($15 161 @ -yk94ms_-e3s_e41656c6_-fvw 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "memops.Implementation" $15)
+($5 165 @ 0_-fvi_hrnjywg5_-dkm 4 "Logical" $1 "memops" $1 "Implementation" $1 "String" $5)
+($5 167 @ 0_-fvi_hrnjywg5_-dl3 4 "Logical" $1 "memops" $1 "Implementation" $1 "Int" $5)
+($5 168 @ 0_-fvi_hrnjywg5_-dlv 4 "Logical" $1 "memops" $1 "Implementation" $1 "Boolean" $5)
+($5 171 @ 0_-fvi_hrnjywg5_-dbr 4 "Logical" $1 "memops" $1 "Implementation" $1 "NonNegativeInt" $5)
+($5 173 @ 0_-fvi_hrnjywg5_-dcl 4 "Logical" $1 "memops" $1 "Implementation" $1 "PositiveInt" $5)
+(subtypeAssn 13 9)
+(supertypeAssn 13 158)
+(generalizationAssn 9 13)
+(typeRefAssn 10 159)
+(typeExpression 10 160)
+(projectionAssn 3 9 157)
+(styleAssn 4 161)
+(projectionAssn 4 158 162)
+(to 5 4)
+(from 5 3)
+(projectionAssn 5 13 163)
+(subtypeAssn 29 16)
+(supertypeAssn 29 158)
+(generalizationAssn 16 29)
+(typeRefAssn 17 165)
+(typeExpression 17 166)
+(typeRefAssn 20 167)
+(typeExpression 20 166)
+(typeRefAssn 23 159)
+(typeExpression 23 166)
+(typeRefAssn 26 168)
+(typeExpression 26 166)
+(projectionAssn 6 16 164)
+(to 7 4)
+(from 7 6)
+(projectionAssn 7 29 169)
+(typeRefAssn 33 171)
+(typeExpression 33 172)
+(typeRefAssn 37 159)
+(typeExpression 37 172)
+(typeRefAssn 43 159)
+(typeExpression 43 172)
+(typeRefAssn 46 171)
+(typeExpression 46 172)
+(typeRefAssn 50 173)
+(typeExpression 50 172)
+(typeAssn 67 167)
+(typeExpression 67 174)
+(typeAssn 69 167)
+(typeExpression 69 175)
+(typeAssn 77 167)
+(typeExpression 77 175)
+(typeAssn 79 167)
+(typeExpression 79 176)
+(typeAssn 87 167)
+(typeExpression 87 177)
+(typeAssn 95 167)
+(typeExpression 95 178)
+(typeAssn 97 159)
+(typeExpression 97 179)
+(typeAssn 105 167)
+(typeExpression 105 180)
+(typeAssn 107 159)
+(typeExpression 107 179)
+(typeAssn 115 167)
+(typeExpression 115 181)
+(typeAssn 117 167)
+(typeExpression 117 182)
+(typeAssn 119 159)
+(typeExpression 119 183)
+(typeAssn 127 167)
+(typeExpression 127 184)
+(typeAssn 129 167)
+(typeExpression 129 185)
+(typeAssn 131 159)
+(typeExpression 131 186)
+(typeAssn 145 167)
+(typeExpression 145 187)
+(projectionAssn 8 32 170)

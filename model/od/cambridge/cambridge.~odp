@@ -1,0 +1,169 @@
+ObjectDomain_Shared_Package 15
+{z8kfsx_-fvi_fhk9tm6f_-p98 2 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "cambridge" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Dependency-owns $8
+objectdomain.uml.core.Projection $6
+objectdomain.uml.view.style.BaseViewElementStyle-owns $7
+objectdomain.uml.view.DependencyView-owns $4
+objectdomain.uml.core.UmlTaggedValue-taggedValues $5
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.view.PackageView-owns $3
+]
+($1 1 > z8kfsx_-fvi_fhk9tm6f_-p98 2 "Logical" $1 "cambridge" $1
+(name "cambridge"
+)
+(uid "z8kfsx_-fvi_fhk9tm6f_-p98"))
+($2 2 < z8kfsx_-fvi_fqjirlib_-p95 "_Cambridge" 1
+(name "_Cambridge"
+)
+(uid "z8kfsx_-fvi_fqjirlib_-p95")
+(diagramType "class"))
+($3 3 < z8kfsx_-fvi_fqjirlib_-p5r "Dangle" 2
+(uid "z8kfsx_-fvi_fqjirlib_-p5r")
+(bbx 10 320 110 80))
+($3 4 < z8kfsx_-fvi_fqjirlib_-p5p "Affiliation" 2
+(autoSizeToFit true)
+(uid "z8kfsx_-fvi_fqjirlib_-p5p")
+(bbx 10 10 150 80))
+($3 5 < z8kfsx_-9el_g8u3kgqo_-p3q "WmsProtocol" 2
+(uid "z8kfsx_-9el_g8u3kgqo_-p3q")
+(bbx 430 180 110 80))
+($3 6 < z8kfsx_-9el_g8u3kgqo_-p3o "NmrCalc" 2
+(uid "z8kfsx_-9el_g8u3kgqo_-p3o")
+(bbx 120 180 110 80))
+($4 7 < z8kfsx_-9el_g8u3kgqo_-p3n "" 2
+(showStereotypeLabel false)
+(stereotypePosition 430 335)
+(uid "z8kfsx_-9el_g8u3kgqo_-p3n")
+(points 135 180 135 90))
+($4 8 < z8kfsx_-9el_g9fdmyol_-p8r "" 2
+(showStereotypeLabel false)
+(uid "z8kfsx_-9el_g9fdmyol_-p8r")
+(points 430 220 230 220)
+(lineStyle "oblique"))
+($3 9 < z8kfsx_-i16_glwhwz86_-p6k "Method" 2
+(autoSizeToFit true)
+(uid "z8kfsx_-i16_glwhwz86_-p6k")
+(bbx 260 270 130 80))
+($4 10 < z8kfsx_-i16_glwhwz86_-p6j "" 2
+(showStereotypeLabel false)
+(stereotypePosition 515 610)
+(uid "z8kfsx_-i16_glwhwz86_-p6j")
+(points 230 253 260 271)
+(lineStyle "oblique"))
+($4 11 < z8kfsx_-i16_glwhwz86_-p6l "" 2
+(showStereotypeLabel false)
+(uid "z8kfsx_-i16_glwhwz86_-p6l")
+(points 430 251 390 273)
+(lineStyle "oblique"))
+($3 12 < z8kfsx_-i16_glwhwz86_-p6g "Template" 2
+(uid "z8kfsx_-i16_glwhwz86_-p6g")
+(bbx 260 500 140 80))
+($4 13 < z8kfsx_-i16_glwhwz86_-p6f "" 2
+(showStereotypeLabel false)
+(stereotypePosition 500 665)
+(uid "z8kfsx_-i16_glwhwz86_-p6f")
+(points 150 260 150 545 260 545))
+($4 14 < z8kfsx_-i16_glwhwz86_-p6h "" 2
+(showStereotypeLabel false)
+(uid "z8kfsx_-i16_glwhwz86_-p6h")
+(points 500 260 500 540 400 540))
+($3 15 < z8kfsx_-gyy_gqz1t6p9_-p94 "AnnealProtocol" 2
+(uid "z8kfsx_-gyy_gqz1t6p9_-p94")
+(bbx 260 400 140 80))
+($4 16 < z8kfsx_-gyy_gqz1t6p9_-p93 "" 2
+(showStereotypeLabel false)
+(stereotypePosition 580 685)
+(uid "z8kfsx_-gyy_gqz1t6p9_-p93")
+(points 328 400 327 350)
+(lineStyle "oblique"))
+($4 17 < z8kfsx_-gyy_gqz1t6p9_-p95 "" 2
+(showStereotypeLabel false)
+(stereotypePosition 465 660)
+(uid "z8kfsx_-gyy_gqz1t6p9_-p95")
+(points 195 260 195 445 260 445))
+($4 18 < z8kfsx_-gyy_gqz1t6p9_-p96 "" 2
+(showStereotypeLabel false)
+(stereotypePosition 715 760)
+(uid "z8kfsx_-gyy_gqz1t6p9_-p96")
+(points 465 260 465 450 400 450))
+($5 19 < z8kfsx_-fvi_fhk9tm6f_-p97 "documentation" 1
+(name "documentation"
+)
+(value "Programs from the University of Cambridge (outside CCPN)"
+)
+(uid "z8kfsx_-fvi_fhk9tm6f_-p97"))
+($5 20 < z8kfsx_-fvi_fhk9tm6f_-p96 "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2008-06-17-10:12:41_00001"
+)
+(uid "z8kfsx_-fvi_fhk9tm6f_-p96"))
+($6 21)
+($6 24)
+($6 26)
+($6 28)
+($6 30)
+($6 32)
+($6 34)
+($6 36)
+($6 38)
+($6 40)
+($6 42)
+($6 44)
+($6 46)
+($6 48)
+($6 50)
+($6 52)
+($1 22 @ -hkpzxr_-dbn_f78xhhy8_-p98 3 "Logical" $1 "cambridge" $1 "Dangle" $1)
+($7 23 @ -yk94ms_-e3s_e41656c6_-fw4 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "People" $7)
+($1 25 @ -yk94ms_-e3s_e41656c6_-jc4 4 "Logical" $1 "ccp" $1 "general" $1 "Affiliation" $1)
+($1 27 @ 0_-fvi_hrnjywg5_-p98 3 "Logical" $1 "cambridge" $1 "WmsProtocol" $1)
+($1 29 @ z8kfsx_-o65_ftli6gtq_-p98 4 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1)
+($8 31 @ z8kfsx_-fvi_fuv25qf3_-p0n 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1 "#<anon> (NmrCalc, Affiliation)" $8)
+($8 33 @ 0_-fvi_hrnjywg5_-p97 4 "Logical" $1 "cambridge" $1 "WmsProtocol" $1 "#<anon> (WmsProtocol, NmrCalc)" $8)
+($1 35 @ -yk94ms_-e3s_e41656c6_-kyd 4 "Logical" $1 "ccp" $1 "general" $1 "Method" $1)
+($8 37 @ z8kfsx_-fvi_fuv25qf3_-p0m 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1 "#<anon> (NmrCalc, Method)" $8)
+($8 39 @ 0_-fvi_hrnjywg5_-p96 4 "Logical" $1 "cambridge" $1 "WmsProtocol" $1 "#<anon> (WmsProtocol, Method)" $8)
+($1 41 @ -yk94ms_-e3s_e41656c6_-jt9 4 "Logical" $1 "ccp" $1 "general" $1 "Template" $1)
+($8 43 @ z8kfsx_-fvi_fuv25qf3_-p0k 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1 "#<anon> (NmrCalc, Template)" $8)
+($8 45 @ 0_-fvi_hrnjywg5_-p95 4 "Logical" $1 "cambridge" $1 "WmsProtocol" $1 "#<anon> (WmsProtocol, Template)" $8)
+($1 47 @ -hkpzxr_-cvb_f2ixo80k_-p97 3 "Logical" $1 "molsim" $1 "AnnealProtocol" $1)
+($8 49 @ z8kfsx_-9el_g9chy1du_-p8o 4 "Logical" $1 "molsim" $1 "AnnealProtocol" $1 "#<anon> (AnnealProtocol, Method)" $8)
+($8 51 @ z8kfsx_-9el_g8u3kgqo_-p7q 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1 "#<anon> (NmrCalc, AnnealProtocol)" $8)
+($8 53 @ 0_-fvi_hrnjywg5_-p94 4 "Logical" $1 "cambridge" $1 "WmsProtocol" $1 "#<anon> (WmsProtocol, AnnealProtocol)" $8)
+(projectionAssn 3 22 21)
+(styleAssn 4 23)
+(projectionAssn 4 25 24)
+(projectionAssn 5 27 26)
+(projectionAssn 6 29 28)
+(to 7 4)
+(from 7 6)
+(projectionAssn 7 31 30)
+(to 8 6)
+(from 8 5)
+(projectionAssn 8 33 32)
+(projectionAssn 9 35 34)
+(to 10 9)
+(from 10 6)
+(projectionAssn 10 37 36)
+(to 11 9)
+(from 11 5)
+(projectionAssn 11 39 38)
+(projectionAssn 12 41 40)
+(to 13 12)
+(from 13 6)
+(projectionAssn 13 43 42)
+(to 14 12)
+(from 14 5)
+(projectionAssn 14 45 44)
+(projectionAssn 15 47 46)
+(to 16 9)
+(from 16 15)
+(projectionAssn 16 49 48)
+(to 17 15)
+(from 17 6)
+(projectionAssn 17 51 50)
+(to 18 15)
+(from 18 5)
+(projectionAssn 18 53 52)

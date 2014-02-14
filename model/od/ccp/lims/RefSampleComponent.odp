@@ -1,0 +1,3466 @@
+ObjectDomain_Shared_Package 15
+{0_-fvi_hrnjywg5_-otk 4 "Logical" objectdomain.uml.mechanisms.UmlPackage-owns "ccp" objectdomain.uml.mechanisms.UmlPackage-owns "lims" objectdomain.uml.mechanisms.UmlPackage-owns "RefSampleComponent" objectdomain.uml.mechanisms.UmlPackage-owns
+}[objectdomain.uml.core.TypeExpression $18
+objectdomain.uml.mechanisms.UmlPackage-owns $1
+objectdomain.uml.core.Generalization-owns $11
+objectdomain.uml.core.Dependency-owns $12
+objectdomain.uml.core.Projection $16
+objectdomain.uml.core.UmlAttribute-features $7
+objectdomain.uml.core.UmlAssociationEnd-connections $10
+objectdomain.uml.view.style.BaseViewElementStyle-owns $15
+objectdomain.uml.view.ClassView-owns $3
+objectdomain.uml.core.UmlTaggedValue-taggedValues $8
+objectdomain.uml.core.UmlConstraint-constraints $14
+objectdomain.uml.core.UmlAssociation-owns $9
+objectdomain.uml.view.Diagram-owns $2
+objectdomain.uml.core.UmlOperation-features $13
+objectdomain.uml.view.GeneralizationView-owns $4
+objectdomain.uml.core.UmlMultiplicity $17
+objectdomain.uml.core.UmlClass-owns $6
+objectdomain.uml.view.AssociationView-owns $5
+objectdomain.uml.core.Stereotype-owns $19
+]
+($1 1 > 0_-fvi_hrnjywg5_-otk 4 "Logical" $1 "ccp" $1 "lims" $1 "RefSampleComponent" $1
+(name "RefSampleComponent"
+)
+(uid "0_-fvi_hrnjywg5_-otk"))
+($2 2 < 0_-fvi_hrnjywg5_-nb1 "_RefSampleComponent-details" 1
+(name "_RefSampleComponent-details"
+)
+(width 6370)
+(uid "0_-fvi_hrnjywg5_-nb1")
+(height 5416)
+(diagramType "class"))
+($3 3 < 0_-fvi_hrnjywg5_-nb0 "AbstractComponent" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nb0")
+(bbx 790 170 140 110))
+($3 4 < 0_-fvi_hrnjywg5_-naz "Construct" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-naz")
+(bbx 970 630 200 170))
+($3 5 < 0_-fvi_hrnjywg5_-nay "Cell" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nay")
+(bbx 870 370 160 150))
+($4 6 < 0_-fvi_hrnjywg5_-nax "" 2
+(uid "0_-fvi_hrnjywg5_-nax")
+(points 950 370 950 350 855 350 855 280))
+($3 7 < 0_-fvi_hrnjywg5_-naw "Substance" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-naw")
+(bbx 1120 370 80 50))
+($4 8 < 0_-fvi_hrnjywg5_-nav "" 2
+(uid "0_-fvi_hrnjywg5_-nav")
+(points 1155 370 1155 350 855 350 855 280))
+($3 9 < 0_-fvi_hrnjywg5_-nau "Composite" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nau")
+(bbx 1290 370 180 110))
+($4 10 < 0_-fvi_hrnjywg5_-nat "" 2
+(uid "0_-fvi_hrnjywg5_-nat")
+(points 1380 370 1380 350 855 350 855 280))
+($3 11 < 0_-fvi_hrnjywg5_-nas "CompositeElement" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nas")
+(bbx 1420 600 130 110))
+($5 12 < 0_-fvi_hrnjywg5_-nar "" 2
+(toMultiplicityPosition 1435 580)
+(toRolePosition 1380 565)
+(uid "0_-fvi_hrnjywg5_-nar")
+(points 1450 480 1450 600)
+(fromMultiplicityPosition 1460 485))
+($5 13 < 0_-fvi_hrnjywg5_-naq "" 2
+(toMultiplicityPosition 1535 580)
+(uid "0_-fvi_hrnjywg5_-naq")
+(points 930 225 1530 225 1530 600)
+(fromRolePosition 950 230)
+(fromMultiplicityPosition 935 230))
+($3 14 < 0_-fvi_hrnjywg5_-nap "ComponentDbRef" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nap")
+(bbx 340 40 120 210))
+($5 15 < 0_-fvi_hrnjywg5_-nao "" 2
+(toMultiplicityPosition 465 40)
+(uid "0_-fvi_hrnjywg5_-nao")
+(points 805 170 805 65 460 65)
+(fromRolePosition 720 135)
+(fromMultiplicityPosition 785 150))
+($3 16 < 0_-fvi_hrnjywg5_-nan "RestrictionEnzyme" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nan")
+(bbx 740 630 170 130))
+($3 17 < 0_-fvi_hrnjywg5_-nam "Primer" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nam")
+(bbx 840 820 180 110))
+($3 18 < 0_-fvi_hrnjywg5_-nal "CompositeInteraction" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nal")
+(bbx 1220 600 170 150))
+($5 19 < 0_-fvi_hrnjywg5_-nak "" 2
+(toMultiplicityPosition 1325 755)
+(toRolePosition 1335 755)
+(uid "0_-fvi_hrnjywg5_-nak")
+(points 1490 710 1490 775 1315 775 1315 750)
+(fromRolePosition 1510 715)
+(fromMultiplicityPosition 1500 715))
+($3 20 < 0_-fvi_hrnjywg5_-naj "MolComponent" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-naj")
+(bbx 500 470 130 170))
+($4 21 < 0_-fvi_hrnjywg5_-nai "" 2
+(uid "0_-fvi_hrnjywg5_-nai")
+(points 620 470 620 350 855 350 855 280))
+($3 22 < 0_-fvi_hrnjywg5_-nah "NaturalSource" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-nah")
+(bbx 1570 90 240 570))
+($5 23 < 0_-fvi_hrnjywg5_-nag "" 2
+(toMultiplicityPosition 1530 265)
+(toRolePosition 1480 275)
+(uid "0_-fvi_hrnjywg5_-nag")
+(points 930 205 1570 205)
+(fromMultiplicityPosition 1055 265))
+($3 24 < 0_-fvi_hrnjywg5_-naf "Molecule" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-naf")
+(bbx 30 60 210 830))
+($5 25 < 0_-fvi_hrnjywg5_-nae "" 2
+(uid "0_-fvi_hrnjywg5_-nae")
+(points 125 60 125 20 1665 20 1665 90)
+(fromMultiplicityPosition 110 40))
+($5 26 < 0_-fvi_hrnjywg5_-nad "" 2
+(toMultiplicityPosition 490 530)
+(toRolePosition 350 580)
+(uid "0_-fvi_hrnjywg5_-nad")
+(points 240 555 500 555)
+(fromRolePosition 235 465)
+(fromMultiplicityPosition 235 550))
+($5 27 < 0_-fvi_hrnjywg5_-nac "" 2
+(toMultiplicityPosition 1320 575)
+(toRolePosition 1220 575)
+(uid "0_-fvi_hrnjywg5_-nac")
+(points 1310 480 1310 600)
+(fromMultiplicityPosition 1320 485))
+($3 28 < 0_-fvi_hrnjywg5_-nab "SampleComponent" 2
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-nab")
+(bbx 1160 250 230 40))
+($5 29 < 0_-fvi_hrnjywg5_-naa "" 2
+(toMultiplicityPosition 935 270)
+(toRolePosition 950 270)
+(uid "0_-fvi_hrnjywg5_-naa")
+(points 1160 260 930 260)
+(fromRolePosition 630 65)
+(fromMultiplicityPosition 1150 205))
+($5 30 < 0_-fvi_hrnjywg5_-na9 "" 2
+(toMultiplicityPosition 1370 180)
+(toRolePosition 1320 365)
+(uid "0_-fvi_hrnjywg5_-na9")
+(points 1345 290 1345 310 1390 310 1390 290)
+(fromRolePosition 1275 295)
+(fromMultiplicityPosition 1355 300))
+($3 31 < 0_-fvi_hrnjywg5_-na8 "MolCompFeature" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-na8")
+(bbx 300 700 170 250))
+($3 32 < 0_-fvi_hrnjywg5_-na7 "FeatureType" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-na7")
+(bbx 890 1060 90 70))
+($3 33 < 0_-fvi_hrnjywg5_-na6 "Entry" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-na6")
+(bbx 310 320 160 210))
+($5 34 < 0_-fvi_hrnjywg5_-na5 "" 2
+(toMultiplicityPosition 370 300)
+(toRolePosition 380 290)
+(uid "0_-fvi_hrnjywg5_-na5")
+(points 365 250 365 320)
+(fromMultiplicityPosition 350 255))
+($5 35 < 0_-fvi_hrnjywg5_-na4 "" 2
+(toMultiplicityPosition 475 790)
+(uid "0_-fvi_hrnjywg5_-na4")
+(points 555 640 555 790 470 790)
+(fromMultiplicityPosition 565 645))
+($4 36 < 0_-fvi_hrnjywg5_-na3 "" 2
+(uid "0_-fvi_hrnjywg5_-na3")
+(points 930 820 930 575 630 575))
+($4 37 < 0_-fvi_hrnjywg5_-na2 "" 2
+(uid "0_-fvi_hrnjywg5_-na2")
+(points 1045 630 1045 575 630 575))
+($4 38 < 0_-fvi_hrnjywg5_-na1 "" 2
+(uid "0_-fvi_hrnjywg5_-na1")
+(points 820 630 820 575 630 575))
+($3 39 < 0_-fvi_hrnjywg5_-na0 "Label" 2
+(uid "0_-fvi_hrnjywg5_-na0")
+(bbx 520 80 160 210))
+($5 40 < 0_-fvi_hrnjywg5_-n9z "" 2
+(toMultiplicityPosition 685 215)
+(uid "0_-fvi_hrnjywg5_-n9z")
+(points 790 215 680 215)
+(fromRolePosition 710 190)
+(fromMultiplicityPosition 775 220))
+($3 41 < 0_-fvi_hrnjywg5_-n9y "LabelType" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-n9y")
+(bbx 1010 1060 80 70))
+($3 42 < 0_-fvi_hrnjywg5_-n9x "LabelName" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-n9x")
+(bbx 1120 1060 80 70))
+($3 43 < 0_-fvi_hrnjywg5_-n9w "SpecificLabelGroup" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-n9w")
+(bbx 520 1010 170 90))
+($5 44 < 0_-fvi_hrnjywg5_-n9v "" 2
+(toMultiplicityPosition 600 985)
+(uid "0_-fvi_hrnjywg5_-n9v")
+(points 615 640 615 1010)
+(fromMultiplicityPosition 625 645))
+($3 45 < 0_-fvi_hrnjywg5_-n9u "IsotopeLabel" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-n9u")
+(bbx 290 990 160 150))
+($5 46 < 0_-fvi_hrnjywg5_-n9t "" 2
+(toMultiplicityPosition 455 1065)
+(uid "0_-fvi_hrnjywg5_-n9t")
+(points 520 1060 450 1060)
+(fromMultiplicityPosition 505 1070))
+($3 47 < 0_-fvi_hrnjywg5_-n9s "MolResidue" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-n9s")
+(bbx 30 910 220 270))
+($5 48 < 0_-fvi_hrnjywg5_-n9r "" 2
+(toMultiplicityPosition 120 890)
+(uid "0_-fvi_hrnjywg5_-n9r")
+(points 110 890 110 910)
+(fromMultiplicityPosition 95 895))
+($5 49 < 0_-fvi_hrnjywg5_-n9q "" 2
+(toMultiplicityPosition 265 1030)
+(uid "0_-fvi_hrnjywg5_-n9q")
+(points 290 1060 250 1060)
+(fromMultiplicityPosition 270 1075))
+($3 50 < 0_-fvi_hrnjywg5_-n9p "ConstructStatus" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-n9p")
+(bbx 1230 1060 110 70))
+($3 51 < 0_-fvi_hrnjywg5_-n9o "StatusType" 2
+(autoSizeToFit true)
+(uid "0_-fvi_hrnjywg5_-n9o")
+(bbx 780 1060 80 70))
+($5 52 < 0_-fvi_hrnjywg5_-n9n "" 2
+(toRolePosition 385 600)
+(uid "0_-fvi_hrnjywg5_-n9n")
+(points 370 700 370 600 500 600)
+(fromRolePosition 315 660)
+(fromMultiplicityPosition 355 680))
+($3 53 < 0_-fvi_hrnjywg5_-n9m "RefSampleComponentStore" 2
+(uid "0_-fvi_hrnjywg5_-n9m")
+(bbx 1140 130 180 70))
+($5 54 < 0_-fvi_hrnjywg5_-n9l "" 2
+(toMultiplicityPosition 935 155)
+(toRolePosition 955 180)
+(uid "0_-fvi_hrnjywg5_-n9l")
+(points 1140 180 930 180)
+(fromMultiplicityPosition 1125 155))
+($2 55 < 0_-fvi_hrnjywg5_-n9k "_RefSampleComponent" 1
+(name "_RefSampleComponent"
+)
+(uid "0_-fvi_hrnjywg5_-n9k")
+(diagramType "class"))
+($3 56 < 0_-fvi_hrnjywg5_-n9j "AbstractComponent" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n9j")
+(bbx 360 260 140 30))
+($3 57 < 0_-fvi_hrnjywg5_-n9i "Construct" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n9i")
+(bbx 730 610 70 30))
+($3 58 < 0_-fvi_hrnjywg5_-n9h "Cell" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n9h")
+(bbx 600 530 50 30))
+($4 59 < 0_-fvi_hrnjywg5_-n9g "" 55
+(uid "0_-fvi_hrnjywg5_-n9g")
+(points 615 530 615 350 465 350 465 290))
+($3 60 < 0_-fvi_hrnjywg5_-n9f "Substance" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n9f")
+(bbx 690 530 80 30))
+($4 61 < 0_-fvi_hrnjywg5_-n9e "" 55
+(uid "0_-fvi_hrnjywg5_-n9e")
+(points 720 530 720 350 465 350 465 290))
+($3 62 < 0_-fvi_hrnjywg5_-n9d "Composite" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n9d")
+(bbx 810 530 80 30))
+($4 63 < 0_-fvi_hrnjywg5_-n9c "" 55
+(uid "0_-fvi_hrnjywg5_-n9c")
+(points 855 530 855 350 465 350 465 290))
+($3 64 < 0_-fvi_hrnjywg5_-n9b "CompositeElement" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n9b")
+(bbx 840 630 130 30))
+($5 65 < 0_-fvi_hrnjywg5_-n9a "" 55
+(toMultiplicityPosition 860 610)
+(toRolePosition 875 610)
+(uid "0_-fvi_hrnjywg5_-n9a")
+(points 870 560 870 630)
+(fromMultiplicityPosition 880 565))
+($5 66 < 0_-fvi_hrnjywg5_-n99 "" 55
+(toMultiplicityPosition 970 610)
+(uid "0_-fvi_hrnjywg5_-n99")
+(points 500 290 960 290 960 630)
+(fromRolePosition 470 295)
+(fromMultiplicityPosition 550 295))
+($3 67 < 0_-fvi_hrnjywg5_-n98 "RestrictionEnzyme" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n98")
+(bbx 570 610 130 30))
+($3 68 < 0_-fvi_hrnjywg5_-n97 "Primer" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n97")
+(bbx 570 660 50 30))
+($3 69 < 0_-fvi_hrnjywg5_-n96 "CompositeInteraction" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n96")
+(bbx 710 690 150 30))
+($5 70 < 0_-fvi_hrnjywg5_-n95 "" 55
+(toMultiplicityPosition 865 710)
+(toRolePosition 875 710)
+(uid "0_-fvi_hrnjywg5_-n95")
+(points 920 660 920 705 860 705)
+(fromRolePosition 925 665)
+(fromMultiplicityPosition 905 665))
+($3 71 < 0_-fvi_hrnjywg5_-n94 "ComponentDbRef" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n94")
+(bbx 290 180 120 30))
+($3 72 < 0_-fvi_hrnjywg5_-n93 "Entry" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n93")
+(bbx 80 180 160 30))
+($5 73 < 0_-fvi_hrnjywg5_-n92 "" 55
+(toMultiplicityPosition 385 215)
+(uid "0_-fvi_hrnjywg5_-n92")
+(points 375 260 375 210)
+(fromRolePosition 285 240)
+(fromMultiplicityPosition 360 230))
+($5 74 < 0_-fvi_hrnjywg5_-n91 "" 55
+(toMultiplicityPosition 245 185)
+(toRolePosition 210 220)
+(uid "0_-fvi_hrnjywg5_-n91")
+(points 290 205 240 205)
+(fromMultiplicityPosition 280 210))
+($3 75 < 0_-fvi_hrnjywg5_-n90 "MolComponent" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n90")
+(bbx 450 530 110 30))
+($4 76 < 0_-fvi_hrnjywg5_-n8z "" 55
+(uid "0_-fvi_hrnjywg5_-n8z")
+(points 545 530 545 350 465 350 465 290))
+($3 77 < 0_-fvi_hrnjywg5_-n8y "NaturalSource" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n8y")
+(bbx 240 100 240 30))
+($5 78 < 0_-fvi_hrnjywg5_-n8x "" 55
+(toMultiplicityPosition 550 95)
+(toRolePosition 635 75)
+(uid "0_-fvi_hrnjywg5_-n8x")
+(points 430 260 430 130)
+(fromMultiplicityPosition 495 185))
+($3 79 < 0_-fvi_hrnjywg5_-n8w "Molecule" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n8w")
+(bbx 30 530 210 30))
+($5 80 < 0_-fvi_hrnjywg5_-n8v "" 55
+(toMultiplicityPosition 440 515)
+(toRolePosition 310 350)
+(uid "0_-fvi_hrnjywg5_-n8v")
+(points 240 535 450 535)
+(fromRolePosition 165 295)
+(fromMultiplicityPosition 130 315))
+($5 81 < 0_-fvi_hrnjywg5_-n8u "" 55
+(uid "0_-fvi_hrnjywg5_-n8u")
+(points 35 530 35 100 240 100)
+(fromMultiplicityPosition 40 510))
+($5 82 < 0_-fvi_hrnjywg5_-n8t "" 55
+(toMultiplicityPosition 830 670)
+(toRolePosition 740 665)
+(uid "0_-fvi_hrnjywg5_-n8t")
+(points 820 560 820 690)
+(fromMultiplicityPosition 800 565))
+($3 83 < 0_-fvi_hrnjywg5_-n8s "SampleComponent" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n8s")
+(bbx 210 330 230 30))
+($5 84 < 0_-fvi_hrnjywg5_-n8r "" 55
+(toMultiplicityPosition 415 295)
+(toRolePosition 445 320)
+(uid "0_-fvi_hrnjywg5_-n8r")
+(points 405 330 405 290)
+(fromRolePosition 245 115)
+(fromMultiplicityPosition 400 120))
+($5 85 < 0_-fvi_hrnjywg5_-n8q "" 55
+(toMultiplicityPosition 465 100)
+(toRolePosition 195 310)
+(uid "0_-fvi_hrnjywg5_-n8q")
+(points 255 360 255 390 190 390 190 330 210 330)
+(fromRolePosition 260 365)
+(fromMultiplicityPosition 245 365))
+($3 86 < 0_-fvi_hrnjywg5_-n8p "MolCompFeature" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n8p")
+(bbx 170 610 120 30))
+($4 87 < 0_-fvi_hrnjywg5_-n8o "" 55
+(uid "0_-fvi_hrnjywg5_-n8o")
+(points 765 610 765 590 540 590 540 560))
+($4 88 < 0_-fvi_hrnjywg5_-n8n "" 55
+(uid "0_-fvi_hrnjywg5_-n8n")
+(points 595 610 595 590 540 590 540 560))
+($4 89 < 0_-fvi_hrnjywg5_-n8m "" 55
+(uid "0_-fvi_hrnjywg5_-n8m")
+(points 570 675 540 675 540 560))
+($5 90 < 0_-fvi_hrnjywg5_-n8l "" 55
+(toMultiplicityPosition 295 630)
+(uid "0_-fvi_hrnjywg5_-n8l")
+(points 470 560 470 625 290 625)
+(fromMultiplicityPosition 480 575))
+($3 91 < 0_-fvi_hrnjywg5_-n8k "Label" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n8k")
+(bbx 140 260 50 30))
+($5 92 < 0_-fvi_hrnjywg5_-n8j "" 55
+(toMultiplicityPosition 195 280)
+(uid "0_-fvi_hrnjywg5_-n8j")
+(points 360 275 190 275)
+(fromRolePosition 260 280)
+(fromMultiplicityPosition 345 290))
+($3 93 < 0_-fvi_hrnjywg5_-n8i "SpecificLabelGroup" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n8i")
+(bbx 460 720 130 30))
+($5 94 < 0_-fvi_hrnjywg5_-n8h "" 55
+(toMultiplicityPosition 505 700)
+(uid "0_-fvi_hrnjywg5_-n8h")
+(points 515 560 515 720)
+(fromMultiplicityPosition 525 575))
+($3 95 < 0_-fvi_hrnjywg5_-n8g "IsotopeLabel" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n8g")
+(bbx 290 720 90 30))
+($5 96 < 0_-fvi_hrnjywg5_-n8f "" 55
+(toMultiplicityPosition 390 740)
+(uid "0_-fvi_hrnjywg5_-n8f")
+(points 460 735 380 735)
+(fromMultiplicityPosition 440 745))
+($3 97 < 0_-fvi_hrnjywg5_-n8e "MolResidue" 55
+(showAttributeCompartment false)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n8e")
+(bbx 30 720 220 30))
+($5 98 < 0_-fvi_hrnjywg5_-n8d "" 55
+(toMultiplicityPosition 50 695)
+(uid "0_-fvi_hrnjywg5_-n8d")
+(points 40 560 40 720)
+(fromMultiplicityPosition 45 575))
+($5 99 < 0_-fvi_hrnjywg5_-n8c "" 55
+(toMultiplicityPosition 255 710)
+(uid "0_-fvi_hrnjywg5_-n8c")
+(points 290 735 250 735)
+(fromMultiplicityPosition 280 740))
+($5 100 < 0_-fvi_hrnjywg5_-n8b "" 55
+(toRolePosition 325 555)
+(uid "0_-fvi_hrnjywg5_-n8b")
+(points 270 610 270 550 450 550)
+(fromRolePosition 130 590)
+(fromMultiplicityPosition 275 590))
+($3 101 < 0_-fvi_hrnjywg5_-n8a "RefSampleComponentStore" 55
+(showAttributeCompartment false)
+(autoSizeToFit true)
+(showOperationCompartment false)
+(uid "0_-fvi_hrnjywg5_-n8a")
+(bbx 680 240 180 30))
+($5 102 < 0_-fvi_hrnjywg5_-n89 "" 55
+(toMultiplicityPosition 505 245)
+(toRolePosition 520 245)
+(uid "0_-fvi_hrnjywg5_-n89")
+(points 680 265 500 265)
+(fromMultiplicityPosition 665 245))
+($6 103 < 0_-fvi_hrnjywg5_-n88 "AbstractComponent" 1
+(name "AbstractComponent"
+)
+(uid "0_-fvi_hrnjywg5_-n88")
+(isAbstract true))
+($7 104 < 0_-fvi_hrnjywg5_-n87 "name" 103
+(changeability "frozen")
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-n87")
+(multiplicity "1"))
+($8 105 < 0_-fvi_hrnjywg5_-n86 "documentation" 104
+(name "documentation"
+)
+(value "The name of the component. Unique identifier."
+)
+(uid "0_-fvi_hrnjywg5_-n86"))
+($8 106 < 0_-fvi_hrnjywg5_-n85 "guid" 104
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00036"
+)
+(uid "0_-fvi_hrnjywg5_-n85"))
+($7 107 < 0_-fvi_hrnjywg5_-n84 "synonyms" 103
+(name "synonyms"
+)
+(uid "0_-fvi_hrnjywg5_-n84")
+(multiplicity "*"))
+($8 108 < 0_-fvi_hrnjywg5_-n83 "documentation" 107
+(name "documentation"
+)
+(value "The synonyms of the component."
+)
+(uid "0_-fvi_hrnjywg5_-n83"))
+($8 109 < 0_-fvi_hrnjywg5_-n82 "baseName" 107
+(name "baseName"
+)
+(value "synonym"
+)
+(uid "0_-fvi_hrnjywg5_-n82"))
+($8 110 < 0_-fvi_hrnjywg5_-n81 "guid" 107
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00037"
+)
+(uid "0_-fvi_hrnjywg5_-n81"))
+($7 111 < 0_-fvi_hrnjywg5_-n80 "details" 103
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-n80"))
+($8 112 < 0_-fvi_hrnjywg5_-n7z "documentation" 111
+(name "documentation"
+)
+(value "Detail field for comments."
+)
+(uid "0_-fvi_hrnjywg5_-n7z"))
+($8 113 < 0_-fvi_hrnjywg5_-n7y "guid" 111
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00038"
+)
+(uid "0_-fvi_hrnjywg5_-n7y"))
+($9 114 < 0_-fvi_hrnjywg5_-n7x "#<anon> (AbstractComponent, CompositeElement)##component," 103
+(name "")
+(uid "0_-fvi_hrnjywg5_-n7x"))
+($10 115 < 0_-fvi_hrnjywg5_-n7w "component#0" 114
+(name "component"
+)
+(uid "0_-fvi_hrnjywg5_-n7w")
+(multiplicity "1"))
+($8 116 < 0_-fvi_hrnjywg5_-n7v "documentation" 115
+(name "documentation"
+)
+(value "Component involved as an element in a composite."
+)
+(uid "0_-fvi_hrnjywg5_-n7v"))
+($8 117 < 0_-fvi_hrnjywg5_-n7u "guid" 115
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00027"
+)
+(uid "0_-fvi_hrnjywg5_-n7u"))
+($10 118 < 0_-fvi_hrnjywg5_-n7t "#1" 114
+(uid "0_-fvi_hrnjywg5_-n7t")
+(multiplicity "*"))
+($8 119 < 0_-fvi_hrnjywg5_-n7s "documentation" 118
+(name "documentation"
+)
+(value "List of element where the component is part of a composite."
+)
+(uid "0_-fvi_hrnjywg5_-n7s"))
+($8 120 < 0_-fvi_hrnjywg5_-n7r "guid" 118
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00028"
+)
+(uid "0_-fvi_hrnjywg5_-n7r"))
+($9 121 < 0_-fvi_hrnjywg5_-n7q "#<anon> (AbstractComponent, ComponentDbRef)##component," 103
+(name "")
+(uid "0_-fvi_hrnjywg5_-n7q"))
+($10 122 < 0_-fvi_hrnjywg5_-n7p "component#0" 121
+(changeability "frozen")
+(aggregation "composite")
+(name "component"
+)
+(uid "0_-fvi_hrnjywg5_-n7p")
+(multiplicity "1"))
+($8 123 < 0_-fvi_hrnjywg5_-n7o "documentation" 122
+(name "documentation"
+)
+(value "Link to the abstract component to which this entry belongs."
+)
+(uid "0_-fvi_hrnjywg5_-n7o"))
+($8 124 < 0_-fvi_hrnjywg5_-n7n "guid" 122
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00029"
+)
+(uid "0_-fvi_hrnjywg5_-n7n"))
+($10 125 < 0_-fvi_hrnjywg5_-n7m "#1" 121
+(uid "0_-fvi_hrnjywg5_-n7m")
+(multiplicity "*"))
+($8 126 < 0_-fvi_hrnjywg5_-n7l "guid" 125
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00030"
+)
+(uid "0_-fvi_hrnjywg5_-n7l"))
+($11 127 < 0_-fvi_hrnjywg5_-n7k "#<anon> (AbstractComponent, DataObject)" 103
+(uid "0_-fvi_hrnjywg5_-n7k"))
+($9 128 < 0_-fvi_hrnjywg5_-n7j "#<anon> (AbstractComponent, NaturalSource)##," 103
+(name "")
+(uid "0_-fvi_hrnjywg5_-n7j"))
+($10 129 < 0_-fvi_hrnjywg5_-n7i "#0" 128
+(uid "0_-fvi_hrnjywg5_-n7i")
+(isNavigable false))
+($8 130 < 0_-fvi_hrnjywg5_-n7h "documentation" 129
+(name "documentation"
+)
+(value "The component associated to the natural source."
+)
+(uid "0_-fvi_hrnjywg5_-n7h"))
+($10 131 < 0_-fvi_hrnjywg5_-n7g "#1" 128
+(uid "0_-fvi_hrnjywg5_-n7g"))
+($8 132 < 0_-fvi_hrnjywg5_-n7f "documentation" 131
+(name "documentation"
+)
+(value "The natural source of the component."
+)
+(uid "0_-fvi_hrnjywg5_-n7f"))
+($8 133 < 0_-fvi_hrnjywg5_-n7e "guid" 131
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00031"
+)
+(uid "0_-fvi_hrnjywg5_-n7e"))
+($9 134 < 0_-fvi_hrnjywg5_-n7d "#<anon> (AbstractComponent, Label)##component," 103
+(name "")
+(uid "0_-fvi_hrnjywg5_-n7d"))
+($10 135 < 0_-fvi_hrnjywg5_-n7c "component#0" 134
+(changeability "frozen")
+(aggregation "composite")
+(name "component"
+)
+(uid "0_-fvi_hrnjywg5_-n7c")
+(multiplicity "1"))
+($8 136 < 0_-fvi_hrnjywg5_-n7b "guid" 135
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00034"
+)
+(uid "0_-fvi_hrnjywg5_-n7b"))
+($10 137 < 0_-fvi_hrnjywg5_-n7a "#1" 134
+(uid "0_-fvi_hrnjywg5_-n7a")
+(multiplicity "*"))
+($8 138 < 0_-fvi_hrnjywg5_-n79 "guid" 137
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00035"
+)
+(uid "0_-fvi_hrnjywg5_-n79"))
+($9 139 < 0_-fvi_hrnjywg5_-n78 "#<anon> (AbstractComponent, RefNmrSpectrum)##refSampleComponent," 103
+(name "")
+(uid "0_-fvi_hrnjywg5_-n78"))
+($10 140 < 0_-fvi_hrnjywg5_-n77 "refSampleComponent#0" 139
+(changeability "frozen")
+(name "refSampleComponent"
+)
+(uid "0_-fvi_hrnjywg5_-n77"))
+($8 141 < 0_-fvi_hrnjywg5_-n76 "documentation" 140
+(name "documentation"
+)
+(value "RefSampleComponent of the component in this spectrum"
+)
+(uid "0_-fvi_hrnjywg5_-n76"))
+($8 142 < 0_-fvi_hrnjywg5_-n75 "guid" 140
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2012-03-28-17:22:44_00015"
+)
+(uid "0_-fvi_hrnjywg5_-n75"))
+($10 143 < 0_-fvi_hrnjywg5_-n74 "#1" 139
+(uid "0_-fvi_hrnjywg5_-n74")
+(isNavigable false))
+($8 144 < 0_-fvi_hrnjywg5_-n73 "isDerived" 139
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-n73"))
+($8 145 < 0_-fvi_hrnjywg5_-n72 "documentation" 103
+(name "documentation"
+)
+(value "The abstract component is used to define the details which characterise all components, these are name, any synonyms and a CAS number. There are 4 subclasses of abstract component: Molecular component (MolComponent), Cell, Substance and Composite."
+)
+(uid "0_-fvi_hrnjywg5_-n72"))
+($8 146 < 0_-fvi_hrnjywg5_-n71 "guid" 103
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00057"
+)
+(uid "0_-fvi_hrnjywg5_-n71"))
+($8 147 < 0_-fvi_hrnjywg5_-n70 "keyNames" 103
+(name "keyNames"
+)
+(value "name"
+)
+(uid "0_-fvi_hrnjywg5_-n70"))
+($6 148 < 0_-fvi_hrnjywg5_-n6z "CompositeElement" 1
+(name "CompositeElement"
+)
+(uid "0_-fvi_hrnjywg5_-n6z"))
+($7 149 < 0_-fvi_hrnjywg5_-n6y "serial" 148
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-n6y")
+(multiplicity "1"))
+($8 150 < 0_-fvi_hrnjywg5_-n6x "documentation" 149
+(name "documentation"
+)
+(value "Unique identifier."
+)
+(uid "0_-fvi_hrnjywg5_-n6x"))
+($8 151 < 0_-fvi_hrnjywg5_-n6w "isAutomatic" 149
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-n6w"))
+($8 152 < 0_-fvi_hrnjywg5_-n6v "guid" 149
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00001"
+)
+(uid "0_-fvi_hrnjywg5_-n6v"))
+($7 153 < 0_-fvi_hrnjywg5_-n6u "stoichiometry" 148
+(name "stoichiometry"
+)
+(uid "0_-fvi_hrnjywg5_-n6u"))
+($8 154 < 0_-fvi_hrnjywg5_-n6t "documentation" 153
+(name "documentation"
+)
+(value "The stoichiometry is the number of this element involved in the composit."
+)
+(uid "0_-fvi_hrnjywg5_-n6t"))
+($8 155 < 0_-fvi_hrnjywg5_-n6s "guid" 153
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00002"
+)
+(uid "0_-fvi_hrnjywg5_-n6s"))
+($7 156 < 0_-fvi_hrnjywg5_-n6r "details" 148
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-n6r"))
+($8 157 < 0_-fvi_hrnjywg5_-n6q "documentation" 156
+(name "documentation"
+)
+(value "Detail field for comments."
+)
+(uid "0_-fvi_hrnjywg5_-n6q"))
+($8 158 < 0_-fvi_hrnjywg5_-n6p "guid" 156
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00003"
+)
+(uid "0_-fvi_hrnjywg5_-n6p"))
+($9 159 < 0_-fvi_hrnjywg5_-n6o "#<anon> (CompositeElement, CompositeInteraction)##elements,interactions" 148
+(name "")
+(uid "0_-fvi_hrnjywg5_-n6o"))
+($10 160 < 0_-fvi_hrnjywg5_-n6n "elements#0" 159
+(name "elements"
+)
+(uid "0_-fvi_hrnjywg5_-n6n")
+(multiplicity "2"))
+($8 161 < 0_-fvi_hrnjywg5_-n6m "baseName" 160
+(name "baseName"
+)
+(value "element"
+)
+(uid "0_-fvi_hrnjywg5_-n6m"))
+($8 162 < 0_-fvi_hrnjywg5_-n6l "documentation" 160
+(name "documentation"
+)
+(value "The 2 composite elements involved in an interaction."
+)
+(uid "0_-fvi_hrnjywg5_-n6l"))
+($8 163 < 0_-fvi_hrnjywg5_-n6k "guid" 160
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00039"
+)
+(uid "0_-fvi_hrnjywg5_-n6k"))
+($10 164 < 0_-fvi_hrnjywg5_-n6j "interactions#1" 159
+(name "interactions"
+)
+(uid "0_-fvi_hrnjywg5_-n6j")
+(multiplicity "*"))
+($8 165 < 0_-fvi_hrnjywg5_-n6i "baseName" 164
+(name "baseName"
+)
+(value "interaction"
+)
+(uid "0_-fvi_hrnjywg5_-n6i"))
+($8 166 < 0_-fvi_hrnjywg5_-n6h "documentation" 164
+(name "documentation"
+)
+(value "Interactions where a composite element is involved."
+)
+(uid "0_-fvi_hrnjywg5_-n6h"))
+($8 167 < 0_-fvi_hrnjywg5_-n6g "guid" 164
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:28_00040"
+)
+(uid "0_-fvi_hrnjywg5_-n6g"))
+($11 168 < 0_-fvi_hrnjywg5_-n6f "#<anon> (CompositeElement, DataObject)" 148
+(uid "0_-fvi_hrnjywg5_-n6f"))
+($8 169 < 0_-fvi_hrnjywg5_-n6e "documentation" 148
+(name "documentation"
+)
+(value "One element of the composite."
+)
+(uid "0_-fvi_hrnjywg5_-n6e"))
+($8 170 < 0_-fvi_hrnjywg5_-n6d "guid" 148
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00058"
+)
+(uid "0_-fvi_hrnjywg5_-n6d"))
+($8 171 < 0_-fvi_hrnjywg5_-n6c "keyNames" 148
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-n6c"))
+($6 172 < 0_-fvi_hrnjywg5_-n6b "CompositeInteraction" 1
+(name "CompositeInteraction"
+)
+(uid "0_-fvi_hrnjywg5_-n6b"))
+($7 173 < 0_-fvi_hrnjywg5_-n6a "serial" 172
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-n6a")
+(multiplicity "1"))
+($8 174 < 0_-fvi_hrnjywg5_-n69 "documentation" 173
+(name "documentation"
+)
+(value "Unique identifier."
+)
+(uid "0_-fvi_hrnjywg5_-n69"))
+($8 175 < 0_-fvi_hrnjywg5_-n68 "isAutomatic" 173
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-n68"))
+($8 176 < 0_-fvi_hrnjywg5_-n67 "guid" 173
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00004"
+)
+(uid "0_-fvi_hrnjywg5_-n67"))
+($7 177 < 0_-fvi_hrnjywg5_-n66 "interactionType" 172
+(name "interactionType"
+)
+(uid "0_-fvi_hrnjywg5_-n66")
+(multiplicity "1"))
+($8 178 < 0_-fvi_hrnjywg5_-n65 "documentation" 177
+(name "documentation"
+)
+(value "The type of the interaction."
+)
+(uid "0_-fvi_hrnjywg5_-n65"))
+($8 179 < 0_-fvi_hrnjywg5_-n64 "guid" 177
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00005"
+)
+(uid "0_-fvi_hrnjywg5_-n64"))
+($7 180 < 0_-fvi_hrnjywg5_-n63 "affinity" 172
+(name "affinity"
+)
+(uid "0_-fvi_hrnjywg5_-n63"))
+($8 181 < 0_-fvi_hrnjywg5_-n62 "documentation" 180
+(name "documentation"
+)
+(value "The dissociation constant K of the complex, in units of M (moles/liter) to the appropriate power, according to the formula "
+"K=[A][B][C]/[ABC] "
+"Here in units of M-squared (for a ternary complex)."
+)
+(uid "0_-fvi_hrnjywg5_-n62"))
+($8 182 < 0_-fvi_hrnjywg5_-n61 "guid" 180
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00006"
+)
+(uid "0_-fvi_hrnjywg5_-n61"))
+($7 183 < 0_-fvi_hrnjywg5_-n60 "assessmentMethod" 172
+(name "assessmentMethod"
+)
+(uid "0_-fvi_hrnjywg5_-n60"))
+($8 184 < 0_-fvi_hrnjywg5_-n5z "documentation" 183
+(name "documentation"
+)
+(value "The assessment method used to define this interaction."
+)
+(uid "0_-fvi_hrnjywg5_-n5z"))
+($8 185 < 0_-fvi_hrnjywg5_-n5y "guid" 183
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00007"
+)
+(uid "0_-fvi_hrnjywg5_-n5y"))
+($7 186 < 0_-fvi_hrnjywg5_-n5x "details" 172
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-n5x"))
+($8 187 < 0_-fvi_hrnjywg5_-n5w "documentation" 186
+(name "documentation"
+)
+(value "Detail field for comments."
+)
+(uid "0_-fvi_hrnjywg5_-n5w"))
+($8 188 < 0_-fvi_hrnjywg5_-n5v "guid" 186
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00008"
+)
+(uid "0_-fvi_hrnjywg5_-n5v"))
+($11 189 < 0_-fvi_hrnjywg5_-n5u "#<anon> (CompositeInteraction, DataObject)" 172
+(uid "0_-fvi_hrnjywg5_-n5u"))
+($8 190 < 0_-fvi_hrnjywg5_-n5t "documentation" 172
+(name "documentation"
+)
+(value "The interaction between two composite elements."
+)
+(uid "0_-fvi_hrnjywg5_-n5t"))
+($8 191 < 0_-fvi_hrnjywg5_-n5s "guid" 172
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00059"
+)
+(uid "0_-fvi_hrnjywg5_-n5s"))
+($8 192 < 0_-fvi_hrnjywg5_-n5r "keyNames" 172
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-n5r"))
+($6 193 < 0_-fvi_hrnjywg5_-n5q "Construct" 1
+(name "Construct"
+)
+(uid "0_-fvi_hrnjywg5_-n5q"))
+($7 194 < 0_-fvi_hrnjywg5_-n5p "constructStatus" 193
+(name "constructStatus"
+)
+(uid "0_-fvi_hrnjywg5_-n5p")
+(multiplicity "1"))
+($8 195 < 0_-fvi_hrnjywg5_-n5o "documentation" 194
+(name "documentation"
+)
+(value "The status of the construct e.g. empty, with target, ..."
+)
+(uid "0_-fvi_hrnjywg5_-n5o"))
+($8 196 < 0_-fvi_hrnjywg5_-n5n "guid" 194
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00009"
+)
+(uid "0_-fvi_hrnjywg5_-n5n"))
+($7 197 < 0_-fvi_hrnjywg5_-n5m "sequenceType" 193
+(name "sequenceType"
+)
+(uid "0_-fvi_hrnjywg5_-n5m"))
+($8 198 < 0_-fvi_hrnjywg5_-n5l "documentation" 197
+(name "documentation"
+)
+(value "The type of nucleic acid sequence in the construct. Note that to find all the DNA molecules it is necessary to search for DNA + cDNA and for RNA, RNA + mRNA + tRNA."
+)
+(uid "0_-fvi_hrnjywg5_-n5l"))
+($8 199 < 0_-fvi_hrnjywg5_-n5k "guid" 197
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00010"
+)
+(uid "0_-fvi_hrnjywg5_-n5k"))
+($7 200 < 0_-fvi_hrnjywg5_-n5j "function" 193
+(name "function"
+)
+(uid "0_-fvi_hrnjywg5_-n5j"))
+($8 201 < 0_-fvi_hrnjywg5_-n5i "documentation" 200
+(name "documentation"
+)
+(value "The Construct class is also used to describe vectors and so the function attribute can be used to indicate the function of the vector e.g. expression."
+)
+(uid "0_-fvi_hrnjywg5_-n5i"))
+($8 202 < 0_-fvi_hrnjywg5_-n5h "guid" 200
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00011"
+)
+(uid "0_-fvi_hrnjywg5_-n5h"))
+($7 203 < 0_-fvi_hrnjywg5_-n5g "resistanceDetails" 193
+(name "resistanceDetails"
+)
+(uid "0_-fvi_hrnjywg5_-n5g"))
+($8 204 < 0_-fvi_hrnjywg5_-n5f "documentation" 203
+(name "documentation"
+)
+(value "Detail field for resistance information. Precise information should go to a MolCompFeature."
+)
+(uid "0_-fvi_hrnjywg5_-n5f"))
+($8 205 < 0_-fvi_hrnjywg5_-n5e "guid" 203
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00012"
+)
+(uid "0_-fvi_hrnjywg5_-n5e"))
+($7 206 < 0_-fvi_hrnjywg5_-n5d "promoterDetails" 193
+(name "promoterDetails"
+)
+(uid "0_-fvi_hrnjywg5_-n5d"))
+($8 207 < 0_-fvi_hrnjywg5_-n5c "documentation" 206
+(name "documentation"
+)
+(value "Detail field for promoter information. Precise information should go to a MolCompFeature."
+)
+(uid "0_-fvi_hrnjywg5_-n5c"))
+($8 208 < 0_-fvi_hrnjywg5_-n5b "guid" 206
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00013"
+)
+(uid "0_-fvi_hrnjywg5_-n5b"))
+($7 209 < 0_-fvi_hrnjywg5_-n5a "markerDetails" 193
+(name "markerDetails"
+)
+(uid "0_-fvi_hrnjywg5_-n5a"))
+($8 210 < 0_-fvi_hrnjywg5_-n59 "documentation" 209
+(name "documentation"
+)
+(value "Detail field for marker information. Precise information should go to a MolCompFeature."
+)
+(uid "0_-fvi_hrnjywg5_-n59"))
+($8 211 < 0_-fvi_hrnjywg5_-n58 "guid" 209
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00014"
+)
+(uid "0_-fvi_hrnjywg5_-n58"))
+($11 212 < 0_-fvi_hrnjywg5_-n57 "#<anon> (Construct, MolComponent)" 193
+(uid "0_-fvi_hrnjywg5_-n57"))
+($8 213 < 0_-fvi_hrnjywg5_-n56 "documentation" 193
+(name "documentation"
+)
+(value "This is a subtype of MolComponent. It is used to summarise information about a construct such as an expression vector plasmid."
+)
+(uid "0_-fvi_hrnjywg5_-n56"))
+($8 214 < 0_-fvi_hrnjywg5_-n55 "guid" 193
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00060"
+)
+(uid "0_-fvi_hrnjywg5_-n55"))
+($6 215 < 0_-fvi_hrnjywg5_-n54 "Cell" 1
+(name "Cell"
+)
+(uid "0_-fvi_hrnjywg5_-n54"))
+($7 216 < 0_-fvi_hrnjywg5_-n53 "cultureCollection" 215
+(name "cultureCollection"
+)
+(uid "0_-fvi_hrnjywg5_-n53"))
+($8 217 < 0_-fvi_hrnjywg5_-n52 "documentation" 216
+(name "documentation"
+)
+(value "N/A"
+)
+(uid "0_-fvi_hrnjywg5_-n52"))
+($8 218 < 0_-fvi_hrnjywg5_-n51 "guid" 216
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00015"
+)
+(uid "0_-fvi_hrnjywg5_-n51"))
+($7 219 < 0_-fvi_hrnjywg5_-n50 "competentMethod" 215
+(name "competentMethod"
+)
+(uid "0_-fvi_hrnjywg5_-n50"))
+($8 220 < 0_-fvi_hrnjywg5_-n4z "documentation" 219
+(name "documentation"
+)
+(value "The method used to obtain competent cells."
+)
+(uid "0_-fvi_hrnjywg5_-n4z"))
+($8 221 < 0_-fvi_hrnjywg5_-n4y "guid" 219
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00016"
+)
+(uid "0_-fvi_hrnjywg5_-n4y"))
+($7 222 < 0_-fvi_hrnjywg5_-n4x "features" 215
+(name "features"
+)
+(uid "0_-fvi_hrnjywg5_-n4x"))
+($8 223 < 0_-fvi_hrnjywg5_-n4w "documentation" 222
+(name "documentation"
+)
+(value "The specific properties of the cell. e.g. 'cannot used galactose'."
+)
+(uid "0_-fvi_hrnjywg5_-n4w"))
+($8 224 < 0_-fvi_hrnjywg5_-n4v "guid" 222
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00017"
+)
+(uid "0_-fvi_hrnjywg5_-n4v"))
+($7 225 < 0_-fvi_hrnjywg5_-n4u "divided" 215
+(name "divided"
+)
+(uid "0_-fvi_hrnjywg5_-n4u"))
+($8 226 < 0_-fvi_hrnjywg5_-n4t "documentation" 225
+(name "documentation"
+)
+(value "N/A"
+)
+(uid "0_-fvi_hrnjywg5_-n4t"))
+($8 227 < 0_-fvi_hrnjywg5_-n4s "guid" 225
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00018"
+)
+(uid "0_-fvi_hrnjywg5_-n4s"))
+($7 228 < 0_-fvi_hrnjywg5_-n4r "phase" 215
+(name "phase"
+)
+(uid "0_-fvi_hrnjywg5_-n4r"))
+($8 229 < 0_-fvi_hrnjywg5_-n4q "documentation" 228
+(name "documentation"
+)
+(value "N/A"
+)
+(uid "0_-fvi_hrnjywg5_-n4q"))
+($8 230 < 0_-fvi_hrnjywg5_-n4p "guid" 228
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00019"
+)
+(uid "0_-fvi_hrnjywg5_-n4p"))
+($11 231 < 0_-fvi_hrnjywg5_-n4o "#<anon> (Cell, AbstractComponent)" 215
+(uid "0_-fvi_hrnjywg5_-n4o"))
+($8 232 < 0_-fvi_hrnjywg5_-n4n "documentation" 215
+(name "documentation"
+)
+(value "Cell is a subclass of AbstractComponent. The information on the cell component."
+)
+(uid "0_-fvi_hrnjywg5_-n4n"))
+($8 233 < 0_-fvi_hrnjywg5_-n4m "guid" 215
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00061"
+)
+(uid "0_-fvi_hrnjywg5_-n4m"))
+($6 234 < 0_-fvi_hrnjywg5_-n4l "Composite" 1
+(name "Composite"
+)
+(uid "0_-fvi_hrnjywg5_-n4l"))
+($7 235 < 0_-fvi_hrnjywg5_-n4k "assessmentMethod" 234
+(name "assessmentMethod"
+)
+(uid "0_-fvi_hrnjywg5_-n4k"))
+($8 236 < 0_-fvi_hrnjywg5_-n4j "documentation" 235
+(name "documentation"
+)
+(value "The assessment Method used to determine the composite."
+)
+(uid "0_-fvi_hrnjywg5_-n4j"))
+($8 237 < 0_-fvi_hrnjywg5_-n4i "guid" 235
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00024"
+)
+(uid "0_-fvi_hrnjywg5_-n4i"))
+($7 238 < 0_-fvi_hrnjywg5_-n4h "molecularMass" 234
+(name "molecularMass"
+)
+(uid "0_-fvi_hrnjywg5_-n4h"))
+($8 239 < 0_-fvi_hrnjywg5_-n4g "documentation" 238
+(name "documentation"
+)
+(value "The experimental molecular mass in dalton (Da)."
+)
+(uid "0_-fvi_hrnjywg5_-n4g"))
+($8 240 < 0_-fvi_hrnjywg5_-n4f "guid" 238
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00025"
+)
+(uid "0_-fvi_hrnjywg5_-n4f"))
+($7 241 < 0_-fvi_hrnjywg5_-n4e "molecularMassMethod" 234
+(name "molecularMassMethod"
+)
+(uid "0_-fvi_hrnjywg5_-n4e"))
+($8 242 < 0_-fvi_hrnjywg5_-n4d "documentation" 241
+(name "documentation"
+)
+(value "The method used to determine the experimental molecular mass."
+)
+(uid "0_-fvi_hrnjywg5_-n4d"))
+($8 243 < 0_-fvi_hrnjywg5_-n4c "guid" 241
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00026"
+)
+(uid "0_-fvi_hrnjywg5_-n4c"))
+($11 244 < 0_-fvi_hrnjywg5_-n4b "#<anon> (Composite, AbstractComponent)" 234
+(uid "0_-fvi_hrnjywg5_-n4b"))
+($9 245 < 0_-fvi_hrnjywg5_-n4a "#<anon> (Composite, CompositeElement)##,elements" 234
+(name "")
+(uid "0_-fvi_hrnjywg5_-n4a"))
+($10 246 < 0_-fvi_hrnjywg5_-n49 "#0" 245
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-n49")
+(multiplicity "1"))
+($8 247 < 0_-fvi_hrnjywg5_-n48 "guid" 246
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00020"
+)
+(uid "0_-fvi_hrnjywg5_-n48"))
+($10 248 < 0_-fvi_hrnjywg5_-n47 "elements#1" 245
+(name "elements"
+)
+(uid "0_-fvi_hrnjywg5_-n47")
+(multiplicity "*"))
+($8 249 < 0_-fvi_hrnjywg5_-n46 "baseName" 248
+(name "baseName"
+)
+(value "element"
+)
+(uid "0_-fvi_hrnjywg5_-n46"))
+($8 250 < 0_-fvi_hrnjywg5_-n45 "guid" 248
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00021"
+)
+(uid "0_-fvi_hrnjywg5_-n45"))
+($9 251 < 0_-fvi_hrnjywg5_-n44 "#<anon> (Composite, CompositeInteraction)##,interactions" 234
+(name "")
+(uid "0_-fvi_hrnjywg5_-n44"))
+($10 252 < 0_-fvi_hrnjywg5_-n43 "#0" 251
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-n43")
+(multiplicity "1"))
+($8 253 < 0_-fvi_hrnjywg5_-n42 "guid" 252
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00022"
+)
+(uid "0_-fvi_hrnjywg5_-n42"))
+($10 254 < 0_-fvi_hrnjywg5_-n41 "interactions#1" 251
+(name "interactions"
+)
+(uid "0_-fvi_hrnjywg5_-n41")
+(multiplicity "*"))
+($8 255 < 0_-fvi_hrnjywg5_-n40 "baseName" 254
+(name "baseName"
+)
+(value "interaction"
+)
+(uid "0_-fvi_hrnjywg5_-n40"))
+($8 256 < 0_-fvi_hrnjywg5_-n3z "guid" 254
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00023"
+)
+(uid "0_-fvi_hrnjywg5_-n3z"))
+($8 257 < 0_-fvi_hrnjywg5_-n3y "documentation" 234
+(name "documentation"
+)
+(value "Composite is a subclass of AbstractComponent. It is a non-covalent complex of any kind. E.g. A DNA duplex, a micelle, possibly containing other molecules. A protein with an inhibitor bound. A cell containing plasmids."
+)
+(uid "0_-fvi_hrnjywg5_-n3y"))
+($8 258 < 0_-fvi_hrnjywg5_-n3x "guid" 234
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00062"
+)
+(uid "0_-fvi_hrnjywg5_-n3x"))
+($6 259 < 0_-fvi_hrnjywg5_-n3w "Primer" 1
+(name "Primer"
+)
+(uid "0_-fvi_hrnjywg5_-n3w"))
+($7 260 < 0_-fvi_hrnjywg5_-n3v "direction" 259
+(name "direction"
+)
+(uid "0_-fvi_hrnjywg5_-n3v")
+(multiplicity "1"))
+($8 261 < 0_-fvi_hrnjywg5_-n3u "documentation" 260
+(name "documentation"
+)
+(value "Which direction? 5' or 3'."
+)
+(uid "0_-fvi_hrnjywg5_-n3u"))
+($8 262 < 0_-fvi_hrnjywg5_-n3t "guid" 260
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00027"
+)
+(uid "0_-fvi_hrnjywg5_-n3t"))
+($7 263 < 0_-fvi_hrnjywg5_-n3s "isUniversal" 259
+(name "isUniversal"
+)
+(uid "0_-fvi_hrnjywg5_-n3s")
+(multiplicity "1"))
+($8 264 < 0_-fvi_hrnjywg5_-n3r "documentation" 263
+(name "documentation"
+)
+(value "Is universal for all polymer molecules?"
+)
+(uid "0_-fvi_hrnjywg5_-n3r"))
+($8 265 < 0_-fvi_hrnjywg5_-n3q "guid" 263
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00028"
+)
+(uid "0_-fvi_hrnjywg5_-n3q"))
+($7 266 < 0_-fvi_hrnjywg5_-n3p "meltingTemperature" 259
+(name "meltingTemperature"
+)
+(uid "0_-fvi_hrnjywg5_-n3p"))
+($8 267 < 0_-fvi_hrnjywg5_-n3o "documentation" 266
+(name "documentation"
+)
+(value "The melting temperature at which this primer is used."
+)
+(uid "0_-fvi_hrnjywg5_-n3o"))
+($8 268 < 0_-fvi_hrnjywg5_-n3n "guid" 266
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00029"
+)
+(uid "0_-fvi_hrnjywg5_-n3n"))
+($11 269 < 0_-fvi_hrnjywg5_-n3m "#<anon> (Primer, MolComponent)" 259
+(uid "0_-fvi_hrnjywg5_-n3m"))
+($8 270 < 0_-fvi_hrnjywg5_-n3l "documentation" 259
+(name "documentation"
+)
+(value "This is a subtype of MolComponent. A specific oligonucleotide or primer such as a PCR-primer used to amplify nucleic acid fragments."
+)
+(uid "0_-fvi_hrnjywg5_-n3l"))
+($8 271 < 0_-fvi_hrnjywg5_-n3k "guid" 259
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00001"
+)
+(uid "0_-fvi_hrnjywg5_-n3k"))
+($6 272 < 0_-fvi_hrnjywg5_-n3j "Substance" 1
+(name "Substance"
+)
+(uid "0_-fvi_hrnjywg5_-n3j"))
+($11 273 < 0_-fvi_hrnjywg5_-n3i "#<anon> (Substance, AbstractComponent)" 272
+(uid "0_-fvi_hrnjywg5_-n3i"))
+($8 274 < 0_-fvi_hrnjywg5_-n3h "documentation" 272
+(name "documentation"
+)
+(value "A Substance should be limited to cases that cannot be put under any of the others. Typically: bovine calf serum, light petroleum, wheat germ extract, algal hydrolysate."
+)
+(uid "0_-fvi_hrnjywg5_-n3h"))
+($8 275 < 0_-fvi_hrnjywg5_-n3g "guid" 272
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00002"
+)
+(uid "0_-fvi_hrnjywg5_-n3g"))
+($6 276 < 0_-fvi_hrnjywg5_-n3f "RestrictionEnzyme" 1
+(name "RestrictionEnzyme"
+)
+(uid "0_-fvi_hrnjywg5_-n3f"))
+($7 277 < 0_-fvi_hrnjywg5_-n3e "recogSeqCoding" 276
+(name "recogSeqCoding"
+)
+(uid "0_-fvi_hrnjywg5_-n3e"))
+($8 278 < 0_-fvi_hrnjywg5_-n3d "documentation" 277
+(name "documentation"
+)
+(value "Recognition sequence on coding strand."
+)
+(uid "0_-fvi_hrnjywg5_-n3d"))
+($8 279 < 0_-fvi_hrnjywg5_-n3c "guid" 277
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00030"
+)
+(uid "0_-fvi_hrnjywg5_-n3c"))
+($7 280 < 0_-fvi_hrnjywg5_-n3b "recogSeqNonCoding" 276
+(name "recogSeqNonCoding"
+)
+(uid "0_-fvi_hrnjywg5_-n3b"))
+($8 281 < 0_-fvi_hrnjywg5_-n3a "documentation" 280
+(name "documentation"
+)
+(value "Recognition sequence on non-coding strand."
+)
+(uid "0_-fvi_hrnjywg5_-n3a"))
+($8 282 < 0_-fvi_hrnjywg5_-n39 "guid" 280
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00031"
+)
+(uid "0_-fvi_hrnjywg5_-n39"))
+($7 283 < 0_-fvi_hrnjywg5_-n38 "cutOffsetCoding" 276
+(name "cutOffsetCoding"
+)
+(uid "0_-fvi_hrnjywg5_-n38"))
+($8 284 < 0_-fvi_hrnjywg5_-n37 "documentation" 283
+(name "documentation"
+)
+(value "Enzyme cut offset on coding strand."
+)
+(uid "0_-fvi_hrnjywg5_-n37"))
+($8 285 < 0_-fvi_hrnjywg5_-n36 "guid" 283
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00032"
+)
+(uid "0_-fvi_hrnjywg5_-n36"))
+($7 286 < 0_-fvi_hrnjywg5_-n35 "cutOffsetNonCoding" 276
+(name "cutOffsetNonCoding"
+)
+(uid "0_-fvi_hrnjywg5_-n35"))
+($8 287 < 0_-fvi_hrnjywg5_-n34 "documentation" 286
+(name "documentation"
+)
+(value "Enzyme cut offset on non-coding strand."
+)
+(uid "0_-fvi_hrnjywg5_-n34"))
+($8 288 < 0_-fvi_hrnjywg5_-n33 "guid" 286
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00033"
+)
+(uid "0_-fvi_hrnjywg5_-n33"))
+($11 289 < 0_-fvi_hrnjywg5_-n32 "#<anon> (RestrictionEnzyme, MolComponent)" 276
+(uid "0_-fvi_hrnjywg5_-n32"))
+($8 290 < 0_-fvi_hrnjywg5_-n31 "documentation" 276
+(name "documentation"
+)
+(value "This is a subtype of MolComponent. Restriction enzymes are known to cleave nucleic acide sequences at certain positions."
+)
+(uid "0_-fvi_hrnjywg5_-n31"))
+($8 291 < 0_-fvi_hrnjywg5_-n30 "guid" 276
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00003"
+)
+(uid "0_-fvi_hrnjywg5_-n30"))
+($12 292 < 0_-fvi_hrnjywg5_-n2z "#<anon> (RefSampleComponent, Molecule)" 1
+(uid "0_-fvi_hrnjywg5_-n2z"))
+($12 293 < 0_-fvi_hrnjywg5_-n2y "#<anon> (RefSampleComponent, Taxonomy)" 1
+(uid "0_-fvi_hrnjywg5_-n2y"))
+($6 294 < 0_-fvi_hrnjywg5_-n2x "ComponentDbRef" 1
+(name "ComponentDbRef"
+)
+(uid "0_-fvi_hrnjywg5_-n2x"))
+($7 295 < 0_-fvi_hrnjywg5_-n2w "serial" 294
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-n2w")
+(multiplicity "1"))
+($8 296 < 0_-fvi_hrnjywg5_-n2v "documentation" 295
+(name "documentation"
+)
+(value "Unique identifier."
+)
+(uid "0_-fvi_hrnjywg5_-n2v"))
+($8 297 < 0_-fvi_hrnjywg5_-n2u "isAutomatic" 295
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-n2u"))
+($8 298 < 0_-fvi_hrnjywg5_-n2t "guid" 295
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00036"
+)
+(uid "0_-fvi_hrnjywg5_-n2t"))
+($7 299 < 0_-fvi_hrnjywg5_-n2s "alignBegin" 294
+(name "alignBegin"
+)
+(uid "0_-fvi_hrnjywg5_-n2s"))
+($8 300 < 0_-fvi_hrnjywg5_-n2r "documentation" 299
+(name "documentation"
+)
+(value "Optional. Residue number  (MolResidue.serial)in the molecule sequence where the alignment begins."
+)
+(uid "0_-fvi_hrnjywg5_-n2r"))
+($8 301 < 0_-fvi_hrnjywg5_-n2q "guid" 299
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00037"
+)
+(uid "0_-fvi_hrnjywg5_-n2q"))
+($7 302 < 0_-fvi_hrnjywg5_-n2p "alignEnd" 294
+(name "alignEnd"
+)
+(uid "0_-fvi_hrnjywg5_-n2p"))
+($8 303 < 0_-fvi_hrnjywg5_-n2o "documentation" 302
+(name "documentation"
+)
+(value "Optional. Residue number (MolResidue.serial) in the molecule sequence where the alignment ends."
+)
+(uid "0_-fvi_hrnjywg5_-n2o"))
+($8 304 < 0_-fvi_hrnjywg5_-n2n "guid" 302
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00038"
+)
+(uid "0_-fvi_hrnjywg5_-n2n"))
+($7 305 < 0_-fvi_hrnjywg5_-n2m "dbRefAlignBegin" 294
+(name "dbRefAlignBegin"
+)
+(uid "0_-fvi_hrnjywg5_-n2m"))
+($8 306 < 0_-fvi_hrnjywg5_-n2l "documentation" 305
+(name "documentation"
+)
+(value "Optional. Residue number in the database reference sequence where the alignment begins."
+)
+(uid "0_-fvi_hrnjywg5_-n2l"))
+($8 307 < 0_-fvi_hrnjywg5_-n2k "guid" 305
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00039"
+)
+(uid "0_-fvi_hrnjywg5_-n2k"))
+($7 308 < 0_-fvi_hrnjywg5_-n2j "dbRefAlignEnd" 294
+(name "dbRefAlignEnd"
+)
+(uid "0_-fvi_hrnjywg5_-n2j"))
+($8 309 < 0_-fvi_hrnjywg5_-n2i "documentation" 308
+(name "documentation"
+)
+(value "Optional. Residue number in the database reference sequence where the alignment ends."
+)
+(uid "0_-fvi_hrnjywg5_-n2i"))
+($8 310 < 0_-fvi_hrnjywg5_-n2h "guid" 308
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00040"
+)
+(uid "0_-fvi_hrnjywg5_-n2h"))
+($7 311 < 0_-fvi_hrnjywg5_-n2g "threadingScore" 294
+(name "threadingScore"
+)
+(uid "0_-fvi_hrnjywg5_-n2g"))
+($8 312 < 0_-fvi_hrnjywg5_-n2f "documentation" 311
+(name "documentation"
+)
+(value "The scoring value."
+)
+(uid "0_-fvi_hrnjywg5_-n2f"))
+($8 313 < 0_-fvi_hrnjywg5_-n2e "guid" 311
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00041"
+)
+(uid "0_-fvi_hrnjywg5_-n2e"))
+($7 314 < 0_-fvi_hrnjywg5_-n2d "threadingProg" 294
+(name "threadingProg"
+)
+(uid "0_-fvi_hrnjywg5_-n2d"))
+($8 315 < 0_-fvi_hrnjywg5_-n2c "documentation" 314
+(name "documentation"
+)
+(value "Program used to obtain the threading score."
+)
+(uid "0_-fvi_hrnjywg5_-n2c"))
+($8 316 < 0_-fvi_hrnjywg5_-n2b "guid" 314
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00042"
+)
+(uid "0_-fvi_hrnjywg5_-n2b"))
+($7 317 < 0_-fvi_hrnjywg5_-n2a "details" 294
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-n2a"))
+($8 318 < 0_-fvi_hrnjywg5_-n29 "documentation" 317
+(name "documentation"
+)
+(value "Detail field for comments."
+)
+(uid "0_-fvi_hrnjywg5_-n29"))
+($8 319 < 0_-fvi_hrnjywg5_-n28 "guid" 317
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00043"
+)
+(uid "0_-fvi_hrnjywg5_-n28"))
+($9 320 < 0_-fvi_hrnjywg5_-n27 "#<anon> (ComponentDbRef, Entry)##,dbRef" 294
+(name "")
+(uid "0_-fvi_hrnjywg5_-n27"))
+($10 321 < 0_-fvi_hrnjywg5_-n26 "#0" 320
+(uid "0_-fvi_hrnjywg5_-n26")
+(multiplicity "*"))
+($8 322 < 0_-fvi_hrnjywg5_-n25 "documentation" 321
+(name "documentation"
+)
+(value "The ComponentDbRef list associated to a particular database reference."
+)
+(uid "0_-fvi_hrnjywg5_-n25"))
+($8 323 < 0_-fvi_hrnjywg5_-n24 "guid" 321
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00034"
+)
+(uid "0_-fvi_hrnjywg5_-n24"))
+($10 324 < 0_-fvi_hrnjywg5_-n23 "dbRef#1" 320
+(name "dbRef"
+)
+(uid "0_-fvi_hrnjywg5_-n23")
+(multiplicity "1"))
+($8 325 < 0_-fvi_hrnjywg5_-n22 "documentation" 324
+(name "documentation"
+)
+(value "The database reference to which this entry belongs."
+)
+(uid "0_-fvi_hrnjywg5_-n22"))
+($8 326 < 0_-fvi_hrnjywg5_-n21 "guid" 324
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00035"
+)
+(uid "0_-fvi_hrnjywg5_-n21"))
+($11 327 < 0_-fvi_hrnjywg5_-n20 "#<anon> (ComponentDbRef, DataObject)" 294
+(uid "0_-fvi_hrnjywg5_-n20"))
+($8 328 < 0_-fvi_hrnjywg5_-n1z "documentation" 294
+(name "documentation"
+)
+(value "The link between a database reference (DbRef) and a component."
+)
+(uid "0_-fvi_hrnjywg5_-n1z"))
+($8 329 < 0_-fvi_hrnjywg5_-n1y "guid" 294
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00004"
+)
+(uid "0_-fvi_hrnjywg5_-n1y"))
+($8 330 < 0_-fvi_hrnjywg5_-n1x "keyNames" 294
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-n1x"))
+($12 331 < 0_-fvi_hrnjywg5_-n1w "#<anon> (RefSampleComponent, DbRef)" 1
+(uid "0_-fvi_hrnjywg5_-n1w"))
+($12 332 < 0_-fvi_hrnjywg5_-n1v "#<anon> (RefSampleComponent, Affiliation)" 1
+(uid "0_-fvi_hrnjywg5_-n1v"))
+($6 333 < 0_-fvi_hrnjywg5_-n1u "MolCompFeature" 1
+(name "MolCompFeature"
+)
+(uid "0_-fvi_hrnjywg5_-n1u"))
+($7 334 < 0_-fvi_hrnjywg5_-n1t "serial" 333
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-n1t")
+(multiplicity "1"))
+($8 335 < 0_-fvi_hrnjywg5_-n1s "isAutomatic" 334
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-n1s"))
+($8 336 < 0_-fvi_hrnjywg5_-n1r "guid" 334
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00046"
+)
+(uid "0_-fvi_hrnjywg5_-n1r"))
+($7 337 < 0_-fvi_hrnjywg5_-n1q "name" 333
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-n1q")
+(multiplicity "1"))
+($8 338 < 0_-fvi_hrnjywg5_-n1p "documentation" 337
+(name "documentation"
+)
+(value "The name of the feature."
+)
+(uid "0_-fvi_hrnjywg5_-n1p"))
+($8 339 < 0_-fvi_hrnjywg5_-n1o "guid" 337
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00047"
+)
+(uid "0_-fvi_hrnjywg5_-n1o"))
+($7 340 < 0_-fvi_hrnjywg5_-n1n "featureType" 333
+(name "featureType"
+)
+(uid "0_-fvi_hrnjywg5_-n1n")
+(multiplicity "1"))
+($8 341 < 0_-fvi_hrnjywg5_-n1m "documentation" 340
+(name "documentation"
+)
+(value "The type of the feature e.g. 'tag', 'cleavage site', 'promoter', 'resistance', 'marker', 'product',..."
+)
+(uid "0_-fvi_hrnjywg5_-n1m"))
+($8 342 < 0_-fvi_hrnjywg5_-n1l "guid" 340
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00048"
+)
+(uid "0_-fvi_hrnjywg5_-n1l"))
+($7 343 < 0_-fvi_hrnjywg5_-n1k "status" 333
+(name "status"
+)
+(uid "0_-fvi_hrnjywg5_-n1k"))
+($8 344 < 0_-fvi_hrnjywg5_-n1j "documentation" 343
+(name "documentation"
+)
+(value "The status of the feature e.g. cut, uncut,..."
+)
+(uid "0_-fvi_hrnjywg5_-n1j"))
+($8 345 < 0_-fvi_hrnjywg5_-n1i "guid" 343
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00049"
+)
+(uid "0_-fvi_hrnjywg5_-n1i"))
+($7 346 < 0_-fvi_hrnjywg5_-n1h "startSeqId" 333
+(name "startSeqId"
+)
+(uid "0_-fvi_hrnjywg5_-n1h"))
+($8 347 < 0_-fvi_hrnjywg5_-n1g "documentation" 346
+(name "documentation"
+)
+(value "Residue number (MolResidue.serial) of the start sequence in the MolComponent."
+)
+(uid "0_-fvi_hrnjywg5_-n1g"))
+($8 348 < 0_-fvi_hrnjywg5_-n1f "guid" 346
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00050"
+)
+(uid "0_-fvi_hrnjywg5_-n1f"))
+($7 349 < 0_-fvi_hrnjywg5_-n1e "endSeqId" 333
+(name "endSeqId"
+)
+(uid "0_-fvi_hrnjywg5_-n1e"))
+($8 350 < 0_-fvi_hrnjywg5_-n1d "documentation" 349
+(name "documentation"
+)
+(value "Residue number (MolResidue.serial) of the end sequence in the MolComponent."
+)
+(uid "0_-fvi_hrnjywg5_-n1d"))
+($8 351 < 0_-fvi_hrnjywg5_-n1c "guid" 349
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00051"
+)
+(uid "0_-fvi_hrnjywg5_-n1c"))
+($7 352 < 0_-fvi_hrnjywg5_-n1b "length" 333
+(changeability "frozen")
+(name "length"
+)
+(uid "0_-fvi_hrnjywg5_-n1b"))
+($8 353 < 0_-fvi_hrnjywg5_-n1a "isDerived" 352
+(name "isDerived"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-n1a"))
+($8 354 < 0_-fvi_hrnjywg5_-n19 "documentation" 352
+(name "documentation"
+)
+(value "The sequence length of the feature."
+)
+(uid "0_-fvi_hrnjywg5_-n19"))
+($8 355 < 0_-fvi_hrnjywg5_-n18 "guid" 352
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00052"
+)
+(uid "0_-fvi_hrnjywg5_-n18"))
+($7 356 < 0_-fvi_hrnjywg5_-n17 "ordering" 333
+(name "ordering"
+)
+(uid "0_-fvi_hrnjywg5_-n17"))
+($8 357 < 0_-fvi_hrnjywg5_-n16 "documentation" 356
+(name "documentation"
+)
+(value "Integer defining the ordering of MolCompFeatures. For when startSeqId and endSeqId are not known."
+)
+(uid "0_-fvi_hrnjywg5_-n16"))
+($8 358 < 0_-fvi_hrnjywg5_-n15 "guid" 356
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00053"
+)
+(uid "0_-fvi_hrnjywg5_-n15"))
+($7 359 < 0_-fvi_hrnjywg5_-n14 "details" 333
+(name "details"
+)
+(uid "0_-fvi_hrnjywg5_-n14"))
+($8 360 < 0_-fvi_hrnjywg5_-n13 "documentation" 359
+(name "documentation"
+)
+(value "Detail field for comments."
+)
+(uid "0_-fvi_hrnjywg5_-n13"))
+($8 361 < 0_-fvi_hrnjywg5_-n12 "guid" 359
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00054"
+)
+(uid "0_-fvi_hrnjywg5_-n12"))
+($13 362 < 0_-fvi_hrnjywg5_-n11 "getLength" 333
+(name "getLength"
+)
+(uid "0_-fvi_hrnjywg5_-n11")
+(isQuery true))
+($8 363 < 0_-fvi_hrnjywg5_-n10 "documentation" 362
+(name "documentation"
+)
+(value "Getter for derived attribute length."
+)
+(uid "0_-fvi_hrnjywg5_-n10"))
+($8 364 < 0_-fvi_hrnjywg5_-n0z "opType" 362
+(name "opType"
+)
+(value "get"
+)
+(uid "0_-fvi_hrnjywg5_-n0z"))
+($8 365 < 0_-fvi_hrnjywg5_-n0y "guid" 362
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00055"
+)
+(uid "0_-fvi_hrnjywg5_-n0y"))
+($8 366 < 0_-fvi_hrnjywg5_-n0x "code:java" 362
+(name "code:java"
+)
+(value "java.lang.Integer n1 = getStartSeqId();"
+"java.lang.Integer n2 = getEndSeqId();"
+"if ((n1 == null) || (n2 == null))"
+"  result = null;"
+"else"
+"  result = n2 - n1 + 1;"
+)
+(uid "0_-fvi_hrnjywg5_-n0x"))
+($8 367 < 0_-fvi_hrnjywg5_-n0w "code:python" 362
+(name "code:python"
+)
+(value "if self.startSeqId == None or self.endSeqId == None:"
+"  result = None"
+"else:"
+"  result = self.endSeqId - self.startSeqId + 1"
+)
+(uid "0_-fvi_hrnjywg5_-n0w"))
+($11 368 < 0_-fvi_hrnjywg5_-n0v "#<anon> (MolCompFeature, DataObject)" 333
+(uid "0_-fvi_hrnjywg5_-n0v"))
+($9 369 < 0_-fvi_hrnjywg5_-n0u "#<anon> (MolCompFeature, MolComponent)##refMolCompFeatures,refMolComponent" 333
+(name "")
+(uid "0_-fvi_hrnjywg5_-n0u"))
+($10 370 < 0_-fvi_hrnjywg5_-n0t "refMolCompFeatures#0" 369
+(name "refMolCompFeatures"
+)
+(uid "0_-fvi_hrnjywg5_-n0t")
+(multiplicity "*"))
+($8 371 < 0_-fvi_hrnjywg5_-n0s "baseName" 370
+(name "baseName"
+)
+(value "refMolCompFeature"
+)
+(uid "0_-fvi_hrnjywg5_-n0s"))
+($8 372 < 0_-fvi_hrnjywg5_-n0r "guid" 370
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00044"
+)
+(uid "0_-fvi_hrnjywg5_-n0r"))
+($10 373 < 0_-fvi_hrnjywg5_-n0q "refMolComponent#1" 369
+(name "refMolComponent"
+)
+(uid "0_-fvi_hrnjywg5_-n0q"))
+($8 374 < 0_-fvi_hrnjywg5_-n0p "guid" 373
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00045"
+)
+(uid "0_-fvi_hrnjywg5_-n0p"))
+($8 375 < 0_-fvi_hrnjywg5_-n0o "documentation" 333
+(name "documentation"
+)
+(value "The MolCompFeature is used to assign information to each part of the MolComponent sequence, as defined by a series of MolResidues with consecutive serials."
+)
+(uid "0_-fvi_hrnjywg5_-n0o"))
+($8 376 < 0_-fvi_hrnjywg5_-n0n "guid" 333
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00005"
+)
+(uid "0_-fvi_hrnjywg5_-n0n"))
+($8 377 < 0_-fvi_hrnjywg5_-n0m "keyNames" 333
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-n0m"))
+($6 378 < 0_-fvi_hrnjywg5_-n0l "FeatureType" 1
+(name "FeatureType"
+)
+(uid "0_-fvi_hrnjywg5_-n0l"))
+($11 379 < 0_-fvi_hrnjywg5_-n0k "#<anon> (FeatureType, Line)" 378
+(uid "0_-fvi_hrnjywg5_-n0k"))
+($8 380 < 0_-fvi_hrnjywg5_-n0j "isOpen" 378
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-n0j"))
+($8 381 < 0_-fvi_hrnjywg5_-n0i "enumeration" 378
+(name "enumeration"
+)
+(value "('tag','cleavage site','promoter','resistance','marker','product',)"
+)
+(uid "0_-fvi_hrnjywg5_-n0i"))
+($8 382 < 0_-fvi_hrnjywg5_-n0h "documentation" 378
+(name "documentation"
+)
+(value "This is an open enumeration of the feature type for the MolCompFeature: 'tag', 'cleavage site', 'promoter', 'resistance', 'marker', 'product', ..."
+)
+(uid "0_-fvi_hrnjywg5_-n0h"))
+($8 383 < 0_-fvi_hrnjywg5_-n0g "guid" 378
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00006"
+)
+(uid "0_-fvi_hrnjywg5_-n0g"))
+($6 384 < 0_-fvi_hrnjywg5_-n0f "Label" 1
+(name "Label"
+)
+(uid "0_-fvi_hrnjywg5_-n0f"))
+($7 385 < 0_-fvi_hrnjywg5_-n0e "serial" 384
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-n0e")
+(multiplicity "1"))
+($8 386 < 0_-fvi_hrnjywg5_-n0d "isAutomatic" 385
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-n0d"))
+($8 387 < 0_-fvi_hrnjywg5_-n0c "guid" 385
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00057"
+)
+(uid "0_-fvi_hrnjywg5_-n0c"))
+($7 388 < 0_-fvi_hrnjywg5_-n0b "labelType" 384
+(name "labelType"
+)
+(uid "0_-fvi_hrnjywg5_-n0b")
+(multiplicity "1"))
+($8 389 < 0_-fvi_hrnjywg5_-n0a "documentation" 388
+(name "documentation"
+)
+(value "Type of label. See datatype for details"
+)
+(uid "0_-fvi_hrnjywg5_-n0a"))
+($8 390 < 0_-fvi_hrnjywg5_-n09 "guid" 388
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00058"
+)
+(uid "0_-fvi_hrnjywg5_-n09"))
+($7 391 < 0_-fvi_hrnjywg5_-n08 "labelName" 384
+(name "labelName"
+)
+(uid "0_-fvi_hrnjywg5_-n08")
+(multiplicity "1"))
+($8 392 < 0_-fvi_hrnjywg5_-n07 "documentation" 391
+(name "documentation"
+)
+(value "name of label, describing the exact label used. See datatype for details"
+)
+(uid "0_-fvi_hrnjywg5_-n07"))
+($8 393 < 0_-fvi_hrnjywg5_-n06 "guid" 391
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00059"
+)
+(uid "0_-fvi_hrnjywg5_-n06"))
+($7 394 < 0_-fvi_hrnjywg5_-n05 "numInstances" 384
+(name "numInstances"
+)
+(uid "0_-fvi_hrnjywg5_-n05"))
+($8 395 < 0_-fvi_hrnjywg5_-n04 "documentation" 394
+(name "documentation"
+)
+(value "number of instances of label present in component. Not set is not applicable."
+)
+(uid "0_-fvi_hrnjywg5_-n04"))
+($8 396 < 0_-fvi_hrnjywg5_-n03 "guid" 394
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00060"
+)
+(uid "0_-fvi_hrnjywg5_-n03"))
+($7 397 < 0_-fvi_hrnjywg5_-n02 "incorporation" 384
+(name "incorporation"
+)
+(uid "0_-fvi_hrnjywg5_-n02"))
+($8 398 < 0_-fvi_hrnjywg5_-n01 "documentation" 397
+(name "documentation"
+)
+(value "Fractional incorporation of label.  Not set is not applicable."
+)
+(uid "0_-fvi_hrnjywg5_-n01"))
+($8 399 < 0_-fvi_hrnjywg5_-n00 "guid" 397
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00061"
+)
+(uid "0_-fvi_hrnjywg5_-n00"))
+($7 400 < 0_-fvi_hrnjywg5_-mzz "isUniform" 384
+(name "isUniform"
+)
+(uid "0_-fvi_hrnjywg5_-mzz"))
+($8 401 < 0_-fvi_hrnjywg5_-mzy "documentation" 400
+(name "documentation"
+)
+(value "Is label uniform, i.e. is the label present in all sites where it might be expected? Uniform labeling is for instance where all Methionines were SelenoMethionine, or where all carbons were 13C labeled."
+)
+(uid "0_-fvi_hrnjywg5_-mzy"))
+($8 402 < 0_-fvi_hrnjywg5_-mzx "guid" 400
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:29_00062"
+)
+(uid "0_-fvi_hrnjywg5_-mzx"))
+($7 403 < 0_-fvi_hrnjywg5_-mzw "elementName" 384
+(name "elementName"
+)
+(uid "0_-fvi_hrnjywg5_-mzw"))
+($8 404 < 0_-fvi_hrnjywg5_-mzv "documentation" 403
+(name "documentation"
+)
+(value "Name of element used for labeling. e.g. 'C' for C13 or C14, 'S', for radioactive sulphur, 'Se' for SelenoMethionine. Not set is not applicable."
+)
+(uid "0_-fvi_hrnjywg5_-mzv"))
+($8 405 < 0_-fvi_hrnjywg5_-mzu "guid" 403
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00001"
+)
+(uid "0_-fvi_hrnjywg5_-mzu"))
+($7 406 < 0_-fvi_hrnjywg5_-mzt "massNumber" 384
+(name "massNumber"
+)
+(uid "0_-fvi_hrnjywg5_-mzt"))
+($8 407 < 0_-fvi_hrnjywg5_-mzs "documentation" 406
+(name "documentation"
+)
+(value "Mass number of isotope of element used for labeling. e.g. 13 for 13C. Not set is not applicable."
+)
+(uid "0_-fvi_hrnjywg5_-mzs"))
+($8 408 < 0_-fvi_hrnjywg5_-mzr "guid" 406
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00002"
+)
+(uid "0_-fvi_hrnjywg5_-mzr"))
+($11 409 < 0_-fvi_hrnjywg5_-mzq "#<anon> (Label, DataObject)" 384
+(uid "0_-fvi_hrnjywg5_-mzq"))
+($8 410 < 0_-fvi_hrnjywg5_-mzp "documentation" 384
+(name "documentation"
+)
+(value "Label (isotopic, fluorophore, X-ray anomalous scatterer, or other) attached to AbstractComponent. Isotope labeling given in SpecificLabelGroup and IsotopeLabel must be consistent with labeling given in the Label class, as both are valid together."
+)
+(uid "0_-fvi_hrnjywg5_-mzp"))
+($8 411 < 0_-fvi_hrnjywg5_-mzo "guid" 384
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00007"
+)
+(uid "0_-fvi_hrnjywg5_-mzo"))
+($8 412 < 0_-fvi_hrnjywg5_-mzn "keyNames" 384
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-mzn"))
+($6 413 < 0_-fvi_hrnjywg5_-mzm "LabelType" 1
+(name "LabelType"
+)
+(uid "0_-fvi_hrnjywg5_-mzm"))
+($11 414 < 0_-fvi_hrnjywg5_-mzl "#<anon> (LabelType, Line)" 413
+(uid "0_-fvi_hrnjywg5_-mzl"))
+($8 415 < 0_-fvi_hrnjywg5_-mzk "documentation" 413
+(name "documentation"
+)
+(value "Type of label. NB TBD The eumeration needs to be expanded to cover standard label types."
+)
+(uid "0_-fvi_hrnjywg5_-mzk"))
+($8 416 < 0_-fvi_hrnjywg5_-mzj "isOpen" 413
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-mzj"))
+($8 417 < 0_-fvi_hrnjywg5_-mzi "enumeration" 413
+(name "enumeration"
+)
+(value "('anomalous scatterer','fluorophore','radioactive','isotope')"
+)
+(uid "0_-fvi_hrnjywg5_-mzi"))
+($8 418 < 0_-fvi_hrnjywg5_-mzh "guid" 413
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00008"
+)
+(uid "0_-fvi_hrnjywg5_-mzh"))
+($6 419 < 0_-fvi_hrnjywg5_-mzg "LabelName" 1
+(name "LabelName"
+)
+(uid "0_-fvi_hrnjywg5_-mzg"))
+($11 420 < 0_-fvi_hrnjywg5_-mzf "#<anon> (LabelName, Line)" 419
+(uid "0_-fvi_hrnjywg5_-mzf"))
+($8 421 < 0_-fvi_hrnjywg5_-mze "documentation" 419
+(name "documentation"
+)
+(value "Label name. NB TBD The eumeration needs to be expanded to cover standard label names."
+)
+(uid "0_-fvi_hrnjywg5_-mze"))
+($8 422 < 0_-fvi_hrnjywg5_-mzd "isOpen" 419
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-mzd"))
+($8 423 < 0_-fvi_hrnjywg5_-mzc "enumeration" 419
+(name "enumeration"
+)
+(value "('SelenoMethionine','SelenoCysteine','3H','14C','nitroxyl')"
+)
+(uid "0_-fvi_hrnjywg5_-mzc"))
+($8 424 < 0_-fvi_hrnjywg5_-mzb "guid" 419
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00009"
+)
+(uid "0_-fvi_hrnjywg5_-mzb"))
+($6 425 < 0_-fvi_hrnjywg5_-mza "SpecificLabelGroup" 1
+(name "SpecificLabelGroup"
+)
+(uid "0_-fvi_hrnjywg5_-mza"))
+($7 426 < 0_-fvi_hrnjywg5_-mz9 "serial" 425
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-mz9")
+(multiplicity "1"))
+($8 427 < 0_-fvi_hrnjywg5_-mz8 "isAutomatic" 426
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-mz8"))
+($8 428 < 0_-fvi_hrnjywg5_-mz7 "guid" 426
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00005"
+)
+(uid "0_-fvi_hrnjywg5_-mz7"))
+($7 429 < 0_-fvi_hrnjywg5_-mz6 "fraction" 425
+(initialValue "1.0"
+)
+(name "fraction"
+)
+(uid "0_-fvi_hrnjywg5_-mz6")
+(multiplicity "1"))
+($8 430 < 0_-fvi_hrnjywg5_-mz5 "documentation" 429
+(name "documentation"
+)
+(value "Fraction of the molecules that are labeled with the labeing pattern defined by the SpecificLabelGroup. If the fraction attributes of the various specificLabelGroups do not add up to 100%, the remainder of the molecules in the group are assumed to be at natural abundance."
+)
+(uid "0_-fvi_hrnjywg5_-mz5"))
+($8 431 < 0_-fvi_hrnjywg5_-mz4 "guid" 429
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00006"
+)
+(uid "0_-fvi_hrnjywg5_-mz4"))
+($11 432 < 0_-fvi_hrnjywg5_-mz3 "#<anon> (SpecificLabelGroup, DataObject)" 425
+(uid "0_-fvi_hrnjywg5_-mz3"))
+($9 433 < 0_-fvi_hrnjywg5_-mz2 "#<anon> (SpecificLabelGroup, IsotopeLabel)##," 425
+(name "")
+(uid "0_-fvi_hrnjywg5_-mz2"))
+($10 434 < 0_-fvi_hrnjywg5_-mz1 "#0" 433
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-mz1")
+(multiplicity "1"))
+($8 435 < 0_-fvi_hrnjywg5_-mz0 "guid" 434
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00003"
+)
+(uid "0_-fvi_hrnjywg5_-mz0"))
+($10 436 < 0_-fvi_hrnjywg5_-myz "#1" 433
+(uid "0_-fvi_hrnjywg5_-myz")
+(multiplicity "*"))
+($8 437 < 0_-fvi_hrnjywg5_-myy "guid" 436
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00004"
+)
+(uid "0_-fvi_hrnjywg5_-myy"))
+($8 438 < 0_-fvi_hrnjywg5_-myx "documentation" 425
+(name "documentation"
+)
+(value "Group of specific isotope labels that apply together to an individual molecule. Molecules that are mixtures of isotopomers may have several SpecificLabelGroups. Isotope labeling given in SpecificLabelGroup and IsotopeLabel must be consistent with labeling given in the Label class, as both are valid together."
+)
+(uid "0_-fvi_hrnjywg5_-myx"))
+($8 439 < 0_-fvi_hrnjywg5_-myw "guid" 425
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00010"
+)
+(uid "0_-fvi_hrnjywg5_-myw"))
+($8 440 < 0_-fvi_hrnjywg5_-myv "keyNames" 425
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-myv"))
+($6 441 < 0_-fvi_hrnjywg5_-myu "IsotopeLabel" 1
+(name "IsotopeLabel"
+)
+(uid "0_-fvi_hrnjywg5_-myu"))
+($7 442 < 0_-fvi_hrnjywg5_-myt "serial" 441
+(changeability "frozen")
+(name "serial"
+)
+(uid "0_-fvi_hrnjywg5_-myt")
+(multiplicity "1"))
+($8 443 < 0_-fvi_hrnjywg5_-mys "isAutomatic" 442
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-mys"))
+($8 444 < 0_-fvi_hrnjywg5_-myr "guid" 442
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00010"
+)
+(uid "0_-fvi_hrnjywg5_-myr"))
+($7 445 < 0_-fvi_hrnjywg5_-myq "elementSymbol" 441
+(changeability "frozen")
+(name "elementSymbol"
+)
+(uid "0_-fvi_hrnjywg5_-myq")
+(multiplicity "1"))
+($8 446 < 0_-fvi_hrnjywg5_-myp "documentation" 445
+(name "documentation"
+)
+(value "Element symbol for chemical element that is isotope substituted. "
+)
+(uid "0_-fvi_hrnjywg5_-myp"))
+($8 447 < 0_-fvi_hrnjywg5_-myo "guid" 445
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00011"
+)
+(uid "0_-fvi_hrnjywg5_-myo"))
+($7 448 < 0_-fvi_hrnjywg5_-myn "massNumber" 441
+(changeability "frozen")
+(name "massNumber"
+)
+(uid "0_-fvi_hrnjywg5_-myn")
+(multiplicity "1"))
+($8 449 < 0_-fvi_hrnjywg5_-mym "documentation" 448
+(name "documentation"
+)
+(value "Mass number of incorporated isotope ."
+)
+(uid "0_-fvi_hrnjywg5_-mym"))
+($8 450 < 0_-fvi_hrnjywg5_-myl "guid" 448
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00012"
+)
+(uid "0_-fvi_hrnjywg5_-myl"))
+($7 451 < 0_-fvi_hrnjywg5_-myk "incorporation" 441
+(name "incorporation"
+)
+(uid "0_-fvi_hrnjywg5_-myk"))
+($8 452 < 0_-fvi_hrnjywg5_-myj "documentation" 451
+(name "documentation"
+)
+(value "Fraction of element that is consists of isotope. Unless given specifically in another IsotopeLabel, the rest of the element is assumed to consist of the isotopes in their natural abundance."
+)
+(uid "0_-fvi_hrnjywg5_-myj"))
+($8 453 < 0_-fvi_hrnjywg5_-myi "guid" 451
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00013"
+)
+(uid "0_-fvi_hrnjywg5_-myi"))
+($7 454 < 0_-fvi_hrnjywg5_-myh "atomNames" 441
+(name "atomNames"
+)
+(uid "0_-fvi_hrnjywg5_-myh")
+(multiplicity "*"))
+($8 455 < 0_-fvi_hrnjywg5_-myg "documentation" 454
+(name "documentation"
+)
+(value "Names of atoms that have been isotope substituted. Applies to the residues given by self.molResidues, or, if self.molResidues is empty, to the entire molecule."
+)
+(uid "0_-fvi_hrnjywg5_-myg"))
+($8 456 < 0_-fvi_hrnjywg5_-myf "baseName" 454
+(name "baseName"
+)
+(value "atomName"
+)
+(uid "0_-fvi_hrnjywg5_-myf"))
+($8 457 < 0_-fvi_hrnjywg5_-mye "guid" 454
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00014"
+)
+(uid "0_-fvi_hrnjywg5_-mye"))
+($11 458 < 0_-fvi_hrnjywg5_-myd "#<anon> (IsotopeLabel, DataObject)" 441
+(uid "0_-fvi_hrnjywg5_-myd"))
+($9 459 < 0_-fvi_hrnjywg5_-myc "#<anon> (IsotopeLabel, MolResidue)##," 441
+(name "")
+(uid "0_-fvi_hrnjywg5_-myc"))
+($10 460 < 0_-fvi_hrnjywg5_-myb "#0" 459
+(uid "0_-fvi_hrnjywg5_-myb")
+(multiplicity "*"))
+($8 461 < 0_-fvi_hrnjywg5_-mya "documentation" 460
+(name "documentation"
+)
+(value "Isotope label objects relevant to MolResidue"
+)
+(uid "0_-fvi_hrnjywg5_-mya"))
+($8 462 < 0_-fvi_hrnjywg5_-my9 "guid" 460
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00007"
+)
+(uid "0_-fvi_hrnjywg5_-my9"))
+($10 463 < 0_-fvi_hrnjywg5_-my8 "#1" 459
+(uid "0_-fvi_hrnjywg5_-my8")
+(multiplicity "*"))
+($8 464 < 0_-fvi_hrnjywg5_-my7 "documentation" 463
+(name "documentation"
+)
+(value "MolResidues to which isotope labeling applies. If not set, the isotope labeling applies to all residues in Molecule."
+)
+(uid "0_-fvi_hrnjywg5_-my7"))
+($8 465 < 0_-fvi_hrnjywg5_-my6 "guid" 463
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00008"
+)
+(uid "0_-fvi_hrnjywg5_-my6"))
+($14 466 < 0_-fvi_hrnjywg5_-my5 "self_specificLabelGroup_molComponent_molecule_is_value_molecule" 463
+(name "self_specificLabelGroup_molComponent_molecule_is_value_molecule"
+)
+(uid "0_-fvi_hrnjywg5_-my5")
+(body "code:python"
+"_"
+"value is None or self.specificLabelGroup.molComponent.molecule is value.molecule"
+"_"
+"code:java"
+"_"
+"other == null || self.getSpecificLabelGroup().getMolComponent().getMolecule() == other.getMolecule()"
+))
+($8 467 < 0_-fvi_hrnjywg5_-my4 "guid" 466
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00009"
+)
+(uid "0_-fvi_hrnjywg5_-my4"))
+($8 468 < 0_-fvi_hrnjywg5_-my3 "documentation" 441
+(name "documentation"
+)
+(value "Isotope label or labeling pattern. Refers to elements of a type given by elementSymbol. If self.molResidues is set the substitution is limited to these residues. If self.atomNames is set the substitution is limited to atoms with these names."
+)
+(uid "0_-fvi_hrnjywg5_-my3"))
+($8 469 < 0_-fvi_hrnjywg5_-my2 "guid" 441
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00011"
+)
+(uid "0_-fvi_hrnjywg5_-my2"))
+($8 470 < 0_-fvi_hrnjywg5_-my1 "keyNames" 441
+(name "keyNames"
+)
+(value "serial"
+)
+(uid "0_-fvi_hrnjywg5_-my1"))
+($6 471 < 0_-fvi_hrnjywg5_-my0 "ConstructStatus" 1
+(name "ConstructStatus"
+)
+(uid "0_-fvi_hrnjywg5_-my0"))
+($11 472 < 0_-fvi_hrnjywg5_-mxz "#<anon> (ConstructStatus, Line)" 471
+(uid "0_-fvi_hrnjywg5_-mxz"))
+($8 473 < 0_-fvi_hrnjywg5_-mxy "isOpen" 471
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-mxy"))
+($8 474 < 0_-fvi_hrnjywg5_-mxx "enumeration" 471
+(name "enumeration"
+)
+(value "('empty','with target',)"
+)
+(uid "0_-fvi_hrnjywg5_-mxx"))
+($8 475 < 0_-fvi_hrnjywg5_-mxw "documentation" 471
+(name "documentation"
+)
+(value "This is an open enumeration of the construct status for the Construct: 'empty', 'with target', ..."
+)
+(uid "0_-fvi_hrnjywg5_-mxw"))
+($8 476 < 0_-fvi_hrnjywg5_-mxv "guid" 471
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00012"
+)
+(uid "0_-fvi_hrnjywg5_-mxv"))
+($6 477 < 0_-fvi_hrnjywg5_-mxu "StatusType" 1
+(name "StatusType"
+)
+(uid "0_-fvi_hrnjywg5_-mxu"))
+($11 478 < 0_-fvi_hrnjywg5_-mxt "#<anon> (StatusType, Line)" 477
+(uid "0_-fvi_hrnjywg5_-mxt"))
+($8 479 < 0_-fvi_hrnjywg5_-mxs "isOpen" 477
+(name "isOpen"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-mxs"))
+($8 480 < 0_-fvi_hrnjywg5_-mxr "enumeration" 477
+(name "enumeration"
+)
+(value "('cut','uncut',)"
+)
+(uid "0_-fvi_hrnjywg5_-mxr"))
+($8 481 < 0_-fvi_hrnjywg5_-mxq "documentation" 477
+(name "documentation"
+)
+(value "This is an open enumeration of the status type for the MolCompFeature: 'cutted', 'uncutted', ..."
+)
+(uid "0_-fvi_hrnjywg5_-mxq"))
+($8 482 < 0_-fvi_hrnjywg5_-mxp "guid" 477
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00013"
+)
+(uid "0_-fvi_hrnjywg5_-mxp"))
+($6 483 < 0_-fvi_hrnjywg5_-mxo "MolComponent" 1
+(name "MolComponent"
+)
+(uid "0_-fvi_hrnjywg5_-mxo"))
+($7 484 < 0_-fvi_hrnjywg5_-mxn "molType" 483
+(name "molType"
+)
+(uid "0_-fvi_hrnjywg5_-mxn"))
+($8 485 < 0_-fvi_hrnjywg5_-mxm "documentation" 484
+(name "documentation"
+)
+(value "Type of component, on the general lines of biopolymer/polymer/nonpolymer. See MolComponentType DataType for details"
+)
+(uid "0_-fvi_hrnjywg5_-mxm"))
+($8 486 < 0_-fvi_hrnjywg5_-mxl "guid" 484
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00028"
+)
+(uid "0_-fvi_hrnjywg5_-mxl"))
+($7 487 < 0_-fvi_hrnjywg5_-mxk "casNum" 483
+(name "casNum"
+)
+(uid "0_-fvi_hrnjywg5_-mxk"))
+($8 488 < 0_-fvi_hrnjywg5_-mxj "documentation" 487
+(name "documentation"
+)
+(value "CAS registry number (http://www.cas.org/EO/regsys.html)."
+)
+(uid "0_-fvi_hrnjywg5_-mxj"))
+($8 489 < 0_-fvi_hrnjywg5_-mxi "guid" 487
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00029"
+)
+(uid "0_-fvi_hrnjywg5_-mxi"))
+($7 490 < 0_-fvi_hrnjywg5_-mxh "empiricalFormula" 483
+(name "empiricalFormula"
+)
+(uid "0_-fvi_hrnjywg5_-mxh"))
+($8 491 < 0_-fvi_hrnjywg5_-mxg "documentation" 490
+(name "documentation"
+)
+(value "The molecular formula of the molComponent."
+)
+(uid "0_-fvi_hrnjywg5_-mxg"))
+($8 492 < 0_-fvi_hrnjywg5_-mxf "guid" 490
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00030"
+)
+(uid "0_-fvi_hrnjywg5_-mxf"))
+($7 493 < 0_-fvi_hrnjywg5_-mxe "molecularMass" 483
+(name "molecularMass"
+)
+(uid "0_-fvi_hrnjywg5_-mxe"))
+($8 494 < 0_-fvi_hrnjywg5_-mxd "documentation" 493
+(name "documentation"
+)
+(value "The experimental molecular mass in dalton (Da)."
+)
+(uid "0_-fvi_hrnjywg5_-mxd"))
+($8 495 < 0_-fvi_hrnjywg5_-mxc "guid" 493
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00031"
+)
+(uid "0_-fvi_hrnjywg5_-mxc"))
+($7 496 < 0_-fvi_hrnjywg5_-mxb "seqDetails" 483
+(name "seqDetails"
+)
+(uid "0_-fvi_hrnjywg5_-mxb"))
+($8 497 < 0_-fvi_hrnjywg5_-mxa "guid" 496
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00032"
+)
+(uid "0_-fvi_hrnjywg5_-mxa"))
+($7 498 < 0_-fvi_hrnjywg5_-mx9 "seqString" 483
+(name "seqString"
+)
+(uid "0_-fvi_hrnjywg5_-mx9"))
+($8 499 < 0_-fvi_hrnjywg5_-mx8 "guid" 498
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00033"
+)
+(uid "0_-fvi_hrnjywg5_-mx8"))
+($11 500 < 0_-fvi_hrnjywg5_-mx7 "#<anon> (MolComponent, AbstractComponent)" 483
+(uid "0_-fvi_hrnjywg5_-mx7"))
+($9 501 < 0_-fvi_hrnjywg5_-mx6 "#<anon> (MolComponent, MolCompFeature)##," 483
+(name "")
+(uid "0_-fvi_hrnjywg5_-mx6"))
+($10 502 < 0_-fvi_hrnjywg5_-mx5 "#0" 501
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-mx5")
+(multiplicity "1"))
+($8 503 < 0_-fvi_hrnjywg5_-mx4 "guid" 502
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00020"
+)
+(uid "0_-fvi_hrnjywg5_-mx4"))
+($10 504 < 0_-fvi_hrnjywg5_-mx3 "#1" 501
+(uid "0_-fvi_hrnjywg5_-mx3")
+(multiplicity "*"))
+($8 505 < 0_-fvi_hrnjywg5_-mx2 "guid" 504
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00021"
+)
+(uid "0_-fvi_hrnjywg5_-mx2"))
+($9 506 < 0_-fvi_hrnjywg5_-mx1 "#<anon> (MolComponent, SpecificLabelGroup)##," 483
+(name "")
+(uid "0_-fvi_hrnjywg5_-mx1"))
+($10 507 < 0_-fvi_hrnjywg5_-mx0 "#0" 506
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-mx0")
+(multiplicity "1"))
+($8 508 < 0_-fvi_hrnjywg5_-mwz "guid" 507
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00022"
+)
+(uid "0_-fvi_hrnjywg5_-mwz"))
+($10 509 < 0_-fvi_hrnjywg5_-mwy "#1" 506
+(uid "0_-fvi_hrnjywg5_-mwy")
+(multiplicity "*"))
+($8 510 < 0_-fvi_hrnjywg5_-mwx "guid" 509
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-18:23:30_00023"
+)
+(uid "0_-fvi_hrnjywg5_-mwx"))
+($8 511 < 0_-fvi_hrnjywg5_-mww "documentation" 483
+(name "documentation"
+)
+(value "One type of component. A Molecular component (MolComponent) represents a pure component of known melecular structure. This includes most chemicals, proteins, DNA, RNA, DNA/RNA and also enzymes, constructs and primers. Restriction enzymes, primers and constructs are subtypes of MolCOmponent with additional features recorded. NaCl is a MolComponent, so is lysozyme."
+)
+(uid "0_-fvi_hrnjywg5_-mww"))
+($8 512 < 0_-fvi_hrnjywg5_-mwv "guid" 483
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00015"
+)
+(uid "0_-fvi_hrnjywg5_-mwv"))
+($14 513 < 0_-fvi_hrnjywg5_-mwu "SpecificLabelGroups_add_up_to_less_than_1" 483
+(name "SpecificLabelGroups_add_up_to_less_than_1"
+)
+(uid "0_-fvi_hrnjywg5_-mwu")
+(body "code:python"
+"_"
+"import functools"
+"isValid = functools.reduce(operator.add, [x.fraction for x in self.specificLabelGroups], 0) <= 1.0"
+"_"
+"code:java"
+"_"
+"float summ = 0.0f;"
+"for (ccp.api.lims.RefSampleComponent.SpecificLabelGroup x: getSpecificLabelGroups())"
+"  summ += x.getFraction();"
+""
+"if (summ <= 1.0f)"
+"  isValid = true;"
+"else"
+"  isValid = false;"
+))
+($8 514 < 0_-fvi_hrnjywg5_-mwt "guid" 513
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00016"
+)
+(uid "0_-fvi_hrnjywg5_-mwt"))
+($6 515 < 0_-fvi_hrnjywg5_-mws "RefSampleComponentStore" 1
+(name "RefSampleComponentStore"
+)
+(uid "0_-fvi_hrnjywg5_-mws"))
+($7 516 < 0_-fvi_hrnjywg5_-mwr "name" 515
+(changeability "frozen")
+(name "name"
+)
+(uid "0_-fvi_hrnjywg5_-mwr")
+(multiplicity "1"))
+($8 517 < 0_-fvi_hrnjywg5_-mwq "documentation" 516
+(name "documentation"
+)
+(value "name of RefSampleCompoenntStore"
+)
+(uid "0_-fvi_hrnjywg5_-mwq"))
+($8 518 < 0_-fvi_hrnjywg5_-mwp "guid" 516
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:37:28_00003"
+)
+(uid "0_-fvi_hrnjywg5_-mwp"))
+($9 519 < 0_-fvi_hrnjywg5_-mwo "#<anon> (RefSampleComponentStore, AbstractComponent)##,components" 515
+(name "")
+(uid "0_-fvi_hrnjywg5_-mwo"))
+($10 520 < 0_-fvi_hrnjywg5_-mwn "#0" 519
+(changeability "frozen")
+(aggregation "composite")
+(uid "0_-fvi_hrnjywg5_-mwn")
+(multiplicity "1"))
+($8 521 < 0_-fvi_hrnjywg5_-mwm "guid" 520
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:37:28_00001"
+)
+(uid "0_-fvi_hrnjywg5_-mwm"))
+($10 522 < 0_-fvi_hrnjywg5_-mwl "components#1" 519
+(name "components"
+)
+(uid "0_-fvi_hrnjywg5_-mwl")
+(multiplicity "*"))
+($8 523 < 0_-fvi_hrnjywg5_-mwk "baseName" 522
+(name "baseName"
+)
+(value "component"
+)
+(uid "0_-fvi_hrnjywg5_-mwk"))
+($8 524 < 0_-fvi_hrnjywg5_-mwj "guid" 522
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:37:28_00002"
+)
+(uid "0_-fvi_hrnjywg5_-mwj"))
+($11 525 < 0_-fvi_hrnjywg5_-mwi "#<anon> (RefSampleComponentStore, TopObject)" 515
+(uid "0_-fvi_hrnjywg5_-mwi"))
+($8 526 < 0_-fvi_hrnjywg5_-mwh "documentation" 515
+(name "documentation"
+)
+(value "TopObject for RefSampleComponent package"
+)
+(uid "0_-fvi_hrnjywg5_-mwh"))
+($8 527 < 0_-fvi_hrnjywg5_-mwg "guid" 515
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-09-05-12:37:24_00007"
+)
+(uid "0_-fvi_hrnjywg5_-mwg"))
+($8 528 < 0_-fvi_hrnjywg5_-mwf "keyNames" 515
+(name "keyNames"
+)
+(value "name"
+)
+(uid "0_-fvi_hrnjywg5_-mwf"))
+($12 529 < 0_-fvi_hrnjywg5_-mwe "#<anon> (RefSampleComponent, LabeledMolecule)" 1
+(uid "0_-fvi_hrnjywg5_-mwe"))
+($8 530 < 0_-fvi_hrnjywg5_-mwd "shortName" 1
+(name "shortName"
+)
+(value "REFS"
+)
+(uid "0_-fvi_hrnjywg5_-mwd"))
+($8 531 < 0_-fvi_hrnjywg5_-mwc "documentation" 1
+(name "documentation"
+)
+(value "Sample composition and description of the individual components. Includes information specific for certain biochemical techniques."
+)
+(uid "0_-fvi_hrnjywg5_-mwc"))
+($8 532 < 0_-fvi_hrnjywg5_-mwb "packageGroup" 1
+(name "packageGroup"
+)
+(value "pp"
+)
+(uid "0_-fvi_hrnjywg5_-mwb"))
+($8 533 < 0_-fvi_hrnjywg5_-mwa "isDraft" 1
+(name "isDraft"
+)
+(value "True"
+)
+(uid "0_-fvi_hrnjywg5_-mwa"))
+($8 534 < 0_-fvi_hrnjywg5_-mw9 "guid" 1
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00056"
+)
+(uid "0_-fvi_hrnjywg5_-mw9"))
+($16 536)
+($18 539)
+($18 540)
+($18 543)
+($18 544)
+($18 547)
+($18 550)
+($16 556)
+($18 558)
+($18 559)
+($18 560)
+($18 561)
+($18 562)
+($18 563)
+($18 564)
+($18 566)
+($18 567)
+($18 568)
+($16 569)
+($16 570)
+($16 571)
+($16 572)
+($16 573)
+($16 574)
+($16 575)
+($16 576)
+($16 577)
+($16 578)
+($16 579)
+($16 580)
+($16 581)
+($18 582)
+($16 583)
+($16 584)
+($16 585)
+($16 586)
+($16 588)
+($16 589)
+($16 591)
+($16 593)
+($16 595)
+($16 597)
+($16 599)
+($16 601)
+($16 603)
+($16 605)
+($16 606)
+($16 608)
+($16 609)
+($16 610)
+($16 611)
+($16 612)
+($16 613)
+($16 614)
+($16 615)
+($16 616)
+($16 617)
+($16 618)
+($16 619)
+($16 620)
+($16 621)
+($16 622)
+($16 623)
+($16 625)
+($16 626)
+($16 627)
+($16 628)
+($16 629)
+($18 631)
+($16 632)
+($16 633)
+($16 634)
+($16 635)
+($16 636)
+($16 637)
+($16 638)
+($16 639)
+($16 640)
+($16 641)
+($16 642)
+($16 643)
+($16 644)
+($16 645)
+($16 646)
+($16 647)
+($16 648)
+($16 649)
+($16 650)
+($16 651)
+($16 652)
+($16 653)
+($16 654)
+($16 655)
+($16 656)
+($16 657)
+($16 658)
+($16 659)
+($16 660)
+($16 661)
+($16 662)
+($16 663)
+($16 664)
+($16 665)
+($16 666)
+($16 667)
+($16 668)
+($16 669)
+($16 670)
+($16 671)
+($16 672)
+($16 673)
+($16 674)
+($16 675)
+($16 676)
+($16 677)
+($16 678)
+($16 679)
+($15 535 @ -yk94ms_-e3s_e41656c6_-fw0 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "SampleComponent" $15)
+($6 537 @ 0_-fvi_hrnjywg5_-d9g 4 "Logical" $1 "memops" $1 "Implementation" $1 "DataObject" $6)
+($6 538 @ 0_-fvi_hrnjywg5_-dkx 4 "Logical" $1 "memops" $1 "Implementation" $1 "Line" $6)
+($6 541 @ 0_-fvi_hrnjywg5_-dkm 4 "Logical" $1 "memops" $1 "Implementation" $1 "String" $6)
+($6 542 @ 0_-fvi_hrnjywg5_-dl3 4 "Logical" $1 "memops" $1 "Implementation" $1 "Int" $6)
+($6 545 @ 0_-fvi_hrnjywg5_-dkg 4 "Logical" $1 "memops" $1 "Implementation" $1 "Text" $6)
+($6 546 @ 0_-fvi_hrnjywg5_-dlb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Float" $6)
+($6 548 @ 0_-fvi_hrnjywg5_-o2a 5 "Logical" $1 "ccp" $1 "general" $1 "DbRef" $1 "Entry" $6)
+($6 549 @ 0_-fvi_hrnjywg5_-nl7 5 "Logical" $1 "ccp" $1 "general" $1 "Taxonomy" $1 "NaturalSource" $6)
+($19 551 @ -yk94ms_-e3s_e41656c6_-fw7 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "DataType" $19)
+($6 552 @ 0_-fvi_hrnjywg5_-dct 4 "Logical" $1 "memops" $1 "Implementation" $1 "FloatRatio" $6)
+($6 553 @ 0_-fvi_hrnjywg5_-dlv 4 "Logical" $1 "memops" $1 "Implementation" $1 "Boolean" $6)
+($6 554 @ 0_-fvi_hrnjywg5_-dkb 4 "Logical" $1 "memops" $1 "Implementation" $1 "Word" $6)
+($6 555 @ 0_-fvi_hrnjywg5_-nde 5 "Logical" $1 "ccp" $1 "lims" $1 "RefData" $1 "RefNmrSpectrum" $6)
+($6 557 @ -yk94ms_-e3s_e41656c6_-kas 5 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "MolType" $6)
+($6 565 @ -yk94ms_-e3s_e41656c6_-lsj 5 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "MolResidue" $6)
+($15 587 @ -yk94ms_-e3s_e41656c6_-fvh 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Taxonomy" $15)
+($15 590 @ -yk94ms_-e3s_e41656c6_-fvz 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Molecule" $15)
+($6 592 @ -yk94ms_-e3s_e41656c6_-lyc 5 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "Molecule" $6)
+($9 594 @ -yk94ms_-e3s_e41656c6_-ltz 6 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "Molecule" $6 "#<anon> (Molecule, NaturalSource)##," $9)
+($9 596 @ -yk94ms_-e3s_e41656c6_-ltt 6 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "Molecule" $6 "#<anon> (Molecule, MolComponent)##," $9)
+($15 598 @ -yk94ms_-e3s_e41656c6_-fw1 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "Sample" $15)
+($6 600 @ -yk94ms_-e3s_e41656c6_-k4i 5 "Logical" $1 "ccp" $1 "lims" $1 "Sample" $1 "SampleComponent" $6)
+($9 602 @ -yk94ms_-e3s_e41656c6_-k3z 6 "Logical" $1 "ccp" $1 "lims" $1 "Sample" $1 "SampleComponent" $6 "#<anon> (SampleComponent, AbstractComponent)##,refComponent" $9)
+($9 604 @ -yk94ms_-e3s_e41656c6_-k3v 6 "Logical" $1 "ccp" $1 "lims" $1 "Sample" $1 "SampleComponent" $6 "#<anon> (SampleComponent, )##contents,container" $9)
+($15 607 @ -yk94ms_-e3s_e41656c6_-fvr 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "DbRef" $15)
+($9 624 @ -yk94ms_-e3s_e41656c6_-lua 6 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1 "Molecule" $6 "#<anon> (Molecule, MolResidue)##," $9)
+($6 630 @ 0_-fvi_hrnjywg5_-dbb 4 "Logical" $1 "memops" $1 "Implementation" $1 "TopObject" $6)
+($19 680 @ -yk94ms_-e3s_e41656c6_-fwy 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "import" $19)
+($1 681 @ -yk94ms_-e3s_e41656c6_-m0p 4 "Logical" $1 "ccp" $1 "molecule" $1 "Molecule" $1)
+($1 682 @ -yk94ms_85r_eqyymv3f_-o9w 4 "Logical" $1 "ccp" $1 "general" $1 "Taxonomy" $1)
+($1 683 @ -yk94ms_-e3s_e41656c6_-id3 4 "Logical" $1 "ccp" $1 "general" $1 "DbRef" $1)
+($1 684 @ -yk94ms_-e3s_e41656c6_-jc4 4 "Logical" $1 "ccp" $1 "general" $1 "Affiliation" $1)
+($1 685 @ -yk94ms_-9af_etcy0zwh_-p98 4 "Logical" $1 "ccp" $1 "molecule" $1 "LabeledMolecule" $1)
+(styleAssn 3 535)
+(typeAssn 115 103)
+(assocEndAssn 103 115)
+(typeAssn 122 103)
+(assocEndAssn 103 122)
+(typeAssn 129 103)
+(assocEndAssn 103 129)
+(typeAssn 135 103)
+(assocEndAssn 103 135)
+(typeAssn 522 103)
+(assocEndAssn 103 522)
+(typeAssn 140 103)
+(assocEndAssn 103 140)
+(subtypeAssn 127 103)
+(supertypeAssn 127 537)
+(generalizationAssn 103 127)
+(typeRefAssn 104 538)
+(typeExpression 104 539)
+(typeRefAssn 107 538)
+(typeExpression 107 540)
+(typeRefAssn 111 541)
+(typeExpression 111 539)
+(typeAssn 248 148)
+(assocEndAssn 148 248)
+(assocEndAssn 148 118)
+(typeAssn 160 148)
+(assocEndAssn 148 160)
+(subtypeAssn 168 148)
+(supertypeAssn 168 537)
+(generalizationAssn 148 168)
+(typeRefAssn 149 542)
+(typeExpression 149 539)
+(typeRefAssn 153 542)
+(typeExpression 153 543)
+(typeRefAssn 156 541)
+(typeExpression 156 539)
+(assocEndAssn 172 164)
+(typeAssn 254 172)
+(assocEndAssn 172 254)
+(subtypeAssn 189 172)
+(supertypeAssn 189 537)
+(generalizationAssn 172 189)
+(typeRefAssn 173 542)
+(typeExpression 173 544)
+(typeRefAssn 177 545)
+(typeExpression 177 544)
+(typeRefAssn 180 546)
+(typeExpression 180 544)
+(typeRefAssn 183 545)
+(typeExpression 183 544)
+(typeRefAssn 186 541)
+(typeExpression 186 544)
+(typeAssn 164 172)
+(typeAssn 118 148)
+(assocEndAssn 294 125)
+(typeAssn 321 294)
+(assocEndAssn 294 321)
+(subtypeAssn 327 294)
+(supertypeAssn 327 537)
+(generalizationAssn 294 327)
+(typeRefAssn 295 542)
+(typeExpression 295 547)
+(typeRefAssn 299 542)
+(typeExpression 299 547)
+(typeRefAssn 302 542)
+(typeExpression 302 547)
+(typeRefAssn 305 542)
+(typeExpression 305 547)
+(typeRefAssn 308 542)
+(typeExpression 308 547)
+(typeRefAssn 311 546)
+(typeExpression 311 547)
+(typeRefAssn 314 545)
+(typeExpression 314 547)
+(typeRefAssn 317 541)
+(typeExpression 317 547)
+(typeAssn 324 548)
+(typeAssn 125 294)
+(typeAssn 131 549)
+(assocEndAssn 384 137)
+(subtypeAssn 409 384)
+(supertypeAssn 409 537)
+(generalizationAssn 384 409)
+(typeRefAssn 385 542)
+(typeExpression 385 550)
+(stereotypeAssn 413 551)
+(subtypeAssn 414 413)
+(supertypeAssn 414 538)
+(generalizationAssn 413 414)
+(typeRefAssn 388 413)
+(typeExpression 388 550)
+(stereotypeAssn 419 551)
+(subtypeAssn 420 419)
+(supertypeAssn 420 538)
+(generalizationAssn 419 420)
+(typeRefAssn 391 419)
+(typeExpression 391 550)
+(typeRefAssn 394 542)
+(typeExpression 394 550)
+(typeRefAssn 397 552)
+(typeExpression 397 550)
+(typeRefAssn 400 553)
+(typeExpression 400 550)
+(typeRefAssn 403 554)
+(typeExpression 403 550)
+(typeRefAssn 406 542)
+(typeExpression 406 550)
+(typeAssn 137 384)
+(typeAssn 143 555)
+(projectionAssn 3 103 536)
+(styleAssn 4 535)
+(subtypeAssn 212 193)
+(typeAssn 502 483)
+(assocEndAssn 483 502)
+(typeAssn 507 483)
+(assocEndAssn 483 507)
+(typeAssn 373 483)
+(assocEndAssn 483 373)
+(subtypeAssn 500 483)
+(supertypeAssn 500 103)
+(generalizationAssn 483 500)
+(typeRefAssn 484 557)
+(typeExpression 484 558)
+(typeRefAssn 487 554)
+(typeExpression 487 559)
+(typeRefAssn 490 538)
+(typeExpression 490 560)
+(typeRefAssn 493 546)
+(typeExpression 493 561)
+(typeRefAssn 496 541)
+(typeExpression 496 562)
+(typeRefAssn 498 541)
+(typeExpression 498 562)
+(assocEndAssn 333 504)
+(typeAssn 370 333)
+(assocEndAssn 333 370)
+(subtypeAssn 368 333)
+(supertypeAssn 368 537)
+(generalizationAssn 333 368)
+(typeRefAssn 334 542)
+(typeExpression 334 563)
+(typeRefAssn 337 538)
+(typeExpression 337 564)
+(stereotypeAssn 378 551)
+(subtypeAssn 379 378)
+(supertypeAssn 379 538)
+(generalizationAssn 378 379)
+(typeRefAssn 340 378)
+(typeExpression 340 564)
+(stereotypeAssn 477 551)
+(subtypeAssn 478 477)
+(supertypeAssn 478 538)
+(generalizationAssn 477 478)
+(typeRefAssn 343 477)
+(typeExpression 343 560)
+(typeRefAssn 346 542)
+(typeExpression 346 564)
+(typeRefAssn 349 542)
+(typeExpression 349 564)
+(typeRefAssn 352 542)
+(typeExpression 352 560)
+(typeRefAssn 356 542)
+(typeExpression 356 564)
+(typeRefAssn 359 541)
+(typeExpression 359 564)
+(typeAssn 504 333)
+(assocEndAssn 425 509)
+(typeAssn 434 425)
+(assocEndAssn 425 434)
+(subtypeAssn 432 425)
+(supertypeAssn 432 537)
+(generalizationAssn 425 432)
+(typeRefAssn 426 542)
+(typeExpression 426 550)
+(typeRefAssn 429 552)
+(typeExpression 429 550)
+(assocEndAssn 441 436)
+(typeAssn 460 441)
+(assocEndAssn 441 460)
+(subtypeAssn 458 441)
+(supertypeAssn 458 537)
+(generalizationAssn 441 458)
+(typeRefAssn 442 542)
+(typeExpression 442 550)
+(typeRefAssn 445 554)
+(typeExpression 445 550)
+(typeRefAssn 448 542)
+(typeExpression 448 550)
+(typeRefAssn 451 552)
+(typeExpression 451 550)
+(typeRefAssn 454 554)
+(typeExpression 454 550)
+(typeAssn 463 565)
+(typeAssn 436 441)
+(typeAssn 509 425)
+(supertypeAssn 212 483)
+(generalizationAssn 193 212)
+(stereotypeAssn 471 551)
+(subtypeAssn 472 471)
+(supertypeAssn 472 538)
+(generalizationAssn 471 472)
+(typeRefAssn 194 471)
+(typeExpression 194 560)
+(typeRefAssn 197 538)
+(typeExpression 197 566)
+(typeRefAssn 200 541)
+(typeExpression 200 567)
+(typeRefAssn 203 541)
+(typeExpression 203 568)
+(typeRefAssn 206 541)
+(typeExpression 206 568)
+(typeRefAssn 209 541)
+(typeExpression 209 568)
+(projectionAssn 4 193 556)
+(styleAssn 5 535)
+(subtypeAssn 231 215)
+(supertypeAssn 231 103)
+(generalizationAssn 215 231)
+(typeRefAssn 216 545)
+(typeExpression 216 539)
+(typeRefAssn 219 545)
+(typeExpression 219 539)
+(typeRefAssn 222 545)
+(typeExpression 222 539)
+(typeRefAssn 225 545)
+(typeExpression 225 539)
+(typeRefAssn 228 545)
+(typeExpression 228 539)
+(projectionAssn 5 215 569)
+(to 6 3)
+(from 6 5)
+(projectionAssn 6 231 570)
+(styleAssn 7 535)
+(subtypeAssn 273 272)
+(supertypeAssn 273 103)
+(generalizationAssn 272 273)
+(projectionAssn 7 272 571)
+(to 8 3)
+(from 8 7)
+(projectionAssn 8 273 572)
+(styleAssn 9 535)
+(typeAssn 246 234)
+(assocEndAssn 234 246)
+(typeAssn 252 234)
+(assocEndAssn 234 252)
+(subtypeAssn 244 234)
+(supertypeAssn 244 103)
+(generalizationAssn 234 244)
+(typeRefAssn 235 545)
+(typeExpression 235 539)
+(typeRefAssn 238 546)
+(typeExpression 238 539)
+(typeRefAssn 241 545)
+(typeExpression 241 539)
+(projectionAssn 9 234 573)
+(to 10 3)
+(from 10 9)
+(projectionAssn 10 244 574)
+(styleAssn 11 535)
+(projectionAssn 11 148 575)
+(to 12 11)
+(from 12 9)
+(projectionAssn 12 245 576)
+(to 13 11)
+(from 13 3)
+(projectionAssn 13 114 577)
+(styleAssn 14 535)
+(projectionAssn 14 294 578)
+(to 15 14)
+(from 15 3)
+(projectionAssn 15 121 579)
+(styleAssn 16 535)
+(subtypeAssn 289 276)
+(supertypeAssn 289 483)
+(generalizationAssn 276 289)
+(typeRefAssn 277 538)
+(typeExpression 277 564)
+(typeRefAssn 280 538)
+(typeExpression 280 564)
+(typeRefAssn 283 542)
+(typeExpression 283 564)
+(typeRefAssn 286 542)
+(typeExpression 286 564)
+(projectionAssn 16 276 580)
+(styleAssn 17 535)
+(subtypeAssn 269 259)
+(supertypeAssn 269 483)
+(generalizationAssn 259 269)
+(typeRefAssn 260 554)
+(typeExpression 260 566)
+(typeRefAssn 263 553)
+(typeExpression 263 547)
+(typeRefAssn 266 546)
+(typeExpression 266 582)
+(projectionAssn 17 259 581)
+(styleAssn 18 535)
+(projectionAssn 18 172 583)
+(to 19 18)
+(from 19 11)
+(projectionAssn 19 159 584)
+(styleAssn 20 535)
+(projectionAssn 20 483 585)
+(to 21 3)
+(from 21 20)
+(projectionAssn 21 500 586)
+(styleAssn 22 587)
+(projectionAssn 22 549 588)
+(to 23 22)
+(from 23 3)
+(projectionAssn 23 128 589)
+(styleAssn 24 590)
+(projectionAssn 24 592 591)
+(to 25 22)
+(from 25 24)
+(projectionAssn 25 594 593)
+(to 26 20)
+(from 26 24)
+(projectionAssn 26 596 595)
+(to 27 18)
+(from 27 9)
+(projectionAssn 27 251 597)
+(styleAssn 28 598)
+(projectionAssn 28 600 599)
+(to 29 3)
+(from 29 28)
+(projectionAssn 29 602 601)
+(to 30 28)
+(from 30 28)
+(projectionAssn 30 604 603)
+(styleAssn 31 535)
+(projectionAssn 31 333 605)
+(styleAssn 32 535)
+(projectionAssn 32 378 606)
+(styleAssn 33 607)
+(projectionAssn 33 548 608)
+(to 34 33)
+(from 34 14)
+(projectionAssn 34 320 609)
+(to 35 31)
+(from 35 20)
+(projectionAssn 35 501 610)
+(to 36 20)
+(from 36 17)
+(projectionAssn 36 269 611)
+(to 37 20)
+(from 37 4)
+(projectionAssn 37 212 612)
+(to 38 20)
+(from 38 16)
+(projectionAssn 38 289 613)
+(styleAssn 39 535)
+(projectionAssn 39 384 614)
+(to 40 39)
+(from 40 3)
+(projectionAssn 40 134 615)
+(styleAssn 41 535)
+(projectionAssn 41 413 616)
+(styleAssn 42 535)
+(projectionAssn 42 419 617)
+(styleAssn 43 535)
+(projectionAssn 43 425 618)
+(to 44 43)
+(from 44 20)
+(projectionAssn 44 506 619)
+(styleAssn 45 535)
+(projectionAssn 45 441 620)
+(to 46 45)
+(from 46 43)
+(projectionAssn 46 433 621)
+(styleAssn 47 590)
+(projectionAssn 47 565 622)
+(to 48 47)
+(from 48 24)
+(projectionAssn 48 624 623)
+(to 49 47)
+(from 49 45)
+(projectionAssn 49 459 625)
+(styleAssn 50 535)
+(projectionAssn 50 471 626)
+(styleAssn 51 535)
+(projectionAssn 51 477 627)
+(to 52 20)
+(from 52 31)
+(projectionAssn 52 369 628)
+(styleAssn 53 535)
+(typeAssn 520 515)
+(assocEndAssn 515 520)
+(subtypeAssn 525 515)
+(supertypeAssn 525 630)
+(generalizationAssn 515 525)
+(typeRefAssn 516 538)
+(typeExpression 516 631)
+(projectionAssn 53 515 629)
+(to 54 3)
+(from 54 53)
+(projectionAssn 54 519 632)
+(styleAssn 56 535)
+(projectionAssn 56 103 633)
+(styleAssn 57 535)
+(projectionAssn 57 193 634)
+(styleAssn 58 535)
+(projectionAssn 58 215 635)
+(to 59 56)
+(from 59 58)
+(projectionAssn 59 231 636)
+(styleAssn 60 535)
+(projectionAssn 60 272 637)
+(to 61 56)
+(from 61 60)
+(projectionAssn 61 273 638)
+(styleAssn 62 535)
+(projectionAssn 62 234 639)
+(to 63 56)
+(from 63 62)
+(projectionAssn 63 244 640)
+(styleAssn 64 535)
+(projectionAssn 64 148 641)
+(to 65 64)
+(from 65 62)
+(projectionAssn 65 245 642)
+(to 66 64)
+(from 66 56)
+(projectionAssn 66 114 643)
+(styleAssn 67 535)
+(projectionAssn 67 276 644)
+(styleAssn 68 535)
+(projectionAssn 68 259 645)
+(styleAssn 69 535)
+(projectionAssn 69 172 646)
+(to 70 69)
+(from 70 64)
+(projectionAssn 70 159 647)
+(styleAssn 71 535)
+(projectionAssn 71 294 648)
+(styleAssn 72 607)
+(projectionAssn 72 548 649)
+(to 73 71)
+(from 73 56)
+(projectionAssn 73 121 650)
+(to 74 72)
+(from 74 71)
+(projectionAssn 74 320 651)
+(styleAssn 75 535)
+(projectionAssn 75 483 652)
+(to 76 56)
+(from 76 75)
+(projectionAssn 76 500 653)
+(styleAssn 77 587)
+(projectionAssn 77 549 654)
+(to 78 77)
+(from 78 56)
+(projectionAssn 78 128 655)
+(styleAssn 79 590)
+(projectionAssn 79 592 656)
+(to 80 75)
+(from 80 79)
+(projectionAssn 80 596 657)
+(to 81 77)
+(from 81 79)
+(projectionAssn 81 594 658)
+(to 82 69)
+(from 82 62)
+(projectionAssn 82 251 659)
+(styleAssn 83 598)
+(projectionAssn 83 600 660)
+(to 84 56)
+(from 84 83)
+(projectionAssn 84 602 661)
+(to 85 83)
+(from 85 83)
+(projectionAssn 85 604 662)
+(styleAssn 86 535)
+(projectionAssn 86 333 663)
+(to 87 75)
+(from 87 57)
+(projectionAssn 87 212 664)
+(to 88 75)
+(from 88 67)
+(projectionAssn 88 289 665)
+(to 89 75)
+(from 89 68)
+(projectionAssn 89 269 666)
+(to 90 86)
+(from 90 75)
+(projectionAssn 90 501 667)
+(styleAssn 91 535)
+(projectionAssn 91 384 668)
+(to 92 91)
+(from 92 56)
+(projectionAssn 92 134 669)
+(styleAssn 93 535)
+(projectionAssn 93 425 670)
+(to 94 93)
+(from 94 75)
+(projectionAssn 94 506 671)
+(styleAssn 95 535)
+(projectionAssn 95 441 672)
+(to 96 95)
+(from 96 93)
+(projectionAssn 96 433 673)
+(styleAssn 97 590)
+(projectionAssn 97 565 674)
+(to 98 97)
+(from 98 79)
+(projectionAssn 98 624 675)
+(to 99 97)
+(from 99 95)
+(projectionAssn 99 459 676)
+(to 100 75)
+(from 100 86)
+(projectionAssn 100 369 677)
+(styleAssn 101 535)
+(projectionAssn 101 515 678)
+(to 102 56)
+(from 102 101)
+(projectionAssn 102 519 679)
+(stereotypeAssn 292 680)
+(clientAssn 292 1)
+(supplierAssn 292 681)
+(stereotypeAssn 293 680)
+(clientAssn 293 1)
+(supplierAssn 293 682)
+(stereotypeAssn 331 680)
+(clientAssn 331 1)
+(supplierAssn 331 683)
+(stereotypeAssn 332 680)
+(clientAssn 332 1)
+(supplierAssn 332 684)
+(stereotypeAssn 529 680)
+(clientAssn 529 1)
+(supplierAssn 529 685)

@@ -581,11 +581,13 @@ except:
   dd['False'] = not True
   del dd
 
+
 class DummyClass:
   pass
 
+
 sentinel = DummyClass()
-  
+
 
 
 
@@ -596,7 +598,7 @@ sentinel = DummyClass()
 booleans = (True, False)
 
 #############################################################################
-  
+
 
 # imports:
 import types
@@ -615,6 +617,7 @@ except:
 
 from memops.metamodel import TaggedValues
 from memops.metamodel import ImpConstants
+
 MemopsError = ImpConstants.MemopsError
 from memops.metamodel import OpTypes
 from memops.general.Constants import infinity
@@ -627,14 +630,15 @@ import memops.metamodel.Util as metaUtil
 #newGuid = guidGenerator.newGuid
 
 
-  
+
 def transferGuid(obj, targetContainer):
   """ Make new guid for obj when copied into a new container, e.g.
   for inheriting down an element.
   guid is deterministic, being composed of object and container guid
   """
-  
+
   return '__'.join((obj.guid, targetContainer.guid))
+
 
 #############################################################################
 #
@@ -669,14 +673,15 @@ def compareModels(model1, model2, elementPairings=None, ignoreImplicit=True):
                but different guids
   """
   from memops.metamodel import Util as metaUtil
+
   start = time.time()
-  
+
   # check for identical models
   top1 = model1.topPackage()
   top2 = model2.topPackage()
   if top1 is top2:
     raise MemopsError("%s and %s are from the same model" % (model1, model2))
-  
+
   # set up
   result = {}
   dict1 = makeObjDict(top1, ignoreImplicit)
@@ -686,126 +691,129 @@ def compareModels(model1, model2, elementPairings=None, ignoreImplicit=True):
   differ = result['differ'] = []
   namematch = result['namematch'] = {}
   unique1 = set()
-  
+
   # check elementPairings
   dicts = (dict1, dict2)
   if elementPairings:
     for guids in elementPairings:
-      
+
       # check element pairs are consistent with models
-      for ii in 0,1:
+      for ii in 0, 1:
         jj = 1 - ii
         guid = guids[ii]
-        if guid not in dicts [ii]:
-          raise MemopsError("%s from elementPairings not found in model %s " 
-                          % (guid, ii))
-        if guid in dicts [jj]:
-          raise MemopsError("%s (%s) from elementPairings found in model %s "
-                          % (guid, dicts[jj][guid], jj))
-      
+        if guid not in dicts[ii]:
+          raise MemopsError(
+            "%s from elementPairings not found in model %s " % (guid, ii))
+        if guid in dicts[jj]:
+          raise MemopsError(
+            "%s (%s) from elementPairings found in model %s " % (
+              guid, dicts[jj][guid], jj))
+
       # check diffs and append
-      diffs = compareElements(dict1[guids[0]], dict2[guids[1]], 
+      diffs = compareElements(dict1[guids[0]], dict2[guids[1]],
                               ignoreImplicit=ignoreImplicit)
       differ.append((guids[0], guids[1], diffs))
-    
+
     # clean element dicts
     for guids in elementPairings:
-      for ii in 0,1:
+      for ii in 0, 1:
         dicts[ii].pop(guids[ii], None)
-  
+
   # compare models
-  for guid,ee in dict1.items():
+  for guid, ee in dict1.items():
     qName = ee.qualifiedName()
     ee2 = dict2.get(guid)
-    
+
     if ee2 is None:
       # no match
       unique1.add(ee)
-    
+
     else:
       # same guid found in both models
       del dict2[guid]
-      
+
       # compare elements
       diffs = compareElements(ee, ee2, ignoreImplicit=ignoreImplicit)
       if diffs:
         differ.append((ee.guid, ee.guid, diffs))
         if ee.guid is None:
           print('WARNING %s has no guid' % ee.qualifiedName)
- 
+
     # check for name matches
     try:
       ee2b = top2.metaObjFromQualName(qName)
     except:
       ee2b = None
-    
+
     if ee2b is not None and ee2b is not ee2:
       # name match without guid match
       diffs = compareElements(ee, ee2b, ignoreImplicit=ignoreImplicit)
       diffs.remove('guid')
       namematch[qName] = (diffs, ee.guid, ee2b.guid)
-  
+
   # complete result and return
   result['unique1'] = unique1
   result['unique2'] = set(dict2.values())
-  
+
   end = time.time()
-  print('End comparing models, time used %s' % (end-start))
-    
+  print('End comparing models, time used %s' % (end - start))
+
   #
   return result
+
 
 def compareElements(ee, ee2, ignoreImplicit=True, language='python'):
   """ compare two MetaModelElements. Returns list of tags that differ.
   Language-specific values are only compared for language 'language'
   """
-  
+
   # tagged values that are skipped as irrelevant
-  ignoreTagVals  = set(['repositoryTag', 'repositoryId', 
-                    'docDiagramNames', 'packageGroup', 'isDraft',
-                    'isReferenceData'])
-  
+  ignoreTagVals = set(
+    ['repositoryTag', 'repositoryId', 'docDiagramNames', 'packageGroup',
+     'isDraft', 'isReferenceData'])
+
   # dictionaries with language
-  languageCoded = set(['typeCodes', 'codeStubs', 'constructorCodeStubs', 
-                   'destructorCodeStubs', 'postDestructorCodeStubs'])
-  
+  languageCoded = set(
+    ['typeCodes', 'codeStubs', 'constructorCodeStubs', 'destructorCodeStubs',
+     'postDestructorCodeStubs'])
+
   result = set()
-  
+
   clazz = ee.__class__
   if ee2.__class__ is clazz:
-    
-    elems = [ee,ee2]
-    
-    for tag,pData in clazz.parameterData.items():
-      
+
+    elems = [ee, ee2]
+
+    for tag, pData in clazz.parameterData.items():
+
       # set up
       hicard = pData.get('hicard')
       pType = pData.get('type')
-      
+
       if pType == 'content':
         continue
-      
+
       if ignoreImplicit and tag == 'usename':
         continue
-      
+
       values = []
-      for ii in (0,1):
-        vals = getattr(elems[ii],tag)
-        
-        if hicard in (1,None):
+      for ii in (0, 1):
+        vals = getattr(elems[ii], tag)
+
+        if hicard in (1, None):
           if pData.get('isLink'):
             # NB the 'and' guards against x being None
             vals = ((vals and vals.guid),)
           else:
             vals = (vals,)
- 
+
         elif pData.get('isLink'):
           # multilink - sort before comparison
           vals = [x.guid for x in vals]
           vals.sort()
-        
+
         values.append(vals)
-      
+
       # modify tagged values to remove irrelevant differences:
       if tag == 'taggedValues':
         for tt in values:
@@ -813,12 +821,12 @@ def compareElements(ee, ee2, ignoreImplicit=True, language='python'):
           for ss in ignoreTagVals:
             if ss in dd:
               del dd[ss]
-      
+
       # compare values - languiage-specific codes
       if tag in languageCoded:
         if values[0][0].get(language) == values[1][0].get(language):
           continue
-      
+
       # do compare
       if len(values[0]) != len(values[1]):
         result.add(tag)
@@ -827,24 +835,24 @@ def compareElements(ee, ee2, ignoreImplicit=True, language='python'):
           if values[0][ii] != values[1][ii]:
             result.add(tag)
             break
-      
+
   else:
     # elements are from different classes
     result.add('class')
     if ee.guid != ee2.guid:
       result.add('guid')
-      
-  
+
+
   #
   return result
-  
-  
+
+
 def makeObjDict(rootElement, ignoreImplicit=False, crucialOnly=False):
   """ make a guid:element dictionary
   """
-  
+
   result = {}
-  
+
   ll = [rootElement]
   for ee in ll:
     if crucialOnly and isinstance(ee, MetaOperation):
@@ -852,104 +860,91 @@ def makeObjDict(rootElement, ignoreImplicit=False, crucialOnly=False):
     if not (ignoreImplicit and ee.isImplicit):
       result[ee.guid] = ee
       ll.extend(ee._MetaModelElement__elementDict.values())
-      if isinstance(ee,ConstrainedElement):
+      if isinstance(ee, ConstrainedElement):
         ll.extend(ee._ConstrainedElement__constraints.values())
   #
   return result
+
 
 #############################################################################
 #
 # consistency checking functions
 #
 #############################################################################
- 
+
 def finaliseMetaClass(clazz):
   """ Enforces  some of the design rules for MetaClasses and their parameters,
   and sets some derived parameter attributes
   """
-  
+
   # lists of supported values
-  allowedParTags = {
-   'default':None, 
-   'type':None,
-   'hicard':IntType,
-   'enumeration':TupleType,
-   'isFixed':None,
-   'setterFunc':StringType,
-   'getterFunc':StringType,
-   'namelist':StringType,
-   'isLink':IntType,
-  }
-  
+  allowedParTags = {'default':None, 'type':None, 'hicard':IntType,
+                    'enumeration':TupleType, 'isFixed':None,
+                    'setterFunc':StringType, 'getterFunc':StringType,
+                    'namelist':StringType, 'isLink':IntType, }
+
   miscParTypes = ('Boolean', 'Token', 'StringDict', 'content')
-  
+
   pythonParTypes = (StringType, IntType)
-  
+
   unTypedPars = (
-   (MetaDataType, 'enumeration'),
-   (MetaAttribute, 'defaultValue'),
-   (MetaParameter, 'defaultValue'),
-   (MetaConstant, 'value'),
+    (MetaDataType, 'enumeration'), (MetaAttribute, 'defaultValue'),
+    (MetaParameter, 'defaultValue'), (MetaConstant, 'value'),
   )
-  
+
   for pName, pData in clazz.parameterData.items():
-    
+
     # check parameter tags and value types
-    for tag,val in pData.items():
-    
+    for tag, val in pData.items():
+
       try:
         parType = allowedParTags[tag]
       except:
-        raise MemopsError("%s: illegal tag %s for parameter %s" 
-         % (clazz.__name__, tag, pName)
-        )
-        
-      if parType is not None and not isinstance(val,parType):
-        raise MemopsError("%s: tag %s for parameter %s has illegal value %s" 
-         % (clazz.__name__, tag, pName, val)
-        )
-    
+        raise MemopsError(
+          "%s: illegal tag %s for parameter %s" % (clazz.__name__, tag, pName))
+
+      if parType is not None and not isinstance(val, parType):
+        raise MemopsError(
+          "%s: tag %s for parameter %s has illegal value %s" % (
+            clazz.__name__, tag, pName, val))
+
     # special checks
-    
+
     # Booleans
     if pData.get('isFixed', sentinel) not in (True, False, sentinel):
-        # NBNB we use sentinel to check that there is a value in the dictionaru
-        # We can not use 'in pData', because we must conform to Python 2.1
-      raise MemopsError("%s: tag %s for parameter %s has illegal value %s" 
-       % (clazz.__name__, tag, pName, pData.get('isFixed'))
-      )
-    
+      # NBNB we use sentinel to check that there is a value in the dictionaru
+      # We can not use 'in pData', because we must conform to Python 2.1
+      raise MemopsError("%s: tag %s for parameter %s has illegal value %s" % (
+        clazz.__name__, tag, pName, pData.get('isFixed')))
+
     # 'type' tag
     myType = pData.get('type')
-    
+
     if pData.get('nameList') and (myType != 'content' or tag == 'constraints'):
       raise MemopsError(
-       "%s: parameter %s is not standard content but has 'namelist'" 
-       % (clazz.__name__, pName)
-      )
-      
+        "%s: parameter %s is not standard content but has 'namelist'" % (
+          clazz.__name__, pName))
+
     if myType is None:
       if (clazz, pName) not in unTypedPars:
-        raise MemopsError("%s: parameter %s has no explicit type " 
-                          % (clazz.__name__, pName))
-        
-    elif myType in miscParTypes:
-      if myType == 'StringDict' and pData.get('hicard',1) != 1:
         raise MemopsError(
-         "%s: tag %s for parameter %s is StringDict but has hicard %s" 
-         % (clazz.__name__, tag, pName, pData.get('hicard'))
-        )
-    
+          "%s: parameter %s has no explicit type " % (clazz.__name__, pName))
+
+    elif myType in miscParTypes:
+      if myType == 'StringDict' and pData.get('hicard', 1) != 1:
+        raise MemopsError(
+          "%s: tag %s for parameter %s is StringDict but has hicard %s" % (
+            clazz.__name__, tag, pName, pData.get('hicard')))
+
     elif myType in pythonParTypes:
       pass
-    
-    elif issubclass(myType,MetaModelElement):
+
+    elif issubclass(myType, MetaModelElement):
       pData['isLink'] = True
-    
+
     else:
-      raise MemopsError("%s: parameter %s has unsupported type %s" 
-                        % (clazz.__name__, pName, myType))
-           
+      raise MemopsError("%s: parameter %s has unsupported type %s" % (
+        clazz.__name__, pName, myType))
 
 
 #############################################################################
@@ -962,46 +957,25 @@ def finaliseMetaClass(clazz):
 class MetaModelElement:
   """ Base class for all MetaModel elements
   """
-  
+
   # information for handling input parameters
   parameterData = {
-  
+
     # input parameters
-    
-   # NB container type must be set outside class definition
-   'container':{
-    #'type':MetaModelElement,
-   },
-   'name':{
-    'type':'Token',
-   },
-   'usename':{
-    'type':'Token',
-    'getterFunc':'getUsename',
-    'default':None
-   },
-   'guid':{
-    'type':StringType,
-   },
-   'documentation':{
-    'type':StringType,
-    'default':'',
-   },
-   'taggedValues':{
-    'type':'StringDict',
-    'default':{},
-   },
-   'isImplicit':{
-    'type':'Boolean',
-    'default':False,
-   },
-  }
-  
-  allowedTags = TaggedValues.allowedTags['MetaModelElement']
-  
+
+    # NB container type must be set outside class definition
+    'container':{  #'type':MetaModelElement,}, 'name':{'type':'Token', },
+                   'usename':{'type':'Token', 'getterFunc':'getUsename',
+                              'default':None}, 'guid':{'type':StringType, },
+                   'documentation':{'type':StringType, 'default':'', },
+                   'taggedValues':{'type':'StringDict', 'default':{}, },
+                   'isImplicit':{'type':'Boolean', 'default':False, }, }
+
+    allowedTags = TaggedValues.allowedTags['MetaModelElement']
+
   # attribute used for guid uniqueness check
   guidDict = None
-  
+
   def __getattr__(self, tag):
     """ getattr.
     There are four classes of gettable attributes
@@ -1014,19 +988,19 @@ class MetaModelElement:
        copied on exit
        
     """
-    
+
     try:
       pData = self.__class__.parameterData[tag]
     except KeyError:
-      raise AttributeError("%s object has no attribute %s" 
-                            % (self.__class__, tag))
-      
+      raise AttributeError(
+        "%s object has no attribute %s" % (self.__class__, tag))
+
     # defined attribute
     getterFunc = pData.get('getterFunc')
- 
+
     if getterFunc:
-      return getattr(self,getterFunc)()
-    
+      return getattr(self, getterFunc)()
+
     elif pData.get('type') == 'content':
       if tag == 'constraints':
         ll = list(self._ConstrainedElement__constraints.items())
@@ -1034,81 +1008,83 @@ class MetaModelElement:
         return [x[1] for x in ll]
       else:
         # get named elements from elementDict
-        return [self.__elementDict[x] for x in getattr(self,pData['namelist'])]
-    
+        return [self.__elementDict[x] for x in
+                getattr(self, pData['namelist'])]
+
     else:
       try:
         return copy.copy(self.__dataDict[tag])
       except KeyError:
-        raise AttributeError("%s object has no attribute %s" 
-                             % (self.__class__, tag))
-  
+        raise AttributeError(
+          "%s object has no attribute %s" % (self.__class__, tag))
+
   def __setattr__(self, tag, value):
-    
+
     pData = self.parameterData.get(tag)
-    
+
     if pData is None:
       # non-defined parameters
       self.__dict__[tag] = value
-    
+
     else:
-     # check parameter type
+      # check parameter type
       pType = pData.get('type')
-      hicard = pData.get('hicard',1)
+      hicard = pData.get('hicard', 1)
       setterFunc = pData.get('setterFunc')
-      
+
       if setterFunc == 'unsettable':
-        raise MemopsError("Tried to set implementation attribute %s in class %s" % 
-                          (tag, self.__class__.__name__))
-      
+        raise MemopsError(
+          "Tried to set implementation attribute %s in class %s" % (
+            tag, self.__class__.__name__))
+
       elif pType == 'content':
-        raise MemopsError("Tried to set content attribute %s in class %s" % 
-                          (tag, self.__class__.__name__))
-      
+        raise MemopsError("Tried to set content attribute %s in class %s" % (
+          tag, self.__class__.__name__))
+
       elif setterFunc:
-        getattr(self,setterFunc)(value)
-      
+        getattr(self, setterFunc)(value)
+
       elif pType == 'StringDict':
         # copy to avoid sharing internal objects
         self.__dataDict[tag] = copy.copy(value)
-      
-      elif hicard !=1:
+
+      elif hicard != 1:
         # copy to avoid sharing internal objects
         self.__dataDict[tag] = copy.copy(value)
-      
+
       else:
         self.__dict__[tag] = value
-        
-   
+
+
   def __init__(self, **params):
     """ basic init. NB only parameters with parameterData records can be set
     """
-    
+
     # set up
     parameterData = self.parameterData
-    
+
     # Set implementation attributes
     self.__elementDict = {}
     self.__dataDict = {}
     self._tempData = {}
-    
+
     # check attributes necessary for normal error handling
     if params.get('name') is None:
-      raise MemopsError("Tried to create %s without a name" % 
-                        (self.__class__.__name__))
-    
+      raise MemopsError(
+        "Tried to create %s without a name" % (self.__class__.__name__))
+
     if params.get('container') is None:
-      if not (isinstance(self,MetaPackage) and 
-               params['name'] == ImpConstants.rootPackageName):
-        raise MemopsError("Tried to create %s %s without a container" % 
-                        (self.__class__.__name__, params['name']))
-    
+      if not (isinstance(self, MetaPackage) and params[
+        'name'] == ImpConstants.rootPackageName):
+        raise MemopsError("Tried to create %s %s without a container" % (
+          self.__class__.__name__, params['name']))
+
     # set parameters
     # set order (name and container needed for error handling)
     ll = list(parameterData.keys())
     ll.remove('name')
     ll.remove('container')
-    ll = ['name','container'] + ll
+    ll = ['name', 'container'] + ll
     # set values
     nFound = 0
     for tag in ll:
@@ -1122,152 +1098,149 @@ class MetaModelElement:
         if val is not sentinel:
           if pData.get('setterFunc') != 'unsettable':
             setattr(self, tag, val)
-    
+
     # check for undefined parameters
     nn = len(params) - nFound
     if nn:
       ll2 = [x for x in params.keys() if x not in ll]
       raise MemopsError("""%s: Input parameters contained %s undefined names:
-%s""" % (self,nn,ll2))
-    
+%s""" % (self, nn, ll2))
+
     # set link from container
     container = self.container
     if container is not None:
-      if isinstance(self,MetaConstraint):
+      if isinstance(self, MetaConstraint):
         containerDict = container._ConstrainedElement__constraints
       else:
         containerDict = container.__elementDict
       if self.name in containerDict.keys():
-        raise MemopsError("%s already has %s named %s" % 
-         (container, self.__class__.__name__, self.name)
-        )
+        raise MemopsError("%s already has %s named %s" % (
+          container, self.__class__.__name__, self.name))
       else:
         containerDict[self.name] = self
-  
-  
+
+
   def __repr__(self):
     """ give ID string for MetaModelElement
     """
     return "<%s: %s>" % (self.__class__.__name__, self.qualifiedName())
-    
+
   def qualifiedName(self):
     """ Get qualified name of MetaElement relative to topmost package ('root')
     """
     ll = []
     ee = self
     cc = ee.container
-    
+
     # special case: RootPackage
     if cc is None:
       return self.name
-    
+
     # normal cases
     while cc is not None:
       ll.append(ee.name)
       ee = cc
       cc = ee.container
-    
+
     ll.reverse()
-    
+
     #
-    return '.'.join(ll) 
-  
+    return '.'.join(ll)
+
   def getUsename(self):
     """getter for semiderived attribute usename
     """
-    
+
     result = self.__dict__['usename']
     if result is None:
       result = self.name
     #
     return result
-    
-    
+
+
   def metaObjFromQualName(self, qname):
     """ find MetaObject given qualified name
     """
-    
+
     namePath = qname.split('.')
-    
+
     # find result
     result = self.topPackage()
     for name in namePath[:-1]:
       result = result.__elementDict.get(name)
       if result is None:
         raise MemopsError("No MetaObject corresponding to %s" % qname)
-    
+
     # final step - account for MetaConstraints
     name = namePath[-1]
-    
+
     result = result.__elementDict.get(name)
-    
-    if result is None and isinstance(self,ConstrainedElement):
+
+    if result is None and isinstance(self, ConstrainedElement):
       result = self._ConstrainedElement__constraints.get(name)
-    
+
     if result is None:
       raise MemopsError("No MetaObject corresponding to %s" % qname)
-    
+
     #
     return result
-  
+
   def topPackage(self):
     """ return root package (topmost container)
     """
     result = self
-    while  result.container is not None:
+    while result.container is not None:
       result = result.container
     #
     return result
-     
+
   def addTaggedValue(self, tag, value):
     """ Add tagged value
     """
-    
+
     if type(tag) != StringType:
-      raise MemopsError("%s tagged value tag %s is not a string" %(self, tag))
+      raise MemopsError("%s tagged value tag %s is not a string" % (self, tag))
     if type(value) != StringType:
-      raise MemopsError("%s tagged value %s value %s is not a string" %
-       (self, tag, value)
-      )
-    
+      raise MemopsError(
+        "%s tagged value %s value %s is not a string" % (self, tag, value))
+
     allowedTags = self.allowedTags
     allowedVals = allowedTags.get(tag, sentinel)
     if allowedVals is not sentinel:
       if allowedVals is not None and value not in allowedVals:
-        raise MemopsError("%s tag %s has illegal value %s" %
-         (self, tag, value)
-        )
+        raise MemopsError(
+          "%s tag %s has illegal value %s" % (self, tag, value))
     else:
       raise MemopsError("%s : unsupported tag %s " % (self, tag))
-    
+
     self.__dataDict['taggedValues'][tag] = value
-  
+
   def removeTaggedValue(self, tag):
     """Remove existing tagged value
     """
-    
+
     if tag in self.__dataDict['taggedValues'].keys():
       del self.__dataDict['taggedValues'][tag]
     else:
       raise MemopsError("%s has no tagged value %s " % (self, tag))
-  
+
   def canAccess(self, target):
     """ check if target is accessible from self
     """
-    
+
     pp1 = self
     while not isinstance(pp1, MetaPackage):
       pp1 = pp1.container
-      
+
     pp2 = target
     while not isinstance(pp2, MetaPackage):
       pp2 = pp2.container
-    
+
     if pp1 is pp2 or pp2 in pp1.importedPackages:
       return True
     else:
       return False
-    
+
   def _getCloningDict(self):
     """ get dictionary of parameters as input for making
     a copy of self.
@@ -1275,31 +1248,31 @@ class MetaModelElement:
     NB called from subclasses but should not be called from the outside
     """
     result = {}
-    for pName,pData in self.__class__.parameterData.items():
- 
-      if pName in ('container','guid'):
+    for pName, pData in self.__class__.parameterData.items():
+
+      if pName in ('container', 'guid'):
         pass
- 
-      elif (pData.get('type') == 'content'
-            or pData.get('setterFunc') == 'unsettable'):
+
+      elif (pData.get('type') == 'content' or pData.get(
+        'setterFunc') == 'unsettable'):
         pass
- 
+
       else:
-        result[pName] = getattr(self,pName)
- 
+        result[pName] = getattr(self, pName)
+
     tagVals = result['taggedValues']
     if tagVals.get('originalGuid') is None:
       tagVals['originalGuid'] = self.guid
-    
+
     return result
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid. Recursively checks contents
     Includes general attribute checks
     """
-    
+
     name = self.name
-    
+
     container = self.container
     if container:
       # container link check
@@ -1308,148 +1281,150 @@ class MetaModelElement:
       else:
         dd = container.__elementDict
       if dd.get(name) is not self:
-        raise MemopsError("Two-way container link %s-%s is broken. Bug (1)?"
-                           % (container, self))
+        raise MemopsError(
+          "Two-way container link %s-%s is broken. Bug (1)?" % (
+            container, self))
 
     # general parameter checks
     for tag, pData in self.parameterData.items():
-      
+
       # set up
       pType = pData.get('type')
       enumeration = pData.get('enumeration')
-      
+
       # unsettable (implementation) parameters
       if pType == 'content':
         continue
-      
-      value = getattr(self,tag)
-          
+
+      value = getattr(self, tag)
+
       # default values
       if value == pData.get('default', sentinel):
         # Always OK.
         # This check takes care of fixed parameters, 
         # optional attributes that are set to None, etc.
         continue
-      
+
       elif pData.get('isFixed'):
         # check fixed parameters
-        raise MemopsError("%s - wrong value %s for fixed attribute %s" % 
-                          (self, value, tag))
-      
+        raise MemopsError(
+          "%s - wrong value %s for fixed attribute %s" % (self, value, tag))
+
       # string dictionaries
       if pType == 'StringDict':
-        for key,val in value.items():
+        for key, val in value.items():
           if not key or not isinstance(key, StringType):
-            raise MemopsError("%s: non-string or empty key %s in StringDict %s"
-                              % (self, key, tag))
+            raise MemopsError(
+              "%s: non-string or empty key %s in StringDict %s" % (
+                self, key, tag))
           if not val or not isinstance(val, StringType):
-            raise MemopsError("%s: non-string or empty value %s in StringDict %s"
-                              % (self, val, tag))
+            raise MemopsError(
+              "%s: non-string or empty value %s in StringDict %s" % (
+                self, val, tag))
         continue
-      
+
       # single or list (for further processing):
-      hicard = pData.get('hicard',1)
+      hicard = pData.get('hicard', 1)
       if hicard == 1:
         value = (value,)
-        
+
       elif hicard != infinity and len(value) > hicard:
         # hicard check
-        raise MemopsError("%s.%s - more than %s elements in value: %s" % 
-                          (self, tag, hicard, value))
-          
-      
+        raise MemopsError("%s.%s - more than %s elements in value: %s" % (
+          self, tag, hicard, value))
+
+
       # Booleans and other enumerated types
       if pType == 'Boolean':
         enumeration = booleans
-      
+
       if enumeration is not None:
         for item in value:
           if item not in enumeration:
-            raise MemopsError("%s.%s - %s not among allowed values" % 
-                              (self, tag, value))
+            raise MemopsError(
+              "%s.%s - %s not among allowed values" % (self, tag, value))
         continue
-      
+
       # string types
       if pType == StringType:
         for item in value:
-          if not item or not isinstance(item,StringType):
-            raise MemopsError("%s.%s - %s is empty or not a string" % 
-                              (self, tag, value))
-      
+          if not item or not isinstance(item, StringType):
+            raise MemopsError(
+              "%s.%s - %s is empty or not a string" % (self, tag, value))
+
       elif pType == 'Token':
         for item in value:
-          if not item or not isinstance(item,StringType):
-            raise MemopsError("%s.%s - %s is empty or not a string" % 
-                              (self, tag, item))
+          if not item or not isinstance(item, StringType):
+            raise MemopsError(
+              "%s.%s - %s is empty or not a string" % (self, tag, item))
           for char in item:
             if char not in ImpConstants.validNameChars:
-              raise MemopsError("%s %s %s contains illegal character %s"
-                                % (self, tag, item, char))
-                              
+              raise MemopsError("%s %s %s contains illegal character %s" % (
+                self, tag, item, char))
+
           if item[0] in string.digits:
-            raise MemopsError("%s %s %s starts with a digit"
-                              % (self, tag, item))
-      
+            raise MemopsError(
+              "%s %s %s starts with a digit" % (self, tag, item))
+
       # special exception - supertype of MemopsObject
-      elif tag in ('supertypes','supertype') and name == 'MemopsObject':
-        pass 
-      
-      # special exception - supertype of MemopsObject
+      elif tag in ('supertypes', 'supertype') and name == 'MemopsObject':
+        pass
+
+        # special exception - supertype of MemopsObject
       elif tag == 'subtypes' and name == 'ComplexDataType':
-        pass 
-      
-      # other cases:
+        pass
+
+        # other cases:
       elif pType is not None:
         for item in value:
           if not isinstance(item, pType):
-            raise MemopsError("%s - %s should be type %s for attribute %s" %
-                              (self, value, pType, tag))
-    
+            raise MemopsError("%s - %s should be type %s for attribute %s" % (
+              self, value, pType, tag))
+
     # specific checks for MetaModelElement attributes      
-    
+
     # name
     if not self.isImplicit:
       # autogenerated elements can be assumed to be OK
       if name[0] == ImpConstants.underscore:
-        raise MemopsError("%s: name %s of non-implicit element starts with '_'"
-         % (self, name)
-        )
- 
-      if (ImpConstants.underscore in name[1:]
-          and not isinstance(self,MetaOperation)
-          and not isinstance(self,MetaConstraint)):
+        raise MemopsError(
+          "%s: name %s of non-implicit element starts with '_'" % (self, name))
+
+      if (ImpConstants.underscore in name[1:] and not isinstance(self,
+                                                                 MetaOperation) and not isinstance(
+        self, MetaConstraint)):
         print("WARNING, name of %s contains underscore" % self)
-    
+
     # check correct guid format
     guid = self.guid
     for char in """&'"<>""":
       if char in guid:
-        raise MemopsError("%s: guid %s contains illegal character %s"
-                          % (self, guid, repr(char)))
+        raise MemopsError("%s: guid %s contains illegal character %s" % (
+          self, guid, repr(char)))
     # check guid uniqueness
     guidDict = MetaModelElement.guidDict
     if guidDict is not None:
       competitor = guidDict.get(guid)
       if competitor is not None:
-        raise MemopsError("%s: guid %s duplicates guid of %s"
-                          % (self, guid, competitor))
-        
+        raise MemopsError(
+          "%s: guid %s duplicates guid of %s" % (self, guid, competitor))
+
       else:
         guidDict[guid] = self
-      
+
       # _tempData dictionary
       if self._tempData:
         raise MemopsError(
-         "%s - _tempData dictionary is not emptied, keys are %s" % 
-                          (self,self._tempData.keys()))
-    
-    
+          "%s - _tempData dictionary is not emptied, keys are %s" % (
+            self, self._tempData.keys()))
+
+
     # recursive contents check:
     for obj in self.__elementDict.values():
       obj.checkValid(complete=complete)
       if obj.container is not self:
-        raise MemopsError("Two-way container link %s-%s is broken. Bug (2)?"
-                           % (self,obj))
+        raise MemopsError(
+          "Two-way container link %s-%s is broken. Bug (2)?" % (self, obj))
 
 # NB required as class is not defined inside itself
 MetaModelElement.parameterData['container']['type'] = MetaModelElement
@@ -1460,54 +1435,54 @@ MetaModelElement.parameterData['container']['type'] = MetaModelElement
 class ConstrainedElement(MetaModelElement):
   """ abstract class for elements 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(MetaModelElement.parameterData)
-  
+
   # implementation parameters
   parameterData['constraints'] = {'type':'content'}
-  
+
   # allowed tagged values
   allowedTags = MetaModelElement.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['ConstrainedElement'])
-   
+
   def __init__(self, **params):
-    
+
     if self.__class__ is ConstrainedElement:
       raise MemopsError(
-       "Attempt to create istance of abstract class ConstrainedElement"
-      )
-      
+        "Attempt to create istance of abstract class ConstrainedElement")
+
     self.__constraints = {}
-      
+
     MetaModelElement.__init__(self, **params)
-    
+
     # Set implementation attributes
     self._MetaModelElement__dataDict['constraints'] = {}
-  
+
   def getAllConstraints(self):
     """ Not really necessary here, but in some subclasses it is overridden.
     """
     return self.constraints
-  
-  def getConstraint(self,name):
+
+  def getConstraint(self, name):
     """ get contraint by name
     """
     return self.__constraints.get(name)
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
     MetaModelElement.checkValid(self, complete=complete)
-    
+
     # validity check constraints
     for constraint in self.__constraints.values():
       constraint.checkValid(complete=complete)
       if constraint.container is not self:
-        raise MemopsError("Two-way container link %s-%s is broken. Bug (3)?"
-                           % (self,constraint))
-        
-    
+        raise MemopsError(
+          "Two-way container link %s-%s is broken. Bug (3)?" % (
+            self, constraint))
+
+
 #############################################################################
 
 
@@ -1515,54 +1490,48 @@ class HasParameters(MetaModelElement):
   """ abstract class for elements that have parameters , 
   i.e. MetaOperations and MetaExceptions
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(MetaModelElement.parameterData)
-  parameterData.update( {
-   'parameters':{
-    'type':'content',
-    'namelist':'_HasParameters__parameterNames',},
-   'visibility':{
-    'type':'Token',
-    'enumeration':ImpConstants.visibility_enumeration,
-    'default':ImpConstants.public_visibility,
-    'isFixed':False,
-   },
-  })
-  
+  parameterData.update({'parameters':{'type':'content',
+                                      'namelist':'_HasParameters__parameterNames', },
+                        'visibility':{'type':'Token',
+                                      'enumeration':ImpConstants.visibility_enumeration,
+                                      'default':ImpConstants.public_visibility,
+                                      'isFixed':False, }, })
+
   # allowed tagged values
   allowedTags = MetaModelElement.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['HasParameters'])
-   
+
   def __init__(self, **params):
-    
+
     if self.__class__ is HasParameters:
       raise MemopsError(
-       "Attempt to create istance of abstract class HasParameters"
-      )
-    
-    MetaModelElement.__init__(self,**params)
-    
+        "Attempt to create istance of abstract class HasParameters")
+
+    MetaModelElement.__init__(self, **params)
+
     # implementation attributes
     self.__parameterNames = []
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
     MetaModelElement.checkValid(self, complete=complete)
-    
+
+
 #############################################################################
 
 class HasSupertype:
   """ Abstract class to provide supertype/subtype functionality
   """
-  
+
   def __init__(self, **params):
 
     raise MemopsError(
-     "Attempt to create istance of abstract class HasSupertype"
-    )
-  
+      "Attempt to create istance of abstract class HasSupertype")
+
   def getSupertype(self):
     """ get supertype (derived attribute)
     """
@@ -1571,123 +1540,121 @@ class HasSupertype:
       return ll[0]
     else:
       return None
-  
+
   def setSupertypes(self, supertypes):
     """ setter for link supertypes
     """
-    
+
     # first clean up
     ll = self._MetaModelElement__dataDict.get('supertypes')
     if ll:
       for obj in ll:
         obj._MetaModelElement__dataDict['subtypes'].remove(self)
-    
+
     # then reset internal list
     self._MetaModelElement__dataDict['supertypes'] = []
-    
+
     # now put in data
     for supertype in supertypes:
       self.addSupertype(supertype)
-  
+
   def removeSupertype(self, supertype):
     """ remove supertype/subtypes link
     """
-    
+
     ll = self._MetaModelElement__dataDict['supertypes']
-    
+
     if supertype in ll:
       ll.remove(supertype)
       supertype._MetaModelElement__dataDict['subtypes'].remove(self)
-    
+
     else:
       raise MemopsError(
-       "%s: Attempt to remove non-existing supertype %s" % (self, supertype)
-      )
-  
+        "%s: Attempt to remove non-existing supertype %s" % (self, supertype))
+
   def addSupertype(self, supertype):
     """ add supertype/subtypes link
     """
-    
+
     ll = self._MetaModelElement__dataDict['supertypes']
-    
+
     if supertype not in ll:
       ll.append(supertype)
       supertype._MetaModelElement__dataDict['subtypes'].append(self)
-    
+
     else:
       raise MemopsError(
-       "%s: Attempt to add pre-existing supertype %s" % (self, supertype)
-      )
-  
+        "%s: Attempt to add pre-existing supertype %s" % (self, supertype))
+
   def getAllSupertypes(self):
     """ recursively get list of self and all its supertypes
     self is the first element of the list.
     Search is depth-first and repects order of individual supertypes
     """
-    
+
     result = []
-    lists  = [[self]]
+    lists = [[self]]
     indices = [-1]
     while indices:
       ind = indices[-1]
       obj = lists[-1][ind]
-      
+
       # handling of diamond inheritance - python style
       # A class is included only in the last place it appears
       if obj in result:
         result.remove(obj)
-      
+
       result.append(obj)
-      
+
       ind = ind + 1
       if ind:
         indices[-1] = ind
       else:
         lists.pop()
         indices.pop()
-      
+
       ll = obj._MetaModelElement__dataDict['supertypes']
       if ll:
         lists.append(ll)
         indices.append(-len(ll))
-    
+
     #
     return result
-  
+
   def getAllSubtypes(self):
     """ recursively get list of self and all its subtypes
     self is the first element of the list
     """
-    
+
     result = [self]
     for obj in result:
       result.extend(obj._MetaModelElement__dataDict['subtypes'])
     #
     return result
-  
+
   def getNonAbstractSubtypes(self):
     """ recursively get list of self and all its non-abstract subtypes
     """
-    
+
     ll = [self]
     for obj in ll:
       ll.extend(obj._MetaModelElement__dataDict['subtypes'])
     return [x for x in ll if not x.isAbstract]
-  
+
   def getAllElements(self, clazz=None):
     """ utility function - to get all elements, possibly only of a given type
     
     NB should be private in languages that support the concept.
     """
-    
+
     ll = self.getAllSupertypes()
     ll.reverse()
     elements = {}
-    
+
     # get all elements
     for obj in ll:
       elements.update(obj._MetaModelElement__elementDict)
-    
+
     # return sorted list
     items = list(elements.items())
     items.sort()
@@ -1695,10 +1662,11 @@ class HasSupertype:
       result = [x[1] for x in items if isinstance(x[1], clazz)]
     else:
       result = [x[1] for x in items]
-      
+
     #
     return result
-    
+
+
 #############################################################################
 
 
@@ -1706,526 +1674,452 @@ class AbstractDataType(ConstrainedElement, HasSupertype):
   """ abstract class for abstract data types 
   (classes, simple and complex dataypes) 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(ConstrainedElement.parameterData)
-  parameterData.update( {
-   'isRoot':{
-    'type':'Boolean',
-    'default':False,
-    'isFixed':True,
-   },
-   'isLeaf':{
-    'type':'Boolean',
-    'default':False,
-    'isFixed':True,
-   },
-   'isAbstract':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'visibility':{
-    'type':'Token',
-    'enumeration':ImpConstants.visibility_enumeration,
-    'default':ImpConstants.public_visibility,
-    'isFixed':True,
-   },
-   'supertype':{
-    'setterFunc':'unsettable',
-    'getterFunc':'getSupertype',
-    'default':None,
-   },
-   'supertypes':{
-    'setterFunc':'setSupertypes',
-    'hicard':infinity,
-   },
-   'subtypes':{
-    'setterFunc':'unsettable',
-    'hicard':infinity,
-   },
-  })
-  
+  parameterData.update(
+    {'isRoot':{'type':'Boolean', 'default':False, 'isFixed':True, },
+     'isLeaf':{'type':'Boolean', 'default':False, 'isFixed':True, },
+     'isAbstract':{'type':'Boolean', 'default':False, },
+     'visibility':{'type':'Token',
+                   'enumeration':ImpConstants.visibility_enumeration,
+                   'default':ImpConstants.public_visibility, 'isFixed':True, },
+     'supertype':{'setterFunc':'unsettable', 'getterFunc':'getSupertype',
+                  'default':None, },
+     'supertypes':{'setterFunc':'setSupertypes', 'hicard':infinity, },
+     'subtypes':{'setterFunc':'unsettable', 'hicard':infinity, }, })
+
   # allowed tagged values
   allowedTags = ConstrainedElement.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['AbstractDataType'])
-   
+
   def __init__(self, **params):
-    
+
     if self.__class__ is AbstractDataType:
       raise MemopsError(
-       "Attempt to create istance of abstract class AbstractDataType"
-      )
-    
-    ConstrainedElement.__init__(self,**params)
-    
+        "Attempt to create istance of abstract class AbstractDataType")
+
+    ConstrainedElement.__init__(self, **params)
+
     # implementation attributes
     dd = self._MetaModelElement__dataDict
     if dd.get('subtypes') is None:
       dd['subtypes'] = []
     if dd.get('supertypes') is None:
       dd['supertypes'] = []
-  
+
   def getConstraint(self, name):
     """ Get constraint called name
     Return None if nothing found
     
     Recursively search supertypes till you find constraint
     """
-    
+
     for obj in self.getAllSupertypes():
       result = obj._ConstrainedElement__constraints.get(name)
       if result is not None:
         return result
     else:
       return None
-  
+
   def getAllConstraints(self):
     """ get all constraints, including those from supertypes
     """
-    
+
     allSupertypes = self.getAllSupertypes()
     allSupertypes.reverse()
     constraints = {}
     for supertype in allSupertypes:
       constraints.update(supertype._ConstrainedElement__constraints)
-      
+
     ll = list(constraints.items())
     ll.sort()
     return [x[1] for x in ll]
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
     from memops.metamodel import Util as metaUtil
-    
+
     ConstrainedElement.checkValid(self, complete=complete)
-    
+
     if self.isRoot and self.supertypes:
       raise MemopsError("%s is root but has supertypes" % (self))
-    
+
     for supertype in self.supertypes:
-    
+
       # abstract class cannot have non-abstract supertype
       if self.isAbstract and not supertype.isAbstract:
-        raise MemopsError("Abstract %s has non-abstract supertype %s"
-                          % (self, supertype))
-                          
+        raise MemopsError(
+          "Abstract %s has non-abstract supertype %s" % (self, supertype))
+
       # package access check
       if not self.canAccess(supertype):
-        raise MemopsError("%s - cannot access supertype %s"
-                          % (self, supertype))
-      
+        raise MemopsError(
+          "%s - cannot access supertype %s" % (self, supertype))
+
       # check two-way link
       if complete:
         # NB check is too slow to be done routinely
         if supertype.subtypes.count(self) != 1:
-          raise MemopsError("Two-way supertype link %s-%s is broken. Bug (1)?"
-                             % (supertype, self))
-      
+          raise MemopsError(
+            "Two-way supertype link %s-%s is broken. Bug (1)?" % (
+              supertype, self))
+
     # check that abstract classes have subclasses
     if self.isAbstract and not self.getNonAbstractSubtypes():
       print("WARNING - %s: abstract type lacks non-abstract subtypes" % self)
-    
-    
+
     subtypes = self.subtypes
-    
+
     # leaf cannot have subtypes
     if subtypes and self.isLeaf:
-      raise MemopsError("%s is leaf but has subtypes"
-                        % (self))
-    
+      raise MemopsError("%s is leaf but has subtypes" % (self))
+
     # name style
     if self.name[0] not in ImpConstants.uppercase:
       print("WARNING, name of %s does not start with upper case" % self)
-    
+
     # check two-way link
     for obj in subtypes:
       if self not in obj.supertypes:
-        raise MemopsError("Two-way supertype link %s-%s is broken. Bug (2)?"
-                           % (self, obj))
-                           
+        raise MemopsError(
+          "Two-way supertype link %s-%s is broken. Bug (2)?" % (self, obj))
+
+
 #############################################################################
 
 
 class AbstractValue(ConstrainedElement):
   """ abstract class for abstract values (parameters, attributes, and roles) 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(ConstrainedElement.parameterData)
-  parameterData.update( {
-   'locard':{
-    'type':IntType,
-    'default':0,
-   },
-   'hicard':{
-    'type':IntType,
-    'default':1,
-   },
-   'isOrdered':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'isUnique':{
-    'type':'Boolean',
-    'default':True,
-   },
-  })
-  
+  parameterData.update({'locard':{'type':IntType, 'default':0, },
+                        'hicard':{'type':IntType, 'default':1, },
+                        'isOrdered':{'type':'Boolean', 'default':False, },
+                        'isUnique':{'type':'Boolean', 'default':True, }, })
+
   # allowed tagged values
   allowedTags = ConstrainedElement.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['AbstractValue'])
-   
+
   def __init__(self, **params):
-    
+
     if self.__class__ is AbstractValue:
       raise MemopsError(
-       "Attempt to create istance of abstract class AbstractValue"
-      )
-    
-    ConstrainedElement.__init__(self,**params)
-  
+        "Attempt to create istance of abstract class AbstractValue")
+
+    ConstrainedElement.__init__(self, **params)
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     ConstrainedElement.checkValid(self, complete=complete)
-    
+
     # limits to locard and hicard
     if self.locard < 0:
-      raise MemopsError( "%s: locard %s < 0" % (self, self.locard))
-    
+      raise MemopsError("%s: locard %s < 0" % (self, self.locard))
+
     if self.hicard != infinity:
       if self.hicard < 1:
-        raise MemopsError( "%s: hicard %s < 1" % (self, self.hicard))
+        raise MemopsError("%s: hicard %s < 1" % (self, self.hicard))
       if self.hicard < self.locard:
-        raise MemopsError( "%s: hicard %s < locard %s" 
-                          % (self, self.hicard, self.locard))
-    
+        raise MemopsError(
+          "%s: hicard %s < locard %s" % (self, self.hicard, self.locard))
+
     # check unique and ordered NBNB TBD more rules to be added later, 
     # maybe elsewhere
     if self.hicard == 1:
       for tag in ('isOrdered', 'isUnique'):
         default = self.parameterData[tag]['default']
         if getattr(self, tag) != default:
-          raise MemopsError("%s: %s must be %s for hicard==1"
-                            % (self, tag, default))
-          
+          raise MemopsError(
+            "%s: %s must be %s for hicard==1" % (self, tag, default))
+
     # name style
     if self.name[0] not in ImpConstants.lowercase:
       print("WARNING, name of %s does not start with lower case" % self)
-      
+
+
 #############################################################################
 
 
 class ClassElement(AbstractValue):
   """ abstract class class elements (attributes and roles) 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(AbstractValue.parameterData)
-  parameterData.update( {
-   'visibility':{
-    'type':'Token',
-    'enumeration':ImpConstants.visibility_enumeration,
-    'default':ImpConstants.public_visibility,
-    'isFixed':True,
-   },
-   'isAbstract':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'changeability':{
-    'type':'Token',
-    'enumeration':ImpConstants.changeability_enumeration,
-    'default':ImpConstants.changeable,
-   },
-   'isDerived':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'isImplementation':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'isAutomatic':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'baseName':{
-    'type':'Token',
-   },
-  })
-  
+  parameterData.update({'visibility':{'type':'Token',
+                                      'enumeration':ImpConstants.visibility_enumeration,
+                                      'default':ImpConstants.public_visibility,
+                                      'isFixed':True, },
+                        'isAbstract':{'type':'Boolean', 'default':False, },
+                        'changeability':{'type':'Token',
+                                         'enumeration':ImpConstants.changeability_enumeration,
+                                         'default':ImpConstants.changeable, },
+                        'isDerived':{'type':'Boolean', 'default':False, },
+                        'isImplementation':{'type':'Boolean',
+                                            'default':False, },
+                        'isAutomatic':{'type':'Boolean', 'default':False, },
+                        'baseName':{'type':'Token', }, })
+
   # allowed tagged values
   allowedTags = AbstractValue.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['ClassElement'])
-   
+
   def __init__(self, **params):
-    
+
     if self.__class__ is ClassElement:
       raise MemopsError(
-       "Attempt to create istance of abstract class ClassElement"
-      )
-    
-    AbstractValue.__init__(self,**params)
-  
+        "Attempt to create istance of abstract class ClassElement")
+
+    AbstractValue.__init__(self, **params)
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     container = self.container
-    
+
     if isinstance(container, MetaClass):
       Base = self.metaObjFromQualName('.'.join(
-       [ImpConstants.modellingPackageName, 
-       ImpConstants.implementationPackageName,
-       ImpConstants.baseClassName])
-      )
+        [ImpConstants.modellingPackageName,
+         ImpConstants.implementationPackageName, ImpConstants.baseClassName]))
     else:
       Base = self.metaObjFromQualName('.'.join(
-       [ImpConstants.modellingPackageName, 
-       ImpConstants.implementationPackageName,
-       ImpConstants.baseDataTypeObjName])
-      )
-    
+        [ImpConstants.modellingPackageName,
+         ImpConstants.implementationPackageName,
+         ImpConstants.baseDataTypeObjName]))
+
     name = self.name
     baseName = self.baseName
-    
+
     # check name length
     if len(name) > ImpConstants.maxTagLength:
-      raise MemopsError(
-       "%s: name %s longer than %s characters"
-       % (self, name, ImpConstants.maxTagLength)
-      )
-      
+      raise MemopsError("%s: name %s longer than %s characters" % (
+        self, name, ImpConstants.maxTagLength))
+
     if len(baseName) > ImpConstants.maxTagLength:
-      raise MemopsError(
-       "%s: baseName %s longer than %s characters"
-       % (self, baseName, ImpConstants.maxTagLength)
-      )
-    
+      raise MemopsError("%s: baseName %s longer than %s characters" % (
+        self, baseName, ImpConstants.maxTagLength))
+
     AbstractValue.checkValid(self, complete=complete)
-    
+
     # check changeability
     if self.changeability == ImpConstants.add_only:
-      raise MemopsError("%s: changeability %s not implemented yet" 
-                        % (self, self.changeability))
-    
+      raise MemopsError("%s: changeability %s not implemented yet" % (
+        self, self.changeability))
+
     # check baseName usage.
-    
+
     if baseName != name and self.hicard == 1:
-      raise MemopsError("%s hicard is 1 but baseName %s differs from name %s"
-                        % (self, self.baseName, self.name))
-    
+      raise MemopsError(
+        "%s hicard is 1 but baseName %s differs from name %s" % (
+          self, self.baseName, self.name))
+
     # give warning for dissimilar name and basename:
     nn = int(len(name) / 2)
     if name[:nn] != baseName[:nn]:
-      print("WARNING, %s baseName %s dissimilar to name %s"  
-                        % (self, self.baseName, self.name))
-    
-    
+      print("WARNING, %s baseName %s dissimilar to name %s" % (
+        self, self.baseName, self.name))
+
+
     # get temporary info for operations (avoids repeated getattr calls
     tempOpInfo = []
     for op in container.getAllOperations():
       if op.target is self and op.opSubType is None:
         tempOpInfo.append((op.opType, op.isImplicit))
-        
+
     # check derived elements:
     if self.isDerived:
-    
+
       if self.isAutomatic:
-        raise MemopsError("%s is both derived and automatic"  % self)
-    
+        raise MemopsError("%s is both derived and automatic" % self)
+
       if self.isImplementation:
-        raise MemopsError("%s is both derived and Implementation"  % self)
-      
+        raise MemopsError("%s is both derived and Implementation" % self)
+
       # check for getter:
       getters = [x for x in tempOpInfo if x[0] == 'get']
       if not getters:
         raise MemopsError("derived %s lacks getFunction" % self)
-      
+
       elif getters[0][1] and not self.isImplicit:
         raise MemopsError("derived %s lacks explicit getFunction" % self)
-      
+
       # check for setter
       setters = [x for x in tempOpInfo if x[0] == 'set']
-      
+
       if self.changeability == ImpConstants.frozen:
         if setters:
-          raise MemopsError("derived unchangeable %s has setFunction" % (self,))
-          
+          raise MemopsError(
+            "derived unchangeable %s has setFunction" % (self,))
+
       else:
-      
+
         if not setters:
           raise MemopsError("derived changeable %s lacks setFunction" % self)
- 
+
         elif setters[0][1] and not self.isImplicit:
-          raise MemopsError("derived changeable %s lacks explicit setFunction" 
-                            % self)
-    
+          raise MemopsError(
+            "derived changeable %s lacks explicit setFunction" % self)
+
     # check implementation elements:
     elif self.isImplementation:
-    
+
       if self.isAutomatic:
-        raise MemopsError("%s is both automatic and Implementation"  % self)
-        
+        raise MemopsError("%s is both automatic and Implementation" % self)
+
       # check for getter:
       getters = [x for x in tempOpInfo if x[0] == 'get' and not x[1]]
       if getters:
         raise MemopsError("Implementation %s has explicit getFunction" % self)
-      
+
       if self.changeability != ImpConstants.frozen:
         raise MemopsError("Implementation %s is not frozen" % self)
-    
+
     else:
       # special check on Base class elements
       if container is Base and self.name != 'override':
         raise MemopsError(
-         "%s: ClassElement of %s must be Implementation or Derived" 
-         % (self, Base)
-        )
-    
+          "%s: ClassElement of %s must be Implementation or Derived" % (
+            self, Base))
+
       # check automatic elements:
       if self.isAutomatic:
- 
+
         setters = [x for x in tempOpInfo if x[0] == 'set' and not x[1]]
         if setters:
           raise MemopsError("automatic %s has explicit setFunction" % self)
- 
+
       if self.isAutomatic or self.changeability == ImpConstants.frozen:
         for tag in ('add', 'remove'):
           ops = [x for x in tempOpInfo if x[0] == tag]
           if ops:
-            raise MemopsError("%s is automatic or frozen and has %sFunction"
-             % (self, tag)
-            )
-    
+            raise MemopsError(
+              "%s is automatic or frozen and has %sFunction" % (self, tag))
+
     # NBNB TBD we do not check for 'add' and 'remove' functions here, as
     # they should be done as 'get, add, set'
-    
+
     # special case - check attribute called 'serial' 
     if name == ImpConstants.serial_attribute:
-      
-      if not isinstance(self,MetaAttribute):
+
+      if not isinstance(self, MetaAttribute):
         raise MemopsError("%s: name 'serial' reserved for attribute" % self)
-      
+
       if not isinstance(self.container, MetaClass):
-        raise MemopsError("%s: name 'serial' only allowed inside MetaClass"
-                          % self)
-      
+        raise MemopsError(
+          "%s: name 'serial' only allowed inside MetaClass" % self)
+
       if self.valueType.name != 'Int':
         raise MemopsError("%s: 'serial' attribute must be type 'Int'" % self)
-      
+
       serialValues = {'isAutomatic':True, 'changeability':ImpConstants.frozen,
-                     'hicard':1, 'locard':1,}
-      for key,val in serialValues.items():
-        x = getattr(self,key)
+                      'hicard':1, 'locard':1, }
+      for key, val in serialValues.items():
+        x = getattr(self, key)
         if x != val:
           raise MemopsError("%s: %s must be %s, was %s" % (self, key, val, x))
-      
+
     # check overriding
     allSupertypes = container.getAllSupertypes()
     mayNotOverride = not (Base in allSupertypes)
     for supertype in allSupertypes[1:]:
       superElem = supertype._MetaModelElement__elementDict.get(name)
       if superElem is not None:
-        
+
         if superElem.__class__ is not self.__class__:
-          raise MemopsError("%s overrides %s but types are different"
-                            % (superElem, self)
-                           )
-        
+          raise MemopsError(
+            "%s overrides %s but types are different" % (superElem, self))
+
         # classes without supertype cannot override or be overridden
         if mayNotOverride and not superElem.isAbstract:
           raise MemopsError(
-           "Name clash between %s and %s - classes do not descend from %s"
-                            % (superElem, self, Base)
-                           )
-        
+            "Name clash between %s and %s - classes do not descend from %s" % (
+              superElem, self, Base))
+
         # superElem must be abstract
         if not superElem.isAbstract:
-          raise MemopsError("%s overrides non-abstract %s" % 
-                            (self, superElem))
-        
+          raise MemopsError("%s overrides non-abstract %s" % (self, superElem))
+
         parameterData = self.parameterData
         for tag in parameterData.keys():
-           
-          if tag in ('isAbstract', 'container', 'documentation', 'guid', 
-                     'changeability', 'isDerived', 'otherRole'):
+
+          if tag in (
+            'isAbstract', 'container', 'documentation', 'guid',
+            'changeability', 'isDerived', 'otherRole'):
             # NB different changeability is only allowed because the
             # overridden role has to be abstract
             continue
-            
+
           if parameterData[tag].get('type') == 'content':
             continue
-            
-          val = getattr(self,tag)
-          superval = getattr(superElem,tag)
+
+          val = getattr(self, tag)
+          superval = getattr(superElem, tag)
           if val == superval:
             pass
-            
+
           elif tag == 'defaultValue' and not superval:
             # attributes only
             pass
-                        
+
           elif tag == 'locard':
             if superval > val:
               raise MemopsError(
-               "%s: locard %s lower than in overridden %s %s"
-               % (self, val, self.__class__.__name__, superElem)
-              )
-              
+                "%s: locard %s lower than in overridden %s %s" % (
+                  self, val, self.__class__.__name__, superElem))
+
           elif tag == 'hicard':
-            
+
             if (superval == 1) != (val == 1):
               raise MemopsError(
-               "%s overriding %s: hicard must be 1 in both or neither"
-               % (self, superElem)
-              )
-            
+                "%s overriding %s: hicard must be 1 in both or neither" % (
+                  self, superElem))
+
             elif superval == infinity:
               pass
-            
+
             elif val == infinity:
               raise MemopsError(
-               "%s: hicard infinity higher than in overridden %s %s"
-               % (self, self.__class__.__name__, superElem)
-              )
+                "%s: hicard infinity higher than in overridden %s %s" % (
+                  self, self.__class__.__name__, superElem))
               pass
-            
+
             elif superval < val:
               raise MemopsError(
-               "%s: hicard %s higher than in overridden %s %s"
-               % (self, val, self.__class__.__name__, superElem)
-              )
-              
+                "%s: hicard %s higher than in overridden %s %s" % (
+                  self, val, self.__class__.__name__, superElem))
+
           elif tag == 'taggedValues':
-            for tt,vv in superval.items():
+            for tt, vv in superval.items():
               if val.get(tt) != vv:
                 raise MemopsError(
-                 "%s: tagged value %s not the same as in overridden %s %s"
-                 % (self, tt, self.__class__.__name__, superElem)
-                )
-          
+                  "%s: tagged value %s not the same as in overridden %s %s" % (
+                    self, tt, self.__class__.__name__, superElem))
+
           elif tag == 'valueType':
             if superval not in val.getAllSupertypes():
               if superval.qualifiedName() != 'memops.Implementation.Any':
                 raise MemopsError(
-                 "%s overrides %s but valueType %s is not subtype of %s"
-                 % (self, superElem, val, superval)
-                )
-          
+                  "%s overrides %s but valueType %s is not subtype of %s" % (
+                    self, superElem, val, superval))
+
           else:
-            raise MemopsError("%s overrides %s but differs for %s" % 
-                              (self,superElem,tag))
-        
-        
+            raise MemopsError(
+              "%s overrides %s but differs for %s" % (self, superElem, tag))
+
         for name in self._ConstrainedElement__constraints.keys():
           if superElem.getConstraint(name) is not None:
-            raise MemopsError("%s constraint %s overrides inherited constraint" 
-                              % (self,name))
-      
+            raise MemopsError(
+              "%s constraint %s overrides inherited constraint" % (self, name))
+
+
 #############################################################################
 
 
@@ -2233,67 +2127,64 @@ class ComplexDataType(AbstractDataType):
   """ Abstract superclass of MetaClass and MetaDataObjType
   """
   parameterData = semideepcopy(AbstractDataType.parameterData)
-  parameterData['constructorCodeStubs'] = {
-   'type':'StringDict',
-   'default':{},
-  }
+  parameterData['constructorCodeStubs'] = {'type':'StringDict', 'default':{}, }
   parameterData['attributes'] = {'type':'content',
-                                     'namelist':'_ComplexDataType__attributeNames'}
+                                 'namelist':'_ComplexDataType__attributeNames'}
   parameterData['operations'] = {'type':'content',
-                                     'namelist':'_ComplexDataType__operationNames'}
-  
+                                 'namelist':'_ComplexDataType__operationNames'}
+
   # allowed tagged values
   allowedTags = AbstractDataType.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['ComplexDataType'])
-   
+
   def __init__(self, **params):
-    
-    AbstractDataType.__init__(self,**params)
-    
+
+    AbstractDataType.__init__(self, **params)
+
     # Set implementation attributes
     self.__attributeNames = []
     self.__operationNames = []
 
-  def addConstructorCodeStub(self,tag,value):
+  def addConstructorCodeStub(self, tag, value):
     """ Add constructorCodeStub
     """
-    
+
     if type(tag) != StringType:
-      raise MemopsError("%s codeStub tag %s is not a string" %(self, tag))
-    
+      raise MemopsError("%s codeStub tag %s is not a string" % (self, tag))
+
     if type(value) != StringType:
-      raise MemopsError("%s codeStub %s value %s is not a string" %
-       (self, tag, value)
-      )
-    
+      raise MemopsError(
+        "%s codeStub %s value %s is not a string" % (self, tag, value))
+
     if tag not in ImpConstants.codeStubTags:
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
-    
+
     self._MetaModelElement__dataDict['constructorCodeStubs'][tag] = value
-  
+
   def removeConstructorCodeStub(self, tag):
     """Remove existing ConstructorCodeStub
     """
-    
-    if self._MetaModelElement__dataDict['constructorCodeStubs'].get(tag, sentinel) is not sentinel:
+
+    if self._MetaModelElement__dataDict['constructorCodeStubs'].get(tag,
+                                                                    sentinel) is not sentinel:
       del self._MetaModelElement__dataDict['constructorCodeStubs'][tag]
     else:
       raise MemopsError("%s has no ConstructorCodeStub %s " % (self, tag))
-  
+
   def inheritDown(self):
     """ Copy all contained elements and constraints down to subtypes
     """
-    
+
     subtypes = self.subtypes
-    
-    for ll in  (self.attributes, self.constraints):
+
+    for ll in (self.attributes, self.constraints):
       for obj in ll:
         dd = obj._getCloningDict()
         for subtype in self.subtypes:
           dd['container'] = subtype
           dd['guid'] = transferGuid(obj, subtype)
           obj.__class__(**dd)
-    
+
     if hasattr(self, 'roles'):
       for obj in self.roles:
         if obj.isImplementation and not obj.otherRole:
@@ -2302,22 +2193,21 @@ class ComplexDataType(AbstractDataType):
             dd['container'] = subtype
             dd['guid'] = transferGuid(obj, subtype)
             obj.__class__(**dd)
-        
+
         else:
           raise MemopsError(
-           "%s: attempt to inherit down non-implementation or two-way role"
-           % (obj)
-          )
-    
+            "%s: attempt to inherit down non-implementation or two-way role" % (
+              obj))
+
     for obj in self.operations:
       dd = obj._getCloningDict()
       target = obj.target
       for subtype in self.subtypes:
-          
+
         dd['container'] = subtype
         dd['guid'] = transferGuid(obj, subtype)
         newObj = obj.__class__(**dd)
-        
+
         if target:
           container = obj.container
           if target is container:
@@ -2326,182 +2216,139 @@ class ComplexDataType(AbstractDataType):
             newObj.target = newObj
           elif target.container is container:
             newObj.target = subtype.getElement(target.name)
-        
+
         for par in obj.parameters:
           dd2 = par._getCloningDict()
           dd2['container'] = newObj
           dd2['guid'] = transferGuid(par, newObj)
           par.__class__(**dd2)
-    
+
   def getElement(self, name):
     """ Get contained element called name
     Return None if nothing found
     
     Recursively search supertypes till you find element
     """
-    
+
     ll = self.getAllSupertypes()
-    
+
     for obj in ll:
       result = obj._MetaModelElement__elementDict.get(name)
       if result is not None:
         return result
     else:
       return None
-  
+
   # synonym functions
   getAttribute = getElement
   getOperation = getElement
-      
+
   def getAllAttributes(self):
     """ get contained atttributes, including those from supertypes
     """
     return self.getAllElements(clazz=MetaAttribute)
-    
+
   def getAllOperations(self):
     """ get contained operations, including those from supertypes
     """
     return self.getAllElements(clazz=MetaOperation)
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     AbstractDataType.checkValid(self, complete=complete)
-    
+
     # check code
     constructorCode = self._MetaModelElement__dataDict['constructorCodeStubs']
     if constructorCode:
-      
+
       if self.isAbstract:
-        raise MemopsError("Abstract ComplexDataType %s has special constructor"
-         % (self)
-        )
-      
+        raise MemopsError(
+          "Abstract ComplexDataType %s has special constructor" % (self))
+
       codeTags = ImpConstants.codeStubTags
       for codeTag in constructorCode.keys():
- 
+
         # check code tags
         if codeTag not in codeTags:
-          raise MemopsError("%s: Ilegal dcontructorCodeStubs tag %s"
-                            % (self, codeTag))
-    
+          raise MemopsError(
+            "%s: Ilegal dcontructorCodeStubs tag %s" % (self, codeTag))
+
     # check uniqueness of Operations signatures:
     opCheckDict = {}
     for op in self.getAllOperations():
       tt = (op.opType, op.opSubType, op.target)
       if opCheckDict.get(tt):
         raise MemopsError(
-         "%s: Class has another operation with opType,opSubType,target %s"
-         % (self,tt)
-        )
+          "%s: Class has another operation with opType,opSubType,target %s" % (
+            self, tt))
       else:
         opCheckDict[tt] = True
-    
+
     # Now check presence of an opSubType=None variant for all operations.
-    for opType,opSubType,target in opCheckDict.keys():
-      if opSubType is not None and not opCheckDict.get((opType,None,target)):
-        raise MemopsError(
-         """%s: opType,opSubType,target is %s. 
-MetaOperation with opSubType:None not found""" % (self,tt)
-        )
-    
+    for opType, opSubType, target in opCheckDict.keys():
+      if opSubType is not None and not opCheckDict.get((opType, None, target)):
+        raise MemopsError("""%s: opType,opSubType,target is %s.
+MetaOperation with opSubType:None not found""" % (self, tt))
+
     # check presence of non-overridden abstract attributes and operations
     if not self.isAbstract:
       for attr in self.getAllAttributes():
         if attr.isAbstract:
-          raise MemopsError("%s is not abstract but has abstract attr %s"
-                            % (self, attr.name))
+          raise MemopsError(
+            "%s is not abstract but has abstract attr %s" % (self, attr.name))
       for op in self.getAllOperations():
         if op.isAbstract:
-          raise MemopsError("%s is not abstract but has abstract operation %s"
-                            % (self, attr.name))
-                            
+          raise MemopsError(
+            "%s is not abstract but has abstract operation %s" % (
+              self, attr.name))
+
+
 #############################################################################
 
 
 class MetaPackage(MetaModelElement):
   """ abstract class for elements 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(MetaModelElement.parameterData)
   parameterData['container']['default'] = None
-  parameterData.update( {
-   'isRoot':{
-    'type':'Boolean',
-    'default':False,
-    'isFixed':True,
-   },
-   'isLeaf':{
-    'type':'Boolean',
-    'default':False,
-    'isFixed':True,
-   },
-   'isAbstract':{
-    'type':'Boolean',
-    'default':False,
-    'isFixed':True,
-   },
-   'visibility':{
-    'type':'Token',
-    'enumeration':ImpConstants.visibility_enumeration,
-    'default':ImpConstants.public_visibility,
-    'isFixed':True,
-   },
-   'shortName':{
-    'type':'Token',
-    'default':None,
-   },
-   'importedPackages':{
-    'hicard':infinity,
-    'setterFunc':'setImportedPackages',
-    'default':[],
-   },
-   'accessedPackages':{
-    'setterFunc':'unsettable',
-    'hicard':infinity,
-   },
-   'classes':{
-    'type':'content',
-    'namelist':'_MetaPackage__classNames',
-   },
-   'dataTypes':{
-    'type':'content',
-    'namelist':'_MetaPackage__dataTypeNames',
-   },
-   'dataObjTypes':{
-    'type':'content',
-    'namelist':'_MetaPackage__dataObjTypeNames',
-   },
-   'constants':{
-    'type':'content',
-    'namelist':'_MetaPackage__constantNames',
-   },
-   'exceptions':{
-    'type':'content',
-    'namelist':'_MetaPackage__exceptionNames',
-   },
-   'containedPackages':{
-    'type':'content',
-    'namelist':'_MetaPackage__containedPackageNames',
-   },
-   'topObjectClass':{
-    'setterFunc':'unsettable',
-    'default':None
-   },
-  })
-  
+  parameterData.update(
+    {'isRoot':{'type':'Boolean', 'default':False, 'isFixed':True, },
+     'isLeaf':{'type':'Boolean', 'default':False, 'isFixed':True, },
+     'isAbstract':{'type':'Boolean', 'default':False, 'isFixed':True, },
+     'visibility':{'type':'Token',
+                   'enumeration':ImpConstants.visibility_enumeration,
+                   'default':ImpConstants.public_visibility, 'isFixed':True, },
+     'shortName':{'type':'Token', 'default':None, },
+     'importedPackages':{'hicard':infinity, 'setterFunc':'setImportedPackages',
+                         'default':[], },
+     'accessedPackages':{'setterFunc':'unsettable', 'hicard':infinity, },
+     'classes':{'type':'content', 'namelist':'_MetaPackage__classNames', },
+     'dataTypes':{'type':'content',
+                  'namelist':'_MetaPackage__dataTypeNames', },
+     'dataObjTypes':{'type':'content',
+                     'namelist':'_MetaPackage__dataObjTypeNames', },
+     'constants':{'type':'content',
+                  'namelist':'_MetaPackage__constantNames', },
+     'exceptions':{'type':'content',
+                   'namelist':'_MetaPackage__exceptionNames', },
+     'containedPackages':{'type':'content',
+                          'namelist':'_MetaPackage__containedPackageNames', },
+     'topObjectClass':{'setterFunc':'unsettable', 'default':None}, })
+
   # allowed tagged values
   allowedTags = MetaModelElement.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaPackage'])
-   
+
   def __init__(self, **params):
-    
+
     from memops.metamodel import Util as metaUtil
-    
+
     MetaModelElement.__init__(self, **params)
-    
+
     # Set implementation attributes
     self.__containedPackageNames = []
     self.__classNames = []
@@ -2509,87 +2356,85 @@ class MetaPackage(MetaModelElement):
     self.__dataTypeNames = []
     self.__exceptionNames = []
     self.__constantNames = []
-    
+
     self.__dict__['topObjectClass'] = None
-    
+
     self._MetaModelElement__dataDict['accessedPackages'] = []
-    
+
     # finish link from container
     container = params.get('container')
     if container is not None:
       container.__containedPackageNames.append(params['name'])
-    
+
     # check container circularity
-    metaUtil.checkLinkCircularity(self,'container')
-  
+    metaUtil.checkLinkCircularity(self, 'container')
+
   def setImportedPackages(self, importedPackages):
     """ setter for link importedPackages
     """
-    
+
     # first clean up
     ll = self._MetaModelElement__dataDict.get('importedPackages')
     if ll:
       for pp in ll:
         pp._MetaModelElement__dataDict['accessedPackages'].remove(self)
-    
+
     # then reset internal list
     dd = self._MetaModelElement__dataDict
     if dd.get('importedPackages') is None:
       dd['importedPackages'] = []
-    
+
     # now put in data
     for importedPackage in importedPackages:
       self.addImportedPackage(importedPackage)
-  
+
   def addImportedPackage(self, importedPackage):
     """ Add imported package (two-way link)
     """
- 
+
     # check parameter type
     if not isinstance(importedPackage, MetaPackage):
       raise MemopsError(
-       "%s: addImportedPackage parameter should be MetaPackage, was %s"
-       % (self, importedPackage)
-      )
-      
+        "%s: addImportedPackage parameter should be MetaPackage, was %s" % (
+          self, importedPackage))
+
     importedPackages = self._MetaModelElement__dataDict['importedPackages']
-    accessedPackages = importedPackage._MetaModelElement__dataDict['accessedPackages']
-    
+    accessedPackages = importedPackage._MetaModelElement__dataDict[
+      'accessedPackages']
+
     if importedPackage in importedPackages:
-      raise MemopsError(
-       "%s: addImportedPackage, %s already imported" % (self, importedPackage)
-      )
-      
+      raise MemopsError("%s: addImportedPackage, %s already imported" % (
+        self, importedPackage))
+
     if self in accessedPackages:
-      raise MemopsError(
-       "%s: addImportedPackage, %s already accesssed" % (self, importedPackage)
-      )
-      
+      raise MemopsError("%s: addImportedPackage, %s already accesssed" % (
+        self, importedPackage))
+
     # make change
     importedPackages.append(importedPackage)
     accessedPackages.append(self)
-  
+
   def removeImportedPackage(self, importedPackage):
     """Remove existing importedPackage
     """
-          
+
     importedPackages = self._MetaModelElement__dataDict['importedPackages']
-    
+
     if importedPackage in importedPackages:
-      accessedPackages = importedPackage._MetaModelElement__dataDict['accessedPackages']
+      accessedPackages = importedPackage._MetaModelElement__dataDict[
+        'accessedPackages']
       accessedPackages.remove(self)
-    
+
     else:
-      raise MemopsError(
-       "%s: removeImportedPackage, %s was not imported" % (self, importedPackage)
-      )
-  
+      raise MemopsError("%s: removeImportedPackage, %s was not imported" % (
+        self, importedPackage))
+
   def getElement(self, name):
     """ Get contained element called name
     Return None if nothing found
     """
     return self._MetaModelElement__elementDict.get(name)
-  
+
   # synonym functions
   getClass = getElement
   getConstant = getElement
@@ -2597,141 +2442,129 @@ class MetaPackage(MetaModelElement):
   getDataObjType = getElement
   getDataType = getElement
   getException = getElement
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     from memops.metamodel import Util as metaUtil
-    
+
     importedPackages = self._MetaModelElement__dataDict['importedPackages']
     accessedPackages = self._MetaModelElement__dataDict['accessedPackages']
-    
+
     # check containment circularity
-    metaUtil.checkLinkCircularity(self,'container')
-    
+    metaUtil.checkLinkCircularity(self, 'container')
+
     # check two-way import/access link
     for pp in importedPackages:
       if pp._MetaModelElement__dataDict['accessedPackages'].count(self) != 1:
-        raise MemopsError("Two-way import/access link %s-%s broken. Bug (1)?"
-                           % (self, pp))
-    
+        raise MemopsError(
+          "Two-way import/access link %s-%s broken. Bug (1)?" % (self, pp))
+
     for pp in accessedPackages:
       if pp._MetaModelElement__dataDict['importedPackages'].count(self) != 1:
-        raise MemopsError("Two-way import/access link %s-%s broken. Bug (2)?"
-                           % (self, pp))
-    
+        raise MemopsError(
+          "Two-way import/access link %s-%s broken. Bug (2)?" % (self, pp))
+
     # check for 'None'; container
     if self.container is None:
       # root package. Check name
       if self.name != ImpConstants.rootPackageName:
-        raise MemopsError("Root package named %s, must be %s"
-         % (self.name, ImpConstants.rootPackageName)
-        )
-      
+        raise MemopsError("Root package named %s, must be %s" % (
+          self.name, ImpConstants.rootPackageName))
+
       # initialise guid uniqueness check
       MetaModelElement.guidDict = {}
-    
+
     MetaModelElement.checkValid(self, complete=complete)
-    
+
     if self.container is None:
       # Root package clean up after guid uniqueness check
       MetaModelElement.guidDict = None
-    
+
     # check mandatory packages and get implementation package
     RootPackage = self.topPackage()
-    ModellingPackage = RootPackage.getElement(ImpConstants.modellingPackageName)
+    ModellingPackage = RootPackage.getElement(
+      ImpConstants.modellingPackageName)
     if not isinstance(ModellingPackage, MetaPackage):
       raise MemopsError(
-       "No package %s found" % ImpConstants.modellingPackageName
-      )
-      
+        "No package %s found" % ImpConstants.modellingPackageName)
+
     Impl = ModellingPackage.getElement(ImpConstants.implementationPackageName)
     AccessControl = ModellingPackage.getElement(
-     ImpConstants.accessControlPackageName
-    )
-    
+      ImpConstants.accessControlPackageName)
+
     if not isinstance(Impl, MetaPackage):
       raise MemopsError("No Implementation package found")
-      
+
     if not isinstance(AccessControl, MetaPackage):
       raise MemopsError("No AccessControl package found")
-    
+
     if self is Impl:
       if self._MetaModelElement__dataDict['importedPackages']:
         raise MemopsError(
-         "Implementation package %s may not import other packages"
-         % self.qualifiedName()
-        )
-      if self.__containedPackageNames :
+          "Implementation package %s may not import other packages" % self.qualifiedName())
+      if self.__containedPackageNames:
         raise MemopsError(
-         "Implementation package '%s' must contain no other packages" 
-         % ImpConstants.implementationPackageName
-        )
-      
+          "Implementation package '%s' must contain no other packages" % ImpConstants.implementationPackageName)
+
       # check Implementation classes used elsewhere
       tag = ImpConstants.baseDataTypeObjName
       cc = self.getElement(tag)
-      if not cc or not isinstance(cc,MetaDataObjType):
+      if not cc or not isinstance(cc, MetaDataObjType):
         raise MemopsError(
-         "Implementation package '%s' does not contain MetaDataObjType %s"
-         % (ImpConstants.implementationPackageName,tag)
-        )
+          "Implementation package '%s' does not contain MetaDataObjType %s" % (
+            ImpConstants.implementationPackageName, tag))
       for tag in ImpConstants.implementationClassNames:
         cc = self.getElement(tag)
-        if not cc or not isinstance(cc,MetaClass):
+        if not cc or not isinstance(cc, MetaClass):
           raise MemopsError(
-           "Implementation package '%s' does not contain class %s"
-           % (ImpConstants.implementationPackageName,tag)
-          )
-          
-      # check special roles:
+            "Implementation package '%s' does not contain class %s" % (
+              ImpConstants.implementationPackageName, tag))
+
+          # check special roles:
         cc = self.getElement(ImpConstants.dataRootName)
-        for tag in (ImpConstants.repositoryRole, 
-                   ImpConstants.packageLocatorRole):
+        for tag in (
+          ImpConstants.repositoryRole, ImpConstants.packageLocatorRole):
           if not isinstance(cc.getElement(tag), MetaRole):
-            raise MemopsError("MemopsRoot class '%s' does not contain role %s"
-                              % (cc,tag))
-      
+            raise MemopsError(
+              "MemopsRoot class '%s' does not contain role %s" % (cc, tag))
+
     # check container packages:
     if self.__containedPackageNames:
-      
+
       if accessedPackages or importedPackages:
         raise MemopsError(
-         "%s: Packages containing other packages can not import or access"
-         % (self,)
-        )
-      
-      if (self.__classNames or self.__dataObjTypeNames or self.__dataTypeNames
-          or self.__exceptionNames or self.__constantNames):
+          "%s: Packages containing other packages can not import or access" % (
+            self,))
+
+      if (
+                self.__classNames or self.__dataObjTypeNames or self.__dataTypeNames or self.__exceptionNames or self.__constantNames):
         raise MemopsError(
-         "%s: Packages containing other packages can contain nothing else"
-         % (self,)
-        )
-        
+          "%s: Packages containing other packages can contain nothing else" % (
+            self,))
+
       # check shortName
       if self.shortName is not None:
-        raise MemopsError("%s: branch package has shortName" (self,))
-      
+        raise MemopsError("%s: branch package has shortName"(self, ))
+
       # name style check:
-      if (self.name[0] not in ImpConstants.lowercase and 
-          self.container is not None):
+      if (self.name[
+            0] not in ImpConstants.lowercase and self.container is not None):
         print("WARNING, name of %s does not start with lower case" % self)
-      
-    elif (self.__classNames or self.__dataObjTypeNames or self.__dataTypeNames
-          or self.__exceptionNames or self.__constantNames):
+
+    elif (
+              self.__classNames or self.__dataObjTypeNames or self.__dataTypeNames or self.__exceptionNames or self.__constantNames):
       # leaf package - NB package could be empty, hence the elif
-      
+
       # check shortName
       if self.shortName is None:
         raise MemopsError("%s: leaf package lacks a shortName" % (self,))
-        
+
       if len(self.shortName) > ImpConstants.maxShortNameLength:
-        raise MemopsError(
-         "%s: shortName %s longer than %s characters"
-         % (self, self.shortName, ImpConstants.maxShortNameLength)
-        )
-      
+        raise MemopsError("%s: shortName %s longer than %s characters" % (
+          self, self.shortName, ImpConstants.maxShortNameLength))
+
       # check TopObject 
       hasNonAbstract = False
       topObjects = []
@@ -2739,43 +2572,35 @@ class MetaPackage(MetaModelElement):
       for clazz in self.classes:
         if not clazz.isAbstract:
           hasNonAbstract = True
-        
+
         if clazz.supertype is TopObjClass:
           topObjects.append(clazz)
-      
+
       if self is not Impl and hasNonAbstract and not topObjects:
         raise MemopsError(
-         "%s: has non-abstract classes but lacks TopObject"
-         % (self, )
-        )
-      
+          "%s: has non-abstract classes but lacks TopObject" % (self, ))
+
       if len(topObjects) > 1:
         raise MemopsError(
-         "%s: has several TopObjects: %s"
-         % (self, topObjects)
-        )
-      
+          "%s: has several TopObjects: %s" % (self, topObjects))
+
       # check package importing
       if self is not Impl:
         ll = self.importedPackages
         if Impl not in ll:
           raise MemopsError(
-           "package %s does not import the Implementation package"
-           % self
-          )
+            "package %s does not import the Implementation package" % self)
         if self is not AccessControl and AccessControl not in ll:
           raise MemopsError(
-           "package %s does not import the AccessControl package"
-           % self
-          )
-      
+            "package %s does not import the AccessControl package" % self)
+
       # name style check:
       if self.name[0] not in ImpConstants.uppercase:
         print("WARNING, name of %s does not start with upper case" % self)
-    
+
     if self is RootPackage:
       # special checks for root package, and for entire model
-      
+
       # check for cycles in import/access for packages. 
       # and in supertypes/subtypes for classes
       # Done centrally for speed
@@ -2785,42 +2610,43 @@ class MetaPackage(MetaModelElement):
       dataObjTypes = []
       exceptions = []
       ll = [self]
-      
+
       for pp in ll:
         ll2 = pp.containedPackages
         if ll2:
           ll.extend(ll2)
         else:
           leafPackages.append(pp)
-        
+
         classes.extend(pp.classes)
         dataTypes.extend(pp.dataTypes)
         dataObjTypes.extend(pp.dataObjTypes)
         exceptions.extend(pp.exceptions)
-        
-      dummy = metaUtil.topologicalSortSubgraph(leafPackages, 'importedPackages')
+
+      dummy = metaUtil.topologicalSortSubgraph(leafPackages,
+                                               'importedPackages')
       for ll in (classes, dataTypes, dataObjTypes, exceptions):
         dummy = metaUtil.topologicalSortSubgraph(ll, 'supertypes')
-      
+
       # checks for diamond multiple inheritance and inheritance order
-      for ss in (ImpConstants.baseClassName,ImpConstants.baseDataTypeObjName):
+      for ss in (ImpConstants.baseClassName, ImpConstants.baseDataTypeObjName):
         dd = {}
         ll = [Impl.getElement(ss)]
         for obj in ll:
-        
+
           if dd.get(obj):
-            raise MemopsError("%s inherits twice from %s" % (obj,ss))
-          
+            raise MemopsError("%s inherits twice from %s" % (obj, ss))
+
           dd[obj] = True
           subtypes = obj.subtypes
-          tmp = [xx for xx in subtypes
-                 if xx._MetaModelElement__dataDict['supertypes'][0] is not obj]
+          tmp = [xx for xx in subtypes if
+                 xx._MetaModelElement__dataDict['supertypes'][0] is not obj]
           if tmp:
-            raise MemopsError("%s: classes should have %s as first supertype"
-                              % (tmp, obj))
-              
+            raise MemopsError(
+              "%s: classes should have %s as first supertype" % (tmp, obj))
+
           ll.extend(subtypes)
-      
+
 # must be done here after end of class definition
 MetaPackage.parameterData['importedPackages']['type'] = MetaPackage
 MetaPackage.parameterData['accessedPackages']['type'] = MetaPackage
@@ -2831,170 +2657,143 @@ MetaPackage.parameterData['container']['type'] = MetaPackage
 class MetaClass(ComplexDataType):
   """ class for normal Classes
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(ComplexDataType.parameterData)
   parameterData['container']['type'] = MetaPackage
-  parameterData.update( {
-   'isSingleton':{
-    'type':'Boolean',
-    'default':False,
-    'isFixed':True,
-   },
-   'partitionsChildren':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'isDerived':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'keyNames':{
-    'type':StringType,
-    'hicard':infinity,
-    'getterFunc':'getKeyNames',
-    'default':[],
-   },
-   'destructorCodeStubs':{
-    'type':'StringDict',
-    'default':{},
-   },
-   'postDestructorCodeStubs':{
-    'type':'StringDict',
-    'default':{},
-   },
-   'roles':{
-    'type':'content',
-    'namelist':'_MetaClass__roleNames',
-   },
-   'parentRole':{
-    'getterFunc':'getParentRole',
-    'setterFunc':'unsettable',
-    'default':None
-   },
-  })
-  
+  parameterData.update(
+    {'isSingleton':{'type':'Boolean', 'default':False, 'isFixed':True, },
+     'partitionsChildren':{'type':'Boolean', 'default':False, },
+     'isDerived':{'type':'Boolean', 'default':False, },
+     'keyNames':{'type':StringType, 'hicard':infinity,
+                 'getterFunc':'getKeyNames', 'default':[], },
+     'destructorCodeStubs':{'type':'StringDict', 'default':{}, },
+     'postDestructorCodeStubs':{'type':'StringDict', 'default':{}, },
+     'roles':{'type':'content', 'namelist':'_MetaClass__roleNames', },
+     'parentRole':{'getterFunc':'getParentRole', 'setterFunc':'unsettable',
+                   'default':None}, })
+
   # allowed tagged values
   allowedTags = ComplexDataType.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaClass'])
-  
+
   def __init__(self, **params):
-    
+
     ComplexDataType.__init__(self, **params)
-    
+
     # Set implementation attributes
     self.__roleNames = []
-    
+
     # finish link from container
     params['container']._MetaPackage__classNames.append(params['name'])
-    
+
     # topObjectClass - special case of Implementation package
-    if (params.get('name') == ImpConstants.dataRootName
-        and params['container'].name == ImpConstants.implementationPackageName):
+    if (params.get('name') == ImpConstants.dataRootName and params[
+      'container'].name == ImpConstants.implementationPackageName):
       params['container'].__dict__['topObjectClass'] = self
-  
+
   def addKeyName(self, name):
     """ add mainkey name to list
     """
-    
+
     keyNames = self._MetaModelElement__dataDict['keyNames']
-    
+
     if name in keyNames:
       raise MemopsError("%s keyName %s is already in list" % (self, name))
-    
+
     elif not keyNames and self.getKeyNames():
       raise MemopsError("%s keyNames is defined in superclass" % (self, ))
-    
+
     else:
       keyNames.append(name)
-  
+
   def removeKeyName(self, name):
     """ remove mainkey name from list
     """
-    
+
     keyNames = self._MetaModelElement__dataDict['keyNames']
-    
+
     if not keyNames and self.getKeyNames():
       raise MemopsError("%s keyNames is defined in superclass" % (self, ))
-    
+
     elif name not in keyNames:
       raise MemopsError("%s keyName %s is not in list" % (self, name))
-    
+
     else:
       keyNames.remove(name)
-  
+
   def getKeyNames(self):
     """ get keyNames list, from class or a superclass
     """
-    
+
     for obj in self.getAllSupertypes():
       # NB ComplexDataType - the topmost superclall has no 'keyNames' attribute
-      result = obj._MetaModelElement__dataDict.get('keyNames',[])
+      result = obj._MetaModelElement__dataDict.get('keyNames', [])
       if result:
         break
-    
+
     return result[:]
-  
+
   def addDestructorCodeStub(self, tag, value):
     """ Add destructorCodeStub
     """
-    
+
     if type(tag) != StringType:
-      raise MemopsError("%s codeStub tag %s is not a string" %(self, tag))
-    
+      raise MemopsError("%s codeStub tag %s is not a string" % (self, tag))
+
     if type(value) != StringType:
-      raise MemopsError("%s codeStub %s value %s is not a string" %
-       (self, tag, value)
-      )
-    
+      raise MemopsError(
+        "%s codeStub %s value %s is not a string" % (self, tag, value))
+
     if tag not in ImpConstants.codeStubTags:
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
-    
+
     self._MetaModelElement__dataDict['destructorCodeStubs'][tag] = value
-  
+
   def removeDestructorCodeStub(self, tag):
     """Remove existing DestructorCodeStub
     """
-    
-    if self._MetaModelElement__dataDict['destructorCodeStubs'].get(tag, sentinel) is not sentinel:
+
+    if self._MetaModelElement__dataDict['destructorCodeStubs'].get(tag,
+                                                                   sentinel) is not sentinel:
       del self._MetaModelElement__dataDict['destructorCodeStubs'][tag]
     else:
       raise MemopsError("%s has no DestructorCodeStub %s " % (self, tag))
-  
+
   def addPostDestructorCodeStub(self, tag, value):
     """ Add destructorCodeStub
     """
-    
+
     if type(tag) != StringType:
-      raise MemopsError("%s codeStub tag %s is not a string" %(self, tag))
-    
+      raise MemopsError("%s codeStub tag %s is not a string" % (self, tag))
+
     if type(value) != StringType:
-      raise MemopsError("%s codeStub %s value %s is not a string" %
-       (self, tag, value)
-      )
-    
+      raise MemopsError(
+        "%s codeStub %s value %s is not a string" % (self, tag, value))
+
     if ImpConstants.codeStubTags.get(tag, sentinel) is sentinel:
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
-    
+
     self._MetaModelElement__dataDict['postDestructorCodeStubs'][tag] = value
-  
+
   def removePostDestructorCodeStub(self, tag):
     """Remove existing DestructorCodeStub
     """
-    
-    if self._MetaModelElement__dataDict['postDestructorCodeStubs'].get(sentinel) is not sentinel:
+
+    if self._MetaModelElement__dataDict['postDestructorCodeStubs'].get(
+      sentinel) is not sentinel:
       del self._MetaModelElement__dataDict['postDestructorCodeStubs'][tag]
     else:
       raise MemopsError("%s has no postDestructorCodeStub %s " % (self, tag))
-      
+
   getRole = ComplexDataType.getElement
-  
+
   def delete(self):
     """ remove links to other MetaElements, check that delete is legal.
     Intended for elements specific to some implementation
     NB delete does not cascade.
     """
-    
+
     # check for presence of roles
     for role in self.getAllRoles():
       if role.isImplementation and role.otherRole is None:
@@ -3002,45 +2801,44 @@ class MetaClass(ComplexDataType):
         pass
       else:
         raise MemopsError(
-         "Attempt to delete %s, class has non-implementation roles" % self
-        )
-    
+          "Attempt to delete %s, class has non-implementation roles" % self)
+
     # clear supertype/subtype links
     for obj in self.subtypes:
       obj.removeSupertype(self)
     for obj in self.supertypes:
       self.removeSupertype(obj)
-    
+
     # clear container links
     container = self.container
     container._MetaPackage__classNames.remove(self.name)
     del container._MetaModelElement__elementDict[self.name]
-    
+
     #remove container from contents, 
     #to ensure you get an error message irf they are picked up
     for obj in self._MetaModelElement__elementDict.values():
       obj.__dict__['container'] = None
-    
+
   def getAllRoles(self):
     """ get contained roles, including those from supertypes
     """
     return self.getAllElements(clazz=MetaRole)
-  
+
   def getParentRole(self):
     """ get class on other side of parent role
     """
-    
+
     for obj in self.getAllSupertypes():
       result = obj.__dict__.get('parentRole')
       if result is not None:
         break
     #
     return result
-  
+
   def getParentClass(self):
     """ get class on other side of parent role
     """
-    
+
     for obj in self.getAllSupertypes():
       parentRole = obj.__dict__.get('parentRole')
       if parentRole is not None:
@@ -3051,529 +2849,494 @@ class MetaClass(ComplexDataType):
   def getChildRoles(self):
     """ get child roles
     """
-    return [x for x in self.getAllRoles() 
-            if x.hierarchy == ImpConstants.child_hierarchy]
-  
+    return [x for x in self.getAllRoles() if
+            x.hierarchy == ImpConstants.child_hierarchy]
+
   def getClassElements(self):
     """ get roles and attributes
     """
     return self.attributes + self.roles
-  
+
   def getAllClassElements(self):
     """ get all roles and attributes, included inherited ones
     """
     return self.getAllAttributes() + self.getAllRoles()
-  
+
   def getSingleClassElements(self):
     """ get roles and attributes with hicard == 1
     """
     return [x for x in (self.attributes + self.roles) if x.hicard == 1]
-            
+
   def getAllSingleClassElements(self):
     """ get roles and attributes with hicard == 1, included inherited ones
     """
-    return [x for x in (self.getAllAttributes() + self.getAllRoles())  if x.hicard == 1]
-  
+    return [x for x in (self.getAllAttributes() + self.getAllRoles()) if
+            x.hicard == 1]
+
   def getMultipleClassElements(self):
     """ get roles and attributes with hicard != 1
     """
-    return [x for x in (self.getAttributes() + self.getRoles()) if x.hicard != 1]
-  
+    return [x for x in (self.getAttributes() + self.getRoles()) if
+            x.hicard != 1]
+
   def getAllMultipleClassElements(self):
     """ get all roles and attributes with hicard != 1, included inherited ones
     """
-    return [x for x in (self.getAllAttributes() + self.getAllRoles()) if x.hicard != 1]
-            
+    return [x for x in (self.getAllAttributes() + self.getAllRoles()) if
+            x.hicard != 1]
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     # get constant objects
     RootPackage = self.topPackage()
-    ModellingPackage = RootPackage.getElement(ImpConstants.modellingPackageName)
+    ModellingPackage = RootPackage.getElement(
+      ImpConstants.modellingPackageName)
     Impl = ModellingPackage.getElement(ImpConstants.implementationPackageName)
     Base = Impl.getElement(ImpConstants.baseClassName)
     DataRoot = Impl.getElement(ImpConstants.dataRootName)
     DataObject = Impl.getElement(ImpConstants.dataObjClassName)
     ImplObject = Impl.getElement(ImpConstants.implObjClassName)
     TopObject = Impl.getElement(ImpConstants.topObjClassName)
-    
+
     ComplexDataType.checkValid(self, complete=complete)
-    
+
     # check derived classes
     if self.isDerived:
       keyNames = self.getKeyNames()
       for x in self.attributes:
         if not x.isDerived or x.isImplementation or x.name in keyNames:
           raise MemopsError(
-           "Element %s of derived class %s neither derived, implementation nor a key"
-           % (x.name, self)
-          )
-      for role in self.roles :
-        if not (role.isDerived or role.isImplementation 
-                or role.name in keyNames or role is self.parentRole):
+            "Element %s of derived class %s neither derived, implementation nor a key" % (
+              x.name, self))
+      for role in self.roles:
+        if not (
+                role.isDerived or role.isImplementation or role.name in keyNames or role is self.parentRole):
           raise MemopsError(
-           "Element %s of derived class %s neither derived, implementation nor a key"
-           % (role.name, self)
-          )
+            "Element %s of derived class %s neither derived, implementation nor a key" % (
+              role.name, self))
         otherRole = role.otherRole
-        
+
         if otherRole:
           # check that links to derived class have manual getters
           for op in otherRole.container.getAllOperations():
-            if (op.target is otherRole and op.opType == 'get' 
-                and not op.isImplicit):
+            if (
+                    op.target is otherRole and op.opType == 'get' and not op.isImplicit):
               break
           else:
             raise MemopsError(
-             "Link %s to derived class %s must have manually defined 'get' function"
-             % (otherRole, self)
-            )
-      
+              "Link %s to derived class %s must have manually defined 'get' function" % (
+                otherRole, self))
+
       if not self.isAbstract:
         parentClass = self.parentRole.valueType
-        factoryFunction = metaUtil.getOperation(self, 'new', inClass=parentClass)
+        factoryFunction = metaUtil.getOperation(self, 'new',
+                                                inClass=parentClass)
         if not factoryFunction or factoryFunction.isImplicit:
           raise MemopsError(
-           "Derived class %s must have manually defined factory function"
-           % (otherRole, self)
-          )
-          
+            "Derived class %s must have manually defined factory function" % (
+              otherRole, self))
+
     # check keyNames
     for tag in self.getKeyNames():
       keyElement = self.getElement(tag)
       if keyElement is None:
-        raise MemopsError("%s keyName %s is not an element in the class" %
-         (self, tag)
-        )
+        raise MemopsError(
+          "%s keyName %s is not an element in the class" % (self, tag))
       if keyElement.changeability != ImpConstants.frozen:
-        raise MemopsError("%s key %s is changeable" %
-         (self, tag)
-        )
+        raise MemopsError("%s key %s is changeable" % (self, tag))
       if keyElement.isDerived:
         # in order to speed up checking and facilitate database impl.
-        raise MemopsError("%s key %s is derived" %
-         (self, tag)
-        )
+        raise MemopsError("%s key %s is derived" % (self, tag))
       if keyElement.isImplementation:
         # in order to speed up checking and facilitate database impl.
-        raise MemopsError("%s key %s is Implementation element" %
-         (self, tag)
-        )
+        raise MemopsError("%s key %s is Implementation element" % (self, tag))
       if keyElement.hicard != keyElement.locard:
-        raise MemopsError("%s key %s does not have n..n cardinality" %
-         (self, tag)
-        )
-      if isinstance(keyElement, MetaRole): 
+        raise MemopsError(
+          "%s key %s does not have n..n cardinality" % (self, tag))
+      if isinstance(keyElement, MetaRole):
         if not self.canAccess(keyElement.valueType):
-          raise MemopsError("%s: key %s is link into nonacessible package"
-                            % (self,tag))
-        
-        if (TopObject in self.getAllSupertypes() 
-           and not TopObject in keyElement.valueType.getAllSupertypes()):
-          raise MemopsError("%s: key %s is link to non-topObject"
-                            % (self,tag))
-      
+          raise MemopsError(
+            "%s: key %s is link into nonacessible package" % (self, tag))
+
+        if (
+              TopObject in self.getAllSupertypes() and not TopObject in keyElement.valueType.getAllSupertypes()):
+          raise MemopsError(
+            "%s: key %s is link to non-topObject" % (self, tag))
+
     # check name length
     if len(self.name) > ImpConstants.maxClassNameLength:
-      raise MemopsError(
-       "%s: name %s longer than %s characters"
-       % (self, self.name, ImpConstants.maxClassNameLength)
-      )
-    
+      raise MemopsError("%s: name %s longer than %s characters" % (
+        self, self.name, ImpConstants.maxClassNameLength))
+
     # check that child class names do not conflict with each other
     dd = {}
     for role in self.getAllRoles():
       if role.hierarchy == ImpConstants.child_hierarchy:
         for cc in role.valueType.getNonAbstractSubtypes():
-        
+
           cname = cc.name
           val = dd.get(cname, sentinel)
-          
+
           if val is not sentinel:
             raise MemopsError(
-             "%s has two child classes named %s;\n links are %s and %s"
-             % (self, cname, role, val)
-            )
-          
+              "%s has two child classes named %s;\n links are %s and %s" % (
+                self, cname, role, val))
+
           else:
             dd[cname] = role
-    
+
     # get parentRole
     parentRole = self.parentRole
     if parentRole is not None:
-      
+
       # set parentClass
       parentClass = parentRole.valueType
-    
-      if parentRole.otherRole is None: 
+
+      if parentRole.otherRole is None:
         if not parentRole.isAbstract:
-          raise MemopsError("%s: non-Abstract class with one-way parentRole" 
-                            % self)
+          raise MemopsError(
+            "%s: non-Abstract class with one-way parentRole" % self)
       elif parentRole.otherRole.hicard == 1:
         # check for only children with key.
         if self.keyNames:
-          raise MemopsError("%s: only child has keyNames: %s" 
-                            % (self, self.keyNames))
+          raise MemopsError(
+            "%s: only child has keyNames: %s" % (self, self.keyNames))
       elif not parentRole.isAbstract and not self.keyNames:
         # check that classes with parentRole also have mainKey
-          raise MemopsError("%s: class with parentRole lacks keyNames" % self)
-          
+        raise MemopsError("%s: class with parentRole lacks keyNames" % self)
+
     else:
       parentClass = None
-    
+
     # remove very top class as that is a DataObjType
-    allSupertypes = [x for x in self.getAllSupertypes() 
-                     if x.name != 'ComplexDataType']
-    
+    allSupertypes = [x for x in self.getAllSupertypes() if
+                     x.name != 'ComplexDataType']
+
     if Base not in allSupertypes and not self.isAbstract:
-      raise MemopsError("%s: non-abstract class is not subtype of %s"
-                        % (self, Base))
-    
+      raise MemopsError(
+        "%s: non-abstract class is not subtype of %s" % (self, Base))
+
     if self.container is Impl:
       # Implementation package 
-      
+
       if ImplObject not in allSupertypes and not self.isAbstract:
         raise MemopsError(
-         "%s: non-abstract Implementation class is not subtype of %s"
-          % (self, ImplObject)
-         )
-         
+          "%s: non-abstract Implementation class is not subtype of %s" % (
+            self, ImplObject))
+
       if parentRole is not None and parentClass is not DataRoot:
-        raise MemopsError("%s: has incorrect parentClass %s"
-                          % (self, parentClass))
-                          
+        raise MemopsError(
+          "%s: has incorrect parentClass %s" % (self, parentClass))
+
       if self is DataRoot:
         # DataRoot
-      
+
         if not self.partitionsChildren:
           raise MemopsError(
-           "%s: %s does not have partitionsChildren True"
-           % (self, DataRoot)
-          )
+            "%s: %s does not have partitionsChildren True" % (self, DataRoot))
         if parentRole is not None:
-          raise MemopsError("%s: subType of %s has parentRole %s"
-                            % (self, DataRoot, parentRole))
+          raise MemopsError("%s: subType of %s has parentRole %s" % (
+            self, DataRoot, parentRole))
         if self.container.topObjectClass is not self:
-          raise MemopsError("%s has topObjectClass %s, should be %s" 
-                          % (Impl, DataRoot, self))
-                     
-      if self is TopObject:   
+          raise MemopsError(
+            "%s has topObjectClass %s, should be %s" % (Impl, DataRoot, self))
+
+      if self is TopObject:
         if not self.partitionsChildren:
           raise MemopsError(
-           "%s: %s does not have partitionsChildren True"
-           % (self, TopObject)
-          )
-      
+            "%s: %s does not have partitionsChildren True" % (self, TopObject))
+
     else:
-      
+
       if DataObject not in allSupertypes:
         if not self.isAbstract:
-          raise MemopsError("%s: non-abstract class is not subtype of %s"
-                            % (self, DataObject))
-        
+          raise MemopsError(
+            "%s: non-abstract class is not subtype of %s" % (self, DataObject))
+
         if [x for x in self.roles if x.otherRole and not x.implementation]:
           raise MemopsError(
-           "%s: class with non-implementation or two-way role is not subtype of %s"
-           % (self, DataObject)
-          )
-          
-        
+            "%s: class with non-implementation or two-way role is not subtype of %s" % (
+              self, DataObject))
+
       if TopObject in allSupertypes:
         # TopObject
- 
+
         if not parentRole:
-          raise MemopsError("%s: TopObject has no parentRole"
-                            % (self,))
- 
+          raise MemopsError("%s: TopObject has no parentRole" % (self,))
+
         if parentClass is not DataRoot:
           raise MemopsError(
-           "%s: TopObject has incorrect parentClass %s, should be %s"
-           % (self, parentClass, DataRoot)
-          )
- 
+            "%s: TopObject has incorrect parentClass %s, should be %s" % (
+              self, parentClass, DataRoot))
+
         if parentRole.otherRole.hicard == 1:
-          raise MemopsError("%s: TopObject is is an only child"
-                            % (self,))
-        
+          raise MemopsError("%s: TopObject is is an only child" % (self,))
+
         for role in DataRoot.getAllRoles():
           # check existence of currentRole
-          if role.valueType in allSupertypes and role.name.startswith('current'):
+          if role.valueType in allSupertypes and role.name.startswith(
+            'current'):
             break
         else:
-          raise MemopsError("%s: TopObject is not pointed to by a 'current' link"
-                            % (self, ))
- 
+          raise MemopsError(
+            "%s: TopObject is not pointed to by a 'current' link" % (self, ))
+
       else:
         # Normal class
- 
+
         if parentRole is not None:
           if parentClass.container is not self.container:
-            raise MemopsError("%s: has parentClass %s from different package"
-                              % (self, parentClass))
-    
+            raise MemopsError(
+              "%s: has parentClass %s from different package" % (
+                self, parentClass))
+
     # check that links are not inherited across package boundaries
     # except for certain one-way links
     if self is not DataObject:
-      if [x for x in self.roles if x.otherRole or
-          not x.isAbstract and not x.isDerived and not x.isImplementation]:
+      if [x for x in self.roles if
+          x.otherRole or not x.isAbstract and not x.isDerived and not x.isImplementation]:
         pp = self.container
         ll = [x for x in self.getAllSubtypes() if x.container is not pp]
         if ll:
           raise MemopsError(
-           "%s: has both roles and out-of-package subclasses:\n%s"
-           % (self, ll)
-          )
-    
+            "%s: has both roles and out-of-package subclasses:\n%s" % (
+              self, ll))
+
     # check that non-abstract class has parentRole and mainkey
     if not self.isAbstract and DataRoot not in allSupertypes:
       if parentRole is None:
         raise MemopsError("%s: non-abstract class lacks parentRole" % (self,))
- 
+
       if not self.keyNames and parentRole.otherRole.hicard != 1:
         raise MemopsError(
-         "%s: non-abstract class lacks keyNames and is not only child" % (self,)
-        )
-    
+          "%s: non-abstract class lacks keyNames and is not only child" % (
+            self,))
+
     # check partitionsChildren behaves correctly
     # NB must not be checked for ComplexDataType class
     if not self.partitionsChildren:
       ll = [x for x in allSupertypes if x.partitionsChildren]
       if ll:
         raise MemopsError(
-         "%s does not partition children, but its superclass(es) do:\n%s"
-         % (self, ll)
-        )
-    
+          "%s does not partition children, but its superclass(es) do:\n%s" % (
+            self, ll))
+
     # check parent role cyclicity
     sup = self
     while sup is not None:
       low = sup
       sup = low.getParentClass()
       if sup is self:
-        raise MemopsError("%s is (indirectly) its own parentClass"
-                          % (self,tag))
-    
+        raise MemopsError(
+          "%s is (indirectly) its own parentClass" % (self, tag))
+
     # All non-abstract classes must be under root
     if DataRoot not in allSupertypes:
       if not self.isAbstract and low is not DataRoot:
         raise MemopsError("%s does not descend from %s" % (self, DataRoot))
-    
+
     # check presence of non-overridden abstract roles
     if not self.isAbstract:
       for role in self.getAllRoles():
         if role.isAbstract:
-          raise MemopsError("%s is not abstract but has abstract role %s"
-                            % (self,role.name))
- 
+          raise MemopsError(
+            "%s is not abstract but has abstract role %s" % (self, role.name))
+
     # check code
-    for tag in ('destructorCodeStubs','postDestructorCodeStubs'):
+    for tag in ('destructorCodeStubs', 'postDestructorCodeStubs'):
       destructorCode = self._MetaModelElement__dataDict[tag]
       if destructorCode:
- 
+
         if self.isAbstract:
-          raise MemopsError("Abstract class %s has special destructor" %
-           (self)
-          )
- 
+          raise MemopsError(
+            "Abstract class %s has special destructor" % (self))
+
         codeTags = ImpConstants.codeStubTags
         for codeTag in destructorCode.keys():
- 
+
           # check code tags
           if codeTag not in codeTags:
-            raise MemopsError("%s: Illegal %s tag %s"
-                              % (self, tag, codeTag))
-    
+            raise MemopsError("%s: Illegal %s tag %s" % (self, tag, codeTag))
+
     # check special 'serial' attribute
     serial = self.getElement(ImpConstants.serial_attribute)
     if serial is not None:
       if not isinstance(serial, MetaAttribute):
-        raise MemopsError("%s - non-MetaAttribute named %s"
-                          % (serial, serial.name))
- 
-      if ( not serial.isAutomatic or serial.hicard != 1 or serial.locard != 1
-          or serial.changeability != ImpConstants.frozen  
-          or serial.valueType.name != 'Int' ):
         raise MemopsError(
-         """%s:
-'%s' attribute must be Int, automatic, non-changeable and 1..1"""
-         % (serial, serial.name)
-        )
+          "%s - non-MetaAttribute named %s" % (serial, serial.name))
+
+      if (
+                not serial.isAutomatic or serial.hicard != 1 or serial.locard != 1 or serial.changeability != ImpConstants.frozen or serial.valueType.name != 'Int' ):
+        raise MemopsError("""%s:
+'%s' attribute must be Int, automatic, non-changeable and 1..1""" % (
+          serial, serial.name))
+
 #
 MetaClass.parameterData['supertype']['type'] = MetaClass
 MetaClass.parameterData['supertypes']['type'] = MetaClass
 MetaClass.parameterData['subtypes']['type'] = MetaClass
 MetaPackage.parameterData['topObjectClass']['type'] = MetaClass
-    
+
 #############################################################################
 
 class MetaDataObjType(ComplexDataType):
   """ class for complex data objects
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(ComplexDataType.parameterData)
   parameterData['container']['type'] = MetaPackage
-  parameterData['isChangeable'] = {'type':IntType, 
-                                  'getterFunc':'getIsChangeable',}
-  
+  parameterData['isChangeable'] = {'type':IntType,
+                                   'getterFunc':'getIsChangeable', }
+
   # allowed tagged values
   allowedTags = ComplexDataType.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaDataObjType'])
-  
+
   def __init__(self, **params):
-    
+
     ComplexDataType.__init__(self, **params)
-    
+
     # finish link from container
     params['container']._MetaPackage__dataObjTypeNames.append(params['name'])
-  
+
   def getIsChangeable(self):
     for attr in self.getAllAttributes():
       if attr.changeability != ImpConstants.frozen:
         return True
     #
     return False
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     BaseDataType = self.metaObjFromQualName('.'.join(
-     [ImpConstants.modellingPackageName, ImpConstants.implementationPackageName,
-     ImpConstants.baseDataTypeObjName])
-    )
-    
+      [ImpConstants.modellingPackageName,
+       ImpConstants.implementationPackageName,
+       ImpConstants.baseDataTypeObjName]))
+
     ComplexDataType.checkValid(self, complete=complete)
-    
+
     # check changeability
     if self.isChangeable:
       raise MemopsError("""%s has changeable attribute - 
-       Changeable MetaDataObjTypes not implemented""" % self
-      )
-    
+       Changeable MetaDataObjTypes not implemented""" % self)
+
     # check inheritance across package boundaries 
     if not self.isAbstract:
       pp = self.container
       ll = [x for x in self.getAllSubtypes() if x.container is not pp]
       if ll:
         raise MemopsError("%s has out-of-package subtypes %s" % (self, ll))
-    
+
     # check supertypes
     if BaseDataType not in self.getAllSupertypes():
       if not self.isAbstract:
-        raise MemopsError("%s: non-abstract DataObjType is not subtype of %s"
-                          % (self, BaseDataType))
+        raise MemopsError(
+          "%s: non-abstract DataObjType is not subtype of %s" % (
+            self, BaseDataType))
+
 #
 MetaDataObjType.parameterData['supertype']['type'] = MetaDataObjType
 MetaDataObjType.parameterData['supertypes']['type'] = MetaDataObjType
 MetaDataObjType.parameterData['subtypes']['type'] = MetaDataObjType
-    
+
 #############################################################################
 
 class MetaDataType(AbstractDataType):
   """ class for data types
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(AbstractDataType.parameterData)
   parameterData['container']['type'] = MetaPackage
-  parameterData.update( {
-   'isOpen':{
-    'type':'Boolean',
-    'default':True,
-   },
-   'enumeration':{
-    'hicard':infinity,
-    'default':[],
-   },
-   'length':{
-    'type':IntType,
-    'default':None,
-   },
-   'typeCodes':{
-    'type':'StringDict',
-    'default':{},
-   },
-  })
-  
+  parameterData.update({'isOpen':{'type':'Boolean', 'default':True, },
+                        'enumeration':{'hicard':infinity, 'default':[], },
+                        'length':{'type':IntType, 'default':None, },
+                        'typeCodes':{'type':'StringDict', 'default':{}, }, })
+
   # allowed tagged values
   allowedTags = AbstractDataType.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaDataType'])
-  
+
   def __init__(self, **params):
-    
+
     AbstractDataType.__init__(self, **params)
-    
+
     # finish link from container
     params['container']._MetaPackage__dataTypeNames.append(params['name'])
-      
+
   def addTypeCode(self, tag, value):
     """ Add typeCode
     """
-    
+
     if type(tag) != StringType:
-      raise MemopsError("%s typeCode tag %s is not a string" %(self, tag))
-    
+      raise MemopsError("%s typeCode tag %s is not a string" % (self, tag))
+
     if type(value) != StringType:
-      raise MemopsError("%s typeCode %s value %s is not a string" %
-       (self, tag, value)
-      )
-    
+      raise MemopsError(
+        "%s typeCode %s value %s is not a string" % (self, tag, value))
+
     if tag not in ImpConstants.codeStubTags:
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
-    
+
     self._MetaModelElement__dataDict['typeCodes'][tag] = value
-  
+
   def removeTypeCode(self, tag):
     """Remove existing TypeCode
     """
-    
-    if self._MetaModelElement__dataDict['typeCodes'].get(tag, sentinel) is not sentinel:
+
+    if self._MetaModelElement__dataDict['typeCodes'].get(tag,
+                                                         sentinel) is not sentinel:
       del self._MetaModelElement__dataDict['typeCodes'][tag]
     else:
       raise MemopsError("%s has no typeCode %s " % (self, tag))
-    
-  def isValid(self,value):
+
+  def isValid(self, value):
     """ This function is needed because value constants
     must be checked for validity as part of the MetaModel.
     NB for enumerations values must be added to the enumeration
     before the check works.
     """
-    
+
     # check value in enumeration
     if not self.isOpen:
       # closed enumeration
       if value not in self.enumeration:
         return False
-    
+
     # check special check function - or just correct PythonType
-    baseType = getattr(genConstants.baseDataTypeModule,self.typeCodes['python'])
-    if hasattr(baseType,'isValid'):
-      if not getattr(baseType,'isValid')(value):
+    baseType = getattr(genConstants.baseDataTypeModule,
+                       self.typeCodes['python'])
+    if hasattr(baseType, 'isValid'):
+      if not getattr(baseType, 'isValid')(value):
         return False
     else:
       pythonType = baseType.PythonType
-      if not isinstance(value,pythonType):
+      if not isinstance(value, pythonType):
         return False
-    
+
     # check length
     if self.length:
       if len(value) > self.length:
         return False
-        
+
     try:
       for constraint in self._ConstrainedElement__constraints.values():
- 
+
         code = constraint.codeStubs.get('python')
-        
+
         import re
+
         containsWhitespace = re.compile('\s').search
         containsNonAlphanumeric = re.compile('[^a-zA-Z0-9_]').search
         dd = {'value':value, 'True':True, 'False':False, 'string':string,
-          'containsWhitespace':containsWhitespace, 
-          'containsNonAlphanumeric':containsNonAlphanumeric,}
- 
+              'containsWhitespace':containsWhitespace,
+              'containsNonAlphanumeric':containsNonAlphanumeric, }
+
         if code is None:
           isValid = True
         elif code.find('isValid') == -1:
@@ -3583,638 +3346,553 @@ class MetaDataType(AbstractDataType):
           #exec code in dd
           exec(code, dd)
           isValid = dd['isValid']
- 
+
         if not isValid:
           return False
-      
+
     except:
       print("Error checking constraints in %s" % self.qualifiedName())
       raise
-    
+
     #
     return True
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     AbstractDataType.checkValid(self, complete=complete)
-    
+
     enumeration = self._MetaModelElement__dataDict.get('enumeration')
-    
+
     if not self.isOpen and not enumeration:
-      raise MemopsError("%s isOpen set to %s for non-enumeration"
-                        % (self,self.isOpen))
-    
+      raise MemopsError(
+        "%s isOpen set to %s for non-enumeration" % (self, self.isOpen))
+
     for ee in enumeration:
       if not self.isValid(ee):
-        raise MemopsError("%s : Illegal enumeration value %s"
-         % (self.qualifiedName(),ee)
-        )
+        raise MemopsError(
+          "%s : Illegal enumeration value %s" % (self.qualifiedName(), ee))
 
     # check single inheritance
     if len(self.supertypes) > 1:
       raise MemopsError("%s has more than one supertype" % (self))
-      
+
 
 #
 MetaDataType.parameterData['supertype']['type'] = MetaDataType
 MetaDataType.parameterData['supertypes']['type'] = MetaDataType
 MetaDataType.parameterData['subtypes']['type'] = MetaDataType
-    
+
 #############################################################################
 
 class MetaException(HasParameters, HasSupertype):
   """ class for exceptions 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(HasParameters.parameterData)
   parameterData['container']['type'] = MetaPackage
-  parameterData.update( {
-   'scope':{
-    'type':'Token',
-    'enumeration':ImpConstants.scope_enumeration,
-    'default':ImpConstants.instance_level,
-    'isFixed':True,
-   },
-   'supertype':{
-    'setterFunc':'unsettable',
-    'setterFunc':'setSupertype',
-    'default':None,
-   },
-   'supertypes':{
-    'hicard':infinity,
-   },
-   'subtypes':{
-    'setterFunc':'unsettable',
-    'hicard':infinity,
-   },
-  })
-  
+  parameterData.update({
+    'scope':{'type':'Token', 'enumeration':ImpConstants.scope_enumeration,
+             'default':ImpConstants.instance_level, 'isFixed':True, },
+    'supertype':{'setterFunc':'unsettable', 'setterFunc':'setSupertype',
+                 'default':None, }, 'supertypes':{'hicard':infinity, },
+    'subtypes':{'setterFunc':'unsettable', 'hicard':infinity, }, })
+
   # allowed tagged values
   allowedTags = HasParameters.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaException'])
-   
+
   def __init__(self, **params):
-    
+
     HasParameters.__init__(self, **params)
-    
+
     # implementation attributes
     dd = self._MetaModelElement__dataDict
     if dd.get('subtypes') is None:
       dd['subtypes'] = []
     if dd.get('supertypes') is None:
       dd['supertypes'] = []
-    
+
     # finish link from container
     params['container']._MetaPackage__exceptionNames.append(params['name'])
-  
+
   getElement = ComplexDataType.getElement
-  
+
   getParameter = getElement
-  
+
   def getAllParameters(self):
-  
+
     return self.getAllElements(clazz=MetaParameter)
-    
-  
+
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     from memops.metamodel import Util as metaUtil
-    
+
     HasParameters.checkValid(self, complete=complete)
-    
+
     parameters = self.parameters
-    
+
     # check single inheritance
     supertypes = self.supertypes
     if len(supertypes) > 1:
       raise MemopsError("%s has more than one supertype" % (self))
-    
+
     if supertypes:
       supertype = supertypes[0]
- 
+
       # package access check
       if not self.canAccess(supertype):
-        raise MemopsError("%s - cannot access supertype %s"
-                          % (self, supertype))
-      
+        raise MemopsError(
+          "%s - cannot access supertype %s" % (self, supertype))
+
       # check two-way link
       if supertype._MetaModelElement__dataDict['subtypes'].count(self) != 1:
-        raise MemopsError("Two-way supertype link %s-%s is broken. Bug (3)?"
-                           % (supertype, self))
-    
+        raise MemopsError(
+          "Two-way supertype link %s-%s is broken. Bug (3)?" % (
+            supertype, self))
+
     # name style
     if self.name[0] not in ImpConstants.uppercase:
       print("WARNING, name of %s does not start with upper case" % self)
-    
+
     # check two-way link
     for obj in self._MetaModelElement__dataDict['subtypes']:
       if obj.supertype is not self:
-        raise MemopsError("Two-way supertype link %s-%s is broken. Bug (4)?"
-                           % (self, obj))
-    
+        raise MemopsError(
+          "Two-way supertype link %s-%s is broken. Bug (4)?" % (self, obj))
+
     # checks on Parameters.
     if not self.isImplicit:
-      
-      # return parameters
-      pars = [x for x in parameters if x.direction == ImpConstants.return_direction]
-      if len(pars) > 1:
-        raise MemopsError(
-         "%s: more than one return parameter : %s"
-         % (self,[x.name for x in pars])
-        )         
 
-# must be set here, after the class definition
+      # return parameters
+      pars = [x for x in parameters if
+              x.direction == ImpConstants.return_direction]
+      if len(pars) > 1:
+        raise MemopsError("%s: more than one return parameter : %s" % (
+          self, [x.name for x in pars]))
+
+        # must be set here, after the class definition
+
+
 MetaException.parameterData['supertype']['type'] = MetaException
 MetaException.parameterData['supertypes']['type'] = MetaException
 MetaException.parameterData['subtypes']['type'] = MetaException
-    
+
 #############################################################################
 
 class MetaOperation(HasParameters):
   """ class for operations 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(HasParameters.parameterData)
   parameterData['container']['type'] = ComplexDataType
-  parameterData.update( {
-   'scope':{
-    'type':'Token',
-    'enumeration':ImpConstants.scope_enumeration,
-    'default':ImpConstants.instance_level,
-   },
-   'codeStubs':{
-    'type':'StringDict',
-    'default':{},
-   },
-   'exceptions':{
-    'type':MetaException,
-    'hicard':infinity,
-    'default':[],
-   },
-   'isQuery':{
-    'type':'Boolean',
-   },
-   'isAbstract':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'opType':{
-    'type':'Token',
-    'enumeration':tuple(OpTypes.operationData.keys()),
-   },
-   'opSubType':{
-    'type':'Token',
-    'default':None,
-   },
-   'target':{
-    'type':MetaModelElement
-   },
-  })
-  
+  parameterData.update({
+    'scope':{'type':'Token', 'enumeration':ImpConstants.scope_enumeration,
+             'default':ImpConstants.instance_level, },
+    'codeStubs':{'type':'StringDict', 'default':{}, },
+    'exceptions':{'type':MetaException, 'hicard':infinity, 'default':[], },
+    'isQuery':{'type':'Boolean', },
+    'isAbstract':{'type':'Boolean', 'default':False, },
+    'opType':{'type':'Token',
+              'enumeration':tuple(OpTypes.operationData.keys()), },
+    'opSubType':{'type':'Token', 'default':None, },
+    'target':{'type':MetaModelElement}, })
+
   # allowed tagged values
   allowedTags = HasParameters.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaOperation'])
-   
+
   def __init__(self, **params):
-    
+
     HasParameters.__init__(self, **params)
-    
+
     # implementation attributes
     self._MetaModelElement__dataDict['exceptions'] = []
-    
+
     # finish link from container
     params['container']._ComplexDataType__operationNames.append(params['name'])
-      
+
 
   def addCodeStub(self, tag, value):
     """ Add codeStub
     """
-    
+
     if type(tag) != StringType:
-      raise MemopsError("%s codeStub tag %s is not a string" %(self, tag))
-    
+      raise MemopsError("%s codeStub tag %s is not a string" % (self, tag))
+
     if type(value) != StringType:
-      raise MemopsError("%s codeStub %s value %s is not a string" %
-       (self, tag, value)
-      )
-    
+      raise MemopsError(
+        "%s codeStub %s value %s is not a string" % (self, tag, value))
+
     if tag not in ImpConstants.codeStubTags:
       raise MemopsError("%s : unsupported  codeStub tag %s " % (self, tag))
-    
+
     self._MetaModelElement__dataDict['codeStubs'][tag] = value
-  
+
   def removeConstructorCodeStub(self, tag):
     """Remove existing codeStub
     """
-    
-    if self._MetaModelElement__dataDict['codeStubs'].get(tag, sentinel) is not sentinel:
+
+    if self._MetaModelElement__dataDict['codeStubs'].get(tag,
+                                                         sentinel) is not sentinel:
       del self._MetaModelElement__dataDict['codeStubs'][tag]
     else:
       raise MemopsError("%s has no codeStub %s " % (self, tag))
-  
+
   def getElement(self, name):
     """ Get contained element called name
     Return None if nothing found
     """
     return self._MetaModelElement__elementDict.get(name)
-  
+
   getParameter = getElement
-  
-  def addException(self,value):
+
+  def addException(self, value):
     """ Add exception to exceptions list
     """
-    
+
     exceptions = self._MetaModelElement__dataDict['exceptions']
-    
+
     if not value.isinstance(MetaException):
       raise MemopsError("%s - %s is not a MetaException" % (self, value))
-      
+
     elif value in exceptions:
-      raise MemopsError("%s - exception %s is already in list" %
-       (self, value)
-      )
-    
-    exceptions.append(value) 
-  
+      raise MemopsError("%s - exception %s is already in list" % (self, value))
+
+    exceptions.append(value)
+
   def removeException(self, value):
     """Remove existing exception
     """
-    
+
     exceptions = self._MetaModelElement__dataDict['exceptions']
-    
+
     if value in exceptions:
-      exceptions.remove(value) 
-      
+      exceptions.remove(value)
+
     else:
-      raise MemopsError("%s - has no exception %s" %
-       (self, value)
-      )
-  
+      raise MemopsError("%s - has no exception %s" % (self, value))
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     # NBNB Some things are checked only in ModelAdapt
     # ops with targetTag != masterOp must replace an autogenerated operation 
     # and must conform to the rules for this operation
-    
+
     IC = ImpConstants
-    
-    implPackage = self.metaObjFromQualName('.'.join(
-     [IC.modellingPackageName, IC.implementationPackageName])
-    )
+
+    implPackage = self.metaObjFromQualName(
+      '.'.join([IC.modellingPackageName, IC.implementationPackageName]))
     if isinstance(self.container, MetaClass):
       Base = implPackage.getElement(IC.baseClassName)
     else:
       Base = implPackage.getElement(IC.baseDataTypeObjName)
-    
+
     HasParameters.checkValid(self, complete=complete)
-    
+
     parameters = self.parameters
-    
+
     # check code
     codeTags = ImpConstants.codeStubTags
     for codeTag in self._MetaModelElement__dataDict['codeStubs'].keys():
-      
+
       # check code tags
       if codeTag not in codeTags:
         raise MemopsError("%s: Ilegal codeStub tag %s" % (self, codeTag))
-    
+
     # exception package access check
     for exception in self._MetaModelElement__dataDict['exceptions']:
       if not self.canAccess(exception):
-        raise MemopsError("%s - cannot access exception %s" % (self, exception))
-    
+        raise MemopsError(
+          "%s - cannot access exception %s" % (self, exception))
+
     # name style
     if not self.isImplicit and self.name[0] not in ImpConstants.lowercase:
       print("WARNING, name of %s does not start with lower case" % self)
-      
+
     # opType dependent checks
     # check valid opType
     opType = self.opType
     opTypeInfo = OpTypes.operationData.get(opType)
     if opTypeInfo is None:
-      raise MemopsError("%s: Illegal optype %s" % (self,opType))
-      
+      raise MemopsError("%s: Illegal optype %s" % (self, opType))
+
     targetTag = opTypeInfo['targetTag']
-    
+
     # check isQuery fits opType
     if opTypeInfo['group'] != 'other':
       # Operations with isQuery are allowed on deleted objects.
       # That was the deciding factor in letting isQuery be optional
       # for 'other' operations
-      if ((opTypeInfo['group'] not in ('query', 'otherQuery')) != 
-          (not(self.isQuery))):
+      if ((opTypeInfo['group'] not in ('query', 'otherQuery')) != (
+        not (self.isQuery))):
         # Queries *must* be isQuery. Other opTypes may not, 'other' may choose
-        raise MemopsError("%s has group == %s but isQuery == %s" % 
-                          (self, opTypeInfo['group'], self.isQuery))
-    
+        raise MemopsError("%s has group == %s but isQuery == %s" % (
+          self, opTypeInfo['group'], self.isQuery))
+
     # check for explicit parameters
     if targetTag != 'masterOp':
       # only masterOp target is allowed explicit parameters
       for par in parameters:
         if not par.isImplicit:
-          raise MemopsError("%s with opType %s has explicit parameter %s"
-                            % (self, self.opType, par))
-    
+          raise MemopsError("%s with opType %s has explicit parameter %s" % (
+            self, self.opType, par))
+
     # check target
     target = self.target
-      
+
     # check target type
-    targetTypes = {
-     'ClassElement':ClassElement,
-     'MetaRole':MetaRole,
-     'MetaAttribute':MetaAttribute,
-     'ChildClass':MetaClass,
-     'container':ComplexDataType,
-     'masterOp':MetaOperation,
-    }
+    targetTypes = {'ClassElement':ClassElement, 'MetaRole':MetaRole,
+                   'MetaAttribute':MetaAttribute, 'ChildClass':MetaClass,
+                   'container':ComplexDataType, 'masterOp':MetaOperation, }
     if not isinstance(target, targetTypes[targetTag]):
-      raise MemopsError("%s: target %s does not fit target type %s"
-                         % (self, target, targetTag))
- 
+      raise MemopsError("%s: target %s does not fit target type %s" % (
+        self, target, targetTag))
+
     # type specific checks
     if targetTag == 'container':
       # container target
       if target is not self.container:
-        raise MemopsError("%s: target %s differs from op container %s"
-                          % (self,target,self.container))
- 
+        raise MemopsError("%s: target %s differs from op container %s" % (
+          self, target, self.container))
+
     elif targetTag == 'masterOp':
       # masterOp target
       if self.opSubType is None:
         if target is not self:
-          raise MemopsError("%s: target should be operation itself, is %s"
-                            % (self, target))
- 
-      else:
-        if (target.opType != self.opType or target.target != target
-            or target.opSubType is not None):
           raise MemopsError(
-           "%s: target should be opType=None version of operation, is %s"
-           % (self, target)
-          )
- 
+            "%s: target should be operation itself, is %s" % (self, target))
+
+      else:
+        if (
+                target.opType != self.opType or target.target != target or target.opSubType is not None):
+          raise MemopsError(
+            "%s: target should be opType=None version of operation, is %s" % (
+              self, target))
+
     elif targetTag == 'ChildClass':
       # ChildClass target
       if target.getParentClass() is not self.container:
-        raise MemopsError("%s: target should be childclass of %s, is %s"
-         % (self, self.container, target)
-        )
- 
+        raise MemopsError("%s: target should be childclass of %s, is %s" % (
+          self, self.container, target))
+
     else:
       # ClassElement target
       if (target.container not in self.container.getAllSupertypes()):
         raise MemopsError(
-         "%s: target %s must be element of same class as op or a superclass"
-         % (self, target)
-        )
-    
+          "%s: target %s must be element of same class as op or a superclass" % (
+            self, target))
+
     # special case - findFirst and findAll
-    if (opType in ('findFirst', 'findAll') 
-        and isinstance(target.valueType, MetaDataType)):
+    if (opType in ('findFirst', 'findAll') and isinstance(target.valueType,
+                                                          MetaDataType)):
       raise MemopsError(
-       "%s: %s or operation has Datatype attribute target %s"
-       % (self, opType, target)
-      )
-    
+        "%s: %s or operation has Datatype attribute target %s" % (
+          self, opType, target))
+
     # check overriding of elements
     allSupertypes = self.container.getAllSupertypes()
     mayNotOverride = not (Base in allSupertypes)
     for supertype in allSupertypes[1:]:
       superElem = supertype._MetaModelElement__elementDict.get(self.name)
       if superElem is not None:
-        
+
         if superElem.__class__ is not self.__class__:
-          raise MemopsError("%s overrides %s but types are different"
-                            % (superElem, self)
-                           )
-        
+          raise MemopsError(
+            "%s overrides %s but types are different" % (superElem, self))
+
         # classes without supertype cannot override or be overridden
         if mayNotOverride and not superElem.isAbstract:
           raise MemopsError(
-           "Name clash between %s and %s - classes do not descend from %s"
-                            % (superElem, self, Base)
-                           )
-        
+            "Name clash between %s and %s - classes do not descend from %s" % (
+              superElem, self, Base))
+
         parameterData = self.parameterData
         for tag in parameterData.keys():
-        
-          if tag in ('codeStubs', 'isAbstract', 'container', 'documentation', 
-                     'guid'):
+
+          if tag in (
+            'codeStubs', 'isAbstract', 'container', 'documentation', 'guid'):
             continue
-          
+
           if parameterData[tag].get('type') == 'content':
             continue
-          
-          val = getattr(self,tag)
-          superval = getattr(superElem,tag)
-          
+
+          val = getattr(self, tag)
+          superval = getattr(superElem, tag)
+
           if val == superval:
             pass
-            
+
           elif tag == 'target':
             if targetTag == 'container':
               pass
-            elif  targetTag == 'masterOp':
+            elif targetTag == 'masterOp':
               pass
-            elif  targetTag == 'ChildClass':
+            elif targetTag == 'ChildClass':
               raise MemopsError(
-               "%s overrides %s but %s operations may not be overridden"
-               % (self, superElem, self.opType)
-              )
+                "%s overrides %s but %s operations may not be overridden" % (
+                  self, superElem, self.opType))
             else:
               # ClassElement target - superval must be overridden by val
               if superval is not supertype.getElement(val.name):
                 raise MemopsError(
-                 "%s overrides %s but target %s does not override %s"
-                 % (self, superElem, val, superval)
-                )
-                
+                  "%s overrides %s but target %s does not override %s" % (
+                    self, superElem, val, superval))
+
           elif tag == 'taggedValues':
-            for tt,vv in superval.items():
+            for tt, vv in superval.items():
               if val.get(tt) != vv:
-                raise MemopsError("%s overrides %s but tagged value %s differs"
-                                  % (self,superElem,tt))
+                raise MemopsError(
+                  "%s overrides %s but tagged value %s differs" % (
+                    self, superElem, tt))
                 raise MemopsError
-                
+
           else:
-            raise MemopsError("%s overrides %s but differs for %s" % 
-                              (self,superElem,tag))
-    
+            raise MemopsError(
+              "%s overrides %s but differs for %s" % (self, superElem, tag))
+
         if self.opType != 'init':
           # parameter inheritance
           if len(parameters) != len(superElem.parameters):
             raise MemopsError(
-             "%s overrides %s but number of parameters is different"
-             % (self,superElem)
-            )
-    
+              "%s overrides %s but number of parameters is different" % (
+                self, superElem))
+
     # checks on Parameters.
     if not self.isImplicit:
       # input parameters
-      pars = [x for x in parameters if x.direction == ImpConstants.in_direction]
+      pars = [x for x in parameters if
+              x.direction == ImpConstants.in_direction]
       if len(pars) == 1 and not pars[0].isImplicit and pars[0].name != 'value':
         if self.container.container is not implPackage:
           # warn of unusual names, but exclude implPackage to keep number down
-          print (
-           "WARNING, %s: single input parameter is not named 'value' but %s"
-           % (self,pars[0].name)
-          )
-      
+          print(
+            "WARNING, %s: single input parameter is not named 'value' but %s" % (
+              self, pars[0].name))
+
       foundOptional = None
       for par in pars:
         if par.taggedValues.get('isSubdivided'):
           if len(pars) >= 2 and par is pars[-2]:
-            
+
             if pars[-1].taggedValues.get('isSubdivided'):
               if par.hicard == 1:
                 raise MemopsError(
-                 "%s: isSubdivided KeywordValue parameter %s is not the last input parameter"
-                 % (self, par.name)
-                )
+                  "%s: isSubdivided KeywordValue parameter %s is not the last input parameter" % (
+                    self, par.name))
               elif pars[-1].hicard != 1:
                 raise MemopsError(
-                 "%s: isSubdivided Two KeywordValue parameters %s and %s"
-                 % (self, par.name, pars[-1].name)
-                )
-                
+                  "%s: isSubdivided Two KeywordValue parameters %s and %s" % (
+                    self, par.name, pars[-1].name))
+
             else:
               raise MemopsError(
-               "%s: isSubdivided parameter %s is not the last input parameter"
-               % (self, par.name)
-              )
-          
+                "%s: isSubdivided parameter %s is not the last input parameter" % (
+                  self, par.name))
+
           elif par is not pars[-1]:
             raise MemopsError(
-             "%s: isSubdivided parameter %s is not the last input parameter"
-             % (self, par.name)
-            )
-          
-        elif ((par.locard == 0 and par.hicard == 1)
-              or par.defaultValue is not None):
+              "%s: isSubdivided parameter %s is not the last input parameter" % (
+                self, par.name))
+
+        elif ((
+                    par.locard == 0 and par.hicard == 1) or par.defaultValue is not None):
           # optional parameter. NB the or statement is currently superflous
           # but we might allow defaults for hicard!= 1 later
           foundOptional = par
- 
+
         else:
           # mandatory parameter - must come first
           if foundOptional is not None:
             raise MemopsError(
-             "%s: mandatory parameter %s appears after optional %s"
-             % (self, par.name, foundOptional.name)
-            )
-      
+              "%s: mandatory parameter %s appears after optional %s" % (
+                self, par.name, foundOptional.name))
+
     # return parameters
-    pars = [x for x in parameters if x.direction == ImpConstants.return_direction]
+    pars = [x for x in parameters if
+            x.direction == ImpConstants.return_direction]
     if pars:
-      if opTypeInfo['group'] in ('modify','delete'):
-        raise MemopsError(
-         "%s: modifier has return parameter"
-         % (self,)
-        )
+      if opTypeInfo['group'] in ('modify', 'delete'):
+        raise MemopsError("%s: modifier has return parameter" % (self,))
       elif len(pars) > 1:
-        raise MemopsError(
-         "%s: more than one return parameter : %s"
-         % (self,[x.name for x in pars])
-        )
-        
+        raise MemopsError("%s: more than one return parameter : %s" % (
+          self, [x.name for x in pars]))
+
+
 #############################################################################
 
 class MetaRole(ClassElement):
   """ class for roles (link ends) 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(ClassElement.parameterData)
   parameterData['container']['type'] = MetaClass
-  parameterData.update( {
-   'scope':{
-    'type':'Token',
-    'enumeration':ImpConstants.scope_enumeration,
-    'default':ImpConstants.instance_level,
-    'isFixed':True,
-   },
-   'valueType':{
-    'type':MetaClass,
-   },
-   'aggregation':{
-    'default':None,
-    'type':'Token',
-    'enumeration':ImpConstants.aggregation_enumeration,
-   },
-   'hierarchy':{
-    'default':None,
-    'type':'Token',
-    'enumeration':ImpConstants.hierarchy_enumeration,
-   },
-   'otherRole':{
-    'default':None,
-    'setterFunc':'setOtherRole',
-   },
-   'partitionsChildren':{
-    'type':'Boolean',
-    'default':False,
-   },
-   'noDeleteIfSet':{
-    'type':'Boolean',
-    'default':False,
-   },
-  })
-  
+  parameterData.update({
+    'scope':{'type':'Token', 'enumeration':ImpConstants.scope_enumeration,
+             'default':ImpConstants.instance_level, 'isFixed':True, },
+    'valueType':{'type':MetaClass, },
+    'aggregation':{'default':None, 'type':'Token',
+                   'enumeration':ImpConstants.aggregation_enumeration, },
+    'hierarchy':{'default':None, 'type':'Token',
+                 'enumeration':ImpConstants.hierarchy_enumeration, },
+    'otherRole':{'default':None, 'setterFunc':'setOtherRole', },
+    'partitionsChildren':{'type':'Boolean', 'default':False, },
+    'noDeleteIfSet':{'type':'Boolean', 'default':False, }, })
+
   # allowed tagged values
   allowedTags = ClassElement.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaRole'])
-   
+
   def __init__(self, **params):
-    
+
     ClassElement.__init__(self, **params)
-    
+
     # finish link from container
     params['container']._MetaClass__roleNames.append(params['name'])
-    
+
     if params.get('hierarchy') == ImpConstants.parent_hierarchy:
-    
+
       # set container parentRole
       params['container'].__dict__['parentRole'] = self
-  
-  def setOtherRole(self,value):
+
+  def setOtherRole(self, value):
     """ set otherRole link
     """
-    
+
     current = self.__dict__.get('otherRole')
-    
+
     if value is None:
       if current:
         raise MemopsError(
-         "%s - attempt to unset (partially) set otherRole"
-         % (self,)
-        )
+          "%s - attempt to unset (partially) set otherRole" % (self,))
       else:
         self.__dict__['otherRole'] = None
-    
+
     else:
-    
+
       reverse = value.__dict__.get('otherRole')
- 
+
       if current is value and reverse is self:
         #we are already set up
         return
- 
+
       elif current is None and reverse is None:
         # NB value and self may be the same, but this still works
         self.__dict__['otherRole'] = value
         value.__dict__['otherRole'] = self
-        
+
         # set container.container.topObjectClass
-        if self.hierarchy in (ImpConstants.parent_hierarchy,
-                              ImpConstants.child_hierarchy):
+        if self.hierarchy in (
+          ImpConstants.parent_hierarchy, ImpConstants.child_hierarchy):
           packages = (self.container.container, value.container.container)
           if packages[0] is not packages[1]:
             objs = (self, value)
@@ -4223,233 +3901,206 @@ class MetaRole(ClassElement):
               if obj.hierarchy == ImpConstants.parent_hierarchy:
                 # out-of-package parent role - this must be the TopObject
                 packages[ii].__dict__['topObjectClass'] = obj.container
-        
+
       else:
         raise MemopsError(
-         "%s - attempt to overwrite (partially) set otherRole with value %s"
-         % (self, value)
-        )
-  
+          "%s - attempt to overwrite (partially) set otherRole with value %s" % (
+            self, value))
+
   def removeOtherRole(self):
     """ remove otherRole link
     """
-    
+
     current = self.__dict__.get('otherRole')
-    
+
     if current is None:
-      raise MemopsError("%s - attempt to remove non-existing otherRole"
-                        % (self,))
+      raise MemopsError(
+        "%s - attempt to remove non-existing otherRole" % (self,))
     else:
       # NB current and self may be the same, but this still works
       self.__dict__['otherRole'] = None
       current.__dict__['otherRole'] = None
-      
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     ClassElement.checkValid(self, complete=complete)
-    
+
     valueType = self.valueType
     otherRole = self.otherRole
     hicard = self.hicard
     container = self.container
     constraints = self.constraints
-    Impl = self.metaObjFromQualName('.'.join([ImpConstants.modellingPackageName,
-                                    ImpConstants.implementationPackageName]))
+    Impl = self.metaObjFromQualName('.'.join(
+      [ImpConstants.modellingPackageName,
+       ImpConstants.implementationPackageName]))
     DataRoot = Impl.getElement(ImpConstants.dataRootName)
     Base = Impl.getElement(ImpConstants.baseClassName)
     DataObject = Impl.getElement(ImpConstants.dataObjClassName)
     TopObject = Impl.getElement(ImpConstants.topObjClassName)
-    
+
     # check package access
     if self.canAccess(valueType):
       # same package or other package is imported - no trouble
       pass
-      
+
     elif valueType.canAccess(self):
       # other package imports this one
-      
+
       if otherRole is None:
         # NBNB TBD this could be DANGEROUS - RECONSIDER later
         #if not (DataRoot is self.container and 
         #      TopObject in valueType.getAllSupertypes()):
-        if not (DataObject is self.container or (DataRoot is self.container and 
-                TopObject in valueType.getAllSupertypes())):
+        if not (DataObject is self.container or (
+              DataRoot is self.container and TopObject in valueType.getAllSupertypes())):
           # MemopsRoot.currentTopObject has special handling.
           # any other case is illegal.
-          raise MemopsError("%s - one-way link to %s in non-imported package"
-                          % (self, valueType))
-                          
+          raise MemopsError(
+            "%s - one-way link to %s in non-imported package" % (
+              self, valueType))
+
       elif self.isDerived:
         pass
-      
+
       elif self.locard != 0:
-        raise MemopsError("%s - mandatory link to %s in non-imported package"
-                        % (self, valueType))
+        raise MemopsError(
+          "%s - mandatory link to %s in non-imported package" % (
+            self, valueType))
       elif self.changeability == ImpConstants.frozen:
-        raise MemopsError("%s - frozen link to %s in non-imported package"
-                      % (self, valueType))
+        raise MemopsError(
+          "%s - frozen link to %s in non-imported package" % (self, valueType))
     else:
-      raise MemopsError("%s - link to %s in non-imported package"
-                     % (self, valueType))
-    
+      raise MemopsError(
+        "%s - link to %s in non-imported package" % (self, valueType))
+
     # check otherRole and constraint location
     if otherRole is not None:
       if constraints:
         if container.container is not otherRole.container.container:
           if not self.canAccess(otherRole):
             raise MemopsError(
-             "%s: constraints on wrong side of interpackage link"
-             % (self,)
-            )
-            
+              "%s: constraints on wrong side of interpackage link" % (self,))
+
         elif hicard != 1 and otherRole.hicard == 1:
-          raise MemopsError("%s: constraints on wrong side of one-to-many link"
-           % (self,)
-          )
-          
+          raise MemopsError(
+            "%s: constraints on wrong side of one-to-many link" % (self,))
+
         if otherRole.constraints:
-          raise MemopsError("%s: constraints on both sides of link"
-           % (self,)
-          )
-          
+          raise MemopsError("%s: constraints on both sides of link" % (self,))
+
     # checks for parentRoles and composite aggregations 
     if self.hierarchy == ImpConstants.parent_hierarchy:
-      if (hicard != 1 or self.locard != 1 
-          or self.changeability != ImpConstants.frozen 
-          or self.aggregation != ImpConstants.composite_aggregation 
-          or self.isDerived or self.isAutomatic  or self.isImplementation
-          or (otherRole is None and not self.isAbstract)):
+      if (
+                        hicard != 1 or self.locard != 1 or self.changeability != ImpConstants.frozen or self.aggregation != ImpConstants.composite_aggregation or self.isDerived or self.isAutomatic or self.isImplementation or (
+              otherRole is None and not self.isAbstract)):
         raise MemopsError("""%s - invalid parentRole :
 hicard:%s, locard:%s, changeability:%s, aggregation:%s
-isDerived:%s, isAutomatic:%s, isImplementation:%s, otherRole:%s""" % 
-         (self, hicard, self.locard, self.changeability, self.aggregation, 
+isDerived:%s, isAutomatic:%s, isImplementation:%s, otherRole:%s""" % (
+          self, hicard, self.locard, self.changeability, self.aggregation,
           self.isDerived, self.isAutomatic, self.isImplementation, otherRole
-         )
-        )
-      
+        ))
+
       # check parentRole
       pr = self.container.parentRole
       if pr is not self:
-        raise MemopsError("% has hierarchy %s, but %s is class parent"
-                          % (self, ImpConstants.parent_hierarchy, pr))
-      
+        raise MemopsError("% has hierarchy %s, but %s is class parent" % (
+          self, ImpConstants.parent_hierarchy, pr))
+
       # check package topObjectClass
       package = self.container.container
       if package is not self.valueType.container:
         # out-of-package parent role - this must be the TopObject
         if package.__dict__['topObjectClass'] is not self.container:
           raise MemopsError(
-           "parentRole % incompatible with package.topObjectClass %s"
-           % (self, package.__dict__['topObjectClass'])
-          )
-        
+            "parentRole % incompatible with package.topObjectClass %s" % (
+              self, package.__dict__['topObjectClass']))
+
       if constraints:
-        raise MemopsError("%s: constraints on parent role"
-         % (self,)
-        )
-      
+        raise MemopsError("%s: constraints on parent role" % (self,))
+
     elif self.aggregation == ImpConstants.composite_aggregation:
-      raise MemopsError("%s - non-parentRole has aggregation %s" 
-                        % (self, self.aggregation))
-    
+      raise MemopsError(
+        "%s - non-parentRole has aggregation %s" % (self, self.aggregation))
+
     if self.hierarchy == ImpConstants.child_hierarchy:
       if constraints:
-        raise MemopsError("%s: constraints on child role"
-         % (self,)
-        )
+        raise MemopsError("%s: constraints on child role" % (self,))
       if not otherRole:
-        raise MemopsError("%s: child role lacks otherRole"
-         % (self,)
-        )
-    
+        raise MemopsError("%s: child role lacks otherRole" % (self,))
+
     # check limits on partitioning roles
     if self.partitionsChildren:
       if self.hierarchy != ImpConstants.no_hierarchy:
         raise MemopsError(
-         "%s: only crosslinks can have partitionsChildren True"
-         % (self,)
-        )
-    
+          "%s: only crosslinks can have partitionsChildren True" % (self,))
+
     if otherRole is None:
-      if (not self.isAbstract and not self.isDerived 
-          and not self.isImplementation):
+      if (
+            not self.isAbstract and not self.isDerived and not self.isImplementation):
         # check that valueType does not have out-of-package subclasses
         # for two-way roles this is handled at the class level
         pp = valueType.container
         ll = [x for x in valueType.getAllSubtypes() if x.container is not pp]
         if ll:
           raise MemopsError(
-           "%s: link to class %s with out-of-package subclasses :\n%s"
-           % (self, valueType, ll)
-          )
-      
+            "%s: link to class %s with out-of-package subclasses :\n%s" % (
+              self, valueType, ll))
+
     else:
-    
+
       # check abstract association
       if self.isAbstract != otherRole.isAbstract:
-        raise MemopsError("%s: association has abstract and non-abstract role"
-         % self.qualifiedName()
-        )
-    
+        raise MemopsError(
+          "%s: association has abstract and non-abstract role" % self.qualifiedName())
+
       # check coherence with otherRole
       if otherRole.otherRole is not self:
-        raise MemopsError("%s otherRole incoherent across Association" 
-         % self.qualifiedName()
-        )
-      elif otherRole.container is not valueType:
-        raise MemopsError("%s valueType differs from otherRole.container" 
-         % self.qualifiedName()
-        )
-      elif container is not otherRole.valueType:
-        raise MemopsError("%s otherRole.valueType differs from container" 
-         % self.qualifiedName()
-        )
-      
-      # check limits on cardinalities (NB may later be relaxed)
-      
-      # limit on bi-ordering:
-      if (self.isOrdered and otherRole.isOrdered
-          and not self.isDerived and not self.isImplementation):
         raise MemopsError(
-         "%s: a link cannot be ordered in both directions, unless it is derived or implementation" 
-         % self.qualifiedName()
-        )
-      
+          "%s otherRole incoherent across Association" % self.qualifiedName())
+      elif otherRole.container is not valueType:
+        raise MemopsError(
+          "%s valueType differs from otherRole.container" % self.qualifiedName())
+      elif container is not otherRole.valueType:
+        raise MemopsError(
+          "%s otherRole.valueType differs from container" % self.qualifiedName())
+
+      # check limits on cardinalities (NB may later be relaxed)
+
+      # limit on bi-ordering:
+      if (
+              self.isOrdered and otherRole.isOrdered and not self.isDerived and not self.isImplementation):
+        raise MemopsError(
+          "%s: a link cannot be ordered in both directions, unless it is derived or implementation" % self.qualifiedName())
+
       # limit on non-unique two-way links
       if not self.isUnique and not self.isDerived and not self.isImplementation:
         raise MemopsError(
-         "%s: a two-way link must be derived, implementation, or unique in both directions" 
-         % self.qualifiedName()
-        )
-      
+          "%s: a two-way link must be derived, implementation, or unique in both directions" % self.qualifiedName())
+
     # NB - Abstract roles are not allowed in non-abstract classes, but this
     # is checked in MetaClass.checkValid
-      
+
     # check overriding
     allSupertypes = container.getAllSupertypes()
-    
-    if (Base not in allSupertypes 
-        and not self.isAbstract and not self.isImplementation):
+
+    if (
+            Base not in allSupertypes and not self.isAbstract and not self.isImplementation):
       raise MemopsError(
-       "%s: Non-abstract, non-implementation role in class that does not inherit from %s" %
-       (self, Base)
-      )
-    
+        "%s: Non-abstract, non-implementation role in class that does not inherit from %s" % (
+          self, Base))
+
     for supertype in allSupertypes[1:]:
       superElem = supertype._MetaModelElement__elementDict.get(self.name)
       if superElem is not None:
-        
+
         superval = superElem.otherRole
-        
+
         if otherRole is None:
           if superval is not None:
             raise MemopsError(
-             "one-way link %s overrides two-way link %s:"
-             % (self, superval)
-            )
-        
+              "one-way link %s overrides two-way link %s:" % (self, superval))
+
         else:
           xx = otherRole.container.supertype
           if xx is not None:
@@ -4458,83 +4109,69 @@ isDerived:%s, isAutomatic:%s, isImplementation:%s, otherRole:%s""" %
             superOther = None
           if (superOther is not superval):
             raise MemopsError(
-             "%s overrides %s but otherRole %s does not override %s" %
-             (self, superElem, otherRole, superval)
-            )
-        
+              "%s overrides %s but otherRole %s does not override %s" % (
+                self, superElem, otherRole, superval))
+
         break
-        
+
 # must be set here, after the class definition
 MetaRole.parameterData['otherRole']['type'] = MetaRole
 MetaClass.parameterData['parentRole']['type'] = MetaRole
-    
+
 #############################################################################
 
 class MetaAttribute(ClassElement):
   """ class for roles (link ends) 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(ClassElement.parameterData)
   parameterData['container']['type'] = ComplexDataType
-  parameterData.update( {
-   'scope':{
-    'type':'Token',
-    'enumeration':ImpConstants.scope_enumeration,
-    'default':ImpConstants.instance_level,
-   },
-   'valueType':{
-    'type':AbstractDataType,
-   },
-   'defaultValue':{
-    'default':[],
-    'hicard':infinity,
-   },
-  })
-  
+  parameterData.update({
+    'scope':{'type':'Token', 'enumeration':ImpConstants.scope_enumeration,
+             'default':ImpConstants.instance_level, },
+    'valueType':{'type':AbstractDataType, },
+    'defaultValue':{'default':[], 'hicard':infinity, }, })
+
   # allowed tagged values
   allowedTags = ClassElement.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaAttribute'])
-   
+
   def __init__(self, **params):
-    
+
     ClassElement.__init__(self, **params)
-    
+
     # finish link from container
     params['container']._ComplexDataType__attributeNames.append(params['name'])
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     ClassElement.checkValid(self, complete=complete)
-    
+
     # default value requires a MetaDataType valueType
     defaultValue = self.defaultValue
-    
+
     if (not isinstance(self.valueType, MetaDataType) and defaultValue):
       raise MemopsError(
-       "%s - default value only when valueType is a MetaDataType"
-       % (self,)
-      )
-    
+        "%s - default value only when valueType is a MetaDataType" % (self,))
+
     # default value must be valid
     if defaultValue:
-    
+
       if not isinstance(self.valueType, MetaDataType):
         raise MemopsError(
-         "%s - default value only when valueType is a MetaDataType"
-         % (self,)
-        )
-        
+          "%s - default value only when valueType is a MetaDataType" % (self,))
+
       if len(defaultValue) > self.hicard and self.hicard != infinity:
-        raise MemopsError("%s - default value %s longer than hicard %s"
-                          % (self, self.defaultValue, self.hicard))
-        
+        raise MemopsError("%s - default value %s longer than hicard %s" % (
+          self, self.defaultValue, self.hicard))
+
       if len(defaultValue) < self.locard:
-        raise MemopsError("%s - default value %s shorter than locard %s"
-                          % (self, self.defaultValue, self.locard))
-      
+        raise MemopsError("%s - default value %s shorter than locard %s" % (
+          self, self.defaultValue, self.locard))
+
       #if self.locard == 0:
       #  # optional attribute with default value is not allowed 
       #  # there would be no way to set it to None or empty
@@ -4542,383 +4179,352 @@ class MetaAttribute(ClassElement):
       #   "%s - attribute with cardinality 0..%s has defaultValue (%s)"
       #   % (self, self.hicard, self.defaultValue)
       #  )
-        
-    
+
+
       for dv in defaultValue:
         if not self.valueType.isValid(dv):
-          raise MemopsError("%s - default value %s from  %s is invalid"
-                            % (self, dv, self.defaultValue))
-    
+          raise MemopsError("%s - default value %s from  %s is invalid" % (
+            self, dv, self.defaultValue))
+
     # package access check
     if not self.canAccess(self.valueType):
-      raise MemopsError("%s - cannot access valueType %s"
-                        % (self, self.valueType))
-                        
+      raise MemopsError(
+        "%s - cannot access valueType %s" % (self, self.valueType))
+
     # special check:
     if isinstance(self.valueType, MetaClass):
-      raise MemopsError("%s -attribute can not have class valueType: %s"
-                        % (self, self.valueType))
-                        
+      raise MemopsError("%s -attribute can not have class valueType: %s" % (
+        self, self.valueType))
+
+
 #############################################################################
 
 class MetaParameter(AbstractValue):
   """ class for roles (link ends) 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(AbstractValue.parameterData)
   parameterData['container']['type'] = HasParameters
   parameterData['locard']['default'] = 1
-  parameterData.update( {
-   'direction':{
-    'type':'Token',
-    'enumeration':ImpConstants.direction_enumeration,
-   },
-   'valueType':{
-    'type':AbstractDataType,
-   },
-   'defaultValue':{
-    'default':None,
-   },
-  })
-  
-  
+  parameterData.update({'direction':{'type':'Token',
+                                     'enumeration':ImpConstants.direction_enumeration, },
+                        'valueType':{'type':AbstractDataType, },
+                        'defaultValue':{'default':None, }, })
+
+
   # allowed tagged values
   allowedTags = AbstractValue.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaParameter'])
-   
+
   def __init__(self, **params):
-    
+
     AbstractValue.__init__(self, **params)
-    
+
     # finish link from container
     params['container']._HasParameters__parameterNames.append(params['name'])
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     AbstractValue.checkValid(self, complete=complete)
-    
+
     valueType = self.valueType
     superValueTypes = valueType.getAllSupertypes()
     Base = None
     if isinstance(valueType, MetaClass):
       Base = self.metaObjFromQualName('.'.join(
-       [ImpConstants.modellingPackageName, 
-       ImpConstants.implementationPackageName,
-       ImpConstants.baseClassName])
-      )
+        [ImpConstants.modellingPackageName,
+         ImpConstants.implementationPackageName, ImpConstants.baseClassName]))
     elif isinstance(valueType, MetaDataObjType):
       Base = self.metaObjFromQualName('.'.join(
-       [ImpConstants.modellingPackageName, 
-       ImpConstants.implementationPackageName,
-       ImpConstants.baseDataTypeObjName])
-      )
+        [ImpConstants.modellingPackageName,
+         ImpConstants.implementationPackageName,
+         ImpConstants.baseDataTypeObjName]))
     if Base is not None and not Base in superValueTypes:
       #raise MemopsError("%s valueType %s does not descend from %s"
       #                  % (self, valueType, Base))
       #NBNB TBD tenporary HACK - test should be put back soonest
-      print("WARNING - %s valueType %s does not descend from %s"
-                        % (self, valueType, Base))
-      
+      print("WARNING - %s valueType %s does not descend from %s" % (
+        self, valueType, Base))
+
     # package access check
     operationData = OpTypes.operationData
     if operationData[self.container.opType]['targetTag'] == 'masterOp':
       # Other operations have their parameters follow autogeneration rules
       # also, ops for e.g. interpackage links would fail this test
       if not self.canAccess(self.valueType):
-        raise MemopsError("%s - cannot access valueType %s"
-                          % (self, self.valueType))
- 
+        raise MemopsError(
+          "%s - cannot access valueType %s" % (self, self.valueType))
+
     # default value checks
     if self.defaultValue:
-      
+
       if self.direction != ImpConstants.in_direction:
-        raise MemopsError("%s - non-input parameter has explicit default %s"
-                          % (self, self.defaultValue))
-    
+        raise MemopsError(
+          "%s - non-input parameter has explicit default %s" % (
+            self, self.defaultValue))
+
       if self.hicard != 1:
-        raise MemopsError("%s - has explicit default %s and hicard %s"
-                          % (self, self.defaultValue, self.hicard))
-    
+        raise MemopsError("%s - has explicit default %s and hicard %s" % (
+          self, self.defaultValue, self.hicard))
+
       if self.locard != 0:
-        raise MemopsError("%s - is mandatory but has explicit default %s"
-                          % (self, self.defaultValue))
-    
+        raise MemopsError("%s - is mandatory but has explicit default %s" % (
+          self, self.defaultValue))
+
       if not isinstance(self.valueType, MetaDataType):
         raise MemopsError(
-         "%s: explicit default %s but valueType %s is not a MetaDataType"
-         % (self, self.defaultValue, self.valueType)
-        )    
+          "%s: explicit default %s but valueType %s is not a MetaDataType" % (
+            self, self.defaultValue, self.valueType))
 
       if not self.valueType.isValid(self.defaultValue):
-        raise MemopsError("%s - default value %s is invalid"
-                          % (self, self.defaultValue))
-        
+        raise MemopsError(
+          "%s - default value %s is invalid" % (self, self.defaultValue))
+
     # optional parameters
-    if (self.locard == 0 and self.hicard == 1
-        and self.direction != ImpConstants.in_direction):
-      raise MemopsError("%s - non-input parameter is optional (0..1)" % (self,))
-    
-    
+    if (
+            self.locard == 0 and self.hicard == 1 and self.direction != ImpConstants.in_direction):
+      raise MemopsError(
+        "%s - non-input parameter is optional (0..1)" % (self,))
+
+
     # check subdivided parameters
     # these are Dictionaries that are implemented as undefined keyword/value
     # input or lists implemented as undefined parameters 
     # for langauges that allow it.
     # In practice we are talking about Python *par and **par.
     if self.taggedValues.get('isSubdivided'):
-      
+
       if self.direction != ImpConstants.in_direction:
-        raise MemopsError("%s - isSubdivided and direction is not %s" 
-                          %  (self, self.direction))
-                          
+        raise MemopsError(
+          "%s - isSubdivided and direction is not %s" % (self, self.direction))
+
       if self.hicard == 1:
-        if self.locard != 1 :
-          raise MemopsError(
-           "%s: isSubdivided parameter is 1..0"
-           % (self, )
-          )
-        skDict = self.metaObjFromQualName('memops.Implementation.StringKeyDict')
+        if self.locard != 1:
+          raise MemopsError("%s: isSubdivided parameter is 1..0" % (self, ))
+        skDict = self.metaObjFromQualName(
+          'memops.Implementation.StringKeyDict')
         if skDict not in self.valueType.getAllSupertypes():
-          raise MemopsError("%s - isSubdivided, hicard == 1 and type is not %s"
-                            %  (self, skDict))
-      
-      else:
-        if self.locard != 0 :
           raise MemopsError(
-           "%s: isSubdivided parameter is n..m"
-           % (self, )
-          )
-        
-       
+            "%s - isSubdivided, hicard == 1 and type is not %s" % (
+              self, skDict))
+
+      else:
+        if self.locard != 0:
+          raise MemopsError("%s: isSubdivided parameter is n..m" % (self, ))
+
+
     # check overiding of elements. NB special, as operations
     # override but do not have supertypes themselves
     container = self.container
     superContainer = None
-    if isinstance(container,MetaOperation):
+    if isinstance(container, MetaOperation):
       for supertype in container.container.getAllSupertypes()[1:]:
         superContainer = supertype._MetaModelElement__elementDict.get(
-         container.name
-        )
+          container.name)
         if superContainer is not None:
           break
-          
-    elif isinstance(container,MetaException):
+
+    elif isinstance(container, MetaException):
       superContainer = container.supertype
-      
+
     if superContainer is not None and superContainer.opType != 'init':
       superElem = superContainer.getElement(self.name)
       if superElem is None:
-        raise MemopsError(
-         "%s: new parameter %s in overriding %s "
-         % (container, self.name, superContainer.__class__.__name__)
-        )
+        raise MemopsError("%s: new parameter %s in overriding %s " % (
+          container, self.name, superContainer.__class__.__name__))
 
       else:
         # check that parameters fit
 
         if not (self.isImplicit and superElem.isImplicit):
           # no need to police autogenerated parameters.
-          
+
           parameterData = self.parameterData
           for tag in parameterData.keys():
 
             if tag in ('container', 'documentation', 'guid', 'defaultValue'):
               continue
-          
+
             if parameterData[tag].get('type') == 'content':
               continue
 
-            val = getattr(self,tag)
-            superval = getattr(superElem,tag)
+            val = getattr(self, tag)
+            superval = getattr(superElem, tag)
 
             if val == superval:
               pass
-                        
+
             elif tag == 'locard':
               if superval > val:
                 raise MemopsError(
-                 "%s: locard %s lower than in overridden %s %s"
-                 % (self, val, self.__class__.__name__, superElem)
-                )
- 
+                  "%s: locard %s lower than in overridden %s %s" % (
+                    self, val, self.__class__.__name__, superElem))
+
             elif tag == 'hicard':
- 
+
               if (superval == 1) != (val == 1):
                 raise MemopsError(
-                 "%s overriding %s: hicard must be 1 in both or neither"
-                 % (self, superElem)
-                )
- 
+                  "%s overriding %s: hicard must be 1 in both or neither" % (
+                    self, superElem))
+
               elif superval == infinity:
                 pass
- 
+
               elif val == infinity:
                 raise MemopsError(
-                 "%s: hicard infinity higher than in overridden %s %s"
-                 % (self, self.__class__.__name__, superElem)
-                )
+                  "%s: hicard infinity higher than in overridden %s %s" % (
+                    self, self.__class__.__name__, superElem))
                 pass
- 
+
               elif superval < val:
                 raise MemopsError(
-                 "%s: hicard %s higher than in overridden %s %s"
-                 % (self, val, self.__class__.__name__, superElem)
-                )
+                  "%s: hicard %s higher than in overridden %s %s" % (
+                    self, val, self.__class__.__name__, superElem))
 
             elif tag == 'valueType':
               if superval not in val.getAllSupertypes():
                 if superval.qualifiedName() != 'memops.Implementation.Any':
                   raise MemopsError(
-                   "%s overrides %s, but valuetype %s is not a subtype of %s"
-                   % (self,superElem,val,superval)
-                  )
+                    "%s overrides %s, but valuetype %s is not a subtype of %s" % (
+                      self, superElem, val, superval))
 
             elif tag == 'taggedValues':
-              for tt,vv in superval.items():
+              for tt, vv in superval.items():
                 if val.get(tt) != vv:
                   raise MemopsError(
-                   "%s overrides %s but tagged value %s differs"
-                   % (self,superElem,tt)
-                  )
+                    "%s overrides %s but tagged value %s differs" % (
+                      self, superElem, tt))
 
             else:
-              raise MemopsError("%s overrides %s but differs for %s" %
-                                (self,superElem,tag))
-   
+              raise MemopsError(
+                "%s overrides %s but differs for %s" % (self, superElem, tag))
+
+
 #############################################################################
 
 class MetaConstant(MetaModelElement):
   """ class for static constants
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(MetaModelElement.parameterData)
   parameterData['container']['type'] = MetaPackage
-  parameterData.update( {
-   'value':{
-   },
-   'valueType':{
-    'type':MetaDataType,
-   },
-  })
-  
+  parameterData.update({'value':{}, 'valueType':{'type':MetaDataType, }, })
+
   # allowed tagged values
   allowedTags = MetaModelElement.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaConstant'])
-  
+
   def __init__(self, **params):
-    
+
     MetaModelElement.__init__(self, **params)
-    
+
     # finish link from container
     params['container']._MetaPackage__constantNames.append(params['name'])
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     MetaModelElement.checkValid(self, complete=complete)
-    
+
     if not self.valueType.isValid(self.value):
-      raise MemopsError("%s - value %s is invalid" % (self,self.value))
-    
+      raise MemopsError("%s - value %s is invalid" % (self, self.value))
+
     # package access check
     if not self.canAccess(self.valueType):
-      raise MemopsError("%s - cannot access valueType %s"
-                        % (self, self.valueType))
-    
+      raise MemopsError(
+        "%s - cannot access valueType %s" % (self, self.valueType))
+
     # name style
     if self.name[0] not in ImpConstants.uppercase:
       print("WARNING, name of %s does not start with upper case" % self)
-    
+
+
 #############################################################################
 
 
 class MetaConstraint(MetaModelElement):
   """ abstract class for elements 
   """
-  
+
   # information for handling input parameters
   parameterData = semideepcopy(MetaModelElement.parameterData)
   parameterData['container']['type'] = ConstrainedElement
-  parameterData['codeStubs'] = {
-   'type':'StringDict',
-   'default':{},
-  }
-  
+  parameterData['codeStubs'] = {'type':'StringDict', 'default':{}, }
+
   # allowed tagged values
   allowedTags = MetaModelElement.allowedTags.copy()
   allowedTags.update(TaggedValues.allowedTags['MetaConstraint'])
-   
+
   def __init__(self, **params):
-    
+
     MetaModelElement.__init__(self, **params)
-    
+
     # special case - MetaParameters cannot have constraints.
     if isinstance(self.container, MetaParameter):
       raise MemopsError("Attempt to add constraint to %s" % self.container)
-      
+
 
   def addCodeStub(self, tag, value):
     """ Add codeStub
     """
-    
+
     if type(tag) != StringType:
-      raise MemopsError("%s codeStub tag %s is not a string" %(self, tag))
-    
+      raise MemopsError("%s codeStub tag %s is not a string" % (self, tag))
+
     if type(value) != StringType:
-      raise MemopsError("%s codeStub %s value %s is not a string" %
-       (self, tag, value)
-      )
-    
+      raise MemopsError(
+        "%s codeStub %s value %s is not a string" % (self, tag, value))
+
     if tag not in ImpConstants.codeStubTags:
       raise MemopsError("%s : unsupported  codeStub tag %s " % (self, tag))
-    
+
     self._MetaModelElement__dataDict['codeStubs'][tag] = value
-  
+
   def removeCodeStub(self, tag):
     """Remove existing CodeStub
     """
-    
-    if self._MetaModelElement__dataDict['codeStubs'].get(tag, sentinel) is not sentinel:
+
+    if self._MetaModelElement__dataDict['codeStubs'].get(tag,
+                                                         sentinel) is not sentinel:
       del self._MetaModelElement__dataDict['codeStubs'][tag]
     else:
       raise MemopsError("%s has no CodeStub %s " % (self, tag))
-  
+
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    
+
     MetaModelElement.checkValid(self, complete=complete)
-    
+
     # check if container is derived
-    if isinstance(self.container,ClassElement) and self.container.isDerived:
-      raise MemopsError("MetaConstraint %s is attached to derived element"
-       % self.qualifiedName()
-      )
-    
+    if isinstance(self.container, ClassElement) and self.container.isDerived:
+      raise MemopsError(
+        "MetaConstraint %s is attached to derived element" % self.qualifiedName())
+
     # check if container is Implementation
-    if isinstance(self.container,ClassElement) and self.container.isImplementation:
-      raise MemopsError("MetaConstraint %s is attached to Implementation element"
-       % self.qualifiedName()
-      )
-    
+    if isinstance(self.container,
+                  ClassElement) and self.container.isImplementation:
+      raise MemopsError(
+        "MetaConstraint %s is attached to Implementation element" % self.qualifiedName())
+
     # check code
     codeStubs = self._MetaModelElement__dataDict['codeStubs']
     codeTags = ImpConstants.codeStubTags
     for codeTag in codeStubs.keys():
-      
+
       # check code tags
       if codeTag not in codeTags:
         raise MemopsError("%s: Ilegal codeStub tag %s" % (self, codeTag))
-      
+
       # check code content
       codeString = codeStubs.get(codeTag)
-      if (codeString is not None
-       and codeString.find('isValid') == -1
-       and len(codeString.split('\n')) != 1
+      if (codeString is not None and codeString.find('isValid') == -1 and len(
+        codeString.split('\n')) != 1
       ):
         raise MemopsError("""MetaConstraint:
 %s
@@ -4930,7 +4536,6 @@ that does not contains string 'isValid'
       """ % (self, codeTag, codeString))
 
 
-
 #############################################################################
 #
 # classes
@@ -4939,9 +4544,9 @@ that does not contains string 'isValid'
 
 # non-abstract classes. NB used in XmlModelGen
 nonAbstractClasses = (
- MetaPackage, MetaClass, MetaDataObjType, MetaDataType, MetaException, 
- MetaOperation, MetaRole, MetaAttribute, MetaParameter, MetaConstant, 
- MetaConstraint
+  MetaPackage, MetaClass, MetaDataObjType, MetaDataType, MetaException,
+  MetaOperation, MetaRole, MetaAttribute, MetaParameter, MetaConstant,
+  MetaConstraint
 )
 
 # check business rules for MetaClasses

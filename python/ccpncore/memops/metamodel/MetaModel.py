@@ -58,7 +58,7 @@ Non-implementation attributes are generally kept in the normal __dict__,
 and are exported directly. Collections and dictionaries, which can not be 
 exported directly, are kept in the __dataDict dictionary.
 Contained elements are kept in the __elementDict or __constraints dictionaries.
-New attribtues can be freely defined. These are kept in the __dict__ as for 
+New attributes can be freely defined. These are kept in the __dict__ as for
 normal Python objects.
 The _tempData dictionary has no parameterData record and is treated as a 
 'new attribute'. It is used for temporary information storage during
@@ -117,7 +117,7 @@ Names:
  The usename attribute is intended for such renaming. It is  temporary, intended
  for use by ModelAdapt, and is reset when packages are reset. Usename attributes
  are ignored in model comparison if ignoreImplicit  is set to True.
- NBNB TBD Usename is not yet in ue in the generation machinery
+ TODO Usename is not yet in use in the generation machinery
 
 #############################################################################
    
@@ -150,7 +150,7 @@ Packages:
    with 'import otherPackage' in Python. Elements from the imported packages can
    be used in most ways at the Code level. The only exception is that a class
    cannot have subclasses in another package if it is non-abstract or involved
-   in a link. Abstract, derived, and implementation links are excempt from this
+   in a link. Abstract, derived, and implementation links are exempt from this
    rule. There is one exception to this: The link between
    AccessControl.AccessObject and Implementation.DataObject is specifically
    allowed, at the cost of adding some special hacks to the code generation.
@@ -176,7 +176,7 @@ Packages:
  - Constraints are evaluated in check_valid and also before modifying the 
   data in modifier functions (set and add/remove)
 
- - Constraints attached to MetaClasses and MetaDataObjTypes are evaulated only 
+ - Constraints attached to MetaClasses and MetaDataObjTypes are evaluated only
   in check_valid.
 
  - Constraint codeStubs are given in the manner of tagged values. The precise
@@ -241,16 +241,16 @@ purpose. The name of the link can be anything.
 The set of parent-child links form a tree rooted in the MemopsRoot class; a 
 MemopsRoot object has no parent and has no UML composition link.
 
-Subtypes of TopObject are children of the MemospRoot object; all other
-classes except MemospRoot are children of a class in the same package.
+Subtypes of TopObject are children of the MemopsRoot object; all other
+classes except MemopsRoot are children of a class in the same package.
 
 All classes (abstract or not) with a non-abstract parent link must have a
-mainkey, unless the parent-child link is  one-to-one. This mainkey is a set of
+main key, unless the parent-child link is  one-to-one. This main key is a set of
 attributes and/or links of the whose value identifies it uniquely among the
 objects with the same class and the same parent object. The parent-child links
 define a unique path from the Project object to each object, and knowing the
-mainkeys alows you to chose the right object at each step on the path. The
-precise rules for parent and mainkeys in the presence of inheritance are
+main keys allows you to chose the right object at each step on the path. The
+precise rules for parent and main keys in the presence of inheritance are
 described below.
 
 Rules governing parents and keys:
@@ -261,10 +261,10 @@ Rules governing parents and keys:
  - Parent-child links may be either one-to-many or one-to-one.
    The latter are referred to as 'only children'.
 
- - All classes with a non-abstract parent have a mainkey, except for only 
-   children. Only children have no mainkey.
+ - All classes with a non-abstract parent have a main key, except for only
+   children. Only children have no main key.
 
- - The local key ('mainkey') of each object must define it uniquely within the
+ - The local key ('main key') of each object must define it uniquely within the
   link to its parent object.
 
  - The local key consists of an attribute, a link, or an ordered tuple of 
@@ -276,7 +276,7 @@ Rules governing parents and keys:
 
  - All attributes and links partaking in a local key must be frozen non-derived,
  and mandatory, and locard must be equal to hicard. Cardinality 0..1 is 
- forbidden, even though it could in theory be accomodated. Links to classes in
+ forbidden, even though it could in theory be accommodated. Links to classes in
  accessed (i.e. not imported) packages are not allowed as keys.
  
  - TopObject keys may only contain attributes and links to other TopObjects
@@ -396,11 +396,11 @@ For languages that do not allow multiple inheritance (possibly for all
   The overriding associations must be between subclasses of these classes.
   Unless both the overridden role is one-way, the otherRoles must override 
   each other like the roles. Note that an abstract one-way association may 
-  be overriddden by a two-way asociation.
+  be overriddden by a two-way association.
  
  - MetaParameters may override each other without restraint if both are
  implicit. Otherwise most attributes must be identical. The two may differ in
- container (obvously), the overriding parameter may have extra
+ container (obviously), the overriding parameter may have extra
  tagged values, and the its valueType may be a subtype of the one it is 
  overriding.
  The cardinality of the overriding element must be a subset of the
@@ -477,7 +477,7 @@ For languages that do not allow multiple inheritance (possibly for all
    with the same exceptions as for 'set'
   - 'sorted': for all elements with hicard != 1 and isOrdered==False
     These functions return a sorted list of the linked-to objects.
-    For childlinks the list is sorted by local key, 
+    For child links the list is sorted by local key,
     in other cases by (class, fullKey).
   - 'findFirst' functions: for all roles or DataObjType attributes 
     with hicard != 1 without exception
@@ -542,8 +542,8 @@ For languages that do not allow multiple inheritance (possibly for all
 
  Rules for code tagged values :
  
- Codestubs are used in Constraints, Operations and in ComplexDataTypes 
- (constructor and destructor code). codestubs are always StringDicts.
+ Code stubs are used in Constraints, Operations and in ComplexDataTypes
+ (constructor and destructor code). code stubs are always StringDicts.
  The dictionary key may consist of up to three parts, with a colon (':')
  as separator. The three parts are interpreted as 
  'language:implementation:variant'
@@ -569,67 +569,38 @@ For languages that do not allow multiple inheritance (possibly for all
 
 """
 
-######################################################################
-# hack for Python 2.1 compatibility  NBNB                            #
-######################################################################
+# imports:
+import string
+import copy
+import time
+
+from ccpncore.memops.general import Constants as genConstants
+from ccpncore.memops.metamodel import Util as metaUtil
+from ccpncore.memops.metamodel import TaggedValues
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.universal.Util import semideepcopy
+
+infinity = genConstants.infinity
+IntType = metaConstants.IntType
+StringType = metaConstants.StringType
+TupleType = metaConstants.TupleType
+sentinel = metaConstants.sentinel
+MemopsError = metaConstants.MemopsError
+
+
+
+# Python 2.1 dual-use constants
+
 try:
   junk = True
   junk = False
-except:
+except NameError:
   dd = globals()
   dd['True'] = not 0
   dd['False'] = not True
   del dd
 
-
-class DummyClass:
-  pass
-
-
-sentinel = DummyClass()
-
-
-
-
-#############################################################################
-# enumerated types:
-# NB most are imported from ImpConstants
-
 booleans = (True, False)
-
-#############################################################################
-
-
-# imports:
-import types
-import string
-import copy
-import time
-
-try:
-  IntType = types.IntType
-  StringType = types.StringType
-  TupleType = types.TupleType
-except:
-  IntType = int
-  StringType = str
-  TupleType = tuple
-
-from memops.metamodel import TaggedValues
-from memops.metamodel import ImpConstants
-
-MemopsError = ImpConstants.MemopsError
-from memops.metamodel import OpTypes
-from memops.general.Constants import infinity
-from memops.general import Constants as genConstants
-
-from memops.universal.Util import semideepcopy
-
-import memops.metamodel.Util as metaUtil
-#guidGenerator = metaUtil.SimpleGuidGenerator('ModelAdapt','www.ccpn.ac.uk')
-#newGuid = guidGenerator.newGuid
-
-
 
 def transferGuid(obj, targetContainer):
   """ Make new guid for obj when copied into a new container, e.g.
@@ -1075,7 +1046,7 @@ class MetaModelElement:
 
     if params.get('container') is None:
       if not (isinstance(self, MetaPackage) and params[
-        'name'] == ImpConstants.rootPackageName):
+        'name'] == metaConstants.rootPackageName):
         raise MemopsError("Tried to create %s %s without a container" % (
           self.__class__.__name__, params['name']))
 
@@ -1358,7 +1329,7 @@ class MetaModelElement:
             raise MemopsError(
               "%s.%s - %s is empty or not a string" % (self, tag, item))
           for char in item:
-            if char not in ImpConstants.validNameChars:
+            if char not in metaConstants.validNameChars:
               raise MemopsError("%s %s %s contains illegal character %s" % (
                 self, tag, item, char))
 
@@ -1386,11 +1357,11 @@ class MetaModelElement:
     # name
     if not self.isImplicit:
       # autogenerated elements can be assumed to be OK
-      if name[0] == ImpConstants.underscore:
+      if name[0] == metaConstants.underscore:
         raise MemopsError(
           "%s: name %s of non-implicit element starts with '_'" % (self, name))
 
-      if (ImpConstants.underscore in name[1:] and not isinstance(self,
+      if (metaConstants.underscore in name[1:] and not isinstance(self,
                                                                  MetaOperation) and not isinstance(
         self, MetaConstraint)):
         print("WARNING, name of %s contains underscore" % self)
@@ -1496,8 +1467,8 @@ class HasParameters(MetaModelElement):
   parameterData.update({'parameters':{'type':'content',
                                       'namelist':'_HasParameters__parameterNames', },
                         'visibility':{'type':'Token',
-                                      'enumeration':ImpConstants.visibility_enumeration,
-                                      'default':ImpConstants.public_visibility,
+                                      'enumeration':metaConstants.visibility_enumeration,
+                                      'default':metaConstants.public_visibility,
                                       'isFixed':False, }, })
 
   # allowed tagged values
@@ -1682,8 +1653,8 @@ class AbstractDataType(ConstrainedElement, HasSupertype):
      'isLeaf':{'type':'Boolean', 'default':False, 'isFixed':True, },
      'isAbstract':{'type':'Boolean', 'default':False, },
      'visibility':{'type':'Token',
-                   'enumeration':ImpConstants.visibility_enumeration,
-                   'default':ImpConstants.public_visibility, 'isFixed':True, },
+                   'enumeration':metaConstants.visibility_enumeration,
+                   'default':metaConstants.public_visibility, 'isFixed':True, },
      'supertype':{'setterFunc':'unsettable', 'getterFunc':'getSupertype',
                   'default':None, },
      'supertypes':{'setterFunc':'setSupertypes', 'hicard':infinity, },
@@ -1777,7 +1748,7 @@ class AbstractDataType(ConstrainedElement, HasSupertype):
       raise MemopsError("%s is leaf but has subtypes" % (self))
 
     # name style
-    if self.name[0] not in ImpConstants.uppercase:
+    if self.name[0] not in metaConstants.uppercase:
       print("WARNING, name of %s does not start with upper case" % self)
 
     # check two-way link
@@ -1840,7 +1811,7 @@ class AbstractValue(ConstrainedElement):
             "%s: %s must be %s for hicard==1" % (self, tag, default))
 
     # name style
-    if self.name[0] not in ImpConstants.lowercase:
+    if self.name[0] not in metaConstants.lowercase:
       print("WARNING, name of %s does not start with lower case" % self)
 
 
@@ -1854,13 +1825,13 @@ class ClassElement(AbstractValue):
   # information for handling input parameters
   parameterData = semideepcopy(AbstractValue.parameterData)
   parameterData.update({'visibility':{'type':'Token',
-                                      'enumeration':ImpConstants.visibility_enumeration,
-                                      'default':ImpConstants.public_visibility,
+                                      'enumeration':metaConstants.visibility_enumeration,
+                                      'default':metaConstants.public_visibility,
                                       'isFixed':True, },
                         'isAbstract':{'type':'Boolean', 'default':False, },
                         'changeability':{'type':'Token',
-                                         'enumeration':ImpConstants.changeability_enumeration,
-                                         'default':ImpConstants.changeable, },
+                                         'enumeration':metaConstants.changeability_enumeration,
+                                         'default':metaConstants.changeable, },
                         'isDerived':{'type':'Boolean', 'default':False, },
                         'isImplementation':{'type':'Boolean',
                                             'default':False, },
@@ -1887,30 +1858,30 @@ class ClassElement(AbstractValue):
 
     if isinstance(container, MetaClass):
       Base = self.metaObjFromQualName('.'.join(
-        [ImpConstants.modellingPackageName,
-         ImpConstants.implementationPackageName, ImpConstants.baseClassName]))
+        [metaConstants.modellingPackageName,
+         metaConstants.implementationPackageName, metaConstants.baseClassName]))
     else:
       Base = self.metaObjFromQualName('.'.join(
-        [ImpConstants.modellingPackageName,
-         ImpConstants.implementationPackageName,
-         ImpConstants.baseDataTypeObjName]))
+        [metaConstants.modellingPackageName,
+         metaConstants.implementationPackageName,
+         metaConstants.baseDataTypeObjName]))
 
     name = self.name
     baseName = self.baseName
 
     # check name length
-    if len(name) > ImpConstants.maxTagLength:
+    if len(name) > metaConstants.maxTagLength:
       raise MemopsError("%s: name %s longer than %s characters" % (
-        self, name, ImpConstants.maxTagLength))
+        self, name, metaConstants.maxTagLength))
 
-    if len(baseName) > ImpConstants.maxTagLength:
+    if len(baseName) > metaConstants.maxTagLength:
       raise MemopsError("%s: baseName %s longer than %s characters" % (
-        self, baseName, ImpConstants.maxTagLength))
+        self, baseName, metaConstants.maxTagLength))
 
     AbstractValue.checkValid(self, complete=complete)
 
     # check changeability
-    if self.changeability == ImpConstants.add_only:
+    if self.changeability == metaConstants.add_only:
       raise MemopsError("%s: changeability %s not implemented yet" % (
         self, self.changeability))
 
@@ -1954,7 +1925,7 @@ class ClassElement(AbstractValue):
       # check for setter
       setters = [x for x in tempOpInfo if x[0] == 'set']
 
-      if self.changeability == ImpConstants.frozen:
+      if self.changeability == metaConstants.frozen:
         if setters:
           raise MemopsError(
             "derived unchangeable %s has setFunction" % (self,))
@@ -1979,7 +1950,7 @@ class ClassElement(AbstractValue):
       if getters:
         raise MemopsError("Implementation %s has explicit getFunction" % self)
 
-      if self.changeability != ImpConstants.frozen:
+      if self.changeability != metaConstants.frozen:
         raise MemopsError("Implementation %s is not frozen" % self)
 
     else:
@@ -1996,7 +1967,7 @@ class ClassElement(AbstractValue):
         if setters:
           raise MemopsError("automatic %s has explicit setFunction" % self)
 
-      if self.isAutomatic or self.changeability == ImpConstants.frozen:
+      if self.isAutomatic or self.changeability == metaConstants.frozen:
         for tag in ('add', 'remove'):
           ops = [x for x in tempOpInfo if x[0] == tag]
           if ops:
@@ -2007,7 +1978,7 @@ class ClassElement(AbstractValue):
     # they should be done as 'get, add, set'
 
     # special case - check attribute called 'serial' 
-    if name == ImpConstants.serial_attribute:
+    if name == metaConstants.serial_attribute:
 
       if not isinstance(self, MetaAttribute):
         raise MemopsError("%s: name 'serial' reserved for attribute" % self)
@@ -2019,7 +1990,7 @@ class ClassElement(AbstractValue):
       if self.valueType.name != 'Int':
         raise MemopsError("%s: 'serial' attribute must be type 'Int'" % self)
 
-      serialValues = {'isAutomatic':True, 'changeability':ImpConstants.frozen,
+      serialValues = {'isAutomatic':True, 'changeability':metaConstants.frozen,
                       'hicard':1, 'locard':1, }
       for key, val in serialValues.items():
         x = getattr(self, key)
@@ -2156,7 +2127,7 @@ class ComplexDataType(AbstractDataType):
       raise MemopsError(
         "%s codeStub %s value %s is not a string" % (self, tag, value))
 
-    if tag not in ImpConstants.codeStubTags:
+    if tag not in metaConstants.codeStubTags:
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
 
     self._MetaModelElement__dataDict['constructorCodeStubs'][tag] = value
@@ -2267,7 +2238,7 @@ class ComplexDataType(AbstractDataType):
         raise MemopsError(
           "Abstract ComplexDataType %s has special constructor" % (self))
 
-      codeTags = ImpConstants.codeStubTags
+      codeTags = metaConstants.codeStubTags
       for codeTag in constructorCode.keys():
 
         # check code tags
@@ -2320,8 +2291,8 @@ class MetaPackage(MetaModelElement):
      'isLeaf':{'type':'Boolean', 'default':False, 'isFixed':True, },
      'isAbstract':{'type':'Boolean', 'default':False, 'isFixed':True, },
      'visibility':{'type':'Token',
-                   'enumeration':ImpConstants.visibility_enumeration,
-                   'default':ImpConstants.public_visibility, 'isFixed':True, },
+                   'enumeration':metaConstants.visibility_enumeration,
+                   'default':metaConstants.public_visibility, 'isFixed':True, },
      'shortName':{'type':'Token', 'default':None, },
      'importedPackages':{'hicard':infinity, 'setterFunc':'setImportedPackages',
                          'default':[], },
@@ -2469,9 +2440,9 @@ class MetaPackage(MetaModelElement):
     # check for 'None'; container
     if self.container is None:
       # root package. Check name
-      if self.name != ImpConstants.rootPackageName:
+      if self.name != metaConstants.rootPackageName:
         raise MemopsError("Root package named %s, must be %s" % (
-          self.name, ImpConstants.rootPackageName))
+          self.name, metaConstants.rootPackageName))
 
       # initialise guid uniqueness check
       MetaModelElement.guidDict = {}
@@ -2485,14 +2456,14 @@ class MetaPackage(MetaModelElement):
     # check mandatory packages and get implementation package
     RootPackage = self.topPackage()
     ModellingPackage = RootPackage.getElement(
-      ImpConstants.modellingPackageName)
+      metaConstants.modellingPackageName)
     if not isinstance(ModellingPackage, MetaPackage):
       raise MemopsError(
-        "No package %s found" % ImpConstants.modellingPackageName)
+        "No package %s found" % metaConstants.modellingPackageName)
 
-    Impl = ModellingPackage.getElement(ImpConstants.implementationPackageName)
+    Impl = ModellingPackage.getElement(metaConstants.implementationPackageName)
     AccessControl = ModellingPackage.getElement(
-      ImpConstants.accessControlPackageName)
+      metaConstants.accessControlPackageName)
 
     if not isinstance(Impl, MetaPackage):
       raise MemopsError("No Implementation package found")
@@ -2506,26 +2477,26 @@ class MetaPackage(MetaModelElement):
           "Implementation package %s may not import other packages" % self.qualifiedName())
       if self.__containedPackageNames:
         raise MemopsError(
-          "Implementation package '%s' must contain no other packages" % ImpConstants.implementationPackageName)
+          "Implementation package '%s' must contain no other packages" % metaConstants.implementationPackageName)
 
       # check Implementation classes used elsewhere
-      tag = ImpConstants.baseDataTypeObjName
+      tag = metaConstants.baseDataTypeObjName
       cc = self.getElement(tag)
       if not cc or not isinstance(cc, MetaDataObjType):
         raise MemopsError(
           "Implementation package '%s' does not contain MetaDataObjType %s" % (
-            ImpConstants.implementationPackageName, tag))
-      for tag in ImpConstants.implementationClassNames:
+            metaConstants.implementationPackageName, tag))
+      for tag in metaConstants.implementationClassNames:
         cc = self.getElement(tag)
         if not cc or not isinstance(cc, MetaClass):
           raise MemopsError(
             "Implementation package '%s' does not contain class %s" % (
-              ImpConstants.implementationPackageName, tag))
+              metaConstants.implementationPackageName, tag))
 
           # check special roles:
-        cc = self.getElement(ImpConstants.dataRootName)
+        cc = self.getElement(metaConstants.dataRootName)
         for tag in (
-          ImpConstants.repositoryRole, ImpConstants.packageLocatorRole):
+          metaConstants.repositoryRole, metaConstants.packageLocatorRole):
           if not isinstance(cc.getElement(tag), MetaRole):
             raise MemopsError(
               "MemopsRoot class '%s' does not contain role %s" % (cc, tag))
@@ -2550,7 +2521,7 @@ class MetaPackage(MetaModelElement):
 
       # name style check:
       if (self.name[
-            0] not in ImpConstants.lowercase and self.container is not None):
+            0] not in metaConstants.lowercase and self.container is not None):
         print("WARNING, name of %s does not start with lower case" % self)
 
     elif (
@@ -2561,14 +2532,14 @@ class MetaPackage(MetaModelElement):
       if self.shortName is None:
         raise MemopsError("%s: leaf package lacks a shortName" % (self,))
 
-      if len(self.shortName) > ImpConstants.maxShortNameLength:
+      if len(self.shortName) > metaConstants.maxShortNameLength:
         raise MemopsError("%s: shortName %s longer than %s characters" % (
-          self, self.shortName, ImpConstants.maxShortNameLength))
+          self, self.shortName, metaConstants.maxShortNameLength))
 
       # check TopObject 
       hasNonAbstract = False
       topObjects = []
-      TopObjClass = Impl.getElement(ImpConstants.topObjClassName)
+      TopObjClass = Impl.getElement(metaConstants.topObjClassName)
       for clazz in self.classes:
         if not clazz.isAbstract:
           hasNonAbstract = True
@@ -2595,7 +2566,7 @@ class MetaPackage(MetaModelElement):
             "package %s does not import the AccessControl package" % self)
 
       # name style check:
-      if self.name[0] not in ImpConstants.uppercase:
+      if self.name[0] not in metaConstants.uppercase:
         print("WARNING, name of %s does not start with upper case" % self)
 
     if self is RootPackage:
@@ -2629,7 +2600,7 @@ class MetaPackage(MetaModelElement):
         dummy = metaUtil.topologicalSortSubgraph(ll, 'supertypes')
 
       # checks for diamond multiple inheritance and inheritance order
-      for ss in (ImpConstants.baseClassName, ImpConstants.baseDataTypeObjName):
+      for ss in (metaConstants.baseClassName, metaConstants.baseDataTypeObjName):
         dd = {}
         ll = [Impl.getElement(ss)]
         for obj in ll:
@@ -2688,8 +2659,8 @@ class MetaClass(ComplexDataType):
     params['container']._MetaPackage__classNames.append(params['name'])
 
     # topObjectClass - special case of Implementation package
-    if (params.get('name') == ImpConstants.dataRootName and params[
-      'container'].name == ImpConstants.implementationPackageName):
+    if (params.get('name') == metaConstants.dataRootName and params[
+      'container'].name == metaConstants.implementationPackageName):
       params['container'].__dict__['topObjectClass'] = self
 
   def addKeyName(self, name):
@@ -2745,7 +2716,7 @@ class MetaClass(ComplexDataType):
       raise MemopsError(
         "%s codeStub %s value %s is not a string" % (self, tag, value))
 
-    if tag not in ImpConstants.codeStubTags:
+    if tag not in metaConstants.codeStubTags:
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
 
     self._MetaModelElement__dataDict['destructorCodeStubs'][tag] = value
@@ -2771,7 +2742,7 @@ class MetaClass(ComplexDataType):
       raise MemopsError(
         "%s codeStub %s value %s is not a string" % (self, tag, value))
 
-    if ImpConstants.codeStubTags.get(tag, sentinel) is sentinel:
+    if metaConstants.codeStubTags.get(tag, sentinel) is sentinel:
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
 
     self._MetaModelElement__dataDict['postDestructorCodeStubs'][tag] = value
@@ -2850,7 +2821,7 @@ class MetaClass(ComplexDataType):
     """ get child roles
     """
     return [x for x in self.getAllRoles() if
-            x.hierarchy == ImpConstants.child_hierarchy]
+            x.hierarchy == metaConstants.child_hierarchy]
 
   def getClassElements(self):
     """ get roles and attributes
@@ -2892,13 +2863,13 @@ class MetaClass(ComplexDataType):
     # get constant objects
     RootPackage = self.topPackage()
     ModellingPackage = RootPackage.getElement(
-      ImpConstants.modellingPackageName)
-    Impl = ModellingPackage.getElement(ImpConstants.implementationPackageName)
-    Base = Impl.getElement(ImpConstants.baseClassName)
-    DataRoot = Impl.getElement(ImpConstants.dataRootName)
-    DataObject = Impl.getElement(ImpConstants.dataObjClassName)
-    ImplObject = Impl.getElement(ImpConstants.implObjClassName)
-    TopObject = Impl.getElement(ImpConstants.topObjClassName)
+      metaConstants.modellingPackageName)
+    Impl = ModellingPackage.getElement(metaConstants.implementationPackageName)
+    Base = Impl.getElement(metaConstants.baseClassName)
+    DataRoot = Impl.getElement(metaConstants.dataRootName)
+    DataObject = Impl.getElement(metaConstants.dataObjClassName)
+    ImplObject = Impl.getElement(metaConstants.implObjClassName)
+    TopObject = Impl.getElement(metaConstants.topObjClassName)
 
     ComplexDataType.checkValid(self, complete=complete)
 
@@ -2944,7 +2915,7 @@ class MetaClass(ComplexDataType):
       if keyElement is None:
         raise MemopsError(
           "%s keyName %s is not an element in the class" % (self, tag))
-      if keyElement.changeability != ImpConstants.frozen:
+      if keyElement.changeability != metaConstants.frozen:
         raise MemopsError("%s key %s is changeable" % (self, tag))
       if keyElement.isDerived:
         # in order to speed up checking and facilitate database impl.
@@ -2966,14 +2937,14 @@ class MetaClass(ComplexDataType):
             "%s: key %s is link to non-topObject" % (self, tag))
 
     # check name length
-    if len(self.name) > ImpConstants.maxClassNameLength:
+    if len(self.name) > metaConstants.maxClassNameLength:
       raise MemopsError("%s: name %s longer than %s characters" % (
-        self, self.name, ImpConstants.maxClassNameLength))
+        self, self.name, metaConstants.maxClassNameLength))
 
     # check that child class names do not conflict with each other
     dd = {}
     for role in self.getAllRoles():
-      if role.hierarchy == ImpConstants.child_hierarchy:
+      if role.hierarchy == metaConstants.child_hierarchy:
         for cc in role.valueType.getNonAbstractSubtypes():
 
           cname = cc.name
@@ -3153,7 +3124,7 @@ class MetaClass(ComplexDataType):
           raise MemopsError(
             "Abstract class %s has special destructor" % (self))
 
-        codeTags = ImpConstants.codeStubTags
+        codeTags = metaConstants.codeStubTags
         for codeTag in destructorCode.keys():
 
           # check code tags
@@ -3161,14 +3132,14 @@ class MetaClass(ComplexDataType):
             raise MemopsError("%s: Illegal %s tag %s" % (self, tag, codeTag))
 
     # check special 'serial' attribute
-    serial = self.getElement(ImpConstants.serial_attribute)
+    serial = self.getElement(metaConstants.serial_attribute)
     if serial is not None:
       if not isinstance(serial, MetaAttribute):
         raise MemopsError(
           "%s - non-MetaAttribute named %s" % (serial, serial.name))
 
       if (
-                not serial.isAutomatic or serial.hicard != 1 or serial.locard != 1 or serial.changeability != ImpConstants.frozen or serial.valueType.name != 'Int' ):
+                not serial.isAutomatic or serial.hicard != 1 or serial.locard != 1 or serial.changeability != metaConstants.frozen or serial.valueType.name != 'Int' ):
         raise MemopsError("""%s:
 '%s' attribute must be Int, automatic, non-changeable and 1..1""" % (
           serial, serial.name))
@@ -3204,7 +3175,7 @@ class MetaDataObjType(ComplexDataType):
 
   def getIsChangeable(self):
     for attr in self.getAllAttributes():
-      if attr.changeability != ImpConstants.frozen:
+      if attr.changeability != metaConstants.frozen:
         return True
     #
     return False
@@ -3214,9 +3185,9 @@ class MetaDataObjType(ComplexDataType):
     """
 
     BaseDataType = self.metaObjFromQualName('.'.join(
-      [ImpConstants.modellingPackageName,
-       ImpConstants.implementationPackageName,
-       ImpConstants.baseDataTypeObjName]))
+      [metaConstants.modellingPackageName,
+       metaConstants.implementationPackageName,
+       metaConstants.baseDataTypeObjName]))
 
     ComplexDataType.checkValid(self, complete=complete)
 
@@ -3280,7 +3251,7 @@ class MetaDataType(AbstractDataType):
       raise MemopsError(
         "%s typeCode %s value %s is not a string" % (self, tag, value))
 
-    if tag not in ImpConstants.codeStubTags:
+    if tag not in metaConstants.codeStubTags:
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
 
     self._MetaModelElement__dataDict['typeCodes'][tag] = value
@@ -3394,8 +3365,8 @@ class MetaException(HasParameters, HasSupertype):
   parameterData = semideepcopy(HasParameters.parameterData)
   parameterData['container']['type'] = MetaPackage
   parameterData.update({
-    'scope':{'type':'Token', 'enumeration':ImpConstants.scope_enumeration,
-             'default':ImpConstants.instance_level, 'isFixed':True, },
+    'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
+             'default':metaConstants.instance_level, 'isFixed':True, },
     'supertype':{'setterFunc':'unsettable', 'setterFunc':'setSupertype',
                  'default':None, }, 'supertypes':{'hicard':infinity, },
     'subtypes':{'setterFunc':'unsettable', 'hicard':infinity, }, })
@@ -3457,7 +3428,7 @@ class MetaException(HasParameters, HasSupertype):
             supertype, self))
 
     # name style
-    if self.name[0] not in ImpConstants.uppercase:
+    if self.name[0] not in metaConstants.uppercase:
       print("WARNING, name of %s does not start with upper case" % self)
 
     # check two-way link
@@ -3471,7 +3442,7 @@ class MetaException(HasParameters, HasSupertype):
 
       # return parameters
       pars = [x for x in parameters if
-              x.direction == ImpConstants.return_direction]
+              x.direction == metaConstants.return_direction]
       if len(pars) > 1:
         raise MemopsError("%s: more than one return parameter : %s" % (
           self, [x.name for x in pars]))
@@ -3493,8 +3464,8 @@ class MetaOperation(HasParameters):
   parameterData = semideepcopy(HasParameters.parameterData)
   parameterData['container']['type'] = ComplexDataType
   parameterData.update({
-    'scope':{'type':'Token', 'enumeration':ImpConstants.scope_enumeration,
-             'default':ImpConstants.instance_level, },
+    'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
+             'default':metaConstants.instance_level, },
     'codeStubs':{'type':'StringDict', 'default':{}, },
     'exceptions':{'type':MetaException, 'hicard':infinity, 'default':[], },
     'isQuery':{'type':'Boolean', },
@@ -3530,7 +3501,7 @@ class MetaOperation(HasParameters):
       raise MemopsError(
         "%s codeStub %s value %s is not a string" % (self, tag, value))
 
-    if tag not in ImpConstants.codeStubTags:
+    if tag not in metaConstants.codeStubTags:
       raise MemopsError("%s : unsupported  codeStub tag %s " % (self, tag))
 
     self._MetaModelElement__dataDict['codeStubs'][tag] = value
@@ -3587,7 +3558,7 @@ class MetaOperation(HasParameters):
     # ops with targetTag != masterOp must replace an autogenerated operation 
     # and must conform to the rules for this operation
 
-    IC = ImpConstants
+    IC = metaConstants
 
     implPackage = self.metaObjFromQualName(
       '.'.join([IC.modellingPackageName, IC.implementationPackageName]))
@@ -3601,7 +3572,7 @@ class MetaOperation(HasParameters):
     parameters = self.parameters
 
     # check code
-    codeTags = ImpConstants.codeStubTags
+    codeTags = metaConstants.codeStubTags
     for codeTag in self._MetaModelElement__dataDict['codeStubs'].keys():
 
       # check code tags
@@ -3615,7 +3586,7 @@ class MetaOperation(HasParameters):
           "%s - cannot access exception %s" % (self, exception))
 
     # name style
-    if not self.isImplicit and self.name[0] not in ImpConstants.lowercase:
+    if not self.isImplicit and self.name[0] not in metaConstants.lowercase:
       print("WARNING, name of %s does not start with lower case" % self)
 
     # opType dependent checks
@@ -3770,7 +3741,7 @@ class MetaOperation(HasParameters):
     if not self.isImplicit:
       # input parameters
       pars = [x for x in parameters if
-              x.direction == ImpConstants.in_direction]
+              x.direction == metaConstants.in_direction]
       if len(pars) == 1 and not pars[0].isImplicit and pars[0].name != 'value':
         if self.container.container is not implPackage:
           # warn of unusual names, but exclude implPackage to keep number down
@@ -3818,7 +3789,7 @@ class MetaOperation(HasParameters):
 
     # return parameters
     pars = [x for x in parameters if
-            x.direction == ImpConstants.return_direction]
+            x.direction == metaConstants.return_direction]
     if pars:
       if opTypeInfo['group'] in ('modify', 'delete'):
         raise MemopsError("%s: modifier has return parameter" % (self,))
@@ -3837,13 +3808,13 @@ class MetaRole(ClassElement):
   parameterData = semideepcopy(ClassElement.parameterData)
   parameterData['container']['type'] = MetaClass
   parameterData.update({
-    'scope':{'type':'Token', 'enumeration':ImpConstants.scope_enumeration,
-             'default':ImpConstants.instance_level, 'isFixed':True, },
+    'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
+             'default':metaConstants.instance_level, 'isFixed':True, },
     'valueType':{'type':MetaClass, },
     'aggregation':{'default':None, 'type':'Token',
-                   'enumeration':ImpConstants.aggregation_enumeration, },
+                   'enumeration':metaConstants.aggregation_enumeration, },
     'hierarchy':{'default':None, 'type':'Token',
-                 'enumeration':ImpConstants.hierarchy_enumeration, },
+                 'enumeration':metaConstants.hierarchy_enumeration, },
     'otherRole':{'default':None, 'setterFunc':'setOtherRole', },
     'partitionsChildren':{'type':'Boolean', 'default':False, },
     'noDeleteIfSet':{'type':'Boolean', 'default':False, }, })
@@ -3859,7 +3830,7 @@ class MetaRole(ClassElement):
     # finish link from container
     params['container']._MetaClass__roleNames.append(params['name'])
 
-    if params.get('hierarchy') == ImpConstants.parent_hierarchy:
+    if params.get('hierarchy') == metaConstants.parent_hierarchy:
 
       # set container parentRole
       params['container'].__dict__['parentRole'] = self
@@ -3892,13 +3863,13 @@ class MetaRole(ClassElement):
 
         # set container.container.topObjectClass
         if self.hierarchy in (
-          ImpConstants.parent_hierarchy, ImpConstants.child_hierarchy):
+          metaConstants.parent_hierarchy, metaConstants.child_hierarchy):
           packages = (self.container.container, value.container.container)
           if packages[0] is not packages[1]:
             objs = (self, value)
             for ii in (0, 1):
               obj = objs[ii]
-              if obj.hierarchy == ImpConstants.parent_hierarchy:
+              if obj.hierarchy == metaConstants.parent_hierarchy:
                 # out-of-package parent role - this must be the TopObject
                 packages[ii].__dict__['topObjectClass'] = obj.container
 
@@ -3933,12 +3904,12 @@ class MetaRole(ClassElement):
     container = self.container
     constraints = self.constraints
     Impl = self.metaObjFromQualName('.'.join(
-      [ImpConstants.modellingPackageName,
-       ImpConstants.implementationPackageName]))
-    DataRoot = Impl.getElement(ImpConstants.dataRootName)
-    Base = Impl.getElement(ImpConstants.baseClassName)
-    DataObject = Impl.getElement(ImpConstants.dataObjClassName)
-    TopObject = Impl.getElement(ImpConstants.topObjClassName)
+      [metaConstants.modellingPackageName,
+       metaConstants.implementationPackageName]))
+    DataRoot = Impl.getElement(metaConstants.dataRootName)
+    Base = Impl.getElement(metaConstants.baseClassName)
+    DataObject = Impl.getElement(metaConstants.dataObjClassName)
+    TopObject = Impl.getElement(metaConstants.topObjClassName)
 
     # check package access
     if self.canAccess(valueType):
@@ -3967,7 +3938,7 @@ class MetaRole(ClassElement):
         raise MemopsError(
           "%s - mandatory link to %s in non-imported package" % (
             self, valueType))
-      elif self.changeability == ImpConstants.frozen:
+      elif self.changeability == metaConstants.frozen:
         raise MemopsError(
           "%s - frozen link to %s in non-imported package" % (self, valueType))
     else:
@@ -3990,9 +3961,9 @@ class MetaRole(ClassElement):
           raise MemopsError("%s: constraints on both sides of link" % (self,))
 
     # checks for parentRoles and composite aggregations 
-    if self.hierarchy == ImpConstants.parent_hierarchy:
+    if self.hierarchy == metaConstants.parent_hierarchy:
       if (
-                        hicard != 1 or self.locard != 1 or self.changeability != ImpConstants.frozen or self.aggregation != ImpConstants.composite_aggregation or self.isDerived or self.isAutomatic or self.isImplementation or (
+                        hicard != 1 or self.locard != 1 or self.changeability != metaConstants.frozen or self.aggregation != metaConstants.composite_aggregation or self.isDerived or self.isAutomatic or self.isImplementation or (
               otherRole is None and not self.isAbstract)):
         raise MemopsError("""%s - invalid parentRole :
 hicard:%s, locard:%s, changeability:%s, aggregation:%s
@@ -4005,7 +3976,7 @@ isDerived:%s, isAutomatic:%s, isImplementation:%s, otherRole:%s""" % (
       pr = self.container.parentRole
       if pr is not self:
         raise MemopsError("% has hierarchy %s, but %s is class parent" % (
-          self, ImpConstants.parent_hierarchy, pr))
+          self, metaConstants.parent_hierarchy, pr))
 
       # check package topObjectClass
       package = self.container.container
@@ -4019,11 +3990,11 @@ isDerived:%s, isAutomatic:%s, isImplementation:%s, otherRole:%s""" % (
       if constraints:
         raise MemopsError("%s: constraints on parent role" % (self,))
 
-    elif self.aggregation == ImpConstants.composite_aggregation:
+    elif self.aggregation == metaConstants.composite_aggregation:
       raise MemopsError(
         "%s - non-parentRole has aggregation %s" % (self, self.aggregation))
 
-    if self.hierarchy == ImpConstants.child_hierarchy:
+    if self.hierarchy == metaConstants.child_hierarchy:
       if constraints:
         raise MemopsError("%s: constraints on child role" % (self,))
       if not otherRole:
@@ -4031,7 +4002,7 @@ isDerived:%s, isAutomatic:%s, isImplementation:%s, otherRole:%s""" % (
 
     # check limits on partitioning roles
     if self.partitionsChildren:
-      if self.hierarchy != ImpConstants.no_hierarchy:
+      if self.hierarchy != metaConstants.no_hierarchy:
         raise MemopsError(
           "%s: only crosslinks can have partitionsChildren True" % (self,))
 
@@ -4128,8 +4099,8 @@ class MetaAttribute(ClassElement):
   parameterData = semideepcopy(ClassElement.parameterData)
   parameterData['container']['type'] = ComplexDataType
   parameterData.update({
-    'scope':{'type':'Token', 'enumeration':ImpConstants.scope_enumeration,
-             'default':ImpConstants.instance_level, },
+    'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
+             'default':metaConstants.instance_level, },
     'valueType':{'type':AbstractDataType, },
     'defaultValue':{'default':[], 'hicard':infinity, }, })
 
@@ -4208,7 +4179,7 @@ class MetaParameter(AbstractValue):
   parameterData['container']['type'] = HasParameters
   parameterData['locard']['default'] = 1
   parameterData.update({'direction':{'type':'Token',
-                                     'enumeration':ImpConstants.direction_enumeration, },
+                                     'enumeration':metaConstants.direction_enumeration, },
                         'valueType':{'type':AbstractDataType, },
                         'defaultValue':{'default':None, }, })
 
@@ -4235,13 +4206,13 @@ class MetaParameter(AbstractValue):
     Base = None
     if isinstance(valueType, MetaClass):
       Base = self.metaObjFromQualName('.'.join(
-        [ImpConstants.modellingPackageName,
-         ImpConstants.implementationPackageName, ImpConstants.baseClassName]))
+        [metaConstants.modellingPackageName,
+         metaConstants.implementationPackageName, metaConstants.baseClassName]))
     elif isinstance(valueType, MetaDataObjType):
       Base = self.metaObjFromQualName('.'.join(
-        [ImpConstants.modellingPackageName,
-         ImpConstants.implementationPackageName,
-         ImpConstants.baseDataTypeObjName]))
+        [metaConstants.modellingPackageName,
+         metaConstants.implementationPackageName,
+         metaConstants.baseDataTypeObjName]))
     if Base is not None and not Base in superValueTypes:
       #raise MemopsError("%s valueType %s does not descend from %s"
       #                  % (self, valueType, Base))
@@ -4261,7 +4232,7 @@ class MetaParameter(AbstractValue):
     # default value checks
     if self.defaultValue:
 
-      if self.direction != ImpConstants.in_direction:
+      if self.direction != metaConstants.in_direction:
         raise MemopsError(
           "%s - non-input parameter has explicit default %s" % (
             self, self.defaultValue))
@@ -4285,7 +4256,7 @@ class MetaParameter(AbstractValue):
 
     # optional parameters
     if (
-            self.locard == 0 and self.hicard == 1 and self.direction != ImpConstants.in_direction):
+            self.locard == 0 and self.hicard == 1 and self.direction != metaConstants.in_direction):
       raise MemopsError(
         "%s - non-input parameter is optional (0..1)" % (self,))
 
@@ -4297,7 +4268,7 @@ class MetaParameter(AbstractValue):
     # In practice we are talking about Python *par and **par.
     if self.taggedValues.get('isSubdivided'):
 
-      if self.direction != ImpConstants.in_direction:
+      if self.direction != metaConstants.in_direction:
         raise MemopsError(
           "%s - isSubdivided and direction is not %s" % (self, self.direction))
 
@@ -4440,7 +4411,7 @@ class MetaConstant(MetaModelElement):
         "%s - cannot access valueType %s" % (self, self.valueType))
 
     # name style
-    if self.name[0] not in ImpConstants.uppercase:
+    if self.name[0] not in metaConstants.uppercase:
       print("WARNING, name of %s does not start with upper case" % self)
 
 
@@ -4480,7 +4451,7 @@ class MetaConstraint(MetaModelElement):
       raise MemopsError(
         "%s codeStub %s value %s is not a string" % (self, tag, value))
 
-    if tag not in ImpConstants.codeStubTags:
+    if tag not in metaConstants.codeStubTags:
       raise MemopsError("%s : unsupported  codeStub tag %s " % (self, tag))
 
     self._MetaModelElement__dataDict['codeStubs'][tag] = value
@@ -4514,7 +4485,7 @@ class MetaConstraint(MetaModelElement):
 
     # check code
     codeStubs = self._MetaModelElement__dataDict['codeStubs']
-    codeTags = ImpConstants.codeStubTags
+    codeTags = metaConstants.codeStubTags
     for codeTag in codeStubs.keys():
 
       # check code tags

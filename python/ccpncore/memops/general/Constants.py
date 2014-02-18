@@ -66,13 +66,13 @@ falseString = 'False'
 
 # Current version of data model.
 # Used by generation scripts to mark generated code.
-# Main way of tracking IO code and IO mappings for compatibiilty.
+# Main way of tracking IO code and IO mappings for compatibility.
 # Incremented by hand when model (or I/O generators) changes
 
 currentModelVersion = Version.Version(2, 1, '', 2,'', 'DataModel')
 
 # valid characters for file names 
-# NB string.ascii_letters and string.digits are not compatible 
+# NB string.ascii_letters and string.digits are not compatible
 # with Python 2.1 (used in ObjectDomain)
 defaultFileNameChar = '_'
 separatorFileNameChar = '+'

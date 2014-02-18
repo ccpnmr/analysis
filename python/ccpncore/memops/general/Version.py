@@ -55,6 +55,7 @@ software development. Bioinformatics 21, 1678-1684.
 
 import time
 import os
+import functools
 
 # Maps memops.general.Constants modelVersion to repository location
 # Used with function getRepositoryDir below - see there for usage.
@@ -91,6 +92,7 @@ cvsWorkingDir = 'ccpn'
 
 svnWorkingDir = 'work'
 
+@functools.total_ordering
 class Version:
 
   def __init__(self, major=0, minor=0, level='', release=0, 
@@ -107,28 +109,21 @@ class Version:
     self.name = name
 
   def __repr__(self):
-
     return '%s.%s.%s%s' % (self.major, self.minor, self.level, self.release)
 
-  def __cmp__(self, other):
+  def __eq__(self, other):
+    return (self.__class__ is other.__class__ and
+            (self.major, self.minor, self.level, self.relese) ==
+            (other.major, other.minor, other.level, other.relese))
+
+  def __lt__(self, other):
     
-    if not isinstance(other, Version):
-      return cmp(id(self), id(other))
-
-    result = cmp( (self.major, self.minor), (other.major, other.minor) )
-
-    if not result:
-      result = cmp(self.level, other.level)
-
-      if result:
-        if '' in (self.level, other.level):
-          # NB empty string compares larger than letters - special case
-          result = -result
-      
-      else:
-        result = cmp(self.release, other.release)
-    
-    return result
+    if self.__class__ is other.__class__:
+      # NBNB the 'self.level or "~~~"' is to make empty strings compare highest
+      return ((self.major, self.minor, self.level or '~~~', self.relese) <
+              (other.major, other.minor, other.level or '~~~', other.relese))
+    else:
+      return id(self) < id(other)
     
     
   def __hash__(self):
@@ -201,46 +196,22 @@ def parseVersionString(s):
     release = 0
   
   return major, minor, level, release
-  
 
 
 def cmpVersionStrings(str1, str2):
   """ Compare version strings as versions
   """
-  tpl1 = parseVersionString(str1)
-  tpl2 = parseVersionString(str2)
+  ll1 = list(parseVersionString(str1))
+  ll1[2] = ll1[2] or '~~~'
+  ll2 = list(parseVersionString(str2))
+  ll2[2] = ll2[2] or '~~~'
 
-  s1 = tpl1[:2]
-  s2 = tpl2[:2]
-  if s1 < s2:
-    result = -1
-  elif s1 > s2:
-    result = 1
+  if ll1 == ll2:
+    return 0
+  elif ll1 < ll2:
+    return -1
   else:
-    s1 = tpl1[2]
-    s2 = tpl2[2]
-    if s1 < s2:
-      result = -1
-    elif s1 > s2:
-      result = 1
-    else:
-      result = 0
-    if result:
-      if '' in ll:
-        # NB empty string compares larger than letters - special case
-        result = -result
-        
-    else:
-      s1 = tpl1[3]
-      s2 = tpl2[3]
-      if s1 < s2:
-        result = -1
-      elif s1 > s2:
-        result = -1
-      else:
-        result = 0
-  
-  return result
+    return 1
 
 
 def getRepositoryDir(versionTag, repoTag=None):

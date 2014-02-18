@@ -643,7 +643,7 @@ def compareModels(model1, model2, elementPairings=None, ignoreImplicit=True):
                which tags differ for unique objects with identical names
                but different guids
   """
-  from memops.metamodel import Util as metaUtil
+  from ccpncore.memops.metamodel import Util as metaUtil
 
   start = time.time()
 

@@ -58,6 +58,8 @@ software development. Bioinformatics 21, 1678-1684.
 #
 
 import os
+import shutil
+import sys
 
 # Note: makeAbsolute is Boolean so the default should be
 # False but ObjectDomain does not understand True/False
@@ -90,8 +92,8 @@ def unnormalisePath(path):
   On Unix does nothing, on Windows replaces '/' with '\\'/
   """
 
-  if (Constants.dirsep != os.sep):
-    path = path.replace(Constants.dirsep, os.sep)
+  if (os.sep != '/'):
+    path = path.replace('/', os.sep)
 
   return path
 
@@ -177,7 +179,7 @@ def setTopDirectory(newTopDirectory):
   paths = []
   for path in sys.path:
     path = normalisePath(path)
-    if path == oldTopDirectory or path.startswith(oldTopDirectory + Constants.dirsep):
+    if path == oldTopDirectory or path.startswith(oldTopDirectory + '/'):
       paths.append(path)
 
   sys_modules = sys.modules

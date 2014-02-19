@@ -12,7 +12,7 @@ from memops.general import Constants as genConstants
 try:
   junk = True
   junk = False
-except:
+except NameError:
   dd = globals()
   dd['True'] = not 0
   dd['False'] = not True

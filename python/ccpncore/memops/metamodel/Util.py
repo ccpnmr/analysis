@@ -63,15 +63,16 @@ software development. Bioinformatics 21, 1678-1684.
 try:
   junk = True
   junk = False
-except:
+except NameError:
   dd = globals()
   dd['True'] = 1
   dd['False'] = 0
   del dd
 
+# Python 2.1 compatibility
 try:
   StringType = basestring
-except:
+except NameError:
   StringType = str
 
 import time
@@ -122,11 +123,11 @@ def sortByDataObjTypeDependency(objList):
 def checkLinkCircularity(myself, tag):
   """ check for circular relationships in -to-one links
   """
-  next = myself
-  while next is not None:
-    prev = next
-    next = getattr(prev,tag)
-    if next is myself:
+  target = myself
+  while target is not None:
+    prev = target
+    target = getattr(prev,tag)
+    if target is myself:
       raise MemopsError("%s is (indirectly) its own %s" 
                                   % (myself,tag))
         
@@ -216,10 +217,10 @@ def parseCardinality(cardString):
   
   #
   if result == [genConstants.infinity]:
-    return (0, genConstants.infinity)
+    return 0, genConstants.infinity
   
   elif len(result) == 1:
-    return (result[0], result[0])
+    return result[0], result[0]
     
   elif len(result) == 2:
     return tuple(result)
@@ -322,7 +323,7 @@ def getOperation(target, opType, inClass=None, opSubType=None):
       inClass = target.container
   
   for op in inClass.getAllOperations():
-    if ((op.target) is target and op.opType == opType
+    if (op.target is target and op.opType == opType
         and op.opSubType == opSubType):
       return op
   #
@@ -381,7 +382,7 @@ def getReferenceName(oo, pp=None, subDirs=None):
   not be valid for the purpose of importing oo.
   """
 
-  if (pp is not None and (oo.container is pp)):
+  if pp is not None and (oo.container is pp):
     # pp passed in and oo directly available from pp. Return short name
     name = oo.name
   else:
@@ -405,7 +406,7 @@ def getReferenceName(oo, pp=None, subDirs=None):
 def coerceToList(params):
   
   # wrap non-iterables into list
-  if (params is None):
+  if params is None:
     params = []
   elif isinstance(params, StringType):
     params = [params]

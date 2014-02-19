@@ -109,7 +109,7 @@ typeCode_enumeration = [int_code, long_code, float_code, double_code,
 typeCode_enumeration.sort()
 
 baseDataTypeModule = __import__(
- 'memops.general.baseDataTypes', globals(), locals(), typeCode_enumeration
+ 'ccpncore.memops.general.baseDataTypes', globals(), locals(), typeCode_enumeration
 )
 
 # NBNB TBD the codes for 'Dict and List are short-term hacks

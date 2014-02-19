@@ -577,8 +577,10 @@ import time
 from ccpncore.memops.general import Constants as genConstants
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.memops.metamodel import TaggedValues
+from ccpncore.memops.metamodel import OpTypes
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.universal.Util import semideepcopy
+
 
 infinity = genConstants.infinity
 IntType = metaConstants.IntType
@@ -595,10 +597,8 @@ try:
   junk = True
   junk = False
 except NameError:
-  dd = globals()
-  dd['True'] = not 0
-  dd['False'] = not True
-  del dd
+  globals()['True'] = not 0
+  globals()['False'] = not True
 
 booleans = (True, False)
 
@@ -639,11 +639,10 @@ def compareModels(model1, model2, elementPairings=None, ignoreImplicit=True):
   'unique2:    set of elements found only in model2
   'differ':    dictionary of 'guid:list-of-tag' of 
                which tags differ for which guids
-  'namematch': dictionary of 'qualifiedName:list-of-tag' of 
+  'namematch': dictionary of 'qualifiedName:list-of-tag' of
                which tags differ for unique objects with identical names
                but different guids
   """
-  from ccpncore.memops.metamodel import Util as metaUtil
 
   start = time.time()
 
@@ -739,14 +738,12 @@ def compareElements(ee, ee2, ignoreImplicit=True, language='python'):
   """
 
   # tagged values that are skipped as irrelevant
-  ignoreTagVals = set(
-    ['repositoryTag', 'repositoryId', 'docDiagramNames', 'packageGroup',
-     'isDraft', 'isReferenceData'])
+  ignoreTagVals = set(['repositoryTag', 'repositoryId', 'docDiagramNames', 'packageGroup',
+                      'isDraft', 'isReferenceData'])
 
   # dictionaries with language
-  languageCoded = set(
-    ['typeCodes', 'codeStubs', 'constructorCodeStubs', 'destructorCodeStubs',
-     'postDestructorCodeStubs'])
+  languageCoded = set(['typeCodes', 'codeStubs', 'constructorCodeStubs', 'destructorCodeStubs',
+                   'postDestructorCodeStubs'])
 
   result = set()
 
@@ -879,35 +876,34 @@ def finaliseMetaClass(clazz):
           "%s: tag %s for parameter %s has illegal value %s" % (
             clazz.__name__, tag, pName, val))
 
-    # special checks
+      # special checks
+      if (clazz, pName) not in unTypedPars:
+        raise MemopsError(
+          "%s: parameter %s has no explicit type " % (clazz.__name__, pName))
+
+      elif myType in miscParTypes:
+        if myType == 'StringDict' and pData.get('hicard', 1) != 1:
+          raise MemopsError(
+            "%s: tag %s for parameter %s is StringDict but has hicard %s" % (
+              clazz.__name__, tag, pName, pData.get('hicard')))
+
 
     # Booleans
     if pData.get('isFixed', sentinel) not in (True, False, sentinel):
       # NBNB we use sentinel to check that there is a value in the dictionaru
       # We can not use 'in pData', because we must conform to Python 2.1
-      raise MemopsError("%s: tag %s for parameter %s has illegal value %s" % (
-        clazz.__name__, tag, pName, pData.get('isFixed')))
+      raise MemopsError("%s: tag isFixed for parameter %s has illegal value %s" % (
+        clazz.__name__, pName, pData.get('isFixed')))
 
     # 'type' tag
     myType = pData.get('type')
 
-    if pData.get('nameList') and (myType != 'content' or tag == 'constraints'):
+    if pData.get('nameList') and (myType != 'content' or pName == 'constraints'):
       raise MemopsError(
         "%s: parameter %s is not standard content but has 'namelist'" % (
           clazz.__name__, pName))
 
-    if myType is None:
-      if (clazz, pName) not in unTypedPars:
-        raise MemopsError(
-          "%s: parameter %s has no explicit type " % (clazz.__name__, pName))
-
-    elif myType in miscParTypes:
-      if myType == 'StringDict' and pData.get('hicard', 1) != 1:
-        raise MemopsError(
-          "%s: tag %s for parameter %s is StringDict but has hicard %s" % (
-            clazz.__name__, tag, pName, pData.get('hicard')))
-
-    elif myType in pythonParTypes:
+    if myType is None or myType in pythonParTypes:
       pass
 
     elif issubclass(myType, MetaModelElement):
@@ -941,8 +937,9 @@ class MetaModelElement:
                    'documentation':{'type':StringType, 'default':'', },
                    'taggedValues':{'type':'StringDict', 'default':{}, },
                    'isImplicit':{'type':'Boolean', 'default':False, }, }
+  }
 
-    allowedTags = TaggedValues.allowedTags['MetaModelElement']
+  allowedTags = TaggedValues.allowedTags['MetaModelElement']
 
   # attribute used for guid uniqueness check
   guidDict = None
@@ -1042,7 +1039,7 @@ class MetaModelElement:
     # check attributes necessary for normal error handling
     if params.get('name') is None:
       raise MemopsError(
-        "Tried to create %s without a name" % (self.__class__.__name__))
+        "Tried to create %s without a name" % self.__class__.__name__)
 
     if params.get('container') is None:
       if not (isinstance(self, MetaPackage) and params[
@@ -1061,7 +1058,7 @@ class MetaModelElement:
     for tag in ll:
       val = params.get(tag, sentinel)
       if val is not sentinel:
-        nFound = nFound + 1
+        nFound += 1
         setattr(self, tag, val)
       else:
         pData = parameterData[tag]
@@ -1710,12 +1707,11 @@ class AbstractDataType(ConstrainedElement, HasSupertype):
   def checkValid(self, complete=False):
     """ Check that object is valid.
     """
-    from memops.metamodel import Util as metaUtil
 
     ConstrainedElement.checkValid(self, complete=complete)
 
     if self.isRoot and self.supertypes:
-      raise MemopsError("%s is root but has supertypes" % (self))
+      raise MemopsError("%s is root but has supertypes" % self)
 
     for supertype in self.supertypes:
 
@@ -1745,7 +1741,7 @@ class AbstractDataType(ConstrainedElement, HasSupertype):
 
     # leaf cannot have subtypes
     if subtypes and self.isLeaf:
-      raise MemopsError("%s is leaf but has subtypes" % (self))
+      raise MemopsError("%s is leaf but has subtypes" % self)
 
     # name style
     if self.name[0] not in metaConstants.uppercase:
@@ -2146,8 +2142,6 @@ class ComplexDataType(AbstractDataType):
     """ Copy all contained elements and constraints down to subtypes
     """
 
-    subtypes = self.subtypes
-
     for ll in (self.attributes, self.constraints):
       for obj in ll:
         dd = obj._getCloningDict()
@@ -2236,7 +2230,7 @@ class ComplexDataType(AbstractDataType):
 
       if self.isAbstract:
         raise MemopsError(
-          "Abstract ComplexDataType %s has special constructor" % (self))
+          "Abstract ComplexDataType %s has special constructor" % self)
 
       codeTags = metaConstants.codeStubTags
       for codeTag in constructorCode.keys():
@@ -2261,7 +2255,7 @@ class ComplexDataType(AbstractDataType):
     for opType, opSubType, target in opCheckDict.keys():
       if opSubType is not None and not opCheckDict.get((opType, None, target)):
         raise MemopsError("""%s: opType,opSubType,target is %s.
-MetaOperation with opSubType:None not found""" % (self, tt))
+MetaOperation with opSubType:None not found""" % (self, (opType, opSubType, target)))
 
     # check presence of non-overridden abstract attributes and operations
     if not self.isAbstract:
@@ -2273,7 +2267,7 @@ MetaOperation with opSubType:None not found""" % (self, tt))
         if op.isAbstract:
           raise MemopsError(
             "%s is not abstract but has abstract operation %s" % (
-              self, attr.name))
+              self, op.name))
 
 
 #############################################################################
@@ -2316,7 +2310,7 @@ class MetaPackage(MetaModelElement):
 
   def __init__(self, **params):
 
-    from memops.metamodel import Util as metaUtil
+    from ccpncore.memops.metamodel import Util as metaUtil
 
     MetaModelElement.__init__(self, **params)
 
@@ -2418,7 +2412,7 @@ class MetaPackage(MetaModelElement):
     """ Check that object is valid.
     """
 
-    from memops.metamodel import Util as metaUtil
+    from ccpncore.memops.metamodel import Util as metaUtil
 
     importedPackages = self._MetaModelElement__dataDict['importedPackages']
     accessedPackages = self._MetaModelElement__dataDict['accessedPackages']
@@ -2493,13 +2487,13 @@ class MetaPackage(MetaModelElement):
             "Implementation package '%s' does not contain class %s" % (
               metaConstants.implementationPackageName, tag))
 
-          # check special roles:
-        cc = self.getElement(metaConstants.dataRootName)
-        for tag in (
-          metaConstants.repositoryRole, metaConstants.packageLocatorRole):
-          if not isinstance(cc.getElement(tag), MetaRole):
-            raise MemopsError(
-              "MemopsRoot class '%s' does not contain role %s" % (cc, tag))
+      # check special roles:
+      cc = self.getElement(metaConstants.dataRootName)
+      for tag2 in (
+        metaConstants.repositoryRole, metaConstants.packageLocatorRole):
+        if not isinstance(cc.getElement(tag2), MetaRole):
+          raise MemopsError(
+            "MemopsRoot class '%s' does not contain role %s" % (cc, tag2))
 
     # check container packages:
     if self.__containedPackageNames:
@@ -2517,7 +2511,7 @@ class MetaPackage(MetaModelElement):
 
       # check shortName
       if self.shortName is not None:
-        raise MemopsError("%s: branch package has shortName"(self, ))
+        raise MemopsError("%s: branch package has shortName" % self)
 
       # name style check:
       if (self.name[
@@ -2594,10 +2588,9 @@ class MetaPackage(MetaModelElement):
         dataObjTypes.extend(pp.dataObjTypes)
         exceptions.extend(pp.exceptions)
 
-      dummy = metaUtil.topologicalSortSubgraph(leafPackages,
-                                               'importedPackages')
+      metaUtil.topologicalSortSubgraph(leafPackages, 'importedPackages')
       for ll in (classes, dataTypes, dataObjTypes, exceptions):
-        dummy = metaUtil.topologicalSortSubgraph(ll, 'supertypes')
+        metaUtil.topologicalSortSubgraph(ll, 'supertypes')
 
       # checks for diamond multiple inheritance and inheritance order
       for ss in (metaConstants.baseClassName, metaConstants.baseDataTypeObjName):
@@ -2698,7 +2691,7 @@ class MetaClass(ComplexDataType):
     """
 
     for obj in self.getAllSupertypes():
-      # NB ComplexDataType - the topmost superclall has no 'keyNames' attribute
+      # NB ComplexDataType - the topmost superclass has no 'keyNames' attribute
       result = obj._MetaModelElement__dataDict.get('keyNames', [])
       if result:
         break
@@ -2906,8 +2899,7 @@ class MetaClass(ComplexDataType):
                                                 inClass=parentClass)
         if not factoryFunction or factoryFunction.isImplicit:
           raise MemopsError(
-            "Derived class %s must have manually defined factory function" % (
-              otherRole, self))
+            "Derived class %s must have manually defined factory function" % self)
 
     # check keyNames
     for tag in self.getKeyNames():
@@ -3095,13 +3087,13 @@ class MetaClass(ComplexDataType):
             self, ll))
 
     # check parent role cyclicity
-    sup = self
+    sup = low = self
     while sup is not None:
       low = sup
       sup = low.getParentClass()
       if sup is self:
         raise MemopsError(
-          "%s is (indirectly) its own parentClass" % (self, tag))
+          "%s is (indirectly) its own parentClass" % self)
 
     # All non-abstract classes must be under root
     if DataRoot not in allSupertypes:
@@ -3122,7 +3114,7 @@ class MetaClass(ComplexDataType):
 
         if self.isAbstract:
           raise MemopsError(
-            "Abstract class %s has special destructor" % (self))
+            "Abstract class %s has special destructor" % self)
 
         codeTags = metaConstants.codeStubTags
         for codeTag in destructorCode.keys():
@@ -3347,7 +3339,7 @@ class MetaDataType(AbstractDataType):
 
     # check single inheritance
     if len(self.supertypes) > 1:
-      raise MemopsError("%s has more than one supertype" % (self))
+      raise MemopsError("%s has more than one supertype" % self)
 
 
 #
@@ -3367,7 +3359,7 @@ class MetaException(HasParameters, HasSupertype):
   parameterData.update({
     'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
              'default':metaConstants.instance_level, 'isFixed':True, },
-    'supertype':{'setterFunc':'unsettable', 'setterFunc':'setSupertype',
+    'supertype':{'setterFunc':'setSupertype',
                  'default':None, }, 'supertypes':{'hicard':infinity, },
     'subtypes':{'setterFunc':'unsettable', 'hicard':infinity, }, })
 
@@ -3402,8 +3394,6 @@ class MetaException(HasParameters, HasSupertype):
     """ Check that object is valid.
     """
 
-    from memops.metamodel import Util as metaUtil
-
     HasParameters.checkValid(self, complete=complete)
 
     parameters = self.parameters
@@ -3411,7 +3401,7 @@ class MetaException(HasParameters, HasSupertype):
     # check single inheritance
     supertypes = self.supertypes
     if len(supertypes) > 1:
-      raise MemopsError("%s has more than one supertype" % (self))
+      raise MemopsError("%s has more than one supertype" % self)
 
     if supertypes:
       supertype = supertypes[0]
@@ -3604,7 +3594,7 @@ class MetaOperation(HasParameters):
       # That was the deciding factor in letting isQuery be optional
       # for 'other' operations
       if ((opTypeInfo['group'] not in ('query', 'otherQuery')) != (
-        not (self.isQuery))):
+        not self.isQuery)):
         # Queries *must* be isQuery. Other opTypes may not, 'other' may choose
         raise MemopsError("%s has group == %s but isQuery == %s" % (
           self, opTypeInfo['group'], self.isQuery))
@@ -3657,7 +3647,7 @@ class MetaOperation(HasParameters):
 
     else:
       # ClassElement target
-      if (target.container not in self.container.getAllSupertypes()):
+      if target.container not in self.container.getAllSupertypes():
         raise MemopsError(
           "%s: target %s must be element of same class as op or a superclass" % (
             self, target))
@@ -3724,7 +3714,6 @@ class MetaOperation(HasParameters):
                 raise MemopsError(
                   "%s overrides %s but tagged value %s differs" % (
                     self, superElem, tt))
-                raise MemopsError
 
           else:
             raise MemopsError(
@@ -3975,8 +3964,8 @@ isDerived:%s, isAutomatic:%s, isImplementation:%s, otherRole:%s""" % (
       # check parentRole
       pr = self.container.parentRole
       if pr is not self:
-        raise MemopsError("% has hierarchy %s, but %s is class parent" % (
-          self, metaConstants.parent_hierarchy, pr))
+        raise MemopsError("%s has hierarchy %s, but %s is class parent" %
+          (self, metaConstants.parent_hierarchy, pr))
 
       # check package topObjectClass
       package = self.container.container
@@ -3984,7 +3973,7 @@ isDerived:%s, isAutomatic:%s, isImplementation:%s, otherRole:%s""" % (
         # out-of-package parent role - this must be the TopObject
         if package.__dict__['topObjectClass'] is not self.container:
           raise MemopsError(
-            "parentRole % incompatible with package.topObjectClass %s" % (
+            "parentRole %s incompatible with package.topObjectClass %s" % (
               self, package.__dict__['topObjectClass']))
 
       if constraints:
@@ -4078,7 +4067,7 @@ isDerived:%s, isAutomatic:%s, isImplementation:%s, otherRole:%s""" % (
             superOther = xx.getElement(otherRole.name)
           else:
             superOther = None
-          if (superOther is not superval):
+          if superOther is not superval:
             raise MemopsError(
               "%s overrides %s but otherRole %s does not override %s" % (
                 self, superElem, otherRole, superval))
@@ -4124,7 +4113,7 @@ class MetaAttribute(ClassElement):
     # default value requires a MetaDataType valueType
     defaultValue = self.defaultValue
 
-    if (not isinstance(self.valueType, MetaDataType) and defaultValue):
+    if not isinstance(self.valueType, MetaDataType) and defaultValue:
       raise MemopsError(
         "%s - default value only when valueType is a MetaDataType" % (self,))
 
@@ -4521,5 +4510,5 @@ nonAbstractClasses = (
 )
 
 # check business rules for MetaClasses
-for clazz in nonAbstractClasses:
-  finaliseMetaClass(clazz)
+for cls in nonAbstractClasses:
+  finaliseMetaClass(cls)

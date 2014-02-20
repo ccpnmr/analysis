@@ -572,6 +572,7 @@ For languages that do not allow multiple inheritance (possibly for all
 # imports:
 import string
 import copy
+import time
 
 from ccpncore.memops import Constants as memopsConstants
 from ccpncore.memops.metamodel import Util as metaUtil
@@ -876,15 +877,6 @@ def finaliseMetaClass(clazz):
             clazz.__name__, tag, pName, val))
 
       # special checks
-      if (clazz, pName) not in unTypedPars:
-        raise MemopsError(
-          "%s: parameter %s has no explicit type " % (clazz.__name__, pName))
-
-      elif myType in miscParTypes:
-        if myType == 'StringDict' and pData.get('hicard', 1) != 1:
-          raise MemopsError(
-            "%s: tag %s for parameter %s is StringDict but has hicard %s" % (
-              clazz.__name__, tag, pName, pData.get('hicard')))
 
 
     # Booleans
@@ -902,11 +894,24 @@ def finaliseMetaClass(clazz):
         "%s: parameter %s is not standard content but has 'namelist'" % (
           clazz.__name__, pName))
 
-    if myType is None or myType in pythonParTypes:
+    if myType is None:
+      if (clazz, pName) not in unTypedPars:
+        raise MemopsError(
+          "%s: parameter %s has no explicit type " % (clazz.__name__, pName))
+
+    elif myType in miscParTypes:
+      if myType == 'StringDict' and pData.get('hicard', 1) != 1:
+        raise MemopsError(
+          "%s: tag %s for parameter %s is StringDict but has hicard %s" % (
+            clazz.__name__, tag, pName, pData.get('hicard')))
+
+    elif myType in pythonParTypes:
       pass
 
     elif issubclass(myType, MetaModelElement):
       pData['isLink'] = True
+
+
 
     else:
       raise MemopsError("%s: parameter %s has unsupported type %s" % (
@@ -930,12 +935,13 @@ class MetaModelElement:
     # input parameters
 
     # NB container type must be set outside class definition
-    'container':{  #'type':MetaModelElement,}, 'name':{'type':'Token', },
-                   'usename':{'type':'Token', 'getterFunc':'getUsename',
-                              'default':None}, 'guid':{'type':StringType, },
-                   'documentation':{'type':StringType, 'default':'', },
-                   'taggedValues':{'type':'StringDict', 'default':{}, },
-                   'isImplicit':{'type':'Boolean', 'default':False, }, }
+    'container':{},
+    'name':{'type':'Token', },
+    'usename':{'type':'Token', 'getterFunc':'getUsename', 'default':None},
+    'guid':{'type':StringType, },
+    'documentation':{'type':StringType, 'default':'', },
+    'taggedValues':{'type':'StringDict', 'default':{}, },
+    'isImplicit':{'type':'Boolean', 'default':False, },
   }
 
   allowedTags = TaggedValues.allowedTags['MetaModelElement']
@@ -2092,8 +2098,11 @@ class ClassElement(AbstractValue):
 class ComplexDataType(AbstractDataType):
   """ Abstract superclass of MetaClass and MetaDataObjType
   """
-.  parameterData['constructorCodeStubs'] = {'type':'StringDict', 'default':{}, }
-  parameterData['attributes'] = {'type':'content',
+  parameterData = memopsUtil.semideepcopy(AbstractDataType.parameterData)
+  parameterData['constructorCodeStubs'] = {'type':'StringDict', 'default':{}, }
+  parameterData['attributes'] = {'type':'con'
+                                        ''
+                                        'tent',
                                  'namelist':'_ComplexDataType__attributeNames'}
   parameterData['operations'] = {'type':'content',
                                  'namelist':'_ComplexDataType__operationNames'}

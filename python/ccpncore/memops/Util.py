@@ -1,15 +1,25 @@
 __author__ = 'rhf22'
 
+import types
+
+try:
+  # Python 2.1 only
+  ListType = types.ListType
+  DictType = types.DictType
+except AttributeError:
+  # PYthon >= 2.5
+  ListType = list
+  DictType = dict
 
 
 try:
-  from  xml.etree import ElementTree # in python >=2.5
+  from xml.etree import ElementTree # in python >=2.5
 except ImportError:
   # effbot's pure Python module. Python 2.1. In ObjectDomain only
   from elementtree import ElementTree
 
 try:
-  from  xml.etree import ElementInclude # in python >=2.5
+  from xml.etree import ElementInclude # in python >=2.5
 except ImportError:
   # effbot's pure Python module. Python 2.1. In ObjectDomain only
   from elementtree import ElementInclude
@@ -31,15 +41,14 @@ def semideepcopy(dd, doneDict=None):
   key = id(dd)
   result = doneDict.get(key)
   if result is None:
-    result = {}
-    doneDict[key] = result
+    doneDict[key] = result = {}
 
     for kk,val in dd.items():
 
-      if type(val) == DictType:
+      if isinstance(val, DictType):
         result[kk] = semideepcopy(val, doneDict)
 
-      elif type(val) == ListType:
+      elif isinstance(val, ListType):
         key2 = id(val)
         newval = doneDict.get(key2)
         if newval is None:

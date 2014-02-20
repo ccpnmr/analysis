@@ -56,7 +56,6 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 """
 
-# NBNB TBD clear out unneeded
 from ccpncore.memops import Version
 
 
@@ -89,20 +88,17 @@ infinity = -1
 
 # names of basic data types
 int_code = 'Int'
-long_code = 'Long'
 float_code = 'Float'
-double_code = 'Double'
 string_code = 'String'
 boolean_code = 'Boolean'
-datetime_code = 'DateTime'
 dict_code = 'Dict'
-typeCode_enumeration = [int_code, long_code, float_code, double_code,
- string_code, boolean_code, datetime_code, dict_code,
+typeCode_enumeration = [int_code, float_code,
+ string_code, boolean_code, dict_code,
 ]
 typeCode_enumeration.sort()
 
 baseDataTypeModule = __import__(
- 'ccpncore.memops.general.baseDataTypes', globals(), locals(), typeCode_enumeration
+ 'ccpncore.memops.baseDataTypes', globals(), locals(), typeCode_enumeration
 )
 
 # NBNB TBD the codes for 'Dict and List are short-term hacks
@@ -115,8 +111,8 @@ baseDataTypeModule = __import__(
 # jdbcTypeCode_enumeration.sort()
 
 # names of java data types. 
-javaTypeCode_enumeration = ['java.lang.Integer','java.lang.Long',
-'java.lang.Float','java.lang.Double', 'java.lang.String','java.lang.Boolean',
+javaTypeCode_enumeration = ['java.lang.Integer',
+'java.lang.Float','java.lang.String','java.lang.Boolean',
 'java.util.Map', 'java.util.Collection'
 ]
 javaTypeCode_enumeration.sort()
@@ -126,15 +122,12 @@ javaTypeCode_enumeration.sort()
 javaSimpleTypeCode_enumeration = [
 # TBD: is excluding None (which is not allowed in Python 3 because of sort()) a problem?
 # 'int','long','float','double','boolean', None
- 'int','long','float','double','boolean'
+ 'int,''float','boolean'
 ]
 javaSimpleTypeCode_enumeration.sort()
 
 # names of xml data types.
-xmlTypeCode_enumeration = [
- 'string', 'boolean', 'int', 'long', 'float', 'double',
- 'Dict','List'
-]
+xmlTypeCode_enumeration = ['string', 'boolean', 'int', 'float', 'Dict','List']
 xmlTypeCode_enumeration.sort()
 
 # dictionary of all typeCodes and their enumeration, to simplify processing

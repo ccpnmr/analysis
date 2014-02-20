@@ -7,7 +7,7 @@ import types
 
 try:
   IntType = types.IntType
-except:
+except AttributeError:
   IntType = int
 
 import time
@@ -40,10 +40,8 @@ try:
   junk = True
   junk = False
 except NameError:
-  dd = globals()
-  dd['True'] = not 0
-  dd['False'] = not True
-  del dd
+  globals()['True'] = not 0
+  globals()['False'] = not True
 
 xmlTrue = 'true'
 xmlFalse = 'false'
@@ -238,18 +236,18 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
     
     # get tree:
     fp = open(absFilename,'rb')
+    elemtree = ElementTree.parse(fp)
     
-    try:
-      elemtree = ElementTree.parse(fp)
-    except ImportError:
-      from elementtree import SimpleXMLTreeBuilderO
-      fp.close()
-      
-      print('WARNING, standard parser not found - trying alternative parser')
-      
-      fp = open(absFilename,'rb')
-      elemtree = ElementTree.parse(fp,
-                                   parser=SimpleXMLTreeBuilder.TreeBuilder())
+    # try:
+    #   elemtree = ElementTree.parse(fp)
+    # except ImportError:
+    #   from elementtree import SimpleXMLTreeBuilder
+    #   fp.close()
+    #
+    #   print('WARNING, standard parser not found - trying alternative parser')
+    #
+    #   fp = open(absFilename,'rb')
+    #   elemtree = ElementTree.parse(fp, parser=SimpleXMLTreeBuilder.TreeBuilder())
     fp.close()
     
     # process elements
@@ -446,7 +444,7 @@ no href attribute found for %s element
       ii = len(ll)
       modified = False
       while ii > 0:
-        ii = ii - 1
+        ii -= 1
         obj = ll[ii]
         
         container = objMap.get(obj.container)
@@ -841,7 +839,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     if isinstance(metaObj, MetaModel.MetaClass):
       supertypes = metaObj.getAllSupertypes()
     
-      if (self.TopObject in supertypes and not self.DataRoot in supertypes):
+      if self.TopObject in supertypes and not self.DataRoot in supertypes:
         # handle special case - currentTopObject link and its operations
         #  stored on wrong side
  
@@ -990,7 +988,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     """
     
     self.indent -= self.INDENT
-    self.writeOne("</%s>" % (metaObj.__class__.__name__))
+    self.writeOne("</%s>" % metaObj.__class__.__name__)
     
   
   def writePlainXmlElement(self, metaObj, tag):
@@ -1010,10 +1008,9 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     
     if value:
     
-      self.writeOne("<%s>" % (tag))
+      self.writeOne("<%s>" % tag)
     
       self.indent += self.INDENT
-      ind = self.indent * ' '
     
       items = value.items()
       items.sort()
@@ -1032,7 +1029,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
         self.writeOne('<item tag="%s">%s</item>' % (key, val))
         
       self.indent -= self.INDENT
-      self.writeOne("</%s>" % (tag))
+      self.writeOne("</%s>" % tag)
   
   
   def writeList(self, metaObj, tag):
@@ -1043,10 +1040,9 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     
     if value:
     
-      self.writeOne("<%s>" % (tag))
+      self.writeOne("<%s>" % tag)
     
       self.indent += self.INDENT
-      ind = self.indent * ' '
  
       for val in value:
         # write element. NB strings can *not* be indented
@@ -1054,7 +1050,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
                       % (self.toXmlString(metaObj, tag, val)))
  
       self.indent -= self.INDENT
-      self.writeOne("</%s>" % (tag))
+      self.writeOne("</%s>" % tag)
   
   
   def toXmlString(self, metaObj, tag, value=None):

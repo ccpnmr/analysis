@@ -208,7 +208,7 @@ def getPythonDirectory():
   
   func = os.path.dirname
   
-  return func(func(func(func(os.path.abspath(__file__)))))
+  return func(func(func(os.path.abspath(__file__))))
 
 def removePath(path):
   """Removes path whether file or directory, taking into account whether symbolic link.

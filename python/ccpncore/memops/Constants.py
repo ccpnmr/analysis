@@ -57,8 +57,7 @@ software development. Bioinformatics 21, 1678-1684.
 """
 
 # NBNB TBD clear out unneeded
-
-from ccpncore.memops.general import Version
+from ccpncore.memops import Version
 
 
 trueString = 'True'
@@ -82,12 +81,6 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
 
-# Repository tag prefix
-repositoryTagPrefix = 'branch_'
-
-# NB the ''.join() construction is necessary to avoid the string being overwritten on check-in
-emptyRepositoryId = ''.join(('$','I','d',':  $'))
-emptyRepositoryTag = ''.join(('$','N','a','m','e',':  $'))
 
 # Data Type constants    
 
@@ -115,11 +108,11 @@ baseDataTypeModule = __import__(
 # NBNB TBD the codes for 'Dict and List are short-term hacks
 
 # names of jdbc data types.
-jdbcTypeCode_enumeration = [
- 'CLOB', 'VARCHAR', 'BIT', 'INTEGER', 'BIGINT', 'FLOAT', 'DOUBLE', 'TIMESTAMP',
- 'Dict','List'
-]
-jdbcTypeCode_enumeration.sort()
+# jdbcTypeCode_enumeration = [
+#  'CLOB', 'VARCHAR', 'BIT', 'INTEGER', 'BIGINT', 'FLOAT', 'DOUBLE', 'TIMESTAMP',
+#  'Dict','List'
+# ]
+# jdbcTypeCode_enumeration.sort()
 
 # names of java data types. 
 javaTypeCode_enumeration = ['java.lang.Integer','java.lang.Long',

@@ -78,9 +78,9 @@ except NameError:
 import time
 strftime = time.strftime
 
-from memops.general import Constants as genConstants
-from memops.metamodel import ImpConstants
-MemopsError = ImpConstants.MemopsError
+from ccpncore.memops import Constants as memopsConstants
+from ccpncore.memops.metamodel import Constants as metaConstants
+MemopsError = metaConstants.MemopsError
 
 def sortByAttribute(objList, tag):
   """ sorts list of objects on value of obj.tag. Returns new list
@@ -206,7 +206,7 @@ def parseCardinality(cardString):
   
   for tag in cardString.strip().split('..'):
     if tag == '*':
-      result.append(genConstants.infinity)
+      result.append(memopsConstants.infinity)
     else:
       try:
         result.append(int(tag))
@@ -216,8 +216,8 @@ def parseCardinality(cardString):
         )
   
   #
-  if result == [genConstants.infinity]:
-    return 0, genConstants.infinity
+  if result == [memopsConstants.infinity]:
+    return 0, memopsConstants.infinity
   
   elif len(result) == 1:
     return result[0], result[0]
@@ -245,7 +245,7 @@ class SimpleGuidGenerator:
     self.lastTimeStamp = ''
     
     # check for characters not allowed in XML storage
-    for char in ImpConstants.xmlDisallowedChars:
+    for char in metaConstants.xmlDisallowedChars:
       if char in self.operator:
         raise MemopsError(
          "operator %s contains disallowed character %s"
@@ -363,7 +363,7 @@ def getReturnPar(op):
 
   for par in op.parameters:
     
-    if par.direction == ImpConstants.return_direction:
+    if par.direction == metaConstants.return_direction:
       return par
   
   return None
@@ -413,7 +413,7 @@ def coerceToList(params):
   else:
     try:
       params = list(params)
-    except:
+    except TypeError:
       params = [params]
   #
   return params

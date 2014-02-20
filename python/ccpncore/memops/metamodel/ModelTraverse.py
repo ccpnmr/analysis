@@ -10,9 +10,9 @@ variable names, etc.
 Does no output.
 """
 
-from memops.metamodel import ModelTraverse_py_2_1
-from memops.metamodel.ModelPortal import ModelPortal
-from memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import ModelTraverse_py_2_1
+from ccpncore.memops.metamodel.ModelPortal import ModelPortal
+from ccpncore.memops.metamodel import MetaModel
 MemopsError = MetaModel.MemopsError
 
 class ModelTraverse(ModelTraverse_py_2_1.ModelTraverse_py_2_1, object):

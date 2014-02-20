@@ -3,9 +3,6 @@
 NB while ObjectDomain is in use this file must work under Jython (Python 2.1)
 """
 
-repositoryTag = '$Name: not supported by cvs2svn $'
-repositoryId  = '$Id: XmlModelIo.py,v 1.18 2010-06-25 10:10:31 rhfogh Exp $'
-
 import types
 
 try:
@@ -15,30 +12,26 @@ except:
 
 import time
 import os
-import sys
 
-import memops.universal.Io as uniIo
-
-import memops.general.Constants as genConstants
-baseDataTypeModule = genConstants.baseDataTypeModule
-infinity = genConstants.infinity
-
-import memops.general.Util as genUtil
-import memops.universal.Util as uniUtil
-
-from memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import MetaModel
 MemopsError = MetaModel.MemopsError
-from memops.metamodel import ImpConstants
-from memops.metamodel import TaggedValues
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.metamodel import TaggedValues
+from ccpncore.memops.metamodel.ModelPortal import ModelPortal
+from ccpncore.memops.metamodel import ModelTraverse_py_2_1
+from ccpncore.memops import Util as memopsUtil
+from ccpncore.memops import TextWriter_py_2_1
+from ccpncore.memops.Util import ElementTree
+from ccpncore.memops.Util import ElementInclude
 
-from memops.metamodel.ModelPortal import ModelPortal
-from memops.general import TextWriter_py_2_1 
-from memops.metamodel import ModelTraverse_py_2_1 
+from ccpncore.util import Path
 
-from memops.universal.ElementTree import ElementTree
-from memops.universal.ElementTree import ElementInclude
+from ccpncore.memops import Constants as memopsConstants
+baseDataTypeModule = memopsConstants.baseDataTypeModule
+infinity = memopsConstants.infinity
 XINCLUDE_FALLBACK = ElementInclude.XINCLUDE_FALLBACK
 XINCLUDE_INCLUDE = ElementInclude.XINCLUDE_INCLUDE
+
 
 ######################################################################
 # hack for Python 2.1 compatibility  NBNB                            #
@@ -46,7 +39,7 @@ XINCLUDE_INCLUDE = ElementInclude.XINCLUDE_INCLUDE
 try:
   junk = True
   junk = False
-except:
+except NameError:
   dd = globals()
   dd['True'] = not 0
   dd['False'] = not True
@@ -81,12 +74,9 @@ def writeModel(topPackage=None, modelPortal=None, rootFileName=None,
       modelPortal = ModelPortal(topPackage)
       modelPortal.setModelFlavour('language','xmlmodel')
   
-  scriptRevision = genUtil.getRepositoryInfo(repositoryId).get('revision')
-  
   xmlModelGen = XmlModelGen(modelPortal=modelPortal, rootFileName=rootFileName, 
                         rootDirName=rootDirName, releaseVersion=releaseVersion,
-                        scriptName='XmlModelIo', scriptRevision=scriptRevision,
-                        skipImplicit=skipImplicit, **kw)
+                        scriptName='XmlModelIo', skipImplicit=skipImplicit, **kw)
                         
   xmlModelGen.processModel()
 
@@ -107,8 +97,6 @@ def readModel(rootFileName=None, rootDirName=None,
   """
   start = time.time()
   
-  scriptRevision = genUtil.getRepositoryInfo(repositoryId).get('revision')
-  
   # expand included files so you also get containers
   if includePackageNames:
     newIncludes = []
@@ -123,8 +111,7 @@ def readModel(rootFileName=None, rootDirName=None,
   
   xmlModelRead = XmlModelRead(rootFileName=rootFileName,
                               rootDirName=rootDirName, 
-                              scriptName='XmlModelIo', 
-                              scriptRevision=scriptRevision,
+                              scriptName='XmlModelIo',
                               excludePackageNames=excludePackageNames,
                               releaseVersion=None,
                               includePackageNames=includePackageNames, **kw)
@@ -156,7 +143,7 @@ class TempHolder:
 
 class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
 
-  codeDirName = genConstants.xmlCodeDir
+  codeDirName = memopsConstants.xmlCodeDir
   classNameMapping = {}
   for clazz in MetaModel.nonAbstractClasses:
     classNameMapping[clazz.__name__] = clazz
@@ -185,10 +172,10 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
     
     # special parameters: optional with default values
     if self.rootFileName is None:
-      self.rootFileName = ImpConstants.rootPackageDirName
+      self.rootFileName = metaConstants.rootPackageDirName
     
     if self.rootDirName is None:
-      self.rootDirName = uniIo.getTopDirectory()
+      self.rootDirName = Path.getTopDirectory()
     
     # process self.includePackageNames, including container names
     inclNames = self.includePackageNames
@@ -217,7 +204,7 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
     self.delayedLoadData = []
     
     # make dummy top object and use to get appropriate file name
-    dummy = MetaModel.MetaPackage(name=ImpConstants.rootPackageName,
+    dummy = MetaModel.MetaPackage(name=metaConstants.rootPackageName,
     guid='www.ccpn.ac.uk_RasmusFogh_2006-06-21-19:13:29_00000',
      taggedValues={'packageGroup':TaggedValues.defaultPackageGroup}
     )
@@ -255,7 +242,7 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
     try:
       elemtree = ElementTree.parse(fp)
     except ImportError:
-      from elementtree import SimpleXMLTreeBuilder
+      from elementtree import SimpleXMLTreeBuilderO
       fp.close()
       
       print('WARNING, standard parser not found - trying alternative parser')
@@ -569,7 +556,7 @@ no href attribute found for %s element
           if typeCode == 'Boolean':
             fromString = str2bool
           else:
-            fromString = getattr(genConstants.baseDataTypeModule,
+            fromString = getattr(memopsConstants.baseDataTypeModule,
                                  typeCode).fromString
           
           # convert values
@@ -592,7 +579,7 @@ no href attribute found for %s element
 class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1, 
                   ModelTraverse_py_2_1.ModelTraverse_py_2_1):
 
-  codeDirName = genConstants.xmlCodeDir
+  codeDirName = memopsConstants.xmlCodeDir
   
   _xmlSpecialTags = ('name', 'guid', 'container', 'documentation')
  
@@ -609,7 +596,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
         setattr(self, tag, val)
     
     # TopObject and DataRoot for us below
-    ic = ImpConstants
+    ic = metaConstants
     Impl = self.modelPortal.metaObjFromQualName('.'.join(
      [ic.modellingPackageName,ic.implementationPackageName]
     ))
@@ -629,9 +616,9 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     
     # special parameters: optional with default values
     if self.rootFileName is None:
-      self.rootFileName = ImpConstants.rootPackageDirName
+      self.rootFileName = metaConstants.rootPackageDirName
     if self.rootDirName is None:
-      self.rootDirName = uniIo.getTopDirectory()
+      self.rootDirName = Path.getTopDirectory()
     
     if self.skipImplicit is None:
       self.skipImplicit = True
@@ -666,47 +653,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     elif hasattr(self.modelPortal, 'varNames'):
       self.varNames = self.modelPortal.varNames
       self.operationData = self.modelPortal.operationData
-    
-    # make repositoryTag and repositoryId dictionary
-    # for every qualifiedName get previous repository ID information
-    # In this way you can use the previous info for newly generated models
-    self.oldRepData = oldRepData = {}
-    try:
-      dd = kw.copy()
-      del dd['scriptName']
-      del dd['scriptRevision']
-      del dd['releaseVersion']
-      oldTop = readModel(checkValidity=False, **dd)
-      oldPackages = [oldTop]
-      while oldPackages:
-        package = oldPackages.pop()
-        pName = package.qualifiedName()
-        
-        # set dict entry
-        ff = package._MetaModelElement__dataDict['taggedValues'].get
-        x1, x2 = ff('repositoryId'), ff('repositoryTag')
-        if x1 or x2:
-          oldRepData[pName] = (x1, x2)
-        
-        ll = package.containedPackages
-        if ll:
-          # add contained packages to loop
-          oldPackages.extend(ll)
-          
-        else:
-          # set dict entries for contents
-          for tag in ('dataTypes', 'constants', 'exceptions','dataObjTypes',
-                      'classes'):
-            for metaObj in getattr(package, tag):
-              ff = metaObj._MetaModelElement__dataDict['taggedValues'].get
-              x1, x2 = ff('repositoryId'), ff('repositoryTag')
-              
-              if x1 or x2:
-                ss = '%s.%s' % (pName, metaObj.name)
-                oldRepData[ss] = (x1,x2)
-    except:
-      print('WARNING - import of XML reader failed')
-      pass
+
     
     # set xml tag lists
     self._xmlInfo = {
@@ -968,17 +915,6 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
  
   def startXmlFile(self, obj):
     
-    # first set tagged values for repositoryId and repositoryTag
-    ff = obj._MetaModelElement__dataDict['taggedValues'].get
-    if not ff('repositoryId') or not ff('repositoryTag'):
-      tt = self.oldRepData.get(obj.qualifiedName())
-      if tt is None:
-        obj.addTaggedValue('repositoryId', genConstants.emptyRepositoryId)
-        obj.addTaggedValue('repositoryTag', genConstants.emptyRepositoryTag)
-      else:
-        obj.addTaggedValue('repositoryId', tt[0])
-        obj.addTaggedValue('repositoryTag', tt[1])
-    
     # do actual work
     self.openFile(self.getObjFileName(obj))
     
@@ -1030,7 +966,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
       val = self.toXmlString(metaObj, tag)
       if val:
         strings.append(' %s="%s"' % (tag, val))
-    strings = uniUtil.compactStringList(strings, maxChars=80-self.indent)
+    strings = memopsUtil.compactStringList(strings, maxChars=80-self.indent)
     
     # then write lines to file
     for ss in strings:
@@ -1151,7 +1087,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
       if typeCode == 'Boolean':
         result = value and xmlTrue or xmlFalse
       else:
-        toString = getattr(genConstants.baseDataTypeModule,typeCode).toString
+        toString = getattr(memopsConstants.baseDataTypeModule,typeCode).toString
         result = toString(value)
     
     else:

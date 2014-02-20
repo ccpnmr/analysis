@@ -2,11 +2,11 @@
 All functions (except for __init__) are queries on the model
 """
 
-from memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.metamodel import Util as metaUtil
+from ccpncore.memops import Constants as memopsConstants
 MemopsError = MetaModel.MemopsError
-from memops.metamodel import ImpConstants
-from memops.metamodel import Util as metaUtil
-from memops.general import Constants as genConstants
 
 ######################################################################
 # hack for Python 2.1 compatibility  NBNB                            #
@@ -14,7 +14,7 @@ from memops.general import Constants as genConstants
 try:
   junk = True
   junk = False
-except:
+except NameError:
   dd = globals()
   dd['True'] = not 0
   dd['False'] = not True
@@ -31,7 +31,7 @@ class ModelPortal:
     
     # set data model version
     if dataModelVersion is None:
-      self.dataModelVersion = genConstants.currentModelVersion
+      self.dataModelVersion = memopsConstants.currentModelVersion
     else:
       self.dataModelVersion = dataModelVersion
     
@@ -246,7 +246,7 @@ class ModelPortal:
     if isinstance(complexDataType, MetaModel.MetaClass):
       for role in complexDataType.getAllRoles():
         if (not role.isDerived and not role.isImplementation and not role.isAutomatic
-            and role.locard > 0 and (role.hierarchy == ImpConstants.no_hierarchy)):
+            and role.locard > 0 and (role.hierarchy == metaConstants.no_hierarchy)):
           elems.append(role)
     
     return metaUtil.sortByAttribute(elems,'name')
@@ -272,7 +272,7 @@ class ModelPortal:
     flav = flavours.get(key)
     if flav is not None and flav != val:
       raise MemopsError(
-       "attempt to change model flavour from %s:%s to :%s" % (flav,val,)
+       "attempt to change model flavour from %s:%s to :%s" % (key,flav,val,)
       )
     else:
       flavours[key] = val

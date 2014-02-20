@@ -2,9 +2,8 @@
     NB must be usable in Python 2.1
 """
 
-from memops.universal import Util as uniUtil
-from memops.metamodel import ImpConstants
-from memops.general import Constants as genConstants
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops import Constants as memopsConstants
 
 ######################################################################
 # hack for Python 2.1 compatibility  NBNB                            #
@@ -148,7 +147,7 @@ operationData = {
  'getByKey':{
  'group':'query',
  'targetTag':'container',
- 'scope':ImpConstants.classifier_level,
+ 'scope':metaConstants.classifier_level,
  },
  'getFullKey':{
  'group':'query',
@@ -197,7 +196,7 @@ operationData['get']['subOps'] = {
   # 'taggedValues':{'key:'value', 'key:'value'}
   # 'opDocTemplate':"some text %s other text",
   'parameters':[
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
     'useCollection':True,
     # 'parDocumentation':"some text, maybe with %(value)s formatting"
     #                     #making use of the self.varNames dictionary
@@ -213,11 +212,11 @@ operationData['get']['subOps'] = {
 operationData['findFirst']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'conditions', 'direction':ImpConstants.in_direction,
+   {'name':'conditions', 'direction':metaConstants.in_direction,
     'target':'memops.Implementation.StringKeyDict',
     'taggedValues':{'isSubdivided':'True'},
    },
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
     'parDocumentation':"the first %(value)s that satisfies the %(conditions)s ",
    },
   ],
@@ -227,11 +226,11 @@ operationData['findFirst']['subOps'] = {
 operationData['findAll']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'conditions', 'direction':ImpConstants.in_direction,
+   {'name':'conditions', 'direction':metaConstants.in_direction,
     'target':'memops.Implementation.StringKeyDict',
     'taggedValues':{'isSubdivided':'True'},
    },
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
     'parDocumentation':"all %(value)s that satisfy the %(conditions)s ",
     'locard':0, 'useCollection':True,
    },
@@ -243,9 +242,9 @@ operationData['findAll']['subOps'] = {
 operationData['sorted']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
     'isOrdered':True, 'isUnique':True, 
-    'locard':0, 'hicard':genConstants.infinity,
+    'locard':0, 'hicard':memopsConstants.infinity,
    },
   ],
  },
@@ -255,7 +254,7 @@ operationData['sorted']['subOps'] = {
 operationData['set']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'value', 'direction':ImpConstants.in_direction,
+   {'name':'value', 'direction':metaConstants.in_direction,
     'useCollection':True,
     'parDocumentation':"the %(value)s(s) to set",
    },
@@ -267,7 +266,7 @@ operationData['set']['subOps'] = {
 operationData['add']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'value', 'direction':ImpConstants.in_direction,
+   {'name':'value', 'direction':metaConstants.in_direction,
     'parDocumentation':"the %(value)s to add",},
   ],
  },
@@ -277,7 +276,7 @@ operationData['add']['subOps'] = {
 operationData['remove']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'value', 'direction':ImpConstants.in_direction,
+   {'name':'value', 'direction':metaConstants.in_direction,
     'parDocumentation':"the %(value)s to remove",},
   ],
  },
@@ -288,12 +287,12 @@ operationData['new']['subOps'] = {
  None:{
   'opDocTemplate':'Factory function to create %s',
   'parameters':[
-   {'name':'attrlinks', 'direction':ImpConstants.in_direction,
+   {'name':'attrlinks', 'direction':metaConstants.in_direction,
     'target':'memops.Implementation.StringKeyDict',
     'taggedValues':{'isSubdivided':'True'},
     'parDocumentation':"the attribute and link parameters",
    },
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
     'parDocumentation':"the new object",
    }
   ],
@@ -305,14 +304,14 @@ operationData['init']['subOps'] = {
  None:{
   'opDocTemplate':'Constructor for %s',
   'parameters':[
-   {'name':'parent', 'direction':ImpConstants.in_direction,
+   {'name':'parent', 'direction':metaConstants.in_direction,
     'parDocumentation':"the parent object",},
-   {'name':'attrlinks', 'direction':ImpConstants.in_direction,
+   {'name':'attrlinks', 'direction':metaConstants.in_direction,
     'target':'memops.Implementation.StringKeyDict',
     'taggedValues':{'isSubdivided':'True'},
     'parDocumentation':"the attribute and link parameters",
    },
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
     'parDocumentation':"the new object",
    }
   ],
@@ -324,12 +323,12 @@ operationData['clone']['subOps'] = {
  None:{
   'opDocTemplate':'Clone function for %s',
   'parameters':[
-   {'name':'attrDict', 'direction':ImpConstants.in_direction,
+   {'name':'attrDict', 'direction':metaConstants.in_direction,
     'target':'memops.Implementation.StringKeyDict',
     'taggedValues':{'isSubdivided':'True'},
     'parDocumentation':"the attribute parameters",
    },
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
     'parDocumentation':"the new object clone",
    }
   ],
@@ -340,7 +339,7 @@ operationData['clone']['subOps'] = {
 operationData['checkValid']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'complete', 'direction':ImpConstants.in_direction,
+   {'name':'complete', 'direction':metaConstants.in_direction,
      'parDocumentation':"whether to do a complete but slow check",
      'target':'memops.Implementation.Boolean',
      'defaultValue':False
@@ -353,7 +352,7 @@ operationData['checkValid']['subOps'] = {
 operationData['checkAllValid']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'complete', 'direction':ImpConstants.in_direction,
+   {'name':'complete', 'direction':metaConstants.in_direction,
      'parDocumentation':"whether to do a complete but slow check",
      'target':'memops.Implementation.Boolean',
      'defaultValue':False
@@ -366,11 +365,11 @@ operationData['checkAllValid']['subOps'] = {
 operationData['getAttr']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'name', 'direction':ImpConstants.in_direction,
+   {'name':'name', 'direction':metaConstants.in_direction,
     'parDocumentation':"the attribute or link name",
     'target':'memops.Implementation.String',
    },
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
     'parDocumentation':"get attribute or link by name",
     'target':'memops.Implementation.Any',
    },
@@ -382,11 +381,11 @@ operationData['getAttr']['subOps'] = {
 operationData['setAttr']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'name', 'direction':ImpConstants.in_direction,
+   {'name':'name', 'direction':metaConstants.in_direction,
     'parDocumentation':"the attribute or link name",
     'target':'memops.Implementation.String',
    },
-   {'name':'value', 'direction':ImpConstants.in_direction,
+   {'name':'value', 'direction':metaConstants.in_direction,
     'parDocumentation':"value to set attribute or link to",
     'target':'memops.Implementation.Any',
    },
@@ -398,14 +397,14 @@ operationData['setAttr']['subOps'] = {
 operationData['getFullKey']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'useGuid', 'direction':ImpConstants.in_direction,
+   {'name':'useGuid', 'direction':metaConstants.in_direction,
      'parDocumentation':"whether to use guid instead of key for TopObject.",
      'target':'memops.Implementation.Boolean', 
      'defaultValue':False
     },
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
      'parDocumentation':"list containing full object key",
-     'target':'memops.Implementation.Any', 'hicard':genConstants.infinity,  
+     'target':'memops.Implementation.Any', 'hicard':memopsConstants.infinity,
      'locard':0, 'isOrdered':True, 'isUnique':False,
     },
    ],
@@ -416,7 +415,7 @@ operationData['getFullKey']['subOps'] = {
 operationData['getLocalKey']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
      'parDocumentation':"Local object key",
      'target':'memops.Implementation.Any', 
     },
@@ -428,16 +427,16 @@ operationData['getLocalKey']['subOps'] = {
 operationData['getByKey']['subOps'] = {
  None:{
   'parameters':[
-   {'name':'startObj', 'direction':ImpConstants.in_direction,
+   {'name':'startObj', 'direction':metaConstants.in_direction,
      'parDocumentation':"TopObject that is the start of the search",
      'target':'memops.Implementation.MemopsObject',
     },
-   {'name':'fullKey', 'direction':ImpConstants.in_direction,
+   {'name':'fullKey', 'direction':metaConstants.in_direction,
      'parDocumentation':"list containing full object key",
-     'target':'memops.Implementation.Any', 'hicard':genConstants.infinity, 
+     'target':'memops.Implementation.Any', 'hicard':memopsConstants.infinity,
      'locard':0, 'isOrdered':True, 'isUnique':False,
     },
-   {'name':'result', 'direction':ImpConstants.return_direction,
+   {'name':'result', 'direction':metaConstants.return_direction,
      'parDocumentation':"object corresponding to key",
     },
    ],
@@ -456,10 +455,10 @@ operationData['singleDelete']['subOps'] = {
   '''singleDelete for %s:   deletes objects
 *Implementation function* - will CORRUPT DATA if called outside the API delete function.''',
   'parameters':[
-   {'name':'objsToBeDeleted', 'direction':ImpConstants.in_direction,
+   {'name':'objsToBeDeleted', 'direction':metaConstants.in_direction,
     'parDocumentation':"Set of objects to be deleted",
     'target':'memops.Implementation.MemopsObject',
-    'hicard':genConstants.infinity, 'locard':0,
+    'hicard':memopsConstants.infinity, 'locard':0,
     'isOrdered':False, 'isUnique':True,
    },
   ],
@@ -474,20 +473,20 @@ operationData['checkDelete']['subOps'] = {
    determines cascading deletes to follow from delete of object.
    *Implementation function* - should be called only by API delete function.''',
   'parameters':[
-   {'name':'objsToBeDeleted', 'direction':ImpConstants.in_direction,
+   {'name':'objsToBeDeleted', 'direction':metaConstants.in_direction,
     'parDocumentation':"Set of objects to be deleted (input/ouput)",
     'target':'memops.Implementation.MemopsObject',
-    'hicard':genConstants.infinity, 'locard':0,
+    'hicard':memopsConstants.infinity, 'locard':0,
     'isOrdered':False, 'isUnique':True,
    },
-   {'name':'objsToBeChecked', 'direction':ImpConstants.in_direction,
+   {'name':'objsToBeChecked', 'direction':metaConstants.in_direction,
     'parDocumentation':
     "List of objects to be checked for deletion (input/ouput)",
     'target':'memops.Implementation.MemopsObject',
-    'hicard':genConstants.infinity, 'locard':0,
+    'hicard':memopsConstants.infinity, 'locard':0,
     'isOrdered':True, 'isUnique':False,
    },
-   {'name':'linkCounter', 'direction':ImpConstants.in_direction,
+   {'name':'linkCounter', 'direction':metaConstants.in_direction,
     'parDocumentation':
     "Dictionary to track links with locard checks (input/output)",
     'target':'memops.Implementation.Dict',
@@ -568,7 +567,8 @@ def getTarget(metaOp, opData=None):
       
     else:
       # target is a ClassElement
-      targetName = uniUtil.lowerFirst(masterOp.name[len(prefix):])
+      ss = masterOp.name[len(prefix):]
+      targetName = ss[0].lower() + ss[1:]
       if infoDict.get('useCollection'):
         result = metaOp.container.getElement(targetName)
         

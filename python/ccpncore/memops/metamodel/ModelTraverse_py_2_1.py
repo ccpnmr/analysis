@@ -10,12 +10,10 @@ variable names, etc.
 Does no output.
 """
 
-from memops.universal import Util as uniUtil
-from memops.metamodel import MetaModel
-from memops.metamodel import Util as metaUtil
+from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import Util as metaUtil
+from ccpncore.memops.metamodel import Constants as metaConstants
 MemopsError = MetaModel.MemopsError
-from memops.metamodel import ImpConstants
-from memops.metamodel.ModelPortal import ModelPortal
 
 ######################################################################
 # hack for Python 2.1 compatibility  NBNB                            #
@@ -23,7 +21,7 @@ from memops.metamodel.ModelPortal import ModelPortal
 try:
   junk = True
   junk = False
-except:
+except NameError:
   dd = globals()
   dd['True'] = not 0
   dd['False'] = not True
@@ -35,20 +33,23 @@ class ModelTraverse_py_2_1:
   """ Tools for traversing a model - loops and calls empty functions
   Also model query functions that may need overriding elsewhere.
   """
+
+  # Dummy value - modelPortal is set in subclasses
+  modelPortal = None
     
   # set some general info
   # special metaClasses and metaPackages
-  implPackageName = '%s.%s' % (ImpConstants.modellingPackageName,
-                               ImpConstants.implementationPackageName)
-  dataRootName = '%s.%s' % (implPackageName, ImpConstants.dataRootName)
-  baseClassName = '%s.%s' % (implPackageName, ImpConstants.baseClassName)
-  rootClassName = '%s.%s' % (implPackageName, ImpConstants.rootClassName)
+  implPackageName = '%s.%s' % (metaConstants.modellingPackageName,
+                               metaConstants.implementationPackageName)
+  dataRootName = '%s.%s' % (implPackageName, metaConstants.dataRootName)
+  baseClassName = '%s.%s' % (implPackageName, metaConstants.baseClassName)
+  rootClassName = '%s.%s' % (implPackageName, metaConstants.rootClassName)
   baseDataTypeObjName = '%s.%s' % (implPackageName, 
-                                   ImpConstants.baseDataTypeObjName)
-  topObjClassName = '%s.%s' % (implPackageName, ImpConstants.topObjClassName)
-  dataObjClassName = '%s.%s' % (implPackageName, ImpConstants.dataObjClassName)
+                                   metaConstants.baseDataTypeObjName)
+  topObjClassName = '%s.%s' % (implPackageName, metaConstants.topObjClassName)
+  dataObjClassName = '%s.%s' % (implPackageName, metaConstants.dataObjClassName)
   implObjClassName = '%s.%s' % (implPackageName, 
-                              ImpConstants.implObjClassName)
+                              metaConstants.implObjClassName)
     
   ###########################################################################
   
@@ -76,13 +77,13 @@ class ModelTraverse_py_2_1:
     # Normally we rely on topObjClassName etc. but in this file only
     # this kind of attribute is needed
     self.implPackage = impl = pp.metaObjFromQualName(self.implPackageName)
-    self.topObject = impl.getElement(ImpConstants.topObjClassName)
-    self.dataRoot = impl.getElement(ImpConstants.dataRootName)
-    self.rootClass = impl.getElement(ImpConstants.rootClassName)
-    self.baseClass = impl.getElement(ImpConstants.baseClassName)
-    self.dataObject = impl.getElement(ImpConstants.dataObjClassName)
-    self.implObject = impl.getElement(ImpConstants.implObjClassName)
-    self.baseDataType = impl.getElement(ImpConstants.baseDataTypeObjName)
+    self.topObject = impl.getElement(metaConstants.topObjClassName)
+    self.dataRoot = impl.getElement(metaConstants.dataRootName)
+    self.rootClass = impl.getElement(metaConstants.rootClassName)
+    self.baseClass = impl.getElement(metaConstants.baseClassName)
+    self.dataObject = impl.getElement(metaConstants.dataObjClassName)
+    self.implObject = impl.getElement(metaConstants.implObjClassName)
+    self.baseDataType = impl.getElement(metaConstants.baseDataTypeObjName)
     self.anyObject = impl.getElement('Any')
     
     # branch packages
@@ -383,11 +384,11 @@ class ModelTraverse_py_2_1:
   def valueVar(self, element, doInstance=False, prefix=''):
 
     var = self.varNames['value']
-    if (not doInstance and element.hicard != 1):
+    if not doInstance and element.hicard != 1:
       var = self.varNames['values']
 
     if prefix:
-      var = prefix + uniUtil.upperFirst(var)
+      var = prefix + var[0].upper() + var[1:]
 
     return var
 
@@ -421,7 +422,7 @@ class ModelTraverse_py_2_1:
         
     if oo is self.modelPortal.topPackage:
       # root package - special case - use memops package instead
-      oo = oo.getElement(ImpConstants.modellingPackageName)
+      oo = oo.getElement(metaConstants.modellingPackageName)
       
         
     return metaUtil.getReferenceName(oo, pp, subDirs=subDirs)
@@ -490,16 +491,17 @@ class ModelTraverse_py_2_1:
     # NB, MemopsRoot is partitioning so we always get one
     sentinel = -min(len(classes[0]), len(classes[1]))
     ii = -1
+    indexcc = 0
     while ii >= sentinel:
       cc = classes[0][ii]
       if cc is classes[1][ii]:
         if cc.partitionsChildren:
           indexcc = ii
-        ii = ii - 1
+        ii -= 1
       else:
         break
 
-    # get lists of non-shared parents
+    # get lists of non-shared parents. NB indexcc is negative
     separate = (classes[0][:indexcc], classes[1][:indexcc])
 
     # find partitioning links, if any
@@ -510,20 +512,18 @@ class ModelTraverse_py_2_1:
       spz = separate[1-ic]
       for ii in range(len(spx)):
         cc = spx[ii]
-        found = False
         for role in cc.getAllRoles():
           if role.partitionsChildren:
             valueType = role.valueType
             for jj in range(len(spz)):
               cc2 = spz[jj]
               if valueType in cc2.getAllSupertypes():
-                if (indices[ic][0] == ii and indices[ic][1] == jj):
+                if indices[ic][0] == ii and indices[ic][1] == jj:
                   raise MemopsError(
                    "Partitioning roles %s and %s incompatible for %s"
                    % (partitionRoles[ic], role, inputRole)
                   )
                 else:
-                  found = True
                   indices[ic][0] = ii
                   indices[ic][1] = jj
                   partitionRoles[ic] = role
@@ -539,7 +539,7 @@ class ModelTraverse_py_2_1:
             break
       else:
         continue
-      break
+      # break
      
     # select partitioning link, get both roles, and further check compatibility
     if partitionRoles[0] is None and partitionRoles[1] is None:
@@ -568,7 +568,7 @@ class ModelTraverse_py_2_1:
       
     else:
       raise MemopsError("Partitioning roles %s and %s are incompatible"
-                        % (partitionRoles[0], partitionRole[1]))
+                        % (partitionRoles[0], partitionRoles[1]))
     
     # set uplinks lists
     result = ([],partitionRoles)

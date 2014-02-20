@@ -1,5 +1,5 @@
 
-from ccpncore.memops.general.Constants import trueString
+from ccpncore.memops.Constants import trueString
 
 # used for packages with no packageGroup defined
 defaultPackageGroup = 'core'
@@ -13,8 +13,8 @@ allowedTags = {
   'specificImplementation':('db','file'),
  },
  'AbstractDataType':{
-  'repositoryId':None,
-  'repositoryTag':None,
+  # 'repositoryId':None,
+  # 'repositoryTag':None,
  },
  'MetaDataObjType':{
  },
@@ -35,8 +35,8 @@ allowedTags = {
  'MetaPackage':{
   'docDiagramNames':None,
   'packageGroup':('nmr','pp',defaultPackageGroup),
-  'repositoryId':None,
-  'repositoryTag':None,
+  # 'repositoryId':None,
+  # 'repositoryTag':None,
   'isDraft':(trueString,), # NBNB TODO do we need this?
   'isReferenceData':(trueString,), # NBNB TODO do we need this?
  },
@@ -54,11 +54,11 @@ allowedTags = {
  'MetaConstraint':{
  },
  'MetaConstant':{
-  'repositoryId':None,
-  'repositoryTag':None,
+  # 'repositoryId':None,
+  # 'repositoryTag':None,
  },
  'MetaException':{
-  'repositoryId':None,
-  'repositoryTag':None,
+  # 'repositoryId':None,
+  # 'repositoryTag':None,
  }
 } 

@@ -1,3 +1,5 @@
+"""NB Must conform to PYthon 2.1. Imporetd in ObjectDomain.
+"""
 __author__ = 'rhf22'
 
 import types
@@ -24,6 +26,17 @@ except ImportError:
   # effbot's pure Python module. Python 2.1. In ObjectDomain only
   from elementtree import ElementInclude
 
+
+
+def upperFirst(s):
+  """uppercase first letter
+  """
+  return s[0].upper() + s[1:]
+
+def lowerFirst(s):
+  """lowercase first letter
+  """
+  return s[0].lower() + s[1:]
 
 
 def semideepcopy(dd, doneDict=None):

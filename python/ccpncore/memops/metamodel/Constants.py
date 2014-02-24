@@ -100,7 +100,6 @@ guid_attribute = 'guid'
 rootPackageDirName = 'RootPackage'
 modellingPackageName = 'memops'
 implementationPackageName = 'Implementation'
-accessControlPackageName = 'AccessControl'
 rootPackageName = 'Root'
 
 dataRootName = 'MemopsRoot'

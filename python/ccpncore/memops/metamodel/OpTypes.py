@@ -509,7 +509,7 @@ def getTarget(metaOp, opData=None):
   - for ClassElement and ChildClass targets assumes names of the form 
     prefixElementname_somesubtypesuffix
   """
-  from memops.metamodel.MetaModel import MemopsError
+  from ccpncore.memops.metamodel.MetaModel import MemopsError
  
   # set up
   opType = metaOp.opType

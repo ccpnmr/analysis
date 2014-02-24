@@ -184,7 +184,7 @@ def dataObjTypeDependencies(obj, tag):
   For use in topologicalSortSubgraph
   """
   
-  from memops.metamodel.MetaModel import MetaDataObjType
+  from ccpncore.memops.metamodel.MetaModel import MetaDataObjType
   
   if not isinstance(obj, MetaDataObjType):
     raise MemopsError(

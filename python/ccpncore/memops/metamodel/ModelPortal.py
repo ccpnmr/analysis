@@ -5,7 +5,7 @@ All functions (except for __init__) are queries on the model
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import Util as metaUtil
-from ccpncore.memops import Constants as memopsConstants
+from ccpncore.memops.Version import currentModelVersion
 MemopsError = MetaModel.MemopsError
 
 ######################################################################
@@ -31,7 +31,7 @@ class ModelPortal:
     
     # set data model version
     if dataModelVersion is None:
-      self.dataModelVersion = memopsConstants.currentModelVersion
+      self.dataModelVersion = currentModelVersion
     else:
       self.dataModelVersion = dataModelVersion
     

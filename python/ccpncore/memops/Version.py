@@ -55,7 +55,7 @@ software development. Bioinformatics 21, 1678-1684.
 
 import time
 import os
-import functools
+# import functools
 
 # Maps memops.general.Constants modelVersion to repository location
 # Used with function getRepositoryDir below - see there for usage.
@@ -92,7 +92,7 @@ cvsWorkingDir = 'ccpn'
 
 svnWorkingDir = 'work'
 
-@functools.total_ordering
+# @functools.total_ordering
 class Version:
 
   def __init__(self, major=0, minor=0, level='', release=0, 
@@ -124,12 +124,43 @@ class Version:
               (other.major, other.minor, other.level or '~~~', other.relese))
     else:
       return id(self) < id(other)
+
+  def __gt__(self, other):
+
+    if self.__class__ is other.__class__:
+      # NBNB the 'self.level or "~~~"' is to make empty strings compare highest
+      return ((self.major, self.minor, self.level or '~~~', self.relese) >
+              (other.major, other.minor, other.level or '~~~', other.relese))
+    else:
+      return id(self) > id(other)
+
+
+  def __ge__(self, other):
+    return self == other or self > other
+
+
+  def __le__(self, other):
+    return self == other or self < other
+
+
+  def __cmp__(self, other):
+    return (self > other) - (self < other)
     
     
   def __hash__(self):
     return hash(('__!@#$%%memops.general.Version.Version', 
                  self.major, self.minor, self.level, self.release))
   
+
+
+# Current version of data model.
+# Used by generation scripts to mark generated code.
+# Main way of tracking IO code and IO mappings for compatibility.
+# Incremented by hand when model (or I/O generators) changes
+currentModelVersion = Version(3, 0, 'a', 1,'', 'DataModel')
+
+
+
 #versionDict = {}
 #for key in versionTupleDict.keys():
 #  versionDict[key] = Version(name=key, *versionTupleDict[key])

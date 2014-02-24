@@ -130,9 +130,7 @@ Packages:
   currently called RootPackage (the name is set in ImpConstants). The name of
   this package is omitted in qualified package names.
   Package memops.Implementation (name may change in later versions), is reserved
-  for the implementation, and must be imported by all other packages. 
-  Similarly memops.AccessControl must eb imported by all packages except
-  itself and Implementation.
+  for the implementation, and must be imported by all other packages.
   
   Packages are linked to each other through the following relationships:
 
@@ -151,9 +149,7 @@ Packages:
    be used in most ways at the Code level. The only exception is that a class
    cannot have subclasses in another package if it is non-abstract or involved
    in a link. Abstract, derived, and implementation links are exempt from this
-   rule. There is one exception to this: The link between
-   AccessControl.AccessObject and Implementation.DataObject is specifically
-   allowed, at the cost of adding some special hacks to the code generation.
+   rule.
 
    If package A imports package B, B is in A.importedPackages, and  A is in
    B.accessedPackages. Links that cross package boundaries must be navigable
@@ -348,8 +344,7 @@ For languages that do not allow multiple inheritance (possibly for all
  subclasses before code generation starts.
   
  - Superclasses involved in links can not have subclasses in other packages, 
-  unless the links are abstract, derived, implementation, or the specific
-  link between AccessControl.AccessObject and Implementation.DataObject.
+  unless the links are abstract, derived, or implementation,
  
  - Non-abstract MetaDataObjTypes may not have subtypes in other packages. 
   
@@ -2463,14 +2458,9 @@ class MetaPackage(MetaModelElement):
         "No package %s found" % metaConstants.modellingPackageName)
 
     Impl = ModellingPackage.getElement(metaConstants.implementationPackageName)
-    AccessControl = ModellingPackage.getElement(
-      metaConstants.accessControlPackageName)
 
     if not isinstance(Impl, MetaPackage):
       raise MemopsError("No Implementation package found")
-
-    if not isinstance(AccessControl, MetaPackage):
-      raise MemopsError("No AccessControl package found")
 
     if self is Impl:
       if self._MetaModelElement__dataDict['importedPackages']:
@@ -2562,9 +2552,6 @@ class MetaPackage(MetaModelElement):
         if Impl not in ll:
           raise MemopsError(
             "package %s does not import the Implementation package" % self)
-        if self is not AccessControl and AccessControl not in ll:
-          raise MemopsError(
-            "package %s does not import the AccessControl package" % self)
 
       # name style check:
       if self.name[0] not in metaConstants.uppercase:

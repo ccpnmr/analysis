@@ -2,12 +2,13 @@ ObjectDomain_Model 15
 {-ay8ldh_-8xx_co4lxoon_-p8v 0
 }[objectdomain.uml.mechanisms.UmlPackage-owns $4
 objectdomain.uml.view.style.BaseViewElementStyle-owns $9
+objectdomain.uml.view.DependencyView-owns $11
 objectdomain.uml.core.UmlTaggedValue-taggedValues $5
 objectdomain.uml.view.Diagram-owns $3
 objectdomain.domain.ModelEnvironment-owns $2
 objectdomain.uml.mechanisms.StylePackage-owns $8
 objectdomain.uml.mechanisms.StereotypePackage-owns $6
-objectdomain.domain.DomainLockObject $11
+objectdomain.domain.DomainLockObject $12
 objectdomain.uml.core.UmlClassifier-owns $10
 objectdomain.uml.mechanisms.UmlModel-models $1
 objectdomain.uml.core.Stereotype-owns $7
@@ -19,237 +20,237 @@ objectdomain.uml.core.Stereotype-owns $7
 (uid "-ay8ldh_-8xx_co4lxoon_-p8v"))
 ($2 2 < 0_-fvi_hrnjywg5_-cb0 "ModelEnvironment" 1
 (uid "0_-fvi_hrnjywg5_-cb0"))
-($4 64 < -yk94ms_-e3s_e41656c6_-p97 "Logical" 1
+($4 67 < -yk94ms_-e3s_e41656c6_-p97 "Logical" 1
 (name "Logical"
 )
 (namespaceRoot true)
 (uid "-yk94ms_-e3s_e41656c6_-p97"))
-($5 65 < -yk94ms_-e3s_e41656c6_-fxg "Rose::global" 64
+($5 68 < -yk94ms_-e3s_e41656c6_-fxg "Rose::global" 67
 (name "Rose::global"
 )
 (value "TRUE"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fxg"))
-($4 66 < -yk94ms_-e3s_e41656c6_-fv3 "Deployment" 1
+($4 69 < -yk94ms_-e3s_e41656c6_-fv3 "Deployment" 1
 (name "Deployment"
 )
 (namespaceRoot true)
 (uid "-yk94ms_-e3s_e41656c6_-fv3"))
-($3 67 < -yk94ms_-e3s_e41656c6_-fv2 "Deployment View" 66
+($3 70 < -yk94ms_-e3s_e41656c6_-fv2 "Deployment View" 69
 (name "Deployment View"
 )
 (width 6480)
 (uid "-yk94ms_-e3s_e41656c6_-fv2")
 (height 8505)
 (diagramType "deployment"))
-($4 68 < -yk94ms_-e3s_e41656c6_-fvc "Component" 1
+($4 71 < -yk94ms_-e3s_e41656c6_-fvc "Component" 1
 (name "Component"
 )
 (namespaceRoot true)
 (uid "-yk94ms_-e3s_e41656c6_-fvc"))
-($3 69 < -yk94ms_-e3s_e41656c6_-fv6 "Main" 68
+($3 72 < -yk94ms_-e3s_e41656c6_-fv6 "Main" 71
 (name "Main"
 )
 (width 6480)
 (uid "-yk94ms_-e3s_e41656c6_-fv6")
 (height 8505)
 (diagramType "component"))
-($4 70 < -yk94ms_-e3s_e41656c6_-fvb "Abstract Logical Model" 68
+($4 73 < -yk94ms_-e3s_e41656c6_-fvb "Abstract Logical Model" 71
 (name "Abstract Logical Model"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fvb"))
-($6 71 < -yk94ms_-e3s_e41656c6_-fxf "stereotypes" 1
+($6 74 < -yk94ms_-e3s_e41656c6_-fxf "stereotypes" 1
 (uid "-yk94ms_-e3s_e41656c6_-fxf"))
-($7 72 < -yk94ms_-e3s_e41656c6_-fxe "_odPackage" 71
+($7 75 < -yk94ms_-e3s_e41656c6_-fxe "_odPackage" 74
 (name "_odPackage"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fxe")
 (baseClass "Package"))
-($7 73 < -yk94ms_-e3s_e41656c6_-fxd "odStub" 71
+($7 76 < -yk94ms_-e3s_e41656c6_-fxd "odStub" 74
 (name "odStub"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fxd"))
-($7 74 < -yk94ms_-e3s_e41656c6_-fxc "access" 71
+($7 77 < -yk94ms_-e3s_e41656c6_-fxc "access" 74
 (name "access"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fxc")
 (baseClass "Dependency"))
-($7 75 < -yk94ms_-e3s_e41656c6_-fxb "association" 71
+($7 78 < -yk94ms_-e3s_e41656c6_-fxb "association" 74
 (name "association"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fxb")
 (baseClass "AssociationEnd"))
-($7 76 < -yk94ms_-e3s_e41656c6_-fxa "create" 71
+($7 79 < -yk94ms_-e3s_e41656c6_-fxa "create" 74
 (name "create"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fxa")
 (baseClass "BehavioralFeature"))
-($7 77 < -yk94ms_-e3s_e41656c6_-fx9 "destroy" 71
+($7 80 < -yk94ms_-e3s_e41656c6_-fx9 "destroy" 74
 (name "destroy"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx9")
 (baseClass "BehavioralFeature"))
-($7 78 < -yk94ms_-e3s_e41656c6_-fx8 "document" 71
+($7 81 < -yk94ms_-e3s_e41656c6_-fx8 "document" 74
 (name "document"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx8")
 (baseClass "Component"))
-($7 79 < -yk94ms_-e3s_e41656c6_-fx7 "executable" 71
+($7 82 < -yk94ms_-e3s_e41656c6_-fx7 "executable" 74
 (name "executable"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx7")
 (baseClass "Component"))
-($7 80 < -yk94ms_-e3s_e41656c6_-fx6 "extend" 71
+($7 83 < -yk94ms_-e3s_e41656c6_-fx6 "extend" 74
 (name "extend"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx6")
 (baseClass "Dependency"))
-($7 81 < -yk94ms_-e3s_e41656c6_-fx5 "facade" 71
+($7 84 < -yk94ms_-e3s_e41656c6_-fx5 "facade" 74
 (name "facade"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx5")
 (baseClass "Package"))
-($7 82 < -yk94ms_-e3s_e41656c6_-fx4 "file" 71
+($7 85 < -yk94ms_-e3s_e41656c6_-fx4 "file" 74
 (name "file"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx4")
 (baseClass "Component"))
-($7 83 < -yk94ms_-e3s_e41656c6_-fx3 "framework" 71
+($7 86 < -yk94ms_-e3s_e41656c6_-fx3 "framework" 74
 (name "framework"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx3")
 (baseClass "Package"))
-($7 84 < -yk94ms_-e3s_e41656c6_-fx2 "friend" 71
+($7 87 < -yk94ms_-e3s_e41656c6_-fx2 "friend" 74
 (name "friend"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx2")
 (baseClass "Dependency"))
-($7 85 < -yk94ms_-e3s_e41656c6_-fx1 "global" 71
+($7 88 < -yk94ms_-e3s_e41656c6_-fx1 "global" 74
 (name "global"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx1")
 (baseClass "AssociationEnd"))
-($7 86 < -yk94ms_-e3s_e41656c6_-fx0 "implementation" 71
+($7 89 < -yk94ms_-e3s_e41656c6_-fx0 "implementation" 74
 (name "implementation"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fx0")
 (baseClass "Generalization"))
-($7 87 < -yk94ms_-e3s_e41656c6_-fwz "implementationClass" 71
+($7 90 < -yk94ms_-e3s_e41656c6_-fwz "implementationClass" 74
 (name "implementationClass"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwz")
 (baseClass "Class"))
-($7 88 < -yk94ms_-e3s_e41656c6_-fwy "import" 71
+($7 91 < -yk94ms_-e3s_e41656c6_-fwy "import" 74
 (name "import"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwy")
 (baseClass "Dependency"))
-($7 89 < -yk94ms_-e3s_e41656c6_-fwx "include" 71
+($7 92 < -yk94ms_-e3s_e41656c6_-fwx "include" 74
 (name "include"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwx")
 (baseClass "Dependency"))
-($7 90 < -yk94ms_-e3s_e41656c6_-fww "invariant" 71
+($7 93 < -yk94ms_-e3s_e41656c6_-fww "invariant" 74
 (name "invariant"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fww")
 (baseClass "Constraint"))
-($7 91 < -yk94ms_-e3s_e41656c6_-fwv "library" 71
+($7 94 < -yk94ms_-e3s_e41656c6_-fwv "library" 74
 (name "library"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwv")
 (baseClass "Component"))
-($7 92 < -yk94ms_-e3s_e41656c6_-fwu "local" 71
+($7 95 < -yk94ms_-e3s_e41656c6_-fwu "local" 74
 (name "local"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwu")
 (baseClass "AssociationEnd"))
-($7 93 < -yk94ms_-e3s_e41656c6_-fwt "metaclass" 71
+($7 96 < -yk94ms_-e3s_e41656c6_-fwt "metaclass" 74
 (name "metaclass"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwt")
 (baseClass "Classifier"))
-($7 94 < -yk94ms_-e3s_e41656c6_-fws "metamodel" 71
+($7 97 < -yk94ms_-e3s_e41656c6_-fws "metamodel" 74
 (name "metamodel"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fws")
 (baseClass "Package"))
-($7 95 < -yk94ms_-e3s_e41656c6_-fwr "parameter" 71
+($7 98 < -yk94ms_-e3s_e41656c6_-fwr "parameter" 74
 (name "parameter"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwr")
 (baseClass "AssociationEnd"))
-($7 96 < -yk94ms_-e3s_e41656c6_-fwq "postcondition" 71
+($7 99 < -yk94ms_-e3s_e41656c6_-fwq "postcondition" 74
 (name "postcondition"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwq")
 (baseClass "Constraint"))
-($7 97 < -yk94ms_-e3s_e41656c6_-fwp "powertype" 71
+($7 100 < -yk94ms_-e3s_e41656c6_-fwp "powertype" 74
 (name "powertype"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwp")
 (baseClass "Classifier"))
-($7 98 < -yk94ms_-e3s_e41656c6_-fwo "precondition" 71
+($7 101 < -yk94ms_-e3s_e41656c6_-fwo "precondition" 74
 (name "precondition"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwo")
 (baseClass "Constraint"))
-($7 99 < -yk94ms_-e3s_e41656c6_-fwn "process" 71
+($7 102 < -yk94ms_-e3s_e41656c6_-fwn "process" 74
 (name "process"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwn")
 (baseClass "Classifier"))
-($7 100 < -yk94ms_-e3s_e41656c6_-fwm "requirement" 71
+($7 103 < -yk94ms_-e3s_e41656c6_-fwm "requirement" 74
 (name "requirement"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwm")
 (baseClass "Comment"))
-($7 101 < -yk94ms_-e3s_e41656c6_-fwl "responsibility" 71
+($7 104 < -yk94ms_-e3s_e41656c6_-fwl "responsibility" 74
 (name "responsibility"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwl")
 (baseClass "Comment"))
-($7 102 < -yk94ms_-e3s_e41656c6_-fwk "self" 71
+($7 105 < -yk94ms_-e3s_e41656c6_-fwk "self" 74
 (name "self"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwk")
 (baseClass "AssociationEnd"))
-($7 103 < -yk94ms_-e3s_e41656c6_-fwj "stub" 71
+($7 106 < -yk94ms_-e3s_e41656c6_-fwj "stub" 74
 (name "stub"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwj")
 (baseClass "Package"))
-($7 104 < -yk94ms_-e3s_e41656c6_-fwi "systemModel" 71
+($7 107 < -yk94ms_-e3s_e41656c6_-fwi "systemModel" 74
 (name "systemModel"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwi")
 (baseClass "Package"))
-($7 105 < -yk94ms_-e3s_e41656c6_-fwh "table" 71
+($7 108 < -yk94ms_-e3s_e41656c6_-fwh "table" 74
 (name "table"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwh")
 (baseClass "Component"))
-($7 106 < -yk94ms_-e3s_e41656c6_-fwg "thread" 71
+($7 109 < -yk94ms_-e3s_e41656c6_-fwg "thread" 74
 (name "thread"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwg")
 (baseClass "Classifier"))
-($7 107 < -yk94ms_-e3s_e41656c6_-fwf "topLevel" 71
+($7 110 < -yk94ms_-e3s_e41656c6_-fwf "topLevel" 74
 (name "topLevel"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwf")
 (baseClass "Package"))
-($7 108 < -yk94ms_-e3s_e41656c6_-fwe "type" 71
+($7 111 < -yk94ms_-e3s_e41656c6_-fwe "type" 74
 (name "type"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwe")
 (baseClass "Class"))
-($7 109 < -yk94ms_-e3s_e41656c6_-fwd "utility" 71
+($7 112 < -yk94ms_-e3s_e41656c6_-fwd "utility" 74
 (name "utility"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fwd")
 (baseClass "Classifier"))
-($7 110 < -yk94ms_-e3s_e41656c6_-fwc "boundary" 71
+($7 113 < -yk94ms_-e3s_e41656c6_-fwc "boundary" 74
 (smallImageFile stereotype/image/small/boundary.gif)
 (name "boundary"
 )
@@ -257,14 +258,14 @@ objectdomain.uml.core.Stereotype-owns $7
 (iconFile stereotype/icon/boundary.wmf)
 (uid "-yk94ms_-e3s_e41656c6_-fwc")
 (baseClass "Class"))
-($7 111 < -yk94ms_-e3s_e41656c6_-fwb "entity" 71
+($7 114 < -yk94ms_-e3s_e41656c6_-fwb "entity" 74
 (smallImageFile stereotype/image/small/entity.gif)
 (name "entity"
 )
 (iconFile stereotype/icon/entity.wmf)
 (uid "-yk94ms_-e3s_e41656c6_-fwb")
 (baseClass "Class"))
-($7 112 < -yk94ms_-e3s_e41656c6_-fwa "control" 71
+($7 115 < -yk94ms_-e3s_e41656c6_-fwa "control" 74
 (smallImageFile stereotype/image/small/control.gif)
 (name "control"
 )
@@ -273,41 +274,41 @@ objectdomain.uml.core.Stereotype-owns $7
 (uid "-yk94ms_-e3s_e41656c6_-fwa")
 (defaultIconHeight 60)
 (baseClass "Class"))
-($7 113 < -yk94ms_-e3s_e41656c6_-fw9 "interface" 71
+($7 116 < -yk94ms_-e3s_e41656c6_-fw9 "interface" 74
 (name "interface"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fw9")
 (baseClass "Class"))
-($7 114 < -yk94ms_-e3s_e41656c6_-fw8 "body" 71
+($7 117 < -yk94ms_-e3s_e41656c6_-fw8 "body" 74
 (name "body"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fw8")
 (baseClass "Component"))
-($7 115 < -yk94ms_-e3s_e41656c6_-fw7 "DataType" 71
+($7 118 < -yk94ms_-e3s_e41656c6_-fw7 "DataType" 74
 (name "DataType"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fw7")
 (baseClass "Classifier"))
-($7 116 < -yk94ms_-e3s_e41656c6_-fw6 "Cluster" 71
+($7 119 < -yk94ms_-e3s_e41656c6_-fw6 "Cluster" 74
 (name "Cluster"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fw6")
 (baseClass "Dependency"))
-($8 117 < -yk94ms_-e3s_e41656c6_-fw5 "styles" 1
+($8 120 < -yk94ms_-e3s_e41656c6_-fw5 "styles" 1
 (uid "-yk94ms_-e3s_e41656c6_-fw5"))
-($9 118 < -yk94ms_-e3s_e41656c6_-fw4 "People" 117
+($9 121 < -yk94ms_-e3s_e41656c6_-fw4 "People" 120
 (fillColor 255 204 153)
 (name "People"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fw4"))
-($9 119 < -yk94ms_-e3s_e41656c6_-fw3 "Experiment" 117
+($9 122 < -yk94ms_-e3s_e41656c6_-fw3 "Experiment" 120
 (fillColor 255 153 0)
 (name "Experiment"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fw3"))
-($9 120 < -yk94ms_-e3s_e41656c6_-fw2 "Other" 117
+($9 123 < -yk94ms_-e3s_e41656c6_-fw2 "Other" 120
 (fillColor 255 153 153)
 (name "Other"
 )
@@ -315,37 +316,37 @@ objectdomain.uml.core.Stereotype-owns $7
 (font "SansSerif" 12 BOLD)
 (stereotypeFont "SansSerif" 10 PLAIN)
 (uid "-yk94ms_-e3s_e41656c6_-fw2"))
-($9 121 < -yk94ms_-e3s_e41656c6_-fw1 "Sample" 117
+($9 124 < -yk94ms_-e3s_e41656c6_-fw1 "Sample" 120
 (fillColor 0 204 51)
 (name "Sample"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fw1"))
-($9 122 < -yk94ms_-e3s_e41656c6_-fw0 "SampleComponent" 117
+($9 125 < -yk94ms_-e3s_e41656c6_-fw0 "SampleComponent" 120
 (fillColor 153 255 153)
 (name "SampleComponent"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fw0"))
-($9 123 < -yk94ms_-e3s_e41656c6_-fvz "Molecule" 117
+($9 126 < -yk94ms_-e3s_e41656c6_-fvz "Molecule" 120
 (fillColor 153 204 255)
 (name "Molecule"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvz"))
-($9 124 < -yk94ms_-e3s_e41656c6_-fvy "ExpBlueprint" 117
+($9 127 < -yk94ms_-e3s_e41656c6_-fvy "ExpBlueprint" 120
 (fillColor 102 153 255)
 (name "ExpBlueprint"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvy"))
-($9 125 < -yk94ms_-e3s_e41656c6_-fvx "Instrument" 117
+($9 128 < -yk94ms_-e3s_e41656c6_-fvx "Instrument" 120
 (fillColor 204 153 0)
 (name "Instrument"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvx"))
-($9 126 < -yk94ms_-e3s_e41656c6_-fvw "memops.Implementation" 117
+($9 129 < -yk94ms_-e3s_e41656c6_-fvw "memops.Implementation" 120
 (fillColor 204 204 204)
 (name "memops.Implementation"
 )
@@ -354,142 +355,142 @@ objectdomain.uml.core.Stereotype-owns $7
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvw")
 (stereotypeColor 255 255 255))
-($9 127 < -yk94ms_-e3s_e41656c6_-fvv "Annotation" 117
+($9 130 < -yk94ms_-e3s_e41656c6_-fvv "Annotation" 120
 (fillColor 102 204 255)
 (name "Annotation"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvv"))
-($9 128 < -yk94ms_-e3s_e41656c6_-fvu "ChemComp" 117
+($9 131 < -yk94ms_-e3s_e41656c6_-fvu "ChemComp" 120
 (fillColor 0 204 204)
 (name "ChemComp"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvu"))
-($9 129 < -yk94ms_-e3s_e41656c6_-fvt "Citation" 117
+($9 132 < -yk94ms_-e3s_e41656c6_-fvt "Citation" 120
 (fillColor 255 153 102)
 (name "Citation"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvt"))
-($9 130 < -yk94ms_-e3s_e41656c6_-fvs "Coordinates" 117
+($9 133 < -yk94ms_-e3s_e41656c6_-fvs "Coordinates" 120
 (fillColor 255 255 102)
 (name "Coordinates"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvs"))
-($9 131 < -yk94ms_-e3s_e41656c6_-fvr "DbRef" 117
+($9 134 < -yk94ms_-e3s_e41656c6_-fvr "DbRef" 120
 (fillColor 0 204 153)
 (name "DbRef"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvr"))
-($9 132 < -yk94ms_-e3s_e41656c6_-fvq "Entry" 117
+($9 135 < -yk94ms_-e3s_e41656c6_-fvq "Entry" 120
 (fillColor 255 51 51)
 (name "Entry"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvq"))
-($9 133 < -yk94ms_-e3s_e41656c6_-fvp "Location" 117
+($9 136 < -yk94ms_-e3s_e41656c6_-fvp "Location" 120
 (fillColor 102 255 102)
 (name "Location"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvp"))
-($9 134 < -yk94ms_-e3s_e41656c6_-fvo "Method" 117
+($9 137 < -yk94ms_-e3s_e41656c6_-fvo "Method" 120
 (fillColor 255 204 102)
 (name "Method"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvo"))
-($9 135 < -yk94ms_-e3s_e41656c6_-fvn "MolSystem" 117
+($9 138 < -yk94ms_-e3s_e41656c6_-fvn "MolSystem" 120
 (fillColor 204 255 255)
 (name "MolSystem"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvn"))
-($9 136 < -yk94ms_-e3s_e41656c6_-fvm "Nmr" 117
+($9 139 < -yk94ms_-e3s_e41656c6_-fvm "Nmr" 120
 (fillColor 255 204 0)
 (name "Nmr"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvm"))
-($9 137 < -yk94ms_-e3s_e41656c6_-fvl "NmrReference" 117
+($9 140 < -yk94ms_-e3s_e41656c6_-fvl "NmrReference" 120
 (fillColor 204 0 0)
 (name "NmrReference"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvl"))
-($9 138 < -yk94ms_-e3s_e41656c6_-fvk "Nucleus" 117
+($9 141 < -yk94ms_-e3s_e41656c6_-fvk "Nucleus" 120
 (fillColor 255 51 102)
 (name "Nucleus"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvk"))
-($9 139 < -yk94ms_-e3s_e41656c6_-fvj "RefContainer" 117
+($9 142 < -yk94ms_-e3s_e41656c6_-fvj "RefContainer" 120
 (fillColor 204 255 153)
 (name "RefContainer"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvj"))
-($9 140 < -yk94ms_-e3s_e41656c6_-fvi "Target" 117
+($9 143 < -yk94ms_-e3s_e41656c6_-fvi "Target" 120
 (fillColor 0 153 204)
 (name "Target"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvi"))
-($9 141 < -yk94ms_-e3s_e41656c6_-fvh "Taxonomy" 117
+($9 144 < -yk94ms_-e3s_e41656c6_-fvh "Taxonomy" 120
 (fillColor 220 153 100)
 (name "Taxonomy"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvh"))
-($9 142 < -yk94ms_-e3s_e41656c6_-fvg "NmrExpPrototype" 117
+($9 145 < -yk94ms_-e3s_e41656c6_-fvg "NmrExpPrototype" 120
 (fillColor 255 102 51)
 (name "NmrExpPrototype"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvg"))
-($9 143 < -yk94ms_-e3s_e41656c6_-fvf "NmrConstraints" 117
+($9 146 < -yk94ms_-e3s_e41656c6_-fvf "NmrConstraints" 120
 (fillColor 255 130 201)
 (name "NmrConstraints"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvf"))
-($9 144 < -yk94ms_-e3s_e41656c6_-fve "Protocol" 117
+($9 147 < -yk94ms_-e3s_e41656c6_-fve "Protocol" 120
 (fillColor 255 85 168)
 (name "Protocol"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fve"))
-($9 145 < -yk94ms_-e3s_e41656c6_-fvd "ChemCompCoord" 117
+($9 148 < -yk94ms_-e3s_e41656c6_-fvd "ChemCompCoord" 120
 (fillColor 0 185 225)
 (name "ChemCompCoord"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_-e3s_e41656c6_-fvd"))
-($9 146 < -yk94ms_63g_erotfltk_-p8v "Classification" 117
+($9 149 < -yk94ms_63g_erotfltk_-p8v "Classification" 120
 (fillColor 153 153 255)
 (name "Classification"
 )
 (font "SansSerif" 12 BOLD)
 (uid "-yk94ms_63g_erotfltk_-p8v"))
-($4 147 < -yk94ms_-e3s_e41656c6_-fv5 "Usecase" 1
+($4 150 < -yk94ms_-e3s_e41656c6_-fv5 "Usecase" 1
 (name "Usecase"
 )
 (namespaceRoot true)
 (uid "-yk94ms_-e3s_e41656c6_-fv5"))
-($5 148 < -yk94ms_-e3s_e41656c6_-fv4 "Rose::global" 147
+($5 151 < -yk94ms_-e3s_e41656c6_-fv4 "Rose::global" 150
 (name "Rose::global"
 )
 (value "TRUE"
 )
 (uid "-yk94ms_-e3s_e41656c6_-fv4"))
-($10 149 < z8kfsx_-m68_gtzvewsk_-p2c "?" 1
+($10 152 < z8kfsx_-m68_gtzvewsk_-p2c "?" 1
 (name "?"
 )
 (uid "z8kfsx_-m68_gtzvewsk_-p2c"))
-($11 150
+($12 154
 (name "DomainLockObject"
 )
 (uid "64m3b9_4p5_bqjok6kd_-p8j"))
@@ -508,52 +509,56 @@ objectdomain.uml.core.Stereotype-owns $7
 ($3 15 @ 0_-fvi_hrnjywg5_-jrb 5 "Logical" $4 "ccp" $4 "molecule" $4 "Validation" $4 "_Validation" $3)
 ($3 16 @ 0_-fvi_hrnjywg5_-mw8 5 "Logical" $4 "ccp" $4 "lims" $4 "Sample" $4 "_Sample-details" $3)
 ($3 17 @ 0_-fvi_hrnjywg5_-kal 5 "Logical" $4 "ccp" $4 "molecule" $4 "MolSystem" $4 "_MolSystem-details" $3)
-($4 18 @ 0_-fvi_hrnjywg5_-dqa 3 "Logical" $4 "memops" $4 "Implementation" $4 "$CCPN_SVNROOT/memops/Implementation.odp" A  U )
-($4 19 @ -yk94ms_-e3s_e41656c6_-ow3 2 "Logical" $4 "memops" $4 "$CCPN_SVNROOT/memops/memops.odp" A  U )
-($4 20 @ 0_-fvi_hrnjywg5_-otk 4 "Logical" $4 "ccp" $4 "lims" $4 "RefSampleComponent" $4 "$CCPN_SVNROOT/ccp/lims/RefSampleComponent.odp" A  U )
-($4 21 @ -yk94ms_-e3s_e41656c6_-k89 4 "Logical" $4 "ccp" $4 "lims" $4 "Sample" $4 "$CCPN_SVNROOT/ccp/lims/Sample.odp" A  U )
-($4 22 @ z8kfsx_-gyy_h0cfqt95_-p8g 4 "Logical" $4 "ccp" $4 "lims" $4 "RefData" $4 "$CCPN_SVNROOT/ccp/lims/RefData.odp" A  U )
-($4 23 @ -yk94ms_85r_eqyymv3f_-p96 3 "Logical" $4 "ccp" $4 "lims" $4 "$CCPN_SVNROOT/ccp/lims/package.odp" A  U )
-($4 24 @ 0_-fvi_hrnjywg5_-ota 4 "Logical" $4 "ccp" $4 "nmr" $4 "Nmr" $4 "$CCPN_SVNROOT/ccp/nmr/Nmr.odp" A  U )
-($4 25 @ z8kfsx_-o65_ftli6gtq_-p98 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrCalc" $4 "$CCPN_SVNROOT/ccp/nmr/NmrCalc.odp" A  U )
-($4 26 @ -yk94ms_-e3s_e41656c6_-lll 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrConstraint" $4 "$CCPN_SVNROOT/ccp/nmr/NmrConstraint.odp" A  U )
-($4 27 @ z8kfsx_fb8_g1xcbxen_-p98 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrScreen" $4 "$CCPN_SVNROOT/ccp/nmr/NmrScreen.odp" A  U )
-($4 28 @ -yk94ms_-e3s_e41656c6_-hz0 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrReference" $4 "$CCPN_SVNROOT/ccp/nmr/NmrReference.odp" A  U )
-($4 29 @ -yk94ms_-e3s_e41656c6_-ouq 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrExpPrototype" $4 "$CCPN_SVNROOT/ccp/nmr/NmrExpPrototype.odp" A  U )
-($4 30 @ -yk94ms_-e3s_e41656c6_-hgs 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrEntry" $4 "$CCPN_SVNROOT/ccp/nmr/NmrEntry.odp" A  U )
-($4 31 @ -yk94ms_85r_eqyymv3f_-p95 3 "Logical" $4 "ccp" $4 "nmr" $4 "$CCPN_SVNROOT/ccp/nmr/package.odp" A  U )
-($4 32 @ 0_-fvi_hrnjywg5_-oto 4 "Logical" $4 "ccp" $4 "general" $4 "Annotation" $4 "$CCPN_SVNROOT/ccp/general/Annotation.odp" A  U )
-($4 33 @ -hkpzxr_v5_f8zng6fd_-p3m 4 "Logical" $4 "ccp" $4 "general" $4 "KeywordDefinition" $4 "$CCPN_SVNROOT/ccp/general/KeywordDefinition.odp" A  U )
-($4 34 @ -yk94ms_85r_eqyymv3f_-o9w 4 "Logical" $4 "ccp" $4 "general" $4 "Taxonomy" $4 "$CCPN_SVNROOT/ccp/general/Taxonomy.odp" A  U )
-($4 35 @ -yk94ms_-e3s_e41656c6_-jt9 4 "Logical" $4 "ccp" $4 "general" $4 "Template" $4 "$CCPN_SVNROOT/ccp/general/Template.odp" A  U )
-($4 36 @ -yk94ms_jd_f02m0kiw_-p98 4 "Logical" $4 "ccp" $4 "general" $4 "DataLocation" $4 "$CCPN_SVNROOT/ccp/general/DataLocation.odp" A  U )
-($4 37 @ -yk94ms_-e3s_e41656c6_-jc4 4 "Logical" $4 "ccp" $4 "general" $4 "Affiliation" $4 "$CCPN_SVNROOT/ccp/general/Affiliation.odp" A  U )
-($4 38 @ -yk94ms_-e3s_e41656c6_-kyd 4 "Logical" $4 "ccp" $4 "general" $4 "Method" $4 "$CCPN_SVNROOT/ccp/general/Method.odp" A  U )
-($4 39 @ -yk94ms_-e3s_e41656c6_-hn7 4 "Logical" $4 "ccp" $4 "general" $4 "Instrument" $4 "$CCPN_SVNROOT/ccp/general/Instrument.odp" A  U )
-($4 40 @ -yk94ms_-e3s_e41656c6_-id3 4 "Logical" $4 "ccp" $4 "general" $4 "DbRef" $4 "$CCPN_SVNROOT/ccp/general/DbRef.odp" A  U )
-($4 41 @ -yk94ms_-e3s_e41656c6_-iio 4 "Logical" $4 "ccp" $4 "general" $4 "Citation" $4 "$CCPN_SVNROOT/ccp/general/Citation.odp" A  U )
-($4 42 @ -yk94ms_85r_eqyymv3f_-p97 3 "Logical" $4 "ccp" $4 "general" $4 "$CCPN_SVNROOT/ccp/general/package.odp" A  U )
-($4 43 @ 0_-fvi_hrnjywg5_-ote 4 "Logical" $4 "ccp" $4 "molecule" $4 "Validation" $4 "$CCPN_SVNROOT/ccp/molecule/Validation.odp" A  U )
-($4 44 @ -yk94ms_-e3s_e41656c6_-ibf 4 "Logical" $4 "ccp" $4 "molecule" $4 "MolSystem" $4 "$CCPN_SVNROOT/ccp/molecule/MolSystem.odp" A  U )
-($4 45 @ -yk94ms_-e3s_e41656c6_-m0p 4 "Logical" $4 "ccp" $4 "molecule" $4 "Molecule" $4 "$CCPN_SVNROOT/ccp/molecule/Molecule.odp" A  U )
-($4 46 @ -yk94ms_-e3s_e41656c6_-j6m 4 "Logical" $4 "ccp" $4 "molecule" $4 "MolStructure" $4 "$CCPN_SVNROOT/ccp/molecule/MolStructure.odp" A  U )
-($4 47 @ -yk94ms_-e3s_e41656c6_-p0n 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemComp" $4 "$CCPN_SVNROOT/ccp/molecule/ChemComp.odp" A  U )
-($4 48 @ -yk94ms_nm6_eje47wjh_-p96 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemCompCharge" $4 "$CCPN_SVNROOT/ccp/molecule/ChemCompCharge.odp" A  U )
-($4 49 @ -yk94ms_-e3s_e41656c6_-m4c 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemCompCoord" $4 "$CCPN_SVNROOT/ccp/molecule/ChemCompCoord.odp" A  U )
-($4 50 @ -yk94ms_mbj_el0wdpob_-p97 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemCompLabel" $4 "$CCPN_SVNROOT/ccp/molecule/ChemCompLabel.odp" A  U )
-($4 51 @ -yk94ms_-9af_etcy0zwh_-p98 4 "Logical" $4 "ccp" $4 "molecule" $4 "LabeledMolecule" $4 "$CCPN_SVNROOT/ccp/molecule/LabeledMolecule.odp" A  U )
-($4 52 @ -yk94ms_-e3s_e41656c6_-kpr 4 "Logical" $4 "ccp" $4 "molecule" $4 "Stereochemistry" $4 "$CCPN_SVNROOT/ccp/molecule/Stereochemistry.odp" A  U )
-($4 53 @ -yk94ms_-e3s_e41656c6_-hj7 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemElement" $4 "$CCPN_SVNROOT/ccp/molecule/ChemElement.odp" A  U )
-($4 54 @ -yk94ms_85r_eqyymv3f_-p98 3 "Logical" $4 "ccp" $4 "molecule" $4 "$CCPN_SVNROOT/ccp/molecule/package.odp" A  U )
-($4 55 @ -yk94ms_-e3s_e41656c6_-p96 2 "Logical" $4 "ccp" $4 "$CCPN_SVNROOT/ccp/ccp.odp" A  U )
-($4 56 @ 0_-fvi_hrnjywg5_-p98 3 "Logical" $4 "cambridge" $4 "WmsProtocol" $4 "$CCPN_SVNROOT/cambridge/WmsProtocol.odp" A  U )
-($4 57 @ -hkpzxr_-dbn_f78xhhy8_-p98 3 "Logical" $4 "cambridge" $4 "Dangle" $4 "$CCPN_SVNROOT/cambridge/Dangle.odp" A  U )
-($4 58 @ z8kfsx_-fvi_fhk9tm6f_-p98 2 "Logical" $4 "cambridge" $4 "$CCPN_SVNROOT/cambridge/cambridge.odp" A  U )
-($4 59 @ 0_-fvi_hrnjywg5_-cp1 3 "Logical" $4 "utrecht" $4 "Haddock" $4 "$CCPN_SVNROOT/utrecht/Haddock.odp" A  U )
-($4 60 @ z8kflu_om1_et67ge31_-p98 2 "Logical" $4 "utrecht" $4 "$CCPN_SVNROOT/utrecht/utrecht.odp" A  U )
-($4 61 @ -hkpzxr_-cvb_f2ixo80k_-p97 3 "Logical" $4 "molsim" $4 "AnnealProtocol" $4 "$CCPN_SVNROOT/molsim/AnnealProtocol.odp" A  U )
-($4 62 @ -hkpzxr_-li2_fcvq0su4_-p5d 3 "Logical" $4 "molsim" $4 "Symmetry" $4 "$CCPN_SVNROOT/molsim/Symmetry.odp" A  U )
-($4 63 @ -hkpzxr_-cvb_f2ixo80k_-p98 2 "Logical" $4 "molsim" $4 "$CCPN_SVNROOT/molsim/molsim.odp" A  U )
+($3 18 @ 0_-fvi_hrnjywg5_-dq9 4 "Logical" $4 "memops" $4 "Implementation" $4 "_BasicDataTypes" $3)
+($3 19 @ z8kfsx_-fvi_fqjirlib_-p95 3 "Logical" $4 "cambridge" $4 "_Cambridge" $3)
+($3 20 @ 0_-fvi_hrnjywg5_-p5r 4 "Logical" $4 "cambridge" $4 "Dangle" $4 "_Dangle-details" $3)
+($4 21 @ 0_-fvi_hrnjywg5_-dqa 3 "Logical" $4 "memops" $4 "Implementation" $4 "$CCPN_SVNROOT/memops/Implementation.odp" A  U )
+($4 22 @ -yk94ms_-e3s_e41656c6_-ow3 2 "Logical" $4 "memops" $4 "$CCPN_SVNROOT/memops/memops.odp" A  U )
+($4 23 @ 0_-fvi_hrnjywg5_-otk 4 "Logical" $4 "ccp" $4 "lims" $4 "RefSampleComponent" $4 "$CCPN_SVNROOT/ccp/lims/RefSampleComponent.odp" A  U )
+($4 24 @ -yk94ms_-e3s_e41656c6_-k89 4 "Logical" $4 "ccp" $4 "lims" $4 "Sample" $4 "$CCPN_SVNROOT/ccp/lims/Sample.odp" A  U )
+($4 25 @ z8kfsx_-gyy_h0cfqt95_-p8g 4 "Logical" $4 "ccp" $4 "lims" $4 "RefData" $4 "$CCPN_SVNROOT/ccp/lims/RefData.odp" A  U )
+($4 26 @ -yk94ms_85r_eqyymv3f_-p96 3 "Logical" $4 "ccp" $4 "lims" $4 "$CCPN_SVNROOT/ccp/lims/package.odp" A  U )
+($4 27 @ 0_-fvi_hrnjywg5_-ota 4 "Logical" $4 "ccp" $4 "nmr" $4 "Nmr" $4 "$CCPN_SVNROOT/ccp/nmr/Nmr.odp" A  U )
+($4 28 @ z8kfsx_-o65_ftli6gtq_-p98 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrCalc" $4 "$CCPN_SVNROOT/ccp/nmr/NmrCalc.odp" A  U )
+($4 29 @ -yk94ms_-e3s_e41656c6_-lll 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrConstraint" $4 "$CCPN_SVNROOT/ccp/nmr/NmrConstraint.odp" A  U )
+($4 30 @ z8kfsx_fb8_g1xcbxen_-p98 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrScreen" $4 "$CCPN_SVNROOT/ccp/nmr/NmrScreen.odp" A  U )
+($4 31 @ -yk94ms_-e3s_e41656c6_-hz0 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrReference" $4 "$CCPN_SVNROOT/ccp/nmr/NmrReference.odp" A  U )
+($4 32 @ -yk94ms_-e3s_e41656c6_-ouq 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrExpPrototype" $4 "$CCPN_SVNROOT/ccp/nmr/NmrExpPrototype.odp" A  U )
+($4 33 @ -yk94ms_-e3s_e41656c6_-hgs 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrEntry" $4 "$CCPN_SVNROOT/ccp/nmr/NmrEntry.odp" A  U )
+($4 34 @ -yk94ms_85r_eqyymv3f_-p95 3 "Logical" $4 "ccp" $4 "nmr" $4 "$CCPN_SVNROOT/ccp/nmr/package.odp" A  U )
+($4 35 @ 0_-fvi_hrnjywg5_-oto 4 "Logical" $4 "ccp" $4 "general" $4 "Annotation" $4 "$CCPN_SVNROOT/ccp/general/Annotation.odp" A  U )
+($4 36 @ -hkpzxr_v5_f8zng6fd_-p3m 4 "Logical" $4 "ccp" $4 "general" $4 "KeywordDefinition" $4 "$CCPN_SVNROOT/ccp/general/KeywordDefinition.odp" A  U )
+($4 37 @ -yk94ms_85r_eqyymv3f_-o9w 4 "Logical" $4 "ccp" $4 "general" $4 "Taxonomy" $4 "$CCPN_SVNROOT/ccp/general/Taxonomy.odp" A  U )
+($4 38 @ -yk94ms_-e3s_e41656c6_-jt9 4 "Logical" $4 "ccp" $4 "general" $4 "Template" $4 "$CCPN_SVNROOT/ccp/general/Template.odp" A  U )
+($4 39 @ -yk94ms_jd_f02m0kiw_-p98 4 "Logical" $4 "ccp" $4 "general" $4 "DataLocation" $4 "$CCPN_SVNROOT/ccp/general/DataLocation.odp" A  U )
+($4 40 @ -yk94ms_-e3s_e41656c6_-jc4 4 "Logical" $4 "ccp" $4 "general" $4 "Affiliation" $4 "$CCPN_SVNROOT/ccp/general/Affiliation.odp" A  U )
+($4 41 @ -yk94ms_-e3s_e41656c6_-kyd 4 "Logical" $4 "ccp" $4 "general" $4 "Method" $4 "$CCPN_SVNROOT/ccp/general/Method.odp" A  U )
+($4 42 @ -yk94ms_-e3s_e41656c6_-hn7 4 "Logical" $4 "ccp" $4 "general" $4 "Instrument" $4 "$CCPN_SVNROOT/ccp/general/Instrument.odp" A  U )
+($4 43 @ -yk94ms_-e3s_e41656c6_-id3 4 "Logical" $4 "ccp" $4 "general" $4 "DbRef" $4 "$CCPN_SVNROOT/ccp/general/DbRef.odp" A  U )
+($4 44 @ -yk94ms_-e3s_e41656c6_-iio 4 "Logical" $4 "ccp" $4 "general" $4 "Citation" $4 "$CCPN_SVNROOT/ccp/general/Citation.odp" A  U )
+($4 45 @ -yk94ms_85r_eqyymv3f_-p97 3 "Logical" $4 "ccp" $4 "general" $4 "$CCPN_SVNROOT/ccp/general/package.odp" A  U )
+($4 46 @ 0_-fvi_hrnjywg5_-ote 4 "Logical" $4 "ccp" $4 "molecule" $4 "Validation" $4 "$CCPN_SVNROOT/ccp/molecule/Validation.odp" A  U )
+($4 47 @ -yk94ms_-e3s_e41656c6_-ibf 4 "Logical" $4 "ccp" $4 "molecule" $4 "MolSystem" $4 "$CCPN_SVNROOT/ccp/molecule/MolSystem.odp" A  U )
+($4 48 @ -yk94ms_-e3s_e41656c6_-m0p 4 "Logical" $4 "ccp" $4 "molecule" $4 "Molecule" $4 "$CCPN_SVNROOT/ccp/molecule/Molecule.odp" A  U )
+($4 49 @ -yk94ms_-e3s_e41656c6_-j6m 4 "Logical" $4 "ccp" $4 "molecule" $4 "MolStructure" $4 "$CCPN_SVNROOT/ccp/molecule/MolStructure.odp" A  U )
+($4 50 @ -yk94ms_-e3s_e41656c6_-p0n 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemComp" $4 "$CCPN_SVNROOT/ccp/molecule/ChemComp.odp" A  U )
+($4 51 @ -yk94ms_nm6_eje47wjh_-p96 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemCompCharge" $4 "$CCPN_SVNROOT/ccp/molecule/ChemCompCharge.odp" A  U )
+($4 52 @ -yk94ms_-e3s_e41656c6_-m4c 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemCompCoord" $4 "$CCPN_SVNROOT/ccp/molecule/ChemCompCoord.odp" A  U )
+($4 53 @ -yk94ms_mbj_el0wdpob_-p97 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemCompLabel" $4 "$CCPN_SVNROOT/ccp/molecule/ChemCompLabel.odp" A  U )
+($4 54 @ -yk94ms_-9af_etcy0zwh_-p98 4 "Logical" $4 "ccp" $4 "molecule" $4 "LabeledMolecule" $4 "$CCPN_SVNROOT/ccp/molecule/LabeledMolecule.odp" A  U )
+($4 55 @ -yk94ms_-e3s_e41656c6_-kpr 4 "Logical" $4 "ccp" $4 "molecule" $4 "Stereochemistry" $4 "$CCPN_SVNROOT/ccp/molecule/Stereochemistry.odp" A  U )
+($4 56 @ -yk94ms_-e3s_e41656c6_-hj7 4 "Logical" $4 "ccp" $4 "molecule" $4 "ChemElement" $4 "$CCPN_SVNROOT/ccp/molecule/ChemElement.odp" A  U )
+($4 57 @ -yk94ms_85r_eqyymv3f_-p98 3 "Logical" $4 "ccp" $4 "molecule" $4 "$CCPN_SVNROOT/ccp/molecule/package.odp" A  U )
+($4 58 @ -yk94ms_-e3s_e41656c6_-p96 2 "Logical" $4 "ccp" $4 "$CCPN_SVNROOT/ccp/ccp.odp" A  U )
+($4 59 @ 0_-fvi_hrnjywg5_-p98 3 "Logical" $4 "cambridge" $4 "WmsProtocol" $4 "$CCPN_SVNROOT/cambridge/WmsProtocol.odp" A  U )
+($4 60 @ -hkpzxr_-dbn_f78xhhy8_-p98 3 "Logical" $4 "cambridge" $4 "Dangle" $4 "$CCPN_SVNROOT/cambridge/Dangle.odp" A  U )
+($4 61 @ z8kfsx_-fvi_fhk9tm6f_-p98 2 "Logical" $4 "cambridge" $4 "$CCPN_SVNROOT/cambridge/cambridge.odp" A  U )
+($4 62 @ 0_-fvi_hrnjywg5_-cp1 3 "Logical" $4 "utrecht" $4 "Haddock" $4 "$CCPN_SVNROOT/utrecht/Haddock.odp" A  U )
+($4 63 @ z8kflu_om1_et67ge31_-p98 2 "Logical" $4 "utrecht" $4 "$CCPN_SVNROOT/utrecht/utrecht.odp" A  U )
+($4 64 @ -hkpzxr_-cvb_f2ixo80k_-p97 3 "Logical" $4 "molsim" $4 "AnnealProtocol" $4 "$CCPN_SVNROOT/molsim/AnnealProtocol.odp" A  U )
+($4 65 @ -hkpzxr_-li2_fcvq0su4_-p5d 3 "Logical" $4 "molsim" $4 "Symmetry" $4 "$CCPN_SVNROOT/molsim/Symmetry.odp" A  U )
+($4 66 @ -hkpzxr_-cvb_f2ixo80k_-p98 2 "Logical" $4 "molsim" $4 "$CCPN_SVNROOT/molsim/molsim.odp" A  U )
+($11 153 @ 0_-m68_hs235ny7_-p97 4 "Logical" $4 "cambridge" $4 "_Cambridge" $3 "" $11)
 (openDiagrams 2 3)
 (openDiagrams 2 4)
 (openDiagrams 2 5)
@@ -569,9 +574,9 @@ objectdomain.uml.core.Stereotype-owns $7
 (openDiagrams 2 15)
 (openDiagrams 2 16)
 (openDiagrams 2 17)
-(sharedPackages 2 18)
-(sharedPackages 2 19)
-(sharedPackages 2 20)
+(openDiagrams 2 18)
+(openDiagrams 2 19)
+(openDiagrams 2 20)
 (sharedPackages 2 21)
 (sharedPackages 2 22)
 (sharedPackages 2 23)
@@ -615,15 +620,19 @@ objectdomain.uml.core.Stereotype-owns $7
 (sharedPackages 2 61)
 (sharedPackages 2 62)
 (sharedPackages 2 63)
-(lockedBy 72 150)
-(stereotypeAssn 64 72)
-(lockedBy 64 150)
-(stereotypeAssn 66 72)
-(lockedBy 66 150)
-(stereotypeAssn 68 72)
-(lockedBy 68 150)
-(lockedBy 71 150)
-(lockedBy 117 150)
-(stereotypeAssn 147 72)
-(lockedBy 147 150)
-(lockedBy 1 150)
+(sharedPackages 2 64)
+(sharedPackages 2 65)
+(sharedPackages 2 66)
+(selection 2 153)
+(lockedBy 75 154)
+(stereotypeAssn 67 75)
+(lockedBy 67 154)
+(stereotypeAssn 69 75)
+(lockedBy 69 154)
+(stereotypeAssn 71 75)
+(lockedBy 71 154)
+(lockedBy 74 154)
+(lockedBy 120 154)
+(stereotypeAssn 150 75)
+(lockedBy 150 154)
+(lockedBy 1 154)

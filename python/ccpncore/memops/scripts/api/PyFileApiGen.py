@@ -1,14 +1,9 @@
-import memops.general.Util as genUtil
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.metamodel import MetaModel
 
-from memops.metamodel import ImpConstants
-from memops.metamodel import MetaModel
+from ccpncore.memops.scripts.api.PyApiGen import PyApiGen
+from ccpncore.memops.scripts.api.FileApiGen import FileApiGen
 MemopsError = MetaModel.MemopsError
-
-from memops.scripts_v2.api.PyApiGen import PyApiGen
-from memops.scripts_v2.api.FileApiGen import FileApiGen
-
-repositoryTag = '$Name:  $'
-repositoryId  = '$Id: PyFileApiGen.py,v 1.57.2.1 2011/04/18 13:13:09 rhfogh Exp $'
 
 
 def writeApi(modelPortal, rootFileName=None, rootDirName=None,
@@ -18,11 +13,9 @@ def writeApi(modelPortal, rootFileName=None, rootDirName=None,
   Only function that should be called directly by 'make' scripts etc.
   """
   
-  scriptRevision = genUtil.getRepositoryInfo(repositoryId).get('revision')
-  
   pyFileApiGen = PyFileApiGen(modelPortal=modelPortal, rootFileName=rootFileName, 
                         rootDirName=rootDirName, releaseVersion=releaseVersion,
-                        scriptName='PyFileApiGen', scriptRevision=scriptRevision,
+                        scriptName='PyFileApiGen',
                         **kw)
   pyFileApiGen.processModel()
 
@@ -219,7 +212,7 @@ for %s, %s in %s.items():
     elem = op.target
     
     if (isinstance(elem, MetaModel.MetaRole) 
-        and elem.hierarchy == ImpConstants.child_hierarchy):
+        and elem.hierarchy == metaConstants.child_hierarchy):
     
       self.possiblyLoadData(self.varNames['self'], elem, inClass=inClass)
       self.setVar(ddname, self.getMemoryValue(self.varNames['self'], elem))
@@ -243,10 +236,10 @@ ll.sort()
     # we are adding a statement after rather than before an endBlock, 
     # but in Python it does not matter
     
-    attrName = ImpConstants.serial_attribute
-    ddName = ImpConstants.serialdict_attribute
+    attrName = metaConstants.serial_attribute
+    ddName = metaConstants.serialdict_attribute
     serialKids = [x for x in inClass.getAllRoles() 
-                  if (x.hierarchy == ImpConstants.child_hierarchy and
+                  if (x.hierarchy == metaConstants.child_hierarchy and
                   x.valueType.getElement(attrName))]
     
     if serialKids:
@@ -540,7 +533,7 @@ for (targetName,repository) in inData:
 
     PyApiGen.writeStartFunc(self, op, inClass)
 
-    if (op.scope == ImpConstants.instance_level and not 
+    if (op.scope == metaConstants.instance_level and not
         (op.opType == 'new' and op.isImplicit)):
       self.setDataDict()
 

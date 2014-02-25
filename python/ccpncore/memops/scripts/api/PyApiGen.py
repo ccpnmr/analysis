@@ -1,19 +1,17 @@
-import memops.universal.Util as uniUtil
+from ccpncore.memops import Constants as memopsConstants
 
-import memops.general.Constants as genConstants
-basicDataTypes = genConstants.baseDataTypeModule
-from memops.general import Util as genUtil
+from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.metamodel import Util as metaUtil
 
-from memops.metamodel import MetaModel
-from memops.metamodel import ImpConstants
-from memops.metamodel import Util as metaUtil
+from ccpncore.memops import Util as memopsUtil
 
-from memops.universal import Util as uniUtil
+from ccpncore.memops.scripts.core.PyLanguage import PyLanguage
+from ccpncore.memops.scripts.core.PyType import PyType
 
-from memops.scripts_v2.core.PyLanguage import PyLanguage
-from memops.scripts_v2.core.PyType import PyType
+from ccpncore.memops.scripts.api.ApiGen import ApiGen
 
-from memops.scripts_v2.api.ApiGen import ApiGen
+basicDataTypes = memopsConstants.baseDataTypeModule
 
 # This class implements as much of ApiInterface as is independent of implementation details
 # Overrides some of ApiGen for overrides that are independent of implementation details
@@ -92,14 +90,13 @@ class PyApiGen(PyLanguage, PyType, ApiGen):
 class %s(%s):
   r""\"%s
   ""\"
-""" % (clazz.name, ss, uniUtil.breakString(clazz.documentation)))
+""" % (clazz.name, ss, memopsUtil.breakString(clazz.documentation)))
   
     self.indent += self.INDENT
     
     # write source revision comment
-    objRevision = genUtil.getRepositoryRevision(clazz)
-    self.writeComment("  from data model element %s revision %s"
-                      % (clazz.qualifiedName(), objRevision))
+    self.writeComment("  from data model element %s"
+                      % (clazz.qualifiedName()))
     
     self.setVar(self.varNames['metaclass'], 
                 self.callFunc('getElement', 'metaPackage', 
@@ -184,7 +181,7 @@ _notifies = {'':[]}
     ss = dataType.typeCodes['python']
     if ss == dataType.name and dataType.container.getElement(ss) is not None:
       self.write("from %s.general.baseDataTypes import %s\n"
-       % (ImpConstants.modellingPackageName, ss)
+       % (metaConstants.modellingPackageName, ss)
       )
 
   ###########################################################################
@@ -210,8 +207,8 @@ _notifies = {'':[]}
       n = dataType.typeCodes['python']
       basicType = getattr(basicDataTypes, n)
  
-      impPackageName = '%s.%s' % (ImpConstants.modellingPackageName, 
-                                  ImpConstants.implementationPackageName)
+      impPackageName = '%s.%s' % (metaConstants.modellingPackageName,
+                                  metaConstants.implementationPackageName)
       impPackage = element.metaObjFromQualName(impPackageName)
        
       if inClass.container is impPackage:
@@ -363,7 +360,7 @@ if ll:
       self.setVar(resultVar, self.noneValue)
       
     else:
-      raise ImpConstants.MemopsError(
+      raise metaConstants.MemopsError(
              "checkFindBody called with invalid funcType: %s" % funcType)
     
     self.write("""
@@ -469,7 +466,7 @@ ll.sort()
 
   # implements ApiGen
   def writeInheritedOperation(self, op, inClass):
-    if op.scope == ImpConstants.instance_level:
+    if op.scope == metaConstants.instance_level:
       # copying down staticmethods messes up Python
       name = self.getFuncname(op)
       self.writeNewline()
@@ -519,7 +516,7 @@ def __init__(self, *args, **kw):
   def writeEndFunc(self, op, inClass):
     
     ApiGen.writeEndFunc(self, op, inClass)
-    if op.scope != ImpConstants.instance_level:
+    if op.scope != metaConstants.instance_level:
       ss = self.getFuncname(op)
       self.writeNewline()
       self.write("%s = staticmethod(%s)" % (ss, ss))
@@ -622,7 +619,7 @@ containsNonAlphanumeric = re.compile('[^a-zA-Z0-9_]').search
  
 from %s.general import Implementation as implementation
 ApiError = implementation.ApiError
-""" % ImpConstants.modellingPackageName)
+""" % metaConstants.modellingPackageName)
  
     # handle package imports
     self.write("\n# imported packages:\n")
@@ -635,7 +632,7 @@ ApiError = implementation.ApiError
 from %s.metamodel import XmlModelIo
 topPackage = XmlModelIo.readModel(checkValidity=False)
 metaPackage = topPackage.metaObjFromQualName('%s')
-""" % (ImpConstants.modellingPackageName, self.implPackageName))
+""" % (metaConstants.modellingPackageName, self.implPackageName))
     
     else:
       self.write("""
@@ -655,10 +652,10 @@ metaPackage = %s.topPackage.metaObjFromQualName('%s')
       
       if element.isImplementation:
         setter = 'None'
-      elif (element.isDerived and element.changeability == ImpConstants.frozen):
+      elif element.isDerived and element.changeability == metaConstants.frozen:
         setter = 'None'
       elif (isinstance(element,MetaModel.MetaRole)
-       and element.hierarchy != ImpConstants.no_hierarchy
+       and element.hierarchy != metaConstants.no_hierarchy
       ):
         setter =' None'
       else:
@@ -668,7 +665,7 @@ metaPackage = %s.topPackage.metaObjFromQualName('%s')
 %s = property(%s, %s, None,
 r""\"%s
 ""\")
-""" % (element.name, getter, setter, uniUtil.breakString(element.documentation)))
+""" % (element.name, getter, setter, memopsUtil.breakString(element.documentation)))
     
     else:
       name = element.name
@@ -684,7 +681,7 @@ r""\"%s
   # internal function 
   def getDataObjIdTuple(self, tag):
     
-    raise ImpConstants.MemopsError("getDataObjIdTuple not Implemented")
+    raise metaConstants.MemopsError("getDataObjIdTuple not Implemented")
 
   ###########################################################################
 

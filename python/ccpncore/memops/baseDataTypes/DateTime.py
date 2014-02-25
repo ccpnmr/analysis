@@ -48,4 +48,31 @@ software development. Bioinformatics 21, 1678-1684.
 
 ===========================REFERENCE END===============================
 """
+import time
+
 from memops.general.baseDataTypes.String import *
+
+# Draft TIme class for use in reworking nthis type.
+
+class DateTime(float):
+    """Simple class to print time in ascii, represented as floats as in time.time()"""
+    def __str__(self):
+        """Print as a string"""
+        # equivalent to time.asctime(time.localtime(self))
+        return time.ctime(self)
+
+    def __repr__(self):
+        return 'Time(%s)' % float.__repr__(self)
+
+    @staticmethod
+    def fromString(string):
+        """Make from a string, inverse of __str__"""
+        return Time(time.mktime(time.strptime(string)))
+#end class
+
+
+def now():
+    return Time(time.time())
+day = 24*3600.0
+week = 7*day
+year = 365*day

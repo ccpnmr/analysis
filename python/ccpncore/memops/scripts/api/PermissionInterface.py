@@ -4,4 +4,4 @@ class PermissionInterface(object):
 
   def checkPermission(self, op, inClass):
 
-    raise 'should be overridden'
+    raise NotImplementedError("Should be overwritten")

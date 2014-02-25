@@ -306,7 +306,7 @@ class LanguageInterface:
 
     raise NotImplementedError("Should be overridden")
 
-  def callFunc(self, func, var=None, params = None, doWrite = True):
+  def callFunc(self, func, obj=None, params=None, doWrite=True):
 
     raise NotImplementedError("Should be overridden")
     

@@ -53,19 +53,14 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 
 """
-from memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops import Constants as genConstants
+from ccpncore.memops.scripts.core.LanguageInterface import LanguageInterface
+from ccpncore.memops.scripts.core.TypeInterface import TypeInterface
+from ccpncore.memops.TextWriter import TextWriter
+from ccpncore.memops.format.xml.XmlGen import XmlGen
+
 MemopsError = MetaModel.MemopsError
-
-from memops.metamodel import ImpConstants
-
-from memops.universal.Constants import trueString, falseString
-
-import memops.general.Constants as genConstants
-from memops.scripts_v2.core.LanguageInterface import LanguageInterface
-from memops.scripts_v2.core.TypeInterface import TypeInterface
-from memops.general.TextWriter import TextWriter
-from memops.format.xml.XmlGen import XmlGen
-
 headerTextTypeNames = ['Token','Word']
 
 mandatoryAttributes = ()
@@ -146,7 +141,6 @@ class XmlMapWrite(LanguageInterface, TypeInterface, TextWriter, XmlGen):
   
     globalMapVar = self.localVarNames['globalMap']
     currentMapVar = self.localVarNames['currentMap']
-    prefix = package.shortName
     
     if package is self.implPackage:
       # set up top level dicts
@@ -334,7 +328,6 @@ class XmlMapWrite(LanguageInterface, TypeInterface, TextWriter, XmlGen):
     contentMapVar = lv['contentMap']
     abstractTypes = lv['abstractTypes']
     classMap = self.globalMap[self.prefix]['abstractTypes'][clazz.name]
-    cMap = self.getDictEntry(abstractTypes, self.toLiteral(clazz.name))
   
     self.newDict(contentMapVar, keyType=self.stringVarType, needDeclType=True)
     self.setDictEntry(lv['currentMap'], self.toLiteral('content'), 
@@ -565,7 +558,7 @@ class XmlMapWrite(LanguageInterface, TypeInterface, TextWriter, XmlGen):
 
   ###########################################################################
   
-  def addXmlClassCreation(self, dictName,  clazz, package):
+  def addXmlClassCreation(self, dictName,  clazz, package=None):
     """ Write info for creation of new class
     """
     
@@ -1365,7 +1358,6 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
     self.baseClassVarType = self.getImportName(self.baseClass, subDirs=apiDirs)
     self.baseDataVarType = self.getImportName(self.baseDataType, subDirs=apiDirs)
 
-    tt = self.dictInterfaceType(self.stringVarType, self.dictInterfaceType())
     params= (('stream', self.fileInterfaceType('r'), 'input stream'),
              ('topObjId', self.stringVarType, 'top object id', self.toLiteral(None)),
              ('topObject', self.baseClassVarType, 'top object', self.toLiteral(None)),
@@ -1954,7 +1946,6 @@ require some code modifications.
     # IF BLOCK 113
     self.writeComment('IF BLOCK 113')
     self.startIf(self.comparison(self.toLiteral('delay'), '==', 'proc'))
-    tt = self.dictInterfaceType()
     self.newList('ll', varType=self.anyVarType, needDeclType=True)
     self.addList('value', 'll')
     self.setDictEntry('objDelayDict', 'name', 'll')
@@ -2917,7 +2908,7 @@ intrapackge and later out-of-package children are set.
     tt = self.getClassname('obj2')
     tt = self.getDictEntry('linkContent', tt, keyIsMandatory=True)
     ss = self.dictVarType
-    tt = self.setVar('curMap', tt, varType=ss, castType=ss)
+    self.setVar('curMap', tt, varType=ss, castType=ss)
 
     # IF BLOCK 306
     self.writeComment('IF BLOCK 306')
@@ -3011,7 +3002,7 @@ intrapackge and later out-of-package children are set.
     tt = self.getClassname('obj')
     tt = self.getDictEntry('dataTypeMap', tt, keyIsMandatory=True)
     ss = self.dictVarType
-    tt = self.setVar('curMap', tt, varType=ss, castType=ss)
+    self.setVar('curMap', tt, varType=ss, castType=ss)
 
     self.peekStack('parentStack', 'parentObj', varType=self.baseClassVarType)
     tt = self.getDictEntry('curMap', self.toLiteral('fromParent'), keyIsMandatory=True)

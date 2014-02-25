@@ -1,33 +1,21 @@
 import os
-from memops.universal import Io as uniIo
-from memops.general import Version
-from memops.metamodel import MetaModel
-from memops.metamodel import ImpConstants
-from memops.metamodel import XmlModelIo
-from memops.format.xml import XmlGen
-from memops.metamodel.ModelPortal import ModelPortal
-from memops.scripts_v2.core import PyFileModelAdapt
-implTemplate = "%s.%s.%%s" % (ImpConstants.modellingPackageName,
-                              ImpConstants.implementationPackageName)
+from ccpncore.util import Path
+from ccpncore.memops import Version
+from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.metamodel import XmlModelIo
+from ccpncore.memops.format.xml import XmlGen
+from ccpncore.memops.metamodel.ModelPortal import ModelPortal
+from ccpncore.memops.scripts.core import PyFileModelAdapt
+implTemplate = "%s.%s.%%s" % (metaConstants.modellingPackageName,
+                              metaConstants.implementationPackageName)
 stringTypeName = implTemplate % 'String'
 
-ignoreTags = set([
- 'accessedPackages', 
- 'codeStubs', 
- 'constructorCodeStubs', 
- 'destructorCodeStubs',
- 'postDestructorCodeStubs',
- 'documentation', 
- 'hicard',
- 'importedPackages',
- 'isAutomatic',
- 'isOrdered',
- 'isUnique',
- 'partitionsChildren', 
- 'subtypes',]
-)
+ignoreTags = {'accessedPackages', 'codeStubs', 'constructorCodeStubs', 'destructorCodeStubs',
+              'postDestructorCodeStubs', 'documentation', 'hicard', 'importedPackages',
+              'isAutomatic', 'isOrdered', 'isUnique', 'partitionsChildren', 'subtypes'}
 
-nameTags = set(['name', 'baseName'])
+nameTags = {'name', 'baseName'}
 
 class LocalXmlGen(XmlGen.XmlGen):
 
@@ -64,7 +52,7 @@ def makeUpgrade(oldTag, curTopPackage=None, modelPortal=None,
                                 excludePackageNames=excludePackageNames)
   
   # find old implementation top directory, and old version string .
-  currentTopDir = uniIo.getTopDirectory()
+  currentTopDir = Path.getTopDirectory()
   currentVersion = versionFromDir(currentTopDir)
   
   # get top directory for old version file tree
@@ -102,9 +90,10 @@ def dirNameFromVersionString(versionString):
 def versionFromDir(topDir):
   """ Get current version string for directory tree rooted in topDir
   """
-  from memops.general import Version
-  genConstantsFile = os.path.join(topDir, 'python/memops/general/Constants.py')
-  for line in open(genConstantsFile):
+  # TODO fix compatibility file getting now files have moved
+  from ccpncore.memops import Version
+  versionFile = os.path.join(topDir, 'python/memops/general/Constants.py')
+  for line in open(versionFile):
     if line.startswith('currentModelVersion = '):
       exec(line, locals(), globals())
       return currentModelVersion
@@ -162,13 +151,13 @@ def makeCompatibility(oldmodel, newmodel, modelPortal=None,
         
         vt = ee.valueType
         cc = ee.container
-        if (vt.container in cc.container.accessedPackages):
+        if vt.container in cc.container.accessedPackages:
           # interpackage link in wrong direction. Not in maps. Must be skipped
           # Should not matter, but skip rather than ignore in case of model changes.
           skips.append((cc.container.shortName, cc.name, ee.name, ee.guid, 
                         ee.__class__.__name__))
  
-        elif ee.hierarchy != ImpConstants.no_hierarchy:
+        elif ee.hierarchy != metaConstants.no_hierarchy:
           # parent or child link. Delay is not defined - must be skipped
           skips.append((cc.container.shortName, cc.name, ee.name, ee.guid, 
                         ee.__class__.__name__))
@@ -179,7 +168,7 @@ def makeCompatibility(oldmodel, newmodel, modelPortal=None,
           dd = XmlGen.getRoleMap(ee, cc, globalMapping)
           elemMap = {}
           if dd is None:
-            print 'WARNING, no map found for %s' % ee
+            print ('WARNING, no map found for %s' % ee)
             
           else:
             for tag in ('type', 'proc', 'name', 'eType', 'tag'):
@@ -193,7 +182,7 @@ def makeCompatibility(oldmodel, newmodel, modelPortal=None,
                              elemMap, None))
             else:
               # cannot create map, skip
-              print 'WARNING, incomplete map found for %s' % ee
+              print ('WARNING, incomplete map found for %s' % ee)
               skips.append((cc.container.shortName, cc.name, ee.name, ee.guid, 
                             ee.__class__.__name__))
  
@@ -227,7 +216,7 @@ def makeCompatibility(oldmodel, newmodel, modelPortal=None,
             delays.append((cc.container.shortName, cc.name, ee.name, ee.guid,
                            elemMap, valueTypeGuid))
           else:
-            print 'WARNING, no map found for %s' % ee
+            print ('WARNING, no map found for %s' % ee)
             skips.append((cc.container.shortName, cc.name, ee.name, ee.guid, ee.__class__.__name__))
   
         else:
@@ -341,7 +330,7 @@ newElements = [
     
       if isinstance(newobj, MetaModel.ClassElement):
         if (newobj.isDerived and
-            (oldobj.isDerived or newobj.changeability == ImpConstants.frozen)):
+            (oldobj.isDerived or newobj.changeability == metaConstants.frozen)):
           # derived non-settable element, or both sides derived. Ignore
           continue 
         
@@ -363,7 +352,7 @@ newElements = [
         usediffs.difference_update(nameTags)
         
         if not (isinstance(newobj, MetaModel.MetaRole) and
-                newobj.hierarchy == ImpConstants.parent_hierarchy):
+                newobj.hierarchy == metaConstants.parent_hierarchy):
           # ignore parent role renamings, handle everything else   
              
           if isinstance(newobj, MetaModel.ClassElement):

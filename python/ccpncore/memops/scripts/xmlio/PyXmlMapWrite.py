@@ -53,21 +53,13 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 
 """
-from memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops import Constants as memopsConstants
+from ccpncore.memops.scripts.xmlio.XmlMapWrite import XmlMapWrite
+from ccpncore.memops.scripts.core.PyLanguage import PyLanguage
+from ccpncore.memops.scripts.core.PyType import PyType
+
 MemopsError = MetaModel.MemopsError
-
-from memops.metamodel import ImpConstants
-
-from memops.universal.Constants import trueString, falseString
-
-import memops.general.Util as genUtil
-import memops.general.Constants as genConstants
-from memops.scripts_v2.xmlio.XmlMapWrite import XmlMapWrite
-from memops.scripts_v2.core.PyLanguage import PyLanguage
-from memops.scripts_v2.core.PyType import PyType
-
-repositoryTag = '$Name:  $'
-repositoryId  = '$Id: PyXmlMapWrite.py,v 1.29 2010/06/25 10:10:31 rhfogh Exp $'
 
 
 def writeXmlIo(modelPortal, rootFileName=None, rootDirName=None,
@@ -77,12 +69,9 @@ def writeXmlIo(modelPortal, rootFileName=None, rootDirName=None,
   Only function that should be called directly by 'make' scripts etc.
   """
   
-  scriptRevision = genUtil.getRepositoryInfo(repositoryId).get('revision')
-  
   pyXmlWrite = PyXmlMapWrite(modelPortal=modelPortal, rootFileName=rootFileName, 
                         rootDirName=rootDirName, releaseVersion=releaseVersion,
-                        scriptName='PyXmlMapWrite', scriptRevision=scriptRevision,
-                        **kw)
+                        scriptName='PyXmlMapWrite', **kw)
   pyXmlWrite.processModel()
 
 
@@ -132,12 +121,12 @@ class PyXmlMapWrite(PyLanguage, PyType, XmlMapWrite):
       pp = clazz.container
       if pp in package.accessedPackages:
         self.write("import %s" 
-         % self.getImportName(pp, subDirs=[genConstants.apiCodeDir])
+         % self.getImportName(pp, subDirs=[memopsConstants.apiCodeDir])
         )
     
     self.setDictEntry(dictName, self.toLiteral('class'), 
                       self.getImportName(clazz, 
-                                         subDirs=[genConstants.apiCodeDir]))
+                                         subDirs=[memopsConstants.apiCodeDir]))
 
   ###########################################################################
 
@@ -167,7 +156,7 @@ class PyXmlMapWrite(PyLanguage, PyType, XmlMapWrite):
     # import own API package
     self.writeComment("\n Current package api")
     self.write("import %s" 
-               % self.getImportName(package, subDirs=[genConstants.apiCodeDir]))
+               % self.getImportName(package, subDirs=[memopsConstants.apiCodeDir]))
 
     if package is self.implPackage:
       
@@ -426,8 +415,6 @@ if mapping is None:
   # implements XmlMapWrite
   def streamOrderedCollection(self, var):
 
-    collection = 'll'
-
     self.write('''
 if tmpMap['type'] == 'child':
   items = list(%s.items())
@@ -602,7 +589,7 @@ for event, elem in ElementTree.iterparse(stream, events=("start", "end")):
 
   # LoadFromStream function
   # implements XmlMapWrite
-  def streamElementTag(self, state):
+  def streamElementTag(self, state='start'):
 
     return 'elem.tag'
 
@@ -670,7 +657,7 @@ else:
 
   # LoadFromStream function
   # implements XmlMapWrite
-  def streamElementIsSkip(self):
+  def streamElementIsSkip(self, doReset=True):
 
     return self.comparison('elem', 'is', 'skipElement')
 

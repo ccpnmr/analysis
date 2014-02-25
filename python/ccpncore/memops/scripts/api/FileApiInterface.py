@@ -1,7 +1,7 @@
 """interface for language specific parts of File Api
 """
 
-from memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import MetaModel
 MemopsError = MetaModel.MemopsError
 
 class FileApiInterface(object):
@@ -10,7 +10,7 @@ class FileApiInterface(object):
 
   ###########################################################################
 
-  def getImplLink(self, owner, linkName, var, ownerClass):
+  def getImplLink(self, owner, linkName, var, ownerClass, castType=None):
     """ Get implementation link value
     """
 

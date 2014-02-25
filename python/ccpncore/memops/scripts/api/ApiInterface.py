@@ -1,4 +1,4 @@
-from memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import MetaModel
 MemopsError = MetaModel.MemopsError
 
 # interface for language and/or implementation specific parts of Api Generation
@@ -175,7 +175,7 @@ class ApiInterface(object):
 
   ###########################################################################
 
-  def getImplLink(self, owner, linkName, var, ownerClass):
+  def getImplLink(self, owner, linkName, var, ownerClass, castType=None):
 
     raise MemopsError("getImplLink should be overridden in subclass")
 
@@ -191,7 +191,7 @@ class ApiInterface(object):
 
   ###########################################################################
 
-  def getImplAttr(self, owner, attrName):
+  def getImplAttr(self, owner, attrName, inClass=None):
 
     raise MemopsError("getImplAttr should be overridden in subclass")
 
@@ -199,7 +199,7 @@ class ApiInterface(object):
 
   ###########################################################################
 
-  def setImplAttr(self, owner, attrName, value, inClass = None):
+  def setImplAttr(self, owner, attrName, value, inClass=None):
 
     raise MemopsError("setImplAttr should be overridden in subclass")
 

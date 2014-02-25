@@ -58,24 +58,24 @@ software development. Bioinformatics 21, 1678-1684.
 # NBNB TBD allow for changeability == 'add_only'
 
 
-from memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import MetaModel
 MemopsError = MetaModel.MemopsError
-from memops.metamodel import ImpConstants
-from memops.metamodel import Util as metaUtil
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.metamodel import Util as metaUtil
 
-import memops.general.Constants as genConstants
-infinity = genConstants.infinity
+from ccpncore.memops import Constants as memopsConstants
+infinity = memopsConstants.infinity
 
-from memops.scripts_v2.core.LanguageInterface import LanguageInterface
-from memops.scripts_v2.core.TypeInterface import TypeInterface
-from memops.general.TextWriter import TextWriter
-from memops.universal import Util as uniUtil
-from memops.metamodel.ModelTraverse import ModelTraverse
+from ccpncore.memops.scripts.core.LanguageInterface import LanguageInterface
+from ccpncore.memops.scripts.core.TypeInterface import TypeInterface
+from ccpncore.memops.TextWriter import TextWriter
+from ccpncore.memops import Util as memopsUtil
+from ccpncore.memops.metamodel.ModelTraverse import ModelTraverse
 
-from memops.scripts_v2.api.ApiInterface import ApiInterface
-from memops.scripts_v2.api.PermissionInterface import PermissionInterface
-from memops.scripts_v2.api.PersistenceInterface import PersistenceInterface
-from memops.scripts_v2.api.TransactionInterface import TransactionInterface
+from ccpncore.memops.scripts.api.ApiInterface import ApiInterface
+from ccpncore.memops.scripts.api.PermissionInterface import PermissionInterface
+from ccpncore.memops.scripts.api.PersistenceInterface import PersistenceInterface
+from ccpncore.memops.scripts.api.TransactionInterface import TransactionInterface
   
 mandatoryAttributes = ('varNames',)
 
@@ -84,7 +84,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
              TransactionInterface, TypeInterface, LanguageInterface, 
              TextWriter, ModelTraverse):
   
-  codeDirName = genConstants.apiCodeDir
+  codeDirName = memopsConstants.apiCodeDir
 
   oldSelfVar = 'oldSelf'
   oldSelfVars = 'oldSelves'
@@ -418,7 +418,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     if isinstance(inClass, MetaModel.MetaClass):
       for role in inClass.getAllRoles():
         if (not role.isDerived  and not role.isImplementation 
-            and role.hierarchy != ImpConstants.parent_hierarchy):
+            and role.hierarchy != metaConstants.parent_hierarchy):
           self.writeInitRoleDefault(role)
 
   ###########################################################################
@@ -448,7 +448,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     if role.hicard == 1:
       self.setValue(self.varNames['self'], role, value=None)
       
-    elif role.hierarchy == ImpConstants.child_hierarchy:
+    elif role.hierarchy == metaConstants.child_hierarchy:
       self.setValue(self.varNames['self'], role,
                     value=self.newDict(valueType=self.elementVarType(role)))
         
@@ -541,7 +541,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     thatVar = role.baseName
     thoseVar = role.name
     if thoseVar == thatVar:
-      thoseVar = thoseVar + '_s'
+      thoseVar += '_s'
     
     if role.isDerived:
       return
@@ -558,7 +558,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.startBlock() 
     # necessary to shield internal parameters from name clashes
     
-    if (role.hicard == 1):
+    if role.hicard == 1:
       self.getValue(self.varNames['self'], role, thatVar, inClass=inClass)
       self.startIf(self.valueIsNotNone(thatVar))
       
@@ -573,8 +573,8 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
         # look for cascading deletes
         # NB either branch of the 'or' catches child links
         if (otherRole.hicard == otherRole.locard or
-         (role.hierarchy != ImpConstants.parent_hierarchy
-         and otherRole.changeability == ImpConstants.frozen)
+         (role.hierarchy != metaConstants.parent_hierarchy
+         and otherRole.changeability == metaConstants.frozen)
         ):
           self.checkObjToBeDeleted(thatVar)
 
@@ -605,7 +605,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       else:
         # look for cascading deletes
         if (otherRole.hicard == otherRole.locard or
-            otherRole.changeability == ImpConstants.frozen):
+            otherRole.changeability == metaConstants.frozen):
 
           self.startLoop(thatVar, thoseVar, **self.collectionParams(role))
           self.checkObjToBeDeleted(thatVar)
@@ -689,7 +689,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     parentRole = inClass.parentRole
     
     if self.topObject in inClass.getAllSupertypes():
-      BaseName = uniUtil.upperFirst(parentRole.otherRole.baseName)
+      BaseName = memopsUtil.upperFirst(parentRole.otherRole.baseName)
       curRole = parentRole.valueType.getElement('current' + BaseName)
       self.getValue(self.varNames['self'], parentRole, var=parentRole.baseName, 
                     lenient=True, inClass=inClass)
@@ -718,7 +718,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
     otherRole = role.otherRole
     
-    if role.hierarchy == ImpConstants.child_hierarchy:
+    if role.hierarchy == metaConstants.child_hierarchy:
       # always deleted
       return
       
@@ -730,7 +730,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       # no action needed
       return
     
-    elif otherRole.changeability == ImpConstants.frozen:
+    elif otherRole.changeability == metaConstants.frozen:
       # always deleted
       return
     
@@ -740,7 +740,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     thatVar = role.baseName
     var = otherRole.name
     if var == thatVar:
-      var = var + '_2'
+      var += '_2'
 
     if otherRole.hicard == 1:
       
@@ -936,11 +936,6 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     ###self.writeComment('TBD: writeGetElement self.defineVar')
     self.defineVar(resultVar, varType=resultVarType)
 
-    """ TBD: This is not needed any more
-    if opType not in ('get', 'getByKey', 'getFullKey', 'getLocalKey', 'sorted', 'findFirst', 'findAll'):
-      currentVar = self.valueVar(target, prefix=self.currentPrefix)
-      self.defineVar(currentVar, varType=self.collectionType(target))
-"""
 
     self.startTransaction(op, inClass)
 
@@ -1250,7 +1245,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
               else:
                 self.writeSetRoleNN(op, inClass)
                 
-        if element.name == ImpConstants.serial_attribute:
+        if element.name == metaConstants.serial_attribute:
           self.setSerialValue(inClass, value=var)
         else:
           self.setValue(self.varNames['self'], element, value=var)
@@ -1413,7 +1408,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     iterVar = 'cv'
 
     # TBD: is this correct?  NMBNB TBD this function still to check RHF
-    if otherRole.changeability != ImpConstants.frozen:
+    if otherRole.changeability != metaConstants.frozen:
       # TBD: otherRole.locard == 1 implies already know that everything in currentVar is in var
       # but that is assuming that locard check has been done
       self.startLoop(iterVar, currentVar, **self.collectionParams(role))
@@ -1424,7 +1419,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
     self.startLoop(iterVar, var, **self.collectionParams(role))
     # TBD: is this correct?
-    if otherRole.changeability != ImpConstants.frozen:
+    if otherRole.changeability != metaConstants.frozen:
       self.startIf(self.negate(self.isInCollection(iterVar, currentVar, **self.collectionParams(role))))
       self.getValue(iterVar, otherRole, self.oldSelfVar, lenient=True,
                     inClass=inClass, needVarType=False)
@@ -1472,7 +1467,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
   def writeAddRoleN1(self, op, inClass):
 
     role = op.target
-    if role.changeability != ImpConstants.frozen: # TBD: is this correct?
+    if role.changeability != metaConstants.frozen: # TBD: is this correct?
       
       # set up variables etc.
       var = self.valueVar(role, doInstance=True)
@@ -1499,7 +1494,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
   def writeAddRoleNN(self, op, inClass):
 
     role = op.target
-    if role.changeability != ImpConstants.frozen: # TBD: is this correct?
+    if role.changeability != metaConstants.frozen: # TBD: is this correct?
       var = self.valueVar(role, doInstance=True)
       otherRole = role.otherRole
       self.getValue(var, otherRole, self.oldSelfVars, lenient=True, inClass=inClass)
@@ -1512,7 +1507,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
   def writeRemoveRoleN1(self, op, inClass):
 
     role = op.target
-    if role.changeability != ImpConstants.frozen: # TBD: is this correct?
+    if role.changeability != metaConstants.frozen: # TBD: is this correct?
       var = self.valueVar(role, doInstance=True)
       otherRole = role.otherRole
       self.setValue(var, otherRole, value=None)
@@ -1524,7 +1519,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
   def writeRemoveRoleNN(self, op, inClass):
 
     role = op.target
-    if role.changeability != ImpConstants.frozen: # TBD: is this correct?
+    if role.changeability != metaConstants.frozen: # TBD: is this correct?
       var = self.valueVar(role, doInstance=True)
       otherRole = role.otherRole
       self.getValue(var, otherRole, self.oldSelfVars, lenient=True, inClass=inClass)
@@ -1693,7 +1688,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
         self.writeCheckValidOtherRole(op, inClass, elem)
    
       # check object partitioning - do two-way links only once
-      if elem.hierarchy == ImpConstants.no_hierarchy:
+      if elem.hierarchy == metaConstants.no_hierarchy:
          otherRole = elem.otherRole
          if (otherRole is None or otherRole.hicard > elem.hicard
              or (otherRole.hicard == elem.hicard and otherRole.name >= elem.name)):
@@ -1819,7 +1814,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     # actual classs
     if isinstance(inClass, MetaModel.MetaClass):
       for role in inClass.getAllRoles():
-        if (role.hierarchy == ImpConstants.child_hierarchy):
+        if role.hierarchy == metaConstants.child_hierarchy:
           self.writeCheckAllValidElement(op, inClass, role, isChildLink=True)
     
   ###########################################################################
@@ -1892,7 +1887,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
   def writeExternalOp(self, op, inClass):
 
     returnPars = [x for x in op.parameters 
-                  if x.direction == ImpConstants.return_direction]
+                  if x.direction == metaConstants.return_direction]
 
     if returnPars and len(returnPars) != 1:
         raise MemopsError("%s: multiple return parameters not allowed"
@@ -2056,7 +2051,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     currentVar = self.valueVar(element, prefix=self.currentPrefix)
     
     # checks for frozen elements
-    if element.changeability == ImpConstants.frozen:
+    if element.changeability == metaConstants.frozen:
       self.startIf(self.varNames['notInConstructor'])
       self.raiseApiError('cannot set %s, frozen' % op.target.name, 
                          self.varNames['self'], inOp=op)
@@ -2118,25 +2113,25 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     # handle partitioning role
     useMultiRoleAt = None
     crossRole = partitionRoles[0]
-    if partitionRoles[0] is None:
+    if crossRole is None:
       crossRole = partitionRoles[1]
-      if partitionRoles[1] is not None:
+      if crossRole is not None:
         # set special topObjectClass for typing. Only needed if we are here
         topObjRole = role.valueType.getElement(self.varNames['topObject'])
         if len(uplinks[1]) == 1 and uplinks[1][0] is topObjRole:
           topObjClasses[1] = role.valueType.container.topObjectClass
         
-        if partitionRoles[1].hicard == 1:
-          uplinks[1].append(partitionRoles[1])
+        if crossRole.hicard == 1:
+          uplinks[1].append(crossRole)
         else:
           useMultiRoleAt = 1
     
-    elif partitionRoles[0].hicard == 1:
+    elif crossRole.hicard == 1:
       # set special topObjectClass for typing. Only needed if we are here
       topObjRole = role.container.getElement(self.varNames['topObject'])
       if len(uplinks[0]) == 1 and uplinks[0][0] is topObjRole:
         topObjClasses[0] = role.container.container.topObjectClass
-      uplinks[0].append(partitionRoles[0])
+      uplinks[0].append(crossRole)
     
     elif partitionRoles[1] is not None and partitionRoles[1].hicard == 1:
       # set special topObjectClass for typing. Only needed if we are here
@@ -2144,7 +2139,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       topObjRole = role.valueType.getElement(self.varNames['topObject'])
       if len(uplinks[1]) == 1 and uplinks[1][0] is topObjRole:
         topObjClasses[1] = role.valueType.container.topObjectClass
-      uplinks[1].append(partitionRoles[1])
+      uplinks[1].append(crossRole)
       
     else:
       useMultiRoleAt = 0
@@ -2159,7 +2154,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     xvarName = self.varNames['self']
     ii = 0
     for rr in uplinks[0]:
-      ii = ii + 1
+      ii += 1
       ss = 'xx%s' % ii
       
       # get variable typing element
@@ -2190,7 +2185,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     yvarName = valueVar
     ii = 0
     for rr in uplinks[1]:
-      ii = ii + 1
+      ii += 1
       ss = 'yy%s' % ii
       
       # get variable typing element
@@ -2213,7 +2208,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       self.startIf(self.negate(self.comparison(xvarName, 'is', yvarName)))
       self.raiseApiError("""Link %s between objects from separate partitions
  - %s does not match""" 
-                     % (role.name, rr.valueType.qualifiedName()), 
+                     % (role.name, uplinks[1][-1].valueType.qualifiedName()),
                         self.varNames['self'], valueVar)
       self.endIf()
     
@@ -2318,7 +2313,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
   ###########################################################################
 
-  def checkVarCanBeRemoved(self, var, element, nRemoved=1):
+  def checkVarCanBeRemoved(self, var, element, nRemoved="1"):
     """cardinality check for use in remove function
     """
 
@@ -2327,7 +2322,8 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       self.startIf(self.comparison(
                    self.lenCollection(var, **self.collectionParams(element)),
                    '<', self.arithmetic(locard,'+',nRemoved)))
-      self.raiseApiError('locard: %s: cannot remove value' % var, 
+      # NBNB use of string nRremoved instead of suggested int is OK.
+      self.raiseApiError('locard: %s: cannot remove value' % var,
                          self.varNames['self'])
       self.endIf()
 
@@ -2470,24 +2466,24 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
           self.endIf()
 
     elif opType == 'remove':
-      var = self.valueVar(role, doInstance=True)
       if otherLocard == 1:
         raise MemopsError(
          "Error for %s.This should never happen with the current model rules."
          % op.qualifiedName()
         )
-        # DIAGRAM N1 remove: this card check called "value"
-        # if condition can only happen if isUnique = False, in that case can 
-        # have value in values more than once
-        if not role.isUnique:
-          self.startIf(self.comparison(
-           self.countInCollection(var, currentVar, **self.collectionParams(role)),
-           '==', 1)
-          )
-        self.raiseApiError('locard %s: cannot remove value' % otherRole.name, 
-                           self.varNames['self'], inOp=op)
-        if not role.isUnique:
-          self.endIf()
+      # DIAGRAM N1 remove: this card check called "value"
+      # if condition can only happen if isUnique = False, in that case can
+      # have value in values more than once
+      # var = self.valueVar(role, doInstance=True)
+      # if not role.isUnique:
+      #   self.startIf(self.comparison(
+      #    self.countInCollection(var, currentVar, **self.collectionParams(role)),
+      #    '==', 1)
+      #   )
+      # self.raiseApiError('locard %s: cannot remove value' % otherRole.name,
+      #                    self.varNames['self'], inOp=op)
+      # if not role.isUnique:
+      #   self.endIf()
 
   ###########################################################################
 
@@ -2756,7 +2752,6 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       dummyCollVar = 'xx'
       self.startBlock()
       if element.isOrdered:
-        varType = self.elementVarType(element)
         collParams = {'isUnique':True, 'isOrdered':False,
                       'varType':self.elementVarType(element)}
         self.defineVar(dummyCollVar, varType=self.collectionType(element, isUnique=True, isOrdered=False))
@@ -2956,7 +2951,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
    
     if opType in ('init', 'fullDelete') or ((
      isinstance(element,MetaModel.ClassElement) ) and 
-     element.changeability != ImpConstants.frozen
+     element.changeability != metaConstants.frozen
     ):
       if opType == 'fullDelete':
         s = '' # check already done in singleDelete
@@ -3045,7 +3040,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     this only works for operations with container targets
     """
     
-    returndir = ImpConstants.return_direction
+    returndir = metaConstants.return_direction
     
     if target is None:
       # No target - get information from standard operationData

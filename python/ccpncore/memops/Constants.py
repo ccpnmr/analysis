@@ -82,9 +82,10 @@ int_code = 'Int'
 float_code = 'Float'
 string_code = 'String'
 boolean_code = 'Boolean'
+datetime_code = 'DateTime'
 dict_code = 'Dict'
 typeCode_enumeration = [int_code, float_code,
- string_code, boolean_code, dict_code,
+ string_code, boolean_code, datetime_code, dict_code,
 ]
 typeCode_enumeration.sort()
 
@@ -168,3 +169,16 @@ xmlSubDirs = [xmlCodeDir]
 # # Directory names for Python code xml Schema subdirectories (in model)
 # xmlSchemaDir = 'xmlSchema'
 # xmlSchemaSubDirs = [xmlSchemaDir]
+
+
+class ApiError(Exception):
+  ''' Base class for all Api Errors
+  '''
+  def getError_msg(self):
+    args = self.args
+    try:
+      return args[0]
+    except:
+      return ''
+
+  error_msg = property(getError_msg, None, None)

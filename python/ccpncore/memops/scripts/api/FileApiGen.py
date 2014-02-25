@@ -1,11 +1,11 @@
-from memops.metamodel import ImpConstants
-from memops.metamodel import MetaModel
-MemopsError = MetaModel.MemopsError
-from memops.metamodel import Util as metaUtil
-from memops.general import Constants as genConstants
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import Util as metaUtil
+from ccpncore.memops import Constants as memopsConstants
 
-from memops.scripts_v2.api.ApiGen import ApiGen
-from memops.scripts_v2.api.FileApiInterface import FileApiInterface
+from ccpncore.memops.scripts.api.ApiGen import ApiGen
+from ccpncore.memops.scripts.api.FileApiInterface import FileApiInterface
+MemopsError = MetaModel.MemopsError
 
 # implements PermissionInterface, PersistenceInterface, TransactionInterface
 # implements implementation-specific parts of ApiInterface
@@ -31,7 +31,7 @@ class FileApiGen(ApiGen, FileApiInterface):
     ##dd['varType'] = self.elementVarType[self.topObject]
     pp = self.modelPortal.topPackage
     impl = pp.metaObjFromQualName(self.implPackageName)
-    dd['varType'] = self.elementVarType(impl.getElement(ImpConstants.baseClassName))
+    dd['varType'] = self.elementVarType(impl.getElement(metaConstants.baseClassName))
     
     # special trick to avoid continous checking of topObject.isLoaded
     # is checked in possiblyLoadData
@@ -77,7 +77,7 @@ class FileApiGen(ApiGen, FileApiInterface):
       
       # 'topObject' must have been set at this point
 
-      if element.changeability != ImpConstants.frozen:
+      if element.changeability != metaConstants.frozen:
       
         if (isinstance(element, MetaModel.MetaRole) and 
             self.couldHaveMultipleStoragesToCheck(element)):
@@ -420,7 +420,7 @@ class FileApiGen(ApiGen, FileApiInterface):
       
       
       if (element.hicard != 1 and isinstance(element,MetaModel.MetaRole)
-          and element.hierarchy == ImpConstants.child_hierarchy):
+          and element.hierarchy == metaConstants.child_hierarchy):
         # handle child links
         
         ###valString = self.getDictValues(valString, isUnique=element.isUnique, isOrdered=element.isOrdered)
@@ -526,7 +526,7 @@ class FileApiGen(ApiGen, FileApiInterface):
           self.defineVar(rootVar, self.elementVarType(self.dataRoot))
           self.getImplLink(self.varNames['self'], 'root', rootVar, inClass)
           for role in self.dataRoot.getAllRoles():
-            if role.hierarchy == ImpConstants.child_hierarchy:
+            if role.hierarchy == metaConstants.child_hierarchy:
               self.callFunc('refreshTopObjects', rootVar, 
                         params=self.toLiteral(role.valueType.packageName))
         else:
@@ -534,7 +534,7 @@ class FileApiGen(ApiGen, FileApiInterface):
       
       elif container.container is self.implPackage:
         # link from root to TopObject or 'current' link or DataObject.access
-        if element.hierarchy == ImpConstants.child_hierarchy:
+        if element.hierarchy == metaConstants.child_hierarchy:
           # link from root to TopObject
           if owner != rootVar:
             self.defineVar(rootVar, self.elementVarType(self.dataRoot))
@@ -596,7 +596,7 @@ class FileApiGen(ApiGen, FileApiInterface):
             varName = owner
             ii = 0
             for rr in uplinks[0]:
-              ii = ii + 1
+              ii += 1
               ss = 'xx%s' % ii
               # next two lines look silly,
               # but allow faster getting of Implementation links
@@ -680,7 +680,7 @@ class FileApiGen(ApiGen, FileApiInterface):
   # implements PersistenceInterface
   def setSerialValue(self, inClass, value):
     
-    attrName = ImpConstants.serial_attribute
+    attrName = metaConstants.serial_attribute
     element = inClass.getElement(attrName)
     selfVar = self.varNames['self']
     parentVar = self.varNames['parent']
@@ -690,7 +690,7 @@ class FileApiGen(ApiGen, FileApiInterface):
     self.startBlock()
     self.defineVar(parentVar, self.elementVarType(inClass.getParentClass()))
     self.getImplLink(selfVar, 'parent', parentVar, inClass)
-    ss = self.getImplAttr(parentVar, ImpConstants.serialdict_attribute)
+    ss = self.getImplAttr(parentVar, metaConstants.serialdict_attribute)
     self.setVar('oldSerial', self.getDictEntry(ss, dictKey), intType, intType)
     self.initSerialDictIfNull(inClass.parentRole.otherRole.name)
     self.startIf(self.comparison(value, '<', self.toLiteral(0)))
@@ -770,7 +770,7 @@ class FileApiGen(ApiGen, FileApiInterface):
       
       element = op.target
 
-      if element.changeability != ImpConstants.frozen:
+      if element.changeability != metaConstants.frozen:
         self.startIf(self.varNames['notIsReading'])
         if isinstance(element, MetaModel.MetaAttribute):
           self.startIf(self.varNames['notInConstructor'])
@@ -932,7 +932,6 @@ class FileApiGen(ApiGen, FileApiInterface):
                          self.varNames['topObject'], inClass)
                          
         # set implementation attributes
-        varType = self.booleanType
         # NBNB TBD check 'if condition' for non-python
         self.startIf(self.getDictEntry(self.varNames['attrlinks'],
             self.toLiteral(self.varNames['isReading']),
@@ -1001,7 +1000,7 @@ class FileApiGen(ApiGen, FileApiInterface):
       
       
     otherRole = parentRole.otherRole
-    if (otherRole.hicard == 1):
+    if otherRole.hicard == 1:
       # only child
       self.checkVarIsNone(self.getValue(parentVar, otherRole, lenient=True,
                                         inClass=inClass))
@@ -1019,7 +1018,7 @@ class FileApiGen(ApiGen, FileApiInterface):
  
       # check hicard - NB hardwired here to avoid getting child collection
       hicard = otherRole.hicard
-      if hicard != genConstants.infinity:
+      if hicard != memopsConstants.infinity:
         self.startIf(self.comparison(self.lenDict(dictVar),
                                      '>', hicard))
         self.raiseApiError('%s can have maximum %d %s'
@@ -1074,7 +1073,7 @@ class FileApiGen(ApiGen, FileApiInterface):
     if isinstance(inClass, MetaModel.MetaClass):
       if self.topObject in inClass.getAllSupertypes():
         for role in inClass.getAllRoles():
-          if role.hierarchy == ImpConstants.child_hierarchy:
+          if role.hierarchy == metaConstants.child_hierarchy:
             self.writeInitRoleDefault(role)
                          
   ###########################################################################
@@ -1099,13 +1098,13 @@ class FileApiGen(ApiGen, FileApiInterface):
       thatVar = role.baseName
       thoseVar = role.name
       if thoseVar == thatVar:
-        thoseVar = thoseVar + '_s'
+        thoseVar += '_s'
       
       if inClass.container is not role.otherRole.container.container:
         # other has different storage from self
         # add storage to storages dict
 
-        if (role.hicard == 1):
+        if role.hicard == 1:
           self.addStorageToCheck(thatVar, role.valueType)
 
         else:
@@ -1154,12 +1153,12 @@ class FileApiGen(ApiGen, FileApiInterface):
   # implements ApiInterface
   def writeInitSerial(self, op, inClass):
     
-    attrName = ImpConstants.serial_attribute
-    ddName = ImpConstants.serialdict_attribute
+    attrName = metaConstants.serial_attribute
+    ddName = metaConstants.serialdict_attribute
     selfVar = self.varNames['self']
     element = inClass.getElement(attrName)
     serialKids = [x for x in inClass.getAllRoles() 
-                  if (x.hierarchy == ImpConstants.child_hierarchy and
+                  if (x.hierarchy == metaConstants.child_hierarchy and
                   x.valueType.getElement(attrName))]
     
     # set new serial if necessary
@@ -1487,7 +1486,7 @@ class FileApiGen(ApiGen, FileApiInterface):
           otherRole.container.container in inClass.container.importedPackages):
         # add package loading for 'self' package for interpackage links
         # in import direction. NB only these can be triggered during load
-        if not (otherRole.hicard == genConstants.infinity 
+        if not (otherRole.hicard == memopsConstants.infinity
                 and otherRole.locard == 0):
           # if the reverse role is 0..* we never need to load
           
@@ -1599,7 +1598,7 @@ class FileApiGen(ApiGen, FileApiInterface):
       self.elseIf()
       self.writeComment('check unloaded TopObject')
       
-      for tag in  [ImpConstants.guid_attribute] + inClass.keyNames:
+      for tag in  [metaConstants.guid_attribute] + inClass.keyNames:
         self.writeCheckElement(op, inClass, inClass.getElement(tag))
       
       self.endIf()
@@ -1613,7 +1612,7 @@ class FileApiGen(ApiGen, FileApiInterface):
     """ check that roles a.b and b.a are the same.
     """
     
-    if (role.hierarchy == ImpConstants.parent_hierarchy 
+    if (role.hierarchy == metaConstants.parent_hierarchy
         and role.otherRole.hicard != 1):
       return
     else:
@@ -1638,7 +1637,7 @@ class FileApiGen(ApiGen, FileApiInterface):
     # Extra check on metaClass.keyNames added because Java now has examples
     # (e.g. AbstractMeasurement) where that is empty
     if (isinstance(metaClass, MetaModel.MetaClass)
-                  and role.hierarchy == ImpConstants.child_hierarchy) and metaClass.keyNames:
+                  and role.hierarchy == metaConstants.child_hierarchy) and metaClass.keyNames:
     
       # get local key
       self.setLocalKeyVar(metaClass=metaClass,
@@ -1681,7 +1680,7 @@ class FileApiGen(ApiGen, FileApiInterface):
                   convertCollection=False, inClass=inClass, needVarType=False)
     
     if (isinstance(metaClass, MetaModel.MetaClass)
-                  and role.hierarchy == ImpConstants.child_hierarchy) and metaClass.keyNames:
+                  and role.hierarchy == metaConstants.child_hierarchy) and metaClass.keyNames:
       self.endIf()
       
     self.checkFindBody(op, inClass, funcType='findFirst')
@@ -1907,7 +1906,7 @@ class FileApiGen(ApiGen, FileApiInterface):
     ss = self.getDictEntry(self.getMemoryValue(startObj, downlink),
                            objKeyVar)
 
-    return (listOffset, ss)
+    return listOffset, ss
 
   ###########################################################################
 
@@ -1953,7 +1952,7 @@ class FileApiGen(ApiGen, FileApiInterface):
     dictVar = 'dd'
     objKeyVar = 'objKey'
     
-    if role.hierarchy == ImpConstants.parent_hierarchy:
+    if role.hierarchy == metaConstants.parent_hierarchy:
       
       if otherRole.locard != otherRole.hicard:
         # maybe delete

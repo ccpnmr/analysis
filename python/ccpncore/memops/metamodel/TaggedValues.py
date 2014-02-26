@@ -1,5 +1,6 @@
 
-from ccpncore.memops.Constants import trueString
+from ccpncore.memops.metamodel import Constants as metaConstants
+trueString = metaConstants.trueString
 
 # used for packages with no packageGroup defined
 defaultPackageGroup = 'core'

@@ -27,7 +27,8 @@ def getImplementationDirectory(repositoryPath):
   """Get implementation directory from the repositoryPath
   """
 
-  return Path.joinPath(repositoryPath, metaConstants.modellingPackageName, metaConstants.implementationPackageName)
+  return Path.joinPath(repositoryPath, metaConstants.modellingPackageName,
+                       metaConstants.implementationPackageName)
 
 def getTopObjectFile(topObject):
   """Get topObject file name (not path)

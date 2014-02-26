@@ -59,12 +59,8 @@ software development. Bioinformatics 21, 1678-1684.
 
 
 from ccpncore.memops.metamodel import MetaModel
-MemopsError = MetaModel.MemopsError
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import Util as metaUtil
-
-from ccpncore.memops import Constants as memopsConstants
-infinity = memopsConstants.infinity
 
 from ccpncore.memops.scripts.core.LanguageInterface import LanguageInterface
 from ccpncore.memops.scripts.core.TypeInterface import TypeInterface
@@ -76,7 +72,10 @@ from ccpncore.memops.scripts.api.ApiInterface import ApiInterface
 from ccpncore.memops.scripts.api.PermissionInterface import PermissionInterface
 from ccpncore.memops.scripts.api.PersistenceInterface import PersistenceInterface
 from ccpncore.memops.scripts.api.TransactionInterface import TransactionInterface
-  
+
+infinity = metaConstants.infinity
+MemopsError = MetaModel.MemopsError
+
 mandatoryAttributes = ('varNames',)
 
 # Requires other writers also to be implemented in subclass
@@ -84,7 +83,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
              TransactionInterface, TypeInterface, LanguageInterface, 
              TextWriter, ModelTraverse):
   
-  codeDirName = memopsConstants.apiCodeDir
+  codeDirName = metaConstants.apiCodeDir
 
   oldSelfVar = 'oldSelf'
   oldSelfVars = 'oldSelves'

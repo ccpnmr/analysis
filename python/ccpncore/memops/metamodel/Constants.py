@@ -25,6 +25,77 @@ class MemopsError(Exception):
   # TODO reorganise error system
   pass
 
+
+trueString = 'True'
+falseString = 'False'
+
+# Special constants
+infinity = -1
+
+
+
+# Directory names for Python code api subdirectories
+apiCodeDir = 'api'
+
+# Directory names for Python code xml subdirectories
+xmlCodeDir = 'xml'
+
+
+# names of basic data types
+int_code = 'Int'
+float_code = 'Float'
+string_code = 'String'
+boolean_code = 'Boolean'
+datetime_code = 'DateTime'
+dict_code = 'Dict'
+typeCode_enumeration = [int_code, float_code,
+ string_code, boolean_code, datetime_code, dict_code,
+]
+typeCode_enumeration.sort()
+
+baseDataTypeModule = __import__(
+ 'ccpncore.memops.baseDataTypes', globals(), locals(), typeCode_enumeration
+)
+
+# NBNB TBD the codes for 'Dict and List are short-term hacks
+
+# names of jdbc data types.
+# jdbcTypeCode_enumeration = [
+#  'CLOB', 'VARCHAR', 'BIT', 'INTEGER', 'BIGINT', 'FLOAT', 'DOUBLE', 'TIMESTAMP',
+#  'Dict','List'
+# ]
+# jdbcTypeCode_enumeration.sort()
+
+# names of java data types.
+javaTypeCode_enumeration = ['java.lang.Integer',
+'java.lang.Float','java.lang.String','java.lang.Boolean',
+'java.util.Map', 'java.util.Collection'
+]
+javaTypeCode_enumeration.sort()
+
+# names of java simple data types.
+# NB the simpleType for strings is the empty string
+javaSimpleTypeCode_enumeration = [
+# TBD: is excluding None (which is not allowed in Python 3 because of sort()) a problem?
+# 'int','long','float','double','boolean', None
+ 'int,''float','boolean'
+]
+javaSimpleTypeCode_enumeration.sort()
+
+# names of xml data types.
+xmlTypeCode_enumeration = ['string', 'boolean', 'int', 'float', 'Dict','List']
+xmlTypeCode_enumeration.sort()
+
+# dictionary of all typeCodes and their enumeration, to simplify processing
+typeCodes = {
+ 'typeCode':typeCode_enumeration,
+ # 'jdbcTypeCode':jdbcTypeCode_enumeration,
+ # 'javaTypeCode':javaTypeCode_enumeration,
+ # 'javaSimpleTypeCode':javaSimpleTypeCode_enumeration,
+ 'xmlTypeCode':xmlTypeCode_enumeration
+}
+
+
 # MetaModel constants
 
 # visibility enumeration

@@ -54,7 +54,7 @@ software development. Bioinformatics 21, 1678-1684.
 
 """
 from ccpncore.memops.metamodel import MetaModel
-from ccpncore.memops import Constants as memopsConstants
+from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.scripts.xmlio.XmlMapWrite import XmlMapWrite
 from ccpncore.memops.scripts.core.PyLanguage import PyLanguage
 from ccpncore.memops.scripts.core.PyType import PyType
@@ -121,12 +121,12 @@ class PyXmlMapWrite(PyLanguage, PyType, XmlMapWrite):
       pp = clazz.container
       if pp in package.accessedPackages:
         self.write("import %s" 
-         % self.getImportName(pp, subDirs=[memopsConstants.apiCodeDir])
+         % self.getImportName(pp, subDirs=[metaConstants.apiCodeDir])
         )
     
     self.setDictEntry(dictName, self.toLiteral('class'), 
                       self.getImportName(clazz, 
-                                         subDirs=[memopsConstants.apiCodeDir]))
+                                         subDirs=[metaConstants.apiCodeDir]))
 
   ###########################################################################
 
@@ -156,7 +156,7 @@ class PyXmlMapWrite(PyLanguage, PyType, XmlMapWrite):
     # import own API package
     self.writeComment("\n Current package api")
     self.write("import %s" 
-               % self.getImportName(package, subDirs=[memopsConstants.apiCodeDir]))
+               % self.getImportName(package, subDirs=[metaConstants.apiCodeDir]))
 
     if package is self.implPackage:
       

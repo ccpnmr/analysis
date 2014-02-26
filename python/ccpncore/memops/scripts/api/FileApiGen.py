@@ -1,7 +1,6 @@
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Util as metaUtil
-from ccpncore.memops import Constants as memopsConstants
 
 from ccpncore.memops.scripts.api.ApiGen import ApiGen
 from ccpncore.memops.scripts.api.FileApiInterface import FileApiInterface
@@ -1018,7 +1017,7 @@ class FileApiGen(ApiGen, FileApiInterface):
  
       # check hicard - NB hardwired here to avoid getting child collection
       hicard = otherRole.hicard
-      if hicard != memopsConstants.infinity:
+      if hicard != metaConstants.infinity:
         self.startIf(self.comparison(self.lenDict(dictVar),
                                      '>', hicard))
         self.raiseApiError('%s can have maximum %d %s'
@@ -1486,7 +1485,7 @@ class FileApiGen(ApiGen, FileApiInterface):
           otherRole.container.container in inClass.container.importedPackages):
         # add package loading for 'self' package for interpackage links
         # in import direction. NB only these can be triggered during load
-        if not (otherRole.hicard == memopsConstants.infinity
+        if not (otherRole.hicard == metaConstants.infinity
                 and otherRole.locard == 0):
           # if the reverse role is 0..* we never need to load
           

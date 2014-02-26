@@ -92,7 +92,7 @@ def unnormalisePath(path):
   On Unix does nothing, on Windows replaces '/' with '\\'/
   """
 
-  if (os.sep != '/'):
+  if os.sep != '/':
     path = path.replace('/', os.sep)
 
   return path
@@ -112,7 +112,7 @@ def splitPath(path):
   (head, tail) = os.path.split(unnormalisePath(path))
   head = normalisePath(head)
 
-  return (head, tail)
+  return head, tail
 
 def converseSplitPath(path):
   """
@@ -130,7 +130,7 @@ def converseSplitPath(path):
   if head is None:
     (head, tail) = pair
 
-  return (head, tail)
+  return head, tail
 
 def getTopDirectory():
 

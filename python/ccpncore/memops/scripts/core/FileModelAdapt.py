@@ -1,7 +1,6 @@
 """ Python-specific version of ModelAdapt
 """
 
-from ccpncore.memops import Constants as memopsConstants
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.scripts.core.ModelAdapt import ModelAdapt
 
@@ -45,7 +44,7 @@ class FileModelAdapt(ModelAdapt):
        {'name':'topObjectsToCheck', 'direction':metaConstants.in_direction,
         'parDocumentation':"Set of topObjects to check for modifiability",
         'target':'memops.Implementation.MemopsObject', 
-        'hicard':memopsConstants.infinity, 'locard':0,
+        'hicard':metaConstants.infinity, 'locard':0,
         'isOrdered':False, 'isUnique':True,
        },
       )

@@ -290,7 +290,6 @@ All have the same attributes:
 """
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.memops import Constants as memopsConstants
 from ccpncore.memops import Version
 from ccpncore.memops.metamodel.ModelTraverse import ModelTraverse
 MemopsError = MetaModel.MemopsError
@@ -318,9 +317,9 @@ class XmlGen(ModelTraverse):
     pp = self.modelPortal.topPackage
     self.implPackage = pp.metaObjFromQualName(self.implPackageName)
     #self.baseClass = self.implPackage.getElement(ImpConstants.baseClassName)
-    self.booleanType = self.implPackage.getElement(memopsConstants.boolean_code)
-    self.stringType = self.implPackage.getElement(memopsConstants.string_code)
-    self.intType = self.implPackage.getElement(memopsConstants.int_code)
+    self.booleanType = self.implPackage.getElement(metaConstants.boolean_code)
+    self.stringType = self.implPackage.getElement(metaConstants.string_code)
+    self.intType = self.implPackage.getElement(metaConstants.int_code)
     self.anyType = self.implPackage.getElement('Any')
     self.dataObject = self.implPackage.getElement(metaConstants.dataObjClassName)
     self.topObject = self.implPackage.getElement(metaConstants.topObjClassName)
@@ -428,7 +427,7 @@ class XmlGen(ModelTraverse):
     tag = xmlTagFromElem(xx)
     result = {'tag':tag, 'type':'simple', 'guid':guid,}
     
-    if xx.typeCodes.get('python') == memopsConstants.string_code:
+    if xx.typeCodes.get('python') == metaConstants.string_code:
       for xx2 in xx.getAllSupertypes():
         if xx2.name in ('Token', 'GuidString'):
           # Token, spaceless max 32 chars 

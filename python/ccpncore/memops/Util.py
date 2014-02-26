@@ -3,6 +3,21 @@
 __author__ = 'rhf22'
 
 import types
+import os
+from ccpncore.util import Path
+
+######################################################################
+# hack for Python 2.1 compatibility                                                        #
+######################################################################
+try:
+  junk = True
+  junk = False
+except NameError:
+  dd = globals()
+  dd['True'] = 1
+  dd['False'] = 0
+  del dd
+
 
 try:
   # Python 2.1 only
@@ -108,7 +123,7 @@ def compactStringList(stringList, separator='', maxChars=80):
       start = n
       nchars = i
     else:
-      nchars = nchars + i
+      nchars += i
   result.append(separator.join(stringList[start:len(stringList)]))
 
   return result
@@ -136,3 +151,62 @@ def breakString(text, separator=' ', joiner='\n', maxChars=72):
                         maxChars=maxChars)
 
   return joiner.join(t)
+
+
+
+def recursiveImport(dirname, modname=None, ignoreModules = None, force=False):
+  """ recursively import all .py files
+  (not starting with '__' and not containing internal '.' in their name)
+  from directory dirname and all its subdirectories, provided they
+  contain '__init__.py'
+  Serves to check that files compile without error
+
+  modname is the module name (dot-separated) corresponding to the directory
+  dirName.
+  If modname is None, dirname must be on the pythonPath
+
+  Note that there are potential problems if the files we want are not
+  the ones encountered first on the pythonPath
+  """
+
+  listdir = os.listdir(dirname)
+  try:
+    listdir.remove('__init__.py')
+  except ValueError:
+    if not force:
+      return
+
+  files = []
+
+  if ignoreModules is None:
+    ignoreModules = []
+
+  if modname is None:
+    prefix = ''
+  else:
+    prefix = modname + '.'
+
+  listdir2 = []
+  for name in listdir:
+    head,ext = os.path.splitext(name)
+    if (prefix + head) in ignoreModules:
+      pass
+    elif ext == '.py' and head.find('.') == -1:
+      files.append(head)
+    else:
+      listdir2.append(name)
+
+  # import directory and underlying directories
+  if modname:
+    # Note that files is never empty, so module is lowest level not toplevel
+    for ff in files:
+      try:
+        __import__(modname, {}, {}, [ff])
+      except:
+        print("WARNING, Import failed for %s.%s" % (modname,ff))
+
+  for name in listdir2:
+    newdirname = Path.joinPath(dirname,name)
+    if os.path.isdir(newdirname) and name.find('.') == -1:
+      recursiveImport(newdirname, prefix + name,ignoreModules)
+

@@ -56,10 +56,6 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 """
 
-
-trueString = 'True'
-falseString = 'False'
-
 # valid characters for file names 
 # NB string.ascii_letters and string.digits are not compatible
 # with Python 2.1 (used in ObjectDomain)
@@ -70,105 +66,6 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           + defaultFileNameChar)
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
-
-
-# Data Type constants    
-
-# Special constants
-infinity = -1
-
-# names of basic data types
-int_code = 'Int'
-float_code = 'Float'
-string_code = 'String'
-boolean_code = 'Boolean'
-datetime_code = 'DateTime'
-dict_code = 'Dict'
-typeCode_enumeration = [int_code, float_code,
- string_code, boolean_code, datetime_code, dict_code,
-]
-typeCode_enumeration.sort()
-
-baseDataTypeModule = __import__(
- 'ccpncore.memops.baseDataTypes', globals(), locals(), typeCode_enumeration
-)
-
-# NBNB TBD the codes for 'Dict and List are short-term hacks
-
-# names of jdbc data types.
-# jdbcTypeCode_enumeration = [
-#  'CLOB', 'VARCHAR', 'BIT', 'INTEGER', 'BIGINT', 'FLOAT', 'DOUBLE', 'TIMESTAMP',
-#  'Dict','List'
-# ]
-# jdbcTypeCode_enumeration.sort()
-
-# names of java data types. 
-javaTypeCode_enumeration = ['java.lang.Integer',
-'java.lang.Float','java.lang.String','java.lang.Boolean',
-'java.util.Map', 'java.util.Collection'
-]
-javaTypeCode_enumeration.sort()
-
-# names of java simple data types. 
-# NB the simpleType for strings is the empty string
-javaSimpleTypeCode_enumeration = [
-# TBD: is excluding None (which is not allowed in Python 3 because of sort()) a problem?
-# 'int','long','float','double','boolean', None
- 'int,''float','boolean'
-]
-javaSimpleTypeCode_enumeration.sort()
-
-# names of xml data types.
-xmlTypeCode_enumeration = ['string', 'boolean', 'int', 'float', 'Dict','List']
-xmlTypeCode_enumeration.sort()
-
-# dictionary of all typeCodes and their enumeration, to simplify processing
-typeCodes = {
- 'typeCode':typeCode_enumeration,
- # 'jdbcTypeCode':jdbcTypeCode_enumeration,
- # 'javaTypeCode':javaTypeCode_enumeration,
- # 'javaSimpleTypeCode':javaSimpleTypeCode_enumeration,
- 'xmlTypeCode':xmlTypeCode_enumeration
-}
-
-# file, string constants
-keyStringSeparator = ','
-
-# directory name for python directory
-pythonDir = 'python'
-
-# directory name for model directory (parallel with Python directory)
-# modelDir = 'model'
-
-# Directory names for Python code model subdirectories
-modelSubDirs = ['model']
-
-# Directory names for Python code api subdirectories
-apiCodeDir = 'api'
-apiSubDirs = [apiCodeDir]
-
-#
-# # directory name for java directory
-# javaDir = 'java'
-#
-# # directory name for java sql api
-# javaSqlDir = 'sqlApi'
-#
-# # directory name for java xml api
-# javaXmlDir = 'xmlApi'
-#
-# # directory name for java model
-# javaModelDir = 'model'
-#
-# # directory name for sql table creation scripts
-# sqlDir = 'sql'
-# Directory names for Python code xml subdirectories
-xmlCodeDir = 'xml'
-xmlSubDirs = [xmlCodeDir]
-#
-# # Directory names for Python code xml Schema subdirectories (in model)
-# xmlSchemaDir = 'xmlSchema'
-# xmlSchemaSubDirs = [xmlSchemaDir]
 
 
 class ApiError(Exception):

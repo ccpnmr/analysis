@@ -78,7 +78,6 @@ except NameError:
 import time
 strftime = time.strftime
 
-from ccpncore.memops import Constants as memopsConstants
 from ccpncore.memops.metamodel import Constants as metaConstants
 MemopsError = metaConstants.MemopsError
 
@@ -206,7 +205,7 @@ def parseCardinality(cardString):
   
   for tag in cardString.strip().split('..'):
     if tag == '*':
-      result.append(memopsConstants.infinity)
+      result.append(metaConstants.infinity)
     else:
       try:
         result.append(int(tag))
@@ -216,8 +215,8 @@ def parseCardinality(cardString):
         )
   
   #
-  if result == [memopsConstants.infinity]:
-    return 0, memopsConstants.infinity
+  if result == [metaConstants.infinity]:
+    return 0, metaConstants.infinity
   
   elif len(result) == 1:
     return result[0], result[0]
@@ -345,7 +344,6 @@ def getFuncname(op, inClass=None):
   
   if op.opSubType is not None:
     op = getOperation(op.target, op.opType, inClass)
-  #
   if op is None:
     raise MemopsError("No operation with opSubType None corresponds to %s"
      % op.qualifiedName()
@@ -365,7 +363,7 @@ def getReturnPar(op):
     
     if par.direction == metaConstants.return_direction:
       return par
-  
+
   return None
 
 ###########################################################################
@@ -381,6 +379,7 @@ def getReferenceName(oo, pp=None, subDirs=None):
   Unless oo is an object contained within a package, the result will
   not be valid for the purpose of importing oo.
   """
+  pathStart = ['ccpncore']
 
   if pp is not None and (oo.container is pp):
     # pp passed in and oo directly available from pp. Return short name
@@ -390,12 +389,11 @@ def getReferenceName(oo, pp=None, subDirs=None):
     qname = oo.qualifiedName()
     if qname == '':
       name = qname
-    elif subDirs:
-      pathList = qname.split('.')
-      pathList[1:1] = subDirs
-      name = '.'.join(pathList)
     else:
-      name = qname
+      if subDirs is None:
+        subDirs = []
+      pathList = qname.split('.')
+      name = '.'.join(pathStart + subDirs + pathList)
 
   return name
 

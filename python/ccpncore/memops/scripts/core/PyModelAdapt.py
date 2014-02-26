@@ -4,7 +4,6 @@
 from ccpncore.memops.scripts.core.ModelAdapt import ModelAdapt
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.memops import Constants as memopsConstants
 
 import copy
 
@@ -200,7 +199,7 @@ else:
       
       params = {'name':'navigation', 'direction':metaConstants.in_direction,
                 'isImplicit':True, 'valueType':anyType,
-                'locard':0, 'hicard':memopsConstants.infinity,
+                'locard':0, 'hicard':metaConstants.infinity,
                 'taggedValues':{'isSubdivided':'True'},}
       self.newElement(MetaModel.MetaParameter, container=op, **params)
     

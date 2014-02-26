@@ -569,7 +569,6 @@ import string
 import copy
 import time
 
-from ccpncore.memops import Constants as memopsConstants
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.memops.metamodel import TaggedValues
 from ccpncore.memops.metamodel import OpTypes
@@ -577,7 +576,7 @@ from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops import Util as memopsUtil
 
 
-infinity = memopsConstants.infinity
+infinity = metaConstants.infinity
 IntType = metaConstants.IntType
 StringType = metaConstants.StringType
 TupleType = metaConstants.TupleType
@@ -3266,7 +3265,7 @@ class MetaDataType(AbstractDataType):
         return False
 
     # check special check function - or just correct PythonType
-    baseType = getattr(memopsConstants.baseDataTypeModule,
+    baseType = getattr(metaConstants.baseDataTypeModule,
                        self.typeCodes['python'])
     if hasattr(baseType, 'isValid'):
       if not getattr(baseType, 'isValid')(value):

@@ -199,7 +199,6 @@ import string
 import time
 
 # Ccp imports
-from ccpncore.memops import Constants as memopsConstants
 from ccpncore.memops import Util as memopsUtil
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import MetaModel
@@ -208,8 +207,8 @@ from ccpncore.memops.metamodel import TaggedValues
 from ccpncore.memops.metamodel import Util as metaUtil
 MemopsError = MetaModel.MemopsError
 
-trueString = memopsConstants.trueString
-falseString = memopsConstants.falseString
+trueString = metaConstants.trueString
+falseString = metaConstants.falseString
 # NBNB ObjectDomain always works under Python 2.1
 # Ccp imports
 True = not 0
@@ -603,7 +602,7 @@ def modelFromOd():
           baseName = memopsUtil.lowerFirst(topClass.name)
           params = {'container':rootClass, 'valueType':topClass, 
            'hierarchy':metaConstants.child_hierarchy,
-           'locard':0, 'hicard':memopsConstants.infinity,
+           'locard':0, 'hicard':metaConstants.infinity,
            'name':baseName+'s', 'baseName':baseName,
            'guid':'ccpn_automatic_%s.%s' % (rootClass.qualifiedName(),baseName),
            'documentation':'child link',
@@ -1089,7 +1088,7 @@ def finaliseDataType(dataType):
   if enum:
     typeCode = dataType.typeCodes.get('python')
     if typeCode:
-      func = getattr(memopsConstants.baseDataTypeModule,typeCode).fromString
+      func = getattr(metaConstants.baseDataTypeModule,typeCode).fromString
       try:
         dataType.enumeration = tuple(map(func,enum))
       except:
@@ -1149,7 +1148,7 @@ def createMetaConstant(metaPackage,qname):
   if defVal:
     typeCode = valueType.typeCodes.get('python')
     if typeCode:
-      func = getattr(memopsConstants.baseDataTypeModule,typeCode).fromString
+      func = getattr(metaConstants.baseDataTypeModule,typeCode).fromString
       try:
         value = func(defVal)
       except:
@@ -1266,7 +1265,7 @@ def attributesFromOd(metaObj):
       params['locard'] = max(rr.low,0)
       hicard = rr.high
       if hicard < 1:
-        hicard = memopsConstants.infinity
+        hicard = metaConstants.infinity
       params['hicard'] = hicard
       if hicard != 1:
         params.update(defaultMultiAttrMultiplicity)
@@ -1308,7 +1307,7 @@ def attributesFromOd(metaObj):
     defaultValue = odAttr.getInitialValue()
     if defaultValue:
       typeCode = valueType.typeCodes.get('python')
-      ff = getattr(memopsConstants.baseDataTypeModule, typeCode).fromString
+      ff = getattr(metaConstants.baseDataTypeModule, typeCode).fromString
       if hicard == 1:
         try:
           params['defaultValue'] = (ff(defaultValue),)
@@ -1489,7 +1488,7 @@ def rolesFromOd(metaClass):
         dd['locard'] = max(rr.low,0)
         hicard = rr.high
         if hicard < 1:
-          hicard = memopsConstants.infinity
+          hicard = metaConstants.infinity
         dd['hicard'] = hicard
         if hicard != 1:
           dd.update(defaultMultiRoleMultiplicity)
@@ -1740,7 +1739,7 @@ def parametersFromOd(metaOp):
       defaultValue = odPar.getDefaultValue()
       if defaultValue:
         typeCode = valueType.typeCodes.get('python')
-        ff = getattr(memopsConstants.baseDataTypeModule, typeCode).fromString
+        ff = getattr(metaConstants.baseDataTypeModule, typeCode).fromString
         if hicard == 1:
           params['locard'] = 0
           try:

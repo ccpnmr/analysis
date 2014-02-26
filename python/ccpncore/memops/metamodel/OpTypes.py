@@ -3,7 +3,6 @@
 """
 
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.memops import Constants as memopsConstants
 
 ######################################################################
 # hack for Python 2.1 compatibility  NBNB                            #
@@ -244,7 +243,7 @@ operationData['sorted']['subOps'] = {
   'parameters':[
    {'name':'result', 'direction':metaConstants.return_direction,
     'isOrdered':True, 'isUnique':True, 
-    'locard':0, 'hicard':memopsConstants.infinity,
+    'locard':0, 'hicard':metaConstants.infinity,
    },
   ],
  },
@@ -404,7 +403,7 @@ operationData['getFullKey']['subOps'] = {
     },
    {'name':'result', 'direction':metaConstants.return_direction,
      'parDocumentation':"list containing full object key",
-     'target':'memops.Implementation.Any', 'hicard':memopsConstants.infinity,
+     'target':'memops.Implementation.Any', 'hicard':metaConstants.infinity,
      'locard':0, 'isOrdered':True, 'isUnique':False,
     },
    ],
@@ -433,7 +432,7 @@ operationData['getByKey']['subOps'] = {
     },
    {'name':'fullKey', 'direction':metaConstants.in_direction,
      'parDocumentation':"list containing full object key",
-     'target':'memops.Implementation.Any', 'hicard':memopsConstants.infinity,
+     'target':'memops.Implementation.Any', 'hicard':metaConstants.infinity,
      'locard':0, 'isOrdered':True, 'isUnique':False,
     },
    {'name':'result', 'direction':metaConstants.return_direction,
@@ -458,7 +457,7 @@ operationData['singleDelete']['subOps'] = {
    {'name':'objsToBeDeleted', 'direction':metaConstants.in_direction,
     'parDocumentation':"Set of objects to be deleted",
     'target':'memops.Implementation.MemopsObject',
-    'hicard':memopsConstants.infinity, 'locard':0,
+    'hicard':metaConstants.infinity, 'locard':0,
     'isOrdered':False, 'isUnique':True,
    },
   ],
@@ -476,14 +475,14 @@ operationData['checkDelete']['subOps'] = {
    {'name':'objsToBeDeleted', 'direction':metaConstants.in_direction,
     'parDocumentation':"Set of objects to be deleted (input/ouput)",
     'target':'memops.Implementation.MemopsObject',
-    'hicard':memopsConstants.infinity, 'locard':0,
+    'hicard':metaConstants.infinity, 'locard':0,
     'isOrdered':False, 'isUnique':True,
    },
    {'name':'objsToBeChecked', 'direction':metaConstants.in_direction,
     'parDocumentation':
     "List of objects to be checked for deletion (input/ouput)",
     'target':'memops.Implementation.MemopsObject',
-    'hicard':memopsConstants.infinity, 'locard':0,
+    'hicard':metaConstants.infinity, 'locard':0,
     'isOrdered':True, 'isUnique':False,
    },
    {'name':'linkCounter', 'direction':metaConstants.in_direction,

@@ -1,5 +1,3 @@
-from ccpncore.memops import Constants as memopsConstants
-
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import Util as metaUtil
@@ -11,7 +9,7 @@ from ccpncore.memops.scripts.core.PyType import PyType
 
 from ccpncore.memops.scripts.api.ApiGen import ApiGen
 
-basicDataTypes = memopsConstants.baseDataTypeModule
+basicDataTypes = metaConstants.baseDataTypeModule
 
 # This class implements as much of ApiInterface as is independent of implementation details
 # Overrides some of ApiGen for overrides that are independent of implementation details

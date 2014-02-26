@@ -26,9 +26,8 @@ from ccpncore.memops.Util import ElementInclude
 
 from ccpncore.util import Path
 
-from ccpncore.memops import Constants as memopsConstants
-baseDataTypeModule = memopsConstants.baseDataTypeModule
-infinity = memopsConstants.infinity
+baseDataTypeModule = metaConstants.baseDataTypeModule
+infinity = metaConstants.infinity
 XINCLUDE_FALLBACK = ElementInclude.XINCLUDE_FALLBACK
 XINCLUDE_INCLUDE = ElementInclude.XINCLUDE_INCLUDE
 
@@ -141,7 +140,7 @@ class TempHolder:
 
 class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
 
-  codeDirName = memopsConstants.xmlCodeDir
+  codeDirName = metaConstants.xmlCodeDir
   classNameMapping = {}
   for clazz in MetaModel.nonAbstractClasses:
     classNameMapping[clazz.__name__] = clazz
@@ -554,7 +553,7 @@ no href attribute found for %s element
           if typeCode == 'Boolean':
             fromString = str2bool
           else:
-            fromString = getattr(memopsConstants.baseDataTypeModule,
+            fromString = getattr(metaConstants.baseDataTypeModule,
                                  typeCode).fromString
           
           # convert values
@@ -577,7 +576,7 @@ no href attribute found for %s element
 class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1, 
                   ModelTraverse_py_2_1.ModelTraverse_py_2_1):
 
-  codeDirName = memopsConstants.xmlCodeDir
+  codeDirName = metaConstants.xmlCodeDir
   
   _xmlSpecialTags = ('name', 'guid', 'container', 'documentation')
  
@@ -1083,7 +1082,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
       if typeCode == 'Boolean':
         result = value and xmlTrue or xmlFalse
       else:
-        toString = getattr(memopsConstants.baseDataTypeModule,typeCode).toString
+        toString = getattr(metaConstants.baseDataTypeModule,typeCode).toString
         result = toString(value)
     
     else:

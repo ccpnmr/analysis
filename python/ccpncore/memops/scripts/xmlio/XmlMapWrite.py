@@ -54,7 +54,7 @@ software development. Bioinformatics 21, 1678-1684.
 
 """
 from ccpncore.memops.metamodel import MetaModel
-from ccpncore.memops import Constants as genConstants
+from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.scripts.core.LanguageInterface import LanguageInterface
 from ccpncore.memops.scripts.core.TypeInterface import TypeInterface
 from ccpncore.memops.TextWriter import TextWriter
@@ -71,7 +71,7 @@ repositoryId  = '$Id: XmlMapWrite.py,v 1.42.2.7 2010/06/14 11:21:33 jmci Exp $'
 
 class XmlMapWrite(LanguageInterface, TypeInterface, TextWriter, XmlGen):
 
-  codeDirName = genConstants.xmlCodeDir
+  codeDirName = metaConstants.xmlCodeDir
   
   localVarNames = {
    'globalMap':'globalMap',
@@ -593,7 +593,7 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
   # SaveToStream function
   def writeSaveToStream(self, originator, indentBySpaces = 2):
 
-    apiDirs = [genConstants.apiCodeDir]
+    apiDirs = [metaConstants.apiCodeDir]
     self.rootClassVarType = self.getImportName(self.rootClass, subDirs=apiDirs)
     self.baseClassVarType = self.getImportName(self.baseClass, subDirs=apiDirs)
     self.baseDataVarType = self.getImportName(self.baseDataType, subDirs=apiDirs)
@@ -1353,7 +1353,7 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
   # LoadFromStream function
   def writeLoadFromStream(self, parser):
 
-    apiDirs = [genConstants.apiCodeDir]
+    apiDirs = [metaConstants.apiCodeDir]
     self.rootClassVarType = self.getImportName(self.rootClass, subDirs=apiDirs)
     self.baseClassVarType = self.getImportName(self.baseClass, subDirs=apiDirs)
     self.baseDataVarType = self.getImportName(self.baseDataType, subDirs=apiDirs)

@@ -456,16 +456,16 @@ class TextWriter_py_2_1:
     
     if metaObj.container is None:
       # Root package only
-      pathList.append(metaConstants.modellingPackageName)
       if self.codeDirName:
         pathList.append(self.codeDirName)
+      pathList.append(metaConstants.modellingPackageName)
       pathList.append(self.rootFileName)
       
     else:
       # any other object
       ll = metaObj.qualifiedName().split('.')
       if self.codeDirName:
-        ll[1:1] = [self.codeDirName]
+        ll.insert(0,self.codeDirName)
       pathList.extend(ll)
       
       # special handling for ModelElements that may correspond to directories:

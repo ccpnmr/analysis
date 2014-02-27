@@ -918,7 +918,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     self.writeOne('<?xml version="1.0"?>')
     
     self.writeMultilineComment(
-     (self.getVersionString(metaobj=obj, objRevision='?', date='?') + 
+     (self.getVersionString(metaobj=obj date='?') +
      '\n' + 
      self.getCreditsString(metaobj=obj, programType='model')),
      compress=False

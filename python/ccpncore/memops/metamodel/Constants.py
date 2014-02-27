@@ -40,6 +40,10 @@ apiCodeDir = 'api'
 # Directory names for Python code xml subdirectories
 xmlCodeDir = 'xml'
 
+# documentation directories
+imageDir = 'doc/graphics'
+docDir = 'doc'
+
 
 # names of basic data types
 int_code = 'Int'

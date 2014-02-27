@@ -71,7 +71,9 @@ except:
   dd['False'] = not True
   del dd
 
-from ccpncore.memops.Constants import trueString, falseString
+from ccpncore.memops.metamodel import Constants as metaConstants
+trueString =  metaConstants.trueString
+falseString = metaConstants.falseString
 
 # Python types acceptable as input instead of main type
 compatibleTypes = ()

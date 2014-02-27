@@ -1181,8 +1181,6 @@ def attributesFromOd(metaObj):
     if not name:
       raise MemopsError("nameless attribute in %s" % metaObj)
 
-    print '###', metaObj.qualifiedName(), name
-
     try:
       valueType = metaObjFromQualName(odAttr.getTypeRef().qualifiedName)
     except:

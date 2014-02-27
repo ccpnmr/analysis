@@ -33,9 +33,6 @@ class ModelTraverse_py_2_1:
   """ Tools for traversing a model - loops and calls empty functions
   Also model query functions that may need overriding elsewhere.
   """
-
-  # Dummy value - modelPortal is set in subclasses
-  modelPortal = None
     
   # set some general info
   # special metaClasses and metaPackages

@@ -85,6 +85,7 @@ class Undo(deque):
   def addItem(self, undoMethod, undoData, redoMethod, redoData=None):
     """Add item to the undo stack.
        Note that might not know redoData until after we do undo.
+       NBNB NO, we should know, so resetting facility disabled. Rasmus
     """
 
     if self.blocked:
@@ -116,7 +117,9 @@ class Undo(deque):
 
 
   def undo(self):
-    """Undo one step, waypoinit of operation"""
+    """Undo one operation - or one waypoinit if waypoints are not set
+
+    For now errors are handled by printing a warning and clearing the undo object"""
 
     # TBD: what should we do if undoMethod() throws an exception?
 
@@ -149,7 +152,9 @@ class Undo(deque):
       self.clear()
 
   def redo(self):
-    """Redo one waypoint."""
+    """Redo one waypoint - or one operation if waypoints are not set.
+
+    For now errors are handled by printing a warning and clearing the undo object"""
 
     # TBD: what should we do if redoMethod() throws an exception?
 
@@ -182,13 +187,16 @@ class Undo(deque):
       self.clear()
 
   def clear(self):
+    """Clear and reset undo object """
     self.nextIndex = 0
     self.waypoints.clear()
     self.blocked = False
     deque.clear(self)
 
-  def canundo(self):
+  def canUndo(self) -> bool:
+    """Can an undo operation be performed?"""
     return self.nextIndex > 0
 
-  def canredo(self):
+  def canRedo(self) -> bool:
+    """can a redo operation be performed"""
     return self.nextIndex <= len(self)

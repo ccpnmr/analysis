@@ -6,7 +6,7 @@ MemopsError = MetaModel.MemopsError
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.util import Path
 
-from memops.general import TextWriter_py_2_1
+from ccpncore.memops.metamodel import TextWriter_py_2_1
 
 settings = TextWriter_py_2_1.settings
 

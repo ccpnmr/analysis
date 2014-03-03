@@ -6,8 +6,6 @@ import os
 from ccpncore.memops.metamodel.MetaModel import MemopsError
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import Util as metaUtil
-from ccpncore.memops import Util as memopsUtil
-
 from ccpncore.memops.scripts.core import LanguageInterface
 from ccpncore.memops import TextWriter
 
@@ -1152,7 +1150,7 @@ def %s(%s):''' % (funcname, paramString))
   # implements LanguageInterface
   def getDocString(self, op, inClass=None):
     
-    return memopsUtil.breakString(op.documentation)
+    return metaUtil.breakString(op.documentation)
   
   ###########################################################################
 

@@ -573,7 +573,6 @@ from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.memops.metamodel import TaggedValues
 from ccpncore.memops.metamodel import OpTypes
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.memops import Util as memopsUtil
 
 
 infinity = metaConstants.infinity
@@ -1404,7 +1403,7 @@ class ConstrainedElement(MetaModelElement):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(MetaModelElement.parameterData)
+  parameterData = metaUtil.semideepcopy(MetaModelElement.parameterData)
 
   # implementation parameters
   parameterData['constraints'] = {'type':'content'}
@@ -1459,7 +1458,7 @@ class HasParameters(MetaModelElement):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(MetaModelElement.parameterData)
+  parameterData = metaUtil.semideepcopy(MetaModelElement.parameterData)
   parameterData.update({'parameters':{'type':'content',
                                       'namelist':'_HasParameters__parameterNames', },
                         'visibility':{'type':'Token',
@@ -1643,7 +1642,7 @@ class AbstractDataType(ConstrainedElement, HasSupertype):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(ConstrainedElement.parameterData)
+  parameterData = metaUtil.semideepcopy(ConstrainedElement.parameterData)
   parameterData.update(
     {'isRoot':{'type':'Boolean', 'default':False, 'isFixed':True, },
      'isLeaf':{'type':'Boolean', 'default':False, 'isFixed':True, },
@@ -1761,7 +1760,7 @@ class AbstractValue(ConstrainedElement):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(ConstrainedElement.parameterData)
+  parameterData = metaUtil.semideepcopy(ConstrainedElement.parameterData)
   parameterData.update({'locard':{'type':IntType, 'default':0, },
                         'hicard':{'type':IntType, 'default':1, },
                         'isOrdered':{'type':'Boolean', 'default':False, },
@@ -1818,7 +1817,7 @@ class ClassElement(AbstractValue):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(AbstractValue.parameterData)
+  parameterData = metaUtil.semideepcopy(AbstractValue.parameterData)
   parameterData.update({'visibility':{'type':'Token',
                                       'enumeration':metaConstants.visibility_enumeration,
                                       'default':metaConstants.public_visibility,
@@ -2092,7 +2091,7 @@ class ClassElement(AbstractValue):
 class ComplexDataType(AbstractDataType):
   """ Abstract superclass of MetaClass and MetaDataObjType
   """
-  parameterData = memopsUtil.semideepcopy(AbstractDataType.parameterData)
+  parameterData = metaUtil.semideepcopy(AbstractDataType.parameterData)
   parameterData['constructorCodeStubs'] = {'type':'StringDict', 'default':{}, }
   parameterData['attributes'] = {'type':'con'
                                         ''
@@ -2279,7 +2278,7 @@ class MetaPackage(MetaModelElement):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(MetaModelElement.parameterData)
+  parameterData = metaUtil.semideepcopy(MetaModelElement.parameterData)
   parameterData['container']['default'] = None
   parameterData.update(
     {'isRoot':{'type':'Boolean', 'default':False, 'isFixed':True, },
@@ -2616,7 +2615,7 @@ class MetaClass(ComplexDataType):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(ComplexDataType.parameterData)
+  parameterData = metaUtil.semideepcopy(ComplexDataType.parameterData)
   parameterData['container']['type'] = MetaPackage
   parameterData.update(
     {'isSingleton':{'type':'Boolean', 'default':False, 'isFixed':True, },
@@ -3142,7 +3141,7 @@ class MetaDataObjType(ComplexDataType):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(ComplexDataType.parameterData)
+  parameterData = metaUtil.semideepcopy(ComplexDataType.parameterData)
   parameterData['container']['type'] = MetaPackage
   parameterData['isChangeable'] = {'type':IntType,
                                    'getterFunc':'getIsChangeable', }
@@ -3207,7 +3206,7 @@ class MetaDataType(AbstractDataType):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(AbstractDataType.parameterData)
+  parameterData = metaUtil.semideepcopy(AbstractDataType.parameterData)
   parameterData['container']['type'] = MetaPackage
   parameterData.update({'isOpen':{'type':'Boolean', 'default':True, },
                         'enumeration':{'hicard':infinity, 'default':[], },
@@ -3347,7 +3346,7 @@ class MetaException(HasParameters, HasSupertype):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(HasParameters.parameterData)
+  parameterData = metaUtil.semideepcopy(HasParameters.parameterData)
   parameterData['container']['type'] = MetaPackage
   parameterData.update({
     'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
@@ -3444,7 +3443,7 @@ class MetaOperation(HasParameters):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(HasParameters.parameterData)
+  parameterData = metaUtil.semideepcopy(HasParameters.parameterData)
   parameterData['container']['type'] = ComplexDataType
   parameterData.update({
     'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
@@ -3787,7 +3786,7 @@ class MetaRole(ClassElement):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(ClassElement.parameterData)
+  parameterData = metaUtil.semideepcopy(ClassElement.parameterData)
   parameterData['container']['type'] = MetaClass
   parameterData.update({
     'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
@@ -4078,7 +4077,7 @@ class MetaAttribute(ClassElement):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(ClassElement.parameterData)
+  parameterData = metaUtil.semideepcopy(ClassElement.parameterData)
   parameterData['container']['type'] = ComplexDataType
   parameterData.update({
     'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
@@ -4157,7 +4156,7 @@ class MetaParameter(AbstractValue):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(AbstractValue.parameterData)
+  parameterData = metaUtil.semideepcopy(AbstractValue.parameterData)
   parameterData['container']['type'] = HasParameters
   parameterData['locard']['default'] = 1
   parameterData.update({'direction':{'type':'Token',
@@ -4363,7 +4362,7 @@ class MetaConstant(MetaModelElement):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(MetaModelElement.parameterData)
+  parameterData = metaUtil.semideepcopy(MetaModelElement.parameterData)
   parameterData['container']['type'] = MetaPackage
   parameterData.update({'value':{}, 'valueType':{'type':MetaDataType, }, })
 
@@ -4405,7 +4404,7 @@ class MetaConstraint(MetaModelElement):
   """
 
   # information for handling input parameters
-  parameterData = memopsUtil.semideepcopy(MetaModelElement.parameterData)
+  parameterData = metaUtil.semideepcopy(MetaModelElement.parameterData)
   parameterData['container']['type'] = ConstrainedElement
   parameterData['codeStubs'] = {'type':'StringDict', 'default':{}, }
 

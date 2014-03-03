@@ -50,12 +50,14 @@ software development. Bioinformatics 21, 1678-1684.
 """
 import time
 
-from memops.general.baseDataTypes.String import *
+# Time class for use in reworking nthis type.
 
-# Draft TIme class for use in reworking nthis type.
-
-class DateTime(float):
+class Time(float):
     """Simple class to print time in ascii, represented as floats as in time.time()"""
+    day = 24*3600.0
+    week = 7*day
+    year = 365*day
+
     def __str__(self):
         """Print as a string"""
         # equivalent to time.asctime(time.localtime(self))
@@ -67,12 +69,31 @@ class DateTime(float):
     @staticmethod
     def fromString(string):
         """Make from a string, inverse of __str__"""
-        return Time(time.mktime(time.strptime(string)))
+        try:
+          return Time(string)
+        except ValueError:
+          return Time(time.mktime(time.strptime(string)))
+
+    @staticmethod
+    def now():
+        return Time(time.time())
 #end class
 
 
-def now():
-    return Time(time.time())
-day = 24*3600.0
-week = 7*day
-year = 365*day
+# corresponding python type
+PythonType = Time
+
+# Python types acceptable as input instead of main type
+compatibleTypes = (str, float)
+
+# Special isValid function
+# None
+
+# conversion to String
+toString  = str
+
+# conversion from string
+fromString = Time.fromString
+
+# casting/creation function.
+create = Time

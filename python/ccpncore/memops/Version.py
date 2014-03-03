@@ -57,7 +57,7 @@ import time
 import os
 # import functools
 
-# Maps memops.general.Constants modelVersion to repository location
+# Maps ccpncore.lmemops.Version modelVersion to repository location
 # Used with function getRepositoryDir below - see there for usage.
 #
 # 'modelVersion': (repositoryCode', (repository location list)
@@ -148,7 +148,7 @@ class Version:
     
     
   def __hash__(self):
-    return hash(('__!@#$%%memops.general.Version.Version', 
+    return hash(('__!@#$%%ccpncore.memops.Version.Version',
                  self.major, self.minor, self.level, self.release))
   
 

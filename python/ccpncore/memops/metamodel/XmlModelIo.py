@@ -13,23 +13,21 @@ except AttributeError:
 import time
 import os
 
-from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import MetaModel, TextWriter_py_2_1
+
 MemopsError = MetaModel.MemopsError
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import TaggedValues
 from ccpncore.memops.metamodel.ModelPortal import ModelPortal
 from ccpncore.memops.metamodel import ModelTraverse_py_2_1
-from ccpncore.memops import Util as memopsUtil
-from ccpncore.memops import TextWriter_py_2_1
-from ccpncore.memops.Util import ElementTree
-from ccpncore.memops.Util import ElementInclude
+from ccpncore.memops.metamodel import Util as metaUtil
 
 from ccpncore.util import Path
 
 baseDataTypeModule = metaConstants.baseDataTypeModule
 infinity = metaConstants.infinity
-XINCLUDE_FALLBACK = ElementInclude.XINCLUDE_FALLBACK
-XINCLUDE_INCLUDE = ElementInclude.XINCLUDE_INCLUDE
+XINCLUDE_FALLBACK = metaUtil.ElementInclude.XINCLUDE_FALLBACK
+XINCLUDE_INCLUDE = metaUtil.ElementInclude.XINCLUDE_INCLUDE
 
 
 ######################################################################
@@ -235,18 +233,7 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
     
     # get tree:
     fp = open(absFilename,'rb')
-    elemtree = ElementTree.parse(fp)
-    
-    # try:
-    #   elemtree = ElementTree.parse(fp)
-    # except ImportError:
-    #   from elementtree import SimpleXMLTreeBuilder
-    #   fp.close()
-    #
-    #   print('WARNING, standard parser not found - trying alternative parser')
-    #
-    #   fp = open(absFilename,'rb')
-    #   elemtree = ElementTree.parse(fp, parser=SimpleXMLTreeBuilder.TreeBuilder())
+    elemtree = metaUtil.ElementTree.parse(fp)
     fp.close()
     
     # process elements
@@ -918,7 +905,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     self.writeOne('<?xml version="1.0"?>')
     
     self.writeMultilineComment(
-     (self.getVersionString(metaobj=obj date='?') +
+     (self.getVersionString(metaobj=obj, date='?') +
      '\n' + 
      self.getCreditsString(metaobj=obj, programType='model')),
      compress=False
@@ -963,7 +950,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
       val = self.toXmlString(metaObj, tag)
       if val:
         strings.append(' %s="%s"' % (tag, val))
-    strings = memopsUtil.compactStringList(strings, maxChars=80-self.indent)
+    strings = metaUtil.compactStringList(strings, maxChars=80-self.indent)
     
     # then write lines to file
     for ss in strings:

@@ -65,7 +65,7 @@ from ccpncore.memops.metamodel.MetaModel import MemopsError
 # Python 2.1 hack
 try:
   StringType = types.StringType
-except NameError:
+except AttributeError:
   StringType = str
 
 infoFileName = '_licenseInfo'

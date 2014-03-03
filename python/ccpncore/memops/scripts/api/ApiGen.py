@@ -56,7 +56,7 @@ software development. Bioinformatics 21, 1678-1684.
 # implements most high-level logic
 
 # NBNB TBD allow for changeability == 'add_only'
-
+from ccpncore.memops.ModelTraverse import ModelTraverse
 
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Constants as metaConstants
@@ -65,8 +65,6 @@ from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.memops.scripts.core.LanguageInterface import LanguageInterface
 from ccpncore.memops.scripts.core.TypeInterface import TypeInterface
 from ccpncore.memops.TextWriter import TextWriter
-from ccpncore.memops import Util as memopsUtil
-from ccpncore.memops.metamodel.ModelTraverse import ModelTraverse
 
 from ccpncore.memops.scripts.api.ApiInterface import ApiInterface
 from ccpncore.memops.scripts.api.PermissionInterface import PermissionInterface
@@ -79,9 +77,10 @@ MemopsError = MetaModel.MemopsError
 mandatoryAttributes = ('varNames',)
 
 # Requires other writers also to be implemented in subclass
-class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface, 
-             TransactionInterface, TypeInterface, LanguageInterface, 
-             TextWriter, ModelTraverse):
+class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
+             TransactionInterface, TypeInterface, LanguageInterface,
+             TextWriter,
+             ModelTraverse):
   
   codeDirName = metaConstants.apiCodeDir
 
@@ -688,7 +687,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     parentRole = inClass.parentRole
     
     if self.topObject in inClass.getAllSupertypes():
-      BaseName = memopsUtil.upperFirst(parentRole.otherRole.baseName)
+      BaseName = metaUtil.upperFirst(parentRole.otherRole.baseName)
       curRole = parentRole.valueType.getElement('current' + BaseName)
       self.getValue(self.varNames['self'], parentRole, var=parentRole.baseName, 
                     lenient=True, inClass=inClass)

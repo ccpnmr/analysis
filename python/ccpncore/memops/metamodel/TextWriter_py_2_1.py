@@ -40,7 +40,7 @@ settings = {
   'endStatement': '',
   'fileSuffix': 'py',
   'packageFile': 'package',
-  'baseDirName':'python',
+  'baseDirName':'python/ccpncore',
   'classesInPackage':True,
    # LanguageInterface settings :
    'noneValue': 'None',
@@ -261,6 +261,8 @@ class TextWriter_py_2_1:
     self.indents.append(self.indent)
     self.indent = 0
     self.fp = open(fileName, 'w')
+
+    print ('### OPENED ' + fileName)
 
   ###########################################################################
 

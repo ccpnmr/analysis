@@ -2,8 +2,6 @@ from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import Util as metaUtil
 
-from ccpncore.memops import Util as memopsUtil
-
 from ccpncore.memops.scripts.core.PyLanguage import PyLanguage
 from ccpncore.memops.scripts.core.PyType import PyType
 
@@ -88,7 +86,7 @@ class PyApiGen(PyLanguage, PyType, ApiGen):
 class %s(%s):
   r""\"%s
   ""\"
-""" % (clazz.name, ss, memopsUtil.breakString(clazz.documentation)))
+""" % (clazz.name, ss, metaUtil.breakString(clazz.documentation)))
   
     self.indent += self.INDENT
     
@@ -178,7 +176,7 @@ _notifies = {'':[]}
     
     ss = dataType.typeCodes['python']
     if ss == dataType.name and dataType.container.getElement(ss) is not None:
-      self.write("from %s.general.baseDataTypes import %s\n"
+      self.write("from ccpncore.%s.baseDataTypes import %s\n"
        % (metaConstants.modellingPackageName, ss)
       )
 
@@ -615,8 +613,7 @@ import re
 containsWhitespace = re.compile('\s').search
 containsNonAlphanumeric = re.compile('[^a-zA-Z0-9_]').search
  
-from %s.general import Implementation as implementation
-ApiError = implementation.ApiError
+from ccpncore.%s.Constants import ApiError
 """ % metaConstants.modellingPackageName)
  
     # handle package imports
@@ -627,7 +624,7 @@ ApiError = implementation.ApiError
     # handle metaPackage
     if package is implPackage:
       self.write("""
-from %s.metamodel import XmlModelIo
+from ccpncore.%s.metamodel import XmlModelIo
 topPackage = XmlModelIo.readModel(checkValidity=False)
 metaPackage = topPackage.metaObjFromQualName('%s')
 """ % (metaConstants.modellingPackageName, self.implPackageName))
@@ -663,7 +660,7 @@ metaPackage = %s.topPackage.metaObjFromQualName('%s')
 %s = property(%s, %s, None,
 r""\"%s
 ""\")
-""" % (element.name, getter, setter, memopsUtil.breakString(element.documentation)))
+""" % (element.name, getter, setter, metaUtil.breakString(element.documentation)))
     
     else:
       name = element.name

@@ -199,12 +199,12 @@ import string
 import time
 
 # Ccp imports
-from ccpncore.memops import Util as memopsUtil
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import OpTypes
 from ccpncore.memops.metamodel import TaggedValues
 from ccpncore.memops.metamodel import Util as metaUtil
+
 MemopsError = MetaModel.MemopsError
 
 trueString = metaConstants.trueString
@@ -551,7 +551,7 @@ def modelFromOd():
                   metaConstants.implementationPackageName)
   implPackage = rootPackage.metaObjFromQualName(ss)
   rootClass = implPackage.getElement(metaConstants.dataRootName)
-  rootName = memopsUtil.lowerFirst(metaConstants.dataRootName)
+  rootName = metaUtil.lowerFirst(metaConstants.dataRootName)
   
   # Second run for special purposes and some things that have to be delayed
   for metaPackage in leafPackages:
@@ -599,7 +599,7 @@ def modelFromOd():
            'documentation':'parent link',
           }
           topRole = MetaModel.MetaRole(**params)
-          baseName = memopsUtil.lowerFirst(topClass.name)
+          baseName = metaUtil.lowerFirst(topClass.name)
           params = {'container':rootClass, 'valueType':topClass, 
            'hierarchy':metaConstants.child_hierarchy,
            'locard':0, 'hicard':metaConstants.infinity,
@@ -619,7 +619,7 @@ def modelFromOd():
         
         # add current link if necessary
         baseName = topRole.otherRole.baseName
-        BaseName =  memopsUtil.upperFirst(baseName)
+        BaseName =  metaUtil.upperFirst(baseName)
         curRoleName = 'current' + BaseName
         curRole = rootClass.getElement(curRoleName)
         if curRole is None:
@@ -1411,7 +1411,7 @@ def rolesFromOd(metaClass):
       # get name(s) (first pass)
       tempRoleName = ae.name
       if not tempRoleName:
-        tempRoleName = memopsUtil.lowerFirst(dd['valueType'].name)
+        tempRoleName = metaUtil.lowerFirst(dd['valueType'].name)
       
       # get tagged values
       tv, etv = taggedValuesFromOd(ae,'MetaRole')
@@ -1512,7 +1512,7 @@ def rolesFromOd(metaClass):
              % (metaClass.qualifiedName(), tempRoleName)
             )
           else:
-            baseName = memopsUtil.lowerFirst(dd['valueType'].name)
+            baseName = metaUtil.lowerFirst(dd['valueType'].name)
  
         dd['baseName'] = baseName
  

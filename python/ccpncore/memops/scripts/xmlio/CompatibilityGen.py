@@ -90,9 +90,10 @@ def dirNameFromVersionString(versionString):
 def versionFromDir(topDir):
   """ Get current version string for directory tree rooted in topDir
   """
-  # TODO fix compatibility file getting now files have moved
   from ccpncore.memops import Version
   versionFile = os.path.join(topDir, 'python/memops/general/Constants.py')
+  if not os.path.isfile(versionFile):
+    versionFile = os.path.join(topDir, 'python/ccpncore/memops/Version.py')
   for line in open(versionFile):
     if line.startswith('currentModelVersion = '):
       exec(line, locals(), globals())

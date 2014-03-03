@@ -35,7 +35,7 @@ def getTopObjectFile(topObject):
   where topObject can be of class MemopsRoot or TopObject
   """
 
-  from memops.general.Io import getCcpFileString
+  from ccpncore.util.Common import getCcpFileString
   
   if topObject.root is topObject:
     # This is MemopsRoot

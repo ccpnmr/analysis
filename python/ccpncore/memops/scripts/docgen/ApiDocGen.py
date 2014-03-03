@@ -59,19 +59,14 @@ import string
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import OpTypes
 from ccpncore.memops.metamodel import Util as metaUtil
-
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.license import data as licenseData
-
 from ccpncore.util import Path as Path
-from ccpncore.memops import Util as memopsUtil
-
 from ccpncore.memops.license import headers
-
 from ccpncore.memops import TextWriter
-from ccpncore.memops.metamodel.ModelTraverse import ModelTraverse
-
+from ccpncore.memops.ModelTraverse import ModelTraverse
 from ccpncore.memops.scripts.docgen.Documentation import Documentation
+
 
 infinity = metaConstants.infinity
 MemopsError = MetaModel.MemopsError
@@ -148,9 +143,10 @@ DRAFT - backward compatibility of future versions not guaranteed.<br>
       if not hasattr(self, tag):
         raise MemopsError("ApiDocGen lacks mandatory %s attribute" % tag)
 
-    ###self.codeDirName = uniIo.joinPath(genConstants.apiCodeDir, self.docDir)
+    #self.codeDirName = uniIo.joinPath(genConstants.apiCodeDir, self.docDir)
     self.codeDirName = metaConstants.apiCodeDir
     self.topDocDir = Path.joinPath(self.baseDirName, self.docDir)
+    self.baseDirName = Path.joinPath(self.baseDirName, self.docDir)
     self.topApiFile = '%s.%s' % (self.topApiPrefix, self.fileSuffix)
     self.classMapFile = '%s.%s' % (self.classMapPrefix, self.fileSuffix)
     self.methodMapFile = '%s.%s' % (self.methodMapPrefix, self.fileSuffix)
@@ -258,6 +254,7 @@ DRAFT - backward compatibility of future versions not guaranteed.<br>
 
     # write class, attribute, method maps (only do once, for root package)
     if not package.container:
+
       # write class map
       fileName = Path.joinPath(self.rootDirName, self.topDocDir, self.classMapPrefix)
       self.openFile(fileName)
@@ -1926,7 +1923,7 @@ so, you should assume that these classes are not relevant to your purpose.
     for ss in ('guid', 'OpType', 'OpSubType', 'isQuery', 'isAbstract', 'Scope'):
       self.writeStartRow()
       self.writeCell('%s:' % ss)
-      self.writeCell(str(getattr(elem, memopsUtil.lowerFirst(ss))))
+      self.writeCell(str(getattr(elem, metaUtil.lowerFirst(ss))))
       self.writeEndRow()
 
     # Code
@@ -2144,6 +2141,8 @@ so, you should assume that these classes are not relevant to your purpose.
     self.writeLink('%s.%s' % (diapath, self.fileSuffix), 'Diagram')
 
     self.writeVerticalBar()
+
+    print ('@@@', topPath, diapath, tt, self.docDir)
 
     if special == 'Class Map':
       self.writeStyleString('Class Map', _class='underover')
@@ -2833,7 +2832,8 @@ so, you should assume that these classes are not relevant to your purpose.
 
     # TBD: this affects how many ..'s you get to find stylesheet, so can be seen to be correct or not via that
     if not elem:
-      topPath = self.upDir(2)  # HACK for Help and License
+      #topPath = self.upDir(2)  # HACK for Help and License
+      topPath = self.upDir(1)  # HACK for Help and License
     elif self.elemHasOwnDirectory(elem):
       topPath = self.pathToTop(elem, isDiagram=isDiagram, upDir=upDir)
     else:
@@ -3092,7 +3092,8 @@ so, you should assume that these classes are not relevant to your purpose.
     if element.container is None:
       if hasattr(element, 'topPackage') and element is element.topPackage():
         # this is the root package
-        return Path.joinPath(*(['..']*(n+1+upDir)))
+        #return Path.joinPath(*(['..']*(n+1+upDir)))
+        return Path.joinPath(*(['..']*(n+upDir)))
     
       raise MemopsError("path from root element not implemented for %s" 
        % element
@@ -3109,7 +3110,8 @@ so, you should assume that these classes are not relevant to your purpose.
     else:
       length = length + n + 1
   
-    return self.upDir(length)
+    #return self.upDir(length)
+    return self.upDir(length-2) # truing to adjust to new locations. TODO experiment
 
   ###########################################################################
 
@@ -3140,9 +3142,9 @@ so, you should assume that these classes are not relevant to your purpose.
     """ Generate directory name relative to top directory of an element
     """
   
-    n = len(self.baseDirNames)
+    #n = len(self.baseDirNames)
     ll = self.baseDirNames + element.qualifiedName().split('.')
-    ll[n+1:n+1] = self.docSubDirs
+    #ll[n+1:n+1] = self.docSubDirs
     if not ignoreElemType and not self.elemHasOwnDirectory(element):
       del ll[-1]
 
@@ -3186,6 +3188,7 @@ so, you should assume that these classes are not relevant to your purpose.
    
     # absolute or relative path
     if absoluteName:
+      #pathList = [self.rootDirName] + self.baseDirNames
       pathList = [self.rootDirName] + self.baseDirNames
     else:
       pathList = []
@@ -3193,14 +3196,14 @@ so, you should assume that these classes are not relevant to your purpose.
     if metaObj.container is None:
       # Root package only
       pathList.append(metaConstants.modellingPackageName)
-      pathList.append(self.codeDirName)
-      pathList.append(self.docDir)
+      #pathList.append(self.codeDirName)
+      #pathList.append(self.docDir)
       pathList.append(self.rootFileName)
 
     else:
       # any other object
       ll = metaObj.qualifiedName().split('.')
-      ll[1:1] = [self.codeDirName, self.docDir]
+      #ll[1:1] = [self.codeDirName, self.docDir]
       pathList.extend(ll)
       if self.elemHasOwnDirectory(metaObj):
         # gets own directory

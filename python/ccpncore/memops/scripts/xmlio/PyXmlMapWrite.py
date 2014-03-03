@@ -151,7 +151,7 @@ class PyXmlMapWrite(PyLanguage, PyType, XmlMapWrite):
     super(PyXmlMapWrite, self).initLeafPackage(package)
     
     self.write(
-     "from memops.general.Constants import baseDataTypeModule as basicDataTypes"
+     "from ccpncore.memops.metamodel.Constants import baseDataTypeModule as basicDataTypes"
     )
     # import own API package
     self.writeComment("\n Current package api")
@@ -162,7 +162,7 @@ class PyXmlMapWrite(PyLanguage, PyType, XmlMapWrite):
       
       self.writeNewline()
       self.writeComment('ApiError import')
-      self.writeOne('from memops.general.Implementation import ApiError')
+      self.writeOne('from ccpncore.memops.Constants import ApiError')
       self.writeNewline()
 
       # set up boolean converters
@@ -496,7 +496,7 @@ elem = None
     # LOOP H
     self.write('''
 # get elementtree NBNB TBD to be redone to allow for different sources
-from memops.universal.ElementTree import ElementTree
+from xml.etree import ElementTree
 
 # LOOP H
 for event, elem in ElementTree.iterparse(stream, events=("start", "end")):
@@ -533,7 +533,7 @@ for event, elem in ElementTree.iterparse(stream, events=("start", "end")):
 
     super(PyXmlMapWrite, self).streamEndElement()
 
-    # clean out to save memory
+    # clean out to save memory#
     self.writeComment('clean out to save memory')
     self.startIf('clearElem')
     self.writeOne('elem.clear()')

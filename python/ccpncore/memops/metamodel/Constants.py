@@ -41,8 +41,10 @@ apiCodeDir = 'api'
 xmlCodeDir = 'xml'
 
 # documentation directories
-imageDir = 'doc/graphics'
-docDir = 'doc'
+imageDir = 'apidoc/graphics'
+docDir = 'apidoc'
+
+configFilePath = 'data/ccpnConfig.json'
 
 
 # names of basic data types

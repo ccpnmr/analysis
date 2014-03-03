@@ -63,78 +63,132 @@ class Undo(deque):
      then just don't use this method and then every item is in its own waypoint.
   """
 
-  def __init__(self, maxUndoCount=20):
+  def __init__(self, maxWaypoints=20, maxOperations=10000):
     """Create Undo object with maximum stack length maxUndoCount"""
 
-    self.maxUndoCount = maxUndoCount
-    self.haveWaypoint = False
-    self.currentIndex = -1
+    self.maxWaypoints = maxWaypoints
+    self.maxOperations = maxOperations
+    self.nextIndex = 0   # points to next free slot (or first slot to redo)
+    self.waypoints = []  # array of last item in each waypoint
+    self.blocked = False
     deque.__init__(self)
 
   def newWaypoint(self):
-    # get rid of oldest waypoint if there are too many
-    if self.currentIndex == self.maxUndoCount - 1:
-      self.popleft()
-      self.currentIndex -= 1
+    """Start new waypoint"""
+    waypoints = self.waypoints
+    waypoints.append(self.nextIndex-1)
 
-    # clear out redos that are no longer going to be doable
-    for n in range(len(self)-self.currentIndex-1):
-      self.pop()
-
-    # create new waypoint
-    self.append([])
-    self.haveWaypoint = True
-    self.currentIndex += 1
+    if len(waypoints) > self.maxWaypoints:
+      del self[:waypoints[0]+1]
+      del waypoints[0]
 
   def addItem(self, undoMethod, undoData, redoMethod, redoData=None):
     """Add item to the undo stack.
        Note that might not know redoData until after we do undo.
     """
-    haveWaypoint = self.haveWaypoint
-    if not haveWaypoint:
-      self.newWaypoint()
 
-    waypoint = self[-1]
-    waypoint.append((undoMethod, undoData, redoMethod, redoData))
+    if self.blocked:
+      return
 
-    if not haveWaypoint:
-      self.haveWaypoint = False
+    # clear out redos that are no longer going to be doable
+    for n in range(len(self)-self.nextIndex):
+      self.pop()
+
+    # add new data
+    self.append((undoMethod, undoData, redoMethod, redoData))
+
+    # fix waypoints:
+    ll = self.waypoints
+    while ll and ll[-1] >= self.nextIndex:
+      ll.pop()
+
+    # correct for maxOperations
+    if len(self) > self.maxOperations:
+      self.popleft()
+      ll = self.waypoints
+      if ll:
+        for n,val in enumerate(ll):
+          ll[n] = val - 1
+        if ll[0] < 0:
+          del ll[0]
+    else:
+      self.nextIndex += 1
+
 
   def undo(self):
-    """Undo one waypoint"""
+    """Undo one step, waypoinit of operation"""
 
     # TBD: what should we do if undoMethod() throws an exception?
 
-    self.haveWaypoint = False
-    if self.currentIndex < 0:
-      return # should this instead be an Exception?
+    if self.nextIndex == 0:
+      return
 
-    waypoint  = self[self.currentIndex]
-    for n, (undoMethod, undoData, redoMethod, redoData) in enumerate(reversed(waypoint)):
-      if undoData is None:
-        redoData = undoMethod()
-      else:
-        redoData = undoMethod(undoData)
-      if redoData:
-        waypoint[n] = (undoMethod, undoData, redoMethod, redoData)
+    elif self.maxWaypoints:
+      undoTo = -1
+      for val in self.waypoints:
+        if val < self.nextIndex:
+          undoTo = val
+        else:
+          break
+    else:
+      undoTo = max(self.nextIndex - 2, -1)
 
-    self.currentIndex -= 1
+    # block addition of items while operating
+    self.blocked = True
+    try:
+      for n in range(self.nextIndex-1,undoTo,-1):
+        undoMethod, undoData, redoMethod, redoData = self[n]
+        if undoData is None:
+          undoMethod()
+        else:
+          undoMethod(undoData)
+      self.nextIndex = undoTo + 1
+      self.blocked = False
+    except:
+      print ("WARNING, error while undoing. Undo is cleared")
+      self.clear()
 
   def redo(self):
     """Redo one waypoint."""
 
     # TBD: what should we do if redoMethod() throws an exception?
 
-    self.haveWaypoint = False
+    if self.nextIndex > len(self):
+      return
 
-    if self.currentIndex >= len(self)-1:
-      return # should this instead be an Exception?
+    elif self.maxWaypoints:
+      redoTo = len(self) - 1
+      for val in reversed(self.waypoints):
+        if val >= self.nextIndex:
+          redoTo = val
+        else:
+          break
 
-    self.currentIndex += 1
+    else:
+      redoTo = min(self.nextIndex, len(self))
 
-    waypoint  = self[self.currentIndex]
-    for undoMethod, undoData, redoMethod, redoData in waypoint:
-      if redoData is None:
-        redoMethod()
-      else:
-        redoMethod(redoData)
+    # block addition of items while operating
+    self.blocked = True
+    try:
+      for n in range(self.nextIndex,redoTo+1):
+        undoMethod, undoData, redoMethod, redoData = self[n]
+        if redoData is None:
+          redoMethod()
+        else:
+          redoMethod(redoData)
+      self.nextIndex = redoTo + 1
+    except:
+      print ("WARNING, error while redoing. Undo is cleared")
+      self.clear()
+
+  def clear(self):
+    self.nextIndex = 0
+    self.waypoints.clear()
+    self.blocked = False
+    deque.clear(self)
+
+  def canundo(self):
+    return self.nextIndex > 0
+
+  def canredo(self):
+    return self.nextIndex <= len(self)

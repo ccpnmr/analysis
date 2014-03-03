@@ -443,30 +443,28 @@ ll.sort()
       self.startIf(self.varNames['notOverride'])
       
       self.write("""
-from memops.universal import Io as uniIo
-from memops.general.Util import configParameter
-import os.path
-rootDir = uniIo.normalisePath(uniIo.os.getcwd())
+from ccpncore.util import Path
+from ccpncpre.util.Common import getConfigParameter
+import os, os.path
+rootDir = Path.normalisePath(os.getcwd())
 
 # repositories from configuration
-for (name, urlPath) in configParameter('repositories'):
+for (name, urlPath) in getConfigParameter('repositories'):
   self.newRepository(name=name, url=Url(path=urlPath))
 
 # default repositories
 inData = (
- ('userData', uniIo.normalisePath(uniIo.joinPath(rootDir, self.name))),
- ('backup', 
-  uniIo.normalisePath(uniIo.joinPath(rootDir, self.name + '_backup'))),
- ('refData', 
-  uniIo.normalisePath(uniIo.joinPath(uniIo.getTopDirectory(), 'data'))),
- ('generalData', uniIo.normalisePath(os.path.expanduser('~/.ccpn/data'))),
+ ('userData', Path.joinPath(rootDir, self.name)),
+ ('backup', Path.joinPath(rootDir, self.name + '_backup')),
+ ('refData', Path.joinPath(Path.getTopDirectory(), 'data')),
+ ('generalData', Path.normalisePath(os.path.expanduser('~/.ccpn/data'))),
 )
 for (name, urlPath) in inData:
   if not self.findFirstRepository(name=name):
     self.newRepository(name=name, url=Url(path=urlPath))
 
 # packageLocators from configuration
-for (targetName,repository) in configParameter('packageLocators'):
+for (targetName,repository) in getConfigParameter('packageLocators'):
   loc = self.findFirstPackageLocator(targetName=targetName)
   if loc is None:
     loc = self.newPackageLocator(targetName=targetName,

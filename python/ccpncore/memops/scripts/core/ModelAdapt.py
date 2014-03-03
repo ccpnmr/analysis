@@ -11,7 +11,7 @@ from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.memops.metamodel import OpTypes
-from ccpncore.memops import Util as memopsUtil
+
 
 MemopsError = MetaModel.MemopsError
 try:
@@ -19,7 +19,7 @@ try:
 except AttributeError:
   StringType = str
 
-from memops.metamodel.ModelTraverse import ModelTraverse
+from ccpncore.memops.ModelTraverse import ModelTraverse
 
 
 class ModelAdapt(ModelTraverse):
@@ -890,7 +890,7 @@ class ModelAdapt(ModelTraverse):
           targetName = target.baseName
         else:
           targetName = target.name
-        opName = opName + memopsUtil.upperFirst(targetName)
+        opName = opName + metaUtil.upperFirst(targetName)
     
     # handle subTypes
     if opSubType is None:
@@ -963,7 +963,7 @@ class ModelAdapt(ModelTraverse):
       result = template % target.qualifiedName()
     else:
       result = (self.opDocTemplate %
-                (memopsUtil.upperFirst(opType), target.qualifiedName()))
+                (metaUtil.upperFirst(opType), target.qualifiedName()))
     
     if (copyElemDoc and 
         opData['targetTag'] not in ('container', 'masterOp', 'ChildClass')):

@@ -65,9 +65,10 @@ from ccpncore.memops.scripts.core import PyFileModelAdapt
 from ccpncore.memops.scripts.api import PyFileApiGen
 from ccpncore.memops.scripts.xmlio import PyXmlMapWrite
 from ccpncore.memops.scripts.docgen import PyApiDocGen
-from ccpncore.memops import Util as memopsUtil
 from ccpncore.util import Path
+from ccpncore.util import Common as commonUtil
 
+defaultIgnoreModules = []
 
 def getModelPortal(dataModelVersion=None, includePackageNames=None,
                    excludePackageNames=None):
@@ -112,7 +113,7 @@ def makePython(modelPortal, rootDirName=None, rootFileName=None,
   
   if ignoreModules is None:
     # modules known not to import - should not be checked
-    from memops.scripts_v2.Constants import ignoreModules 
+    ignoreModules = defaultIgnoreModules
     
   # generate XML map
   start = time.time()
@@ -147,7 +148,7 @@ def makePython(modelPortal, rootDirName=None, rootFileName=None,
   Memops start test importing
   """)
   start = time.time()
-  memopsUtil.recursiveImport(Path.getPythonDirectory(),ignoreModules=ignoreModules,
+  commonUtil.recursiveImport(Path.getPythonDirectory(),ignoreModules=ignoreModules,
                          force=True)
   end = time.time()
   print("""

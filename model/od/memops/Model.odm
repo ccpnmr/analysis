@@ -2,13 +2,12 @@ ObjectDomain_Model 15
 {-ay8ldh_-8xx_co4lxoon_-p8v 0
 }[objectdomain.uml.mechanisms.UmlPackage-owns $4
 objectdomain.uml.view.style.BaseViewElementStyle-owns $9
-objectdomain.uml.view.DependencyView-owns $11
 objectdomain.uml.core.UmlTaggedValue-taggedValues $5
 objectdomain.uml.view.Diagram-owns $3
 objectdomain.domain.ModelEnvironment-owns $2
 objectdomain.uml.mechanisms.StylePackage-owns $8
 objectdomain.uml.mechanisms.StereotypePackage-owns $6
-objectdomain.domain.DomainLockObject $12
+objectdomain.domain.DomainLockObject $11
 objectdomain.uml.core.UmlClassifier-owns $10
 objectdomain.uml.mechanisms.UmlModel-models $1
 objectdomain.uml.core.Stereotype-owns $7
@@ -490,7 +489,7 @@ objectdomain.uml.core.Stereotype-owns $7
 (name "?"
 )
 (uid "z8kfsx_-m68_gtzvewsk_-p2c"))
-($12 154
+($11 153
 (name "DomainLockObject"
 )
 (uid "64m3b9_4p5_bqjok6kd_-p8j"))
@@ -558,7 +557,6 @@ objectdomain.uml.core.Stereotype-owns $7
 ($4 64 @ -hkpzxr_-cvb_f2ixo80k_-p97 3 "Logical" $4 "molsim" $4 "AnnealProtocol" $4 "$CCPN_SVNROOT/molsim/AnnealProtocol.odp" A  U )
 ($4 65 @ -hkpzxr_-li2_fcvq0su4_-p5d 3 "Logical" $4 "molsim" $4 "Symmetry" $4 "$CCPN_SVNROOT/molsim/Symmetry.odp" A  U )
 ($4 66 @ -hkpzxr_-cvb_f2ixo80k_-p98 2 "Logical" $4 "molsim" $4 "$CCPN_SVNROOT/molsim/molsim.odp" A  U )
-($11 153 @ 0_-m68_hs235ny7_-p97 4 "Logical" $4 "cambridge" $4 "_Cambridge" $3 "" $11)
 (openDiagrams 2 3)
 (openDiagrams 2 4)
 (openDiagrams 2 5)
@@ -623,16 +621,16 @@ objectdomain.uml.core.Stereotype-owns $7
 (sharedPackages 2 64)
 (sharedPackages 2 65)
 (sharedPackages 2 66)
-(selection 2 153)
-(lockedBy 75 154)
+(selection 2 3)
+(lockedBy 75 153)
 (stereotypeAssn 67 75)
-(lockedBy 67 154)
+(lockedBy 67 153)
 (stereotypeAssn 69 75)
-(lockedBy 69 154)
+(lockedBy 69 153)
 (stereotypeAssn 71 75)
-(lockedBy 71 154)
-(lockedBy 74 154)
-(lockedBy 120 154)
+(lockedBy 71 153)
+(lockedBy 74 153)
+(lockedBy 120 153)
 (stereotypeAssn 150 75)
-(lockedBy 150 154)
-(lockedBy 1 154)
+(lockedBy 150 153)
+(lockedBy 1 153)

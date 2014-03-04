@@ -2142,8 +2142,6 @@ so, you should assume that these classes are not relevant to your purpose.
 
     self.writeVerticalBar()
 
-    print ('@@@', topPath, diapath, tt, self.docDir)
-
     if special == 'Class Map':
       self.writeStyleString('Class Map', _class='underover')
     else:

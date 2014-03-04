@@ -71,6 +71,17 @@ and contains original contributions embedded in the framework
   </supertypes>
 
 
+  <MetaAttribute name="_ID"
+   guid="www.ccpn.ac.uk_Fogh_2014-03-03-16:24:15_00001"
+   container="www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00005"
+   baseName="_ID" changeability="frozen" hicard="1" isAbstract="false"
+   isAutomatic="true" isDerived="false" isImplementation="false"
+   isImplicit="false" isOrdered="false" isUnique="true" locard="1"
+   scope="instance_level" visibility="public_vis">
+    <documentation>Persistent object ID</documentation>
+    <valueType>www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00032</valueType>
+  </MetaAttribute>
+
   <MetaAttribute name="applicationData"
    guid="www.ccpn.ac.uk_Fogh_2006-09-14-18:48:27_00007"
    container="www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00005"

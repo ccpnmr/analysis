@@ -52,11 +52,8 @@ or out-of-package link elements.
 
 
 Every Class element has an attribute '_ID' that gives an arbitrary object ID of
-the form '_int'. Intra-package links use these IDs as object pointers.  The IDs
-depend on the order in which objects are encountered while saving; it follows
-that different data files cannot be compared with 'diff', because otherwise
-identical dat may be using different IDs.
-/home/rhf22/CCPN/cvsroots/trunk/all/python/memops/format/xml/XmlIO.py
+the form '_int'. Intra-package links use these IDs as object pointers. This nattribute is
+persistent and set at creation time from version 3 onwards
 
 
 By default all two-way intra-package links are stored at both ends, and

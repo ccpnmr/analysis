@@ -14,7 +14,13 @@ class PersistenceInterface(object):
     raise NotImplementedError("Should be overwritten")
 
   def setSerialValue(self, owner, value):
-    """ special setValue versin for 'serial' attribute
+    """ special setValue version for 'serial' attribute
+    """
+
+    raise NotImplementedError("Should be overwritten")
+
+  def setIdValue(self, owner, value):
+    """ special setValue version for '_ID' attribute
     """
 
     raise NotImplementedError("Should be overwritten")

@@ -494,6 +494,10 @@ class LanguageInterface:
 
     raise NotImplementedError("Should be overridden")
 
+  def stringSlice(self, val, fromStart=0, fromEnd=None):
+
+    raise NotImplementedError("Should be overridden")
+
   def currentTime(self):
 
     raise NotImplementedError("Should be overridden")

@@ -704,6 +704,38 @@ class FileApiGen(ApiGen, FileApiInterface):
   ###########################################################################
 
   ###########################################################################
+
+  # implements PersistenceInterface
+  def setIdValue(self, inClass, value):
+
+    attrName = metaConstants.id_attribute
+    idVar = metaConstants.lastid_attribute
+    element = inClass.getElement(attrName)
+    selfVar = self.varNames['self']
+    #parentVar = self.varNames['parent']
+    intType = self.elementVarType(element)
+    #dictKey = self.toLiteral(inClass.parentRole.otherRole.name)
+
+    self.startBlock()
+    #self.defineVar(parentVar, self.elementVarType(inClass.getParentClass()))
+    #self.getImplLink(selfVar, 'parent', parentVar, inClass)
+    ss = self.getImplAttr(self.varNames['topObject'], idVar)
+    self.setVar(idVar, ss, intType, intType)
+    #self.initSerialDictIfNull(inClass.parentRole.otherRole.name)
+    self.startIf(self.comparison(value, '<', self.toLiteral(0)))
+    self.setVar(value, self.arithmetic(idVar, '+', self.toLiteral(1)))
+    self.setImplAttr(self.varNames['topObject'], idVar, value, inClass)
+    #self.setDictEntry(ss, dictKey, value)
+    self.elseIf(self.comparison(value, '>', idVar))
+    #self.setDictEntry(ss, dictKey, value)
+    self.setImplAttr(self.varNames['topObject'], idVar, value, inClass)
+    self.endIf()
+    self.setValue(selfVar, element, value)
+    self.endBlock()
+
+  ###########################################################################
+
+  ###########################################################################
   # implementation of TransactionInterface
   ###########################################################################
 

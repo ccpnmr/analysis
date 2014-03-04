@@ -167,6 +167,8 @@ maxClassNameLength = 32
 maxShortNameLength = 4
 
 # names of attributes with special treatment:
+id_attribute = '_ID'
+lastid_attribute = '_lastId'
 serial_attribute = 'serial'
 serialdict_attribute = 'serialDict'
 details_attribute = 'details'

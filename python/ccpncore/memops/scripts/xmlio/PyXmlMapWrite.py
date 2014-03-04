@@ -306,10 +306,10 @@ if mapping is None:
     strs2 = [element]
     
     for key in keys:
-      if key == '_ID':
-        strs.append(' %s="_%%s"' % key)
-      else:
-        strs.append(' %s="%%s"' % key)
+      # if key == '_ID':
+      #   strs.append(' %s="_%%s"' % key)
+      # else:
+      strs.append(' %s="%%s"' % key)
       strs2.append(attrs[key])
         
     if closeElement:

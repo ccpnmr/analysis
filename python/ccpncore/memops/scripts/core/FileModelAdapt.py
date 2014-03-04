@@ -34,6 +34,7 @@ class FileModelAdapt(ModelAdapt):
     self.varNames['topObjects'] = 'topObjects'
     self.varNames['activeRepositories'] = 'activeRepositories'
     self.varNames[metaConstants.serialdict_attribute] = '_serialDict'
+    self.varNames[metaConstants.lastid_attribute] = '_lastId'
     
     # adapt opData
     operationData = self.operationData

@@ -1,5 +1,6 @@
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import Util as metaUtil
 
 from ccpncore.memops.scripts.api.PyApiGen import PyApiGen
 from ccpncore.memops.scripts.api.FileApiGen import FileApiGen
@@ -76,6 +77,29 @@ for %s, %s in %s.items():
     func(%s, %s)
 ''' % (keyVar, valueVar, self.varNames['attrlinks'], self.varNames['self'], 
        keyVar, self.varNames['self'], valueVar))
+
+    if isinstance(inClass, MetaModel.MetaClass):
+      # Set _ID attribute. NBNB new March 2014 Rasmus Fogh
+
+      idVar = metaConstants.id_attribute
+      for cls in supertypes:
+        element = cls.getElement(idVar)
+        if element is not None:
+          break
+      else:
+        raise MemopsError("No element %s found cor class %s" % (idVar, inClass))
+
+      self.startIf(self.valueIsNone(
+       self.getValue(self.varNames['self'], element, lenient=True, inClass=inClass))
+      )
+      setterOp = metaUtil.getOperation(element, 'set', inClass=inClass)
+      funcName = self.getFuncname(setterOp, inClass)
+      self.callFunc(funcName, obj=self.varNames['self'], params=self.toLiteral(-1))
+      self.elseIf()
+      self.raiseApiError("Cannot pass in explicit ID if not reading",
+                         'parent', self.toLiteral(inClass.qualifiedName()))
+      self.endIf()
+
 
     self.setImplAttr(self.varNames['self'], 'inConstructor', False)
     self.indent -= self.INDENT

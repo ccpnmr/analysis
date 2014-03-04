@@ -621,7 +621,6 @@ objectdomain.uml.core.Stereotype-owns $7
 (sharedPackages 2 64)
 (sharedPackages 2 65)
 (sharedPackages 2 66)
-(selection 2 3)
 (lockedBy 75 153)
 (stereotypeAssn 67 75)
 (lockedBy 67 153)

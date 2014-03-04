@@ -668,11 +668,11 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
     self.writeNewline()
 
     # set object ID dictionary
-    self.writeComment('set object ID dictionary')
-    self.setVar('nextID', 1, varType=self.intVarType)
-    self.newDict('classIDs', keyType=self.anyVarType, valueType=self.intVarType, 
-                 needDeclType=True)
-    self.writeNewline()
+    # self.writeComment('set object ID dictionary')
+    # self.setVar('nextID', 1, varType=self.intVarType)
+    # self.newDict('classIDs', keyType=self.anyVarType, valueType=self.intVarType,
+    #              needDeclType=True)
+    # self.writeNewline()
 
     # set start indent
     self.writeNewline()
@@ -855,17 +855,18 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
     # if typ == 'class'
     self.startIf(self.comparison('typ', '==', self.toLiteral('class')))
 
-    # get and write obj _ID
-    self.writeComment('get and write obj _ID')
-    self.setVar('_ID', self.getDictEntry('classIDs', 'val'), varType=self.intVarType, castType=self.intVarType)
-    self.startIf(self.valueIsNone('_ID'))
-    self.setVar('_ID', 'nextID')
-    self.setDictEntry('classIDs', 'val', '_ID')
-    self.setVar('nextID', self.arithmetic('nextID', '+', 1))
-    self.endIf()
-    self.writeNewline()
+    # # get and write obj _ID
+    # self.writeComment('get and write obj _ID')
+    # self.setVar('_ID', self.getDictEntry('classIDs', 'val'), varType=self.intVarType, castType=self.intVarType)
+    # self.startIf(self.valueIsNone('_ID'))
+    # self.setVar('_ID', 'nextID')
+    # self.setDictEntry('classIDs', 'val', '_ID')
+    # self.setVar('nextID', self.arithmetic('nextID', '+', 1))
+    # self.endIf()
+    # self.writeNewline()
 
-    self.streamWriteStartElement('classtag', closeElement=False, _ID='_ID')
+
+    self.streamWriteStartElement('classtag', closeElement=False)
     self.writeNewline()
 
     # IF BLOCK 3
@@ -931,13 +932,19 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
     # if typ == 'link'
     self.startIf(self.comparison('typ', '==', self.toLiteral('link')))
 
-    self.setVar('_ID', self.getDictEntry('classIDs', 'value'),
-                varType=self.intVarType, castType=self.intVarType)
-    self.startIf(self.valueIsNone('_ID'))
-    self.setVar('_ID', 'nextID')
-    self.setDictEntry('classIDs', 'value', '_ID')
-    self.setVar('nextID', self.arithmetic('nextID', '+', 1))
-    self.endIf()
+
+    ss = self.streamGetValue('value', '_ID', keyIsMandatory=True)
+    self.setVar('_ID', ss, varType=self.intVarType)
+
+    #
+    # self.setVar('_ID', self.getDictEntry('classIDs', 'value'),
+    #             varType=self.intVarType, castType=self.intVarType)
+    # self.startIf(self.valueIsNone('_ID'))
+    # self.setVar('_ID', 'nextID')
+    # self.setDictEntry('classIDs', 'value', '_ID')
+    # self.setVar('nextID', self.arithmetic('nextID', '+', 1))
+    # self.endIf()
+
     ss = self.getDictEntry('tmpMap', self.toLiteral('name'), castType=self.stringVarType)
     self.streamWriteAttr(ss, '_ID', haveUnderscore=True)
     self.writeNewline()
@@ -1073,12 +1080,17 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
     # LOOP C
     self.writeComment('LOOP C')
     self.startLoop('value', 'vals', isUnique=False, isOrdered=True)
-    self.setVar('_ID', self.getDictEntry('classIDs', 'value'), varType=self.intVarType, castType=self.intVarType)
-    self.startIf(self.valueIsNone('_ID'))
-    self.setVar('_ID', 'nextID')
-    self.setDictEntry('classIDs', 'value', '_ID')
-    self.setVar('nextID', self.arithmetic('nextID', '+', 1))
-    self.endIf()
+
+    self.setVar('_ID', self.streamGetValue('value', '_ID', keyIsMandatory=True), varType=self
+                .intVarType, castType=self.intVarType)
+
+    # self.setVar('_ID', self.getDictEntry('classIDs', 'value'), varType=self.intVarType, castType=self.intVarType)
+    # self.startIf(self.valueIsNone('_ID'))
+    # self.setVar('_ID', 'nextID')
+    # self.setDictEntry('classIDs', 'value', '_ID')
+    # self.setVar('nextID', self.arithmetic('nextID', '+', 1))
+    # self.endIf()
+
     self.streamWriteValue('_ID', haveUnderscore=True)
 
     # LOOP C
@@ -1872,9 +1884,11 @@ require some code modifications.
     self.startIf(self.comparison(self.toLiteral('_ID'), '==', 'tag2'))
 
     self.setDictEntry('objectDict', 'value', 'obj')
+    self.setVar('value', self.stringSlice('value', self.toLiteral(1)))
 
     # IF BLOCK 110
-    self.elseIf()
+    # self.elseIf()
+    self.endIf()
 
     tt = self.dictInterfaceType(self.stringVarType)
     self.defineVar('tmpMap', tt)
@@ -1986,7 +2000,7 @@ require some code modifications.
     self.endIf()
 
     # IF BLOCK 110
-    self.endIf()
+    # self.endIf()
 
     # LOOP I
     self.endLoop()

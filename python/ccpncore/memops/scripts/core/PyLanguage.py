@@ -1020,6 +1020,20 @@ def %s(%s):''' % (funcname, paramString))
   ###########################################################################
 
   # implements LanguageInterface
+  def stringSlice(self, val, fromStart=0, fromEnd=None):
+    """Slice string. Uses Python convention with positive and negative indices"""
+
+    if fromEnd:
+      return '%s[%s:%s]' % (val, fromStart, fromEnd)
+    else:
+      return '%s[%s]' % (val, fromStart)
+
+
+  ###########################################################################
+
+  ###########################################################################
+
+  # implements LanguageInterface
   def currentTime(self):
 
     return 'time.ctime()'

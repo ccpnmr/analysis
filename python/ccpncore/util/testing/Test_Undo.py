@@ -3,8 +3,8 @@ from ccpncore.util.Undo import Undo
 def test_undo_create():
   undoObject = Undo()
 
-def test_undo_create_maxcount():
-  undoObject = Undo(maxUndoCount=100)
+def test_undo_create_maxwaypoints():
+  undoObject = Undo(maxWaypoints=100)
 
 def test_undo_add_one_item():
   undoObject = Undo()

@@ -7,7 +7,7 @@ import copy
 import types
 import time
 
-from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.metamodel import Constants as metaConstants, ModelTraverse
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.memops.metamodel import OpTypes
@@ -18,8 +18,6 @@ try:
   StringType = types.StringType
 except AttributeError:
   StringType = str
-
-from ccpncore.memops.ModelTraverse import ModelTraverse
 
 
 class ModelAdapt(ModelTraverse):

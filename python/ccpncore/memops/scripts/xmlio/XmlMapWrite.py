@@ -57,7 +57,7 @@ from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.scripts.core.LanguageInterface import LanguageInterface
 from ccpncore.memops.scripts.core.TypeInterface import TypeInterface
-from ccpncore.memops.TextWriter import TextWriter
+from ccpncore.memops.metamodel.TextWriter import TextWriter
 from ccpncore.memops.format.xml.XmlGen import XmlGen
 
 MemopsError = MetaModel.MemopsError

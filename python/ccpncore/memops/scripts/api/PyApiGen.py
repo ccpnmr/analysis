@@ -613,7 +613,7 @@ import re
 containsWhitespace = re.compile('\s').search
 containsNonAlphanumeric = re.compile('[^a-zA-Z0-9_]').search
  
-from ccpncore.%s.Constants import ApiError
+from ccpncore.%s.ApiError import ApiError
 """ % metaConstants.modellingPackageName)
  
     # handle package imports

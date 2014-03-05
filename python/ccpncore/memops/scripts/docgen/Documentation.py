@@ -60,7 +60,7 @@ import time
 from ccpncore.util import Path
 from ccpncore.memops import Version
 from ccpncore.memops.metamodel import MetaModel
-from ccpncore.memops.TextWriter import TextWriter
+from ccpncore.memops.metamodel.TextWriter import TextWriter
 
 
 MemopsError = MetaModel.MemopsError

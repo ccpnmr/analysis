@@ -128,7 +128,7 @@ CCPN project: An interim report on a data model for the NMR community
 
 import os, gc
 
-from ccpncore.memops.Constants import ApiError
+from ccpncore.memops.ApiError import ApiError
 from ccpncore.memops.format.xml import Util as xmlUtil
 
 implPrefix = 'IMPL'

@@ -56,18 +56,6 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 """
 
-# valid characters for file names 
-# NB string.ascii_letters and string.digits are not compatible
-# with Python 2.1 (used in ObjectDomain)
-defaultFileNameChar = '_'
-separatorFileNameChar = '+'
-validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
-                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' 
-                          + defaultFileNameChar)
-validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
-
-
-
 class ApiError(Exception):
   ''' Base class for all Api Errors
   '''

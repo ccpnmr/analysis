@@ -288,10 +288,9 @@ All have the same attributes:
 
 
 """
-from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import MetaModel, ModelTraverse
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops import Version
-from ccpncore.memops.ModelTraverse import ModelTraverse
 
 MemopsError = MetaModel.MemopsError
 

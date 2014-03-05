@@ -5,7 +5,7 @@ import os, os.path
 
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.util import Path
-from ccpncore.memops.Constants import ApiError
+from ccpncore.memops.ApiError import ApiError
 
 fileSuffix = ".xml"
 lenFileSuffix = len(fileSuffix)

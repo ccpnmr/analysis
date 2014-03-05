@@ -36,7 +36,7 @@ def getCcpFileString(fileNameString):
   Changes an input string to the one used for a component of file names.
   """
 
-  return doConvertStringToFileName(fileNameString, validFileNamePartChars,
+  return convertStringToFileName(fileNameString, validFileNamePartChars,
                                    defaultFileNameChar)
 
 def recursiveImport(dirname, modname=None, ignoreModules = None, force=False):
@@ -102,3 +102,8 @@ def getConfigParameter(name):
 
   dd = json.load(open(Path.joinPath(Path.getTopDirectory(),metaConstants.configFilePath)))
   return dd.get(name)
+
+
+def isWindowsOS():
+
+  return sys.platform[:3].lower() == 'win'

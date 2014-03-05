@@ -85,6 +85,20 @@ and contains original contributions embedded in the framework
   </MetaRole>
 
 
+  <MetaAttribute name="_lastId"
+   guid="www.ccpn.ac.uk_Fogh_2014-03-05-13:04:27_00001"
+   container="www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00002"
+   baseName="_lastId" changeability="frozen" hicard="1" isAbstract="false"
+   isAutomatic="true" isDerived="false" isImplementation="false"
+   isImplicit="false" isOrdered="false" isUnique="true" locard="1"
+   scope="instance_level" visibility="public_vis">
+    <documentation>Last ID used among descendants of topObject</documentation>
+    <valueType>www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00032</valueType>
+    <defaultValue>
+      <item>0</item>
+    </defaultValue>
+  </MetaAttribute>
+
   <MetaOperation name="getPackageLocator"
    guid="www.ccpn.ac.uk_Fogh_2007-04-23-17:23:00_00001"
    container="www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00002"

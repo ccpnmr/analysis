@@ -2836,63 +2836,89 @@ objectdomain.uml.core.Stereotype-owns $19
 (value "www.ccpn.ac.uk_Fogh_2007-04-23-17:23:00_00001"
 )
 (uid "0_-fvi_hrnjywg5_-db1"))
-($10 488 < 0_-fvi_hrnjywg5_-db0 "#<anon> (TopObject, DbTopObject)" 477
+($8 488 < 0_-m68_hsem1x8h_-p98 "_lastId" 477
+(initialValue "0"
+)
+(changeability "frozen")
+(name "_lastId"
+)
+(uid "0_-m68_hsem1x8h_-p98")
+(multiplicity "1"))
+($9 489 < 0_-m68_hsem1x8h_-p97 "documentation" 488
+(name "documentation"
+)
+(value "Last ID used among descendants of topObject"
+)
+(uid "0_-m68_hsem1x8h_-p97"))
+($9 490 < 0_-m68_hsem1x8h_-p96 "isAutomatic" 488
+(name "isAutomatic"
+)
+(value "True"
+)
+(uid "0_-m68_hsem1x8h_-p96"))
+($9 491 < 0_-m68_hsem9l6q_-p98 "guid" 488
+(name "guid"
+)
+(value "www.ccpn.ac.uk_Fogh_2014-03-05-13:04:27_00001"
+)
+(uid "0_-m68_hsem9l6q_-p98"))
+($10 492 < 0_-fvi_hrnjywg5_-db0 "#<anon> (TopObject, DbTopObject)" 477
 (uid "0_-fvi_hrnjywg5_-db0"))
-($10 489 < 0_-fvi_hrnjywg5_-daz "#<anon> (TopObject, DataObject)" 477
+($10 493 < 0_-fvi_hrnjywg5_-daz "#<anon> (TopObject, DataObject)" 477
 (uid "0_-fvi_hrnjywg5_-daz"))
-($13 490 < 0_-fvi_hrnjywg5_-day "#<anon> (TopObject, PackageLocator)##," 477
+($13 494 < 0_-fvi_hrnjywg5_-day "#<anon> (TopObject, PackageLocator)##," 477
 (name "")
 (uid "0_-fvi_hrnjywg5_-day"))
-($14 491 < 0_-fvi_hrnjywg5_-dax "#0" 490
+($14 495 < 0_-fvi_hrnjywg5_-dax "#0" 494
 (uid "0_-fvi_hrnjywg5_-dax")
 (isNavigable false))
-($14 492 < 0_-fvi_hrnjywg5_-daw "#1" 490
+($14 496 < 0_-fvi_hrnjywg5_-daw "#1" 494
 (changeability "frozen")
 (uid "0_-fvi_hrnjywg5_-daw")
 (multiplicity "1"))
-($9 493 < 0_-fvi_hrnjywg5_-dav "documentation" 492
+($9 497 < 0_-fvi_hrnjywg5_-dav "documentation" 496
 (name "documentation"
 )
 (value "Package locator relevant for TopObject"
 )
 (uid "0_-fvi_hrnjywg5_-dav"))
-($9 494 < 0_-fvi_hrnjywg5_-dau "guid" 492
+($9 498 < 0_-fvi_hrnjywg5_-dau "guid" 496
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-23-17:22:59_00001"
 )
 (uid "0_-fvi_hrnjywg5_-dau"))
-($9 495 < 0_-fvi_hrnjywg5_-dat "isDerived" 490
+($9 499 < 0_-fvi_hrnjywg5_-dat "isDerived" 494
 (name "isDerived"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-dat"))
-($10 496 < 0_-fvi_hrnjywg5_-das "#<anon> (TopObject, FileTopObject)" 477
+($10 500 < 0_-fvi_hrnjywg5_-das "#<anon> (TopObject, FileTopObject)" 477
 (uid "0_-fvi_hrnjywg5_-das"))
-($9 497 < 0_-fvi_hrnjywg5_-dar "documentation" 477
+($9 501 < 0_-fvi_hrnjywg5_-dar "documentation" 477
 (name "documentation"
 )
 (value "Superclass for TopObjects (except for MemopsRoot). The attributes and operations are different in File and Db implementations"
 )
 (uid "0_-fvi_hrnjywg5_-dar"))
-($9 498 < 0_-fvi_hrnjywg5_-daq "guid" 477
+($9 502 < 0_-fvi_hrnjywg5_-daq "guid" 477
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00002"
 )
 (uid "0_-fvi_hrnjywg5_-daq"))
-($9 499 < 0_-fvi_hrnjywg5_-dap "partitionsChildren" 477
+($9 503 < 0_-fvi_hrnjywg5_-dap "partitionsChildren" 477
 (name "partitionsChildren"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-dap"))
-($7 500 < 0_-fvi_hrnjywg5_-dao "PackageLocator" 1
+($7 504 < 0_-fvi_hrnjywg5_-dao "PackageLocator" 1
 (name "PackageLocator"
 )
 (uid "0_-fvi_hrnjywg5_-dao"))
-($8 501 < 0_-fvi_hrnjywg5_-dan "targetName" 500
+($8 505 < 0_-fvi_hrnjywg5_-dan "targetName" 504
 (initialValue "any"
 )
 (changeability "frozen")
@@ -2900,69 +2926,69 @@ objectdomain.uml.core.Stereotype-owns $19
 )
 (uid "0_-fvi_hrnjywg5_-dan")
 (multiplicity "1"))
-($9 502 < 0_-fvi_hrnjywg5_-dam "documentation" 501
+($9 506 < 0_-fvi_hrnjywg5_-dam "documentation" 505
 (name "documentation"
 )
 (value "Qualified name of relevant package. If set to 'any' covers all packages that do not have  a specific PackageLocator."
 )
 (uid "0_-fvi_hrnjywg5_-dam"))
-($9 503 < 0_-fvi_hrnjywg5_-dal "guid" 501
+($9 507 < 0_-fvi_hrnjywg5_-dal "guid" 505
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-18:48:27_00006"
 )
 (uid "0_-fvi_hrnjywg5_-dal"))
-($13 504 < 0_-fvi_hrnjywg5_-dak "#<anon> (PackageLocator, Repository)##stored,repositories" 500
+($13 508 < 0_-fvi_hrnjywg5_-dak "#<anon> (PackageLocator, Repository)##stored,repositories" 504
 (name "")
 (uid "0_-fvi_hrnjywg5_-dak"))
-($14 505 < 0_-fvi_hrnjywg5_-daj "stored#0" 504
+($14 509 < 0_-fvi_hrnjywg5_-daj "stored#0" 508
 (name "stored"
 )
 (uid "0_-fvi_hrnjywg5_-daj")
 (multiplicity "*"))
-($9 506 < 0_-fvi_hrnjywg5_-dai "documentation" 505
+($9 510 < 0_-fvi_hrnjywg5_-dai "documentation" 509
 (name "documentation"
 )
 (value "Groups of packages (LocationInfo) stored in repository."
 )
 (uid "0_-fvi_hrnjywg5_-dai"))
-($9 507 < 0_-fvi_hrnjywg5_-dah "baseName" 505
+($9 511 < 0_-fvi_hrnjywg5_-dah "baseName" 509
 (name "baseName"
 )
 (value "stored"
 )
 (uid "0_-fvi_hrnjywg5_-dah"))
-($9 508 < 0_-fvi_hrnjywg5_-dag "guid" 505
+($9 512 < 0_-fvi_hrnjywg5_-dag "guid" 509
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-18:48:27_00004"
 )
 (uid "0_-fvi_hrnjywg5_-dag"))
-($14 509 < 0_-fvi_hrnjywg5_-daf "repositories#1" 504
+($14 513 < 0_-fvi_hrnjywg5_-daf "repositories#1" 508
 (isOrdered true)
 (name "repositories"
 )
 (uid "0_-fvi_hrnjywg5_-daf")
 (multiplicity "1..*"))
-($9 510 < 0_-fvi_hrnjywg5_-dae "documentation" 509
+($9 514 < 0_-fvi_hrnjywg5_-dae "documentation" 513
 (name "documentation"
 )
 (value "repositories to search for data for packageLocaator packages - ordered to form a search path"
 )
 (uid "0_-fvi_hrnjywg5_-dae"))
-($9 511 < 0_-fvi_hrnjywg5_-dad "baseName" 509
+($9 515 < 0_-fvi_hrnjywg5_-dad "baseName" 513
 (name "baseName"
 )
 (value "repository"
 )
 (uid "0_-fvi_hrnjywg5_-dad"))
-($9 512 < 0_-fvi_hrnjywg5_-dac "guid" 509
+($9 516 < 0_-fvi_hrnjywg5_-dac "guid" 513
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-18:48:27_00005"
 )
 (uid "0_-fvi_hrnjywg5_-dac"))
-($15 513 < 0_-fvi_hrnjywg5_-dab "value_is_not_backup_repository" 509
+($15 517 < 0_-fvi_hrnjywg5_-dab "value_is_not_backup_repository" 513
 (name "value_is_not_backup_repository"
 )
 (uid "0_-fvi_hrnjywg5_-dab")
@@ -2974,135 +3000,135 @@ objectdomain.uml.core.Stereotype-owns $19
 "_"
 "other.getName() != \"backup\""
 ))
-($9 514 < 0_-fvi_hrnjywg5_-daa "guid" 513
+($9 518 < 0_-fvi_hrnjywg5_-daa "guid" 517
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-23-16:26:07_00001"
 )
 (uid "0_-fvi_hrnjywg5_-daa"))
-($10 515 < 0_-fvi_hrnjywg5_-da9 "#<anon> (PackageLocator, ImplementationObject)" 500
+($10 519 < 0_-fvi_hrnjywg5_-da9 "#<anon> (PackageLocator, ImplementationObject)" 504
 (uid "0_-fvi_hrnjywg5_-da9"))
-($9 516 < 0_-fvi_hrnjywg5_-da8 "documentation" 500
+($9 520 < 0_-fvi_hrnjywg5_-da8 "documentation" 504
 (name "documentation"
 )
 (value "Storage locations for one or more packages"
 )
 (uid "0_-fvi_hrnjywg5_-da8"))
-($9 517 < 0_-fvi_hrnjywg5_-da7 "guid" 500
+($9 521 < 0_-fvi_hrnjywg5_-da7 "guid" 504
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00003"
 )
 (uid "0_-fvi_hrnjywg5_-da7"))
-($9 518 < 0_-fvi_hrnjywg5_-da6 "keyNames" 500
+($9 522 < 0_-fvi_hrnjywg5_-da6 "keyNames" 504
 (name "keyNames"
 )
 (value "targetName"
 )
 (uid "0_-fvi_hrnjywg5_-da6"))
-($7 519 < 0_-fvi_hrnjywg5_-da5 "Repository" 1
+($7 523 < 0_-fvi_hrnjywg5_-da5 "Repository" 1
 (name "Repository"
 )
 (uid "0_-fvi_hrnjywg5_-da5"))
-($8 520 < 0_-fvi_hrnjywg5_-da4 "name" 519
+($8 524 < 0_-fvi_hrnjywg5_-da4 "name" 523
 (changeability "frozen")
 (name "name"
 )
 (uid "0_-fvi_hrnjywg5_-da4")
 (multiplicity "1"))
-($9 521 < 0_-fvi_hrnjywg5_-da3 "documentation" 520
+($9 525 < 0_-fvi_hrnjywg5_-da3 "documentation" 524
 (name "documentation"
 )
 (value "name of repository"
 )
 (uid "0_-fvi_hrnjywg5_-da3"))
-($9 522 < 0_-fvi_hrnjywg5_-da2 "guid" 520
+($9 526 < 0_-fvi_hrnjywg5_-da2 "guid" 524
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-18:48:28_00029"
 )
 (uid "0_-fvi_hrnjywg5_-da2"))
-($8 523 < 0_-fvi_hrnjywg5_-da1 "format" 519
+($8 527 < 0_-fvi_hrnjywg5_-da1 "format" 523
 (initialValue "xml"
 )
 (name "format"
 )
 (uid "0_-fvi_hrnjywg5_-da1")
 (multiplicity "1"))
-($9 524 < 0_-fvi_hrnjywg5_-da0 "documentation" 523
+($9 528 < 0_-fvi_hrnjywg5_-da0 "documentation" 527
 (name "documentation"
 )
 (value "Format in which data are supplied (default is 'xml', meaning standard CCPN XML). May differ from the format in which data are actually stored."
 )
 (uid "0_-fvi_hrnjywg5_-da0"))
-($9 525 < 0_-fvi_hrnjywg5_-d9z "guid" 523
+($9 529 < 0_-fvi_hrnjywg5_-d9z "guid" 527
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-18:48:28_00030"
 )
 (uid "0_-fvi_hrnjywg5_-d9z"))
-($8 526 < 0_-fvi_hrnjywg5_-d9y "url" 519
+($8 530 < 0_-fvi_hrnjywg5_-d9y "url" 523
 (name "url"
 )
 (uid "0_-fvi_hrnjywg5_-d9y")
 (multiplicity "1"))
-($9 527 < 0_-fvi_hrnjywg5_-d9x "documentation" 526
+($9 531 < 0_-fvi_hrnjywg5_-d9x "documentation" 530
 (name "documentation"
 )
 (value "Url of data repository"
 )
 (uid "0_-fvi_hrnjywg5_-d9x"))
-($9 528 < 0_-fvi_hrnjywg5_-d9w "guid" 526
+($9 532 < 0_-fvi_hrnjywg5_-d9w "guid" 530
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-18:48:28_00031"
 )
 (uid "0_-fvi_hrnjywg5_-d9w"))
-($11 529 < 0_-fvi_hrnjywg5_-d9v "getFileLocation#Word##PathString" 519
+($11 533 < 0_-fvi_hrnjywg5_-d9v "getFileLocation#Word##PathString" 523
 (name "getFileLocation"
 )
 (uid "0_-fvi_hrnjywg5_-d9v")
 (isQuery true))
-($12 530 < 0_-fvi_hrnjywg5_-d9u "packageName" 529
+($12 534 < 0_-fvi_hrnjywg5_-d9u "packageName" 533
 (name "packageName"
 )
 (uid "0_-fvi_hrnjywg5_-d9u"))
-($9 531 < 0_-fvi_hrnjywg5_-d9t "documentation" 530
+($9 535 < 0_-fvi_hrnjywg5_-d9t "documentation" 534
 (name "documentation"
 )
 (value "Name of package to get location for"
 )
 (uid "0_-fvi_hrnjywg5_-d9t"))
-($9 532 < 0_-fvi_hrnjywg5_-d9s "guid" 530
+($9 536 < 0_-fvi_hrnjywg5_-d9s "guid" 534
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-24-13:22:35_00004"
 )
 (uid "0_-fvi_hrnjywg5_-d9s"))
-($12 533 < 0_-fvi_hrnjywg5_-d9r "result" 529
+($12 537 < 0_-fvi_hrnjywg5_-d9r "result" 533
 (name "result"
 )
 (kind "return")
 (uid "0_-fvi_hrnjywg5_-d9r"))
-($9 534 < 0_-fvi_hrnjywg5_-d9q "guid" 533
+($9 538 < 0_-fvi_hrnjywg5_-d9q "guid" 537
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-25-16:32:34_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d9q"))
-($9 535 < 0_-fvi_hrnjywg5_-d9p "documentation" 529
+($9 539 < 0_-fvi_hrnjywg5_-d9p "documentation" 533
 (name "documentation"
 )
 (value "get absolute file location for TopObject in repository"
 )
 (uid "0_-fvi_hrnjywg5_-d9p"))
-($9 536 < 0_-fvi_hrnjywg5_-d9o "opType" 529
+($9 540 < 0_-fvi_hrnjywg5_-d9o "opType" 533
 (name "opType"
 )
 (value "otherQuery"
 )
 (uid "0_-fvi_hrnjywg5_-d9o"))
-($9 537 < 0_-fvi_hrnjywg5_-d9n "code:java" 529
+($9 541 < 0_-fvi_hrnjywg5_-d9n "code:java" 533
 (name "code:java"
 )
 (value "memops.api.Implementation.Url url = getUrl();"
@@ -3118,7 +3144,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "}"
 )
 (uid "0_-fvi_hrnjywg5_-d9n"))
-($9 538 < 0_-fvi_hrnjywg5_-d9m "code:python" 529
+($9 542 < 0_-fvi_hrnjywg5_-d9m "code:python" 533
 (name "code:python"
 )
 (value "url = self.url"
@@ -3132,154 +3158,154 @@ objectdomain.uml.core.Stereotype-owns $19
 "  raise ApiError(\"getFileLocation not implemented for url.protocol == '%s'\" % protocol)"
 )
 (uid "0_-fvi_hrnjywg5_-d9m"))
-($9 539 < 0_-fvi_hrnjywg5_-d9l "guid" 529
+($9 543 < 0_-fvi_hrnjywg5_-d9l "guid" 533
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-24-13:22:35_00003"
 )
 (uid "0_-fvi_hrnjywg5_-d9l"))
-($10 540 < 0_-fvi_hrnjywg5_-d9k "#<anon> (Repository, ImplementationObject)" 519
+($10 544 < 0_-fvi_hrnjywg5_-d9k "#<anon> (Repository, ImplementationObject)" 523
 (uid "0_-fvi_hrnjywg5_-d9k"))
-($9 541 < 0_-fvi_hrnjywg5_-d9j "documentation" 519
+($9 545 < 0_-fvi_hrnjywg5_-d9j "documentation" 523
 (name "documentation"
 )
 (value "Data repository - database, directory, or server, where data are stored"
 )
 (uid "0_-fvi_hrnjywg5_-d9j"))
-($9 542 < 0_-fvi_hrnjywg5_-d9i "guid" 519
+($9 546 < 0_-fvi_hrnjywg5_-d9i "guid" 523
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00004"
 )
 (uid "0_-fvi_hrnjywg5_-d9i"))
-($9 543 < 0_-fvi_hrnjywg5_-d9h "keyNames" 519
+($9 547 < 0_-fvi_hrnjywg5_-d9h "keyNames" 523
 (name "keyNames"
 )
 (value "name"
 )
 (uid "0_-fvi_hrnjywg5_-d9h"))
-($7 544 < 0_-fvi_hrnjywg5_-d9g "DataObject" 1
+($7 548 < 0_-fvi_hrnjywg5_-d9g "DataObject" 1
 (name "DataObject"
 )
 (uid "0_-fvi_hrnjywg5_-d9g")
 (isAbstract true))
-($8 545 < 0_-fvi_hrnjywg5_-d9f "applicationData" 544
+($8 549 < 0_-fvi_hrnjywg5_-d9f "applicationData" 548
 (name "applicationData"
 )
 (uid "0_-fvi_hrnjywg5_-d9f")
 (multiplicity "*"))
-($9 546 < 0_-fvi_hrnjywg5_-d9e "documentation" 545
+($9 550 < 0_-fvi_hrnjywg5_-d9e "documentation" 549
 (name "documentation"
 )
 (value "Application-specific data"
 )
 (uid "0_-fvi_hrnjywg5_-d9e"))
-($9 547 < 0_-fvi_hrnjywg5_-d9d "baseName" 545
+($9 551 < 0_-fvi_hrnjywg5_-d9d "baseName" 549
 (name "baseName"
 )
 (value "applicationData"
 )
 (uid "0_-fvi_hrnjywg5_-d9d"))
-($9 548 < 0_-fvi_hrnjywg5_-d9c "guid" 545
+($9 552 < 0_-fvi_hrnjywg5_-d9c "guid" 549
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-18:48:27_00007"
 )
 (uid "0_-fvi_hrnjywg5_-d9c"))
-($8 549 < 0_-m68_hsbqewyc_-p90 "_ID" 544
+($8 553 < 0_-m68_hsbqewyc_-p90 "_ID" 548
 (changeability "frozen")
 (name "_ID"
 )
 (uid "0_-m68_hsbqewyc_-p90")
 (multiplicity "1"))
-($9 550 < 0_-m68_hsbqewyc_-p8z "documentation" 549
+($9 554 < 0_-m68_hsbqewyc_-p8z "documentation" 553
 (name "documentation"
 )
 (value "Persistent object ID"
 )
 (uid "0_-m68_hsbqewyc_-p8z"))
-($9 551 < 0_-m68_hsbqewyc_-p8v "isAutomatic" 549
+($9 555 < 0_-m68_hsbqewyc_-p8v "isAutomatic" 553
 (name "isAutomatic"
 )
 (value "True"
 )
 (uid "0_-m68_hsbqewyc_-p8v"))
-($9 552 < 0_-m68_hsbqewyc_-p8t "guid" 549
+($9 556 < 0_-m68_hsbqewyc_-p8t "guid" 553
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2014-03-03-16:24:15_00001"
 )
 (uid "0_-m68_hsbqewyc_-p8t"))
-($13 553 < 0_-fvi_hrnjywg5_-d95 "#<anon> (DataObject, TopObject)##," 544
+($13 557 < 0_-fvi_hrnjywg5_-d95 "#<anon> (DataObject, TopObject)##," 548
 (name "")
 (uid "0_-fvi_hrnjywg5_-d95"))
-($14 554 < 0_-fvi_hrnjywg5_-d94 "#0" 553
+($14 558 < 0_-fvi_hrnjywg5_-d94 "#0" 557
 (uid "0_-fvi_hrnjywg5_-d94")
 (isNavigable false))
-($14 555 < 0_-fvi_hrnjywg5_-d93 "#1" 553
+($14 559 < 0_-fvi_hrnjywg5_-d93 "#1" 557
 (changeability "frozen")
 (uid "0_-fvi_hrnjywg5_-d93")
 (multiplicity "1"))
-($9 556 < 0_-fvi_hrnjywg5_-d92 "documentation" 555
+($9 560 < 0_-fvi_hrnjywg5_-d92 "documentation" 559
 (name "documentation"
 )
 (value "TopObject - topmost parent in package."
 )
 (uid "0_-fvi_hrnjywg5_-d92"))
-($9 557 < 0_-fvi_hrnjywg5_-d91 "guid" 555
+($9 561 < 0_-fvi_hrnjywg5_-d91 "guid" 559
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-12-31-09:00:59_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d91"))
-($9 558 < 0_-fvi_hrnjywg5_-d90 "isImplementation" 553
+($9 562 < 0_-fvi_hrnjywg5_-d90 "isImplementation" 557
 (name "isImplementation"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-d90"))
-($10 559 < 0_-fvi_hrnjywg5_-d8z "#<anon> (DataObject, MemopsObject)" 544
+($10 563 < 0_-fvi_hrnjywg5_-d8z "#<anon> (DataObject, MemopsObject)" 548
 (uid "0_-fvi_hrnjywg5_-d8z"))
-($9 560 < 0_-fvi_hrnjywg5_-d8y "documentation" 544
+($9 564 < 0_-fvi_hrnjywg5_-d8y "documentation" 548
 (name "documentation"
 )
 (value "Superclass for non-implementation classes"
 )
 (uid "0_-fvi_hrnjywg5_-d8y"))
-($9 561 < 0_-fvi_hrnjywg5_-d8x "guid" 544
+($9 565 < 0_-fvi_hrnjywg5_-d8x "guid" 548
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00005"
 )
 (uid "0_-fvi_hrnjywg5_-d8x"))
-($7 562 < 0_-fvi_hrnjywg5_-d8w "FileMemopsRoot" 1
+($7 566 < 0_-fvi_hrnjywg5_-d8w "FileMemopsRoot" 1
 (name "FileMemopsRoot"
 )
 (uid "0_-fvi_hrnjywg5_-d8w")
 (isAbstract true))
-($11 563 < 0_-fvi_hrnjywg5_-d8v "saveModified" 562
+($11 567 < 0_-fvi_hrnjywg5_-d8v "saveModified" 566
 (name "saveModified"
 )
 (uid "0_-fvi_hrnjywg5_-d8v"))
-($9 564 < 0_-fvi_hrnjywg5_-d8u "documentation" 563
+($9 568 < 0_-fvi_hrnjywg5_-d8u "documentation" 567
 (name "documentation"
 )
 (value "Save all modified data"
 )
 (uid "0_-fvi_hrnjywg5_-d8u"))
-($9 565 < 0_-fvi_hrnjywg5_-d8t "opType" 563
+($9 569 < 0_-fvi_hrnjywg5_-d8t "opType" 567
 (name "opType"
 )
 (value "other"
 )
 (uid "0_-fvi_hrnjywg5_-d8t"))
-($9 566 < 0_-fvi_hrnjywg5_-d8s "guid" 563
+($9 570 < 0_-fvi_hrnjywg5_-d8s "guid" 567
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-18:48:26_00006"
 )
 (uid "0_-fvi_hrnjywg5_-d8s"))
-($9 567 < 0_-fvi_hrnjywg5_-d8r "code:java" 563
+($9 571 < 0_-fvi_hrnjywg5_-d8r "code:java" 567
 (name "code:java"
 )
 (value "// NB must be done by direct access"
@@ -3296,7 +3322,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "  save();"
 )
 (uid "0_-fvi_hrnjywg5_-d8r"))
-($9 568 < 0_-fvi_hrnjywg5_-d8q "code:python" 563
+($9 572 < 0_-fvi_hrnjywg5_-d8q "code:python" 567
 (name "code:python"
 )
 (value "# NB must be done by direct access"
@@ -3311,23 +3337,23 @@ objectdomain.uml.core.Stereotype-owns $19
 "  self.save()"
 )
 (uid "0_-fvi_hrnjywg5_-d8q"))
-($11 569 < 0_-fvi_hrnjywg5_-d8p "saveAll" 562
+($11 573 < 0_-fvi_hrnjywg5_-d8p "saveAll" 566
 (name "saveAll"
 )
 (uid "0_-fvi_hrnjywg5_-d8p"))
-($9 570 < 0_-fvi_hrnjywg5_-d8o "documentation" 569
+($9 574 < 0_-fvi_hrnjywg5_-d8o "documentation" 573
 (name "documentation"
 )
 (value "force save of all data"
 )
 (uid "0_-fvi_hrnjywg5_-d8o"))
-($9 571 < 0_-fvi_hrnjywg5_-d8n "opType" 569
+($9 575 < 0_-fvi_hrnjywg5_-d8n "opType" 573
 (name "opType"
 )
 (value "other"
 )
 (uid "0_-fvi_hrnjywg5_-d8n"))
-($9 572 < 0_-fvi_hrnjywg5_-d8m "code:python" 569
+($9 576 < 0_-fvi_hrnjywg5_-d8m "code:python" 573
 (name "code:python"
 )
 (value "# NB must be done by direct access"
@@ -3341,7 +3367,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "self.save()"
 )
 (uid "0_-fvi_hrnjywg5_-d8m"))
-($9 573 < 0_-fvi_hrnjywg5_-d8l "code:java" 569
+($9 577 < 0_-fvi_hrnjywg5_-d8l "code:java" 573
 (name "code:java"
 )
 (value "// NB must be done by direct access"
@@ -3357,45 +3383,45 @@ objectdomain.uml.core.Stereotype-owns $19
 "save();"
 )
 (uid "0_-fvi_hrnjywg5_-d8l"))
-($9 574 < 0_-fvi_hrnjywg5_-d8k "guid" 569
+($9 578 < 0_-fvi_hrnjywg5_-d8k "guid" 573
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-29-18:26:22_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d8k"))
-($11 575 < 0_-fvi_hrnjywg5_-d8j "refreshTopObjects#Word" 562
+($11 579 < 0_-fvi_hrnjywg5_-d8j "refreshTopObjects#Word" 566
 (name "refreshTopObjects"
 )
 (uid "0_-fvi_hrnjywg5_-d8j"))
-($12 576 < 0_-fvi_hrnjywg5_-d8i "packageName" 575
+($12 580 < 0_-fvi_hrnjywg5_-d8i "packageName" 579
 (name "packageName"
 )
 (uid "0_-fvi_hrnjywg5_-d8i"))
-($9 577 < 0_-fvi_hrnjywg5_-d8h "documentation" 576
+($9 581 < 0_-fvi_hrnjywg5_-d8h "documentation" 580
 (name "documentation"
 )
 (value "packageName for package to refresh"
 )
 (uid "0_-fvi_hrnjywg5_-d8h"))
-($9 578 < 0_-fvi_hrnjywg5_-d8g "guid" 576
+($9 582 < 0_-fvi_hrnjywg5_-d8g "guid" 580
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-24-16:25:58_00002"
 )
 (uid "0_-fvi_hrnjywg5_-d8g"))
-($9 579 < 0_-fvi_hrnjywg5_-d8f "opType" 575
+($9 583 < 0_-fvi_hrnjywg5_-d8f "opType" 579
 (name "opType"
 )
 (value "other"
 )
 (uid "0_-fvi_hrnjywg5_-d8f"))
-($9 580 < 0_-fvi_hrnjywg5_-d8e "documentation" 575
+($9 584 < 0_-fvi_hrnjywg5_-d8e "documentation" 579
 (name "documentation"
 )
 (value "Check on disk to make sure all topObjects in package packageName are present."
 )
 (uid "0_-fvi_hrnjywg5_-d8e"))
-($9 581 < 0_-fvi_hrnjywg5_-d8d "code:java" 575
+($9 585 < 0_-fvi_hrnjywg5_-d8d "code:java" 579
 (name "code:java"
 )
 (value "if (\"memops.Implementation\".equals(packageName))"
@@ -3447,7 +3473,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "}"
 )
 (uid "0_-fvi_hrnjywg5_-d8d"))
-($9 582 < 0_-fvi_hrnjywg5_-d8c "code:python" 575
+($9 586 < 0_-fvi_hrnjywg5_-d8c "code:python" 579
 (name "code:python"
 )
 (value "# NB must be done by direct access"
@@ -3498,29 +3524,29 @@ objectdomain.uml.core.Stereotype-owns $19
 "  "
 )
 (uid "0_-fvi_hrnjywg5_-d8c"))
-($9 583 < 0_-fvi_hrnjywg5_-d8b "guid" 575
+($9 587 < 0_-fvi_hrnjywg5_-d8b "guid" 579
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-24-16:25:58_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d8b"))
-($11 584 < 0_-fvi_hrnjywg5_-d8a "backupAll" 562
+($11 588 < 0_-fvi_hrnjywg5_-d8a "backupAll" 566
 (name "backupAll"
 )
 (uid "0_-fvi_hrnjywg5_-d8a"))
-($9 585 < 0_-fvi_hrnjywg5_-d89 "documentation" 584
+($9 589 < 0_-fvi_hrnjywg5_-d89 "documentation" 588
 (name "documentation"
 )
 (value "back up memopsRoot and all known top objects"
 )
 (uid "0_-fvi_hrnjywg5_-d89"))
-($9 586 < 0_-fvi_hrnjywg5_-d88 "opType" 584
+($9 590 < 0_-fvi_hrnjywg5_-d88 "opType" 588
 (name "opType"
 )
 (value "other"
 )
 (uid "0_-fvi_hrnjywg5_-d88"))
-($9 587 < 0_-fvi_hrnjywg5_-d87 "code:java" 584
+($9 591 < 0_-fvi_hrnjywg5_-d87 "code:java" 588
 (name "code:java"
 )
 (value "if (findFirstRepository(\"name\", \"backup\") != null) {"
@@ -3531,7 +3557,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "}"
 )
 (uid "0_-fvi_hrnjywg5_-d87"))
-($9 588 < 0_-fvi_hrnjywg5_-d86 "code:python" 584
+($9 592 < 0_-fvi_hrnjywg5_-d86 "code:python" 588
 (name "code:python"
 )
 (value "if self.findFirstRepository(name='backup'):"
@@ -3541,62 +3567,62 @@ objectdomain.uml.core.Stereotype-owns $19
 "      topObj.backup()"
 )
 (uid "0_-fvi_hrnjywg5_-d86"))
-($9 589 < 0_-fvi_hrnjywg5_-d85 "guid" 584
+($9 593 < 0_-fvi_hrnjywg5_-d85 "guid" 588
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-30-10:40:04_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d85"))
-($11 590 < 0_-fvi_hrnjywg5_-d84 "importData#PathString##TopObject" 562
+($11 594 < 0_-fvi_hrnjywg5_-d84 "importData#PathString##TopObject" 566
 (name "importData"
 )
 (uid "0_-fvi_hrnjywg5_-d84"))
-($12 591 < 0_-fvi_hrnjywg5_-d83 "filePath" 590
+($12 595 < 0_-fvi_hrnjywg5_-d83 "filePath" 594
 (name "filePath"
 )
 (uid "0_-fvi_hrnjywg5_-d83"))
-($9 592 < 0_-fvi_hrnjywg5_-d82 "documentation" 591
+($9 596 < 0_-fvi_hrnjywg5_-d82 "documentation" 595
 (name "documentation"
 )
 (value "name of file to load"
 )
 (uid "0_-fvi_hrnjywg5_-d82"))
-($9 593 < 0_-fvi_hrnjywg5_-d81 "guid" 591
+($9 597 < 0_-fvi_hrnjywg5_-d81 "guid" 595
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-11-15:05:49_00002"
 )
 (uid "0_-fvi_hrnjywg5_-d81"))
-($12 594 < 0_-fvi_hrnjywg5_-d80 "result" 590
+($12 598 < 0_-fvi_hrnjywg5_-d80 "result" 594
 (name "result"
 )
 (kind "return")
 (uid "0_-fvi_hrnjywg5_-d80"))
-($9 595 < 0_-fvi_hrnjywg5_-d7z "guid" 594
+($9 599 < 0_-fvi_hrnjywg5_-d7z "guid" 598
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-11-15:05:49_00003"
 )
 (uid "0_-fvi_hrnjywg5_-d7z"))
-($9 596 < 0_-fvi_hrnjywg5_-d7y "documentation" 590
+($9 600 < 0_-fvi_hrnjywg5_-d7y "documentation" 594
 (name "documentation"
 )
 (value "Load data from file, without triggering any other loads. If the guid or code of the file TopObject are already in memory you will get an error. The loaded file will be saved in the first repository on the search path, overriding anything that might be there already"
 )
 (uid "0_-fvi_hrnjywg5_-d7y"))
-($9 597 < 0_-fvi_hrnjywg5_-d7x "opType" 590
+($9 601 < 0_-fvi_hrnjywg5_-d7x "opType" 594
 (name "opType"
 )
 (value "other"
 )
 (uid "0_-fvi_hrnjywg5_-d7x"))
-($9 598 < 0_-fvi_hrnjywg5_-d7w "code:java" 590
+($9 602 < 0_-fvi_hrnjywg5_-d7w "code:java" 594
 (name "code:java"
 )
 (value "result = memops.format.xml.Io.loadFromFile(this, filePath);"
 )
 (uid "0_-fvi_hrnjywg5_-d7w"))
-($9 599 < 0_-fvi_hrnjywg5_-d7v "code:python" 590
+($9 603 < 0_-fvi_hrnjywg5_-d7v "code:python" 594
 (name "code:python"
 )
 (value "from memops.format.xml import XmlIO"
@@ -3611,60 +3637,60 @@ objectdomain.uml.core.Stereotype-owns $19
 "  activeRepositories.insert(0, useRepository)"
 )
 (uid "0_-fvi_hrnjywg5_-d7v"))
-($9 600 < 0_-fvi_hrnjywg5_-d7u "guid" 590
+($9 604 < 0_-fvi_hrnjywg5_-d7u "guid" 594
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-11-15:05:49_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d7u"))
-($9 601 < 0_-fvi_hrnjywg5_-d7t "documentation" 562
+($9 605 < 0_-fvi_hrnjywg5_-d7t "documentation" 566
 (name "documentation"
 )
 (value "Memops Root Object for file implementations"
 )
 (uid "0_-fvi_hrnjywg5_-d7t"))
-($9 602 < 0_-fvi_hrnjywg5_-d7s "guid" 562
+($9 606 < 0_-fvi_hrnjywg5_-d7s "guid" 566
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00007"
 )
 (uid "0_-fvi_hrnjywg5_-d7s"))
-($9 603 < 0_-fvi_hrnjywg5_-d7r "specificImplementation" 562
+($9 607 < 0_-fvi_hrnjywg5_-d7r "specificImplementation" 566
 (name "specificImplementation"
 )
 (value "file"
 )
 (uid "0_-fvi_hrnjywg5_-d7r"))
-($7 604 < 0_-fvi_hrnjywg5_-d7q "DbMemopsRoot" 1
+($7 608 < 0_-fvi_hrnjywg5_-d7q "DbMemopsRoot" 1
 (name "DbMemopsRoot"
 )
 (uid "0_-fvi_hrnjywg5_-d7q")
 (isAbstract true))
-($9 605 < 0_-fvi_hrnjywg5_-d7p "documentation" 604
+($9 609 < 0_-fvi_hrnjywg5_-d7p "documentation" 608
 (name "documentation"
 )
 (value "Memops Root Object for database implementations"
 )
 (uid "0_-fvi_hrnjywg5_-d7p"))
-($9 606 < 0_-fvi_hrnjywg5_-d7o "guid" 604
+($9 610 < 0_-fvi_hrnjywg5_-d7o "guid" 608
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00008"
 )
 (uid "0_-fvi_hrnjywg5_-d7o"))
-($9 607 < 0_-fvi_hrnjywg5_-d7n "specificImplementation" 604
+($9 611 < 0_-fvi_hrnjywg5_-d7n "specificImplementation" 608
 (name "specificImplementation"
 )
 (value "db"
 )
 (uid "0_-fvi_hrnjywg5_-d7n"))
-($7 608 < 0_-fvi_hrnjywg5_-d7m "StringKeyDict" 1
+($7 612 < 0_-fvi_hrnjywg5_-d7m "StringKeyDict" 1
 (name "StringKeyDict"
 )
 (uid "0_-fvi_hrnjywg5_-d7m"))
-($10 609 < 0_-fvi_hrnjywg5_-d7l "#<anon> (StringKeyDict, Dict)" 608
+($10 613 < 0_-fvi_hrnjywg5_-d7l "#<anon> (StringKeyDict, Dict)" 612
 (uid "0_-fvi_hrnjywg5_-d7l"))
-($9 610 < 0_-fvi_hrnjywg5_-d7k "documentation" 608
+($9 614 < 0_-fvi_hrnjywg5_-d7k "documentation" 612
 (name "documentation"
 )
 (value "Dictionary where all keys are strings. "
@@ -3672,150 +3698,150 @@ objectdomain.uml.core.Stereotype-owns $19
 "Allowed onlly for MetaParameters"
 )
 (uid "0_-fvi_hrnjywg5_-d7k"))
-($9 611 < 0_-fvi_hrnjywg5_-d7j "guid" 608
+($9 615 < 0_-fvi_hrnjywg5_-d7j "guid" 612
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-11-03-14:03:26_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d7j"))
-($9 612 < 0_-fvi_hrnjywg5_-d7i "typeCode:java" 608
+($9 616 < 0_-fvi_hrnjywg5_-d7i "typeCode:java" 612
 (name "typeCode:java"
 )
 (value "java.util.Map<java.lang.String, java.lang.Object>"
 )
 (uid "0_-fvi_hrnjywg5_-d7i"))
-($7 613 < 0_-fvi_hrnjywg5_-d7h "Any" 1
+($7 617 < 0_-fvi_hrnjywg5_-d7h "Any" 1
 (name "Any"
 )
 (uid "0_-fvi_hrnjywg5_-d7h"))
-($9 614 < 0_-fvi_hrnjywg5_-d7g "documentation" 613
+($9 618 < 0_-fvi_hrnjywg5_-d7g "documentation" 617
 (name "documentation"
 )
 (value "Basic data type - could be anything at all. Allowed only for parameters, not serialisable."
 )
 (uid "0_-fvi_hrnjywg5_-d7g"))
-($9 615 < 0_-fvi_hrnjywg5_-d7f "typeCode:python" 613
+($9 619 < 0_-fvi_hrnjywg5_-d7f "typeCode:python" 617
 (name "typeCode:python"
 )
 (value "Any"
 )
 (uid "0_-fvi_hrnjywg5_-d7f"))
-($9 616 < 0_-fvi_hrnjywg5_-d7e "guid" 613
+($9 620 < 0_-fvi_hrnjywg5_-d7e "guid" 617
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-11-17-09:06:35_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d7e"))
-($9 617 < 0_-fvi_hrnjywg5_-d7d "typeCode:java" 613
+($9 621 < 0_-fvi_hrnjywg5_-d7d "typeCode:java" 617
 (name "typeCode:java"
 )
 (value "java.lang.Object"
 )
 (uid "0_-fvi_hrnjywg5_-d7d"))
-($7 618 < 0_-fvi_hrnjywg5_-d7c "ImplementationObject" 1
+($7 622 < 0_-fvi_hrnjywg5_-d7c "ImplementationObject" 1
 (name "ImplementationObject"
 )
 (uid "0_-fvi_hrnjywg5_-d7c")
 (isAbstract true))
-($8 619 < 0_-m68_hsbqewyc_-p8y "_ID" 618
+($8 623 < 0_-m68_hsbqewyc_-p8y "_ID" 622
 (changeability "frozen")
 (name "_ID"
 )
 (uid "0_-m68_hsbqewyc_-p8y")
 (multiplicity "1"))
-($9 620 < 0_-m68_hsbqewyc_-p8x "documentation" 619
+($9 624 < 0_-m68_hsbqewyc_-p8x "documentation" 623
 (name "documentation"
 )
 (value "Persistent object ID"
 )
 (uid "0_-m68_hsbqewyc_-p8x"))
-($9 621 < 0_-m68_hsbqewyc_-p8w "isAutomatic" 619
+($9 625 < 0_-m68_hsbqewyc_-p8w "isAutomatic" 623
 (name "isAutomatic"
 )
 (value "True"
 )
 (uid "0_-m68_hsbqewyc_-p8w"))
-($9 622 < 0_-m68_hsbqewyc_-p8u "guid" 619
+($9 626 < 0_-m68_hsbqewyc_-p8u "guid" 623
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2014-03-03-16:24:15_00002"
 )
 (uid "0_-m68_hsbqewyc_-p8u"))
-($13 623 < 0_-fvi_hrnjywg5_-d7b "#<anon> (ImplementationObject, MemopsRoot)##,topObject" 618
+($13 627 < 0_-fvi_hrnjywg5_-d7b "#<anon> (ImplementationObject, MemopsRoot)##,topObject" 622
 (name "")
 (uid "0_-fvi_hrnjywg5_-d7b"))
-($14 624 < 0_-fvi_hrnjywg5_-d7a "#0" 623
+($14 628 < 0_-fvi_hrnjywg5_-d7a "#0" 627
 (uid "0_-fvi_hrnjywg5_-d7a")
 (isNavigable false))
-($14 625 < 0_-fvi_hrnjywg5_-d79 "topObject#1" 623
+($14 629 < 0_-fvi_hrnjywg5_-d79 "topObject#1" 627
 (changeability "frozen")
 (name "topObject"
 )
 (uid "0_-fvi_hrnjywg5_-d79")
 (multiplicity "1"))
-($9 626 < 0_-fvi_hrnjywg5_-d78 "documentation" 625
+($9 630 < 0_-fvi_hrnjywg5_-d78 "documentation" 629
 (name "documentation"
 )
 (value "TopObject - topmost parent in package."
 )
 (uid "0_-fvi_hrnjywg5_-d78"))
-($9 627 < 0_-fvi_hrnjywg5_-d77 "guid" 625
+($9 631 < 0_-fvi_hrnjywg5_-d77 "guid" 629
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-12-31-09:00:59_00004"
 )
 (uid "0_-fvi_hrnjywg5_-d77"))
-($9 628 < 0_-fvi_hrnjywg5_-d76 "isImplementation" 623
+($9 632 < 0_-fvi_hrnjywg5_-d76 "isImplementation" 627
 (name "isImplementation"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-d76"))
-($10 629 < 0_-fvi_hrnjywg5_-d75 "#<anon> (ImplementationObject, MemopsObject)" 618
+($10 633 < 0_-fvi_hrnjywg5_-d75 "#<anon> (ImplementationObject, MemopsObject)" 622
 (uid "0_-fvi_hrnjywg5_-d75"))
-($9 630 < 0_-fvi_hrnjywg5_-d74 "documentation" 618
+($9 634 < 0_-fvi_hrnjywg5_-d74 "documentation" 622
 (name "documentation"
 )
 (value "Superclass for Implementation package objects"
 )
 (uid "0_-fvi_hrnjywg5_-d74"))
-($9 631 < 0_-fvi_hrnjywg5_-d73 "guid" 618
+($9 635 < 0_-fvi_hrnjywg5_-d73 "guid" 622
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-12-15-19:00:39_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d73"))
-($16 632 < 0_-fvi_hrnjywg5_-d72 "Comment" 1
+($16 636 < 0_-fvi_hrnjywg5_-d72 "Comment" 1
 (name "Comment"
 )
 (uid "0_-fvi_hrnjywg5_-d72")
 (body "DbTopObject and FileTopObject are alternatives"
 ))
-($16 633 < 0_-fvi_hrnjywg5_-d71 "Comment1" 1
+($16 637 < 0_-fvi_hrnjywg5_-d71 "Comment1" 1
 (name "Comment1"
 )
 (uid "0_-fvi_hrnjywg5_-d71")
 (body "DbMemopsRoot and FileMemopsRoot are alternatives"
 ))
-($7 634 < 0_-fvi_hrnjywg5_-d70 "SpacelessString" 1
+($7 638 < 0_-fvi_hrnjywg5_-d70 "SpacelessString" 1
 (name "SpacelessString"
 )
 (uid "0_-fvi_hrnjywg5_-d70"))
-($10 635 < 0_-fvi_hrnjywg5_-d6z "#<anon> (SpacelessString, String)" 634
+($10 639 < 0_-fvi_hrnjywg5_-d6z "#<anon> (SpacelessString, String)" 638
 (uid "0_-fvi_hrnjywg5_-d6z"))
-($9 636 < 0_-fvi_hrnjywg5_-d6y "documentation" 634
+($9 640 < 0_-fvi_hrnjywg5_-d6y "documentation" 638
 (name "documentation"
 )
 (value "String not containing whitespace"
 )
 (uid "0_-fvi_hrnjywg5_-d6y"))
-($9 637 < 0_-fvi_hrnjywg5_-d6x "guid" 634
+($9 641 < 0_-fvi_hrnjywg5_-d6x "guid" 638
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-09-12-18:31:28_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d6x"))
-($15 638 < 0_-fvi_hrnjywg5_-d6w "contains_no_white_space" 634
+($15 642 < 0_-fvi_hrnjywg5_-d6w "contains_no_white_space" 638
 (name "contains_no_white_space"
 )
 (uid "0_-fvi_hrnjywg5_-d6w")
@@ -3848,80 +3874,80 @@ objectdomain.uml.core.Stereotype-owns $19
 "_"
 "<xsd:pattern value=\"[^\\s]+\"/>"
 ))
-($9 639 < 0_-fvi_hrnjywg5_-d6v "guid" 638
+($9 643 < 0_-fvi_hrnjywg5_-d6v "guid" 642
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-09-12-18:31:28_00002"
 )
 (uid "0_-fvi_hrnjywg5_-d6v"))
-($7 640 < 0_-fvi_hrnjywg5_-d6u "LongWord" 1
+($7 644 < 0_-fvi_hrnjywg5_-d6u "LongWord" 1
 (name "LongWord"
 )
 (uid "0_-fvi_hrnjywg5_-d6u"))
-($10 641 < 0_-fvi_hrnjywg5_-d6t "#<anon> (LongWord, SpacelessString)" 640
+($10 645 < 0_-fvi_hrnjywg5_-d6t "#<anon> (LongWord, SpacelessString)" 644
 (uid "0_-fvi_hrnjywg5_-d6t"))
-($9 642 < 0_-fvi_hrnjywg5_-d6s "documentation" 640
+($9 646 < 0_-fvi_hrnjywg5_-d6s "documentation" 644
 (name "documentation"
 )
 (value "80 char string without white space"
 )
 (uid "0_-fvi_hrnjywg5_-d6s"))
-($9 643 < 0_-fvi_hrnjywg5_-d6r "length" 640
+($9 647 < 0_-fvi_hrnjywg5_-d6r "length" 644
 (name "length"
 )
 (value "80"
 )
 (uid "0_-fvi_hrnjywg5_-d6r"))
-($9 644 < 0_-fvi_hrnjywg5_-d6q "guid" 640
+($9 648 < 0_-fvi_hrnjywg5_-d6q "guid" 644
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-09-12-18:31:28_00003"
 )
 (uid "0_-fvi_hrnjywg5_-d6q"))
-($7 645 < 0_-fvi_hrnjywg5_-d6p "FileTopObject" 1
+($7 649 < 0_-fvi_hrnjywg5_-d6p "FileTopObject" 1
 (name "FileTopObject"
 )
 (uid "0_-fvi_hrnjywg5_-d6p")
 (isAbstract true))
-($11 646 < 0_-fvi_hrnjywg5_-d6o "loadFrom#Repository" 645
+($11 650 < 0_-fvi_hrnjywg5_-d6o "loadFrom#Repository" 649
 (name "loadFrom"
 )
 (uid "0_-fvi_hrnjywg5_-d6o"))
-($12 647 < 0_-fvi_hrnjywg5_-d6n "repository" 646
+($12 651 < 0_-fvi_hrnjywg5_-d6n "repository" 650
 (name "repository"
 )
 (uid "0_-fvi_hrnjywg5_-d6n"))
-($9 648 < 0_-fvi_hrnjywg5_-d6m "documentation" 647
+($9 652 < 0_-fvi_hrnjywg5_-d6m "documentation" 651
 (name "documentation"
 )
 (value "Repository to load from"
 )
 (uid "0_-fvi_hrnjywg5_-d6m"))
-($9 649 < 0_-fvi_hrnjywg5_-d6l "guid" 647
+($9 653 < 0_-fvi_hrnjywg5_-d6l "guid" 651
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-03-14:53:28_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d6l"))
-($9 650 < 0_-fvi_hrnjywg5_-d6k "documentation" 646
+($9 654 < 0_-fvi_hrnjywg5_-d6k "documentation" 650
 (name "documentation"
 )
 (value "Load TopObject from specific Repository"
 )
 (uid "0_-fvi_hrnjywg5_-d6k"))
-($9 651 < 0_-fvi_hrnjywg5_-d6j "opType" 646
+($9 655 < 0_-fvi_hrnjywg5_-d6j "opType" 650
 (name "opType"
 )
 (value "other"
 )
 (uid "0_-fvi_hrnjywg5_-d6j"))
-($9 652 < 0_-fvi_hrnjywg5_-d6i "guid" 646
+($9 656 < 0_-fvi_hrnjywg5_-d6i "guid" 650
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-23-15:11:29_00009"
 )
 (uid "0_-fvi_hrnjywg5_-d6i"))
-($9 653 < 0_-fvi_hrnjywg5_-d6h "code:java" 646
+($9 657 < 0_-fvi_hrnjywg5_-d6h "code:java" 650
 (name "code:java"
 )
 (value "// NB must be done by direct access"
@@ -3948,7 +3974,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "}"
 )
 (uid "0_-fvi_hrnjywg5_-d6h"))
-($9 654 < 0_-fvi_hrnjywg5_-d6g "code:python" 646
+($9 658 < 0_-fvi_hrnjywg5_-d6g "code:python" 650
 (name "code:python"
 )
 (value "# NB must be done by direct access"
@@ -3983,23 +4009,23 @@ objectdomain.uml.core.Stereotype-owns $19
 "                       % (repository, repository.format, repository.url.protocol))"
 )
 (uid "0_-fvi_hrnjywg5_-d6g"))
-($11 655 < 0_-fvi_hrnjywg5_-d6f "load" 645
+($11 659 < 0_-fvi_hrnjywg5_-d6f "load" 649
 (name "load"
 )
 (uid "0_-fvi_hrnjywg5_-d6f"))
-($9 656 < 0_-fvi_hrnjywg5_-d6e "opType" 655
+($9 660 < 0_-fvi_hrnjywg5_-d6e "opType" 659
 (name "opType"
 )
 (value "other"
 )
 (uid "0_-fvi_hrnjywg5_-d6e"))
-($9 657 < 0_-fvi_hrnjywg5_-d6d "guid" 655
+($9 661 < 0_-fvi_hrnjywg5_-d6d "guid" 659
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-09-14-18:48:27_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d6d"))
-($9 658 < 0_-fvi_hrnjywg5_-d6c "code:python" 655
+($9 662 < 0_-fvi_hrnjywg5_-d6c "code:python" 659
 (name "code:python"
 )
 (value "repositories = self.activeRepositories"
@@ -4009,7 +4035,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "  raise ApiError('No active repository found for TopObject %s' % self)"
 )
 (uid "0_-fvi_hrnjywg5_-d6c"))
-($9 659 < 0_-fvi_hrnjywg5_-d6b "code:java" 655
+($9 663 < 0_-fvi_hrnjywg5_-d6b "code:java" 659
 (name "code:java"
 )
 (value "java.util.List<? extends memops.api.Implementation.Repository> repositories = getActiveRepositories();"
@@ -4019,29 +4045,29 @@ objectdomain.uml.core.Stereotype-owns $19
 "  throw new memops.general.ApiException(\"No active repository found for TopObject\" + this);"
 )
 (uid "0_-fvi_hrnjywg5_-d6b"))
-($9 660 < 0_-fvi_hrnjywg5_-d6a "documentation" 655
+($9 664 < 0_-fvi_hrnjywg5_-d6a "documentation" 659
 (name "documentation"
 )
 (value "Load data corresponding to TopObject"
 )
 (uid "0_-fvi_hrnjywg5_-d6a"))
-($11 661 < 0_-fvi_hrnjywg5_-d69 "restore" 645
+($11 665 < 0_-fvi_hrnjywg5_-d69 "restore" 649
 (name "restore"
 )
 (uid "0_-fvi_hrnjywg5_-d69"))
-($9 662 < 0_-fvi_hrnjywg5_-d68 "opType" 661
+($9 666 < 0_-fvi_hrnjywg5_-d68 "opType" 665
 (name "opType"
 )
 (value "other"
 )
 (uid "0_-fvi_hrnjywg5_-d68"))
-($9 663 < 0_-fvi_hrnjywg5_-d67 "guid" 661
+($9 667 < 0_-fvi_hrnjywg5_-d67 "guid" 665
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-23-15:11:29_00012"
 )
 (uid "0_-fvi_hrnjywg5_-d67"))
-($9 664 < 0_-fvi_hrnjywg5_-d66 "code:python" 661
+($9 668 < 0_-fvi_hrnjywg5_-d66 "code:python" 665
 (name "code:python"
 )
 (value "repository = self.root.findFirstRepository(name=\"backup\")"
@@ -4051,7 +4077,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "  raise ApiError('No backup repository found for TopObject %s' % self)"
 )
 (uid "0_-fvi_hrnjywg5_-d66"))
-($9 665 < 0_-fvi_hrnjywg5_-d65 "code:java" 661
+($9 669 < 0_-fvi_hrnjywg5_-d65 "code:java" 665
 (name "code:java"
 )
 (value "memops.api.Implementation.Repository repository = getRoot().findFirstRepository(\"name\", \"backup\");"
@@ -4061,109 +4087,109 @@ objectdomain.uml.core.Stereotype-owns $19
 "  throw new memops.general.ApiException(\"No backup repository found for TopObject \" + this);"
 )
 (uid "0_-fvi_hrnjywg5_-d65"))
-($9 666 < 0_-fvi_hrnjywg5_-d64 "documentation" 661
+($9 670 < 0_-fvi_hrnjywg5_-d64 "documentation" 665
 (name "documentation"
 )
 (value "restore data from current backup location"
 )
 (uid "0_-fvi_hrnjywg5_-d64"))
-($10 667 < 0_-fvi_hrnjywg5_-d63 "#<anon> (FileTopObject, FileStorageObject)" 645
+($10 671 < 0_-fvi_hrnjywg5_-d63 "#<anon> (FileTopObject, FileStorageObject)" 649
 (uid "0_-fvi_hrnjywg5_-d63"))
-($9 668 < 0_-fvi_hrnjywg5_-d62 "documentation" 645
+($9 672 < 0_-fvi_hrnjywg5_-d62 "documentation" 649
 (name "documentation"
 )
 (value "Object to hold file and URL information for a package, *not* including memops.Implementation"
 )
 (uid "0_-fvi_hrnjywg5_-d62"))
-($9 669 < 0_-fvi_hrnjywg5_-d61 "guid" 645
+($9 673 < 0_-fvi_hrnjywg5_-d61 "guid" 649
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-03-14:53:27_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d61"))
-($2 670 < 0_-fvi_hrnjywg5_-d60 "_Implementation-details" 1
+($2 674 < 0_-fvi_hrnjywg5_-d60 "_Implementation-details" 1
 (name "_Implementation-details"
 )
 (uid "0_-fvi_hrnjywg5_-d60")
 (diagramType "class"))
-($3 671 < 0_-fvi_hrnjywg5_-d5z "MemopsObject" 670
+($3 675 < 0_-fvi_hrnjywg5_-d5z "MemopsObject" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5z")
 (bbx 450 20 110 90))
-($3 672 < 0_-fvi_hrnjywg5_-d5y "ApplicationData" 670
+($3 676 < 0_-fvi_hrnjywg5_-d5y "ApplicationData" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5y")
 (bbx 1180 170 120 110))
-($3 673 < 0_-fvi_hrnjywg5_-d5x "MemopsRoot" 670
+($3 677 < 0_-fvi_hrnjywg5_-d5x "MemopsRoot" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5x")
 (bbx 830 240 190 190))
-($3 674 < 0_-fvi_hrnjywg5_-d5w "AppDataBoolean" 670
+($3 678 < 0_-fvi_hrnjywg5_-d5w "AppDataBoolean" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5w")
 (bbx 1360 20 120 90))
-($4 675 < 0_-fvi_hrnjywg5_-d5v "" 670
+($4 679 < 0_-fvi_hrnjywg5_-d5v "" 674
 (uid "0_-fvi_hrnjywg5_-d5v")
 (points 1360 45 1340 45 1340 210 1300 210))
-($3 676 < 0_-fvi_hrnjywg5_-d5s "AppDataInt" 670
+($3 680 < 0_-fvi_hrnjywg5_-d5s "AppDataInt" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5s")
 (bbx 1360 290 80 90))
-($4 677 < 0_-fvi_hrnjywg5_-d5r "" 670
+($4 681 < 0_-fvi_hrnjywg5_-d5r "" 674
 (uid "0_-fvi_hrnjywg5_-d5r")
 (points 1360 310 1340 310 1340 210 1300 210))
-($3 678 < 0_-fvi_hrnjywg5_-d5o "AppDataFloat" 670
+($3 682 < 0_-fvi_hrnjywg5_-d5o "AppDataFloat" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5o")
 (bbx 1370 160 100 90))
-($4 679 < 0_-fvi_hrnjywg5_-d5n "" 670
+($4 683 < 0_-fvi_hrnjywg5_-d5n "" 674
 (uid "0_-fvi_hrnjywg5_-d5n")
 (points 1370 180 1340 180 1340 210 1300 210))
-($3 680 < 0_-fvi_hrnjywg5_-d5m "AppDataString" 670
+($3 684 < 0_-fvi_hrnjywg5_-d5m "AppDataString" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5m")
 (bbx 1360 420 100 90))
-($4 681 < 0_-fvi_hrnjywg5_-d5l "" 670
+($4 685 < 0_-fvi_hrnjywg5_-d5l "" 674
 (uid "0_-fvi_hrnjywg5_-d5l")
 (points 1360 440 1340 440 1340 210 1300 210))
-($3 682 < 0_-fvi_hrnjywg5_-d5k "Url" 670
+($3 686 < 0_-fvi_hrnjywg5_-d5k "Url" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5k")
 (bbx 1150 310 170 230))
-($3 683 < 0_-fvi_hrnjywg5_-d5j "FileStorageObject" 670
+($3 687 < 0_-fvi_hrnjywg5_-d5j "FileStorageObject" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5j")
 (bbx 250 350 190 290))
-($3 684 < 0_-fvi_hrnjywg5_-d5i "UrlProtocol" 670
+($3 688 < 0_-fvi_hrnjywg5_-d5i "UrlProtocol" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5i")
 (bbx 380 630 80 70))
-($4 685 < 0_-fvi_hrnjywg5_-d5h "" 670
+($4 689 < 0_-fvi_hrnjywg5_-d5h "" 674
 (uid "0_-fvi_hrnjywg5_-d5h")
 (points 830 365 440 365))
-($3 686 < 0_-fvi_hrnjywg5_-d5g "StorageFormat" 670
+($3 690 < 0_-fvi_hrnjywg5_-d5g "StorageFormat" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5g")
 (bbx 640 630 100 70))
-($3 687 < 0_-fvi_hrnjywg5_-d5f "DbTopObject" 670
+($3 691 < 0_-fvi_hrnjywg5_-d5f "DbTopObject" 674
 (uid "0_-fvi_hrnjywg5_-d5f")
 (bbx 100 430 100 50))
-($3 688 < 0_-fvi_hrnjywg5_-d5e "TopObject" 670
+($3 692 < 0_-fvi_hrnjywg5_-d5e "TopObject" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5e")
-(bbx 20 250 120 90))
-($4 689 < 0_-fvi_hrnjywg5_-d5d "" 670
+(bbx 20 250 120 110))
+($4 693 < 0_-fvi_hrnjywg5_-d5d "" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5d")
 (points 135 360 135 430))
-($3 690 < 0_-fvi_hrnjywg5_-d5c "PackageLocator" 670
+($3 694 < 0_-fvi_hrnjywg5_-d5c "PackageLocator" 674
 (uid "0_-fvi_hrnjywg5_-d5c")
 (bbx 490 290 200 70))
-($3 691 < 0_-fvi_hrnjywg5_-d5b "Repository" 670
+($3 695 < 0_-fvi_hrnjywg5_-d5b "Repository" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5b")
 (bbx 540 480 170 130))
-($6 692 < 0_-fvi_hrnjywg5_-d5a "" 670
+($6 696 < 0_-fvi_hrnjywg5_-d5a "" 674
 (toMultiplicityPosition 565 460)
 (toRolePosition 565 440)
 (uid "0_-fvi_hrnjywg5_-d5a")
@@ -4171,197 +4197,197 @@ objectdomain.uml.core.Stereotype-owns $19
 (fromRolePosition 575 390)
 (toOrderedPosition 600 460)
 (fromMultiplicityPosition 605 365))
-($3 693 < 0_-fvi_hrnjywg5_-d59 "DataObject" 670
+($3 697 < 0_-fvi_hrnjywg5_-d59 "DataObject" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d59")
 (bbx 30 20 180 90))
-($3 694 < 0_-fvi_hrnjywg5_-d58 "FileMemopsRoot" 670
+($3 698 < 0_-fvi_hrnjywg5_-d58 "FileMemopsRoot" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d58")
 (bbx 790 560 190 150))
-($3 695 < 0_-fvi_hrnjywg5_-d57 "DbMemopsRoot" 670
+($3 699 < 0_-fvi_hrnjywg5_-d57 "DbMemopsRoot" 674
 (uid "0_-fvi_hrnjywg5_-d57")
 (bbx 900 480 110 50))
-($6 696 < 0_-fvi_hrnjywg5_-d56 "" 670
+($6 700 < 0_-fvi_hrnjywg5_-d56 "" 674
 (toMultiplicityPosition 695 335)
 (toRolePosition 630 390)
 (uid "0_-fvi_hrnjywg5_-d56")
 (points 830 330 690 330)
 (fromMultiplicityPosition 805 335))
-($6 697 < 0_-fvi_hrnjywg5_-d55 "" 670
+($6 701 < 0_-fvi_hrnjywg5_-d55 "" 674
 (toMultiplicityPosition 715 500)
 (toRolePosition 715 495)
 (uid "0_-fvi_hrnjywg5_-d55")
 (points 840 430 840 495 710 495)
 (fromMultiplicityPosition 820 435))
-($3 698 < 0_-fvi_hrnjywg5_-d54 "ImplementationObject" 670
+($3 702 < 0_-fvi_hrnjywg5_-d54 "ImplementationObject" 674
 (uid "0_-fvi_hrnjywg5_-d54")
 (bbx 550 170 150 70))
-($4 699 < 0_-fvi_hrnjywg5_-d53 "" 670
+($4 703 < 0_-fvi_hrnjywg5_-d53 "" 674
 (uid "0_-fvi_hrnjywg5_-d53")
 (points 60 250 60 110))
-($3 700 < 0_-fvi_hrnjywg5_-d52 "MemopsDataTypeObject" 670
+($3 704 < 0_-fvi_hrnjywg5_-d52 "MemopsDataTypeObject" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d52")
 (bbx 1110 20 160 110))
-($4 701 < 0_-fvi_hrnjywg5_-d51 "" 670
+($4 705 < 0_-fvi_hrnjywg5_-d51 "" 674
 (uid "0_-fvi_hrnjywg5_-d51")
 (points 850 240 850 195 700 195))
-($4 702 < 0_-fvi_hrnjywg5_-d50 "" 670
+($4 706 < 0_-fvi_hrnjywg5_-d50 "" 674
 (uid "0_-fvi_hrnjywg5_-d50")
 (points 585 290 585 240))
-($4 703 < 0_-fvi_hrnjywg5_-d4z "" 670
+($4 707 < 0_-fvi_hrnjywg5_-d4z "" 674
 (uid "0_-fvi_hrnjywg5_-d4z")
 (points 695 480 695 240))
-($4 704 < 0_-fvi_hrnjywg5_-d4y "" 670
+($4 708 < 0_-fvi_hrnjywg5_-d4y "" 674
 (uid "0_-fvi_hrnjywg5_-d4y")
 (points 1205 170 1205 130))
-($4 705 < 0_-fvi_hrnjywg5_-d4x "" 670
+($4 709 < 0_-fvi_hrnjywg5_-d4x "" 674
 (uid "0_-fvi_hrnjywg5_-d4x")
 (points 1165 310 1165 130))
-($4 706 < 0_-fvi_hrnjywg5_-d4w "" 670
+($4 710 < 0_-fvi_hrnjywg5_-d4w "" 674
 (uid "0_-fvi_hrnjywg5_-d4w")
 (points 955 430 955 480))
-($6 707 < 0_-fvi_hrnjywg5_-d4v "" 670
+($6 711 < 0_-fvi_hrnjywg5_-d4v "" 674
 (toMultiplicityPosition 825 245)
 (toRolePosition 750 245)
 (uid "0_-fvi_hrnjywg5_-d4v")
 (points 650 240 650 245 830 245))
-($6 708 < 0_-fvi_hrnjywg5_-d4u "" 670
+($6 712 < 0_-fvi_hrnjywg5_-d4u "" 674
 (toMultiplicityPosition 80 225)
 (uid "0_-fvi_hrnjywg5_-d4u")
 (points 95 110 95 250))
-($4 709 < 0_-fvi_hrnjywg5_-d4t "" 670
+($4 713 < 0_-fvi_hrnjywg5_-d4t "" 674
 (uid "0_-fvi_hrnjywg5_-d4t")
 (points 860 430 860 560))
-($17 710 < 0_-fvi_hrnjywg5_-d4s "Comment" 670
+($17 714 < 0_-fvi_hrnjywg5_-d4s "Comment" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d4s")
 (bbx 10 360 210 40))
-($17 711 < 0_-fvi_hrnjywg5_-d4r "Comment1" 670
+($17 715 < 0_-fvi_hrnjywg5_-d4r "Comment1" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d4r")
 (bbx 870 410 170 60))
-($4 712 < 0_-fvi_hrnjywg5_-d4q "" 670
+($4 716 < 0_-fvi_hrnjywg5_-d4q "" 674
 (uid "0_-fvi_hrnjywg5_-d4q")
 (points 210 55 450 55))
-($4 713 < 0_-fvi_hrnjywg5_-d4p "" 670
+($4 717 < 0_-fvi_hrnjywg5_-d4p "" 674
 (uid "0_-fvi_hrnjywg5_-d4p")
 (points 555 170 555 110))
-($6 714 < 0_-fvi_hrnjywg5_-d4o "" 670
+($6 718 < 0_-fvi_hrnjywg5_-d4o "" 674
 (toMultiplicityPosition 870 210)
 (toRolePosition 880 210)
 (uid "0_-fvi_hrnjywg5_-d4o")
 (points 560 80 870 80 870 240))
-($6 715 < 0_-fvi_hrnjywg5_-d4n "" 670
+($6 719 < 0_-fvi_hrnjywg5_-d4n "" 674
 (toMultiplicityPosition 150 255)
 (toRolePosition 305 290)
 (uid "0_-fvi_hrnjywg5_-d4n")
 (points 830 255 140 255)
 (fromRolePosition 790 235))
-($3 716 < 0_-fvi_hrnjywg5_-d4m "PathString" 670
+($3 720 < 0_-fvi_hrnjywg5_-d4m "PathString" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d4m")
 (bbx 510 630 80 70))
-($6 717 < 0_-fvi_hrnjywg5_-d4l "" 670
+($6 721 < 0_-fvi_hrnjywg5_-d4l "" 674
 (toMultiplicityPosition 470 315)
 (uid "0_-fvi_hrnjywg5_-d4l")
 (points 140 305 490 305))
-($6 718 < 0_-fvi_hrnjywg5_-d4k "" 670
+($6 722 < 0_-fvi_hrnjywg5_-d4k "" 674
 (toMultiplicityPosition 695 280)
 (uid "0_-fvi_hrnjywg5_-d4k")
 (points 830 305 690 305))
-($6 719 < 0_-fvi_hrnjywg5_-d4j "" 670
+($6 723 < 0_-fvi_hrnjywg5_-d4j "" 674
 (toMultiplicityPosition 530 590)
 (toRolePosition 475 595)
 (uid "0_-fvi_hrnjywg5_-d4j")
 (points 440 590 540 590)
 (toOrderedPosition 470 590))
-($6 720 < 0_-fvi_hrnjywg5_-d4i "" 670
+($6 724 < 0_-fvi_hrnjywg5_-d4i "" 674
 (uid "0_-fvi_hrnjywg5_-d4i")
 (points 830 275 140 275)
 (fromMultiplicityPosition 805 290))
-($3 721 < 0_-fvi_hrnjywg5_-d4h "FileTopObject" 670
+($3 725 < 0_-fvi_hrnjywg5_-d4h "FileTopObject" 674
 (uid "0_-fvi_hrnjywg5_-d4h")
 (bbx 20 500 140 110))
-($4 722 < 0_-fvi_hrnjywg5_-d4g "" 670
+($4 726 < 0_-fvi_hrnjywg5_-d4g "" 674
 (uid "0_-fvi_hrnjywg5_-d4g")
 (points 60 360 60 500))
-($4 723 < 0_-fvi_hrnjywg5_-d4f "" 670
+($4 727 < 0_-fvi_hrnjywg5_-d4f "" 674
 (uid "0_-fvi_hrnjywg5_-d4f")
 (points 160 525 250 525))
-($3 724 < 0_-fvi_hrnjywg5_-d4e "ComplexDataType" 670
+($3 728 < 0_-fvi_hrnjywg5_-d4e "ComplexDataType" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d4e")
 (bbx 900 10 170 230))
-($4 725 < 0_-fvi_hrnjywg5_-d4d "" 670
+($4 729 < 0_-fvi_hrnjywg5_-d4d "" 674
 (uid "0_-fvi_hrnjywg5_-d4d")
 (points 560 60 900 60))
-($4 726 < 0_-fvi_hrnjywg5_-d4c "" 670
+($4 730 < 0_-fvi_hrnjywg5_-d4c "" 674
 (uid "0_-fvi_hrnjywg5_-d4c")
 (points 1110 80 1070 80))
-($3 727 < 0_-fvi_hrnjywg5_-d4b "SymmTracelessMatrix" 670
+($3 731 < 0_-fvi_hrnjywg5_-d4b "SymmTracelessMatrix" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d4b")
 (bbx 1070 560 150 170))
-($4 728 < 0_-fvi_hrnjywg5_-d4a "" 670
+($4 732 < 0_-fvi_hrnjywg5_-d4a "" 674
 (uid "0_-fvi_hrnjywg5_-d4a")
 (points 1120 560 1120 130))
-($3 729 < 0_-fvi_hrnjywg5_-d49 "ThreeValueAnswer" 670
+($3 733 < 0_-fvi_hrnjywg5_-d49 "ThreeValueAnswer" 674
 (uid "0_-fvi_hrnjywg5_-d49")
 (bbx 180 630 130 70))
-($7 730 < 0_-fvi_hrnjywg5_-d48 "MemopsDataTypeObject" 1
+($7 734 < 0_-fvi_hrnjywg5_-d48 "MemopsDataTypeObject" 1
 (name "MemopsDataTypeObject"
 )
 (uid "0_-fvi_hrnjywg5_-d48")
 (isAbstract true))
-($8 731 < 0_-fvi_hrnjywg5_-d47 "override" 730
+($8 735 < 0_-fvi_hrnjywg5_-d47 "override" 734
 (changeability "frozen")
 (name "override"
 )
 (uid "0_-fvi_hrnjywg5_-d47")
 (multiplicity "1"))
-($9 732 < 0_-fvi_hrnjywg5_-d46 "documentation" 731
+($9 736 < 0_-fvi_hrnjywg5_-d46 "documentation" 735
 (name "documentation"
 )
 (value "Overrride switch for DataObjType. Works like MemopsRoot.override, but only for the object itself. If set to True on creation must be reset to False explicitly later. Once set to False can only be reset to True by bypassing the API. "
 )
 (uid "0_-fvi_hrnjywg5_-d46"))
-($9 733 < 0_-fvi_hrnjywg5_-d45 "guid" 731
+($9 737 < 0_-fvi_hrnjywg5_-d45 "guid" 735
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-28-16:40:44_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d45"))
-($9 734 < 0_-fvi_hrnjywg5_-d44 "isImplementation" 731
+($9 738 < 0_-fvi_hrnjywg5_-d44 "isImplementation" 735
 (name "isImplementation"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-d44"))
-($11 735 < 0_-fvi_hrnjywg5_-d43 "endOverride" 730
+($11 739 < 0_-fvi_hrnjywg5_-d43 "endOverride" 734
 (name "endOverride"
 )
 (uid "0_-fvi_hrnjywg5_-d43"))
-($9 736 < 0_-fvi_hrnjywg5_-d42 "documentation" 735
+($9 740 < 0_-fvi_hrnjywg5_-d42 "documentation" 739
 (name "documentation"
 )
 (value "removes DataObj from override status"
 )
 (uid "0_-fvi_hrnjywg5_-d42"))
-($9 737 < 0_-fvi_hrnjywg5_-d41 "opType" 735
+($9 741 < 0_-fvi_hrnjywg5_-d41 "opType" 739
 (name "opType"
 )
 (value "other"
 )
 (uid "0_-fvi_hrnjywg5_-d41"))
-($9 738 < 0_-fvi_hrnjywg5_-d40 "code:java" 735
+($9 742 < 0_-fvi_hrnjywg5_-d40 "code:java" 739
 (name "code:java"
 )
 (value "overrideSet.remove(java.lang.System.identityHashCode(this));"
 )
 (uid "0_-fvi_hrnjywg5_-d40"))
-($9 739 < 0_-fvi_hrnjywg5_-d3z "code:python" 735
+($9 743 < 0_-fvi_hrnjywg5_-d3z "code:python" 739
 (name "code:python"
 )
 (value "# NB must be done by direct data access"
@@ -4369,168 +4395,168 @@ objectdomain.uml.core.Stereotype-owns $19
 "  del self.__dict__['override']"
 )
 (uid "0_-fvi_hrnjywg5_-d3z"))
-($9 740 < 0_-fvi_hrnjywg5_-d3y "guid" 735
+($9 744 < 0_-fvi_hrnjywg5_-d3y "guid" 739
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-04-29-14:37:48_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d3y"))
-($10 741 < 0_-fvi_hrnjywg5_-d3x "#<anon> (MemopsDataTypeObject, ComplexDataType)" 730
+($10 745 < 0_-fvi_hrnjywg5_-d3x "#<anon> (MemopsDataTypeObject, ComplexDataType)" 734
 (uid "0_-fvi_hrnjywg5_-d3x"))
-($9 742 < 0_-fvi_hrnjywg5_-d3w "documentation" 730
+($9 746 < 0_-fvi_hrnjywg5_-d3w "documentation" 734
 (name "documentation"
 )
 (value "Superclass for DataObjTypes"
 )
 (uid "0_-fvi_hrnjywg5_-d3w"))
-($9 743 < 0_-fvi_hrnjywg5_-d3v "guid" 730
+($9 747 < 0_-fvi_hrnjywg5_-d3v "guid" 734
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-12-15-19:00:39_00003"
 )
 (uid "0_-fvi_hrnjywg5_-d3v"))
-($7 744 < 0_-fvi_hrnjywg5_-d3u "ComplexDataType" 1
+($7 748 < 0_-fvi_hrnjywg5_-d3u "ComplexDataType" 1
 (name "ComplexDataType"
 )
 (uid "0_-fvi_hrnjywg5_-d3u")
 (isAbstract true))
-($8 745 < 0_-fvi_hrnjywg5_-d3t "className" 744
+($8 749 < 0_-fvi_hrnjywg5_-d3t "className" 748
 (changeability "frozen")
 (name "className"
 )
 (uid "0_-fvi_hrnjywg5_-d3t")
 (multiplicity "1"))
-($9 746 < 0_-fvi_hrnjywg5_-d3s "documentation" 745
+($9 750 < 0_-fvi_hrnjywg5_-d3s "documentation" 749
 (name "documentation"
 )
 (value "Name of class of object. If class names differ for different implementations, name of the coresponding Python class. This is really a class attribute and may be implemented as such by languages that support the concept."
 )
 (uid "0_-fvi_hrnjywg5_-d3s"))
-($9 747 < 0_-fvi_hrnjywg5_-d3r "isImplementation" 745
+($9 751 < 0_-fvi_hrnjywg5_-d3r "isImplementation" 749
 (name "isImplementation"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-d3r"))
-($9 748 < 0_-fvi_hrnjywg5_-d3q "guid" 745
+($9 752 < 0_-fvi_hrnjywg5_-d3q "guid" 749
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-22-14:11:28_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d3q"))
-($8 749 < 0_-fvi_hrnjywg5_-d3p "packageName" 744
+($8 753 < 0_-fvi_hrnjywg5_-d3p "packageName" 748
 (changeability "frozen")
 (name "packageName"
 )
 (uid "0_-fvi_hrnjywg5_-d3p")
 (multiplicity "1"))
-($9 750 < 0_-fvi_hrnjywg5_-d3o "documentation" 749
+($9 754 < 0_-fvi_hrnjywg5_-d3o "documentation" 753
 (name "documentation"
 )
 (value "Name of package containing class, as a dot-separated string. E.g. 'ccp.nmr.Nmr'. This is really a class attribute and may be implemented as such by languages that support the concept."
 )
 (uid "0_-fvi_hrnjywg5_-d3o"))
-($9 751 < 0_-fvi_hrnjywg5_-d3n "isImplementation" 749
+($9 755 < 0_-fvi_hrnjywg5_-d3n "isImplementation" 753
 (name "isImplementation"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-d3n"))
-($9 752 < 0_-fvi_hrnjywg5_-d3m "guid" 749
+($9 756 < 0_-fvi_hrnjywg5_-d3m "guid" 753
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-22-14:12:02_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d3m"))
-($8 753 < 0_-fvi_hrnjywg5_-d3l "packageShortName" 744
+($8 757 < 0_-fvi_hrnjywg5_-d3l "packageShortName" 748
 (changeability "frozen")
 (name "packageShortName"
 )
 (uid "0_-fvi_hrnjywg5_-d3l"))
-($9 754 < 0_-fvi_hrnjywg5_-d3k "documentation" 753
+($9 758 < 0_-fvi_hrnjywg5_-d3k "documentation" 757
 (name "documentation"
 )
 (value "Short name of package containing class, generally as four or fewer upper case characters. E.g. 'NMRC'. Package shortnames are unique across packages. They are not set (value None) for packages that contain other packages. This is really a class attribute and may be implemented as such by languages that support the concept.1"
 )
 (uid "0_-fvi_hrnjywg5_-d3k"))
-($9 755 < 0_-fvi_hrnjywg5_-d3j "isImplementation" 753
+($9 759 < 0_-fvi_hrnjywg5_-d3j "isImplementation" 757
 (name "isImplementation"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-d3j"))
-($9 756 < 0_-fvi_hrnjywg5_-d3i "guid" 753
+($9 760 < 0_-fvi_hrnjywg5_-d3i "guid" 757
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-22-14:12:02_00002"
 )
 (uid "0_-fvi_hrnjywg5_-d3i"))
-($8 757 < 0_-fvi_hrnjywg5_-d3h "qualifiedName" 744
+($8 761 < 0_-fvi_hrnjywg5_-d3h "qualifiedName" 748
 (changeability "frozen")
 (name "qualifiedName"
 )
 (uid "0_-fvi_hrnjywg5_-d3h")
 (multiplicity "1"))
-($9 758 < 0_-fvi_hrnjywg5_-d3g "documentation" 757
+($9 762 < 0_-fvi_hrnjywg5_-d3g "documentation" 761
 (name "documentation"
 )
 (value "Fully qualified name of class, equal to (packageName + '.' + className). If class names differ between implementations, name of corresponding Python class. This is really a class attribute and may be implemented as such by languages that support the concept."
 )
 (uid "0_-fvi_hrnjywg5_-d3g"))
-($9 759 < 0_-fvi_hrnjywg5_-d3f "isDerived" 757
+($9 763 < 0_-fvi_hrnjywg5_-d3f "isDerived" 761
 (name "isDerived"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-d3f"))
-($9 760 < 0_-fvi_hrnjywg5_-d3e "guid" 757
+($9 764 < 0_-fvi_hrnjywg5_-d3e "guid" 761
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-22-14:12:02_00003"
 )
 (uid "0_-fvi_hrnjywg5_-d3e"))
-($11 761 < 0_-fvi_hrnjywg5_-d3d "getQualifiedName" 744
+($11 765 < 0_-fvi_hrnjywg5_-d3d "getQualifiedName" 748
 (name "getQualifiedName"
 )
 (uid "0_-fvi_hrnjywg5_-d3d")
 (isQuery true))
-($9 762 < 0_-fvi_hrnjywg5_-d3c "opType" 761
+($9 766 < 0_-fvi_hrnjywg5_-d3c "opType" 765
 (name "opType"
 )
 (value "get"
 )
 (uid "0_-fvi_hrnjywg5_-d3c"))
-($9 763 < 0_-fvi_hrnjywg5_-d3b "documentation" 761
+($9 767 < 0_-fvi_hrnjywg5_-d3b "documentation" 765
 (name "documentation"
 )
 (value "getter for derived attribute qualifiedName"
 )
 (uid "0_-fvi_hrnjywg5_-d3b"))
-($9 764 < 0_-fvi_hrnjywg5_-d3a "code:python" 761
+($9 768 < 0_-fvi_hrnjywg5_-d3a "code:python" 765
 (name "code:python"
 )
 (value "result = '.'.join((self.__class__._packageName, self.__class__.__name__))"
 )
 (uid "0_-fvi_hrnjywg5_-d3a"))
-($9 765 < 0_-fvi_hrnjywg5_-d39 "code:java" 761
+($9 769 < 0_-fvi_hrnjywg5_-d39 "code:java" 765
 (name "code:java"
 )
 (value "result = getPackageName() + \".\" + getClassName();"
 )
 (uid "0_-fvi_hrnjywg5_-d39"))
-($9 766 < 0_-fvi_hrnjywg5_-d38 "guid" 761
+($9 770 < 0_-fvi_hrnjywg5_-d38 "guid" 765
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-22-14:12:02_00005"
 )
 (uid "0_-fvi_hrnjywg5_-d38"))
-($8 767 < 0_-fvi_hrnjywg5_-d37 "fieldNames" 744
+($8 771 < 0_-fvi_hrnjywg5_-d37 "fieldNames" 748
 (changeability "frozen")
 (name "fieldNames"
 )
 (uid "0_-fvi_hrnjywg5_-d37")
 (multiplicity "*"))
-($9 768 < 0_-fvi_hrnjywg5_-d36 "documentation" 767
+($9 772 < 0_-fvi_hrnjywg5_-d36 "documentation" 771
 (name "documentation"
 )
 (value "Names of all object fields in alphabetical order. Attribute names and role  names (where relevant) are given in alphabetical order (for each type). "
@@ -4538,77 +4564,77 @@ objectdomain.uml.core.Stereotype-owns $19
 "If you need more information about the classes, the place to look is in the obejct .metaclass MetaModel object."
 )
 (uid "0_-fvi_hrnjywg5_-d36"))
-($9 769 < 0_-fvi_hrnjywg5_-d35 "baseName" 767
+($9 773 < 0_-fvi_hrnjywg5_-d35 "baseName" 771
 (name "baseName"
 )
 (value "fieldName"
 )
 (uid "0_-fvi_hrnjywg5_-d35"))
-($9 770 < 0_-fvi_hrnjywg5_-d34 "guid" 767
+($9 774 < 0_-fvi_hrnjywg5_-d34 "guid" 771
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-02-26-14:05:19_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d34"))
-($9 771 < 0_-fvi_hrnjywg5_-d33 "isImplementation" 767
+($9 775 < 0_-fvi_hrnjywg5_-d33 "isImplementation" 771
 (name "isImplementation"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-d33"))
-($8 772 < 0_-fvi_hrnjywg5_-d32 "inConstructor" 744
+($8 776 < 0_-fvi_hrnjywg5_-d32 "inConstructor" 748
 (changeability "frozen")
 (name "inConstructor"
 )
 (uid "0_-fvi_hrnjywg5_-d32")
 (multiplicity "1"))
-($9 773 < 0_-fvi_hrnjywg5_-d31 "documentation" 772
+($9 777 < 0_-fvi_hrnjywg5_-d31 "documentation" 776
 (name "documentation"
 )
 (value "Implementation switch that determines if an object is being constructed, and turns off some validity checking."
 )
 (uid "0_-fvi_hrnjywg5_-d31"))
-($9 774 < 0_-fvi_hrnjywg5_-d30 "isImplementation" 772
+($9 778 < 0_-fvi_hrnjywg5_-d30 "isImplementation" 776
 (name "isImplementation"
 )
 (value "True"
 )
 (uid "0_-fvi_hrnjywg5_-d30"))
-($9 775 < 0_-fvi_hrnjywg5_-d2z "guid" 772
+($9 779 < 0_-fvi_hrnjywg5_-d2z "guid" 776
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-22-14:12:02_00004"
 )
 (uid "0_-fvi_hrnjywg5_-d2z"))
-($11 776 < 0_-fvi_hrnjywg5_-d2y "toDetailedString##String" 744
+($11 780 < 0_-fvi_hrnjywg5_-d2y "toDetailedString##String" 748
 (name "toDetailedString"
 )
 (uid "0_-fvi_hrnjywg5_-d2y")
 (isQuery true))
-($12 777 < 0_-fvi_hrnjywg5_-d2x "result" 776
+($12 781 < 0_-fvi_hrnjywg5_-d2x "result" 780
 (name "result"
 )
 (kind "return")
 (uid "0_-fvi_hrnjywg5_-d2x"))
-($9 778 < 0_-fvi_hrnjywg5_-d2w "guid" 777
+($9 782 < 0_-fvi_hrnjywg5_-d2w "guid" 781
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-02-29-18:14:41_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d2w"))
-($9 779 < 0_-fvi_hrnjywg5_-d2v "documentation" 776
+($9 783 < 0_-fvi_hrnjywg5_-d2v "documentation" 780
 (name "documentation"
 )
 (value "Return object with all its contents as a detailed, multiline string"
 )
 (uid "0_-fvi_hrnjywg5_-d2v"))
-($9 780 < 0_-fvi_hrnjywg5_-d2u "opType" 776
+($9 784 < 0_-fvi_hrnjywg5_-d2u "opType" 780
 (name "opType"
 )
 (value "otherQuery"
 )
 (uid "0_-fvi_hrnjywg5_-d2u"))
-($9 781 < 0_-fvi_hrnjywg5_-d2t "code:python" 776
+($9 785 < 0_-fvi_hrnjywg5_-d2t "code:python" 780
 (name "code:python"
 )
 (value "ll = ['{']"
@@ -4623,187 +4649,187 @@ objectdomain.uml.core.Stereotype-owns $19
 "result = ''.join(ll)"
 )
 (uid "0_-fvi_hrnjywg5_-d2t"))
-($9 782 < 0_-fvi_hrnjywg5_-d2s "code:java" 776
+($9 786 < 0_-fvi_hrnjywg5_-d2s "code:java" 780
 (name "code:java"
 )
 (value "result = null; /* NBNB TBD */"
 )
 (uid "0_-fvi_hrnjywg5_-d2s"))
-($9 783 < 0_-fvi_hrnjywg5_-d2r "guid" 776
+($9 787 < 0_-fvi_hrnjywg5_-d2r "guid" 780
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-02-26-13:25:50_00002"
 )
 (uid "0_-fvi_hrnjywg5_-d2r"))
-($9 784 < 0_-fvi_hrnjywg5_-d2q "guid" 744
+($9 788 < 0_-fvi_hrnjywg5_-d2q "guid" 748
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2007-10-18-17:15:48_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d2q"))
-($9 785 < 0_-fvi_hrnjywg5_-d2p "documentation" 744
+($9 789 < 0_-fvi_hrnjywg5_-d2p "documentation" 748
 (name "documentation"
 )
 (value "Topmost Superclass of both classes and complex datatype objects. Contains some implementation attributes"
 )
 (uid "0_-fvi_hrnjywg5_-d2p"))
-($7 786 < 0_-fvi_hrnjywg5_-d2c "IntSign" 1
+($7 790 < 0_-fvi_hrnjywg5_-d2c "IntSign" 1
 (name "IntSign"
 )
 (uid "0_-fvi_hrnjywg5_-d2c"))
-($10 787 < 0_-fvi_hrnjywg5_-d2b "#<anon> (IntSign, Int)" 786
+($10 791 < 0_-fvi_hrnjywg5_-d2b "#<anon> (IntSign, Int)" 790
 (uid "0_-fvi_hrnjywg5_-d2b"))
-($9 788 < 0_-fvi_hrnjywg5_-d2a "documentation" 786
+($9 792 < 0_-fvi_hrnjywg5_-d2a "documentation" 790
 (name "documentation"
 )
 (value "+/- 1 - for sign infomation"
 )
 (uid "0_-fvi_hrnjywg5_-d2a"))
-($9 789 < 0_-fvi_hrnjywg5_-d29 "isOpen" 786
+($9 793 < 0_-fvi_hrnjywg5_-d29 "isOpen" 790
 (name "isOpen"
 )
 (value "False"
 )
 (uid "0_-fvi_hrnjywg5_-d29"))
-($9 790 < 0_-fvi_hrnjywg5_-d28 "enumeration" 786
+($9 794 < 0_-fvi_hrnjywg5_-d28 "enumeration" 790
 (name "enumeration"
 )
 (value "('1','-1')"
 )
 (uid "0_-fvi_hrnjywg5_-d28"))
-($9 791 < 0_-fvi_hrnjywg5_-d27 "guid" 786
+($9 795 < 0_-fvi_hrnjywg5_-d27 "guid" 790
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-04-10-18:39:10_00003"
 )
 (uid "0_-fvi_hrnjywg5_-d27"))
-($7 792 < 0_-fvi_hrnjywg5_-d26 "SymmTracelessMatrix" 1
+($7 796 < 0_-fvi_hrnjywg5_-d26 "SymmTracelessMatrix" 1
 (name "SymmTracelessMatrix"
 )
 (uid "0_-fvi_hrnjywg5_-d26"))
-($8 793 < 0_-fvi_hrnjywg5_-d25 "aAxial" 792
+($8 797 < 0_-fvi_hrnjywg5_-d25 "aAxial" 796
 (changeability "frozen")
 (name "aAxial"
 )
 (uid "0_-fvi_hrnjywg5_-d25")
 (multiplicity "1"))
-($9 794 < 0_-fvi_hrnjywg5_-d24 "documentation" 793
+($9 798 < 0_-fvi_hrnjywg5_-d24 "documentation" 797
 (name "documentation"
 )
 (value "Axial component"
 )
 (uid "0_-fvi_hrnjywg5_-d24"))
-($9 795 < 0_-fvi_hrnjywg5_-d23 "guid" 793
+($9 799 < 0_-fvi_hrnjywg5_-d23 "guid" 797
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-04-16-13:49:38_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d23"))
-($8 796 < 0_-fvi_hrnjywg5_-d22 "aRhombic" 792
+($8 800 < 0_-fvi_hrnjywg5_-d22 "aRhombic" 796
 (changeability "frozen")
 (name "aRhombic"
 )
 (uid "0_-fvi_hrnjywg5_-d22")
 (multiplicity "1"))
-($9 797 < 0_-fvi_hrnjywg5_-d21 "documentation" 796
+($9 801 < 0_-fvi_hrnjywg5_-d21 "documentation" 800
 (name "documentation"
 )
 (value "rhombic component"
 )
 (uid "0_-fvi_hrnjywg5_-d21"))
-($9 798 < 0_-fvi_hrnjywg5_-d20 "guid" 796
+($9 802 < 0_-fvi_hrnjywg5_-d20 "guid" 800
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-04-16-13:49:38_00002"
 )
 (uid "0_-fvi_hrnjywg5_-d20"))
-($8 799 < 0_-fvi_hrnjywg5_-d1z "alpha" 792
+($8 803 < 0_-fvi_hrnjywg5_-d1z "alpha" 796
 (changeability "frozen")
 (name "alpha"
 )
 (uid "0_-fvi_hrnjywg5_-d1z")
 (multiplicity "1"))
-($9 800 < 0_-fvi_hrnjywg5_-d1y "documentation" 799
+($9 804 < 0_-fvi_hrnjywg5_-d1y "documentation" 803
 (name "documentation"
 )
 (value "Euler angle alpha in radians"
 )
 (uid "0_-fvi_hrnjywg5_-d1y"))
-($9 801 < 0_-fvi_hrnjywg5_-d1x "guid" 799
+($9 805 < 0_-fvi_hrnjywg5_-d1x "guid" 803
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-04-16-13:49:38_00003"
 )
 (uid "0_-fvi_hrnjywg5_-d1x"))
-($8 802 < 0_-fvi_hrnjywg5_-d1w "beta" 792
+($8 806 < 0_-fvi_hrnjywg5_-d1w "beta" 796
 (changeability "frozen")
 (name "beta"
 )
 (uid "0_-fvi_hrnjywg5_-d1w")
 (multiplicity "1"))
-($9 803 < 0_-fvi_hrnjywg5_-d1v "documentation" 802
+($9 807 < 0_-fvi_hrnjywg5_-d1v "documentation" 806
 (name "documentation"
 )
 (value "Euler angle beta in radians"
 )
 (uid "0_-fvi_hrnjywg5_-d1v"))
-($9 804 < 0_-fvi_hrnjywg5_-d1u "guid" 802
+($9 808 < 0_-fvi_hrnjywg5_-d1u "guid" 806
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-04-16-13:49:38_00004"
 )
 (uid "0_-fvi_hrnjywg5_-d1u"))
-($8 805 < 0_-fvi_hrnjywg5_-d1t "gamma" 792
+($8 809 < 0_-fvi_hrnjywg5_-d1t "gamma" 796
 (changeability "frozen")
 (name "gamma"
 )
 (uid "0_-fvi_hrnjywg5_-d1t")
 (multiplicity "1"))
-($9 806 < 0_-fvi_hrnjywg5_-d1s "documentation" 805
+($9 810 < 0_-fvi_hrnjywg5_-d1s "documentation" 809
 (name "documentation"
 )
 (value "Euler angle gamma in radians"
 )
 (uid "0_-fvi_hrnjywg5_-d1s"))
-($9 807 < 0_-fvi_hrnjywg5_-d1r "guid" 805
+($9 811 < 0_-fvi_hrnjywg5_-d1r "guid" 809
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-04-16-13:49:38_00005"
 )
 (uid "0_-fvi_hrnjywg5_-d1r"))
-($10 808 < 0_-fvi_hrnjywg5_-d1q "#<anon> (SymmTracelessMatrix, MemopsDataTypeObject)" 792
+($10 812 < 0_-fvi_hrnjywg5_-d1q "#<anon> (SymmTracelessMatrix, MemopsDataTypeObject)" 796
 (uid "0_-fvi_hrnjywg5_-d1q"))
-($9 809 < 0_-fvi_hrnjywg5_-d1p "documentation" 792
+($9 813 < 0_-fvi_hrnjywg5_-d1p "documentation" 796
 (name "documentation"
 )
 (value "Symmetric traceless tenaor, used for instance for alignment tensors."
 )
 (uid "0_-fvi_hrnjywg5_-d1p"))
-($9 810 < 0_-fvi_hrnjywg5_-d1o "guid" 792
+($9 814 < 0_-fvi_hrnjywg5_-d1o "guid" 796
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-04-16-13:49:36_00004"
 )
 (uid "0_-fvi_hrnjywg5_-d1o"))
-($7 811 < 0_-fvi_hrnjywg5_-d1n "RgbColor" 1
+($7 815 < 0_-fvi_hrnjywg5_-d1n "RgbColor" 1
 (name "RgbColor"
 )
 (uid "0_-fvi_hrnjywg5_-d1n"))
-($10 812 < 0_-fvi_hrnjywg5_-d1m "#<anon> (RgbColor, HexString)" 811
+($10 816 < 0_-fvi_hrnjywg5_-d1m "#<anon> (RgbColor, HexString)" 815
 (uid "0_-fvi_hrnjywg5_-d1m"))
-($9 813 < 0_-fvi_hrnjywg5_-d1l "documentation" 811
+($9 817 < 0_-fvi_hrnjywg5_-d1l "documentation" 815
 (name "documentation"
 )
 (value "RGB colour specification- "
 )
 (uid "0_-fvi_hrnjywg5_-d1l"))
-($9 814 < 0_-fvi_hrnjywg5_-d1k "guid" 811
+($9 818 < 0_-fvi_hrnjywg5_-d1k "guid" 815
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-05-05-15:12:50_00007"
 )
 (uid "0_-fvi_hrnjywg5_-d1k"))
-($15 815 < 0_-fvi_hrnjywg5_-d1j "length_is_7" 811
+($15 819 < 0_-fvi_hrnjywg5_-d1j "length_is_7" 815
 (name "length_is_7"
 )
 (uid "0_-fvi_hrnjywg5_-d1j")
@@ -4815,31 +4841,31 @@ objectdomain.uml.core.Stereotype-owns $19
 "_"
 "value.length() == 7"
 ))
-($9 816 < 0_-fvi_hrnjywg5_-d1i "guid" 815
+($9 820 < 0_-fvi_hrnjywg5_-d1i "guid" 819
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-05-05-15:12:50_00008"
 )
 (uid "0_-fvi_hrnjywg5_-d1i"))
-($7 817 < 0_-fvi_hrnjywg5_-d0t "NegativeFloat" 1
+($7 821 < 0_-fvi_hrnjywg5_-d0t "NegativeFloat" 1
 (name "NegativeFloat"
 )
 (uid "0_-fvi_hrnjywg5_-d0t"))
-($10 818 < 0_-fvi_hrnjywg5_-d0s "#<anon> (NegativeFloat, Float)" 817
+($10 822 < 0_-fvi_hrnjywg5_-d0s "#<anon> (NegativeFloat, Float)" 821
 (uid "0_-fvi_hrnjywg5_-d0s"))
-($9 819 < 0_-fvi_hrnjywg5_-d0r "documentation" 817
+($9 823 < 0_-fvi_hrnjywg5_-d0r "documentation" 821
 (name "documentation"
 )
 (value "Float less than 0"
 )
 (uid "0_-fvi_hrnjywg5_-d0r"))
-($9 820 < 0_-fvi_hrnjywg5_-d0q "guid" 817
+($9 824 < 0_-fvi_hrnjywg5_-d0q "guid" 821
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-05-29-14:27:55_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d0q"))
-($15 821 < 0_-fvi_hrnjywg5_-d0p "value_lt_0" 817
+($15 825 < 0_-fvi_hrnjywg5_-d0p "value_lt_0" 821
 (name "value_lt_0"
 )
 (uid "0_-fvi_hrnjywg5_-d0p")
@@ -4855,31 +4881,31 @@ objectdomain.uml.core.Stereotype-owns $19
 "_"
 "<xsd:maxExclusive value=\"0\"/>"
 ))
-($9 822 < 0_-fvi_hrnjywg5_-d0o "guid" 821
+($9 826 < 0_-fvi_hrnjywg5_-d0o "guid" 825
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-05-29-14:27:55_00002"
 )
 (uid "0_-fvi_hrnjywg5_-d0o"))
-($7 823 < 0_-fvi_hrnjywg5_-d0n "NegativeInt" 1
+($7 827 < 0_-fvi_hrnjywg5_-d0n "NegativeInt" 1
 (name "NegativeInt"
 )
 (uid "0_-fvi_hrnjywg5_-d0n"))
-($10 824 < 0_-fvi_hrnjywg5_-d0m "#<anon> (NegativeInt, Int)" 823
+($10 828 < 0_-fvi_hrnjywg5_-d0m "#<anon> (NegativeInt, Int)" 827
 (uid "0_-fvi_hrnjywg5_-d0m"))
-($9 825 < 0_-fvi_hrnjywg5_-d0l "documentation" 823
+($9 829 < 0_-fvi_hrnjywg5_-d0l "documentation" 827
 (name "documentation"
 )
 (value "Integer < 0"
 )
 (uid "0_-fvi_hrnjywg5_-d0l"))
-($9 826 < 0_-fvi_hrnjywg5_-d0k "guid" 823
+($9 830 < 0_-fvi_hrnjywg5_-d0k "guid" 827
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-05-29-14:27:55_00003"
 )
 (uid "0_-fvi_hrnjywg5_-d0k"))
-($15 827 < 0_-fvi_hrnjywg5_-d0j "alue_lt_0" 823
+($15 831 < 0_-fvi_hrnjywg5_-d0j "alue_lt_0" 827
 (name "alue_lt_0"
 )
 (uid "0_-fvi_hrnjywg5_-d0j")
@@ -4895,32 +4921,32 @@ objectdomain.uml.core.Stereotype-owns $19
 "_"
 "<xsd:maxExclusive value=\"0\"/>"
 ))
-($9 828 < 0_-fvi_hrnjywg5_-d0i "guid" 827
+($9 832 < 0_-fvi_hrnjywg5_-d0i "guid" 831
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-05-29-14:27:55_00004"
 )
 (uid "0_-fvi_hrnjywg5_-d0i"))
-($7 829 < 0_-fvi_hrnjywg5_-d0b "GuidString" 1
+($7 833 < 0_-fvi_hrnjywg5_-d0b "GuidString" 1
 (name "GuidString"
 )
 (uid "0_-fvi_hrnjywg5_-d0b"))
-($10 830 < 0_-fvi_hrnjywg5_-d0a "#<anon> (GuidString, Line)" 829
+($10 834 < 0_-fvi_hrnjywg5_-d0a "#<anon> (GuidString, Line)" 833
 (uid "0_-fvi_hrnjywg5_-d0a"))
-($9 831 < 0_-fvi_hrnjywg5_-d09 "documentation" 829
+($9 835 < 0_-fvi_hrnjywg5_-d09 "documentation" 833
 (name "documentation"
 )
 (value "GUID (globally unique identifier) string. Specially set up"
 "to allow use as file name etc."
 )
 (uid "0_-fvi_hrnjywg5_-d09"))
-($9 832 < 0_-fvi_hrnjywg5_-d08 "guid" 829
+($9 836 < 0_-fvi_hrnjywg5_-d08 "guid" 833
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-06-30-16:30:50_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d08"))
-($15 833 < 0_-fvi_hrnjywg5_-d07 "value_is_url_safe" 829
+($15 837 < 0_-fvi_hrnjywg5_-d07 "value_is_url_safe" 833
 (name "value_is_url_safe"
 )
 (uid "0_-fvi_hrnjywg5_-d07")
@@ -4932,79 +4958,79 @@ objectdomain.uml.core.Stereotype-owns $19
 "_"
 "value.matches(\"^[_a-zA-Z0-9-]*$\")"
 ))
-($9 834 < 0_-fvi_hrnjywg5_-d06 "guid" 833
+($9 838 < 0_-fvi_hrnjywg5_-d06 "guid" 837
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2008-06-30-16:30:50_00002"
 )
 (uid "0_-fvi_hrnjywg5_-d06"))
-($7 835 < 0_-fvi_hrnjywg5_-d05 "Page" 1
+($7 839 < 0_-fvi_hrnjywg5_-d05 "Page" 1
 (name "Page"
 )
 (uid "0_-fvi_hrnjywg5_-d05"))
-($10 836 < 0_-fvi_hrnjywg5_-d04 "#<anon> (Page, String)" 835
+($10 840 < 0_-fvi_hrnjywg5_-d04 "#<anon> (Page, String)" 839
 (uid "0_-fvi_hrnjywg5_-d04"))
-($9 837 < 0_-fvi_hrnjywg5_-d03 "documentation" 835
+($9 841 < 0_-fvi_hrnjywg5_-d03 "documentation" 839
 (name "documentation"
 )
 (value "Limited-length string, max length 4000"
 )
 (uid "0_-fvi_hrnjywg5_-d03"))
-($9 838 < 0_-fvi_hrnjywg5_-d02 "length" 835
+($9 842 < 0_-fvi_hrnjywg5_-d02 "length" 839
 (name "length"
 )
 (value "4000"
 )
 (uid "0_-fvi_hrnjywg5_-d02"))
-($9 839 < 0_-fvi_hrnjywg5_-d01 "guid" 835
+($9 843 < 0_-fvi_hrnjywg5_-d01 "guid" 839
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2009-01-23-10:52:32_00001"
 )
 (uid "0_-fvi_hrnjywg5_-d01"))
-($7 840 < 0_-fvi_hrnjywg5_-d00 "ThreeValueAnswer" 1
+($7 844 < 0_-fvi_hrnjywg5_-d00 "ThreeValueAnswer" 1
 (name "ThreeValueAnswer"
 )
 (uid "0_-fvi_hrnjywg5_-d00"))
-($10 841 < 0_-fvi_hrnjywg5_-czz "#<anon> (ThreeValueAnswer, Word)" 840
+($10 845 < 0_-fvi_hrnjywg5_-czz "#<anon> (ThreeValueAnswer, Word)" 844
 (uid "0_-fvi_hrnjywg5_-czz"))
-($9 842 < 0_-fvi_hrnjywg5_-czy "documentation" 840
+($9 846 < 0_-fvi_hrnjywg5_-czy "documentation" 844
 (name "documentation"
 )
 (value "Enumeration: 'yes' , 'no', 'maybe'"
 )
 (uid "0_-fvi_hrnjywg5_-czy"))
-($9 843 < 0_-fvi_hrnjywg5_-czx "isOpen" 840
+($9 847 < 0_-fvi_hrnjywg5_-czx "isOpen" 844
 (name "isOpen"
 )
 (value "False"
 )
 (uid "0_-fvi_hrnjywg5_-czx"))
-($9 844 < 0_-fvi_hrnjywg5_-czw "enumeration" 840
+($9 848 < 0_-fvi_hrnjywg5_-czw "enumeration" 844
 (name "enumeration"
 )
 (value "('yes', 'no', 'maybe')"
 )
 (uid "0_-fvi_hrnjywg5_-czw"))
-($9 845 < 0_-fvi_hrnjywg5_-czv "guid" 840
+($9 849 < 0_-fvi_hrnjywg5_-czv "guid" 844
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2010-11-17-16:21:33_00001"
 )
 (uid "0_-fvi_hrnjywg5_-czv"))
-($7 846 < 0_-fvi_hrnjywg5_-czu "HexString" 1
+($7 850 < 0_-fvi_hrnjywg5_-czu "HexString" 1
 (name "HexString"
 )
 (uid "0_-fvi_hrnjywg5_-czu"))
-($10 847 < 0_-fvi_hrnjywg5_-czt "#<anon> (HexString, String)" 846
+($10 851 < 0_-fvi_hrnjywg5_-czt "#<anon> (HexString, String)" 850
 (uid "0_-fvi_hrnjywg5_-czt"))
-($9 848 < 0_-fvi_hrnjywg5_-czs "guid" 846
+($9 852 < 0_-fvi_hrnjywg5_-czs "guid" 850
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2011-12-02-09:49:50_00001"
 )
 (uid "0_-fvi_hrnjywg5_-czs"))
-($15 849 < 0_-fvi_hrnjywg5_-czr "HexStringFormat" 846
+($15 853 < 0_-fvi_hrnjywg5_-czr "HexStringFormat" 850
 (name "HexStringFormat"
 )
 (uid "0_-fvi_hrnjywg5_-czr")
@@ -5016,25 +5042,25 @@ objectdomain.uml.core.Stereotype-owns $19
 "_"
 "true"
 ))
-($9 850 < 0_-fvi_hrnjywg5_-czq "guid" 849
+($9 854 < 0_-fvi_hrnjywg5_-czq "guid" 853
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2011-12-02-09:49:50_00002"
 )
 (uid "0_-fvi_hrnjywg5_-czq"))
-($7 851 < 0_-fvi_hrnjywg5_-czp "RgbaColor" 1
+($7 855 < 0_-fvi_hrnjywg5_-czp "RgbaColor" 1
 (name "RgbaColor"
 )
 (uid "0_-fvi_hrnjywg5_-czp"))
-($10 852 < 0_-fvi_hrnjywg5_-czo "#<anon> (RgbaColor, HexString)" 851
+($10 856 < 0_-fvi_hrnjywg5_-czo "#<anon> (RgbaColor, HexString)" 855
 (uid "0_-fvi_hrnjywg5_-czo"))
-($9 853 < 0_-fvi_hrnjywg5_-czn "guid" 851
+($9 857 < 0_-fvi_hrnjywg5_-czn "guid" 855
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2011-12-02-09:49:50_00003"
 )
 (uid "0_-fvi_hrnjywg5_-czn"))
-($15 854 < 0_-fvi_hrnjywg5_-czm "length_is_9" 851
+($15 858 < 0_-fvi_hrnjywg5_-czm "length_is_9" 855
 (name "length_is_9"
 )
 (uid "0_-fvi_hrnjywg5_-czm")
@@ -5046,35 +5072,31 @@ objectdomain.uml.core.Stereotype-owns $19
 "_"
 "value.length() == 9"
 ))
-($9 855 < 0_-fvi_hrnjywg5_-czl "guid" 854
+($9 859 < 0_-fvi_hrnjywg5_-czl "guid" 858
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2011-12-02-09:49:50_00004"
 )
 (uid "0_-fvi_hrnjywg5_-czl"))
-($9 856 < 0_-fvi_hrnjywg5_-czk "shortName" 1
+($9 860 < 0_-fvi_hrnjywg5_-czk "shortName" 1
 (name "shortName"
 )
 (value "IMPL"
 )
 (uid "0_-fvi_hrnjywg5_-czk"))
-($9 857 < 0_-fvi_hrnjywg5_-czj "documentation" 1
+($9 861 < 0_-fvi_hrnjywg5_-czj "documentation" 1
 (name "documentation"
 )
 (value "The memops implementation - the basic machinery that makes the various subroutine libraries function."
 )
 (uid "0_-fvi_hrnjywg5_-czj"))
-($9 858 < 0_-fvi_hrnjywg5_-czi "guid" 1
+($9 862 < 0_-fvi_hrnjywg5_-czi "guid" 1
 (name "guid"
 )
 (value "www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00025"
 )
 (uid "0_-fvi_hrnjywg5_-czi"))
-($18 859)
-($18 861)
-($18 862)
 ($18 863)
-($18 864)
 ($18 865)
 ($18 866)
 ($18 867)
@@ -5120,18 +5142,18 @@ objectdomain.uml.core.Stereotype-owns $19
 ($18 907)
 ($18 908)
 ($18 909)
+($18 910)
 ($18 911)
-($21 912)
-($21 913)
-($21 914)
-($21 915)
-($21 916
-(body "*"
-))
+($18 912)
+($18 913)
+($18 915)
+($21 916)
 ($21 917)
 ($21 918)
 ($21 919)
-($21 920)
+($21 920
+(body "*"
+))
 ($21 921)
 ($21 922)
 ($21 923)
@@ -5150,15 +5172,15 @@ objectdomain.uml.core.Stereotype-owns $19
 ($21 936)
 ($21 937)
 ($21 938)
-($18 941)
-($18 942)
-($18 943)
-($21 944)
-($18 945)
+($21 939)
+($21 940)
+($21 941)
+($21 942)
+($21 943)
 ($18 946)
 ($18 947)
 ($18 948)
-($18 949)
+($21 949)
 ($18 950)
 ($18 951)
 ($18 952)
@@ -5202,12 +5224,12 @@ objectdomain.uml.core.Stereotype-owns $19
 ($18 990)
 ($18 991)
 ($18 992)
-($21 993)
+($18 993)
 ($18 994)
 ($18 995)
 ($18 996)
 ($18 997)
-($18 998)
+($21 998)
 ($18 999)
 ($18 1000)
 ($18 1001)
@@ -5264,231 +5286,236 @@ objectdomain.uml.core.Stereotype-owns $19
 ($18 1052)
 ($18 1053)
 ($18 1054)
-($19 860 @ -yk94ms_-e3s_e41656c6_-fw7 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "DataType" $19)
-($20 910 @ -yk94ms_-e3s_e41656c6_-fvw 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "memops.Implementation" $20)
-($7 939 @ 0_-fvi_hrnjywg5_-nio 5 "Logical" $1 "ccp" $1 "general" $1 "Taxonomy" $1 "Taxonomy" $7)
-($7 940 @ 0_-fvi_hrnjywg5_-gla 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1 "NmrCalcStore" $7)
-(stereotypeAssn 140 860)
-(projectionAssn 3 140 859)
-(stereotypeAssn 160 860)
-(projectionAssn 4 160 861)
-(stereotypeAssn 152 860)
-(projectionAssn 5 152 862)
-(stereotypeAssn 171 860)
-(projectionAssn 6 171 863)
-(stereotypeAssn 166 860)
+($18 1055)
+($18 1056)
+($18 1057)
+($18 1058)
+($18 1059)
+($19 864 @ -yk94ms_-e3s_e41656c6_-fw7 2 "stereotypes" objectdomain.uml.mechanisms.StereotypePackage-owns "DataType" $19)
+($20 914 @ -yk94ms_-e3s_e41656c6_-fvw 2 "styles" objectdomain.uml.mechanisms.StylePackage-owns "memops.Implementation" $20)
+($7 944 @ 0_-fvi_hrnjywg5_-nio 5 "Logical" $1 "ccp" $1 "general" $1 "Taxonomy" $1 "Taxonomy" $7)
+($7 945 @ 0_-fvi_hrnjywg5_-gla 5 "Logical" $1 "ccp" $1 "nmr" $1 "NmrCalc" $1 "NmrCalcStore" $7)
+(stereotypeAssn 140 864)
+(projectionAssn 3 140 863)
+(stereotypeAssn 160 864)
+(projectionAssn 4 160 865)
+(stereotypeAssn 152 864)
+(projectionAssn 5 152 866)
+(stereotypeAssn 171 864)
+(projectionAssn 6 171 867)
+(stereotypeAssn 166 864)
 (subtypeAssn 167 166)
-(stereotypeAssn 443 860)
+(stereotypeAssn 443 864)
 (subtypeAssn 444 443)
 (supertypeAssn 444 171)
 (generalizationAssn 443 444)
 (supertypeAssn 167 443)
 (generalizationAssn 166 167)
-(projectionAssn 7 166 864)
-(stereotypeAssn 177 860)
+(projectionAssn 7 166 868)
+(stereotypeAssn 177 864)
 (subtypeAssn 178 177)
 (supertypeAssn 178 171)
 (generalizationAssn 177 178)
-(projectionAssn 8 177 865)
+(projectionAssn 8 177 869)
 (to 9 6)
 (from 9 8)
-(projectionAssn 9 178 866)
-(stereotypeAssn 182 860)
+(projectionAssn 9 178 870)
+(stereotypeAssn 182 864)
 (subtypeAssn 183 182)
-(stereotypeAssn 640 860)
-(subtypeAssn 641 640)
-(stereotypeAssn 634 860)
-(subtypeAssn 635 634)
-(supertypeAssn 635 171)
-(generalizationAssn 634 635)
-(supertypeAssn 641 634)
-(generalizationAssn 640 641)
-(supertypeAssn 183 640)
+(stereotypeAssn 644 864)
+(subtypeAssn 645 644)
+(stereotypeAssn 638 864)
+(subtypeAssn 639 638)
+(supertypeAssn 639 171)
+(generalizationAssn 638 639)
+(supertypeAssn 645 638)
+(generalizationAssn 644 645)
+(supertypeAssn 183 644)
 (generalizationAssn 182 183)
-(projectionAssn 10 182 867)
-(stereotypeAssn 431 860)
+(projectionAssn 10 182 871)
+(stereotypeAssn 431 864)
 (subtypeAssn 432 431)
 (supertypeAssn 432 160)
 (generalizationAssn 431 432)
-(projectionAssn 11 431 868)
+(projectionAssn 11 431 872)
 (to 12 4)
 (from 12 11)
-(projectionAssn 12 432 869)
-(projectionAssn 13 443 870)
+(projectionAssn 12 432 873)
+(projectionAssn 13 443 874)
 (to 14 6)
 (from 14 13)
-(projectionAssn 14 444 871)
+(projectionAssn 14 444 875)
 (to 15 13)
 (from 15 7)
-(projectionAssn 15 167 872)
-(stereotypeAssn 461 860)
+(projectionAssn 15 167 876)
+(stereotypeAssn 461 864)
 (subtypeAssn 462 461)
 (supertypeAssn 462 160)
 (generalizationAssn 461 462)
-(projectionAssn 16 461 873)
+(projectionAssn 16 461 877)
 (to 17 4)
 (from 17 16)
-(projectionAssn 17 462 874)
-(stereotypeAssn 467 860)
-(projectionAssn 18 467 875)
-(stereotypeAssn 148 860)
+(projectionAssn 17 462 878)
+(stereotypeAssn 467 864)
+(projectionAssn 18 467 879)
+(stereotypeAssn 148 864)
 (subtypeAssn 149 148)
 (supertypeAssn 149 171)
 (generalizationAssn 148 149)
-(projectionAssn 19 148 876)
+(projectionAssn 19 148 880)
 (to 20 6)
 (from 20 19)
-(projectionAssn 20 149 877)
-(stereotypeAssn 608 860)
-(subtypeAssn 609 608)
-(supertypeAssn 609 467)
-(generalizationAssn 608 609)
-(projectionAssn 21 608 878)
+(projectionAssn 20 149 881)
+(stereotypeAssn 612 864)
+(subtypeAssn 613 612)
+(supertypeAssn 613 467)
+(generalizationAssn 612 613)
+(projectionAssn 21 612 882)
 (to 22 18)
 (from 22 21)
-(projectionAssn 22 609 879)
-(stereotypeAssn 613 860)
-(projectionAssn 23 613 880)
-(stereotypeAssn 416 860)
+(projectionAssn 22 613 883)
+(stereotypeAssn 617 864)
+(projectionAssn 23 617 884)
+(stereotypeAssn 416 864)
 (subtypeAssn 417 416)
 (supertypeAssn 417 171)
 (generalizationAssn 416 417)
-(projectionAssn 24 416 881)
+(projectionAssn 24 416 885)
 (to 25 6)
 (from 25 24)
-(projectionAssn 25 417 882)
-(stereotypeAssn 455 860)
+(projectionAssn 25 417 886)
+(stereotypeAssn 455 864)
 (subtypeAssn 456 455)
 (supertypeAssn 456 152)
 (generalizationAssn 455 456)
-(projectionAssn 26 455 883)
+(projectionAssn 26 455 887)
 (to 27 5)
 (from 27 26)
-(projectionAssn 27 456 884)
-(stereotypeAssn 423 860)
+(projectionAssn 27 456 888)
+(stereotypeAssn 423 864)
 (subtypeAssn 424 423)
 (supertypeAssn 424 152)
 (generalizationAssn 423 424)
-(projectionAssn 28 423 885)
+(projectionAssn 28 423 889)
 (to 29 5)
 (from 29 28)
-(projectionAssn 29 424 886)
-(stereotypeAssn 449 860)
+(projectionAssn 29 424 890)
+(stereotypeAssn 449 864)
 (subtypeAssn 450 449)
 (supertypeAssn 450 152)
 (generalizationAssn 449 450)
-(projectionAssn 30 449 887)
+(projectionAssn 30 449 891)
 (to 31 5)
 (from 31 30)
-(projectionAssn 31 450 888)
-(projectionAssn 32 634 889)
+(projectionAssn 31 450 892)
+(projectionAssn 32 638 893)
 (to 33 6)
 (from 33 32)
-(projectionAssn 33 635 890)
-(projectionAssn 34 640 891)
+(projectionAssn 33 639 894)
+(projectionAssn 34 644 895)
 (to 35 32)
 (from 35 34)
-(projectionAssn 35 641 892)
+(projectionAssn 35 645 896)
 (to 36 34)
 (from 36 10)
-(projectionAssn 36 183 893)
-(stereotypeAssn 786 860)
-(subtypeAssn 787 786)
-(supertypeAssn 787 160)
-(generalizationAssn 786 787)
-(projectionAssn 37 786 894)
+(projectionAssn 36 183 897)
+(stereotypeAssn 790 864)
+(subtypeAssn 791 790)
+(supertypeAssn 791 160)
+(generalizationAssn 790 791)
+(projectionAssn 37 790 898)
 (to 38 4)
 (from 38 37)
-(projectionAssn 38 787 895)
-(stereotypeAssn 811 860)
-(subtypeAssn 812 811)
-(stereotypeAssn 846 860)
-(subtypeAssn 847 846)
-(supertypeAssn 847 171)
-(generalizationAssn 846 847)
-(supertypeAssn 812 846)
-(generalizationAssn 811 812)
-(projectionAssn 39 811 896)
-(stereotypeAssn 817 860)
-(subtypeAssn 818 817)
-(supertypeAssn 818 152)
-(generalizationAssn 817 818)
-(projectionAssn 40 817 897)
+(projectionAssn 38 791 899)
+(stereotypeAssn 815 864)
+(subtypeAssn 816 815)
+(stereotypeAssn 850 864)
+(subtypeAssn 851 850)
+(supertypeAssn 851 171)
+(generalizationAssn 850 851)
+(supertypeAssn 816 850)
+(generalizationAssn 815 816)
+(projectionAssn 39 815 900)
+(stereotypeAssn 821 864)
+(subtypeAssn 822 821)
+(supertypeAssn 822 152)
+(generalizationAssn 821 822)
+(projectionAssn 40 821 901)
 (to 41 5)
 (from 41 40)
-(projectionAssn 41 818 898)
-(stereotypeAssn 823 860)
-(subtypeAssn 824 823)
-(supertypeAssn 824 160)
-(generalizationAssn 823 824)
-(projectionAssn 42 823 899)
+(projectionAssn 41 822 902)
+(stereotypeAssn 827 864)
+(subtypeAssn 828 827)
+(supertypeAssn 828 160)
+(generalizationAssn 827 828)
+(projectionAssn 42 827 903)
 (to 43 4)
 (from 43 42)
-(projectionAssn 43 824 900)
-(stereotypeAssn 829 860)
-(subtypeAssn 830 829)
-(supertypeAssn 830 166)
-(generalizationAssn 829 830)
-(projectionAssn 44 829 901)
+(projectionAssn 43 828 904)
+(stereotypeAssn 833 864)
+(subtypeAssn 834 833)
+(supertypeAssn 834 166)
+(generalizationAssn 833 834)
+(projectionAssn 44 833 905)
 (to 45 7)
 (from 45 44)
-(projectionAssn 45 830 902)
-(stereotypeAssn 835 860)
-(subtypeAssn 836 835)
-(supertypeAssn 836 171)
-(generalizationAssn 835 836)
-(projectionAssn 46 835 903)
+(projectionAssn 45 834 906)
+(stereotypeAssn 839 864)
+(subtypeAssn 840 839)
+(supertypeAssn 840 171)
+(generalizationAssn 839 840)
+(projectionAssn 46 839 907)
 (to 47 6)
 (from 47 46)
-(projectionAssn 47 836 904)
-(projectionAssn 48 846 905)
+(projectionAssn 47 840 908)
+(projectionAssn 48 850 909)
 (to 49 6)
 (from 49 48)
-(projectionAssn 49 847 906)
+(projectionAssn 49 851 910)
 (to 50 48)
 (from 50 39)
-(projectionAssn 50 812 907)
-(stereotypeAssn 851 860)
-(subtypeAssn 852 851)
-(supertypeAssn 852 846)
-(generalizationAssn 851 852)
-(projectionAssn 51 851 908)
+(projectionAssn 50 816 911)
+(stereotypeAssn 855 864)
+(subtypeAssn 856 855)
+(supertypeAssn 856 850)
+(generalizationAssn 855 856)
+(projectionAssn 51 855 912)
 (to 52 48)
 (from 52 51)
-(projectionAssn 52 852 909)
-(styleAssn 54 910)
+(projectionAssn 52 856 913)
+(styleAssn 54 914)
 (typeAssn 132 118)
 (assocEndAssn 118 132)
 (subtypeAssn 137 118)
-(stereotypeAssn 744 860)
-(typeRefAssn 745 182)
-(typeExpression 745 912)
+(stereotypeAssn 748 864)
 (typeRefAssn 749 182)
-(typeExpression 749 912)
+(typeExpression 749 916)
 (typeRefAssn 753 182)
-(typeExpression 753 912)
-(typeRefAssn 757 166)
-(typeExpression 757 912)
-(typeRefAssn 767 182)
-(typeExpression 767 913)
-(typeRefAssn 772 140)
-(typeExpression 772 912)
-(typeAssn 777 171)
-(typeExpression 777 914)
-(supertypeAssn 137 744)
+(typeExpression 753 916)
+(typeRefAssn 757 182)
+(typeExpression 757 916)
+(typeRefAssn 761 166)
+(typeExpression 761 916)
+(typeRefAssn 771 182)
+(typeExpression 771 917)
+(typeRefAssn 776 140)
+(typeExpression 776 916)
+(typeAssn 781 171)
+(typeExpression 781 918)
+(supertypeAssn 137 748)
 (generalizationAssn 118 137)
 (typeRefAssn 119 140)
-(typeExpression 119 915)
-(typeAssn 124 613)
-(typeExpression 124 916)
+(typeExpression 119 919)
+(typeAssn 124 617)
+(typeExpression 124 920)
 (typeAssn 251 215)
 (assocEndAssn 215 251)
 (typeAssn 257 215)
 (assocEndAssn 215 257)
 (typeAssn 262 215)
 (assocEndAssn 215 262)
-(typeAssn 625 215)
-(assocEndAssn 215 625)
+(typeAssn 629 215)
+(assocEndAssn 215 629)
 (assocEndAssn 215 133)
 (typeAssn 271 215)
 (assocEndAssn 215 271)
@@ -5502,494 +5529,496 @@ objectdomain.uml.core.Stereotype-owns $19
 (typeAssn 363 296)
 (assocEndAssn 296 363)
 (typeRefAssn 297 140)
-(typeExpression 297 917)
+(typeExpression 297 921)
 (typeRefAssn 301 140)
-(typeExpression 301 917)
-(typeAssn 509 519)
-(assocEndAssn 519 509)
-(typeAssn 264 519)
-(assocEndAssn 519 264)
-(typeAssn 364 519)
-(assocEndAssn 519 364)
-(subtypeAssn 540 519)
-(typeAssn 624 618)
-(assocEndAssn 618 624)
-(subtypeAssn 629 618)
-(supertypeAssn 629 118)
-(generalizationAssn 618 629)
-(typeRefAssn 619 160)
-(typeExpression 619 918)
-(supertypeAssn 540 618)
-(generalizationAssn 519 540)
-(typeRefAssn 520 166)
-(typeExpression 520 919)
-(stereotypeAssn 410 860)
+(typeExpression 301 921)
+(typeAssn 513 523)
+(assocEndAssn 523 513)
+(typeAssn 264 523)
+(assocEndAssn 523 264)
+(typeAssn 364 523)
+(assocEndAssn 523 364)
+(subtypeAssn 544 523)
+(typeAssn 628 622)
+(assocEndAssn 622 628)
+(subtypeAssn 633 622)
+(supertypeAssn 633 118)
+(generalizationAssn 622 633)
+(typeRefAssn 623 160)
+(typeExpression 623 922)
+(supertypeAssn 544 622)
+(generalizationAssn 523 544)
+(typeRefAssn 524 166)
+(typeExpression 524 923)
+(stereotypeAssn 410 864)
 (subtypeAssn 411 410)
 (supertypeAssn 411 182)
 (generalizationAssn 410 411)
-(typeRefAssn 523 410)
-(typeExpression 523 919)
-(stereotypeAssn 372 860)
+(typeRefAssn 527 410)
+(typeExpression 527 923)
+(stereotypeAssn 372 864)
 (subtypeAssn 401 372)
-(stereotypeAssn 730 860)
-(subtypeAssn 741 730)
-(supertypeAssn 741 744)
-(generalizationAssn 730 741)
-(typeRefAssn 731 140)
-(typeExpression 731 920)
-(supertypeAssn 401 730)
+(stereotypeAssn 734 864)
+(subtypeAssn 745 734)
+(supertypeAssn 745 748)
+(generalizationAssn 734 745)
+(typeRefAssn 735 140)
+(typeExpression 735 924)
+(supertypeAssn 401 734)
 (generalizationAssn 372 401)
-(stereotypeAssn 404 860)
+(stereotypeAssn 404 864)
 (subtypeAssn 405 404)
 (supertypeAssn 405 182)
 (generalizationAssn 404 405)
 (typeRefAssn 373 404)
-(typeExpression 373 921)
+(typeExpression 373 925)
 (typeRefAssn 376 166)
-(typeExpression 376 921)
+(typeExpression 376 925)
 (typeRefAssn 379 166)
-(typeExpression 379 921)
+(typeExpression 379 925)
 (typeRefAssn 382 166)
-(typeExpression 382 921)
-(stereotypeAssn 437 860)
+(typeExpression 382 925)
+(stereotypeAssn 437 864)
 (subtypeAssn 438 437)
 (supertypeAssn 438 443)
 (generalizationAssn 437 438)
 (typeRefAssn 385 437)
-(typeExpression 385 921)
+(typeExpression 385 925)
 (typeRefAssn 388 160)
-(typeExpression 388 922)
+(typeExpression 388 926)
 (typeRefAssn 391 437)
-(typeExpression 391 923)
-(typeRefAssn 526 372)
-(typeExpression 526 919)
-(typeAssn 530 182)
-(typeExpression 530 924)
-(typeAssn 533 437)
-(typeExpression 533 925)
-(typeAssn 318 519)
-(typeExpression 318 923)
-(typeAssn 327 519)
-(typeExpression 327 926)
+(typeExpression 391 927)
+(typeRefAssn 530 372)
+(typeExpression 530 923)
+(typeAssn 534 182)
+(typeExpression 534 928)
+(typeAssn 537 437)
+(typeExpression 537 929)
+(typeAssn 318 523)
+(typeExpression 318 927)
+(typeAssn 327 523)
+(typeExpression 327 930)
 (typeRefAssn 341 140)
-(typeExpression 341 927)
+(typeExpression 341 931)
 (typeRefAssn 345 140)
-(typeExpression 345 928)
+(typeExpression 345 932)
 (typeRefAssn 354 182)
-(typeExpression 354 929)
+(typeExpression 354 933)
 (typeRefAssn 358 182)
-(typeExpression 358 929)
+(typeExpression 358 933)
 (supertypeAssn 249 296)
 (generalizationAssn 215 249)
 (subtypeAssn 267 215)
-(supertypeAssn 267 618)
+(supertypeAssn 267 622)
 (generalizationAssn 215 267)
 (subtypeAssn 268 215)
-(supertypeAssn 268 604)
+(supertypeAssn 268 608)
 (generalizationAssn 215 268)
 (subtypeAssn 269 215)
-(typeAssn 576 182)
-(typeExpression 576 930)
-(typeAssn 591 437)
-(typeExpression 591 931)
-(typeAssn 555 477)
-(assocEndAssn 477 555)
+(typeAssn 580 182)
+(typeExpression 580 934)
+(typeAssn 595 437)
+(typeExpression 595 935)
+(typeAssn 559 477)
+(assocEndAssn 477 559)
 (typeAssn 272 477)
 (assocEndAssn 477 272)
-(typeAssn 491 477)
-(assocEndAssn 477 491)
+(typeAssn 495 477)
+(assocEndAssn 477 495)
 (typeAssn 285 477)
 (assocEndAssn 477 285)
-(subtypeAssn 488 477)
-(supertypeAssn 488 473)
-(generalizationAssn 477 488)
-(subtypeAssn 489 477)
-(typeAssn 554 544)
-(assocEndAssn 544 554)
-(subtypeAssn 559 544)
-(supertypeAssn 559 118)
-(generalizationAssn 544 559)
-(stereotypeAssn 108 860)
+(subtypeAssn 492 477)
+(supertypeAssn 492 473)
+(generalizationAssn 477 492)
+(subtypeAssn 493 477)
+(typeAssn 558 548)
+(assocEndAssn 548 558)
+(subtypeAssn 563 548)
+(supertypeAssn 563 118)
+(generalizationAssn 548 563)
+(stereotypeAssn 108 864)
 (subtypeAssn 115 108)
-(supertypeAssn 115 730)
+(supertypeAssn 115 734)
 (generalizationAssn 108 115)
 (typeRefAssn 109 166)
-(typeExpression 109 932)
+(typeExpression 109 936)
 (typeRefAssn 112 166)
-(typeExpression 112 932)
-(typeRefAssn 545 108)
-(typeExpression 545 933)
-(typeRefAssn 549 160)
-(typeExpression 549 918)
-(supertypeAssn 489 544)
-(generalizationAssn 477 489)
-(subtypeAssn 496 477)
-(subtypeAssn 667 645)
-(supertypeAssn 667 296)
-(generalizationAssn 645 667)
-(typeAssn 647 519)
-(typeExpression 647 934)
-(supertypeAssn 496 645)
-(generalizationAssn 477 496)
-(typeRefAssn 478 829)
-(typeExpression 478 919)
-(typeAssn 505 500)
-(assocEndAssn 500 505)
-(typeAssn 259 500)
-(assocEndAssn 500 259)
-(assocEndAssn 500 492)
-(typeAssn 278 500)
-(assocEndAssn 500 278)
-(subtypeAssn 515 500)
-(supertypeAssn 515 618)
-(generalizationAssn 500 515)
-(typeRefAssn 501 182)
-(typeExpression 501 919)
-(typeAssn 492 500)
-(typeAssn 594 477)
-(typeExpression 594 931)
-(supertypeAssn 269 562)
+(typeExpression 112 936)
+(typeRefAssn 549 108)
+(typeExpression 549 937)
+(typeRefAssn 553 160)
+(typeExpression 553 922)
+(supertypeAssn 493 548)
+(generalizationAssn 477 493)
+(subtypeAssn 500 477)
+(subtypeAssn 671 649)
+(supertypeAssn 671 296)
+(generalizationAssn 649 671)
+(typeAssn 651 523)
+(typeExpression 651 938)
+(supertypeAssn 500 649)
+(generalizationAssn 477 500)
+(typeRefAssn 478 833)
+(typeExpression 478 923)
+(typeRefAssn 488 160)
+(typeExpression 488 939)
+(typeAssn 509 504)
+(assocEndAssn 504 509)
+(typeAssn 259 504)
+(assocEndAssn 504 259)
+(assocEndAssn 504 496)
+(typeAssn 278 504)
+(assocEndAssn 504 278)
+(subtypeAssn 519 504)
+(supertypeAssn 519 622)
+(generalizationAssn 504 519)
+(typeRefAssn 505 182)
+(typeExpression 505 923)
+(typeAssn 496 504)
+(typeAssn 598 477)
+(typeExpression 598 935)
+(supertypeAssn 269 566)
 (generalizationAssn 215 269)
 (typeRefAssn 216 182)
-(typeExpression 216 935)
+(typeExpression 216 940)
 (typeRefAssn 221 140)
-(typeExpression 221 936)
+(typeExpression 221 941)
 (typeRefAssn 224 182)
-(typeExpression 224 929)
+(typeExpression 224 933)
 (typeAssn 230 166)
-(typeExpression 230 937)
+(typeExpression 230 942)
 (typeRefAssn 243 182)
-(typeExpression 243 938)
+(typeExpression 243 943)
 (typeRefAssn 246 140)
-(typeExpression 246 938)
-(typeAssn 253 939)
-(typeAssn 289 940)
+(typeExpression 246 943)
+(typeAssn 253 944)
+(typeAssn 289 945)
 (typeAssn 133 215)
-(projectionAssn 54 118 911)
-(styleAssn 55 910)
-(projectionAssn 55 108 941)
-(styleAssn 56 910)
-(projectionAssn 56 215 942)
-(styleAssn 57 910)
-(stereotypeAssn 187 860)
+(projectionAssn 54 118 915)
+(styleAssn 55 914)
+(projectionAssn 55 108 946)
+(styleAssn 56 914)
+(projectionAssn 56 215 947)
+(styleAssn 57 914)
+(stereotypeAssn 187 864)
 (subtypeAssn 191 187)
 (supertypeAssn 191 108)
 (generalizationAssn 187 191)
 (typeRefAssn 188 140)
-(typeExpression 188 944)
-(projectionAssn 57 187 943)
+(typeExpression 188 949)
+(projectionAssn 57 187 948)
 (to 58 55)
 (from 58 57)
-(projectionAssn 58 191 945)
-(styleAssn 59 910)
-(stereotypeAssn 194 860)
+(projectionAssn 58 191 950)
+(styleAssn 59 914)
+(stereotypeAssn 194 864)
 (subtypeAssn 198 194)
 (supertypeAssn 198 108)
 (generalizationAssn 194 198)
 (typeRefAssn 195 160)
-(typeExpression 195 944)
-(projectionAssn 59 194 946)
+(typeExpression 195 949)
+(projectionAssn 59 194 951)
 (to 60 55)
 (from 60 59)
-(projectionAssn 60 198 947)
-(styleAssn 61 910)
-(stereotypeAssn 201 860)
+(projectionAssn 60 198 952)
+(styleAssn 61 914)
+(stereotypeAssn 201 864)
 (subtypeAssn 205 201)
 (supertypeAssn 205 108)
 (generalizationAssn 201 205)
 (typeRefAssn 202 152)
-(typeExpression 202 944)
-(projectionAssn 61 201 948)
+(typeExpression 202 949)
+(projectionAssn 61 201 953)
 (to 62 55)
 (from 62 61)
-(projectionAssn 62 205 949)
-(styleAssn 63 910)
-(stereotypeAssn 208 860)
+(projectionAssn 62 205 954)
+(styleAssn 63 914)
+(stereotypeAssn 208 864)
 (subtypeAssn 212 208)
 (supertypeAssn 212 108)
 (generalizationAssn 208 212)
 (typeRefAssn 209 171)
-(typeExpression 209 944)
-(projectionAssn 63 208 950)
+(typeExpression 209 949)
+(projectionAssn 63 208 955)
 (to 64 55)
 (from 64 63)
-(projectionAssn 64 212 951)
-(styleAssn 65 910)
-(projectionAssn 65 372 952)
-(styleAssn 66 910)
-(projectionAssn 66 296 953)
+(projectionAssn 64 212 956)
+(styleAssn 65 914)
+(projectionAssn 65 372 957)
+(styleAssn 66 914)
+(projectionAssn 66 296 958)
 (to 67 66)
 (from 67 56)
-(projectionAssn 67 249 954)
-(projectionAssn 68 1 955)
-(styleAssn 69 910)
-(projectionAssn 69 544 956)
-(styleAssn 70 910)
-(projectionAssn 70 730 957)
+(projectionAssn 67 249 959)
+(projectionAssn 68 1 960)
+(styleAssn 69 914)
+(projectionAssn 69 548 961)
+(styleAssn 70 914)
+(projectionAssn 70 734 962)
 (to 71 70)
 (from 71 65)
-(projectionAssn 71 401 958)
+(projectionAssn 71 401 963)
 (to 72 70)
 (from 72 55)
-(projectionAssn 72 115 959)
-(styleAssn 73 910)
-(projectionAssn 73 500 960)
+(projectionAssn 72 115 964)
+(styleAssn 73 914)
+(projectionAssn 73 504 965)
 (to 74 73)
 (from 74 56)
-(projectionAssn 74 256 961)
+(projectionAssn 74 256 966)
 (to 75 73)
 (from 75 56)
-(projectionAssn 75 276 962)
-(styleAssn 76 910)
-(projectionAssn 76 519 963)
+(projectionAssn 75 276 967)
+(styleAssn 76 914)
+(projectionAssn 76 523 968)
 (to 77 76)
 (from 77 73)
-(projectionAssn 77 504 964)
+(projectionAssn 77 508 969)
 (to 78 76)
 (from 78 56)
-(projectionAssn 78 261 965)
+(projectionAssn 78 261 970)
 (to 79 76)
 (from 79 66)
-(projectionAssn 79 362 966)
-(styleAssn 80 910)
-(projectionAssn 80 562 967)
+(projectionAssn 79 362 971)
+(styleAssn 80 914)
+(projectionAssn 80 566 972)
 (to 81 80)
 (from 81 56)
-(projectionAssn 81 269 968)
-(styleAssn 82 910)
-(projectionAssn 82 604 969)
+(projectionAssn 81 269 973)
+(styleAssn 82 914)
+(projectionAssn 82 608 974)
 (to 83 82)
 (from 83 56)
-(projectionAssn 83 268 970)
-(styleAssn 84 910)
-(projectionAssn 84 473 971)
-(styleAssn 85 910)
-(projectionAssn 85 618 972)
+(projectionAssn 83 268 975)
+(styleAssn 84 914)
+(projectionAssn 84 473 976)
+(styleAssn 85 914)
+(projectionAssn 85 622 977)
 (to 86 56)
 (from 86 85)
-(projectionAssn 86 623 973)
+(projectionAssn 86 627 978)
 (to 87 54)
 (from 87 85)
-(projectionAssn 87 629 974)
+(projectionAssn 87 633 979)
 (to 88 85)
 (from 88 76)
-(projectionAssn 88 540 975)
+(projectionAssn 88 544 980)
 (to 89 85)
 (from 89 56)
-(projectionAssn 89 267 976)
+(projectionAssn 89 267 981)
 (to 90 85)
 (from 90 73)
-(projectionAssn 90 515 977)
+(projectionAssn 90 519 982)
 (to 91 56)
 (from 91 54)
-(projectionAssn 91 131 978)
+(projectionAssn 91 131 983)
 (to 92 54)
 (from 92 69)
-(projectionAssn 92 559 979)
-(styleAssn 93 910)
-(projectionAssn 93 477 980)
+(projectionAssn 92 563 984)
+(styleAssn 93 914)
+(projectionAssn 93 477 985)
 (to 94 73)
 (from 94 93)
-(projectionAssn 94 490 981)
+(projectionAssn 94 494 986)
 (to 95 84)
 (from 95 93)
-(projectionAssn 95 488 982)
+(projectionAssn 95 492 987)
 (to 96 69)
 (from 96 93)
-(projectionAssn 96 489 983)
+(projectionAssn 96 493 988)
 (to 97 93)
 (from 97 69)
-(projectionAssn 97 553 984)
+(projectionAssn 97 557 989)
 (to 98 93)
 (from 98 56)
-(projectionAssn 98 270 985)
-(styleAssn 99 910)
-(projectionAssn 99 645 986)
+(projectionAssn 98 270 990)
+(styleAssn 99 914)
+(projectionAssn 99 649 991)
 (to 100 66)
 (from 100 99)
-(projectionAssn 100 667 987)
+(projectionAssn 100 671 992)
 (to 101 99)
 (from 101 93)
-(projectionAssn 101 496 988)
-(styleAssn 102 910)
-(projectionAssn 102 744 989)
+(projectionAssn 101 500 993)
+(styleAssn 102 914)
+(projectionAssn 102 748 994)
 (to 103 102)
 (from 103 54)
-(projectionAssn 103 137 990)
+(projectionAssn 103 137 995)
 (to 104 102)
 (from 104 70)
-(projectionAssn 104 741 991)
-(styleAssn 105 910)
-(stereotypeAssn 792 860)
-(subtypeAssn 808 792)
-(supertypeAssn 808 730)
-(generalizationAssn 792 808)
-(typeRefAssn 793 152)
-(typeExpression 793 993)
-(typeRefAssn 796 152)
-(typeExpression 796 993)
-(typeRefAssn 799 152)
-(typeExpression 799 993)
-(typeRefAssn 802 152)
-(typeExpression 802 993)
-(typeRefAssn 805 152)
-(typeExpression 805 993)
-(projectionAssn 105 792 992)
+(projectionAssn 104 745 996)
+(styleAssn 105 914)
+(stereotypeAssn 796 864)
+(subtypeAssn 812 796)
+(supertypeAssn 812 734)
+(generalizationAssn 796 812)
+(typeRefAssn 797 152)
+(typeExpression 797 998)
+(typeRefAssn 800 152)
+(typeExpression 800 998)
+(typeRefAssn 803 152)
+(typeExpression 803 998)
+(typeRefAssn 806 152)
+(typeExpression 806 998)
+(typeRefAssn 809 152)
+(typeExpression 809 998)
+(projectionAssn 105 796 997)
 (to 106 70)
 (from 106 105)
-(projectionAssn 106 808 994)
+(projectionAssn 106 812 999)
 (to 107 93)
 (from 107 56)
-(projectionAssn 107 282 995)
-(styleAssn 671 910)
-(projectionAssn 671 118 996)
-(styleAssn 672 910)
-(projectionAssn 672 108 997)
-(styleAssn 673 910)
-(projectionAssn 673 215 998)
-(styleAssn 674 910)
-(projectionAssn 674 187 999)
-(to 675 672)
-(from 675 674)
-(projectionAssn 675 191 1000)
-(styleAssn 676 910)
-(projectionAssn 676 194 1001)
-(to 677 672)
-(from 677 676)
-(projectionAssn 677 198 1002)
-(styleAssn 678 910)
-(projectionAssn 678 201 1003)
-(to 679 672)
+(projectionAssn 107 282 1000)
+(styleAssn 675 914)
+(projectionAssn 675 118 1001)
+(styleAssn 676 914)
+(projectionAssn 676 108 1002)
+(styleAssn 677 914)
+(projectionAssn 677 215 1003)
+(styleAssn 678 914)
+(projectionAssn 678 187 1004)
+(to 679 676)
 (from 679 678)
-(projectionAssn 679 205 1004)
-(styleAssn 680 910)
-(projectionAssn 680 208 1005)
-(to 681 672)
+(projectionAssn 679 191 1005)
+(styleAssn 680 914)
+(projectionAssn 680 194 1006)
+(to 681 676)
 (from 681 680)
-(projectionAssn 681 212 1006)
-(styleAssn 682 910)
-(projectionAssn 682 372 1007)
-(styleAssn 683 910)
-(projectionAssn 683 296 1008)
-(styleAssn 684 910)
-(projectionAssn 684 404 1009)
-(to 685 683)
-(from 685 673)
-(projectionAssn 685 249 1010)
-(styleAssn 686 910)
-(projectionAssn 686 410 1011)
-(styleAssn 687 910)
-(projectionAssn 687 473 1012)
-(styleAssn 688 910)
-(projectionAssn 688 477 1013)
+(projectionAssn 681 198 1007)
+(styleAssn 682 914)
+(projectionAssn 682 201 1008)
+(to 683 676)
+(from 683 682)
+(projectionAssn 683 205 1009)
+(styleAssn 684 914)
+(projectionAssn 684 208 1010)
+(to 685 676)
+(from 685 684)
+(projectionAssn 685 212 1011)
+(styleAssn 686 914)
+(projectionAssn 686 372 1012)
+(styleAssn 687 914)
+(projectionAssn 687 296 1013)
+(styleAssn 688 914)
+(projectionAssn 688 404 1014)
 (to 689 687)
-(from 689 688)
-(projectionAssn 689 488 1014)
-(styleAssn 690 910)
-(projectionAssn 690 500 1015)
-(styleAssn 691 910)
-(projectionAssn 691 519 1016)
-(to 692 691)
-(from 692 690)
-(projectionAssn 692 504 1017)
-(styleAssn 693 910)
-(projectionAssn 693 544 1018)
-(styleAssn 694 910)
-(projectionAssn 694 562 1019)
-(styleAssn 695 910)
-(projectionAssn 695 604 1020)
-(to 696 690)
-(from 696 673)
-(projectionAssn 696 256 1021)
-(to 697 691)
-(from 697 673)
-(projectionAssn 697 261 1022)
-(styleAssn 698 910)
-(projectionAssn 698 618 1023)
-(to 699 693)
-(from 699 688)
-(projectionAssn 699 489 1024)
-(styleAssn 700 910)
-(projectionAssn 700 730 1025)
-(to 701 698)
-(from 701 673)
-(projectionAssn 701 267 1026)
-(to 702 698)
-(from 702 690)
-(projectionAssn 702 515 1027)
-(to 703 698)
-(from 703 691)
-(projectionAssn 703 540 1028)
-(to 704 700)
-(from 704 672)
-(projectionAssn 704 115 1029)
-(to 705 700)
-(from 705 682)
-(projectionAssn 705 401 1030)
-(to 706 695)
-(from 706 673)
-(projectionAssn 706 268 1031)
-(to 707 673)
-(from 707 698)
-(projectionAssn 707 623 1032)
-(to 708 688)
-(from 708 693)
-(projectionAssn 708 553 1033)
-(to 709 694)
-(from 709 673)
-(projectionAssn 709 269 1034)
-(projectionAssn 710 632 1035)
-(projectionAssn 711 633 1036)
-(to 712 671)
-(from 712 693)
-(projectionAssn 712 559 1037)
-(to 713 671)
-(from 713 698)
-(projectionAssn 713 629 1038)
-(to 714 673)
-(from 714 671)
-(projectionAssn 714 131 1039)
-(to 715 688)
-(from 715 673)
-(projectionAssn 715 270 1040)
-(styleAssn 716 910)
-(projectionAssn 716 437 1041)
-(to 717 690)
-(from 717 688)
-(projectionAssn 717 490 1042)
-(to 718 690)
-(from 718 673)
-(projectionAssn 718 276 1043)
-(to 719 691)
-(from 719 683)
-(projectionAssn 719 362 1044)
-(to 720 688)
-(from 720 673)
-(projectionAssn 720 282 1045)
-(styleAssn 721 910)
-(projectionAssn 721 645 1046)
-(to 722 721)
-(from 722 688)
-(projectionAssn 722 496 1047)
-(to 723 683)
-(from 723 721)
-(projectionAssn 723 667 1048)
-(styleAssn 724 910)
-(projectionAssn 724 744 1049)
-(to 725 724)
-(from 725 671)
-(projectionAssn 725 137 1050)
-(to 726 724)
-(from 726 700)
-(projectionAssn 726 741 1051)
-(styleAssn 727 910)
-(projectionAssn 727 792 1052)
-(to 728 700)
-(from 728 727)
-(projectionAssn 728 808 1053)
-(styleAssn 729 910)
-(stereotypeAssn 840 860)
-(subtypeAssn 841 840)
-(supertypeAssn 841 182)
-(generalizationAssn 840 841)
-(projectionAssn 729 840 1054)
+(from 689 677)
+(projectionAssn 689 249 1015)
+(styleAssn 690 914)
+(projectionAssn 690 410 1016)
+(styleAssn 691 914)
+(projectionAssn 691 473 1017)
+(styleAssn 692 914)
+(projectionAssn 692 477 1018)
+(to 693 691)
+(from 693 692)
+(projectionAssn 693 492 1019)
+(styleAssn 694 914)
+(projectionAssn 694 504 1020)
+(styleAssn 695 914)
+(projectionAssn 695 523 1021)
+(to 696 695)
+(from 696 694)
+(projectionAssn 696 508 1022)
+(styleAssn 697 914)
+(projectionAssn 697 548 1023)
+(styleAssn 698 914)
+(projectionAssn 698 566 1024)
+(styleAssn 699 914)
+(projectionAssn 699 608 1025)
+(to 700 694)
+(from 700 677)
+(projectionAssn 700 256 1026)
+(to 701 695)
+(from 701 677)
+(projectionAssn 701 261 1027)
+(styleAssn 702 914)
+(projectionAssn 702 622 1028)
+(to 703 697)
+(from 703 692)
+(projectionAssn 703 493 1029)
+(styleAssn 704 914)
+(projectionAssn 704 734 1030)
+(to 705 702)
+(from 705 677)
+(projectionAssn 705 267 1031)
+(to 706 702)
+(from 706 694)
+(projectionAssn 706 519 1032)
+(to 707 702)
+(from 707 695)
+(projectionAssn 707 544 1033)
+(to 708 704)
+(from 708 676)
+(projectionAssn 708 115 1034)
+(to 709 704)
+(from 709 686)
+(projectionAssn 709 401 1035)
+(to 710 699)
+(from 710 677)
+(projectionAssn 710 268 1036)
+(to 711 677)
+(from 711 702)
+(projectionAssn 711 627 1037)
+(to 712 692)
+(from 712 697)
+(projectionAssn 712 557 1038)
+(to 713 698)
+(from 713 677)
+(projectionAssn 713 269 1039)
+(projectionAssn 714 636 1040)
+(projectionAssn 715 637 1041)
+(to 716 675)
+(from 716 697)
+(projectionAssn 716 563 1042)
+(to 717 675)
+(from 717 702)
+(projectionAssn 717 633 1043)
+(to 718 677)
+(from 718 675)
+(projectionAssn 718 131 1044)
+(to 719 692)
+(from 719 677)
+(projectionAssn 719 270 1045)
+(styleAssn 720 914)
+(projectionAssn 720 437 1046)
+(to 721 694)
+(from 721 692)
+(projectionAssn 721 494 1047)
+(to 722 694)
+(from 722 677)
+(projectionAssn 722 276 1048)
+(to 723 695)
+(from 723 687)
+(projectionAssn 723 362 1049)
+(to 724 692)
+(from 724 677)
+(projectionAssn 724 282 1050)
+(styleAssn 725 914)
+(projectionAssn 725 649 1051)
+(to 726 725)
+(from 726 692)
+(projectionAssn 726 500 1052)
+(to 727 687)
+(from 727 725)
+(projectionAssn 727 671 1053)
+(styleAssn 728 914)
+(projectionAssn 728 748 1054)
+(to 729 728)
+(from 729 675)
+(projectionAssn 729 137 1055)
+(to 730 728)
+(from 730 704)
+(projectionAssn 730 745 1056)
+(styleAssn 731 914)
+(projectionAssn 731 796 1057)
+(to 732 704)
+(from 732 731)
+(projectionAssn 732 812 1058)
+(styleAssn 733 914)
+(stereotypeAssn 844 864)
+(subtypeAssn 845 844)
+(supertypeAssn 845 182)
+(generalizationAssn 844 845)
+(projectionAssn 733 844 1059)

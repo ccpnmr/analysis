@@ -210,6 +210,13 @@ def getPythonDirectory():
   
   return func(func(func(os.path.abspath(__file__))))
 
+
+def getDataDirectory():
+
+  directory = joinPath(getTopDirectory(), 'data')
+
+  return directory
+
 def removePath(path):
   """Removes path whether file or directory, taking into account whether symbolic link.
   """

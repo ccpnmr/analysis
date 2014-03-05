@@ -60,7 +60,11 @@ class PyFileApiGen(FileApiGen, PyApiGen):
       self.writeComment('Hack for handling the root implementation atribute')
       self.setDictEntry(self.getDataDict(self.varNames['self']), 
                         self.toLiteral('memopsRoot'), 'self')
-    
+
+    # Add _lastId attribute to topObject
+    #if inClass is inClass.container.topObjectClass
+
+
     self.write("try:")
     self.indent += self.INDENT
     self.write('''

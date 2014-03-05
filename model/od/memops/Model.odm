@@ -7,7 +7,8 @@ objectdomain.uml.view.Diagram-owns $3
 objectdomain.domain.ModelEnvironment-owns $2
 objectdomain.uml.mechanisms.StylePackage-owns $8
 objectdomain.uml.mechanisms.StereotypePackage-owns $6
-objectdomain.domain.DomainLockObject $11
+objectdomain.uml.core.UmlClass-owns $11
+objectdomain.domain.DomainLockObject $12
 objectdomain.uml.core.UmlClassifier-owns $10
 objectdomain.uml.mechanisms.UmlModel-models $1
 objectdomain.uml.core.Stereotype-owns $7
@@ -489,7 +490,7 @@ objectdomain.uml.core.Stereotype-owns $7
 (name "?"
 )
 (uid "z8kfsx_-m68_gtzvewsk_-p2c"))
-($11 154
+($12 155
 (name "DomainLockObject"
 )
 (uid "64m3b9_4p5_bqjok6kd_-p8j"))
@@ -519,9 +520,9 @@ objectdomain.uml.core.Stereotype-owns $7
 ($4 26 @ z8kfsx_-gyy_h0cfqt95_-p8g 4 "Logical" $4 "ccp" $4 "lims" $4 "RefData" $4 "$CCPN_SVNROOT/ccp/lims/RefData.odp" A  U )
 ($4 27 @ -yk94ms_85r_eqyymv3f_-p96 3 "Logical" $4 "ccp" $4 "lims" $4 "$CCPN_SVNROOT/ccp/lims/package.odp" A  U )
 ($4 28 @ 0_-fvi_hrnjywg5_-ota 4 "Logical" $4 "ccp" $4 "nmr" $4 "Nmr" $4 "$CCPN_SVNROOT/ccp/nmr/Nmr.odp" A  U )
-($4 29 @ z8kfsx_-o65_ftli6gtq_-p98 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrCalc" $4 "$CCPN_SVNROOT/ccp/nmr/NmrCalc.odp" A  U )
-($4 30 @ -yk94ms_-e3s_e41656c6_-lll 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrConstraint" $4 "$CCPN_SVNROOT/ccp/nmr/NmrConstraint.odp" A  U )
-($4 31 @ z8kfsx_fb8_g1xcbxen_-p98 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrScreen" $4 "$CCPN_SVNROOT/ccp/nmr/NmrScreen.odp" A  U )
+($4 29 @ z8kfsx_fb8_g1xcbxen_-p98 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrScreen" $4 "$CCPN_SVNROOT/ccp/nmr/NmrScreen.odp" A  U )
+($4 30 @ z8kfsx_-o65_ftli6gtq_-p98 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrCalc" $4 "$CCPN_SVNROOT/ccp/nmr/NmrCalc.odp" A  U )
+($4 31 @ -yk94ms_-e3s_e41656c6_-lll 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrConstraint" $4 "$CCPN_SVNROOT/ccp/nmr/NmrConstraint.odp" A  U )
 ($4 32 @ -yk94ms_-e3s_e41656c6_-hz0 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrReference" $4 "$CCPN_SVNROOT/ccp/nmr/NmrReference.odp" A  U )
 ($4 33 @ -yk94ms_-e3s_e41656c6_-ouq 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrExpPrototype" $4 "$CCPN_SVNROOT/ccp/nmr/NmrExpPrototype.odp" A  U )
 ($4 34 @ -yk94ms_-e3s_e41656c6_-hgs 4 "Logical" $4 "ccp" $4 "nmr" $4 "NmrEntry" $4 "$CCPN_SVNROOT/ccp/nmr/NmrEntry.odp" A  U )
@@ -558,6 +559,7 @@ objectdomain.uml.core.Stereotype-owns $7
 ($4 65 @ -hkpzxr_-cvb_f2ixo80k_-p97 3 "Logical" $4 "molsim" $4 "AnnealProtocol" $4 "$CCPN_SVNROOT/molsim/AnnealProtocol.odp" A  U )
 ($4 66 @ -hkpzxr_-li2_fcvq0su4_-p5d 3 "Logical" $4 "molsim" $4 "Symmetry" $4 "$CCPN_SVNROOT/molsim/Symmetry.odp" A  U )
 ($4 67 @ -hkpzxr_-cvb_f2ixo80k_-p98 2 "Logical" $4 "molsim" $4 "$CCPN_SVNROOT/molsim/molsim.odp" A  U )
+($11 154 @ 0_-fvi_hrnjywg5_-dd0 4 "Logical" $4 "memops" $4 "Implementation" $4 "Token" $11)
 (openDiagrams 2 3)
 (openDiagrams 2 4)
 (openDiagrams 2 5)
@@ -623,16 +625,16 @@ objectdomain.uml.core.Stereotype-owns $7
 (sharedPackages 2 65)
 (sharedPackages 2 66)
 (sharedPackages 2 67)
-(selection 2 21)
-(lockedBy 76 154)
+(selection 2 154)
+(lockedBy 76 155)
 (stereotypeAssn 68 76)
-(lockedBy 68 154)
+(lockedBy 68 155)
 (stereotypeAssn 70 76)
-(lockedBy 70 154)
+(lockedBy 70 155)
 (stereotypeAssn 72 76)
-(lockedBy 72 154)
-(lockedBy 75 154)
-(lockedBy 121 154)
+(lockedBy 72 155)
+(lockedBy 75 155)
+(lockedBy 121 155)
 (stereotypeAssn 151 76)
-(lockedBy 151 154)
-(lockedBy 1 154)
+(lockedBy 151 155)
+(lockedBy 1 155)

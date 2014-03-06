@@ -58,12 +58,9 @@ software development. Bioinformatics 21, 1678-1684.
 """
 
 # repository tags for old version to makec compatibilty for
-#oldVersionTags = ('branch_2_0_3','stable_2_0_4', 'stable_2_0_5', 
-#                  'stable_2_0_6', 'stable_2_0_7', 'stable_2_0_8', 
-#                  'stable_2_0_9', 'stable_2_2_0')
 oldVersionTags = ('2.0.a0', '2.0.a1', '2.0.a2', '2.0.a3', 
                   '2.0.b1', '2.0.b2', '2.0.b3', '2.0.4', '2.0.5', '2.0.6',
-                  '2.1.0', '2.1.1',)
+                  '2.1.0', '2.1.1','2.1.2',)
 
 import time
 

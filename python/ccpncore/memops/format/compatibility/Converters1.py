@@ -45,9 +45,9 @@ automated software development. Bioinformatics 21, 1678-1684.
  
 """
 # imports
-from memops.general.Implementation import ApiError
-from memops.metamodel import ImpConstants
-from memops.general.Constants import currentModelVersion
+from ccpncore.memops.ApiError import ApiError
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.Version import currentModelVersion
 currentVersionStr = str(currentModelVersion)
    
 
@@ -134,7 +134,7 @@ def removeElementName(guid, globalMapping, newElementsByGuid):
   if useObj.__class__.__name__ in ('MetaAttribute', 'MetaRole'):
     
     if (useObj.isAbstract 
-        or (useObj.isDerived and useObj.changeability == ImpConstants.frozen)):
+        or (useObj.isDerived and useObj.changeability == metaConstants.frozen)):
       # These elements have no maps, so nothing to do
       return
       
@@ -321,7 +321,7 @@ def fixExoLinkMap(newGuid, action, prefix, globalMapping, typeName):
   if action == 'skip', enter skip record for guid under (prefix, typeName) name
   """
   
-  from memops.format.xml import XmlGen
+  from ccpncore.memops.format.xml import XmlGen
   
   exoTag = XmlGen.xmlTag(prefix, typeName, var='exo')
   
@@ -366,7 +366,7 @@ def getElementsByGuid(rootPackage):
   NBNB may need version-specific expansion later to handle 
   difficult reference data modifications.
   """
-  from memops.metamodel.MetaModel import makeObjDict
+  from ccpncore.memops.metamodel.MetaModel import makeObjDict
   #
   return makeObjDict(rootPackage, ignoreImplicit=True, crucialOnly=True)
 
@@ -375,7 +375,7 @@ def getCompatibilityModule(fromVersion):
   """
   compModules = ['Minor', 'General', 'MapInfo']
   
-  from memops.general.Version import cmpVersionStrings
+  from ccpncore.Version import cmpVersionStrings
   
   newVersion = currentVersionStr
   
@@ -393,7 +393,7 @@ def getCompatibilityModule(fromVersion):
     return
     
   ss = fromVersion.replace('.', '_')
-  moduleDir = "memops.format.compatibility.%s.v_%s" % (srcDir, ss)
+  moduleDir = "ccpncore.memops.format.compatibility.%s.v_%s" % (srcDir, ss)
   try:
     result = __import__(moduleDir, {}, {}, compModules)
   except ImportError:

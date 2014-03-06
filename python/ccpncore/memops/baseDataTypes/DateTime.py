@@ -48,52 +48,26 @@ software development. Bioinformatics 21, 1678-1684.
 
 ===========================REFERENCE END===============================
 """
-import time
+import datetime
 
-# Time class for use in reworking nthis type.
-
-class Time(float):
-    """Simple class to print time in ascii, represented as floats as in time.time()"""
-    day = 24*3600.0
-    week = 7*day
-    year = 365*day
-
-    def __str__(self):
-        """Print as a string"""
-        # equivalent to time.asctime(time.localtime(self))
-        return time.ctime(self)
-
-    def __repr__(self):
-        return 'Time(%s)' % float.__repr__(self)
-
-    @staticmethod
-    def fromString(string):
-        """Make from a string, inverse of __str__"""
-        try:
-          return Time(string)
-        except ValueError:
-          return Time(time.mktime(time.strptime(string)))
-
-    @staticmethod
-    def now():
-        return Time(time.time())
-#end class
 
 
 # corresponding python type
-PythonType = Time
+PythonType = datetime.datetime
 
 # Python types acceptable as input instead of main type
-compatibleTypes = (str, float)
+compatibleTypes = (int, float)
 
 # Special isValid function
 # None
 
 # conversion to String
-toString  = str
+def toString(value:datetime.datetime) -> str:
+  return repr(value.timestamp())
 
 # conversion from string
-fromString = Time.fromString
+def fromString(ss:str) -> datetime.datetime:
+  return datetime.datetime.fromtimestamp(float(ss))
 
 # casting/creation function.
-create = Time
+create = datetime.datetime.fromtimestamp

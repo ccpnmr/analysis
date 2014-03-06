@@ -74,10 +74,11 @@ versionMap = {
  '2.0.4' : ('cvs', ('stable_2_2_0',) ),
  '2.0.b3': ('svn', ('tags', 'test2.2.2_stable_A') ),
  '2.0.5' : ('svn', ('branches', 'model_2_0_5')),  # NB NOT the same as branch model2_0_5 (obsolete)
+ '2.0.6' : ('svn', ('branches', 'stable_20131212')),
  '2.1.0' : ('svn', ('tags', 'model_2_1_0') ),
  '2.1.1' : ('svn', ('tags', 'model_2_1_1') ),  # NBNB present only on rhf22 computer. FIXNE!
  #'jmci' : ('svn', ('tags', 'jmci') ),   # Temporary - JMCI python versions
- 'merge' : ('svn', ('branches', 'merge_2_1_2')),  # Temporary locatoin for 2.1.2 stable/trunk merge
+ 'merge' : ('svn', ('branches', 'merge_2_1_2')),  # Temporary location for 2.1.2 stable/trunk merge
  
  # Current stable/trunk versions
  's'     : ('svn', ('branches', 'stable',) ),       # stable
@@ -85,8 +86,8 @@ versionMap = {
  #'marc'     : ('svn', ('branches', 'FEmarcvDijk',) ),       # Marc new xml model version
 }
 # Synonyms for stable/trunk, used by backwards compatibility code
-versionMap['2.0.6'] = versionMap['s']
-versionMap['2.1.2'] = versionMap['t']
+versionMap['2.1.2'] = versionMap['s']
+#versionMap['2.1.2'] = versionMap['t']
 
 cvsWorkingDir = 'ccpn'
 
@@ -167,7 +168,8 @@ currentModelVersion = Version(3, 0, 'a', 1,'', 'DataModel')
 #
 #def findVersion(key):
 #  """Find version given key."""
-#
+#'2.0.6' : ('svn', ('branches', 'stable_20131212')),
+
 #  return versionDict.get(key)
 
 def getVersion(s=None, timestamp = None, name = None):

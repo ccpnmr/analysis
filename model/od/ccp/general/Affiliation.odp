@@ -31,15 +31,15 @@ objectdomain.uml.core.Stereotype-owns $18
 ($3 3 < 0_-fvi_hrnjywg5_-osu "Person" 2
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-osu")
-(bbx 490 200 150 170))
+(bbx 490 200 150 210))
 ($3 4 < 0_-fvi_hrnjywg5_-ost "Organisation" 2
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-ost")
-(bbx 900 520 150 240))
+(bbx 900 520 150 290))
 ($3 5 < 0_-fvi_hrnjywg5_-oss "Citation" 2
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-oss")
-(bbx 900 60 190 240))
+(bbx 900 60 190 290))
 ($4 6 < 0_-fvi_hrnjywg5_-osr "" 2
 (toMultiplicityPosition 645 275)
 (toRolePosition 655 275)
@@ -51,14 +51,14 @@ objectdomain.uml.core.Stereotype-owns $18
 ($3 7 < 0_-fvi_hrnjywg5_-osq "Entry" 2
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-osq")
-(bbx 140 130 210 190))
+(bbx 140 130 210 230))
 ($3 8 < 0_-fvi_hrnjywg5_-osp "AbstractInstrument" 2
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-osp")
-(bbx 820 340 280 140))
+(bbx 820 340 280 170))
 ($4 9 < 0_-fvi_hrnjywg5_-oso "" 2
 (toMultiplicityPosition 545 255)
-(toRolePosition 650 340)
+(toRolePosition 650 360)
 (uid "0_-fvi_hrnjywg5_-oso")
 (points 820 360 640 360)
 (fromMultiplicityPosition 725 1150))
@@ -88,53 +88,53 @@ objectdomain.uml.core.Stereotype-owns $18
 ($3 13 < 0_-fvi_hrnjywg5_-osk "PersonTitle" 2
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-osk")
-(bbx 1120 140 80 60))
+(bbx 1120 140 80 70))
 ($3 14 < 0_-fvi_hrnjywg5_-osj "FamilyTitle" 2
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-osj")
-(bbx 1120 30 80 60))
+(bbx 1120 30 80 70))
 ($3 15 < 0_-fvi_hrnjywg5_-osi "PersonInGroup" 2
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-osi")
-(bbx 290 350 150 170))
+(bbx 290 350 150 210))
 ($4 16 < 0_-fvi_hrnjywg5_-osh "" 2
-(toMultiplicityPosition 445 345)
+(toMultiplicityPosition 445 365)
 (uid "0_-fvi_hrnjywg5_-osh")
 (points 490 365 440 365)
 (fromMultiplicityPosition 475 370))
 ($3 17 < 0_-fvi_hrnjywg5_-osg "Group" 2
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-osg")
-(bbx 400 610 90 90))
+(bbx 400 610 90 110))
 ($4 18 < 0_-fvi_hrnjywg5_-osf "" 2
 (toMultiplicityPosition 495 660)
 (uid "0_-fvi_hrnjywg5_-osf")
 (points 900 685 490 685)
 (fromMultiplicityPosition 875 700))
 ($4 19 < 0_-fvi_hrnjywg5_-ose "" 2
-(toMultiplicityPosition 450 535)
+(toMultiplicityPosition 450 575)
 (uid "0_-fvi_hrnjywg5_-ose")
-(points 435 610 435 520)
+(points 435 610 435 560)
 (fromMultiplicityPosition 415 585))
 ($4 20 < 0_-fvi_hrnjywg5_-osd "" 2
 (toRolePosition 985 500)
 (uid "0_-fvi_hrnjywg5_-osd")
-(points 975 480 975 520)
+(points 975 510 975 520)
 (fromMultiplicityPosition 720 1260))
 ($4 21 < 0_-fvi_hrnjywg5_-osc "" 2
 (toMultiplicityPosition 380 675)
 (toRolePosition 305 635)
 (uid "0_-fvi_hrnjywg5_-osc")
 (points 140 320 40 320 40 660 400 660)
-(fromRolePosition 70 300)
+(fromRolePosition 70 320)
 (fromMultiplicityPosition 130 325))
 ($4 22 < 0_-fvi_hrnjywg5_-osb "" 2
-(toMultiplicityPosition 125 165)
+(toMultiplicityPosition 125 185)
 (toRolePosition 20 190)
 (uid "0_-fvi_hrnjywg5_-osb")
 (points 940 60 940 35 80 35 80 185 140 185)
 (fromRolePosition 830 40)
-(toOrderedPosition 55 165))
+(toOrderedPosition 55 185))
 ($4 23 < 0_-fvi_hrnjywg5_-osa "" 2
 (toMultiplicityPosition 180 105)
 (toRolePosition 90 95)
@@ -144,12 +144,12 @@ objectdomain.uml.core.Stereotype-owns $18
 (fromMultiplicityPosition 885 85))
 ($3 24 < 0_-fvi_hrnjywg5_-os9 "AffiliationStore" 2
 (uid "0_-fvi_hrnjywg5_-os9")
-(bbx 1120 300 110 60))
+(bbx 1120 300 110 70))
 ($4 25 < 0_-fvi_hrnjywg5_-os8 "" 2
 (toMultiplicityPosition 1055 550)
 (uid "0_-fvi_hrnjywg5_-os8")
-(points 1140 360 1140 545 1050 545)
-(fromMultiplicityPosition 1155 375))
+(points 1140 370 1140 545 1050 545)
+(fromMultiplicityPosition 1155 385))
 ($4 26 < 0_-fvi_hrnjywg5_-os7 "" 2
 (toMultiplicityPosition 645 320)
 (uid "0_-fvi_hrnjywg5_-os7")
@@ -158,14 +158,14 @@ objectdomain.uml.core.Stereotype-owns $18
 ($4 27 < 0_-fvi_hrnjywg5_-os6 "" 2
 (toRolePosition 445 475)
 (uid "0_-fvi_hrnjywg5_-os6")
-(points 510 370 510 470 440 470))
+(points 510 410 510 470 440 470))
 ($3 28 < 0_-fvi_hrnjywg5_-os5 "MimeTypeDataStore" 2
 (uid "0_-fvi_hrnjywg5_-os5")
-(bbx 60 540 290 60))
+(bbx 60 560 290 70))
 ($4 29 < 0_-fvi_hrnjywg5_-os4 "" 2
-(toRolePosition 140 520)
+(toRolePosition 140 540)
 (uid "0_-fvi_hrnjywg5_-os4")
-(points 290 485 190 485 190 540)
+(points 290 485 190 485 190 560)
 (fromRolePosition 185 455)
 (fromMultiplicityPosition 280 490))
 ($2 30 < 0_-fvi_hrnjywg5_-os3 "_Affiliation" 1

@@ -2293,9 +2293,8 @@ require some code modifications.
     # Rasmus 29/1/09 - remove useless empty dicts NBNB
     # NB delayDataDict is also used for backwards compatibility.
     # It should be possible to get the improvement also when upgrading,
-    # but that would require debuggnig the compatibility scripts.
-    # NBNB TBD  At the next major version upgrade 
-    # this should be changed to plain self.elseIf()
+    # but that would require debugging the compatibility scripts.
+    # NBNB TODO  At the next major version upgrade this should be changed to plain self.elseIf()
     tt = self.dictInterfaceType(self.stringVarType, self.listInterfaceType())
     ss =  self.getDictEntry('delayDataDict', self.streamObjDictKey('xx', True),
                             keyIsMandatory=True)

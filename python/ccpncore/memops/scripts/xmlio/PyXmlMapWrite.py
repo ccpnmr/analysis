@@ -210,7 +210,7 @@ def getGlobalMap(oldVersionStr=None):
       self.write("""  
     # adjust Io map for compatibility considerations
     if oldVersionStr != newVersionStr:
-      from ccpncore.memops.format.compatibility.part1.Converters1 import modifyIoMap
+      from ccpncore.memops.format.compatibility.Converters1 import modifyIoMap
       # versions are different - compatibility needed
       modifyIoMap(oldVersionStr, versionMapping)
   #
@@ -563,7 +563,7 @@ for event, elem in ElementTree.iterparse(stream, events=("start", "end")):
   # implements XmlMapWrite
   def streamDoCompatibility(self):
 
-    self.writeOne('from ccpncore.memops.format.compatibility.part1 import Converters1')
+    self.writeOne('from ccpncore.memops.format.compatibility import Converters1')
     self.writeOne('Converters1.minorPostProcess(fileVersion, result, delayDataDict, objectDict, mapping, topObjElem)')
 
   ###########################################################################

@@ -217,8 +217,8 @@ if (repository in activeRepositories and len(activeRepositories) &lt;= 1
     and not self.isDeleted):
     raise ApiError("%s: cannot remove TopObject from last repository %s" % (self, repository))
 
-from memops.format.xml import Util as xmlUtil
-fileLocation = xmlUtil.findTopObjectPath(repository.url.getDataLocation(), self)
+from ccpncore.util import ApiPath
+fileLocation = ApiPath.findTopObjectPath(repository.url.getDataLocation(), self)
 import os
 try:
   os.remove(fileLocation)
@@ -308,7 +308,7 @@ if repository.format == 'xml' and repository.url.protocol == 'file':
   # must be done before saving
   activeRepositories = self.activeRepositories
 
-  from memops.format.xml import XmlIO
+  from ccpncore.memops.format.xml import XmlIO
   XmlIO.save(repository.url.getDataLocation(), self)
 
   if repository not in activeRepositories:

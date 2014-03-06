@@ -37,12 +37,12 @@ def makeUpgrade(oldTag, curTopPackage=None, modelPortal=None,
   """ Make upgrader code from 'oldTag' version to current
   Will look for the old model using Version.getRepositoryDir(tag)
   and place the compatibility code in e.g.
-  memops/format/compatibility/upgrade/v_2_0_3
-  memops/format/compatibility/downgrade/v_2_2_1
+  ccpncore/memops/format/compatibility/upgrade/v_2_0_3
+  ccpncore/memops/format/compatibility/downgrade/v_2_2_1
   """
   
-  compDataDir = 'python/memops/format/compatibility/'
-  infoMod = "memops.format.compatibility."
+  compDataDir = 'python/ccpncore/memops/format/compatibility/'
+  infoMod = "ccpncore.memops.format.compatibility."
   if infoFileName is None:
     infoFileName = 'MapInfo.py'
   

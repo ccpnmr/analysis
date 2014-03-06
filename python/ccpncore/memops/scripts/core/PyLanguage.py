@@ -5,7 +5,7 @@ import os
 
 from ccpncore.memops.metamodel.MetaModel import MemopsError
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.memops.metamodel TextWriter
+from ccpncore.memops.metamodel import TextWriter
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.memops.scripts.core import LanguageInterface
 

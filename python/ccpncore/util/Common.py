@@ -4,6 +4,7 @@
 __author__ = 'rhf22'
 
 import os
+import sys
 import json
 
 from ccpncore.util import Path
@@ -100,8 +101,12 @@ def getConfigParameter(name):
   """get configuration parameter, from reading configuration file
   """
 
-  dd = json.load(open(Path.joinPath(Path.getTopDirectory(),metaConstants.configFilePath)))
-  return dd.get(name)
+  file = Path.joinPath(Path.getTopDirectory(),metaConstants.configFilePath)
+  print ('###', file)
+  dd = json.load(open(file))
+  print ('###', list(dd.keys()))
+  return dd[
+    'configuration'].get(name)
 
 
 def isWindowsOS():

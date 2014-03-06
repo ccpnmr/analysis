@@ -102,7 +102,7 @@ and contains original contributions embedded in the framework
     <target>www.ccpn.ac.uk_Fogh_2007-10-11-15:05:49_00001</target>
     <codeStubs>
       <item tag="java">result = memops.format.xml.Io.loadFromFile(this, filePath);</item>
-      <item tag="python">from memops.format.xml import XmlIO
+      <item tag="python">from ccpncore.memops.format.xml import XmlIO
 result = XmlIO.loadFromFile(self, filePath)
 # set to modified, as the loaded version may not come from the topmost repository
 result.__dict__['isModified'] = True
@@ -193,8 +193,8 @@ if packageName == 'memops.Implementation':
     raise ApiError("refreshTopObjects not allowed for memops.Implementation")
 
 import os, os.path
-from memops.format.xml import XmlIO
-from memops.format.xml import Util as xmlUtil
+from ccpncore.memops.format.xml import XmlIO
+from ccpncore.util import ApiPath
 
 topObjects = self.__dict__['topObjects']
 ff = self.findFirstPackageLocator
@@ -210,9 +210,9 @@ for repository in repositories:
   if not os.path.isdir(fileLocation):
     raise ApiError("%s is not a directory" % fileLocation)
   
-  fileSuffix = xmlUtil.fileSuffix
-  lenSuffix = xmlUtil.lenFileSuffix
-  sep = xmlUtil.keySep
+  fileSuffix = ApiPath.fileSuffix
+  lenSuffix = ApiPath.lenFileSuffix
+  sep = ApiPath.keySep
   for filename in os.listdir(fileLocation):
 
     if filename.startswith('.'):

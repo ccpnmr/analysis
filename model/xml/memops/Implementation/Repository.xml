@@ -111,7 +111,7 @@ else
 protocol = url.protocol
 
 if protocol == 'file':
-  from memops.universal import Io as uniIo
+  from ccpncore.util import Path
   result = Path.joinPath(url.getDataLocation(), *packageName.split('.'))
 
 else:

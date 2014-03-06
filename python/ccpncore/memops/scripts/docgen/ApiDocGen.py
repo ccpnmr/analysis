@@ -56,7 +56,8 @@ software development. Bioinformatics 21, 1678-1684.
 import os
 import string
 
-from ccpncore.memops.metamodel import MetaModel, ModelTraverse
+from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel.ModelTraverse import ModelTraverse
 from ccpncore.memops.metamodel import OpTypes
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.memops.metamodel import Constants as metaConstants

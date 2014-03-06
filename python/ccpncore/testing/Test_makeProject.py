@@ -43,6 +43,8 @@ def makeProject():
 
     chemComp = project.findFirstChemComp(molType='protein', ccpCode=ccpCode)
 
+    print ('###', seqPosition, ccpCode, chemComp)
+
     if seqPosition == 0:
       linking = 'start'
     elif seqPosition == len(exampleSequence) - 1:

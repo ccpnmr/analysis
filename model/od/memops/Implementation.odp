@@ -1733,7 +1733,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "  # must be done before saving"
 "  activeRepositories = self.activeRepositories"
 ""
-"  from memops.format.xml import XmlIO"
+"  from ccpncore.memops.format.xml import XmlIO"
 "  XmlIO.save(repository.url.getDataLocation(), self)"
 ""
 "  if repository not in activeRepositories:"
@@ -1816,8 +1816,8 @@ objectdomain.uml.core.Stereotype-owns $19
 "    and not self.isDeleted):"
 "    raise ApiError(\"%s: cannot remove TopObject from last repository %s\" % (self, repository))"
 ""
-"from memops.format.xml import Util as xmlUtil"
-"fileLocation = xmlUtil.findTopObjectPath(repository.url.getDataLocation(), self)"
+"from ccpncore.util import ApiPath"
+"fileLocation = ApiPath.findTopObjectPath(repository.url.getDataLocation(), self)"
 "import os"
 "try:"
 "  os.remove(fileLocation)"
@@ -3151,7 +3151,7 @@ objectdomain.uml.core.Stereotype-owns $19
 "protocol = url.protocol"
 ""
 "if protocol == 'file':"
-"  from memops.universal import Io as uniIo"
+"  from ccpncore.util import Path"
 "  result = Path.joinPath(url.getDataLocation(), *packageName.split('.'))"
 ""
 "else:"
@@ -3481,8 +3481,8 @@ objectdomain.uml.core.Stereotype-owns $19
 "    raise ApiError(\"refreshTopObjects not allowed for memops.Implementation\")"
 ""
 "import os, os.path"
-"from memops.format.xml import XmlIO"
-"from memops.format.xml import Util as xmlUtil"
+"from ccpncore.memops.format.xml import XmlIO"
+"from ccpncore.util import ApiPath"
 ""
 "topObjects = self.__dict__['topObjects']"
 "ff = self.findFirstPackageLocator"
@@ -3498,9 +3498,9 @@ objectdomain.uml.core.Stereotype-owns $19
 "  if not os.path.isdir(fileLocation):"
 "    raise ApiError(\"%s is not a directory\" % fileLocation)"
 "  "
-"  fileSuffix = xmlUtil.fileSuffix"
-"  lenSuffix = xmlUtil.lenFileSuffix"
-"  sep = xmlUtil.keySep"
+"  fileSuffix = ApiPath.fileSuffix"
+"  lenSuffix = ApiPath.lenFileSuffix"
+"  sep = ApiPath.keySep"
 "  for filename in os.listdir(fileLocation):"
 ""
 "    if filename.startswith('.'):"
@@ -3625,7 +3625,7 @@ objectdomain.uml.core.Stereotype-owns $19
 ($9 603 < 0_-fvi_hrnjywg5_-d7v "code:python" 594
 (name "code:python"
 )
-(value "from memops.format.xml import XmlIO"
+(value "from ccpncore.memops.format.xml import XmlIO"
 "result = XmlIO.loadFromFile(self, filePath)"
 "# set to modified, as the loaded version may not come from the topmost repository"
 "result.__dict__['isModified'] = True"
@@ -4159,14 +4159,14 @@ objectdomain.uml.core.Stereotype-owns $19
 ($3 687 < 0_-fvi_hrnjywg5_-d5j "FileStorageObject" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5j")
-(bbx 250 350 190 290))
+(bbx 250 380 160 290))
 ($3 688 < 0_-fvi_hrnjywg5_-d5i "UrlProtocol" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5i")
 (bbx 380 630 80 70))
 ($4 689 < 0_-fvi_hrnjywg5_-d5h "" 674
 (uid "0_-fvi_hrnjywg5_-d5h")
-(points 830 365 440 365))
+(points 830 395 410 395))
 ($3 690 < 0_-fvi_hrnjywg5_-d5g "StorageFormat" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5g")
@@ -4188,15 +4188,15 @@ objectdomain.uml.core.Stereotype-owns $19
 ($3 695 < 0_-fvi_hrnjywg5_-d5b "Repository" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d5b")
-(bbx 540 480 170 130))
+(bbx 540 460 170 130))
 ($6 696 < 0_-fvi_hrnjywg5_-d5a "" 674
-(toMultiplicityPosition 565 460)
-(toRolePosition 565 440)
+(toMultiplicityPosition 570 440)
+(toRolePosition 570 420)
 (uid "0_-fvi_hrnjywg5_-d5a")
-(points 595 360 595 480)
-(fromRolePosition 575 390)
-(toOrderedPosition 600 460)
-(fromMultiplicityPosition 605 365))
+(points 600 360 600 460)
+(fromRolePosition 580 390)
+(toOrderedPosition 605 440)
+(fromMultiplicityPosition 610 365))
 ($3 697 < 0_-fvi_hrnjywg5_-d59 "DataObject" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d59")
@@ -4215,10 +4215,10 @@ objectdomain.uml.core.Stereotype-owns $19
 (points 830 330 690 330)
 (fromMultiplicityPosition 805 335))
 ($6 701 < 0_-fvi_hrnjywg5_-d55 "" 674
-(toMultiplicityPosition 715 500)
-(toRolePosition 715 495)
+(toMultiplicityPosition 725 490)
+(toRolePosition 725 485)
 (uid "0_-fvi_hrnjywg5_-d55")
-(points 840 430 840 495 710 495)
+(points 840 430 840 485 720 485)
 (fromMultiplicityPosition 820 435))
 ($3 702 < 0_-fvi_hrnjywg5_-d54 "ImplementationObject" 674
 (uid "0_-fvi_hrnjywg5_-d54")
@@ -4238,7 +4238,7 @@ objectdomain.uml.core.Stereotype-owns $19
 (points 585 290 585 240))
 ($4 707 < 0_-fvi_hrnjywg5_-d4z "" 674
 (uid "0_-fvi_hrnjywg5_-d4z")
-(points 695 480 695 240))
+(points 700 460 700 240))
 ($4 708 < 0_-fvi_hrnjywg5_-d4y "" 674
 (uid "0_-fvi_hrnjywg5_-d4y")
 (points 1205 170 1205 130))
@@ -4298,11 +4298,11 @@ objectdomain.uml.core.Stereotype-owns $19
 (uid "0_-fvi_hrnjywg5_-d4k")
 (points 830 305 690 305))
 ($6 723 < 0_-fvi_hrnjywg5_-d4j "" 674
-(toMultiplicityPosition 530 590)
-(toRolePosition 475 595)
+(toMultiplicityPosition 520 580)
+(toRolePosition 445 610)
 (uid "0_-fvi_hrnjywg5_-d4j")
-(points 440 590 540 590)
-(toOrderedPosition 470 590))
+(points 410 605 540 605)
+(toOrderedPosition 470 580))
 ($6 724 < 0_-fvi_hrnjywg5_-d4i "" 674
 (uid "0_-fvi_hrnjywg5_-d4i")
 (points 830 275 140 275)
@@ -4315,7 +4315,7 @@ objectdomain.uml.core.Stereotype-owns $19
 (points 60 360 60 500))
 ($4 727 < 0_-fvi_hrnjywg5_-d4f "" 674
 (uid "0_-fvi_hrnjywg5_-d4f")
-(points 160 525 250 525))
+(points 160 555 250 555))
 ($3 728 < 0_-fvi_hrnjywg5_-d4e "ComplexDataType" 674
 (autoSizeToFit true)
 (uid "0_-fvi_hrnjywg5_-d4e")

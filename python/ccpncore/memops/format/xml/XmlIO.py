@@ -126,10 +126,11 @@ CCPN project: An interim report on a data model for the NMR community
  
 """
 
-import os, gc
+import os
+import gc
 
 from ccpncore.memops.ApiError import ApiError
-from ccpncore.memops.format.xml import Util as xmlUtil
+from ccpncore.util import ApiPath
 
 implPrefix = 'IMPL'
 originatorString = "CCPN Python XmlIO"
@@ -155,7 +156,7 @@ xmlFooter = """
 def save(repositoryPath, topObject, mapping=None, 
          comment=None, simplified=True, compact=True, expanded=False): 
   
-  fileLocation = xmlUtil.findTopObjectPath(repositoryPath, topObject)
+  fileLocation = ApiPath.findTopObjectPath(repositoryPath, topObject)
   
   if os.path.exists(fileLocation):
     # File that fits guid already exists - overwrite it
@@ -181,7 +182,7 @@ def saveToStream(stream, topObject, mapping=None,
   """ wrapper function, to handle garbage collection for Xml export.
   """
    
-  from memops.xml import Implementation
+  from ccpncore.xml.memops import Implementation
    
   if gc.isenabled():
     gc.disable()
@@ -198,14 +199,14 @@ def saveToStream(stream, topObject, mapping=None,
 def loadProject(repositoryPath, projectName, partialLoad=False):
   """ Load project by projectName
   """
-  filePath = xmlUtil.getProjectFile(repositoryPath, projectName)
+  filePath = ApiPath.getProjectFile(repositoryPath, projectName)
   return loadProjectFile(filePath, partialLoad=partialLoad)
 
 
 def loadProjectFile(filePath, partialLoad=False):
   """ Load project by file name
   """
-  topObjId = xmlUtil.getTopObjIdFromFileName(filePath, mustBeMultipart=False)
+  topObjId = ApiPath.getTopObjIdFromFileName(filePath, mustBeMultipart=False)
   
   filePath = os.path.abspath(filePath)
   lowestDir = os.path.dirname(filePath)
@@ -227,8 +228,8 @@ def loadProjectFile(filePath, partialLoad=False):
 def loadTopObject(repositoryPath, topObject):
   """ Load given topObject 
   """
-  filePath = xmlUtil.findTopObjectPath(repositoryPath, topObject)
-  topObjId = xmlUtil.getTopObjIdFromFileName(filePath, mustBeMultipart=True)
+  filePath = ApiPath.findTopObjectPath(repositoryPath, topObject)
+  topObjId = ApiPath.getTopObjIdFromFileName(filePath, mustBeMultipart=True)
   
   return loadFromStream(open(filePath), topObjId=topObjId, topObject=topObject)
 
@@ -242,7 +243,7 @@ def loadFromFile(memopsRoot, filePath, partialLoad=False):
    
   # load file
   try:
-    topObjId = xmlUtil.getTopObjIdFromFileName(filePath, mustBeMultipart=True)
+    topObjId = ApiPath.getTopObjIdFromFileName(filePath, mustBeMultipart=True)
     topObject = loadFromStream(stream, topObject=memopsRoot,
                                      topObjId=topObjId,
                                      partialLoad=partialLoad)
@@ -255,7 +256,7 @@ def loadFromFile(memopsRoot, filePath, partialLoad=False):
 def loadFromStream(stream, topObjId=None, topObject=None, partialLoad=False):
   """ Wrapper function, to handle garbage collection for Xml import.
   """
-  from memops.xml import Implementation
+  from ccpncore.xml.memops import Implementation
   if gc.isenabled():
     gc.disable()
     try:

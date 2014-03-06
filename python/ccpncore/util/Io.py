@@ -5,11 +5,13 @@ __author__ = 'rhf22'
 
 import os
 import shutil
+
 from ccpncore.api.memops import  Implementation
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.util import Path
+from ccpncore.util import ApiPath
 from ccpncore.util import Common as commonUtil
-from ccpncore.memops.format.xml import Util as xmlUtil
+
 
 printWarning = None
 
@@ -135,7 +137,7 @@ def loadProject(path:str, projectName:str=None, showWarning:"function"=None, ask
   if not os.path.isdir(path):
     raise IOError('path "%s" is not a directory' % path)
 
-  projectFile = xmlUtil.getProjectFile(path, projectName)
+  projectFile = ApiPath.getProjectFile(path, projectName)
 
   if projectName:
     # projectName was specified so projectFile better exist
@@ -144,7 +146,7 @@ def loadProject(path:str, projectName:str=None, showWarning:"function"=None, ask
   else:
     # projectName was not specified so default projectFile might not exist
     if not os.path.exists(projectFile):
-      projectFiles = xmlUtil.getPossibleProjectFiles(path)
+      projectFiles = ApiPath.getPossibleProjectFiles(path)
 
       if len(projectFiles) == 0:
         raise IOError('"%s" contains no project file' % path)
@@ -160,7 +162,7 @@ def loadProject(path:str, projectName:str=None, showWarning:"function"=None, ask
     # TBD: should projectName be based on projectFile or on path???
     # the way it is set here do not need to change project.name
     # but if you used the path then you would need to change it
-    projectName = xmlUtil.getTopObjIdFromFileName(projectFile)
+    projectName = ApiPath.getTopObjIdFromFileName(projectFile)
 
   # doing the loadProject twice has a bit of an overhead, but not much
 
@@ -184,7 +186,7 @@ def loadProject(path:str, projectName:str=None, showWarning:"function"=None, ask
       return isGeneralDataWriteable(generalDataRepository)
     return True
 
-  if project is not None and (not xmlUtil.areAllTopObjectsPresent(project) or
+  if project is not None and (not ApiPath.areAllTopObjectsPresent(project) or
       not isGeneralDataOk(project)):
     # if not all loaded (shell) TopObjects can be found, try again
     project = None
@@ -378,7 +380,7 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
   # if newPath same as oldPath, check if newProjectName already exists if it's not same as oldProjectName
   if newPath == oldPath:
     if newProjectName != oldProjectName:
-      location = xmlUtil.getTopObjectPath(project)
+      location = ApiPath.getTopObjectPath(project)
       if os.path.exists(location):
         answer = checkRemoveIfExists(location, removeExisting, showYesNo)
         if answer is None:
@@ -555,7 +557,7 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
         try:
           topObject.save()
         except:
-          location = xmlUtil.getTopObjectPath(topObject)
+          location = ApiPath.getTopObjectPath(topObject)
           print('Exception working on topObject %s, file %s' % (topObject, location))
           raise
       # be safe and do below in case new modifications after
@@ -579,7 +581,7 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
       for topObject in badTopObjects:
         print()
         print('%s, path:' % topObject)
-        print(xmlUtil.getTopObjectPath(topObject))
+        print(ApiPath.getTopObjectPath(topObject))
       return False
 
     return True

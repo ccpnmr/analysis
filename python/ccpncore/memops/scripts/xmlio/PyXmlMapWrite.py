@@ -162,7 +162,7 @@ class PyXmlMapWrite(PyLanguage, PyType, XmlMapWrite):
       
       self.writeNewline()
       self.writeComment('ApiError import')
-      self.writeOne('from ccpncore.memops.Constants import ApiError')
+      self.writeOne('from ccpncore.memops.ApiError import ApiError')
       self.writeNewline()
 
       # set up boolean converters
@@ -210,7 +210,7 @@ def getGlobalMap(oldVersionStr=None):
       self.write("""  
     # adjust Io map for compatibility considerations
     if oldVersionStr != newVersionStr:
-      from memops.format.compatibility.part1.Converters1 import modifyIoMap
+      from ccpncore.memops.format.compatibility.part1.Converters1 import modifyIoMap
       # versions are different - compatibility needed
       modifyIoMap(oldVersionStr, versionMapping)
   #
@@ -563,7 +563,7 @@ for event, elem in ElementTree.iterparse(stream, events=("start", "end")):
   # implements XmlMapWrite
   def streamDoCompatibility(self):
 
-    self.writeOne('from memops.format.compatibility.part1 import Converters1')
+    self.writeOne('from ccpncore.memops.format.compatibility.part1 import Converters1')
     self.writeOne('Converters1.minorPostProcess(fileVersion, result, delayDataDict, objectDict, mapping, topObjElem)')
 
   ###########################################################################
@@ -831,7 +831,7 @@ for ii, vv in enumerate(val):
     self.write('''
 from ccpncore.memops.Version import currentModelVersion
 newVersionStr = str(currentModelVersion)
-from memops.xml.Implementation import getGlobalMap
+from ccpncore.xml.memops.Implementation import getGlobalMap
  
 globalMapping = getGlobalMap(fileVersion)
 

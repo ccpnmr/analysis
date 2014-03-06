@@ -62,8 +62,10 @@ class PyFileApiGen(FileApiGen, PyApiGen):
                         self.toLiteral('memopsRoot'), 'self')
 
     # Add _lastId attribute to topObject
-    #if inClass is inClass.container.topObjectClass
-
+    if inClass is inClass.container.topObjectClass:
+      self.setDictEntry(self.getDataDict(self.varNames['self']),
+                        self.toLiteral(metaConstants.lastid_attribute),
+                        self.toLiteral(0))
 
     self.write("try:")
     self.indent += self.INDENT
@@ -472,7 +474,7 @@ ll.sort()
       
       self.write("""
 from ccpncore.util import Path
-from ccpncpre.util.Common import getConfigParameter
+from ccpncore.util.Common import getConfigParameter
 import os, os.path
 rootDir = Path.normalisePath(os.getcwd())
 

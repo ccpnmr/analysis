@@ -57,6 +57,9 @@ import logging
 import os
 import time
 
+# this code assumes we only have one project open at a time
+# when a new logger is created the handlers for the old one are closed
+
 MAX_LOG_FILE_DAYS = 7
 
 logger = None
@@ -73,9 +76,12 @@ def createLogger(loggerName, project, stream=None, level=logging.WARNING, mode='
 
   global logger
 
-  assert not logger, 'for now only one logger can be created'
-
   assert mode in ('a', 'w'), 'for now mode must be "a" or "w"'
+
+  if logger:
+    # there seems no way to close the logger itself
+    for handler in logger.handlers:
+      handler.close()
 
   repository = project.findFirstRepository(name='userData')
   if not repository:

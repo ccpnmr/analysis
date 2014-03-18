@@ -60,11 +60,24 @@ import time
 # this code assumes we only have one project open at a time
 # when a new logger is created the handlers for the old one are closed
 
+# note that cannot do logger = getLogger() at top of a module because it almost certainly will not be what one wants
+# instead one has to do it at runtime, e.g. in a constructor inside a class or in a non-class function
+
+# in general the application should call createLogger() before anyone calls getLogger()
+# but getLogger() can be called first for "short term" or "testing" use
+
 MAX_LOG_FILE_DAYS = 7
 
 logger = None
 
+DEFAULT_LOGGER_NAME = 'defaultLogger'
+
 def getLogger():
+
+  global logger
+
+  if not logger:
+    logger = logging.getLogger(DEFAULT_LOGGER_NAME)
 
   return logger
 

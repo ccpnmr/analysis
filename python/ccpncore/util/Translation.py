@@ -19,7 +19,7 @@ translationDict = {}  # maps from default language text to translated text
 translationModuleSet = set()  # keeps track of which translation modules have been loaded
 
 def setTranslationLanguage(language=defaultLanguage, debug=False):
-  # Set the translation language
+  """ Set the translation language """
   
   global translationLanguage, translationDict, translationDebug, translationModuleSet
 

@@ -6,12 +6,18 @@ HALIGN_DICT = {
   'left': QtCore.Qt.AlignLeft,
   'right': QtCore.Qt.AlignRight,
   'center': QtCore.Qt.AlignHCenter,
+  'l': QtCore.Qt.AlignLeft,
+  'r': QtCore.Qt.AlignRight,
+  'c': QtCore.Qt.AlignHCenter,
 }
 
 VALIGN_DICT = {
   'top': QtCore.Qt.AlignTop,
   'bottom': QtCore.Qt.AlignBottom,
   'center': QtCore.Qt.AlignVCenter,
+  't': QtCore.Qt.AlignTop,
+  'b': QtCore.Qt.AlignBottom,
+  'c': QtCore.Qt.AlignVCenter,
 }
 
 POLICY_DICT = {

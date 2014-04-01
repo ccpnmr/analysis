@@ -62,6 +62,10 @@ class Color(str):
     self.a = a
     self.name = name
     
+  def rgba(self):
+
+    return (self.r, self.g, self.b, self.a)
+
   def __repr__(self):
 
     return self.name

@@ -53,7 +53,6 @@ software development. Bioinformatics 21, 1678-1684.
 
 """
 
-import time
 import os
 # import functools
 
@@ -94,50 +93,47 @@ cvsWorkingDir = 'ccpn'
 svnWorkingDir = 'work'
 
 # @functools.total_ordering
-class Version:
-
-  def __init__(self, major=0, minor=0, level='', release=0, 
-               timestamp=None, name='Test'):
-
-    if timestamp is None:
-      timestamp = time.ctime()
-
-    self.major = int(major)
-    self.minor = int(minor)
-    self.level = level
-    self.release = int(release)
-    self.timestamp = timestamp
-    self.name = name
-
-  def __repr__(self):
-    return '%s.%s.%s%s' % (self.major, self.minor, self.level, self.release)
-
-  def __eq__(self, other):
-    return (self.__class__ is other.__class__ and
-            (self.major, self.minor, self.level, self.relese) ==
-            (other.major, other.minor, other.level, other.relese))
+class Version(str):
 
   def __lt__(self, other):
-    
-    if self.__class__ is other.__class__:
-      # NBNB the 'self.level or "~~~"' is to make empty strings compare highest
-      return ((self.major, self.minor, self.level or '~~~', self.relese) <
-              (other.major, other.minor, other.level or '~~~', other.relese))
-    else:
-      return id(self) < id(other)
+
+    ll1 = [self.major, self.minor, self.level, self.release]
+    try:
+      ll2 = self.versionAsList(other)
+    except ValueError:
+      return str.__lt__(self, other)
+    for ll in ll1,ll2:
+      # hack to make sure empty leverl comapare last
+      ll[2] = ll[2] or '~~~'
+
+    return ll1 < ll2
 
   def __gt__(self, other):
 
-    if self.__class__ is other.__class__:
-      # NBNB the 'self.level or "~~~"' is to make empty strings compare highest
-      return ((self.major, self.minor, self.level or '~~~', self.relese) >
-              (other.major, other.minor, other.level or '~~~', other.relese))
-    else:
-      return id(self) > id(other)
+    return not (self == other or self < other)
 
+  @staticmethod
+  def versionAsList(self) -> list:
+    """Decompose version string in major,minor,level,release, raise ValueError if incorrect"""
+
+    if ''.join(self.split()) != self:
+      raise ValueError("Version string contains whitespace: '%s'" % self)
+
+    ll = self.split('.')
+    if len(ll) == 3:
+      ss = ll[2]
+      for startat in range(len(ss)):
+        try:
+          release = int(ss[startat:])
+          level = ss[:startat] or None
+          return [int(ll[0]), int(ll[1]), level, release]
+        except ValueError:
+          continue
+    #
+    raise ValueError("Version string : %s - format must be e.g. 2.0.5; 31.27.aa33" % self)
 
   def __ge__(self, other):
-    return self == other or self > other
+    return not self < other
 
 
   def __le__(self, other):
@@ -146,19 +142,79 @@ class Version:
 
   def __cmp__(self, other):
     return (self > other) - (self < other)
-    
-    
-  def __hash__(self):
-    return hash(('__!@#$%%ccpncore.memops.Version.Version',
-                 self.major, self.minor, self.level, self.release))
-  
 
+  def getMajor(self) -> int:
+    return self.versionAsList()[0]
+
+  major = property(getMajor, None, None,"major version number")
+
+  def getMinor(self) -> int:
+    return self.versionAsList()[1]
+
+  minor = property(getMinor, None, None,"minor version number")
+
+  def getLevel(self) -> str:
+    return self.versionAsList()[2]
+
+  level = property(getLevel, None, None,"version level (None, 'a', 'b', ...)")
+
+
+  def getRelease(self) -> int:
+    return self.versionAsList()[0]
+
+  relesae = property(getRelease, None, None,"version release number")
+
+  def getDirName(self):
+    ll = ['v']
+    ll.extend(self.split('.'))
+    return '_'.join(ll)
 
 # Current version of data model.
 # Used by generation scripts to mark generated code.
 # Main way of tracking IO code and IO mappings for compatibility.
 # Incremented by hand when model (or I/O generators) changes
-currentModelVersion = Version(3, 0, 'a', 1,'', 'DataModel')
+currentModelVersion = Version('3.0.a1')
+
+
+
+
+
+def getRepositoryDir(versionTag, repoTag=None):
+  """ Get repository directory. Used for compatibility code generation scripts
+  (CompatibilityGen) and optionally for repository navigation scripts.
+  Should *NOT* be used in released code, as it makes assumptions about the
+  code repository structure.
+
+  Assumes that code trees are rooted in
+  for CVS:
+   $CVSROOT/extraDirs/ccpn (for model only)
+  for SVN:
+   $CCPN_SVNROOT/work/extraDirs/ccpn
+
+  extraDirs is one or more directories as given in the versionMap
+  """
+
+  progCode, extraDirs = versionMap[versionTag]
+
+  if not repoTag:
+    if progCode == 'cvs':
+      repoTag = cvsWorkingDir
+    else:
+      repoTag = svnWorkingDir
+
+  if progCode == 'cvs':
+    # get cvs directory
+    ll = [os.environ.get('CVSROOT')]
+    ll.extend(extraDirs)
+    ll.append(repoTag)
+
+  else:
+    # get svn directory
+    ll = [os.environ.get('CCPN_SVNROOT'), repoTag]
+    ll.extend(extraDirs)
+    ll.append('ccpn')
+  #
+  return os.path.join(*ll)
 
 
 
@@ -188,98 +244,3 @@ def getVersion(s=None, timestamp = None, name = None):
     result.name = name
     #
     return result
-  
-  
-def parseVersionString(s):
-  """ Parse version string into (major, minor, level, release) tuple
-  """
-  ll = s.split('.')
-  
-  if len(ll) == 3:
-  
-    (major, minor, rest) = ll
-  
-  elif len(ll) == 2:
-  
-    (major, rest) = ll
-    
-    n = 0
-    while rest[n] in '0123456789':
-      n += 1
-      
-    minor = rest[:n]
-    rest = rest[n:]
-  
-  else:
-    raise ValueError("Invalid argument to getVersion: %s" % s)
-  
-  # finish processing and return result
-  if rest[-1] in '0123456789':
-  
-    n = 0
-    while rest[n] not in '0123456789':
-      n += 1
-    
-    level = rest[:n]
-    release = rest[n:]
-  
-  else:
-    # version of form '1.0.b'. Treat as release 0
-    level = rest
-    release = 0
-  
-  return major, minor, level, release
-
-
-def cmpVersionStrings(str1, str2):
-  """ Compare version strings as versions
-  """
-  ll1 = list(parseVersionString(str1))
-  ll1[2] = ll1[2] or '~~~'
-  ll2 = list(parseVersionString(str2))
-  ll2[2] = ll2[2] or '~~~'
-
-  if ll1 == ll2:
-    return 0
-  elif ll1 < ll2:
-    return -1
-  else:
-    return 1
-
-
-def getRepositoryDir(versionTag, repoTag=None):
-  """ Get repository directory. Used for compatibility code generation scripts
-  (CompatibilityGen) and optionally for repository navigation scripts. 
-  Should *NOT* be used in released code, as it makes assumptions about the
-  code repository structure.
-  
-  Assumes that code trees are rooted in
-  for CVS:
-   $CVSROOT/extraDirs/ccpn (for model only)
-  for SVN:
-   $CCPN_SVNROOT/work/extraDirs/ccpn
-  
-  extraDirs is one or more directories as given in the versionMap
-  """
-  
-  progCode, extraDirs = versionMap[versionTag]
-  
-  if not repoTag:
-    if progCode == 'cvs':
-      repoTag = cvsWorkingDir
-    else:
-      repoTag = svnWorkingDir
-  
-  if progCode == 'cvs':
-    # get cvs directory
-    ll = [os.environ.get('CVSROOT')]
-    ll.extend(extraDirs)
-    ll.append(repoTag)
-  
-  else:
-    # get svn directory
-    ll = [os.environ.get('CCPN_SVNROOT'), repoTag]
-    ll.extend(extraDirs)
-    ll.append('ccpn')
-  #
-  return os.path.join(*ll)

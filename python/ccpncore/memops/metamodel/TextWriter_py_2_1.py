@@ -452,20 +452,18 @@ class TextWriter_py_2_1:
       pathList = [self.rootDirName, self.baseDirName]
     else:
       pathList = []
+
+    if self.codeDirName:
+      pathList.append(self.codeDirName)
     
     if metaObj.container is None:
       # Root package only
-      if self.codeDirName:
-        pathList.append(self.codeDirName)
       pathList.append(metaConstants.modellingPackageName)
       pathList.append(self.rootFileName)
       
     else:
       # any other object
-      ll = metaObj.qualifiedName().split('.')
-      if self.codeDirName:
-        ll.insert(0,self.codeDirName)
-      pathList.extend(ll)
+      pathList.extend(metaObj.qualifiedName().split('.'))
       
       # special handling for ModelElements that may correspond to directories:
       if (isinstance(metaObj, MetaModel.MetaPackage) 

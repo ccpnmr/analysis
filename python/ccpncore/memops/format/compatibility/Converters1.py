@@ -186,7 +186,7 @@ def fixElementMap(newGuid, action, prefix, globalMapping, newElementsByGuid,
   
   """
   
-  from memops.format.xml import XmlGen
+  from ccpncore.memops.format.xml import XmlGen
   
   if action == 'ignore':
     return

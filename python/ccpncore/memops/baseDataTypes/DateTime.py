@@ -48,26 +48,32 @@ software development. Bioinformatics 21, 1678-1684.
 
 ===========================REFERENCE END===============================
 """
-import datetime
 
+# Waltz to sho9ehorn this into Python 2.1 ObjectDOmain:
+try:
+  import datetime
 
+  # corresponding python type
+  PythonType = datetime.datetime
 
-# corresponding python type
-PythonType = datetime.datetime
+  # Python types acceptable as input instead of main type
+  compatibleTypes = (int, float)
 
-# Python types acceptable as input instead of main type
-compatibleTypes = (int, float)
+  # Special isValid function
+  # None
 
-# Special isValid function
-# None
+  # conversion to String
+  def toString(value):
+    return repr(value.timestamp())
 
-# conversion to String
-def toString(value:datetime.datetime) -> str:
-  return repr(value.timestamp())
+  # conversion from string
+  def fromString(ss):
+    return datetime.datetime.fromtimestamp(float(ss))
 
-# conversion from string
-def fromString(ss:str) -> datetime.datetime:
-  return datetime.datetime.fromtimestamp(float(ss))
+  # casting/creation function.
+  create = datetime.datetime.fromtimestamp
 
-# casting/creation function.
-create = datetime.datetime.fromtimestamp
+except:
+  # This will not make the code work in earnetss,
+  # #but inside ObjectDomain it just needs ot be present
+  from ccpncore.memops.baseDataTypes.Float import *

@@ -3,10 +3,12 @@ from ccpncore.util import Path
 from ccpncore.memops import Version
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.memops.metamodel import XmlModelIo
 from ccpncore.memops.format.xml import XmlGen
 from ccpncore.memops.metamodel.ModelPortal import ModelPortal
 from ccpncore.memops.scripts.core import PyFileModelAdapt
+
+from ccpnmodel.util import Path as modelPath
+
 implTemplate = "%s.%s.%%s" % (metaConstants.modellingPackageName,
                               metaConstants.implementationPackageName)
 stringTypeName = implTemplate % 'String'
@@ -47,9 +49,8 @@ def makeUpgrade(oldTag, curTopPackage=None, modelPortal=None,
     infoFileName = 'MapInfo.py'
   
   if curTopPackage is None:
-    curTopPackage = XmlModelIo.readModel(
-                                includePackageNames=includePackageNames,
-                                excludePackageNames=excludePackageNames)
+    curTopPackage = modelPath.readModel(includePackageNames=includePackageNames,
+                                        excludePackageNames=excludePackageNames)
   
   # find old implementation top directory, and old version string .
   currentTopDir = Path.getTopDirectory()
@@ -62,9 +63,8 @@ def makeUpgrade(oldTag, curTopPackage=None, modelPortal=None,
   oldVersion = versionFromDir(oldDirName)
   oldVersionDirName = dirNameFromVersionString(str(oldVersion))
   
-  oldTopPackage = XmlModelIo.readModel(includePackageNames=includePackageNames,
-                                       excludePackageNames=excludePackageNames,
-                                       rootDirName=oldDirName)
+  oldTopPackage = modelPath.readModel(oldTag, includePackageNames=includePackageNames,
+                                       excludePackageNames=excludePackageNames)
   
   if currentVersion >= oldVersion:
     loc = 'upgrade'
@@ -97,7 +97,7 @@ def versionFromDir(topDir):
   for line in open(versionFile):
     if line.startswith('currentModelVersion = '):
       exec(line, locals(), globals())
-      return currentModelVersion
+      return Version.currentModelVersion
   else:
     return  None
     

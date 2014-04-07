@@ -102,9 +102,7 @@ def getConfigParameter(name):
   """
 
   file = Path.joinPath(Path.getTopDirectory(),metaConstants.configFilePath)
-  print ('###', file)
   dd = json.load(open(file))
-  print ('###', list(dd.keys()))
   return dd[
     'configuration'].get(name)
 

@@ -59,13 +59,17 @@ software development. Bioinformatics 21, 1678-1684.
 
 import time
 
+
 from ccpncore.memops.metamodel import XmlModelIo
 from ccpncore.memops.metamodel.ModelPortal import ModelPortal
+
 from ccpncore.memops.scripts.core import PyFileModelAdapt
 from ccpncore.memops.scripts.api import PyFileApiGen
 from ccpncore.memops.scripts.xmlio import PyXmlMapWrite
 from ccpncore.memops.scripts.docgen import PyApiDocGen
+
 from ccpncore.util import Path
+from ccpnmodel.util import Path as modelPath
 from ccpncore.util import Common as commonUtil
 
 defaultIgnoreModules = []
@@ -81,7 +85,7 @@ def getModelPortal(dataModelVersion=None, includePackageNames=None,
     ignored together with their contents.
   """
   # load model
-  topPackage = XmlModelIo.readModel(includePackageNames=includePackageNames,
+  topPackage = XmlModelIo.readModel(dataModelVersion, includePackageNames=includePackageNames,
                                     excludePackageNames=excludePackageNames)
   
   start = time.time()
@@ -150,6 +154,8 @@ def makePython(modelPortal, rootDirName=None, rootFileName=None,
   start = time.time()
   commonUtil.recursiveImport(Path.getPythonDirectory(),ignoreModules=ignoreModules,
                          force=True)
+  commonUtil.recursiveImport(modelPath.getPythonDirectory(),ignoreModules=ignoreModules,
+                         force=True)
   end = time.time()
   print("""
   Memops done Test Importing, time %s
@@ -158,7 +164,5 @@ def makePython(modelPortal, rootDirName=None, rootFileName=None,
 
 if __name__ == '__main__':
   
-  
-  
-  modelPortal = getModelPortal()
-  makePython(modelPortal)
+
+  makePython(getModelPortal())

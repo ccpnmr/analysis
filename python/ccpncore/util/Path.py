@@ -133,14 +133,11 @@ def converseSplitPath(path):
   return head, tail
 
 def getTopDirectory():
+  """
+  Returns the 'top' directory of the contaiiining repository (ccpnv3).
+  """
 
-  """
-  Returns the 'top' directory of the whole code and data structure.
-  """
-  
-  func = os.path.dirname
-  
-  return func(getPythonDirectory())
+  return os.path.dirname(getPythonDirectory())
 
 def setTopDirectory(newTopDirectory):
 
@@ -211,11 +208,14 @@ def getPythonDirectory():
   return func(func(func(os.path.abspath(__file__))))
 
 
+def getDirectoryFromTop(downPath):
+
+  return joinPath(getTopDirectory(), downPath)
+
+
 def getDataDirectory():
 
-  directory = joinPath(getTopDirectory(), 'data')
-
-  return directory
+  return getDirectoryFromTop('data')
 
 def removePath(path):
   """Removes path whether file or directory, taking into account whether symbolic link.

@@ -114,7 +114,7 @@ settings = {
   'endStatement': '',
   'fileSuffix': 'xml',
   'packageFile': 'package',
-  'baseDirName':'model',
+  'baseDirName':'xml',
   'classesInPackage':False,
    # LanguageInterface settings :
    'noneValue': '',
@@ -473,7 +473,7 @@ class TextWriter_py_2_1:
       elif not isinstance(metaObj.container, MetaModel.MetaPackage):
         raise MemopsError(" file names not implemented for objects of type %s"
                           % (metaObj.__class__.__name__,))
-    
+
     # add suffix
     if addSuffix and self.fileSuffix:
       pathList[-1] = '%s.%s' % (pathList[-1], self.fileSuffix)

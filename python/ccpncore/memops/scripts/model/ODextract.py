@@ -226,7 +226,6 @@ guidGenerator = metaUtil.SimpleGuidGenerator(odUser.operator,
                                              odUser.organisation)
 newGuid = guidGenerator.newGuid
 
-
 OdContainingPackageName = 'Model.Logical'
 
 # NBNB HACK used for renaming of old to new tagged values
@@ -702,7 +701,6 @@ if (result == null) {
   #
   return rootPackage
 
-
 def getTopPackageName(odObj):
   """ get name of top-level package containing odObj
   By definition this is also the qualified name of the top-level package.
@@ -834,7 +832,6 @@ def objectsFromOd(odPackage, container, dataTypeObjMap):
   #
   return metaPackage
 
-
 def classFromOd(metaPackage, odClass):
   """ create MetaClass or MetaDataObjType within metaPackage
   """
@@ -899,7 +896,6 @@ def classFromOd(metaPackage, odClass):
   
   # Constraints:
   addConstraints(clazz, odClass)
-  
 
 def dataTypeFromOd(metaPackage, odDataTypeClass):
   """ create metaDataType within metaPackage

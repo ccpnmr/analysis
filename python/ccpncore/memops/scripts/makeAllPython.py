@@ -75,10 +75,8 @@ if __name__ == '__main__':
   
   # make compatibility code
   start = time.time()
-  copyTopPackage = XmlModelIo.readModel()
   for oldTag in oldVersionTags:
-    CompatibilityGen.makeUpgrade(oldTag, curTopPackage=copyTopPackage,
-                                 modelPortal=modelPortal)
+    CompatibilityGen.makeUpgrade(oldTag, modelPortal=modelPortal)
   end = time.time()
   print ("""
   Memops made Compatibility maps, time %s

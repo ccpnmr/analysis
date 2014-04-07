@@ -59,9 +59,7 @@ def correctData(topObj, delayDataDict, toNewObjDict, mapping=None):
     NB this function does nothing without further additions
   """
   
-  # emptyDict = {}
-  # emptyList = []
-  # doGet = delayDataDict.get
+  # emptaa = delayDataDict.get
   
   pName = topObj.packageName
   

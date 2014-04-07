@@ -53,55 +53,96 @@ software development. Bioinformatics 21, 1678-1684.
 
 """
 
-import os
+# import os
 # import functools
 
 # Maps ccpncore.lmemops.Version modelVersion to repository location
 # Used with function getRepositoryDir below - see there for usage.
 #
 # 'modelVersion': (repositoryCode', (repository location list)
-versionMap = {
- # history versions
- '1.1.a3': ('cvs', ('branch4',) ),
- '2.0.a0': ('cvs', ('branch_2_0_3',) ),
- '2.0.a1': ('cvs', ('stable_2_0_4',) ),
- '2.0.a2': ('cvs', ('stable_2_0_5',) ),
- '2.0.a3': ('cvs', ('stable_2_0_6',) ),
- '2.0.b1': ('cvs', ('stable_2_0_7',) ),
- '2.0.b2': ('cvs', ('stable_2_0_8',) ),
- 
- '2.0.4' : ('cvs', ('stable_2_2_0',) ),
- '2.0.b3': ('svn', ('tags', 'test2.2.2_stable_A') ),
- '2.0.5' : ('svn', ('branches', 'model_2_0_5')),  # NB NOT the same as branch model2_0_5 (obsolete)
- '2.0.6' : ('svn', ('branches', 'stable_20131212')),
- '2.1.0' : ('svn', ('tags', 'model_2_1_0') ),
- '2.1.1' : ('svn', ('tags', 'model_2_1_1') ),  # NBNB present only on rhf22 computer. FIXNE!
- #'jmci' : ('svn', ('tags', 'jmci') ),   # Temporary - JMCI python versions
- 'merge' : ('svn', ('branches', 'merge_2_1_2')),  # Temporary location for 2.1.2 stable/trunk merge
- 
- # Current stable/trunk versions
- 's'     : ('svn', ('branches', 'stable',) ),       # stable
- 't'     : ('svn', ('trunk',) ),                    # trunk
- #'marc'     : ('svn', ('branches', 'FEmarcvDijk',) ),       # Marc new xml model version
-}
-# Synonyms for stable/trunk, used by backwards compatibility code
-versionMap['2.1.2'] = versionMap['s']
-#versionMap['2.1.2'] = versionMap['t']
+# versionMap = {
+#  # history versions
+#  '1.1.a3': ('cvs', ('branch4',) ),
+#  '2.0.a0': ('cvs', ('branch_2_0_3',) ),
+#  '2.0.a1': ('cvs', ('stable_2_0_4',) ),
+#  '2.0.a2': ('cvs', ('stable_2_0_5',) ),
+#  '2.0.a3': ('cvs', ('stable_2_0_6',) ),
+#  '2.0.b1': ('cvs', ('stable_2_0_7',) ),
+#  '2.0.b2': ('cvs', ('stable_2_0_8',) ),
+#
+#  '2.0.4' : ('cvs', ('stable_2_2_0',) ),
+#  '2.0.b3': ('svn', ('tags', 'test2.2.2_stable_A') ),
+#  '2.0.5' : ('svn', ('branches', 'model_2_0_5')),  # NB NOT the same as branch model2_0_5 (obsolete)
+#  '2.0.6' : ('svn', ('branches', 'stable_20131212')),
+#  '2.1.0' : ('svn', ('tags', 'model_2_1_0') ),
+#  '2.1.1' : ('svn', ('tags', 'model_2_1_1') ),  # NBNB present only on rhf22 computer. FIXNE!
+#  #'jmci' : ('svn', ('tags', 'jmci') ),   # Temporary - JMCI python versions
+#  'merge' : ('svn', ('branches', 'merge_2_1_2')),  # Temporary location for 2.1.2 stable/trunk merge
+#
+#  # Current stable/trunk versions
+#  's'     : ('svn', ('branches', 'stable',) ),       # stable
+#  't'     : ('svn', ('trunk',) ),                    # trunk
+#  #'marc'     : ('svn', ('branches', 'FEmarcvDijk',) ),       # Marc new xml model version
+# }
+# # Synonyms for stable/trunk, used by backwards compatibility code
+# versionMap['2.1.2'] = versionMap['s']
+# #versionMap['2.1.2'] = versionMap['t']
+#
+# cvsWorkingDir = 'ccpn'
+#
+# svnWorkingDir = 'work'
 
-cvsWorkingDir = 'ccpn'
 
-svnWorkingDir = 'work'
+def versionAsList(tag):
+  """Decompose version string in major,minor,level,release, raise ValueError if incorrect"""
 
-# @functools.total_ordering
-class Version(str):
+  if ''.join(tag.split()) != tag:
+    raise ValueError("Version string contains whitespace: '%s'" % tag)
+
+  ll = tag.split('.')
+  if len(ll) == 3:
+    ss = ll[2]
+    for startat in range(len(ss)):
+      try:
+        release = int(ss[startat:])
+        level = ss[:startat] or None
+        return [int(ll[0]), int(ll[1]), level, release]
+      except ValueError:
+        continue
+  #
+  raise ValueError("Invalid version string : %s - format must be e.g. 2.0.5; 31.27.aa33" % tag)
+
+
+
+# Unfortunately this file must be Python 2.1 compliant
+class Version:
+
+  def __init__(self, value):
+
+    # in case a veersion was passed in:
+    value = str(value)
+
+    self._value = value
+
+    # Serves as validity check:
+    versionAsList(value)
+
+  def __str__(self):
+    return str(self._value)
+
+  def __repr__(self):
+    return repr(self._value_)
 
   def __lt__(self, other):
 
-    ll1 = [self.major, self.minor, self.level, self.release]
+    v1 = self._value
+    v2 = str(other)
+
+    ll1 = versionAsList(v1)
     try:
-      ll2 = self.versionAsList(other)
+      ll2 = versionAsList(v2)
     except ValueError:
-      return str.__lt__(self, other)
+      return str.__lt__(v1, v2)
     for ll in ll1,ll2:
       # hack to make sure empty leverl comapare last
       ll[2] = ll[2] or '~~~'
@@ -112,25 +153,9 @@ class Version(str):
 
     return not (self == other or self < other)
 
-  @staticmethod
-  def versionAsList(self) -> list:
-    """Decompose version string in major,minor,level,release, raise ValueError if incorrect"""
+  def __eq__(self, other):
+    return self._value == str(other)
 
-    if ''.join(self.split()) != self:
-      raise ValueError("Version string contains whitespace: '%s'" % self)
-
-    ll = self.split('.')
-    if len(ll) == 3:
-      ss = ll[2]
-      for startat in range(len(ss)):
-        try:
-          release = int(ss[startat:])
-          level = ss[:startat] or None
-          return [int(ll[0]), int(ll[1]), level, release]
-        except ValueError:
-          continue
-    #
-    raise ValueError("Version string : %s - format must be e.g. 2.0.5; 31.27.aa33" % self)
 
   def __ge__(self, other):
     return not self < other
@@ -143,30 +168,33 @@ class Version(str):
   def __cmp__(self, other):
     return (self > other) - (self < other)
 
-  def getMajor(self) -> int:
-    return self.versionAsList()[0]
-
-  major = property(getMajor, None, None,"major version number")
-
-  def getMinor(self) -> int:
-    return self.versionAsList()[1]
-
-  minor = property(getMinor, None, None,"minor version number")
-
-  def getLevel(self) -> str:
-    return self.versionAsList()[2]
-
-  level = property(getLevel, None, None,"version level (None, 'a', 'b', ...)")
+  def getMajor(self):
+    return versionAsList(self)[0]
 
 
-  def getRelease(self) -> int:
-    return self.versionAsList()[0]
+  def getMinor(self):
+    return versionAsList(self)[1]
 
-  relesae = property(getRelease, None, None,"version release number")
+
+  def getLevel(self):
+    return versionAsList(self)[2]
+
+
+  def getRelease(self):
+    return versionAsList(self)[0]
+
+  try:
+    major = property(getMajor, None, None,"major version number")
+    minor = property(getMinor, None, None,"minor version number")
+    level = property(getLevel, None, None,"version level (None, 'a', 'b', ...)")
+    release = property(getRelease, None, None,"version release number")
+  except:
+    # Ignore this if imorted into Python 2.1 (e.g. ObjectDomain)
+    pass
 
   def getDirName(self):
     ll = ['v']
-    ll.extend(self.split('.'))
+    ll.extend(self._value.split('.'))
     return '_'.join(ll)
 
 # Current version of data model.
@@ -175,46 +203,45 @@ class Version(str):
 # Incremented by hand when model (or I/O generators) changes
 currentModelVersion = Version('3.0.a1')
 
+Version.versionAsList = versionAsList
 
 
-
-
-def getRepositoryDir(versionTag, repoTag=None):
-  """ Get repository directory. Used for compatibility code generation scripts
-  (CompatibilityGen) and optionally for repository navigation scripts.
-  Should *NOT* be used in released code, as it makes assumptions about the
-  code repository structure.
-
-  Assumes that code trees are rooted in
-  for CVS:
-   $CVSROOT/extraDirs/ccpn (for model only)
-  for SVN:
-   $CCPN_SVNROOT/work/extraDirs/ccpn
-
-  extraDirs is one or more directories as given in the versionMap
-  """
-
-  progCode, extraDirs = versionMap[versionTag]
-
-  if not repoTag:
-    if progCode == 'cvs':
-      repoTag = cvsWorkingDir
-    else:
-      repoTag = svnWorkingDir
-
-  if progCode == 'cvs':
-    # get cvs directory
-    ll = [os.environ.get('CVSROOT')]
-    ll.extend(extraDirs)
-    ll.append(repoTag)
-
-  else:
-    # get svn directory
-    ll = [os.environ.get('CCPN_SVNROOT'), repoTag]
-    ll.extend(extraDirs)
-    ll.append('ccpn')
-  #
-  return os.path.join(*ll)
+# def getRepositoryDir(versionTag, repoTag=None):
+#   """ Get repository directory. Used for compatibility code generation scripts
+#   (CompatibilityGen) and optionally for repository navigation scripts.
+#   Should *NOT* be used in released code, as it makes assumptions about the
+#   code repository structure.
+#
+#   Assumes that code trees are rooted in
+#   for CVS:
+#    $CVSROOT/extraDirs/ccpn (for model only)
+#   for SVN:
+#    $CCPN_SVNROOT/work/extraDirs/ccpn
+#
+#   extraDirs is one or more directories as given in the versionMap
+#   """
+#
+#   progCode, extraDirs = versionMap[versionTag]
+#
+#   if not repoTag:
+#     if progCode == 'cvs':
+#       repoTag = cvsWorkingDir
+#     else:
+#       repoTag = svnWorkingDir
+#
+#   if progCode == 'cvs':
+#     # get cvs directory
+#     ll = [os.environ.get('CVSROOT')]
+#     ll.extend(extraDirs)
+#     ll.append(repoTag)
+#
+#   else:
+#     # get svn directory
+#     ll = [os.environ.get('CCPN_SVNROOT'), repoTag]
+#     ll.extend(extraDirs)
+#     ll.append('ccpn')
+#   #
+#   return os.path.join(*ll)
 
 
 
@@ -227,20 +254,20 @@ def getRepositoryDir(versionTag, repoTag=None):
 #'2.0.6' : ('svn', ('branches', 'stable_20131212')),
 
 #  return versionDict.get(key)
-
-def getVersion(s=None, timestamp = None, name = None):
-  """Get version given string representation in form '1.0.b3'.
-  Amplified to handle strings of form 1.0b3, 
-  for backwards compatibility. Rasmus Fogh 3May04"""
-  
-  if s:
-    (major, minor, level, release) = parseVersionString(s)
-    return Version(major, minor, level, release, timestamp=timestamp, name=name)
-    
-  else:
-    # special case - get default version
-    result = Version()
-    result.timestamp = timestamp
-    result.name = name
-    #
-    return result
+#
+# def getVersion(s=None, timestamp = None, name = None):
+#   """Get version given string representation in form '1.0.b3'.
+#   Amplified to handle strings of form 1.0b3,
+#   for backwards compatibility. Rasmus Fogh 3May04"""
+#
+#   if s:
+#     (major, minor, level, release) = parseVersionString(s)
+#     return Version(major, minor, level, release, timestamp=timestamp, name=name)
+#
+#   else:
+#     # special case - get default version
+#     result = Version()
+#     result.timestamp = timestamp
+#     result.name = name
+#     #
+#     return result

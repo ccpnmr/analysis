@@ -22,7 +22,9 @@ from ccpncore.memops.metamodel.ModelPortal import ModelPortal
 from ccpncore.memops.metamodel import ModelTraverse_py_2_1
 from ccpncore.memops.metamodel import Util as metaUtil
 
-from ccpncore.util import Path
+#from ccpncore.util import Path
+
+from ccpnmodel.util import Path as modelPath
 
 baseDataTypeModule = metaConstants.baseDataTypeModule
 infinity = metaConstants.infinity
@@ -54,9 +56,10 @@ def str2bool(value):
   else:
     raise ValueError("String '%s' is not legal for a Boolean" % value)
 
+
 def writeModel(topPackage=None, modelPortal=None, rootFileName=None, 
                rootDirName=None, releaseVersion=None, skipImplicit=None,
-               **kw):
+               versionTag=None, **kw):
   """write XML file version of model
   """
   
@@ -68,15 +71,17 @@ def writeModel(topPackage=None, modelPortal=None, rootFileName=None,
     else:
       modelPortal = ModelPortal(topPackage)
       modelPortal.setModelFlavour('language','xmlmodel')
-  
-  xmlModelGen = XmlModelGen(modelPortal=modelPortal, rootFileName=rootFileName, 
-                        rootDirName=rootDirName, releaseVersion=releaseVersion,
-                        scriptName='XmlModelIo', skipImplicit=skipImplicit, **kw)
+
+
+  xmlModelGen = XmlModelGen(modelPortal=modelPortal, rootFileName=rootFileName,
+                            versionTag=versionTag,
+                            rootDirName=rootDirName, releaseVersion=releaseVersion,
+                            scriptName='XmlModelIo', skipImplicit=skipImplicit, **kw)
                         
   xmlModelGen.processModel()
 
 
-def readModel(rootFileName=None, rootDirName=None,
+def readModel(rootFileName=None, rootDirName=None, versionTag=None,
               excludePackageNames=None, includePackageNames=None, 
               checkValidity=True, **kw):
   """XML model reader
@@ -90,6 +95,7 @@ def readModel(rootFileName=None, rootDirName=None,
   Putting e.g. 'ccp' in includePackageNames will *not* cause
   packages contained in ccp to be included.
   """
+
   start = time.time()
   
   # expand included files so you also get containers
@@ -105,7 +111,8 @@ def readModel(rootFileName=None, rootDirName=None,
     includePackageNames = newIncludes
   
   xmlModelRead = XmlModelRead(rootFileName=rootFileName,
-                              rootDirName=rootDirName, 
+                              rootDirName=rootDirName,
+                              versionTag=versionTag,
                               scriptName='XmlModelIo',
                               excludePackageNames=excludePackageNames,
                               releaseVersion=None,
@@ -138,7 +145,9 @@ class TempHolder:
 
 class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
 
-  codeDirName = metaConstants.xmlCodeDir
+  #codeDirName = metaConstants.xmlCodeDir
+  codeDirName = None
+
   classNameMapping = {}
   for clazz in MetaModel.nonAbstractClasses:
     classNameMapping[clazz.__name__] = clazz
@@ -170,7 +179,7 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
       self.rootFileName = metaConstants.rootPackageDirName
     
     if self.rootDirName is None:
-      self.rootDirName = Path.getTopDirectory()
+      self.rootDirName = modelPath.getModelDirectory(self.versionTag)
     
     # process self.includePackageNames, including container names
     inclNames = self.includePackageNames
@@ -205,7 +214,9 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
     )
     rootfile = self.getObjFileName(dummy, addSuffix=True)
     del dummy
-    
+
+    print('### loading ', rootfile)
+
     # parse XML file and recurse over xIncluded files
     self.loadXmlFile(rootfile)
     
@@ -374,9 +385,6 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
               dd = {}
               for ee in elem:
                 dd[ee.get('tag')] = ee.text
-                #if ee.get('tag') == 'python' and tag != 'typeCodes':
-                  #print '\n\n\n###', tag, currentObj, 'python\n'
-                  #print ee.text
               setattr(currentObj, tag, dd)
  
             elif pData.get('hicard',1) == 1:
@@ -563,7 +571,8 @@ no href attribute found for %s element
 class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1, 
                   ModelTraverse_py_2_1.ModelTraverse_py_2_1):
 
-  codeDirName = metaConstants.xmlCodeDir
+  #codeDirName = metaConstants.xmlCodeDir
+  codeDirName = None
   
   _xmlSpecialTags = ('name', 'guid', 'container', 'documentation')
  
@@ -578,7 +587,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     for (tag, val) in kw.items():
       if not hasattr(self, tag):
         setattr(self, tag, val)
-    
+
     # TopObject and DataRoot for us below
     ic = metaConstants
     Impl = self.modelPortal.metaObjFromQualName('.'.join(
@@ -596,13 +605,15 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
     # in-line version of TextWriter init
     for tag in TextWriter_py_2_1.mandatoryAttributes:
       if not hasattr(self, tag):
-        raise MemopsError(" TextWriter lacks mandatory %s attribute" % tag)     
-    
+        raise MemopsError(" TextWriter lacks mandatory %s attribute" % tag)
+
     # special parameters: optional with default values
     if self.rootFileName is None:
       self.rootFileName = metaConstants.rootPackageDirName
+
     if self.rootDirName is None:
-      self.rootDirName = Path.getTopDirectory()
+      self.rootDirName = modelPath.getModelDirectory(self.versionTag)
+
     
     if self.skipImplicit is None:
       self.skipImplicit = True
@@ -734,7 +745,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
       for pp in package.containedPackages:
         fileName = self.getObjFileName(pp, absoluteName=False, addSuffix=True)
         self.writeXmlInclude(
-         os.path.join((self.getDirDepth()-1)*'../', fileName), 
+         os.path.join((self.getDirDepth()-3)*'../', fileName),
          objName=pp.qualifiedName(), isMandatory=False
         )
       
@@ -900,6 +911,7 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
   def startXmlFile(self, obj):
     
     # do actual work
+    #print ('###', self.getObjFileName(obj))
     self.openFile(self.getObjFileName(obj))
     
     self.writeOne('<?xml version="1.0"?>')

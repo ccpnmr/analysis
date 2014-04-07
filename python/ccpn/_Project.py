@@ -75,7 +75,7 @@ class Project(AbstractWrapperClass):
   def _unregisterAllNotify(self):
     """Register already prepared notifiers"""
     while self._activeNotifiers:
-      tt,func = self._activeNotifiers.pop()
+      tt,func = self._activeNotifiers.popitem()
       genImpl.unregisterNotify(func, tt[0], tt[1])
   
   def _initializeAll(self):

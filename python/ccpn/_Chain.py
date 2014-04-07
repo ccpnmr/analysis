@@ -3,7 +3,7 @@ import functools
 
 from ccpcode._AbstractWrapperClass import AbstractWrapperClass
 from ccpcode._Molecule import Molecule
-from ccp.api.molecule.MolSystem import Chain as Ccpn_Chain
+from ccpncore.api.ccp..molecule.MolSystem import Chain as Ccpn_Chain
 from ccp.lib import MoleculeModify
 from ccpnmr.dataIo.DataMapper import DataMapper
 
@@ -52,7 +52,7 @@ class Chain(AbstractWrapperClass):
     """role of chain in Molecule"""
     return self._wrappedData.role
     
-  @name.setter
+  @role.setter
   def role(self, value:str):
     self._wrappedData.role = value
   
@@ -95,7 +95,7 @@ class Chain(AbstractWrapperClass):
     """Finalize chain so that it can no longer be modified"""
     self._wrappedData.molecule.isFinalized = True
   
-  def extendSequence(self, sequence:iterable, startNumber:int=None,
+  def extendSequence(self, sequence:"iterable", startNumber:int=None,
                      preferredMolType=None):
     """Add sequence to chain, without setting bonds to pre-existing residues  
     
@@ -112,7 +112,7 @@ class Chain(AbstractWrapperClass):
     
     ff = DataMapper.selectChemCompId
     dd = self._project.residueName2chemCompIds
-    newMolResidues = MoleculeModify.addMixedResidues(ccpnMolecule,
+    MoleculeModify.addMixedResidues(ccpnMolecule,
       [ff(dd, resType, prefMolType=preferredMolType) for resType in sequence],
       startNumber=startNumber
     )
@@ -133,7 +133,7 @@ class Chain(AbstractWrapperClass):
     
     #
     className = Ccpn_Chain.qualifiedName
-    result = [(className, 'delete', self.delete), 
+    result = [(className, 'delete', self.delete),
               (className, '__init__', functools.partial(cls,project=project))]
     return result
     
@@ -164,7 +164,7 @@ def newChain(parent:Molecule, compoundName:str, shortName:str=None,
                                         role=role,
                                         details=comment)
   
-  return self._project._data2Obj.get(newCcpnChain)
+  return parent._project._data2Obj.get(newCcpnChain)
   
 def makeChain(parent:Molecule, sequence:str, compoundName:str, 
               startNumber:int=1, preferredMolType:str=None, 
@@ -181,7 +181,7 @@ def makeChain(parent:Molecule, sequence:str, compoundName:str,
   role:: role for new chain (optional)
   comment:: comment for new chain (optional)"""
   
-  ccpnRoot = self._wrappedData.root
+  ccpnRoot = parent._wrappedData.root
   if ccpnRoot.findFirstMolecule(name=compoundName):
     raise Exception("CCPN_Molecule named {} already exists")
   

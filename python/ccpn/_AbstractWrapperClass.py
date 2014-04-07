@@ -233,13 +233,13 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     """Dictionary implementation method: iteration"""
     
     cls = self.__class__
-    propertyAttrs = (getAttr(self,x) for x in sorted(dir(cls))
+    propertyAttrs = (getattr(self,x) for x in sorted(dir(cls))
                      if (not x.startswith('_') and 
                      isinstance(getattr(cls,x), property)))
     
     prefix = self._pid + IDSEP
-    childAttrs = (y for y in self._project._pid2Obj[x.shortClassName] 
-                  for x in self._childClasses
+    childAttrs = (y for x in self._childClasses
+                  for y in self._project._pid2Obj[x.shortClassName]
                   if y.startswith(prefix))
     
     dd = self.__dict__
@@ -272,10 +272,10 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
                 (other._pid, id(other._project)))
       except AttributeError:
         # Rare case - a different class with matching name:
-        return (id(type(self)) < id(type(other)))
+        return id(type(self)) < id(type(other))
     
     else:
-      return (selfname < othername)
+      return selfname < othername
   
   # CCPN properties 
   @property
@@ -304,13 +304,13 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   def id(self) -> str:
     """Object local identifier, unique for a given type with a given parent.
     Set automatically from other (immutable) object attributes."""
-    pass
+    return None
   
   @property
   @abc.abstractmethod
   def _parent(self):
     """Parent (containing) object."""
-    pass
+    return None
   
   
   # Abstract methods
@@ -378,7 +378,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   def _getChildren(self, cls)-> list:
     """Get children of type cls belonging to parent
     """
-    return list((self._project._data2Obj[tag].get(x)
+    return list((self._project._data2Obj[x]
                 for x in cls._getAllWrappedData(self)))
   
   @classmethod
@@ -407,5 +407,5 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     #
     return None
     
-AbstractWrapperClass.getById.__annotations__['result'] = (AbstractWrapperClass, 
+AbstractWrapperClass.getById.__annotations__['result'] = (AbstractWrapperClass,
                                                           None)

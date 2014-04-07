@@ -4,6 +4,7 @@ import functools
 from ccpcode._AbstractWrapperClass import AbstractWrapperClass
 from ccpcode._Chain import Chain
 from ccp.api.molecule.MolSystem import Residue as Ccpn_Residue
+from ccpnmr.dataIo.DataMapper import DataMapper
 
 def splitIntFromChars(value:str):
   """convert a string with a leading integer optionally followed by characters
@@ -13,7 +14,7 @@ def splitIntFromChars(value:str):
   
   value = value.strip()
   
-  for ii in reverse(range(1,len(value)+1)):
+  for ii in reversed(range(1,len(value)+1)):
     try:
       number = int(value[:ii])
       chars = value[ii:]
@@ -29,7 +30,7 @@ def splitIntFromChars(value:str):
 
 
 
-class Residue(AstractWrapperClass):
+class Residue(AbstractWrapperClass):
   """Molecular Residue."""
   
   # Short class name, for PID.
@@ -119,37 +120,37 @@ class Residue(AstractWrapperClass):
     return result
     
     
-  def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None, 
-                 descriptor:str=None, molType:str=None, comment:str=None) -> Chain:
-    """Create new child Residue"""
-    project = self._project
-    ccpnChain = self._wrappedData
-    ccpnMolecule = ccpnChain.molecule
-    
-    if ccpnMolecule.isFinalized:
-      raise Exception("Chain {} can no longer be extended".format(self))
-   
-    # get chem comp ID strings from residue name
-    molType, ccpCode = DataMapper.selectChemCompId(project.residueName2chemCompIds,
-                                                   name, prefMolType=molType)
-    
-    # split seqCode in number+string
-    intCode, seqInsertCode = splitIntFromChars(seqCode)
-    if len(seqInsertCode) > 1:
-      raise Exception(
-        "Only one non-numerical character suffix allowed for seqCode {}".format(seqCode)
-      )
-    
-    # make residue
-    ccpnResidue = ccpnChain.newResidue(molType=molType, ccpCode=ccpCode,
-                                       linking=linking, descriptor=descriptor,
-                                       details=comment)
-                         
-    if intCode is None:
-      ccpnResidue.seqCode = ccpnResidue.seqId
-    else:
-      ccpnResidue.seqCode = intCode
-      ccpnResidue.seqInsertCode = seqInsertCode
+def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None,
+               descriptor:str=None, molType:str=None, comment:str=None) -> Chain:
+  """Create new child Residue"""
+  project = parent._project
+  ccpnChain = parent._wrappedData
+  ccpnMolecule = ccpnChain.molecule
+
+  if ccpnMolecule.isFinalized:
+    raise Exception("Chain {} can no longer be extended".format(parent))
+
+  # get chem comp ID strings from residue name
+  molType, ccpCode = DataMapper.selectChemCompId(project.residueName2chemCompIds,
+                                                 name, prefMolType=molType)
+
+  # split seqCode in number+string
+  intCode, seqInsertCode = splitIntFromChars(seqCode)
+  if len(seqInsertCode) > 1:
+    raise Exception(
+      "Only one non-numerical character suffix allowed for seqCode {}".format(seqCode)
+    )
+
+  # make residue
+  ccpnResidue = ccpnChain.newResidue(molType=molType, ccpCode=ccpCode,
+                                     linking=linking, descriptor=descriptor,
+                                     details=comment)
+
+  if intCode is None:
+    ccpnResidue.seqCode = ccpnResidue.seqId
+  else:
+    ccpnResidue.seqCode = intCode
+    ccpnResidue.seqInsertCode = seqInsertCode
     
     
     
@@ -161,4 +162,4 @@ Chain.residues = Residue._wrappedChildProperty()
 # NBNB TODO fix grandchild link, currentl not working
 
 # NBNB the below may not be inserted correctly as a method
-Molecule.newChain = newChain
+Chain.newResidue = newResidue

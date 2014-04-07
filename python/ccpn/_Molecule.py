@@ -3,7 +3,7 @@ import functools
 
 from ccpcode._AbstractWrapperClass import AbstractWrapperClass
 from ccpcode._Project import Project
-from ccp.api.molecule.MolSystem import MolSystem as Ccpn_MolSystem
+from ccpncore.ccp.api.molecule.MolSystem import MolSystem as Ccpn_MolSystem
 
 
 class Molecule(AbstractWrapperClass):

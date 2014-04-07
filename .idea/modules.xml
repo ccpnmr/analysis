@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/ccpn.iml" filepath="$PROJECT_DIR$/.idea/ccpn.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../ccpnmodel/.idea/ccpnmodel.iml" filepath="$PROJECT_DIR$/../../../ccpnmodel/.idea/ccpnmodel.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../ccpnmodel/trunk/ccpn/python/.idea/python.iml" filepath="$PROJECT_DIR$/../../../ccpnmodel/trunk/ccpn/python/.idea/python.iml" />
     </modules>
   </component>
 </project>

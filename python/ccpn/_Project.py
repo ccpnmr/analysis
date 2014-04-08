@@ -1,8 +1,8 @@
 
-from ccpcode._AbstractWrapperClass import AbstractWrapperClass
-from ccp.api.nmr.Nmr import NmrProject as Ccpn_NmrProject
-from memops.general import Implementation as genImpl
-from ccp.lib import DataConvertLib
+from ccpn._AbstractWrapperClass import AbstractWrapperClass
+from ccpncore.api.nmr.Nmr import NmrProject as Ccpn_NmrProject
+from ccpncore.memops.general import Implementation as genImpl
+from ccpncore.lib import DataConvertLib
 
 
 class Project(AbstractWrapperClass):

@@ -1,10 +1,10 @@
 
 import functools
 
-from ccpcode._AbstractWrapperClass import AbstractWrapperClass
-from ccpcode._Molecule import Molecule
-from ccpncore.api.ccp..molecule.MolSystem import Chain as Ccpn_Chain
-from ccp.lib import MoleculeModify
+from ccpn._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._Molecule import Molecule
+from ccpncore.api.ccp.molecule.MolSystem import Chain as Ccpn_Chain
+from ccpncore.lib import MoleculeModify
 from ccpnmr.dataIo.DataMapper import DataMapper
 
 
@@ -185,16 +185,16 @@ def makeChain(parent:Molecule, sequence:str, compoundName:str,
   if ccpnRoot.findFirstMolecule(name=compoundName):
     raise Exception("CCPN_Molecule named {} already exists")
   
-  newChain = parent.newChain(compoundName=compoundName, shortName=shortName, 
+  chain = parent.newChain(compoundName=compoundName, shortName=shortName,
                              role=role, comment=comment)
                       
-  newChain.extendSequence(sequence=sequence, startNumber=startNumber,
+  chain.extendSequence(sequence=sequence, startNumber=startNumber,
                           preferredMolType=preferredMolType)
   
-  newChain.finalize()
+  chain.finalize()
   
   #
-  return newChain
+  return chain
 
 
   

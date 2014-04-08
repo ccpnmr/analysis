@@ -1,9 +1,9 @@
 
 import functools
 
-from ccpcode._AbstractWrapperClass import AbstractWrapperClass
-from ccpcode._Chain import Chain
-from ccp.api.molecule.MolSystem import Residue as Ccpn_Residue
+from ccpn._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._Chain import Chain
+from ccpcore.api.molecule.MolSystem import Residue as Ccpn_Residue
 from ccpnmr.dataIo.DataMapper import DataMapper
 
 def splitIntFromChars(value:str):
@@ -26,7 +26,7 @@ def splitIntFromChars(value:str):
     chars = value
       
     
-  return (number,chars)
+  return number,chars
 
 
 
@@ -87,7 +87,7 @@ class Residue(AbstractWrapperClass):
     return self._wrappedData.descriptor
     
   @linking.setter
-  def descriptor(self, value:str):
+  def linking(self, value:str):
     self._wrappedData.descriptor = value
   
   @property

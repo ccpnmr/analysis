@@ -1,9 +1,9 @@
 
 import functools
 
-from ccpcode._AbstractWrapperClass import AbstractWrapperClass
-from ccpcode._Project import Project
-from ccpncore.ccp.api.molecule.MolSystem import MolSystem as Ccpn_MolSystem
+from ccpn._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._Project import Project
+from ccpncore.api.molecule.MolSystem import MolSystem as Ccpn_MolSystem
 
 
 class Molecule(AbstractWrapperClass):

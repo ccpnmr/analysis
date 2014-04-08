@@ -65,7 +65,6 @@ oldVersionTags = ('2.0.a0', '2.0.a1', '2.0.a2', '2.0.a3',
 import time
 
 from ccpncore.memops.scripts import makePython
-from ccpncore.memops.metamodel import XmlModelIo
 from ccpncore.memops.scripts.xmlio import CompatibilityGen
 
         

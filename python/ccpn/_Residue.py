@@ -3,7 +3,7 @@ import functools
 
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Chain import Chain
-from ccpcore.api.molecule.MolSystem import Residue as Ccpn_Residue
+from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
 from ccpnmr.dataIo.DataMapper import DataMapper
 
 def splitIntFromChars(value:str):

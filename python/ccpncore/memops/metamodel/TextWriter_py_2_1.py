@@ -6,11 +6,11 @@
 
 import time
 import os
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.util import Path
 
 from ccpncore.memops.metamodel import MetaModel
 MemopsError = MetaModel.MemopsError
-from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.util import Path
 
 ######################################################################
 # hack for Python 2.1 compatibility  NBNB                            #
@@ -228,6 +228,7 @@ class TextWriter_py_2_1:
 
     if not os.path.exists(dirName):
       self.createDir(os.path.dirname(dirName))
+      print ('### CREATE DIR', dirName)
       try:
         os.mkdir(dirName)
       except:

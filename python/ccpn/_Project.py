@@ -1,7 +1,7 @@
 
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
-from ccpncore.api.nmr.Nmr import NmrProject as Ccpn_NmrProject
-from ccpncore.memops.general import Implementation as genImpl
+from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
+from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
 
 
@@ -52,6 +52,9 @@ class Project(AbstractWrapperClass):
   
   def _registerAllNotify(self):
     """Register or remove notifiers"""
+
+    # TODO notifier system NOT in working order - class-specific getNotifier functions broken
+
     classes = [self.__class__]
     for cls in classes:
       # breadth-firts traversal of child class tree
@@ -64,19 +67,22 @@ class Project(AbstractWrapperClass):
         previousNotify = self._activeNotifiers.get(tt)
         if previousNotify:
           # remove previously set notifier
-          genImpl.unregisterNotify(previousNotify, className, funcName)
+          Notifiers.unregisterNotify(previousNotify, className, funcName)
         
         # set new notifier in list for later removal
         self._activeNotifiers[tt] = notify
         
         # register notifier
-        genImpl.unregisterNotify(notify, className, funcName)
+        Notifiers.registerNotify(notify, className, funcName)
   
   def _unregisterAllNotify(self):
     """Register already prepared notifiers"""
+
+    # TODO notifier system NOT in working order - class-specific getNotifier functions broken
+
     while self._activeNotifiers:
       tt,func = self._activeNotifiers.popitem()
-      genImpl.unregisterNotify(func, tt[0], tt[1])
+      Notifiers.unregisterNotify(func, tt[0], tt[1])
   
   def _initializeAll(self):
     """Initialize children, using existing objects in data model"""

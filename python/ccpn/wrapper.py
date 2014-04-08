@@ -1,6 +1,6 @@
 """Wrapper around CCPN NMR project - only file appliations need to import"""
 
-from ccp.api.nmr.Nmr import NmrProject as Ccpn_NmrProject
+from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
 
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported

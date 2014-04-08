@@ -174,6 +174,8 @@ def getBestChemComp(project, resName, atomNames, molType=None, download=True):
 
   Word (Molecule.MolResidue.ccpCodes)
   """
+
+  # TODO NBNB move to lib.memops.Implementation.MemopsRoot.py
   
   # TODO NBNB Refactor. Now non-proteins also have names of form 'Xyz'
   
@@ -292,6 +294,8 @@ def findMatchingMolSystemAtom(atomName, residue, namingSystem, excludeAtoms,
   #weirdos = {'O1P':'OP1','O2P':'OP2','C5A':'C7'}
   #if weirdos.get(atomName) and residue.molResidue.molType in nulciec:
   #  atomName = weirdos[atomName]
+
+  # TODO NBNB refaotor signature, and move to lib.ccp.molecule.Molecule.Residue
   
   # If desired change (e.g.) '2HB' to 'HB2'
   if fixAtomNames and atomName[0] in '123':
@@ -365,6 +369,8 @@ def priorityOrderedNamingSystems(chemComp, prefNamingSystemName=None):
 
   List of (ChemComp.NamingSystem)
   """
+
+  # NBNB TODO move to lib.ccp.molecule.ChemComp.ChemComp
   
   result = []
   

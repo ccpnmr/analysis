@@ -39,8 +39,8 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 
 """
 
-from ccp.general.ChemCompOverview import chemCompOverview
-from ccp.general.Io import getChemComp, getStdChemComps
+from ccpncore.lib.chemComp.ChemCompOverview import chemCompOverview
+#from ccp.general.Io import getChemComp, getStdChemComps
 
 # priority order of naming systems
 namingSystemPriorityOrder = ['PDB','IUPAC','PDB_REMED','BMRB','XPLOR',

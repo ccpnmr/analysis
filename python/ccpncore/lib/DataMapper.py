@@ -68,7 +68,7 @@ import os
 #from ccpnmr.analysis.core import AssignmentBasic, ConstraintBasic
 #from ccp.lib import MoleculeAlign
 from ccpncore.lib import DataConvertLib
-from ccp.lib import MoleculeQuery
+from ccpncore.lib import MoleculeQuery
 
 emptyTuple = ()
 

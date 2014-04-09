@@ -4,7 +4,7 @@ import functools
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Chain import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
-from ccpnmr.dataIo.DataMapper import DataMapper
+from ccpncore.lib.DataMapper import DataMapper
 
 def splitIntFromChars(value:str):
   """convert a string with a leading integer optionally followed by characters

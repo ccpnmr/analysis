@@ -5,7 +5,7 @@ from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Molecule import Molecule
 from ccpncore.api.ccp.molecule.MolSystem import Chain as Ccpn_Chain
 from ccpncore.lib import MoleculeModify
-from ccpnmr.dataIo.DataMapper import DataMapper
+from ccpncore.lib.DataMapper import DataMapper
 
 
 class Chain(AbstractWrapperClass):

@@ -220,9 +220,13 @@ def getBestChemComp(project, resName, atomNames, molType=None, download=True):
             chemComp = chemCompTest
             break
  
+        else:
+          continue
+        break
+
       else:
         continue
-      break 
+      break
     
     # get ChemComp outside std ChemComps, 
     if not chemComp:

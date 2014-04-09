@@ -106,7 +106,7 @@ class Project(AbstractWrapperClass):
     return self._wrappedData.guid
     
   @property
-  def parent(self) -> AbstractWrapperClass:
+  def _parent(self) -> AbstractWrapperClass:
     """Parent (containing) object."""
     return None
   

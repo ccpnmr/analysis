@@ -375,7 +375,7 @@ def getCompatibilityModule(fromVersion):
   """
   compModules = ['Minor', 'General', 'MapInfo']
   
-  from ccpncore.Version import cmpVersionStrings
+  from ccpncore.memops.Version import cmpVersionStrings
   
   newVersion = currentVersionStr
   

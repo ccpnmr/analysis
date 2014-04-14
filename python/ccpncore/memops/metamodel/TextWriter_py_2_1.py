@@ -448,7 +448,7 @@ class TextWriter_py_2_1:
     otherwise it is relative to the relevant baseDir
     """
     
-    # absoulte or relative path
+    # absolute or relative path
     if absoluteName:
       pathList = [self.rootDirName, self.baseDirName]
     else:

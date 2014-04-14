@@ -564,7 +564,7 @@ for event, elem in ElementTree.iterparse(stream, events=("start", "end")):
   def streamDoCompatibility(self):
 
     self.writeOne('from ccpncore.memops.format.compatibility import Converters1')
-    self.writeOne('Converters1.minorPostProcess(fileVersion, result, delayDataDict, objectDict, mapping, topObjElem)')
+    self.writeOne('Converters1.minorPostProcess(fileVersion, result, delayDataDict, objectDict, mapping)')
 
   ###########################################################################
 
@@ -572,15 +572,15 @@ for event, elem in ElementTree.iterparse(stream, events=("start", "end")):
 
   # LoadFromStream function
   # implements XmlMapWrite
-  def streamSetupCompatibility(self):
-    
-    self.writeComment('Set up for compatibility - keeping XML parse tree')
-    self.setVar('clearElem', self.getDictEntry('mapping', '"clearXmlElements"'))
-    self.startIf('clearElem')
-    self.setVar('topObjElem', 'elem')
-    self.elseIf()
-    self.setVar('topObjElem', None)
-    self.endIf()
+  # def streamSetupCompatibility(self):
+  #
+  #   self.writeComment('Set up for compatibility - keeping XML parse tree')
+  #   self.setVar('clearElem', self.getDictEntry('mapping', '"clearXmlElements"'))
+  #   self.startIf('clearElem')
+  #   self.setVar('topObjElem', 'elem')
+  #   self.elseIf()
+  #   self.setVar('topObjElem', None)
+  #   self.endIf()
 
 
   ###########################################################################

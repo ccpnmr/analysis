@@ -1800,7 +1800,7 @@ require some code modifications.
     self.setVar('topObjByGuid', ss, castType=tt)
     self.writeNewline()
     
-    self.streamSetupCompatibility()
+    # self.streamSetupCompatibility()
 
     # IF BLOCK 107
     self.elseIf()
@@ -3504,9 +3504,9 @@ derefencing as you go using objectDict.
   ###########################################################################
   
   # LoadFromStream function
-  def streamSetupCompatibility(self):
-
-    raise MemopsError("must be overridden")
+  # def streamSetupCompatibility(self):
+  #
+  #   raise MemopsError("must be overridden")
 
   ###########################################################################
 

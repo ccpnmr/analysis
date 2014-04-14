@@ -17,7 +17,7 @@ from ccpncore.memops.metamodel import MetaModel, TextWriter_py_2_1
 
 MemopsError = MetaModel.MemopsError
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.memops.metamodel import TaggedValues
+# from ccpncore.memops.metamodel import TaggedValues
 from ccpncore.memops.metamodel.ModelPortal import ModelPortal
 from ccpncore.memops.metamodel import ModelTraverse_py_2_1
 from ccpncore.memops.metamodel import Util as metaUtil
@@ -175,11 +175,12 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
         raise MemopsError(" TextWriter lacks mandatory %s attribute" % tag)     
     
     # special parameters: optional with default values
-    if self.rootFileName is None:
-      self.rootFileName = metaConstants.rootPackageDirName
-    
-    if self.rootDirName is None:
-      self.rootDirName = modelPath.getModelDirectory(self.versionTag)
+    if self.rootFileName is None or self.rootDirName is None:
+      self.fileName = os.path.join(modelPath.getModelDirectory(self.versionTag),
+                                     metaConstants.rootPackageDirName)
+    else:
+      self.fileName = os.path.join(self.rootDirName, self.rootFileName)
+
     
     # process self.includePackageNames, including container names
     inclNames = self.includePackageNames
@@ -192,7 +193,6 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
             inclNames.append(ss)
     
     self.fp = None
-    self.fileName = ''
     self.indent = 0
     self.indents = []
     self.errorMsg = ''
@@ -206,19 +206,11 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
     # set up
     self.objMap = {}
     self.delayedLoadData = []
-    
-    # make dummy top object and use to get appropriate file name
-    dummy = MetaModel.MetaPackage(name=metaConstants.rootPackageName,
-    guid='www.ccpn.ac.uk_RasmusFogh_2006-06-21-19:13:29_00000',
-     taggedValues={'packageGroup':TaggedValues.defaultPackageGroup}
-    )
-    rootfile = self.getObjFileName(dummy, addSuffix=True)
-    del dummy
 
-    print('### loading ', rootfile)
+    print('### loading ', self.fileName)
 
     # parse XML file and recurse over xIncluded files
-    self.loadXmlFile(rootfile)
+    self.loadXmlFile(self.fileName)
     
     # load delayed data
     self.loadDelayedData()

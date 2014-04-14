@@ -2,12 +2,15 @@ import os
 from ccpncore.util import Path
 from ccpncore.memops import Version
 from ccpncore.memops.metamodel import MetaModel
+from ccpncore.memops.metamodel import XmlModelIo
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.format.xml import XmlGen
 from ccpncore.memops.metamodel.ModelPortal import ModelPortal
 from ccpncore.memops.scripts.core import PyFileModelAdapt
+from ccpnmodel.util import Conversion
 
-from ccpnmodel.util import Path as modelPath
+compDataDir = 'ccpncore/memops/compatibility'
+defaultInfoFile = 'MapInfo.py'
 
 implTemplate = "%s.%s.%%s" % (metaConstants.modellingPackageName,
                               metaConstants.implementationPackageName)
@@ -33,53 +36,41 @@ class LocalXmlGen(XmlGen.XmlGen):
     super(LocalXmlGen, self).__init__()
 
 
-def makeUpgrade(oldTag, curTopPackage=None, modelPortal=None,
-                includePackageNames=(), excludePackageNames=(), 
-                infoFileName=None):
-  """ Make upgrader code from 'oldTag' version to current
-  Will look for the old model using Version.getRepositoryDir(tag)
+def makeUpgrade(fromVersionTag, toVersionTag, toTopPackage=None, modelPortal=None,
+                includePackageNames=(), excludePackageNames=(), infoFileName=None):
+  """ Make upgrade or downgrade map code from fromVersion to toVersion
+  Will look for the models in ccpnmodel.versionDir
   and place the compatibility code in e.g.
-  ccpncore/memops/format/compatibility/upgrade/v_2_0_3
-  ccpncore/memops/format/compatibility/downgrade/v_2_2_1
+  ccpncore/memops/format/compatibility/upgrade/v_2_0_3/MapInfo.py
+  ccpncore/memops/format/compatibility/downgrade/v_2_2_1/MapInfo.py
   """
-  
-  compDataDir = 'python/ccpncore/memops/format/compatibility/'
-  infoMod = "ccpncore.memops.format.compatibility."
+
   if infoFileName is None:
-    infoFileName = 'MapInfo.py'
+    infoFileName = defaultInfoFile
+
+  fromVersion = Version.Version(fromVersionTag)
+  toVersion = Version.Version(toVersionTag)
+  if fromVersion == toVersion:
+    raise Exception("Trying to make compatibility between identical versions: %s %s"
+                    % (fromVersion, toVersion))
   
-  if curTopPackage is None:
-    curTopPackage = modelPath.readModel(includePackageNames=includePackageNames,
-                                        excludePackageNames=excludePackageNames)
-  
-  # find old implementation top directory, and old version string .
-  currentTopDir = Path.getTopDirectory()
-  currentVersion = versionFromDir(currentTopDir)
-  
-  # get top directory for old version file tree
-  oldDirName = Version.getRepositoryDir(oldTag)
-  
-  # get old version string and directiory name derived from it.
-  oldVersion = versionFromDir(oldDirName)
-  oldVersionDirName = dirNameFromVersionString(str(oldVersion))
-  
-  oldTopPackage = modelPath.readModel(oldTag, includePackageNames=includePackageNames,
+  if toTopPackage is None:
+    toTopPackage = XmlModelIo.readModel(versionTag=toVersionTag,
+                                       includePackageNames=includePackageNames,
                                        excludePackageNames=excludePackageNames)
-  
-  if currentVersion >= oldVersion:
-    loc = 'upgrade'
-  else:
-    loc = 'downgrade'
-  
+
+  fromTopPackage = XmlModelIo.readModel(versionTag=fromVersion,
+                                      includePackageNames=includePackageNames,
+                                      excludePackageNames=excludePackageNames)
+
   # full name for map info file
-  mapInfoFile = os.path.join(currentTopDir, compDataDir+loc, oldVersionDirName, 
+  mapInfoFile = os.path.join(Path.getPythonDirectory(), compDataDir, fromVersion.getDirName(),
                              infoFileName)
-  
-  genData = __import__('.'.join((infoMod+loc, oldVersionDirName, 'General')),
-                       {}, {}, ['elementPairings'])
-  
-  makeCompatibility(oldTopPackage, curTopPackage, modelPortal=modelPortal,
-                    elementPairings=genData.elementPairings, 
+
+  conversionInfo = Conversion.getConversionInfo(fromVersion, toVersion)
+
+  makeCompatibility(fromTopPackage, toTopPackage, modelPortal=modelPortal,
+                    elementPairings=conversionInfo['elementPairings'],
                     fileName=mapInfoFile)
 
 def dirNameFromVersionString(versionString):
@@ -102,18 +93,18 @@ def versionFromDir(topDir):
     return  None
     
   
-def makeCompatibility(oldmodel, newmodel, modelPortal=None, 
-                      elementPairings=None, fileName='NewCompatibility.py'):
+def makeCompatibility(fromModel, toModel, modelPortal=None,
+                      elementPairings=None, fileName='CompatibilityMapInfo.py'):
   """ Make compatibility info for converting oldModel to newModel.
   elementPairings is a list of (oldGuid, newGuid) pairs that
   map elements from the two models. Note that several old guids
   can map to a single new guid and vice versa.
   """
   
-  comparison = MetaModel.compareModels(oldmodel, newmodel, 
+  comparison = MetaModel.compareModels(fromModel, toModel,
                                        elementPairings=elementPairings)
   if modelPortal is None:
-    modelPortal = ModelPortal(newmodel)
+    modelPortal = ModelPortal(toModel)
     PyFileModelAdapt.processModel(modelPortal)
   xmlGen = LocalXmlGen(modelPortal=modelPortal)
   xmlGen.processModel()

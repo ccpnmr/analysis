@@ -57,25 +57,31 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 """
 
-# repository tags for old version to makec compatibilty for
-oldVersionTags = ('2.0.a0', '2.0.a1', '2.0.a2', '2.0.a3', 
-                  '2.0.b1', '2.0.b2', '2.0.b3', '2.0.4', '2.0.5', '2.0.6',
-                  '2.1.0', '2.1.1','2.1.2',)
+# repository tags for old version to make compatibilty for
+#By default takes complete linear versoin list fro current oldVersionTag
+#NBNB TODO version 2.0.6 not supported yet.
+# NBNB TODO data downgrade not supported yet
 
 import time
+import importlib
 
+from ccpncore.memops import Version
 from ccpncore.memops.scripts import makePython
 from ccpncore.memops.scripts.xmlio import CompatibilityGen
+
+# Default situation - upgrade from all old versions to current one
+currentVersion = Version.currentModelVersion
+currentUpgradeModule = importlib.import_module('ccpnmodel.%s.upgrade' % currentVersion.getDirName())
+oldVersionTags = currentUpgradeModule.versionSequence
 
         
 if __name__ == '__main__':
   
-  modelPortal = makePython.getModelPortal()
-  
   # make compatibility code
   start = time.time()
+  modelPortal = makePython.getModelPortal(currentVersion)
   for oldTag in oldVersionTags:
-    CompatibilityGen.makeUpgrade(oldTag, modelPortal=modelPortal)
+    CompatibilityGen.makeUpgrade(Version.Version(oldTag), currentVersion, modelPortal=modelPortal)
   end = time.time()
   print ("""
   Memops made Compatibility maps, time %s

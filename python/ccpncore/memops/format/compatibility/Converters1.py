@@ -45,17 +45,23 @@ automated software development. Bioinformatics 21, 1678-1684.
  
 """
 # imports
+import importlib
+from ccpnmodel.util import Conversion
 from ccpncore.memops.ApiError import ApiError
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.memops.Version import currentModelVersion
-currentVersionStr = str(currentModelVersion)
-   
+from ccpncore.memops import Version
+currentVersion = Version.currentModelVersion
 
-def modifyIoMap(oldVersionStr, globalMapping):
+mapInfoLocation = 'ccpncore.memops.format.compatibility'
+
+
+def modifyIoMap(fromVersionStr, globalMapping):
   """ Adapt globalMapping to read oldVersion data
   """
-  
-  compatibilityModule = getCompatibilityModule(oldVersionStr)
+
+  fromVersion = Version.Version(fromVersionStr)
+
+  infodd = Conversion.getConversionInfo(fromVersion, currentVersion)
   
   # Model information by guid
   anApiClass = globalMapping['IMPL']['abstractTypes']['MemopsObject']['class']
@@ -63,9 +69,9 @@ def modifyIoMap(oldVersionStr, globalMapping):
   
   # new elements retrofitted by hand and therefore treated as old 
   # used for e.g. changes of parent tree.
-  elemsTreatedAsOld = set(compatibilityModule.General.elemsTreatedAsOld)
+  elemsTreatedAsOld = set(infodd['elemsTreatedAsOld'])
 
-  diffMap = compatibilityModule.MapInfo
+  diffMap =  importlib.import_module('%s.%s.MapInfo' % (mapInfoLocation,fromVersion.getDirName()))
 
   # correct maps for newly introduced elements
   for tag in ('newElements', 'newMandatories', 'neutraliseElements'):
@@ -113,7 +119,7 @@ def modifyIoMap(oldVersionStr, globalMapping):
                     elemMap=elemMap)
   
   # make extra changes
-  compatibilityModule.General.extraMapChanges(globalMapping)
+  infodd['extraMapChanges'](globalMapping)
   
 def removeElementName(guid, globalMapping, newElementsByGuid):
   """ Remove element from name lists used for selecting input
@@ -370,54 +376,7 @@ def getElementsByGuid(rootPackage):
   #
   return makeObjDict(rootPackage, ignoreImplicit=True, crucialOnly=True)
 
-def getCompatibilityModule(fromVersion):
-  """ import relevant compatibility module
-  """
-  compModules = ['Minor', 'General', 'MapInfo']
-  
-  from ccpncore.memops.Version import cmpVersionStrings
-  
-  newVersion = currentVersionStr
-  
-  compar = cmpVersionStrings(fromVersion, newVersion)
-  if compar < 0:
-    # fromVersion is older 
-    srcDir = 'upgrade'
-  
-  elif compar > 0:
-    # fromVersion is newer 
-    srcDir = 'downgrade'
-  
-  else:
-    # versions identical
-    return
-    
-  ss = fromVersion.replace('.', '_')
-  moduleDir = "ccpncore.memops.format.compatibility.%s.v_%s" % (srcDir, ss)
-  try:
-    result = __import__(moduleDir, {}, {}, compModules)
-  except ImportError:
-    if compar < 0:
-      raise ApiError("""Could not import %s
-Backwards compatibility from %s to %s missing.""" 
-       % (moduleDir, fromVersion, newVersion))
-    else:
-      raise ApiError("""Could not import %s
-Forwards compatibility from %s to %s missing.
-Trying to load new-version data with old-version code?
-""" 
-       % (moduleDir, fromVersion, newVersion))
-      
-  
-  for ss in compModules:
-    if not hasattr(result, ss):
-      raise ApiError("Compatibility error: No module %s found in %s" 
-                     % (ss, moduleDir))
-  #
-  return result
-
-def minorPostProcess(fromVersionStr, topObj, delayDataDict, toNewObjDict,
-                     mapping=None, topObjElem=None):
+def minorPostProcess(fromVersion, topObj, delayDataDict, toNewObjDict, mapping=None):
   """ postProcess - update newRoot object tree
   May be used to postprocess a file load (minor upgrade)
   
@@ -425,16 +384,8 @@ def minorPostProcess(fromVersionStr, topObj, delayDataDict, toNewObjDict,
   delayDataDict is a {newobj:{tag:value}} dictionary of delayed set elements
   and children
   toNewObjDict is _ID:newObj for minor upgrades
+  mapping is the IO mapping
   """
-  
-  mod = getCompatibilityModule(fromVersionStr)
-  if mod is not None:
-    if topObjElem:
-      # Done like this to avoid rewriting correctData functions that do
-      # not need topObjElem
-      mod.Minor.correctData(topObj, delayDataDict, toNewObjDict, mapping, 
-                            topObjElem)
-    else:
-      mod.Minor.correctData(topObj, delayDataDict, toNewObjDict, mapping)
 
-
+  infodd = Conversion.getConversionInfo(fromVersion, currentVersion)
+  infodd['correctData'](topObj, delayDataDict, toNewObjDict, mapping)

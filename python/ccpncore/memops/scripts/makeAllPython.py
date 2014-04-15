@@ -80,7 +80,7 @@ if __name__ == '__main__':
   # make compatibility code
   start = time.time()
   modelPortal = makePython.getModelPortal(currentVersion)
-  for oldTag in oldVersionTags:
+  for oldTag in oldVersionTags[:-1]:
     CompatibilityGen.makeUpgrade(Version.Version(oldTag), currentVersion, modelPortal=modelPortal)
   end = time.time()
   print ("""

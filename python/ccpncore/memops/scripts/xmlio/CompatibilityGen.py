@@ -9,7 +9,7 @@ from ccpncore.memops.metamodel.ModelPortal import ModelPortal
 from ccpncore.memops.scripts.core import PyFileModelAdapt
 from ccpnmodel.util import Conversion
 
-compDataDir = 'ccpncore/memops/compatibility'
+compDataDir = 'ccpncore/memops/format/compatibility'
 defaultInfoFile = 'MapInfo.py'
 
 implTemplate = "%s.%s.%%s" % (metaConstants.modellingPackageName,
@@ -95,7 +95,7 @@ def versionFromDir(topDir):
   
 def makeCompatibility(fromModel, toModel, modelPortal=None,
                       elementPairings=None, fileName='CompatibilityMapInfo.py'):
-  """ Make compatibility info for converting oldModel to newModel.
+  """ Make compatibility info for converting fromModel to toModel.
   elementPairings is a list of (oldGuid, newGuid) pairs that
   map elements from the two models. Note that several old guids
   can map to a single new guid and vice versa.
@@ -109,7 +109,10 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
   xmlGen = LocalXmlGen(modelPortal=modelPortal)
   xmlGen.processModel()
   globalMapping = xmlGen.globalMap
-  
+
+  dirName = os.path.dirname(fileName)
+  if not os.path.exists(dirName):
+    os.makedirs(dirName)
   fp = open(fileName, 'w')
   
   dict1 = comparison['dict1']
@@ -122,11 +125,11 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
     # elements unique in old model
     if ee.container not in elems:
       if isinstance(ee, MetaModel.AbstractDataType):
-        skips.append((ee.container.shortName, ee.name, None, ee.guid, 
+        skips.append((ee.container.shortName, ee.name, '', ee.guid,
                       ee.__class__.__name__))
         
       elif isinstance(ee, MetaModel.MetaPackage):
-        skips.append((ee.shortName, None, None, ee.guid, ee.__class__.__name__))
+        skips.append((ee.shortName or '', '', '', ee.guid, ee.__class__.__name__))
         
       elif (isinstance(ee, MetaModel.MetaOperation) or 
             isinstance(ee, MetaModel.MetaConstraint)):
@@ -215,6 +218,9 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
           # ee valueType does not exist and can not be substituted. Skip.
           skips.append((cc.container.shortName, cc.name, ee.name, ee.guid, ee.__class__.__name__))
      
+  for tt in skips:
+    if None in tt:
+      print('###', tt)
   skips.sort()
   fp.write('''
 # Packages, classElements and AbstractDataTypes skipped in new model
@@ -222,7 +228,7 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
 skipElements = [
 ''')
   for tt in skips: 
-    fp.write(" %s, \n" % (tt,))
+    fp.write(" %s, \n" % (tuple(x or None for x in tt),))
   fp.write(']\n')
       
   delays.sort()
@@ -260,11 +266,14 @@ delayElements = [
           optional.append(tt)
     
     elif isinstance(ee, MetaModel.AbstractDataType):
-      optional.append((ee.container.shortName, ee.name, None, ee.guid))
+      optional.append((ee.container.shortName, ee.name, '', ee.guid))
       
     elif isinstance(ee, MetaModel.MetaPackage):
-      optional.append((ee.shortName, None, None, ee.guid))
-  
+      optional.append((ee.shortName or '', '', '', ee.guid))
+
+  for tt in optional:
+    if None in tt:
+      print('@@@', tt)
   mandatory.sort()
   optional.sort()
   constraints.sort()
@@ -294,8 +303,8 @@ newMandatories = [
 # (prefix, typeName, elemName, newGuid)
 newElements = [
 ''')
-  for tt in optional: 
-    fp.write(" %s, \n" % (tt,))
+  for tt in optional:
+    fp.write(" %s, \n" % (tuple(x or None for x in tt),))
   fp.write(']\n')
         
   # 
@@ -357,7 +366,7 @@ newElements = [
             # isinstance(newobj, MetaModel.AbstractDataType)
             shortName = oldobj.container.shortName
             oldobjName =  oldobj.name
-            tt = (shortName, oldobjName, None)
+            tt = (shortName, oldobjName, '')
             renames[tt] = (newobj.name, newGuid)
             
             # add renames for oldobj classElements - their XML tags will change
@@ -386,8 +395,10 @@ newElements = [
         newvt = newobj.valueType
         oldvt = oldobj.valueType
         
-        if [x for x in oldvt.getAllSupertypes() if x.guid == newvt.guid]:
+        if ([x for x in oldvt.getAllSupertypes() if x.guid == newvt.guid]
+            and oldvt.guid in globalMapping['mapsByGuid']):
           # relaxation: change from subtype to supertype - always OK
+          # NB standard treatment only works if te old type is still present in the new map
           action = 'ignore'
           valueTypeGuid = None
           
@@ -459,7 +470,7 @@ newElements = [
   neutraliseElements.sort()
   allDiffs.sort()
   typeChanges.sort()
-  namematch = comparison['namematch'].items()
+  namematch = list(comparison['namematch'].items())
   namematch.sort()
   
         
@@ -482,8 +493,10 @@ neutraliseElements = [
 # (prefix, typeName, elemName, newName, newGuid
 renames = [
 ''')
+
+  # NBNB kludge around the impossibility of sorting strings with None
   for tt1, tt2 in sorted(renames.items()):
-    fp.write(" %s, \n" % (tt1+tt2,))
+    fp.write(" %s, \n" % (tuple(x or None for x in tt1+tt2),))
   fp.write(']\n')
   
   fp.write('''

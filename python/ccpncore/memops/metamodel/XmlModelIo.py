@@ -31,6 +31,8 @@ infinity = metaConstants.infinity
 XINCLUDE_FALLBACK = metaUtil.ElementInclude.XINCLUDE_FALLBACK
 XINCLUDE_INCLUDE = metaUtil.ElementInclude.XINCLUDE_INCLUDE
 
+modelBaseDir = 'xml/memops'
+
 
 ######################################################################
 # hack for Python 2.1 compatibility  NBNB                            #
@@ -81,7 +83,7 @@ def writeModel(topPackage=None, modelPortal=None, rootFileName=None,
   xmlModelGen.processModel()
 
 
-def readModel(rootFileName=None, rootDirName=None, versionTag=None,
+def readModel(versionTag=None, rootFileName=None, rootDirName=None,
               excludePackageNames=None, includePackageNames=None, 
               checkValidity=True, **kw):
   """XML model reader
@@ -177,7 +179,8 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
     # special parameters: optional with default values
     if self.rootFileName is None or self.rootDirName is None:
       self.fileName = os.path.join(modelPath.getModelDirectory(self.versionTag),
-                                     metaConstants.rootPackageDirName)
+                                  modelBaseDir,
+                                  metaConstants.rootPackageDirName + '.' + self.fileSuffix)
     else:
       self.fileName = os.path.join(self.rootDirName, self.rootFileName)
 
@@ -207,7 +210,6 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
     self.objMap = {}
     self.delayedLoadData = []
 
-    print('### loading ', self.fileName)
 
     # parse XML file and recurse over xIncluded files
     self.loadXmlFile(self.fileName)
@@ -425,7 +427,7 @@ no href attribute found for %s element
     ll = self.delayedLoadData
     objMap = self.objMap
     
-    # loop over delaued data in reverse order till list is empty
+    # loop over delayed data in reverse order till list is empty
     while ll:
       ii = len(ll)
       modified = False

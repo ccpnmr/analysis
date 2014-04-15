@@ -2450,8 +2450,7 @@ class MetaPackage(MetaModelElement):
 
     # check mandatory packages and get implementation package
     RootPackage = self.topPackage()
-    ModellingPackage = RootPackage.getElement(
-      metaConstants.modellingPackageName)
+    ModellingPackage = RootPackage.getElement(metaConstants.modellingPackageName)
     if not isinstance(ModellingPackage, MetaPackage):
       raise MemopsError(
         "No package %s found" % metaConstants.modellingPackageName)

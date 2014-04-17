@@ -228,7 +228,6 @@ class TextWriter_py_2_1:
 
     if not os.path.exists(dirName):
       self.createDir(os.path.dirname(dirName))
-      print ('### CREATE DIR', dirName)
       try:
         os.mkdir(dirName)
       except:

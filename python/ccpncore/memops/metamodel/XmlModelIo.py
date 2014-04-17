@@ -905,7 +905,6 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
   def startXmlFile(self, obj):
     
     # do actual work
-    #print ('###', self.getObjFileName(obj))
     self.openFile(self.getObjFileName(obj))
     
     self.writeOne('<?xml version="1.0"?>')

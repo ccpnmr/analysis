@@ -131,7 +131,7 @@ class Version:
     return str(self._value)
 
   def __repr__(self):
-    return repr(self._value_)
+    return repr(self._value)
 
   def __lt__(self, other):
 

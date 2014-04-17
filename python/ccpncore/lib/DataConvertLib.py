@@ -305,7 +305,6 @@ def findMatchingMolSystemAtom(atomName, residue, namingSystem, excludeAtoms,
   if fixAtomNames and atomName[0] in '123':
     # move leading indices to end of name
     atomName = atomName[1:] + atomName[0]
-    #print '### newName', atomName
   
   # get list of atomSysNames for preferred NamingSystem and its reference systems
   # First by sysName, then by altSysNames

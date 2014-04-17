@@ -217,10 +217,7 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
         else:
           # ee valueType does not exist and can not be substituted. Skip.
           skips.append((cc.container.shortName, cc.name, ee.name, ee.guid, ee.__class__.__name__))
-     
-  for tt in skips:
-    if None in tt:
-      print('###', tt)
+
   skips.sort()
   fp.write('''
 # Packages, classElements and AbstractDataTypes skipped in new model
@@ -271,9 +268,6 @@ delayElements = [
     elif isinstance(ee, MetaModel.MetaPackage):
       optional.append((ee.shortName or '', '', '', ee.guid))
 
-  for tt in optional:
-    if None in tt:
-      print('@@@', tt)
   mandatory.sort()
   optional.sort()
   constraints.sort()

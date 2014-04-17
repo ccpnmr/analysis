@@ -534,10 +534,10 @@ for event, elem in ElementTree.iterparse(stream, events=("start", "end")):
     super(PyXmlMapWrite, self).streamEndElement()
 
     # clean out to save memory#
-    self.writeComment('clean out to save memory')
-    self.startIf('clearElem')
-    self.writeOne('elem.clear()')
-    self.endIf()
+    # self.writeComment('clean out to save memory')
+    # self.startIf('clearElem')
+    # self.writeOne('elem.clear()')
+    # self.endIf()
 
     # IF BLOCK 100
     self.endIf()
@@ -646,10 +646,10 @@ else:
       elem = 'elem'
 
     self.writeOne('skipElement = %s' % elem)
-    if setToNone:
-      self.startIf('clearElem')
-      self.writeOne('elem.clear()')
-      self.endIf()
+    # if setToNone:
+    #   self.startIf('clearElem')
+    #   self.writeOne('elem.clear()')
+    #   self.endIf()
 
   ###########################################################################
 

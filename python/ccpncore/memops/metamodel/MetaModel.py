@@ -661,21 +661,30 @@ def compareModels(model1, model2, elementPairings=None, ignoreImplicit=True):
     for guids in elementPairings:
 
       # check element pairs are consistent with models
+      # NB simply skip if there is a mismatch - we may have a valid  pair where one of the
+      # halves have been deleted in a later model
       for ii in 0, 1:
         jj = 1 - ii
         guid = guids[ii]
         if guid not in dicts[ii]:
-          raise MemopsError(
-            "%s from elementPairings not found in model %s " % (guid, ii))
+          # raise MemopsError(
+          #   "%s from elementPairings not found in model %s " % (guid, ii))
+          print( "WARNING from compareModels: %s from elementPairings not found in model %s "
+                 % (guid, ii))
+          break
         if guid in dicts[jj]:
-          raise MemopsError(
-            "%s (%s) from elementPairings found in model %s " % (
-              guid, dicts[jj][guid], jj))
+          # raise MemopsError(
+          #   "%s (%s) from elementPairings found in model %s " % (
+          #     guid, dicts[jj][guid], jj))
+          print( "WARNING from compareModels: %s (%s) from elementPairings found in model %s "
+                 % (guid, dicts[jj][guid], ii))
+          break
+      else:
 
-      # check diffs and append
-      diffs = compareElements(dict1[guids[0]], dict2[guids[1]],
-                              ignoreImplicit=ignoreImplicit)
-      differ.append((guids[0], guids[1], diffs))
+        # check diffs and append
+        diffs = compareElements(dict1[guids[0]], dict2[guids[1]],
+                                ignoreImplicit=ignoreImplicit)
+        differ.append((guids[0], guids[1], diffs))
 
     # clean element dicts
     for guids in elementPairings:

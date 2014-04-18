@@ -10,14 +10,21 @@ from ccpncore.api.memops import  Implementation
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.util import Path
 from ccpncore.util import ApiPath
+from ccpncore.util import Logging
 from ccpncore.util import Common as commonUtil
+from ccpncore.memops.ApiError import ApiError
 
 
 printWarning = None
 
+class DefaultIoHandler:
+  """Class to handle interactions with user and logging
+  Should be subclassed for actual functionality
+  This default class simply does nothing"""
+
 
 def newProject(projectName, path:str=None, removeExisting:bool=False,
-               showYesNo:"function"=None) -> Implementation.MemopsRoot:
+               showYesNo:"function"=None, applicationName='ccpn') -> Implementation.MemopsRoot:
   """
   Create, and return, a new project using a specified path (directory).
   If path is not specified it takes the current working directory.
@@ -44,12 +51,15 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
     fullPath = Path.joinPath(path, projectName) + repositoryNameMap[name]
     answer = checkRemoveIfExists(fullPath, removeExisting, showYesNo)
     if answer is None:
-      print ("Project overlaps existing file. Reeurning None")
+      print ("Project overlaps existing file. Returning None")
       return None
 
   project = Implementation.MemopsRoot(name=projectName)
 
-  print ("Project is ", project)
+  # create logger
+  logger = Logging.createLogger(applicationName, project)
+
+  logger.info("Project is ", project)
 
   for name in repositoryNameMap.keys():
     fullPath = Path.normalisePath(Path.joinPath(path, projectName)
@@ -59,8 +69,7 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
 
   return project
 
-def checkRemoveIfExists(path:str, removeExisting:bool=False,
-                        showYesNo:"function"=None) -> bool:
+def checkRemoveIfExists(path:str, removeExisting:bool=False, showYesNo:"function"=None) -> bool:
   """
   If path already exists:
     If removeExisting:
@@ -109,15 +118,13 @@ def checkRemoveIfExists(path:str, removeExisting:bool=False,
   return False
 
 
-
-
-def loadProject(path:str, projectName:str=None, showWarning:"function"=None, askFile:bool=None,
-                askDir:bool=None, suppressGeneralDataDir:bool=False):
+def loadProject(path:str, projectName:str=None, askFile:"function"=None,
+                askDir:"function"=None, suppressGeneralDataDir:bool=False,
+                applicationName='ccpn'):
   """
   Loads a project file and checks and deletes unwanted project repositories and
   changes the project repository path if the project has moved.  Returns the project.
   (The project repository path is effectively the userData repository.)
-  showWarning (if not None) has signature showWarning(title, message)
   askFile (if not None) has signature askFile(title, message, initial_value = '')
   askDir (if not None) has signature askDir(title, message, initial_value = '')
   Throws an IOError if there is an I/O error.
@@ -125,9 +132,6 @@ def loadProject(path:str, projectName:str=None, showWarning:"function"=None, ask
   """
 
   from ccpncore.memops.format.xml import XmlIO
-
-  if not showWarning:
-    showWarning = printWarning
 
   path = Path.normalisePath(path, makeAbsolute=True)
 
@@ -286,36 +290,37 @@ def loadProject(path:str, projectName:str=None, showWarning:"function"=None, ask
         # msg = 'Repository "%s" with path "%s" has no packageLocators, deleting' % (repository.name, oldPath)
         repository.delete()
       elif not os.path.exists(oldPath):
-        title = 'Repository path does not exist'
-        if showWarning is printWarning:
-          tt = ''
-        else:
-          tt = ' (see console for packages)'
-        msg = 'Repository "%s" path "%s" does not exist%s' % (repository.name, oldPath, tt)
 
-        print('List of packageLocators for repository "%s":' % repository.name)
+        msg = 'Repository "%s" path "%s" does not exist' % (repository.name, oldPath)
+        warningMessages.append(msg)
+
+        warningMessages.append('List of packageLocators for repository "%s":' % repository.name)
         for packageLocator in repository.stored:
-          print('  %s' % packageLocator.targetName)
+          warningMessages.append('  %s' % packageLocator.targetName)
 
         if askDir:
+          title = 'Repository path does not exist'
           newPath = askDir(title, msg + ': enter new path', initial_value=oldPath)
           while newPath and not os.path.exists(newPath):
             msg = 'Path "%s" does not exist' % newPath
             newPath = askDir(title, msg + ': enter new path', initial_value=newPath)
           if newPath:
             repository.url = Implementation.Url(path=Path.normalisePath(newPath))
-        else:
-          warningMessages.append(msg)
+            warningMessages.append("New path set: %s" % newPath)
+          else:
+            warningMessages.append(msg)
 
   if warningMessages:
-    showWarning('Warnings', '\n\n'.join(warningMessages))
+    logger = Logging.createLogger(applicationName, project)
+    for msg in warningMessages:
+      logger.warning(msg)
 
   return project
 
 
 def saveProject(project, newPath = None, newProjectName = None, changeBackup = True,
                 createFallback = False, removeExisting = False, showYesNo = None,
-                checkValid = False, changeDataLocations = False, showWarning = None):
+                checkValid = False, changeDataLocations = False):
   """
   Save the userData for a project to a location given by newPath (the url.path
   of the userData repository) if set, or the existing location if not.
@@ -347,6 +352,8 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
   If there is no exception or early return then at end userData is pointing to newPath.
   Return True if save done, False if not (unless there is an exception)
   """
+
+  logger = Logging.getLogger()
 
   # check project valid (so don't save an obviously invalid project)
   if checkValid:
@@ -413,24 +420,27 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
         topObjects.append(topObject)
         repositories.add(repository)
     if topObjects:
-      print('Warning, topObjects %s, in repositories %s, being left in original locations' % (topObjects, repositories))
+      logger.warning('TopObjects %s, in repositories %s, being left in original locations'
+                     % (topObjects, repositories))
+
+  oldUrl = userData.url
+  if changeBackup:
+    # change project backup url to point to new path
+    backupRepository = project.findFirstRepository(name="backup")
+    if backupRepository:
+      oldBackupUrl = backupRepository.url
+    else:
+      changeBackup = False
 
   try:
-    oldUrl = userData.url
-    if changeBackup:
-      # change project backup url to point to new path
-      backupRepository = project.findFirstRepository(name="backup")
-      if backupRepository:
-        oldBackupUrl = backupRepository.url
-      else:
-        changeBackup = False
-
     # copy userData files over
     if newPath != oldPath:
       # if os.path.exists(oldPath):  # only copy if this is a directory
       if os.path.isdir(oldPath):
         # just copy everything from oldPath to newPath
-        print('Copying directory %s to %s (this might take some time if there are big files)' % (oldPath, newPath))
+        logger.warning(
+          'Copying directory %s to %s (this might take some time if there are big files)'
+          % (oldPath, newPath))
         shutil.copytree(oldPath, newPath)
 
         # but need to remove all implementation files
@@ -543,7 +553,8 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
         dirName = os.path.dirname(newFullPath)
         if not os.path.exists(dirName):
           os.makedirs(dirName)
-        print('Copying file %s to %s (%d of %d)' % (oldFullPath, newFullPath, n+1, nfilesToCopy))
+        logger.warning('Copying file %s to %s (%d of %d)'
+                       % (oldFullPath, newFullPath, n+1, nfilesToCopy))
         shutil.copy(oldFullPath, newFullPath)
 
       # finally change dataUrl paths
@@ -558,7 +569,7 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
           topObject.save()
         except:
           location = ApiPath.getTopObjectPath(topObject)
-          print('Exception working on topObject %s, file %s' % (topObject, location))
+          logger.warning('Exception working on topObject %s, file %s' % (topObject, location))
           raise
       # be safe and do below in case new modifications after
       # modifiedTopObjects has been created
@@ -575,13 +586,10 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
         badTopObjects.append(topObject)
 
     if badTopObjects:
-      if showWarning:
-        showWarning('Incomplete save', 'It looks like one or more files did not save completely, see console for list')
-      print('It looks like one or more files did not save completely, you should check them:')
+      logger.warning(
+        'Incomplete save - one or more files did not save completely, you should check them:')
       for topObject in badTopObjects:
-        print()
-        print('%s, path:' % topObject)
-        print(ApiPath.getTopObjectPath(topObject))
+        logger.warning("Bad save: %s - %s" % (topObject, ApiPath.getTopObjectPath(topObject)))
       return False
 
     return True
@@ -599,3 +607,127 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
         Path.removePath(newPath)
       except:
         pass
+
+
+
+def checkFileAtPath(path):
+  """Check that file on disk ends correctly
+  """
+  if not os.path.exists(path):
+    return False
+
+  size = os.path.getsize(path)
+  fp = open(path, 'rU')
+
+  ss = '<!--End of Memops Data-->'
+  n = len(ss)
+  fp.seek(size-n-2, 0)  # -2 just to be safe in case has \r\n as line ending
+  data = fp.read().strip()[-n:]
+  fp.close()
+
+  return data == ss
+
+def checkFileIntegrity(topObject):
+  """Check that topObject file on disk ends correctly
+  """
+  path = ApiPath.getTopObjectPath(topObject)
+
+  return checkFileAtPath(path)
+
+def createTopObjectFallback(topObject):
+  """
+  Create backup of topObject in same directory as original file but with '.bak' appended.
+  This function is not intended to be used outside this module but could be.
+  """
+
+  logger = Logging.getLogger()
+
+  location = ApiPath.getTopObjectPath(topObject)
+  if not os.path.exists(location):
+    return
+
+  backupLocation = location + '.bak'
+  if not checkFileAtPath(location) and checkFileAtPath(backupLocation):
+    # current file no good and current backup good so do not do backup
+    logger.warning('File at location "%s" not complete so not backing up' % location)
+    return
+
+  # copy rather than move because will need that much disk space in any case
+  # and sometimes move fails at OS level if file with that name already exists
+  directory = os.path.dirname(backupLocation)
+  if not os.path.exists(directory):
+    os.makedirs(directory)
+  shutil.copy(location, backupLocation)
+
+
+def renameProject(project, newProjectName):
+  """ Rename project.
+  """
+
+  logger = Logging.getLogger()
+
+  logger.warning('Renaming project %s to %s' % (project.name, newProjectName))
+
+  # change project name
+  if newProjectName == project.name:
+    return
+
+  else:
+    project.override = True # TBD: for now name is frozen so change this way
+    try:
+      # below constraint is not checked in setName() if override is True so repeat here
+      isValid = newProjectName.isalnum()  # superfluous but faster in most cases
+      if not isValid:
+        for cc in newProjectName:
+          if cc != '_' and not cc.isalnum():
+            isValid = False
+            break
+        else:
+          isValid = True
+      if not isValid:
+        raise ApiError('project name must only have characters that are alphanumeric or underscore')
+
+      # below checks for length of name as well
+      project.name = newProjectName
+    finally:
+      project.override = False
+
+
+def _downlinkTagsByImport(root):
+  """ gives you the role names of links from MemopsRoot to TopObjects
+  in import order, so that imported packages come before importing packages
+  """
+
+  from ccpncore.memops.metamodel import Util as metaUtil
+
+  leafPackages = []
+  packages = [root.metaclass.container.topPackage()]
+  for pp in packages:
+    childPackages = pp.containedPackages
+    if childPackages:
+      packages.extend(childPackages)
+    else:
+      leafPackages.append(pp)
+
+  # sort leafPackages by import (imported before importing)
+  leafPackages = metaUtil.topologicalSortSubgraph(leafPackages,
+                                                  'accessedPackages')
+  tags = []
+  for pp in leafPackages:
+    cc = pp.topObjectClass
+    if cc is not None:
+      pr = cc.parentRole
+      if pr is not None:
+        tags.append(pr.otherRole.name)
+  #
+  return tags
+
+
+def loadAllData(root):
+  """ Load all data for a given root (version >= 2.0)
+  """
+  # load all new data before modifying IO map
+  for tag in _downlinkTagsByImport(root):
+    for topObj in getattr(root, tag):
+      if not topObj.isLoaded:
+        topObj.load()

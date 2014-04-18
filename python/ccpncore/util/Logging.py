@@ -60,8 +60,9 @@ import time
 # this code assumes we only have one project open at a time
 # when a new logger is created the handlers for the old one are closed
 
-# note that cannot do logger = getLogger() at top of a module because it almost certainly will not be what one wants
-# instead one has to do it at runtime, e.g. in a constructor inside a class or in a non-class function
+# note that cannot do logger = getLogger() at top of a module because it almost certainly
+# will not be what one wants. instead one has to do it at runtime, e.g. in a constructor
+# inside a class or in a non-class function
 
 # in general the application should call createLogger() before anyone calls getLogger()
 # but getLogger() can be called first for "short term" or "testing" use
@@ -112,7 +113,7 @@ def createLogger(loggerName, project, stream=None, level=logging.WARNING, mode='
   else:
     os.makedirs(logDirectory)
 
-  _removeOldLogFiles(logDirectory, removeOldLogsDays)
+  _removeOldLogFiles(logPath, removeOldLogsDays)
 
   logger = logging.getLogger(loggerName)
   logger.logPath = logPath  # just for convenience
@@ -143,11 +144,13 @@ def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):
 
   logDirectory = os.path.dirname(logPath)
   logFiles = os.listdir(logDirectory)
+  print ('###',logPath, logDirectory, logFiles)
   logFiles = [logFile for logFile in logFiles if logFile != logPath and not os.path.isdir(logFile)]
 
   currentTime = time.time()
   removeTime = currentTime - removeOldLogsDays * 24 * 3600
   for logFile in logFiles:
+    print ('### checking', logFile)
     mtime = os.path.getmtime(logFile)
     if mtime < removeTime:
       os.remove(logFile)

@@ -61,6 +61,10 @@ import os
 import shutil
 import sys
 
+dirsep = '/'
+# note, cannot just use os.sep below because can have window file names cropping up on unix machines
+winsep = '\\'
+
 # Note: makeAbsolute is Boolean so the default should be
 # False but ObjectDomain does not understand True/False
 def normalisePath(path, makeAbsolute=None):
@@ -68,10 +72,6 @@ def normalisePath(path, makeAbsolute=None):
   Normalises the path, e.g. removes redundant .. and slashes and
   makes sure path uses '/' rather than '\\' as can happen on Windows.
   """
-
-  dirsep = '/'
-  # note, cannot just use os.sep below because can have window file names cropping up on unix machines
-  winsep = '\\'
 
   if os.sep == winsep:
     path = path.replace(dirsep, winsep)

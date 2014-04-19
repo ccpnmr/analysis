@@ -371,7 +371,7 @@ allDiffs = [
  ('ccp.nmr.Nmr.IntensityType', 'IntensityType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', {'supertypes', 'supertype'}), 
  ('ccp.nmr.Nmr.ShiftRefType', 'ShiftRefType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', {'supertypes', 'supertype'}), 
  ('ccp.nmr.NmrReference.ChemAtomNmrDistrib.refAtoms', 'refAtoms', 'www.ccpn.ac.uk_Fogh_2010-05-14-17:17:46_00001', 'www.ccpn.ac.uk_Fogh_2010-05-14-17:17:46_00001', {'changeability'}), 
- ('ccp.nmr.NmrScreen.NmrScreen', 'NmrScreen', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', {'parentRole', 'supertypes', 'supertype', 'partitionsChildren'}), 
+ ('ccp.nmr.NmrScreen.NmrScreen', 'NmrScreen', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', {'supertypes', 'parentRole', 'supertype', 'partitionsChildren'}), 
  ('ccp.nmr.NmrScreen.NmrScreen.startDate', 'startDate', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00038', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00038', {'locard'}), 
  ('ccp.nmr.NmrScreen.RefSpectrum.concentration', 'concentration', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00053', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00053', {'container'}), 
  ('ccp.nmr.NmrScreen.RefSpectrum.dataSource', 'dataSource', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00050', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00050', {'container'}), 

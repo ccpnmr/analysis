@@ -389,12 +389,17 @@ newElements = [
         newvt = newobj.valueType
         oldvt = oldobj.valueType
         
-        if ([x for x in oldvt.getAllSupertypes() if x.guid == newvt.guid]
-            and oldvt.guid in globalMapping['mapsByGuid']):
+        if ([x for x in oldvt.getAllSupertypes() if x.guid == newvt.guid]):
+            # and oldvt.guid in globalMapping['mapsByGuid']):
           # relaxation: change from subtype to supertype - always OK
-          # NB standard treatment only works if te old type is still present in the new map
+          # NB standard treatment only works if the old type is still present in the new map
           action = 'ignore'
-          valueTypeGuid = None
+          if oldvt.guid in globalMapping['mapsByGuid']:
+            # old valueType is still around and can be used
+            valueTypeGuid = None
+          else:
+            # oldvt no longer around - switch to new vt
+            valueTypeGuid = newvt.guid
           
         elif [x for x in newvt.getAllSupertypes() if x.guid == oldvt.guid]:
           # restriction - change from supertype to subtype - delay

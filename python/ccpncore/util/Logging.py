@@ -144,13 +144,13 @@ def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):
 
   logDirectory = os.path.dirname(logPath)
   logFiles = os.listdir(logDirectory)
-  print ('###',logPath, logDirectory, logFiles)
+  # print ('###',logPath, logDirectory, logFiles)
   logFiles = [logFile for logFile in logFiles if logFile != logPath and not os.path.isdir(logFile)]
 
   currentTime = time.time()
   removeTime = currentTime - removeOldLogsDays * 24 * 3600
   for logFile in logFiles:
-    print ('### checking', logFile)
+    # print ('### checking', logFile)
     mtime = os.path.getmtime(logFile)
     if mtime < removeTime:
       os.remove(logFile)

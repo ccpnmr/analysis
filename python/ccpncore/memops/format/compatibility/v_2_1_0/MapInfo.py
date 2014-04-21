@@ -364,14 +364,14 @@ nameMatches = [
 # excluding those where only names and/or valueTypes differ
 # (oldElem.qName, newElem.name, oldGuid, newGuid, differentTags
 allDiffs = [
- ('cambridge.WmsProtocol.InterfaceParameter.hicard', 'hicard', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00005', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00005', {'locard', 'documentation', 'defaultValue'}), 
- ('cambridge.WmsProtocol.InterfaceParameter.locard', 'locard', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00006', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00006', {'documentation', 'defaultValue'}), 
+ ('cambridge.WmsProtocol.InterfaceParameter.hicard', 'hicard', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00005', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00005', {'locard', 'defaultValue', 'documentation'}), 
+ ('cambridge.WmsProtocol.InterfaceParameter.locard', 'locard', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00006', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00006', {'defaultValue', 'documentation'}), 
  ('cambridge.WmsProtocol.WmsProtocol', 'WmsProtocol', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', {'parentRole'}), 
  ('ccp.general.DataLocation.NumberType', 'NumberType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', {'supertypes', 'supertype'}), 
  ('ccp.nmr.Nmr.IntensityType', 'IntensityType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', {'supertypes', 'supertype'}), 
  ('ccp.nmr.Nmr.ShiftRefType', 'ShiftRefType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', {'supertypes', 'supertype'}), 
  ('ccp.nmr.NmrReference.ChemAtomNmrDistrib.refAtoms', 'refAtoms', 'www.ccpn.ac.uk_Fogh_2010-05-14-17:17:46_00001', 'www.ccpn.ac.uk_Fogh_2010-05-14-17:17:46_00001', {'changeability'}), 
- ('ccp.nmr.NmrScreen.NmrScreen', 'NmrScreen', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', {'parentRole', 'partitionsChildren', 'supertypes', 'supertype'}), 
+ ('ccp.nmr.NmrScreen.NmrScreen', 'NmrScreen', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', {'parentRole', 'supertypes', 'partitionsChildren', 'supertype'}), 
  ('ccp.nmr.NmrScreen.NmrScreen.startDate', 'startDate', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00038', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00038', {'locard'}), 
  ('ccp.nmr.NmrScreen.RefSpectrum.concentration', 'concentration', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00053', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00053', {'container'}), 
  ('ccp.nmr.NmrScreen.RefSpectrum.dataSource', 'dataSource', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00050', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00050', {'container'}), 

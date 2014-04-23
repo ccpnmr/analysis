@@ -933,7 +933,7 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
     self.startIf(self.comparison('typ', '==', self.toLiteral('link')))
 
 
-    ss = self.streamGetValue('value', '_ID', keyIsMandatory=True)
+    ss = self.streamGetValue('value', "'_ID'", keyIsMandatory=True)
     self.setVar('_ID', ss, varType=self.intVarType)
 
     #
@@ -1081,7 +1081,7 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
     self.writeComment('LOOP C')
     self.startLoop('value', 'vals', isUnique=False, isOrdered=True)
 
-    self.setVar('_ID', self.streamGetValue('value', '_ID', keyIsMandatory=True), varType=self
+    self.setVar('_ID', self.streamGetValue('value', "'_ID'", keyIsMandatory=True), varType=self
                 .intVarType, castType=self.intVarType)
 
     # self.setVar('_ID', self.getDictEntry('classIDs', 'value'), varType=self.intVarType, castType=self.intVarType)

@@ -598,7 +598,6 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
     # saveModified failed so revert to old values
     if newProjectName != oldProjectName:
       project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
-
     if newPath != oldPath:
       userData.url = oldUrl
       if changeBackup:

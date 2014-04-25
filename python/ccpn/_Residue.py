@@ -1,7 +1,6 @@
 
-import functools
-
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._Project import Project
 from ccpn._Chain import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
 from ccpncore.lib.DataMapper import DataMapper
@@ -105,19 +104,6 @@ class Residue(AbstractWrapperClass):
   def _getAllWrappedData(cls, parent: Chain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
     return parent._wrappedData.sortedResidues()
-  
-    
-  @classmethod
-  def _getNotifiers(cls, project) -> list:
-    """Get list of (className,funcName,notifier) tuples"""
-    
-    # NBNB TBD we should likely have som system of deleteAfter, createAfter
-    
-    #
-    className = Ccpn_Residue.qualifiedName
-    result = [(className, 'delete', self.delete), 
-              (className, '__init__', functools.partial(cls,project=project))]
-    return result
     
     
 def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None,
@@ -163,3 +149,10 @@ Chain.residues = Residue._wrappedChildProperty()
 
 # NBNB the below may not be inserted correctly as a method
 Chain.newResidue = newResidue
+
+# Notifiers:
+Project._apiNotifiers.extend(
+  ( ('_newObject', {'cls':Residue}, Ccpn_Residue.qualifiedName, '__init__'),
+    ('_finaliseDelete', {}, Ccpn_Residue.qualifiedName, 'delete')
+  )
+)

@@ -1,6 +1,4 @@
 
-import functools
-
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Project import Project
 from ccpncore.api.ccp.molecule.MolSystem import MolSystem as Ccpn_MolSystem
@@ -66,19 +64,7 @@ class Molecule(AbstractWrapperClass):
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (MolSystems) for all Molecules children of parent Project"""
     return parent._wrappedData.root.sortedMolSystems()
-  
-  @classmethod
-  def _getNotifiers(cls, project) -> list:
-    """Get list of (className,funcName,notifier) tuples"""
-    
-    # NBNB TBD we should likely have som system of deleteAfter, createAfter
-    
-    #
-    className = Ccpn_MolSystem.qualifiedName
-    result = [(className, 'delete', self.delete), 
-              (className, '__init__', functools.partial(cls,project=project))]
-    return result
-    
+
 def newMolecule(parent:Project, shortName:str, name:str=None, 
                 comment:str=None) -> Molecule:
   """Create new child Molecule"""
@@ -87,9 +73,13 @@ def newMolecule(parent:Project, shortName:str, name:str=None,
     
     
 # Connections to parents:
-
 Project._childClasses.append(Molecule)
 Project.molecules = Molecule._wrappedChildProperty()
-
-# NBNB the below may not be inseretd correctly as a method
 Project.newMolecule = newMolecule
+
+# Notifiers:
+Project._apiNotifiers.extend(
+  ( ('_newObject', {'cls':Molecule}, Ccpn_MolSystem.qualifiedName, '__init__'),
+    ('_finaliseDelete', {}, Ccpn_MolSystem.qualifiedName, 'delete')
+  )
+)

@@ -315,11 +315,6 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     if cls not in parent._childClasses:
       raise Exception
     raise NotImplementedError("Code error: function not implemented")
-  
-  @classmethod
-  def _getNotifiers(cls, project) -> list:
-    """Get list of (className,funcName,notifier) tuples"""
-    raise NotImplementedError("Code error: function not implemented")
     
 
   # CCPN functions
@@ -342,7 +337,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     # NBNB clean-up of wrapper structure is done via notifiers.
     # NBNB some child classes must override this function"""
     
-    self._wrappedData.delete(
+    self._wrappedData.delete()
     
     
   # CCPN Implementation methods

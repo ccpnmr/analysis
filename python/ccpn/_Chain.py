@@ -1,8 +1,7 @@
 
-import functools
-
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Molecule import Molecule
+from ccpn._Project import Project
 from ccpncore.api.ccp.molecule.MolSystem import Chain as Ccpn_Chain
 from ccpncore.lib import MoleculeModify
 from ccpncore.lib.DataMapper import DataMapper
@@ -123,20 +122,7 @@ class Chain(AbstractWrapperClass):
   def _getAllWrappedData(cls, parent: Molecule)-> list:
     """get wrappedData (MolSystem.Chains) for all Chain children of parent Molecule"""
     return parent._wrappedData.sortedChains()
-  
-    
-  @classmethod
-  def _getNotifiers(cls, project) -> list:
-    """Get list of (className,funcName,notifier) tuples"""
-    
-    # NBNB TBD we should likely have som system of deleteAfter, createAfter
-    
-    #
-    className = Ccpn_Chain.qualifiedName
-    result = [(className, 'delete', self.delete),
-              (className, '__init__', functools.partial(cls,project=project))]
-    return result
-    
+
 def newChain(parent:Molecule, compoundName:str, shortName:str=None, 
              role:str=None, comment:str=None) -> Chain:
   """Create new child Chain
@@ -204,10 +190,14 @@ Chain.copy.__annotations__['return'] = Chain
     
     
 # Connections to parents:
-
 Molecule._childClasses.append(Chain)
 Molecule.chains = Chain._wrappedChildProperty()
-
-# NBNB the below may not be inserted correctly as a method
 Molecule.newChain = newChain
 Molecule.makeChain = makeChain
+
+# Notifiers:
+Project._apiNotifiers.extend(
+  ( ('_newObject', {'cls':Chain}, Ccpn_Chain.qualifiedName, '__init__'),
+    ('_finaliseDelete', {}, Ccpn_Chain.qualifiedName, 'delete')
+  )
+)

@@ -1,4 +1,6 @@
 
+import functools
+
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
 from ccpncore.memops import Notifiers
@@ -15,7 +17,11 @@ class Project(AbstractWrapperClass):
   _childClasses = []
 
   # List of CCPN api notifiers
-  # Format is (wrapperFundName, apiClassName, apiFuncName
+  # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName
+  # The function self.wrapperFuncName(**parameterDict) will be registered
+  # in the CCPN api notifier system
+  # api notifiers are set automatically,
+  # and are cleared by self._clearNotifiers and by self.delete()
   _apiNotifiers = []
   
   # Top level mapping dictionaries:
@@ -32,10 +38,7 @@ class Project(AbstractWrapperClass):
     self._project = self
     self._wrappedData = wrappedData
     self._pid = pid = ''
-    
-    # Notifier tracking dict, {(fullClassname,funcname):func)} 
-    # They must be stored to enable us to remove them afterwards
-    self._activeNotifiers = {}
+    self._activeNotifiers = []
     
     # setup object handling dictionaries
     self._data2Obj = {wrappedData:self}
@@ -49,44 +52,35 @@ class Project(AbstractWrapperClass):
     self.residueName2chemCompIds = DataConvertLib.getStdResNameMap(
       wrappedData.root.sortedChemComps()
     )
-    
-    self._registerAllNotify()
+
+    self._registerApiNotifiers()
     
     self._initializeAll()
   
-  def _registerAllNotify(self):
+  def _registerApiNotifiers(self):
     """Register or remove notifiers"""
 
-    # TODO notifier system NOT in working order - class-specific getNotifier functions broken
+    for tt in self._apiNotifiers:
+      wrapperFuncName, parameterDict, apiClassName, apiFuncName = tt
+      notify = functools.partial(getattr(self,wrapperFuncName), **parameterDict)
+      self._registerNotify(notify, apiClassName, apiFuncName)
 
-    classes = [self.__class__]
-    for cls in classes:
-      # breadth-firts traversal of child class tree
-      classes.extend(cls._childClasses)
-      
-      # get and process notifiers
-      for className, funcName, notify in cls._getNotifiers(self):
-        
-        tt = (className, funcName)
-        previousNotify = self._activeNotifiers.get(tt)
-        if previousNotify:
-          # remove previously set notifier
-          Notifiers.unregisterNotify(previousNotify, className, funcName)
-        
-        # set new notifier in list for later removal
-        self._activeNotifiers[tt] = notify
-        
-        # register notifier
-        Notifiers.registerNotify(notify, className, funcName)
-  
-  def _unregisterAllNotify(self):
-    """Register already prepared notifiers"""
-
-    # TODO notifier system NOT in working order - class-specific getNotifier functions broken
-
+  def _clearNotifiers(self):
+    """CLear all notifiers, previous to closing or deleting POroject
+    """
     while self._activeNotifiers:
-      tt,func = self._activeNotifiers.popitem()
-      Notifiers.unregisterNotify(func, tt[0], tt[1])
+      tt = self._activeNotifiers.pop()
+      Notifiers.unregisterNotify(*tt)
+
+  def _registerNotify(self, notify, apiClassName, apiFuncName):
+    """Register a single notifier"""
+    self._activeNotifiers.append((notify, apiClassName, apiFuncName))
+    Notifiers.registerNotify(notify, apiClassName, apiFuncName)
+
+  def _unregisterNotify(self, notify, apiClassName, apiFuncName):
+    """Unregister a single notifier"""
+    self._activeNotifiers.remove((notify, apiClassName, apiFuncName))
+    Notifiers.unregisterNotify(notify, apiClassName, apiFuncName)
   
   def _initializeAll(self):
     """Initialize children, using existing objects in data model"""
@@ -122,6 +116,12 @@ class Project(AbstractWrapperClass):
     # remove from pid2Obj
     del self._pid2Obj[obj.shortClassName][obj._pid]
 
+  def delete(self):
+    """Cleans up the wrapper project, without deleting the CCPN project (impossible)"""
+    self.clearNotifiers()
+    for tag in ('_wrappedData','_data2Obj','_pid2Obj'):
+      delattr(self,tag)
+
 
   # CCPN properties  
   @property
@@ -143,19 +143,6 @@ class Project(AbstractWrapperClass):
   def nmrProject(self) -> Ccpn_NmrProject:
     """CCPN equivalen to object: Nmrproject"""
     return self._wrappedData
-    
-  @classmethod
-  def _getNotifiers(cls, dummy) -> list:
-    """Get list of (className,funcName,notifier) tuples"""
-    #
-    return [(Ccpn_NmrProject.qualifiedName, 'delete', self.delete)]
-  
-  # Implementation functions
-  ##classmethod
-  #d#ef _getAllWrappedData(cls, parent: AbstractWrapperClass)-> list:
-  #  raise NotImplementedError("Code error: function not implemented")
-  #
-  #  Not relevant for Project, which has no parent. DELIBERATELY not implemented
 
 
 # NBNB set function parameter annotations for AbstractBaseClass functions

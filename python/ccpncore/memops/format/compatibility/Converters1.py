@@ -71,6 +71,8 @@ def modifyIoMap(fromVersionStr, globalMapping):
   # used for e.g. changes of parent tree.
   elemsTreatedAsOld = set(infodd['elemsTreatedAsOld'])
 
+  print ('###importMap', '%s.%s.MapInfo' % (mapInfoLocation,fromVersion.getDirName()))
+
   diffMap =  importlib.import_module('%s.%s.MapInfo' % (mapInfoLocation,fromVersion.getDirName()))
 
   # correct maps for newly introduced elements
@@ -106,6 +108,8 @@ def modifyIoMap(fromVersionStr, globalMapping):
                     typeName, elemName)
       if elemName is None:
         fixExoLinkMap(newGuid, 'rename', prefix, globalMapping, typeName)
+  dd = globalMapping['mapsByGuid']['www.ccpn.ac.uk_Fogh_2006-08-16-18:20:12_00012']
+  print('###mod4', globalMapping['IMPL']['globalRelease'], dd['tag'], dd['data'] )
       
 
   # correct maps for delayed elements
@@ -117,7 +121,7 @@ def modifyIoMap(fromVersionStr, globalMapping):
       fixElementMap(newGuid, 'delay', prefix, globalMapping, newElementsByGuid,
                     typeName, elemName, valueTypeGuid=valueTypeGuid,
                     elemMap=elemMap)
-  
+
   # make extra changes
   infodd['extraMapChanges'](globalMapping)
   

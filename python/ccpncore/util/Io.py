@@ -113,7 +113,7 @@ def checkRemoveIfExists(path:str, removeExisting:bool=False, showYesNo:"function
           Path.removePath(path)
           return True
     else:
-      raise IOError('%s already exists' % path)
+      return None
   #
   return False
 
@@ -318,9 +318,9 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
   return project
 
 
-def saveProject(project, newPath = None, newProjectName = None, changeBackup = True,
-                createFallback = False, removeExisting = False, showYesNo = None,
-                checkValid = False, changeDataLocations = False):
+def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
+                createFallback=False, removeExisting=False, showYesNo=None,
+                checkValid=False, changeDataLocations=False):
   """
   Save the userData for a project to a location given by newPath (the url.path
   of the userData repository) if set, or the existing location if not.
@@ -381,8 +381,8 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
       newProjectName = os.path.basename(newPath)
       # below is because of data model limit
       newProjectName = newProjectName[:32]
-
-  renameProject(project, newProjectName)
+  if newProjectName != project.name:
+    renameProject(project, newProjectName)
 
   # if newPath same as oldPath, check if newProjectName already exists if it's not same as oldProjectName
   if newPath == oldPath:

@@ -347,14 +347,9 @@ if mapping is None:
 
   # SaveToStream function
   # implements XmlMapWrite
-  def streamWriteAttr(self, key, value, haveUnderscore=False):
+  def streamWriteAttr(self, key, value):
 
-    if haveUnderscore:
-      ss = '_'
-    else:
-      ss = ''
-
-    self.streamWrite('\' %%s="%s%%s"\' %% (%s, %s)' % (ss, key, value))
+    self.streamWrite('\' %%s="%%s"\' %% (%s, %s)' % (key, value))
 
   ###########################################################################
 
@@ -362,14 +357,9 @@ if mapping is None:
 
   # SaveToStream function
   # implements XmlMapWrite
-  def streamWriteValue(self, value, haveUnderscore=False):
+  def streamWriteValue(self, value):
 
-    if haveUnderscore:
-      ss = '_'
-    else:
-      ss = ''
-
-    self.streamWrite('\' %s%%s\' %% %s' % (ss, value))
+    self.streamWrite('\' %%s\' %% %s' % value)
 
   ###########################################################################
 

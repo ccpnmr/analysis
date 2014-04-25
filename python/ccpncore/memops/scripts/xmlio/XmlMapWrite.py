@@ -946,7 +946,7 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
     # self.endIf()
 
     ss = self.getDictEntry('tmpMap', self.toLiteral('name'), castType=self.stringVarType)
-    self.streamWriteAttr(ss, '_ID', haveUnderscore=True)
+    self.streamWriteAttr(ss, '_ID')
     self.writeNewline()
 
     # IF BLOCK 6
@@ -1091,7 +1091,7 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
     # self.setVar('nextID', self.arithmetic('nextID', '+', 1))
     # self.endIf()
 
-    self.streamWriteValue('_ID', haveUnderscore=True)
+    self.streamWriteValue('_ID')
 
     # LOOP C
     self.endLoop()
@@ -1309,7 +1309,7 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
   ###########################################################################
   
   # SaveToStream function
-  def streamWriteAttr(self, key, value, haveUnderscore=False):
+  def streamWriteAttr(self, key, value):
 
     raise MemopsError("XmlMapWrite.streamWriteAttr must be overridden")
 
@@ -1318,7 +1318,7 @@ definition element (e.g. <aSerial><Int>5</Int></aSerial> instead of
   ###########################################################################
   
   # SaveToStream function
-  def streamWriteValue(self, value, haveUnderscore=False):
+  def streamWriteValue(self, value):
 
     raise MemopsError("XmlMapWrite.streamWriteValue must be overridden")
 

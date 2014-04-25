@@ -44,7 +44,7 @@ class Molecule(AbstractWrapperClass):
   
   @property
   def name(self) -> str:
-    """name of Project"""
+    """name of Molecule"""
     return self._wrappedData.name
     
   @name.setter

@@ -10,8 +10,7 @@ PREFIXSEP  = ':'
 
 @functools.total_ordering
 class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
-  """Abstract class containing common functionality 
-  for ccpcode and ccpnmrcode classes
+  """Abstract class containing common functionality for wrapper classes
   
   Rules for subclasses:
   
@@ -40,7 +39,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   
   Example: 
   There will be a link to the Atom class from both the Residue class, the Chain class,
-  the Molecule class, and the Project. There relative keys for each objetc might be:
+  the Molecule class, and the Project. There relative keys for each object might be:
   
   From object:  relative id:
   Project       'AT:MS1.A.127.N'
@@ -64,11 +63,11 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   
   Initialising happens by passing in an NmrProject instance and creating the
   wrapper instances automatically starting from there. Unless we change this,
-  this means we assume that all data cna be found by navigating from an 
+  this means we assume that all data can be found by navigating from an
   NmrProject.
   
   New classes can be added, provided they match the requirements. All classes 
-  must form a paren t-child tree with the root at Project. All classes must
+  must form a parent-child tree with the root at Project. All classes must
   must have class-level attributes shortClassName and _childClasses.
   Each class must implement the properties id and _parent, and the methods 
   _getAllWrappedData,  (so that , rename, and delete. Note that the 
@@ -98,16 +97,16 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     # NB wrappedData must be globally unique. CCPN objects all are, 
     # but for non-CCPN objects this must be ensured.
     
-    self._project = project   # NBNB TBD different init for Project
-    self._wrappedData = wrappedData
-    
-    # Check if object is already 
+    # Check if object is already wrapped
     data2Obj = project._data2Obj
     if wrappedData in data2Obj:
-      raise Exception("Cannot create new object for underlying %s: One  already exists" 
-                      % wrappedData)
-    else:
-      data2Obj[wrappedData] = self
+      raise ValueError("Cannot create new object for underlying %s: One  already exists"
+                       % wrappedData)
+
+    # initialise
+    self._project = project
+    self._wrappedData = wrappedData
+    data2Obj[wrappedData] = self
       
     # set _pid
     parent = self._parent
@@ -164,8 +163,8 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
           #    
           return dd[key]
       else:
-        # prefix is not a child type. Treat as normal tag
-        return self.__dict__[tag]
+        # prefix is not a child type. Treat as error
+          raise KeyError("No child named " + tag)
           
     else:
       # get normal attribute
@@ -186,19 +185,17 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
         self.__class__.__name__, tag))
     
     # check for child wrapperclass type attribute
-    project = self._project 
     tt = tag.split(PREFIXSEP)
     if len(tt) == 2:
-      # String of form '{prefix}:{pid}'
-      if project._pid2Obj.get(tt[0]):
-        # prefix matches a known class name. Unsettable
-        raise AttributeError(
-          "{} can't set attribute that matches defined wrapper class type: {}".
-          format(self.__class__.__name__, tag)
-        )
+      # String of form '{prefix}:{pid}'. Unsettable
+      raise AttributeError(
+         "{} can't set attribute with name of form 'xy:abcd': {}".
+        format(self.__class__.__name__, tag)
+      )
     
-    # No exception encountered. Try to set attribute
-    setattr(self, tag, value)
+    else:
+      # No exception encountered. Try to set attribute
+      setattr(self, tag, value)
       
   def __delitem__(self, tag:str):
     """Dictionary implementation method: delete item"""
@@ -215,16 +212,13 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
         self.__class__.__name__, tag))
     
     # check for child wrapperclass type attribute
-    project = self._project 
     tt = tag.split(PREFIXSEP)
     if len(tt) == 2:
-      # String of form '{prefix}:{pid}'
-      if project._pid2Obj.get(tt[0]):
-        # prefix matches a known class name. Unettable
-        raise AttributeError(
-          "{} can't delete attribute that matches defined wrapper class type: {}".
-          format(self.__class__.__name__, tag)
-        )
+      # String of form '{prefix}:{pid}' undeletable
+      raise AttributeError(
+        "{} can't delete attribute of form 'xy:abcd: {}".
+        format(self.__class__.__name__, tag)
+      )
     
     # No exception encountered. Try to delete attribute
     delattr(self, tag)
@@ -244,7 +238,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     
     dd = self.__dict__
     extraAttrs = (tt[1] for tt in sorted(dd.items) 
-                  if not tt[0].startswith('_'))
+                  if not tt[0].startswith('_') and len(tt[0].split(PREFIXSEP)) != 2)
     
     #
     return itertools.chain(propertyAttrs, childAttrs, extraAttrs) 
@@ -331,7 +325,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   # CCPN functions
   #@abc.abstractmethod
   def rename(self, value: str) -> None:
-    """Change object id, modifying entier project to maintain consistency"""
+    """Change object id, modifying entire project to maintain consistency"""
     raise NotImplementedError("Code error: function not implemented")
   
   # In addition each class (except for Project) must define a newClass method 
@@ -342,34 +336,13 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   # def newMolecule( self, *args, **kw):
   # and then doing Project.newMolecule = newMolecule
   
-  def delete(self, wrappedData=None) -> None:
-    """Delete object, with all children and underlying data
-    Note that delete functions of children are generally called from notifiers
-    following deletion of underlying data children.
+  def delete(self) -> None:
+    """Delete object, with all children and underlying data.
     
-    NB wrappedData variable necessary to allow use in notifiers
-    NB this function must be overridden in some instances"""
+    # NBNB clean-up of wrapper structure is done via notifiers.
+    # NBNB some child classes must override this function"""
     
-    # NBNB clean-up of wrapper structure is don via notifiers.
-    # NBNB some child classes must override this function
-    
-    wrapped = self._wrappedData
-    if wrappedData is None or wrappedData is wrapped:
-      # Only delete if this is called for the right wrapped data
-      
-      pid = self._pid
-    
-      if not wrapped.isDeleted:
-        wrapped.delete()
-      
-      tag = [self.shortClassName]
-      # remove from pid2Obj
-      del self._project._pid2Obj[tag][pid]
-      
-      # remove from wrapped2Obj
-      del self._project._data2Obj[wrapped]
-    
-    
+    self._wrappedData.delete(
     
     
   # CCPN Implementation methods

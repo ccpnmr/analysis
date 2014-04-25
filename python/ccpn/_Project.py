@@ -13,9 +13,13 @@ class Project(AbstractWrapperClass):
   
   # List of child classes. 
   _childClasses = []
+
+  # List of CCPN api notifiers
+  # Format is (wrapperFundName, apiClassName, apiFuncName
+  _apiNotifiers = []
   
-  # Top level maoing dictionaries:
-  # pid to object and ccpnData tp pbject
+  # Top level mapping dictionaries:
+  # pid to object and ccpnData to object
   #__slots__ = ['_pid2Obj', '_data2Obj']
   
   
@@ -98,6 +102,26 @@ class Project(AbstractWrapperClass):
         if newObj is None:
           newObj = childClass(project, wrappedObj)
         newObj.initializeAll()
+
+
+  def _newObject(self, cls, wrappedData):
+    """Create new wrapper object of class cls, associated with wrappedData.
+    For use in creation notifiers"""
+    return cls(self, wrappedData)
+
+  def _finaliseDelete(self, wrappedData) -> None:
+    """Clean up after object deletion - to be called from notifiers
+    wrapperObject to delete is identified from wrappedData"""
+
+    if not wrappedData.isDeleted:
+      raise ValueError("_finaliseDelete called before wrapped data are deleted: %s" % wrappedData)
+
+    # remove from wrapped2Obj
+    obj = self._data2Obj.pop(wrappedData)
+
+    # remove from pid2Obj
+    del self._pid2Obj[obj.shortClassName][obj._pid]
+
 
   # CCPN properties  
   @property

@@ -20,8 +20,7 @@ class Atom(AbstractWrapperClass):
   def ccpnAtom(self) -> Ccpn_Atom:
     """ CCPN atom matching Residue"""
     return self._wrappedData
-  
-  
+
 
   @property
   def _parent(self) -> Residue:
@@ -32,7 +31,7 @@ class Atom(AbstractWrapperClass):
     
   @property
   def name(self) -> str:
-    """Residue type name string (e.g. 'Ala')"""
+    """Atom name string (e.g. 'HA')"""
     return self._wrappedData.name
 
   id = name
@@ -41,18 +40,18 @@ class Atom(AbstractWrapperClass):
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: Residue)-> list:
-    """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
+    """get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue"""
     return parent._wrappedData.sortedAtoms()
     
     
 def newAtom(parent:Residue, name:str) -> Atom:
-  """Create new child Residue"""
+  """Create new child Atom"""
   project = parent._project
   ccpnResidue = parent._wrappedData
 
   # NBNB TBD
-  # requires changing of descripror and chemcompvar,
-  # interction with structire ensembles, ...
+  # requires changing of descriptor and chemCompVar,
+  # interaction with structure ensembles, ...
     
     
     
@@ -61,7 +60,6 @@ def newAtom(parent:Residue, name:str) -> Atom:
 Residue._childClasses.append(Atom)
 Residue.atoms = Atom._wrappedChildProperty()
 
-# NBNB the below may not be inserted correctly as a method
 Residue.newAtom = newAtom
 
 # Notifiers:

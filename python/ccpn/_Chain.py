@@ -3,8 +3,10 @@ from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Molecule import Molecule
 from ccpn._Project import Project
 from ccpncore.api.ccp.molecule.MolSystem import Chain as Ccpn_Chain
+
 from ccpncore.lib import MoleculeModify
 from ccpncore.lib.DataMapper import DataMapper
+from ccpncore.util import Common as commonUtil
 
 
 class Chain(AbstractWrapperClass):
@@ -90,33 +92,79 @@ class Chain(AbstractWrapperClass):
     return self._project._data2Obj[newCcpnChain]
                                   
 
-  def finalizeChain(self):
+  def finalize(self):
     """Finalize chain so that it can no longer be modified"""
     self._wrappedData.molecule.isFinalized = True
   
-  def extendSequence(self, sequence:"iterable", startNumber:int=None,
+  def addResidues(self, sequence:"iterable", startNumber:int=None,
                      preferredMolType=None):
     """Add sequence to chain, without setting bonds to pre-existing residues  
     
     sequence:: a sequence of CCPN residue type codes or one-letter codes
-    startNumber:: residue number of first residue in sequence
+    if sequence contains more than one residue, it is assumed that the residues
+    form a linear polymer
+    startNumber:: residue number of first residue in sequence.
+    If not given, is it one  more than the last
     preferredMolType:: MolType to use in case of ambiguity (one of 'protein',
                        'DNA', 'RNA', 'carbohydrate', 'other'"""
-    
+
+
+
     ccpnChain = self._wrappedData
     ccpnMolecule = ccpnChain.molecule
     
-    if ccpnMolecule.isFinalized:
-      raise Exception("Chain {} can no longer be extended".format(self))
-    
-    ff = DataMapper.selectChemCompId
-    dd = self._project.residueName2chemCompIds
-    MoleculeModify.addMixedResidues(ccpnMolecule,
-      [ff(dd, resType, prefMolType=preferredMolType) for resType in sequence],
-      startNumber=startNumber
-    )
-    
-    
+    if ccpnMolecule.isFinalized or ccpnMolecule.sortedChains != [ccpnChain]:
+      raise ValueError("Chain {} can no longer be modified".format(self))
+
+    if not sequence:
+      msg = "No residues given to add to chain"
+      self._project.logger.error(msg)
+      return
+
+    # get startNumber for new sequence
+    if startNumber is None:
+      ll = ccpnMolecule.sortedMolResidues()
+      if ll:
+        startNumber = ll[-1].serial + 1
+      else:
+        startNumber = 1
+
+    getccId = DataMapper.selectChemCompId
+    dd = self._project._residueName2chemCompIds
+
+    if len(sequence) == 1:
+      # Single residue. Add it
+      tt = getccId(sequence[0])
+      if tt:
+        molType, ccpCode = tt
+      else:
+        msg = "No ChemComp ID found for %s" % sequence
+        self._project.logger.error(msg)
+        raise ValueError(msg)
+
+      chemComp = ccpnMolecule.root.findFirstChemComp(molType=molType, ccpCode=ccpCode)
+      chemCompVar = (chemComp.findFirstChemCompVar(linking='none', isDefaultVar=True) or
+                     chemComp.findFirstChemCompVar(linking='none'))
+      molResidues = [ccpnMolecule.newMolResidue(chemCompVar=chemCompVar, seqCode=startNumber)]
+
+    else:
+      # multiple residues, add as linear polumer
+
+      molResidues = MoleculeModify.makeLinearSequence(ccpnMolecule,
+        [getccId(dd, resType, prefMolType=preferredMolType) for resType in sequence],
+        seqCodeStart=startNumber
+      )
+
+    # make MolSystem Residues
+    for molResidue in molResidues:
+      ccpnChain.newResidue(self, seqId=molResidue.serial,seqCode=molResidue.seqCode,
+                           seqInsertCode=molResidue.seqInsertCode, linking=molResidue.linking,
+                           descriptor=molResidue.descriptor )
+
+    # make ChainFragments
+    ccpnChain.createChainFragments()
+
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: Molecule)-> list:
@@ -125,7 +173,7 @@ class Chain(AbstractWrapperClass):
 
 def newChain(parent:Molecule, compoundName:str, shortName:str=None, 
              role:str=None, comment:str=None) -> Chain:
-  """Create new child Chain
+  """Create new child Chain, empty or matrching existing molecule
   
   compoundName:: Name of new CCPN_Molecule matching chain; 
                  will use matching molecule if one exists.
@@ -152,12 +200,13 @@ def newChain(parent:Molecule, compoundName:str, shortName:str=None,
   
   return parent._project._data2Obj.get(newCcpnChain)
   
-def makeChain(parent:Molecule, sequence:str, compoundName:str, 
+def makeChain(parent:Molecule, sequence, compoundName:str,
               startNumber:int=1, preferredMolType:str=None, 
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
   """Make new chain from sequence of residue codes
   
-  sequence:: string of one- or three-letter residue type codes
+  sequence:: string of one-letter or sequence of three-residue type codes
+  if empty uses existing molecule (if any)
   compoundName:: name of new CCPN_Molecule (e.g. 'Lysozyme')
   preferredMolType:: preferred molType to use for ambiguous codes (mainly 
                      one-letter codes). Normal preference order is: 
@@ -166,17 +215,27 @@ def makeChain(parent:Molecule, sequence:str, compoundName:str,
   shortName:: shortName for new chain (optional)
   role:: role for new chain (optional)
   comment:: comment for new chain (optional)"""
-  
+
+  if not sequence:
+    msg = "makeChain requires non-empty sequence"
+    parent._project.logger.error(msg)
+    raise ValueError(msg)
+
+  # rename compoundName if necessary
   ccpnRoot = parent._wrappedData.root
-  if ccpnRoot.findFirstMolecule(name=compoundName):
-    raise Exception("CCPN_Molecule named {} already exists")
-  
+  oldName = compoundName
+  while ccpnRoot.findFirstMolecule(name=compoundName):
+    compoundName = commonUtil.incrementName(compoundName)
+  if oldName != compoundName:
+    parent._project.logger.warning(
+      "CCPN molecule named %s already exists. New molecule has been named %s" %
+      (oldName,compoundName))
+
   chain = parent.newChain(compoundName=compoundName, shortName=shortName,
                              role=role, comment=comment)
-                      
-  chain.extendSequence(sequence=sequence, startNumber=startNumber,
-                          preferredMolType=preferredMolType)
-  
+
+  chain.addResidues(sequence=sequence, startNumber=startNumber,
+                    preferredMolType=preferredMolType)
   chain.finalize()
   
   #

@@ -9,6 +9,7 @@ from ccpn._Project import Project
 from ccpn._Molecule import Molecule
 from ccpn._Chain import Chain
 from ccpn._Residue import Residue
+from ccpn._Atom import Atom
 
 
 def makeWrapperProject(ccpn_NmrProject: Ccpn_NmrProject) -> Project:

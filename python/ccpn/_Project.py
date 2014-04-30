@@ -5,6 +5,7 @@ from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
+from ccpncore.util import Logging
 
 
 class Project(AbstractWrapperClass):
@@ -49,9 +50,11 @@ class Project(AbstractWrapperClass):
     dd[pid] = self
     
     # general residue name to ChemCompIDs tuple Map.
-    self.residueName2chemCompIds = DataConvertLib.getStdResNameMap(
+    self._residueName2chemCompIds = DataConvertLib.getStdResNameMap(
       wrappedData.root.sortedChemComps()
     )
+
+    self._logger = Logging.getLogger()
 
     self._registerApiNotifiers()
     

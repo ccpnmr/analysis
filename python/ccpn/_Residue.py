@@ -4,30 +4,7 @@ from ccpn._Project import Project
 from ccpn._Chain import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
 from ccpncore.lib.DataMapper import DataMapper
-
-def splitIntFromChars(value:str):
-  """convert a string with a leading integer optionally followed by characters
-  into an (integer,string) tuple"""
-  
-  #NBNB TODO should be moved to a Util library
-  
-  value = value.strip()
-  
-  for ii in reversed(range(1,len(value)+1)):
-    try:
-      number = int(value[:ii])
-      chars = value[ii:]
-      break
-    except ValueError:
-      continue
-  else:
-    number = None
-    chars = value
-      
-    
-  return number,chars
-
-
+from ccpncore.util import Common as commonUtil
 
 class Residue(AbstractWrapperClass):
   """Molecular Residue."""
@@ -59,7 +36,7 @@ class Residue(AbstractWrapperClass):
     """Parent (containing) object."""
     return self._project._data2Obj[self._wrappedData.chain]
   
-  molecule = _parent
+  chain = _parent
     
   @property
   def name(self) -> str:
@@ -107,7 +84,7 @@ class Residue(AbstractWrapperClass):
     
     
 def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None,
-               descriptor:str=None, molType:str=None, comment:str=None) -> Chain:
+               descriptor:str=None, molType:str=None, comment:str=None) -> Residue:
   """Create new child Residue"""
   project = parent._project
   ccpnChain = parent._wrappedData
@@ -117,11 +94,11 @@ def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None,
     raise Exception("Chain {} can no longer be extended".format(parent))
 
   # get chem comp ID strings from residue name
-  molType, ccpCode = DataMapper.selectChemCompId(project.residueName2chemCompIds,
+  molType, ccpCode = DataMapper.selectChemCompId(project._residueName2chemCompIds,
                                                  name, prefMolType=molType)
 
   # split seqCode in number+string
-  intCode, seqInsertCode = splitIntFromChars(seqCode)
+  intCode, seqInsertCode = commonUtil.splitIntFromChars(seqCode)
   if len(seqInsertCode) > 1:
     raise Exception(
       "Only one non-numerical character suffix allowed for seqCode {}".format(seqCode)

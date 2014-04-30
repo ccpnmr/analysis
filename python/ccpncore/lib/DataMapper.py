@@ -716,7 +716,7 @@ class DataMapper:
     return ccId
   
   
-  # NBNB modified interae and behaviour rel to analysis/core
+  # NBNB modified interface and behaviour rel to analysis/core
   #def getBestMolType(atomNames, ccpCodes=None):
   @staticmethod
   def getBestMolType(atomNames):
@@ -774,7 +774,7 @@ class DataMapper:
     
 
 
-  @staticmethod
+  #@staticmethod
   # def makeSeqMapping(molSystem, chainResId2ResNames, resName2ChemCompId):
   #   """ make sequence mapping, using several alternative methods
   #   .. input:

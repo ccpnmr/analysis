@@ -5,6 +5,9 @@ __author__ = 'rhf22'
 
 import os
 import shutil
+# import gc
+import time
+import glob
 
 from ccpncore.api.memops import  Implementation
 from ccpncore.memops.metamodel import Constants as metaConstants
@@ -178,16 +181,16 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
     print("\nFirst loading attempt failed - compatibility problem?.")
     project = None
 
-  def isGeneralDataWriteable(generalDataRepository):
-    oldPath = generalDataRepository.url.path
-    return commonUtil.isWindowsOS() or os.access(oldPath, os.W_OK|os.X_OK)
+  def isGeneralDataWriteable(generalDataRep):
+    ppath = generalDataRep.url.path
+    return commonUtil.isWindowsOS() or os.access(ppath, os.W_OK|os.X_OK)
 
-  def isGeneralDataOk(project):
+  def isGeneralDataOk(proj):
     if suppressGeneralDataDir:
       return True
-    generalDataRepository = project.findFirstRepository(name='generalData')
-    if generalDataRepository:
-      return isGeneralDataWriteable(generalDataRepository)
+    generalDataRep = proj.findFirstRepository(name='generalData')
+    if generalDataRep:
+      return isGeneralDataWriteable(generalDataRep)
     return True
 
   if project is not None and (not ApiPath.areAllTopObjectsPresent(project) or
@@ -229,15 +232,18 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
     newBackupPath = path + '_backup'
     if oldBackupPath.startswith(oldPath): # hopefully true
       if path != oldPath:
-        warningMessages.append('Backup is being changed from\n"%s"\nto\n"%s"' % (oldBackupPath, newBackupPath))
+        warningMessages.append('Backup is being changed from\n"%s"\nto\n"%s"' %
+                               (oldBackupPath, newBackupPath))
         backupRepository.url = Implementation.Url(path=newBackupPath)
     elif not os.path.exists(oldBackupPath):
-      warningMessages.append('Backup is being changed from\n"%s"\nto\n"%s"' % (oldBackupPath, newBackupPath))
+      warningMessages.append('Backup is being changed from\n"%s"\nto\n"%s"' %
+                             (oldBackupPath, newBackupPath))
       backupRepository.url = Implementation.Url(path=newBackupPath)
 
   # check if project repository is called 'userData'
   if projectRepository.name != 'userData':
-    warningMessages.append('Project has non-standard repository name "%s"' % projectRepository.name)
+    warningMessages.append('Project has non-standard repository name "%s"' %
+                           projectRepository.name)
 
   # repoint dataStores that are in same directory as project
   # (but only if old path does not exist and new one does)
@@ -730,3 +736,564 @@ def loadAllData(root):
     for topObj in getattr(root, tag):
       if not topObj.isLoaded:
         topObj.load()
+
+
+
+# def backupProject(project, dataLocationStores = None, skipRefData = True, clearOutDir = False):
+#
+#   def modificationTime(path):
+#     return os.stat(path)[8]
+#
+#   backupRepository = project.findFirstRepository(name="backup")
+#
+#   if not backupRepository:
+#     print('Warning: no backup path set, so no backup done')
+#     return
+#
+#   backupUrl = backupRepository.url
+#   backupPath = backupUrl.path
+#
+#   if not dataLocationStores:
+#     dataLocationStores = set()
+#
+#   if clearOutDir:
+#     Path.removePath(backupPath)
+#
+#   topObjects = tuple(project.topObjects) + (project,)
+#
+#   for topObject in topObjects:
+#     if skipRefData:
+#       repository = topObject.findFirstActiveRepository(name='refData')
+#       if repository:
+#         continue
+#
+#     if topObject.isModified:
+#       topObject.backup()
+#     else:
+#       repository = topObject.findFirstActiveRepository()
+#       if repository:
+#         origFile = xmlUtil.findTopObjectPath(repository.url.path, topObject)
+#         if os.path.exists(origFile):
+#           # problem with appending repository.name is that topObject.backup()
+#           # above does not do it this way, so end up with inconsistent backup
+#           ###backupDir = joinPath(backupPath, repository.name)
+#           # so use same backup pah as topObject.backup()
+#           backupDir = backupPath
+#           backupFile = xmlUtil.findTopObjectPath(backupDir, topObject)
+#           if not os.path.exists(backupFile) or \
+#               (modificationTime(backupFile) < modificationTime(origFile)):
+#             directory = os.path.dirname(backupFile)
+#             if not os.path.exists(directory):
+#               os.makedirs(directory)
+#             shutil.copy(origFile, backupFile)
+#         else:
+#           # one is stuffed
+#           print('Warning: could not backup %s since could not find original file "%s"' % (topObject, origFile))
+#       else:
+#         # one is stuffed
+#         print('Warning: could not backup %s since could not find repository' % topObject)
+#
+#   dataBackupPath = joinPath(backupPath, 'data')
+#   for dataLocationStore in dataLocationStores:
+#     dataBackupDir = joinPath(dataBackupPath, dataLocationStore.name)
+#     for dataStore in dataLocationStore.dataStores:
+#       origFile = dataStore.dataUrl.url.path
+#       backupFile = joinPath(dataBackupDir, dataStore.path)
+#
+#       if os.path.exists(origFile):
+#         if not os.path.exists(backupFile) or \
+#             (modificationTime(backupFile) < modificationTime(origFile)):
+#           directory = os.path.dirname(backupFile)
+#           if not os.path.exists(directory):
+#             os.makedirs(directory)
+#           shutil.copy(origFile, backupFile)
+#       else:
+#         print('Warning: could not backup dataStore "%s" because could not find original file "%s"' % (dataStore.name, origFile))
+#
+# def modifyPackageLocators(project,repositoryName,repositoryPath,packageNames,resetPackageLocator = True,resetRepository = False):
+#
+#   """
+#   Resets package locators for specified packages to specified repository.
+#
+#   Use as, for example:
+#
+#   modifyPackageLocators(project,'newChemComps','/mydir/data/chemComps/',('ccp.molecule.ChemComp','ccp.molecule.ChemCompCoord'))
+#
+#   Additional args:
+#
+#   - resetPackageLocator:  True   will reset the package locator completely, removing old info
+#                           False  will add the repository to the package locator.
+#
+#   - resetRepository:      True   will reset url for the repository, even if it already exists
+#                           False  will not reset the url for the repository if it already exists
+#
+#   Returns the relevant repository.
+#
+#   """
+#
+#   repository = project.findFirstRepository(name = repositoryName)
+#   ss = normalisePath(repositoryPath)
+#
+#   if not repository:
+#     repository = project.newRepository(name= repositoryName,
+#                                        url=Implementation.Url(path=ss))
+#   elif resetRepository and repository.url.path != repositoryPath:
+#     repository.url = Implementation.Url(path=ss)
+#
+#   for packageName in packageNames:
+#     packageLocator = project.findFirstPackageLocator(targetName = packageName)
+#
+#     if not packageLocator:
+#       raise ApiError("Cannot modify repository 'any' for package %s"
+#                      % packageName)
+#
+#     if resetPackageLocator:
+#       packageLocator.repositories = (repository,)
+#     elif not repository in packageLocator.repositories:
+#       packageLocator.addRepository(repository)
+#
+#   return repository
+#
+# def packageProject(project, filePrefix=None, includeBackups=False, includeData=False):
+#   """
+#   Package up project userData into one gzipped tar file.
+#   If filePrefix is None then instead use the userData path.
+#   The tar file is filePrefix+".tgz".
+#   By default only *.xml files are packaged up.
+#   If includeBackups then also *.xml.bak files are included.
+#   If includeData then also dataStores located inside project directory are included.
+#   """
+#
+#   import tarfile
+#
+#   userPath = getUserDataPath(project)
+#   userDir = os.path.dirname(userPath)
+#
+#   if includeData:
+#     userPathP = userPath + '/'
+#     n = len(userDir) + 1
+#     includedDataPaths = set()
+#     for dataLocationStore in project.dataLocationStores:
+#       for dataStore in dataLocationStore.dataStores:
+#         fullPath = dataStore.fullPath
+#         if fullPath.startswith(userPathP):
+#           includedDataPaths.add(fullPath[n:])
+#
+#   userPath = os.path.basename(userPath)
+#
+#   def visitDir(directory):
+#     tarFiles = []
+#     files = os.listdir(directory)
+#     for relfile in files:
+#       fullfile = os.path.join(directory, relfile)
+#       include = False
+#       if os.path.isdir(fullfile):
+#         tarFiles.extend(visitDir(fullfile))
+#       elif relfile.endswith('.xml'):
+#         include = True
+#       elif includeBackups and relfile.endswith('.xml.bak'):
+#         include = True
+#       elif includeData and fullfile in includedDataPaths:
+#         include = True
+#
+#       if include:
+#         print(fullfile)
+#         tarFiles.append(fullfile)
+#
+#     if tarFiles:
+#       tarFiles.insert(0, directory)
+#
+#     return tarFiles
+#
+#   if not filePrefix:
+#     filePrefix = userPath
+#
+#   tarFile = '%s.tgz' % filePrefix
+#   tarFp = tarfile.open(tarFile, 'w:gz')
+#
+#   cwd = os.getcwd()
+#   os.chdir(userDir)
+#   try:
+#     print('Files included in tar file:')
+#     tarFiles = visitDir(userPath)
+#     for tarFile in tarFiles:
+#       tarFp.add(tarFile, recursive=False)
+#   finally:
+#     os.chdir(cwd)
+#     tarFp.close()
+#
+# def logMemoryStats(project, path):
+#   """
+#   Logs stats for a project.
+#   It appends information to the file given by path.
+#   """
+#
+#   path = normalisePath(path)
+#   fp = open(path, 'a')
+#   if fp:
+#     t = time.ctime(time.time())
+#     m = gc.collect()
+#     n = len(gc.get_objects())
+#     s = '%s: %d collected, %d objects' % (t, m, n)
+#     fp.write('%s\n' % s)
+#     print('logging: %s' % s)
+#     fp.close()
+#
+
+
+def backupProject(project, dataLocationStores = None, skipRefData = True, clearOutDir = False):
+
+  def modificationTime(path):
+    return os.stat(path)[8]
+
+  backupRepository = project.findFirstRepository(name="backup")
+
+  if not backupRepository:
+    print('Warning: no backup path set, so no backup done')
+    return
+
+  backupUrl = backupRepository.url
+  backupPath = backupUrl.path
+
+  if not dataLocationStores:
+    dataLocationStores = set()
+
+  if clearOutDir:
+    Path.removePath(backupPath)
+
+  topObjects = tuple(project.topObjects) + (project,)
+
+  for topObject in topObjects:
+    if skipRefData:
+      repository = topObject.findFirstActiveRepository(name='refData')
+      if repository:
+        continue
+
+    if topObject.isModified:
+      topObject.backup()
+    else:
+      repository = topObject.findFirstActiveRepository()
+      if repository:
+        origFile = ApiPath.findTopObjectPath(repository.url.path, topObject)
+        if os.path.exists(origFile):
+          # problem with appending repository.name is that topObject.backup()
+          # above does not do it this way, so end up with inconsistent backup
+          ###backupDir = joinPath(backupPath, repository.name)
+          # so use same backup pah as topObject.backup()
+          backupDir = backupPath
+          backupFile = ApiPath.findTopObjectPath(backupDir, topObject)
+          if not os.path.exists(backupFile) or \
+              (modificationTime(backupFile) < modificationTime(origFile)):
+            directory = os.path.dirname(backupFile)
+            if not os.path.exists(directory):
+              os.makedirs(directory)
+            shutil.copy(origFile, backupFile)
+        else:
+          # one is stuffed
+          print('Warning: could not backup %s since could not find original file "%s"' % (topObject, origFile))
+      else:
+        # one is stuffed
+        print('Warning: could not backup %s since could not find repository' % topObject)
+
+  dataBackupPath = Path.joinPath(backupPath, 'data')
+  for dataLocationStore in dataLocationStores:
+    dataBackupDir = Path.joinPath(dataBackupPath, dataLocationStore.name)
+    for dataStore in dataLocationStore.dataStores:
+      origFile = dataStore.dataUrl.url.path
+      backupFile = Path.joinPath(dataBackupDir, dataStore.path)
+
+      if os.path.exists(origFile):
+        if not os.path.exists(backupFile) or \
+            (modificationTime(backupFile) < modificationTime(origFile)):
+          directory = os.path.dirname(backupFile)
+          if not os.path.exists(directory):
+            os.makedirs(directory)
+          shutil.copy(origFile, backupFile)
+      else:
+        print('Warning: could not backup dataStore "%s" because could not find original file "%s"' % (dataStore.name, origFile))
+
+def modifyPackageLocators(project,repositoryName,repositoryPath,packageNames,resetPackageLocator = True,resetRepository = False):
+
+  """
+  Resets package locators for specified packages to specified repository.
+
+  Use as, for example:
+
+  modifyPackageLocators(project,'newChemComps','/mydir/data/chemComps/',('ccp.molecule.ChemComp','ccp.molecule.ChemCompCoord'))
+
+  Additional args:
+
+  - resetPackageLocator:  True   will reset the package locator completely, removing old info
+                          False  will add the repository to the package locator.
+
+  - resetRepository:      True   will reset url for the repository, even if it already exists
+                          False  will not reset the url for the repository if it already exists
+
+  Returns the relevant repository.
+
+  """
+
+  repository = project.findFirstRepository(name = repositoryName)
+  ss = Path.normalisePath(repositoryPath)
+
+  if not repository:
+    repository = project.newRepository(name= repositoryName,
+                                       url=Implementation.Url(path=ss))
+  elif resetRepository and repository.url.path != repositoryPath:
+    repository.url = Implementation.Url(path=ss)
+
+  for packageName in packageNames:
+    packageLocator = project.findFirstPackageLocator(targetName = packageName)
+
+    if not packageLocator:
+      raise ApiError("Cannot modify repository 'any' for package %s"
+                     % packageName)
+
+    if resetPackageLocator:
+      packageLocator.repositories = (repository,)
+    elif not repository in packageLocator.repositories:
+      packageLocator.addRepository(repository)
+
+  return repository
+
+def packageProject(project, filePrefix=None, includeBackups=False, includeData=False):
+  """
+  Package up project userData into one gzipped tar file.
+  If filePrefix is None then instead use the userData path.
+  The tar file is filePrefix+".tgz".
+  By default only *.xml files are packaged up.
+  If includeBackups then also *.xml.bak files are included.
+  If includeData then also dataStores located inside project directory are included.
+  """
+
+  import tarfile
+
+  userPath = getUserDataPath(project)
+  userDir = os.path.dirname(userPath)
+
+  if includeData:
+    userPathP = userPath + '/'
+    n = len(userDir) + 1
+    includedDataPaths = set()
+    for dataLocationStore in project.dataLocationStores:
+      for dataStore in dataLocationStore.dataStores:
+        fullPath = dataStore.fullPath
+        if fullPath.startswith(userPathP):
+          includedDataPaths.add(fullPath[n:])
+
+  userPath = os.path.basename(userPath)
+
+  def visitDir(directory):
+    tarFiles = []
+    for relfile in os.listdir(directory):
+      fullfile = os.path.join(directory, relfile)
+      include = False
+      if os.path.isdir(fullfile):
+        tarFiles.extend(visitDir(fullfile))
+      elif relfile.endswith('.xml'):
+        include = True
+      elif includeBackups and relfile.endswith('.xml.bak'):
+        include = True
+      elif includeData and fullfile in includedDataPaths:
+        include = True
+
+      if include:
+        print(fullfile)
+        tarFiles.append(fullfile)
+
+    if tarFiles:
+      tarFiles.insert(0, directory)
+
+    return tarFiles
+
+  if not filePrefix:
+    filePrefix = userPath
+
+  tarFile = '%s.tgz' % filePrefix
+  tarFp = tarfile.open(tarFile, 'w:gz')
+
+  cwd = os.getcwd()
+  os.chdir(userDir)
+  try:
+    print('Files included in tar file:')
+    files = visitDir(userPath)
+    for tarFile in files:
+      tarFp.add(tarFile, recursive=False)
+  finally:
+    os.chdir(cwd)
+    tarFp.close()
+
+def logMemoryStats(project, path):
+  """
+  Logs stats for a project.
+  It appends information to the file given by path.
+  """
+
+  path = Path.normalisePath(path)
+  fp = open(path, 'a')
+  if fp:
+    t = time.ctime(time.time())
+    m = gc.collect()
+    n = len(gc.get_objects())
+    s = '%s: %d collected, %d objects' % (t, m, n)
+    fp.write('%s\n' % s)
+    print('logging: %s' % s)
+    fp.close()
+
+def findCcpXmlFile(project,packageName,fileSearchString):
+
+  """
+  Finds an XML file by a file search pattern from all available package repositories
+  """
+
+  ff = project.findFirstPackageLocator
+  packageLocator = ff(targetName=packageName) or ff(targetName='any')
+
+  xmlFileName = None
+  # The repositories link is ordered!
+  for repository in packageLocator.repositories:
+
+    fileLocation = repository.getFileLocation(packageName)
+    xmlFileNameMatches = glob.glob(os.path.join(fileLocation,fileSearchString))
+
+    if xmlFileNameMatches:
+      if xmlFileNameMatches[-1][-4:] == '.xml':
+        xmlFileName = xmlFileNameMatches[-1]
+        break
+
+  return xmlFileName
+
+def getRepositoryPath(project, repositoryName):
+
+  repository = project.findFirstRepository(name=repositoryName)
+  if repository:
+    path = repository.url.path
+  else:
+    path = None
+
+  return path
+
+def setRepositoryPath(project, repositoryName, path):
+
+  from ccpncore.api.memops.Implementation import Url
+
+  repository = project.findFirstRepository(name=repositoryName)
+  if repository:
+    if path != repository.url.path:
+      # TBD: should we copy anything over from old url?
+      url = Url(path=normalisePath(path))
+      repository.url = url
+
+  # TBD: should we throw an exception if repository is not found?
+
+def getBackupPath(project):
+
+  return getRepositoryPath(project, 'backup')
+
+def setBackupPath(project, path):
+
+  return setRepositoryPath(project, 'backup', path)
+
+def getUserDataPath(project):
+
+  return getRepositoryPath(project, 'userData')
+
+def setUserDataPath(project, path):
+
+  return setRepositoryPath(project, 'userData', path)
+
+def getCcpFileString(fileString):
+  """
+  Changes an input string to the one used for a component of file names.
+  """
+
+  return doConvertStringToFileName(fileString, commonUtil.validFileNamePartChars,
+                                   commonUtil.defaultFileNameChar)
+
+
+def findCcpnProjectDirs(inDir):
+  """ Find list of (potential) CCPN project dirs within inDir
+  """
+  result = []
+  for dirpath, dirnames, filenames in os.walk(inDir):
+    if dirpath.endswith('memops') and 'Implementation' in dirnames:
+      result.append(os.path.dirname(dirpath))
+  #
+  return result
+  # NBNB fixme
+  ff = project.findFirstPackageLocator
+  packageLocator = ff(targetName=packageName) or ff(targetName='any')
+
+  xmlFileName = None
+  # The repositories link is ordered!
+  for repository in packageLocator.repositories:
+
+    fileLocation = repository.getFileLocation(packageName)
+    xmlFileNameMatches = glob.glob(os.path.join(fileLocation,fileSearchString))
+
+    if xmlFileNameMatches:
+      if xmlFileNameMatches[-1][-4:] == '.xml':
+        xmlFileName = xmlFileNameMatches[-1]
+        break
+
+  return xmlFileName
+#
+# def getRepositoryPath(project, repositoryName):
+#
+#   repository = project.findFirstRepository(name=repositoryName)
+#   if repository:
+#     path = repository.url.path
+#   else:
+#     path = None
+#
+#   return path
+#
+# def setRepositoryPath(project, repositoryName, path):
+#
+#   from memops.api.Implementation import Url
+#
+#   repository = project.findFirstRepository(name=repositoryName)
+#   if repository:
+#     if path != repository.url.path:
+#       # TBD: should we copy anything over from old url?
+#       url = Url(path=normalisePath(path))
+#       repository.url = url
+#
+#   # TBD: should we throw an exception if repository is not found?
+#
+# def getBackupPath(project):
+#
+#   return getRepositoryPath(project, 'backup')
+#
+# def setBackupPath(project, path):
+#
+#   return setRepositoryPath(project, 'backup', path)
+#
+# def getUserDataPath(project):
+#
+#   return getRepositoryPath(project, 'userData')
+#
+# def setUserDataPath(project, path):
+#
+#   return setRepositoryPath(project, 'userData', path)
+#
+# def getCcpFileString(fileString):
+#   """
+#   Changes an input string to the one used for a component of file names.
+#   """
+#   from memops.general.Constants import defaultFileNameChar
+#   from memops.general.Constants import validFileNamePartChars
+#
+#   return doConvertStringToFileName(fileString, validFileNamePartChars,
+#                                    defaultFileNameChar)
+#
+#
+# def findCcpnProjectDirs(inDir):
+#   """ Find list of (potential) CCPN project dirs within inDir
+#   """
+#   result = []
+#   for dirpath, dirnames, filenames in os.walk(inDir):
+#     if dirpath.endswith('memops') and 'Implementation' in dirnames:
+#       result.append(os.path.dirname(dirpath))
+#   #
+#   return result

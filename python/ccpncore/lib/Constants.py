@@ -102,24 +102,24 @@ software development. Bioinformatics 21, 1678-1684.
 # Standard residue codes
 #
 
-# standardResidueCcpCodes = {
-#
-#     'protein':
-#
-#       ['Ala','Arg','Asn','Asp','Cys',
-#        'Gln','Glu','Gly','His','Ile',
-#        'Leu','Lys','Met','Phe','Pro',
-#        'Ser','Thr','Trp','Tyr','Val'],
-#
-#     'DNA':
-#
-#       ['A','C','G','T'],
-#
-#     'RNA':
-#
-#       ['A','C','G','U']
-#
-#                           }
+standardResidueCcpCodes = {
+
+    'protein':
+
+      ['Ala','Arg','Asn','Asp','Cys',
+       'Gln','Glu','Gly','His','Ile',
+       'Leu','Lys','Met','Phe','Pro',
+       'Ser','Thr','Trp','Tyr','Val'],
+
+    'DNA':
+
+      ['A','C','G','T'],
+
+    'RNA':
+
+      ['A','C','G','U']
+
+                          }
 
 code1LetterToCcpCodeDict = {
 

@@ -49,6 +49,39 @@ def getCcpFileString(fileNameString):
   return convertStringToFileName(fileNameString, validFileNamePartChars,
                                    defaultFileNameChar)
 
+def incrementName(name:str) -> str:
+  """Add '_1' to name or change suffix '_n' to '_(n+1) """
+  ll = name.rsplit('_',1)
+  if len(ll) == 2:
+    try:
+      ll[1] = int(ll[1]) + 1
+      return '_'.join(ll)
+
+    except ValueError:
+      pass
+
+  return name + '_1'
+
+
+def splitIntFromChars(value:str):
+  """convert a string with a leading integer optionally followed by characters
+  into an (integer,string) tuple"""
+
+  value = value.strip()
+
+  for ii in reversed(range(1,len(value)+1)):
+    try:
+      number = int(value[:ii])
+      chars = value[ii:]
+      break
+    except ValueError:
+      continue
+  else:
+    number = None
+    chars = value
+
+  return number,chars
+
 def recursiveImport(dirname, modname=None, ignoreModules = None, force=False):
   """ recursively import all .py files
   (not starting with '__' and not containing internal '.' in their name)

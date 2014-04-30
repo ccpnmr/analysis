@@ -55,9 +55,11 @@ software development. Bioinformatics 21, 1678-1684.
 
 ===========================REFERENCE END===============================
 """
-
+from ccpncore.util import Logging
 from ccpncore.memops.ApiError import ApiError
 from ccpncore.api.ccp.molecule import Molecule
+from ccpncore.util import CopyData
+from ccpncore.lib.chemComp import Io as chemCompIo
 
 ###from ccp.general.Io import getChemComp
 
@@ -71,16 +73,16 @@ def makeMolecule(project, molType, sequence, molName=None, startNum=1, isCyclic=
 
   """Descrn: Makes Molecule for a given sequence
      Inputs: Project, Word (ChemComp.molType), List of Words (ChemComp.CcpCode),
-             String ( Ccp.Moleule.Molecule.name) Int (first MolResidue.seqCode)
+             String ( Ccp.Molecule.Molecule.name) Int (first MolResidue.seqCode)
      Output: Molecule
   """
 
   if not molName:
     i = 1
-    molName = 'Molecule %d' % (i)
+    molName = 'Molecule %d' % i
     while project.findFirstMolecule(name=molName):
       i += 1
-      molName = 'Molecule %d' % (i)
+      molName = 'Molecule %d' % i
  
   molecule =  project.newMolecule(name=molName)
 
@@ -98,7 +100,8 @@ def makeMolecule(project, molType, sequence, molName=None, startNum=1, isCyclic=
 def addMolResidues(molecule, molType, sequence, startNum=1, isCyclic=False):
   """Descrn: Makes MolResidues for a given sequence in a new or specified Molecule
      Inputs: Ccp.Molecule.Molecule, Word (ChemComp.molType), List of Words (ChemComp.CcpCode),
-             Ccp.Moleule.Molecule, String ( Ccp.Moleule.Molecule.name) Int (first MolResidue.seqCode)
+             Ccp.Moleule.Molecule, String ( Ccp.Molecule.Molecule.name)
+             Int (first MolResidue.seqCode)
      Output: List of Ccp.Molecule.MolResidues
   """
   
@@ -123,7 +126,7 @@ def addMolResidues(molecule, molType, sequence, startNum=1, isCyclic=False):
     
     project = molecule.root
     for i in range(len(sequence)):
-      chemComp = getChemComp(project, molType, sequence[i])
+      chemComp = chemCompIo.getChemComp(project, molType, sequence[i])
       if chemComp:
         chemCompVar  = chemComp.findFirstChemCompVar(linking='none') or chemComp.findFirstChemCompVar() # just a default
         descriptor   = chemCompVar.descriptor
@@ -148,6 +151,7 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
      Inputs: Molecule.molecule, List of Tuples of Strings (molType, ccpCode), Int, Boolean
      Output: List of Molecule.MolResidues
   """
+  logger = Logging.getLogger()
   
   if len(sequence) < 2:
     raise ApiError("Sequence %s too short for function" % sequence)
@@ -189,18 +193,16 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
       if otherLinkCodes:
         for linkCode in otherLinkCodes:
           # TBC these mostly seem to exist already...
-          if molResidue.findFirstMolResLinkEnd(linkCode=linkCode):
-            continue
-          
-          linkEnd = molResidue.newMolResLinkEnd(linkCode=linkCode)
-          molResLinkEnds.append(linkEnd)
- 
+          if not molResidue.findFirstMolResLinkEnd(linkCode=linkCode):
+            linkEnd = molResidue.newMolResLinkEnd(linkCode=linkCode)
+            molResLinkEnds.append(linkEnd)
+
     # middle residues
     for seqTuple in doSequence:
       molType,ccpCode = seqTuple
       seqCode += 1
       serial += 1
-      if chemCompData.has_key(seqTuple):
+      if seqTuple in chemCompData:
         molResData,otherLinkCodes = chemCompData[seqTuple]
       else:
         molResData,otherLinkCodes = _getLinearChemCompData(project, molType,
@@ -214,11 +216,9 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
       if otherLinkCodes:
         for linkCode in otherLinkCodes:
           # TBC these mostly seem to exist already...
-          if molResidue.findFirstMolResLinkEnd(linkCode=linkCode):
-            continue
-          
-          linkEnd = molResidue.newMolResLinkEnd(linkCode=linkCode)
-          molResLinkEnds.append(linkEnd)
+          if not molResidue.findFirstMolResLinkEnd(linkCode=linkCode):
+            linkEnd = molResidue.newMolResLinkEnd(linkCode=linkCode)
+            molResLinkEnds.append(linkEnd)
  
     # last residue
     if not isCyclic:
@@ -265,26 +265,23 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
     # final validity check
     molecule.checkAllValid()
 
-  finally: # TBD: TEMP until exception cleanup sorted out
+  except:
+    # clean up
+    try:
+      while molResLinks:
+        molResLink = molResLinks.pop()
+        molResLink.delete()
+      while molResidues:
+        molResidue = molResidues.pop()
+        molResidue.delete()
+    except:
+      logger.error("Error in clean-up after precious error")
+
+  finally:
     # reset override and set isModified
     root.__dict__['override'] = False
     molecule.__dict__['isModified'] = True
- 
-    """
-  except Exception, e:
-    # clean up 
-    try:
-      for molResLink in molResLinks:
-        molResLink.delete()
-      for molResidue in molResidues:
-        molResidue.delete()
-    except:
-      pass
-      
-    del root.__dict__['override']
-    molecule.__dict__['isModified'] = True
-    raise e
-"""
+
     
   # call notifiers:
   for clazz, objs in (
@@ -320,7 +317,7 @@ def _getLinearChemCompData(project, molType, ccpCode, linking):
     chemComp = project.findFirstChemComp(molType='other', ccpCode=ccpCode)
 
   if chemComp is None:
-    chemComp = getChemComp(project, molType, ccpCode)
+    chemComp = chemCompIo.getChemComp(project, molType, ccpCode)
 
   if chemComp is None:
     raise ApiError("No chemComp for %s residue %s" % (molType, ccpCode))
@@ -370,7 +367,7 @@ def _getLinearChemCompData(project, molType, ccpCode, linking):
   elif linking != 'middle' or seqLinks not in (['next','prev'],['prev','next']):
     raise ApiError("Illegal linking %s with seqLinks %s" % (linking,seqLinks))
   
-  return (molResData, otherLinkCodes)
+  return molResData, otherLinkCodes
 
 
 #################################################################
@@ -410,13 +407,15 @@ def setMolResidueChemCompVar(molResidue,chemCompVar):
              which bypasses the API - but it does check molecule validity at the end.
      Inputs: Ccp.Molecule.MolResidue, Ccp.ChemComp.ChemCompVar
      Output: Ccp.Molecule.MolResidue
+
+     NBNB TBD looks broken
   """
   
   if molResidue.chemCompVar is chemCompVar:
     return molResidue
   
   molecule     = molResidue.molecule
-  seqCode      = molResidue.seqCode
+  # seqCode      = molResidue.seqCode
   linking      = chemCompVar.linking
   descriptor   = chemCompVar.descriptor 
   chemComp = chemCompVar.chemComp
@@ -424,7 +423,7 @@ def setMolResidueChemCompVar(molResidue,chemCompVar):
   links = []
   for linkEnd in molResidue.molResLinkEnds:
     if linkEnd.molResLink:
-      codes = [linkEnd.linkCode]
+      # codes = [linkEnd.linkCode]
       for linkEnd2 in linkEnd.molResLink.molResLinkEnds:
         if linkEnd2 is not linkEnd:
           links.append( [linkEnd.linkCode, linkEnd2] )
@@ -441,7 +440,7 @@ def setMolResidueChemCompVar(molResidue,chemCompVar):
     linkCode = linkEnd.linkCode
     linkCodes.append(linkCode)
     if not molResidue.findFirstMolResLinkEnd(linkCode=linkCode):
-      molResLinkEnd = molResidue.newMolResLinkEnd(linkCode=linkCode)
+      molResidue.newMolResLinkEnd(linkCode=linkCode)
   
   for linkEnd in molResidue.molResLinkEnds:
     if linkEnd.linkCode not in linkCodes:
@@ -453,7 +452,7 @@ def setMolResidueChemCompVar(molResidue,chemCompVar):
   for (linkCodeA,linkEndB) in links:
     linkEndA = molResidue.findFirstMolResLinkEnd(linkCode=linkCodeA)
     if linkEndA and linkEndB:
-      molResLink = molecule.newMolResLink(molResLinkEnds=(linkEndA,linkEndB))
+      molecule.newMolResLink(molResLinkEnds=(linkEndA,linkEndB))
     
   molecule.checkAllValid(complete=True)
  
@@ -543,7 +542,8 @@ def copyMolecule(molecule, newName=None):
   
   project = molecule.root
   i       = len(project.molecules) + 1
-  newName = newName or 'Molecule %d' % (i)
-  newMolecule = copySubTree(molecule, project, topObjectParameters={'name':newName,}, maySkipCrosslinks=1 )
+  newName = newName or 'Molecule %d' % i
+  newMolecule = CopyData.copySubTree(molecule, project, topObjectParameters={'name':newName,},
+                                     maySkipCrosslinks=1 )
   
   return newMolecule

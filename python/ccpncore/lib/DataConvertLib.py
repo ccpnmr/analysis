@@ -39,7 +39,10 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 
 """
 
+import copy
 from ccpncore.lib.chemComp.ChemCompOverview import chemCompOverview
+from ccpncore.lib.chemComp import Io as chemCompIo
+from ccpncore.lib.DataMapper import DataMapper
 #from ccp.general.Io import getChemComp, getStdChemComps
 
 # priority order of naming systems
@@ -179,7 +182,7 @@ def getBestChemComp(project, resName, atomNames, molType=None, download=True):
   
   # TODO NBNB Refactor. Now non-proteins also have names of form 'Xyz'
   
-  chemComp = None
+  # chemComp = None
   
   # get molType
   if not molType:
@@ -188,7 +191,7 @@ def getBestChemComp(project, resName, atomNames, molType=None, download=True):
   if molType in ('DNA','RNA','DNA/RNA'):
     if len(resName) == 1:
       if 'PD' in atomNames:
-        resName = resName + '11'
+        resName += '11'
   
   # reset character case depending on molType
   if molType == 'protein':
@@ -201,7 +204,7 @@ def getBestChemComp(project, resName, atomNames, molType=None, download=True):
     return chemComp
     
   ccpCodeDict = {}
-  chemComps = getStdChemComps(project, molTypes=[molType,])
+  chemComps = chemCompIo.getStdChemComps(project, molTypes=[molType,])
   
   for chemComp0 in chemComps:
     ccpCodeDict[chemComp0.ccpCode] = chemComp0
@@ -230,14 +233,14 @@ def getBestChemComp(project, resName, atomNames, molType=None, download=True):
     
     # get ChemComp outside std ChemComps, 
     if not chemComp:
-      chemComp = getChemComp(project, molType, resName, download=download)
+      chemComp = chemCompIo.getChemComp(project, molType, resName, download=download)
       
     # get ChemComp outside std ChemComp - try with type Other
     if not chemComp and molType != 'other':
-      chemComp = getChemComp(project, 'other', resName, download=download)
+      chemComp = chemCompIo.getChemComp(project, 'other', resName, download=download)
       if not chemComp:
         resName = resName[0] + resName[1:].lower()
-        chemComp = getChemComp(project, 'other', resName)
+        chemComp = chemCompIo.getChemComp(project, 'other', resName)
     
   return chemComp
 
@@ -308,7 +311,7 @@ def findMatchingMolSystemAtom(atomName, residue, namingSystem, excludeAtoms,
   
   # get list of atomSysNames for preferred NamingSystem and its reference systems
   # First by sysName, then by altSysNames
-  atom = None
+  # atom = None
   chemComp = residue.chemCompVar.chemComp
   namingSystem0 = chemComp.findFirstNamingSystem(name=namingSystem)
   atomSysNames = []
@@ -440,7 +443,7 @@ def getStdResNameMap(chemComps=None):
         ccpCodesCC.add(ccpCode)
 
         # Add ccpCode and main names
-        tags = set((ccpCode, ccpCode.upper(), chemComp.code3Letter))
+        tags = {ccpCode, ccpCode.upper(), chemComp.code3Letter}
         tag = chemComp.code1Letter
         if tag and chemComp.className == 'StdChemComp':
           tags.add(tag)
@@ -486,7 +489,7 @@ def getStdResNameMap(chemComps=None):
 
       # get tags to add
       ccId = (molType, ccpCode)
-      tags = set((ccpCode,))
+      tags = {ccpCode}
       cifCode = tt[1]
       if cifCode:
         truCif = cifCode[0].upper() + cifCode[1:].lower()

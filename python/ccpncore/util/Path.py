@@ -208,12 +208,13 @@ def getPythonDirectory():
   return func(func(func(os.path.abspath(__file__))))
 
 
-def getDirectoryFromTop(downPath):
+def getDirectoryFromTop(*args):
+  """Get directory with path given by successive path sections args, starting at top"""
 
-  return joinPath(getTopDirectory(), downPath)
+  return joinPath(getTopDirectory(), *args)
 
 
-def getDataDirectory():
+def getDataDirectory(*args):
 
   return getDirectoryFromTop('data')
 

@@ -10,6 +10,9 @@ class Atom(AbstractWrapperClass):
   
   # Short class name, for PID.
   shortClassName = 'MA'
+
+  # Name of plural link to instances of class
+  _pluralLinkName = 'atoms'
   
   # List of child classes. 
   _childClasses = []
@@ -49,6 +52,8 @@ def newAtom(parent:Residue, name:str) -> Atom:
   project = parent._project
   ccpnResidue = parent._wrappedData
 
+  raise NotImplementedError("Creation of new Atoms not yet implemented")
+
   # NBNB TBD
   # requires changing of descriptor and chemCompVar,
   # interaction with structure ensembles, ...
@@ -58,7 +63,6 @@ def newAtom(parent:Residue, name:str) -> Atom:
 # Connections to parents:
 
 Residue._childClasses.append(Atom)
-Residue.atoms = Atom._wrappedChildProperty()
 
 Residue.newAtom = newAtom
 

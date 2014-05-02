@@ -5,7 +5,6 @@ from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
-from ccpncore.util import Logging
 
 
 class Project(AbstractWrapperClass):
@@ -13,6 +12,9 @@ class Project(AbstractWrapperClass):
   
   # Short class name, for PID.
   shortClassName = 'PR'
+
+  # Name of plural link to instances of class
+  _pluralLinkName = 'projects'
   
   # List of child classes. 
   _childClasses = []
@@ -54,7 +56,7 @@ class Project(AbstractWrapperClass):
       wrappedData.root.sortedChemComps()
     )
 
-    self._logger = Logging.getLogger()
+    self._logger = wrappedData.logger
 
     self._registerApiNotifiers()
     

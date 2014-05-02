@@ -14,6 +14,9 @@ class Chain(AbstractWrapperClass):
   
   # Short class name, for PID.
   shortClassName = 'MC'
+
+  # Name of plural link to instances of class
+  _pluralLinkName = 'chains'
   
   # List of child classes. 
   _childClasses = []
@@ -97,7 +100,7 @@ class Chain(AbstractWrapperClass):
     self._wrappedData.molecule.isFinalized = True
   
   def addResidues(self, sequence:"iterable", startNumber:int=None,
-                     preferredMolType=None):
+                     preferredMolType:str=None):
     """Add sequence to chain, without setting bonds to pre-existing residues  
     
     sequence:: a sequence of CCPN residue type codes or one-letter codes
@@ -148,7 +151,7 @@ class Chain(AbstractWrapperClass):
       molResidues = [ccpnMolecule.newMolResidue(chemCompVar=chemCompVar, seqCode=startNumber)]
 
     else:
-      # multiple residues, add as linear polumer
+      # multiple residues, add as linear polymer
 
       molResidues = MoleculeModify.makeLinearSequence(ccpnMolecule,
         [getccId(dd, resType, prefMolType=preferredMolType) for resType in sequence],
@@ -170,6 +173,7 @@ class Chain(AbstractWrapperClass):
   def _getAllWrappedData(cls, parent: Molecule)-> list:
     """get wrappedData (MolSystem.Chains) for all Chain children of parent Molecule"""
     return parent._wrappedData.sortedChains()
+
 
 def newChain(parent:Molecule, compoundName:str, shortName:str=None, 
              role:str=None, comment:str=None) -> Chain:
@@ -250,7 +254,6 @@ Chain.copy.__annotations__['return'] = Chain
     
 # Connections to parents:
 Molecule._childClasses.append(Chain)
-Molecule.chains = Chain._wrappedChildProperty()
 Molecule.newChain = newChain
 Molecule.makeChain = makeChain
 

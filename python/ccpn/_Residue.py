@@ -11,6 +11,9 @@ class Residue(AbstractWrapperClass):
   
   # Short class name, for PID.
   shortClassName = 'MR'
+
+  # Name of plural link to instances of class
+  _pluralLinkName = 'residues'
   
   # List of child classes. 
   _childClasses = []
@@ -118,13 +121,8 @@ def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None,
     
     
 # Connections to parents:
-
 Chain._childClasses.append(Residue)
-Chain.residues = Residue._wrappedChildProperty()
-#Molecule.residues = Residue._wrappedChildProperty()
-# NBNB TODO fix grandchild link, currentl not working
 
-# NBNB the below may not be inserted correctly as a method
 Chain.newResidue = newResidue
 
 # Notifiers:

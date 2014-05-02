@@ -9,6 +9,9 @@ class Molecule(AbstractWrapperClass):
   
   # Short class name, for PID.
   shortClassName = 'MO'
+
+  # Name of plural link to instances of class
+  _pluralLinkName = 'molecules'
   
   # List of child classes. 
   _childClasses = []
@@ -65,16 +68,15 @@ class Molecule(AbstractWrapperClass):
     """get wrappedData (MolSystems) for all Molecules children of parent Project"""
     return parent._wrappedData.root.sortedMolSystems()
 
+# Connections to parents:
+Project._childClasses.append(Molecule)
+
 def newMolecule(parent:Project, shortName:str, name:str=None, 
                 comment:str=None) -> Molecule:
   """Create new child Molecule"""
   ccpnProject = parent._wrappedData.root
   ccpnProject.newMolSystem(code=shortName, name=name, details=comment)
-    
-    
-# Connections to parents:
-Project._childClasses.append(Molecule)
-Project.molecules = Molecule._wrappedChildProperty()
+
 Project.newMolecule = newMolecule
 
 # Notifiers:

@@ -78,7 +78,10 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   
   # Short class name, for PID. Must be overridden for each subclass
   shortClassName = 'AM'
-  
+
+  # Name of plural link to instances of class
+  _pluralLinkName = 'abstractWrapperClasses'
+
   # List of child classes. Must be overridden for each subclass.
   _childClasses = []
   
@@ -317,20 +320,20 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     raise NotImplementedError("Code error: function not implemented")
     
 
-  # CCPN functions
   #@abc.abstractmethod
   def rename(self, value: str) -> None:
     """Change object id, modifying entire project to maintain consistency"""
     raise NotImplementedError("Code error: function not implemented")
   
-  # In addition each class (except for Project) must define a newClass method 
-  # and add it into the parent class namespace. 
+  # In addition each class (except for Project) must define a  newClass method
   # The function (e.g. Project.newMolecule), ... must create a new child object
   # AND ALL UNDERLYING DATA, taking in all parameters necessary to do so. 
-  # This can be done by  defining a function (not a method) 
+  # This can be done by defining a function (not a method)
   # def newMolecule( self, *args, **kw):
   # and then doing Project.newMolecule = newMolecule
-  
+
+  # CCPN functions
+
   def delete(self) -> None:
     """Delete object, with all children and underlying data.
     
@@ -338,42 +341,93 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     # NBNB some child classes must override this function"""
     
     self._wrappedData.delete()
-    
-    
-  # CCPN Implementation methods
-  
-  @classmethod
-  def _getChildren(self, cls)-> list:
-    """Get children of type cls belonging to parent
-    """
-    return list((self._project._data2Obj[x]
-                for x in cls._getAllWrappedData(self)))
-  
-  @classmethod
-  def _wrappedChildProperty(cls) -> property:
-    """Return a property that makes up a link to a child class"""
-    return property(functools.partial(AbstractWrapperClass._getChildren, cls=cls),
-                    None, None, 
-                    "sorted list of %s type child objects" % cls.__name__)
-  
-  # CCPN functions
-  
+
+
   def getById(self, identifier: str):
-    """Get child or (great...)grandchild object by relative ID#
+    """Get  object by absolute ID#
     in either long form ('Residue:MS1.A.127') or short form ('MR:MS1.A.127')"""
-    
-    project = self._project
+
     tt = identifier.split(PREFIXSEP)
     if len(tt) == 2:
-        dd = project._pid2Obj.get(tt[0])
+        dd = self._project._pid2Obj.get(tt[0])
         if dd:
-            key = tt[1] 
-            if project is not self:
-              key = IDSEP.join((self._pid,key))
-            #    
+            key = tt[1]
+            #
             return dd.get(key)
     #
     return None
     
-AbstractWrapperClass.getById.__annotations__['result'] = (AbstractWrapperClass,
-                                                          None)
+  # CCPN Implementation methods
+  
+  # @classmethod
+  # def _getChildren(self, cls)-> list:
+  #   """Get children of type cls belonging to parent
+  #   """
+  #   return list((self._project._data2Obj[x]
+  #               for x in cls._getAllWrappedData(self)))
+  
+  # @classmethod
+  # def _wrappedChildProperty(cls) -> property:
+  #   """Return a property that makes up a link to a child class"""
+  #   return property(functools.partial(AbstractWrapperClass._getChildren, cls=cls),
+  #                   None, None,
+  #                   "sorted list of %s type child objects" % cls.__name__)
+
+  @classmethod
+  def _linkWrapperClasses(cls, ancestors:list=None):
+    """Recursively set up links and functions involving children for wrapper classes"""
+
+    if ancestors:
+      # add getCls in all ancestors
+      funcName = 'get' + cls.__name__
+      for ancestor in ancestors:
+        setattr(ancestor, funcName, cls._getDescendant)
+
+      # Add descendant links
+      linkName = cls._pluralLinkName
+      descendantClasses = list(reversed(ancestors)) + [cls]
+      for ii in range(len(descendantClasses)-1):
+        ancestor = descendantClasses[ii]
+        prop = property(functools.partial(AbstractWrapperClass._allDescendants,
+                                          descendantClasses=descendantClasses[ii+1:]),
+                        None, None,
+                        "sorted list of %s type child objects" % cls.__name__)
+        setattr(ancestor, linkName, prop)
+
+    else:
+      # Project class. Start generaation here
+      ancestors = []
+
+    # recursively call next leverl down the tree
+    ancestors.append(cls)
+    for cc in cls._childClasses:
+      cc._linkWrapperClasses(ancestors)
+
+  @classmethod
+  def _getDescendant(cls, myself,  relativeId: str):
+    """Get descendant of class named className with relative key relativeId
+     Implementation function, used to generate getCls functions"""
+
+    dd = myself._project._pid2Obj.get(cls.__name__)
+    if dd:
+        return dd.get(IDSEP.join((myself._pid,relativeId)))
+    else:
+      return None
+
+  def _allDescendants(self, descendantClasses):
+    """get all descendants of a given class , following descendantClasses down the data tree
+    Implementation function, used to generate child and descendant links
+    descendantClasses is a list of classes going down from the class of self down the data tree.
+    E.g. if called on a chain with descendantClass == [Residue,Atom] the function returns
+    a sorted list of all Atoms in a Chain"""
+    data2Obj = self._project._data2Obj
+    objects = [self]
+    for cls in descendantClasses:
+      # function gets wrapped data for all children starting from parent
+      func = cls._getAllWrappedData
+      # data is iterator of wrapped data for children starting from all parents
+      data = itertools.chain(func(x) for x in objects)
+      # objects is all wrapper objects for next child level down
+      objects = [data2Obj[x] for x in data]
+    #
+      return objects

@@ -753,8 +753,9 @@ class DataMapper:
     elif 'CA' in atomNames:
       molType = 'protein'
   
-    elif ("C1" in atomNames) and ("C2" in atomNames) and ("C3" in atomNames) and ("C4" in atomNames) \
-         and ( ("O2" in atomNames) or ("O3" in atomNames) or ("O4" in atomNames)):
+    elif (("C1" in atomNames) and ("C2" in atomNames) and ("C3" in atomNames) and
+          ("C4" in atomNames)and
+          ( ("O2" in atomNames) or ("O3" in atomNames) or ("O4" in atomNames))):
       molType = 'carbohydrate'
     
     else:
@@ -975,23 +976,23 @@ class DataMapper:
     matchAtom = chemComp.findFirstChemAtom(name=atomName)
     if matchAtom is None:
       matchAtomSet = chemComp.findFirstChemAtomSet(name=atomName)
-      matchObj = matchAtomSet
+      matchObject = matchAtomSet
     elif atomName == 'H':
       # special case - necessary to map protein backbone H to H rather than H*
-      matchObj = matchAtom
+      matchObject = matchAtom
       matchAtomSet = None
     else:
-      matchObj = matchAtom
+      matchObject = matchAtom
       matchAtomSet = matchAtom.chemAtomSet
     
     
-    if matchObj is None:
+    if matchObject is None:
       # Nothing found
       print('WARNING. Bad ref data? No ChemAtomSet found for %s' % atomSysName)
     
     elif matchAtomSet is None:
         # Single atom
-        result['name'] = MoleculeQuery.makeGuiName(atomName, matchObj.elementSymbol)
+        result['name'] = MoleculeQuery.makeGuiName(atomName, matchObject.elementSymbol)
     
     else:
       # We have a matching atom set
@@ -1012,18 +1013,18 @@ class DataMapper:
       # set isEquivalent 
       if equivObj:
         result['isEquivalent'] = True
-        matchObj = equivObj
+        matchObject = equivObj
         
-      name = matchObj.name
+      name = matchObject.name
       
       # set isProchiral and modify name if necessary
-      xx = matchObj.chemAtomSet
+      xx = matchObject.chemAtomSet
       if xx and xx.isProchiral:
         result['isProchiral'] = True
         if not useStereospecific:
-          name = DataMapper.nonStereoName(matchObj, excludeAtomNames=excludeAtomNames)
+          name = DataMapper.nonStereoName(matchObject, excludeAtomNames=excludeAtomNames)
       
-      result['name'] = MoleculeQuery.makeGuiName(name, matchObj.elementSymbol)
+      result['name'] = MoleculeQuery.makeGuiName(name, matchObject.elementSymbol)
     #
     return result
       

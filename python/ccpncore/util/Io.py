@@ -3,9 +3,9 @@
 
 __author__ = 'rhf22'
 
+# import gc
 import os
 import shutil
-# import gc
 import time
 import glob
 
@@ -52,15 +52,15 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
 
   for name in repositoryNameMap.keys():
     fullPath = Path.joinPath(path, projectName) + repositoryNameMap[name]
-    answer = checkRemoveIfExists(fullPath, removeExisting, showYesNo)
-    if answer is None:
-      print ("Project overlaps existing file. Returning None")
+    if not absentOrRemoved(fullPath, removeExisting, showYesNo):
+      Logging.getLogger().warning("Project overlaps existing file. Returning None")
       return None
 
   project = Implementation.MemopsRoot(name=projectName)
 
   # create logger
   logger = Logging.createLogger(applicationName, project)
+  project.logger = logger
 
   logger.info("Project is ", project)
 
@@ -72,7 +72,7 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
 
   return project
 
-def checkRemoveIfExists(path:str, removeExisting:bool=False, showYesNo:"function"=None) -> bool:
+def absentOrRemoved(path:str, removeExisting:bool=False, showYesNo:"function"=None) -> bool:
   """
   If path already exists:
     If removeExisting:
@@ -80,11 +80,11 @@ def checkRemoveIfExists(path:str, removeExisting:bool=False, showYesNo:"function
       Return True
     Else if showYesNo:
       Ask the user if it is ok to delete the path
-      If yes, delete and return True.  If no return None.
+      If yes, delete and return True.  If no return False.
     Else:
-      Raise an IOError
+      return False
   Else:
-    Return False
+    Return True
   This function is not intended to be used outside this module but could be.
   """
 
@@ -104,21 +104,21 @@ def checkRemoveIfExists(path:str, removeExisting:bool=False, showYesNo:"function
         ss = ', '.join(files)
         message = '%s already exists, remove it and all of its contents (%s) (if no, then no action taken)?' % (path, ss)
         if not showYesNo('Remove directory', message):
-          return None
+          return False
         else:
           Path.removePath(path)
           return True
       else:
         message = '%s already exists (not as a directory), remove it?' % path
         if not showYesNo('Remove file', message):
-          return None
+          return False
         else:
           Path.removePath(path)
           return True
     else:
-      return None
-  #
-  return False
+      return False
+  else:
+    return True
 
 
 def loadProject(path:str, projectName:str=None, askFile:"function"=None,
@@ -136,7 +136,21 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
 
   from ccpncore.memops.format.xml import XmlIO
 
+  def isGeneralDataWriteable(generalDataRep):
+    ppath = generalDataRep.url.path
+    return commonUtil.isWindowsOS() or os.access(ppath, os.W_OK|os.X_OK)
+
+  def isGeneralDataOk(proj):
+    if suppressGeneralDataDir:
+      return True
+    generalDataRep = proj.findFirstRepository(name='generalData')
+    if generalDataRep:
+      return isGeneralDataWriteable(generalDataRep)
+    return True
+
   path = Path.normalisePath(path, makeAbsolute=True)
+
+  warningMessages = []
 
   # check if path exists and is directory
   if not os.path.exists(path):
@@ -178,32 +192,18 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
     project = XmlIO.loadProject(path, projectName, partialLoad=False)
 
   except:
-    print("\nFirst loading attempt failed - compatibility problem?.")
+    warningMessages.append("\nFirst loading attempt failed - compatibility problem?.")
     project = None
-
-  def isGeneralDataWriteable(generalDataRep):
-    ppath = generalDataRep.url.path
-    return commonUtil.isWindowsOS() or os.access(ppath, os.W_OK|os.X_OK)
-
-  def isGeneralDataOk(proj):
-    if suppressGeneralDataDir:
-      return True
-    generalDataRep = proj.findFirstRepository(name='generalData')
-    if generalDataRep:
-      return isGeneralDataWriteable(generalDataRep)
-    return True
 
   if project is not None and (not ApiPath.areAllTopObjectsPresent(project) or
       not isGeneralDataOk(project)):
     # if not all loaded (shell) TopObjects can be found, try again
     project = None
-    ###print "\nSome files unfindable - has project moved?."
+    warningMessages.append("\nSome files unfindable - project may have moved.")
 
   if project is None:
-    ###print "Re-trying, skipping cached TopObjects:"
+    warningMessages.append("Re-trying load, skipping cached TopObjects:")
     project = XmlIO.loadProject(path, projectName, partialLoad=True)
-
-  warningMessages = []
 
   # try and fix project repository path, if needed
   packageLocator = project.packageLocator
@@ -316,8 +316,12 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
           else:
             warningMessages.append(msg)
 
+  # make logger
+  logger = Logging.createLogger(applicationName, project)
+  project.logger = logger
+
   if warningMessages:
-    logger = Logging.createLogger(applicationName, project)
+    # log warnings
     for msg in warningMessages:
       logger.warning(msg)
 
@@ -394,26 +398,23 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   if newPath == oldPath:
     if newProjectName != oldProjectName:
       location = ApiPath.getTopObjectPath(project)
-      if os.path.exists(location):
-        answer = checkRemoveIfExists(location, removeExisting, showYesNo)
-        if answer is None:
-          project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
-          return False
-  else: # check instead if newPath already exists
-    if os.path.exists(newPath):
-      answer = checkRemoveIfExists(newPath, removeExisting, showYesNo)
-      if answer is None:
-        if newProjectName != oldProjectName:
-          project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
+      if not absentOrRemoved(location, removeExisting, showYesNo):
+        project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
         return False
-      # TBD: should we be removing it?
-      Path.removePath(newPath)
-    else:
+  else: # check instead if newPath already exists
+    if absentOrRemoved(newPath, removeExisting, showYesNo):
       # NBNB 2008/04/03 Rasmus Fogh. Added because it otherwise fell over when
       # target path did not exist
       upDir = os.path.dirname(newPath)
       if not os.path.exists(upDir):
         os.makedirs(upDir)
+    else:
+      if newProjectName != oldProjectName:
+        project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
+        return False
+      else:
+        # TBD: should we be removing it?
+        Path.removePath(newPath)
 
     # check if any topObject activeRepository is not either of above
     refData = project.findFirstRepository(name='refData')

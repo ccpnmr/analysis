@@ -114,18 +114,18 @@ def getBestNamingSystemCC(chemComps, atomNamesList, prefNamingSystemName=None):
  
       for atomName in atomNames:
       
-        namingSystemR = namingSystem
+        refNamingSystem = namingSystem
         done = False
         
-        while namingSystemR:
+        while refNamingSystem:
           # First choice plain mapping
-          if namingSystemR.findFirstAtomSysName(sysName=atomName):
+          if refNamingSystem.findFirstAtomSysName(sysName=atomName):
             score += fullHit
             break
 
           # Otherwise try alternative sys names
           else:
-            for atomSysName0 in namingSystemR.atomSysNames:
+            for atomSysName0 in refNamingSystem.atomSysNames:
               if atomName in atomSysName0.altSysNames:
                 score += altHit
                 done = True
@@ -136,7 +136,7 @@ def getBestNamingSystemCC(chemComps, atomNamesList, prefNamingSystemName=None):
               
             else:
               #  no luck, try again with reference naming system
-              namingSystemR = namingSystemR.atomReference
+              refNamingSystem = refNamingSystem.atomReference
 
       scoreDict[ns] = score
 

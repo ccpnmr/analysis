@@ -3,7 +3,6 @@ from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Project import Project
 from ccpn._Residue import Residue
 from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
-from ccpncore.util import Common as commonUtil
 
 class Atom(AbstractWrapperClass):
   """Molecular Atom."""

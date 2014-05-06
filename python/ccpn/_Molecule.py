@@ -26,15 +26,17 @@ class Molecule(AbstractWrapperClass):
     return self._wrappedData
   
   
-  @property
-  def id(self) -> str:
-    """Molecule id: shortName"""
-    return self._wrappedData.code
+  # @property
+  # def id(self) -> str:
+  #   """Molecule id: shortName"""
+  #   return self._wrappedData.code
     
   @property
-  def shortName(self) -> str:
+  def id(self) -> str:
     """short form of name, used for id"""
     return self._wrappedData.code
+
+  shortName = id
     
   @property
   def _parent(self) -> Project:

@@ -27,12 +27,12 @@ class Residue(AbstractWrapperClass):
   
   
   @property
-  def id(self) -> str:
+  def seqCode(self) -> str:
     """Residue sequence code and id (e.g. '1', '127B') """
     obj = self._wrappedData
     return str(obj.seqCode) + obj.seqInsertCode.strip()
   
-  seqCode = id
+  id = seqCode
     
   @property
   def _parent(self) -> Chain:

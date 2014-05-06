@@ -10,6 +10,7 @@ from ccpn._Molecule import Molecule
 from ccpn._Chain import Chain
 from ccpn._Residue import Residue
 from ccpn._Atom import Atom
+from ccpn._Spectrum import Spectrum
 
 # Set up interclass links and related functions
 Project._linkWrapperClasses()

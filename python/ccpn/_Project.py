@@ -56,7 +56,7 @@ class Project(AbstractWrapperClass):
       wrappedData.root.sortedChemComps()
     )
 
-    self._logger = wrappedData.logger
+    self._logger = wrappedData.root.logger
 
     self._registerApiNotifiers()
     
@@ -86,21 +86,6 @@ class Project(AbstractWrapperClass):
     """Unregister a single notifier"""
     self._activeNotifiers.remove((notify, apiClassName, apiFuncName))
     Notifiers.unregisterNotify(notify, apiClassName, apiFuncName)
-  
-  def _initializeAll(self):
-    """Initialize children, using existing objects in data model"""
- 
-    project = self._project
-    data2Obj = project._data2Obj
- 
-    for childClass in self._childClasses:
-      
-      # recursively create chldren
-      for wrappedObj in childClass._getAllWrappedData(self):
-        newObj = data2Obj.get(wrappedObj)
-        if newObj is None:
-          newObj = childClass(project, wrappedObj)
-        newObj.initializeAll()
 
 
   def _newObject(self, cls, wrappedData):

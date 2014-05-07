@@ -431,3 +431,18 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
       objects = [data2Obj[x] for x in data]
     #
       return objects
+
+  def _initializeAll(self):
+    """Initialize children, using existing objects in data model"""
+
+    project = self._project
+    data2Obj = project._data2Obj
+
+    for childClass in self._childClasses:
+
+      # recursively create children
+      for wrappedObj in childClass._getAllWrappedData(self):
+        newObj = data2Obj.get(wrappedObj)
+        if newObj is None:
+          newObj = childClass(project, wrappedObj)
+        newObj._initializeAll()

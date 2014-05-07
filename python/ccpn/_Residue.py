@@ -126,8 +126,9 @@ Chain._childClasses.append(Residue)
 Chain.newResidue = newResidue
 
 # Notifiers:
+className = Ccpn_Residue._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Residue}, Ccpn_Residue.qualifiedName, '__init__'),
-    ('_finaliseDelete', {}, Ccpn_Residue.qualifiedName, 'delete')
+  ( ('_newObject', {'cls':Residue}, className, '__init__'),
+    ('_finaliseDelete', {}, className, 'delete')
   )
 )

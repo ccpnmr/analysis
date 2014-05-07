@@ -66,8 +66,9 @@ Residue._childClasses.append(Atom)
 Residue.newAtom = newAtom
 
 # Notifiers:
+className = Ccpn_Atom._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Atom}, Ccpn_Atom.qualifiedName, '__init__'),
-    ('_finaliseDelete', {}, Ccpn_Atom.qualifiedName, 'delete')
+  ( ('_newObject', {'cls':Atom}, className, '__init__'),
+    ('_finaliseDelete', {}, className, 'delete')
   )
 )

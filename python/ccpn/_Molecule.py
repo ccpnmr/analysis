@@ -82,8 +82,9 @@ def newMolecule(parent:Project, shortName:str, name:str=None,
 Project.newMolecule = newMolecule
 
 # Notifiers:
+className = Ccpn_MolSystem._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Molecule}, Ccpn_MolSystem.qualifiedName, '__init__'),
-    ('_finaliseDelete', {}, Ccpn_MolSystem.qualifiedName, 'delete')
+  ( ('_newObject', {'cls':Molecule}, className, '__init__'),
+    ('_finaliseDelete', {}, className, 'delete')
   )
 )

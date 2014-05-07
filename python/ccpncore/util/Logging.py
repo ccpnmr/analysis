@@ -143,8 +143,7 @@ def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):
   """Remove old log files."""
 
   logDirectory = os.path.dirname(logPath)
-  logFiles = os.listdir(logDirectory)
-  # print ('###',logPath, logDirectory, logFiles)
+  logFiles = [os.path.join(logDirectory, x) for x in os.listdir(logDirectory)]
   logFiles = [logFile for logFile in logFiles if logFile != logPath and not os.path.isdir(logFile)]
 
   currentTime = time.time()

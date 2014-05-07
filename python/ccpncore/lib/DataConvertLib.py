@@ -42,7 +42,6 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 import copy
 from ccpncore.lib.chemComp.ChemCompOverview import chemCompOverview
 from ccpncore.lib.chemComp import Io as chemCompIo
-from ccpncore.lib.DataMapper import DataMapper
 #from ccp.general.Io import getChemComp, getStdChemComps
 
 # priority order of naming systems
@@ -50,6 +49,8 @@ namingSystemPriorityOrder = ['PDB','IUPAC','PDB_REMED','BMRB','XPLOR',
                              'CYANA2.1','DIANA', 'GROMOS','MSD','SYBYL',
                              'UCSF','AQUA','DISGEO','DISMAN', 'MOLMOL','MSI']
 
+# molType priority order
+molTypeOrder = ('protein', 'DNA', 'RNA', 'carbohydrate', 'other')
     
 ###################################################################
 #
@@ -419,8 +420,6 @@ def getStdResNameMap(chemComps=None):
   Output:
    Dictionary {Word:(Word,Word)}
   """
-
-  molTypeOrder = DataMapper.molTypeOrder
 
   result = {}
 

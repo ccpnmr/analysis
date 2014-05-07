@@ -260,8 +260,9 @@ Molecule.newChain = newChain
 Molecule.makeChain = makeChain
 
 # Notifiers:
+className = Ccpn_Chain._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Chain}, Ccpn_Chain.qualifiedName, '__init__'),
-    ('_finaliseDelete', {}, Ccpn_Chain.qualifiedName, 'delete')
+  ( ('_newObject', {'cls':Chain}, className, '__init__'),
+    ('_finaliseDelete', {}, className, 'delete')
   )
 )

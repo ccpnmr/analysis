@@ -117,9 +117,7 @@ class DataMapper:
   """ Format-independent and importer-independent class for 
   importing, mapping and converting input data to CCPN.
   """
-  
-  # molType priority order
-  molTypeOrder = ('protein', 'DNA', 'RNA', 'carbohydrate', 'other')
+
   
   # def __init__(self, ccpnProject=None, molSystem=None, nmrProject=None,
   #              nmrConstaintStore=None, **kw):
@@ -707,7 +705,7 @@ class DataMapper:
         
         if ccId is None:
           # try in priority order:
-          for molType in DataMapper.molTypeOrder:
+          for molType in DataConvertLib.molTypeOrder:
             ll = [tt for tt in ccIds if molType == tt[0]]
             if len(ll) == 1:
               ccId = ll[0]

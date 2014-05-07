@@ -1,6 +1,6 @@
 __author__ = 'rhf22'
 
-from Collections.abc import Sequence
+from collections.abc import Sequence
 
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Project import Project
@@ -594,8 +594,9 @@ Project._childClasses.append(Spectrum)
 Project.newSpectrum = newSpectrum
 
 # Notifiers:
+className = Ccpn_DataSource._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':newSpectrum}, Ccpn_DataSource.qualifiedName, '__init__'),
-    ('_finaliseDelete', {}, Ccpn_DataSource.qualifiedName, 'delete')
+  ( ('_newObject', {'cls':newSpectrum}, className, '__init__'),
+    ('_finaliseDelete', {}, className, 'delete')
   )
 )

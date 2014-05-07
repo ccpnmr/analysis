@@ -20,14 +20,14 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           + defaultFileNameChar)
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
-apiTopDir = 'ccpncore/api'
+apiTopModule = 'ccpncore.api'
 
 
 def getClassFromFullName(qualifiedName):
   """ Get Api class from fully qualified (dot-separated) name
   """
   pathList = qualifiedName.split('.')
-  mod = __import__('.'.join([apiTopDir] + pathList[:-1]),{},{},[pathList[-1]])
+  mod = __import__('.'.join([apiTopModule] + pathList[:-1]),{},{},[pathList[-1]])
   return getattr(mod,pathList[-1])
 
 

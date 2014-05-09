@@ -22,7 +22,7 @@ class Spectrum(AbstractWrapperClass):
   # CCPN properties
   @property
   def ccpnSpectrum(self) -> Ccpn_DataSource:
-    """ CCPN dataSOurce matching Spectrum"""
+    """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
 
 
@@ -291,6 +291,17 @@ class Spectrum(AbstractWrapperClass):
 
 
   @property
+  def phase0(self) -> tuple:
+    """Tuple with zero order phase correction (or None) per dimension
+    (Always None for sampled dimensions)."""
+    return tuple(x.phase0 for x in self._wrappedData.sortedDataDims()
+                 if hasattr(x, 'phase0'))
+
+  @phase0.setter
+  def phase0(self, value:Sequence):
+    self._setDataDimValue('phase0', value)
+
+  @property
   def phase1(self) -> tuple:
     """Tuple with first order phase correction (or None) per dimension
     (Always None for sampled dimensions)."""
@@ -476,14 +487,21 @@ class Spectrum(AbstractWrapperClass):
     Uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef
     Axis code is used to identify the axis, how axes are linked, and how they map to
     window axes, experiment templates etc. The following codes are accepted:
+
     - Nucleus names (H, C, N, P, F, D, Na, Ca, ...)
+
     - HX groups (Hn, Hc, Ch, Nh) showing carbon or nitrogen bound to protons
+
     - Protein-specific groups (HA, Ca, CO)
+
     - Double quantum  axes ( DQ(C,C), DQ(H,C), ...
+
     - Coupling constants (J, J(H,H), J(H,C), ...
+
     - measurement types (time, temp, pH, conc, pressure, field, offset, ...
-    - Duplicate codes are distinguished by sufficxes (H, H2, H3, ...) (NB there is no H1)
-    - E.g. Hc is bound to Ch, but not to Ch2
+
+    - Duplicate codes are distinguished by suffixes (H, H2, H3, ...) (NB there is no H1)
+      E.g. Hc is bound to Ch, but not to Ch2
 
     TBD codes match AtomSite.name, but NBNB NmrExpPrototypes must be updated to match system"""
     return tuple(x and x.name for x in self._mainExpDimRefs())
@@ -578,7 +596,7 @@ class Spectrum(AbstractWrapperClass):
 
 def newSpectrum(parent:Project, name:str) -> Spectrum:
   """Create new child Atom"""
-  project = parent._project
+  project = parent
 
   raise NotImplementedError("Creation of new Spectra not yet implemented")
 
@@ -596,7 +614,7 @@ Project.newSpectrum = newSpectrum
 # Notifiers:
 className = Ccpn_DataSource._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':newSpectrum}, className, '__init__'),
+  ( ('_newObject', {'cls':Spectrum}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

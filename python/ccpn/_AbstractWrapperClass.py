@@ -10,9 +10,11 @@ PREFIXSEP  = ':'
 
 @functools.total_ordering
 class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
-  """Abstract class containing common functionality for wrapper classes
+  """Abstract class containing common functionality for wrapper classes.
+
+  ADVANCED. Core programmers only.
   
-  Rules for subclasses:
+  **Rules for subclasses:**
   
   All collection attributes are tuples. For objects these are sorted by pid;
   for simple values they are ordered. 
@@ -22,7 +24,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   
   For each child class there will be a newChild factory function, wrapping the
   normal class creator. There will be a collection attribute for each child, 
-  grandchild, and generally descendant. NBNB TBD We may decide that the relevant
+  grandchild, and generally descendant. We may decide that the relevant
   attribute can be defined as an abstract class, e.g. to have a single 
   restraintLists attribute that includes different classes for distance 
   restraint lists, dihedral restraint lists etc. subclassing an 
@@ -33,51 +35,62 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   The pid is the object id relative to the project; keys relative to objects lower
   in the hierarchy will omit successively more keys.
 
-  Classes behave as dictionaries containing their child objects (NOT grandchildren #
+  Classes behave as dictionaries containing their child objects (NOT grandchildren
   or other descendants), using the relative object id as key. 
   The ID will use the form with full length class names as prefix.
   
-  Example: 
+  **Example:**
+
   There will be a link to the Atom class from both the Residue class, the Chain class,
-  the Molecule class, and the Project. There relative keys for each object might be:
+  the Molecule class, and the Project. The relative keys for each object might be:
   
-  From object:  relative id:
-  Project       'AT:MS1.A.127.N'
-  Molecule      'AT:A.127.N'
-  Chain         'AT:127.N'
-  Residue       'AT:N'
+  =============  ================
+  From object:   relative id:
+  =============  ================
+
+  Project        'AT:MS1.A.127.N'
+
+  Molecule       'AT:A.127.N'
+
+  Chain          'AT:127.N'
+
+  Residue        'AT:N'
+
+  ============  ================
   
-  Code organisation:
+  **Code organisation:**
   
   All code related to a given class lives in the file for the class. 
   On importing it, it will insert relevant functions in the parent class.
-  All import must be through the wrapper module, where it is guaranteed that
+  All import must be through the ccpn module, where it is guaranteed that
   all modules are imported in the right order. 
   
   This is organised as a wrapper API, which means that all actual data live 
   in the wrapped data and are derived where needed. All data storage is done
   at the wrapped data, not at the wrapper level, and there is no mechanism for
-  storing attributes that have been added at the wrapper level. key and uniqueness
+  storing attributes that have been added at the wrapper level. Key and uniqueness
   checking, type checking etc.  is also done in the wrapped data, not at the 
   wrapper level.
   
-  Initialising happens by passing in an NmrProject instance and creating the
-  wrapper instances automatically starting from there. Unless we change this,
+  Initialising happens by passing in an NmrProject instance to the Project __init__;
+  all wrapper instances are created automatically starting from there. Unless we change this,
   this means we assume that all data can be found by navigating from an
   NmrProject.
   
   New classes can be added, provided they match the requirements. All classes 
   must form a parent-child tree with the root at Project. All classes must
-  must have class-level attributes shortClassName and _childClasses.
+  must have class-level attributes shortClassName, _childClasses, and _pluralLinkName.
   Each class must implement the properties id and _parent, and the methods 
-  _getAllWrappedData,  (so that , rename, and delete. Note that the 
-  properties and the two implementation functions (starting with underscore) 
+  _getAllWrappedData,  and rename. Note that the
+  properties and the _getAllWrappedData function
   must work from the underlying data, as they will be called before the pid
-  and object dictionary data are set up.
+  and object dictionary data are set up. New classes must also set the _apiNotifiers
+  data to ensure that objetcs are created adn deleted according to teh wrapped (CCPN API)
+  objects
   """
   
   # Short class name, for PID. Must be overridden for each subclass
-  shortClassName = 'AM'
+  shortClassName = None
 
   # Name of plural link to instances of class
   _pluralLinkName = 'abstractWrapperClasses'
@@ -93,7 +106,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   
   # Implementation methods
   
-  def __init__(self, project, wrappedData):
+  def __init__(self, project, wrappedData:object):
    
     # NB project parameter type is Project. Set in Project.py
     
@@ -301,13 +314,13 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   def id(self) -> str:
     """Object local identifier, unique for a given type with a given parent.
     Set automatically from other (immutable) object attributes."""
-    return None
+    raise NotImplementedError("Code error: function not implemented")
   
   @property
   @abc.abstractmethod
   def _parent(self):
     """Parent (containing) object."""
-    return None
+    raise NotImplementedError("Code error: function not implemented")
   
   
   # Abstract methods
@@ -321,7 +334,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     
 
   #@abc.abstractmethod
-  def rename(self, value: str) -> None:
+  def rename(self, value:str):
     """Change object id, modifying entire project to maintain consistency"""
     raise NotImplementedError("Code error: function not implemented")
   
@@ -334,7 +347,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
 
   # CCPN functions
 
-  def delete(self) -> None:
+  def delete(self):
     """Delete object, with all children and underlying data.
     
     # NBNB clean-up of wrapper structure is done via notifiers.
@@ -358,20 +371,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     return None
     
   # CCPN Implementation methods
-  
-  # @classmethod
-  # def _getChildren(self, cls)-> list:
-  #   """Get children of type cls belonging to parent
-  #   """
-  #   return list((self._project._data2Obj[x]
-  #               for x in cls._getAllWrappedData(self)))
-  
-  # @classmethod
-  # def _wrappedChildProperty(cls) -> property:
-  #   """Return a property that makes up a link to a child class"""
-  #   return property(functools.partial(AbstractWrapperClass._getChildren, cls=cls),
-  #                   None, None,
-  #                   "sorted list of %s type child objects" % cls.__name__)
+
 
   @classmethod
   def _linkWrapperClasses(cls, ancestors:list=None):
@@ -381,7 +381,11 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
       # add getCls in all ancestors
       funcName = 'get' + cls.__name__
       for ancestor in ancestors:
-        setattr(ancestor, funcName, cls._getDescendant)
+        prop = property(functools.partial(AbstractWrapperClass._getDescendant,
+                                          className=cls.__name__),
+                        None, None,
+                        "Get child %s object by relative ID" % cls.__name__)
+        setattr(ancestor, funcName, prop)
 
       # Add descendant links
       linkName = cls._pluralLinkName
@@ -393,24 +397,21 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
                         None, None,
                         "sorted list of %s type child objects" % cls.__name__)
         setattr(ancestor, linkName, prop)
-
     else:
       # Project class. Start generaation here
       ancestors = []
 
-    # recursively call next leverl down the tree
-    ancestors.append(cls)
+    # recursively call next level down the tree
     for cc in cls._childClasses:
-      cc._linkWrapperClasses(ancestors)
+      cc._linkWrapperClasses(ancestors + [cls])
 
-  @classmethod
-  def _getDescendant(cls, myself,  relativeId: str):
+  def _getDescendant(self, className,  relativeId: str):
     """Get descendant of class named className with relative key relativeId
      Implementation function, used to generate getCls functions"""
 
-    dd = myself._project._pid2Obj.get(cls.__name__)
+    dd = self._project._pid2Obj.get(className)
     if dd:
-        return dd.get(IDSEP.join((myself._pid,relativeId)))
+        return dd.get(IDSEP.join((self._pid,relativeId)))
     else:
       return None
 
@@ -446,3 +447,6 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
         if newObj is None:
           newObj = childClass(project, wrappedObj)
         newObj._initializeAll()
+
+
+AbstractWrapperClass.getById.__annotations__['return'] = AbstractWrapperClass

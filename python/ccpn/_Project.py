@@ -139,3 +139,4 @@ class Project(AbstractWrapperClass):
 # MUST be done here to avoid circular import problems
 AbstractWrapperClass.__init__.__annotations__['project'] = Project
 AbstractWrapperClass.project.fget.__annotations__['return'] = Project
+#AbstractWrapperClass.project.getter.__annotations__['return'] = Project

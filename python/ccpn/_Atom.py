@@ -20,7 +20,7 @@ class Atom(AbstractWrapperClass):
   # CCPN properties  
   @property
   def ccpnAtom(self) -> Ccpn_Atom:
-    """ CCPN atom matching Residue"""
+    """ CCPN atom matching Atom"""
     return self._wrappedData
 
 

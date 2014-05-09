@@ -8,6 +8,8 @@ from ccpncore.lib import MoleculeModify
 from ccpncore.lib.DataMapper import DataMapper
 from ccpncore.util import Common as commonUtil
 
+from collections.abc import Sequence
+
 
 class Chain(AbstractWrapperClass):
   """Molecular Chain."""
@@ -101,19 +103,19 @@ class Chain(AbstractWrapperClass):
     """Finalize chain so that it can no longer be modified"""
     self._wrappedData.molecule.isFinalized = True
   
-  def addResidues(self, sequence:"iterable", startNumber:int=None,
+  def addResidues(self, sequence:Sequence, startNumber:int=None,
                      preferredMolType:str=None):
-    """Add sequence to chain, without setting bonds to pre-existing residues  
-    
-    sequence:: a sequence of CCPN residue type codes or one-letter codes
-    if sequence contains more than one residue, it is assumed that the residues
+    """Add sequence to chain, without setting bonds to pre-existing residues
+
+    :param Sequence sequence: a sequence of CCPN residue type codes or one-letter codes \
+    if sequence contains more than one residue, it is assumed that the residues \
     form a linear polymer
-    startNumber:: residue number of first residue in sequence.
+
+    :param int startNumber: residue number of first residue in sequence. \
     If not given, is it one  more than the last
-    preferredMolType:: MolType to use in case of ambiguity (one of 'protein',
-                       'DNA', 'RNA', 'carbohydrate', 'other'"""
 
-
+    :param str preferredMolType: MolType to use in case of ambiguity (one of 'protein', \
+    'DNA', 'RNA', 'carbohydrate', 'other'"""
 
     ccpnChain = self._wrappedData
     ccpnMolecule = ccpnChain.molecule
@@ -179,13 +181,13 @@ class Chain(AbstractWrapperClass):
 
 def newChain(parent:Molecule, compoundName:str, shortName:str=None, 
              role:str=None, comment:str=None) -> Chain:
-  """Create new child Chain, empty or matrching existing molecule
+  """Create new child Chain, empty or matching existing compound
   
-  compoundName:: Name of new CCPN_Molecule matching chain; 
-                 will use matching molecule if one exists.
-  shortName:: shortName for new chain (optional)
-  role:: role for new chain (optional)
-  comment:: comment for new chain (optional)"""
+  :param str compoundName: Name of new compound (CCPN_Molecule) matching chain, \
+      Will use matching molecule if one exists.
+  :param str shortName: shortName for new chain (optional)
+  :param str role: role for new chain (optional)
+  :param str comment: comment for new chain (optional)"""
   
   ccpnMolSystem = parent.ccpnMolSystem
   ccpnRoot = ccpnMolSystem.root
@@ -211,16 +213,19 @@ def makeChain(parent:Molecule, sequence, compoundName:str,
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
   """Make new chain from sequence of residue codes
   
-  sequence:: string of one-letter or sequence of three-residue type codes
+  :param Sequence sequence: string of one-letter or sequence of three-residue type codes \
   if empty uses existing molecule (if any)
-  compoundName:: name of new CCPN_Molecule (e.g. 'Lysozyme')
-  preferredMolType:: preferred molType to use for ambiguous codes (mainly 
-                     one-letter codes). Normal preference order is: 
-                     'protein','DNA', 'RNA', 'carbohydrate', 'other'.
-  startNumber:: number of first residue in sequence
-  shortName:: shortName for new chain (optional)
-  role:: role for new chain (optional)
-  comment:: comment for new chain (optional)"""
+
+  :param str compoundName: name of new CCPN_Molecule (e.g. 'Lysozyme')
+  :param str preferredMolType: preferred molType to use for ambiguous codes (mainly \
+  one-letter codes). Normal preference order is: \
+  'protein','DNA', 'RNA', 'carbohydrate', 'other'. \
+  :param int startNumber: number of first residue in sequence
+  :param str shortName: shortName for new chain (optional)
+  :param str role: role for new chain (optional)
+  :param str4 comment: comment for new chain (optional)
+
+  """
 
   if not sequence:
     msg = "makeChain requires non-empty sequence"

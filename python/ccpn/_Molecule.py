@@ -24,12 +24,6 @@ class Molecule(AbstractWrapperClass):
   def ccpnMolSystem(self) -> Ccpn_MolSystem:
     """ CCPN molsystem matching Molecule"""
     return self._wrappedData
-  
-  
-  # @property
-  # def id(self) -> str:
-  #   """Molecule id: shortName"""
-  #   return self._wrappedData.code
     
   @property
   def id(self) -> str:

@@ -10,6 +10,6 @@ class OpenProjectTest(Testing):
     assert self.project.name == 'CcpnDemo001'
 
   def test_spectra(self):
-    print('number of spectra = %d' % self.project.spectra)
+    print('number of spectra = %d' % len(self.project.spectra))
 
 

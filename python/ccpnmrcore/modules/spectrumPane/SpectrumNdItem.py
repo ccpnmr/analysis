@@ -10,6 +10,16 @@ class SpectrumNdItem(SpectrumItem):
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
 
+    numPoints = spectrumVar.numPoints # this block of code TEMP
+    region = [(0, numPoints[0]), (0, numPoints[1])]
+    for i in range(2, len(numPoints)):
+      n = numPoints[i] // 2
+      region.append((n, n+1))
+      
+    dimMapping = {} # this block of code TEMP
+    for i in range(len(numPoints)):
+      dimMapping[i] = i
+              
     SpectrumItem.__init__(self, parent, spectrumVar, region, dimMapping):
     
     self.posContoursVisible = True # this block of code TEMP
@@ -22,21 +32,34 @@ class SpectrumNdItem(SpectrumItem):
     self.contourDisplayIndexDict = {} # level -> display list index
     
   # implements superclass function
-  def drawSpectrum(self, painter, rect):
+  def drawContours(self, painter, rect):
     
+    if not self.posContoursVisible and not self.negContoursVisible:
+      return
+      
     self.constructContours()
     
     posColors = self.posColors
-    posColorsCount = len(posColors)
     negColors = self.negColors
-    negColorsCount = len(negColors)
     
     levels = self.levels
     posLevels = sorted([level for level in levels if level >= 0])
     negLevels = sorted([level for level in levels if level < 0], reverse=True)
+ 
+    glLoadIdentity()
+    GL.glPushMatrix()
     
-    for level in posLevels:
-      color = posColors()
+    colorsLevels = []
+    if self.posContoursVisible
+    for (colors, levels) in ((posColors, posLevels), (negColors, negLevels)):
+      count = len(colors)
+      for n, level in enumerate(levels):
+        color = colors[n % count]
+        glColor4f(*color)
+        # TBD: scaling, translating, etc.
+        glCallList(self.contourDisplayIndexDict[level])
+      
+    GL.glPopMatrix()
     
   ##### functions not to be used externally #####
   
@@ -58,23 +81,30 @@ class SpectrumNdItem(SpectrumItem):
     if not levels:
       return
       
-    self.createDisplayLists(levels)
-      
     # do the contouring and store results in display list
-    posLevels = numpy.array(sorted([level for level in levels if level >= 0]), numpy.float32)
-    negLevels = numpy.array(sorted([level for level in levels if level < 0], reverse=True), numpy.float32)
-
+    if self.posContoursVisible:
+      posLevels = numpy.array(sorted([level for level in levels if level >= 0]), numpy.float32)
+      self.createDisplayLists(posLevels)
+    else:
+      posLevels = []
+      
+    if self.negContoursVisible:
+      negLevels = numpy.array(sorted([level for level in levels if level < 0], reverse=True), numpy.float32)
+      self.createDisplayLists(negLevels)
+    else
+      negLevels = []
+      
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     
     for dataArray in self.getPlaneData():
       
       if posLevels:
-        posContours = contourer2d(data, posLevels)
+        posContours = contourer2d(dataArray, posLevels)
         for n, contourData in enumerate(posContours):
           self.addContoursToDisplayList(contourData, posLevels[n])
         
       if negLevels:
-        negContours = contourer2d(data, negLevels)
+        negContours = contourer2d(dataArray, negLevels)
         for n, contourData in enumerate(negContours):
           self.addContoursToDisplayList(contourData, negLevels[n])
         
@@ -98,7 +128,20 @@ class SpectrumNdItem(SpectrumItem):
     
   def getPlaneData(self):
     
-    region = self.region
+    spectrum = self.spectrum
+    xDim = self.xDim
+    yDim = self.yDim
+    region = self.region # TBD: in ppm not points, assume in points for now
+    if spectrum.dimCount == 2: # TBD
+      planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
+      position = [0, 0]
+      yield position, planeData
+    elif spectrum.dimCount == 3: # TBD
+      planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
+      for z in range(*(region[2])):  # TBD
+        position = [0, 0, z]  # TBD
+        planeData = spectrum.getPlaneData(position, xDim, yDim)
+        yield position, planeData
     
   def addContoursToDisplayList(self, contourData, level):
   """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
@@ -107,6 +150,6 @@ class SpectrumNdItem(SpectrumItem):
     
     for contour in contourData:
       GL.glVertexPointer(2, GL.GL_FLOAT, 0, contour)
-      GL.glDrawArrays(GL.GL_LINE_LOOP, 0, len(contour)/2)
+      GL.glDrawArrays(GL.GL_LINE_LOOP, 0, len(contour)//2)
       
     GL.glEndList()

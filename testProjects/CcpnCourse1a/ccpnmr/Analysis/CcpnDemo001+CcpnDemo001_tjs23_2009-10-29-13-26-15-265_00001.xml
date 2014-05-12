@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<_StorageUnit release="2.0.b3" originator="CCPN Python XmlIO" packageGuid="www.ccpn.ac.uk_Fogh_2006-08-17-14:16:20_00002" time="Thu Sep 30 14:31:06 2010">
+
+<ANAL.AnalysisProject _ID="_1" createdBy="tjs23" guid="CcpnDemo001_tjs23_2009-10-29-13-26-15-265_00001" isThreadingAllowed="false">
+  <ANAL.AnalysisProject.name>
+    <IMPL.Line>CcpnDemo001</IMPL.Line>
+  </ANAL.AnalysisProject.name>
+  <ANAL.AnalysisProject.activeWindowGroup> _2</ANAL.AnalysisProject.activeWindowGroup>
+  <IMPL.DataObject.applicationData>
+    <IMPL.AppDataString>
+      <IMPL.ApplicationData.application>
+        <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+      </IMPL.ApplicationData.application>
+      <IMPL.ApplicationData.keyword>
+        <IMPL.Line>popup_geometry:open_project</IMPL.Line>
+      </IMPL.ApplicationData.keyword>
+      <IMPL.AppDataString.value>
+        <IMPL.String>600x500+152+230</IMPL.String>
+      </IMPL.AppDataString.value>
+    </IMPL.AppDataString>
+    <IMPL.AppDataString>
+      <IMPL.ApplicationData.application>
+        <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+      </IMPL.ApplicationData.application>
+      <IMPL.ApplicationData.keyword>
+        <IMPL.Line>popup_geometry:edit_spectrum</IMPL.Line>
+      </IMPL.ApplicationData.keyword>
+      <IMPL.AppDataString.value>
+        <IMPL.String>780x500+1+24</IMPL.String>
+      </IMPL.AppDataString.value>
+    </IMPL.AppDataString>
+    <IMPL.AppDataInt value="1285853455">
+      <IMPL.ApplicationData.application>
+        <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+      </IMPL.ApplicationData.application>
+      <IMPL.ApplicationData.keyword>
+        <IMPL.Line>CcpNmrAnalysisTimeStamp</IMPL.Line>
+      </IMPL.ApplicationData.keyword>
+    </IMPL.AppDataInt>
+    <IMPL.AppDataString>
+      <IMPL.ApplicationData.application>
+        <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+      </IMPL.ApplicationData.application>
+      <IMPL.ApplicationData.keyword>
+        <IMPL.Line>popup_geometry:top</IMPL.Line>
+      </IMPL.ApplicationData.keyword>
+      <IMPL.AppDataString.value>
+        <IMPL.String>794x1+104+124</IMPL.String>
+      </IMPL.AppDataString.value>
+    </IMPL.AppDataString>
+    <IMPL.AppDataString>
+      <IMPL.ApplicationData.application>
+        <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+      </IMPL.ApplicationData.application>
+      <IMPL.ApplicationData.keyword>
+        <IMPL.Line>popup_geometry:edit_experiment</IMPL.Line>
+      </IMPL.ApplicationData.keyword>
+      <IMPL.AppDataString.value>
+        <IMPL.String>750x500+158+230</IMPL.String>
+      </IMPL.AppDataString.value>
+    </IMPL.AppDataString>
+  </IMPL.DataObject.applicationData>
+  <ANAL.AnalysisProject.nmrProject>
+    <NMR.exo-NmrProject>
+      <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+    </NMR.exo-NmrProject>
+  </ANAL.AnalysisProject.nmrProject>
+  <ANAL.AnalysisProject.analysisSpectra>
+    <ANAL.AnalysisSpectrum _ID="_3" autoBaseLevel="153.25937141681601" autoNumLevels="10" usePrecalculated="true">
+      <ANAL.AnalysisSpectrum.font>
+        <IMPL.Line>Helvetica 10</IMPL.Line>
+      </ANAL.AnalysisSpectrum.font>
+      <ANAL.AnalysisSpectrum.negColors>
+        <IMPL.RgbColor>#FF00FF</IMPL.RgbColor>
+      </ANAL.AnalysisSpectrum.negColors>
+      <ANAL.AnalysisSpectrum.negLevels> -5891.80509296326</ANAL.AnalysisSpectrum.negLevels>
+      <ANAL.AnalysisSpectrum.posColors>
+        <IMPL.RgbColor>#C0C0FF</IMPL.RgbColor>
+        <IMPL.RgbColor>#9A9AFF</IMPL.RgbColor>
+        <IMPL.RgbColor>#7373FF</IMPL.RgbColor>
+        <IMPL.RgbColor>#4D4DFF</IMPL.RgbColor>
+        <IMPL.RgbColor>#2626FF</IMPL.RgbColor>
+        <IMPL.RgbColor>#0000FF</IMPL.RgbColor>
+        <IMPL.RgbColor>#0000D9</IMPL.RgbColor>
+        <IMPL.RgbColor>#0000B3</IMPL.RgbColor>
+        <IMPL.RgbColor>#00008C</IMPL.RgbColor>
+        <IMPL.RgbColor>#000066</IMPL.RgbColor>
+      </ANAL.AnalysisSpectrum.posColors>
+      <ANAL.AnalysisSpectrum.posLevels> 153.25937141681601 229.88905712522401 344.83358568783603 517.250378531754 775.87556779763099 1163.8133516964465 1745.7200275446698 2618.5800413170045 3927.8700619755068 5891.80509296326</ANAL.AnalysisSpectrum.posLevels>
+      <ANAL.AnalysisSpectrum.spectrumWindowViews> _4</ANAL.AnalysisSpectrum.spectrumWindowViews>
+      <ANAL.AnalysisSpectrum.contourDir>
+        <IMPL.Url>
+          <IMPL.Url.path>
+            <IMPL.PathString>/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1a/storedContours</IMPL.PathString>
+          </IMPL.Url.path>
+        </IMPL.Url>
+      </ANAL.AnalysisSpectrum.contourDir>
+      <ANAL.AnalysisSpectrum.dataSource>
+        <NMR.exo-DataSource>
+          <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+          <IMPL.Int>1</IMPL.Int>
+          <IMPL.Int>1</IMPL.Int>
+        </NMR.exo-DataSource>
+      </ANAL.AnalysisSpectrum.dataSource>
+      <ANAL.AnalysisSpectrum.analysisDataDims>
+        <ANAL.AnalysisDataDim _ID="_5" assignTolerance="0.40000000000000002" noeTolerance="0.40000000000000002">
+          <ANAL.AnalysisDataDim.axisMappings> _6</ANAL.AnalysisDataDim.axisMappings>
+          <ANAL.AnalysisDataDim.dataDim>
+            <NMR.exo-FreqDataDim>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.PositiveInt>2</IMPL.PositiveInt>
+            </NMR.exo-FreqDataDim>
+          </ANAL.AnalysisDataDim.dataDim>
+        </ANAL.AnalysisDataDim>
+        <ANAL.AnalysisDataDim _ID="_7" assignTolerance="0.050000000000000003" noeTolerance="0.050000000000000003">
+          <ANAL.AnalysisDataDim.axisMappings> _8</ANAL.AnalysisDataDim.axisMappings>
+          <ANAL.AnalysisDataDim.dataDim>
+            <NMR.exo-FreqDataDim>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.PositiveInt>1</IMPL.PositiveInt>
+            </NMR.exo-FreqDataDim>
+          </ANAL.AnalysisDataDim.dataDim>
+        </ANAL.AnalysisDataDim>
+      </ANAL.AnalysisSpectrum.analysisDataDims>
+      <ANAL.AnalysisSpectrum.analysisPeakLists>
+        <ANAL.AnalysisPeakList _ID="_9" noeIntensityType="volume">
+          <ANAL.AnalysisPeakList.windowPeakLists> _10</ANAL.AnalysisPeakList.windowPeakLists>
+          <ANAL.AnalysisPeakList.peakList>
+            <NMR.exo-PeakList>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+            </NMR.exo-PeakList>
+          </ANAL.AnalysisPeakList.peakList>
+        </ANAL.AnalysisPeakList>
+      </ANAL.AnalysisSpectrum.analysisPeakLists>
+    </ANAL.AnalysisSpectrum>
+    <ANAL.AnalysisSpectrum _ID="_11" autoBaseLevel="194.59408657020995" autoNumLevels="10" usePrecalculated="true">
+      <ANAL.AnalysisSpectrum.font>
+        <IMPL.Line>Helvetica 10</IMPL.Line>
+      </ANAL.AnalysisSpectrum.font>
+      <ANAL.AnalysisSpectrum.negColors>
+        <IMPL.RgbColor>#FF8000</IMPL.RgbColor>
+      </ANAL.AnalysisSpectrum.negColors>
+      <ANAL.AnalysisSpectrum.negLevels> -7480.8504022684419</ANAL.AnalysisSpectrum.negLevels>
+      <ANAL.AnalysisSpectrum.posColors>
+        <IMPL.RgbColor>#FF8000</IMPL.RgbColor>
+      </ANAL.AnalysisSpectrum.posColors>
+      <ANAL.AnalysisSpectrum.posLevels> 194.5940865702099 291.89112985531489 437.83669478297242 656.75504217445859 985.13256326168789 1477.6988448925315 2216.5482673387978 3324.8224010081967 4987.2336015122937 7480.8504022684419</ANAL.AnalysisSpectrum.posLevels>
+      <ANAL.AnalysisSpectrum.spectrumWindowViews> _12</ANAL.AnalysisSpectrum.spectrumWindowViews>
+      <ANAL.AnalysisSpectrum.contourDir>
+        <IMPL.Url>
+          <IMPL.Url.path>
+            <IMPL.PathString>/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1a/storedContours</IMPL.PathString>
+          </IMPL.Url.path>
+        </IMPL.Url>
+      </ANAL.AnalysisSpectrum.contourDir>
+      <ANAL.AnalysisSpectrum.dataSource>
+        <NMR.exo-DataSource>
+          <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+          <IMPL.Int>2</IMPL.Int>
+          <IMPL.Int>1</IMPL.Int>
+        </NMR.exo-DataSource>
+      </ANAL.AnalysisSpectrum.dataSource>
+      <ANAL.AnalysisSpectrum.analysisDataDims>
+        <ANAL.AnalysisDataDim _ID="_13" assignTolerance="0.050000000000000003" noeTolerance="0.050000000000000003">
+          <ANAL.AnalysisDataDim.axisMappings> _14</ANAL.AnalysisDataDim.axisMappings>
+          <ANAL.AnalysisDataDim.dataDim>
+            <NMR.exo-FreqDataDim>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>2</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.PositiveInt>1</IMPL.PositiveInt>
+            </NMR.exo-FreqDataDim>
+          </ANAL.AnalysisDataDim.dataDim>
+        </ANAL.AnalysisDataDim>
+        <ANAL.AnalysisDataDim _ID="_15" assignTolerance="0.40000000000000002" noeTolerance="0.40000000000000002">
+          <ANAL.AnalysisDataDim.axisMappings> _16</ANAL.AnalysisDataDim.axisMappings>
+          <ANAL.AnalysisDataDim.dataDim>
+            <NMR.exo-FreqDataDim>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>2</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.PositiveInt>3</IMPL.PositiveInt>
+            </NMR.exo-FreqDataDim>
+          </ANAL.AnalysisDataDim.dataDim>
+        </ANAL.AnalysisDataDim>
+        <ANAL.AnalysisDataDim _ID="_17" assignTolerance="0.20000000000000001" noeTolerance="0.20000000000000001">
+          <ANAL.AnalysisDataDim.axisMappings> _18</ANAL.AnalysisDataDim.axisMappings>
+          <ANAL.AnalysisDataDim.dataDim>
+            <NMR.exo-FreqDataDim>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>2</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.PositiveInt>2</IMPL.PositiveInt>
+            </NMR.exo-FreqDataDim>
+          </ANAL.AnalysisDataDim.dataDim>
+        </ANAL.AnalysisDataDim>
+      </ANAL.AnalysisSpectrum.analysisDataDims>
+      <ANAL.AnalysisSpectrum.analysisPeakLists>
+        <ANAL.AnalysisPeakList _ID="_19" noeIntensityType="volume">
+          <ANAL.AnalysisPeakList.windowPeakLists> _20</ANAL.AnalysisPeakList.windowPeakLists>
+          <ANAL.AnalysisPeakList.peakList>
+            <NMR.exo-PeakList>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>2</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+            </NMR.exo-PeakList>
+          </ANAL.AnalysisPeakList.peakList>
+        </ANAL.AnalysisPeakList>
+      </ANAL.AnalysisSpectrum.analysisPeakLists>
+    </ANAL.AnalysisSpectrum>
+    <ANAL.AnalysisSpectrum _ID="_21" autoBaseLevel="217.2307206961168" autoNumLevels="10" usePrecalculated="true">
+      <ANAL.AnalysisSpectrum.font>
+        <IMPL.Line>Helvetica 10</IMPL.Line>
+      </ANAL.AnalysisSpectrum.font>
+      <ANAL.AnalysisSpectrum.negColors>
+        <IMPL.RgbColor>#8000FF</IMPL.RgbColor>
+      </ANAL.AnalysisSpectrum.negColors>
+      <ANAL.AnalysisSpectrum.negLevels> -5567.3857753407101</ANAL.AnalysisSpectrum.negLevels>
+      <ANAL.AnalysisSpectrum.posColors>
+        <IMPL.RgbColor>#800080</IMPL.RgbColor>
+      </ANAL.AnalysisSpectrum.posColors>
+      <ANAL.AnalysisSpectrum.posLevels> 144.82048046407783 217.2307206961168 325.84608104417521 488.76912156626281 733.1536823493941 1099.730523524091 1649.5957852861366 2474.3936779292053 3711.5905168938079 5567.3857753407101</ANAL.AnalysisSpectrum.posLevels>
+      <ANAL.AnalysisSpectrum.spectrumWindowViews> _22</ANAL.AnalysisSpectrum.spectrumWindowViews>
+      <ANAL.AnalysisSpectrum.contourDir>
+        <IMPL.Url>
+          <IMPL.Url.path>
+            <IMPL.PathString>/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1a/storedContours</IMPL.PathString>
+          </IMPL.Url.path>
+        </IMPL.Url>
+      </ANAL.AnalysisSpectrum.contourDir>
+      <ANAL.AnalysisSpectrum.dataSource>
+        <NMR.exo-DataSource>
+          <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+          <IMPL.Int>3</IMPL.Int>
+          <IMPL.Int>1</IMPL.Int>
+        </NMR.exo-DataSource>
+      </ANAL.AnalysisSpectrum.dataSource>
+      <ANAL.AnalysisSpectrum.analysisDataDims>
+        <ANAL.AnalysisDataDim _ID="_23" assignTolerance="0.050000000000000003" noeTolerance="0.050000000000000003">
+          <ANAL.AnalysisDataDim.axisMappings> _24</ANAL.AnalysisDataDim.axisMappings>
+          <ANAL.AnalysisDataDim.dataDim>
+            <NMR.exo-FreqDataDim>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>3</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.PositiveInt>1</IMPL.PositiveInt>
+            </NMR.exo-FreqDataDim>
+          </ANAL.AnalysisDataDim.dataDim>
+        </ANAL.AnalysisDataDim>
+        <ANAL.AnalysisDataDim _ID="_25" assignTolerance="0.40000000000000002" noeTolerance="0.40000000000000002">
+          <ANAL.AnalysisDataDim.axisMappings> _26</ANAL.AnalysisDataDim.axisMappings>
+          <ANAL.AnalysisDataDim.dataDim>
+            <NMR.exo-FreqDataDim>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>3</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.PositiveInt>3</IMPL.PositiveInt>
+            </NMR.exo-FreqDataDim>
+          </ANAL.AnalysisDataDim.dataDim>
+        </ANAL.AnalysisDataDim>
+        <ANAL.AnalysisDataDim _ID="_27" assignTolerance="0.20000000000000001" noeTolerance="0.20000000000000001">
+          <ANAL.AnalysisDataDim.axisMappings> _28</ANAL.AnalysisDataDim.axisMappings>
+          <ANAL.AnalysisDataDim.dataDim>
+            <NMR.exo-FreqDataDim>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>3</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.PositiveInt>2</IMPL.PositiveInt>
+            </NMR.exo-FreqDataDim>
+          </ANAL.AnalysisDataDim.dataDim>
+        </ANAL.AnalysisDataDim>
+      </ANAL.AnalysisSpectrum.analysisDataDims>
+      <ANAL.AnalysisSpectrum.analysisPeakLists>
+        <ANAL.AnalysisPeakList _ID="_29" noeIntensityType="volume">
+          <ANAL.AnalysisPeakList.windowPeakLists> _30</ANAL.AnalysisPeakList.windowPeakLists>
+          <ANAL.AnalysisPeakList.peakList>
+            <NMR.exo-PeakList>
+              <IMPL.GuidString>CcpnDemo001_tjs23_2009-10-29-13-26-15-263_00002</IMPL.GuidString>
+              <IMPL.Int>3</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+            </NMR.exo-PeakList>
+          </ANAL.AnalysisPeakList.peakList>
+        </ANAL.AnalysisPeakList>
+      </ANAL.AnalysisSpectrum.analysisPeakLists>
+    </ANAL.AnalysisSpectrum>
+  </ANAL.AnalysisProject.analysisSpectra>
+  <ANAL.AnalysisProject.axisTypes>
+    <ANAL.AxisType _ID="_31" name="13C" numDecimals="2" peakSize="0.20000000000000001">
+      <ANAL.AxisType.isotopeCodes> 13C</ANAL.AxisType.isotopeCodes>
+      <ANAL.AxisType.region> 0.0 250.0</ANAL.AxisType.region>
+      <ANAL.AxisType.axisUnits> _32 _33</ANAL.AxisType.axisUnits>
+    </ANAL.AxisType>
+    <ANAL.AxisType _ID="_34" name="15N" numDecimals="2" peakSize="0.20000000000000001">
+      <ANAL.AxisType.isotopeCodes> 15N</ANAL.AxisType.isotopeCodes>
+      <ANAL.AxisType.region> 80.0 155.0</ANAL.AxisType.region>
+      <ANAL.AxisType.axisUnits> _32 _33</ANAL.AxisType.axisUnits>
+    </ANAL.AxisType>
+    <ANAL.AxisType _ID="_35" name="19F" numDecimals="2" peakSize="0.20000000000000001">
+      <ANAL.AxisType.isotopeCodes> 19F</ANAL.AxisType.isotopeCodes>
+      <ANAL.AxisType.region> -250.0 100.0</ANAL.AxisType.region>
+      <ANAL.AxisType.axisUnits> _32 _33</ANAL.AxisType.axisUnits>
+    </ANAL.AxisType>
+    <ANAL.AxisType _ID="_36" name="1H" numDecimals="3" peakSize="0.02">
+      <ANAL.AxisType.isotopeCodes> 1H</ANAL.AxisType.isotopeCodes>
+      <ANAL.AxisType.region> -4.0 20.0</ANAL.AxisType.region>
+      <ANAL.AxisType.axisUnits> _32 _33</ANAL.AxisType.axisUnits>
+    </ANAL.AxisType>
+    <ANAL.AxisType _ID="_37" name="2H" numDecimals="3" peakSize="0.10000000000000001">
+      <ANAL.AxisType.isotopeCodes> 2H</ANAL.AxisType.isotopeCodes>
+      <ANAL.AxisType.region> -4.0 20.0</ANAL.AxisType.region>
+      <ANAL.AxisType.axisUnits> _32 _33</ANAL.AxisType.axisUnits>
+    </ANAL.AxisType>
+    <ANAL.AxisType _ID="_38" name="31P" numDecimals="2" peakSize="0.20000000000000001">
+      <ANAL.AxisType.isotopeCodes> 31P</ANAL.AxisType.isotopeCodes>
+      <ANAL.AxisType.region> -50.0 100.0</ANAL.AxisType.region>
+      <ANAL.AxisType.axisUnits> _32 _33</ANAL.AxisType.axisUnits>
+    </ANAL.AxisType>
+    <ANAL.AxisType _ID="_39" isSampled="true" name="T" numDecimals="1">
+      <ANAL.AxisType.measurementType>
+        <NMRX.ExpMeasurementType>temperature</NMRX.ExpMeasurementType>
+      </ANAL.AxisType.measurementType>
+      <ANAL.AxisType.region> 273.0 333.0</ANAL.AxisType.region>
+      <ANAL.AxisType.axisUnits> _40 _41</ANAL.AxisType.axisUnits>
+    </ANAL.AxisType>
+    <ANAL.AxisType _ID="_42" isSampled="true" name="sampled" numDecimals="2">
+      <ANAL.AxisType.measurementType>
+        <NMRX.ExpMeasurementType>sampled</NMRX.ExpMeasurementType>
+      </ANAL.AxisType.measurementType>
+      <ANAL.AxisType.region> 0.0 10.0</ANAL.AxisType.region>
+    </ANAL.AxisType>
+    <ANAL.AxisType _ID="_43" isSampled="true" name="t">
+      <ANAL.AxisType.measurementType>
+        <NMRX.ExpMeasurementType>time</NMRX.ExpMeasurementType>
+      </ANAL.AxisType.measurementType>
+      <ANAL.AxisType.region> -1000000.0 1000000.0</ANAL.AxisType.region>
+      <ANAL.AxisType.axisUnits> _44</ANAL.AxisType.axisUnits>
+    </ANAL.AxisType>
+    <ANAL.AxisType _ID="_45" name="value">
+      <ANAL.AxisType.measurementType>
+        <NMRX.ExpMeasurementType>none</NMRX.ExpMeasurementType>
+      </ANAL.AxisType.measurementType>
+      <ANAL.AxisType.region> -1000000.0 1000000.0</ANAL.AxisType.region>
+      <ANAL.AxisType.axisUnits> _46</ANAL.AxisType.axisUnits>
+    </ANAL.AxisType>
+  </ANAL.AnalysisProject.axisTypes>
+  <ANAL.AnalysisProject.axisUnits>
+    <ANAL.AxisUnit _ID="_41" isBackwards="false" unit="C">
+    </ANAL.AxisUnit>
+    <ANAL.AxisUnit _ID="_33" unit="Hz">
+    </ANAL.AxisUnit>
+    <ANAL.AxisUnit _ID="_40" isBackwards="false" unit="K">
+    </ANAL.AxisUnit>
+    <ANAL.AxisUnit _ID="_46" isBackwards="false" unit="arbitrary">
+    </ANAL.AxisUnit>
+    <ANAL.AxisUnit _ID="_32" unit="ppm">
+    </ANAL.AxisUnit>
+    <ANAL.AxisUnit _ID="_44" isBackwards="false" unit="sec">
+    </ANAL.AxisUnit>
+  </ANAL.AnalysisProject.axisUnits>
+  <ANAL.AnalysisProject.panelTypes>
+    <ANAL.PanelType _ID="_47" name="C1">
+      <ANAL.PanelType.axisType> _31</ANAL.PanelType.axisType>
+    </ANAL.PanelType>
+    <ANAL.PanelType _ID="_48" name="H1">
+      <ANAL.PanelType.axisType> _36</ANAL.PanelType.axisType>
+    </ANAL.PanelType>
+    <ANAL.PanelType _ID="_49" name="N1">
+      <ANAL.PanelType.axisType> _34</ANAL.PanelType.axisType>
+    </ANAL.PanelType>
+  </ANAL.AnalysisProject.panelTypes>
+  <ANAL.AnalysisProject.spectrumWindowGroups>
+    <ANAL.SpectrumWindowGroup _ID="_2" serial="1">
+      <ANAL.SpectrumWindowGroup.name>
+        <IMPL.Line>default_group</IMPL.Line>
+      </ANAL.SpectrumWindowGroup.name>
+      <ANAL.SpectrumWindowGroup.spectrumWindows> _50 _51</ANAL.SpectrumWindowGroup.spectrumWindows>
+    </ANAL.SpectrumWindowGroup>
+  </ANAL.AnalysisProject.spectrumWindowGroups>
+  <ANAL.AnalysisProject.spectrumWindows>
+    <ANAL.SpectrumWindow _ID="_51" serial="1">
+      <ANAL.SpectrumWindow.location> 105 205</ANAL.SpectrumWindow.location>
+      <ANAL.SpectrumWindow.name>
+        <IMPL.Line>window1</IMPL.Line>
+      </ANAL.SpectrumWindow.name>
+      <ANAL.SpectrumWindow.spectrumWindowGroups> _2</ANAL.SpectrumWindow.spectrumWindowGroups>
+      <ANAL.SpectrumWindow.spectrumWindowPanes>
+        <ANAL.SpectrumWindowPane _ID="_52" aspectRatio="8.0" serial="1">
+          <ANAL.SpectrumWindowPane.name>
+            <IMPL.Line>A</IMPL.Line>
+          </ANAL.SpectrumWindowPane.name>
+          <ANAL.SpectrumWindowPane.axisPanels>
+            <ANAL.AxisPanel _ID="_53" isVisible="true" label="x">
+              <ANAL.AxisPanel.axisUnit> _32</ANAL.AxisPanel.axisUnit>
+              <ANAL.AxisPanel.panelType> _48</ANAL.AxisPanel.panelType>
+              <ANAL.AxisPanel.axisRegions>
+                <ANAL.AxisRegion _ID="_54" serial="1" size="418">
+                  <ANAL.AxisRegion.region> 7.6677852671581501 9.0217797057798226</ANAL.AxisRegion.region>
+                </ANAL.AxisRegion>
+              </ANAL.AxisPanel.axisRegions>
+            </ANAL.AxisPanel>
+            <ANAL.AxisPanel _ID="_55" isVisible="true" label="y">
+              <ANAL.AxisPanel.axisUnit> _32</ANAL.AxisPanel.axisUnit>
+              <ANAL.AxisPanel.panelType> _49</ANAL.AxisPanel.panelType>
+              <ANAL.AxisPanel.axisRegions>
+                <ANAL.AxisRegion _ID="_56" serial="1" size="537">
+                  <ANAL.AxisRegion.region> 113.33301617334199 127.24871021238195</ANAL.AxisRegion.region>
+                </ANAL.AxisRegion>
+              </ANAL.AxisPanel.axisRegions>
+            </ANAL.AxisPanel>
+          </ANAL.SpectrumWindowPane.axisPanels>
+          <ANAL.SpectrumWindowPane.slicePanels>
+            <ANAL.SlicePanel _ID="_57" label="x">
+            </ANAL.SlicePanel>
+            <ANAL.SlicePanel _ID="_58" label="y">
+            </ANAL.SlicePanel>
+          </ANAL.SpectrumWindowPane.slicePanels>
+          <ANAL.SpectrumWindowPane.spectrumWindowViews>
+            <ANAL.SpectrumWindowView _ID="_4">
+              <ANAL.SpectrumWindowView.axisMappings>
+                <ANAL.AxisMapping _ID="_8" label="x">
+                </ANAL.AxisMapping>
+                <ANAL.AxisMapping _ID="_6" label="y">
+                </ANAL.AxisMapping>
+              </ANAL.SpectrumWindowView.axisMappings>
+              <ANAL.SpectrumWindowView.windowPeakLists>
+                <ANAL.WindowPeakList _ID="_10">
+                </ANAL.WindowPeakList>
+              </ANAL.SpectrumWindowView.windowPeakLists>
+            </ANAL.SpectrumWindowView>
+          </ANAL.SpectrumWindowPane.spectrumWindowViews>
+        </ANAL.SpectrumWindowPane>
+      </ANAL.SpectrumWindow.spectrumWindowPanes>
+    </ANAL.SpectrumWindow>
+    <ANAL.SpectrumWindow _ID="_50" serial="2">
+      <ANAL.SpectrumWindow.location> 584 205</ANAL.SpectrumWindow.location>
+      <ANAL.SpectrumWindow.name>
+        <IMPL.Line>window2</IMPL.Line>
+      </ANAL.SpectrumWindow.name>
+      <ANAL.SpectrumWindow.spectrumWindowGroups> _2</ANAL.SpectrumWindow.spectrumWindowGroups>
+      <ANAL.SpectrumWindow.spectrumWindowPanes>
+        <ANAL.SpectrumWindowPane _ID="_59" aspectRatio="10.0" serial="1">
+          <ANAL.SpectrumWindowPane.name>
+            <IMPL.Line>A</IMPL.Line>
+          </ANAL.SpectrumWindowPane.name>
+          <ANAL.SpectrumWindowPane.axisPanels>
+            <ANAL.AxisPanel _ID="_60" isVisible="true" label="x">
+              <ANAL.AxisPanel.axisUnit> _32</ANAL.AxisPanel.axisUnit>
+              <ANAL.AxisPanel.panelType> _48</ANAL.AxisPanel.panelType>
+              <ANAL.AxisPanel.axisRegions>
+                <ANAL.AxisRegion _ID="_61" serial="1" size="359">
+                  <ANAL.AxisRegion.region> 7.4730700894951747 9.0909693318783997</ANAL.AxisRegion.region>
+                </ANAL.AxisRegion>
+              </ANAL.AxisPanel.axisRegions>
+            </ANAL.AxisPanel>
+            <ANAL.AxisPanel _ID="_62" isVisible="true" label="y">
+              <ANAL.AxisPanel.axisUnit> _32</ANAL.AxisPanel.axisUnit>
+              <ANAL.AxisPanel.panelType> _47</ANAL.AxisPanel.panelType>
+              <ANAL.AxisPanel.axisRegions>
+                <ANAL.AxisRegion _ID="_63" serial="1" size="495">
+                  <ANAL.AxisRegion.region> 48.505047689929562 70.81312916568713</ANAL.AxisRegion.region>
+                </ANAL.AxisRegion>
+              </ANAL.AxisPanel.axisRegions>
+            </ANAL.AxisPanel>
+            <ANAL.AxisPanel _ID="_64" isVisible="true" label="z1">
+              <ANAL.AxisPanel.axisUnit> _32</ANAL.AxisPanel.axisUnit>
+              <ANAL.AxisPanel.panelType> _49</ANAL.AxisPanel.panelType>
+              <ANAL.AxisPanel.axisRegions>
+                <ANAL.AxisRegion _ID="_65" serial="1">
+                  <ANAL.AxisRegion.region> 116.34903443419493 116.72399096118889</ANAL.AxisRegion.region>
+                </ANAL.AxisRegion>
+              </ANAL.AxisPanel.axisRegions>
+            </ANAL.AxisPanel>
+          </ANAL.SpectrumWindowPane.axisPanels>
+          <ANAL.SpectrumWindowPane.slicePanels>
+            <ANAL.SlicePanel _ID="_66" label="x">
+            </ANAL.SlicePanel>
+            <ANAL.SlicePanel _ID="_67" label="y">
+            </ANAL.SlicePanel>
+            <ANAL.SlicePanel _ID="_68" label="z1">
+            </ANAL.SlicePanel>
+          </ANAL.SpectrumWindowPane.slicePanels>
+          <ANAL.SpectrumWindowPane.spectrumWindowViews>
+            <ANAL.SpectrumWindowView _ID="_22">
+              <ANAL.SpectrumWindowView.axisMappings>
+                <ANAL.AxisMapping _ID="_24" label="x">
+                </ANAL.AxisMapping>
+                <ANAL.AxisMapping _ID="_28" label="y">
+                </ANAL.AxisMapping>
+                <ANAL.AxisMapping _ID="_26" label="z1">
+                </ANAL.AxisMapping>
+              </ANAL.SpectrumWindowView.axisMappings>
+              <ANAL.SpectrumWindowView.windowPeakLists>
+                <ANAL.WindowPeakList _ID="_30">
+                </ANAL.WindowPeakList>
+              </ANAL.SpectrumWindowView.windowPeakLists>
+            </ANAL.SpectrumWindowView>
+            <ANAL.SpectrumWindowView _ID="_12">
+              <ANAL.SpectrumWindowView.axisMappings>
+                <ANAL.AxisMapping _ID="_14" label="x">
+                </ANAL.AxisMapping>
+                <ANAL.AxisMapping _ID="_18" label="y">
+                </ANAL.AxisMapping>
+                <ANAL.AxisMapping _ID="_16" label="z1">
+                </ANAL.AxisMapping>
+              </ANAL.SpectrumWindowView.axisMappings>
+              <ANAL.SpectrumWindowView.windowPeakLists>
+                <ANAL.WindowPeakList _ID="_20">
+                </ANAL.WindowPeakList>
+              </ANAL.SpectrumWindowView.windowPeakLists>
+            </ANAL.SpectrumWindowView>
+          </ANAL.SpectrumWindowPane.spectrumWindowViews>
+        </ANAL.SpectrumWindowPane>
+      </ANAL.SpectrumWindow.spectrumWindowPanes>
+    </ANAL.SpectrumWindow>
+  </ANAL.AnalysisProject.spectrumWindows>
+</ANAL.AnalysisProject>
+
+</_StorageUnit>
+<!--End of Memops Data-->

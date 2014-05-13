@@ -7,13 +7,13 @@ from ccpncore.api.ccp.molecule.MolSystem import MolSystem as Ccpn_MolSystem
 class Molecule(AbstractWrapperClass):
   """Molecule or complex, composed of chains."""
   
-  # Short class name, for PID.
+  #: Short class name, for PID.
   shortClassName = 'MO'
 
-  # Name of plural link to instances of class
+  #: Name of plural link to instances of class
   _pluralLinkName = 'molecules'
   
-  # List of child classes. 
+  #: List of child classes.
   _childClasses = []
   
   #NBNB TODO add atom links code some time.

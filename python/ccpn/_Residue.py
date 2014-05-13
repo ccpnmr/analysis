@@ -9,13 +9,13 @@ from ccpncore.util import Common as commonUtil
 class Residue(AbstractWrapperClass):
   """Molecular Residue."""
   
-  # Short class name, for PID.
+  #: Short class name, for PID.
   shortClassName = 'MR'
 
-  # Name of plural link to instances of class
+  #: Name of plural link to instances of class
   _pluralLinkName = 'residues'
   
-  # List of child classes. 
+  #: List of child classes.
   _childClasses = []
   
 

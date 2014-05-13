@@ -13,7 +13,8 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   """Abstract class containing common functionality for wrapper classes.
 
   ADVANCED. Core programmers only.
-  
+
+
   **Rules for subclasses:**
   
   All collection attributes are tuples. For objects these are sorted by pid;
@@ -44,20 +45,16 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   There will be a link to the Atom class from both the Residue class, the Chain class,
   the Molecule class, and the Project. The relative keys for each object might be:
   
-  =============  ================
-  From object:   relative id:
-  =============  ================
+  ===============  =================
+  From object:      relative id:
+  ===============  =================
+  Project           'AT:MS1.A.127.N'
+  Molecule          'AT:A.127.N'
+  Chain             'AT:127.N'
+  Residue           'AT:N'
+  ===============  =================
 
-  Project        'AT:MS1.A.127.N'
 
-  Molecule       'AT:A.127.N'
-
-  Chain          'AT:127.N'
-
-  Residue        'AT:N'
-
-  ============  ================
-  
   **Code organisation:**
   
   All code related to a given class lives in the file for the class. 
@@ -88,14 +85,15 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   data to ensure that objetcs are created adn deleted according to teh wrapped (CCPN API)
   objects
   """
-  
-  # Short class name, for PID. Must be overridden for each subclass
+
+  #: Short class name, for PID. Must be overridden for each subclass
   shortClassName = None
 
-  # Name of plural link to instances of class
+
+  #: Name of plural link to instances of class
   _pluralLinkName = 'abstractWrapperClasses'
 
-  # List of child classes. Must be overridden for each subclass.
+  #: List of child classes. Must be overridden for each subclass.
   _childClasses = []
   
   # limits attributes to those declared.
@@ -381,11 +379,11 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
       # add getCls in all ancestors
       funcName = 'get' + cls.__name__
       for ancestor in ancestors:
-        prop = property(functools.partial(AbstractWrapperClass._getDescendant,
-                                          className=cls.__name__),
-                        None, None,
-                        "Get child %s object by relative ID" % cls.__name__)
-        setattr(ancestor, funcName, prop)
+        # Add getDescendant function
+        def func(self,  relativeId: str) -> cls:
+          return cls._getDescendant(self, relativeId)
+        func.__doc__= "Get child %s object by relative ID" % cls.__name__
+        setattr(ancestor, funcName, func)
 
       # Add descendant links
       linkName = cls._pluralLinkName
@@ -394,8 +392,11 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
         ancestor = descendantClasses[ii]
         prop = property(functools.partial(AbstractWrapperClass._allDescendants,
                                           descendantClasses=descendantClasses[ii+1:]),
-                        None, None,
-                        "sorted list of %s type child objects" % cls.__name__)
+                          None, None,
+                          ("Type: (*%s*,)\* \n\nsorted %s type child objects" %
+                            (cls.__name__, cls.__name__)
+                          )
+                        )
         setattr(ancestor, linkName, prop)
     else:
       # Project class. Start generaation here
@@ -405,11 +406,12 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     for cc in cls._childClasses:
       cc._linkWrapperClasses(ancestors + [cls])
 
-  def _getDescendant(self, className,  relativeId: str):
-    """Get descendant of class named className with relative key relativeId
+  @classmethod
+  def _getDescendant(cls, self,  relativeId: str):
+    """Get descendant of class cls with relative key relativeId
      Implementation function, used to generate getCls functions"""
 
-    dd = self._project._pid2Obj.get(className)
+    dd = self._project._pid2Obj.get(cls.__name__)
     if dd:
         return dd.get(IDSEP.join((self._pid,relativeId)))
     else:

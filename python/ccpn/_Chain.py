@@ -14,13 +14,13 @@ from collections.abc import Sequence
 class Chain(AbstractWrapperClass):
   """Molecular Chain."""
   
-  # Short class name, for PID.
+  #: Short class name, for PID.
   shortClassName = 'MC'
 
-  # Name of plural link to instances of class
+  #: Name of plural link to instances of class
   _pluralLinkName = 'chains'
   
-  # List of child classes. 
+  #: List of child classes.
   _childClasses = []
   
 

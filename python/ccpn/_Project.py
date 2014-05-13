@@ -10,13 +10,13 @@ from ccpncore.lib import DataConvertLib
 class Project(AbstractWrapperClass):
   """Project (root) object. Corresponds to CCPN: NmrProject"""
   
-  # Short class name, for PID.
+  #: Short class name, for PID.
   shortClassName = 'PR'
 
-  # Name of plural link to instances of class
+  #: Name of plural link to instances of class
   _pluralLinkName = 'projects'
   
-  # List of child classes. 
+  #: List of child classes.
   _childClasses = []
 
   # List of CCPN api notifiers

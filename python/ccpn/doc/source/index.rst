@@ -5,15 +5,12 @@
 
 Welcome to CCPN's documentation!
 ================================
-
-Contents:
-
 .. toctree::
    :maxdepth: 2
-   
-   ccpn.rst
 
+   ccpn/modules.rst
 
+   ccpncore/modules.rst
 
 Indices and tables
 ==================

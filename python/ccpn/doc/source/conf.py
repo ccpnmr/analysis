@@ -34,6 +34,7 @@ sys.path.append('/media/sf_Documents/rhf22/svnroots/ccpnmodel/trunk/ccpn/python'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
 ]
@@ -86,7 +87,7 @@ add_function_parentheses = True
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-add_module_names = True
+#add_module_names = True
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
@@ -100,6 +101,18 @@ pygments_style = 'sphinx'
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 #keep_warnings = False
+
+# Added by RHF for customization etc.
+autodoc_member_order = 'bysource'
+
+autodoc_default_flags = ['members', 'undoc-members', 'show-inheritance']
+
+autosummary_generate = True
+
+def setup(app):
+  
+       from ccpncore.util.SphinxExtensions import autodoc_process_docstring
+       app.connect('autodoc-process-docstring', autodoc_process_docstring())
 
 
 # -- Options for HTML output ----------------------------------------------

@@ -1,4 +1,41 @@
-"""Top level module for CCPN data wrapper """
+"""CCPN data. High level interface for normal data access
+
+ccpn.AbstractWrapperClass class
+-------------------------------
+
+.. autoclass:: ccpn._AbstractWrapperClass.AbstractWrapperClass
+
+ccpn.Project class
+------------------
+
+.. autoclass:: ccpn._Project.Project
+
+ccpn.Molecule class
+-------------------
+
+.. autoclass:: ccpn._Molecule.Molecule
+
+ccpn.Chain class
+----------------
+
+.. autoclass:: ccpn._Chain.Chain
+
+ccpn.Residue class
+------------------
+
+.. autoclass:: ccpn._Residue.Residue
+
+ccpn.Atom class
+---------------
+
+.. autoclass:: ccpn._Atom.Atom
+
+ccpn.Spectrum class
+-------------------
+
+.. autoclass:: ccpn._Spectrum.Spectrum
+
+"""
 
 from ccpncore.util import Io as ioUtil
 

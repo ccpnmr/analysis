@@ -1,4 +1,6 @@
-"""
+"""Logger and message handler"""
+
+LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 
 Logging.py: Utility code for CCPN code generation framework

@@ -1,4 +1,6 @@
-"""
+"""Constant definitions"""
+
+LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 
 Constants.py: <write function here>

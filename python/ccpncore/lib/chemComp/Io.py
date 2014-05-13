@@ -1,4 +1,6 @@
-"""
+"""Code for ChemComp I/O"""
+
+LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 
 Io.py: General I/O code for CCPN

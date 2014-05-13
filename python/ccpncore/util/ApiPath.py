@@ -1,4 +1,4 @@
-""" Python XML I/O Utility code
+""" I/O and path handling code for CCPN data model files
 """
 
 import os, os.path

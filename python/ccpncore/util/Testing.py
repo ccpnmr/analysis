@@ -1,4 +1,13 @@
+"""Test code
+
+Testing class
+-------------------
+
+.. autoclass:: Testing
+
 """
+
+LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 
 Testing.py: Utility code for CCPN code generation framework

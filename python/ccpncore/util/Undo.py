@@ -1,4 +1,11 @@
-"""
+"""General undo handler
+
+Undo class
+----------
+
+.. autoclass:: Undo"""
+
+LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 
 Undo.py: Utility code for CCPN code generation framework

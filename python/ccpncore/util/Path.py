@@ -1,5 +1,7 @@
+"""General path handling utilities"""
 
-"""
+
+LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 
 Path.py: Utility code for CCPN code generation framework

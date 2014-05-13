@@ -1,4 +1,6 @@
-"""
+"""Code for generating and modifying Molecules and MolSystems"""
+
+LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 
 Molecule.py: Utility functions

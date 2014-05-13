@@ -1,4 +1,6 @@
-"""
+"""Code for copying CCPN data model objects"""
+
+LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 
 Util.py: code for CCPN data model and code generation framework

@@ -1,3 +1,5 @@
+"""Code for querying Molecules and MolSystems"""
+
 LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 

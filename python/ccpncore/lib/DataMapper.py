@@ -1,5 +1,12 @@
+"""Data conversion function
 
+DataMapper class
+-------------------
+
+.. autoclass:: DataMapper
 """
+
+LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================
 
 DataMapper.py: code for CCPN data reading and conversion

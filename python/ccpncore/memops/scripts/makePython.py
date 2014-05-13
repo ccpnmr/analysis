@@ -72,6 +72,8 @@ from ccpncore.util import Path
 from ccpnmodel.util import Path as modelPath
 from ccpncore.util import Common as commonUtil
 
+from ccpncore.memops.scripts.docgen import sphinxDocumentation
+
 defaultIgnoreModules = []
 
 def getModelPortal(dataModelVersion=None, includePackageNames=None,
@@ -128,7 +130,15 @@ def makePython(modelPortal, rootDirName=None, rootFileName=None,
   Memops done XML map generation, time %s
   """ % (end-start))
   
-  
+  # generate API
+  start = time.time()
+  PyFileApiGen.writeApi(modelPortal, rootDirName=rootDirName,
+   rootFileName=rootFileName, releaseVersion=releaseVersion)
+  end = time.time()
+  print("""
+  Memops done Api generation, time %s
+  """ % (end-start))
+
   # generate documentation
   start = time.time()
   PyApiDocGen.writeApiDoc(modelPortal, rootDirName=rootDirName,
@@ -137,14 +147,12 @@ def makePython(modelPortal, rootDirName=None, rootFileName=None,
   print("""
   Memops done ApiDocGen, time %s
   """ % (end-start))
-  
-  # generate API
+
   start = time.time()
-  PyFileApiGen.writeApi(modelPortal, rootDirName=rootDirName,
-   rootFileName=rootFileName, releaseVersion=releaseVersion)
+  sphinxDocumentation.refreshSphinxDocumentation()
   end = time.time()
   print("""
-  Memops done Api generation, time %s
+  Memops refreshed sphinx documentation, time %s
   """ % (end-start))
   
   # check for compile errors

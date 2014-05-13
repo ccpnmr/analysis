@@ -1,3 +1,6 @@
+"""Summary of known ChemComps. Regularly updated by PDBe"""
+
+
 #
 # File produced for CCPN by PDBe from ChemComp information, model 2.1.2, date 19-02-2014
 #

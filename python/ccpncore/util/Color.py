@@ -1,3 +1,11 @@
+"""
+Color specification
+
+Color class
+-------------------
+
+.. autoclass:: Color"""
+
 def rgbaToHex(r, g, b, a=255):
   
   return '#' + ''.join([hex(x)[2:] for x in (r, g, b, a)])

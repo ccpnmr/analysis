@@ -1,5 +1,6 @@
+"""Translation and translation dictionary handling"""
+
 import importlib
-import os
 
 from ccpncore.util import Logging
 

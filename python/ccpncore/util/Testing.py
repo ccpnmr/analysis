@@ -1,11 +1,4 @@
-"""Test code
-
-Testing class
--------------------
-
-.. autoclass:: Testing
-
-"""
+"""Test code"""
 
 LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================

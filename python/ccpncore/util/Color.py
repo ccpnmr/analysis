@@ -1,10 +1,4 @@
-"""
-Color specification
-
-Color class
--------------------
-
-.. autoclass:: Color"""
+"""Color specification"""
 
 def rgbaToHex(r, g, b, a=255):
   

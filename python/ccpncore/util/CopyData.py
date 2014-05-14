@@ -63,25 +63,18 @@ import time
 from ccpncore.util import Logging
 
 
-def copySubTree(sourceObj, newParent, maySkipCrosslinks=False,
- topObjectParameters = None, objectMap=None
+def copySubTree(sourceObj, newParent, maySkipCrosslinks:bool=False,
+ topObjectParameters:dict=None, objectMap:dict=None
 ):
-  """ Descrn: Copies subtree rooted in sourceObj to a subtree rooted in 
-              a new targetObj that is a child of newParent
-              Recursively copies all children.
-     Inputs: - top object to be copied, 
-             - parent of new copy, 
-             - Boolean: if a link cannot be validly copied, can the function
-               omit it (or must it throw an error),
-             - dictionary of parameters to be passed to copy of top object
-             - dictionary of oldObject:newObject mappings. 
-             This is for cases where links from the old tree to certain objects
-             should be replaced with links from the new tree not to the same
-             objects but to a a different set of (pre-existing) objects. E.g.
-             when copying peak lists from one experiment to another you have to
-             give the mapping from old DataDimRefs to new DataDimRefs.
+  """ Copy an api object and all its descendants within or between projects
 
-     Output: new copy of top object.
+  :param sourceObj: CCPN api object to be copied
+  :param newParent: parent for the copied object
+  :param bool maySkipCrosslinks: Whether to skip crosslinks if copying them it not possible.
+  :param dict topObjectParameters: parameters to be passed to copy of source object
+  :param dict objectMap: oldObject:newObject mappings to use as targets for crosslinks
+  :result: copy of source object
+
   
   (Parts of) crosslinks to objects within the subtree are copied to
   links to the new object copies;
@@ -113,7 +106,7 @@ def copySubTree(sourceObj, newParent, maySkipCrosslinks=False,
   if sourceObj.root is sourceObj:
     raise MemopsError("copySubTree cannot be used to copy entire projects")
       
-  result = transferData(newParent, sourceObj, oldToNew=objectMap, 
+  result = _transferData(newParent, sourceObj, oldToNew=objectMap,
                         targetObjParams=topObjectParameters,
                         ignoreMissing=maySkipCrosslinks, useOptLinks=True)
   #
@@ -135,17 +128,21 @@ def newGuid(prefix = ''):
   return guid
 
 
-def transferData(newParent, sourceObj, oldToNew=None, 
+def _transferData(newParent, sourceObj, oldToNew=None,
                  oldVersionStr=None, targetObjParams=None,
                  ignoreMissing=True, useOptLinks=False):
   """ Copy sourceObj and recursively all its children,
-  to a new tree where the new targetObj is a child of newRoot
+  to a new tree where the new targetObj is a child of newRoo
+
   - If oldVersionStr is set, do as  backwards compatibility, 
   including minor post-processing, otherwise do as subtree copying
+
   - targetObjParams: parameters to be passed to the copy of sourceObj.
     Only meaningful for subtree copy, and ignored for
     backwards compatibility.
+
   - oldToNew is an old-to-new-object dictionary, serves for either
+
   - useOptLinks controls if optional links (basically the -to-one
     direction of one-to-many links) should be followed. For compatibility
     this is awaste of time (but harmless), but for copySubTree it is

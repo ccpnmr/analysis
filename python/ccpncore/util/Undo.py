@@ -1,9 +1,4 @@
-"""General undo handler
-
-Undo class
-----------
-
-.. autoclass:: Undo"""
+"""General undo handler"""
 
 LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================

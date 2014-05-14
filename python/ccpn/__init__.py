@@ -1,5 +1,27 @@
 """CCPN data. High level interface for normal data access
 
+The standard ways of starting a project are:
+
+- ccpn.openProject(*path*, ...)
+- ccpn.newProject(*projectName*, ...)
+- ccpn.Project(*ccpncore.api.ccp.nmr.Nmr.NmrProject*)
+
+
+.. currentmodule:: ccpn
+
+.. autosummary::
+
+  openProject
+  newProject
+   _AbstractWrapperClass.AbstractWrapperClass
+   _Project.Project
+   _Molecule.Molecule
+   _Chain.Chain
+   _Residue.Residue
+   _Atom.Atom
+   _Spectrum.Spectrum
+
+
 ccpn.AbstractWrapperClass class
 -------------------------------
 
@@ -37,6 +59,11 @@ ccpn.Spectrum class
 
 """
 
+# import sys
+# print ('sys.path=', sys.path)
+# for key in sorted(sys.modules):
+#   print(' - ', key)
+
 from ccpncore.util import Io as ioUtil
 
 # All classes must be imported in correct order for subsequent code
@@ -53,8 +80,9 @@ from ccpn._Spectrum import Spectrum
 Project._linkWrapperClasses()
 
 
-def openProject(path:str, nmrProjectName=None) -> Project:
+def openProject(path:str, nmrProjectName:str=None) -> Project:
   """Open project at path, and create a wrapper project.
+
   Will use named nmrProject, first NmrProject if no name given,
   and will create a new NmrProject if none exists"""
   apiProject = ioUtil.loadProject(path)
@@ -75,7 +103,7 @@ def openProject(path:str, nmrProjectName=None) -> Project:
     return Project(nmrProject)
 
 def newProject(projectName:str, path:str=None) -> Project:
-  """Open project at path, and create a wrapper project"""
+  """Make new project at path, and create a wrapper project"""
   apiProject = ioUtil.newProject(projectName, path, removeExisting=True)
   if apiProject is None:
     raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"

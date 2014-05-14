@@ -34,13 +34,14 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
   The 'userData' repository is pointed to the path.
   The 'backup' repository is pointed to the path + '_backup'.
   If either of these paths already exist (either as files or as directories):
-    If removeExisting:
-      Delete the path
-    Else if showYesNo:
-      Ask the user if it is ok to delete the path
-      If yes, delete.  If no return None.
-    Else:
-      Raise an IOError
+
+  If removeExisting:
+    Delete the path
+  Else if showYesNo:
+    Ask the user if it is ok to delete the path
+    If yes, delete.  If no return None.
+  Else:
+    Raise an IOError
   """
 
   # relies on knowing that repositories to move have these names, and these values for path suffix
@@ -72,7 +73,8 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
   return project
 
 def absentOrRemoved(path:str, removeExisting:bool=False, showYesNo:"function"=None) -> bool:
-  """
+  """Check if file is present, possibly removing it first.
+
   If path already exists:
     If removeExisting:
       Delete the path
@@ -84,6 +86,7 @@ def absentOrRemoved(path:str, removeExisting:bool=False, showYesNo:"function"=No
       return False
   Else:
     Return True
+
   This function is not intended to be used outside this module but could be.
   """
 
@@ -859,8 +862,8 @@ def packageProject(project, filePrefix=None, includeBackups=False, includeData=F
   Package up project userData into one gzipped tar file.
   If filePrefix is None then instead use the userData path.
   The tar file is filePrefix+".tgz".
-  By default only *.xml files are packaged up.
-  If includeBackups then also *.xml.bak files are included.
+  By default only \*.xml files are packaged up.
+  If includeBackups then also \*.xml.bak files are included.
   If includeData then also dataStores located inside project directory are included.
   """
 

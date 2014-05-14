@@ -429,11 +429,11 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
       # function gets wrapped data for all children starting from parent
       func = cls._getAllWrappedData
       # data is iterator of wrapped data for children starting from all parents
-      data = itertools.chain(func(x) for x in objects)
+      data = itertools.chain(*(func(x) for x in objects))
       # objects is all wrapper objects for next child level down
       objects = [data2Obj[x] for x in data]
     #
-      return objects
+    return objects
 
   def _initializeAll(self):
     """Initialize children, using existing objects in data model"""

@@ -1,6 +1,6 @@
 """Common utilities
 
-NB Must conform to PYthon 2.1. Imporetd in ObjectDomain.
+NB Must conform to PYthon 2.1. Imported in ObjectDomain.
 """
 
 __author__ = 'rhf22'

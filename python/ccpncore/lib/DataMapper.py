@@ -1,10 +1,4 @@
-"""Data conversion function
-
-DataMapper class
--------------------
-
-.. autoclass:: DataMapper
-"""
+"""Data conversion function"""
 
 LICENSE = """
 ======================COPYRIGHT/LICENSE START==========================

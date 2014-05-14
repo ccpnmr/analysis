@@ -1,3 +1,5 @@
+# import sys
+# print('sys.path=',sys.path)
 from ccpn.testing.Testing import Testing
 
 class OpenProjectTest(Testing):

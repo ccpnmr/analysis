@@ -6,7 +6,10 @@ from ccpncore.util import Path as corePath
 import subprocess
 import os
 import shutil
+from sphinx import apidoc
+
 joinPath = corePath.joinPath
+
 
 # Relative path to documentation directory
 documentationPath = 'ccpn/doc'
@@ -34,13 +37,14 @@ def refreshSphinxDocumentation():
         'ccpncore/api', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
   print( '### running: ' + ' '.join(ll))
-  subprocess.call(ll)
+  apidoc.main(ll)
 
   # then ccpn
   ll = ['ccpn/doc/source/ccpn', 'ccpn']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
   print( '### running: ' + ' '.join(ll))
-  subprocess.call(ll)
+  apidoc.main(ll)
+  #subprocess.call(ll)
 
   # rebuild docs
   subprocess.call(['make', '-C', docDirectory, 'html'])

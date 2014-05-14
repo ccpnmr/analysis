@@ -5,6 +5,7 @@ __author__ = 'rhf22'
 from ccpncore.util import Path as corePath
 import subprocess
 import os
+import shutil
 joinPath = corePath.joinPath
 
 # Relative path to documentation directory
@@ -19,8 +20,8 @@ def refreshSphinxDocumentation():
   # Remove sphinx-apidoc files
   for ss in ('ccpn', 'ccpncore'):
     inDirectory = joinPath(docDirectory, 'source', ss)
-    for file in os.listdir(inDirectory):
-      os.remove(joinPath(inDirectory, file))
+    shutil.rmtree(inDirectory)
+    os.mkdir(inDirectory)
 
   # clean builds
   subprocess.call(['make', '-C', docDirectory, 'clean'])

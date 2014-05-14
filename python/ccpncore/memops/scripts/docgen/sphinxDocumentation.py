@@ -20,7 +20,8 @@ def refreshSphinxDocumentation():
   # Remove sphinx-apidoc files
   for ss in ('ccpn', 'ccpncore'):
     inDirectory = joinPath(docDirectory, 'source', ss)
-    shutil.rmtree(inDirectory)
+    if os.path.exists(inDirectory):
+      shutil.rmtree(inDirectory)
     os.mkdir(inDirectory)
 
   # clean builds

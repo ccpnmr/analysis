@@ -375,6 +375,10 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   def _linkWrapperClasses(cls, ancestors:list=None):
     """Recursively set up links and functions involving children for wrapper classes"""
 
+    print ('### _linkAll', cls.__name__)
+    if ancestors:
+      print ('### _linkAll 2', [x.__name__ for x in ancestors])
+
     if ancestors:
       # add getCls in all ancestors
       funcName = 'get' + cls.__name__
@@ -387,11 +391,13 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
 
       # Add descendant links
       linkName = cls._pluralLinkName
-      descendantClasses = list(reversed(ancestors)) + [cls]
-      for ii in range(len(descendantClasses)-1):
-        ancestor = descendantClasses[ii]
+      newAncestors = ancestors + [cls]
+      print ('## descendants', [x.__name__ for x in newAncestors])
+      for ii in range(len(newAncestors)-1):
+        ancestor = newAncestors[ii]
+        print ('### setting property', ancestor.__name__, [x.__name__ for x in newAncestors[ii+1:]])
         prop = property(functools.partial(AbstractWrapperClass._allDescendants,
-                                          descendantClasses=descendantClasses[ii+1:]),
+                                          descendantClasses=newAncestors[ii+1:]),
                           None, None,
                           ("Type: (*%s*,)\* \n\nsorted %s type child objects" %
                             (cls.__name__, cls.__name__)
@@ -399,12 +405,12 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
                         )
         setattr(ancestor, linkName, prop)
     else:
-      # Project class. Start generaation here
-      ancestors = []
+      # Project class. Start generation here
+      newAncestors = [cls]
 
     # recursively call next level down the tree
     for cc in cls._childClasses:
-      cc._linkWrapperClasses(ancestors + [cls])
+      cc._linkWrapperClasses(newAncestors)
 
   @classmethod
   def _getDescendant(cls, self,  relativeId: str):
@@ -425,7 +431,13 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     a sorted list of all Atoms in a Chain"""
     data2Obj = self._project._data2Obj
     objects = [self]
+
+    print ('###', [x.__name__ for x in descendantClasses])
+
     for cls in descendantClasses:
+
+      print ('###2', cls.__name__, cls)
+
       # function gets wrapped data for all children starting from parent
       func = cls._getAllWrappedData
       # data is iterator of wrapped data for children starting from all parents

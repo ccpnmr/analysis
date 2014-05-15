@@ -1,10 +1,8 @@
-# import sys
-# print('sys.path=',sys.path)
 from ccpn.testing.Testing import Testing
 
 from ccpncore.api.ccp.nmr.Nmr import NmrProject
 
-class OpenProjectTest(Testing):
+class SimpleProjectTest(Testing):
 
   def __init__(self, *args, **kw):
     Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
@@ -23,6 +21,7 @@ class OpenProjectTest(Testing):
 
   def test_spectra(self):
     assert len(self.project.spectra) == 3
+    print([x.id for x in self.project.spectra])
   
   def test_chains(self):
     assert len(self.project.chains) == 0

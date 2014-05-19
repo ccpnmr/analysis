@@ -375,10 +375,6 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   def _linkWrapperClasses(cls, ancestors:list=None):
     """Recursively set up links and functions involving children for wrapper classes"""
 
-    print ('### _linkAll', cls.__name__)
-    if ancestors:
-      print ('### _linkAll 2', [x.__name__ for x in ancestors])
-
     if ancestors:
       # add getCls in all ancestors
       funcName = 'get' + cls.__name__
@@ -392,10 +388,8 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
       # Add descendant links
       linkName = cls._pluralLinkName
       newAncestors = ancestors + [cls]
-      print ('## descendants', [x.__name__ for x in newAncestors])
       for ii in range(len(newAncestors)-1):
         ancestor = newAncestors[ii]
-        print ('### setting property', ancestor.__name__, [x.__name__ for x in newAncestors[ii+1:]])
         prop = property(functools.partial(AbstractWrapperClass._allDescendants,
                                           descendantClasses=newAncestors[ii+1:]),
                           None, None,
@@ -419,7 +413,11 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
 
     dd = self._project._pid2Obj.get(cls.__name__)
     if dd:
-        return dd.get(IDSEP.join((self._pid,relativeId)))
+        if self is self._project:
+            key = relativeId
+        else:
+            key = IDSEP.join((self._pid,relativeId))
+        return dd.get(key)
     else:
       return None
 
@@ -432,11 +430,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     data2Obj = self._project._data2Obj
     objects = [self]
 
-    print ('###', [x.__name__ for x in descendantClasses])
-
     for cls in descendantClasses:
-
-      print ('###2', cls.__name__, cls)
 
       # function gets wrapped data for all children starting from parent
       func = cls._getAllWrappedData

@@ -1,0 +1,19 @@
+WARNING:Io:loadProject:2014-05-15 14:47:56,069:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-15 14:47:56,070:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-15 14:47:56,070:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-15 14:47:56,070:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-15 14:47:56,070:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-15 14:47:56,070:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"

@@ -1,0 +1,1862 @@
+WARNING:Io:loadProject:2014-05-19 16:12:11,603:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:12:11,603:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:12:11,604:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:12:11,604:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:12:11,605:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:12:11,605:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:14:42,260:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:14:42,312:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:14:42,312:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:14:42,312:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:14:42,312:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:14:42,312:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:14:50,623:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:14:50,624:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:14:50,624:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:15:42,735:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:15:42,735:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:15:42,735:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:15:42,735:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:15:42,735:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:15:42,735:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:15:51,657:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:15:51,657:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:15:51,657:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:15:51,657:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:15:51,657:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:15:51,657:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:15:51,657:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:15:51,657:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:15:51,658:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:15:51,658:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:15:51,658:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:15:51,658:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:18:54,219:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:18:54,219:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:18:54,219:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:18:54,219:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:18:54,219:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:18:54,219:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:19:00,919:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:19:56,957:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:19:56,957:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:19:56,957:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:19:56,957:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:19:56,957:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:19:56,957:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:20:02,571:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:20:02,571:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:20:02,571:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:20:02,571:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:20:02,571:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:20:02,571:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:20:02,572:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:20:02,572:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:20:02,572:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:20:02,572:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:20:02,572:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:20:02,572:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:23:15,511:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:23:15,511:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:23:15,511:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:23:15,512:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:23:15,512:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:23:15,512:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:23:21,127:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:23:21,127:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:23:21,127:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:23:21,127:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:23:21,128:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:23:21,128:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:23:21,128:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:23:21,128:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:23:21,128:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:23:21,128:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:23:21,128:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:23:21,128:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:23:59,953:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:23:59,953:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:23:59,953:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:23:59,953:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:23:59,953:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:23:59,953:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:24:06,537:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:24:06,537:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:24:06,537:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:24:06,537:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:24:06,538:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:24:06,538:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:24:06,538:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:24:06,538:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:24:06,538:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:24:06,538:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:24:06,538:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:24:06,538:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:24:52,839:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:24:52,840:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:24:52,840:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:24:52,840:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:24:52,840:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:24:52,840:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:24:58,096:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:28:05,054:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:28:05,054:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:28:05,054:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:28:05,054:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:28:05,054:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:28:05,054:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:28:10,577:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:31:07,804:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:31:07,810:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:31:07,810:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:31:07,810:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:31:07,810:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:31:07,810:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:31:13,235:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:31:13,235:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:31:13,236:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:34:03,226:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:34:03,227:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:34:03,227:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:34:03,227:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:34:03,227:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:34:03,227:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:34:08,691:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:49:34,536:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:49:34,536:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:49:34,537:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:49:34,537:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:49:34,537:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:49:34,537:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:49:40,658:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:53:38,615:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:53:38,615:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:53:38,616:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:53:38,616:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:53:38,616:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:53:38,616:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:53:44,205:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:53:44,205:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 16:53:44,205:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:53:44,205:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 16:53:44,205:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:53:44,205:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 16:53:44,206:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:53:44,206:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 16:53:44,206:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:53:44,206:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 16:53:44,206:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 16:53:44,206:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:04:16,968:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:04:16,968:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:04:16,968:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:04:16,968:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:04:16,968:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:04:16,968:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:04:21,884:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:04:21,884:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:04:21,885:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:04:45,410:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:04:45,410:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:04:45,410:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:04:45,410:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:04:45,410:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:04:45,410:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:04:50,357:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:04:50,357:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:04:50,357:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:04:50,357:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:04:50,357:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:04:50,357:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:04:50,358:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:04:50,358:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:04:50,358:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:04:50,358:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:04:50,358:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:04:50,358:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:12:39,743:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:12:39,743:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:12:39,743:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:12:39,744:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:12:39,744:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:12:39,744:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:12:46,560:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:12:46,560:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:12:46,561:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:12:52,737:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:12:52,737:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:12:52,737:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:12:52,737:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:12:52,737:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:12:52,737:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:12:52,737:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:12:52,737:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:12:52,737:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:12:52,738:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:12:52,738:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:12:52,738:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:12:52,738:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:12:52,738:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:12:52,738:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:12:52,738:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:12:52,738:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:12:52,738:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:22:01,297:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:22:01,310:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:22:01,310:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:22:01,311:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:22:01,311:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:22:01,311:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:22:07,206:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:22:07,206:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:22:07,206:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:22:07,206:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:22:07,206:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:22:07,206:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:22:07,207:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:22:07,207:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:22:07,207:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:22:07,207:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:22:07,207:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:22:07,207:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:28,765:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:28,765:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:28,765:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:28,765:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:28,767:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:28,767:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:34,508:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:34,508:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:34,508:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:34,508:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:34,509:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:34,509:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:34,509:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:34,509:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:34,509:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:34,509:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:34,509:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:34,509:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:40,316:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:40,317:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:40,317:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:40,317:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:40,317:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:40,317:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:40,317:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:45,864:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:45,864:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:45,864:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:45,864:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:45,864:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:45,864:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:45,864:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:45,864:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:45,865:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:45,866:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:45,866:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:45,866:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:45,866:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,773:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:51,773:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:51,773:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:51,773:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:51,773:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,774:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,775:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,775:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,775:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,775:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:51,775:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,259:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:58,259:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:58,259:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:58,259:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:58,259:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:58,259:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:58,302:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:27:58,303:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,943:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:04,943:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:04,943:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:04,943:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:04,943:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:04,943:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:04,943:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:04,971:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:04,972:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:10,456:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:10,457:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:28:10,458:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:19,928:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:19,941:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:19,941:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:19,941:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:19,941:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:19,942:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:26,131:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:32,256:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:32,256:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:32,256:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:32,256:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:32,256:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:32,256:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:32,256:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:32,256:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:32,256:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:32,257:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:32,257:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:32,257:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:32,257:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:32,257:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:32,257:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:32,257:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:32,257:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:32,257:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:
+Some files unfindable - project may have moved.
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Re-trying load, skipping cached TopObjects:
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Project file has moved from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b"
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:38,188:Backup is being changed from
+"/home/rhf22/Testdata/inData/withspectra/Tutorials/MunsterCourse/CcpnCourse1b_backup"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/testProjects/CcpnCourse1b_backup"
+WARNING:Io:loadProject:2014-05-19 17:29:38,189:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:38,189:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:38,189:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:38,189:refData has been changed from
+"/home/rhf22/cvsroots/release/ccpnmr/ccpnmr2.1/data"
+to
+"/Users/wb104/svnsf/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-05-19 17:29:38,189:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:38,189:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:38,189:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"
+WARNING:Io:loadProject:2014-05-19 17:29:38,189:generalData has been changed from
+"/home/rhf22/.ccpn/data"
+to
+"/Users/wb104/.ccpn/data"

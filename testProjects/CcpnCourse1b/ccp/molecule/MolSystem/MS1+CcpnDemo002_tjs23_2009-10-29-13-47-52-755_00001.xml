@@ -1,0 +1,3668 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<_StorageUnit release="2.0.b3" originator="CCPN Python XmlIO" packageGuid="www.ccpn.ac.uk_Fogh_2006-08-16-14:22:54_00022" time="Wed May 26 17:48:40 2010">
+
+<MOLS.MolSystem _ID="_1" code="MS1" createdBy="tjs23" guid="CcpnDemo002_tjs23_2009-10-29-13-47-52-755_00001">
+  <MOLS.MolSystem.name>
+    <IMPL.Text>MS1</IMPL.Text>
+  </MOLS.MolSystem.name>
+  <IMPL.DataObject.applicationData>
+    <IMPL.AppDataInt value="1274892513">
+      <IMPL.ApplicationData.application>
+        <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+      </IMPL.ApplicationData.application>
+      <IMPL.ApplicationData.keyword>
+        <IMPL.Line>CcpNmrAnalysisTimeStamp</IMPL.Line>
+      </IMPL.ApplicationData.keyword>
+    </IMPL.AppDataInt>
+  </IMPL.DataObject.applicationData>
+  <MOLS.MolSystem.chains>
+    <MOLS.Chain _ID="_2">
+      <MOLS.Chain.code>
+        <IMPL.Line>A</IMPL.Line>
+      </MOLS.Chain.code>
+      <MOLS.Chain.details>
+        <IMPL.Text>KKEEASSKSY...</IMPL.Text>
+      </MOLS.Chain.details>
+      <MOLS.Chain.molecule>
+        <MOLE.exo-Molecule>
+          <IMPL.GuidString>CcpnDemo002_tjs23_2009-10-29-13-47-50-515_00001</IMPL.GuidString>
+        </MOLE.exo-Molecule>
+      </MOLS.Chain.molecule>
+      <MOLS.Chain.chainFragments>
+        <MOLS.ChainFragment _ID="_3" isLinearPolymer="true" molType="protein" serial="1">
+          <MOLS.ChainFragment.residues> _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16 _17 _18 _19 _20 _21 _22 _23 _24 _25 _26 _27 _28 _29 _30 _31 _32 _33 _34 _35 _36 _37 _38 _39 _40 _41 _42 _43 _44 _45 _46 _47 _48 _49 _50 _51 _52 _53 _54 _55 _56 _57 _58 _59 _60 _61 _62 _63 _64 _65 _66 _67 _68 _69 _70 _71 _72 _73 _74 _75 _76 _77 _78 _79 _80 _81 _82 _83 _84 _85 _86 _87 _88 _89 _90 _91 _92 _93 _94 _95 _96</MOLS.ChainFragment.residues>
+        </MOLS.ChainFragment>
+      </MOLS.Chain.chainFragments>
+      <MOLS.Chain.residues>
+        <MOLS.Residue _ID="_4" linking="start" seqCode="1" seqId="1">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:H3,HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_97" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_98" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_99" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_100" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_101" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_102" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_103" name="H1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_104" name="H2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_105" name="H3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_106" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_107" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_108" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_109" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_110" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_111" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_112" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_113" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_114" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_115" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_116" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_117" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_118" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_119" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_120" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_5" linking="middle" seqCode="2" seqId="2">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_121" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_122" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_123" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_124" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_125" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_126" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_127" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_128" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_129" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_130" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_131" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_132" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_133" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_134" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_135" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_136" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_137" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_138" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_139" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_140" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_141" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_142" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_6" linking="middle" seqCode="3" seqId="3">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_143" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_144" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_145" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_146" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_147" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_148" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_149" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_150" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_151" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_152" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_153" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_154" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_155" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_156" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_157" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_7" linking="middle" seqCode="4" seqId="4">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_158" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_159" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_160" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_161" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_162" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_163" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_164" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_165" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_166" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_167" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_168" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_169" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_170" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_171" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_172" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_8" linking="middle" seqCode="5" seqId="5">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_173" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_174" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_175" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_176" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_177" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_178" name="HB1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_179" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_180" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_181" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_182" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_9" linking="middle" seqCode="6" seqId="6">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_183" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_184" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_185" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_186" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_187" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_188" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_189" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_190" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_191" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_192" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_193" name="OG">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_10" linking="middle" seqCode="7" seqId="7">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_194" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_195" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_196" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_197" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_198" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_199" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_200" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_201" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_202" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_203" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_204" name="OG">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_11" linking="middle" seqCode="8" seqId="8">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_205" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_206" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_207" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_208" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_209" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_210" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_211" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_212" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_213" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_214" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_215" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_216" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_217" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_218" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_219" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_220" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_221" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_222" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_223" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_224" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_225" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_226" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_12" linking="middle" seqCode="9" seqId="9">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_227" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_228" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_229" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_230" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_231" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_232" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_233" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_234" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_235" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_236" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_237" name="OG">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_13" linking="middle" seqCode="10" seqId="10">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HH</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_238" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_239" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_240" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_241" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_242" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_243" name="CE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_244" name="CE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_245" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_246" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_247" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_248" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_249" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_250" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_251" name="HD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_252" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_253" name="HE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_254" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_255" name="HH">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_256" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_257" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_258" name="OH">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_14" linking="middle" seqCode="11" seqId="11">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HH12</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_259" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_260" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_261" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_262" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_263" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_264" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_265" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_266" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_267" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_268" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_269" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_270" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_271" name="HE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_272" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_273" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_274" name="HH11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_275" name="HH12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_276" name="HH21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_277" name="HH22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_278" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_279" name="NE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_280" name="NH1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_281" name="NH2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_282" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_15" linking="middle" seqCode="12" seqId="12">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_283" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_284" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_285" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_286" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_287" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_288" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_289" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_290" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_291" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_292" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_293" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_294" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_295" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_296" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_297" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_16" linking="middle" seqCode="13" seqId="13">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_298" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_299" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_300" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_301" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_302" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_303" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_304" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_305" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_306" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_307" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_308" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_309" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_310" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_311" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_312" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_313" name="HD23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_314" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_315" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_316" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_17" linking="middle" seqCode="14" seqId="14">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_317" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_318" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_319" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_320" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_321" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_322" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_323" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_324" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_325" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_326" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_327" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_328" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_329" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_330" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_331" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_332" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_333" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_334" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_335" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_18" linking="middle" seqCode="15" seqId="15">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_336" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_337" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_338" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_339" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_340" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_341" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_342" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_343" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_344" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_345" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_346" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_347" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_348" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_349" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_350" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_351" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_352" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_353" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_354" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_19" linking="middle" seqCode="16" seqId="16">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_355" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_356" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_357" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_358" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_359" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_360" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_361" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_362" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_363" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_364" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_365" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_366" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_367" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_368" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_369" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_20" linking="middle" seqCode="17" seqId="17">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_370" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_371" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_372" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_373" name="HA2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_374" name="HA3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_375" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_376" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_21" linking="middle" seqCode="18" seqId="18">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_377" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_378" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_379" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_380" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_381" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_382" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_383" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_384" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_385" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_386" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_387" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_388" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_389" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_390" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_391" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_392" name="HD23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_393" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_394" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_395" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_22" linking="middle" seqCode="19" seqId="19">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG1</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_396" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_397" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_398" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_399" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_400" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_401" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_402" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_403" name="HG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_404" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_405" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_406" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_407" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_408" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_409" name="OG1">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_23" linking="middle" seqCode="20" seqId="20">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_410" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_411" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_412" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_413" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_414" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_415" name="HB1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_416" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_417" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_418" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_419" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_24" linking="middle" seqCode="21" seqId="21">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_420" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_421" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_422" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_423" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_424" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_425" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_426" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_427" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_428" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_429" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_430" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_431" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_432" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_433" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_434" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_435" name="HD23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_436" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_437" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_438" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_25" linking="middle" seqCode="22" seqId="22">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_439" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_440" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_441" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_442" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_443" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_444" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_445" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_446" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_447" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_448" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_449" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_450" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_451" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_452" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_453" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_454" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_455" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_456" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_457" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_458" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_459" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_460" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_26" linking="middle" seqCode="23" seqId="23">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_461" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_462" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_463" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_464" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_465" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_466" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_467" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_468" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_469" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_470" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_471" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_472" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_473" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_474" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_475" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_27" linking="middle" seqCode="24" seqId="24">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HH12</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_476" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_477" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_478" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_479" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_480" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_481" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_482" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_483" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_484" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_485" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_486" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_487" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_488" name="HE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_489" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_490" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_491" name="HH11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_492" name="HH12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_493" name="HH21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_494" name="HH22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_495" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_496" name="NE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_497" name="NH1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_498" name="NH2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_499" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_28" linking="middle" seqCode="25" seqId="25">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_500" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_501" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_502" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_503" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_504" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_505" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_506" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_507" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_508" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_509" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_510" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_511" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_512" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_513" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_514" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_515" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_516" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_517" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_518" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_519" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_520" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_521" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_29" linking="middle" seqCode="26" seqId="26">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_522" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_523" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_524" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_525" name="HA2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_526" name="HA3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_527" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_528" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_30" linking="middle" seqCode="27" seqId="27">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_529" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_530" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_531" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_532" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_533" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_534" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_535" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_536" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_537" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_538" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_539" name="OG">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_31" linking="middle" seqCode="28" seqId="28">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_540" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_541" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_542" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_543" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_544" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_545" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_546" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_547" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_548" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_549" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_550" name="OG">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_32" linking="middle" seqCode="29" seqId="29">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HH12</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_551" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_552" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_553" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_554" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_555" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_556" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_557" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_558" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_559" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_560" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_561" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_562" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_563" name="HE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_564" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_565" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_566" name="HH11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_567" name="HH12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_568" name="HH21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_569" name="HH22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_570" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_571" name="NE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_572" name="NH1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_573" name="NH2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_574" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_33" linking="middle" seqCode="30" seqId="30">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_575" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_576" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_577" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_578" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_579" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_580" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_581" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_582" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_583" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_584" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_585" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_586" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_587" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_588" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_34" linking="middle" seqCode="31" seqId="31">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_589" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_590" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_591" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_592" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_593" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_594" name="HB1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_595" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_596" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_597" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_598" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_35" linking="middle" seqCode="32" seqId="32">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_599" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_600" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_601" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_602" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_603" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_604" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_605" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_606" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_607" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_608" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_609" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_610" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_611" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_612" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_613" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_614" name="HD23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_615" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_616" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_617" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_36" linking="middle" seqCode="33" seqId="33">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_618" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_619" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_620" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_621" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_622" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_623" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_624" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_625" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_626" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_627" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_628" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_629" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_630" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_631" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_632" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_633" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_634" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_635" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_636" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_637" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_638" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_639" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_37" linking="middle" seqCode="34" seqId="34">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_640" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_641" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_642" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_643" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_644" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_645" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_646" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_647" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_648" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_649" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_650" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_651" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_652" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_653" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_654" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_655" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_656" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_657" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_658" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_659" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_660" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_661" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_38" linking="middle" seqCode="35" seqId="35">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_662" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_663" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_664" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_665" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_666" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_667" name="CE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_668" name="CE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_669" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_670" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_671" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_672" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_673" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_674" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_675" name="HD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_676" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_677" name="HE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_678" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_679" name="HZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_680" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_681" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_39" linking="middle" seqCode="36" seqId="36">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_682" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_683" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_684" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_685" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_686" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_687" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_688" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_689" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_690" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_691" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_692" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_693" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_694" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_695" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_696" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_697" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_698" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_699" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_700" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_40" linking="middle" seqCode="37" seqId="37">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_701" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_702" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_703" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_704" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_705" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_706" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_707" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_708" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_709" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_710" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_711" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_712" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_713" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_714" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_715" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_716" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_717" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_718" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_719" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_720" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_721" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_722" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_41" linking="middle" seqCode="38" seqId="38">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_723" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_724" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_725" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_726" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_727" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_728" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_729" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_730" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_731" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_732" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_733" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_734" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_735" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_736" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_737" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_42" linking="middle" seqCode="39" seqId="39">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_738" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_739" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_740" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_741" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_742" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_743" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_744" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_745" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_746" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_747" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_748" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_749" name="ND2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_750" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_751" name="OD1">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_43" linking="middle" seqCode="40" seqId="40">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HH</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_752" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_753" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_754" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_755" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_756" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_757" name="CE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_758" name="CE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_759" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_760" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_761" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_762" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_763" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_764" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_765" name="HD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_766" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_767" name="HE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_768" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_769" name="HH">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_770" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_771" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_772" name="OH">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_44" linking="middle" seqCode="41" seqId="41">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_773" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_774" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_775" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_776" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_777" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_778" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_779" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_780" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_781" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_782" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_783" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_784" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_785" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_786" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_45" linking="middle" seqCode="42" seqId="42">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_787" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_788" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_789" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_790" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_791" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_792" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_793" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_794" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_795" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_796" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_797" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_798" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_799" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_800" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_801" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_802" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_803" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_804" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_805" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_46" linking="middle" seqCode="43" seqId="43">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_806" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_807" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_808" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_809" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_810" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_811" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_812" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_813" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_814" name="HG11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_815" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_816" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_817" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_818" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_819" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_820" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_821" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_47" linking="middle" seqCode="44" seqId="44">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_822" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_823" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_824" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_825" name="HA2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_826" name="HA3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_827" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_828" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_48" linking="middle" seqCode="45" seqId="45">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_829" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_830" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_831" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_832" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_833" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_834" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_835" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_836" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_837" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_838" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_839" name="OG">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_49" linking="middle" seqCode="46" seqId="46">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_840" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_841" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_842" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_843" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_844" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_845" name="HB1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_846" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_847" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_848" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_849" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_50" linking="middle" seqCode="47" seqId="47">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_850" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_851" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_852" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_853" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_854" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_855" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_856" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_857" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_858" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_859" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_860" name="OG">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_51" linking="middle" seqCode="48" seqId="48">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_861" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_862" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_863" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_864" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_865" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_866" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_867" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_868" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_869" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_870" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_871" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_872" name="ND2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_873" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_874" name="OD1">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_52" linking="middle" seqCode="49" seqId="49">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_875" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_876" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_877" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_878" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_879" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_880" name="CE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_881" name="CE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_882" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_883" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_884" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_885" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_886" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_887" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_888" name="HD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_889" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_890" name="HE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_891" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_892" name="HZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_893" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_894" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_53" linking="middle" seqCode="50" seqId="50">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HD2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_895" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_896" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_897" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_898" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_899" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_900" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_901" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_902" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_903" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_904" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_905" name="OD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_906" name="OD2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_54" linking="middle" seqCode="51" seqId="51">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_907" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_908" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_909" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_910" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_911" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_912" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_913" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_914" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_915" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_916" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_917" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_918" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_919" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_920" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_921" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_922" name="HD23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_923" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_924" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_925" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_55" linking="middle" seqCode="52" seqId="52">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HH</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_926" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_927" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_928" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_929" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_930" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_931" name="CE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_932" name="CE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_933" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_934" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_935" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_936" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_937" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_938" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_939" name="HD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_940" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_941" name="HE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_942" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_943" name="HH">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_944" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_945" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_946" name="OH">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_56" linking="middle" seqCode="53" seqId="53">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_947" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_948" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_949" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_950" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_951" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_952" name="CE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_953" name="CE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_954" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_955" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_956" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_957" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_958" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_959" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_960" name="HD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_961" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_962" name="HE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_963" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_964" name="HZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_965" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_966" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_57" linking="middle" seqCode="54" seqId="54">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_967" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_968" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_969" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_970" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_971" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_972" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_973" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_974" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_975" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_976" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_977" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_978" name="ND2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_979" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_980" name="OD1">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_58" linking="middle" seqCode="55" seqId="55">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_981" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_982" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_983" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_984" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_985" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_986" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_987" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_988" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_989" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_990" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_991" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_992" name="ND2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_993" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_994" name="OD1">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_59" linking="middle" seqCode="56" seqId="56">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_995" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_996" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_997" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_998" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_999" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1000" name="HB1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1001" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1002" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1003" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1004" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_60" linking="middle" seqCode="57" seqId="57">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1005" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1006" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1007" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1008" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1009" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1010" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1011" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1012" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1013" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1014" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1015" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1016" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1017" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1018" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1019" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1020" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1021" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1022" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1023" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_61" linking="middle" seqCode="58" seqId="58">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1024" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1025" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1026" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1027" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1028" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1029" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1030" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1031" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1032" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1033" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1034" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1035" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1036" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1037" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1038" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1039" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1040" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1041" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1042" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1043" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1044" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1045" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_62" linking="middle" seqCode="59" seqId="59">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1046" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1047" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1048" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1049" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1050" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1051" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1052" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1053" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1054" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1055" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1056" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1057" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1058" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1059" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1060" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1061" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1062" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1063" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1064" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1065" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1066" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1067" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_63" linking="middle" seqCode="60" seqId="60">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1068" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1069" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1070" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1071" name="HA2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1072" name="HA3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1073" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1074" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_64" linking="middle" seqCode="61" seqId="61">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1075" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1076" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1077" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1078" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1079" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1080" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1081" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1082" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1083" name="HG11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1084" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1085" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1086" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1087" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1088" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1089" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1090" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_65" linking="middle" seqCode="62" seqId="62">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1091" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1092" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1093" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1094" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1095" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1096" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1097" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1098" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1099" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1100" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1101" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1102" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1103" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1104" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1105" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_66" linking="middle" seqCode="63" seqId="63">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1106" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1107" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1108" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1109" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1110" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1111" name="HB1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1112" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1113" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1114" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1115" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_67" linking="middle" seqCode="64" seqId="64">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1116" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1117" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1118" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1119" name="HA2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1120" name="HA3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1121" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1122" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_68" linking="middle" seqCode="65" seqId="65">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HD2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1123" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1124" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1125" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1126" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1127" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1128" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1129" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1130" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1131" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1132" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1133" name="OD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1134" name="OD2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_69" linking="middle" seqCode="66" seqId="66">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1135" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1136" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1137" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1138" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1139" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1140" name="CE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1141" name="CE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1142" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1143" name="CZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1144" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1145" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1146" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1147" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1148" name="HD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1149" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1150" name="HE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1151" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1152" name="HZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1153" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1154" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_70" linking="middle" seqCode="67" seqId="67">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1155" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1156" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1157" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1158" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1159" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1160" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1161" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1162" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1163" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1164" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1165" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1166" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1167" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1168" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1169" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_71" linking="middle" seqCode="68" seqId="68">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1170" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1171" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1172" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1173" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1174" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1175" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1176" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1177" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1178" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1179" name="HE21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1180" name="HE22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1181" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1182" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1183" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1184" name="NE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1185" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1186" name="OE1">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_72" linking="middle" seqCode="69" seqId="69">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1187" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1188" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1189" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1190" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1191" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1192" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1193" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1194" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1195" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1196" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1197" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1198" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1199" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1200" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_73" linking="middle" seqCode="70" seqId="70">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1201" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1202" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1203" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1204" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1205" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1206" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1207" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1208" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1209" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1210" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1211" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1212" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1213" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1214" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1215" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1216" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1217" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1218" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1219" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1220" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1221" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1222" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_74" linking="middle" seqCode="71" seqId="71">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1223" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1224" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1225" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1226" name="HA2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1227" name="HA3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1228" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1229" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_75" linking="middle" seqCode="72" seqId="72">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1230" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1231" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1232" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1233" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1234" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1235" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1236" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1237" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1238" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1239" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1240" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1241" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1242" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1243" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_76" linking="middle" seqCode="73" seqId="73">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1244" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1245" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1246" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1247" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1248" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1249" name="HB1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1250" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1251" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1252" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1253" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_77" linking="middle" seqCode="74" seqId="74">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1254" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1255" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1256" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1257" name="HA2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1258" name="HA3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1259" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1260" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_78" linking="middle" seqCode="75" seqId="75">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1261" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1262" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1263" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1264" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1265" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1266" name="HB1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1267" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1268" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1269" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1270" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_79" linking="middle" seqCode="76" seqId="76">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1271" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1272" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1273" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1274" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1275" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1276" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1277" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1278" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1279" name="HG11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1280" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1281" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1282" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1283" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1284" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1285" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1286" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_80" linking="middle" seqCode="77" seqId="77">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1287" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1288" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1289" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1290" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1291" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1292" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1293" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1294" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1295" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1296" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1297" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1298" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1299" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1300" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1301" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1302" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1303" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1304" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1305" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1306" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1307" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1308" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_81" linking="middle" seqCode="78" seqId="78">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1309" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1310" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1311" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1312" name="CD1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1313" name="CD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1314" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1315" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1316" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1317" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1318" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1319" name="HD11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1320" name="HD12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1321" name="HD13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1322" name="HD21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1323" name="HD22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1324" name="HD23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1325" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1326" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1327" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_82" linking="middle" seqCode="79" seqId="79">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1328" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1329" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1330" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1331" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1332" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1333" name="HB1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1334" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1335" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1336" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1337" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_83" linking="middle" seqCode="80" seqId="80">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1338" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1339" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1340" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1341" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1342" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1343" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1344" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1345" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1346" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1347" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1348" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1349" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1350" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1351" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1352" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1353" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1354" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1355" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1356" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1357" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1358" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1359" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_84" linking="middle" seqCode="81" seqId="81">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1360" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1361" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1362" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1363" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1364" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1365" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1366" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1367" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1368" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1369" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1370" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1371" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1372" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1373" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1374" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1375" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1376" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1377" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1378" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1379" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1380" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1381" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_85" linking="middle" seqCode="82" seqId="82">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1382" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1383" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1384" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1385" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1386" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1387" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1388" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1389" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1390" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1391" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1392" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1393" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1394" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1395" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1396" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1397" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1398" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1399" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1400" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1401" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1402" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1403" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_86" linking="middle" seqCode="83" seqId="83">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1404" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1405" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1406" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1407" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1408" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1409" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1410" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1411" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1412" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1413" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1414" name="OG">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_87" linking="middle" seqCode="84" seqId="84">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1415" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1416" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1417" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1418" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1419" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1420" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1421" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1422" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1423" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1424" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1425" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1426" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1427" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1428" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_88" linking="middle" seqCode="85" seqId="85">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1429" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1430" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1431" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1432" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1433" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1434" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1435" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1436" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1437" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1438" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1439" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1440" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1441" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1442" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1443" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_89" linking="middle" seqCode="86" seqId="86">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1444" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1445" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1446" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1447" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1448" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1449" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1450" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1451" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1452" name="HG11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1453" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1454" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1455" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1456" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1457" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1458" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1459" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_90" linking="middle" seqCode="87" seqId="87">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1460" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1461" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1462" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1463" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1464" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1465" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1466" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1467" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1468" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1469" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1470" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1471" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1472" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1473" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1474" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1475" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1476" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1477" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1478" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1479" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1480" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1481" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_91" linking="middle" seqCode="88" seqId="88">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1482" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1483" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1484" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1485" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1486" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1487" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1488" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1489" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1490" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1491" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1492" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1493" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1494" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1495" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1496" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1497" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1498" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1499" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1500" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1501" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1502" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1503" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_92" linking="middle" seqCode="89" seqId="89">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1504" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1505" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1506" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1507" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1508" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1509" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1510" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1511" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1512" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1513" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1514" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1515" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1516" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1517" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1518" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_93" linking="middle" seqCode="90" seqId="90">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HZ3</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1519" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1520" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1521" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1522" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1523" name="CE">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1524" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1525" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1526" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1527" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1528" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1529" name="HD2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1530" name="HD3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1531" name="HE2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1532" name="HE3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1533" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1534" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1535" name="HZ1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1536" name="HZ2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1537" name="HZ3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1538" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1539" name="NZ">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1540" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_94" linking="middle" seqCode="91" seqId="91">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>deprot:HE2</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1541" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1542" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1543" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1544" name="CD">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1545" name="CG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1546" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1547" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1548" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1549" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1550" name="HG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1551" name="HG3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1552" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1553" name="O">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1554" name="OE1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1555" name="OE2">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_95" linking="middle" seqCode="92" seqId="92">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>neutral</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1556" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1557" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1558" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1559" name="CG1">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1560" name="CG2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1561" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1562" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1563" name="HB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1564" name="HG11">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1565" name="HG12">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1566" name="HG13">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1567" name="HG21">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1568" name="HG22">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1569" name="HG23">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1570" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1571" name="O">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+        <MOLS.Residue _ID="_96" linking="end" seqCode="93" seqId="93">
+          <MOLS.Residue.descriptor>
+            <IMPL.Line>prot:HG;deprot:H''</IMPL.Line>
+          </MOLS.Residue.descriptor>
+          <MOLS.Residue.atoms>
+            <MOLS.Atom _ID="_1572" name="C">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1573" name="CA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1574" name="CB">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1575" name="H">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1576" name="HA">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1577" name="HB2">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1578" name="HB3">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1579" name="HG">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1580" name="N">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1581" name="O'">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1582" name="O''">
+            </MOLS.Atom>
+            <MOLS.Atom _ID="_1583" name="OG">
+            </MOLS.Atom>
+          </MOLS.Residue.atoms>
+        </MOLS.Residue>
+      </MOLS.Chain.residues>
+    </MOLS.Chain>
+  </MOLS.MolSystem.chains>
+</MOLS.MolSystem>
+
+</_StorageUnit>
+<!--End of Memops Data-->

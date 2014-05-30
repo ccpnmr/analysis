@@ -18,7 +18,7 @@ from ccpncore.memops.ApiError import ApiError
 
 # NBNB TBD this should be done by putting the function inside the class - later
 
-from ccpncore.lib.ccp.general.DataLocation import AbstractDataStore
+from ccpncore.api.ccp.general.DataLocation import AbstractDataStore
 
 
 printWarning = None
@@ -357,7 +357,7 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
           dataStores =  dataUrl.sortedDataStores()
           fullPaths = [dataStore.fullPath for dataStore in dataStores]
           baseDir, newPaths = Path.suggestFileLocations(fullPaths,
-                                                         startDir=startDir)
+                                                        startDir=startDir)
 
           if baseDir is not None:
             # We have a file location that fits all missing files.

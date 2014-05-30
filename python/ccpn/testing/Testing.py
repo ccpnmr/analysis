@@ -21,9 +21,15 @@ class Testing(unittest.TestCase):
     unittest.TestCase.__init__(self, *args, **kw)
 
   def setUp(self):
-
+      
     projectPath = self.projectPath
 
     if projectPath:
       self.project = ccpn.openProject(projectPath)
 
+  def getSpectrum(self):
+
+    if self.project is not None and hasattr(self, 'spectrumName'):
+      return self.project.getById('Spectrum:'+self.spectrumName)
+    
+    return None

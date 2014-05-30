@@ -62,6 +62,7 @@ software development. Bioinformatics 21, 1678-1684.
 import os
 import shutil
 import sys
+import glob
 
 dirsep = '/'
 # note, cannot just use os.sep below because can have window file names cropping up on unix machines
@@ -233,4 +234,76 @@ def removePath(path):
     shutil.rmtree(path)
 
 
+def commonSuperDirectory(*fileNames) ->str:
+  """ Find lowest directory that contains all files in list
+  NB does not normalise file names.
+
+  Input: a list of file names
+  Output: lowest directory that contains all files. Does *not* end with a file
+  """
+  return os.path.dirname(os.path.commonprefix(fileNames))
+
+def suggestFileLocations(fileNames:list, startDir:str=None) -> tuple:
+  """ From a list of files, return a common superdirectory and a list of
+  relative file names. If any of the files do not exist, search for an
+  alternative superdirectory that does contain the set of relative file names.
+  Searches in either a auperdirectory of the starting/current directory,
+  or in a direct subdirectory.
+
+  Input: list of file names
+  Output: Superdirectory, list of relative file names.
+          If no suitable location is found, superdirectory is returned as None
+  """
+
+  if not fileNames:
+    return None, []
+
+  # set up startDir
+  if startDir is None:
+    startDir = os.getcwd()
+  startDir = normalisePath(startDir, makeAbsolute=True)
+
+  # find common baseDir and paths
+  files = [normalisePath(fp, makeAbsolute=True) for fp in fileNames]
+  baseDir = commonSuperDirectory(*files)
+  prefix = os.path.join(baseDir, '')
+  lenPrefix = len(prefix)
+  paths = [fp[lenPrefix:] for fp in files]
+
+  if [fp for fp in files if not os.path.exists(fp)]:
+    # some file not found.
+
+    # look in superdirectories
+    tail = 'junk'
+    baseDir = startDir
+    while tail:
+      for path in paths:
+        fp = os.path.join(baseDir, path)
+        if not os.path.exists(fp):
+          # a file is not found. try new baseDir
+          break
+      else:
+        # this one is OK - stop searching
+        break
+      #
+      baseDir, tail = os.path.split(baseDir)
+
+    else:
+      # No success - try in a subdirectory (one level) of startDir
+      matches = glob.glob(os.path.join(startDir, '*', paths[0]))
+      for aMatch in matches:
+        baseDir = normalisePath(aMatch[:-len(paths[0])])
+        for path in paths:
+          fp = os.path.join(baseDir, path)
+          if not os.path.exists(fp):
+            # a file is not found. try new baseDir
+            break
+        else:
+          # this one is OK - stop searching
+          break
+      else:
+        # we give up
+        baseDir = None
+  #
+  return baseDir, paths
 

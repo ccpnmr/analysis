@@ -5,16 +5,20 @@ __author__ = 'rhf22'
 
 import os
 import shutil
-import time
+# import time
 import glob
 
-from ccpncore.api.memops import  Implementation
+from ccpncore.api.memops import Implementation
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.util import Path
 from ccpncore.util import ApiPath
 from ccpncore.util import Logging
 from ccpncore.util import Common as commonUtil
 from ccpncore.memops.ApiError import ApiError
+
+# NBNB TBD this should be done by putting the function inside the class - later
+
+from ccpncore.lib.ccp.general.DataLocation import AbstractDataStore
 
 
 printWarning = None
@@ -125,7 +129,7 @@ def absentOrRemoved(path:str, removeExisting:bool=False, showYesNo:"function"=No
 
 def loadProject(path:str, projectName:str=None, askFile:"function"=None,
                 askDir:"function"=None, suppressGeneralDataDir:bool=False,
-                applicationName='ccpn'):
+                fixDataStores=True, applicationName='ccpn'):
   """
   Loads a project file and checks and deletes unwanted project repositories and
   changes the project repository path if the project has moved.  Returns the project.
@@ -318,6 +322,53 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
           else:
             warningMessages.append(msg)
 
+  # check and fix dataLocationStores
+  if fixDataStores:
+    dataStores = []
+    for dataLocationStore in project.dataLocationStores:
+      for dataStore in dataLocationStore.dataStores:
+        if hasattr(dataStore, 'nmrDataSources') and not dataStore.nmrDataSources:
+          warningMessages.append('deleting empty dataStore %s with path %s'
+                                  % (dataStore, dataStore.fullPath))
+          dataStore.delete()
+        # We do nto use these, and if we ever did, who knows what else ehy might be used for
+        # elif isinstance(dataStore, MimeTypeDataStore) and not dataStore.nmrDataSourceImages:
+        #   warningMessages.append('deleting empty dataStore %s with path %s'
+        #                          % (dataStore, dataStore.fullPath))
+        #   dataStore.delete()
+        else:
+          dataStores.append(dataStore)
+
+    badDataStores = [dataStore for dataStore in dataStores
+                     if not os.path.exists(dataStore.fullPath)]
+
+    if badDataStores:
+      # find DataUrls involved
+      dataUrls = set(dataStore.dataUrl for dataStore in badDataStores)
+      # NBNB change here to possibly start a directory higher NBNB TBD
+      startDir = project.packageLocator.findFirstRepository().url.dataLocation
+
+      for dataUrl in dataUrls:
+        if not dataUrl.dataStores.difference(badDataStores):
+          # all DataStores for this DataUrl are bad
+          # we can make changes without affecting 'good' DataStores
+
+          # Look for an obvious place the data may have moved to
+          dataStores =  dataUrl.sortedDataStores()
+          fullPaths = [dataStore.fullPath for dataStore in dataStores]
+          baseDir, newPaths = Path.suggestFileLocations(fullPaths,
+                                                         startDir=startDir)
+
+          if baseDir is not None:
+            # We have a file location that fits all missing files.
+            # Change dataStores to use it
+            warningMessages.append('WARNING, resetting data locations to: \n%s\n'
+                                   % baseDir)
+
+            AbstractDataStore.changeDataStoreUrl(dataStores[0], baseDir)
+            for ii,dataStore in enumerate(dataStores):
+              dataStore.path = newPaths[ii]
+
   # make logger
   logger = Logging.createLogger(applicationName, project)
   project.logger = logger
@@ -328,6 +379,7 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
       logger.warning(msg)
 
   return project
+
 
 
 def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,

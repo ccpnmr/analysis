@@ -63,7 +63,7 @@ software development. Bioinformatics 21, 1678-1684.
 
 import os
 import re
-from urllib import request as urlrequest
+from urllib.request import urlopen
 
 from ccpncore.util import Logging
 from ccpncore.util import Io as utilIo
@@ -378,7 +378,7 @@ def downloadChemCompInfoFromCcpForge(repository, molType, ccpCode, sourceName=No
   try:
 
     # Get the file list, needs to be decomposed to get direct links
-    r1 = urlrequest.urlopen(ccpForgeDirUrl)
+    r1 = urlopen(ccpForgeDirUrl)
 
     try:
       dirData = r1.read()
@@ -389,7 +389,7 @@ def downloadChemCompInfoFromCcpForge(repository, molType, ccpCode, sourceName=No
       
       if urlLocation:
  
-        r2 = urlrequest.urlopen(urlLocation)
+        r2 = urlopen(urlLocation)
     
         try:
           data = r2.read()

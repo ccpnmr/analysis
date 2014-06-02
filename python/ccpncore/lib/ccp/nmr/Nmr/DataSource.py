@@ -250,15 +250,13 @@ def getPlaneData(spectrum, position=None, xDim=0, yDim=1):
     if dim not in (xDim, yDim):
       p = position[dim] % blockSizes[dim]
       blockSlice[numDim-dim-1] = slice(p, p+1)
+
+  blockSizes = blockSizes[::-1]  # reverse (dim ordering backwards)
     
   data = numpy.zeros((yPoints, xPoints), dtype=numpy.float32)
   
   fileName = dataStore.fullPath
-  ### TBD: hack
-  fileName = '/Users/wb104/support/paris/spectra/115.spc'
   fp = open(fileName, 'rb')
-
-  blockSizes = blockSizes[::-1]
   
   for xblock in range(xblocks):
     
@@ -294,7 +292,7 @@ def getPlaneData(spectrum, position=None, xDim=0, yDim=1):
   
   return data
 
-def getSliceData(spectrum, position=None, sliceDim=0, xDim=0, yDim=1):
+def getSliceData(spectrum, position=None, sliceDim=0):
   # Get an actual array of data points,
   # spanning blocks as required
   # returns 1D array
@@ -303,48 +301,18 @@ def getSliceData(spectrum, position=None, sliceDim=0, xDim=0, yDim=1):
   if numDim < 1:
     return None
 
+  dataStore = spectrum.dataStore
+  if not dataStore:
+    return None
+
   if not position:
     position = numDim * [0]
     
   dataDims = spectrum.sortedDataDims()
   numPoints = [dataDim.numPoints for dataDim in dataDims]
-  xPoints = numPoints[xDim]
+  slicePoints = numPoints[sliceDim]
 
-  if numDim >= 2:
-    yPoints = numPoints[yDim]
-    if numDim > 2:
-      # FIXME: Does not work for 3d spectra when switching axes.
-      tempPos = position[:]
-      tempPos[sliceDim] = 0
-      planeData = getPlaneData(spectrum, position=tempPos, xDim=xDim, yDim=yDim)
-    else:
-      planeData = getPlaneData(spectrum, xDim=xDim, yDim=yDim)
-      
-    if sliceDim == 0:
-      if xDim < yDim:
-        #data = numpy.empty((2,  xPoints), dtype=numpy.float32)
-        sliceData = planeData[position[yDim], :]
-        #data[0] = numpy.arange(0, xPoints)
-      else:
-        #data = numpy.empty((2,  yPoints), dtype=numpy.float32)
-        sliceData = planeData[:, position[yDim]]
-        #data[0] = numpy.arange(0, yPoints)
-    else:
-      if xDim < yDim:
-        #data = numpy.empty((2,  yPoints), dtype=numpy.float32)
-        sliceData = planeData[:, position[xDim]]
-        #data[0] = numpy.arange(0, yPoints)
-      else:
-        #data = numpy.empty((2,  xPoints), dtype=numpy.float32)
-        sliceData = planeData[position[xDim], :]
-        #data[0] = numpy.arange(0, xPoints)
-        
-    #data[1] = sliceData
-    data = sliceData
-    return data
-
-  #data = numpy.empty((2,  xPoints), dtype=float32)
-  data = numpy.empty((xPoints,), dtype=float32)
+  data = numpy.empty((slicePoints,), dtype=numpy.float32)
 
   for dim in range(numDim):
     point = position[dim]
@@ -365,20 +333,25 @@ def getSliceData(spectrum, position=None, sliceDim=0, xDim=0, yDim=1):
   numBlocks, cumulativeBlocks = _cumulativeArray(blocks)
   dtype = '%s%s%s' % (isBigEndian and '>' or '<', isFloatData and 'f' or 'i', wordSize)
   
-  xblockSize = blockSizes[xDim]
-  xblocks = 1 + (xPoints-1)//xblockSize
+  sliceBlockSize = blockSizes[sliceDim]
+  sliceBlocks = 1 + (slicePoints-1)//sliceBlockSize
 
   blockCoords = [position[dim]//blockSizes[dim] for dim in range(numDim)]
   blockSlice = numDim*[0]
 
-  p = position[xDim] % blockSizes[xDim]
-  blockSlice[numDim-xDim-1] = s_[p:p+1]
+  p = position[sliceDim] % blockSizes[sliceDim]
+  blockSlice[numDim-sliceDim-1] = numpy.s_[p:p+1]
 
-  for xblock in range(xblocks):
-    blockCoords[xDim] = xblock
-    xlower = xblock * xblockSize
-    xupper = min(xlower+xblockSize, xPoints)
-    blockSlice[numDim-xDim-1] = s_[0:xupper-xlower]
+  blockSizes = blockSizes[::-1]  # reverse (dim ordering backwards)
+  
+  fileName = dataStore.fullPath
+  fp = open(fileName, 'rb')
+  
+  for sliceBlock in range(sliceBlocks):
+    blockCoords[sliceDim] = sliceBlock
+    sliceLower = sliceBlock * sliceBlockSize
+    sliceUpper = min(sliceLower+sliceBlockSize, slicePoints)
+    blockSlice[numDim-sliceDim-1] = numpy.s_[0:sliceUpper-sliceLower]
     
     ind =  sum(x[0]*x[1] for x in zip(blockCoords, cumulativeBlocks))
     offset = wordSize * (blockSize * ind) + headerSize
@@ -388,9 +361,7 @@ def getSliceData(spectrum, position=None, sliceDim=0, xDim=0, yDim=1):
     if blockData.dtype != numpy.float32:
       blockData = array(blockData, numpy.float32)
         
-    #data[0, xlower:xupper] = arange(xlower,  xupper)
-    #data[1, xlower:xupper] = blockData[blockSlice].squeeze()
-    data[xlower:xupper] = blockData[blockSlice].squeeze()
+    data[sliceLower:sliceUpper] = blockData[blockSlice].squeeze()
 
   return data
 

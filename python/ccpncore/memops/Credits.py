@@ -1,11 +1,11 @@
 """Module Documentation here"""
-__copyright__ = "Copyright (C) CCPN project 2014 - $Year"
+__copyright__ = "Copyright (C) CCPN project 2014 - $Date"
 __license__ = "CCPN license. See ccpncore.memops.Credits.CcpnLicense for license text"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __reference__ = "For publications, please reference ccpncore.memops.Credits.CcpNmrReference"
-# Data for last code modification:
+# Last code modification:
 __author__ = "$Author"
-__date__ = "$LastChangedDate"
+__date__ = "$Date"
 __version__ = "$Revision"
 
 

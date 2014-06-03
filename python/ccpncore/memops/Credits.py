@@ -1,12 +1,12 @@
 """Module Documentation here"""
-__copyright__ = "Copyright (C) CCPN project 2014 - $Date:$"
+__copyright__ = "Copyright (C) CCPN project 2014 - $Date$"
 __license__ = "CCPN license. See ccpncore.memops.Credits.CcpnLicense for license text"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __reference__ = "For publications, please reference ccpncore.memops.Credits.CcpNmrReference"
 # Last code modification:
-__author__ = "$Author$:"
-__date__ = "$Date$:"
-__version__ = "$Revision$:"
+__author__ = "$Author$"
+__date__ = "$Date$"
+__version__ = "$Revision$"
 
 
 # Please use this reference for use of CcpNmr suite software and other CCPN applications

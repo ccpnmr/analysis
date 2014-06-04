@@ -241,9 +241,8 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
     """Dictionary implementation method: iteration"""
     
     cls = self.__class__
-    propertyAttrs = (getattr(self,x) for x in sorted(dir(cls))
-                     if (not x.startswith('_') and 
-                     isinstance(getattr(cls,x), property)))
+    propertyAttrs = (x for x in sorted(dir(cls))
+                     if (not x.startswith('_') and  isinstance(getattr(cls,x), property)))
     
     prefix = self._pid + IDSEP
     childAttrs = (y for x in self._childClasses
@@ -251,15 +250,16 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
                   if y.startswith(prefix))
     
     dd = self.__dict__
-    extraAttrs = (tt[1] for tt in sorted(dd.items) 
-                  if not tt[0].startswith('_') and len(tt[0].split(PREFIXSEP)) != 2)
+    extraAttrs = (x for x in sorted(dd)
+                  if not x.startswith('_') and len(x.split(PREFIXSEP)) != 2)
     
     #
-    return itertools.chain(propertyAttrs, childAttrs, extraAttrs) 
+    return itertools.chain(propertyAttrs, childAttrs, extraAttrs)
+
     
   def __len__(self):
     """Dictionary implementation method: length"""
-    return len(list(self.keys()))
+    return len(list(self))
     
   
   # equality: We use the default Python behavior, 

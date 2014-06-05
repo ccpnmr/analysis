@@ -94,16 +94,22 @@ except NameError:
 
 
 try:
-  from xml.etree import ElementTree # in python >=2.5
+  from lxml import etree as ElementTree
 except ImportError:
-  # effbot's pure Python module. Python 2.1. In ObjectDomain only
-  from elementtree import ElementTree
+  try:
+    from xml.etree import ElementTree # in python >=2.5
+  except ImportError:
+    # effbot's pure Python module. Python 2.1. In ObjectDomain only
+    from elementtree import ElementTree
 
 try:
-  from xml.etree import ElementInclude # in python >=2.5
+  from lxml import ElementInclude
 except ImportError:
-  # effbot's pure Python module. Python 2.1. In ObjectDomain only
-  from elementtree import ElementInclude
+  try:
+    from xml.etree import ElementInclude # in python >=2.5
+  except ImportError:
+    # effbot's pure Python module. Python 2.1. In ObjectDomain only
+    from elementtree import ElementInclude
 
 
 from ccpncore.memops.metamodel import Constants as metaConstants

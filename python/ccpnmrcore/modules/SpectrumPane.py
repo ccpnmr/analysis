@@ -2,8 +2,8 @@ import operator
 
 from PySide import QtCore, QtGui, QtOpenGL
 
-from ccpncore.gui.Base import Base
-
+from ccpnmrcore.modules.Base import Base
+from ccpnmrcore.modules.spectrumPane.SpectrumScene import SpectrumScene
   
 # this allows combining of OpenGL and ordinary Qt drawing
 # the pre-calculated OpenGL is done in the drawPre() function
@@ -16,10 +16,10 @@ from ccpncore.gui.Base import Base
 # abstract class: subclass needs to implement addSpectrum()
 class SpectrumPane(QtGui.QGraphicsView, Base):
   
-  def __init__(self, parent, spectraVar=None, region=None, dimMapping=None, **kw):
+  def __init__(self, project, parent, spectraVar=None, region=None, dimMapping=None, **kw):
     
     QtGui.QGraphicsView.__init__(self, parent)
-    Base.__init__(self, **kw)
+    Base.__init__(self, project, **kw)
     
     if spectraVar is None:
       spectraVar = []
@@ -29,7 +29,7 @@ class SpectrumPane(QtGui.QGraphicsView, Base):
     self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate) # recommended for OpenGL usage
     # When any visible part of the scene changes or is reexposed, QGraphicsView will update the entire viewport
     
-    self.spectrumScene = SpectrumScene(self) # this object initiates the drawing
+    self.setScene(SpectrumScene(self)) # the scene initiates the drawing
       
     self.setSpectra(spectraVar, region, dimMapping)
     

@@ -1,6 +1,8 @@
+import operator
+
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane
 
-from ccpnmrcore.modeules.spectrumPane.SpectrumNdItem import SpectrumNdItem
+from ccpnmrcore.modules.spectrumPane.SpectrumNdItem import SpectrumNdItem
 
 class SpectrumNdPane(SpectrumPane):
 
@@ -16,8 +18,10 @@ class SpectrumNdPane(SpectrumPane):
   # overrides superclass function
   def drawPre(self, painter, rect):
 
-    spectrumItems = sorted(self.spectrumItems, key=operator.attrgetter('rank'), reverse=True)
-
+    # below gives rise to infinite loop, and there is no 'rank' attribute yet
+    #spectrumItems = sorted(self.spectrumItems, key=operator.attrgetter('rank'), reverse=True)
+    spectrumItems = self.spectrumItems
+    
     for spectrumItem in spectrumItems:
       spectrumItem.drawContours(painter, rect)
     

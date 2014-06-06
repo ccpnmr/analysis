@@ -36,10 +36,11 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
     self.setDimMapping(dimMapping)
     
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
-    
+    """ TBD: spectrum.peakLists does not exist yet
     for peakList in spectrum.peakLists:
       self.peakListItems[peakList] = PeakListItem(self, peakList)
-    
+"""
+
     spectrumPane.spectrumItems.append(self)
 
   def setDimMapping(self, dimMapping):
@@ -52,15 +53,15 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
         inverseDim = dimMapping[dim]
         if inverseDim == 0:
           xDim = inverseDim
-        elif inversedim == 1:
-          yDim = inverseDime
+        elif inverseDim == 1:
+          yDim = inverseDim
     
-    dimCount = self.spectrum.dimCount
+    dimensionCount = self.spectrum.dimensionCount
     if xDim is not None: 
-      assert 0 <= xDim < dimCount, 'xDim = %d, dimCount = %d' % (xDim, dimCount)
+      assert 0 <= xDim < dimensionCount, 'xDim = %d, dimensionCount = %d' % (xDim, dimensionCount)
       
     if yDim is not None:
-      assert 0 <= yDim < dimCount, 'yDim = %d, dimCount = %d' % (yDim, dimCount)
+      assert 0 <= yDim < dimensionCount, 'yDim = %d, dimensionCount = %d' % (yDim, dimensionCount)
       assert xDim != yDim, 'xDim = yDim = %d' % xDim
     
     self.xDim = xDim
@@ -70,13 +71,17 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
     
     raise Exception('should be implemented in subclass')
     
-  # any attribute not known about is checked first int the parent and then in the spectrum
+  # any attribute not known about is checked first in the parent and then in the spectrum
   def __getattr__(self, attr):
 
-    if hasattr(self.parent, attr):
-      return getattr(self.parent, attr)
-    elif hasattr(self, spectrum, attr)
-      return getattr(self.spectrum, attr)
+    """ self.parent() gives infinite loop
+    parent = self.parent()
+    if hasattr(parent, attr):
+      return getattr(parent, attr)
+"""
+    spectrum = self.spectrum
+    if hasattr(spectrum, attr):
+      return getattr(spectrum, attr)
       
     raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-
+    

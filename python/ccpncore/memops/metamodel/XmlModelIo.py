@@ -320,6 +320,8 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
       # handle contained elements
       for elem in modelElem:
         tag = elem.tag
+        if tag is metaUtil.ElementTree.Comment:
+          continue
         if classNameMapping.get(tag) is None:
           # Element content - handle directly
         

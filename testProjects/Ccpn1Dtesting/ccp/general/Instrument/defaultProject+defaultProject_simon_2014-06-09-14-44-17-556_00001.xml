@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<_StorageUnit release="2.1.2" originator="CCPN Python XmlIO" packageGuid="www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00038" time="Mon Jun  9 14:48:44 2014">
+
+<INST.InstrumentStore _ID="_1" createdBy="simon" guid="defaultProject_simon_2014-06-09-14-44-17-556_00001">
+  <INST.InstrumentStore.name>
+    <IMPL.Line>defaultProject</IMPL.Line>
+  </INST.InstrumentStore.name>
+</INST.InstrumentStore>
+
+</_StorageUnit>
+<!--End of Memops Data-->

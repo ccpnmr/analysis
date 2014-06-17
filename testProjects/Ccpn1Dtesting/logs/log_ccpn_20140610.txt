@@ -1,0 +1,455 @@
+WARNING:Io:loadProject:2014-06-10 12:12:39,120:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:12:39,120:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:12:58,087:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:12:58,087:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:13:16,702:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:13:16,702:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:13:41,859:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:13:41,859:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:14:33,770:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:14:33,770:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:15:31,746:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:15:31,746:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:16:15,417:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:16:15,418:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:18:56,559:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:18:56,559:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:20:08,236:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:20:08,237:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:26:58,545:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:26:58,545:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:30:20,568:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:30:20,569:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 12:32:35,358:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 12:32:35,358:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:10:42,115:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:10:42,230:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:11:41,502:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:11:41,502:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:12:51,115:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:12:51,115:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:13:16,787:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:13:16,787:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:15:15,558:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:15:15,558:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:23:42,404:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:23:42,404:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:24:14,453:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:24:14,454:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:24:35,296:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:24:35,296:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:24:50,501:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:24:50,501:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:25:15,416:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:25:15,416:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:29:28,065:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:29:28,065:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:29:50,745:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:29:50,746:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:38:52,879:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:38:52,880:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:39:03,848:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:39:03,848:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:39:34,015:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:39:34,015:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:40:27,962:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:40:27,962:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:48:07,105:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:48:07,105:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:50:03,319:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:50:03,319:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:51:27,134:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:51:27,134:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 14:51:43,155:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 14:51:43,155:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:26:50,091:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:26:50,124:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:27:18,937:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:27:18,937:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:28:06,979:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:28:06,980:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:28:30,030:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:28:30,030:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:28:47,077:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:28:47,077:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:37:43,081:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:37:43,081:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:38:53,416:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:38:53,416:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:39:06,868:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:39:06,868:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:39:26,189:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:39:26,189:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:40:24,822:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:40:24,822:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:40:49,685:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:40:49,685:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:41:11,754:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:41:11,754:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:42:10,375:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:42:10,375:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:43:03,619:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:43:03,619:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:49:40,877:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:49:40,877:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:51:35,189:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:51:35,189:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:51:48,180:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:51:48,180:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:52:43,299:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:52:43,299:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:53:28,290:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:53:28,290:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:53:50,793:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:53:50,793:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 15:54:06,306:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 15:54:06,306:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:00:20,020:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:00:20,020:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:08:51,619:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:08:51,659:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:09:06,317:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:09:06,318:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:09:23,796:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:09:23,796:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:09:49,611:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:09:49,611:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:10:23,897:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:10:23,897:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:10:56,324:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:10:56,324:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:11:25,167:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:11:25,167:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:11:49,532:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:11:49,532:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:12:11,153:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:12:11,154:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:12:15,911:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:12:15,911:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:17:08,295:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:17:08,295:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:17:22,514:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:17:22,514:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:17:45,653:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:17:45,653:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:18:09,638:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:18:09,638:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:18:52,273:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:18:52,273:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:19:17,509:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:19:17,509:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:19:45,866:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:19:45,866:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:20:21,673:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:20:21,673:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:20:35,535:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:20:35,535:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:20:45,521:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:20:45,521:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:21:19,282:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:21:19,282:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:21:36,949:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:21:36,949:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:22:09,428:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:22:09,428:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:22:21,030:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:22:21,030:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:24:02,433:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:24:02,433:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:24:59,218:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:24:59,218:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 16:29:14,860:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 16:29:14,860:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:04:11,629:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:04:11,634:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:04:48,585:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:04:48,585:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:09:12,014:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:09:12,014:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:12:18,680:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:12:18,680:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:13:17,034:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:13:17,034:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:13:34,145:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:13:34,145:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:13:50,382:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:13:50,382:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:14:12,643:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:14:12,643:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:15:01,280:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:15:01,280:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r
+WARNING:Io:loadProject:2014-06-10 18:15:17,785:refData has been changed from
+"/Users/simon/Programs/10.8/analysis2.4/ccpnmr/ccpnmr2.4/data"
+to
+"/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/data"
+WARNING:Io:loadProject:2014-06-10 18:15:17,785:deleting empty dataStore <ccp.general.DataLocation.BlockedBinaryMatrix ['defaultProject', 1]> with path /Users/simon/Dropbox/STD-examples/MIX_1_A3_component_1H/00227/pdata/1/1r

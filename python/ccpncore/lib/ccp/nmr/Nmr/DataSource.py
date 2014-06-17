@@ -192,6 +192,7 @@ def _cumulativeArray(array):
 
   return (n, cumul)
   
+
 def getPlaneData(spectrum, position=None, xDim=0, yDim=1):
   """ Get plane data through position in dimensions xDim, yDim
       Returns 2D float32 NumPy array in order (y, x) 
@@ -359,7 +360,7 @@ def getSliceData(spectrum, position=None, sliceDim=0):
     blockData = numpy.fromfile(file=fp, dtype=dtype, count=blockSize).reshape(blockSizes) # data is in reverse order: e.g. z,y,x not x,y,z
 
     if blockData.dtype != numpy.float32:
-      blockData = array(blockData, numpy.float32)
+      blockData = numpy.array(blockData, numpy.float32)
         
     data[sliceLower:sliceUpper] = blockData[blockSlice].squeeze()
 

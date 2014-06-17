@@ -12,7 +12,7 @@ from ccpncore.util.Color import Color
 # abstract class: subclass needs to implement drawSpectrum()
 class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
 
-  def __init__(self, spectrumPane, spectrumVar, region=None, dimMapping=None):
+  def __init__(self, spectrumPane, spectrumVar, region=None, dimMapping=None, register=True):
     """ spectrumPane is the parent
         spectrumVar is the Spectrum name or object
         region is in units of parent, ordered by spectrum dimensions
@@ -41,11 +41,12 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
       self.peakListItems[peakList] = PeakListItem(self, peakList)
 """
 
-    spectrumPane.spectrumItems.append(self)
+    # spectrumPane.spectrumItems.append(self)
 
   def setDimMapping(self, dimMapping):
     
     self.dimMapping = dimMapping
+
     xDim = yDim = None
     if dimMapping:
       inverseDimMapping = {}

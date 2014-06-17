@@ -31,7 +31,6 @@ class SpectrumNdItem(SpectrumItem):
     dimMapping = {} # this block of code TEMP
     for i in range(len(pointCount)):
       dimMapping[i] = i
-              
     SpectrumItem.__init__(self, parent, spectrumVar, region, dimMapping)
     
     self.posContoursVisible = True # this block of code TEMP

@@ -4,7 +4,7 @@ from PySide import QtCore, QtGui, QtOpenGL
 
 from ccpnmrcore.modules.Base import Base
 from ccpnmrcore.modules.spectrumPane.SpectrumScene import SpectrumScene
-  
+
 # this allows combining of OpenGL and ordinary Qt drawing
 # the pre-calculated OpenGL is done in the drawPre() function
 # then the Qt scene is drawn (presumably it's in the "Item" layer)

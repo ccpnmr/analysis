@@ -278,7 +278,7 @@ class Spectrum(AbstractWrapperClass):
   def spectralWidthHz(self) -> tuple:
     """Type: (*float,*)\*dimensionCount, *settable*
 
-    spectral width before adjustment (generally in Hz)."""
+    spectral width before correcting for spectrometer frequency (generally in Hz)."""
     return tuple(x.spectralWidth for x in self._wrappedData.sortedDataDims()
                  if hasattr(x, 'spectralWidth'))
 
@@ -290,12 +290,13 @@ class Spectrum(AbstractWrapperClass):
       for ii,dataDim in enumerate(dataSource.sortedDataDims()):
         val = value[ii]
         if hasattr(dataDim, attributeName):
-          if val is None:
-            raise ValueError("Attempt to set %s to None in dimension %s: %s"
-                           % (attributeName, ii+1, value))
+          if not val:
+            raise ValueError("Attempt to set %s to %s in dimension %s: %s"
+                           % (attributeName, val, ii+1, value))
           else:
             # We assume that the number of points is constant, so setting SW changes valuePerPoint
-            setattr(dataDim, attributeName, val/dataDim.numPoints)
+            swold = getattr(dataDim, attributeName)
+            dataDim.valuePerPoint *= (val/swold)
         elif val is not None:
           raise ValueError("Attempt to set %s in sampled dimension %s: %s"
                            % (attributeName, ii+1, value))
@@ -638,14 +639,9 @@ class Spectrum(AbstractWrapperClass):
 
 
 def newSpectrum(parent:Project, name:str) -> Spectrum:
-  """Create new child Atom"""
-  project = parent
+  """Create new child Spectrum"""
 
-  raise NotImplementedError("Creation of new Spectra not yet implemented")
-
-  # NBNB TBD
-  # requires changing of descriptor and chemCompVar,
-  # interaction with structure ensembles, ...
+  raise NotImplementedError("Not implemented. Use loadSpectrum function instead")
 
 
 # Connections to parents:

@@ -1,6 +1,41 @@
-__author__ = 'rhf22'
+"""Spectrum wrapper class. Wraps a CCPN Nmr.DataSource
+
+- There is a separate Spectrum for each DataSource.
+- Values that are only defined for some DataDIm subclasses are set to None where not defined.
+- Projections (DataSource.numDim<Experiment.numDim) are supported, but can not be set up
+in the wrapper code.
+- Reduced-dimensionality spectra are supported but can not be set up in the wrapper code.
+- For each dimension data in this class are given for only one dataDimRef,expDimRef pair.
+  Selection is:
+  - ExpDimRef must have a dataDimRef (where applicable).
+  - if there is more than one, take the lowest serial ExpDimRef with measurementType 'Shift',
+    or, failing that, the lowest serial ExpDimRef
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+               "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                 " or ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author: rhfogh $"
+__date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+__version__ = "$Revision: 7686 $"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
 
 from collections.abc import Sequence
+import operator
 
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Project import Project
@@ -360,8 +395,15 @@ class Spectrum(AbstractWrapperClass):
     """Get main ExpDimRef  for each dimension
     - uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
     result = []
-    for expDim in self._wrappedData.experiment.sortedExpDims():
-      expDimRefs = expDim.sortedExpDimRefs()
+    for dataDim in self._wrappedData.sortedDataDims():
+      # NB MUST loop over dataDims in case of projection spectra
+      expDim = dataDim.expDim
+      if hasattr(dataDim, 'dataDimRefs'):
+        expDimRefs = sorted((x.expDimRef for x in dataDim.dataDimRefs),
+                            operator.attrgetter('serial'))
+      else:
+        expDimRefs = expDim.sortedExpDimRefs()
+
       if not expDimRefs:
         result.append(None)
       else:
@@ -381,8 +423,15 @@ class Spectrum(AbstractWrapperClass):
     - uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
     dataSource = self._wrappedData
     if len(value) == dataSource.numDim:
-      for ii,expDim in enumerate(self._wrappedData.experiment.sortedExpDims()):
-        expDimRefs = expDim.sortedExpDimRefs()
+      for ii,dataDim in enumerate(self._wrappedData.sortedDataDims()):
+        # NB MUST loop over dataDims, in case of projection spectra
+        expDim = dataDim.expDim
+        if hasattr(dataDim, 'dataDimRefs'):
+          expDimRefs = sorted((x.expDimRef for x in dataDim.dataDimRefs),
+                              operator.attrgetter('serial'))
+        else:
+          expDimRefs = expDim.sortedExpDimRefs()
+
         if not expDimRefs:
           if value[ii] is not None:
             raise ValueError("Attempt to set value for invalid attribute %s in dimension %s: %s" %

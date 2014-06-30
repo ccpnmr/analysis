@@ -83,20 +83,20 @@ class SpectrumReference(AbstractWrapperClass):
   @property
   def maxAliasedFrequency(self) -> float:
     """maximum possible peak frequency (in ppm) for this reference """
-    return self._wrappedData.expDimRef.maxAliasedFrequency
+    return self._wrappedData.expDimRef.maxAliasedFreq
 
   @maxAliasedFrequency.setter
   def maxAliasedFrequency(self, value):
-     self._wrappedData.expDimRef.maxAliasedFrequency = value
+     self._wrappedData.expDimRef.maxAliasedFreq = value
 
   @property
   def minAliasedFrequency(self) -> float:
     """minimum possible peak frequency (in ppm) for this reference """
-    return self._wrappedData.expDimRef.minAliasedFrequency
+    return self._wrappedData.expDimRef.minAliasedFreq
 
-  @maxAliasedFrequency.setter
+  @minAliasedFrequency.setter
   def minAliasedFrequency(self, value):
-     self._wrappedData.expDimRef.minAliasedFrequency = value
+     self._wrappedData.expDimRef.minAliasedFreq = value
 
 
   @property
@@ -213,22 +213,34 @@ class SpectrumReference(AbstractWrapperClass):
                  for x in y.sortedDataDimRefs() if hasattr(y, 'dataDimRef'))
 
 
-def newSpectrumRefence(parent:Spectrum, name:str) -> SpectrumReference:
+def newSpectrumReference(parent:Spectrum, dimension:int, spectrometerFrequency:float,
+                       isotopeCodes:Sequence, axisCode:str=None, measurementType:str='Shift',
+                       maxAliasedFrequency:float=None, minAliasedFrequency:float=None,
+                       foldingMode:str=None, axisUnit:str=None, referencePoint:float=0.0,
+                       referenceValue:float=0.0) -> SpectrumReference:
   """Create new child Atom"""
-  spectrum = parent
+  dataSource = parent._wrappedData
+  dataDim = dataSource.findFirstDataDim(dim=dimension)
+  if dataDim is None:
+    raise ValueError("Cannot create SpectrumReference for non-existent dimension: %s" % dimension)
 
-  raise NotImplementedError("Creation of new Spectra not yet implemented")
+  expDimRef = dataDim.expDim.newExpDimRef(sf=spectrometerFrequency, isotopeCodes=isotopeCodes,
+                                          measurementType=measurementType,
+                                          isFolded=(foldingMode!='folded'), name=axisCode,
+                                          unit=axisUnit, minAliasedFreq=minAliasedFrequency,
+                                          maxAliasedFreq=maxAliasedFrequency,)
 
-  # NBNB TBD
-  # requires changing of descriptor and chemCompVar,
-  # interaction with structure ensembles, ...
+  dataDimRef = dataDim.newDataDimRef(expDimRef=expDimRef, refPoint=referencePoint,
+                                     refValue=referenceValue)
+
+  return parent.project._data2Obj[dataDimRef]
 
 
 # Connections to parents:
 
 Spectrum._childClasses.append(SpectrumReference)
 
-Spectrum.newSpectrumReference = newSpectrumRefence
+Spectrum.newSpectrumReference = newSpectrumReference
 
 # Notifiers:
 className = Ccpn_DataDimRef._metaclass.qualifiedName()

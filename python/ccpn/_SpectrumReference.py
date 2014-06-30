@@ -3,6 +3,7 @@ __author__ = 'rhf22'
 from collections.abc import Sequence
 
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._Project import Project
 from ccpn._Spectrum import Spectrum
 from ccpncore.api.ccp.nmr.Nmr import DataDimRef as Ccpn_DataDimRef
 
@@ -212,9 +213,9 @@ class SpectrumReference(AbstractWrapperClass):
                  for x in y.sortedDataDimRefs() if hasattr(y, 'dataDimRef'))
 
 
-def newSpectrumRefence(parent:Spectrum, name:str) -> Spectrum:
+def newSpectrumRefence(parent:Spectrum, name:str) -> SpectrumReference:
   """Create new child Atom"""
-  project = parent
+  spectrum = parent
 
   raise NotImplementedError("Creation of new Spectra not yet implemented")
 
@@ -225,12 +226,12 @@ def newSpectrumRefence(parent:Spectrum, name:str) -> Spectrum:
 
 # Connections to parents:
 
-Project._childClasses.append(Spectrum)
+Spectrum._childClasses.append(SpectrumReference)
 
-Project.newSpectrum = newSpectrum
+Spectrum.newSpectrumReference = newSpectrumRefence
 
 # Notifiers:
-className = Ccpn_DataSource._metaclass.qualifiedName()
+className = Ccpn_DataDimRef._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Spectrum}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

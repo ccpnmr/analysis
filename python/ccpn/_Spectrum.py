@@ -570,7 +570,7 @@ class Spectrum(AbstractWrapperClass):
       else:
         result.append(None)
     #
-        return result
+    return result
 
   def _setDataDimRefAttribute(self, attributeName:str, value:Sequence, mandatory:bool=True):
     """Set main DataDimRef attribute for each dimension
@@ -626,8 +626,17 @@ class Spectrum(AbstractWrapperClass):
     spectral width after processing (generally in ppm) """
     return tuple(x and x.spectralWidth for x in self._mainDataDimRefs())
 
-  # NBNB TBD Do we want this parameter settable? and if so with what behaviour?
-  # NBNB YES!
+  @spectralWidth.setter
+  def spectralWidth(self, value):
+    for ii,dataDimRef in enumerate(self._mainDataDimRefs()):
+      if dataDimRef is not None:
+        oldsw = dataDimRef[ii]
+        sw = value[ii]
+        localValuePerPoint = dataDimRef.localValuePerPoint
+        if localValuePerPoint:
+          dataDimRef.localValePerPoint = localValuePerPoint*sw/oldsw
+        else:
+          dataDimRef.dataDim.valuePerPoint *= (sw/oldsw)
 
   # Implementation functions
 

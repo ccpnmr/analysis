@@ -1,4 +1,4 @@
-"""General path handling utilities"""
+"""General path handling utilities. NB must be python 2.1 complieant!!!"""
 
 
 LICENSE = """
@@ -234,7 +234,7 @@ def removePath(path):
     shutil.rmtree(path)
 
 
-def commonSuperDirectory(*fileNames) ->str:
+def commonSuperDirectory(*fileNames):
   """ Find lowest directory that contains all files in list
   NB does not normalise file names.
 
@@ -243,7 +243,7 @@ def commonSuperDirectory(*fileNames) ->str:
   """
   return os.path.dirname(os.path.commonprefix(fileNames))
 
-def suggestFileLocations(fileNames:list, startDir:str=None) -> tuple:
+def suggestFileLocations(fileNames, startDir=None):
   """ From a list of files, return a common superdirectory and a list of
   relative file names. If any of the files do not exist, search for an
   alternative superdirectory that does contain the set of relative file names.

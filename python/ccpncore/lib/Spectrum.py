@@ -13,7 +13,7 @@ def createExperiment(nmrProject:object, name:str, numDim:int, sf:Sequence,
   experiment = nmrProject.newExperiment(name=name, numDim=numDim, **additionalParameters)
 
   if isAcquisition is None:
-    isAcquisition = (None,) * numDim
+    isAcquisition = (False,) * numDim
 
   for n, expDim in enumerate(experiment.sortedExpDims()):
     expDim.isAcquisition = isAcquisition[n]

@@ -197,7 +197,6 @@ software development. Bioinformatics 21, 1678-1684.
 # general imports
 import string
 import time
-
 # Ccp imports
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import MetaModel

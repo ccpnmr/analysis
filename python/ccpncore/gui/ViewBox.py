@@ -6,8 +6,8 @@ from pyqtgraph.Point import Point
 class ViewBox(pg.ViewBox):
 
   def __init__(self, *args, **kwds):
-        pg.ViewBox.__init__(self, *args, **kwds)
-        self.setMenuDisabled()
+    pg.ViewBox.__init__(self, *args, **kwds)
+    self.setMenuDisabled()
 
   def mouseClickEvent(self, event):
 
@@ -44,7 +44,6 @@ class ViewBox(pg.ViewBox):
     if event.double():
       event.accept()
       print("Double Click event")
-
 
 
   def mouseDragEvent(self, event, axis=None):

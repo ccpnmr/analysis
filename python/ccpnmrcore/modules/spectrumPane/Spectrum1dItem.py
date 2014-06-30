@@ -20,33 +20,40 @@ class Spectrum1dItem:
 
     self.spectrum = spectrumVar  # TEMP
     self.spectralData = self.getSliceData()
-    self.spectrumItem = pg.PlotDataItem(self.spectralData)
-    dimMapping = {} # this block of code TEMP
-    for i in range(len(self.spectrum.pointCount)):
-      dimMapping[i] = i
+    # self.spectrumItem = pg.PlotDataItem(self.spectralData)
+    # self.integrals = self.autoIntegration()
+    # dimMapping = {} # this block of code TEMP
+    # for i in range(len(self.spectrum.pointCount)):
+    #   dimMapping[i] = i
     # SpectrumItem.__init__(self, parent, spectrumVar, region, dimMapping)
 
+
+
+  def autoIntegration(self):
+    integration = LibSpectrum.automaticIntegration(self.spectrum)
 
   def getSliceData(self):
 
     spectrum = self.spectrum
-    if spectrum.dimensionCount == 1: # TBD
-      pointCount = spectrum.pointCount # this block of code TEMP
-    region = [(0, pointCount[0])]
-    dataDimRef = spectrum.ccpnSpectrum.findFirstDataDim().findFirstDataDimRef()
+    # if spectrum.numDim == 1: # TBD
+    #   # pointCount = spectrum.pointCount # this block of code TEMP
+    # region = [(0, pointCount[0])]
+    dataDimRef = spectrum.findFirstDataDim().findFirstDataDimRef()
 
     firstPoint = dataDimRef.pointToValue(0)
-    numpts = spectrum.ccpnSpectrum.findFirstDataDim().numPoints
-    lastPoint = dataDimRef.pointToValue(numpts-1)
-    pointSpacing = (lastPoint-firstPoint)/numpts
+    pointCount = spectrum.findFirstDataDim().numPoints
+    lastPoint = dataDimRef.pointToValue(pointCount-1)
+    pointSpacing = (lastPoint-firstPoint)/pointCount
 
-    position = numpy.array([firstPoint + n*pointSpacing for n in range(numpts)],numpy.float32)
-
+    position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
+    print('position: ',position)
    # below does not work yet
    #planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
     sliceData = LibSpectrum.getSliceData(spectrum)
-    print(type(sliceData))
+    print('sliceData',sliceData)
     spectrumData = []
     for x,y in zip(position,sliceData):
       spectrumData.append([x,y])
-    return numpy.array(spectrumData,numpy.float32)
+    print(spectrumData)
+
+    # return numpy.array(spectrumData,numpy.float32)

@@ -307,3 +307,35 @@ def suggestFileLocations(fileNames, startDir=None):
   #
   return baseDir, paths
 
+def checkFilePath(filePath, allowDir=True):
+
+  msg = ''
+  isOk = True
+
+  if not filePath:
+    isOk = False
+
+  elif not os.path.exists(filePath):
+    msg = 'Location "%s" does not exist' % filePath
+    isOk = False
+
+  elif not os.access(filePath, os.R_OK):
+    msg = 'Location "%s" is not readable' % filePath
+    isOk = False
+
+  elif os.path.isdir(filePath):
+    if allowDir:
+      return isOk, msg
+    else:
+      msg = 'Location "%s" is a directory' % filePath
+      isOk = False
+
+  elif not os.path.isfile(filePath):
+    msg = 'Location "%s" is not a regular file' % filePath
+    isOk = False
+
+  elif os.stat(filePath).st_size == 0:
+    msg = 'File "%s" is of zero size '% filePath
+    isOk = False
+
+  return isOk, msg

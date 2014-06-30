@@ -1,7 +1,8 @@
-from PySide import QtGui
+from PySide import QtGui, QtCore
 import pyqtgraph as pg
-import sys
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
+# from ccpn.lib.Spectrum import getSpectrumFileFormat
+
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane
 from ccpncore.gui import ViewBox
 
@@ -15,24 +16,28 @@ class Spectrum1dPane(SpectrumPane):
     self.viewBox = ViewBox.ViewBox()
     self.xAxis = pg.AxisItem(orientation='top')
     self.yAxis = pg.AxisItem(orientation='right')
-    self.widget = pg.PlotWidget(
-      viewBox=self.viewBox, enableMenu=False, axisItems={
+    self.widget = pg.PlotWidget( viewBox = self.viewBox,
+      enableMenu=False, axisItems={
         'bottom':self.xAxis, 'right': self.yAxis})
+    # self.dock = pg.dockarea.Dock("Dock1", size=(1, 1))
+    # self.dockArea = pg.dockarea.DockArea()
 
+    self.widget.plotItem.setAcceptDrops(True)
+    self.widget.dragEnterEvent = self.dragEnterEvent
+    self.widget.dropEvent = self.dropEvent
     self.viewBox.invertX()
-    self.widget.plotItem.vb.state['background'] = None
-    self.widget.plotItem.vb.updateBackground()
-    self.createCrossHair()
+    self.crossHair = self.createCrossHair()
     # connect cross hair (mouseMoved)
     self.widget.scene().sigMouseMoved.connect(self.mouseMoved)
-
+    self.widget.setAcceptDrops(True)
+    self.widget.dropEvent = self.dropEvent
+    print(self.widget.setAcceptDrops)
     ## setup axes for display
     self.axes = self.widget.plotItem.axes
     self.axes['left']['item'].hide()
     self.axes['right']['item'].show()
-    # orientation left to put text on left of axis and same for top
-    self.axes['right']['item'].orientation = 'left'
-    self.axes['bottom']['item'].orientation = 'top'
+    self.axes['bottom']['item'].orientation = 'bottom'
+    # print(isinstance(self.parent, QtGui.QGraphicsScene))
 
 
   def addSpectrum(self, spectrumVar, region=None, dimMapping=None):
@@ -53,18 +58,68 @@ class Spectrum1dPane(SpectrumPane):
         self.hLine.setPos(mousePoint.y())
 
 
+  def dropEvent(self, event):
+
+
+    event.accept()
+    data = event.mimeData()
+    print(data,"dropped")
+    print("dropped")
+    if isinstance(self.parent, QtGui.QGraphicsScene):
+      event.ignore()
+      return
+
+    if event.mimeData().urls():
+      mods = event.keyboardModifiers()
+      haveCtrl = mods & QtCore.Qt.CTRL or mods & QtCore.Qt.META
+      haveShift = mods & QtCore.Qt.SHIFT
+
+      if haveShift or haveCtrl:
+        replace = False
+      else:
+        replace = True
+
+      filePaths = [url.path() for url in event.mimeData().urls()]
+      if filePaths:
+        spectrumFormat = getSpectrumFileFormat(filePaths[0])
+        print(filePaths)
+        print(spectrumFormat)
+
+        if spectrumFormat:
+          event.acceptProposedAction()
+          self.openSpectra(filePaths, replace=replace)
+          return
+
+        peakListFormat = getPeakListFileFormat(filePaths[0])
+        if peakListFormat:
+          event.acceptProposedAction()
+          self.mainApp.openPeakList(filePaths[0])
+          return
+
+        else:
+          event.ignore()
+
+      else:
+        event.ignore()
+
+    else:
+      event.ignore()
+
+
 ###For testing
-if __name__ == '__main__':
-
-  def testMain():
-    app = QtGui.QApplication(sys.argv)
-    w = QtGui.QWidget()
-    layout = QtGui.QGridLayout()
-    spectrumWidget=Spectrum1dPane()
-    widget=spectrumWidget.widget
-    layout.addWidget(widget)
-    w.setLayout(layout)
-    w.show()
-    sys.exit(app.exec_())
-
-  testMain()
+#
+# if __name__ == '__main__':
+#
+#   def testMain():
+#     app = QtGui.QApplication(sys.argv)
+#
+#     w = QtGui.QWidget()
+#     layout = QtGui.QGridLayout()
+#     spectrumWidget=Spectrum1dPane()
+#     widget=spectrumWidget.widget
+#     layout.addWidget(widget)
+#     w.setLayout(layout)
+#     w.show()
+#     sys.exit(app.exec_())
+#
+#   testMain()

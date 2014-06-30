@@ -2,7 +2,12 @@ from PySide import QtCore, QtGui
 import sys, os
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane
 from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
-from ccpncore.util import Io as Io
+from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
+
+from ccpncore.lib.memops.Implementation.Project import loadDataSource
+# from ccpncore.util import Io as Io
+from ccpn import openProject
+from ccpn.lib import Spectrum as LibSpectrum
 import pyqtgraph.console as console
 
 class MainWindow(QtGui.QMainWindow):
@@ -47,9 +52,10 @@ class MainWindow(QtGui.QMainWindow):
     # fileMenu.addAction(QtGui.QAction(("Close"), self, shortcut=QtGui.QKeySequence('q','p'),
     #             triggered=self.close))
     fileMenu.addAction(QtGui.QAction("Open Project", self, shortcut=QtGui.QKeySequence("P, O"), triggered=self.openProject))
-    fileMenu.addAction(QtGui.QAction("Save Project", self, shortcut=QtGui.QKeySequence("P, S"), triggered=self.saveProject()))
-    fileMenu.addAction(QtGui.QAction("Save Project As", self, shortcut=QtGui.QKeySequence("P, A"), triggered=self.saveProjectAs()))
+    fileMenu.addAction(QtGui.QAction("Save Project", self, shortcut=QtGui.QKeySequence("P, S"), triggered=self.saveProject))
+    fileMenu.addAction(QtGui.QAction("Save Project As", self, shortcut=QtGui.QKeySequence("P, A"), triggered=self.saveProjectAs))
     fileMenu.addAction(QtGui.QAction("Close Program", self, shortcut=QtGui.QKeySequence("Q, T"), triggered=(QtCore.QCoreApplication.instance().quit)))
+    spectrumMenu.addAction(QtGui.QAction("Open Spectra", self, shortcut=QtGui.QKeySequence("F, O"), triggered=self.loadSpectra))
 
     windowMenu.addAction(QtGui.QAction("Hide Console", self, shortcut=QtGui.QKeySequence("H, C"),triggered=self.hideConsole))
     windowMenu.addAction(QtGui.QAction("Show Console", self, shortcut=QtGui.QKeySequence("S, C"),triggered=self.showConsole))
@@ -68,13 +74,38 @@ class MainWindow(QtGui.QMainWindow):
 
 
   def openProject(self):
-    self.currentProject = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
-    Io.loadProject(self.currentProject)
-    msg  = (self.currentProject)+' opened'
-    self.statusBar().showMessage(msg)
-    self.pythonConsole.write("openProject("+self.currentProject+")\n")
-    self.pythonConsole.write("for spectrum in spectra:\n  openSpectrum(spectrum)")
+    global current
+    currentProjectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
 
+    current = openProject(currentProjectDir)
+    msg  = (currentProjectDir)+' opened'
+    self.statusBar().showMessage(msg)
+    self.pythonConsole.write("openProject('"+currentProjectDir+"')\n")
+
+
+  def loadSpectra(self):
+    directory = QtGui.QFileDialog.getExistingDirectory(self, 'Open Spectra')
+    dataSource = loadDataSource(current,directory)
+    spectrum = current._data2Obj[dataSource]
+    print(spectrum)
+    msg = 'spectrum loaded '+dataSource.name
+    print(dataSource.numDim)
+    if dataSource.numDim == 1:
+      data = Spectrum1dItem(self.spectrumWidget,dataSource).spectralData
+    print(data)
+    self.statusBar().showMessage(msg)
+    self.pythonConsole.write("project.loadSpectrum('"+directory+"')\n")
+
+
+      # dirLength=len(os.listdir(directory))
+      #
+      # print(dirLength)
+
+  def saveProject(self):
+    print("project saved")
+
+  def saveProjectAs(self):
+    print("project saved as...")
 
 
   def showCrossHair(self):

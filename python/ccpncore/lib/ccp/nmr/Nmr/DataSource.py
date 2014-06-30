@@ -57,6 +57,7 @@ software development. Bioinformatics 21, 1678-1684.
 """
 
 import numpy
+import os
 
 # Additional functions for ccp.nmr.Nmr.DataSource
 #
@@ -64,6 +65,8 @@ import numpy
 # so they can be used as DataSource methods
 from ccpncore.lib.ccp.nmr.Nmr.Experiment import getOnebondExpDimRefs, getAcqExpDim
 from ccpncore.lib.ccp.nmr.Nmr.AbstractDataDim import getIsotopeCodes
+# from ccpncore.lib.spectrum.Integral.Integral import getIntegralRegions, setIntegrals, calculateIntegralValues
+
 
 def getDimCodes(dataSource):
   """ Get dimcode of form hx1, hx2, x1, x2, where the x's are directly bound to 
@@ -279,7 +282,7 @@ def getPlaneData(spectrum, position=None, xDim=0, yDim=1):
       blockData = numpy.fromfile(file=fp, dtype=dtype, count=blockSize).reshape(blockSizes) # data is in reverse order: e.g. z,y,x not x,y,z
 
       if blockData.dtype != numpy.float32:
-        blockData = array(blockData, numpy.float32)
+        blockData = numpy.array(blockData, numpy.float32)
       
       blockPlane = blockData[tuple(blockSlice)]
         
@@ -308,12 +311,13 @@ def getSliceData(spectrum, position=None, sliceDim=0):
 
   if not position:
     position = numDim * [0]
-    
+
   dataDims = spectrum.sortedDataDims()
   numPoints = [dataDim.numPoints for dataDim in dataDims]
   slicePoints = numPoints[sliceDim]
 
-  data = numpy.empty((slicePoints,), dtype=numpy.float32)
+  # data = numpy.empty((slicePoints,), dtype=numpy.float32)
+  data = numpy.empty((2,  slicePoints), dtype=numpy.float32)
 
   for dim in range(numDim):
     point = position[dim]
@@ -333,7 +337,7 @@ def getSliceData(spectrum, position=None, sliceDim=0):
   blocks = [1 + (numPoints[dim]-1) // blockSizes[dim] for dim in range(numDim)]
   numBlocks, cumulativeBlocks = _cumulativeArray(blocks)
   dtype = '%s%s%s' % (isBigEndian and '>' or '<', isFloatData and 'f' or 'i', wordSize)
-  
+
   sliceBlockSize = blockSizes[sliceDim]
   sliceBlocks = 1 + (slicePoints-1)//sliceBlockSize
 
@@ -344,16 +348,18 @@ def getSliceData(spectrum, position=None, sliceDim=0):
   blockSlice[numDim-sliceDim-1] = numpy.s_[p:p+1]
 
   blockSizes = blockSizes[::-1]  # reverse (dim ordering backwards)
-  
-  fileName = dataStore.fullPath
+
+  print(dir(dataStore))
+  fileName = dataStore.getDataUrl().url.path
+  print(dir(fileName))
   fp = open(fileName, 'rb')
-  
+
   for sliceBlock in range(sliceBlocks):
     blockCoords[sliceDim] = sliceBlock
     sliceLower = sliceBlock * sliceBlockSize
     sliceUpper = min(sliceLower+sliceBlockSize, slicePoints)
     blockSlice[numDim-sliceDim-1] = numpy.s_[0:sliceUpper-sliceLower]
-    
+
     ind =  sum(x[0]*x[1] for x in zip(blockCoords, cumulativeBlocks))
     offset = wordSize * (blockSize * ind) + headerSize
     fp.seek(offset, 0)
@@ -361,8 +367,82 @@ def getSliceData(spectrum, position=None, sliceDim=0):
 
     if blockData.dtype != numpy.float32:
       blockData = numpy.array(blockData, numpy.float32)
-        
-    data[sliceLower:sliceUpper] = blockData[blockSlice].squeeze()
+
+    data[0, sliceLower:sliceUpper] = blockData[blockSlice].squeeze()
 
   return data
+
+def automaticIntegration(spectrum,xDim):
+#
+  numDim = spectrum.numDim
+  if numDim != 1:
+    return
+  dataStore = spectrum.dataStore
+  if not dataStore:
+    return None
+
+  spectrum.valueArray = valueArray = getSliceData(spectrum)
+
+  noise = estimateNoise(spectrum)
+  level =  noise * 6
+  # if len(self.peakList) > 0:
+  #   integrals = self.getPeakIntegralRegions(valueArray[1, :], noise, level)
+  # else:
+  integrals = getIntegralRegions(xDim,valueArray[0, :], noise, level)
+  setIntegrals(spectrum,integrals)
+  #
+  for integral in spectrum.integrals:
+    integral.calculateBias(valueArray[0, :],noise)
+    calculateIntegralValues(integral.points, valueArray[1, :], integral.bias*-1, integral.slope)
+
+  if len(spectrum.integrals) > 0:
+    spectrum.integralFactor = 1/spectrum.integrals[0].points[-1][0]
+  else:
+    spectrum.integralFactor = None
+  for integral in spectrum.integrals:
+    integral.calculateVolume()
+
+
+  print('spectrum.integrals',spectrum.integrals)
+  # for a in spectrum.integrals:
+  #   print(pointToPpm(spectrum,a))
+
+  return spectrum.integrals
+
+
+# def setIntegrals(spectrum, dim, values, factor = 1.0):
+#
+#     self.integrals = []
+#     # append = self.integrals.append
+
+def estimateNoise(spectrum):
+
+    if spectrum.noiseLevel:
+      return spectrum.noiseLevel
+
+    if spectrum.numDim > 1:
+      planeData = getPlaneData([0] * spectrum.numDim, 0, 1)
+      value = 1.1 * numpy.std(planeData.flatten()) # multiplier a guess
+    else:
+
+      if len(spectrum.valueArray) != 0:
+        sliceData = spectrum.valueArray
+      else:
+        spectrum.valueArray = sliceData = getSliceData(spectrum)
+
+      sliceDataStd = numpy.std(sliceData)
+      sliceData = numpy.array(sliceData,numpy.float32)
+      # Clip the data to remove outliers
+      sliceData = sliceData.clip(-sliceDataStd, sliceDataStd)
+
+      value = 1.1 * numpy.std(sliceData) # multiplier a guess
+
+    #value *= self.scale
+
+    spectrum.noiseLevel = float(value)
+
+    return spectrum.noiseLevel # Qt can't serialise numpy float types
+
+
+
 

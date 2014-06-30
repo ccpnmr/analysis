@@ -43,18 +43,11 @@ thisFile = os.path.join(curDir, __file__)
 
 def updateFile(fileName):
 
-  #print('HERE100', fileName)
-  #print('HERE200', startMatch)
-  #print('HERE201', endMatch)
   fp = open(fileName, 'rU')
   data = fp.read()
   fp.close()
-  #print('HERE202', endMatch[:1000])
   n1 = data.find(startMatch)
   n2 = data.find(endMatch)
-  #print('HERE203', n1)
-  #print('HERE204', n2)
-  #import sys; sys.exit()
   if n1 >= 0 and n2 > n1: # have a match
     data = data[:n1] + template + data[n2+len(endMatch):]
   else:

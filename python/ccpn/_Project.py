@@ -1,11 +1,18 @@
 
 import functools
+from collections import namedtuple
 
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
 
+class DottedNamedTuple(namedtuple):
+  def __str__(self):
+    return '.'.join(str(x) for x in self)
+
+Assignment = DottedNamedTuple('Assignment', ('chain', 'sequence', 'type', 'atom'))
+SpinSystem = DottedNamedTuple('SpinSystem', ('chain', 'sequence', 'type'))
 
 class Project(AbstractWrapperClass):
   """Project (root) object. Corresponds to CCPN: NmrProject"""
@@ -133,6 +140,19 @@ class Project(AbstractWrapperClass):
   def nmrProject(self) -> Ccpn_NmrProject:
     """CCPN equivalen to object: Nmrproject"""
     return self._wrappedData
+
+  #
+  # utility functions
+  #
+  def _assignment2Resonance(self, assignment:Assignment) -> object:
+    """get or create ccp.nmr.Nmr.Resonance matching assignment"""
+    # NBNB TBD
+    raise NotImplementedError("_assignment2Resonance")
+
+  def _resonance2Assignment(self, resonance:object) -> Assignment:
+    """ get or create Assignmetn matching ccp.nmr.Nmr.resonanc"""
+    # NBNB TBD
+    raise NotImplementedError("_resonance2Assignment")
 
 
 # NBNB set function parameter annotations for AbstractBaseClass functions

@@ -1,16 +1,7 @@
-"""Spectrum wrapper class. Wraps a CCPN Nmr.DataSource
-
-- There is a separate Spectrum for each DataSource.
-- Values that are only defined for some DataDIm subclasses are set to None where not defined.
-- Projections (DataSource.numDim<Experiment.numDim) are supported, but can not be set up
-in the wrapper code.
-- Reduced-dimensionality spectra are supported but can not be set up in the wrapper code.
-- For each dimension data in this class are given for only one dataDimRef,expDimRef pair.
-  Selection is:
-  - ExpDimRef must have a dataDimRef (where applicable).
-  - if there is more than one, take the lowest serial ExpDimRef with measurementType 'Shift',
-    or, failing that, the lowest serial ExpDimRef
-
+"""Spectrum  class. Gives spectrum values, including per-dimension values as tuples.
+Values that are not defined for a given dimension (e.g. sampled dimensions) are given as None.
+Reference-related values apply only to the first Reference given (which is sufficient for
+all common cases).
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -208,7 +199,7 @@ class Spectrum(AbstractWrapperClass):
       raise ValueError("Value must have length %s, was %s" % (dataSource.numDim, value))
 
   @property
-  def pointCount(self) -> tuple:
+  def pointCounts(self) -> tuple:
     """Type: (*int,*)\*dimensionCount, *settable*
 
     Number active of points
@@ -222,8 +213,8 @@ class Spectrum(AbstractWrapperClass):
         result.append(dataDim.numPoints)
     return tuple(result)
 
-  @pointCount.setter
-  def pointCount(self, value:Sequence):
+  @pointCounts.setter
+  def pointCounts(self, value:Sequence):
     dataSource = self._wrappedData
     if len(value) == dataSource.numDim:
       for ii,dataDim in enumerate(dataSource.sortedDataDims()):
@@ -236,7 +227,7 @@ class Spectrum(AbstractWrapperClass):
                        (dataSource.numDim, value))
 
   @property
-  def totalPointCount(self) -> tuple:
+  def totalPointCounts(self) -> tuple:
     """Type: (*int,*)\*dimensionCount, *settable*
 
     Total number of points
@@ -251,8 +242,8 @@ class Spectrum(AbstractWrapperClass):
         result.append(dataDim.numPoints)
     return tuple(result)
 
-  @totalPointCount.setter
-  def totalPointCount(self, value:Sequence):
+  @totalPointCounts.setter
+  def totalPointCounts(self, value:Sequence):
     dataSource = self._wrappedData
     if len(value) == dataSource.numDim:
       for ii,dataDim in enumerate(dataSource.sortedDataDims()):
@@ -265,7 +256,7 @@ class Spectrum(AbstractWrapperClass):
                        (dataSource.numDim, value))
 
   @property
-  def pointOffset(self) -> tuple:
+  def pointOffsets(self) -> tuple:
     """Type: (*int,*)\*dimensionCount, *settable*
 
      index of first active point relative to total points."""
@@ -277,8 +268,8 @@ class Spectrum(AbstractWrapperClass):
         result.append(0)
     return tuple(result)
 
-  @pointOffset.setter
-  def pointOffset(self, value:Sequence):
+  @pointOffsets.setter
+  def pointOffsets(self, value:Sequence):
     dataSource = self._wrappedData
     attributeName = 'pointOffset'
     if len(value) == dataSource.numDim:
@@ -303,22 +294,22 @@ class Spectrum(AbstractWrapperClass):
     self._setDataDimValue('isComplex', value)
 
   @property
-  def dimensionType(self) -> tuple:
+  def dimensionTypes(self) -> tuple:
     """Type: (*str,*)\*dimensionCount
 
     dimension types ('Fid' / 'Freq' / 'Sampled')."""
     return tuple(x.className[:-7] for x in self._wrappedData.sortedDataDims())
 
   @property
-  def spectralWidthHz(self) -> tuple:
+  def spectralWidthsHz(self) -> tuple:
     """Type: (*float,*)\*dimensionCount, *settable*
 
     spectral width before correcting for spectrometer frequency (generally in Hz)."""
     return tuple(x.spectralWidth for x in self._wrappedData.sortedDataDims()
                  if hasattr(x, 'spectralWidth'))
 
-  @spectralWidthHz.setter
-  def spectralWidthHz(self, value:Sequence):
+  @spectralWidthsHz.setter
+  def spectralWidthsHz(self, value:Sequence):
     dataSource = self._wrappedData
     attributeName = 'spectralWidth'
     if len(value) == dataSource.numDim:
@@ -341,27 +332,27 @@ class Spectrum(AbstractWrapperClass):
 
 
   @property
-  def phase0(self) -> tuple:
+  def phases0(self) -> tuple:
     """Type: (*float,*)\*dimensionCount, *settable*
 
     zero order phase correction (or None). Always None for sampled dimensions."""
     return tuple(x.phase0 for x in self._wrappedData.sortedDataDims()
                  if hasattr(x, 'phase0'))
 
-  @phase0.setter
-  def phase0(self, value:Sequence):
+  @phases0.setter
+  def phases0(self, value:Sequence):
     self._setDataDimValue('phase0', value)
 
   @property
-  def phase1(self) -> tuple:
+  def phases1(self) -> tuple:
     """Type: (*float,*)\*dimensionCount, *settable*
 
     first order phase correction (or None). Always None for sampled dimensions."""
     return tuple(x.phase1 for x in self._wrappedData.sortedDataDims()
                  if hasattr(x, 'phase1'))
 
-  @phase1.setter
-  def phase1(self, value:Sequence):
+  @phases1.setter
+  def phases1(self, value:Sequence):
     self._setDataDimValue('phase1', value)
 
 
@@ -392,178 +383,127 @@ class Spectrum(AbstractWrapperClass):
   # Attributes belonging to ExpDimRef and DataDimRef
 
   def _mainExpDimRefs(self) -> list:
-    """Get main ExpDimRef  for each dimension
-    - uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
-    result = []
-    for dataDim in self._wrappedData.sortedDataDims():
-      # NB MUST loop over dataDims in case of projection spectra
-      expDim = dataDim.expDim
-      if hasattr(dataDim, 'dataDimRefs'):
-        expDimRefs = sorted((x.expDimRef for x in dataDim.dataDimRefs),
-                            operator.attrgetter('serial'))
-      else:
-        expDimRefs = expDim.sortedExpDimRefs()
+    """Get main ExpDimRef (serial=1) for each dimension"""
 
-      if not expDimRefs:
-        result.append(None)
-      else:
-        for expDimRef in expDimRefs:
-          if expDimRef.measurementType == 'Shift':
-            break
-        else:
-          expDimRef = expDimRefs[0]
-        #
-        result.append(expDimRef)
+    result = tuple(x.findFirstExpDimRef(serial=1)
+                   for x in self._wrappedData.experiment.sortedExpDims())
     #
-        return result
+    return result
 
 
   def _setExpDimRefAttribute(self, attributeName:str, value:Sequence, mandatory:bool=True):
-    """Set main ExpDimRef attribute for each dimension
-    - uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
+    """Set main ExpDimRef attribute (serial=1) for each dimension"""
     dataSource = self._wrappedData
     if len(value) == dataSource.numDim:
       for ii,dataDim in enumerate(self._wrappedData.sortedDataDims()):
         # NB MUST loop over dataDims, in case of projection spectra
-        expDim = dataDim.expDim
-        if hasattr(dataDim, 'dataDimRefs'):
-          expDimRefs = sorted((x.expDimRef for x in dataDim.dataDimRefs),
-                              operator.attrgetter('serial'))
+        expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
+        val = value[ii]
+        if expDimRef is None and val is not None:
+          raise ValueError("Attempt to set attribute %s in dimension %s to %s - must be None" %
+                             (attributeName, ii+1, val))
+        elif val is None and mandatory:
+          raise ValueError(
+            "Attempt to set mandatory attribute %s to None in dimension %s: %s" %
+            (attributeName, ii+1, val))
         else:
-          expDimRefs = expDim.sortedExpDimRefs()
-
-        if not expDimRefs:
-          if value[ii] is not None:
-            raise ValueError("Attempt to set value for invalid attribute %s in dimension %s: %s" %
-                             (attributeName, ii+1, value))
-        else:
-          for expDimRef in expDimRefs:
-            if expDimRef.measurementType == 'Shift':
-              break
-          else:
-            expDimRef = expDimRefs[0]
-          #
-          if value is None and mandatory:
-            raise ValueError(
-              "Attempt to set value to None for mandatory attribute %s in dimension %s: %s" %
-              (attributeName, ii+1, value))
-          else:
-            setattr(expDimRef, attributeName, value[ii])
-    else:
-      raise ValueError("Value must have length %s, was %s" % (dataSource.numDim, value))
+          setattr(expDimRef, attributeName, val)
 
   @property
-  def spectrometerFrequency(self) -> tuple:
+  def spectrometerFrequencies(self) -> tuple:
     """Tuple of spectrometer frequency for main dimensions reference """
     return tuple(x and x.sf for x in self._mainExpDimRefs())
 
-  @spectrometerFrequency.setter
-  def spectrometerFrequency(self, value):
+  @spectrometerFrequencies.setter
+  def spectrometerFrequencies(self, value):
     self._setExpDimRefAttribute('sf', value)
 
   @property
-  def measurementType(self) -> tuple:
+  def measurementTypes(self) -> tuple:
     """Type: (*str,*)\*dimensionCount, *settable*
 
     measurement type for main dimensions reference """
     return tuple(x and x.measurementType for x in self._mainExpDimRefs())
 
-  @measurementType.setter
-  def measurementType(self, value):
+  @measurementTypes.setter
+  def measurementTypes(self, value):
     self._setExpDimRefAttribute('measurementType', value)
 
   @property
-  def maxAliasedFrequency(self) -> tuple:
+  def maxAliasedFrequencies(self) -> tuple:
     """Type: (*float,*)\*dimensionCount, *settable*
 
      maximum possible peak frequency (in ppm) for main dimensions reference """
     return tuple(x and x.maxAliasedFrequency for x in self._mainExpDimRefs())
 
-  @maxAliasedFrequency.setter
-  def maxAliasedFrequency(self, value):
+  @maxAliasedFrequencies.setter
+  def maxAliasedFrequencies(self, value):
     self._setExpDimRefAttribute('maxAliasedFrequency', value, mandatory=False)
 
   @property
-  def minAliasedFrequency(self) -> tuple:
+  def minAliasedFrequencies(self) -> tuple:
     """Type: (*str,*)\*dimensionCount, *settable*
 
      minimum possible peak frequency (in ppm) for main dimensions reference """
     return tuple(x and x.minAliasedFrequency for x in self._mainExpDimRefs())
 
-  @minAliasedFrequency.setter
-  def minAliasedFrequency(self, value):
+  @minAliasedFrequencies.setter
+  def minAliasedFrequencies(self, value):
     self._setExpDimRefAttribute('minAliasedFrequency', value, mandatory=False)
 
 
   @property
-  def isotopeCode(self) -> tuple:
+  def isotopeCodes(self) -> tuple:
     """Type: (*str,*)\*dimensionCount, *settable*
 
-    main ExpDimRef isotopeCode - None if no unique code
-
-    Uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
+    main ExpDimRef (serial=1) isotopeCode - None if no unique code"""
     result = []
-    for expDim in self._wrappedData.experiment.sortedExpDims():
-      expDimRefs = expDim.sortedExpDimRefs()
-      if not expDimRefs:
+    for dataDim in self._wrappedData.sortedDataDims():
+      expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
+      if expDimRef is None:
         result.append(None)
       else:
-        for expDimRef in expDimRefs:
-          if expDimRef.measurementType == 'Shift':
-            break
-        else:
-          expDimRef = expDimRefs[0]
-        #
         isotopeCodes = expDimRef.isotopeCodes
         if len(isotopeCodes) == 1:
           result.append(isotopeCodes[0])
         else:
           result.append(None)
     #
-          return tuple(result)
+    return tuple(result)
 
-  @isotopeCode.setter
-  def isotopeCode(self, value:Sequence):
-    """Set main ExpDimRef isotopeCode for each dimension
-    - uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
+  @isotopeCodes.setter
+  def isotopeCodes(self, value:Sequence):
+    """Set main ExpDimRef (serial=1) isotopeCode for each dimension"""
     dataSource = self._wrappedData
     if len(value) == dataSource.numDim:
-      for ii,expDim in enumerate(self._wrappedData.experiment.sortedExpDims()):
-        expDimRefs = expDim.sortedExpDimRefs()
-        if not expDimRefs:
-          if value[ii] is not None:
-            raise ValueError("Cannot set isotopeCode in dimension %s: %s" %
-                             (ii+1, value))
+      for ii,dataDim in enumerate(dataSource.sortedDataDims()):
+        expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
+        val = value[ii]
+        if expDimRef is None:
+          if val is not None:
+            raise ValueError("Cannot set isotopeCode %s in dimension %s" % (val, ii+1))
+        elif val is None:
+          expDimRef.isotopeCodes = ()
         else:
-          for expDimRef in expDimRefs:
-            if expDimRef.measurementType == 'Shift':
-              break
-          else:
-            expDimRef = expDimRefs[0]
-          #
-          if value[ii] is None:
-            val = ()
-          else:
-            val = (value[ii],)
-          expDimRef.isotopeCodes = val
+          expDimRef.isotopeCodes = (val,)
     else:
       raise ValueError("Value must have length %s, was %s" % (dataSource.numDim, value))
 
   @property
-  def foldingMode(self) -> tuple:
+  def foldingModes(self) -> tuple:
     """Type: (*str,*)\*dimensionCount, *settable*
 
     main ExpDimRef folding mode (values: 'aliased', 'folded', None)"""
     dd = {True:'folded', False:'aliased', None:None}
     return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
 
-  @foldingMode.setter
-  def foldingMode(self, value):
+  @foldingModes.setter
+  def foldingModes(self, value):
     dd = {'aliased':False, 'folded':True, None:None}
     self._setExpDimRefAttribute('isFolded', [dd[x] for x in value])
 
   @property
-  def axisCode(self) -> tuple:
+  def axisCodes(self) -> tuple:
     """Type: (*str,*)\*dimensionCount, *settable*
 
     Main ExpDimRef axisCode for each dimension - None if no unique code.
@@ -590,12 +530,12 @@ class Spectrum(AbstractWrapperClass):
     TBD codes match AtomSite.name, but NBNB NmrExpPrototypes must be updated to match system"""
     return tuple(x and x.name for x in self._mainExpDimRefs())
 
-  @axisCode.setter
-  def axisCode(self, value):
+  @axisCodes.setter
+  def axisCodes(self, value):
     self._setExpDimRefAttribute('name', value, mandatory=False)
 
   @property
-  def axisUnit(self) -> tuple:
+  def axisUnits(self) -> tuple:
     """Type: (*str,*)\*dimensionCount, *settable*
 
     Main ExpDimRef axis unit (most commonly 'ppm') - None if no unique code
@@ -603,8 +543,8 @@ class Spectrum(AbstractWrapperClass):
     Uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
     return tuple(x and x.unit for x in self._mainExpDimRefs())
 
-  @axisUnit.setter
-  def axisUnit(self, value):
+  @axisUnits.setter
+  def axisUnits(self, value):
     self._setExpDimRefAttribute('unit', value, mandatory=False)
 
   # Attributes belonging to DataDimRef
@@ -623,7 +563,7 @@ class Spectrum(AbstractWrapperClass):
 
   def _setDataDimRefAttribute(self, attributeName:str, value:Sequence, mandatory:bool=True):
     """Set main DataDimRef attribute for each dimension
-    - uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
+    - uses first ExpDimRef with serial=1"""
     dataSource = self._wrappedData
     if len(value) == dataSource.numDim:
       expDimRefs = self._mainExpDimRefs()
@@ -647,36 +587,36 @@ class Spectrum(AbstractWrapperClass):
       raise ValueError("Value must have length %s, was %s" % (dataSource.numDim, value))
 
   @property
-  def referencePoint(self) -> tuple:
+  def referencePoints(self) -> tuple:
     """Type: (*float,*)\*dimensionCount, *settable*
 
     point used for axis (chemical shift) referencing."""
     return tuple(x and x.refPoint for x in self._mainDataDimRefs())
 
-  @referencePoint.setter
-  def referencePoint(self, value):
+  @referencePoints.setter
+  def referencePoints(self, value):
     self._setDataDimRefAttribute('refPoint', value)
 
   @property
-  def referenceValue(self) -> tuple:
+  def referenceValues(self) -> tuple:
     """Type: (*str,*)\*dimensionCount, *settable*
 
     value used for axis (chemical shift) referencing."""
     return tuple(x and x.refValue for x in self._mainDataDimRefs())
 
-  @referenceValue.setter
-  def referenceValue(self, value):
+  @referenceValues.setter
+  def referenceValues(self, value):
     self._setDataDimRefAttribute('refValue', value)
 
   @property
-  def spectralWidth(self) -> tuple:
+  def spectralWidths(self) -> tuple:
     """Type: (*float,*)\*dimensionCount, *settable*
 
     spectral width after processing (generally in ppm) """
     return tuple(x and x.spectralWidth for x in self._mainDataDimRefs())
 
-  @spectralWidth.setter
-  def spectralWidth(self, value):
+  @spectralWidths.setter
+  def spectralWidths(self, value):
     for ii,dataDimRef in enumerate(self._mainDataDimRefs()):
       if dataDimRef is not None:
         oldsw = dataDimRef[ii]

@@ -4,6 +4,10 @@ from ccpn._Project import Project
 from ccpn._Residue import Residue
 from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
 
+import array as array
+
+# NBNB TBD add settable linkedAtoms link for non-ChemCOmp links
+
 class Atom(AbstractWrapperClass):
   """Molecular Atom."""
   

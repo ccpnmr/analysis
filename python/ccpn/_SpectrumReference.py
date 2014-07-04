@@ -9,8 +9,10 @@ from ccpncore.api.ccp.nmr.Nmr import DataDimRef as Ccpn_DataDimRef
 
 
 class SpectrumReference(AbstractWrapperClass):
-  """NMR spectrum reference. Can only exist for Fourier transformed dimensions
-  (CCPN: FreqDtaDim)"""
+  """ADVANCED. NMR spectrum reference. Can only exist for Fourier transformed dimensions
+  (CCPN: FreqDataDim). Required for experiments with assignable splittings (e.g. J-coupling, RDC),
+  reduced-dimensionality, more than one nucleus per axis, o
+  r multi-atom parameters (J-dimensions, MQ dimensions)."""
 
   #: Short class name, for PID.
   shortClassName = 'SR'

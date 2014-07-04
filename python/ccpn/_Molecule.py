@@ -3,6 +3,7 @@ from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Project import Project
 from ccpncore.api.ccp.molecule.MolSystem import MolSystem as Ccpn_MolSystem
 
+# NBNB TBD remove this class - there is only one MoSystem
 
 class Molecule(AbstractWrapperClass):
   """Molecule or complex, composed of chains."""

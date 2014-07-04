@@ -8,7 +8,12 @@ from ccpncore.api.ccp.nmr.Nmr import Peak as Ccpn_Peak
 
 
 class Peak(AbstractWrapperClass):
-  """Peak."""
+  """Peak. Includes values for per-dimension values and for assignments.
+  Assignments are complete for normal shift dimensions, but only the main referencing is used
+  in each dimension. For assigning splittings, J-couplings, MQ dimensions, reduced-dimensionality
+  experiments etc. you must use the PeakAssignment object (NBNB still to be written).
+  Assignments are per dimension, and for now assume that each assignment can be combined with
+  all assignments for other dimensions """
   
   #: Short class name, for PID.
   shortClassName = 'PK'
@@ -66,7 +71,7 @@ class Peak(AbstractWrapperClass):
     """figureOfMerit of Peak"""
     return self._wrappedData.figOfMerit
 
-  @volume.setter
+  @figureOfMerit.setter
   def figureOfMerit(self, value:float):
     self._wrappedData.figOfMerit = value
 
@@ -110,30 +115,32 @@ class Peak(AbstractWrapperClass):
 
   @property
   def assignments(self) -> tuple:
-    """Peak assignment - a single Assignment per dimension.
-    More complex assignments must be viewed using the PeakAssignment"""
+    """Peak assignment - a list of possible single Assignment for each dimension.
+    It is assumed (for now) that all combinations are possible"""
     result = []
     for peakDim in self._wrappedData.sortedPeakDims():
-      ll = peakDim.sortedPeakDimContribs()
-      if len(ll) == 1:
-        pdc = ll[0]
+
+      mainPeakDimContribs = peakDim.mainPeakDimContribs
+      # Done this way as a quick way of sorting the values
+      mainPeakDimContribs = [x for x in peakDim.sortedPeakDimContribs() if x in mainPeakDimContribs]
+      dimResults = []
+      result.append(dimResults)
+      func = self._project._resonance2Assignment
+      for pdc in mainPeakDimContribs:
         if hasattr(pdc, 'resonance'):
           resonance = pdc.resonance
           if resonance:
-            result.append(pdc.resonance.getAssignment())
-          else:
-            result.append('NO.assignment.NBNB.TBD')
+            result.append(func(resonance))
         else:
           result.append('COMPLEX.assignment.NBNB.TBD')
-      else:
-        result.append('MULTIPLE.assignment.NBNB.TBD')
     #
     return tuple(result)
 
   @assignments.setter
   def assignments(self, value:Sequence):
-    raise NotImplemented("assignments.setter awaits sorting out assignments")
-    
+    ccpnPeak = self._wrappedData
+    _setPeakAssignments(ccpnPeak, self._project, value)
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: PeakList)-> list:
@@ -149,37 +156,21 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
             assignments:Sequence=()) -> PeakList:
   """Create new child Peak"""
   ccpnPeakList = parent._wrappedData
-  peak = ccpnPeakList.newPeak(height=height, volume=volume, figureOfMerit=figureOfMerit,
+  ccpnPeak = ccpnPeakList.newPeak(height=height, volume=volume, figureOfMerit=figureOfMerit,
                               annotation=annotation,details=comment)
 
   # set peak position
   # NBNB TBD currently unused parameters could be added, and will have to come in here as well
   if position:
-    for ii,peakDim in enumerate(peak.sortedPeakDims()):
+    for ii,peakDim in enumerate(ccpnPeak.sortedPeakDims()):
       peakDim.value = position[ii]
   elif pointPosition:
-    for ii,peakDim in enumerate(peak.sortedPeakDims()):
+    for ii,peakDim in enumerate(ccpnPeak.sortedPeakDims()):
       peakDim.position = pointPosition[ii]
 
   # Setting assignments
   if assignments:
-    for ii,peakDim in enumerate(peak.sortedPeakDims()):
-      assignment = assignments[ii]
-
-      # NBNB TBD throw error if dimension does not match one-resonance assignment.
-
-      contribs = peakDim.sortedPeakDimContribs()
-
-      if assignment is None:
-        for contrib in contribs:
-          contrib.delete()
-      else:
-        resonance = parent._project.assignment2resonance(assignment)
-        if not (len(contribs) == 1 and contribs[0].resonance is resonance):
-          for contrib in contribs:
-            contrib.delete()
-        peakDim.newPeakDimContrib(resonance=resonance)
-      # NBNB TBD
+    _setPeakAssignments(ccpnPeak, parent._project, assignments)
 
 PeakList.newPeak = newPeak
 
@@ -190,3 +181,34 @@ Project._apiNotifiers.extend(
     ('_finaliseDelete', {}, className, 'delete')
   )
 )
+
+def _setPeakAssignments(ccpnPeak, wrapperProject, value):
+  """Set assignments on peak
+  Separate utility function to avoid duplicating code in assignments setter and newPeak function
+  """
+  numDim =  ccpnPeak.peakList.dataSource.numDim
+  if len(value) != numDim:
+    raise ValueError("Assignment length does not match peak list dimensionality %s: %s"
+                      % (numDim, value))
+
+  for ii, val in enumerate(value):
+    if len(set(val)) != len(val):
+      raise ValueError("Assignments contain duplicates in dimension %s: %s" % (ii+1, value))
+
+  func = wrapperProject.assignment2Resonance
+  for ii,peakDim in enumerate(ccpnPeak.sortedPeakDims()):
+    dimAssignments = value[ii]
+    resonances = [func(x) for x in dimAssignments]
+    mainPeakDimContribs = peakDim.mainPeakDimContribs
+    for pdc in mainPeakDimContribs:
+      # Remove unwanted contribs and purge pre-existing resonances from input.
+      if hasattr(pdc, 'resonance'):
+        resonance = pdc.resonance
+        if resonance in resonances:
+          resonances.remove(resonance)
+        else:
+          pdc.delete()
+
+    for resonance in resonances:
+      # Add new contrib for missing resonances
+      peakDim.newPeakDimContrib(resonance=resonance)

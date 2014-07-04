@@ -4,6 +4,10 @@ from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
 
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 
+from PySide import QtCore, QtGui
+
+import sys
+
 
 
 import ccpn
@@ -32,5 +36,19 @@ class Spectrum1dPaneTest(Testing):
 
 
 
+if __name__ == '__main__':
+ def testMain():
 
-
+   spectrum = Spectrum1dPaneTest()
+   w = QtGui.QWidget()
+   layout = QtGui.QGridLayout()
+   spectrumPane=Spectrum1dPane()
+   widget = spectrumPane.widget
+   layout.addWidget(widget)
+   widget.plot(spectrum.test_spectrum1dPane())
+   widget.plotItem.layout.setContentsMargins(0, 0, 0, 0)
+   w.setLayout(layout)
+   w.show()
+   w.raise_()
+   sys.exit(spectrum.exec_())
+ testMain()

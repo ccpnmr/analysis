@@ -16,7 +16,7 @@ from ccpnmrcore.modules.spectrumPane.SpectrumScene import SpectrumScene
 # abstract class: subclass needs to implement addSpectrum()
 class SpectrumPane(QtGui.QGraphicsView, Base):
   
-  def __init__(self, project, parent, spectraVar=None, region=None, dimMapping=None, **kw):
+  def __init__(self, project=None, parent=None, spectraVar=None, region=None, dimMapping=None, **kw):
     
     QtGui.QGraphicsView.__init__(self, parent)
     Base.__init__(self, project, **kw)

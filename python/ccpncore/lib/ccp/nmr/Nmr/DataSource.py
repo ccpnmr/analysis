@@ -316,8 +316,8 @@ def getSliceData(spectrum, position=None, sliceDim=0):
   numPoints = [dataDim.numPoints for dataDim in dataDims]
   slicePoints = numPoints[sliceDim]
 
-  # data = numpy.empty((slicePoints,), dtype=numpy.float32)
-  data = numpy.empty((2,  slicePoints), dtype=numpy.float32)
+  data = numpy.empty((slicePoints,), dtype=numpy.float32)
+  # data = numpy.empty((2,  slicePoints), dtype=numpy.float32)
 
   for dim in range(numDim):
     point = position[dim]
@@ -349,9 +349,7 @@ def getSliceData(spectrum, position=None, sliceDim=0):
 
   blockSizes = blockSizes[::-1]  # reverse (dim ordering backwards)
 
-  print(dir(dataStore))
-  fileName = dataStore.getDataUrl().url.path
-  print(dir(fileName))
+  fileName = dataStore.fullPath
   fp = open(fileName, 'rb')
 
   for sliceBlock in range(sliceBlocks):
@@ -368,7 +366,7 @@ def getSliceData(spectrum, position=None, sliceDim=0):
     if blockData.dtype != numpy.float32:
       blockData = numpy.array(blockData, numpy.float32)
 
-    data[0, sliceLower:sliceUpper] = blockData[blockSlice].squeeze()
+    data[sliceLower:sliceUpper] = blockData[blockSlice].squeeze()
 
   return data
 

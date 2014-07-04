@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 # NBNB TBD must be replaced with numpy (array is deprecated from Python 3.4
-from numpy import array as array
+import array as array
 
 # def cumulativeArray(array):
 #   """ get total size and strides array.

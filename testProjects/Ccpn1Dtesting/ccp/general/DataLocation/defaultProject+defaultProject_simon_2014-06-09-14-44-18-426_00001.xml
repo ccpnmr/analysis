@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<_StorageUnit release="2.1.2" originator="CCPN Python XmlIO" packageGuid="www.ccpn.ac.uk_Fogh_2007-04-03-19:08:10_00001" time="Mon Jun  9 14:48:44 2014">
+<_StorageUnit release="2.1.2" originator="CCPN Python XmlIO" packageGuid="www.ccpn.ac.uk_Fogh_2007-04-03-19:08:10_00001" time="Thu Jul  3 15:35:00 2014">
 
 <DLOC.DataLocationStore _ID="_1" createdBy="simon" guid="defaultProject_simon_2014-06-09-14-44-18-426_00001">
   <DLOC.DataLocationStore.name>
     <IMPL.Line>defaultProject</IMPL.Line>
   </DLOC.DataLocationStore.name>
   <DLOC.DataLocationStore.dataStores>
-    <DLOC.BlockedBinaryMatrix _ID="_2" fileType="Bruker" isBigEndian="false" numberType="int" serial="1">
-      <DLOC.BlockedBinaryMatrix.blockSizes> 8192</DLOC.BlockedBinaryMatrix.blockSizes>
-      <DLOC.NumericMatrix.isComplex> false</DLOC.NumericMatrix.isComplex>
-      <DLOC.NumericMatrix.numPoints> 16384</DLOC.NumericMatrix.numPoints>
-      <DLOC.AbstractDataStore.path>
-        <IMPL.PathString>MIX_1_A3_component_1H/00227/pdata/1/1r</IMPL.PathString>
-      </DLOC.AbstractDataStore.path>
-    </DLOC.BlockedBinaryMatrix>
-    <DLOC.BlockedBinaryMatrix _ID="_3" fileType="Bruker" isBigEndian="false" numberType="int" serial="2">
+    <DLOC.BlockedBinaryMatrix _ID="_2" fileType="Bruker" isBigEndian="false" numberType="int" serial="2">
       <DLOC.BlockedBinaryMatrix.blockSizes> 8192</DLOC.BlockedBinaryMatrix.blockSizes>
       <DLOC.NumericMatrix.isComplex> false</DLOC.NumericMatrix.isComplex>
       <DLOC.NumericMatrix.numPoints> 32768</DLOC.NumericMatrix.numPoints>
@@ -22,13 +14,45 @@
         <IMPL.PathString>MIX_1_A3_component_1H/66509/pdata/1/1r</IMPL.PathString>
       </DLOC.AbstractDataStore.path>
     </DLOC.BlockedBinaryMatrix>
+    <DLOC.BlockedBinaryMatrix _ID="_3" fileType="Bruker" isBigEndian="false" numberType="int" serial="3">
+      <DLOC.BlockedBinaryMatrix.blockSizes> 8192</DLOC.BlockedBinaryMatrix.blockSizes>
+      <DLOC.NumericMatrix.isComplex> false</DLOC.NumericMatrix.isComplex>
+      <DLOC.NumericMatrix.numPoints> 32768</DLOC.NumericMatrix.numPoints>
+      <DLOC.AbstractDataStore.path>
+        <IMPL.PathString>MIX_1_A3_component_1H/42849/pdata/1/1r</IMPL.PathString>
+      </DLOC.AbstractDataStore.path>
+    </DLOC.BlockedBinaryMatrix>
+    <DLOC.BlockedBinaryMatrix _ID="_4" fileType="Bruker" isBigEndian="false" numberType="int" serial="4">
+      <DLOC.BlockedBinaryMatrix.blockSizes> 8192</DLOC.BlockedBinaryMatrix.blockSizes>
+      <DLOC.NumericMatrix.isComplex> false</DLOC.NumericMatrix.isComplex>
+      <DLOC.NumericMatrix.numPoints> 32768</DLOC.NumericMatrix.numPoints>
+      <DLOC.AbstractDataStore.path>
+        <IMPL.PathString>MIX_1_A3_component_1H/04463/pdata/1/1r</IMPL.PathString>
+      </DLOC.AbstractDataStore.path>
+    </DLOC.BlockedBinaryMatrix>
+    <DLOC.BlockedBinaryMatrix _ID="_5" fileType="Bruker" isBigEndian="false" numberType="int" serial="5">
+      <DLOC.BlockedBinaryMatrix.blockSizes> 8192</DLOC.BlockedBinaryMatrix.blockSizes>
+      <DLOC.NumericMatrix.isComplex> false</DLOC.NumericMatrix.isComplex>
+      <DLOC.NumericMatrix.numPoints> 32768</DLOC.NumericMatrix.numPoints>
+      <DLOC.AbstractDataStore.path>
+        <IMPL.PathString>MIX_1_A3_component_1H/02364/pdata/1/1r</IMPL.PathString>
+      </DLOC.AbstractDataStore.path>
+    </DLOC.BlockedBinaryMatrix>
+    <DLOC.BlockedBinaryMatrix _ID="_6" fileType="Bruker" isBigEndian="false" numberType="int" serial="6">
+      <DLOC.BlockedBinaryMatrix.blockSizes> 8192</DLOC.BlockedBinaryMatrix.blockSizes>
+      <DLOC.NumericMatrix.isComplex> false</DLOC.NumericMatrix.isComplex>
+      <DLOC.NumericMatrix.numPoints> 16384</DLOC.NumericMatrix.numPoints>
+      <DLOC.AbstractDataStore.path>
+        <IMPL.PathString>MIX_1_A3_component_1H/00227/pdata/1/1r</IMPL.PathString>
+      </DLOC.AbstractDataStore.path>
+    </DLOC.BlockedBinaryMatrix>
   </DLOC.DataLocationStore.dataStores>
   <DLOC.DataLocationStore.dataUrls>
-    <DLOC.DataUrl _ID="_4" serial="1">
+    <DLOC.DataUrl _ID="_7" serial="1">
       <DLOC.DataUrl.name>
         <IMPL.Line>auto-1</IMPL.Line>
       </DLOC.DataUrl.name>
-      <DLOC.DataUrl.dataStores> _2 _3</DLOC.DataUrl.dataStores>
+      <DLOC.DataUrl.dataStores> _3 _2 _6 _4 _5</DLOC.DataUrl.dataStores>
       <DLOC.DataUrl.url>
         <IMPL.Url>
           <IMPL.Url.path>

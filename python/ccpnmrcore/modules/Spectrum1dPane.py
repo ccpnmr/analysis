@@ -2,15 +2,17 @@ from PySide import QtGui, QtCore
 import pyqtgraph as pg
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 # from ccpn.lib.Spectrum import getSpectrumFileFormat
-
+from ccpn import openProject
+from ccpncore.util import Io as Io
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane
 from ccpncore.gui import ViewBox
+import random
 
 
 class Spectrum1dPane(SpectrumPane):
 
   def __init__(self):
-
+    SpectrumPane.__init__(self)
     pg.setConfigOptions(background='w')
     pg.setConfigOptions(foreground='k')
     self.viewBox = ViewBox.ViewBox()
@@ -19,9 +21,6 @@ class Spectrum1dPane(SpectrumPane):
     self.widget = pg.PlotWidget( viewBox = self.viewBox,
       enableMenu=False, axisItems={
         'bottom':self.xAxis, 'right': self.yAxis})
-    # self.dock = pg.dockarea.Dock("Dock1", size=(1, 1))
-    # self.dockArea = pg.dockarea.DockArea()
-
     self.widget.plotItem.setAcceptDrops(True)
     self.widget.dragEnterEvent = self.dragEnterEvent
     self.widget.dropEvent = self.dropEvent
@@ -31,7 +30,6 @@ class Spectrum1dPane(SpectrumPane):
     self.widget.scene().sigMouseMoved.connect(self.mouseMoved)
     self.widget.setAcceptDrops(True)
     self.widget.dropEvent = self.dropEvent
-    print(self.widget.setAcceptDrops)
     ## setup axes for display
     self.axes = self.widget.plotItem.axes
     self.axes['left']['item'].hide()
@@ -57,10 +55,7 @@ class Spectrum1dPane(SpectrumPane):
         self.vLine.setPos(mousePoint.x())
         self.hLine.setPos(mousePoint.y())
 
-
-  def dropEvent(self, event):
-
-
+  def dropEvent(self,event):
     event.accept()
     data = event.mimeData()
     print(data,"dropped")
@@ -70,41 +65,45 @@ class Spectrum1dPane(SpectrumPane):
       return
 
     if event.mimeData().urls():
-      mods = event.keyboardModifiers()
-      haveCtrl = mods & QtCore.Qt.CTRL or mods & QtCore.Qt.META
-      haveShift = mods & QtCore.Qt.SHIFT
 
-      if haveShift or haveCtrl:
-        replace = False
-      else:
-        replace = True
 
       filePaths = [url.path() for url in event.mimeData().urls()]
-      if filePaths:
-        spectrumFormat = getSpectrumFileFormat(filePaths[0])
-        print(filePaths)
-        print(spectrumFormat)
 
-        if spectrumFormat:
-          event.acceptProposedAction()
-          self.openSpectra(filePaths, replace=replace)
-          return
+      if len(filePaths) == 1:
+          global current
+          currentProjectDir = filePaths[0]
 
-        peakListFormat = getPeakListFileFormat(filePaths[0])
-        if peakListFormat:
-          event.acceptProposedAction()
-          self.mainApp.openPeakList(filePaths[0])
-          return
-
-        else:
-          event.ignore()
+          current = Io.loadProject(currentProjectDir)
+          # self.statusBar().showMessage(msg)
+          # self.pythonConsole.write("openProject('"+currentProjectDir+"')\n")
+          msg  = (current.name)+' opened'
+          print(msg)
+          print(current)
+          for experiment in current.currentNmrProject.findAllExperiments():
+            print(experiment)
+            # experimentItem = QtGui.QTreeWidgetItem(self.spectrumItem)
+            # experimentItem.setText(0,str(experiment.name))
+            # experimentItem.setData(0, QtCore.Qt.UserRole, experiment)
+            # experimentItem.data(0, QtCore.Qt.UserRole).toPyObject()
+            dataSource = experiment.findFirstDataSource()
+            if dataSource is not None:
+              if dataSource.numDim == 1:
+                data = Spectrum1dItem(self,dataSource).spectralData
+                # print(data)
+                self.widget.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
+              # for peakList in dataSource.findAllPeakLists():
+              #   peakListItem = QtGui.QTreeWidgetItem(self.peaksItem)
+              #   peakListItem.setText(0, str(peakList))
+                # peakListItem.setData(0, QtCore.Qt.UserRole + 1, peakList)
+                # peakListItem.setData(1, QtCore.Qt.DisplayRole, str(peakList))
+          # self.statusBar().showMessage(msg)
+          # self.pythonConsole.write("openProject('"+currentProjectDir.name+"')\n")
+          # list1 = self.spectrumItem.takeChildren()
+          # for item in list1:
+          #   print((item.data()))
 
       else:
-        event.ignore()
-
-    else:
-      event.ignore()
-
+         pass
 
 ###For testing
 #

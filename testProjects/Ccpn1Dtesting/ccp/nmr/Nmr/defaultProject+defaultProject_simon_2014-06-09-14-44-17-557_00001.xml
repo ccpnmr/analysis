@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<_StorageUnit release="2.1.2" originator="CCPN Python XmlIO" packageGuid="www.ccpn.ac.uk_Fogh_2006-08-16-14:22:46_00006" time="Mon Jun  9 14:48:44 2014">
+<_StorageUnit release="2.1.2" originator="CCPN Python XmlIO" packageGuid="www.ccpn.ac.uk_Fogh_2006-08-16-14:22:46_00006" time="Thu Jul  3 15:35:00 2014">
 
 <NMR.NmrProject _ID="_1" createdBy="simon" guid="defaultProject_simon_2014-06-09-14-44-17-557_00001">
   <NMR.NmrProject.name>
     <IMPL.Line>defaultProject</IMPL.Line>
   </NMR.NmrProject.name>
   <IMPL.DataObject.applicationData>
-    <IMPL.AppDataInt value="1402321585">
+    <IMPL.AppDataInt value="1404398100">
       <IMPL.ApplicationData.application>
         <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
       </IMPL.ApplicationData.application>
@@ -129,7 +129,7 @@
             </NMRX.exo-RefExpDim>
           </NMR.ExpDim.refExpDim>
           <NMR.ExpDim.expDimRefs>
-            <NMR.ExpDimRef _ID="_9" baseFrequency="250.13" serial="1" sf="250.131544655141" unit="ppm">
+            <NMR.ExpDimRef _ID="_9" baseFrequency="250.13" maxAliasedFreq="16.428799999999999" minAliasedFreq="-4.2642455092707046" serial="1" sf="250.131544655141" unit="ppm">
               <NMR.ExpDimRef.isotopeCodes> 1H</NMR.ExpDimRef.isotopeCodes>
               <NMR.ExpDimRef.dataDimRefs> _6</NMR.ExpDimRef.dataDimRefs>
               <NMR.ExpDimRef.dimensionScalings> _7</NMR.ExpDimRef.dimensionScalings>
@@ -146,13 +146,533 @@
         </NMR.ExpDim>
       </NMR.Experiment.expDims>
     </NMR.Experiment>
+    <NMR.Experiment _ID="_10" numDim="1" serial="3">
+      <NMR.Experiment.name>
+        <IMPL.Line>Bruker_42849</IMPL.Line>
+      </NMR.Experiment.name>
+      <NMR.Experiment.refExperiment>
+        <NMRX.exo-RefExperiment>
+          <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+          <IMPL.Int>1</IMPL.Int>
+        </NMRX.exo-RefExperiment>
+      </NMR.Experiment.refExperiment>
+      <NMR.Experiment.dataSources>
+        <NMR.DataSource _ID="_11" numDim="1" scale="0.03125" serial="1">
+          <NMR.DataSource.dataType>
+            <NMR.DataSourceDataType>processed</NMR.DataSourceDataType>
+          </NMR.DataSource.dataType>
+          <NMR.DataSource.name>
+            <IMPL.Line>1</IMPL.Line>
+          </NMR.DataSource.name>
+          <NMR.DataSource.activePeakList> _12</NMR.DataSource.activePeakList>
+          <NMR.DataSource.dataStore>
+            <DLOC.exo-BlockedBinaryMatrix>
+              <IMPL.GuidString>defaultProject_simon_2014-06-09-14-44-18-426_00001</IMPL.GuidString>
+              <IMPL.Int>3</IMPL.Int>
+            </DLOC.exo-BlockedBinaryMatrix>
+          </NMR.DataSource.dataStore>
+          <NMR.DataSource.dataDims>
+            <NMR.FreqDataDim _ID="_13" dim="1" isComplex="false" numPoints="32768" numPointsOrig="32768" valuePerPoint="0.15795847890786774">
+              <IMPL.DataObject.applicationData>
+                <IMPL.AppDataFloat value="0.050000000000000003">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>assignmentTolerance</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="0.050000000000000003">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>noeTolerance</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="1.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>shiftWeight</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="0.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>peakFindmin_lw</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="1.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>peakFindboxwidth</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+              </IMPL.DataObject.applicationData>
+              <NMR.FreqDataDim.dataDimRefs>
+                <NMR.DataDimRef _ID="_14" refPoint="16385.0" refValue="6.1754772453646467">
+                </NMR.DataDimRef>
+              </NMR.FreqDataDim.dataDimRefs>
+              <NMR.AbstractDataDim.dimensionScalings>
+                <NMR.DimensionScaling _ID="_15">
+                  <NMR.DimensionScaling.scalingFactors> 1.0</NMR.DimensionScaling.scalingFactors>
+                </NMR.DimensionScaling>
+              </NMR.AbstractDataDim.dimensionScalings>
+            </NMR.FreqDataDim>
+          </NMR.DataSource.dataDims>
+          <NMR.DataSource.peakLists>
+            <NMR.PeakList _ID="_12" serial="1">
+              <NMR.PeakList.details>
+                <IMPL.String>Default list</IMPL.String>
+              </NMR.PeakList.details>
+              <IMPL.DataObject.applicationData>
+                <IMPL.AppDataString>
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>symbol</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                  <IMPL.AppDataString.value>
+                    <IMPL.String>x</IMPL.String>
+                  </IMPL.AppDataString.value>
+                </IMPL.AppDataString>
+              </IMPL.DataObject.applicationData>
+            </NMR.PeakList>
+          </NMR.DataSource.peakLists>
+        </NMR.DataSource>
+      </NMR.Experiment.dataSources>
+      <NMR.Experiment.expDims>
+        <NMR.ExpDim _ID="_16" dim="1" isAcquisition="true">
+          <NMR.ExpDim.dataDims> _13</NMR.ExpDim.dataDims>
+          <NMR.ExpDim.refExpDim>
+            <NMRX.exo-RefExpDim>
+              <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+            </NMRX.exo-RefExpDim>
+          </NMR.ExpDim.refExpDim>
+          <NMR.ExpDim.expDimRefs>
+            <NMR.ExpDimRef _ID="_17" baseFrequency="250.13" serial="1" sf="250.131544655141" unit="ppm">
+              <NMR.ExpDimRef.isotopeCodes> 1H</NMR.ExpDimRef.isotopeCodes>
+              <NMR.ExpDimRef.dataDimRefs> _14</NMR.ExpDimRef.dataDimRefs>
+              <NMR.ExpDimRef.dimensionScalings> _15</NMR.ExpDimRef.dimensionScalings>
+              <NMR.ExpDimRef.refExpDimRef>
+                <NMRX.exo-RefExpDimRef>
+                  <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+                  <IMPL.Int>1</IMPL.Int>
+                  <IMPL.Int>1</IMPL.Int>
+                  <IMPL.Int>1</IMPL.Int>
+                </NMRX.exo-RefExpDimRef>
+              </NMR.ExpDimRef.refExpDimRef>
+            </NMR.ExpDimRef>
+          </NMR.ExpDim.expDimRefs>
+        </NMR.ExpDim>
+      </NMR.Experiment.expDims>
+    </NMR.Experiment>
+    <NMR.Experiment _ID="_18" numDim="1" serial="4">
+      <NMR.Experiment.name>
+        <IMPL.Line>Bruker_04463</IMPL.Line>
+      </NMR.Experiment.name>
+      <NMR.Experiment.refExperiment>
+        <NMRX.exo-RefExperiment>
+          <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+          <IMPL.Int>1</IMPL.Int>
+        </NMRX.exo-RefExperiment>
+      </NMR.Experiment.refExperiment>
+      <NMR.Experiment.dataSources>
+        <NMR.DataSource _ID="_19" numDim="1" scale="0.03125" serial="1">
+          <NMR.DataSource.dataType>
+            <NMR.DataSourceDataType>processed</NMR.DataSourceDataType>
+          </NMR.DataSource.dataType>
+          <NMR.DataSource.name>
+            <IMPL.Line>1</IMPL.Line>
+          </NMR.DataSource.name>
+          <NMR.DataSource.activePeakList> _20</NMR.DataSource.activePeakList>
+          <NMR.DataSource.dataStore>
+            <DLOC.exo-BlockedBinaryMatrix>
+              <IMPL.GuidString>defaultProject_simon_2014-06-09-14-44-18-426_00001</IMPL.GuidString>
+              <IMPL.Int>4</IMPL.Int>
+            </DLOC.exo-BlockedBinaryMatrix>
+          </NMR.DataSource.dataStore>
+          <NMR.DataSource.dataDims>
+            <NMR.FreqDataDim _ID="_21" dim="1" isComplex="false" numPoints="32768" numPointsOrig="32768" valuePerPoint="0.15795847890786774">
+              <IMPL.DataObject.applicationData>
+                <IMPL.AppDataFloat value="0.050000000000000003">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>assignmentTolerance</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="0.050000000000000003">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>noeTolerance</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="1.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>shiftWeight</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="0.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>peakFindmin_lw</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="1.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>peakFindboxwidth</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+              </IMPL.DataObject.applicationData>
+              <NMR.FreqDataDim.dataDimRefs>
+                <NMR.DataDimRef _ID="_22" refPoint="16385.0" refValue="6.1754772453646467">
+                </NMR.DataDimRef>
+              </NMR.FreqDataDim.dataDimRefs>
+              <NMR.AbstractDataDim.dimensionScalings>
+                <NMR.DimensionScaling _ID="_23">
+                  <NMR.DimensionScaling.scalingFactors> 1.0</NMR.DimensionScaling.scalingFactors>
+                </NMR.DimensionScaling>
+              </NMR.AbstractDataDim.dimensionScalings>
+            </NMR.FreqDataDim>
+          </NMR.DataSource.dataDims>
+          <NMR.DataSource.peakLists>
+            <NMR.PeakList _ID="_20" serial="1">
+              <NMR.PeakList.details>
+                <IMPL.String>Default list</IMPL.String>
+              </NMR.PeakList.details>
+              <IMPL.DataObject.applicationData>
+                <IMPL.AppDataString>
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>symbol</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                  <IMPL.AppDataString.value>
+                    <IMPL.String>x</IMPL.String>
+                  </IMPL.AppDataString.value>
+                </IMPL.AppDataString>
+              </IMPL.DataObject.applicationData>
+            </NMR.PeakList>
+          </NMR.DataSource.peakLists>
+        </NMR.DataSource>
+      </NMR.Experiment.dataSources>
+      <NMR.Experiment.expDims>
+        <NMR.ExpDim _ID="_24" dim="1" isAcquisition="true">
+          <NMR.ExpDim.dataDims> _21</NMR.ExpDim.dataDims>
+          <NMR.ExpDim.refExpDim>
+            <NMRX.exo-RefExpDim>
+              <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+            </NMRX.exo-RefExpDim>
+          </NMR.ExpDim.refExpDim>
+          <NMR.ExpDim.expDimRefs>
+            <NMR.ExpDimRef _ID="_25" baseFrequency="250.13" serial="1" sf="250.131544655141" unit="ppm">
+              <NMR.ExpDimRef.isotopeCodes> 1H</NMR.ExpDimRef.isotopeCodes>
+              <NMR.ExpDimRef.dataDimRefs> _22</NMR.ExpDimRef.dataDimRefs>
+              <NMR.ExpDimRef.dimensionScalings> _23</NMR.ExpDimRef.dimensionScalings>
+              <NMR.ExpDimRef.refExpDimRef>
+                <NMRX.exo-RefExpDimRef>
+                  <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+                  <IMPL.Int>1</IMPL.Int>
+                  <IMPL.Int>1</IMPL.Int>
+                  <IMPL.Int>1</IMPL.Int>
+                </NMRX.exo-RefExpDimRef>
+              </NMR.ExpDimRef.refExpDimRef>
+            </NMR.ExpDimRef>
+          </NMR.ExpDim.expDimRefs>
+        </NMR.ExpDim>
+      </NMR.Experiment.expDims>
+    </NMR.Experiment>
+    <NMR.Experiment _ID="_26" numDim="1" serial="5">
+      <NMR.Experiment.name>
+        <IMPL.Line>Bruker_02364</IMPL.Line>
+      </NMR.Experiment.name>
+      <NMR.Experiment.refExperiment>
+        <NMRX.exo-RefExperiment>
+          <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+          <IMPL.Int>1</IMPL.Int>
+        </NMRX.exo-RefExperiment>
+      </NMR.Experiment.refExperiment>
+      <NMR.Experiment.dataSources>
+        <NMR.DataSource _ID="_27" numDim="1" scale="0.0625" serial="1">
+          <NMR.DataSource.dataType>
+            <NMR.DataSourceDataType>processed</NMR.DataSourceDataType>
+          </NMR.DataSource.dataType>
+          <NMR.DataSource.name>
+            <IMPL.Line>1</IMPL.Line>
+          </NMR.DataSource.name>
+          <NMR.DataSource.activePeakList> _28</NMR.DataSource.activePeakList>
+          <NMR.DataSource.dataStore>
+            <DLOC.exo-BlockedBinaryMatrix>
+              <IMPL.GuidString>defaultProject_simon_2014-06-09-14-44-18-426_00001</IMPL.GuidString>
+              <IMPL.Int>5</IMPL.Int>
+            </DLOC.exo-BlockedBinaryMatrix>
+          </NMR.DataSource.dataStore>
+          <NMR.DataSource.dataDims>
+            <NMR.FreqDataDim _ID="_29" dim="1" isComplex="false" numPoints="32768" numPointsOrig="32768" valuePerPoint="0.15795847890786774">
+              <IMPL.DataObject.applicationData>
+                <IMPL.AppDataFloat value="0.050000000000000003">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>assignmentTolerance</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="0.050000000000000003">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>noeTolerance</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="1.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>shiftWeight</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="0.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>peakFindmin_lw</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="1.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>peakFindboxwidth</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+              </IMPL.DataObject.applicationData>
+              <NMR.FreqDataDim.dataDimRefs>
+                <NMR.DataDimRef _ID="_30" refPoint="16385.0" refValue="6.1754772453646467">
+                </NMR.DataDimRef>
+              </NMR.FreqDataDim.dataDimRefs>
+              <NMR.AbstractDataDim.dimensionScalings>
+                <NMR.DimensionScaling _ID="_31">
+                  <NMR.DimensionScaling.scalingFactors> 1.0</NMR.DimensionScaling.scalingFactors>
+                </NMR.DimensionScaling>
+              </NMR.AbstractDataDim.dimensionScalings>
+            </NMR.FreqDataDim>
+          </NMR.DataSource.dataDims>
+          <NMR.DataSource.peakLists>
+            <NMR.PeakList _ID="_28" serial="1">
+              <NMR.PeakList.details>
+                <IMPL.String>Default list</IMPL.String>
+              </NMR.PeakList.details>
+              <IMPL.DataObject.applicationData>
+                <IMPL.AppDataString>
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>symbol</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                  <IMPL.AppDataString.value>
+                    <IMPL.String>x</IMPL.String>
+                  </IMPL.AppDataString.value>
+                </IMPL.AppDataString>
+              </IMPL.DataObject.applicationData>
+            </NMR.PeakList>
+          </NMR.DataSource.peakLists>
+        </NMR.DataSource>
+      </NMR.Experiment.dataSources>
+      <NMR.Experiment.expDims>
+        <NMR.ExpDim _ID="_32" dim="1" isAcquisition="true">
+          <NMR.ExpDim.dataDims> _29</NMR.ExpDim.dataDims>
+          <NMR.ExpDim.refExpDim>
+            <NMRX.exo-RefExpDim>
+              <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+            </NMRX.exo-RefExpDim>
+          </NMR.ExpDim.refExpDim>
+          <NMR.ExpDim.expDimRefs>
+            <NMR.ExpDimRef _ID="_33" baseFrequency="250.13" serial="1" sf="250.131544655141" unit="ppm">
+              <NMR.ExpDimRef.isotopeCodes> 1H</NMR.ExpDimRef.isotopeCodes>
+              <NMR.ExpDimRef.dataDimRefs> _30</NMR.ExpDimRef.dataDimRefs>
+              <NMR.ExpDimRef.dimensionScalings> _31</NMR.ExpDimRef.dimensionScalings>
+              <NMR.ExpDimRef.refExpDimRef>
+                <NMRX.exo-RefExpDimRef>
+                  <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+                  <IMPL.Int>1</IMPL.Int>
+                  <IMPL.Int>1</IMPL.Int>
+                  <IMPL.Int>1</IMPL.Int>
+                </NMRX.exo-RefExpDimRef>
+              </NMR.ExpDimRef.refExpDimRef>
+            </NMR.ExpDimRef>
+          </NMR.ExpDim.expDimRefs>
+        </NMR.ExpDim>
+      </NMR.Experiment.expDims>
+    </NMR.Experiment>
+    <NMR.Experiment _ID="_34" numDim="1" serial="6">
+      <NMR.Experiment.name>
+        <IMPL.Line>Bruker_00227</IMPL.Line>
+      </NMR.Experiment.name>
+      <NMR.Experiment.refExperiment>
+        <NMRX.exo-RefExperiment>
+          <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+          <IMPL.Int>1</IMPL.Int>
+        </NMRX.exo-RefExperiment>
+      </NMR.Experiment.refExperiment>
+      <NMR.Experiment.dataSources>
+        <NMR.DataSource _ID="_35" numDim="1" scale="0.0078125" serial="1">
+          <NMR.DataSource.dataType>
+            <NMR.DataSourceDataType>processed</NMR.DataSourceDataType>
+          </NMR.DataSource.dataType>
+          <NMR.DataSource.name>
+            <IMPL.Line>1</IMPL.Line>
+          </NMR.DataSource.name>
+          <NMR.DataSource.activePeakList> _36</NMR.DataSource.activePeakList>
+          <NMR.DataSource.dataStore>
+            <DLOC.exo-BlockedBinaryMatrix>
+              <IMPL.GuidString>defaultProject_simon_2014-06-09-14-44-18-426_00001</IMPL.GuidString>
+              <IMPL.Int>6</IMPL.Int>
+            </DLOC.exo-BlockedBinaryMatrix>
+          </NMR.DataSource.dataStore>
+          <NMR.DataSource.dataDims>
+            <NMR.FreqDataDim _ID="_37" dim="1" isComplex="false" numPoints="16384" numPointsOrig="16384" valuePerPoint="0.44486265488338134">
+              <IMPL.DataObject.applicationData>
+                <IMPL.AppDataFloat value="0.050000000000000003">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>assignmentTolerance</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="0.050000000000000003">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>noeTolerance</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="1.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>shiftWeight</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="0.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>peakFindmin_lw</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+                <IMPL.AppDataFloat value="1.0">
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>peakFindboxwidth</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                </IMPL.AppDataFloat>
+              </IMPL.DataObject.applicationData>
+              <NMR.FreqDataDim.dataDimRefs>
+                <NMR.DataDimRef _ID="_38" refPoint="8193.0" refValue="4.694016107121751">
+                </NMR.DataDimRef>
+              </NMR.FreqDataDim.dataDimRefs>
+              <NMR.AbstractDataDim.dimensionScalings>
+                <NMR.DimensionScaling _ID="_39">
+                  <NMR.DimensionScaling.scalingFactors> 1.0</NMR.DimensionScaling.scalingFactors>
+                </NMR.DimensionScaling>
+              </NMR.AbstractDataDim.dimensionScalings>
+            </NMR.FreqDataDim>
+          </NMR.DataSource.dataDims>
+          <NMR.DataSource.peakLists>
+            <NMR.PeakList _ID="_36" serial="1">
+              <NMR.PeakList.details>
+                <IMPL.String>Default list</IMPL.String>
+              </NMR.PeakList.details>
+              <IMPL.DataObject.applicationData>
+                <IMPL.AppDataString>
+                  <IMPL.ApplicationData.application>
+                    <IMPL.Line>CcpNmr_Analysis</IMPL.Line>
+                  </IMPL.ApplicationData.application>
+                  <IMPL.ApplicationData.keyword>
+                    <IMPL.Line>symbol</IMPL.Line>
+                  </IMPL.ApplicationData.keyword>
+                  <IMPL.AppDataString.value>
+                    <IMPL.String>x</IMPL.String>
+                  </IMPL.AppDataString.value>
+                </IMPL.AppDataString>
+              </IMPL.DataObject.applicationData>
+            </NMR.PeakList>
+          </NMR.DataSource.peakLists>
+        </NMR.DataSource>
+      </NMR.Experiment.dataSources>
+      <NMR.Experiment.expDims>
+        <NMR.ExpDim _ID="_40" dim="1" isAcquisition="true">
+          <NMR.ExpDim.dataDims> _37</NMR.ExpDim.dataDims>
+          <NMR.ExpDim.refExpDim>
+            <NMRX.exo-RefExpDim>
+              <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+              <IMPL.Int>1</IMPL.Int>
+              <IMPL.Int>1</IMPL.Int>
+            </NMRX.exo-RefExpDim>
+          </NMR.ExpDim.refExpDim>
+          <NMR.ExpDim.expDimRefs>
+            <NMR.ExpDimRef _ID="_41" baseFrequency="600.13" serial="1" sf="600.13281700000005" unit="ppm">
+              <NMR.ExpDimRef.isotopeCodes> 1H</NMR.ExpDimRef.isotopeCodes>
+              <NMR.ExpDimRef.dataDimRefs> _38</NMR.ExpDimRef.dataDimRefs>
+              <NMR.ExpDimRef.dimensionScalings> _39</NMR.ExpDimRef.dimensionScalings>
+              <NMR.ExpDimRef.refExpDimRef>
+                <NMRX.exo-RefExpDimRef>
+                  <IMPL.GuidString>cam_wb104_2008-01-15-16-06-40_00050</IMPL.GuidString>
+                  <IMPL.Int>1</IMPL.Int>
+                  <IMPL.Int>1</IMPL.Int>
+                  <IMPL.Int>1</IMPL.Int>
+                </NMRX.exo-RefExpDimRef>
+              </NMR.ExpDimRef.refExpDimRef>
+            </NMR.ExpDimRef>
+          </NMR.ExpDim.expDimRefs>
+        </NMR.ExpDim>
+      </NMR.Experiment.expDims>
+    </NMR.Experiment>
   </NMR.NmrProject.experiments>
   <NMR.NmrProject.measurementLists>
-    <NMR.ShiftList _ID="_10" serial="1">
+    <NMR.ShiftList _ID="_42" serial="1">
       <NMR.AbstractMeasurementList.name>
         <IMPL.Line>ShiftList 1</IMPL.Line>
       </NMR.AbstractMeasurementList.name>
-      <NMR.ShiftList.experiments> _2</NMR.ShiftList.experiments>
+      <NMR.ShiftList.experiments> _2 _10 _34 _18 _26</NMR.ShiftList.experiments>
     </NMR.ShiftList>
   </NMR.NmrProject.measurementLists>
 </NMR.NmrProject>

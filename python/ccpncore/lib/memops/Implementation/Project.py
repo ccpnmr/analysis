@@ -5,15 +5,14 @@ import os
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.lib.Spectrum import createExperiment, createDataSource, createBlockedMatrix
 
-from ccpncore.api.memops.Implementation import MemopsRoot
 from ccpncore.api.memops.Implementation import Url
-from ccpn import _Spectrum as Spectrum
 
-def loadDataSource(project, filePath, reReadSpectrum=None):
+def loadDataSource(apiProject, filePath, reReadSpectrum=None):
 
   isOk, msg = checkFilePath(filePath)
 
   if not isOk:
+    print(msg)
     # showError('Error', msg)
     return
 
@@ -24,19 +23,20 @@ def loadDataSource(project, filePath, reReadSpectrum=None):
                   VARIAN:Varian, XEASY:Xeasy}
 
   dataFileFormat = getSpectrumFileFormat(filePath)
-
+  print(dataFileFormat)
   if dataFileFormat is None:
     msg = 'Spectrum data format could not be determined for %s'
     # showError('Error', msg % filePath)
     return
-
-  if dataFileFormat == CCPN:
-    return project.getSpectrum(filePath)
+  #
+  # if dataFileFormat == CCPN:
+  #   return project.getSpectrum(filePath)
 
   formatData = paramModules[dataFileFormat].readParams(filePath)
 
   if formatData is None:
     msg = 'Spectrum load failed for %s'
+    print(msg)
     # showError('Error', msg % filePath)
     return
 
@@ -45,9 +45,9 @@ def loadDataSource(project, filePath, reReadSpectrum=None):
     isFloatData, headerSize, blockHeaderSize, isotopes, specFreqs, specWidths, \
     refPoints, refPpms, sampledValues, sampledErrors, pulseProgram, dataScale = formatData
 
-  print(formatData)
   if not os.path.exists(specFile):
     msg = 'Spectrum data file %s not found'
+    print(msg)
     # showError('Error', msg % specFile)
     return
 
@@ -69,31 +69,20 @@ def loadDataSource(project, filePath, reReadSpectrum=None):
     else:
 
 
-      nmrProject = project._wrappedData
-      print(len(numPoints))
+      nmrProject = apiProject.currentNmrProject
       newExperiment = createExperiment(nmrProject, name=name, numDim=len(numPoints),
                                        sf = specFreqs, isotopeCodes=isotopes)
 
-      dataLocationStore = project._wrappedData.root.newDataLocationStore(name=name)
-      dataUrl = dataLocationStore.newDataUrl(url=Url(path=specFile))
-      blockMatrix = createBlockedMatrix(dataUrl, name, numPoints=numPoints,
+      dataLocationStore = apiProject.newDataLocationStore(name=name)
+      dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
+      blockMatrix = createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
                                         blockSizes=blockSizes,isBigEndian=isBigEndian)
-      newDataSource = createDataSource(newExperiment,name=name, numPoints=numPoints,
-                                       sw=specWidths, refppm=refPpms,
-                                       refpt=refPoints,dataStore=blockMatrix)
+      newDataSource = createDataSource(newExperiment,name=name,numPoints=numPoints,sw=specWidths,
+                                       refppm=refPpms,refpt=refPoints,dataStore=blockMatrix)
 
-
-
-      # spectrum = Spectrum.newSpectrum(name, specFile, numPoints, blockSizes, wordSize,
-      #                     isBigEndian, isFloatData, 'rb', headerSize,
-      #                     blockHeaderSize, filePath, dataFileFormat,
-      #                     dataScale=dataScale)
 
     for i, values in enumerate(sampledValues):
       if values:
         newDataSource.setSampledData(i, values, sampledErrors[i] or None)
-
-    # newDataSource.setReferencing(isotopes, specFreqs, specWidths,
-    #                         refPoints, refPpms)
 
     return newDataSource

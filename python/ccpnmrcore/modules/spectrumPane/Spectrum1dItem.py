@@ -46,14 +46,11 @@ class Spectrum1dItem:
     pointSpacing = (lastPoint-firstPoint)/pointCount
 
     position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
-    print('position: ',position)
    # below does not work yet
    #planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
     sliceData = LibSpectrum.getSliceData(spectrum)
-    print('sliceData',sliceData)
     spectrumData = []
     for x,y in zip(position,sliceData):
       spectrumData.append([x,y])
-    print(spectrumData)
 
-    # return numpy.array(spectrumData,numpy.float32)
+    return numpy.array(spectrumData,numpy.float32)

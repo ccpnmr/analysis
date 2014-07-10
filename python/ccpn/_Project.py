@@ -1,7 +1,7 @@
 
 import functools
 
-from ccpncore.util.Classes import NmrAtom as _NmrAtom
+#from ccpncore.util.Classes import NmrAtom as _NmrAtom
 
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
@@ -140,11 +140,11 @@ class Project(AbstractWrapperClass):
   # utility functions
   #
 
-  def NmrAtom(self, *args, **kwargs):
-    """ Factory function to produce NmrAtom with _project variable set to Project"""
-    result = _NmrAtom(*args, **kwargs)
-    result._project = self
-    return result
+  # def NmrAtom(self, *args, **kwargs):
+  #   """ Factory function to produce NmrAtom with _project variable set to Project"""
+  #   result = _NmrAtom(*args, **kwargs)
+  #   result._project = self
+  #   return result
 
   def _assignment2Resonance(self, assignment:Assignment) -> object:
     """get or create ccp.nmr.Nmr.Resonance matching assignment"""

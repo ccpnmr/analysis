@@ -32,7 +32,6 @@ from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._Project import Project
 from ccpncore.api.ccp.nmr.Nmr import DataSource as Ccpn_DataSource
 
-
 class Spectrum(AbstractWrapperClass):
   """NMR spectrum."""
 

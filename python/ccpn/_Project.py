@@ -1,18 +1,13 @@
 
 import functools
-from collections import namedtuple
+
+from ccpncore.util.Classes import NmrAtom as _NmrAtom
 
 from ccpn._AbstractWrapperClass import AbstractWrapperClass
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
 
-class DottedNamedTuple(namedtuple):
-  def __str__(self):
-    return '.'.join(str(x) for x in self)
-
-Assignment = DottedNamedTuple('Assignment', ('chain', 'sequence', 'type', 'atom'))
-SpinSystem = DottedNamedTuple('SpinSystem', ('chain', 'sequence', 'type'))
 
 class Project(AbstractWrapperClass):
   """Project (root) object. Corresponds to CCPN: NmrProject"""
@@ -144,6 +139,13 @@ class Project(AbstractWrapperClass):
   #
   # utility functions
   #
+
+  def NmrAtom(self, *args, **kwargs):
+    """ Factory function to produce NmrAtom with _project variable set to Project"""
+    result = _NmrAtom(*args, **kwargs)
+    result._project = self
+    return result
+
   def _assignment2Resonance(self, assignment:Assignment) -> object:
     """get or create ccp.nmr.Nmr.Resonance matching assignment"""
     # NBNB TBD

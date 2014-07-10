@@ -27,7 +27,7 @@ __version__ = "$Revision: 7686 $"
 
 from collections.abc import Sequence
 
-from ccpn._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.nmr.Nmr import DataSource as Ccpn_DataSource
 

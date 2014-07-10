@@ -2,9 +2,9 @@ __author__ = 'rhf22'
 
 from collections.abc import Sequence
 
-from ccpn._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._wrapper._Project import Project
-from ccpn._Spectrum import Spectrum
+from ccpn._wrapper._Spectrum import Spectrum
 from ccpncore.api.ccp.nmr.Nmr import DataDimRef as Ccpn_DataDimRef
 
 

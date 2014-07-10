@@ -1,8 +1,8 @@
 from collections.abc import Sequence
 
-from ccpn._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._wrapper._Project import Project
-from ccpn._PeakList import PeakList
+from ccpn._wrapper._PeakList import PeakList
 from ccpncore.api.ccp.nmr.Nmr import Peak as Ccpn_Peak
 
 

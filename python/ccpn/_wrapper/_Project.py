@@ -146,12 +146,12 @@ class Project(AbstractWrapperClass):
   #   result._project = self
   #   return result
 
-  def _assignment2Resonance(self, assignment:Assignment) -> object:
+  def _assignment2Resonance(self, assignment) -> object:
     """get or create ccp.nmr.Nmr.Resonance matching assignment"""
     # NBNB TBD
     raise NotImplementedError("_assignment2Resonance")
 
-  def _resonance2Assignment(self, resonance:object) -> Assignment:
+  def _resonance2Assignment(self, resonance:object):
     """ get or create Assignmetn matching ccp.nmr.Nmr.resonanc"""
     # NBNB TBD
     raise NotImplementedError("_resonance2Assignment")

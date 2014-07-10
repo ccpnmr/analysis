@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
-from ccpn._AbstractWrapperClass import AbstractWrapperClass
-from ccpn._Molecule import Molecule
+from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._Molecule import Molecule
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.molecule.MolSystem import Chain as Ccpn_Chain
 from ccpncore.lib import MoleculeModify

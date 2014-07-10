@@ -89,10 +89,10 @@ ChemicalShiftList._childClasses.append(ChemicalShift)
 
 def newChemicalShift(parent:ChemicalShiftList, value:float, assignment:object,
                      valueError:float=0.0, figureOfMerit:float=1.0,
-                     comment:str=None) -> ChemicalShift
+                     comment:str=None) -> ChemicalShift:
   """Create new child Shift"""
   parent._wrappedData.newShift(value=value,
-                               resonance=self._project.assignment2Resonance(sssignment),
+                               resonance=parent._project.assignment2Resonance(assignment),
                                error=valueError, figOfMerit=figureOfMerit, details=comment)
 
 ChemicalShiftList.newChemicalShift = newChemicalShift

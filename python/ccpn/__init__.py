@@ -74,7 +74,12 @@ from ccpn._Molecule import Molecule
 from ccpn._Chain import Chain
 from ccpn._Residue import Residue
 from ccpn._Atom import Atom
+from ccpn._ChemicalShiftList import ChemicalShiftList
+from ccpn._ChemicalShift import ChemicalShift
 from ccpn._Spectrum import Spectrum
+from ccpn._SpectrumReference import SpectrumReference
+from ccpn._PeakList import PeakList
+from ccpn._Peak import Peak
 
 # Set up interclass links and related functions
 Project._linkWrapperClasses()

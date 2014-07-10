@@ -145,7 +145,7 @@ class Peak(AbstractWrapperClass):
   @classmethod
   def _getAllWrappedData(cls, parent: PeakList)-> list:
     """get wrappedData (Peaks) for all Peak children of parent PeakList"""
-    return parent._wrappedData.sortedPeakLists()
+    return parent._wrappedData.sortedPeaks()
 
 # Connections to parents:
 PeakList._childClasses.append(Peak)

@@ -1,19 +1,19 @@
-
 import pyqtgraph as pg
 from PySide import QtCore
 from pyqtgraph.Point import Point
 
 class ViewBox(pg.ViewBox):
 
-  def __init__(self, *args, **kwds):
+  def __init__(self, current  = None,  *args, **kwds):
     pg.ViewBox.__init__(self, *args, **kwds)
     self.setMenuDisabled()
+    self.current = current
 
   def mouseClickEvent(self, event):
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
       event.accept()
-      print("Left Click Event")
+      self.current.pane = self.parent
 
     elif (event.button() == QtCore.Qt.LeftButton) and (
               event.modifiers() & QtCore.Qt.ControlModifier) and not (

@@ -1,31 +1,56 @@
 from PySide import QtCore, QtGui
+from functools import partial
 
-from ccpncore.gui.Base import Base
 from ccpncore.gui.Icon import Icon
 
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
 
-class Button(QtGui.QPushButton, Base):
+class Button(QtGui.QPushButton):
 
-  def __init__(self, parent, text='', callback=None, icon=None,
+  def __init__(self, parent, text='', action=None, callback=None, icon=None,
                toggle=None, **kw):
     
     QtGui.QPushButton.__init__(self, parent)
-    Base.__init__(self, **kw)
-    
+    self.timer = QtCore.QTimer()
+    self.timer.setSingleShot(True)
+    self.double_clicked = False
+    self.timer.timeout.connect(self.singleClick)
     self.setText(text)
-
+    self.action = action
     if icon: # filename or pixmap
       self.setIcon(Icon(icon))
       self.setIconSize(QtCore.QSize(22,22))
-    
     if toggle is not None:
       self.setCheckable(True)
       self.setSelected(toggle)
       
     self.callback = None
     self.setCallback(callback)
+
+  def mouseReleaseEvent(self, event):
+    if not self.double_clicked:
+        self.timer.start(100)
+    else:
+        self.double_clicked = False
+
+  def mouseDoubleClickEvent(self, event):
+    if event.button() == QtCore.Qt.LeftButton and not (event.modifiers()):
+      self.timer.stop()
+      self.double_clicked = True
+      self.action()
+
+  def singleClick(self):
+    if self.double_clicked == False:
+      self.toggle()
+
+  # def mousePressEvent(self, event):
+  #   if event.button() == QtCore.Qt.RightButton and not (event.modifiers()):
+  #     event.accept()
+  #     self.action()
+  #
+  #   elif event.button() == QtCore.Qt.LeftButton and not (event.modifiers()):
+  #     self.toggle()
 
   def setSelected(self, selected):
     
@@ -48,7 +73,9 @@ class Button(QtGui.QPushButton, Base):
 
   def setText(self, text):
 
-    QtGui.QPushButton.setText(self, self.translate(text))
+    QtGui.QPushButton.setText(self, text)
+
+
 
 if __name__ == '__main__':
 

@@ -13,9 +13,9 @@ def getSliceData(spectrum, position=None, sliceDim=0):
   return DataSource.getSliceData(spectrum, position=position, sliceDim=sliceDim)
 
 
-def automaticIntegration(spectrum, xDim=0):
+def automaticIntegration(spectrum, spectralData):
 
-  return DataSource.automaticIntegration(spectrum, xDim=xDim)
+  return DataSource.automaticIntegration(spectrum.ccpnSpectrum, spectralData)
 
 
 

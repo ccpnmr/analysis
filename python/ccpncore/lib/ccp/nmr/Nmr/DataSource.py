@@ -65,7 +65,8 @@ import os
 # so they can be used as DataSource methods
 from ccpncore.lib.ccp.nmr.Nmr.Experiment import getOnebondExpDimRefs, getAcqExpDim
 from ccpncore.lib.ccp.nmr.Nmr.AbstractDataDim import getIsotopeCodes
-# from ccpncore.lib.spectrum.Integral.Integral import getIntegralRegions, setIntegrals, calculateIntegralValues
+# from ccpncore.lib.spectrum.Integral import getIntegralRegions, setIntegrals, calculateIntegralValues
+from ccpncore.lib.spectrum.Integral import Integral as spInt
 
 
 def getDimCodes(dataSource):
@@ -370,7 +371,7 @@ def getSliceData(spectrum, position=None, sliceDim=0):
 
   return data
 
-def automaticIntegration(spectrum,xDim):
+def automaticIntegration(spectrum,spectralData):
 #
   numDim = spectrum.numDim
   if numDim != 1:
@@ -378,20 +379,22 @@ def automaticIntegration(spectrum,xDim):
   dataStore = spectrum.dataStore
   if not dataStore:
     return None
-
-  spectrum.valueArray = valueArray = getSliceData(spectrum)
-
+  # spectrum.valueArray = [[]] * numDim
+  # if len(valueArray[xDim]) != 0:
+  #   valueArray = valueArray[xDim]
+  valueArray = spectrum.valueArray = spectralData
   noise = estimateNoise(spectrum)
   level =  noise * 6
   # if len(self.peakList) > 0:
   #   integrals = self.getPeakIntegralRegions(valueArray[1, :], noise, level)
   # else:
-  integrals = getIntegralRegions(xDim,valueArray[0, :], noise, level)
-  setIntegrals(spectrum,integrals)
+  integrals = spInt.getIntegralRegions(spectralData[1, :], noise, level)
+  spInt.setIntegrals(spectrum,integrals)
+
   #
   for integral in spectrum.integrals:
-    integral.calculateBias(valueArray[0, :],noise)
-    calculateIntegralValues(integral.points, valueArray[1, :], integral.bias*-1, integral.slope)
+    integral.calculateBias(spectralData[1, :], noise)
+    spInt.calculateIntegralValues(integral.points, spectralData[1, :], integral.bias*-1, integral.slope)
 
   if len(spectrum.integrals) > 0:
     spectrum.integralFactor = 1/spectrum.integrals[0].points[-1][0]
@@ -400,10 +403,11 @@ def automaticIntegration(spectrum,xDim):
   for integral in spectrum.integrals:
     integral.calculateVolume()
 
-
-  print('spectrum.integrals',spectrum.integrals)
+  #
   # for a in spectrum.integrals:
-  #   print(pointToPpm(spectrum,a))
+  #   # print(spectrum.integralFactor)
+  #
+
 
   return spectrum.integrals
 
@@ -427,7 +431,8 @@ def estimateNoise(spectrum):
         sliceData = spectrum.valueArray
       else:
         spectrum.valueArray = sliceData = getSliceData(spectrum)
-
+      # print(sliceData)
+      # print(sliceData[1])
       sliceDataStd = numpy.std(sliceData)
       sliceData = numpy.array(sliceData,numpy.float32)
       # Clip the data to remove outliers

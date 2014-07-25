@@ -4,6 +4,12 @@ from OpenGL import GL
 
 from ccpncore.util.Color import Color
 
+import pyqtgraph as pg
+
+from ccpnmrcore.modules.spectrumPane.PeakListItem import PeakListItem
+from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
+
+
 # this class mixes both OpenGL and Qt functionality
 # it's a Qt QGraphicsItem because that means can re-order drawing of spectra peaks easily
 # and it also allows turning on and off of a spectrum easily
@@ -36,12 +42,12 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
     self.setDimMapping(dimMapping)
     
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
-    """ TBD: spectrum.peakLists does not exist yet
+    self.integralListItems = []
     for peakList in spectrum.peakLists:
-      self.peakListItems[peakList] = PeakListItem(self, peakList)
-"""
-
-    # spectrumPane.spectrumItems.append(self)
+      # print(peakList)
+      self.peakListItems[peakList.pid] = PeakListItem(self, peakList)
+    self.integralListItems.append(IntegralListItem(self))
+    spectrumPane.spectrumItems.append(self)
 
   def setDimMapping(self, dimMapping):
     

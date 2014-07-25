@@ -43,11 +43,15 @@ class Spectrum1dPane(SpectrumPane):
     self.axes['bottom']['item'].orientation = 'bottom'
     self.dock = Dock(name=self.title, size=(1000,1000))
     self.spectrumToolbar = QtGui.QToolBar()
-    self.dock.addWidget(self.spectrumToolbar)
-    self.dock.addWidget(self.widget)
+    self.spectrumToolbar.setMovable(True)
+    self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+    self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 9)
     self.spectrumIndex = 1
     self.viewBox.current = current
-
+    self.positionBox = QtGui.QPushButton()
+    self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
+    self.widget.scene().sigMouseMoved.connect(self.showMousePosition)
+    self.dock.addWidget(self.widget, 2, 1, 1, 10)
 
 
   # def addSpectrum(self, spectrumVar, region=None, dimMapping=None):
@@ -66,6 +70,11 @@ class Spectrum1dPane(SpectrumPane):
     self.widget.addItem(self.vLine, ignoreBounds=True)
     self.widget.addItem(self.hLine, ignoreBounds=True)
 
+
+  def showMousePosition(self, pos):
+
+    position = self.viewBox.mapSceneToView(pos).toTuple()
+    self.positionBox.setText("X: %.3f  I: %.2E" % position)
 
   def mouseMoved(self, event):
     position = event
@@ -106,21 +115,18 @@ class Spectrum1dPane(SpectrumPane):
     toolBarButton.setPalette(palette)
     toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
     toolBarButton.toggled.connect(spectrumItem.plot.setVisible)
-    spectrumButtonMenu = QtGui.QMenu()
 
     if self.spectrumIndex < 10:
       shortcutKey = "s,"+str(self.spectrumIndex)
       self.spectrumIndex+=1
     else:
       shortcutKey = None
-    # spectrumButtonMenu.addAction(QtGui.QAction("Preferences", self, triggered=partial(self.showSpectrumPreferences,spectrum)))
-    toolBarButton.setMenu(spectrumButtonMenu)
     toolBarButton.setShortcut(QtGui.QKeySequence(shortcutKey))
     self.spectrumToolbar.addWidget(toolBarButton)
     spectrum.spectrumItem = spectrumItem
     for peakList in spectrum.peakLists:
-      self.createPeakMarkings(peakList)
-    self.createIntegralMarkings(spectrum)
+      spectrumItem.addPeaks(self, peakList)
+    spectrumItem.addIntegrals(self)
     return spectrum
     # pass
 
@@ -134,9 +140,12 @@ class Spectrum1dPane(SpectrumPane):
       label = QtGui.QLabel(form)
       label.setText(str(peakList.pid))
       checkBox = QtGui.QCheckBox()
-      checkBox.setChecked(True)
-      # checkBox.toggle()
-      checkBox.stateChanged.connect(lambda: self.peakListToggle(checkBox.checkState(),peakList))
+      if spectrum.spectrumItem.peakListItems[peakList.pid].displayed == True:
+        checkBox.setChecked(True)
+      else:
+        checkBox.setChecked(False)
+
+      checkBox.stateChanged.connect(lambda: self.peakListToggle(spectrum.spectrumItem, checkBox.checkState(),peakList))
       # checkBox.toggle()
       layout.addWidget(checkBox, i, 0)
       layout.addWidget(label, i, 1)
@@ -144,7 +153,6 @@ class Spectrum1dPane(SpectrumPane):
 
     layout.addWidget(QtGui.QLabel(text='Integrals'), 2, 0)
     i+=1
-    print(i)
     # Set dialog layout
 
     newLabel = QtGui.QLabel(form)
@@ -153,7 +161,11 @@ class Spectrum1dPane(SpectrumPane):
     newCheckBox.setChecked(True)
     layout.addWidget(newCheckBox, i, 0)
     layout.addWidget(newLabel, i, 1)
-    newCheckBox.stateChanged.connect(lambda: self.integralToggle(newCheckBox.checkState(),spectrum))
+    if spectrum.spectrumItem.integralListItems[0].displayed == True:
+      newCheckBox.setChecked(True)
+    else:
+      newCheckBox.setChecked(False)
+    newCheckBox.stateChanged.connect(lambda: self.integralToggle(newCheckBox.checkState(),spectrum.spectrumItem))
     i+=1
     newFrame=QtGui.QFrame()
     newLayout = QtGui.QGridLayout()
@@ -183,17 +195,17 @@ class Spectrum1dPane(SpectrumPane):
     form.exec_()
 
 
-  def peakListToggle(self, state, peakList):
+  def peakListToggle(self, spectrumItem, state, peakList):
     if state == QtCore.Qt.Checked:
-      self.showPeaks(peakList)
+      self.showPeaks(spectrumItem, peakList)
     if state == QtCore.Qt.Unchecked:
-      self.hidePeaks(peakList)
+      self.hidePeaks(spectrumItem, peakList)
 
-  def integralToggle(self, state, spectrum):
+  def integralToggle(self, state, spectrumItem):
     if state == QtCore.Qt.Checked:
-      self.showIntegrals(spectrum)
+      spectrumItem.showIntegrals()
     if state == QtCore.Qt.Unchecked:
-      self.hideIntegrals(spectrum)
+      spectrumItem.hideIntegrals()
 
 
   def removeSpectrum(self, spectrum):
@@ -206,47 +218,31 @@ class Spectrum1dPane(SpectrumPane):
   def hideSpectrum(self, spectrum):
     spectrum.spectrumItem.plot.hide()
 
+  def showPeaks(self, spectrumItem, peakList):
+    spectrumItem.showPeaks(peakList)
 
-  def createPeakMarkings(self, peakList):
-    # for peakList in spectrum.peakLists:
-    peakList.peakMarkings = []
-    for peak in peakList.peaks:
-      peakHeight = peak._wrappedData.findFirstPeakIntensity(intensityType='height').value
-      # peak.append([peak.position[0],peakHeight])
+  def showIntegrals(self, spectrumItem):
+    spectrumItem.showIntegrals()
 
-      text = pg.TextItem(text=str("%.3f" % peak.position[0]),anchor=(0.5,1.5),color='k')
-      roi = pg.LineSegmentROI([[peak.position[0],peakHeight],[peak.position[0],peakHeight+1.5]], pen='k')
-      self.widget.addItem(roi)
-      self.widget.addItem(text)
-      text.setPos(peak.position[0],peakHeight)
-      peakList.peakMarkings.append(roi)
-      peakList.peakMarkings.append(text)
+  def hideIntegrals(self, spectrumItem):
+    spectrumItem.hideIntegrals()
 
-  def showPeaks(self, peakList):
+  def hidePeaks(self, spectrumItem, peakList):
 
-    for marking in peakList.peakMarkings:
-      marking.show()
-
-  def showIntegrals(self, spectrum):
-
-    for marking in spectrum.spectrumItem.integralMarkings:
-      marking.show()
-
-  def hidePeaks(self, peakList):
-
-    for marking in peakList.peakMarkings:
-      marking.hide()
+    spectrumItem.hidePeaks(peakList)
 
 
   def hideIntegrals(self, spectrum):
 
     for marking in spectrum.spectrumItem.integralMarkings:
       marking.hide()
+      self.integralMarkings.displayed = False
+
 
   def createIntegralMarkings(self, spectrum):
 
     for integral in spectrum.spectrumItem.integrals:
-
+        spectrum.spectrumItem.integralMarkings.displayed = False
         position = (integral.lastPoint+integral.firstPoint)/2
         text = pg.TextItem(html=("%.1f&#x222b" % round(integral.volume*spectrum.ccpnSpectrum.integralFactor,2)),color='k')
         roi = pg.LineSegmentROI([[integral.firstPoint,0],[integral.lastPoint,0]], pen='k')

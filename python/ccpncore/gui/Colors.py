@@ -16,6 +16,21 @@ class ColorDialog(QtGui.QColorDialog):
 
     self.setColor(color)
 
+
+  def getColor(self, initialColor=None):
+
+    if initialColor is not None:
+      self.setColor(initialColor)
+
+    self.exec_()
+
+    color = self.currentColor()
+
+    if self.aborted:
+      return None
+    else:
+      return color
+
   def setColor(self, color):
     # color can be name, #hex, (r,g,b) or (r,g,b,a)
 

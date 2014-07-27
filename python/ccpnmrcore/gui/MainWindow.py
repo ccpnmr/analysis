@@ -1,17 +1,17 @@
 from PySide import QtCore, QtGui
 import sys
+import random
+import numpy as np
+import pyqtgraph as pg
+from pyqtgraph.dockarea import DockArea
+
 from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
 from ccpnmrcore.Current import Current
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpncore.lib.memops.Implementation.Project import loadDataSource
-from ccpncore.util import Io as Io
-from ccpn import openProject
-import random
-import numpy as np
-import pyqtgraph as pg
-from ccpncore.gui.Console import PythonConsole
-from pyqtgraph.dockarea import DockArea
 from ccpncore.gui.SideBar import SideBar
+from ccpncore.gui.Console import PythonConsole
+from ccpn import openProject
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -53,7 +53,7 @@ class MainWindow(QtGui.QMainWindow):
     # self.spectrumToolbar = QtGui.QToolBar()
     # self.dock1.addWidget(self.spectrumToolbar)
     self.dockArea.addDock(self.widget1)
-    self.widget1.name = 'Module %s' % str(self.moduleCount+1)
+    # self.widget1.name = 'Module %s' % (self.moduleCount+1)
 
     self.splitter1.addWidget(self.dockArea)
     self.state = None
@@ -80,7 +80,7 @@ class MainWindow(QtGui.QMainWindow):
     windowMenu.addAction(QtGui.QAction("Hide CrossHair", self, shortcut=QtGui.QKeySequence("H, H"), triggered=self.hideCrossHair))
     windowMenu.addAction(QtGui.QAction("Save State", self, shortcut=QtGui.QKeySequence("S, S"), triggered=self.saveState))
     windowMenu.addAction(QtGui.QAction("Restore State", self, shortcut=QtGui.QKeySequence("R, S"), triggered=self.restoreState))
-    windowMenu.addAction(QtGui.QAction("New Module", self, shortcut=QtGui.QKeySequence("A, M"), triggered=self.addModule))
+    windowMenu.addAction(QtGui.QAction("Add Module", self, shortcut=QtGui.QKeySequence("A, M"), triggered=self.addModule))
 
     # windowMenu.addAction(QtGui.QAction("New Window", self, shortcut=QtGui.QKeySequence("N, W"), triggered=self.handleNewWindow))
     self.console.runMacroButton.clicked.connect(self.runMacro)
@@ -112,11 +112,11 @@ class MainWindow(QtGui.QMainWindow):
     self.moduleCount+=1
     self.dockArea.addDock(newModule.dock)
 
-  # def saveState(self):
-  #   self.state = self.dockArea.saveState()
-  #
-  # def loadState(self):
-  #   self.state = self.dockArea.restoreState(self.state)
+  def saveState(self):
+    self.state = self.dockArea.saveState()
+    print(self.state)
+  def loadState(self):
+    self.state = self.dockArea.restoreState(self.state)
 
   def openProject(self, projectDir=None):
 

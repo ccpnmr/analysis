@@ -9,6 +9,7 @@ from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane
 from ccpncore.gui import ViewBox
 from ccpncore.gui.Button import Button
+from ccpncore.gui.Colors import ColorDialog
 
 class Spectrum1dPane(SpectrumPane):
 
@@ -106,23 +107,23 @@ class Spectrum1dPane(SpectrumPane):
     spectrumItem.plot.parent = spectrum
     spectrumItem.plot.curve.setClickable(True)
     spectrumItem.plot.sigClicked.connect(self.clicked)
-    toolBarButton = Button(self.parent,text=spectrum.name,action=partial(self.showSpectrumPreferences,spectrum))
-    toolBarButton.setCheckable(True)
-    toolBarButton.setChecked(True)
-    palette = QtGui.QPalette(toolBarButton.palette())
+    spectrumItem.toolBarButton = Button(self.parent,text=spectrum.name,action=partial(self.showSpectrumPreferences,spectrum))
+    spectrumItem.toolBarButton.setCheckable(True)
+    spectrumItem.toolBarButton.setChecked(True)
+    palette = QtGui.QPalette(spectrumItem.toolBarButton.palette())
     # print(spectrum.colour)
     palette.setColor(QtGui.QPalette.Button,spectrumItem.colour)
-    toolBarButton.setPalette(palette)
-    toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
-    toolBarButton.toggled.connect(spectrumItem.plot.setVisible)
+    spectrumItem.toolBarButton.setPalette(palette)
+    spectrumItem.toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
+    spectrumItem.toolBarButton.toggled.connect(spectrumItem.plot.setVisible)
 
     if self.spectrumIndex < 10:
       shortcutKey = "s,"+str(self.spectrumIndex)
       self.spectrumIndex+=1
     else:
       shortcutKey = None
-    toolBarButton.setShortcut(QtGui.QKeySequence(shortcutKey))
-    self.spectrumToolbar.addWidget(toolBarButton)
+    spectrumItem.toolBarButton.setShortcut(QtGui.QKeySequence(shortcutKey))
+    self.spectrumToolbar.addWidget(spectrumItem.toolBarButton)
     spectrum.spectrumItem = spectrumItem
     for peakList in spectrum.peakLists:
       spectrumItem.addPeaks(self, peakList)
@@ -167,32 +168,26 @@ class Spectrum1dPane(SpectrumPane):
       newCheckBox.setChecked(False)
     newCheckBox.stateChanged.connect(lambda: self.integralToggle(newCheckBox.checkState(),spectrum.spectrumItem))
     i+=1
-    newFrame=QtGui.QFrame()
-    newLayout = QtGui.QGridLayout()
-    for j in range(8):
-      for k in range(8):
-        colourButton = QtGui.QPushButton()
+    # newPushButton = Button(self.parent,text="Colour",action=self.changeSpectrumColour)
+    newPushButton = QtGui.QPushButton('Colour')
+    newPushButton.clicked.connect(partial(self.changeSpectrumColour, spectrum.spectrumItem))
+    layout.addWidget(newPushButton, i, 0, 1, 2)
+    # okButton = QtGui.QPushButton("OK")
+    # layout.addWidget(okButton, i+1, 0, 1, 2)
 
-    layout.addWidget(newFrame,i,0,2,4)
-    # colourButton_9 = QtGui.QPushButton()
-    # layout.addWidget(colourButton_9,i+2,0)
-    # colourButton_10 = QtGui.QPushButton()
-    # layout.addWidget(colourButton_10,i+2,1)
-    # colourButton_11 = QtGui.QPushButton()
-    # layout.addWidget(colourButton_11,i+2,2)
-    # colourButton_12 = QtGui.QPushButton()
-    # layout.addWidget(colourButton_12,i+2,3)
-    # colourButton_13 = QtGui.QPushButton()
-    # layout.addWidget(colourButton_13,i+3,0)
-    # colourButton_14 = QtGui.QPushButton()
-    # layout.addWidget(colourButton_14,i+3,1)
-    # colourButton_15 = QtGui.QPushButton()
-    # layout.addWidget(colourButton_15,i+3,2)
-    # colourButton_16 = QtGui.QPushButton()
-    # layout.addWidget(colourButton_16,i+3,3)
+
     form.setLayout(layout)
 
     form.exec_()
+
+  def changeSpectrumColour(self, spectrumItem):
+    dialog = ColorDialog()
+    # print(dir(spectrumItem))
+    spectrumItem.colour = dialog.getColor()
+    palette = QtGui.QPalette(spectrumItem.toolBarButton.palette())
+    palette.setColor(QtGui.QPalette.Button,spectrumItem.colour)
+    spectrumItem.toolBarButton.setPalette(palette)
+    spectrumItem.plot.setPen(spectrumItem.colour)
 
 
   def peakListToggle(self, spectrumItem, state, peakList):

@@ -9,6 +9,14 @@ class ViewBox(pg.ViewBox):
     self.setMenuDisabled()
     self.current = current
 
+
+  def setMenuDisabled(self, enableMenu=False):
+    self.state['enableMenu'] = enableMenu
+    self.sigStateChanged.emit(self)
+
+  def menuDisabled(self):
+    return self.state.get('enableMenu', False)
+
   def mouseClickEvent(self, event):
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():

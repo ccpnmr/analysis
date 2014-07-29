@@ -1,10 +1,12 @@
 import operator
 
 from PySide import QtCore, QtGui, QtOpenGL
+from ccpncore.gui import ViewBox
 
-from ccpnmrcore.modules.Base import Base
-from ccpnmrcore.modules.spectrumPane.SpectrumScene import SpectrumScene
+from pyqtgraph.dockarea import Dock
 
+
+import pyqtgraph as pg
 # this allows combining of OpenGL and ordinary Qt drawing
 # the pre-calculated OpenGL is done in the drawPre() function
 # then the Qt scene is drawn (presumably it's in the "Item" layer)
@@ -14,25 +16,69 @@ from ccpnmrcore.modules.spectrumPane.SpectrumScene import SpectrumScene
 # only the OpenGL needs to be called explicitly
 
 # abstract class: subclass needs to implement addSpectrum()
-class SpectrumPane(QtGui.QGraphicsView, Base):
+class SpectrumPane(pg.PlotWidget):
   
-  def __init__(self, project=None, parent=None, spectraVar=None, region=None, dimMapping=None, **kw):
-    
-    QtGui.QGraphicsView.__init__(self, parent)
-    Base.__init__(self, project, **kw)
-    
+  def __init__(self, project=None, parent=None, spectraVar=None, region=None, dimMapping=None, current=None, title=None, **kw):
+
+    pg.setConfigOptions(background='w')
+    pg.setConfigOptions(foreground='k')
+    pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=False, background='w', foreground='k')
+    self.axes = self.plotItem.axes
+    self.title = title
+    self.parent = parent
+    self.project = project
+    self.viewBox = self.plotItem.vb
+    self.viewBox.parent = self
+    self.viewBox.current = current
+    self.xAxis = pg.AxisItem(orientation='top')
+    self.yAxis = pg.AxisItem(orientation='right')
+    self.axes['left']['item'].hide()
+    self.axes['right']['item'].show()
+    self.axes['bottom']['item'].orientation = 'bottom'
+    self.dragEnterEvent = self.dragEnterEvent
+    self.setAcceptDrops(True)
+    self.dropEvent = self.dropEvent
+    self.crossHair = self.createCrossHair()
+    self.scene().sigMouseMoved.connect(self.mouseMoved)
+
     if spectraVar is None:
       spectraVar = []
-      
-    self.setViewport(QtOpenGL.QGLWidget()) # this allows combining of OpenGL and ordinary Qt drawing
-    
-    self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate) # recommended for OpenGL usage
-    # When any visible part of the scene changes or is reexposed, QGraphicsView will update the entire viewport
-    
-    self.setScene(SpectrumScene(self)) # the scene initiates the drawing
-      
+
+
     self.setSpectra(spectraVar, region, dimMapping)
-    
+
+  def createCrossHair(self):
+    self.vLine = pg.InfiniteLine(angle=90, movable=False)
+    self.hLine = pg.InfiniteLine(angle=0, movable=False)
+    self.addItem(self.vLine, ignoreBounds=True)
+    self.addItem(self.hLine, ignoreBounds=True)
+
+  def mouseMoved(self, event):
+    position = event
+    if self.sceneBoundingRect().contains(position):
+        mousePoint = self.viewBox.mapSceneToView(position)
+        self.vLine.setPos(mousePoint.x())
+        self.hLine.setPos(mousePoint.y())
+
+  def showMousePosition(self, pos):
+
+    position = self.viewBox.mapSceneToView(pos).toTuple()
+    self.positionBox.setText("X: %.3f  I: %.2E" % position)
+
+
+  def zoomToRegion(self, region):
+    self.widget.setXRange(region[0],region[1])
+    self.widget.setYRange(region[2],region[3])
+
+  def zoomX(self, region):
+    self.widget.setXRange(region[0],region[1])
+
+  def zoomY(self, region):
+    self.widget.setYRange(region[0],region[1])
+
+  def zoomAll(self):
+    self.widget.autoRange()
+
   ##### functions used externally #####
 
   def clearSpectra(self):
@@ -42,11 +88,11 @@ class SpectrumPane(QtGui.QGraphicsView, Base):
     self.dimMapping = None
         
   def addSpectrum(self, spectrumVar, region=None, dimMapping=None):
-    
+
     raise Exception('should be implemented in subclass')
-      
+
   def setSpectra(self, spectraVar, region=None, dimMapping=None):
-    
+
     self.clearSpectra()
     for spectrumVar in spectraVar:
       self.addSpectrum(spectrumVar, region, dimMapping)
@@ -55,6 +101,17 @@ class SpectrumPane(QtGui.QGraphicsView, Base):
     
   # can be overridden (so implemented) in subclass
   # meant for OpenGL drawing
+  def showMousePosition(self, pos):
+
+    position = self.viewBox.mapSceneToView(pos).toTuple()
+    self.positionBox.setText("X: %.3f  I: %.2E" % position)
+
+  def dragEnterEvent(self, event):
+    event.accept()
+
+  def dropEvent(self, event):
+    event.accept()
+
   def drawPre(self, painter, rect):
 
     pass

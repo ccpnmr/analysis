@@ -10,7 +10,6 @@ class IntegralListItem(QtGui.QGraphicsItem):
     """
 
     QtGui.QGraphicsItem.__init__(self, spectrum)
-    print(spectrum)
     self.integralItems = []
     for integral in spectrum.integrals:
       self.integralItems.append(IntegralItem(spectrum, integral))

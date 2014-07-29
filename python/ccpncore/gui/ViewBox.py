@@ -63,9 +63,7 @@ class ViewBox(pg.ViewBox):
     elif (event.button() == QtCore.Qt.RightButton) and (
               event.modifiers() & QtCore.Qt.ShiftModifier) and not (
               event.modifiers() & QtCore.Qt.ControlModifier) or event.button() == QtCore.Qt.MidButton:
-      print("Zoom into area")
       if event.isFinish():  ## This is the final move in the drag; change the view scale now
-        print("finish")
         self.rbScaleBox.hide()
         ax = QtCore.QRectF(Point(event.buttonDownPos(event.button())), Point(event.pos()))
         ax = self.childGroup.mapRectFromParent(ax)

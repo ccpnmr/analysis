@@ -28,7 +28,6 @@ class PeakItem(QtGui.QGraphicsItem):
     QtGui.QGraphicsItem.__init__(self, peakListItem)
     
     self.peak = peak
-    # print(self.peak)
     # TBD: symbol and annotation
     # self.peakSymbolItem = PeakSymbolItem(self, peak)
     self.peakAnnotationItem = PeakAnnotationItem(self.peak)  #(this in turn has peakTextItem, peakPointerItem)

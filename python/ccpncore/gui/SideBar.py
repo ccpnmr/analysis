@@ -47,6 +47,11 @@ class SideBar(QtGui.QTreeWidget):
           peakListItem = QtGui.QTreeWidgetItem(newItem)
           peakListItem.setText(0, peakList.pid)
 
+  def clearSideBar(self):
+    self.projectItem.setText(0, "Project")
+    self.spectrumItem.setText(0, "Spectra")
+    self.spectrumItem.takeChildren()
+
 
   def dropEvent(self, event):
     '''If object can be dropped into this area, accept dropEvent, otherwise throw an error

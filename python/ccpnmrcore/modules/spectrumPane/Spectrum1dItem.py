@@ -3,6 +3,8 @@ import numpy
 from ccpnmrcore.modules.spectrumPane.SpectrumItem import SpectrumItem
 
 from PySide import QtCore, QtGui
+from numpy import argwhere
+from scipy.ndimage.filters import maximum_filter
 
 from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
 
@@ -43,8 +45,8 @@ class Spectrum1dItem(SpectrumItem):
   def addPeaks(self, pane, peakList):
 
     for peak in peakList.peaks:
-      pane.widget.addItem(self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.peakTextItem)
-      pane.widget.addItem(self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.peakPointerItem)
+      pane.addItem(self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.peakTextItem)
+      pane.addItem(self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.peakPointerItem)
       self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.displayed = True
       self.peakListItems[peakList.pid].displayed = True
 
@@ -52,8 +54,8 @@ class Spectrum1dItem(SpectrumItem):
     for integralListItem in self.integralListItems:
       integralListItem.displayed = True
       for integral in integralListItem.integralItems:
-        pane.widget.addItem(integral.integralTextItem)
-        pane.widget.addItem(integral.integralPointerItem)
+        pane.addItem(integral.integralTextItem)
+        pane.addItem(integral.integralPointerItem)
         integralListItem.displayed = True
 
   def showIntegrals(self):
@@ -77,6 +79,7 @@ class Spectrum1dItem(SpectrumItem):
       self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.peakPointerItem.hide()
       self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.displayed = True
       self.peakListItems[peakList.pid].displayed = False
+
   def getSliceData(self):
 
     spectrum = self.spectrum.ccpnSpectrum
@@ -88,12 +91,30 @@ class Spectrum1dItem(SpectrumItem):
     position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
     sliceData = LibSpectrum.getSliceData(spectrum)
     scaledData = sliceData*spectrum.scale
-    # spectrumData = numpy.array(position, scaledData, dtype=numpy.float32)
-    # spectrumData = numpy.empty((2), dtype=numpy.float32)
-    # position
-    # spectrumData[1] = scaledData
-    # #   spectrumData.append([x,y])
     spectrumData = numpy.array([position,scaledData], numpy.float32)
-    # print(spectrumData)
     return numpy.array(spectrumData,numpy.float32)
+
+  def findPeaks(data, threshold, size=3, mode='wrap'):
+
+   peaks = []
+
+   if (data.size == 0) or (data.max() < threshold):
+     return peaks
+
+   boolsVal = data > threshold
+
+   maxFilter = maximum_filter(data, size=size, mode=mode)
+   boolsMax = data == maxFilter
+
+   boolsPeak = boolsVal & boolsMax
+
+   indices = argwhere(boolsPeak) # True positional indices
+
+   for position in indices:
+     position = tuple(position)
+     height = data[position]
+     peak = Peak(position, data, height)
+     peaks.append(peak)
+
+   return peaks
 

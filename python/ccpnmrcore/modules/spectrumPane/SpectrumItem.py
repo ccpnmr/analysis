@@ -44,7 +44,6 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
     self.integralListItems = []
     for peakList in spectrum.peakLists:
-      # print(peakList)
       self.peakListItems[peakList.pid] = PeakListItem(self, peakList)
     self.integralListItems.append(IntegralListItem(self))
     spectrumPane.spectrumItems.append(self)

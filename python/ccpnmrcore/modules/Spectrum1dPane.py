@@ -7,7 +7,6 @@ from functools import partial
 
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane
-from ccpncore.gui import ViewBox
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Colors import ColorDialog
 
@@ -15,33 +14,12 @@ class Spectrum1dPane(SpectrumPane):
 
   def __init__(self, project=None, parent=None, title=None, current=None):
     SpectrumPane.__init__(self, parent, project)
-    pg.setConfigOptions(background='w')
-    pg.setConfigOptions(foreground='k')
     self.project = project
-    self.title = title
-    self.viewBox = ViewBox.ViewBox()
-    self.viewBox.parent = self
-    self.viewBox.current = current
-    self.xAxis = pg.AxisItem(orientation='top')
-    self.yAxis = pg.AxisItem(orientation='right')
-    self.widget = pg.PlotWidget( viewBox = self.viewBox,
-      enableMenu=False, axisItems={
-        'bottom':self.xAxis, 'right': self.yAxis})
     self.parent = parent
-    self.widget.plotItem.setAcceptDrops(True)
-    self.widget.dragEnterEvent = self.dragEnterEvent
-    self.widget.dropEvent = self.dropEvent
-    self.current = current
+    self.title = title
     self.viewBox.invertX()
-    self.crossHair = self.createCrossHair()
-    self.widget.scene().sigMouseMoved.connect(self.mouseMoved)
-    self.widget.setAcceptDrops(True)
-    self.widget.dropEvent = self.dropEvent
-    ## setup axes for display
-    self.axes = self.widget.plotItem.axes
-    self.axes['left']['item'].hide()
-    self.axes['right']['item'].show()
-    self.axes['bottom']['item'].orientation = 'bottom'
+    self.dropEvent = self.dropEvent
+    self.plotItem.setAcceptDrops(True)
     self.dock = Dock(name=self.title, size=(1000,1000))
     self.spectrumToolbar = QtGui.QToolBar()
     self.spectrumToolbar.setMovable(True)
@@ -51,38 +29,8 @@ class Spectrum1dPane(SpectrumPane):
     self.viewBox.current = current
     self.positionBox = QtGui.QPushButton()
     self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
-    self.widget.scene().sigMouseMoved.connect(self.showMousePosition)
-    self.dock.addWidget(self.widget, 2, 1, 1, 10)
-
-
-  # def addSpectrum(self, spectrumVar, region=None, dimMapping=None):
-  #   spectrumItem = Spectrum1dItem(self, spectrumVar, region, dimMapping)
-
-  # def addModule(self):
-  #   newDock = Dock("Module 1", size=(1000,1000))
-  #   spectrumToolbar = QtGui.QToolBar()
-  #   newDock.addWidget(spectrumToolbar)
-  #   newDock.addWidget(self.widget)
-
-
-  def createCrossHair(self):
-    self.vLine = pg.InfiniteLine(angle=90, movable=False)
-    self.hLine = pg.InfiniteLine(angle=0, movable=False)
-    self.widget.addItem(self.vLine, ignoreBounds=True)
-    self.widget.addItem(self.hLine, ignoreBounds=True)
-
-
-  def showMousePosition(self, pos):
-
-    position = self.viewBox.mapSceneToView(pos).toTuple()
-    self.positionBox.setText("X: %.3f  I: %.2E" % position)
-
-  def mouseMoved(self, event):
-    position = event
-    if self.widget.sceneBoundingRect().contains(position):
-        mousePoint = self.viewBox.mapSceneToView(position)
-        self.vLine.setPos(mousePoint.x())
-        self.hLine.setPos(mousePoint.y())
+    self.scene().sigMouseMoved.connect(self.showMousePosition)
+    self.dock.addWidget(self, 2, 1, 1, 10)
 
   def clicked(self, spectrum):
     self.current.spectrum = spectrum.parent
@@ -99,9 +47,8 @@ class Spectrum1dPane(SpectrumPane):
 
     spectrumItem = Spectrum1dItem(self,spectrum)
     colour = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
-    # spectrumItem = self.widget.plotItem
     data = spectrumItem.spectralData
-    spectrumItem.plot = self.widget.plotItem.plot(data[0],data[1], pen={'color':colour},clickable=True,)
+    spectrumItem.plot = self.plotItem.plot(data[0],data[1], pen={'color':colour},clickable=True,)
     spectrumItem.colour = QtGui.QColor.fromRgb(colour[0],colour[1],colour[2])
     spectrumItem.name = spectrum.name
     spectrumItem.plot.parent = spectrum
@@ -111,7 +58,6 @@ class Spectrum1dPane(SpectrumPane):
     spectrumItem.toolBarButton.setCheckable(True)
     spectrumItem.toolBarButton.setChecked(True)
     palette = QtGui.QPalette(spectrumItem.toolBarButton.palette())
-    # print(spectrum.colour)
     palette.setColor(QtGui.QPalette.Button,spectrumItem.colour)
     spectrumItem.toolBarButton.setPalette(palette)
     spectrumItem.toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
@@ -129,7 +75,6 @@ class Spectrum1dPane(SpectrumPane):
       spectrumItem.addPeaks(self, peakList)
     spectrumItem.addIntegrals(self)
     return spectrum
-    # pass
 
 
   def showSpectrumPreferences(self,spectrum):
@@ -147,14 +92,12 @@ class Spectrum1dPane(SpectrumPane):
         checkBox.setChecked(False)
 
       checkBox.stateChanged.connect(lambda: self.peakListToggle(spectrum.spectrumItem, checkBox.checkState(),peakList))
-      # checkBox.toggle()
       layout.addWidget(checkBox, i, 0)
       layout.addWidget(label, i, 1)
       i+=1
 
     layout.addWidget(QtGui.QLabel(text='Integrals'), 2, 0)
     i+=1
-    # Set dialog layout
 
     newLabel = QtGui.QLabel(form)
     newLabel.setText(str(spectrum.pid)+' Integrals')
@@ -168,12 +111,9 @@ class Spectrum1dPane(SpectrumPane):
       newCheckBox.setChecked(False)
     newCheckBox.stateChanged.connect(lambda: self.integralToggle(newCheckBox.checkState(),spectrum.spectrumItem))
     i+=1
-    # newPushButton = Button(self.parent,text="Colour",action=self.changeSpectrumColour)
     newPushButton = QtGui.QPushButton('Colour')
     newPushButton.clicked.connect(partial(self.changeSpectrumColour, spectrum.spectrumItem))
     layout.addWidget(newPushButton, i, 0, 1, 2)
-    # okButton = QtGui.QPushButton("OK")
-    # layout.addWidget(okButton, i+1, 0, 1, 2)
 
 
     form.setLayout(layout)
@@ -182,7 +122,6 @@ class Spectrum1dPane(SpectrumPane):
 
   def changeSpectrumColour(self, spectrumItem):
     dialog = ColorDialog()
-    # print(dir(spectrumItem))
     spectrumItem.colour = dialog.getColor()
     palette = QtGui.QPalette(spectrumItem.toolBarButton.palette())
     palette.setColor(QtGui.QPalette.Button,spectrumItem.colour)
@@ -242,25 +181,12 @@ class Spectrum1dPane(SpectrumPane):
         text = pg.TextItem(html=("%.1f&#x222b" % round(integral.volume*spectrum.ccpnSpectrum.integralFactor,2)),color='k')
         roi = pg.LineSegmentROI([[integral.firstPoint,0],[integral.lastPoint,0]], pen='k')
         # roi.addItem(text)
-        self.widget.addItem(text)
-        self.widget.addItem(roi)
+        self.addItem(text)
+        self.addItem(roi)
         text.setPos(float(position),-3)
         spectrum.spectrumItem.integralMarkings.append(roi)
         spectrum.spectrumItem.integralMarkings.append(text)
 
-
-  def zoomToRegion(self, region):
-    self.widget.setXRange(region[0],region[1])
-    self.widget.setYRange(region[2],region[3])
-
-  def zoomX(self, region):
-    self.widget.setXRange(region[0],region[1])
-
-  def zoomY(self, region):
-    self.widget.setYRange(region[0],region[1])
-
-  def zoomAll(self):
-    self.widget.autoRange()
 
   def dropEvent(self,event):
     event.accept()
@@ -277,6 +203,7 @@ class Spectrum1dPane(SpectrumPane):
         for dirpath, dirnames, filenames in os.walk(filePaths[0]):
           if dirpath.endswith('memops') and 'Implementation' in dirnames:
             self.parent.openProject(filePaths[0])
+            self.addSpectra(self.project.spectra)
 
 
 
@@ -291,6 +218,3 @@ class Spectrum1dPane(SpectrumPane):
       spectrum = self.addSpectrum(spectrum)
       self.current.spectrum = spectrum
       self.current.pane = self
-      for peakList in spectrum.peakLists:
-        self.createPeakMarkings(peakList)
-      self.createIntegralMarkings(spectrum)

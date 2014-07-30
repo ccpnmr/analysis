@@ -8,3 +8,6 @@ class Base(GuiBase):
     
     GuiBase.__init__(self, *args, **kw)
     
+  def getById(self, pid):
+
+    return self.project.getById(pid)

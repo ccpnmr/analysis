@@ -60,7 +60,7 @@ import unittest
 from ccpncore.util import Path
 from ccpncore.util import Io
 
-TEST_PROJECTS_PATH = os.path.join(Path.getTopDirectory(), 'testProjects')
+TEST_PROJECTS_PATH = os.path.join(Path.getTopDirectory(), 'data/testProjects')
 
 class Testing(unittest.TestCase):
   """Base class for all testing code that requires projects."""

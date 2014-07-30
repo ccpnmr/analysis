@@ -18,4 +18,8 @@ def automaticIntegration(spectrum, spectralData):
   return DataSource.automaticIntegration(spectrum.ccpnSpectrum, spectralData)
 
 
+def estimateNoise(spectrum):
+  return DataSource.estimateNoise(spectrum.ccpnSpectrum)
+
+
 

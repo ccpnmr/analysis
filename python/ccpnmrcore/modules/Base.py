@@ -11,3 +11,8 @@ class Base(GuiBase):
   def getById(self, pid):
 
     return self.project.getById(pid)
+
+  def getObject(self, pidOrObject):
+    
+    return self.getById(pidOrObject) if type(pidOrObject) is type('') else pidOrObject
+      

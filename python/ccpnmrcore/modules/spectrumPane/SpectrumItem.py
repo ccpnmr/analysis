@@ -42,10 +42,9 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
     self.setDimMapping(dimMapping)
     
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
-    self.integralListItems = []
+
     for peakList in spectrum.peakLists:
       self.peakListItems[peakList.pid] = PeakListItem(self, peakList)
-    self.integralListItems.append(IntegralListItem(self))
     spectrumPane.spectrumItems.append(self)
 
   def setDimMapping(self, dimMapping):

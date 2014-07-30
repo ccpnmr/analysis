@@ -73,6 +73,7 @@ class MainWindow(QtGui.QMainWindow):
     spectrumMenu.addAction(QtGui.QAction("Open Spectra", self, shortcut=QtGui.QKeySequence("F, O"), triggered=self.loadSpectra))
     spectrumMenu.addAction(QtGui.QAction("Manual Integration", self, shortcut=QtGui.QKeySequence("M, I"), triggered=self.manualIntegration))
     spectrumMenu.addAction(QtGui.QAction("Automatic Integration", self, shortcut=QtGui.QKeySequence("A, I"), triggered=self.automaticIntegration))
+    spectrumMenu.addAction(QtGui.QAction("Find Peaks", self, shortcut=QtGui.QKeySequence("F, P"), triggered=Spectrum1dItem.findPeaks))
 
     windowMenu.addAction(QtGui.QAction("Hide Console", self, shortcut=QtGui.QKeySequence("H, C"),triggered=self.hideConsole))
     windowMenu.addAction(QtGui.QAction("Show Console", self, shortcut=QtGui.QKeySequence("S, C"),triggered=self.showConsole))
@@ -126,20 +127,9 @@ class MainWindow(QtGui.QMainWindow):
     else:
       currentProjectDir = projectDir
     self.project = openProject(currentProjectDir)
-    # print(self.project)
     msg  = (currentProjectDir)+' opened'
     self.leftWidget.fillSideBar(self.project)
     self.spectrumWidget.project = self.project
-    # self.leftWidget.projectItem.setText(0, project.name)
-    # for spectrum in project.spectra:
-    #   print((spectrum.pid))
-    #   newItem = self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
-    #   if spectrum is not None:
-    #     for peakList in spectrum.peakLists:
-    #       print(peakList.pid)
-    #       print(newItem)
-    #       peakListItem = QtGui.QTreeWidgetItem(newItem)
-    #       peakListItem.setText(0, peakList.pid)
     self.statusBar().showMessage(msg)
     self.pythonConsole.write("openProject('"+currentProjectDir+"')\n")
     self.namespace['project'] = self.project

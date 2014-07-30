@@ -4,10 +4,11 @@ from ccpnmrcore.modules.spectrumPane.SpectrumItem import SpectrumItem
 
 from PySide import QtCore, QtGui
 from numpy import argwhere
-from scipy.ndimage.filters import maximum_filter
+from scipy.ndimage import maximum_filter
+from ccpn._wrapper._Peak import Peak as Peak
 
 from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
-
+from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
 
 class Spectrum1dItem(SpectrumItem):
 
@@ -24,15 +25,24 @@ class Spectrum1dItem(SpectrumItem):
     self.spectrum = spectrumVar  # TEMP
     self.spectrumPane = spectrumPane
     self.spectralData = self.getSliceData()
+
     self.integrals = self.autoIntegration()
+    # self.integralListItems = []
+    # self.integralListItems.append(IntegralListItem(self))
+    self.integralListItems = []
+
     # dimMapping = {} # this block of code TEMP
     # for i in range(len(self.spectrum.pointCount)):
     #   dimMapping[i] = i
     SpectrumItem.__init__(self, spectrumPane, spectrumVar, region)
+    self.integralListItems.append(IntegralListItem(self))
+
 
   def autoIntegration(self):
     return LibSpectrum.automaticIntegration(self.spectrum, self.spectralData)
 
+  def estimateNoise(self):
+    return LibSpectrum.estimateNoise(self.spectrum)
 
   def showPeaks(self, peakList):
 
@@ -49,6 +59,29 @@ class Spectrum1dItem(SpectrumItem):
       pane.addItem(self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.peakPointerItem)
       self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.displayed = True
       self.peakListItems[peakList.pid].displayed = True
+
+  def findPeaks(self, size=3, mode='wrap'):
+
+   peaks = []
+   data = self.spectralData
+   threshold = self.estimateNoise()*10
+   if (data.size == 0) or (data.max() < threshold):
+    return peaks
+   boolsVal = data[1] > threshold
+   maxFilter = maximum_filter(data[1], size=size, mode='wrap')
+
+   boolsMax = data[1] == maxFilter
+
+   boolsPeak = boolsVal & boolsMax
+
+   indices = argwhere(boolsPeak) # True positional indices
+   for position in indices:
+     peakPosition = data[0][position]
+     height = data[1][position]
+     peaks.append([peakPosition,height])
+
+   return peaks
+
 
   def addIntegrals(self, pane):
     for integralListItem in self.integralListItems:
@@ -94,27 +127,4 @@ class Spectrum1dItem(SpectrumItem):
     spectrumData = numpy.array([position,scaledData], numpy.float32)
     return numpy.array(spectrumData,numpy.float32)
 
-  def findPeaks(data, threshold, size=3, mode='wrap'):
-
-   peaks = []
-
-   if (data.size == 0) or (data.max() < threshold):
-     return peaks
-
-   boolsVal = data > threshold
-
-   maxFilter = maximum_filter(data, size=size, mode=mode)
-   boolsMax = data == maxFilter
-
-   boolsPeak = boolsVal & boolsMax
-
-   indices = argwhere(boolsPeak) # True positional indices
-
-   for position in indices:
-     position = tuple(position)
-     height = data[position]
-     peak = Peak(position, data, height)
-     peaks.append(peak)
-
-   return peaks
 

@@ -35,17 +35,32 @@ class SpectrumPane(pg.PlotWidget):
     self.axes['left']['item'].hide()
     self.axes['right']['item'].show()
     self.axes['bottom']['item'].orientation = 'bottom'
-    self.dragEnterEvent = self.dragEnterEvent
     self.setAcceptDrops(True)
-    self.dropEvent = self.dropEvent
     self.crossHair = self.createCrossHair()
+    self.viewBox.invertX()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
+    self.dock = Dock(name=self.title, size=(1000,1000))
+    self.spectrumToolbar = QtGui.QToolBar()
+    self.spectrumToolbar.setMovable(True)
+    self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+    self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 9)
+    self.spectrumIndex = 1
+    self.viewBox.current = current
+    self.positionBox = QtGui.QPushButton()
+    self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
+    self.scene().sigMouseMoved.connect(self.showMousePosition)
+    self.dock.addWidget(self, 2, 1, 1, 10)
 
     if spectraVar is None:
       spectraVar = []
 
 
     self.setSpectra(spectraVar, region, dimMapping)
+
+  def clicked(self, spectrum):
+    self.current.spectrum = spectrum.parent
+    self.current.spectra.append(spectrum.parent)
+    self.parent.pythonConsole.write('######current.spectrum='+str(self.current.spectrum)+'\n')
 
   def createCrossHair(self):
     self.vLine = pg.InfiniteLine(angle=90, movable=False)

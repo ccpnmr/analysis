@@ -16,26 +16,8 @@ class Spectrum1dPane(SpectrumPane):
     SpectrumPane.__init__(self, parent, project)
     self.project = project
     self.parent = parent
-    self.title = title
     self.viewBox.invertX()
-    self.dropEvent = self.dropEvent
     self.plotItem.setAcceptDrops(True)
-    self.dock = Dock(name=self.title, size=(1000,1000))
-    self.spectrumToolbar = QtGui.QToolBar()
-    self.spectrumToolbar.setMovable(True)
-    self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
-    self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 9)
-    self.spectrumIndex = 1
-    self.viewBox.current = current
-    self.positionBox = QtGui.QPushButton()
-    self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
-    self.scene().sigMouseMoved.connect(self.showMousePosition)
-    self.dock.addWidget(self, 2, 1, 1, 10)
-
-  def clicked(self, spectrum):
-    self.current.spectrum = spectrum.parent
-    self.current.spectra.append(spectrum.parent)
-    self.parent.pythonConsole.write('######current.spectrum='+str(self.current.spectrum)+'\n')
 
 
   def addSpectra(self, spectra):
@@ -114,10 +96,7 @@ class Spectrum1dPane(SpectrumPane):
     newPushButton = QtGui.QPushButton('Colour')
     newPushButton.clicked.connect(partial(self.changeSpectrumColour, spectrum.spectrumItem))
     layout.addWidget(newPushButton, i, 0, 1, 2)
-
-
     form.setLayout(layout)
-
     form.exec_()
 
   def changeSpectrumColour(self, spectrumItem):
@@ -164,28 +143,6 @@ class Spectrum1dPane(SpectrumPane):
   def hidePeaks(self, spectrumItem, peakList):
 
     spectrumItem.hidePeaks(peakList)
-
-
-  def hideIntegrals(self, spectrum):
-
-    for marking in spectrum.spectrumItem.integralMarkings:
-      marking.hide()
-      self.integralMarkings.displayed = False
-
-
-  def createIntegralMarkings(self, spectrum):
-
-    for integral in spectrum.spectrumItem.integrals:
-        spectrum.spectrumItem.integralMarkings.displayed = False
-        position = (integral.lastPoint+integral.firstPoint)/2
-        text = pg.TextItem(html=("%.1f&#x222b" % round(integral.volume*spectrum.ccpnSpectrum.integralFactor,2)),color='k')
-        roi = pg.LineSegmentROI([[integral.firstPoint,0],[integral.lastPoint,0]], pen='k')
-        # roi.addItem(text)
-        self.addItem(text)
-        self.addItem(roi)
-        text.setPos(float(position),-3)
-        spectrum.spectrumItem.integralMarkings.append(roi)
-        spectrum.spectrumItem.integralMarkings.append(text)
 
 
   def dropEvent(self,event):

@@ -38,7 +38,8 @@ class Button(QtGui.QPushButton):
     if event.button() == QtCore.Qt.LeftButton and not (event.modifiers()):
       self.timer.stop()
       self.double_clicked = True
-      self.action()
+      if self.action:
+        self.action()
 
   def singleClick(self):
     if self.double_clicked == False:

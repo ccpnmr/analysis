@@ -90,7 +90,7 @@ class Project(AbstractWrapperClass):
     Notifiers.unregisterNotify(notify, apiClassName, apiFuncName)
 
 
-  def _newObject(self, cls, wrappedData):
+  def _newObject(self, wrappedData, cls):
     """Create new wrapper object of class cls, associated with wrappedData.
     For use in creation notifiers"""
     return cls(self, wrappedData)

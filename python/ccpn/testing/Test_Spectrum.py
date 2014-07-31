@@ -31,8 +31,12 @@ class SpectrumTest(Testing):
   def test_pointCount(self):
     spectrum = self.getSpectrum()
     numPoints = tuple([dataDim.numPoints for dataDim in spectrum.ccpnSpectrum.sortedDataDims()])
-    assert spectrum.pointCount == numPoints
+    assert spectrum.pointCounts == numPoints
 
   def test_filePath(self):
     spectrum = self.getSpectrum()
     spectrum.filePath.startswith(Path.getTopDirectory())
+    
+  def test_rank(self):  # not implemented yet
+    spectrum = self.getSpectrum()
+    print(hasattr(spectrum, 'rank'))

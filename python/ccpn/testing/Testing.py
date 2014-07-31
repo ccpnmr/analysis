@@ -1,7 +1,6 @@
 import os
 import unittest
 
-from ccpncore.util import Path
 from ccpncore.util.Testing import TEST_PROJECTS_PATH
 
 import ccpn

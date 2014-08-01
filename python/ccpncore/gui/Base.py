@@ -40,7 +40,7 @@ class Base:
     if tipText:
       self.setToolTip(tipText)
 
-    parent = self.parent()
+    parent = self.parent() if hasattr(self, 'parent') else None # Not all Qt objects have a parent
     if parent and not isFloatWidget:
       # Setup gridding within parent
       layout = parent.layout()

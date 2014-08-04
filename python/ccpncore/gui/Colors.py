@@ -1,6 +1,22 @@
 import sys
 from PySide import QtGui
 
+def inverseGrey(color):
+
+  r, g, b, a = color.getRgb()
+
+  m = (11*r + 16*g + 5*b)/32
+
+  if (m > 192) or (m < 64):
+    m = 255-m
+  elif m<128:
+    m += 128
+  elif m<192:
+    m -= 128
+
+  return QtGui.QColor(m, m, m)
+
+
 class ColorDialog(QtGui.QColorDialog):
 
   def __init__(self, parent=None, doAlpha=False, **kw):

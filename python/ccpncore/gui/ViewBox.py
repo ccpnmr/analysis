@@ -21,7 +21,8 @@ class ViewBox(pg.ViewBox):
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
       event.accept()
-      self.current.pane = self.parent
+      print('Left Click Event')
+      # self.current.pane = self.parent
 
     elif (event.button() == QtCore.Qt.LeftButton) and (
               event.modifiers() & QtCore.Qt.ControlModifier) and not (

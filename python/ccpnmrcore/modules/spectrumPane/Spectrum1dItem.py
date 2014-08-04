@@ -76,9 +76,11 @@ class Spectrum1dItem(SpectrumItem):
 
    indices = argwhere(boolsPeak) # True positional indices
    for position in indices:
-     peakPosition = data[0][position]
+     peakPosition = [0,float(data[0][position])]
      height = data[1][position]
      peaks.append([peakPosition,height])
+     self.spectrum.peakLists[0].newPeak(height=float(height), position=peakPosition)
+     self.showPeaks(self.spectrum.peakLists[0])
 
    return peaks
 

@@ -1,6 +1,4 @@
 from PySide import QtGui, QtCore
-import pyqtgraph as pg
-from pyqtgraph.dockarea import Dock
 import random
 import os
 from functools import partial
@@ -17,6 +15,7 @@ class Spectrum1dPane(SpectrumPane):
     self.project = project
     self.parent = parent
     self.viewBox.invertX()
+    self.current = current
     self.plotItem.setAcceptDrops(True)
 
 
@@ -50,6 +49,7 @@ class Spectrum1dPane(SpectrumPane):
       self.spectrumIndex+=1
     else:
       shortcutKey = None
+
     spectrumItem.toolBarButton.setShortcut(QtGui.QKeySequence(shortcutKey))
     self.spectrumToolbar.addWidget(spectrumItem.toolBarButton)
     spectrum.spectrumItem = spectrumItem
@@ -120,7 +120,6 @@ class Spectrum1dPane(SpectrumPane):
     if state == QtCore.Qt.Unchecked:
       spectrumItem.hideIntegrals()
 
-
   def removeSpectrum(self, spectrum):
 
     pass
@@ -161,8 +160,6 @@ class Spectrum1dPane(SpectrumPane):
           if dirpath.endswith('memops') and 'Implementation' in dirnames:
             self.parent.openProject(filePaths[0])
             self.addSpectra(self.project.spectra)
-
-
 
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))

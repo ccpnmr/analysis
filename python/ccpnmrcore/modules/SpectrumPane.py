@@ -22,7 +22,8 @@ class SpectrumPane(pg.PlotWidget):
 
     pg.setConfigOptions(background='w')
     pg.setConfigOptions(foreground='k')
-    pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=False, background='w', foreground='k')
+    pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=False,
+                           background='w', foreground='k')
     self.axes = self.plotItem.axes
     self.title = title
     self.parent = parent
@@ -82,17 +83,17 @@ class SpectrumPane(pg.PlotWidget):
 
 
   def zoomToRegion(self, region):
-    self.widget.setXRange(region[0],region[1])
-    self.widget.setYRange(region[2],region[3])
+    self.setXRange(region[0],region[1])
+    self.setYRange(region[2],region[3])
 
   def zoomX(self, region):
-    self.widget.setXRange(region[0],region[1])
+    self.setXRange(region[0],region[1])
 
   def zoomY(self, region):
-    self.widget.setYRange(region[0],region[1])
+    self.setYRange(region[0],region[1])
 
   def zoomAll(self):
-    self.widget.autoRange()
+    self.autoRange()
 
   ##### functions used externally #####
 

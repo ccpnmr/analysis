@@ -3,7 +3,7 @@ import sys
 import random
 import numpy as np
 import pyqtgraph as pg
-from pyqtgraph.dockarea import DockArea
+from pyqtgraph.dockarea import DockArea, Dock
 
 from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
 from ccpnmrcore.Current import Current
@@ -11,6 +11,8 @@ from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpncore.lib.memops.Implementation.Project import loadDataSource
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.Console import PythonConsole
+from ccpncore.gui.PeakTable import PeakListSimple
+
 from ccpn import openProject
 
 class MainWindow(QtGui.QMainWindow):
@@ -53,7 +55,7 @@ class MainWindow(QtGui.QMainWindow):
     # self.spectrumToolbar = QtGui.QToolBar()
     # self.dock1.addWidget(self.spectrumToolbar)
     self.dockArea.addDock(self.widget1)
-    # self.widget1.name = 'Module %s' % (self.moduleCount+1)
+    self.widget1.name = 'Module %s' % (self.moduleCount+1)
 
     self.splitter1.addWidget(self.dockArea)
     self.state = None
@@ -74,6 +76,7 @@ class MainWindow(QtGui.QMainWindow):
     spectrumMenu.addAction(QtGui.QAction("Manual Integration", self, shortcut=QtGui.QKeySequence("M, I"), triggered=self.manualIntegration))
     spectrumMenu.addAction(QtGui.QAction("Automatic Integration", self, shortcut=QtGui.QKeySequence("A, I"), triggered=self.automaticIntegration))
     spectrumMenu.addAction(QtGui.QAction("Find Peaks", self, shortcut=QtGui.QKeySequence("F, P"), triggered=Spectrum1dItem.findPeaks))
+    spectrumMenu.addAction(QtGui.QAction("Peak Table", self, shortcut=QtGui.QKeySequence("L, T"), triggered=self.showPeakTable))
 
     windowMenu.addAction(QtGui.QAction("Hide Console", self, shortcut=QtGui.QKeySequence("H, C"),triggered=self.hideConsole))
     windowMenu.addAction(QtGui.QAction("Show Console", self, shortcut=QtGui.QKeySequence("S, C"),triggered=self.showConsole))
@@ -134,6 +137,12 @@ class MainWindow(QtGui.QMainWindow):
     self.pythonConsole.write("openProject('"+currentProjectDir+"')\n")
     self.namespace['project'] = self.project
     self.pythonConsole.localNamespace = self.namespace
+
+  def showPeakTable(self):
+    peakList = PeakListSimple()
+    peakDock = Dock(name='PeakList', size=(1000,1000))
+    peakDock.addWidget(peakList)
+    self.dockArea.addDock(peakDock)
 
 
 

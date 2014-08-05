@@ -17,6 +17,8 @@ class Spectrum1dPane(SpectrumPane):
     self.viewBox.invertX()
     self.current = current
     self.plotItem.setAcceptDrops(True)
+    self.title = title
+    print(self.title)
 
 
   def addSpectra(self, spectra):
@@ -124,11 +126,21 @@ class Spectrum1dPane(SpectrumPane):
 
     pass
 
+
+  def findPeaks(self, spectrum):
+    peakList = spectrum.spectrumItem.findPeaks()
+    print(peakList)
+    self.addPeaks(spectrum.spectrumItem, peakList)
+
   def showSpectrum(self, spectrum):
     spectrum.spectrumItem.plot.show()
 
   def hideSpectrum(self, spectrum):
     spectrum.spectrumItem.plot.hide()
+
+  def addPeaks(self,spectrumItem, peakList):
+    print(peakList)
+    spectrumItem.addPeaks(self, peakList)
 
   def showPeaks(self, spectrumItem, peakList):
     spectrumItem.showPeaks(peakList)

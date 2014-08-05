@@ -62,27 +62,33 @@ class Spectrum1dItem(SpectrumItem):
 
   def findPeaks(self, size=3, mode='wrap'):
 
+   if self.spectrum.peakLists is None:
+     peakList = self.spectrum.newPeakList
+     print(peakList)
+   else:
+     peakList = self.spectrum.peakLists[0]
    peaks = []
    data = self.spectralData
    threshold = self.estimateNoise()*10
    if (data.size == 0) or (data.max() < threshold):
     return peaks
    boolsVal = data[1] > threshold
-   maxFilter = maximum_filter(data[1], size=size, mode='wrap')
+   maxFilter = maximum_filter(data[1], size=size, mode=mode)
 
    boolsMax = data[1] == maxFilter
 
    boolsPeak = boolsVal & boolsMax
-
    indices = argwhere(boolsPeak) # True positional indices
    for position in indices:
      peakPosition = [0,float(data[0][position])]
      height = data[1][position]
      peaks.append([peakPosition,height])
-     self.spectrum.peakLists[0].newPeak(height=float(height), position=peakPosition)
-     self.showPeaks(self.spectrum.peakLists[0])
+     peakList.newPeak(height=float(height), position=peakPosition)
 
-   return peaks
+
+   # self.addPeaks(self.current.pane, peakList)
+
+   return peakList
 
 
   def addIntegrals(self, pane):

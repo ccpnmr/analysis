@@ -17,6 +17,12 @@ class PeakListItem(QtGui.QGraphicsItem):
 
     for peak in peakList.peaks:
       self.peakItems[peak.pid] = PeakItem(self, peak)
+
+
+  def createPeakItems(self):
+    for peak in self.peakList.peaks:
+      print(peak, peak.pid)
+      self.peakItems[peak.pid] = PeakItem(self, peak)
       
 class PeakItem(QtGui.QGraphicsItem):
 
@@ -44,7 +50,10 @@ class PeakSymbolItem(QtGui.QGraphicsItem):
 class PeakAnnotationItem(QtGui.QGraphicsItem):
 
   def __init__(self, peak):
-    peakHeight = peak._wrappedData.findFirstPeakIntensity(intensityType='height').value
+    if peak.height is not None:
+      peakHeight = peak.height
+    else:
+      peakHeight = peak._wrappedData.findFirstPeakIntensity(intensityType='height').value
     self.peak = peak
     self.peakTextItem = pg.TextItem(text=str("%.3f" % peak.position[0]), anchor=(-0.9,2.5), color='k')
     self.peakPointerItem =  pg.ArrowItem(pos=(peak.position[0],peakHeight), angle = -45, headLen=60, tipAngle=5)

@@ -129,7 +129,6 @@ class Spectrum1dPane(SpectrumPane):
 
   def findPeaks(self, spectrum):
     peakList = spectrum.spectrumItem.findPeaks()
-    print(peakList)
     self.addPeaks(spectrum.spectrumItem, peakList)
 
   def showSpectrum(self, spectrum):

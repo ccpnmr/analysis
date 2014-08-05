@@ -80,13 +80,12 @@ class Spectrum1dItem(SpectrumItem):
    boolsPeak = boolsVal & boolsMax
    indices = argwhere(boolsPeak) # True positional indices
    for position in indices:
-     peakPosition = [0,float(data[0][position])]
+     peakPosition = [float(data[0][position])]
+     print('position',peakPosition)
      height = data[1][position]
      peaks.append([peakPosition,height])
      peakList.newPeak(height=float(height), position=peakPosition)
-
-
-   # self.addPeaks(self.current.pane, peakList)
+   self.peakListItems[peakList.pid].createPeakItems()
 
    return peakList
 

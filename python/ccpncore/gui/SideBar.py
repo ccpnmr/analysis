@@ -8,6 +8,7 @@ class SideBar(QtGui.QTreeWidget):
     self.header().hide()
     self.setDragEnabled(True)
     self.acceptDrops()
+    self.itemDoubleClicked.connect(self.test)
     self.setDropIndicatorShown(True)
     self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
     self.projectItem = QtGui.QTreeWidgetItem(self)
@@ -26,6 +27,10 @@ class SideBar(QtGui.QTreeWidget):
     newItem.setText(0, data.name)
     newItem.setData(0, QtCore.Qt.DisplayRole, str(data.pid))
     return newItem
+
+
+  def test(self):
+    print('Double Click Test')
 
   def dragEnterEvent(self, event):
     if event.mimeData().hasUrls():
@@ -46,6 +51,7 @@ class SideBar(QtGui.QTreeWidget):
         for peakList in spectrum.peakLists:
           peakListItem = QtGui.QTreeWidgetItem(newItem)
           peakListItem.setText(0, peakList.pid)
+
 
   def clearSideBar(self):
     self.projectItem.setText(0, "Project")

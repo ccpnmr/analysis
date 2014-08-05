@@ -48,8 +48,6 @@ class ViewBox(pg.ViewBox):
       event.accept()
       self.autoRange()
 
-      print('Context Menu to be activated here')
-
     if event.double():
       event.accept()
       print("Double Click event")

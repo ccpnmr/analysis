@@ -82,3 +82,10 @@ def getTranslation(text):
     translatedText += ' (%s)' % text
     
   return translatedText
+
+class Translation:
+  def __init__(self):
+    updateTranslationDict(self)
+
+  def translate(self, text):
+    return Translation.getTranslation(text)

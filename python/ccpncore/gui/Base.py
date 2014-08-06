@@ -1,6 +1,6 @@
 from PySide import QtGui, QtCore
 
-from ccpncore.util import Translation
+from ccpncore.util.Translation import Translation
 
 HALIGN_DICT = {
   'left': QtCore.Qt.AlignLeft,
@@ -30,7 +30,7 @@ POLICY_DICT = {
   'ignored': QtGui.QSizePolicy.Ignored,
 }
 
-class Base:
+class Base(Translation):
 
   def __init__(self, tipText=None, grid=(None, None), gridSpan=(1,1), stretch=(0,0),
                hAlign=None, vAlign=None, hPolicy=None, vPolicy=None,
@@ -44,7 +44,7 @@ class Base:
     if parent and not isFloatWidget:
       # Setup gridding within parent
       layout = parent.layout()
- 
+
       if not layout:
         layout = QtGui.QGridLayout(parent)
         layout.setSpacing(2)
@@ -75,11 +75,7 @@ class Base:
       rgb = QtGui.QColor(bgColor).getRgb()[:3]
       self.setStyleSheet("background-color: rgb(%d, %d, %d);" %  rgb)
 
-    Translation.updateTranslationDict(self)
-    
-  def translate(self, text):
-  
-    return Translation.getTranslation(text)
+    Translation.__init__(self)
 
   def _getRowCol(self, grid):
 

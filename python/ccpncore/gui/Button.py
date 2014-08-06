@@ -2,22 +2,23 @@ from PySide import QtCore, QtGui
 from functools import partial
 
 from ccpncore.gui.Icon import Icon
+from ccpncore.gui.Base import Base
 
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
 
-class Button(QtGui.QPushButton):
+class Button(QtGui.QPushButton, Base):
 
-  def __init__(self, parent, text='', action=None, callback=None, icon=None,
+  def __init__(self, parent, text='', callback=None, icon=None,
                toggle=None, **kw):
     
     QtGui.QPushButton.__init__(self, parent)
-    self.timer = QtCore.QTimer()
-    self.timer.setSingleShot(True)
-    self.double_clicked = False
-    self.timer.timeout.connect(self.singleClick)
+    Base.__init__(self, **kw)
+    # self.timer = QtCore.QTimer()
+    # self.timer.setSingleShot(True)
+    # self.double_clicked = False
+    # self.timer.timeout.connect(self.singleClick)
     self.setText(text)
-    self.action = action
     if icon: # filename or pixmap
       self.setIcon(Icon(icon))
       self.setIconSize(QtCore.QSize(22,22))
@@ -28,22 +29,24 @@ class Button(QtGui.QPushButton):
     self.callback = None
     self.setCallback(callback)
 
-  def mouseReleaseEvent(self, event):
-    if not self.double_clicked:
-        self.timer.start(100)
-    else:
-        self.double_clicked = False
+  # def mouseReleaseEvent(self, event):
+  #   if not self.double_clicked:
+  #       self.timer.start(100)
+  #   else:
+  #       self.double_clicked = False
+  #
+  # def mouseDoubleClickEvent(self, event):
+  #   if event.button() == QtCore.Qt.LeftButton and not (event.modifiers()):
+  #     self.timer.stop()
+  #     self.double_clicked = True
+  #     if self.action:
+  #       self.action()
+  #
+  # def singleClick(self):
+  #   if self.double_clicked == False:
+  #     self.toggle()
+  #   else:
 
-  def mouseDoubleClickEvent(self, event):
-    if event.button() == QtCore.Qt.LeftButton and not (event.modifiers()):
-      self.timer.stop()
-      self.double_clicked = True
-      if self.action:
-        self.action()
-
-  def singleClick(self):
-    if self.double_clicked == False:
-      self.toggle()
 
   # def mousePressEvent(self, event):
   #   if event.button() == QtCore.Qt.RightButton and not (event.modifiers()):
@@ -108,6 +111,7 @@ if __name__ == '__main__':
              grid=(0, 3))
 
   window.show()
+  window.raise_()
   
   app.start()
 

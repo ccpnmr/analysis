@@ -1,15 +1,14 @@
 import pyqtgraph.console as console
 from PySide import QtGui
 
-class PythonConsole:
-  def __init__(self, parent=None):
-    self.parent = parent
-    self.console = console.ConsoleWidget()
+class PythonConsole(console.ConsoleWidget):
+  def __init__(self, parent=None, namespace=None):
+    console.ConsoleWidget.__init__(self, parent, namespace)
     # self.console.addAction()
     self.runMacroButton = QtGui.QPushButton()
     # self.console.ui.runMacroButton.setCheckable(True)
     self.runMacroButton.setText('Run Macro')
-    self.console.ui.horizontalLayout.addWidget(self.runMacroButton)
+    self.ui.horizontalLayout.addWidget(self.runMacroButton)
   #
   #
   def runMacro(self):

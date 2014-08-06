@@ -1,24 +1,22 @@
 from PySide import QtGui, QtCore
 import random
-import os
 from functools import partial
 
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane
 from ccpncore.gui.Button import Button
-from ccpncore.gui.Colors import ColorDialog
+from ccpncore.gui.ColourDialog import ColorDialog
 
 class Spectrum1dPane(SpectrumPane):
 
   def __init__(self, project=None, parent=None, title=None, current=None):
-    SpectrumPane.__init__(self, parent, project)
+    SpectrumPane.__init__(self, project, parent, title=title)
     self.project = project
     self.parent = parent
     self.viewBox.invertX()
     self.current = current
     self.plotItem.setAcceptDrops(True)
     self.title = title
-    print(self.title)
 
 
   def addSpectra(self, spectra):
@@ -37,7 +35,7 @@ class Spectrum1dPane(SpectrumPane):
     spectrumItem.plot.parent = spectrum
     spectrumItem.plot.curve.setClickable(True)
     spectrumItem.plot.sigClicked.connect(self.clicked)
-    spectrumItem.toolBarButton = Button(self.parent,text=spectrum.name,action=partial(self.showSpectrumPreferences,spectrum))
+    spectrumItem.toolBarButton = Button(self.parent,text=spectrum.name)#,action=partial(self.showSpectrumPreferences,spectrum))
     spectrumItem.toolBarButton.setCheckable(True)
     spectrumItem.toolBarButton.setChecked(True)
     palette = QtGui.QPalette(spectrumItem.toolBarButton.palette())
@@ -153,33 +151,3 @@ class Spectrum1dPane(SpectrumPane):
   def hidePeaks(self, spectrumItem, peakList):
 
     spectrumItem.hidePeaks(peakList)
-
-
-  def dropEvent(self,event):
-    event.accept()
-    if isinstance(self.parent, QtGui.QGraphicsScene):
-      event.ignore()
-      return
-
-    if event.mimeData().urls():
-
-      filePaths = [url.path() for url in event.mimeData().urls()]
-      print(filePaths)
-      print(len(filePaths))
-      if len(filePaths) == 1:
-        for dirpath, dirnames, filenames in os.walk(filePaths[0]):
-          if dirpath.endswith('memops') and 'Implementation' in dirnames:
-            self.parent.openProject(filePaths[0])
-            self.addSpectra(self.project.spectra)
-
-    else:
-      data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
-      pidData = str(data.data(),encoding='utf-8')
-      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04']
-      pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
-      actualPid = ''.join(map(str, pidData2))
-      spectrum = self.project.getById(actualPid)
-      print(actualPid, spectrum)
-      spectrum = self.addSpectrum(spectrum)
-      self.current.spectrum = spectrum
-      self.current.pane = self

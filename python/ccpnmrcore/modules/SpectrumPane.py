@@ -1,4 +1,4 @@
-import operator
+import os
 
 from PySide import QtCore, QtGui, QtOpenGL
 from ccpncore.gui import ViewBox
@@ -113,10 +113,6 @@ class SpectrumPane(pg.PlotWidget):
     for spectrumVar in spectraVar:
       self.addSpectrum(spectrumVar, region, dimMapping)
 
-  ##### functions called from SpectrumScene #####
-    
-  # can be overridden (so implemented) in subclass
-  # meant for OpenGL drawing
   def showMousePosition(self, pos):
 
     position = self.viewBox.mapSceneToView(pos).toTuple()
@@ -125,18 +121,36 @@ class SpectrumPane(pg.PlotWidget):
   def dragEnterEvent(self, event):
     event.accept()
 
-  def dropEvent(self, event):
+  def dropEvent(self,event):
     event.accept()
+    if isinstance(self.parent, QtGui.QGraphicsScene):
+      event.ignore()
+      return
 
-  def drawPre(self, painter, rect):
+    if event.mimeData().urls():
 
-    pass
+      filePaths = [url.path() for url in event.mimeData().urls()]
+      print(filePaths)
+      print(len(filePaths))
+      if len(filePaths) == 1:
+        for dirpath, dirnames, filenames in os.walk(filePaths[0]):
+          if dirpath.endswith('memops') and 'Implementation' in dirnames:
+            self.parent.openProject(filePaths[0])
+            self.addSpectra(self.project.spectra)
 
-  # can be overridden (so implemented) in subclass
-  # meant for on-the-fly (so not scene-related) Qt drawing
-  def drawPost(self, painter, rect):
+    else:
+      data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
+      pidData = str(data.data(),encoding='utf-8')
+      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04']
+      pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
+      actualPid = ''.join(map(str, pidData2))
+      spectrum = self.project.getById(actualPid)
+      print(actualPid, spectrum)
+      spectrum = self.addSpectrum(spectrum)
+      self.current.spectrum = spectrum
+      self.current.pane = self
 
-    pass
+
 
 
 

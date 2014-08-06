@@ -68,6 +68,7 @@ class Testing(unittest.TestCase, Application):
     
     if self.window:
       self.window.show()
+      self.window.raise_()
       self.start()
     
   def getSpectrum(self):

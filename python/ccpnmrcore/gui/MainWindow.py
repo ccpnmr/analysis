@@ -9,16 +9,18 @@ from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
 from ccpnmrcore.Current import Current
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpncore.lib.memops.Implementation.Project import loadDataSource
-from ccpncore.gui.SideBar import SideBar
+from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import PythonConsole
-from ccpncore.gui.PeakTable import PeakListSimple
+from ccpncore.gui.MainWindow import MainWindow as GuiMainWindow
+from ccpnmrcore.modules.PeakTable import PeakListSimple
+from ccpncore.gui.SideBar import SideBar
 
 from ccpn import openProject
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(GuiMainWindow):
 
-  def __init__(self):
-    super(MainWindow, self).__init__()
+  def __init__(self, **kw):
+    GuiMainWindow.__init__(self, **kw)
     self.project = None
     # project = None
     self.initUi()
@@ -26,31 +28,29 @@ class MainWindow(QtGui.QMainWindow):
   def initUi(self):
 
 
-    self.layout = QtGui.QHBoxLayout(self)
+    # self.layout = QtGui.QHBoxLayout(self)
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.current = Current()
-    self.console = PythonConsole(parent=self)
-    self.pythonConsole = self.console.console
-    self.pythonConsole.setGeometry(300, 300, 300, 200)
     self.namespace = {'pg': pg, 'np': np, 'current': self.current, 'openProject':self.openProject}
-    self.pythonConsole.localNamespace = self.namespace
-    self.spectrumWidget=Spectrum1dPane(parent=self,project=self.project, title='Module 1', current=self.current)
+    self.pythonConsole = PythonConsole(parent=self, namespace=self.namespace)
+    self.pythonConsole.setGeometry(300, 300, 300, 200)
+    self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current)
     self.moduleCount = 1
-    self.widget1=self.spectrumWidget.dock
+    self.widget1=self.spectrumPane.dock
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
     self.splitter3.addWidget(self.leftWidget)
     self.splitter1.addWidget(self.splitter3)
-    self.spectrumWidget.current = self.current
+    # self.spectrumPane.current = self.current
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
     self.splitter2.addWidget(self.pythonConsole)
-    self.layout.addWidget(self.splitter2)
+    # self.layout.addWidget(self.splitter2)
     self.current.spectra = []
     self.dockArea = DockArea()
 
-    self.current.pane = self.spectrumWidget
+    self.current.pane = self.spectrumPane
     # self.spectrumBarWidget = QtGui.QToolBar()
     # self.spectrumToolbar = QtGui.QToolBar()
     # self.dock1.addWidget(self.spectrumToolbar)
@@ -68,7 +68,8 @@ class MainWindow(QtGui.QMainWindow):
 
     spectrumMenu = QtGui.QMenu("&Spectrum", self)
     windowMenu = QtGui.QMenu("&Window", self)
-    fileMenu.addAction(QtGui.QAction("Open Project", self, shortcut=QtGui.QKeySequence("P, O"), triggered=self.openProject))
+    ##fileMenu.addAction(QtGui.QAction("Open Project", self, shortcut=QtGui.QKeySequence("P, O"), triggered=self.openProject))
+    fileMenu.addAction(Action(self, "Open Project", callback=self.openProject, shortcut="PO"))
     fileMenu.addAction(QtGui.QAction("Save Project", self, shortcut=QtGui.QKeySequence("P, S"), triggered=self.saveProject))
     fileMenu.addAction(QtGui.QAction("Save Project As", self, shortcut=QtGui.QKeySequence("P, A"), triggered=self.saveProjectAs))
     fileMenu.addAction(QtGui.QAction("Close Program", self, shortcut=QtGui.QKeySequence("Q, T"), triggered=(QtCore.QCoreApplication.instance().quit)))
@@ -87,7 +88,7 @@ class MainWindow(QtGui.QMainWindow):
     windowMenu.addAction(QtGui.QAction("Add Module", self, shortcut=QtGui.QKeySequence("A, M"), triggered=self.addModule))
 
     # windowMenu.addAction(QtGui.QAction("New Window", self, shortcut=QtGui.QKeySequence("N, W"), triggered=self.handleNewWindow))
-    self.console.runMacroButton.clicked.connect(self.runMacro)
+    self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
     windowMenu.addAction(QtGui.QAction("Run Macro", self, shortcut=QtGui.QKeySequence("R, M"), triggered=self.runMacro))
     self.windowMenu = windowMenu
     self._menuBar.addMenu(fileMenu)
@@ -107,6 +108,8 @@ class MainWindow(QtGui.QMainWindow):
         print(line)# print(line.strip())
         self.pythonConsole.execSingle(line)
         self.pythonConsole.write(line)
+
+    f.close()
 
   def addModule(self):
     newModule = Spectrum1dPane(parent=self, title='Module %s' % str(self.moduleCount+1), current=self.current)
@@ -132,19 +135,19 @@ class MainWindow(QtGui.QMainWindow):
     self.project = openProject(currentProjectDir)
     msg  = (currentProjectDir)+' opened'
     self.leftWidget.fillSideBar(self.project)
-    self.spectrumWidget.project = self.project
+    self.spectrumPane.project = self.project
     self.statusBar().showMessage(msg)
-    self.pythonConsole.write("openProject('"+currentProjectDir+"')\n")
+    self.pythonConsole.write("project = openProject('"+currentProjectDir+"')\n")
     self.namespace['project'] = self.project
-    self.pythonConsole.localNamespace = self.namespace
 
   def showPeakTable(self):
-    peakList = PeakListSimple()
-    peakDock = Dock(name='PeakList', size=(1000,1000))
+
+    peakList = PeakListSimple(dimensions=self.current.spectrum.dimensionCount)
+    if self.current.spectrum.peaks:
+      peakList.updateContents(self.current.spectrum.peakLists)
+    peakDock = Dock(name=self.current.spectrum.peakLists[0].pid, size=(1000,1000))
     peakDock.addWidget(peakList)
     self.dockArea.addDock(peakDock)
-
-
 
   def automaticIntegration(spectrum):
     spectrum.automaticIntegration()
@@ -160,10 +163,10 @@ class MainWindow(QtGui.QMainWindow):
     # print(spectrum)
 
     if dataSource.numDim == 1:
-      data = Spectrum1dItem(self.spectrumWidget,dataSource).spectralData
+      data = Spectrum1dItem(self.spectrumPane,dataSource).spectralData
       self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
     # elif dataSource.numDim > 1:
-    #   data = SpectrumNdItem(self.spectrumWidget,dataSource).spectralData
+    #   data = SpectrumNdItem(self.spectrumPane,dataSource).spectralData
     #   print(data)
     #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
     msg = dataSource.name+' loaded'
@@ -185,12 +188,12 @@ class MainWindow(QtGui.QMainWindow):
 
 
   def showCrossHair(self):
-    self.spectrumWidget.vLine.show()
-    self.spectrumWidget.hLine.show()
+    self.spectrumPane.vLine.show()
+    self.spectrumPane.hLine.show()
 
   def hideCrossHair(self):
-    self.spectrumWidget.vLine.hide()
-    self.spectrumWidget.hLine.hide()
+    self.spectrumPane.vLine.hide()
+    self.spectrumPane.hLine.hide()
 
   def hideConsole(self):
     self.pythonConsole.hide()

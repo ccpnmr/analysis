@@ -1,0 +1,92 @@
+# should work if suitably edited for Linux, Irix, Solaris, OSX, Windows
+
+# general rules:
+# *_LIB = required library or libraries (use -l or equivalen)
+# *_INCLUDE_FLAGS = where to find include files (use -I)
+# *_LIB_FLAGS = where to find libraries (use -L)
+
+# the C compiler and associated things
+CC = cc -m64
+LINK = $(CC)
+MAKE = make
+CO_NAME = -c $<
+OUT_NAME = -o $@
+OBJ_SUFFIX = o
+DYLIB_SUFFIX = so
+RM = rm -f
+
+# compiler flags
+
+# Windows specific flag
+WIN_FLAG = 
+
+# use below for everything with malloc.h
+#MALLOC_FLAG =
+# use below for everything without malloc.h (e.g. OSX)
+MALLOC_FLAG = -DDO_NOT_HAVE_MALLOC
+
+# use below for everything with -fPIC option (e.g. gcc)
+FPIC_FLAG = -fPIC
+# use below for everything without -fPIC option (e.g. Windows)
+#FPIC_FLAG =
+
+# optimisation flag
+OPT_FLAG = -O
+
+CC_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG) $(MALLOC_FLAG)
+LINK_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG)
+
+# linking command for C libraries into Python world
+LINK_LIBRARIES = sh linkSharedObjs
+
+# copying command for C libraries into Python world
+COPY_LIBRARIES = sh copySharedObjs
+
+# math
+MATH_LIB = -lm
+
+# Python
+##PYTHON_DIR = /System/Library/Frameworks/Python.framework/Versions/2.6
+PYTHON_DIR = /Users/wb104/anaconda
+#PYTHON_DIR = /Users/wb104/anaconda/envs/py3k
+# for Unix do not seem to need PYTHON_LIB
+# for Windows seem to need below (or similar)
+#PYTHON_LIB = -lPython24
+##PYTHON_LIB = -lpython2.6
+PYTHON_LIB = -lpython2.7
+#PYTHON_LIB = -lpython3.3m
+##PYTHON_INCLUDE_FLAGS = -I$(PYTHON_DIR)/Headers -I$(PYTHON_DIR)/Extras/lib/python/numpy/core/include/numpy
+PYTHON_INCLUDE_FLAGS = -I$(PYTHON_DIR)/include/python2.7 -I$(PYTHON_DIR)/lib/python2.7/site-packages/numpy/core/include/numpy
+#PYTHON_INCLUDE_FLAGS = -I$(PYTHON_DIR)/include/python3.3m -I$(PYTHON_DIR)/lib/python3.3/site-packages/numpy/core/include/numpy
+# for Unix do not seem to need PYTHON_LIB_FLAGS
+##PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/python2.6/config
+PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/python2.7/config
+#PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib
+# for Windows seem to need below (or similar)
+# PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/libs
+
+# shared library flags
+# use below for Linux or Irix
+#SHARED_FLAGS = -shared
+# use below for OSX
+##SHARED_FLAGS = -L$(PYTHON_DIR)/lib -bundle -bundle_loader $(PYTHON_DIR)/bin/python
+SHARED_FLAGS = -L$(PYTHON_DIR)/lib -bundle -bundle_loader $(PYTHON_DIR)/bin/python
+# use below for Solaris
+#SHARED_FLAGS = -G
+
+# GL
+GL_DIR = /System/Library/Frameworks/OpenGL.framework/Versions/Current
+GL_LIB = -lGLU -lGL
+# use below for everything but OSX
+#GL_INCLUDE_FLAGS = -I$(GL_DIR)/include
+# use below for OSX
+GL_INCLUDE_FLAGS = -I$(GL_DIR)/Headers
+# use below for Linux and Solaris
+#GL_LIB_FLAGS = -L$(GL_DIR)/lib
+# use below for OSX
+GL_LIB_FLAGS = -L$(GL_DIR)/Libraries
+# use below for Irix
+#GL_LIB_FLAGS = -L$(GL_DIR)/lib32
+# use below for 64 bit
+#GL_LIB_FLAGS = -L$(GL_DIR)/lib64
+

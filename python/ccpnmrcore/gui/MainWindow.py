@@ -4,22 +4,25 @@ import random
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.dockarea import DockArea, Dock
+import os
 
 from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
 from ccpnmrcore.Current import Current
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
-from ccpncore.lib.memops.Implementation.Project import loadDataSource
+from ccpncore.lib.memops.Implementation.Project import loadDataSource, getSpectrumFileFormat
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import PythonConsole
 from ccpncore.gui.MainWindow import MainWindow as GuiMainWindow
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpncore.gui.SideBar import SideBar
 
-from ccpn import openProject
+from ccpn import openProject, newProject
 
 class MainWindow(GuiMainWindow):
 
   def __init__(self, **kw):
+    from ccpncore.util import Translation
+    Translation.setTranslationLanguage('Dutch')
     GuiMainWindow.__init__(self, **kw)
     self.project = None
     # project = None
@@ -68,28 +71,29 @@ class MainWindow(GuiMainWindow):
 
     spectrumMenu = QtGui.QMenu("&Spectrum", self)
     windowMenu = QtGui.QMenu("&Window", self)
-    ##fileMenu.addAction(QtGui.QAction("Open Project", self, shortcut=QtGui.QKeySequence("P, O"), triggered=self.openProject))
+    ##fileMenu.addAction(QtGui.QAction("Open Project", self, shortcut="P, O"), triggered=self.openProject))
+    fileMenu.addAction(Action(self, "New Project", callback=self.newProject, shortcut="PN"))
     fileMenu.addAction(Action(self, "Open Project", callback=self.openProject, shortcut="PO"))
-    fileMenu.addAction(QtGui.QAction("Save Project", self, shortcut=QtGui.QKeySequence("P, S"), triggered=self.saveProject))
-    fileMenu.addAction(QtGui.QAction("Save Project As", self, shortcut=QtGui.QKeySequence("P, A"), triggered=self.saveProjectAs))
-    fileMenu.addAction(QtGui.QAction("Close Program", self, shortcut=QtGui.QKeySequence("Q, T"), triggered=(QtCore.QCoreApplication.instance().quit)))
-    spectrumMenu.addAction(QtGui.QAction("Open Spectra", self, shortcut=QtGui.QKeySequence("F, O"), triggered=self.loadSpectra))
-    spectrumMenu.addAction(QtGui.QAction("Manual Integration", self, shortcut=QtGui.QKeySequence("M, I"), triggered=self.manualIntegration))
-    spectrumMenu.addAction(QtGui.QAction("Automatic Integration", self, shortcut=QtGui.QKeySequence("A, I"), triggered=self.automaticIntegration))
-    spectrumMenu.addAction(QtGui.QAction("Find Peaks", self, shortcut=QtGui.QKeySequence("F, P"), triggered=Spectrum1dItem.findPeaks))
-    spectrumMenu.addAction(QtGui.QAction("Peak Table", self, shortcut=QtGui.QKeySequence("L, T"), triggered=self.showPeakTable))
+    fileMenu.addAction(Action(self, "Save Project", callback=self.saveProject, shortcut="PS"))
+    fileMenu.addAction(Action(self, "Save Project As", shortcut="PA", callback=self.saveProjectAs))
+    fileMenu.addAction(Action(self, "Close Program", callback=QtCore.QCoreApplication.instance().quit, shortcut="QT"))
+    spectrumMenu.addAction(Action(self, "Open Spectra", callback=self.loadSpectra, shortcut="FO"))
+    spectrumMenu.addAction(Action(self, "Manual Integration", shortcut="MI", callback=self.manualIntegration))
+    spectrumMenu.addAction(Action(self, "Automatic Integration", callback=self.automaticIntegration, shortcut="AI"))
+    spectrumMenu.addAction(Action(self, "Find Peaks", callback=Spectrum1dItem.findPeaks, shortcut="FP"))
+    spectrumMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="LT"))
 
-    windowMenu.addAction(QtGui.QAction("Hide Console", self, shortcut=QtGui.QKeySequence("H, C"),triggered=self.hideConsole))
-    windowMenu.addAction(QtGui.QAction("Show Console", self, shortcut=QtGui.QKeySequence("S, C"),triggered=self.showConsole))
-    windowMenu.addAction(QtGui.QAction("Show CrossHair", self, shortcut=QtGui.QKeySequence("S, H"), triggered=self.showCrossHair))
-    windowMenu.addAction(QtGui.QAction("Hide CrossHair", self, shortcut=QtGui.QKeySequence("H, H"), triggered=self.hideCrossHair))
-    windowMenu.addAction(QtGui.QAction("Save State", self, shortcut=QtGui.QKeySequence("S, S"), triggered=self.saveState))
-    windowMenu.addAction(QtGui.QAction("Restore State", self, shortcut=QtGui.QKeySequence("R, S"), triggered=self.restoreState))
-    windowMenu.addAction(QtGui.QAction("Add Module", self, shortcut=QtGui.QKeySequence("A, M"), triggered=self.addModule))
+    windowMenu.addAction(Action(self, "Hide Console", callback=self.hideConsole, shortcut="HC"))
+    windowMenu.addAction(Action(self, "Show Console", callback=self.showConsole, shortcut="SC"))
+    windowMenu.addAction(Action(self, "Show CrossHair", callback=self.showCrossHair, shortcut="SH"))
+    windowMenu.addAction(Action(self, "Hide CrossHair", callback=self.hideCrossHair, shortcut="HH"))
+    windowMenu.addAction(Action(self, "Save State", callback=self.saveState, shortcut="SS"))
+    windowMenu.addAction(Action(self, "Restore State", callback=self.restoreState, shortcut="RS"))
+    windowMenu.addAction(Action(self, "Add Module", callback=self.addModule, shortcut="AM"))
 
-    # windowMenu.addAction(QtGui.QAction("New Window", self, shortcut=QtGui.QKeySequence("N, W"), triggered=self.handleNewWindow))
+    # windowMenu.addAction(Action("New Window", self, shortcut="N, W"), callback=self.handleNewWindow))
     self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
-    windowMenu.addAction(QtGui.QAction("Run Macro", self, shortcut=QtGui.QKeySequence("R, M"), triggered=self.runMacro))
+    windowMenu.addAction(Action("Run Macro", self, shortcut="RM", callback=self.runMacro))
     self.windowMenu = windowMenu
     self._menuBar.addMenu(fileMenu)
     self._menuBar.addMenu(spectrumMenu)
@@ -125,6 +129,13 @@ class MainWindow(GuiMainWindow):
   def loadState(self):
     self.state = self.dockArea.restoreState(self.state)
 
+  def newProject(self):
+    self.project=newProject('defaultProject')
+    msg  = (self.project.name)+' created'
+    self.statusBar().showMessage(msg)
+    self.pythonConsole.write("project = newProject('"+self.project.name+"')\n")
+    self.namespace['project'] = self.project
+
   def openProject(self, projectDir=None):
 
     if projectDir is None:
@@ -158,7 +169,7 @@ class MainWindow(GuiMainWindow):
   def loadSpectra(self):
     directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
     print(directory)
-    dataSource = loadDataSource(self.project,directory[0])
+    dataSource = loadDataSource(self.project._wrappedData.parent,directory[0])
     # spectrum = current._data2Obj[dataSource]
     # print(spectrum)
 
@@ -170,6 +181,7 @@ class MainWindow(GuiMainWindow):
     #   print(data)
     #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
     msg = dataSource.name+' loaded'
+    print(dataSource)
     self.statusBar().showMessage(msg)
     self.pythonConsole.write("project.loadSpectrum('"+directory+"')\n")
     self.pythonConsole.execSingle('c')
@@ -239,24 +251,34 @@ class MainWindow(GuiMainWindow):
           #   print((item.data()))
 
         else:
-          pass
-          # spectrumFormat = getSpectrumFileFormat(filePaths[0])
-          # print(filePaths)
-          # print(spectrumFormat)
-          #
-          # if spectrumFormat:
-          #   event.acceptProposedAction()
-          #   self.openSpectra(filePaths, replace=replace)
-          #   return
-          #
+          spectrumFormat = getSpectrumFileFormat(filePaths[0])
+          print(filePaths)
+          print(spectrumFormat)
+
+          if spectrumFormat:
+            event.acceptProposedAction()
+            dataSource = loadDataSource(self.project,filePaths[0])
+
+
+          if dataSource.numDim == 1:
+            data = Spectrum1dItem(self.spectrumPane,dataSource).spectralData
+            self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
+          # elif dataSource.numDim > 1:
+          #   data = SpectrumNdItem(self.spectrumPane,dataSource).spectralData
+          #   print(data)
+          #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
+            msg = dataSource.name+' loaded'
+            self.statusBar().showMessage(msg)
+            self.pythonConsole.write("project.loadSpectrum('"+filePaths[0]+"')\n")
+
           # peakListFormat = getPeakListFileFormat(filePaths[0])
           # if peakListFormat:
           #   event.acceptProposedAction()
           #   self.mainApp.openPeakList(filePaths[0])
           #   return
-          #
-          # else:
-          #   event.ignore()
+
+          else:
+            event.ignore()
 
       else:
         event.ignore()

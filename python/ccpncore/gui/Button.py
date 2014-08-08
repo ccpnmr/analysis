@@ -1,8 +1,7 @@
 from PySide import QtCore, QtGui
-from functools import partial
 
-from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Base import Base
+from ccpncore.gui.Icon import Icon
 
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked

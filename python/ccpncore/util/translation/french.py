@@ -1,3 +1,0 @@
-translationDict = {
-  'Help': 'Aidez',
-}

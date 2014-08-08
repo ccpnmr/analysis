@@ -1,0 +1,3 @@
+translationDict = {
+  'Help': 'Aidez',
+}

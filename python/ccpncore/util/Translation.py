@@ -1,6 +1,7 @@
 """Translation and translation dictionary handling"""
 
 import importlib
+import sys
 
 from ccpncore.util import Logging
 
@@ -31,16 +32,39 @@ def setTranslationLanguage(language=defaultLanguage, debug=False):
   
   updateTranslationDict()
 
-def updateTranslationDict(obj=None):
-  """ Add all the translations for directory in which this object is located """
-  
+### CARE: Problem is that we want to find the module in which the object is created,
+### not the module in which the code which creates it lives.
+### The code below is dangerous and could not work in some Python implementations.
+
+def updateTranslationDict(depth=None):
+  """ Add all the translations for directory in which this object is located.
+      The depth is how far up calling stack to go (not including this function itself).
+  """
+
   if translationLanguage == defaultLanguage:
     return
   
-  if obj:
-    objModuleName = obj.__module__
-  else:
+  if depth is None:
     objModuleName = 'ccpncore.util'
+  else:
+    fileName = sys._getframe(depth+1).f_code.co_filename
+    for objModuleName in sys.modules:
+      module = sys.modules[objModuleName]
+      try:
+        if module.__file__ == fileName:
+          break
+      except:
+        pass
+    else:
+      logger = Logging.getLogger()
+      logger.warning('translation module not found for path "%s"' % fileName)
+      return
+    n = objModuleName.rfind('.')
+    if n < 0:
+      logger = Logging.getLogger()
+      logger.warning('translation module missing . for path "%s"' % fileName)
+      return
+    objModuleName = objModuleName[:n]
     
   if objModuleName in translationModuleSet:  # translations already been added for this directory
     return
@@ -84,8 +108,12 @@ def getTranslation(text):
   return translatedText
 
 class Translation:
-  def __init__(self):
-    updateTranslationDict(self)
+  def __init__(self, depth=2):
+    """ The depth is how far up calling stack to go (not including this function itself).
+        In general want to go 2 up the stack because that is the module in which the widget lives.
+        (0 is normally Base.py and 1 is normally the ccpncore.gui file, e.g. Action.py or Button.py)
+    """
+    updateTranslationDict(depth+1)
 
   def translate(self, text):
-    return Translation.getTranslation(text)
+    return getTranslation(text)

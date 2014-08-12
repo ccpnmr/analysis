@@ -42,17 +42,25 @@ class SpectrumPane(pg.PlotWidget):
     self.crossHair = self.createCrossHair()
     self.viewBox.invertX()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
-    self.dock = Dock(name=self.title, size=(1000,1000))
+    self.dock = Dock(name=self.title, size=(1100, 1300))
+    # self.dock.setStyleSheet("border: 1px solid #44a")
+
     self.spectrumToolbar = QtGui.QToolBar()
-    self.spectrumToolbar.setMovable(True)
-    self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
-    self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 9)
+    spectrumToolBarColor = QtGui.QColor(214,215,213)
+    palette = QtGui.QPalette(self.spectrumToolbar.palette())
+    palette.setColor(QtGui.QPalette.Button,spectrumToolBarColor)
+    # self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
+    self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 7)
+    self.spectrumUtilToolbar = QtGui.QToolBar()
+    self.spectrumUtilToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
+    self.dock.addWidget(self.spectrumUtilToolbar, 0, 7, 2, 3)
     self.spectrumIndex = 1
     self.viewBox.current = current
     self.positionBox = QtGui.QLabel()
     self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
+    # self.positionBox.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
-    self.dock.addWidget(self, 2, 1, 1, 10)
+    self.dock.addWidget(self, 2, 0, 1, 11)
 
     if spectraVar is None:
       spectraVar = []

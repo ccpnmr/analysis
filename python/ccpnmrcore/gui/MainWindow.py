@@ -25,6 +25,7 @@ class MainWindow(GuiMainWindow):
     self.project = None
     # project = None
     self.initUi()
+    self.setGeometry(50,100,1200,800)
 
   def initUi(self):
 
@@ -35,21 +36,27 @@ class MainWindow(GuiMainWindow):
     self.current = Current()
     self.namespace = {'pg': pg, 'np': np, 'current': self.current, 'openProject':self.openProject}
     self.pythonConsole = PythonConsole(parent=self, namespace=self.namespace)
-    self.pythonConsole.setGeometry(300, 300, 300, 200)
+    # self.pythonConsole.setGeometry(1200, 700, 10, 1)
     self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current)
     self.moduleCount = 1
     self.widget1=self.spectrumPane.dock
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
+    self.leftWidget.setGeometry(0, 0, 10, 600)
     self.splitter3.addWidget(self.leftWidget)
     self.splitter1.addWidget(self.splitter3)
     # self.spectrumPane.current = self.current
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
+
     self.splitter2.addWidget(self.pythonConsole)
+    self.pythonConsole.hide()
+    # self.splitter2.setGeometry(QtCore.QRect(1200, 1300, 100, 100))
     # self.layout.addWidget(self.splitter2)
     self.current.spectra = []
     self.dockArea = DockArea()
+
+    self.dockArea.setGeometry(0, 0, 1100, 1300)
 
     self.current.pane = self.spectrumPane
     # self.spectrumBarWidget = QtGui.QToolBar()
@@ -61,7 +68,6 @@ class MainWindow(GuiMainWindow):
     self.splitter1.addWidget(self.dockArea)
     self.state = None
     self.setCentralWidget(self.splitter2)
-    # QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
 
     self.statusBar().showMessage('Ready')
     self._menuBar =  QtGui.QMenuBar()

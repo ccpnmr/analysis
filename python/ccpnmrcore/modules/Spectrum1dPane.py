@@ -7,6 +7,7 @@ from ccpnmrcore.modules.SpectrumPane import SpectrumPane
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ColourDialog import ColorDialog
 from ccpncore.gui.Action import Action
+from ccpncore.gui.Menu import Menu
 
 class Spectrum1dPane(SpectrumPane):
 
@@ -25,18 +26,26 @@ class Spectrum1dPane(SpectrumPane):
     self.plotItem.setAcceptDrops(True)
     self.title = title
     self.spectrumItems = []
+    self.fillToolBar()
+    
 
-    
-    
-    
-  def get1dContextMenu(self):  
-    self.contextMenu = QtGui.QMenu(self)
-    self.contextMenu.addAction(Action(self, "Auto Scale", callback=self.zoomYAll, isFloatWidget=True))
+  def fillToolBar(self):
+    self.spectrumUtilToolbar.addAction("AutoScale", self.zoomYAll)
+    self.spectrumUtilToolbar.addAction("Full", self.zoomXAll)
+    self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
+    self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
+    self.spectrumUtilToolbar.addAction("Undo", self.zoomXAll)
+    self.spectrumUtilToolbar.addAction("Redo", self.zoomXAll)
+    #
+
+  def get1dContextMenu(self):
+    self.contextMenu = Menu(self, isFloatWidget=True)
+    self.contextMenu.addItem("Auto Scale", callback=self.zoomYAll)
     self.contextMenu.addSeparator()
-    self.contextMenu.addAction(Action(self, "Full", callback=self.zoomXAll, isFloatWidget=True))
-    self.contextMenu.addAction(Action(self, "Zoom", callback=self.raiseZoomPopup, isFloatWidget=True))
-    self.contextMenu.addAction(Action(self, "Store Zoom", callback=self.storeZoom, isFloatWidget=True))
-    self.contextMenu.addAction(Action(self, "Restore Zoom", callback=self.restoreZoom, isFloatWidget=True))
+    self.contextMenu.addItem("Full", callback=self.zoomXAll)
+    self.contextMenu.addItem("Zoom", callback=self.raiseZoomPopup)
+    self.contextMenu.addItem("Store Zoom", callback=self.storeZoom)
+    self.contextMenu.addItem("Restore Zoom", callback=self.restoreZoom)
     self.contextMenu.addSeparator()
     self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self.toggleCrossHair,
                                          checkable=True)
@@ -46,15 +55,14 @@ class Spectrum1dPane(SpectrumPane):
       self.crossHairAction.setChecked(False)
     self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     self.gridAction = QtGui.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
-    print(self.gridAction)
     if self.gridShown == True:
       self.gridAction.setChecked(True)
     else:
       self.gridAction.setChecked(False)
     self.contextMenu.addAction(self.gridAction, isFloatWidget=True)
-    self.contextMenu.addAction(Action(self, "Peaks", self.peakListToggle, isFloatWidget=True))
+    self.contextMenu.addItem("Peaks", callback=self.peakListToggle)
     self.contextMenu.addSeparator()
-    self.contextMenu.addAction(Action(self, "Integrals", self.integralToggle, isFloatWidget=True))
+    self.contextMenu.addItem("Integrals", callback=self.integralToggle)
     self.autoIntegrationAction = QtGui.QAction("Automatic", self,
                                                triggered=self.toggleIntegrationMethod, checkable=True, )
     self.manualIntegrationAction = QtGui.QAction("Manual", self,
@@ -72,7 +80,7 @@ class Spectrum1dPane(SpectrumPane):
       # self.contextMenu.addAction(self.integrationAction)
 
     self.contextMenu.addSeparator()
-    self.contextMenu.addAction(Action(self, "Print", self.raisePrintMenu, isFloatWidget=True))
+    self.contextMenu.addItem("Print", callback=self.raisePrintMenu)
     return self.contextMenu
 
   def toggleIntegrationMethod(self):
@@ -111,13 +119,11 @@ class Spectrum1dPane(SpectrumPane):
     y2 = self.viewBox.childrenBoundingRect().top()
     y1 = y2 + self.viewBox.childrenBoundingRect().height()
     self.viewBox.setYRange(y2,y1)
-    print(y2,y1)
 
   def zoomXAll(self):
     x2 = self.viewBox.childrenBoundingRect().left()
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2,x1)
-    print(x2,x1)
 
   def zoomTo(self, x1, x2, y1, y2):
     self.zoomToRegion([float(x1.text()),float(x2.text()),float(y1.text()),float(y2.text())])
@@ -268,7 +274,6 @@ class Spectrum1dPane(SpectrumPane):
     spectrum.spectrumItem.plot.hide()
 
   def addPeaks(self,spectrumItem, peakList):
-    print(peakList)
     spectrumItem.addPeaks(self, peakList)
 
   def showPeaks(self, spectrumItem, peakList):

@@ -1,21 +1,39 @@
 import pyqtgraph as pg
-from PySide import QtCore
+from PySide import QtCore, QtGui
 from pyqtgraph.Point import Point
 
 class ViewBox(pg.ViewBox):
 
   def __init__(self, current  = None,  *args, **kwds):
     pg.ViewBox.__init__(self, *args, **kwds)
-    self.setMenuDisabled()
+    # self.setMenuEnabled()
     self.current = current
+    self.menu = None # Override pyqtgraph ViewBoxMenu
+    self.menu = self.getMenu()
 
 
-  def setMenuDisabled(self, enableMenu=False):
-    self.state['enableMenu'] = enableMenu
-    self.sigStateChanged.emit(self)
+  # def setMenuDisabled(self, enableMenu=False):
+  #   self.state['enableMenu'] = enableMenu
+  #   self.sigStateChanged.emit(self)
+  #
+  # def menuDisabled(self):
+  #   return self.state.get('enableMenu', False)
 
-  def menuDisabled(self):
-    return self.state.get('enableMenu', False)
+  def raiseContextMenu(self, event):
+    """
+    Raise the context menu
+    """
+    position  = event.screenPos()
+    self.menu.popup(QtCore.QPoint(position.x(), position.y()))
+
+  def getMenu(self):
+    # if self.menu is None:
+      self.menu = QtGui.QMenu()
+
+      # self.menu.addAction(QtGui.QAction("Vue d\'ensemble", self, triggered=self.autoRange))
+      # self.viewAll.triggered.connect()
+      return self.menu
+
 
   def mouseClickEvent(self, event):
 
@@ -42,6 +60,9 @@ class ViewBox(pg.ViewBox):
 
     elif event.button() == QtCore.Qt.RightButton and not event.modifiers():
       event.accept()
+      self.raiseContextMenu(event)
+
+
       print('Context Menu to be activated here')
 
     elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ShiftModifier):

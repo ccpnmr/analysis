@@ -2,6 +2,8 @@ import pyqtgraph as pg
 from PySide import QtCore, QtGui
 from pyqtgraph.Point import Point
 
+from ccpncore.gui.Menu import Menu
+
 class ViewBox(pg.ViewBox):
 
   def __init__(self, current  = None,  *args, **kwds):
@@ -27,11 +29,8 @@ class ViewBox(pg.ViewBox):
     self.menu.popup(QtCore.QPoint(position.x(), position.y()))
 
   def getMenu(self):
-    # if self.menu is None:
-      self.menu = QtGui.QMenu()
-
-      # self.menu.addAction(QtGui.QAction("Vue d\'ensemble", self, triggered=self.autoRange))
-      # self.viewAll.triggered.connect()
+    if self.menu is None:
+      self.menu = Menu(self.parent(), isFloatWidget=True)
       return self.menu
 
 

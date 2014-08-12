@@ -53,6 +53,14 @@ class SideBar(QtGui.QTreeWidget):
           peakListItem.setText(0, peakList.pid)
 
 
+    # empty = 'empty'
+    self.restraintsItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
+    self.structuresItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
+    # newItem3 = QtGui.QTreeWidgetItem(self.restraintsItem)
+    # newItem2 = self.addItem(self.structuresItem, empty)
+    # newItem3 = self.addItem(self.structuresItem, empty)
+    # newItem3.setText(0, "empty")
+
   def clearSideBar(self):
     self.projectItem.setText(0, "Project")
     self.spectrumItem.setText(0, "Spectra")

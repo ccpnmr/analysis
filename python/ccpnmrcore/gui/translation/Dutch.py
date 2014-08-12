@@ -1,4 +1,5 @@
 translationDict = {
+  'New Project':  'Nieuw Project',
   'Open Project': 'Project Openen',
   'Save Project': 'Project Opslaan',
   'Save Project As': 'Project Opslaan Als',
@@ -14,10 +15,10 @@ translationDict = {
   'View': 'Weergave',
   'Hide Console': 'Console Verbergen',
   'Show Console': 'Console Weergeven',
-  'Hide Crosshair': 'Richtkruis Verbergen',
-  'Show Crosshair': 'Richtkruis Weergeven',
-  'Save state': 'Status Opslaan',
-  'Restore state': 'Status Herstellen',
-  'Add module': 'Module Toevoegen',
-  'Run macro': 'Macro Uitvoeren',
+  'Hide CrossHair': 'Richtkruis Verbergen',
+  'Show CrossHair': 'Richtkruis Weergeven',
+  'Save State': 'Status Opslaan',
+  'Restore State': 'Status Herstellen',
+  'Add Module': 'Module Toevoegen',
+  'Run Macro': 'Macro Uitvoeren',
 }

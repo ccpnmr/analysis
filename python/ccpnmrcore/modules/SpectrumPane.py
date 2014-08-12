@@ -22,9 +22,11 @@ class SpectrumPane(pg.PlotWidget):
 
     pg.setConfigOptions(background='w')
     pg.setConfigOptions(foreground='k')
-    pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=False,
+
+    pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
                            background='w', foreground='k')
     self.axes = self.plotItem.axes
+    self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.title = title
     self.parent = parent
     self.project = project
@@ -47,7 +49,7 @@ class SpectrumPane(pg.PlotWidget):
     self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 9)
     self.spectrumIndex = 1
     self.viewBox.current = current
-    self.positionBox = QtGui.QPushButton()
+    self.positionBox = QtGui.QLabel()
     self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     self.dock.addWidget(self, 2, 1, 1, 10)
@@ -95,6 +97,7 @@ class SpectrumPane(pg.PlotWidget):
   def zoomAll(self):
     self.autoRange()
 
+
   ##### functions used externally #####
 
   def clearSpectra(self):
@@ -137,6 +140,8 @@ class SpectrumPane(pg.PlotWidget):
           if dirpath.endswith('memops') and 'Implementation' in dirnames:
             self.parent.openProject(filePaths[0])
             self.addSpectra(self.project.spectra)
+
+
 
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))

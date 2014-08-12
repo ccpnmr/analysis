@@ -6,18 +6,154 @@ from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ColourDialog import ColorDialog
+from ccpncore.gui.Action import Action
 
 class Spectrum1dPane(SpectrumPane):
 
   def __init__(self, project=None, parent=None, title=None, current=None):
     SpectrumPane.__init__(self, project, parent, title=title)
+    # self.contextMenu = None
     self.project = project
     self.parent = parent
     self.viewBox.invertX()
+    self.showGrid(x=True, y=True)
+    self.gridShown = True
+    self.crossHairShown = True
+    self.autoIntegration = True
+    self.viewBox.menu = self.get1dContextMenu()
     self.current = current
     self.plotItem.setAcceptDrops(True)
     self.title = title
+    self.spectrumItems = []
 
+    
+    
+    
+  def get1dContextMenu(self):  
+    self.contextMenu = QtGui.QMenu(self)
+    self.contextMenu.addAction(Action(self, "Auto Scale", callback=self.zoomYAll, isFloatWidget=True))
+    self.contextMenu.addSeparator()
+    self.contextMenu.addAction(Action(self, "Full", callback=self.zoomXAll, isFloatWidget=True))
+    self.contextMenu.addAction(Action(self, "Zoom", callback=self.raiseZoomPopup, isFloatWidget=True))
+    self.contextMenu.addAction(Action(self, "Store Zoom", callback=self.storeZoom, isFloatWidget=True))
+    self.contextMenu.addAction(Action(self, "Restore Zoom", callback=self.restoreZoom, isFloatWidget=True))
+    self.contextMenu.addSeparator()
+    self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self.toggleCrossHair,
+                                         checkable=True)
+    if self.crossHairShown == True:
+      self.crossHairAction.setChecked(True)
+    else:
+      self.crossHairAction.setChecked(False)
+    self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
+    self.gridAction = QtGui.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
+    print(self.gridAction)
+    if self.gridShown == True:
+      self.gridAction.setChecked(True)
+    else:
+      self.gridAction.setChecked(False)
+    self.contextMenu.addAction(self.gridAction, isFloatWidget=True)
+    self.contextMenu.addAction(Action(self, "Peaks", self.peakListToggle, isFloatWidget=True))
+    self.contextMenu.addSeparator()
+    self.contextMenu.addAction(Action(self, "Integrals", self.integralToggle, isFloatWidget=True))
+    self.autoIntegrationAction = QtGui.QAction("Automatic", self,
+                                               triggered=self.toggleIntegrationMethod, checkable=True, )
+    self.manualIntegrationAction = QtGui.QAction("Manual", self,
+                                                 triggered=self.toggleIntegrationMethod, checkable=True)
+    if self.autoIntegration == True:
+      self.autoIntegrationAction.setChecked(True)
+      self.manualIntegrationAction.setChecked(False)
+    if self.autoIntegration == False:
+      self.autoIntegrationAction.setChecked(False)
+      self.manualIntegrationAction.setChecked(True)
+    self.contextMenu.addAction(self.autoIntegrationAction, isFloatWidget=True)
+    self.contextMenu.addAction(self.manualIntegrationAction, isFloatWidget=True)
+
+      # self.integrationAction = Action(self, self.integrationMethod, self.toggleIntegrationMethod)
+      # self.contextMenu.addAction(self.integrationAction)
+
+    self.contextMenu.addSeparator()
+    self.contextMenu.addAction(Action(self, "Print", self.raisePrintMenu, isFloatWidget=True))
+    return self.contextMenu
+
+  def toggleIntegrationMethod(self):
+    if self.autoIntegration == True:
+      self.autoIntegration = False
+    else:
+      self.autoIntegration = True
+
+  def toggleCrossHair(self):
+    if self.crossHairShown ==True:
+      self.vLine.hide()
+      self.hLine.hide()
+      self.crossHairShown = False
+    else:
+      self.vLine.show()
+      self.hLine.show()
+      self.crossHairShown = True
+
+  def hideCrossHair(self):
+    self.spectrumPane.vLine.hide()
+    self.spectrumPane.hLine.hide()
+
+
+  def toggleGrid(self):
+    if self.gridShown == True:
+      self.showGrid(x=False, y=False)
+      self.gridShown = False
+    else:
+      self.showGrid(x=True, y=True)
+      self.gridShown = True
+
+  def raisePrintMenu(self):
+    pass
+
+  def zoomYAll(self):
+    y2 = self.viewBox.childrenBoundingRect().top()
+    y1 = y2 + self.viewBox.childrenBoundingRect().height()
+    self.viewBox.setYRange(y2,y1)
+    print(y2,y1)
+
+  def zoomXAll(self):
+    x2 = self.viewBox.childrenBoundingRect().left()
+    x1 = x2 + self.viewBox.childrenBoundingRect().width()
+    self.viewBox.setXRange(x2,x1)
+    print(x2,x1)
+
+  def zoomTo(self, x1, x2, y1, y2):
+    self.zoomToRegion([float(x1.text()),float(x2.text()),float(y1.text()),float(y2.text())])
+    self.zoomPopup.close()
+
+  def raiseZoomPopup(self):
+    self.zoomPopup = QtGui.QDialog()
+    layout = QtGui.QGridLayout()
+    layout.addWidget(QtGui.QLabel(text='x1'), 0, 0)
+    x1 = QtGui.QLineEdit()
+    layout.addWidget(x1, 0, 1, 1, 1)
+    layout.addWidget(QtGui.QLabel(text='x2'), 0, 2)
+    x2 = QtGui.QLineEdit()
+    layout.addWidget(x2, 0, 3, 1, 1)
+    layout.addWidget(QtGui.QLabel(text='y1'), 1, 0,)
+    y1 = QtGui.QLineEdit()
+    layout.addWidget(y1, 1, 1, 1, 1)
+    layout.addWidget(QtGui.QLabel(text='y2'), 1, 2)
+    y2 = QtGui.QLineEdit()
+    layout.addWidget(y2, 1, 3, 1, 1)
+    okButton = QtGui.QPushButton(text="OK")
+    okButton.clicked.connect(partial(self.zoomTo,x1,x2,y1,y2))
+    cancelButton = QtGui.QPushButton(text='Cancel')
+    layout.addWidget(okButton,2, 1)
+    layout.addWidget(cancelButton, 2, 3)
+    cancelButton.clicked.connect(self.zoomPopup.close)
+    self.zoomPopup.setLayout(layout)
+    self.zoomPopup.exec_()
+
+
+  def storeZoom(self):
+    self.storedZoom = self.viewBox.viewRange()
+
+  def restoreZoom(self):
+    self.setXRange(self.storedZoom[0][0], self.storedZoom[0][1])
+    self.setYRange(self.storedZoom[1][0], self.storedZoom[1][1])
 
   def addSpectra(self, spectra):
     for spectrum in spectra:
@@ -56,6 +192,7 @@ class Spectrum1dPane(SpectrumPane):
     for peakList in spectrum.peakLists:
       spectrumItem.addPeaks(self, peakList)
     spectrumItem.addIntegrals(self)
+    self.spectrumItems.append(spectrumItem)
     return spectrum
 
 
@@ -108,11 +245,8 @@ class Spectrum1dPane(SpectrumPane):
     spectrumItem.plot.setPen(spectrumItem.colour)
 
 
-  def peakListToggle(self, spectrumItem, state, peakList):
-    if state == QtCore.Qt.Checked:
-      self.showPeaks(spectrumItem, peakList)
-    if state == QtCore.Qt.Unchecked:
-      self.hidePeaks(spectrumItem, peakList)
+  def peakListToggle(self):
+    pass
 
   def integralToggle(self, state, spectrumItem):
     if state == QtCore.Qt.Checked:
@@ -121,9 +255,7 @@ class Spectrum1dPane(SpectrumPane):
       spectrumItem.hideIntegrals()
 
   def removeSpectrum(self, spectrum):
-
     pass
-
 
   def findPeaks(self, spectrum):
     peakList = spectrum.spectrumItem.findPeaks()

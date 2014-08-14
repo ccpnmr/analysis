@@ -5,6 +5,9 @@ from ccpncore.gui import ViewBox
 
 from pyqtgraph.dockarea import Dock
 
+from collections import OrderedDict
+
+from ccpncore.lib.memops.Implementation.Project import loadDataSource
 
 import pyqtgraph as pg
 # this allows combining of OpenGL and ordinary Qt drawing
@@ -16,6 +19,20 @@ import pyqtgraph as pg
 # only the OpenGL needs to be called explicitly
 
 # abstract class: subclass needs to implement addSpectrum()
+
+SPECTRUM_COLOURS = OrderedDict([('#FF0000','red'),
+                                ('#00FFFF','cyan'),
+                                ('#FF8000','orange'),
+                                ('#0080FF','manganese blue'),
+                                ('#FFFF00','yellow'),
+                                ('#0000FF','blue'),
+                                ('#80FF00','chartreuse'),
+                                ('#8000FF','purple'),
+                                ('#00FF00','green'),
+                                ('#FF00FF','magenta'),
+                                ('#00FF80','spring green'),
+                                ('#FF0080','deep pink')])
+
 class SpectrumPane(pg.PlotWidget):
   
   def __init__(self, project=None, parent=None, spectraVar=None, region=None, dimMapping=None, current=None, title=None, **kw):
@@ -71,7 +88,8 @@ class SpectrumPane(pg.PlotWidget):
   def clicked(self, spectrum):
     self.current.spectrum = spectrum.parent
     self.current.spectra.append(spectrum.parent)
-    self.parent.pythonConsole.write('######current.spectrum='+str(self.current.spectrum)+'\n')
+    self.parent.pythonConsole.write('current.spectrum='+str(self.current.spectrum)+'\n')
+    self.parent.statusBar().showMessage('current.spectrum='+str(self.current.spectrum.pid))
 
   def createCrossHair(self):
     self.vLine = pg.InfiniteLine(angle=90, movable=False)
@@ -85,6 +103,10 @@ class SpectrumPane(pg.PlotWidget):
         mousePoint = self.viewBox.mapSceneToView(position)
         self.vLine.setPos(mousePoint.x())
         self.hLine.setPos(mousePoint.y())
+
+  def addSpectra(self, spectra):
+    for spectrum in spectra:
+      self.addSpectrum(spectrum)
 
   def showMousePosition(self, pos):
 
@@ -149,7 +171,8 @@ class SpectrumPane(pg.PlotWidget):
             self.parent.openProject(filePaths[0])
             self.addSpectra(self.project.spectra)
 
-
+        else:
+          self.parent.loadSpectra(filePaths[0])
 
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))

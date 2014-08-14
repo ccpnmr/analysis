@@ -17,7 +17,7 @@ def inverseGrey(color):
   return QtGui.QColor(m, m, m)
 
 
-class ColorDialog(QtGui.QColorDialog):
+class ColourDialog(QtGui.QColorDialog):
 
   def __init__(self, parent=None, doAlpha=False, **kw):
 
@@ -88,3 +88,4 @@ class ColorDialog(QtGui.QColorDialog):
   def quit(self):
 
     self.aborted = True
+

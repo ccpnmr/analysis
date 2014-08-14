@@ -2,7 +2,7 @@ import pyqtgraph.console as console
 from PySide import QtGui
 
 class PythonConsole(console.ConsoleWidget):
-  def __init__(self, parent=None, namespace=None):
+  def __init__(self, parent=None, namespace=None, historyFile=None):
     console.ConsoleWidget.__init__(self, parent, namespace)
     # self.console.addAction()
     self.runMacroButton = QtGui.QPushButton()

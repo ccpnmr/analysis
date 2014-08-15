@@ -247,7 +247,7 @@ Spectrum.newSpectrumReference = newSpectrumReference
 # Notifiers:
 className = Ccpn_DataDimRef._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Spectrum}, className, '__init__'),
+  ( ('_newObject', {'cls':SpectrumReference}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

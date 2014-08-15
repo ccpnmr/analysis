@@ -20,18 +20,18 @@ import pyqtgraph as pg
 
 # abstract class: subclass needs to implement addSpectrum()
 
-SPECTRUM_COLOURS = OrderedDict([('#FF0000','red'),
-                                ('#00FFFF','cyan'),
-                                ('#FF8000','orange'),
-                                ('#0080FF','manganese blue'),
-                                ('#FFFF00','yellow'),
-                                ('#0000FF','blue'),
-                                ('#80FF00','chartreuse'),
-                                ('#8000FF','purple'),
-                                ('#00FF00','green'),
-                                ('#FF00FF','magenta'),
-                                ('#00FF80','spring green'),
-                                ('#FF0080','deep pink')])
+SPECTRUM_COLOURS = OrderedDict([('#ff0000','red'),
+                                ('#00ffff','cyan'),
+                                ('#ff8000','orange'),
+                                ('#0080ff','manganese blue'),
+                                ('#ffff00','yellow'),
+                                ('#0000ff','blue'),
+                                ('#80ff00','chartreuse'),
+                                ('#8000ff','purple'),
+                                ('#00ff00','green'),
+                                ('#ff00ff','magenta'),
+                                ('#00ff80','spring green'),
+                                ('#ff0080','deep pink')])
 
 class SpectrumPane(pg.PlotWidget):
   

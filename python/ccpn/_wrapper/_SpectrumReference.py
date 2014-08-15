@@ -38,7 +38,7 @@ class SpectrumReference(AbstractWrapperClass):
     """short form of name, used for id"""
 
     dataDimRef = self._wrappedData
-    result = '%s,%s' % (dataDimRef.dataDim.dim, dataDimRef.expDimref.serial)
+    result = '%s,%s' % (dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
 
     return result
 

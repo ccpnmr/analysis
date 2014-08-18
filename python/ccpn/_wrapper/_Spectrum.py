@@ -551,7 +551,7 @@ class Spectrum(AbstractWrapperClass):
     """ List of DataDimRef matching main ExpDimRef for each dimension"""
     result = []
     expDimRefs = self._mainExpDimRefs()
-    for ii, dataDim in self._wrappedData.sortedDataDims():
+    for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
       if hasattr(dataDim, 'dataDimRefs'):
         result.append(dataDim.findFirstDataDimRef(expDimRef=expDimRefs[ii]))
       else:
@@ -565,7 +565,7 @@ class Spectrum(AbstractWrapperClass):
     dataSource = self._wrappedData
     if len(value) == dataSource.numDim:
       expDimRefs = self._mainExpDimRefs()
-      for ii, dataDim in self._wrappedData.sortedDataDims():
+      for ii, dataDim in  enumerate(self._wrappedData.sortedDataDims()):
         if hasattr(dataDim, 'dataDimRefs'):
           dataDimRef = dataDim.findFirstDataDimRef(expDimRef=expDimRefs[ii])
         else:

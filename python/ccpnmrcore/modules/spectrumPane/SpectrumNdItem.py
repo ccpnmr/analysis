@@ -255,8 +255,8 @@ class SpectrumNdItem(SpectrumItem):
     ccpnSpectrum = spectrum.ccpnSpectrum
     dataDim = ccpnSpectrum.findFirstDataDim(dim=dim+1)
     dataDimRef = dataDim.findFirstDataDimRef()
-    firstPoint = dataDimRef.valueToPoint(region0)
-    lastPoint = dataDimRef.valueToPoint(region1)
+    firstPoint = dataDimRef.valueToPoint(region0) - 1  # -1 because points in API start from 1
+    lastPoint = dataDimRef.valueToPoint(region1) - 1
     
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
     translate = pixelViewBox0 - firstPoint * scale

@@ -3,12 +3,12 @@ from PySide import QtCore, QtGui
 from OpenGL import GL
 
 from ccpncore.util.Color import Color
+from ccpnmrcore.Base import Base
 
 import pyqtgraph as pg
 
 from ccpnmrcore.modules.spectrumPane.PeakListItem import PeakListItem
 from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
-
 
 # this class mixes both OpenGL and Qt functionality
 # it's a Qt QGraphicsItem because that means can re-order drawing of spectra peaks easily
@@ -16,7 +16,7 @@ from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
 # it also used OpenGL for drawing contours (ND) or lines (1D)
 
 # abstract class: subclass needs to implement drawSpectrum()
-class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
+class SpectrumItem(QtGui.QGraphicsItem, Base):  # abstract class
 
   def __init__(self, spectrumPane, spectrumVar, region=None, dimMapping=None, register=True):
     """ spectrumPane is the parent
@@ -27,11 +27,9 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
     """
     
     QtGui.QGraphicsItem.__init__(self)
-    self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
+    Base.__init__(self, spectrumPane.project)
     
-    ###spectrum = self.getById(spectrumVar)
-    # below TEMP, waiting for wrapper model
-    spectrum = spectrumVar
+    spectrum = self.getObject(spectrumVar)
     
     #if region is None:
     #  region = spectrum.defaultRegion(dimMapping)
@@ -42,11 +40,16 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
     self.setDimMapping(dimMapping)
     
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
-
+    """
     for peakList in spectrum.peakLists:
       self.peakListItems[peakList.pid] = PeakListItem(self, peakList)
+"""      
     spectrumPane.spectrumItems.append(self)
 
+  def boundingRect(self):  # seems necessary to have
+
+    return QtCore.QRectF(-1000, -1000, 1000, 1000)  # TBD: remove hardwiring
+    
   def setDimMapping(self, dimMapping):
     
     self.dimMapping = dimMapping
@@ -72,10 +75,6 @@ class SpectrumItem(QtGui.QGraphicsItem):  # abstract class
     self.xDim = xDim
     self.yDim = yDim
 
-  def drawSpectrum(self, painter, rect):
-    
-    raise Exception('should be implemented in subclass')
-    
   # any attribute not known about is checked first in the parent and then in the spectrum
   def __getattr__(self, attr):
 

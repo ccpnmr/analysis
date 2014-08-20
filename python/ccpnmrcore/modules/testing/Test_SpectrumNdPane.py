@@ -33,6 +33,6 @@ class SpectrumPaneTest(Testing):
 
   def test_spectrumNdPane(self):
 
-    spectrumPane = SpectrumNdPane(self.project, self.frame)
+    spectrumPane = SpectrumNdPane(project=self.project, parent=self.frame)
     spectrum = self.getSpectrum()
     spectrumPane.addSpectrum(spectrum)

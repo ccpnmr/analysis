@@ -1,22 +1,15 @@
 import os
 
-from PySide import QtCore, QtGui, QtOpenGL
-from ccpncore.gui import ViewBox
-
-from pyqtgraph.dockarea import Dock
-
 from collections import OrderedDict
 
-from ccpncore.lib.memops.Implementation.Project import loadDataSource
+from PySide import QtCore, QtGui, QtOpenGL
 
 import pyqtgraph as pg
-# this allows combining of OpenGL and ordinary Qt drawing
-# the pre-calculated OpenGL is done in the drawPre() function
-# then the Qt scene is drawn (presumably it's in the "Item" layer)
-# then the on-the-fly Qt is drone in the drawPost() function
-# both drawPre() and drawPost() are called from the scene code
-# most drawing happens automatically because of Qt
-# only the OpenGL needs to be called explicitly
+from pyqtgraph.dockarea import Dock
+
+from ccpncore.gui import ViewBox
+
+from ccpnmrcore.Base import Base
 
 # abstract class: subclass needs to implement addSpectrum()
 
@@ -33,15 +26,21 @@ SPECTRUM_COLOURS = OrderedDict([('#ff0000','red'),
                                 ('#00ff80','spring green'),
                                 ('#ff0080','deep pink')])
 
-class SpectrumPane(pg.PlotWidget):
+class SpectrumPane(pg.PlotWidget, Base):
   
   def __init__(self, project=None, parent=None, spectraVar=None, region=None, dimMapping=None, current=None, title=None, **kw):
 
     pg.setConfigOptions(background='w')
     pg.setConfigOptions(foreground='k')
 
-    pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
-                           background='w', foreground='k')
+    if parent is None or isinstance(parent, Dock):
+      pg.PlotWidget.__init__(self, parent=None, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
+                             background='w', foreground='k')
+    else:
+      pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
+                             background='w', foreground='k')
+                             
+    Base.__init__(self, project=project, **kw)
     self.axes = self.plotItem.axes
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.title = title
@@ -57,27 +56,29 @@ class SpectrumPane(pg.PlotWidget):
     self.axes['bottom']['item'].orientation = 'bottom'
     self.setAcceptDrops(True)
     self.crossHair = self.createCrossHair()
-    self.viewBox.invertX()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
-    self.dock = Dock(name=self.title, size=(1100, 1300))
-    # self.dock.setStyleSheet("border: 1px solid #44a")
-
+    
+    if parent is None:
+      self.dock = Dock(name=self.title, size=(1100,1300))
+    elif isinstance(parent, Dock):
+      self.dock = parent
+    else:
+      self.dock = None
     self.spectrumToolbar = QtGui.QToolBar()
     spectrumToolBarColor = QtGui.QColor(214,215,213)
     palette = QtGui.QPalette(self.spectrumToolbar.palette())
     palette.setColor(QtGui.QPalette.Button,spectrumToolBarColor)
-    # self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
-    self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 7)
-    self.spectrumUtilToolbar = QtGui.QToolBar()
-    self.spectrumUtilToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
-    self.dock.addWidget(self.spectrumUtilToolbar, 0, 7, 2, 3)
+    #self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+    if self.dock:
+      self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 9)
     self.spectrumIndex = 1
     self.viewBox.current = current
     self.positionBox = QtGui.QLabel()
-    self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
-    # self.positionBox.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    if self.dock:
+      self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
-    self.dock.addWidget(self, 2, 0, 1, 11)
+    if self.dock:
+      self.dock.addWidget(self, 2, 1, 1, 10)
 
     if spectraVar is None:
       spectraVar = []
@@ -103,11 +104,7 @@ class SpectrumPane(pg.PlotWidget):
         mousePoint = self.viewBox.mapSceneToView(position)
         self.vLine.setPos(mousePoint.x())
         self.hLine.setPos(mousePoint.y())
-
-  def addSpectra(self, spectra):
-    for spectrum in spectra:
-      self.addSpectrum(spectrum)
-
+    
   def showMousePosition(self, pos):
 
     position = self.viewBox.mapSceneToView(pos).toTuple()
@@ -139,6 +136,10 @@ class SpectrumPane(pg.PlotWidget):
   def addSpectrum(self, spectrumVar, region=None, dimMapping=None):
 
     raise Exception('should be implemented in subclass')
+
+  def addSpectra(self, spectra):
+    for spectrum in spectra:
+      self.addSpectrum(spectrum)
 
   def setSpectra(self, spectraVar, region=None, dimMapping=None):
 
@@ -173,6 +174,7 @@ class SpectrumPane(pg.PlotWidget):
 
         else:
           self.parent.loadSpectra(filePaths[0])
+
 
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))

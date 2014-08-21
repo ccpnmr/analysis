@@ -31,24 +31,20 @@ class SpectrumPane(pg.PlotWidget, Base):
   def __init__(self, project=None, parent=None, spectraVar=None, current=None, title=None, pid=None, preferences=None, **kw):
 
     if preferences.general.colourScheme == 'light':
-
-      self.background = pg.setConfigOptions(background='w')
-      self.foreground = pg.setConfigOptions(foreground='k')
-      pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
-                           background='w', foreground='k')
-    elif preferences.general.colourScheme == 'dark':
-      self.background = self.background = pg.setConfigOptions(background='k')
-      self.foreground = pg.setConfigOptions(foreground='w')
-      pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
-                           background='k', foreground='w')
-
-    # pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
-    #                        background='w', foreground='k')
+      background = 'w'
+      foreground = 'k'
+    else:
+      background = 'k'
+      foreground = 'w'
+      
+    pg.setConfigOptions(background=background)
+    pg.setConfigOptions(foreground=foreground)
+    pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
+                           background=background, foreground=foreground)
     Base.__init__(self,project=project, **kw)
     self.axes = self.plotItem.axes
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.title = title
-    self.parent = parent
     self.project = project
     self.pid = pid
     self.viewBox = self.plotItem.vb

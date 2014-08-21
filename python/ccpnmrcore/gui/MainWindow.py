@@ -2,11 +2,12 @@ from PySide import QtCore, QtGui
 import sys
 import random
 import numpy as np
+import json
 import pyqtgraph as pg
 from pyqtgraph.dockarea import DockArea, Dock
-import os
 
 from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
+from ccpnmrcore.modules.SpectrumNdPane import SpectrumNdPane
 from ccpnmrcore.Current import Current
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpncore.lib.memops.Implementation.Project import loadDataSource, getSpectrumFileFormat
@@ -16,7 +17,8 @@ from ccpncore.gui.MainWindow import MainWindow as GuiMainWindow
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
-from ccpnmrcore.popups.SpectrumPreferencesPopup import SpectrumPreferencesPopup
+from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
+from ccpncore.util.AttrDict import AttrDict
 
 from ccpn import openProject, newProject
 
@@ -35,21 +37,30 @@ class MainWindow(GuiMainWindow):
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.current = Current()
-    self.namespace = {'pg': pg, 'np': np, 'current': self.current, 'openProject':self.openProject, 'self':self}
+    self.panes = {}
+    self.preferencesFile = open("/Users/simon/pysideTestingCode/v3settings.json")
+    self.preferences = json.load(self.preferencesFile, object_hook=AttrDict)
+    self.preferencesFile.close()
+    self.namespace = {'pg': pg, 'np': np, 'current': self.current, 'openProject':self.openProject,
+                      'newProject':self.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
+                      'panes':self.panes, 'preferences':self.preferences}
     self.pythonConsole = PythonConsole(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
-    self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current)
+    self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
+    self.panes[self.spectrumPane.pid] = self.spectrumPane
     self.moduleCount = 1
     self.widget1=self.spectrumPane.dock
+    print(self.widget1)
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
     self.leftWidget.setGeometry(0, 0, 10, 600)
+    self.leftWidget.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
     self.splitter3.addWidget(self.leftWidget)
     self.splitter1.addWidget(self.splitter3)
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
     self.splitter2.heightMax = 200
-    self.leftWidget.itemDoubleClicked.connect(self.raiseSpectrumPreferences)
+    self.leftWidget.itemDoubleClicked.connect(self.raiseSpectrumProperties)
     self.pythonConsole.heightMax = 200
     self.splitter2.addWidget(self.pythonConsole)
     self.pythonConsole.hide()
@@ -60,12 +71,13 @@ class MainWindow(GuiMainWindow):
     self.dockArea.setGeometry(0, 0, 1100, 1300)
     self.current.pane = self.spectrumPane
     self.dockArea.addDock(self.widget1)
-    self.widget1.name = 'Module %s' % (self.moduleCount+1)
+    # self.widget1.name = 'Module %s' % (self.moduleCount+1)
     self.splitter1.addWidget(self.dockArea)
     self.state = None
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
     self._menuBar =  QtGui.QMenuBar()
+
 
 
     fileMenu = QtGui.QMenu("&Project", self)
@@ -98,7 +110,7 @@ class MainWindow(GuiMainWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Preferences...", callback=self.showApplicationPreferences))
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Close Program", callback=QtCore.QCoreApplication.instance().quit, shortcut="QT"))
+    fileMenu.addAction(Action(self, "Close Program", callback=self.quitAction, shortcut="QT"))
 
     spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="FO"))
     spectrumMenu.addAction(Action(self, "Remove...", callback=self.removeSpectra))
@@ -182,13 +194,16 @@ class MainWindow(GuiMainWindow):
     self.setWindowTitle('Analysis v3')
     self.show()
 
-  def raiseSpectrumPreferences(self, item):
+  def raiseSpectrumProperties(self, item):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
     spectrum = self.project.getById(dataItem)
-    SpectrumPreferencesPopup(spectrum).exec_()
+    SpectrumPropertiesPopup(spectrum).exec_()
 
-  def newProject(self):
-    self.project=newProject('defaultProject')
+  def newProject(self, name=None):
+    if name is None:
+      self.project=newProject('defaultProject')
+    else:
+      self.project=newProject(name)
     msg  = (self.project.name)+' created'
     self.statusBar().showMessage(msg)
     self.pythonConsole.write("project = newProject('"+self.project.name+"')\n")
@@ -208,6 +223,7 @@ class MainWindow(GuiMainWindow):
     self.pythonConsole.write("project = openProject('"+currentProjectDir+"')\n")
     self.pythonConsole.ui.historyList.addItem("project = openProject('"+currentProjectDir+"')\n")
     self.namespace['project'] = self.project
+
 
   def openRecentProject(self):
     pass
@@ -238,6 +254,11 @@ class MainWindow(GuiMainWindow):
 
   def showApplicationPreferences(self):
     pass
+
+  def quitAction(self):
+    # pass
+    pref = open(self.preferencesFile, 'w+')
+    json.dumps(self.preferences, pref)
 
   def removeSpectra(self):
     pass
@@ -270,14 +291,26 @@ class MainWindow(GuiMainWindow):
     pass
 
   def addSpectrum1dPane(self):
-    newModule = Spectrum1dPane(self.parent(), title='Module %s' % str(self.moduleCount+1), current=self.current)
+    newModule = Spectrum1dPane(parent=self, title='Module %s' % str(self.moduleCount+1),
+                               current=self.current, pid='QP:%s' % str(self.moduleCount+1),
+                               preferences=self.preferences)
+    self.panes[newModule.pid] = newModule
     newModule.project = self.project
     newModule.current = self.current
     self.moduleCount+=1
+
     self.dockArea.addDock(newModule.dock)
 
   def addSpectrumNdPane(self):
-    pass
+    newModule = SpectrumNdPane(parent=self, title='Module %s' % str(self.moduleCount+1),
+                               current=self.current, pid='QP:%s' % str(self.moduleCount+1),
+                               preferences=self.preferences)
+    self.panes[newModule.pid] = newModule
+    newModule.project = self.project
+    newModule.current = self.current
+    self.moduleCount+=1
+
+    self.dockArea.addDock(newModule.dock)
 
   def setLayoutToDefault(self):
     pass
@@ -376,7 +409,7 @@ class MainWindow(GuiMainWindow):
 
     peakList = PeakListSimple(dimensions=self.current.spectrum.dimensionCount)
     if self.current.spectrum.peaks:
-      peakList.updateContents(self.current.spectrum.peakLists)
+      peakList.updateContents(self.current.spectrum)
     peakDock = Dock(name=self.current.spectrum.peakLists[0].pid, size=(1000,1000))
     peakDock.addWidget(peakList)
     self.dockArea.addDock(peakDock)
@@ -390,18 +423,26 @@ class MainWindow(GuiMainWindow):
   def loadSpectra(self, directory=None):
     if directory == None:
       directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
-    dataSource = loadDataSource(self.project,directory[0])
+      spectrum = loadDataSource(self.project,directory[0])
 
-    if dataSource.numDim == 1:
-      data = Spectrum1dItem(self.spectrumPane,dataSource).spectralData
-      self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
+    else:
+      spectrum = loadDataSource(self.project,directory)
 
-    msg = dataSource.name+' loaded'
-    print(dataSource)
+    if spectrum.dimensionCount == 1:
+      # data = Spectrum1dItem(self.spectrumPane,spectrum).spectralData
+      # print(dir(self.widget1))
+      self.current.pane.addSpectrum(spectrum)
+      # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
+      # self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
+
+    msg = spectrum.name+' loaded'
     self.statusBar().showMessage(msg)
-    self.pythonConsole.write("project.loadSpectrum('"+directory+"')\n")
-    self.logFile.write("project.loadSpectrum('"+directory+"')\n")
-    self.pythonConsole.execSingle('c')
+    if len(directory) == 1:
+      self.pythonConsole.write("project.loadSpectrum('"+directory+"')\n")
+    else:
+      self.pythonConsole.write("project.loadSpectrum('"+directory[0]+"')\n")
+    # self.logFile.write("project.loadSpectrum('"+directory+"')\n")
+    # self.pythonConsole.execSingle('c')
 
   def saveProject(self):
 
@@ -479,7 +520,7 @@ class MainWindow(GuiMainWindow):
           #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
             msg = dataSource.name+' loaded'
             self.statusBar().showMessage(msg)
-            self.pythonConsole.write("project.loadSpectrum('"+filePaths[0]+"')\n")
+            self.pythonConsole.write("loadSpectrum('"+filePaths[0]+"')\n")
 
           # peakListFormat = getPeakListFileFormat(filePaths[0])
           # if peakListFormat:

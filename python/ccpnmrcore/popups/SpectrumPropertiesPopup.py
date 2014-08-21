@@ -17,7 +17,7 @@ VOLUME_UNITS = ['μl', 'ml', 'l']
 
 class SpectrumPropertiesPopup(QtGui.QDialog):
   def __init__(self, spectrum=None, parent=None):
-    super(SpectrumPreferencesPopup, self).__init__(parent)
+    super(SpectrumPropertiesPopup, self).__init__(parent)
 
     tabWidget = QtGui.QTabWidget()
     if spectrum.dimensionCount == 1:

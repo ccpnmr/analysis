@@ -11,6 +11,8 @@ from ccpncore.gui import ViewBox
 
 from ccpnmrcore.Base import Base
 
+from ccpncore.lib.memops.Implementation.Project import loadDataSource
+
 # abstract class: subclass needs to implement addSpectrum()
 
 SPECTRUM_COLOURS = OrderedDict([('#ff0000','red'),
@@ -23,29 +25,34 @@ SPECTRUM_COLOURS = OrderedDict([('#ff0000','red'),
                                 ('#8000ff','purple'),
                                 ('#00ff00','green'),
                                 ('#ff00ff','magenta'),
-                                ('#00ff80','spring green'),
-                                ('#ff0080','deep pink')])
+                                ('#00FF80','spring green'),
+                                ('#FF0080','deep pink')])
 
 class SpectrumPane(pg.PlotWidget, Base):
   
-  def __init__(self, project=None, parent=None, spectraVar=None, region=None, dimMapping=None, current=None, title=None, **kw):
+  def __init__(self, project=None, parent=None, spectraVar=None, region=None, dimMapping=None, current=None, title=None, pid=None, preferences=None, **kw):
 
-    pg.setConfigOptions(background='w')
-    pg.setConfigOptions(foreground='k')
+    if preferences.general.colourScheme == 'light':
 
-    if parent is None or isinstance(parent, Dock):
-      pg.PlotWidget.__init__(self, parent=None, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
-                             background='w', foreground='k')
-    else:
+      self.background = pg.setConfigOptions(background='w')
+      self.foreground = pg.setConfigOptions(foreground='k')
       pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
-                             background='w', foreground='k')
-                             
-    Base.__init__(self, project=project, **kw)
+                           background='w', foreground='k')
+    elif preferences.general.colourScheme == 'dark':
+      self.background = self.background = pg.setConfigOptions(background='k')
+      self.foreground = pg.setConfigOptions(foreground='w')
+      pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
+                           background='k', foreground='w')
+
+    # pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
+    #                        background='w', foreground='k')
+    Base.__init__(self,project=project, **kw)
     self.axes = self.plotItem.axes
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.title = title
     self.parent = parent
     self.project = project
+    self.pid = pid
     self.viewBox = self.plotItem.vb
     self.viewBox.parent = self
     self.viewBox.current = current
@@ -57,7 +64,6 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.setAcceptDrops(True)
     self.crossHair = self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
-    
     if parent is None:
       self.dock = Dock(name=self.title, size=(1100,1300))
     elif isinstance(parent, Dock):
@@ -65,6 +71,8 @@ class SpectrumPane(pg.PlotWidget, Base):
     else:
       self.dock = None
     self.spectrumToolbar = QtGui.QToolBar()
+    self.spectrumUtilToolbar = QtGui.QToolBar()
+    # self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
     spectrumToolBarColor = QtGui.QColor(214,215,213)
     palette = QtGui.QPalette(self.spectrumToolbar.palette())
     palette.setColor(QtGui.QPalette.Button,spectrumToolBarColor)
@@ -78,11 +86,10 @@ class SpectrumPane(pg.PlotWidget, Base):
       self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     if self.dock:
-      self.dock.addWidget(self, 2, 1, 1, 10)
+      self.dock.addWidget(self, 2, 0, 1, 11)
 
     if spectraVar is None:
       spectraVar = []
-
 
     self.setSpectra(spectraVar, region, dimMapping)
 
@@ -108,7 +115,7 @@ class SpectrumPane(pg.PlotWidget, Base):
   def showMousePosition(self, pos):
 
     position = self.viewBox.mapSceneToView(pos).toTuple()
-    self.positionBox.setText("X: %.3f  I: %.2E" % position)
+    self.positionBox.setText("X: %.3f  Y: %.3f" % position)
 
 
   def zoomToRegion(self, region):
@@ -147,11 +154,6 @@ class SpectrumPane(pg.PlotWidget, Base):
     for spectrumVar in spectraVar:
       self.addSpectrum(spectrumVar, region, dimMapping)
 
-  def showMousePosition(self, pos):
-
-    position = self.viewBox.mapSceneToView(pos).toTuple()
-    self.positionBox.setText("X: %.3f  I: %.2E" % position)
-
   def dragEnterEvent(self, event):
     event.accept()
 
@@ -173,17 +175,19 @@ class SpectrumPane(pg.PlotWidget, Base):
             self.addSpectra(self.project.spectra)
 
         else:
+          print(filePaths[0])
           self.parent.loadSpectra(filePaths[0])
+      elif len(filePaths) > 1:
+        [self.parent.loadSpectra(filePath) for filePath in filePaths]
 
 
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
       pidData = str(data.data(),encoding='utf-8')
-      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04']
+      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e']
       pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
       actualPid = ''.join(map(str, pidData2))
-      spectrum = self.project.getById(actualPid)
-      print(actualPid, spectrum)
+      spectrum = self.getById(actualPid)
       spectrum = self.addSpectrum(spectrum)
       self.current.spectrum = spectrum
       self.current.pane = self

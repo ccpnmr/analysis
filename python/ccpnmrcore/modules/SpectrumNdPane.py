@@ -11,14 +11,16 @@ class SpectrumNdPane(SpectrumPane):
   def __init__(self, *args, **kw):
     
     SpectrumPane.__init__(self, *args, **kw)
+
+    self.plotItem.setAcceptDrops(True)
     
     self.setViewport(QtOpenGL.QGLWidget())
     self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
-    
+
     self.viewBox.invertX()
     self.viewBox.invertY()
       
-    #self.showGrid(x=True, y=True)
+    self.showGrid(x=True, y=True)
           
   ##### functions used externally #####
 

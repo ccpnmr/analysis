@@ -25,8 +25,8 @@ class Spectrum1dItem(SpectrumItem):
     self.spectrum = spectrumVar  # TEMP
     self.spectrumPane = spectrumPane
     self.spectralData = self.getSliceData()
-
-    self.integrals = self.autoIntegration()
+    print(self.spectrum)
+    # self.integrals = self.autoIntegration()
     # self.integralListItems = []
     # self.integralListItems.append(IntegralListItem(self))
     self.integralListItems = []
@@ -35,7 +35,7 @@ class Spectrum1dItem(SpectrumItem):
     # for i in range(len(self.spectrum.pointCount)):
     #   dimMapping[i] = i
     SpectrumItem.__init__(self, spectrumPane, spectrumVar, region)
-    self.integralListItems.append(IntegralListItem(self))
+    # self.integralListItems.append(IntegralListItem(self))
 
 
   def autoIntegration(self):
@@ -117,7 +117,7 @@ class Spectrum1dItem(SpectrumItem):
     for peak in peakList.peaks:
       self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.peakTextItem.hide()
       self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.peakPointerItem.hide()
-      self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.displayed = True
+      self.peakListItems[peakList.pid].peakItems[peak.pid].peakAnnotationItem.displayed = False
       self.peakListItems[peakList.pid].displayed = False
 
   def getSliceData(self):

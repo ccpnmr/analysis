@@ -13,10 +13,11 @@ from ccpncore.util import Logging
 
 class Spectrum1dPane(SpectrumPane):
 
-  def __init__(self, project=None, parent=None, title=None, current=None):
-    SpectrumPane.__init__(self, project, parent, title=title)
+  def __init__(self, project=None, parent=None, title=None, current=None, pid=None, preferences=None):
+    SpectrumPane.__init__(self, project, parent, title=title, pid=pid, preferences=preferences)
     # self.contextMenu = None
     self.project = project
+    self.pid = pid
     self.parent = parent
     self.viewBox.invertX()
     self.showGrid(x=True, y=True)
@@ -31,7 +32,6 @@ class Spectrum1dPane(SpectrumPane):
     self.fillToolBar()
     self.storedZooms = []
     self.colourIndex = 0
-
 
   def fillToolBar(self):
 
@@ -67,11 +67,12 @@ class Spectrum1dPane(SpectrumPane):
     self.contextMenu.addAction(self.gridAction, isFloatWidget=True)
     self.contextMenu.addSeparator()
     self.peakAction = QtGui.QAction("Peaks", self, triggered=self.peakListToggle, checkable=True)
-    if self.current.spectrum is not None:
-      if self.current.spectrum.spectrumItem.peakListItems[0].displayed == True:
-        self.peakAction.setChecked(True)
-      else:
-        self.peakAction.setChecked(False)
+    # if self.current.spectrum is not None:
+    #   if self.current.spectrum.spectrumItem.peakListItems[self.current.spectrum.peakLists[0].pid].displayed == True:
+    #     self.peakAction.setChecked(True)
+    #   else:
+    #     print("self.current.spectrum is None")
+    #     self.peakAction.setChecked(False)
     self.contextMenu.addAction(self.peakAction, isFloatWidget=True)
     self.contextMenu.addItem("Integrals", callback=self.integralToggle)
     self.autoIntegrationAction = QtGui.QAction("Automatic", self,
@@ -184,23 +185,23 @@ class Spectrum1dPane(SpectrumPane):
 
     spectrumItem = Spectrum1dItem(self,spectrum)
     colour = list(SPECTRUM_COLOURS.keys())[self.colourIndex]
-    print(colour)
     data = spectrumItem.spectralData
     spectrumItem.plot = self.plotItem.plot(data[0],data[1], pen={'color':colour},clickable=True,)
     spectrumItem.colour = QtGui.QColor(colour)
-    print(spectrumItem.colour)
     spectrumItem.name = spectrum.name
     spectrumItem.plot.parent = spectrum
     spectrumItem.plot.curve.setClickable(True)
     spectrumItem.plot.sigClicked.connect(self.clicked)
-    spectrumItem.toolBarButton = Button(self.parent,text=spectrum.name)
-    spectrumItem.toolBarButton.setCheckable(True)
-    spectrumItem.toolBarButton.setChecked(True)
-    palette = QtGui.QPalette(spectrumItem.toolBarButton.palette())
-    palette.setColor(QtGui.QPalette.Button,colour)
-    spectrumItem.toolBarButton.setPalette(palette)
-    spectrumItem.toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
-    spectrumItem.toolBarButton.toggled.connect(spectrumItem.plot.setVisible)
+    # spectrumItem.toolBarButton = QtGui.QToolButton(self.parent,text=spectrum.name)
+    # spectrumItem.toolBarButton.setCheckable(True)
+    # spectrumItem.toolBarButton.setChecked(True)
+    # # print(spectrumItem.toolBarButton.actions())
+    # palette = QtGui.QPalette(spectrumItem.toolBarButton.palette())
+    # palette.setColor(QtGui.QPalette.Button,colour)
+    # spectrumItem.toolBarButton.setPalette(palette)
+    # spectrumItem.toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
+    # spectrumItem.toolBarButton.toggled.connect(spectrumItem.plot.setVisible)
+
     self.parent.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
     if self.colourIndex != len(SPECTRUM_COLOURS) - 1:
       self.colourIndex +=1
@@ -213,8 +214,24 @@ class Spectrum1dPane(SpectrumPane):
     else:
       shortcutKey = None
 
-    spectrumItem.toolBarButton.setShortcut(QtGui.QKeySequence(shortcutKey))
-    self.spectrumToolbar.addWidget(spectrumItem.toolBarButton)
+    # spectrumItem.toolBarButton.setShortcut(QtGui.QKeySequence(shortcutKey))
+    newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
+    newAction.setCheckable(True)
+    newAction.setChecked(True)
+    newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
+    palette = QtGui.QPalette(newAction.associatedWidgets()[1].palette())
+    palette.setColor(QtGui.QPalette.ColorRole(0), spectrumItem.colour)
+    # print(dir(newAction.associatedWidgets()[1]))
+    print(newAction.associatedWidgets()[1].palette().color(QtGui.QPalette.ColorRole(0)))
+    newAction.associatedWidgets()[1].palette().setColor(QtGui.QPalette.Button, spectrumItem.colour)
+    print(newAction.associatedWidgets()[1].palette().color(QtGui.QPalette.ColorRole(0)))
+    # newAction.associatedWidgets()[1].setPalette(palette)
+    newAction.toggled.connect(spectrumItem.plot.setVisible)
+    self.spectrumToolbar.addAction(newAction)
+
+
+
+
     spectrum.spectrumItem = spectrumItem
     # for peakList in spectrum.peakLists:
     #   spectrumItem.addPeaks(self, peakList)

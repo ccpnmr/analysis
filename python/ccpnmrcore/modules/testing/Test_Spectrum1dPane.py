@@ -30,7 +30,6 @@ class Spectrum1dPaneTest(Testing):
   def __init__(self, *args, **kw):
     Testing.__init__(self, 'Ccpn1Dtesting', *args, **kw)
     self.spectrumName = '1D'
-    print(self.spectrumName)
 
 
   def test_spectrum1dPane(self):

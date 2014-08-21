@@ -18,7 +18,9 @@ from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
+from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpncore.util.AttrDict import AttrDict
+from difflib import Differ
 
 from ccpn import openProject, newProject
 
@@ -38,8 +40,8 @@ class MainWindow(GuiMainWindow):
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.current = Current()
     self.panes = {}
-    #self.preferencesFile = open("/Users/simon/pysideTestingCode/v3settings.json")
-    self.preferencesFile = open("/Users/wb104/svnsf/trunk/testv3/v3settings.json")
+    self.preferencesFile = open("/Users/simon/pysideTestingCode/v3settings.json")
+    # self.preferencesFile = open("/Users/wb104/svnsf/trunk/testv3/v3settings.json")
     self.preferences = json.load(self.preferencesFile, object_hook=AttrDict)
     self.preferencesFile.close()
     self.namespace = {'pg': pg, 'np': np, 'current': self.current, 'openProject':self.openProject,
@@ -52,7 +54,6 @@ class MainWindow(GuiMainWindow):
     self.panes[self.spectrumPane.pid] = self.spectrumPane
     self.moduleCount = 1
     self.widget1=self.spectrumPane.dock
-    print(self.widget1)
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
     self.leftWidget.setGeometry(0, 0, 10, 600)
@@ -255,12 +256,31 @@ class MainWindow(GuiMainWindow):
     pass
 
   def showApplicationPreferences(self):
-    pass
+    PreferencesPopup(preferences=self.preferences).exec_()
+    # print(self.preferences)
 
   def quitAction(self):
     # pass
-    pref = open(self.preferencesFile, 'w+')
-    json.dumps(self.preferences, pref)
+    prefFile = open("/Users/simon/pysideTestingCode/v3settings.json")
+    pref = json.load(prefFile)
+    prefFile.close()
+    if not pref == self.preferences:
+      msgBox = QtGui.QMessageBox()
+      msgBox.setText("Application Preferences have been changed")
+      msgBox.setInformativeText("Do you want to save your changes?")
+      msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+      ret = msgBox.exec_()
+      if ret == QtGui.QMessageBox.Yes:
+        prefFile = open("/Users/simon/pysideTestingCode/v3settings.json", 'w+')
+        json.dump(self.preferences, prefFile)
+        prefFile.close()
+      else:
+        pass
+
+    QtGui.QApplication.quit()
+
+    # json.dumps(self.preferences, pref)
+
 
   def removeSpectra(self):
     pass
@@ -293,6 +313,7 @@ class MainWindow(GuiMainWindow):
     pass
 
   def addSpectrum1dPane(self):
+
     #newModule = Spectrum1dPane(parent=self, title='Module %s' % str(self.moduleCount+1),
     newModule = Spectrum1dPane(title='Module %s' % str(self.moduleCount+1),
                                current=self.current, pid='QP:%s' % str(self.moduleCount+1),
@@ -305,6 +326,7 @@ class MainWindow(GuiMainWindow):
     self.dockArea.addDock(newModule.dock)
 
   def addSpectrumNdPane(self):
+
     #newModule = SpectrumNdPane(parent=self, title='Module %s' % str(self.moduleCount+1),
     newModule = SpectrumNdPane(title='Module %s' % str(self.moduleCount+1),
                                current=self.current, pid='QP:%s' % str(self.moduleCount+1),

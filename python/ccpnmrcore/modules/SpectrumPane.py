@@ -11,8 +11,6 @@ from ccpncore.gui import ViewBox
 
 from ccpnmrcore.Base import Base
 
-from ccpncore.lib.memops.Implementation.Project import loadDataSource
-
 # abstract class: subclass needs to implement addSpectrum()
 
 SPECTRUM_COLOURS = OrderedDict([('#ff0000','red'),
@@ -64,6 +62,7 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.setAcceptDrops(True)
     self.crossHair = self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
+    # print('parent',parent)
     if parent is None:
       self.dock = Dock(name=self.title, size=(1100,1300))
     elif isinstance(parent, Dock):
@@ -185,8 +184,8 @@ class SpectrumPane(pg.PlotWidget, Base):
       WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e']
       pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
       actualPid = ''.join(map(str, pidData2))
-      spectrum = self.getById(actualPid)
-      spectrum = self.addSpectrum(spectrum)
+      spectrum = self.getObject(actualPid)
+      self.addSpectrum(spectrum)
       self.current.spectrum = spectrum
       self.current.pane = self
 

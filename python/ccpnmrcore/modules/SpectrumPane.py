@@ -30,7 +30,7 @@ SPECTRUM_COLOURS = OrderedDict([('#ff0000','red'),
 
 class SpectrumPane(pg.PlotWidget, Base):
   
-  def __init__(self, project=None, parent=None, spectraVar=None, region=None, dimMapping=None, current=None, title=None, pid=None, preferences=None, **kw):
+  def __init__(self, project=None, parent=None, spectraVar=None, current=None, title=None, pid=None, preferences=None, **kw):
 
     if preferences.general.colourScheme == 'light':
 
@@ -91,7 +91,7 @@ class SpectrumPane(pg.PlotWidget, Base):
     if spectraVar is None:
       spectraVar = []
 
-    self.setSpectra(spectraVar, region, dimMapping)
+    self.setSpectra(spectraVar)
 
   def clicked(self, spectrum):
     self.current.spectrum = spectrum.parent
@@ -137,22 +137,20 @@ class SpectrumPane(pg.PlotWidget, Base):
   def clearSpectra(self):
     
     self.spectrumItems = []
-    self.region = None
-    self.dimMapping = None
         
-  def addSpectrum(self, spectrumVar, region=None, dimMapping=None):
+  def addSpectrum(self, spectrumVar, dimMapping=None):
 
     raise Exception('should be implemented in subclass')
 
-  def addSpectra(self, spectra):
-    for spectrum in spectra:
-      self.addSpectrum(spectrum)
+  def addSpectra(self, spectrumVars):
+    for spectrumVar in spectrumVars:
+      self.addSpectrum(spectrumVar)
 
-  def setSpectra(self, spectraVar, region=None, dimMapping=None):
+  def setSpectra(self, spectraVar):
 
     self.clearSpectra()
     for spectrumVar in spectraVar:
-      self.addSpectrum(spectrumVar, region, dimMapping)
+      self.addSpectrum(spectrumVar)
 
   def dragEnterEvent(self, event):
     event.accept()

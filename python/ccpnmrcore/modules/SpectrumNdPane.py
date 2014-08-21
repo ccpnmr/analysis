@@ -21,10 +21,16 @@ class SpectrumNdPane(SpectrumPane):
     self.viewBox.invertY()
       
     self.showGrid(x=True, y=True)
-    self.region = None  # only needed in Nd
+    self.region = None
           
   ##### functions used externally #####
 
+  # overrides superclass function
+  def clearSpectra(self):
+    
+    SpectrumPane.clearSpectra(self)    
+    self.region = None
+    
   # implements superclass function
   def addSpectrum(self, spectrumVar, dimMapping=None):
     

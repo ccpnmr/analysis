@@ -21,11 +21,19 @@ class SpectrumNdPane(SpectrumPane):
     self.viewBox.invertY()
       
     self.showGrid(x=True, y=True)
+    self.region = None  # only needed in Nd
           
   ##### functions used externally #####
 
   # implements superclass function
-  def addSpectrum(self, spectrumVar, region=None, dimMapping=None):
+  def addSpectrum(self, spectrumVar, dimMapping=None):
     
-    spectrumItem = SpectrumNdItem(self, spectrumVar, region, dimMapping)
+    spectrum = self.getObject(spectrumVar)
+    if spectrum.dimensionCount < 1:
+      # TBD: logger message
+      return
+      
+    # TBD: check if dimensions make sense
+      
+    spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region)
     self.scene().addItem(spectrumItem)

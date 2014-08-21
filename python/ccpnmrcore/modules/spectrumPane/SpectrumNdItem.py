@@ -13,33 +13,28 @@ from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function 
 
 class SpectrumNdItem(SpectrumItem):
 
-  def __init__(self, spectrumPane, spectrumVar, region=None, dimMapping=None):
+  def __init__(self, spectrumPane, spectrum, dimMapping=None, region=None):
     """ spectrumPane is the parent
-        spectrumVar is the Spectrum name or object
+        spectrum is the Spectrum name or object
         region is in units of parent, ordered by spectrum dimensions
         dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
 
-    spectrum = self.spectrum = spectrumVar  # TEMP
-    
-    if not region and not spectrumPane.spectrumItems:
+    SpectrumItem.__init__(self, spectrumPane, spectrum, dimMapping)
+        
+    if not region:
       # chicken and egg problem, can't know xDim until after dimMapping set up
       # and that is set up in SpectrumItem constructor, but that needs to know
       # region; similar problem with spectrum object itself, which is set up in
       # SpectrumItem constructor but need to have it to hand before that called
-      xDim = 0 # TBD
-      yDim = 1 # TBD
-      region = self.defaultRegion()
+      xDim = self.xDim
+      yDim = self.yDim
+      region = spectrumPane.region = self.defaultRegion()
       viewBox = spectrumPane.viewBox
       # TBD: below assumes axes inverted
       viewBox.setXRange(region[xDim][1], region[xDim][0])
       viewBox.setYRange(region[yDim][1], region[yDim][0])
-          
-    dimMapping = {} # this block of code TEMP
-    for i in range(spectrum.dimensionCount):
-      dimMapping[i] = i
-    SpectrumItem.__init__(self, spectrumPane, spectrumVar, region, dimMapping)
     
     self.posContoursVisible = True # this block of code TEMP
     self.negContoursVisible = True

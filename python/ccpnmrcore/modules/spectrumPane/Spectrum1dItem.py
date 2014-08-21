@@ -15,15 +15,15 @@ class Spectrum1dItem(SpectrumItem):
   # sigClicked = QtCore.Signal()
 
 
-  def __init__(self, spectrumPane, spectrumVar, region=None, dimMapping=None):
+  def __init__(self, spectrumPane, spectrum, dimMapping=None):
     """ spectrumPane is the parent
-        spectrumVar is the Spectrum name or object
+        spectrum is the Spectrum name or object
         region is in units of parent, ordered by spectrum dimensions
         dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
-    self.spectrum = spectrumVar  # TEMP
-    self.spectrumPane = spectrumPane
+    SpectrumItem.__init__(self, spectrumPane, spectrum, dimMapping)
+    
     self.spectralData = self.getSliceData()
     print(self.spectrum)
     # self.integrals = self.autoIntegration()
@@ -31,12 +31,7 @@ class Spectrum1dItem(SpectrumItem):
     # self.integralListItems.append(IntegralListItem(self))
     self.integralListItems = []
 
-    # dimMapping = {} # this block of code TEMP
-    # for i in range(len(self.spectrum.pointCount)):
-    #   dimMapping[i] = i
-    SpectrumItem.__init__(self, spectrumPane, spectrumVar, region)
     # self.integralListItems.append(IntegralListItem(self))
-
 
   def autoIntegration(self):
     return LibSpectrum.automaticIntegration(self.spectrum, self.spectralData)

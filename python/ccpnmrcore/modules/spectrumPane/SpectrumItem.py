@@ -18,25 +18,18 @@ from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
 # abstract class: subclass needs to implement drawSpectrum()
 class SpectrumItem(QtGui.QGraphicsItem, Base):  # abstract class
 
-  def __init__(self, spectrumPane, spectrumVar, region=None, dimMapping=None, register=True):
+  def __init__(self, spectrumPane, spectrum, dimMapping=None):
     """ spectrumPane is the parent
-        spectrumVar is the Spectrum name or object
-        region is in units of parent, ordered by spectrum dimensions
+        spectrum is the Spectrum object
         dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
     
     QtGui.QGraphicsItem.__init__(self)
     Base.__init__(self, spectrumPane.project)
-    
-    spectrum = self.getObject(spectrumVar)
-    
-    #if region is None:
-    #  region = spectrum.defaultRegion(dimMapping)
-    
+        
     self.spectrumPane = spectrumPane
     self.spectrum = spectrum
-    self.region = region
     self.setDimMapping(dimMapping)
     
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
@@ -50,21 +43,27 @@ class SpectrumItem(QtGui.QGraphicsItem, Base):  # abstract class
 
     return QtCore.QRectF(-1000, -1000, 1000, 1000)  # TBD: remove hardwiring
     
-  def setDimMapping(self, dimMapping):
+  def setDimMapping(self, dimMapping=None):
     
+    spectrum = self.spectrum
+    
+    if dimMapping is None:
+      dimMapping = {}
+      for i in range(spectrum.dimensionCount):
+        dimMapping[i] = i
+            
     self.dimMapping = dimMapping
+    dimensionCount = spectrum.dimensionCount
 
     xDim = yDim = None
-    if dimMapping:
-      inverseDimMapping = {}
-      for dim in self.dimMapping:
-        inverseDim = dimMapping[dim]
-        if inverseDim == 0:
-          xDim = inverseDim
-        elif inverseDim == 1:
-          yDim = inverseDim
+    inverseDimMapping = {}
+    for dim in dimMapping:
+      inverseDim = dimMapping[dim]
+      if inverseDim == 0:
+        xDim = inverseDim
+      elif inverseDim == 1:
+        yDim = inverseDim
     
-    dimensionCount = self.spectrum.dimensionCount
     if xDim is not None: 
       assert 0 <= xDim < dimensionCount, 'xDim = %d, dimensionCount = %d' % (xDim, dimensionCount)
       
@@ -75,17 +74,3 @@ class SpectrumItem(QtGui.QGraphicsItem, Base):  # abstract class
     self.xDim = xDim
     self.yDim = yDim
 
-  # any attribute not known about is checked first in the parent and then in the spectrum
-  def __getattr__(self, attr):
-
-    """ self.parent() gives infinite loop
-    parent = self.parent()
-    if hasattr(parent, attr):
-      return getattr(parent, attr)
-"""
-    spectrum = self.spectrum
-    if hasattr(spectrum, attr):
-      return getattr(spectrum, attr)
-      
-    raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-    

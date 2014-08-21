@@ -38,7 +38,8 @@ class MainWindow(GuiMainWindow):
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.current = Current()
     self.panes = {}
-    self.preferencesFile = open("/Users/simon/pysideTestingCode/v3settings.json")
+    #self.preferencesFile = open("/Users/simon/pysideTestingCode/v3settings.json")
+    self.preferencesFile = open("/Users/wb104/svnsf/trunk/testv3/v3settings.json")
     self.preferences = json.load(self.preferencesFile, object_hook=AttrDict)
     self.preferencesFile.close()
     self.namespace = {'pg': pg, 'np': np, 'current': self.current, 'openProject':self.openProject,
@@ -46,7 +47,8 @@ class MainWindow(GuiMainWindow):
                       'panes':self.panes, 'preferences':self.preferences}
     self.pythonConsole = PythonConsole(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
-    self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
+    ###self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
+    self.spectrumPane=Spectrum1dPane(project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
     self.panes[self.spectrumPane.pid] = self.spectrumPane
     self.moduleCount = 1
     self.widget1=self.spectrumPane.dock
@@ -291,18 +293,20 @@ class MainWindow(GuiMainWindow):
     pass
 
   def addSpectrum1dPane(self):
-    newModule = Spectrum1dPane(parent=self, title='Module %s' % str(self.moduleCount+1),
+    #newModule = Spectrum1dPane(parent=self, title='Module %s' % str(self.moduleCount+1),
+    newModule = Spectrum1dPane(title='Module %s' % str(self.moduleCount+1),
                                current=self.current, pid='QP:%s' % str(self.moduleCount+1),
                                preferences=self.preferences)
     self.panes[newModule.pid] = newModule
     newModule.project = self.project
     newModule.current = self.current
     self.moduleCount+=1
-
+    
     self.dockArea.addDock(newModule.dock)
 
   def addSpectrumNdPane(self):
-    newModule = SpectrumNdPane(parent=self, title='Module %s' % str(self.moduleCount+1),
+    #newModule = SpectrumNdPane(parent=self, title='Module %s' % str(self.moduleCount+1),
+    newModule = SpectrumNdPane(title='Module %s' % str(self.moduleCount+1),
                                current=self.current, pid='QP:%s' % str(self.moduleCount+1),
                                preferences=self.preferences)
     self.panes[newModule.pid] = newModule

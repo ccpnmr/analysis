@@ -15,7 +15,7 @@ SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 SAMPLE_STATES = ['liquid', 'solid', 'ordered', 'powder', 'crystal']
 VOLUME_UNITS = ['μl', 'ml', 'l']
 
-class SpectrumPreferencesPopup(QtGui.QDialog):
+class SpectrumPropertiesPopup(QtGui.QDialog):
   def __init__(self, spectrum=None, parent=None):
     super(SpectrumPreferencesPopup, self).__init__(parent)
 
@@ -24,16 +24,16 @@ class SpectrumPreferencesPopup(QtGui.QDialog):
       tabWidget.addTab(GeneralTab(spectrum), "General")
       tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
       tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
-      tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
+      # tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
 
     else:
       tabWidget.addTab(GeneralTab(spectrum), "General")
       tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
       tabWidget.addTab(ContoursTab(spectrum), "Contours")
       tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
-      tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
+      # tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
 
-    self.setWindowTitle("Spectrum Preferences")
+    self.setWindowTitle("Spectrum Information")
     buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
 
     buttonBox.accepted.connect(self.accept)
@@ -67,9 +67,9 @@ class GeneralTab(QtGui.QWidget):
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(item[0]))
       colourBox.addItem(QtGui.QIcon(pix), item[1])
-    colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
-    colourButton = QtGui.QPushButton(text="More...")
-    colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
+    # colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
+    # colourButton = QtGui.QPushButton(text="More...")
+    # colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
     spectrumType = QtGui.QComboBox()
     spectrumType.addItems(SPECTRA)
     spectrumType.addItem(spectrum.experimentName)
@@ -96,7 +96,7 @@ class GeneralTab(QtGui.QWidget):
     if spectrum.dimensionCount == 1:
       layout.addWidget(colourLabel, 6, 0)
       layout.addWidget(colourBox, 6, 1)
-      layout.addWidget(colourButton, 6, 2)
+      # layout.addWidget(colourButton, 6, 2)
       layout.addWidget(spectrumTypeLabel, 7, 0)
       layout.addWidget(spectrumType, 7, 1)
       layout.addWidget(pulseProgramLabel, 8, 0)
@@ -149,11 +149,13 @@ class DimensionsTab(QtGui.QWidget):
       pointsData = QtGui.QLabel(str(spectrum.pointCounts[i]))
       axisTypeLabel = QtGui.QLabel(DIMENSIONS[i]+"-Type")
       axisTypeData = QtGui.QLabel(spectrum.dimensionTypes[i])
-      spectralWidthLabel = QtGui.QLabel(DIMENSIONS[i]+"-Spectral Width (Hz)")
-      spectralWidthData = QtGui.QLabel(str(spectrum.spectralWidthsHz[i]))
+      spectralWidthLabel = QtGui.QLabel(DIMENSIONS[i]+"-Spectral Width (ppm)")
+      spectralWidthData = QtGui.QLabel(str("%.3f" % spectrum.spectralWidths[i]))
+      spectralWidthHzLabel = QtGui.QLabel(DIMENSIONS[i]+"-Spectral Width (Hz)")
+      spectralWidthHzData = QtGui.QLabel(str("%.3f" % spectrum.spectralWidthsHz[i]))
       spectralReferencingLabel = QtGui.QLabel(DIMENSIONS[i]+"-Referencing")
       spectralReferencingData = QtGui.QLineEdit()
-      # spectralReferencingData.setText(str(spectrum.referenceValues[i]))
+      spectralReferencingData.setText(str("%.3f" % spectrum.referenceValues[i]))
       spectralAssignmentToleranceLabel = QtGui.QLabel(DIMENSIONS[i]+"-Assignment Tolerance")
       spectralAssignmentToleranceData = QtGui.QLineEdit()
       spectralShiftWeightingLabel = QtGui.QLabel(DIMENSIONS[i]+"-Shift Weighting")
@@ -167,12 +169,14 @@ class DimensionsTab(QtGui.QWidget):
       layout.addWidget(axisTypeData, j+2, 1)
       layout.addWidget(spectralWidthLabel, j+3, 0)
       layout.addWidget(spectralWidthData, j+3, 1)
-      layout.addWidget(spectralReferencingLabel, j+4, 0)
-      layout.addWidget(spectralReferencingData, j+4, 1)
-      layout.addWidget(spectralAssignmentToleranceLabel, j+5, 0)
-      layout.addWidget(spectralAssignmentToleranceData, j+5, 1)
-      layout.addWidget(spectralShiftWeightingLabel, j+6, 0)
-      layout.addWidget(spectralShiftWeightingData, j+6, 1)
+      layout.addWidget(spectralWidthHzLabel, j+4, 0)
+      layout.addWidget(spectralWidthHzData, j+4, 1)
+      layout.addWidget(spectralReferencingLabel, j+5, 0)
+      layout.addWidget(spectralReferencingData, j+5, 1)
+      layout.addWidget(spectralAssignmentToleranceLabel, j+6, 0)
+      layout.addWidget(spectralAssignmentToleranceData, j+6, 1)
+      layout.addWidget(spectralShiftWeightingLabel, j+7, 0)
+      layout.addWidget(spectralShiftWeightingData, j+7, 1)
       j+=8
 
 
@@ -194,7 +198,7 @@ class ContoursTab(QtGui.QWidget):
     positiveContourCountLabel = QtGui.QLabel("Number of contours")
     positiveContourCountData = QtGui.QLineEdit()
     positiveContourColourLabel = QtGui.QLabel("Colour")
-    positiveContoursColourPulldown = QtGui.Q
+    # positiveContoursColourPulldown = QtGui.Q
 
 
 
@@ -232,7 +236,7 @@ class PeakListsTab(QtGui.QWidget):
     super(PeakListsTab, self).__init__(parent)
 
     i=0
-    layout = QtGui.QGridLayout()
+    layout = QtGui.QHBoxLayout()
     for peakList in spectrum.peakLists:
       label = QtGui.QLabel()
       label.setText(str(peakList.pid))
@@ -243,8 +247,8 @@ class PeakListsTab(QtGui.QWidget):
       #   checkBox.setChecked(False)
       #
       # checkBox.stateChanged.connect(lambda: self.peakListToggle(spectrum.spectrumItem, checkBox.checkState(),peakList))
-      layout.addWidget(checkBox, i, 0)
-      layout.addWidget(label, i, 1)
+      layout.addWidget(checkBox)
+      layout.addWidget(label)
       # i+=1
 
     self.setLayout(layout)

@@ -257,7 +257,6 @@ class MainWindow(GuiMainWindow):
 
   def showApplicationPreferences(self):
     PreferencesPopup(preferences=self.preferences).exec_()
-    # print(self.preferences)
 
   def quitAction(self):
     # pass

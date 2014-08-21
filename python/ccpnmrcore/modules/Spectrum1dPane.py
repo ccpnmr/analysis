@@ -13,12 +13,13 @@ from ccpncore.util import Logging
 
 class Spectrum1dPane(SpectrumPane):
 
-  def __init__(self, project=None, parent=None, title=None, current=None, pid=None, preferences=None):
-    SpectrumPane.__init__(self, project, parent, title=title, pid=pid, preferences=preferences)
+  def __init__(self, project=None, title=None, current=None, pid=None, preferences=None):
+    SpectrumPane.__init__(self, project, title=title, pid=pid, preferences=preferences)
     # self.contextMenu = None
     self.project = project
     self.pid = pid
-    self.parent = parent
+    # self.parent = parent
+    print('parent',self.parent)
     self.viewBox.invertX()
     self.showGrid(x=True, y=True)
     self.gridShown = True
@@ -228,16 +229,12 @@ class Spectrum1dPane(SpectrumPane):
     # newAction.associatedWidgets()[1].setPalette(palette)
     newAction.toggled.connect(spectrumItem.plot.setVisible)
     self.spectrumToolbar.addAction(newAction)
-
-
-
-
     spectrum.spectrumItem = spectrumItem
     # for peakList in spectrum.peakLists:
     #   spectrumItem.addPeaks(self, peakList)
     # spectrumItem.addIntegrals(self)
     self.spectrumItems.append(spectrumItem)
-    return spectrum
+
 
 
   def showSpectrumPreferences(self,spectrum):

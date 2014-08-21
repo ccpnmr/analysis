@@ -67,9 +67,10 @@ class GeneralTab(QtGui.QWidget):
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(item[0]))
       colourBox.addItem(QtGui.QIcon(pix), item[1])
-    # colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
-    # colourButton = QtGui.QPushButton(text="More...")
-    # colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
+    colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
+    colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
+    colourButton = QtGui.QPushButton(text="More...")
+    colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
     spectrumType = QtGui.QComboBox()
     spectrumType.addItems(SPECTRA)
     spectrumType.addItem(spectrum.experimentName)
@@ -126,11 +127,12 @@ class GeneralTab(QtGui.QWidget):
   def changedColourComboIndex(self, spectrum, value):
 
     spectrum.spectrumItem.colour = QtGui.QColor(list(SPECTRUM_COLOURS.keys())[value])
-    print(QtGui.QColor(list(SPECTRUM_COLOURS.keys())[value]))
-    palette = QtGui.QPalette(spectrum.spectrumItem.toolBarButton.palette())
-    palette.setColor(QtGui.QPalette.Button,spectrum.spectrumItem.colour)
-    spectrum.spectrumItem.toolBarButton.setPalette(palette)
+    # palette = QtGui.QPalette(spectrum.spectrumItem.toolBarButton.palette())
+    # palette.setColor(QtGui.QPalette.Button,spectrum.spectrumItem.colour)
+    # spectrum.spectrumItem.toolBarButton.setPalette(palette)
     spectrum.spectrumItem.plot.setPen(spectrum.spectrumItem.colour)
+
+
 
 class DimensionsTab(QtGui.QWidget):
   def __init__(self, spectrum, dimensions, parent=None):

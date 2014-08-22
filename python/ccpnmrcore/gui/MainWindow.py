@@ -48,7 +48,8 @@ class MainWindow(GuiMainWindow):
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     
     ###self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
-    self.spectrumPane=Spectrum1dPane(project=project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
+    self.spectrumPane=Spectrum1dPane(project=self.project, title='Module 1', current=self.current,
+                                     pid='QP:1', preferences=self.preferences, mainWindow=self)
     self.panes[self.spectrumPane.pid] = self.spectrumPane
     self.moduleCount = 1
     self.widget1=self.spectrumPane.dock
@@ -329,7 +330,7 @@ class MainWindow(GuiMainWindow):
     #newModule = Spectrum1dPane(parent=self, title='Module %s' % str(self.moduleCount+1),
     newModule = Spectrum1dPane(title='Module %s' % str(self.moduleCount+1),
                                current=self.current, pid='QP:%s' % str(self.moduleCount+1),
-                               preferences=self.preferences)
+                               preferences=self.preferences, mainWindow=self)
     self.panes[newModule.pid] = newModule
     newModule.project = self.project
     newModule.current = self.current
@@ -342,7 +343,7 @@ class MainWindow(GuiMainWindow):
     #newModule = SpectrumNdPane(parent=self, title='Module %s' % str(self.moduleCount+1),
     newModule = SpectrumNdPane(title='Module %s' % str(self.moduleCount+1),
                                current=self.current, pid='QP:%s' % str(self.moduleCount+1),
-                               preferences=self.preferences)
+                               preferences=self.preferences, mainWindow=self)
     self.panes[newModule.pid] = newModule
     newModule.project = self.project
     newModule.current = self.current
@@ -467,11 +468,8 @@ class MainWindow(GuiMainWindow):
       spectrum = loadDataSource(self.project,directory)
 
     if spectrum.dimensionCount == 1:
-      # data = Spectrum1dItem(self.spectrumPane,spectrum).spectralData
-      # print(dir(self.widget1))
       self.current.pane.addSpectrum(spectrum)
-      # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
-      # self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
+      self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
 
     msg = spectrum.name+' loaded'
     self.statusBar().showMessage(msg)

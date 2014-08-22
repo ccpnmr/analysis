@@ -1,4 +1,5 @@
 from PySide import QtCore, QtGui
+import os
 import sys
 import random
 import numpy as np
@@ -40,10 +41,7 @@ class MainWindow(GuiMainWindow):
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.current = Current()
     self.panes = {}
-    self.preferencesFile = open("/Users/simon/pysideTestingCode/v3settings.json")
-    # self.preferencesFile = open("/Users/wb104/svnsf/trunk/testv3/v3settings.json")
-    self.preferences = json.load(self.preferencesFile, object_hook=AttrDict)
-    self.preferencesFile.close()
+    self.setupPreferences()
     self.namespace = {'pg': pg, 'np': np, 'current': self.current, 'openProject':self.openProject,
                       'newProject':self.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
                       'panes':self.panes, 'preferences':self.preferences}
@@ -227,7 +225,16 @@ class MainWindow(GuiMainWindow):
     self.pythonConsole.ui.historyList.addItem("project = openProject('"+currentProjectDir+"')\n")
     self.namespace['project'] = self.project
 
-
+  def setupPreferences(self):
+      
+    preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
+    try:
+      fp = open(preferencesPath)
+      self.preferences = json.load(fp, object_hook=AttrDict)
+      fp.close()
+    except:
+      self.preferences = None # TBD: should give some sensible default
+  
   def openRecentProject(self):
     pass
 

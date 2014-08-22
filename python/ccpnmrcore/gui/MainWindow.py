@@ -28,14 +28,13 @@ from ccpn import openProject, newProject
 
 class MainWindow(GuiMainWindow):
 
-  def __init__(self, **kw):
+  def __init__(self, project=None, **kw):
     GuiMainWindow.__init__(self, **kw)
-    self.project = None
-    # project = None
-    self.initUi()
+    self.initUi(project)
     self.setGeometry(50,100,1200,800)
+    self.setProject(project)
 
-  def initUi(self):
+  def initUi(self, project):
 
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -47,8 +46,9 @@ class MainWindow(GuiMainWindow):
                       'panes':self.panes, 'preferences':self.preferences}
     self.pythonConsole = PythonConsole(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
+    
     ###self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
-    self.spectrumPane=Spectrum1dPane(project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
+    self.spectrumPane=Spectrum1dPane(project=project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
     self.panes[self.spectrumPane.pid] = self.spectrumPane
     self.moduleCount = 1
     self.widget1=self.spectrumPane.dock
@@ -78,7 +78,6 @@ class MainWindow(GuiMainWindow):
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
     self._menuBar =  QtGui.QMenuBar()
-
 
 
     fileMenu = QtGui.QMenu("&Project", self)
@@ -216,14 +215,21 @@ class MainWindow(GuiMainWindow):
       currentProjectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
     else:
       currentProjectDir = projectDir
-    self.project = openProject(currentProjectDir)
+    project = openProject(currentProjectDir)
+    self.setProject(project)
     msg  = (currentProjectDir)+' opened'
-    self.leftWidget.fillSideBar(self.project)
-    self.spectrumPane.project = self.project
     self.statusBar().showMessage(msg)
     self.pythonConsole.write("project = openProject('"+currentProjectDir+"')\n")
     self.pythonConsole.ui.historyList.addItem("project = openProject('"+currentProjectDir+"')\n")
-    self.namespace['project'] = self.project
+    
+  def setProject(self, project):
+    
+    if project is not None:
+      self.leftWidget.fillSideBar(project)
+      self.spectrumPane.project = project
+      self.namespace['project'] = project
+    
+    self.project = project
 
   def setupPreferences(self):
       

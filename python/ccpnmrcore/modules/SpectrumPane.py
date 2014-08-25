@@ -61,6 +61,8 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.setAcceptDrops(True)
     self.crossHair = self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
+    self.storedZooms = []
+
     # print('parent',parent)
     if parent is None:
       self.dock = Dock(name=self.title, size=(1100,1300))
@@ -76,7 +78,8 @@ class SpectrumPane(pg.PlotWidget, Base):
     palette.setColor(QtGui.QPalette.Button,spectrumToolBarColor)
     #self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
     if self.dock:
-      self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 9)
+      self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 6)
+      self.dock.addWidget(self.spectrumUtilToolbar, 0, 6, 2, 4)
     self.spectrumIndex = 1
     self.viewBox.current = current
     self.positionBox = QtGui.QLabel()
@@ -115,10 +118,10 @@ class SpectrumPane(pg.PlotWidget, Base):
     position = self.viewBox.mapSceneToView(pos).toTuple()
     self.positionBox.setText("X: %.3f  Y: %.3f" % position)
 
-
-  def zoomToRegion(self, region):
-    self.setXRange(region[0],region[1])
-    self.setYRange(region[2],region[3])
+  #
+  # def zoomToRegion(self, region):
+  #   self.setXRange(region[0],region[1])
+  #   self.setYRange(region[2],region[3])
 
   def zoomX(self, region):
     self.setXRange(region[0],region[1])
@@ -128,6 +131,46 @@ class SpectrumPane(pg.PlotWidget, Base):
 
   def zoomAll(self):
     self.autoRange()
+
+  def zoomTo(self, x1, x2, y1, y2):
+    self.zoomToRegion([float(x1.text()),float(x2.text()),float(y1.text()),float(y2.text())])
+    self.zoomPopup.close()
+
+  def raiseZoomPopup(self):
+    self.zoomPopup = QtGui.QDialog()
+    layout = QtGui.QGridLayout()
+    layout.addWidget(QtGui.QLabel(text='x1'), 0, 0)
+    x1 = QtGui.QLineEdit()
+    layout.addWidget(x1, 0, 1, 1, 1)
+    layout.addWidget(QtGui.QLabel(text='x2'), 0, 2)
+    x2 = QtGui.QLineEdit()
+    layout.addWidget(x2, 0, 3, 1, 1)
+    layout.addWidget(QtGui.QLabel(text='y1'), 1, 0,)
+    y1 = QtGui.QLineEdit()
+    layout.addWidget(y1, 1, 1, 1, 1)
+    layout.addWidget(QtGui.QLabel(text='y2'), 1, 2)
+    y2 = QtGui.QLineEdit()
+    layout.addWidget(y2, 1, 3, 1, 1)
+    okButton = QtGui.QPushButton(text="OK")
+    okButton.clicked.connect(partial(self.zoomTo,x1,x2,y1,y2))
+    cancelButton = QtGui.QPushButton(text='Cancel')
+    layout.addWidget(okButton,2, 1)
+    layout.addWidget(cancelButton, 2, 3)
+    cancelButton.clicked.connect(self.zoomPopup.close)
+    self.zoomPopup.setLayout(layout)
+    self.zoomPopup.exec_()
+
+
+  def storeZoom(self):
+    self.storedZooms.append(self.viewBox.viewRange())
+
+  def restoreZoom(self):
+    if len(self.storedZooms) != 0:
+      restoredZoom = self.storedZooms.pop()
+      self.setXRange(restoredZoom[0][0], restoredZoom[0][1])
+      self.setYRange(restoredZoom[1][0], restoredZoom[1][1])
+
+
 
 
   ##### functions used externally #####

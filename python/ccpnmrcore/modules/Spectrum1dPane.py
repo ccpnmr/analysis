@@ -31,12 +31,9 @@ class Spectrum1dPane(SpectrumPane):
     self.title = title
     self.spectrumItems = []
     self.fillToolBar()
-    self.storedZooms = []
     self.colourIndex = 0
 
   def fillToolBar(self):
-    print('icons/zoom-best-fit.png')
-    # autoScaleAction =
     self.spectrumUtilToolbar.addAction("AutoScale", self.zoomYAll)
     self.spectrumUtilToolbar.addAction("Full", self.zoomXAll)
     self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
@@ -143,44 +140,6 @@ class Spectrum1dPane(SpectrumPane):
     x2 = self.viewBox.childrenBoundingRect().left()
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2,x1)
-
-  def zoomTo(self, x1, x2, y1, y2):
-    self.zoomToRegion([float(x1.text()),float(x2.text()),float(y1.text()),float(y2.text())])
-    self.zoomPopup.close()
-
-  def raiseZoomPopup(self):
-    self.zoomPopup = QtGui.QDialog()
-    layout = QtGui.QGridLayout()
-    layout.addWidget(QtGui.QLabel(text='x1'), 0, 0)
-    x1 = QtGui.QLineEdit()
-    layout.addWidget(x1, 0, 1, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='x2'), 0, 2)
-    x2 = QtGui.QLineEdit()
-    layout.addWidget(x2, 0, 3, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='y1'), 1, 0,)
-    y1 = QtGui.QLineEdit()
-    layout.addWidget(y1, 1, 1, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='y2'), 1, 2)
-    y2 = QtGui.QLineEdit()
-    layout.addWidget(y2, 1, 3, 1, 1)
-    okButton = QtGui.QPushButton(text="OK")
-    okButton.clicked.connect(partial(self.zoomTo,x1,x2,y1,y2))
-    cancelButton = QtGui.QPushButton(text='Cancel')
-    layout.addWidget(okButton,2, 1)
-    layout.addWidget(cancelButton, 2, 3)
-    cancelButton.clicked.connect(self.zoomPopup.close)
-    self.zoomPopup.setLayout(layout)
-    self.zoomPopup.exec_()
-
-
-  def storeZoom(self):
-    self.storedZooms.append(self.viewBox.viewRange())
-
-  def restoreZoom(self):
-    if len(self.storedZooms) != 0:
-      restoredZoom = self.storedZooms.pop()
-      self.setXRange(restoredZoom[0][0], restoredZoom[0][1])
-      self.setYRange(restoredZoom[1][0], restoredZoom[1][1])
 
 
   def addSpectrum(self, spectrum):

@@ -1,10 +1,15 @@
 from PySide import QtGui, QtCore
 
-# from ccpncore.gui.Base import Base
+from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ColourDialog import ColourDialog
 from ccpnmrcore.modules.SpectrumPane import SPECTRUM_COLOURS
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
+from ccpncore.gui.Label import Label
+from ccpncore.gui.LineEdit import LineEdit
+from ccpncore.gui.PullDownList import PulldownList
+from ccpncore.gui.CheckBox import CheckBox
+
 
 from functools import partial
 
@@ -15,9 +20,11 @@ SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 SAMPLE_STATES = ['liquid', 'solid', 'ordered', 'powder', 'crystal']
 VOLUME_UNITS = ['μl', 'ml', 'l']
 
+
 class SpectrumPropertiesPopup(QtGui.QDialog):
-  def __init__(self, spectrum=None, parent=None):
+  def __init__(self, spectrum=None, parent=None, **kw):
     super(SpectrumPropertiesPopup, self).__init__(parent)
+    Base.__init__(self, **kw)
 
     tabWidget = QtGui.QTabWidget()
     if spectrum.dimensionCount == 1:
@@ -46,75 +53,64 @@ class SpectrumPropertiesPopup(QtGui.QDialog):
 
 
 
-class GeneralTab(QtGui.QWidget):
+class GeneralTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, parent=None):
     super(GeneralTab, self).__init__(parent)
 
-    layout = QtGui.QGridLayout()
-    pathLabel = QtGui.QLabel("Path:")
-    pathData = QtGui.QLineEdit()
+
+    pathLabel = Label(self, text="Path:", grid=(1, 0))
+    pathData = LineEdit(self, grid=(1, 1))
     pathData.setText(spectrum.filePath)
-    dataTypeLabel = QtGui.QLabel("Data Type: ")
-    dataTypeData = QtGui.QLabel(getSpectrumFileFormat(spectrum.filePath))
-    templateLabel = QtGui.QLabel("Template: ")
-    dateLabel = QtGui.QLabel("Date: ")
-    pidLabel = QtGui.QLabel("PID: ")
-    pidData = QtGui.QLabel(spectrum.pid)
-    spectrumTypeLabel = QtGui.QLabel("Spectrum Type: ")
-    colourLabel = QtGui.QLabel("Colour")
-    colourBox = QtGui.QComboBox()
-    for item in SPECTRUM_COLOURS.items():
-      pix=QtGui.QPixmap(QtCore.QSize(20,20))
-      pix.fill(QtGui.QColor(item[0]))
-      colourBox.addItem(QtGui.QIcon(pix), item[1])
-    colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
-    colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
-    colourButton = QtGui.QPushButton(text="More...")
-    colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
-    spectrumType = QtGui.QComboBox()
-    spectrumType.addItems(SPECTRA)
-    spectrumType.addItem(spectrum.experimentName)
-    spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
-    pulseProgramLabel = QtGui.QLabel("Pulse Program: ")
-    recordingDataLabel = QtGui.QLabel("Date Recorded")
-    minimumValueLabel = QtGui.QLabel("Minimum Value: ")
-    maximumValueLabel = QtGui.QLabel("Maximum Value: ")
-    noiseLevelLabel = QtGui.QLabel("Noise Level: ")
-    noiseLevelData = QtGui.QLineEdit()
-    if spectrum.ccpnSpectrum.noiseLevel is not None:
-      noiseLevelData.setText(str('%.3d' % spectrum.ccpnSpectrum.noiseLevel))
-    else:
-      noiseLevelData.setText('None')
-
-    layout.addWidget(pathLabel, 1, 0)
-    layout.addWidget(pathData, 1, 1)
-    layout.addWidget(dataTypeLabel, 2, 0)
-    layout.addWidget(dataTypeData, 2, 1)
-    layout.addWidget(templateLabel, 3, 0)
-    layout.addWidget(dateLabel, 4, 0)
-    layout.addWidget(pidLabel, 5, 0)
-    layout.addWidget(pidData, 5, 1)
+    dataTypeLabel = Label(self, text="Data Type: ", grid=(2, 0))
+    dataTypeData = Label(self, text=getSpectrumFileFormat(spectrum.filePath), grid=(2, 1))
+    templateLabel = Label(self, text="Template: ", grid=(3, 0))
+    dateLabel = Label(self, text="Date: ", grid=(4, 0))
+    pidLabel = Label(self, text="PID: ", grid=(5, 0))
+    pidData = Label(self, text=spectrum.pid, grid=(5, 1))
     if spectrum.dimensionCount == 1:
-      layout.addWidget(colourLabel, 6, 0)
-      layout.addWidget(colourBox, 6, 1)
-      # layout.addWidget(colourButton, 6, 2)
-      layout.addWidget(spectrumTypeLabel, 7, 0)
-      layout.addWidget(spectrumType, 7, 1)
-      layout.addWidget(pulseProgramLabel, 8, 0)
-      layout.addWidget(minimumValueLabel, 9, 0)
-      layout.addWidget(maximumValueLabel, 10, 0)
-      layout.addWidget(noiseLevelLabel, 11, 0)
-      layout.addWidget(noiseLevelData, 11, 1)
+      colourLabel = Label(self, text="Colour", grid=(6,0))
+      # colourBox = PulldownList(self, grid=(6, 1))
+      # for item in SPECTRUM_COLOURS.items():
+      #   pix=QtGui.QPixmap(QtCore.QSize(20,20))
+      #   pix.fill(QtGui.QColor(item[0]))
+      #   colourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+      # colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
+      # colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
+      colourButton = Button(self, text="More...", grid=(6, 2))
+      colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
+      spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(7, 0))
+      # spectrumType = PulldownList(self, grid=(7, 1))
+      # spectrumType.addItems(SPECTRA)
+      # spectrumType.addItem(spectrum.experimentName)
+      # spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
+      pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(8, 0))
+      recordingDataLabel = Label(self, text="Date Recorded", grid=(9, 0))
+      minimumValueLabel = Label(self, text="Minimum Value: ", grid=(10, 0))
+      maximumValueLabel = Label(self, text="Maximum Value: ", grid=(11, 0))
+      noiseLevelLabel = Label(self, text="Noise Level: ", grid=(12, 0))
+      noiseLevelData = LineEdit(self, )
+      if spectrum.ccpnSpectrum.noiseLevel is not None:
+        noiseLevelData.setText(str('%.3d' % spectrum.ccpnSpectrum.noiseLevel))
+      else:
+        noiseLevelData.setText('None')
     else:
-      layout.addWidget(spectrumTypeLabel, 6, 0)
-      layout.addWidget(spectrumType, 6, 1)
-      layout.addWidget(pulseProgramLabel, 7, 0)
-      layout.addWidget(minimumValueLabel, 8, 0)
-      layout.addWidget(maximumValueLabel, 9, 0)
-      layout.addWidget(noiseLevelLabel, 10, 0)
-      layout.addWidget(noiseLevelData, 10, 1)
+      spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(6, 0))
+      # spectrumType = PulldownList(self, grid=(6, 1))
+      # spectrumType.addItems(SPECTRA)
+      # spectrumType.addItem(spectrum.experimentName)
+      # spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
+      pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(7, 0))
+      recordingDataLabel = Label(self, text="Date Recorded", grid=(8, 0))
+      minimumValueLabel = Label(self, text="Minimum Value: ", grid=(9, 0))
+      maximumValueLabel = Label(self, text="Maximum Value: ", grid=(10, 0))
+      noiseLevelLabel = Label(self, text="Noise Level: ", grid=(11, 0))
+      noiseLevelData = LineEdit(self, grid=(11, 1))
+      if spectrum.ccpnSpectrum.noiseLevel is not None:
+        noiseLevelData.setText(str('%.3d' % spectrum.ccpnSpectrum.noiseLevel))
+      else:
+        noiseLevelData.setText('None')
 
-    self.setLayout(layout)
+
 
   def changeSpectrumColour(self, spectrum):
     dialog = ColourDialog()
@@ -139,50 +135,29 @@ class DimensionsTab(QtGui.QWidget):
     super(DimensionsTab, self).__init__(parent)
 
     layout = QtGui.QGridLayout()
-    dimensionalityLabel = QtGui.QLabel("Dimensionality")
-    dimensionality = QtGui.QLabel(str(dimensions)+"D")
-    layout.addWidget(dimensionalityLabel, 0, 0)
-    layout.addWidget(dimensionality, 0, 1)
+    dimensionalityLabel = Label(self, text="Dimensionality", grid=(0, 0))
+    dimensionality = Label(self, text=str(dimensions)+"D", grid=(0, 1))
     j = 2
     for i in range(dimensions):
-      axisLabel = QtGui.QLabel(DIMENSIONS[i]+"-Label")
-      axisLabelData = QtGui.QLabel(str(spectrum.isotopeCodes[i]))
-      pointsLabel = QtGui.QLabel(DIMENSIONS[i]+"-Points")
-      pointsData = QtGui.QLabel(str(spectrum.pointCounts[i]))
-      axisTypeLabel = QtGui.QLabel(DIMENSIONS[i]+"-Type")
-      axisTypeData = QtGui.QLabel(spectrum.dimensionTypes[i])
-      spectralWidthLabel = QtGui.QLabel(DIMENSIONS[i]+"-Spectral Width (ppm)")
-      spectralWidthData = QtGui.QLabel(str("%.3f" % spectrum.spectralWidths[i]))
-      spectralWidthHzLabel = QtGui.QLabel(DIMENSIONS[i]+"-Spectral Width (Hz)")
-      spectralWidthHzData = QtGui.QLabel(str("%.3f" % spectrum.spectralWidthsHz[i]))
-      spectralReferencingLabel = QtGui.QLabel(DIMENSIONS[i]+"-Referencing")
-      spectralReferencingData = QtGui.QLineEdit()
-      spectralReferencingData.setText(str("%.3f" % spectrum.referenceValues[i]))
-      spectralAssignmentToleranceLabel = QtGui.QLabel(DIMENSIONS[i]+"-Assignment Tolerance")
-      spectralAssignmentToleranceData = QtGui.QLineEdit()
-      spectralShiftWeightingLabel = QtGui.QLabel(DIMENSIONS[i]+"-Shift Weighting")
-      spectralShiftWeightingData = QtGui.QLineEdit()
-
-      layout.addWidget(axisLabel, j, 0)
-      layout.addWidget(axisLabelData, j, 1)
-      layout.addWidget(pointsLabel, j+1, 0)
-      layout.addWidget(pointsData, j+1, 1)
-      layout.addWidget(axisTypeLabel, j+2, 0)
-      layout.addWidget(axisTypeData, j+2, 1)
-      layout.addWidget(spectralWidthLabel, j+3, 0)
-      layout.addWidget(spectralWidthData, j+3, 1)
-      layout.addWidget(spectralWidthHzLabel, j+4, 0)
-      layout.addWidget(spectralWidthHzData, j+4, 1)
-      layout.addWidget(spectralReferencingLabel, j+5, 0)
-      layout.addWidget(spectralReferencingData, j+5, 1)
-      layout.addWidget(spectralAssignmentToleranceLabel, j+6, 0)
-      layout.addWidget(spectralAssignmentToleranceData, j+6, 1)
-      layout.addWidget(spectralShiftWeightingLabel, j+7, 0)
-      layout.addWidget(spectralShiftWeightingData, j+7, 1)
-      j+=8
+      axisLabel = Label(self, text=DIMENSIONS[i]+"-Label", grid=(j, 0))
+      axisLabelData = Label(self, text=str(spectrum.isotopeCodes[i]), grid=(j, 1))
+      pointsLabel = Label(self, text=DIMENSIONS[i]+"-Points", grid=(j+1, 0))
+      pointsData = Label(self, text=str(spectrum.pointCounts[i]), grid=(j+1, 1))
+      axisTypeLabel = Label(self, text=DIMENSIONS[i]+"-Type", grid=(j+2, 0))
+      axisTypeData = Label(self, text=spectrum.dimensionTypes[i], grid=(j+2, 1))
+      spectralWidthLabel = Label(self, text=DIMENSIONS[i]+"-Spectral Width (ppm)", grid=(j+3, 0))
+      spectralWidthData = Label(self, text=str("%.3f" % spectrum.spectralWidths[i]), grid=(j+3, 1))
+      spectralWidthHzLabel = Label(self, text=DIMENSIONS[i]+"-Spectral Width (Hz)", grid=(j+4, 0))
+      spectralWidthHzData = Label(self, text=str("%.3f" % spectrum.spectralWidthsHz[i]), grid=(j+5, 0))
+      spectralReferencingLabel = Label(self, text=DIMENSIONS[i]+"-Referencing", grid=(j+6, 0))
+      spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referenceValues[i]), grid=(j+6, 1))
+      spectralAssignmentToleranceLabel = Label(self, text=DIMENSIONS[i]+"-Assignment Tolerance", grid=(j+7, 0))
+      spectralAssignmentToleranceData = LineEdit(self, grid=(j+7, 1))
+      spectralShiftWeightingLabel = Label(self, text=DIMENSIONS[i]+"-Shift Weighting", grid=(j+8, 0))
+      spectralShiftWeightingData = LineEdit(self, grid=(j+8, 1))
+      j+=9
 
 
-    self.setLayout(layout)
 
     # for i in range(dimensions):
 
@@ -190,116 +165,120 @@ class ContoursTab(QtGui.QWidget):
   def __init__(self, spectrum, parent=None):
     super(ContoursTab, self).__init__(parent)
 
-    layout = QtGui.QGridLayout()
-    positiveContoursLabel = QtGui.QLabel("Show Positive Levels")
-    positiveContoursCheckBox = QtGui.QCheckBox()
-    positiveBaseLevelLabel = QtGui.QLabel("Base Level")
-    positiveBaseLevelData = QtGui.QLineEdit()
-    positiveMultiplierLabel = QtGui.QLabel("Multiplier")
-    positiveMultiplierData = QtGui.QLineEdit()
-    positiveContourCountLabel = QtGui.QLabel("Number of contours")
-    positiveContourCountData = QtGui.QLineEdit()
-    positiveContourColourLabel = QtGui.QLabel("Colour")
-    # positiveContoursColourPulldown = QtGui.Q
+    positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(0, 0))
+    positiveContoursCheckBox = CheckBox(self, grid=(0, 1), checked="True")
+    negativeContoursLabel = Label(self, text="Show negative Contours", grid=(1 ,0))
+    negativeContoursCheckBox = CheckBox(self, grid=(1, 1), checked="True")
+    positiveBaseLevelLabel = Label(self, text="Base Level", grid=(2, 0))
+    positiveBaseLevelData = LineEdit(self, text=str(spectrum.spectrumItem.baseLevel), grid=(2, 1))
+    positiveBaseLevelData.textChanged.connect(partial(self.lineEditTextChanged, spectrum.spectrumItem.baseLevel))
+    positiveMultiplierLabel = Label(self, text="Multiplier", grid=(3, 0))
+    positiveMultiplierData = LineEdit(self, text=str(spectrum.spectrumItem.multiplier), grid=(3, 1))
+    positiveContourCountLabel = Label(self, text="Number of contours", grid=(4, 0))
+    positiveContourCountData = LineEdit(self, text=str(spectrum.spectrumItem.numberOfLevels), grid=(4, 1))
+    positiveContourColourLabel = Label(self, text="Colour",grid=(5, 0))
+    positiveColourBox = PulldownList(self, grid=(5, 1))
+    for item in SPECTRUM_COLOURS.items():
+      pix=QtGui.QPixmap(QtCore.QSize(20,20))
+      pix.fill(QtGui.QColor(item[0]))
+      positiveColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    positiveColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(QtGui.QColor.fromRgb(
+      spectrum.spectrumItem.posColors[0][0], spectrum.spectrumItem.posColors[0][1], spectrum.spectrumItem.posColors[0][2]).name()))
+    positiveColourBox.currentIndexChanged.connect(partial(self.changePosColourComboIndex, spectrum))
+    positiveColourBox = Button(self, text="More...", grid=(5, 2))
+    positiveColourBox.clicked.connect(partial(self.changeSpectrumColour, spectrum))
 
 
+    #
+    # negativeContoursLabel = Label(self, text="Show negative Levels", grid=(6, 0))
+    # negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked="True")
+    # negativeBaseLevelLabel = Label(self, text="Base Level", grid=(7, 0))
+    # negativeBaseLevelData = LineEdit(self, text=spectrum.spectrumItem.baseLevel, grid=(7, 1))
+    # negativeMultiplierLabel = Label(self, text="Multiplier", grid=(8, 0))
+    # negativeMultiplierData = LineEdit(self, grid=(8, 1))
+    # negativeContourCountLabel = Label(self, text="Number of contours", grid=(9, 0))
+    # negativeContourCountData = LineEdit(self, grid=(9, 1))
+    negativeContourColourLabel = Label(self, text="Colour",grid=(6, 0))
+    negativeColourBox = PulldownList(self, grid=(6, 1))
+    for item in SPECTRUM_COLOURS.items():
+      pix=QtGui.QPixmap(QtCore.QSize(20,20))
+      pix.fill(QtGui.QColor(item[0]))
+      negativeColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    negativeColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(QtGui.QColor.fromRgb(
+      spectrum.spectrumItem.negColors[0][0], spectrum.spectrumItem.negColors[0][1], spectrum.spectrumItem.negColors[0][2]).name()))
+    negativeColourBox.currentIndexChanged.connect(partial(self.changeNegColourComboIndex, spectrum))
+    negativeColourBox = Button(self, text="More...", grid=(6, 2))
+    negativeColourBox.clicked.connect(partial(self.changeSpectrumColour, spectrum))
 
-    negativeContoursLabel = QtGui.QLabel("Show Negative Levels")
-    negativeContoursCheckBox = QtGui.QCheckBox()
-    negativeBaseLevelLabel = QtGui.QLabel("Base Level")
-    negativeBaseLevelData = QtGui.QLineEdit()
-    negativeMultiplierLabel = QtGui.QLabel("Multiplier")
-    negativeMultiplierData = QtGui.QLineEdit()
-    negativeContourCountLabel = QtGui.QLabel("Number of contours")
-    negativeContourCountData = QtGui.QLineEdit()
+  def lineEditTextChanged(self, text, property):
+      pass
+      # print(text)
+      # property = text
+      # print(property.parent)
 
-    layout.addWidget(positiveContoursLabel, 0, 0)
-    layout.addWidget(positiveContoursCheckBox, 0, 1)
-    layout.addWidget(positiveBaseLevelLabel, 1, 0)
-    layout.addWidget(positiveBaseLevelData, 1, 1)
-    layout.addWidget(positiveMultiplierLabel, 2, 0)
-    layout.addWidget(positiveMultiplierData, 2, 1)
-    layout.addWidget(positiveContourCountLabel, 3, 0)
-    layout.addWidget(positiveContourCountData, 3, 1)
-    layout.addWidget(negativeContoursLabel, 4, 0)
-    layout.addWidget(negativeContoursCheckBox, 4, 1)
-    layout.addWidget(negativeBaseLevelLabel, 5, 0)
-    layout.addWidget(negativeBaseLevelData, 5, 1)
-    layout.addWidget(negativeMultiplierLabel, 6, 0)
-    layout.addWidget(negativeMultiplierData, 6, 1)
-    layout.addWidget(negativeContourCountLabel, 7, 0)
-    layout.addWidget(negativeContourCountData, 7, 1)
+  def changeSpectrumColour(self):
+    pass
 
-    self.setLayout(layout)
+  def changePosColourComboIndex(self, spectrum, value):
+
+    spectrum.spectrumItem.colour = ((QtGui.QColor(list(SPECTRUM_COLOURS.keys())[value]).getRgb(),))
+    # palette = QtGui.QPalette(spectrum.spectrumItem.toolBarButton.palette())
+    # palette.setColor(QtGui.QPalette.Button,spectrum.spectrumItem.colour)
+    # spectrum.spectrumItem.toolBarButton.setPalette(palette)
+    # spectrumContour == spectrum.spectrumItem.colour
+    spectrum.spectrumItem.posColors = spectrum.spectrumItem.colour
+    # spectrum.spectrumItem.negColors = spectrumContour
+
+  def changeNegColourComboIndex(self, spectrum, value):
+
+    spectrum.spectrumItem.colour = ((QtGui.QColor(list(SPECTRUM_COLOURS.keys())[value]).getRgb(),))
+    # palette = QtGui.QPalette(spectrum.spectrumItem.toolBarButton.palette())
+    # palette.setColor(QtGui.QPalette.Button,spectrum.spectrumItem.colour)
+    # spectrum.spectrumItem.toolBarButton.setPalette(palette)
+    spectrum.spectrumItem.negColors = spectrum.spectrumItem.colour
 
 
 class PeakListsTab(QtGui.QWidget):
   def __init__(self, spectrum, parent=None):
     super(PeakListsTab, self).__init__(parent)
-
+    #
     i=0
-    layout = QtGui.QHBoxLayout()
     for peakList in spectrum.peakLists:
-      label = QtGui.QLabel()
-      label.setText(str(peakList.pid))
-      checkBox = QtGui.QCheckBox()
-      # if spectrum.spectrumItem.peakListItems[peakList.pid].displayed == True:
-      #   checkBox.setChecked(True)
-      # else:
-      #   checkBox.setChecked(False)
-      #
-      # checkBox.stateChanged.connect(lambda: self.peakListToggle(spectrum.spectrumItem, checkBox.checkState(),peakList))
-      layout.addWidget(checkBox)
-      layout.addWidget(label)
-      # i+=1
+      label = Label(self, text=str(peakList.pid), grid=(i, 1))
+      checkBox = CheckBox(self, grid=(i, 0), checked="True")
+    #   # if spectrum.spectrumItem.peakListItems[peakList.pid].displayed == True:
+    #   #   checkBox.setChecked(True)
+    #   # else:
+    #   #   checkBox.setChecked(False)
+    #   #
+    #   # checkBox.stateChanged.connect(lambda: self.peakListToggle(spectrum.spectrumItem, checkBox.checkState(),peakList))
+    #   # i+=1
 
-    self.setLayout(layout)
 
 class AcquisitionTab(QtGui.QWidget):
   def __init__(self, spectrum, parent=None):
       super(AcquisitionTab, self).__init__(parent)
 
-      layout = QtGui.QGridLayout()
-      spectrometerLabel = QtGui.QLabel("Acquisition: ")
-      spectrometerData = QtGui.QLineEdit()
-      probeLabel = QtGui.QLabel("Probe: ")
-      probeData = QtGui.QLineEdit()
-      numberScansLabel = QtGui.QLabel("Number of Scans: ")
-      numberScansData = QtGui.QLineEdit()
-      sampleStateLabel = QtGui.QLabel("Sample State: ")
-      sampleStateData = QtGui.QComboBox()
+      spectrometerLabel = Label(self, text="Acquisition: ", grid=(0, 0))
+      spectrometerData = LineEdit(self, grid=(0, 1))
+      probeLabel = Label(self, text="Probe: ",grid=(1, 0))
+      probeData = LineEdit(self, grid=(1, 1))
+      numberScansLabel = Label(self, text="Number of Scans: ", grid=(2, 0))
+      numberScansData = LineEdit(self, grid=(2, 1))
+      sampleStateLabel = Label(self, text="Sample State: ", grid=(3, 0))
+      sampleStateData = PulldownList(self, grid=(3, 1))
       sampleStateData.addItems(SAMPLE_STATES)
-      sampleVolumeLabel = QtGui.QLabel("Sample Volume: ")
-      sampleVolumeData = QtGui.QLineEdit()
-      # volumeUnitLabel = QtGui.QLabel("Volume Unit")
-      volumeUnitData = QtGui.QComboBox()
+      sampleVolumeLabel = Label(self, text="Sample Volume: ", grid=(4, 0))
+      sampleVolumeData = LineEdit(self, grid=(4, 1))
+      # volumeUnitLabel = Label(self, text="Volume Unit")
+      volumeUnitData = PulldownList(self)
       volumeUnitData.addItems(VOLUME_UNITS)
-      tubeTypeLabel = QtGui.QLabel("NMR Tube Type: ")
-      tubeTypeData = QtGui.QLineEdit()
-      spinningAngleLabel = QtGui.QLabel("Spinning Angle: ")
-      spinningAngleData = QtGui.QLineEdit()
-      spinningRateLabel = QtGui.QLabel("Spinning Rate: ")
-      spinningRateData = QtGui.QLineEdit()
-
-      layout.addWidget(spectrometerLabel, 0, 0)
-      layout.addWidget(spectrometerData, 0, 1)
-      layout.addWidget(probeLabel, 1, 0)
-      layout.addWidget(probeData, 1, 1)
-      layout.addWidget(numberScansLabel, 2, 0)
-      layout.addWidget(numberScansData, 2, 1)
-      layout.addWidget(sampleStateLabel, 3, 0)
-      layout.addWidget(sampleStateData, 3, 1)
-      layout.addWidget(sampleVolumeLabel, 4, 0)
-      layout.addWidget(sampleVolumeData, 4, 1)
-      layout.addWidget(volumeUnitData, 4, 2)
-      layout.addWidget(tubeTypeLabel, 5, 0)
-      layout.addWidget(tubeTypeData, 5, 1)
-      layout.addWidget(spinningAngleLabel, 6, 0)
-      layout.addWidget(spinningAngleData, 6, 1)
-      layout.addWidget(spinningRateLabel, 7, 0)
-      layout.addWidget(spinningRateData, 7, 1)
-
-      self.setLayout(layout)
+      tubeTypeLabel = Label(self, text="NMR Tube Type: ", grid=(5, 0))
+      tubeTypeData = LineEdit(self, grid=(5, 1))
+      spinningAngleLabel = Label(self, text="Spinning Angle: ", grid=(6, 0))
+      spinningAngleData = LineEdit(self, grid=(6, 1))
+      spinningRateLabel = Label(self, text="Spinning Rate: ", grid=(7, 0))
+      spinningRateData = LineEdit(self, grid=(7, 1))
 
 
 

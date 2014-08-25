@@ -16,7 +16,6 @@ class SpectrumNdPane(SpectrumPane):
     
     self.setViewport(QtOpenGL.QGLWidget())
     self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
-
     self.viewBox.invertX()
     self.viewBox.invertY()
       
@@ -43,3 +42,4 @@ class SpectrumNdPane(SpectrumPane):
       
     spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region)
     self.scene().addItem(spectrumItem)
+    spectrum.spectrumItem = spectrumItem

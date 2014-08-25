@@ -48,7 +48,7 @@ class MainWindow(GuiMainWindow):
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     
     ###self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
-    self.spectrumPane=Spectrum1dPane(project=project, title='Module 1', current=self.current,
+    self.spectrumPane=SpectrumNdPane(project=project, title='Module 1', current=self.current,
                                      pid='QP:1', preferences=self.preferences, mainWindow=self)
     self.panes[self.spectrumPane.pid] = self.spectrumPane
     self.moduleCount = 1

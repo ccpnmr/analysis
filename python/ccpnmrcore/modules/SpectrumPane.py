@@ -23,12 +23,13 @@ SPECTRUM_COLOURS = OrderedDict([('#ff0000','red'),
                                 ('#8000ff','purple'),
                                 ('#00ff00','green'),
                                 ('#ff00ff','magenta'),
-                                ('#00FF80','spring green'),
-                                ('#FF0080','deep pink')])
+                                ('#00ff80','spring green'),
+                                ('#ff0080','deep pink')])
 
 class SpectrumPane(pg.PlotWidget, Base):
   
-  def __init__(self, project=None, parent=None, spectraVar=None, current=None, title=None, pid=None, preferences=None, **kw):
+  def __init__(self, project=None, parent=None, spectraVar=None, current=None, title=None, pid=None,
+               mainWindow=None, preferences=None, **kw):
 
     if preferences.general.colourScheme == 'light':
       background = 'w'
@@ -46,6 +47,8 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.title = title
     self.project = project
+    self.mainWindow = mainWindow
+    self.current = current
     self.pid = pid
     self.viewBox = self.plotItem.vb
     self.viewBox.parent = self
@@ -164,22 +167,24 @@ class SpectrumPane(pg.PlotWidget, Base):
       if len(filePaths) == 1:
         for dirpath, dirnames, filenames in os.walk(filePaths[0]):
           if dirpath.endswith('memops') and 'Implementation' in dirnames:
-            self.parent.openProject(filePaths[0])
+            self.mainWindow.openProject(filePaths[0])
             self.addSpectra(self.project.spectra)
 
         else:
           print(filePaths[0])
-          self.parent.loadSpectra(filePaths[0])
+          self.mainWindow.loadSpectra(filePaths[0])
       elif len(filePaths) > 1:
-        [self.parent.loadSpectra(filePath) for filePath in filePaths]
+        [self.mainWindow.loadSpectra(filePath) for filePath in filePaths]
 
 
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
       pidData = str(data.data(),encoding='utf-8')
-      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e']
+      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12']
       pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
       actualPid = ''.join(map(str, pidData2))
+      print(list(actualPid))
+
       spectrum = self.getObject(actualPid)
       self.addSpectrum(spectrum)
       self.current.spectrum = spectrum

@@ -1,3 +1,5 @@
+__author__ = 'simon'
+
 from PySide import QtGui, QtCore
 import json
 from functools import partial
@@ -9,6 +11,7 @@ from ccpncore.gui.PullDownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
 
 LANGUAGES = ['English-UK', 'English-US', 'Nederlands', 'Deutsch', 'Español', 'Français', 'Dansk']
+COLOUR_SCHEMES = ['light', 'dark']
 
 
 class PreferencesPopup(QtGui.QDialog):
@@ -16,6 +19,7 @@ class PreferencesPopup(QtGui.QDialog):
     super(PreferencesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.preferences = preferences
+    self.oldPreferences = preferences
     self.generalTitle = Label(self, text="General", grid=(0, 0))
     self.generalTitle.setStyleSheet("font: bold;")
     self.autoBackupLabel =  Label(self, text="Auto Backup On Open: ", grid=(2, 0))
@@ -43,9 +47,10 @@ class PreferencesPopup(QtGui.QDialog):
     self.editorData = LineEdit(self, text=self.preferences.general.editor, grid=(14, 1))
     self.colourSchemeLabel = Label(self, text="Colour Scheme: ", grid=(16, 0))
     self.colourSchemeBox = PulldownList(self, grid=(16, 1))
-    self.colourSchemeBox.addItems(['light', 'dark'])
+    self.colourSchemeBox.addItems(COLOUR_SCHEMES)
     self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
       self.preferences.general.colourScheme))
+    self.colourSchemeBox.currentIndexChanged.connect(self.changeColourScheme)
 
     self.licenceLabel = Label(self, text='Licence', grid=(18, 0))
     self.licenceButton = Button(self,text='Show Licence', grid=(18, 1))
@@ -58,16 +63,21 @@ class PreferencesPopup(QtGui.QDialog):
     buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)
     buttonBox.accepted.connect(self.accept)
 
+
     self.layout().addWidget(buttonBox, 28, 0, 1, 2)
 
   def changeLanguage(self, value):
     self.preferences.general.language = (LANGUAGES[value])
 
-  def toggleGeneralOptions(self, property, checked):
-    self.preferences.general[property] = str(checked)
+  def changeColourScheme(self, value):
+    self.preferences.general.colourScheme = (COLOUR_SCHEMES[value])
 
-  def toggleSpectralOptions(self, property, checked):
-    self.preferences.spectra[property] = str(checked)
+  def toggleGeneralOptions(self, preference, checked):
+    self.preferences.general[preference] = str(checked)
+
+  def toggleSpectralOptions(self, preference, checked):
+    self.preferences.spectra[preference] = str(checked)
+
 
 
 

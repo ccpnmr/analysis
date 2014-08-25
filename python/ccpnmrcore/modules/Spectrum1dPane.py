@@ -5,6 +5,7 @@ from functools import partial
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane, SPECTRUM_COLOURS
 from ccpncore.gui.Button import Button
+from ccpncore.gui.Icon import Icon
 from ccpncore.gui.ColourDialog import ColourDialog
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Menu import Menu
@@ -13,14 +14,13 @@ from ccpncore.util import Logging
 
 class Spectrum1dPane(SpectrumPane):
 
-  def __init__(self, project=None, title=None, current=None, pid=None, preferences=None):
-    SpectrumPane.__init__(self, project, title=title, pid=pid, preferences=preferences)
+  def __init__(self, project=None, title=None, current=None, pid=None, preferences=None, mainWindow=None):
+    SpectrumPane.__init__(self, project, title=title, pid=pid, mainWindow=mainWindow, preferences=preferences)
     # self.contextMenu = None
     self.project = project
     self.pid = pid
-    # self.parent = parent
-    print('parent',self.parent)
     self.viewBox.invertX()
+    self.mainWindow = mainWindow
     self.showGrid(x=True, y=True)
     self.gridShown = True
     self.crossHairShown = True
@@ -35,13 +35,14 @@ class Spectrum1dPane(SpectrumPane):
     self.colourIndex = 0
 
   def fillToolBar(self):
-
+    print('icons/zoom-best-fit.png')
+    # autoScaleAction =
     self.spectrumUtilToolbar.addAction("AutoScale", self.zoomYAll)
     self.spectrumUtilToolbar.addAction("Full", self.zoomXAll)
     self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
     self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
-    self.spectrumUtilToolbar.addAction("Undo", self.zoomXAll)
-    self.spectrumUtilToolbar.addAction("Redo", self.zoomXAll)
+    # self.spectrumUtilToolbar.addAction("Undo", self.zoomXAll)
+    # self.spectrumUtilToolbar.addAction("Redo", self.zoomXAll)
     #
 
   def get1dContextMenu(self):
@@ -203,7 +204,7 @@ class Spectrum1dPane(SpectrumPane):
     # spectrumItem.toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
     # spectrumItem.toolBarButton.toggled.connect(spectrumItem.plot.setVisible)
 
-    self.parent.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
+    self.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
     if self.colourIndex != len(SPECTRUM_COLOURS) - 1:
       self.colourIndex +=1
     else:

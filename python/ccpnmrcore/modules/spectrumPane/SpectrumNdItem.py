@@ -3,8 +3,6 @@ import numpy
 from OpenGL import GL
 from PySide import QtGui, QtCore, QtOpenGL
 
-from ccpncore.util.Color import Color
-
 from ccpnmrcore.modules.spectrumPane.SpectrumItem import SpectrumItem
 
 from ccpnc.contour import Contourer2d
@@ -35,16 +33,32 @@ class SpectrumNdItem(SpectrumItem):
       # TBD: below assumes axes inverted
       viewBox.setXRange(region[xDim][1], region[xDim][0])
       viewBox.setYRange(region[yDim][1], region[yDim][0])
-    
+
     self.posContoursVisible = True # this block of code TEMP
     self.negContoursVisible = True
-    self.levels = (10000000.0, 5000000.0, 2000000.0)
-    self.posColors = (Color('#ff0000').rgba(),)
-    self.negColors = (Color('#0000ff').rgba(),)
+    self.baseLevel = 1000000.00
+    self.multiplier = 1.8
+    self.numberOfLevels = 20
+    self.levels = self.getLevels()
+    # print(self.levels)
+
+    # self.levels = (1000000.0, 200000.0, 400000.0, 500000.0, 700000.0, 10000000.0, 5000000.0, 2000000.0,
+    # -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
+    self.posColors = (QtGui.QColor('#ff8000').getRgb(),)
+    self.negColors = (QtGui.QColor('#0000ff').getRgb(),)
     
     self.contoursValid = False
     self.contourDisplayIndexDict = {} # level -> display list index
     
+  def getLevels(self):
+    # levels = [self.baseLevel]
+    # print(levels)
+    levels = [self.baseLevel]
+    for n in range(self.numberOfLevels-1):
+      levels.append(self.multiplier*levels[-1])
+
+    return tuple(levels)
+
   ##### override of superclass function
   
   def paint(self, painter, option, widget=None):
@@ -66,7 +80,7 @@ class SpectrumNdItem(SpectrumItem):
     
     posColors = self.posColors
     negColors = self.negColors
-    
+
     levels = self.levels
     posLevels = sorted([level for level in levels if level >= 0])
     negLevels = sorted([level for level in levels if level < 0], reverse=True)
@@ -96,6 +110,7 @@ class SpectrumNdItem(SpectrumItem):
       colorsLevels = []
       for (colors, levels) in ((posColors, posLevels), (negColors, negLevels)):
         count = len(colors)
+
         for n, level in enumerate(levels):
           color = colors[n % count]
           GL.glColor4f(*color)
@@ -111,7 +126,7 @@ class SpectrumNdItem(SpectrumItem):
     """ Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level or color needs to call this function.
     """
-    
+
     oldLevels = set(self.contourDisplayIndexDict)
     levels = set(self.levels)
     
@@ -162,7 +177,8 @@ class SpectrumNdItem(SpectrumItem):
   def releaseDisplayList(self, level):
 
     if level in self.contourDisplayIndexDict:
-      GL.deleteLists(self.contourDisplayIndexDict[level], 1)
+
+      GL.glDeleteLists(self.contourDisplayIndexDict[level], 1)
       del self.contourDisplayIndexDict[level]
 
   def createDisplayLists(self, levels):

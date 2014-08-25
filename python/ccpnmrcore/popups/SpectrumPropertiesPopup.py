@@ -69,20 +69,20 @@ class GeneralTab(QtGui.QWidget, Base):
     pidData = Label(self, text=spectrum.pid, grid=(5, 1))
     if spectrum.dimensionCount == 1:
       colourLabel = Label(self, text="Colour", grid=(6,0))
-      # colourBox = PulldownList(self, grid=(6, 1))
-      # for item in SPECTRUM_COLOURS.items():
-      #   pix=QtGui.QPixmap(QtCore.QSize(20,20))
-      #   pix.fill(QtGui.QColor(item[0]))
-      #   colourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-      # colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
-      # colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
+      colourBox = PulldownList(self, grid=(6, 1))
+      for item in SPECTRUM_COLOURS.items():
+        pix=QtGui.QPixmap(QtCore.QSize(20,20))
+        pix.fill(QtGui.QColor(item[0]))
+        colourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+      colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
+      colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
       colourButton = Button(self, text="More...", grid=(6, 2))
       colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
       spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(7, 0))
-      # spectrumType = PulldownList(self, grid=(7, 1))
-      # spectrumType.addItems(SPECTRA)
-      # spectrumType.addItem(spectrum.experimentName)
-      # spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
+      spectrumType = PulldownList(self, grid=(7, 1))
+      spectrumType.addItems(SPECTRA)
+      spectrumType.addItem(spectrum.experimentName)
+      spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
       pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(8, 0))
       recordingDataLabel = Label(self, text="Date Recorded", grid=(9, 0))
       minimumValueLabel = Label(self, text="Minimum Value: ", grid=(10, 0))
@@ -171,11 +171,13 @@ class ContoursTab(QtGui.QWidget):
     negativeContoursCheckBox = CheckBox(self, grid=(1, 1), checked="True")
     positiveBaseLevelLabel = Label(self, text="Base Level", grid=(2, 0))
     positiveBaseLevelData = LineEdit(self, text=str(spectrum.spectrumItem.baseLevel), grid=(2, 1))
-    positiveBaseLevelData.textChanged.connect(partial(self.lineEditTextChanged, spectrum.spectrumItem.baseLevel))
+    positiveBaseLevelData.textChanged.connect(partial(self.lineEditTextChanged1, spectrum.spectrumItem))
     positiveMultiplierLabel = Label(self, text="Multiplier", grid=(3, 0))
     positiveMultiplierData = LineEdit(self, text=str(spectrum.spectrumItem.multiplier), grid=(3, 1))
+    positiveMultiplierData.textChanged.connect(partial(self.lineEditTextChanged2, spectrum.spectrumItem))
     positiveContourCountLabel = Label(self, text="Number of contours", grid=(4, 0))
     positiveContourCountData = LineEdit(self, text=str(spectrum.spectrumItem.numberOfLevels), grid=(4, 1))
+    positiveContourCountData.textChanged.connect(partial(self.lineEditTextChanged3, spectrum.spectrumItem))
     positiveContourColourLabel = Label(self, text="Colour",grid=(5, 0))
     positiveColourBox = PulldownList(self, grid=(5, 1))
     for item in SPECTRUM_COLOURS.items():
@@ -187,6 +189,8 @@ class ContoursTab(QtGui.QWidget):
     positiveColourBox.currentIndexChanged.connect(partial(self.changePosColourComboIndex, spectrum))
     positiveColourBox = Button(self, text="More...", grid=(5, 2))
     positiveColourBox.clicked.connect(partial(self.changeSpectrumColour, spectrum))
+    # spectrum.spectrumItem.levels = self.newLevels(spectrum)
+    # print(self.newLevels(spectrum))
 
 
     #
@@ -210,11 +214,20 @@ class ContoursTab(QtGui.QWidget):
     negativeColourBox = Button(self, text="More...", grid=(6, 2))
     negativeColourBox.clicked.connect(partial(self.changeSpectrumColour, spectrum))
 
-  def lineEditTextChanged(self, text, property):
-      pass
-      # print(text)
-      # property = text
-      # print(property.parent)
+  def lineEditTextChanged1(self, item, text):
+      item.baseLevel = float(text)
+  def lineEditTextChanged2(self, item, text):
+      item.multiplier = float(text)
+  def lineEditTextChanged3(self, item, text):
+      item.numberOfLevels = int(text)
+
+  # def newLevels(self, spectrum):
+  #   levels = [spectrum.spectrumItem.baseLevel]
+  #   for n in range(spectrum.spectrumItem.numberOfLevels-1):
+  #     levels.append(spectrum.spectrumItem.multiplier*spectrum.spectrumItem.levels[-1])
+  #   print(levels)
+  #   return tuple(levels)
+
 
   def changeSpectrumColour(self):
     pass

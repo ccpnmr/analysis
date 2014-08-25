@@ -39,12 +39,15 @@ class SpectrumNdItem(SpectrumItem):
     self.baseLevel = 1000000.00
     self.multiplier = 1.8
     self.numberOfLevels = 20
-    self.levels = self.getLevels()
-    # print(self.levels)
-
-    # self.levels = (1000000.0, 200000.0, 400000.0, 500000.0, 700000.0, 10000000.0, 5000000.0, 2000000.0,
-    # -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
-    self.posColors = (QtGui.QColor('#ff8000').getRgb(),)
+    # self.levels = self.getLevels()
+    # # print(self.levels)
+    # self.levels = [self.baseLevel]
+    # for n in range(self.numberOfLevels-1):
+    #   self.levels.append(self.multiplier*self.levels[-1])
+    # self.levels = tuple(self.levels)
+    self.levels = (1000000.0, 200000.0, 400000.0, 500000.0, 700000.0, 10000000.0, 5000000.0, 2000000.0,
+    -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
+    self.posColors = (QtGui.QColor('#ff0000').getRgb(),)
     self.negColors = (QtGui.QColor('#0000ff').getRgb(),)
     
     self.contoursValid = False
@@ -54,7 +57,7 @@ class SpectrumNdItem(SpectrumItem):
     # levels = [self.baseLevel]
     # print(levels)
     levels = [self.baseLevel]
-    for n in range(self.numberOfLevels-1):
+    for n in range(int(self.numberOfLevels-1)):
       levels.append(self.multiplier*levels[-1])
 
     return tuple(levels)

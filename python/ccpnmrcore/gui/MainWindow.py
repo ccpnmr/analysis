@@ -48,11 +48,15 @@ class MainWindow(GuiMainWindow):
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     
     ###self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
-    self.spectrumPane=SpectrumNdPane(project=project, title='Module 1', current=self.current,
+    self.spectrumPane1=Spectrum1dPane(project=project, title='Module 1_1D', current=self.current,
                                      pid='QP:1', preferences=self.preferences, mainWindow=self)
-    self.panes[self.spectrumPane.pid] = self.spectrumPane
-    self.moduleCount = 1
-    self.widget1=self.spectrumPane.dock
+    self.spectrumPane2=SpectrumNdPane(project=project, title='Module 2_ND', current=self.current,
+                                     pid='QP:2', preferences=self.preferences, mainWindow=self)
+    self.panes[self.spectrumPane1.pid] = self.spectrumPane1
+    self.panes[self.spectrumPane2.pid] = self.spectrumPane2
+    self.moduleCount = 2
+    self.widget1=self.spectrumPane1.dock
+    self.widget2=self.spectrumPane2.dock
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
     self.leftWidget.setGeometry(0, 0, 10, 600)
@@ -71,9 +75,9 @@ class MainWindow(GuiMainWindow):
     self.current.spectra = []
     self.dockArea = DockArea()
     self.dockArea.setGeometry(0, 0, 1100, 1300)
-    self.current.pane = self.spectrumPane
+    self.current.pane = self.spectrumPane1
     self.dockArea.addDock(self.widget1)
-    # self.widget1.name = 'Module %s' % (self.moduleCount+1)
+    self.dockArea.addDock(self.widget2)
     self.splitter1.addWidget(self.dockArea)
     self.state = None
     self.setCentralWidget(self.splitter2)
@@ -227,7 +231,8 @@ class MainWindow(GuiMainWindow):
     
     if project is not None:
       self.leftWidget.fillSideBar(project)
-      self.spectrumPane.project = project
+      self.spectrumPane1.project = project
+      self.spectrumPane2.project = project
       self.namespace['project'] = project
     
     self.project = project
@@ -328,7 +333,7 @@ class MainWindow(GuiMainWindow):
   def addSpectrum1dPane(self):
 
     #newModule = Spectrum1dPane(parent=self, title='Module %s' % str(self.moduleCount+1),
-    newModule = Spectrum1dPane(title='Module %s' % str(self.moduleCount+1),
+    newModule = Spectrum1dPane(title='Module %s_1D' % str(self.moduleCount+1),
                                current=self.current, pid='QP:%s' % str(self.moduleCount+1),
                                preferences=self.preferences, mainWindow=self)
     self.panes[newModule.pid] = newModule
@@ -341,7 +346,7 @@ class MainWindow(GuiMainWindow):
   def addSpectrumNdPane(self):
 
     #newModule = SpectrumNdPane(parent=self, title='Module %s' % str(self.moduleCount+1),
-    newModule = SpectrumNdPane(title='Module %s' % str(self.moduleCount+1),
+    newModule = SpectrumNdPane(title='Module %s_Nd' % str(self.moduleCount+1),
                                current=self.current, pid='QP:%s' % str(self.moduleCount+1),
                                preferences=self.preferences, mainWindow=self)
     self.panes[newModule.pid] = newModule
@@ -548,7 +553,7 @@ class MainWindow(GuiMainWindow):
 
 
           if dataSource.numDim == 1:
-            data = Spectrum1dItem(self.spectrumPane,dataSource).spectralData
+            data = Spectrum1dItem(self.current.pane,dataSource).spectralData
             self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
           # elif dataSource.numDim > 1:
           #   data = SpectrumNdItem(self.spectrumPane,dataSource).spectralData

@@ -153,7 +153,7 @@ class DimensionsTab(QtGui.QWidget):
       spectralWidthLabel = Label(self, text=DIMENSIONS[i]+"-Spectral Width (ppm)", grid=(j+3, 0))
       spectralWidthData = Label(self, text=str("%.3f" % spectrum.spectralWidths[i]), grid=(j+3, 1))
       spectralWidthHzLabel = Label(self, text=DIMENSIONS[i]+"-Spectral Width (Hz)", grid=(j+4, 0))
-      spectralWidthHzData = Label(self, text=str("%.3f" % spectrum.spectralWidthsHz[i]), grid=(j+5, 0))
+      spectralWidthHzData = Label(self, text=str("%.3f" % spectrum.spectralWidthsHz[i]), grid=(j+4, 1))
       spectralReferencingLabel = Label(self, text=DIMENSIONS[i]+"-Referencing", grid=(j+6, 0))
       spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referenceValues[i]), grid=(j+6, 1))
       spectralAssignmentToleranceLabel = Label(self, text=DIMENSIONS[i]+"-Assignment Tolerance", grid=(j+7, 0))
@@ -184,16 +184,19 @@ class ContoursTab(QtGui.QWidget):
     positiveContourCountData = LineEdit(self, text=str(spectrum.spectrumItem.numberOfLevels), grid=(4, 1))
     positiveContourCountData.textChanged.connect(partial(self.lineEditTextChanged3, spectrum.spectrumItem))
     positiveContourColourLabel = Label(self, text="Colour",grid=(5, 0))
-    positiveColourBox = PulldownList(self, grid=(5, 1))
+    self.positiveColourBox = PulldownList(self, grid=(5, 1))
     for item in SPECTRUM_COLOURS.items():
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(item[0]))
-      positiveColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-    positiveColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(QtGui.QColor.fromRgb(
+      self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    try:
+      self.positiveColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(QtGui.QColor.fromRgb(
       spectrum.spectrumItem.posColors[0][0], spectrum.spectrumItem.posColors[0][1], spectrum.spectrumItem.posColors[0][2]).name()))
-    positiveColourBox.currentIndexChanged.connect(partial(self.changePosColourComboIndex, spectrum))
-    positiveColourBox = Button(self, text="More...", grid=(5, 2))
-    positiveColourBox.clicked.connect(partial(self.changeSpectrumColour, spectrum))
+      self.positiveColourBox.currentIndexChanged.connect(partial(self.changePosColourComboIndex, spectrum))
+    except ValueError:
+      pass
+    self.positiveColourButton = Button(self, text="More...", grid=(5, 2))
+    self.positiveColourButton.clicked.connect(partial(self.changePosSpectrumColour, spectrum))
     # spectrum.spectrumItem.levels = self.newLevels(spectrum)
     # print(self.newLevels(spectrum))
 
@@ -208,31 +211,61 @@ class ContoursTab(QtGui.QWidget):
     # negativeContourCountLabel = Label(self, text="Number of contours", grid=(9, 0))
     # negativeContourCountData = LineEdit(self, grid=(9, 1))
     negativeContourColourLabel = Label(self, text="Colour",grid=(6, 0))
-    negativeColourBox = PulldownList(self, grid=(6, 1))
+    self.negativeColourBox = PulldownList(self, grid=(6, 1))
     for item in SPECTRUM_COLOURS.items():
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(item[0]))
-      negativeColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-    negativeColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(QtGui.QColor.fromRgb(
+      self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    try:
+      self.negativeColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(QtGui.QColor.fromRgb(
       spectrum.spectrumItem.negColors[0][0], spectrum.spectrumItem.negColors[0][1], spectrum.spectrumItem.negColors[0][2]).name()))
-    negativeColourBox.currentIndexChanged.connect(partial(self.changeNegColourComboIndex, spectrum))
-    negativeColourBox = Button(self, text="More...", grid=(6, 2))
-    negativeColourBox.clicked.connect(partial(self.changeSpectrumColour, spectrum))
+      self.negativeColourBox.currentIndexChanged.connect(partial(self.changeNegColourComboIndex, spectrum))
+    except ValueError:
+      pass
+
+    self.negativeColourButton = Button(self, text="More...", grid=(6, 2))
+    self.negativeColourButton.clicked.connect(partial(self.changeNegSpectrumColour, spectrum))
+
+
 
     spectrum.spectrumItem.levels = spectrum.spectrumItem.getLevels()
 
   def lineEditTextChanged1(self, item, text):
-      item.baseLevel = float(text)
-      item.levels = item.getLevels()
+    item.baseLevel = float(text)
+    item.levels = item.getLevels()
   def lineEditTextChanged2(self, item, text):
-      item.multiplier = float(text)
-      item.levels = item.getLevels()
+    item.multiplier = float(text)
+    item.levels = item.getLevels()
   def lineEditTextChanged3(self, item, text):
-      item.numberOfLevels = int(text)
-      item.levels = item.getLevels()
+    item.numberOfLevels = int(text)
+    item.levels = item.getLevels()
 
-  def changeSpectrumColour(self):
-    pass
+  def changePosSpectrumColour(self, spectrum):
+    dialog = ColourDialog()
+    newColour = dialog.getColor()
+    spectrum.spectrumItem.posColors = (newColour.getRgb(),)
+    pix=QtGui.QPixmap(QtCore.QSize(20,20))
+    pix.fill(QtGui.QColor(newColour))
+    newIndex = str(len(SPECTRUM_COLOURS.items())+1)
+    self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+    self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+    SPECTRUM_COLOURS[newColour.name()] = 'Colour %s' % newIndex
+    print(newIndex)
+    self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
+    
+
+  def changeNegSpectrumColour(self, spectrum):
+    dialog = ColourDialog()
+    newColour = dialog.getColor()
+    spectrum.spectrumItem.negColors = (newColour.getRgb(),)
+    pix=QtGui.QPixmap(QtCore.QSize(20,20))
+    pix.fill(QtGui.QColor(newColour))
+    newIndex = str(len(SPECTRUM_COLOURS.items())+1)
+    self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
+    self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
+    SPECTRUM_COLOURS[newColour.name()] = 'Colour %s' % newIndex
+    print(newIndex)
+    self.negativeColourBox.setCurrentIndex(int(newIndex)-1)
 
   def changePosColourComboIndex(self, spectrum, value):
 

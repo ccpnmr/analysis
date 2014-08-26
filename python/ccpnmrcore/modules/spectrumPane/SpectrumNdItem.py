@@ -38,6 +38,12 @@ class SpectrumNdItem(SpectrumItem):
       viewBox.setXRange(region[xDim][1], region[xDim][0])
       viewBox.setYRange(region[yDim][1], region[yDim][0])
 
+    if posColor is None:
+      posColor = 'ff0000' # red
+      
+    if negColor is None:
+      negColor = '0000ff' # blue
+      
     self.posContoursVisible = True # this block of code TEMP
     self.negContoursVisible = True
     self.baseLevel = 1000000.00
@@ -51,16 +57,25 @@ class SpectrumNdItem(SpectrumItem):
     # self.levels = tuple(self.levels)
     # self.levels = (1000000.0, 200000.0, 400000.0, 500000.0, 700000.0, 10000000.0, 5000000.0, 2000000.0,
     # -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
-    self.posColors = (QtGui.QColor(posColor).getRgb(),)
-    self.negColors = (QtGui.QColor(negColor).getRgb(),)
+    self.posColors = (self.getColorTuple(posColor),)
+    self.negColors = (self.getColorTuple(negColor),)
     
     self.contoursValid = False
     self.contourDisplayIndexDict = {} # level -> display list index
     
+  def getColorTuple(self, colorString):
+    
+    colorTuple = QtGui.QColor(colorString).getRgb()
+    colorTuple = tuple([c/255 for c in colorTuple])
+    
+    return colorTuple
+    
   def getLevels(self):
+    
     levels = [self.baseLevel]
     for n in range(int(self.numberOfLevels-1)):
       levels.append(self.multiplier*levels[-1])
+      
     return tuple(numpy.array(levels, dtype=numpy.float32))
 
   ##### override of superclass function
@@ -116,9 +131,7 @@ class SpectrumNdItem(SpectrumItem):
         count = len(colors)
 
         for n, level in enumerate(levels):
-          # color = colors[n % count]
-          color = (colors[0][0]/255, colors[0][1]/255, colors[0][2]/255, 0)
-          # print(color)
+          color = colors[n % count]
           GL.glColor4f(*color)
           # TBD: scaling, translating, etc.
           GL.glCallList(self.contourDisplayIndexDict[level])
@@ -207,13 +220,13 @@ class SpectrumNdItem(SpectrumItem):
     elif dimensionCount == 3: # TBD
       zDims = set(range(dimensionCount)) - {xDim, yDim}
       zDim = zDims.pop()
-      zregion = self.region[zDim] # TBD: should be in ppm not points, assume in points for now
-      position = dimCount * [0]
-      # below does not work yet
-      #planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
-      planeData = LibSpectrum.getPlaneData(spectrum, xDim=xDim, yDim=yDim)
-      for z in range(*zregion):  # TBD
+      zregionValue = self.spectrumPane.region[zDim]
+      zregionPoint = self.getPointFromValue(zDim, zregionValue)
+      zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
+      position = dimensionCount * [0]
+      for z in range(*zregionPoint):  # TBD
         position[zDim] = z
+        # below does not work yet
         #planeData = spectrum.getPlaneData(position, xDim, yDim)
         planeData = LibSpectrum.getPlaneData(spectrum, position, xDim=xDim, yDim=yDim)
         yield position, planeData
@@ -230,21 +243,21 @@ class SpectrumNdItem(SpectrumItem):
     GL.glEndList()
 
   def defaultRegion(self):
+    
     spectrum = self.spectrum
-    ccpnSpectrum = spectrum.ccpnSpectrum
+    dimensionCount = spectrum.dimensionCount
     pointCounts = spectrum.pointCounts
-    dimCount = len(pointCounts)
-    pntRegion = [(0, pointCounts[0]), (0, pointCounts[1])]
-    for i in range(2, dimCount):
-      n = pointCounts[i] // 2
-      pntRegion.append((n, n+1))
+    pntRegion = dimensionCount * [None]
+    for dim in range(dimensionCount):
+      if dim in (self.xDim, self.yDim):
+        region = (0, pointCounts[dim])
+      else:
+        n = pointCounts[dim] // 2
+        region = (n, n+1)
+      pntRegion[dim] = region
     ppmRegion = []
-    for i in range(dimCount):
-      dataDim = ccpnSpectrum.findFirstDataDim(dim=i+1)
-      dataDimRef = dataDim.findFirstDataDimRef()
-      firstPpm = dataDimRef.pointToValue(0)
-      pointCount = pointCounts[i]
-      lastPpm = dataDimRef.pointToValue(pointCount)
+    for dim in range(dimensionCount):
+      (firstPpm, lastPpm) = self.getValueFromPoint(dim, pntRegion[dim])
       ppmRegion.append((firstPpm, lastPpm))
       
     return ppmRegion
@@ -267,17 +280,38 @@ class SpectrumNdItem(SpectrumItem):
       pixelViewBox0 = plotItem.getAxis('bottom').height()
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
     
-    spectrum = self.spectrum
-    ccpnSpectrum = spectrum.ccpnSpectrum
-    dataDim = ccpnSpectrum.findFirstDataDim(dim=dim+1)
-    dataDimRef = dataDim.findFirstDataDimRef()
-    firstPoint = dataDimRef.valueToPoint(region0) - 1  # -1 because points in API start from 1
-    lastPoint = dataDimRef.valueToPoint(region1) - 1
+    (firstPoint, lastPoint) = self.getPointFromValue(dim, (region0, region1))
     
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
     translate = pixelViewBox0 - firstPoint * scale
     
     return translate, scale
+
+  def getPointFromValue(self, dim, value):
+    
+    spectrum = self.spectrum
+    ccpnSpectrum = spectrum.ccpnSpectrum
+    dataDim = ccpnSpectrum.findFirstDataDim(dim=dim+1)
+    dataDimRef = dataDim.findFirstDataDimRef()
+    
+    point = []
+    for v in value:
+      point.append(dataDimRef.valueToPoint(v) - 1)  # -1 because points in data model start from 1
+      
+    return point
+    
+  def getValueFromPoint(self, dim, point):
+
+    spectrum = self.spectrum
+    ccpnSpectrum = spectrum.ccpnSpectrum
+    dataDim = ccpnSpectrum.findFirstDataDim(dim=dim+1)
+    dataDimRef = dataDim.findFirstDataDimRef()
+
+    value = []
+    for p in point:
+      value.append(dataDimRef.pointToValue(p+1))  # +1 because points in data model start from 1
+
+    return value
 
   def raiseBaseLevel(self):
     print(self.baseLevel)

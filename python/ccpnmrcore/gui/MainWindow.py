@@ -4,6 +4,7 @@ import sys
 import random
 import numpy as np
 import json
+from functools import partial
 import pyqtgraph as pg
 from pyqtgraph.dockarea import DockArea, Dock
 
@@ -96,7 +97,8 @@ class MainWindow(GuiMainWindow):
 
     fileMenu.addAction(Action(self, "New", callback=self.newProject, shortcut="PN"))
     fileMenu.addAction(Action(self, "Open...", callback=self.openProject, shortcut="PO"))
-    fileMenu.addAction(Action(self, "Open Recent", callback=self.openRecentProject))
+    self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
+    self.fillRecentProjectsMenu()
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="PS"))
     fileMenu.addAction(Action(self, "Save As...", shortcut="PA", callback=self.saveProjectAs))
@@ -226,7 +228,12 @@ class MainWindow(GuiMainWindow):
     self.statusBar().showMessage(msg)
     self.pythonConsole.write("project = openProject('"+currentProjectDir+"')\n")
     self.pythonConsole.ui.historyList.addItem("project = openProject('"+currentProjectDir+"')\n")
-    
+    if len(self.preferences.recentFiles) != 10:
+      self.preferences.recentFiles.insert(0, currentProjectDir)
+    else:
+      self.preferences.recentFiles.pop()
+      self.preferences.recentFiles.append(currentProjectDir)
+
   def setProject(self, project):
     
     if project is not None:
@@ -247,8 +254,12 @@ class MainWindow(GuiMainWindow):
     except:
       self.preferences = None # TBD: should give some sensible default
   
-  def openRecentProject(self):
-    pass
+  def fillRecentProjectsMenu(self):
+    for recentFile in self.preferences.recentFiles:
+      self.action = Action(self, text=recentFile, callback=partial(self.openProject,projectDir=recentFile))
+      self.recentProjectsMenu.addAction(self.action)
+
+
 
   def saveBackup(self):
     pass
@@ -279,7 +290,7 @@ class MainWindow(GuiMainWindow):
 
   def quitAction(self):
     # pass
-    prefFile = open("/Users/simon/pysideTestingCode/v3settings.json")
+    prefFile = open("~/.ccpn/v3settings.json")
     pref = json.load(prefFile)
     prefFile.close()
     if not pref == self.preferences:
@@ -289,7 +300,7 @@ class MainWindow(GuiMainWindow):
       msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
       ret = msgBox.exec_()
       if ret == QtGui.QMessageBox.Yes:
-        prefFile = open("/Users/simon/pysideTestingCode/v3settings.json", 'w+')
+        prefFile = open("~/.ccpn/v3settings.json", 'w+')
         json.dump(self.preferences, prefFile)
         prefFile.close()
       else:
@@ -515,8 +526,6 @@ class MainWindow(GuiMainWindow):
 
     event.accept()
     data = event.mimeData()
-    print(data,"dropped")
-    print("dropped")
     if isinstance(self.parent, QtGui.QGraphicsScene):
       event.ignore()
       return
@@ -544,17 +553,15 @@ class MainWindow(GuiMainWindow):
 
         else:
           spectrumFormat = getSpectrumFileFormat(filePaths[0])
-          print(filePaths)
-          print(spectrumFormat)
 
           if spectrumFormat:
             event.acceptProposedAction()
             dataSource = loadDataSource(self.project,filePaths[0])
 
 
-          if dataSource.numDim == 1:
-            data = Spectrum1dItem(self.current.pane,dataSource).spectralData
-            self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
+          # if dataSource.numDim == 1:
+          #   data = Spectrum1dItem(self.current.pane,dataSource).spectralData
+          #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
           # elif dataSource.numDim > 1:
           #   data = SpectrumNdItem(self.spectrumPane,dataSource).spectralData
           #   print(data)

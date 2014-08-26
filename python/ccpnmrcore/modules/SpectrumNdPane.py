@@ -25,6 +25,23 @@ class SpectrumNdPane(SpectrumPane):
   ##### functions used externally #####
 
   # overrides superclass function
+  def wheelEvent(self, event, axis=None):
+    if event.modifiers() & QtCore.Qt.ShiftModifier:
+      if event.delta() > 0:
+        self.current.spectrum.spectrumItem.raiseBaseLevel()
+      else:
+        self.current.spectrum.spectrumItem.lowerBaseLevel()
+    elif not event.modifiers():
+      QtGui.QGraphicsView.wheelEvent(self, event)
+      sc = 1.001 ** event.delta()
+      #self.scale *= sc
+      #self.updateMatrix()
+      self.scale(sc, sc)
+    else:
+      event.ignore
+
+
+
   def clearSpectra(self):
     
     SpectrumPane.clearSpectra(self)    
@@ -43,7 +60,6 @@ class SpectrumNdPane(SpectrumPane):
     spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region)
     self.scene().addItem(spectrumItem)
     spectrum.spectrumItem = spectrumItem
-    print(dir(spectrumItem))
 
   def upBy8(self):
     newLevels = []
@@ -69,7 +85,17 @@ class SpectrumNdPane(SpectrumPane):
       newLevels.append(level/2)
     self.current.spectrum.spectrumItem.levels = tuple(newLevels)
 
+  def addOne(self):
+    self.current.spectrum.spectrumItem.numberOfLevels +=1
+    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+
+  def subtractOne(self):
+    self.current.spectrum.spectrumItem.numberOfLevels -=1
+    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+
   def fillToolBar(self):
+    self.spectrumUtilToolbar.addAction("+1", self.addOne)
+    self.spectrumUtilToolbar.addAction("-1", self.subtractOne)
     self.spectrumUtilToolbar.addAction("*2", self.upBy2)
     self.spectrumUtilToolbar.addAction("/2", self.downBy2)
     self.spectrumUtilToolbar.addAction("*8", self.upBy8)

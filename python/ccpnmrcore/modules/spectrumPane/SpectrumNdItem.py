@@ -271,4 +271,14 @@ class SpectrumNdItem(SpectrumItem):
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
     translate = pixelViewBox0 - firstPoint * scale
     
-    return translate, scale 
+    return translate, scale
+
+  def raiseBaseLevel(self):
+    print(self.baseLevel)
+    self.baseLevel*=1.25
+    self.levels = self.getLevels()
+
+  def lowerBaseLevel(self):
+    self.baseLevel/=1.25
+    self.levels = self.getLevels()
+

@@ -39,14 +39,14 @@ class SpectrumNdItem(SpectrumItem):
     self.baseLevel = 1000000.00
     self.multiplier = 1.8
     self.numberOfLevels = 20
-    # self.levels = self.getLevels()
-    # # print(self.levels)
-    # self.levels = [self.baseLevel]
-    # for n in range(self.numberOfLevels-1):
-    #   self.levels.append(self.multiplier*self.levels[-1])
+    try:
+      self.levels
+    except AttributeError:
+      self.levels = self.getLevels()
+
     # self.levels = tuple(self.levels)
-    self.levels = (1000000.0, 200000.0, 400000.0, 500000.0, 700000.0, 10000000.0, 5000000.0, 2000000.0,
-    -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
+    # self.levels = (1000000.0, 200000.0, 400000.0, 500000.0, 700000.0, 10000000.0, 5000000.0, 2000000.0,
+    # -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
     self.posColors = (QtGui.QColor('#ff0000').getRgb(),)
     self.negColors = (QtGui.QColor('#0000ff').getRgb(),)
     
@@ -54,13 +54,10 @@ class SpectrumNdItem(SpectrumItem):
     self.contourDisplayIndexDict = {} # level -> display list index
     
   def getLevels(self):
-    # levels = [self.baseLevel]
-    # print(levels)
     levels = [self.baseLevel]
     for n in range(int(self.numberOfLevels-1)):
       levels.append(self.multiplier*levels[-1])
-
-    return tuple(levels)
+    return tuple(numpy.array(levels, dtype=numpy.float32))
 
   ##### override of superclass function
   
@@ -132,7 +129,6 @@ class SpectrumNdItem(SpectrumItem):
 
     oldLevels = set(self.contourDisplayIndexDict)
     levels = set(self.levels)
-    
     # release unwanted old levels
     removedLevels = oldLevels - levels
     for level in removedLevels:
@@ -220,7 +216,7 @@ class SpectrumNdItem(SpectrumItem):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
     
     GL.glNewList(self.contourDisplayIndexDict[level], GL.GL_COMPILE)
-    
+
     for contour in contourData:
       GL.glVertexPointer(2, GL.GL_FLOAT, 0, contour)
       GL.glDrawArrays(GL.GL_LINE_LOOP, 0, len(contour)//2)

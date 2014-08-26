@@ -40,7 +40,7 @@ class SpectrumNdItem(SpectrumItem):
 
     if posColor is None:
       posColor = 'ff0000' # red
-      
+
     if negColor is None:
       negColor = '0000ff' # blue
       
@@ -59,7 +59,7 @@ class SpectrumNdItem(SpectrumItem):
     # -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
     self.posColors = (self.getColorTuple(posColor),)
     self.negColors = (self.getColorTuple(negColor),)
-    
+
     self.contoursValid = False
     self.contourDisplayIndexDict = {} # level -> display list index
     

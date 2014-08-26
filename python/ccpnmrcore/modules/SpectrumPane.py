@@ -1,8 +1,10 @@
 import os
 
 from collections import OrderedDict
+from functools import partial
 
 from PySide import QtCore, QtGui, QtOpenGL
+
 
 import pyqtgraph as pg
 from pyqtgraph.dockarea import Dock
@@ -27,7 +29,9 @@ SPECTRUM_COLOURS = OrderedDict([('#ff0000','red'),
                                 ('#ff0080','deep pink')])
 
 class SpectrumPane(pg.PlotWidget, Base):
-  
+
+  sigClicked = QtCore.Signal(object, object)
+
   def __init__(self, project=None, parent=None, spectraVar=None, current=None, title=None, pid=None,
                mainWindow=None, preferences=None, **kw):
 
@@ -95,7 +99,7 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.setSpectra(spectraVar)
 
   def clicked(self, spectrum):
-    self.current.spectrum = spectrum.parent
+    self.current.spectrum = spectrum
     self.current.spectra.append(spectrum.parent)
     self.parent.pythonConsole.write('current.spectrum='+str(self.current.spectrum)+'\n')
     self.parent.statusBar().showMessage('current.spectrum='+str(self.current.spectrum.pid))

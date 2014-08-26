@@ -11,13 +11,17 @@ from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function 
 
 class SpectrumNdItem(SpectrumItem):
 
-  def __init__(self, spectrumPane, spectrum, dimMapping=None, region=None):
+  sigClicked = QtCore.Signal(object, object)
+
+  def __init__(self, spectrumPane, spectrum, dimMapping=None, region=None, posColor=None, negColor=None, **kw):
     """ spectrumPane is the parent
         spectrum is the Spectrum name or object
         region is in units of parent, ordered by spectrum dimensions
         dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
+
+    self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
 
     SpectrumItem.__init__(self, spectrumPane, spectrum, dimMapping)
         
@@ -37,7 +41,7 @@ class SpectrumNdItem(SpectrumItem):
     self.posContoursVisible = True # this block of code TEMP
     self.negContoursVisible = True
     self.baseLevel = 1000000.00
-    self.multiplier = 1.8
+    self.multiplier = 1.4
     self.numberOfLevels = 20
     try:
       self.levels
@@ -47,8 +51,8 @@ class SpectrumNdItem(SpectrumItem):
     # self.levels = tuple(self.levels)
     # self.levels = (1000000.0, 200000.0, 400000.0, 500000.0, 700000.0, 10000000.0, 5000000.0, 2000000.0,
     # -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
-    self.posColors = (QtGui.QColor('#ff0000').getRgb(),)
-    self.negColors = (QtGui.QColor('#0000ff').getRgb(),)
+    self.posColors = (QtGui.QColor(posColor).getRgb(),)
+    self.negColors = (QtGui.QColor(negColor).getRgb(),)
     
     self.contoursValid = False
     self.contourDisplayIndexDict = {} # level -> display list index
@@ -60,7 +64,7 @@ class SpectrumNdItem(SpectrumItem):
     return tuple(numpy.array(levels, dtype=numpy.float32))
 
   ##### override of superclass function
-  
+
   def paint(self, painter, option, widget=None):
     
     self.drawContours(painter)
@@ -112,7 +116,9 @@ class SpectrumNdItem(SpectrumItem):
         count = len(colors)
 
         for n, level in enumerate(levels):
-          color = colors[n % count]
+          # color = colors[n % count]
+          color = (colors[0][0]/255, colors[0][1]/255, colors[0][2]/255, 0)
+          # print(color)
           GL.glColor4f(*color)
           # TBD: scaling, translating, etc.
           GL.glCallList(self.contourDisplayIndexDict[level])
@@ -275,10 +281,10 @@ class SpectrumNdItem(SpectrumItem):
 
   def raiseBaseLevel(self):
     print(self.baseLevel)
-    self.baseLevel*=1.25
+    self.baseLevel*=1.4
     self.levels = self.getLevels()
 
   def lowerBaseLevel(self):
-    self.baseLevel/=1.25
+    self.baseLevel/=1.4
     self.levels = self.getLevels()
 

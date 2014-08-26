@@ -2,9 +2,11 @@ import operator
 
 from PySide import QtCore, QtGui, QtOpenGL
 
-from ccpnmrcore.modules.SpectrumPane import SpectrumPane
+from ccpnmrcore.modules.SpectrumPane import SpectrumPane, SPECTRUM_COLOURS
 
 from ccpnmrcore.modules.spectrumPane.SpectrumNdItem import SpectrumNdItem
+
+from functools import partial
 
 class SpectrumNdPane(SpectrumPane):
 
@@ -21,6 +23,8 @@ class SpectrumNdPane(SpectrumPane):
     self.fillToolBar()
     self.showGrid(x=True, y=True)
     self.region = None
+    self.colourIndex = 0
+
           
   ##### functions used externally #####
 
@@ -54,36 +58,46 @@ class SpectrumNdPane(SpectrumPane):
     if spectrum.dimensionCount < 1:
       # TBD: logger message
       return
-      
+
     # TBD: check if dimensions make sense
-      
-    spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region)
-    self.scene().addItem(spectrumItem)
+    self.posColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex]
+    self.negColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex+1]
+    spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
+    newItem = self.scene().addItem(spectrumItem)
+    self.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)\n" % (spectrum))
+    spectrumItem.name = spectrum.name
+    if self.colourIndex != len(SPECTRUM_COLOURS) - 2:
+      self.colourIndex +=2
+    else:
+      self.colourIndex = 0
+
+    if self.spectrumIndex < 10:
+      shortcutKey = "s,"+str(self.spectrumIndex)
+      self.spectrumIndex+=1
+    else:
+      shortcutKey = None
+
+    print(newItem)
+    newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
+    newAction.setCheckable(True)
+    newAction.setChecked(True)
+    newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
+
+    newAction.toggled.connect(spectrumItem.setVisible)
+    self.spectrumToolbar.addAction(newAction)
+    self.spectrumItems.append(spectrumItem)
+    self.current.spectrum = spectrum
+
+    # spectrumItem.posColors =
     spectrum.spectrumItem = spectrumItem
 
-  def upBy8(self):
-    newLevels = []
-    for level in self.current.spectrum.spectrumItem.levels:
-      newLevels.append(level*8)
-    self.current.spectrum.spectrumItem.levels = tuple(newLevels)
-
   def upBy2(self):
-    newLevels = []
-    for level in self.current.spectrum.spectrumItem.levels:
-      newLevels.append(level*2)
-    self.current.spectrum.spectrumItem.levels = tuple(newLevels)
-
-  def downBy8(self):
-    newLevels = []
-    for level in self.current.spectrum.spectrumItem.levels:
-      newLevels.append(level/8)
-    self.current.spectrum.spectrumItem.levels = tuple(newLevels)
+    self.current.spectrum.spectrumItem.baseLevel*=1.4
+    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
 
   def downBy2(self):
-    newLevels = []
-    for level in self.current.spectrum.spectrumItem.levels:
-      newLevels.append(level/2)
-    self.current.spectrum.spectrumItem.levels = tuple(newLevels)
+    self.current.spectrum.spectrumItem.baseLevel/=1.4
+    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
 
   def addOne(self):
     self.current.spectrum.spectrumItem.numberOfLevels +=1
@@ -96,10 +110,8 @@ class SpectrumNdPane(SpectrumPane):
   def fillToolBar(self):
     self.spectrumUtilToolbar.addAction("+1", self.addOne)
     self.spectrumUtilToolbar.addAction("-1", self.subtractOne)
-    self.spectrumUtilToolbar.addAction("*2", self.upBy2)
-    self.spectrumUtilToolbar.addAction("/2", self.downBy2)
-    self.spectrumUtilToolbar.addAction("*8", self.upBy8)
-    self.spectrumUtilToolbar.addAction("/8", self.downBy8)
+    self.spectrumUtilToolbar.addAction("*1.4", self.upBy2)
+    self.spectrumUtilToolbar.addAction("/1.4", self.downBy2)
     self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
     self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
 

@@ -40,6 +40,7 @@ class SpectrumPropertiesPopup(QtGui.QDialog):
       tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
       # tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
 
+
     self.setWindowTitle("Spectrum Information")
     buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
 
@@ -50,6 +51,10 @@ class SpectrumPropertiesPopup(QtGui.QDialog):
     mainLayout.addWidget(tabWidget)
     mainLayout.addWidget(buttonBox)
     self.setLayout(mainLayout)
+
+  def keyPressEvent(self, event):
+    if event.key() == QtCore.Qt.Key_Enter:
+      pass
 
 
 
@@ -214,20 +219,17 @@ class ContoursTab(QtGui.QWidget):
     negativeColourBox = Button(self, text="More...", grid=(6, 2))
     negativeColourBox.clicked.connect(partial(self.changeSpectrumColour, spectrum))
 
+    spectrum.spectrumItem.levels = spectrum.spectrumItem.getLevels()
+
   def lineEditTextChanged1(self, item, text):
       item.baseLevel = float(text)
+      item.levels = item.getLevels()
   def lineEditTextChanged2(self, item, text):
       item.multiplier = float(text)
+      item.levels = item.getLevels()
   def lineEditTextChanged3(self, item, text):
       item.numberOfLevels = int(text)
-
-  # def newLevels(self, spectrum):
-  #   levels = [spectrum.spectrumItem.baseLevel]
-  #   for n in range(spectrum.spectrumItem.numberOfLevels-1):
-  #     levels.append(spectrum.spectrumItem.multiplier*spectrum.spectrumItem.levels[-1])
-  #   print(levels)
-  #   return tuple(levels)
-
+      item.levels = item.getLevels()
 
   def changeSpectrumColour(self):
     pass

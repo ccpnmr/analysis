@@ -73,7 +73,7 @@ class SpectrumNdPane(SpectrumPane):
     self.spectrumUtilToolbar.addAction("*2", self.upBy2)
     self.spectrumUtilToolbar.addAction("/2", self.downBy2)
     self.spectrumUtilToolbar.addAction("*8", self.upBy8)
-    self.spectrumUtilToolbar.addAction("/2", self.downBy2)
+    self.spectrumUtilToolbar.addAction("/8", self.downBy8)
     self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
     self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
 

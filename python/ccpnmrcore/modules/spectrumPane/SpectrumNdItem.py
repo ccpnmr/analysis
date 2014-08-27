@@ -28,6 +28,8 @@ class SpectrumNdItem(SpectrumItem):
     self.posColor = posColor
     self.negColor = negColor
 
+    self.setZValue(-1)  # this is so that the contours are drawn on the bottom
+
     if not region:
       # chicken and egg problem, can't know xDim until after dimMapping set up
       # and that is set up in SpectrumItem constructor, but that needs to know

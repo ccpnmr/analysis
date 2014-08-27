@@ -32,7 +32,8 @@ class MainWindow(GuiMainWindow):
   def __init__(self, project=None, **kw):
     GuiMainWindow.__init__(self, **kw)
     self.initUi(project)
-    self.setGeometry(50,100,1200,800)
+    screen = QtGui.QDesktopWidget().screenGeometry()
+    self.setGeometry(0, 0, screen.width(), screen.height())
     self.setProject(project)
 
   def initUi(self, project):
@@ -590,6 +591,7 @@ def main():
 
   app = QtGui.QApplication(sys.argv)
   window = MainWindow()
+  window.showMaximized()
   window.raise_()
   sys.exit(app.exec_())
 

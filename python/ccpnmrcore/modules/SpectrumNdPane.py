@@ -66,6 +66,7 @@ class SpectrumNdPane(SpectrumPane):
     newItem = self.scene().addItem(spectrumItem)
     self.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)\n" % (spectrum))
     spectrumItem.name = spectrum.name
+    spectrum.spectrumItem = spectrumItem
     if self.colourIndex != len(SPECTRUM_COLOURS) - 2:
       self.colourIndex +=2
     else:
@@ -77,14 +78,23 @@ class SpectrumNdPane(SpectrumPane):
     else:
       shortcutKey = None
 
-    print(newItem)
-    newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
-    newAction.setCheckable(True)
-    newAction.setChecked(True)
-    newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
+    pix=QtGui.QPixmap(60,10)
+    # pix2=QtGui.QPixmap(30,10)
+    # pix.scaled(60,20)
+    # pix.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+    pix.fill(QtGui.QColor(self.posColors))
+    spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
+    newIcon = QtGui.QIcon(pix)
+    # newIcon.actualSize(QtCore.QSize(80,60))
+    spectrumItem.newAction.setIcon(newIcon)
+    spectrumItem.newAction.setCheckable(True)
+    spectrumItem.newAction.setChecked(True)
+    spectrumItem.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
 
-    newAction.toggled.connect(spectrumItem.setVisible)
-    self.spectrumToolbar.addAction(newAction)
+    spectrumItem.newAction.toggled.connect(spectrumItem.setVisible)
+    self.spectrumToolbar.addAction(spectrumItem.newAction)
+    spectrumItem.widget = self.spectrumToolbar.widgetForAction(spectrumItem.newAction)
+    spectrumItem.widget.setFixedSize(60,30)
     self.spectrumItems.append(spectrumItem)
     self.current.spectrum = spectrum
 

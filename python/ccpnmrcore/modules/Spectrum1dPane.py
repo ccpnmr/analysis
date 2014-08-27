@@ -34,8 +34,13 @@ class Spectrum1dPane(SpectrumPane):
     self.colourIndex = 0
 
   def fillToolBar(self):
-    self.spectrumUtilToolbar.addAction("AutoScale", self.zoomYAll)
-    self.spectrumUtilToolbar.addAction("Full", self.zoomXAll)
+    autoScaleAction = self.spectrumUtilToolbar.addAction("AutoScale", self.zoomYAll)
+    autoScaleActionIcon = Icon('icons/zoom-fit-best')
+    # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
+    autoScaleAction.setIcon(autoScaleActionIcon)
+    # autoScaleAction.setText("AutoScale")
+    fullZoomAction = self.spectrumUtilToolbar.addAction("Full", self.zoomXAll)
+    # fullZoomAction.setIcon(Icon)
     self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
     self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
     # self.spectrumUtilToolbar.addAction("Undo", self.zoomXAll)
@@ -153,13 +158,15 @@ class Spectrum1dPane(SpectrumPane):
     spectrumItem.plot.parent = spectrum
     spectrumItem.plot.curve.setClickable(True)
     spectrumItem.plot.sigClicked.connect(self.clicked)
+    # palette = QtGui.QPalette()
+    # palette.setColor(QtGui.QPalette.Button,spectrumItem.colour)
+
     # spectrumItem.toolBarButton = QtGui.QToolButton(self.parent,text=spectrum.name)
     # spectrumItem.toolBarButton.setCheckable(True)
     # spectrumItem.toolBarButton.setChecked(True)
     # # print(spectrumItem.toolBarButton.actions())
-    # palette = QtGui.QPalette(spectrumItem.toolBarButton.palette())
     # palette.setColor(QtGui.QPalette.Button,colour)
-    # spectrumItem.toolBarButton.setPalette(palette)
+    # spectrumItem.toolBarButton.
     # spectrumItem.toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
     # spectrumItem.toolBarButton.toggled.connect(spectrumItem.plot.setVisible)
 
@@ -176,11 +183,18 @@ class Spectrum1dPane(SpectrumPane):
       shortcutKey = None
 
     # spectrumItem.toolBarButton.setShortcut(QtGui.QKeySequence(shortcutKey))
-    newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
-    newAction.setCheckable(True)
-    newAction.setChecked(True)
-    newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
-
+    pix=QtGui.QPixmap(60,10)
+    # pix2=QtGui.QPixmap(30,10)
+    # pix.scaled(60,20)
+    # pix.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+    pix.fill(QtGui.QColor(spectrumItem.colour))
+    spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
+    newIcon = QtGui.QIcon(pix)
+    # newIcon.actualSize(QtCore.QSize(80,60))
+    spectrumItem.newAction.setIcon(newIcon)
+    spectrumItem.newAction.setCheckable(True)
+    spectrumItem.newAction.setChecked(True)
+    spectrumItem.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
     # palette.Button.setAutoFillBackground(True)
     # palette..setColor(spectrumItem.color)
     # newAction.associatedWidgets()[1].setPalette(palette)
@@ -191,12 +205,16 @@ class Spectrum1dPane(SpectrumPane):
     # newAction.associatedWidgets()[1].palette().setColor(QtGui.QPalette.Button, spectrumItem.colour)
     # print(newAction.associatedWidgets()[1].palette().color(QtGui.QPalette.ColorRole(0)))
     # newAction.associatedWidgets()[1].setPalette(palette)
-    newAction.toggled.connect(spectrumItem.plot.setVisible)
-    self.spectrumToolbar.addAction(newAction)
-    spectrum.spectrumItem = spectrumItem
+    spectrumItem.newAction.toggled.connect(spectrumItem.setVisible)
+    self.spectrumToolbar.addAction(spectrumItem.newAction)
+    spectrumItem.widget = self.spectrumToolbar.widgetForAction(spectrumItem.newAction)
+    spectrumItem.widget.setFixedSize(60,30)
+    self.spectrumItems.append(spectrumItem)
+    self.current.spectrum = spectrum
     # for peakList in spectrum.peakLists:
     #   spectrumItem.addPeaks(self, peakList)
     # spectrumItem.addIntegrals(self)
+    spectrum.spectrumItem = spectrumItem
     self.spectrumItems.append(spectrumItem)
 
 

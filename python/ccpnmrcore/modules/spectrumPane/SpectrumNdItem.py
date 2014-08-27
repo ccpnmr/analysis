@@ -24,7 +24,10 @@ class SpectrumNdItem(SpectrumItem):
     self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
 
     SpectrumItem.__init__(self, spectrumPane, spectrum, dimMapping)
-        
+
+    self.posColor = posColor
+    self.negColor = negColor
+
     if not region:
       # chicken and egg problem, can't know xDim until after dimMapping set up
       # and that is set up in SpectrumItem constructor, but that needs to know
@@ -38,11 +41,13 @@ class SpectrumNdItem(SpectrumItem):
       viewBox.setXRange(region[xDim][1], region[xDim][0])
       viewBox.setYRange(region[yDim][1], region[yDim][0])
 
-    if posColor is None:
-      posColor = 'ff0000' # red
+    if self.posColor is None:
+      self.posColor = 'ff0000' # red
 
-    if negColor is None:
-      negColor = '0000ff' # blue
+    if self.negColor is None:
+      self.negColor = '0000ff' # blue
+
+    print('posColour',posColor)
       
     self.posContoursVisible = True # this block of code TEMP
     self.negContoursVisible = True
@@ -57,8 +62,8 @@ class SpectrumNdItem(SpectrumItem):
     # self.levels = tuple(self.levels)
     # self.levels = (1000000.0, 200000.0, 400000.0, 500000.0, 700000.0, 10000000.0, 5000000.0, 2000000.0,
     # -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
-    self.posColors = (self.getColorTuple(posColor),)
-    self.negColors = (self.getColorTuple(negColor),)
+    self.posColors = (self.getColorTuple(self.posColor),)
+    self.negColors = (self.getColorTuple(self.negColor),)
 
     self.contoursValid = False
     self.contourDisplayIndexDict = {} # level -> display list index
@@ -67,7 +72,7 @@ class SpectrumNdItem(SpectrumItem):
     
     colorTuple = QtGui.QColor(colorString).getRgb()
     colorTuple = tuple([c/255 for c in colorTuple])
-    
+
     return colorTuple
     
   def getLevels(self):

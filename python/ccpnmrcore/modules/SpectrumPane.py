@@ -75,7 +75,9 @@ class SpectrumPane(pg.PlotWidget, Base):
     else:
       self.dock = None
     self.spectrumToolbar = QtGui.QToolBar()
+    self.spectrumToolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     self.spectrumUtilToolbar = QtGui.QToolBar()
+    self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
     # self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
     spectrumToolBarColor = QtGui.QColor(214,215,213)
     palette = QtGui.QPalette(self.spectrumToolbar.palette())

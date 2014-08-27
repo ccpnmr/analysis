@@ -180,9 +180,13 @@ class Spectrum1dPane(SpectrumPane):
     newAction.setCheckable(True)
     newAction.setChecked(True)
     newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
-    palette = QtGui.QPalette(newAction.associatedWidgets()[1].palette())
-    palette.setColor(QtGui.QPalette.ColorRole(0), spectrumItem.colour)
-    # print(dir(newAction.associatedWidgets()[1]))
+
+    # palette.Button.setAutoFillBackground(True)
+    # palette..setColor(spectrumItem.color)
+    # newAction.associatedWidgets()[1].setPalette(palette)
+
+
+    # # print(dir(newAction.associatedWidgets()[1]))
     # print(newAction.associatedWidgets()[1].palette().color(QtGui.QPalette.ColorRole(0)))
     # newAction.associatedWidgets()[1].palette().setColor(QtGui.QPalette.Button, spectrumItem.colour)
     # print(newAction.associatedWidgets()[1].palette().color(QtGui.QPalette.ColorRole(0)))

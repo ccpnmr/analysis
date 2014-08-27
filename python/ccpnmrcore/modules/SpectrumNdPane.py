@@ -5,7 +5,7 @@ from PySide import QtCore, QtGui, QtOpenGL
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane, SPECTRUM_COLOURS
 
 from ccpnmrcore.modules.spectrumPane.SpectrumNdItem import SpectrumNdItem
-
+from ccpncore.gui.Icon import Icon
 from functools import partial
 
 class SpectrumNdPane(SpectrumPane):
@@ -24,6 +24,7 @@ class SpectrumNdPane(SpectrumPane):
     self.showGrid(x=True, y=True)
     self.region = None
     self.colourIndex = 0
+    self.spectrumUtilToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
           
   ##### functions used externally #####
@@ -94,6 +95,7 @@ class SpectrumNdPane(SpectrumPane):
     spectrumItem.newAction.toggled.connect(spectrumItem.setVisible)
     self.spectrumToolbar.addAction(spectrumItem.newAction)
     spectrumItem.widget = self.spectrumToolbar.widgetForAction(spectrumItem.newAction)
+    spectrumItem.widget.clicked.connect(partial(self.clickedNd, spectrum))
     spectrumItem.widget.setFixedSize(60,30)
     self.spectrumItems.append(spectrumItem)
     self.current.spectrum = spectrum
@@ -118,10 +120,28 @@ class SpectrumNdPane(SpectrumPane):
     self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
 
   def fillToolBar(self):
-    self.spectrumUtilToolbar.addAction("+1", self.addOne)
-    self.spectrumUtilToolbar.addAction("-1", self.subtractOne)
-    self.spectrumUtilToolbar.addAction("*1.4", self.upBy2)
-    self.spectrumUtilToolbar.addAction("/1.4", self.downBy2)
-    self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
-    self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
+    plusOneAction = self.spectrumUtilToolbar.addAction("+1", self.addOne)
+    plusOneIcon = Icon('icons/contourAdd')
+    plusOneAction.setIcon(plusOneIcon)
+    plusOneAction.setToolTip('Add One Level')
+    minusOneAction = self.spectrumUtilToolbar.addAction("+1", self.subtractOne)
+    minusOneIcon = Icon('icons/contourRemove')
+    minusOneAction.setIcon(minusOneIcon)
+    minusOneAction.setToolTip('Remove One Level ')
+    upBy2Action = self.spectrumUtilToolbar.addAction("*1.4", self.upBy2)
+    upBy2Icon = Icon('icons/contourBaseUp')
+    upBy2Action.setIcon(upBy2Icon)
+    upBy2Action.setToolTip('Raise Contour Base Level')
+    downBy2Action = self.spectrumUtilToolbar.addAction("*1.4", self.upBy2)
+    downBy2Icon = Icon('icons/contourBaseDown')
+    downBy2Action.setIcon(downBy2Icon)
+    downBy2Action.setToolTip('Lower Contour Base Level')
+    storeZoomAction = self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
+    storeZoomIcon = Icon('icons/zoom-store')
+    storeZoomAction.setIcon(storeZoomIcon)
+    storeZoomAction.setToolTip('Store Zoom')
+    restoreZoomAction = self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
+    restoreZoomIcon = Icon('icons/zoom-restore')
+    restoreZoomAction.setIcon(restoreZoomIcon)
+    restoreZoomAction.setToolTip('Restore Zoom')
 

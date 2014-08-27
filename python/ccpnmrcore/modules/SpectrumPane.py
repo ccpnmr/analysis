@@ -84,7 +84,7 @@ class SpectrumPane(pg.PlotWidget, Base):
     palette.setColor(QtGui.QPalette.Button,spectrumToolBarColor)
     #self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
     if self.dock:
-      self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 6)
+      self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 5)
       self.dock.addWidget(self.spectrumUtilToolbar, 0, 6, 2, 4)
     self.spectrumIndex = 1
     self.viewBox.current = current
@@ -101,10 +101,19 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.setSpectra(spectraVar)
 
   def clicked(self, spectrum):
+      self.current.spectrum = spectrum
+      self.current.spectra.append(spectrum.parent)
+      print(self.current.spectrum)
+      self.mainWindow.pythonConsole.write('current.spectrum='+str(self.current.spectrum)+'\n')
+      self.mainWindow.statusBar().showMessage('current.spectrum='+str(self.current.spectrum.pid))
+
+  def clickedNd(self, spectrum, event):
+    # if event.button() == QtCore.Qt.RightButton and not event.modifiers():
+    #   event.accept()
     self.current.spectrum = spectrum
-    self.current.spectra.append(spectrum.parent)
-    self.parent.pythonConsole.write('current.spectrum='+str(self.current.spectrum)+'\n')
-    self.parent.statusBar().showMessage('current.spectrum='+str(self.current.spectrum.pid))
+    self.current.spectra.append(spectrum)
+    self.parent.mainWindow.write('current.spectrum='+str(self.current.spectrum)+'\n')
+    self.mainWindow.statusBar().showMessage('current.spectrum='+str(self.current.spectrum.pid))
 
   def createCrossHair(self):
     self.vLine = pg.InfiniteLine(angle=90, movable=False)

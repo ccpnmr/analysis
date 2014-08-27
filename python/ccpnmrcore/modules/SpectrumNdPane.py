@@ -26,6 +26,7 @@ class SpectrumNdPane(SpectrumPane):
     self.colourIndex = 0
     self.spectrumUtilToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
+
           
   ##### functions used externally #####
 

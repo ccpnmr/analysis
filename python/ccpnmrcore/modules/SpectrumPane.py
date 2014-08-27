@@ -76,21 +76,23 @@ class SpectrumPane(pg.PlotWidget, Base):
       self.dock = None
     self.spectrumToolbar = QtGui.QToolBar()
     self.spectrumToolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+    self.spectrumToolbar.setMinimumHeight(44)
+    self.spectrumToolbar.setMaximumWidth(550)
+
     self.spectrumUtilToolbar = QtGui.QToolBar()
-    self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
-    # self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
+    # self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
     spectrumToolBarColor = QtGui.QColor(214,215,213)
     palette = QtGui.QPalette(self.spectrumToolbar.palette())
     palette.setColor(QtGui.QPalette.Button,spectrumToolBarColor)
-    #self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
     if self.dock:
-      self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 5)
-      self.dock.addWidget(self.spectrumUtilToolbar, 0, 6, 2, 4)
+      self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 6)
+      self.dock.addWidget(self.spectrumUtilToolbar, 0, 6, 2, 3)
+
     self.spectrumIndex = 1
     self.viewBox.current = current
     self.positionBox = QtGui.QLabel()
     if self.dock:
-      self.dock.addWidget(self.positionBox, 0, 10, 2, 1)
+      self.dock.addWidget(self.positionBox, 0, 9, 2, 2)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     if self.dock:
       self.dock.addWidget(self, 2, 0, 1, 11)

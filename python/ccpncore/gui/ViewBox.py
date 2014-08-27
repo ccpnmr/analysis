@@ -34,7 +34,7 @@ class ViewBox(pg.ViewBox):
       return self.menu
 
 
-  def mouseClickEvent(self, event):
+  def mouseClickEvent(self, event, axis=None):
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
       event.accept()
@@ -57,9 +57,13 @@ class ViewBox(pg.ViewBox):
       event.accept()
       print('Pick and Assign')
 
-    elif event.button() == QtCore.Qt.RightButton and not event.modifiers():
+    elif event.button() == QtCore.Qt.RightButton and not event.modifiers() and axis is None:
       event.accept()
       self.raiseContextMenu(event)
+
+    elif event.button() == QtCore.Qt.RightButton and not event.modifiers():
+      event.accept()
+      print('axis Context Menu')
 
 
       print('Context Menu to be activated here')

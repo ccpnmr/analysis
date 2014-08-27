@@ -11,7 +11,7 @@ class Icon(QtGui.QIcon):
     assert image or color
     
     if color:
-      image = QtGui.QPixmap(22, 22)
+      image = QtGui.QPixmap(10, 10)
       painter = QtGui.QPainter(image)
       
       if isinstance(color, str):

@@ -65,9 +65,9 @@ class GeneralTab(QtGui.QWidget, Base):
     super(GeneralTab, self).__init__(parent)
 
 
-    nameLabel = (Label(self, text="Spectrum name: ", grid=(0,0)))
-    nameData = LineEdit(self, grid=(0, 1))
-    nameData.setText(spectrum.spectrumItem.name)
+    # nameLabel = (Label(self, text="Spectrum name: ", grid=(0,0)))
+    # nameData = LineEdit(self, grid=(0, 1))
+    # nameData.setText(spectrum.spectrumItem.name)
     pathLabel = Label(self, text="Path:", grid=(1, 0))
     pathData = LineEdit(self, grid=(1, 1))
     pathData.setText(spectrum.filePath)

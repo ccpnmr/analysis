@@ -41,7 +41,7 @@ class SpectrumPane(pg.PlotWidget, Base):
     else:
       background = 'k'
       foreground = 'w'
-      
+
     pg.setConfigOptions(background=background)
     pg.setConfigOptions(foreground=foreground)
     pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
@@ -135,10 +135,10 @@ class SpectrumPane(pg.PlotWidget, Base):
     position = self.viewBox.mapSceneToView(pos).toTuple()
     self.positionBox.setText("X: %.3f  Y: %.3f" % position)
 
-  #
-  # def zoomToRegion(self, region):
-  #   self.setXRange(region[0],region[1])
-  #   self.setYRange(region[2],region[3])
+
+  def zoomToRegion(self, region):
+    self.setXRange(region[0],region[1])
+    self.setYRange(region[2],region[3])
 
   def zoomX(self, region):
     self.setXRange(region[0],region[1])

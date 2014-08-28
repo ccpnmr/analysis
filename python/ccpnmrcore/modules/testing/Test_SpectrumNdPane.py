@@ -25,14 +25,21 @@ from ccpnmrcore.testing.Testing import Testing
 
 from ccpnmrcore.modules.SpectrumNdPane import SpectrumNdPane
 
+import json
+import os
+# from ccpncore.util.AttrDict import AttrDict
+
+
 class SpectrumPaneTest(Testing):
 
   def __init__(self, *args, **kw):
     Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
     self.spectrumName = 'HSQC'
+    preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json')
+    self.preferences = json.load(open(preferencesPath), object_hook=AttrDict)
 
   def test_spectrumNdPane(self):
 
-    spectrumPane = SpectrumNdPane(project=self.project, parent=self.frame)
+    spectrumPane = SpectrumNdPane(project=self.project, parent=self.frame, preferences=self.preferences)
     spectrum = self.getSpectrum()
     spectrumPane.addSpectrum(spectrum)

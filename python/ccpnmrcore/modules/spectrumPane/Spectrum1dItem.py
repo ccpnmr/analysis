@@ -25,7 +25,7 @@ class Spectrum1dItem(SpectrumItem):
     SpectrumItem.__init__(self, spectrumPane, spectrum, dimMapping)
     
     self.spectralData = self.getSliceData()
-    print(self.spectrum)
+
     # self.integrals = self.autoIntegration()
     # self.integralListItems = []
     # self.integralListItems.append(IntegralListItem(self))
@@ -62,6 +62,7 @@ class Spectrum1dItem(SpectrumItem):
      print(peakList)
    else:
      peakList = self.spectrum.peakLists[0]
+   print('#######',peakList.pid)
    peaks = []
    data = self.spectralData
    threshold = self.estimateNoise()*10
@@ -80,7 +81,7 @@ class Spectrum1dItem(SpectrumItem):
      height = data[1][position]
      peaks.append([peakPosition,height])
      peakList.newPeak(height=float(height), position=peakPosition)
-   self.peakListItems[peakList.pid].createPeakItems()
+   print(self.peakListItems[peakList.pid])#.createPeakItems()
 
    return peakList
 

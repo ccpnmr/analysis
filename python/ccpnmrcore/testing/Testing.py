@@ -24,6 +24,7 @@ __version__ = "$Revision: 7686 $"
 import os
 import unittest
 
+
 from PySide import QtGui
 
 from ccpncore.gui.Button import Button

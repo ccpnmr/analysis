@@ -133,7 +133,7 @@ class SpectrumNdPane(SpectrumPane):
     upBy2Icon = Icon('icons/contourBaseUp')
     upBy2Action.setIcon(upBy2Icon)
     upBy2Action.setToolTip('Raise Contour Base Level')
-    downBy2Action = self.spectrumUtilToolbar.addAction("*1.4", self.upBy2)
+    downBy2Action = self.spectrumUtilToolbar.addAction("*1.4", self.downBy2)
     downBy2Icon = Icon('icons/contourBaseDown')
     downBy2Action.setIcon(downBy2Icon)
     downBy2Action.setToolTip('Lower Contour Base Level')

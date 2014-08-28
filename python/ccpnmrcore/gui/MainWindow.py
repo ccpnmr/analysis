@@ -251,7 +251,6 @@ class MainWindow(GuiMainWindow):
     try:
       fp = open(preferencesPath)
       self.preferences = json.load(fp, object_hook=AttrDict)
-      print(self.preferences)
       fp.close()
     except:
       self.preferences = None # TBD: should give some sensible default

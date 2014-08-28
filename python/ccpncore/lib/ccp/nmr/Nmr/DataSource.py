@@ -427,7 +427,7 @@ def estimateNoise(spectrum):
       value = 1.1 * numpy.std(planeData.flatten()) # multiplier a guess
     else:
 
-      if len(spectrum.valueArray) != 0:
+      if hasattr(spectrum, 'valueArray') and len(spectrum.valueArray) != 0:
         sliceData = spectrum.valueArray
       else:
         spectrum.valueArray = sliceData = getSliceData(spectrum)

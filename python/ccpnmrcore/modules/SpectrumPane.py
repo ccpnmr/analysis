@@ -114,7 +114,7 @@ class SpectrumPane(pg.PlotWidget, Base):
     #   event.accept()
     self.current.spectrum = spectrum
     self.current.spectra.append(spectrum)
-    self.mainWindow.write('current.spectrum='+str(self.current.spectrum)+'\n')
+    self.mainWindow.pythonConsole.write('current.spectrum='+str(self.current.spectrum.pid)+'\n')
     self.mainWindow.statusBar().showMessage('current.spectrum='+str(self.current.spectrum.pid))
 
   def createCrossHair(self):

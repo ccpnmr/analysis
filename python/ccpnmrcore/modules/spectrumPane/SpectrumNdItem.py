@@ -49,8 +49,7 @@ class SpectrumNdItem(SpectrumItem):
     if self.negColor is None:
       self.negColor = '0000ff' # blue
 
-    print('posColour',posColor)
-      
+
     self.posContoursVisible = True # this block of code TEMP
     self.negContoursVisible = True
     self.baseLevel = 1000000.00

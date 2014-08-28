@@ -109,7 +109,7 @@ class SpectrumPane(pg.PlotWidget, Base):
       self.mainWindow.pythonConsole.write('current.spectrum='+str(self.current.spectrum)+'\n')
       self.mainWindow.statusBar().showMessage('current.spectrum='+str(self.current.spectrum.pid))
 
-  def clickedNd(self, spectrum, event):
+  def clickedNd(self, spectrum):
     # if event.button() == QtCore.Qt.RightButton and not event.modifiers():
     #   event.accept()
     self.current.spectrum = spectrum
@@ -215,6 +215,7 @@ class SpectrumPane(pg.PlotWidget, Base):
 
   def dropEvent(self,event):
     event.accept()
+    self.current.pane = self
     if isinstance(self.parent, QtGui.QGraphicsScene):
       event.ignore()
       return
@@ -222,8 +223,6 @@ class SpectrumPane(pg.PlotWidget, Base):
     if event.mimeData().urls():
 
       filePaths = [url.path() for url in event.mimeData().urls()]
-      print(filePaths)
-      print(len(filePaths))
       if len(filePaths) == 1:
         for dirpath, dirnames, filenames in os.walk(filePaths[0]):
           if dirpath.endswith('memops') and 'Implementation' in dirnames:
@@ -231,7 +230,6 @@ class SpectrumPane(pg.PlotWidget, Base):
             self.addSpectra(self.project.spectra)
 
         else:
-          print(filePaths[0])
           self.mainWindow.loadSpectra(filePaths[0])
       elif len(filePaths) > 1:
         [self.mainWindow.loadSpectra(filePath) for filePath in filePaths]
@@ -240,7 +238,7 @@ class SpectrumPane(pg.PlotWidget, Base):
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
       pidData = str(data.data(),encoding='utf-8')
-      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12']
+      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12', '\x0c']
       pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
       actualPid = ''.join(map(str, pidData2))
       print(list(actualPid))

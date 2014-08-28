@@ -251,6 +251,7 @@ class MainWindow(GuiMainWindow):
     try:
       fp = open(preferencesPath)
       self.preferences = json.load(fp, object_hook=AttrDict)
+      print(self.preferences)
       fp.close()
     except:
       self.preferences = None # TBD: should give some sensible default
@@ -291,7 +292,7 @@ class MainWindow(GuiMainWindow):
 
   def quitAction(self):
     # pass
-    prefFile = open("~/.ccpn/v3settings.json")
+    prefFile = open(os.path.expanduser("~/.ccpn/v3settings.json"))
     pref = json.load(prefFile)
     prefFile.close()
     if not pref == self.preferences:
@@ -301,7 +302,8 @@ class MainWindow(GuiMainWindow):
       msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
       ret = msgBox.exec_()
       if ret == QtGui.QMessageBox.Yes:
-        prefFile = open("~/.ccpn/v3settings.json", 'w+')
+        preferencesPath = os.path.expanduser("~/.ccpn/v3settings.json")
+        prefFile = open(preferencesPath, 'w+')
         json.dump(self.preferences, prefFile)
         prefFile.close()
       else:
@@ -484,7 +486,6 @@ class MainWindow(GuiMainWindow):
     else:
       spectrum = loadDataSource(self.project,directory)
 
-    if spectrum.dimensionCount == 1:
       self.current.pane.addSpectrum(spectrum)
       self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
 

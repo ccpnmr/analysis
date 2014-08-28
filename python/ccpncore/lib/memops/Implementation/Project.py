@@ -7,7 +7,8 @@ from ccpncore.lib.Spectrum import createExperiment, createDataSource, createBloc
 
 from ccpncore.api.memops.Implementation import Url
 
-def loadDataSource(apiProject, filePath, reReadSpectrum=None):
+def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
+
 
   isOk, msg = checkFilePath(filePath)
 
@@ -23,7 +24,6 @@ def loadDataSource(apiProject, filePath, reReadSpectrum=None):
                   VARIAN:Varian, XEASY:Xeasy}
 
   dataFileFormat = getSpectrumFileFormat(filePath)
-  print(dataFileFormat)
   if dataFileFormat is None:
     msg = 'Spectrum data format could not be determined for %s'
     # showError('Error', msg % filePath)
@@ -69,7 +69,8 @@ def loadDataSource(apiProject, filePath, reReadSpectrum=None):
     else:
 
 
-      nmrProject = apiProject.currentNmrProject
+      nmrProject = wrapperProject.nmrProject
+      apiProject = wrapperProject._wrappedData.root
       newExperiment = createExperiment(nmrProject, name=name, numDim=len(numPoints),
                                        sf = specFreqs, isotopeCodes=isotopes)
 
@@ -81,8 +82,12 @@ def loadDataSource(apiProject, filePath, reReadSpectrum=None):
                                        refppm=refPpms,refpt=refPoints,dataStore=blockMatrix)
 
 
+
+
     for i, values in enumerate(sampledValues):
       if values:
         newDataSource.setSampledData(i, values, sampledErrors[i] or None)
 
-    return newDataSource
+    spectrum = wrapperProject._data2Obj[newDataSource]
+
+    return spectrum

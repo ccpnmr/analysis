@@ -9,6 +9,9 @@ from ccpncore.api.memops.Implementation import Url
 
 def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
 
+  if reReadSpectrum is not None:
+    # NBNB TBD Rasmus - this is clearly not working yet
+    raise NotImplementedError("reReadSpectrum parameter not implemented yet")
 
   isOk, msg = checkFilePath(filePath)
 
@@ -60,21 +63,28 @@ def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
 
     if mid == 'pdata':
       rest, upper = os.path.split(rest)
-      name = '%s:%s' % (upper, lower)
+      name = '%s-%s' % (upper, lower)
+
+  if ':' in name:
+    # Fix name to fit PID requirements. NBNB temporary fix
+    name = name.replace(':','-')
+  if '.' in name:
+    # Fix name to fit PID requirements. NBNB temporary fix
+    name = name.replace('.',',')
 
   if numPoints:
 
     if reReadSpectrum:
       spectrum = reReadSpectrum
+      # NBNB TBD BROKEN - spectrum is overwritten lower down
     else:
 
 
       nmrProject = wrapperProject.nmrProject
-      apiProject = wrapperProject._wrappedData.root
       newExperiment = createExperiment(nmrProject, name=name, numDim=len(numPoints),
                                        sf = specFreqs, isotopeCodes=isotopes)
 
-      dataLocationStore = apiProject.newDataLocationStore(name=name)
+      dataLocationStore = nmrProject.root.newDataLocationStore(name=name)
       dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
       blockMatrix = createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
                                         blockSizes=blockSizes,isBigEndian=isBigEndian)
@@ -88,6 +98,7 @@ def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
       if values:
         newDataSource.setSampledData(i, values, sampledErrors[i] or None)
 
+    # NBNB TBD BROKEN - newDataSource is not always set.
     spectrum = wrapperProject._data2Obj[newDataSource]
 
     return spectrum

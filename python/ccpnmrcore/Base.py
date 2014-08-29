@@ -10,6 +10,7 @@ class Base(GuiBase):
     
   def getById(self, pid):
 
+    print(pid)
     return self.project.getById(pid)
 
   def getObject(self, pidOrObject):

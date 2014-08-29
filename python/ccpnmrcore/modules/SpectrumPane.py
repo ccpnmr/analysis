@@ -230,7 +230,10 @@ class SpectrumPane(pg.PlotWidget, Base):
             self.addSpectra(self.project.spectra)
 
         else:
+          print(filePaths[0])
           self.mainWindow.loadSpectra(filePaths[0])
+
+
       elif len(filePaths) > 1:
         [self.mainWindow.loadSpectra(filePath) for filePath in filePaths]
 
@@ -238,15 +241,15 @@ class SpectrumPane(pg.PlotWidget, Base):
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
       pidData = str(data.data(),encoding='utf-8')
-      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12', '\x0c']
+      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12', '\x0c', '\x05', '\x10']
       pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
       actualPid = ''.join(map(str, pidData2))
       print(list(actualPid))
 
+
       spectrum = self.getObject(actualPid)
       self.addSpectrum(spectrum)
       self.current.spectrum = spectrum
-      self.current.pane = self
 
 
 

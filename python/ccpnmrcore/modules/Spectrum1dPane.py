@@ -211,7 +211,7 @@ class Spectrum1dPane(SpectrumPane):
     # newAction.associatedWidgets()[1].palette().setColor(QtGui.QPalette.Button, spectrumItem.colour)
     # print(newAction.associatedWidgets()[1].palette().color(QtGui.QPalette.ColorRole(0)))
     # newAction.associatedWidgets()[1].setPalette(palette)
-    spectrumItem.newAction.toggled.connect(spectrumItem.setVisible)
+    spectrumItem.newAction.toggled.connect(spectrumItem.plot.setVisible)
     self.spectrumToolbar.addAction(spectrumItem.newAction)
     spectrumItem.widget = self.spectrumToolbar.widgetForAction(spectrumItem.newAction)
     spectrumItem.widget.setFixedSize(60,30)

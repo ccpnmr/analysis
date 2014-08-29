@@ -204,7 +204,9 @@ class MainWindow(GuiMainWindow):
 
   def raiseSpectrumProperties(self, item):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
+    print(dataItem)
     spectrum = self.project.getById(dataItem)
+    print(dataItem)
     SpectrumPropertiesPopup(spectrum).exec_()
 
   def newProject(self, name=None):
@@ -484,11 +486,13 @@ class MainWindow(GuiMainWindow):
 
     else:
       spectrum = loadDataSource(self.project,directory)
-
-      self.current.pane.addSpectrum(spectrum)
-      self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
+      print(spectrum)
+      # self.current.pane.addSpectrum(spectrum)
+      # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
 
     msg = spectrum.name+' loaded'
+    self.current.pane.addSpectrum(spectrum)
+    self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
     self.statusBar().showMessage(msg)
     if len(directory) == 1:
       self.pythonConsole.write("project.loadSpectrum('"+directory+"')\n")

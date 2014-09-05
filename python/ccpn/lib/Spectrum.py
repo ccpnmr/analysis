@@ -23,5 +23,18 @@ def automaticIntegration(spectrum, spectralData):
 def estimateNoise(spectrum):
   return DataSource.estimateNoise(spectrum.ccpnSpectrum)
 
+def getDimPointFromValue(spectrum, dimension, value):
+  """ Convert from value (e.g. ppm) to point (counting from 0) for an arbitrary
+      number of values in a given dimension (counting from 0).  If value is a
+      number then return a number, otherwise return a list.
+  """
+  return DataSource.getDimPointFromValue(spectrum.ccpnSpectrum, dimension, value)
+    
+def getDimValueFromPoint(spectrum, dimension, point):
+  """ Convert from point (counting from 0) to value (e.g. ppm) for an arbitrary
+      number of points in a given dimension (counting from 0).  If point is a
+      number then return a number, otherwise return a list.
+  """
+  return DataSource.getDimValueFromPoint(spectrum.ccpnSpectrum, dimension, point)
 
 

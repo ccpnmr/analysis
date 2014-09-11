@@ -4,12 +4,12 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2002 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, TImothy J. Stevens Geerten Vuister"
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-               "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                 " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:

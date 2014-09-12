@@ -555,7 +555,7 @@ def renumberChainSeqCodes(chain, firstSeqCode=1, skipZeroSeqCode=False):
     
     
 def copyMolecule(molecule, newName=None):
-  """Make a new molecule based upon the sequence of an existing ome
+  """Make a new molecule based upon the sequence of an existing one
   .. describe:: Input
   
   Molecule.Molecule
@@ -566,7 +566,7 @@ def copyMolecule(molecule, newName=None):
   """
   
   project = molecule.root
-  i       = len(project.molecules) + 1
+  i = len(project.molecules) + 1
   newName = newName or 'Molecule %d' % i
   newMolecule = CopyData.copySubTree(molecule, project, topObjectParameters={'name':newName,},
                                      maySkipCrosslinks=1 )

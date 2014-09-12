@@ -87,8 +87,7 @@ from ccpncore.util import Logging
 
 
 def copySubTree(sourceObj, newParent, maySkipCrosslinks:bool=False,
- topObjectParameters:dict=None, objectMap:dict=None
-):
+                topObjectParameters:dict=None, objectMap:dict=None):
   """ Copy an api object and all its descendants within or between projects
 
   :param sourceObj: CCPN api object to be copied
@@ -119,7 +118,7 @@ def copySubTree(sourceObj, newParent, maySkipCrosslinks:bool=False,
   Note that the function first builds all objects, then connects crosslinks,
   then connects parent-to-child links. Finally all notifiers are called but in
   random order. If there is an error the routine tries to delete all created
-  objects before re-raising the original error. A a failed function call may
+  objects before re-raising the original error. A failed function call may
   consume serial numbers if the key of the sourceObj is 'serial'. Also, there is
   a relatively high bug risk, as is always the case with functions that have to
   clean up after an error. 
@@ -155,7 +154,7 @@ def _transferData(newParent, sourceObj, oldToNew=None,
                  oldVersionStr=None, targetObjParams=None,
                  ignoreMissing=True, useOptLinks=False):
   """ Copy sourceObj and recursively all its children,
-  to a new tree where the new targetObj is a child of newRoo
+  to a new tree where the new targetObj is a child of newParent
 
   - If oldVersionStr is set, do as  backwards compatibility, 
   including minor post-processing, otherwise do as subtree copying
@@ -168,7 +167,7 @@ def _transferData(newParent, sourceObj, oldToNew=None,
 
   - useOptLinks controls if optional links (basically the -to-one
     direction of one-to-many links) should be followed. For compatibility
-    this is awaste of time (but harmless), but for copySubTree it is
+    this is a waste of time (but harmless), but for copySubTree it is
     necessary
   """
 

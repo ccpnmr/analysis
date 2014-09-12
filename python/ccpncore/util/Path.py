@@ -87,13 +87,16 @@ import shutil
 import sys
 import glob
 
+# NB necessary compatibility
+# - this is imported to Python 2.1 (in ObjectDomain)
+aliasTrue = not 0
+aliasFalse = not aliasTrue
+
 dirsep = '/'
 # note, cannot just use os.sep below because can have window file names cropping up on unix machines
 winsep = '\\'
 
-# Note: makeAbsolute is Boolean so the default should be
-# False but ObjectDomain does not understand True/False
-def normalisePath(path, makeAbsolute=None):
+def normalisePath(path, makeAbsolute=aliasFalse):
   """
   Normalises the path, e.g. removes redundant .. and slashes and
   makes sure path uses '/' rather than '\\' as can happen on Windows.
@@ -284,10 +287,10 @@ def suggestFileLocations(fileNames, startDir=None):
   # set up startDir
   if startDir is None:
     startDir = os.getcwd()
-  startDir = normalisePath(startDir, makeAbsolute=True)
+  startDir = normalisePath(startDir, makeAbsolute=aliasTrue)
 
   # find common baseDir and paths
-  files = [normalisePath(fp, makeAbsolute=True) for fp in fileNames]
+  files = [normalisePath(fp, makeAbsolute=aliasTrue) for fp in fileNames]
   baseDir = commonSuperDirectory(*files)
   prefix = os.path.join(baseDir, '')
   lenPrefix = len(prefix)
@@ -330,35 +333,35 @@ def suggestFileLocations(fileNames, startDir=None):
   #
   return baseDir, paths
 
-def checkFilePath(filePath, allowDir=True):
+def checkFilePath(filePath, allowDir=aliasTrue):
 
   msg = ''
-  isOk = True
+  isOk = aliasTrue
 
   if not filePath:
-    isOk = False
+    isOk = aliasFalse
 
   elif not os.path.exists(filePath):
     msg = 'Location "%s" does not exist' % filePath
-    isOk = False
+    isOk = aliasFalse
 
   elif not os.access(filePath, os.R_OK):
     msg = 'Location "%s" is not readable' % filePath
-    isOk = False
+    isOk = aliasFalse
 
   elif os.path.isdir(filePath):
     if allowDir:
       return isOk, msg
     else:
       msg = 'Location "%s" is a directory' % filePath
-      isOk = False
+      isOk = aliasFalse
 
   elif not os.path.isfile(filePath):
     msg = 'Location "%s" is not a regular file' % filePath
-    isOk = False
+    isOk = aliasFalse
 
   elif os.stat(filePath).st_size == 0:
     msg = 'File "%s" is of zero size '% filePath
-    isOk = False
+    isOk = aliasFalse
 
   return isOk, msg

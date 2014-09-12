@@ -53,7 +53,14 @@ class Residue(AbstractWrapperClass):
   def seqCode(self) -> str:
     """Residue sequence code and id (e.g. '1', '127B') """
     obj = self._wrappedData
-    return str(obj.seqCode) + obj.seqInsertCode.strip()
+    objSeqCode = obj.seqCode
+    relativeOffset = obj.relativeOffset
+    result = obj.seqInsertCode or ''
+    if objSeqCode is not None:
+      result = str(objSeqCode) + result
+    if relativeOffset is not None:
+      result = '%s%+d' % (result, relativeOffset)
+    return result
   
   id = seqCode
     

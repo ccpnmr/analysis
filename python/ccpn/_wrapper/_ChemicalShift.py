@@ -95,10 +95,8 @@ class ChemicalShift(AbstractWrapperClass):
 
   @property
   def assignment(self) -> object:
-    """NmrAtom that the shift belongs to"""
-    return self._project.resonance2Assignment(self._wrappedData.resonance)
-
-  # NBNB TBD consider how to handle relevant setter - people may want to reset assignment
+    """Atom that the shift belongs to"""
+    return self._project._dta2Obj(self._wrappedData.resonance)
 
     
   # Implementation functions
@@ -115,7 +113,7 @@ def newChemicalShift(parent:ChemicalShiftList, value:float, assignment:object,
                      comment:str=None) -> ChemicalShift:
   """Create new child Shift"""
   parent._wrappedData.newShift(value=value,
-                               resonance=parent._project.assignment2Resonance(assignment),
+                               resonance=assignment._getAtomResonance(),
                                error=valueError, figOfMerit=figureOfMerit, details=comment)
 
 ChemicalShiftList.newChemicalShift = newChemicalShift

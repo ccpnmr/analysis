@@ -24,8 +24,6 @@ __version__ = "$Revision: 7686 $"
 
 import functools
 
-#from ccpncore.util.Classes import NmrAtom as _NmrAtom
-
 from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
 from ccpncore.memops import Notifiers
@@ -163,25 +161,16 @@ class Project(AbstractWrapperClass):
   # utility functions
   #
 
-  # def NmrAtom(self, *args, **kwargs):
-  #   """ Factory function to produce NmrAtom with _project variable set to Project"""
-  #   result = _NmrAtom(*args, **kwargs)
-  #   result._project = self
-  #   return result
-
-  def _assignment2Resonance(self, assignment) -> object:
-    """get or create ccp.nmr.Nmr.Resonance matching assignment"""
-    # NBNB TBD
-    raise NotImplementedError("_assignment2Resonance")
-
-  def _resonance2Assignment(self, resonance:object):
-    """ get or create Assignmetn matching ccp.nmr.Nmr.resonanc"""
-    # NBNB TBD
-    raise NotImplementedError("_resonance2Assignment")
-
-
 # NBNB set function parameter annotations for AbstractBaseClass functions
 # MUST be done here to avoid circular import problems
 AbstractWrapperClass.__init__.__annotations__['project'] = Project
 AbstractWrapperClass.project.fget.__annotations__['return'] = Project
 #AbstractWrapperClass.project.getter.__annotations__['return'] = Project
+
+
+
+def _getAtomResonance(atom:object) -> object:
+  """get or create resonance corresponding to Atom
+  NBNB TBD Must add Resonance if not currently there. NOT YET DONE
+  NBNB duplicate. consolidate and move to right place"""
+  return atom.ccpnResonance

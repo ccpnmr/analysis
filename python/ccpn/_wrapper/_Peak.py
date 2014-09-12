@@ -22,11 +22,15 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from collections.abc import Sequence
+import itertools
+import operator
 
 from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._PeakList import PeakList
 from ccpncore.api.ccp.nmr.Nmr import Peak as Ccpn_Peak
+
+from ccpncore.lib.ccp.nmr.Nmr import Peak as CcpnLibPeak
 
 
 class Peak(AbstractWrapperClass):
@@ -136,32 +140,77 @@ class Peak(AbstractWrapperClass):
       peakDim.position = value[ii]
 
   @property
-  def assignments(self) -> tuple:
-    """Peak assignment - a list of possible single Assignment for each dimension.
-    It is assumed (for now) that all combinations are possible"""
+  def dimensionAssignments(self) -> tuple:
+    """Peak dimension assignment - a list of lists of assigned Atoms for each dimension.
+    Assignments as a list of individual combinations is given in 'assignments'.
+    Setting dimensionAssignments implies that all combinations are possible"""
     result = []
     for peakDim in self._wrappedData.sortedPeakDims():
 
       mainPeakDimContribs = peakDim.mainPeakDimContribs
       # Done this way as a quick way of sorting the values
       mainPeakDimContribs = [x for x in peakDim.sortedPeakDimContribs() if x in mainPeakDimContribs]
-      dimResults = []
+
+      data2Obj = self._project._data2Obj
+      dimResults = [data2Obj[pdc.resonance] for pdc in mainPeakDimContribs
+                    if hasattr(pdc, 'resonance')]
       result.append(dimResults)
-      func = self._project._resonance2Assignment
-      for pdc in mainPeakDimContribs:
-        if hasattr(pdc, 'resonance'):
-          resonance = pdc.resonance
-          if resonance:
-            result.append(func(resonance))
-        else:
-          result.append('COMPLEX.assignment.NBNB.TBD')
     #
     return tuple(result)
+
+  @dimensionAssignments.setter
+  def dimensionAssignments(self, value:Sequence):
+    ccpnPeak = self._wrappedData
+    dimResonances = list(value)
+    for ii, atoms in enumerate(dimResonances):
+      dimValues = tuple(x._getCcpnResonance() for x in value[ii])
+      dimResonances[ii] = tuple(x for x in dimValues if x is not None)
+
+    CcpnLibPeak.setPeakDimAssignments(ccpnPeak, dimResonances)
+
+  @property
+  def assignments(self) -> tuple:
+    """Peak assignment - a list of lists of assigned Atom combinations
+    (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None
+    Assignments per dimension are given in 'dimensionAssignments'."""
+    data2Obj = self._project._data2Obj
+    ccpnPeak = self._wrappedData
+    peakDims = ccpnPeak.sortedPeakDims()
+    mainPeakDimContribs = [list(sorted(x.mainPeakDimContribs, key=operator.attrgetter('serial')))
+                           for x in peakDims]
+    result = []
+    for peakContrib in ccpnPeak.sortedPeakContribs():
+      allAtoms = []
+      peakDimContribs = peakContrib.peakDimContribs
+      for ii,peakDim in enumerate(peakDims):
+        atoms = [data2Obj(x.resonance) for x in mainPeakDimContribs[ii]
+                if x in peakDimContribs and hasattr(x, 'resonance')]
+        if not atoms:
+          atoms = [None]
+        allAtoms.append(atoms)
+
+      result += itertools.product(*allAtoms)
+    #
+    return tuple(result)
+
 
   @assignments.setter
   def assignments(self, value:Sequence):
     ccpnPeak = self._wrappedData
-    _setPeakAssignments(ccpnPeak, self._project, value)
+    peakDims = ccpnPeak.sortedPeakDims()
+    dimensionCount = len(peakDims)
+
+    # get resonance, all tuples and per dimension
+    resonances = []
+    for tt in value:
+      ll = dimensionCount*[None]
+      resonances.append(ll)
+      for atom, ii in enumerate(tt):
+        if atom is not None:
+          ll[ii] = atom._getCcpnResonance()
+
+    # set assignments
+    CcpnLibPeak.setAssignments(ccpnPeak, resonances)
 
   # Implementation functions
   @classmethod
@@ -175,7 +224,7 @@ PeakList._childClasses.append(Peak)
 def newPeak(parent:PeakList,height:float=None, volume:float=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
             position:Sequence=(), pointPosition:Sequence=(),
-            assignments:Sequence=()) -> PeakList:
+            dimensionAssignments:Sequence=(), assignments:Sequence=()) -> Peak:
   """Create new child Peak"""
   ccpnPeakList = parent._wrappedData
   ccpnPeak = ccpnPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
@@ -191,8 +240,31 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
       peakDim.position = pointPosition[ii]
 
   # Setting assignments
+  if dimensionAssignments:
+    dimResonances = list(dimensionAssignments)
+    for ii, atoms in enumerate(dimResonances):
+      dimValues = tuple(x._getCcpnResonance() for x in dimensionAssignments[ii])
+      dimResonances[ii] = tuple(x for x in dimValues if x is not None)
+
+    # set dimensionAssignments
+    CcpnLibPeak.setPeakDimAssignments(ccpnPeak, dimResonances)
+
   if assignments:
-    _setPeakAssignments(ccpnPeak, parent._project, assignments)
+    peakDims = ccpnPeak.sortedPeakDims()
+    dimensionCount = len(peakDims)
+
+    # get resonance, all tuples and per dimension
+    resonances = []
+    for tt in assignments:
+      ll = dimensionCount*[None]
+      resonances.append(ll)
+      for ii,atom in enumerate(tt):
+        if atom is not None:
+          ll[ii] = atom._getCcpnResonance()
+
+    # set assignments
+    CcpnLibPeak.setAssignments(ccpnPeak, resonances)
+
 
 PeakList.newPeak = newPeak
 
@@ -203,34 +275,3 @@ Project._apiNotifiers.extend(
     ('_finaliseDelete', {}, className, 'delete')
   )
 )
-
-def _setPeakAssignments(ccpnPeak, wrapperProject, value):
-  """Set assignments on peak
-  Separate utility function to avoid duplicating code in assignments setter and newPeak function
-  """
-  numDim =  ccpnPeak.peakList.dataSource.numDim
-  if len(value) != numDim:
-    raise ValueError("Assignment length does not match peak list dimensionality %s: %s"
-                      % (numDim, value))
-
-  for ii, val in enumerate(value):
-    if len(set(val)) != len(val):
-      raise ValueError("Assignments contain duplicates in dimension %s: %s" % (ii+1, value))
-
-  func = wrapperProject.assignment2Resonance
-  for ii,peakDim in enumerate(ccpnPeak.sortedPeakDims()):
-    dimAssignments = value[ii]
-    resonances = [func(x) for x in dimAssignments]
-    mainPeakDimContribs = peakDim.mainPeakDimContribs
-    for pdc in mainPeakDimContribs:
-      # Remove unwanted contribs and purge pre-existing resonances from input.
-      if hasattr(pdc, 'resonance'):
-        resonance = pdc.resonance
-        if resonance in resonances:
-          resonances.remove(resonance)
-        else:
-          pdc.delete()
-
-    for resonance in resonances:
-      # Add new contrib for missing resonances
-      peakDim.newPeakDimContrib(resonance=resonance)

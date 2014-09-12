@@ -30,7 +30,9 @@ from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
 # NBNB TBD add settable linkedAtoms link for non-ChemCOmp links
 
 class Atom(AbstractWrapperClass):
-  """Molecular Atom."""
+  """Molecular Atom.
+
+  NBNB TBD rewrite - move to under Project, ..."""
   
   #: Short class name, for PID.
   shortClassName = 'MA'
@@ -62,6 +64,16 @@ class Atom(AbstractWrapperClass):
     return self._wrappedData.name
 
   id = name
+
+  # Utiity functions
+  def _getCcpnResonance(self) -> object:
+    """get or create resonance corresponding to Atom
+    NBNB TBD Must add Resonance if not currently there. NOT YET DONE
+    NBNB duplicate. consolidate and move to right place
+
+    NBNB TBD, change to private property?"""
+    return self.ccpnResonance
+
 
     
   # Implementation functions

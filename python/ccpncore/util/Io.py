@@ -414,10 +414,10 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   If userData does not exist then throws IOError.
   If newPath is not specified then it is set to oldPath.
   If newProjectName is not specified then it is set to oldProjectName if
-    newPath==oldPath, otherwise it is set to basename(newPath).
+  newPath==oldPath, otherwise it is set to basename(newPath).
   If changeBackup, then also changes backup URL path for project.
   If createFallback, then makes copy of existing modified topObjects
-    files (in newPath, not oldPath) before doing save.
+  files (in newPath, not oldPath) before doing save.
   If newPath != oldPath and newPath exists (either as file or as directory):
     If removeExisting:
       Delete the newPath.

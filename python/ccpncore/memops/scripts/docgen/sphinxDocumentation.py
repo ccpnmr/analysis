@@ -44,7 +44,7 @@ def refreshSphinxDocumentation():
   docDirectory = joinPath(pythonDirectory, documentationPath)
 
   # Remove sphinx-apidoc files
-  for ss in ('ccpn', 'ccpncore'):
+  for ss in ('ccpn', 'ccpncore', 'ccpnmrcore'):
     inDirectory = joinPath(docDirectory, 'source', ss)
     if os.path.exists(inDirectory):
       shutil.rmtree(inDirectory)
@@ -58,6 +58,13 @@ def refreshSphinxDocumentation():
   # First ccpncore
   ll = ['ccpn/doc/source/ccpncore', 'ccpncore',
         'ccpncore/api', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/']
+  ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
+  print( '### running: ' + ' '.join(ll))
+  apidoc.main(ll)
+  
+
+  # then ccpnmrcore
+  ll = ['ccpn/doc/source/ccpnmrcore', 'ccpnmrcore']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
   print( '### running: ' + ' '.join(ll))
   apidoc.main(ll)

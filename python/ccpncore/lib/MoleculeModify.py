@@ -373,7 +373,9 @@ def setMolResidueChemCompVar(molResidue,chemCompVar):
   """Descrn: Replaces a molResidue with an equivalently connected one (if possible) 
              with a different chemChemCompVar. This is a very naughty function 
              which bypasses the API - but it does check molecule validity at the end.
+
      Inputs: Ccp.Molecule.MolResidue, Ccp.ChemComp.ChemCompVar
+
      Output: Ccp.Molecule.MolResidue
 
      NBNB TBD looks broken

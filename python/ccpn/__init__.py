@@ -25,37 +25,37 @@ The standard ways of starting a project are:
 ccpn.AbstractWrapperClass class
 -------------------------------
 
-.. autoclass:: ccpn._AbstractWrapperClass.AbstractWrapperClass
+.. autoclass:: ccpn._wrapper._AbstractWrapperClass.AbstractWrapperClass
 
 ccpn.Project class
 ------------------
 
-.. autoclass:: ccpn._Project.Project
+.. autoclass:: ccpn._wrapper._Project.Project
 
 ccpn.Molecule class
 -------------------
 
-.. autoclass:: ccpn._Molecule.Molecule
+.. autoclass:: ccpn._wrapper._Molecule.Molecule
 
 ccpn.Chain class
 ----------------
 
-.. autoclass:: ccpn._Chain.Chain
+.. autoclass:: ccpn._wrapper._Chain.Chain
 
 ccpn.Residue class
 ------------------
 
-.. autoclass:: ccpn._Residue.Residue
+.. autoclass:: ccpn._wrapper._Residue.Residue
 
 ccpn.Atom class
 ---------------
 
-.. autoclass:: ccpn._Atom.Atom
+.. autoclass:: ccpn._wrapper._Atom.Atom
 
 ccpn.Spectrum class
 -------------------
 
-.. autoclass:: ccpn._Spectrum.Spectrum
+.. autoclass:: ccpn._wrapper._Spectrum.Spectrum
 
 """
 

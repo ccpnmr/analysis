@@ -228,7 +228,7 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
       prevLinkEnd = molResidues[0].findFirstMolResLinkEnd(linkCode='prev')
       molResLinkEnds.append(prevLinkEnd)
       molResLinks.append(
-       molecule.MolResLink(molResLinkEnds=[nextLinkEnd,prevLinkEnd])
+       molecule.newMolResLink(molResLinkEnds=[nextLinkEnd,prevLinkEnd])
       )
     
     # final validity check

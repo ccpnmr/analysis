@@ -149,7 +149,7 @@ def getChemCompArchiveXmlFilePath(chemCompPath,molType,ccpCode):
 #                               identifier, copyFile):
 #
 #   result = None
-#   logger = Logging.getLogger()
+#   logger = repository.root._logger
 #
 #   # Try to find file...
 #
@@ -328,7 +328,7 @@ def downloadChemCompInfoFromCcpForge(repository, molType, ccpCode, sourceName=No
   Returns name of copied file, or None if unsuccessful
   """
 
-  logger = Logging.getLogger()
+  logger = repository.root._logger
     
   result = None
   

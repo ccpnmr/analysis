@@ -957,7 +957,7 @@ class DataMapper:
     
     if matchObject is None:
       # Nothing found
-      print('WARNING. Bad ref data? No ChemAtomSet found for %s' % atomSysName)
+      chemComp.root._logger.warning('Bad ref data? No ChemAtomSet found for %s' % atomSysName)
     
     elif matchAtomSet is None:
         # Single atom

@@ -87,7 +87,7 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
 
   # create logger
   logger = Logging.createLogger(applicationName, project)
-  project.logger = logger
+  project._logger = logger
 
   logger.info("Project is ", project)
 
@@ -394,7 +394,7 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
 
   # make logger
   logger = Logging.createLogger(applicationName, project)
-  project.logger = logger
+  project._logger = logger
 
   if warningMessages:
     # log warnings
@@ -440,7 +440,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   Return True if save done, False if not (unless there is an exception)
   """
 
-  logger = Logging.getLogger()
+  logger = project._logger
 
   # check project valid (so don't save an obviously invalid project)
   if checkValid:
@@ -825,7 +825,7 @@ def backupProject(project, dataLocationStores = None, skipRefData = True, clearO
   backupRepository = project.findFirstRepository(name="backup")
 
   if not backupRepository:
-    print('Warning: no backup path set, so no backup done')
+    project._logger.warning('Warning: no backup path set, so no backup done')
     return
 
   backupUrl = backupRepository.url
@@ -866,10 +866,13 @@ def backupProject(project, dataLocationStores = None, skipRefData = True, clearO
             shutil.copy(origFile, backupFile)
         else:
           # one is stuffed
-          print('Warning: could not backup %s since could not find original file "%s"' % (topObject, origFile))
+          project._logger.warning('Warning: could not backup" "'
+                                  ' %s since could not find original file "%s"'
+                                  % (topObject, origFile))
       else:
         # one is stuffed
-        print('Warning: could not backup %s since could not find repository' % topObject)
+        project._logger.warning('Warning: could not backup %s since could not find repository'
+                                % topObject)
 
   dataBackupPath = Path.joinPath(backupPath, 'data')
   for dataLocationStore in dataLocationStores:
@@ -886,7 +889,9 @@ def backupProject(project, dataLocationStores = None, skipRefData = True, clearO
             os.makedirs(directory)
           shutil.copy(origFile, backupFile)
       else:
-        print('Warning: could not backup dataStore "%s" because could not find original file "%s"' % (dataStore.name, origFile))
+        project._logger.warning('Warning: could not backup dataStore '
+                                '"%s" because could not find original file "%s"'
+                                % (dataStore.name, origFile))
 
 def modifyPackageLocators(project,repositoryName,repositoryPath,packageNames,resetPackageLocator = True,resetRepository = False):
 
@@ -974,7 +979,7 @@ def packageProject(project, filePrefix=None, includeBackups=False, includeData=F
         include = True
 
       if include:
-        print(fullfile)
+        project._logger.info(fullfile)
         tarFiles.append(fullfile)
 
     if tarFiles:
@@ -991,7 +996,7 @@ def packageProject(project, filePrefix=None, includeBackups=False, includeData=F
   cwd = os.getcwd()
   os.chdir(userDir)
   try:
-    print('Files included in tar file:')
+    project._logger.nfo('Files included in tar file:')
     files = visitDir(userPath)
     for tarFile in files:
       tarFp.add(tarFile, recursive=False)
@@ -1014,7 +1019,7 @@ def packageProject(project, filePrefix=None, includeBackups=False, includeData=F
 #     n = len(gc.get_objects())
 #     s = '%s: %d collected, %d objects' % (t, m, n)
 #     fp.write('%s\n' % s)
-#     print('logging: %s' % s)
+#     project._logger.info('logging: %s' % s)
 #     fp.close()
 
 def findCcpXmlFile(project,packageName,fileSearchString):

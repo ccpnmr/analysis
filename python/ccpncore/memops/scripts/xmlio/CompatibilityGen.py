@@ -123,6 +123,12 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
   map elements from the two models. Note that several old guids
   can map to a single new guid and vice versa.
   """
+
+  try:
+    from ccpncore.util.Logging import getLogger
+    loggerfunc = getLogger().warning
+  except:
+    loggerfunc = print
   
   comparison = MetaModel.compareModels(fromModel, toModel,
                                        elementPairings=elementPairings)
@@ -186,7 +192,7 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
           dd = XmlGen.getRoleMap(ee, cc, globalMapping)
           elemMap = {}
           if dd is None:
-            print ('WARNING, no map found for %s' % ee)
+            loggerfunc ('WARNING, no map found for %s' % ee)
             
           else:
             for tag in ('type', 'proc', 'name', 'eType', 'tag'):
@@ -200,7 +206,7 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
                              elemMap, None))
             else:
               # cannot create map, skip
-              print ('WARNING, incomplete map found for %s' % ee)
+              loggerfunc ('WARNING, incomplete map found for %s' % ee)
               skips.append((cc.container.shortName, cc.name, ee.name, ee.guid, 
                             ee.__class__.__name__))
  
@@ -234,7 +240,7 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
             delays.append((cc.container.shortName, cc.name, ee.name, ee.guid,
                            elemMap, valueTypeGuid))
           else:
-            print ('WARNING, no map found for %s' % ee)
+            loggerfunc ('WARNING, no map found for %s' % ee)
             skips.append((cc.container.shortName, cc.name, ee.name, ee.guid, ee.__class__.__name__))
   
         else:

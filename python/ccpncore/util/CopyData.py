@@ -117,7 +117,7 @@ def _transferData(newParent, sourceObj, oldToNew=None,
     necessary
   """
 
-  logger = Logging.getLogger()
+  logger = newParent.root._logger
 
   from ccpncore.memops.metamodel import Constants as metaConstants
   

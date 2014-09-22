@@ -146,7 +146,7 @@ class Chain(AbstractWrapperClass):
 
     if not sequence:
       msg = "No residues given to add to chain"
-      self._project.logger.error(msg)
+      self._project._logger.error(msg)
       return
 
     # get startNumber for new sequence
@@ -167,7 +167,7 @@ class Chain(AbstractWrapperClass):
         molType, ccpCode = tt
       else:
         msg = "No ChemComp ID found for %s" % sequence
-        self._project.logger.error(msg)
+        self._project._logger.error(msg)
         raise ValueError(msg)
 
       chemComp = ccpnMolecule.root.findFirstChemComp(molType=molType, ccpCode=ccpCode)
@@ -250,7 +250,7 @@ def makeChain(parent:Molecule, sequence, compoundName:str,
 
   if not sequence:
     msg = "makeChain requires non-empty sequence"
-    parent._project.logger.error(msg)
+    parent._project._logger.error(msg)
     raise ValueError(msg)
 
   # rename compoundName if necessary
@@ -259,7 +259,7 @@ def makeChain(parent:Molecule, sequence, compoundName:str,
   while ccpnRoot.findFirstMolecule(name=compoundName):
     compoundName = commonUtil.incrementName(compoundName)
   if oldName != compoundName:
-    parent._project.logger.warning(
+    parent._project._logger.warning(
       "CCPN molecule named %s already exists. New molecule has been named %s" %
       (oldName,compoundName))
 

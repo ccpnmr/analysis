@@ -13,19 +13,18 @@ The standard ways of starting a project are:
 
   openProject
   newProject
-   _AbstractWrapperClass.AbstractWrapperClass
    _Project.Project
    _Molecule.Molecule
    _Chain.Chain
    _Residue.Residue
    _Atom.Atom
+   _ChemicalShiftList.ChemicalShiftList
+   _ChemicalShift.ChemicalShift
    _Spectrum.Spectrum
-
-
-ccpn.AbstractWrapperClass class
--------------------------------
-
-.. autoclass:: ccpn._wrapper._AbstractWrapperClass.AbstractWrapperClass
+   _SpectrumReference.SpectrumReference
+   _PeakList.PeakList
+   _Peak.Peak
+   _AbstractWrapperClass.AbstractWrapperClass
 
 ccpn.Project class
 ------------------
@@ -52,10 +51,41 @@ ccpn.Atom class
 
 .. autoclass:: ccpn._wrapper._Atom.Atom
 
+ccpn.ChemicalShiftList class
+----------------------------
+
+.. autoclass:: ccpn._wrapper._ChemicalShiftList.ChemicalShiftList
+
+ccpn.ChemicalShift class
+------------------------
+
+.. autoclass:: ccpn._wrapper._ChemicalShift.ChemicalShift
+
 ccpn.Spectrum class
 -------------------
 
 .. autoclass:: ccpn._wrapper._Spectrum.Spectrum
+
+ccpn.SpectrumReference class
+----------------------------
+
+.. autoclass:: ccpn._wrapper._SpectrumReference.SpectrumReference
+
+ccpn.PeakList class
+-------------------
+
+.. autoclass:: ccpn._wrapper._PeakList.PeakList
+
+ccpn.Peak class
+---------------
+
+.. autoclass:: ccpn._wrapper._Peak.Peak
+
+
+ccpn.AbstractWrapperClass class
+-------------------------------
+
+.. autoclass:: ccpn._wrapper._AbstractWrapperClass.AbstractWrapperClass
 
 """
 

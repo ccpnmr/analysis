@@ -105,7 +105,8 @@ def addMolResidues(molecule, molType, sequence, startNum=1, isCyclic=False):
 
       else:
         # TBD: should be logging
-        print('Warning: Residue code %s cannot be found for molecule type %s.' % (sequence[i],molType))
+        project._logger.warning('Warning: Residue code %s cannot be found for molecule type %s.'
+                                % (sequence[i],molType))
   
   return molResidues
   
@@ -119,7 +120,7 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
      Inputs: Molecule.molecule, List of Tuples of Strings (molType, ccpCode), Int, Boolean
      Output: List of Molecule.MolResidues
   """
-  logger = Logging.getLogger()
+  logger = molecule.root._logger
   
   if len(sequence) < 2:
     raise ApiError("Sequence %s too short for function" % sequence)

@@ -460,11 +460,12 @@ def getBoundAtoms(atom):
 #
 #   ChemComp.ChemTorsion
 #   """
-#   logger = Logging.getLogger()
-#
 #   assert len(atoms) == 4
 #
 #   residue = list(atoms)[0].residue
+
+#   logger = residue.root._logger
+#
 #   for i in (1,2,3):
 #     if not areAtomsBound(atoms[i-1],atoms[i]):
 #       logger.warning ('ERROR, Get atom torsion failed: Atoms %s and %s are not bound' %
@@ -1257,7 +1258,7 @@ def getBoundAtoms(atom):
 #   #  project.chemAtomNmrRefDict = {}
 #   #else:
 #
-#   logger = Logging.getLogger()
+#   logger = project._logger
 #
 #
 #   nmrRefStore = project.findFirstNmrReferenceStore(molType=molType, ccpCode=ccpCode)

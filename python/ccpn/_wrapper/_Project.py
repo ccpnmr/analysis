@@ -79,7 +79,7 @@ class Project(AbstractWrapperClass):
       wrappedData.root.sortedChemComps()
     )
 
-    self._logger = wrappedData.root.logger
+    self._logger = wrappedData.root._logger
 
     self._registerApiNotifiers()
     

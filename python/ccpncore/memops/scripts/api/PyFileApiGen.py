@@ -112,7 +112,7 @@ for %s, %s in %s.items():
     
     self.writeOne("except:")
     self.indent += self.INDENT
-    self.writeOne('print("ERROR in %s.__init__")' % inClass.qualifiedName())
+    self.writeOne('self.root._logger.error("in %s.__init__")' % inClass.qualifiedName())
     self.setImplAttr(self.varNames['self'], 'inConstructor', False)
     self.writeOne('raise')
     self.indent -= self.INDENT
@@ -513,6 +513,12 @@ for (targetName,repository) in inData:
      repositories=self.findAllRepositories(name=repository)
     )
 
+# Add logger attribute
+try:
+  from ccpncore.util.Logging import getLogger
+  self._logger = getLogger()
+except ImportError:
+  self._logger = None
 """)
       self.endIf()
     

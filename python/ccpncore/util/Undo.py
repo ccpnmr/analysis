@@ -120,7 +120,8 @@ class Undo(deque):
       self.nextIndex = undoTo + 1
       self.blocked = False
     except:
-      print ("WARNING, error while undoing. Undo is cleared")
+      from ccpncore.util.Logging import getLogger
+      getLogger().warning ("error while undoing. Undo is cleared")
       self.clear()
 
   def redo(self):
@@ -155,7 +156,8 @@ class Undo(deque):
           redoMethod(redoData)
       self.nextIndex = redoTo + 1
     except:
-      print ("WARNING, error while redoing. Undo is cleared")
+      from ccpncore.util.Logging import getLogger
+      getLogger().warning("WARNING, error while redoing. Undo is cleared")
       self.clear()
 
   def clear(self):

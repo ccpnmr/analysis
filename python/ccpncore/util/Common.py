@@ -156,7 +156,8 @@ def recursiveImport(dirname, modname=None, ignoreModules = None, force=False):
       try:
         __import__(modname, {}, {}, [ff])
       except:
-        print("WARNING, Import failed for %s.%s" % (modname,ff))
+        from ccpncore.util.Logging import getLogger
+        getLogger().warning("Import failed for %s.%s" % (modname,ff))
 
   for name in listdir2:
     newdirname = Path.joinPath(dirname,name)

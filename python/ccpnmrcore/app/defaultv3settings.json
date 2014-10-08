@@ -1,0 +1,24 @@
+{
+    "general": {
+        "autoBackupOnOpen": "False",
+        "autoSaveOnQuit": "True",
+        "autoSaveLayoutOnQuit": "True",
+        "auxiliaryFilesPath": "~/.ccpn",
+        "macroPath": "/Users/simon/ccpnMacros",
+        "language": "English-UK",
+        "editor": "default",
+        "colourScheme": "dark",
+        "license": ""
+    },
+    "spectra": {
+        "keepExternal": "True",
+        "BrukerTemplates": "pdata/*",
+        "nmrPipeTemplates": "*ft*",
+        "ucsfTemplates": [
+            "*.ucsf",
+            "*.UCSF"
+        ]
+    },
+    "recentFiles": [
+    ]
+}

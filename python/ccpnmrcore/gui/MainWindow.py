@@ -35,7 +35,7 @@ from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
 from ccpnmrcore.modules.SpectrumNdPane import SpectrumNdPane
 from ccpnmrcore.Current import Current
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
-from ccpncore.lib.memops.Implementation.Project import loadDataSource, getSpectrumFileFormat
+from ccpncore.lib.memops.Implementation.MemopsRoot import loadDataSource, getSpectrumFileFormat
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import PythonConsole
 from ccpncore.gui.MainWindow import MainWindow as GuiMainWindow
@@ -45,6 +45,7 @@ from ccpncore.gui.TextEditor import TextEditor
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpncore.util.AttrDict import AttrDict
+from ccpncore.util import Path
 from difflib import Differ
 
 from ccpn import openProject, newProject
@@ -255,7 +256,8 @@ class MainWindow(GuiMainWindow):
     self.statusBar().showMessage(msg)
     self.pythonConsole.write("project = openProject('"+currentProjectDir+"')\n")
     self.pythonConsole.ui.historyList.addItem("project = openProject('"+currentProjectDir+"')\n")
-    if len(self.preferences.recentFiles) != 10:
+    
+    if len(self.preferences.recentFiles) < 10:
       self.preferences.recentFiles.insert(0, currentProjectDir)
     else:
       self.preferences.recentFiles.pop()
@@ -274,19 +276,17 @@ class MainWindow(GuiMainWindow):
   def setupPreferences(self):
       
     preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
-    try:
-      fp = open(preferencesPath)
-      self.preferences = json.load(fp, object_hook=AttrDict)
-      fp.close()
-    except:
-      self.preferences = None # TBD: should give some sensible default
-  
-  def fillRecentProjectsMenu(self):
+    if not os.path.exists('preferencesPath'):
+      preferencesPath = os.path.join(Path.getPythonDirectory(), 'ccpnmrcore', 'app', 'defaultv3settings.json')
+
+    fp = open(preferencesPath)
+    self.preferences = json.load(fp, object_hook=AttrDict)
+    fp.close()
+
+  def fillRecentProjectsMenu(self):    
     for recentFile in self.preferences.recentFiles:
       self.action = Action(self, text=recentFile, callback=partial(self.openProject,projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
-
-
 
   def saveBackup(self):
     pass

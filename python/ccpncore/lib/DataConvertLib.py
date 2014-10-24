@@ -23,6 +23,10 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 """Utility functions for data conversion"""
 
+# NBNB TBD Rewrite/replace COMPLETELY based on residueType/sequenceCode
+
+
+
 
 import copy
 from ccpncore.lib.chemComp.ChemCompOverview import chemCompOverview

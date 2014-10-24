@@ -1,69 +1,51 @@
-LICENSE = """
-======================COPYRIGHT/LICENSE START==========================
+"""MOdule for generic merging of data model objects
+Transfers simple and link attributes from the source object to target object
+Does not transfer derived, automatic or immutable attributes
+Links will be transferred where possible
+Where necessary the Api is bypassed
 
-MergeObjects.py: Part of the CcpNmr Analysis program
+Logical analysis and design by R.H. Fogh
 
-Copyright (C) 2003-2010 Wayne Boucher and Tim Stevens (University of Cambridge)
+Coding and testing by T.J. Stevens
 
-=======================================================================
+Definitions:
+Objects targetObj and sourceObj of class O
+link O.a (a) to class A, with backlink A.o ( o)
 
-The CCPN license can be found in ../../../../license/CCPN.license.
-
-======================COPYRIGHT/LICENSE END============================
-
-for further information, please contact :
-
-- CCPN website (http://www.ccpn.ac.uk/)
-
-- email: ccpn@bioc.cam.ac.uk
-
-- contact the authors: wb104@bioc.cam.ac.uk, tjs23@cam.ac.uk
-=======================================================================
-
-If you are using this software for academic purposes, we suggest
-quoting the following references:
-
-===========================REFERENCE START=============================
-R. Fogh, J. Ionides, E. Ulrich, W. Boucher, W. Vranken, J.P. Linge, M.
-Habeck, W. Rieping, T.N. Bhat, J. Westbrook, K. Henrick, G. Gilliland,
-H. Berman, J. Thornton, M. Nilges, J. Markley and E. Laue (2002). The
-CCPN project: An interim report on a data model for the NMR community
-(Progress report). Nature Struct. Biol. 9, 416-418.
-
-Wim F. Vranken, Wayne Boucher, Tim J. Stevens, Rasmus
-H. Fogh, Anne Pajon, Miguel Llinas, Eldon L. Ulrich, John L. Markley, John
-Ionides and Ernest D. Laue (2005). The CCPN Data Model for NMR Spectroscopy:
-Development of a Software Pipeline. Proteins 59, 687 - 696.
-
-===========================REFERENCE END===============================
-
+A note on checks:
+Where the API is bypassed, the function does validity checks at each step,
+and rolls back the last step if the checks fail.
+The checks are done on sourceObj, targetObj, objects on the other end of
+links, and the parents of the latter. The check on parents is done because
+this includes a check on the keys of the children - the merge cannot change
+the keys of either source or target, but can change the key of linked-to objects.
 """
-# A generic method to merge data model objects
-# Transfer simple and link attributes from the source object to target object
-# Does not transfer derived, automatic or immutable attributes
-# Links will be transferred where possible
-# Where necessary the Api is bypassed
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2002 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Timothy J. Stevens, Geerten Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+               "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                 " or ccpncore.memops.Credits.CcpNmrReference")
 
-# Logical analysis and design by R.H. Fogh
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author$"
+__date__ = "$Date$"
+__version__ = "$Revision$"
 
-# Coding and testing by T.J. Stevens
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
-#Definitions:
-#Objects targetObj and sourceObj of class O
-#link O.a (a) to class A, with backlink A.o ( o)
 
-# A note on checks:
-# Where the API is bypassed, the function does validity checks at each step,
-# and rolls back the last step if the checks fail.
-# The checks are done on souceObj, targetObj, objects on the other end of
-# links, and the parents of the latter. The check on parents is done because
-# this includes a check on the keys of the children - the merge cannot change
-# the keys of either source or target, but can change the key of linked-to objects.
 
-from memops.general import Constants as genConstants
-from memops.general.Implementation import ApiError
-from memops.universal import Util as uniUtil
-from memops.metamodel import ImpConstants
+from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.memops.ApiError import ApiError
+from ccpncore.memops.metamodel import Util as metaUtil
 
 def mergeObjects(sourceObj,targetObj):
   """Merges sourceObj into targetObj, deleting sourceObj.
@@ -86,8 +68,6 @@ def mergeObjects(sourceObj,targetObj):
   may be left in an illegal state, even if no error is raised.
   It is recommended to use this function with caution, 
   and to run checkAllValid after it has been used.  """
-
-  #exclude parent # done! Mandatory
   
   #same class check
   if sourceObj.qualifiedName != targetObj.qualifiedName:
@@ -101,7 +81,7 @@ def mergeObjects(sourceObj,targetObj):
   for a in objClass.getAllAttributes():
     attrName = a.name
  
-    if a.isDerived or a.isAutomatic or a.changeability == ImpConstants.frozen:
+    if a.isDerived or a.isAutomatic or a.changeability == metaConstants.frozen:
       continue
       
     elif a.hicard == a.locard:
@@ -113,7 +93,7 @@ def mergeObjects(sourceObj,targetObj):
 
     else:
       # find add operation
-      addfunc = getattr(targetObj, 'add' + uniUtil.upperFirst(a.baseName))
+      addfunc = getattr(targetObj, 'add' + metaUtil.upperFirst(a.baseName))
       
       # Thisd is OK, as we iterate over list2 but modify list1
       attrList1 = targetObj.__dict__[attrName]
@@ -136,7 +116,7 @@ def mergeObjects(sourceObj,targetObj):
       else:
         # might have duplicates (and must be an internal list)
         for aVal in attrList2:
-          if len(attrList1) >= a.hicard and a.hicard != genConstants.infinity:
+          if len(attrList1) >= a.hicard and a.hicard != metaConstants.infinity:
             break
           # keep adding while there is room
           if attrList1.count(aVal) < attrList2.count(aVal):
@@ -147,23 +127,22 @@ def mergeObjects(sourceObj,targetObj):
   nastyLinks = []
   childLinks = []
   for a in objClass.getAllRoles():
-    linkName = a.name
     
     # select links and how to treat them
     
     if a.hicard == a.locard or a.isDerived or a.isAutomatic:
       continue
  
-    if a.changeability == ImpConstants.frozen:
+    if a.changeability == metaConstants.frozen:
       continue
       # This is probably right; it could be changed if we bypassed the API.
       
     o = a.otherRole
     
-    if a.hierarchy == ImpConstants.child_hierarchy:
+    if a.hierarchy == metaConstants.child_hierarchy:
       childLinks.append(a)
     
-    elif o is None or o.changeability != ImpConstants.frozen:
+    elif o is None or o.changeability != metaConstants.frozen:
       # links that can be handled without bypassing API
       niceLinks.append(a)
     else:
@@ -198,7 +177,7 @@ def mergeObjects(sourceObj,targetObj):
         # there will be no problems on the source/target side as we only
         # make changes when the link is unset in the target
         
-        # Whatever the number of objects, you will eitehr be able to
+        # Whatever the number of objects, you will either be able to
         # remove sourceObj from attrObj or to add targetObj.
         #
         if getattr(targetObj,linkName) is None:
@@ -216,7 +195,7 @@ def mergeObjects(sourceObj,targetObj):
         # It also deletes the old link to sourceObj where appropriate
         
         # find add operation
-        ss = uniUtil.upperFirst(a.baseName)
+        ss = metaUtil.upperFirst(a.baseName)
         addfunc = getattr(targetObj, 'add' + ss)
         removefunc = getattr(sourceObj, 'remove' + ss)
         
@@ -308,6 +287,9 @@ def mergeObjects(sourceObj,targetObj):
           if  getattr(targetObj,linkName) is None:
 
             #do
+            childDict = {}
+            oldKey = None
+            newKey = None
             attrObj = getattr(sourceObj,linkName)
             if backName in keyNames:
               oldKey = attrObj.getLocalKey()
@@ -362,7 +344,7 @@ def mergeObjects(sourceObj,targetObj):
           keepList = list(getattr(targetObj, linkName))
           ll = list(getattr(sourceObj, linkName))
           
-          if a.hicard == genConstants.infinity:
+          if a.hicard == metaConstants.infinity:
             moveList = ll
             ignoreList = []
           else:
@@ -374,6 +356,8 @@ def mergeObjects(sourceObj,targetObj):
               continue
             
           # do
+          oldKeys = []
+          newKeys = []
           if backName in keyNames:
             oldKeys = [x.getLocalKey() for x in moveList]
           setattr(sourceObj, linkName, ignoreList)

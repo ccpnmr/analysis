@@ -128,6 +128,7 @@ class Peak(AbstractWrapperClass):
   def position(self,value:Sequence):
     for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
       peakDim.value = value[ii]
+      peakDim.realValue = None
 
   @property
   def pointPosition(self) -> tuple:
@@ -176,7 +177,7 @@ class Peak(AbstractWrapperClass):
     data2Obj = self._project._data2Obj
     ccpnPeak = self._wrappedData
     peakDims = ccpnPeak.sortedPeakDims()
-    mainPeakDimContribs = [list(sorted(x.mainPeakDimContribs, key=operator.attrgetter('serial')))
+    mainPeakDimContribs = [sorted(x.mainPeakDimContribs, key=operator.attrgetter('serial'))
                            for x in peakDims]
     result = []
     for peakContrib in ccpnPeak.sortedPeakContribs():

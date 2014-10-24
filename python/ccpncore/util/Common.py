@@ -4,6 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpncore.lib import Constants as coreConstants
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -25,8 +27,6 @@ __version__ = "$Revision: 7686 $"
 
 NB Must conform to PYthon 2.1. Imported in ObjectDomain.
 """
-
-__author__ = 'rhf22'
 
 import os
 import sys
@@ -88,25 +88,6 @@ def incrementName(name:str) -> str:
   return name + '_1'
 
 
-def splitIntFromChars(value:str):
-  """convert a string with a leading integer optionally followed by characters
-  into an (integer,string) tuple"""
-
-  value = value.strip()
-
-  for ii in reversed(range(1,len(value)+1)):
-    try:
-      number = int(value[:ii])
-      chars = value[ii:]
-      break
-    except ValueError:
-      continue
-  else:
-    number = None
-    chars = value
-
-  return number,chars
-
 def recursiveImport(dirname, modname=None, ignoreModules = None, force=False):
   """ recursively import all .py files
   (not starting with '__' and not containing internal '.' in their name)
@@ -155,7 +136,7 @@ def recursiveImport(dirname, modname=None, ignoreModules = None, force=False):
     for ff in files:
       try:
         __import__(modname, {}, {}, [ff])
-      except:
+      except ImportError:
         from ccpncore.util.Logging import getLogger
         getLogger().warning("Import failed for %s.%s" % (modname,ff))
 
@@ -178,3 +159,59 @@ def getConfigParameter(name):
 def isWindowsOS():
 
   return sys.platform[:3].lower() == 'win'
+
+
+def parseSequenceCode(value):
+  """split sequence code into (seqCode,seqInsertCode, offset) tuple"""
+
+  # sequenceCodePattern = re.compile('(\d+)?(.*?)(\+\d+|\-\d+)?$')
+
+  tt = coreConstants.sequenceCodePattern.match(value.strip()).groups()
+
+  if not tt[0] and not tt[1]:
+    # special case: entire string matches offset modifier and is misread
+    return None, tt[2], None
+  else:
+    return (
+      tt[0] and int(tt[0]),      # None or an integer
+      tt[1],                     # Text string, possibly empty
+      tt[2] and int(tt[2]),      # None or an integer
+    )
+
+def splitIntFromChars(value:str):
+  """convert a string with a leading integer optionally followed by characters
+  into an (integer,string) tuple"""
+
+  value = value.strip()
+
+  for ii in reversed(range(1,len(value)+1)):
+    try:
+      number = int(value[:ii])
+      chars = value[ii:]
+      break
+    except ValueError:
+      continue
+  else:
+    number = None
+    chars = value
+
+  return number,chars
+
+
+def integerStringSortKey(key):
+  """return sort key so that strings starting with an integer sort as if by integer"""
+
+  result = list(key)
+  for ii,val in enumerate(result):
+    if isinstance(val, str):
+      vv = val.lstrip()
+      ll = []
+      for char in vv:
+        if char.isdigit():
+          ll.append(char)
+        else:
+          break
+      if ll :
+        result[ii] = '%30s' % ''.join(ll) + vv[len(ll):]
+
+  return result

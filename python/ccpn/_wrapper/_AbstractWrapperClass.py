@@ -439,7 +439,8 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
         if self is self._project:
             key = relativeId
         else:
-            key = IDSEP.join((self._pid,relativeId))
+            key = '%s%s%s' % (self._pid,IDSEP, relativeId)
+            # key = IDSEP.join((self._pid,relativeId))
         return dd.get(key)
     else:
       return None

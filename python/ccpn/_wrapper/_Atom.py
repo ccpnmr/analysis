@@ -27,7 +27,7 @@ from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Residue import Residue
 from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
 
-# NBNB TBD add settable linkedAtoms link for non-ChemCOmp links
+# NBNB TBD add settable linkedAtoms link for non-ChemComp links
 
 class Atom(AbstractWrapperClass):
   """Molecular Atom.
@@ -35,7 +35,7 @@ class Atom(AbstractWrapperClass):
   NBNB TBD rewrite - move to under Project, ..."""
   
   #: Short class name, for PID.
-  shortClassName = 'MA'
+  shortClassName = 'AT'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'atoms'

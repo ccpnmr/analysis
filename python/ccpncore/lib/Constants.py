@@ -1,4 +1,4 @@
-"""Module Documentation here
+"""Definition of program-level constants
 
 """
 #=========================================================================================
@@ -21,7 +21,21 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""Constant definitions"""
+
+import re
+
+# sequenceCode parsing expression
+# A sequenceCOde is combined (without whitesspace) of:
+#   an optional integer
+#   an optional text field, as short as possible
+#   an optional field of the form +ii of -ii, where ii is an integer
+#
+# The expression below has one error:
+# a string of the form '+12' is parsed as (None, '', '+12'}
+# whereas it should be interpreted as (None, '+12', None), but that cannot be helped
+sequenceCodePattern = re.compile('(\d+)?(.*?)(\+\d+|\-\d+)?$')
+
+
 
 
 # Tolerance for determining that two shifts are identical

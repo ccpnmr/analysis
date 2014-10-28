@@ -9,6 +9,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="ccpnmodel" />
+    <orderEntry type="module" module-name="ccpnmodel" />
   </component>
   <component name="PackageRequirementsSettings">
     <option name="requirementsPath" value="" />

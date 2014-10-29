@@ -38,7 +38,7 @@ class Spectrum1dItem(SpectrumItem):
   # sigClicked = QtCore.Signal()
 
 
-  def __init__(self, spectrumPane, spectrum, dimMapping=None):
+  def __init__(self, spectrumPane, spectrum, spectralData = None, dimMapping=None):
     """ spectrumPane is the parent
         spectrum is the Spectrum name or object
         region is in units of parent, ordered by spectrum dimensions
@@ -47,8 +47,11 @@ class Spectrum1dItem(SpectrumItem):
     """
     SpectrumItem.__init__(self, spectrumPane, spectrum, dimMapping)
     
-    self.spectralData = self.getSliceData()
-
+    if spectralData is None:
+      self.spectralData = self.getSliceData()
+    else:
+      self.spectralData = spectralData
+    self.setZValue(-1)
     # self.integrals = self.autoIntegration()
     # self.integralListItems = []
     # self.integralListItems.append(IntegralListItem(self))

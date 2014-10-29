@@ -26,10 +26,15 @@ import operator
 from PySide import QtCore, QtGui, QtOpenGL
 
 from ccpnmrcore.modules.SpectrumPane import SpectrumPane, SPECTRUM_COLOURS
-
+from ccpncore.gui.Action import Action
 from ccpnmrcore.modules.spectrumPane.SpectrumNdItem import SpectrumNdItem
+from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
+from ccpncore.gui.Menu import Menu
 from ccpncore.gui.Icon import Icon
+from ccpn.lib import Spectrum as LibSpectrum
+import numpy
 from functools import partial
+import pyqtgraph as pg
 
 class SpectrumNdPane(SpectrumPane):
 
@@ -41,6 +46,8 @@ class SpectrumNdPane(SpectrumPane):
     
     self.setViewport(QtOpenGL.QGLWidget())
     self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+    self.crossHairShown = True
+    self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
     self.fillToolBar()
@@ -48,7 +55,7 @@ class SpectrumNdPane(SpectrumPane):
     self.region = None
     self.colourIndex = 0
     self.spectrumUtilToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-
+    self.traceMarkers = []
 
           
   ##### functions used externally #####
@@ -69,7 +76,42 @@ class SpectrumNdPane(SpectrumPane):
     else:
       event.ignore
 
+  def get2dContextMenu(self):
 
+    self.contextMenu = Menu(self, isFloatWidget=True)
+    self.contextMenu.addItem("H Trace", callback=partial(self.addTraceMarker,'horizontal'))
+    self.contextMenu.addItem("V Trace", callback=partial(self.addTraceMarker,'vertical'))
+    self.removeTraces = self.contextMenu.addItem("Remove Traces", callback=self.clearTraceMarkers)
+    self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self.toggleCrossHair,
+                                         checkable=True)
+
+    if self.crossHairShown == True:
+      self.crossHairAction.setChecked(True)
+    else:
+      self.crossHairAction.setChecked(False)
+    self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
+    return self.contextMenu
+
+
+
+  def toggleCrossHair(self):
+    if self.crossHairShown ==True:
+      self.hideCrossHair()
+    else:
+      self.showCrossHair()
+      self.crossHairShown = True
+
+  def showCrossHair(self):
+      self.vLine.show()
+      self.hLine.show()
+      self.crossHairAction.setChecked(True)
+      self.crossHairShown = True
+
+  def hideCrossHair(self):
+    self.vLine.hide()
+    self.hLine.hide()
+    self.crossHairAction.setChecked(False)
+    self.crossHairShown = False
 
   def clearSpectra(self):
     
@@ -143,6 +185,56 @@ class SpectrumNdPane(SpectrumPane):
     self.current.spectrum.spectrumItem.numberOfLevels -=1
     self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
 
+  def addTraceMarker(self, orientation):
+    if orientation == 'horizontal':
+      traceMarker = pg.InfiniteLine(angle=0, movable=True, pos=self.mousePoint)
+      self.addItem(traceMarker)
+      dim = 0
+    if orientation == 'vertical':
+      traceMarker = pg.InfiniteLine(angle=90, movable=True, pos=self.mousePoint)
+      self.addItem(traceMarker)
+      dim=1
+    self.traceMarkers.append(traceMarker)
+    self.phasingModule = self.mainWindow.addSpectrum1dPane()
+    self.plotTrace(dim, position=self.mousePoint.toTuple(), module=self.phasingModule)
+    traceMarker.sigPositionChanged.connect(partial(self.markerMoved,self.phasingModule))
+
+
+  def plotTrace(self, dim, position=None, module=None):
+    positions = []
+    if position is None:
+      position = self.mousePoint.toTuple()
+    else:
+      position = position
+    i = 0
+    for pos in position:
+      dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[i].findFirstDataDimRef()
+      positions.append(dataDimRef.valueToPoint(int(position[i])))
+      i+=1
+    spectrum = self.current.spectrum
+    dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[dim].findFirstDataDimRef()
+    firstPoint = dataDimRef.pointToValue(0)
+    pointCount = spectrum.ccpnSpectrum.sortedDataDims()[dim].numPoints
+    lastPoint = dataDimRef.pointToValue(pointCount)
+    pointSpacing = (lastPoint-firstPoint)/pointCount
+    position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
+    data = LibSpectrum.getSliceData(spectrum.ccpnSpectrum,position=positions, sliceDim=dim)
+    spectrumData = numpy.array([position,data], numpy.float32)
+    spectrumItem = Spectrum1dItem(self,spectrum, spectralData=spectrumData)
+    spectrumItem.plot = module.plotItem.plot(spectrumData[0],spectrumData[1])
+
+
+  def clearTraceMarkers(self):
+    for item in self.traceMarkers:
+      self.removeItem(item)
+
+  def markerMoved(self, module, traceMarker):
+    positions = [traceMarker.getXPos(),traceMarker.getYPos()]
+    module.plotItem.clear()
+    self.plotTrace(dim=0, position=positions, module=module)
+
+
+
   def fillToolBar(self):
     plusOneAction = self.spectrumUtilToolbar.addAction("+1", self.addOne)
     plusOneIcon = Icon('icons/contourAdd')
@@ -168,4 +260,5 @@ class SpectrumNdPane(SpectrumPane):
     restoreZoomIcon = Icon('icons/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
+
 

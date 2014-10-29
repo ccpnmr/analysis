@@ -37,6 +37,11 @@ class PeakListItem(QtGui.QGraphicsItem):
     self.peakList = peakList
     self.peakItems = {}  # CCPN peak -> Qt peakItem
     self.displayed = False
+    self.symbolColour = None
+    self.symbolStyle = None
+    self.isSymbolDisplayed = False
+    self.textColour = None
+    self.isTextDisplayed = False
 
     for peak in peakList.peaks:
       self.peakItems[peak.pid] = PeakItem(self, peak)
@@ -59,6 +64,7 @@ class PeakItem(QtGui.QGraphicsItem):
     self.peak = peak
     # TBD: symbol and annotation
     # self.peakSymbolItem = PeakSymbolItem(self, peak)
+
     self.peakAnnotationItem = PeakAnnotationItem(self.peak)  #(this in turn has peakTextItem, peakPointerItem)
 
 class PeakSymbolItem(QtGui.QGraphicsItem):
@@ -73,6 +79,7 @@ class PeakSymbolItem(QtGui.QGraphicsItem):
 class PeakAnnotationItem(QtGui.QGraphicsItem):
 
   def __init__(self, peak):
+    self.textOffset = None
     if peak.height is not None:
       peakHeight = peak.height
     else:

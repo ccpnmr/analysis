@@ -141,17 +141,18 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.mainWindow.statusBar().showMessage('current.spectrum='+str(self.current.spectrum.pid))
 
   def createCrossHair(self):
-    self.vLine = pg.InfiniteLine(angle=90, movable=False)
-    self.hLine = pg.InfiniteLine(angle=0, movable=False)
-    self.addItem(self.vLine, ignoreBounds=True)
+    self.vLine = pg.InfiniteLine(angle=90, movable=False, pen='w')
+    self.hLine = pg.InfiniteLine(angle=0, movable=False, pen='w')
+    self.addItem(self.vLine, ignoreBounds=True, )
     self.addItem(self.hLine, ignoreBounds=True)
 
   def mouseMoved(self, event):
     position = event
     if self.sceneBoundingRect().contains(position):
-        mousePoint = self.viewBox.mapSceneToView(position)
-        self.vLine.setPos(mousePoint.x())
-        self.hLine.setPos(mousePoint.y())
+        self.mousePoint = self.viewBox.mapSceneToView(position)
+        self.vLine.setPos(self.mousePoint.x())
+        self.hLine.setPos(self.mousePoint.y())
+    return self.mousePoint
     
   def showMousePosition(self, pos):
 

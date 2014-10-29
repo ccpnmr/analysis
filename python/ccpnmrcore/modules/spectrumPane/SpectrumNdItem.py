@@ -233,7 +233,7 @@ class SpectrumNdItem(SpectrumItem):
     # could create them in one go but more likely to get fragmentation that way
     for level in levels:
       self.contourDisplayIndexDict[level] = GL.glGenLists(1)
-    
+
   def getPlaneData(self):
     
     spectrum = self.spectrum
@@ -343,7 +343,6 @@ class SpectrumNdItem(SpectrumItem):
     return value
 
   def raiseBaseLevel(self):
-    print(self.baseLevel)
     self.baseLevel*=1.4
     self.levels = self.getLevels()
 

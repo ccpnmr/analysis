@@ -43,8 +43,9 @@ def readParams(filePath):
       if os.path.isfile(filePath):
         procs_file = filePath
       else:
-        msg = 'Could not find Bruker "procs" file %s'
+        msg = 'Could not find Bruker "procs" file "%s"' % filePath
         # showError('Error', msg % filePath)
+        print(msg)
         return
 
   wordSize = 4

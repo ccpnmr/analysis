@@ -61,7 +61,7 @@ def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
   formatData = paramModules[dataFileFormat].readParams(filePath)
 
   if formatData is None:
-    msg = 'Spectrum load failed for %s'
+    msg = 'Spectrum load failed for "%s": could not read params' % filePath
     print(msg)
     # showError('Error', msg % filePath)
     return
@@ -102,7 +102,7 @@ def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
       # NBNB TBD BROKEN - spectrum is overwritten lower down
     else:
 
-
+      numberType = 'float' if isFloatData else 'int'
       nmrProject = wrapperProject.nmrProject
       newExperiment = createExperiment(nmrProject, name=name, numDim=len(numPoints),
                                        sf = specFreqs, isotopeCodes=isotopes)
@@ -110,7 +110,9 @@ def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
       dataLocationStore = nmrProject.root.newDataLocationStore(name=name)
       dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
       blockMatrix = createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
-                                        blockSizes=blockSizes,isBigEndian=isBigEndian)
+                                        blockSizes=blockSizes,isBigEndian=isBigEndian,
+                                        numberType=numberType, headerSize=headerSize,
+                                        nByte=wordSize)
       newDataSource = createDataSource(newExperiment,name=name,numPoints=numPoints,sw=specWidths,
                                        refppm=refPpms,refpt=refPoints,dataStore=blockMatrix)
 

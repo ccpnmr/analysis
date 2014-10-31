@@ -1,26 +1,3 @@
-"""Module Documentation here
-
-"""
-#=========================================================================================
-# Licence, Reference and Credits
-#=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
-
-#=========================================================================================
-# Last code modification:
-#=========================================================================================
-__author__ = "$Author: rhfogh $"
-__date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__version__ = "$Revision: 7686 $"
-
-#=========================================================================================
-# Start of code
-#=========================================================================================
 """
 ======================COPYRIGHT/LICENSE START==========================
 
@@ -394,6 +371,108 @@ def getSliceData(spectrum, position=None, sliceDim=0):
 
   return data
 
+def getRegionData(spectrum, startPoint, endPoint):
+
+  dataStore = spectrum.dataStore
+  if not dataStore:
+    return None
+      
+  blockSizes = dataStore.blockSizes
+  dataDims = spectrum.sortedDataDims()
+  numPoints = [dataDim.numPoints for dataDim in dataDims]
+  numDim = spectrum.numDim
+    
+  blockRanges = []
+  rangeSizes = []
+  regionSizes = []
+   
+  startPoint = list(startPoint)
+  endPoint = list(endPoint)
+  for dim in range(numDim):
+    start = min(startPoint[dim], endPoint[dim])
+    end = max(startPoint[dim], endPoint[dim])
+      
+    start = min(max(1, int(start)), numPoints[dim]-1)
+    end = min(max(1, int(end)), numPoints[dim]-1)
+   
+    startPoint[dim] = start
+    endPoint[dim] = end
+
+  intRegion = (startPoint, endPoint)
+   
+  n = 1
+  for dim in dims:
+    startBlockCoord = int(startPoint[dim]//blockSizes[dim])
+    endBlockCoord = int(endPoint[dim]//blockSizes[dim])
+    blockRange = range(startBlockCoord,endBlockCoord+1)
+    blockRanges.append(blockRange)
+    m = len(blockRange)
+    rangeSizes.append(m)
+    regionSizes.append(int(endPoint[dim]-startPoint[dim])+1)
+    n *= m
+   
+  blockCoords = [None] * n
+  for i in range(n):
+    blockCoord = []
+
+    j = i
+    for dim in dims:
+      index = j % rangeSizes[dim]
+      blockCoord.append(blockRanges[dim][index])
+      j = j // rangeSizes[dim]
+
+    blockCoords[i] =  tuple(blockCoord)
+
+  data = zeros(regionSizes, dtype=numpy.float32)
+
+  dataSlice = [0] * numDim
+  blockSlice = [0] * numDim
+
+  blockSize, cumulativeBlockSizes = _cumulativeArray(blockSizes)
+  wordSize = dataStore.nByte
+  isBigEndian = dataStore.isBigEndian
+  isFloatData = dataStore.numberType == 'float'
+  headerSize = dataStore.headerSize
+  format = dataStore.fileType
+  blocks = [1 + (numPoints[dim]-1) // blockSizes[dim] for dim in range(numDim)]
+  numBlocks, cumulativeBlocks = _cumulativeArray(blocks)
+  dtype = '%s%s%s' % (isBigEndian and '>' or '<', isFloatData and 'f' or 'i', wordSize)
+    
+  for blockCoord in blockCoords:
+
+    for i in dims:
+      first = 1 + blockCoord[i] * blockSizes[i]
+      next = first + blockSizes[i]
+      offset = startPoint[i]
+
+      if first < offset:
+        blockLow = offset-first
+      else:
+        blockLow = 0
+
+      if next > endPoint[i]+1:
+        blockHigh = blockSizes[i] + (endPoint[i]+1-next)
+      else:
+        blockHigh = blockSizes[i]
+
+      dataLow = first - offset + blockLow
+      dataHigh = dataLow + (blockHigh-blockLow)
+
+      dataSlice[i] = s_[dataLow:dataHigh]
+      blockSlice[i] = s_[blockLow:blockHigh]
+
+    ind =  sum(x[0]*x[1] for x in zip(blockCoord, cumulativeBlocks))
+    offset = wordSize * (blockSize * ind) + headerSize
+    fp.seek(offset, 0)
+    blockData = numpy.fromfile(file=fp, dtype=dtype, count=blockSize).reshape(blockSizes) # data is in reverse order: e.g. z,y,x not x,y,z
+
+    if blockData.dtype != numpy.float32:
+      blockData = numpy.array(blockData, numpy.float32)
+      
+    data[dataSlice] = blockData[blockSlice].T
+
+  return data.T, intRegion
+  
 def automaticIntegration(spectrum,spectralData):
 #
   numDim = spectrum.numDim
@@ -468,6 +547,40 @@ def estimateNoise(spectrum):
     spectrum.noiseLevel = float(value)
 
     return spectrum.noiseLevel # Qt can't serialise numpy float types
+
+def getDimPointFromValue(spectrum, dimension, value):
+  """ Convert from value (e.g. ppm) to point (counting from 0) for an arbitrary
+      number of values in a given dimension (counting from 0).  If value is a
+      number then return a number, otherwise return a list.
+  """
+  dataDim = spectrum.findFirstDataDim(dim=dimension+1)
+  dataDimRef = dataDim.findFirstDataDimRef()
+    
+  if isinstance(value, (int, float)):
+    point = dataDimRef.valueToPoint(value) - 1  # -1 because points in data model start from 1
+  else:
+    point = []
+    for v in value:
+      point.append(dataDimRef.valueToPoint(v) - 1)  # -1 because points in data model start from 1
+      
+  return point
+    
+def getDimValueFromPoint(spectrum, dimension, point):
+  """ Convert from point (counting from 0) to value (e.g. ppm) for an arbitrary
+      number of points in a given dimension (counting from 0).  If point is a
+      number then return a number, otherwise return a list.
+  """
+  dataDim = spectrum.findFirstDataDim(dim=dimension+1)
+  dataDimRef = dataDim.findFirstDataDimRef()
+
+  if isinstance(point, (int, float)):
+    value = dataDimRef.pointToValue(point+1)  # +1 because points in data model start from 1
+  else:
+    value = []
+    for p in point:
+      value.append(dataDimRef.pointToValue(p+1))  # +1 because points in data model start from 1
+      
+  return value
 
 
 

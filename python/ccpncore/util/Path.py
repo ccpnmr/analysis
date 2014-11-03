@@ -182,6 +182,17 @@ def getPythonDirectory():
   
   return func(func(func(os.path.abspath(__file__))))
 
+def getCcpnModelDirectory():
+
+  """
+  Returns the directory containing the ccpnmodel, python and testdata directory
+  for the ccpnmodel code tree
+  """
+  import ccpnmodel
+  func = os.path.dirname
+
+  return func(func(func(os.path.abspath(ccpnmodel.__file__))))
+
 
 def getDirectoryFromTop(*args):
   """Get directory with path given by successive path sections args, starting at top"""

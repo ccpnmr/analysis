@@ -51,6 +51,8 @@ class SpectrumNdItem(SpectrumItem):
     self.posColor = posColor
     self.negColor = negColor
 
+    # self.spectralData = self.getSlices()
+
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
 
     if not region:
@@ -260,6 +262,10 @@ class SpectrumNdItem(SpectrumItem):
         planeData = LibSpectrum.getPlaneData(spectrum, position, xDim=xDim, yDim=yDim)
         yield position, planeData
     
+
+
+
+
   def addContoursToDisplayList(self, contourData, level):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
     

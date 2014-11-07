@@ -329,16 +329,12 @@ class MainWindow(GuiMainWindow):
       if ret == QtGui.QMessageBox.Yes:
         preferencesPath = os.path.expanduser("~/.ccpn/v3settings.json")
         prefFile = open(preferencesPath, 'w+')
-        # print(json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': ')))
         json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
         prefFile.close()
       else:
         pass
 
     QtGui.QApplication.quit()
-
-    # json.dumps(self.preferences, pref)
-
 
   def removeSpectra(self):
     pass
@@ -382,6 +378,7 @@ class MainWindow(GuiMainWindow):
     self.moduleCount+=1
     
     self.dockArea.addDock(newModule.dock)
+    return newModule
 
   def addSpectrumNdPane(self):
 

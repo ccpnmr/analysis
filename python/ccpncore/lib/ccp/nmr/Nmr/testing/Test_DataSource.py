@@ -35,8 +35,20 @@ class DataSourcePlaneDataTest(Testing):
     print('planeData.shape =', planeData.shape)
     print('planeData =', planeData[508:,2045:])
 
-  def Test_Get2DSliceData(self, *args, **kw):
+class DataSourceSliceDataTest(Testing):
+
+  def __init__(self, *args, **kw):
+    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
+    
+  def Test_GetSliceData(self, *args, **kw):
     spectrum = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()
-    sliceData = DataSource.getSliceData(spectrum)
+    # just check an arbitrary slice
+    sliceData = DataSource.getSliceData(spectrum, position=(1000, 230), sliceDim=1)
     print('sliceData.shape =', sliceData.shape)
+    # check a small part of the returned data
+    actualInd = 379
+    actualData = [-75826.875, -135818.1563, -132515.0938, -76160.47656, 14403.3877, 119186.0625]
+    sliceData = sliceData[actualInd:actualInd+len(actualData)]
     print('sliceData =', sliceData)
+    diff = sum(abs(actualData-sliceData))
+    assert diff < 0.001

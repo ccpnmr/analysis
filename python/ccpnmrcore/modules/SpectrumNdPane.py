@@ -227,6 +227,7 @@ class SpectrumNdPane(SpectrumPane):
     traceMarker.sigPositionChanged.connect(self.markerMoved)
     proxy = pg.SignalProxy(traceMarker.sigPositionChanged, slot=(self.markerMoved))
     if self.phaseButtonShown == False:
+      print('showingbutton')
       self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
       self.phasingAction.toggled.connect(self.togglePhasingBar)
       self.spectrumUtilToolbar.addAction(self.phasingAction)
@@ -353,7 +354,7 @@ class SpectrumNdPane(SpectrumPane):
       self.removeItem(item)
       self.removeItem(item)
     self.spectrumUtilToolbar.removeAction(self.phasingAction)
-    self.phaseButtonShown == False
+    self.phaseButtonShown = False
     self.traces = []
 
   def fillToolBar(self):

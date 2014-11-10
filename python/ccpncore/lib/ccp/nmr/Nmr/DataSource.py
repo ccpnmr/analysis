@@ -318,7 +318,6 @@ def getSliceData(spectrum, position=None, sliceDim=0):
   slicePoints = numPoints[sliceDim]
 
   data = numpy.empty((slicePoints,), dtype=numpy.float32)
-  # data = numpy.empty((2,  slicePoints), dtype=numpy.float32)
 
   for dim in range(numDim):
     point = position[dim]
@@ -345,8 +344,10 @@ def getSliceData(spectrum, position=None, sliceDim=0):
   blockCoords = [position[dim]//blockSizes[dim] for dim in range(numDim)]
   blockSlice = numDim*[0]
 
-  p = position[sliceDim] % blockSizes[sliceDim]
-  blockSlice[numDim-sliceDim-1] = numpy.s_[p:p+1]
+  for dim in range(numDim):
+    if dim != sliceDim:
+      p = position[dim] % blockSizes[dim]
+      blockSlice[numDim-dim-1] = slice(p,p+1)
 
   blockSizes = blockSizes[::-1]  # reverse (dim ordering backwards)
 
@@ -357,7 +358,7 @@ def getSliceData(spectrum, position=None, sliceDim=0):
     blockCoords[sliceDim] = sliceBlock
     sliceLower = sliceBlock * sliceBlockSize
     sliceUpper = min(sliceLower+sliceBlockSize, slicePoints)
-    blockSlice[numDim-sliceDim-1] = numpy.s_[0:sliceUpper-sliceLower]
+    blockSlice[numDim-sliceDim-1] = slice(sliceUpper-sliceLower)
 
     ind =  sum(x[0]*x[1] for x in zip(blockCoords, cumulativeBlocks))
     offset = wordSize * (blockSize * ind) + headerSize
@@ -368,6 +369,8 @@ def getSliceData(spectrum, position=None, sliceDim=0):
       blockData = numpy.array(blockData, numpy.float32)
 
     data[sliceLower:sliceUpper] = blockData[blockSlice].squeeze()
+
+  fp.close()
 
   return data
 

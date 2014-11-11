@@ -38,6 +38,8 @@ import math
 from functools import partial
 import pyqtgraph as pg
 from scipy import signal
+from ccpncore.gui.Button import Button
+from ccpncore.gui.Arrow import Arrow
 
 class SpectrumNdPane(SpectrumPane):
 
@@ -54,6 +56,7 @@ class SpectrumNdPane(SpectrumPane):
     self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
+    # self.viewBox.keyPressEvent = self.keyPressEvent
     self.showGrid(x=True, y=True)
     self.region = None
     self.colourIndex = 0
@@ -62,6 +65,9 @@ class SpectrumNdPane(SpectrumPane):
     self.traceScale = 1e6
     self.traces = []
     self.phaseButtonShown = False
+    self.phasedData = None
+    self.setShortcuts()
+
 
           
   ##### functions used externally #####
@@ -87,12 +93,17 @@ class SpectrumNdPane(SpectrumPane):
     else:
       event.ignore
 
+  def setShortcuts(self):
+    self.removeTraces = QtGui.QShortcut(QtGui.QKeySequence("R, T"), self, self.clearTraceMarkers)
+    self.phasingShortcut = QtGui.QShortcut(QtGui.QKeySequence('P, P'), self, self.addPivot)
+    self.hTraceShortcut = QtGui.QShortcut(QtGui.QKeySequence("H, T"), self, self.addHTraceMarker)
+    self.vTraceShortcut = QtGui.QShortcut(QtGui.QKeySequence("V, T"), self, self.addVTraceMarker)
+
   def get2dContextMenu(self):
 
     self.contextMenu = Menu(self, isFloatWidget=True)
-    self.contextMenu.addAction(self.hTraceAction)
-    self.contextMenu.addAction(self.vTraceAction)
-    self.removeTraces = self.contextMenu.addItem(text="Remove Traces", callback=self.clearTraceMarkers, shortcut="RT")
+    # self.contextMenu.addAction(self.hTraceAction)
+    # self.contextMenu.addAction(self.vTraceAction)
     self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self.toggleCrossHair,
                                          checkable=True)
 
@@ -188,6 +199,12 @@ class SpectrumNdPane(SpectrumPane):
       self.plotTrace(trace.spectrumItemTrace.dim,trace.spectrumItemTrace.position, traceMarker=trace)
 
 
+
+  def addPivot(self):
+    self.pivot = Arrow(pos=(self.mousePoint.toTuple()[0],self.mousePoint.toTuple()[1]), angle = -90, movable=True)
+    self.addItem(self.pivot)
+
+
   def increaseTraceScale(self):
     self.traceScale/=1.41
     for trace in self.traces:
@@ -230,6 +247,7 @@ class SpectrumNdPane(SpectrumPane):
       print('showingbutton')
       self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
       self.phasingAction.toggled.connect(self.togglePhasingBar)
+      self.phasingAction.setShortcut("P, C")
       self.spectrumUtilToolbar.addAction(self.phasingAction)
       self.phaseButtonShown = True
 
@@ -245,6 +263,7 @@ class SpectrumNdPane(SpectrumPane):
     if self.phaseButtonShown == False:
       self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
       self.phasingAction.toggled.connect(self.togglePhasingBar)
+      self.phasingAction.setShortcut("P, C")
       self.spectrumUtilToolbar.addAction(self.phasingAction)
       self.phaseButtonShown = True
 
@@ -257,35 +276,64 @@ class SpectrumNdPane(SpectrumPane):
     elif traceMarker.angle== 90:
       positions = [traceMarker.getXPos(),traceMarker.getYPos()]
       dim = 0
-    self.plotTrace(dim=dim, position=positions, traceMarker=traceMarker)
+    if self.phasedData is not None:
+      self.plotTrace(dim=dim, position=positions, traceMarker=traceMarker, phasedData=self.phasedData)
+    else:
+      self.plotTrace(dim=dim, position=positions, traceMarker=traceMarker)
 
   def phasingZeroOrder(self, value):
+    if not hasattr(self.current.spectrum, 'phase0'):
+      self.current.spectrum.phase= 0.0
     for trace in self.traces:
-
+      self.current.spectrum.phase0 = float(value)
       transformedData = signal.hilbert(trace.data)
-      # print(transformedData)
-      p0 = math.radians(value)
-      # print('deg',value,'rad',p0)
-      phasedData = (transformedData.real * math.cos(p0)) - (transformedData.imag * math.sin(p0))
-      # print('npcos',numpy.cos(p0))
-      # print(phasedData)
-      # phasedData2 = numpy.real(phasedData)
-      # print(phasedData2[0:9])
+      p0 = math.radians(self.current.spectrum.phase0)
+      self.phasedData = (transformedData.real * math.cos(p0)) + (transformedData.imag * math.sin(p0))
       self.removeItem(trace.spectrumItemTrace)
-      self.plotTrace(trace.spectrumItemTrace.dim,trace.spectrumItemTrace.position, traceMarker=trace, data=phasedData)
-    #   p0 = p0 * pi / 180.  # convert to radians
-    #   p1 = p1 * pi / 180.
-    #   size = data.shape[-1]
-    #   apod = np.exp(1.0j * (p0 + (p1 * np.arange(size) / size))
-    #               ).astype(data.dtype)
-    # if inv:
-    #     apod = 1 / apod
-    # return apod * data
+      self.plotTrace(trace.spectrumItemTrace.dim,trace.spectrumItemTrace.position, traceMarker=trace, phasedData=self.phasedData)
 
-  def phasingFirstOrder(self):
-    pass
 
-  def plotTrace(self, dim, position=None, traceMarker=None, data=None):
+  def phasingFirstOrder(self, value):
+    self.phasedData = []
+    if not hasattr(self.current.spectrum, 'phase0'):
+      self.current.spectrum.phase0 = 0.0
+      print
+    for trace in self.traces:
+      self.current.spectrum.phase1 = value
+      proportionality = 0
+      pivotPosition = self.pivot.pos().toTuple()
+      transformedData = signal.hilbert(trace.data)
+      dim = trace.spectrumItemTrace.dim
+      if dim == 0:
+        dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[1].findFirstDataDimRef()
+        nptsOrig = self.current.spectrum.totalPointCounts[1]
+        pivot = dataDimRef.valueToPoint(pivotPosition[1])
+        proportionality = pivot/nptsOrig
+      if dim == 1:
+        dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[0].findFirstDataDimRef()
+        nptsOrig = self.current.spectrum.totalPointCounts[0]
+        pivot = dataDimRef.valueToPoint(pivotPosition[0])
+        proportionality = pivot/nptsOrig
+      phaseCorr = math.radians(float(value))
+      phase0 = math.radians(self.current.spectrum.phase0)+((proportionality*phaseCorr)*-1)
+
+
+
+      # phase0 = 0.0
+      phaseAngles = [phase0 + ((ii/len(transformedData))*phaseCorr) for ii in range(len(transformedData))]
+
+      for ii in range(len(phaseAngles)):
+        self.phasedData.append(((transformedData[ii].real * math.cos(phaseAngles[ii])) + (transformedData[ii].imag * math.sin(phaseAngles[ii]))))
+      # self.phasedData = numpy.array(self.phasedData)
+      self.current.spectrum.phase0 = math.degrees(phase0)
+      self.zeroPhaseSlider.setValue(self.zeroPhaseSlider.value()+self.current.spectrum.phase0)
+      self.removeItem(trace.spectrumItemTrace)
+      self.plotTrace(trace.spectrumItemTrace.dim,trace.spectrumItemTrace.position, traceMarker=trace, phasedData=self.phasedData)
+
+
+
+
+  def plotTrace(self, dim, position=None, traceMarker=None, phasedData=None):
 
     positions = []
     if position is None:
@@ -298,8 +346,7 @@ class SpectrumNdPane(SpectrumPane):
     spectrum = self.current.spectrum
 
     if dim == 0:
-      if data is None:
-        data = LibSpectrum.getSliceData(spectrum.ccpnSpectrum,position=positions, sliceDim=1)
+      data = LibSpectrum.getSliceData(spectrum.ccpnSpectrum,position=positions, sliceDim=1)
       dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[1].findFirstDataDimRef()
       firstPoint = dataDimRef.pointToValue(0)
       pointCount = len(data)
@@ -307,7 +354,10 @@ class SpectrumNdPane(SpectrumPane):
       pointSpacing = (lastPoint-firstPoint)/pointCount
       positions2 = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],dtype=numpy.float32)
       spectrumData = numpy.array([positions2,data], dtype=numpy.float32)
-      data2 = (data/self.traceScale)
+      if phasedData is not None:
+        data2 = (phasedData/self.traceScale)*-1
+      else:
+        data2 = (data/self.traceScale)*-1
       data3 = numpy.array([x+position[0] for x in data2])
       traceMarker.spectrumItemTrace = pg.PlotDataItem(data3,positions2)
       traceMarker.spectrumItemTrace.dim = dim
@@ -317,22 +367,25 @@ class SpectrumNdPane(SpectrumPane):
 
     if dim == 1:
       dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[0].findFirstDataDimRef()
-      if data is None:
-        data = LibSpectrum.getSliceData(spectrum.ccpnSpectrum,position=positions, sliceDim=0)
-      # print(data)
+      data = LibSpectrum.getSliceData(spectrum.ccpnSpectrum,position=positions, sliceDim=0)
       firstPoint = dataDimRef.pointToValue(0)
       pointCount = len(data)
       lastPoint = dataDimRef.pointToValue(pointCount)
       pointSpacing = (lastPoint-firstPoint)/pointCount
       positions2 = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],dtype=numpy.float32)
       # spectrumData = numpy.array([positions2,data], dtype=numpy.float32)
-      data2 = (data/self.traceScale)*-1
+      if phasedData is not None:
+        data2 = (numpy.array(phasedData)/self.traceScale)*-1
+      else:
+        data2 = (data/self.traceScale)*-1
+
       data3 = numpy.array([x+position[1] for x in data2])
       traceMarker.spectrumItemTrace = pg.PlotDataItem(positions2,data3)
       traceMarker.spectrumItemTrace.dim = dim
       traceMarker.data = data
       traceMarker.spectrumItemTrace.position = position
       self.addItem(traceMarker.spectrumItemTrace)
+
 
     return traceMarker
 
@@ -345,6 +398,7 @@ class SpectrumNdPane(SpectrumPane):
 
     floatValue = float(value)
     slider.setValue(floatValue)
+
 
   def clearTraceMarkers(self):
     for item in self.traceMarkers:
@@ -382,11 +436,6 @@ class SpectrumNdPane(SpectrumPane):
     restoreZoomIcon = Icon('icons/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
-    self.hTraceAction = QtGui.QAction("H T", self, shortcut=QtGui.QKeySequence("H, T"), triggered=partial(self.addHTraceMarker))
-    self.vTraceAction = QtGui.QAction("V T", self, shortcut=QtGui.QKeySequence("V, T"), triggered=partial(self.addVTraceMarker))
-    self.spectrumUtilToolbar.addAction(self.hTraceAction)
-    self.spectrumUtilToolbar.addAction(self.vTraceAction)
-
 
 
   def togglePhasingBar(self):
@@ -397,22 +446,23 @@ class SpectrumNdPane(SpectrumPane):
 
   def raisePhasingToolBar(self):
     self.phasingToolBar = QtGui.QToolBar()
-    zeroPhaseSlider  = QtGui.QSlider(self)
-    zeroPhaseSlider.setOrientation(QtCore.Qt.Horizontal)
-    zeroPhaseSlider.setRange(-180.0, 180.0)
-    zeroPhaseSlider.setValue(0)
-    zeroPhaseSlider.setFixedWidth(350)
-    zeroPhaseSlider.setTickInterval(0.1)
+    self.zeroPhaseSlider  = QtGui.QSlider(self)
+    self.zeroPhaseSlider.setOrientation(QtCore.Qt.Horizontal)
+    self.zeroPhaseSlider.setRange(-180.0, 180.0)
+    self.zeroPhaseSlider.setValue(0)
+    self.zeroPhaseSlider.setFixedWidth(350)
+    self.zeroPhaseSlider.setTickInterval(0.1)
     zeroPhaseLabel = QtGui.QLineEdit(self)
     zeroPhaseLabel.setFixedWidth(50)
     zeroLabel = Label(self,text="P0")
     zeroLabel.setFixedWidth(30)
     self.phasingToolBar.addWidget(zeroLabel)
-    self.phasingToolBar.addWidget(zeroPhaseSlider)
-    zeroPhaseLabel.setText(str(zeroPhaseSlider.value()))
-    zeroPhaseSlider.valueChanged.connect(partial(self.changeValue,zeroPhaseLabel))
-    zeroPhaseLabel.textChanged.connect(partial(self.changeSliderValue,zeroPhaseSlider))
-    zeroPhaseSlider.valueChanged.connect(self.phasingZeroOrder)
+    self.phasingToolBar.addWidget(self.zeroPhaseSlider)
+    zeroPhaseLabel.setText(str(self.zeroPhaseSlider.value()))
+    self.zeroPhaseSlider.valueChanged.connect(partial(self.changeValue,zeroPhaseLabel))
+    self.zeroPhaseSlider.valueChanged.connect(self.phasingZeroOrder)
+    zeroPhaseLabel.textChanged.connect(partial(self.changeSliderValue,self.zeroPhaseSlider))
+    zeroPhaseLabel.textChanged.connect(self.phasingZeroOrder)
     self.phasingToolBar.addWidget(zeroPhaseLabel)
     firstPhaseSlider  = QtGui.QSlider(self)
     firstPhaseSlider.setFixedWidth(350)
@@ -427,8 +477,15 @@ class SpectrumNdPane(SpectrumPane):
     firstPhaseLabel.setText(str(firstPhaseSlider.value()))
     firstPhaseSlider.valueChanged.connect(partial(self.changeValue,firstPhaseLabel))
     firstPhaseLabel.textChanged.connect(partial(self.changeSliderValue,firstPhaseSlider))
+    firstPhaseSlider.valueChanged.connect(self.phasingFirstOrder)
+    firstPhaseLabel.textChanged.connect(self.phasingFirstOrder)
+    # self.pivotButton = Button(self, text='pivot', callback=self.addPivot)
     self.phasingToolBar.addWidget(firstLabel)
     self.phasingToolBar.addWidget(firstPhaseSlider)
     self.phasingToolBar.addWidget(firstPhaseLabel)
+    # self.phasingToolBar.addWidget(self.pivotButton)
     self.dock.addWidget(self.phasingToolBar, 3, 0, 1, 11)
+
+
+
 

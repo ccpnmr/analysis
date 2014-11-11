@@ -63,6 +63,7 @@ class MainWindow(GuiMainWindow):
   def initUi(self, project):
 
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
+    self.w = None
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.current = Current()
     self.panes = {}
@@ -228,10 +229,9 @@ class MainWindow(GuiMainWindow):
 
   def raiseSpectrumProperties(self, item):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
-    print(dataItem)
     spectrum = self.project.getById(dataItem)
-    print(dataItem)
-    SpectrumPropertiesPopup(spectrum).exec_()
+    self.w = SpectrumPropertiesPopup(spectrum)
+    self.w.show()
 
   def newProject(self, name=None):
     if name is None:

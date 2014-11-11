@@ -35,3 +35,4 @@ class Menu(QtGui.QMenu, Base):
   def addItem(self, text, shortcut=None, callback=None, checkable=False):
     self.addAction(Action(self.parent(), text, callback=callback, shortcut=shortcut,
                          checkable=checkable, isFloatWidget=self.isFloatWidget))
+    # print(shortcut)

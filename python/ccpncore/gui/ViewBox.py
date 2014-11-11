@@ -88,9 +88,6 @@ class ViewBox(pg.ViewBox):
       event.accept()
       print('axis Context Menu')
 
-
-      print('Context Menu to be activated here')
-
     elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
       event.accept()
       self.autoRange()
@@ -98,7 +95,6 @@ class ViewBox(pg.ViewBox):
     if event.double():
       event.accept()
       print("Double Click event")
-
 
   def mouseDragEvent(self, event, axis=None):
 

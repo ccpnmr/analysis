@@ -98,7 +98,9 @@ class SpectrumNdPane(SpectrumPane):
     self.phasingShortcut = QtGui.QShortcut(QtGui.QKeySequence('P, P'), self, self.addPivot)
     self.hTraceShortcut = QtGui.QShortcut(QtGui.QKeySequence("H, T"), self, self.addHTraceMarker)
     self.vTraceShortcut = QtGui.QShortcut(QtGui.QKeySequence("V, T"), self, self.addVTraceMarker)
-
+    self.nextZPlaneShortcut = QtGui.QShortcut(QtGui.QKeySequence("Z, N"), self, self.nextZPlane)
+    self.prevZPlaneShortcut = QtGui.QShortcut(QtGui.QKeySequence("Z, P"), self, self.prevZPlane)
+    
   def get2dContextMenu(self):
 
     self.contextMenu = Menu(self, isFloatWidget=True)
@@ -217,6 +219,40 @@ class SpectrumNdPane(SpectrumPane):
   #     self.removeItem(trace)
   #     trace.newSpectrumItemTrace = pg.PlotDataItem(xData,yData)
   #     self.addItem(trace.SpectrumItemTrace)
+    
+  def nextZPlane(self):
+
+    self.changeZPlane(1)
+    
+  def prevZPlane(self):
+
+    self.changeZPlane(-1)
+
+  def changeZPlane(self, direction):
+    
+    if len(self.region) < 3:
+      return
+      
+    smallest = None
+    # take smallest inter-plane distance
+    for spectrumItem in self.spectrumItems:
+      zPlaneSize = spectrumItem.zPlaneSize()
+      if zPlaneSize is not None:
+        if smallest is None or zPlaneSize < smallest:
+          smallest = zPlaneSize
+
+    if smallest is None:
+      smallest = 1.0 # arbitrary
+      
+    delta = smallest * direction
+    
+    zregion = list(self.region[2])
+    for n in range(2):
+      zregion[n] += delta
+    self.region[2] = tuple(zregion)
+    
+    for spectrumItem in self.spectrumItems:
+      spectrumItem.update()  # is this best way to force a re-draw??
 
   def upBy2(self):
     self.current.spectrum.spectrumItem.baseLevel*=1.4

@@ -29,12 +29,17 @@ from PySide import QtGui, QtCore, QtOpenGL
 from ccpnmrcore.modules.spectrumPane.SpectrumItem import SpectrumItem
 
 from ccpnc.contour import Contourer2d
+###from ccpnc.peak import Peak
 
 from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
 
-class SpectrumNdItem(SpectrumItem):
+###from ccpnmrcore.modules.spectrumPane.PeakListNdItem import PeakListNdItem
 
-  sigClicked = QtCore.Signal(object, object)
+class SpectrumNdItem(SpectrumItem):
+  
+  ###PeakListItemClass = PeakListNdItem
+  
+  #sigClicked = QtCore.Signal(object, object)
 
   def __init__(self, spectrumPane, spectrum, dimMapping=None, region=None, posColor=None, negColor=None, **kw):
     """ spectrumPane is the parent
@@ -52,6 +57,8 @@ class SpectrumNdItem(SpectrumItem):
     self.negColor = negColor
 
     # self.spectralData = self.getSlices()
+    
+    self.previousRegion = spectrum.dimensionCount * [None]
 
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
 
@@ -93,7 +100,7 @@ class SpectrumNdItem(SpectrumItem):
 
     self.contoursValid = False
     self.contourDisplayIndexDict = {} # level -> display list index
-    
+        
   def getColorTuple(self, colorString):
     
     colorTuple = QtGui.QColor(colorString).getRgb()
@@ -109,6 +116,24 @@ class SpectrumNdItem(SpectrumItem):
       
     return tuple(numpy.array(levels, dtype=numpy.float32))
 
+  def zPlaneSize(self):
+    
+    spectrum = self.spectrum
+    dimensionCount = spectrum.dimensionCount
+    if dimensionCount < 3:
+      return None
+      
+    xDim = self.xDim
+    yDim = self.yDim
+    
+    zDims = set(range(dimensionCount)) - {xDim, yDim}
+    zDim = zDims.pop()
+    point = (0.0, 1.0)
+    value = LibSpectrum.getDimValueFromPoint(spectrum, zDim, point)
+    size = abs(value[1] - value[0])
+
+    return size
+    
   ##### override of superclass function
 
   def paint(self, painter, option, widget=None):
@@ -179,10 +204,17 @@ class SpectrumNdItem(SpectrumItem):
 
     oldLevels = set(self.contourDisplayIndexDict)
     levels = set(self.levels)
-    # release unwanted old levels
-    removedLevels = oldLevels - levels
+    if self.previousRegion[2:] == self.spectrumPane.region[2:]:
+      # release unwanted old levels
+      removedLevels = oldLevels - levels
+    else:
+      # release everything if z region changes (could do better)
+      removedLevels = oldLevels
+      oldLevels = set()
     for level in removedLevels:
       self.releaseDisplayList(level)
+      
+    self.previousRegion = self.spectrumPane.region[:]
       
     # create wanted new levels
     levels -= oldLevels
@@ -252,7 +284,7 @@ class SpectrumNdItem(SpectrumItem):
       zDims = set(range(dimensionCount)) - {xDim, yDim}
       zDim = zDims.pop()
       zregionValue = self.spectrumPane.region[zDim]
-      zregionPoint = self.getPointFromValue(zDim, zregionValue)
+      zregionPoint = LibSpectrum.getDimPointFromValue(spectrum, zDim, zregionValue)
       zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
       position = dimensionCount * [0]
       for z in range(*zregionPoint):  # TBD
@@ -292,7 +324,7 @@ class SpectrumNdItem(SpectrumItem):
       pntRegion[dim] = region
     ppmRegion = []
     for dim in range(dimensionCount):
-      (firstPpm, lastPpm) = self.getValueFromPoint(dim, pntRegion[dim])
+      (firstPpm, lastPpm) = LibSpectrum.getDimValueFromPoint(spectrum, dim, pntRegion[dim])
       ppmRegion.append((firstPpm, lastPpm))
       
     return ppmRegion
@@ -315,38 +347,12 @@ class SpectrumNdItem(SpectrumItem):
       pixelViewBox0 = plotItem.getAxis('bottom').height()
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
     
-    (firstPoint, lastPoint) = self.getPointFromValue(dim, (region0, region1))
+    (firstPoint, lastPoint) = LibSpectrum.getDimPointFromValue(self.spectrum, dim, (region0, region1))
     
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
     translate = pixelViewBox0 - firstPoint * scale
     
     return translate, scale
-
-  def getPointFromValue(self, dim, value):
-    
-    spectrum = self.spectrum
-    ccpnSpectrum = spectrum.ccpnSpectrum
-    dataDim = ccpnSpectrum.findFirstDataDim(dim=dim+1)
-    dataDimRef = dataDim.findFirstDataDimRef()
-    
-    point = []
-    for v in value:
-      point.append(dataDimRef.valueToPoint(v) - 1)  # -1 because points in data model start from 1
-      
-    return point
-    
-  def getValueFromPoint(self, dim, point):
-
-    spectrum = self.spectrum
-    ccpnSpectrum = spectrum.ccpnSpectrum
-    dataDim = ccpnSpectrum.findFirstDataDim(dim=dim+1)
-    dataDimRef = dataDim.findFirstDataDimRef()
-
-    value = []
-    for p in point:
-      value.append(dataDimRef.pointToValue(p+1))  # +1 because points in data model start from 1
-
-    return value
 
   def raiseBaseLevel(self):
     self.baseLevel*=1.4
@@ -355,4 +361,6 @@ class SpectrumNdItem(SpectrumItem):
   def lowerBaseLevel(self):
     self.baseLevel/=1.4
     self.levels = self.getLevels()
+        
+    
 

@@ -222,13 +222,13 @@ class SpectrumNdPane(SpectrumPane):
     
   def nextZPlane(self):
 
-    self.changeZPlane(1)
+    self.changeZPlane(-1) # -1 because ppm units are backwards
     
   def prevZPlane(self):
 
-    self.changeZPlane(-1)
+    self.changeZPlane(1)
 
-  def changeZPlane(self, direction):
+  def changeZPlane(self, planeCount=1):
     
     if len(self.region) < 3:
       return
@@ -244,7 +244,7 @@ class SpectrumNdPane(SpectrumPane):
     if smallest is None:
       smallest = 1.0 # arbitrary
       
-    delta = smallest * direction
+    delta = smallest * planeCount
     
     zregion = list(self.region[2])
     for n in range(2):

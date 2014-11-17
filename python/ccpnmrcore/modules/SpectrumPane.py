@@ -155,10 +155,8 @@ class SpectrumPane(pg.PlotWidget, Base):
     return self.mousePoint
     
   def showMousePosition(self, pos):
-
     position = self.viewBox.mapSceneToView(pos).toTuple()
     self.positionBox.setText("X: %.3f  Y: %.3f" % position)
-
 
   def zoomToRegion(self, region):
     self.setXRange(region[0],region[1])

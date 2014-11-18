@@ -30,7 +30,7 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.PullDownList import PulldownList
+from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
 
 LANGUAGES = ['English-UK', 'English-US', 'Nederlands', 'Deutsch', 'Español', 'Français', 'Dansk']

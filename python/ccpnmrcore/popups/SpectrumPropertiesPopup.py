@@ -30,7 +30,7 @@ from ccpnmrcore.modules.SpectrumPane import SPECTRUM_COLOURS
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.PullDownList import PulldownList
+from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox

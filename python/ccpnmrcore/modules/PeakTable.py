@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpncore.gui import Base
 from ccpncore.gui.Table import ObjectTable, Column
-from ccpncore.gui.PullDownList import PulldownList
+from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Label import Label
 import sys
 from PySide import QtGui, QtCore

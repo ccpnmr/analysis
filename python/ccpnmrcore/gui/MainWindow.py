@@ -35,7 +35,7 @@ from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
 from ccpnmrcore.modules.SpectrumNdPane import SpectrumNdPane
 from ccpnmrcore.Current import Current
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
-from ccpncore.lib.memops.Implementation.MemopsRoot import loadDataSource, getSpectrumFileFormat
+from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import PythonConsole
 from ccpncore.gui.MainWindow import MainWindow as GuiMainWindow
@@ -46,6 +46,8 @@ from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Path
+from ccpn.lib.Project import loadSpectrum
+
 from difflib import Differ
 
 from ccpn import openProject, newProject
@@ -504,10 +506,10 @@ class MainWindow(GuiMainWindow):
   def loadSpectra(self, directory=None):
     if directory == None:
       directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
-      spectrum = loadDataSource(self.project,directory[0])
+      spectrum = loadSpectrum(self.project,directory[0])
 
     else:
-      spectrum = loadDataSource(self.project,directory)
+      spectrum = loadSpectrum(self.project,directory)
       print(spectrum)
       # self.current.pane.addSpectrum(spectrum)
       # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
@@ -583,7 +585,7 @@ class MainWindow(GuiMainWindow):
 
           if spectrumFormat:
             event.acceptProposedAction()
-            dataSource = loadDataSource(self.project,filePaths[0])
+            dataSource = loadSpectrum(self.project,filePaths[0])
 
 
           # if dataSource.numDim == 1:

@@ -30,11 +30,7 @@ from ccpncore.lib.Spectrum import createExperiment, createDataSource, createBloc
 
 from ccpncore.api.memops.Implementation import Url
 
-def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
-
-  if reReadSpectrum is not None:
-    # NBNB TBD Rasmus - this is clearly not working yet
-    raise NotImplementedError("reReadSpectrum parameter not implemented yet")
+def loadDataSource(nmrProject, filePath):
 
   isOk, msg = checkFilePath(filePath)
 
@@ -51,9 +47,9 @@ def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
 
   dataFileFormat = getSpectrumFileFormat(filePath)
   if dataFileFormat is None:
-    msg = 'Spectrum data format could not be determined for %s'
-    # showError('Error', msg % filePath)
-    return
+    msg = 'Spectrum data format could not be determined for %s' % filePath
+    print(msg)
+    return None
   #
   # if dataFileFormat == CCPN:
   #   return project.getSpectrum(filePath)
@@ -63,8 +59,7 @@ def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
   if formatData is None:
     msg = 'Spectrum load failed for "%s": could not read params' % filePath
     print(msg)
-    # showError('Error', msg % filePath)
-    return
+    return None
 
   else:
     specFile, numPoints, blockSizes, wordSize, isBigEndian, \
@@ -72,10 +67,9 @@ def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
     refPoints, refPpms, sampledValues, sampledErrors, pulseProgram, dataScale = formatData
 
   if not os.path.exists(specFile):
-    msg = 'Spectrum data file %s not found'
+    msg = 'Spectrum data file %s not found' % specFile
     print(msg)
-    # showError('Error', msg % specFile)
-    return
+    return None
 
   dirName, fileName = os.path.split(specFile)
   name, fex = os.path.splitext(fileName)
@@ -95,35 +89,21 @@ def loadDataSource(wrapperProject, filePath, reReadSpectrum=None):
     # Fix name to fit PID requirements. NBNB temporary fix
     name = name.replace('.',',')
 
-  if numPoints:
+  numberType = 'float' if isFloatData else 'int'
+  experiment = createExperiment(nmrProject, name=name, numDim=len(numPoints),
+                                sf = specFreqs, isotopeCodes=isotopes)
 
-    if reReadSpectrum:
-      spectrum = reReadSpectrum
-      # NBNB TBD BROKEN - spectrum is overwritten lower down
-    else:
+  dataLocationStore = nmrProject.root.newDataLocationStore(name=name)
+  dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
+  blockMatrix = createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
+                                    blockSizes=blockSizes, isBigEndian=isBigEndian,
+                                    numberType=numberType, headerSize=headerSize,
+                                    nByte=wordSize)
+  dataSource = createDataSource(experiment, name=name, numPoints=numPoints, sw=specWidths,
+                                refppm=refPpms, refpt=refPoints, dataStore=blockMatrix)
 
-      numberType = 'float' if isFloatData else 'int'
-      nmrProject = wrapperProject.nmrProject
-      newExperiment = createExperiment(nmrProject, name=name, numDim=len(numPoints),
-                                       sf = specFreqs, isotopeCodes=isotopes)
+  for i, values in enumerate(sampledValues):
+    if values:
+      dataSource.setSampledData(i, values, sampledErrors[i] or None)
 
-      dataLocationStore = nmrProject.root.newDataLocationStore(name=name)
-      dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
-      blockMatrix = createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
-                                        blockSizes=blockSizes,isBigEndian=isBigEndian,
-                                        numberType=numberType, headerSize=headerSize,
-                                        nByte=wordSize)
-      newDataSource = createDataSource(newExperiment,name=name,numPoints=numPoints,sw=specWidths,
-                                       refppm=refPpms,refpt=refPoints,dataStore=blockMatrix)
-
-
-
-
-    for i, values in enumerate(sampledValues):
-      if values:
-        newDataSource.setSampledData(i, values, sampledErrors[i] or None)
-
-    # NBNB TBD BROKEN - newDataSource is not always set.
-    spectrum = wrapperProject._data2Obj[newDataSource]
-
-    return spectrum
+  return dataSource

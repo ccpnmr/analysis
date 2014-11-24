@@ -34,6 +34,8 @@ nucCcpnRe = re.compile('^(\d+)([A-Z]+)$')
 VNMR_FILE_HEADER_SIZE = 32
 VNMR_BLOCK_HEADER_SIZE = 28
 
+FILE_TYPE = 'Varian'
+
 def readParams(filePath):
 
   dirName, fileName = os.path.split(filePath)
@@ -97,7 +99,7 @@ def readParams(filePath):
   if dataFileParams['swapped']:
     isBigEndian = not isBigEndian
 
-  data = (dataFile, numPoints, blockSizes,
+  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
           wordSize, isBigEndian, isFloatData,
           headerSize, blockHeaderSize,
           isotopes, specFreqs,

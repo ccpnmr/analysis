@@ -28,6 +28,8 @@ from ccpncore.lib.spectrum.Util import checkIsotope
 
 WHITESPACE_AND_NULL =  set(['\x00', '\t', '\n', '\r', '\x0b', '\x0c'])
 
+FILE_TYPE = 'Azara'
+
 def readParams(filePath):
   
   # Check we didn't get a binary file
@@ -175,7 +177,7 @@ def readParams(filePath):
     # showError('Error', msg % dataFile)
     return
 
-  data = (dataFile, numPoints, blockSizes,
+  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
           wordSize, isBigEndian, isFloatData,
           headerSize, blockHeaderSize,
           isotopes, specFreqs,

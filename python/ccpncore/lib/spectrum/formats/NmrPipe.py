@@ -21,7 +21,9 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import os, sys
+import os, re, sys
+
+import numpy
 
 from ccpncore.lib.spectrum.Util import checkIsotope
 # from memops.qtgui.MessageDialog import showError
@@ -37,6 +39,8 @@ SF_INDEX = (218, 119, 10, 28)
 ORIGIN_INDEX = (249, 101, 12, 30)
 ISOTOPE_INDEX = (18, 16, 20, 22)
 VALUE_INDEX = 199
+
+FILE_TYPE = 'NMRPipe'
 
 def readParams(filePath):
 
@@ -139,7 +143,7 @@ def readParams(filePath):
     else:
       isotopes[i] = checkIsotope(isotope.decode("utf-8"))
 
-  data = (dataFile, numPoints, blockSizes,
+  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
           wordSize, isBigEndian, isFloatData,
           headerSize, blockHeaderSize,
           isotopes, specFreqs,
@@ -148,3 +152,107 @@ def readParams(filePath):
           pulseProgram, dataScale)
 
   return data
+
+def guessFileTemplate(dataSource):
+  
+  dataStore = dataSource.dataStore
+  if not dataStore:
+    return None
+  
+  fullPath = dataStore.fullPath
+  fileName = os.path.basename(fullPath)
+  numDim = dataSource.numDim
+  
+  if numDim < 3:
+    template = fileName
+    
+  elif numDim == 3:
+    template = re.sub('\d\d\d', '%03d', fileName)
+    
+  else: # numDim == 4
+    template = re.sub('\d\d\d\d\d', '%02d%03d', fileName)
+
+  return os.path.join(os.path.dirname(fullPath), template)
+  
+def _getFileData(fullPath, numPoints, headerSize, dtype):
+  
+  if len(numPoints) == 1:
+    n = numPoints[0]
+  else:
+    n = numPoints[0] * numPoints[1]
+    
+  fp = open(fullPath, 'rb')
+  fp.seek(headerSize, 0)
+  data = numpy.fromfile(file=fp, dtype=dtype, count=n).reshape(numPoints) # data is in reverse order: y,x not x,y
+  fp.close()
+  
+  if data.dtype != numpy.float32:
+    data = numpy.array(data, numpy.float32)
+    
+  return data
+  
+def readData(dataSource):
+  
+  if not hasattr(dataSource, 'template'):
+    dataSource.template = guessFileTemplate(dataSource)
+    # TBD: for now assume that above works
+  
+  dataStore = dataSource.dataStore
+  if not dataStore:
+    return None
+  
+  fullPath = dataStore.fullPath
+  wordSize = dataStore.nByte
+  isBigEndian = dataStore.isBigEndian
+  isFloatData = dataStore.numberType == 'float'
+  headerSize = dataStore.headerSize
+  
+  dtype = '%s%s%s' % (isBigEndian and '>' or '<', isFloatData and 'f' or 'i', wordSize)
+  
+  numPoints = tuple(reversed([dataDim.numPoints for dataDim in dataSource.sortedDataDims()]))
+  numDim = dataSource.numDim
+  
+  if numDim < 3:
+    data = _getFileData(fullPath, numPoints, headerSize, dtype)
+    
+  elif numDim == 3:
+    yxPoints = numPoints[-2:]
+    data = numpy.zeros(numPoints, dtype='float32')
+    template = dataSource.template
+    for z in range(numPoints[0]):
+      zdata = _getFileData(template % (z+1), yxPoints, headerSize, dtype)
+      data[z,:,:] = zdata
+      
+  else:
+    raise Exception('numDim > 3 not implemented yet')
+    
+  return data
+  
+def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
+    
+  if not hasattr(dataSource, 'data'):
+    dataSource.data = readData(dataSource)
+    
+  numDim = dataSource.numDim
+  
+  if not position:
+    position = numDim*[0]
+  
+  dataDims = dataSource.sortedDataDims()
+  
+  slices = numDim * [0]
+  for dim, dataDim in enumerate(dataDims):
+    if dim in (xDim, yDim):
+      slices[numDim-dim-1] = slice(dataDim.numPoints)
+    else:
+      slices[numDim-dim-1] = slice(position[dim], position[dim]+1)
+  
+  data = dataSource.data[slices]
+  data = data.squeeze() # eliminate dims with size 1
+  
+  if xDim > yDim:
+    data = data.transpose()
+    
+  return data
+
+    

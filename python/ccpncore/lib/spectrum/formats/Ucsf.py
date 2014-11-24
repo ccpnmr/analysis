@@ -29,6 +29,8 @@ from ccpncore.lib.spectrum.Util import checkIsotope
 UCSF_FILE_HEADER = 180
 UCSF_DIM_HEADER = 128
 
+FILE_TYPE = 'UCSF'
+
 from array import array
 
 def readParams(fileName):
@@ -115,7 +117,7 @@ def readParams(fileName):
    
   fileObj.close()
   
-  data = (dataFile, numPoints, blockSizes,
+  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
           wordSize, isBigEndian, isFloatData,
           headerSize, blockHeaderSize, isotopes, specFreqs,
           specWidths, refPoints, refPpms,

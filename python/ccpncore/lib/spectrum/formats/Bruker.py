@@ -26,6 +26,8 @@ import os, sys
 from ccpncore.lib.spectrum.Util import checkIsotope
 # from memops.qtgui.MessageDialog import showError
 
+FILE_TYPE = 'Bruker'
+
 def readParams(filePath):
 
   if os.path.isdir(filePath):
@@ -121,7 +123,7 @@ def readParams(filePath):
     refPoints[i] = float(dimDict.get('$refPoint', 0.0))
     isotopes[i] = checkIsotope(dimDict.get('$AXNUC', '<1H>')[1:-1])
 
-  data = (dataFile, numPoints, blockSizes,
+  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
           wordSize, isBigEndian, isFloatData,
           headerSize, blockHeaderSize,
           isotopes, specFreqs,

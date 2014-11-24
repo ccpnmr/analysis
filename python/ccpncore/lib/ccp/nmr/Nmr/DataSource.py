@@ -68,6 +68,7 @@ from ccpncore.lib.ccp.nmr.Nmr.AbstractDataDim import getIsotopeCodes
 # from ccpncore.lib.spectrum.Integral import getIntegralRegions, setIntegrals, calculateIntegralValues
 from ccpncore.lib.spectrum.Integral import Integral as spInt
 
+from ccpncore.lib.spectrum.formats import NmrPipe
 
 def getDimCodes(dataSource):
   """ Get dimcode of form hx1, hx2, x1, x2, where the x's are directly bound to 
@@ -210,6 +211,9 @@ def getPlaneData(spectrum, position=None, xDim=0, yDim=1):
   if not dataStore:
     return None
          
+  if dataStore.fileType == 'NMRPipe': # data is not blocked but multi-file in general
+    return NmrPipe.getPlaneData(spectrum, position, xDim, yDim)
+    
   assert numDim == 2 or (position and len(position) == numDim), 'numDim = %d, position = %s' % (numDim, position)
   assert xDim != yDim, 'xDim = yDim = %d' % xDim
   assert 0 <= xDim < numDim, 'xDim = %d' % xDim

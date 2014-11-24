@@ -40,6 +40,8 @@ XEASY_PARAM_DICT = {
   'nuc': 'Identifier for dimension w',
 }
 
+FILE_TYPE = 'Xeasy'
+
 def readParams(paramFileName):
 
   # Format invariant
@@ -103,7 +105,7 @@ def readParams(paramFileName):
     refPoints[j] = 1.0
     isotopes[j] = checkIsotope(dd[XEASY_PARAM_DICT['nuc']+ss])
 
-  data = (dataFile, numPoints, blockSizes,
+  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
           wordSize, isBigEndian, isFloatData,
           headerSize, blockHeaderSize,
           isotopes, specFreqs,

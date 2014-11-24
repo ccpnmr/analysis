@@ -62,7 +62,7 @@ def loadDataSource(nmrProject, filePath):
     return None
 
   else:
-    specFile, numPoints, blockSizes, wordSize, isBigEndian, \
+    fileType, specFile, numPoints, blockSizes, wordSize, isBigEndian, \
     isFloatData, headerSize, blockHeaderSize, isotopes, specFreqs, specWidths, \
     refPoints, refPpms, sampledValues, sampledErrors, pulseProgram, dataScale = formatData
 
@@ -98,7 +98,7 @@ def loadDataSource(nmrProject, filePath):
   blockMatrix = createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
                                     blockSizes=blockSizes, isBigEndian=isBigEndian,
                                     numberType=numberType, headerSize=headerSize,
-                                    nByte=wordSize)
+                                    nByte=wordSize, fileType=fileType)
   dataSource = createDataSource(experiment, name=name, numPoints=numPoints, sw=specWidths,
                                 refppm=refPpms, refpt=refPoints, dataStore=blockMatrix)
 

@@ -93,7 +93,7 @@ def createDataSource(experiment:object, name:str, numPoints:Sequence, sw:Sequenc
 
 def createBlockedMatrix(dataUrl:object, path:str, numPoints:Sequence, blockSizes:Sequence=None,
                         isBigEndian:bool=True, numberType:str='float', isComplex:bool=None,
-                        headerSize:int=0, blockHeaderSize:int=0, nByte=4,
+                        headerSize:int=0, blockHeaderSize:int=0, nByte=4, fileType=None,
                        **additionalParameters) -> object:
   """Create BlockedBinaryMatrix object. Explicit parameters are the most important,
   additional parameters to BlockedBinaryMatrix are passed in additionalParameters"""
@@ -121,10 +121,11 @@ def createBlockedMatrix(dataUrl:object, path:str, numPoints:Sequence, blockSizes
   matrix = dataLocationStore.newBlockedBinaryMatrix(dataUrl=dataUrl, path=path,
                  numPoints=numPoints, blockSizes=blockSizes, isBigEndian=isBigEndian,
                  numberType=numberType, isComplex=isComplex, headerSize=headerSize,
-                 blockHeaderSize=blockHeaderSize, nByte=nByte, **additionalParameters)
+                 blockHeaderSize=blockHeaderSize, nByte=nByte, fileType=fileType,
+                 **additionalParameters)
 
   return matrix
-  
+
 # if __name__ == '__main__':
 #
 #   from ccpncore.api.memops.Implementation import MemopsRoot

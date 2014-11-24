@@ -26,6 +26,8 @@ import os, sys
 from ccpncore.lib.spectrum.Util import checkIsotope
 # from memops.qtgui.MessageDialog import showError
 
+FILE_TYPE = 'None'
+
 def readParams(paramFileName):
 
   dataFile = None
@@ -49,7 +51,7 @@ def readParams(paramFileName):
   specFreqs = [0] * ndim
   isotopes = [0] * ndim
 
-  data = (dataFile, numPoints, blockSizes,
+  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
           wordSize, isBigEndian, isFloatData,
           headerSize, blockHeaderSize,
           isotopes, specFreqs,

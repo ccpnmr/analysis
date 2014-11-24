@@ -28,6 +28,8 @@ from ccpncore.lib.spectrum.Util import checkIsotope
 
 from array import array
 
+FILE_TYPE = 'NMRView'
+
 def readParams(paramFileName):
 
   byteOrderFlags = { ('34','18','AB','CD') : 'big',
@@ -120,7 +122,7 @@ def readParams(paramFileName):
   
   isotopes = _guessConsistentNuclei(specFreqs)
 
-  data = (dataFile, numPoints, blockSizes,
+  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
           wordSize, isBigEndian, isFloatData,
           headerSize, blockHeaderSize,
           isotopes, specFreqs,

@@ -28,6 +28,8 @@ from ccpncore.lib.spectrum.Util import checkIsotope
 
 from array import array
 
+FILE_TYPE = 'Felix'
+
 def readParams(paramFileName):
 
   dataFile = paramFileName
@@ -94,7 +96,7 @@ def readParams(paramFileName):
       j = j + 1
     isotopes[i] = checkIsotope(isotope)
   
-  data = (dataFile, numPoints, blockSizes,
+  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
           wordSize, isBigEndian, isFloatData,
           headerSize, blockHeaderSize,
           isotopes, specFreqs,

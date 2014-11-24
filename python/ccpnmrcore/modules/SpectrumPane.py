@@ -91,6 +91,7 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.scene().sigMouseMoved.connect(self.mouseMoved)
     self.scene().sigMouseHover.connect(self.setCurrentPane)
     self.storedZooms = []
+    self.spectrumItems = []
 
     # print('parent',parent)
     if parent is None:
@@ -295,12 +296,15 @@ class SpectrumPane(pg.PlotWidget, Base):
 
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
+      #data = event.mimeData().text()
+      print('RECEIVED mimeData: "%s"' % data)
+      
       pidData = str(data.data(),encoding='utf-8')
-      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12', '\x0c', '\x05', '\x10']
+      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12', '\x0c', '\x05', '\x10', '\x14']
       pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
       actualPid = ''.join(map(str, pidData2))
       print(list(actualPid))
-
+      
 
       spectrum = self.getObject(actualPid)
       print(spectrum)

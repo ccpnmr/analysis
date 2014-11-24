@@ -54,7 +54,6 @@ class SpectrumItem(QtGui.QGraphicsItem, Base):  # abstract class
     self.spectrumPane = spectrumPane
     self.spectrum = spectrum
     self.setDimMapping(dimMapping)
-    
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
     """
     for peakList in spectrum.peakLists:
@@ -74,7 +73,6 @@ class SpectrumItem(QtGui.QGraphicsItem, Base):  # abstract class
       dimMapping = {}
       for i in range(spectrum.dimensionCount):
         dimMapping[i] = i
-            
     self.dimMapping = dimMapping
     dimensionCount = spectrum.dimensionCount
 
@@ -93,7 +91,7 @@ class SpectrumItem(QtGui.QGraphicsItem, Base):  # abstract class
     if yDim is not None:
       assert 0 <= yDim < dimensionCount, 'yDim = %d, dimensionCount = %d' % (yDim, dimensionCount)
       assert xDim != yDim, 'xDim = yDim = %d' % xDim
-    
+
     self.xDim = xDim
     self.yDim = yDim
 

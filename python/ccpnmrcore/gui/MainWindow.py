@@ -104,7 +104,7 @@ class MainWindow(GuiMainWindow):
     self.current.spectra = []
     self.dockArea = DockArea()
     self.dockArea.setGeometry(0, 0, 1100, 1300)
-    self.current.pane = self.spectrumPane1
+    self.current.pane = self.spectrumPane2
     self.dockArea.addDock(self.widget1)
     self.dockArea.addDock(self.widget2)
     self.splitter1.addWidget(self.dockArea)
@@ -112,7 +112,7 @@ class MainWindow(GuiMainWindow):
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
     self._menuBar =  QtGui.QMenuBar()
-
+    self.setShortcuts()
 
     fileMenu = QtGui.QMenu("&Project", self)
     spectrumMenu = QtGui.QMenu("&Spectra", self)
@@ -123,19 +123,19 @@ class MainWindow(GuiMainWindow):
     macroMenu = QtGui.QMenu("Macro", self)
     helpMenu = QtGui.QMenu("&Help", self)
 
-    fileMenu.addAction(Action(self, "New", callback=self.newProject, shortcut="PN"))
-    fileMenu.addAction(Action(self, "Open...", callback=self.openProject, shortcut="PO"))
+    fileMenuAction = fileMenu.addAction(QtGui.QAction("New", self, triggered=self.newProject))
+    fileMenu.addAction(Action(self, "Open...", callback=self.openProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="PS"))
+    fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
     fileMenu.addAction(Action(self, "Save As...", shortcut="PA", callback=self.saveProjectAs))
     backupOption = fileMenu.addMenu("Backup")
     backupOption.addAction(Action(self, "Save", callback=self.saveBackup))
     backupOption.addAction(Action(self, "Restore", callback=self.restoreBackup))
     fileMenu.addSeparator()
-    fileMenu.addAction(QtGui.QAction("Undo", self, triggered=self.undo, shortcut=QtGui.QKeySequence("Ctrl+Z")))
-    fileMenu.addAction(QtGui.QAction("Redo", self, triggered=self.redo, shortcut=QtGui.QKeySequence("Ctrl+Y")))
+    fileMenu.addAction(QtGui.QAction("Undo", self, triggered=self.undo, shortcut=QtGui.QKeySequence("Ctrl+z")))
+    fileMenu.addAction(QtGui.QAction("Redo", self, triggered=self.redo, shortcut=QtGui.QKeySequence("Ctrl+y")))
     logOption = fileMenu.addMenu("Log File")
     logOption.addAction(Action(self, "Save As...", callback=self.saveLogFile))
     logOption.addAction(Action(self, "Clear", callback=self.clearLogFile))
@@ -145,9 +145,9 @@ class MainWindow(GuiMainWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Preferences...", callback=self.showApplicationPreferences))
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Close Program", callback=self.quitAction, shortcut="QT"))
+    fileMenu.addAction(Action(self, "Close Program", callback=self.quitAction, shortcut="qt"))
 
-    spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="FO"))
+    spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
     spectrumMenu.addAction(Action(self, "Remove...", callback=self.removeSpectra))
     spectrumMenu.addAction(Action(self, "Rename...", callback=self.renameSpectra))
     spectrumMenu.addAction(Action(self, "Reload", callback=self.reloadSpectra))
@@ -228,6 +228,11 @@ class MainWindow(GuiMainWindow):
     self._menuBar.setNativeMenuBar(False)
     self.setWindowTitle('Analysis v3')
     self.show()
+
+  def setShortcuts(self):
+    toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
+    toggleCrossHairShortcut = QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHair)
+    toggleGridShortcut = QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGrid)
 
   def raiseSpectrumProperties(self, item):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
@@ -394,6 +399,7 @@ class MainWindow(GuiMainWindow):
     self.moduleCount+=1
 
     self.dockArea.addDock(newModule.dock)
+    return newModule
 
   def setLayoutToDefault(self):
     pass
@@ -406,6 +412,8 @@ class MainWindow(GuiMainWindow):
 
   def restoreLayout(self):
     pass
+
+
 
   def toggleConsole(self):
     if self.pythonConsoleShown == True:
@@ -533,11 +541,11 @@ class MainWindow(GuiMainWindow):
     print("project saved as...")
 
 
-  def showCrossHair(self):
-    self.current.pane.showCrossHair()
+  def toggleCrossHair(self):
+    self.current.pane.toggleCrossHair()
 
-  def hideCrossHair(self):
-    self.current.pane.hideCrossHair()
+  def toggleGrid(self):
+    self.current.pane.toggleGrid()
 
   def hideConsole(self):
     self.pythonConsole.hide()

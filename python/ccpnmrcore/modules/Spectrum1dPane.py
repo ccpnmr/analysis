@@ -134,33 +134,33 @@ class Spectrum1dPane(SpectrumPane):
     else:
       self.autoIntegration = True
 
-  def toggleCrossHair(self):
-    if self.crossHairShown ==True:
-      self.hideCrossHair()
-    else:
-      self.showCrossHair()
-      self.crossHairShown = True
+  # def toggleCrossHair(self):
+  #   if self.crossHairShown ==True:
+  #     self.hideCrossHair()
+  #   else:
+  #     self.showCrossHair()
+  #     self.crossHairShown = True
+  #
+  # def showCrossHair(self):
+  #     self.vLine.show()
+  #     self.hLine.show()
+  #     self.crossHairAction.setChecked(True)
+  #     self.crossHairShown = True
+  #
+  # def hideCrossHair(self):
+  #   self.vLine.hide()
+  #   self.hLine.hide()
+  #   self.crossHairAction.setChecked(False)
+  #   self.crossHairShown = False
+  #
 
-  def showCrossHair(self):
-      self.vLine.show()
-      self.hLine.show()
-      self.crossHairAction.setChecked(True)
-      self.crossHairShown = True
-
-  def hideCrossHair(self):
-    self.vLine.hide()
-    self.hLine.hide()
-    self.crossHairAction.setChecked(False)
-    self.crossHairShown = False
-
-
-  def toggleGrid(self):
-    if self.gridShown == True:
-      self.showGrid(x=False, y=False)
-      self.gridShown = False
-    else:
-      self.showGrid(x=True, y=True)
-      self.gridShown = True
+  # def toggleGrid(self):
+  #   if self.gridShown == True:
+  #     self.showGrid(x=False, y=False)
+  #     self.gridShown = False
+  #   else:
+  #     self.showGrid(x=True, y=True)
+  #     self.gridShown = True
 
   def raisePrintMenu(self):
     pass

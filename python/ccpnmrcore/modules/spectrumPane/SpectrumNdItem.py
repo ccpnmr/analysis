@@ -125,13 +125,13 @@ class SpectrumNdItem(SpectrumItem):
       
     xDim = self.xDim
     yDim = self.yDim
-    
     zDims = set(range(dimensionCount)) - {xDim, yDim}
+    self.zDims = zDims
     zDim = zDims.pop()
+
     point = (0.0, 1.0)
     value = LibSpectrum.getDimValueFromPoint(spectrum, zDim, point)
     size = abs(value[1] - value[0])
-
     return size
     
   ##### override of superclass function
@@ -284,6 +284,7 @@ class SpectrumNdItem(SpectrumItem):
       zDims = set(range(dimensionCount)) - {xDim, yDim}
       zDim = zDims.pop()
       zregionValue = self.spectrumPane.region[zDim]
+      print(zregionValue)
       zregionPoint = LibSpectrum.getDimPointFromValue(spectrum, zDim, zregionValue)
       zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
       position = dimensionCount * [0]
@@ -291,6 +292,7 @@ class SpectrumNdItem(SpectrumItem):
         position[zDim] = z
         # below does not work yet
         #planeData = spectrum.getPlaneData(position, xDim, yDim)
+        print(xDim, yDim)
         planeData = LibSpectrum.getPlaneData(spectrum, position, xDim=xDim, yDim=yDim)
         yield position, planeData
     

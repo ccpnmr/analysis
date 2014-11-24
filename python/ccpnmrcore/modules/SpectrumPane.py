@@ -82,12 +82,14 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.viewBox.current = current
     self.xAxis = pg.AxisItem(orientation='top')
     self.yAxis = pg.AxisItem(orientation='right')
+    self.gridShown = None
     self.axes['left']['item'].hide()
     self.axes['right']['item'].show()
     self.axes['bottom']['item'].orientation = 'bottom'
     self.setAcceptDrops(True)
     self.crossHair = self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
+    self.scene().sigMouseHover.connect(self.setCurrentPane)
     self.storedZooms = []
 
     # print('parent',parent)
@@ -124,6 +126,9 @@ class SpectrumPane(pg.PlotWidget, Base):
       spectraVar = []
 
     self.setSpectra(spectraVar)
+  #
+  def setCurrentPane(self):
+    self.current.pane = self
 
   def clicked(self, spectrum):
       self.current.spectrum = spectrum
@@ -145,6 +150,34 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.hLine = pg.InfiniteLine(angle=0, movable=False, pen='w')
     self.addItem(self.vLine, ignoreBounds=True, )
     self.addItem(self.hLine, ignoreBounds=True)
+
+
+  def toggleCrossHair(self):
+    if self.crossHairShown ==True:
+      self.hideCrossHair()
+    else:
+      self.showCrossHair()
+      self.crossHairShown = True
+
+  def showCrossHair(self):
+      self.vLine.show()
+      self.hLine.show()
+      self.crossHairAction.setChecked(True)
+      self.crossHairShown = True
+
+  def hideCrossHair(self):
+    self.vLine.hide()
+    self.hLine.hide()
+    self.crossHairAction.setChecked(False)
+    self.crossHairShown = False
+
+  def toggleGrid(self):
+    if self.gridShown == True:
+      self.showGrid(x=False, y=False)
+      self.gridShown = False
+    else:
+      self.showGrid(x=True, y=True)
+      self.gridShown = True
 
   def mouseMoved(self, event):
     position = event

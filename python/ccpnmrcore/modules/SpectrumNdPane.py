@@ -79,12 +79,13 @@ class SpectrumNdPane(SpectrumPane):
   # overrides superclass function
   def wheelEvent(self, event):
     if event.modifiers() & QtCore.Qt.ShiftModifier:
-      if event.delta() > 0:
-        self.current.spectrum.spectrumItem.raiseBaseLevel()
-        self.current.spectrum.spectrumItem.update()
-      else:
-        self.current.spectrum.spectrumItem.lowerBaseLevel()
-        self.current.spectrum.spectrumItem.update()
+      for spectrumItem in self.spectrumItems:
+        if event.delta() > 0:
+            spectrumItem.raiseBaseLevel()
+            spectrumItem.update()
+        else:
+          spectrumItem.lowerBaseLevel()
+          spectrumItem.update()
     elif not event.modifiers():
       QtGui.QGraphicsView.wheelEvent(self, event)
       sc = 1.001 ** event.delta()
@@ -136,28 +137,8 @@ class SpectrumNdPane(SpectrumPane):
 
     return self.contextMenu
 
-
-  #
-  # def flipZX(self):
-  #   newModule = self.mainWindow.addSpectrumNdPane()
-  #   for spectrumItem in self.spectrumItems:
-  #       # oldDimMapping = spectrumItem.dimMapping
-  #     newDimMapping = {0:spectrumItem.dimMapping[2], 1:spectrumItem.dimMapping[1], 2:spectrumItem.dimMapping[0]}
-  #     newRegion = spectrumItem.region
-  #     # print(spectrumItem.region)
-  #     # print(newRegion)
-  #     # print(oldDimMapping)
-  #     # print('newDimMapping',newDimMapping)
-  #     newModule.addSpectrum(spectrumItem.spectrum, dimMapping=[1,2,0], region=newRegion)
-  #     # spectrumItem.setDimMapping(newDimMapping)
-  #     # spectrumItem.defaultRegion = newRegion
-  #     # print('new',spectrumItem.dimMapping)
-  #     # spectrumItem.update()
-  #     # print(newSpectrumItem)
-
-
   def rotateAboutY(self):
-    print("rotating about Y")
+
     for spectrumItem in self.spectrumItems:
       spectrumItem.xDim = spectrumItem.dimMapping[2]
       spectrum = spectrumItem.spectrum
@@ -166,54 +147,81 @@ class SpectrumNdPane(SpectrumPane):
       zDims = set(range(spectrumItem.spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
       zDim = zDims.pop()
       newDimMapping = {0:spectrumItem.xDim, 1:spectrumItem.yDim, 2:zDim}
-      print(newDimMapping)
       spectrumItem.dimMapping = newDimMapping
       pntRegion = dimensionCount * [None]
-      print(spectrumItem.xDim, spectrumItem.yDim)
       for dim in range(dimensionCount):
         if dim in (spectrumItem.xDim, spectrumItem.yDim):
           region = (0, pointCounts[dim])
-          print('region1',region)
         else:
           n = pointCounts[dim] // 2
           region = (n, n+1)
-          print('region2',region)
         pntRegion[dim] = region
-      print('pnt',pntRegion)
       ppmRegion = []
       for dim in range(dimensionCount):
         (firstPpm, lastPpm) = LibSpectrum.getDimValueFromPoint(spectrum, dim, pntRegion[dim])
-        print(LibSpectrum.getDimValueFromPoint(spectrum, dim, pntRegion[dim]))
         ppmRegion.append((firstPpm, lastPpm))
 
-      print(ppmRegion)
-      # spectrumItem.previousRegion = ppmRegion
       self.region = ppmRegion
-      print('region',self.region)
-      # spectrumItem.
       spectrumItem.update()
       self.zoomX(ppmRegion[spectrumItem.xDim])
       self.zoomY(ppmRegion[spectrumItem.yDim])
-    self.updateZSlider(self.spectrumItems[0])
+      dataDimRef = spectrumItem.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
+      self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
+      # self.planeLabel.textChanged.connect(self.changeZPlane)
 
 
   def rotateAboutX(self):
-    print("rotating about X")
+
     for spectrumItem in self.spectrumItems:
       spectrumItem.yDim = spectrumItem.dimMapping[2]
-      print(spectrumItem.yDim)
       spectrum = spectrumItem.spectrum
       dimensionCount = spectrum.dimensionCount
       pointCounts = spectrum.pointCounts
       zDims = set(range(spectrumItem.spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
       zDim = zDims.pop()
       newDimMapping = {0:spectrumItem.xDim, 1:spectrumItem.yDim, 2:zDim}
-      print(newDimMapping)
       spectrumItem.dimMapping = newDimMapping
       pntRegion = dimensionCount * [None]
-      print(spectrumItem.xDim, spectrumItem.yDim)
       for dim in range(dimensionCount):
-        print(dim)
+        if dim in (spectrumItem.xDim, spectrumItem.yDim):
+          region = (0, pointCounts[dim])
+        else:
+          n = pointCounts[dim] // 2
+          region = (n, n+1)
+        pntRegion[dim] = region
+      ppmRegion = []
+      for dim in range(dimensionCount):
+        (firstPpm, lastPpm) = LibSpectrum.getDimValueFromPoint(spectrum, dim, pntRegion[dim])
+        ppmRegion.append((firstPpm, lastPpm))
+
+      self.region = ppmRegion
+      spectrumItem.update()
+      self.zoomX(ppmRegion[spectrumItem.xDim])
+      self.zoomY(ppmRegion[spectrumItem.yDim])
+      # self.planeLabel.textChanged.disconnect(self.changeZPlane)
+      dataDimRef = spectrumItem.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
+      self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
+      # self.planeLabel.textChanged.connect(self.changeZPlane)
+
+
+  def swapXY(self):
+
+    for spectrumItem in self.spectrumItems:
+
+      spectrumItem.xDim = spectrumItem.dimMapping[1]
+      spectrumItem.yDim = spectrumItem.dimMapping[0]
+      spectrum = spectrumItem.spectrum
+      dimensionCount = spectrum.dimensionCount
+      if dimensionCount > 2:
+        zDims = set(range(spectrumItem.spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
+        zDim = zDims.pop()
+        newDimMapping = {0:spectrumItem.xDim, 1:spectrumItem.yDim, 2:zDim}
+      else:
+        newDimMapping = {0:spectrumItem.xDim, 1:spectrumItem.yDim}
+      spectrumItem.dimMapping = newDimMapping
+      pointCounts = spectrum.pointCounts
+      pntRegion = dimensionCount * [None]
+      for dim in range(dimensionCount):
         if dim in (spectrumItem.xDim, spectrumItem.yDim):
           region = (0, pointCounts[dim])
           # print('region1',region)
@@ -222,87 +230,17 @@ class SpectrumNdPane(SpectrumPane):
           region = (n, n+1)
           # print('region2',region)
         pntRegion[dim] = region
-      print('pnt',pntRegion)
       ppmRegion = []
       for dim in range(dimensionCount):
         (firstPpm, lastPpm) = LibSpectrum.getDimValueFromPoint(spectrum, dim, pntRegion[dim])
-        print(LibSpectrum.getDimValueFromPoint(spectrum, dim, pntRegion[dim]))
         ppmRegion.append((firstPpm, lastPpm))
 
-      print(ppmRegion)
-      # spectrumItem.previousRegion = ppmRegion
       self.region = ppmRegion
-      print('region',self.region)
-      # spectrumItem.
       spectrumItem.update()
       self.zoomX(ppmRegion[spectrumItem.xDim])
       self.zoomY(ppmRegion[spectrumItem.yDim])
-    #   self.planeLabel.textChanged.disconnect(self.changeZPlane)
-    #   dataDimRef = spectrumItem.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
-    #   self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
-    #   self.planeLabel.textChanged.connect(self.changeZPlane)
-    # # self.updateZSlider(self.spectrumItems[0])
 
 
-  def swapXY(self):
-    self.rotateAboutX()
-    self.rotateAboutY()
-
-    # for spectrumItem in self.spectrumItems:
-    #   #
-    #   spectrumItem.xDim = spectrumItem.dimMapping[1]
-    #   spectrumItem.yDim = spectrumItem.dimMapping[0]
-    #   zDims = set(range(spectrumItem.spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
-    #   zDim = zDims.pop()
-    #   newDimMapping = {0:spectrumItem.xDim, 1:spectrumItem.yDim, 2:zDim}
-    #   print(spectrumItem.dimMapping)
-    #   spectrumItem.dimMapping = newDimMapping
-    #   print(spectrumItem.dimMapping)
-    #   spectrum = spectrumItem.spectrum
-    #   dimensionCount = spectrum.dimensionCount
-    #   pointCounts = spectrum.pointCounts
-    #   pntRegion = dimensionCount * [None]
-    #   for dim in range(dimensionCount):
-    #     if dim in (spectrumItem.yDim, spectrumItem.xDim):
-    #       xRegion = (0, pointCounts[spectrumItem.xDim])
-    #       yRegion = (0, pointCounts[spectrumItem.yDim])
-    #       pntRegion[spectrumItem.xDim] = xRegion
-    #       pntRegion[spectrumItem.yDim] = yRegion
-    #     else:
-    #       n = pointCounts[dim] // 2
-    #       region = (n, n+1)
-    #       pntRegion[dim] = region
-    #
-    #   ppmRegion = []
-    #   for dim in spectrumItem.dimMapping.values():
-    #     (firstPpm, lastPpm) = LibSpectrum.getDimValueFromPoint(spectrum, dim, pntRegion[dim])
-    #     print(dim, pntRegion[dim])
-    #     print(LibSpectrum.getDimValueFromPoint(spectrum, dim, pntRegion[dim]))
-    #     ppmRegion.append((firstPpm, lastPpm))
-    #
-    #   # spectrumItem.previousRegion = ppmRegion
-    #   self.region = ppmRegion
-    #   print('region',self.region)
-    #   # spectrumItem.
-    #   spectrumItem.update()
-
-      # spectrumItem.dimMapping[0] = spectrumItem.xDim
-      # spectrumItem.dimMapping[1] = spectrumItem.yDim
-      # print(spectrumItem.dimMapping)
-      # print(self.region)
-      # self.region[1], self.region[0] = spectrumItem.previousRegion[0],spectrumItem.previousRegion[1]
-      # print(self.region)
-      # # spectrumItem.previousRegion = self.region
-      # spectrumItem.update()
-      # self.zoomX(spectrumItem.previousRegion[spectrumItem.xDim])
-      # self.zoomY(spectrumItem.previousRegion[spectrumItem.yDim])
-
-  def updateZSlider(self, spectrumItem):
-    zDims = set(range(spectrumItem.spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
-    zDim = zDims.pop()
-    dataDimRef = spectrumItem.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
-    self.current.spectrum.pointCounts[zDim]/2
-    # self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
   # def toggleCrossHair(self):
   #   if self.crossHairShown ==True:
   #     self.hideCrossHair()
@@ -338,7 +276,10 @@ class SpectrumNdPane(SpectrumPane):
     # TBD: check if dimensions make sense
     self.posColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex]
     self.negColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex+1]
-    spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
+    if len(self.spectrumItems) >= 1:
+      spectrumItem = SpectrumNdItem(self, spectrum, self.spectrumItems[0].dimMapping, self.region, self.posColors, self.negColors)
+    else:
+      spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
     print('addSpectrum...region',self.region)
     newItem = self.scene().addItem(spectrumItem)
     self.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)\n" % (spectrum))
@@ -398,7 +339,7 @@ class SpectrumNdPane(SpectrumPane):
       self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
       self.planeLabel.setFixedWidth(100)
       self.planeLabel.setFixedHeight(30)
-      self.planeLabel.textChanged.connect(self.changeZPlane)
+      # self.planeLabel.textChanged.connect(self.changeZPlane)
       nextPlaneButton = Button(self,'>')
       nextPlaneButton.setFixedWidth(30)
       nextPlaneButton.setFixedHeight(30)
@@ -453,18 +394,18 @@ class SpectrumNdPane(SpectrumPane):
   def nextZPlane(self):
 
     self.changeZPlane(-1) # -1 because ppm units are backwards
-    # dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[2].findFirstDataDimRef()
-    # newPlaneNumber = dataDimRef.valueToPoint(float(self.planeLabel.text())) + 1
-    # newPoint = dataDimRef.pointToValue(newPlaneNumber)
-    # self.planeLabel.setText('%0.3f' % newPoint)
+    dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[2].findFirstDataDimRef()
+    newPlaneNumber = dataDimRef.valueToPoint(float(self.planeLabel.text())) + 1
+    newPoint = dataDimRef.pointToValue(newPlaneNumber)
+    self.planeLabel.setText('%0.3f' % newPoint)
     
   def prevZPlane(self):
 
     self.changeZPlane(1)
-    # dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[2].findFirstDataDimRef()
-    # newPlaneNumber = dataDimRef.valueToPoint(float(self.planeLabel.text())) - 1
-    # newPoint = dataDimRef.pointToValue(newPlaneNumber)
-    # self.planeLabel.setText('%0.3f' % newPoint)
+    dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[2].findFirstDataDimRef()
+    newPlaneNumber = dataDimRef.valueToPoint(float(self.planeLabel.text())) - 1
+    newPoint = dataDimRef.pointToValue(newPlaneNumber)
+    self.planeLabel.setText('%0.3f' % newPoint)
 
   def changeZPlane(self, planeCount=1):
     
@@ -485,7 +426,6 @@ class SpectrumNdPane(SpectrumPane):
     zDim = spectrumItem.dimMapping[2]
     delta = smallest * planeCount
     zregion = list(self.region[zDim])
-    print(zregion)
     for n in range(2):
       zregion[n] += delta
     self.region[zDim] = tuple(zregion)
@@ -493,12 +433,14 @@ class SpectrumNdPane(SpectrumPane):
       spectrumItem.update()  # is this best way to force a re-draw??
 
   def upBy2(self):
-    self.current.spectrum.spectrumItem.baseLevel*=1.4
-    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+    for spectrumItem in self.spectrumItems:
+      spectrumItem.baseLevel*=1.4
+      spectrumItem.levels = spectrumItem.getLevels()
 
   def downBy2(self):
-    self.current.spectrum.spectrumItem.baseLevel/=1.4
-    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+    for spectrumItem in self.spectrumItems:
+      spectrumItem.baseLevel/=1.4
+      spectrumItem.levels = spectrumItem.getLevels()
 
   def addOne(self):
     self.current.spectrum.spectrumItem.numberOfLevels +=1

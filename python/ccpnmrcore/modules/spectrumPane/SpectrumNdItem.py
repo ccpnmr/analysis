@@ -69,11 +69,13 @@ class SpectrumNdItem(SpectrumItem):
       # SpectrumItem constructor but need to have it to hand before that called
       xDim = self.xDim
       yDim = self.yDim
+
       region = spectrumPane.region = self.defaultRegion()
       viewBox = spectrumPane.viewBox
       # TBD: below assumes axes inverted
       viewBox.setXRange(region[xDim][1], region[xDim][0])
       viewBox.setYRange(region[yDim][1], region[yDim][0])
+
 
     if self.posColor is None:
       self.posColor = 'ff0000' # red
@@ -204,7 +206,13 @@ class SpectrumNdItem(SpectrumItem):
 
     oldLevels = set(self.contourDisplayIndexDict)
     levels = set(self.levels)
-    if self.previousRegion[2:] == self.spectrumPane.region[2:]:
+    zDims = set(range(self.spectrum.dimensionCount)) - {self.xDim, self.yDim}
+    self.zDims = zDims
+    if len(self.zDims) > 0:
+      zDim = zDims.pop()
+    else:
+      zDim = None
+    if zDim is not None and self.previousRegion[zDim] == self.spectrumPane.region[zDim]:
       # release unwanted old levels
       removedLevels = oldLevels - levels
     else:
@@ -215,7 +223,7 @@ class SpectrumNdItem(SpectrumItem):
       self.releaseDisplayList(level)
       
     self.previousRegion = self.spectrumPane.region[:]
-      
+
     # create wanted new levels
     levels -= oldLevels
     if not levels:
@@ -348,7 +356,7 @@ class SpectrumNdItem(SpectrumItem):
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
     
     (firstPoint, lastPoint) = LibSpectrum.getDimPointFromValue(self.spectrum, dim, (region0, region1))
-    
+
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
     translate = pixelViewBox0 - firstPoint * scale
     

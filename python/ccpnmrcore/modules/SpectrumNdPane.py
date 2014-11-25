@@ -201,6 +201,7 @@ class SpectrumNdPane(SpectrumPane):
     print("rotating about X")
     for spectrumItem in self.spectrumItems:
       spectrumItem.yDim = spectrumItem.dimMapping[2]
+      print(spectrumItem.yDim)
       spectrum = spectrumItem.spectrum
       dimensionCount = spectrum.dimensionCount
       pointCounts = spectrum.pointCounts
@@ -212,13 +213,14 @@ class SpectrumNdPane(SpectrumPane):
       pntRegion = dimensionCount * [None]
       print(spectrumItem.xDim, spectrumItem.yDim)
       for dim in range(dimensionCount):
+        print(dim)
         if dim in (spectrumItem.xDim, spectrumItem.yDim):
           region = (0, pointCounts[dim])
-          print('region1',region)
+          # print('region1',region)
         else:
           n = pointCounts[dim] // 2
           region = (n, n+1)
-          print('region2',region)
+          # print('region2',region)
         pntRegion[dim] = region
       print('pnt',pntRegion)
       ppmRegion = []
@@ -235,11 +237,11 @@ class SpectrumNdPane(SpectrumPane):
       spectrumItem.update()
       self.zoomX(ppmRegion[spectrumItem.xDim])
       self.zoomY(ppmRegion[spectrumItem.yDim])
-      self.planeLabel.textChanged.disconnect(self.changeZPlane)
-      dataDimRef = spectrumItem.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
-      self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
-      self.planeLabel.textChanged.connect(self.changeZPlane)
-    # self.updateZSlider(self.spectrumItems[0])
+    #   self.planeLabel.textChanged.disconnect(self.changeZPlane)
+    #   dataDimRef = spectrumItem.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
+    #   self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
+    #   self.planeLabel.textChanged.connect(self.changeZPlane)
+    # # self.updateZSlider(self.spectrumItems[0])
 
 
   def swapXY(self):
@@ -477,20 +479,18 @@ class SpectrumNdPane(SpectrumPane):
         if smallest is None or zPlaneSize < smallest:
           smallest = zPlaneSize
 
-    print(smallest,zPlaneSize)
     if smallest is None:
       smallest = 1.0 # arbitrary
       
     zDim = spectrumItem.dimMapping[2]
-    print(type(smallest), smallest, type(planeCount), planeCount)
     delta = smallest * planeCount
     zregion = list(self.region[zDim])
+    print(zregion)
     for n in range(2):
       zregion[n] += delta
     self.region[zDim] = tuple(zregion)
     for spectrumItem in self.spectrumItems:
       spectrumItem.update()  # is this best way to force a re-draw??
-      print(spectrumItem.dimMapping)
 
   def upBy2(self):
     self.current.spectrum.spectrumItem.baseLevel*=1.4

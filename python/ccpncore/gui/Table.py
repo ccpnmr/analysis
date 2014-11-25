@@ -30,7 +30,7 @@ from ccpncore.gui.BasePopup import BasePopup
 from ccpncore.gui.Splitter import Splitter
 from ccpncore.gui.TableModel import ObjectTableModel
 from ccpncore.gui.Label import Label
-from ccpncore.gui.PullDownList import PulldownList
+from ccpncore.gui.PulldownList import PulldownList
 
 import re
 

@@ -32,6 +32,7 @@ from ccpnmrcore.modules.spectrumPane.SpectrumNdItem import SpectrumNdItem
 from ccpncore.gui.Menu import Menu
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
+from ccpncore.lib.NmrExpPrototype import resetAllAxisCodes
 from ccpncore.gui.LineEdit import LineEdit
 from ccpn.lib import Spectrum as LibSpectrum
 import numpy
@@ -70,6 +71,7 @@ class SpectrumNdPane(SpectrumPane):
     self.phasedData = None
     self.pivot = None
     self.planeLabel = None
+    self.axesSwapped = False
     self.setShortcuts()
 
 
@@ -148,6 +150,10 @@ class SpectrumNdPane(SpectrumPane):
       zDim = zDims.pop()
       newDimMapping = {0:spectrumItem.xDim, 1:spectrumItem.yDim, 2:zDim}
       spectrumItem.dimMapping = newDimMapping
+      self.xAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[0]])
+      self.yAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[1]])
+      self.xAxis.mappedDim = int(spectrumItem.dimMapping[0])
+      self.yAxis.mappedDim = int(spectrumItem.dimMapping[1])
       pntRegion = dimensionCount * [None]
       for dim in range(dimensionCount):
         if dim in (spectrumItem.xDim, spectrumItem.yDim):
@@ -181,6 +187,10 @@ class SpectrumNdPane(SpectrumPane):
       zDim = zDims.pop()
       newDimMapping = {0:spectrumItem.xDim, 1:spectrumItem.yDim, 2:zDim}
       spectrumItem.dimMapping = newDimMapping
+      self.xAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[0]])
+      self.yAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[1]])
+      self.xAxis.mappedDim = int(spectrumItem.dimMapping[0])
+      self.yAxis.mappedDim = int(spectrumItem.dimMapping[1])
       pntRegion = dimensionCount * [None]
       for dim in range(dimensionCount):
         if dim in (spectrumItem.xDim, spectrumItem.yDim):
@@ -219,6 +229,10 @@ class SpectrumNdPane(SpectrumPane):
       else:
         newDimMapping = {0:spectrumItem.xDim, 1:spectrumItem.yDim}
       spectrumItem.dimMapping = newDimMapping
+      self.xAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[0]])
+      self.yAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[1]])
+      self.xAxis.mappedDim = int(spectrumItem.dimMapping[0])
+      self.yAxis.mappedDim = int(spectrumItem.dimMapping[1])
       pointCounts = spectrum.pointCounts
       pntRegion = dimensionCount * [None]
       for dim in range(dimensionCount):
@@ -239,26 +253,10 @@ class SpectrumNdPane(SpectrumPane):
       spectrumItem.update()
       self.zoomX(ppmRegion[spectrumItem.xDim])
       self.zoomY(ppmRegion[spectrumItem.yDim])
-
-
-  # def toggleCrossHair(self):
-  #   if self.crossHairShown ==True:
-  #     self.hideCrossHair()
-  #   else:
-  #     self.showCrossHair()
-  #     self.crossHairShown = True
-  #
-  # def showCrossHair(self):
-  #     self.vLine.show()
-  #     self.hLine.show()
-  #     self.crossHairAction.setChecked(True)
-  #     self.crossHairShown = True
-  #
-  # def hideCrossHair(self):
-  #   self.vLine.hide()
-  #   self.hLine.hide()
-  #   self.crossHairAction.setChecked(False)
-  #   self.crossHairShown = False
+      if self.axesSwapped == False:
+        self.axesSwapped = True
+      else:
+        self.axesSwapped = False
 
   def clearSpectra(self):
     
@@ -268,7 +266,18 @@ class SpectrumNdPane(SpectrumPane):
   # implements superclass function
   def addSpectrum(self, spectrumVar, dimMapping=None):
     
+    resetAllAxisCodes(self.project._wrappedData)
     spectrum = self.getObject(spectrumVar)
+    # refExpDims = list(spectrum._wrappedData.experiment.refExperiment.getRefExpDims())
+    # print(refExpDims)
+    # for i in range(len(refExpDims)):
+    #   print(i, refMap[refExpDims[i].sortedRefExpDimRefs()[0]])
+    # #
+    # # for refExpDim in refExpDims:
+    # #   print((refExpDim.dim))
+    # #   axisCode = refMap[refExpDim.sortedRefExpDimRefs()[0]]
+    #   axisCodeMap[refExpDim.dim] = axisCode
+    # print(axisCodeMap)
     if spectrum.dimensionCount < 1:
       # TBD: logger message
       return
@@ -280,8 +289,18 @@ class SpectrumNdPane(SpectrumPane):
       spectrumItem = SpectrumNdItem(self, spectrum, self.spectrumItems[0].dimMapping, self.region, self.posColors, self.negColors)
     else:
       spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
-    print('addSpectrum...region',self.region)
+    spectrumItem.axisCodeMap = {}
+    # for dim in range(spectrum.dimensionCount):
+      # dataDimRef = spectrum.ccpnSpectrum.sortedDataDims()[dim].findFirstDataDimRef()
+      # spectrumItem.axisCodeMap[dim] = (refMap[dataDimRef.getExpDimRef().refExpDimRef])
     newItem = self.scene().addItem(spectrumItem)
+    # self.xAxis.setAxisCode()
+    self.xAxis.mappedDim = spectrumItem.dimMapping[0]
+    self.yAxis.mappedDim = spectrumItem.dimMapping[1]
+    self.xAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[0]])
+    self.yAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[1]])
+
+
     self.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)\n" % (spectrum))
     spectrumItem.name = spectrum.name
     spectrum.spectrumItem = spectrumItem
@@ -367,7 +386,7 @@ class SpectrumNdPane(SpectrumPane):
     self.traceScale*=1.41
     for trace in self.traces:
       self.removeItem(trace.spectrumItemTrace)
-      self.plotTrace(trace.spectrumItemTrace.dim,trace.spectrumItemTrace.position, traceMarker=trace)
+      self.plotTrace(trace.spectrumItemTrace.position, traceMarker=trace)
 
   def addPivot(self):
     if self.current.traceMarker.angle == 0:
@@ -382,7 +401,7 @@ class SpectrumNdPane(SpectrumPane):
     self.traceScale/=1.41
     for trace in self.traces:
       self.removeItem(trace.spectrumItemTrace)
-      self.plotTrace(trace.spectrumItemTrace.dim,trace.spectrumItemTrace.position, traceMarker=trace)
+      self.plotTrace(trace.spectrumItemTrace.position, traceMarker=trace)
 
   #
   # def updateTrace(self, xData, yData):
@@ -455,53 +474,55 @@ class SpectrumNdPane(SpectrumPane):
     traceMarker = pg.InfiniteLine(angle=0, movable=True, pos=self.mousePoint)
     self.current.traceMarker = traceMarker
     self.addItem(traceMarker)
-    dim = 1
+    traceMarker.axis = self.xAxis
+    traceMarker.positionAxis = self.yAxis
     self.traceMarkers.append(traceMarker)
-    trace = self.plotTrace(dim, position=self.mousePoint.toTuple(), traceMarker=traceMarker)
+    trace = self.plotTrace(position=self.mousePoint.toTuple(), traceMarker=traceMarker)
     self.traces.append(trace)
     traceMarker.sigPositionChanged.connect(self.markerMoved)
     proxy = pg.SignalProxy(traceMarker.sigPositionChanged, slot=(self.markerMoved))
-    if self.phaseButtonShown == False:
-      print('showingbutton')
-      self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
-      self.phasingAction.toggled.connect(self.togglePhasingBar)
-      self.phasingAction.setShortcut("P, C")
-      self.spectrumUtilToolbar.addAction(self.phasingAction)
-      self.phaseButtonShown = True
+    # if self.phaseButtonShown == False:
+    #   print('showingbutton')
+    #   self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
+    #   self.phasingAction.toggled.connect(self.togglePhasingBar)
+    #   self.phasingAction.setShortcut("P, C")
+    #   self.spectrumUtilToolbar.addAction(self.phasingAction)
+    #   self.phaseButtonShown = True
 
   def addVTraceMarker(self):
     traceMarker = pg.InfiniteLine(angle=90, movable=True, pos=self.mousePoint)
     self.current.traceMarker = traceMarker
     self.addItem(traceMarker)
-    dim = 0
+    traceMarker.axis = self.yAxis
+    traceMarker.positionAxis = self.xAxis
     self.traceMarkers.append(traceMarker)
-    trace = self.plotTrace(dim, position=self.mousePoint.toTuple(), traceMarker=traceMarker)
+    trace = self.plotTrace(position=self.mousePoint.toTuple(), traceMarker=traceMarker)
     self.traces.append(trace)
     traceMarker.sigPositionChanged.connect(self.markerMoved)
     proxy = pg.SignalProxy(traceMarker.sigPositionChanged, slot=(self.markerMoved))
-    if self.phaseButtonShown == False:
-      self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
-      self.phasingAction.toggled.connect(self.togglePhasingBar)
-      self.phasingAction.setShortcut("P, C")
-      self.spectrumUtilToolbar.addAction(self.phasingAction)
-      self.phaseButtonShown = True
+    # if self.phaseButtonShown == False:
+    #   self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
+    #   self.phasingAction.toggled.connect(self.togglePhasingBar)
+    #   self.phasingAction.setShortcut("P, C")
+    #   self.spectrumUtilToolbar.addAction(self.phasingAction)
+    #   self.phaseButtonShown = True
 
 
   def markerMoved(self, traceMarker):
     self.removeItem(traceMarker.spectrumItemTrace)
-    if traceMarker.angle== 0:
-      dim = 1
-      positions = [traceMarker.getXPos(),traceMarker.getYPos()]
-    elif traceMarker.angle== 90:
-      positions = [traceMarker.getXPos(),traceMarker.getYPos()]
-      dim = 0
-    if self.phasedData is None:
-      self.plotTrace(dim=dim, position=positions, traceMarker=traceMarker)
-    else:
-      self.phasing(0, traceMarker, position=positions)
+    # if traceMarker.angle== 0:
+    #   axis =
+    positions = [traceMarker.getXPos(),traceMarker.getYPos()]
+    # elif traceMarker.angle== 90:
+    #   positions = [traceMarker.getXPos(),traceMarker.getYPos()]
+    #   dim = 0
+    # if self.phasedData is None:
+    self.plotTrace(position=positions, traceMarker=traceMarker)
+    # else:
+    # self.phasing(0, traceMarker, position=positions)
 
 
-  def phasing(self, value, movingTrace=None, position=None):
+  def phasing(self, value, movingTrace=None, position=None, axis=None):
 
     phaseList0 = list(self.current.spectrum.phases0)
     phaseList1 = list(self.current.spectrum.phases1)
@@ -522,16 +543,16 @@ class SpectrumNdPane(SpectrumPane):
         self.current.spectrum.phases0 = phaseList0
         self.current.spectrum.phases1 = phaseList1
 
-        if dim == 0:
-          dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[1].findFirstDataDimRef()
-          nptsOrig = self.current.spectrum.totalPointCounts[1]
-          pivot = dataDimRef.valueToPoint(pivotPosition[1])
-          proportionality = pivot/nptsOrig
-        if dim == 1:
-          dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[0].findFirstDataDimRef()
-          nptsOrig = self.current.spectrum.totalPointCounts[0]
-          pivot = dataDimRef.valueToPoint(pivotPosition[0])
-          proportionality = pivot/nptsOrig
+        # if dim == 0:
+        #   dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[1].findFirstDataDimRef()
+        #   nptsOrig = self.current.spectrum.totalPointCounts[1]
+        #   pivot = dataDimRef.valueToPoint(pivotPosition[1])
+        #   proportionality = pivot/nptsOrig
+        # if dim == 1:
+        dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[axis.mappedDim].findFirstDataDimRef()
+        nptsOrig = self.current.spectrum.totalPointCounts[axis.mappedDim]
+        pivot = dataDimRef.valueToPoint(pivotPosition[axis.mappedDim])
+        proportionality = pivot/nptsOrig
         phaseCorr = math.radians(float(self.current.spectrum.phases1[dim]))
         phase0 = math.radians(self.current.spectrum.phases0[dim])+((proportionality*phaseCorr)*-1)
 
@@ -557,16 +578,11 @@ class SpectrumNdPane(SpectrumPane):
       phaseList1[dim] = self.firstPhaseSlider.value()
       self.current.spectrum.phases0 = phaseList0
       self.current.spectrum.phases1 = phaseList1
-      if dim == 0:
-        dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[1].findFirstDataDimRef()
-        nptsOrig = self.current.spectrum.totalPointCounts[1]
-        pivot = dataDimRef.valueToPoint(pivotPosition[1])
-        proportionality = pivot/nptsOrig
-      if dim == 1:
-        dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[0].findFirstDataDimRef()
-        nptsOrig = self.current.spectrum.totalPointCounts[0]
-        pivot = dataDimRef.valueToPoint(pivotPosition[0])
-        proportionality = pivot/nptsOrig
+
+      dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[axis.mappedDim].findFirstDataDimRef()
+      nptsOrig = self.current.spectrum.totalPointCounts[axis.mappedDim]
+      pivot = dataDimRef.valueToPoint(pivotPosition[axis.mappedDim])
+      proportionality = pivot/nptsOrig
       phaseCorr = math.radians(float(self.current.spectrum.phases1[dim]))
       phase0 = math.radians(self.current.spectrum.phases0[dim])+((proportionality*phaseCorr)*-1)
 
@@ -583,55 +599,62 @@ class SpectrumNdPane(SpectrumPane):
 
 
 
-  def plotTrace(self, dim, position=None, traceMarker=None, phasedData=None):
+  def plotTrace(self, position=None, traceMarker=None, phasedData=None):
 
     positions = []
     if position is None:
-      position = self.mousePoint.toTuple()
+      position = [self.mousePoint.toTuple()[0],self.mousePoint.toTuple()[1]]
+
     else:
-      position = position
-    for i in range(len(position)):
-      positions.append(math.floor(LibSpectrum.getDimPointFromValue(self.current.spectrum, i, position[i])))
+      position = list(position)
+      if self.axesSwapped == True:
+        position.reverse()
+    if self.current.spectrum.dimensionCount > 2:
+      zDims = set(range(self.current.spectrum.dimensionCount)) - {self.xAxis.mappedDim, self.yAxis.mappedDim}
+      zDim = zDims.pop()
+      position.append(int(self.region[zDim][0]))
 
+    # for i in range(len(position)):
+    #   positions.append(math.floor(LibSpectrum.getDimPointFromValue(self.current.spectrum, i, position[i])))
+    # print(positions)
+    dimensionCount = self.current.spectrum.dimensionCount
+    ppmRegion = dimensionCount * [None]
+    pointCounts = self.current.spectrum.pointCounts
+    for dim in range(dimensionCount):
+      # if dim in (self.current.spectrum.spectrumItem.xDim, self.current.spectrum.spectrumItem.yDim):
+      region = (position[self.current.spectrum.spectrumItem.dimMapping[dim]])
+      # else:
+      #   n = position[dim]
+      #   region = n
+      ppmRegion[dim] = region
+    pntRegion = []
+    for dim in range(dimensionCount):
+        pnt = LibSpectrum.getDimPointFromValue(self.current.spectrum, dim, ppmRegion[dim])
+        pntRegion.append(math.floor(pnt))
     spectrum = self.current.spectrum
-    if dim == 0:
-      data = LibSpectrum.getSliceData(spectrum.ccpnSpectrum,position=positions, sliceDim=1)
-      dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[1].findFirstDataDimRef()
-      firstPoint = dataDimRef.pointToValue(0)
-      pointCount = len(data)
-      lastPoint = dataDimRef.pointToValue(pointCount)
-      pointSpacing = (lastPoint-firstPoint)/pointCount
-      positions2 = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],dtype=numpy.float32)
-      if phasedData is not None:
-        data2 = (numpy.array(phasedData)/self.traceScale)*-1
-      else:
-        data2 = (data/self.traceScale)*-1
-      data3 = numpy.array([x+position[0] for x in data2])
+    dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[traceMarker.axis.mappedDim].findFirstDataDimRef()
+    data = LibSpectrum.getSliceData(spectrum.ccpnSpectrum,position=pntRegion, sliceDim=traceMarker.axis.mappedDim)
+    firstPoint = dataDimRef.pointToValue(0)
+    pointCount = len(data)
+    lastPoint = dataDimRef.pointToValue(pointCount)
+    pointSpacing = (lastPoint-firstPoint)/pointCount
+    positions2 = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],dtype=numpy.float32)
+    # positions2 = positions2[::-1]
+    if phasedData is not None:
+      data2 = (numpy.array(phasedData)/self.traceScale)*-1
+    else:
+      data2 = (data/self.traceScale)*-1
+    if traceMarker.angle == 0:
+      data3 = numpy.array([x+ppmRegion[traceMarker.positionAxis.mappedDim] for x in data2])
+      traceMarker.spectrumItemTrace = pg.PlotDataItem(positions2, data3)
+    else:
+      # positions2 = positions2[::-1]
+      data3 = numpy.array([x+ppmRegion[traceMarker.positionAxis.mappedDim] for x in data2])
       traceMarker.spectrumItemTrace = pg.PlotDataItem(data3,positions2)
-      traceMarker.spectrumItemTrace.dim = dim
-      traceMarker.data = data
-      traceMarker.spectrumItemTrace.position = position
-      self.addItem(traceMarker.spectrumItemTrace)
-
-    if dim == 1:
-      dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[0].findFirstDataDimRef()
-      data = LibSpectrum.getSliceData(spectrum.ccpnSpectrum,position=positions, sliceDim=0)
-      firstPoint = dataDimRef.pointToValue(0)
-      pointCount = len(data)
-      lastPoint = dataDimRef.pointToValue(pointCount)
-      pointSpacing = (lastPoint-firstPoint)/pointCount
-      positions2 = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],dtype=numpy.float32)
-      if phasedData is not None:
-        data2 = (numpy.array(phasedData)/self.traceScale)*-1
-      else:
-        data2 = (data/self.traceScale)*-1
-
-      data3 = numpy.array([x+position[1] for x in data2])
-      traceMarker.spectrumItemTrace = pg.PlotDataItem(positions2,data3)
-      traceMarker.spectrumItemTrace.dim = dim
-      traceMarker.data = data
-      traceMarker.spectrumItemTrace.position = position
-      self.addItem(traceMarker.spectrumItemTrace)
+    traceMarker.spectrumItemTrace.dim = traceMarker.axis.mappedDim
+    traceMarker.data = data
+    traceMarker.spectrumItemTrace.position = position
+    self.addItem(traceMarker.spectrumItemTrace)
 
 
     return traceMarker

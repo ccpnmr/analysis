@@ -33,6 +33,7 @@ import pyqtgraph as pg
 from pyqtgraph.dockarea import Dock
 
 from ccpncore.gui import ViewBox
+from ccpnmrcore.gui.Axis import Axis
 
 from ccpnmrcore.Base import Base
 
@@ -80,8 +81,9 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.viewBox = self.plotItem.vb
     self.viewBox.parent = self
     self.viewBox.current = current
-    self.xAxis = pg.AxisItem(orientation='top')
-    self.yAxis = pg.AxisItem(orientation='right')
+    self.xAxis = Axis(self, orientation='bottom')
+    self.yAxis = Axis(self, orientation='right')
+    # self.plotItem.setLabels(right=('Nh', 'ppm'), bottom=('Hn', 'ppm'))
     self.gridShown = None
     self.axes['left']['item'].hide()
     self.axes['right']['item'].show()

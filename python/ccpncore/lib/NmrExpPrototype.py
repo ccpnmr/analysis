@@ -24,6 +24,54 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+def resetAllAxisCodes(nmrProject):
+  """Reset all axisCodes (ExpDimRef.name) in project to be unique, match the isotope,
+  and match the standard Prototype where a prototrype is known"""
+
+  stdCodeMap = refExpDimRefCodeMap(nmrProject.root)
+
+  for experiment in nmrProject.sortedExperiments():
+
+    if experiment.refExperiment is None:
+      # No prototype - just use nucleus as axis code
+
+      foundCodes = {}
+      for expDim in experiment.expDims:
+        for expDimRef in expDim.expDimRefs:
+          isotopeCodes = expDimRef.isotopeCodes
+
+          # Get axis code
+          if expDimRef.measurementype.lower() == 'shift' and len(isotopeCodes) == 1:
+            # Normal shift axis, use nucleus to set
+            code = isotope2Nucleus(isotopeCodes[0])
+          else:
+            # Different type of axis.
+            # For simplicity set to axis_1, axis_2, ... for now
+            print ("WARNING, non-std axis - axisCode set to 'axis'")
+            code = 'axis'
+            foundCodes[code] = 0
+
+          # add index for duplicates
+          indx = foundCodes.get(code)
+          if indx is None:
+            foundCodes[code] = 0
+          else:
+            indx += 1
+            foundCodes[code] = indx
+            code = '%s_%s' % (code, str(indx))
+
+          # Set the attribute
+          expDimRef.name = code
+
+
+    else:
+      # We have a prototype - use standard axisCode map
+      for expDim in experiment.expDims:
+        for expDimRef in expDim.expDimRefs:
+          expDimRef.name = stdCodeMap[expDimRef.refExpDimRef]
+
+
+
 def refExpDimRefCodeMap(project):
   """get RefExpDimRef: axisCode map for all NmExpPrototypes in project"""
   result = {}
@@ -56,7 +104,7 @@ def _measurementCodeMap(nmrExpPrototype, forReversed=False):
     else:
       indx += 1
       foundCodes[code] = indx
-      code += str(indx)
+      code = '%s_%s' % (code, str(indx))
     result[measurement] = code
   #
   return result

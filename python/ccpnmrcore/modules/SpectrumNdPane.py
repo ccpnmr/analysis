@@ -268,16 +268,6 @@ class SpectrumNdPane(SpectrumPane):
     
     resetAllAxisCodes(self.project._wrappedData)
     spectrum = self.getObject(spectrumVar)
-    # refExpDims = list(spectrum._wrappedData.experiment.refExperiment.getRefExpDims())
-    # print(refExpDims)
-    # for i in range(len(refExpDims)):
-    #   print(i, refMap[refExpDims[i].sortedRefExpDimRefs()[0]])
-    # #
-    # # for refExpDim in refExpDims:
-    # #   print((refExpDim.dim))
-    # #   axisCode = refMap[refExpDim.sortedRefExpDimRefs()[0]]
-    #   axisCodeMap[refExpDim.dim] = axisCode
-    # print(axisCodeMap)
     if spectrum.dimensionCount < 1:
       # TBD: logger message
       return
@@ -290,11 +280,7 @@ class SpectrumNdPane(SpectrumPane):
     else:
       spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
     spectrumItem.axisCodeMap = {}
-    # for dim in range(spectrum.dimensionCount):
-      # dataDimRef = spectrum.ccpnSpectrum.sortedDataDims()[dim].findFirstDataDimRef()
-      # spectrumItem.axisCodeMap[dim] = (refMap[dataDimRef.getExpDimRef().refExpDimRef])
     newItem = self.scene().addItem(spectrumItem)
-    # self.xAxis.setAxisCode()
     self.xAxis.mappedDim = spectrumItem.dimMapping[0]
     self.yAxis.mappedDim = spectrumItem.dimMapping[1]
     self.xAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[0]])
@@ -368,6 +354,8 @@ class SpectrumNdPane(SpectrumPane):
       self.planeToolbar.addWidget(nextPlaneButton)
       self.planeToolbar.setContentsMargins(0,0,0,0)
       self.dock.addWidget(self.planeToolbar, 3, 0, 1, 11)
+    # self.rotateAboutX()
+    # self.rotateAboutX()
 
   # def changeZPosition(self, value):
   #   dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[2].findFirstDataDimRef()
@@ -413,7 +401,7 @@ class SpectrumNdPane(SpectrumPane):
   def nextZPlane(self):
 
     self.changeZPlane(-1) # -1 because ppm units are backwards
-    dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[2].findFirstDataDimRef()
+    dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[self.current.spectrum.spectrumItem.dimMapping[2]].findFirstDataDimRef()
     newPlaneNumber = dataDimRef.valueToPoint(float(self.planeLabel.text())) + 1
     newPoint = dataDimRef.pointToValue(newPlaneNumber)
     self.planeLabel.setText('%0.3f' % newPoint)
@@ -421,7 +409,7 @@ class SpectrumNdPane(SpectrumPane):
   def prevZPlane(self):
 
     self.changeZPlane(1)
-    dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[2].findFirstDataDimRef()
+    dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[self.current.spectrum.spectrumItem.dimMapping[2]].findFirstDataDimRef()
     newPlaneNumber = dataDimRef.valueToPoint(float(self.planeLabel.text())) - 1
     newPoint = dataDimRef.pointToValue(newPlaneNumber)
     self.planeLabel.setText('%0.3f' % newPoint)
@@ -481,13 +469,13 @@ class SpectrumNdPane(SpectrumPane):
     self.traces.append(trace)
     traceMarker.sigPositionChanged.connect(self.markerMoved)
     proxy = pg.SignalProxy(traceMarker.sigPositionChanged, slot=(self.markerMoved))
-    # if self.phaseButtonShown == False:
-    #   print('showingbutton')
-    #   self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
-    #   self.phasingAction.toggled.connect(self.togglePhasingBar)
-    #   self.phasingAction.setShortcut("P, C")
-    #   self.spectrumUtilToolbar.addAction(self.phasingAction)
-    #   self.phaseButtonShown = True
+    if self.phaseButtonShown == False:
+      print('showingbutton')
+      self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
+      self.phasingAction.toggled.connect(self.togglePhasingBar)
+      self.phasingAction.setShortcut("P, C")
+      self.spectrumUtilToolbar.addAction(self.phasingAction)
+      self.phaseButtonShown = True
 
   def addVTraceMarker(self):
     traceMarker = pg.InfiniteLine(angle=90, movable=True, pos=self.mousePoint)
@@ -500,12 +488,12 @@ class SpectrumNdPane(SpectrumPane):
     self.traces.append(trace)
     traceMarker.sigPositionChanged.connect(self.markerMoved)
     proxy = pg.SignalProxy(traceMarker.sigPositionChanged, slot=(self.markerMoved))
-    # if self.phaseButtonShown == False:
-    #   self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
-    #   self.phasingAction.toggled.connect(self.togglePhasingBar)
-    #   self.phasingAction.setShortcut("P, C")
-    #   self.spectrumUtilToolbar.addAction(self.phasingAction)
-    #   self.phaseButtonShown = True
+    if self.phaseButtonShown == False:
+      self.phasingAction = QtGui.QAction("phasing", self, checkable=True)
+      self.phasingAction.toggled.connect(self.togglePhasingBar)
+      self.phasingAction.setShortcut("P, C")
+      self.spectrumUtilToolbar.addAction(self.phasingAction)
+      self.phaseButtonShown = True
 
 
   def markerMoved(self, traceMarker):
@@ -519,7 +507,7 @@ class SpectrumNdPane(SpectrumPane):
     # if self.phasedData is None:
     self.plotTrace(position=positions, traceMarker=traceMarker)
     # else:
-    # self.phasing(0, traceMarker, position=positions)
+    self.phasing(traceMarker, position=positions)
 
 
   def phasing(self, value, movingTrace=None, position=None, axis=None):
@@ -535,7 +523,7 @@ class SpectrumNdPane(SpectrumPane):
         if self.pivot is not None:
           pivotPosition = self.pivot.pos().toTuple()
         else:
-          pivotPosition = (0, 0)
+          pivotPosition = tuple([0] * self.current.spectrum.dimensionCount)
         transformedData = signal.hilbert(trace.data)
         dim = trace.spectrumItemTrace.dim
         phaseList0[dim] = self.zeroPhaseSlider.value()
@@ -549,9 +537,9 @@ class SpectrumNdPane(SpectrumPane):
         #   pivot = dataDimRef.valueToPoint(pivotPosition[1])
         #   proportionality = pivot/nptsOrig
         # if dim == 1:
-        dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[axis.mappedDim].findFirstDataDimRef()
-        nptsOrig = self.current.spectrum.totalPointCounts[axis.mappedDim]
-        pivot = dataDimRef.valueToPoint(pivotPosition[axis.mappedDim])
+        dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[trace.positionAxis.mappedDim].findFirstDataDimRef()
+        nptsOrig = self.current.spectrum.totalPointCounts[trace.positionAxis.mappedDim]
+        pivot = dataDimRef.valueToPoint(pivotPosition[trace.positionAxis.mappedDim])
         proportionality = pivot/nptsOrig
         phaseCorr = math.radians(float(self.current.spectrum.phases1[dim]))
         phase0 = math.radians(self.current.spectrum.phases0[dim])+((proportionality*phaseCorr)*-1)
@@ -562,16 +550,16 @@ class SpectrumNdPane(SpectrumPane):
         for ii in range(len(phaseAngles)):
           self.phasedData.append(((transformedData[ii].real * math.cos(phaseAngles[ii])) + (transformedData[ii].imag * math.sin(phaseAngles[ii]))))
         self.current.spectrum.phase0 = math.degrees(phase0)
-        # self.zeroPhaseSlider.setValue(self.current.spectrum.phase0)
+        self.zeroPhaseSlider.setValue(self.current.spectrum.phase0)
         self.removeItem(trace.spectrumItemTrace)
-        self.plotTrace(trace.spectrumItemTrace.dim,trace.spectrumItemTrace.position, traceMarker=trace, phasedData=self.phasedData)
+        self.plotTrace(trace.spectrumItemTrace.position, traceMarker=trace, phasedData=self.phasedData)
     if movingTrace is not None:
       self.phasedData = []
       proportionality = 0
       if self.pivot is not None:
         pivotPosition = self.pivot.pos().toTuple()
       else:
-        pivotPosition = (0, 0)
+        pivotPosition = (0, 0, 0)
       transformedData = signal.hilbert(movingTrace.data)
       dim = movingTrace.spectrumItemTrace.dim
       phaseList0[dim] = self.zeroPhaseSlider.value()
@@ -591,7 +579,7 @@ class SpectrumNdPane(SpectrumPane):
       for ii in range(len(phaseAngles)):
         self.phasedData.append(((transformedData[ii].real * math.cos(phaseAngles[ii])) + (transformedData[ii].imag * math.sin(phaseAngles[ii]))))
       self.current.spectrum.phase0 = math.degrees(phase0)
-      # self.zeroPhaseSlider.setValue(self.current.spectrum.phase0)
+      self.zeroPhaseSlider.setValue(self.current.spectrum.phase0)
       self.removeItem(movingTrace.spectrumItemTrace)
       # print(movingTrace.data)
       movingTrace.spectrumItemTrace.position = position

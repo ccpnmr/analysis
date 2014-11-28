@@ -61,6 +61,9 @@ class SpectrumNdItem(SpectrumItem):
     self.previousRegion = spectrum.dimensionCount * [None]
 
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
+    if dimMapping is not None:
+      self.xDim = dimMapping[0]
+      self.yDim = dimMapping[1]
 
     if not region:
       # chicken and egg problem, can't know xDim until after dimMapping set up
@@ -75,7 +78,6 @@ class SpectrumNdItem(SpectrumItem):
       # TBD: below assumes axes inverted
       viewBox.setXRange(region[xDim][1], region[xDim][0])
       viewBox.setYRange(region[yDim][1], region[yDim][0])
-
 
     if self.posColor is None:
       self.posColor = 'ff0000' # red

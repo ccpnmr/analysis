@@ -41,7 +41,7 @@ def resetAllAxisCodes(nmrProject):
           isotopeCodes = expDimRef.isotopeCodes
 
           # Get axis code
-          if expDimRef.measurementype.lower() == 'shift' and len(isotopeCodes) == 1:
+          if expDimRef.measurementType.lower() == 'shift' and len(isotopeCodes) == 1:
             # Normal shift axis, use nucleus to set
             code = isotope2Nucleus(isotopeCodes[0])
           else:

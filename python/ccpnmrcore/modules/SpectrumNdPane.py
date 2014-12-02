@@ -542,15 +542,15 @@ class SpectrumNdPane(SpectrumPane):
         pivot = dataDimRef.valueToPoint(pivotPosition[trace.positionAxis.mappedDim])
         proportionality = pivot/nptsOrig
         phaseCorr = math.radians(float(self.current.spectrum.phases1[dim]))
-        phase0 = math.radians(self.current.spectrum.phases0[dim])+((proportionality*phaseCorr)*-1)
+        phase0 = math.radians(self.current.spectrum.phases0[dim])###+((proportionality*phaseCorr)*-1)
 
 
-        phaseAngles = [phase0 + ((ii/len(transformedData))*phaseCorr) for ii in range(len(transformedData))]
+        phaseAngles = [phase0 + (((ii-pivot+1)/len(transformedData))*phaseCorr) for ii in range(len(transformedData))]
 
         for ii in range(len(phaseAngles)):
           self.phasedData.append(((transformedData[ii].real * math.cos(phaseAngles[ii])) + (transformedData[ii].imag * math.sin(phaseAngles[ii]))))
-        self.current.spectrum.phase0 = math.degrees(phase0)
-        self.zeroPhaseSlider.setValue(self.current.spectrum.phase0)
+        ###self.current.spectrum.phase0 = math.degrees(phase0)
+        ###self.zeroPhaseSlider.setValue(self.current.spectrum.phase0)
         self.removeItem(trace.spectrumItemTrace)
         self.plotTrace(trace.spectrumItemTrace.position, traceMarker=trace, phasedData=self.phasedData)
     if movingTrace is not None:
@@ -572,14 +572,14 @@ class SpectrumNdPane(SpectrumPane):
       pivot = dataDimRef.valueToPoint(pivotPosition[axis.mappedDim])
       proportionality = pivot/nptsOrig
       phaseCorr = math.radians(float(self.current.spectrum.phases1[dim]))
-      phase0 = math.radians(self.current.spectrum.phases0[dim])+((proportionality*phaseCorr)*-1)
+      phase0 = math.radians(self.current.spectrum.phases0[dim])###+((proportionality*phaseCorr)*-1)
 
-      phaseAngles = [phase0 + ((ii/len(transformedData))*phaseCorr) for ii in range(len(transformedData))]
+      phaseAngles = [phase0 + (((ii-pivot+1)/len(transformedData))*phaseCorr) for ii in range(len(transformedData))]
 
       for ii in range(len(phaseAngles)):
         self.phasedData.append(((transformedData[ii].real * math.cos(phaseAngles[ii])) + (transformedData[ii].imag * math.sin(phaseAngles[ii]))))
-      self.current.spectrum.phase0 = math.degrees(phase0)
-      self.zeroPhaseSlider.setValue(self.current.spectrum.phase0)
+      ###self.current.spectrum.phase0 = math.degrees(phase0)
+      ###self.zeroPhaseSlider.setValue(self.current.spectrum.phase0)
       self.removeItem(movingTrace.spectrumItemTrace)
       # print(movingTrace.data)
       movingTrace.spectrumItemTrace.position = position

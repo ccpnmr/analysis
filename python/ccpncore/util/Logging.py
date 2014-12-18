@@ -66,8 +66,10 @@ def createLogger(loggerName, project, stream=None, level=logging.WARNING, mode='
 
   if logger:
     # there seems no way to close the logger itself
-    for handler in logger.handlers:
-      handler.close()
+    # and just closing the handler does not work
+    # (and certainly do not want to close stdout or stderr)
+    for handler in logger.handlers[:]:
+      logger.removeHandler(handler)
 
   repository = project.findFirstRepository(name='userData')
   if not repository:

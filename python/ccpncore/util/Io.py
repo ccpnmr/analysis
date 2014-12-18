@@ -403,6 +403,13 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
 
   return project
 
+def cleanupProject(project):
+  """Clean up project preparatory to closing (close log handlers etc.)"""
+  if hasattr(project, '_logger'):
+    logger = project._logger
+    for handler in logger.handlers[:]:
+      logger.removeHandler(handler)
+
 
 
 def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,

@@ -763,10 +763,8 @@ class XmlModelGen(TextWriter_py_2_1.TextWriter_py_2_1,
       # root package
       for pp in package.containedPackages:
         fileName = self.getObjFileName(pp, absoluteName=False, addSuffix=True)
-        self.writeXmlInclude(
-         os.path.join((self.getDirDepth()-3)*'../', fileName),
-         objName=pp.qualifiedName(), isMandatory=False
-        )
+        self.writeXmlInclude(os.path.join('../', fileName), objName=pp.qualifiedName(),
+                             isMandatory=False)
       
     # end file
     self.writeComment("End packages contained in %s " % package.name)

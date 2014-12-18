@@ -131,6 +131,6 @@ class Version:
 # Used by generation scripts to mark generated code.
 # Main way of tracking IO code and IO mappings for compatibility.
 # Incremented by hand when model (or I/O generators) changes
-currentModelVersion = Version('3.0.a1')
+currentModelVersion = Version('3.0.2')
 
 Version.versionAsList = versionAsList

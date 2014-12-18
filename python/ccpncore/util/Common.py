@@ -136,7 +136,8 @@ def recursiveImport(dirname, modname=None, ignoreModules = None, force=False):
     for ff in files:
       try:
         __import__(modname, {}, {}, [ff])
-      except ImportError:
+      except:
+        # We want log output, not an Eception in all cases here
         from ccpncore.util.Logging import getLogger
         getLogger().warning("Import failed for %s.%s" % (modname,ff))
 

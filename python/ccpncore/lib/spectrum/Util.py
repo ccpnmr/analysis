@@ -21,8 +21,10 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util.Path import checkFilePath
 import os
+from collections.abc import Sequence
+
+from ccpncore.util.Path import checkFilePath
 
 ISOTOPE_DICT = {'H':'1H',
                 'C':'13C',
@@ -161,3 +163,32 @@ def getSpectrumFileFormat(filePath):
     dirName, fileName = os.path.split(filePath)
     if fileName == 'procpar':
       return VARIAN
+
+  def mapAxisCodes(newCodes:Sequence, referenceCodes:Sequence) -> list:
+    """reorder newCodes so that they best match referenceCodes
+    Returns list of length referenceCodes with newCodes put in the matching slot.
+    IF newCodes are shorter than referenceCodes, the unused slots are filled with '-'
+    All newCodes must map, and if a match cannot be found returns None """
+
+    default = '-'
+    result = [default] * len(referenceCodes)
+
+    # NBNB TBD - this is functional but must be MUCH expanded
+
+    # map identical residues
+    remainder = []
+    for code in newCodes:
+      if code in referenceCodes:
+        result[referenceCodes.index(code)] = code
+      else:
+        remainder.append(code)
+
+    # match on nuclei (based on first letter only, random choice for duplicates)
+    for code in remainder:
+      for ii, ref in referenceCodes:
+        if ref[0] == code[0] and result[ii] == default:
+          result[ii] = code
+        else:
+          return []
+    #
+        return result

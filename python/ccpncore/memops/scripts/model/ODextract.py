@@ -1759,7 +1759,9 @@ def parametersFromOd(metaOp):
         if hicard == 1:
           params['locard'] = 0
           try:
-            params['defaultValue'] = (ff(defaultValue),)
+            #params['defaultValue'] = (ff(defaultValue),)
+            # 27/11/2014 Rasmus Fogh. This should be the value, no the tuple
+            params['defaultValue'] = ff(defaultValue)
           except:
             print ("%s error in converting default value %s"
                    % (odPar.qualifiedName, defaultValue))

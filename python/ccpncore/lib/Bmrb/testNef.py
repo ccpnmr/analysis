@@ -2,6 +2,7 @@ import bmrb
 import json
 
 if __name__ == '__main__':
-  entry = bmrb.entry.fromFile('NEF_draft_2014_v6.star')
+  #entry = bmrb.entry.fromFile('/home/rhf22/rhf22/Git/NEF/specification/Commented_Example.nef')
+  #entry = bmrb.entry.fromFile('/home/rhf22/rhf22/Git/NEF/data/original/CCPN_CASD155.nef')
+  entry = bmrb.entry.fromFile('/home/rhf22/rhf22/Git/NEF/data/original/CCPN_H1GI.nef')
   entry.printTree()
-  print json.dumps(entry, cls=bmrb.JSON_Encoder, indent=4, sort_keys=True)

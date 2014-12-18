@@ -1,10 +1,13 @@
 #!/usr/bin/python -u
 #
+from __future__ import absolute_import
+
 import sys
 import os
 sys.path.append( os.path.split( __file__ )[0] )
-from lexer import STARLexer
-from handlers import ErrorHandler, ContentHandler
+
+from .lexer import STARLexer
+from .handlers import ErrorHandler, ContentHandler
 
 #
 # returns tag/value (loop or free) pair in one callback
@@ -21,15 +24,11 @@ class parser :
         self._eh = eh
 
     def parse( self ) :
-        if self._lex == None :
-            print "Lexer not initialized"
-            sys.exit( 1 )
-        if self._ch == None :
-            print "Content handler not initialized"
-            sys.exit( 1 )
-        if self._eh == None :
-            print "Error handler not initialized"
-            sys.exit( 1 )
+
+        assert isinstance( self._lex, STARLexer )
+        assert isinstance( self._ch, ContentHandler )
+        assert isinstance( self._eh, ErrorHandler )
+
         while True :
             tok = self._lex.yylex()
             if tok == STARLexer.ERROR :
@@ -58,19 +57,15 @@ class parser :
 #
 #
     def parseDataBlock( self ) :
-        if self._lex == None :
-            print "Lexer not initialized"
-            sys.exit( 1 )
-        if self._ch == None :
-            print "Content handler not initialized"
-            sys.exit( 1 )
-        if self._eh == None :
-            print "Error handler not initialized"
-            sys.exit( 1 )
+
+        assert isinstance( self._lex, STARLexer )
+        assert isinstance( self._ch, ContentHandler )
+        assert isinstance( self._eh, ErrorHandler )
+
         while True :
             tok = self._lex.yylex()
             if tok == STARLexer.ERROR :
-                print "+ error", self._lex.getText()
+                sys.stderr.write("+ error %s\n" % self._lex.getText())
                 self._eh.fatalError( self._lex.getLine(), self._lex.getText() )
                 return True
             elif tok == STARLexer.WARNING :
@@ -95,15 +90,11 @@ class parser :
 #
 #
     def parseSaveFrame( self ) :
-        if self._lex == None :
-            print "Lexer not initialized"
-            sys.exit( 1 )
-        if self._ch == None :
-            print "Content handler not initialized"
-            sys.exit( 1 )
-        if self._eh == None :
-            print "Error handler not initialized"
-            sys.exit( 1 )
+
+        assert isinstance( self._lex, STARLexer )
+        assert isinstance( self._ch, ContentHandler )
+        assert isinstance( self._eh, ErrorHandler )
+
         tag = None
         tagline = -1
         val = None
@@ -185,15 +176,11 @@ class parser :
 #
 #
     def parseLoop( self ) :
-        if self._lex == None :
-            print "Lexer not initialized"
-            sys.exit( 1 )
-        if self._ch == None :
-            print "Content handler not initialized"
-            sys.exit( 1 )
-        if self._eh == None :
-            print "Error handler not initialized"
-            sys.exit( 1 )
+
+        assert isinstance( self._lex, STARLexer )
+        assert isinstance( self._ch, ContentHandler )
+        assert isinstance( self._eh, ErrorHandler )
+
         tags = []
         taglines = []
         numvals = 0
@@ -307,15 +294,11 @@ class parser2 :
         self._eh = eh
 
     def parse( self ) :
-        if self._lex == None :
-            print "Lexer not initialized"
-            sys.exit( 1 )
-        if self._ch == None :
-            print "Content handler not initialized"
-            sys.exit( 1 )
-        if self._eh == None :
-            print "Error handler not initialized"
-            sys.exit( 1 )
+
+        assert isinstance( self._lex, STARLexer )
+        assert isinstance( self._ch, ContentHandler2 )
+        assert isinstance( self._eh, ErrorHandler )
+
         while True :
             tok = self._lex.yylex()
             if tok == STARLexer.ERROR :
@@ -344,19 +327,15 @@ class parser2 :
 #
 #
     def parseDataBlock( self ) :
-        if self._lex == None :
-            print "Lexer not initialized"
-            sys.exit( 1 )
-        if self._ch == None :
-            print "Content handler not initialized"
-            sys.exit( 1 )
-        if self._eh == None :
-            print "Error handler not initialized"
-            sys.exit( 1 )
+
+        assert isinstance( self._lex, STARLexer )
+        assert isinstance( self._ch, ContentHandler2 )
+        assert isinstance( self._eh, ErrorHandler )
+
         while True :
             tok = self._lex.yylex()
             if tok == STARLexer.ERROR :
-                print "+ error", self._lex.getText()
+                sys.stderr.write("+ error %s\n" % self._lex.getText())
                 self._eh.fatalError( self._lex.getLine(), self._lex.getText() )
                 return True
             elif tok == STARLexer.WARNING :
@@ -381,15 +360,11 @@ class parser2 :
 #
 #
     def parseSaveFrame( self ) :
-        if self._lex == None :
-            print "Lexer not initialized"
-            sys.exit( 1 )
-        if self._ch == None :
-            print "Content handler not initialized"
-            sys.exit( 1 )
-        if self._eh == None :
-            print "Error handler not initialized"
-            sys.exit( 1 )
+
+        assert isinstance( self._lex, STARLexer )
+        assert isinstance( self._ch, ContentHandler2 )
+        assert isinstance( self._eh, ErrorHandler )
+
         tag = None
         tagline = -1
         val = None
@@ -445,7 +420,7 @@ class parser2 :
                             if self._eh.warning( self._lex.getLine(), "value already in quotes: %s" % (val)  ) :
                                 return True
                     except :
-                        print "Exception, val=|%s|" % (str( val ),)
+                        sys.stderr.write("Exception, val=|%s|\n" % (val))
                         raise
                 if tok == STARLexer.DVNSEMICOLON :
                     if val.startswith( "\n" ) : val = val.lstrip( "\n" )
@@ -472,15 +447,11 @@ class parser2 :
 #
 #
     def parseLoop( self ) :
-        if self._lex == None :
-            print "Lexer not initialized"
-            sys.exit( 1 )
-        if self._ch == None :
-            print "Content handler not initialized"
-            sys.exit( 1 )
-        if self._eh == None :
-            print "Error handler not initialized"
-            sys.exit( 1 )
+
+        assert isinstance( self._lex, STARLexer )
+        assert isinstance( self._ch, ContentHandler2 )
+        assert isinstance( self._eh, ErrorHandler )
+
         numtags = 0
         numvals = 0
         loopcol = 0

@@ -54,7 +54,7 @@ class STARLexer( object ) :
     _re_csquote = re.compile( r"'(?=(\s|$))" )
     _re_osemi = re.compile( "^;" )
 
-    _re_none = re.compile( r"^\s*$" )    
+    _re_none = re.compile( r"^\s*$" )
 
     def __init__( self, inf ) :
         self._in = inf
@@ -73,28 +73,28 @@ class STARLexer( object ) :
         return self._text
 
     def pushBack( self, text ) :
-        if self._verbose : print "** push back |" + text + "|, buffer=|" + self._buffer + "|"
+        if self._verbose : print("** push back |%s|, buffer=|%s|" % (text. self._buffer) )
         self._buffer = text + " " + self._buffer
-        if self._verbose : print "** buffer = |" + self._buffer + "|"
+        if self._verbose : print("** buffer = |%s|" % self._buffer)
 
     def yylex( self ) :
-        if self._in == None :
-            print "Input file not open"
+        if self._in is None :
+            sys.stderr.write("Input file not open.\n")
             sys.exit( 1 )
         self._text = ""
 
-        if self._verbose : print "1) buffer: |" + self._buffer + "| len:", len( self._buffer )
+        if self._verbose : print("1) buffer: |%s| len: %d" % (self._buffer, len( self._buffer )))
         if self._buffer.isspace() : self._buffer = ""
 
         while len( self._buffer ) < 1 :
             line = self._in.readline()
-            if self._verbose : print "line:", line
+            if self._verbose : print("line:", line)
             if len( line ) == 0 : return self.FILEEND
             self._lineno = self._lineno + 1
             self._buffer = line.strip()
             if self._buffer.isspace() : self._buffer = ""
 
-        if self._verbose : print "2) buffer: |" + self._buffer + "| len:", len( self._buffer )    
+        if self._verbose : print("2) buffer: |%s| len: %d" % (self._buffer, len( self._buffer )))
 
         while len( self._buffer ) > 0 :
             if self._yystate == self.YYINITIAL :
@@ -122,7 +122,7 @@ class STARLexer( object ) :
 # saveframe
                 m = self._re_savestart.search( self._buffer )
                 if m :
-                    if self._verbose : print "-- savestart", m.group( 1 )
+                    if self._verbose : print("-- savestart %s" % m.group( 1 ))
                     self._text = m.group( 1 )
                     self._buffer = self._buffer[len( m.group( 0 ) ):]
                     self._buffer = self._buffer.strip()
@@ -168,7 +168,7 @@ class STARLexer( object ) :
 # squote
                 m = self._re_osquote.search( self._buffer )
                 if m :
-                    if self._verbose : print "found opening single quote in |%s|, %d" % (self._buffer,self._lineno)
+                    if self._verbose : print("found opening single quote in |%s|, %d" % (self._buffer, self._lineno))
                     self._buffer = self._buffer[1:]
                     n = self._re_csquote.search( self._buffer )
                     if not n :
@@ -176,7 +176,7 @@ class STARLexer( object ) :
                         return self.ERROR
                     self._text = self._buffer[:n.start()]
                     self._buffer = self._buffer[n.end():]
-                    if self._verbose : print "text is |%s|, buffer is |%s|, %d" % (self._text,self._buffer,self._lineno)
+                    if self._verbose : print("text is |%s|, buffer is |%s|, %d" % (self._text, self._buffer, self._lineno))
                     self._buffer = self._buffer.strip()
                     if len( self._text ) < 1 :
                         self._text = "Value |%s| is an empty string" % (self._text,)
@@ -201,7 +201,7 @@ class STARLexer( object ) :
                     self._yystate = self.YYSEMI
                     self._buffer = self._buffer[1:]
                     if self._verbose :
-                        print "entering YYSEMI, buffer:", self._buffer, "len =", len( self._buffer )
+                        print("entering YYSEMI, buffer: %s len = %d" % (self._buffer, len(self._buffer)))
                     if not self._buffer.endswith( "\n" ) :
                         self._buffer = self._buffer + "\n" # re-add if it was stripped
                     continue
@@ -209,24 +209,24 @@ class STARLexer( object ) :
                 m = self._re_none.search( self._buffer )
                 if m : continue
 # fail
-                self._text = self._buffer 
+                self._text = self._buffer
                 self._buffer = ""
                 return self.ERROR
 
             elif self._yystate == self.YYSEMI :
                 self._text = self._text + self._buffer
-                if self._verbose : print "in YYSEMI, buffer:", self._buffer
+                if self._verbose : print("in YYSEMI, buffer: %s" % self._buffer)
 # grrr. a post-condition loop would be nice. and a check for eof, too.
                 while True :
                     line = self._in.readline()
-                    if self._verbose : print "in YYSEMI, line:", line
+                    if self._verbose : print("in YYSEMI, line: %s" % line)
                     if len( line ) == 0 : return self.FILEEND
                     self._lineno = self._lineno + 1
                     self._buffer = line              # .strip() keep original formatting
                     m = self._re_osemi.search( self._buffer )
                     if m :
                         self._buffer = self._buffer[2:]
-                        if self._verbose : print "in YYSEMI, buffer:", self._buffer, "return to YYINITIAL"
+                        if self._verbose : print("in YYSEMI, buffer: %s return to YYINITIAL" % self._buffer)
                         self._yystate = self.YYINITIAL
                         return self.DVNSEMICOLON
                     else :
@@ -241,7 +241,7 @@ def main() :
     rc = None
     while rc != l.FILEEND :
         rc = l.yylex()
-        print "RC =", rc, ":", l.getText()
+        print("RC = %s : %s" % (rc, l.getText()))
 #
 #
 #

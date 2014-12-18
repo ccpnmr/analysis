@@ -9,14 +9,16 @@
 # Content handler ones simply raise "Abstract method called"
 # exception (this is good enough).
 #
+import sys
+
 class ErrorHandler :
     def fatalError( self, line, msg ) :
-        print "critical parse error in line", line, ":", msg
+        sys.stderr.write("critical parse error in line %s: %s\n" % (line, msg))
     def error( self, line, msg ) :
-        print "parse error in line", line, ":", msg
+        sys.stderr.write("parse error in line %s : %s\n" % (line, msg))
         return True
     def warning( self, line, msg ) :
-        print "parser warning in line", line, ":", msg
+        sys.stderr.write("parser warning in line %s : %s\n" % (line, msg))
         return True
 
 #

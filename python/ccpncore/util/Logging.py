@@ -96,7 +96,7 @@ def createLogger(loggerName, project, stream=None, level=None, mode='a', removeO
   logger.logPath = logPath  # just for convenience
   logger.shutdown = logging.shutdown  # just for convenience but tricky
 
-  handler = logging.FileHandler(logPath)
+  handler = logging.FileHandler(logPath, mode=mode)
   _setupHandler(handler, level)
 
   if stream:

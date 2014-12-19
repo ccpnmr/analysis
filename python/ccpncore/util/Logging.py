@@ -29,6 +29,8 @@ import logging
 import os
 import time
 
+defaultLogLevel = logging.WARNING
+
 # this code assumes we only have one project open at a time
 # when a new logger is created the handlers for the old one are closed
 
@@ -54,7 +56,7 @@ def getLogger():
 
   return logger
 
-def createLogger(loggerName, project, stream=None, level=logging.WARNING, mode='a', removeOldLogsDays=MAX_LOG_FILE_DAYS):
+def createLogger(loggerName, project, stream=None, level=None, mode='a', removeOldLogsDays=MAX_LOG_FILE_DAYS):
   """Return a (unique) logger for this project and with given programName, if any.
      Puts log output into a log file but also optionally can have output go to
      another, specified, stream (e.g. a console)
@@ -63,13 +65,6 @@ def createLogger(loggerName, project, stream=None, level=logging.WARNING, mode='
   global logger
 
   assert mode in ('a', 'w'), 'for now mode must be "a" or "w"'
-
-  if logger:
-    # there seems no way to close the logger itself
-    # and just closing the handler does not work
-    # (and certainly do not want to close stdout or stderr)
-    for handler in logger.handlers[:]:
-      logger.removeHandler(handler)
 
   repository = project.findFirstRepository(name='userData')
   if not repository:
@@ -89,22 +84,34 @@ def createLogger(loggerName, project, stream=None, level=logging.WARNING, mode='
 
   _removeOldLogFiles(logPath, removeOldLogsDays)
 
-  logger = logging.getLogger(loggerName)
+  if logger:
+    # there seems no way to close the logger itself
+    # and just closing the handler does not work
+    # (and certainly do not want to close stdout or stderr)
+    for handler in logger.handlers[:]:
+      logger.removeHandler(handler)
+  else:
+    logger = logging.getLogger(loggerName)
+
   logger.logPath = logPath  # just for convenience
   logger.shutdown = logging.shutdown  # just for convenience but tricky
 
-  fp = open(logPath, 'a')
-  _addStreamHandler(logger, fp, level)
+  handler = logging.FileHandler(logPath)
+  _setupHandler(handler, level)
 
   if stream:
-    _addStreamHandler(logger, stream, level)
+    handler = logging.StreamHandler(stream)
+    _setupHandler(handler, level)
 
   return logger
 
-def _addStreamHandler(logger, stream, level=logging.WARNING):
+def _setupHandler(handler, level=None):
   """Add a stream handler for this logger."""
 
-  handler = logging.StreamHandler(stream)
+  if level is None:
+    level = defaultLogLevel
+
+  # handler = logging.StreamHandler(stream)
   handler.setLevel(level)
 
   format = '%(levelname)s:%(module)s:%(funcName)s:%(asctime)s:%(message)s'
@@ -112,6 +119,18 @@ def _addStreamHandler(logger, stream, level=logging.WARNING):
   handler.setFormatter(formatter)
 
   logger.addHandler(handler)
+
+# def _addStreamHandler(logger, stream, level=logging.WARNING):
+#   """Add a stream handler for this logger."""
+#
+#   handler = logging.StreamHandler(stream)
+#   handler.setLevel(level)
+#
+#   format = '%(levelname)s:%(module)s:%(funcName)s:%(asctime)s:%(message)s'
+#   formatter = logging.Formatter(format)
+#   handler.setFormatter(formatter)
+#
+#   logger.addHandler(handler)
 
 def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):
   """Remove old log files."""

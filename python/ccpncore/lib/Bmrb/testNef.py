@@ -1,4 +1,4 @@
-import bmrb
+from ccpncore.lib.Bmrb import bmrb
 import json
 
 if __name__ == '__main__':

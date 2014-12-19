@@ -45,9 +45,9 @@ else:
     BytesIO = StringIO
 
 # Local libraries
-from sans import STARLexer
-from sans import SansParser
-from sans import ErrorHandler, ContentHandler
+from .sans import STARLexer
+from .sans import SansParser
+from .sans import ErrorHandler, ContentHandler
 
 #############################################
 #            Global Variables               #

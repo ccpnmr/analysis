@@ -21,6 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+from ccpncore.util import Logging
 from ccpncore.util.Testing import Testing
 
 class LoggingTest(Testing):
@@ -48,10 +49,10 @@ class LoggingTest(Testing):
 
     assert len(logLines) == 1
 
-    logLine = logLines[0]
+    logLine = logLines[0].rstrip()
     n = logLine.rindex(':')
     msg = logLine[n+1:]
 
-    assert msg == message1
+    assert msg == message1, '"%s" versus "%s"' % (msg, message1)
 
 

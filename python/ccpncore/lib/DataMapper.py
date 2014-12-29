@@ -31,6 +31,8 @@ __version__ = "$Revision: 7686 $"
 # NEW TODO Dat conversion functionality (commented out0 TO REUSE OR REMOVE
 
 import os
+from collections.abc import Sequence
+
 #import copy
 #from collections import namedtuple, defaultdict
 
@@ -636,11 +638,32 @@ class DataMapper:
     return None
   
   @staticmethod
+  def pickChemCompId(resNameMap:dict, resType:str, atomNames:Sequence=None,
+                     prefMolType:str=None) -> tuple:
+    """Get the best matching ccId ((molType,ccpCode) tuple) from resNameMap and resType
+    using (optional) atomNames and prefMolType to resolve ambiguity if necessary
+    .. describe:: Input
+
+               dict {resType:((molType,ccpCode),)},
+               String resType
+               List of Words (normalised atom names)
+               Word (preferred molType)
+
+    .. describe:: Output
+
+    (molType,ccpCode) tuple"""
+
+    # Wrapper functoin NBNB TBD refactor and merge with called function?
+
+    ccIds = resNameMap.get(resType or resType.upper())
+    return DataMapper.selectChemCompId(ccIds, atomNames=atomNames, prefMolType=prefMolType)
+
+  @staticmethod
   def selectChemCompId(ccIds, atomNames=None, prefMolType=None):
     """Get the best matching ccId ((molType,ccpCode) tuple) from the presented list
     using (optional) atomNames and prefMolType to resolve ambiguity if necessary
     .. describe:: Input
- 
+
                List of tuples (molType,ccpCode),
                List of Words (normalised atom names)
                Word (referred molType)
@@ -649,22 +672,22 @@ class DataMapper:
 
     (molType,ccpCode) tuple
     """
-  
+
     ccId = None
-    
+
     if ccIds:
       if len(ccIds) == 1:
         # Only one ChemComp matches. Use it
         ccId = ccIds[0]
       else:
         # more than one match, choose by type
-        
+
         if prefMolType:
           #Use preferred molType,if given
           ll = [tt for tt in ccIds if prefMolType == tt[0]]
           if len(ll) == 1:
             ccId = ll[0]
-            
+
         if ccId is None and atomNames:
           # match on basis of atom names
           # NB the expression for ll ensures that molType 'DNA/RNA'
@@ -673,7 +696,7 @@ class DataMapper:
           ll = [tt for tt in sorted(ccIds) if tt[0] in molType]
           if ll:
             ccId = ll[0]
-        
+
         if ccId is None:
           # try in priority order:
           for molType in DataConvertLib.molTypeOrder:

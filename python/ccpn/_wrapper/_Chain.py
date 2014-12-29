@@ -24,7 +24,6 @@ __version__ = "$Revision: 7686 $"
 from collections.abc import Sequence
 
 from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
-from ccpn._wrapper._Molecule import Molecule
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.molecule.MolSystem import Chain as Ccpn_Chain
 from ccpncore.lib import MoleculeModify
@@ -60,7 +59,7 @@ class Chain(AbstractWrapperClass):
   @property
   def id(self) -> str:
     """short form of name, used for id"""
-    return self._wrappedData.code
+    return self._wrappedData.code.replace('.','_').replace(':','_')
 
   shortName = id
     
@@ -70,9 +69,9 @@ class Chain(AbstractWrapperClass):
     return self._wrappedData.molecule.name
     
   @property
-  def _parent(self) -> Molecule:
+  def _parent(self) -> Project:
     """Parent (containing) object."""
-    return self._project._data2Obj[self._wrappedData.molSystem]
+    return self._project
   
   molecule = _parent
   
@@ -95,26 +94,22 @@ class Chain(AbstractWrapperClass):
     self._wrappedData.details = value
 
   # CCPN functions
-  def copy(self, newMolecule:Molecule=None, shortName=None):
+  def copy(self, shortName:str):
     """Make copy of chain."""
-    
-    if newMolecule is None and shortName is None:
-      raise Exception("Chain.copy must have newMolecule or shortName given")
-    
-    parent = (newMolecule or self.molecule)._wrappedData
+
+    molSystem = self._project._wrappedData.molSystem
+
+    if molSystem.findFirstChain(code=shortName) is not None:
+      raise ValueError("Project already hsa one Chain with shortNAme %s" % shortName)
     
     ccpnChain = self._wrappedData
     tags = ['molecule', 'role', 'magnEquivalenceCode', 'physicalState', 
             'conformationalIsomer', 'chemExchangeState', 'details']
     params = {tag:getattr(ccpnChain,tag) for tag in tags}
-    if shortName is None:
-      params['code'] = ccpnChain.code
-      params['pdbOneLetterCode'] = ccpnChain.pdbOneLetterCode
-    else:
-      params['code'] = shortName
-      params['pdbOneLetterCode'] = shortName[0]
+    params['code'] = shortName
+    params['pdbOneLetterCode'] = shortName[0]
       
-    newCcpnChain = parent.newChain(**params)
+    newCcpnChain = molSystem.newChain(**params)
     
     #
     return self._project._data2Obj[newCcpnChain]
@@ -128,9 +123,9 @@ class Chain(AbstractWrapperClass):
                      preferredMolType:str=None):
     """Add sequence to chain, without setting bonds to pre-existing residues
 
-    :param Sequence sequence: a sequence of CCPN residue type codes or one-letter codes \
-    if sequence contains more than one residue, it is assumed that the residues \
-    form a linear polymer
+    :param Sequence sequence: a sequence of three-letter-codes, CCPN residue type codes\
+    or one-letter codes if sequence contains more than one residue, it is assumed that\
+    the residues form a linear polymer
 
     :param int startNumber: residue number of first residue in sequence. \
     If not given, is it one  more than the last
@@ -146,7 +141,7 @@ class Chain(AbstractWrapperClass):
 
     if not sequence:
       msg = "No residues given to add to chain"
-      self._project._logger.error(msg)
+      self._project._logger.warning(msg)
       return
 
     # get startNumber for new sequence
@@ -157,12 +152,18 @@ class Chain(AbstractWrapperClass):
       else:
         startNumber = 1
 
-    getccId = DataMapper.selectChemCompId
     dd = self._project._residueName2chemCompIds
+    ccSequence = [DataMapper.pickChemCompId(dd, x, prefMolType=preferredMolType)
+                  for x in sequence]
+    if None in ccSequence:
+      ii = ccSequence.index(None)
+      msg = "Residue %s in sequence: %s not recognised" % (ii, sequence[ii])
+      self._project._logger.warning(msg)
+      return
 
     if len(sequence) == 1:
       # Single residue. Add it
-      tt = getccId(sequence[0])
+      tt = ccSequence[0]
       if tt:
         molType, ccpCode = tt
       else:
@@ -178,10 +179,8 @@ class Chain(AbstractWrapperClass):
     else:
       # multiple residues, add as linear polymer
 
-      molResidues = MoleculeModify.makeLinearSequence(ccpnMolecule,
-        [getccId(dd, resType, prefMolType=preferredMolType) for resType in sequence],
-        seqCodeStart=startNumber
-      )
+      molResidues = MoleculeModify.makeLinearSequence(ccpnMolecule, ccSequence,
+                                                      seqCodeStart=startNumber)
 
     # make MolSystem Residues
     for molResidue in molResidues:
@@ -195,12 +194,12 @@ class Chain(AbstractWrapperClass):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent: Molecule)-> list:
-    """get wrappedData (MolSystem.Chains) for all Chain children of parent Molecule"""
-    return parent._wrappedData.sortedChains()
+  def _getAllWrappedData(cls, parent:Project)-> list:
+    """get wrappedData (MolSystem.Chains) for all Chain children of parent NmrProject.molSystem"""
+    return parent._wrappedData.molSystem.sortedChains()
 
 
-def newChain(parent:Molecule, compoundName:str, shortName:str=None, 
+def newChain(parent:Project, compoundName:str, shortName:str=None,
              role:str=None, comment:str=None) -> Chain:
   """Create new child Chain, empty or matching existing compound
   
@@ -210,7 +209,7 @@ def newChain(parent:Molecule, compoundName:str, shortName:str=None,
   :param str role: role for new chain (optional)
   :param str comment: comment for new chain (optional)"""
   
-  ccpnMolSystem = parent.ccpnMolSystem
+  ccpnMolSystem = parent.nmrProject.molSystem
   ccpnRoot = ccpnMolSystem.root
   
   if shortName is None:
@@ -229,7 +228,7 @@ def newChain(parent:Molecule, compoundName:str, shortName:str=None,
   
   return parent._project._data2Obj.get(newCcpnChain)
   
-def makeChain(parent:Molecule, sequence, compoundName:str,
+def makeChain(parent:Project, sequence, compoundName:str,
               startNumber:int=1, preferredMolType:str=None, 
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
   """Make new chain from sequence of residue codes
@@ -281,9 +280,9 @@ Chain.copy.__annotations__['return'] = Chain
     
     
 # Connections to parents:
-Molecule._childClasses.append(Chain)
-Molecule.newChain = newChain
-Molecule.makeChain = makeChain
+Project._childClasses.append(Chain)
+Project.newChain = newChain
+Project.makeChain = makeChain
 
 # Notifiers:
 className = Ccpn_Chain._metaclass.qualifiedName()

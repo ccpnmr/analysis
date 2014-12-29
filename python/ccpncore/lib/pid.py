@@ -4,6 +4,32 @@ Version 2/3 Pid routines
 from cing import __version__
 import cing.Libs.io as io
 
+# def makePid(head, *args):
+#   """make pid from head and list of successive keys.
+#   Head may be an existing pid, or a naked string
+#   Keys are converted to string, and illegal characters are converted to '_'
+#   The head is  not checked - it should be either a valid pid or a class code"""
+#
+#   # NBNB TBD tighten up and implement rules for valid characters
+#
+#   # NBNB TBD speed up, using character mapping
+#
+#   # map args to correcteid strings
+#   ll = [str(val).replace('.','_').replace(':','_') for val in args]
+#
+#   if ':' in head:
+#     if head[-1] == ':':
+#       result = head + '.'.join(ll)
+#
+#     else:
+#       ll.insert(0,head)
+#       result = '.'.join(ll)
+#   else:
+#     result = head + ':' + '.'.join(ll)
+#
+#   #
+#   return result
+
 
 def decodePid(sourceObject, thePid):
     """
@@ -142,7 +168,9 @@ class Pid(str):
         MO = 'Molecule'
     )
 
-    def __init__(self, string):
+    def __init__(self, string, *args):
+        """First argument ('string' must be a valid pid string with one, non-initial ':'
+        Additional arguments are converted to string with disallowed characters changed to '_'"""
         str.__init__(string)
 
         # inlining this here is 1) faster, 2) guarantees that we never get invalid Pids.

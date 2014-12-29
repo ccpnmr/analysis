@@ -56,9 +56,12 @@ class Spectrum(AbstractWrapperClass):
 
     dataSource = self._wrappedData
     ccpnExperiment = dataSource.experiment
-    result = ccpnExperiment.name
-    if dataSource is not ccpnExperiment.sortedDataSources()[0]:
-      result = '%s_%s' % (result, dataSource.serial)
+    # NBNB TBD 1) ensure uniqueness
+    # NBNB TBD 2) restrict type of original attribute
+    result = '_'.join(ccpnExperiment.name.split())
+    result = result.replace('.','_').replace(':','_')
+    if dataSource.serial  != 1:
+      result = '%s,%s' % (result, dataSource.serial)
 
     return result
 

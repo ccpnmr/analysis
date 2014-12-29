@@ -48,7 +48,7 @@ class ChemicalShift(AbstractWrapperClass):
   @property
   def id(self) -> str:
     """identifier - assignment string"""
-    return str(self._project.resonance2Assignment(self._wrappedData.resonance))
+    return self.assignment.id
     
   @property
   def _parent(self) -> Project:
@@ -96,7 +96,7 @@ class ChemicalShift(AbstractWrapperClass):
   @property
   def assignment(self) -> object:
     """Atom that the shift belongs to"""
-    return self._project._dta2Obj(self._wrappedData.resonance)
+    return self._project._data2Obj(self._wrappedData.resonance)
 
     
   # Implementation functions

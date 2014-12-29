@@ -25,6 +25,7 @@ from collections.abc import MutableMapping
 import itertools
 import functools
 import abc
+from ccpncore.lib.pid import Pid
 
 #from . import PREFIXSEP, IDSEP
 IDSEP = '.'
@@ -319,13 +320,13 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   def pid(self) -> str:
     """Object project-wide identifier, unique within project.
     Set automatically from short class name, and id of object and parents."""
-    return PREFIXSEP.join((self.shortClassName, self._pid))
+    return Pid(PREFIXSEP.join((self.shortClassName, self._pid)))
   
   @property
   def longPid(self) -> str:
     """Object project-wide identifier, unique within project.
     Set automatically from full class name, and id of object and parents."""
-    return PREFIXSEP.join((type(self).__name__, self._pid))
+    return Pid(PREFIXSEP.join((type(self).__name__, self._pid)))
     
   
   # CCPN abstract properties

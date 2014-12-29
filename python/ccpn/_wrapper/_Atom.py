@@ -27,7 +27,9 @@ from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Residue import Residue
 from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
 
-# NBNB TBD add settable linkedAtoms link for non-ChemComp links
+# NBNB TBD add settable linkedAtoms link for non-ChemComp links ???
+
+# NBNB TBD modify to deal with StructureAtoms and RestraintAtoms CombiClass?
 
 class Atom(AbstractWrapperClass):
   """Molecular Atom.

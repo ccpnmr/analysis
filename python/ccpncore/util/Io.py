@@ -28,8 +28,8 @@ __author__ = 'rhf22'
 
 import os
 import shutil
-# import time
 import glob
+# import time
 
 from ccpncore.api.memops import Implementation
 from ccpncore.memops.metamodel import Constants as metaConstants
@@ -391,6 +391,11 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
             AbstractDataStore.changeDataStoreUrl(dataStores[0], baseDir)
             for ii,dataStore in enumerate(dataStores):
               dataStore.path = newPaths[ii]
+
+  if hasattr(project, '_movedPackageNames'):
+    # Special hack for moving data of renamed packages on upgrade
+    for newName, oldName in project._movedPackageNames.items():
+      movePackageData(project, newName, oldName)
 
   # make logger
   logger = Logging.createLogger(applicationName, project)
@@ -1074,6 +1079,35 @@ def setRepositoryPath(project, repositoryName, path):
       repository.url = url
 
   # TBD: should we throw an exception if repository is not found?
+
+
+def movePackageData(root, newPackageName, oldPackageName):
+  """Move all data from package oldPackageNAme to newPackageName"""
+  ff = root.findFirstPackageLocator
+  repositories = (ff(targetName=newPackageName) or ff(targetName='any')).repositories
+  newLocations = [x.getFileLocation(newPackageName) for x in repositories]
+
+  # If there were data in correct location assume that project is fixed already
+  if not any(x for x in newLocations if os.path.isdir(x)):
+    repositories = (ff(targetName=oldPackageName) or ff(targetName='any')).repositories
+    oldLocations = [x.getFileLocation(oldPackageName) for x in repositories]
+    oldLocations = [x for x in oldLocations if os.path.isdir(x)]
+
+    if oldLocations:
+      # there were old data in the wrong location. Move to new one.
+      newDir = newLocations[-1]
+      os.makedirs(newDir)
+      for oldDir in oldLocations:
+        for filename in os.listdir(oldDir):
+
+          if filename.startswith('.'):
+            # skip hidden files (on *nix/Mac)
+            continue
+
+          elif filename.endswith('.xml'):
+            shutil.move(os.path.join(oldDir, filename), os.path.join(newDir, filename))
+
+
 
 # def getBackupPath(project):
 #

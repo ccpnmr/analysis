@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
@@ -14,9 +14,9 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
-__date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__version__ = "$Revision: 7686 $"
+__author__ = "$Author$"
+__date__ = "$Date$"
+__version__ = "$Revision$"
 
 #=========================================================================================
 # Start of code
@@ -24,19 +24,19 @@ __version__ = "$Revision: 7686 $"
 
 from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Chain import Chain
-from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
+from ccpn._wrapper._NmrChain import NmrChain
+from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup
 from ccpncore.lib.DataMapper import DataMapper
 from ccpncore.util import Common as commonUtil
 
-class Residue(AbstractWrapperClass):
-  """Molecular Residue."""
+class NmrResidue(AbstractWrapperClass):
+  """Nmr Residue, for assignment."""
   
   #: Short class name, for PID.
-  shortClassName = 'MR'
+  shortClassName = 'NR'
 
   #: Name of plural link to instances of class
-  _pluralLinkName = 'residues'
+  _pluralLinkName = 'nmrResidues'
   
   #: List of child classes.
   _childClasses = []
@@ -44,69 +44,44 @@ class Residue(AbstractWrapperClass):
 
   # CCPN properties  
   @property
-  def ccpnResidue(self) -> Ccpn_Residue:
-    """ CCPN residue matching Residue"""
+  def resonanceGroup(self) -> ResonanceGroup:
+    """ CCPN resonanceGroup matching Residue"""
     return self._wrappedData
   
   
   @property
-  def seqCode(self) -> str:
-    """Residue sequence code and id (e.g. '1', '127B') """
-    obj = self._wrappedData
-    objSeqCode = obj.seqCode
-    result = obj.seqInsertCode or ''
-    if objSeqCode is not None:
-      result = str(objSeqCode) + result
-    return result
+  def sequenceCode(self) -> str:
+    """Residue sequence code and id (e.g. '1', '127B', '@157+1) """
+    return self._wrappedData.sequenceCode
+
+  # NBNB TBD we need rename function to set this
 
   @property
   def id(self) -> str:
     """Residue ID. Identical to seqCode, with '.' and ':' replaced by '_'"""
-    return self.seqCode.replace('.','_').replace(':','_')
+    return self._wrappedData.sequenceCode.replace('.','_').replace(':','_')
     
   @property
-  def _parent(self) -> Chain:
+  def _parent(self) -> NmrChain:
     """Parent (containing) object."""
     return self._project._data2Obj[self._wrappedData.chain]
   
-  chain = _parent
-    
+  nmrChain = _parent
+
   @property
   def name(self) -> str:
-    """Residue type name string (e.g. 'ALA')"""
+    """Residue type name string (e.g. 'Ala')"""
     return self._wrappedData.code3Letter
 
   @name.setter
   def name(self, value:str):
-    self._wrappedData.code3Letter = value
-    molType, ccpCode = DataMapper.pickChemCompId(self._project._residueName2chemCompIds,
-                                                 value)
-    # NBNB TBD reorganise model so that code3Letter is used throughout, and change this
-    self._wrappedData.molType = molType
-    self._wrappedData.ccpCode = ccpCode
+    ccpnNmrResidue = self._wrappedData
+    ccpnNmrResiduea.code3Letter = value
 
-  # @property
-  # def molType(self) -> str:
-  #   """Molecule type string ('protein', 'DNA', 'RNA', 'carbohydrate', or 'other')"""
-  #   return self._wrappedData.molType
-  
-  @property
-  def linking(self) -> str:
-    """linking (substitution pattern) code for residue"""
-    return self._wrappedData.linking
-    
-  @linking.setter
-  def linking(self, value:str):
-    self._wrappedData.linking = value
-  
-  @property
-  def descriptor(self) -> str:
-    """variant descriptor (protonation state etc.) for residue"""
-    return self._wrappedData.descriptor
-    
-  @descriptor.setter
-  def descriptor(self, value:str):
-    self._wrappedData.descriptor = value
+    # get chem comp ID strings from residue name
+    tt = DataMapper.pickChemCompId(self._project._residueName2chemCompIds, value)
+    if tt is not None:
+      ccpnNmrResidue.molType, ccpnNmrResidue.ccpCode = tt
   
   @property
   def comment(self) -> str:
@@ -120,15 +95,16 @@ class Residue(AbstractWrapperClass):
     
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent: Chain)-> list:
+  def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
-    return parent._wrappedData.sortedResidues()
+    return parent._wrappedData.sortedResonanceGroups()
     
     
-def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None,
-               descriptor:str=None, molType:str=None, comment:str=None) -> Residue:
+def newNmrResidue(parent:NmrChain, name:str, sequenceCode:str=None, comment:str=None) -> NmrResidue:
   """Create new child Residue"""
-  project = parent._project
+  nmrProject = parent._project._wrappedData
+
+  nmrProject.newResonanceGroup
   ccpnChain = parent._wrappedData
   ccpnMolecule = ccpnChain.molecule
 

@@ -154,7 +154,7 @@ class Project(AbstractWrapperClass):
   
   @property
   def nmrProject(self) -> Ccpn_NmrProject:
-    """CCPN equivalen to object: Nmrproject"""
+    """CCPN equivalent to object: Nmrproject"""
     return self._wrappedData
 
   #

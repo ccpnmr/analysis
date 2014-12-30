@@ -173,4 +173,6 @@ def _getAtomResonance(atom:object) -> object:
   """get or create resonance corresponding to Atom
   NBNB TBD Must add Resonance if not currently there. NOT YET DONE
   NBNB duplicate. consolidate and move to right place"""
+  # NBNB TBD Completely rewrite once Atom class is stabilised
+
   return atom.ccpnResonance

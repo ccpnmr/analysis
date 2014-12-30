@@ -31,9 +31,9 @@ skipElements = [
 # classElements skipped in new model, but available for simple data transfer
 # (prefix, typeName, elemName, newGuid, elemMap, valueTypeGuid)
 delayElements = [
- ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'name': 'refExpDim', 'type': 'exolink', 'eType': 'cplx', 'tag': 'NMR.ExpDim.refExpDim'}, None), 
- ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'name': 'clusterCode', 'type': 'attr', 'eType': 'cplx', 'tag': 'NMR.ResonanceGroup.clusterCode'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
- ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'name': 'isActive', 'type': 'attr', 'tag': 'NMR.ResonanceGroup.isActive'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
+ ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'type': 'exolink', 'name': 'refExpDim', 'eType': 'cplx', 'tag': 'NMR.ExpDim.refExpDim'}, None), 
+ ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'type': 'attr', 'name': 'clusterCode', 'eType': 'cplx', 'tag': 'NMR.ResonanceGroup.clusterCode'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
+ ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'type': 'attr', 'name': 'isActive', 'tag': 'NMR.ResonanceGroup.isActive'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
 ]
 
 # MetaConstraints added in new model
@@ -41,6 +41,7 @@ delayElements = [
 newConstraints = [
  ('ccp.molecule.MolSystem.Atom.non_single_atoms_have_components', 'www.ccpn.ac.uk_Fogh_2014-07-31-11:44:56_00001'), 
  ('ccp.nmr.Nmr.ConnectedStretch.activeResonanceGroups_must_go_with_active_SequentialAssignments', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:49:36_00001'), 
+ ('ccp.nmr.Nmr.Resonance.implName.name_is_unique_in_resonanceGroup', 'www.ccpn.ac.uk_Fogh_2014-12-30-13:36:29_00001'), 
  ('ccp.nmr.Nmr.ResonanceGroup.satellite_resonance_group_must_have_offset', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:38_00002'), 
  ('ccp.nmr.Nmr.ResonanceGroup.satellite_resonance_groups_must_be_unique', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:38_00001'), 
  ('ccp.nmr.NmrConstraint.DihedralItem.no_Dihedral_item_with_resonances_in_opposite_order', 'www.ccpn.ac.uk_Fogh_2014-07-29-12:54:23_00003'), 
@@ -315,6 +316,7 @@ newElements = [
  ('NMR', 'Experiment', 'experimentType', 'www.ccpn.ac.uk_Fogh_2014-11-28-21:31:22_00004'), 
  ('NMR', 'NmrChain', None, 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:22_00001'), 
  ('NMR', 'NmrChain', 'code', 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:23_00005'), 
+ ('NMR', 'NmrChain', 'details', 'www.ccpn.ac.uk_Fogh_2014-12-30-11:21:22_00001'), 
  ('NMR', 'NmrChain', 'resonanceGroups', 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:23_00002'), 
  ('NMR', 'NmrProject', 'connectedStretchs', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:49:40_00001'), 
  ('NMR', 'NmrProject', 'guiTasks', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:55_00009'), 
@@ -330,6 +332,7 @@ newElements = [
  ('NMR', 'PeakList', 'symbolStyle', 'www.ccpn.ac.uk_Fogh_2014-10-28-18:26:00_00001'), 
  ('NMR', 'PeakList', 'textColour', 'www.ccpn.ac.uk_Fogh_2014-10-28-18:26:00_00003'), 
  ('NMR', 'Resonance', 'displayAxes', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:39_00001'), 
+ ('NMR', 'Resonance', 'implName', 'www.ccpn.ac.uk_Fogh_2014-12-30-11:21:22_00002'), 
  ('NMR', 'ResonanceGroup', 'activeStretch', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:50:06_00004'), 
  ('NMR', 'ResonanceGroup', 'mainResonanceGroup', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:41_00004'), 
  ('NMR', 'ResonanceGroup', 'nmrChain', 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:23_00001'), 
@@ -389,6 +392,7 @@ newElements = [
  ('NMRC', 'JCouplingContribution', None, 'www.ccpn.ac.uk_Fogh_2014-07-22-17:02:49_00007'), 
  ('NMRC', 'JCouplingContribution', 'items', 'www.ccpn.ac.uk_Fogh_2014-07-22-17:05:55_00019'), 
  ('NMRC', 'JCouplingItem', None, 'www.ccpn.ac.uk_Fogh_2014-07-22-17:02:49_00008'), 
+ ('NMRC', 'NmrConstraintStore', 'details', 'www.ccpn.ac.uk_Fogh_2014-12-30-14:45:38_00001'), 
  ('NMRC', 'RdcConstraint', 'contributions', 'www.ccpn.ac.uk_Fogh_2014-07-29-17:21:12_00002'), 
  ('NMRC', 'RdcContribution', None, 'www.ccpn.ac.uk_Fogh_2014-07-29-12:54:23_00004'), 
  ('NMRC', 'RdcContribution', 'items', 'www.ccpn.ac.uk_Fogh_2014-07-29-12:54:26_00013'), 
@@ -428,6 +432,7 @@ nameMatches = [
 # (oldElem.qName, newElem.name, oldGuid, newGuid, differentTags
 allDiffs = [
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
- ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'partitionsChildren', 'isDerived'}), 
+ ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'isDerived', 'partitionsChildren'}), 
+ ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'locard', 'isDerived', 'documentation'}), 
  ('molsim.Symmetry.MolSystemSymmetrySet', 'MolSystemSymmetrySet', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', {'parentRole'}), 
 ]

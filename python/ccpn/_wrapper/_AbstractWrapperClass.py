@@ -72,10 +72,9 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
   ===============  =================
   From object:      relative id:
   ===============  =================
-  Project           'AT:MS1.A.127.N'
-  Molecule          'AT:A.127.N'
-  Chain             'AT:127.N'
-  Residue           'AT:N'
+  Project           'MA.A.127.N'
+  Chain             'MA:127.N'
+  Residue           'MA:N'
   ===============  =================
 
 

@@ -76,7 +76,7 @@ class NmrResidue(AbstractWrapperClass):
   @name.setter
   def name(self, value:str):
     ccpnNmrResidue = self._wrappedData
-    ccpnNmrResiduea.code3Letter = value
+    ccpnNmrResidue.code3Letter = value
 
     # get chem comp ID strings from residue name
     tt = DataMapper.pickChemCompId(self._project._residueName2chemCompIds, value)
@@ -101,49 +101,36 @@ class NmrResidue(AbstractWrapperClass):
     
     
 def newNmrResidue(parent:NmrChain, name:str, sequenceCode:str=None, comment:str=None) -> NmrResidue:
-  """Create new child Residue"""
-  nmrProject = parent._project._wrappedData
+  """Create new child NmrResidue"""
+  ccpnNmrChain = parent._wrappedData
+  nmrProject = ccpnNmrChain.nmrProject
+  nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=name, details=comment,
+                               nmrChsin=ccpnNmrChain)
 
-  nmrProject.newResonanceGroup
-  ccpnChain = parent._wrappedData
-  ccpnMolecule = ccpnChain.molecule
 
-  if ccpnMolecule.isFinalized:
-    raise Exception("Chain {} can no longer be extended".format(parent))
-
-  # get chem comp ID strings from residue name
-  molType, ccpCode = DataMapper.pickChemCompId(project._residueName2chemCompIds,
-                                               name, prefMolType=molType)
-
-  # split seqCode in number+string
-  intCode, seqInsertCode = commonUtil.splitIntFromChars(seqCode)
-  if len(seqInsertCode) > 1:
-    raise Exception(
-      "Only one non-numerical character suffix allowed for seqCode {}".format(seqCode)
-    )
-
-  # make residue
-  ccpnResidue = ccpnChain.newResidue(molType=molType, ccpCode=ccpCode,
-                                     linking=linking, descriptor=descriptor,
-                                     details=comment)
-
-  if intCode is None:
-    ccpnResidue.seqCode = ccpnResidue.seqId
+def fetchNmrResidue(parent:NmrChain, sequenceCode:str, name:str=None) -> NmrResidue:
+  """Fetch NmrResidue with name=name, creating it if necessary"""
+  resonanceGroup = parent._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
+  if resonanceGroup:
+    if name is not None and name != resonanceGroup.name:
+      raise ValueError("%s has residue type %s, not %s" % (sequenceCode, resonanceGroup.name, name))
+    else:
+      result = parent._project._data2Obj.get(resonanceGroup)
   else:
-    ccpnResidue.seqCode = intCode
-    ccpnResidue.seqInsertCode = seqInsertCode
-    
-    
-    
-# Connections to parents:
-Chain._childClasses.append(Residue)
+    result = parent.newNmrResidue(name=name, sequenceCode=sequenceCode)
+  #
+  return result
 
-Chain.newResidue = newResidue
+# Connections to parents:
+NmrChain._childClasses.append(NmrResidue)
+
+NmrChain.newNmrResidue = newNmrResidue
+NmrChain.fetchNmrResidue = fetchNmrResidue
 
 # Notifiers:
-className = Ccpn_Residue._metaclass.qualifiedName()
+className = ResonanceGroup._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Residue}, className, '__init__'),
+  ( ('_newObject', {'cls':NmrResidue}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

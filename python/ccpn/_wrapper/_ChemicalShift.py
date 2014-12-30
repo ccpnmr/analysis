@@ -95,7 +95,7 @@ class ChemicalShift(AbstractWrapperClass):
 
   @property
   def assignment(self) -> object:
-    """Atom that the shift belongs to"""
+    """NmrAtom that the shift belongs to"""
     return self._project._data2Obj(self._wrappedData.resonance)
 
     

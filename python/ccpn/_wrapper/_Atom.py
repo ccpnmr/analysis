@@ -34,10 +34,10 @@ from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
 class Atom(AbstractWrapperClass):
   """Molecular Atom.
 
-  NBNB TBD rewrite - move to under Project, ..."""
+  NBNB TBD rewrite - move to under Project, ... OR NOT ???"""
   
   #: Short class name, for PID.
-  shortClassName = 'AT'
+  shortClassName = 'MA'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'atoms'
@@ -74,6 +74,9 @@ class Atom(AbstractWrapperClass):
     NBNB duplicate. consolidate and move to right place
 
     NBNB TBD, change to private property?"""
+
+    # NBNB TBD Completely redo once Atom is stable.
+
     return self.ccpnResonance
 
 

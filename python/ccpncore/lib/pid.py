@@ -1,8 +1,10 @@
 """
 Version 2/3 Pid routines
 """
-from cing import __version__
-import cing.Libs.io as io
+try:
+  from cing import __version__
+except ImportError:
+  __version__ = '???'
 
 # def makePid(head, *args):
 #   """make pid from head and list of successive keys.
@@ -36,6 +38,9 @@ def decodePid(sourceObject, thePid):
     try to decode thePid relative to sourceObject
     return decoded pid object or None on not found or Error
     """
+
+    import cing.Libs.io as io
+
     if thePid is None:
         return None
 
@@ -354,6 +359,8 @@ class Pid(str):
         # if type is not None:
         #     parts[0] = type
         # return Pid.new(*parts)
+
+        import cing.Libs.io as io
 
         parts = self._split()
 

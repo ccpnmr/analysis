@@ -91,23 +91,24 @@ class PeakList(AbstractWrapperClass):
   def isSimulated(self, value:bool):
     self._wrappedData.isSimulated = value
 
-  # NBNB WILL NOT WORK until we implement the ShiftList class
   @property
-  def shiftList(self) -> AbstractWrapperClass:
-    ccpn_shiftList = self._wrappedData.shiftList
-    if ccpn_shiftList is None:
-      return None
-    else:
-      return self._project._data2Obj[ccpn_shiftList]
+  def chemicalShiftList(self):
+    """ChemicalShiftList associated with Spectrum."""
+    return self._project._data2Obj.get(self._wrappedData.shiftList)
 
-  @shiftList.setter
-  def shiftList(self, value:AbstractWrapperClass):
+  @chemicalShiftList.setter
+  def chemicalShiftList(self, value):
+    ccpnPeakList = self._wrappedData
     if value is None:
-      self._wrappedData.shiftList = None
+      ccpnPeakList.specificShiftList = None
     else:
-      self._wrappedData.shiftList = value._wrappedData
-
-    
+      ccpnShiftList = value._wrappedData
+      if ccpnShiftList is ccpnPeakList.shiftList:
+        return
+      elif ccpnShiftList is ccpnPeakList.dataSource.experiment.shiftList:
+        ccpnPeakList.specificShiftList = None
+      else:
+        ccpnPeakList.specificShiftList = ccpnShiftList
     
   # Implementation functions
   @classmethod

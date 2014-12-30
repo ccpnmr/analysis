@@ -29,6 +29,7 @@ from collections.abc import Sequence
 
 from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
 from ccpn._wrapper._Project import Project
+from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import DataSource as Ccpn_DataSource
 
 class Spectrum(AbstractWrapperClass):
@@ -108,12 +109,12 @@ class Spectrum(AbstractWrapperClass):
     self._wrappedData.experiment.spinningRate = value
 
   @property
-  def chemicalShiftList(self):
+  def chemicalShiftList(self) -> ChemicalShiftList:
     """ChemicalShiftList associated with Spectrum."""
     return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
 
   @chemicalShiftList.setter
-  def chemicalShiftList(self, value):
+  def chemicalShiftList(self, value:ChemicalShiftList):
     self._wrappedData.experiment.shiftList = value._wrappedData
 
   @property

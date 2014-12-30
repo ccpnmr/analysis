@@ -104,12 +104,15 @@ from ccpn._wrapper._Chain import Chain
 from ccpn._wrapper._Residue import Residue
 from ccpn._wrapper._Atom import Atom
 from ccpn._wrapper._NmrChain import NmrChain
+from ccpn._wrapper._NmrResidue import NmrResidue
+from ccpn._wrapper._NmrAtom import NmrAtom
 from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
 from ccpn._wrapper._ChemicalShift import ChemicalShift
 from ccpn._wrapper._Spectrum import Spectrum
 from ccpn._wrapper._SpectrumReference import SpectrumReference
 from ccpn._wrapper._PeakList import PeakList
 from ccpn._wrapper._Peak import Peak
+from ccpn._wrapper._RestraintSet import RestraintSet
 
 # Set up interclass links and related functions
 Project._linkWrapperClasses()

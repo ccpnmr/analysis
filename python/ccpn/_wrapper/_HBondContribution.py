@@ -25,21 +25,21 @@ __version__ = "$Revision$"
 from collections.abc import Sequence
 from ccpn._wrapper._AbstractRestraintContribution import AbstractRestraintContribution
 from ccpn._wrapper._Project import Project
-from ccpn._wrapper._DistanceRestraint import DistanceRestraint
-from ccpncore.api.ccp.nmr.NmrConstraint import DistanceContribution as Ccpn_DistanceContribution
+from ccpn._wrapper._HBondRestraint import HBondRestraint
+from ccpncore.api.ccp.nmr.NmrConstraint import HBondContribution as Ccpn_HBondContribution
 
 
-class DistanceContribution(AbstractRestraintContribution):
-  """Distance Contribution."""
+class HBondContribution(AbstractRestraintContribution):
+  """HBond Contribution."""
   
   #: Short class name, for PID.
-  shortClassName = 'DC'
+  shortClassName = 'BC'
 
   # Number of atoms in a Restraint item - set in subclasses
-  restraintItemLength = DistanceRestraint.restraintItemLength
+  restraintItemLength = HBondRestraint.restraintItemLength
 
   #: Name of plural link to instances of class
-  _pluralLinkName = 'distanceContributions'
+  _pluralLinkName = 'hBondContributions'
   
   #: List of child classes.
   _childClasses = []
@@ -47,31 +47,31 @@ class DistanceContribution(AbstractRestraintContribution):
 
   # CCPN properties  
   @property
-  def ccpnContribution(self) -> DistanceContribution:
-    """ CCPN DistanceContribution matching DistanceContribution"""
+  def ccpnContribution(self) -> HBondContribution:
+    """ CCPN HBondContribution matching HBondContribution"""
     return self._wrappedData
 
   @property
-  def _parent(self) -> DistanceRestraint:
+  def _parent(self) -> HBondRestraint:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.distanceConstraint]
+    return  self._project._data2Obj[self._wrappedData.hBondConstraint]
     
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:DistanceRestraint)-> list:
-    """get wrappedData - all DistanceConstraint children of parent DistanceConstraintList"""
+  def _getAllWrappedData(cls, parent:HBondRestraint)-> list:
+    """get wrappedData - all HBondConstraint children of parent HBondConstraintList"""
     return parent._wrappedData.sortedContributions()
 
 # Connections to parents:
-DistanceRestraint._childClasses.append(DistanceContribution)
+HBondRestraint._childClasses.append(HBondContribution)
 
-def newContribution(parent:DistanceRestraint, targetValue:float=None, error:float=None,
+def newContribution(parent:HBondRestraint, targetValue:float=None, error:float=None,
                     weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
-                    restraintItems:Sequence=()) -> DistanceContribution:
-  """Create new child DistanceContribution"""
+                    restraintItems:Sequence=()) -> HBondContribution:
+  """Create new child HBondContribution"""
   constraint = parent._wrappedData
-  obj = constraint.newDistanceContribution(targetValue=targetValue, error=error,
+  obj = constraint.newHBondContribution(targetValue=targetValue, error=error,
                                            weight=weight, upperLimit=upperLimit,
                                            lowerLimit=lowerLimit,
                                            additionalUpperLimit=additionalUpperLimit,
@@ -80,12 +80,12 @@ def newContribution(parent:DistanceRestraint, targetValue:float=None, error:floa
   result.restraintItems = restraintItems
   return result
 
-DistanceRestraint.newRestraint = newContribution
+HBondRestraint.newRestraint = newContribution
 
 # Notifiers:
-className = Ccpn_DistanceContribution._metaclass.qualifiedName()
+className = Ccpn_HBondContribution._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':DistanceContribution}, className, '__init__'),
+  ( ('_newObject', {'cls':HBondContribution}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

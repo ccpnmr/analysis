@@ -25,21 +25,21 @@ __version__ = "$Revision$"
 from collections.abc import Sequence
 from ccpn._wrapper._AbstractRestraintContribution import AbstractRestraintContribution
 from ccpn._wrapper._Project import Project
-from ccpn._wrapper._DistanceRestraint import DistanceRestraint
-from ccpncore.api.ccp.nmr.NmrConstraint import DistanceContribution as Ccpn_DistanceContribution
+from ccpn._wrapper._DihedralRestraint import DihedralRestraint
+from ccpncore.api.ccp.nmr.NmrConstraint import DihedralContribution as Ccpn_DihedralContribution
 
 
-class DistanceContribution(AbstractRestraintContribution):
-  """Distance Contribution."""
+class DihedralContribution(AbstractRestraintContribution):
+  """Dihedral Contribution."""
   
   #: Short class name, for PID.
-  shortClassName = 'DC'
+  shortClassName = 'HC'
 
   # Number of atoms in a Restraint item - set in subclasses
-  restraintItemLength = DistanceRestraint.restraintItemLength
+  restraintItemLength = DihedralRestraint.restraintItemLength
 
   #: Name of plural link to instances of class
-  _pluralLinkName = 'distanceContributions'
+  _pluralLinkName = 'dihedralContributions'
   
   #: List of child classes.
   _childClasses = []
@@ -47,31 +47,31 @@ class DistanceContribution(AbstractRestraintContribution):
 
   # CCPN properties  
   @property
-  def ccpnContribution(self) -> DistanceContribution:
-    """ CCPN DistanceContribution matching DistanceContribution"""
+  def ccpnContribution(self) -> DihedralContribution:
+    """ CCPN DihedralContribution matching DihedralContribution"""
     return self._wrappedData
 
   @property
-  def _parent(self) -> DistanceRestraint:
+  def _parent(self) -> DihedralRestraint:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.distanceConstraint]
+    return  self._project._data2Obj[self._wrappedData.dihedralConstraint]
     
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:DistanceRestraint)-> list:
-    """get wrappedData - all DistanceConstraint children of parent DistanceConstraintList"""
+  def _getAllWrappedData(cls, parent:DihedralRestraint)-> list:
+    """get wrappedData - all DihedralConstraint children of parent DihedralConstraintList"""
     return parent._wrappedData.sortedContributions()
 
 # Connections to parents:
-DistanceRestraint._childClasses.append(DistanceContribution)
+DihedralRestraint._childClasses.append(DihedralContribution)
 
-def newContribution(parent:DistanceRestraint, targetValue:float=None, error:float=None,
+def newContribution(parent:DihedralRestraint, targetValue:float=None, error:float=None,
                     weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
-                    restraintItems:Sequence=()) -> DistanceContribution:
-  """Create new child DistanceContribution"""
+                    restraintItems:Sequence=()) -> DihedralContribution:
+  """Create new child DihedralContribution"""
   constraint = parent._wrappedData
-  obj = constraint.newDistanceContribution(targetValue=targetValue, error=error,
+  obj = constraint.newDihedralContribution(targetValue=targetValue, error=error,
                                            weight=weight, upperLimit=upperLimit,
                                            lowerLimit=lowerLimit,
                                            additionalUpperLimit=additionalUpperLimit,
@@ -80,12 +80,12 @@ def newContribution(parent:DistanceRestraint, targetValue:float=None, error:floa
   result.restraintItems = restraintItems
   return result
 
-DistanceRestraint.newRestraint = newContribution
+DihedralRestraint.newRestraint = newContribution
 
 # Notifiers:
-className = Ccpn_DistanceContribution._metaclass.qualifiedName()
+className = Ccpn_DihedralContribution._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':DistanceContribution}, className, '__init__'),
+  ( ('_newObject', {'cls':DihedralContribution}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

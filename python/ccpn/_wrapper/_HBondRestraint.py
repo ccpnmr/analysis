@@ -25,21 +25,21 @@ __version__ = "$Revision$"
 from collections.abc import Sequence
 from ccpn._wrapper._AbstractRestraint import AbstractRestraint
 from ccpn._wrapper._Project import Project
-from ccpn._wrapper._DistanceRestraintList import DistanceRestraintList
-from ccpncore.api.ccp.nmr.NmrConstraint import DistanceConstraint
+from ccpn._wrapper._HBondRestraintList import HBondRestraintList
+from ccpncore.api.ccp.nmr.NmrConstraint import HBondConstraint
 
 
-class DistanceRestraint(AbstractRestraint):
-  """Distance Restraint."""
+class HBondRestraint(AbstractRestraint):
+  """HBond Restraint."""
   
   #: Short class name, for PID.
-  shortClassName = 'DR'
+  shortClassName = 'BR'
 
   # Number of atoms in a Restraint item - set in subclasses
-  restraintItemLength = DistanceRestraintList.restraintItemLength
+  restraintItemLength = HBondRestraintList.restraintItemLength
 
   #: Name of plural link to instances of class
-  _pluralLinkName = 'distanceRestraints'
+  _pluralLinkName = 'hBondRestraints'
   
   #: List of child classes.
   _childClasses = []
@@ -47,36 +47,36 @@ class DistanceRestraint(AbstractRestraint):
 
   # CCPN properties  
   @property
-  def ccpnRestraint(self) -> DistanceConstraint:
-    """ CCPN DistanceConstraint matching DistanceRestraint"""
+  def ccpnRestraint(self) -> HBondConstraint:
+    """ CCPN HBondConstraint matching HBondRestraint"""
     return self._wrappedData
 
   @property
-  def _parent(self) -> DistanceRestraintList:
+  def _parent(self) -> HBondRestraintList:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.distanceConstraintList]
+    return  self._project._data2Obj[self._wrappedData.hBondConstraintList]
     
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:DistanceRestraintList)-> list:
-    """get wrappedData - all DistanceConstraint children of parent DistanceConstraintList"""
+  def _getAllWrappedData(cls, parent:HBondRestraintList)-> list:
+    """get wrappedData - all HBondConstraint children of parent HBondConstraintList"""
     return parent._wrappedData.sortedConstraints()
 
 # Connections to parents:
-DistanceRestraintList._childClasses.append(DistanceRestraint)
+HBondRestraintList._childClasses.append(HBondRestraint)
 
-def newRestraint(parent:DistanceRestraintList,comment:str=None,
-                         peaks:Sequence=()) -> DistanceRestraint:
-  """Create new child DistanceRestraint"""
+def newRestraint(parent:HBondRestraintList,comment:str=None,
+                         peaks:Sequence=()) -> HBondRestraint:
+  """Create new child HBondRestraint"""
   constraintList = parent._wrappedData
-  obj = constraintList.newDistanceConstraint(details=comment, peaks=peaks)
+  obj = constraintList.newHBondConstraint(details=comment, peaks=peaks)
   return parent._project._data2Obj.get(obj)
 
-def makeSimpleRestraint(parent:DistanceRestraintList,comment:str=None,
+def makeSimpleRestraint(parent:HBondRestraintList,comment:str=None,
                         peaks:Sequence=(),  targetValue:float=None, error:float=None,
                         weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                         additionalUpperLimit:float=None, additionalLowerLimit:float=None,
-                        restraintItems:Sequence=()) -> DistanceRestraint:
+                        restraintItems:Sequence=()) -> HBondRestraint:
 
   restraint = parent.newRestraint(comment=comment, peaks=peaks)
   restraint.newContribution(targetValue=targetValue,error=error, weight=weight,
@@ -87,13 +87,13 @@ def makeSimpleRestraint(parent:DistanceRestraintList,comment:str=None,
   #
   return restraint
 
-DistanceRestraintList.newRestraint = newRestraint
-DistanceRestraintList.makeSimpleRestraint = makeSimpleRestraint
+HBondRestraintList.newRestraint = newRestraint
+HBondRestraintList.makeSimpleRestraint = makeSimpleRestraint
 
 # Notifiers:
-className = DistanceConstraint._metaclass.qualifiedName()
+className = HBondConstraint._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':DistanceRestraint}, className, '__init__'),
+  ( ('_newObject', {'cls':HBondRestraint}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

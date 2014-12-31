@@ -48,7 +48,7 @@ class AbstractRestraintContribution(AbstractWrapperObject):
   @property
   def targetValue(self) -> float:
     """targetValue of contribution """
-    return str(self._wrappedData.targetValue)
+    return self._wrappedData.targetValue
 
   @targetValue.setter
   def targetValue(self, value:float):
@@ -57,7 +57,7 @@ class AbstractRestraintContribution(AbstractWrapperObject):
   @property
   def error(self) -> float:
     """error of contribution """
-    return str(self._wrappedData.error)
+    return self._wrappedData.error
 
   @error.setter
   def error(self, value:float):
@@ -66,7 +66,7 @@ class AbstractRestraintContribution(AbstractWrapperObject):
   @property
   def weight(self) -> float:
     """weight of contribution """
-    return str(self._wrappedData.weight)
+    return self._wrappedData.weight
 
   @weight.setter
   def weight(self, value:float):
@@ -75,7 +75,7 @@ class AbstractRestraintContribution(AbstractWrapperObject):
   @property
   def upperLimit(self) -> float:
     """upperLimit of contribution """
-    return str(self._wrappedData.upperLimit)
+    return self._wrappedData.upperLimit
 
   @upperLimit.setter
   def upperLimit(self, value:float):
@@ -84,7 +84,7 @@ class AbstractRestraintContribution(AbstractWrapperObject):
   @property
   def lowerLimit(self) -> float:
     """lowerLimit of contribution """
-    return str(self._wrappedData.lowerLimit)
+    return self._wrappedData.lowerLimit
 
   @lowerLimit.setter
   def lowerLimit(self, value:float):
@@ -93,7 +93,7 @@ class AbstractRestraintContribution(AbstractWrapperObject):
   @property
   def additionalUpperLimit(self) -> float:
     """additionalUpperLimit of contribution """
-    return str(self._wrappedData.additionalUpperLimit)
+    return self._wrappedData.additionalUpperLimit
 
   @additionalUpperLimit.setter
   def additionalUpperLimit(self, value:float):
@@ -102,11 +102,20 @@ class AbstractRestraintContribution(AbstractWrapperObject):
   @property
   def additionalLowerLimit(self) -> float:
     """additionalLowerLimit of contribution """
-    return str(self._wrappedData.additionalLowerLimit)
+    return self._wrappedData.additionalLowerLimit
 
   @additionalLowerLimit.setter
   def additionalLowerLimit(self, value:float):
     self._wrappedData.additionalLowerLimit = value
+
+  @property
+  def combinationId(self) -> int:
+    """combinationId of contribution, describing which contribution are AND'ed together"""
+    return self._wrappedData.combinationId
+
+  @combinationId.setter
+  def combinationId(self, value:int):
+    self._wrappedData.combinationId = value
 
   @property
   def restraintItems(self) -> tuple:

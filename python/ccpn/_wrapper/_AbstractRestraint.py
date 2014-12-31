@@ -23,9 +23,9 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from collections.abc import Sequence
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 
-class AbstractRestaint(AbstractWrapperClass):
+class AbstractRestraint(AbstractWrapperObject):
   """Abstract restraint."""
   
   #: Short class name, for PID.
@@ -36,6 +36,11 @@ class AbstractRestaint(AbstractWrapperClass):
   def id(self) -> str:
     """id string - serial number converted to string"""
     return str(self._wrappedData.serial)
+
+  @property
+  def serial(self) -> int:
+    """serial number, key attribute for Peak"""
+    return self._wrappedData.serial
 
   @property
   def comment(self) -> str:

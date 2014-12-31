@@ -27,12 +27,12 @@ __version__ = "$Revision: 7686 $"
 
 from collections.abc import Sequence
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import DataSource as Ccpn_DataSource
 
-class Spectrum(AbstractWrapperClass):
+class Spectrum(AbstractWrapperObject):
   """NMR spectrum."""
 
   #: Short class name, for PID.

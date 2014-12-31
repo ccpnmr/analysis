@@ -22,14 +22,14 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrChain import NmrChain
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup
 from ccpncore.lib.DataMapper import DataMapper
 from ccpncore.util import Common as commonUtil
 
-class NmrResidue(AbstractWrapperClass):
+class NmrResidue(AbstractWrapperObject):
   """Nmr Residue, for assignment."""
   
   #: Short class name, for PID.
@@ -104,8 +104,9 @@ def newNmrResidue(parent:NmrChain, name:str, sequenceCode:str=None, comment:str=
   """Create new child NmrResidue"""
   ccpnNmrChain = parent._wrappedData
   nmrProject = ccpnNmrChain.nmrProject
-  nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=name, details=comment,
-                               nmrChsin=ccpnNmrChain)
+  obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=name, details=comment,
+                                     nmrChsin=ccpnNmrChain)
+  return parent._project._data2Obj.get(obj)
 
 
 def fetchNmrResidue(parent:NmrChain, sequenceCode:str, name:str=None) -> NmrResidue:

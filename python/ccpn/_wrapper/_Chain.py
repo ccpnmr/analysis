@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from collections.abc import Sequence
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.molecule.MolSystem import Chain as Ccpn_Chain
 from ccpncore.lib import MoleculeModify
@@ -31,7 +31,7 @@ from ccpncore.lib.DataMapper import DataMapper
 from ccpncore.util import Common as commonUtil
 
 
-class Chain(AbstractWrapperClass):
+class Chain(AbstractWrapperObject):
   """Molecular Chain."""
   
   #: Short class name, for PID.

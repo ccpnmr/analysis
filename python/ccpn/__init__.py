@@ -98,7 +98,7 @@ from ccpncore.util import Io as ioUtil
 
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
 from ccpn._wrapper._Residue import Residue

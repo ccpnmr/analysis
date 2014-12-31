@@ -47,9 +47,14 @@ class DistanceRestraint(AbstractRestraint):
 
   # CCPN properties  
   @property
-  def ccpnDistanceRestraint(self) -> DistanceConstraint:
+  def ccpnRestraint(self) -> DistanceConstraint:
     """ CCPN DistanceConstraint matching DistanceRestraint"""
     return self._wrappedData
+
+  @property
+  def _parent(self) -> DistanceRestraintList:
+    """Parent (containing) object."""
+    return  self._project._data2Obj[self._wrappedData.distanceConstraintList]
     
   # Implementation functions
   @classmethod
@@ -60,14 +65,29 @@ class DistanceRestraint(AbstractRestraint):
 # Connections to parents:
 DistanceRestraintList._childClasses.append(DistanceRestraint)
 
-def newDistanceRestraint(parent:DistanceRestraintList,comment:str=None, peaks:Sequence,
-                         targetValue) -> DistanceRestraint:
+def newRestraint(parent:DistanceRestraintList,comment:str=None,
+                         peaks:Sequence=()) -> DistanceRestraint:
   """Create new child DistanceRestraint"""
   constraintList = parent._wrappedData
-  constraintList.newDistanceConstraint(name=name, details=comment, unit=unit,
-                                               potentialType=potentialType)
+  obj = constraintList.newDistanceConstraint(details=comment, peaks=peaks)
+  return parent._project._data2Obj.get(obj)
 
-DistanceRestraintList.newPeakList = newDistanceRestraint
+def makeSimpleRestraint(parent:DistanceRestraintList,comment:str=None,
+                        peaks:Sequence=(),  targetValue:float=None, error:float=None,
+                        weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
+                        additionalUpperLimit:float=None, additionalLowerLimit:float=None,
+                        restraintItems:Sequence=()) -> DistanceRestraint:
+
+  restraint = parent.newRestraint(comment=comment, peaks=peaks)
+  restraint.newContribution(targetValue=targetValue,error=error, weight=weight,
+                            upperLimit=upperLimit, lowerLimit=lowerLimit,
+                            additionalUpperLimit=additionalUpperLimit,
+                            additionalLowerLimit=additionalLowerLimit,
+                            restraintItems=restraintItems)
+  #
+  return restraint
+
+DistanceRestraintList.newRestraint = newRestraint
 
 # Notifiers:
 className = DistanceConstraint._metaclass.qualifiedName()

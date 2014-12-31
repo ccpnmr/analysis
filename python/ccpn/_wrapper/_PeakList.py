@@ -22,13 +22,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Spectrum import Spectrum
 from ccpncore.api.ccp.nmr.Nmr import PeakList as Ccpn_PeakList
 
 
-class PeakList(AbstractWrapperClass):
+class PeakList(AbstractWrapperObject):
   """Peak List."""
   
   #: Short class name, for PID.
@@ -123,7 +123,8 @@ def newPeakList(parent:Spectrum,name:str=None, comment:str=None,
              isSimulated:bool=False) -> PeakList:
   """Create new child PeakList"""
   ccpnDataSource = parent._wrappedData
-  ccpnDataSource.newPeakList(name=name, details=comment, isSimulated=isSimulated)
+  obj = ccpnDataSource.newPeakList(name=name, details=comment, isSimulated=isSimulated)
+  return parent._project._data2Obj.get(obj)
 
 Spectrum.newPeakList = newPeakList
 

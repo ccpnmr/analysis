@@ -25,7 +25,7 @@ from collections.abc import Sequence
 import itertools
 import operator
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._PeakList import PeakList
 from ccpncore.api.ccp.nmr.Nmr import Peak as Ccpn_Peak
@@ -33,7 +33,7 @@ from ccpncore.api.ccp.nmr.Nmr import Peak as Ccpn_Peak
 from ccpncore.lib.ccp.nmr.Nmr import Peak as CcpnLibPeak
 
 
-class Peak(AbstractWrapperClass):
+class Peak(AbstractWrapperObject):
   """Peak. Includes values for per-dimension values and for assignments.
   Assignments are complete for normal shift dimensions, but only the main referencing is used
   in each dimension. For assigning splittings, J-couplings, MQ dimensions, reduced-dimensionality
@@ -265,6 +265,8 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
 
     # set assignments
     CcpnLibPeak.setAssignments(ccpnPeak, resonances)
+
+  return parent._project._data2Obj.get(ccpnPeak)
 
 
 PeakList.newPeak = newPeak

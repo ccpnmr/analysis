@@ -64,8 +64,9 @@ def newDistanceRestraintList(parent:RestraintSet,name:str=None, comment:str=None
                              unit:str=None, potentialType:str=None) -> DistanceRestraintList:
   """Create new child DistanceRestraintList"""
   nmrConstraintStore = parent._wrappedData
-  nmrConstraintStore.newDistanceConstraintList(name=name, details=comment, unit=unit,
-                                               potentialType=potentialType)
+  obj = nmrConstraintStore.newDistanceConstraintList(name=name, details=comment, unit=unit,
+                                                     potentialType=potentialType)
+  return parent._project._data2Obj.get(obj)
 
 RestraintSet.newPeakList = newDistanceRestraintList
 

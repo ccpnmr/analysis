@@ -64,8 +64,9 @@ def newDihedralRestraintList(parent:RestraintSet,name:str=None, comment:str=None
                              unit:str=None, potentialType:str=None) -> DihedralRestraintList:
   """Create new child DihedralRestraintList"""
   nmrConstraintStore = parent._wrappedData
-  nmrConstraintStore.newDihedralConstraintList(name=name, details=comment, unit=unit,
-                                               potentialType=potentialType)
+  obj = nmrConstraintStore.newDihedralConstraintList(name=name, details=comment, unit=unit,
+                                                     potentialType=potentialType)
+  return parent._project._data2Obj.get(obj)
 
 RestraintSet.newPeakList = newDihedralRestraintList
 

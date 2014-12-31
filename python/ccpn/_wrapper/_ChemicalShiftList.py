@@ -22,11 +22,11 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.nmr.Nmr import ShiftList as Ccpn_ShiftList
 
-class ChemicalShiftList(AbstractWrapperClass):
+class ChemicalShiftList(AbstractWrapperObject):
   """Chemical Shift list."""
   
   #: Short class name, for PID.
@@ -112,8 +112,9 @@ Project._childClasses.append(ChemicalShiftList)
 def newChemicalShiftList(parent:Project, name:str=None, unit:str='ppm',
                          isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
   """Create new child Molecule"""
-  parent._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
-                                   dtails=comment)
+  obj = parent._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
+                                         details=comment)
+  return parent._data2Obj.get(obj)
 
 Project.newChemicalShiftList = newChemicalShiftList
 

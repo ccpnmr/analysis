@@ -33,7 +33,7 @@ PREFIXSEP  = ':'
 
 
 @functools.total_ordering
-class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
+class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
   """Abstract class containing common functionality for wrapper classes.
 
   ADVANCED. Core programmers only.
@@ -413,7 +413,7 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
       newAncestors = ancestors + [cls]
       for ii in range(len(newAncestors)-1):
         ancestor = newAncestors[ii]
-        prop = property(functools.partial(AbstractWrapperClass._allDescendants,
+        prop = property(functools.partial(AbstractWrapperObject._allDescendants,
                                           descendantClasses=newAncestors[ii+1:]),
                           None, None,
                           ("Type: (*%s*,)\* \n\nsorted %s type child objects" %
@@ -481,4 +481,4 @@ class AbstractWrapperClass(MutableMapping, metaclass=abc.ABCMeta):
         newObj._initializeAll()
 
 
-AbstractWrapperClass.getById.__annotations__['return'] = AbstractWrapperClass
+AbstractWrapperObject.getById.__annotations__['return'] = AbstractWrapperObject

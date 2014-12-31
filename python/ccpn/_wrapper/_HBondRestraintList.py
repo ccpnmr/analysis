@@ -64,8 +64,9 @@ def newHBondRestraintList(parent:RestraintSet,name:str=None, comment:str=None,
                              unit:str=None, potentialType:str=None) -> HBondRestraintList:
   """Create new child HBondRestraintList"""
   nmrConstraintStore = parent._wrappedData
-  nmrConstraintStore.newHBondConstraintList(name=name, details=comment, unit=unit,
+  obj = nmrConstraintStore.newHBondConstraintList(name=name, details=comment, unit=unit,
                                                potentialType=potentialType)
+  return parent._project._data2Obj.get(obj)
 
 RestraintSet.newPeakList = newHBondRestraintList
 

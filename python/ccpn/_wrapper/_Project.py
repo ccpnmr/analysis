@@ -24,13 +24,14 @@ __version__ = "$Revision: 7686 $"
 
 import functools
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
+from ccpncore.util import Common as commonUtil
 
 
-class Project(AbstractWrapperClass):
+class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to CCPN: NmrProject"""
   
   #: Short class name, for PID.
@@ -73,6 +74,9 @@ class Project(AbstractWrapperClass):
     self._pid2Obj[self.__class__.__name__] =  dd = {}
     self._pid2Obj[self.shortClassName] = dd
     dd[pid] = self
+
+    # Set up pid sorting dictionary to cache pid sort keys
+    self._pidSortKeys = {}
     
     # general residue name to ChemCompIDs tuple Map.
     self._residueName2chemCompIds = DataConvertLib.getStdResNameMap(
@@ -143,7 +147,7 @@ class Project(AbstractWrapperClass):
     return self._wrappedData.guid
     
   @property
-  def _parent(self) -> AbstractWrapperClass:
+  def _parent(self) -> AbstractWrapperObject:
     """Parent (containing) object."""
     return None
   
@@ -161,11 +165,38 @@ class Project(AbstractWrapperClass):
   # utility functions
   #
 
+  def _pidSortKey(self, key) -> tuple:
+    """ sort key that sorts by header then fields with numerical fields sorted numerically
+     (e.g. '11a' before '2b'). If header is missing it is treated as empty string ('')
+
+     The input parameter 'key' may be a pid string or a sequence of pid strings"""
+
+    if isinstance(key, str):
+      pid = key
+      result = self._pidSortKeys.get(pid)
+      if result is None:
+        ll = pid.split(':',1)
+        if len(ll) == 1:
+          ll = ['', pid]
+        result = ll[:1] + commonUtil.integerStringSortKey(pid.split('.'))
+        self._pidSortKeys[pid] = result
+
+    else:
+      # Treat as list of pids
+      result = list(key)
+      for ii,pid in result:
+        ll = pid.split(':',1)
+        if len(ll) == 1:
+          ll = ['', pid]
+        result[ii] = ll[:1] + commonUtil.integerStringSortKey(pid.split('.'))
+    #
+    return result
+
 # NBNB set function parameter annotations for AbstractBaseClass functions
 # MUST be done here to avoid circular import problems
-AbstractWrapperClass.__init__.__annotations__['project'] = Project
-AbstractWrapperClass.project.fget.__annotations__['return'] = Project
-#AbstractWrapperClass.project.getter.__annotations__['return'] = Project
+AbstractWrapperObject.__init__.__annotations__['project'] = Project
+AbstractWrapperObject.project.fget.__annotations__['return'] = Project
+#AbstractWrapperObject.project.getter.__annotations__['return'] = Project
 
 
 

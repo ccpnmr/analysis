@@ -22,13 +22,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
 from ccpncore.api.ccp.nmr.Nmr import NmrChain as Ccpn_NmrChain
 
 
-class NmrChain(AbstractWrapperClass):
+class NmrChain(AbstractWrapperObject):
   """Nmr Assignment Chain."""
   
   #: Short class name, for PID.

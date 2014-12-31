@@ -25,13 +25,13 @@ __author__ = 'rhf22'
 
 from collections.abc import Sequence
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Spectrum import Spectrum
 from ccpncore.api.ccp.nmr.Nmr import DataDimRef as Ccpn_DataDimRef
 
 
-class SpectrumReference(AbstractWrapperClass):
+class SpectrumReference(AbstractWrapperObject):
   """ADVANCED. NMR spectrum reference. Can only exist for Fourier transformed dimensions
   (CCPN: FreqDataDim). Required for experiments with assignable splittings (e.g. J-coupling, RDC),
   reduced-dimensionality, more than one nucleus per axis, o

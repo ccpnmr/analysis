@@ -22,14 +22,14 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
 from ccpncore.lib.DataMapper import DataMapper
 from ccpncore.util import Common as commonUtil
 
-class Residue(AbstractWrapperClass):
+class Residue(AbstractWrapperObject):
   """Molecular Residue."""
   
   #: Short class name, for PID.
@@ -156,6 +156,8 @@ def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None,
   else:
     ccpnResidue.seqCode = intCode
     ccpnResidue.seqInsertCode = seqInsertCode
+
+  return parent._project._data2Obj.get(ccpnResidue)
     
     
     

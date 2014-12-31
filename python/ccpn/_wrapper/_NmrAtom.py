@@ -23,13 +23,13 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrResidue import NmrResidue
 from ccpncore.api.ccp.nmr.Nmr import Resonance
 from ccpncore.lib import MoleculeQuery
 
-class NmrAtom(AbstractWrapperClass):
+class NmrAtom(AbstractWrapperObject):
   """Nmr Atom (corresponds to Resonance."""
   
   #: Short class name, for PID.

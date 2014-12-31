@@ -22,10 +22,10 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._RestraintSet import RestraintSet
 
-class AbstractRestraintList(AbstractWrapperClass):
+class AbstractRestraintList(AbstractWrapperObject):
   """ Abstract RestraintList - superclass of actual restraint lists."""
   
   #: Short class name, for PID.

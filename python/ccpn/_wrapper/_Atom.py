@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperClass import AbstractWrapperClass
+from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Residue import Residue
 from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
@@ -31,7 +31,7 @@ from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
 
 # NBNB TBD modify to deal with StructureAtoms and RestraintAtoms CombiClass?
 
-class Atom(AbstractWrapperClass):
+class Atom(AbstractWrapperObject):
   """Molecular Atom.
 
   NBNB TBD rewrite - move to under Project, ... OR NOT ???"""

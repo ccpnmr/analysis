@@ -209,19 +209,36 @@ def nextUniqueName(name):
 
 
 def integerStringSortKey(key):
-  """return sort key so that strings starting with an integer sort as if by integer"""
+  """return sort key so that strings starting with an integer sort as if by integer
 
-  result = list(key)
-  for ii,val in enumerate(result):
-    if isinstance(val, str):
-      vv = val.lstrip()
-      ll = []
-      for char in vv:
-        if char.isdigit():
-          ll.append(char)
-        else:
-          break
-      if ll :
-        result[ii] = '%30s' % ''.join(ll) + vv[len(ll):]
+  params:: key  either sequence or single string"""
 
-  return result
+  if isinstance(key, str):
+    vv = key.lstrip()
+    ll = []
+    for char in vv:
+      if char.isdigit():
+        ll.append(char)
+      else:
+        break
+    if ll :
+      return '%30s' % ''.join(ll) + vv[len(ll):]
+    else:
+      return key
+
+  else:
+    result = list(key)
+
+    for ii,val in enumerate(result):
+      if isinstance(val, str):
+        vv = val.lstrip()
+        ll = []
+        for char in vv:
+          if char.isdigit():
+            ll.append(char)
+          else:
+            break
+        if ll :
+          result[ii] = '%30s' % ''.join(ll) + vv[len(ll):]
+
+    return result

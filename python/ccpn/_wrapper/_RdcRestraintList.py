@@ -64,8 +64,9 @@ def newRdcRestraintList(parent:RestraintSet,name:str=None, comment:str=None,
                              unit:str=None, potentialType:str=None) -> RdcRestraintList:
   """Create new child RdcRestraintList"""
   nmrConstraintStore = parent._wrappedData
-  nmrConstraintStore.newRdcConstraintList(name=name, details=comment, unit=unit,
-                                               potentialType=potentialType)
+  obj = nmrConstraintStore.newRdcConstraintList(name=name, details=comment, unit=unit,
+                                                potentialType=potentialType)
+  return parent._project._data2Obj.get(obj)
 
 RestraintSet.newPeakList = newRdcRestraintList
 

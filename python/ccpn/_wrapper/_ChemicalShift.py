@@ -49,7 +49,9 @@ class ChemicalShift(AbstractWrapperObject):
   @property
   def id(self) -> str:
     """identifier - assignment string"""
-    return self.assignment.id
+    # NBNB TBD - check if this breaks something. We could use coma-separated at need
+    # but NBNB the NEF export assumes dot-separated
+    return self.assignment._pid
     
   @property
   def _parent(self) -> Project:

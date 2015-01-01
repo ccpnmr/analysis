@@ -58,10 +58,13 @@ class Chain(AbstractWrapperObject):
     
   @property
   def id(self) -> str:
-    """short form of name, used for id"""
+    """short form of name, corrected to use for id"""
     return self._wrappedData.code.replace('.','_').replace(':','_')
 
-  shortName = id
+  @property
+  def shortName(self) -> str:
+    """short form of name"""
+    return self._wrappedData.code
     
   @property
   def compoundName(self) -> str:

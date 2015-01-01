@@ -294,19 +294,13 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
   def __lt__(self, other):
     """Ordering implementation function, necessary for making lists sortable.
     """
-    selfname = type(self).__name__
-    othername = type(other).__name__
-    
-    if selfname == othername:
-      try:
-        return ((self._pid, id(self._project)) < 
-                (other._pid, id(other._project)))
-      except AttributeError:
-        # Rare case - a different class with matching name:
-        return id(type(self)) < id(type(other))
-    
+
+    selfPid = self.longPid
+    otherPid = other.longPid
+    if selfPid == otherPid:
+      return self._project.id < other._project.id
     else:
-      return selfname < othername
+      return self._project._pidSortKey(selfPid) < other._project._pidSortKey(otherPid)
   
   # CCPN properties 
   @property

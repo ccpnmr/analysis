@@ -155,7 +155,7 @@ class AbstractRestraintContribution(AbstractWrapperObject):
     for ll in value:
       # make new items
       getattr(ccpnContribution, self._newItemFuncName)(
-        resonances=fetchFixedResonance(pid) for pid in ll)
+        resonances=tuple(fetchFixedResonance(pid) for pid in ll))
     
   # Implementation functions
 

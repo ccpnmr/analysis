@@ -166,30 +166,34 @@ class Project(AbstractWrapperObject):
   #
 
   def _pidSortKey(self, key) -> tuple:
-    """ sort key that sorts by header then fields with numerical fields sorted numerically
-     (e.g. '11a' before '2b'). If header is missing it is treated as empty string ('')
+    """ sort key that splits pids, and sorts numerical fields numerically (e.g. '11a' before '2b').
+     A string without  ':' is treated as a pid with empty header, so that simple strings
+     sort numerically as well
 
-     The input parameter 'key' may be a pid string or a sequence of pid strings"""
+     If 'key' is a non-string sequence,
+     directly contained strings are converted to their _pidSortKeys"""
 
-    if isinstance(key, str):
-      pid = key
-      result = self._pidSortKeys.get(pid)
-      if result is None:
-        ll = pid.split(':',1)
+    result = self._pidSortKeys.get(key)
+
+    if result is None:
+
+      if isinstance(key, str):
+        ll = key.split(':',1)
         if len(ll) == 1:
-          ll = ['', pid]
-        result = ll[:1] + commonUtil.integerStringSortKey(pid.split('.'))
-        self._pidSortKeys[pid] = result
+          ll = ['', key]
+        result = ll[:1] + commonUtil.integerStringSortKey(key.split('.'))
 
-    else:
-      # Treat as list of pids
-      result = list(key)
-      for ii,pid in result:
-        ll = pid.split(':',1)
-        if len(ll) == 1:
-          ll = ['', pid]
-        result[ii] = ll[:1] + commonUtil.integerStringSortKey(pid.split('.'))
+      else:
+        # Treat as list of pids
+        result = list(key)
+        for ii,pid in result:
+          if isinstance(pid, str):
+            ll = pid.split(':',1)
+            if len(ll) == 1:
+              ll = ['', pid]
+            result[ii] = ll[:1] + commonUtil.integerStringSortKey(pid.split('.'))
     #
+    self._pidSortKeys[key] = result
     return result
 
 # NBNB set function parameter annotations for AbstractBaseClass functions

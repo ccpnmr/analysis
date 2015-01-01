@@ -35,7 +35,7 @@ class Atom(AbstractWrapperObject):
   """Molecular Atom.
 
   NBNB TBD rewrite - move to under Project, ... OR NOT ???"""
-  
+
   #: Short class name, for PID.
   shortClassName = 'MA'
 
@@ -61,25 +61,13 @@ class Atom(AbstractWrapperObject):
   residue = _parent
     
   @property
-  def name(self) -> str:
+  def id(self) -> str:
     """Atom name string (e.g. 'HA')"""
     return self._wrappedData.name
 
-  id = name
+  name = id
 
   # Utiity functions
-  def _getCcpnResonance(self) -> object:
-    """get or create resonance corresponding to Atom
-    NBNB TBD Must add Resonance if not currently there. NOT YET DONE
-    NBNB duplicate. consolidate and move to right place
-
-    NBNB TBD, change to private property?"""
-
-    # NBNB TBD Completely redo once Atom is stable.
-
-    return self.ccpnResonance
-
-
     
   # Implementation functions
   @classmethod

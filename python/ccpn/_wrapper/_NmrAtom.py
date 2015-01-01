@@ -57,11 +57,11 @@ class NmrAtom(AbstractWrapperObject):
   residue = _parent
     
   @property
-  def name(self) -> str:
+  def id(self) -> str:
     """Atom name string (e.g. 'HA')"""
     return self._wrappedData.name
 
-  id = name
+  name = id
     
   # Implementation functions
   @classmethod
@@ -77,7 +77,7 @@ def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAto
 
   if not isotopeCode:
     if name:
-      isotopeCode =MoleculeQuery.DEFAULT_ISOTOPES.get(name[0])
+      isotopeCode = MoleculeQuery.DEFAULT_ISOTOPES.get(name[0])
     else:
       raise ValueError("newNmrAtom requires either name or isotopeCode as input")
 

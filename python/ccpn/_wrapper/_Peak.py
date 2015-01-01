@@ -32,7 +32,6 @@ from ccpncore.api.ccp.nmr.Nmr import Peak as Ccpn_Peak
 
 from ccpncore.lib.ccp.nmr.Nmr import Peak as CcpnLibPeak
 
-
 class Peak(AbstractWrapperObject):
   """Peak. Includes values for per-dimension values and for assignments.
   Assignments are complete for normal shift dimensions, but only the main referencing is used
@@ -142,7 +141,7 @@ class Peak(AbstractWrapperObject):
 
   @property
   def dimensionAssignments(self) -> tuple:
-    """Peak dimension assignment - a list of lists of assigned Atoms for each dimension.
+    """Peak dimension assignment - a list of lists of NmrAtoms for each dimension.
     Assignments as a list of individual combinations is given in 'assignments'.
     Setting dimensionAssignments implies that all combinations are possible"""
     result = []
@@ -164,14 +163,14 @@ class Peak(AbstractWrapperObject):
     ccpnPeak = self._wrappedData
     dimResonances = list(value)
     for ii, atoms in enumerate(dimResonances):
-      dimValues = tuple(x._getCcpnResonance() for x in value[ii])
+      dimValues = tuple(x._wrappedData for x in value[ii])
       dimResonances[ii] = tuple(x for x in dimValues if x is not None)
 
     CcpnLibPeak.setPeakDimAssignments(ccpnPeak, dimResonances)
 
   @property
   def assignments(self) -> tuple:
-    """Peak assignment - a list of lists of assigned Atom combinations
+    """Peak assignment - a list of lists of NmrAtom combinations
     (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None
     Assignments per dimension are given in 'dimensionAssignments'."""
     data2Obj = self._project._data2Obj
@@ -206,9 +205,9 @@ class Peak(AbstractWrapperObject):
     for tt in value:
       ll = dimensionCount*[None]
       resonances.append(ll)
-      for atom, ii in enumerate(tt):
+      for ii, atom in enumerate(tt):
         if atom is not None:
-          ll[ii] = atom._getCcpnResonance()
+          ll[ii] = atom._wrappedData
 
     # set assignments
     CcpnLibPeak.setAssignments(ccpnPeak, resonances)
@@ -244,7 +243,7 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
   if dimensionAssignments:
     dimResonances = list(dimensionAssignments)
     for ii, atoms in enumerate(dimResonances):
-      dimValues = tuple(x._getCcpnResonance() for x in dimensionAssignments[ii])
+      dimValues = tuple(x._wrappedData for x in dimensionAssignments[ii])
       dimResonances[ii] = tuple(x for x in dimValues if x is not None)
 
     # set dimensionAssignments
@@ -261,7 +260,7 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
       resonances.append(ll)
       for ii,atom in enumerate(tt):
         if atom is not None:
-          ll[ii] = atom._getCcpnResonance()
+          ll[ii] = atom._wrappedData
 
     # set assignments
     CcpnLibPeak.setAssignments(ccpnPeak, resonances)

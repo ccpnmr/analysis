@@ -27,7 +27,7 @@ from collections.abc import Sequence
 def setPeakDimAssignments(peak, value:Sequence):
   """Set per-dimension assignments on peak.
   value is a list of lists (one per dimension) of resonances.
-  NB only works for single-PeakCOntrib, one-ref-per-dimension assignments
+  NB only works for single-PeakContrib, one-ref-per-dimension assignments
   NB resets PeakContribs
   """
   numDim =  peak.peakList.dataSource.numDim

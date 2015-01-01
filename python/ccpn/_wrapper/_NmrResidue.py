@@ -27,7 +27,6 @@ from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrChain import NmrChain
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup
 from ccpncore.lib.DataMapper import DataMapper
-from ccpncore.util import Common as commonUtil
 
 class NmrResidue(AbstractWrapperObject):
   """Nmr Residue, for assignment."""

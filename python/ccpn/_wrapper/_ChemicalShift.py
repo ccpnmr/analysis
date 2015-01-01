@@ -25,6 +25,7 @@ __version__ = "$Revision$"
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
+from ccpn._wrapper._NmrAtom import NmrAtom
 from ccpncore.api.ccp.nmr.Nmr import Shift as Ccpn_Shift
 
 class ChemicalShift(AbstractWrapperObject):
@@ -94,7 +95,7 @@ class ChemicalShift(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
-  def assignment(self) -> object:
+  def assignment(self) -> NmrAtom:
     """NmrAtom that the shift belongs to"""
     return self._project._data2Obj(self._wrappedData.resonance)
 
@@ -108,12 +109,12 @@ class ChemicalShift(AbstractWrapperObject):
 # Connections to parents:
 ChemicalShiftList._childClasses.append(ChemicalShift)
 
-def newChemicalShift(parent:ChemicalShiftList, value:float, assignment:object,
+def newChemicalShift(parent:ChemicalShiftList, value:float, assignment:NmrAtom,
                      valueError:float=0.0, figureOfMerit:float=1.0,
                      comment:str=None) -> ChemicalShift:
   """Create new child Shift"""
   obj = parent._wrappedData.newShift(value=value,
-                                     resonance=assignment._getAtomResonance(), error=valueError,
+                                     resonance=assignment._wrappedData, error=valueError,
                                      figOfMerit=figureOfMerit, details=comment)
   return parent._project._data2Obj.get(obj)
 

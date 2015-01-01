@@ -59,7 +59,12 @@ class RestraintSet(AbstractWrapperObject):
   def serial(self) -> int:
     """serial number, key attribute for RestraintSet"""
     return self._wrappedData.serial
-  
+
+  @property
+  def _parent(self) -> Project:
+    """Parent (containing) object."""
+    return self._project
+
   @property
   def comment(self) -> str:
     """Free-form text comment"""

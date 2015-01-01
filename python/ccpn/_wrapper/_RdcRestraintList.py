@@ -49,6 +49,51 @@ class RdcRestraintList(AbstractRestraintList):
   def ccpnRdcRestraintList(self) -> RdcConstraintList:
     """ CCPN RdcConstraintList matching RdcRestraintList"""
     return self._wrappedData
+
+  @property
+  def tensorMagnitude(self) -> float:
+    """magnitude of orientation tensor """
+    return self._wrappedData.tensorMagnitude
+
+  @tensorMagnitude.setter
+  def tensorMagnitude(self, value:float):
+    self._wrappedData.tensorMagnitude = value
+
+  @property
+  def tensorRhombicity(self) -> float:
+    """rhombicity of orientation tensor """
+    return self._wrappedData.tensorRhombicity
+
+  @tensorRhombicity.setter
+  def tensorRhombicity(self, value:float):
+    self._wrappedData.tensorRhombicity = value
+
+  @property
+  def tensorChainCode(self) -> str:
+    """Chain code of residue anchoring orientation tensor"""
+    return self._wrappedData.tensorChainCode
+
+  @tensorChainCode.setter
+  def tensorChainCode(self, value:str):
+    self._wrappedData.tensorChainCode = value
+
+  @property
+  def tensorSequenceCode(self) -> str:
+    """Sequence code of residue anchoring orientation tensor"""
+    return self._wrappedData.tensorSequenceCode
+
+  @tensorSequenceCode.setter
+  def tensorSequenceCode(self, value:str):
+    self._wrappedData.tensorSequenceCode = value
+
+  @property
+  def tensorResidueType(self) -> str:
+    """Residue Type of residue anchoring orientation tensor"""
+    return self._wrappedData.tensorResidueType
+
+  @tensorResidueType.setter
+  def tensorResidueType(self, value:str):
+    self._wrappedData.tensorResidueType = value
     
   # Implementation functions
   @classmethod

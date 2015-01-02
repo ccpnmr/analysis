@@ -55,7 +55,7 @@ class AbstractRestraint(AbstractWrapperObject):
   def peaks(self) -> tuple:
     """peaks used to derive restraint"""
     ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._wrappedData.peaks)
+    return tuple(sorted(ff(x) for x in self._wrappedData.peaks))
 
   @peaks.setter
   def peaks(self, value:Sequence):

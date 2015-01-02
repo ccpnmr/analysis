@@ -495,13 +495,13 @@ class Spectrum(AbstractWrapperObject):
   def foldingModes(self) -> tuple:
     """Type: (*str,*)\*dimensionCount, *settable*
 
-    main ExpDimRef folding mode (values: 'aliased', 'folded', None)"""
-    dd = {True:'folded', False:'aliased', None:None}
+    main ExpDimRef folding mode (values: 'circular', 'mirror', None)"""
+    dd = {True:'mirror', False:'circular', None:None}
     return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
 
   @foldingModes.setter
   def foldingModes(self, value):
-    dd = {'aliased':False, 'folded':True, None:None}
+    dd = {'circular':False, 'mirror':True, None:None}
     self._setExpDimRefAttribute('isFolded', [dd[x] for x in value])
 
   @property

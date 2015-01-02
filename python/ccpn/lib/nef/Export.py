@@ -29,7 +29,7 @@ import itertools
 
 from ccpn.lib.nef import Util as nefUtil
 from ccpncore.lib.Bmrb import bmrb
-
+bmrb.enableNEFDefaults()
 
 nefExtension = 'nef'
 
@@ -48,17 +48,12 @@ nefTagsByPotentialType = {
   'lower_bound-parabolic-linear' : ('lower_linear_limit', 'lower_limit'),
   'unknown' : ('lower_linear_limit', 'lower_limit','upper_limit', 'upper_linear_limit'),
 }
-ccpnTagsByPotentialType = {
-  'log-normal' : (),
-  'parabolic'  :(),
-  'square-well-parabolic' : ('lowerLimit', 'upperLimit'),
-  'upper-bound-parabolic' : ('upperLimit',),
-  'lower-bound-parabolic' : ('lowerLimit',),
-  'square-well-parabolic-linear' : ('additionalLowerLimit', 'lowerLimit','upperLimit',
-                                  'additionalUpperLimit'),
-  'upper_bound-parabolic-linear' : ('upperLimit','additionalUpperLimit'),
-  'lower_bound-parabolic-linear' : ('additionalLowerLimit', 'lowerLimit'),
-  'unknown' : ('additionalLowerLimit', 'lowerLimit','upperLimit','additionalUpperLimit'),
+
+nef2CcpnTags = {
+  'lower_limit' : 'lowerLimit',
+  'upper_limit' : 'upperLimit',
+  'lower_linear_limit' : 'additionalLowerLimit',
+  'upper_linear_limit' : 'additionalUpperLimit',
 }
 
 
@@ -153,13 +148,7 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
   else:
     shiftLists = [shiftList]
 
-  # Make assignment map
-  assignmentMap = Nef.mapAllAssignments(nmrProject, molSystem=molSystem)
-  for nmrConstraintStore in set(x.topObject for x in constraintLists):
-    Nef.mapAllAssignments(nmrConstraintStore, assignmentMap=assignmentMap, molSystem=molSystem)
-
-
-  # Make BMRB object tree
+  # Make BMRB object tree :
 
   # Make Entry
   entry = bmrb.entry.fromScratch(dataName)
@@ -193,7 +182,7 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
 
   # Make peak list and spectrum frames
   for peakList in peakLists:
-    entry.addSaveframe(makePeakListFrame(peakList, assignmentMap, shiftList=shiftList))
+    entry.addSaveframe(makePeakListFrame(peakList))
 
   # Make Peak-restraint links frame
   entry.addSaveframe(makePeakRestraintLinksFrame(useConstraintLists, peakLists))
@@ -344,7 +333,7 @@ def makeShiftListFrame(shiftList):
   """make a saveFrame for a shift list"""
 
   if shiftList.name is None:
-    shiftList.name = 'ShiftList_%s' % shiftList.serial
+    shiftList.name = shiftList.longPid
   framecode = shiftList.name
   # NBNB TBD ensure names are unique
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode,
@@ -415,7 +404,8 @@ def makeRestraintListFrame(restraintList):
     for contribution in restraint.contributions:
       row1 = [serial, contribution.combinationId]
       row3 = [contribution.weight, contribution.targetValue, contribution.error]
-      for tag in ccpnTagsByPotentialType:
+      for ss in nefTagsByPotentialType:
+        tag = nef2CcpnTags.get(ss,ss)
         row3.append(getattr(contribution, tag))
 
       for restraintItem in contribution.restraintItems:
@@ -428,13 +418,17 @@ def makeRestraintListFrame(restraintList):
   #
   return saveframe
 
-def makePeakListFrame(peakList, assignmentMap, shiftList=None):
-  """ake saveFrame for peakList an containing spectrum"""
+def makePeakListFrame(peakList):
+  """make saveFrame for peakList an containing spectrum"""
 
-  dataSource = peakList.dataSource
-  experiment = dataSource.experiment
-  framecode = 'nmr_spectrum_%s_%s_%s' % (experiment.name, dataSource.serial, peakList.serial)
-  category = 'nmr_spectrum'
+  # Set up variables
+  spectrum = peakList.spectrum
+  dimensionCount = spectrum.dimensionCount
+  ccpnDataDims = spectrum.ccpnSpectrum.sortedDataDims()
+  framecode = peakList.name
+  if framecode is None:
+    framecode = peakList.name = peakList.longPid
+  category = 'nef_nmr_spectrum'
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode,
                                          tag_prefix=category)
 
@@ -442,17 +436,17 @@ def makePeakListFrame(peakList, assignmentMap, shiftList=None):
   saveframe.addTags([
     ('sf_category',category),
     ('sf_framecode',framecode),
-    ('num_dimensions',dataSource.numDim),
-    ('chemical_shift_list','$chemical_shift_list_%s'
-                           % (experiment.shiftList or shiftList).serial),
+    ('num_dimensions',dimensionCount),
+    ('chemical_shift_list','$%s' % spectrum.chemicalShiftList.name)
   ])
 
-  refExperiment = experiment.refExperiment
-  if refExperiment is not None:
-    name = refExperiment.name
-    synonym = refExperiment.synonym or '?'
+  # Experiment type
+  refExperiment = spectrum.ccpnSpectrum.experiment.refExperiment
+  if refExperiment is None:
+    name = synonym = None
   else:
-    name =synonym = '?'
+    name = refExperiment.name
+    synonym = refExperiment.synonym
   saveframe.addTags([
     ('experiment_classification',name),
     ('expriment_type',synonym),
@@ -460,59 +454,37 @@ def makePeakListFrame(peakList, assignmentMap, shiftList=None):
 
 
   # experiment dimensions loop
-  loop = bmrb.loop.fromScratch(category='spectrum_dimension')
+  loop = bmrb.loop.fromScratch(category='nef_spectrum_dimension')
   saveframe.addLoop(loop)
   for tag in ('dimension_id', 'axis_unit', 'axis_code', 'spectrometer_frequency',
               'spectral_width', 'value_first_point', 'folding', 'absolute_peak_positions',
               'is_acquisition'):
     loop.addColumn(tag)
 
-  for dim,dataDim in enumerate(dataSource.sortedDataDims()):
-
-    # Find ExpDimRef to use. NB, could break for unusual cases
-    expDimRefs = dataDim.expDim.sortedExpDimRefs()
-    for expDimRef in expDimRefs:
-      if expDimRef.measurementType.lower() == 'shift':
-        # unfortunately casing of word is not reliable
-        break
-    else:
-      expDimRef = expDimRefs[0]
-
-    dataDimRef = dataDim.findFirstDataDimRef(expDimRef=expDimRef)
-
-    isotopeCodes = expDimRef.isotopeCodes
-    if len(isotopeCodes) == 1:
-      isotopeCode = isotopeCodes[0]
-    else:
-      isotopeCode = '?'
-
-    #
-    loop.addDataByColumn('dimension_id', dim+1)
-    loop.addDataByColumn('axis_unit', expDimRef.unit or '?')
-    loop.addDataByColumn('axis_code', isotopeCode)
-    loop.addDataByColumn('spectrometer_frequency', expDimRef.sf or '?')
-    loop.addDataByColumn('spectral_width', dataDimRef.spectralWidthOrig)
-    loop.addDataByColumn('value_first_point', dataDimRef.pointToValue(1. - dataDim.pointOffset))
-    if expDimRef.isFolded:
-      folding = 'mirror'
-    elif expDimRef.hasAliasedFreq:
-      # NBNB in practice people might not have set this correctly, but well ...
-      folding = 'circular'
-    else:
-      folding='none'
-    loop.addDataByColumn('folding', folding)
-    loop.addDataByColumn('absolute_peak_positions', 'true')  # Always true in CCPN
-    loop.addDataByColumn('is_acquisition', expDimRef.expDim.isAcquisition)
-
+  rows = zip(
+    range(1, dimensionCount + 1),
+    spectrum.axisUnits,
+    spectrum.isotopeCodes,
+    spectrum.spectrometerFrequencies,
+    spectrum.spectralWidths,
+    tuple(x.primaryDataDimRef.pointToValue(1. - x.pointOffset) for x in ccpnDataDims),
+    # NBNB TBD this can break for non-Freq dimensions
+    spectrum.foldingModes,
+    (True,) * dimensionCount,
+    # NBNB TBD we have no way of representing data for absPeakPositions=False
+    tuple(x.isAcquisition for x in ccpnDataDims),
+  )
+  for row in rows:
+    loop.addData(row)
 
   # dimension connection loop
-  loop = bmrb.loop.fromScratch(category='spectrum_dimension_transfer')
+  loop = bmrb.loop.fromScratch(category='nef_spectrum_dimension_transfer')
   saveframe.addLoop(loop)
   for tag in ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect'):
     loop.addColumn(tag)
 
   ref2Dim = {}
-  for dim,dataDim in enumerate(dataSource.sortedDataDims()):
+  for dim,dataDim in enumerate(ccpnDataDims):
     # Find ExpDimRef to use. NB, could break for unusual cases
     expDimRefs = dataDim.expDim.sortedExpDimRefs()
     for expDimRef in expDimRefs:
@@ -524,7 +496,7 @@ def makePeakListFrame(peakList, assignmentMap, shiftList=None):
     ref2Dim[expDimRef] = dim + 1
 
   rows = []
-  for expTransfer in experiment.expTransfers:
+  for expTransfer in spectrum.ccpnSpectrum.experiment.expTransfers:
     row = [ref2Dim.get(x) for x in expTransfer.expDimRefs]
     if None not in row:
       row.sort()
@@ -537,65 +509,51 @@ def makePeakListFrame(peakList, assignmentMap, shiftList=None):
 
 
   # main peak loop
-  loop = bmrb.loop.fromScratch(category='peak')
+  loop = bmrb.loop.fromScratch(category='nef_peak')
   saveframe.addLoop(loop)
   for tag in ('peak_id', 'volume', 'volume_uncertainty', 'height', 'height_uncertainty'):
     loop.addColumn(tag)
-  for ii in range(1, dataSource.numDim + 1):
+  for ii in range(1, dimensionCount + 1):
     loop.addColumn('position_%s' % ii)
     loop.addColumn('position_uncertainty_%s' % ii)
-  for ii in range(1, dataSource.numDim + 1):
+  for ii in range(1, dimensionCount + 1):
     loop.addColumn('chain_code_%s' % ii)
     loop.addColumn('sequence_code_%s' % ii)
     loop.addColumn('residue_type_%s' % ii)
     loop.addColumn('atom_name_%s' % ii)
 
-  for peak in peakList.sortedPeaks():
+  for peak in peakList.peaks():
 
-    peakDims = peak.sortedPeakDims()
+    # serial and intensities
+    firstpart = [peak.serial, peak.volume, peak.volumeError, peak.height, peak.heightError]
 
-    firstpart = [peak.serial] + Nef._getPeakIntensityData(peak)
+    # peak position
+    firstpart.extend(zip(peak.position, peak.positionError))
 
-    for peakDim in peakDims:
-      firstpart.append(peakDim.value)
-      firstpart.append(peakDim.valueError)
-
-
-    mainPeakDimContribs = [sorted(x.mainPeakDimContribs, key=operator.attrgetter('serial'))
-                           for x in peakDims]
-    combinations = []
-    for peakContrib in peak.sortedPeakContribs():
-      allAtoms = []
-      peakDimContribs = peakContrib.peakDimContribs
-      for ii,peakDim in enumerate(peakDims):
-        atoms = [list(assignmentMap.get(x.resonance)) for x in mainPeakDimContribs[ii]
-                 if x in peakDimContribs and hasattr(x, 'resonance')]
-        if not atoms:
-          atoms = [[None]*4]
-        allAtoms.append(atoms)
-
-      combinations.extend(itertools.product(*allAtoms))
-
-    if combinations:
-      # Assigned peak add a line per assignment
-      for combination in combinations:
+    # assignments
+    assignments = peak.assignments
+    if assignments:
+      for assignment in assignments:
         row = list(firstpart)
-        row.extend(itertools.chain(*combination))
+        for nmrAtom in assignment:
+          if nmrAtom is None:
+            row.extend((None, None, None, None))
+          else:
+            row.extend(nmrAtom._pid.split('.'))
         loop.addData(row)
     else:
-      # unassigned peak - add one line
-      loop.addData(firstpart + (dataSource.numDim * 4 ) * ['.'])
-
+      # Unassigned peak
+      firstpart.extend([None] * (dimensionCount * 4))
+      loop.addData(firstpart)
   #
   return saveframe
 
 
-
-def makePeakRestraintLinksFrame(constraintLists, peakLists):
+def makePeakRestraintLinksFrame(restraintLists, peakLists):
   """ Make peak-constraint links frame, with links tha match both constraintLists and peakLists"""
 
   # header block
-  category = 'peak_restraint_links'
+  category = 'nef_peak_restraint_links'
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=category,
                                          tag_prefix=category)
   saveframe.addTags([
@@ -604,54 +562,25 @@ def makePeakRestraintLinksFrame(constraintLists, peakLists):
   ])
 
   # peak restraint links loop
-  loop = bmrb.loop.fromScratch(category='peak_restraint_link')
+  loop = bmrb.loop.fromScratch(category='nef_peak_restraint_link')
   saveframe.addLoop(loop)
   for tag in ('nmr_spectrum_id', 'peak_id', 'restraint_list_id', 'restraint_id'):
     loop.addColumn(tag)
 
-  for constraintList in constraintLists:
-    junk, restraint_list_id = _getStarFrameCodes(constraintList)
-    restraint_list_id = '$' + restraint_list_id
-    for constraint in constraintList.sortedConstraints():
-      restraint_id = constraint.serial
-      peaks = [x.peak for x in constraint.sortedPeakContribs()]
-      for peak in peaks:
-        if peak is not None and peak.peakList in peakLists:
-          peakList = peak.peakList
-          dataSource = peakList.dataSource
-          peak_id = peak.serial
-          nmr_spectrum_id = ('$nmr_spectrum_%s_%s_%s'
-          % (dataSource.experiment.name, dataSource.serial, peakList.serial))
-          #
-          loop.addData([nmr_spectrum_id, peak_id, restraint_list_id, restraint_id])
+  for restraintList in restraintLists:
+    restraint_list_id = '$' + restraintList.name
+    for restraint in restraintList:
+      restraint_id = restraint.serial
+      for peak in restraint.peaks:
+        loop.addData(['$'+peak.peakList.name, peak.serial, restraint_list_id, restraint_id])
   #
   return saveframe
-
-def _getStarFrameCodes(constraintList):
-  """ get category and framecode for a constraintList
-  NBNB necessary because we use differewnt frame codes for H-bond constraints"""
-
-  className = constraintList.className
-  if className.startswith('Rdc'):
-    restraintType = 'rdc'
-    frameformat = 'rdc_restraint_list_%s'
-  elif className.startswith('Distance'):
-    restraintType = 'distance'
-    frameformat = 'distance_restraint_list_%s'
-  elif className.startswith('HBond'):
-    restraintType = 'distance'
-    frameformat = 'hydrogen_bond_restraint_list_%s'
-  elif className.startswith('Dihedral'):
-    restraintType = 'dihedral'
-    frameformat = 'dihedral_restraint_list_%s'
-  else:
-    raise ValueError("Object %s is not a valid type of ConstraintList" % constraintList)
-  #
-  return restraintType, frameformat % constraintList.serial
 
 if __name__ == '__main__':
 
   if len(sys.argv) >= 3:
+
+    NBNB TBD fix
 
     from memops.general.Io import loadProject
     # set up input

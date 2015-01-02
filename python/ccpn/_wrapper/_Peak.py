@@ -83,6 +83,15 @@ class Peak(AbstractWrapperObject):
     self._wrappedData.height = value
 
   @property
+  def heightError(self) -> float:
+    """height error of Peak"""
+    return self._wrappedData.heightError
+
+  @heightError.setter
+  def heightError(self, value:float):
+    self._wrappedData.heightError = value
+
+  @property
   def volume(self) -> float:
     """volume of Peak"""
     return self._wrappedData.volume
@@ -90,6 +99,15 @@ class Peak(AbstractWrapperObject):
   @volume.setter
   def volume(self, value:float):
     self._wrappedData.volume = value
+
+  @property
+  def volumeError(self) -> float:
+    """volume error of Peak"""
+    return self._wrappedData.volumeError
+
+  @volumeError.setter
+  def volumeError(self, value:float):
+    self._wrappedData.volumeError = value
 
   @property
   def figureOfMerit(self) -> float:
@@ -128,6 +146,16 @@ class Peak(AbstractWrapperObject):
     for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
       peakDim.value = value[ii]
       peakDim.realValue = None
+
+  @property
+  def positionError(self) -> tuple:
+    """Peak position error in ppm (or other relevant unit)."""
+    return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
+
+  @positionError.setter
+  def positionError(self,value:Sequence):
+    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+      peakDim.valueError = value[ii]
 
   @property
   def pointPosition(self) -> tuple:

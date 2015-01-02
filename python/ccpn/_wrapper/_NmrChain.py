@@ -82,6 +82,11 @@ class NmrChain(AbstractWrapperObject):
 
     return self._parent._data2Obj.get(ccpnChain)
 
+  @classmethod
+  def _getAllWrappedData(cls, parent: Project)-> list:
+    """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
+    return parent._wrappedData.sortedNmrChains()
+
 
 def newNmrChain(parent:Project, shortName:str=None, comment:str=None) -> NmrChain:
   """Create new child NmrChain

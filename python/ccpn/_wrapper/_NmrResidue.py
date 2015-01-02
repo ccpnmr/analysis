@@ -63,7 +63,7 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def _parent(self) -> NmrChain:
     """Parent (containing) object."""
-    return self._project._data2Obj[self._wrappedData.chain]
+    return self._project._data2Obj[self._wrappedData.nmrChain]
   
   nmrChain = _parent
 

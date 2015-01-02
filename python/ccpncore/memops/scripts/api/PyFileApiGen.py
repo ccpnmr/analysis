@@ -684,6 +684,22 @@ except:
 
   # internal function 
   def addToStringForClass(self, clazz):
+
+    # __lt__ function
+    self.startFunc('__lt__',
+     params=(self.varNames['self'], 'other'),
+     docString=""" comparison function. WIth functools.totalordering allows object comparison."""
+    )
+
+    self.write("""
+selfClass = self.qualifiedName
+otherClass = other.qualifiedName
+if selfClass == otherClass:
+  return self.getFullKey() < other.getFullKey()
+else:
+  return selfClass < otherClass""")
+
+    self.endFunc()
       
     # __repr__ function
     self.startFunc('__repr__', params=(self.varNames['self'],), 
@@ -734,9 +750,9 @@ except:
 
   # internal function 
   def addToStringForDataObj(self):
-    
+
     # __repr__ function
-    self.startFunc('__repr__', 
+    self.startFunc('__repr__',
      params=(self.varNames['self'], ), 
      docString=""" string representation of object.
     identifies object uniquely, but can not be executed to regenerate it."""

@@ -242,6 +242,8 @@ def mapResonanceGroups(nmrProject, molSystem=None, chainMap=None, defaultChainCo
           residueType = None
         sequenceCode = '@%s' % resonanceGroup.serial
         result[resonanceGroup] = (defaultChainCode, sequenceCode, residueType)
+  #
+  return result
 
 
 def mapAssignedResonances(topObject, assignmentMap, molSystem=None, chainMap=None):

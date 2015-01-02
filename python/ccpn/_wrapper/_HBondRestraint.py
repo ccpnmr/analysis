@@ -54,7 +54,7 @@ class HBondRestraint(AbstractRestraint):
   @property
   def _parent(self) -> HBondRestraintList:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.hBondConstraintList]
+    return  self._project._data2Obj[self._wrappedData.parentList]
     
   # Implementation functions
   @classmethod

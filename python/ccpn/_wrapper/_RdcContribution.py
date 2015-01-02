@@ -47,14 +47,14 @@ class RdcContribution(AbstractRestraintContribution):
 
   # CCPN properties  
   @property
-  def ccpnContribution(self) -> RdcContribution:
+  def ccpnContribution(self) -> Ccpn_RdcContribution:
     """ CCPN RdcContribution matching RdcContribution"""
     return self._wrappedData
 
   @property
   def _parent(self) -> RdcRestraint:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.rdcConstraint]
+    return  self._project._data2Obj[self._wrappedData.constraint]
     
   # Implementation functions
   @classmethod

@@ -67,7 +67,7 @@ class NmrAtom(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: NmrResidue)-> list:
     """get wrappedData (Resonances) for all Atom children of parent Residue"""
-    return [sorted(parent._wrappedData.atoms, key=operator.attrgetter('name'))]
+    return sorted(parent._wrappedData.resonances, key=operator.attrgetter('name'))
     
     
 def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:

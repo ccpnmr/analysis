@@ -54,7 +54,7 @@ class DihedralRestraint(AbstractRestraint):
   @property
   def _parent(self) -> DihedralRestraintList:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.dihedralConstraintList]
+    return  self._project._data2Obj[self._wrappedData.parentList]
     
   # Implementation functions
   @classmethod

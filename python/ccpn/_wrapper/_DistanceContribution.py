@@ -47,14 +47,14 @@ class DistanceContribution(AbstractRestraintContribution):
 
   # CCPN properties  
   @property
-  def ccpnContribution(self) -> DistanceContribution:
+  def ccpnContribution(self) -> Ccpn_DistanceContribution:
     """ CCPN DistanceContribution matching DistanceContribution"""
     return self._wrappedData
 
   @property
   def _parent(self) -> DistanceRestraint:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.distanceConstraint]
+    return  self._project._data2Obj[self._wrappedData.constraint]
     
   # Implementation functions
   @classmethod

@@ -54,7 +54,7 @@ class DistanceRestraint(AbstractRestraint):
   @property
   def _parent(self) -> DistanceRestraintList:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.distanceConstraintList]
+    return  self._project._data2Obj[self._wrappedData.parentList]
     
   # Implementation functions
   @classmethod

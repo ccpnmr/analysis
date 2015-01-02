@@ -80,9 +80,13 @@ class PyApiGen(PyLanguage, PyType, ApiGen):
       ss = 'object'
     else:
       ss = self.getImportName(superclass, package)
+
+    self.writeNewline()
   
-    self.write("""
-###############################################################################
+    if clazz is self.baseClass:
+      self.write("@functools.total_ordering")
+
+    self.write("""###############################################################################
 class %s(%s):
   r""\"%s
   ""\"
@@ -606,6 +610,7 @@ def __init__(self, *args, **kw):
 import traceback
 import types
 import operator
+import functools
 
 # special function for fast whitespace checking.
 # used in DataType Word and Token handcode

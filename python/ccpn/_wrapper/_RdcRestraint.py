@@ -54,7 +54,7 @@ class RdcRestraint(AbstractRestraint):
   @property
   def _parent(self) -> RdcRestraintList:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.rdcConstraintList]
+    return  self._project._data2Obj[self._wrappedData.parentList]
     
   # Implementation functions
   @classmethod

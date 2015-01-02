@@ -60,6 +60,10 @@ class Project(AbstractWrapperObject):
   def __init__(self, wrappedData: Ccpn_NmrProject):
     """ Special init for root (Project) object
     """
+
+    if not isinstance(wrappedData, Ccpn_NmrProject):
+      raise ValueError("Project initialised with %s, should be ccp.nmr.Nmr.NmrProject."
+                       % wrappedData)
     
     # set up attributes
     self._project = self

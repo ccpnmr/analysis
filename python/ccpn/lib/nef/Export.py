@@ -23,11 +23,7 @@ __version__ = "$Revision$"
 
 import os
 import sys
-import operator
 import datetime
-import itertools
-
-from ccpn.lib.nef import Util as nefUtil
 from ccpncore.lib.Bmrb import bmrb
 bmrb.enableNEFDefaults()
 
@@ -59,58 +55,63 @@ nef2CcpnTags = {
 
 # NBNB TBD we might want an exportNmrCalc2Nef wrapper as well
 
-# def exportConstraintStore2Nef(nmrConstraintStore, dataName=None, directory=None):
-#   """Export NmrConstraintStore and associated data to NEF"""
-#
-#   # nmrProject
-#   nmrProject = nmrConstraintStore.nmrProject
-#
-#   # MolSystem
-#   aSet = set(y.topObject for x in nmrConstraintStore.fixedAtomSets for y in x.atoms )
-#   if len(aSet) == 1:
-#     molSystem = aSet.pop()
-#   else:
-#     raise ValueError("NmrConstraintStore must link to exactly 1 MolSystem - %s found"
-#     % len(aSet))
-#
-#   # PeakLists
-#   peakLists = set(z.peakList for x in nmrConstraintStore.constraintLists
-#                   for y in x.constraints
-#                   for z in y.peaks)
-#   peakLists = list(peakLists)
-#
-#   # NBNB TBD temporary hack to get right result for CASD entries:
-#   if not peakLists:
-#     peakLists = [z for x in nmrProject.sortedExperiments() for y in x.sortedDataSources()
-#                  for z in y.sortedPeakLists()]
-#
-#   if not dataName:
-#     dataName = '%s-%s-%s' % (nmrProject.root.name, nmrProject.name, nmrConstraintStore.serial)
-#   else:
-#     ll = dataName.rsplit('.',1)
-#     if len(ll) == 2 and ll[1] == nefExtension:
-#       dataName = ll[0]
-#
-#   entry = makeStarEntry(nmrProject, molSystem, dataName, peakLists,
-#                         nmrConstraintStore.sortedConstraintLists())
-#
-#   # Export object tree
-#   if not directory:
-#     # set directory
-#     directory = os.getcwd()
-#   if not os.path.exists(directory):
-#     os.makedirs(directory)
-#
-#   # write file
-#   filePath = os.path.join(directory, dataName)
-#   filePath = '.'.join((filePath, nefExtension))
-#   open(filePath, 'w').write(entry.exportString())
+def exportRestraintStore(restraintSet, dataName=None, directory=None):
+  """Export restraintSet and associated data to NEF"""
+
+  # nmrProject
+  project = restraintSet._project
+
+  restraintLists = (restraintSet.distanceRestraintLists +
+                     restraintSet.hBondRestraintLists +
+                     restraintSet.dihedralRestraintLists +
+                     restraintSet.rdcRestraintLists )
+
+  # PeakLists
+  peakLists = set(z.peakList for x in restraintLists
+                  for y in x.restraints
+                  for z in y.peaks)
+  peakLists = list(sorted(peakLists))
+
+  # NBNB TBD temporary hack to get right result for CASD entries:
+  if not peakLists:
+    peakLists = [y for x in project.spectra for y in x.peakLists]
+
+  if peakLists:
+    shiftList = None
+  else:
+    shiftList = project.chemicalShiftLists[0]
+
+  if dataName:
+    ll = dataName.rsplit('.',1)
+    if len(ll) == 2 and ll[1] == nefExtension:
+      dataName = ll[0]
+  else:
+    dataName = '%s-%s' % (project.name, restraintSet.serial)
+
+  entry = makeStarEntry(project, dataName, project.chains, peakLists,
+                        restraintLists, shiftList=shiftList)
+
+  # Export object tree
+  if not directory:
+    # set directory
+    directory = os.getcwd()
+  if not os.path.exists(directory):
+    os.makedirs(directory)
+
+  # write file
+  filePath = os.path.join(directory, dataName)
+  filePath = '.'.join((filePath, nefExtension))
+  open(filePath, 'w').write(entry.exportString())
 
 
 def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
                   shiftList=None,):
   """Make Bmrb Sans entry for export.
    shift lists are taken from peaklists, otherwise from shiftList parameter"""
+
+  peakLists.sort()
+  restraintLists.sort()
+  chains.sort()
 
   # Set up parameters and sanity check
 
@@ -139,7 +140,7 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
 
   # Shift list check
   aSet = set(x.chemicalShiftList for x in peakLists)
-  shiftLists = [x for x in sorted(project.chemicalShiftLists) if x in aSet]
+  shiftLists = [x for x in project.chemicalShiftLists if x in aSet]
   if shiftLists:
     if shiftList is not None:
       raise ValueError("Function takes peakLists or a shiftList, but not both")
@@ -176,7 +177,7 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
     entry.addSaveframe(makeShiftListFrame(shiftList))
 
   # Make restraint lists
-  for restraintList in sorted(restraintLists):
+  for restraintList in restraintLists:
     # NB sorting will sort by type then name
     entry.addSaveframe(makeRestraintListFrame(restraintList))
 
@@ -185,7 +186,7 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
     entry.addSaveframe(makePeakListFrame(peakList))
 
   # Make Peak-restraint links frame
-  entry.addSaveframe(makePeakRestraintLinksFrame(useConstraintLists, peakLists))
+  entry.addSaveframe(makePeakRestraintLinksFrame(restraintLists, peakLists))
 
   return entry
 
@@ -256,7 +257,9 @@ def makeMolecularSystemFrame(chains):
               'cross_linking'):
     loop.addColumn(tag)
 
-  for chain in set(chains):
+  for chain in chains:
+    if chains.count(chain) != 1:
+      raise ValueError("Duplicate chains not allowed: %s" % (chains,))
     chainCode = chain.shortName
     for residue in chain.residues:
       sequenceCode = residue.sequenceCode
@@ -572,7 +575,8 @@ def makePeakRestraintLinksFrame(restraintLists, peakLists):
     for restraint in restraintList:
       restraint_id = restraint.serial
       for peak in restraint.peaks:
-        loop.addData(['$'+peak.peakList.name, peak.serial, restraint_list_id, restraint_id])
+        if peak.peakList in peakLists:
+          loop.addData(['$'+peak.peakList.name, peak.serial, restraint_list_id, restraint_id])
   #
   return saveframe
 
@@ -580,12 +584,18 @@ if __name__ == '__main__':
 
   if len(sys.argv) >= 3:
 
-    NBNB TBD fix
+    from ccpncore.util.Io import loadProject
+    from ccpn import Project
+    from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
 
-    from memops.general.Io import loadProject
     # set up input
     junk, projectDir, outputDir = sys.argv[:3]
     ccpnProject = loadProject(projectDir)
+
+    # NBNB TBD this must be integrated in upgrade once we are in a stable version
+    correctFinalResult(ccpnProject)
+
+    pp = Project(ccpnProject.findFirstNmrProject())
 
     if len(sys.argv) >= 4:
       # set up input
@@ -594,7 +604,7 @@ if __name__ == '__main__':
     else:
       constraintStore = ccpnProject.findFirstNmrConstraintStore()
 
-    exportConstraintStore2Nef(constraintStore, directory=outputDir)
+    exportRestraintStore(pp._data2Obj[constraintStore], directory=outputDir)
 
   else:
     print ("Error. Parameters are: ccpnProjectDirectory outputDirectory [constraintStoreSerial] ")

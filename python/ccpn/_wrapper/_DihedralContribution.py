@@ -47,15 +47,15 @@ class DihedralContribution(AbstractRestraintContribution):
 
   # CCPN properties  
   @property
-  def ccpnContribution(self) -> DihedralContribution:
+  def ccpnContribution(self) -> Ccpn_DihedralContribution:
     """ CCPN DihedralContribution matching DihedralContribution"""
     return self._wrappedData
 
   @property
   def _parent(self) -> DihedralRestraint:
     """Parent (containing) object."""
-    return  self._project._data2Obj[self._wrappedData.dihedralConstraint]
-    
+    return  self._project._data2Obj[self._wrappedData.constraint]
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:DihedralRestraint)-> list:

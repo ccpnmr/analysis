@@ -168,9 +168,9 @@ class Peak(AbstractWrapperObject):
       peakDim.position = value[ii]
 
   @property
-  def dimensionAssignments(self) -> tuple:
+  def dimensionNmrAtoms(self) -> tuple:
     """Peak dimension assignment - a list of lists of NmrAtoms for each dimension.
-    Assignments as a list of individual combinations is given in 'assignments'.
+    Assignments as a list of individual combinations is given in 'assignedNmrAtoms'.
     Setting dimensionAssignments implies that all combinations are possible"""
     result = []
     for peakDim in self._wrappedData.sortedPeakDims():
@@ -186,8 +186,8 @@ class Peak(AbstractWrapperObject):
     #
     return tuple(result)
 
-  @dimensionAssignments.setter
-  def dimensionAssignments(self, value:Sequence):
+  @dimensionNmrAtoms.setter
+  def dimensionNmrAtoms(self, value:Sequence):
     ccpnPeak = self._wrappedData
     dimResonances = list(value)
     for ii, atoms in enumerate(dimResonances):
@@ -197,7 +197,7 @@ class Peak(AbstractWrapperObject):
     CcpnLibPeak.setPeakDimAssignments(ccpnPeak, dimResonances)
 
   @property
-  def assignments(self) -> tuple:
+  def assignedNmrAtoms(self) -> tuple:
     """Peak assignment - a list of lists of NmrAtom combinations
     (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None
     Assignments per dimension are given in 'dimensionAssignments'."""
@@ -222,8 +222,8 @@ class Peak(AbstractWrapperObject):
     return tuple(result)
 
 
-  @assignments.setter
-  def assignments(self, value:Sequence):
+  @assignedNmrAtoms.setter
+  def assignedNmrAtoms(self, value:Sequence):
     ccpnPeak = self._wrappedData
     peakDims = ccpnPeak.sortedPeakDims()
     dimensionCount = len(peakDims)
@@ -239,6 +239,28 @@ class Peak(AbstractWrapperObject):
 
     # set assignments
     CcpnLibPeak.setAssignments(ccpnPeak, resonances)
+
+  @property
+  def dimensionAssignments(self) -> tuple:
+    """Peak dimension assignments - a list of lists of AtomAssignment tuples for each dimension.
+    Assignments as a list of individual combinations is given in 'assignments'."""
+
+    result = []
+    for ll in self.dimensionNmrAtoms:
+      result.append(list(x.assignment for x in ll))
+    #
+    return tuple(result)
+
+  @property
+  def assignments(self) -> tuple:
+    """Peak dimension assignments a list of lists of AtomAssignment tuple combinations
+    (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None"""
+
+    result = []
+    for ll in self.assignedNmrAtoms:
+      result.append(list(x and x.assignment for x in ll))
+    #
+    return tuple(result)
 
   # Implementation functions
   @classmethod

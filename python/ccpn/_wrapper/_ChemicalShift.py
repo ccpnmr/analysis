@@ -49,9 +49,7 @@ class ChemicalShift(AbstractWrapperObject):
   @property
   def id(self) -> str:
     """identifier - assignment string"""
-    # NBNB TBD - check if this breaks something. We could use coma-separated at need
-    # but NBNB the NEF export assumes dot-separated
-    return self.assignment._pid
+    return ','.join(self.nmrAtom.assignment)
     
   @property
   def _parent(self) -> Project:
@@ -97,7 +95,7 @@ class ChemicalShift(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
-  def assignment(self) -> NmrAtom:
+  def nmrAtom(self) -> NmrAtom:
     """NmrAtom that the shift belongs to"""
     return self._project._data2Obj.get(self._wrappedData.resonance)
 
@@ -111,12 +109,12 @@ class ChemicalShift(AbstractWrapperObject):
 # Connections to parents:
 ChemicalShiftList._childClasses.append(ChemicalShift)
 
-def newChemicalShift(parent:ChemicalShiftList, value:float, assignment:NmrAtom,
+def newChemicalShift(parent:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                      valueError:float=0.0, figureOfMerit:float=1.0,
                      comment:str=None) -> ChemicalShift:
   """Create new child Shift"""
   obj = parent._wrappedData.newShift(value=value,
-                                     resonance=assignment._wrappedData, error=valueError,
+                                     resonance=nmrAtom._wrappedData, error=valueError,
                                      figOfMerit=figureOfMerit, details=comment)
   return parent._project._data2Obj.get(obj)
 

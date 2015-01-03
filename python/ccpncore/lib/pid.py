@@ -6,31 +6,31 @@ try:
 except ImportError:
   __version__ = '???'
 
-# def makePid(head, *args):
-#   """make pid from head and list of successive keys.
-#   Head may be an existing pid, or a naked string
-#   Keys are converted to string, and illegal characters are converted to '_'
-#   The head is  not checked - it should be either a valid pid or a class code"""
-#
-#   # NBNB TBD tighten up and implement rules for valid characters
-#
-#   # NBNB TBD speed up, using character mapping
-#
-#   # map args to correcteid strings
-#   ll = [str(val).replace('.','_').replace(':','_') for val in args]
-#
-#   if ':' in head:
-#     if head[-1] == ':':
-#       result = head + '.'.join(ll)
-#
-#     else:
-#       ll.insert(0,head)
-#       result = '.'.join(ll)
-#   else:
-#     result = head + ':' + '.'.join(ll)
-#
-#   #
-#   return result
+def makePid(head, *args):
+  """make pid from head and list of successive keys.
+  Head may be an existing pid, or a naked string
+  Keys are converted to string, and illegal characters are converted to '_'
+  The head is  not checked - it should be either a valid pid or a class code"""
+
+  # NBNB TBD tighten up and expand rules for valid characters
+
+  # NBNB TBD speed up, using character mapping
+
+  # map args to corrected strings
+  ll = [str(val).replace('.','_').replace(':','_') for val in args]
+
+  if ':' in head:
+    if head[-1] == ':':
+      result = head + '.'.join(ll)
+
+    else:
+      ll.insert(0,head)
+      result = '.'.join(ll)
+  else:
+    result = head + ':' + '.'.join(ll)
+
+  #
+  return result
 
 
 def decodePid(sourceObject, thePid):
@@ -360,7 +360,6 @@ class Pid(str):
         #     parts[0] = type
         # return Pid.new(*parts)
 
-        import cing.Libs.io as io
 
         parts = self._split()
 
@@ -369,6 +368,7 @@ class Pid(str):
             # NB this allows negative indices also, according to normal Python rules
             idparts[index] = newId
         except IndexError:
+            import cing.Libs.io as io
             io.error('Pid.modify: invalid index ({0})\n', index+1)
         parts[1:] = idparts
 

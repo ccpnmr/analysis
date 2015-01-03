@@ -48,12 +48,12 @@ class RestraintList(AbstractWrapperObject):
   @property
   def id(self) -> str:
     """id string - serial number converted to string"""
-    return '%s-%s' % (self.restraintType, self._wrappedData.serial)
+    return '%s,%s' % (self.restraintType, self._wrappedData.serial)
 
   @property
   def restraintType(self) -> str:
     """Restraint type"""
-    return self._wrappedData.__class__.__name__[:-13]
+    return self._wrappedData.__class__.__name__[:-14]
 
   @property
   def serial(self) -> int:

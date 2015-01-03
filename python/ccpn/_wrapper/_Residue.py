@@ -23,6 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
+from ccpn._wrapper._AbstractWrapperObject import ResidueAssignment
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
@@ -50,19 +51,19 @@ class Residue(AbstractWrapperObject):
   
   
   @property
-  def seqCode(self) -> str:
+  def sequenceCode(self) -> str:
     """Residue sequence code and id (e.g. '1', '127B') """
     obj = self._wrappedData
     objSeqCode = obj.seqCode
-    result = obj.seqInsertCode or ''
+    result = (obj.seqInsertCode or '').strip()
     if objSeqCode is not None:
       result = str(objSeqCode) + result
     return result
 
   @property
   def id(self) -> str:
-    """Residue ID. Identical to seqCode, with '.' and ':' replaced by '_'"""
-    return self.seqCode.replace('.','_').replace(':','_')
+    """Residue ID. Identical to sequenceCode, with '.' and ':' replaced by '_'"""
+    return self.sequenceCode.replace('.','_').replace(':','_')
     
   @property
   def _parent(self) -> Chain:
@@ -116,6 +117,12 @@ class Residue(AbstractWrapperObject):
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
+
+  @property
+  def assignment(self) -> str:
+    """ResidueAssignment named tuple (chainCode, sequenceCode, residueType)"""
+    obj = self._wrappedData
+    return ResidueAssignment(obj.chain.code, self.sequenceCode, obj.code3Letter)
     
     
   # Implementation functions
@@ -125,7 +132,7 @@ class Residue(AbstractWrapperObject):
     return parent._wrappedData.sortedResidues()
     
     
-def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None,
+def newResidue(parent:Chain, name:str, sequenceCode:str=None, linking:str=None,
                descriptor:str=None, molType:str=None, comment:str=None) -> Residue:
   """Create new child Residue"""
   project = parent._project
@@ -139,11 +146,11 @@ def newResidue(parent:Chain, name:str, seqCode:str=None, linking:str=None,
   molType, ccpCode = DataMapper.pickChemCompId(project._residueName2chemCompIds,
                                                name, prefMolType=molType)
 
-  # split seqCode in number+string
-  intCode, seqInsertCode = commonUtil.splitIntFromChars(seqCode)
+  # split sequenceCode in number+string
+  intCode, seqInsertCode = commonUtil.splitIntFromChars(sequenceCode)
   if len(seqInsertCode) > 1:
     raise Exception(
-      "Only one non-numerical character suffix allowed for seqCode {}".format(seqCode)
+      "Only one non-numerical character suffix allowed for sequenceCode {}".format(sequenceCode)
     )
 
   # make residue

@@ -25,11 +25,16 @@ from collections.abc import MutableMapping
 import itertools
 import functools
 import abc
+from collections import namedtuple
 from ccpncore.lib.pid import Pid
 
 #from . import PREFIXSEP, IDSEP
 IDSEP = '.'
 PREFIXSEP  = ':'
+
+atomAssignmentTuple = ('chainCode', 'sequenceCode', 'residueType', 'name')
+AtomAssignment = namedtuple('AtomAssignment', atomAssignmentTuple)
+ResidueAssignment = namedtuple('ResidueAssignment', atomAssignmentTuple[:3])
 
 
 @functools.total_ordering
@@ -123,6 +128,10 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
   # The __dict__ slot allows setting of new attributes, but is instantiated
   # only when necessary.
   #__slots__ = ['_project', '_wrappedData', '_pid', '__dict__']
+
+  # NBNB TBD
+  # Two objects compare aa dictionaries (because this is a MutableMapping)
+  # and this does noto work properly NBNB Reconsider
   
   
   # Implementation methods

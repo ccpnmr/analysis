@@ -23,6 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
+from ccpn._wrapper._AbstractWrapperObject import AtomAssignment
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Residue import Residue
 from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
@@ -63,11 +64,16 @@ class Atom(AbstractWrapperObject):
   @property
   def id(self) -> str:
     """Atom name string (e.g. 'HA')"""
-    return self._wrappedData.name
+    return self._wrappedData.name.replace('.','_').replace(':','_')
 
   name = id
 
-  # Utiity functions
+  @property
+  def assignment(self) -> str:
+    """AtomAssignment named tuple (chainCode, sequenceCode, residueType, name)"""
+    return AtomAssignment( *(self._parent.assignment + (self.name,)))
+
+  # Utility functions
     
   # Implementation functions
   @classmethod

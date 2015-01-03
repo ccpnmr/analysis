@@ -147,7 +147,7 @@ class Project(AbstractWrapperObject):
   @property
   def id(self) -> str:
     """Project id: Globally unique identifier (guid)"""
-    return self._wrappedData.guid
+    return self._wrappedData.guid.replace('.','_').replace(':','_')
     
   @property
   def _parent(self) -> AbstractWrapperObject:
@@ -194,7 +194,7 @@ class Project(AbstractWrapperObject):
       else:
         # Treat as list of pids
         result = list(key)
-        for ii,pid in result:
+        for ii,pid in enumerate(result):
           if isinstance(pid, str):
             ll = pid.split(':',1)
             if len(ll) == 1:

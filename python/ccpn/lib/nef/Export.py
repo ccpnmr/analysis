@@ -24,8 +24,8 @@ __version__ = "$Revision$"
 import os
 import sys
 import datetime
+from ccpn import RestraintContribution
 from ccpncore.lib.Bmrb import bmrb
-bmrb.enableNEFDefaults()
 
 nefExtension = 'nef'
 
@@ -98,7 +98,7 @@ def exportRestraintStore(restraintSet, dataName=None, directory=None):
   # write file
   filePath = os.path.join(directory, dataName)
   filePath = '.'.join((filePath, nefExtension))
-  open(filePath, 'w').write(entry.exportString())
+  open(filePath, 'w').write(entry.nefString())
 
 
 def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
@@ -258,9 +258,10 @@ def makeMolecularSystemFrame(chains):
               'cross_linking'):
     loop.addColumn(tag)
 
-  for chain in chains:
-    if chains.count(chain) != 1:
+  chainCodes = [x.shortName for x in chains]
+  if len(chainCodes) != len(set(chainCodes)):
       raise ValueError("Duplicate chains not allowed: %s" % (chains,))
+  for chain in chains:
     chainCode = chain.shortName
     for residue in chain.residues:
       sequenceCode = residue.sequenceCode
@@ -357,7 +358,8 @@ def makeShiftListFrame(shiftList):
               'value', 'value_uncertainty',):
     loop.addColumn(tag)
 
-  for row in [(x.id.split('.') + [x.value, x.error]) for x in shiftList.chemicalShifts]:
+  for row in sorted((x.nmrAtom.assignment + (x.value, x.valueError))
+                    for x in shiftList.chemicalShifts):
     loop.addData(row)
   #
   return saveframe
@@ -366,6 +368,7 @@ def makeRestraintListFrame(restraintList):
   """make a saveFrame for a restraint list of whatever type"""
   restraintType = restraintList.restraintType
   potentialType = restraintList.potentialType
+  restraintItemLength = RestraintContribution.restraintType2Length[restraintList.restraintType]
 
   if restraintList.name is None:
     restraintList.name = restraintList.longPid
@@ -387,7 +390,7 @@ def makeRestraintListFrame(restraintList):
   for tag in ('restraint_id', 'restraint_combination_id',):
     loop.addColumn(tag)
   # Assignment tags:
-  for ii in range(1, restraintList.restraintItemLength+1):
+  for ii in range(1, restraintItemLength + 1):
     for tag in ('chain_code_', 'sequence_code_', 'residue_type_', 'atom_name_'):
       ss = str(ii)
       loop.addColumn(tag + ss)
@@ -405,19 +408,18 @@ def makeRestraintListFrame(restraintList):
   for restraint in restraintList.restraints:
     serial = restraint.serial
 
-    for contribution in restraint.contributions:
+    for contribution in restraint.restraintContributions:
       row1 = [serial, contribution.combinationId]
       row3 = [contribution.weight, contribution.targetValue, contribution.error]
-      for ss in nefTagsByPotentialType:
+      for ss in nefTagsByPotentialType[restraintList.potentialType]:
         tag = nef2CcpnTags.get(ss,ss)
         row3.append(getattr(contribution, tag))
 
       for restraintItem in contribution.restraintItems:
         row2 = []
         # Assignment tags:
-        for fullId in restraintItem:
-          row2.extend(fullId.split('.'))
-        #
+        for assignment in restraintItem:
+          row2.extend(assignment)
         loop.addData(row1 + row2 + row3)
   #
   return saveframe
@@ -437,11 +439,16 @@ def makePeakListFrame(peakList):
                                          tag_prefix=category)
 
   # Top tagged values
+  obj = spectrum.chemicalShiftList
+  if obj is None:
+    shiftListString = None
+  else:
+    shiftListString = '$%s' % obj.name
   saveframe.addTags([
     ('sf_category',category),
     ('sf_framecode',framecode),
     ('num_dimensions',dimensionCount),
-    ('chemical_shift_list','$%s' % spectrum.chemicalShiftList.name)
+    ('chemical_shift_list', shiftListString)
   ])
 
   # Experiment type
@@ -476,7 +483,7 @@ def makePeakListFrame(peakList):
     spectrum.foldingModes,
     (True,) * dimensionCount,
     # NBNB TBD we have no way of representing data for absPeakPositions=False
-    tuple(x.isAcquisition for x in ccpnDataDims),
+    tuple(x.expDim.isAcquisition for x in ccpnDataDims),
   )
   for row in rows:
     loop.addData(row)
@@ -526,24 +533,25 @@ def makePeakListFrame(peakList):
     loop.addColumn('residue_type_%s' % ii)
     loop.addColumn('atom_name_%s' % ii)
 
-  for peak in peakList.peaks():
+  for peak in peakList.peaks:
 
     # serial and intensities
     firstpart = [peak.serial, peak.volume, peak.volumeError, peak.height, peak.heightError]
 
     # peak position
-    firstpart.extend(zip(peak.position, peak.positionError))
+    for ll in zip(peak.position, peak.positionError):
+      firstpart.extend(ll)
 
     # assignments
-    assignments = peak.assignments
-    if assignments:
-      for assignment in assignments:
+    assignedNmrAtoms = peak.assignedNmrAtoms
+    if assignedNmrAtoms:
+      for assignment in assignedNmrAtoms:
         row = list(firstpart)
         for nmrAtom in assignment:
           if nmrAtom is None:
             row.extend((None, None, None, None))
           else:
-            row.extend(nmrAtom._pid.split('.'))
+            row.extend(nmrAtom.assignment)
         loop.addData(row)
     else:
       # Unassigned peak
@@ -573,13 +581,45 @@ def makePeakRestraintLinksFrame(restraintLists, peakLists):
 
   for restraintList in restraintLists:
     restraint_list_id = '$' + restraintList.name
-    for restraint in restraintList:
+    for restraint in restraintList.restraints:
       restraint_id = restraint.serial
       for peak in restraint.peaks:
         if peak.peakList in peakLists:
           loop.addData(['$'+peak.peakList.name, peak.serial, restraint_list_id, restraint_id])
   #
   return saveframe
+
+def prepareNmrProject(nmrProject):
+  """Fix non-CCPN-generated NmrProjects that violate normal assumptions"""
+
+  # If there is only one shiftList, make sure all experiments have it set
+  shiftLists = nmrProject.findAllMeasurementLists(className='ShiftList')
+  if len(shiftLists) == 1:
+    shiftList = shiftLists.pop()
+    for experiment in nmrProject.experiments:
+      experiment.shiftList = shiftList
+
+  # fix restraint list names to be unique
+  constraintLists = [y for x in nmrProject.sortedNmrConstraintStores()
+                       for y in x.sortedConstraitnLists()]
+
+  names = [x.name for x in constraintLists]
+  for ii,name in enumerate(names):
+    obj = constraintLists[ii]
+    if name:
+      names[ii] =  '_'.join(obj.name.split())
+    else:
+      names[ii] = ("RestraintList:%s.%s,%s" %
+                   (obj.nmrConstraintStore.serial, 'Re'+obj.className[3:-14], obj.serial))
+
+  for ii,name in enumerate(names):
+    obj = constraintLists[ii]
+    if names.count(name) > 1:
+      name = ("RestraintList:%s.%s,%s" %
+              (obj.nmrConstraintStore.serial, 'Re'+obj.className[3:-14], obj.serial))
+      names[ii] = name
+    constraintLists[ii].name = name
+
 
 if __name__ == '__main__':
 
@@ -596,7 +636,9 @@ if __name__ == '__main__':
     # from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
     # correctFinalResult(ccpnProject)
 
-    pp = Project(ccpnProject.findFirstNmrProject())
+    nmrProject = ccpnProject.findFirstNmrProject()
+    prepareNmrProject(nmrProject)
+    pp = Project(nmrProject)
 
     if len(sys.argv) >= 4:
       # set up input

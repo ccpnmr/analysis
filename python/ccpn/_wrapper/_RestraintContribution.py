@@ -24,9 +24,11 @@ __version__ = "$Revision$"
 
 from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
+from ccpn._wrapper._AbstractWrapperObject import AtomAssignment
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Restraint import Restraint
 from ccpncore.api.ccp.nmr.NmrConstraint import ConstraintContribution as ccpnContribution
+from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance
 
 class RestraintContribution(AbstractWrapperObject):
   """Restraint contribution."""
@@ -146,17 +148,16 @@ class RestraintContribution(AbstractWrapperObject):
 
   @property
   def restraintItems(self) -> tuple:
-    """restraint items of contribution """
+    """restraint items of contribution - given as a tuple of lists of AtomAssignments """
 
     itemLength = self.restraintType2Length[self._parent._parent.restraintType]
 
     result = []
-    ff = self._project._data2Obj.get
     sortkey = self._project._pidSortKey
 
     if itemLength > 1:
       for ccpnItem in self._wrappedData.items:
-        assignments = [ff(x)._pid for x in ccpnItem.resonances]
+        assignments = [fixedResonance2Assignment(x) for x in ccpnItem.resonances]
         if sortkey(assignments[0]) > sortkey(assignments[-1]):
           # order so smallest string comes first
           # NB This assumes that assignments are either length 2 or ordered (as is so far the case)
@@ -164,18 +165,18 @@ class RestraintContribution(AbstractWrapperObject):
         result.append(tuple(assignments))
     else:
       for ccpnItem in self._wrappedData.items:
-        assignment = ff(ccpnItem.resonances)._pid
+        assignment = fixedResonance2Assignment(ccpnItem.resonance)
         result.append((assignment,))
     #
-      return tuple(sorted(result, key=sortkey))
+    return tuple(sorted(result, key=sortkey))
 
   @restraintItems.setter
-  def restraintItems(self, value:Sequence):
+  def restraintItems(self, assignments:Sequence):
 
     itemLength = self.restraintType2Length[self._parent._parent.restraintType]
     newItemFuncName ="new%sItem" % self._parent._parent.restraintType
 
-    for ll in value:
+    for ll in assignments:
       # make new items
       if len(ll) != self.restraintItemLength:
         raise ValueError("RestraintItems must have length %s: %s" % (itemLength, ll))
@@ -185,14 +186,14 @@ class RestraintContribution(AbstractWrapperObject):
       # remove old items
       item.delete()
 
-    fetchFixedResonance = self._parent._parent._fetchFixedResonance
+    fetchFixedResonance = self._parent._parent._parent._fetchFixedResonance
     if itemLength > 1:
-      for ll in value:
+      for ll in assignments:
         # make new items
         getattr(ccpnContribution, newItemFuncName)(
-          resonances=tuple(fetchFixedResonance(pid) for pid in ll))
+          resonances=tuple(fetchFixedResonance(assignment) for assignment in ll))
     else:
-      for ll in value:
+      for ll in assignments:
         # make new items
         getattr(ccpnContribution, newItemFuncName)(
           resonance=fetchFixedResonance(ll[0]))
@@ -230,3 +231,8 @@ for clazz in ccpnContribution._metaclass.getNonAbstractSubtypes():
       ('_finaliseDelete', {}, className, 'delete')
     )
 )
+
+def fixedResonance2Assignment(fixedResonance:FixedResonance) -> AtomAssignment:
+  """Utility function - get AtomAssignment from FixedResonance """
+  tags = ('chainCode', 'sequenceCode', 'residueType', 'name')
+  return AtomAssignment(*(getattr(fixedResonance,tag) for tag in tags))

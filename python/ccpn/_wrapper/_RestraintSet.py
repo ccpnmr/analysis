@@ -24,6 +24,7 @@ __version__ = "$Revision$"
 # from collections.abc import Sequence
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
+from ccpn._wrapper._AbstractWrapperObject import AtomAssignment
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore
 from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance
@@ -81,16 +82,15 @@ class RestraintSet(AbstractWrapperObject):
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
     return parent._wrappedData.sortedNmrConstraintStores()
 
-  def _fetchFixedResonance(self, pid:str) -> FixedResonance:
-    """Ftech FixedResonance matching pid string, creating anew if needed.
+  def _fetchFixedResonance(self, assignment:AtomAssignment) -> FixedResonance:
+    """Fetch FixedResonance matching AtomAssignment, creating anew if needed.
     The pid header (if present) is ignored"""
 
     nmrConstraintStore = self._wrappedData
 
-    val = pid.split(':',1)[-1]
-    tt = val.split('.')
+    tt = assignment
     if len(tt) != 4:
-      raise ValueError("pid %s must have four fields, not counting the optional header" % pid)
+      raise ValueError("assignment %s must have four fields" % tt)
 
     dd = {
       'chainCode':tt[0],

@@ -37,7 +37,9 @@ def mapAllAssignments(topObject, assignmentMap=None, molSystem=None, chainMap=No
   if assignmentMap is None:
     assignmentMap = {}
 
-  assert ((molSystem is None) != (chainMap is None)), "Pass in molSystem or chainMap, but not both."
+  # We need wither chainMap or molSystem, and chainMap takes precedence
+  if chainMap:
+    molSystem = None
 
   # Map assigned resonances
   mapAssignedResonances(topObject, assignmentMap, chainMap=chainMap, molSystem=molSystem)
@@ -73,7 +75,9 @@ def _testAssignmentMap(assignmentMap):
 def mapResonanceGroups(nmrProject, molSystem=None, chainMap=None, defaultChainCode=None):
   """Map ResonanceGroups to three-string assignments"""
 
-  assert ((molSystem is  None) != (chainMap is None)),  "Pass in molSystem or chainMap, not both"
+  # We need either chainMap or molSystem, and chainMap takes precedence
+  if chainMap:
+    molSystem = None
 
   result = {}
 

@@ -113,21 +113,24 @@ from ccpn._wrapper._SpectrumReference import SpectrumReference
 from ccpn._wrapper._PeakList import PeakList
 from ccpn._wrapper._Peak import Peak
 from ccpn._wrapper._RestraintSet import RestraintSet
-from ccpn._wrapper._AbstractRestraintList import AbstractRestraintList
-from ccpn._wrapper._AbstractRestraint import AbstractRestraint
-from ccpn._wrapper._AbstractRestraintContribution import AbstractRestraintContribution
-from ccpn._wrapper._DistanceRestraintList import DistanceRestraintList
-from ccpn._wrapper._DistanceRestraint import DistanceRestraint
-from ccpn._wrapper._DistanceContribution import DistanceContribution
-from ccpn._wrapper._DihedralRestraintList import DihedralRestraintList
-from ccpn._wrapper._DihedralRestraint import DihedralRestraint
-from ccpn._wrapper._DihedralContribution import DihedralContribution
-from ccpn._wrapper._RdcRestraintList import RdcRestraintList
-from ccpn._wrapper._RdcRestraint import RdcRestraint
-from ccpn._wrapper._RdcContribution import RdcContribution
-from ccpn._wrapper._HBondRestraintList import HBondRestraintList
-from ccpn._wrapper._HBondRestraint import HBondRestraint
-from ccpn._wrapper._HBondContribution import HBondContribution
+from ccpn._wrapper._RestraintList import RestraintList
+from ccpn._wrapper._Restraint import Restraint
+from ccpn._wrapper._RestraintContribution import RestraintContribution
+# from ccpn._wrapper._AbstractRestraintList import AbstractRestraintList
+# from ccpn._wrapper._AbstractRestraint import AbstractRestraint
+# from ccpn._wrapper._AbstractRestraintContribution import AbstractRestraintContribution
+# from ccpn._wrapper._DistanceRestraintList import DistanceRestraintList
+# from ccpn._wrapper._DistanceRestraint import DistanceRestraint
+# from ccpn._wrapper._DistanceContribution import DistanceContribution
+# from ccpn._wrapper._DihedralRestraintList import DihedralRestraintList
+# from ccpn._wrapper._DihedralRestraint import DihedralRestraint
+# from ccpn._wrapper._DihedralContribution import DihedralContribution
+# from ccpn._wrapper._RdcRestraintList import RdcRestraintList
+# from ccpn._wrapper._RdcRestraint import RdcRestraint
+# from ccpn._wrapper._RdcContribution import RdcContribution
+# from ccpn._wrapper._HBondRestraintList import HBondRestraintList
+# from ccpn._wrapper._HBondRestraint import HBondRestraint
+# from ccpn._wrapper._HBondContribution import HBondContribution
 
 # Set up interclass links and related functions
 Project._linkWrapperClasses()

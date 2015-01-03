@@ -61,10 +61,7 @@ def exportRestraintStore(restraintSet, dataName=None, directory=None):
   # nmrProject
   project = restraintSet._project
 
-  restraintLists = (restraintSet.distanceRestraintLists +
-                     restraintSet.hBondRestraintLists +
-                     restraintSet.dihedralRestraintLists +
-                     restraintSet.rdcRestraintLists )
+  restraintLists = restraintSet.restraintLists
 
   # PeakLists
   peakLists = set(z.peakList for x in restraintLists
@@ -122,7 +119,8 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
                        % (peakList, project))
 
   # Chain check
-  if len(chains) != len(set(chains)):
+  ll = [x.id for x in chains]
+  if len(ll) != len(set(ll)):
     raise ValueError("Chains parameter contains duplicates: %s" % chains)
   for chain in chains:
     if chain._project is not project:
@@ -130,22 +128,25 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
                        % (chain, project))
 
   # restraint list check
-  aSet = set(x.restraintSet for x in restraintLists)
+  aSet = set(x.restraintSet.id for x in restraintLists)
   if len(aSet) == 1:
-    rs = aSet.pop()
-    if rs._project is not project:
+    if restraintLists[0].restraintSet._project is not project:
       raise ValueError("Restraint lists do not match Project")
   else:
     raise ValueError("Restraint lists are not from a single RestraintSet")
 
   # Shift list check
-  aSet = set(x.chemicalShiftList for x in peakLists)
-  shiftLists = [x for x in project.chemicalShiftLists if x in aSet]
+  aSet = set(x.chemicalShiftList.id for x in peakLists if x.chemicalShiftList is not None)
+  shiftLists = [x for x in project.chemicalShiftLists if x.id in aSet]
   if shiftLists:
     if shiftList is not None:
       raise ValueError("Function takes peakLists or a shiftList, but not both")
   elif shiftList is None:
-    raise ValueError("Function must have either peakLists or one shiftList")
+    allShiftLists = project.chemicalShiftLists
+    if len(allShiftLists) == 1:
+      shiftLists = allShiftLists
+    else:
+      raise ValueError("Function must have either peakLists with shiftLists or one shiftList")
   else:
     shiftLists = [shiftList]
 
@@ -363,11 +364,11 @@ def makeShiftListFrame(shiftList):
 
 def makeRestraintListFrame(restraintList):
   """make a saveFrame for a restraint list of whatever type"""
-  restraintType = restraintList.__class__.__name__[:-13]
+  restraintType = restraintList.restraintType
   potentialType = restraintList.potentialType
 
   if restraintList.name is None:
-    restraintList.name = '%sRestraintList_%s' % (restraintType, restraintList.serial)
+    restraintList.name = restraintList.longPid
   framecode = restraintList.name
   frameCategory = 'nef_%s_restraint_list' % restraintType.lower()
   # NBNB TBD ensure names are unique
@@ -586,14 +587,14 @@ if __name__ == '__main__':
 
     from ccpncore.util.Io import loadProject
     from ccpn import Project
-    from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
 
     # set up input
     junk, projectDir, outputDir = sys.argv[:3]
     ccpnProject = loadProject(projectDir)
 
-    # NBNB TBD this must be integrated in upgrade once we are in a stable version
-    correctFinalResult(ccpnProject)
+    # # NBNB TBD this must be integrated in upgrade once we are in a stable version
+    # from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
+    # correctFinalResult(ccpnProject)
 
     pp = Project(ccpnProject.findFirstNmrProject())
 

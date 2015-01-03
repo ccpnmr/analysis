@@ -301,6 +301,10 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
       return self._project.id < other._project.id
     else:
       return self._project._pidSortKey(selfPid) < other._project._pidSortKey(otherPid)
+
+  def __repr__(self):
+    """String representation"""
+    return "<ccpn.%s>" % self.longPid
   
   # CCPN properties 
   @property

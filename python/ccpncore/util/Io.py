@@ -406,6 +406,12 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
     for msg in warningMessages:
       logger.warning(msg)
 
+  # NBNB Hack: do data upgrade for V2-V3transition
+  # TBD remove for future versions
+  if hasattr(project,'_isUpgraded') and project._isUpgraded:
+    from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
+    correctFinalResult(project)
+  #
   return project
 
 def cleanupProject(project):

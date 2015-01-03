@@ -259,9 +259,15 @@ def mapAssignedResonances(topObject, assignmentMap, molSystem=None, chainMap=Non
 
     # set up loop-level parameters
     resonances = list(resonanceSet.resonances)
-    resonances.sort(key=operator.attrgetter('name'))
+    if resonanceSet.findFirstResonance(name=None):
+      resonances.sort(key=operator.attrgetter('serial'))
+    else:
+      resonances.sort(key=operator.attrgetter('name'))
     atomSets = list(resonanceSet.atomSets)
-    atomSets.sort(key=operator.attrgetter('name'))
+    if resonanceSet.findFirstAtomSet(name=None):
+      atomSets.sort(key=operator.attrgetter('serial'))
+    else:
+      atomSets.sort(key=operator.attrgetter('name'))
     allAtoms = [x for y in atomSets for x in y.atoms]
     chemAtomSet = getChemAtomSetFromAtoms(allAtoms)
     if len(set(x.residue for x in allAtoms)) == 1:

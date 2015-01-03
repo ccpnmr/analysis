@@ -24,17 +24,44 @@ __version__ = "$Revision$"
 
 from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
+from ccpn._wrapper._Project import Project
+from ccpn._wrapper._Restraint import Restraint
+from ccpncore.api.ccp.nmr.NmrConstraint import ConstraintContribution as ccpnContribution
 
-class AbstractRestraintContribution(AbstractWrapperObject):
-  """Abstract restraint contribution."""
+class RestraintContribution(AbstractWrapperObject):
+  """Restraint contribution."""
   
   #: Short class name, for PID.
-  shortClassName = None
+  shortClassName = 'RC'
 
-  # Tag for Item creation function
-  newItemFuncName = None
+  # Number of atoms in a Restraint item, by restraint type
+  restraintType2Length = {
+    'Distance':2,
+    'Dihedral':4,
+    'Rdc':2,
+    'HBond':2,
+    'JCoupling':2,
+    'Csa':1,
+    'ChemicalShift':1,
+  }
+
+  #: Name of plural link to instances of class
+  _pluralLinkName = 'restraintContributions'
+
+  #: List of child classes.
+  _childClasses = []
 
   # CCPN properties
+  @property
+  def ccpnContribution(self) -> ccpnContribution:
+    """ CCPN RdcContribution matching RdcContribution"""
+    return self._wrappedData
+
+  @property
+  def _parent(self) -> Restraint:
+    """Parent (containing) object."""
+    return  self._project._data2Obj[self._wrappedData.constraint]
+
   @property
   def id(self) -> str:
     """id string - serial number converted to string"""
@@ -121,30 +148,37 @@ class AbstractRestraintContribution(AbstractWrapperObject):
   def restraintItems(self) -> tuple:
     """restraint items of contribution """
 
-    # NBNB TBD must be overridden for restraints with one-resonance items
+    itemLength = self.restraintType2Length[self._parent._parent.restraintType]
 
     result = []
     ff = self._project._data2Obj.get
     sortkey = self._project._pidSortKey
-    for ccpnItem in self._wrappedData.items:
-      assignments = [ff(x)._pid for x in ccpnItem.resonances]
-      if sortkey(assignments[0]) > sortkey(assignments[-1]):
-        # order so smallest string comes first
-        # NB This assumes that assignments are either length 2 or ordered (as is so far the case)
-        assignments.reverse()
-      result.append(tuple(assignments))
+
+    if itemLength > 1:
+      for ccpnItem in self._wrappedData.items:
+        assignments = [ff(x)._pid for x in ccpnItem.resonances]
+        if sortkey(assignments[0]) > sortkey(assignments[-1]):
+          # order so smallest string comes first
+          # NB This assumes that assignments are either length 2 or ordered (as is so far the case)
+          assignments.reverse()
+        result.append(tuple(assignments))
+    else:
+      for ccpnItem in self._wrappedData.items:
+        assignment = ff(ccpnItem.resonances)._pid
+        result.append((assignment,))
     #
       return tuple(sorted(result, key=sortkey))
 
   @restraintItems.setter
   def restraintItems(self, value:Sequence):
 
-    # NBNB TBD must be overridden for restraints with one-resonance items
+    itemLength = self.restraintType2Length[self._parent._parent.restraintType]
+    newItemFuncName ="new%sItem" % self._parent._parent.restraintType
 
     for ll in value:
       # make new items
       if len(ll) != self.restraintItemLength:
-        raise ValueError("RestraintItems must have length %s: %s" % (self.restraintItemLength, ll))
+        raise ValueError("RestraintItems must have length %s: %s" % (itemLength, ll))
 
     ccpnContribution = self._wrappedData
     for item in ccpnContribution.items:
@@ -152,13 +186,47 @@ class AbstractRestraintContribution(AbstractWrapperObject):
       item.delete()
 
     fetchFixedResonance = self._parent._parent._fetchFixedResonance
-    for ll in value:
-      # make new items
-      getattr(ccpnContribution, self._newItemFuncName)(
-        resonances=tuple(fetchFixedResonance(pid) for pid in ll))
+    if itemLength > 1:
+      for ll in value:
+        # make new items
+        getattr(ccpnContribution, newItemFuncName)(
+          resonances=tuple(fetchFixedResonance(pid) for pid in ll))
+    else:
+      for ll in value:
+        # make new items
+        getattr(ccpnContribution, newItemFuncName)(
+          resonance=fetchFixedResonance(ll[0]))
     
   # Implementation functions
+  @classmethod
+  def _getAllWrappedData(cls, parent:Restraint)-> list:
+    """get wrappedData - all Constraint children of parent ConstraintList"""
+    return parent._wrappedData.sortedContributions()
 
 # Connections to parents:
+Restraint._childClasses.append(RestraintContribution)
+
+def newContribution(parent:Restraint, targetValue:float=None, error:float=None,
+                    weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
+                    additionalUpperLimit:float=None, additionalLowerLimit:float=None,
+                    restraintItems:Sequence=()) -> RestraintContribution:
+  """Create new child Contribution"""
+  constraint = parent._wrappedData
+  creator = constraint.getattr("new%sContribution" % parent._parent.restraintType)
+  obj = creator(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
+                lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
+                additionalLowerLimit=additionalLowerLimit)
+  result = parent._project._data2Obj.get(obj)
+  result.restraintItems = restraintItems
+  return result
+
+Restraint.newContribution = newContribution
 
 # Notifiers:
+for clazz in ccpnContribution._metaclass.getNonAbstractSubtypes():
+  className = clazz.qualifiedName()
+  Project._apiNotifiers.extend(
+    ( ('_newObject', {'cls':RestraintContribution}, className, '__init__'),
+      ('_finaliseDelete', {}, className, 'delete')
+    )
+)

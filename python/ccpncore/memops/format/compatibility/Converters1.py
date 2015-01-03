@@ -413,3 +413,8 @@ def minorPostProcess(fromVersion, topObj, delayDataDict, toNewObjDict, mapping=N
 
   infodd = Conversion.getConversionInfo(fromVersion, currentVersion)
   infodd['correctData'](topObj, delayDataDict, toNewObjDict, mapping)
+
+  # NBNB Hack: do data upgrade for V2-V3transition
+  # TBD remove for future versions
+  if topObj.className == 'MemopsRoot':
+    topObj._isUpgraded = True

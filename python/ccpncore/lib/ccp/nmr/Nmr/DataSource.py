@@ -305,7 +305,6 @@ def getSliceData(spectrum, position=None, sliceDim=0):
   # Get an actual array of data points,
   # spanning blocks as required
   # returns 1D array
-
   numDim = spectrum.numDim
   if numDim < 1:
     return None
@@ -316,13 +315,11 @@ def getSliceData(spectrum, position=None, sliceDim=0):
 
   if not position:
     position = numDim * [0]
-
   dataDims = spectrum.sortedDataDims()
   numPoints = [dataDim.numPoints for dataDim in dataDims]
   slicePoints = numPoints[sliceDim]
 
   data = numpy.empty((slicePoints,), dtype=numpy.float32)
-
   for dim in range(numDim):
     point = position[dim]
     if point >= numPoints[dim]:
@@ -344,7 +341,6 @@ def getSliceData(spectrum, position=None, sliceDim=0):
 
   sliceBlockSize = blockSizes[sliceDim]
   sliceBlocks = 1 + (slicePoints-1)//sliceBlockSize
-
   blockCoords = [position[dim]//blockSizes[dim] for dim in range(numDim)]
   blockSlice = numDim*[0]
 
@@ -363,17 +359,13 @@ def getSliceData(spectrum, position=None, sliceDim=0):
     sliceLower = sliceBlock * sliceBlockSize
     sliceUpper = min(sliceLower+sliceBlockSize, slicePoints)
     blockSlice[numDim-sliceDim-1] = slice(sliceUpper-sliceLower)
-
     ind =  sum(x[0]*x[1] for x in zip(blockCoords, cumulativeBlocks))
     offset = wordSize * (blockSize * ind) + headerSize
     fp.seek(offset, 0)
     blockData = numpy.fromfile(file=fp, dtype=dtype, count=blockSize).reshape(blockSizes) # data is in reverse order: e.g. z,y,x not x,y,z
-
     if blockData.dtype != numpy.float32:
       blockData = numpy.array(blockData, numpy.float32)
-
     data[sliceLower:sliceUpper] = blockData[blockSlice].squeeze()
-
   fp.close()
 
   return data

@@ -33,6 +33,7 @@ from pyqtgraph.dockarea import DockArea, Dock
 
 from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
 from ccpnmrcore.modules.SpectrumNdPane import SpectrumNdPane
+from ccpnmrcore.modules.TiedNdStrip import TiedNdStrip
 from ccpnmrcore.Current import Current
 from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
@@ -77,15 +78,19 @@ class MainWindow(GuiMainWindow):
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     
     ###self.spectrumPane=Spectrum1dPane(parent=self, project=self.project, title='Module 1', current=self.current, pid='QP:1', preferences=self.preferences)
-    self.spectrumPane1=Spectrum1dPane(project=project, title='Module 1_1D', current=self.current,
-                                     pid='QP:1', preferences=self.preferences, mainWindow=self)
-    self.spectrumPane2=SpectrumNdPane(project=project, title='Module 2_ND', current=self.current,
-                                     pid='QP:2', preferences=self.preferences, mainWindow=self)
-    self.panes[self.spectrumPane1.pid] = self.spectrumPane1
-    self.panes[self.spectrumPane2.pid] = self.spectrumPane2
+    # self.spectrumPane1=Spectrum1dPane(project=project, title='Module 1_1D', current=self.current,
+    #                                  pid='QP:1', preferences=self.preferences, mainWindow=self)
+    # self.spectrumPane2=SpectrumNdPane(project=project, title='Module 2_ND', current=self.current,
+    #                                  pid='QP:2', preferences=self.preferences, mainWindow=self)
+    self.spectrumPane3 = TiedNdStrip(parent=self, project=project, current=self.current,
+                               preferences=self.preferences, mainWindow=self)
+    # self.panes[self.spectrumPane1.pid] = self.spectrumPane1
+    # self.panes[self.spectrumPane2.pid] = self.spectrumPane2
+    # self.panes[self.spectrumPane3.pid] = self.spectrumPane3
     self.moduleCount = 2
-    self.widget1=self.spectrumPane1.dock
-    self.widget2=self.spectrumPane2.dock
+    # self.widget1=self.spectrumPane1.dock
+    # self.widget2=self.spectrumPane2.dock
+    self.widget3=self.spectrumPane3
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
     self.leftWidget.setGeometry(0, 0, 10, 600)
@@ -104,9 +109,10 @@ class MainWindow(GuiMainWindow):
     self.current.spectra = []
     self.dockArea = DockArea()
     self.dockArea.setGeometry(0, 0, 1100, 1300)
-    self.current.pane = self.spectrumPane2
-    self.dockArea.addDock(self.widget1)
-    self.dockArea.addDock(self.widget2)
+    self.current.pane = self.spectrumPane3
+    # self.dockArea.addDock(self.widget1)
+    # self.dockArea.addDock(self.widget2)
+    self.dockArea.addDock(self.widget3)
     self.splitter1.addWidget(self.dockArea)
     self.state = None
     self.setCentralWidget(self.splitter2)
@@ -263,7 +269,7 @@ class MainWindow(GuiMainWindow):
     self.statusBar().showMessage(msg)
     self.pythonConsole.write("project = openProject('"+currentProjectDir+"')\n")
     self.pythonConsole.ui.historyList.addItem("project = openProject('"+currentProjectDir+"')\n")
-    
+
     if len(self.preferences.recentFiles) < 10:
       self.preferences.recentFiles.insert(0, currentProjectDir)
     else:
@@ -271,13 +277,14 @@ class MainWindow(GuiMainWindow):
       self.preferences.recentFiles.append(currentProjectDir)
 
   def setProject(self, project):
-    
+
     if project is not None:
       self.leftWidget.fillSideBar(project)
-      self.spectrumPane1.project = project
-      self.spectrumPane2.project = project
+      # self.spectrumPane1.project = project
+      # self.spectrumPane2.project = project
+      self.spectrumPane3.project = project
       self.namespace['project'] = project
-    
+
     self.project = project
 
   def setupPreferences(self):

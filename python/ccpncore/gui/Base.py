@@ -25,6 +25,8 @@ from PySide import QtGui, QtCore
 
 from ccpncore.util.Translation import Translation
 
+from pyqtgraph.dockarea import Dock
+
 HALIGN_DICT = {
   'left': QtCore.Qt.AlignLeft,
   'right': QtCore.Qt.AlignRight,
@@ -63,15 +65,22 @@ class Base(Translation):
     if tipText:
       self.setToolTip(tipText)
 
+    if isinstance(self, Dock):
+      return
+
     parent = self.parent() if hasattr(self, 'parent') else None # Not all Qt objects have a parent
+
     if parent and not isFloatWidget:
       # Setup gridding within parent
-      layout = parent.layout()
+      if isinstance(parent, Dock):
+        layout = parent.layout
+      else:
+        layout = parent.layout()
 
       if not layout:
         layout = QtGui.QGridLayout(parent)
-        layout.setSpacing(2)
-        layout.setContentsMargins(2,2,2,2)
+        # layout.setSpacing(2)
+        # layout.setContentsMargins(2,2,2,2)
         parent.setLayout( layout )
  
       if isinstance(layout, QtGui.QGridLayout): 

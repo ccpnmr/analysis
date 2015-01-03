@@ -53,7 +53,7 @@ class Spectrum1dPane(SpectrumPane):
     self.plotItem.setAcceptDrops(True)
     self.title = title
     self.spectrumItems = []
-    self.fillToolBar()
+    # self.fillToolBar()
     self.colourIndex = 0
 
   def fillToolBar(self):
@@ -72,8 +72,7 @@ class Spectrum1dPane(SpectrumPane):
     restoreZoomAction = self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
     restoreZoomIcon = Icon('icons/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
-    restoreZoomAction.setToolTip('Restore Zoom')    # self.spectrumUtilToolbar.addAction("Undo", self.zoomXAll)
-    # self.spectrumUtilToolbar.addAction("Redo", self.zoomXAll)
+    restoreZoomAction.setToolTip('Restore Zoom')
     #
 
   def get1dContextMenu(self):
@@ -211,82 +210,62 @@ class Spectrum1dPane(SpectrumPane):
     else:
       shortcutKey = None
 
-    # spectrumItem.toolBarButton.setShortcut(QtGui.QKeySequence(shortcutKey))
     pix=QtGui.QPixmap(60,10)
-    # pix2=QtGui.QPixmap(30,10)
-    # pix.scaled(60,20)
-    # pix.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
     pix.fill(QtGui.QColor(spectrumItem.colour))
     spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
     newIcon = QtGui.QIcon(pix)
-    # newIcon.actualSize(QtCore.QSize(80,60))
     spectrumItem.newAction.setIcon(newIcon)
     spectrumItem.newAction.setCheckable(True)
     spectrumItem.newAction.setChecked(True)
     spectrumItem.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
-    # palette.Button.setAutoFillBackground(True)
-    # palette..setColor(spectrumItem.color)
-    # newAction.associatedWidgets()[1].setPalette(palette)
-
-
-    # # print(dir(newAction.associatedWidgets()[1]))
-    # print(newAction.associatedWidgets()[1].palette().color(QtGui.QPalette.ColorRole(0)))
-    # newAction.associatedWidgets()[1].palette().setColor(QtGui.QPalette.Button, spectrumItem.colour)
-    # print(newAction.associatedWidgets()[1].palette().color(QtGui.QPalette.ColorRole(0)))
-    # newAction.associatedWidgets()[1].setPalette(palette)
     spectrumItem.newAction.toggled.connect(spectrumItem.plot.setVisible)
     self.spectrumToolbar.addAction(spectrumItem.newAction)
     spectrumItem.widget = self.spectrumToolbar.widgetForAction(spectrumItem.newAction)
     spectrumItem.widget.setFixedSize(60,30)
-    self.spectrumItems.append(spectrumItem)
     self.current.spectrum = spectrum
-    # for peakList in spectrum.peakLists:
-    #   spectrumItem.addPeaks(self, peakList)
-    # spectrumItem.addIntegrals(self)
     spectrum.spectrumItem = spectrumItem
-    self.spectrumItems.append(spectrumItem)
 
 
 
-  def showSpectrumPreferences(self,spectrum):
-    form = QtGui.QDialog()
-    layout = QtGui.QGridLayout()
-    layout.addWidget(QtGui.QLabel(text='Peak Lists'))
-    i=1
-    for peakList in spectrum.peakLists:
-      label = QtGui.QLabel(form)
-      label.setText(str(peakList.pid))
-      checkBox = QtGui.QCheckBox()
-      if spectrum.spectrumItem.peakListItems[peakList.pid].displayed == True:
-        checkBox.setChecked(True)
-      else:
-        checkBox.setChecked(False)
-
-      checkBox.stateChanged.connect(lambda: self.peakListToggle(spectrum.spectrumItem, checkBox.checkState(),peakList))
-      layout.addWidget(checkBox, i, 0)
-      layout.addWidget(label, i, 1)
-      i+=1
-
-    layout.addWidget(QtGui.QLabel(text='Integrals'), 2, 0)
-    i+=1
-
-    newLabel = QtGui.QLabel(form)
-    newLabel.setText(str(spectrum.pid)+' Integrals')
-    newCheckBox = QtGui.QCheckBox()
-    newCheckBox.setChecked(True)
-    layout.addWidget(newCheckBox, i, 0)
-    layout.addWidget(newLabel, i, 1)
-    if spectrum.spectrumItem.integralListItems[0].displayed == True:
-      newCheckBox.setChecked(True)
-    else:
-      newCheckBox.setChecked(False)
-    newCheckBox.stateChanged.connect(lambda: self.integralToggle(newCheckBox.checkState(),spectrum.spectrumItem))
-    i+=1
-    newPushButton = QtGui.QPushButton('Colour')
-
-    layout.addWidget(newPushButton, i, 0, 1, 2)
-    form.setLayout(layout)
-    form.exec_()
+  # def showSpectrumPreferences(self,spectrum):
+  #   form = QtGui.QDialog()
+  #   layout = QtGui.QGridLayout()
+  #   layout.addWidget(QtGui.QLabel(text='Peak Lists'))
+  #   i=1
+  #   for peakList in spectrum.peakLists:
+  #     label = QtGui.QLabel(form)
+  #     label.setText(str(peakList.pid))
+  #     checkBox = QtGui.QCheckBox()
+  #     if spectrum.spectrumItem.peakListItems[peakList.pid].displayed == True:
+  #       checkBox.setChecked(True)
+  #     else:
+  #       checkBox.setChecked(False)
+  #
+  #     checkBox.stateChanged.connect(lambda: self.peakListToggle(spectrum.spectrumItem, checkBox.checkState(),peakList))
+  #     layout.addWidget(checkBox, i, 0)
+  #     layout.addWidget(label, i, 1)
+  #     i+=1
+  #
+  #   layout.addWidget(QtGui.QLabel(text='Integrals'), 2, 0)
+  #   i+=1
+  #
+  #   newLabel = QtGui.QLabel(form)
+  #   newLabel.setText(str(spectrum.pid)+' Integrals')
+  #   newCheckBox = QtGui.QCheckBox()
+  #   newCheckBox.setChecked(True)
+  #   layout.addWidget(newCheckBox, i, 0)
+  #   layout.addWidget(newLabel, i, 1)
+  #   if spectrum.spectrumItem.integralListItems[0].displayed == True:
+  #     newCheckBox.setChecked(True)
+  #   else:
+  #     newCheckBox.setChecked(False)
+  #   newCheckBox.stateChanged.connect(lambda: self.integralToggle(newCheckBox.checkState(),spectrum.spectrumItem))
+  #   i+=1
+  #   newPushButton = QtGui.QPushButton('Colour')
+  #
+  #   layout.addWidget(newPushButton, i, 0, 1, 2)
+  #   form.setLayout(layout)
+  #   form.exec_()
 
   def changeSpectrumColour(self, spectrumItem):
     dialog = ColourDialog()
@@ -332,5 +311,4 @@ class Spectrum1dPane(SpectrumPane):
     spectrumItem.hideIntegrals()
 
   def hidePeaks(self, spectrumItem, peakList):
-
     spectrumItem.hidePeaks(peakList)

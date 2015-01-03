@@ -31,7 +31,7 @@ UNCHECKED = QtCore.Qt.Unchecked
 
 class Button(QtGui.QPushButton, Base):
 
-  def __init__(self, parent, text='', callback=None, icon=None,
+  def __init__(self, parent, text='', callbacks=None, icon=None,
                toggle=None, **kw):
     
     QtGui.QPushButton.__init__(self, parent)
@@ -48,8 +48,8 @@ class Button(QtGui.QPushButton, Base):
       self.setCheckable(True)
       self.setSelected(toggle)
       
-    self.callback = None
-    self.setCallback(callback)
+    self.callbacks = callbacks
+    # self.setCallback(callbacks)
 
   # def mouseReleaseEvent(self, event):
   #   if not self.double_clicked:
@@ -86,21 +86,31 @@ class Button(QtGui.QPushButton, Base):
       else:
         self.setChecked(UNCHECKED)
 
-  def setCallback(self, callback):
+  def setCallback(self, callbacks):
   
-    if self.callback:
-      self.disconnect(self, QtCore.SIGNAL('clicked()'), self.callback)
+    if self.callbacks:
+      self.disconnect(self, QtCore.SIGNAL('clicked()'), self.callbacks[0])
     
-    if callback:
-      self.connect(self, QtCore.SIGNAL('clicked()'), callback)
+    if callbacks:
+      self.connect(self, QtCore.SIGNAL('clicked()'), callbacks[0])
       # self.clicked.connect doesn't work with lambda, yet...
     
-    self.callback = callback
+    self.callbacks = callbacks[0]
 
   def setText(self, text):
 
     QtGui.QPushButton.setText(self, text)
 
+  def mousePressEvent(self, event):
+
+    # Mouse Right Button Release Event
+
+    if event.button() == QtCore.Qt.LeftButton:
+      self.callbacks[0]()
+    if event.button() == QtCore.Qt.MiddleButton:
+      self.callbacks[1]()
+    if event.button() == QtCore.Qt.RightButton:
+      self.callbacks[2]()
 
 
 if __name__ == '__main__':

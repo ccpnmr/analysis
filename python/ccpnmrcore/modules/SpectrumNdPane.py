@@ -25,45 +25,44 @@ import operator
 
 from PySide import QtCore, QtGui, QtOpenGL
 
-from ccpnmrcore.modules.SpectrumPane import SpectrumPane, SPECTRUM_COLOURS
+from ccpn.lib import Spectrum as LibSpectrum
+
 from ccpncore.gui.Action import Action
+from ccpncore.gui.Arrow import Arrow
+from ccpncore.gui.Button import Button
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-from ccpnmrcore.modules.spectrumPane.SpectrumNdItem import SpectrumNdItem
 from ccpncore.gui.Menu import Menu
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
-from ccpncore.lib.NmrExpPrototype import resetAllAxisCodes
 from ccpncore.gui.LineEdit import LineEdit
-from ccpn.lib import Spectrum as LibSpectrum
+
+from ccpncore.lib.NmrExpPrototype import resetAllAxisCodes
+
+from ccpnmrcore.modules.spectrumPane.SpectrumNdItem import SpectrumNdItem
+from ccpnmrcore.modules.SpectrumPane import SpectrumPane, SPECTRUM_COLOURS
+
 import numpy
 import math
-from functools import partial
 import pyqtgraph as pg
+from functools import partial
 from scipy import signal
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Arrow import Arrow
+
 
 class SpectrumNdPane(SpectrumPane):
 
   def __init__(self, *args, **kw):
-    
+
     SpectrumPane.__init__(self, *args, **kw)
 
     self.plotItem.setAcceptDrops(True)
-    
     self.setViewport(QtOpenGL.QGLWidget())
     self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
     self.crossHairShown = True
-    self.fillToolBar()
     self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
-    # self.viewBox.keyPressEvent = self.keyPressEvent
-    self.showGrid(x=True, y=True)
-    self.gridShown = True
     self.region = None
     self.colourIndex = 0
-    self.spectrumUtilToolbar.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
     self.traceMarkers = []
     self.traceScale = 1e6
     self.traces = []
@@ -73,9 +72,19 @@ class SpectrumNdPane(SpectrumPane):
     self.planeLabel = None
     self.axesSwapped = False
     self.setShortcuts()
+    # self.positionBox = QtGui.QLabel()
+    # self.dock.addWidget(self.positionBox, 0, 9, 2, 2)
+    # self.scene().sigMouseMoved.connect(self.showMousePosition)
+    # stripWidget = QtGui.QWidget()
+    # layout = QtGui.QGridLayout()
+    # layout.setContentsMargins(0,0,0,0)
+    # stripWidget.setLayout(layout)
+    # self.dock.addWidget(stripWidget, 2, 0, 1, 11)
+    # self.dock.widgets[-1].layout().addWidget(self, 0, 1)
+    # self.plotItem.resizeEvent = self.resizeEvent
 
 
-          
+
   ##### functions used externally #####
 
   # overrides superclass function
@@ -111,7 +120,6 @@ class SpectrumNdPane(SpectrumPane):
     self.prevZPlaneShortcut = QtGui.QShortcut(QtGui.QKeySequence("Z, P"), self, self.prevZPlane)
     self.zoomFullShortcut = QtGui.QShortcut(QtGui.QKeySequence("Z, F"), self, self.zoomFull)
     self.flipXYShortcut = QtGui.QShortcut(QtGui.QKeySequence("X, Y"), self, self.swapXY)
-    # self.flipXYShortcut.setShortcutContext(QtCore.Qt.WidgetShortcut)
     self.flipXZShortcut = QtGui.QShortcut(QtGui.QKeySequence("Y, Z"), self, self.rotateAboutX)
     self.flipXZShortcut = QtGui.QShortcut(QtGui.QKeySequence("X, Z"), self, self.rotateAboutY)
 
@@ -154,6 +162,7 @@ class SpectrumNdPane(SpectrumPane):
       self.yAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[1]])
       self.xAxis.mappedDim = int(spectrumItem.dimMapping[0])
       self.yAxis.mappedDim = int(spectrumItem.dimMapping[1])
+      self.axisCodeLabel.setText(spectrum.axisCodes[spectrumItem.dimMapping[2]])
       pntRegion = dimensionCount * [None]
       for dim in range(dimensionCount):
         if dim in (spectrumItem.xDim, spectrumItem.yDim):
@@ -191,6 +200,7 @@ class SpectrumNdPane(SpectrumPane):
       self.yAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[1]])
       self.xAxis.mappedDim = int(spectrumItem.dimMapping[0])
       self.yAxis.mappedDim = int(spectrumItem.dimMapping[1])
+      self.axisCodeLabel.setText(spectrum.axisCodes[spectrumItem.dimMapping[2]])
       pntRegion = dimensionCount * [None]
       for dim in range(dimensionCount):
         if dim in (spectrumItem.xDim, spectrumItem.yDim):
@@ -259,14 +269,14 @@ class SpectrumNdPane(SpectrumPane):
         self.axesSwapped = False
 
   def clearSpectra(self):
-    
-    SpectrumPane.clearSpectra(self)    
+
+    SpectrumPane.clearSpectra(self)
     self.region = None
-    
+
   # implements superclass function
   def addSpectrum(self, spectrumVar, dimMapping=None):
-    
-    resetAllAxisCodes(self.project._wrappedData)
+
+    # resetAllAxisCodes(self.project._wrappedData)
     spectrum = self.getObject(spectrumVar)
     if spectrum.dimensionCount < 1:
       # TBD: logger message
@@ -275,19 +285,24 @@ class SpectrumNdPane(SpectrumPane):
     # TBD: check if dimensions make sense
     self.posColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex]
     self.negColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex+1]
-    if len(self.spectrumItems) >= 1:
-      spectrumItem = SpectrumNdItem(self, spectrum, self.spectrumItems[0].dimMapping, self.region, self.posColors, self.negColors)
-    else:
-      spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
-    spectrumItem.axisCodeMap = {}
+    # if len(self.spectrumItems) >= 1:
+    #   if self.spectrumItems[0].spectrum.axisCodes == spectrum.axisCodes:
+    #     spectrumItem = SpectrumNdItem(self, spectrum, self.spectrumItems[0].dimMapping, self.region, self.posColors, self.negColors)
+    #     self.spectrumItems[0].spectrum.axisCodes
+    #   else:
+    #     print('Axis codes do not match pane')
+    #     return
+    #
+    # else:
+    spectrumItem = SpectrumNdItem(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
     newItem = self.scene().addItem(spectrumItem)
-    self.xAxis.mappedDim = spectrumItem.dimMapping[0]
-    self.yAxis.mappedDim = spectrumItem.dimMapping[1]
-    self.xAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[0]])
-    self.yAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[1]])
+    # self.xAxis.mappedDim = spectrumItem.dimMapping[0]
+    # self.yAxis.mappedDim = spectrumItem.dimMapping[1]
+    # self.xAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[0]])
+    # self.yAxis.setAxisCode(spectrum.axisCodes[spectrumItem.dimMapping[1]])
 
 
-    self.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)\n" % (spectrum))
+    # self.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)\n" % (spectrum))
     spectrumItem.name = spectrum.name
     spectrum.spectrumItem = spectrumItem
     if self.colourIndex != len(SPECTRUM_COLOURS) - 2:
@@ -295,67 +310,74 @@ class SpectrumNdPane(SpectrumPane):
     else:
       self.colourIndex = 0
 
-    if self.spectrumIndex < 10:
-      shortcutKey = "s,"+str(self.spectrumIndex)
-      self.spectrumIndex+=1
-    else:
-      shortcutKey = None
+    # if self.spectrumIndex < 10:
+    #   shortcutKey = "s,"+str(self.spectrumIndex)
+    #   self.spectrumIndex+=1
+    # else:
+    #   shortcutKey = None
 
-    pix=QtGui.QPixmap(60,10)
-    # pix2=QtGui.QPixmap(30,10)
-    # pix.scaled(60,20)
-    # pix.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-    pix.fill(QtGui.QColor(self.posColors))
-    spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
-    newIcon = QtGui.QIcon(pix)
-    # newIcon.actualSize(QtCore.QSize(80,60))
-    spectrumItem.newAction.setIcon(newIcon)
-    spectrumItem.newAction.setCheckable(True)
-    spectrumItem.newAction.setChecked(True)
-    spectrumItem.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
-    spectrumItem.newAction.toggled.connect(spectrumItem.setVisible)
-    self.spectrumToolbar.addAction(spectrumItem.newAction)
-    spectrumItem.widget = self.spectrumToolbar.widgetForAction(spectrumItem.newAction)
-    spectrumItem.widget.clicked.connect(partial(self.clickedNd, spectrum))
-    spectrumItem.widget.setFixedSize(60,30)
-    self.current.spectrum = spectrum
-    if spectrum.dimensionCount > 2 and self.planeLabel is None:
-      self.planeToolbar = QtGui.QToolBar()
-      tileButton = Button(self, 'T')
-      tileButton.setFixedWidth(30)
-      tileButton.setFixedHeight(30)
-      self.planeToolbar.addWidget(tileButton)
-      self.spinSystemLabel = Label(self)
-      self.spinSystemLabel.setMaximumWidth(1150)
-      self.spinSystemLabel.setScaledContents(True)
-      self.spinSystemLabel.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
-      # self.spinSystemLabel.setFixedWidth(900)
-      self.planeToolbar.addWidget(self.spinSystemLabel)
-      prevPlaneButton = Button(self,'<')
-      prevPlaneButton.setFixedWidth(30)
-      prevPlaneButton.setFixedHeight(30)
-      prevPlaneButton.clicked.connect(self.prevZPlane)
-      self.planeLabel = LineEdit(self)
-      self.planeLabel.setAlignment(QtCore.Qt.AlignHCenter)
-      zDims = set(range(spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
-      zDim = zDims.pop()
-      dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
-      self.current.spectrum.pointCounts[zDim]/2
-      self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
-      self.planeLabel.setFixedWidth(100)
-      self.planeLabel.setFixedHeight(30)
-      # self.planeLabel.textChanged.connect(self.changeZPlane)
-      nextPlaneButton = Button(self,'>')
-      nextPlaneButton.setFixedWidth(30)
-      nextPlaneButton.setFixedHeight(30)
-      nextPlaneButton.clicked.connect(self.nextZPlane)
-      self.planeToolbar.addWidget(prevPlaneButton)
-      self.planeToolbar.addWidget(self.planeLabel)
-      self.planeToolbar.addWidget(nextPlaneButton)
-      self.planeToolbar.setContentsMargins(0,0,0,0)
-      self.dock.addWidget(self.planeToolbar, 3, 0, 1, 11)
-    # self.rotateAboutX()
-    # self.rotateAboutX()
+    # pix=QtGui.QPixmap(60,10)
+    # pix.fill(QtGui.QColor(self.posColors))
+    # # spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
+    # newIcon = QtGui.QIcon(pix)
+    # spectrumItem.newAction.setIcon(newIcon)
+    # spectrumItem.newAction.setCheckable(True)
+    # spectrumItem.newAction.setChecked(True)
+    # # spectrumItem.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
+    # spectrumItem.newAction.toggled.connect(spectrumItem.setVisible)
+    # self.spectrumToolbar.addAction(spectrumItem.newAction)
+    # spectrumItem.widget = self.spectrumToolbar.widgetForAction(spectrumItem.newAction)
+    # spectrumItem.widget.clicked.connect(partial(self.clickedNd, spectrum))
+    # spectrumItem.widget.setFixedSize(60,30)
+    # self.current.spectrum = spectrum
+    # self.spectrumItems.append(spectrumItem)
+    # print(self.spectrumItems)
+    # if spectrum.dimensionCount > 2 and self.planeLabel is None:
+    #   print('planing')
+    #   self.addPlaneToolbar(spectrum,spectrumItem)
+
+  def addPlaneToolbar(self, spectrum, spectrumItem):
+    self.planeToolbar = QtGui.QToolBar()
+    # tileButton = Button(self, 'T', callbacks=self.tileDisplay)
+    # tileButton.setFixedWidth(30)
+    # tileButton.setFixedHeight(30)
+    # self.planeToolbar.addWidget(tileButton)
+    # self.spinSystemLabel = Label(self)
+    # self.spinSystemLabel.setMaximumWidth(1150)
+    # self.spinSystemLabel.setScaledContents(True)
+    # self.spinSystemLabel.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
+    # # self.spinSystemLabel.setFixedWidth(900)
+    # self.planeToolbar.addWidget(self.spinSystemLabel)
+    prevPlaneButton = Button(self,'<', callbacks=[self.prevZPlane])
+    prevPlaneButton.setFixedWidth(30)
+    prevPlaneButton.setFixedHeight(30)
+    self.planeLabel = LineEdit(self)
+    self.planeLabel.setAlignment(QtCore.Qt.AlignHCenter)
+    zDims = set(range(spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
+    zDim = zDims.pop()
+    dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
+    self.current.spectrum.pointCounts[zDim]/2
+    self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
+    self.planeLabel.setFixedWidth(100)
+    self.planeLabel.setFixedHeight(30)
+    # self.axisCodeLabel = Label(self, text=spectrum.axisCodes[spectrumItem.dimMapping[2]])
+    # self.planeLabel.textChanged.connect(self.changeZPlane)
+    nextPlaneButton = Button(self,'>', callbacks=[self.nextZPlane])
+    nextPlaneButton.setFixedWidth(30)
+    nextPlaneButton.setFixedHeight(30)
+    # self.planeToolbar.addWidget(self.axisCodeLabel)
+    self.planeToolbar.addWidget(prevPlaneButton)
+    self.planeToolbar.addWidget(self.planeLabel)
+    self.planeToolbar.addWidget(nextPlaneButton)
+    rotateButton = Button(self, 'R', callbacks=[self.rotateAboutX, self.rotateAboutY, self.swapXY])
+    rotateButton.setFixedWidth(30)
+    rotateButton.setFixedHeight(30)
+    self.planeToolbar.addWidget(rotateButton)
+    self.planeToolbar.setContentsMargins(0,0,0,0)
+    # self.addWidget(self.planeToolbar, 3, 0)
+    # print(self.dock.widgets[-1].layout())#.addWidget(self.planeToolbar, 3, 0)
+    # self..addWidget(self.planeToolbar, 3, 0)
+
 
   # def changeZPosition(self, value):
   #   dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[2].findFirstDataDimRef()
@@ -369,6 +391,9 @@ class SpectrumNdPane(SpectrumPane):
   #     for spectrumItem in self.spectrumItems:
   #       spectrumItem.update()  # is this best way to force a re-draw??
 
+
+  def tileDisplay(self):
+    pass
 
   def decreaseTraceScale(self):
     self.traceScale*=1.41
@@ -397,7 +422,7 @@ class SpectrumNdPane(SpectrumPane):
   #     self.removeItem(trace)
   #     trace.newSpectrumItemTrace = pg.PlotDataItem(xData,yData)
   #     self.addItem(trace.SpectrumItemTrace)
-    
+
   def nextZPlane(self):
 
     self.changeZPlane(-1) # -1 because ppm units are backwards
@@ -405,7 +430,7 @@ class SpectrumNdPane(SpectrumPane):
     newPlaneNumber = dataDimRef.valueToPoint(float(self.planeLabel.text())) + 1
     newPoint = dataDimRef.pointToValue(newPlaneNumber)
     self.planeLabel.setText('%0.3f' % newPoint)
-    
+
   def prevZPlane(self):
 
     self.changeZPlane(1)
@@ -415,10 +440,10 @@ class SpectrumNdPane(SpectrumPane):
     self.planeLabel.setText('%0.3f' % newPoint)
 
   def changeZPlane(self, planeCount=1):
-    
+
     if len(self.region) < 3:
       return
-      
+
     smallest = None
     # take smallest inter-plane distance
     for spectrumItem in self.spectrumItems:
@@ -429,7 +454,7 @@ class SpectrumNdPane(SpectrumPane):
 
     if smallest is None:
       smallest = 1.0 # arbitrary
-      
+
     zDim = spectrumItem.dimMapping[2]
     delta = smallest * planeCount
     zregion = list(self.region[zDim])
@@ -529,21 +554,13 @@ class SpectrumNdPane(SpectrumPane):
         phaseList0[dim] = self.zeroPhaseSlider.value()
         phaseList1[dim] = self.firstPhaseSlider.value()
         self.current.spectrum.phases0 = phaseList0
-        self.current.spectrum.phases1 = phaseList1
 
-        # if dim == 0:
-        #   dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[1].findFirstDataDimRef()
-        #   nptsOrig = self.current.spectrum.totalPointCounts[1]
-        #   pivot = dataDimRef.valueToPoint(pivotPosition[1])
-        #   proportionality = pivot/nptsOrig
-        # if dim == 1:
         dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[trace.positionAxis.mappedDim].findFirstDataDimRef()
         nptsOrig = self.current.spectrum.totalPointCounts[trace.positionAxis.mappedDim]
         pivot = dataDimRef.valueToPoint(pivotPosition[trace.positionAxis.mappedDim])
         proportionality = pivot/nptsOrig
         phaseCorr = math.radians(float(self.current.spectrum.phases1[dim]))
         phase0 = math.radians(self.current.spectrum.phases0[dim])###+((proportionality*phaseCorr)*-1)
-
 
         phaseAngles = [phase0 + (((ii-pivot+1)/len(transformedData))*phaseCorr) for ii in range(len(transformedData))]
 
@@ -741,7 +758,10 @@ class SpectrumNdPane(SpectrumPane):
     self.phasingToolBar.addWidget(self.firstPhaseSlider)
     self.phasingToolBar.addWidget(firstPhaseLabel)
     # self.phasingToolBar.addWidget(self.pivotButton)
-    self.dock.addWidget(self.phasingToolBar, 3, 0, 1, 11)
+    if not hasattr(self, 'planeToolbar'):
+      self.dock.addWidget(self.phasingToolBar, 3, 0, 1, 11)
+    else:
+      self.dock.addWidget(self.phasingToolBar, 4, 0, 1, 11)
 
 
 

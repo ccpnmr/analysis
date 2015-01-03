@@ -35,7 +35,9 @@ from pyqtgraph.dockarea import Dock
 from ccpncore.gui import ViewBox
 from ccpnmrcore.gui.Axis import Axis
 
-from ccpnmrcore.Base import Base
+from ccpnmrcore import Base as GuiBase
+
+QtCore.qInstallMsgHandler(lambda *args: None)
 
 # abstract class: subclass needs to implement addSpectrum()
 
@@ -52,25 +54,25 @@ SPECTRUM_COLOURS = OrderedDict([('#ff0000','red'),
                                 ('#00ff80','spring green'),
                                 ('#ff0080','deep pink')])
 
-class SpectrumPane(pg.PlotWidget, Base):
+class SpectrumPane(pg.PlotWidget, GuiBase):
 
   sigClicked = QtCore.Signal(object, object)
 
   def __init__(self, project=None, parent=None, spectraVar=None, current=None, title=None, pid=None,
                mainWindow=None, preferences=None, **kw):
 
-    if preferences.general.colourScheme == 'light':
-      background = 'w'
-      foreground = 'k'
-    else:
-      background = 'k'
-      foreground = 'w'
+    # if preferences.general.colourScheme == 'light':
+    #   background = 'w'
+    #   foreground = 'k'
+    # else:
+    background = 'k'
+    foreground = 'w'
 
     pg.setConfigOptions(background=background)
     pg.setConfigOptions(foreground=foreground)
     pg.PlotWidget.__init__(self, parent, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
                            background=background, foreground=foreground)
-    Base.__init__(self,project=project, **kw)
+    GuiBase.__init__(self,project=project, **kw)
     self.axes = self.plotItem.axes
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.title = title
@@ -81,50 +83,56 @@ class SpectrumPane(pg.PlotWidget, Base):
     self.viewBox = self.plotItem.vb
     self.viewBox.parent = self
     self.viewBox.current = current
-    self.xAxis = Axis(self, orientation='bottom')
-    self.yAxis = Axis(self, orientation='right')
-    # self.plotItem.setLabels(right=('Nh', 'ppm'), bottom=('Hn', 'ppm'))
-    self.gridShown = None
+    self.xAxis = Axis(self, orientation='top')
+    self.yAxis = Axis(self, orientation='left')
+    self.gridShown = True
     self.axes['left']['item'].hide()
     self.axes['right']['item'].show()
-    self.axes['bottom']['item'].orientation = 'bottom'
+    self.axes['bottom']['item'].orientation = 'top'
+    self.axes['right']['item'].orientation = 'left'
+    self.grid = pg.GridItem()
+    self.addItem(self.grid)
     self.setAcceptDrops(True)
     self.crossHair = self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
     self.scene().sigMouseHover.connect(self.setCurrentPane)
     self.storedZooms = []
     self.spectrumItems = []
+    #
+    # if parent is None:
+    #   self.dock = Dock(name=self.title, size=(1100,1300))
+    #   self.dock.addWidget(self.spectrumFrame)
+    # elif isinstance(parent, Dock):
+    #   self.dock = parent
+    # else:
+    #   self.dock = None
+    # self.spectrumToolbar = QtGui.QToolBar()
+    # self.spectrumToolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+    # self.spectrumToolbar.setMinimumHeight(44)
+    # self.spectrumToolbar.setMaximumWidth(550)
+    #
+    # self.spectrumUtilToolbar = QtGui.QToolBar()
+    # spectrumToolBarColor = QtGui.QColor(214,215,213)
+    # palette = QtGui.QPalette(self.spectrumToolbar.palette())
+    # palette.setColor(QtGui.QPalette.Button,spectrumToolBarColor)
+    # if self.dock:
+    #   self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 6)
+    #   self.dock.addWidget(self.spectrumUtilToolbar, 0, 6, 2, 3)
 
-    # print('parent',parent)
-    if parent is None:
-      self.dock = Dock(name=self.title, size=(1100,1300))
-    elif isinstance(parent, Dock):
-      self.dock = parent
-    else:
-      self.dock = None
-    self.spectrumToolbar = QtGui.QToolBar()
-    self.spectrumToolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-    self.spectrumToolbar.setMinimumHeight(44)
-    self.spectrumToolbar.setMaximumWidth(550)
-
-    self.spectrumUtilToolbar = QtGui.QToolBar()
-    # self.spectrumToolbar.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
-    spectrumToolBarColor = QtGui.QColor(214,215,213)
-    palette = QtGui.QPalette(self.spectrumToolbar.palette())
-    palette.setColor(QtGui.QPalette.Button,spectrumToolBarColor)
-    if self.dock:
-      self.dock.addWidget(self.spectrumToolbar, 0, 0, 2, 6)
-      self.dock.addWidget(self.spectrumUtilToolbar, 0, 6, 2, 3)
-
-    self.spectrumIndex = 1
-    self.viewBox.current = current
-    self.positionBox = QtGui.QLabel()
-    if self.dock:
-      self.dock.addWidget(self.positionBox, 0, 9, 2, 2)
-    self.scene().sigMouseMoved.connect(self.showMousePosition)
-    if self.dock:
-      self.dock.addWidget(self, 2, 0, 1, 11)
-
+    # self.spectrumIndex = 1
+    # self.viewBox.current = current
+    # self.positionBox = QtGui.QLabel()
+    # if self.dock:
+    #   self.dock.addWidget(self.positionBox, 0, 9, 2, 2)
+    # self.scene().sigMouseMoved.connect(self.showMousePosition)
+    # self.spectrumFrame = QtGui.QWidget()
+    # # self.layout = QtGui.QGridLayout()
+    # # self.spectrumFrame.setLayout(self.layout)
+    # if self.dock:
+    #   self.dock.addWidget(self.spectrumFrame, 2, 0)
+    # print(self.dock.widgets)
+    #
+    # self.layout.addWidget(self, 0, 0)
     if spectraVar is None:
       spectraVar = []
 
@@ -311,7 +319,7 @@ class SpectrumPane(pg.PlotWidget, Base):
       spectrum = self.getObject(actualPid)
       print(spectrum)
       self.addSpectrum(spectrum)
-      self.current.spectrum = spectrum
+      # self.current.spectrum = spectrum
 
 
 

@@ -625,7 +625,7 @@ class Spectrum(AbstractWrapperObject):
         sw = value[ii]
         localValuePerPoint = dataDimRef.localValuePerPoint
         if localValuePerPoint:
-          dataDimRef.localValePerPoint = localValuePerPoint*sw/oldsw
+          dataDimRef.localValuePerPoint = localValuePerPoint*sw/oldsw
         else:
           dataDimRef.dataDim.valuePerPoint *= (sw/oldsw)
 

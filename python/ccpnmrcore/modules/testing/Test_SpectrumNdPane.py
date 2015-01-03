@@ -27,7 +27,7 @@ from ccpnmrcore.modules.SpectrumNdPane import SpectrumNdPane
 
 import json
 import os
-# from ccpncore.util.AttrDict import AttrDict
+from ccpncore.util.AttrDict import AttrDict
 
 
 class SpectrumPaneTest(Testing):

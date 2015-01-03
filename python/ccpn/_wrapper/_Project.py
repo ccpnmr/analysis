@@ -30,7 +30,6 @@ from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
 from ccpncore.util import Common as commonUtil
 
-
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to CCPN: NmrProject"""
   
@@ -159,6 +158,11 @@ class Project(AbstractWrapperObject):
   def name(self) -> str:
     """name of Project"""
     return self._wrappedData.name
+
+  @property
+  def path(self) -> str:
+    """path of/to Project"""
+    return utilIo.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
   
   @property
   def nmrProject(self) -> Ccpn_NmrProject:

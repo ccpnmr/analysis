@@ -49,7 +49,7 @@ class ChemicalShift(AbstractWrapperObject):
   @property
   def id(self) -> str:
     """identifier - assignment string"""
-    return ','.join(self.nmrAtom.assignment)
+    return ','.join(x or '' for x in self.nmrAtom.assignment)
     
   @property
   def _parent(self) -> Project:

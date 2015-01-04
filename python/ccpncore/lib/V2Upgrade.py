@@ -526,17 +526,19 @@ def regularisedResonanceName(resonance):
   result = None
   if elementCode and upperName.startswith(elementCode):
     # name is OK
-    if not resonanceName.startswith(elementCode):
+    if resonanceName.startswith(elementCode):
+      result = resonanceName
+    else:
       # except for casing - fix the casing
       result = elementCode + resonanceName[len(elementCode):]
 
-      if 'X' in result or 'Y' in result:
-        # Necessary to avoid potential clashes with XY names set above
-        # No actual assigned names contain 'X' or 'Y' anyway
-        result = '%s@%s' % (result, resonance.serial)
-      else:
-        # Name might be proper assignment name. Change to new wildcard convention
-        result.replace('*', '#')
+    if 'X' in result or 'Y' in result:
+      # Necessary to avoid potential clashes with XY names set above
+      # No actual assigned names contain 'X' or 'Y' anyway
+      result = '%s@%s' % (result, resonance.serial)
+    else:
+      # Name might be proper assignment name. Change to new wildcard convention
+      result.replace('*', '#')
 
 
   else:

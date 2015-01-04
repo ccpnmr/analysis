@@ -307,13 +307,21 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
     selfPid = self.longPid
     otherPid = other.longPid
     if selfPid == otherPid:
-      return self._project.id < other._project.id
+      return id(self._project) < id(other._project)
     else:
       return self._project._pidSortKey(selfPid) < other._project._pidSortKey(otherPid)
 
   def __repr__(self):
     """String representation"""
     return "<ccpn.%s>" % self.longPid
+
+  def __eq__(self, other):
+    """Python 2 behaviour - objects equal only to themselves. Necessary to avoid """
+    return self is other
+
+  def __hash__(self):
+    """Python 2 behaviour - objects equal only to themselves. Necessary to avoid """
+    return hash(id(self))
   
   # CCPN properties 
   @property

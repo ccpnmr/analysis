@@ -64,10 +64,14 @@ def exportRestraintStore(restraintSet, dataName=None, directory=None):
   restraintLists = restraintSet.restraintLists
 
   # PeakLists
-  peakLists = set(z.peakList for x in restraintLists
-                  for y in x.restraints
-                  for z in y.peaks)
-  peakLists = list(sorted(peakLists))
+  # Now objects are not hashable we need to do all this to remove duplicates
+  # As there will be few peaklists, sorting is probably not warranted
+  peakLists = []
+  for peakList in (z.peakList for x in restraintLists
+                   for y in x.restraints
+                   for z in y.peaks):
+    if peakList not in peakLists:
+      peakLists.append(peakList)
 
   # NBNB TBD temporary hack to get right result for CASD entries:
   if not peakLists:
@@ -358,8 +362,9 @@ def makeShiftListFrame(shiftList):
               'value', 'value_uncertainty',):
     loop.addColumn(tag)
 
-  for row in sorted((x.nmrAtom.assignment + (x.value, x.valueError))
-                    for x in shiftList.chemicalShifts):
+  sortkey = shiftList._project._pidSortKey
+  for row in sorted(((x.nmrAtom.assignment + (x.value, x.valueError))
+                    for x in shiftList.chemicalShifts), key=sortkey):
     loop.addData(row)
   #
   return saveframe
@@ -373,7 +378,12 @@ def makeRestraintListFrame(restraintList):
   if restraintList.name is None:
     restraintList.name = restraintList.longPid
   framecode = restraintList.name
-  frameCategory = 'nef_%s_restraint_list' % restraintType.lower()
+  if restraintType == 'HBond':
+    restraintListTag = 'distance'
+  else:
+    restraintListTag = restraintType.lower()
+
+  frameCategory = 'nef_%s_restraint_list' % restraintListTag
   # NBNB TBD ensure names are unique
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode, tag_prefix=frameCategory)
 
@@ -589,13 +599,16 @@ def makePeakRestraintLinksFrame(restraintLists, peakLists):
   for tag in ('nmr_spectrum_id', 'peak_id', 'restraint_list_id', 'restraint_id'):
     loop.addColumn(tag)
 
+  data = []
   for restraintList in restraintLists:
     restraint_list_id = '$' + restraintList.name
     for restraint in restraintList.restraints:
       restraint_id = restraint.serial
       for peak in restraint.peaks:
         if peak.peakList in peakLists:
-          loop.addData(['$'+peak.peakList.name, peak.serial, restraint_list_id, restraint_id])
+          data.append(['$'+peak.peakList.name, peak.serial, restraint_list_id, restraint_id])
+  for ll in sorted(data):
+      loop.addData(ll)
   #
   return saveframe
 
@@ -657,7 +670,7 @@ if __name__ == '__main__':
     else:
       constraintStore = ccpnProject.findFirstNmrConstraintStore()
 
-    exportRestraintStore(pp._data2Obj[constraintStore], directory=outputDir)
+    exportRestraintStore(pp._data2Obj[constraintStore], dataName=nmrProject.root.name, directory=outputDir)
 
   else:
     print ("Error. Parameters are: ccpnProjectDirectory outputDirectory [constraintStoreSerial] ")

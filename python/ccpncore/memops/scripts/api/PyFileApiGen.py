@@ -688,7 +688,7 @@ except:
     # __lt__ function
     self.startFunc('__lt__',
      params=(self.varNames['self'], 'other'),
-     docString=""" comparison function. WIth functools.totalordering allows object comparison."""
+     docString=""" comparison function. With functools.totalordering allows object comparison."""
     )
 
     self.write("""
@@ -699,6 +699,22 @@ if selfClass == otherClass:
 else:
   return selfClass < otherClass""")
 
+    self.endFunc()
+
+    # __eq__ function
+    self.startFunc('__eq__',
+     params=(self.varNames['self'], 'other'),
+     docString=""" equality function. With functools.totalordering allows object comparison."""
+    )
+    self.write("return (self is other)")
+    self.endFunc()
+
+    # __hash__ function
+    self.startFunc('__hash__',
+     params=(self.varNames['self'],),
+     docString=""" hash function. Necessary now we have __eq__."""
+    )
+    self.write("return hash(id(self))")
     self.endFunc()
       
     # __repr__ function

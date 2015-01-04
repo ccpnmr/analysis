@@ -687,11 +687,11 @@ nameMatches = [
 # (oldElem.qName, newElem.name, oldGuid, newGuid, differentTags
 allDiffs = [
  ('cambridge.WmsProtocol.WmsProtocol', 'WmsProtocol', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', {'parentRole'}), 
- ('ccp.general.DataLocation.NumberType', 'NumberType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', {'supertype', 'supertypes'}), 
+ ('ccp.general.DataLocation.NumberType', 'NumberType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', {'supertypes', 'supertype'}), 
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
  ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'partitionsChildren', 'isDerived'}), 
- ('ccp.nmr.Nmr.IntensityType', 'IntensityType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', {'supertype', 'supertypes'}), 
+ ('ccp.nmr.Nmr.IntensityType', 'IntensityType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', {'supertypes', 'supertype'}), 
  ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'locard', 'isDerived', 'documentation'}), 
- ('ccp.nmr.Nmr.ShiftRefType', 'ShiftRefType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', {'supertype', 'supertypes'}), 
+ ('ccp.nmr.Nmr.ShiftRefType', 'ShiftRefType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', {'supertypes', 'supertype'}), 
  ('molsim.Symmetry.MolSystemSymmetrySet', 'MolSystemSymmetrySet', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', {'parentRole'}), 
 ]

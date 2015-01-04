@@ -211,7 +211,7 @@ class Peak(AbstractWrapperObject):
       allAtoms = []
       peakDimContribs = peakContrib.peakDimContribs
       for ii,peakDim in enumerate(peakDims):
-        atoms = [data2Obj(x.resonance) for x in mainPeakDimContribs[ii]
+        atoms = [data2Obj.get(x.resonance) for x in mainPeakDimContribs[ii]
                 if x in peakDimContribs and hasattr(x, 'resonance')]
         if not atoms:
           atoms = [None]

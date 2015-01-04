@@ -46,7 +46,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     
   @property
   def id(self) -> str:
-    """identifier - serial num ber converted to string"""
+    """identifier - serial number converted to string"""
     return str(self._wrappedData.serial)
 
   @property

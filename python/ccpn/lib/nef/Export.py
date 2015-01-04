@@ -383,6 +383,16 @@ def makeRestraintListFrame(restraintList):
     ('potential_type',restraintList.potentialType)
   ])
 
+  # Rdc-specific tags:
+  if restraintType == 'Rdc':
+    saveframe.addTags([
+      ('tensor_magnitude',restraintList.tensorMagnitude),
+      ('tensor_rhombicity',restraintList.tensorRhombicity),
+      ('tensor_chain_code',restraintList.tensorChainCode),
+      ('tensor_sequence_code',restraintList.tensorSequenceCode),
+      ('tensor_residue_type',restraintList.tensorResidueType),
+    ])
+
   # restraint loop
   loop = bmrb.loop.fromScratch(category=frameCategory[:-5])
   saveframe.addLoop(loop)
@@ -601,7 +611,7 @@ def prepareNmrProject(nmrProject):
 
   # fix restraint list names to be unique
   constraintLists = [y for x in nmrProject.sortedNmrConstraintStores()
-                       for y in x.sortedConstraitnLists()]
+                       for y in x.sortedConstraintLists()]
 
   names = [x.name for x in constraintLists]
   for ii,name in enumerate(names):
@@ -610,13 +620,13 @@ def prepareNmrProject(nmrProject):
       names[ii] =  '_'.join(obj.name.split())
     else:
       names[ii] = ("RestraintList:%s.%s,%s" %
-                   (obj.nmrConstraintStore.serial, 'Re'+obj.className[3:-14], obj.serial))
+                   (obj.nmrConstraintStore.serial, obj.className[:-14], obj.serial))
 
   for ii,name in enumerate(names):
     obj = constraintLists[ii]
     if names.count(name) > 1:
       name = ("RestraintList:%s.%s,%s" %
-              (obj.nmrConstraintStore.serial, 'Re'+obj.className[3:-14], obj.serial))
+              (obj.nmrConstraintStore.serial, obj.className[:-14], obj.serial))
       names[ii] = name
     constraintLists[ii].name = name
 

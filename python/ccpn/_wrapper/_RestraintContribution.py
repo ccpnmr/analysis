@@ -235,4 +235,5 @@ for clazz in ccpnContribution._metaclass.getNonAbstractSubtypes():
 def fixedResonance2Assignment(fixedResonance:FixedResonance) -> AtomAssignment:
   """Utility function - get AtomAssignment from FixedResonance """
   tags = ('chainCode', 'sequenceCode', 'residueType', 'name')
-  return AtomAssignment(*(getattr(fixedResonance,tag) for tag in tags))
+  result = AtomAssignment(*(getattr(fixedResonance,tag) for tag in tags))
+  return result

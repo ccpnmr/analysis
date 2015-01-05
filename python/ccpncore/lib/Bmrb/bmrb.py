@@ -60,8 +60,9 @@ allow_v2_entries = False
 raise_parse_warnings = False
 skip_empty_loops = False
 
-# WARNING: str_conversion_dict canot contain both booleans and arithmetic types
-#          as this causes values 0 and 1  to be converted to 'false' and 'true'
+# WARNING: str_conversion_dict cannot contain both booleans and 
+# arithmetic types. Attempting to use both will cause an issue since 
+# boolean True == 1 in python and False == 0.
 str_conversion_dict = { None:"." }
 
 # Used internally
@@ -121,8 +122,9 @@ def cleanValue(value):
     # Allow manual specification of conversions for booleans, Nones, etc.
     if value in str_conversion_dict:
         if any(isinstance(value, type(x)) for x in str_conversion_dict):
-            # The additional check avoids numerical types to misidentified as booleans
-            # PROVIDED the dictionsry does not contain both numericals and booleans
+		# The additional check prevents numerical types from being
+		# interpreted as booleans. This is PROVIDED the dictionary 
+		# does not contain both numericals and booleans
             value = str_conversion_dict[value]
 
     # Convert non-string types to string

@@ -199,7 +199,11 @@ class Chain(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (MolSystem.Chains) for all Chain children of parent NmrProject.molSystem"""
-    return parent._wrappedData.molSystem.sortedChains()
+    molSystem =  parent._wrappedData.molSystem
+    if molSystem is None:
+      return []
+    else:
+      return parent._wrappedData.molSystem.sortedChains()
 
 
 def newChain(parent:Project, compoundName:str, shortName:str=None,

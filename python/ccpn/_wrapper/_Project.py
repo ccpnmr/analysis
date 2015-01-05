@@ -29,6 +29,7 @@ from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
 from ccpncore.util import Common as commonUtil
+from ccpncore.util import Io as utilIo
 
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to CCPN: NmrProject"""

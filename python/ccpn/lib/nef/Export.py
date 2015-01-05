@@ -205,8 +205,8 @@ def makeMetaDataFrame():
                                          tag_prefix='nef_nmr_meta_data')
 
   saveframe.addTags([
-    ('sf_category','nmr_meta_data'),
-    ('sf_framecode','nmr_meta_data'),
+    ('sf_category','nef_nmr_meta_data'),
+    ('sf_framecode','nef_nmr_meta_data'),
     ('format_name','nmr_exchange_format'),
     ('format_version','0.7'),
     ('program_name','CCPN'),

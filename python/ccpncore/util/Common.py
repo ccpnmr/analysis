@@ -198,15 +198,6 @@ def splitIntFromChars(value:str):
 
   return number,chars
 
-def nextUniqueName(name):
-  """make next unique name in series name, name_1, name_2, ..."""
-  ll = name.rsplit('_',1 )
-  if len(ll) == 2 and  ll[1] and all(x.isdigit() for x in ll[1]):
-    next = int(ll[1]) + 1
-    return '%s_%s' % (ll[0], next)
-  else:
-    return name + '_1'
-
 
 def integerStringSortKey(key):
   """return sort key so that strings starting with an integer sort as if by integer

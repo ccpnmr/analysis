@@ -72,6 +72,7 @@ def exportRestraintStore(restraintSet, dataName=None, directory=None):
                    for z in y.peaks):
     if peakList not in peakLists:
       peakLists.append(peakList)
+  peakLists.sort()
 
   # NBNB TBD temporary hack to get right result for CASD entries:
   if not peakLists:

@@ -123,7 +123,23 @@ class Residue(AbstractWrapperObject):
     """ResidueAssignment named tuple (chainCode, sequenceCode, residueType)"""
     obj = self._wrappedData
     return ResidueAssignment(obj.chain.code, self.sequenceCode, obj.code3Letter)
-    
+
+  # CCPN functions
+  # def linkToResidue(self, targetResidue, fromLinkCode, toLinkCode=None):
+  #   """Link residue to targetResidue, using linkCodes given
+  #   NBNB TBD currently function only set Molecule-level links and assumes that
+  #   ChemCompVar fits. Expand later"""
+  #   linkCodeMap = {'prev':'next', 'next':'prev'}
+  #   if toLinkCode is None:
+  #     toLinkCode = linkCodeMap.get(fromLinkCode)
+  #   if toLinkCode is None:
+  #     raise ValueError("toLinkCode missing for link type: %s" % fromLinkCode)
+  #
+  #   fromMolResidue = self._wrappedData.molResidue
+  #   toMolResidue = targetResidue._wrappedData.molResidue
+  #   linkEnds = (fromMolResidue.findFirstMolResLinkEnd(linkCode=fromLinkCode),
+  #               toMolResidue.findFirstMolResLinkEnd(linkCode=toLinkCode))
+  #   fromLinkCode.molecule.newMolResLink(molResLinkEnds=linkEnds)
     
   # Implementation functions
   @classmethod
@@ -132,46 +148,51 @@ class Residue(AbstractWrapperObject):
     return parent._wrappedData.sortedResidues()
     
     
-def newResidue(parent:Chain, name:str, sequenceCode:str=None, linking:str=None,
-               descriptor:str=None, molType:str=None, comment:str=None) -> Residue:
-  """Create new child Residue"""
-  project = parent._project
-  ccpnChain = parent._wrappedData
-  ccpnMolecule = ccpnChain.molecule
+# def newResidue(parent:Chain, name:str, linking:str=None, sequenceCode:str=None,
+#                descriptor:str=None, molType:str=None, comment:str=None) -> Residue:
+#   """Create new child Residue"""
+#   project = parent._project
+#   ccpnChain = parent._wrappedData
+#   ccpnMolecule = ccpnChain.molecule
+#   ccpnProject = ccpnChain.root
+#
+#   if ccpnMolecule.isFinalised:
+#     raise Exception("Chain {} can no longer be extended".format(parent))
+#
+#   # get chemCompVar and add MolResidue
+#   molType, ccpCode = DataMapper.pickChemCompId(project._residueName2chemCompIds,
+#                                                name, prefMolType=molType)
+#   chemComp = ccpnProject.findFirstChemComp(molType=molType, ccpCode=ccpCode)
+#   if descriptor is None:
+#     chemCompVar = chemComp.findFirstChemCompVar(linking=linking, isDefaultVar=True)
+#   else:
+#     chemCompVar = chemComp.findFirstChemCompVar(linking=linking, descriptor=descriptor)
+#   newMolResidue = ccpnMolecule.newMolResidue(chemComp=chemComp, chemCompVar=chemCompVar)
+#
+#   # split sequenceCode in number+string
+#   seqCode, seqInsertCode = commonUtil.splitIntFromChars(sequenceCode)
+#   if len(seqInsertCode) > 1:
+#     raise Exception(
+#       "Only one non-numerical character suffix allowed for sequenceCode {}".format(sequenceCode)
+#     )
+#
+#   # make residue
+#   ccpnResidue = ccpnChain.newResidue(seqId=newMolResidue.serial, linking=chemCompVar.linking,
+#                                      descriptor=chemCompVar.descriptor, details=comment,
+#                                      code3Letter = chemComp.code3Letter)
+#   if seqCode is None:
+#     ccpnResidue.seqCode = ccpnResidue.seqId
+#   else:
+#     ccpnResidue.seqCode = seqCode
+#     ccpnResidue.seqInsertCode = seqInsertCode
+#
+#   return parent._project._data2Obj.get(ccpnResidue)
 
-  if ccpnMolecule.isFinalized:
-    raise Exception("Chain {} can no longer be extended".format(parent))
-
-  # get chem comp ID strings from residue name
-  molType, ccpCode = DataMapper.pickChemCompId(project._residueName2chemCompIds,
-                                               name, prefMolType=molType)
-
-  # split sequenceCode in number+string
-  intCode, seqInsertCode = commonUtil.splitIntFromChars(sequenceCode)
-  if len(seqInsertCode) > 1:
-    raise Exception(
-      "Only one non-numerical character suffix allowed for sequenceCode {}".format(sequenceCode)
-    )
-
-  # make residue
-  ccpnResidue = ccpnChain.newResidue(molType=molType, ccpCode=ccpCode,
-                                     linking=linking, descriptor=descriptor,
-                                     details=comment)
-
-  if intCode is None:
-    ccpnResidue.seqCode = ccpnResidue.seqId
-  else:
-    ccpnResidue.seqCode = intCode
-    ccpnResidue.seqInsertCode = seqInsertCode
-
-  return parent._project._data2Obj.get(ccpnResidue)
-    
-    
     
 # Connections to parents:
 Chain._childClasses.append(Residue)
 
-Chain.newResidue = newResidue
+# Chain.newResidue = newResidue
 
 # Notifiers:
 className = Ccpn_Residue._metaclass.qualifiedName()

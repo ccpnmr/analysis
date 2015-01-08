@@ -111,7 +111,10 @@ class Base(Translation):
 
   def _getRowCol(self, grid):
 
-    layout = self.parent().layout()
+    if isinstance(self.parent(), Dock):
+      layout = self.parent().layout
+    else:
+      layout = self.parent().layout()
 
     if grid:
       row, col = grid

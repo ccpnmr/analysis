@@ -25,16 +25,16 @@ from ccpncore.gui.Base import Base as GuiBase
 
 class Base(GuiBase):
   
-  def __init__(self, project, *args, **kw):
+  def __init__(self, appBase, *args, **kw):
     
-    self.project = project
+    self.appBase = appBase
     
     GuiBase.__init__(self, *args, **kw)
     
   def getById(self, pid):
 
     print(pid)
-    return self.project.getById(pid)
+    return self.appBase.project.getById(pid)
 
   def getObject(self, pidOrObject):
     

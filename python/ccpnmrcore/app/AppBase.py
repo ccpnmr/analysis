@@ -3,9 +3,10 @@ __author__ = 'simon'
 
 from ccpn import openProject, newProject
 from ccpncore.util import Path
-from ccpncore.util import AttrDict
+from ccpncore.util.AttrDict import AttrDict
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.Current import Current
+from ccpnmrcore.modules.MainWindow import MainWindow
 
 import os, json
 
@@ -17,7 +18,17 @@ class AppBase(GuiBase):
     self.guiWindows = []
     self.current = Current()
     self.setupPreferences()
-    self.mainWindow = MainWindow(self)
+    ### TBD needs changing when GUI wrapper is available
+    apiProject = project._wrappedData.parent
+    apiWindowStore = apiProject.findFirstWindowStore()
+    if apiWindowStore is None:
+      apiWindowStore = apiProject.newWindowStore(nmrProject=apiProject.findFirstNmrProject())
+    apiWindow = apiWindowStore.findFirstWindow()
+    guiTask = apiProject.findFirstGuiTask(name='CcpnAssign') # TBD: what should the name be?? ask Rasmus
+    if not guiTask:
+      guiTask = apiProject.newGuiTask(name='CcpnAssign', nmrProjectName=apiProject.findFirstNmrProject().name)
+    self.mainWindow = MainWindow(self, apiWindow)
+    self.mainWindow.raise_()
 
   def openProject(self, path):
     self.project = openProject(path)
@@ -35,6 +46,9 @@ class AppBase(GuiBase):
     else:
       self.project=newProject(name)
     self.setProject(isNew=True)
+
+  def saveProject(self):
+    print("project saved")
 
   def setupPreferences(self):
 

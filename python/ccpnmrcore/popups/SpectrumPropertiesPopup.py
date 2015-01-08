@@ -26,7 +26,7 @@ from PySide import QtGui, QtCore
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ColourDialog import ColourDialog
-from ccpnmrcore.modules.SpectrumPane import SPECTRUM_COLOURS
+# from ccpnmrcore.modules.SpectrumPane import SPECTRUM_COLOURS
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
@@ -103,14 +103,14 @@ class GeneralTab(QtGui.QWidget, Base):
     if spectrum.dimensionCount == 1:
       colourLabel = Label(self, text="Colour", grid=(6,0))
       self.colourBox = PulldownList(self, grid=(6, 1))
-      for item in SPECTRUM_COLOURS.items():
-        pix=QtGui.QPixmap(QtCore.QSize(20,20))
-        pix.fill(QtGui.QColor(item[0]))
-        self.colourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-      self.colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
-      self.colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
-      colourButton = Button(self, text="More...", grid=(6, 2))
-      colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
+      # for item in SPECTRUM_COLOURS.items():
+      #   pix=QtGui.QPixmap(QtCore.QSize(20,20))
+      #   pix.fill(QtGui.QColor(item[0]))
+      #   self.colourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+      # self.colourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.colour.name()))
+      # self.colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
+      # colourButton = Button(self, text="More...", grid=(6, 2))
+      # colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
       spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(7, 0))
       spectrumType = PulldownList(self, grid=(7, 1))
       spectrumType.addItems(SPECTRA)
@@ -153,10 +153,10 @@ class GeneralTab(QtGui.QWidget, Base):
     spectrum.spectrumItem.plot.setPen(spectrum.spectrumItem.colour)
     pix=QtGui.QPixmap(QtCore.QSize(20,20))
     pix.fill(QtGui.QColor(newColour))
-    newIndex = str(len(SPECTRUM_COLOURS.items())+1)
-    self.colourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-    SPECTRUM_COLOURS[newColour.name()] = 'Colour %s' % newIndex
-    self.colourBox.setCurrentIndex(int(newIndex)-1)
+    # newIndex = str(len(SPECTRUM_COLOURS.items())+1)
+    # self.colourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+    # SPECTRUM_COLOURS[newColour.name()] = 'Colour %s' % newIndex
+    # self.colourBox.setCurrentIndex(int(newIndex)-1)
     pix=QtGui.QPixmap(60,10)
     pix.fill(newColour)
     newIcon = QtGui.QIcon(pix)
@@ -164,7 +164,7 @@ class GeneralTab(QtGui.QWidget, Base):
 
   def changedColourComboIndex(self, spectrum, value):
 
-    spectrum.spectrumItem.colour = QtGui.QColor(list(SPECTRUM_COLOURS.keys())[value])
+    # spectrum.spectrumItem.colour = QtGui.QColor(list(SPECTRUM_COLOURS.keys())[value])
     # palette = QtGui.QPalette(spectrum.spectrumItem.toolBarButton.palette())
     # palette.setColor(QtGui.QPalette.Button,spectrum.spectrumItem.colour)
     # spectrum.spectrumItem.toolBarButton.setPalette(palette)
@@ -233,15 +233,15 @@ class ContoursTab(QtGui.QWidget):
     positiveContourCountData.valueChanged.connect(partial(self.lineEditTextChanged3, spectrum))
     positiveContourColourLabel = Label(self, text="Colour",grid=(5, 0))
     self.positiveColourBox = PulldownList(self, grid=(5, 1))
-    for item in SPECTRUM_COLOURS.items():
-      pix=QtGui.QPixmap(QtCore.QSize(20,20))
-      pix.fill(QtGui.QColor(item[0]))
-      self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-    try:
-      self.positiveColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.posColor))
-      self.positiveColourBox.currentIndexChanged.connect(partial(self.changePosColourComboIndex, spectrum))
-    except ValueError:
-      pass
+    # for item in SPECTRUM_COLOURS.items():
+    #   pix=QtGui.QPixmap(QtCore.QSize(20,20))
+    #   pix.fill(QtGui.QColor(item[0]))
+    #   self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    # try:
+    #   # self.positiveColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.posColor))
+    #   # self.positiveColourBox.currentIndexChanged.connect(partial(self.changePosColourComboIndex, spectrum))
+    # except ValueError:
+    #   pass
     self.positiveColourButton = Button(self, text="More...", grid=(5, 2))
     self.positiveColourButton.clicked.connect(partial(self.changePosSpectrumColour, spectrum))
     # spectrum.spectrumItem.levels = self.newLevels(spectrum)
@@ -259,15 +259,15 @@ class ContoursTab(QtGui.QWidget):
     # negativeContourCountData = LineEdit(self, grid=(9, 1))
     negativeContourColourLabel = Label(self, text="Colour",grid=(6, 0))
     self.negativeColourBox = PulldownList(self, grid=(6, 1))
-    for item in SPECTRUM_COLOURS.items():
-      pix=QtGui.QPixmap(QtCore.QSize(20,20))
-      pix.fill(QtGui.QColor(item[0]))
-      self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-    try:
-      self.negativeColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.negColor))
-      self.negativeColourBox.currentIndexChanged.connect(partial(self.changeNegColourComboIndex, spectrum))
-    except ValueError:
-      pass
+    # for item in SPECTRUM_COLOURS.items():
+    #   pix=QtGui.QPixmap(QtCore.QSize(20,20))
+    #   pix.fill(QtGui.QColor(item[0]))
+    #   self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    # try:
+    #   self.negativeColourBox.setCurrentIndex(list(SPECTRUM_COLOURS.keys()).index(spectrum.spectrumItem.negColor))
+    #   self.negativeColourBox.currentIndexChanged.connect(partial(self.changeNegColourComboIndex, spectrum))
+    # except ValueError:
+    #   pass
 
     self.negativeColourButton = Button(self, text="More...", grid=(6, 2))
     self.negativeColourButton.clicked.connect(partial(self.changeNegSpectrumColour, spectrum))
@@ -292,11 +292,11 @@ class ContoursTab(QtGui.QWidget):
     spectrum.spectrumItem.posColors = (spectrum.spectrumItem.getColorTuple(newColour),)
     pix=QtGui.QPixmap(QtCore.QSize(20,20))
     pix.fill(QtGui.QColor(newColour))
-    newIndex = str(len(SPECTRUM_COLOURS.items())+1)
-    self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-    self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-    SPECTRUM_COLOURS[newColour.name()] = 'Colour %s' % newIndex
-    self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
+    # newIndex = str(len(SPECTRUM_COLOURS.items())+1)
+    # self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+    # self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+    # SPECTRUM_COLOURS[newColour.name()] = 'Colour %s' % newIndex
+    # self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
     pix=QtGui.QPixmap(60,10)
     pix.fill(newColour)
     newIcon = QtGui.QIcon(pix)
@@ -309,22 +309,22 @@ class ContoursTab(QtGui.QWidget):
     spectrum.spectrumItem.negColors = (spectrum.spectrumItem.getColorTuple(newColour),)
     pix=QtGui.QPixmap(QtCore.QSize(20,20))
     pix.fill(QtGui.QColor(newColour))
-    newIndex = str(len(SPECTRUM_COLOURS.items())+1)
-    self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
-    self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
-    SPECTRUM_COLOURS[newColour.name()] = 'Colour %s' % newIndex
-    self.negativeColourBox.setCurrentIndex(int(newIndex)-1)
+    # newIndex = str(len(SPECTRUM_COLOURS.items())+1)
+    # self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
+    # self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
+    # SPECTRUM_COLOURS[newColour.name()] = 'Colour %s' % newIndex
+    # self.negativeColourBox.setCurrentIndex(int(newIndex)-1)
 
 
-  def changePosColourComboIndex(self, spectrum, value):
-
-    newColour = list(SPECTRUM_COLOURS.keys())[value]
-    spectrum.spectrumItem.posColor = newColour
-    spectrum.spectrumItem.posColors = (spectrum.spectrumItem.getColorTuple(newColour),)
-    pix=QtGui.QPixmap(60,10)
-    pix.fill(newColour)
-    newIcon = QtGui.QIcon(pix)
-    spectrum.spectrumItem.newAction.setIcon(newIcon)
+  # def changePosColourComboIndex(self, spectrum, value):
+  #
+  #   newColour = list(SPECTRUM_COLOURS.keys())[value]
+  #   spectrum.spectrumItem.posColor = newColour
+  #   spectrum.spectrumItem.posColors = (spectrum.spectrumItem.getColorTuple(newColour),)
+  #   pix=QtGui.QPixmap(60,10)
+  #   pix.fill(newColour)
+  #   newIcon = QtGui.QIcon(pix)
+  #   spectrum.spectrumItem.newAction.setIcon(newIcon)
 
 
 

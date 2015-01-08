@@ -6,7 +6,7 @@ from PySide import QtGui, QtCore
 
 from ccpncore.gui import ViewBox
 
-from ccpnmrcore import Base as GuiBase
+from ccpnmrcore.Base import Base as GuiBase
 
 from ccpnmrcore.gui.Axis import Axis
 
@@ -16,10 +16,9 @@ class GuiStrip(pg.PlotWidget, GuiBase):
 
   sigClicked = QtCore.Signal(object, object)
 
-  def __init__(self, spectraVar, guiSpectrumDisplay, strip, **kw):
+  def __init__(self, guiSpectrumDisplay, spectraVar, **kw):
     self.guiSpectrumDisplay = guiSpectrumDisplay
-    self.strip = strip
-
+    # self.strip = strip
     background = 'k'
     foreground = 'w'
 
@@ -27,9 +26,13 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     pg.setConfigOptions(foreground=foreground)
     pg.PlotWidget.__init__(self, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
                            background=background, foreground=foreground)
+
+    GuiBase.__init__(self, guiSpectrumDisplay.appBase)
+    self.axes = self.plotItem.axes
+    self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
-    self.viewBox.parent = self
-    self.viewBox.current = self.current
+    # self.viewBox.parent = self
+    # self.viewBox.current = self.current
     self.xAxis = Axis(self, orientation='top')
     self.yAxis = Axis(self, orientation='left')
     self.gridShown = True
@@ -40,15 +43,15 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.grid = pg.GridItem()
     self.addItem(self.grid)
     self.setAcceptDrops(True)
-    self.crossHair = self.createCrossHair()
-    self.scene().sigMouseMoved.connect(self.mouseMoved)
-    self.scene().sigMouseHover.connect(self.setCurrentPane)
+    # self.crossHair = self.createCrossHair()
+    # self.scene().sigMouseMoved.connect(self.mouseMoved)
+    # self.scene().sigMouseHover.connect(self.setCurrentPane)
     self.storedZooms = []
     self.spectrumItems = []
     if spectraVar is None:
       spectraVar = []
-
-    self.setSpectra(spectraVar)
+    guiSpectrumDisplay.addWidget(self)
+    # self.setSpectra(spectraVar)
 
   def showSpectrum(self, guiSpectrumView):
     raise Exception('should be implemented in subclass')

@@ -24,17 +24,17 @@ class GuiSpectrumDisplay(GuiModule):
       self.guiStrips.append(guiStrip)  ##needs looking at
       print("Here again", guiStrip)
 
-    # self.spectrumToolBar = ToolBar(self, grid=(0, 0), gridSpan=(2, 6))
-    # self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-    # self.spectrumToolBar.setMinimumHeight(44)
-    # self.spectrumToolBar.setMaximumWidth(550)
-    #
-    # self.spectrumUtilToolBar = ToolBar(self, grid=(0, 6), gridSpan=(2, 3))
-    # toolBarColour = QtGui.QColor(214,215,213)
-    # palette = QtGui.QPalette(self.spectrumUtilToolBar.palette())
-    # palette2 = QtGui.QPalette(self.spectrumToolBar.palette())
-    # palette.setColor(QtGui.QPalette.Button,toolBarColour)
-    # palette2.setColor(QtGui.QPalette.Button,toolBarColour)
+    self.spectrumToolBar = ToolBar(self, grid=(0, 0))#, gridSpan=(2, 6))
+    self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+    self.spectrumToolBar.setMinimumHeight(44)
+    self.spectrumToolBar.setMaximumWidth(550)
+
+    self.spectrumUtilToolBar = ToolBar(self, grid=(0, 6))#, gridSpan=(2, 3))
+    toolBarColour = QtGui.QColor(214,215,213)
+    palette = QtGui.QPalette(self.spectrumUtilToolBar.palette())
+    palette2 = QtGui.QPalette(self.spectrumToolBar.palette())
+    palette.setColor(QtGui.QPalette.Button,toolBarColour)
+    palette2.setColor(QtGui.QPalette.Button,toolBarColour)
 
     self.positionBox = Label(self, grid=(0, 9), gridSpan=(2, 2))
 

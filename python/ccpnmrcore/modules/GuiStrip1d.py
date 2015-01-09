@@ -93,10 +93,10 @@ class GuiStrip1d(GuiStrip):
     colour = (0, 0, 255)  ## TBD
     data = guiSpectrumView.spectralData
     self.plot = self.plotItem.plot(data[0],data[1], pen={'color':colour},clickable=True,)
-    # guiSpectrumView.colour = QtGui.QColor(colour)
+    # self.colour = QtGui.QColor(colour)
     # self.name = spectrum.name
     # self.plot.parent = spectrum
-    # guiSpectrumView.plot.curve.setClickable(True)
+    self.plot.curve.setClickable(True)
     # guiSpectrumView.plot.sigClicked.connect(self.clicked)
     # palette = QtGui.QPalette()
     # palette.setColor(QtGui.QPalette.Button,spectrumView.colour)

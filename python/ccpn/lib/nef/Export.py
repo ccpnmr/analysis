@@ -25,6 +25,7 @@ import os
 import sys
 import datetime
 from ccpn import RestraintContribution
+from ccpn.lib.nef import Util as nefUtil
 from ccpncore.lib.Bmrb import bmrb
 
 nefExtension = 'nef'
@@ -193,6 +194,8 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
 
   # Make Peak-restraint links frame
   entry.addSaveframe(makePeakRestraintLinksFrame(restraintLists, peakLists))
+
+  entry = nefUtil.regulariseEntry(entry)
 
   return entry
 

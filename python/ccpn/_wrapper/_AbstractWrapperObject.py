@@ -487,7 +487,6 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
     data2Obj = project._data2Obj
 
     for childClass in self._childClasses:
-      print("@~@~ initialising class %s" % childClass.__name__)
 
       # recursively create children
       for wrappedObj in childClass._getAllWrappedData(self):

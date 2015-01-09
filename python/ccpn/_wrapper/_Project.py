@@ -89,7 +89,6 @@ class Project(AbstractWrapperObject):
 
     # Set necessary values in ccpnProject
     if wrappedData.molSystem is None:
-      print ("@~@~ making MolSystem %s" % wrappedData.name)
       wrappedData.root.newMolSystem(name=wrappedData.name, code=wrappedData.name,
                                     nmrProjects = (wrappedData,))
 

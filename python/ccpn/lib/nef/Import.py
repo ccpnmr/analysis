@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import os
+import json
 import sys
 import collections
 import ccpn
@@ -30,6 +31,36 @@ import ccpn
 # from ccpncore.util import Common as commonUtil
 from ccpn.lib.nef import Export
 from ccpncore.lib.Bmrb import bmrb
+
+def bmrbEntry2Data1(entry:bmrb.entry)-> dict:
+  """Convert Bmrb entry to nested OrderedDict data structure:
+  - an entry is an OrderedDict of saveframe OrderedDicts
+  - a saveframe OrderedDict contains tag:value and loopPrefix:loop
+  - a loop is a list of namedtuples with row data named after column names"""
+
+
+  result = {}
+  #
+  for frame in entry.frame_list:
+    frameDict = dict((tt[0], None if tt[1] == '.' else tt[1])
+                            for tt in frame.tags)
+    result[frameDict['sf_framecode']] = frameDict
+    for loop in frame.loops:
+      # Struct = collections.namedtuple(underScore2camelCase(loopPrefix[1:]),
+      #                                 [underScore2camelCase(x) for x in loop.columns])
+      prefix = loop.category
+      columns = loop.columns
+      frameDict[prefix] = [dict(zip(columns, (None if x == '.' else x for x in row)))
+                           for row in loop.data]
+  #
+  return result
+
+
+
+
+
+
+
 
 def bmrbEntry2Data(entry:bmrb.entry)-> collections.OrderedDict:
   """Convert Bmrb entry to nested OrderedDict data structure:
@@ -296,3 +327,6 @@ if __name__ == '__main__':
 
   else:
     print ("Error. Parameters are: ccpnProjectDirectory outputDirectory [constraintStoreSerial] ")
+
+  Export to JSON
+  bmrbData = bmrbEntry2Data1(bmrb.entry.fromFile(sys.argv[1]))

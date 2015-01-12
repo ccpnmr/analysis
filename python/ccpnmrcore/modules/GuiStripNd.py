@@ -6,20 +6,21 @@ from ccpnmrcore.modules.GuiStrip import GuiStrip
 
 class GuiStripNd(GuiStrip):
 
-  def __init__(self, guiSpectrumDisplay, spectraVar, **kw):
-    GuiStrip.__init__(self, guiSpectrumDisplay, spectraVar)
+  def __init__(self, guiSpectrumDisplay, apiStrip, **kw):
+    GuiStrip.__init__(self, guiSpectrumDisplay, apiStrip)
 
     self.plotItem.setAcceptDrops(True)
     self.setViewport(QtOpenGL.QGLWidget())
     self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
-    self.viewBox.menu = self.get2dContextMenu()
+    ###self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
-    self.region = guiSpectrumDisplay.defaultRegion()
+    ###self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
-    self.setShortcuts()
+    ###self.setShortcuts()
 
+  """
   def showSpectrum(self, guiSpectrumView):
     orderedAxes = self.strip.orderedAxes
     self.xAxis = orderedAxes[0]
@@ -28,7 +29,7 @@ class GuiStripNd(GuiStrip):
     apiSpectrum = guiSpectrumView.dataSource
 
     newItem = self.scene().addItem(guiSpectrumView)
-
+"""
   def addSpectrum(self, spectrum, guiSpectrumView):
 
     # resetAllAxisCodes(self.project._wrappedData)

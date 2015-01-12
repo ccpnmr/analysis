@@ -13,6 +13,7 @@ class GuiSpectrumDisplay(GuiModule):
 
   def __init__(self, dockArea, apiSpectrumDisplay):
     GuiModule.__init__(self, dockArea, apiSpectrumDisplay)
+    self.apiSpectrumDisplay = apiSpectrumDisplay # redundancy: this is same as self.apiModule
     self.guiSpectrumViews = []
     self.guiStrips = []
     self.spectrumToolBar = ToolBar(self, grid=(0, 0), gridSpan=(1, 6))

@@ -24,9 +24,9 @@ __version__ = "$Revision: 7686 $"
 import sys
 from PySide import QtGui
 
-def inverseGrey(color):
+def inverseGrey(colour):
 
-  r, g, b, a = color.getRgb()
+  r, g, b, a = colour.getRgb()
 
   m = (11*r + 16*g + 5*b)/32
 
@@ -51,62 +51,62 @@ class ColourDialog(QtGui.QColorDialog):
     self.aborted = False
     self.rejected.connect(self.quit)
 
-  def set(self, color):
+  def set(self, colour):
 
-    self.setColor(color)
+    self.setColour(colour)
 
 
-  def getColor(self, initialColor=None):
+  def getColor(self, initialColour=None):
 
-    if initialColor is not None:
-      self.setColor(initialColor)
+    if initialColour is not None:
+      self.setColor(initialColour)
 
     self.exec_()
 
-    color = self.currentColor()
+    colour = self.currentColour()
 
     if self.aborted:
       return None
     else:
-      return color
+      return colour
 
-  def setColor(self, color):
-    # color can be name, #hex, (r,g,b) or (r,g,b,a)
+  def setColour(self, colour):
+    # colour can be name, #hex, (r,g,b) or (r,g,b,a)
 
-    if isinstance(color, (list, tuple)) and color:
+    if isinstance(colour, (list, tuple)) and colour:
 
-      if isinstance(color[0], float):
-        color = [int(255*c) for c in color]
+      if isinstance(colour[0], float):
+        colour = [int(255*c) for c in colour]
 
-      qColor = QtGui.QColor(*color)
-      color = color.upper()
+      qColour = QtGui.QColor(*colour)
+      colour = colour.upper()
 
-    elif isinstance(color, QtGui.QColor):
-      qColor = QtGui.QColor(color)
+    elif isinstance(colour, QtGui.QColor):
+      qColour = QtGui.QColor(colour)
 
-    elif color[0] == '#':
-      if isinstance(color[0], float):
-        color = [int(255*c) for c in color]
+    elif colour[0] == '#':
+      if isinstance(colour[0], float):
+        colour = [int(255*c) for c in colour]
 
-      qColor = QtGui.QColor(*color)
-      color = color.upper()
+      qColour = QtGui.QColor(*colour)
+      colour = colour.upper()
 
-      if len(color) == 9:
-        r = int(color[1:3], 16)
-        g = int(color[3:5], 16)
-        b = int(color[5:7], 16)
-        a = int(color[7:9], 16)
-        color = (r, g, b, a)
+      if len(colour) == 9:
+        r = int(colour[1:3], 16)
+        g = int(colour[3:5], 16)
+        b = int(colour[5:7], 16)
+        a = int(colour[7:9], 16)
+        colour = (r, g, b, a)
 
       else:
-        r = int(color[1:3], 16)
-        g = int(color[3:5], 16)
-        b = int(color[5:7], 16)
-        color = (r, g, b)
+        r = int(colour[1:3], 16)
+        g = int(colour[3:5], 16)
+        b = int(colour[5:7], 16)
+        colour = (r, g, b)
 
-      qColor = QtGui.QColor(*color)
+      qColour = QtGui.QColor(*colour)
 
-    self.setCurrentColor(qColor)
+    self.setCurrentColor(qColour)
 
   def quit(self):
 

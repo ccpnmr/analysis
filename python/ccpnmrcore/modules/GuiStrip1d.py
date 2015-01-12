@@ -15,8 +15,8 @@ from ccpncore.gui.Menu import Menu
 
 class GuiStrip1d(GuiStrip):
 
-  def __init__(self, guiSpectrumDisplay, spectraVar, **kw):
-    GuiStrip.__init__(self, guiSpectrumDisplay, spectraVar)
+  def __init__(self, guiSpectrumDisplay, spectraVar, apiStrip, **kw):
+    GuiStrip.__init__(self, guiSpectrumDisplay, spectraVar, apiStrip)
     # self.contextMenu = None
     self.viewBox.invertX()
     self.showGrid(x=True, y=True)

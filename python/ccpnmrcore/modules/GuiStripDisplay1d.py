@@ -8,10 +8,10 @@ from ccpnmrcore.modules.spectrumItems.GuiSpectrumView1d import GuiSpectrumView1d
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
 
-  def __init__(self, dockArea, apiSpectrumDisplay):
-    if not apiSpectrumDisplay.strips:
-      apiSpectrumDisplay.newStrip1d()
-    GuiSpectrumDisplay.__init__(self, dockArea, apiSpectrumDisplay)
+  def __init__(self, dockArea, apiSpectrumDisplay1d):
+    if not apiSpectrumDisplay1d.strips:
+      apiSpectrumDisplay1d.newStrip1d()
+    GuiSpectrumDisplay.__init__(self, dockArea, apiSpectrumDisplay1d)
 
   def addSpectrum(self, spectrum):
 

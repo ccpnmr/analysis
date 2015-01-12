@@ -41,7 +41,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   
   #sigClicked = QtCore.Signal(object, object)
 
-  def __init__(self, guiSpectrumDisplay, spectrum, dimMapping=None, region=None, posColor=None, negColor=None, **kw):
+  def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None, region=None, posColor=None, negColor=None, **kw):
     """ spectrumPane is the parent
         spectrum is the Spectrum name or object
         region is in units of parent, ordered by spectrum dimensions
@@ -51,14 +51,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
 
-    GuiSpectrumView.__init__(self, guiSpectrumDisplay, spectrum, dimMapping)
+    GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
 
     self.posColor = posColor
     self.negColor = negColor
 
     # self.spectralData = self.getSlices()
     
-    self.previousRegion = spectrum.dimensionCount * [None]
+    self.previousRegion = apiSpectrumView.dimensionCount * [None]
 
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
     if dimMapping is not None:

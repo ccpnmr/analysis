@@ -15,7 +15,7 @@ class GuiStripNd(GuiStrip):
     self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
-    self.region = guiSpectrumDisplay.defa
+    self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
     self.setShortcuts()

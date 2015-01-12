@@ -16,7 +16,7 @@ class GuiStrip(pg.PlotWidget, GuiBase):
 
   sigClicked = QtCore.Signal(object, object)
 
-  def __init__(self, guiSpectrumDisplay, spectraVar, **kw):
+  def __init__(self, guiSpectrumDisplay, spectraVar, apiStrip, **kw):
     self.guiSpectrumDisplay = guiSpectrumDisplay
     # self.strip = strip
     background = 'k'

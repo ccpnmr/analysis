@@ -530,7 +530,7 @@ class Spectrum(AbstractWrapperObject):
       E.g. Hc is bound to Ch, but not to Ch2
 
     TBD codes match AtomSite.name, but NBNB NmrExpPrototypes must be updated to match system"""
-    return tuple(x and x.name for x in self._mainExpDimRefs())
+    return tuple(x and x.axisCode for x in self._mainExpDimRefs())
 
   @axisCodes.setter
   def axisCodes(self, value):

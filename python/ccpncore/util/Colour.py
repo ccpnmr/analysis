@@ -31,7 +31,7 @@ def rgbToHex(r, g, b):
 
   return '#' + ''.join([hex(x)[2:] for x in (r, g, b)])
   
-colorNameToHexDict = {
+colourNameToHexDict = {
   'red':     '#ff0000',
   'green':   '#00ff00',
   'blue':    '#0000ff',
@@ -40,28 +40,28 @@ colorNameToHexDict = {
   'cyan':    '#ffff00',
 }
 
-# Note that Color strings are not re-used
+# Note that Colour strings are not re-used
 
-class Color(str):
-  """ A class to make color manipulation easier and more transparent.
+class Colour(str):
+  """ A class to make colour manipulation easier and more transparent.
       Assumes that r, g, b values are 8-bit so between 0 and 255 and have optional a.
       
-  >>> c = Color('magenta')
-  >>> c = Color('#ff00ff')
-  >>> c = Color((255, 0, 255))
+  >>> c = Colour('magenta')
+  >>> c = Colour('#ff00ff')
+  >>> c = Colour((255, 0, 255))
   """
   
   def __init__(self, value):
     """ value can be name or #rrggbb or #rrggbbaa or (r, g, b) or (r, g, b, a) tuple/list """
     
     if not value:
-      raise Exception('not allowed blank color')
+      raise Exception('not allowed blank colour')
     
     if isinstance(value, str):
       value = value.lower()
       name = value
       if value[0] != '#':
-        value = colorNameToHexDict[name]
+        value = colourNameToHexDict[name]
         
       assert len(value) in (7, 9), 'len(value) = %d, should be 7 or 9' % len(value)
       

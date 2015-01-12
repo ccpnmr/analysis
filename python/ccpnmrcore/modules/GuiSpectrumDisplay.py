@@ -33,7 +33,7 @@ class GuiSpectrumDisplay(GuiModule):
     palette2.setColor(QtGui.QPalette.Button,toolBarColour)
 
     self.positionBox = Label(self, grid=(0, 9), gridSpan=(1, 1))
-    self.positionBox.setMaximumWidth(screenWidth*0.1)
+    self.positionBox.setFixedWidth(screenWidth*0.08)
 
     for apiStrip in apiSpectrumDisplay.strips:   ### probably need orderedStrips() here ?? ask Rasmus
       className = apiStrip.className

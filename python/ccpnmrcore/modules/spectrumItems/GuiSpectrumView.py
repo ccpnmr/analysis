@@ -25,7 +25,7 @@ from PySide import QtCore, QtGui
 
 from OpenGL import GL
 
-from ccpncore.util.Color import Color
+from ccpncore.util.Colour import Colour
 from ccpnmrcore.Base import Base as GuiBase
 
 import pyqtgraph as pg

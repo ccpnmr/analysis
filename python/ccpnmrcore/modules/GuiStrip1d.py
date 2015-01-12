@@ -8,7 +8,8 @@ from functools import partial
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 # from ccpncore.gui.Button import Button
 from ccpncore.gui.Icon import Icon
-# from ccpncore.gui.ColourDialog import ColourDialog
+from ccpncore.gui.ColourDialog import ColourDialog
+from ccpncore.util.Colour import spectrumColours
 # from ccpncore.gui.Action import Action
 from ccpncore.gui.Menu import Menu
 # from ccpncore.util import Logging
@@ -27,6 +28,7 @@ class GuiStrip1d(GuiStrip):
     self.plotItem.setAcceptDrops(True)
     self.spectrumItems = []
     self.colourIndex = 0
+    self.spectrumIndex = 0
     self.guiSpectrumDisplay = guiSpectrumDisplay
     self.fillToolBar()
     print(guiSpectrumDisplay.spectrumToolBar)
@@ -109,54 +111,81 @@ class GuiStrip1d(GuiStrip):
     restoreZoomIcon = Icon('icons/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
-    tileAction = self.guiSpectrumDisplay.spectrumUtilToolBar.addAction("T", self.zoomYAll)
 
+  # def showSpectrumPreferences(self, spectrum):
+  #   form = QtGui.QDialog()
+  #   layout = QtGui.QGridLayout()
+  #   layout.addWidget(QtGui.QLabel(text='Peak Lists'))
+  #   i=1
+  #   # for peakList in spectrum.peakLists:
+  #   #   label = QtGui.QLabel(form)
+  #   #   label.setText(str(peakList.pid))
+  #   #   checkBox = QtGui.QCheckBox()
+  #   #   if spectrum.spectrumItem.peakListItems[peakList.pid].displayed == True:
+  #   #     checkBox.setChecked(True)
+  #   #   else:
+  #   #     checkBox.setChecked(False)
+  #   #
+  #   #   checkBox.stateChanged.connect(lambda: self.peakListToggle(spectrum.spectrumItem, checkBox.checkState(),peakList))
+  #   #   layout.addWidget(checkBox, i, 0)
+  #   #   layout.addWidget(label, i, 1)
+  #   #   i+=1
+  #   #
+  #   # layout.addWidget(QtGui.QLabel(text='Integrals'), 2, 0)
+  #   # i+=1
+  #
+  #   newLabel = QtGui.QLabel(form)
+  #   newLabel.setText(str(spectrum.pid)+' Integrals')
+  #   newCheckBox = QtGui.QCheckBox()
+  #   newCheckBox.setChecked(True)
+  #   layout.addWidget(newCheckBox, i, 0)
+  #   layout.addWidget(newLabel, i, 1)
+  #   if spectrum.spectrumItem.integralListItems[0].displayed == True:
+  #     newCheckBox.setChecked(True)
+  #   else:
+  #     newCheckBox.setChecked(False)
+  #   newCheckBox.stateChanged.connect(lambda: self.integralToggle(newCheckBox.checkState(),spectrum.spectrumItem))
+  #   i+=1
+  #   newPushButton = QtGui.QPushButton('Colour')
+  #
+  #   layout.addWidget(newPushButton, i, 0, 1, 2)
+  #   form.setLayout(layout)
+  #   form.exec_()
 
   def addSpectrum(self, spectrum, guiSpectrumView):
 
-    colour = (0, 0, 255)  ## TBD
+    colour = QtGui.QColor(list(spectrumColours.keys())[self.colourIndex])
     data = guiSpectrumView.spectralData
-    self.plot = self.plotItem.plot(data[0],data[1], pen={'color':colour},clickable=True,)
-    # self.colour = QtGui.QColor(colour)
-    # self.name = spectrum.name
-    # self.plot.parent = spectrum
-    self.plot.curve.setClickable(True)
-    # guiSpectrumView.plot.sigClicked.connect(self.clicked)
-    # palette = QtGui.QPalette()
-    # palette.setColor(QtGui.QPalette.Button,guiSpectrumView.colour)
-    #
-    # guiSpectrumView.toolBarButton = QtGui.QToolButton(self.parent,text=spectrum.name)
-    # guiSpectrumView.toolBarButton.setCheckable(True)
-    # guiSpectrumView.toolBarButton.setChecked(True)
-    # # print(spectrumView.toolBarButton.actions())
-    # palette.setColor(QtGui.QPalette.Button,colour)
-    # # guiSpectrumView.toolBarButton.
-    # guiSpectrumView.toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
-    # guiSpectrumView.toolBarButton.toggled.connect(guiSpectrumView.plot.setVisible)
+    # if self.colourScheme == 'dark':
+    #   colour = colour.lighter(f=120)
+    # elif self.colourScheme == 'light':
+    #   colour = colour.lighter(f=85)
 
+    guiSpectrumView.plot = self.plotItem.plot(data[0],data[1], pen={'color':colour},clickable=True,)
+    guiSpectrumView.plot.curve.setClickable(True)
     self.appBase.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
-    # if self.colourIndex != len(SPECTRUM_COLOURS) - 1:
-    #   self.colourIndex +=1
-    # else:
-    #   self.colourIndex = 0
-    #
-    # if self.spectrumIndex < 10:
-    #   shortcutKey = "s,"+str(self.spectrumIndex)
-    #   self.spectrumIndex+=1
-    # else:
-    #   shortcutKey = None
+    if self.colourIndex != len(spectrumColours) - 1:
+      self.colourIndex +=1
+    else:
+      self.colourIndex = 0
 
+    if self.spectrumIndex < 10:
+      shortcutKey = "s,"+str(self.spectrumIndex)
+      self.spectrumIndex+=1
+    else:
+      shortcutKey = None
+
+    print(shortcutKey)
     pix=QtGui.QPixmap(60,10)
-    pix.fill(QtGui.QColor.fromRgb(0, 0, 255))
+    pix.fill(QtGui.QColor(colour))
     guiSpectrumView.newAction = self.guiSpectrumDisplay.spectrumToolBar.addAction(guiSpectrumView.name, QtGui.QToolButton)
     newIcon = QtGui.QIcon(pix)
     guiSpectrumView.newAction.setIcon(newIcon)
     guiSpectrumView.newAction.setCheckable(True)
     guiSpectrumView.newAction.setChecked(True)
-    # spectrumView.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
-    guiSpectrumView.newAction.toggled.connect(self.plot.setVisible)
+    guiSpectrumView.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
+    guiSpectrumView.newAction.toggled.connect(guiSpectrumView.plot.setVisible)
     self.guiSpectrumDisplay.spectrumToolBar.addAction(guiSpectrumView.newAction)
     guiSpectrumView.widget = self.guiSpectrumDisplay.spectrumToolBar.widgetForAction(guiSpectrumView.newAction)
-    guiSpectrumView.widget.setFixedSize(100,30)
-    # self.current.spectrum = spectrum
-    # spectrum.spectrumView = guiSpectrumView
+    guiSpectrumView.widget.setFixedSize(60,30)
+    spectrum.spectrumView = guiSpectrumView

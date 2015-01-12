@@ -23,6 +23,8 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 """Color specification"""
 
+from collections import OrderedDict
+
 def rgbaToHex(r, g, b, a=255):
   
   return '#' + ''.join([hex(x)[2:] for x in (r, g, b, a)])
@@ -31,6 +33,7 @@ def rgbToHex(r, g, b):
 
   return '#' + ''.join([hex(x)[2:] for x in (r, g, b)])
   
+
 colourNameToHexDict = {
   'red':     '#ff0000',
   'green':   '#00ff00',
@@ -39,6 +42,20 @@ colourNameToHexDict = {
   'magenta': '#ff00ff',
   'cyan':    '#ffff00',
 }
+
+spectrumColours = OrderedDict([('#ff0000','red'),
+                                ('#00ffff','cyan'),
+                                ('#ff8000','orange'),
+                                ('#0080ff','manganese blue'),
+                                ('#ffff00','yellow'),
+                                ('#0000ff','blue'),
+                                ('#80ff00','chartreuse'),
+                                ('#8000ff','purple'),
+                                ('#00ff00','green'),
+                                ('#ff00ff','magenta'),
+                                ('#00ff80','spring green'),
+                                ('#ff0080','deep pink')])
+
 
 # Note that Colour strings are not re-used
 

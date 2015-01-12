@@ -13,9 +13,6 @@ from ccpnmrcore.Base import Base as GuiBase
 
 from ccpnmrcore.gui.Axis import Axis
 
-
-
-
 class GuiStrip(pg.PlotWidget, GuiBase):
 
   sigClicked = QtCore.Signal(object, object)
@@ -23,8 +20,8 @@ class GuiStrip(pg.PlotWidget, GuiBase):
   def __init__(self, guiSpectrumDisplay, apiStrip, **kw):
     self.guiSpectrumDisplay = guiSpectrumDisplay
     # self.strip = strip
-    background = 'k'
-    foreground = 'w'
+    background = 'w'
+    foreground = 'k'
 
     pg.setConfigOptions(background=background)
     pg.setConfigOptions(foreground=foreground)
@@ -52,6 +49,7 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
     self.spectrumItems = []
+    self.colourScheme = 'light'
     guiSpectrumDisplay.addWidget(self, 1, 0, 1, 10)
 
   def createCrossHair(self):

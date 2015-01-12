@@ -27,9 +27,9 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
       guiTask = apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='CcpnAssign') # constant should be stored somewhere
       module = guiTask.newStripDisplay1d(name='Module1_1D', axisCodes=('H','intensity'))
       apiWindow.addModule(module)
-      codes = ('H','N')
-      module = guiTask.newStripDisplayNd(name='Module2_ND', axisCodes=codes, axisOrder=codes)
-      apiWindow.addModule(module)
+      # codes = ('H','N')
+      # module = guiTask.newStripDisplayNd(name='Module2_ND', axisCodes=codes, axisOrder=codes)
+      # apiWindow.addModule(module)
     GuiWindow.__init__(self, appBase, apiWindow)
     self.setupWindow()
     self.setupMenus()

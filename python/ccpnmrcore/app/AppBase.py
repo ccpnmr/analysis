@@ -10,7 +10,6 @@ from ccpnmrcore.modules.MainWindow import MainWindow
 
 import os, json
 
-
 class AppBase(GuiBase):
 
   def __init__(self, project=None):

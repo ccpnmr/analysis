@@ -7,7 +7,7 @@ from functools import partial
 
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 # from ccpncore.gui.Button import Button
-# from ccpncore.gui.Icon import Icon
+from ccpncore.gui.Icon import Icon
 # from ccpncore.gui.ColourDialog import ColourDialog
 # from ccpncore.gui.Action import Action
 from ccpncore.gui.Menu import Menu
@@ -15,8 +15,8 @@ from ccpncore.gui.Menu import Menu
 
 class GuiStrip1d(GuiStrip):
 
-  def __init__(self, guiSpectrumDisplay, spectraVar, apiStrip, **kw):
-    GuiStrip.__init__(self, guiSpectrumDisplay, spectraVar, apiStrip)
+  def __init__(self, guiSpectrumDisplay, apiStrip, **kw):
+    GuiStrip.__init__(self, guiSpectrumDisplay, apiStrip)
     # self.contextMenu = None
     self.viewBox.invertX()
     self.showGrid(x=True, y=True)
@@ -28,6 +28,7 @@ class GuiStrip1d(GuiStrip):
     self.spectrumItems = []
     # self.fillToolBar()
     self.colourIndex = 0
+    self.guiSpectrumDisplay = guiSpectrumDisplay
 
   def get1dContextMenu(self):
     self.contextMenu = Menu(self, isFloatWidget=True)
@@ -88,6 +89,25 @@ class GuiStrip1d(GuiStrip):
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2,x1)
 
+  def fillToolBar(self):
+    autoScaleAction = self.spectrumUtilToolbar.addAction("AutoScale", self.zoomYAll)
+    autoScaleActionIcon = Icon('icons/zoom-fit-best')
+    # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
+    autoScaleAction.setIcon(autoScaleActionIcon)
+    # autoScaleAction.setText("AutoScale")
+    fullZoomAction = self.spectrumUtilToolbar.addAction("Full", self.zoomXAll)
+    fullZoomIcon = Icon('icons/zoom-full')
+    fullZoomAction.setIcon(fullZoomIcon)
+    storeZoomAction = self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
+    storeZoomIcon = Icon('icons/zoom-store')
+    storeZoomAction.setIcon(storeZoomIcon)
+    storeZoomAction.setToolTip('Store Zoom')
+    restoreZoomAction = self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
+    restoreZoomIcon = Icon('icons/zoom-restore')
+    restoreZoomAction.setIcon(restoreZoomIcon)
+    restoreZoomAction.setToolTip('Restore Zoom')
+
+
   def addSpectrum(self, spectrum, guiSpectrumView):
 
     colour = (0, 0, 255)  ## TBD
@@ -99,16 +119,16 @@ class GuiStrip1d(GuiStrip):
     self.plot.curve.setClickable(True)
     # guiSpectrumView.plot.sigClicked.connect(self.clicked)
     # palette = QtGui.QPalette()
-    # palette.setColor(QtGui.QPalette.Button,spectrumView.colour)
-
-    # spectrumView.toolBarButton = QtGui.QToolButton(self.parent,text=spectrum.name)
-    # spectrumView.toolBarButton.setCheckable(True)
-    # spectrumView.toolBarButton.setChecked(True)
+    # palette.setColor(QtGui.QPalette.Button,guiSpectrumView.colour)
+    #
+    # guiSpectrumView.toolBarButton = QtGui.QToolButton(self.parent,text=spectrum.name)
+    # guiSpectrumView.toolBarButton.setCheckable(True)
+    # guiSpectrumView.toolBarButton.setChecked(True)
     # # print(spectrumView.toolBarButton.actions())
     # palette.setColor(QtGui.QPalette.Button,colour)
-    # spectrumView.toolBarButton.
-    # spectrumView.toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
-    # spectrumView.toolBarButton.toggled.connect(spectrumView.plot.setVisible)
+    # # guiSpectrumView.toolBarButton.
+    # guiSpectrumView.toolBarButton.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
+    # guiSpectrumView.toolBarButton.toggled.connect(guiSpectrumView.plot.setVisible)
 
     self.appBase.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
     # if self.colourIndex != len(SPECTRUM_COLOURS) - 1:
@@ -122,17 +142,17 @@ class GuiStrip1d(GuiStrip):
     # else:
     #   shortcutKey = None
 
-    # pix=QtGui.QPixmap(60,10)
-    # pix.fill(QtGui.QColor(guiSpectrumView.colour))
-    # guiSpectrumView.newAction = self.spectrumToolbar.addAction(guiSpectrumView.name, QtGui.QToolButton)
-    # newIcon = QtGui.QIcon(pix)
-    # guiSpectrumView.newAction.setIcon(newIcon)
-    # guiSpectrumView.newAction.setCheckable(True)
-    # guiSpectrumView.newAction.setChecked(True)
-    # # spectrumView.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
-    # guiSpectrumView.newAction.toggled.connect(guiSpectrumView.plot.setVisible)
-    # self.spectrumToolbar.addAction(guiSpectrumView.newAction)
-    # guiSpectrumView.widget = self.spectrumToolbar.widgetForAction(guiSpectrumView.newAction)
-    # guiSpectrumView.widget.setFixedSize(60,30)
+    pix=QtGui.QPixmap(60,10)
+    pix.fill(QtGui.QColor.fromRgb(0, 0, 255))
+    guiSpectrumView.newAction = self.guiSpectrumDisplay.spectrumToolBar.addAction(guiSpectrumView.name, QtGui.QToolButton)
+    newIcon = QtGui.QIcon(pix)
+    guiSpectrumView.newAction.setIcon(newIcon)
+    guiSpectrumView.newAction.setCheckable(True)
+    guiSpectrumView.newAction.setChecked(True)
+    # spectrumView.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
+    guiSpectrumView.newAction.toggled.connect(self.plot.setVisible)
+    self.guiSpectrumDisplay.spectrumToolbar.addAction(guiSpectrumView.newAction)
+    guiSpectrumView.widget = self.guiSpectrumDisplay.spectrumToolbar.widgetForAction(guiSpectrumView.newAction)
+    guiSpectrumView.widget.setFixedSize(60,30)
     # self.current.spectrum = spectrum
     # spectrum.spectrumView = guiSpectrumView

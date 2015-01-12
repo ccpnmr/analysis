@@ -92,6 +92,7 @@ class SpectrumPane(pg.PlotWidget, GuiBase):
     self.axes['right']['item'].orientation = 'left'
     self.grid = pg.GridItem()
     self.addItem(self.grid)
+    self.addItem(self.grid)
     self.setAcceptDrops(True)
     self.crossHair = self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)

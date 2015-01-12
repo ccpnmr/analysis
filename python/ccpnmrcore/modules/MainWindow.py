@@ -28,7 +28,6 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
       module = guiTask.newStripDisplay1d(name='Module1_1D', axisCodes=('H','intensity'))
       apiWindow.addModule(module)
       # guiTask.newStripDisplayNd(name='Module2_Nd')
-      print('api',apiWindow.modules)
     GuiWindow.__init__(self, appBase, apiWindow)
     self.setupWindow()
     self.setupMenus()
@@ -392,10 +391,10 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
     print("project saved as...")
 
   def toggleCrossHair(self):
-    self.current.pane.toggleCrossHair()
+    self.appBase.current.pane.toggleCrossHair()
 
   def toggleGrid(self):
-    self.current.pane.toggleGrid()
+    self.appBase.current.pane.toggleGrid()
 
   def hideConsole(self):
     self.pythonConsole.hide()

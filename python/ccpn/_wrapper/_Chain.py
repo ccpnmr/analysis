@@ -325,7 +325,6 @@ def makeChains(parent:Project, residueRecords) -> Chain:
   #
   return chains
 
-
 def makeSimpleChain(parent:Project, sequence, compoundName:str='Molecule_1',
               startNumber:int=1, preferredMolType:str=None,
               shortName:str=None, role:str=None, comment:str=None) -> Chain:

@@ -35,7 +35,6 @@ class GuiWindow(GuiBase):
       if isinstance(apiModule, SpectrumDisplay):
         className = apiModule.className
         classModule = importlib.import_module('ccpnmrcore.modules.Gui' + className)
-        print("I'm here", classModule)
         clazz = getattr(classModule, 'Gui'+className)
         guiModule = clazz(self.dockArea, apiModule)
       else:
@@ -49,7 +48,6 @@ class GuiWindow(GuiBase):
 
     else:
       spectrum = loadSpectrum(self.project,directory)
-      print(spectrum)
       # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
 
     msg = spectrum.name+' loaded'
@@ -116,7 +114,6 @@ class GuiWindow(GuiBase):
 
       if filePaths:
 
-        print(filePaths)
         if len(filePaths) == 1:
           global project
           currentProjectDir = filePaths[0]
@@ -128,7 +125,6 @@ class GuiWindow(GuiBase):
           # self.pythonConsole.write("openProject('"+currentProjectDir.name+"')\n")
           # list1 = self.spectrumItem.takeChildren()
           # for item in list1:
-          #   print((item.data()))
 
         else:
           spectrumFormat = specUtil.getSpectrumFileFormat(filePaths[0])
@@ -143,7 +139,6 @@ class GuiWindow(GuiBase):
           #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
           # elif dataSource.numDim > 1:
           #   data = SpectrumNdItem(self.spectrumPane,dataSource).spectralData
-          #   print(data)
           #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
             msg = dataSource.name+' loaded'
             self.statusBar().showMessage(msg)

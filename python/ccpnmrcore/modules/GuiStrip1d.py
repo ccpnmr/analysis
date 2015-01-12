@@ -26,31 +26,34 @@ class GuiStrip1d(GuiStrip):
     self.viewBox.menu = self.get1dContextMenu()
     self.plotItem.setAcceptDrops(True)
     self.spectrumItems = []
-    # self.fillToolBar()
     self.colourIndex = 0
     self.guiSpectrumDisplay = guiSpectrumDisplay
+    self.fillToolBar()
+    print(guiSpectrumDisplay.spectrumToolBar)
+    print(guiSpectrumDisplay.spectrumUtilToolBar)
+
 
   def get1dContextMenu(self):
     self.contextMenu = Menu(self, isFloatWidget=True)
     self.contextMenu.addItem("Auto Scale", callback=self.zoomYAll)
     self.contextMenu.addSeparator()
     self.contextMenu.addItem("Full", callback=self.zoomXAll)
-    # self.contextMenu.addItem("Zoom", callback=self.raiseZoomPopup)
-    # self.contextMenu.addItem("Store Zoom", callback=self.storeZoom)
-    # self.contextMenu.addItem("Restore Zoom", callback=self.restoreZoom)
-    # self.contextMenu.addSeparator()
-    # self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self.toggleCrossHair,
-    #                                      checkable=True)
-    # if self.crossHairShown == True:
-    #   self.crossHairAction.setChecked(True)
-    # else:
-    #   self.crossHairAction.setChecked(False)
-    # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
-    # self.gridAction = QtGui.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
-    # if self.gridShown == True:
-    #   self.gridAction.setChecked(True)
-    # else:
-    #   self.gridAction.setChecked(False)
+    self.contextMenu.addItem("Zoom", callback=self.raiseZoomPopup)
+    self.contextMenu.addItem("Store Zoom", callback=self.storeZoom)
+    self.contextMenu.addItem("Restore Zoom", callback=self.restoreZoom)
+    self.contextMenu.addSeparator()
+    self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self.toggleCrossHair,
+                                         checkable=True)
+    if self.crossHairShown == True:
+      self.crossHairAction.setChecked(True)
+    else:
+      self.crossHairAction.setChecked(False)
+    self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
+    self.gridAction = QtGui.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
+    if self.gridShown == True:
+      self.gridAction.setChecked(True)
+    else:
+      self.gridAction.setChecked(False)
     # self.contextMenu.addAction(self.gridAction, isFloatWidget=True)
     # self.contextMenu.addSeparator()
     # self.peakAction = QtGui.QAction("Peaks", self, triggered=self.peakListToggle, checkable=True)
@@ -90,22 +93,23 @@ class GuiStrip1d(GuiStrip):
     self.viewBox.setXRange(x2,x1)
 
   def fillToolBar(self):
-    autoScaleAction = self.spectrumUtilToolbar.addAction("AutoScale", self.zoomYAll)
+    autoScaleAction = self.guiSpectrumDisplay.spectrumUtilToolBar.addAction("AutoScale", self.zoomYAll)
     autoScaleActionIcon = Icon('icons/zoom-fit-best')
     # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
     autoScaleAction.setIcon(autoScaleActionIcon)
     # autoScaleAction.setText("AutoScale")
-    fullZoomAction = self.spectrumUtilToolbar.addAction("Full", self.zoomXAll)
+    fullZoomAction = self.guiSpectrumDisplay.spectrumUtilToolBar.addAction("Full", self.zoomXAll)
     fullZoomIcon = Icon('icons/zoom-full')
     fullZoomAction.setIcon(fullZoomIcon)
-    storeZoomAction = self.spectrumUtilToolbar.addAction("Store Zoom", self.storeZoom)
+    storeZoomAction = self.guiSpectrumDisplay.spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
     storeZoomIcon = Icon('icons/zoom-store')
     storeZoomAction.setIcon(storeZoomIcon)
     storeZoomAction.setToolTip('Store Zoom')
-    restoreZoomAction = self.spectrumUtilToolbar.addAction("Restore Zoom", self.restoreZoom)
+    restoreZoomAction = self.guiSpectrumDisplay.spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
     restoreZoomIcon = Icon('icons/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
+    tileAction = self.guiSpectrumDisplay.spectrumUtilToolBar.addAction("T", self.zoomYAll)
 
 
   def addSpectrum(self, spectrum, guiSpectrumView):
@@ -151,8 +155,8 @@ class GuiStrip1d(GuiStrip):
     guiSpectrumView.newAction.setChecked(True)
     # spectrumView.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
     guiSpectrumView.newAction.toggled.connect(self.plot.setVisible)
-    self.guiSpectrumDisplay.spectrumToolbar.addAction(guiSpectrumView.newAction)
-    guiSpectrumView.widget = self.guiSpectrumDisplay.spectrumToolbar.widgetForAction(guiSpectrumView.newAction)
-    guiSpectrumView.widget.setFixedSize(60,30)
+    self.guiSpectrumDisplay.spectrumToolBar.addAction(guiSpectrumView.newAction)
+    guiSpectrumView.widget = self.guiSpectrumDisplay.spectrumToolBar.widgetForAction(guiSpectrumView.newAction)
+    guiSpectrumView.widget.setFixedSize(100,30)
     # self.current.spectrum = spectrum
     # spectrum.spectrumView = guiSpectrumView

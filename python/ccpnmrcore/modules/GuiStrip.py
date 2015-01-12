@@ -3,6 +3,7 @@ __author__ = 'simon'
 import pyqtgraph as pg
 
 import os
+from functools import partial
 
 from PySide import QtGui, QtCore
 
@@ -31,11 +32,10 @@ class GuiStrip(pg.PlotWidget, GuiBase):
                            background=background, foreground=foreground)
 
     GuiBase.__init__(self, guiSpectrumDisplay.appBase)
+    self.current = guiSpectrumDisplay.appBase.current
     self.axes = self.plotItem.axes
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
-    # self.viewBox.parent = self
-    # self.viewBox.current = self.current
     self.xAxis = Axis(self, orientation='top')
     self.yAxis = Axis(self, orientation='left')
     self.gridShown = True
@@ -48,15 +48,11 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.setAcceptDrops(True)
     self.crossHair = self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
-    # self.scene().sigMouseHover.connect(self.setCurrentPane)
+    self.scene().sigMouseHover.connect(self.setCurrentPane)
+    self.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
     self.spectrumItems = []
-    # if spectraVar is None:
-    #   spectraVar = []
-    print(self)
-    guiSpectrumDisplay.addWidget(self, 1, 0)
-    # self.setSpectra(spectraVar)
-
+    guiSpectrumDisplay.addWidget(self, 1, 0, 1, 10)
 
   def createCrossHair(self):
     self.vLine = pg.InfiniteLine(angle=90, movable=False, pen='w')
@@ -65,6 +61,34 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.addItem(self.hLine, ignoreBounds=True)
 
 
+  def setCurrentPane(self):
+    self.current.pane = self
+
+  def toggleCrossHair(self):
+    if self.crossHairShown ==True:
+      self.hideCrossHair()
+    else:
+      self.showCrossHair()
+      self.crossHairShown = True
+
+  def showCrossHair(self):
+      self.vLine.show()
+      self.hLine.show()
+      self.crossHairAction.setChecked(True)
+      self.crossHairShown = True
+
+  def hideCrossHair(self):
+    self.vLine.hide()
+    self.hLine.hide()
+    self.crossHairAction.setChecked(False)
+    self.crossHairShown = False
+
+  def toggleGrid(self):
+    if self.grid.isVisible() == True:
+      self.grid.hide()
+    else:
+      self.grid.show()
+
   def mouseMoved(self, event):
     position = event
     if self.sceneBoundingRect().contains(position):
@@ -72,6 +96,52 @@ class GuiStrip(pg.PlotWidget, GuiBase):
         self.vLine.setPos(self.mousePoint.x())
         self.hLine.setPos(self.mousePoint.y())
     return self.mousePoint
+
+  def showMousePosition(self, pos):
+    position = self.viewBox.mapSceneToView(pos).toTuple()
+    self.guiSpectrumDisplay.positionBox.setText("X: %.3f  Y: %.3f" % position)
+
+  def zoomToRegion(self, region):
+    self.setXRange(region[0],region[1])
+    self.setYRange(region[2],region[3])
+
+  def zoomX(self, region):
+    self.setXRange(region[0],region[1])
+
+  def zoomY(self, region):
+    self.setYRange(region[0],region[1])
+
+  def zoomAll(self):
+    self.autoRange()
+
+  def zoomTo(self, x1, x2, y1, y2):
+    self.zoomToRegion([float(x1.text()),float(x2.text()),float(y1.text()),float(y2.text())])
+    self.zoomPopup.close()
+
+  def raiseZoomPopup(self):
+    self.zoomPopup = QtGui.QDialog()
+    layout = QtGui.QGridLayout()
+    layout.addWidget(QtGui.QLabel(text='x1'), 0, 0)
+    x1 = QtGui.QLineEdit()
+    layout.addWidget(x1, 0, 1, 1, 1)
+    layout.addWidget(QtGui.QLabel(text='x2'), 0, 2)
+    x2 = QtGui.QLineEdit()
+    layout.addWidget(x2, 0, 3, 1, 1)
+    layout.addWidget(QtGui.QLabel(text='y1'), 1, 0,)
+    y1 = QtGui.QLineEdit()
+    layout.addWidget(y1, 1, 1, 1, 1)
+    layout.addWidget(QtGui.QLabel(text='y2'), 1, 2)
+    y2 = QtGui.QLineEdit()
+    layout.addWidget(y2, 1, 3, 1, 1)
+    okButton = QtGui.QPushButton(text="OK")
+    okButton.clicked.connect(partial(self.zoomTo,x1,x2,y1,y2))
+    cancelButton = QtGui.QPushButton(text='Cancel')
+    layout.addWidget(okButton,2, 1)
+    layout.addWidget(cancelButton, 2, 3)
+    cancelButton.clicked.connect(self.zoomPopup.close)
+    self.zoomPopup.setLayout(layout)
+    self.zoomPopup.exec_()
+
 
   def storeZoom(self):
     self.storedZooms.append(self.viewBox.viewRange())
@@ -82,19 +152,6 @@ class GuiStrip(pg.PlotWidget, GuiBase):
       self.setXRange(restoredZoom[0][0], restoredZoom[0][1])
       self.setYRange(restoredZoom[1][0], restoredZoom[1][1])
 
-
-  def zoomYAll(self):
-    y2 = self.viewBox.childrenBoundingRect().top()
-    y1 = y2 + self.viewBox.childrenBoundingRect().height()
-    self.viewBox.setYRange(y2,y1)
-
-  def zoomXAll(self):
-    x2 = self.viewBox.childrenBoundingRect().left()
-    x1 = x2 + self.viewBox.childrenBoundingRect().width()
-    self.viewBox.setXRange(x2,x1)
-
-
-
   def showSpectrum(self, guiSpectrumView):
     raise Exception('should be implemented in subclass')
 
@@ -103,13 +160,11 @@ class GuiStrip(pg.PlotWidget, GuiBase):
 
   def dropEvent(self,event):
     event.accept()
-    # self.current.pane = self
     if isinstance(self.parent, QtGui.QGraphicsScene):
       event.ignore()
       return
 
     if event.mimeData().urls():
-      # event.accept()
       filePaths = [url.path() for url in event.mimeData().urls()]
       if len(filePaths) == 1:
         for dirpath, dirnames, filenames in os.walk(filePaths[0]):
@@ -127,18 +182,11 @@ class GuiStrip(pg.PlotWidget, GuiBase):
 
 
     else:
-      # event.accept()
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
-      #data = event.mimeData().text()
       print('RECEIVED mimeData: "%s"' % data)
-
       pidData = str(data.data(),encoding='utf-8')
       WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12', '\x0c', '\x05', '\x10', '\x14']
       pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
       actualPid = ''.join(map(str, pidData2))
-      # print(list(actualPid))
-
-
       spectrum = self.getObject(actualPid)
-      # print(spectrum)
       self.guiSpectrumDisplay.addSpectrum(spectrum)

@@ -40,3 +40,6 @@ class Base(GuiBase):
     
     return self.getById(pidOrObject) if type(pidOrObject) is type('') else pidOrObject
       
+  def getWrapperObject(self, apiObject):
+
+    return self.appBase.project._data2Obj[apiObject]

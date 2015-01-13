@@ -25,10 +25,10 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
     QtGui.QMainWindow.__init__(self)
     if not apiWindow.modules:
       guiTask = apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='CcpnAssign') # constant should be stored somewhere
-      module = guiTask.newStripDisplay1d(name='Module1_1D', axisCodes=('H','intensity'))
+      module = guiTask.newStripDisplay1d(name='Module1_1D', axisCodes=('H','intensity'), stripDirection='Y')
       apiWindow.addModule(module)
       codes = ('H','N')
-      module = guiTask.newStripDisplayNd(name='Module2_ND', axisCodes=codes, axisOrder=codes)
+      module = guiTask.newStripDisplayNd(name='Module2_ND', axisCodes=codes, axisOrder=codes, stripDirection='Y')
       apiWindow.addModule(module)
     GuiWindow.__init__(self, appBase, apiWindow)
     self.setupWindow()

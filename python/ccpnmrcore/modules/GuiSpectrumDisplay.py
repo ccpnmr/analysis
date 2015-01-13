@@ -44,14 +44,5 @@ class GuiSpectrumDisplay(GuiModule):
 
   def addStrip(self):
     pass
-
-  def findGuiStrip(self, apiStrip):
-    
-    # TBD: alternative is to use a dict but then that has to be kept in sync with self.guiStrips
-    for guiStrip in self.guiStrips:
-      if guiStrip.apiStrip is apiStrip:
-        return guiStrip
-        
-    return None
     
     

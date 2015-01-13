@@ -21,6 +21,8 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.guiSpectrumDisplay = guiSpectrumDisplay
     self.apiStrip = apiStrip
     
+    apiStrip.guiStrip = self  # runtime only
+    
     background = 'w'
     foreground = 'k'
 

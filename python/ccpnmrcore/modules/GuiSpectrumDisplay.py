@@ -40,9 +40,18 @@ class GuiSpectrumDisplay(GuiModule):
       classModule = importlib.import_module('ccpnmrcore.modules.Gui' + className)
       clazz = getattr(classModule, 'Gui'+className)
       guiStrip = clazz(self, apiStrip)
-      self.guiStrips.append(guiStrip)  ##needs looking at
-
 
 
   def addStrip(self):
     pass
+
+  def findGuiStrip(self, apiStrip):
+    
+    # TBD: alternative is to use a dict but then that has to be kept in sync with self.guiStrips
+    for guiStrip in self.guiStrips:
+      if guiStrip.apiStrip is apiStrip:
+        return guiStrip
+        
+    return None
+    
+    

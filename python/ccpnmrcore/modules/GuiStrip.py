@@ -19,7 +19,8 @@ class GuiStrip(pg.PlotWidget, GuiBase):
 
   def __init__(self, guiSpectrumDisplay, apiStrip, **kw):
     self.guiSpectrumDisplay = guiSpectrumDisplay
-    # self.strip = strip
+    self.apiStrip = apiStrip
+    
     background = 'w'
     foreground = 'k'
 
@@ -51,6 +52,7 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.spectrumItems = []
     self.colourScheme = 'light'
     guiSpectrumDisplay.addWidget(self, 1, 0, 1, 10)
+    guiSpectrumDisplay.guiStrips.append(self)
 
   def createCrossHair(self):
     self.vLine = pg.InfiniteLine(angle=90, movable=False, pen='w')

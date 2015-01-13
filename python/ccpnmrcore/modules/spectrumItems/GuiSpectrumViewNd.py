@@ -58,7 +58,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     # self.spectralData = self.getSlices()
     
-    self.previousRegion = apiSpectrumView.dimensionCount * [None]
+    apiDataSource = apiSpectrumView.dataSource
+    dimensionCount = apiDataSource.numDim
+    self.previousRegion = dimensionCount * [None]
 
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
     if dimMapping is not None:
@@ -74,10 +76,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       yDim = self.yDim
 
       region = guiSpectrumDisplay.region = self.defaultRegion()
-      viewBox = guiSpectrumDisplay.viewBox
-      # TBD: below assumes axes inverted
-      viewBox.setXRange(region[xDim][1], region[xDim][0])
-      viewBox.setYRange(region[yDim][1], region[yDim][0])
+      apiStrips = apiSpectrumView.strips
+      if apiStrips:
+        apiStrip = apiStrips[0]
+        guiStrip = guiSpectrumDisplay.findGuiStrip(apiStrip)
+        viewBox = guiStrip.viewBox
+        # TBD: below assumes axes inverted
+        viewBox.setXRange(region[xDim][1], region[xDim][0])
+        viewBox.setYRange(region[yDim][1], region[yDim][0])
 
     if self.posColor is None:
       self.posColor = 'ff0000' # red

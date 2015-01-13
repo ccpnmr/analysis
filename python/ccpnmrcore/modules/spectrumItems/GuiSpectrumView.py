@@ -52,9 +52,15 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
     GuiBase.__init__(self, guiSpectrumDisplay.appBase)
         
     self.guiSpectrumDisplay = guiSpectrumDisplay
-    self.spectrum = apiSpectrumView
+    self.apiSpectrumView = apiSpectrumView
+    
+    apiDataSource = apiSpectrumView.dataSource
+    self.spectrum = self.getWrapperObject(apiDataSource)
+    
     self.setDimMapping(dimMapping)
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
+
+    
     """
     for peakList in spectrum.peakLists:
       self.peakListItems[peakList.pid] = PeakListItem(self, peakList)
@@ -67,14 +73,13 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
     
   def setDimMapping(self, dimMapping=None):
     
-    spectrum = self.spectrum
+    dimensionCount = self.spectrum.dimensionCount
     
     if dimMapping is None:
       dimMapping = {}
-      for i in range(spectrum.dimensionCount):
+      for i in range(dimensionCount):
         dimMapping[i] = i
     self.dimMapping = dimMapping
-    dimensionCount = spectrum.dimensionCount
 
     xDim = yDim = None
     inverseDimMapping = {}

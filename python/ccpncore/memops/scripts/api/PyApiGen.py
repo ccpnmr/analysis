@@ -83,7 +83,7 @@ class PyApiGen(PyLanguage, PyType, ApiGen):
 
     self.writeNewline()
   
-    if clazz is self.baseClass:
+    if clazz in (self.baseClass, self.baseDataType):
       self.write("@functools.total_ordering")
 
     self.write("""###############################################################################
@@ -123,11 +123,9 @@ class %s(%s):
     
     if clazz is self.baseDataType:
       # special code for topmost actual class
-      
-      self.addHashForDataObj()
-      
-      self.addCompareToForDataObj(clazz)
-      
+
+      self.addComparisonsForDataObj()
+
       self.addToStringForDataObj()
   
   ###########################################################################
@@ -147,6 +145,8 @@ class %s(%s):
       # special code for topmost actual class
       
       self.addToStringForClass(clazz)
+
+      self.addComparisonsForClass(clazz)
   
     # Initialise notification machinery
     if not clazz.isAbstract:

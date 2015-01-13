@@ -93,7 +93,7 @@ for %s, %s in %s.items():
         if element is not None:
           break
       else:
-        raise MemopsError("No element %s found cor class %s" % (idVar, inClass))
+        raise MemopsError("No element %s found for class %s" % (idVar, inClass))
 
       self.startIf(self.valueIsNone(
        self.getValue(self.varNames['self'], element, lenient=True, inClass=inClass))
@@ -102,8 +102,8 @@ for %s, %s in %s.items():
       funcName = self.getFuncname(setterOp, inClass)
       self.callFunc(funcName, obj=self.varNames['self'], params=self.toLiteral(-1))
       self.elseIf()
-      self.raiseApiError("Cannot pass in explicit ID if not reading",
-                         'parent', self.toLiteral(inClass.qualifiedName()))
+      self.raiseApiError("Class %s - set explicit _ID %s when not reading",
+                         self.toLiteral(inClass.qualifiedName()), 'value')
       self.endIf()
 
 
@@ -682,12 +682,28 @@ except:
 
   ###########################################################################
 
-  # internal function 
-  def addToStringForClass(self, clazz):
+  def addComparisonsForClass(self, clazz):
+
+    # __eq__ function
+    self.startFunc('__eq__',
+     params=(self.varNames['self'], self.varNames['other']),
+     docString=""" equality function. With functools.totalordering allows object comparison."""
+    )
+    self.returnStatement(self.comparison(self.varNames['self'], 'is', self.varNames['other']))
+    self.endFunc()
+
+    # __hash__ function
+    self.startFunc('__hash__',
+     params=(self.varNames['self'],),
+     docString=""" hash function. Necessary now we have __eq__."""
+    )
+    ss = self.callFunc('id', params=[self.varNames['self']], doWrite=False,)
+    self.returnStatement(self.callFunc('hash',params=[ss], doWrite=False))
+    self.endFunc()
 
     # __lt__ function
     self.startFunc('__lt__',
-     params=(self.varNames['self'], 'other'),
+     params=(self.varNames['self'], self.varNames['other']),
      docString=""" comparison function. With functools.totalordering allows object comparison."""
     )
 
@@ -701,21 +717,12 @@ else:
 
     self.endFunc()
 
-    # __eq__ function
-    self.startFunc('__eq__',
-     params=(self.varNames['self'], 'other'),
-     docString=""" equality function. With functools.totalordering allows object comparison."""
-    )
-    self.write("return (self is other)")
-    self.endFunc()
+  ###########################################################################
 
-    # __hash__ function
-    self.startFunc('__hash__',
-     params=(self.varNames['self'],),
-     docString=""" hash function. Necessary now we have __eq__."""
-    )
-    self.write("return hash(id(self))")
-    self.endFunc()
+  ###########################################################################
+
+  # internal function
+  def addToStringForClass(self, clazz):
       
     # __repr__ function
     self.startFunc('__repr__', params=(self.varNames['self'],), 
@@ -786,40 +793,27 @@ else:
 
   ###########################################################################
 
-  # internal function 
-  def addCompareToForDataObj(self, clazz):
-    
-    # __cmp__ function
-    self.startFunc('__cmp__', 
-     params=(self.varNames['self'], self.varNames['other']), 
-     docString=" basic compare function. NB inConstructor is automatically excluded"
+    # __lt__, __eq__, and __hash__  functions
+  def addComparisonsForDataObj(self):
+    self.startFunc('__lt__',
+     params=(self.varNames['self'], self.varNames['other']),
+     docString=""" less-than function. With functools.totalordering allows object comparison."""
     )
-    
-    self.startIf(self.isInstance(self.varNames['other'], 
-                                 self.getImportName(clazz, clazz.container)))
     self.setDataDict()
-    params = []
-    for tag in (self.varNames['self'], self.varNames['other']):
-      par = '%sKey' % tag
-      params.append(par)
-      self.setVar(par, self.getDataObjIdTuple(tag))
-    self.returnStatement(self.callFunc('cmp', doWrite=False, params=params))
-    
-    self.elseIf()
-    self.returnStatement(self.callFunc('cmp', doWrite=False, params=(
-     self.callFunc('id', params=(self.varNames['self'],), doWrite=False),
-     self.callFunc('id', params=(self.varNames['other'],), doWrite=False))
-     ))
-    self.endIf()
-    
+    self.returnStatement(self.comparison(self.getDataObjIdTuple(self.varNames['self']), '<',
+                                         self.getDataObjIdTuple(self.varNames['other'])))
+
     self.endFunc()
-  
-  ###########################################################################
 
-  ###########################################################################
-
-  # internal function 
-  def addHashForDataObj(self):
+    # __eq__ function
+    self.startFunc('__eq__',
+     params=(self.varNames['self'], self.varNames['other']),
+     docString=""" equality function. With functools.totalordering allows object comparison."""
+    )
+    self.setDataDict()
+    self.returnStatement(self.equals(self.getDataObjIdTuple(self.varNames['self']),
+                                         self.getDataObjIdTuple(self.varNames['other'])))
+    self.endFunc()
       
     # __hash__ function
     self.startFunc('__hash__', params=(self.varNames['self'],), 

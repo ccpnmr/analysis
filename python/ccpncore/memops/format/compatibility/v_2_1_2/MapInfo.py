@@ -178,8 +178,7 @@ newConstraints = [
  ('ccpnmr.gui.Task.BoundStrip.axiscodes_same_as_parent_display', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00019'), 
  ('ccpnmr.gui.Task.Display1d.XY_axes_only', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00021'), 
  ('ccpnmr.gui.Task.DisplayNd.no_intensity_axis', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00023'), 
- ('ccpnmr.gui.Task.FreeStrip.axisCodes.axis_code_length_matches_display', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:45:29_00001'), 
- ('ccpnmr.gui.Task.FreeStrip.axisOrder.free_axis_order_is_reordering_of_axis_codes', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:06_00001'), 
+ ('ccpnmr.gui.Task.FreeStrip.axisOrder.free_axis_order_codes_contained_in_axis_codes', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:06_00001'), 
  ('ccpnmr.gui.Task.FreeStrip1d.Y_axis_is_intensity', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:36_00002'), 
  ('ccpnmr.gui.Task.FreeStripDisplay1d.Y_axis_is_intensity', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00027'), 
  ('ccpnmr.gui.Task.FreeStripDisplay1d.only_one_intensity_axis', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00028'), 
@@ -192,7 +191,7 @@ newConstraints = [
  ('ccpnmr.gui.Task.SampledAxis.code.value_axis_code_starts_with_lower_case', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00007'), 
  ('ccpnmr.gui.Task.SpectrumView.free_displays_are_linked_to_specific_strip_bound_displays_are_not', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00001'), 
  ('ccpnmr.gui.Task.SpectrumView.stripSerial.only_free_strip_displays_have_individual_spectrum_views', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:52:44_00014'), 
- ('ccpnmr.gui.Task.Strip.only_one_struip_in_non_strip_displays', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00007'), 
+ ('ccpnmr.gui.Task.Strip.only_one_strip_in_non_strip_displays', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00007'), 
  ('ccpnmr.gui.Task.ValueAxis.code.value_axis_code_starts_with_lower_case', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00010'), 
  ('memops.Implementation.KeyWord.only_keyword_characters', 'www.ccpn.ac.uk_Fogh_2014-03-07-15:48:27_00002'), 
 ]
@@ -677,9 +676,9 @@ typeChanges = [
 # Different elements with matching qualifiedNames
 # (element.qName, differentTags, oldGuid, newGuid
 nameMatches = [
- ('cambridge.WmsProtocol.WmsProtocol.memopsRoot', ({'documentation', 'otherRole'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00061', 'ccpn_automatic_cambridge.WmsProtocol.WmsProtocol.memopsRoot')), 
+ ('cambridge.WmsProtocol.WmsProtocol.memopsRoot', ({'otherRole', 'documentation'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00061', 'ccpn_automatic_cambridge.WmsProtocol.WmsProtocol.memopsRoot')), 
  ('ccpnmr', ({'documentation'}, 'www.ccpn.ac.uk_Fogh_2006-08-17-14:16:20_00001', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:25_00001')), 
- ('memops.Implementation.MemopsRoot.wmsProtocols', ({'documentation', 'otherRole'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00062', 'ccpn_automatic_memops.Implementation.MemopsRoot.wmsProtocol')), 
+ ('memops.Implementation.MemopsRoot.wmsProtocols', ({'otherRole', 'documentation'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00062', 'ccpn_automatic_memops.Implementation.MemopsRoot.wmsProtocol')), 
 ]
 
 # Differences for matching elements, 
@@ -687,11 +686,11 @@ nameMatches = [
 # (oldElem.qName, newElem.name, oldGuid, newGuid, differentTags
 allDiffs = [
  ('cambridge.WmsProtocol.WmsProtocol', 'WmsProtocol', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', {'parentRole'}), 
- ('ccp.general.DataLocation.NumberType', 'NumberType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', {'supertypes', 'supertype'}), 
+ ('ccp.general.DataLocation.NumberType', 'NumberType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', {'supertype', 'supertypes'}), 
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
  ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'partitionsChildren', 'isDerived'}), 
- ('ccp.nmr.Nmr.IntensityType', 'IntensityType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', {'supertypes', 'supertype'}), 
- ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'documentation', 'isDerived', 'locard'}), 
- ('ccp.nmr.Nmr.ShiftRefType', 'ShiftRefType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', {'supertypes', 'supertype'}), 
+ ('ccp.nmr.Nmr.IntensityType', 'IntensityType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', {'supertype', 'supertypes'}), 
+ ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'documentation', 'locard', 'isDerived'}), 
+ ('ccp.nmr.Nmr.ShiftRefType', 'ShiftRefType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', {'supertype', 'supertypes'}), 
  ('molsim.Symmetry.MolSystemSymmetrySet', 'MolSystemSymmetrySet', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', {'parentRole'}), 
 ]

@@ -50,7 +50,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
     
     QtGui.QGraphicsItem.__init__(self)
     GuiBase.__init__(self, guiSpectrumDisplay.appBase)
-        
+    self.apiSpectrumView = apiSpectrumView
     self.guiSpectrumDisplay = guiSpectrumDisplay
     self.apiSpectrumView = apiSpectrumView
     
@@ -74,7 +74,6 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
   def setDimMapping(self, dimMapping=None):
     
     dimensionCount = self.spectrum.dimensionCount
-    
     if dimMapping is None:
       dimMapping = {}
       for i in range(dimensionCount):

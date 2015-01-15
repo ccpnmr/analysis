@@ -79,7 +79,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       apiStrips = apiSpectrumView.strips
       if apiStrips:
         apiStrip = apiStrips[0]
-        guiStrip = guiSpectrumDisplay.findGuiStrip(apiStrip)
+        guiStrip = apiStrip.guiStrip
         viewBox = guiStrip.viewBox
         # TBD: below assumes axes inverted
         viewBox.setXRange(region[xDim][1], region[xDim][0])
@@ -162,7 +162,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       return
       
     self.constructContours()
-    
+
     posColors = self.posColors
     negColors = self.negColors
 
@@ -171,11 +171,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     negLevels = sorted([level for level in levels if level < 0], reverse=True)
  
     painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
-
+    apiStrips = self.apiSpectrumView.strips
+    apiStrip = apiStrips[0]
+    guiStrip = apiStrip.guiStrip
     try:
       
-      spectrum = self.spectrum
-      guiSpectrumDisplay = self.guiSpectrumDisplay
+      # spectrum = self.spectrum
+      # guiSpectrumDisplay = self.guiSpectrumDisplay
       xTranslate, xScale = self.getTranslateScale(self.xDim)
       yTranslate, yScale = self.getTranslateScale(self.yDim)
       GL.glLoadIdentity()
@@ -186,7 +188,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
       # the below is because the y axis goes from top to bottom
       GL.glScale(1.0, -1.0, 1.0)
-      GL.glTranslate(0.0, -self.spectrumPane.height(), 0.0)
+      GL.glTranslate(0.0, -guiStrip.height(), 0.0)
       
       # the below makes sure that spectrum points get mapped to screen pixels correctly
       GL.glTranslate(xTranslate, yTranslate, 0.0)
@@ -201,6 +203,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           GL.glColor4f(*color)
           # TBD: scaling, translating, etc.
           GL.glCallList(self.contourDisplayIndexDict[level])
+          print('HERE111', level)
       GL.glPopMatrix()
 
     finally:
@@ -230,7 +233,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     for level in removedLevels:
       self.releaseDisplayList(level)
       
-    self.previousRegion = self.spectrumPane.region[:]
+    # self.previousRegion = self.spectrumPane.region[:]
 
     # create wanted new levels
     levels -= oldLevels
@@ -286,6 +289,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   def getPlaneData(self):
     
+    apiStrips = self.apiSpectrumView.strips
+    apiStrip = apiStrips[0]
+    guiStrip = apiStrip.guiStrip
+
     spectrum = self.spectrum
     dimensionCount = spectrum.dimensionCount
     xDim = self.xDim
@@ -299,7 +306,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     elif dimensionCount == 3: # TBD
       zDims = set(range(dimensionCount)) - {xDim, yDim}
       zDim = zDims.pop()
-      zregionValue = self.spectrumPane.region[zDim]
+      zregionValue = guiStrip.region[zDim]
       zregionPoint = LibSpectrum.getDimPointFromValue(spectrum, zDim, zregionValue)
       zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
       position = dimensionCount * [0]
@@ -345,19 +352,21 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
   def getTranslateScale(self, dim):
     
-    spectrumPane = self.spectrumPane
-    plotItem = spectrumPane.plotItem
-    viewBox = spectrumPane.viewBox
+    apiStrips = self.apiSpectrumView.strips
+    apiStrip = apiStrips[0]
+    guiStrip = apiStrip.guiStrip
+    plotItem = guiStrip.plotItem
+    viewBox = guiStrip.viewBox
     isX = (dim == self.xDim)  # assumes that xDim != yDim
-    viewRegion = spectrumPane.viewRange()
+    viewRegion = guiStrip.viewRange()
     if isX:
       region1, region0 = viewRegion[0]  # TBD: relies on axes being backwards
-      pixelCount = spectrumPane.width()
+      pixelCount = guiStrip.width()
       pixelViewBox0 = plotItem.getAxis('left').width()
       pixelViewBox1 = pixelViewBox0 + viewBox.width()
     else:
       region1, region0 = viewRegion[1]  # TBD: relies on axes being backwards
-      pixelCount = spectrumPane.height()
+      pixelCount = guiStrip.height()
       pixelViewBox0 = plotItem.getAxis('bottom').height()
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
     

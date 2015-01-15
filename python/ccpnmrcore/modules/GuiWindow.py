@@ -31,7 +31,7 @@ class GuiWindow(GuiBase):
     self.dockArea = DockArea()
     self.dockArea.guiWindow = self
     self.dockArea.setGeometry(0, 0, 1100, 1300)
-    for apiModule in apiWindow.modules:
+    for apiModule in apiWindow.sortedModules():
       if isinstance(apiModule, SpectrumDisplay):
         className = apiModule.className
         classModule = importlib.import_module('ccpnmrcore.modules.Gui' + className)

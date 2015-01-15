@@ -69,14 +69,14 @@ class Base(Translation):
       return
 
     parent = self.parent() if hasattr(self, 'parent') else None # Not all Qt objects have a parent
-
+    print('parent',parent, 'isFloatWidget',isFloatWidget)
     if parent and not isFloatWidget:
       # Setup gridding within parent
       if isinstance(parent, Dock):
         layout = parent.layout
       else:
         layout = parent.layout()
-
+      print(layout)
       if not layout:
         layout = QtGui.QGridLayout(parent)
         # layout.setSpacing(2)
@@ -93,6 +93,7 @@ class Base(Translation):
         hAlign = HALIGN_DICT.get(hAlign, 0)
         vAlign = VALIGN_DICT.get(vAlign, 0)
         align = hAlign | vAlign
+        print('here11111')
         layout.addWidget(self, row, col, rowSpan, colSpan, align)
                 
     if hPolicy or vPolicy:

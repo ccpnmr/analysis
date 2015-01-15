@@ -52,9 +52,10 @@ class AppBase(GuiBase):
   def setupPreferences(self):
 
     preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
-    if not os.path.exists('preferencesPath'):
+    print(preferencesPath)
+    if not os.path.exists(preferencesPath):
       preferencesPath = os.path.join(Path.getPythonDirectory(), 'ccpnmrcore', 'app', 'defaultv3settings.json')
-
     fp = open(preferencesPath)
     self.preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
+    print(self.preferences)
     fp.close()

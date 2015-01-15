@@ -17,22 +17,30 @@ class GuiStrip(pg.PlotWidget, GuiBase):
 
   sigClicked = QtCore.Signal(object, object)
 
-  def __init__(self, guiSpectrumDisplay, apiStrip, **kw):
-    self.guiSpectrumDisplay = guiSpectrumDisplay
+  def __init__(self, guiFrame, apiStrip, **kw):
+    self.guiFrame = guiFrame
+    self.guiSpectrumDisplay = guiFrame.guiSpectrumDisplay
     self.apiStrip = apiStrip
     
     apiStrip.guiStrip = self  # runtime only
-    
-    background = 'w'
-    foreground = 'k'
+
+
+    pg.PlotWidget.__init__(self, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
+                           )
+
+    GuiBase.__init__(self, guiFrame.appBase)
+    # if self.appBase.preferences.general.colourScheme == 'light':
+    #   background = 'w'
+    #   foreground = 'k'
+    #   print(background)
+    # else:
+    background = 'k'
+    foreground = 'w'
+
 
     pg.setConfigOptions(background=background)
     pg.setConfigOptions(foreground=foreground)
-    pg.PlotWidget.__init__(self, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
-                           background=background, foreground=foreground)
-
-    GuiBase.__init__(self, guiSpectrumDisplay.appBase)
-    self.current = guiSpectrumDisplay.appBase.current
+    self.current = guiFrame.appBase.current
     self.axes = self.plotItem.axes
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
@@ -53,15 +61,19 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.storedZooms = []
     self.spectrumItems = []
     self.colourScheme = 'light'
-    guiSpectrumDisplay.addWidget(self, 1, 0, 1, 10)
-    guiSpectrumDisplay.guiStrips.append(self)
+    n = len(self.guiSpectrumDisplay.apiSpectrumDisplay.strips)-1
+    print(n)
+    self.guiSpectrumDisplay.addWidget(self, 1, n)
+    self.scene().sigMouseHover.connect(self.setCurrentPane)
+    self.setStyleSheet("border: 1px solid white")
+    self.guiSpectrumDisplay.guiStrips.append(self)
+
 
   def createCrossHair(self):
     self.vLine = pg.InfiniteLine(angle=90, movable=False, pen='w')
     self.hLine = pg.InfiniteLine(angle=0, movable=False, pen='w')
     self.addItem(self.vLine, ignoreBounds=True, )
     self.addItem(self.hLine, ignoreBounds=True)
-
 
   def setCurrentPane(self):
     self.current.pane = self
@@ -90,6 +102,9 @@ class GuiStrip(pg.PlotWidget, GuiBase):
       self.grid.hide()
     else:
       self.grid.show()
+
+  def setCurrentPane(self):
+    self.guiSpectrumDisplay.currentStrip = self
 
   def mouseMoved(self, event):
     position = event

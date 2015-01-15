@@ -107,10 +107,10 @@ class GeneralTab(QtGui.QWidget, Base):
         pix=QtGui.QPixmap(QtCore.QSize(20,20))
         pix.fill(QtGui.QColor(item[0]))
         self.colourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-      self.colourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.spectrumView.colour.name()))
+      self.colourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.ccpnSpectrum.sliceColour))
       self.colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
-      colourButton = Button(self, text="More...", grid=(6, 2))
-      colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
+      colourButton = Button(self, text="More...", grid=(6, 2), callbacks=[partial(self.changeSpectrumColour, spectrum)])
+      # colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
       spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(7, 0))
       spectrumType = PulldownList(self, grid=(7, 1))
       spectrumType.addItems(SPECTRA)
@@ -148,9 +148,10 @@ class GeneralTab(QtGui.QWidget, Base):
   def changeSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
-    palette = QtGui.QPalette(spectrum.spectrumView.toolBarButton.palette())
-    palette.setColor(QtGui.QPalette.Button,spectrum.spectrumView.colour)
-    spectrum.spectrumView.plot.setPen(spectrum.spectrumView.colour)
+    # palette = QtGui.QPalette(spectrum.guispectrumView.toolBarButton.palette())
+    # palette.setColor(QtGui.QPalette.Button,spectrum.spectrumView.colour)
+    spectrum.ccpnSpectrum.setSliceColour(newColour.name())
+    spectrum.guiSpectrumView.plot.setPen(spectrum.ccpnSpectrum.sliceColour)
     pix=QtGui.QPixmap(QtCore.QSize(20,20))
     pix.fill(QtGui.QColor(newColour))
     newIndex = str(len(spectrumColours.items())+1)
@@ -160,19 +161,16 @@ class GeneralTab(QtGui.QWidget, Base):
     pix=QtGui.QPixmap(60,10)
     pix.fill(newColour)
     newIcon = QtGui.QIcon(pix)
-    spectrum.spectrumView.newAction.setIcon(newIcon)
+    spectrum.guiSpectrumView.newAction.setIcon(newIcon)
 
   def changedColourComboIndex(self, spectrum, value):
 
-    # spectrum.spectrumView.colour = QtGui.QColor(list(spectrumColours.keys())[value])
-    # palette = QtGui.QPalette(spectrum.spectrumView.toolBarButton.palette())
-    # palette.setColor(QtGui.QPalette.Button,spectrum.spectrumView.colour)
-    # spectrum.spectrumView.toolBarButton.setPalette(palette)
-    spectrum.spectrumView.plot.setPen(spectrum.spectrumView.colour)
+    spectrum.ccpnSpectrum.setSliceColour(list(spectrumColours.keys())[value])
+    spectrum.guiSpectrumView.plot.setPen(QtGui.QColor(spectrum.ccpnSpectrum.sliceColour))
     pix=QtGui.QPixmap(60,10)
-    pix.fill(spectrum.spectrumView.colour)
+    pix.fill(QtGui.QColor(spectrum.ccpnSpectrum.sliceColour))
     newIcon = QtGui.QIcon(pix)
-    spectrum.spectrumView.newAction.setIcon(newIcon)
+    spectrum.guiSpectrumView.newAction.setIcon(newIcon)
 
 
 

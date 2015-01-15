@@ -1,5 +1,9 @@
 from pyqtgraph.dockarea import DockArea
 
+import os, json
+
+from functools import partial
+
 from PySide import QtGui, QtCore
 
 from ccpn.lib.Project import loadSpectrum
@@ -212,7 +216,7 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
 
   def fillRecentProjectsMenu(self):
     for recentFile in self.appBase.preferences.recentFiles:
-      self.action = Action(self, text=recentFile, callback=partial(self.openProject,projectDir=recentFile))
+      self.action = Action(self, text=recentFile, callback=partial(self.appBase.openProject,projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
 
   def saveBackup(self):
@@ -247,7 +251,7 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
     prefFile = open(os.path.expanduser("~/.ccpn/v3settings.json"))
     pref = json.load(prefFile)
     prefFile.close()
-    if not pref == self.preferences:
+    if pref != self.appBase.preferences:
       msgBox = QtGui.QMessageBox()
       msgBox.setText("Application Preferences have been changed")
       msgBox.setInformativeText("Do you want to save your changes?")
@@ -256,7 +260,7 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
       if ret == QtGui.QMessageBox.Yes:
         preferencesPath = os.path.expanduser("~/.ccpn/v3settings.json")
         prefFile = open(preferencesPath, 'w+')
-        json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        json.dump(self.appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
         prefFile.close()
       else:
         pass

@@ -63,7 +63,7 @@ class ColourDialog(QtGui.QColorDialog):
 
     self.exec_()
 
-    colour = self.currentColour()
+    colour = self.currentColor()
 
     if self.aborted:
       return None

@@ -123,7 +123,7 @@ class BasePopup(QtGui.QWidget, Base):
 
   def body(self, master):
     
-    raise Exception('this method should be implemented in subclass')
+    pass # this method can be overridden in subclass
 
 if __name__ == '__main__':
 
@@ -139,13 +139,11 @@ if __name__ == '__main__':
 
       BasePopup.__init__(self, parent, 'Test Popup', modal=False)
 
-    def body(self, master):
-
       self.setGeometry(600, 400, 50, 50)
       
-      label = Label(master, text='label 1', grid=(0,0))
-      label = Label(master, text='label 2', grid=(1,0))
-      button = Button(master, text='close', callback=self.close, grid=(3,0))
+      label = Label(self, text='label 1', grid=(0,0))
+      label = Label(self, text='label 2', grid=(1,0))
+      button = Button(self, text='close', callback=self.close, grid=(3,0))
 
   popup = None
   window = QtGui.QWidget()

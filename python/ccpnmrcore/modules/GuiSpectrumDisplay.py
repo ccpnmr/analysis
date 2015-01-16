@@ -32,7 +32,7 @@ class GuiSpectrumDisplay(GuiModule):
 
     self.positionBox = Label(self, grid=(0, 2), gridSpan=(1, 1))
     self.positionBox.setFixedWidth(screenWidth*0.08)
-    self.stripFrame = GuiFrame(self, appBase=self.appBase, grid=(1, 0), gridSpan=(1, 4))
+    self.stripFrame = GuiFrame(self, appBase=self.appBase, grid=(1, 0), gridSpan=(1, 3))
     self.stripFrame.guiSpectrumDisplay = self
 
 

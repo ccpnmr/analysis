@@ -62,8 +62,12 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.spectrumItems = []
     self.colourScheme = 'light'
     n = len(self.guiSpectrumDisplay.apiSpectrumDisplay.strips)-1
-    print(n)
-    self.guiSpectrumDisplay.addWidget(self, 1, n)
+    layout = self.guiFrame.layout()
+    if not layout:
+      layout = QtGui.QGridLayout(self.guiFrame)
+      self.guiFrame.setLayout(layout)
+       
+    layout.addWidget(self, 0, n)
     self.scene().sigMouseHover.connect(self.setCurrentPane)
     self.setStyleSheet("border: 1px solid white")
     self.guiSpectrumDisplay.guiStrips.append(self)

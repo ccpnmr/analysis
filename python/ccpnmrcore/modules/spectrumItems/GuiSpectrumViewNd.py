@@ -42,10 +42,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   #sigClicked = QtCore.Signal(object, object)
 
   def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None, region=None, posColor=None, negColor=None, **kw):
-    """ spectrumPane is the parent
-        spectrum is the Spectrum name or object
+    """ guiSpectrumDisplay is the parent
+        apiSpectrumView is the (API) SpectrumView object
         region is in units of parent, ordered by spectrum dimensions
-        dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
+        dimMapping is from spectrum numerical dimensions to guiStrip numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
 
@@ -67,24 +67,32 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.xDim = dimMapping[0]
       self.yDim = dimMapping[1]
 
+    apiStrips = apiSpectrumView.strips
+    if apiStrips:
+      # just looks at first strip, is that correct idea??
+      apiStrip = apiStrips[0]
+      guiStrip = apiStrip.guiStrip
+      viewBox = guiStrip.viewBox
+    else:
+      guiStrip = viewBox = None
+      
     if not region:
       # chicken and egg problem, can't know xDim until after dimMapping set up
       # and that is set up in SpectrumItem constructor, but that needs to know
       # region; similar problem with spectrum object itself, which is set up in
       # SpectrumItem constructor but need to have it to hand before that called
-      xDim = self.xDim
-      yDim = self.yDim
-
       region = guiSpectrumDisplay.region = self.defaultRegion()
-      apiStrips = apiSpectrumView.strips
-      if apiStrips:
-        apiStrip = apiStrips[0]
-        guiStrip = apiStrip.guiStrip
-        viewBox = guiStrip.viewBox
+      
+      if viewBox:
+        xDim = self.xDim
+        yDim = self.yDim
         # TBD: below assumes axes inverted
         viewBox.setXRange(region[xDim][1], region[xDim][0])
         viewBox.setYRange(region[yDim][1], region[yDim][0])
 
+    if guiStrip: # TBD: HACK, TEMP, should be using guiStrip.positions
+      guiStrip.region = region
+      
     if self.posColor is None:
       self.posColor = 'ff0000' # red
 
@@ -162,7 +170,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       return
       
     self.constructContours()
-
+    
     posColors = self.posColors
     negColors = self.negColors
 
@@ -171,13 +179,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     negLevels = sorted([level for level in levels if level < 0], reverse=True)
  
     painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
-    apiStrips = self.apiSpectrumView.strips
-    apiStrip = apiStrips[0]
-    guiStrip = apiStrip.guiStrip
+
     try:
       
-      # spectrum = self.spectrum
-      # guiSpectrumDisplay = self.guiSpectrumDisplay
+      spectrum = self.spectrum
+      guiSpectrumDisplay = self.guiSpectrumDisplay
       xTranslate, xScale = self.getTranslateScale(self.xDim)
       yTranslate, yScale = self.getTranslateScale(self.yDim)
       GL.glLoadIdentity()
@@ -185,6 +191,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       ### do not need the below and if you have them then the axes get zapped as well unless it has positive Z values
       ###GL.glClearColor(1.0, 1.0, 1.0, 1.0)
       ###GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+    
+      apiStrips = self.apiSpectrumView.strips
+      apiStrip = apiStrips[0]
+      guiStrip = apiStrip.guiStrip
     
       # the below is because the y axis goes from top to bottom
       GL.glScale(1.0, -1.0, 1.0)
@@ -203,7 +213,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           GL.glColor4f(*color)
           # TBD: scaling, translating, etc.
           GL.glCallList(self.contourDisplayIndexDict[level])
-          print('HERE111', level)
       GL.glPopMatrix()
 
     finally:
@@ -233,7 +242,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     for level in removedLevels:
       self.releaseDisplayList(level)
       
-    # self.previousRegion = self.spectrumPane.region[:]
+    self.previousRegion = self.guiSpectrumDisplay.region[:]  # TBD: not quite right, should be looking at the strip(s)
 
     # create wanted new levels
     levels -= oldLevels
@@ -289,10 +298,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   def getPlaneData(self):
     
-    apiStrips = self.apiSpectrumView.strips
-    apiStrip = apiStrips[0]
-    guiStrip = apiStrip.guiStrip
-
     spectrum = self.spectrum
     dimensionCount = spectrum.dimensionCount
     xDim = self.xDim
@@ -306,7 +311,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     elif dimensionCount == 3: # TBD
       zDims = set(range(dimensionCount)) - {xDim, yDim}
       zDim = zDims.pop()
-      zregionValue = guiStrip.region[zDim]
+      zregionValue = self.guiSpectrumDisplay.region[zDim]
       zregionPoint = LibSpectrum.getDimPointFromValue(spectrum, zDim, zregionValue)
       zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
       position = dimensionCount * [0]
@@ -355,6 +360,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     apiStrips = self.apiSpectrumView.strips
     apiStrip = apiStrips[0]
     guiStrip = apiStrip.guiStrip
+    
     plotItem = guiStrip.plotItem
     viewBox = guiStrip.viewBox
     isX = (dim == self.xDim)  # assumes that xDim != yDim

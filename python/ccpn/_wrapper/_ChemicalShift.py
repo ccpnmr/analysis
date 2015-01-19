@@ -47,7 +47,7 @@ class ChemicalShift(AbstractWrapperObject):
     return self._wrappedData
     
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """identifier - assignment string"""
     return ','.join(x or '' for x in self.nmrAtom.assignment)
     

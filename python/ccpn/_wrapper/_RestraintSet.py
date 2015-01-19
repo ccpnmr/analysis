@@ -52,7 +52,7 @@ class RestraintSet(AbstractWrapperObject):
 
     
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """short form of name, used for id"""
     return str(self._wrappedData.serial)
 

@@ -57,7 +57,7 @@ class Peak(AbstractWrapperObject):
     return self._wrappedData
     
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """id string - serial number converted to string"""
     return str(self._wrappedData.serial)
 

@@ -61,7 +61,7 @@ class Residue(AbstractWrapperObject):
     return result
 
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """Residue ID. Identical to sequenceCode, Characters translated for pid"""
     return self.sequenceCode.translate(Pid.remapSeparators)
     

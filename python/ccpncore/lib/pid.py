@@ -7,12 +7,12 @@ except ImportError:
   __version__ = '???'
 
 # set separators
-separator1 = ':'
-separator2 = '.'
+PREFIXSEP = ':'
+IDSEP = '.'
 
-# Set translation between separator2 and alternative character
+# Set translation between IDSEP and alternative character
 altCharacter = '^'
-remapSeparators = str.maketrans(separator2,altCharacter)
+remapSeparators = str.maketrans(IDSEP,altCharacter)
 
 def makePid(head, *args):
   """make pid from head and list of successive keys.
@@ -23,14 +23,14 @@ def makePid(head, *args):
   # map args to corrected strings
   ll = [val.translate(remapSeparators) for val in args]
 
-  if head[-1] == separator1:
+  if head[-1] == PREFIXSEP:
       sep = ''
-  elif separator1 in head:
-      sep = separator2
+  elif PREFIXSEP in head:
+      sep = IDSEP
   else:
-      sep = separator1
+      sep = PREFIXSEP
   #
-  return sep.join((head, separator2.join(*ll)))
+  return sep.join((head, IDSEP.join(*ll)))
 
 
 def decodePid(sourceObject, thePid):
@@ -176,13 +176,13 @@ class Pid(str):
     )
 
     def __init__(self, string, *args):
-        """First argument ('string' must be a valid pid string with at least one, non-initial separator1
+        """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
         Additional arguments are converted to string with disallowed characters changed to altCharacter"""
         str.__init__(string)
 
         # inlining this here is 1) faster, 2) guarantees that we never get invalid Pids.
         # We can then assume validity for the rest of the functions
-        if separator1 not in self or self[0] == separator1:
+        if PREFIXSEP not in self or self[0] == PREFIXSEP:
             raise ValueError("String %s is not a valid Pid" % str.__repr__(self))
 
         self._version = 'cing:%s' % __version__
@@ -198,7 +198,7 @@ class Pid(str):
         # else:
         #     return ''
 
-        return self.split(separator1,1)[0]
+        return self.split(PREFIXSEP,1)[0]
     
     @property
     def id(self):
@@ -207,18 +207,18 @@ class Pid(str):
         """
         # parts = self._split()
         # if len(parts) > 1:
-        #     return separator2.join(parts[1:])
+        #     return IDSEP.join(parts[1:])
         # else:
         #     return ''
 
-        return self.split(separator1,1)[1]
+        return self.split(PREFIXSEP,1)[1]
 
     #end def
 
     @staticmethod
     def isValid(text):
         # tests here
-        # if self.find(separator1) < 0:
+        # if self.find(PREFIXSEP) < 0:
         #     return False
         # parts = self._split()
         # if len(parts) < 2:
@@ -230,7 +230,7 @@ class Pid(str):
         # invalid PIds. A static function allows yo to check for validity before creating.
         # Even so, is it necessary? It is no longer used above
 
-         return separator1 in text and text[0] != separator1
+         return PREFIXSEP in text and text[0] != PREFIXSEP
 
     @property
     def str(self):
@@ -257,11 +257,11 @@ class Pid(str):
         # NB using parts [1:] instead of modifying indices allows negative indices to work normally
         parts = self._split()[1:][start:stop]
         # if len(parts) > 0:
-        #     return separator2.join(*parts)
+        #     return IDSEP.join(*parts)
         # else:
         #     return ''
 
-        return separator2.join(parts)
+        return IDSEP.join(parts)
     #end def
     
     def __getitem__(self, i):
@@ -290,19 +290,19 @@ class Pid(str):
         # """
         # allParts = []
         #
-        # parts = self.split(separator1)
+        # parts = self.split(PREFIXSEP)
         # if len(parts) > 0:
         #     allParts.append(parts[0])
         # if len(parts) > 1:
-        #     for p in parts[1].split(separator2):
+        #     for p in parts[1].split(IDSEP):
         #         allParts.append(p)
         # return allParts
 
-        parts = self.split(separator1, 1)
+        parts = self.split(PREFIXSEP, 1)
         result = [parts[0]]
 
         if parts[1]:
-            result.extend(parts[1].split(separator2))
+            result.extend(parts[1].split(IDSEP))
 
         return result
 
@@ -330,11 +330,11 @@ class Pid(str):
         """Join args using the rules for constructing a pid
         """
         # if len(args) >= 2:
-        #     tmp =separator1.join( args[0:2] )
+        #     tmp =PREFIXSEP.join( args[0:2] )
         #     tmp2 = [tmp] + list(args[2:]) # don't know why args is tuple and thus I have to use
         #                                   # the list operator to avoid TypeError:
         #                                   # can only concatenate list (not "tuple") to list?
-        #     return separator2.join(tmp2)
+        #     return IDSEP.join(tmp2)
         # elif len(args) >= 1:
         #     return args[0]
         # else:
@@ -342,7 +342,7 @@ class Pid(str):
 
         # NB the behaviour is len(args) == 1 is correct (return "type:")
         if args:
-            return separator1.join((args[0], separator2.join(args[1:])))
+            return PREFIXSEP.join((args[0], IDSEP.join(args[1:])))
         else:
             return ''
 

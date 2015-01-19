@@ -56,7 +56,7 @@ class SpectrumReference(AbstractWrapperObject):
 
 
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """short form of name, used for id"""
 
     dataDimRef = self._wrappedData

@@ -704,34 +704,34 @@ if __name__ == '__main__':
   # print(json.dumps(data, sort_keys=True, indent=4))
 
   # # regularise file
-  # inPath = sys.argv[1]
-  # if len(sys.argv) > 2:
-  #   outPath = sys.argv[2]
-  # else:
-  #   outPath = None
-  # if os.path.isdir(inPath):
-  #   for fileName in os.listdir(inPath):
-  #     print("Regularising %s" % fileName)
-  #     files = list(os.path.join(x, fileName) for x in (inPath, outPath))
-  #     try:
-  #       regulariseNefFile(*files)
-  #     except:
-  #       print ("File %s raised an ERROR" % files)
-  # else:
-  #     regulariseNefFile(inPath, outPath)
+  inPath = sys.argv[1]
+  if len(sys.argv) > 2:
+    outPath = sys.argv[2]
+  else:
+    outPath = None
+  if os.path.isdir(inPath):
+    for fileName in os.listdir(inPath):
+      print("Regularising %s" % fileName)
+      files = list(os.path.join(x, fileName) for x in (inPath, outPath))
+      try:
+        regulariseNefFile(*files)
+      except:
+        print ("File %s raised an ERROR" % files)
+  else:
+      regulariseNefFile(inPath, outPath)
 
 
   # Compare files
-  inDir = sys.argv[1]
-  fileNames = os.listdir(inDir)
-
-  for fileName in fileNames:
-    tt = fileName.split('-', 1)
-    if len(tt) == 2:
-      originalName = tt[1]
-      files = tuple(os.path.join(inDir, x) for x in (fileName, originalName))
-      print("\n\n\n\nCOMPARING %s to %s :" % (fileName, originalName))
-      try:
-        compareNefFiles(*files)
-      except:
-        print("Comparison raised an ERROR")
+  # inDir = sys.argv[1]
+  # fileNames = os.listdir(inDir)
+  #
+  # for fileName in fileNames:
+  #   tt = fileName.split('-', 1)
+  #   if len(tt) == 2:
+  #     originalName = tt[1]
+  #     files = tuple(os.path.join(inDir, x) for x in (fileName, originalName))
+  #     print("\n\n\n\nCOMPARING %s to %s :" % (fileName, originalName))
+  #     try:
+  #       compareNefFiles(*files)
+  #     except:
+  #       print("Comparison raised an ERROR")

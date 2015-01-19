@@ -49,7 +49,7 @@ class NmrChain(AbstractWrapperObject):
     return self._wrappedData
     
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """short form of name, as used for id with illegal characters replaced by Pid.altCharacter"""
     return self._wrappedData.code.translate(Pid.remapSeparators)
 

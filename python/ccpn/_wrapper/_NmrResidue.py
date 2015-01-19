@@ -58,7 +58,7 @@ class NmrResidue(AbstractWrapperObject):
   # NBNB TBD we need rename function to set this
 
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """Residue ID. Identical to seqCode, with characters remmaped for pid"""
     return self._wrappedData.translate(Pid.remapSeparators)
     

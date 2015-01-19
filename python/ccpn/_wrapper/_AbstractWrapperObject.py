@@ -27,10 +27,8 @@ import functools
 import abc
 from collections import namedtuple
 from ccpncore.lib.pid import Pid
-
-#from . import PREFIXSEP, IDSEP
-IDSEP = '.'
-PREFIXSEP  = ':'
+from ccpncore.lib.pid import PREFIXSEP
+from ccpncore.lib.pid import IDSEP
 
 atomAssignmentTuple = ('chainCode', 'sequenceCode', 'residueType', 'name')
 AtomAssignment = namedtuple('AtomAssignment', atomAssignmentTuple)
@@ -127,7 +125,7 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
   # limits attributes to those declared.
   # The __dict__ slot allows setting of new attributes, but is instantiated
   # only when necessary.
-  #__slots__ = ['_project', '_wrappedData', '_pid', '__dict__']
+  #__slots__ = ['_project', '_wrappedData', 'id', '__dict__']
 
   # NBNB TBD
   # Two objects compare aa dictionaries (because this is a MutableMapping)
@@ -157,10 +155,10 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
     # set _pid
     parent = self._parent
     if parent is project:
-      pid = self.id
+      _id = self._key
     else:
-      pid = IDSEP.join((parent._pid, self.id))
-    self._pid = pid
+      _id = IDSEP.join((parent.id, self._key))
+    self.id = _id
     
     # update pid:object mapping dictionary
     className = self.__class__.__name__
@@ -205,7 +203,7 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
         else:
           # this is then a direct child
           if project is not self:
-            key = IDSEP.join((self._pid,key))
+            key = IDSEP.join((self.id,key))
           #    
           return dd[key]
       else:
@@ -276,7 +274,7 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
     propertyAttrs = (x for x in sorted(dir(cls))
                      if (not x.startswith('_') and  isinstance(getattr(cls,x), property)))
     
-    prefix = self._pid + IDSEP
+    prefix = self.id + IDSEP
     childAttrs = (y for x in self._childClasses
                   for y in self._project._pid2Obj[x.shortClassName]
                   if y.startswith(prefix))
@@ -336,20 +334,20 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
   def pid(self) -> str:
     """Object project-wide identifier, unique within project.
     Set automatically from short class name, and id of object and parents."""
-    return Pid(PREFIXSEP.join((self.shortClassName, self._pid)))
+    return Pid(PREFIXSEP.join((self.shortClassName, self.id)))
   
   @property
   def longPid(self) -> str:
     """Object project-wide identifier, unique within project.
     Set automatically from full class name, and id of object and parents."""
-    return Pid(PREFIXSEP.join((type(self).__name__, self._pid)))
+    return Pid(PREFIXSEP.join((type(self).__name__, self.id)))
     
   
   # CCPN abstract properties
   
   @property
   @abc.abstractmethod
-  def id(self) -> str:
+  def _key(self) -> str:
     """Object local identifier, unique for a given type with a given parent.
     Set automatically from other (immutable) object attributes."""
     raise NotImplementedError("Code error: function not implemented")

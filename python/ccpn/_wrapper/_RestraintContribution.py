@@ -65,7 +65,7 @@ class RestraintContribution(AbstractWrapperObject):
     return  self._project._data2Obj[self._wrappedData.constraint]
 
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """id string - serial number converted to string"""
     return str(self._wrappedData.serial)
 

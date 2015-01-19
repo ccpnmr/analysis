@@ -70,7 +70,7 @@ class Project(AbstractWrapperObject):
     # set up attributes
     self._project = self
     self._wrappedData = wrappedData
-    self._pid = pid = ''
+    self.id = _id = ''
     self._activeNotifiers = []
     
     # setup object handling dictionaries
@@ -79,7 +79,7 @@ class Project(AbstractWrapperObject):
     
     self._pid2Obj[self.__class__.__name__] =  dd = {}
     self._pid2Obj[self.shortClassName] = dd
-    dd[pid] = self
+    dd[_id] = self
 
     # Set up pid sorting dictionary to cache pid sort keys
     self._pidSortKeys = {}
@@ -153,7 +153,7 @@ class Project(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """Project id: Globally unique identifier (guid)"""
     return self._wrappedData.guid.translate(Pid.remapSeparators)
     
@@ -183,33 +183,33 @@ class Project(AbstractWrapperObject):
 
   def _pidSortKey(self, key) -> tuple:
     """ sort key that splits pids, and sorts numerical fields numerically (e.g. '11a' before '2b').
-     A string without separator1 is treated as a pid with empty header, so that simple strings
+     A string without PREFIXSEP is treated as a pid with empty header, so that simple strings
      sort numerically as well
 
      If 'key' is a non-string sequence,
      directly contained strings are converted to their _pidSortKeys"""
-    separator1 = Pid.separator1
-    separator2 = Pid.separator2
+    PREFIXSEP = Pid.PREFIXSEP
+    IDSEP = Pid.IDSEP
 
     result = self._pidSortKeys.get(key)
 
     if result is None:
 
       if isinstance(key, str):
-        ll = key.split(separator1,1)
+        ll = key.split(PREFIXSEP,1)
         if len(ll) == 1:
           ll = ['', key]
-        result = ll[:1] + commonUtil.integerStringSortKey(key.split(separator2))
+        result = ll[:1] + commonUtil.integerStringSortKey(key.split(IDSEP))
 
       else:
         # Treat as list of pids
         result = list(key)
         for ii,pid in enumerate(result):
           if isinstance(pid, str):
-            ll = pid.split(separator1,1)
+            ll = pid.split(PREFIXSEP,1)
             if len(ll) == 1:
               ll = ['', pid]
-            result[ii] = ll[:1] + commonUtil.integerStringSortKey(pid.split(separator2))
+            result[ii] = ll[:1] + commonUtil.integerStringSortKey(pid.split(IDSEP))
     #
     self._pidSortKeys[key] = result
     return result

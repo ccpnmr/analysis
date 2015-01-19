@@ -50,15 +50,9 @@ class Chain(AbstractWrapperObject):
   def ccpnChain(self) -> Ccpn_Chain:
     """ CCPN chain matching Chain"""
     return self._wrappedData
-  
-  
-  # @property
-  # def id(self) -> str:
-  #   """Molecule id: shortName"""
-  #   return self._wrappedData.code
     
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """short form of name, corrected to use for id"""
     return self._wrappedData.code.translate(Pid.remapSeparators)
 

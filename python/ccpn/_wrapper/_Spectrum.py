@@ -53,7 +53,7 @@ class Spectrum(AbstractWrapperObject):
 
 
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """short form of name, used for id"""
 
     dataSource = self._wrappedData
@@ -67,7 +67,7 @@ class Spectrum(AbstractWrapperObject):
 
     return result
 
-  name = id
+  name = _key
 
   @property
   def _parent(self) -> Project:

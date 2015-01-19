@@ -63,11 +63,11 @@ class Atom(AbstractWrapperObject):
   residue = _parent
     
   @property
-  def id(self) -> str:
+  def _key(self) -> str:
     """Atom name string (e.g. 'HA')"""
     return self._wrappedData.name.translate(Pid.remapSeparators)
 
-  name = id
+  name = _key
 
   @property
   def assignment(self) -> str:

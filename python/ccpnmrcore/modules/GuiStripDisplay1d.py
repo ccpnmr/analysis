@@ -63,7 +63,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     apiStrip = self.apiSpectrumDisplay.newStrip1d()
     print('HERE221')
     n = len(self.apiSpectrumDisplay.strips) - 1
-    guiStrip = GuiStrip1d(self.stripFrame, apiStrip)#, grid=(1, n))
+    guiStrip = GuiStrip1d(self.stripFrame, apiStrip, grid=(1, n), stretch=(0, 1))
     if n > 0:
       prevGuiStrip = self.guiStrips[n-1]
       prevGuiStrip.axes['right']['item'].hide()

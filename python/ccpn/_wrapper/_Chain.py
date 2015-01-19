@@ -29,6 +29,7 @@ from ccpncore.api.ccp.molecule.MolSystem import Chain as Ccpn_Chain
 from ccpncore.lib import MoleculeModify
 from ccpncore.lib.DataMapper import DataMapper
 from ccpncore.util import Common as commonUtil
+from ccpncore.lib import pid as Pid
 
 
 class Chain(AbstractWrapperObject):
@@ -59,7 +60,7 @@ class Chain(AbstractWrapperObject):
   @property
   def id(self) -> str:
     """short form of name, corrected to use for id"""
-    return self._wrappedData.code.replace('.','_').replace(':','_')
+    return self._wrappedData.code.translate(Pid.remapSeparators)
 
   @property
   def shortName(self) -> str:

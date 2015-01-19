@@ -28,6 +28,7 @@ from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrChain import NmrChain
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup
 from ccpncore.lib.DataMapper import DataMapper
+from ccpncore.lib import pid as Pid
 
 class NmrResidue(AbstractWrapperObject):
   """Nmr Residue, for assignment."""
@@ -58,8 +59,8 @@ class NmrResidue(AbstractWrapperObject):
 
   @property
   def id(self) -> str:
-    """Residue ID. Identical to seqCode, with '.' and ':' replaced by '_'"""
-    return self._wrappedData.sequenceCode.replace('.','_').replace(':','_')
+    """Residue ID. Identical to seqCode, with characters remmaped for pid"""
+    return self._wrappedData.translate(Pid.remapSeparators)
     
   @property
   def _parent(self) -> NmrChain:

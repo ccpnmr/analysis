@@ -26,6 +26,7 @@ from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
 from ccpncore.api.ccp.nmr.Nmr import NmrChain as Ccpn_NmrChain
+from ccpncore.lib import pid as Pid
 
 
 class NmrChain(AbstractWrapperObject):
@@ -49,8 +50,8 @@ class NmrChain(AbstractWrapperObject):
     
   @property
   def id(self) -> str:
-    """short form of name, as used for id with illegal characters replaced by '_'"""
-    return self._wrappedData.code.replace('.','_').replace(':','_')
+    """short form of name, as used for id with illegal characters replaced by Pid.altCharacter"""
+    return self._wrappedData.code.translate(Pid.remapSeparators)
 
   @property
   def shortName(self) -> str:

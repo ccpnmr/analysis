@@ -28,7 +28,7 @@ from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
 from ccpncore.lib.DataMapper import DataMapper
-from ccpncore.util import Common as commonUtil
+from ccpncore.lib import pid as Pid
 
 class Residue(AbstractWrapperObject):
   """Molecular Residue."""
@@ -62,8 +62,8 @@ class Residue(AbstractWrapperObject):
 
   @property
   def id(self) -> str:
-    """Residue ID. Identical to sequenceCode, with '.' and ':' replaced by '_'"""
-    return self.sequenceCode.replace('.','_').replace(':','_')
+    """Residue ID. Identical to sequenceCode, Characters translated for pid"""
+    return self.sequenceCode.translate(Pid.remapSeparators)
     
   @property
   def _parent(self) -> Chain:

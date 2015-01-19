@@ -316,11 +316,13 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
     return "<ccpn.%s>" % self.longPid
 
   def __eq__(self, other):
-    """Python 2 behaviour - objects equal only to themselves. Necessary to avoid """
+    """Python 2 behaviour - objects equal only to themselves.
+    Necessary to avoid dictionary-type behaviour"""
     return self is other
 
   def __hash__(self):
-    """Python 2 behaviour - objects equal only to themselves. Necessary to avoid """
+    """Python 2 behaviour - objects equal only to themselves.
+    Necessary to avoid dictionary-type behaviour"""
     return hash(id(self))
   
   # CCPN properties 

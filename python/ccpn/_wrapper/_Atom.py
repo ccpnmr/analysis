@@ -27,6 +27,7 @@ from ccpn._wrapper._AbstractWrapperObject import AtomAssignment
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Residue import Residue
 from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
+from ccpncore.lib import pid as Pid
 
 # NBNB TBD add settable linkedAtoms link for non-ChemComp links ???
 
@@ -64,7 +65,7 @@ class Atom(AbstractWrapperObject):
   @property
   def id(self) -> str:
     """Atom name string (e.g. 'HA')"""
-    return self._wrappedData.name.replace('.','_').replace(':','_')
+    return self._wrappedData.name.translate(Pid.remapSeparators)
 
   name = id
 

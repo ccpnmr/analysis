@@ -31,6 +31,7 @@ from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import DataSource as Ccpn_DataSource
+from ccpncore.lib import pid as Pid
 
 class Spectrum(AbstractWrapperObject):
   """NMR spectrum."""
@@ -60,7 +61,7 @@ class Spectrum(AbstractWrapperObject):
     # NBNB TBD 1) ensure uniqueness
     # NBNB TBD 2) restrict type of original attribute
     result = '_'.join(ccpnExperiment.name.split())
-    result = result.replace('.','_').replace(':','_')
+    result = result.translate(Pid.remapSeparators)
     if dataSource.serial  != 1:
       result = '%s,%s' % (result, dataSource.serial)
 

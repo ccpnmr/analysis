@@ -71,7 +71,6 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
 
     print('HERE222')
 
-
     #self.stripCount+=1
 
       # self.strips[-1].axes['right']['item'].tickLength = 5000

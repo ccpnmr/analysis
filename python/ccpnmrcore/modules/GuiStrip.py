@@ -37,9 +37,12 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     background = 'k'
     foreground = 'w'
 
-
-    pg.setConfigOptions(background=background)
-    pg.setConfigOptions(foreground=foreground)
+    #
+    # pg.setConfigOption('background', background)
+    # pg.setConfigOption('foreground', foreground)
+    self.setBackground(background)
+    # self.setForegroundBrush(foreground)
+    # print(dir(self))
     self.current = guiFrame.appBase.current
     self.axes = self.plotItem.axes
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
@@ -51,13 +54,22 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.axes['right']['item'].show()
     self.axes['bottom']['item'].orientation = 'top'
     self.axes['right']['item'].orientation = 'left'
+    self.textItem = pg.TextItem(text='Hn', color=(255, 255, 255))
+    self.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
+    self.textItem2 = pg.TextItem(text='Nh', color=(255, 255, 255))
+    self.textItem2.setPos(self.viewBox.boundingRect().topRight())
+    self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
+    self.scene().addItem(self.textItem)
+    self.scene().addItem(self.textItem2)
     self.grid = pg.GridItem()
     self.addItem(self.grid)
+    # self.plotItem.resizeEvent = self.resizeEvent
     self.setAcceptDrops(True)
     self.crossHair = self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
-    self.scene().sigMouseHover.connect(self.setCurrentPane)
+    # self.scene().sigMouseHover.connect(self.setCurrentPane)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
+    # self.current.pane = self.guiSpectrumDisplay
     self.storedZooms = []
     self.spectrumItems = []
     self.colourScheme = 'light'
@@ -65,27 +77,32 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     layout = self.guiFrame.layout()
     if not layout:
       layout = QtGui.QGridLayout(self.guiFrame)
+      layout.setContentsMargins(0, 0, 0, 0)
       self.guiFrame.setLayout(layout)
        
     # print(self.guiFrame.width())
+
     layout.setColumnStretch(n, 1)
-    layout.setContentsMargins(0,0,0,0)
+    layout.setSpacing(1)
     layout.addWidget(self, 0, n)
+    # self.scene().sigMouseClicked.connect(self.setCurrentPane)
 
-
-    self.scene().sigMouseHover.connect(self.setCurrentPane)
-    self.setStyleSheet("border: 1px solid white")
     self.guiSpectrumDisplay.guiStrips.append(self)
 
+
+  def moveAxisCodeLabels(self):
+    self.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
+    self.textItem2.setPos(self.viewBox.boundingRect().topRight())
+
+  def hideCrossHairs(self):
+    for strip in self.guiSpectrumDisplay.guiStrips:
+      strip.hideCrossHair()
 
   def createCrossHair(self):
     self.vLine = pg.InfiniteLine(angle=90, movable=False, pen='w')
     self.hLine = pg.InfiniteLine(angle=0, movable=False, pen='w')
     self.addItem(self.vLine, ignoreBounds=True, )
     self.addItem(self.hLine, ignoreBounds=True)
-
-  def setCurrentPane(self):
-    self.current.pane = self
 
   def toggleCrossHair(self):
     if self.crossHairShown ==True:
@@ -114,6 +131,11 @@ class GuiStrip(pg.PlotWidget, GuiBase):
 
   def setCurrentPane(self):
     self.guiSpectrumDisplay.currentStrip = self
+    self.appBase.mainWindow.pythonConsole.write('current.pane = '+str(self.guiSpectrumDisplay.name()))
+    self.appBase.current.pane = self.guiSpectrumDisplay
+    for strip in self.guiSpectrumDisplay.guiStrips:
+      strip.hideCrossHair()
+    self.guiSpectrumDisplay.currentStrip.showCrossHair()
 
   def mouseMoved(self, event):
     position = event

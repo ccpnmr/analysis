@@ -34,6 +34,7 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
       codes = ('H','N')
       module = guiTask.newStripDisplayNd(name='Module2_ND', axisCodes=codes, axisOrder=codes, stripDirection='Y')
       apiWindow.addModule(module)
+      self.apiWindow=apiWindow
     GuiWindow.__init__(self, appBase, apiWindow)
     self.setupWindow()
     self.setupMenus()

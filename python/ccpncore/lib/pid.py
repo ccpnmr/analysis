@@ -6,31 +6,31 @@ try:
 except ImportError:
   __version__ = '???'
 
+# set separators
+separator1 = ':'
+separator2 = '.'
+
+# Set translation between separator2 and alternative character
+altCharacter = '^'
+remapSeparators = str.maketrans(separator2,altCharacter)
+
 def makePid(head, *args):
   """make pid from head and list of successive keys.
   Head may be an existing pid, or a naked string
-  Keys are converted to string, and illegal characters are converted to '_'
+  Keys are converted to string, and illegal characters are converted to altCharacter
   The head is  not checked - it should be either a valid pid or a class code"""
 
-  # NBNB TBD tighten up and expand rules for valid characters
-
-  # NBNB TBD speed up, using character mapping
-
   # map args to corrected strings
-  ll = [str(val).replace('.','_').replace(':','_') for val in args]
+  ll = [val.translate(remapSeparators) for val in args]
 
-  if ':' in head:
-    if head[-1] == ':':
-      result = head + '.'.join(ll)
-
-    else:
-      ll.insert(0,head)
-      result = '.'.join(ll)
+  if head[-1] == separator1:
+      sep = ''
+  elif separator1 in head:
+      sep = separator2
   else:
-    result = head + ':' + '.'.join(ll)
-
+      sep = separator1
   #
-  return result
+  return sep.join((head, separator2.join(*ll)))
 
 
 def decodePid(sourceObject, thePid):
@@ -38,6 +38,8 @@ def decodePid(sourceObject, thePid):
     try to decode thePid relative to sourceObject
     return decoded pid object or None on not found or Error
     """
+
+    # REFACTOR. This DOES decode PID parts. TBD NBNB
 
     import cing.Libs.io as io
 
@@ -174,13 +176,13 @@ class Pid(str):
     )
 
     def __init__(self, string, *args):
-        """First argument ('string' must be a valid pid string with one, non-initial ':'
-        Additional arguments are converted to string with disallowed characters changed to '_'"""
+        """First argument ('string' must be a valid pid string with at least one, non-initial separator1
+        Additional arguments are converted to string with disallowed characters changed to altCharacter"""
         str.__init__(string)
 
         # inlining this here is 1) faster, 2) guarantees that we never get invalid Pids.
         # We can then assume validity for the rest of the functions
-        if self.count(':') !=1 or self[0] == ':':
+        if separator1 not in self or self[0] == separator1:
             raise ValueError("String %s is not a valid Pid" % str.__repr__(self))
 
         self._version = 'cing:%s' % __version__
@@ -196,7 +198,7 @@ class Pid(str):
         # else:
         #     return ''
 
-        return self.split(':',1)[0]
+        return self.split(separator1,1)[0]
     
     @property
     def id(self):
@@ -205,18 +207,18 @@ class Pid(str):
         """
         # parts = self._split()
         # if len(parts) > 1:
-        #     return '.'.join(parts[1:])
+        #     return separator2.join(parts[1:])
         # else:
         #     return ''
 
-        return self.split(':',1)[1]
+        return self.split(separator1,1)[1]
 
     #end def
 
     @staticmethod
     def isValid(text):
         # tests here
-        # if self.find(':') < 0:
+        # if self.find(separator1) < 0:
         #     return False
         # parts = self._split()
         # if len(parts) < 2:
@@ -228,10 +230,7 @@ class Pid(str):
         # invalid PIds. A static function allows yo to check for validity before creating.
         # Even so, is it necessary? It is no longer used above
 
-        if text.count(':') !=1 or text[0] == ':':
-            return False
-        else:
-            return True
+         return separator1 in text and text[0] != separator1
 
     @property
     def str(self):
@@ -249,7 +248,8 @@ class Pid(str):
     
     def __len__(self):
         ll = len(self._split())-1
-        if ll < 0: ll=0
+        if ll < 0:
+            ll=0
         return ll
     #end def
     
@@ -257,11 +257,11 @@ class Pid(str):
         # NB using parts [1:] instead of modifying indices allows negative indices to work normally
         parts = self._split()[1:][start:stop]
         # if len(parts) > 0:
-        #     return '.'.join(*parts)
+        #     return separator2.join(*parts)
         # else:
         #     return ''
 
-        return '.'.join(parts)
+        return separator2.join(parts)
     #end def
     
     def __getitem__(self, i):
@@ -290,19 +290,19 @@ class Pid(str):
         # """
         # allParts = []
         #
-        # parts = self.split(':')
+        # parts = self.split(separator1)
         # if len(parts) > 0:
         #     allParts.append(parts[0])
         # if len(parts) > 1:
-        #     for p in parts[1].split('.'):
+        #     for p in parts[1].split(separator2):
         #         allParts.append(p)
         # return allParts
 
-        parts = self.split(':', 1)
+        parts = self.split(separator1, 1)
         result = [parts[0]]
 
         if parts[1]:
-            result.extend('.'.split(parts[1]))
+            result.extend(parts[1].split(separator2))
 
         return result
 
@@ -330,11 +330,11 @@ class Pid(str):
         """Join args using the rules for constructing a pid
         """
         # if len(args) >= 2:
-        #     tmp =':'.join( args[0:2] )
+        #     tmp =separator1.join( args[0:2] )
         #     tmp2 = [tmp] + list(args[2:]) # don't know why args is tuple and thus I have to use
         #                                   # the list operator to avoid TypeError:
         #                                   # can only concatenate list (not "tuple") to list?
-        #     return '.'.join(tmp2)
+        #     return separator2.join(tmp2)
         # elif len(args) >= 1:
         #     return args[0]
         # else:
@@ -342,7 +342,7 @@ class Pid(str):
 
         # NB the behaviour is len(args) == 1 is correct (return "type:")
         if args:
-            return '%s:%s' % (args[0], '.'.join(args[1:]))
+            return separator1.join((args[0], separator2.join(args[1:])))
         else:
             return ''
 

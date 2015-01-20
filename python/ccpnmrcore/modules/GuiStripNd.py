@@ -3,6 +3,10 @@ __author__ = 'simon'
 from PySide import QtGui, QtCore, QtOpenGL
 
 from ccpncore.gui.Icon import Icon
+from ccpncore.gui.Button import Button
+from ccpncore.gui.Label import Label
+from ccpncore.gui.LineEdit import LineEdit
+from ccpncore.gui.ToolBar import ToolBar
 
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 
@@ -103,3 +107,45 @@ class GuiStripNd(GuiStrip):
   def subtractOne(self):
     self.current.spectrum.spectrumItem.numberOfLevels -=1
     self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+
+  def addPlaneToolbar(self, guiFrame, stripNumber):
+    self.planeToolbar = ToolBar(guiFrame, grid=(3, stripNumber), stretch=(0, 1), hAlign='center')
+    # tileButton = Button(self, 'T', callbacks=self.tileDisplay)
+    # tileButton.setFixedWidth(30)
+    # tileButton.setFixedHeight(30)
+    # self.planeToolbar.addWidget(tileButton)
+    # self.spinSystemLabel = Label(self)
+    # self.spinSystemLabel.setMaximumWidth(1150)
+    # self.spinSystemLabel.setScaledContents(True)
+    # self.spinSystemLabel.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
+    # # self.spinSystemLabel.setFixedWidth(900)
+    # self.planeToolbar.addWidget(self.spinSystemLabel)
+    # prevPlaneButton = Button(self,'<')#, callbacks=[self.prevZPlane])
+    # prevPlaneButton.setFixedWidth(30)
+    # prevPlaneButton.setFixedHeight(30)
+    self.planeLabel = LineEdit(self)
+    # self.planeLabel.setAlignment(QtCore.Qt.AlignHCenter)
+    # zDims = set(range(spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
+    # zDim = zDims.pop()
+    # dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
+    # self.current.spectrum.pointCounts[zDim]/2
+    # self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
+    # self.planeLabel.setFixedWidth(100)
+    self.planeLabel.setFixedHeight(30)
+    # self.axisCodeLabel = Label(self, text=spectrum.axisCodes[spectrumItem.dimMapping[2]])
+    # self.planeLabel.textChanged.connect(self.changeZPlane)
+    nextPlaneButton = Button(self,'>')#, callbacks=[self.nextZPlane])
+    nextPlaneButton.setFixedWidth(30)
+    nextPlaneButton.setFixedHeight(30)
+    # self.planeToolbar.addWidget(self.axisCodeLabel)
+    self.planeToolbar.addAction('<')
+    self.planeToolbar.addWidget(self.planeLabel)
+    self.planeToolbar.addAction('>')
+    # rotateButton = Button(self, 'R', callbacks=[self.rotateAboutX, self.rotateAboutY, self.swapXY])
+    # rotateButton.setFixedWidth(30)
+    # rotateButton.setFixedHeight(30)
+    # self.planeToolbar.addWidget(rotateButton)
+    self.planeToolbar.setContentsMargins(0,0,0,0)
+    # self.addWidget(self.planeToolbar, 3, 0)
+    # print(self.dock.widgets[-1].layout())#.addWidget(self.planeToolbar, 3, 0)
+    # self..addWidget(self.planeToolbar, 3, 0)

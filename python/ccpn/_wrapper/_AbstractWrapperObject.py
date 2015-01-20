@@ -167,7 +167,7 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
       dd = {}
       project._pid2Obj[className] = dd 
       project._pid2Obj[self.shortClassName] = dd
-    dd[pid] = self
+    dd[_id] = self
   
   # NBNB TBD we have a loophole
   # Code like setattr(obj, 'Atom:N', value) would still work. 

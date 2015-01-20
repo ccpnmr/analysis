@@ -54,6 +54,8 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     self.axes['right']['item'].show()
     self.axes['bottom']['item'].orientation = 'top'
     self.axes['right']['item'].orientation = 'left'
+    self.axes['bottom']['item'].setPen(pg.functions.mkPen('w'))
+    self.axes['right']['item'].setPen(pg.functions.mkPen('w'))
     self.textItem = pg.TextItem(text='Hn', color=(255, 255, 255))
     self.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
     self.textItem2 = pg.TextItem(text='Nh', color=(255, 255, 255))
@@ -72,7 +74,6 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     # self.current.pane = self.guiSpectrumDisplay
     self.storedZooms = []
     self.spectrumItems = []
-    self.colourScheme = 'light'
     n = len(self.guiSpectrumDisplay.apiSpectrumDisplay.strips)-1
     layout = self.guiFrame.layout()
     if not layout:

@@ -21,7 +21,7 @@ class GuiStripNd(GuiStrip):
     self.planeLabel = None
     self.axesSwapped = False
     # print(guiSpectrumDisplay)
-    self.fillToolBar()
+    # self.fillToolBar()
     ###self.setShortcuts()
 
   """
@@ -58,32 +58,32 @@ class GuiStripNd(GuiStrip):
     newItem = self.scene().addItem(guiSpectrumView)
 
 
-  def fillToolBar(self):
-    spectrumUtilToolBar =  self.guiSpectrumDisplay.spectrumUtilToolBar
-    plusOneAction = spectrumUtilToolBar.addAction("+1", self.addOne)
-    plusOneIcon = Icon('icons/contourAdd')
-    plusOneAction.setIcon(plusOneIcon)
-    plusOneAction.setToolTip('Add One Level')
-    minusOneAction = spectrumUtilToolBar.addAction("+1", self.subtractOne)
-    minusOneIcon = Icon('icons/contourRemove')
-    minusOneAction.setIcon(minusOneIcon)
-    minusOneAction.setToolTip('Remove One Level ')
-    upBy2Action = spectrumUtilToolBar.addAction("*1.4", self.upBy2)
-    upBy2Icon = Icon('icons/contourBaseUp')
-    upBy2Action.setIcon(upBy2Icon)
-    upBy2Action.setToolTip('Raise Contour Base Level')
-    downBy2Action = spectrumUtilToolBar.addAction("*1.4", self.downBy2)
-    downBy2Icon = Icon('icons/contourBaseDown')
-    downBy2Action.setIcon(downBy2Icon)
-    downBy2Action.setToolTip('Lower Contour Base Level')
-    storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
-    storeZoomIcon = Icon('icons/zoom-store')
-    storeZoomAction.setIcon(storeZoomIcon)
-    storeZoomAction.setToolTip('Store Zoom')
-    restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
-    restoreZoomIcon = Icon('icons/zoom-restore')
-    restoreZoomAction.setIcon(restoreZoomIcon)
-    restoreZoomAction.setToolTip('Restore Zoom')
+  # def fillToolBar(self):
+  #   spectrumUtilToolBar =  self.guiSpectrumDisplay.spectrumUtilToolBar
+  #   plusOneAction = spectrumUtilToolBar.addAction("+1", self.addOne)
+  #   plusOneIcon = Icon('icons/contourAdd')
+  #   plusOneAction.setIcon(plusOneIcon)
+  #   plusOneAction.setToolTip('Add One Level')
+  #   minusOneAction = spectrumUtilToolBar.addAction("+1", self.subtractOne)
+  #   minusOneIcon = Icon('icons/contourRemove')
+  #   minusOneAction.setIcon(minusOneIcon)
+  #   minusOneAction.setToolTip('Remove One Level ')
+  #   upBy2Action = spectrumUtilToolBar.addAction("*1.4", self.upBy2)
+  #   upBy2Icon = Icon('icons/contourBaseUp')
+  #   upBy2Action.setIcon(upBy2Icon)
+  #   upBy2Action.setToolTip('Raise Contour Base Level')
+  #   downBy2Action = spectrumUtilToolBar.addAction("*1.4", self.downBy2)
+  #   downBy2Icon = Icon('icons/contourBaseDown')
+  #   downBy2Action.setIcon(downBy2Icon)
+  #   downBy2Action.setToolTip('Lower Contour Base Level')
+  #   storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
+  #   storeZoomIcon = Icon('icons/zoom-store')
+  #   storeZoomAction.setIcon(storeZoomIcon)
+  #   storeZoomAction.setToolTip('Store Zoom')
+  #   restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
+  #   restoreZoomIcon = Icon('icons/zoom-restore')
+  #   restoreZoomAction.setIcon(restoreZoomIcon)
+  #   restoreZoomAction.setToolTip('Restore Zoom')
 
   def upBy2(self):
     for spectrumItem in self.spectrumItems:

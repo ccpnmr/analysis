@@ -37,6 +37,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     n = len(self.apiSpectrumDisplay.strips) - 1
     guiStrip = GuiStripNd(self.stripFrame, apiStrip, grid=(1, n), stretch=(0, 1))
     guiStrip.addPlaneToolbar(self.stripFrame, n)
+    guiStrip.addSpinSystemLabel(self.stripFrame, n)
     if n > 0:
       prevGuiStrip = self.guiStrips[n-1]
       prevGuiStrip.axes['right']['item'].hide()

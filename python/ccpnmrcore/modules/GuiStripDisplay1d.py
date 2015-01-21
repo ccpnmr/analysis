@@ -9,6 +9,9 @@ from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpnmrcore.modules.GuiStrip1d import GuiStrip1d
 from ccpnmrcore.modules.spectrumItems.GuiSpectrumView1d import GuiSpectrumView1d
 
+from ccpncore.gui.Label import Label
+from ccpncore.gui.VerticalLabel import VerticalLabel
+
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
 
@@ -18,6 +21,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     self.apiStripDisplay1d = apiSpectrumDisplay1d
     GuiSpectrumDisplay.__init__(self, dockArea, apiSpectrumDisplay1d)
     self.fillToolBar()
+    self.addSpinSystemSideLabel()
 
   def addSpectrum(self, spectrum):
 
@@ -89,3 +93,9 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
         self.addPlaneToolbar(item, widget, newPane)
       """
 
+  def addSpinSystemSideLabel(self):
+    spinSystemSideLabel = VerticalLabel(self, text='A.147.ALA.HA')
+    # spinSystemSideLabel.setText()
+    self.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
+    # print(spinSystemSideLabel.paintEvent())
+    spinSystemSideLabel.setFixedWidth(30)

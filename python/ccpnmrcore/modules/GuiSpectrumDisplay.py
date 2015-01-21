@@ -17,22 +17,22 @@ class GuiSpectrumDisplay(GuiModule):
     self.apiSpectrumDisplay = apiSpectrumDisplay # redundancy: this is same as self.apiModule
     self.guiSpectrumViews = []
     self.guiStrips = []
-    self.spectrumToolBar = ToolBar(self, grid=(0, 0), gridSpan=(1, 1))
+    self.spectrumToolBar = ToolBar(self, grid=(0, 0), gridSpan=(1, 2))
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     screenWidth  = QtGui.QApplication.desktop().screenGeometry().width()
-    self.spectrumToolBar.setMaximumWidth(screenWidth*0.6)
+    # self.spectrumToolBar.setMaximumWidth(screenWidth*0.6)
 
-    self.spectrumUtilToolBar = ToolBar(self, grid=(0, 1), gridSpan=(1, 1))
-    self.spectrumUtilToolBar.setMinimumWidth(screenWidth*0.15)
+    self.spectrumUtilToolBar = ToolBar(self, grid=(0, 2), gridSpan=(1, 1))
+    # self.spectrumUtilToolBar.setMinimumWidth(screenWidth*0.15)
     toolBarColour = QtGui.QColor(214,215,213)
     palette = QtGui.QPalette(self.spectrumUtilToolBar.palette())
     palette2 = QtGui.QPalette(self.spectrumToolBar.palette())
     palette.setColor(QtGui.QPalette.Button,toolBarColour)
     palette2.setColor(QtGui.QPalette.Button,toolBarColour)
 
-    self.positionBox = Label(self, grid=(0, 2), gridSpan=(1, 1))
+    self.positionBox = Label(self, grid=(0, 3), gridSpan=(1, 1))
     self.positionBox.setFixedWidth(screenWidth*0.08)
-    self.stripFrame = GuiFrame(self, appBase=self.appBase, grid=(1, 0), gridSpan=(1, 3))
+    self.stripFrame = GuiFrame(self, appBase=self.appBase, grid=(1, 1), gridSpan=(1, 3))
     self.stripFrame.guiSpectrumDisplay = self
 
 

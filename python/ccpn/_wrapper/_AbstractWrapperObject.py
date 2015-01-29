@@ -30,11 +30,6 @@ from ccpncore.lib.pid import Pid
 from ccpncore.lib.pid import PREFIXSEP
 from ccpncore.lib.pid import IDSEP
 
-atomAssignmentTuple = ('chainCode', 'sequenceCode', 'residueType', 'name')
-AtomAssignment = namedtuple('AtomAssignment', atomAssignmentTuple)
-ResidueAssignment = namedtuple('ResidueAssignment', atomAssignmentTuple[:3])
-
-
 @functools.total_ordering
 class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
   """Abstract class containing common functionality for wrapper classes.

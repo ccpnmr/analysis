@@ -71,8 +71,6 @@ class Chain(AbstractWrapperObject):
     """Parent (containing) object."""
     return self._project
   
-  molecule = _parent
-  
   @property
   def role(self) -> str:
     """role of chain in Molecule"""

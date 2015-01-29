@@ -28,6 +28,7 @@ from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Spectrum import Spectrum
 from ccpncore.api.ccp.nmr.Nmr import DataDimRef as Ccpn_DataDimRef
+from ccpncore.lib import pid as Pid
 
 
 class SpectrumReference(AbstractWrapperObject):
@@ -50,17 +51,17 @@ class SpectrumReference(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def ccpnDataDimRef(self) -> Ccpn_DataDimRef:
+  def ccpnSpectrumReference(self) -> Ccpn_DataDimRef:
     """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
 
 
   @property
   def _key(self) -> str:
-    """short form of name, used for id"""
+    """object identifier, used for id"""
 
     dataDimRef = self._wrappedData
-    result = '%s,%s' % (dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
+    result = '%s%s%s' % (dataDimRef.dataDim.dim, Pid.IDSEP, dataDimRef.expDimRef.serial)
 
     return result
 
@@ -151,33 +152,20 @@ class SpectrumReference(AbstractWrapperObject):
   def axisCode(self) -> str:
     """Type: (*str,*)\*dimensionCount, *settable*
 
-    Main ExpDimRef axisCode for each dimension - None if no unique code.
+    Main ExpDimRef axisCode for each dimension - None if no main ExpDimRef
 
-    Uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef
-    Axis code is used to identify the axis, how axes are linked, and how they map to
-    window axes, experiment templates etc. The following codes are accepted:
-
-    - Nucleus names (H, C, N, P, F, D, Na, Ca, ...)
-
-    - HX groups (Hn, Hc, Ch, Nh) showing carbon or nitrogen bound to protons
-
-    - Protein-specific groups (HA, Ca, CO)
-
-    - Double quantum  axes ( DQ(C,C), DQ(H,C), ...
-
-    - Coupling constants (J, J(H,H), J(H,C), ...
-
-    - measurement types (time, temp, pH, conc, pressure, field, offset, ...
-
-    - Duplicate codes are distinguished by suffixes (H, H2, H3, ...) (NB there is no H1)
-      E.g. Hc is bound to Ch, but not to Ch2
+    If the axisCode is set, each will be unique and match the RefExpDimRef.axisCode
+    If it is not set, axisCodes may not be unique. They will be the element symbol
+    for shift and TROESY, comma-separated element symbols for MQ magnetisation,
+    'missing' for a shift, TROESY or MQ without isotope indication, the measurement
+    or 'unknown' otherwise.
 
     TBD codes match AtomSite.name, but NBNB NmrExpPrototypes must be updated to match system"""
-    return self._wrappedData.expDimRef.name
+    return self._wrappedData.expDimRef.useAxisCode
 
   @axisCode.setter
   def axisCode(self, value:str):
-      self._wrappedData.expDimRef.name = value
+      self._wrappedData.expDimRef.axisCode = value
 
   @property
   def axisUnit(self) -> str:

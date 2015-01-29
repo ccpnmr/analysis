@@ -24,11 +24,11 @@ __version__ = "$Revision$"
 
 from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._AbstractWrapperObject import AtomAssignment
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Restraint import Restraint
 from ccpncore.api.ccp.nmr.NmrConstraint import ConstraintContribution as ccpnContribution
 from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance
+from ccpncore.lib import pid as Pid
 
 class RestraintContribution(AbstractWrapperObject):
   """Restraint contribution."""
@@ -55,7 +55,7 @@ class RestraintContribution(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def ccpnContribution(self) -> ccpnContribution:
+  def ccpnRestraintContribution(self) -> ccpnContribution:
     """ CCPN RdcContribution matching RdcContribution"""
     return self._wrappedData
 
@@ -148,7 +148,7 @@ class RestraintContribution(AbstractWrapperObject):
 
   @property
   def restraintItems(self) -> tuple:
-    """restraint items of contribution - given as a tuple of lists of AtomAssignments """
+    """restraint items of contribution - given as a tuple of lists of AtomId """
 
     itemLength = self.restraintType2Length[self._parent._parent.restraintType]
 
@@ -157,26 +157,25 @@ class RestraintContribution(AbstractWrapperObject):
 
     if itemLength > 1:
       for ccpnItem in self._wrappedData.items:
-        assignments = [fixedResonance2Assignment(x) for x in ccpnItem.resonances]
-        if sortkey(assignments[0]) > sortkey(assignments[-1]):
+        atomIds = [_fixedResonance2AtomId(x) for x in ccpnItem.resonances]
+        if sortkey(atomIds[0]) > sortkey(atomIds[-1]):
           # order so smallest string comes first
           # NB This assumes that assignments are either length 2 or ordered (as is so far the case)
-          assignments.reverse()
-        result.append(tuple(assignments))
+          atomIds.reverse()
+        result.append(tuple(atomIds))
     else:
       for ccpnItem in self._wrappedData.items:
-        assignment = fixedResonance2Assignment(ccpnItem.resonance)
-        result.append((assignment,))
+        result.append((_fixedResonance2AtomId(ccpnItem.resonance),))
     #
     return tuple(sorted(result, key=sortkey))
 
   @restraintItems.setter
-  def restraintItems(self, assignments:Sequence):
+  def restraintItems(self, value:Sequence):
 
     itemLength = self.restraintType2Length[self._parent._parent.restraintType]
     newItemFuncName ="new%sItem" % self._parent._parent.restraintType
 
-    for ll in assignments:
+    for ll in value:
       # make new items
       if len(ll) != self.restraintItemLength:
         raise ValueError("RestraintItems must have length %s: %s" % (itemLength, ll))
@@ -188,15 +187,15 @@ class RestraintContribution(AbstractWrapperObject):
 
     fetchFixedResonance = self._parent._parent._parent._fetchFixedResonance
     if itemLength > 1:
-      for ll in assignments:
+      for ll in value:
         # make new items
         getattr(ccpnContribution, newItemFuncName)(
-          resonances=tuple(fetchFixedResonance(assignment) for assignment in ll))
+          resonances=tuple(fetchFixedResonance(Pid.splitId(x)) for x in ll))
     else:
-      for ll in assignments:
+      for ll in value:
         # make new items
         getattr(ccpnContribution, newItemFuncName)(
-          resonance=fetchFixedResonance(ll[0]))
+          resonance=fetchFixedResonance(Pid.splitId(ll[0])))
     
   # Implementation functions
   @classmethod
@@ -232,8 +231,7 @@ for clazz in ccpnContribution._metaclass.getNonAbstractSubtypes():
     )
 )
 
-def fixedResonance2Assignment(fixedResonance:FixedResonance) -> AtomAssignment:
-  """Utility function - get AtomAssignment from FixedResonance """
+def _fixedResonance2AtomId(fixedResonance:FixedResonance) -> str:
+  """Utility function - get AtomId from FixedResonance """
   tags = ('chainCode', 'sequenceCode', 'residueType', 'name')
-  result = AtomAssignment(*(getattr(fixedResonance,tag) for tag in tags))
-  return result
+  return Pid.makeId(getattr(fixedResonance, tag) for tag in tags)

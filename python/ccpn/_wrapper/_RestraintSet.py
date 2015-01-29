@@ -23,12 +23,13 @@ __version__ = "$Revision$"
 #=========================================================================================
 # from collections.abc import Sequence
 
+from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._AbstractWrapperObject import AtomAssignment
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore
 from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance
 from ccpncore.lib import MoleculeQuery
+from ccpncore.lib import pid as Pid
 
 
 class RestraintSet(AbstractWrapperObject):
@@ -46,15 +47,15 @@ class RestraintSet(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def nmrConstraintStore(self) -> NmrConstraintStore:
+  def ccpnRestraintSet(self) -> NmrConstraintStore:
     """ CCPN NmrConstraintStore matching RestraintSet"""
     return self._wrappedData
 
     
   @property
   def _key(self) -> str:
-    """short form of name, used for id"""
-    return str(self._wrappedData.serial)
+    """name, regularised as used for id"""
+    return self._wrappedData.name.translate(Pid.remapSeparators)
 
   @property
   def serial(self) -> int:
@@ -82,9 +83,8 @@ class RestraintSet(AbstractWrapperObject):
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
     return parent._wrappedData.sortedNmrConstraintStores()
 
-  def _fetchFixedResonance(self, assignment:AtomAssignment) -> FixedResonance:
-    """Fetch FixedResonance matching AtomAssignment, creating anew if needed.
-    The pid header (if present) is ignored"""
+  def _fetchFixedResonance(self, assignment:Sequence) -> FixedResonance:
+    """Fetch FixedResonance matching assignment tuple, creating anew if needed."""
 
     nmrConstraintStore = self._wrappedData
 

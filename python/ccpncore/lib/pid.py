@@ -13,6 +13,7 @@ IDSEP = '.'
 # Set translation between IDSEP and alternative character
 altCharacter = '^'
 remapSeparators = str.maketrans(IDSEP,altCharacter)
+unmapSeparators = str.maketrans(altCharacter, IDSEP)
 
 def makePid(head, *args):
   """make pid from head and list of successive keys.
@@ -31,6 +32,21 @@ def makePid(head, *args):
       sep = PREFIXSEP
   #
   return sep.join((head, IDSEP.join(*ll)))
+
+def makeId(*args):
+  """make id from list of successive keys.
+  Keys are converted to string, and illegal characters are converted to altCharacter"""
+
+  # map args to corrected strings
+  return IDSEP.join(val.translate(remapSeparators) for val in args)
+
+def splitId(idString):
+  """Split idString into tuple of component elements,
+  mapping altCharacter back to separator
+  Keys are converted to string, and illegal characters are converted to altCharacter"""
+
+  # map args to corrected strings
+  return tuple(val.translate(unmapSeparators) for val in idString.split(IDSEP))
 
 
 def decodePid(sourceObject, thePid):

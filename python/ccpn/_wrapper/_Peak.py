@@ -242,23 +242,23 @@ class Peak(AbstractWrapperObject):
 
   @property
   def dimensionAssignments(self) -> tuple:
-    """Peak dimension assignments - a list of lists of AtomAssignment tuples for each dimension.
+    """Peak dimension assignments - a list of lists of NmrAtom.id for each dimension.
     Assignments as a list of individual combinations is given in 'assignments'."""
 
     result = []
     for ll in self.dimensionNmrAtoms:
-      result.append(list(x.assignment for x in ll))
+      result.append(list(x.id for x in ll))
     #
     return tuple(result)
 
   @property
   def assignments(self) -> tuple:
-    """Peak dimension assignments a list of lists of AtomAssignment tuple combinations
+    """Peak dimension assignments a list of lists of NmrAtom.id combinations
     (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None"""
 
     result = []
     for ll in self.assignedNmrAtoms:
-      result.append(list(x and x.assignment for x in ll))
+      result.append(list(x and x.id for x in ll))
     #
     return tuple(result)
 

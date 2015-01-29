@@ -23,7 +23,6 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._AbstractWrapperObject import ResidueAssignment
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
@@ -62,8 +61,9 @@ class Residue(AbstractWrapperObject):
 
   @property
   def _key(self) -> str:
-    """Residue ID. Identical to sequenceCode, Characters translated for pid"""
-    return self.sequenceCode.translate(Pid.remapSeparators)
+    """Residue ID. Identical to sequenceCode.residueType. Characters translated for pid"""
+    return Pid.IDSEP.join((self.sequenceCode.translate(Pid.remapSeparators),
+                           self.name.translate(Pid.remapSeparators)))
     
   @property
   def _parent(self) -> Chain:
@@ -117,12 +117,6 @@ class Residue(AbstractWrapperObject):
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
-
-  @property
-  def assignment(self) -> str:
-    """ResidueAssignment named tuple (chainCode, sequenceCode, residueType)"""
-    obj = self._wrappedData
-    return ResidueAssignment(obj.chain.code, self.sequenceCode, obj.code3Letter)
 
   # CCPN functions
   # def linkToResidue(self, targetResidue, fromLinkCode, toLinkCode=None):

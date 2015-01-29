@@ -24,7 +24,6 @@ __version__ = "$Revision$"
 
 import operator
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._AbstractWrapperObject import AtomAssignment
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrResidue import NmrResidue
 from ccpncore.api.ccp.nmr.Nmr import Resonance
@@ -46,7 +45,7 @@ class NmrAtom(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnResonance(self) -> Resonance:
+  def ccpnNmrAtom(self) -> Resonance:
     """ CCPN atom matching Atom"""
     return self._wrappedData
 
@@ -60,15 +59,13 @@ class NmrAtom(AbstractWrapperObject):
     
   @property
   def _key(self) -> str:
-    """Atom name string (e.g. 'HA')"""
+    """Atom name string (e.g. 'HA') regularised as used for ID"""
     return self._wrappedData.name.translate(Pid.remapSeparators)
 
-  name = _key
-
   @property
-  def assignment(self) -> str:
-    """AtomAssignment named tuple (chainCode, sequenceCode, residueType, name)"""
-    return AtomAssignment( *(self._parent.assignment + (self.name,)))
+  def name(self) -> str:
+    """Atom name string (e.g. 'HA')"""
+    return self._wrappedData.name
     
   # Implementation functions
   @classmethod

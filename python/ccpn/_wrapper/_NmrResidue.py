@@ -23,7 +23,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._AbstractWrapperObject import ResidueAssignment
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrChain import NmrChain
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup
@@ -45,7 +44,7 @@ class NmrResidue(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def resonanceGroup(self) -> ResonanceGroup:
+  def ccpnNmrResidue(self) -> ResonanceGroup:
     """ CCPN resonanceGroup matching Residue"""
     return self._wrappedData
   
@@ -59,8 +58,9 @@ class NmrResidue(AbstractWrapperObject):
 
   @property
   def _key(self) -> str:
-    """Residue ID. Identical to seqCode, with characters remmaped for pid"""
-    return self._wrappedData.translate(Pid.remapSeparators)
+    """Residue local ID"""
+    return Pid.IDSEP.join((self.sequenceCode.translate(Pid.remapSeparators),
+                           self.name.translate(Pid.remapSeparators)))
     
   @property
   def _parent(self) -> NmrChain:
@@ -92,12 +92,6 @@ class NmrResidue(AbstractWrapperObject):
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
-
-  @property
-  def assignment(self) -> str:
-    """ResidueAssignment named tuple (chainCode, sequenceCode, residueType)"""
-    obj = self._wrappedData
-    return ResidueAssignment(obj.nmrChain.code, obj.sequenceCode, obj.residueType)
 
   # Implementation functions
   @classmethod

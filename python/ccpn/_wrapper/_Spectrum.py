@@ -54,20 +54,16 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def _key(self) -> str:
+    """name, regularised as used for id"""
+
+    return self._wrappedData.name.translate(Pid.remapSeparators)
+
+
+  @property
+  def name(self) -> str:
     """short form of name, used for id"""
 
-    dataSource = self._wrappedData
-    ccpnExperiment = dataSource.experiment
-    # NBNB TBD 1) ensure uniqueness
-    # NBNB TBD 2) restrict type of original attribute
-    result = '_'.join(ccpnExperiment.name.split())
-    result = result.translate(Pid.remapSeparators)
-    if dataSource.serial  != 1:
-      result = '%s,%s' % (result, dataSource.serial)
-
-    return result
-
-  name = _key
+    return self._wrappedData.name
 
   @property
   def _parent(self) -> Project:
@@ -509,33 +505,20 @@ class Spectrum(AbstractWrapperObject):
   def axisCodes(self) -> tuple:
     """Type: (*str,*)\*dimensionCount, *settable*
 
-    Main ExpDimRef axisCode for each dimension - None if no unique code.
+    Main ExpDimRef axisCode for each dimension - None if no main ExpDimRef
 
-    Uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef
-    Axis code is used to identify the axis, how axes are linked, and how they map to
-    window axes, experiment templates etc. The following codes are accepted:
+    If the axisCode is set, each will be unique and match the RefExpDimRef.axisCode
+    If it is not set, axisCodes may not be unique. They will be the element symbol
+    for shift and TROESY, comma-separated element symbols for MQ magnetisation,
+    'missing' for a shift, TROESY or MQ without isotope indication, the measurement
+    or 'unknown' otherwise.
 
-    - Nucleus names (H, C, N, P, F, D, Na, Ca, ...)
-
-    - HX groups (Hn, Hc, Ch, Nh) showing carbon or nitrogen bound to protons
-
-    - Protein-specific groups (HA, Ca, CO)
-
-    - Double quantum  axes ( DQ(C,C), DQ(H,C), ...
-
-    - Coupling constants (J, J(H,H), J(H,C), ...
-
-    - measurement types (time, temp, pH, conc, pressure, field, offset, ...
-
-    - Duplicate codes are distinguished by suffixes (H, H2, H3, ...) (NB there is no H1)
-      E.g. Hc is bound to Ch, but not to Ch2
-
-    TBD codes match AtomSite.name, but NBNB NmrExpPrototypes must be updated to match system"""
-    return tuple(x and x.axisCode for x in self._mainExpDimRefs())
+    TBD codes match AtomSite.axisCode, but NBNB NmrExpPrototypes must be updated to match system"""
+    return tuple(x and x.useAxisCode for x in self._mainExpDimRefs())
 
   @axisCodes.setter
   def axisCodes(self, value):
-    self._setExpDimRefAttribute('name', value, mandatory=False)
+    self._setExpDimRefAttribute('axisCode', value, mandatory=False)
 
   @property
   def axisUnits(self) -> tuple:

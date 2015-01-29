@@ -25,6 +25,7 @@ __version__ = "$Revision$"
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.nmr.Nmr import ShiftList as Ccpn_ShiftList
+from ccpncore.lib import pid as Pid
 
 class ChemicalShiftList(AbstractWrapperObject):
   """Chemical Shift list."""
@@ -46,13 +47,13 @@ class ChemicalShiftList(AbstractWrapperObject):
     
   @property
   def _key(self) -> str:
-    """identifier - serial number converted to string"""
-    return str(self._wrappedData.serial)
+    """name, regularised as used for id"""
+    return self._wrappedData.name.translate(Pid.remapSeparators)
 
   @property
   def serial(self) -> int:
-    """Shift list serial number"""
-    return self._wrappedData.serial
+    """Shift list name"""
+    return self._wrappedData.name
     
   @property
   def _parent(self) -> Project:
@@ -65,10 +66,6 @@ class ChemicalShiftList(AbstractWrapperObject):
   def name(self) -> str:
     """name of ChemicalShiftList"""
     return self._wrappedData.name
-    
-  @name.setter
-  def name(self, value:str):
-    self._wrappedData.name = value
 
   @property
   def unit(self) -> str:

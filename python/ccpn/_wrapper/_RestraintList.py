@@ -26,6 +26,7 @@ from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._RestraintSet import RestraintSet
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList
+from ccpncore.lib import pid as Pid
 
 class RestraintList(AbstractWrapperObject):
   """ RestraintList - All restraints lists, with type determined by the restraintType attribute."""
@@ -48,7 +49,7 @@ class RestraintList(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """id string - serial number converted to string"""
-    return '%s,%s' % (self.restraintType, self._wrappedData.serial)
+    return self._wrappedData.name.translate(Pid.remapSeparators)
 
   @property
   def restraintType(self) -> str:

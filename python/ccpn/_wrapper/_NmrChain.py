@@ -63,8 +63,6 @@ class NmrChain(AbstractWrapperObject):
     """Parent (containing) object."""
     return self._project
   
-  molecule = _parent
-  
   @property
   def comment(self) -> str:
     """Free-form text comment"""

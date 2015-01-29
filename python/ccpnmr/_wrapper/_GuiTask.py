@@ -21,13 +21,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from collections.abc import Sequence
-
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpnmr._wrapper._GuiWindow import GuiWindow
 from ccpncore.api.ccpnmr.gui.Task import GuiTask as Ccpn_GuiTask
-# from ccpncore.util import Common as commonUtil
 from ccpncore.lib import pid as Pid
 
 
@@ -52,7 +49,7 @@ class GuiTask(AbstractWrapperObject):
     
   @property
   def _key(self) -> str:
-    """locak id, fo form nameSpace.name"""
+    """local id, of form nameSpace.name"""
     return Pid.IDSEP.join((self._wrappedData.nameSpace, self._wrappedData.name))
 
   @property

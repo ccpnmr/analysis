@@ -1,4 +1,4 @@
-"""GUI window class
+"""GUI SpectrumDisplay class
 
 """
 #=========================================================================================
@@ -30,7 +30,6 @@ from ccpnmr._wrapper._GuiTask import GuiTask
 from ccpnmr._wrapper._GuiWindow import GuiWindow
 from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as Ccpn_SpectrumDisplay
 from ccpncore.util import Common as commonUtil
-from ccpncore.lib import pid as Pid
 
 
 class SpectrumDisplay(AbstractWrapperObject):
@@ -105,6 +104,20 @@ class SpectrumDisplay(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
+  def axisCodes(self) -> tuple:
+    """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
+    return self._wrappedData.axisCodes
+
+  @property
+  def axisOrder(self) -> tuple:
+    """String Axis codes in display order (X, Y, Z1, Z2, ...), determine axis display order"""
+    return self._wrappedData.axisOrder
+
+  @axisOrder.setter
+  def axisOrder(self, value:Sequence):
+    self._wrappedData.axisOrder = value
+
+  @property
   def guiWindow(self) -> GuiWindow:
     """Gui window showing SpectrumDisplay"""
     return self._project._data2Obj.get(self._wrappedData.window)
@@ -124,42 +137,76 @@ class SpectrumDisplay(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:Project)-> list:
-    """get wrappedData (ccp.gui.windows) for all WIndow children of parent NmrProject.windowStore"""
-    windowStore = parent._wrappedData.windowStore
+  def _getAllWrappedData(cls, parent:GuiTask)-> list:
+    """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of parent GuiTask"""
+    return [x for x in parent._wrappedData.sortedModules()
+            if isinstance(x, Ccpn_SpectrumDisplay)]
 
-    if windowStore is None:
-      return []
+def newSpectrumDisplay(parent:GuiTask, axisCodes:Sequence, stripDirection:str=None,
+                       name:str=None, gridCell:Sequence=(1,1), gridSpan:Sequence=(1,1),
+                       window:GuiWindow=None, comment:str=None, independentStrips=False,
+                       nmrResidue=None):
+
+  # Map to determine display type
+  displayTypeMap = {
+    (True, True,False):('newDisplay1d','newStrip1d'),
+    (True, False,False):('newStripDisplay1d','newStrip1d'),
+    (False, True,False):('newDisplayNd','newStripNd'),
+    (False, False,False):('newStripDisplayNd','newStripNd'),
+    (False, False,True):('newStripDisplayNd','newFreeStripNd'),
+    (True, False,True):('newStripDisplay1d','newFreeStrip1d'),
+  }
+
+  ccpnGuiTask = parent._wrappedData
+
+  if len(axisCodes) <2:
+    raise ValueError("New SpectrumDisplay must have at least two axisCodes")
+
+  # set display type discriminator and get display types
+  mapTuple = (
+    axisCodes[1] == 'intensity',   # 1d display
+    stripDirection is None,        # single=pane display
+    bool(independentStrips)        # free-strip display
+  )
+  tt = displayTypeMap.get(mapTuple)
+  if tt is None:
+    raise ValueError("stripDirection must be set if independentStrips is True")
+  else:
+    newDisplayFunc, newStripFunc = tt
+
+  # set parameters for display
+  displayPars = dict(
+    stripDirection=stripDirection, gridCell=gridCell, gridSpan=gridSpan, window=window,
+    details=comment, nmrResidue=nmrResidue
+  )
+  # Add name, setting and insuring uniqueness if necessary
+  if name is None:
+    if 'intensity' in axisCodes:
+      name = ''.join(['1D:', axisCodes[0]] + axisCodes[2:])
     else:
-      return windowStore.sortedWindows()
+      name = ''.join(axisCodes)
+  while ccpnGuiTask.findFirstModule(name=name):
+    name = commonUtil.incrementName(name)
+  displayPars['name'] = name
 
-
-
-def newGuiWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=()) -> GuiWindow:
-  """Create new child GuiWindow
-
-  :param str title: window  title (optional, defaults to 'Wn' n positive integer
-  :param tuple size: x,y size for new window in integer pixels
-  :param tuple position: x,y position for new window in integer pixels"""
-
-  windowStore = parent.nmrProject.windowStore
-
-  newCcpnGuiWindow = windowStore.newGuiWindow(title=title)
-  if position:
-    newCcpnGuiWindow.position = position
-  if size:
-    newCcpnGuiWindow.size = size
-
-  return parent._data2Obj.get(newCcpnGuiWindow)
+  if independentStrips:
+    # Create FreeStripDisplay and first strip
+    ccpnSpectrumDisplay = getattr(ccpnGuiTask, newDisplayFunc)(**displayPars)
+    ccpnStrip = ccpnSpectrumDisplay.newStrip(axisCodes=axisCodes, axisOrder=axisCodes)
+  else:
+    # Create Boundstrip/Nostrip display and first strip
+    displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
+    ccpnSpectrumDisplay = getattr(ccpnGuiTask, newDisplayFunc)(**displayPars)
+    ccpnStrip = ccpnSpectrumDisplay.newStrip()
 
 # Connections to parents:
-Project._childClasses.append(GuiWindow)
-Project.newGuiWindow = newGuiWindow
+Project._childClasses.append(SpectrumDisplay)
+Project.newSpectrumDisplay = newSpectrumDisplay
 
 # Notifiers:
-className = Ccpn_Window._metaclass.qualifiedName()
+className = Ccpn_SpectrumDisplay._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':GuiWindow}, className, '__init__'),
+  ( ('_newObject', {'cls':SpectrumDisplay}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

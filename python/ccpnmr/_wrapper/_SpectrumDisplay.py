@@ -135,12 +135,54 @@ class SpectrumDisplay(AbstractWrapperObject):
   def nmrResidue(self, value:NmrResidue):
     self._wrappedData.resonanceGroup = value and value._wrappedData
 
+  @property
+  def orderedAxes(self) -> tuple:
+    """Axes in display order (X, Y, Z1, Z2, ...) """
+    ff = self._project._data2Obj.get
+    return tuple(ff(x) for x in self._wrappedData.orderedAxes)
+
+  @orderedAxes.setter
+  def orderedAxes(self, value:Sequence):
+    self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
+
+  @property
+  def positions(self) -> tuple:
+    """Axis centre positions, in display order"""
+    return self._wrappedData.positions
+
+  @positions.setter
+  def positions(self, value):
+    self._wrappedData.positions = value
+
+  @property
+  def widths(self) -> tuple:
+    """Axis display widths, in display order"""
+    return self._wrappedData.widths
+
+  @widths.setter
+  def widths(self, value):
+    self._wrappedData.widths = value
+
+  @property
+  def units(self) -> tuple:
+    """Axis units, in display order"""
+    return self._wrappedData.units
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:GuiTask)-> list:
     """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of parent GuiTask"""
     return [x for x in parent._wrappedData.sortedModules()
             if isinstance(x, Ccpn_SpectrumDisplay)]
+
+  # CCPN functions
+  def resetAxisOrder(self):
+    """Reset display to original axis order"""
+    self._wrappedData.resetAxisOrder()
+
+  def pickAxis(self, axisCode):
+    """Reset display to original axis order"""
+    return self._project._data2Obj.get(self._wrappedData.pickAxis(axisCode))
 
 def newSpectrumDisplay(parent:GuiTask, axisCodes:Sequence, stripDirection:str=None,
                        name:str=None, gridCell:Sequence=(1,1), gridSpan:Sequence=(1,1),

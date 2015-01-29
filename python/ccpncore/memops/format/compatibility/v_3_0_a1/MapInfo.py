@@ -31,8 +31,8 @@ skipElements = [
 # classElements skipped in new model, but available for simple data transfer
 # (prefix, typeName, elemName, newGuid, elemMap, valueTypeGuid)
 delayElements = [
- ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'name': 'refExpDim', 'type': 'exolink', 'tag': 'NMR.ExpDim.refExpDim', 'eType': 'cplx'}, None), 
- ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'name': 'clusterCode', 'type': 'attr', 'tag': 'NMR.ResonanceGroup.clusterCode', 'eType': 'cplx'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
+ ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'name': 'refExpDim', 'type': 'exolink', 'eType': 'cplx', 'tag': 'NMR.ExpDim.refExpDim'}, None), 
+ ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'name': 'clusterCode', 'type': 'attr', 'eType': 'cplx', 'tag': 'NMR.ResonanceGroup.clusterCode'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
  ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'name': 'isActive', 'type': 'attr', 'tag': 'NMR.ResonanceGroup.isActive'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
 ]
 
@@ -109,6 +109,7 @@ newMandatories = [
  ('GUIT', 'SampledAxis', 'code', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00006'), 
  ('GUIT', 'SampledAxis', 'unit', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00008'), 
  ('GUIT', 'SpectrumView', 'dataSourceSerial', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:52:44_00012'), 
+ ('GUIT', 'SpectrumView', 'dimensionOrdering', 'www.ccpn.ac.uk_Fogh_2014-11-11-18:29:24_00003'), 
  ('GUIT', 'SpectrumView', 'experimentName', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:52:44_00011'), 
  ('GUIT', 'SpectrumView', 'spectrumDisplay', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:51:55_00006'), 
  ('GUIT', 'Strip', 'index', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:53:34_00016'), 
@@ -239,7 +240,6 @@ newElements = [
  ('GUIT', 'SpectrumDisplay', 'strips', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:51:55_00004'), 
  ('GUIT', 'SpectrumView', None, 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:26_00010'), 
  ('GUIT', 'SpectrumView', 'dataSource', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:52:44_00010'), 
- ('GUIT', 'SpectrumView', 'dimensionOrdering', 'www.ccpn.ac.uk_Fogh_2014-11-11-18:29:24_00003'), 
  ('GUIT', 'SpectrumView', 'displayNegativeContours', 'www.ccpn.ac.uk_Fogh_2014-12-02-18:39:42_00002'), 
  ('GUIT', 'SpectrumView', 'displayPositiveContours', 'www.ccpn.ac.uk_Fogh_2014-12-02-18:39:42_00001'), 
  ('GUIT', 'SpectrumView', 'experimentType', 'www.ccpn.ac.uk_Fogh_2014-11-28-21:31:23_00002'), 
@@ -433,7 +433,7 @@ nameMatches = [
 allDiffs = [
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
  ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'isDerived', 'partitionsChildren'}), 
- ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'isDerived', 'documentation', 'locard'}), 
+ ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'isDerived', 'locard', 'documentation'}), 
  ('ccp.nmr.NmrExpPrototype.ExpMeasurementType', 'ExpMeasurementType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', {'taggedValues', 'documentation'}), 
  ('molsim.Symmetry.MolSystemSymmetrySet', 'MolSystemSymmetrySet', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', {'parentRole'}), 
 ]

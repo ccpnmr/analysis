@@ -79,6 +79,39 @@ class Strip(AbstractWrapperObject):
   def axisOrder(self, value:Sequence):
     self._wrappedData.axisOrder = value
 
+  @property
+  def orderedAxes(self) -> tuple:
+    """Axes in display order (X, Y, Z1, Z2, ...) """
+    ff = self._project._data2Obj.get
+    return tuple(ff(x) for x in self._wrappedData.orderedAxes)
+
+  @orderedAxes.setter
+  def orderedAxes(self, value:Sequence):
+    self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
+
+  @property
+  def positions(self) -> tuple:
+    """Axis centre positions, in display order"""
+    return self._wrappedData.positions
+
+  @positions.setter
+  def positions(self, value):
+    self._wrappedData.positions = value
+
+  @property
+  def widths(self) -> tuple:
+    """Axis display widths, in display order"""
+    return self._wrappedData.widths
+
+  @widths.setter
+  def widths(self, value):
+    self._wrappedData.widths = value
+
+  @property
+  def units(self) -> tuple:
+    """Axis units, in display order"""
+    return self._wrappedData.units
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:SpectrumDisplay)-> list:
@@ -101,6 +134,14 @@ class Strip(AbstractWrapperObject):
   def moveTo(self, newIndex:int):
     """Move strip to index newIndex in orderedStrips"""
     self._wrappedData.moveTo(newIndex)
+
+  def resetAxisOrder(self):
+    """Reset display to original axis order"""
+    self._wrappedData.resetAxisOrder()
+
+  def pickAxis(self, axisCode):
+    """Reset display to original axis order"""
+    return self._project._data2Obj.get(self._wrappedData.pickAxis(axisCode))
 
 
 # Connections to parents:

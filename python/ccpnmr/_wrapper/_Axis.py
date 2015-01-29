@@ -114,23 +114,11 @@ class Axis(AbstractWrapperObject):
     """Overrides normal delete"""
     raise  ValueError("Axes cannot be deleted independently")
 
-  #CCPN functions
-
 # Connections to parents:
 SpectrumDisplay._childClasses.append(Axis)
 
 # We should NOT have any newAxis functions
 
-# orderedAxes property
-def getOrderedAxes(container) -> tuple:
-  ff = container._project._data2Obj.get
-  return tuple(ff(x) for x in container._wrappedData.orderedAxes)
-
-def setOrderedAxes(container, value:Sequence):
-  container._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
-
-SpectrumDisplay.orderedAxes = property(getOrderedAxes, setOrderedAxes)
-Strip.orderedAxes = property(getOrderedAxes, setOrderedAxes)
 
 # Notifiers:
 className = Ccpn_Axis._metaclass.qualifiedName()

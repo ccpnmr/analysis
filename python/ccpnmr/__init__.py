@@ -7,6 +7,10 @@
 
    _GuiWindow.GuiWindow
    _GuiTask.GuiTask
+   _SpectrumDisplay.SpectrumDisplay
+   _Strip.Strip
+   _Axis.Axis
+   _SpectrumView.SpectrumView
 
 ccpnmr.GuiWindow class
 ------------------
@@ -17,6 +21,27 @@ ccpnmr.GuiTask class
 ------------------
 
 .. autoclass:: ccpn._wrapper._GuiTask.GuiTask
+
+ccpnmr.SpectrumDisplay class
+------------------
+
+.. autoclass:: ccpn._wrapper._SpectrumDisplay.SpectrumDisplay
+
+ccpnmr.Strip class
+------------------
+
+.. autoclass:: ccpn._wrapper._Strip.Strip
+
+ccpnmr.Axis class
+------------------
+
+.. autoclass:: ccpn._wrapper._Axis.Axis
+
+ccpnmr.SpectrumView class
+------------------
+
+.. autoclass:: ccpn._wrapper._SpectrumView.SpectrumView
+
 """
 
 # import sys
@@ -27,8 +52,6 @@ ccpnmr.GuiTask class
 # Following import statement to ensure wrapper classes correctly loaded
 import ccpn
 
-# from ccpncore.util import Io as ioUtil
-
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
 
@@ -38,6 +61,10 @@ previousChildClasses = list(Project._childClasses)
 
 from ccpnmr._wrapper._GuiWindow import GuiWindow
 from ccpnmr._wrapper._GuiTask import GuiTask
+from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
+from ccpnmr._wrapper._Strip import Strip
+from ccpnmr._wrapper._Axis import Axis
+# from ccpnmr._wrapper._SpectrumView import SpectrumView
 
 # Set up interclass links and related functions
 # HACK to link up newly imported wrapper classes only

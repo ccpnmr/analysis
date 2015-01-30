@@ -146,6 +146,16 @@ class SpectrumDisplay(AbstractWrapperObject):
     self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
 
   @property
+  def orderedStrips(self) -> tuple:
+    """Strips in displayed order """
+    ff = self._project._data2Obj.get
+    return tuple(ff(x) for x in self._wrappedData.orderedStrips)
+
+  @orderedStrips.setter
+  def orderedStrips(self, value:Sequence):
+    self._wrappedData.orderedStrips = tuple(x._wrappedData for x in value)
+
+  @property
   def positions(self) -> tuple:
     """Axis centre positions, in display order"""
     return self._wrappedData.positions
@@ -231,6 +241,7 @@ def newSpectrumDisplay(parent:GuiTask, axisCodes:Sequence, stripDirection:str=No
     name = commonUtil.incrementName(name)
   displayPars['name'] = name
 
+  # Create SpectrumDisplay and first strip
   if independentStrips:
     # Create FreeStripDisplay and first strip
     ccpnSpectrumDisplay = getattr(ccpnGuiTask, newDisplayFunc)(**displayPars)
@@ -240,6 +251,25 @@ def newSpectrumDisplay(parent:GuiTask, axisCodes:Sequence, stripDirection:str=No
     displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
     ccpnSpectrumDisplay = getattr(ccpnGuiTask, newDisplayFunc)(**displayPars)
     ccpnStrip = ccpnSpectrumDisplay.newStrip()
+
+  # Create axes
+    for ii, code in axisCodes:
+      if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
+         not stripDirection):
+        stripSerial = 0
+      else:
+        stripSerial = 1
+
+      if code[0].isupper():
+        ccpnSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
+      elif code == 'intensity':
+        ccpnSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
+      elif code.startswith('fid'):
+        ccpnSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
+      else:
+        ccpnSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
+  #
+  return parent._project._data2Obj.get(ccpnSpectrumDisplay)
 
 # Connections to parents:
 Project._childClasses.append(SpectrumDisplay)

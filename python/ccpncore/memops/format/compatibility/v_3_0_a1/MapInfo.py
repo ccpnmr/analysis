@@ -31,19 +31,22 @@ skipElements = [
 # classElements skipped in new model, but available for simple data transfer
 # (prefix, typeName, elemName, newGuid, elemMap, valueTypeGuid)
 delayElements = [
- ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'name': 'refExpDim', 'type': 'exolink', 'eType': 'cplx', 'tag': 'NMR.ExpDim.refExpDim'}, None), 
- ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'name': 'clusterCode', 'type': 'attr', 'eType': 'cplx', 'tag': 'NMR.ResonanceGroup.clusterCode'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
- ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'name': 'isActive', 'type': 'attr', 'tag': 'NMR.ResonanceGroup.isActive'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
+ ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'eType': 'cplx', 'tag': 'NMR.ExpDim.refExpDim', 'type': 'exolink', 'name': 'refExpDim'}, None), 
+ ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'eType': 'cplx', 'tag': 'NMR.ResonanceGroup.clusterCode', 'type': 'attr', 'name': 'clusterCode'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
+ ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'tag': 'NMR.ResonanceGroup.isActive', 'type': 'attr', 'name': 'isActive'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
 ]
 
 # MetaConstraints added in new model
 # (qualifiedName, guid)
 newConstraints = [
  ('ccp.molecule.MolSystem.Atom.non_single_atoms_have_components', 'www.ccpn.ac.uk_Fogh_2014-07-31-11:44:56_00001'), 
+ ('ccp.nmr.Nmr.AbstractMeasurementList.name.name_uniquely_identifies_MeasurementList', 'www.ccpn.ac.uk_Fogh_2015-01-30-13:54:37_00001'), 
  ('ccp.nmr.Nmr.ConnectedStretch.activeResonanceGroups_must_go_with_active_SequentialAssignments', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:49:36_00001'), 
+ ('ccp.nmr.Nmr.DataSource.name.name_uniquely_identifies_spectrum', 'www.ccpn.ac.uk_Fogh_2015-01-30-13:54:37_00002'), 
  ('ccp.nmr.Nmr.Resonance.implName.name_is_unique_in_resonanceGroup', 'www.ccpn.ac.uk_Fogh_2014-12-30-13:36:29_00001'), 
  ('ccp.nmr.Nmr.ResonanceGroup.satellite_resonance_group_must_have_offset', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:38_00002'), 
  ('ccp.nmr.Nmr.ResonanceGroup.satellite_resonance_groups_must_be_unique', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:38_00001'), 
+ ('ccp.nmr.NmrConstraint.AbstractConstraintList.name.name_uniquely_identifies_constraintList', 'www.ccpn.ac.uk_Fogh_2015-01-30-13:54:37_00003'), 
  ('ccp.nmr.NmrConstraint.DihedralItem.no_Dihedral_item_with_resonances_in_opposite_order', 'www.ccpn.ac.uk_Fogh_2014-07-29-12:54:23_00003'), 
  ('ccpnmr.gui.Task.BoundDisplay.axisOrder.bound_axis_order_is_contained_in_axis_codes', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:43:15_00001'), 
  ('ccpnmr.gui.Task.BoundDisplay1d.Y_axis_is_intensity', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00011'), 
@@ -52,6 +55,7 @@ newConstraints = [
  ('ccpnmr.gui.Task.BoundStrip.axiscodes_same_as_parent_display', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00019'), 
  ('ccpnmr.gui.Task.Display1d.XY_axes_only', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00021'), 
  ('ccpnmr.gui.Task.DisplayNd.no_intensity_axis', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00023'), 
+ ('ccpnmr.gui.Task.FidAxis.code.fid_axis_code_starts_with_fid', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00010'), 
  ('ccpnmr.gui.Task.FreeStrip.axisOrder.free_axis_order_codes_contained_in_axis_codes', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:06_00001'), 
  ('ccpnmr.gui.Task.FreeStrip1d.Y_axis_is_intensity', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:36_00002'), 
  ('ccpnmr.gui.Task.FreeStripDisplay1d.Y_axis_is_intensity', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00027'), 
@@ -66,7 +70,6 @@ newConstraints = [
  ('ccpnmr.gui.Task.SpectrumView.free_displays_are_linked_to_specific_strip_bound_displays_are_not', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00001'), 
  ('ccpnmr.gui.Task.SpectrumView.stripSerial.only_free_strip_displays_have_individual_spectrum_views', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:52:44_00014'), 
  ('ccpnmr.gui.Task.Strip.only_one_strip_in_non_strip_displays', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00007'), 
- ('ccpnmr.gui.Task.ValueAxis.code.value_axis_code_starts_with_lower_case', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00010'), 
 ]
 
 # Mandatory classElements added in new model
@@ -84,6 +87,8 @@ newMandatories = [
  ('GUIT', 'AxisWidthGroup', 'serial', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:42:29_00010'), 
  ('GUIT', 'BoundDisplay', 'axisCodes', 'www.ccpn.ac.uk_Fogh_2015-01-28-15:29:03_00001'), 
  ('GUIT', 'BoundDisplay', 'axisOrder', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:42:29_00011'), 
+ ('GUIT', 'FidAxis', 'code', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00009'), 
+ ('GUIT', 'FidAxis', 'unit', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00011'), 
  ('GUIT', 'FreeStrip', 'axisCodes', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:44:49_00001'), 
  ('GUIT', 'FreeStrip', 'axisOrder', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:44:00_00007'), 
  ('GUIT', 'FreeStrip1d', 'spectrumDisplay', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:55_00003'), 
@@ -117,8 +122,6 @@ newMandatories = [
  ('GUIT', 'Strip', 'spectrumDisplay', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:51:55_00003'), 
  ('GUIT', 'Strip1d', 'spectrumDisplay', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:43:15_00002'), 
  ('GUIT', 'StripNd', 'spectrumDisplay', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:43:15_00004'), 
- ('GUIT', 'ValueAxis', 'code', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00009'), 
- ('GUIT', 'ValueAxis', 'unit', 'www.ccpn.ac.uk_Fogh_2014-11-06-10:53:15_00011'), 
  ('GUIW', 'Window', 'serial', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:30_00013'), 
  ('GUIW', 'Window', 'title', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:30_00014'), 
  ('GUIW', 'Window', 'windowStore', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:40:01_00002'), 
@@ -187,6 +190,7 @@ newElements = [
  ('GUIT', 'BoundStrip', None, 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00018'), 
  ('GUIT', 'Display1d', None, 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00020'), 
  ('GUIT', 'DisplayNd', None, 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00022'), 
+ ('GUIT', 'FidAxis', None, 'www.ccpn.ac.uk_Fogh_2014-11-06-10:52:33_00003'), 
  ('GUIT', 'FreeStrip', None, 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00030'), 
  ('GUIT', 'FreeStrip1d', None, 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:36_00001'), 
  ('GUIT', 'FreeStripDisplay', None, 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00029'), 
@@ -262,7 +266,6 @@ newElements = [
  ('GUIT', 'StripDisplayNd', None, 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00025'), 
  ('GUIT', 'StripNd', None, 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:35_00016'), 
  ('GUIT', 'TaskModule', None, 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:26_00012'), 
- ('GUIT', 'ValueAxis', None, 'www.ccpn.ac.uk_Fogh_2014-11-06-10:52:33_00003'), 
  ('GUIW', None, None, 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:25_00003'), 
  ('GUIW', 'Window', None, 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:26_00001'), 
  ('GUIW', 'Window', 'modules', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:30_00012'), 
@@ -432,8 +435,8 @@ nameMatches = [
 # (oldElem.qName, newElem.name, oldGuid, newGuid, differentTags
 allDiffs = [
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
- ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'isDerived', 'partitionsChildren'}), 
- ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'isDerived', 'locard', 'documentation'}), 
- ('ccp.nmr.NmrExpPrototype.ExpMeasurementType', 'ExpMeasurementType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', {'taggedValues', 'documentation'}), 
+ ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'partitionsChildren', 'isDerived'}), 
+ ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'locard', 'documentation', 'isDerived'}), 
+ ('ccp.nmr.NmrExpPrototype.ExpMeasurementType', 'ExpMeasurementType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', {'documentation', 'taggedValues'}), 
  ('molsim.Symmetry.MolSystemSymmetrySet', 'MolSystemSymmetrySet', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', {'parentRole'}), 
 ]

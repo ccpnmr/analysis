@@ -8,6 +8,8 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.ToolBar import ToolBar
 
+from ccpncore.util import Colour
+
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 
 class GuiStripNd(GuiStrip):
@@ -16,7 +18,9 @@ class GuiStripNd(GuiStrip):
     GuiStrip.__init__(self, guiFrame, apiStrip)
 
     self.plotItem.setAcceptDrops(True)
-    self.setViewport(QtOpenGL.QGLWidget())
+    self.viewportWidget = QtOpenGL.QGLWidget()
+    self.setViewport(self.viewportWidget)
+    self.guiSpectrumDisplay.viewportDict[self.viewportWidget] = self
     self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
     ###self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
@@ -24,6 +28,7 @@ class GuiStripNd(GuiStrip):
     ###self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
+    self.colourIndex = 0
     # print(guiSpectrumDisplay)
     # self.fillToolBar()
     ###self.setShortcuts()
@@ -38,7 +43,7 @@ class GuiStripNd(GuiStrip):
 
     newItem = self.scene().addItem(guiSpectrumView)
 """
-  def addSpectrum(self, spectrum, guiSpectrumView):
+  def addSpectrum(self, guiSpectrumView):
 
     # resetAllAxisCodes(self.project._wrappedData)
     # spectrum = self.getObject(spectrumVar)
@@ -59,7 +64,20 @@ class GuiStripNd(GuiStrip):
     # #
     # # else:
     # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
-    newItem = self.scene().addItem(guiSpectrumView)
+    #print('HERE711', self.scene(), guiSpectrumView)
+    apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
+    
+    if not apiDataSource.positiveContourColour:
+      apiDataSource.positiveContourColour = Colour.spectrumHexColours[self.colourIndex]
+      self.colourIndex += 1
+      self.colourIndex %= len(Colour.spectrumHexColours)
+      
+    if not apiDataSource.negativeContourColour:
+      apiDataSource.negativeContourColour = Colour.spectrumHexColours[self.colourIndex]
+      self.colourIndex += 1
+      self.colourIndex %= len(Colour.spectrumHexColours)
+
+    self.scene().addItem(guiSpectrumView)
 
 
   # def fillToolBar(self):

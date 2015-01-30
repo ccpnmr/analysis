@@ -4,44 +4,73 @@ __author__ = 'simon'
 from pyqtgraph.dockarea import DockArea
 
 from ccpn.lib.Project import loadSpectrum
-
-from ccpncore.gui.Action import Action
-from ccpncore.gui.Console import PythonConsole
-from ccpncore.gui.SideBar import SideBar
-from ccpncore.gui.TextEditor import TextEditor
+from ccpn.lib import Spectrum
 
 from ccpncore.lib.spectrum import Util as specUtil
 
 from ccpnmrcore.Base import Base as GuiBase
 
-from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
-# from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-
 from PySide import QtGui, QtCore
 
-import os, json, sys, importlib
-from functools import partial
+import importlib
+
 from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay
 
-class GuiWindow(GuiBase):
+from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
+from ccpnmrcore.modules.GuiStripDisplay1d import GuiStripDisplay1d
+from ccpnmrcore.modules.GuiStripDisplayNd import GuiStripDisplayNd
 
+class GuiWindow(GuiBase):
+  
   def __init__(self, appBase, apiWindow):
+    
     self.appBase = appBase
     self.apiWindow = apiWindow
     self.dockArea = DockArea()
     self.dockArea.guiWindow = self
     self.dockArea.setGeometry(0, 0, 1100, 1300)
-    for apiModule in apiWindow.sortedModules():
-      if isinstance(apiModule, SpectrumDisplay):
-        className = apiModule.className
-        classModule = importlib.import_module('ccpnmrcore.modules.Gui' + className)
-        clazz = getattr(classModule, 'Gui'+className)
-        guiModule = clazz(self.dockArea, apiModule)
-      else:
-        raise Exception("Don't know how to deal with this yet")
+    
+    apiModules = apiWindow.sortedModules()
+    if apiModules:
+      for apiModule in apiModules:
+        if isinstance(apiModule, SpectrumDisplay):
+          className = apiModule.className
+          classModule = importlib.import_module('ccpnmrcore.modules.Gui' + className)
+          clazz = getattr(classModule, 'Gui'+className)
+          guiModule = clazz(self.dockArea, apiModule)
+        else:
+          raise Exception("Don't know how to deal with this yet")
+      self.blankDisplay = None
+    else:
+      self.blankDisplay = GuiBlankDisplay(self.dockArea)
+        
     appBase.guiWindows.append(self)
 
+  def displayFirstSpectrum(self, spectrum):
+    
+    assert self.blankDisplay
+    
+    self.blankDisplay.setParent(None)
+    self.blankDiplay = None
+    
+    apiGuiTask = self.apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
+    #axisCodes = spectrum.axisCodes
+    axisCodes = Spectrum.getAxisCodes(spectrum)
+    if spectrum.dimensionCount == 1:
+      axisCodes = axisCodes + ('intensity',)
+      apiStripDisplay = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=axisCodes, stripDirection='Y')
+      guiStripDisplay = GuiStripDisplay1d(self.dockArea, apiStripDisplay)
+    else:
+      apiStripDisplay = apiGuiTask.newStripDisplayNd(name='Module2_ND', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
+      ###for axisCode in axisCodes:
+      ###  apiStripDisplay.newAxis(code=axisCode)
+      guiStripDisplay = GuiStripDisplayNd(self.dockArea, apiStripDisplay)
+      
+    guiStripDisplay.addSpectrum(spectrum)
+    self.apiWindow.addModule(apiStripDisplay)
+    
   def loadSpectra(self, directory=None):
+    
     if directory == None:
       directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
       spectrum = loadSpectrum(self.project,directory[0])
@@ -88,10 +117,10 @@ class GuiWindow(GuiBase):
     # return newModule
 
   def setShortcuts(self):
+    
     toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
     toggleCrossHairShortcut = QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHair)
     toggleGridShortcut = QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGrid)
-
 
   def dropEvent(self, event):
     '''if object can be dropped into this area, accept dropEvent, otherwise throw an error
@@ -142,7 +171,7 @@ class GuiWindow(GuiBase):
           #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
             msg = dataSource.name+' loaded'
             self.statusBar().showMessage(msg)
-            self.pythonConsole.write("loadSpectrum('"+filePaths[0]+"')\n")
+            self.appBase.mainWindow.pythonConsole.write("loadSpectrum('"+filePaths[0]+"')\n")
 
           # peakListFormat = getPeakListFileFormat(filePaths[0])
           # if peakListFormat:

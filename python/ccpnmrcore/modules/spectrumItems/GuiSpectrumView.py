@@ -54,8 +54,8 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
     self.guiSpectrumDisplay = guiSpectrumDisplay
     self.apiSpectrumView = apiSpectrumView
     
-    apiDataSource = apiSpectrumView.dataSource
-    self.spectrum = self.getWrapperObject(apiDataSource)
+    self.apiDataSource = apiSpectrumView.dataSource
+    self.spectrum = self.getWrapperObject(self.apiDataSource)
     
     self.setDimMapping(dimMapping)
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem

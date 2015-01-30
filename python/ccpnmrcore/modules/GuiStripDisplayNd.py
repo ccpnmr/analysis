@@ -1,17 +1,37 @@
 __author__ = 'simon'
 
+import re
+
 from PySide import QtGui, QtCore
+
+from ccpncore.gui.VerticalLabel import VerticalLabel
+
+from ccpn.lib import Spectrum as LibSpectrum
 
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpnmrcore.modules.spectrumItems.GuiSpectrumViewNd import GuiSpectrumViewNd
 from ccpnmrcore.modules.GuiStripNd import GuiStripNd
-from ccpncore.gui.VerticalLabel import VerticalLabel
 
+def _findPpmRegion(spectrum, axisDim, spectrumDim):
+  
+  pointCount = spectrum.pointCounts[spectrumDim]
+  if axisDim < 2: # want entire region
+    region = (0, pointCount)
+  else:
+    n = pointCount // 2
+    region = (n, n+1)
+    
+  firstPpm, lastPpm = LibSpectrum.getDimValueFromPoint(spectrum, spectrumDim, region)
+  
+  return 0.5*(firstPpm+lastPpm), abs(lastPpm-firstPpm)
+  
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def __init__(self, dockArea, apiSpectrumDisplayNd):
     if not apiSpectrumDisplayNd.strips:
       apiSpectrumDisplayNd.newStripNd()
+    
+    self.viewportDict = {} # maps QGLWidget to GuiStripNd
 
     GuiSpectrumDisplay.__init__(self, dockArea, apiSpectrumDisplayNd)
     self.fillToolBar()
@@ -20,23 +40,49 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def addSpectrum(self, spectrum):
 
+    apiSpectrumDisplay = self.apiSpectrumDisplay
+    
+    #axisCodes = spectrum.axisCodes
+    axisCodes = LibSpectrum.getAxisCodes(spectrum)
+    if axisCodes != self.apiSpectrumDisplay.axisCodes:
+      raise Exception('Cannot overlay that spectrum on this display')
+      
     apiDataSource = spectrum._wrappedData
-    apiSpectrumView = self.apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)
-    if not apiSpectrumView:
-      ##axisCodes=spectrum.axisCodes
-      axisCodes = ('H', 'N')  # TEMP
-      apiSpectrumView = self.apiSpectrumDisplay.newSpectrumView(dataSourceSerial=apiDataSource.serial,
-                          experimentName=apiDataSource.experiment.name, axisCodes=axisCodes)
+    apiSpectrumView = apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)
+    if apiSpectrumView:
+      raise Exception('Spectrum already in display')
+      
+    dimensionCount = spectrum.dimensionCount
+    dimensionOrdering = range(1, dimensionCount+1)
+    apiSpectrumView = apiSpectrumDisplay.newSpectrumView(dataSourceSerial=apiDataSource.serial,
+                          experimentName=apiDataSource.experiment.name, axisCodes=axisCodes) # dimensionOrdering currently broken #, dimensionOrdering=dimensionOrdering)
     guiSpectrumView = GuiSpectrumViewNd(self, apiSpectrumView)
 
+    # at this point likely there is only one guiStrip???
+    if not apiSpectrumDisplay.axes: # need to create these since not done automatically
+      # TBD: assume all strips the same and the strip direction is the Y direction
+      for m, axisCode in enumerate(apiSpectrumDisplay.axisCodes):
+        position, width = _findPpmRegion(spectrum, m, dimensionOrdering[m]-1) # -1 because dimensionOrdering starts at 1
+        for n, guiStrip in enumerate(self.guiStrips):
+          if m == 1: # Y direction
+            if n == 0:
+              apiSpectrumDisplay.newFrequencyAxis(code=axisCode, position=position, width=width, stripSerial=1)
+          else: # other directions
+            apiSpectrumDisplay.newFrequencyAxis(code=axisCode, position=position, width=width) # TBD: non-frequency axis
+        
+          viewBox = guiStrip.viewBox
+          region = (position-0.5*width, position+0.5*width)
+          if m == 0:
+            viewBox.setXRange(*region)
+          else: # m == 1
+            viewBox.setYRange(*region)
+        
     for guiStrip in self.guiStrips:
-      guiStrip.addSpectrum(spectrum, guiSpectrumView)
-
-
+      guiStrip.addSpectrum(guiSpectrumView)
+    
   def addStrip(self):
 
     apiStrip = self.apiSpectrumDisplay.newStripNd()
-    print('HERE221')
     n = len(self.apiSpectrumDisplay.strips) - 1
     guiStrip = GuiStripNd(self.stripFrame, apiStrip, grid=(1, n), stretch=(0, 1))
     guiStrip.addPlaneToolbar(self.stripFrame, n)
@@ -45,8 +91,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       prevGuiStrip = self.guiStrips[n-1]
       prevGuiStrip.axes['right']['item'].hide()
       guiStrip.setYLink(prevGuiStrip)
-
-    print('HERE222')
 
   def fillToolBar(self):
     GuiSpectrumDisplay.fillToolBar(self)

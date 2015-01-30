@@ -6,10 +6,11 @@ from functools import partial
 
 from PySide import QtGui, QtCore
 
+from ccpn import openProject, newProject
 from ccpn.lib.Project import loadSpectrum
 
 from ccpncore.gui.Action import Action
-from ccpncore.gui.Console import PythonConsole
+from ccpncore.gui.Console import Console
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
@@ -26,66 +27,87 @@ from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 class MainWindow(QtGui.QMainWindow, GuiWindow):
 
   def __init__(self, appBase, apiWindow):
+    
     QtGui.QMainWindow.__init__(self)
-    if not apiWindow.modules:
-      guiTask = apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='CcpnAssign') # constant should be stored somewhere
-      module = guiTask.newStripDisplay1d(name='Module1_1D', axisCodes=('H','intensity'), stripDirection='Y')
-      apiWindow.addModule(module)
-      codes = ('H','N')
-      module = guiTask.newStripDisplayNd(name='Module2_ND', axisCodes=codes, axisOrder=codes, stripDirection='Y')
-      apiWindow.addModule(module)
-      self.apiWindow=apiWindow
+    
+    #if not apiWindow.modules:
+      #apiGuiTask = apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
+      ##apiModule = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=('H','intensity'), stripDirection='Y')
+      ##apiWindow.addModule(apiModule)
+      ##codes = ('H','N')
+      ##apiModule = apiGuiTask.newStripDisplayNd(name='Module2_ND', axisCodes=codes, axisOrder=codes, stripDirection='Y')
+      ##apiWindow.addModule(apiModule)
+      #apiModule = apiGuiTask.newTaskModule(name=self.INITIAL_MODULE_NAME)
+      #apiWindow.addModule(apiModule)
+      
     GuiWindow.__init__(self, appBase, apiWindow)
+    
     self.setupWindow()
     self.setupMenus()
-    self.setProject()
+    self.initProject()
 
-  def setProject(self, isNew=False):
+  def initProject(self, project=None):
 
-    project = self.appBase.project
-    if project is not None:
-      path = project.path
-      self.leftWidget.fillSideBar(project)
-      self.namespace['project'] = project
-      msg  = (path)+(' created' if isNew else ' opened')
-      self.statusBar().showMessage(msg)
-      msg2 = "project = " + ('new' if isNew else 'open') + "Project("+path+")\n"
-      self.pythonConsole.write(msg2)
-      self.pythonConsole.ui.historyList.addItem(msg2)
+    if project:
+      self.appBase.initProject(project)
+    else:
+      project = self.appBase.project
+      
+    isNew = self.apiWindow.root.isModified  # a bit of a hack this, but should be correct
+    
+    path = project.path
+    self.leftWidget.fillSideBar(project)
+    self.namespace['project'] = project
+    msg  = path + (' created' if isNew else ' opened')
+    self.statusBar().showMessage(msg)
+    
+    msg2 = "project = " + ('new' if isNew else 'open') + "Project("+path+")\n"
+    self.pythonConsole.write(msg2)
+    self.pythonConsole.ui.historyList.addItem(msg2)
 
-      preferences = self.appBase.preferences
-      if len(preferences.recentFiles) < 10:
-        preferences.recentFiles.insert(0, path)
-      else:
-        preferences.recentFiles.pop()
-        preferences.recentFiles.append(path)
+    if not isNew:
+      recentFiles = self.appBase.preferences.recentFiles
+      if len(recentFiles) >= 10:
+        recentFiles.pop()
+      recentFiles.insert(0, path)
 
+  def openProject(self, path):
+    
+    project = openProject(path)
+    self.initProject(project)
+
+  def newProject(self, path='defaultProject'):
+    
+    project = newProject(name)
+    self.initProject(project)
+    
   def setupWindow(self):
 
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
-    # self.setupPreferences()
-    self.namespace = {'current': self.appBase.current, 'openProject':self.appBase.openProject,
-                      'newProject':self.appBase.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
+    
+    self.namespace = {'current': self.appBase.current, 'openProject':self.openProject,
+                      'newProject':self.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
                       'preferences':self.appBase.preferences}
-    self.pythonConsole = PythonConsole(parent=self, namespace=self.namespace)
+    self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
+    self.pythonConsole.heightMax = 200
+    
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
     self.leftWidget.setGeometry(0, 0, 10, 600)
     self.leftWidget.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
+    
     self.splitter3.addWidget(self.leftWidget)
     self.splitter1.addWidget(self.splitter3)
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
     self.splitter2.heightMax = 200
+    
     self.leftWidget.itemDoubleClicked.connect(self.raiseSpectrumProperties)
-    self.pythonConsole.heightMax = 200
     self.splitter2.addWidget(self.pythonConsole)
     self.pythonConsole.hide()
     self.splitter2.setGeometry(QtCore.QRect(1200, 1300, 100, 100))
-    # self.dockArea = DockArea()
-    # self.dockArea.setGeometry(0, 0, 1100, 1300)
     self.splitter1.addWidget(self.dockArea)
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
@@ -104,8 +126,8 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
     macroMenu = QtGui.QMenu("Macro", self)
     helpMenu = QtGui.QMenu("&Help", self)
 
-    fileMenuAction = fileMenu.addAction(QtGui.QAction("New", self, triggered=self.appBase.newProject))
-    fileMenu.addAction(Action(self, "Open...", callback=self.appBase.openProject, shortcut="po"))
+    fileMenuAction = fileMenu.addAction(QtGui.QAction("New", self, triggered=self.newProject))
+    fileMenu.addAction(Action(self, "Open...", callback=self.openProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
     fileMenu.addSeparator()
@@ -217,7 +239,7 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
 
   def fillRecentProjectsMenu(self):
     for recentFile in self.appBase.preferences.recentFiles:
-      self.action = Action(self, text=recentFile, callback=partial(self.appBase.openProject,projectDir=recentFile))
+      self.action = Action(self, text=recentFile, callback=partial(self.openProject,projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
 
   def saveBackup(self):

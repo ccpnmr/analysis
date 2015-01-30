@@ -28,6 +28,8 @@ from PySide import QtGui, QtCore, QtOpenGL
 
 from ccpnmrcore.modules.spectrumItems.GuiSpectrumView import GuiSpectrumView
 
+from ccpncore.util import Colour
+
 from ccpnc.contour import Contourer2d
 ###from ccpnc.peak import Peak
 
@@ -35,13 +37,28 @@ from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function 
 
 ###from ccpnmrcore.modules.spectrumPane.PeakListNdItem import PeakListNdItem
 
+# TBD: for now ignore fact that apiSpectrumView can override contour colour and/or contour levels
+
+def _getLevels(count, base, factor):
+  
+  base *= 100  # TEMP
+  
+  levels = []
+  if count > 0:
+    levels = [base]
+    for n in range(count-1):
+      levels.append(factor * levels[-1])
+      
+  return levels
+       
 class GuiSpectrumViewNd(GuiSpectrumView):
   
   ###PeakListItemClass = PeakListNdItem
   
   #sigClicked = QtCore.Signal(object, object)
 
-  def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None, region=None, posColor=None, negColor=None, **kw):
+  #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None, region=None, **kw):
+  def __init__(self, guiSpectrumDisplay, apiSpectrumView, **kw):
     """ guiSpectrumDisplay is the parent
         apiSpectrumView is the (API) SpectrumView object
         region is in units of parent, ordered by spectrum dimensions
@@ -51,22 +68,30 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
 
-    GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
-
-    self.posColor = posColor
-    self.negColor = negColor
+    #GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
+    GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView)
 
     # self.spectralData = self.getSlices()
     
-    apiDataSource = apiSpectrumView.dataSource
+    """ dimensionOrdering not working yet so for now hardwire
+    xDim, yDim = apiSpectrumView.dimensionOrdering[:2]
+    xDim -= 1  # dimensionOrdering starts at 1
+    yDim -= 1
+    """
+    xDim = 0
+    yDim = 1
+    # TBD: this is not correct
+    apiDataSource = self.apiDataSource
     dimensionCount = apiDataSource.numDim
     self.previousRegion = dimensionCount * [None]
 
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
+    """
     if dimMapping is not None:
       self.xDim = dimMapping[0]
       self.yDim = dimMapping[1]
-
+"""
+    """
     apiStrips = apiSpectrumView.strips
     if apiStrips:
       # just looks at first strip, is that correct idea??
@@ -75,7 +100,21 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       viewBox = guiStrip.viewBox
     else:
       guiStrip = viewBox = None
-      
+"""
+    """
+    for guiStrip in guiSpectrumDisplay.guiStrips:
+      viewBox = guiStrip.viewBox
+      apiStrip = guiStrip.apiStrip
+      for dim, axis in enumerate(apiStrip.getOrderedAxes()[:2]):
+        position = axis.position
+        width = axis.width
+        region = (position-0.5*width, position+0.5*width)
+        if dim == 0:
+          viewBox.setXRange(*region)
+        else: # dim == 1
+          viewBox.setYRange(*region)
+"""
+    """
     if not region:
       # chicken and egg problem, can't know xDim until after dimMapping set up
       # and that is set up in SpectrumItem constructor, but that needs to know
@@ -89,17 +128,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         # TBD: below assumes axes inverted
         viewBox.setXRange(region[xDim][1], region[xDim][0])
         viewBox.setYRange(region[yDim][1], region[yDim][0])
-
     if guiStrip: # TBD: HACK, TEMP, should be using guiStrip.positions
       guiStrip.region = region
+      """
       
-    if self.posColor is None:
-      self.posColor = 'ff0000' # red
-
-    if self.negColor is None:
-      self.negColor = '0000ff' # blue
-
-
+    """
     self.posContoursVisible = True # this block of code TEMP
     self.negContoursVisible = True
     self.baseLevel = 1000000.00
@@ -109,23 +142,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.levels
     except AttributeError:
       self.levels = self.getLevels()
-
+"""
     # self.levels = tuple(self.levels)
     # self.levels = (1000000.0, 200000.0, 400000.0, 500000.0, 700000.0, 10000000.0, 5000000.0, 2000000.0,
     # -1000000.0, -200000.0, -400000.0, -500000.0, -700000.0, -10000000.0, -5000000.0, -2000000.0)
-    self.posColors = (self.getColorTuple(self.posColor),)
-    self.negColors = (self.getColorTuple(self.negColor),)
 
-    self.contoursValid = False
-    self.contourDisplayIndexDict = {} # level -> display list index
-        
-  def getColorTuple(self, colorString):
-    
-    colorTuple = QtGui.QColor(colorString).getRgb()
-    colorTuple = tuple([c/255 for c in colorTuple])
-
-    return colorTuple
-    
+    ###self.contoursValid = False
+    self.contourDisplayIndexDict = {} # level -> display list index  # TBD: this is wrong when working with multiple views
+            
+  """
   def getLevels(self):
     
     levels = [self.baseLevel]
@@ -133,6 +158,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       levels.append(self.multiplier*levels[-1])
       
     return tuple(numpy.array(levels, dtype=numpy.float32))
+"""
 
   def zPlaneSize(self):
     
@@ -156,7 +182,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   def paint(self, painter, option, widget=None):
     
-    self.drawContours(painter)
+    if not widget:
+      return
+      
+    guiStrip = self.guiSpectrumDisplay.viewportDict[widget]
+    self.drawContours(painter, guiStrip)
   
   def boundingRect(self):  # seems necessary to have
 
@@ -164,20 +194,25 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   
   ##### functions not to be used externally #####
 
-  def drawContours(self, painter):
+  def drawContours(self, painter, guiStrip):
     
-    if not self.posContoursVisible and not self.negContoursVisible:
+    apiDataSource = self.apiDataSource
+    posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
+    negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
+    ###if not self.posContoursVisible and not self.negContoursVisible:
+    if not posLevels and not negLevels:
       return
       
-    self.constructContours()
+    self.constructContours(guiStrip, posLevels, negLevels)
     
-    posColors = self.posColors
-    negColors = self.negColors
+    posColor = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour
+    negColor = Colour.scaledRgba(apiDataSource.negativeContourColour)
 
+    """
     levels = self.levels
     posLevels = sorted([level for level in levels if level >= 0])
     negLevels = sorted([level for level in levels if level < 0], reverse=True)
- 
+""" 
     painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
 
     try:
@@ -204,12 +239,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       GL.glTranslate(xTranslate, yTranslate, 0.0)
       GL.glScale(xScale, yScale, 1.0)
       
-      colorsLevels = []
-      for (colors, levels) in ((posColors, posLevels), (negColors, negLevels)):
-        count = len(colors)
-
+      for (color, levels) in ((posColor, posLevels), (negColor, negLevels)):
         for n, level in enumerate(levels):
-          color = colors[n % count]
           GL.glColor4f(*color)
           # TBD: scaling, translating, etc.
           GL.glCallList(self.contourDisplayIndexDict[level])
@@ -219,11 +250,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
       painter.endNativePainting()
       
-  def constructContours(self):
+  def constructContours(self, guiStrip, posLevels, negLevels):
     """ Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level or color needs to call this function.
     """
 
+    """
     oldLevels = set(self.contourDisplayIndexDict)
     levels = set(self.levels)
     zDims = set(range(self.spectrum.dimensionCount)) - {self.xDim, self.yDim}
@@ -241,23 +273,31 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       oldLevels = set()
     for level in removedLevels:
       self.releaseDisplayList(level)
+    """
+    self.releaseDisplayLists()  # TBD: can one do better??
       
-    self.previousRegion = self.guiSpectrumDisplay.region[:]  # TBD: not quite right, should be looking at the strip(s)
+    ###self.previousRegion = self.guiSpectrumDisplay.region[:]  # TBD: not quite right, should be looking at the strip(s)
 
     # create wanted new levels
+    """
     levels -= oldLevels
     if not levels:
       return
-      
+    """
+    
     # do the contouring and store results in display list
-    if self.posContoursVisible:
-      posLevels = numpy.array(sorted([level for level in levels if level >= 0]), numpy.float32)
+    ###if self.posContoursVisible:
+    if posLevels:
+      ###posLevels = numpy.array(sorted([level for level in levels if level >= 0]), numpy.float32)
+      posLevels = numpy.array(posLevels, numpy.float32)
       self.createDisplayLists(posLevels)
     else:
       posLevels = []
       
-    if self.negContoursVisible:
-      negLevels = numpy.array(sorted([level for level in levels if level < 0], reverse=True), numpy.float32)
+    #if self.negContoursVisible:
+    if negLevels:
+      ###negLevels = numpy.array(sorted([level for level in levels if level < 0], reverse=True), numpy.float32)
+      negLevels = numpy.array(negLevels, numpy.float32)
       self.createDisplayLists(negLevels)
     else:
       negLevels = []
@@ -280,7 +320,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
   def releaseDisplayLists(self):
 
-    for level in self.contourDisplayIndexDict:
+    levels = list(self.contourDisplayIndexDict.keys()) # need to do it this way else deleting entries while iterating over dict
+    for level in levels:
       self.releaseDisplayList(level)
 
   def releaseDisplayList(self, level):
@@ -300,8 +341,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     spectrum = self.spectrum
     dimensionCount = spectrum.dimensionCount
-    xDim = self.xDim
-    yDim = self.yDim
+    apiSpectrumView = self.apiSpectrumView
+    """ dimensionOrdering not working yet so for now hardwire
+    xDim, yDim = apiSpectrumView.dimensionOrdering[:2]
+    xDim -= 1  # dimensionOrdering starts at 1
+    yDim -= 1
+    """
+    xDim = 0
+    yDim = 1
+    ###xDim = self.xDim
+    ###yDim = self.yDim
     if dimensionCount == 2: # TBD
       # below does not work yet
       #planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
@@ -309,8 +358,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       position = [0, 0]
       yield position, planeData
     elif dimensionCount == 3: # TBD
-      zDims = set(range(dimensionCount)) - {xDim, yDim}
-      zDim = zDims.pop()
+      ###zDims = set(range(dimensionCount)) - {xDim, yDim}
+      ###zDim = zDims.pop()
+      zDim = apiSpectrumView.dimensionOrdering[2]
       zregionValue = self.guiSpectrumDisplay.region[zDim]
       zregionPoint = LibSpectrum.getDimPointFromValue(spectrum, zDim, zregionValue)
       zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))

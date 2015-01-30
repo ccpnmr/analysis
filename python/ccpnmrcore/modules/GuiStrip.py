@@ -7,13 +7,15 @@ from functools import partial
 
 from PySide import QtGui, QtCore
 
+from ccpn import Spectrum
+
 from ccpncore.gui import ViewBox
 
-from ccpnmrcore.Base import Base as GuiBase
+from ccpnmrcore.DropBase import DropBase
 
 from ccpnmrcore.gui.Axis import Axis
 
-class GuiStrip(pg.PlotWidget, GuiBase):
+class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the drop events are not processed
 
   sigClicked = QtCore.Signal(object, object)
 
@@ -25,10 +27,9 @@ class GuiStrip(pg.PlotWidget, GuiBase):
     apiStrip.guiStrip = self  # runtime only
 
 
-    pg.PlotWidget.__init__(self, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True,
-                           )
+    pg.PlotWidget.__init__(self, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True)
 
-    GuiBase.__init__(self, guiFrame.appBase)
+    DropBase.__init__(self, guiFrame.appBase, self.dropCallback, **kw)
     # if self.appBase.preferences.general.colourScheme == 'light':
     #   background = 'w'
     #   foreground = 'k'
@@ -204,38 +205,8 @@ class GuiStrip(pg.PlotWidget, GuiBase):
   def showSpectrum(self, guiSpectrumView):
     raise Exception('should be implemented in subclass')
 
-  def dragEnterEvent(self, event):
-    event.accept()
-
-  def dropEvent(self,event):
-    event.accept()
-    if isinstance(self.parent, QtGui.QGraphicsScene):
-      event.ignore()
-      return
-
-    if event.mimeData().urls():
-      filePaths = [url.path() for url in event.mimeData().urls()]
-      if len(filePaths) == 1:
-        for dirpath, dirnames, filenames in os.walk(filePaths[0]):
-          if dirpath.endswith('memops') and 'Implementation' in dirnames:
-            self.appBase.openProject(filePaths[0])
-            self.addSpectra(self.project.spectra)
-
-        else:
-          print(filePaths[0])
-          self.appBase.mainWindow.loadSpectra(filePaths[0])
-
-
-      elif len(filePaths) > 1:
-        [self.appBase.mainWindow.loadSpectra(filePath) for filePath in filePaths]
-
-
-    else:
-      data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
-      print('RECEIVED mimeData: "%s"' % data)
-      pidData = str(data.data(),encoding='utf-8')
-      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12', '\x0c', '\x05', '\x10', '\x14']
-      pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
-      actualPid = ''.join(map(str, pidData2))
-      spectrum = self.getObject(actualPid)
-      self.guiSpectrumDisplay.addSpectrum(spectrum)
+  def dropCallback(self, dropObject):
+    
+    if isinstance(dropObject, Spectrum):
+      self.guiSpectrumDisplay.addSpectrum(dropObject)
+    

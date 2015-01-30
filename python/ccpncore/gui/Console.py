@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 import pyqtgraph.console as console
 from PySide import QtGui
 
-class PythonConsole(console.ConsoleWidget):
+class Console(console.ConsoleWidget):
   def __init__(self, parent=None, namespace=None, historyFile=None):
     console.ConsoleWidget.__init__(self, parent, namespace)
     # self.console.addAction()

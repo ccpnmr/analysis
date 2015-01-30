@@ -21,19 +21,18 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.gui.Base import Base as GuiBase
+from ccpncore.gui.Base import Base as CoreBase
 
-class Base(GuiBase):
+class Base(CoreBase):
   
   def __init__(self, appBase, *args, **kw):
     
     self.appBase = appBase
     
-    GuiBase.__init__(self, *args, **kw)
+    CoreBase.__init__(self, *args, **kw)
     
   def getById(self, pid):
 
-    print(pid)
     return self.appBase.project.getById(pid)
 
   def getObject(self, pidOrObject):

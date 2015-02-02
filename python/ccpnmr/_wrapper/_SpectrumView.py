@@ -26,6 +26,7 @@ from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
+from ccpnmr._wrapper._Strip import Strip
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as Ccpn_SpectrumView
 from ccpncore.lib import pid as Pid
 
@@ -97,10 +98,16 @@ class SpectrumView(AbstractWrapperObject):
   @property
   def positiveContourColour(self) -> str:
     """Colour identifier for positive contours"""
-    return self._wrappedData.positiveContourColour
+    wrappedData = self._wrappedData
+    result = wrappedData.positiveContourColour
+    if result is None:
+      obj = wrappedData.dataSource
+      result = obj and obj.positiveContourColour
+    return result
 
   @positiveContourColour.setter
   def positiveContourColour(self, value:str):
+    wrappedData = self._wrappedData
     self._wrappedData.positiveContourColour = value
 
   @property
@@ -192,6 +199,16 @@ class SpectrumView(AbstractWrapperObject):
   @sliceColour.setter
   def sliceColour(self, value:str):
     self._wrappedData.sliceColour = value
+
+  @property
+  def strips(self) -> Strip:
+    """Strips attached to SpectrumView -n either one, or all in Display"""
+    stripSerial = self.stripSerial
+    if stripSerial:
+      ll = tuple(self._project._data2Obj.get(
+        self._parent._wrappedData.findFirstStrip(serial=stripSerial)))
+    else:
+      return self._parent.orderedStrips
 
   # Implementation functions
   @classmethod

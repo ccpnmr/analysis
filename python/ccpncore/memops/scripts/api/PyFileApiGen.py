@@ -57,7 +57,7 @@ class PyFileApiGen(FileApiGen, PyApiGen):
     supertypes = inClass.getAllSupertypes()
     
     if self.dataRoot in supertypes:
-      self.writeComment('Hack for handling the root implementation atribute')
+      self.writeComment('Hack for handling the root implementation attribute')
       self.setDictEntry(self.getDataDict(self.varNames['self']), 
                         self.toLiteral('memopsRoot'), 'self')
 
@@ -106,13 +106,15 @@ for %s, %s in %s.items():
                          self.toLiteral(inClass.qualifiedName()), 'value')
       self.endIf()
 
-
     self.setImplAttr(self.varNames['self'], 'inConstructor', False)
     self.indent -= self.INDENT
     
     self.writeOne("except:")
     self.indent += self.INDENT
-    self.writeOne('self.root._logger.error("in %s.__init__")' % inClass.qualifiedName())
+    if self.dataRoot in supertypes:
+      self.writeOne('print("ERROR in %s.__init__")' % inClass.qualifiedName())
+    else:
+      self.writeOne('self.root._logger.error("in %s.__init__")' % inClass.qualifiedName())
     self.setImplAttr(self.varNames['self'], 'inConstructor', False)
     self.writeOne('raise')
     self.indent -= self.INDENT

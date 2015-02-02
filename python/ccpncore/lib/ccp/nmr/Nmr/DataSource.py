@@ -58,6 +58,7 @@ software development. Bioinformatics 21, 1678-1684.
 
 import numpy
 import os
+import re
 
 # Additional functions for ccp.nmr.Nmr.DataSource
 #
@@ -581,6 +582,20 @@ def getDimValueFromPoint(spectrum, dimension, point):
       
   return value
 
+def getAxisCodes(spectrum):
+  """ Return axis codes for spectrum, using the isotopeCode if the axisCode not set
+  """
 
-
+  expDimRefs = [expDim.findFirstExpDimRef(serial=1) for expDim in spectrum.experiment.sortedExpDims()]
+  axisCodes = []
+  for expDimRef in expDimRefs:
+    axisCode = None
+    if expDimRef:
+      axisCode = expDimRef.axisCode
+      if not axisCode:
+        isotopeCode = expDimRef.isotopeCodes[0]  # assumes there is at least one isotopeCode
+        axisCode = re.match('\d+(\D+)', isotopeCode).group(1)
+    axisCodes.append(axisCode)
+    
+  return tuple(axisCodes)
 

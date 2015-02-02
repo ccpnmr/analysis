@@ -37,6 +37,9 @@ def getSliceData(spectrum:object, position:collections.abc.Sequence=None, sliceD
   # return spectrum.ccpnSpectrum.getSliceData(position=position, xDim=xDim, yDim=yDim)
   return DataSource.getSliceData(spectrum, position=position, sliceDim=sliceDim)
 
+def getRegionData(spectrum:object, startPoint:collections.abc.Sequence, endPoint:collections.abc.Sequence):
+  
+  return DataSource.getRegionData(spectrum, startPoint, endPoint)
 
 def automaticIntegration(spectrum, spectralData):
 
@@ -60,4 +63,7 @@ def getDimValueFromPoint(spectrum, dimension, point):
   """
   return DataSource.getDimValueFromPoint(spectrum.ccpnSpectrum, dimension, point)
 
-
+def getAxisCodes(spectrum):
+  """ Return axis codes for spectrum, using the isotopeCode if the axisCode not set
+  """
+  return DataSource.getAxisCodes(spectrum.ccpnSpectrum)

@@ -122,6 +122,7 @@ class Strip(AbstractWrapperObject):
     """Overrides normal delete"""
     ccpnStrip = self._wrappedData
     if len(ccpnStrip.spectrumDisplay.strips) > 1:
+
       ccpnStrip.delete()
     else:
       raise  ValueError("The last strip in a display cannot be deleted")

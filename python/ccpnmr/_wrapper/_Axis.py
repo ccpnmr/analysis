@@ -21,12 +21,9 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from collections.abc import Sequence
-
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
-from ccpnmr._wrapper._Strip import Strip
 from ccpncore.api.ccpnmr.gui.Task import Axis as Ccpn_Axis
 from ccpncore.lib import pid as Pid
 

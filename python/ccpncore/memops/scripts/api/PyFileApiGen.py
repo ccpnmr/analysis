@@ -811,8 +811,12 @@ else:
      docString=""" equality function. With functools.totalordering allows object comparison."""
     )
     self.setDataDict()
+    self.startTry()
     self.returnStatement(self.equals(self.getDataObjIdTuple(self.varNames['self']),
                                          self.getDataObjIdTuple(self.varNames['other'])))
+    self.catchException()
+    self.returnStatement(self.comparison(self.varNames['self'], 'is', self.varNames['other']))
+    self.endTry()
     self.endFunc()
       
     # __hash__ function

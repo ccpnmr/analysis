@@ -21,38 +21,30 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import os
+
 import sys
 
-from ccpn import openProject, newProject
-
-from ccpncore.gui.Application import Application
-
-# from ccpnmrcore.gui.MainWindow import MainWindow
-
-from ccpnmrcore.app.AppBase import AppBase
+from ccpnmrcore.app.AppBase import AppBase, startProgram
 
 applicationName = 'Assign'
 applicationVersion = '1.0'
-
-def usage():
-
-  print('Correct syntax: %s [projectPath]' % sys.argv[0])
 
 class Assign(AppBase):
   pass
 
 if __name__ == '__main__':
+  import sys
+  
+  def usage():
+    print('Correct syntax: %s [projectPath]' % sys.argv[0])
+
   if len(sys.argv) == 2:
     projectPath = sys.argv[1]
-    project = openProject(projectPath)
   elif len(sys.argv) != 1:
     usage()
     sys.exit(1)
   else:
-    project = newProject('defaultProject')
+    projectPath = None
 
-  app = Application(applicationName, applicationVersion)
-  assign = Assign(project=project)
-  app.start()
+  startProgram(Assign, applicationName, applicationVersion, projectPath)
 

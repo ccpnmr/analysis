@@ -24,10 +24,8 @@ class DropBase(GuiBase):
 
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
-      print('RECEIVED mimeData: "%s"' % data)
       pidData = str(data.data(),encoding='utf-8')
-      WHITESPACE_AND_NULL = ['\x01', '\x00', '\n','\x1e','\x02','\x03','\x04','\x0e','\x12', '\x0c', '\x05', '\x10', '\x14', '\x1c', '\x08']
-      pidData2 = [s for s in pidData if s not in WHITESPACE_AND_NULL]
-      actualPid = ''.join(map(str, pidData2))
+      pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
+      actualPid = ''.join(pidData)
       wrapperObject = self.getObject(actualPid)
       self.dropCallback(wrapperObject)

@@ -68,13 +68,13 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
             if n == 0:
               apiSpectrumDisplay.newFrequencyAxis(code=axisCode, position=position, width=width, stripSerial=1)
           else: # other directions
-            apiSpectrumDisplay.newFrequencyAxis(code=axisCode, position=position, width=width) # TBD: non-frequency axis
+            apiSpectrumDisplay.newFrequencyAxis(code=axisCode, position=position, width=width, stripSerial=1) # TBD: non-frequency axis; TBD: should have stripSerial=0 but that not working
         
           viewBox = guiStrip.viewBox
           region = (position-0.5*width, position+0.5*width)
           if m == 0:
             viewBox.setXRange(*region)
-          else: # m == 1
+          elif m == 1:
             viewBox.setYRange(*region)
         
     for guiStrip in self.guiStrips:

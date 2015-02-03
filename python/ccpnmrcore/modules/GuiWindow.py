@@ -62,8 +62,6 @@ class GuiWindow(GuiBase):
       guiStripDisplay = GuiStripDisplay1d(self.dockArea, apiStripDisplay)
     else:
       apiStripDisplay = apiGuiTask.newStripDisplayNd(name='Module2_ND', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
-      ###for axisCode in axisCodes:
-      ###  apiStripDisplay.newAxis(code=axisCode)
       guiStripDisplay = GuiStripDisplayNd(self.dockArea, apiStripDisplay)
       
     guiStripDisplay.addSpectrum(spectrum)

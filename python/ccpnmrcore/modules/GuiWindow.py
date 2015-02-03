@@ -58,7 +58,7 @@ class GuiWindow(GuiBase):
     axisCodes = Spectrum.getAxisCodes(spectrum)
     if spectrum.dimensionCount == 1:
       axisCodes = axisCodes + ('intensity',)
-      apiStripDisplay = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=axisCodes, stripDirection='Y')
+      apiStripDisplay = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
       guiStripDisplay = GuiStripDisplay1d(self.dockArea, apiStripDisplay)
     else:
       apiStripDisplay = apiGuiTask.newStripDisplayNd(name='Module2_ND', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')

@@ -12,6 +12,7 @@ from ccpnmrcore.modules.spectrumItems.GuiSpectrumView1d import GuiSpectrumView1d
 from ccpncore.gui.Label import Label
 from ccpncore.gui.VerticalLabel import VerticalLabel
 
+from ccpn.lib import Spectrum as LibSpectrum
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
 
@@ -28,6 +29,12 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     apiDataSource = spectrum._wrappedData
     apiSpectrumView = self.apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)
 
+    #axisCodes = spectrum.axisCodes
+    axisCodes = LibSpectrum.getAxisCodes(spectrum)
+    axisCodes = axisCodes + ('intensity',)
+    if axisCodes != self.apiSpectrumDisplay.axisCodes:
+      raise Exception('Cannot overlay that spectrum on this display')
+
     # guiSpectrumView = GuiSpectrumView1d(self, apiStripDisplay1d)
     # # guiSpectrumView.name = apiSpectrumDislay1d.name
     # for guiStrip in self.guiStrips:
@@ -35,9 +42,9 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
 
     if not apiSpectrumView:
       ##axisCodes=spectrum.axisCodes
-      axisCodes = ('H', 'intensity')  # TEMP
-      apiSpectrumView = self.apiSpectrumDisplay.newSpectrumView(dataSourceSerial=apiDataSource.serial,
-                          experimentName=apiDataSource.experiment.name, axisCodes=axisCodes)
+      dimensionOrdering = (1, 0) # 0 because that is the intensity axis so gets mapped to nothing in the spectrum
+      apiSpectrumView = self.apiSpectrumDisplay.newSpectrumView(spectrumName=apiDataSource.name,
+                            dimensionOrdering=dimensionOrdering)
     guiSpectrumView = GuiSpectrumView1d(self, apiSpectrumView)
 
     for guiStrip in self.guiStrips:

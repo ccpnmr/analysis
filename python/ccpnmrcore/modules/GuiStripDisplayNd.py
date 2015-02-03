@@ -54,8 +54,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       
     dimensionCount = spectrum.dimensionCount
     dimensionOrdering = range(1, dimensionCount+1)
-    apiSpectrumView = apiSpectrumDisplay.newSpectrumView(dataSourceSerial=apiDataSource.serial,
-                          experimentName=apiDataSource.experiment.name, axisCodes=axisCodes) # dimensionOrdering currently broken #, dimensionOrdering=dimensionOrdering)
+    apiSpectrumView = apiSpectrumDisplay.newSpectrumView(spectrumName=apiDataSource.name,
+                          dimensionOrdering=dimensionOrdering)
     guiSpectrumView = GuiSpectrumViewNd(self, apiSpectrumView)
 
     # at this point likely there is only one guiStrip???

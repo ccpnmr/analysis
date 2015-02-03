@@ -595,6 +595,17 @@ class Spectrum(AbstractWrapperObject):
     self._setDataDimRefAttribute('refValue', value)
 
   @property
+  def assignmentTolerances(self) -> tuple:
+    """Type: (*str,*)\*dimensionCount, *settable*
+
+    Assignment tolerance in axis unit (ppm)."""
+    return tuple(x and x.assignmentTolerance for x in self._mainDataDimRefs())
+
+  @assignmentTolerances.setter
+  def assignmentTolerances(self, value):
+    self._setDataDimRefAttribute('assignmentTolerance', value)
+
+  @property
   def spectralWidths(self) -> tuple:
     """Type: (*float,*)\*dimensionCount, *settable*
 

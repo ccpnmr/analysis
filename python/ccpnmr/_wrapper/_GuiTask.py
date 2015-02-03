@@ -93,36 +93,36 @@ class GuiTask(AbstractWrapperObject):
     return tuple(x for x in ccpnRoot.sotedGuiTasks()
                  if x.nmrProject in (nmrProject, None))
 
-# CCPN functions
-def passivate(self):
-  """passivate active task"""
-  if self.status == 'active':
-    self._wrappedData.passivate()
-  else:
-    raise ValueError("Cannot passivate %s task: %s" % (self.status, self))
+  # CCPN functions
+  def passivate(self):
+    """passivate active task"""
+    if self.status == 'active':
+      self._wrappedData.passivate()
+    else:
+      raise ValueError("Cannot passivate %s task: %s" % (self.status, self))
 
-def activate(self, guiWindow:GuiWindow=None):
-  """activate passive task"""
-  if self.status == 'passive':
+  def activate(self, guiWindow:GuiWindow=None):
+    """activate passive task"""
+    if self.status == 'passive':
+      window=guiWindow and guiWindow._wrappedData
+      self._wrappedData.activate(window=window)
+    else:
+      raise ValueError("Cannot activate %s task: %s" % (self.status, self))
+
+  def clone(self, name:str, nameSpace:str=None)->GuiTask:
+    """copy task exactly, first passivating if active"""
+    return self._project._data2Obj.get(self._wrappedData.clone())
+
+  def loadAsTemplate(self, name:str, nameSpace:str=None, guiWindow:GuiWindow=None)->GuiTask:
+    """copy and activate template task, adapting and pruning contents to fit"""
     window=guiWindow and guiWindow._wrappedData
-    self._wrappedData.activate(window=window)
-  else:
-    raise ValueError("Cannot activate %s task: %s" % (self.status, self))
+    newObj = self._wrappedData.adaptedCopy(nmrProject=self._project._wrappedData,
+                                           window=window, name=name, nameSpace=nameSpace)
+    return self._project._data2Obj.get(newObj)
 
-def clone(self, name:str, nameSpace:str=None)->GuiTask:
-  """copy task exactly, first passivating if active"""
-  return self._project._data2Obj.get(self._wrappedData.clone())
-
-def loadAsTemplate(self, name:str, nameSpace:str=None, guiWindow:GuiWindow=None)->GuiTask:
-  """copy and activate template task, adapting and pruning contents to fit"""
-  window=guiWindow and guiWindow._wrappedData
-  newObj = self._wrappedData.adaptedCopy(nmrProject=self._project._wrappedData,
-                                         window=window, name=name, nameSpace=nameSpace)
-  return self._project._data2Obj.get(newObj)
-
-def pruneSpectrumViews(self, name:str, nameSpace:str=None)->GuiTask:
-  """Remove spectrum views that do not match existing spectra, e.g. after loading a template"""
-  self._wrappedData.pruneSpectrumViews()
+  def pruneSpectrumViews(self, name:str, nameSpace:str=None)->GuiTask:
+    """Remove spectrum views that do not match existing spectra, e.g. after loading a template"""
+    self._wrappedData.pruneSpectrumViews()
 
 
 def newGuiTask(parent:Project, name:str, nameSpace:str=None, comment:str=None) -> GuiTask:

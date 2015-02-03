@@ -26,7 +26,7 @@ __version__ = "$Revision$"
 
 def resetAllAxisCodes(nmrProject):
   """Reset all axisCodes (ExpDimRef.name) in project to be unique, match the isotope,
-  and match the standard Prototype where a prototrype is known"""
+  and match the standard Prototype where a prototype is known"""
 
   stdCodeMap = refExpDimRefCodeMap(nmrProject.root)
 
@@ -111,7 +111,7 @@ def _measurementCodeMap(nmrExpPrototype, forReversed=False):
 
 
 def _connectedShiftMeasurements(expMeasurement):
-  """find expMeasurements that are of type Shift, natch a HX bond, and onebonded to the input measurement"""
+  """find expMeasurements that are of type Shift, match a HX bond, and onebonded to the input measurement"""
   result = []
 
   nmrExpPrototype = expMeasurement.nmrExpPrototype
@@ -260,6 +260,11 @@ def getAtomSiteAxisCode(atomSite):
           while tag in ll:
             ll.remove(tag)
 
+    # Now remove the '-x' tags - they were there to catch the above problem
+    for tag in ('-n', '-c'):
+      while tag in ll:
+        ll.remove(tag)
+
     result += ''.join(sorted(set(ll)))
 
   elif nucleus in 'CN':
@@ -286,6 +291,11 @@ def getAtomSiteAxisCode(atomSite):
         for tag in tags:
           while tag in ll:
             ll.remove(tag)
+
+    # Now remove the '-x' tags - they were there to catch the above problem
+    for tag in ('-h', '-f'):
+      while tag in ll:
+        ll.remove(tag)
 
     result += ''.join(sorted(set(ll)))
   #

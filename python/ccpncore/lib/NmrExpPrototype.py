@@ -317,8 +317,8 @@ def testExpPrototypes():
 
       # check axis codes
       codes = []
-      for red in refExperiment.refExpDims:
-        for redr in red.refExpDimRefs:
+      for red in refExperiment.sortedRefExpDims():
+        for redr in red.sortedRefExpDimRefs():
           code = codeMap[redr]
           codes.append(code)
           axisCodeSet.add(code)

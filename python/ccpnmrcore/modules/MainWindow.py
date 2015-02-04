@@ -75,11 +75,15 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
     
     project = openProject(path)
     self.initProject(project)
+    
+    return project
 
   def newProject(self, path='defaultProject'):
     
     project = newProject(name)
     self.initProject(project)
+    
+    return project
     
   def setupWindow(self):
 

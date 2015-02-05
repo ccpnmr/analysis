@@ -57,7 +57,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
     self.apiDataSource = apiSpectrumView.dataSource
     self.spectrum = self.getWrapperObject(self.apiDataSource)
     
-    self.setDimMapping(dimMapping)
+    ###self.setDimMapping(dimMapping)
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
 
     
@@ -71,6 +71,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
 
     return QtCore.QRectF(-1000, -1000, 1000, 1000)  # TBD: remove hardwiring
     
+  """
   def setDimMapping(self, dimMapping=None):
     
     dimensionCount = self.spectrum.dimensionCount
@@ -98,4 +99,4 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
 
     self.xDim = xDim
     self.yDim = yDim
-
+  """

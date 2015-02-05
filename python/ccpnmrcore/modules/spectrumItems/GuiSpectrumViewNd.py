@@ -61,6 +61,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def __init__(self, guiSpectrumDisplay, apiSpectrumView, **kw):
     """ guiSpectrumDisplay is the parent
         apiSpectrumView is the (API) SpectrumView object
+    """
+    """ old comment
         region is in units of parent, ordered by spectrum dimensions
         dimMapping is from spectrum numerical dimensions to guiStrip numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
@@ -192,8 +194,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
     contourDict = self.constructContours(guiStrip, posLevels, negLevels)
     
-    posColor = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour
-    negColor = Colour.scaledRgba(apiDataSource.negativeContourColour)
+    posColour = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour
+    negColour = Colour.scaledRgba(apiDataSource.negativeContourColour)
 
     painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
 
@@ -201,8 +203,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
       spectrum = self.spectrum
       guiSpectrumDisplay = self.guiSpectrumDisplay
-      xTranslate, xScale = self.getTranslateScale(self.xDim)
-      yTranslate, yScale = self.getTranslateScale(self.yDim)
+      xyDataDims = self.apiSpectrumView.orderedDataDims[:2]
+      xTranslate, xScale = self.getTranslateScale(guiStrip, xyDataDims[0].dim-1) # -1 because API dims start at 1
+      yTranslate, yScale = self.getTranslateScale(guiStrip, xyDataDims[1].dim-1)
+      
       GL.glLoadIdentity()
       GL.glPushMatrix()
       ### do not need the below and if you have them then the axes get zapped as well unless it has positive Z values
@@ -221,9 +225,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       GL.glTranslate(xTranslate, yTranslate, 0.0)
       GL.glScale(xScale, yScale, 1.0)
       
-      for (color, levels) in ((posColor, posLevels), (negColor, negLevels)):
+      for (colour, levels) in ((posColour, posLevels), (negColour, negLevels)):
         for n, level in enumerate(levels):
-          GL.glColor4f(*color)
+          GL.glColor4f(*colour)
           # TBD: scaling, translating, etc.
           GL.glCallList(contourDict[level])
       GL.glPopMatrix()
@@ -365,23 +369,17 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     return ppmRegion
   """
   
-  def getTranslateScale(self, dim):
-    
-    apiStrips = self.apiSpectrumView.strips
-    apiStrip = apiStrips[0]
-    guiStrip = apiStrip.guiStrip
-    
+  def getTranslateScale(self, guiStrip, dim):
+        
     plotItem = guiStrip.plotItem
     viewBox = guiStrip.viewBox
-    isX = (dim == self.xDim)  # assumes that xDim != yDim
     viewRegion = guiStrip.viewRange()
-    if isX:
-      region1, region0 = viewRegion[0]  # TBD: relies on axes being backwards
+    region1, region0 = viewRegion[dim]  # TBD: relies on axes being backwards
+    if dim == 0:
       pixelCount = guiStrip.width()
       pixelViewBox0 = plotItem.getAxis('left').width()
       pixelViewBox1 = pixelViewBox0 + viewBox.width()
     else:
-      region1, region0 = viewRegion[1]  # TBD: relies on axes being backwards
       pixelCount = guiStrip.height()
       pixelViewBox0 = plotItem.getAxis('bottom').height()
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
@@ -393,6 +391,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     return translate, scale
 
+  """
   def raiseBaseLevel(self):
     self.baseLevel*=1.4
     self.levels = self.getLevels()
@@ -400,6 +399,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def lowerBaseLevel(self):
     self.baseLevel/=1.4
     self.levels = self.getLevels()
-        
+  """     
     
 

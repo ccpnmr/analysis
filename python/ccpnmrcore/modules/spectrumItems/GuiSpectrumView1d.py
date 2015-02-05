@@ -38,14 +38,18 @@ class GuiSpectrumView1d(GuiSpectrumView):
   # sigClicked = QtCore.Signal()
 
 
-  def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
+  #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
+  def __init__(self, guiSpectrumDisplay, apiSpectrumView):
     """ spectrumPane is the parent
         spectrum is the Spectrum name or object
+        """
+    """ old comment
         region is in units of parent, ordered by spectrum dimensions
         dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
-    GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
+    #GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
+    GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView)
     
     # if spectralData is None:
     #   self.spectralData = self.getSliceData()

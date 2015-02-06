@@ -41,7 +41,8 @@ from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
 # abstract class: subclass needs to implement drawSpectrum()
 class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
 
-  def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
+  #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
+  def __init__(self, guiSpectrumDisplay, apiSpectrumView):
     """ spectrumPane is the parent
         spectrum is the Spectrum object
         dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions

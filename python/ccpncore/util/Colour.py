@@ -56,6 +56,7 @@ spectrumColours = OrderedDict([('#ff0000','red'),
                                 ('#00ff80','spring green'),
                                 ('#ff0080','deep pink')])
 
+spectrumHexColours = tuple(spectrumColours.keys())
 
 # Note that Colour strings are not re-used
 
@@ -105,8 +106,14 @@ class Colour(str):
     self.name = name
     
   def rgba(self):
+    """Returns 4-tuple of (r, g, b, a) where each one is in range 0 to 255"""
 
     return (self.r, self.g, self.b, self.a)
+    
+  def scaledRgba(self):
+    """Returns 4-tuple of (r, g, b, a) where each one is in range 0.0 to 1.0"""
+
+    return (self.r / 255.0, self.g / 255.0, self.b / 255.0, self.a / 255.0)
 
   def __repr__(self):
 
@@ -115,3 +122,11 @@ class Colour(str):
   def __str__(self):
 
     return self.__repr__()
+
+def rgba(value):
+  
+  return Colour(value).rgba()
+  
+def scaledRgba(value):
+
+  return Colour(value).scaledRgba()

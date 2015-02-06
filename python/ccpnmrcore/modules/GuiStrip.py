@@ -103,8 +103,10 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
   def createCrossHair(self):
     self.vLine = pg.InfiniteLine(angle=90, movable=False, pen='w')
     self.hLine = pg.InfiniteLine(angle=0, movable=False, pen='w')
-    self.addItem(self.vLine, ignoreBounds=True, )
+    self.addItem(self.vLine, ignoreBounds=True)
     self.addItem(self.hLine, ignoreBounds=True)
+    self.guiSpectrumDisplay.hLines.append(self.hLine)
+    self.guiSpectrumDisplay.vLines.append(self.vLine)
 
   def toggleCrossHair(self):
     if self.crossHairShown ==True:
@@ -114,14 +116,18 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
       self.crossHairShown = True
 
   def showCrossHair(self):
-      self.vLine.show()
-      self.hLine.show()
+      for vLine in self.guiSpectrumDisplay.vLines:
+        vLine.show()
+      for hLine in self.guiSpectrumDisplay.hLines:
+        hLine.show()
       self.crossHairAction.setChecked(True)
       self.crossHairShown = True
 
   def hideCrossHair(self):
-    self.vLine.hide()
-    self.hLine.hide()
+    for vLine in self.guiSpectrumDisplay.vLines:
+        vLine.hide()
+    for hLine in self.guiSpectrumDisplay.hLines:
+        hLine.hide()
     self.crossHairAction.setChecked(False)
     self.crossHairShown = False
 
@@ -135,16 +141,26 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.guiSpectrumDisplay.currentStrip = self
     self.appBase.mainWindow.pythonConsole.write('current.pane = '+str(self.guiSpectrumDisplay.name()))
     self.appBase.current.pane = self.guiSpectrumDisplay
-    for strip in self.guiSpectrumDisplay.guiStrips:
-      strip.hideCrossHair()
+    # for strip in self.guiSpectrumDisplay.guiStrips:
+      # strip.hideCrossHair()
     self.guiSpectrumDisplay.currentStrip.showCrossHair()
+
+  # def mouseMoved(self, event):
+  #   position = event
+  #   if self.sceneBoundingRect().contains(position):
+  #       self.mousePoint = self.viewBox.mapSceneToView(position)
+  #       self.vLine.setPos(self.mousePoint.x())
+  #       self.hLine.setPos(self.mousePoint.y())
+  #   return self.mousePoint
 
   def mouseMoved(self, event):
     position = event
     if self.sceneBoundingRect().contains(position):
         self.mousePoint = self.viewBox.mapSceneToView(position)
-        self.vLine.setPos(self.mousePoint.x())
-        self.hLine.setPos(self.mousePoint.y())
+        for vLine in self.guiSpectrumDisplay.vLines:
+          vLine.setPos(self.mousePoint.x())
+        for hLine in self.guiSpectrumDisplay.hLines:
+          hLine.setPos(self.mousePoint.y())
     return self.mousePoint
 
   def showMousePosition(self, pos):

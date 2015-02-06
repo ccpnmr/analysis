@@ -28,7 +28,7 @@ class GuiWindow(GuiBase):
     self.apiWindow = apiWindow
     self.dockArea = DockArea()
     self.dockArea.guiWindow = self
-    self.dockArea.setGeometry(0, 0, 1100, 1300)
+    self.dockArea.setGeometry(0, 0, 12000, 8000)
     
     apiModules = apiWindow.sortedModules()
     if apiModules:
@@ -51,13 +51,12 @@ class GuiWindow(GuiBase):
     assert self.blankDisplay
     
     self.blankDisplay.setParent(None)
-    self.blankDiplay = None
+    self.blankDisplay = None
     
     apiGuiTask = self.apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
     #axisCodes = spectrum.axisCodes
     axisCodes = Spectrum.getAxisCodes(spectrum)
     if spectrum.dimensionCount == 1:
-      axisCodes = axisCodes + ('intensity',)
       apiStripDisplay = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
       guiStripDisplay = GuiStripDisplay1d(self.dockArea, apiStripDisplay)
     else:

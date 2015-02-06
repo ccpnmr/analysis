@@ -21,7 +21,8 @@ class GuiSpectrumDisplay(GuiModule):
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     screenWidth  = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setMaximumWidth(screenWidth*0.6)
-
+    self.hLines = []
+    self.vLines = []
     self.spectrumUtilToolBar = ToolBar(self, grid=(0, 2), gridSpan=(1, 1))
     # self.spectrumUtilToolBar.setMinimumWidth(screenWidth*0.15)
     toolBarColour = QtGui.QColor(214,215,213)
@@ -33,6 +34,7 @@ class GuiSpectrumDisplay(GuiModule):
     self.positionBox = Label(self, grid=(0, 3), gridSpan=(1, 1))
     self.positionBox.setFixedWidth(screenWidth*0.08)
     self.stripFrame = GuiFrame(self, appBase=self.appBase, grid=(1, 1), gridSpan=(1, 3))
+
     self.stripFrame.guiSpectrumDisplay = self
 
 

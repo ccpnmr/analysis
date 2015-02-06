@@ -31,7 +31,7 @@ from scipy.ndimage import maximum_filter
 from ccpn._wrapper._Peak import Peak as Peak
 
 from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
-from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
+# from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
 
 class GuiSpectrumView1d(GuiSpectrumView):
 

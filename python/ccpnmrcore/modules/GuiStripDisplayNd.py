@@ -92,6 +92,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       prevGuiStrip.axes['right']['item'].hide()
       guiStrip.setYLink(prevGuiStrip)
 
+
   def fillToolBar(self):
     GuiSpectrumDisplay.fillToolBar(self)
     # self.spectrumUtilToolBar.addAction(QtGui.QAction('HS', self, triggered=self.hideSpinSystemLabel))

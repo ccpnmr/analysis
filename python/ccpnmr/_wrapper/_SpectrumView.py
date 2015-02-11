@@ -27,11 +27,14 @@ from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpnmr._wrapper._Strip import Strip
-from ccpncore.api.ccpnmr.gui.Task import SpectrumView as Ccpn_SpectrumView
+from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.lib import pid as Pid
+from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
+from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
+from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
 
 
-class SpectrumView(AbstractWrapperObject):
+class SpectrumView(GuiSpectrumView, AbstractWrapperObject):
   """Display Strip for 1D or nD spectrum"""
   
   #: Short class name, for PID.
@@ -46,14 +49,9 @@ class SpectrumView(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnSpectrumView(self) -> Ccpn_SpectrumView:
+  def apiSpectrumView(self) -> ApiSpectrumView:
     """ CCPN SpectrumView matching SpectrumView"""
     return self._wrappedData
-    
-  @property
-  def _key(self) -> str:
-    """id string - combined spectrumName and stripSerial"""
-    return Pid.IDSEP.join((self.spectrumName, str(self.stripSerial)))
 
   @property
   def stripSerial(self) -> int:
@@ -219,15 +217,55 @@ class SpectrumView(AbstractWrapperObject):
   #CCPN functions
 
 
+# Define subtypes and factory function
+class SpectrumView1d(GuiSpectrumView1d, SpectrumView):
+  """1D Spectrum View"""
+
+  def __init__(self, project:Project, wrappedData:ApiSpectrumView):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    GuiSpectrumView1d.__init__(self)
+
+  # put in subclass to make superclass abstract
+  @property
+  def _key(self) -> str:
+    """id string - combined spectrumName and stripSerial"""
+    return Pid.IDSEP.join((self.spectrumName, str(self.stripSerial)))
+
+
+class SpectrumViewNd(GuiSpectrumViewNd, SpectrumView):
+  """ND Spectrum View"""
+
+  def __init__(self, project:Project, wrappedData:ApiSpectrumView):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    GuiSpectrumViewNd.__init__(self)
+
+  # put in subclass to make superclass abstract
+  @property
+  def _key(self) -> str:
+    """id string - combined spectrumName and stripSerial"""
+    return Pid.IDSEP.join((self.spectrumName, str(self.stripSerial)))
+
+
+def _factoryFunction(project:Project, wrappedData:ApiSpectrumView) -> SpectrumView:
+  """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
+  if 'intensity' in wrappedData.spectrumDisplay.axisCodes:
+    # 1D display
+    return SpectrumView1d(project, wrappedData)
+  else:
+    # ND display
+    return SpectrumViewNd(project, wrappedData)
+
 # Connections to parents:
 SpectrumDisplay._childClasses.append(SpectrumView)
 
 # We should NOT have any newStrip functions, except possibly for FreeStrips
 
 # Notifiers:
-className = Ccpn_SpectrumView._metaclass.qualifiedName()
+className = ApiSpectrumView._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':SpectrumView}, className, '__init__'),
+  ( ('_newObject', {'cls':SpectrumView._factoryFunction}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

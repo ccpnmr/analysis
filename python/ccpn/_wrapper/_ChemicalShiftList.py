@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
-from ccpncore.api.ccp.nmr.Nmr import ShiftList as Ccpn_ShiftList
+from ccpncore.api.ccp.nmr.Nmr import ShiftList as ApiShiftList
 from ccpncore.lib import pid as Pid
 
 class ChemicalShiftList(AbstractWrapperObject):
@@ -41,7 +41,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnShiftList(self) -> Ccpn_ShiftList:
+  def apiShiftList(self) -> ApiShiftList:
     """ CCPN ShiftList matching ChemicalShiftList"""
     return self._wrappedData
     
@@ -116,7 +116,7 @@ def newChemicalShiftList(parent:Project, name:str=None, unit:str='ppm',
 Project.newChemicalShiftList = newChemicalShiftList
 
 # Notifiers:
-className = Ccpn_ShiftList._metaclass.qualifiedName()
+className = ApiShiftList._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':ChemicalShiftList}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

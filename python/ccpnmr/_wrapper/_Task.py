@@ -21,21 +21,23 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+from collections.abc import Sequence
+
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
-from ccpnmr._wrapper._GuiWindow import GuiWindow
-from ccpncore.api.ccpnmr.gui.Task import GuiTask as Ccpn_GuiTask
+from ccpnmr._wrapper._Window import Window
+from ccpncore.api.ccpnmr.gui.Task import GuiTask as ApiGuiTask
 from ccpncore.lib import pid as Pid
 
 
-class GuiTask(AbstractWrapperObject):
+class Task(AbstractWrapperObject):
   """GUI task, corresponds to set of interacting modules"""
   
   #: Short class name, for PID.
   shortClassName = 'GT'
 
   #: Name of plural link to instances of class
-  _pluralLinkName = 'guiTasks'
+  _pluralLinkName = 'tasks'
   
   #: List of child classes.
   _childClasses = []
@@ -43,8 +45,8 @@ class GuiTask(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnGuiTask(self) -> Ccpn_GuiTask:
-    """ CCPN Task matching GuiTask"""
+  def apiGuiTask(self) -> ApiGuiTask:
+    """ CCPN GuiTask matching Task"""
     return self._wrappedData
     
   @property
@@ -73,6 +75,16 @@ class GuiTask(AbstractWrapperObject):
     return self._wrappedData.details
 
   @property
+  def windows(self) -> Window:
+    """Gui windows where Task is shown"""
+    ff = self._project._data2Obj.get
+    return tuple(ff(x) for x in self._wrappedData.windows)
+
+  @windows.setter
+  def windows(self, value:Sequence):
+    self._wrappedData.windows = tuple(x._wrappedData for x in value)
+
+  @property
   def status(self) -> str:
     """Status of task: connected to Project, disconnected form Project,
     or unrelated (template only)"""
@@ -86,63 +98,65 @@ class GuiTask(AbstractWrapperObject):
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
-    """get wrappedData (ccp.gui.guiTasks) for all GuiTasks disconnected or connected to NmrProject"""
+    """get wrappedData (ccp.gui.guiTasks) for all GuiTasks connected to NmrProject"""
     nmrProject = parent._wrappedData
-    ccpnRoot = nmrProject.root
-
-    return tuple(x for x in ccpnRoot.sotedGuiTasks()
-                 if x.nmrProject in (nmrProject, None))
+    return tuple(nmrProject.sortedGuiTasks())
 
   # CCPN functions
   def passivate(self):
     """passivate active task"""
     if self.status == 'active':
       self._wrappedData.passivate()
+      self._unwrapAll()
     else:
       raise ValueError("Cannot passivate %s task: %s" % (self.status, self))
 
-  def activate(self, guiWindow:GuiWindow=None):
+  def activate(self, window:Window=None):
     """activate passive task"""
     if self.status == 'passive':
-      window=guiWindow and guiWindow._wrappedData
+      window=window and window._wrappedData
       self._wrappedData.activate(window=window)
+      self._initializeAll()
     else:
       raise ValueError("Cannot activate %s task: %s" % (self.status, self))
 
-  def clone(self, name:str, nameSpace:str=None)->GuiTask:
+  def clone(self, name:str, nameSpace:str=None)->Task:
     """copy task exactly, first passivating if active"""
     return self._project._data2Obj.get(self._wrappedData.clone())
 
-  def loadAsTemplate(self, name:str, nameSpace:str=None, guiWindow:GuiWindow=None)->GuiTask:
+  def loadAsTemplate(self, name:str, nameSpace:str=None, window:Window=None)->Task:
     """copy and activate template task, adapting and pruning contents to fit"""
-    window=guiWindow and guiWindow._wrappedData
+    window=window and window._wrappedData
     newObj = self._wrappedData.adaptedCopy(nmrProject=self._project._wrappedData,
                                            window=window, name=name, nameSpace=nameSpace)
     return self._project._data2Obj.get(newObj)
 
-  def pruneSpectrumViews(self, name:str, nameSpace:str=None)->GuiTask:
+  def pruneSpectrumViews(self, name:str, nameSpace:str=None)->Task:
     """Remove spectrum views that do not match existing spectra, e.g. after loading a template"""
     self._wrappedData.pruneSpectrumViews()
 
 
-def newGuiTask(parent:Project, name:str, nameSpace:str=None, comment:str=None) -> GuiTask:
-  """Create new child GuiTask"""
+def newTask(parent:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
+  """Create new child Task"""
 
   nmrProject = parent.nmrProject
 
-  newCcpnGuiTask = nmrProject.root.newGuiTask(name=name, nameSpace=nameSpace,
+  newApiTask = nmrProject.root.newGuiTask(name=name, nameSpace=nameSpace,
                                                 nmrProject=nmrProject, details=comment)
 
-  return parent._data2Obj.get(newCcpnGuiTask)
+  return parent._data2Obj.get(newApiTask)
 
 # Connections to parents:
-Project._childClasses.append(GuiTask)
-Project.newGuiWindow = newGuiTask
+Project._childClasses.append(Task)
+Project.newTask = newTask
 
 # Notifiers:
-className = Ccpn_GuiTask._metaclass.qualifiedName()
+
+# NBNB TBD Add notifiers, one way or the other, for activating and passivating tasks
+
+className = ApiGuiTask._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':GuiTask}, className, '__init__'),
+  ( ('_newObject', {'cls':Task}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

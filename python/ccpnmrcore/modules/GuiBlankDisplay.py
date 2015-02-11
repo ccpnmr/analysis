@@ -18,7 +18,7 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
     Dock.__init__(self, name='BlankDisplay', size=(1100,1300))
     dockArea.addDock(self)
     
-    DropBase.__init__(self, dockArea.guiWindow.appBase, self.dropCallback)
+    DropBase.__init__(self, dockArea.guiWindow._appBase, self.dropCallback)
     
     self.label = Label(self, text='Drag Spectrum Here', grid=(0, 0))
 

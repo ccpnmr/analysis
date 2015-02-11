@@ -14,8 +14,8 @@ from ccpnmrcore.modules.GuiStrip import GuiStrip
 
 class GuiStripNd(GuiStrip):
 
-  def __init__(self, guiFrame, apiStrip, **kw):
-    GuiStrip.__init__(self, guiFrame, apiStrip)
+  def __init__(self):
+    GuiStrip.__init__(self)
 
     self.plotItem.setAcceptDrops(True)
     self.viewportWidget = QtOpenGL.QGLWidget()
@@ -66,12 +66,12 @@ class GuiStripNd(GuiStrip):
     # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
     #print('HERE711', self.scene(), guiSpectrumView)
     apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
-    
+
     if not apiDataSource.positiveContourColour:
       apiDataSource.positiveContourColour = Colour.spectrumHexColours[self.colourIndex]
       self.colourIndex += 1
       self.colourIndex %= len(Colour.spectrumHexColours)
-      
+
     if not apiDataSource.negativeContourColour:
       apiDataSource.negativeContourColour = Colour.spectrumHexColours[self.colourIndex]
       self.colourIndex += 1

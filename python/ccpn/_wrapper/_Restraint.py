@@ -26,7 +26,7 @@ from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._RestraintList import RestraintList
-from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraint
+from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraint as ApiAbstractConstraint
 
 class Restraint(AbstractWrapperObject):
   """Restraint, of type given in restraintType."""
@@ -42,8 +42,8 @@ class Restraint(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def ccpnRestraint(self) -> AbstractConstraint:
-    """ CCPN RdcConstraint matching RdcRestraint"""
+  def apiConstraint(self) -> ApiAbstractConstraint:
+    """ CCPN API Constraint matching Restraint"""
     return self._wrappedData
 
   @property
@@ -96,7 +96,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def error(self) -> float:
-    """error of constraint - consensus of all contributions or None"""
+    """error of restraint - consensus of all contributions or None"""
     aSet = set(x.error for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -110,7 +110,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def weight(self) -> float:
-    """weight of constraint - consensus of all contributions or None"""
+    """weight of restraint - consensus of all contributions or None"""
     aSet = set(x.weight for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -124,7 +124,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def upperLimit(self) -> float:
-    """upperLimit of constraint - consensus of all contributions or None"""
+    """upperLimit of restraint - consensus of all contributions or None"""
     aSet = set(x.upperLimit for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -138,7 +138,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def lowerLimit(self) -> float:
-    """lowerLimit of constraint - consensus of all contributions or None"""
+    """lowerLimit of restraint - consensus of all contributions or None"""
     aSet = set(x.lowerLimit for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -152,7 +152,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def additionalUpperLimit(self) -> float:
-    """additionalUpperLimit of constraint - consensus of all contributions or None"""
+    """additionalUpperLimit of restraint - consensus of all contributions or None"""
     aSet = set(x.additionalUpperLimit for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -166,7 +166,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def additionalLowerLimit(self) -> float:
-    """additionalLowerLimit of constraint - consensus of all contributions or None"""
+    """additionalLowerLimit of restraint - consensus of all contributions or None"""
     aSet = set(x.additionalLowerLimit for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -190,8 +190,8 @@ RestraintList._childClasses.append(Restraint)
 def newRestraint(parent:RestraintList,comment:str=None,
                          peaks:Sequence=()) -> Restraint:
   """Create new child RdcRestraint"""
-  constraintList = parent._wrappedData
-  creator = constraintList.getattr("new%sConstraint" % parent.restraintType)
+  apiConstraintList = parent._wrappedData
+  creator = apiConstraintList.getattr("new%sConstraint" % parent.restraintType)
   obj = creator(details=comment, peaks=peaks)
   return parent._project._data2Obj.get(obj)
 
@@ -214,7 +214,7 @@ RestraintList.newRestraint = newRestraint
 RestraintList.makeSimpleRestraint = makeSimpleRestraint
 
 # Notifiers:
-for clazz in AbstractConstraint._metaclass.getNonAbstractSubtypes():
+for clazz in ApiAbstractConstraint._metaclass.getNonAbstractSubtypes():
   className = clazz.qualifiedName()
   Project._apiNotifiers.extend(
     ( ('_newObject', {'cls':RestraintList}, className, '__init__'),

@@ -11,8 +11,8 @@ from ccpncore.gui.Menu import Menu
 
 class GuiStrip1d(GuiStrip):
 
-  def __init__(self, guiFrame, apiStrip, **kw):
-    GuiStrip.__init__(self, guiFrame, apiStrip)
+  def __init__(self):
+    GuiStrip.__init__(self)
     self.viewBox.invertX()
     self.showGrid(x=True, y=True)
     self.gridShown = True
@@ -35,13 +35,13 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu.addSeparator()
     self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self.toggleCrossHair,
                                          checkable=True)
-    if self.crossHairShown == True:
+    if self.crossHairShown:
       self.crossHairAction.setChecked(True)
     else:
       self.crossHairAction.setChecked(False)
     self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     self.gridAction = QtGui.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
-    if self.gridShown == True:
+    if self.gridShown:
       self.gridAction.setChecked(True)
     else:
       self.gridAction.setChecked(False)
@@ -78,7 +78,7 @@ class GuiStrip1d(GuiStrip):
     # print(spectrum.ccpnSpectrum.spectrumViews)
     guiSpectrumView.plot = self.plotItem.plot(data[0],data[1], pen={'color':QtGui.QColor(colour)},clickable=True,)
     guiSpectrumView.plot.curve.setClickable(True)
-    self.appBase.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
+    self._appBase.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
 
     if self.spectrumIndex < 10:
       shortcutKey = "s,"+str(self.spectrumIndex)

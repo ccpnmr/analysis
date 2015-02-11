@@ -25,7 +25,7 @@ __version__ = "$Revision: 7686 $"
 import functools
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpncore.api.ccp.nmr.Nmr import NmrProject as Ccpn_NmrProject
+from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
 from ccpncore.util import Common as commonUtil
@@ -34,7 +34,7 @@ from ccpncore.lib import pid as Pid
 
 
 class Project(AbstractWrapperObject):
-  """Project (root) object. Corresponds to CCPN: NmrProject"""
+  """Project (root) object. Corresponds to API: NmrProject"""
   
   #: Short class name, for PID.
   shortClassName = 'PR'
@@ -59,11 +59,11 @@ class Project(AbstractWrapperObject):
   
   
   # Implementation methods
-  def __init__(self, wrappedData: Ccpn_NmrProject):
+  def __init__(self, wrappedData: ApiNmrProject):
     """ Special init for root (Project) object
     """
 
-    if not isinstance(wrappedData, Ccpn_NmrProject):
+    if not isinstance(wrappedData, ApiNmrProject):
       raise ValueError("Project initialised with %s, should be ccp.nmr.Nmr.NmrProject."
                        % wrappedData)
     
@@ -89,7 +89,7 @@ class Project(AbstractWrapperObject):
       wrappedData.root.sortedChemComps()
     )
 
-    # Set necessary values in ccpnProject
+    # Set necessary values in apiProject
     if wrappedData.molSystem is None:
       wrappedData.root.newMolSystem(name=wrappedData.name, code=wrappedData.name,
                                     nmrProjects = (wrappedData,))
@@ -97,6 +97,12 @@ class Project(AbstractWrapperObject):
     self._logger = wrappedData.root._logger
 
     self._registerApiNotifiers()
+
+    # set appBase attribute - for gui applications
+    if hasattr(wrappedData, '_appBase'):
+      self._appBase = wrappedData._appBase
+    else:
+      self._appBase = None
     
     self._initializeAll()
   
@@ -145,7 +151,7 @@ class Project(AbstractWrapperObject):
     del self._pid2Obj[obj.shortClassName][obj._pid]
 
   def delete(self):
-    """Cleans up the wrapper project, without deleting the CCPN project (impossible)"""
+    """Cleans up the wrapper project, without deleting the API project (impossible)"""
     self.clearNotifiers()
     for tag in ('_wrappedData','_data2Obj','_pid2Obj'):
       delattr(self,tag)
@@ -173,8 +179,8 @@ class Project(AbstractWrapperObject):
     return utilIo.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
   
   @property
-  def nmrProject(self) -> Ccpn_NmrProject:
-    """CCPN equivalent to object: Nmrproject"""
+  def nmrProject(self) -> ApiNmrProject:
+    """API equivalent to object: Nmrproject"""
     return self._wrappedData
 
   #

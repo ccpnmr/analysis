@@ -27,7 +27,7 @@ from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Spectrum import Spectrum
-from ccpncore.api.ccp.nmr.Nmr import DataDimRef as Ccpn_DataDimRef
+from ccpncore.api.ccp.nmr.Nmr import DataDimRef as ApiDataDimRef
 from ccpncore.lib import pid as Pid
 
 
@@ -51,7 +51,7 @@ class SpectrumReference(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def ccpnSpectrumReference(self) -> Ccpn_DataDimRef:
+  def apiSpectrumReference(self) -> ApiDataDimRef:
     """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
 
@@ -259,7 +259,7 @@ Spectrum._childClasses.append(SpectrumReference)
 Spectrum.newSpectrumReference = newSpectrumReference
 
 # Notifiers:
-className = Ccpn_DataDimRef._metaclass.qualifiedName()
+className = ApiDataDimRef._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':SpectrumReference}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

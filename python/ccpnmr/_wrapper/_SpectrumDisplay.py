@@ -26,13 +26,18 @@ from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrResidue import NmrResidue
-from ccpnmr._wrapper._GuiTask import GuiTask
-from ccpnmr._wrapper._GuiWindow import GuiWindow
-from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as Ccpn_SpectrumDisplay
+from ccpnmr._wrapper._Task import Task
+from ccpnmr._wrapper._Window import Window
+from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
+from ccpncore.api.ccpnmr.gui.Task import StripDisplay1d as ApiStripDisplay1d
+from ccpncore.api.ccpnmr.gui.Task import StripDisplayNd as ApiStripDisplayNd
 from ccpncore.util import Common as commonUtil
+from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpnmrcore.modules.GuiStripDisplayNd import GuiStripDisplayNd
+from ccpnmrcore.modules.GuiStripDisplay1d import GuiStripDisplay1d
 
 
-class SpectrumDisplay(AbstractWrapperObject):
+class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   """Spectrum display for 1D or nD spectrum"""
   
   #: Short class name, for PID.
@@ -43,18 +48,12 @@ class SpectrumDisplay(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
-  
 
   # CCPN properties  
   @property
-  def ccpnSpectrumDisplay(self) -> Ccpn_SpectrumDisplay:
+  def apiSpectrumDisplay(self) -> ApiSpectrumDisplay:
     """ CCPN SpectrumDisplay matching SpectrumDisplay"""
     return self._wrappedData
-    
-  @property
-  def _key(self) -> str:
-    """short form of name, corrected to use for id"""
-    return self._wrappedData.name
 
   @property
   def name(self) -> str:
@@ -62,7 +61,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     return self._wrappedData.name
     
   @property
-  def _parent(self) -> GuiTask:
+  def _parent(self) -> Task:
     """Parent (containing) object."""
     return self._project._data2Obj.get(self._wrappedData.guiTask)
 
@@ -118,12 +117,12 @@ class SpectrumDisplay(AbstractWrapperObject):
     self._wrappedData.axisOrder = value
 
   @property
-  def guiWindow(self) -> GuiWindow:
+  def window(self) -> Window:
     """Gui window showing SpectrumDisplay"""
     return self._project._data2Obj.get(self._wrappedData.window)
 
-  @guiWindow.setter
-  def guiWindow(self, value:GuiWindow):
+  @window.setter
+  def window(self, value:Window):
     self._wrappedData.window = value and value._wrappedData
 
   @property
@@ -146,7 +145,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
 
   @property
-  def orderedStrips(self) -> tuple:
+  def   orderedStrips(self) -> tuple:
     """Strips in displayed order """
     ff = self._project._data2Obj.get
     return tuple(ff(x) for x in self._wrappedData.orderedStrips)
@@ -180,24 +179,26 @@ class SpectrumDisplay(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:GuiTask)-> list:
-    """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of parent GuiTask"""
+  def _getAllWrappedData(cls, parent:Task)-> list:
+    """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of parent Task"""
     return [x for x in parent._wrappedData.sortedModules()
-            if isinstance(x, Ccpn_SpectrumDisplay)]
+            if isinstance(x, ApiSpectrumDisplay)]
 
   # CCPN functions
   def resetAxisOrder(self):
     """Reset display to original axis order"""
     self._wrappedData.resetAxisOrder()
 
-  def pickAxis(self, axisCode):
+  def findAxis(self, axisCode):
     """Reset display to original axis order"""
-    return self._project._data2Obj.get(self._wrappedData.pickAxis(axisCode))
+    return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-def newSpectrumDisplay(parent:GuiTask, axisCodes:Sequence, stripDirection:str=None,
+def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str=None,
                        name:str=None, gridCell:Sequence=(1,1), gridSpan:Sequence=(1,1),
-                       window:GuiWindow=None, comment:str=None, independentStrips=False,
+                       window:Window=None, comment:str=None, independentStrips=False,
                        nmrResidue=None):
+
+  # NBNB TBD recheck after classes are done
 
   # Map to determine display type
   displayTypeMap = {
@@ -209,7 +210,7 @@ def newSpectrumDisplay(parent:GuiTask, axisCodes:Sequence, stripDirection:str=No
     (True, False,True):('newStripDisplay1d','newFreeStrip1d'),
   }
 
-  ccpnGuiTask = parent._wrappedData
+  apiTask = parent._wrappedData
 
   if len(axisCodes) <2:
     raise ValueError("New SpectrumDisplay must have at least two axisCodes")
@@ -237,20 +238,20 @@ def newSpectrumDisplay(parent:GuiTask, axisCodes:Sequence, stripDirection:str=No
       name = ''.join(['1D:', axisCodes[0]] + axisCodes[2:])
     else:
       name = ''.join(axisCodes)
-  while ccpnGuiTask.findFirstModule(name=name):
+  while apiTask.findFirstModule(name=name):
     name = commonUtil.incrementName(name)
   displayPars['name'] = name
 
   # Create SpectrumDisplay and first strip
   if independentStrips:
     # Create FreeStripDisplay and first strip
-    ccpnSpectrumDisplay = getattr(ccpnGuiTask, newDisplayFunc)(**displayPars)
-    ccpnStrip = ccpnSpectrumDisplay.newStrip(axisCodes=axisCodes, axisOrder=axisCodes)
+    apiSpectrumDisplay = getattr(apiTask, newDisplayFunc)(**displayPars)
+    apiStrip = apiSpectrumDisplay.newStrip(axisCodes=axisCodes, axisOrder=axisCodes)
   else:
     # Create Boundstrip/Nostrip display and first strip
     displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
-    ccpnSpectrumDisplay = getattr(ccpnGuiTask, newDisplayFunc)(**displayPars)
-    ccpnStrip = ccpnSpectrumDisplay.newStrip()
+    apiSpectrumDisplay = getattr(apiTask, newDisplayFunc)(**displayPars)
+    apiStrip = apiSpectrumDisplay.newStrip()
 
   # Create axes
     for ii, code in axisCodes:
@@ -261,24 +262,76 @@ def newSpectrumDisplay(parent:GuiTask, axisCodes:Sequence, stripDirection:str=No
         stripSerial = 1
 
       if code[0].isupper():
-        ccpnSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
+        apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
       elif code == 'intensity':
-        ccpnSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
+        apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
       elif code.startswith('fid'):
-        ccpnSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
+        apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
       else:
-        ccpnSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
+        apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
   #
-  return parent._project._data2Obj.get(ccpnSpectrumDisplay)
+  return parent._project._data2Obj.get(apiSpectrumDisplay)
 
 # Connections to parents:
 Project._childClasses.append(SpectrumDisplay)
 Project.newSpectrumDisplay = newSpectrumDisplay
 
 # Notifiers:
-className = Ccpn_SpectrumDisplay._metaclass.qualifiedName()
+className = ApiSpectrumDisplay._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':SpectrumDisplay}, className, '__init__'),
+    ('_finaliseDelete', {}, className, 'delete')
+  )
+)
+
+
+# Define subtypes and factory function
+class StripDisplay1d(GuiStripDisplay1d, SpectrumDisplay):
+  """ND strip display"""
+
+  def __init__(self, project:Project, wrappedData:ApiStripDisplay1d):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    GuiStripDisplay1d.__init__(self)
+
+  # put in subclass to make superclass abstract
+  @property
+  def _key(self) -> str:
+    """short form of name, corrected to use for id"""
+    return self._wrappedData.name
+
+
+class StripDisplayNd(GuiStripDisplayNd, SpectrumDisplay):
+  """ND strip display"""
+
+  def __init__(self, project:Project, wrappedData:ApiStripDisplayNd):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    GuiStripDisplayNd.__init__(self)
+
+  # put in subclass to make superclass abstract
+  @property
+  def _key(self) -> str:
+    """short form of name, corrected to use for id"""
+    return self._wrappedData.name
+
+def _factoryFunction(project:Project, wrappedData:ApiSpectrumDisplay) -> SpectrumDisplay:
+  """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
+  if isinstance(wrappedData, ApiStripDisplayNd):
+    return StripDisplayNd(project, wrappedData)
+  elif isinstance(wrappedData, ApiStripDisplay1d):
+    return StripDisplay1d(project, wrappedData)
+  else:
+    raise ValueError("Attempt to make SpectrumDisplay from illegal object type: %s"
+    % wrappedData)
+
+
+SpectrumDisplay._factoryFunction = staticmethod(_factoryFunction)
+
+# Notifiers:
+className = ApiSpectrumDisplay._metaclass.qualifiedName()
+Project._apiNotifiers.extend(
+  ( ('_newObject', {'cls':SpectrumDisplay._factoryFunction}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

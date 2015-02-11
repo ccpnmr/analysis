@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
-from ccpncore.api.ccpnmr.gui.Task import Axis as Ccpn_Axis
+from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 from ccpncore.lib import pid as Pid
 
 
@@ -43,7 +43,7 @@ class Axis(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnAxis(self) -> Ccpn_Axis:
+  def apiAxis(self) -> ApiAxis:
     """ CCPN Axis matching Axis"""
     return self._wrappedData
     
@@ -118,7 +118,7 @@ SpectrumDisplay._childClasses.append(Axis)
 
 
 # Notifiers:
-className = Ccpn_Axis._metaclass.qualifiedName()
+className = ApiAxis._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Axis}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

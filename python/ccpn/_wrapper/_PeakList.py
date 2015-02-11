@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Spectrum import Spectrum
-from ccpncore.api.ccp.nmr.Nmr import PeakList as Ccpn_PeakList
+from ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 
 
 class PeakList(AbstractWrapperObject):
@@ -43,8 +43,8 @@ class PeakList(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnPeakList(self) -> Ccpn_PeakList:
-    """ CCPN peakLists matching PeakList"""
+  def apiPeakList(self) -> ApiPeakList:
+    """ API peakLists matching PeakList"""
     return self._wrappedData
     
   @property
@@ -98,17 +98,17 @@ class PeakList(AbstractWrapperObject):
 
   @chemicalShiftList.setter
   def chemicalShiftList(self, value):
-    ccpnPeakList = self._wrappedData
+    apiPeakList = self._wrappedData
     if value is None:
-      ccpnPeakList.specificShiftList = None
+      apiPeakList.specificShiftList = None
     else:
-      ccpnShiftList = value._wrappedData
-      if ccpnShiftList is ccpnPeakList.shiftList:
+      apiShiftList = value._wrappedData
+      if apiShiftList is apiPeakList.shiftList:
         return
-      elif ccpnShiftList is ccpnPeakList.dataSource.experiment.shiftList:
-        ccpnPeakList.specificShiftList = None
+      elif apiShiftList is apiPeakList.dataSource.experiment.shiftList:
+        apiPeakList.specificShiftList = None
       else:
-        ccpnPeakList.specificShiftList = ccpnShiftList
+        apiPeakList.specificShiftList = apiShiftList
     
   # Implementation functions
   @classmethod
@@ -122,14 +122,14 @@ Spectrum._childClasses.append(PeakList)
 def newPeakList(parent:Spectrum,name:str=None, comment:str=None,
              isSimulated:bool=False) -> PeakList:
   """Create new child PeakList"""
-  ccpnDataSource = parent._wrappedData
-  obj = ccpnDataSource.newPeakList(name=name, details=comment, isSimulated=isSimulated)
+  apiDataSource = parent._wrappedData
+  obj = apiDataSource.newPeakList(name=name, details=comment, isSimulated=isSimulated)
   return parent._project._data2Obj.get(obj)
 
 Spectrum.newPeakList = newPeakList
 
 # Notifiers:
-className = Ccpn_PeakList._metaclass.qualifiedName()
+className = ApiPeakList._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':PeakList}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

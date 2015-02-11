@@ -26,8 +26,8 @@ from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Restraint import Restraint
-from ccpncore.api.ccp.nmr.NmrConstraint import ConstraintContribution as ccpnContribution
-from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance
+from ccpncore.api.ccp.nmr.NmrConstraint import ConstraintContribution as ApiContribution
+from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
 from ccpncore.lib import pid as Pid
 
 class RestraintContribution(AbstractWrapperObject):
@@ -55,8 +55,8 @@ class RestraintContribution(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def ccpnRestraintContribution(self) -> ccpnContribution:
-    """ CCPN RdcContribution matching RdcContribution"""
+  def apiContribution(self) -> ApiContribution:
+    """ API Contribution matching Contribution"""
     return self._wrappedData
 
   @property
@@ -139,7 +139,7 @@ class RestraintContribution(AbstractWrapperObject):
 
   @property
   def combinationId(self) -> int:
-    """combinationId of contribution, describing which contribution are AND'ed together"""
+    """combinationId of contribution, describing which contributions are AND'ed together"""
     return self._wrappedData.combinationId
 
   @combinationId.setter
@@ -156,16 +156,16 @@ class RestraintContribution(AbstractWrapperObject):
     sortkey = self._project._pidSortKey
 
     if itemLength > 1:
-      for ccpnItem in self._wrappedData.items:
-        atomIds = [_fixedResonance2AtomId(x) for x in ccpnItem.resonances]
+      for apiItem in self._wrappedData.items:
+        atomIds = [_fixedResonance2AtomId(x) for x in apiItem.resonances]
         if sortkey(atomIds[0]) > sortkey(atomIds[-1]):
           # order so smallest string comes first
           # NB This assumes that assignments are either length 2 or ordered (as is so far the case)
           atomIds.reverse()
         result.append(tuple(atomIds))
     else:
-      for ccpnItem in self._wrappedData.items:
-        result.append((_fixedResonance2AtomId(ccpnItem.resonance),))
+      for apiItem in self._wrappedData.items:
+        result.append((_fixedResonance2AtomId(apiItem.resonance),))
     #
     return tuple(sorted(result, key=sortkey))
 
@@ -180,8 +180,8 @@ class RestraintContribution(AbstractWrapperObject):
       if len(ll) != self.restraintItemLength:
         raise ValueError("RestraintItems must have length %s: %s" % (itemLength, ll))
 
-    ccpnContribution = self._wrappedData
-    for item in ccpnContribution.items:
+    apiContribution = self._wrappedData
+    for item in apiContribution.items:
       # remove old items
       item.delete()
 
@@ -189,12 +189,12 @@ class RestraintContribution(AbstractWrapperObject):
     if itemLength > 1:
       for ll in value:
         # make new items
-        getattr(ccpnContribution, newItemFuncName)(
+        getattr(apiContribution, newItemFuncName)(
           resonances=tuple(fetchFixedResonance(Pid.splitId(x)) for x in ll))
     else:
       for ll in value:
         # make new items
-        getattr(ccpnContribution, newItemFuncName)(
+        getattr(apiContribution, newItemFuncName)(
           resonance=fetchFixedResonance(Pid.splitId(ll[0])))
     
   # Implementation functions
@@ -206,7 +206,7 @@ class RestraintContribution(AbstractWrapperObject):
 # Connections to parents:
 Restraint._childClasses.append(RestraintContribution)
 
-def newContribution(parent:Restraint, targetValue:float=None, error:float=None,
+def newRestraintContribution(parent:Restraint, targetValue:float=None, error:float=None,
                     weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
                     restraintItems:Sequence=()) -> RestraintContribution:
@@ -220,10 +220,10 @@ def newContribution(parent:Restraint, targetValue:float=None, error:float=None,
   result.restraintItems = restraintItems
   return result
 
-Restraint.newContribution = newContribution
+Restraint.newRestraintContribution = newRestraintContribution
 
 # Notifiers:
-for clazz in ccpnContribution._metaclass.getNonAbstractSubtypes():
+for clazz in ApiContribution._metaclass.getNonAbstractSubtypes():
   className = clazz.qualifiedName()
   Project._apiNotifiers.extend(
     ( ('_newObject', {'cls':RestraintContribution}, className, '__init__'),
@@ -231,7 +231,7 @@ for clazz in ccpnContribution._metaclass.getNonAbstractSubtypes():
     )
 )
 
-def _fixedResonance2AtomId(fixedResonance:FixedResonance) -> str:
+def _fixedResonance2AtomId(fixedResonance:ApiFixedResonance) -> str:
   """Utility function - get AtomId from FixedResonance """
   tags = ('chainCode', 'sequenceCode', 'residueType', 'name')
   return Pid.makeId(getattr(fixedResonance, tag) for tag in tags)

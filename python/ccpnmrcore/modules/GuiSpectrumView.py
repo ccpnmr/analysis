@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
@@ -14,9 +14,9 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
-__date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__version__ = "$Revision: 7686 $"
+__author__ = "$Author$"
+__date__ = "$Date$"
+__version__ = "$Revision$"
 
 #=========================================================================================
 # Start of code
@@ -30,8 +30,8 @@ from ccpnmrcore.Base import Base as GuiBase
 
 import pyqtgraph as pg
 
-# from ccpnmrcore.modules.spectrumPane.PeakListItem import PeakListItem
-# from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
+from ccpnmrcore.modules.spectrumPane.PeakListItem import PeakListItem
+from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
 
 # this class mixes both OpenGL and Qt functionality
 # it's a Qt QGraphicsItem because that means can re-order drawing of spectra peaks easily
@@ -42,7 +42,7 @@ import pyqtgraph as pg
 class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
 
   #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
-  def __init__(self, guiSpectrumDisplay, apiSpectrumView):
+  def __init__(self):
     """ spectrumPane is the parent
         spectrum is the Spectrum object
         dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
@@ -50,13 +50,10 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
     """
     
     QtGui.QGraphicsItem.__init__(self)
-    GuiBase.__init__(self, guiSpectrumDisplay.appBase)
-    self.apiSpectrumView = apiSpectrumView
-    self.guiSpectrumDisplay = guiSpectrumDisplay
-    self.apiSpectrumView = apiSpectrumView
+    GuiBase.__init__(self, self._project._appBase)
     
-    self.apiDataSource = apiSpectrumView.dataSource
-    self.spectrum = self.getWrapperObject(self.apiDataSource)
+    self.apiDataSource = self._wrappedData.dataSource
+    self.spectrum = self._parent # Is this necessary?
     
     ###self.setDimMapping(dimMapping)
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem

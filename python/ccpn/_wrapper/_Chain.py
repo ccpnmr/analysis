@@ -25,7 +25,7 @@ from collections.abc import Sequence
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
-from ccpncore.api.ccp.molecule.MolSystem import Chain as Ccpn_Chain
+from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpncore.lib import MoleculeModify
 from ccpncore.lib.DataMapper import DataMapper
 from ccpncore.util import Common as commonUtil
@@ -47,7 +47,7 @@ class Chain(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnChain(self) -> Ccpn_Chain:
+  def apiChain(self) -> ApiChain:
     """ CCPN chain matching Chain"""
     return self._wrappedData
     
@@ -90,7 +90,7 @@ class Chain(AbstractWrapperObject):
     self._wrappedData.details = value
 
   # CCPN functions
-  def copy(self, shortName:str):
+  def clone(self, shortName:str):
     """Make copy of chain."""
 
     molSystem = self._project._wrappedData.molSystem
@@ -392,7 +392,7 @@ def makeSimpleChain(parent:Project, sequence, compoundName:str='Molecule_1',
   
 # Clean-up
     
-Chain.copy.__annotations__['return'] = Chain
+Chain.clone.__annotations__['return'] = Chain
     
     
 # Connections to parents:
@@ -402,7 +402,7 @@ Project.makeSimpleChain = makeSimpleChain
 Project.makeChains = makeChains
 
 # Notifiers:
-className = Ccpn_Chain._metaclass.qualifiedName()
+className = ApiChain._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Chain}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

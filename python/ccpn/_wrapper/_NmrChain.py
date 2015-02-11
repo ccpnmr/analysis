@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
-from ccpncore.api.ccp.nmr.Nmr import NmrChain as Ccpn_NmrChain
+from ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 from ccpncore.lib import pid as Pid
 
 
@@ -44,7 +44,7 @@ class NmrChain(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnNmrChain(self) -> Ccpn_NmrChain:
+  def apiNmrChain(self) -> ApiNmrChain:
     """ CCPN NmrChain matching NmrChain"""
     return self._wrappedData
     
@@ -75,11 +75,11 @@ class NmrChain(AbstractWrapperObject):
   @property
   def chain(self) -> Chain:
     """Free-form text comment"""
-    ccpnChain = self._wrappedData.chain
-    if ccpnChain is None:
+    apiChain = self._wrappedData.chain
+    if apiChain is None:
       return None
 
-    return self._parent._data2Obj.get(ccpnChain)
+    return self._parent._data2Obj.get(apiChain)
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
@@ -103,9 +103,9 @@ def newNmrChain(parent:Project, shortName:str=None, comment:str=None) -> NmrChai
       code = '@%s' % ii
     shortName = code
   
-  newCcpnNmrChain = nmrProject.newNmrChain(code=shortName, details=comment)
+  newApiNmrChain = nmrProject.newNmrChain(code=shortName, details=comment)
   
-  return parent._data2Obj.get(newCcpnNmrChain)
+  return parent._data2Obj.get(newApiNmrChain)
   
 def fetchNmrChain(parent:Project, shortName:str=None) -> NmrChain:
   """Fetch chain with given shortName; If none exists call newNmrChain to make one first
@@ -114,10 +114,10 @@ def fetchNmrChain(parent:Project, shortName:str=None) -> NmrChain:
   """
 
   nmrProject = parent.nmrProject
-  ccpnNmrChain = nmrProject.findFirstNmrChain(code=shortName)
-  if ccpnNmrChain is None:
-    ccpnNmrChain = nmrProject.newNmrChain(code=shortName)
-  return parent._data2Obj.get(ccpnNmrChain)
+  apiNmrChain = nmrProject.findFirstNmrChain(code=shortName)
+  if apiNmrChain is None:
+    apiNmrChain = nmrProject.newNmrChain(code=shortName)
+  return parent._data2Obj.get(apiNmrChain)
 
   
 # Clean-up
@@ -128,7 +128,7 @@ Project.newNmrChain = newNmrChain
 Project.fetchNmrChain = fetchNmrChain
 
 # Notifiers:
-className = Ccpn_NmrChain._metaclass.qualifiedName()
+className = ApiNmrChain._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':NmrChain}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

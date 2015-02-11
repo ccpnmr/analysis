@@ -131,6 +131,7 @@ ccpn.AbstractWrapperObject class
 #   print(' - ', key)
 
 from ccpncore.util import Io as ioUtil
+from ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
 
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
@@ -166,18 +167,7 @@ def openProject(path:str, nmrProjectName:str=None) -> Project:
   if apiProject is None:
     raise ValueError("No valid project loaded from %s" % path )
   else:
-    nmrProjects = apiProject.sortedNmrProjects()
-    if nmrProjects:
-      if nmrProjectName:
-        nmrProject = apiProject.findFirstNmrProject(name=nmrProjectName)
-        if nmrProject is None:
-          raise ValueError("No NmrProject found with name: %s" % nmrProjectName)
-      else:
-        nmrProject = nmrProjects[0]
-    else:
-      nmrProject = apiProject.newNmrProject(name=nmrProjectName or 'default')
-
-    return Project(nmrProject)
+    return _wrapApiProject(apiProject, nmrProjectName=nmrProjectName)
 
 def newProject(projectName:str, path:str=None) -> Project:
   """Make new project at path, and create a wrapper project"""
@@ -187,3 +177,18 @@ def newProject(projectName:str, path:str=None) -> Project:
                      % (projectName, path) )
   else:
     return Project(apiProject.newNmrProject(name=projectName))
+
+def _wrapApiProject(apiProject:ApiProject, nmrProjectName:str=None) -> Project:
+  """convert existing MemopsRoot to wrapped Project, using nmrProjectName to select NmrProject"""
+  nmrProjects = apiProject.sortedNmrProjects()
+  if nmrProjects:
+    if nmrProjectName:
+      nmrProject = apiProject.findFirstNmrProject(name=nmrProjectName)
+      if nmrProject is None:
+        raise ValueError("No NmrProject found with name: %s" % nmrProjectName)
+    else:
+      nmrProject = nmrProjects[0]
+  else:
+    nmrProject = apiProject.newNmrProject(name=nmrProjectName or 'default')
+
+  return Project(nmrProject)

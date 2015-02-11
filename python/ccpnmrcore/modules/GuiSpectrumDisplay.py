@@ -12,9 +12,8 @@ from ccpnmrcore.modules.GuiModule import GuiModule
 
 class GuiSpectrumDisplay(GuiModule):
 
-  def __init__(self, dockArea, apiSpectrumDisplay):
-    GuiModule.__init__(self, dockArea, apiSpectrumDisplay)
-    self.apiSpectrumDisplay = apiSpectrumDisplay # redundancy: this is same as self.apiModule
+  def __init__(self):
+    GuiModule.__init__(self)
     self.guiSpectrumViews = []
     self.guiStrips = []
     self.spectrumToolBar = ToolBar(self, grid=(0, 0), gridSpan=(1, 2))
@@ -33,18 +32,18 @@ class GuiSpectrumDisplay(GuiModule):
 
     self.positionBox = Label(self, grid=(0, 3), gridSpan=(1, 1))
     self.positionBox.setFixedWidth(screenWidth*0.08)
-    self.stripFrame = GuiFrame(self, appBase=self.appBase, grid=(1, 1), gridSpan=(1, 3))
+    self.stripFrame = GuiFrame(self, appBase=self._appBase, grid=(1, 1), gridSpan=(1, 3))
 
     self.stripFrame.guiSpectrumDisplay = self
+    #
+    #
+    # for n, apiStrip in enumerate(apiSpectrumDisplay.sortedStrips()):   ### probably need orderedStrips() here ?? ask Rasmus
+    #   className = apiStrip.className
+    #   classModule = importlib.import_module('ccpnmrcore.modules.Gui' + className)
+    #   clazz = getattr(classModule, 'Gui'+className)
+    #   guiStrip = clazz(self.stripFrame, apiStrip)
 
-
-    for n, apiStrip in enumerate(apiSpectrumDisplay.sortedStrips()):   ### probably need orderedStrips() here ?? ask Rasmus
-      className = apiStrip.className
-      classModule = importlib.import_module('ccpnmrcore.modules.Gui' + className)
-      clazz = getattr(classModule, 'Gui'+className)
-      guiStrip = clazz(self.stripFrame, apiStrip)
-
-    self.currentStrip = apiSpectrumDisplay.sortedStrips()[0].guiStrip
+    # self.currentStrip = apiSpectrumDisplay.sortedStrips()[0].guiStrip
 
   def fillToolBar(self):
 

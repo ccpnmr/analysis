@@ -25,12 +25,13 @@ from collections.abc import Sequence
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
-from ccpncore.api.ccpnmr.gui.Window import Window as Ccpn_Window
-from ccpncore.util import Common as commonUtil
+from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
+from ccpnmrcore.modules.GuiWindow import GuiWindow
+from ccpnmrcore.modules.GuiMainWindow import GuiMainWindow
 from ccpncore.lib import pid as Pid
 
 
-class GuiWindow(AbstractWrapperObject):
+class Window(GuiWindow, AbstractWrapperObject):
   """GUI window, corresponds to OS window"""
   
   #: Short class name, for PID.
@@ -41,18 +42,12 @@ class GuiWindow(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
-  
 
   # CCPN properties  
   @property
-  def ccpnGuiWindow(self) -> Ccpn_Window:
-    """ CCPN Wndow matching GuiWindow"""
+  def apiWindow(self) -> ApiWindow:
+    """ CCPN Window matching Window"""
     return self._wrappedData
-    
-  @property
-  def _key(self) -> str:
-    """short form of name, corrected to use for id"""
-    return self._wrappedData.title.translate(Pid.remapSeparators)
 
   @property
   def title(self) -> str:
@@ -85,7 +80,7 @@ class GuiWindow(AbstractWrapperObject):
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
-    """get wrappedData (ccp.gui.windows) for all WIndow children of parent NmrProject.windowStore"""
+    """get wrappedData (ccp.gui.windows) for all Window children of parent NmrProject.windowStore"""
     windowStore = parent._wrappedData.windowStore
 
     if windowStore is None:
@@ -95,8 +90,8 @@ class GuiWindow(AbstractWrapperObject):
 
 
 
-def newGuiWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=()) -> GuiWindow:
-  """Create new child GuiWindow
+def newWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:
+  """Create new child Window
 
   :param str title: window  title (optional, defaults to 'Wn' n positive integer
   :param tuple size: x,y size for new window in integer pixels
@@ -104,22 +99,63 @@ def newGuiWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=(
 
   windowStore = parent.nmrProject.windowStore
 
-  newCcpnGuiWindow = windowStore.newGuiWindow(title=title)
+  newApiWindow = windowStore.newGuiWindow(title=title)
   if position:
-    newCcpnGuiWindow.position = position
+    newApiWindow.position = position
   if size:
-    newCcpnGuiWindow.size = size
+    newApiWindow.size = size
 
-  return parent._data2Obj.get(newCcpnGuiWindow)
+  return parent._data2Obj.get(newApiWindow)
 
 # Connections to parents:
-Project._childClasses.append(GuiWindow)
-Project.newGuiWindow = newGuiWindow
+Project._childClasses.append(Window)
+Project.newWindow = newWindow
+
+
+# Define subtypes and factory function
+class MainWindow(GuiMainWindow, Window):
+  """GUI main window, corresponds to OS window"""
+
+  def __init__(self, project:Project, wrappedData:object):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    GuiMainWindow.__init__(self)
+
+  # put in subclass to make superclass abstract
+  @property
+  def _key(self) -> str:
+    """short form of name, corrected to use for id"""
+    return self._wrappedData.title.translate(Pid.remapSeparators)
+
+
+class SideWindow(GuiWindow, Window):
+  """GUI side window, corresponds to OS window"""
+
+  def __init__(self, project:Project, wrappedData:object):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    GuiWindow.__init__(self)
+
+  # put in subclass to make superclass abstract
+  @property
+  def _key(self) -> str:
+    """short form of name, corrected to use for id"""
+    return self._wrappedData.title.translate(Pid.remapSeparators)
+
+def _factoryFunction(project:Project, wrappedData:ApiWindow) ->Window:
+  """create Window, dispatching to subtype depending on wrappedData"""
+  if wrappedData.title == 'Main':
+    return MainWindow(project, wrappedData)
+  else:
+    return SideWindow(project, wrappedData)
+
+
+Window._factoryFunction = staticmethod(_factoryFunction)
 
 # Notifiers:
-className = Ccpn_Window._metaclass.qualifiedName()
+className = ApiWindow._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':GuiWindow}, className, '__init__'),
+  ( ('_newObject', {'cls':Window._factoryFunction}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

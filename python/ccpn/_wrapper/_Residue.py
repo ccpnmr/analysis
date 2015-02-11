@@ -25,7 +25,7 @@ __version__ = "$Revision: 7686 $"
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
-from ccpncore.api.ccp.molecule.MolSystem import Residue as Ccpn_Residue
+from ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 from ccpncore.lib.DataMapper import DataMapper
 from ccpncore.lib import pid as Pid
 
@@ -44,8 +44,8 @@ class Residue(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnResidue(self) -> Ccpn_Residue:
-    """ CCPN residue matching Residue"""
+  def apiResidue(self) -> ApiResidue:
+    """ API residue matching Residue"""
     return self._wrappedData
   
   
@@ -140,47 +140,6 @@ class Residue(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: Chain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
     return parent._wrappedData.sortedResidues()
-    
-    
-# def newResidue(parent:Chain, name:str, linking:str=None, sequenceCode:str=None,
-#                descriptor:str=None, molType:str=None, comment:str=None) -> Residue:
-#   """Create new child Residue"""
-#   project = parent._project
-#   ccpnChain = parent._wrappedData
-#   ccpnMolecule = ccpnChain.molecule
-#   ccpnProject = ccpnChain.root
-#
-#   if ccpnMolecule.isFinalised:
-#     raise Exception("Chain {} can no longer be extended".format(parent))
-#
-#   # get chemCompVar and add MolResidue
-#   molType, ccpCode = DataMapper.pickChemCompId(project._residueName2chemCompIds,
-#                                                name, prefMolType=molType)
-#   chemComp = ccpnProject.findFirstChemComp(molType=molType, ccpCode=ccpCode)
-#   if descriptor is None:
-#     chemCompVar = chemComp.findFirstChemCompVar(linking=linking, isDefaultVar=True)
-#   else:
-#     chemCompVar = chemComp.findFirstChemCompVar(linking=linking, descriptor=descriptor)
-#   newMolResidue = ccpnMolecule.newMolResidue(chemComp=chemComp, chemCompVar=chemCompVar)
-#
-#   # split sequenceCode in number+string
-#   seqCode, seqInsertCode = commonUtil.splitIntFromChars(sequenceCode)
-#   if len(seqInsertCode) > 1:
-#     raise Exception(
-#       "Only one non-numerical character suffix allowed for sequenceCode {}".format(sequenceCode)
-#     )
-#
-#   # make residue
-#   ccpnResidue = ccpnChain.newResidue(seqId=newMolResidue.serial, linking=chemCompVar.linking,
-#                                      descriptor=chemCompVar.descriptor, details=comment,
-#                                      code3Letter = chemComp.code3Letter)
-#   if seqCode is None:
-#     ccpnResidue.seqCode = ccpnResidue.seqId
-#   else:
-#     ccpnResidue.seqCode = seqCode
-#     ccpnResidue.seqInsertCode = seqInsertCode
-#
-#   return parent._project._data2Obj.get(ccpnResidue)
 
     
 # Connections to parents:
@@ -189,7 +148,7 @@ Chain._childClasses.append(Residue)
 # Chain.newResidue = newResidue
 
 # Notifiers:
-className = Ccpn_Residue._metaclass.qualifiedName()
+className = ApiResidue._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Residue}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

@@ -5,22 +5,22 @@
 
 .. autosummary::
 
-   _GuiWindow.GuiWindow
-   _GuiTask.GuiTask
+   _Window.Window
+   _Task.Task
    _SpectrumDisplay.SpectrumDisplay
    _Strip.Strip
    _Axis.Axis
    _SpectrumView.SpectrumView
 
-ccpnmr.GuiWindow class
+ccpnmr.Window class
 ------------------
 
-.. autoclass:: ccpn._wrapper._GuiWindow.GuiWindow
+.. autoclass:: ccpn._wrapper._Window.Window
 
-ccpnmr.GuiTask class
+ccpnmr.Task class
 ------------------
 
-.. autoclass:: ccpn._wrapper._GuiTask.GuiTask
+.. autoclass:: ccpn._wrapper._Task.Task
 
 ccpnmr.SpectrumDisplay class
 ------------------
@@ -59,8 +59,8 @@ import ccpn
 from ccpn._wrapper._Project import Project
 previousChildClasses = list(Project._childClasses)
 
-from ccpnmr._wrapper._GuiWindow import GuiWindow
-from ccpnmr._wrapper._GuiTask import GuiTask
+from ccpnmr._wrapper._Window import Window
+from ccpnmr._wrapper._Task import Task
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpnmr._wrapper._Strip import Strip
 from ccpnmr._wrapper._Axis import Axis

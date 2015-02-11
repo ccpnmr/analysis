@@ -1,54 +1,47 @@
 __author__ = 'simon'
 
-from PySide import QtGui, QtCore
-
 from ccpncore.gui.Icon import Icon
-import os
 
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpnmrcore.modules.GuiStrip1d import GuiStrip1d
-from ccpnmrcore.modules.spectrumItems.GuiSpectrumView1d import GuiSpectrumView1d
 
-from ccpncore.gui.Label import Label
 from ccpncore.gui.VerticalLabel import VerticalLabel
 
-from ccpn.lib import Spectrum as LibSpectrum
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
 
-  def __init__(self, dockArea, apiSpectrumDisplay1d):
-    if not apiSpectrumDisplay1d.strips:
-      apiSpectrumDisplay1d.newStrip1d()
-    self.apiStripDisplay1d = apiSpectrumDisplay1d
-    GuiSpectrumDisplay.__init__(self, dockArea, apiSpectrumDisplay1d)
+  def __init__(self):
+    # if not apiSpectrumDisplay1d.strips:
+    #   apiSpectrumDisplay1d.newStrip1d()
+
+    GuiSpectrumDisplay.__init__(self)
     self.fillToolBar()
     self.addSpinSystemSideLabel()
 
-  def addSpectrum(self, spectrum):
-
-    apiDataSource = spectrum._wrappedData
-    apiSpectrumView = self.apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)
-
-    #axisCodes = spectrum.axisCodes
-    axisCodes = LibSpectrum.getAxisCodes(spectrum)
-    axisCodes = axisCodes + ('intensity',)
-    if axisCodes != self.apiSpectrumDisplay.axisCodes:
-      raise Exception('Cannot overlay that spectrum on this display')
-
-    # guiSpectrumView = GuiSpectrumView1d(self, apiStripDisplay1d)
-    # # guiSpectrumView.name = apiSpectrumDislay1d.name
-    # for guiStrip in self.guiStrips:
-    #   guiStrip.addSpectrum(apiStripDisplay1d, guiSpectrumView)
-
-    if not apiSpectrumView:
-      ##axisCodes=spectrum.axisCodes
-      dimensionOrdering = (1, 0) # 0 because that is the intensity axis so gets mapped to nothing in the spectrum
-      apiSpectrumView = self.apiSpectrumDisplay.newSpectrumView(spectrumName=apiDataSource.name,
-                            dimensionOrdering=dimensionOrdering)
-    guiSpectrumView = GuiSpectrumView1d(self, apiSpectrumView)
-
-    for guiStrip in self.guiStrips:
-      guiStrip.addSpectrum(spectrum, guiSpectrumView)
+  # def addSpectrum(self, spectrum):
+  #
+  #   apiDataSource = spectrum._wrappedData
+  #   apiSpectrumView = self.apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)
+  #
+  #   #axisCodes = spectrum.axisCodes
+  #   axisCodes = LibSpectrum.getAxisCodes(spectrum)
+  #   axisCodes = axisCodes + ('intensity',)
+  #   if axisCodes != self.apiSpectrumDisplay.axisCodes:
+  #     raise Exception('Cannot overlay that spectrum on this display')
+  #
+  #   # guiSpectrumView = GuiSpectrumView1d(self, apiStripDisplay1d)
+  #   # # guiSpectrumView.name = apiSpectrumDislay1d.name
+  #   # for guiStrip in self.guiStrips:
+  #   #   guiStrip.addSpectrum(apiStripDisplay1d, guiSpectrumView)
+  #
+  #   if not apiSpectrumView:
+  #     ##axisCodes=spectrum.axisCodes
+  #     dimensionOrdering = (1, 0) # 0 because that is the intensity axis so gets mapped to nothing in the spectrum
+  #     apiSpectrumView = self.apiSpectrumDisplay.newSpectrumView(spectrumName=apiDataSource.name,
+  #                           dimensionOrdering=dimensionOrdering)
+  #   guiSpectrumView = GuiSpectrumView1d(self, apiSpectrumView)
+  #
+  #   for guiStrip in self.guiStrips:
+  #     guiStrip.addSpectrum(spectrum, guiSpectrumView)
 
   def fillToolBar(self):
     GuiSpectrumDisplay.fillToolBar(self)
@@ -69,18 +62,18 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
 
-  def addStrip(self):
-
-    apiStrip = self.apiSpectrumDisplay.newStrip1d()
-    print('HERE221')
-    n = len(self.apiSpectrumDisplay.strips) - 1
-    guiStrip = GuiStrip1d(self.stripFrame, apiStrip, grid=(1, n), stretch=(0, 1))
-    if n > 0:
-      prevGuiStrip = self.guiStrips[n-1]
-      prevGuiStrip.axes['right']['item'].hide()
-      guiStrip.setYLink(prevGuiStrip)
-
-    print('HERE222')
+  # def addStrip(self):
+  #
+  #   apiStrip = self.apiSpectrumDisplay.newStrip1d()
+  #   print('HERE221')
+  #   n = len(self.apiSpectrumDisplay.strips) - 1
+  #   guiStrip = GuiStrip1d(self.stripFrame, apiStrip, grid=(1, n), stretch=(0, 1))
+  #   if n > 0:
+  #     prevGuiStrip = self.guiStrips[n-1]
+  #     prevGuiStrip.axes['right']['item'].hide()
+  #     guiStrip.setYLink(prevGuiStrip)
+  #
+  #   print('HERE222')
 
     #self.stripCount+=1
 

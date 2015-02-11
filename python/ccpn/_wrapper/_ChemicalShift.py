@@ -26,7 +26,7 @@ from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
 from ccpn._wrapper._NmrAtom import NmrAtom
-from ccpncore.api.ccp.nmr.Nmr import Shift as Ccpn_Shift
+from ccpncore.api.ccp.nmr.Nmr import Shift as ApiShift
 
 class ChemicalShift(AbstractWrapperObject):
   """Chemical Shift."""
@@ -42,7 +42,7 @@ class ChemicalShift(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnShift(self) -> Ccpn_Shift:
+  def apiShift(self) -> ApiShift:
     """ CCPN Chemical Shift matching ChemicalShift"""
     return self._wrappedData
     
@@ -122,7 +122,7 @@ def newChemicalShift(parent:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
 ChemicalShiftList.newChemicalShift = newChemicalShift
 
 # Notifiers:
-className = Ccpn_Shift._metaclass.qualifiedName()
+className = ApiShift._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':ChemicalShift}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

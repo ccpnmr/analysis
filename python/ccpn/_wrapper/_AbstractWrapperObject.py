@@ -484,11 +484,30 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
     for childClass in self._childClasses:
 
       # recursively create children
-      for wrappedObj in childClass._getAllWrappedData(self):
-        newObj = data2Obj.get(wrappedObj)
-        if newObj is None:
-          newObj = childClass(project, wrappedObj)
-        newObj._initializeAll()
+      for apiObj in childClass._getAllWrappedData(self):
+        obj = data2Obj.get(apiObj)
+        if obj is None:
+          if hasattr(childClass, '_factoryFunction'):
+            obj = childClass._factoryFunction(project, apiObj)
+          else:
+            obj = childClass(project, apiObj)
+        obj._initializeAll()
+
+  def _unwrapAll(self):
+    """remove wrapper from object and child objects
+    For special case where wrapper objects are removed without deleting wrappedData"""
+    project = self._project
+    data2Obj = project._data2Obj
+
+    for childClass in self._childClasses:
+
+      # recursively unwrap children
+      for apiObj in childClass._getAllWrappedData(self):
+        obj = data2Obj.get(apiObj)
+        if obj is not None:
+          obj._unwrapAll()
+          del self._pid2Obj[obj.shortClassName][obj._pid]
+        del data2Obj[apiObj]
 
 
 AbstractWrapperObject.getById.__annotations__['return'] = AbstractWrapperObject

@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrChain import NmrChain
-from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup
+from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpncore.lib.DataMapper import DataMapper
 from ccpncore.lib import pid as Pid
 
@@ -44,7 +44,7 @@ class NmrResidue(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnNmrResidue(self) -> ResonanceGroup:
+  def apiResonanceGroup(self) -> ApiResonanceGroup:
     """ CCPN resonanceGroup matching Residue"""
     return self._wrappedData
   
@@ -76,13 +76,13 @@ class NmrResidue(AbstractWrapperObject):
 
   @name.setter
   def name(self, value:str):
-    ccpnNmrResidue = self._wrappedData
-    ccpnNmrResidue.code3Letter = value
+    apiResonanceGroup = self._wrappedData
+    apiResonanceGroup.code3Letter = value
 
     # get chem comp ID strings from residue name
     tt = DataMapper.pickChemCompId(self._project._residueName2chemCompIds, value)
     if tt is not None:
-      ccpnNmrResidue.molType, ccpnNmrResidue.ccpCode = tt
+      apiResonanceGroup.molType, apiResonanceGroup.ccpCode = tt
   
   @property
   def comment(self) -> str:
@@ -102,21 +102,22 @@ class NmrResidue(AbstractWrapperObject):
     
 def newNmrResidue(parent:NmrChain, name:str, sequenceCode:str=None, comment:str=None) -> NmrResidue:
   """Create new child NmrResidue"""
-  ccpnNmrChain = parent._wrappedData
-  nmrProject = ccpnNmrChain.nmrProject
+  apiNmrChain = parent._wrappedData
+  nmrProject = apiNmrChain.nmrProject
   obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=name, details=comment,
-                                     nmrChsin=ccpnNmrChain)
+                                     nmrChsin=apiNmrChain)
   return parent._project._data2Obj.get(obj)
 
 
 def fetchNmrResidue(parent:NmrChain, sequenceCode:str, name:str=None) -> NmrResidue:
   """Fetch NmrResidue with name=name, creating it if necessary"""
-  resonanceGroup = parent._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
-  if resonanceGroup:
-    if name is not None and name != resonanceGroup.name:
-      raise ValueError("%s has residue type %s, not %s" % (sequenceCode, resonanceGroup.name, name))
+  apiResonanceGroup = parent._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
+  if apiResonanceGroup:
+    if name is not None and name != apiResonanceGroup.name:
+      raise ValueError("%s has residue type %s, not %s" % (sequenceCode,
+                                                           apiResonanceGroup.name, name))
     else:
-      result = parent._project._data2Obj.get(resonanceGroup)
+      result = parent._project._data2Obj.get(apiResonanceGroup)
   else:
     result = parent.newNmrResidue(name=name, sequenceCode=sequenceCode)
   #
@@ -129,7 +130,7 @@ NmrChain.newNmrResidue = newNmrResidue
 NmrChain.fetchNmrResidue = fetchNmrResidue
 
 # Notifiers:
-className = ResonanceGroup._metaclass.qualifiedName()
+className = ApiResonanceGroup._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':NmrResidue}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

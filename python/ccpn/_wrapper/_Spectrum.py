@@ -30,7 +30,7 @@ from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
-from ccpncore.api.ccp.nmr.Nmr import DataSource as Ccpn_DataSource
+from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.lib import pid as Pid
 
 class Spectrum(AbstractWrapperObject):
@@ -47,7 +47,7 @@ class Spectrum(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def ccpnSpectrum(self) -> Ccpn_DataSource:
+  def apiDataSource(self) -> ApiDataSource:
     """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
 
@@ -186,16 +186,16 @@ class Spectrum(AbstractWrapperObject):
   # Attributes belonging to AbstractDataDim
 
   def _setDataDimValue(self, attributeName, value:Sequence):
-    dataSource = self._wrappedData
-    if len(value) == dataSource.numDim:
-      for ii,dataDim in enumerate(dataSource.sortedDataDims()):
+    apiDataSource = self._wrappedData
+    if len(value) == apiDataSource.numDim:
+      for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         if hasattr (dataDim, attributeName):
           setattr(dataDim, attributeName, value[ii])
         elif value[ii] is not None:
           raise ValueError("Attempt to set value for invalid attribute %s in dimension %s: %s" %
                            (attributeName, ii+1, value))
     else:
-      raise ValueError("Value must have length %s, was %s" % (dataSource.numDim, value))
+      raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
   def pointCounts(self) -> tuple:
@@ -214,16 +214,16 @@ class Spectrum(AbstractWrapperObject):
 
   @pointCounts.setter
   def pointCounts(self, value:Sequence):
-    dataSource = self._wrappedData
-    if len(value) == dataSource.numDim:
-      for ii,dataDim in enumerate(dataSource.sortedDataDims()):
+    apiDataSource = self._wrappedData
+    if len(value) == apiDataSource.numDim:
+      for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         if hasattr(dataDim, 'numPointsValid'):
           dataDim.numPointsValid = value[ii]
         else:
           dataDim.numPoints = value[ii]
     else:
       raise ValueError("pointCount value must have length %s, was %s" %
-                       (dataSource.numDim, value))
+                       (apiDataSource.numDim, value))
 
   @property
   def totalPointCounts(self) -> tuple:
@@ -243,16 +243,16 @@ class Spectrum(AbstractWrapperObject):
 
   @totalPointCounts.setter
   def totalPointCounts(self, value:Sequence):
-    dataSource = self._wrappedData
-    if len(value) == dataSource.numDim:
-      for ii,dataDim in enumerate(dataSource.sortedDataDims()):
+    apiDataSource = self._wrappedData
+    if len(value) == apiDataSource.numDim:
+      for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         if hasattr(dataDim, 'numPointsOrig'):
           dataDim.numPointsOrig = value[ii]
         else:
           dataDim.numPoints = value[ii]
     else:
       raise ValueError("totalPointCount value must have length %s, was %s" %
-                       (dataSource.numDim, value))
+                       (apiDataSource.numDim, value))
 
   @property
   def pointOffsets(self) -> tuple:
@@ -269,17 +269,17 @@ class Spectrum(AbstractWrapperObject):
 
   @pointOffsets.setter
   def pointOffsets(self, value:Sequence):
-    dataSource = self._wrappedData
+    apiDataSource = self._wrappedData
     attributeName = 'pointOffset'
-    if len(value) == dataSource.numDim:
-      for ii,dataDim in enumerate(dataSource.sortedDataDims()):
+    if len(value) == apiDataSource.numDim:
+      for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         if hasattr (dataDim, attributeName):
           setattr(dataDim, attributeName, value[ii])
         elif value[ii]:
           raise ValueError("Attempt to set value for %s in dimension %s: %s" %
                            (attributeName, ii+1, value))
     else:
-      raise ValueError("Value must have length %s, was %s" % (dataSource.numDim, value))
+      raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
   def isComplex(self) -> tuple:
@@ -309,10 +309,10 @@ class Spectrum(AbstractWrapperObject):
 
   @spectralWidthsHz.setter
   def spectralWidthsHz(self, value:Sequence):
-    dataSource = self._wrappedData
+    apiDataSource = self._wrappedData
     attributeName = 'spectralWidth'
-    if len(value) == dataSource.numDim:
-      for ii,dataDim in enumerate(dataSource.sortedDataDims()):
+    if len(value) == apiDataSource.numDim:
+      for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         val = value[ii]
         if hasattr(dataDim, attributeName):
           if not val:
@@ -327,7 +327,7 @@ class Spectrum(AbstractWrapperObject):
                            % (attributeName, ii+1, value))
     else:
       raise ValueError("SpectralWidth value must have length %s, was %s" %
-                       (dataSource.numDim, value))
+                       (apiDataSource.numDim, value))
 
 
   @property
@@ -392,8 +392,8 @@ class Spectrum(AbstractWrapperObject):
 
   def _setExpDimRefAttribute(self, attributeName:str, value:Sequence, mandatory:bool=True):
     """Set main ExpDimRef attribute (serial=1) for each dimension"""
-    dataSource = self._wrappedData
-    if len(value) == dataSource.numDim:
+    apiDataSource = self._wrappedData
+    if len(value) == apiDataSource.numDim:
       for ii,dataDim in enumerate(self._wrappedData.sortedDataDims()):
         # NB MUST loop over dataDims, in case of projection spectra
         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
@@ -473,9 +473,9 @@ class Spectrum(AbstractWrapperObject):
   @isotopeCodes.setter
   def isotopeCodes(self, value:Sequence):
     """Set main ExpDimRef (serial=1) isotopeCode for each dimension"""
-    dataSource = self._wrappedData
-    if len(value) == dataSource.numDim:
-      for ii,dataDim in enumerate(dataSource.sortedDataDims()):
+    apiDataSource = self._wrappedData
+    if len(value) == apiDataSource.numDim:
+      for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
         val = value[ii]
         if expDimRef is None:
@@ -486,7 +486,7 @@ class Spectrum(AbstractWrapperObject):
         else:
           expDimRef.isotopeCodes = (val,)
     else:
-      raise ValueError("Value must have length %s, was %s" % (dataSource.numDim, value))
+      raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
   def foldingModes(self) -> tuple:
@@ -550,8 +550,8 @@ class Spectrum(AbstractWrapperObject):
   def _setDataDimRefAttribute(self, attributeName:str, value:Sequence, mandatory:bool=True):
     """Set main DataDimRef attribute for each dimension
     - uses first ExpDimRef with serial=1"""
-    dataSource = self._wrappedData
-    if len(value) == dataSource.numDim:
+    apiDataSource = self._wrappedData
+    if len(value) == apiDataSource.numDim:
       expDimRefs = self._mainExpDimRefs()
       for ii, dataDim in  enumerate(self._wrappedData.sortedDataDims()):
         if hasattr(dataDim, 'dataDimRefs'):
@@ -570,7 +570,7 @@ class Spectrum(AbstractWrapperObject):
         else:
           setattr(dataDimRef, attributeName, value[ii])
     else:
-      raise ValueError("Value must have length %s, was %s" % (dataSource.numDim, value))
+      raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
   def referencePoints(self) -> tuple:
@@ -646,7 +646,7 @@ Project._childClasses.append(Spectrum)
 Project.newSpectrum = newSpectrum
 
 # Notifiers:
-className = Ccpn_DataSource._metaclass.qualifiedName()
+className = ApiDataSource._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Spectrum}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

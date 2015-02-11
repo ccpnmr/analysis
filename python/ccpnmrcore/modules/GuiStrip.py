@@ -1,35 +1,29 @@
 __author__ = 'simon'
 
 import pyqtgraph as pg
-
 import os
 from functools import partial
-
 from PySide import QtGui, QtCore
-
 from ccpn import Spectrum
-
 from ccpncore.gui import ViewBox
-
 from ccpnmrcore.DropBase import DropBase
-
 from ccpnmrcore.gui.Axis import Axis
 
 class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the drop events are not processed
 
   sigClicked = QtCore.Signal(object, object)
 
-  def __init__(self, guiFrame, apiStrip, **kw):
-    self.guiFrame = guiFrame
-    self.guiSpectrumDisplay = guiFrame.guiSpectrumDisplay
-    self.apiStrip = apiStrip
-    
-    apiStrip.guiStrip = self  # runtime only
+  def __init__(self):
+    self.guiFrame = self._parent.guiFrame
+    self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
+    # self.apiStrip = apiStrip
+    #
+    # apiStrip.guiStrip = self  # runtime only
 
 
     pg.PlotWidget.__init__(self, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True)
 
-    DropBase.__init__(self, guiFrame.appBase, self.dropCallback, **kw)
+    DropBase.__init__(self, self._appBase, self.dropCallback)
     # if self.appBase.preferences.general.colourScheme == 'light':
     #   background = 'w'
     #   foreground = 'k'
@@ -44,7 +38,7 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.setBackground(background)
     # self.setForegroundBrush(foreground)
     # print(dir(self))
-    self.current = guiFrame.appBase.current
+    self.current = self._appBase.current
     self.axes = self.plotItem.axes
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
@@ -68,28 +62,31 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.addItem(self.grid)
     # self.plotItem.resizeEvent = self.resizeEvent
     self.setAcceptDrops(True)
-    self.crossHair = self.createCrossHair()
+    # self.crossHair = self.createCrossHair() NB function does not return anything
     self.scene().sigMouseMoved.connect(self.mouseMoved)
     # self.scene().sigMouseHover.connect(self.setCurrentPane)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     # self.current.pane = self.guiSpectrumDisplay
     self.storedZooms = []
     self.spectrumItems = []
-    n = len(self.guiSpectrumDisplay.apiSpectrumDisplay.strips)-1
-    layout = self.guiFrame.layout()
-    if not layout:
-      layout = QtGui.QGridLayout(self.guiFrame)
-      layout.setContentsMargins(0, 0, 0, 0)
-      self.guiFrame.setLayout(layout)
-       
-    # print(self.guiFrame.width())
 
-    layout.setColumnStretch(n, 1)
-    layout.setSpacing(1)
-    layout.addWidget(self, 0, n)
-    # self.scene().sigMouseClicked.connect(self.setCurrentPane)
 
-    self.guiSpectrumDisplay.guiStrips.append(self)
+    # layout = self.guiFrame.layout()
+    # if not layout:
+    #   layout = QtGui.QGridLayout(self.guiFrame)
+    #   layout.setContentsMargins(0, 0, 0, 0)
+    #   self.guiFrame.setLayout(layout)
+    #
+    # # print(self.guiFrame.width())
+    #
+    #
+    # n = len(self.guiSpectrumDisplay.apiSpectrumDisplay.strips)-1
+    # layout.setColumnStretch(n, 1)
+    # layout.setSpacing(1)
+    # layout.addWidget(self, 0, n)
+    # # self.scene().sigMouseClicked.connect(self.setCurrentPane)
+    #
+    # self.guiSpectrumDisplay.guiStrips.append(self)
 
 
   def moveAxisCodeLabels(self):
@@ -109,11 +106,10 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.guiSpectrumDisplay.vLines.append(self.vLine)
 
   def toggleCrossHair(self):
-    if self.crossHairShown ==True:
+    if self.crossHairShown:
       self.hideCrossHair()
     else:
       self.showCrossHair()
-      self.crossHairShown = True
 
   def showCrossHair(self):
       for vLine in self.guiSpectrumDisplay.vLines:
@@ -132,15 +128,15 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.crossHairShown = False
 
   def toggleGrid(self):
-    if self.grid.isVisible() == True:
+    if self.grid.isVisible():
       self.grid.hide()
     else:
       self.grid.show()
 
   def setCurrentPane(self):
     self.guiSpectrumDisplay.currentStrip = self
-    self.appBase.mainWindow.pythonConsole.write('current.pane = '+str(self.guiSpectrumDisplay.name()))
-    self.appBase.current.pane = self.guiSpectrumDisplay
+    self._appBase.mainWindow.pythonConsole.write('current.pane = '+str(self.guiSpectrumDisplay.name()))
+    self._appBase.current.pane = self.guiSpectrumDisplay
     # for strip in self.guiSpectrumDisplay.guiStrips:
       # strip.hideCrossHair()
     self.guiSpectrumDisplay.currentStrip.showCrossHair()

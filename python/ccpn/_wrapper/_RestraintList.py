@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._RestraintSet import RestraintSet
-from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList
+from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpncore.lib import pid as Pid
 
 class RestraintList(AbstractWrapperObject):
@@ -42,7 +42,7 @@ class RestraintList(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def ccpnRestraintList(self) -> AbstractConstraintList:
+  def apiRestraintList(self) -> ApiAbstractConstraintList:
     """ CCPN ConstraintList matching RestraintList"""
     return self._wrappedData
 
@@ -204,8 +204,8 @@ def newRestraintList(parent:RestraintSet,restraintType, name:str=None, comment:s
                              tensorSequenceCode:str=None,
                              tensorResidueType:str=None) -> RestraintList:
   """Create new child RestraintList of type restraintTypr"""
-  nmrConstraintStore = parent._wrappedData
-  creator = nmrConstraintStore.getattr("new%sConstraintList" % restraintType)
+  apiNmrConstraintStore = parent._wrappedData
+  creator = apiNmrConstraintStore.getattr("new%sConstraintList" % restraintType)
   if restraintType == 'Rdc':
     obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType,
                   tensorMagnitude=tensorMagnitude, tensorRhombicity=tensorRhombicity,
@@ -218,7 +218,7 @@ def newRestraintList(parent:RestraintSet,restraintType, name:str=None, comment:s
 RestraintSet.newPeakList = newRestraintList
 
 # Notifiers:
-for clazz in AbstractConstraintList._metaclass.getNonAbstractSubtypes():
+for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():
   className = clazz.qualifiedName()
   Project._apiNotifiers.extend(
     ( ('_newObject', {'cls':RestraintList}, className, '__init__'),

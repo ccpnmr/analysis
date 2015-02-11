@@ -11,12 +11,14 @@ QtCore.qInstallMsgHandler(lambda *args: None)
 
 class GuiModule(Dock, GuiBase):
 
-  def __init__(self, dockArea, apiModule):
+  def __init__(self):
     
-    self.dockArea = dockArea
-    self.apiModule = apiModule
+    window = self.window
+
+    self.dockArea = window.dockArea
+    # self.apiModule = apiModule
     
-    Dock.__init__(self, name=apiModule.name, size=(1100,1300))
+    Dock.__init__(self, name=self._wrappedData.name, size=(1100,1300))
     dockArea.addDock(self)
     
-    GuiBase.__init__(self, dockArea.guiWindow.appBase)
+    GuiBase.__init__(self, self._project._appBase)

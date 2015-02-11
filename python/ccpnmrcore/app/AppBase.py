@@ -1,7 +1,9 @@
 __author__ = 'simon'
 
 
-from ccpn import openProject, newProject
+from ccpncore.util import Io as ioUtil
+import ccpn
+# from ccpn import openProject, newProject
 
 from ccpncore.gui.Application import Application
 
@@ -10,57 +12,69 @@ from ccpncore.util.AttrDict import AttrDict
 
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.Current import Current
-from ccpnmrcore.modules.MainWindow import MainWindow
+from ccpnmrcore.modules.GuiMainWindow import GuiMainWindow
 
 import os, json
 
 class AppBase(GuiBase):
 
-  def __init__(self, project):
+  def __init__(self, apiProject):
     
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
-    
-    self.initProject(project)
+
+    self.initProject(apiProject)
     self.setupPreferences()
     
-    apiProject = project._wrappedData.parent
-    apiWindowStore = apiProject.findFirstWindowStore()
-    if apiWindowStore is None:
-      apiWindowStore = apiProject.newWindowStore(nmrProject=apiProject.findFirstNmrProject())
-      
-    apiWindow = apiWindowStore.findFirstWindow()
-    apiGuiTask = apiProject.findFirstGuiTask(name='Ccpn') # TBD: what should the name be?? ask Rasmus
-    if not apiGuiTask:
-      apiGuiTask = apiProject.newGuiTask(name='Ccpn', nmrProjectName=apiProject.findFirstNmrProject().name)
-      
-    self.mainWindow = MainWindow(self, apiWindow)
-    self.mainWindow.raise_()
-    
-  def initProject(self, project):
+  def initProject(self, apiProject):
+
+    # Done this way to sneak the appBase in before creating the wrapper
+    apiProject._appBase = self
+    project = ccpn._wrapApiProject(apiProject)
     
     self.project = project
     self.guiWindows = []
     
     self.current = Current()
 
-  """
-  def openProject(self, path):
-    self.project = openProject(path)
-    self.setProject(isNew=False)
-    # for window in self.project.windowStore.windows:
-    #   if window.serial == 1:
-    #     self.mainWindow.setProject()
-    #   else:
-    #     guiWindow = SubWindow(self, window)
-    ##### need to work out how to handle multiple layouts
+    apiProject = project._wrappedData.parent
+    apiWindowStore = apiProject.findFirstWindowStore()
+    if apiWindowStore is None:
+      apiWindowStore = apiProject.newWindowStore(nmrProject=apiProject.findFirstNmrProject())
 
-  def newProject(self, name=None):
-    if name is None:
-      self.project=newProject('defaultProject')
-    else:
-      self.project=newProject(name)
-    self.setProject(isNew=True)
-  """
+    # MinWindow must always exist at this point
+    self.mainWindow = mainWindow = project.getMainWindow('Main')
+    mainWindow.raise_()
+
+    if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
+      apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
+      windows=(mainWindow,))
+
+  def _closeProject(self):
+    """Close project and clean up - should only be called wen opening another"""
+
+    # NBNB TBD add code to save first, ask, etd. Somewhere
+
+    ioUtil.cleanupProject(self.project)
+    self.project.delete()
+    self.project = None
+    self.guiWindows.clear()
+    self.mainWindow = None
+    self.current = None
+
+  def openProject(self, path):
+    """Open new project from path"""
+    self._closeProject()
+    apiProject = ioUtil.loadProject(path)
+    self.initProject(apiProject)
+    self.setupPreferences()
+
+  def newProject(self, name='default'):
+    """Create new, empty project"""
+    self._closeProject()
+    apiProject = ioUtil.newProject(name)
+    self.initProject(apiProject)
+    self.setupPreferences()
+
   def saveProject(self):
     print("project saved")
 
@@ -78,11 +92,11 @@ class AppBase(GuiBase):
 def startProgram(programClass, applicationName, applicationVersion, projectPath=None):
 
   if projectPath:
-    project = openProject(projectPath)
+    apiProject = ioUtil.loadProject(projectPath)
   else:
-    project = newProject('defaultProject')
+    apiProject = ioUtil.newProject('default')
 
   app = Application(applicationName, applicationVersion)
-  program = programClass(project)
+  program = programClass(apiProject)
   app.start()
   

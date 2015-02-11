@@ -25,7 +25,7 @@ __version__ = "$Revision: 7686 $"
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Residue import Residue
-from ccpncore.api.ccp.molecule.MolSystem import Atom as Ccpn_Atom
+from ccpncore.api.ccp.molecule.MolSystem import Atom as ApiAtom
 from ccpncore.lib import pid as Pid
 
 # NBNB TBD add settable linkedAtoms link for non-ChemComp links ???
@@ -47,9 +47,9 @@ class Atom(AbstractWrapperObject):
   _childClasses = []
   
 
-  # CCPN properties  
+  # CCPN properties
   @property
-  def ccpnAtom(self) -> Ccpn_Atom:
+  def apiAtom(self) -> ApiAtom:
     """ CCPN atom matching Atom"""
     return self._wrappedData
 
@@ -83,7 +83,7 @@ class Atom(AbstractWrapperObject):
 def newAtom(parent:Residue, name:str) -> Atom:
   """Create new child Atom"""
   project = parent._project
-  ccpnResidue = parent._wrappedData
+  apiResidue = parent._wrappedData
 
   raise NotImplementedError("Creation of new Atoms not yet implemented")
 
@@ -100,7 +100,7 @@ Residue._childClasses.append(Atom)
 Residue.newAtom = newAtom
 
 # Notifiers:
-className = Ccpn_Atom._metaclass.qualifiedName()
+className = ApiAtom._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Atom}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

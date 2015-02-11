@@ -27,18 +27,18 @@ class Base(CoreBase):
   
   def __init__(self, appBase, *args, **kw):
     
-    self.appBase = appBase
+    self._appBase = appBase
     
     CoreBase.__init__(self, *args, **kw)
     
-  def getById(self, pid):
-
-    return self.appBase.project.getById(pid)
-
-  def getObject(self, pidOrObject):
-    
-    return self.getById(pidOrObject) if type(pidOrObject) is type('') else pidOrObject
-      
-  def getWrapperObject(self, apiObject):
-
-    return self.appBase.project._data2Obj[apiObject]
+  # def getById(self, pid):
+  #
+  #   return self._appBase.project.getById(pid)
+  #
+  # def getObject(self, pidOrObject):
+  #
+  #   return self.getById(pidOrObject) if type(pidOrObject) is type('') else pidOrObject
+  #
+  # def getWrapperObject(self, apiObject):
+  #
+  #   return self._appBase.project._data2Obj[apiObject]

@@ -28,9 +28,9 @@ import operator
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._PeakList import PeakList
-from ccpncore.api.ccp.nmr.Nmr import Peak as Ccpn_Peak
+from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 
-from ccpncore.lib.ccp.nmr.Nmr import Peak as CcpnLibPeak
+from ccpncore.lib.ccp.nmr.Nmr import Peak as ApiLibPeak
 
 class Peak(AbstractWrapperObject):
   """Peak. Includes values for per-dimension values and for assignments.
@@ -52,8 +52,8 @@ class Peak(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnPeak(self) -> Ccpn_Peak:
-    """ CCPN peaks matching Peak"""
+  def apiPeak(self) -> ApiPeak:
+    """ API peaks matching Peak"""
     return self._wrappedData
     
   @property
@@ -188,13 +188,13 @@ class Peak(AbstractWrapperObject):
 
   @dimensionNmrAtoms.setter
   def dimensionNmrAtoms(self, value:Sequence):
-    ccpnPeak = self._wrappedData
+    apiPeak = self._wrappedData
     dimResonances = list(value)
     for ii, atoms in enumerate(dimResonances):
       dimValues = tuple(x._wrappedData for x in value[ii])
       dimResonances[ii] = tuple(x for x in dimValues if x is not None)
 
-    CcpnLibPeak.setPeakDimAssignments(ccpnPeak, dimResonances)
+    ApiLibPeak.setPeakDimAssignments(apiPeak, dimResonances)
 
   @property
   def assignedNmrAtoms(self) -> tuple:
@@ -202,12 +202,12 @@ class Peak(AbstractWrapperObject):
     (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None
     Assignments per dimension are given in 'dimensionAssignments'."""
     data2Obj = self._project._data2Obj
-    ccpnPeak = self._wrappedData
-    peakDims = ccpnPeak.sortedPeakDims()
+    apiPeak = self._wrappedData
+    peakDims = apiPeak.sortedPeakDims()
     mainPeakDimContribs = [sorted(x.mainPeakDimContribs, key=operator.attrgetter('serial'))
                            for x in peakDims]
     result = []
-    for peakContrib in ccpnPeak.sortedPeakContribs():
+    for peakContrib in apiPeak.sortedPeakContribs():
       allAtoms = []
       peakDimContribs = peakContrib.peakDimContribs
       for ii,peakDim in enumerate(peakDims):
@@ -224,8 +224,8 @@ class Peak(AbstractWrapperObject):
 
   @assignedNmrAtoms.setter
   def assignedNmrAtoms(self, value:Sequence):
-    ccpnPeak = self._wrappedData
-    peakDims = ccpnPeak.sortedPeakDims()
+    apiPeak = self._wrappedData
+    peakDims = apiPeak.sortedPeakDims()
     dimensionCount = len(peakDims)
 
     # get resonance, all tuples and per dimension
@@ -238,7 +238,7 @@ class Peak(AbstractWrapperObject):
           ll[ii] = atom._wrappedData
 
     # set assignments
-    CcpnLibPeak.setAssignments(ccpnPeak, resonances)
+    ApiLibPeak.setAssignments(apiPeak, resonances)
 
   @property
   def dimensionAssignments(self) -> tuple:
@@ -276,17 +276,17 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
             position:Sequence=(), pointPosition:Sequence=(),
             dimensionAssignments:Sequence=(), assignments:Sequence=()) -> Peak:
   """Create new child Peak"""
-  ccpnPeakList = parent._wrappedData
-  ccpnPeak = ccpnPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
+  apiPeakList = parent._wrappedData
+  apiPeak = apiPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
                               annotation=annotation,details=comment)
 
   # set peak position
   # NBNB TBD currently unused parameters could be added, and will have to come in here as well
   if position:
-    for ii,peakDim in enumerate(ccpnPeak.sortedPeakDims()):
+    for ii,peakDim in enumerate(apiPeak.sortedPeakDims()):
       peakDim.value = position[ii]
   elif pointPosition:
-    for ii,peakDim in enumerate(ccpnPeak.sortedPeakDims()):
+    for ii,peakDim in enumerate(apiPeak.sortedPeakDims()):
       peakDim.position = pointPosition[ii]
 
   # Setting assignments
@@ -297,10 +297,10 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
       dimResonances[ii] = tuple(x for x in dimValues if x is not None)
 
     # set dimensionAssignments
-    CcpnLibPeak.setPeakDimAssignments(ccpnPeak, dimResonances)
+    ApiLibPeak.setPeakDimAssignments(apiPeak, dimResonances)
 
   if assignments:
-    peakDims = ccpnPeak.sortedPeakDims()
+    peakDims = apiPeak.sortedPeakDims()
     dimensionCount = len(peakDims)
 
     # get resonance, all tuples and per dimension
@@ -313,15 +313,15 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
           ll[ii] = atom._wrappedData
 
     # set assignments
-    CcpnLibPeak.setAssignments(ccpnPeak, resonances)
+    ApiLibPeak.setAssignments(apiPeak, resonances)
 
-  return parent._project._data2Obj.get(ccpnPeak)
+  return parent._project._data2Obj.get(apiPeak)
 
 
 PeakList.newPeak = newPeak
 
 # Notifiers:
-className = Ccpn_Peak._metaclass.qualifiedName()
+className = ApiPeak._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Peak}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

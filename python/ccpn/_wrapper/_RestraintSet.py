@@ -26,8 +26,8 @@ __version__ = "$Revision$"
 from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
-from ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore
-from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance
+from ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
+from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
 from ccpncore.lib import MoleculeQuery
 from ccpncore.lib import pid as Pid
 
@@ -47,7 +47,7 @@ class RestraintSet(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnRestraintSet(self) -> NmrConstraintStore:
+  def apiRestraintSet(self) -> ApiNmrConstraintStore:
     """ CCPN NmrConstraintStore matching RestraintSet"""
     return self._wrappedData
 
@@ -83,10 +83,10 @@ class RestraintSet(AbstractWrapperObject):
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
     return parent._wrappedData.sortedNmrConstraintStores()
 
-  def _fetchFixedResonance(self, assignment:Sequence) -> FixedResonance:
+  def _fetchFixedResonance(self, assignment:Sequence) -> ApiFixedResonance:
     """Fetch FixedResonance matching assignment tuple, creating anew if needed."""
 
-    nmrConstraintStore = self._wrappedData
+    apiNmrConstraintStor = self._wrappedData
 
     tt = assignment
     if len(tt) != 4:
@@ -98,11 +98,11 @@ class RestraintSet(AbstractWrapperObject):
       'residueType':tt[2],
       'name':tt[3]
     }
-    result = nmrConstraintStore.findFirstFixedResonance(**dd)
+    result = apiNmrConstraintStor.findFirstFixedResonance(**dd)
 
     if result is None:
       dd['isotopeCode'] = MoleculeQuery.DEFAULT_ISOTOPES.get(tt[3][0])
-      result = nmrConstraintStore.newFixedResonance(**dd)
+      result = apiNmrConstraintStor.newFixedResonance(**dd)
     #
     return result
 
@@ -113,9 +113,9 @@ def newRestraintSet(parent:Project, comment:str=None) -> RestraintSet:
   :param str comment: comment for new chain (optional)"""
   
   nmrProject = parent._wrappedData
-  newNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
+  newApiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
                                                          details=comment)
-  return parent._data2Obj.get(newNmrConstraintStore)
+  return parent._data2Obj.get(newApiNmrConstraintStore)
 
     
     
@@ -124,7 +124,7 @@ Project._childClasses.append(RestraintSet)
 Project.newRestraintSet = newRestraintSet
 
 # Notifiers:
-className = NmrConstraintStore._metaclass.qualifiedName()
+className = ApiNmrConstraintStore._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':RestraintSet}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

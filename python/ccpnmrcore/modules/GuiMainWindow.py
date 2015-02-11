@@ -6,7 +6,7 @@ from functools import partial
 
 from PySide import QtGui, QtCore
 
-from ccpn import openProject, newProject
+# from ccpn import openProject, newProject
 from ccpn.lib.Project import loadSpectrum
 
 from ccpncore.gui.Action import Action
@@ -24,9 +24,9 @@ from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
 
-class MainWindow(QtGui.QMainWindow, GuiWindow):
+class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
-  def __init__(self, appBase, apiWindow):
+  def __init__(self):
     
     QtGui.QMainWindow.__init__(self)
     
@@ -40,7 +40,7 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
       #apiModule = apiGuiTask.newTaskModule(name=self.INITIAL_MODULE_NAME)
       #apiWindow.addModule(apiModule)
       
-    GuiWindow.__init__(self, appBase, apiWindow)
+    GuiWindow.__init__(self)
     
     self.setupWindow()
     self.setupMenus()
@@ -48,10 +48,11 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
 
   def initProject(self, project=None):
 
-    if project:
-      self.appBase.initProject(project)
-    else:
-      project = self.appBase.project
+    # No need, project already set and initialised in AppBase init
+    # if project:
+    #   self._appBase.initProject(project)
+    # else:
+    #   project = self._appBase.project
       
     isNew = self.apiWindow.root.isModified  # a bit of a hack this, but should be correct
     
@@ -66,33 +67,34 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.ui.historyList.addItem(msg2)
 
     if not isNew:
-      recentFiles = self.appBase.preferences.recentFiles
+      recentFiles = self._appBase.preferences.recentFiles
       if len(recentFiles) >= 10:
         recentFiles.pop()
       recentFiles.insert(0, path)
 
-  def openProject(self, path):
-    
-    project = openProject(path)
-    self.initProject(project)
-    
-    return project
-
-  def newProject(self, path='defaultProject'):
-    
-    project = newProject(name)
-    self.initProject(project)
-    
-    return project
+  # Cannot be done from here - MainWindow is part of project. Do form appBase
+  # def openProject(self, path):
+  #
+  #   project = openProject(path)
+  #   self.initProject(project)
+  #
+  #   return project
+  #
+  # def newProject(self, path='defaultProject'):
+  #
+  #   project = newProject(name)
+  #   self.initProject(project)
+  #
+  #   return project
     
   def setupWindow(self):
 
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     
-    self.namespace = {'current': self.appBase.current, 'openProject':self.openProject,
+    self.namespace = {'current': self._appBase.current, 'openProject':self.openProject,
                       'newProject':self.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
-                      'preferences':self.appBase.preferences}
+                      'preferences':self._appBase.preferences}
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     self.pythonConsole.heightMax = 200
@@ -135,7 +137,7 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Save", callback=self.appBase.saveProject, shortcut="ps"))
+    fileMenu.addAction(Action(self, "Save", callback=self._appBase.saveProject, shortcut="ps"))
     fileMenu.addAction(Action(self, "Save As...", shortcut="pa", callback=self.saveProjectAs))
     backupOption = fileMenu.addMenu("Backup")
     backupOption.addAction(Action(self, "Save", callback=self.saveBackup))
@@ -237,12 +239,12 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
 
   def raiseSpectrumProperties(self, item):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
-    spectrum = self.appBase.project.getById(dataItem)
+    spectrum = self._appBase.project.getById(dataItem)
     popup = SpectrumPropertiesPopup(spectrum)
     popup.show()
 
   def fillRecentProjectsMenu(self):
-    for recentFile in self.appBase.preferences.recentFiles:
+    for recentFile in self._appBase.preferences.recentFiles:
       self.action = Action(self, text=recentFile, callback=partial(self.openProject,projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
 
@@ -271,14 +273,14 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def showApplicationPreferences(self):
-    PreferencesPopup(preferences=self.appBase.preferences).exec_()
+    PreferencesPopup(preferences=self._appBase.preferences).exec_()
 
   def quitAction(self):
     # pass
     prefFile = open(os.path.expanduser("~/.ccpn/v3settings.json"))
     pref = json.load(prefFile)
     prefFile.close()
-    if pref != self.appBase.preferences:
+    if pref != self._appBase.preferences:
       msgBox = QtGui.QMessageBox()
       msgBox.setText("Application Preferences have been changed")
       msgBox.setInformativeText("Do you want to save your changes?")
@@ -287,7 +289,7 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
       if ret == QtGui.QMessageBox.Yes:
         preferencesPath = os.path.expanduser("~/.ccpn/v3settings.json")
         prefFile = open(preferencesPath, 'w+')
-        json.dump(self.appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
         prefFile.close()
       else:
         pass
@@ -424,10 +426,10 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
     print("project saved as...")
 
   def toggleCrossHair(self):
-    self.appBase.current.pane.toggleCrossHair()
+    self._appBase.current.pane.toggleCrossHair()
 
   def toggleGrid(self):
-    self.appBase.current.pane.toggleGrid()
+    self._appBase.current.pane.toggleGrid()
 
   def hideConsole(self):
     self.pythonConsole.hide()
@@ -439,7 +441,7 @@ class MainWindow(QtGui.QMainWindow, GuiWindow):
 # def main():
 #
 #   app = QtGui.QApplication(sys.argv)
-#   window = MainWindow()
+#   window = GuiMainWindow()
 #   window.showMaximized()
 #   window.raise_()
 #   sys.exit(app.exec_())

@@ -26,10 +26,15 @@ from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
-from ccpncore.api.ccpnmr.gui.Task import Strip as Ccpn_Strip
+from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
+from ccpncore.api.ccpnmr.gui.Task import Strip1d as ApiStrip1d
+from ccpncore.api.ccpnmr.gui.Task import StripNd as ApiStripNd
+from ccpnmrcore.modules.GuiStrip import GuiStrip
+from ccpnmrcore.modules.GuiStrip1d import GuiStrip1d
+from ccpnmrcore.modules.GuiStripNd import GuiStripNd
 
 
-class Strip(AbstractWrapperObject):
+class Strip(GuiStrip, AbstractWrapperObject):
   """Display Strip for 1D or nD spectrum"""
   
   #: Short class name, for PID.
@@ -44,14 +49,9 @@ class Strip(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def ccpnStrip(self) -> Ccpn_Strip:
+  def apiStrip(self) -> ApiStrip:
     """ CCPN Strip matching Strip"""
     return self._wrappedData
-    
-  @property
-  def _key(self) -> str:
-    """id string - serial number converted to string"""
-    return str(self._wrappedData.serial)
 
   @property
   def serial(self) -> int:
@@ -140,9 +140,9 @@ class Strip(AbstractWrapperObject):
     """Reset display to original axis order"""
     self._wrappedData.resetAxisOrder()
 
-  def pickAxis(self, axisCode):
+  def findAxis(self, axisCode):
     """Reset display to original axis order"""
-    return self._project._data2Obj.get(self._wrappedData.pickAxis(axisCode))
+    return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
 
 # Connections to parents:
@@ -150,10 +150,51 @@ SpectrumDisplay._childClasses.append(Strip)
 
 # We should NOT have any newStrip functions, except possibly for FreeStrips
 
+# Define subtypes and factory function
+class Strip1d(GuiStrip1d, Strip):
+  """1D strip"""
+
+  def __init__(self, project:Project, wrappedData:ApiStrip1d):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    GuiStrip1d.__init__(self)
+
+  # put in subclass to make superclass abstract
+  @property
+  def _key(self) -> str:
+    """id string - serial number converted to string"""
+    return str(self._wrappedData.serial)
+
+class StripNd(GuiStripNd, Strip):
+  """ND strip """
+
+  def __init__(self, project:Project, wrappedData:ApiStripNd):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    GuiStripNd.__init__(self)
+
+  # put in subclass to make superclass abstract
+  @property
+  def _key(self) -> str:
+    """id string - serial number converted to string"""
+    return str(self._wrappedData.serial)
+
+def _factoryFunction(project:Project, wrappedData:ApiStrip) -> Strip:
+  """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
+  if isinstance(wrappedData, ApiStripNd):
+    return StripNd(project, wrappedData)
+  elif isinstance(wrappedData, ApiStrip1d):
+    return Strip1d(project, wrappedData)
+  else:
+    raise ValueError("Attempt to make SpectrumDisplay from illegal object type: %s"
+    % wrappedData)
+
+Strip._factoryFunction = staticmethod(_factoryFunction)
+
 # Notifiers:
-className = Ccpn_Strip._metaclass.qualifiedName()
+className = ApiStrip._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Strip}, className, '__init__'),
+  ( ('_newObject', {'cls':Strip._factoryFunction}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')
   )
 )

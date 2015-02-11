@@ -22,29 +22,33 @@ from ccpnmrcore.modules.GuiStripDisplayNd import GuiStripDisplayNd
 
 class GuiWindow(GuiBase):
   
-  def __init__(self, appBase, apiWindow):
+  def __init__(self):
     
-    self.appBase = appBase
-    self.apiWindow = apiWindow
+    self._appBase = self._project._appBase
+    # self.apiWindow = apiWindow
     self.dockArea = DockArea()
     self.dockArea.guiWindow = self
     self.dockArea.setGeometry(0, 0, 12000, 8000)
-    
-    apiModules = apiWindow.sortedModules()
-    if apiModules:
-      for apiModule in apiModules:
-        if isinstance(apiModule, SpectrumDisplay):
-          className = apiModule.className
-          classModule = importlib.import_module('ccpnmrcore.modules.Gui' + className)
-          clazz = getattr(classModule, 'Gui'+className)
-          guiModule = clazz(self.dockArea, apiModule)
-        else:
-          raise Exception("Don't know how to deal with this yet")
-      self.blankDisplay = None
-    else:
+
+    if not self._wrappedData.modules:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
+
+    
+    # apiModules = apiWindow.sortedModules()
+    # if apiModules:
+    #   for apiModule in apiModules:
+    #     if isinstance(apiModule, SpectrumDisplay):
+    #       className = apiModule.className
+    #       classModule = importlib.import_module('ccpnmrcore.modules.Gui' + className)
+    #       clazz = getattr(classModule, 'Gui'+className)
+    #       guiModule = clazz(self.dockArea, apiModule)
+    #     else:
+    #       raise Exception("Don't know how to deal with this yet")
+    #   self.blankDisplay = None
+    # else:
+    #   self.blankDisplay = GuiBlankDisplay(self.dockArea)
         
-    appBase.guiWindows.append(self)
+    self._appBase.guiWindows.append(self)
 
   def displayFirstSpectrum(self, spectrum):
     
@@ -77,7 +81,7 @@ class GuiWindow(GuiBase):
       # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
 
     msg = spectrum.name+' loaded'
-    mainWindow = self.appBase.mainWindow
+    mainWindow = self._appBase.mainWindow
     mainWindow.leftWidget.addItem(mainWindow.leftWidget.spectrumItem,spectrum)
     mainWindow.statusBar().showMessage(msg)
     if len(directory) == 1:
@@ -168,7 +172,7 @@ class GuiWindow(GuiBase):
           #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
             msg = dataSource.name+' loaded'
             self.statusBar().showMessage(msg)
-            self.appBase.mainWindow.pythonConsole.write("loadSpectrum('"+filePaths[0]+"')\n")
+            self._appBase.mainWindow.pythonConsole.write("loadSpectrum('"+filePaths[0]+"')\n")
 
           # peakListFormat = getPeakListFileFormat(filePaths[0])
           # if peakListFormat:

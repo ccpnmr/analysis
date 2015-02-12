@@ -66,7 +66,14 @@ class GuiWindow(GuiBase):
     else:
       apiStripDisplay = apiGuiTask.newStripDisplayNd(name='Module2_ND', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
       guiStripDisplay = GuiStripDisplayNd(self.dockArea, apiStripDisplay)
-      
+      guiStripDisplay.guiStrips[0].addSpinSystemLabel(guiStripDisplay.stripFrame, 0)
+    # if spectrum.dimensionCount > 2:
+    #   for i in range(spectrum.dimensionCount-2):
+    #     guiStripDisplay.guiStrips[0].addPlaneToolbar(guiStripDisplay.stripFrame, 0)
+
+
+
+
     guiStripDisplay.addSpectrum(spectrum)
     self.apiWindow.addModule(apiStripDisplay)
     

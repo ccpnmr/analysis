@@ -126,8 +126,12 @@ class GuiStripNd(GuiStrip):
     self.current.spectrum.spectrumItem.numberOfLevels -=1
     self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
 
-  def addPlaneToolbar(self, guiFrame, stripNumber):
-    self.planeToolbar = ToolBar(guiFrame, grid=(3, stripNumber), stretch=(0, 1), hAlign='center')
+  def addPlaneToolbar(self, guiFrame, stripNumber, grid=None):
+    if grid is None:
+     grid = (3, stripNumber)
+    else:
+      grid=grid
+    self.planeToolbar = ToolBar(guiFrame, grid=grid, stretch=(0, 1), hAlign='center')
     # tileButton = Button(self, 'T', callbacks=self.tileDisplay)
     # tileButton.setFixedWidth(30)
     # tileButton.setFixedHeight(30)

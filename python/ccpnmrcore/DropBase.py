@@ -27,5 +27,8 @@ class DropBase(GuiBase):
       pidData = str(data.data(),encoding='utf-8')
       pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
       actualPid = ''.join(pidData)
+      print(actualPid)
       wrapperObject = self.getObject(actualPid)
+      print(wrapperObject, 'wrapper obj')
       self.dropCallback(wrapperObject)
+      print(wrapperObject, 'wrapper obj')

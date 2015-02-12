@@ -9,3 +9,4 @@ class Frame(CoreFrame, GuiBase):
 
     CoreFrame.__init__(self, parent)
     GuiBase.__init__(self, **kw)
+

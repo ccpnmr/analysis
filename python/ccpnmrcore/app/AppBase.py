@@ -3,6 +3,7 @@ __author__ = 'simon'
 
 from ccpncore.util import Io as ioUtil
 import ccpn
+import ccpnmr
 # from ccpn import openProject, newProject
 
 from ccpncore.gui.Application import Application
@@ -41,8 +42,8 @@ class AppBase(GuiBase):
     if apiWindowStore is None:
       apiWindowStore = apiProject.newWindowStore(nmrProject=apiProject.findFirstNmrProject())
 
-    # MinWindow must always exist at this point
-    self.mainWindow = mainWindow = project.getMainWindow('Main')
+    # MainWindow must always exist at this point
+    self.mainWindow = mainWindow = project.getWindow('Main')
     mainWindow.raise_()
 
     if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):

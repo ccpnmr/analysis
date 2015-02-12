@@ -9,7 +9,7 @@ from ccpncore.gui.VerticalLabel import VerticalLabel
 from ccpn.lib import Spectrum as LibSpectrum
 
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpnmrcore.modules.spectrumItems.GuiSpectrumViewNd import GuiSpectrumViewNd
+from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
 from ccpnmrcore.modules.GuiStripNd import GuiStripNd
 
 def _findPpmRegion(spectrum, axisDim, spectrumDim):

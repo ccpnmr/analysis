@@ -30,8 +30,8 @@ from ccpnmrcore.Base import Base as GuiBase
 
 import pyqtgraph as pg
 
-from ccpnmrcore.modules.spectrumPane.PeakListItem import PeakListItem
-from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
+#from ccpnmrcore.modules.spectrumPane.PeakListItem import PeakListItem
+#from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
 
 # this class mixes both OpenGL and Qt functionality
 # it's a Qt QGraphicsItem because that means can re-order drawing of spectra peaks easily

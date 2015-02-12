@@ -13,7 +13,6 @@ from ccpncore.util.AttrDict import AttrDict
 
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.Current import Current
-from ccpnmrcore.modules.GuiMainWindow import GuiMainWindow
 
 import os, json
 

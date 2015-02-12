@@ -25,9 +25,11 @@ from collections.abc import Sequence
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
+from ccpn._wrapper._Spectrum import Spectrum
 from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.GuiMainWindow import GuiMainWindow
+from ccpncore.lib import Spectrum as libSpectrum
 from ccpncore.lib import pid as Pid
 
 
@@ -88,6 +90,99 @@ class Window(GuiWindow, AbstractWrapperObject):
     else:
       return windowStore.sortedWindows()
 
+
+  # CCPN functions
+  def createSpectrumDisplay(self, spectrum:Spectrum, displayAxisCodes:Sequence=(),
+                            axisOrder:Sequence=(), name:str=None, positions:Sequence=(),
+                            widths:Sequence=(), units:Sequence=(),
+                            stripAxis:str=None, contour:bool=True,
+                            independentStrips:bool=False, gridCell:Sequence=(1,1),
+                            gridSpan:Sequence=(1,1)):
+
+    """
+    displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
+    axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
+    positions: axis positions in order - default to heuristic
+    widths: axis widths in order - default to heuristic
+    units: axis units in display order - default to heuristic
+    stripAxis: if 'X' or 'Y' set strip axis, if None set to non-strip display
+    contour: If False, or spectrum passed in is 1D, do 1D display
+    independentStrips: if True do freeStrip display.
+    """
+
+    dataSource = spectrum._wrappedData
+
+    task = self.task
+    if task is None:
+      raise ValueError("Window %s is not attached to any Task" % self)
+
+    params = {
+      'stripAxis': stripAxis,
+      'contour':contour,
+      'independentStrips':independentStrips,
+      'name':name,
+      'gridSpan':gridSpan,
+      'gridCell':gridCell,
+    }
+
+    apiUnits = spectrum.axisUnits
+    apiAxisCodes = spectrum.axisCodes
+
+    mapIndices = ()
+    if axisOrder:
+      mapIndices = libSpectrum.axisCodeMapIndices(apiAxisCodes, axisOrder)
+      if displayAxisCodes:
+        if not libSpectrum.doAxisCodesMatch(axisOrder, displayAxisCodes):
+          raise ValueError("AxisOrder %s do not match display axisCodes %s"
+                           % (axisOrder, displayAxisCodes))
+      else:
+        displayAxisCodes = axisOrder
+      # NBNB If axisOrder and displayAxisCodes are incompatible you are on your owm
+    else:
+      if displayAxisCodes:
+        mapIndices = libSpectrum.axisCodeMapIndices(apiAxisCodes, displayAxisCodes)
+      else:
+        displayAxisCodes = list(apiAxisCodes)
+        mapIndices = list(range(dataSource.numDims))
+
+    # Make DataDim ordering
+    sortedDataDims = dataSource.sortedDataDims()
+    orderedDataDims = []
+    for index in mapIndices:
+      if index < len(sortedDataDims):
+        orderedDataDims.append(sortedDataDims[index])
+      else:
+        orderedDataDims.append(None)
+
+    # Make dimensionOrdering
+    dimensionOrdering = [(0 if x is None else x.dim) for x in orderedDataDims]
+
+    # Add intesity dimension for 1D if necessary
+    if dataSource.numDim == 1 and len(displayAxisCodes) ==1:
+      displayAxisCodes.append('intensity')
+      dimensionOrdering.append(0)
+
+    #
+    display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripAxis=stripAxis,
+                                      contour=contour, independentStrips=independentStrips,
+                                      name=name, gridSpan=gridSpan,gridCell=gridCell)
+    if not units:
+      units = []
+      for dataDim in orderedDataDims:
+        pass
+
+    display.units = units
+
+    if widths:
+      display.widths = widths
+    if positions:
+      display.positions = positions
+
+    # Make spectrumView
+    stripSerial = 1 if independentStrips else 0
+    display._wrappedData.newSpectrumView(dataSource=dataSource,
+                                         stripSerial=stripSerial,
+                                         dimensionOrdering=dimensionOrdering)
 
 
 def newWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:

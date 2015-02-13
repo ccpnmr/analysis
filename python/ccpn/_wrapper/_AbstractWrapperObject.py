@@ -21,17 +21,15 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from collections.abc import MutableMapping
+from collections import abc
 import itertools
 import functools
-import abc
-from collections import namedtuple
 from ccpncore.lib.pid import Pid
 from ccpncore.lib.pid import PREFIXSEP
 from ccpncore.lib.pid import IDSEP
 
 @functools.total_ordering
-class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
+class AbstractWrapperObject(abc.MutableMapping):
   """Abstract class containing common functionality for wrapper classes.
 
   ADVANCED. Core programmers only.
@@ -341,14 +339,12 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
   # CCPN abstract properties
   
   @property
-  @abc.abstractmethod
   def _key(self) -> str:
     """Object local identifier, unique for a given type with a given parent.
     Set automatically from other (immutable) object attributes."""
     raise NotImplementedError("Code error: function not implemented")
   
   @property
-  @abc.abstractmethod
   def _parent(self):
     """Parent (containing) object."""
     raise NotImplementedError("Code error: function not implemented")
@@ -362,9 +358,7 @@ class AbstractWrapperObject(MutableMapping, metaclass=abc.ABCMeta):
     if cls not in parent._childClasses:
       raise Exception
     raise NotImplementedError("Code error: function not implemented")
-    
 
-  #@abc.abstractmethod
   def rename(self, value:str):
     """Change object id, modifying entire project to maintain consistency"""
     raise NotImplementedError("Code error: function not implemented")

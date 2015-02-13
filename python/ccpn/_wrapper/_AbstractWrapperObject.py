@@ -28,8 +28,16 @@ from ccpncore.lib.pid import Pid
 from ccpncore.lib.pid import PREFIXSEP
 from ccpncore.lib.pid import IDSEP
 
+# PROBLEM:
+# The Mutable<MAp[p[ing superclass changes the MetaCLass, which causes
+# trouble with multiple inheritance with GUI classes.
+# To avoid it, we would need to explicitly implement:
+# __contains__, keys, items, values, get, __eq__, and __ne__
+# pop, popitem, clear, update, and setdefault
+# We should already have __getitem__, __setitem__, __delitem__, __iter__, __len__
+
 @functools.total_ordering
-class AbstractWrapperObject(abc.MutableMapping):
+class AbstractWrapperObject():
   """Abstract class containing common functionality for wrapper classes.
 
   ADVANCED. Core programmers only.
@@ -165,7 +173,9 @@ class AbstractWrapperObject(abc.MutableMapping):
   # NBNB TBD we have a loophole
   # Code like setattr(obj, 'Atom:N', value) would still work. 
   # NBNB consider __setattr__ function ???
-  
+
+  # Classes needed to complement abc.MutableMapping mixin abstract class
+
   def __getitem__(self, tag:str):
     """Dictionary implementation method: get item"""
     
@@ -283,7 +293,111 @@ class AbstractWrapperObject(abc.MutableMapping):
   def __len__(self):
     """Dictionary implementation method: length"""
     return len(list(self))
-    
+
+  
+  # Classes lifted from collections.abc.MutableMapping inheriting from it causes metaclass clash
+
+  # sentinel
+  __marker = object()
+
+  def pop(self, key, default=__marker):
+    """D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+      If key is not found, d is returned if given, otherwise KeyError is raised.
+    """
+    try:
+        value = self[key]
+    except KeyError:
+        if default is self.__marker:
+            raise
+        return default
+    else:
+        del self[key]
+        return value
+
+  def popitem(self):
+    """D.popitem() -> (k, v), remove and return some (key, value) pair
+       as a 2-tuple; but raise KeyError if D is empty.
+    """
+    try:
+        key = next(iter(self))
+    except StopIteration:
+        raise KeyError
+    value = self[key]
+    del self[key]
+    return key, value
+
+  def clear(self):
+    """D.clear() -> None.  Remove all items from D."""
+    try:
+        while True:
+            self.popitem()
+    except KeyError:
+        pass
+
+  def update(*args, **kwds):
+    """ D.update([E, ]**F) -> None.  Update D from mapping/iterable E and F.
+        If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
+        If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+        In either case, this is followed by: for k, v in F.items(): D[k] = v
+    """
+    if len(args) > 2:
+        raise TypeError("update() takes at most 2 positional "
+                        "arguments ({} given)".format(len(args)))
+    elif not args:
+        raise TypeError("update() takes at least 1 argument (0 given)")
+    self = args[0]
+    other = args[1] if len(args) >= 2 else ()
+
+    if isinstance(other, abc.Mapping):
+        for key in other:
+            self[key] = other[key]
+    elif hasattr(other, "keys"):
+        for key in other.keys():
+            self[key] = other[key]
+    else:
+        for key, value in other:
+            self[key] = value
+    for key, value in kwds.items():
+        self[key] = value
+
+  def setdefault(self, key, default=None):
+    """D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"""
+    try:
+        return self[key]
+    except KeyError:
+        self[key] = default
+    return default
+
+
+  # Functions lifted from collections.abc.MApping
+
+  def get(self, key, default=None):
+      """D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
+      try:
+          return self[key]
+      except KeyError:
+          return default
+
+  def __contains__(self, key):
+      try:
+          self[key]
+      except KeyError:
+          return False
+      else:
+          return True
+
+  def keys(self):
+      """D.keys() -> a set-like object providing a view on D's keys"""
+      return abc.KeysView(self)
+
+  def items(self):
+      """D.items() -> a set-like object providing a view on D's items"""
+      return abc.ItemsView(self)
+
+  def values(self):
+      """D.values() -> an object providing a view on D's values"""
+      return abc.ValuesView(self)
+
   
   # equality: We use the default Python behavior, 
   #           which is that an object is equal only to itself.
@@ -310,6 +424,11 @@ class AbstractWrapperObject(abc.MutableMapping):
     """Python 2 behaviour - objects equal only to themselves.
     Necessary to avoid dictionary-type behaviour"""
     return self is other
+
+  def __ne__(self, other):
+    """Python 2 behaviour - objects equal only to themselves.
+    Necessary to avoid dictionary-type behaviour"""
+    return self is not other
 
   def __hash__(self):
     """Python 2 behaviour - objects equal only to themselves.

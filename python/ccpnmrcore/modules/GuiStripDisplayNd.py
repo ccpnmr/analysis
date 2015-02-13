@@ -3,11 +3,8 @@ __author__ = 'simon'
 from ccpncore.gui.VerticalLabel import VerticalLabel
 from ccpn.lib import Spectrum as LibSpectrum
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-<<<<<<< .mine
-=======
-from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
-from ccpnmrcore.modules.GuiStripNd import GuiStripNd
->>>>>>> .r8045
+# from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
+# from ccpnmrcore.modules.GuiStripNd import GuiStripNd
 
 
 def _findPpmRegion(spectrum, axisDim, spectrumDim):

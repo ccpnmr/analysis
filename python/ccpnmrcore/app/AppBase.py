@@ -22,8 +22,8 @@ class AppBase(GuiBase):
     
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
-    self.initProject(apiProject)
     self.setupPreferences()
+    self.initProject(apiProject)
     
   def initProject(self, apiProject):
 
@@ -67,14 +67,12 @@ class AppBase(GuiBase):
     self._closeProject()
     apiProject = ioUtil.loadProject(path)
     self.initProject(apiProject)
-    self.setupPreferences()
 
   def newProject(self, name='default'):
     """Create new, empty project"""
     self._closeProject()
     apiProject = ioUtil.newProject(name)
     self.initProject(apiProject)
-    self.setupPreferences()
 
   def saveProject(self):
     print("project saved")
@@ -84,7 +82,8 @@ class AppBase(GuiBase):
     preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
     print(preferencesPath)
     if not os.path.exists(preferencesPath):
-      preferencesPath = os.path.join(Path.getPythonDirectory(), 'ccpnmrcore', 'app', 'defaultv3settings.json')
+      preferencesPath = os.path.join(Path.getPythonDirectory(), 'ccpnmrcore', 'app',
+                                     'defaultv3settings.json')
     fp = open(preferencesPath)
     self.preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
     print(self.preferences)

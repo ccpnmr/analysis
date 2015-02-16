@@ -265,7 +265,7 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str=None,
         apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
       elif code == 'intensity':
         apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
-      elif code.startswith('fid'):
+      elif code.startswith('+fid'):
         apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
       else:
         apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
@@ -273,16 +273,8 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str=None,
   return parent._project._data2Obj.get(apiSpectrumDisplay)
 
 # Connections to parents:
-Project._childClasses.append(SpectrumDisplay)
-Project.newSpectrumDisplay = newSpectrumDisplay
-
-# Notifiers:
-className = ApiSpectrumDisplay._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':SpectrumDisplay}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
-  )
-)
+Task._childClasses.append(SpectrumDisplay)
+Task.newSpectrumDisplay = newSpectrumDisplay
 
 
 # Define subtypes and factory function

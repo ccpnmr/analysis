@@ -33,7 +33,7 @@ from ccpncore.lib import Spectrum as libSpectrum
 from ccpncore.lib import pid as Pid
 
 
-class Window(GuiWindow, AbstractWrapperObject):
+class Window(AbstractWrapperObject):
   """GUI window, corresponds to OS window"""
   
   #: Short class name, for PID.
@@ -125,7 +125,6 @@ class Window(GuiWindow, AbstractWrapperObject):
       'gridCell':gridCell,
     }
 
-    apiUnits = spectrum.axisUnits
     apiAxisCodes = spectrum.axisCodes
 
     mapIndices = ()
@@ -137,27 +136,25 @@ class Window(GuiWindow, AbstractWrapperObject):
                            % (axisOrder, displayAxisCodes))
       else:
         displayAxisCodes = axisOrder
-      # NBNB If axisOrder and displayAxisCodes are incompatible you are on your owm
+    elif displayAxisCodes:
+      mapIndices = libSpectrum.axisCodeMapIndices(apiAxisCodes, displayAxisCodes)
     else:
-      if displayAxisCodes:
-        mapIndices = libSpectrum.axisCodeMapIndices(apiAxisCodes, displayAxisCodes)
-      else:
-        displayAxisCodes = list(apiAxisCodes)
-        mapIndices = list(range(dataSource.numDims))
+      displayAxisCodes = list(apiAxisCodes)
+      mapIndices = list(range(dataSource.numDims))
 
     # Make DataDim ordering
     sortedDataDims = dataSource.sortedDataDims()
     orderedDataDims = []
     for index in mapIndices:
-      if index < len(sortedDataDims):
-        orderedDataDims.append(sortedDataDims[index])
-      else:
+      if index is None:
         orderedDataDims.append(None)
+      else:
+        orderedDataDims.append(sortedDataDims[index])
 
     # Make dimensionOrdering
     dimensionOrdering = [(0 if x is None else x.dim) for x in orderedDataDims]
 
-    # Add intesity dimension for 1D if necessary
+    # Add intensity dimension for 1D if necessary
     if dataSource.numDim == 1 and len(displayAxisCodes) ==1:
       displayAxisCodes.append('intensity')
       dimensionOrdering.append(0)
@@ -166,17 +163,46 @@ class Window(GuiWindow, AbstractWrapperObject):
     display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripAxis=stripAxis,
                                       contour=contour, independentStrips=independentStrips,
                                       name=name, gridSpan=gridSpan,gridCell=gridCell)
-    if not units:
-      units = []
-      for dataDim in orderedDataDims:
-        pass
 
-    display.units = units
+    # Set unit, position and width
+    orderedApiAxes = display._wrappedData.orderedAxes
+    for ii, dataDim in enumerate(orderedDataDims):
 
-    if widths:
-      display.widths = widths
-    if positions:
-      display.positions = positions
+      if dataDim is not None:
+        # Set values only if we have a spectrum axis
+
+        # Get unit, position and width
+        dataDimRef = dataDim.primaryDataDimRef
+        if dataDimRef:
+          # This is a FreqDataDim
+          unit = dataDimRef.expDimRef.unit
+          position = dataDimRef.pointToValue(1) + dataDimRef.spectralWidth/2
+          if ii < 2:
+            width = dataDimRef.spectralWidth
+          else:
+            width = dataDimRef.valuePerPoint
+
+        elif dataDim.className == 'SampledDataDim':
+          unit = dataDim.unit
+          width = len(dataDim.pointValues)
+          position = 1 + width // 2
+          if ii >= 2:
+            width = 1
+          # NBNB TBD this may not work, once we implement sampled axes
+
+        else:
+          # This is a FidDataDim
+          unit = dataDim.unit
+          width = dataDim.maxValue - dataDim.firstValue
+          position = width / 2
+          if ii >= 2:
+            width = dataDim.valuePerPoint
+
+        # Set values
+        apiAxis = orderedApiAxes[ii]
+        apiAxis.unit = unit
+        apiAxis.position = position
+        apiAxis.width = width
 
     # Make spectrumView
     stripSerial = 1 if independentStrips else 0

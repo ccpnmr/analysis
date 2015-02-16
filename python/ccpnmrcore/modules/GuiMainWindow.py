@@ -46,13 +46,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setupMenus()
     self.initProject()
 
-  def initProject(self, project=None):
+  def initProject(self):
 
     # No need, project already set and initialised in AppBase init
     # if project:
     #   self._appBase.initProject(project)
     # else:
     #   project = self._appBase.project
+
+    project = self._appBase.project
       
     isNew = self.apiWindow.root.isModified  # a bit of a hack this, but should be correct
     

@@ -234,7 +234,7 @@ Project.newWindow = newWindow
 
 
 # Define subtypes and factory function
-class MainWindow(GuiMainWindow, Window):
+class MainWindow(Window, GuiMainWindow):
   """GUI main window, corresponds to OS window"""
 
   def __init__(self, project:Project, wrappedData:object):
@@ -249,7 +249,7 @@ class MainWindow(GuiMainWindow, Window):
     return self._wrappedData.title.translate(Pid.remapSeparators)
 
 
-class SideWindow(GuiWindow, Window):
+class SideWindow(Window, GuiWindow):
   """GUI side window, corresponds to OS window"""
 
   def __init__(self, project:Project, wrappedData:object):

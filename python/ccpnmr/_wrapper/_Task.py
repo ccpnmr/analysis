@@ -120,18 +120,18 @@ class Task(AbstractWrapperObject):
     else:
       raise ValueError("Cannot activate %s task: %s" % (self.status, self))
 
-  def clone(self, name:str, nameSpace:str=None)->Task:
+  def clone(self, name:str, nameSpace:str=None):
     """copy task exactly, first passivating if active"""
     return self._project._data2Obj.get(self._wrappedData.clone())
 
-  def loadAsTemplate(self, name:str, nameSpace:str=None, window:Window=None)->Task:
+  def loadAsTemplate(self, name:str, nameSpace:str=None, window:Window=None):
     """copy and activate template task, adapting and pruning contents to fit"""
     window=window and window._wrappedData
     newObj = self._wrappedData.adaptedCopy(nmrProject=self._project._wrappedData,
                                            window=window, name=name, nameSpace=nameSpace)
     return self._project._data2Obj.get(newObj)
 
-  def pruneSpectrumViews(self, name:str, nameSpace:str=None)->Task:
+  def pruneSpectrumViews(self, name:str, nameSpace:str=None):
     """Remove spectrum views that do not match existing spectra, e.g. after loading a template"""
     self._wrappedData.pruneSpectrumViews()
 

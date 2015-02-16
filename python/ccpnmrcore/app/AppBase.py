@@ -44,7 +44,7 @@ class AppBase(GuiBase):
 
     # MainWindow must always exist at this point
     # mainWindow = project.getWindow('Main')
-    mainWindow = self._project._data2Obj(apiWindowStore.findFirstWindow(title='Main'))
+    mainWindow = project._data2Obj[apiWindowStore.findFirstWindow(title='Main')]
     self.mainWindow = mainWindow
     mainWindow.raise_()
 

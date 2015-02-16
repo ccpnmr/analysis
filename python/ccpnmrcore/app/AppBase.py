@@ -43,7 +43,9 @@ class AppBase(GuiBase):
       apiWindowStore = apiProject.newWindowStore(nmrProject=apiProject.findFirstNmrProject())
 
     # MainWindow must always exist at this point
-    self.mainWindow = mainWindow = project.getWindow('Main')
+    # mainWindow = project.getWindow('Main')
+    mainWindow = self._project._data2Obj(apiWindowStore.findFirstWindow(title='Main'))
+    self.mainWindow = mainWindow
     mainWindow.raise_()
 
     if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):

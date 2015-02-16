@@ -92,7 +92,7 @@ def registerNotify(notify, classname, funcname=''):
   """register notifiers to class clazz (maybe given as APi class or as class qualifiedName"""
 
 
-  metaClasses = commonUtil.getClassFromFullName(classname)._metaclass.getAllSubtypes()
+  metaClasses = commonUtil.getClassFromFullName(classname)._metaclass.getNonAbstractSubtypes()
 
   for metaClass in metaClasses:
     clazz =  commonUtil.getClassFromFullName(metaClass.qualifiedName())
@@ -107,7 +107,7 @@ def registerNotify(notify, classname, funcname=''):
 
 def unregisterNotify(notify, classname, funcname=''):
 
-  metaClasses = commonUtil.getClassFromFullName(classname)._metaclass.getAllSubtypes()
+  metaClasses = commonUtil.getClassFromFullName(classname)._metaclass.getNonAbstractSubtypes()
 
   for metaClass in metaClasses:
     clazz =  commonUtil.getClassFromFullName(metaClass.qualifiedName())

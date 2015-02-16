@@ -32,6 +32,7 @@ class AppBase(GuiBase):
     project = ccpn._wrapApiProject(apiProject)
     
     self.project = project
+    project._appBase = self
     self.guiWindows = []
     
     self.current = Current()

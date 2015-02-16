@@ -292,9 +292,26 @@ class AbstractWrapperObject():
     
   def __len__(self):
     """Dictionary implementation method: length"""
-    return len(list(self))
+    # return len(list(self))
 
-  
+    # Calling list(self) seems to give an infinite loop, so let us try sounting elements directly
+
+    cls = self.__class__
+    prefix = self.id + IDSEP
+    dd = self.__dict__
+    return (
+      len(x for x in sorted(dir(cls))
+          if (not x.startswith('_') and  isinstance(getattr(cls,x), property)))
+      + len(y for x in cls._childClasses for y in self._project._pid2Obj[x.shortClassName]
+             if y.startswith(prefix))
+      + len(x for x in sorted(dd) if not x.startswith('_') and len(x.split(PREFIXSEP)) != 2))
+
+
+  def __bool__(self):
+    """Truth value: true - wrapper classes are never empty"""
+    return True
+
+
   # Classes lifted from collections.abc.MutableMapping inheriting from it causes metaclass clash
 
   # sentinel

@@ -128,7 +128,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
       raise  ValueError("The last strip in a display cannot be deleted")
 
   #CCPN functions
-  def clone(self) -> Strip:
+  def clone(self):
     """create new strip that duplicates this one, appending it at the end"""
     return self._project._data2Obj.get(self._wrappedData.clone())
 

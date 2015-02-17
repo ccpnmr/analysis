@@ -94,8 +94,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     
-    self.namespace = {'current': self._appBase.current, 'openProject':self.openProject,
-                      'newProject':self.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
+    self.namespace = {'current': self._appBase.current, 'openProject':self._appBase.openProject,
+                      'newProject':self._appBase.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
                       'preferences':self._appBase.preferences}
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
@@ -134,8 +134,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroMenu = QtGui.QMenu("Macro", self)
     helpMenu = QtGui.QMenu("&Help", self)
 
-    fileMenuAction = fileMenu.addAction(QtGui.QAction("New", self, triggered=self.newProject))
-    fileMenu.addAction(Action(self, "Open...", callback=self.openProject, shortcut="po"))
+    fileMenuAction = fileMenu.addAction(QtGui.QAction("New", self, triggered=self._appBase.newProject))
+    fileMenu.addAction(Action(self, "Open...", callback=self._appBase.openProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
     fileMenu.addSeparator()

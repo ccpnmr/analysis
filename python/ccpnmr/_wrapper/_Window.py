@@ -149,7 +149,7 @@ class Window(AbstractWrapperObject):
       mapIndices = libSpectrum.axisCodeMapIndices(apiAxisCodes, displayAxisCodes)
     else:
       displayAxisCodes = list(apiAxisCodes)
-      mapIndices = list(range(dataSource.numDims))
+      mapIndices = list(range(dataSource.numDim))
 
     # Make DataDim ordering
     sortedDataDims = dataSource.sortedDataDims()

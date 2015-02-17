@@ -34,7 +34,7 @@ from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
 from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
 
 
-class SpectrumView(GuiSpectrumView, AbstractWrapperObject):
+class SpectrumView(AbstractWrapperObject):
   """Display Strip for 1D or nD spectrum"""
   
   #: Short class name, for PID.
@@ -218,7 +218,7 @@ class SpectrumView(GuiSpectrumView, AbstractWrapperObject):
 
 
 # Define subtypes and factory function
-class SpectrumView1d(GuiSpectrumView1d, SpectrumView):
+class SpectrumView1d(SpectrumView, GuiSpectrumView1d):
   """1D Spectrum View"""
 
   def __init__(self, project:Project, wrappedData:ApiSpectrumView):
@@ -233,7 +233,7 @@ class SpectrumView1d(GuiSpectrumView1d, SpectrumView):
     return Pid.IDSEP.join((self.spectrumName, str(self.stripSerial)))
 
 
-class SpectrumViewNd(GuiSpectrumViewNd, SpectrumView):
+class SpectrumViewNd(SpectrumView, GuiSpectrumViewNd):
   """ND Spectrum View"""
 
   def __init__(self, project:Project, wrappedData:ApiSpectrumView):

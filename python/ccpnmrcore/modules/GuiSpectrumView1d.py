@@ -4,7 +4,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpnmrcore.modules import GuiSpectrumView
 
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
@@ -27,6 +26,7 @@ import numpy
 
 from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
 
+from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 
 class GuiSpectrumView1d(GuiSpectrumView):
 

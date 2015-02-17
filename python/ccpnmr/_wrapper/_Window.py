@@ -125,15 +125,6 @@ class Window(AbstractWrapperObject):
     if task is None:
       raise ValueError("Window %s is not attached to any Task" % self)
 
-    params = {
-      'stripAxis': stripAxis,
-      'contour':contour,
-      'independentStrips':independentStrips,
-      'name':name,
-      'gridSpan':gridSpan,
-      'gridCell':gridCell,
-    }
-
     apiAxisCodes = spectrum.axisCodes
 
     mapIndices = ()
@@ -150,6 +141,9 @@ class Window(AbstractWrapperObject):
     else:
       displayAxisCodes = list(apiAxisCodes)
       mapIndices = list(range(dataSource.numDim))
+      if contour:
+        displayAxisCodes.insert(1, 'intensity')
+        mapIndices.insert(1,None)
 
     # Make DataDim ordering
     sortedDataDims = dataSource.sortedDataDims()
@@ -169,8 +163,8 @@ class Window(AbstractWrapperObject):
       dimensionOrdering.append(0)
 
     #
-    display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripAxis=stripAxis,
-                                      contour=contour, independentStrips=independentStrips,
+    display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripAxis,
+                                      independentStrips=independentStrips,
                                       name=name, gridSpan=gridSpan,gridCell=gridCell)
 
     # Set unit, position and width

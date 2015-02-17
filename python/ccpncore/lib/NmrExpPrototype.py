@@ -1,3 +1,4 @@
+
 """Functions for calculating axisCodes for NmrExpPrototypes, adn necessary utilities.
 For normal cases, use only refExpFimRefCodeMap function, and get axisCodes from
 refExpDimRefs and the map.
@@ -104,7 +105,7 @@ def _measurementCodeMap(nmrExpPrototype, forReversed=False):
     else:
       indx += 1
       foundCodes[code] = indx
-      code = '%s_%s' % (code, str(indx))
+      code = '%s%s' % (code, indx)
     result[measurement] = code
   #
   return result

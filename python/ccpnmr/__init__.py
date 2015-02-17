@@ -64,7 +64,7 @@ from ccpnmr._wrapper._Task import Task
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpnmr._wrapper._Strip import Strip
 from ccpnmr._wrapper._Axis import Axis
-# from ccpnmr._wrapper._SpectrumView import SpectrumView
+from ccpnmr._wrapper._SpectrumView import SpectrumView
 
 # Set up interclass links and related functions
 # HACK to link up newly imported wrapper classes only

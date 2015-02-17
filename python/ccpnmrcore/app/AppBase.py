@@ -30,6 +30,7 @@ class AppBase(GuiBase):
     # Done this way to sneak the appBase in before creating the wrapper
     apiProject._appBase = self
     project = ccpn._wrapApiProject(apiProject)
+    apiNmrProject = project._wrappedData
     
     self.project = project
     project._appBase = self
@@ -37,11 +38,14 @@ class AppBase(GuiBase):
     
     self.current = Current()
 
-    apiProject = project._wrappedData.parent
-    apiWindowStore = apiProject.findFirstWindowStore()
+    apiWindowStore = apiNmrProject.windowStore
     if apiWindowStore is None:
-      apiWindowStore = apiProject.newWindowStore(nmrProject=apiProject.findFirstNmrProject())
-
+      apiProject = apiNmrProject.parent
+      apiWindowStore = apiProject.findFirstWindowStore()
+      if apiWindowStore is None:
+        apiWindowStore = apiProject.newWindowStore(nmrProject=apiProject.findFirstNmrProject())
+      else:
+        apiNmrProject.windowStore = apiWindowStore
     # MainWindow must always exist at this point
     # mainWindow = project.getWindow('Main')
     mainWindow = project._data2Obj[apiWindowStore.findFirstWindow(title='Main')]

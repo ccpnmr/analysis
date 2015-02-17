@@ -259,6 +259,7 @@ def _factoryFunction(project:Project, wrappedData:ApiSpectrumView) -> SpectrumVi
 
 # Connections to parents:
 SpectrumDisplay._childClasses.append(SpectrumView)
+SpectrumView._factoryFunction = staticmethod(_factoryFunction)
 
 # We should NOT have any newStrip functions, except possibly for FreeStrips
 

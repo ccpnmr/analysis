@@ -42,7 +42,7 @@ from collections.abc import Sequence
 
 #from ccpnmr.analysis.core import AssignmentBasic, ConstraintBasic
 #from ccp.lib import MoleculeAlign
-from ccpncore.lib import MoleculeQuery
+from ccpncore.lib.molecule import MoleculeQuery
 
 emptyTuple = ()
 

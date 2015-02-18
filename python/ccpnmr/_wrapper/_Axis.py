@@ -51,7 +51,7 @@ class Axis(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """local id, of form code.stripSerial"""
-    return Pid.IDSEP.join((self._wrappedData.code, str(self._wrappedData.sripSerial)))
+    return Pid.IDSEP.join((self._wrappedData.code, str(self._wrappedData.stripSerial)))
 
     
   @property

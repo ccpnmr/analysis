@@ -261,7 +261,7 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
     apiStrip = getattr(apiSpectrumDisplay, newStripFunc)()
 
   # Create axes
-    for ii, code in axisCodes:
+    for ii, code in enumerate(axisCodes):
       if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
          not stripDirection):
         stripSerial = 0

@@ -373,6 +373,8 @@ def getSliceData(spectrum, position=None, sliceDim=0):
 
 def getRegionData(spectrum, startPoint, endPoint):
 
+  # NBNB TBD BROKEN!!
+
   dataStore = spectrum.dataStore
   if not dataStore:
     return None
@@ -607,16 +609,42 @@ def resetAxisCodes(spectrum):
 
   # NB determine acquisition dimension to decide which end to start indexing
   axisCodes = []
+  usedCodes = set()
   for dataDim in dataDims:
-    elementNames = [re.match('\d+(\D+)', x).group(1) for x in dataDim.isotopeCodes]
-    measurementType = dataDim.measurementType.lower()
-    # ('Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling','MQShift','T1','T2','T1rho','T1zz')
-    if measurementType == 'shift':
+    expDimRef = dataDim.expDim.sortedExpDimRefs()[0]
+    elementNames = [str(re.match('\d+(\D+)', x).group(1)) for x in expDimRef.isotopeCodes]
+
+    measurementType = expDimRef.measurementType.lower()
+    if measurementType in ('shift', 'troesy', 'shiftanisotropy'):
+      # NB TROESY and SHiftAnisotropy ae i practice never used.
+      # If they do appear this is the better treatment
       axisCode = elementNames[0]
+
+      dataDimRef = dataDim.primaryDataDimRef
+      if axisCode == 'C':
+        # Try to make more specific for CO
+        # Other axisCodes are probably too hard to pin down, unfortunately
+        minFrequency = dataDimRef.pointToValue(1) - dataDimRef.spectralWidth
+        if minFrequency > 150.:
+          axisCode = 'CO'
+
     elif measurementType == 'jcoupling':
-      axisCode = 'J' + ''.join(x.lower() for x in elementNames)
+      axisCode = 'J' + ''.join([x.lower() for x in elementNames])
     elif measurementType == 'mqshift':
-      axisCode = 'MQ' + ''.join(x.lower() for x in elementNames)
-    elif measurementType.startswith('t1') or  measurementType.startswith('t1'):
+      axisCode = 'MQ' + ''.join([x.lower() for x in elementNames])
+    elif measurementType in ('rdc', 'dipolarcoupling'):
+      axisCode = 'DC' + ''.join([x.lower() for x in elementNames])
+    else:
+      # E.g. T1, T2, ...
+      # Not always correct, but the best we can do for now.
       axisCode = 'delay'
+
+    index = 0
+    useCode = axisCode
+    while useCode in usedCodes:
+      index += 1
+      useCode = '%s%s' % (axisCode, index)
+    usedCodes.add(useCode)
+    expDimRef.axisCode = useCode
+
 

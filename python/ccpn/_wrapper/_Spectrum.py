@@ -516,7 +516,22 @@ class Spectrum(AbstractWrapperObject):
     or 'unknown' otherwise.
 
     TBD codes match AtomSite.axisCode, but NBNB NmrExpPrototypes must be updated to match system"""
-    return tuple(x and x.useAxisCode for x in self._mainExpDimRefs())
+    expDimRefs = self._mainExpDimRefs()
+    result = []
+    for expDimRef in expDimRefs:
+      if expDimRef is None:
+        result.append(None)
+      else:
+        axisCode = expDimRef.axisCode
+        if axisCode is None:
+          # We need to reset the axisCodes first
+          break
+    else:
+      return tuple(result)
+
+    # Reset and do it again:
+    self._wrappedData.resetAxisCodes()
+    return tuple(x and x.axisCode for x in expDimRefs)
 
   @axisCodes.setter
   def axisCodes(self, value):

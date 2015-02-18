@@ -153,16 +153,13 @@ class SpectrumReference(AbstractWrapperObject):
   def axisCode(self) -> str:
     """Type: (*str,*)\*dimensionCount, *settable*
 
-    Main ExpDimRef axisCode for each dimension - None if no main ExpDimRef
-
-    If the axisCode is set, each will be unique and match the RefExpDimRef.axisCode
-    If it is not set, axisCodes may not be unique. They will be the element symbol
-    for shift and TROESY, comma-separated element symbols for MQ magnetisation,
-    'missing' for a shift, TROESY or MQ without isotope indication, the measurement
-    or 'unknown' otherwise.
-
-    TBD codes match AtomSite.name, but NBNB NmrExpPrototypes must be updated to match system"""
-    return self._wrappedData.expDimRef.useAxisCode
+    ExpDimRef axisCode """
+    expDimRef = self._wrappedData.expDimRef
+    result = expDimRef.axisCode
+    if result is None:
+      self._wrappedData.dataDim.dataSource.resetAxisCodes()
+      result = expDimRef.axisCode
+    return result
 
   @axisCode.setter
   def axisCode(self, value:str):

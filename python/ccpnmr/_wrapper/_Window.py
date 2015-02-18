@@ -210,8 +210,8 @@ class Window(AbstractWrapperObject):
 
     # Make spectrumView
     stripSerial = 1 if independentStrips else 0
-    display._wrappedData.newSpectrumView(dataSource=dataSource,
-                                         stripSerial=stripSerial,
+    display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
+                                         stripSerial=stripSerial,dataSource=dataSource,
                                          dimensionOrdering=dimensionOrdering)
     #
     return display

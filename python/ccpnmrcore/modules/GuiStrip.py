@@ -14,7 +14,7 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
   sigClicked = QtCore.Signal(object, object)
 
   def __init__(self):
-    self.guiFrame = self._parent.guiFrame
+    self.stripFrame = self._parent.stripFrame
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
     # self.apiStrip = apiStrip
     #
@@ -23,7 +23,7 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
 
     pg.PlotWidget.__init__(self, viewBox=ViewBox.ViewBox(), axes=None, enableMenu=True)
 
-    DropBase.__init__(self, self._appBase, self.dropCallback)
+    DropBase.__init__(self, self._parent._appBase, self.dropCallback)
     # if self.appBase.preferences.general.colourScheme == 'light':
     #   background = 'w'
     #   foreground = 'k'
@@ -71,13 +71,13 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.spectrumItems = []
 
 
-    # layout = self.guiFrame.layout()
+    # layout = self.stripFrame.layout()
     # if not layout:
-    #   layout = QtGui.QGridLayout(self.guiFrame)
+    #   layout = QtGui.QGridLayout(self.stripFrame)
     #   layout.setContentsMargins(0, 0, 0, 0)
-    #   self.guiFrame.setLayout(layout)
+    #   self.stripFrame.setLayout(layout)
     #
-    # # print(self.guiFrame.width())
+    # # print(self.stripFrame.width())
     #
     #
     # n = len(self.guiSpectrumDisplay.apiSpectrumDisplay.strips)-1

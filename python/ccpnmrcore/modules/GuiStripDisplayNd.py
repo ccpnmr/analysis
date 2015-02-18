@@ -97,11 +97,12 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     self.spinSystemSideLabel.show()
 
   def addSpinSystemSideLabel(self):
-    self.spinSystemSideLabel = VerticalLabel(self, text=None)
-    self.spinSystemSideLabel = VerticalLabel(self, text=None)
+    dock = self.dock
+    self.spinSystemSideLabel = VerticalLabel(dock, text=None)
+    self.spinSystemSideLabel = VerticalLabel(dock, text=None)
     self.spinSystemSideLabel.setText('A.147.ALA.HA')
     # spinSystemSideLabel.setText()
-    self.addWidget(self.spinSystemSideLabel, 1, 0, 1, 1)
+    dock.addWidget(self.spinSystemSideLabel, 1, 0, 1, 1)
     # print(dir(spinSystemSideLabel))
     # print(spinSystemSideLabel.paintEvent())
     self.spinSystemSideLabel.setFixedWidth(30)

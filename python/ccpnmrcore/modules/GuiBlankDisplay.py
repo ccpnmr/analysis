@@ -25,4 +25,4 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
   def dropCallback(self, dropObject):
     
     if isinstance(dropObject, Spectrum):
-      self.dockArea.guiWindow.displayFirstSpectrum(dropObject)
+      self.dockArea.guiWindow.createSpectrumDisplay(dropObject)

@@ -253,12 +253,12 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
   if independentStrips:
     # Create FreeStripDisplay and first strip
     apiSpectrumDisplay = getattr(apiTask, newDisplayFunc)(**displayPars)
-    apiStrip = apiSpectrumDisplay.newStrip(axisCodes=axisCodes, axisOrder=axisCodes)
+    apiStrip = getattr(apiSpectrumDisplay, newStripFunc)(axisCodes=axisCodes, axisOrder=axisCodes)
   else:
     # Create Boundstrip/Nostrip display and first strip
     displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
     apiSpectrumDisplay = getattr(apiTask, newDisplayFunc)(**displayPars)
-    apiStrip = apiSpectrumDisplay.newStrip()
+    apiStrip = getattr(apiSpectrumDisplay, newStripFunc)()
 
   # Create axes
     for ii, code in axisCodes:

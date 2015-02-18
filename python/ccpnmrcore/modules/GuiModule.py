@@ -10,6 +10,8 @@ from PySide import QtCore, QtGui
 QtCore.qInstallMsgHandler(lambda *args: None)
 
 class GuiModule(QtGui.QWidget, GuiBase):
+  # It used to subclass Dock but that doesn't work because that has a function name() and we have an attribute name
+  # So instead create a dock
 
   def __init__(self):
     

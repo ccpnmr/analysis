@@ -59,6 +59,10 @@ class SpectrumView(AbstractWrapperObject):
     stripSerial 0 signifies 'all strips'"""
     return self._wrappedData.stripSerial
 
+  @property
+  def spectrumName(self) -> str:
+    """Name of connected spectrum"""
+    return self._wrappedData.spectrumName
     
   @property
   def _parent(self) -> SpectrumDisplay:

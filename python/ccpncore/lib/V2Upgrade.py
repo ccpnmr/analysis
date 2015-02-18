@@ -26,7 +26,7 @@ __version__ = "$Revision$"
 import os
 import operator
 
-from ccpncore.lib import MoleculeQuery
+from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.chemComp.Util import getChemAtomSetFromAtoms
 
 

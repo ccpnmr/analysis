@@ -4,6 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpncore.lib.molecule import DataMapper
+from ccpncore.util import pid as Pid
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -26,8 +29,7 @@ from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
-from ccpncore.lib.DataMapper import DataMapper
-from ccpncore.lib import pid as Pid
+
 
 class Residue(AbstractWrapperObject):
   """Molecular Residue."""

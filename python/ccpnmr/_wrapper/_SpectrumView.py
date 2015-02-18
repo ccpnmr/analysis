@@ -4,6 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpncore.util import pid as Pid
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -28,8 +30,6 @@ from ccpn._wrapper._Project import Project
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpnmr._wrapper._Strip import Strip
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-from ccpncore.lib import pid as Pid
-from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
 from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
 

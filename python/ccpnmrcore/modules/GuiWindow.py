@@ -1,21 +1,13 @@
+from ccpn.lib.wrapper import Spectrum
+
 __author__ = 'simon'
 
+from PySide import QtGui
 
 from pyqtgraph.dockarea import DockArea
-
-from ccpn.lib.Project import loadSpectrum
-from ccpn.lib import Spectrum
-
+from ccpn.lib.wrapper.Project import loadSpectrum
 from ccpncore.lib.spectrum import Util as specUtil
-
 from ccpnmrcore.Base import Base as GuiBase
-
-from PySide import QtGui, QtCore
-
-import importlib
-
-from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay
-
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpnmrcore.modules.GuiStripDisplay1d import GuiStripDisplay1d
 from ccpnmrcore.modules.GuiStripDisplayNd import GuiStripDisplayNd

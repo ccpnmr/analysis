@@ -27,7 +27,7 @@ import json
 import sys
 import collections
 import ccpn
-# from ccpncore.lib.DataMapper import DataMapper
+# from ccpncore.lib.molecule.DataMapper import DataMapper
 # from ccpncore.util import Common as commonUtil
 from ccpn.lib.nef import Export
 from ccpncore.lib.Bmrb import bmrb
@@ -328,5 +328,6 @@ if __name__ == '__main__':
   else:
     print ("Error. Parameters are: ccpnProjectDirectory outputDirectory [constraintStoreSerial] ")
 
-  Export to JSON
+  # Export to JSON
+  # NBNB TBD continue here
   bmrbData = bmrbEntry2Data1(bmrb.entry.fromFile(sys.argv[1]))

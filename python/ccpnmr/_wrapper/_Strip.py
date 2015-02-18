@@ -25,6 +25,7 @@ from collections.abc import Sequence
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
+from ccpn._wrapper._Spectrum import Spectrum
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpncore.api.ccpnmr.gui.Task import Strip1d as ApiStrip1d
@@ -32,6 +33,7 @@ from ccpncore.api.ccpnmr.gui.Task import StripNd as ApiStripNd
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 from ccpnmrcore.modules.GuiStrip1d import GuiStrip1d
 from ccpnmrcore.modules.GuiStripNd import GuiStripNd
+from ccpn.lib import Spectrum as libSpectrum
 
 
 class Strip(GuiStrip, AbstractWrapperObject):
@@ -143,6 +145,49 @@ class Strip(GuiStrip, AbstractWrapperObject):
   def findAxis(self, axisCode):
     """Reset display to original axis order"""
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
+
+  def displaySpectrum(self, spectrum:Spectrum, axisOrder:Sequence=()):
+
+    """
+    Display additional spectrum on strip, with spectrum axes ordered according ton axisOrder
+    """
+    dataSource = spectrum._wrappedData
+    apiStrip = self._wrappedData
+    if apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
+      return
+
+    displayAxisCodes = apiStrip.axisCodes
+
+    # make axis apping indices
+    if axisOrder and axisOrder != displayAxisCodes:
+      # Map axes to axisOrder, and remap to original setting
+      ll = libSpectrum.axisCodeMapIndices(spectrum.axisCodes, axisOrder)
+      mapIndices = [ll[axisOrder.index(x)] for x in displayAxisCodes]
+    else:
+      # Map axes to original display setting
+      mapIndices = libSpectrum.axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
+
+    # Make dimensionOrdering
+    sortedDataDims = dataSource.sortedDataDims()
+    dimensionOrdering = []
+    for index in mapIndices:
+      if index is None:
+        dimensionOrdering.append(0)
+      else:
+        dimensionOrdering.append(sortedDataDims[index].dim)
+
+    # Set spectrumSerial
+    if 'Free' in apiStrip.className:
+      # Independent strips
+      stripSerial = apiStrip.serial
+    else:
+      stripSerial = 0
+
+    # Make spectrumView
+    obj = apiStrip.spectrumDisplay.newSpectrumView(dataSource=dataSource,
+                                                   stripSerial=stripSerial,
+                                                   dimensionOrdering=dimensionOrdering)
+    return self._project._data2Obj[obj]
 
 
 # Connections to parents:

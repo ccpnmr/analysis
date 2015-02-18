@@ -599,3 +599,24 @@ def getAxisCodes(spectrum):
     
   return tuple(axisCodes)
 
+def resetAxisCodes(spectrum):
+  """Set axis codes from per-dimension parameters and heuristics, e.g. for newly loaded spectrum
+  NB ignores expTransfer and links to NmrExpPrototype"""
+
+  dataDims = spectrum.sortedDataDims()
+
+  # NB determine acquisition dimension to decide which end to start indexing
+  axisCodes = []
+  for dataDim in dataDims:
+    elementNames = [re.match('\d+(\D+)', x).group(1) for x in dataDim.isotopeCodes]
+    measurementType = dataDim.measurementType.lower()
+    # ('Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling','MQShift','T1','T2','T1rho','T1zz')
+    if measurementType == 'shift':
+      axisCode = elementNames[0]
+    elif measurementType == 'jcoupling':
+      axisCode = 'J' + ''.join(x.lower() for x in elementNames)
+    elif measurementType == 'mqshift':
+      axisCode = 'MQ' + ''.join(x.lower() for x in elementNames)
+    elif measurementType.startswith('t1') or  measurementType.startswith('t1'):
+      axisCode = 'delay'
+

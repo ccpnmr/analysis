@@ -25,8 +25,9 @@ import os
 from collections.abc import Sequence
 
 from ccpncore.util import Path
-from ccpncore.lib.BlockData import determineBlockSizes
+from ccpncore.lib.spectrum.BlockData import determineBlockSizes
 from ccpncore.memops.ApiError import ApiError
+
 
 def createExperiment(nmrProject:object, name:str, numDim:int, sf:Sequence,
                      isotopeCodes:Sequence, isAcquisition:Sequence=None, **additionalParameters):

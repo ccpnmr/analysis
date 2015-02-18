@@ -193,7 +193,13 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     """Reset display to original axis order"""
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str=None,
+  def displaySpectrum(self, spectrum, axisOrder:Sequence=()):
+    """
+    Display additional spectrum, with spectrum axes ordered according ton axisOrder
+    """
+    self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+
+def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
                        name:str=None, gridCell:Sequence=(1,1), gridSpan:Sequence=(1,1),
                        window:Window=None, comment:str=None, independentStrips=False,
                        nmrResidue=None):
@@ -206,8 +212,8 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str=None,
     (True, False,False):('newStripDisplay1d','newStrip1d'),
     (False, True,False):('newDisplayNd','newStripNd'),
     (False, False,False):('newStripDisplayNd','newStripNd'),
-    (False, False,True):('newStripDisplayNd','newFreeStripNd'),
-    (True, False,True):('newStripDisplay1d','newFreeStrip1d'),
+    (False, False,True):('newFreeStripDisplayNd','newFreeStripNd'),
+    (True, False,True):('newFreeStripDisplay1d','newFreeStrip1d'),
   }
 
   apiTask = parent._wrappedData
@@ -228,9 +234,10 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str=None,
     newDisplayFunc, newStripFunc = tt
 
   # set parameters for display
+  window = window or apiTask.window
   displayPars = dict(
     stripDirection=stripDirection, gridCell=gridCell, gridSpan=gridSpan, window=window,
-    details=comment, nmrResidue=nmrResidue
+    details=comment, resonanceGroup=nmrResidue and nmrResidue._wrappedData
   )
   # Add name, setting and insuring uniqueness if necessary
   if name is None:
@@ -271,6 +278,7 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str=None,
         apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
   #
   return parent._project._data2Obj.get(apiSpectrumDisplay)
+
 
 # Connections to parents:
 Task._childClasses.append(SpectrumDisplay)

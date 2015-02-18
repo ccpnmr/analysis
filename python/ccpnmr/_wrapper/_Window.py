@@ -4,6 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpncore.util import pid as Pid
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -30,7 +32,6 @@ from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.GuiMainWindow import GuiMainWindow
 from ccpncore.lib import Spectrum as libSpectrum
-from ccpncore.lib import pid as Pid
 
 
 class Window(AbstractWrapperObject):
@@ -212,6 +213,8 @@ class Window(AbstractWrapperObject):
     display._wrappedData.newSpectrumView(dataSource=dataSource,
                                          stripSerial=stripSerial,
                                          dimensionOrdering=dimensionOrdering)
+    #
+    return display
 
 
 def newWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:

@@ -30,7 +30,6 @@ from ccpncore.memops import Notifiers
 from ccpncore.lib import DataConvertLib
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Io as utilIo
-from ccpncore.lib import pid as Pid
 
 
 class Project(AbstractWrapperObject):

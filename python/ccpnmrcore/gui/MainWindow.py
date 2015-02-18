@@ -21,21 +21,20 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PySide import QtCore, QtGui
 import os
 import sys
-import random
-import numpy as np
 import json
 from functools import partial
+
+from PySide import QtCore, QtGui
+
+import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.dockarea import DockArea, Dock
-
 from ccpnmrcore.modules.Spectrum1dPane import Spectrum1dPane
 from ccpnmrcore.modules.SpectrumNdPane import SpectrumNdPane
 from ccpnmrcore.modules.TiedNdStrip import TiedNdStrip
 from ccpnmrcore.Current import Current
-from ccpnmrcore.modules.spectrumPane.Spectrum1dItem import Spectrum1dItem
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import PythonConsole
@@ -47,10 +46,7 @@ from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Path
-from ccpn.lib.Project import loadSpectrum
-
-from difflib import Differ
-
+from ccpn.lib.wrapper.Project import loadSpectrum
 from ccpn import openProject, newProject
 
 

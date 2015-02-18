@@ -19,6 +19,6 @@ class GuiModule(Dock, GuiBase):
     # self.apiModule = apiModule
     
     Dock.__init__(self, name=self._wrappedData.name, size=(1100,1300))
-    dockArea.addDock(self)
+    self.dockArea.addDock(self)
     
     GuiBase.__init__(self, self._project._appBase)

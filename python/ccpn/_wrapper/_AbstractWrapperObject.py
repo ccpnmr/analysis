@@ -24,9 +24,11 @@ __version__ = "$Revision: 7686 $"
 from collections import abc
 import itertools
 import functools
-from ccpncore.lib.pid import Pid
-from ccpncore.lib.pid import PREFIXSEP
-from ccpncore.lib.pid import IDSEP
+
+from ccpncore.util.pid import Pid
+from ccpncore.util.pid import PREFIXSEP
+from ccpncore.util.pid import IDSEP
+
 
 # PROBLEM:
 # The Mutable<MAp[p[ing superclass changes the MetaCLass, which causes

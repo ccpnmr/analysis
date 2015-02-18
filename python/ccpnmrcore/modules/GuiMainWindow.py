@@ -1,22 +1,15 @@
-from pyqtgraph.dockarea import DockArea
-
-import os, json
-
+import os
+import json
 from functools import partial
 
 from PySide import QtGui, QtCore
 
 # from ccpn import openProject, newProject
-from ccpn.lib.Project import loadSpectrum
 
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import Console
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
-
-from ccpncore.lib.spectrum import Util as specUtil
-
-from ccpnmrcore.Base import Base as GuiBase
 
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 

@@ -69,7 +69,7 @@ class Project(AbstractWrapperObject):
     # set up attributes
     self._project = self
     self._wrappedData = wrappedData
-    self.id = _id = ''
+    self._id = _id = ''
     self._activeNotifiers = []
     
     # setup object handling dictionaries

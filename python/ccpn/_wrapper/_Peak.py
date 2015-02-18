@@ -247,7 +247,7 @@ class Peak(AbstractWrapperObject):
 
     result = []
     for ll in self.dimensionNmrAtoms:
-      result.append(list(x.id for x in ll))
+      result.append(list(x._id for x in ll))
     #
     return tuple(result)
 
@@ -258,7 +258,7 @@ class Peak(AbstractWrapperObject):
 
     result = []
     for ll in self.assignedNmrAtoms:
-      result.append(list(x and x.id for x in ll))
+      result.append(list(x and x._id for x in ll))
     #
     return tuple(result)
 

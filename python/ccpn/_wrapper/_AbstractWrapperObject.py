@@ -160,8 +160,8 @@ class AbstractWrapperObject():
     if parent is project:
       _id = self._key
     else:
-      _id = IDSEP.join((parent.id, self._key))
-    self.id = _id
+      _id = IDSEP.join((parent._id, self._key))
+    self._id = _id
     
     # update pid:object mapping dictionary
     className = self.__class__.__name__
@@ -208,7 +208,7 @@ class AbstractWrapperObject():
         else:
           # this is then a direct child
           if project is not self:
-            key = IDSEP.join((self.id,key))
+            key = IDSEP.join((self._id,key))
           #    
           return dd[key]
       else:
@@ -279,7 +279,7 @@ class AbstractWrapperObject():
     propertyAttrs = (x for x in sorted(dir(cls))
                      if (not x.startswith('_') and  isinstance(getattr(cls,x), property)))
     
-    prefix = self.id + IDSEP
+    prefix = self._id + IDSEP
     childAttrs = (y for x in self._childClasses
                   for y in self._project._pid2Obj[x.shortClassName]
                   if y.startswith(prefix))
@@ -299,7 +299,7 @@ class AbstractWrapperObject():
     # Calling list(self) seems to give an infinite loop, so let us try sounting elements directly
 
     cls = self.__class__
-    prefix = self.id + IDSEP
+    prefix = self._id + IDSEP
     dd = self.__dict__
     return (
       len(x for x in sorted(dir(cls))
@@ -465,13 +465,13 @@ class AbstractWrapperObject():
   def pid(self) -> str:
     """Object project-wide identifier, unique within project.
     Set automatically from short class name, and id of object and parents."""
-    return Pid(PREFIXSEP.join((self.shortClassName, self.id)))
+    return Pid(PREFIXSEP.join((self.shortClassName, self._id)))
   
   @property
   def longPid(self) -> str:
     """Object project-wide identifier, unique within project.
     Set automatically from full class name, and id of object and parents."""
-    return Pid(PREFIXSEP.join((type(self).__name__, self.id)))
+    return Pid(PREFIXSEP.join((type(self).__name__, self._id)))
     
   
   # CCPN abstract properties
@@ -486,7 +486,11 @@ class AbstractWrapperObject():
   def _parent(self):
     """Parent (containing) object."""
     raise NotImplementedError("Code error: function not implemented")
-  
+
+  @property
+  def id(self):
+    """Full ID of object."""
+    return self._id
   
   # Abstract methods
   @classmethod
@@ -532,6 +536,10 @@ class AbstractWrapperObject():
             return dd.get(key)
     #
     return None
+
+  def getWrapperObject(self, apiObject:object):
+    """get wrapper object wrapping apiObject or None"""
+    return self._project._data2Obj.get(apiObject)
     
   # CCPN Implementation methods
 

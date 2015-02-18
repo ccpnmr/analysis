@@ -27,7 +27,7 @@ import functools
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpncore.memops import Notifiers
-from ccpncore.lib import DataConvertLib
+from ccpncore.lib.molecule import DataConvertLib
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Io as utilIo
 

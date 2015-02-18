@@ -242,9 +242,9 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
   # Add name, setting and insuring uniqueness if necessary
   if name is None:
     if 'intensity' in axisCodes:
-      name = ''.join(['1D:', axisCodes[0]] + axisCodes[2:])
+      name = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
     else:
-      name = ''.join(axisCodes)
+      name = ''.join([str(x) for x in axisCodes])
   while apiTask.findFirstModule(name=name):
     name = commonUtil.incrementName(name)
   displayPars['name'] = name

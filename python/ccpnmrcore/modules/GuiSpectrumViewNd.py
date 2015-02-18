@@ -83,7 +83,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     apiDataSource = self.apiDataSource
     # I think this fixes it - number of DISPLAY axes, rather than dataSource axes. RHF
     # dimensionCount = apiDataSource.numDim
-    dimensionCount = len(self.dimmensionOrdering)
+    dimensionCount = len(self.dimensionOrdering)
     self.previousRegion = dimensionCount * [None]
 
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom

@@ -234,7 +234,7 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
     newDisplayFunc, newStripFunc = tt
 
   # set parameters for display
-  window = window or apiTask.window
+  window = window or apiTask.findFirstWindow()
   displayPars = dict(
     stripDirection=stripDirection, gridCell=gridCell, gridSpan=gridSpan, window=window,
     details=comment, resonanceGroup=nmrResidue and nmrResidue._wrappedData

@@ -32,7 +32,7 @@ from ccpncore.util import Colour
 from ccpnc.contour import Contourer2d
 ###from ccpnc.peak import Peak
 
-from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
+from ccpn.lib.wrapper import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
 
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 ###from ccpnmrcore.modules.spectrumPane.PeakListNdItem import PeakListNdItem

@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 import numpy
 
-from ccpn.lib import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
+from ccpn.lib.wrapper import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
 
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 

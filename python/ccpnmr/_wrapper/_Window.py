@@ -31,7 +31,7 @@ from ccpn._wrapper._Spectrum import Spectrum
 from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.GuiMainWindow import GuiMainWindow
-from ccpncore.lib import Spectrum as libSpectrum
+from ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 
 class Window(AbstractWrapperObject):
@@ -142,7 +142,7 @@ class Window(AbstractWrapperObject):
     else:
       displayAxisCodes = list(apiAxisCodes)
       mapIndices = list(range(dataSource.numDim))
-      if contour:
+      if not contour:
         displayAxisCodes.insert(1, 'intensity')
         mapIndices.insert(1,None)
 

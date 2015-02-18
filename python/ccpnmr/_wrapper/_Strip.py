@@ -33,7 +33,7 @@ from ccpncore.api.ccpnmr.gui.Task import StripNd as ApiStripNd
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 from ccpnmrcore.modules.GuiStrip1d import GuiStrip1d
 from ccpnmrcore.modules.GuiStripNd import GuiStripNd
-from ccpn.lib import Spectrum as libSpectrum
+from ccpn.lib.wrapper import Spectrum as libSpectrum
 
 
 class Strip(GuiStrip, AbstractWrapperObject):

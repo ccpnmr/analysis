@@ -29,7 +29,7 @@ from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrResidue import NmrResidue
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
-from ccpncore.lib import MoleculeQuery
+from ccpncore.lib.molecule import MoleculeQuery
 
 
 class NmrAtom(AbstractWrapperObject):

@@ -28,7 +28,7 @@ from collections.abc import Sequence
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
-from ccpncore.lib import MoleculeModify
+from ccpncore.lib.molecule import MoleculeModify
 from ccpncore.util import Common as commonUtil
 
 

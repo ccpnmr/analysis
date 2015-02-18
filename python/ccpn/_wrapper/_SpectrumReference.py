@@ -160,16 +160,11 @@ class SpectrumReference(AbstractWrapperObject):
     if result is None:
       dataDim.dataSource.resetAxisCodes()
       result = expDimRef.axisCode
-
-    if dataDim.className == 'FidDataDim':
-      result = 'fid' + result
     #
     return result
 
   @axisCode.setter
   def axisCode(self, value:str):
-      if value.startswith('fid') and self._wrappedData.dataDim.className  == 'FidDataDim':
-        value = value[3:]
       self._wrappedData.expDimRef.axisCode = value
 
   @property

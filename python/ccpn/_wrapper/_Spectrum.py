@@ -536,21 +536,12 @@ class Spectrum(AbstractWrapperObject):
         result.append(None)
       else:
         axisCode = expDimRef.axisCode
-        if dataDim.className == 'FidDataDim':
-          axisCode = 'fid' + axisCode
         result.append(axisCode)
 
     return tuple(result)
 
   @axisCodes.setter
   def axisCodes(self, value):
-
-    value = list(value)
-    for ii, dataDim in self._wrappedData.sortedDataDims():
-      val = value[ii]
-      if val.startswith('fid') and dataDim.className == 'FidDataDim':
-        value[ii] = val[3:]
-
     self._setExpDimRefAttribute('axisCode', value, mandatory=False)
 
   @property

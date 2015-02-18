@@ -27,6 +27,7 @@ from collections.abc import Sequence
 
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
+from ccpn._wrapper._Spectrum import Spectrum
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpnmr._wrapper._Strip import Strip
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
@@ -201,6 +202,11 @@ class SpectrumView(AbstractWrapperObject):
   @sliceColour.setter
   def sliceColour(self, value:str):
     self._wrappedData.sliceColour = value
+
+  @property
+  def spectrum(self) -> Spectrum:
+    """Spectrum that SpectrumView refers to"""
+    return self.getWrapperObject(self._wrappedData.gataSource)
 
   @property
   def strips(self) -> Strip:

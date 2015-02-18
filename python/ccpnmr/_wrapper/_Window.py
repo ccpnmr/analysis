@@ -105,7 +105,7 @@ class Window(AbstractWrapperObject):
   def createSpectrumDisplay(self, spectrum:Spectrum, displayAxisCodes:Sequence=(),
                             axisOrder:Sequence=(), name:str=None, positions:Sequence=(),
                             widths:Sequence=(), units:Sequence=(),
-                            stripAxis:str=None, contour:bool=True,
+                            stripAxis:str='Y', is1d:bool=False,
                             independentStrips:bool=False, gridCell:Sequence=(1,1),
                             gridSpan:Sequence=(1,1)):
 
@@ -116,7 +116,7 @@ class Window(AbstractWrapperObject):
     widths: axis widths in order - default to heuristic
     units: axis units in display order - default to heuristic
     stripAxis: if 'X' or 'Y' set strip axis, if None set to non-strip display
-    contour: If False, or spectrum passed in is 1D, do 1D display
+    is1d: If True, or spectrum passed in is 1D, do 1D display
     independentStrips: if True do freeStrip display.
     """
 
@@ -142,7 +142,7 @@ class Window(AbstractWrapperObject):
     else:
       displayAxisCodes = list(apiAxisCodes)
       mapIndices = list(range(dataSource.numDim))
-      if not contour:
+      if is1d:
         displayAxisCodes.insert(1, 'intensity')
         mapIndices.insert(1,None)
 

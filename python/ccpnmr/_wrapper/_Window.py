@@ -126,11 +126,11 @@ class Window(AbstractWrapperObject):
     if task is None:
       raise ValueError("Window %s is not attached to any Task" % self)
 
-    apiAxisCodes = spectrum.axisCodes
+    spectrumAxisCodes = spectrum.axisCodes
 
     mapIndices = ()
     if axisOrder:
-      mapIndices = libSpectrum.axisCodeMapIndices(apiAxisCodes, axisOrder)
+      mapIndices = libSpectrum.axisCodeMapIndices(spectrumAxisCodes, axisOrder)
       if displayAxisCodes:
         if not libSpectrum.doAxisCodesMatch(axisOrder, displayAxisCodes):
           raise ValueError("AxisOrder %s do not match display axisCodes %s"
@@ -138,9 +138,9 @@ class Window(AbstractWrapperObject):
       else:
         displayAxisCodes = axisOrder
     elif displayAxisCodes:
-      mapIndices = libSpectrum.axisCodeMapIndices(apiAxisCodes, displayAxisCodes)
+      mapIndices = libSpectrum.axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
     else:
-      displayAxisCodes = list(apiAxisCodes)
+      displayAxisCodes = list(spectrumAxisCodes)
       mapIndices = list(range(dataSource.numDim))
       if is1d:
         displayAxisCodes.insert(1, 'intensity')

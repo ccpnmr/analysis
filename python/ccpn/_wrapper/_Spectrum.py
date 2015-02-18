@@ -386,10 +386,12 @@ class Spectrum(AbstractWrapperObject):
   def _mainExpDimRefs(self) -> list:
     """Get main ExpDimRef (serial=1) for each dimension"""
 
-    result = tuple(x.findFirstExpDimRef(serial=1)
-                   for x in self._wrappedData.experiment.sortedExpDims())
+    result = []
+    for ii,dataDim in enumerate(self._wrappedData.sortedDataDims()):
+      # NB MUST loop over dataDims, in case of projection spectra
+      result.append(dataDim.expDim.findFirstExpDimRef(serial=1))
     #
-    return result
+    return tuple(result)
 
 
   def _setExpDimRefAttribute(self, attributeName:str, value:Sequence, mandatory:bool=True):
@@ -516,25 +518,35 @@ class Spectrum(AbstractWrapperObject):
     or 'unknown' otherwise.
 
     TBD codes match AtomSite.axisCode, but NBNB NmrExpPrototypes must be updated to match system"""
-    expDimRefs = self._mainExpDimRefs()
+
+    # See if axis codes are set
+    for expDim in self._wrappedData.experiment.expDims:
+      if expDim.sortedExpDimRefs()[0].axisCode is None:
+        self._wrappedData.resetAxisCodes()
+        break
+
     result = []
-    for expDimRef in expDimRefs:
+    for dataDim in self._wrappedData.sortedDataDims():
+      expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
       if expDimRef is None:
         result.append(None)
       else:
         axisCode = expDimRef.axisCode
-        if axisCode is None:
-          # We need to reset the axisCodes first
-          break
-    else:
-      return tuple(result)
+        if dataDim.className == 'FidDataDim':
+          axisCode = 'fid' + axisCode
+        result.append(axisCode)
 
-    # Reset and do it again:
-    self._wrappedData.resetAxisCodes()
-    return tuple(x and x.axisCode for x in expDimRefs)
+    return tuple(result)
 
   @axisCodes.setter
   def axisCodes(self, value):
+
+    value = list(value)
+    for ii, dataDim in self._wrappedData.sortedDataDims():
+      val = value[ii]
+      if val.startswith('fid') and dataDim.className == 'FidDataDim':
+        value[ii] = val[3:]
+
     self._setExpDimRefAttribute('axisCode', value, mandatory=False)
 
   @property

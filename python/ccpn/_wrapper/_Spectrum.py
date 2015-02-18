@@ -522,7 +522,11 @@ class Spectrum(AbstractWrapperObject):
     # See if axis codes are set
     for expDim in self._wrappedData.experiment.expDims:
       if expDim.sortedExpDimRefs()[0].axisCode is None:
-        self._wrappedData.resetAxisCodes()
+        # TEMP, in future should not need import
+        from ccpncore.lib.ccp.nmr.Nmr.DataSource import resetAxisCodes
+        resetAxisCodes(self._wrappedData)
+        # in future can do:
+        # self._wrappedData.resetAxisCodes()
         break
 
     result = []

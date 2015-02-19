@@ -67,12 +67,16 @@ class GuiStripNd(GuiStrip):
     #print('HERE711', self.scene(), guiSpectrumView)
     apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
 
-    if not apiDataSource.positiveContourColour:
+    # Changed to guiSpectrumView.positiveContourColour, which picks up from either
+    # SpectrumView or DataSource
+    if not guiSpectrumView.positiveContourColour:
       apiDataSource.positiveContourColour = Colour.spectrumHexColours[self.colourIndex]
       self.colourIndex += 1
       self.colourIndex %= len(Colour.spectrumHexColours)
 
-    if not apiDataSource.negativeContourColour:
+    if not guiSpectrumView.negativeContourColour:
+    # Changed to guiSpectrumView.negativeContourColour, which picks up from either
+    # SpectrumView or DataSource
       apiDataSource.negativeContourColour = Colour.spectrumHexColours[self.colourIndex]
       self.colourIndex += 1
       self.colourIndex %= len(Colour.spectrumHexColours)

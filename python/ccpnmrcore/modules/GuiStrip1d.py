@@ -62,14 +62,14 @@ class GuiStrip1d(GuiStrip):
 
   def addSpectrum(self, spectrum, guiSpectrumView):
 
-    ccpnSpectrum = spectrum.ccpnSpectrum
-    if not ccpnSpectrum.sliceColour:
-      ccpnSpectrum.sliceColour = list(spectrumColours.keys())[self.colourIndex]
+    apiSpectrum = spectrum.apiSpectrum
+    if not guiSpectrumView.sliceColour:
+      apiSpectrum.sliceColour = list(spectrumColours.keys())[self.colourIndex]
       self.colourIndex += 1
       self.colourIndex %= len(spectrumColours)
 
-    colour = ccpnSpectrum.sliceColour
-    spectrum.ccpnSpectrum.setSliceColour(colour)
+    colour = guiSpectrumView.sliceColour
+    # spectrum.apiSpectrum.setSliceColour(colour)
     data = guiSpectrumView.getSliceData()
     # if self.colourScheme == 'dark':
     #   colour = colour.lighter(f=120)

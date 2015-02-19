@@ -110,35 +110,53 @@ class SpectrumView(AbstractWrapperObject):
 
   @positiveContourColour.setter
   def positiveContourColour(self, value:str):
-    wrappedData = self._wrappedData
-    self._wrappedData.positiveContourColour = value
+    if self.positiveContourColour != value:
+      self._wrappedData.positiveContourColour = value
 
   @property
   def positiveContourCount(self) -> int:
     """Number of positive contours"""
-    return self._wrappedData.positiveContourCount
+    wrappedData = self._wrappedData
+    result = wrappedData.positiveContourCount
+    if result is None:
+      obj = wrappedData.dataSource
+      result = obj and obj.positiveContourCount
+    return result
 
   @positiveContourCount.setter
   def positiveContourCount(self, value:int):
-    self._wrappedData.positiveContourCount = value
+    if self.positiveContourCount != value:
+      self._wrappedData.positiveContourCount = value
 
   @property
   def positiveContourBase(self) -> float:
     """Base level for positive contours"""
-    return self._wrappedData.positiveContourBase
+    wrappedData = self._wrappedData
+    result = wrappedData.positiveContourBase
+    if result is None:
+      obj = wrappedData.dataSource
+      result = obj and obj.positiveContourBase
+    return result
 
   @positiveContourBase.setter
   def positiveContourBase(self, value:float):
-    self._wrappedData.positiveContourBase = value
+    if self.positiveContourBase != value:
+      self._wrappedData.positiveContourBase = value
 
   @property
   def positiveContourFactor(self) -> float:
     """Level multiplication factor for positive contours"""
-    return self._wrappedData.positiveContourFactor
+    wrappedData = self._wrappedData
+    result = wrappedData.positiveContourFactor
+    if result is None:
+      obj = wrappedData.dataSource
+      result = obj and obj.positiveContourFactor
+    return result
 
   @positiveContourFactor.setter
   def positiveContourFactor(self, value:float):
-    self._wrappedData.positiveContourFactor = value
+    if self.positiveContourFactor != value:
+      self._wrappedData.positiveContourFactor = value
 
   @property
   def displayNegativeContours(self) -> bool:
@@ -152,38 +170,62 @@ class SpectrumView(AbstractWrapperObject):
   @property
   def negativeContourColour(self) -> str:
     """Colour identifier for negative contours"""
-    return self._wrappedData.negativeContourColour
+    wrappedData = self._wrappedData
+    result = wrappedData.negativeContourColour
+    if result is None:
+      obj = wrappedData.dataSource
+      result = obj and obj.negativeContourColour
+    return result
 
   @negativeContourColour.setter
   def negativeContourColour(self, value:str):
-    self._wrappedData.negativeContourColour = value
+    if self.negativeContourColour != value:
+      self._wrappedData.negativeContourColour = value
 
   @property
   def negativeContourCount(self) -> int:
     """Number of negative contours"""
-    return self._wrappedData.negativeContourCount
+    wrappedData = self._wrappedData
+    result = wrappedData.negativeContourCount
+    if result is None:
+      obj = wrappedData.dataSource
+      result = obj and obj.negativeContourCount
+    return result
 
   @negativeContourCount.setter
   def negativeContourCount(self, value:int):
-    self._wrappedData.negativeContourCount = value
+    if self.negativeContourCount != value:
+      self._wrappedData.negativeContourCount = value
 
   @property
   def negativeContourBase(self) -> float:
     """Base level for negative contours"""
-    return self._wrappedData.negativeContourBase
+    wrappedData = self._wrappedData
+    result = wrappedData.negativeContourBase
+    if result is None:
+      obj = wrappedData.dataSource
+      result = obj and obj.negativeContourBase
+    return result
 
   @negativeContourBase.setter
   def negativeContourBase(self, value:float):
-    self._wrappedData.negativeContourBase = value
+    if self.negativeContourBase != value:
+      self._wrappedData.negativeContourBase = value
 
   @property
   def negativeContourFactor(self) -> float:
     """Level multiplication factor for negative contours"""
-    return self._wrappedData.negativeContourFactor
+    wrappedData = self._wrappedData
+    result = wrappedData.negativeContourFactor
+    if result is None:
+      obj = wrappedData.dataSource
+      result = obj and obj.negativeContourFactor
+    return result
 
   @negativeContourFactor.setter
   def negativeContourFactor(self, value:float):
-    self._wrappedData.negativeContourFactor = value
+    if self.negativeContourFactor != value:
+      self._wrappedData.negativeContourFactor = value
 
   @property
   def displayNegativeContours(self) -> bool:
@@ -197,11 +239,17 @@ class SpectrumView(AbstractWrapperObject):
   @property
   def sliceColour(self) -> str:
     """Colour for 1D slices and 1D spectra"""
-    return self._wrappedData.sliceColour
+    wrappedData = self._wrappedData
+    result = wrappedData.sliceColour
+    if result is None:
+      obj = wrappedData.dataSource
+      result = obj and obj.sliceColour
+    return result
 
   @sliceColour.setter
   def sliceColour(self, value:str):
-    self._wrappedData.sliceColour = value
+    if self.sliceColour != value:
+      self._wrappedData.sliceColour = value
 
   @property
   def spectrum(self) -> Spectrum:

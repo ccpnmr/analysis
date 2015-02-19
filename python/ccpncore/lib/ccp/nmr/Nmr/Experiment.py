@@ -187,7 +187,7 @@ def resetAxisCodes(experiment):
         # If they do appear this is the better treatment
         axisCode = elementNames[0]
 
-        dataDimRef = expDimRef.findFirstDataDim()
+        dataDimRef = expDimRef.findFirstDataDimRef()
         if dataDimRef is not None:
           if axisCode == 'C':
             # Try to make more specific for CO

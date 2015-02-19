@@ -42,18 +42,18 @@ class PeakFitTest(Testing):
     haveLow = 0
     haveHigh = 1
     low = 0 # arbitrary
-    high = 3.0e6
+    high = 1.0e8
     buffer = [1, 1]
     nonadjacent = 0
     dropFactor = 0.0
     minLinewidth = [0.0, 0.0]
 
-    result = Peak.findPeaks(data, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth)
-    print('number of peaks found = %d' % len(result))
+    peakPoints = Peak.findPeaks(data, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth)
+    print('number of peaks found = %d' % len(peakPoints))
 
-    result.sort(key=itemgetter(1), reverse=True)
+    peakPoints.sort(key=itemgetter(1), reverse=True)
 
-    position, height = result[0]
+    position, height = peakPoints[0]
     print('position of highest peak = %s, height = %s' % (position, height))
 
     numDim = len(position)

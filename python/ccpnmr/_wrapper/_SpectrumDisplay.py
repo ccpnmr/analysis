@@ -62,8 +62,10 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     
   @property
   def _parent(self) -> Task:
-    """Parent (containing) object."""
+    """Task containing spectrumDisplay."""
     return self._project._data2Obj.get(self._wrappedData.guiTask)
+
+  task = _parent
 
   @property
   def stripDirection(self) -> str:

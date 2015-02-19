@@ -65,7 +65,7 @@ class RestraintList(AbstractWrapperObject):
     
   @property
   def _parent(self) -> RestraintSet:
-    """Parent (containing) object."""
+    """RestraintSet containing restraintList."""
     return  self._project._data2Obj[self._wrappedData.nmrConstraintStore]
   
   restraintSet = _parent

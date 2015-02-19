@@ -62,8 +62,6 @@ class ChemicalShiftList(AbstractWrapperObject):
     """Parent (containing) object."""
     return self._project
   
-  project = _parent
-  
   @property
   def name(self) -> str:
     """name of ChemicalShiftList"""

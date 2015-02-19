@@ -69,7 +69,7 @@ class Residue(AbstractWrapperObject):
     
   @property
   def _parent(self) -> Chain:
-    """Parent (containing) object."""
+    """Chain containing residue."""
     return self._project._data2Obj[self._wrappedData.chain]
   
   chain = _parent

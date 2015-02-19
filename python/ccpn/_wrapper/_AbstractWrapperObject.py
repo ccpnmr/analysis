@@ -457,7 +457,7 @@ class AbstractWrapperObject():
   # CCPN properties 
   @property
   def project(self):
-    """Project (root) object."""
+    """Project (root) containing object."""
     # NB return type is Project. Set in Project.py
     return self._project
   

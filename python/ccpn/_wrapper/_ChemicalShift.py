@@ -54,10 +54,10 @@ class ChemicalShift(AbstractWrapperObject):
     
   @property
   def _parent(self) -> Project:
-    """Parent (containing) object."""
-    return self._project
+    """ChemicalShiftList containing ChemicalShift."""
+    return self._project._data2Obj[self._wrappedData.parentList]
   
-  project = _parent
+  chemicalShiftList = _parent
   
   @property
   def value(self) -> float:

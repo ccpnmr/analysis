@@ -68,7 +68,7 @@ class Peak(AbstractWrapperObject):
     
   @property
   def _parent(self) -> PeakList:
-    """Parent (containing) object."""
+    """PeakList containing Peak."""
     return  self._project._data2Obj[self._wrappedData.peakList]
   
   peakList = _parent

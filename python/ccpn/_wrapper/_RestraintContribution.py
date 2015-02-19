@@ -63,8 +63,10 @@ class RestraintContribution(AbstractWrapperObject):
 
   @property
   def _parent(self) -> Restraint:
-    """Parent (containing) object."""
+    """Restraint containing restraintContribution."""
     return  self._project._data2Obj[self._wrappedData.constraint]
+
+  restraint = _parent
 
   @property
   def _key(self) -> str:

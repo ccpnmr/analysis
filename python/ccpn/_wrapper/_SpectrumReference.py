@@ -68,8 +68,10 @@ class SpectrumReference(AbstractWrapperObject):
 
   @property
   def _parent(self) -> Spectrum:
-    """Parent (containing) object."""
+    """Spectrum containing spectrumReference."""
     return self._project._data2Obj[self._wrappedData.dataDim.dataSource]
+
+  spectrum = _parent
 
   # Attributes of DataSource and Experiment:
 

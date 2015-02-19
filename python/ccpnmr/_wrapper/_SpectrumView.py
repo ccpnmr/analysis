@@ -67,9 +67,10 @@ class SpectrumView(AbstractWrapperObject):
     
   @property
   def _parent(self) -> SpectrumDisplay:
-    """Parent (containing) object."""
+    """SpectrumDisplay containing spectrumView."""
     return self._project._data2Obj.get(self._wrappedData.spectrumDisplay)
 
+  spectrumDisplay = _parent
 
   @property
   def experimentType(self) -> str:

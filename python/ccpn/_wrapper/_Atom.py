@@ -57,7 +57,7 @@ class Atom(AbstractWrapperObject):
 
   @property
   def _parent(self) -> Residue:
-    """Parent (containing) object."""
+    """Residue containing Atom."""
     return self._project._data2Obj[self._wrappedData.residue]
   
   residue = _parent

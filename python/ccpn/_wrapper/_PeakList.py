@@ -59,7 +59,7 @@ class PeakList(AbstractWrapperObject):
     
   @property
   def _parent(self) -> Spectrum:
-    """Parent (containing) object."""
+    """Spectrum containing Peaklist."""
     return  self._project._data2Obj[self._wrappedData.dataSource]
   
   spectrum = _parent

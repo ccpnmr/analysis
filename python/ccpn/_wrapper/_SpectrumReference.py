@@ -158,7 +158,7 @@ class SpectrumReference(AbstractWrapperObject):
     dataDim = self._wrappedData.dataDim
     result = expDimRef.axisCode
     if result is None:
-      dataDim.dataSource.resetAxisCodes()
+      dataDim.dataSource.experiment.resetAxisCodes()
       result = expDimRef.axisCode
     #
     return result

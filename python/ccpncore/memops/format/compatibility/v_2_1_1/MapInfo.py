@@ -710,14 +710,14 @@ nameMatches = [
 # excluding those where only names and/or valueTypes differ
 # (oldElem.qName, newElem.name, oldGuid, newGuid, differentTags
 allDiffs = [
- ('cambridge.WmsProtocol.InterfaceParameter.hicard', 'hicard', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00005', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00005', {'documentation', 'defaultValue', 'locard'}), 
- ('cambridge.WmsProtocol.InterfaceParameter.locard', 'locard', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00006', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00006', {'documentation', 'defaultValue'}), 
+ ('cambridge.WmsProtocol.InterfaceParameter.hicard', 'hicard', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00005', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00005', {'locard', 'defaultValue', 'documentation'}), 
+ ('cambridge.WmsProtocol.InterfaceParameter.locard', 'locard', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00006', 'www.ccpn.ac.uk_Fogh_2011-03-22-17:23:24_00006', {'defaultValue', 'documentation'}), 
  ('cambridge.WmsProtocol.WmsProtocol', 'WmsProtocol', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', {'parentRole'}), 
  ('ccp.general.DataLocation.NumberType', 'NumberType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', {'supertypes', 'supertype'}), 
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
- ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'isDerived', 'partitionsChildren'}), 
+ ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'partitionsChildren', 'isDerived', 'documentation'}), 
  ('ccp.nmr.Nmr.IntensityType', 'IntensityType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', {'supertypes', 'supertype'}), 
- ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'isDerived', 'documentation', 'locard'}), 
+ ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'locard', 'isDerived', 'documentation'}), 
  ('ccp.nmr.Nmr.ShiftRefType', 'ShiftRefType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', {'supertypes', 'supertype'}), 
  ('ccp.nmr.NmrExpPrototype.ExpMeasurementType', 'ExpMeasurementType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', {'taggedValues', 'documentation'}), 
  ('ccp.nmr.NmrScreen.RegionWeight.weight', 'weight', 'www.ccpn.ac.uk_Fogh_2012-05-21-18:09:12_00006', 'www.ccpn.ac.uk_Fogh_2012-05-21-18:09:12_00006', {'defaultValue'}), 

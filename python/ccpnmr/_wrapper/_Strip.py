@@ -33,7 +33,7 @@ from ccpncore.api.ccpnmr.gui.Task import StripNd as ApiStripNd
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 from ccpnmrcore.modules.GuiStrip1d import GuiStrip1d
 from ccpnmrcore.modules.GuiStripNd import GuiStripNd
-from ccpn.lib.wrapper import Spectrum as libSpectrum
+from ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 
 class Strip(GuiStrip, AbstractWrapperObject):
@@ -158,7 +158,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
 
     displayAxisCodes = apiStrip.axisCodes
 
-    # make axis apping indices
+    # make axis mapping indices
     if axisOrder and axisOrder != displayAxisCodes:
       # Map axes to axisOrder, and remap to original setting
       ll = libSpectrum.axisCodeMapIndices(spectrum.axisCodes, axisOrder)

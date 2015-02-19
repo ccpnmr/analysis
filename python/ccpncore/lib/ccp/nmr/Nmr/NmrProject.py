@@ -106,4 +106,10 @@ def loadDataSource(nmrProject, filePath):
     if values:
       dataSource.setSampledData(i, values, sampledErrors[i] or None)
 
+  # TEMP, in future should not need import
+  from ccpncore.lib.ccp.nmr.Nmr.Experiment import resetAxisCodes
+  resetAxisCodes(experiment)
+  # in future can do:
+  # experiment.resetAxisCodes()
+
   return dataSource

@@ -510,23 +510,16 @@ class Spectrum(AbstractWrapperObject):
     """Type: (*str,*)\*dimensionCount, *settable*
 
     Main ExpDimRef axisCode for each dimension - None if no main ExpDimRef
-
-    If the axisCode is set, each will be unique and match the RefExpDimRef.axisCode
-    If it is not set, axisCodes may not be unique. They will be the element symbol
-    for shift and TROESY, comma-separated element symbols for MQ magnetisation,
-    'missing' for a shift, TROESY or MQ without isotope indication, the measurement
-    or 'unknown' otherwise.
-
-    TBD codes match AtomSite.axisCode, but NBNB NmrExpPrototypes must be updated to match system"""
+    """
 
     # See if axis codes are set
     for expDim in self._wrappedData.experiment.expDims:
-      if expDim.sortedExpDimRefs()[0].axisCode is None:
+      if expDim.findFirstExpDimRef(axisCode=None) is not None:
         # TEMP, in future should not need import
-        from ccpncore.lib.ccp.nmr.Nmr.DataSource import resetAxisCodes
-        resetAxisCodes(self._wrappedData)
+        from ccpncore.lib.ccp.nmr.Nmr.Experiment import resetAxisCodes
+        resetAxisCodes(self._wrappedData.experiment)
         # in future can do:
-        # self._wrappedData.resetAxisCodes()
+        # self._wrappedData.experiment.resetAxisCodes()
         break
 
     result = []

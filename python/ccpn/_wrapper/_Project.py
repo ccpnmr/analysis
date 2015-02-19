@@ -29,6 +29,7 @@ from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib.molecule import DataConvertLib
 from ccpncore.util import Common as commonUtil
+from ccpncore.util import pid as Pid
 from ccpncore.util import Io as utilIo
 
 

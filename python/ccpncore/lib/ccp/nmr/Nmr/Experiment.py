@@ -78,6 +78,7 @@ software development. Bioinformatics 21, 1678-1684.
 
 ===========================REFERENCE END===============================
 """
+import re
 
 # Additional functions for ccp.nmr.Nmr.Experiment
 #
@@ -165,3 +166,53 @@ def getOnebondExpDimRefs(experiment):
     expDimRefs.append(expTransfer.sortedExpDimRefs())
   
   return expDimRefs
+
+
+def resetAxisCodes(experiment):
+  """Set axis codes from per-dimension parameters and heuristics, e.g. for newly loaded spectrum
+  NB ignores expTransfer and links to NmrExpPrototype"""
+
+  # dataDims = spectrum.sortedDataDims()
+
+  # NB determine acquisition dimension to decide which end to start indexing
+  axisCodes = []
+  usedCodes = set()
+  for expDim in experiment.sortedExpDims():
+    for expDimRef in expDim.sortedExpDimRefs():
+      elementNames = [str(re.match('\d+(\D+)', x).group(1)) for x in expDimRef.isotopeCodes]
+
+      measurementType = expDimRef.measurementType.lower()
+      if measurementType in ('shift', 'troesy', 'shiftanisotropy'):
+        # NB TROESY and SHiftAnisotropy ae i practice never used.
+        # If they do appear this is the better treatment
+        axisCode = elementNames[0]
+
+        dataDimRef = expDimRef.findFirstDataDim()
+        if dataDimRef is not None:
+          if axisCode == 'C':
+            # Try to make more specific for CO
+            # Other axisCodes are probably too hard to pin down, unfortunately
+            minFrequency = dataDimRef.pointToValue(1) - dataDimRef.spectralWidth
+            if minFrequency > 150.:
+              axisCode = 'CO'
+
+      elif measurementType == 'jcoupling':
+        axisCode = 'J' + ''.join([x.lower() for x in elementNames])
+      elif measurementType == 'mqshift':
+        axisCode = 'MQ' + ''.join([x.lower() for x in elementNames])
+      elif measurementType in ('rdc', 'dipolarcoupling'):
+        axisCode = 'DC' + ''.join([x.lower() for x in elementNames])
+      else:
+        # E.g. T1, T2, ...
+        # Not always correct, but the best we can do for now.
+        axisCode = 'delay'
+
+      index = 0
+      useCode = axisCode
+      while useCode in usedCodes:
+        index += 1
+        useCode = '%s%s' % (axisCode, index)
+      usedCodes.add(useCode)
+      expDimRef.axisCode = useCode
+
+

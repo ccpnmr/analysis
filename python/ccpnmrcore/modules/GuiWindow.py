@@ -43,31 +43,31 @@ class GuiWindow(GuiBase):
     self._appBase.guiWindows.append(self)
 
   def displayFirstSpectrum(self, spectrum):
-    
+
     assert self.blankDisplay
     
     self.blankDisplay.setParent(None)
     self.blankDisplay = None
-    
-    apiGuiTask = self.apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
-    #axisCodes = spectrum.axisCodes
-    axisCodes = Spectrum.getAxisCodes(spectrum)
-    if spectrum.dimensionCount == 1:
-      apiStripDisplay = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
-      guiStripDisplay = GuiStripDisplay1d(self.dockArea, apiStripDisplay)
-    else:
-      apiStripDisplay = apiGuiTask.newStripDisplayNd(name='Module2_ND', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
-      guiStripDisplay = GuiStripDisplayNd(self.dockArea, apiStripDisplay)
-      guiStripDisplay.guiStrips[0].addSpinSystemLabel(guiStripDisplay.stripFrame, 0)
-    # if spectrum.dimensionCount > 2:
-    #   for i in range(spectrum.dimensionCount-2):
-    #     guiStripDisplay.guiStrips[0].addPlaneToolbar(guiStripDisplay.stripFrame, 0)
 
+    # NBNB TBD consider whether this should be refactored now we use createSpectrumDisplay
+    self.createSpectrumDisplay(spectrum)
 
-
-
-    guiStripDisplay.addSpectrum(spectrum)
-    self.apiWindow.addModule(apiStripDisplay)
+    # apiGuiTask = self.apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
+    # #axisCodes = spectrum.axisCodes
+    # axisCodes = Spectrum.getAxisCodes(spectrum)
+    # if spectrum.dimensionCount == 1:
+    #   apiStripDisplay = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
+    #   guiStripDisplay = GuiStripDisplay1d(self.dockArea, apiStripDisplay)
+    # else:
+    #   apiStripDisplay = apiGuiTask.newStripDisplayNd(name='Module2_ND', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
+    #   guiStripDisplay = GuiStripDisplayNd(self.dockArea, apiStripDisplay)
+    #   guiStripDisplay.guiStrips[0].addSpinSystemLabel(guiStripDisplay.stripFrame, 0)
+    # # if spectrum.dimensionCount > 2:
+    # #   for i in range(spectrum.dimensionCount-2):
+    # #     guiStripDisplay.guiStrips[0].addPlaneToolbar(guiStripDisplay.stripFrame, 0)
+    #
+    # guiStripDisplay.addSpectrum(spectrum)
+    # self.apiWindow.addModule(apiStripDisplay)
     
   def loadSpectra(self, directory=None):
     

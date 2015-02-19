@@ -394,8 +394,8 @@ def getRegionData(spectrum, startPoint, endPoint):
     start = min(startPoint[dim], endPoint[dim])
     end = max(startPoint[dim], endPoint[dim])
       
-    start = min(max(1, int(start)), numPoints[dim]-1)
-    end = min(max(1, int(end)), numPoints[dim]-1)
+    start = min(max(0, int(start)), numPoints[dim])
+    end = min(max(0, int(end)), numPoints[dim])
    
     startPoint[dim] = start
     endPoint[dim] = end
@@ -403,14 +403,14 @@ def getRegionData(spectrum, startPoint, endPoint):
   intRegion = (startPoint, endPoint)
    
   n = 1
-  for dim in dims:
-    startBlockCoord = int(startPoint[dim]//blockSizes[dim])
-    endBlockCoord = int(endPoint[dim]//blockSizes[dim])
-    blockRange = range(startBlockCoord,endBlockCoord+1)
+  for dim in range(numDim):
+    startBlockCoord = int((startPoint[dim])//blockSizes[dim])
+    endBlockCoord = 1+int((endPoint[dim]-1)//blockSizes[dim])
+    blockRange = range(startBlockCoord,endBlockCoord)
     blockRanges.append(blockRange)
     m = len(blockRange)
     rangeSizes.append(m)
-    regionSizes.append(int(endPoint[dim]-startPoint[dim])+1)
+    regionSizes.append(int(endPoint[dim]-startPoint[dim]))
     n *= m
    
   blockCoords = [None] * n
@@ -418,14 +418,14 @@ def getRegionData(spectrum, startPoint, endPoint):
     blockCoord = []
 
     j = i
-    for dim in dims:
+    for dim in range(numDim):
       index = j % rangeSizes[dim]
       blockCoord.append(blockRanges[dim][index])
       j = j // rangeSizes[dim]
 
     blockCoords[i] =  tuple(blockCoord)
 
-  data = zeros(regionSizes, dtype=numpy.float32)
+  data = numpy.zeros(regionSizes, dtype=numpy.float32)
 
   dataSlice = [0] * numDim
   blockSlice = [0] * numDim
@@ -440,39 +440,46 @@ def getRegionData(spectrum, startPoint, endPoint):
   numBlocks, cumulativeBlocks = _cumulativeArray(blocks)
   dtype = '%s%s%s' % (isBigEndian and '>' or '<', isFloatData and 'f' or 'i', wordSize)
     
+  blockSizesRev = blockSizes[::-1]  # reverse (dim ordering backwards)
+
+  fileName = dataStore.fullPath
+  fp = open(fileName, 'rb')
+  
   for blockCoord in blockCoords:
 
-    for i in dims:
-      first = 1 + blockCoord[i] * blockSizes[i]
-      next = first + blockSizes[i]
-      offset = startPoint[i]
+    for dim in range(numDim):
+      first = blockCoord[dim] * blockSizes[dim]
+      next = first + blockSizes[dim]
+      offset = startPoint[dim]
 
       if first < offset:
         blockLow = offset-first
       else:
         blockLow = 0
 
-      if next > endPoint[i]+1:
-        blockHigh = blockSizes[i] + (endPoint[i]+1-next)
+      if next > endPoint[dim]:
+        blockHigh = blockSizes[dim] + (endPoint[dim]-next)
       else:
-        blockHigh = blockSizes[i]
+        blockHigh = blockSizes[dim]
 
       dataLow = first - offset + blockLow
       dataHigh = dataLow + (blockHigh-blockLow)
 
-      dataSlice[i] = s_[dataLow:dataHigh]
-      blockSlice[i] = s_[blockLow:blockHigh]
+      dataSlice[dim] = slice(dataLow, dataHigh)
+      blockSlice[numDim-dim-1] = slice(blockLow, blockHigh)
 
     ind =  sum(x[0]*x[1] for x in zip(blockCoord, cumulativeBlocks))
     offset = wordSize * (blockSize * ind) + headerSize
     fp.seek(offset, 0)
-    blockData = numpy.fromfile(file=fp, dtype=dtype, count=blockSize).reshape(blockSizes) # data is in reverse order: e.g. z,y,x not x,y,z
+    blockData = numpy.fromfile(file=fp, dtype=dtype, count=blockSize).reshape(blockSizesRev) # data is in reverse order: e.g. z,y,x not x,y,z
 
     if blockData.dtype != numpy.float32:
       blockData = numpy.array(blockData, numpy.float32)
       
     data[dataSlice] = blockData[blockSlice].T
 
+  fp.close()
+  
   return data.T, intRegion
   
 def automaticIntegration(spectrum,spectralData):

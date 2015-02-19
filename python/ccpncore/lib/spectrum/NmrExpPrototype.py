@@ -303,7 +303,7 @@ def getAtomSiteAxisCode(atomSite):
   return result
 
 
-def testExpPrototypes():
+def testExpPrototypes(resetCodes=False):
   """Test functions and make diagnostic output"""
   from ccpncore.util.Io import newProject
   project = newProject("ExpPrototypeTest", removeExisting=True)
@@ -323,10 +323,16 @@ def testExpPrototypes():
           code = codeMap[redr]
           codes.append(code)
           axisCodeSet.add(code)
-      if len(codes) != len(set(codes)):
-        print ("Duplicate code in %s: %s" % (refExperiment.name, codes))
+      if len(codes) == len(set(codes)):
+        if resetCodes:
+          # Codes are unique - set them
+          for red in refExperiment.sortedRefExpDims():
+            for redr in red.sortedRefExpDimRefs():
+              redr.axisCode = codeMap[redr]
+      else:
+        print ("Duplicate code in %s: %s. SKIPPING" % (refExperiment.name, codes))
 
-      print ("TEST %s %s" % (refExperiment.name, codes))
+      # print ("TEST %s %s" % (refExperiment.name, codes))
 
       # check for duplicate synonyms and collect all synonyms
       key = refExperiment.name
@@ -343,8 +349,11 @@ def testExpPrototypes():
     if len(val) > 1:
       print ("Duplicate name: %s %s" % (key, val))
 
-  for tt in sorted(synonyms):
-    print ("SYNONYM: %s %s" % tt)
+  # for tt in sorted(synonyms):
+  #   print ("SYNONYM: %s %s" % tt)
+
+  if resetCodes:
+    project.saveModified()
 
 if __name__ == '__main__':
-  testExpPrototypes()
+  testExpPrototypes(resetCodes=True)

@@ -1,0 +1,226 @@
+import sys
+from PySide import QtGui,QtCore
+from functools import partial
+import math
+
+from ccpnmrcore.modules.GuiModule import GuiModule
+
+class Assigner(GuiModule):
+
+  def __init__(self):
+
+    super(Assigner, self).__init__()
+    GuiModule.__init__(self)
+
+    self.scrollArea = QtGui.QScrollArea()
+    self.horizontalLayout = QtGui.QVBoxLayout(self)
+    self.scrollArea.setWidgetResizable(True)
+    self.scene = QtGui.QGraphicsScene(self)
+    self.scrollContents = QtGui.QGraphicsView(self.scene, self)
+    self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
+    self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
+    self.scrollArea.setWidget(self.scrollContents)
+    self.addButton = QtGui.QPushButton('Add Residue')
+    self.leftButton = QtGui.QPushButton('Left')
+    self.rightButton = QtGui.QPushButton('Right')
+    self.residueCount = 0
+    self.horizontalLayout.addWidget(self.scrollArea)
+    self.horizontalLayout.addWidget(self.addButton)
+    self.horizontalLayout.addWidget(self.leftButton)
+    self.horizontalLayout.addWidget(self.rightButton)
+    self.addButton.connect(self.addButton, QtCore.SIGNAL('clicked()'), self.addResidue)
+    self.leftButton.connect(self.leftButton, QtCore.SIGNAL('clicked()'), self.assignLeft)
+    self.rightButton.connect(self.rightButton, QtCore.SIGNAL('clicked()'), self.assignRight)
+    self.atomSpacing = 66
+    self.residuesShown = []
+
+
+  def assignLeft(self):
+    self.direction = 'left'
+
+  def assignRight(self):
+    self.direction = 'right'
+
+  def addResidue(self):
+
+    if self.residueCount == 0:
+      hAtom = self.addAtom("H", (0, self.atomSpacing))
+      nAtom = self.addAtom("N", (0, hAtom.y()-self.atomSpacing))
+      caAtom = self.addAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()))
+      cbAtom = self.addAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing))
+      coAtom = self.addAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()))
+      self.scene.addItem(hAtom)
+      self.scene.addItem(nAtom)
+      self.scene.addItem(caAtom)
+      self.scene.addItem(cbAtom)
+      self.scene.addItem(coAtom)
+      self.addAssignmentLine(hAtom, nAtom, 'grey', 1.2, 0)
+      self.addAssignmentLine(caAtom, cbAtom, 'grey', 1.2, 0)
+      self.addAssignmentLine(nAtom, caAtom, 'grey', 1.2, 0)
+      self.addAssignmentLine(coAtom, caAtom, 'grey', 1.2, 0)
+      ssText = "nmrAtom_"+str(self.residueCount)
+      nmrAtomLabel = QtGui.QGraphicsTextItem()
+      nmrAtomLabel.setPlainText(ssText)
+      nmrAtomLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
+      self.scene.addItem(nmrAtomLabel)
+      newResidue = {'number':self.residueCount, 'H':hAtom, "N": nAtom, "CA":caAtom, "CB":cbAtom, "CO":coAtom}
+      self.residuesShown.append(newResidue)
+      self.residueCount+=1
+
+    else:
+      if len(self.residuesShown) > 0:
+        if self.direction == 'left':
+          oldResidue = self.residuesShown[0]
+          coAtom2 = self.addAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()-oldResidue["N"].x())-(oldResidue["N"].boundingRect().width()/2),oldResidue["CA"].y()))
+          caAtom2 = self.addAtom("CA", ((coAtom2.x()-self.atomSpacing), oldResidue["N"].y()))
+          cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
+          nAtom2 = self.addAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()))
+          hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
+          self.scene.addItem(coAtom2)
+          self.scene.addItem(caAtom2)
+          self.scene.addItem(cbAtom2)
+          self.scene.addItem(nAtom2)
+          self.scene.addItem(hAtom2)
+          self.addAssignmentLine(nAtom2, hAtom2, 'grey', 1.2, 0)
+          self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.2, 0)
+          self.addAssignmentLine(coAtom2, oldResidue['N'], 'grey', 1.2, 0)
+          self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.2, 0)
+          self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.2, 0)
+          ssText = "nmrAtom_"+str(self.residueCount)
+          nmrAtomLabel = QtGui.QGraphicsTextItem()
+          nmrAtomLabel.setPlainText(ssText)
+          nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
+          self.scene.addItem(nmrAtomLabel)
+          newResidue = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2}
+          self.residuesShown.insert(0, newResidue)
+
+        if self.direction == 'right':
+          oldResidue = self.residuesShown[-1]
+          nAtom2 = self.addAtom("N", (oldResidue["CO"].x()+self.atomSpacing+oldResidue["CO"].boundingRect().width()/2, oldResidue["CA"].y()))
+          hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
+          caAtom2 = self.addAtom("CA", (nAtom2.x()+(nAtom2.x()-oldResidue["CO"].x())-(oldResidue["CO"].boundingRect().width()/2), oldResidue["CO"].y()))
+          cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
+          coAtom2 = self.addAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()))
+          self.scene.addItem(coAtom2)
+          self.scene.addItem(caAtom2)
+          self.scene.addItem(cbAtom2)
+          self.scene.addItem(nAtom2)
+          self.scene.addItem(hAtom2)
+          self.addAssignmentLine(nAtom2, hAtom2, 'grey', 1.2, 0)
+          self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.2, 0)
+          self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.2, 0)
+          self.addAssignmentLine(nAtom2, oldResidue['CO'], 'grey', 1.2, 0)
+          self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.2, 0)
+          ssText = "nmrAtom_"+str(self.residueCount)
+          nmrAtomLabel = QtGui.QGraphicsTextItem()
+          nmrAtomLabel.setPlainText(ssText)
+          nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
+          self.scene.addItem(nmrAtomLabel)
+          newResidue = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2}
+          self.residuesShown.append(newResidue)
+      self.residueCount+=1
+
+
+  def addAssignmentLine(self, atom1, atom2, colour, width, displacement):
+
+    if atom1.y() > atom2.y() and atom1.x() - atom2.x() == 0:
+      x1 = atom1.x() + (atom1.boundingRect().width()/2)
+      y1 = atom1.y() + (atom1.boundingRect().height()*0.2)
+      x2 = atom2.x() + (atom1.boundingRect().width()/2)
+      y2 = atom2.y() + (atom2.boundingRect().height()*0.8)
+      newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width)
+      self.scene.addItem(newLine)
+
+    elif atom1.y() < atom2.y() and atom1.x() - atom2.x() == 0:
+      x1 = atom1.x() + (atom1.boundingRect().width()/2)
+      y1 = atom1.y() + (atom1.boundingRect().height()*0.8)
+      x2 = atom2.x() + (atom1.boundingRect().width()/2)
+      y2 = atom2.y() + (atom2.boundingRect().height()*0.2)
+      newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width)
+      self.scene.addItem(newLine)
+
+    elif atom1.x() > atom2.x() and atom1.y() - atom2.y() == 0:
+      x1 = atom1.x()
+      x2 = atom2.x() + atom2.boundingRect().width()
+      y1 = atom1.y() + (atom1.boundingRect().height()*0.5)
+      y2 = atom2.y() + (atom2.boundingRect().height()*0.5)
+      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width)
+      self.scene.addItem(newLine)
+
+    elif atom1.x() < atom2.x() and atom1.y() - atom2.y() == 0:
+      x1 = atom1.x() + atom1.boundingRect().width()
+      x2 = atom2.x()
+      y1 = atom1.y() + (atom1.boundingRect().height()*0.5)
+      y2 = atom2.y() + (atom2.boundingRect().height()*0.5)
+      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width)
+      self.scene.addItem(newLine)
+
+    elif atom1.y() > atom2.y() and atom1.x() > atom2.x():
+      x1 = atom1.x() + (atom1.boundingRect().width()*0.5)
+      x2 = atom2.x() + (atom1.boundingRect().width()*1.5)
+      y1 = atom1.y() + (atom1.boundingRect().height()/8)
+      y2 = atom2.y() + (atom2.boundingRect().height()/2)
+      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width)
+      self.scene.addItem(newLine)
+
+    elif atom1.y() < atom2.y() and atom1.x() < atom2.x():
+      x1 = atom1.x() + (atom1.boundingRect().width())
+      x2 = atom2.x() + (atom1.boundingRect().width()*0.5)
+      y1 = atom1.y() + (atom1.boundingRect().height()/2)
+      y2 = atom2.y() + (atom2.boundingRect().height()/8)
+      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width)
+      self.scene.addItem(newLine)
+
+    elif atom1.y() > atom2.y() and atom1.x() < atom2.x():
+      x1 = atom1.x() + (atom1.boundingRect().width()*0.5)
+      x2 = atom2.x() - (atom1.boundingRect().width()/16)
+      y1 = atom1.y() + (atom1.boundingRect().height()/8)
+      y2 = atom2.y() + (atom2.boundingRect().height()/2)
+      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width)
+      self.scene.addItem(newLine)
+
+    elif atom1.y() < atom2.y() and atom1.x() > atom2.x():
+      x1 = atom1.x() + (atom1.boundingRect().width())
+      x2 = atom2.x() + (atom1.boundingRect().width()*0.25)
+      y1 = atom1.y() + (atom1.boundingRect().height()/2)
+      y2 = atom2.y() + (atom2.boundingRect().height()/8)
+      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width)
+      self.scene.addItem(newLine)
+
+
+  def addAtom(self, atomType, position):
+    atom = GuiNmrAtom(text=atomType, pos=position)
+    return(atom)
+
+
+class GuiNmrAtom(QtGui.QGraphicsTextItem):
+
+  def __init__(self, text, pos=None):
+
+    super(GuiNmrAtom, self).__init__()
+    font = QtGui.QFont('Lucida Grande')
+    font.setPointSize(21)
+    self.setFont(font)
+    self.setPlainText(text)
+    self.setPos(QtCore.QPointF(pos[0], pos[1]))
+
+
+class AssignmentLine(QtGui.QGraphicsLineItem):
+  def __init__(self, x1, y1, x2, y2, colour, width):
+    QtGui.QGraphicsLineItem.__init__(self)
+    self.pen = QtGui.QPen()
+
+    self.pen.setColor(QtGui.QColor(colour))
+    self.pen.setCosmetic(True)
+    self.pen.setWidth(width)
+    self.setPen(self.pen)
+    self.setLine(x1, y1, x2, y2)
+
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv)
+
+    dialog = Assigner()
+    dialog.show()
+    dialog.raise_()
+
+    app.exec_()

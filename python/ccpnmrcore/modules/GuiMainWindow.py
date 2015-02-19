@@ -13,16 +13,19 @@ from ccpncore.gui.TextEditor import TextEditor
 
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 
+from ccpnmrcore.gui.Assigner import Assigner
+
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
+print(type(QtGui.QMainWindow))
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def __init__(self):
-    
+    # if not hasattr(self._project, "_appBase"):
+    #   raise Exception
     QtGui.QMainWindow.__init__(self)
-    
     #if not apiWindow.modules:
       #apiGuiTask = apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
       ##apiModule = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=('H','intensity'), stripDirection='Y')
@@ -32,12 +35,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       ##apiWindow.addModule(apiModule)
       #apiModule = apiGuiTask.newTaskModule(name=self.INITIAL_MODULE_NAME)
       #apiWindow.addModule(apiModule)
-      
     GuiWindow.__init__(self)
-    
     self.setupWindow()
     self.setupMenus()
     self.initProject()
+
 
   def initProject(self):
 
@@ -51,6 +53,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       
     isNew = self.apiWindow.root.isModified  # a bit of a hack this, but should be correct
     
+    project = self._appBase.project
     path = project.path
     self.leftWidget.fillSideBar(project)
     self.namespace['project'] = project
@@ -89,7 +92,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     
     self.namespace = {'current': self._appBase.current, 'openProject':self._appBase.openProject,
                       'newProject':self._appBase.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
-                      'preferences':self._appBase.preferences}
+                      'preferences':self._appBase.preferences, 'project':self._appBase.project}
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     self.pythonConsole.heightMax = 200
@@ -232,6 +235,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.setNativeMenuBar(False)
     self.show()
 
+  def showAssigner(self):
+    Assigner()
+
   def raiseSpectrumProperties(self, item):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
     spectrum = self._appBase.project.getById(dataItem)
@@ -240,7 +246,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def fillRecentProjectsMenu(self):
     for recentFile in self._appBase.preferences.recentFiles:
-      self.action = Action(self, text=recentFile, callback=partial(self.openProject,projectDir=recentFile))
+      self.action = Action(self, text=recentFile, callback=partial(self._appBase.openProject,projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
 
   def saveBackup(self):

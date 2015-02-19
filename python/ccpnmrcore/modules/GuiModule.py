@@ -19,7 +19,7 @@ class GuiModule(QtGui.QWidget, GuiBase):
     
     self.dockArea = self.window.dockArea
     # self.apiModule = apiModule
-    
+    print(self.dockArea)
     self.dock = Dock(name=self._wrappedData.name, size=(1100,1300))
     self.dockArea.addDock(self.dock)
     

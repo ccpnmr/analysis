@@ -19,11 +19,11 @@ import os, json
 class AppBase(GuiBase):
 
   def __init__(self, apiProject):
-    
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
     self.setupPreferences()
     self.initProject(apiProject)
+
     
   def initProject(self, apiProject):
 
@@ -31,7 +31,6 @@ class AppBase(GuiBase):
     apiProject._appBase = self
     project = ccpn._wrapApiProject(apiProject)
     apiNmrProject = project._wrappedData
-    
     self.project = project
     project._appBase = self
     self.guiWindows = []
@@ -44,6 +43,7 @@ class AppBase(GuiBase):
       apiWindowStore = apiProject.findFirstWindowStore()
       if apiWindowStore is None:
         apiWindowStore = apiProject.newWindowStore(nmrProject=apiProject.findFirstNmrProject())
+
       else:
         apiNmrProject.windowStore = apiWindowStore
     # MainWindow must always exist at this point
@@ -57,7 +57,7 @@ class AppBase(GuiBase):
       windows=(mainWindow._wrappedData,))
 
   def _closeProject(self):
-    """Close project and clean up - should only be called wen opening another"""
+    """Close project and clean up - should only be called when opening another"""
 
     # NBNB TBD add code to save first, ask, etd. Somewhere
 

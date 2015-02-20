@@ -30,11 +30,13 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     self.viewportDict = {} # maps QGLWidget to GuiStripNd
 
     GuiSpectrumDisplay.__init__(self)
-    self.fillToolBar()
+    # self.fillToolBar()
     self.addSpinSystemSideLabel()
     # self._appBase.current.pane = self
 
-  # def addSpectrum(self, spectrum):
+  def addSpectrum(self, spectrum):
+    self.addSpectrum(spectrum)
+
   #
   #   apiSpectrumDisplay = self.apiSpectrumDisplay
   #
@@ -88,10 +90,10 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   #     prevGuiStrip.axes['right']['item'].hide()
   #     guiStrip.setYLink(prevGuiStrip)
 
-  # def fillToolBar(self):
-  #   GuiSpectrumDisplay.fillToolBar(self)
-    # self.spectrumUtilToolBar.addAction(QtGui.QAction('HS', self, triggered=self.hideSpinSystemLabel))
-    # self.spectrumUtilToolBar.addAction(QtGui.QAction("SS", self, triggered=self.showSpinSystemLabel))
+  def fillToolBar(self):
+    GuiSpectrumDisplay.fillToolBar(self)
+  #   self.spectrumUtilToolBar.addAction(QtGui.QAction('HS', self, triggered=self.hideSpinSystemLabel))
+  #   self.spectrumUtilToolBar.addAction(QtGui.QAction("SS", self, triggered=self.showSpinSystemLabel))
 
   def showSpinSystemLabel(self):
     self.spinSystemSideLabel.show()

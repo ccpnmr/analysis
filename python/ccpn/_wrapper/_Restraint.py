@@ -51,7 +51,7 @@ class Restraint(AbstractWrapperObject):
     """RestraintList containing restraint."""
     return  self._project._data2Obj[self._wrappedData.parentList]
 
-  restraintList =-_parent
+  restraintList = _parent
 
   @property
   def _key(self) -> str:

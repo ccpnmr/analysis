@@ -14,7 +14,7 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
   sigClicked = QtCore.Signal(object, object)
 
   def __init__(self):
-    self.stripFrame = self._parent.stripFrame
+    # self.stripFrame = self._parent.stripFrame
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
     # self.apiStrip = apiStrip
     #
@@ -33,6 +33,7 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     foreground = 'w'
 
     #
+    # self.plotItem.setParentItem(self.dock.stripFrame)
     # pg.setConfigOption('background', background)
     # pg.setConfigOption('foreground', foreground)
     self.setBackground(background)
@@ -62,13 +63,14 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.addItem(self.grid)
     # self.plotItem.resizeEvent = self.resizeEvent
     self.setAcceptDrops(True)
-    # self.crossHair = self.createCrossHair() NB function does not return anything
+    self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
     # self.scene().sigMouseHover.connect(self.setCurrentPane)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     # self.current.pane = self.guiSpectrumDisplay
     self.storedZooms = []
     self.spectrumItems = []
+    self.guiSpectrumDisplay.dock.addWidget(self)
 
 
     # layout = self.stripFrame.layout()

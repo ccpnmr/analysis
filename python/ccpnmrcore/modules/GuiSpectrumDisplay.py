@@ -36,6 +36,8 @@ class GuiSpectrumDisplay(GuiModule):
     self.stripFrame = GuiFrame(self.dock, appBase=self._appBase, grid=(1, 1), gridSpan=(1, 3))
 
     self.stripFrame.guiSpectrumDisplay = self
+    import pyqtgraph as pg
+
 
     #
     #

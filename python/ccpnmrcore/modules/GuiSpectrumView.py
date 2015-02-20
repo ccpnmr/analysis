@@ -53,7 +53,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
     GuiBase.__init__(self, self._project._appBase)
     
     self.apiDataSource = self._wrappedData.dataSource
-    self.spectrum = self._parent # Is this necessary?
+    ##self.spectrum = self._parent # Is this necessary?
     
     ###self.setDimMapping(dimMapping)
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
@@ -64,6 +64,9 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
       self.peakListItems[peakList.pid] = PeakListItem(self, peakList)
 """      
     # guiSpectrumDisplay.spectrumItems.append(self)
+    
+    ##for strip in self.strips:
+    ##  strip.addSpectrum(self)
 
   def boundingRect(self):  # seems necessary to have
 

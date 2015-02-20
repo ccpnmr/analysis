@@ -25,4 +25,9 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
   def dropCallback(self, dropObject):
     
     if isinstance(dropObject, Spectrum):
-      self.dockArea.guiWindow.createSpectrumDisplay(dropObject)
+      spectrum = dropObject
+      spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
+      spectrumView = self.getWrapperObject(spectrumDisplay._wrappedData.findFirstSpectrumView(dataSource=spectrum._wrappedData))
+      for strip in spectrumView.strips:
+        strip.addSpectrum(spectrumView)
+      

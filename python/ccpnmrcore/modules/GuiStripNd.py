@@ -64,7 +64,6 @@ class GuiStripNd(GuiStrip):
     # #
     # # else:
     # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
-    #print('HERE711', self.scene(), guiSpectrumView)
     apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
 
     # Changed to guiSpectrumView.positiveContourColour, which picks up from either
@@ -82,7 +81,7 @@ class GuiStripNd(GuiStrip):
       self.colourIndex %= len(Colour.spectrumHexColours)
 
     self.scene().addItem(guiSpectrumView)
-
+ 
 
   # def fillToolBar(self):
   #   spectrumUtilToolBar =  self.guiSpectrumDisplay.spectrumUtilToolBar

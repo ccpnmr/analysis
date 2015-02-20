@@ -80,7 +80,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ###yDim -= 1
 
     # TBD: this is not correct
-    apiDataSource = self.apiDataSource
+    ##apiDataSource = self.apiDataSource
     # I think this fixes it - number of DISPLAY axes, rather than dataSource axes. RHF
     # dimensionCount = apiDataSource.numDim
     dimensionCount = len(self.dimensionOrdering)

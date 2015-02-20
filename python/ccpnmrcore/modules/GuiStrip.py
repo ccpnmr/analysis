@@ -221,4 +221,3 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     
     if isinstance(dropObject, Spectrum):
       self.guiSpectrumDisplay.addSpectrum(dropObject)
-    

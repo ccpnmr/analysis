@@ -1,38 +1,27 @@
 import sys
 from PySide import QtGui,QtCore
-from functools import partial
-import math
 
-from ccpnmrcore.modules.GuiModule import GuiModule
 
-class Assigner(GuiModule):
+from pyqtgraph.dockarea import Dock
+
+class Assigner(Dock):
 
   def __init__(self):
 
-    super(Assigner, self).__init__()
-    GuiModule.__init__(self)
-
+    super(Assigner, self).__init__(name='Assigner')
     self.scrollArea = QtGui.QScrollArea()
-    self.horizontalLayout = QtGui.QVBoxLayout(self)
     self.scrollArea.setWidgetResizable(True)
     self.scene = QtGui.QGraphicsScene(self)
     self.scrollContents = QtGui.QGraphicsView(self.scene, self)
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
     self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
-    self.addButton = QtGui.QPushButton('Add Residue')
-    self.leftButton = QtGui.QPushButton('Left')
-    self.rightButton = QtGui.QPushButton('Right')
     self.residueCount = 0
-    self.horizontalLayout.addWidget(self.scrollArea)
-    self.horizontalLayout.addWidget(self.addButton)
-    self.horizontalLayout.addWidget(self.leftButton)
-    self.horizontalLayout.addWidget(self.rightButton)
-    self.addButton.connect(self.addButton, QtCore.SIGNAL('clicked()'), self.addResidue)
-    self.leftButton.connect(self.leftButton, QtCore.SIGNAL('clicked()'), self.assignLeft)
-    self.rightButton.connect(self.rightButton, QtCore.SIGNAL('clicked()'), self.assignRight)
+    self.layout.addWidget(self.scrollArea)
     self.atomSpacing = 66
     self.residuesShown = []
+
+    # self.dock.addWidget(self)
 
 
   def assignLeft(self):

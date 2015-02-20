@@ -6,15 +6,16 @@ from PySide import QtGui, QtCore
 
 # from ccpn import openProject, newProject
 
+
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import Console
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
-from ccpnmrcore.modules.GuiWindow import GuiWindow
 
 from ccpnmrcore.gui.Assigner import Assigner
-
+from ccpnmrcore.modules.GuiWindow import GuiWindow
+from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
@@ -107,7 +108,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
     self.splitter2.heightMax = 200
-    
+    assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
+    peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
     self.leftWidget.itemDoubleClicked.connect(self.raiseSpectrumProperties)
     self.splitter2.addWidget(self.pythonConsole)
     self.pythonConsole.hide()
@@ -236,7 +238,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.show()
 
   def showAssigner(self):
-    Assigner()
+    self.assigner = Assigner()
+    self.dockArea.addDock(self.assigner)
+    # self.dockArea.addDock(assigner)
 
   def raiseSpectrumProperties(self, item):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
@@ -421,7 +425,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     f.close()
 
   def showPeakTable(self):
-    pass
+    peakList = PeakListSimple(dimensions=3, name="Peak Table")
+    self.dockArea.addDock(peakList)
+
 
   def saveProjectAs(self):
     print("project saved as...")

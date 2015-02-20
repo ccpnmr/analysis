@@ -14,15 +14,16 @@ class GuiSpectrumDisplay(GuiModule):
 
   def __init__(self):
     GuiModule.__init__(self)
+
     self.guiSpectrumViews = []
     self.guiStrips = []
-    self.spectrumToolBar = ToolBar(self, grid=(0, 0), gridSpan=(1, 2))
+    self.spectrumToolBar = ToolBar(self.dock, grid=(0, 0), gridSpan=(1, 2))
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     screenWidth  = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setMaximumWidth(screenWidth*0.6)
     self.hLines = []
     self.vLines = []
-    self.spectrumUtilToolBar = ToolBar(self, grid=(0, 2), gridSpan=(1, 1))
+    self.spectrumUtilToolBar = ToolBar(self.dock, grid=(0, 2), gridSpan=(1, 1))
     # self.spectrumUtilToolBar.setMinimumWidth(screenWidth*0.15)
     toolBarColour = QtGui.QColor(214,215,213)
     palette = QtGui.QPalette(self.spectrumUtilToolBar.palette())
@@ -30,11 +31,12 @@ class GuiSpectrumDisplay(GuiModule):
     palette.setColor(QtGui.QPalette.Button,toolBarColour)
     palette2.setColor(QtGui.QPalette.Button,toolBarColour)
 
-    self.positionBox = Label(self, grid=(0, 3), gridSpan=(1, 1))
+    self.positionBox = Label(self.dock, grid=(0, 3), gridSpan=(1, 1))
     self.positionBox.setFixedWidth(screenWidth*0.08)
-    self.stripFrame = GuiFrame(self, appBase=self._appBase, grid=(1, 1), gridSpan=(1, 3))
+    self.stripFrame = GuiFrame(self.dock, appBase=self._appBase, grid=(1, 1), gridSpan=(1, 3))
 
     self.stripFrame.guiSpectrumDisplay = self
+
     #
     #
     # for n, apiStrip in enumerate(apiSpectrumDisplay.sortedStrips()):   ### probably need orderedStrips() here ?? ask Rasmus

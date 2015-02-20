@@ -226,7 +226,7 @@ def newWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=()) 
 
   windowStore = parent.nmrProject.windowStore
 
-  newApiWindow = windowStore.newGuiWindow(title=title)
+  newApiWindow = windowStore.newWindow(title=title)
   if position:
     newApiWindow.position = position
   if size:

@@ -177,7 +177,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if not widget:
       return
       
-    guiStrip = self.guiSpectrumDisplay.viewportDict[widget]
+    guiStrip = self.spectrumDisplay.viewportDict[widget]
     self.drawContours(painter, guiStrip)
   
   def boundingRect(self):  # seems necessary to have
@@ -204,7 +204,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     try:
       
       spectrum = self.spectrum
-      guiSpectrumDisplay = self.guiSpectrumDisplay
+      guiSpectrumDisplay = self.spectrumDisplay
       xyDataDims = self.apiSpectrumView.orderedDataDims[:2]
       xTranslate, xScale = self.getTranslateScale(guiStrip, xyDataDims[0].dim-1) # -1 because API dims start at 1
       yTranslate, yScale = self.getTranslateScale(guiStrip, xyDataDims[1].dim-1)

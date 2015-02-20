@@ -43,7 +43,7 @@ class GuiStripNd(GuiStrip):
 
     newItem = self.scene().addItem(guiSpectrumView)
 """
-  def addSpectrum(self, guiSpectrumView):
+  def displaySpectrum(self, guiSpectrumView):
 
     # resetAllAxisCodes(self.project._wrappedData)
     # spectrum = self.getObject(spectrumVar)

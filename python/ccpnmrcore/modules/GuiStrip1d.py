@@ -60,7 +60,7 @@ class GuiStrip1d(GuiStrip):
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2,x1)
 
-  def addSpectrum(self, guiSpectrumView):
+  def displaySpectrum(self, guiSpectrumView):
 
     apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
     spectrum = self.getWrapperObject(apiDataSource)

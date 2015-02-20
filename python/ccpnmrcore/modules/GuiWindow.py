@@ -39,16 +39,22 @@ class GuiWindow(GuiBase):
     # else:
     #   self.blankDisplay = GuiBlankDisplay(self.dockArea)
         
-  def displayFirstSpectrum(self, spectrum):
-
-    assert self.blankDisplay
+  def removeBlankDisplay(self):
     
-    self.blankDisplay.setParent(None)
-    self.blankDisplay = None
+    if self.blankDisplay:
+      self.blankDisplay.setParent(None)
+      self.blankDisplay = None
+      
+  ##def displayFirstSpectrum(self, spectrum):
+
+    ##assert self.blankDisplay
+    
+    ##self.blankDisplay.setParent(None)
+    ##self.blankDisplay = None
 
     # NBNB TBD consider whether this should be refactored now we use createSpectrumDisplay
-    self.createSpectrumDisplay(spectrum)
-    self._appBase.guiWindows.append(self)
+    ##self.createSpectrumDisplay(spectrum)
+    ##self._appBase.guiWindows.append(self)
     # apiGuiTask = self.apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
     # #axisCodes = spectrum.axisCodes
     # axisCodes = Spectrum.getAxisCodes(spectrum)

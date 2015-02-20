@@ -25,28 +25,35 @@ from ccpncore.gui import Base
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Label import Label
+from pyqtgraph.dockarea import Dock
 import sys
 from PySide import QtGui, QtCore
 
 UNITS = ['ppm', 'Hz', 'point']
 
-class PeakListSimple(QtGui.QWidget):
+class PeakListSimple(Dock):
 
-  def __init__(self, parent=None, dimensions=None, **kw):
+  def __init__(self, parent=None, dimensions=None, name='Peak List', **kw):
 
-    QtGui.QWidget.__init__(self, parent, **kw)
-    # Base.__init__(self, parent, layoutWindow, panel, grid, **kw)
+    Dock.__init__(self, name=name)
+    # Base.__init__(self, parent, **kw)
 
     self.initPanel()
-    self.dimensions = dimensions
-    self.peakTable = ObjectTable(self, self._getColumns(dimensions), [],
-                                 callback=self.selectPeak, grid=(0,1),gridSpan=(0,6))
+    self.initPanel()
+    # label = Label(self, 'Peak List:', grid=(0, 0))
+    # self.peakListPulldown = PulldownList(self, grid=(0, 1),
+    #                                      callback=self.changePeakList,)
 
-    self.peakListPulldown = PulldownList(self, grid=(0, 1),
-                                         callback=self.changePeakList,)
+    # label = Label(self, ' Position Unit:', grid=(0, 2))
+    # self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
+                                        # callback=self._updateWhenIdle,)
 
+    self.peakTable = ObjectTable(self, self._getColumns(2), [],
+                                 callback=self.selectPeak, grid=(1,0),
+                                 gridSpan=(1,5))
 
-    self.layout().setColumnStretch(4, 1)
+    # self.layout().setColumnStretch(4, 1)
+    # self.updateContents()
 
   def initPanel(self):
     # Overwrites superclass

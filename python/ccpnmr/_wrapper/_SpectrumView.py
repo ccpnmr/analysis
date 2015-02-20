@@ -255,7 +255,7 @@ class SpectrumView(AbstractWrapperObject):
   @property
   def spectrum(self) -> Spectrum:
     """Spectrum that SpectrumView refers to"""
-    return self.getWrapperObject(self._wrappedData.gataSource)
+    return self.getWrapperObject(self._wrappedData.dataSource)
 
   @property
   def strips(self) -> Strip:

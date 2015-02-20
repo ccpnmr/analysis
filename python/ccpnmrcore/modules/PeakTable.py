@@ -21,28 +21,35 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.gui import Base
+from ccpncore.gui.Base import Base
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Label import Label
 from pyqtgraph.dockarea import Dock
-import sys
+
 from PySide import QtGui, QtCore
 
 UNITS = ['ppm', 'Hz', 'point']
 
-class PeakListSimple(Dock):
+#class PeakListSimple(Dock):
+class PeakListSimple(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, dimensions=None, name='Peak List', **kw):
+  def __init__(self, parent=None, peakLists=None, name='Peak List', **kw):
 
-    Dock.__init__(self, name=name)
-    # Base.__init__(self, parent, **kw)
+    if not peakLists:
+      peakLists = []
+      
+    QtGui.QWidget.__init__(self, parent)
+    #Dock.__init__(self, name=name)
+    Base.__init__(self, **kw)
 
     self.initPanel()
-    self.initPanel()
-    # label = Label(self, 'Peak List:', grid=(0, 0))
-    # self.peakListPulldown = PulldownList(self, grid=(0, 1),
-    #                                      callback=self.changePeakList,)
+    self.peakLists = peakLists
+    
+    #self.initPanel()
+    label = Label(self, 'Peak List:', grid=(0, 0))
+    self.peakListPulldown = PulldownList(self, grid=(0, 1),
+                                          callback=self.changePeakList,)
 
     # label = Label(self, ' Position Unit:', grid=(0, 2))
     # self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
@@ -54,6 +61,9 @@ class PeakListSimple(Dock):
 
     # self.layout().setColumnStretch(4, 1)
     # self.updateContents()
+    self.updatePeakLists()
+    if peakLists:
+      self.changePeakList(peakLists[0])
 
   def initPanel(self):
     # Overwrites superclass
@@ -153,17 +163,26 @@ class PeakListSimple(Dock):
 
   def updatePeakLists(self):
 
-    self._updatePulldownList(self.peakListPulldown, self.peakLists,
-                             self.changePeakList, self.peakList,
-                             self._getPeakListName)
+    #self._updatePulldownList(self.peakListPulldown, self.peakLists,
+    #                         self.changePeakList, self.peakList,
+    #                         self._getPeakListName)
+    texts = ['%s:%s:%s' % (peakList.dataSource.experiment.name, peakList.dataSource.name, peakList.serial) for peakList in self.peakLists]
+    print('HERE303', texts)
+    self.peakListPulldown.setData(texts=texts, objects=peakLists)
 
-  def updateContents(self, spectrum):
-    if len(spectrum.peakLists) > 1:
-      for peakList in spectrum.peakLists:
-
-
-        columns = self._getColumns(peakList._wrappedData.dataSource.numDim)
-        self.peakTable.setObjectsAndColumns(peakList._wrappedData.sortedPeaks(), columns)
+  def updateContents(self):
+    peakList = self.peakList
+    if peakList:
+      columns = self._getColumns(peakList.dataSource.numDim)
+      self.peakTable.setObjectsAndColumns(peakList.sortedPeaks(), columns)
+      print('HERE404', len(peakList.sortedPeaks()))
+  #def updateContents(self, spectrum):
+    # if len(spectrum.peakLists) > 1:
+    #   for peakList in spectrum.peakLists:
+    # 
+    # 
+    #     columns = self._getColumns(peakList._wrappedData.dataSource.numDim)
+    #     self.peakTable.setObjectsAndColumns(peakList._wrappedData.sortedPeaks(), columns)
 
   def changePeakList(self, peakList):
 
@@ -184,26 +203,38 @@ class PeakListSimple(Dock):
 
       self.peakList = peakList
       self.peak = None
-      self._updateWhenIdle()
-      self.updatePeakLists()
+      #self._updateWhenIdle()
+      #self.updatePeakLists()
+      self.updateContents()
 
-      for func in self.changePeakListCalls:
-        func(peakList)
+      #for func in self.changePeakListCalls:
+      #  func(peakList)
 
 if __name__ == '__main__':
 
+  import sys
+  
   from ccpncore.gui.Application import TestApplication
+  from ccpncore.util.Io import loadProject
 
-
+  peakLists = []
+  if len(sys.argv) == 2:
+    projectPath = sys.argv[1]
+    project = loadProject(projectPath)
+    nmrProject = project.findFirstNmrProject()
+    for experiment in nmrProject.sortedExperiments():
+      for dataSource in experiment.sortedDataSources():
+        peakLists.extend(dataSource.sortedPeakLists())
+    
   app = TestApplication()
-  peakTable = PeakListSimple()
+  peakTable = PeakListSimple(peakLists=peakLists)
   w = QtGui.QWidget()
   layout = QtGui.QGridLayout()
   layout.addWidget(peakTable)
   w.setLayout(layout)
   w.show()
   w.raise_()
-  sys.exit(app.exec_())
+  app.start()
 
 
 

@@ -1,4 +1,4 @@
-"""Module Documentation here
+"""Code to add functions to API defined elsewhere
 
 """
 #=========================================================================================
@@ -21,8 +21,6 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""Code to add functions to API defined elsewhere
-"""
 
 import importlib
 import os
@@ -33,7 +31,7 @@ def addModuleFunctionsToApi(moduleName, rootModuleName=None):
   """ Add the functions in module (recursively including sub-modules) to API.
       For example, moduleName = 'ccpncore.lib'.
       It is assumed that moduleName represents a directory rather than a file.
-      rootModuleName should not be generally be set by outside code.
+      rootModuleName should not generally be set by outside code.
       It is what is chopped off the start of the module being added
       to the API to get to the API equivalent. """
 

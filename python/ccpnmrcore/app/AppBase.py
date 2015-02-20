@@ -54,7 +54,7 @@ class AppBase(GuiBase):
 
     if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
       apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
-      windows=(mainWindow._wrappedData,))
+                                         windows=(mainWindow._wrappedData,))
 
   def _closeProject(self):
     """Close project and clean up - should only be called when opening another"""

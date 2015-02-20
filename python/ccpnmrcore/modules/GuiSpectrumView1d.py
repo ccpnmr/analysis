@@ -55,15 +55,15 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
   def getSliceData(self):
 
-    spectrum = self.spectrum.ccpnSpectrum
-    dataDimRef = spectrum.findFirstDataDim().findFirstDataDimRef()
+    apiDataSource = self.spectrum.apiDataSource
+    dataDimRef = apiDataSource.findFirstDataDim().findFirstDataDimRef()
     firstPoint = dataDimRef.pointToValue(0)
-    pointCount = spectrum.findFirstDataDim().numPoints
+    pointCount = apiDataSource.findFirstDataDim().numPoints
     lastPoint = dataDimRef.pointToValue(pointCount)
     pointSpacing = (lastPoint-firstPoint)/pointCount
     position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
-    sliceData = LibSpectrum.getSliceData(spectrum)
-    scaledData = sliceData*spectrum.scale
+    sliceData = LibSpectrum.getSliceData(apiDataSource)
+    scaledData = sliceData*apiDataSource.scale
     spectrumData = numpy.array([position,scaledData], numpy.float32)
     return numpy.array(spectrumData,numpy.float32)
 

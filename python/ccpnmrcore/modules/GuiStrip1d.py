@@ -60,11 +60,12 @@ class GuiStrip1d(GuiStrip):
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2,x1)
 
-  def addSpectrum(self, spectrum, guiSpectrumView):
+  def addSpectrum(self, guiSpectrumView):
 
-    apiSpectrum = spectrum.apiSpectrum
+    apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
+    spectrum = self.getWrapperObject(apiDataSource)
     if not guiSpectrumView.sliceColour:
-      apiSpectrum.sliceColour = list(spectrumColours.keys())[self.colourIndex]
+      apiDataSource.sliceColour = list(spectrumColours.keys())[self.colourIndex]
       self.colourIndex += 1
       self.colourIndex %= len(spectrumColours)
 
@@ -88,7 +89,7 @@ class GuiStrip1d(GuiStrip):
 
     pix=QtGui.QPixmap(60,10)
     pix.fill(QtGui.QColor(colour))
-    guiSpectrumView.newAction = self.guiSpectrumDisplay.spectrumToolBar.addAction(spectrum.ccpnSpectrum.getName(), QtGui.QToolButton)
+    guiSpectrumView.newAction = self.guiSpectrumDisplay.spectrumToolBar.addAction(apiDataSource.getName(), QtGui.QToolButton)
     newIcon = QtGui.QIcon(pix)
     guiSpectrumView.newAction.setIcon(newIcon)
     guiSpectrumView.newAction.setCheckable(True)

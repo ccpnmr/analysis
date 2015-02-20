@@ -167,7 +167,6 @@ class PeakListSimple(QtGui.QWidget, Base):
     #                         self.changePeakList, self.peakList,
     #                         self._getPeakListName)
     texts = ['%s:%s:%s' % (peakList.dataSource.experiment.name, peakList.dataSource.name, peakList.serial) for peakList in self.peakLists]
-    print('HERE303', texts)
     self.peakListPulldown.setData(texts=texts, objects=peakLists)
 
   def updateContents(self):
@@ -175,7 +174,6 @@ class PeakListSimple(QtGui.QWidget, Base):
     if peakList:
       columns = self._getColumns(peakList.dataSource.numDim)
       self.peakTable.setObjectsAndColumns(peakList.sortedPeaks(), columns)
-      print('HERE404', len(peakList.sortedPeaks()))
   #def updateContents(self, spectrum):
     # if len(spectrum.peakLists) > 1:
     #   for peakList in spectrum.peakLists:

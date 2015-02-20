@@ -55,7 +55,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
   def getSliceData(self):
 
-    apiDataSource = self.spectrum.apiDataSource
+    apiDataSource = self.apiDataSource
     dataDimRef = apiDataSource.findFirstDataDim().findFirstDataDimRef()
     firstPoint = dataDimRef.pointToValue(0)
     pointCount = apiDataSource.findFirstDataDim().numPoints

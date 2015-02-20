@@ -21,7 +21,6 @@ class GuiWindow(GuiBase):
     self.dockArea = DockArea()
     self.dockArea.guiWindow = self
     self.dockArea.setGeometry(0, 0, 12000, 8000)
-
     if not self._wrappedData.modules:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
@@ -40,8 +39,6 @@ class GuiWindow(GuiBase):
     # else:
     #   self.blankDisplay = GuiBlankDisplay(self.dockArea)
         
-    self._appBase.guiWindows.append(self)
-
   def displayFirstSpectrum(self, spectrum):
 
     assert self.blankDisplay
@@ -51,7 +48,7 @@ class GuiWindow(GuiBase):
 
     # NBNB TBD consider whether this should be refactored now we use createSpectrumDisplay
     self.createSpectrumDisplay(spectrum)
-
+    self._appBase.guiWindows.append(self)
     # apiGuiTask = self.apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
     # #axisCodes = spectrum.axisCodes
     # axisCodes = Spectrum.getAxisCodes(spectrum)

@@ -30,4 +30,4 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
       spectrumView = self.getWrapperObject(spectrumDisplay._wrappedData.findFirstSpectrumView(dataSource=spectrum._wrappedData))
       for strip in spectrumView.strips:
         strip.addSpectrum(spectrumView)
-      
+

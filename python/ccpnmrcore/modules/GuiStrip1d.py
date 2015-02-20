@@ -69,7 +69,7 @@ class GuiStrip1d(GuiStrip):
       self.colourIndex += 1
       self.colourIndex %= len(spectrumColours)
 
-    colour = guiSpectrumView.sliceColour
+    colour = QtGui.QColor('red')
     # spectrum.apiSpectrum.setSliceColour(colour)
     data = guiSpectrumView.getSliceData()
     # if self.colourScheme == 'dark':
@@ -79,7 +79,7 @@ class GuiStrip1d(GuiStrip):
     # print(spectrum.ccpnSpectrum.spectrumViews)
     guiSpectrumView.plot = self.plotItem.plot(data[0],data[1], pen={'color':QtGui.QColor(colour)},clickable=True,)
     guiSpectrumView.plot.curve.setClickable(True)
-    self._appBase.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
+    # self._appBase.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
 
     if self.spectrumIndex < 10:
       shortcutKey = "s,"+str(self.spectrumIndex)

@@ -70,7 +70,7 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     # self.current.pane = self.guiSpectrumDisplay
     self.storedZooms = []
     self.spectrumItems = []
-    self.guiSpectrumDisplay.dock.addWidget(self)
+    self.guiSpectrumDisplay.dock.addWidget(self, 1, 1, 1, 3)
 
 
     # layout = self.stripFrame.layout()

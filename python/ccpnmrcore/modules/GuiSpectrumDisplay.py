@@ -15,7 +15,6 @@ class GuiSpectrumDisplay(GuiModule):
   def __init__(self):
     GuiModule.__init__(self)
 
-    self.guiSpectrumViews = []
     self.guiStrips = []
     self.spectrumToolBar = ToolBar(self.dock, grid=(0, 0), gridSpan=(1, 2))
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -36,9 +35,7 @@ class GuiSpectrumDisplay(GuiModule):
     self.stripFrame = GuiFrame(self.dock, appBase=self._appBase, grid=(1, 1), gridSpan=(1, 3))
 
     self.stripFrame.guiSpectrumDisplay = self
-    import pyqtgraph as pg
-
-
+    # self.dock.addWidget(self.stripFrame)
     #
     #
     # for n, apiStrip in enumerate(apiSpectrumDisplay.sortedStrips()):   ### probably need orderedStrips() here ?? ask Rasmus

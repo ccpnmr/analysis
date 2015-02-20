@@ -33,8 +33,7 @@ class AppBase(GuiBase):
     apiNmrProject = project._wrappedData
     self.project = project
     project._appBase = self
-    self.guiWindows = []
-    
+
     self.current = Current()
 
     apiWindowStore = apiNmrProject.windowStore

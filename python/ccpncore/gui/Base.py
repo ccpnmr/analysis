@@ -69,6 +69,7 @@ class Base(Translation):
       return
 
     parent = self.parent() if hasattr(self, 'parent') else None # Not all Qt objects have a parent
+    # print('parent',parent)
     if parent and not isFloatWidget:
       # Setup gridding within parent
       if isinstance(parent, Dock):

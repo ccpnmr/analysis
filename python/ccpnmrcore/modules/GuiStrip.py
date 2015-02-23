@@ -8,13 +8,14 @@ from ccpn import Spectrum
 from ccpncore.gui import ViewBox
 from ccpnmrcore.DropBase import DropBase
 from ccpnmrcore.gui.Axis import Axis
+import copy
 
 class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the drop events are not processed
 
   sigClicked = QtCore.Signal(object, object)
 
   def __init__(self):
-    # self.stripFrame = self._parent.stripFrame
+    self.stripFrame = self._parent.stripFrame
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
     # self.apiStrip = apiStrip
     #
@@ -61,35 +62,22 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.scene().addItem(self.textItem2)
     self.grid = pg.GridItem()
     self.addItem(self.grid)
+    self.setMinimumWidth(200)
+    self.stripCount = len(self.guiSpectrumDisplay.guiStrips)
+    print(self.stripCount)
     # self.plotItem.resizeEvent = self.resizeEvent
     self.setAcceptDrops(True)
-    crossHair = self.createCrossHair()
-    self._appBase.crossHairs.append(crossHair)
-    self.scene().sigMouseMoved.connect(self.mouseMoved)
-    # self.scene().sigMouseHover.connect(self.setCurrentPane)
+    self.createCrossHair()
+    # self.scene().sigMouseMoved.connect(self.mouseMoved)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
-    # self.current.pane = self.guiSpectrumDisplay
     self.storedZooms = []
-    self.guiSpectrumDisplay.dock.addWidget(self, 1, 1, 1, 3)
-
-
-    # layout = self.stripFrame.layout()
-    # if not layout:
-    #   layout = QtGui.QGridLayout(self.stripFrame)
-    #   layout.setContentsMargins(0, 0, 0, 0)
-    #   self.stripFrame.setLayout(layout)
-    #
-    # # print(self.stripFrame.width())
-    #
-    #
-    # n = len(self.guiSpectrumDisplay.apiSpectrumDisplay.strips)-1
-    # layout.setColumnStretch(n, 1)
-    # layout.setSpacing(1)
-    # layout.addWidget(self, 0, n)
-    # # self.scene().sigMouseClicked.connect(self.setCurrentPane)
-    #
-    # self.guiSpectrumDisplay.guiStrips.append(self)
-
+    self.stripFrame.layout().addWidget(self, 0, 0)
+    # for i in range(20):
+    #   newStrip = pg.PlotWidget()
+    #   newStrip.setMinimumWidth(200)
+    #   print(i)
+    #   self.stripFrame.layout().addWidget(newStrip, 0, i)
+    # # self.stripFrame.layout().addWidget(self, 2, 0, 1, 1)
 
   def moveAxisCodeLabels(self):
     self.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
@@ -104,8 +92,8 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.hLine = pg.InfiniteLine(angle=0, movable=False, pen='w')
     self.addItem(self.vLine, ignoreBounds=True)
     self.addItem(self.hLine, ignoreBounds=True)
-    self.guiSpectrumDisplay.hLines.append(self.hLine)
-    self.guiSpectrumDisplay.vLines.append(self.vLine)
+    # self._appBase.hLines.append(self.hLine)
+    # self._appBase.vLines.append(self.vLine)
 
   def toggleCrossHair(self):
     if self.crossHairShown:
@@ -114,17 +102,17 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
       self.showCrossHair()
 
   def showCrossHair(self):
-      for vLine in self.guiSpectrumDisplay.vLines:
+      for vLine in self._appBase.vLines:
         vLine.show()
-      for hLine in self.guiSpectrumDisplay.hLines:
+      for hLine in self._appBase.hLines:
         hLine.show()
       self.crossHairAction.setChecked(True)
       self.crossHairShown = True
 
   def hideCrossHair(self):
-    for vLine in self.guiSpectrumDisplay.vLines:
+    for vLine in self._appBase.vLines:
         vLine.hide()
-    for hLine in self.guiSpectrumDisplay.hLines:
+    for hLine in self._appBase.hLines:
         hLine.hide()
     self.crossHairAction.setChecked(False)
     self.crossHairShown = False
@@ -135,29 +123,13 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     else:
       self.grid.show()
 
-  def setCurrentPane(self):
-    self.guiSpectrumDisplay.currentStrip = self
-    self._appBase.mainWindow.pythonConsole.write('current.pane = '+str(self.guiSpectrumDisplay.name()))
-    self._appBase.current.pane = self.guiSpectrumDisplay
-    # for strip in self.guiSpectrumDisplay.guiStrips:
-      # strip.hideCrossHair()
-    self.guiSpectrumDisplay.currentStrip.showCrossHair()
-
-  # def mouseMoved(self, event):
-  #   position = event
-  #   if self.sceneBoundingRect().contains(position):
-  #       self.mousePoint = self.viewBox.mapSceneToView(position)
-  #       self.vLine.setPos(self.mousePoint.x())
-  #       self.hLine.setPos(self.mousePoint.y())
-  #   return self.mousePoint
-
   def mouseMoved(self, event):
     position = event
     if self.sceneBoundingRect().contains(position):
         self.mousePoint = self.viewBox.mapSceneToView(position)
-        for vLine in self.guiSpectrumDisplay.vLines:
+        for vLine in self._appBase.vLines:
           vLine.setPos(self.mousePoint.x())
-        for hLine in self.guiSpectrumDisplay.hLines:
+        for hLine in self._appBase.hLines:
           hLine.setPos(self.mousePoint.y())
     return self.mousePoint
 
@@ -206,7 +178,6 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.zoomPopup.setLayout(layout)
     self.zoomPopup.exec_()
 
-
   def storeZoom(self):
     self.storedZooms.append(self.viewBox.viewRange())
 
@@ -220,6 +191,10 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     raise Exception('should be implemented in subclass')
 
   def dropCallback(self, dropObject):
-    
+
+    print(dropObject)
     if isinstance(dropObject, Spectrum):
       self.guiSpectrumDisplay.addSpectrum(dropObject)
+
+    # if isinstance(dropObject, Strip):
+

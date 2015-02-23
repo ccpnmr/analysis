@@ -207,13 +207,11 @@ class Window(AbstractWrapperObject):
         apiAxis.unit = unit
         apiAxis.position = position
         apiAxis.width = width
-
     # Make spectrumView
     stripSerial = 1 if independentStrips else 0
     display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
                                          stripSerial=stripSerial,dataSource=dataSource,
                                          dimensionOrdering=dimensionOrdering)
-    #
     return display
 
 
@@ -247,7 +245,6 @@ class MainWindow(Window, GuiMainWindow):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
     GuiMainWindow.__init__(self)
-
   # put in subclass to make superclass abstract
   @property
   def _key(self) -> str:

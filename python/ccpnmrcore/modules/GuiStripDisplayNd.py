@@ -8,19 +8,7 @@ from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpnmrcore.modules.GuiStripNd import GuiStripNd
 
 
-def _findPpmRegion(spectrum, axisDim, spectrumDim):
-  
-  pointCount = spectrum.pointCounts[spectrumDim]
-  if axisDim < 2: # want entire region
-    region = (0, pointCount)
-  else:
-    n = pointCount // 2
-    region = (n, n+1)
-    
-  firstPpm, lastPpm = LibSpectrum.getDimValueFromPoint(spectrum, spectrumDim, region)
-  
-  return 0.5*(firstPpm+lastPpm), abs(lastPpm-firstPpm)
-  
+
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def __init__(self):
@@ -76,7 +64,15 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   #   for guiStrip in self.guiStrips:
   #     guiStrip.addSpectrum(guiSpectrumView)
   #
-  # def addStrip(self):
+  def addStrip(self):
+
+    print('addNewStrip')
+    print(self.stripFrame.layout())
+    axisCodes = self.strips[0].axisCodes
+    print(axisCodes)
+    # print(newStrip)
+
+    # self.stripFrame.layout().addWidget(newGuiStrip)
   #
   #   apiStrip = self.apiSpectrumDisplay.newStripNd()
   #   n = len(self.apiSpectrumDisplay.strips) - 1
@@ -98,7 +94,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def hideSpinSystemLabel(self):
     self.hideSystemSideLabel.show()
-
 
   def addSpinSystemSideLabel(self):
     dock = self.dock

@@ -37,8 +37,6 @@ class GuiSpectrumDisplay(GuiModule):
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     screenWidth  = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setMaximumWidth(screenWidth*0.6)
-    self.hLines = []
-    self.vLines = []
     self.spectrumUtilToolBar = ToolBar(self.dock, grid=(0, 2), gridSpan=(1, 1))
     # self.spectrumUtilToolBar.setMinimumWidth(screenWidth*0.15)
     toolBarColour = QtGui.QColor(214,215,213)
@@ -47,11 +45,20 @@ class GuiSpectrumDisplay(GuiModule):
     palette.setColor(QtGui.QPalette.Button,toolBarColour)
     palette2.setColor(QtGui.QPalette.Button,toolBarColour)
 
+
+
     self.positionBox = Label(self.dock, grid=(0, 3), gridSpan=(1, 1))
     self.positionBox.setFixedWidth(screenWidth*0.08)
-    self.stripFrame = GuiFrame(self.dock, appBase=self._appBase, grid=(1, 0), gridSpan=(1, 3))
+    self.scrollArea = QtGui.QScrollArea()
+    self.scrollArea.setWidgetResizable(True)
+    self.stripFrame = GuiFrame(self, appBase=self._appBase, grid=(0, 0), stretch=(1, 4))
+    self.layout = QtGui.QGridLayout()
+    self.stripFrame.setLayout(self.layout)
+    print(self.stripFrame.layout())
+    self.scrollArea.setWidget(self.stripFrame)
+    self.dock.addWidget(self.scrollArea, 1, 0, 1, 4)
 
-    self.stripFrame.guiSpectrumDisplay = self
+    # self.stripFrame.guiSpectrumDisplay = self
     # self.dock.addWidget(self.stripFrame)
     #
     #

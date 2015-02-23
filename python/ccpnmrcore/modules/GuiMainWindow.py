@@ -427,8 +427,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     f.close()
 
-  def showPeakTable(self, position='left', relativeTo=None):
-    peakList = PeakListSimple(name="Peak Table", peakLists=self.project.peakLists)
+  def showPeakTable(self, position='left', relativeTo=None, referenceSpectrumDisplay=None):
+    peakList = PeakListSimple(name="Peak Table", peakLists=self.project.peakLists, referenceSpectrumDisplay=referenceSpectrumDisplay)
     if relativeTo is not None:
       self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
     else:

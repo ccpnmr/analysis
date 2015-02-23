@@ -224,7 +224,7 @@ class StripNd(GuiStripNd, Strip):
     """id string - serial number converted to string"""
     return str(self._wrappedData.serial)
 
-def _factoryFunction(project:Project, wrappedData:ApiStrip) -> Strip:
+def _factoryFunction(project:Project, wrappedData:ApiStrip):
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
   if isinstance(wrappedData, ApiStripNd):
     return StripNd(project, wrappedData)

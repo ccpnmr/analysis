@@ -97,7 +97,6 @@ def registerNotify(notify, classname, funcname=''):
   for metaClass in metaClasses:
     clazz =  commonUtil.getClassFromFullName(metaClass.qualifiedName())
     notifies = clazz._notifies
-
     ll = notifies.get(funcname)
     if ll is None:
       notifies[funcname] = [notify]

@@ -23,7 +23,14 @@ class DropBase(GuiBase):
       self.dropCallback(filePaths)
 
     if event.mimeData().hasFormat('application/x-strip'):
-      print('addStripToDisplay')
+      data = (event.mimeData().retrieveData('application/x-strip', str))
+      pidData = str(data.data(),encoding='utf-8')
+      pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
+      actualPid = ''.join(pidData)
+      wrapperObject = self.getObject(actualPid)
+      print(wrapperObject, 'wrapper obj')
+      print(actualPid)
+      # self.dropCallback()
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
       pidData = str(data.data(),encoding='utf-8')

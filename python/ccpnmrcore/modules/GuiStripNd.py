@@ -31,8 +31,8 @@ class GuiStripNd(GuiStrip):
     self.colourIndex = 0
     # print(guiSpectrumDisplay)
     self.fillToolBar()
-    self.addSpinSystemLabel(self.guiSpectrumDisplay.dock, 1)
-    # self.addPlaneToolbar(self.guiSpectrumDisplay.dock, 1)
+    self.addSpinSystemLabel(self.stripFrame, 0)
+    self.addPlaneToolbar(self.stripFrame, 0)
     ###self.setShortcuts()
 
   """
@@ -67,9 +67,7 @@ class GuiStripNd(GuiStrip):
     # # else:
     # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
     apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
-    if apiDataSource.numDim > 2:
-      for dim in range(apiDataSource.numDim - 2):
-        self.addPlaneToolbar(self.guiSpectrumDisplay.dock, grid=(4+dim, 1))
+
     # Changed to guiSpectrumView.positiveContourColour, which picks up from either
     # SpectrumView or DataSource
     if not guiSpectrumView.positiveContourColour:
@@ -86,6 +84,34 @@ class GuiStripNd(GuiStrip):
 
     self.scene().addItem(guiSpectrumView)
 
+
+  def changeZPlane(self, planeCount=None, position=None):
+
+    zAxis = self.orderedAxes[2]
+    smallest = None
+    #take smallest inter-plane distance
+    for spectrumItem in self._parent.spectrumViews:
+      zPlaneSize = spectrumItem.zPlaneSize()
+      if zPlaneSize is not None:
+        if smallest is None or zPlaneSize < smallest:
+          smallest = zPlaneSize
+
+    if smallest is None:
+      smallest = 1.0 # arbitrary
+    #
+    if planeCount:
+      delta = smallest * planeCount
+      zAxis.position = zAxis.position+delta
+    if position:
+      zAxis.position = position
+
+  def nextZPlane(self):
+
+    self.changeZPlane(planeCount=-1) # -1 because ppm units are backwards
+
+  def prevZPlane(self):
+
+    self.changeZPlane(planeCount=1) # -1 because ppm units are backwards
 
   def fillToolBar(self):
     spectrumUtilToolBar =  self.guiSpectrumDisplay.spectrumUtilToolBar
@@ -145,9 +171,9 @@ class GuiStripNd(GuiStrip):
     # self.spinSystemLabel.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
     # # self.spinSystemLabel.setFixedWidth(900)
     # self.planeToolbar.addWidget(self.spinSystemLabel)
-    # prevPlaneButton = Button(self,'<')#, callbacks=[self.prevZPlane])
-    # prevPlaneButton.setFixedWidth(30)
-    # prevPlaneButton.setFixedHeight(30)
+    prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
+    prevPlaneButton.setFixedWidth(30)
+    prevPlaneButton.setFixedHeight(30)
     self.planeLabel = LineEdit(self)
     # self.planeLabel.setAlignment(QtCore.Qt.AlignHCenter)
     # zDims = set(range(spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
@@ -159,17 +185,19 @@ class GuiStripNd(GuiStrip):
     self.planeLabel.setFixedHeight(30)
     # self.axisCodeLabel = Label(self, text=spectrum.axisCodes[spectrumItem.dimMapping[2]])
     # self.planeLabel.textChanged.connect(self.changeZPlane)
-    nextPlaneButton = Button(self,'>')#, callbacks=[self.nextZPlane])
+    nextPlaneButton = Button(self,'>', callback=self.nextZPlane)
     nextPlaneButton.setFixedWidth(30)
     nextPlaneButton.setFixedHeight(30)
-    self.planeToolbar.addAction('<')
-    self.planeToolbar.addWidget(self.planeLabel)
-    self.planeToolbar.addAction('>')
     self.planeToolbar.setContentsMargins(0,0,0,0)
+    self.planeToolbar.addWidget(prevPlaneButton)
+    self.planeToolbar.addWidget(self.planeLabel)
+    self.planeToolbar.addWidget(nextPlaneButton)
+
+
     # print(self.dock.widgets[-1].layout())#.addWidget(self.planeToolbar, 3, 0)
-    # self..addWidget(self.planeToolbar, 3, 0)
 
   def addSpinSystemLabel(self, guiFrame, stripNumber):
-    self.spinSystemLabel = Label(guiFrame, grid=(3, stripNumber), stretch=(0, 1), hAlign='center', dragDrop=True)
+    self.spinSystemLabel = Label(guiFrame, grid=(3, stripNumber), hAlign='center', dragDrop=True)
     self.spinSystemLabel.setText("Spin systems shown here")
     self.spinSystemLabel.setFixedHeight(30)
+    self.spinSystemLabel.pid = self.pid

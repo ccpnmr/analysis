@@ -271,7 +271,7 @@ class SpectrumView(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:SpectrumDisplay)-> list:
     """get wrappedData (ccp.gui.Strip) in serial number order"""
-    return parent._wrappedData.sortedSpextrumViews()
+    return parent._wrappedData.sortedSpectrumViews()
 
   #CCPN functions
 

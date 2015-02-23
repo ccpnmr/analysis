@@ -28,11 +28,12 @@ from ccpncore.gui.Base import Base
 
 class Label(QtGui.QLabel, Base):
 
-  def __init__(self, parent, text='', textColor=None, dragDrop=False, **kw):
+  def __init__(self, parent, text='', pid = None, textColor=None, dragDrop=False, **kw):
 
     QtGui.QLabel.__init__(self, text, parent)
     Base.__init__(self, **kw)
     self.dragDrop = dragDrop
+    self.pid = pid
 
     if textColor:
       self.setStyleSheet('QLabel {color: %s;}' % textColor)
@@ -51,18 +52,21 @@ class Label(QtGui.QLabel, Base):
   #
 
   def mousePressEvent(self, event):
-    itemData = QtCore.QByteArray()
-    # dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-    # dataStream << QtCore.QByteArray(self.labelText) << QtCore.QPoint(event.pos() - self.rect().topLeft())
+    if self.dragDrop == True:
+      itemData = QtCore.QByteArray()
+      # dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+      # dataStream << QtCore.QByteArray(self.labelText) << QtCore.QPoint(event.pos() - self.rect().topLeft())
 
-    mimeData = QtCore.QMimeData()
-    mimeData.setData('application/x-strip', itemData)
-    # mimeData.setText(self.labelText)
+      mimeData = QtCore.QMimeData()
+      mimeData.setData('application/x-strip', itemData)
+      # mimeData.setText(self.labelText)
 
-    drag = QtGui.QDrag(self)
-    drag.setMimeData(mimeData)
-    # drag.setHotSpot(event.pos() - self.rect().topLeft())
-    # drag.setPixmap(self.pixmap())
+      drag = QtGui.QDrag(self)
+      drag.setMimeData(mimeData)
+      # drag.setHotSpot(event.pos() - self.rect().topLeft())
+      # drag.setPixmap(self.pixmap())]
+    else:
+      event.ignore()
 
 
     if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:

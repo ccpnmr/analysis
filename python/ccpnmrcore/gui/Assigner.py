@@ -183,31 +183,6 @@ class Assigner(Dock):
     atom = GuiNmrAtom(text=atomType, pos=position)
     return(atom)
 
-  def clickable(self, GuiNmrAtom):
-
-    class Filter(QtCore.QObject):
-
-      clicked = QtCore.Signal()
-
-      def eventFilter(self, obj, event):
-
-         if obj == GuiNmrAtom:
-          if event.type() == QtCore.QEvent.MouseButtonRelease:
-             if obj.rect().contains(event.pos()):
-               self.clicked.emit()
-               GuiNmrAtom.pos = event.pos()
-               print(GuiNmrAtom.pos())
-
-                           # The developer can opt for .emit(obj) to get the object within the slot.
-               return True
-
-         return False
-
-    filter = Filter(GuiNmrAtom)
-    GuiNmrAtom.installEventFilter(filter)
-    return filter.clicked
-
-
 class GuiNmrAtom(QtGui.QGraphicsTextItem):
 
   def __init__(self, text, pos=None):

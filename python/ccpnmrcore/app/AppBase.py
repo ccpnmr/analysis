@@ -23,6 +23,8 @@ class AppBase(GuiBase):
 
     self.setupPreferences()
     self.initProject(apiProject)
+    self.vLines = []
+    self.hLines = []
 
     
   def initProject(self, apiProject):
@@ -33,7 +35,7 @@ class AppBase(GuiBase):
     apiNmrProject = project._wrappedData
     self.project = project
     project._appBase = self
-    self.crossHairs = []
+
 
     self.current = Current()
 

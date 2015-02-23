@@ -26,6 +26,7 @@ from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Label import Label
 from pyqtgraph.dockarea import Dock
+import pyqtgraph as pg
 import math
 
 from PySide import QtGui, QtCore
@@ -35,7 +36,7 @@ UNITS = ['ppm', 'Hz', 'point']
 #class PeakListSimple(Dock):
 class PeakListSimple(Dock):
 
-  def __init__(self, parent=None, peakLists=None, name='Peak List', **kw):
+  def __init__(self, parent=None, peakLists=None, name='Peak List', referenceSpectrumDisplay=None, **kw):
 
     if not peakLists:
       peakLists = []
@@ -46,7 +47,7 @@ class PeakListSimple(Dock):
 
     self.initPanel()
     self.peakLists = peakLists
-    
+    self.referenceSpectrumDisplay = referenceSpectrumDisplay
     #self.initPanel()
     label = Label(self, 'Peak List:', grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1),
@@ -79,8 +80,18 @@ class PeakListSimple(Dock):
   def selectPeak(self, peak, row, col):
     if not peak:
       return
-    if peak is not self.peak:
-      self.peak = peak
+    else:
+
+      position1 = self._getPeakPosition(peak, 1)
+      position2 = self._getPeakPosition(peak, 0)
+      self.referenceSpectrumDisplay.strips[0].changeZPlane(position=position1)
+      peakList = self.referenceSpectrumDisplay.spectrumViews[0].spectrum.peakLists[0]
+      for peak in peakList.peaks:
+        if abs(peak.position[2] - position1) < 0.05 and abs(peak.position[0] - position2) < 0.02:
+          print(peak.position)
+
+      # self.referenceSpectrumDisplay.strips[0].addLine(position)
+
 
 
   def _getColumns(self, numDim):

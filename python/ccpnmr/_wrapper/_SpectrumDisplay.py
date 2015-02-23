@@ -37,6 +37,12 @@ from ccpnmrcore.modules.GuiStripDisplayNd import GuiStripDisplayNd
 from ccpnmrcore.modules.GuiStripDisplay1d import GuiStripDisplay1d
 
 
+list1 = [GuiSpectrumDisplay,AbstractWrapperObject]
+
+for item in list1:
+  print(item, type(item))
+  if hasattr(item, '__metaclass__'):
+    print(item, item.__metaclass__)
 class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   """Spectrum display for 1D or nD spectrum"""
   
@@ -45,7 +51,6 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumDisplays'
-  
   #: List of child classes.
   _childClasses = []
 

@@ -19,7 +19,6 @@ from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
-print(type(QtGui.QMainWindow))
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
@@ -108,8 +107,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
     self.splitter2.heightMax = 200
-    assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
-    peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
+    # assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
+    # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
     self.leftWidget.itemDoubleClicked.connect(self.raiseSpectrumProperties)
     self.splitter2.addWidget(self.pythonConsole)
     self.pythonConsole.hide()
@@ -237,9 +236,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.setNativeMenuBar(False)
     self.show()
 
-  def showAssigner(self):
+  def showAssigner(self, position, nextTo=None):
     self.assigner = Assigner()
-    self.dockArea.addDock(self.assigner)
+    if nextTo is not None:
+      self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
+    else:
+      self.dockArea.addDock(self.assigner, position=position)
+    return self.assigner
     # self.dockArea.addDock(assigner)
 
   def raiseSpectrumProperties(self, item):
@@ -424,9 +427,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     f.close()
 
-  def showPeakTable(self):
-    peakList = PeakListSimple(dimensions=3, name="Peak Table")
-    self.dockArea.addDock(peakList)
+  def showPeakTable(self, position='left', relativeTo=None):
+    peakList = PeakListSimple(name="Peak Table", peakLists=self.project.peakLists)
+    if relativeTo is not None:
+      self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
+    else:
+      self.dockArea.addDock(peakList, position=position)
 
 
   def saveProjectAs(self):

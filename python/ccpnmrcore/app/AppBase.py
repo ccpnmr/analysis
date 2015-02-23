@@ -33,6 +33,7 @@ class AppBase(GuiBase):
     apiNmrProject = project._wrappedData
     self.project = project
     project._appBase = self
+    self.crossHairs = []
 
     self.current = Current()
 

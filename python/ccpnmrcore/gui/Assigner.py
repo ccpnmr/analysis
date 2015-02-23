@@ -13,6 +13,7 @@ class Assigner(Dock):
     self.scrollArea.setWidgetResizable(True)
     self.scene = QtGui.QGraphicsScene(self)
     self.scrollContents = QtGui.QGraphicsView(self.scene, self)
+    self.scrollContents.setInteractive(True)
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
     self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
@@ -65,6 +66,7 @@ class Assigner(Dock):
           cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
           nAtom2 = self.addAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()))
           hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
+          self.clickable(hAtom2)
           self.scene.addItem(coAtom2)
           self.scene.addItem(caAtom2)
           self.scene.addItem(cbAtom2)
@@ -181,6 +183,30 @@ class Assigner(Dock):
     atom = GuiNmrAtom(text=atomType, pos=position)
     return(atom)
 
+  def clickable(self, GuiNmrAtom):
+
+    class Filter(QtCore.QObject):
+
+      clicked = QtCore.Signal()
+
+      def eventFilter(self, obj, event):
+
+         if obj == GuiNmrAtom:
+          if event.type() == QtCore.QEvent.MouseButtonRelease:
+             if obj.rect().contains(event.pos()):
+               self.clicked.emit()
+               GuiNmrAtom.pos = event.pos()
+               print(GuiNmrAtom.pos())
+
+                           # The developer can opt for .emit(obj) to get the object within the slot.
+               return True
+
+         return False
+
+    filter = Filter(GuiNmrAtom)
+    GuiNmrAtom.installEventFilter(filter)
+    return filter.clicked
+
 
 class GuiNmrAtom(QtGui.QGraphicsTextItem):
 
@@ -193,12 +219,17 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     self.setPlainText(text)
     self.setPos(QtCore.QPointF(pos[0], pos[1]))
 
+  def mousePressEvent(self, event):
+    self.printAtom()
+
+  def printAtom(self):
+    print(self)
+
 
 class AssignmentLine(QtGui.QGraphicsLineItem):
   def __init__(self, x1, y1, x2, y2, colour, width):
     QtGui.QGraphicsLineItem.__init__(self)
     self.pen = QtGui.QPen()
-
     self.pen.setColor(QtGui.QColor(colour))
     self.pen.setCosmetic(True)
     self.pen.setWidth(width)

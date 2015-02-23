@@ -26,22 +26,23 @@ from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Label import Label
 from pyqtgraph.dockarea import Dock
+import math
 
 from PySide import QtGui, QtCore
 
 UNITS = ['ppm', 'Hz', 'point']
 
 #class PeakListSimple(Dock):
-class PeakListSimple(QtGui.QWidget, Base):
+class PeakListSimple(Dock):
 
   def __init__(self, parent=None, peakLists=None, name='Peak List', **kw):
 
     if not peakLists:
       peakLists = []
       
-    QtGui.QWidget.__init__(self, parent)
-    #Dock.__init__(self, name=name)
-    Base.__init__(self, **kw)
+    # QtGui.QWidget.__init__(self, parent)
+    Dock.__init__(self, name=name)
+    # Base.__init__(self, **kw)
 
     self.initPanel()
     self.peakLists = peakLists
@@ -51,16 +52,16 @@ class PeakListSimple(QtGui.QWidget, Base):
     self.peakListPulldown = PulldownList(self, grid=(0, 1),
                                           callback=self.changePeakList,)
 
-    # label = Label(self, ' Position Unit:', grid=(0, 2))
-    # self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
+    label = Label(self, ' Position Unit:', grid=(0, 2))
+    self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
                                         # callback=self._updateWhenIdle,)
 
     self.peakTable = ObjectTable(self, self._getColumns(2), [],
-                                 callback=self.selectPeak, grid=(1,0),
-                                 gridSpan=(1,5))
+                                 callback=self.selectPeak, grid=(1, 0),
+                                 gridSpan=(1, 5))
 
     # self.layout().setColumnStretch(4, 1)
-    # self.updateContents()
+    self.updateContents()
     self.updatePeakLists()
     if peakLists:
       self.changePeakList(peakLists[0])
@@ -80,7 +81,6 @@ class PeakListSimple(QtGui.QWidget, Base):
       return
     if peak is not self.peak:
       self.peak = peak
-      print(self.peak)
 
 
   def _getColumns(self, numDim):
@@ -144,7 +144,7 @@ class PeakListSimple(QtGui.QWidget, Base):
     else: # sampled
       value = unit.pointValues[int(peakDim.position)-1]
 
-    return round(value, 3)
+    return value
 
   def _getPeakAnnotation(self, peak, dim):
 
@@ -166,14 +166,14 @@ class PeakListSimple(QtGui.QWidget, Base):
     #self._updatePulldownList(self.peakListPulldown, self.peakLists,
     #                         self.changePeakList, self.peakList,
     #                         self._getPeakListName)
-    texts = ['%s:%s:%s' % (peakList.dataSource.experiment.name, peakList.dataSource.name, peakList.serial) for peakList in self.peakLists]
-    self.peakListPulldown.setData(texts=texts, objects=peakLists)
+    texts = ['%s:%s:%s' % (peakList._parent.apiDataSource.experiment.name, peakList._parent.apiDataSource.name, peakList.serial) for peakList in self.peakLists]
+    self.peakListPulldown.setData(texts=texts, objects=self.peakLists)
 
   def updateContents(self):
     peakList = self.peakList
     if peakList:
-      columns = self._getColumns(peakList.dataSource.numDim)
-      self.peakTable.setObjectsAndColumns(peakList.sortedPeaks(), columns)
+      columns = self._getColumns(peakList._parent.apiDataSource.numDim)
+      self.peakTable.setObjectsAndColumns(peakList.apiPeakList.sortedPeaks(), columns)
   #def updateContents(self, spectrum):
     # if len(spectrum.peakLists) > 1:
     #   for peakList in spectrum.peakLists:
@@ -187,14 +187,14 @@ class PeakListSimple(QtGui.QWidget, Base):
     if peakList is not self.peakList:
 
       if self.peakList:
-        numDim = self.peakList.dataSource.numDim
+        numDim = self.peakList._parent.apiDataSource.numDim
       else:
         numDim = 2
 
       self.sampledDims  = {}
 
       if peakList:
-        dataDims = peakList.dataSource.sortedDataDims()
+        dataDims = peakList._parent.apiDataSource.sortedDataDims()
         for i, dataDim in enumerate(dataDims):
           if dataDim.className == 'SampledDataDim':
             self.sampledDims[i] = dataDim

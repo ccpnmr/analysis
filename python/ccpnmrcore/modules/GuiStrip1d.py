@@ -20,7 +20,6 @@ class GuiStrip1d(GuiStrip):
     self.autoIntegration = True
     self.viewBox.menu = self.get1dContextMenu()
     self.plotItem.setAcceptDrops(True)
-    self.spectrumItems = []
     self.colourIndex = 0
     self.spectrumIndex = 0
 

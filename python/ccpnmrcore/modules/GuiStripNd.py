@@ -30,7 +30,9 @@ class GuiStripNd(GuiStrip):
     self.axesSwapped = False
     self.colourIndex = 0
     # print(guiSpectrumDisplay)
-    # self.fillToolBar()
+    self.fillToolBar()
+    self.addSpinSystemLabel(self.guiSpectrumDisplay.dock, 1)
+    # self.addPlaneToolbar(self.guiSpectrumDisplay.dock, 1)
     ###self.setShortcuts()
 
   """
@@ -65,6 +67,9 @@ class GuiStripNd(GuiStrip):
     # # else:
     # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
     apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
+    if apiDataSource.numDim > 2:
+      for dim in range(apiDataSource.numDim - 2):
+        self.addPlaneToolbar(self.guiSpectrumDisplay.dock, grid=(4+dim, 1))
     # Changed to guiSpectrumView.positiveContourColour, which picks up from either
     # SpectrumView or DataSource
     if not guiSpectrumView.positiveContourColour:
@@ -82,32 +87,32 @@ class GuiStripNd(GuiStrip):
     self.scene().addItem(guiSpectrumView)
 
 
-  # def fillToolBar(self):
-  #   spectrumUtilToolBar =  self.guiSpectrumDisplay.spectrumUtilToolBar
-  #   plusOneAction = spectrumUtilToolBar.addAction("+1", self.addOne)
-  #   plusOneIcon = Icon('icons/contourAdd')
-  #   plusOneAction.setIcon(plusOneIcon)
-  #   plusOneAction.setToolTip('Add One Level')
-  #   minusOneAction = spectrumUtilToolBar.addAction("+1", self.subtractOne)
-  #   minusOneIcon = Icon('icons/contourRemove')
-  #   minusOneAction.setIcon(minusOneIcon)
-  #   minusOneAction.setToolTip('Remove One Level ')
-  #   upBy2Action = spectrumUtilToolBar.addAction("*1.4", self.upBy2)
-  #   upBy2Icon = Icon('icons/contourBaseUp')
-  #   upBy2Action.setIcon(upBy2Icon)
-  #   upBy2Action.setToolTip('Raise Contour Base Level')
-  #   downBy2Action = spectrumUtilToolBar.addAction("*1.4", self.downBy2)
-  #   downBy2Icon = Icon('icons/contourBaseDown')
-  #   downBy2Action.setIcon(downBy2Icon)
-  #   downBy2Action.setToolTip('Lower Contour Base Level')
-  #   storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
-  #   storeZoomIcon = Icon('icons/zoom-store')
-  #   storeZoomAction.setIcon(storeZoomIcon)
-  #   storeZoomAction.setToolTip('Store Zoom')
-  #   restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
-  #   restoreZoomIcon = Icon('icons/zoom-restore')
-  #   restoreZoomAction.setIcon(restoreZoomIcon)
-  #   restoreZoomAction.setToolTip('Restore Zoom')
+  def fillToolBar(self):
+    spectrumUtilToolBar =  self.guiSpectrumDisplay.spectrumUtilToolBar
+    plusOneAction = spectrumUtilToolBar.addAction("+1", self.addOne)
+    plusOneIcon = Icon('icons/contourAdd')
+    plusOneAction.setIcon(plusOneIcon)
+    plusOneAction.setToolTip('Add One Level')
+    minusOneAction = spectrumUtilToolBar.addAction("+1", self.subtractOne)
+    minusOneIcon = Icon('icons/contourRemove')
+    minusOneAction.setIcon(minusOneIcon)
+    minusOneAction.setToolTip('Remove One Level ')
+    upBy2Action = spectrumUtilToolBar.addAction("*1.4", self.upBy2)
+    upBy2Icon = Icon('icons/contourBaseUp')
+    upBy2Action.setIcon(upBy2Icon)
+    upBy2Action.setToolTip('Raise Contour Base Level')
+    downBy2Action = spectrumUtilToolBar.addAction("*1.4", self.downBy2)
+    downBy2Icon = Icon('icons/contourBaseDown')
+    downBy2Action.setIcon(downBy2Icon)
+    downBy2Action.setToolTip('Lower Contour Base Level')
+    storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
+    storeZoomIcon = Icon('icons/zoom-store')
+    storeZoomAction.setIcon(storeZoomIcon)
+    storeZoomAction.setToolTip('Store Zoom')
+    restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
+    restoreZoomIcon = Icon('icons/zoom-restore')
+    restoreZoomAction.setIcon(restoreZoomIcon)
+    restoreZoomAction.setToolTip('Restore Zoom')
 
   def upBy2(self):
     for spectrumItem in self.spectrumItems:
@@ -128,19 +133,15 @@ class GuiStripNd(GuiStrip):
     self.current.spectrum.spectrumItem.numberOfLevels -=1
     self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
 
-  def addPlaneToolbar(self, guiFrame, stripNumber, grid=None):
+  def addPlaneToolbar(self, guiFrame, stripNumber=None, grid=None):
     if grid is None:
-     grid = (3, stripNumber)
+     grid = (4, stripNumber)
     else:
       grid=grid
     self.planeToolbar = ToolBar(guiFrame, grid=grid, stretch=(0, 1), hAlign='center')
-    # tileButton = Button(self, 'T', callbacks=self.tileDisplay)
-    # tileButton.setFixedWidth(30)
-    # tileButton.setFixedHeight(30)
-    # self.planeToolbar.addWidget(tileButton)
-    # self.spinSystemLabel = Label(self)
-    # self.spinSystemLabel.setMaximumWidth(1150)
-    # self.spinSystemLabel.setScaledContents(True)
+    self.spinSystemLabel = Label(self)
+    self.spinSystemLabel.setMaximumWidth(1150)
+    self.spinSystemLabel.setScaledContents(True)
     # self.spinSystemLabel.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
     # # self.spinSystemLabel.setFixedWidth(900)
     # self.planeToolbar.addWidget(self.spinSystemLabel)
@@ -161,19 +162,14 @@ class GuiStripNd(GuiStrip):
     nextPlaneButton = Button(self,'>')#, callbacks=[self.nextZPlane])
     nextPlaneButton.setFixedWidth(30)
     nextPlaneButton.setFixedHeight(30)
-    # self.planeToolbar.addWidget(self.axisCodeLabel)
     self.planeToolbar.addAction('<')
     self.planeToolbar.addWidget(self.planeLabel)
     self.planeToolbar.addAction('>')
-    # rotateButton = Button(self, 'R', callbacks=[self.rotateAboutX, self.rotateAboutY, self.swapXY])
-    # rotateButton.setFixedWidth(30)
-    # rotateButton.setFixedHeight(30)
-    # self.planeToolbar.addWidget(rotateButton)
     self.planeToolbar.setContentsMargins(0,0,0,0)
-    # self.addWidget(self.planeToolbar, 3, 0)
     # print(self.dock.widgets[-1].layout())#.addWidget(self.planeToolbar, 3, 0)
     # self..addWidget(self.planeToolbar, 3, 0)
 
   def addSpinSystemLabel(self, guiFrame, stripNumber):
-    self.spinSystemLabel = Label(guiFrame, grid=(4, stripNumber), stretch=(0, 1), hAlign='center')
+    self.spinSystemLabel = Label(guiFrame, grid=(3, stripNumber), stretch=(0, 1), hAlign='center', dragDrop=True)
     self.spinSystemLabel.setText("Spin systems shown here")
+    self.spinSystemLabel.setFixedHeight(30)

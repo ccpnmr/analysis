@@ -63,13 +63,13 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.addItem(self.grid)
     # self.plotItem.resizeEvent = self.resizeEvent
     self.setAcceptDrops(True)
-    self.createCrossHair()
+    crossHair = self.createCrossHair()
+    self._appBase.crossHairs.append(crossHair)
     self.scene().sigMouseMoved.connect(self.mouseMoved)
     # self.scene().sigMouseHover.connect(self.setCurrentPane)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     # self.current.pane = self.guiSpectrumDisplay
     self.storedZooms = []
-    self.spectrumItems = []
     self.guiSpectrumDisplay.dock.addWidget(self, 1, 1, 1, 3)
 
 

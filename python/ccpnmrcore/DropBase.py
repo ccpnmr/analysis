@@ -22,6 +22,8 @@ class DropBase(GuiBase):
       filePaths = [url.path() for url in event.mimeData().urls()]
       self.dropCallback(filePaths)
 
+    if event.mimeData().hasFormat('application/x-strip'):
+      print('addStripToDisplay')
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
       pidData = str(data.data(),encoding='utf-8')

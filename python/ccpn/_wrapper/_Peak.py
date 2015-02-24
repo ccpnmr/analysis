@@ -30,8 +30,6 @@ from ccpn._wrapper._Project import Project
 from ccpn._wrapper._PeakList import PeakList
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 
-from ccpncore.lib.ccp.nmr.Nmr import Peak as ApiLibPeak
-
 class Peak(AbstractWrapperObject):
   """Peak. Includes values for per-dimension values and for assignments.
   Assignments are complete for normal shift dimensions, but only the main referencing is used
@@ -194,7 +192,7 @@ class Peak(AbstractWrapperObject):
       dimValues = tuple(x._wrappedData for x in value[ii])
       dimResonances[ii] = tuple(x for x in dimValues if x is not None)
 
-    ApiLibPeak.setPeakDimAssignments(apiPeak, dimResonances)
+    apiPeak.setPeakDimAssignments(dimResonances)
 
   @property
   def assignedNmrAtoms(self) -> tuple:
@@ -238,7 +236,7 @@ class Peak(AbstractWrapperObject):
           ll[ii] = atom._wrappedData
 
     # set assignments
-    ApiLibPeak.setAssignments(apiPeak, resonances)
+    apiPeak.setAssignments(resonances)
 
   @property
   def dimensionAssignments(self) -> tuple:
@@ -297,7 +295,7 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
       dimResonances[ii] = tuple(x for x in dimValues if x is not None)
 
     # set dimensionAssignments
-    ApiLibPeak.setPeakDimAssignments(apiPeak, dimResonances)
+    apiPeak.setPeakDimAssignments(dimResonances)
 
   if assignments:
     peakDims = apiPeak.sortedPeakDims()
@@ -313,7 +311,7 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
           ll[ii] = atom._wrappedData
 
     # set assignments
-    ApiLibPeak.setAssignments(apiPeak, resonances)
+    apiPeak.setAssignments(resonances)
 
   return parent._project._data2Obj.get(apiPeak)
 

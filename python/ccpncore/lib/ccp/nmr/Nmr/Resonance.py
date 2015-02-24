@@ -23,7 +23,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.util import MergeObjects
-from ccpncore.lib.ccp.nmr.Nmr import Shift as libShift
 from ccpncore.memops.ApiError import ApiError
 from ccpncore.api.ccp.nmr import Nmr
 
@@ -120,7 +119,7 @@ def absorbResonance(resonanceA:Nmr.Resonance, resonanceB:Nmr.Resonance) -> None:
   
   # Must be after resonance merge, so that links to peaks are properly set
   for shiftA in resonanceA.shifts:
-    libShift.recalculateShiftValue(shiftA)
+    shiftA.recalculateShiftValue()
   
   # AssognNames ar no longer used in new model
   # Assign names will be merged, but if assigned we only want the correct ones

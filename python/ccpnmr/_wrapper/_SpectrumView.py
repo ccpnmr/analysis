@@ -275,6 +275,20 @@ class SpectrumView(AbstractWrapperObject):
 
   #CCPN functions
 
+# Spectrum.spectrumDisplays property
+def _getSpectrumDisplays(spectrum:Spectrum):
+  return tuple(spectrum._project._data2Obj[x]
+               for x in spectrum._wrappedData.sortedSpectrumViews())
+Spectrum.spectrumDisplays = property(_getSpectrumDisplays, None, None,
+                                   "SpectrumDisplays showing Spectrum")
+
+# Strip.spectrumDisplays property
+def _getSpectrumDisplays(strip:Strip):
+  return tuple(strip._project._data2Obj[x]
+               for x in strip._wrappedData.sortedSpectrumViews())
+Strip.spectrumDisplays = property(_getSpectrumDisplays, None, None,
+                                   "SpectrumDisplays showing Spectrum")
+del _getSpectrumDisplays
 
 # Define subtypes and factory function
 class SpectrumView1d(SpectrumView, GuiSpectrumView1d):

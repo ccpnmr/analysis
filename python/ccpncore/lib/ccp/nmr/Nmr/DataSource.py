@@ -64,8 +64,6 @@ import re
 #
 # NB All functions must have a mandatory DataSource as the first parameter
 # so they can be used as DataSource methods
-from ccpncore.lib.ccp.nmr.Nmr.Experiment import getOnebondExpDimRefs, getAcqExpDim
-from ccpncore.lib.ccp.nmr.Nmr.AbstractDataDim import getIsotopeCodes
 # from ccpncore.lib.spectrum.Integral import getIntegralRegions, setIntegrals, calculateIntegralValues
 from ccpncore.lib.spectrum.Integral import Integral as spInt
 
@@ -78,7 +76,7 @@ def getDimCodes(dataSource):
   """
   isotopeCodes=getIsotopeCodesList(dataSource)
   
-  acqExpDim = getAcqExpDim(dataSource.experiment)
+  acqExpDim = dataSource.experiment.getAcqExpDim()
   dataDims = dataSource.sortedDataDims()
   dimCodes = [None]*dataSource.numDim
   for ii,dataDim in enumerate(dataDims):
@@ -141,7 +139,7 @@ def getXEasyDimCodes(dataSource):
 #def getSpectrumIsotopes(dataSource):
 def getIsotopeCodesList(dataSource):
   """
-  Give isotope code strings pertaining to the dimensions of a given NMR spectrum 
+  Give isotope code strings pertaining to the dimensions of a given NMR dataSource
   
   .. describe:: Input
   
@@ -154,15 +152,15 @@ def getIsotopeCodesList(dataSource):
 
   isotopes = []
   for dataDim in dataSource.sortedDataDims():
-    isotopeCodes = list(getIsotopeCodes(dataDim))
+    isotopeCodes = list(dataDim.getIsotopeCodes())
     isotopes.append(','.join(sorted(isotopeCodes)) or None)
   
   return isotopes
   
        
-def getOnebondDataDims(spectrum):
+def getOnebondDataDims(dataSource):
   """
-  Get pairs of spectrum data dimensions that are connected by onebond transfers
+  Get pairs of dataSource data dimensions that are connected by onebond transfers
   
   .. describe:: Input
   
@@ -174,11 +172,11 @@ def getOnebondDataDims(spectrum):
   """
   
   dataDims = []
-  expDimRefs = getOnebondExpDimRefs(spectrum.experiment)
+  expDimRefs = dataSource.experiment.getOnebondExpDimRefs()
 
   for expDimRef0, expDimRef1 in expDimRefs:
-    dataDim0 = spectrum.findFirstDataDim(expDim=expDimRef0.expDim)
-    dataDim1 = spectrum.findFirstDataDim(expDim=expDimRef1.expDim)
+    dataDim0 = dataSource.findFirstDataDim(expDim=expDimRef0.expDim)
+    dataDim1 = dataSource.findFirstDataDim(expDim=expDimRef1.expDim)
 
     if dataDim0 and dataDim1:
       dataDims.append( [dataDim0,dataDim1] )
@@ -199,21 +197,21 @@ def _cumulativeArray(array):
   return (n, cumul)
   
 
-def getPlaneData(spectrum, position=None, xDim=0, yDim=1):
+def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
   """ Get plane data through position in dimensions xDim, yDim
       Returns 2D float32 NumPy array in order (y, x) 
       Returns None if numDim < 2 or if there is no dataStore """
 
-  numDim = spectrum.numDim
+  numDim = dataSource.numDim
   if numDim < 2:
     return None
     
-  dataStore = spectrum.dataStore
+  dataStore = dataSource.dataStore
   if not dataStore:
     return None
          
   if dataStore.fileType == 'NMRPipe': # data is not blocked but multi-file in general
-    return NmrPipe.getPlaneData(spectrum, position, xDim, yDim)
+    return NmrPipe.getPlaneData(dataSource, position, xDim, yDim)
     
   assert numDim == 2 or (position and len(position) == numDim), 'numDim = %d, position = %s' % (numDim, position)
   assert xDim != yDim, 'xDim = yDim = %d' % xDim
@@ -223,7 +221,7 @@ def getPlaneData(spectrum, position=None, xDim=0, yDim=1):
   if not position:
     position = numDim*[0]
 
-  dataDims = spectrum.sortedDataDims()
+  dataDims = dataSource.sortedDataDims()
   numPoints = [dataDim.numPoints for dataDim in dataDims]
   xPoints = numPoints[xDim]
   yPoints = numPoints[yDim]
@@ -231,7 +229,7 @@ def getPlaneData(spectrum, position=None, xDim=0, yDim=1):
   for dim in range(numDim):
     point = position[dim]
     if point >= numPoints[dim]:
-      raise ValueError('Plane index %d in dimension %d not within spectrum bounds (%d)' % (point, dim+1, numPoints[dim]))
+      raise ValueError('Plane index %d in dimension %d not within dataSource bounds (%d)' % (point, dim+1, numPoints[dim]))
     if point < 0:
       raise ValueError('Plane index %d in dimension %d less than 0' % (point, dim+1))
 
@@ -302,21 +300,21 @@ def getPlaneData(spectrum, position=None, xDim=0, yDim=1):
   
   return data
 
-def getSliceData(spectrum, position=None, sliceDim=0):
+def getSliceData(dataSource, position=None, sliceDim=0):
   # Get an actual array of data points,
   # spanning blocks as required
   # returns 1D array
-  numDim = spectrum.numDim
+  numDim = dataSource.numDim
   if numDim < 1:
     return None
 
-  dataStore = spectrum.dataStore
+  dataStore = dataSource.dataStore
   if not dataStore:
     return None
 
   if not position:
     position = numDim * [0]
-  dataDims = spectrum.sortedDataDims()
+  dataDims = dataSource.sortedDataDims()
   numPoints = [dataDim.numPoints for dataDim in dataDims]
   slicePoints = numPoints[sliceDim]
 
@@ -324,7 +322,7 @@ def getSliceData(spectrum, position=None, sliceDim=0):
   for dim in range(numDim):
     point = position[dim]
     if point >= numPoints[dim]:
-      raise ValueError('Slice index %d not within spectrum bounds' % point)
+      raise ValueError('Slice index %d not within dataSource bounds' % point)
     if point < 0:
       raise ValueError('Slice index %d less than 0' % point)
 
@@ -371,18 +369,18 @@ def getSliceData(spectrum, position=None, sliceDim=0):
 
   return data
 
-def getRegionData(spectrum, startPoint, endPoint):
+def getRegionData(dataSource, startPoint, endPoint):
 
   # NBNB TBD BROKEN!!
 
-  dataStore = spectrum.dataStore
+  dataStore = dataSource.dataStore
   if not dataStore:
     return None
       
   blockSizes = dataStore.blockSizes
-  dataDims = spectrum.sortedDataDims()
+  dataDims = dataSource.sortedDataDims()
   numPoints = [dataDim.numPoints for dataDim in dataDims]
-  numDim = spectrum.numDim
+  numDim = dataSource.numDim
     
   blockRanges = []
   rangeSizes = []
@@ -482,66 +480,66 @@ def getRegionData(spectrum, startPoint, endPoint):
   
   return data.T, intRegion
   
-def automaticIntegration(spectrum,spectralData):
+def automaticIntegration(dataSource,spectralData):
 #
-  numDim = spectrum.numDim
+  numDim = dataSource.numDim
   if numDim != 1:
     return
-  dataStore = spectrum.dataStore
+  dataStore = dataSource.dataStore
   if not dataStore:
     return None
-  # spectrum.valueArray = [[]] * numDim
+  # dataSource.valueArray = [[]] * numDim
   # if len(valueArray[xDim]) != 0:
   #   valueArray = valueArray[xDim]
-  valueArray = spectrum.valueArray = spectralData
-  noise = estimateNoise(spectrum)
+  valueArray = dataSource.valueArray = spectralData
+  noise = estimateNoise(dataSource)
   level =  noise * 6
   # if len(self.peakList) > 0:
   #   integrals = self.getPeakIntegralRegions(valueArray[1, :], noise, level)
   # else:
   integrals = spInt.getIntegralRegions(spectralData[1, :], noise, level)
-  spInt.setIntegrals(spectrum,integrals)
+  spInt.setIntegrals(dataSource,integrals)
 
   #
-  for integral in spectrum.integrals:
+  for integral in dataSource.integrals:
     integral.calculateBias(spectralData[1, :], noise)
     spInt.calculateIntegralValues(integral.points, spectralData[1, :], integral.bias*-1, integral.slope)
 
-  if len(spectrum.integrals) > 0:
-    spectrum.integralFactor = 1/spectrum.integrals[0].points[-1][0]
+  if len(dataSource.integrals) > 0:
+    dataSource.integralFactor = 1/dataSource.integrals[0].points[-1][0]
   else:
-    spectrum.integralFactor = None
-  for integral in spectrum.integrals:
+    dataSource.integralFactor = None
+  for integral in dataSource.integrals:
     integral.calculateVolume()
 
   #
-  # for a in spectrum.integrals:
-  #   # print(spectrum.integralFactor)
+  # for a in dataSource.integrals:
+  #   # print(dataSource.integralFactor)
   #
 
 
-  return spectrum.integrals
+  return dataSource.integrals
 
 
-# def setIntegrals(spectrum, dim, values, factor = 1.0):
+# def setIntegrals(dataSource, dim, values, factor = 1.0):
 #
 #     self.integrals = []
 #     # append = self.integrals.append
 
-def estimateNoise(spectrum):
+def estimateNoise(dataSource):
 
-    if spectrum.noiseLevel:
-      return spectrum.noiseLevel
+    if dataSource.noiseLevel:
+      return dataSource.noiseLevel
 
-    if spectrum.numDim > 1:
-      planeData = getPlaneData([0] * spectrum.numDim, 0, 1)
+    if dataSource.numDim > 1:
+      planeData = getPlaneData([0] * dataSource.numDim, 0, 1)
       value = 1.1 * numpy.std(planeData.flatten()) # multiplier a guess
     else:
 
-      if hasattr(spectrum, 'valueArray') and len(spectrum.valueArray) != 0:
-        sliceData = spectrum.valueArray
+      if hasattr(dataSource, 'valueArray') and len(dataSource.valueArray) != 0:
+        sliceData = dataSource.valueArray
       else:
-        spectrum.valueArray = sliceData = getSliceData(spectrum)
+        dataSource.valueArray = sliceData = getSliceData(dataSource)
       # print(sliceData)
       # print(sliceData[1])
       sliceDataStd = numpy.std(sliceData)
@@ -553,16 +551,16 @@ def estimateNoise(spectrum):
 
     #value *= self.scale
 
-    spectrum.noiseLevel = float(value)
+    dataSource.noiseLevel = float(value)
 
-    return spectrum.noiseLevel # Qt can't serialise numpy float types
+    return dataSource.noiseLevel # Qt can't serialise numpy float types
 
-def getDimPointFromValue(spectrum, dimension, value):
+def getDimPointFromValue(dataSource, dimension, value):
   """ Convert from value (e.g. ppm) to point (counting from 0) for an arbitrary
       number of values in a given dimension (counting from 0).  If value is a
       number then return a number, otherwise return a list.
   """
-  dataDim = spectrum.findFirstDataDim(dim=dimension+1)
+  dataDim = dataSource.findFirstDataDim(dim=dimension+1)
   dataDimRef = dataDim.findFirstDataDimRef()
     
   if isinstance(value, (int, float)):
@@ -574,12 +572,12 @@ def getDimPointFromValue(spectrum, dimension, value):
       
   return point
     
-def getDimValueFromPoint(spectrum, dimension, point):
+def getDimValueFromPoint(dataSource, dimension, point):
   """ Convert from point (counting from 0) to value (e.g. ppm) for an arbitrary
       number of points in a given dimension (counting from 0).  If point is a
       number then return a number, otherwise return a list.
   """
-  dataDim = spectrum.findFirstDataDim(dim=dimension+1)
+  dataDim = dataSource.findFirstDataDim(dim=dimension+1)
   dataDimRef = dataDim.findFirstDataDimRef()
 
   if isinstance(point, (int, float)):

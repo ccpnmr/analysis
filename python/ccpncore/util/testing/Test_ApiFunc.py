@@ -28,7 +28,7 @@ class ApiFuncTest(Testing):
 
   def __init__(self, *args, **kw):
     Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
-    ApiFunc.addModuleFunctionsToApi('ccpncore.lib')
+    # ApiFunc.addModuleFunctionsToApi('ccpncore.lib')
 
   def Test_Spectrum_GetIsotopeCodesList(self, *args, **kw):
     spectrum = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()

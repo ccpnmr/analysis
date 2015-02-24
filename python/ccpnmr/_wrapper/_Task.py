@@ -136,6 +136,12 @@ class Task(AbstractWrapperObject):
     """Remove spectrum views that do not match existing spectra, e.g. after loading a template"""
     self._wrappedData.pruneSpectrumViews()
 
+def _getTask(window):
+  return window._project._data2Obj.get(window._wrappedData.guiTask)
+def _setTask(window, value):
+  window._wrappedData.guiTask = value and value._wrappedData
+Window.task = property(_getTask, _setTask, None, """Task shown in Window.""")
+
 
 def newTask(parent:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
   """Create new child Task"""

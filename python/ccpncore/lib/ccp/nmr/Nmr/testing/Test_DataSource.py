@@ -22,7 +22,6 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 from ccpncore.util.Testing import Testing
-from ccpncore.lib.ccp.nmr.Nmr import DataSource
 
 class DataSourcePlaneDataTest(Testing):
 
@@ -31,7 +30,7 @@ class DataSourcePlaneDataTest(Testing):
     
   def Test_GetPlaneData(self, *args, **kw):
     spectrum = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()
-    planeData = DataSource.getPlaneData(spectrum)
+    planeData = spectrum.getPlaneData()
     print('planeData.shape =', planeData.shape)
     print('planeData =', planeData[508:,2045:])
 
@@ -43,7 +42,7 @@ class DataSourceSliceDataTest(Testing):
   def Test_GetSliceData(self, *args, **kw):
     spectrum = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()
     # just check an arbitrary slice
-    sliceData = DataSource.getSliceData(spectrum, position=(1000, 230), sliceDim=1)
+    sliceData = spectrum.getSliceData(position=(1000, 230), sliceDim=1)
     print('sliceData.shape =', sliceData.shape)
     # check a small part of the returned data
     actualInd = 379

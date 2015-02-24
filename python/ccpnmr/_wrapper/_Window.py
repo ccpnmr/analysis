@@ -80,15 +80,6 @@ class Window(AbstractWrapperObject):
   def size(self, value:Sequence):
     self._wrappedData.size = value
 
-  @property
-  def task(self):
-    """Task shown in Window."""
-    return self._project._data2Obj.get(self._wrappedData.guiTask)
-
-  @task.setter
-  def task(self, value):
-    self._wrappedData.guiTask = value and value._wrappedData
-
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:

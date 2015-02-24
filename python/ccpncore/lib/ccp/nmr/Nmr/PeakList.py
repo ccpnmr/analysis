@@ -24,8 +24,6 @@ __version__ = "$Revision: 7686 $"
 
 import numpy
 
-from ccpncore.lib.ccp.nmr.Nmr import DataSource
-
 def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
                  minLinewidth=None, exclusionBuffer=None,
                  minDropfactor=0.0, checkAllAdjacent=True,
@@ -55,7 +53,7 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
 
   nonAdj = 1 if checkAllAdjacent else 0
 
-  dataArray, intRegion = DataSource.getRegionData(dataSource, startPoint, endPoint)
+  dataArray, intRegion = dataSource.getRegionData(startPoint, endPoint)
   startPoint, endPoint = intRegion
   startPoint = numpy.array(startPoint)
   endPoint = numpy.array(endPoint)

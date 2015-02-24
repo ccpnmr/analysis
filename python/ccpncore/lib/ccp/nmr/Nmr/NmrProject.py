@@ -26,7 +26,7 @@ from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView
 from ccpncore.lib.spectrum.Util import AZARA, BRUKER, CCPN, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
 import os
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
-from ccpncore.lib.spectrum.Spectrum import createExperiment, createDataSource, createBlockedMatrix
+from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
 
 from ccpncore.api.memops.Implementation import Url
 
@@ -90,7 +90,7 @@ def loadDataSource(nmrProject, filePath):
     name = name.replace('.',',')
 
   numberType = 'float' if isFloatData else 'int'
-  experiment = createExperiment(nmrProject, name=name, numDim=len(numPoints),
+  experiment = nmrProject.createExperiment(name=name, numDim=len(numPoints),
                                 sf = specFreqs, isotopeCodes=isotopes)
 
   dataLocationStore = nmrProject.root.newDataLocationStore(name=name)
@@ -99,17 +99,13 @@ def loadDataSource(nmrProject, filePath):
                                     blockSizes=blockSizes, isBigEndian=isBigEndian,
                                     numberType=numberType, headerSize=headerSize,
                                     nByte=wordSize, fileType=fileType)
-  dataSource = createDataSource(experiment, name=name, numPoints=numPoints, sw=specWidths,
+  dataSource = experiment.createDataSource(name=name, numPoints=numPoints, sw=specWidths,
                                 refppm=refPpms, refpt=refPoints, dataStore=blockMatrix)
 
   for i, values in enumerate(sampledValues):
     if values:
       dataSource.setSampledData(i, values, sampledErrors[i] or None)
 
-  # TEMP, in future should not need import
-  from ccpncore.lib.ccp.nmr.Nmr.Experiment import resetAxisCodes
-  resetAxisCodes(experiment)
-  # in future can do:
-  # experiment.resetAxisCodes()
+  experiment.resetAxisCodes()
 
   return dataSource

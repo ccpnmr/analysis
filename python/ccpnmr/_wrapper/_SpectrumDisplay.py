@@ -152,7 +152,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
 
   @property
-  def   orderedStrips(self) -> tuple:
+  def orderedStrips(self) -> tuple:
     """Strips in displayed order """
     ff = self._project._data2Obj.get
     return tuple(ff(x) for x in self._wrappedData.orderedStrips)
@@ -205,6 +205,13 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     Display additional spectrum, with spectrum axes ordered according ton axisOrder
     """
     self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+
+# Window.spectrumDisplays property
+def _getSpectrumDisplays(window:Window):
+  ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiSpectrumDisplay)]
+  return tuple(window._project._data2Obj[x] for x in ll)
+Window.spectrumDisplays = property(_getSpectrumDisplays, None, None,
+                                   "SpectrumDisplays shown in Window")
 
 def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
                        name:str=None, gridCell:Sequence=(1,1), gridSpan:Sequence=(1,1),

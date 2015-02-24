@@ -89,6 +89,87 @@ class Spectrum(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
+  def positiveContourCount(self) -> int:
+    """number of positive contours to draw"""
+    return self._wrappedData.positiveContourCount
+
+  @positiveContourCount.setter
+  def positiveContourCount(self, value):
+    self._wrappedData.positiveContourCount  = value
+
+  @property
+  def positiveContourBase(self) -> float:
+    """base level of positive contours"""
+    return self._wrappedData.positiveContourBase
+
+  @positiveContourBase.setter
+  def positiveContourBase(self, value):
+    self._wrappedData.positiveContourBase  = value
+
+  @property
+  def positiveContourFactor(self) -> float:
+    """level multiplier for positive contours"""
+    return self._wrappedData.positiveContourFactor
+
+  @positiveContourFactor.setter
+  def positiveContourFactor(self, value):
+    self._wrappedData.positiveContourFactor  = value
+
+  @property
+  def positiveContourColour(self) -> str:
+    """colour of positive contours"""
+    return self._wrappedData.positiveContourColour
+
+  @positiveContourColour.setter
+  def positiveContourColour(self, value):
+    self._wrappedData.positiveContourColour  = value
+
+  @property
+  def negativeContourCount(self) -> int:
+    """number of negative contours to draw"""
+    return self._wrappedData.negativeContourCount
+
+  @negativeContourCount.setter
+  def negativeContourCount(self, value):
+    self._wrappedData.negativeContourCount  = value
+
+  @property
+  def negativeContourBase(self) -> float:
+    """base level of negative contours"""
+    return self._wrappedData.negativeContourBase
+
+  @negativeContourBase.setter
+  def negativeContourBase(self, value):
+    self._wrappedData.negativeContourBase  = value
+
+  @property
+  def negativeContourFactor(self) -> float:
+    """level multiplier for negative contours"""
+    return self._wrappedData.negativeContourFactor
+
+  @negativeContourFactor.setter
+  def negativeContourFactor(self, value):
+    self._wrappedData.negativeContourFactor  = value
+
+  @property
+  def negativeContourColour(self) -> str:
+    """colour of negative contours"""
+    return self._wrappedData.negativeContourColour
+
+  @negativeContourColour.setter
+  def negativeContourColour(self, value):
+    self._wrappedData.negativeContourColour  = value
+
+  @property
+  def sliceColour(self) -> str:
+    """colour of 1D slices"""
+    return self._wrappedData.sliceColour
+
+  @sliceColour.setter
+  def sliceColour(self, value):
+    self._wrappedData.sliceColour  = value
+
+  @property
   def scale(self) -> float:
     """Scaling factor for intensities and volumes.
     Intensities and volumes should be *multiplied* by scale before comparison."""
@@ -515,9 +596,7 @@ class Spectrum(AbstractWrapperObject):
     # See if axis codes are set
     for expDim in self._wrappedData.experiment.expDims:
       if expDim.findFirstExpDimRef(axisCode=None) is not None:
-        # TEMP, in future should not need import
-        from ccpncore.lib.ccp.nmr.Nmr.Experiment import resetAxisCodes
-        resetAxisCodes(self._wrappedData.experiment)
+        self._wrappedData.experiment.resetAxisCodes()
         # in future can do:
         # self._wrappedData.experiment.resetAxisCodes()
         break

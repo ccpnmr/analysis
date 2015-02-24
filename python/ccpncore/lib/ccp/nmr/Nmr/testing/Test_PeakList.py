@@ -21,11 +21,9 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from operator import itemgetter
 import numpy
 
 from ccpncore.util.Testing import Testing
-from ccpncore.lib.ccp.nmr.Nmr import PeakList
 
 class PeakListPickPeaksTest(Testing):
 
@@ -41,7 +39,7 @@ class PeakListPickPeaksTest(Testing):
     endPoint = numPoints
     posLevel = 1.0e8
 
-    peaks = PeakList.pickNewPeaks(peakList, startPoint, endPoint, posLevel, fitMethod='gaussian')
+    peaks = peakList.pickNewPeaks(startPoint, endPoint, posLevel, fitMethod='gaussian')
     print('number of peaks', len(peaks))
     assert len(peaks) == 4, 'len(peaks) = %d' % len(peaks)
     
@@ -57,7 +55,7 @@ class PeakListPickPeaksTest(Testing):
     endPoint = [700, 150]
     posLevel = 1.0e8
 
-    peaks = PeakList.pickNewPeaks(peakList, startPoint, endPoint, posLevel, fitMethod='gaussian')
+    peaks = peakList.pickNewPeaks(startPoint, endPoint, posLevel, fitMethod='gaussian')
     print('number of peaks', len(peaks))
     assert len(peaks) == 3, 'len(peaks) = %d' % len(peaks)
     

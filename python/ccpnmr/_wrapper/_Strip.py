@@ -149,7 +149,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
   def displaySpectrum(self, spectrum:Spectrum, axisOrder:Sequence=()):
 
     """
-    Display additional spectrum on strip, with spectrum axes ordered according ton axisOrder
+    Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
     """
     dataSource = spectrum._wrappedData
     apiStrip = self._wrappedData

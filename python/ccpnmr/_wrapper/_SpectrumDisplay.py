@@ -256,16 +256,14 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
     name = commonUtil.incrementName(name)
   displayPars['name'] = name
 
-  # Create SpectrumDisplay and first strip
+  # Create SpectrumDisplay
   if independentStrips:
-    # Create FreeStripDisplay and first strip
+    # Create FreeStripDisplay
     apiSpectrumDisplay = getattr(apiTask, newDisplayFunc)(**displayPars)
-    apiStrip = getattr(apiSpectrumDisplay, newStripFunc)(axisCodes=axisCodes, axisOrder=axisCodes)
   else:
     # Create Boundstrip/Nostrip display and first strip
     displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
     apiSpectrumDisplay = getattr(apiTask, newDisplayFunc)(**displayPars)
-    apiStrip = getattr(apiSpectrumDisplay, newStripFunc)()
 
   # Create axes
     for ii, code in enumerate(axisCodes):
@@ -283,6 +281,12 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
         apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
       else:
         apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
+
+  # Create first strip
+  if independentStrips:
+    apiStrip = getattr(apiSpectrumDisplay, newStripFunc)(axisCodes=axisCodes, axisOrder=axisCodes)
+  else:
+    apiStrip = getattr(apiSpectrumDisplay, newStripFunc)()
   #
   return parent._project._data2Obj.get(apiSpectrumDisplay)
 

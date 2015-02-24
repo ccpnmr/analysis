@@ -189,6 +189,33 @@ class Strip(GuiStrip, AbstractWrapperObject):
                                                    dimensionOrdering=dimensionOrdering)
     return self._project._data2Obj[obj]
 
+def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
+  """Make copy of strip in SpectrumDisplay, at position newIndex - or rightmost"""
+
+  if strip.spectrumDisplay is spectrumDisplay:
+    # Within same display. Not that useful, but harmless
+    newStrip = strip.clone()
+    if newIndex is not None:
+      newStrip.moveTo(newIndex)
+
+  else:
+    mapIndices = libSpectrum.axisCodeMapIndices(strip.axisOrder, spectrumDisplay.axisOrder)
+    if mapIndices is None:
+      raise ValueError("Strip %s not compatible with window %s" % (strip.pid, spectrumDisplay.pid))
+    else:
+      positions = strip.positions
+      widths = strip.widths
+      newStrip = spectrumDisplay.orderedStrips[0].clone()
+      if newIndex is not None:
+        newStrip.moveTo(newIndex)
+      for ii,axis in enumerate(newStrip.orderedAxes):
+        ind = mapIndices[ii]
+        if ind is not None and axis.stripSerial != 0:
+          # Override if there is a mapping and axis is not shared for all strips
+          axis.position = positions[ind]
+          axis.widths = widths[ind]
+
+SpectrumDisplay.copyStrip = copyStrip
 
 # Connections to parents:
 SpectrumDisplay._childClasses.append(Strip)

@@ -191,14 +191,15 @@ class Pid(str):
         MO = 'Molecule'
     )
 
-    def __init__(self, string, *args):
+    def __init__(self, string, **kw):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
         Additional arguments are converted to string with disallowed characters changed to altCharacter"""
-        str.__init__(string)
+        super().__init__(**kw)
+        # str.__init__(self,string)
 
         # inlining this here is 1) faster, 2) guarantees that we never get invalid Pids.
         # We can then assume validity for the rest of the functions
-        if PREFIXSEP not in self or self[0] == PREFIXSEP:
+        if PREFIXSEP not in self or self.startswith(PREFIXSEP):
             raise ValueError("String %s is not a valid Pid" % str.__repr__(self))
 
         self._version = 'cing:%s' % __version__
@@ -231,6 +232,11 @@ class Pid(str):
 
     #end def
 
+    @property
+    def fields(self) -> tuple:
+      """id part of pid as a tuple of fields"""
+      return tuple(self._split()[1:])
+
     @staticmethod
     def isValid(text):
         # tests here
@@ -256,40 +262,45 @@ class Pid(str):
         """
         return str(self)
 
-    def __add__(self, other):
-        tmp = self._split() + [other]
-        #print 'Pid.__add__', tmp
-        return Pid.new(*tmp)
-    #end def
-    
-    def __len__(self):
-        ll = len(self._split())-1
-        if ll < 0:
-            ll=0
-        return ll
-    #end def
-    
-    def __getslice__(self, start, stop):
-        # NB using parts [1:] instead of modifying indices allows negative indices to work normally
-        parts = self._split()[1:][start:stop]
-        # if len(parts) > 0:
-        #     return IDSEP.join(*parts)
-        # else:
-        #     return ''
-
-        return IDSEP.join(parts)
-    #end def
-    
-    def __getitem__(self, i):
-        return self._split()[i+1]
-    #end def
-    
-    def __iter__(self):
-        for f in self._split()[1:]:
-            yield f
-        #end for
-    #end def
-    
+    # Removed as they cause un-string-like behaviour.
+    #
+    # def __add__(self, other):
+    #     tmp = self._split() + [other]
+    #     #print 'Pid.__add__', tmp
+    #     return Pid.new(*tmp)
+    # #end def
+    #
+    #
+    # Use fields property to get list-of-fields instead
+    #
+    # def __len__(self):
+    #     ll = len(self._split())-1
+    #     if ll < 0:
+    #         ll=0
+    #     return ll
+    # #end def
+    #
+    # def __getslice__(self, start, stop):
+    #     # NB using parts [1:] instead of modifying indices allows negative indices to work normally
+    #     parts = self._split()[1:][start:stop]
+    #     # if len(parts) > 0:
+    #     #     return IDSEP.join(*parts)
+    #     # else:
+    #     #     return ''
+    #
+    #     return IDSEP.join(parts)
+    # #end def
+    #
+    # def __getitem__(self, i):
+    #     return self._split()[i+1]
+    # #end def
+    #
+    # def __iter__(self):
+    #     for f in self._split()[1:]:
+    #         yield f
+    #     #end for
+    # #end def
+    #
     # Unecessary: __str__ is inherited
     # def __str__(self):
     #     return str.__str__(self)
@@ -332,7 +343,7 @@ class Pid(str):
         Have to use this as intermediate as str baseclass of Pid only accepts one argument
         """
         # use str operator on all arguments
-        args = map(str, args)
+        args = [str(x) for x in args]
         # could implement mapping here
         if (len(args) > 0) and (args[0] in Pid.nameMap):
             #args = list(args) # don't know why I have to use the list operator
@@ -356,7 +367,7 @@ class Pid(str):
         # else:
         #     return ''
 
-        # NB the behaviour is len(args) == 1 is correct (return "type:")
+        # NB the behaviour if len(args) == 1 is correct (return "type:")
         if args:
             return PREFIXSEP.join((args[0], IDSEP.join(args[1:])))
         else:
@@ -395,6 +406,10 @@ class Pid(str):
 
 
     #end def
+
+    def extend(self, *args):
+      """Make copy with additional fields """
+      return self._join(self._split() + [str(x) for x in args])
 
     def increment(self, index, value):
         """Return new pid with position index incremented by value

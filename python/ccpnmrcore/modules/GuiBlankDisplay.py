@@ -3,7 +3,6 @@ from PySide import QtGui, QtCore
 from pyqtgraph.dockarea import Dock
 
 from ccpn import Spectrum
-from ccpn.lib.wrapper import Spectrum as LibSpectrum
 
 from ccpncore.gui.Label import Label
 
@@ -21,7 +20,7 @@ def _findPpmRegion(spectrum, axisDim, spectrumDim):
     n = pointCount // 2
     region = (n, n+1)
 
-  firstPpm, lastPpm = LibSpectrum.getDimValueFromPoint(spectrum, spectrumDim, region)
+  firstPpm, lastPpm = spectrum.getDimValueFromPoint(spectrumDim, region)
 
   return 0.5*(firstPpm+lastPpm), abs(lastPpm-firstPpm)
 

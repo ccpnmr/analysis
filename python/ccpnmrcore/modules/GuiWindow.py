@@ -1,11 +1,10 @@
-from ccpn.lib.wrapper import Spectrum
+# from ccpn.lib.spectrum import Spectrum
 
 __author__ = 'simon'
 
 from PySide import QtGui
 
 from pyqtgraph.dockarea import DockArea
-from ccpn.lib.wrapper.Project import loadSpectrum
 from ccpncore.lib.spectrum import Util as specUtil
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
@@ -76,10 +75,10 @@ class GuiWindow(GuiBase):
     
     if directory == None:
       directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
-      spectrum = loadSpectrum(self.project,directory[0])
+      spectrum = self.project.loadSpectrum(directory[0])
 
     else:
-      spectrum = loadSpectrum(self.project,directory)
+      spectrum = self.project.loadSpectrum(directory)
       # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
 
     msg = spectrum.name+' loaded'
@@ -163,7 +162,7 @@ class GuiWindow(GuiBase):
 
           if spectrumFormat:
             event.acceptProposedAction()
-            dataSource = loadSpectrum(self.project,filePaths[0])
+            dataSource = self.project.loadSpectrum(filePaths[0])
 
 
           # if dataSource.numDim == 1:

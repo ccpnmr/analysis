@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpn.testing.Testing import Testing
 
-from ccpn.lib import Spectrum
+from ccpn.lib.spectrum import Spectrum
 
 class SpectrumTest(Testing):
 

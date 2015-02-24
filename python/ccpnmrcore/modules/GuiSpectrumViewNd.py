@@ -32,8 +32,6 @@ from ccpncore.util import Colour
 from ccpnc.contour import Contourer2d
 ###from ccpnc.peak import Peak
 
-from ccpn.lib.wrapper import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
-
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 ###from ccpnmrcore.modules.spectrumPane.PeakListNdItem import PeakListNdItem
 
@@ -165,7 +163,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
     zDim = self.apiSpectrumView.orderedDataDims[2].dim - 1
     point = (0.0, 1.0)
-    value = LibSpectrum.getDimValueFromPoint(spectrum, zDim, point)
+    value = spectrum.getDimValueFromPoint(zDim, point)
     size = abs(value[1] - value[0])
     
     return size
@@ -318,7 +316,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if dimensionCount == 2: # TBD
       # below does not work yet
       #planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
-      planeData = LibSpectrum.getPlaneData(spectrum, xDim=xDim, yDim=yDim)
+      planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
       position = [0, 0]
       yield position, planeData
     elif dimensionCount == 3: # TBD
@@ -328,14 +326,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       width = zAxis.width
       zregionValue = (position+0.5*width, position-0.5*width) # Note + and - (axis backwards)
       zDim = dataDims[2].dim - 1
-      zregionPoint = LibSpectrum.getDimPointFromValue(spectrum, zDim, zregionValue)
+      zregionPoint = spectrum.getDimPointFromValue(zDim, zregionValue)
       zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
       position = dimensionCount * [0]
       for z in range(*zregionPoint):  # TBD
         position[zDim] = z
         # below does not work yet
         #planeData = spectrum.getPlaneData(position, xDim, yDim)
-        planeData = LibSpectrum.getPlaneData(spectrum, position, xDim=xDim, yDim=yDim)
+        planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
         yield position, planeData
 
   def addContoursToDisplayList(self, contourDict, contourData, level):
@@ -365,7 +363,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       pntRegion[dim] = region
     ppmRegion = []
     for dim in range(dimensionCount):
-      (firstPpm, lastPpm) = LibSpectrum.getDimValueFromPoint(spectrum, dim, pntRegion[dim])
+      (firstPpm, lastPpm) = spectrum.getDimValueFromPoint(dim, pntRegion[dim])
       ppmRegion.append((firstPpm, lastPpm))
       
     return ppmRegion
@@ -386,7 +384,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       pixelViewBox0 = plotItem.getAxis('bottom').height()
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
     
-    (firstPoint, lastPoint) = LibSpectrum.getDimPointFromValue(self.spectrum, dim, (region0, region1))
+    (firstPoint, lastPoint) = self.spectrum.getDimPointFromValue(dim, (region0, region1))
 
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
     translate = pixelViewBox0 - firstPoint * scale

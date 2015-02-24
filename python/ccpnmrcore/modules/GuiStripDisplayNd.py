@@ -1,4 +1,4 @@
-from ccpn.lib.wrapper import Spectrum as LibSpectrum
+# from ccpn.lib.wrapper import Spectrum as LibSpectrum
 
 __author__ = 'simon'
 

@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 import numpy
 
-from ccpn.lib.wrapper import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
+# from ccpn.lib.wrapper import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
 
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 
@@ -62,7 +62,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     lastPoint = dataDimRef.pointToValue(pointCount)
     pointSpacing = (lastPoint-firstPoint)/pointCount
     position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
-    sliceData = LibSpectrum.getSliceData(apiDataSource)
+    sliceData = apiDataSource.getSliceData()
     scaledData = sliceData*apiDataSource.scale
     spectrumData = numpy.array([position,scaledData], numpy.float32)
     return numpy.array(spectrumData,numpy.float32)

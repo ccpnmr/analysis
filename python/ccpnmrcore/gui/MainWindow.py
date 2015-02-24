@@ -46,7 +46,6 @@ from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Path
-from ccpn.lib.wrapper.Project import loadSpectrum
 from ccpn import openProject, newProject
 
 
@@ -517,10 +516,10 @@ class MainWindow(GuiMainWindow):
   def loadSpectra(self, directory=None):
     if directory == None:
       directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
-      spectrum = loadSpectrum(self.project,directory[0])
+      spectrum = self.project.loadSpectrum(directory[0])
 
     else:
-      spectrum = loadSpectrum(self.project,directory)
+      spectrum = self.project.loadSpectrum(directory)
       print(spectrum)
       # self.current.pane.addSpectrum(spectrum)
       # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
@@ -596,7 +595,7 @@ class MainWindow(GuiMainWindow):
 
           if spectrumFormat:
             event.acceptProposedAction()
-            dataSource = loadSpectrum(self.project,filePaths[0])
+            spectrum = self.project.loadSpectrum(filePaths[0])
 
 
           # if dataSource.numDim == 1:
@@ -606,7 +605,7 @@ class MainWindow(GuiMainWindow):
           #   data = SpectrumNdItem(self.spectrumPane,dataSource).spectralData
           #   print(data)
           #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
-            msg = dataSource.name+' loaded'
+            msg = spectrum.name+' loaded'
             self.statusBar().showMessage(msg)
             self.pythonConsole.write("loadSpectrum('"+filePaths[0]+"')\n")
 

@@ -711,9 +711,9 @@ except:
 
     self.write("""
 selfClass = self.qualifiedName
-otherClass = other.qualifiedName
+otherClass = value.qualifiedName
 if selfClass == otherClass:
-  return self.getFullKey() < other.getFullKey()
+  return self.getFullKey() < value.getFullKey()
 else:
   return selfClass < otherClass""")
 

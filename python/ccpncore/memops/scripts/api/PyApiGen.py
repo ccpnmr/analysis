@@ -40,7 +40,7 @@ class PyApiGen(PyLanguage, PyType, ApiGen):
     self.openObjFile(package)
 
     self.writeFileHeader(package)
-    
+
   ###########################################################################
 
   ###########################################################################
@@ -64,6 +64,11 @@ class PyApiGen(PyLanguage, PyType, ApiGen):
       self.writeProperty(elem, clazz)
 
     self.indent -= self.INDENT
+
+    self.write("""
+from ccpncore.util.ApiFunc import _addModuleFunctionsToApiClass
+_addModuleFunctionsToApiClass('%s', %s)
+""" % (clazz.qualifiedName(), clazz.name))
   
   ###########################################################################
 

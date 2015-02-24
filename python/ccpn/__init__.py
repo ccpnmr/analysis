@@ -132,6 +132,9 @@ ccpn.AbstractWrapperObject class
 
 from ccpncore.util import Io as ioUtil
 from ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
+from ccpncore.util import ApiFunc
+
+libModule = 'ccpn.lib.wrapper'
 
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
@@ -157,6 +160,14 @@ from ccpn._wrapper._RestraintContribution import RestraintContribution
 # Set up interclass links and related functions
 Project._linkWrapperClasses()
 
+# Load in additional utility functions int wrapper classes
+# NB this does NOT pick up utility functions in non-child classes
+# (e.g. AbstractWrapperObject or MainWindow) so these must be avoided
+allActiveClasses = [Project]
+for cls in allActiveClasses:
+  # moduleName = '%s.%s' % (libModule, cls.__name__)
+  ApiFunc._addModuleFunctionsToApiClass( cls.__name__, cls, rootModuleName=libModule)
+  allActiveClasses.extend(cls._childClasses)
 
 def openProject(path:str, nmrProjectName:str=None) -> Project:
   """Open project at path, and create a wrapper project.

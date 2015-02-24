@@ -27,55 +27,87 @@ import os
 
 from ccpncore.util import Path
 
-def addModuleFunctionsToApi(moduleName, rootModuleName=None):
-  """ Add the functions in module (recursively including sub-modules) to API.
-      For example, moduleName = 'ccpncore.lib'.
-      It is assumed that moduleName represents a directory rather than a file.
-      rootModuleName should not generally be set by outside code.
-      It is what is chopped off the start of the module being added
-      to the API to get to the API equivalent. """
+# top level of API module
+topApiModule = 'ccpncore.api'
 
-  if rootModuleName is None:
-    rootModuleName = moduleName
+# def addModuleFunctionsToApi(moduleName, rootModuleName=None, testRun=True):
+#   """ Add the functions in module (recursively including sub-modules) to API.
+#       For example, moduleName = 'ccpncore.lib'.
+#       It is assumed that moduleName represents a directory rather than a file.
+#       rootModuleName should not generally be set by outside code.
+#       It is what is chopped off the start of the module being added
+#       to the API to get to the API equivalent. """
+#
+#   print('@~@~ addDirectory %s %s'% (moduleName, rootModuleName))
+#
+#   if rootModuleName is None:
+#     rootModuleName = moduleName
+#
+#   # unfortunately importing a module does not import its submodules, so we have to
+#   # loop over subdirectories to find the submodules rather than just looking at dir(module)
+#
+#   pythonDirectory = Path.getPythonDirectory()
+#   moduleDirectory = os.path.join(pythonDirectory, os.sep.join(moduleName.split('.')))
+#
+#   for relfile in os.listdir(moduleDirectory):
+#
+#     for name in ('test', 'Test', '_', '.'):
+#       if relfile.startswith(name):
+#         break
+#     else: # no match with above names, so investigate further
+#
+#       absfile = os.path.join(moduleDirectory, relfile)
+#       if os.path.isdir(absfile):
+#         subModuleName = '%s.%s' % (moduleName, relfile)
+#         addModuleFunctionsToApi(subModuleName, rootModuleName, testRun=testRun)
+#
+#       elif relfile.endswith('.py'):
+#         subModuleName = '%s.%s' % (moduleName, relfile[:-3])
+#         packageName = subModuleName[len(rootModuleName)+1:]  # +1 because of extra '.'
+#         apiClass =  _getApiClass(packageName)
+#         if apiClass is not None:
+#           foundModule = _addModuleFunctionsToApiClass(subModuleName, apiClass)
+#           if testRun and foundModule:
+#             print ('@~@~ Added module %s to class %s' % (subModuleName, apiClass))
+#
+#
+#
+# def loadLibraryFunctions(packageName, rootModuleName='ccpncore.lib', testRun=True):
+#   """Load utility functions into classes - to be run during first import only"""
+#   apiClass =  _getApiClass(moduleName, rootModuleName)
+#   if testRun:
+#     print ("@~@~ loadLibraryFunctions %s %s %s" % (moduleName, rootModuleName, apiClass))
+#   if apiClass is not None:
+#     foundModule = _addModuleFunctionsToApiClass(moduleName, apiClass)
+#     if testRun and foundModule:
+#       print ('@~@~ Added module %s to class %s' % (moduleName, apiClass))
+#
+# def _getApiClass(packageName):
+#
+#   # name = moduleName[len(rootModuleName)+1:]  # +1 because of extra '.'
+#   components = packageName.split('.')
+#   if len(components) > 1:
+#     apiModuleName = topApiModule + '.' + '.'.join(components[:-1])
+#     apiClassName = components[-1]
+#     print ('Try importing: %s %s' % (apiModuleName, apiClassName))
+#     try:
+#       apiModule = importlib.import_module(apiModuleName)
+#       return getattr(apiModule, apiClassName)
+#     except ImportError:
+#       print('~@~@ Import Failed %s' % apiModuleName)
+#       return None
+#   else:
+#     return None
 
-  # unfortunately importing a module does not import its submodules, so we have to
-  # loop over subdirectories to find the submodules rather than just looking at dir(module)
-
-  pythonDirectory = Path.getPythonDirectory()
-  moduleDirectory = os.path.join(pythonDirectory, os.sep.join(moduleName.split('.')))
-
-  for relfile in os.listdir(moduleDirectory):
-
-    for name in ('test', 'Test', '_', '.'):
-      if relfile.startswith(name):
-        break
-    else: # no match with above names, so investigate further
-
-      absfile = os.path.join(moduleDirectory, relfile)
-      if os.path.isdir(absfile):
-        subModuleName = '%s.%s' % (moduleName, relfile)
-        addModuleFunctionsToApi(subModuleName, rootModuleName)
-
-      elif relfile.endswith('.py'):
-        subModuleName = '%s.%s' % (moduleName, relfile[:-3])
-        _addModuleFunctionsToApiClass(subModuleName, rootModuleName)
-
-def _addModuleFunctionsToApiClass(moduleName, rootModuleName):
-
-  name = moduleName[len(rootModuleName)+1:]  # +1 because of extra '.'
-  components = name.split('.')
-  if len(components) > 1:
-    apiModuleName = 'ccpncore.api.' + '.'.join(components[:-1])
-    apiClassName = components[-1]
-    try:
-      apiModule = importlib.import_module(apiModuleName)
-      apiClass = getattr(apiModule, apiClassName)
-    except Exception as e:
-      return
-  else:
+def _addModuleFunctionsToApiClass(relModuleName, apiClass, rootModuleName='ccpncore.lib'):
+  moduleName = '%s.%s' % (rootModuleName, relModuleName)
+  try:
+    module = importlib.import_module(moduleName)
+    # print ("Found   %s %s" % (moduleName, apiClass))
+  except ImportError:
+    # print ("Missing %s %s" % (moduleName, apiClass))
     return
 
-  module = importlib.import_module(moduleName)
   for key in dir(module):
 
     if key.startswith('_'):
@@ -86,3 +118,4 @@ def _addModuleFunctionsToApiClass(moduleName, rootModuleName):
     # third condition checks whether this is a function (rather than a class, etc.)
     if hasattr(value, '__module__') and value.__module__ == moduleName and callable(value):
       setattr(apiClass, key, value)
+      # print('@~@~ Transferring %s %s %s' % (apiClass, key, value))

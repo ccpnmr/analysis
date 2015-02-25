@@ -31,18 +31,10 @@ class ViewBox(pg.ViewBox):
 
   def __init__(self, current  = None,  *args, **kwds):
     pg.ViewBox.__init__(self, *args, **kwds)
-    # self.setMenuEnabled()
     self.current = current
     self.menu = None # Override pyqtgraph ViewBoxMenu
     self.menu = self.getMenu()
 
-
-  # def setMenuDisabled(self, enableMenu=False):
-  #   self.state['enableMenu'] = enableMenu
-  #   self.sigStateChanged.emit(self)
-  #
-  # def menuDisabled(self):
-  #   return self.state.get('enableMenu', False)
 
   def raiseContextMenu(self, event):
     """

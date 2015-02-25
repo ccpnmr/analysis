@@ -71,8 +71,8 @@ class Label(QtGui.QLabel, Base):
 
     if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
         self.close()
-    # else:
-    #     self.show()
+    else:
+        self.show()
 
 if __name__ == '__main__':
 

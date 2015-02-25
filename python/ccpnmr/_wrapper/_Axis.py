@@ -85,6 +85,18 @@ class Axis(AbstractWrapperObject):
     self._wrappedData.width = value
 
   @property
+  def region(self) -> tuple:
+    """Display region - position +/- width/2.."""
+    position = self._wrappedData.position
+    halfwidth = self._wrappedData.width / 2.
+    return (position - halfwidth, position + halfwidth)
+
+  @region.setter
+  def region(self, value):
+    self._wrappedData.position = (value[0] + value[1]) / 2.
+    self._wrappedData.width = abs(value[1] - value[0])
+
+  @property
   def unit(self) -> str:
     """Display unit for axis"""
     return self._wrappedData.unit

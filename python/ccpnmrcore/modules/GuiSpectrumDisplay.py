@@ -6,6 +6,7 @@ from PySide import QtGui, QtCore
 
 
 from ccpncore.gui.Label import Label
+from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.ToolBar import ToolBar
 
 from ccpnmrcore.gui.Frame import Frame as GuiFrame
@@ -44,20 +45,22 @@ class GuiSpectrumDisplay(GuiModule):
     palette2.setColor(QtGui.QPalette.Button,toolBarColour)
 
 
-
     self.positionBox = Label(self.dock, grid=(0, 3), gridSpan=(1, 1))
     self.positionBox.setFixedWidth(screenWidth*0.08)
-    self.scrollArea = QtGui.QScrollArea()
+    self.scrollArea = ScrollArea(self.dock, grid=(1, 0), gridSpan=(1, 4))
     self.scrollArea.setWidgetResizable(True)
-    self.stripFrame = GuiFrame(self, appBase=self._appBase, grid=(0, 0), stretch=(1, 4))
-    self.layout = QtGui.QGridLayout()
+    # self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+    self.stripFrame = GuiFrame(self.scrollArea, appBase=self._appBase)
+    self.layout = QtGui.QHBoxLayout()
     self.stripFrame.setLayout(self.layout)
-    print(self.stripFrame.layout())
+    # self.stripFrame.setAcceptDrops(True)
+    # self.scrollArea.setLayout(self.layout)
     self.scrollArea.setWidget(self.stripFrame)
-    self.dock.addWidget(self.scrollArea, 1, 0, 1, 4)
+    self.stripNumber = 1
+    # self.dock.layout.addWidget(self.scrollArea, 1, 0)
 
     # self.stripFrame.guiSpectrumDisplay = self
-    # self.dock.addWidget(self.stripFrame)
+    # self.dock.addWidget(self)
     #
     #
     # for n, apiStrip in enumerate(apiSpectrumDisplay.sortedStrips()):   ### probably need orderedStrips() here ?? ask Rasmus
@@ -68,15 +71,23 @@ class GuiSpectrumDisplay(GuiModule):
 
     # self.currentStrip = apiSpectrumDisplay.sortedStrips()[0].guiStrip
 
+  def addAStrip(self):
+
+    newStrip = self.strips[0].clone()
+    newStrip.setMinimumWidth(200)
+    # self.stripFrame.layout().addWidget(newStrip)
+    # self.stripNumber+=1
+    # # self.stripFrame.layout().addWidget(self, 2, 0, 1, 1)
+
   def fillToolBar(self):
 
-    self.spectrumUtilToolBar.addAction('+', self.addStrip)
+    self.spectrumUtilToolBar.addAction('+', self.addAStrip)
     self.spectrumUtilToolBar.addAction('-', self.removeStrip)
 
 
   def addSpectrumToDisplay(self, spectrum):
 
-    spectrumView = self.getWrapperObject(self._wrappedData.findFirstSpectrumView(dataSource=spectrum._wrappedData))
+    spectrumView = self.getWrapperObject(self._wrappedData.findFirstSpectrumView(dataSource=spectrum.apiDataSource))
 
     dimensionCount = spectrum.dimensionCount
     dimensionOrdering = range(1, dimensionCount+1)
@@ -120,8 +131,8 @@ class GuiSpectrumDisplay(GuiModule):
           elif m == 1:
             viewBox.setYRange(*region)
 
-    for strip in spectrumView.strips:
-      strip.displaySpectrum(spectrumView)
+  #   for strip in spectrumView.strips:
+  #     strip.displaySpectrum(spectrumView)
 
   def addStrip(self):
     pass  # TBD: should raise exception if not implemented in subclass

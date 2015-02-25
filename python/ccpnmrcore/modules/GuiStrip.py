@@ -32,15 +32,15 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     # else:
     background = 'k'
     foreground = 'w'
-
-    #
     # self.plotItem.setParentItem(self.dock.stripFrame)
     # pg.setConfigOption('background', background)
     # pg.setConfigOption('foreground', foreground)
     self.setBackground(background)
+    # self.setAcceptDrops(True)
     # self.setForegroundBrush(foreground)
     # print(dir(self))
     self.current = self._appBase.current
+    # self.plotItem.setAcceptDrops(True)
     self.axes = self.plotItem.axes
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
@@ -49,8 +49,8 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.gridShown = True
     self.axes['left']['item'].hide()
     self.axes['right']['item'].show()
-    self.axes['bottom']['item'].orientation = 'top'
-    self.axes['right']['item'].orientation = 'left'
+    # self.axes['bottom']['item'].orientation = 'top'
+    # self.axes['right']['item'].orientation = 'left'
     self.axes['bottom']['item'].setPen(pg.functions.mkPen('w'))
     self.axes['right']['item'].setPen(pg.functions.mkPen('w'))
     self.textItem = pg.TextItem(text='Hn', color=(255, 255, 255))
@@ -63,21 +63,15 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.grid = pg.GridItem()
     self.addItem(self.grid)
     self.setMinimumWidth(200)
-    self.stripCount = len(self.guiSpectrumDisplay.guiStrips)
-    print(self.stripCount)
     # self.plotItem.resizeEvent = self.resizeEvent
-    self.setAcceptDrops(True)
     self.createCrossHair()
-    # self.scene().sigMouseMoved.connect(self.mouseMoved)
+    self.scene().sigMouseMoved.connect(self.mouseMoved)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
-    self.stripFrame.layout().addWidget(self, 0, 0)
-    # for i in range(20):
-    #   newStrip = pg.PlotWidget()
-    #   newStrip.setMinimumWidth(200)
-    #   print(i)
-    #   self.stripFrame.layout().addWidget(newStrip, 0, i)
-    # # self.stripFrame.layout().addWidget(self, 2, 0, 1, 1)
+    self.stripCount=1
+    self.stripFrame.layout().addWidget(self)
+
+
 
   def moveAxisCodeLabels(self):
     self.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
@@ -92,8 +86,8 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.hLine = pg.InfiniteLine(angle=0, movable=False, pen='w')
     self.addItem(self.vLine, ignoreBounds=True)
     self.addItem(self.hLine, ignoreBounds=True)
-    # self._appBase.hLines.append(self.hLine)
-    # self._appBase.vLines.append(self.vLine)
+    self._appBase.hLines.append(self.hLine)
+    self._appBase.vLines.append(self.vLine)
 
   def toggleCrossHair(self):
     if self.crossHairShown:
@@ -192,9 +186,8 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
 
   def dropCallback(self, dropObject):
 
-    print(dropObject)
     if isinstance(dropObject, Spectrum):
-      self.guiSpectrumDisplay.addSpectrum(dropObject)
+      self.displaySpectrum(dropObject)
 
     # if isinstance(dropObject, Strip):
 

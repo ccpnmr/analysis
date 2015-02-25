@@ -36,7 +36,7 @@ UNITS = ['ppm', 'Hz', 'point']
 #class PeakListSimple(Dock):
 class PeakListSimple(Dock):
 
-  def __init__(self, parent=None, peakLists=None, name='Peak List', referenceSpectrumDisplay=None, **kw):
+  def __init__(self, parent=None, peakLists=None, name='Peak List', referenceSpectrumDisplay=None, matchDisplay=None, assigner=None, **kw):
 
     if not peakLists:
       peakLists = []
@@ -48,6 +48,7 @@ class PeakListSimple(Dock):
     self.initPanel()
     self.peakLists = peakLists
     self.referenceSpectrumDisplay = referenceSpectrumDisplay
+    self.matchDisplay = matchDisplay
     #self.initPanel()
     label = Label(self, 'Peak List:', grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1),
@@ -60,7 +61,7 @@ class PeakListSimple(Dock):
     self.peakTable = ObjectTable(self, self._getColumns(2), [],
                                  callback=self.selectPeak, grid=(1, 0),
                                  gridSpan=(1, 5))
-
+    self.assigner = assigner
     # self.layout().setColumnStretch(4, 1)
     self.updateContents()
     self.updatePeakLists()
@@ -84,11 +85,21 @@ class PeakListSimple(Dock):
 
       position1 = self._getPeakPosition(peak, 1)
       position2 = self._getPeakPosition(peak, 0)
+      # position3 = self._getPeakPosition(peak, 2)
+
       self.referenceSpectrumDisplay.strips[0].changeZPlane(position=position1)
       peakList = self.referenceSpectrumDisplay.spectrumViews[0].spectrum.peakLists[0]
+      self.assigner.addResidue()
       for peak in peakList.peaks:
         if abs(peak.position[2] - position1) < 0.05 and abs(peak.position[0] - position2) < 0.02:
           print(peak.position)
+          for peak2 in self.matchDisplay.spectrumViews[0].spectrum.peakLists[0].peaks:
+            if abs(peak2.position[1] - peak.position[1]) < 0.05:
+              print(peak2.position)
+          self.matchDisplay.strips[0].changeZPlane(position=peak2.position[2])
+          self.assigner.addResidue()
+
+
 
       # self.referenceSpectrumDisplay.strips[0].addLine(position)
 

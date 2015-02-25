@@ -83,18 +83,17 @@ class AppBase(GuiBase):
     self.initProject(apiProject)
 
   def saveProject(self):
+    ioUtil.saveProject(self.project._wrappedData.root)
     print("project saved")
 
   def setupPreferences(self):
 
     preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
-    print(preferencesPath)
     if not os.path.exists(preferencesPath):
       preferencesPath = os.path.join(Path.getPythonDirectory(), 'ccpnmrcore', 'app',
                                      'defaultv3settings.json')
     fp = open(preferencesPath)
     self.preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
-    print(self.preferences)
     fp.close()
     
 def startProgram(programClass, applicationName, applicationVersion, projectPath=None):

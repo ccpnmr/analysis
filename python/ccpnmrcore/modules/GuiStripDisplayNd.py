@@ -2,6 +2,7 @@
 
 __author__ = 'simon'
 
+from ccpncore.gui.Icon import Icon
 from ccpncore.gui.VerticalLabel import VerticalLabel
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 # from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
@@ -19,6 +20,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
     GuiSpectrumDisplay.__init__(self)
     self.fillToolBar()
+    # self.setAcceptDrops(True)
     self.addSpinSystemSideLabel()
     # self._appBase.current.pane = self
 
@@ -64,13 +66,13 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   #   for guiStrip in self.guiStrips:
   #     guiStrip.addSpectrum(guiSpectrumView)
   #
-  def addStrip(self):
-
-    print('addNewStrip')
-    print(self.stripFrame.layout())
-    axisCodes = self.strips[0].axisCodes
-    print(axisCodes)
-    # print(newStrip)
+  # def addStrip(self):
+  #
+  #   print('addNewStrip')
+  #   print(self.stripFrame.layout())
+  #   axisCodes = self.strips[0].axisCodes
+  #   print(axisCodes)
+  #   # print(newStrip)
 
     # self.stripFrame.layout().addWidget(newGuiStrip)
   #
@@ -106,6 +108,51 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     # spinSystemSideLabel.setAlignment(QtCore.Qt.AlignVCenter)
     # spinSystemSideLabel.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Plain)
 
+  def fillToolBar(self):
+    spectrumUtilToolBar =  self.spectrumUtilToolBar
+    plusOneAction = spectrumUtilToolBar.addAction("+1", self.addOne)
+    plusOneIcon = Icon('icons/contourAdd')
+    plusOneAction.setIcon(plusOneIcon)
+    plusOneAction.setToolTip('Add One Level')
+    minusOneAction = spectrumUtilToolBar.addAction("+1", self.subtractOne)
+    minusOneIcon = Icon('icons/contourRemove')
+    minusOneAction.setIcon(minusOneIcon)
+    minusOneAction.setToolTip('Remove One Level ')
+    upBy2Action = spectrumUtilToolBar.addAction("*1.4", self.upBy2)
+    upBy2Icon = Icon('icons/contourBaseUp')
+    upBy2Action.setIcon(upBy2Icon)
+    upBy2Action.setToolTip('Raise Contour Base Level')
+    downBy2Action = spectrumUtilToolBar.addAction("*1.4", self.downBy2)
+    downBy2Icon = Icon('icons/contourBaseDown')
+    downBy2Action.setIcon(downBy2Icon)
+    downBy2Action.setToolTip('Lower Contour Base Level')
+    storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
+    storeZoomIcon = Icon('icons/zoom-store')
+    storeZoomAction.setIcon(storeZoomIcon)
+    storeZoomAction.setToolTip('Store Zoom')
+    restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
+    restoreZoomIcon = Icon('icons/zoom-restore')
+    restoreZoomAction.setIcon(restoreZoomIcon)
+    restoreZoomAction.setToolTip('Restore Zoom')
 
+
+  def upBy2(self):
+    for spectrumItem in self.spectrumItems:
+      spectrumItem.baseLevel*=1.4
+      spectrumItem.levels = spectrumItem.getLevels()
+
+  def downBy2(self):
+    for spectrumItem in self.spectrumItems:
+      spectrumItem.baseLevel/=1.4
+      spectrumItem.levels = spectrumItem.getLevels()
+
+  def addOne(self):
+    self.current.spectrum.spectrumItem.numberOfLevels +=1
+    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+
+
+  def subtractOne(self):
+    self.current.spectrum.spectrumItem.numberOfLevels -=1
+    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
 
 

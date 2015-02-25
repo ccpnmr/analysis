@@ -66,7 +66,6 @@ class Assigner(Dock):
           cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
           nAtom2 = self.addAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()))
           hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
-          self.clickable(hAtom2)
           self.scene.addItem(coAtom2)
           self.scene.addItem(caAtom2)
           self.scene.addItem(cbAtom2)

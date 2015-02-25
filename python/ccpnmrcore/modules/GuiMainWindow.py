@@ -52,6 +52,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     project = self._appBase.project
       
     isNew = self.apiWindow.root.isModified  # a bit of a hack this, but should be correct
+    print(isNew)
     
     project = self._appBase.project
     path = project.path
@@ -249,7 +250,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
     spectrum = self._appBase.project.getById(dataItem)
     popup = SpectrumPropertiesPopup(spectrum)
-    popup.show()
+    popup.exec_()
+    popup.raise_()
 
   def fillRecentProjectsMenu(self):
     for recentFile in self._appBase.preferences.recentFiles:
@@ -427,8 +429,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     f.close()
 
-  def showPeakTable(self, position='left', relativeTo=None, referenceSpectrumDisplay=None):
-    peakList = PeakListSimple(name="Peak Table", peakLists=self.project.peakLists, referenceSpectrumDisplay=referenceSpectrumDisplay)
+  def showPeakTable(self, position='left', relativeTo=None, referenceSpectrumDisplay=None, matchDisplay=None, assigner=None):
+    peakList = PeakListSimple(name="Peak Table", peakLists=self.project.peakLists, matchDisplay=matchDisplay, referenceSpectrumDisplay=referenceSpectrumDisplay, assigner=assigner)
     if relativeTo is not None:
       self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
     else:

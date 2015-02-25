@@ -70,7 +70,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     #GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
     GuiSpectrumView.__init__(self)
-
     # self.spectralData = self.getSlices()
     
     ###xDim, yDim = apiSpectrumView.dimensionOrdering[:2]
@@ -189,6 +188,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     apiDataSource = self.apiDataSource
     posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
     negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
+
     if not posLevels and not negLevels:
       return
       

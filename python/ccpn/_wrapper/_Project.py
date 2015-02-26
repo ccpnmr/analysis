@@ -152,7 +152,7 @@ class Project(AbstractWrapperObject):
 
   def delete(self):
     """Cleans up the wrapper project, without deleting the API project (impossible)"""
-    self.clearNotifiers()
+    self._clearNotifiers()
     for tag in ('_wrappedData','_data2Obj','_pid2Obj'):
       delattr(self,tag)
 

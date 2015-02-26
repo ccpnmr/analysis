@@ -74,6 +74,8 @@ class GuiSpectrumDisplay(GuiModule):
   def addAStrip(self):
 
     newStrip = self.strips[0].clone()
+    # self.strips.reverse[0].axes['right']['item'].hide()
+    newStrip.setYLink(self.strips[0])
     # print(newStrip)
     # for spectrum in self.strips[0]:
     # for spectrum in self.spectrumViews:

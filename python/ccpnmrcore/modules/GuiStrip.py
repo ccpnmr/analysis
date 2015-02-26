@@ -74,11 +74,12 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.plotItem.layout = QtGui.QGridLayout()
     print('layout', self.plotItem.layout)
     self.createCrossHair()
+    proxy = pg.SignalProxy(self.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
     self.scene().sigMouseMoved.connect(self.mouseMoved)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
     self.stripCount = 0
-    self.stripFrame.layout().addWidget(self)
+    self.stripFrame.layout().addWidget(self, 0, len(self._parent.strips))
     # self.addSpinSystemLabel()
     # print(self.spinSystemLabel)
 

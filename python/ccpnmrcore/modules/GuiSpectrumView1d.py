@@ -28,7 +28,7 @@ import numpy
 
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 
-from ccpncore.util.Colour import Colour
+from ccpncore.util.Colour import spectrumColours
 
 class GuiSpectrumView1d(GuiSpectrumView):
 
@@ -46,18 +46,24 @@ class GuiSpectrumView1d(GuiSpectrumView):
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
     #GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
+
     GuiSpectrumView.__init__(self)
 
-    colour = Colour('red').rgba()
+    # if self.spectrum.sliceColour is None:
+    #   self.spectrum.sliceColour = list(spectrumColours.keys())[0]
+
+    self.data = self.getSliceData()
+
     for strip in self.strips:
-      strip.plot(self.getSliceData()[0],self.getSliceData()[1], pen=colour)
-    # if spectralData is None:
-    #   self.spectralData = self.getSliceData()
-    # else:
-    #   self.spectralData = spectralData
-    self.setZValue(-1)
+      if self.spectrum.sliceColour is None:
+        if len(strip.spectrumViews) < 12:
+          self.spectrum.sliceColour = list(spectrumColours.keys())[len(strip.spectrumViews)-1]
+        else:
+          self.spectrum.sliceColour = list(spectrumColours.keys())[(len(strip.spectrumViews) % 12)-1]
 
+      strip.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
 
+      
 
   def getSliceData(self):
 

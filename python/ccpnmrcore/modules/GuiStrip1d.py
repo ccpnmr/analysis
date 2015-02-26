@@ -22,6 +22,12 @@ class GuiStrip1d(GuiStrip):
     self.plotItem.setAcceptDrops(True)
     self.colourIndex = 0
     self.spectrumIndex = 0
+    for spectrumView in self.spectrumViews:
+      print(spectrumView)
+      self.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour)
+
+
+
 
 
   def get1dContextMenu(self):

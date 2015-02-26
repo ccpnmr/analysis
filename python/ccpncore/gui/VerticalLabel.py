@@ -1,14 +1,16 @@
 __author__ = 'simon'
 
 from PySide import QtGui, QtCore
+from ccpncore.gui.Base import Base
 
+class VerticalLabel(QtGui.QWidget, Base):
 
-class VerticalLabel(QtGui.QWidget):
-
-    def __init__(self, parent, text):
-      self.text = text
-      self.height = parent.height()
+    def __init__(self, parent, text, **kwargs):
       QtGui.QWidget.__init__(self, parent)
+      self.text = text
+      self.setText(text)
+      self.height = parent.height()
+      Base.__init__(self, **kwargs)
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)

@@ -28,6 +28,8 @@ import numpy
 
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 
+from ccpncore.util.Colour import Colour
+
 class GuiSpectrumView1d(GuiSpectrumView):
 
   # sigClicked = QtCore.Signal()
@@ -45,12 +47,16 @@ class GuiSpectrumView1d(GuiSpectrumView):
     """
     #GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
     GuiSpectrumView.__init__(self)
-    
+
+    colour = Colour('red').rgba()
+    for strip in self.strips:
+      strip.plot(self.getSliceData()[0],self.getSliceData()[1], pen=colour)
     # if spectralData is None:
     #   self.spectralData = self.getSliceData()
     # else:
     #   self.spectralData = spectralData
     self.setZValue(-1)
+
 
 
   def getSliceData(self):

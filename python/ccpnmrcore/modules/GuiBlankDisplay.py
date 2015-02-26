@@ -44,6 +44,6 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
       spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
       spectrumView = self.getWrapperObject(spectrumDisplay._wrappedData.findFirstSpectrumView(dataSource=spectrum._wrappedData))
       for strip in spectrumView.strips:
-        strip.displaySpectrum(spectrumView)
+        strip.displaySpectrum(spectrum)
       self.dockArea.guiWindow.removeBlankDisplay()
 

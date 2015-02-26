@@ -3,11 +3,17 @@ __author__ = 'simon'
 import pyqtgraph as pg
 import os
 from functools import partial
+
 from PySide import QtGui, QtCore
+
 from ccpn import Spectrum
+from ccpncore.gui.Label import Label
 from ccpncore.gui import ViewBox
-from ccpnmrcore.DropBase import DropBase
+
 from ccpnmrcore.gui.Axis import Axis
+from ccpnmrcore.DropBase import DropBase
+
+
 import copy
 
 class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the drop events are not processed
@@ -64,14 +70,26 @@ class GuiStrip(DropBase, pg.PlotWidget): # DropBase needs to be first, else the 
     self.addItem(self.grid)
     self.setMinimumWidth(200)
     # self.plotItem.resizeEvent = self.resizeEvent
+    print('layout', self.plotItem.layout)
+    self.plotItem.layout = QtGui.QGridLayout()
+    print('layout', self.plotItem.layout)
     self.createCrossHair()
     self.scene().sigMouseMoved.connect(self.mouseMoved)
     self.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
-    self.stripCount=1
+    self.stripCount = 0
     self.stripFrame.layout().addWidget(self)
+    # self.addSpinSystemLabel()
+    # print(self.spinSystemLabel)
 
-
+  def addSpinSystemLabel(self):
+    self.spinSystemLabel = Label(self, hAlign='center', dragDrop=True)
+    self.spinSystemLabel.setText("Spin systems shown here")
+    self.spinSystemLabel.setFixedHeight(30)
+    self.spinSystemLabel.pid = self.pid
+    self._parent.stripNumber+=1
+    self.plotItem.layout.addItem(self.spinSystemLabel, 4, 0)
+    # self.layout().addWidget(self.spinSystemLabel)
 
   def moveAxisCodeLabels(self):
     self.textItem.setPos(self.viewBox.boundingRect().bottomLeft())

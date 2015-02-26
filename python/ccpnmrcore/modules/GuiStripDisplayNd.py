@@ -99,9 +99,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def addSpinSystemSideLabel(self):
     dock = self.dock
-    self.spinSystemSideLabel = VerticalLabel(dock, text=None)
+    self.spinSystemSideLabel = VerticalLabel(self.dock, text='test', grid=(1, 0), gridSpan=(1, 1))
     # spinSystemSideLabel.setText()
-    dock.addWidget(self.spinSystemSideLabel, 1, 0, 1, 1)
     # print(dir(spinSystemSideLabel))
     # print(spinSystemSideLabel.paintEvent())
     self.spinSystemSideLabel.setFixedWidth(30)
@@ -110,6 +109,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def fillToolBar(self):
     spectrumUtilToolBar =  self.spectrumUtilToolBar
+    spectrumUtilToolBar.addAction('+', self.addAStrip)
+    spectrumUtilToolBar.addAction('-', self.removeStrip)
     plusOneAction = spectrumUtilToolBar.addAction("+1", self.addOne)
     plusOneIcon = Icon('icons/contourAdd')
     plusOneAction.setIcon(plusOneIcon)
@@ -154,5 +155,18 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   def subtractOne(self):
     self.current.spectrum.spectrumItem.numberOfLevels -=1
     self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+
+  def addAStrip(self):
+
+    newStrip = self.strips[0].clone()
+    newStrip.setMinimumWidth(200)
+    # self.stripFrame.layout().addWidget(newStrip)
+    # self.stripNumber+=1
+    # # self.stripFrame.layout().addWidget(self, 2, 0, 1, 1)
+
+  def removeStrip(self):
+    pass
+
+
 
 

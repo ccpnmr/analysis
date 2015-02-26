@@ -47,16 +47,16 @@ class GuiSpectrumDisplay(GuiModule):
 
     self.positionBox = Label(self.dock, grid=(0, 3), gridSpan=(1, 1))
     self.positionBox.setFixedWidth(screenWidth*0.08)
-    self.scrollArea = ScrollArea(self.dock, grid=(1, 0), gridSpan=(1, 4))
+    self.scrollArea = ScrollArea(self.dock, grid=(1, 1), gridSpan=(1, 3))
     self.scrollArea.setWidgetResizable(True)
     # self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
     self.stripFrame = GuiFrame(self.scrollArea, appBase=self._appBase)
-    self.layout = QtGui.QHBoxLayout()
+    self.layout = QtGui.QGridLayout()
     self.stripFrame.setLayout(self.layout)
     # self.stripFrame.setAcceptDrops(True)
     # self.scrollArea.setLayout(self.layout)
     self.scrollArea.setWidget(self.stripFrame)
-    self.stripNumber = 1
+    self.stripNumber = 0
     # self.dock.layout.addWidget(self.scrollArea, 1, 0)
 
     # self.stripFrame.guiSpectrumDisplay = self
@@ -74,7 +74,11 @@ class GuiSpectrumDisplay(GuiModule):
   def addAStrip(self):
 
     newStrip = self.strips[0].clone()
-    newStrip.setMinimumWidth(200)
+    # print(newStrip)
+    # for spectrum in self.strips[0]:
+    # for spectrum in self.spectrumViews:
+    #   newStrip.displaySpectrum(spectrum)
+    # newStrip.setMinimumWidth(200)
     # self.stripFrame.layout().addWidget(newStrip)
     # self.stripNumber+=1
     # # self.stripFrame.layout().addWidget(self, 2, 0, 1, 1)

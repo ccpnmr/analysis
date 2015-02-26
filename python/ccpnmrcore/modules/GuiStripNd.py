@@ -196,8 +196,8 @@ class GuiStripNd(GuiStrip):
 
     # print(self.dock.widgets[-1].layout())#.addWidget(self.planeToolbar, 3, 0)
 
-  def addSpinSystemLabel(self, guiFrame, stripNumber):
-    self.spinSystemLabel = Label(guiFrame, grid=(3, stripNumber), hAlign='center', dragDrop=True)
-    self.spinSystemLabel.setText("Spin systems shown here")
-    self.spinSystemLabel.setFixedHeight(30)
-    self.spinSystemLabel.pid = self.pid
+  # def addSpinSystemLabel(self, guiFrame, stripNumber):
+  #   self.spinSystemLabel = Label(guiFrame, grid=(3, stripNumber), hAlign='center', dragDrop=True)
+  #   self.spinSystemLabel.setText("Spin systems shown here")
+  #   self.spinSystemLabel.setFixedHeight(30)
+  #   self.spinSystemLabel.pid = self.pid

@@ -1906,8 +1906,12 @@ require some code modifications.
     self.writeComment('IF BLOCK 110')
     self.startIf(self.comparison(self.toLiteral('_ID'), '==', 'tag2'))
 
+    # Required to allow for old versions where ID start with '_'
     self.setDictEntry('objectDict', 'value', 'obj')
+    self.startIf(self.equals(self.stringSlice('value', self.toLiteral(0), self.toLiteral(1)),
+                             self.toLiteral('_')))
     self.setVar('value', self.stringSlice('value', self.toLiteral(1)))
+    self.endIf()
 
     # IF BLOCK 110
     # self.elseIf()

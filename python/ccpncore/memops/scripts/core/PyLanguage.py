@@ -1049,7 +1049,7 @@ def %s(%s):''' % (funcname, paramString))
     if fromEnd:
       return '%s[%s:%s]' % (val, fromStart, fromEnd)
     else:
-      return '%s[%s]' % (val, fromStart)
+      return '%s[%s:]' % (val, fromStart)
 
 
   ###########################################################################

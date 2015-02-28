@@ -313,19 +313,18 @@ def testExpPrototypes(resetCodes=False):
   axisCodeSet = set()
   useNames = {}
   synonyms= []
-  # for nmrExpPrototype in project.sortedNmrExpPrototypes():
-  for nmrExpPrototype in project.findAllNmrExpPrototypes(serial=293):
-    print("nmrExpPrototype: %s " % nmrExpPrototype._ID)
+  for nmrExpPrototype in project.sortedNmrExpPrototypes():
+  # for nmrExpPrototype in project.findAllNmrExpPrototypes(serial=292):
+    # print("nmrExpPrototype: %s %s " % (nmrExpPrototype, nmrExpPrototype._ID))
     for refExperiment in nmrExpPrototype.sortedRefExperiments():
-      print("refExperiment: %s " % refExperiment._ID)
-      print("refExperiment: %s " % refExperiment._ID)
+      # print("refExperiment: %s %s " % (refExperiment, refExperiment._ID))
 
       # check axis codes
       codes = []
       for red in refExperiment.sortedRefExpDims():
-        print("red: %s " % red._ID)
+        # print("red: %s %s" % (red, red._ID))
         for redr in red.sortedRefExpDimRefs():
-          print("redr: %s " % redr._ID)
+          # print("redr: %s %s " % ( redr, redr._ID))
           code = codeMap[redr]
           codes.append(code)
           axisCodeSet.add(code)
@@ -362,4 +361,4 @@ def testExpPrototypes(resetCodes=False):
     project.saveModified()
 
 if __name__ == '__main__':
-  testExpPrototypes(resetCodes=False)
+  testExpPrototypes(resetCodes=True)

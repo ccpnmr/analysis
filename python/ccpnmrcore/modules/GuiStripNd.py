@@ -17,11 +17,11 @@ class GuiStripNd(GuiStrip):
   def __init__(self):
     GuiStrip.__init__(self)
 
-    self.plotItem.setAcceptDrops(True)
+    self.plotWidget.plotItem.setAcceptDrops(True)
     self.viewportWidget = QtOpenGL.QGLWidget()
-    self.setViewport(self.viewportWidget)
+    self.plotWidget.setViewport(self.viewportWidget)
     self.guiSpectrumDisplay.viewportDict[self.viewportWidget] = self
-    self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+    self.plotWidget.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
     ###self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
@@ -31,8 +31,8 @@ class GuiStripNd(GuiStrip):
     self.colourIndex = 0
     # print(guiSpectrumDisplay)
     # self.fillToolBar()
-    # self.addSpinSystemLabel(self.stripFrame, 0)
-    # self.addPlaneToolbar(self.stripFrame, 0)
+    self.addSpinSystemLabel()
+    self.addPlaneToolbar()
     ###self.setShortcuts()
 
   """
@@ -159,12 +159,12 @@ class GuiStripNd(GuiStrip):
     self.current.spectrum.spectrumItem.numberOfLevels -=1
     self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
 
-  def addPlaneToolbar(self, guiFrame, stripNumber=None, grid=None):
+  def addPlaneToolbar(self, stripNumber=None, grid=None):
     if grid is None:
-     grid = (4, stripNumber)
+     grid = (3, 0)
     else:
       grid=grid
-    self.planeToolbar = ToolBar(guiFrame, grid=grid, stretch=(0, 1), hAlign='center')
+    self.planeToolbar = ToolBar(self, grid=grid, gridSpan=(1, 1), hAlign='center')
     self.spinSystemLabel = Label(self)
     self.spinSystemLabel.setMaximumWidth(1150)
     self.spinSystemLabel.setScaledContents(True)
@@ -192,7 +192,7 @@ class GuiStripNd(GuiStrip):
     self.planeToolbar.addWidget(prevPlaneButton)
     self.planeToolbar.addWidget(self.planeLabel)
     self.planeToolbar.addWidget(nextPlaneButton)
-
+    # self.layout().addWidget(self.planeToolbar, 3, 0)
 
     # print(self.dock.widgets[-1].layout())#.addWidget(self.planeToolbar, 3, 0)
 

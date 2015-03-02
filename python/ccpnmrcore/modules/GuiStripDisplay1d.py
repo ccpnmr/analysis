@@ -44,7 +44,10 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
   #     guiStrip.addSpectrum(spectrum, guiSpectrumView)
 
   def fillToolBar(self):
-    GuiSpectrumDisplay.fillToolBar(self)
+    # GuiSpectrumDisplay.fillToolBar(self)
+    spectrumUtilToolBar =  self.spectrumUtilToolBar
+    spectrumUtilToolBar.addAction('+', self.addAStrip)
+    spectrumUtilToolBar.addAction('-', self.removeStrip)
     autoScaleAction = self.spectrumUtilToolBar.addAction("AutoScale", self.zoomYAll)
     autoScaleActionIcon = Icon('icons/zoom-fit-best')
     # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
@@ -95,8 +98,20 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
 
   def addSpinSystemSideLabel(self):
     dock = self.dock
-    spinSystemSideLabel = VerticalLabel(dock, text='A.147.ALA.HA')
+    spinSystemSideLabel = VerticalLabel(dock, text=None)
     # spinSystemSideLabel.setText()
     dock.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
     # print(spinSystemSideLabel.paintEvent())
     spinSystemSideLabel.setFixedWidth(30)
+
+  def addAStrip(self):
+    # self.stripNumber+=1
+    newStrip = self.strips[0].clone()
+    newStrip.setMinimumWidth(200)
+
+  def removeStrip(self):
+    print(self.strips)
+    strip = self.strips[-1]
+    strip.deleteLater()
+    self.strips.pop(-1)
+    print(self.strips)

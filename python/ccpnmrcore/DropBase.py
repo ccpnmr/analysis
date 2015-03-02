@@ -27,16 +27,16 @@ class DropBase(GuiBase):
       pidData = str(data.data(),encoding='utf-8')
       pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
       actualPid = ''.join(pidData)
-      wrapperObject = self.getObject(actualPid)
+      print('actualPid',actualPid)
+      wrapperObject = self.getById(actualPid)
       print(wrapperObject, 'wrapper obj')
-      print(actualPid)
-      # self.dropCallback()
+      # print('probablyStrip')
+      self.dropCallback(wrapperObject)
     else:
       data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
       pidData = str(data.data(),encoding='utf-8')
       pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
       actualPid = ''.join(pidData)
-      print(actualPid)
       wrapperObject = self.getObject(actualPid)
       print(wrapperObject, 'wrapper obj')
       self.dropCallback(wrapperObject)

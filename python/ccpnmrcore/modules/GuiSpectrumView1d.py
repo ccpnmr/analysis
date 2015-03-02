@@ -61,9 +61,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
         else:
           self.spectrum.sliceColour = list(spectrumColours.keys())[(len(strip.spectrumViews) % 12)-1]
 
-      strip.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
+      strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
 
-      
 
   def getSliceData(self):
 

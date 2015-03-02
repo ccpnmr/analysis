@@ -14,17 +14,17 @@ class GuiStrip1d(GuiStrip):
   def __init__(self):
     GuiStrip.__init__(self)
     self.viewBox.invertX()
-    self.showGrid(x=True, y=True)
+    self.plotWidget.showGrid(x=True, y=True)
     self.gridShown = True
     self.crossHairShown = True
     self.autoIntegration = True
     self.viewBox.menu = self.get1dContextMenu()
-    self.plotItem.setAcceptDrops(True)
+    self.plotWidget.plotItem.setAcceptDrops(True)
     self.colourIndex = 0
     self.spectrumIndex = 0
     for spectrumView in self.spectrumViews:
       print(spectrumView)
-      self.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour)
+      self.plotWidget.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour)
 
 
 

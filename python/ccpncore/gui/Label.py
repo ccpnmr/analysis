@@ -53,7 +53,7 @@ class Label(QtGui.QLabel, Base):
 
   def mousePressEvent(self, event):
     if self.dragDrop == True:
-      itemData = QtCore.QByteArray()
+      itemData = QtCore.QByteArray(self.pid)
       # dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
       # dataStream << QtCore.QByteArray(self.labelText) << QtCore.QPoint(event.pos() - self.rect().topLeft())
 

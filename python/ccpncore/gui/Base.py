@@ -81,7 +81,7 @@ class Base(Translation):
         # layout.setSpacing(2)
         # layout.setContentsMargins(2,2,2,2)
         parent.setLayout( layout )
- 
+
       if isinstance(layout, QtGui.QGridLayout): 
         row, col = self._getRowCol(grid)
         rowStr, colStr = stretch

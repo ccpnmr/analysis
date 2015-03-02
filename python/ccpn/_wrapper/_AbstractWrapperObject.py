@@ -302,11 +302,11 @@ class AbstractWrapperObject():
     prefix = self._id + IDSEP
     dd = self.__dict__
     return (
-      len(x for x in sorted(dir(cls))
-          if (not x.startswith('_') and  isinstance(getattr(cls,x), property)))
-      + len(y for x in cls._childClasses for y in self._project._pid2Obj[x.shortClassName]
-             if y.startswith(prefix))
-      + len(x for x in sorted(dd) if not x.startswith('_') and len(x.split(PREFIXSEP)) != 2))
+      len(list(x for x in sorted(dir(cls))
+          if (not x.startswith('_') and  isinstance(getattr(cls,x), property))))
+      + len(list((y for x in cls._childClasses for y in self._project._pid2Obj[x.shortClassName]
+             if y.startswith(prefix))))
+      + len(list(x for x in sorted(dd) if not x.startswith('_') and len(x.split(PREFIXSEP)) != 2)))
 
 
   def __bool__(self):
@@ -527,13 +527,11 @@ class AbstractWrapperObject():
     """Get  object by absolute ID#
     in either long form ('Residue:MS1.A.127') or short form ('MR:MS1.A.127')"""
 
-    tt = identifier.split(PREFIXSEP)
+    tt = identifier.split(PREFIXSEP,1)
     if len(tt) == 2:
-        dd = self._project._pid2Obj.get(tt[0])
-        if dd:
-            key = tt[1]
-            #
-            return dd.get(key)
+      dd = self._project._pid2Obj.get(tt[0])
+      if dd:
+        return dd.get(tt[1])
     #
     return None
 

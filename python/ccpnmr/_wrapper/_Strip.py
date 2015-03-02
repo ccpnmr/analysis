@@ -89,6 +89,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
 
   @orderedAxes.setter
   def orderedAxes(self, value:Sequence):
+    value = [self.getById(x) if isinstance(x, str) else x for x in value]
     self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
 
   @property
@@ -151,6 +152,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
     """
     Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
     """
+    spectrum = self.getById(spectrum) if isinstance(spectrum, str) else spectrum
     dataSource = spectrum._wrappedData
     apiStrip = self._wrappedData
     if apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
@@ -191,6 +193,8 @@ class Strip(GuiStrip, AbstractWrapperObject):
 
 def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
   """Make copy of strip in SpectrumDisplay, at position newIndex - or rightmost"""
+
+  strip = spectrumDisplay.getById(strip) if isinstance(strip, str) else strip
 
   if strip.spectrumDisplay is spectrumDisplay:
     # Within same display. Not that useful, but harmless

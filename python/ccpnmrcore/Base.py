@@ -37,7 +37,7 @@ class Base(CoreBase):
 
   def getObject(self, pidOrObject):
   
-    return self.getById(pidOrObject) if type(pidOrObject) is type('') else pidOrObject
+    return self.getById(pidOrObject) if isinstance(pidOrObject, str) else pidOrObject
   
   def getWrapperObject(self, apiObject):
   

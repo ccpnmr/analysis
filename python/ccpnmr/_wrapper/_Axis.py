@@ -114,6 +114,7 @@ class Axis(AbstractWrapperObject):
 
   @nmrAtoms.setter
   def nmrAtoms(self, value):
+    value = [self.getById(x) if isinstance(x, str) else x for x in value]
     self._wrappedData.resonances = tuple(x._wrappedData for x in value)
 
   # Implementation functions

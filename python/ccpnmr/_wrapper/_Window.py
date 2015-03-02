@@ -111,6 +111,8 @@ class Window(AbstractWrapperObject):
     independentStrips: if True do freeStrip display.
     """
 
+    spectrum = self.getById(spectrum) if isinstance(spectrum, str) else spectrum
+
     dataSource = spectrum._wrappedData
 
     task = self.task

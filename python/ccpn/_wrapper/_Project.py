@@ -99,8 +99,8 @@ class Project(AbstractWrapperObject):
     self._registerApiNotifiers()
 
     # set appBase attribute - for gui applications
-    if hasattr(wrappedData, '_appBase'):
-      self._appBase = wrappedData._appBase
+    if hasattr(wrappedData.root, '_appBase'):
+      self._appBase = wrappedData.root._appBase
     else:
       self._appBase = None
     

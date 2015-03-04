@@ -8,16 +8,15 @@ from PySide import QtGui, QtCore
 
 from ccpn import Spectrum
 from ccpncore.gui.Label import Label
-from ccpncore.gui import ViewBox
-
 from ccpncore.gui.PlotWidget import PlotWidget
+from ccpncore.gui.Widget import Widget
 
 from ccpnmrcore.gui.Axis import Axis
 from ccpnmrcore.DropBase import DropBase
 
 
 
-class GuiStrip(DropBase, PlotWidget): # DropBase needs to be first, else the drop events are not processed
+class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop events are not processed
 
   sigClicked = QtCore.Signal(object, object)
 
@@ -26,9 +25,9 @@ class GuiStrip(DropBase, PlotWidget): # DropBase needs to be first, else the dro
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
 
 
-
-    # DropBase.__init__(self, self._appBase, self.dropCallback)
-    PlotWidget.__init__(self, self.stripFrame, grid=(0, self.guiSpectrumDisplay.stripCount), gridSpan=(1, 1))
+    Widget.__init__(self)
+    DropBase.__init__(self, self._parent._appBase, self.dropCallback)
+    self.plotWidget = PlotWidget(self.stripFrame, grid=(0, self.guiSpectrumDisplay.stripCount-1), gridSpan=(1, 1))
     if self._parent._appBase.preferences.general.colourScheme == 'light':
       self.background = 'w'
       self.foreground = 'k'
@@ -47,10 +46,10 @@ class GuiStrip(DropBase, PlotWidget): # DropBase needs to be first, else the dro
     self.plotItem.setAcceptDrops(True)
     self.axes = self.plotItem.axes
     self.viewBox = self.plotItem.vb
-    self.xRegion = self.orderedAxes[0].region
-    self.yRegion = self.orderedAxes[1].region
-    self.viewBox.setXRange(*self.xRegion)
-    self.viewBox.setYRange(*self.yRegion)
+    # self.xRegion = self.orderedAxes[0].region
+    # self.yRegion = self.orderedAxes[1].region
+    # self.viewBox.setXRange(*self.xRegion)
+    # self.viewBox.setYRange(*self.yRegion)
     self.xAxis = Axis(self.plotWidget, orientation='top', pen=self.foreground, viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
     self.yAxis = Axis(self.plotWidget, orientation='left', pen=self.foreground, viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
     self.gridShown = True
@@ -77,11 +76,10 @@ class GuiStrip(DropBase, PlotWidget): # DropBase needs to be first, else the dro
     yRegion = self.viewBox.viewRange()[1]
     self.orderedAxes[0].region = xRegion
     self.orderedAxes[1].region = yRegion
-    print(self.orderedAxes[0].position, self.orderedAxes[0].width)
 
 
   def addSpinSystemLabel(self):
-    self.spinSystemLabel = Label(self, grid=(1, 0), hAlign='center', dragDrop=True, pid=self.pid)
+    self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.stripCount-1), hAlign='center', dragDrop=True, pid=self.pid)
     self.spinSystemLabel.setText("Spin systems shown here")
     self.spinSystemLabel.setFixedHeight(30)
     # self.spinSystemLabel.pid = self.pid

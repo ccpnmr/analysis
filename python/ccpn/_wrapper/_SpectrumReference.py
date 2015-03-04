@@ -25,7 +25,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from collections.abc import Sequence
-
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Spectrum import Spectrum

@@ -4,8 +4,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpncore.lib.molecule import DataMapper
-from ccpncore.util import pid as Pid
 
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
@@ -25,6 +23,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from ccpncore.lib.molecule.DataMapper import DataMapper
+from ccpncore.util import pid as Pid
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrChain import NmrChain

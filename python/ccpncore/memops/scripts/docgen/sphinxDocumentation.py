@@ -47,6 +47,7 @@ def refreshSphinxDocumentation():
   for ss in ('ccpn', 'ccpncore', 'ccpnmrcore'):
     inDirectory = joinPath(docDirectory, 'source', ss)
     if os.path.exists(inDirectory):
+      print ("Removing %s" % inDirectory)
       shutil.rmtree(inDirectory)
     os.mkdir(inDirectory)
 

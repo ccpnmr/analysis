@@ -245,11 +245,11 @@ def readMolecularSystem(frameDict, project, nmrCalcRun):
       convertLinking.get(dd['linking']),
       None
     ))
-  chains = project.makeChains(sequence)
+  chains = project._makeChains(sequence)
   for ii, chain in chains:
     nmrCalcRun.newMolResidueData(name=chain.code, code=chainCodes[ii], ioRole='output',
                                    molSystemCode=ccpnMolSystem.code,
-                                   chainCodes=(chain.cod,), )
+                                   chainCodes=(chain.code,), )
 
 
 # def _newResidue(chain, defaultLinking='middle', **kwargs) -> ccpn.Residue:

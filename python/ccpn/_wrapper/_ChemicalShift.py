@@ -114,6 +114,9 @@ def newChemicalShift(parent:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                      valueError:float=0.0, figureOfMerit:float=1.0,
                      comment:str=None) -> ChemicalShift:
   """Create new child Shift"""
+
+  nmrAtom = parent.getById(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
+
   obj = parent._wrappedData.newShift(value=value,
                                      resonance=nmrAtom._wrappedData, error=valueError,
                                      figOfMerit=figureOfMerit, details=comment)

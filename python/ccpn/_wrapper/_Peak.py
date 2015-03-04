@@ -187,12 +187,12 @@ class Peak(AbstractWrapperObject):
   @dimensionNmrAtoms.setter
   def dimensionNmrAtoms(self, value:Sequence):
     apiPeak = self._wrappedData
-    dimResonances = list(value)
-    for ii, atoms in enumerate(dimResonances):
-      dimValues = tuple(x._wrappedData for x in value[ii])
-      dimResonances[ii] = tuple(x for x in dimValues if x is not None)
+    dimNmrAtoms = list(value)
+    for ii, atoms in enumerate(dimNmrAtoms):
+      atoms = tuple(self.getById(x) if isinstance(x, str) else x for x in atoms)
+      dimNmrAtoms[ii] = tuple(x._wrappedData for x in atoms if x is not None)
 
-    apiPeak.setPeakDimAssignments(dimResonances)
+    apiPeak.setPeakDimAssignments(dimNmrAtoms)
 
   @property
   def assignedNmrAtoms(self) -> tuple:
@@ -232,33 +232,35 @@ class Peak(AbstractWrapperObject):
       ll = dimensionCount*[None]
       resonances.append(ll)
       for ii, atom in enumerate(tt):
+        atom = self.getById(atom) if isinstance(atom, str) else atom
         if atom is not None:
           ll[ii] = atom._wrappedData
 
     # set assignments
     apiPeak.setAssignments(resonances)
 
-  @property
-  def dimensionAssignments(self) -> tuple:
-    """Peak dimension assignments - a list of lists of NmrAtom.id for each dimension.
-    Assignments as a list of individual combinations is given in 'assignments'."""
-
-    result = []
-    for ll in self.dimensionNmrAtoms:
-      result.append(list(x._id for x in ll))
-    #
-    return tuple(result)
-
-  @property
-  def assignments(self) -> tuple:
-    """Peak dimension assignments a list of lists of NmrAtom.id combinations
-    (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None"""
-
-    result = []
-    for ll in self.assignedNmrAtoms:
-      result.append(list(x and x._id for x in ll))
-    #
-    return tuple(result)
+  # # NBNB TBD do we need this duplication, or it it enough to return the NmrAtom objecss?
+  # @property
+  # def dimensionAssignments(self) -> tuple:
+  #   """Peak dimension assignments - a list of lists of NmrAtom.id for each dimension.
+  #   Assignments as a list of individual combinations is given in 'assignments'."""
+  #
+  #   result = []
+  #   for ll in self.dimensionNmrAtoms:
+  #     result.append(list(x._id for x in ll))
+  #   #
+  #   return tuple(result)
+  #
+  # @property
+  # def assignments(self) -> tuple:
+  #   """Peak dimension assignments a list of lists of NmrAtom.id combinations
+  #   (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None"""
+  #
+  #   result = []
+  #   for ll in self.assignedNmrAtoms:
+  #     result.append(list(x and x._id for x in ll))
+  #   #
+  #   return tuple(result)
 
   # Implementation functions
   @classmethod

@@ -80,6 +80,7 @@ class Restraint(AbstractWrapperObject):
 
   @peaks.setter
   def peaks(self, value:Sequence):
+    value = tuple(self.getById(x) if isinstance(x, str) else x for x in value)
     self._wrappedData.peaks =  [x._wrappedData for x in value]
 
   @property
@@ -195,7 +196,9 @@ def newRestraint(parent:RestraintList,comment:str=None,
   apiConstraintList = parent._wrappedData
   creator = apiConstraintList.getattr("new%sConstraint" % parent.restraintType)
   obj = creator(details=comment, peaks=peaks)
-  return parent._project._data2Obj.get(obj)
+  result = parent._project._data2Obj.get(creator(details=comment))
+  result.peaks = peaks
+  return result
 
 def makeSimpleRestraint(parent:RestraintList,comment:str=None,
                         peaks:Sequence=(),  targetValue:float=None, error:float=None,

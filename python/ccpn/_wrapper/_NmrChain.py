@@ -75,7 +75,7 @@ class NmrChain(AbstractWrapperObject):
 
   @property
   def chain(self) -> Chain:
-    """Free-form text comment"""
+    """Molecule chain matching NmrChain"""
     apiChain = self._wrappedData.chain
     if apiChain is None:
       return None

@@ -205,7 +205,7 @@ def newRestraintList(parent:RestraintSet,restraintType, name:str=None, comment:s
                              tensorRhombicity:float=None, tensorChainCode:str=None,
                              tensorSequenceCode:str=None,
                              tensorResidueType:str=None) -> RestraintList:
-  """Create new child RestraintList of type restraintTypr"""
+  """Create new child RestraintList of type restraintType"""
   apiNmrConstraintStore = parent._wrappedData
   creator = apiNmrConstraintStore.getattr("new%sConstraintList" % restraintType)
   if restraintType == 'Rdc':

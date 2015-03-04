@@ -29,7 +29,10 @@ from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpncore.lib.molecule import MoleculeModify
+from ccpncore.lib.molecule.DataMapper import DataMapper
 from ccpncore.util import Common as commonUtil
+from ccpncore.util import pid as Pid
+
 
 
 class Chain(AbstractWrapperObject):
@@ -227,7 +230,7 @@ class Chain(AbstractWrapperObject):
 #
 #   return parent._project._data2Obj.get(newCcpnChain)
   
-def makeChains(parent:Project, residueRecords) -> Chain:
+def _makeChains(parent:Project, residueRecords) -> Chain:
   """Make chains from sequence of  tuples
   
   :param Sequence residueRecords: (chainCode, sequenceCode, residueType, linking, descriptor) tuples
@@ -277,7 +280,7 @@ def makeChains(parent:Project, residueRecords) -> Chain:
       if linking == 'start':
         sequence = [newRecord]
       elif linking == 'end':
-        raise ValueError("Illegal 'end' residue linking outside of sequence: %s" % newRecord)
+        raise ValueError("Illegal 'end' residue linking outside of sequence: %s" % (newRecord,))
       else:
         # Linking defaults to 'non' when not in a sequence
         linking = linking or 'none'
@@ -399,7 +402,7 @@ Chain.clone.__annotations__['return'] = Chain
 Project._childClasses.append(Chain)
 # Project.newChain = newChain
 Project.makeSimpleChain = makeSimpleChain
-Project.makeChains = makeChains
+Project._makeChains = _makeChains
 
 # Notifiers:
 className = ApiChain._metaclass.qualifiedName()

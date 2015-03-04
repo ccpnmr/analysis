@@ -173,7 +173,7 @@ class Window(AbstractWrapperObject):
         if dataDimRef:
           # This is a FreqDataDim
           unit = dataDimRef.expDimRef.unit
-          position = dataDimRef.pointToValue(1) + dataDimRef.spectralWidth/2
+          position = dataDimRef.pointToValue(1) - dataDimRef.spectralWidth/2
           if ii < 2:
             width = dataDimRef.spectralWidth
           else:

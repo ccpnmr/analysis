@@ -10,10 +10,10 @@ from ccpn import Spectrum
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PlotWidget import PlotWidget
 from ccpncore.gui.Widget import Widget
+from ccpncore.memops import Notifiers
 
 from ccpnmrcore.gui.Axis import Axis
 from ccpnmrcore.DropBase import DropBase
-
 
 
 class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop events are not processed
@@ -55,7 +55,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.gridShown = True
     self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
     self.viewBox.sigRangeChanged.connect(self.updateRegion)
-    self.grid = pg.GridItem(pen=self.foreground)
+    self.grid = pg.GridItem()#pen=self.foreground)
     # self.grid.setPen())
     self.plotWidget.addItem(self.grid)
     self.setMinimumWidth(200)
@@ -65,6 +65,10 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
     self.addSpinSystemLabel()
+    
+    self.eventOriginator = None
+    Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
+    Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
 
   # def addAStrip(self):
   #
@@ -72,11 +76,37 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   #   print(newStrip.pid)
 
   def updateRegion(self, event):
+    # this is called when the viewBox is changed on the screen via the mouse
+    if self.eventOriginator:
+      return
+    self.eventOriginator = self
+    
     xRegion = self.viewBox.viewRange()[0]
     yRegion = self.viewBox.viewRange()[1]
     self.orderedAxes[0].region = xRegion
     self.orderedAxes[1].region = yRegion
+    #for spectrumView in self.spectrumViews:
+    #  spectrumView.update()
+    #self.update()
+    
+    self.eventOriginator = None
 
+  def axisRegionUpdated(self, apiAxis):
+    # this is called when the api region (position and/or width) is changed
+    
+    if self.eventOriginator:
+      return
+    self.eventOriginator = self
+    
+    xRegion = self.orderedAxes[0].region
+    yRegion = self.orderedAxes[1].region
+    self.viewBox.setXRange(*xRegion)
+    self.viewBox.setYRange(*yRegion)
+    #for spectrumView in self.spectrumViews:
+    #  spectrumView.update()
+    #self.update()
+    
+    self.eventOriginator = None
 
   def addSpinSystemLabel(self):
     self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.stripCount-1), hAlign='center', dragDrop=True, pid=self.pid)

@@ -142,6 +142,25 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.levels = self.getLevels()
 """
     self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
+    
+    self.colourIndex = 0
+        
+    apiDataSource = self.apiSpectrumView.dataSource
+    if not self.positiveContourColour:
+      apiDataSource.positiveContourColour = Colour.spectrumHexColours[self.colourIndex]
+      self.colourIndex += 1
+      self.colourIndex %= len(Colour.spectrumHexColours)
+
+    if not self.negativeContourColour:
+    # Changed to guiSpectrumView.negativeContourColour, which picks up from either
+    # SpectrumView or DataSource
+      apiDataSource.negativeContourColour = Colour.spectrumHexColours[self.colourIndex]
+      self.colourIndex += 1
+      self.colourIndex %= len(Colour.spectrumHexColours)
+
+    for strip in self.strips:
+      strip.plotWidget.scene().addItem(self)
+    
             
   """
   def getLevels(self):
@@ -219,7 +238,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
       # the below is because the y axis goes from top to bottom
       GL.glScale(1.0, -1.0, 1.0)
-      GL.glTranslate(0.0, -guiStrip.height(), 0.0)
+      GL.glTranslate(0.0, -guiStrip.plotWidget.height(), 0.0)
       
       # the below makes sure that spectrum points get mapped to screen pixels correctly
       GL.glTranslate(xTranslate, yTranslate, 0.0)
@@ -371,16 +390,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   
   def getTranslateScale(self, guiStrip, dim):
         
-    plotItem = guiStrip.plotItem
+    plotWidget = guiStrip.plotWidget
+    plotItem = plotWidget.plotItem
     viewBox = guiStrip.viewBox
-    viewRegion = guiStrip.viewRange()
+    viewRegion = plotWidget.viewRange()
     region1, region0 = viewRegion[dim]  # TBD: relies on axes being backwards
+
     if dim == 0:
-      pixelCount = guiStrip.width()
+      pixelCount = plotWidget.width()
       pixelViewBox0 = plotItem.getAxis('left').width()
       pixelViewBox1 = pixelViewBox0 + viewBox.width()
     else:
-      pixelCount = guiStrip.height()
+      pixelCount = plotWidget.height()
       pixelViewBox0 = plotItem.getAxis('bottom').height()
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
     

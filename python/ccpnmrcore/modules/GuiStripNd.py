@@ -66,7 +66,6 @@ class GuiStripNd(GuiStrip):
     # #
     # # else:
     # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
-    apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
 
     # Changed to guiSpectrumView.positiveContourColour, which picks up from either
     # SpectrumView or DataSource

@@ -57,7 +57,6 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
     
     ###self.setDimMapping(dimMapping)
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
-    self.spectrumDisplay.spectrumToolBar
 
     
     """

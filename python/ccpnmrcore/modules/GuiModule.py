@@ -21,4 +21,7 @@ class GuiModule(QtGui.QWidget, GuiBase):
     self.dock = Dock(name=self._wrappedData.name, size=(1100,1300))
     self.dockArea.addDock(self.dock, position=position)
     GuiBase.__init__(self, self._project._appBase)
-    
+
+  def hoverEvent(self, event):
+    event.accept()
+    print(self)

@@ -1,36 +1,45 @@
 __author__ = 'simon'
 
-from pyqtgraph import AxisItem as AxisItem
-from pyqtgraph import LabelItem as LabelItem
+import pyqtgraph as pg
 
-from PySide import QtCore
+class Axis(pg.AxisItem):
 
-from ccpncore.gui import ViewBox
+   def __init__(self, parent, orientation, viewBox=None, axisCode=None, units=None, mappedDim=None, pen=None):
 
-class Axis(AxisItem):
-
-   def __init__(self, parent, orientation, axisCode=None, units=None, mappedDim=None):
      self.parent = parent
+     self.plotItem = self.parent.plotItem
      self.orientation = orientation
-     AxisItem.__init__(self, orientation=orientation, linkView=ViewBox.ViewBox())
+     pg.AxisItem.__init__(self, orientation=orientation, linkView=viewBox)
      self.axisCode = axisCode
      self.units = units
      self.mappedDim = mappedDim
+     self.textItem = pg.TextItem(text=axisCode, color='w')
+     if orientation == 'top':
+       axis = self.plotItem.axes['bottom']['item']
+       self.textItem.setPos(viewBox.boundingRect().bottomLeft())
+       self.textItem.anchor = pg.Point(0, 1)
+     else:
+       axis = self.plotItem.axes['right']['item']
+       self.textItem.setPos(viewBox.boundingRect().topRight())
+       self.textItem.anchor = pg.Point(1, 0)
+     self.parent.scene().addItem(self.textItem)
+     axis.orientation = orientation
+     axis.setPen(pg.functions.mkPen(pen))
+     axis.show()
+
+
 
    def setUnits(self, units):
      self.setLabel(units=units)
 
    def setAxisCode(self, axisCode):
      self.axisCode = str(axisCode)
-     # self.label.setPos(-15,-15)
-     # self.parent.plotItem.setLabel(self.orientation,self.axisCode)
-     if self.orientation == 'bottom':
-       # self.parent.plotItem.removeItem(self.label)
 
 
-       self.label.setPos(3,1)
-       self.parent.plotItem.addItem(self.label)
-       self.update()
+
+       # self.label.setPos(3,1)
+       # self.parent.plotItem.addItem(self.label)
+       # self.update()
        # self.parent.plotItem.labels['bottom'].setPos(3,1)
      # print(self.orientation,self.label.pos())
 

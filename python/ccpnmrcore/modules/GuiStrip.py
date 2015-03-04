@@ -28,18 +28,16 @@ class GuiStrip(DropBase, PlotWidget): # DropBase needs to be first, else the dro
 
 
     # DropBase.__init__(self, self._appBase, self.dropCallback)
-    PlotWidget.__init__(self, self.stripFrame, grid=(0, self.guiSpectrumDisplay.stripCount)) #, gridSpan=(1, 1))
-
-    # if self.appBase.preferences.general.colourScheme == 'light':
-    #   background = 'w'
-    #   foreground = 'k'
-    #   print(background)
-    # else:
-    background = 'k'
-    foreground = 'w'
-    pg.setConfigOption('background', background)
-    pg.setConfigOption('foreground', foreground)
-    self.plotWidget.setBackground(background)
+    PlotWidget.__init__(self, self.stripFrame, grid=(0, self.guiSpectrumDisplay.stripCount), gridSpan=(1, 1))
+    if self._parent._appBase.preferences.general.colourScheme == 'light':
+      self.background = 'w'
+      self.foreground = 'k'
+    else:
+      self.background = 'k'
+      self.foreground = 'w'
+    pg.setConfigOption('background', self.background)
+    pg.setConfigOption('foreground', self.foreground)
+    self.plotWidget.setBackground(self.background)
     self.setAcceptDrops(True)
     self._appBase = self.guiSpectrumDisplay._appBase
     # self.setForegroundBrush(foreground)
@@ -53,23 +51,13 @@ class GuiStrip(DropBase, PlotWidget): # DropBase needs to be first, else the dro
     self.yRegion = self.orderedAxes[1].region
     self.viewBox.setXRange(*self.xRegion)
     self.viewBox.setYRange(*self.yRegion)
-    self.xAxis = Axis(self, orientation='top')
-    self.yAxis = Axis(self, orientation='left')
+    self.xAxis = Axis(self.plotWidget, orientation='top', pen=self.foreground, viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
+    self.yAxis = Axis(self.plotWidget, orientation='left', pen=self.foreground, viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
     self.gridShown = True
-    self.axes['left']['item'].hide()
-    self.axes['right']['item'].show()
-    self.axes['bottom']['item'].orientation = 'top'
-    self.axes['right']['item'].orientation = 'left'
-    self.axes['bottom']['item'].setPen(pg.functions.mkPen('w'))
-    self.axes['right']['item'].setPen(pg.functions.mkPen('w'))
-    self.textItem = pg.TextItem(text=self.orderedAxes[0].code, color=(255, 255, 255), anchor=(0, 1))
-    self.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
-    self.textItem2 = pg.TextItem(text=self.orderedAxes[1].code, color=(255, 255, 255), anchor=(1, 0))
-    self.textItem2.setPos(self.viewBox.boundingRect().topRight())
     self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
-    self.plotWidget.scene().addItem(self.textItem)
-    self.plotWidget.scene().addItem(self.textItem2)
-    self.grid = pg.GridItem()
+    self.viewBox.sigRangeChanged.connect(self.updateRegion)
+    self.grid = pg.GridItem(pen=self.foreground)
+    # self.grid.setPen())
     self.plotWidget.addItem(self.grid)
     self.setMinimumWidth(200)
     self.createCrossHair()
@@ -84,6 +72,14 @@ class GuiStrip(DropBase, PlotWidget): # DropBase needs to be first, else the dro
   #   newStrip = self.strips[0].clone()
   #   print(newStrip.pid)
 
+  def updateRegion(self, event):
+    xRegion = self.viewBox.viewRange()[0]
+    yRegion = self.viewBox.viewRange()[1]
+    self.orderedAxes[0].region = xRegion
+    self.orderedAxes[1].region = yRegion
+    print(self.orderedAxes[0].position, self.orderedAxes[0].width)
+
+
   def addSpinSystemLabel(self):
     self.spinSystemLabel = Label(self, grid=(1, 0), hAlign='center', dragDrop=True, pid=self.pid)
     self.spinSystemLabel.setText("Spin systems shown here")
@@ -91,17 +87,19 @@ class GuiStrip(DropBase, PlotWidget): # DropBase needs to be first, else the dro
     # self.spinSystemLabel.pid = self.pid
     # print(self.pid)
 
+
+
   def moveAxisCodeLabels(self):
-    self.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
-    self.textItem2.setPos(self.viewBox.boundingRect().topRight())
+    self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
+    self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
 
   def hideCrossHairs(self):
     for strip in self.guiSpectrumDisplay.guiStrips:
       strip.hideCrossHair()
 
   def createCrossHair(self):
-    self.vLine = pg.InfiniteLine(angle=90, movable=False, pen='w')
-    self.hLine = pg.InfiniteLine(angle=0, movable=False, pen='w')
+    self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
+    self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
     self.plotWidget.addItem(self.vLine, ignoreBounds=True)
     self.plotWidget.addItem(self.hLine, ignoreBounds=True)
     self.guiSpectrumDisplay._appBase.hLines.append(self.hLine)
@@ -213,7 +211,7 @@ class GuiStrip(DropBase, PlotWidget): # DropBase needs to be first, else the dro
       print(self.guiSpectrumDisplay.strips)
       # print(dropObject._parent)
       # print('dropObject',dropObject)
-      dropObject.deleteLater()
+      dropObject.delete()
       dropObject.clone()
       # # print(newStrip)
       # print('strip cloned')

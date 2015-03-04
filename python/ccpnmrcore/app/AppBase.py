@@ -22,14 +22,16 @@ class AppBase(GuiBase):
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
     self.setupPreferences()
-    self.initProject(apiProject)
     self.vLines = []
     self.hLines = []
+    self.initProject(apiProject)
+
 
     
   def initProject(self, apiProject):
 
     # Done this way to sneak the appBase in before creating the wrapper
+    self.current = Current()
     apiProject._appBase = self
     project = ccpn._wrapApiProject(apiProject)
     apiNmrProject = project._wrappedData
@@ -37,7 +39,7 @@ class AppBase(GuiBase):
     project._appBase = self
 
 
-    self.current = Current()
+
 
     apiWindowStore = apiNmrProject.windowStore
     if apiWindowStore is None:

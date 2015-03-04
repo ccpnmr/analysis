@@ -23,8 +23,7 @@ from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def __init__(self):
-    # if not hasattr(self._project, "_appBase"):
-    #   raise Exception
+    print((self._project._appBase), 'appBase')
     QtGui.QMainWindow.__init__(self)
     #if not apiWindow.modules:
       #apiGuiTask = apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
@@ -49,12 +48,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # else:
     #   project = self._appBase.project
 
-    project = self._appBase.project
+    # project = self._appBase.project
       
     isNew = self.apiWindow.root.isModified  # a bit of a hack this, but should be correct
     print(isNew)
     
-    project = self._appBase.project
+    project = self._project
     path = project.path
     self.leftWidget.fillSideBar(project)
     self.namespace['project'] = project
@@ -91,9 +90,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     
-    self.namespace = {'current': self._appBase.current, 'openProject':self._appBase.openProject,
+    print(self._appBase)
+    self.namespace = {'current': self._project._appBase.current, 'openProject':self._appBase.openProject,
                       'newProject':self._appBase.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
-                      'preferences':self._appBase.preferences, 'project':self._appBase.project}
+                      'preferences':self._appBase.preferences, 'project':self._project}
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     self.pythonConsole.heightMax = 200

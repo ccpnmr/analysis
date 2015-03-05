@@ -74,12 +74,12 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def name(self) -> str:
     """Residue type name string (e.g. 'Ala')"""
-    return self._wrappedData.code3Letter
+    return self._wrappedData.residueType
 
   @name.setter
   def name(self, value:str):
     apiResonanceGroup = self._wrappedData
-    apiResonanceGroup.code3Letter = value
+    apiResonanceGroup.residueType = value
 
     # get chem comp ID strings from residue name
     tt = DataMapper.pickChemCompId(self._project._residueName2chemCompIds, value)

@@ -21,12 +21,13 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util.Path import checkFilePath
-from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
-from ccpncore.lib.spectrum.Util import AZARA, BRUKER, CCPN, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
 import os
+from collections.abc import Sequence
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
+from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
+from ccpncore.lib.spectrum.Util import AZARA, BRUKER, CCPN, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
+from ccpncore.util.Path import checkFilePath
 
 from ccpncore.api.memops.Implementation import Url
 
@@ -109,3 +110,24 @@ def loadDataSource(nmrProject, filePath):
   experiment.resetAxisCodes()
 
   return dataSource
+
+
+def createExperiment(nmrProject:object, name:str, numDim:int, sf:Sequence,
+                     isotopeCodes:Sequence, isAcquisition:Sequence=None, **additionalParameters):
+  """Create Experiment object ExpDim, and one ExpDimRef per ExpDim.
+  Additional parameters to Experiment object are passed in additionalParameters"""
+
+  experiment = nmrProject.newExperiment(name=name, numDim=numDim, **additionalParameters)
+
+  if isAcquisition is None:
+    isAcquisition = (False,) * numDim
+
+  for n, expDim in enumerate(experiment.sortedExpDims()):
+    expDim.isAcquisition = isAcquisition[n]
+    ic = isotopeCodes[n]
+    if ic:
+      if isinstance(ic, str):
+        ic = (ic,)
+      expDim.newExpDimRef(sf=sf[n], unit='ppm', isotopeCodes=ic)
+
+  return experiment

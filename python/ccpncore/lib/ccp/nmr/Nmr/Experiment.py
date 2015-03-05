@@ -79,6 +79,7 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 """
 import re
+from collections.abc import Sequence
 
 # Additional functions for ccp.nmr.Nmr.Experiment
 #
@@ -216,3 +217,46 @@ def resetAxisCodes(experiment):
       expDimRef.axisCode = useCode
 
 
+
+def createDataSource(experiment:object, name:str, numPoints:Sequence, sw:Sequence,
+                     refppm:Sequence, refpt:Sequence, dataStore:object=None,
+                     scale:float=1.0, details:str=None, numPointsOrig:Sequence=None,
+                     pointOffset:Sequence=None, isComplex:Sequence=None,
+                     **additionalParameters) -> object:
+  """Create a processed DataSource, with FreqDataDims, and one DataDimRef for each DataDim.
+  NB Assumes that number and order of dimensions match the Experiment.
+  Parameter names generally follow CCPN data model names. dataStore is a BlockedBinaryMatrix object
+  Sequence type parameters are one per dimension.
+  Additional  parameters for the DataSource are passed in additionalParameters"""
+
+  numDim = len(numPoints)
+
+  if numDim != experiment.numDim:
+    raise ValueError('numDim = %d != %d = experiment.numDim' % (numDim, experiment.numDim))
+
+  spectrum = experiment.newDataSource(name=name, dataStore=dataStore, scale=scale, details=details,
+                                      numDim=numDim, dataType='processed', **additionalParameters)
+
+  # NBNB TBD This is not a CCPN attribute. Removed. Put back if you need it after all,
+  # spectrum.writeable = writeable
+
+  if not numPointsOrig:
+    numPointsOrig = numPoints
+
+  if not pointOffset:
+    pointOffset = (0,) * numDim
+
+  if not isComplex:
+    isComplex = (False,) * numDim
+
+
+  for n , expDim in enumerate(experiment.sortedExpDims()):
+    freqDataDim = spectrum.newFreqDataDim(dim=n+1, numPoints=numPoints[n],
+                             isComplex=isComplex[n], numPointsOrig=numPointsOrig[n],
+                             pointOffset=pointOffset[n],
+                             valuePerPoint=sw[n]/float(numPoints[n]), expDim=expDim)
+    expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
+    if expDimRef:
+      freqDataDim.newDataDimRef(refPoint=refpt[n], refValue=refppm[n], expDimRef=expDimRef)
+
+  return spectrum

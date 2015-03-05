@@ -551,7 +551,6 @@ def regulariseEntry(entryIn):
               try:
                 obj.addData(row)
               except:
-                print ("@~@~ %s %s" % (prefix, useTags))
                 print ("     %s" % row)
                 raise
   return result

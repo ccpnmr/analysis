@@ -74,7 +74,7 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def name(self) -> str:
     """Residue type name string (e.g. 'Ala')"""
-    return self._wrappedData.residueType
+    return self._wrappedData.residueType or ''
 
   @name.setter
   def name(self, value:str):

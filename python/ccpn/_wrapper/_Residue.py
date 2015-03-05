@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpncore.lib.molecule import DataMapper
+from ccpncore.lib.molecule.DataMapper import DataMapper
 from ccpncore.util import pid as Pid
 
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
@@ -77,7 +77,7 @@ class Residue(AbstractWrapperObject):
   @property
   def name(self) -> str:
     """Residue type name string (e.g. 'ALA')"""
-    return self._wrappedData.code3Letter
+    return self._wrappedData.code3Letter or ''
 
   @name.setter
   def name(self, value:str):

@@ -940,12 +940,13 @@ class DataMapper:
   @staticmethod
   def getAtomData(atomSysName, excludeAtomNames=None, useStereospecific=False):
     """ Get atom data (name, isProchiral, isEquivalent) for AtomSysName object.
+
   Rules for name match:
   - If match is an atom and is part of an equivalent atomset, use atomset
-    - unless name is H: in this case use single atom
+  - unless name is H: in this case use single atom
   - If match is an AtomSet (or as above), use AtomSet name. Duplicate hits allowed
   - If match is an atom and is part of a prochiral atomset, and stereospecific
-     is false, use a/b names. Duplicates prohibited
+    is false, use a/b names. Duplicates prohibited
   - Otherwise use atom name. Duplicates prohibited
     
     .. describe:: Input

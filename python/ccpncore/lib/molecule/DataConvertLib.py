@@ -52,8 +52,9 @@ def getBestNamingSystem(residues, atomNamesList):
 
   """
   Descrn: Determine best naming system from residues and matching atom names
-  Inputs: residues: list of residues 
-          atomNamesList: list of list of atom names, matching residues 1:1
+  Inputs:
+    residues: list of residues
+    atomNamesList: list of list of atom names, matching residues 1:1
 
   Output: name of best namingSystem
   """
@@ -236,10 +237,11 @@ def getBestChemComp(project, resName, atomNames, molType=None, download=True):
 def getBestMolType(atomNames, ccpCodes=None):
   """Determine the best molecule type (protein, DNA, RNA, carbohydrate or
              nonpolymer) given the input atom names and residue ccpCodes
+
   .. describe:: Input
   
   List of Words (imported atom names),
-             List of Words (Molecule.MolResidue.ccpCodes)
+  List of Words (Molecule.MolResidue.ccpCodes)
 
   .. describe:: Output
 

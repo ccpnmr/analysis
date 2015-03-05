@@ -40,8 +40,10 @@ from ccpncore.lib.chemComp import Io as chemCompIo
 def makeMolecule(project, molType, sequence, molName=None, startNum=1, isCyclic=False):
 
   """Descrn: Makes Molecule for a given sequence
+
      Inputs: Project, Word (ChemComp.molType), List of Words (ChemComp.CcpCode),
-             String ( Ccp.Molecule.Molecule.name) Int (first MolResidue.seqCode)
+     String ( Ccp.Molecule.Molecule.name) Int (first MolResidue.seqCode)
+
      Output: Molecule
   """
 

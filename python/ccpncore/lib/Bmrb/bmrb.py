@@ -4,11 +4,11 @@
 
 There are five module variables you can set to control our behavior.
 
-*Setting bmrb.verbose to True will print some of what is going on to the terminal.
-*Setting bmrb.raise_parse_warnings to true will raise an exception if the parser encounters something problematic. Normally warnings are suppressed.
-*Setting skip_empty_loops to True will suppress the printing of empty loops when calling __str__ methods.
-*Adding key->value pairs to str_conversion_dict will automatically convert tags whose value matches "key" to the string "value" when printing. This allows you to set the default conversion value for Booleans or other objects.
-*Setting bmrb.allow_v2_entries will allow parsing of and printing of NMR-STAR version 2.1 entries. Most other methods will not operate correctly on parsed 2.1 entries. This is only to allow you parse and access the data in these entries - nothing else. Only set this if you have a really good reason to.
+* Setting bmrb.verbose to True will print some of what is going on to the terminal.
+* Setting bmrb.raise_parse_warnings to true will raise an exception if the parser encounters something problematic. Normally warnings are suppressed.
+* Setting skip_empty_loops to True will suppress the printing of empty loops when calling __str__ methods.
+* Adding key->value pairs to str_conversion_dict will automatically convert tags whose value matches "key" to the string "value" when printing. This allows you to set the default conversion value for Booleans or other objects.
+* Setting bmrb.allow_v2_entries will allow parsing of and printing of NMR-STAR version 2.1 entries. Most other methods will not operate correctly on parsed 2.1 entries. This is only to allow you parse and access the data in these entries - nothing else. Only set this if you have a really good reason to.
 
 Some errors will be detected and exceptions raised, but this does not implement a full validator (at least at present).
 
@@ -45,9 +45,9 @@ else:
     BytesIO = StringIO
 
 # Local libraries
-from .sans import STARLexer
-from .sans import SansParser
-from .sans import ErrorHandler, ContentHandler
+from ccpncore.lib.Bmrb.sans import STARLexer
+from ccpncore.lib.Bmrb.sans import SansParser
+from ccpncore.lib.Bmrb.sans import ErrorHandler, ContentHandler
 
 #############################################
 #            Global Variables               #

@@ -53,17 +53,17 @@ ccpn.Atom class
 .. autoclass:: ccpn._wrapper._Atom.Atom
 
 ccpn.NmrChain class
-----------------
+-------------------
 
 .. autoclass:: ccpn._wrapper._NmrChain.NmrChain
 
 ccpn.NmrResidue class
-------------------
+---------------------
 
 .. autoclass:: ccpn._wrapper._NmrResidue.NmrResidue
 
 ccpn.NmrAtom class
----------------
+------------------
 
 .. autoclass:: ccpn._wrapper._NmrAtom.NmrAtom
 
@@ -98,28 +98,28 @@ ccpn.Peak class
 .. autoclass:: ccpn._wrapper._Peak.Peak
 
 ccpn.RestraintSet class
--------------------
+-----------------------
 
 .. autoclass:: ccpn._wrapper._RestraintSet.RestraintSet
 
 ccpn.RestraintList class
--------------------
+------------------------
 
 .. autoclass:: ccpn._wrapper._RestraintList.RestraintList
 
 ccpn.Restraint class
--------------------
+--------------------
 
 .. autoclass:: ccpn._wrapper._Restraint.Restraint
 
 ccpn.RestraintContribution class
--------------------
+--------------------------------
 
 .. autoclass:: ccpn._wrapper._RestraintContribution.RestraintContribution
 
 
 ccpn.AbstractWrapperObject class
--------------------------------
+--------------------------------
 
 .. autoclass:: ccpn._wrapper._AbstractWrapperObject.AbstractWrapperObject
 

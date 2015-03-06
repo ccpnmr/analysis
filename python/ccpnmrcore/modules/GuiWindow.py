@@ -15,7 +15,8 @@ class GuiWindow(GuiBase):
   
   def __init__(self):
     
-    self._appBase = self._project._appBase
+    GuiBase.__init__(self, self._parent._appBase)
+    #self._appBase = self._project._appBase
     # self.apiWindow = apiWindow
     self.dockArea = DockArea()
     self.dockArea.guiWindow = self
@@ -37,58 +38,32 @@ class GuiWindow(GuiBase):
     #   self.blankDisplay = None
     # else:
     #   self.blankDisplay = GuiBlankDisplay(self.dockArea)
-        
+            
   def removeBlankDisplay(self):
     
     if self.blankDisplay:
       self.blankDisplay.setParent(None)
       self.blankDisplay = None
-      
-  ##def displayFirstSpectrum(self, spectrum):
-
-    ##assert self.blankDisplay
-    
-    ##self.blankDisplay.setParent(None)
-    ##self.blankDisplay = None
-
-    # NBNB TBD consider whether this should be refactored now we use createSpectrumDisplay
-    ##self.createSpectrumDisplay(spectrum)
-    ##self._appBase.guiWindows.append(self)
-    # apiGuiTask = self.apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
-    # #axisCodes = spectrum.axisCodes
-    # axisCodes = Spectrum.getAxisCodes(spectrum)
-    # if spectrum.dimensionCount == 1:
-    #   apiStripDisplay = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
-    #   guiStripDisplay = GuiStripDisplay1d(self.dockArea, apiStripDisplay)
-    # else:
-    #   apiStripDisplay = apiGuiTask.newStripDisplayNd(name='Module2_ND', axisCodes=axisCodes, axisOrder=axisCodes, stripDirection='Y')
-    #   guiStripDisplay = GuiStripDisplayNd(self.dockArea, apiStripDisplay)
-    #   guiStripDisplay.guiStrips[0].addSpinSystemLabel(guiStripDisplay.stripFrame, 0)
-    # # if spectrum.dimensionCount > 2:
-    # #   for i in range(spectrum.dimensionCount-2):
-    # #     guiStripDisplay.guiStrips[0].addPlaneToolbar(guiStripDisplay.stripFrame, 0)
-    #
-    # guiStripDisplay.addSpectrum(spectrum)
-    # self.apiWindow.addModule(apiStripDisplay)
-    
+          
   def loadSpectra(self, directory=None):
     
-    if directory == None:
+    if directory is None:
       directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
-      spectrum = self.project.loadSpectrum(directory[0])
+      if not directory:
+        return
+      directory = directory[0]
 
-    else:
-      spectrum = self.project.loadSpectrum(directory)
-      # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
+    spectrum = self.project.loadSpectrum(directory)
+    # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
 
+    if not spectrum:
+      return
+      
     msg = spectrum.name+' loaded'
     mainWindow = self._appBase.mainWindow
     mainWindow.leftWidget.addItem(mainWindow.leftWidget.spectrumItem,spectrum)
     mainWindow.statusBar().showMessage(msg)
-    if len(directory) == 1:
-      mainWindow.pythonConsole.write("project.loadSpectrum('"+directory+"')\n")
-    else:
-      mainWindow.pythonConsole.write("project.loadSpectrum('"+directory[0]+"')\n")
+    mainWindow.pythonConsole.write("project.loadSpectrum('"+directory+"')\n")
 
   def addSpectrum1dDisplay(self):
       pass

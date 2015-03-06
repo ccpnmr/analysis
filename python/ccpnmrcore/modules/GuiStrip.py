@@ -63,7 +63,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.gridShown = True
     self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
     self.viewBox.sigRangeChanged.connect(self.updateRegion)
-    self.grid = pg.GridItem(pen=self.foreground)
+    self.grid = pg.GridItem()#pen=self.foreground)
     # self.plotWidget.addItem(self.grid)
     # self.setMinimumWidth(200)
     self.createCrossHair()

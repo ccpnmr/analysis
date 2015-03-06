@@ -160,7 +160,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.colourIndex %= len(Colour.spectrumHexColours)
 
     for strip in self.strips:
-      strip.plotWidget.scene().addItem(self)
+      if self not in strip.plotWidget.scene().items():
+        strip.plotWidget.scene().addItem(self)
 
             
   """

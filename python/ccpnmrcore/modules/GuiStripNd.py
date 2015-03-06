@@ -35,7 +35,8 @@ class GuiStripNd(GuiStrip):
     self.addPlaneToolbar()
     ###self.setShortcuts()
     for spectrumView in self.spectrumViews:
-      self.plotWidget.scene().addItem(spectrumView)
+      if spectrumView not in self.plotWidget.scene().items():
+        self.plotWidget.scene().addItem(spectrumView)
 
   """
   def showSpectrum(self, guiSpectrumView):

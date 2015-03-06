@@ -27,7 +27,12 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     Widget.__init__(self)
     DropBase.__init__(self, self._parent._appBase, self.dropCallback)
-    self.plotWidget = PlotWidget(self.stripFrame, grid=(0, self.guiSpectrumDisplay.stripCount-1), gridSpan=(1, 1))
+    self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
+                      dropCallback=self.dropCallback, grid=(0, self.guiSpectrumDisplay.stripCount-1))
+    # self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
+    #           dropCallback=self.dropCallback, grid=(0, self.guiSpectrumDisplay.stripCount-1)) #, gridSpan=(1, 1))
+
+
     if self._parent._appBase.preferences.general.colourScheme == 'light':
       self.background = 'w'
       self.foreground = 'k'
@@ -37,28 +42,30 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     pg.setConfigOption('background', self.background)
     pg.setConfigOption('foreground', self.foreground)
     self.plotWidget.setBackground(self.background)
-    self.setAcceptDrops(True)
+    # self.setAcceptDrops(True)
+    # self.plotWidget.setAcceptDrops(True)
     self._appBase = self.guiSpectrumDisplay._appBase
     # self.setForegroundBrush(foreground)
 
     self.plotItem = self.plotWidget.plotItem
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
-    self.plotItem.setAcceptDrops(True)
+    # self.plotItem.setAcceptDrops(True)
     self.axes = self.plotItem.axes
     self.viewBox = self.plotItem.vb
     # self.xRegion = self.orderedAxes[0].region
     # self.yRegion = self.orderedAxes[1].region
-    # self.viewBox.setXRange(*self.xRegion)
-    # self.viewBox.setYRange(*self.yRegion)
-    self.xAxis = Axis(self.plotWidget, orientation='top', pen=self.foreground, viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
-    self.yAxis = Axis(self.plotWidget, orientation='left', pen=self.foreground, viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
+    self.viewBox.setXRange(*self.orderedAxes[0].region)
+    self.viewBox.setYRange(*self.orderedAxes[1].region)
+    self.xAxis = Axis(self.plotWidget, orientation='top', pen=self.foreground,
+                      viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
+    self.yAxis = Axis(self.plotWidget, orientation='left', pen=self.foreground,
+                      viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
     self.gridShown = True
     self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
     self.viewBox.sigRangeChanged.connect(self.updateRegion)
-    self.grid = pg.GridItem()#pen=self.foreground)
-    # self.grid.setPen())
-    self.plotWidget.addItem(self.grid)
-    self.setMinimumWidth(200)
+    self.grid = pg.GridItem(pen=self.foreground)
+    # self.plotWidget.addItem(self.grid)
+    # self.setMinimumWidth(200)
     self.createCrossHair()
     proxy = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
@@ -109,11 +116,12 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.eventOriginator = None
 
   def addSpinSystemLabel(self):
-    self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.stripCount-1), hAlign='center', dragDrop=True, pid=self.pid)
+    self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.stripCount-1),
+                                 hAlign='center', dragDrop=True, pid=self.pid)
     self.spinSystemLabel.setText("Spin systems shown here")
     self.spinSystemLabel.setFixedHeight(30)
     # self.spinSystemLabel.pid = self.pid
-    # print(self.pid)
+    # print(self.pid)lo
 
 
 
@@ -234,9 +242,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
       self.displaySpectrum(dropObject)
 
     else:
-      print(self.guiSpectrumDisplay.strips)
       self.guiSpectrumDisplay.copyStrip(dropObject, newIndex=0)
-      print(self.guiSpectrumDisplay.strips)
       # print(dropObject._parent)
       # print('dropObject',dropObject)
       dropObject.delete()

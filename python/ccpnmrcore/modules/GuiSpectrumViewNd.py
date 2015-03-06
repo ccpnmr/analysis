@@ -27,6 +27,7 @@ import numpy
 from OpenGL import GL
 from PySide import QtCore
 
+from ccpncore.gui.ToolButton import ToolButton
 from ccpncore.util import Colour
 
 from ccpnc.contour import Contourer2d
@@ -39,13 +40,13 @@ from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 
 def _getLevels(count, base, factor):
   
-  base *= 100  # TEMP
+  base *= 100.0  # TEMP
   
   levels = []
   if count > 0:
     levels = [base]
     for n in range(count-1):
-      levels.append(factor * levels[-1])
+      levels.append(numpy.float32(factor * levels[-1]))
       
   return levels
        
@@ -132,7 +133,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
     """
     self.posContoursVisible = True # this block of code TEMP
-    self.negContoursVisible = True
+    self.negContoursVisibleContoursVisible = True
     self.baseLevel = 1000000.00
     self.multiplier = 1.4
     self.numberOfLevels = 20
@@ -160,7 +161,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     for strip in self.strips:
       strip.plotWidget.scene().addItem(self)
-    
+
             
   """
   def getLevels(self):
@@ -212,7 +213,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       return
       
     contourDict = self.constructContours(guiStrip, posLevels, negLevels)
-    
+
     posColour = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour
     negColour = Colour.scaledRgba(apiDataSource.negativeContourColour)
 
@@ -271,7 +272,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.releaseDisplayLists(contourDict)
     else:
       contourDict = self.contourDisplayIndexDict[xyDataDims] = {}
-      
+
       
     ###self.previousRegion = self.guiSpectrumDisplay.region[:]  # TBD: not quite right, should be looking at the strip(s)
     

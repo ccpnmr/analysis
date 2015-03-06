@@ -28,6 +28,8 @@ import numpy
 
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 
+from ccpncore.gui.ToolButton import ToolButton
+
 from ccpncore.util.Colour import spectrumColours
 
 class GuiSpectrumView1d(GuiSpectrumView):
@@ -61,7 +63,14 @@ class GuiSpectrumView1d(GuiSpectrumView):
         else:
           self.spectrum.sliceColour = list(spectrumColours.keys())[(len(strip.spectrumViews) % 12)-1]
 
-      strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
+      self.plot  = strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
+    spectrumViewButton = ToolButton(self.spectrumDisplay, self.spectrum.sliceColour, self)
+
+
+
+      # print(dir(self.spectrumDisplay))
+
+
 
 
   def getSliceData(self):

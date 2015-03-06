@@ -32,7 +32,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
   def __init__(self):
     GuiModule.__init__(self)
     DropBase.__init__(self, self._appBase, self.dropCallback)
-
+    self.setAcceptDrops(True)
     self.spectrumToolBar = ToolBar(self.dock, grid=(0, 0), gridSpan=(1, 2))
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     screenWidth  = QtGui.QApplication.desktop().screenGeometry().width()
@@ -47,6 +47,9 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.scrollArea = ScrollArea(self.dock, grid=(1, 1), gridSpan=(1, 3))
     self.scrollArea.setWidgetResizable(True)
     self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0), appBase=self._appBase)
+    self.stripFrame.setAcceptDrops(True)
+
+
     self.scrollArea.setWidget(self.stripFrame)
 
     #

@@ -20,7 +20,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
     GuiSpectrumDisplay.__init__(self)
     self.fillToolBar()
-    # self.setAcceptDrops(True)
+    self.setAcceptDrops(True)
     self.addSpinSystemSideLabel()
     # self._appBase.current.pane = self
 
@@ -138,27 +138,32 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
 
   def upBy2(self):
-    for spectrumItem in self.spectrumItems:
-      spectrumItem.baseLevel*=1.4
-      spectrumItem.levels = spectrumItem.getLevels()
+    for spectrumView in self.spectrumViews:
+      spectrumView.spectrum.positiveContourBase*=spectrumView.spectrum.positiveContourFactor
+      spectrumView.spectrum.negativeContourBase*=spectrumView.spectrum.positiveContourFactor
+      # spectrumItem.levels = spectrumItem.getLevels()
 
   def downBy2(self):
-    for spectrumItem in self.spectrumItems:
-      spectrumItem.baseLevel/=1.4
-      spectrumItem.levels = spectrumItem.getLevels()
+    for spectrumView in self.spectrumViews:
+      spectrumView.spectrum.positiveContourBase/=spectrumView.spectrum.positiveContourFactor
+      spectrumView.spectrum.negativeContourBase/=spectrumView.spectrum.negativeContourFactor
 
   def addOne(self):
-    self.current.spectrum.spectrumItem.numberOfLevels +=1
-    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+    for spectrumView in self.spectrumViews:
+      spectrumView.spectrum.positiveContourCount +=1
+      spectrumView.spectrum.negativeContourCount +=1
 
 
   def subtractOne(self):
-    self.current.spectrum.spectrumItem.numberOfLevels -=1
-    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+    for spectrumView in self.spectrumViews:
+      spectrumView.spectrum.positiveContourCount -=1
+      spectrumView.spectrum.negativeContourCount -=1
+
 
   def addAStrip(self):
 
     newStrip = self.strips[0].clone()
+    print(newStrip.positions, newStrip.widths)
     newStrip.setMinimumWidth(200)
     # self.stripFrame.layout().addWidget(newStrip)
     # self.stripNumber+=1

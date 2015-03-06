@@ -16,6 +16,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     GuiSpectrumDisplay.__init__(self)
     self.fillToolBar()
     self.addSpinSystemSideLabel()
+    self.setAcceptDrops(True)
 
   # def addSpectrum(self, spectrum):
   #

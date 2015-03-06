@@ -34,6 +34,8 @@ class GuiStripNd(GuiStrip):
     self.addSpinSystemLabel()
     self.addPlaneToolbar()
     ###self.setShortcuts()
+    for spectrumView in self.spectrumViews:
+      self.plotWidget.scene().addItem(spectrumView)
 
   """
   def showSpectrum(self, guiSpectrumView):
@@ -45,7 +47,43 @@ class GuiStripNd(GuiStrip):
 
     newItem = self.scene().addItem(guiSpectrumView)
 """
-  def displayASpectrum(self, guiSpectrumView):
+  # def displayASpectrum(self, guiSpectrumView):
+  #
+  #   # resetAllAxisCodes(self.project._wrappedData)
+  #   # spectrum = self.getObject(spectrumVar)
+  #   # if spectrum.dimensionCount < 1:
+  #   #   # TBD: logger message
+  #   #   return
+  #   #
+  #   # # TBD: check if dimensions make sense
+  #   # self.posColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex]
+  #   # self.negColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex+1]
+  #   # # if len(self.spectrumItems) >= 1:
+  #   # #   if self.spectrumItems[0].spectrum.axisCodes == spectrum.axisCodes:
+  #   # #     spectrumItem = SpectrumNdItem(self, spectrum, self.spectrumItems[0].dimMapping, self.region, self.posColors, self.negColors)
+  #   # #     self.spectrumItems[0].spectrum.axisCodes
+  #   # #   else:
+  #   # #     print('Axis codes do not match pane')
+  #   # #     return
+  #   # #
+  #   # # else:
+  #   # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
+  #
+  #   # Changed to guiSpectrumView.positiveContourColour, which picks up from either
+  #   # SpectrumView or DataSource
+  #   if not guiSpectrumView.positiveContourColour:
+  #     apiDataSource.positiveContourColour = Colour.spectrumHexColours[self.colourIndex]
+  #     self.colourIndex += 1
+  #     self.colourIndex %= len(Colour.spectrumHexColours)
+  #
+  #   if not guiSpectrumView.negativeContourColour:
+  #   # Changed to guiSpectrumView.negativeContourColour, which picks up from either
+  #   # SpectrumView or DataSource
+  #     apiDataSource.negativeContourColour = Colour.spectrumHexColours[self.colourIndex]
+  #     self.colourIndex += 1
+  #     self.colourIndex %= len(Colour.spectrumHexColours)
+  #
+  #   self.scene().addItem(guiSpectrumView)
 
     # resetAllAxisCodes(self.project._wrappedData)
     # spectrum = self.getObject(spectrumVar)
@@ -66,23 +104,6 @@ class GuiStripNd(GuiStrip):
     # #
     # # else:
     # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
-
-    # Changed to guiSpectrumView.positiveContourColour, which picks up from either
-    # SpectrumView or DataSource
-    if not guiSpectrumView.positiveContourColour:
-      apiDataSource.positiveContourColour = Colour.spectrumHexColours[self.colourIndex]
-      self.colourIndex += 1
-      self.colourIndex %= len(Colour.spectrumHexColours)
-
-    if not guiSpectrumView.negativeContourColour:
-    # Changed to guiSpectrumView.negativeContourColour, which picks up from either
-    # SpectrumView or DataSource
-      apiDataSource.negativeContourColour = Colour.spectrumHexColours[self.colourIndex]
-      self.colourIndex += 1
-      self.colourIndex %= len(Colour.spectrumHexColours)
-
-    self.scene().addItem(guiSpectrumView)
-
 
   def changeZPlane(self, planeCount=None, position=None):
 
@@ -138,65 +159,46 @@ class GuiStripNd(GuiStrip):
   #   restoreZoomIcon = Icon('icons/zoom-restore')
   #   restoreZoomAction.setIcon(restoreZoomIcon)
   #   restoreZoomAction.setToolTip('Restore Zoom')
+  #
+  # def upBy2(self):
+  #   for spectrumItem in self.spectrumItems:
+  #     spectrumItem.baseLevel*=1.4
+  #     spectrumItem.levels = spectrumItem.getLevels()
+  #
+  # def downBy2(self):
+  #   for spectrumItem in self.spectrumItems:
+  #     spectrumItem.baseLevel/=1.4
+  #     spectrumItem.levels = spectrumItem.getLevels()
+  #
+  # def addOne(self):
+  #   self.current.spectrum.spectrumItem.numberOfLevels +=1
+  #   self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
+  #
+  #
+  # def subtractOne(self):
+  #   self.current.spectrum.spectrumItem.numberOfLevels -=1
+  #   self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
 
-  def upBy2(self):
-    for spectrumItem in self.spectrumItems:
-      spectrumItem.baseLevel*=1.4
-      spectrumItem.levels = spectrumItem.getLevels()
+  def addPlaneToolbar(self):
 
-  def downBy2(self):
-    for spectrumItem in self.spectrumItems:
-      spectrumItem.baseLevel/=1.4
-      spectrumItem.levels = spectrumItem.getLevels()
-
-  def addOne(self):
-    self.current.spectrum.spectrumItem.numberOfLevels +=1
-    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
-
-
-  def subtractOne(self):
-    self.current.spectrum.spectrumItem.numberOfLevels -=1
-    self.current.spectrum.spectrumItem.levels = self.current.spectrum.spectrumItem.getLevels()
-
-  def addPlaneToolbar(self, stripNumber=None, grid=None):
-    if grid is None:
-     grid = (3, 0)
-    else:
-      grid=grid
-    self.planeToolbar = ToolBar(self, grid=grid, gridSpan=(1, 1), hAlign='center')
-    self.spinSystemLabel = Label(self)
-    self.spinSystemLabel.setMaximumWidth(1150)
-    self.spinSystemLabel.setScaledContents(True)
-    # self.spinSystemLabel.setSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Fixed)
-    # # self.spinSystemLabel.setFixedWidth(900)
-    # self.planeToolbar.addWidget(self.spinSystemLabel)
-    prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
-    prevPlaneButton.setFixedWidth(30)
-    prevPlaneButton.setFixedHeight(30)
-    self.planeLabel = LineEdit(self)
-    # self.planeLabel.setAlignment(QtCore.Qt.AlignHCenter)
-    # zDims = set(range(spectrum.dimensionCount)) - {spectrumItem.xDim, spectrumItem.yDim}
-    # zDim = zDims.pop()
-    # dataDimRef = self.current.spectrum.ccpnSpectrum.sortedDataDims()[zDim].findFirstDataDimRef()
-    # self.current.spectrum.pointCounts[zDim]/2
-    # self.planeLabel.setText('%0.3f' % (dataDimRef.pointToValue(self.current.spectrum.pointCounts[zDim]/2)))
-    # self.planeLabel.setFixedWidth(100)
-    self.planeLabel.setFixedHeight(30)
-    # self.axisCodeLabel = Label(self, text=spectrum.axisCodes[spectrumItem.dimMapping[2]])
-    # self.planeLabel.textChanged.connect(self.changeZPlane)
-    nextPlaneButton = Button(self,'>', callback=self.nextZPlane)
-    nextPlaneButton.setFixedWidth(30)
-    nextPlaneButton.setFixedHeight(30)
-    self.planeToolbar.setContentsMargins(0,0,0,0)
-    self.planeToolbar.addWidget(prevPlaneButton)
-    self.planeToolbar.addWidget(self.planeLabel)
-    self.planeToolbar.addWidget(nextPlaneButton)
-    # self.layout().addWidget(self.planeToolbar, 3, 0)
-
-    # print(self.dock.widgets[-1].layout())#.addWidget(self.planeToolbar, 3, 0)
-
-  # def addSpinSystemLabel(self, guiFrame, stripNumber):
-  #   self.spinSystemLabel = Label(guiFrame, grid=(3, stripNumber), hAlign='center', dragDrop=True)
-  #   self.spinSystemLabel.setText("Spin systems shown here")
-  #   self.spinSystemLabel.setFixedHeight(30)
-  #   self.spinSystemLabel.pid = self.pid
+    # if self._parent.spectrumViews[0]
+    if len(self.orderedAxes) > 2:
+      for i in range(len(self.orderedAxes)-2):
+        self.planeToolbar = ToolBar(self.stripFrame, grid=(2+i, self.guiSpectrumDisplay.stripCount-1), hAlign='center')
+        self.spinSystemLabel = Label(self)
+        self.spinSystemLabel.setMaximumWidth(1150)
+        self.spinSystemLabel.setScaledContents(True)
+        prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
+        prevPlaneButton.setFixedWidth(30)
+        prevPlaneButton.setFixedHeight(30)
+        self.planeLabel = LineEdit(self)
+        self.planeLabel.setFixedHeight(30)
+        # self.axisCodeLabel = Label(self, text=spectrum.axisCodes[spectrumItem.dimMapping[2]])
+        # self.planeLabel.textChanged.connect(self.changeZPlane)
+        nextPlaneButton = Button(self,'>', callback=self.nextZPlane)
+        nextPlaneButton.setFixedWidth(30)
+        nextPlaneButton.setFixedHeight(30)
+        self.planeToolbar.setContentsMargins(0,0,0,0)
+        self.planeToolbar.addWidget(prevPlaneButton)
+        self.planeToolbar.addWidget(self.planeLabel)
+        self.planeToolbar.addWidget(nextPlaneButton)

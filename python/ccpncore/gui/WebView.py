@@ -1,5 +1,5 @@
 
-from PySide import QtCore, QtGui, QtWebKit
+from PyQt4 import QtCore, QtGui, QtWebKit
 
 from ccpncore.gui.BasePopup import BasePopup
 from ccpncore.gui.Base import Base

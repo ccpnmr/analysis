@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 import sys
 import os
-from PySide import QtGui
+from PyQt4 import QtGui
 
 class TextEditor(QtGui.QTextEdit):
 

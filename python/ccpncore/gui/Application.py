@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PySide import QtGui
+from PyQt4 import QtGui
 
 import sys
 
@@ -29,7 +29,7 @@ class Application(QtGui.QApplication):
 
   def __init__(self, applicationName, applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk'):
 
-    QtGui.QApplication.__init__(self, (applicationName,))
+    QtGui.QApplication.__init__(self, [applicationName,])
 
     self.setApplicationVersion(applicationVersion)
     self.setOrganizationName(organizationName)

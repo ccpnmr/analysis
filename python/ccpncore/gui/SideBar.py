@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 class SideBar(QtGui.QTreeWidget):
   def __init__(self, parent=None):

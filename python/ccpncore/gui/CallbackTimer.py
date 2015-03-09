@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PySide import QtCore
+from PyQt4 import QtCore
 
 class CallbackTimer(QtCore.QTimer):
   

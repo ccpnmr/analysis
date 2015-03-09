@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 import pyqtgraph as pg
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 from pyqtgraph.Point import Point
 
 from ccpncore.gui.Menu import Menu

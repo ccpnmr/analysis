@@ -25,7 +25,7 @@ __author__ = 'simon'
 
 import ast
 
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
 

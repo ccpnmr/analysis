@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 from ccpncore.util.Translation import Translation
 
@@ -73,7 +73,7 @@ class Base(Translation):
     if parent and not isFloatWidget:
       # Setup gridding within parent
       if isinstance(parent, Dock):
-        layout = parent.layout
+        layout = parent.widgetArea.layout()
       else:
         layout = parent.layout()
       if not layout:
@@ -82,25 +82,26 @@ class Base(Translation):
         # layout.setContentsMargins(2,2,2,2)
         parent.setLayout( layout )
 
-      if isinstance(layout, QtGui.QGridLayout): 
+      if isinstance(layout, QtGui.QGridLayout):
         row, col = self._getRowCol(grid)
         rowStr, colStr = stretch
         layout.setRowStretch(row, rowStr)
         layout.setColumnStretch(col, colStr)
- 
+
         rowSpan, colSpan = gridSpan
         hAlign = HALIGN_DICT.get(hAlign, 0)
+
         vAlign = VALIGN_DICT.get(vAlign, 0)
         align = hAlign | vAlign
-        layout.addWidget(self, row, col, rowSpan, colSpan, align)
-                
+        layout.addWidget(self, row, col, rowSpan, colSpan, QtCore.Qt.Alignment(align))
+
     if hPolicy or vPolicy:
       hPolicy = POLICY_DICT.get(hPolicy, 0)
       vPolicy = POLICY_DICT.get(vPolicy, 0)
       self.setSizePolicy(hPolicy, vPolicy)
 
     # Setup colour overrides (styles used primarily)
-     
+
     if bgColor:
       self.setAutoFillBackground(True)
       rgb = QtGui.QColor(bgColor).getRgb()[:3]
@@ -118,10 +119,10 @@ class Base(Translation):
     if grid:
       row, col = grid
       if row is None:
-        row = layout.rowCount()
+        row = 1
 
       if col is None:
-        col = 0
+        col = 1
     else:
       row = layout.rowCount()
       col = 0

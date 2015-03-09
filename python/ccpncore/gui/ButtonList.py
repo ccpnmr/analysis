@@ -1,4 +1,4 @@
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Icon import Icon

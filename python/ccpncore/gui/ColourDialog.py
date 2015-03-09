@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 import sys
-from PySide import QtGui
+from PyQt4 import QtGui
 
 def inverseGrey(colour):
 

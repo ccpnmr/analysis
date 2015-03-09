@@ -1,6 +1,6 @@
 __author__ = 'simon'
 
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 class ToolButton(QtGui.QToolButton):
 

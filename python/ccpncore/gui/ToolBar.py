@@ -3,7 +3,7 @@ __author__ = 'simon'
 
 from ccpncore.gui.Base import Base
 
-from PySide import QtGui
+from PyQt4 import QtGui
 
 class ToolBar(QtGui.QToolBar, Base):
 

@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.BasePopup import BasePopup
@@ -961,7 +961,7 @@ class Column:
     self.editStep = editStep
     self.defaultIcon = None
     #self.alignment = ALIGN_OPTS.get(alignment, alignment) | Qt.AlignVCenter
-    # Alignment combinations broken in PySide v1.1.1
+    # Alignment combinations broken in PyQt4 v1.1.1
     # Use better default than top left
     self.alignment = QtCore.Qt.AlignCenter
     self.orderFunc = orderFunc

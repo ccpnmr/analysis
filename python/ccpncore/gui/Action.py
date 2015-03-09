@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Icon import Icon
@@ -38,6 +38,6 @@ class Action(QtGui.QAction, Base):
     else:
       QtGui.QAction.__init__(self, text, parent, triggered=callback, checkable=checkable)
 
-    Base.__init__(self, **kw)
+    # Base.__init__(self, **kw)
 
 

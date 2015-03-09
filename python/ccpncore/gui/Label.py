@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 Qt = QtCore.Qt
 
 from ccpncore.gui.Base import Base

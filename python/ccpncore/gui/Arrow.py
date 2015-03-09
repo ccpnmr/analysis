@@ -2,7 +2,7 @@ __author__ = 'simon'
 
 
 from pyqtgraph import ArrowItem
-from PySide import QtCore
+from PyQt4 import QtCore
 import pyqtgraph.functions as fn
 
 class Arrow(ArrowItem):

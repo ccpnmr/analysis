@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 import pyqtgraph.console as console
-from PySide import QtGui
+from PyQt4 import QtGui
 
 class Console(console.ConsoleWidget):
   def __init__(self, parent=None, namespace=None, historyFile=None):

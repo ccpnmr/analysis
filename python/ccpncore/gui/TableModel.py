@@ -26,7 +26,7 @@ __author__ = 'simon'
 
 from os import path
 
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 from ccpncore.gui.ColourDialog import inverseGrey
 

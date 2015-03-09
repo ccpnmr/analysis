@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 from OpenGL import GL
 

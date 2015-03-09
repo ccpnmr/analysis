@@ -25,7 +25,7 @@ import os
 import unittest
 
 
-from PySide import QtGui
+from PyQt4 import QtGui
 
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Frame import Frame

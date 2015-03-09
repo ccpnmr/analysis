@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 __author__ = 'simon'
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 
 class TabDialog(QtGui.QDialog):

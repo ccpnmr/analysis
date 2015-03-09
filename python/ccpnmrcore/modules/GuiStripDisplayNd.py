@@ -109,7 +109,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def fillToolBar(self):
     spectrumUtilToolBar =  self.spectrumUtilToolBar
-    spectrumUtilToolBar.addAction('+', self.addAStrip)
+    spectrumUtilToolBar.addAction('+', self.addStrip)
     spectrumUtilToolBar.addAction('-', self.removeStrip)
     plusOneAction = spectrumUtilToolBar.addAction("+1", self.addOne)
     plusOneIcon = Icon('icons/contourAdd')
@@ -160,10 +160,10 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       spectrumView.spectrum.negativeContourCount -=1
 
 
-  def addAStrip(self):
+  def addStrip(self):
 
-    newStrip = self.strips[0].clone()
-    print(newStrip.positions, newStrip.widths)
+    newStrip = self.strips[-1].clone()
+    # print(newStrip.positions, newStrip.widths)
     newStrip.setMinimumWidth(200)
     # self.stripFrame.layout().addWidget(newStrip)
     # self.stripNumber+=1

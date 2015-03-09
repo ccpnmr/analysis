@@ -2,7 +2,7 @@ import os
 import json
 from functools import partial
 
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 # from ccpn import openProject, newProject
 
@@ -37,6 +37,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setupWindow()
     self.setupMenus()
     self.initProject()
+    self.setFixedWidth(QtGui.QApplication.desktop().screenGeometry().width())
 
 
   def initProject(self):
@@ -209,7 +210,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # else:
     #   self.consoleAction.setChecked(False)
     self.consoleAction.setChecked(self.pythonConsole.isVisible())
-    viewMenu.addAction(self.consoleAction, isFloatWidget=True)
+    # viewMenu.addAction(self.consoleAction, isFloatWidget=True)
 
     helpMenu.addAction(Action(self, "Command...", callback=self.showCommandHelp))
     helpMenu.addAction(Action(self, "Tutorials...", callback=self.showTutorials))
@@ -418,7 +419,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def runMacro(self):
     macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro")
-    f = open(macroFile[0])
+    f = open(macroFile)
     lines = f.readlines()
 
     for line in lines:

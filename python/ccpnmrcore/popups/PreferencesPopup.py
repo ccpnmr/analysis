@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 import json
 from functools import partial
 from ccpncore.gui.Label import Label

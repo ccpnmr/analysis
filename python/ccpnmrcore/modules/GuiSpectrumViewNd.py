@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 import numpy
 
 from OpenGL import GL
-from PySide import QtCore
+from PyQt4 import QtCore
 
 from ccpncore.gui.ToolButton import ToolButton
 from ccpncore.util import Colour
@@ -41,7 +41,6 @@ from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 def _getLevels(count, base, factor):
   
   base *= 100.0  # TEMP
-  
   levels = []
   if count > 0:
     levels = [base]
@@ -197,7 +196,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
     guiStrip = self.spectrumDisplay.viewportDict[widget]
     self.drawContours(painter, guiStrip)
-  
+
   def boundingRect(self):  # seems necessary to have
 
     return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TBD: remove hardwiring
@@ -349,6 +348,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       zDim = dataDims[2].dim - 1
       zregionPoint = spectrum.getDimPointFromValue(zDim, zregionValue)
       zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
+      guiStrip.planeLabel.setText('%.3f' % position)
       position = dimensionCount * [0]
       for z in range(*zregionPoint):  # TBD
         position[zDim] = z

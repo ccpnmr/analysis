@@ -1,7 +1,7 @@
 __author__ = 'simon'
 
 
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 from ccpncore.gui.Icon import Icon
@@ -18,16 +18,13 @@ class GuiStrip1d(GuiStrip):
     self.gridShown = True
     self.crossHairShown = True
     self.autoIntegration = True
-    self.viewBox.menu = self.get1dContextMenu()
+    # self.viewBox.menu = self.get1dContextMenu()
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.colourIndex = 0
     self.spectrumIndex = 0
     for spectrumView in self.spectrumViews:
       print(spectrumView)
       self.plotWidget.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour)
-
-
-
 
 
   def get1dContextMenu(self):
@@ -65,43 +62,3 @@ class GuiStrip1d(GuiStrip):
     x2 = self.viewBox.childrenBoundingRect().left()
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2,x1)
-
-  # def displaySpectrum(self, guiSpectrumView):
-  #
-  #   apiDataSource = guiSpectrumView.apiSpectrumView.dataSource
-  #   spectrum = self.getWrapperObject(apiDataSource)
-  #   if not guiSpectrumView.sliceColour:
-  #     apiDataSource.sliceColour = list(spectrumColours.keys())[self.colourIndex]
-  #     self.colourIndex += 1
-  #     self.colourIndex %= len(spectrumColours)
-  #
-  #   colour = QtGui.QColor('red')
-  #   # spectrum.apiSpectrum.setSliceColour(colour)
-  #   data = guiSpectrumView.getSliceData()
-  #   # if self.colourScheme == 'dark':
-  #   #   colour = colour.lighter(f=120)
-  #   # elif self.colourScheme == 'light':
-  #   #   colour = colour.lighter(f=85)
-  #   # print(spectrum.ccpnSpectrum.spectrumViews)
-  #   guiSpectrumView.plot = self.plotItem.plot(data[0],data[1], pen={'color':QtGui.QColor(colour)},clickable=True,)
-  #   guiSpectrumView.plot.curve.setClickable(True)
-  #   # self._appBase.mainWindow.pythonConsole.write("current.pane.addSpectrum(%s)" % (spectrum))
-  #
-  #   if self.spectrumIndex < 10:
-  #     shortcutKey = "s,"+str(self.spectrumIndex)
-  #     self.spectrumIndex+=1
-  #   else:
-  #     shortcutKey = None
-  #
-  #   pix=QtGui.QPixmap(60,10)
-  #   pix.fill(QtGui.QColor(colour))
-  #   guiSpectrumView.newAction = self.guiSpectrumDisplay.spectrumToolBar.addAction(apiDataSource.getName(), QtGui.QToolButton)
-  #   newIcon = QtGui.QIcon(pix)
-  #   guiSpectrumView.newAction.setIcon(newIcon)
-  #   guiSpectrumView.newAction.setCheckable(True)
-  #   guiSpectrumView.newAction.setChecked(True)
-  #   guiSpectrumView.newAction.setShortcut(QtGui.QKeySequence(shortcutKey))
-  #   guiSpectrumView.newAction.toggled.connect(guiSpectrumView.plot.setVisible)
-  #   self.guiSpectrumDisplay.spectrumToolBar.addAction(guiSpectrumView.newAction)
-  #   guiSpectrumView.widget = self.guiSpectrumDisplay.spectrumToolBar.widgetForAction(guiSpectrumView.newAction)
-  #   guiSpectrumView.widget.setFixedSize(60,30)

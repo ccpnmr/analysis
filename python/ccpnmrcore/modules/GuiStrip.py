@@ -4,7 +4,7 @@ import pyqtgraph as pg
 import os
 from functools import partial
 
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 from ccpn import Spectrum
 from ccpncore.gui.Label import Label
@@ -27,10 +27,11 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     Widget.__init__(self)
     DropBase.__init__(self, self._parent._appBase, self.dropCallback)
-    self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
-                      dropCallback=self.dropCallback, grid=(0, self.guiSpectrumDisplay.stripCount-1))
     # self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
-    #           dropCallback=self.dropCallback, grid=(0, self.guiSpectrumDisplay.stripCount-1)) #, gridSpan=(1, 1))
+    #                   dropCallback=self.dropCallback, grid=(0, self.guiSpectrumDisplay.stripCount-1))
+    self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
+              dropCallback=self.dropCallback)#, gridSpan=(1, 1))
+    self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.stripCount)
 
 
     if self._parent._appBase.preferences.general.colourScheme == 'light':
@@ -42,6 +43,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     pg.setConfigOption('background', self.background)
     pg.setConfigOption('foreground', self.foreground)
     self.plotWidget.setBackground(self.background)
+    self.plotWidget.plotItem.axes['top']['item']
     # self.setAcceptDrops(True)
     # self.plotWidget.setAcceptDrops(True)
     self._appBase = self.guiSpectrumDisplay._appBase
@@ -50,7 +52,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotItem = self.plotWidget.plotItem
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     # self.plotItem.setAcceptDrops(True)
-    self.axes = self.plotItem.axes
+    # self.axes = self.plotItem.axes
     self.viewBox = self.plotItem.vb
     # self.xRegion = self.orderedAxes[0].region
     # self.yRegion = self.orderedAxes[1].region
@@ -64,7 +66,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
     self.viewBox.sigRangeChanged.connect(self.updateRegion)
     self.grid = pg.GridItem()#pen=self.foreground)
-    # self.plotWidget.addItem(self.grid)
+    self.plotWidget.addItem(self.grid)
     # self.setMinimumWidth(200)
     self.createCrossHair()
     proxy = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
@@ -77,10 +79,10 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
 
-  # def addAStrip(self):
-  #
-  #   newStrip = self.strips[0].clone()
-  #   print(newStrip.pid)
+  def addStrip(self):
+
+    newStrip = self.strips[0].clone()
+    print(newStrip.pid)
 
   def updateRegion(self, event):
     # this is called when the viewBox is changed on the screen via the mouse
@@ -116,7 +118,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.eventOriginator = None
 
   def addSpinSystemLabel(self):
-    self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.stripCount-1),
+    self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.stripCount),
                                  hAlign='center', dragDrop=True, pid=self.pid)
     self.spinSystemLabel.setText("Spin systems shown here")
     self.spinSystemLabel.setFixedHeight(30)
@@ -180,8 +182,8 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     return self.mousePoint
 
   def showMousePosition(self, pos):
-    position = self.viewBox.mapSceneToView(pos).toTuple()
-    self.guiSpectrumDisplay.positionBox.setText("X: %.3f  Y: %.3f" % position)
+    position = self.viewBox.mapSceneToView(pos)
+    self.guiSpectrumDisplay.positionBox.setText("X: %.3f  Y: %.3f" % (position.x(), position.y()))
 
   def zoomToRegion(self, region):
     self.setXRange(region[0],region[1])
@@ -243,10 +245,12 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     else:
       self.guiSpectrumDisplay.copyStrip(dropObject, newIndex=0)
-      # print(dropObject._parent)
-      # print('dropObject',dropObject)
-      dropObject.delete()
-      dropObject.clone()
+      if self._parent.assignmentDirection == 'i-1':
+        print(self._parent.strips)
+    #   # print(dropObject._parent)
+    #   # print('dropObject',dropObject)
+    #   dropObject.delete()
+    #   dropObject.clone()
       # # print(newStrip)
       # print('strip cloned')
     # else:

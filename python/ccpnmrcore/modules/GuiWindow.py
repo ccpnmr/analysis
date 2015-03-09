@@ -2,7 +2,7 @@
 
 __author__ = 'simon'
 
-from PySide import QtGui
+from PyQt4 import QtGui
 
 from pyqtgraph.dockarea import DockArea
 from ccpncore.lib.spectrum import Util as specUtil

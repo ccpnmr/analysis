@@ -1,6 +1,6 @@
 __author__ = 'simon'
 
-from PySide import QtGui, QtCore, QtOpenGL
+from PyQt4 import QtGui, QtCore, QtOpenGL
 
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Button import Button
@@ -31,12 +31,12 @@ class GuiStripNd(GuiStrip):
     self.colourIndex = 0
     # print(guiSpectrumDisplay)
     # self.fillToolBar()
-    self.addSpinSystemLabel()
+    # self.addSpinSystemLabel()
     self.addPlaneToolbar()
     ###self.setShortcuts()
     for spectrumView in self.spectrumViews:
       if spectrumView not in self.plotWidget.scene().items():
-        self.plotWidget.scene().addItem(spectrumView)
+        self.plotWidget.plotItem.scene().addItem(spectrumView)
 
   """
   def showSpectrum(self, guiSpectrumView):
@@ -125,6 +125,7 @@ class GuiStripNd(GuiStrip):
       zAxis.position = zAxis.position+delta
     if position:
       zAxis.position = position
+    self.planeLabel.setText('%.3f' % zAxis.position)
 
   def nextZPlane(self):
 
@@ -185,7 +186,7 @@ class GuiStripNd(GuiStrip):
     # if self._parent.spectrumViews[0]
     if len(self.orderedAxes) > 2:
       for i in range(len(self.orderedAxes)-2):
-        self.planeToolbar = ToolBar(self.stripFrame, grid=(2+i, self.guiSpectrumDisplay.stripCount-1), hAlign='center')
+        self.planeToolbar = ToolBar(self.stripFrame, grid=(2+i, self.guiSpectrumDisplay.stripCount), hAlign='center')
         self.spinSystemLabel = Label(self)
         self.spinSystemLabel.setMaximumWidth(1150)
         self.spinSystemLabel.setScaledContents(True)
@@ -194,6 +195,7 @@ class GuiStripNd(GuiStrip):
         prevPlaneButton.setFixedHeight(30)
         self.planeLabel = LineEdit(self)
         self.planeLabel.setFixedHeight(30)
+        self.planeLabel.setText('%.3f' % self.positions[2])
         # self.axisCodeLabel = Label(self, text=spectrum.axisCodes[spectrumItem.dimMapping[2]])
         # self.planeLabel.textChanged.connect(self.changeZPlane)
         nextPlaneButton = Button(self,'>', callback=self.nextZPlane)

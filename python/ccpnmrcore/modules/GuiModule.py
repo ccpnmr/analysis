@@ -1,11 +1,11 @@
 
-from PySide import QtGui
+from PyQt4 import QtGui
 
 from ccpnmrcore.Base import Base as GuiBase
 
 from pyqtgraph.dockarea import Dock
 
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 QtCore.qInstallMsgHandler(lambda *args: None)
 

@@ -1,4 +1,4 @@
-from PySide import QtGui
+from PyQt4 import QtGui
 
 from ccpncore.gui.Frame import Frame as CoreFrame
 from ccpnmrcore.Base import Base as GuiBase

@@ -1,14 +1,15 @@
 import sys
-from PySide import QtGui,QtCore
+from PyQt4 import QtGui,QtCore
 
 
 from pyqtgraph.dockarea import Dock
 
 class Assigner(Dock):
 
-  def __init__(self):
+  def __init__(self, project=None):
 
     super(Assigner, self).__init__(name='Assigner')
+    self.project=project
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
     self.scene = QtGui.QGraphicsScene(self)
@@ -33,6 +34,7 @@ class Assigner(Dock):
 
   def addResidue(self):
 
+    newNmrResidue = self.project.new
     if self.residueCount == 0:
       hAtom = self.addAtom("H", (0, self.atomSpacing))
       nAtom = self.addAtom("N", (0, hAtom.y()-self.atomSpacing))
@@ -192,6 +194,7 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     self.setFont(font)
     self.setPlainText(text)
     self.setPos(QtCore.QPointF(pos[0], pos[1]))
+    self.nmrAtom = self.project.newNmrAtom()
 
   def mousePressEvent(self, event):
     self.printAtom()

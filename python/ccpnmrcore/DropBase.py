@@ -1,4 +1,4 @@
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 from ccpnmrcore.Base import Base as GuiBase
 
@@ -23,7 +23,7 @@ class DropBase(GuiBase):
       self.dropCallback(filePaths)
 
     if event.mimeData().hasFormat('application/x-strip'):
-      data = (event.mimeData().retrieveData('application/x-strip', str))
+      data = event.mimeData().data('application/x-strip')
       pidData = str(data.data(),encoding='utf-8')
       pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
       actualPid = ''.join(pidData)
@@ -33,7 +33,7 @@ class DropBase(GuiBase):
       # print('probablyStrip')
       self.dropCallback(wrapperObject)
     else:
-      data = (event.mimeData().retrieveData('application/x-qabstractitemmodeldatalist', str))
+      data = event.mimeData().data('application/x-qabstractitemmodeldatalist')
       pidData = str(data.data(),encoding='utf-8')
       pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
       actualPid = ''.join(pidData)

@@ -29,7 +29,7 @@ from pyqtgraph.dockarea import Dock
 import pyqtgraph as pg
 import math
 
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 UNITS = ['ppm', 'Hz', 'point']
 

@@ -26,7 +26,7 @@ import sys
 import json
 from functools import partial
 
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 import numpy as np
 import pyqtgraph as pg

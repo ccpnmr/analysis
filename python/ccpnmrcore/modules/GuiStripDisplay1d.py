@@ -47,7 +47,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
   def fillToolBar(self):
     # GuiSpectrumDisplay.fillToolBar(self)
     spectrumUtilToolBar =  self.spectrumUtilToolBar
-    spectrumUtilToolBar.addAction('+', self.addAStrip)
+    spectrumUtilToolBar.addAction('+', self.addStrip)
     spectrumUtilToolBar.addAction('-', self.removeStrip)
     autoScaleAction = self.spectrumUtilToolBar.addAction("AutoScale", self.zoomYAll)
     autoScaleActionIcon = Icon('icons/zoom-fit-best')
@@ -105,7 +105,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     # print(spinSystemSideLabel.paintEvent())
     spinSystemSideLabel.setFixedWidth(30)
 
-  def addAStrip(self):
+  def addStrip(self):
     # self.stripNumber+=1
     newStrip = self.strips[0].clone()
     newStrip.setMinimumWidth(200)

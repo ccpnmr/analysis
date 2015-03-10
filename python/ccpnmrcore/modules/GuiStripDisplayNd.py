@@ -4,11 +4,8 @@ __author__ = 'simon'
 
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.VerticalLabel import VerticalLabel
+
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-# from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
-from ccpnmrcore.modules.GuiStripNd import GuiStripNd
-
-
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 

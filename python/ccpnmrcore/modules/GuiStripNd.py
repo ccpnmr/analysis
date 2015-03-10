@@ -31,7 +31,7 @@ class GuiStripNd(GuiStrip):
     self.colourIndex = 0
     # print(guiSpectrumDisplay)
     # self.fillToolBar()
-    # self.addSpinSystemLabel()
+    self.addSpinSystemLabel()
     self.addPlaneToolbar()
     ###self.setShortcuts()
     for spectrumView in self.spectrumViews:
@@ -187,6 +187,7 @@ class GuiStripNd(GuiStrip):
     if len(self.orderedAxes) > 2:
       for i in range(len(self.orderedAxes)-2):
         self.planeToolbar = ToolBar(self.stripFrame, grid=(2+i, self.guiSpectrumDisplay.stripCount), hAlign='center')
+        self.planeToolbar.setMinimumWidth(200)
         self.spinSystemLabel = Label(self)
         self.spinSystemLabel.setMaximumWidth(1150)
         self.spinSystemLabel.setScaledContents(True)

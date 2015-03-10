@@ -14,6 +14,7 @@ from ccpncore.gui.TextEditor import TextEditor
 
 
 from ccpnmrcore.gui.Assigner import Assigner
+from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
@@ -37,7 +38,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setupWindow()
     self.setupMenus()
     self.initProject()
-    self.setFixedWidth(QtGui.QApplication.desktop().screenGeometry().width())
+    # self.setFixedWidth(QtGui.QApplication.desktop().screenGeometry().width())
 
 
   def initProject(self):
@@ -236,12 +237,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.show()
 
   def showAssigner(self, position, nextTo=None):
-    self.assigner = Assigner()
+    assigner = Assigner()
     if nextTo is not None:
-      self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
+      self.dockArea.addDock(assigner, position=position, relativeTo=nextTo)
     else:
-      self.dockArea.addDock(self.assigner, position=position)
-    return self.assigner
+      self.dockArea.addDock(assigner, position=position)
+    return assigner
     # self.dockArea.addDock(assigner)
 
   def raiseSpectrumProperties(self, item):
@@ -427,12 +428,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     f.close()
 
-  def showPeakTable(self, position='left', relativeTo=None, referenceSpectrumDisplay=None, matchDisplay=None, assigner=None):
-    peakList = PeakListSimple(name="Peak Table", peakLists=self.project.peakLists, matchDisplay=matchDisplay, referenceSpectrumDisplay=referenceSpectrumDisplay, assigner=assigner)
+  def showPeakTable(self, position='left', relativeTo=None):
+    peakList = PeakListSimple(name="Peak Table", peakLists=self.project.peakLists)
     if relativeTo is not None:
       self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
     else:
-      self.dockArea.addDock(peakList, position=position)
+      self.dockArea.addDock(peakList, position='bottom')
+
+  def showBackboneAssignmentModule(self, position=None, relativeTo=None, assigner=None):
+    module = BackboneAssignmentModule(self._project, position, relativeTo, assigner)
+    self.dockArea.addDock(module)
 
 
   def saveProjectAs(self):

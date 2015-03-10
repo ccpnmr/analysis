@@ -34,7 +34,6 @@ class Assigner(Dock):
 
   def addResidue(self):
 
-    newNmrResidue = self.project.new
     if self.residueCount == 0:
       hAtom = self.addAtom("H", (0, self.atomSpacing))
       nAtom = self.addAtom("N", (0, hAtom.y()-self.atomSpacing))
@@ -194,7 +193,6 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     self.setFont(font)
     self.setPlainText(text)
     self.setPos(QtCore.QPointF(pos[0], pos[1]))
-    self.nmrAtom = self.project.newNmrAtom()
 
   def mousePressEvent(self, event):
     self.printAtom()

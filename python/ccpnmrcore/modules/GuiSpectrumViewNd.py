@@ -160,7 +160,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     for strip in self.strips:
       if self not in strip.plotWidget.scene().items():
-        strip.plotWidget.scene().addItem(self)
+        strip.plotWidget.plotItem.scene().addItem(self)
 
             
   """

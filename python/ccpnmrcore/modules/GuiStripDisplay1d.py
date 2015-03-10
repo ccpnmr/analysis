@@ -111,8 +111,4 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     newStrip.setMinimumWidth(200)
 
   def removeStrip(self):
-    print(self.strips)
-    strip = self.strips[-1]
-    strip.deleteLater()
-    self.strips.pop(-1)
-    print(self.strips)
+    self.deleteLater()

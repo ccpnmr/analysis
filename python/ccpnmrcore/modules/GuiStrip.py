@@ -31,7 +31,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     #                   dropCallback=self.dropCallback, grid=(0, self.guiSpectrumDisplay.stripCount-1))
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
               dropCallback=self.dropCallback)#, gridSpan=(1, 1))
-    self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.stripCount)
+    self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self)+1)
 
 
     if self._parent._appBase.preferences.general.colourScheme == 'light':
@@ -63,17 +63,20 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.yAxis = Axis(self.plotWidget, orientation='left', pen=self.foreground,
                       viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
     self.gridShown = True
+    self.textItem = pg.TextItem(text=self.pid, color='w')
+    self.textItem.setPos(self.viewBox.boundingRect().topLeft())
+    self.plotWidget.scene().addItem(self.textItem)
     self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
     self.viewBox.sigRangeChanged.connect(self.updateRegion)
     self.grid = pg.GridItem()#pen=self.foreground)
     self.plotWidget.addItem(self.grid)
-    # self.setMinimumWidth(200)
+    self.setMinimumWidth(200)
     self.createCrossHair()
     proxy = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
-    self.addSpinSystemLabel()
+    # self.addSpinSystemLabel()
     
     self.eventOriginator = None
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
@@ -130,6 +133,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   def moveAxisCodeLabels(self):
     self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
     self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
+    self.textItem.setPos(self.viewBox.boundingRect().topLeft())
 
   def hideCrossHairs(self):
     for strip in self.guiSpectrumDisplay.guiStrips:
@@ -244,15 +248,6 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
       self.displaySpectrum(dropObject)
 
     else:
-      self.guiSpectrumDisplay.copyStrip(dropObject, newIndex=0)
       if self._parent.assignmentDirection == 'i-1':
-        print(self._parent.strips)
-    #   # print(dropObject._parent)
-    #   # print('dropObject',dropObject)
-    #   dropObject.delete()
-    #   dropObject.clone()
-      # # print(newStrip)
-      # print('strip cloned')
-    # else:
-    #   print('not a spectrum')
-
+        print('i-1')
+        self.guiSpectrumDisplay.copyStrip(dropObject, newIndex=0)

@@ -55,7 +55,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.scrollArea.setWidgetResizable(True)
     self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0), appBase=self._appBase)
     self.stripFrame.setAcceptDrops(True)
-    self.assignmentDirection == 'i-1'
+    self.assignmentDirection = 'i-1'
 
 
     self.scrollArea.setWidget(self.stripFrame)
@@ -77,10 +77,12 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     pass
 
   def zoomYAll(self):
-    self.currentStrip.zoomYAll()
+    for strip in self.strips:
+      strip.zoomYAll()
 
   def zoomXAll(self):
-    self.currentStrip.zoomXAll()
+    for strip in self.strips:
+      strip.zoomXAll()
 
   def restoreZoom(self):
     self.currentStrip.restoreZoom()

@@ -4,8 +4,6 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
-# from ccpn import openProject, newProject
-
 
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import Console
@@ -69,21 +67,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if len(recentFiles) >= 10:
         recentFiles.pop()
       recentFiles.insert(0, path)
-
-  # Cannot be done from here - MainWindow is part of project. Do form appBase
-  # def openProject(self, path):
-  #
-  #   project = openProject(path)
-  #   self.initProject(project)
-  #
-  #   return project
-  #
-  # def newProject(self, path='defaultProject'):
-  #
-  #   project = newProject(name)
-  #   self.initProject(project)
-  #
-  #   return project
     
   def setupWindow(self):
 

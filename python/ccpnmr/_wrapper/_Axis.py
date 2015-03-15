@@ -4,7 +4,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpncore.util import pid as Pid
 
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
@@ -23,6 +22,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+from ccpncore.util import pid
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
@@ -51,7 +51,7 @@ class Axis(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """local id, of form code.stripSerial"""
-    return Pid.IDSEP.join((self._wrappedData.code, str(self._wrappedData.stripSerial)))
+    return pid.makeId(self._wrappedData.code, self._wrappedData.stripSerial)
 
     
   @property

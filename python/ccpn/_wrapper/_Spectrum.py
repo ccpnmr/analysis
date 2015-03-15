@@ -195,6 +195,8 @@ class Spectrum(AbstractWrapperObject):
 
   @chemicalShiftList.setter
   def chemicalShiftList(self, value:ChemicalShiftList):
+
+    value = self.getById(value) if isinstance(value, str) else value
     self._wrappedData.experiment.shiftList = value._wrappedData
 
   @property

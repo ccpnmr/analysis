@@ -205,7 +205,7 @@ class Project(AbstractWrapperObject):
         ll = key.split(PREFIXSEP,1)
         if len(ll) == 1:
           ll = ['', key]
-        result = ll[:1] + commonUtil.integerStringSortKey(key.split(IDSEP))
+        result = ll[:1] + commonUtil.integerStringSortKey(ll[1].split(IDSEP))
 
       else:
         # Treat as list of pids
@@ -215,7 +215,7 @@ class Project(AbstractWrapperObject):
             ll = pid.split(PREFIXSEP,1)
             if len(ll) == 1:
               ll = ['', pid]
-            result[ii] = ll[:1] + commonUtil.integerStringSortKey(pid.split(IDSEP))
+            result[ii] = ll[:1] + commonUtil.integerStringSortKey(ll[1].split(IDSEP))
     #
     self._pidSortKeys[key] = result
     return result

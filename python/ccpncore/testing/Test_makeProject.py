@@ -27,7 +27,7 @@ __author__ = 'rhf22'
 # Import the Implementation package - this is the root package
 #
 
-from ccpncore.util import Io
+from ccpncore.util import Io as ioUtil
 
 # Put project inside this directory
 projectPath = './local.'
@@ -53,7 +53,7 @@ def doTest():
 
 def makeProject():
 
-  project = Io.newProject(projectName=projectName, removeExisting=True)
+  project = ioUtil.newProject(projectName=projectName, removeExisting=True)
 
   # Make molecule using API
 

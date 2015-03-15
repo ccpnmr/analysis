@@ -25,9 +25,8 @@ from collections import abc
 import itertools
 import functools
 
-from ccpncore.util.pid import Pid
-from ccpncore.util.pid import PREFIXSEP
-from ccpncore.util.pid import IDSEP
+from ccpncore.util import pid
+from ccpncore.util import Common as commonUtil
 
 
 # PROBLEM:
@@ -130,10 +129,6 @@ class AbstractWrapperObject():
   # only when necessary.
   #__slots__ = ['_project', '_wrappedData', 'id', '__dict__']
 
-  # NBNB TBD
-  # Two objects compare aa dictionaries (because this is a MutableMapping)
-  # and this does noto work properly NBNB Reconsider
-  
   
   # Implementation methods
   
@@ -160,7 +155,7 @@ class AbstractWrapperObject():
     if parent is project:
       _id = self._key
     else:
-      _id = IDSEP.join((parent._id, self._key))
+      _id = '%s%s%s'% (parent._id, pid.IDSEP, self._key)
     self._id = _id
     
     # update pid:object mapping dictionary
@@ -194,21 +189,21 @@ class AbstractWrapperObject():
     
     # getting children
     project = self._project
-    tt = tag.split(PREFIXSEP)
+    tt = tag.split(pid.PREFIXSEP, 1)
     if len(tt) == 2:
       # String of form '{prefix}:{pid}'
       dd = project._pid2Obj.get(tt[0])
       if dd:
         # prefix matches a known class name. Child or bust!
         key = tt[1] 
-        if IDSEP in key:
+        if pid.IDSEP in key:
           # not a direct child
           raise KeyError(tag)
           
         else:
           # this is then a direct child
           if project is not self:
-            key = IDSEP.join((self._id,key))
+            key = pid.IDSEP.join((self._id,key))
           #    
           return dd[key]
       else:
@@ -234,8 +229,7 @@ class AbstractWrapperObject():
         self.__class__.__name__, tag))
     
     # check for child wrapperclass type attribute
-    tt = tag.split(PREFIXSEP)
-    if len(tt) == 2:
+    if pid.PREFIXSEP in tag:
       # String of form '{prefix}:{pid}'. Unsettable
       raise AttributeError(
          "{} can't set attribute with name of form 'xy:abcd': {}".
@@ -261,8 +255,7 @@ class AbstractWrapperObject():
         self.__class__.__name__, tag))
     
     # check for child wrapperclass type attribute
-    tt = tag.split(PREFIXSEP)
-    if len(tt) == 2:
+    if pid.PREFIXSEP in tag:
       # String of form '{prefix}:{pid}' undeletable
       raise AttributeError(
         "{} can't delete attribute of form 'xy:abcd: {}".
@@ -279,14 +272,14 @@ class AbstractWrapperObject():
     propertyAttrs = (x for x in sorted(dir(cls))
                      if (not x.startswith('_') and  isinstance(getattr(cls,x), property)))
     
-    prefix = self._id + IDSEP
+    prefix = self._id + pid.IDSEP
     childAttrs = (y for x in self._childClasses
                   for y in self._project._pid2Obj[x.shortClassName]
                   if y.startswith(prefix))
     
     dd = self.__dict__
     extraAttrs = (x for x in sorted(dd)
-                  if not x.startswith('_') and len(x.split(PREFIXSEP)) != 2)
+                  if not x.startswith('_') and pid.PREFIXSEP not in x)
     
     #
     return itertools.chain(propertyAttrs, childAttrs, extraAttrs)
@@ -299,14 +292,15 @@ class AbstractWrapperObject():
     # Calling list(self) seems to give an infinite loop, so let us try sounting elements directly
 
     cls = self.__class__
-    prefix = self._id + IDSEP
+    prefix = self._id + pid.IDSEP
     dd = self.__dict__
     return (
       len(list(x for x in sorted(dir(cls))
           if (not x.startswith('_') and  isinstance(getattr(cls,x), property))))
       + len(list((y for x in cls._childClasses for y in self._project._pid2Obj[x.shortClassName]
              if y.startswith(prefix))))
-      + len(list(x for x in sorted(dd) if not x.startswith('_') and len(x.split(PREFIXSEP)) != 2)))
+      + len(list(x for x in sorted(dd) if not x.startswith('_')
+                 and pid.PREFIXSEP not in x)))
 
 
   def __bool__(self):
@@ -465,13 +459,13 @@ class AbstractWrapperObject():
   def pid(self) -> str:
     """Object project-wide identifier, unique within project.
     Set automatically from short class name, and id of object and parents."""
-    return Pid(PREFIXSEP.join((self.shortClassName, self._id)))
+    return pid.Pid(pid.PREFIXSEP.join((self.shortClassName, self._id)))
   
   @property
   def longPid(self) -> str:
     """Object project-wide identifier, unique within project.
     Set automatically from full class name, and id of object and parents."""
-    return Pid(PREFIXSEP.join((type(self).__name__, self._id)))
+    return pid.Pid(pid.PREFIXSEP.join((type(self).__name__, self._id)))
     
   
   # CCPN abstract properties
@@ -527,7 +521,7 @@ class AbstractWrapperObject():
     """Get  object by absolute ID#
     in either long form ('Residue:MS1.A.127') or short form ('MR:MS1.A.127')"""
 
-    tt = identifier.split(PREFIXSEP,1)
+    tt = identifier.split(pid.PREFIXSEP,1)
     if len(tt) == 2:
       dd = self._project._pid2Obj.get(tt[0])
       if dd:
@@ -587,8 +581,7 @@ class AbstractWrapperObject():
         if self is self._project:
             key = relativeId
         else:
-            key = '%s%s%s' % (self._pid,IDSEP, relativeId)
-            # key = IDSEP.join((self._pid,relativeId))
+            key = '%s%s%s' % (self._pid,pid.IDSEP, relativeId)
         return dd.get(key)
     else:
       return None
@@ -647,5 +640,39 @@ class AbstractWrapperObject():
           del self._pid2Obj[obj.shortClassName][obj._pid]
         del data2Obj[apiObj]
 
+  def _setUniqueStringKey(self, apiObj:object, defaultValue:str, keyTag:str='name') -> str:
+    """(re)set obj.keyAttr to make it a unique key, using defaultValue if not set
+    NB - is called BEFORE data2obj etc. dictionaries are set"""
+
+    wrappedData = self._wrappedData
+    if not hasattr (wrappedData,keyTag):
+      raise ValueError("Cannot set unique %s for %s: %s object has no attribute %s"
+                       % (keyTag, self, wrappedData.__class__, keyTag))
+
+    # Set default value if present value is None
+    value = getattr(wrappedData, keyTag)
+    if value is None:
+      value = defaultValue
+      setattr(wrappedData, keyTag, value)
+
+    # Set to new, unique value if present value is a duplicate
+    apiObjects = self._getAllWrappedData(self._parent)
+    for apiSibling in apiObjects:
+      if apiSibling is wrappedData:
+        # We have reached the object itself in the list. Enough
+        break
+      elif getattr(apiSibling, keyTag) == value:
+        # Object name is duplicate of earlier object name - make unique name
+        print ("@~@~ &s %s %s %s" % (apiObj, apiSibling, value, apiObj.serial))
+
+        # First try appending serial, if possible
+        if hasattr(apiObj, 'serial'):
+          value = '%s-%s' % (value, apiObj.serial)
+        else:
+          value = commonUtil.incrementName(value)
+        while any(x for x in apiSibling if getattr(x, keyTag) == value):
+          value = commonUtil.incrementName(value)
+        setattr(self, keyTag, value)
+        break
 
 AbstractWrapperObject.getById.__annotations__['return'] = AbstractWrapperObject

@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -23,10 +24,9 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 import os
 import unittest
+from ccpn.util import Io as ccpnIo
 
 from ccpncore.util.Testing import TEST_PROJECTS_PATH
-
-import ccpn
 
 class Testing(unittest.TestCase):
   """Base class for all testing of wrapper code that requires projects."""
@@ -47,7 +47,7 @@ class Testing(unittest.TestCase):
     projectPath = self.projectPath
 
     if projectPath:
-      self.project = ccpn.openProject(projectPath)
+      self.project = ccpnIo.openProject(projectPath)
 
   def getSpectrum(self):
 

@@ -3,6 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -24,11 +25,23 @@ __version__ = "$Revision$"
 import os
 import sys
 import datetime
+import random
+from collections.abc import Sequence
 from ccpn import RestraintContribution
 from ccpn.lib.nef import Util as nefUtil
+from ccpncore.lib.spectrum import Spectrum as libSpectrum
 from ccpncore.lib.Bmrb import bmrb
+from ccpncore.memops import Version
+from ccpncore.util import pid
+from ccpncore.util import Path
+from ccpn.util import Io as ccpnIo
+from ccpn.util import General as ccpnGeneral
 
 nefExtension = 'nef'
+# Max value used for random integer. Set to be expressible as a signed 32-bit integer.
+maxRandomInt = 2000000000
+
+formatVersion = 0.8
 
 # potential tags to use depending on potential type - underscore version
 # NBNB TBD move to more appropriate location?
@@ -56,8 +69,11 @@ nef2CcpnTags = {
 
 # NBNB TBD we might want an exportNmrCalc2Nef wrapper as well
 
-def exportRestraintStore(restraintSet, dataName=None, directory=None):
-  """Export restraintSet and associated data to NEF"""
+def exportRestraintStore(restraintSet, dataName=None, directory=None,
+                         forceFirstShiftList=False):
+  """Export restraintSet and associated data to NEF
+
+  Nb forceFirstShiftList is a ahck for cases where shiftlists are not properly set"""
 
   # nmrProject
   project = restraintSet._project
@@ -79,19 +95,21 @@ def exportRestraintStore(restraintSet, dataName=None, directory=None):
   if not peakLists:
     peakLists = [y for x in project.spectra for y in x.peakLists]
 
-  if peakLists:
-    shiftList = None
+  shiftLists = project.chemicalShiftLists
+  if len(shiftLists) == 1 or forceFirstShiftList or not peakLists:
+    shiftList = shiftLists[0]
   else:
-    shiftList = project.chemicalShiftLists[0]
+    shiftList = None
 
   if dataName:
     ll = dataName.rsplit('.',1)
     if len(ll) == 2 and ll[1] == nefExtension:
       dataName = ll[0]
   else:
-    dataName = '%s-%s' % (project.name, restraintSet.serial)
+    dataName = project.name.translate(pid.remapSeparators)
+    dataName = '%s-%s' % (dataName, restraintSet.serial)
 
-  entry = makeStarEntry(project, dataName, project.chains, peakLists,
+  entry = _makeStarEntry(project, dataName, project.chains, peakLists,
                         restraintLists, shiftList=shiftList)
 
   # Export object tree
@@ -107,22 +125,45 @@ def exportRestraintStore(restraintSet, dataName=None, directory=None):
   open(filePath, 'w').write(entry.nefString())
 
 
-def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
-                  shiftList=None,):
+def _makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
+                  shiftList=None, programName:str='CCPN', programVersion:str=None,
+                      coordinateFileName:str=None, relatedEntries:Sequence=(),
+                      programScripts:Sequence=(), programHistory:Sequence=(), uuid=None):
   """Make Bmrb Sans entry for export.
-   shift lists are taken from peaklists, otherwise from shiftList parameter"""
+   shift lists are taken from peaklists, otherwise from shiftList parameter.
+   siftList is used for PeakLists that have none set."""
 
-  peakLists.sort()
-  restraintLists.sort()
-  chains.sort()
+  peakLists = list(sorted(peakLists))
+  restraintLists = list(sorted(restraintLists))
+  chains = list(sorted(chains))
 
   # Set up parameters and sanity check
+
+  # Shift list check
+  aSet = set()
+  if shiftList is not None:
+    aSet.add(shiftList)
+  for peakList in peakLists:
+    aSet.add(peakList.chemicalShiftList)
+  shiftLists = [x for x in project.chemicalShiftLists if x in aSet]
+  if not shiftLists:
+    ll = project.chemicalShiftLists
+    if len(ll) == 1:
+      shiftLists = ll
+      shiftList = shiftLists[0]
+  if not shiftLists:
+    raise ValueError("Function must have either a shiftList or peakLists with shiftLists")
+  elif len(shiftLists) == 1:
+    shiftList = shiftLists[0]
 
   # Peak list check
   for peakList in peakLists:
     if peakList._project is not project:
       raise ValueError("PeakList %s does not match Project %s"
                        % (peakList, project))
+    if peakList.chemicalShiftList is None:
+      # NBNB This is a side effect - but shift lists should always be set anyway
+      peakList.chemicalShiftList = shiftList
 
   # Chain check
   ll = [x.id for x in chains]
@@ -141,43 +182,18 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
   else:
     raise ValueError("Restraint lists are not from a single RestraintSet")
 
-  # Shift list check
-  aSet = set(x.chemicalShiftList.id for x in peakLists if x.chemicalShiftList is not None)
-  shiftLists = [x for x in project.chemicalShiftLists if x.id in aSet]
-  if shiftLists:
-    if shiftList is not None:
-      raise ValueError("Function takes peakLists or a shiftList, but not both")
-  elif shiftList is None:
-    allShiftLists = project.chemicalShiftLists
-    if len(allShiftLists) == 1:
-      shiftLists = allShiftLists
-    else:
-      raise ValueError("Function must have either peakLists with shiftLists or one shiftList")
-  else:
-    shiftLists = [shiftList]
-
   # Make BMRB object tree :
 
   # Make Entry
   entry = bmrb.entry.fromScratch(dataName)
 
   # MetaData saveframe
-  entry.addSaveframe(makeMetaDataFrame())
-
-  # Make ccpn-specific saveframe - NBNB dummy - for test only
-  saveframe = bmrb.saveframe.fromScratch(saveframe_name='ccpn_specific_test_1',
-                                         tag_prefix='ccpn_specific_test')
-  entry.addSaveframe(saveframe)
-
-  saveframe.addTags([
-    ('sf_category','ccpn_specific_test'),
-    ('sf_framecode','ccpn_specific_test_1'),
-    ('ccpn_par_1','someEnum'),
-    ('ccpn_par_2',42),
-  ])
+  entry.addSaveframe(_makeMetaDataFrame(programName=programName, programVersion=programVersion,
+                      coordinateFileName=coordinateFileName, relatedEntries=relatedEntries,
+                      programScripts=programScripts, programHistory=programHistory, uuid=uuid))
 
   # Make molecular system
-  entry.addSaveframe(makeMolecularSystemFrame(chains))
+  entry.addSaveframe(_makeMolecularSystemFrame(chains))
 
   # Make shift lists
   for shiftList in shiftLists:
@@ -185,7 +201,6 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
 
   # Make restraint lists
   for restraintList in restraintLists:
-    # NB sorting will sort by type then name
     entry.addSaveframe(makeRestraintListFrame(restraintList))
 
   # Make peak list and spectrum frames
@@ -195,14 +210,18 @@ def makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=(),
   # Make Peak-restraint links frame
   entry.addSaveframe(makePeakRestraintLinksFrame(restraintLists, peakLists))
 
-  entry = nefUtil.regulariseEntry(entry)
-
   return entry
 
 
-def makeMetaDataFrame():
+def _makeMetaDataFrame(programName:str='CCPN', programVersion:str=None,
+                      coordinateFileName:str=None, relatedEntries:Sequence=(),
+                      programScripts:Sequence=(), programHistory:Sequence=(),
+                      uuid=None):
   """Make Metadata singleton saveframe.
   NBNB currently all values are dummy - later the function will need parameters"""
+
+  if programVersion is None:
+    programVersion = str(Version.currentModelVersion)
 
   # Make meta_data
   saveframe = bmrb.saveframe.fromScratch(saveframe_name='nef_nmr_meta_data',
@@ -212,40 +231,49 @@ def makeMetaDataFrame():
     ('sf_category','nef_nmr_meta_data'),
     ('sf_framecode','nef_nmr_meta_data'),
     ('format_name','nmr_exchange_format'),
-    ('format_version','0.7'),
-    ('program_name','CCPN'),
-    ('program_version','2.9.0'),
+    ('format_version',formatVersion),
+    ('program_name',programName),
+    ('program_version',programVersion),
   ])
-  saveframe.addTag('creation_date', datetime.datetime.today().isoformat())
-  saveframe.addTag('coordinate_file_name', None)
+  timeStamp = datetime.datetime.today().isoformat()
+  saveframe.addTag('creation_date', timeStamp)
+  if uuid is None:
+    # NBNB TBD do we want to have microseconds in the timestamp?
+    uuid = '%s-%s-%s' % (programName, timeStamp, random.randint(0,maxRandomInt))
+  saveframe.addTag('uuid', uuid)
+  saveframe.addTag('coordinate_file_name', coordinateFileName)
 
   # related entries loop
-  loop = bmrb.loop.fromScratch(category='nef_related_entries')
-  saveframe.addLoop(loop)
-  for tag in ('database_name', 'database_accession_code'):
-    loop.addColumn(tag)
-  loop.addData(['PDB', 'fake'])
+  if relatedEntries:
+    loop = bmrb.loop.fromScratch(category='nef_related_entries')
+    saveframe.addLoop(loop)
+    for tag in ('database_name', 'database_accession_code'):
+      loop.addColumn(tag)
+    for dataTuple in relatedEntries:
+      loop.addData(dataTuple)
 
   # Program script loop
-  loop = bmrb.loop.fromScratch(category='nef_program_script')
-  saveframe.addLoop(loop)
-  for tag in ('program_name', 'script_name', 'script', 'ccpn_special_par'):
-    loop.addColumn(tag)
-  loop.addData(['CcpNmr Analysis', 'dummy', """ Try \nsomething, then say\n'Booh!'""", 42])
+  if programScripts:
+    loop = bmrb.loop.fromScratch(category='nef_program_script')
+    saveframe.addLoop(loop)
+    for tag in ('program_name', 'script_name', 'script', 'ccpn_special_par'):
+      loop.addColumn(tag)
+    for dataTuple in programScripts:
+      loop.addData(dataTuple)
 
   # Program history loop
-  loop = bmrb.loop.fromScratch(category='nef_run_history')
-  saveframe.addLoop(loop)
-  for tag in ('run_ordinal', 'program_name', 'program_version', 'script_name', 'script'):
-    loop.addColumn(tag)
-  loop.addData([1, 'CcpNmr Analysis','2.4.1', 'autoSetupRun', None])
-  loop.addData([2, 'Cyana', '3.0', 'init.cya',
-                "rmsdrange:=1-93\n\ncyanalib\n\nread seq protein.seq\n\n"])
+  if programHistory:
+    loop = bmrb.loop.fromScratch(category='nef_run_history')
+    saveframe.addLoop(loop)
+    for tag in ('run_ordinal', 'program_name', 'program_version', 'script_name', 'script'):
+      loop.addColumn(tag)
+    for dataTuple in programHistory:
+      loop.addData(dataTuple)
   #
   return saveframe
 
 
-def makeMolecularSystemFrame(chains):
+def _makeMolecularSystemFrame(chains):
   """ Make molecular system frame"""
 
   project = chains[0]._project
@@ -262,74 +290,105 @@ def makeMolecularSystemFrame(chains):
   # sequence loop
   loop = bmrb.loop.fromScratch(category='nef_sequence')
   saveframe.addLoop(loop)
-  for tag in ('chain_code', 'sequence_code', 'residue_type', 'residue_variant', 'linking',
-              'cross_linking'):
+  for tag in ('chain_code', 'sequence_code', 'residue_type', 'linking', 'residue_variant'):
     loop.addColumn(tag)
+
 
   chainCodes = [x.shortName for x in chains]
   if len(chainCodes) != len(set(chainCodes)):
       raise ValueError("Duplicate chains not allowed: %s" % (chains,))
   for chain in chains:
     chainCode = chain.shortName
-    for residue in chain.residues:
+    residues = chain.residues
+    if not residues:
+      continue
+
+    apiMolResidues = [x._wrappedData.molResidue for x in residues]
+    isCyclic = (apiMolResidues[0].previousMolResidue is apiMolResidues[-1]
+                and apiMolResidues[-1].nextMolResidue is apiMolResidues[0])
+
+    for ii, residue in enumerate(residues):
       sequenceCode = residue.sequenceCode
       residueType = residue.name
-      # NBNB TBD add residue variants
-      residueVariant=None
+      apiMolResidue = apiMolResidues[ii]
+      isLinearPolymer = apiMolResidue.chemComp.isLinearPolymer
+
+      # Set linking
       linking = residue.linking
-
-      # set crossLinking first, as we modify 'linking' later.
-      crossLinking = None
-      if linking in ('start', 'middle', 'end'):
-        # linear polymer residues - crosslinks are done as part of the descriptor
-        descriptor = residue.descriptor
-        if 'link' in descriptor:
-          if 'link:S' in descriptor:
-            # NBNB This could in theory break, if you have e.g. a thioester or thioether link
-            # NBNB TBD improve in V3
-            crossLinking = 'disulfide'
-          else:
-            crossLinking = 'link'
-
-      elif linking != 'none':
-        # Not a linear polymer, and linking is not None - set to 'link'
-        crossLinking = 'link'
-
-      if linking == 'none':
+      if linking == 'none' or not isLinearPolymer:
+        # NB: non-linear-polymer-residues will get 'single' in all cases
         linking = 'single'
-      elif linking not in ('start', 'end'):
-        linking = None
 
-      loop.addData([chainCode, sequenceCode, residueType, residueVariant, linking, crossLinking])
+      elif ii == 0:
+        if isCyclic:
+          linking = 'cyclic'
+        elif linking!= 'start':
+          linking = 'break'
+
+      elif residue is residues[-1]:
+        if isCyclic:
+          linking = 'cyclic'
+        elif linking!= 'end':
+          linking = 'break'
+
+      else:
+        if  apiMolResidue.nextMolResidue is not apiMolResidues[ii+1] and linking != 'end':
+          linking = 'break'
+        if apiMolResidue.previousMolResidue is not apiMolResidues[ii-1] and linking != 'start':
+          linking = 'break'
+
+      # NBNB TBD check residue variants - this is according to new proposal 1/3/2015
+      chemCompVar = residue._wrappedData.chemCompVar
+      chemComp = chemCompVar.chemComp
+      if chemCompVar.isDefaultVar:
+        residueVariant=None
+      else:
+        defaultVar = None
+        if isLinearPolymer:
+          defaultVar = chemComp.findFirstChemCompVar(isDefaultVar=True, linking=linking)
+        if defaultVar is None:
+          defaultVar = chemComp.findFirstChemCompVar(isDefaultVar=True, linking='none')
+        if defaultVar is None:
+          defaultVar = chemComp.findFirstChemCompVar(isDefaultVar=True, linking=linking)
+        if defaultVar is None:
+          defaultVar = chemComp.sortedChemCompVars()[0]
+
+        atoms = chemCompVar.findAllChemAtoms(className='ChemAtom')
+        defAtoms = defaultVar.findAllChemAtoms(className='ChemAtom')
+        addNames = [x.name.translate(pid.unmapSeparators) for x in (atoms - defAtoms)]
+        removeNames = [x.name.translate(pid.unmapSeparators) for x in (defAtoms - atoms)]
+        residueVariant = ','.join(['+%s' %x for x in sorted(addNames)] +
+                                  ['-%s' %x for x in sorted(removeNames)])
+        if not residueVariant:
+          residueVariant = None
+
+      loop.addData([chainCode, sequenceCode, residueType, linking, residueVariant])
 
   # covalent cross-links loop
 
   atomPairs = []
   for chain in chains:
-    molecule = chain.ccpnChain.molecule
+    molecule = chain.apiChain.molecule
     for molResLink in molecule.findAllMolResLinks(isStdLinear=False):
       atoms = []
       atomPairs.append(atoms)
       for molResLinkEnd in molResLink.molResLinkEnds:
-        ccpnResidue = chain.findFirstResidue(seqId=molResLinkEnd.molResidue.serial)
+        apiResidue = chain.findFirstResidue(seqId=molResLinkEnd.molResidue.serial)
         atomName = molResLinkEnd.linkEnd.boundChemAtom.name
-        ccpnAtom = ccpnResidue.findFirstAtom(name=atomName)
-        atoms.append(project._data2Obj[ccpnAtom])
+        apiAtom = apiResidue.findFirstAtom(name=atomName)
+        atoms.append(project._data2Obj[apiAtom])
 
   for molSystemLink in project.nmrProject.molSystem.molSystemLinks:
     atoms = []
     atomPairs.append(atoms)
     for molSystemLinkEnd in molSystemLink.molSystemLinkEnds:
       atomName = molSystemLinkEnd.linkEnd.boundChemAtom.name
-      ccpnAtom = molSystemLinkEnd.residue.findFirstAtom(name=atomName)
-      atoms.append(project._data2Obj[ccpnAtom])
+      apiAtom = molSystemLinkEnd.residue.findFirstAtom(name=atomName)
+      atoms.append(project._data2Obj[apiAtom])
 
   # NB Loop may be empty. The entry.export_string function takes care of this
   loop = bmrb.loop.fromScratch(category='nef_covalent_links')
   saveframe.addLoop(loop)
-  # if atomPairs:
-  # NBNB TBD if statement removed, pending query to Eldon whether STAR should
-  # not itself refuse to print out empty loops
   for tag in ('chain_code_1', 'sequence_code_1', 'residue_type_1', 'atom_name_1',
               'chain_code_2', 'sequence_code_2', 'residue_type_2', 'atom_name_2',):
     loop.addColumn(tag)
@@ -345,19 +404,17 @@ def makeMolecularSystemFrame(chains):
 def makeShiftListFrame(shiftList):
   """make a saveFrame for a shift list"""
 
-  if shiftList.name is None:
-    shiftList.name = shiftList.longPid
-  framecode = shiftList.name
-  # NBNB TBD ensure names are unique
+  sf_category = 'nef_chemical_shift_list'
+  framecode = '%s_%s' % (sf_category, shiftList.name.translate(pid.unmapSeparators))
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode,
                                          tag_prefix='nef_chemical_shift_list')
 
   saveframe.addTags([
-    ('sf_category','nef_chemical_shift_list'),
+    ('sf_category',sf_category),
     ('sf_framecode',framecode),
   ])
 
-  saveframe.addTag('atom_chemical_shift_units', 'ppm')
+  saveframe.addTag('atom_chemical_shift_units', shiftList.unit)
 
   # chemical shift loop
   loop = bmrb.loop.fromScratch(category='nef_chemical_shift')
@@ -367,34 +424,34 @@ def makeShiftListFrame(shiftList):
     loop.addColumn(tag)
 
   sortkey = shiftList._project._pidSortKey
-  for row in sorted(((x.nmrAtom.assignment + (x.value, x.valueError))
+  for row in sorted(((pid.splitId(x.nmrAtom._id) + (x.value, x.valueError))
                     for x in shiftList.chemicalShifts), key=sortkey):
     loop.addData(row)
   #
   return saveframe
 
 def makeRestraintListFrame(restraintList):
-  """make a saveFrame for a restraint list of whatever type"""
+  """make a saveFrame for a restraint list of whatever type."""
   restraintType = restraintList.restraintType
   potentialType = restraintList.potentialType
   restraintItemLength = RestraintContribution.restraintType2Length[restraintList.restraintType]
 
-  if restraintList.name is None:
-    restraintList.name = restraintList.longPid
-  framecode = restraintList.name
   if restraintType == 'HBond':
     restraintListTag = 'distance'
+    if restraintList.origin is None:
+      restraintList.origin = 'hbond'
   else:
     restraintListTag = restraintType.lower()
+  sf_category = 'nef_%s_restraint_list' % restraintListTag
+  framecode = '%s_%s' % (sf_category, restraintList.name.translate(pid.unmapSeparators))
 
-  frameCategory = 'nef_%s_restraint_list' % restraintListTag
-  # NBNB TBD ensure names are unique
-  saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode, tag_prefix=frameCategory)
+  saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode, tag_prefix=sf_category)
 
   saveframe.addTags([
-    ('sf_category',frameCategory),
+    ('sf_category',sf_category),
     ('sf_framecode',framecode),
-    ('potential_type',restraintList.potentialType)
+    ('potential_type',restraintList.potentialType),
+    ('origin',restraintList.origin)
   ])
 
   # Rdc-specific tags:
@@ -408,33 +465,43 @@ def makeRestraintListFrame(restraintList):
     ])
 
   # restraint loop
-  loop = bmrb.loop.fromScratch(category=frameCategory[:-5])
+  loop = bmrb.loop.fromScratch(category=sf_category[:-5])
   saveframe.addLoop(loop)
   # ID tags:
-  for tag in ('restraint_id', 'restraint_combination_id',):
+  for tag in ('ordinal', 'restraint_id', 'restraint_combination_id',):
     loop.addColumn(tag)
   # Assignment tags:
-  for ii in range(1, restraintItemLength + 1):
+  for ii in range(restraintItemLength):
     for tag in ('chain_code_', 'sequence_code_', 'residue_type_', 'atom_name_'):
-      ss = str(ii)
+      ss = str(ii + 1)
       loop.addColumn(tag + ss)
   # fixed tags:
   for tag in ('weight', 'target_value', 'target_value_uncertainty',):
     loop.addColumn(tag)
+  # Rdc-specific tags:
+  if restraintType == 'Rdc':
+    for tag in ('scale', 'distance_dependent'):
+      loop.addColumn(tag)
   # potential tags
   tags = nefTagsByPotentialType.get(potentialType)
   if tags is None:
     tags = nefTagsByPotentialType.get('unknown')
   for tag in tags:
     loop.addColumn(tag)
+  # Dihedral-specific tags:
+  if restraintType == 'Dihedral':
+    loop.addColumn('name')
 
   # Add data
+  ordinal = 0
   for restraint in restraintList.restraints:
     serial = restraint.serial
 
     for contribution in restraint.restraintContributions:
       row1 = [serial, contribution.combinationId]
       row3 = [contribution.weight, contribution.targetValue, contribution.error]
+      if restraintType == 'Rdc':
+        row3.extend((contribution.scale, contribution.isDistanceDependent))
       for ss in nefTagsByPotentialType[restraintList.potentialType]:
         tag = nef2CcpnTags.get(ss,ss)
         row3.append(getattr(contribution, tag))
@@ -442,9 +509,13 @@ def makeRestraintListFrame(restraintList):
       for restraintItem in contribution.restraintItems:
         row2 = []
         # Assignment tags:
-        for assignment in restraintItem:
-          row2.extend(assignment)
-        loop.addData(row1 + row2 + row3)
+        for atomId in restraintItem:
+          row2.extend(pid.splitId(atomId))
+        ordinal += 1
+        ll = [ordinal] + row1 + row2 + row3
+        if restraintType == 'Dihedral':
+          ll.append(ccpnGeneral.dihedralName(project, restraintItem))
+        loop.addData(ll)
   #
   return saveframe
 
@@ -454,20 +525,19 @@ def makePeakListFrame(peakList):
   # Set up variables
   spectrum = peakList.spectrum
   dimensionCount = spectrum.dimensionCount
-  ccpnDataDims = spectrum.ccpnSpectrum.sortedDataDims()
-  framecode = peakList.name
-  if framecode is None:
-    framecode = peakList.name = peakList.longPid
+  apiDataDims = spectrum.apiDataSource.sortedDataDims()
+  if peakList.name is None:
+    peakList.name = '%s-%s' % (spectrum.name.translate(pid.unmapSeparators), peakList.serial)
   category = 'nef_nmr_spectrum'
+  framecode = '%s_%s' % (category, peakList.name)
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode,
                                          tag_prefix=category)
-
   # Top tagged values
-  obj = spectrum.chemicalShiftList
+  obj = peakList.chemicalShiftList
   if obj is None:
     shiftListString = None
   else:
-    shiftListString = '$%s' % obj.name
+    shiftListString = 'nef_chemical_shift_list_%s' % obj.name.translate(pid.unmapSeparators)
   saveframe.addTags([
     ('sf_category',category),
     ('sf_framecode',framecode),
@@ -476,7 +546,7 @@ def makePeakListFrame(peakList):
   ])
 
   # Experiment type
-  refExperiment = spectrum.ccpnSpectrum.experiment.refExperiment
+  refExperiment = spectrum.apiDataSource.experiment.refExperiment
   if refExperiment is None:
     name = synonym = None
   else:
@@ -502,12 +572,12 @@ def makePeakListFrame(peakList):
     spectrum.isotopeCodes,
     spectrum.spectrometerFrequencies,
     spectrum.spectralWidths,
-    tuple(x.primaryDataDimRef.pointToValue(1. - x.pointOffset) for x in ccpnDataDims),
+    tuple(x.primaryDataDimRef.pointToValue(1. - x.pointOffset) for x in apiDataDims),
     # NBNB TBD this can break for non-Freq dimensions
     spectrum.foldingModes,
     (True,) * dimensionCount,
     # NBNB TBD we have no way of representing data for absPeakPositions=False
-    tuple(x.expDim.isAcquisition for x in ccpnDataDims),
+    tuple(x.expDim.isAcquisition for x in apiDataDims),
   )
   for row in rows:
     loop.addData(row)
@@ -519,34 +589,27 @@ def makePeakListFrame(peakList):
     loop.addColumn(tag)
 
   ref2Dim = {}
-  for dim,dataDim in enumerate(ccpnDataDims):
+  expDimRefs = []
+  for dim,dataDim in enumerate(apiDataDims):
     # Find ExpDimRef to use. NB, could break for unusual cases
-    expDimRefs = dataDim.expDim.sortedExpDimRefs()
-    for expDimRef in expDimRefs:
-      if expDimRef.measurementType.lower() == 'shift':
-        # unfortunately casing of word is not reliable
-        break
-    else:
-      expDimRef = expDimRefs[0]
+    expDimRef = dataDim.expDim.sortedExpDimRefs()[0]
+    expDimRefs.append(expDimRef)
     ref2Dim[expDimRef] = dim + 1
 
-  rows = []
-  for expTransfer in spectrum.ccpnSpectrum.experiment.expTransfers:
-    row = [ref2Dim.get(x) for x in expTransfer.expDimRefs]
-    if None not in row:
-      row.sort()
-      row.append(expTransfer.transferType)
-      row.append(not expTransfer.isDirect)
-      rows.append(row)
-
-  for row in sorted(rows):
-    loop.addData(row)
+  for xd1 in expDimRefs:
+    for xd2 in expDimRefs:
+      dim1 = ref2Dim[xd1]
+      dim2 = ref2Dim[xd2]
+      if dim1 < dim2:
+        tt = libSpectrum._expDimRefTransferType(xd1, xd2)
+        if tt is not None:
+          loop.addData([dim1, dim2, tt[0], not(tt[1])])
 
 
   # main peak loop
   loop = bmrb.loop.fromScratch(category='nef_peak')
   saveframe.addLoop(loop)
-  for tag in ('peak_id', 'volume', 'volume_uncertainty', 'height', 'height_uncertainty'):
+  for tag in ('ordinal', 'peak_id', 'volume', 'volume_uncertainty', 'height', 'height_uncertainty'):
     loop.addColumn(tag)
   for ii in range(1, dimensionCount + 1):
     loop.addColumn('position_%s' % ii)
@@ -557,6 +620,7 @@ def makePeakListFrame(peakList):
     loop.addColumn('residue_type_%s' % ii)
     loop.addColumn('atom_name_%s' % ii)
 
+  ordinal = 0
   for peak in peakList.peaks:
 
     # serial and intensities
@@ -570,17 +634,18 @@ def makePeakListFrame(peakList):
     assignedNmrAtoms = peak.assignedNmrAtoms
     if assignedNmrAtoms:
       for assignment in assignedNmrAtoms:
-        row = list(firstpart)
+        ordinal += 1
+        row = [ordinal] + firstpart
         for nmrAtom in assignment:
           if nmrAtom is None:
             row.extend((None, None, None, None))
           else:
-            row.extend(nmrAtom.assignment)
+            row.extend(pid.splitId(nmrAtom._id))
         loop.addData(row)
     else:
       # Unassigned peak
-      firstpart.extend([None] * (dimensionCount * 4))
-      loop.addData(firstpart)
+      ordinal += 1
+      loop.addData([ordinal] + firstpart + [None] * (dimensionCount * 4))
   #
   return saveframe
 
@@ -605,76 +670,98 @@ def makePeakRestraintLinksFrame(restraintLists, peakLists):
 
   data = []
   for restraintList in restraintLists:
-    restraint_list_id = '$' + restraintList.name
+    restraintType = restraintList.restraintType
+    if restraintType == 'HBond':
+      restraintListTag = 'distance'
+    else:
+      restraintListTag = restraintType.lower()
+    restraint_list_id = ( 'nef_%s_restraint_list_%s' %
+                          (restraintListTag, restraintList.name.translate(pid.unmapSeparators)))
+
     for restraint in restraintList.restraints:
       restraint_id = restraint.serial
       for peak in restraint.peaks:
         if peak.peakList in peakLists:
-          data.append(['$'+peak.peakList.name, peak.serial, restraint_list_id, restraint_id])
+          data.append(['nef_nmr_spectrum_' + peak.peakList.name, peak.serial,
+                       restraint_list_id, restraint_id])
   for ll in sorted(data):
       loop.addData(ll)
   #
   return saveframe
 
-def prepareNmrProject(nmrProject):
-  """Fix non-CCPN-generated NmrProjects that violate normal assumptions"""
 
-  # If there is only one shiftList, make sure all experiments have it set
-  shiftLists = nmrProject.findAllMeasurementLists(className='ShiftList')
-  if len(shiftLists) == 1:
-    shiftList = shiftLists.pop()
-    for experiment in nmrProject.experiments:
-      experiment.shiftList = shiftList
+# # No longer necessary - it is all dealt with elsewhere
+# def prepareNmrProject(nmrProject):
+#   """Fix non-CCPN-generated NmrProjects that violate normal assumptions"""
+#
+#   # If there is only one shiftList, make sure all experiments have it set
+#   shiftLists = nmrProject.findAllMeasurementLists(className='ShiftList')
+#   if len(shiftLists) == 1:
+#     shiftList = shiftLists.pop()
+#     for experiment in nmrProject.experiments:
+#       experiment.shiftList = shiftList
+#
 
-  # fix restraint list names to be unique
-  constraintLists = [y for x in nmrProject.sortedNmrConstraintStores()
-                       for y in x.sortedConstraintLists()]
-
-  names = [x.name for x in constraintLists]
-  for ii,name in enumerate(names):
-    obj = constraintLists[ii]
-    if name:
-      names[ii] =  '_'.join(obj.name.split())
-    else:
-      names[ii] = ("RestraintList:%s.%s,%s" %
-                   (obj.nmrConstraintStore.serial, obj.className[:-14], obj.serial))
-
-  for ii,name in enumerate(names):
-    obj = constraintLists[ii]
-    if names.count(name) > 1:
-      name = ("RestraintList:%s.%s,%s" %
-              (obj.nmrConstraintStore.serial, obj.className[:-14], obj.serial))
-      names[ii] = name
-    constraintLists[ii].name = name
+  #
+  # # fix restraint list names to be unique
+  # constraintLists = [y for x in nmrProject.sortedNmrConstraintStores()
+  #                      for y in x.sortedConstraintLists()]
+  #
+  # names = [x.name for x in constraintLists]
+  # for ii,name in enumerate(names):
+  #   obj = constraintLists[ii]
+  #   if name:
+  #     names[ii] =  '_'.join(obj.name.split())
+  #   else:
+  #     names[ii] = ("RestraintList:%s.%s,%s" %
+  #                  (obj.nmrConstraintStore.serial, obj.className[:-14], obj.serial))
+  #
+  # for ii,name in enumerate(names):
+  #   obj = constraintLists[ii]
+  #   if names.count(name) > 1:
+  #     name = ("RestraintList:%s.%s,%s" %
+  #             (obj.nmrConstraintStore.serial, obj.className[:-14], obj.serial))
+  #     names[ii] = name
+  #   constraintLists[ii].name = name
 
 
 if __name__ == '__main__':
 
   if len(sys.argv) >= 3:
 
-    from ccpncore.util.Io import loadProject
-    from ccpn import Project
+    # from ccpncore.util.Io import loadProject
+    # from ccpn import Project
+    #
+    # # set up input
+    # junk, projectDir, outputDir = sys.argv[:3]
+    # apiProject = loadProject(projectDir)
+    #
+    # # # NBNB TBD this must be integrated in upgrade once we are in a stable version
+    # # from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
+    # # correctFinalResult(apiProject)
+    #
+    # nmrProject = apiProject.findFirstNmrProject()
+    # prepareNmrProject(nmrProject)
+    # pp = Project(nmrProject)
 
     # set up input
     junk, projectDir, outputDir = sys.argv[:3]
-    ccpnProject = loadProject(projectDir)
+    project = ccpnIo.openProject(projectDir)
+    apiProject = project._wrappedData.root
 
-    # # NBNB TBD this must be integrated in upgrade once we are in a stable version
-    # from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
-    # correctFinalResult(ccpnProject)
-
-    nmrProject = ccpnProject.findFirstNmrProject()
-    prepareNmrProject(nmrProject)
-    pp = Project(nmrProject)
+    tt = Path.splitPath(projectDir)
+    if not tt[1]:
+      tt = Path.splitPath(tt[0])
 
     if len(sys.argv) >= 4:
       # set up input
       constraintStoreSerial = int(sys.argv[4])
-      constraintStore = ccpnProject.findFirstNmrConstraintStore(serial=constraintStoreSerial)
+      constraintStore = apiProject.findFirstNmrConstraintStore(serial=constraintStoreSerial)
     else:
-      constraintStore = ccpnProject.findFirstNmrConstraintStore()
+      constraintStore = apiProject.findFirstNmrConstraintStore()
 
-    exportRestraintStore(pp._data2Obj[constraintStore], dataName=nmrProject.root.name, directory=outputDir)
+    exportRestraintStore(project._data2Obj[constraintStore], dataName=tt[1],
+                         directory=outputDir, forceFirstShiftList=True)
 
   else:
     print ("Error. Parameters are: ccpnProjectDirectory outputDirectory [constraintStoreSerial] ")

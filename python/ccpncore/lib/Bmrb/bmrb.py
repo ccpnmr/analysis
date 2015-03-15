@@ -1172,7 +1172,12 @@ class loop:
             for datum in copy.deepcopy(self.data):
 
                 # Put quotes as needed on the data
-                datum = [cleanValue(x) for x in datum]
+                try:
+                  datum = [cleanValue(x) for x in datum]
+                except:
+                  print(self.columns)
+                  print(datum)
+                  raise
                 for pos, item in enumerate(datum):
                     if "\n" in item:
                         datum[pos] = "\n;\n%s;\n" % item

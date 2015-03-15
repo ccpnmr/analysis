@@ -44,7 +44,7 @@ class GuiStripNd(GuiStrip):
     self.xAxis = orderedAxes[0]
     self.yAxis = orderedAxes[1]
     self.zAxis = orderedAxes[2:]
-    apiSpectrum = guiSpectrumView.dataSource
+    apiDataSource = guiSpectrumView.dataSource
 
     newItem = self.scene().addItem(guiSpectrumView)
 """

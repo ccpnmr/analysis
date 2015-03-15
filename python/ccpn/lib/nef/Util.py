@@ -434,6 +434,9 @@ def regulariseNefFile(inPath, outPath=None):
   and saveframes sorted by category, frameCode
 
   Export file name has '_r' appended to main file name"""
+
+  raise NotImplementedError(("Still to be upgraded"))
+
   nefDir, nefFile = os.path.split(inPath)
   nefName, nefExt = os.path.splitext(nefFile)
   if outPath is None:

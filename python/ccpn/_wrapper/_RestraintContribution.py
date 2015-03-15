@@ -142,6 +142,40 @@ class RestraintContribution(AbstractWrapperObject):
     self._wrappedData.additionalLowerLimit = value
 
   @property
+  def scale(self) -> float:
+    """scaling factor (RDC only) to be multiplied with targetValue to get scaled value """
+    if hasattr(self._wrappedData, 'scale'):
+      return self._wrappedData.scale
+    else:
+      raise AttributeError("%s RestraintContribution has no attribute 'scale'" %
+      self._parent._parent.restraintType)
+
+  @scale.setter
+  def scale(self, value:float):
+    if hasattr(self._wrappedData, 'scale'):
+      self._wrappedData.scale = value
+    else:
+      raise AttributeError("%s RestraintContribution has no attribute 'scale'" %
+      self._parent._parent.restraintType)
+
+  @property
+  def isDistanceDependent(self) -> float:
+    """Does targetValue depend on a variable distance (RDC only) """
+    if hasattr(self._wrappedData, 'isDistanceDependent'):
+      return self._wrappedData.isDistanceDependent
+    else:
+      raise AttributeError("%s RestraintContribution has no attribute 'isDistanceDependent'" %
+      self._parent._parent.restraintType)
+
+  @isDistanceDependent.setter
+  def isDistanceDependent(self, value:float):
+    if hasattr(self._wrappedData, 'isDistanceDependent'):
+      self._wrappedData.isDistanceDependent = value
+    else:
+      raise AttributeError("%s RestraintContribution has no attribute 'isDistanceDependent'" %
+      self._parent._parent.restraintType)
+
+  @property
   def combinationId(self) -> int:
     """combinationId of contribution, describing which contributions are AND'ed together"""
     return self._wrappedData.combinationId
@@ -238,4 +272,4 @@ for clazz in ApiContribution._metaclass.getNonAbstractSubtypes():
 def _fixedResonance2AtomId(fixedResonance:ApiFixedResonance) -> str:
   """Utility function - get AtomId from FixedResonance """
   tags = ('chainCode', 'sequenceCode', 'residueType', 'name')
-  return Pid.makeId(getattr(fixedResonance, tag) for tag in tags)
+  return Pid.makeId(*(getattr(fixedResonance, tag) for tag in tags))

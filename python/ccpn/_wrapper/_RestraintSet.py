@@ -55,8 +55,8 @@ class RestraintSet(AbstractWrapperObject):
     
   @property
   def _key(self) -> str:
-    """name, regularised as used for id"""
-    return self._wrappedData.name.translate(Pid.remapSeparators)
+    """id string - serial number converted to string"""
+    return str(self._wrappedData.serial)
 
   @property
   def serial(self) -> int:

@@ -40,7 +40,6 @@ class PeakList(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
-  
 
   # CCPN properties  
   @property
@@ -103,15 +102,9 @@ class PeakList(AbstractWrapperObject):
     value = self.getById(value) if isinstance(value, str) else value
     apiPeakList = self._wrappedData
     if value is None:
-      apiPeakList.specificShiftList = None
+      apiPeakList.shiftList = None
     else:
-      apiShiftList = value._wrappedData
-      if apiShiftList is apiPeakList.shiftList:
-        return
-      elif apiShiftList is apiPeakList.dataSource.experiment.shiftList:
-        apiPeakList.specificShiftList = None
-      else:
-        apiPeakList.specificShiftList = apiShiftList
+      apiPeakList.shiftList = value._wrappedData
     
   # Implementation functions
   @classmethod

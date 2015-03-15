@@ -31,22 +31,21 @@ def makePid(head, *args):
   else:
       sep = PREFIXSEP
   #
-  return sep.join((head, IDSEP.join(*ll)))
+  return Pid(sep.join((head, IDSEP.join(ll))))
 
 def makeId(*args):
   """make id from list of successive keys.
   Keys are converted to string, and illegal characters are converted to altCharacter"""
 
   # map args to corrected strings
-  return IDSEP.join(val.translate(remapSeparators) for val in args)
+  return IDSEP.join(str(val).translate(remapSeparators) for val in args)
 
 def splitId(idString):
   """Split idString into tuple of component elements,
-  mapping altCharacter back to separator
-  Keys are converted to string, and illegal characters are converted to altCharacter"""
+  mapping altCharacter back to separator and relacing empty strings with None"""
 
   # map args to corrected strings
-  return tuple(val.translate(unmapSeparators) for val in idString.split(IDSEP))
+  return tuple((val.translate(unmapSeparators) or None) for val in idString.split(IDSEP))
 
 
 def decodePid(sourceObject, thePid):

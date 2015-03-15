@@ -41,6 +41,14 @@ class ChemicalShiftList(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  def __init__(self, project, wrappedData):
+
+    self._wrappedData = wrappedData
+    self._project = project
+    defaultName = 'Shifts%s' % wrappedData.serial
+    self._setUniqueStringKey(wrappedData, defaultName)
+    super().__init__(project, wrappedData)
+
   # CCPN properties  
   @property
   def apiShiftList(self) -> ApiShiftList:

@@ -180,7 +180,7 @@ class Peak(AbstractWrapperObject):
       data2Obj = self._project._data2Obj
       dimResults = [data2Obj[pdc.resonance] for pdc in mainPeakDimContribs
                     if hasattr(pdc, 'resonance')]
-      result.append(dimResults)
+      result.append(sorted(dimResults))
     #
     return tuple(result)
 
@@ -217,7 +217,7 @@ class Peak(AbstractWrapperObject):
 
       result += itertools.product(*allAtoms)
     #
-    return tuple(result)
+    return tuple(sorted(result))
 
 
   @assignedNmrAtoms.setter

@@ -28,7 +28,7 @@ stored in simply accessible for.
 
 ======================COPYRIGHT/LICENSE START==========================
 
-Util.py: MetaModel implementation for CCPN data model and code generation framework
+Io.py: MetaModel implementation for CCPN data model and code generation framework
 
 Copyright (C) 2005 Rasmus Fogh (CCPN Project)
 

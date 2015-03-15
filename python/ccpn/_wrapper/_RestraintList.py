@@ -42,6 +42,19 @@ class RestraintList(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  def __init__(self, project, wrappedData):
+
+    # NB The name will only be unique within the restraintSet, which could cause
+    # problems if anyone was silly enough to write out restraintLists from
+    # different RestraintSets to the same NEF file.
+
+    self._wrappedData = wrappedData
+    self._project = project
+    defaultName = ('%ss-%s' %
+                   (self._wrappedData.__class__.__name__[:-14], wrappedData.serial))
+    self._setUniqueStringKey(wrappedData, defaultName)
+    super().__init__(project, wrappedData)
+
   # CCPN properties
   @property
   def apiRestraintList(self) -> ApiAbstractConstraintList:
@@ -105,6 +118,15 @@ class RestraintList(AbstractWrapperObject):
   @potentialType.setter
   def potentialType(self, value:str):
     self._wrappedData.potentialType = value
+
+  @property
+  def origin(self) -> str:
+    """Data origin for restraints"""
+    return self._wrappedData.origin
+
+  @origin.setter
+  def origin(self, value:str):
+    self._wrappedData.origin = value
 
   @property
   def tensorMagnitude(self) -> float:

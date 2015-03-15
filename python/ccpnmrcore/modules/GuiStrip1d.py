@@ -62,3 +62,4 @@ class GuiStrip1d(GuiStrip):
     x2 = self.viewBox.childrenBoundingRect().left()
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2,x1)
+

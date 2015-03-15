@@ -1,3 +1,5 @@
+from ccpn.Util import Io as ccpnIo
+
 __author__ = 'simon'
 
 
@@ -33,13 +35,10 @@ class AppBase(GuiBase):
     # Done this way to sneak the appBase in before creating the wrapper
     self.current = Current()
     apiProject._appBase = self
-    project = ccpn._wrapApiProject(apiProject)
+    project = ccpnIo._wrapApiProject(apiProject)
     apiNmrProject = project._wrappedData
     self.project = project
     project._appBase = self
-
-
-
 
     apiWindowStore = apiNmrProject.windowStore
     if apiWindowStore is None:

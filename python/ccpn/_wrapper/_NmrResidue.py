@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.lib.molecule.DataMapper import DataMapper
-from ccpncore.util import pid as Pid
+from ccpncore.util import pid
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._NmrChain import NmrChain
@@ -61,8 +61,7 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """Residue local ID"""
-    return Pid.IDSEP.join((self.sequenceCode.translate(Pid.remapSeparators),
-                           self.name.translate(Pid.remapSeparators)))
+    return pid.makeId(self.sequenceCode, self.name)
     
   @property
   def _parent(self) -> NmrChain:

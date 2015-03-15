@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -46,7 +47,7 @@ from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Path
-from ccpn import openProject, newProject
+from ccpn.util import Io as ccpnIo
 
 
 class MainWindow(GuiMainWindow):
@@ -243,9 +244,9 @@ class MainWindow(GuiMainWindow):
 
   def newProject(self, name=None):
     if name is None:
-      self.project=newProject('defaultProject')
+      self.project=ccpnIo.newProject('defaultProject')
     else:
-      self.project=newProject(name)
+      self.project=ccpnIo.newProject(name)
     msg  = (self.project.name)+' created'
     self.statusBar().showMessage(msg)
     self.pythonConsole.write("project = newProject('"+self.project.name+"')\n")
@@ -258,7 +259,7 @@ class MainWindow(GuiMainWindow):
       currentProjectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
     else:
       currentProjectDir = projectDir
-    project = openProject(currentProjectDir)
+    project = ccpnIo.openProject(currentProjectDir)
     self.setProject(project)
     msg  = (currentProjectDir)+' opened'
     self.statusBar().showMessage(msg)

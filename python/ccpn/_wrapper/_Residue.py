@@ -4,8 +4,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpncore.lib.molecule.DataMapper import DataMapper
-from ccpncore.util import pid as Pid
 
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
@@ -25,6 +23,8 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
+from ccpncore.lib.molecule.DataMapper import DataMapper
+from ccpncore.util import pid
 from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
 from ccpn._wrapper._Project import Project
 from ccpn._wrapper._Chain import Chain
@@ -64,8 +64,7 @@ class Residue(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """Residue ID. Identical to sequenceCode.residueType. Characters translated for pid"""
-    return Pid.IDSEP.join((self.sequenceCode.translate(Pid.remapSeparators),
-                           self.name.translate(Pid.remapSeparators)))
+    return pid.makeId(self.sequenceCode, self.name)
     
   @property
   def _parent(self) -> Chain:

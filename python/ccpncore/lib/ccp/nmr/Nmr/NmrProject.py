@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 import os
+from ccpncore.util import Common as commonUtil
 from collections.abc import Sequence
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
@@ -83,12 +84,8 @@ def loadDataSource(nmrProject, filePath):
       rest, upper = os.path.split(rest)
       name = '%s-%s' % (upper, lower)
 
-  if ':' in name:
-    # Fix name to fit PID requirements. NBNB temporary fix
-    name = name.replace(':','-')
-  if '.' in name:
-    # Fix name to fit PID requirements. NBNB temporary fix
-    name = name.replace('.',',')
+  while any(x.findFirstDataSource(name=name) for x in nmrProject.experiments):
+    name = commonUtil.incrementName(name)
 
   numberType = 'float' if isFloatData else 'int'
   experiment = nmrProject.createExperiment(name=name, numDim=len(numPoints),

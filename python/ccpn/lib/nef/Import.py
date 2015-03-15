@@ -4,6 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpn.util import Io as ccpnIo
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -313,7 +315,7 @@ if __name__ == '__main__':
     nefName, junk = os.path.splitext(nefFile)
 
     if len(sys.argv) == 2:
-      pp = ccpn.newProject(nefName, path=outputDir)
+      pp = ccpnIo.newProject(nefName, path=outputDir)
 
     else:
       projectDir = sys.argv[3]

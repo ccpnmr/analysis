@@ -46,7 +46,7 @@ def autodoc_process_docstring():
     if isinstance(obj, property):
       if not (lines and lines[0].startswith('Type:')):
         if hasattr(obj.fget, '__annotations__'):
-          # Necessary because functools.patrial objects do note have __annotations__ attribute
+          # Necessary because functools.partial objects do note have __annotations__ attribute
           typ = obj.fget.__annotations__.get('return')
           ll = []
           if typ:

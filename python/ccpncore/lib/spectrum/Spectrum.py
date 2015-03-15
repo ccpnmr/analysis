@@ -28,6 +28,7 @@ from collections.abc import Sequence
 from ccpncore.util import Path
 from ccpncore.lib.spectrum.BlockData import determineBlockSizes
 from ccpncore.memops.ApiError import ApiError
+from ccpncore.api.ccp.nmr.Nmr import ExpDimRef
 
 def createBlockedMatrix(dataUrl:object, path:str, numPoints:Sequence, blockSizes:Sequence=None,
                         isBigEndian:bool=True, numberType:str='float', isComplex:bool=None,
@@ -148,3 +149,42 @@ def doAxisCodesMatch(axisCodes:Sequence, refAxisCodes:Sequence)->bool:
       return False
   #
   return True
+
+def dimensionTransferType(dataDims:Sequence)->str:
+  """Get ExpTransferType connecting two dataDims - uses heuristics"""
+
+  expDimRefs = [x.expDim.sortedExpDimRefs()[0] for x in dataDims]
+  return _expDimRefTransferType(*expDimRefs)
+
+def _expDimRefTransferType(expDimRef1:ExpDimRef, expDimRef2:ExpDimRef)->str:
+  """Get ExpTransferType and isDirect boolean connecting two expDimRefs - uses heuristics"""
+
+  # First try looking for one-bond axisCodes
+  axisCode1 = expDimRef1.axisCode
+  axisCode2 = expDimRef2.axisCode
+  if len(axisCode1) > 1 and len(axisCode2) > 1:
+    ss2 = axisCode2.upper()
+    if axisCode1.upper() == ss2[1] + ss2[0] + ss2[2:]:
+      if (axisCode1[0].isupper() and axisCode2[0].isupper() and
+          axisCode1[1].islower() and axisCode2[1].islower()):
+        # Hooray, we have a situation like 'Hn'/'Nh' or 'Hp1'/'Ph1'
+        return ('onebond', True)
+
+  # Still here - try with ExpPrototypes
+  refExpDimRef1 = expDimRef1.refExpDimRef
+  refExpDimRef2 = expDimRef2.refExpDimRef
+  if None not in (refExpDimRef1, refExpDimRef2):
+    for atomSite1 in refExpDimRef1.expMeasurement.atomSites:
+      for atomSite2 in refExpDimRef2.expMeasurement.atomSites:
+        ll = list(atomSite1.expTransfers.intersection(atomSite2.expTransfers))
+        if len(ll) == 1:
+          # We have an expTransfer that connects our expDimRefs
+          return (ll[0].transferType, True)
+
+  # Still here - try using expTransfer
+  ll = list(expDimRef1.expTransfers.intersection(expDimRef2.expTransfers))
+  if len(ll) == 1:
+    return (ll[0].transferType, ll[0].isDirect)
+  #
+  return None
+

@@ -328,7 +328,7 @@ def mapAssignedResonances(topObject, assignmentMap, molSystem=None, chainMap=Non
 
           for ii,resonance in enumerate(resonances):
             assignmentMap[resonance] = (chainCode, sequenceCode, residueType,
-                                        newNames[ii].replace('*','#'))
+                                        newNames[ii].replace('*','%'))
 
 
         else:
@@ -340,7 +340,7 @@ def mapAssignedResonances(topObject, assignmentMap, molSystem=None, chainMap=Non
             # consistent, so e.g. HG1* is bound to CG1 and not CG2
             for ii in range(2):
               assignmentMap[resonances[ii]] = (chainCode, sequenceCode, residueType,
-                                               newNames[ii].replace('*','#'))
+                                               newNames[ii].replace('*','%'))
 
           else:
             # Only one resonance. Must choose which.
@@ -388,7 +388,7 @@ def mapAssignedResonances(topObject, assignmentMap, molSystem=None, chainMap=Non
 
             resonanceName = newNames[indx]
             assignmentMap[resonance] = (chainCode, sequenceCode, residueType,
-                                        resonanceName.replace('*','#'))
+                                        resonanceName.replace('*','%'))
 
       elif len(resonances) == 1:
         # Single resonance, not assigned to prochiral
@@ -398,7 +398,7 @@ def mapAssignedResonances(topObject, assignmentMap, molSystem=None, chainMap=Non
           # simple one-to-one stereospecific assignment
           if chemAtomSet:
             # assignment to atomSet
-            resonanceName = chemAtomSet.name.replace('*', '#')
+            resonanceName = chemAtomSet.name.replace('*', '%')
           else:
             #asssignment to single atom
             resonanceName = allAtoms[0].name
@@ -432,7 +432,7 @@ def mapAssignedResonances(topObject, assignmentMap, molSystem=None, chainMap=Non
           resonanceName = '%s@%s' % (atomsName, resonance.serial)
 
           assignmentMap[resonance] = (chainCode, sequenceCode, residueType,
-                                      resonanceName.replace('*','#'))
+                                      resonanceName.replace('*','%'))
 
     else:
       # assigned to multiple residues - cannot be helped
@@ -455,7 +455,7 @@ def mapAssignedResonances(topObject, assignmentMap, molSystem=None, chainMap=Non
         resonanceName = '%s@%s' % (ss, resonance.serial)
 
         assignmentMap[resonance] = (chainCode, sequenceCode, residueType,
-                                    resonanceName.replace('*','#'))
+                                    resonanceName.replace('*','%'))
 
 ###################################################################################
 #
@@ -478,7 +478,7 @@ def regularisedResonanceName(resonance):
     if len(assignNames) == 1:
       # One assignName - use for assignment
       name = assignNames[0]
-      return name.replace('*', '#')
+      return name.replace('*', '%')
 
 
     elif len(assignNames) == 2:
@@ -510,7 +510,7 @@ def regularisedResonanceName(resonance):
           if newChar is not None:
             ll = list(assignNames[0])
             ll[lenPrefix] = newChar
-            return ''.join(ll).replace('*', '#')
+            return ''.join(ll).replace('*', '%')
 
   # If we are still here, assignNames did not help. Use resonanceName only
 
@@ -538,7 +538,7 @@ def regularisedResonanceName(resonance):
       result = '%s@%s' % (result, resonance.serial)
     else:
       # Name might be proper assignment name. Change to new wildcard convention
-      result.replace('*', '#')
+      result.replace('*', '%')
 
 
   else:

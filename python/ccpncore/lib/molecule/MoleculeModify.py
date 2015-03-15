@@ -603,14 +603,14 @@ def expandMolSystemAtoms(chain):
           commonBound = frozenset.intersection(*(x.boundAtoms for x in components))
 
           # Add 'equivalent' atom
-          newName = cas.name.replace('*', '#')
+          newName = cas.name.replace('*', '%')
           newAtom = residue.newAtom(name=newName, atomType='equivalent',
                                     elementSymbol=elementSymbol,atomSetName=cas.name,
                                     components=components, boundAtoms=commonBound)
           casMap[cas] = newAtom
 
           # NBNB the test on '#' count is a hack to exclude Tyr/Phe HD#|HE#
-          hackExclude = newName.count('#') >= 2
+          hackExclude = newName.count('%') >= 2
 
           # Add 'pseudo' atom for proton
           if elementSymbol == 'H':

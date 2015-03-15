@@ -155,6 +155,8 @@ class Undo(deque):
         else:
           redoMethod(redoData)
       self.nextIndex = redoTo + 1
+      # Addded by Rasmus March 2015. Surely we need to reset self.blocked?
+      self.blocked = False
     except:
       from ccpncore.util.Logging import getLogger
       getLogger().warning("WARNING, error while redoing. Undo is cleared")

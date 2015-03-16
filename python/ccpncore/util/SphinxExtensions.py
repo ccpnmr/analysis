@@ -56,7 +56,8 @@ def autodoc_process_docstring():
             # property is modifiable, add it to doc string
             ll.append('*settable*')
           if ll:
-            lines[:0] = [', '.join(ll) + '\n', '\n']
+            #lines[:0] = [', '.join(ll) + '\n', '\n']
+            lines[:0] = [', '.join(ll)+ ' - ']
 
   #
   return process

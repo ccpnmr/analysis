@@ -59,19 +59,20 @@ def refreshSphinxDocumentation():
   # First ccpncore
   # NBNB TBD temporarily removed ccpncore/gui, pending solving Qt imports
   ll = ['ccpn/doc/source/ccpncore', 'ccpncore',
-        # 'ccpncore/api', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/']
-        'ccpncore/api', 'ccpncore/gui', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/']
+        'ccpncore/api', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/',
+        'ccpncore/lib/Bmrb/unit_tests']
+        # 'ccpncore/api', 'ccpncore/gui', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
   print( '### running: ' + ' '.join(ll))
   apidoc.main(ll)
   
 
   # NBNB TBD temporarily removed, pending solving Qt imports
-  # # then ccpnmrcore
-  # ll = ['ccpn/doc/source/ccpnmrcore', 'ccpnmrcore']
-  # ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  # print( '### running: ' + ' '.join(ll))
-  # apidoc.main(ll)
+  # then ccpnmrcore
+  ll = ['ccpn/doc/source/ccpnmrcore', 'ccpnmrcore']
+  ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
+  print( '### running: ' + ' '.join(ll))
+  apidoc.main(ll)
 
   # then ccpn
   ll = ['ccpn/doc/source/ccpn', 'ccpn']

@@ -4,9 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -159,10 +158,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.colourIndex %= len(Colour.spectrumHexColours)
 
     for strip in self.strips:
-      if self not in strip.plotWidget.scene().items():
-        strip.plotWidget.plotItem.scene().addItem(self)
+      if self not in strip.plotWidget.items():
+        strip.plotWidget.plotItem.addItem(self)
 
-            
+
   """
   def getLevels(self):
     
@@ -193,11 +192,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     if not widget:
       return
-      
+
     guiStrip = self.spectrumDisplay.viewportDict[widget]
     self.drawContours(painter, guiStrip)
 
   def boundingRect(self):  # seems necessary to have
+
 
     return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TBD: remove hardwiring
   

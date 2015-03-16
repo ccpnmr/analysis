@@ -4,16 +4,12 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpn._wrapper._Project import Project
-from ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
-from ccpncore.util import Io as ioUtil, Io
-
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-               "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                 " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -26,6 +22,9 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from ccpn._wrapper._Project import Project
+from ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
+from ccpncore.util import Io as ioUtil, Io
 
 def openProject(path:str, nmrProjectName:str=None) -> Project:
   """Open project at path, and create a wrapper project.

@@ -4,10 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpncore.util import pid as Pid
-
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -103,7 +101,7 @@ def newNmrChain(parent:Project, shortName:str=None, comment:str=None) -> NmrChai
       ii += 1
       code = '@%s' % ii
     shortName = code
-  
+
   newApiNmrChain = nmrProject.newNmrChain(code=shortName, details=comment)
   
   return parent._data2Obj.get(newApiNmrChain)

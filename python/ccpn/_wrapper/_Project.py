@@ -5,7 +5,7 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -31,6 +31,7 @@ from ccpncore.lib.molecule import DataConvertLib
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import pid as Pid
 from ccpncore.util import Io as utilIo
+
 
 
 class Project(AbstractWrapperObject):
@@ -103,7 +104,7 @@ class Project(AbstractWrapperObject):
       self._appBase = wrappedData.root._appBase
     else:
       self._appBase = None
-    
+
     self._initializeAll()
   
   def _registerApiNotifiers(self):

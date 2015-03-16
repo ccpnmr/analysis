@@ -4,9 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -104,6 +103,7 @@ class NmrResidue(AbstractWrapperObject):
 def newNmrResidue(parent:NmrChain, name:str, sequenceCode:str=None, comment:str=None) -> NmrResidue:
   """Create new child NmrResidue"""
   apiNmrChain = parent._wrappedData
+  print(name)
   nmrProject = apiNmrChain.nmrProject
   obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=name, details=comment,
                                      nmrChsin=apiNmrChain)

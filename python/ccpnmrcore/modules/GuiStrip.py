@@ -1,3 +1,26 @@
+"""Module Documentation here
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author: rhfogh $"
+__date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+__version__ = "$Revision: 7686 $"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
 __author__ = 'simon'
 
 import pyqtgraph as pg
@@ -42,6 +65,8 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
       self.foreground = 'w'
     pg.setConfigOption('background', self.background)
     pg.setConfigOption('foreground', self.foreground)
+    newScene = self._parent.strips[0].plotWidget.scene()
+
     self.plotWidget.setBackground(self.background)
     self.plotWidget.plotItem.axes['top']['item']
     # self.setAcceptDrops(True)
@@ -68,7 +93,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotWidget.scene().addItem(self.textItem)
     self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
     self.viewBox.sigRangeChanged.connect(self.updateRegion)
-    self.grid = pg.GridItem()#pen=self.foreground)
+    self.grid = pg.GridItem()
     self.plotWidget.addItem(self.grid)
     self.setMinimumWidth(200)
     self.createCrossHair()

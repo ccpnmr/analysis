@@ -1,3 +1,26 @@
+"""Module Documentation here
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author$"
+__date__ = "$Date$"
+__version__ = "$Revision$"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
 import os
 import json
 from functools import partial
@@ -115,7 +138,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu = QtGui.QMenu("&Help", self)
 
     fileMenuAction = fileMenu.addAction(QtGui.QAction("New", self, triggered=self._appBase.newProject))
-    fileMenu.addAction(Action(self, "Open...", callback=self._appBase.openProject, shortcut="po"))
+    fileMenu.addAction(Action(self, "Open...", callback=self.openAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
     fileMenu.addSeparator()
@@ -218,6 +241,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setMenuBar(self._menuBar)
     self._menuBar.setNativeMenuBar(False)
     self.show()
+
+
+  def openAProject(self, projectDir=None):
+
+
+    currentProjectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
+    # else:
+    #   currentProjectDir = projectDir
+
+    self._appBase.openProject(currentProjectDir)
+
 
   def showAssigner(self, position, nextTo=None):
     assigner = Assigner()

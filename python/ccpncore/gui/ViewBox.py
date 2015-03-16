@@ -5,7 +5,7 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -51,28 +51,29 @@ class ViewBox(pg.ViewBox):
 
   def mouseClickEvent(self, event, axis=None):
 
-    if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
-      event.accept()
-      print('Left Click Event')
-      # self.current.pane = self.parent
+    # if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
+    #   event.accept()
+    #   print('Left Click Event')
 
-    elif (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ControlModifier) and not (
-    event.modifiers() & QtCore.Qt.ShiftModifier):
-      position = event.scenePos()
-      mousePoint = self.mapSceneToView(position)
-      print(mousePoint)
 
-    elif (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ShiftModifier) and not (
-    event.modifiers() & QtCore.Qt.ControlModifier):
-      print('Add Select')
+    #
+    # if (event.button() == QtCore.Qt.LeftButton) and (
+    #           event.modifiers() & QtCore.Qt.ControlModifier) and not (
+    # event.modifiers() & QtCore.Qt.ShiftModifier):
+    #   position = event.scenePos()
+    #   mousePoint = self.mapSceneToView(position)
+    #   print(mousePoint)
+    #
+    # elif (event.button() == QtCore.Qt.LeftButton) and (
+    #           event.modifiers() & QtCore.Qt.ShiftModifier) and not (
+    # event.modifiers() & QtCore.Qt.ControlModifier):
+    #   print('Add Select')
+    #
+    # elif event.button() == QtCore.Qt.MiddleButton and not event.modifiers():
+    #   event.accept()
+    #   print('Pick and Assign')
 
-    elif event.button() == QtCore.Qt.MiddleButton and not event.modifiers():
-      event.accept()
-      print('Pick and Assign')
-
-    elif event.button() == QtCore.Qt.RightButton and not event.modifiers() and axis is None:
+    if event.button() == QtCore.Qt.RightButton and not event.modifiers() and axis is None:
       event.accept()
       self.raiseContextMenu(event)
 
@@ -83,15 +84,21 @@ class ViewBox(pg.ViewBox):
     elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
       event.accept()
       self.autoRange()
-
-    if event.double():
-      event.accept()
-      print("Double Click event")
+    #
+    # if event.double():
+    #   event.accept()
+    #   print("Double Click event")
 
   def mouseDragEvent(self, event, axis=None):
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
       pg.ViewBox.mouseDragEvent(self, event)
+
+    elif (event.button() == QtCore.Qt.LeftButton) and (
+              event.modifiers() & QtCore.Qt.ControlModifier) and not (
+              event.modifiers() & QtCore.Qt.ShiftModifier):
+      event.accept()
+
 
 
     elif (event.button() == QtCore.Qt.RightButton) and (

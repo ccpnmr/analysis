@@ -4,9 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -64,14 +63,18 @@ class GuiSpectrumView1d(GuiSpectrumView):
           self.spectrum.sliceColour = list(spectrumColours.keys())[(len(strip.spectrumViews) % 12)-1]
 
       self.plot  = strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
+      self.plot.curve.setClickable(True)
+      self.plot.sigClicked.connect(self.clicked)
     spectrumViewButton = ToolButton(self.spectrumDisplay, self.spectrum.sliceColour, self)
+
 
 
 
       # print(dir(self.spectrumDisplay))
 
 
-
+  def clicked(self):
+    print(self.plot)
 
   def getSliceData(self):
 

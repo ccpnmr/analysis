@@ -1,4 +1,4 @@
-from ccpn.Util import Io as ccpnIo
+from ccpn.util import Io as ccpnIo
 
 __author__ = 'simon'
 

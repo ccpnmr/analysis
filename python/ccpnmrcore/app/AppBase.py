@@ -1,4 +1,3 @@
-"""Module Documentation here
 
 """
 #=========================================================================================
@@ -14,21 +13,18 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
+__author__ = "$Author: simon $"
 __date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __version__ = "$Revision: 7686 $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.util import Io as ccpnIo
-
-__author__ = 'simon'
-
-
-from ccpncore.util import Io as ioUtil
 import ccpn
 import ccpnmr
+from ccpncore.util import Io as ioUtil
+from ccpn.util import Io as ccpnIo
+
 # from ccpn import openProject, newProject
 
 from ccpncore.gui.Application import Application
@@ -87,9 +83,10 @@ class AppBase(GuiBase):
 
     # NBNB TBD add code to save first, ask, etd. Somewhere
 
-    ioUtil.cleanupProject(self.project)
-    self.project.delete()
-    self.project = None
+    if self.project is not None:
+      ioUtil.cleanupProject(self.project)
+      self.project.delete()
+      self.project = None
     self.mainWindow = None
     self.current = None
 

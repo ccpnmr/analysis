@@ -558,7 +558,7 @@ class AbstractWrapperObject():
         prop = property(functools.partial(AbstractWrapperObject._allDescendants,
                                           descendantClasses=newAncestors[ii+1:]),
                           None, None,
-                          ("Type: (*%s*,)\* \n\nsorted %s type child objects" %
+                          ("Type: (*%s*,)\*  - sorted %s type child objects" %
                             (cls.__name__, cls.__name__)
                           )
                         )

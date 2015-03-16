@@ -237,6 +237,34 @@ class SpectrumView(AbstractWrapperObject):
     self._wrappedData.displayNegativeContours = value
 
   @property
+  def positiveLevels(self) -> tuple:
+    """Positive contouring levels from lowest to highest"""
+    number = self.positiveContourCount
+    if number < 1:
+      return tuple()
+    else:
+      result = [self.positiveContourBase]
+      factor = self.positiveContourFactor
+      for ii in range(1, number):
+        result.append(factor * result[-1])
+      #
+      return tuple(result)
+
+  @property
+  def negativeLevels(self) -> tuple:
+    """Negative contouring levels from lowest to highest"""
+    number = self.negativeContourCount
+    if number < 1:
+      return tuple()
+    else:
+      result = [self.negativeContourBase]
+      factor = self.negativeContourFactor
+      for ii in range(1, number):
+        result.append(factor * result[-1])
+      #
+      return tuple(result)
+
+  @property
   def sliceColour(self) -> str:
     """Colour for 1D slices and 1D spectra"""
     wrappedData = self._wrappedData

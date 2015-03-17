@@ -50,8 +50,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     Widget.__init__(self)
     DropBase.__init__(self, self._parent._appBase, self.dropCallback)
-    # self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
-    #                   dropCallback=self.dropCallback, grid=(0, self.guiSpectrumDisplay.stripCount-1))
+
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
               dropCallback=self.dropCallback)#, gridSpan=(1, 1))
     self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self)+1)
@@ -65,22 +64,13 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
       self.foreground = 'w'
     pg.setConfigOption('background', self.background)
     pg.setConfigOption('foreground', self.foreground)
-    newScene = self._parent.strips[0].plotWidget.scene()
-
     self.plotWidget.setBackground(self.background)
     self.plotWidget.plotItem.axes['top']['item']
-    # self.setAcceptDrops(True)
-    # self.plotWidget.setAcceptDrops(True)
     self._appBase = self.guiSpectrumDisplay._appBase
-    # self.setForegroundBrush(foreground)
 
     self.plotItem = self.plotWidget.plotItem
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
-    # self.plotItem.setAcceptDrops(True)
-    # self.axes = self.plotItem.axes
     self.viewBox = self.plotItem.vb
-    # self.xRegion = self.orderedAxes[0].region
-    # self.yRegion = self.orderedAxes[1].region
     self.viewBox.setXRange(*self.orderedAxes[0].region)
     self.viewBox.setYRange(*self.orderedAxes[1].region)
     self.xAxis = Axis(self.plotWidget, orientation='top', pen=self.foreground,
@@ -101,7 +91,6 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
-    # self.addSpinSystemLabel()
     
     self.eventOriginator = None
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
@@ -109,8 +98,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
   def addStrip(self):
 
-    newStrip = self.strips[0].clone()
-    print(newStrip.pid)
+    self.strips[0].clone()
 
   def updateRegion(self, event):
     # this is called when the viewBox is changed on the screen via the mouse

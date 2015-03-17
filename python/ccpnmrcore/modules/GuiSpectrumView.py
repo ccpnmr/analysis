@@ -39,7 +39,8 @@ import pyqtgraph as pg
 # it also used OpenGL for drawing contours (ND) or lines (1D)
 
 # abstract class: subclass needs to implement drawSpectrum()
-class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
+#class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
+class GuiSpectrumView(GuiBase):  # abstract class
 
   #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
   def __init__(self):
@@ -49,7 +50,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
     
-    QtGui.QGraphicsItem.__init__(self)
+    #QtGui.QGraphicsItem.__init__(self)
     GuiBase.__init__(self, self._project._appBase)
     
     self.apiDataSource = self._wrappedData.dataSource
@@ -68,9 +69,9 @@ class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
     ##for strip in self.strips:
     ##  strip.addSpectrum(self)
 
-  def boundingRect(self):  # seems necessary to have
+  ##def boundingRect(self):  # seems necessary to have
 
-    return QtCore.QRectF(-1000, -1000, 1000, 1000)  # TBD: remove hardwiring
+  ##  return QtCore.QRectF(-1000, -1000, 1000, 1000)  # TBD: remove hardwiring
     
   """
   def setDimMapping(self, dimMapping=None):

@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 import numpy
 
 from OpenGL import GL
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 
 from ccpncore.gui.ToolButton import ToolButton
 from ccpncore.util import Colour
@@ -82,7 +82,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     dimensionCount = len(self.dimensionOrdering)
     self.previousRegion = dimensionCount * [None]
 
-    self.setZValue(-1)  # this is so that the contours are drawn on the bottom
+    #self.setZValue(-1)  # this is so that the contours are drawn on the bottom
     """
     if dimMapping is not None:
       self.xDim = dimMapping[0]
@@ -140,7 +140,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     except AttributeError:
       self.levels = self.getLevels()
 """
-    self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
+    #self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
     
     self.colourIndex = 0
         
@@ -157,12 +157,19 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.colourIndex += 1
       self.colourIndex %= len(Colour.spectrumHexColours)
 
+    self.spectrumItems = {} # strip --> associated QtGui.QGraphicsItem 
     for strip in self.strips:
-      if self not in strip.plotWidget.items():
+      self.addSpectrumItem(strip)
+      #if self not in strip.plotWidget.items():
         # newItem = self
-        strip.plotWidget.scene().addItem(self)
+      #  strip.plotWidget.scene().addItem(self)
 
-
+  def addSpectrumItem(self, strip):
+    if strip not in self.spectrumItems:
+      item = GuiSpectrumViewItemNd(self, strip)
+      self.spectrumItems[strip] = item
+      strip.plotWidget.scene().addItem(item)
+    
   """
   def getLevels(self):
     
@@ -186,17 +193,29 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     size = abs(value[1] - value[0])
     
     return size
+   
+class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
+  
+  def __init__(self, spectrumView, strip):
     
+    self.spectrumView = spectrumView
+    self.strip = strip
+    QtGui.QGraphicsItem.__init__(self)  
+    
+    self.setZValue(-1)  # this is so that the contours are drawn on the bottom
+    self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
+ 
   ##### override of superclass function
 
   def paint(self, painter, option, widget=None):
     
-    if not widget:
-      return
+    ##if not widget:
+    ##  return
 
-    guiStrip = self.spectrumDisplay.viewportDict[widget]
-    self.drawContours(painter, guiStrip)
-
+    ##guiStrip = self.spectrumDisplay.viewportDict[widget]
+    ##self.drawContours(painter, guiStrip)
+    self.drawContours(painter)
+    
   def boundingRect(self):  # seems necessary to have
 
 
@@ -204,16 +223,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   
   ##### functions not to be used externally #####
 
-  def drawContours(self, painter, guiStrip):
+  #def drawContours(self, painter, guiStrip):
+  def drawContours(self, painter):
     
-    apiDataSource = self.apiDataSource
+    apiDataSource = self.spectrumView.apiDataSource
     posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
     negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
 
     if not posLevels and not negLevels:
       return
       
-    contourDict = self.constructContours(guiStrip, posLevels, negLevels)
+    #contourDict = self.constructContours(guiStrip, posLevels, negLevels)
+    contourDict = self.constructContours(posLevels, negLevels)
 
     posColour = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour
     negColour = Colour.scaledRgba(apiDataSource.negativeContourColour)
@@ -222,11 +243,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     try:
       
-      spectrum = self.spectrum
-      guiSpectrumDisplay = self.spectrumDisplay
-      xyDataDims = self.apiSpectrumView.orderedDataDims[:2]
-      xTranslate, xScale = self.getTranslateScale(guiStrip, xyDataDims[0].dim-1) # -1 because API dims start at 1
-      yTranslate, yScale = self.getTranslateScale(guiStrip, xyDataDims[1].dim-1)
+      #spectrum = self.spectrum
+      xyDataDims = self.spectrumView.apiSpectrumView.orderedDataDims[:2]
+      #xTranslate, xScale = self.getTranslateScale(guiStrip, xyDataDims[0].dim-1) # -1 because API dims start at 1
+      #yTranslate, yScale = self.getTranslateScale(guiStrip, xyDataDims[1].dim-1)
+      xTranslate, xScale = self.getTranslateScale(xyDataDims[0].dim-1) # -1 because API dims start at 1
+      yTranslate, yScale = self.getTranslateScale(xyDataDims[1].dim-1)
       
       GL.glLoadIdentity()
       GL.glPushMatrix()
@@ -240,7 +262,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
       # the below is because the y axis goes from top to bottom
       GL.glScale(1.0, -1.0, 1.0)
-      GL.glTranslate(0.0, -guiStrip.plotWidget.height(), 0.0)
+      GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
       
       # the below makes sure that spectrum points get mapped to screen pixels correctly
       GL.glTranslate(xTranslate, yTranslate, 0.0)
@@ -257,12 +279,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
       painter.endNativePainting()
       
-  def constructContours(self, guiStrip, posLevels, negLevels):
+  #def constructContours(self, guiStrip, posLevels, negLevels):
+  def constructContours(self, posLevels, negLevels):
     """ Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level or color needs to call this function.
     """
     
-    xyDataDims = self.apiSpectrumView.orderedDataDims[:2]
+    xyDataDims = self.spectrumView.apiSpectrumView.orderedDataDims[:2]
     
     if xyDataDims in self.contourDisplayIndexDict:
       contourDict = self.contourDisplayIndexDict[xyDataDims]
@@ -292,7 +315,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     
-    for position, dataArray in self.getPlaneData(guiStrip):
+    #for position, dataArray in self.getPlaneData(guiStrip):
+    for position, dataArray in self.getPlaneData():
       
       if len(posLevels): # posLevels is a numpy array so cannot just do "if posLevels":
         posContours = Contourer2d.contourer2d(dataArray, posLevels)
@@ -321,11 +345,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     for level in levels:
       contourDict[level] = GL.glGenLists(1)
 
-  def getPlaneData(self, guiStrip):
+  #def getPlaneData(self, guiStrip):
+  def getPlaneData(self):
     
-    spectrum = self.spectrum
+    strip = self.strip
+    spectrum = self.spectrumView.spectrum
     dimensionCount = spectrum.dimensionCount
-    apiSpectrumView = self.apiSpectrumView
+    apiSpectrumView = self.spectrumView.apiSpectrumView
     """ dimensionOrdering not working yet so for now hardwire
     xDim, yDim = apiSpectrumView.dimensionOrdering[:2]
     xDim -= 1  # dimensionOrdering starts at 1
@@ -341,7 +367,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       position = [0, 0]
       yield position, planeData
     elif dimensionCount == 3: # TBD
-      apiStrip = guiStrip.apiStrip
+      apiStrip = strip.apiStrip
       zAxis = apiStrip.orderedAxes[2]
       position = zAxis.position
       width = zAxis.width
@@ -391,11 +417,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     return ppmRegion
   """
   
-  def getTranslateScale(self, guiStrip, dim):
+  #def getTranslateScale(self, guiStrip, dim):
+  def getTranslateScale(self, dim):
         
-    plotWidget = guiStrip.plotWidget
+    strip = self.strip
+    plotWidget = strip.plotWidget
     plotItem = plotWidget.plotItem
-    viewBox = guiStrip.viewBox
+    viewBox = strip.viewBox
     viewRegion = plotWidget.viewRange()
     region1, region0 = viewRegion[dim]  # TBD: relies on axes being backwards
 
@@ -408,7 +436,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       pixelViewBox0 = plotItem.getAxis('bottom').height()
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
     
-    (firstPoint, lastPoint) = self.spectrum.getDimPointFromValue(dim, (region0, region1))
+    (firstPoint, lastPoint) = self.spectrumView.spectrum.getDimPointFromValue(dim, (region0, region1))
 
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
     translate = pixelViewBox0 - firstPoint * scale

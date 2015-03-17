@@ -60,9 +60,10 @@ class GuiStripNd(GuiStrip):
     ###self.setShortcuts()
     for spectrumView in self.spectrumViews:
     #   newSpectrumView = spectrumView
-      if spectrumView not in self.plotWidget.scene().items():
+      #if spectrumView not in self.plotWidget.scene().items():
         # newItem = spectrumView
-        self.plotWidget.scene().addItem(spectrumView)
+        #self.plotWidget.scene().addItem(spectrumView)
+      spectrumView.addSpectrumItem(self)
 
   """
   def showSpectrum(self, guiSpectrumView):

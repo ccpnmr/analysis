@@ -34,6 +34,7 @@ from ccpncore.gui.ToolBar import ToolBar
 from ccpncore.util import Colour
 
 from ccpnmrcore.modules.GuiStrip import GuiStrip
+from ccpnmrcore.modules.spectrumItems.PeakListItem import PeakNd
 
 class GuiStripNd(GuiStrip):
 
@@ -233,3 +234,15 @@ class GuiStripNd(GuiStrip):
         self.planeToolbar.addWidget(prevPlaneButton)
         self.planeToolbar.addWidget(self.planeLabel)
         self.planeToolbar.addWidget(nextPlaneButton)
+
+  def showPeaks(self, peakList):
+    # # self.plotWidget.scene().addItem(peakListItem)
+    # print(self.plotWidget.scene().items())
+    peakItems = []
+    for peak in peakList.peaks:
+     # peakItem =
+     peakItem = PeakNd(self, self.plotWidget.scene(), self.plotWidget, peak, peakList)
+     print(peakItem.pos())
+    #   peakItem = PeakItem(peak)
+    #   self.plotWidget.addItem(peakItem)
+     self.plotWidget.addItem(peakItem)

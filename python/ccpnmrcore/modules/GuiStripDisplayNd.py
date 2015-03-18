@@ -24,6 +24,7 @@ __version__ = "$Revision: 7686 $"
 # from ccpn.lib.wrapper import Spectrum as LibSpectrum
 
 __author__ = 'simon'
+from PyQt4 import QtCore, QtGui
 
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.VerticalLabel import VerticalLabel
@@ -31,6 +32,30 @@ from ccpncore.gui.VerticalLabel import VerticalLabel
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
+
+  def wheelEvent(self, event):
+    if event.modifiers() & QtCore.Qt.ShiftModifier:
+      for spectrumItem in self.spectrumItems:
+        if event.delta() > 0:
+            spectrumItem.raiseBaseLevel()
+            spectrumItem.update()
+        else:
+          spectrumItem.lowerBaseLevel()
+          spectrumItem.update()
+    elif not event.modifiers():
+      QtGui.QGraphicsView.wheelEvent(self, event)
+      sc = 1.001 ** event.delta()
+      #self.scale *= sc
+      #self.updateMatrix()
+      self.scale(sc, sc)
+    elif event.modifiers() & QtCore.Qt.ControlModifier:
+      if event.delta() > 0:
+         self.increaseTraceScale()
+      else:
+        self.decreaseTraceScale()
+    else:
+      event.ignore
+
 
   def __init__(self):
     # if not apiSpectrumDisplayNd.strips:

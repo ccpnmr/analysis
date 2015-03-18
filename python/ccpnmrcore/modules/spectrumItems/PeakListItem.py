@@ -312,6 +312,7 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
               event.modifiers() & QtCore.Qt.ShiftModifier):
 
       event.accept()
+      print(event)
       self.scene.clearSelection()
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
@@ -323,7 +324,7 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
 
 class PeakNd(QtGui.QGraphicsItem):
 
-  def __init__(self, scene, parent, peak, peakList):
+  def __init__(self, strip, scene, parent, peak, peakList):
 
     QtGui.QGraphicsItem.__init__(self, scene=scene)
 
@@ -333,30 +334,46 @@ class PeakNd(QtGui.QGraphicsItem):
     # self.spectrumWindow = spectrumWindow
     # self.panel = spectrumWindow.panel
     self.peakList = peakList
+    self.strip = strip
     self.parent = parent
     self.spectrum = peakList.spectrum
     self.setCacheMode(self.NoCache)
     self.setFlags(self.ItemIgnoresTransformations)
-    self.hover = False
-    self.press = False
+    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
+    # self.hover = False
+    # self.press = False
     self.setAcceptHoverEvents(True)
     self.bbox  = NULL_RECT
-    self.color = 'white'
-    self.brush = 'white'
+    self.color = NULL_COLOR
+    self.brush = NULL_COLOR
     self.peak = peak
     xPpm = self.peak.position[0]
     yPpm = self.peak.position[1]
     # self.setPos(self.parent.viewBox.mapSceneToView
-    print(self.pos())
     sz = 20
     hz = sz/2.0
-    self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
-    self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
-    # self.annotation = PeakNdAnnotation(self, scene)
+    # self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
+    # self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
+    self.drawData = (hz, sz)#, QtCore.QRectF(-hz, -hz, sz, sz))
+    self.annotation = PeakNdAnnotation(self, scene)
     self.setPos(xPpm, yPpm)
+    # self.inPlane = self.isInPlane()
+
 
     #peakLayer.peakItems.append(self)
   #
+  def isInPlane(self):
+
+    if self.strip.orderedAxes[2] is not None:
+      zPosition = self.peak.position[2]
+      zRegion = self.strip.orderedAxes[2].region
+      if zRegion[0] <= zPosition <= zRegion[1]:
+        return True
+      else:
+        return False
+    else:
+      return False
+
   # def hoverEnterEvent(self, event):
   #
   #   self.hover = True
@@ -373,77 +390,51 @@ class PeakNd(QtGui.QGraphicsItem):
   #   self.annotation.hoverLeaveEvent(event)
   #   self.update()
 
-  def setPeak(self, spectrum, analysisPeakList, peak, xDim, yDim,
-              isAliased=False, isSelected=False, isInPlane=True):
+  def mousePressEvent(self, event):
 
-    self.spectrum = spectrum
-    self.analysisSpectrum = analysisSpectrum = spectrum.apiDataSource
-    self.analysisPeakList = analysisPeakList
-    self.peak = peak
-    self.peakDims = peakDims = peak.sortedPeakDims()
-    self.isAliased = isAliased
-    self.isSelected = isSelected
-    self.isInPlane = isInPlane
-    self.axisDims = [xDim, yDim]
-    self.color = QtGui.QColor('White')
-    self.brush = QtGui.QColor('White')
+    if (event.button() == QtCore.Qt.LeftButton): #and not (
+    #           event.modifiers() & QtCore.Qt.ControlModifier) and not (
+    #           event.modifiers() & QtCore.Qt.ShiftModifier):
 
-    xPpm = peakDims[xDim].value
-    yPpm = peakDims[yDim].value
-    self.setPos(xPpm, yPpm)
+      event.accept()
+      self.scene.clearSelection()
+      # self.setFlag(QtGui.QGraphicsSimpleTextItem.ItemIsMovable)
+      # QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
+      self.setSelected(True)
+      print(self.peakItem)
 
-    self.spectrumView, spectrumMapping = self.spectrumWindow.getViewMapping(analysisSpectrum)
-
-    sz = 20
-    hz = sz/2.0
-    self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
-    self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
-    # text = ','.join([pd.annotation or '-' for pd in peakDims])
-    color = QtGui.QColor('white')
-    # self.annotation.syncPeak(text, color)
-
-    # if self.press or self.hover:
-    #   self.hoverLeaveEvent(None)
-
-  # def mousePressEvent(self, event):
-  #
-  #   self.press = True
-  #   self.hover = True
-  #   r, w, box = self.drawData
-  #   self.bbox = box.adjusted(-26,-51, 2, 51)
-  #   self.peakLayer.showIcons(self)
-  #   self.update()
-
-    #return QtGui.QGraphicsItem.mousePressEvent(self, event)
 
   def boundingRect(self):
 
     return self.bbox # .adjust(-2,-2, 2, 2)
 
   def paint(self, painter, option, widget):
+
     if self.peak:
-      r, w, box = self.drawData
+      if self.isInPlane():
+        # r, w, box = self.drawData
+        r, w  = self.drawData
 
-      # if self.hover:
-      self.setZValue(1)
-      painter.setBrush(NULL_COLOR)
+        # if self.hover:
+        self.setZValue(-1)
+        painter.setBrush(NULL_COLOR)
 
-      painter.setPen(QtGui.QColor('white'))
-      # if self.press:
-      #   painter.drawRect(self.bbox)
+        # painter.setPen(QtGui.QColor('white'))
+        # if self.press:
+        #   painter.drawRect(self.bbox)
 
-      painter.setPen(QtGui.QColor('white'))
-      painter.drawEllipse(box)
-
-      # else:
-      #   painter.setPen(self.color)
-      #   self.setZValue(0)
-      painter.drawLine(-r,-r,r,r)
-      painter.drawLine(-r,r,r,-r)
-
-      if self.isSelected:
         painter.setPen(QtGui.QColor('white'))
-        painter.drawRect(-r,-r,w,w)
+        # painter.drawEllipse(box)
+
+        # else:
+        #   painter.setPen(self.color)
+        #   self.setZValue(0)
+        painter.drawLine(-r,-r,r,r)
+        painter.drawLine(-r,r,r,-r)
+        #
+        # if self.isSelected:
+        #   painter.setPen(QtGui.QColor('white'))
+        #   painter.drawRect(-r,-r,w,w)
 
 
 FONT = QtGui.QFont("DejaVu Sans Mono", 9)
@@ -462,13 +453,14 @@ class PeakNdAnnotation(QtGui.QGraphicsItem):
     self.setFlags(self.ItemIgnoresTransformations)
     self.hover = False
     self.setAcceptHoverEvents(True)
-    self.color = QtGui.QColor('white')
-    self.brush = QtGui.QColor('white')
+    self.color = NULL_COLOR
+    self.brush = NULL_COLOR
     self.peakItem = peakItem
     self.text = '-, -, -'
     self.setZValue(-1)
     self.bbox = NULL_RECT
     self.setPos(12, -12)
+    self.show()
 
   def hoverEnterEvent(self, event):
 
@@ -508,7 +500,7 @@ class PeakNdAnnotation(QtGui.QGraphicsItem):
         painter.drawRect(self.bbox)
 
       else:
-        painter.setPen(self.color)
+        painter.setPen(QtGui.QColor('white'))
         self.setZValue(0)
 
       painter.drawText(0, 0, self.text)

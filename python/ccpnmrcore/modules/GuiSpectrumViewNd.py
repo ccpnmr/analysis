@@ -375,7 +375,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       zDim = dataDims[2].dim - 1
       zregionPoint = spectrum.getDimPointFromValue(zDim, zregionValue)
       zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
-      guiStrip.planeLabel.setText('%.3f' % position)
+      strip.planeLabel.setText('%.3f' % position)
       position = dimensionCount * [0]
       for z in range(*zregionPoint):  # TBD
         position[zDim] = z

@@ -170,6 +170,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.spectrumItems[strip] = item
       strip.plotWidget.scene().addItem(item)
     
+  def removeSpectrumItem(self, strip):
+    if strip in self.spectrumItems:
+      item = self.spectrumItems[strip]
+      strip.plotWidget.scene().removeItem(item)
+      del self.spectrumItems[strip]
+      
   """
   def getLevels(self):
     
@@ -203,7 +209,11 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     QtGui.QGraphicsItem.__init__(self)  
     
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
-    self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
+    self.posLevelsPrev = []
+    self.negLevelsPrev = []
+    self.xyDataDimsPrev = None
+    self.posDisplayLists = []
+    self.negDisplayLists = []
  
   ##### override of superclass function
 
@@ -234,7 +244,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       return
       
     #contourDict = self.constructContours(guiStrip, posLevels, negLevels)
-    contourDict = self.constructContours(posLevels, negLevels)
+    self.constructContours(posLevels, negLevels)
 
     posColour = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour
     negColour = Colour.scaledRgba(apiDataSource.negativeContourColour)
@@ -268,11 +278,11 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       GL.glTranslate(xTranslate, yTranslate, 0.0)
       GL.glScale(xScale, yScale, 1.0)
       
-      for (colour, levels) in ((posColour, posLevels), (negColour, negLevels)):
+      for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists), (negColour, negLevels, self.negDisplayLists)):
         for n, level in enumerate(levels):
           GL.glColor4f(*colour)
           # TBD: scaling, translating, etc.
-          GL.glCallList(contourDict[level])
+          GL.glCallList(displayLists[n])
       GL.glPopMatrix()
 
     finally:
@@ -287,63 +297,65 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     
     xyDataDims = self.spectrumView.apiSpectrumView.orderedDataDims[:2]
     
-    if xyDataDims in self.contourDisplayIndexDict:
-      contourDict = self.contourDisplayIndexDict[xyDataDims]
-      levels = set(posLevels + negLevels)
-      oldLevels = set(self.contourDisplayIndexDict)
-      if levels == oldLevels: # no need to construct contours, already have them
-        return contourDict
-      self.releaseDisplayLists(contourDict)
+    if xyDataDims is not self.xyDataDimsPrev:
+      self.releaseDisplayLists(self.posDisplayLists)
+      self.releaseDisplayLists(self.negDisplayLists)
+      doPosLevels = doNegLevels = True
     else:
-      contourDict = self.contourDisplayIndexDict[xyDataDims] = {}
-
+      if posLevels == self.posLevelsPrev:
+        doPosLevels = False
+      else:
+        self.releaseDisplayLists(self.posDisplayLists)
+        doPosLevels = posLevels and True
+      if negLevels == self.negLevelsPrev:
+        doNegLevels = False
+      else:
+        self.releaseDisplayLists(self.negDisplayLists)
+        doNegLevels = negLevels and True
       
     ###self.previousRegion = self.guiSpectrumDisplay.region[:]  # TBD: not quite right, should be looking at the strip(s)
     
     # do the contouring and store results in display list
-    if posLevels:
+    if doPosLevels:
       posLevels = numpy.array(posLevels, numpy.float32)
-      self.createDisplayLists(posLevels, contourDict)
-    else:
-      posLevels = []
+      self.createDisplayLists(posLevels, self.posDisplayLists)
       
-    if negLevels:
+    if doNegLevels:
       negLevels = numpy.array(negLevels, numpy.float32)
-      self.createDisplayLists(negLevels, contourDict)
-    else:
-      negLevels = []
+      self.createDisplayLists(negLevels, self.negDisplayLists)
       
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     
     #for position, dataArray in self.getPlaneData(guiStrip):
     for position, dataArray in self.getPlaneData():
       
-      if len(posLevels): # posLevels is a numpy array so cannot just do "if posLevels":
+      if doPosLevels:
         posContours = Contourer2d.contourer2d(dataArray, posLevels)
         for n, contourData in enumerate(posContours):
-          self.addContoursToDisplayList(contourDict, contourData, posLevels[n])
+          self.addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
         
       if len(negLevels):
         negContours = Contourer2d.contourer2d(dataArray, negLevels)
         for n, contourData in enumerate(negContours):
-          self.addContoursToDisplayList(contourDict, contourData, negLevels[n])
+          self.addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
         
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     
-    return contourDict
+    self.posLevelsPrev = posLevels[:]
+    self.negLevelsPrev = negLevels[:]
+    self.xyDataDimsPrev = xyDataDims
     
-  def releaseDisplayLists(self, contourDict):
+  def releaseDisplayLists(self, displayLists):
 
-    levels = list(contourDict.keys()) # need to do it this way else deleting entries while iterating over dict
-    for level in levels:
-      GL.glDeleteLists(contourDict[level], 1)
-      del contourDict[level]
+    for displayList in displayLists:
+      GL.glDeleteLists(displayList, 1)
+    displayLists[:] = []
 
-  def createDisplayLists(self, levels, contourDict):
+  def createDisplayLists(self, levels, displayLists):
 
     # could create them in one go but more likely to get fragmentation that way
     for level in levels:
-      contourDict[level] = GL.glGenLists(1)
+      displayLists.append(GL.glGenLists(1))
 
   #def getPlaneData(self, guiStrip):
   def getPlaneData(self):
@@ -384,10 +396,10 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
         planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
         yield position, planeData
 
-  def addContoursToDisplayList(self, contourDict, contourData, level):
+  def addContoursToDisplayList(self, displayList, contourData, level):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
     
-    GL.glNewList(contourDict[level], GL.GL_COMPILE)
+    GL.glNewList(displayList, GL.GL_COMPILE)
 
     for contour in contourData:
       GL.glVertexPointer(2, GL.GL_FLOAT, 0, contour)

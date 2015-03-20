@@ -1,26 +1,3 @@
-"""Module Documentation here
-
-"""
-#=========================================================================================
-# Licence, Reference and Credits
-#=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
-
-#=========================================================================================
-# Last code modification:
-#=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
-
-#=========================================================================================
-# Start of code
-#=========================================================================================
 
 # Packages, classElements and AbstractDataTypes skipped in new model
 # (prefix, typeName, elemName, newGuid, elemType)
@@ -54,9 +31,9 @@ skipElements = [
 # classElements skipped in new model, but available for simple data transfer
 # (prefix, typeName, elemName, newGuid, elemMap, valueTypeGuid)
 delayElements = [
- ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'tag': 'NMR.ExpDim.refExpDim', 'type': 'exolink', 'name': 'refExpDim', 'eType': 'cplx'}, None), 
- ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'tag': 'NMR.ResonanceGroup.clusterCode', 'type': 'attr', 'name': 'clusterCode', 'eType': 'cplx'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
- ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'tag': 'NMR.ResonanceGroup.isActive', 'type': 'attr', 'name': 'isActive'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
+ ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'eType': 'cplx', 'name': 'refExpDim', 'tag': 'NMR.ExpDim.refExpDim', 'type': 'exolink'}, None), 
+ ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'eType': 'cplx', 'name': 'clusterCode', 'tag': 'NMR.ResonanceGroup.clusterCode', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
+ ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'name': 'isActive', 'tag': 'NMR.ResonanceGroup.isActive', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
 ]
 
 # MetaConstraints added in new model
@@ -237,8 +214,6 @@ newElements = [
  ('GUIT', 'Mark', 'rulers', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:30_00002'), 
  ('GUIT', 'Module', None, 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:26_00006'), 
  ('GUIT', 'Module', 'details', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:55_00027'), 
- ('GUIT', 'Module', 'gridCell', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:55_00024'), 
- ('GUIT', 'Module', 'gridSpan', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:55_00025'), 
  ('GUIT', 'Module', 'window', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:30_00011'), 
  ('GUIT', 'Module', 'windowId', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:55_00026'), 
  ('GUIT', 'PeakListView', None, 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:26_00007'), 
@@ -462,8 +437,8 @@ nameMatches = [
 # (oldElem.qName, newElem.name, oldGuid, newGuid, differentTags
 allDiffs = [
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
- ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'isDerived', 'partitionsChildren', 'documentation'}), 
- ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'isDerived', 'locard', 'documentation'}), 
- ('ccp.nmr.NmrExpPrototype.ExpMeasurementType', 'ExpMeasurementType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', {'documentation', 'taggedValues'}), 
+ ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'documentation', 'partitionsChildren', 'isDerived'}), 
+ ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'documentation', 'isDerived'}), 
+ ('ccp.nmr.NmrExpPrototype.ExpMeasurementType', 'ExpMeasurementType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:45_00030', {'taggedValues', 'documentation'}), 
  ('molsim.Symmetry.MolSystemSymmetrySet', 'MolSystemSymmetrySet', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', {'parentRole'}), 
 ]

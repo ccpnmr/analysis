@@ -38,7 +38,18 @@ from ccpncore.memops import Notifiers
 from ccpnmrcore.gui.Axis import Axis
 from ccpnmrcore.DropBase import DropBase
 
-
+def sufficientlyDifferentWidth(region1, region2):
+  
+  w1 = abs(region1[1] - region1[0])
+  w2 = abs(region2[1] - region2[0])
+  d = abs(w1 - w2)
+  
+  return d > 1.0e-5 * max(w1, w2)
+  
+def scaledWidth(axis, axisOther, regionOther):
+  
+  return axis.width * axisOther.width / abs(regionOther[1]-regionOther[0])
+  
 class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop events are not processed
 
   sigClicked = QtCore.Signal(object, object)
@@ -82,7 +93,8 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.textItem.setPos(self.viewBox.boundingRect().topLeft())
     self.plotWidget.scene().addItem(self.textItem)
     self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
-    proxy = pg.SignalProxy(self.viewBox.sigRangeChanged, rateLimit=10, slot=self.updateRegion)
+    self.viewBox.sigRangeChanged.connect(self.updateRegion)
+    ###proxy = pg.SignalProxy(self.viewBox.sigRangeChanged, rateLimit=10, slot=self.updateRegion)
     self.grid = pg.GridItem()
     self.plotWidget.addItem(self.grid)
     self.setMinimumWidth(200)
@@ -92,7 +104,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
     
-    self.eventOriginator = None
+    #self.eventOriginator = None
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
 
@@ -102,36 +114,62 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
   def updateRegion(self, event):
     # this is called when the viewBox is changed on the screen via the mouse
-    if self.eventOriginator:
+
+    spectrumDisplay = self.guiSpectrumDisplay
+    if self in spectrumDisplay.stripsUpdated:
       return
-    self.eventOriginator = self
     
-    xRegion = self.viewBox.viewRange()[0]
-    yRegion = self.viewBox.viewRange()[1]
+    xRegion, yRegion = self.viewBox.viewRange()
+
+    if not spectrumDisplay.stripsUpdated:
+      xRegionOld = self.orderedAxes[0].region
+      yRegionOld = self.orderedAxes[1].region
+      xDifferent = sufficientlyDifferentWidth(xRegion, xRegionOld)
+      yDifferent = sufficientlyDifferentWidth(yRegion, yRegionOld)
+      spectrumDisplay.changeBothDims = xDifferent and yDifferent
+      
+    spectrumDisplay.stripsUpdated.add(self)
+    
     self.orderedAxes[0].region = xRegion
     self.orderedAxes[1].region = yRegion
-    #for spectrumView in self.spectrumViews:
-    #  spectrumView.update()
-    #self.update()
     
-    self.eventOriginator = None
+    spectrumDisplay.stripsUpdated.remove(self)
+    
+    if not spectrumDisplay.stripsUpdated:
+      spectrumDisplay.changeBothDims = False
 
   def axisRegionUpdated(self, apiAxis):
     # this is called when the api region (position and/or width) is changed
     
-    if self.eventOriginator:
+    spectrumDisplay = self.guiSpectrumDisplay
+    if self in spectrumDisplay.stripsUpdated:
       return
-    self.eventOriginator = self
+
+    xAxis, yAxis = self.orderedAxes[:2]
+    if apiAxis not in (xAxis._wrappedData, yAxis._wrappedData):
+      return
+      
+    doOtherAxis = spectrumDisplay.changeBothDims and spectrumDisplay.stripsUpdated
+          
+    spectrumDisplay.stripsUpdated.add(self)
     
-    xRegion = self.orderedAxes[0].region
-    yRegion = self.orderedAxes[1].region
+    if doOtherAxis:
+      xRegionOld, yRegionOld = self.viewBox.viewRange()
+      # below is not working because viewBox region and apiAxis region seem to be mismatched
+      #if apiAxis is xAxis._wrappedData:
+      #  yAxis.width = scaledWidth(yAxis, xAxis, xRegionOld)
+      #elif apiAxis is yAxis._wrappedData:
+      #  xAxis.width = scaledWidth(xAxis, yAxis, yRegionOld)
+        
+    xRegion = xAxis.region
+    yRegion = yAxis.region
     self.viewBox.setXRange(*xRegion)
     self.viewBox.setYRange(*yRegion)
-    #for spectrumView in self.spectrumViews:
-    #  spectrumView.update()
-    #self.update()
+
+    spectrumDisplay.stripsUpdated.remove(self)
     
-    self.eventOriginator = None
+    #if not spectrumDisplay.stripsUpdated:
+    #  spectrumDisplay.changeBothDims = False
 
   def addSpinSystemLabel(self):
     self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.stripCount),

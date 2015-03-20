@@ -2,161 +2,103 @@
 
 The standard ways of starting a project are:
 
-- ccpn.openProject(*path*, ...)
-- ccpn.newProject(*projectName*, ...)
-- ccpn.Project(*ccpncore.api.ccp.nmr.Nmr.NmrProject*)
+- :ref:`ccpn-openProject-ref` (*path*, ...)
+- :ref:`ccpn-newProject-ref` (*projectName*, ...)
+- :ref:`ccpn-Project-ref` (*ccpncore.api.ccp.nmr.Nmr.NmrProject*)
+
+Classes are listed with parent (containing) classes before their child (contained) classes.
+The Project class is the top of the tree, and  a single directly or indirectly contains
+all other objects.
+
+All classes in this module are subclasses of the :ref:`ccpn-AbstractWrapperObject-ref`
 
 
 .. currentmodule:: ccpn
 
-.. autosummary::
-
-  openProject
-  newProject
-   _Project.Project
-   _Chain.Chain
-   _Residue.Residue
-   _Atom.Atom
-   _NmrChain.NmrChain
-   _NmrResidue.NmrResidue
-   _NmrAtom.NmrAtom
-   _ChemicalShiftList.ChemicalShiftList
-   _ChemicalShift.ChemicalShift
-   _Spectrum.Spectrum
-   _SpectrumReference.SpectrumReference
-   _PeakList.PeakList
-   _Peak.Peak
-   _RestraintSet.RestraintSet
-   _RestraintList.RestraintList
-   _Restraint.Restraint
-   _RestraintContribution.RestraintContribution
-   _AbstractWrapperClass.AbstractWrapperClass
-
-ccpn.Project class
-------------------
-
-.. autoclass:: ccpn._wrapper._Project.Project
-
-ccpn.Chain class
-----------------
-
-.. autoclass:: ccpn._wrapper._Chain.Chain
-
-ccpn.Residue class
-------------------
-
-.. autoclass:: ccpn._wrapper._Residue.Residue
-
-ccpn.Atom class
----------------
-
-.. autoclass:: ccpn._wrapper._Atom.Atom
-
-ccpn.NmrChain class
--------------------
-
-.. autoclass:: ccpn._wrapper._NmrChain.NmrChain
-
-ccpn.NmrResidue class
----------------------
-
-.. autoclass:: ccpn._wrapper._NmrResidue.NmrResidue
-
-ccpn.NmrAtom class
-------------------
-
-.. autoclass:: ccpn._wrapper._NmrAtom.NmrAtom
-
-ccpn.ChemicalShiftList class
-----------------------------
-
-.. autoclass:: ccpn._wrapper._ChemicalShiftList.ChemicalShiftList
-
-ccpn.ChemicalShift class
+Module level functions :
 ------------------------
 
-.. autoclass:: ccpn._wrapper._ChemicalShift.ChemicalShift
+.. _ccpn-openProject-ref:
 
-ccpn.Spectrum class
--------------------
+ccpn.openProject
+^^^^^^^^^^^^^^^^
 
-.. autoclass:: ccpn._wrapper._Spectrum.Spectrum
+.. autofunction:: ccpn.openProject
 
-ccpn.SpectrumReference class
-----------------------------
+.. _ccpn-newProject-ref:
 
-.. autoclass:: ccpn._wrapper._SpectrumReference.SpectrumReference
+ccpn.newProject
+^^^^^^^^^^^^^^^
 
-ccpn.PeakList class
--------------------
-
-.. autoclass:: ccpn._wrapper._PeakList.PeakList
-
-ccpn.Peak class
----------------
-
-.. autoclass:: ccpn._wrapper._Peak.Peak
-
-ccpn.RestraintSet class
------------------------
-
-.. autoclass:: ccpn._wrapper._RestraintSet.RestraintSet
-
-ccpn.RestraintList class
-------------------------
-
-.. autoclass:: ccpn._wrapper._RestraintList.RestraintList
-
-ccpn.Restraint class
---------------------
-
-.. autoclass:: ccpn._wrapper._Restraint.Restraint
-
-ccpn.RestraintContribution class
---------------------------------
-
-.. autoclass:: ccpn._wrapper._RestraintContribution.RestraintContribution
-
-
-ccpn.AbstractWrapperObject class
---------------------------------
-
-.. autoclass:: ccpn._wrapper._AbstractWrapperObject.AbstractWrapperObject
+.. autofunction:: ccpn.newProject
 
 """
 
-# import sys
-# print ('sys.path=', sys.path)
-# for key in sorted(sys.modules):
-#   print(' - ', key)
-
+import importlib
 from ccpncore.util import ApiFunc
+
+# Import classes and set to this module
+# All classes must be imported in correct order for subsequent code
+# to work, as connections between classes are set when child class is imported
+# _wrappedClassNames gives import order
+_wrappedClasses = []
+AbstractWrapperObject = cls = importlib.import_module(
+  'ccpn._wrapper._AbstractWrapperObject').AbstractWrapperObject
+_wrappedClasses.append(cls)
+Project = cls = importlib.import_module('ccpn._wrapper._Project').Project
+_wrappedClasses.append(cls)
+Chain = cls = importlib.import_module('ccpn._wrapper._Chain').Chain
+_wrappedClasses.append(cls)
+Residue = cls = importlib.import_module('ccpn._wrapper._Residue').Residue
+_wrappedClasses.append(cls)
+Atom = cls = importlib.import_module('ccpn._wrapper._Atom').Atom
+_wrappedClasses.append(cls)
+NmrChain = cls = importlib.import_module('ccpn._wrapper._NmrChain').NmrChain
+_wrappedClasses.append(cls)
+NmrResidue = cls = importlib.import_module('ccpn._wrapper._NmrResidue').NmrResidue
+_wrappedClasses.append(cls)
+NmrAtom = cls = importlib.import_module('ccpn._wrapper._NmrAtom').NmrAtom
+_wrappedClasses.append(cls)
+ChemicalShiftList = cls = importlib.import_module(
+  'ccpn._wrapper._ChemicalShiftList').ChemicalShiftList
+_wrappedClasses.append(cls)
+ChemicalShift = cls = importlib.import_module('ccpn._wrapper._ChemicalShift').ChemicalShift
+_wrappedClasses.append(cls)
+Spectrum = cls = importlib.import_module('ccpn._wrapper._Spectrum').Spectrum
+_wrappedClasses.append(cls)
+SpectrumReference = cls = importlib.import_module(
+  'ccpn._wrapper._SpectrumReference').SpectrumReference
+_wrappedClasses.append(cls)
+PeakList = cls = importlib.import_module('ccpn._wrapper._PeakList').PeakList
+_wrappedClasses.append(cls)
+Peak = cls = importlib.import_module('ccpn._wrapper._Peak').Peak
+_wrappedClasses.append(cls)
+RestraintSet = cls = importlib.import_module('ccpn._wrapper._RestraintSet').RestraintSet
+_wrappedClasses.append(cls)
+RestraintList = cls = importlib.import_module('ccpn._wrapper._RestraintList').RestraintList
+_wrappedClasses.append(cls)
+Restraint = cls = importlib.import_module('ccpn._wrapper._Restraint').Restraint
+_wrappedClasses.append(cls)
+RestraintContribution = cls = importlib.import_module(
+  'ccpn._wrapper._RestraintContribution').RestraintContribution
+_wrappedClasses.append(cls)
+
+# Add class list for extended sphinx documentation to module
+# putting AnstractWrapperObj3ct last
+_sphinxWrappedClasses = _wrappedClasses[1:] + _wrappedClasses[:1]
+
+# set main starting functions in namespace. Must be done after setting Project
+# to avoid circular import problems
 from ccpn.util import Io as ccpnIo
 openProject = ccpnIo.openProject
 newProject = ccpnIo.newProject
 
-libModule = 'ccpn.lib.wrapper'
 
-# All classes must be imported in correct order for subsequent code
-# to work, as connections between classes are set when child class is imported
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Chain import Chain
-from ccpn._wrapper._Residue import Residue
-from ccpn._wrapper._Atom import Atom
-from ccpn._wrapper._NmrChain import NmrChain
-from ccpn._wrapper._NmrResidue import NmrResidue
-from ccpn._wrapper._NmrAtom import NmrAtom
-from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
-from ccpn._wrapper._ChemicalShift import ChemicalShift
-from ccpn._wrapper._Spectrum import Spectrum
-from ccpn._wrapper._SpectrumReference import SpectrumReference
-from ccpn._wrapper._PeakList import PeakList
-from ccpn._wrapper._Peak import Peak
-from ccpn._wrapper._RestraintSet import RestraintSet
-from ccpn._wrapper._RestraintList import RestraintList
-from ccpn._wrapper._Restraint import Restraint
-from ccpn._wrapper._RestraintContribution import RestraintContribution
+# NBNB set function parameter annotations for AbstractBaseClass functions
+# MUST be done here to get correct class type
+AbstractWrapperObject.__init__.__annotations__['project'] = Project
+AbstractWrapperObject.project.fget.__annotations__['return'] = Project
+
 
 # Set up interclass links and related functions
 Project._linkWrapperClasses()
@@ -164,6 +106,7 @@ Project._linkWrapperClasses()
 # Load in additional utility functions int wrapper classes
 # NB this does NOT pick up utility functions in non-child classes
 # (e.g. AbstractWrapperObject or MainWindow) so these must be avoided
+libModule = 'ccpn.lib.wrapper'
 allActiveClasses = [Project]
 for cls in allActiveClasses:
   # moduleName = '%s.%s' % (libModule, cls.__name__)

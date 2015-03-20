@@ -22,9 +22,10 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Chain import Chain
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import Chain
+from ccpncore.util import Pid
 from ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 
 
@@ -95,8 +96,8 @@ def newNmrChain(parent:Project, shortName:str=None, comment:str=None) -> NmrChai
   nmrProject = parent.nmrProject
   
   if shortName is None:
-    code = shortName
-    ii = 0
+    code = "@1"
+    ii = 1
     while nmrProject.findFirstNmrChain(code=code) is not None:
       ii += 1
       code = '@%s' % ii

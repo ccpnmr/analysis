@@ -31,7 +31,7 @@ from ccpn.lib.nef import Util as nefUtil
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 from ccpncore.lib.Bmrb import bmrb
 from ccpncore.memops import Version
-from ccpncore.util import pid
+from ccpncore.util import Pid
 from ccpncore.util import Path
 from ccpn.util import Io as ccpnIo
 from ccpn.util import General as ccpnGeneral
@@ -105,7 +105,7 @@ def exportRestraintStore(restraintSet, dataName=None, directory=None,
     if len(ll) == 2 and ll[1] == nefExtension:
       dataName = ll[0]
   else:
-    dataName = project.name.translate(pid.remapSeparators)
+    dataName = project.name.translate(Pid.remapSeparators)
     dataName = '%s-%s' % (dataName, restraintSet.serial)
 
   entry = _makeStarEntry(project, dataName, project.chains, peakLists,
@@ -354,8 +354,8 @@ def _makeMolecularSystemFrame(chains):
 
         atoms = chemCompVar.findAllChemAtoms(className='ChemAtom')
         defAtoms = defaultVar.findAllChemAtoms(className='ChemAtom')
-        addNames = [x.name.translate(pid.unmapSeparators) for x in (atoms - defAtoms)]
-        removeNames = [x.name.translate(pid.unmapSeparators) for x in (defAtoms - atoms)]
+        addNames = [x.name.translate(Pid.unmapSeparators) for x in (atoms - defAtoms)]
+        removeNames = [x.name.translate(Pid.unmapSeparators) for x in (defAtoms - atoms)]
         residueVariant = ','.join(['+%s' %x for x in sorted(addNames)] +
                                   ['-%s' %x for x in sorted(removeNames)])
         if not residueVariant:
@@ -404,7 +404,7 @@ def makeShiftListFrame(shiftList):
   """make a saveFrame for a shift list"""
 
   sf_category = 'nef_chemical_shift_list'
-  framecode = '%s_%s' % (sf_category, shiftList.name.translate(pid.unmapSeparators))
+  framecode = '%s_%s' % (sf_category, shiftList.name.translate(Pid.unmapSeparators))
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode,
                                          tag_prefix='nef_chemical_shift_list')
 
@@ -423,7 +423,7 @@ def makeShiftListFrame(shiftList):
     loop.addColumn(tag)
 
   sortkey = shiftList._project._pidSortKey
-  for row in sorted(((pid.splitId(x.nmrAtom._id) + (x.value, x.valueError))
+  for row in sorted(((Pid.splitId(x.nmrAtom._id) + (x.value, x.valueError))
                     for x in shiftList.chemicalShifts), key=sortkey):
     loop.addData(row)
   #
@@ -442,7 +442,7 @@ def makeRestraintListFrame(restraintList):
   else:
     restraintListTag = restraintType.lower()
   sf_category = 'nef_%s_restraint_list' % restraintListTag
-  framecode = '%s_%s' % (sf_category, restraintList.name.translate(pid.unmapSeparators))
+  framecode = '%s_%s' % (sf_category, restraintList.name.translate(Pid.unmapSeparators))
 
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode, tag_prefix=sf_category)
 
@@ -509,7 +509,7 @@ def makeRestraintListFrame(restraintList):
         row2 = []
         # Assignment tags:
         for atomId in restraintItem:
-          row2.extend(pid.splitId(atomId))
+          row2.extend(Pid.splitId(atomId))
         ordinal += 1
         ll = [ordinal] + row1 + row2 + row3
         if restraintType == 'Dihedral':
@@ -526,7 +526,7 @@ def makePeakListFrame(peakList):
   dimensionCount = spectrum.dimensionCount
   apiDataDims = spectrum.apiDataSource.sortedDataDims()
   if peakList.name is None:
-    peakList.name = '%s-%s' % (spectrum.name.translate(pid.unmapSeparators), peakList.serial)
+    peakList.name = '%s-%s' % (spectrum.name.translate(Pid.unmapSeparators), peakList.serial)
   category = 'nef_nmr_spectrum'
   framecode = '%s_%s' % (category, peakList.name)
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode,
@@ -536,7 +536,7 @@ def makePeakListFrame(peakList):
   if obj is None:
     shiftListString = None
   else:
-    shiftListString = 'nef_chemical_shift_list_%s' % obj.name.translate(pid.unmapSeparators)
+    shiftListString = 'nef_chemical_shift_list_%s' % obj.name.translate(Pid.unmapSeparators)
   saveframe.addTags([
     ('sf_category',category),
     ('sf_framecode',framecode),
@@ -639,7 +639,7 @@ def makePeakListFrame(peakList):
           if nmrAtom is None:
             row.extend((None, None, None, None))
           else:
-            row.extend(pid.splitId(nmrAtom._id))
+            row.extend(Pid.splitId(nmrAtom._id))
         loop.addData(row)
     else:
       # Unassigned peak
@@ -675,7 +675,7 @@ def makePeakRestraintLinksFrame(restraintLists, peakLists):
     else:
       restraintListTag = restraintType.lower()
     restraint_list_id = ( 'nef_%s_restraint_list_%s' %
-                          (restraintListTag, restraintList.name.translate(pid.unmapSeparators)))
+                          (restraintListTag, restraintList.name.translate(Pid.unmapSeparators)))
 
     for restraint in restraintList.restraints:
       restraint_id = restraint.serial

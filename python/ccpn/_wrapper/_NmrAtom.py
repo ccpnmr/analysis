@@ -23,9 +23,9 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._NmrResidue import NmrResidue
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import NmrResidue
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 from ccpncore.lib.molecule import MoleculeQuery
 
@@ -76,7 +76,7 @@ class NmrAtom(AbstractWrapperObject):
     
 def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
   """Create new child NmrAtom. If name is None, use nucleus@serial"""
-  nmrProject = parent._project
+  nmrProject = parent._project._wrappedData
   resonanceGroup = parent._wrappedData
 
   if not isotopeCode:
@@ -86,8 +86,9 @@ def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAto
       raise ValueError("newNmrAtom requires either name or isotopeCode as input")
 
 
-  return parent._project._data2Obj.get(nmrProject.newResonance(resonanceGroup=resonanceGroup, name=name,
-                                 isotopeCode=isotopeCode))
+  return parent._project._data2Obj.get(nmrProject.newResonance(resonanceGroup=resonanceGroup,
+                                                               name=name,
+                                                               isotopeCode=isotopeCode))
 
 
 def fetchNmrAtom(parent:NmrResidue, name:str):

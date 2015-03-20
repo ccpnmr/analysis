@@ -23,14 +23,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 from collections.abc import Sequence
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Spectrum import Spectrum
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import Spectrum
 from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.GuiMainWindow import GuiMainWindow
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
-from ccpncore.util import pid as Pid
+from ccpncore.util import Pid
 
 
 
@@ -97,8 +97,7 @@ class Window(AbstractWrapperObject):
                             axisOrder:Sequence=(), name:str=None, positions:Sequence=(),
                             widths:Sequence=(), units:Sequence=(),
                             stripAxis:str='Y', is1d:bool=False,
-                            independentStrips:bool=False, gridCell:Sequence=(1,1),
-                            gridSpan:Sequence=(1,1)):
+                            independentStrips:bool=False):
 
     """
     displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
@@ -159,7 +158,7 @@ class Window(AbstractWrapperObject):
     #
     display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripAxis,
                                       independentStrips=independentStrips,
-                                      name=name, gridSpan=gridSpan,gridCell=gridCell)
+                                      name=name)
 
     # Set unit, position and width
     orderedApiAxes = display._wrappedData.orderedAxes

@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util import pid
+from ccpncore.util import Pid
 
 
 def dihedralName(project, restraintItem:tuple) -> str:
@@ -34,9 +34,9 @@ def dihedralName(project, restraintItem:tuple) -> str:
     residues = []
     atomNames = []
     for atomId in restraintItem:
-      ll = pid.splitId(atomId)
+      ll = Pid.splitId(atomId)
       atomNames.append(ll[-1])
-      residues.append(project.getById(pid.makePid('Residue', *ll[:3])))
+      residues.append(project.getById(Pid.makePid('Residue', *ll[:3])))
 
     if None in atomNames or None in residues:
       # These are not correct atomId. Just return NOne

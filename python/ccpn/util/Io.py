@@ -22,9 +22,9 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._Project import Project
+from ccpn import Project
 from ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
-from ccpncore.util import Io as ioUtil, Io
+from ccpncore.util import Io as ioUtil
 
 def openProject(path:str, nmrProjectName:str=None) -> Project:
   """Open project at path, and create a wrapper project.

@@ -24,8 +24,8 @@ __version__ = "$Revision$"
 # from collections.abc import Sequence
 
 from collections.abc import Sequence
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
+from ccpn import AbstractWrapperObject
+from ccpn import Project
 from ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
 from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
 

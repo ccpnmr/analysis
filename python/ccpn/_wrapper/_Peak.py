@@ -25,9 +25,9 @@ from collections.abc import Sequence
 import itertools
 import operator
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._PeakList import PeakList
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import PeakList
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 
 class Peak(AbstractWrapperObject):
@@ -187,12 +187,22 @@ class Peak(AbstractWrapperObject):
   @dimensionNmrAtoms.setter
   def dimensionNmrAtoms(self, value:Sequence):
     apiPeak = self._wrappedData
-    dimNmrAtoms = list(value)
-    for ii, atoms in enumerate(dimNmrAtoms):
-      atoms = tuple(self.getById(x) if isinstance(x, str) else x for x in atoms)
-      dimNmrAtoms[ii] = tuple(x._wrappedData for x in atoms if x is not None)
+    dimResonances = []
+    for atoms in enumerate(value):
+      if atoms is None:
+        dimResonances.append(None)
 
-    apiPeak.setPeakDimAssignments(dimNmrAtoms)
+      else:
+
+        if isinstance(atoms, str):
+          raise ValueError("dimensionNmrAtoms cannot be set to a sequence of strings")
+        if not isinstance(atoms, Sequence):
+          raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
+
+        atoms = tuple(self.getById(x) if isinstance(x, str) else x for x in atoms)
+        dimResonances.append(tuple(x._wrappedData for x in atoms if x is not None))
+
+    apiPeak.setPeakDimAssignments(dimResonances)
 
   @property
   def assignedNmrAtoms(self) -> tuple:

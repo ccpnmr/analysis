@@ -21,11 +21,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util import pid
+from ccpncore.util import Pid
 from collections.abc import Sequence
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpnmr._wrapper._Window import Window
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpnmr import Window
 from ccpncore.api.ccpnmr.gui.Task import GuiTask as ApiGuiTask
 
 
@@ -51,7 +51,7 @@ class Task(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """local id, of form nameSpace.name"""
-    return pid.makeId(self._wrappedData.nameSpace, self._wrappedData.name)
+    return Pid.makeId(self._wrappedData.nameSpace, self._wrappedData.name)
 
   @property
   def nameSpace(self) -> str:

@@ -23,10 +23,10 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 from ccpncore.lib.molecule.DataMapper import DataMapper
-from ccpncore.util import pid
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Chain import Chain
+from ccpncore.util import Pid
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 
 
@@ -63,7 +63,7 @@ class Residue(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """Residue ID. Identical to sequenceCode.residueType. Characters translated for pid"""
-    return pid.makeId(self.sequenceCode, self.name)
+    return Pid.makeId(self.sequenceCode, self.name)
     
   @property
   def _parent(self) -> Chain:

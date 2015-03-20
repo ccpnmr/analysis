@@ -5,7 +5,7 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -128,12 +128,14 @@ pygments_style = 'sphinx'
 # Added by RHF for customization etc.
 autodoc_member_order = 'bysource'
 
-autodoc_default_flags = ['members', 'undoc-members', 'show-inheritance']
+autodoc_default_flags = ['members', 'undoc-members']
 
 autosummary_generate = True
 
 def setup(app):
   
+       from ccpncore.util.SphinxExtensions import autodoc_process_signature
+       app.connect('autodoc-process-signature', autodoc_process_signature())
        from ccpncore.util.SphinxExtensions import autodoc_process_docstring
        app.connect('autodoc-process-docstring', autodoc_process_docstring())
 

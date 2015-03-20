@@ -23,9 +23,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from collections.abc import Sequence
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Spectrum import Spectrum
+from ccpncore.util import Pid
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import Spectrum
 from ccpncore.api.ccp.nmr.Nmr import DataDimRef as ApiDataDimRef
 
 
@@ -126,7 +127,7 @@ class SpectrumReference(AbstractWrapperObject):
 
   @property
   def isotopeCodes(self) -> tuple:
-    """Type: (*str,*)\*, *settable*
+    """\- (*str,*)\*, *settable*
 
     Isotope identification strings for isotopes.
     NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence."""
@@ -150,7 +151,7 @@ class SpectrumReference(AbstractWrapperObject):
 
   @property
   def axisCode(self) -> str:
-    """Type: (*str,*)\*dimensionCount, *settable*
+    """\- (*str,*)\*dimensionCount, *settable*
 
     ExpDimRef axisCode """
     expDimRef = self._wrappedData.expDimRef

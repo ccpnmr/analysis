@@ -9,10 +9,7 @@ Welcome to CCPN's documentation!
    :maxdepth: 2
 
    ccpn/modules.rst
-
-   ccpncore/modules.rst
-
-   ccpnmrcore/modules.rst
+   ccpnmr/modules.rst
 
 Indices and tables
 ==================

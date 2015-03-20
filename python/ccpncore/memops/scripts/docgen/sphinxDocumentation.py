@@ -44,7 +44,7 @@ def refreshSphinxDocumentation():
   docDirectory = joinPath(pythonDirectory, documentationPath)
 
   # Remove sphinx-apidoc files
-  for ss in ('ccpn', 'ccpncore', 'ccpnmrcore'):
+  for ss in ('ccpn', 'ccpncore', 'ccpnmrcore', 'ccpnmr'):
     inDirectory = joinPath(docDirectory, 'source', ss)
     if os.path.exists(inDirectory):
       print ("Removing %s" % inDirectory)
@@ -58,24 +58,31 @@ def refreshSphinxDocumentation():
   # The parameters are command, option, output directory, module to document, dirs to skip
   # First ccpncore
   # NBNB TBD temporarily removed ccpncore/gui, pending solving Qt imports
-  ll = ['ccpn/doc/source/ccpncore', 'ccpncore',
-        'ccpncore/api', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/',
-        'ccpncore/lib/Bmrb/unit_tests']
-        # 'ccpncore/api', 'ccpncore/gui', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/']
-  ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  print( '### running: ' + ' '.join(ll))
-  apidoc.main(ll)
-  
-
-  # NBNB TBD temporarily removed, pending solving Qt imports
-  # then ccpnmrcore
-  ll = ['ccpn/doc/source/ccpnmrcore', 'ccpnmrcore']
-  ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  print( '### running: ' + ' '.join(ll))
-  apidoc.main(ll)
+  # ll = ['ccpn/doc/source/ccpncore', 'ccpncore',
+  #       'ccpncore/api', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/',
+  #       'ccpncore/lib/Bmrb/unit_tests']
+  #       # 'ccpncore/api', 'ccpncore/gui', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/']
+  # ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
+  # print( '### running: ' + ' '.join(ll))
+  # apidoc.main(ll)
+  #
+  #
+  # # NBNB TBD temporarily removed, pending solving Qt imports
+  # # then ccpnmrcore
+  # ll = ['ccpn/doc/source/ccpnmrcore', 'ccpnmrcore']
+  # ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
+  # print( '### running: ' + ' '.join(ll))
+  # apidoc.main(ll)
 
   # then ccpn
-  ll = ['ccpn/doc/source/ccpn', 'ccpn']
+  ll = ['ccpn/doc/source/ccpn', 'ccpn', 'ccpn/lib/wrapper']
+  ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
+  print( '### running: ' + ' '.join(ll))
+  apidoc.main(ll)
+  #subprocess.call(ll)
+
+  # then ccpnmr
+  ll = ['ccpn/doc/source/ccpnmr', 'ccpnmr']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
   print( '### running: ' + ' '.join(ll))
   apidoc.main(ll)

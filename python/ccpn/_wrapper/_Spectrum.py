@@ -27,11 +27,11 @@ __version__ = "$Revision: 7686 $"
 
 from collections.abc import Sequence
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from ccpncore.util import pid as Pid
+from ccpncore.util import Pid
 
 
 class Spectrum(AbstractWrapperObject):
@@ -283,7 +283,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def pointCounts(self) -> tuple:
-    """Type: (*int,*)\*dimensionCount, *settable*
+    """\- (*int,*)\*dimensionCount, *settable*
 
     Number active of points
 
@@ -311,7 +311,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def totalPointCounts(self) -> tuple:
-    """Type: (*int,*)\*dimensionCount, *settable*
+    """\- (*int,*)\*dimensionCount, *settable*
 
     Total number of points
 
@@ -340,7 +340,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def pointOffsets(self) -> tuple:
-    """Type: (*int,*)\*dimensionCount, *settable*
+    """\- (*int,*)\*dimensionCount, *settable*
 
      index of first active point relative to total points."""
     result = []
@@ -367,7 +367,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def isComplex(self) -> tuple:
-    """Type: (*bool,*)\*dimensionCount, *settable*
+    """\- (*bool,*)\*dimensionCount, *settable*
 
     Is dimension complex?"""
     return tuple(x.isComplex for x in self._wrappedData.sortedDataDims())
@@ -378,14 +378,14 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def dimensionTypes(self) -> tuple:
-    """Type: (*str,*)\*dimensionCount
+    """\- (*str,*)\*dimensionCount
 
     dimension types ('Fid' / 'Freq' / 'Sampled')."""
     return tuple(x.className[:-7] for x in self._wrappedData.sortedDataDims())
 
   @property
   def spectralWidthsHz(self) -> tuple:
-    """Type: (*float,*)\*dimensionCount, *settable*
+    """\- (*float,*)\*dimensionCount, *settable*
 
     spectral width before correcting for spectrometer frequency (generally in Hz)."""
     return tuple(x.spectralWidth for x in self._wrappedData.sortedDataDims()
@@ -416,7 +416,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def phases0(self) -> tuple:
-    """Type: (*float,*)\*dimensionCount, *settable*
+    """\- (*float,*)\*dimensionCount, *settable*
 
     zero order phase correction (or None). Always None for sampled dimensions."""
     return tuple(x.phase0 for x in self._wrappedData.sortedDataDims()
@@ -428,7 +428,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def phases1(self) -> tuple:
-    """Type: (*float,*)\*dimensionCount, *settable*
+    """\- (*float,*)\*dimensionCount, *settable*
 
     first order phase correction (or None). Always None for sampled dimensions."""
     return tuple(x.phase1 for x in self._wrappedData.sortedDataDims()
@@ -441,7 +441,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def sampledValues(self) -> tuple:
-    """Type: *((float)\*)\*dimensionCount*, *settable*
+    """\- *((float)\*)\*dimensionCount*, *settable*
 
     tuples of sampled values (None except for Sampled dimensions)."""
     return tuple(x.pointValues for x in self._wrappedData.sortedDataDims()
@@ -453,7 +453,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def sampledValueErrors(self) -> tuple:
-    """Type: *((float)\*)\*dimensionCount*, *settable*
+    """\- *((float)\*)\*dimensionCount*, *settable*
 
     tuples of sampled value errors (None except for Sampled dimensions)."""
     return tuple(x.pointErrors for x in self._wrappedData.sortedDataDims()
@@ -505,7 +505,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def measurementTypes(self) -> tuple:
-    """Type: (*str,*)\*dimensionCount, *settable*
+    """\- (*str,*)\*dimensionCount, *settable*
 
     measurement type for main dimensions reference """
     return tuple(x and x.measurementType for x in self._mainExpDimRefs())
@@ -516,7 +516,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def maxAliasedFrequencies(self) -> tuple:
-    """Type: (*float,*)\*dimensionCount, *settable*
+    """\- (*float,*)\*dimensionCount, *settable*
 
      maximum possible peak frequency (in ppm) for main dimensions reference """
     return tuple(x and x.maxAliasedFrequency for x in self._mainExpDimRefs())
@@ -527,7 +527,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def minAliasedFrequencies(self) -> tuple:
-    """Type: (*str,*)\*dimensionCount, *settable*
+    """\- (*str,*)\*dimensionCount, *settable*
 
      minimum possible peak frequency (in ppm) for main dimensions reference """
     return tuple(x and x.minAliasedFrequency for x in self._mainExpDimRefs())
@@ -539,7 +539,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def isotopeCodes(self) -> tuple:
-    """Type: (*str,*)\*dimensionCount, *settable*
+    """\- (*str,*)\*dimensionCount, *settable*
 
     main ExpDimRef (serial=1) isotopeCode - None if no unique code"""
     result = []
@@ -576,7 +576,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def foldingModes(self) -> tuple:
-    """Type: (*str,*)\*dimensionCount, *settable*
+    """\- (*str,*)\*dimensionCount, *settable*
 
     main ExpDimRef folding mode (values: 'circular', 'mirror', None)"""
     dd = {True:'mirror', False:'circular', None:None}
@@ -589,7 +589,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def axisCodes(self) -> tuple:
-    """Type: (*str,*)\*dimensionCount, *settable*
+    """\- (*str,*)\*dimensionCount, *settable*
 
     Main ExpDimRef axisCode for each dimension - None if no main ExpDimRef
     """
@@ -619,7 +619,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def axisUnits(self) -> tuple:
-    """Type: (*str,*)\*dimensionCount, *settable*
+    """\- (*str,*)\*dimensionCount, *settable*
 
     Main ExpDimRef axis unit (most commonly 'ppm') - None if no unique code
 
@@ -671,7 +671,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def referencePoints(self) -> tuple:
-    """Type: (*float,*)\*dimensionCount, *settable*
+    """\- (*float,*)\*dimensionCount, *settable*
 
     point used for axis (chemical shift) referencing."""
     return tuple(x and x.refPoint for x in self._mainDataDimRefs())
@@ -682,7 +682,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def referenceValues(self) -> tuple:
-    """Type: (*str,*)\*dimensionCount, *settable*
+    """\- (*str,*)\*dimensionCount, *settable*
 
     value used for axis (chemical shift) referencing."""
     return tuple(x and x.refValue for x in self._mainDataDimRefs())
@@ -693,7 +693,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def assignmentTolerances(self) -> tuple:
-    """Type: (*str,*)\*dimensionCount, *settable*
+    """\- (*str,*)\*dimensionCount, *settable*
 
     Assignment tolerance in axis unit (ppm)."""
     return tuple(x and x.assignmentTolerance for x in self._mainDataDimRefs())
@@ -704,7 +704,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def spectralWidths(self) -> tuple:
-    """Type: (*float,*)\*dimensionCount, *settable*
+    """\- (*float,*)\*dimensionCount, *settable*
 
     spectral width after processing (generally in ppm) """
     return tuple(x and x.spectralWidth for x in self._mainDataDimRefs())

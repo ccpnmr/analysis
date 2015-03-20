@@ -22,10 +22,10 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
+from ccpn import AbstractWrapperObject
+from ccpn import Project
 from ccpncore.api.ccp.nmr.Nmr import ShiftList as ApiShiftList
-from ccpncore.util import pid as Pid
+from ccpncore.util import Pid
 
 
 class ChemicalShiftList(AbstractWrapperObject):
@@ -40,7 +40,7 @@ class ChemicalShiftList(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
-  def __init__(self, project, wrappedData):
+  def __init__(self, project:Project, wrappedData:ApiShiftList):
 
     self._wrappedData = wrappedData
     self._project = project

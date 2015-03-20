@@ -22,9 +22,9 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._RestraintSet import RestraintSet
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import RestraintSet
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 
 

@@ -32,16 +32,16 @@ def setPeakDimAssignments(peak, value:Sequence):
   """
   numDim =  peak.peakList.dataSource.numDim
   if len(value) != numDim:
-    raise ValueError("Assignment length does not match number fo peak dimensions %s: %s"
+    raise ValueError("Assignment length does not match number of peak dimensions %s: %s"
                       % (numDim, value))
 
   for ii, val in enumerate(value):
     if len(set(val)) != len(val):
       raise ValueError("Assignments contain duplicates in dimension %s: %s" % (ii+1, val))
 
-  peakContribs = peak.sortedPeakContribs
+  peakContribs = peak.sortedPeakContribs()
   if peakContribs:
-    # Clear existing assignmetns, keeping first peakContrib
+    # Clear existing assignments, keeping first peakContrib
     peakContrib = peakContribs[0]
     for xx in peakContribs[1:]:
       xx.delete()
@@ -57,7 +57,7 @@ def setPeakDimAssignments(peak, value:Sequence):
   for ii,val in enumerate(value):
     peakDim = peakDims[ii]
     for resonance in val:
-      peakDim.newPeakDimContrib(resonance=resonance, peakContrib=peakContrib)
+      peakDim.newPeakDimContrib(resonance=resonance, peakContribs=(peakContrib,))
 
 
 def setAssignments(peak, value:Sequence):

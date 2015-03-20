@@ -23,9 +23,9 @@ __version__ = "$Revision$"
 #=========================================================================================
 from collections.abc import Sequence
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Spectrum import Spectrum
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import Spectrum
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpncore.api.ccpnmr.gui.Task import Strip1d as ApiStrip1d

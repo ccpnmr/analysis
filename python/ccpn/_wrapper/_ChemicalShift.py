@@ -22,10 +22,10 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
-from ccpn._wrapper._NmrAtom import NmrAtom
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import ChemicalShiftList
+from ccpn import NmrAtom
 from ccpncore.api.ccp.nmr.Nmr import Shift as ApiShift
 
 class ChemicalShift(AbstractWrapperObject):

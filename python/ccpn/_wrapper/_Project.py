@@ -24,15 +24,13 @@ __version__ = "$Revision: 7686 $"
 
 import functools
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
+from ccpn import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib.molecule import DataConvertLib
 from ccpncore.util import Common as commonUtil
-from ccpncore.util import pid as Pid
+from ccpncore.util import Pid
 from ccpncore.util import Io as utilIo
-
-
 
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to API: NmrProject"""
@@ -152,10 +150,12 @@ class Project(AbstractWrapperObject):
     del self._pid2Obj[obj.shortClassName][obj._pid]
 
   def delete(self):
-    """Cleans up the wrapper project, without deleting the API project (impossible)"""
+    """Delete underlying data and cleans up the wrapper project"""
     self._clearNotifiers()
-    for tag in ('_wrappedData','_data2Obj','_pid2Obj'):
+    for tag in ('_data2Obj','_pid2Obj'):
       delattr(self,tag)
+    self._wrappedData.delete()
+    del self._wrappedData
 
 
   # CCPN properties  
@@ -221,9 +221,4 @@ class Project(AbstractWrapperObject):
     self._pidSortKeys[key] = result
     return result
 
-# NBNB set function parameter annotations for AbstractBaseClass functions
-# MUST be done here to avoid circular import problems
-AbstractWrapperObject.__init__.__annotations__['project'] = Project
-AbstractWrapperObject.project.fget.__annotations__['return'] = Project
-#AbstractWrapperObject.project.getter.__annotations__['return'] = Project
 

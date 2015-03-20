@@ -176,3 +176,83 @@ class Undo(deque):
   def canRedo(self) -> bool:
     """can a redo operation be performed"""
     return self.nextIndex <= len(self)
+
+'''
+  # scribbles only
+  def _dummyScribbles(self):
+    """Notes on how undo calls in PAI should look"""
+
+    # Call is always
+    #   undo.addItem(undoMethod, undoData, redoMethod, redoData=None)
+
+    # set (hicard != 1
+    undoMethod = self.setElement
+    undoData = currentValues
+    redoMethod = self.setElement
+    redoData = values
+
+    # set (hicard == 1
+    undoMethod = self.setElement
+    undoData = currentValue
+    redoMethod = self.setElement
+    redoData = value
+
+    # add
+    undoMethod = self.removeElement
+    undoData = value
+    redoMethod = self.addElement
+    redoData = value
+
+    # remove
+    undoMethod = self.addElement
+    undoData = value
+    redoMethod = self.removeElement
+    redoData = value
+
+    # init:
+    undoMethod = self.delete
+    undoData = None
+    redoMethod = parent.newObject
+    redoData = **attrlinks
+
+    # delete
+    undoMethod =root._undelete
+    undoData = deleteData  # (objsToBeDeleted, topObjectsToCheck)
+    redoMethod = self.delete
+    redoData = None
+
+  # undelete function
+  def _undelete(selfself, deleteData):
+    """Undelete function on root"""
+    objsToBeDeleted, topObjectsToCheck = deleteData
+
+    for obj in objsToBeDeleted:
+      obj._singleUndelete(objsToBeDeleted)
+
+    for topObjectModify in topObjectsToCheck:
+      if (not (topObjectModify.__dict__.get('isLoaded'))):
+        topObjectModify.load()
+
+      topObjectModify.__dict__['isModified'] = True
+
+  def _singleUndelete(self, objsToBeDeleted):
+    """Set up mirroring _singleDelete. NB relies on exact state matching."""
+
+
+
+  # Code for undo (set, add, remove)
+  if notInConstructor and notIsReading:
+    undo = root.undo
+    if undo is not None:
+      undo.addItem(undoMethod, undoData, redoMethod, redoData)
+
+
+
+  def _newUndo(self, maxWaypoints=20, maxOperations=10000):
+    """function on root, to reseet """
+
+
+  #NBNB TBD: WayPoints on/off must be set explicitly.
+  # NBNB Ask how they want it to work.
+  # NBNB do we want undoSingleOp?
+  '''

@@ -23,10 +23,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.lib.molecule.DataMapper import DataMapper
-from ccpncore.util import pid
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._NmrChain import NmrChain
+from ccpncore.util import Pid
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import NmrChain
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 
 
@@ -60,7 +60,7 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """Residue local ID"""
-    return pid.makeId(self.sequenceCode, self.name)
+    return Pid.makeId(self.sequenceCode, self.name)
     
   @property
   def _parent(self) -> NmrChain:
@@ -100,17 +100,16 @@ class NmrResidue(AbstractWrapperObject):
     return parent._wrappedData.sortedResonanceGroups()
     
     
-def newNmrResidue(parent:NmrChain, name:str, sequenceCode:str=None, comment:str=None) -> NmrResidue:
+def newNmrResidue(parent:NmrChain, name:str=None, sequenceCode:str=None, comment:str=None) -> NmrResidue:
   """Create new child NmrResidue"""
   apiNmrChain = parent._wrappedData
-  print(name)
   nmrProject = apiNmrChain.nmrProject
   obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=name, details=comment,
-                                     nmrChsin=apiNmrChain)
+                                     nmrChain=apiNmrChain)
   return parent._project._data2Obj.get(obj)
 
 
-def fetchNmrResidue(parent:NmrChain, sequenceCode:str, name:str=None) -> NmrResidue:
+def fetchNmrResidue(parent:NmrChain, sequenceCode:str=None, name:str=None) -> NmrResidue:
   """Fetch NmrResidue with name=name, creating it if necessary"""
   apiResonanceGroup = parent._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
   if apiResonanceGroup:

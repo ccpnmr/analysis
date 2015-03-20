@@ -25,6 +25,7 @@ import collections
 
 
 def loadSpectrum(project:object, filePath:str, reReadSpectrum:object=None):
+  """Load spectrum from file a filePath"""
 
   if reReadSpectrum is not None:
     # NBNB TBD Rasmus - this is clearly not working yet

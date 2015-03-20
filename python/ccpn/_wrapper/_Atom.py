@@ -22,9 +22,10 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Residue import Residue
+from ccpncore.util import Pid
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import Residue
 from ccpncore.api.ccp.molecule.MolSystem import Atom as ApiAtom
 
 # NBNB TBD add settable linkedAtoms link for non-ChemComp links ???

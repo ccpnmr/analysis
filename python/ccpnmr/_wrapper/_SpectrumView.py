@@ -21,14 +21,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util import pid
+from ccpncore.util import Pid
 from collections.abc import Sequence
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Spectrum import Spectrum
-from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
-from ccpnmr._wrapper._Strip import Strip
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import Spectrum
+from ccpnmr import SpectrumDisplay
+from ccpnmr import Strip
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
 from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
@@ -330,7 +330,7 @@ class SpectrumView1d(SpectrumView, GuiSpectrumView1d):
   @property
   def _key(self) -> str:
     """id string - combined spectrumName and stripSerial"""
-    return pid.makeId(self.spectrumName, self.stripSerial)
+    return Pid.makeId(self.spectrumName, self.stripSerial)
 
 
 class SpectrumViewNd(SpectrumView, GuiSpectrumViewNd):
@@ -345,7 +345,7 @@ class SpectrumViewNd(SpectrumView, GuiSpectrumViewNd):
   @property
   def _key(self) -> str:
     """id string - combined spectrumName and stripSerial"""
-    return pid.makeId(self.spectrumName, self.stripSerial)
+    return Pid.makeId(self.spectrumName, self.stripSerial)
 
 
 def _factoryFunction(project:Project, wrappedData:ApiSpectrumView) -> SpectrumView:

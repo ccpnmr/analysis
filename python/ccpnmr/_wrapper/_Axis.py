@@ -21,10 +21,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util import pid
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
+from ccpncore.util import Pid
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpnmr import SpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 
 
@@ -50,7 +50,7 @@ class Axis(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """local id, of form code.stripSerial"""
-    return pid.makeId(self._wrappedData.code, self._wrappedData.stripSerial)
+    return Pid.makeId(self._wrappedData.code, self._wrappedData.stripSerial)
 
     
   @property

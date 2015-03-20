@@ -25,8 +25,9 @@ from collections import abc
 import itertools
 import functools
 
-from ccpncore.util import pid
+from ccpncore.util import Pid
 from ccpncore.util import Common as commonUtil
+from ccpncore.api.memops.Implementation import DataObject
 
 
 # PROBLEM:
@@ -132,7 +133,7 @@ class AbstractWrapperObject():
   
   # Implementation methods
   
-  def __init__(self, project, wrappedData:object):
+  def __init__(self, project, wrappedData:DataObject):
    
     # NB project parameter type is Project. Set in Project.py
     
@@ -155,7 +156,7 @@ class AbstractWrapperObject():
     if parent is project:
       _id = self._key
     else:
-      _id = '%s%s%s'% (parent._id, pid.IDSEP, self._key)
+      _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
     self._id = _id
     
     # update pid:object mapping dictionary
@@ -189,21 +190,21 @@ class AbstractWrapperObject():
     
     # getting children
     project = self._project
-    tt = tag.split(pid.PREFIXSEP, 1)
+    tt = tag.split(Pid.PREFIXSEP, 1)
     if len(tt) == 2:
       # String of form '{prefix}:{pid}'
       dd = project._pid2Obj.get(tt[0])
       if dd:
         # prefix matches a known class name. Child or bust!
         key = tt[1] 
-        if pid.IDSEP in key:
+        if Pid.IDSEP in key:
           # not a direct child
           raise KeyError(tag)
           
         else:
           # this is then a direct child
           if project is not self:
-            key = pid.IDSEP.join((self._id,key))
+            key = Pid.IDSEP.join((self._id,key))
           #    
           return dd[key]
       else:
@@ -229,7 +230,7 @@ class AbstractWrapperObject():
         self.__class__.__name__, tag))
     
     # check for child wrapperclass type attribute
-    if pid.PREFIXSEP in tag:
+    if Pid.PREFIXSEP in tag:
       # String of form '{prefix}:{pid}'. Unsettable
       raise AttributeError(
          "{} can't set attribute with name of form 'xy:abcd': {}".
@@ -255,7 +256,7 @@ class AbstractWrapperObject():
         self.__class__.__name__, tag))
     
     # check for child wrapperclass type attribute
-    if pid.PREFIXSEP in tag:
+    if Pid.PREFIXSEP in tag:
       # String of form '{prefix}:{pid}' undeletable
       raise AttributeError(
         "{} can't delete attribute of form 'xy:abcd: {}".
@@ -272,14 +273,14 @@ class AbstractWrapperObject():
     propertyAttrs = (x for x in sorted(dir(cls))
                      if (not x.startswith('_') and  isinstance(getattr(cls,x), property)))
     
-    prefix = self._id + pid.IDSEP
+    prefix = self._id + Pid.IDSEP
     childAttrs = (y for x in self._childClasses
                   for y in self._project._pid2Obj[x.shortClassName]
                   if y.startswith(prefix))
     
     dd = self.__dict__
     extraAttrs = (x for x in sorted(dd)
-                  if not x.startswith('_') and pid.PREFIXSEP not in x)
+                  if not x.startswith('_') and Pid.PREFIXSEP not in x)
     
     #
     return itertools.chain(propertyAttrs, childAttrs, extraAttrs)
@@ -292,7 +293,7 @@ class AbstractWrapperObject():
     # Calling list(self) seems to give an infinite loop, so let us try sounting elements directly
 
     cls = self.__class__
-    prefix = self._id + pid.IDSEP
+    prefix = self._id + Pid.IDSEP
     dd = self.__dict__
     return (
       len(list(x for x in sorted(dir(cls))
@@ -300,7 +301,7 @@ class AbstractWrapperObject():
       + len(list((y for x in cls._childClasses for y in self._project._pid2Obj[x.shortClassName]
              if y.startswith(prefix))))
       + len(list(x for x in sorted(dd) if not x.startswith('_')
-                 and pid.PREFIXSEP not in x)))
+                 and Pid.PREFIXSEP not in x)))
 
 
   def __bool__(self):
@@ -382,7 +383,7 @@ class AbstractWrapperObject():
     return default
 
 
-  # Functions lifted from collections.abc.MApping
+  # Functions lifted from collections.abc.Mapping
 
   def get(self, key, default=None):
       """D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
@@ -456,16 +457,16 @@ class AbstractWrapperObject():
     return self._project
   
   @property
-  def pid(self) -> str:
+  def pid(self) -> Pid.Pid:
     """Object project-wide identifier, unique within project.
     Set automatically from short class name, and id of object and parents."""
-    return pid.Pid(pid.PREFIXSEP.join((self.shortClassName, self._id)))
+    return Pid.Pid(Pid.PREFIXSEP.join((self.shortClassName, self._id)))
   
   @property
-  def longPid(self) -> str:
+  def longPid(self) -> Pid.Pid:
     """Object project-wide identifier, unique within project.
     Set automatically from full class name, and id of object and parents."""
-    return pid.Pid(pid.PREFIXSEP.join((type(self).__name__, self._id)))
+    return Pid.Pid(Pid.PREFIXSEP.join((type(self).__name__, self._id)))
     
   
   # CCPN abstract properties
@@ -482,7 +483,7 @@ class AbstractWrapperObject():
     raise NotImplementedError("Code error: function not implemented")
 
   @property
-  def id(self):
+  def id(self)->str:
     """Full ID of object."""
     return self._id
   
@@ -521,7 +522,7 @@ class AbstractWrapperObject():
     """Get  object by absolute ID#
     in either long form ('Residue:MS1.A.127') or short form ('MR:MS1.A.127')"""
 
-    tt = identifier.split(pid.PREFIXSEP,1)
+    tt = identifier.split(Pid.PREFIXSEP,1)
     if len(tt) == 2:
       dd = self._project._pid2Obj.get(tt[0])
       if dd:
@@ -529,7 +530,7 @@ class AbstractWrapperObject():
     #
     return None
 
-  def getWrapperObject(self, apiObject:object):
+  def getWrapperObject(self, apiObject:DataObject):
     """get wrapper object wrapping apiObject or None"""
     return self._project._data2Obj.get(apiObject)
     
@@ -539,6 +540,7 @@ class AbstractWrapperObject():
   @classmethod
   def _linkWrapperClasses(cls, ancestors:list=None):
     """Recursively set up links and functions involving children for wrapper classes"""
+    import ccpn
 
     if ancestors:
       # add getCls in all ancestors
@@ -547,7 +549,7 @@ class AbstractWrapperObject():
         # Add getDescendant function
         def func(self,  relativeId: str) -> cls:
           return cls._getDescendant(self, relativeId)
-        func.__doc__= "Get child %s object by relative ID" % cls.__name__
+        func.__doc__= "Get child %s object by relative ID" % cls
         setattr(ancestor, funcName, func)
 
       # Add descendant links
@@ -558,8 +560,8 @@ class AbstractWrapperObject():
         prop = property(functools.partial(AbstractWrapperObject._allDescendants,
                                           descendantClasses=newAncestors[ii+1:]),
                           None, None,
-                          ("Type: (*%s*,)\*  - sorted %s type child objects" %
-                            (cls.__name__, cls.__name__)
+                          ("\- *(%s,)*  - sorted %s type child objects" %
+                            (cls, cls.__name__)
                           )
                         )
         setattr(ancestor, linkName, prop)
@@ -581,7 +583,7 @@ class AbstractWrapperObject():
         if self is self._project:
             key = relativeId
         else:
-            key = '%s%s%s' % (self._pid,pid.IDSEP, relativeId)
+            key = '%s%s%s' % (self._pid,Pid.IDSEP, relativeId)
         return dd.get(key)
     else:
       return None

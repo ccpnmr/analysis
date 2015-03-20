@@ -23,13 +23,13 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from collections.abc import Sequence
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
+from ccpn import AbstractWrapperObject
+from ccpn import Project
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpncore.lib.molecule import MoleculeModify
 from ccpncore.lib.molecule.DataMapper import DataMapper
 from ccpncore.util import Common as commonUtil
-from ccpncore.util import pid as Pid
+from ccpncore.util import Pid
 
 
 

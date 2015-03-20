@@ -23,9 +23,9 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from collections.abc import Sequence
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._RestraintList import RestraintList
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import RestraintList
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraint as ApiAbstractConstraint
 
 class Restraint(AbstractWrapperObject):

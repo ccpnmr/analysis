@@ -22,10 +22,10 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._Spectrum import Spectrum
-from ccpn._wrapper._ChemicalShiftList import ChemicalShiftList
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import Spectrum
+from ccpn import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 
 

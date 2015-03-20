@@ -23,11 +23,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 from collections.abc import Sequence
 
-from ccpn._wrapper._AbstractWrapperObject import AbstractWrapperObject
-from ccpn._wrapper._Project import Project
-from ccpn._wrapper._NmrResidue import NmrResidue
-from ccpnmr._wrapper._Task import Task
-from ccpnmr._wrapper._Window import Window
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import NmrResidue
+from ccpnmr import Task
+from ccpnmr import Window
 from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import StripDisplay1d as ApiStripDisplay1d
 from ccpncore.api.ccpnmr.gui.Task import StripDisplayNd as ApiStripDisplayNd
@@ -81,24 +81,6 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   def stripCount(self) -> str:
     """Number of strips"""
     return self._wrappedData.stripCount
-
-  @property
-  def gridCell(self) -> tuple:
-    """Display grid cell as (x,y)"""
-    return self._wrappedData.gridCell
-
-  @gridCell.setter
-  def gridCell(self, value:Sequence):
-    self._wrappedData.gridCell = value
-  
-  @property
-  def gridSpan(self) -> tuple:
-    """Display grid span as (x,y)"""
-    return self._wrappedData.gridSpan
-
-  @gridSpan.setter
-  def gridSpan(self, value:Sequence):
-    self._wrappedData.gridSpan = value
 
   @property
   def comment(self) -> str:
@@ -166,7 +148,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     self._wrappedData.orderedStrips = tuple(x._wrappedData for x in value)
 
   @property
-  def positions(self) -> tuple:
+  def positions(self) -> (float,):
     """Axis centre positions, in display order"""
     return self._wrappedData.positions
 
@@ -204,9 +186,8 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     """Reset display to original axis order"""
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-  def displaySpectrum(self, spectrum, axisOrder:Sequence=()):
-    """
-    Display additional spectrum, with spectrum axes ordered according ton axisOrder
+  def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
+    """Display additional spectrum, with spectrum axes ordered according ton axisOrder
     """
     spectrum = self.getById(spectrum) if isinstance(spectrum, str) else spectrum
     self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
@@ -218,10 +199,9 @@ def _getSpectrumDisplays(window:Window):
 Window.spectrumDisplays = property(_getSpectrumDisplays, None, None,
                                    "SpectrumDisplays shown in Window")
 
-def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
-                       name:str=None, gridCell:Sequence=(1,1), gridSpan:Sequence=(1,1),
-                       window:Window=None, comment:str=None, independentStrips=False,
-                       nmrResidue=None):
+def newSpectrumDisplay(parent:Task, axisCodes:(str,), stripDirection:str='Y',
+                       name:str=None, window:Window=None, comment:str=None,
+                       independentStrips=False, nmrResidue=None):
 
   # NBNB TBD recheck after classes are done
 
@@ -258,7 +238,7 @@ def newSpectrumDisplay(parent:Task, axisCodes:Sequence, stripDirection:str='Y',
   # set parameters for display
   window = window or apiTask.sortedWindows()[0]
   displayPars = dict(
-    stripDirection=stripDirection, gridCell=gridCell, gridSpan=gridSpan, window=window,
+    stripDirection=stripDirection, window=window,
     details=comment, resonanceGroup=nmrResidue and nmrResidue._wrappedData
   )
   # Add name, setting and insuring uniqueness if necessary

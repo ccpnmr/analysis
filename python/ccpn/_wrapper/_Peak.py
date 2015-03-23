@@ -28,6 +28,7 @@ import operator
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import PeakList
+from ccpn import NmrAtom
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 
 class Peak(AbstractWrapperObject):
@@ -327,8 +328,20 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
 
   return parent._project._data2Obj.get(apiPeak)
 
-
 PeakList.newPeak = newPeak
+
+def _atomAssignedPeaks(nmrAtom):
+  """All peaks assigned to the NmrAtom"""
+  apiResonance = nmrAtom._wrappedData
+  apiPeaks = [x.peakDim.peak for x in apiResonance.peakDimContribs]
+  apiPeaks.extend([x.peakDim.peak for x in apiResonance.peakDimContribNs])
+
+  data2Obj = nmrAtom._project._data2Obj
+  result = [sorted(data2Obj[x] for x in set(apiPeaks))]
+  #
+  return result
+
+NmrAtom.assignedPeaks = property(_atomAssignedPeaks, None, None)
 
 # Notifiers:
 className = ApiPeak._metaclass.qualifiedName()

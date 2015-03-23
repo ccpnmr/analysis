@@ -14,6 +14,9 @@ import ccpn
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
 
+# Keep chilcClasses shapshot for later comparison
+_previousChildClasses = list(ccpn.Project._childClasses)
+
 # _wrappedClassNames gives import order
 _wrappedClasses = []
 Window = cls = importlib.import_module('ccpnmr._wrapper._Window').Window
@@ -36,6 +39,6 @@ _sphinxWrappedClasses = _wrappedClasses
 # Set up interclass links and related functions
 # HACK to link up newly imported wrapper classes only
 _childClasses = ccpn.Project._childClasses
-ccpn.Project._childClasses = _wrappedClasses
+ccpn.Project._childClasses = [x for x in _childClasses if x not in _previousChildClasses]
 ccpn.Project._linkWrapperClasses()
 ccpn.Project._childClasses = _childClasses

@@ -28,6 +28,7 @@ from ccpn import Project
 from ccpn import NmrResidue
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 from ccpncore.lib.molecule import MoleculeQuery
+from ccpncore.util import Pid
 
 
 class NmrAtom(AbstractWrapperObject):

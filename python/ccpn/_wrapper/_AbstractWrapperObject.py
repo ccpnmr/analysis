@@ -432,7 +432,7 @@ class AbstractWrapperObject():
 
   def __repr__(self):
     """String representation"""
-    return "<ccpn.%s>" % self.longPid
+    return "<%s.%s>" % (self.__module__.split('.')[0], self.longPid)
 
   def __eq__(self, other):
     """Python 2 behaviour - objects equal only to themselves.
@@ -665,7 +665,6 @@ class AbstractWrapperObject():
         break
       elif getattr(apiSibling, keyTag) == value:
         # Object name is duplicate of earlier object name - make unique name
-        print ("@~@~ &s %s %s %s" % (apiObj, apiSibling, value, apiObj.serial))
 
         # First try appending serial, if possible
         if hasattr(apiObj, 'serial'):

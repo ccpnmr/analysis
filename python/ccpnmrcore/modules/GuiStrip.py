@@ -64,8 +64,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
               dropCallback=self.dropCallback)#, gridSpan=(1, 1))
-    self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self)+1)
-
+    self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self))
 
     if self._parent._appBase.preferences.general.colourScheme == 'light':
       self.background = 'w'
@@ -172,7 +171,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     #  spectrumDisplay.changeBothDims = False
 
   def addSpinSystemLabel(self):
-    self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.stripCount),
+    self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                  hAlign='center', dragDrop=True, pid=self.pid)
     self.spinSystemLabel.setText("Spin systems shown here")
     self.spinSystemLabel.setFixedHeight(30)
@@ -300,5 +299,13 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     else:
       if self._parent.assignmentDirection == 'i-1':
-        print('i-1')
+
+        self.guiSpectrumDisplay.stripFrame.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.guiSpectrumDisplay.copyStrip(dropObject, newIndex=0)
+
+      else:
+        print('i+1')
+        self.guiSpectrumDisplay.stripFrame.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.guiSpectrumDisplay.copyStrip(dropObject)
+
+    # self.guiSpectrumDisplay.regridStrips()

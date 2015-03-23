@@ -42,7 +42,7 @@ class PeakListSimple(Dock):
       peakLists = []
       
     # QtGui.QWidget.__init__(self, parent)
-    Dock.__init__(self, name=name)
+    Dock.__init__(self, name=name, size=(1100, 1300))
     # Base.__init__(self, **kw)
 
     self.initPanel()
@@ -58,7 +58,7 @@ class PeakListSimple(Dock):
                                         # callback=self._updateWhenIdle,)
 
     self.peakTable = ObjectTable(self, self._getColumns(2), [],
-                                 callback=self.selectPeak, grid=(1, 0),
+                                 callback=self.selectPeak, grid=(2, 0),
                                  gridSpan=(1, 5))
     # self.layout().setColumnStretch(4, 1)
     self.updateContents()
@@ -81,9 +81,6 @@ class PeakListSimple(Dock):
       return
     else:
       peak = self.selectedPeak
-
-
-
 
   def _getColumns(self, numDim):
 
@@ -122,35 +119,36 @@ class PeakListSimple(Dock):
                            tipText='Magnitude of spectrum intensity at peak center (interpolated), unless user edited'),
                     Column('Volume', self._getPeakVolume,
                            tipText='Integral of spectrum intensity around peak location, according to chosen volume method'),
-                    Column('Details', 'details',
+                    Column('Details', 'comment',
                            tipText='Textual notes about the peak')])
 
     return columns
 
   def _getPeakPosition(self, peak, dim, unit='ppm'):
 
-    peakDim = peak.sortedPeakDims()[dim]
+    # peakDim = peak.position[dim]
 
-    if peakDim.position is None:
+    if peak.position[dim] is None:
       value = "*NOT SET*"
 
     elif unit == 'ppm':
-      value = peakDim.value
+      value = peak.position[dim]
 
     elif unit == 'point':
-      value = peakDim.dataDimRef.valueToPoint(peakDim.value)
+      value = peak.pointPosition[dim]
 
     elif unit == 'Hz':
-      value = peakDim.value*peakDim.dataDimRef.expDimRef.sf
+      value = peak.position[dim]*peak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf
 
     else: # sampled
-      value = unit.pointValues[int(peakDim.position)-1]
+      value = unit.pointValues[int(peak.sortedPeakDims()[dim].position)-1]
 
     return value
 
   def _getPeakAnnotation(self, peak, dim):
 
-    return peak.annotation
+    if len(peak.dimensionNmrAtoms[dim]) > 0:
+      return peak.dimensionNmrAtoms[dim][0].pid.id
 
   def _getPeakVolume(self, peak):
 
@@ -175,7 +173,7 @@ class PeakListSimple(Dock):
     peakList = self.peakList
     if peakList:
       columns = self._getColumns(peakList._parent.apiDataSource.numDim)
-      self.peakTable.setObjectsAndColumns(peakList.apiPeakList.sortedPeaks(), columns)
+      self.peakTable.setObjectsAndColumns(peakList.peaks, columns)
   #def updateContents(self, spectrum):
     # if len(spectrum.peakLists) > 1:
     #   for peakList in spectrum.peakLists:

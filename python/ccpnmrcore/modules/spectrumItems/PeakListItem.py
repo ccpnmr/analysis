@@ -46,7 +46,7 @@ NULL_RECT = QtCore.QRectF()
 
     # return
 
-class PeakListItem(QtGui.QGraphicsItem):
+class GuiPeakListView(QtGui.QGraphicsItem):
 
   def __init__(self, scene, parent, peakList):
     """ spectrumItem is the QGraphicsItem parent
@@ -324,8 +324,9 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
 
 class PeakNd(QtGui.QGraphicsItem):
 
-  def __init__(self, strip, scene, parent, peak, peakList):
+  def __init__(self, strip, peak):
 
+    scene = strip.plotWidget.scene()
     QtGui.QGraphicsItem.__init__(self, scene=scene)
 
     # self.glWidget = peakLayer.glWidget
@@ -333,10 +334,10 @@ class PeakNd(QtGui.QGraphicsItem):
     # self.peakLayer = peakLayer
     # self.spectrumWindow = spectrumWindow
     # self.panel = spectrumWindow.panel
-    self.peakList = peakList
+    self.peakList = peak._parent
     self.strip = strip
-    self.parent = parent
-    self.spectrum = peakList.spectrum
+    self.parent = strip.plotWidget
+    self.spectrum = self.peakList.spectrum
     self.setCacheMode(self.NoCache)
     self.setFlags(self.ItemIgnoresTransformations)
     self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)

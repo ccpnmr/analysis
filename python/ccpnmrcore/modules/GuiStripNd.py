@@ -34,7 +34,7 @@ from ccpncore.gui.ToolBar import ToolBar
 from ccpncore.util import Colour
 
 from ccpnmrcore.modules.GuiStrip import GuiStrip
-from ccpnmrcore.modules.spectrumItems.PeakListItem import PeakNd
+from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
 
 class GuiStripNd(GuiStrip):
 
@@ -214,11 +214,11 @@ class GuiStripNd(GuiStrip):
     # if self._parent.spectrumViews[0]
     if len(self.orderedAxes) > 2:
       for i in range(len(self.orderedAxes)-2):
-        self.planeToolbar = ToolBar(self.stripFrame, grid=(2+i, self.guiSpectrumDisplay.stripCount), hAlign='center')
+        self.planeToolbar = ToolBar(self.stripFrame, grid=(2+i, self.guiSpectrumDisplay.orderedStrips.index(self)), hAlign='center')
         self.planeToolbar.setMinimumWidth(200)
-        self.spinSystemLabel = Label(self)
-        self.spinSystemLabel.setMaximumWidth(1150)
-        self.spinSystemLabel.setScaledContents(True)
+        # self.spinSystemLabel = Label(self)
+        # self.spinSystemLabel.setMaximumWidth(1150)
+        # self.spinSystemLabel.setScaledContents(True)
         prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
         prevPlaneButton.setFixedWidth(30)
         prevPlaneButton.setFixedHeight(30)
@@ -236,13 +236,7 @@ class GuiStripNd(GuiStrip):
         self.planeToolbar.addWidget(nextPlaneButton)
 
   def showPeaks(self, peakList):
-    # # self.plotWidget.scene().addItem(peakListItem)
-    # print(self.plotWidget.scene().items())
-    peakItems = []
+
     for peak in peakList.peaks:
-     # peakItem =
-     peakItem = PeakNd(self, self.plotWidget.scene(), self.plotWidget, peak, peakList)
-     print(peakItem.pos())
-    #   peakItem = PeakItem(peak)
-    #   self.plotWidget.addItem(peakItem)
+     peakItem = PeakNd(self, peak)
      self.plotWidget.addItem(peakItem)

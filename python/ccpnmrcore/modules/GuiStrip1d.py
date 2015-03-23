@@ -32,7 +32,7 @@ from ccpncore.util.Colour import spectrumColours
 from ccpncore.gui.Menu import Menu
 # from ccpncore.util import Logging
 
-from ccpnmrcore.modules.spectrumItems.PeakListItem import Peak1d, PeakListItem
+from ccpnmrcore.modules.spectrumItems.GuiPeakListView import Peak1d, GuiPeakListView
 class GuiStrip1d(GuiStrip):
 
   def __init__(self):

@@ -436,7 +436,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def runMacro(self):
-    macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro")
+    macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", "/Users/simon/ccpnMacros/")
     f = open(macroFile)
     lines = f.readlines()
 
@@ -452,8 +452,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.dockArea.addDock(peakList, position='bottom')
 
-  def showBackboneAssignmentModule(self, position=None, relativeTo=None, assigner=None):
-    module = BackboneAssignmentModule(self._project, position, relativeTo, assigner)
+  def showBackboneAssignmentModule(self, position=None, relativeTo=None, assigner=None, hsqcDisplay=None):
+    module = BackboneAssignmentModule(self._project, position, relativeTo, assigner, hsqcDisplay)
     self.dockArea.addDock(module)
 
 

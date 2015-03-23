@@ -55,7 +55,7 @@ class Assigner(Dock):
   def assignRight(self):
     self.direction = 'right'
 
-  def addResidue(self):
+  def addResidue(self, name):
 
     if self.residueCount == 0:
       hAtom = self.addAtom("H", (0, self.atomSpacing))
@@ -72,9 +72,8 @@ class Assigner(Dock):
       self.addAssignmentLine(caAtom, cbAtom, 'grey', 1.2, 0)
       self.addAssignmentLine(nAtom, caAtom, 'grey', 1.2, 0)
       self.addAssignmentLine(coAtom, caAtom, 'grey', 1.2, 0)
-      ssText = "nmrAtom_"+str(self.residueCount)
       nmrAtomLabel = QtGui.QGraphicsTextItem()
-      nmrAtomLabel.setPlainText(ssText)
+      nmrAtomLabel.setPlainText(name)
       nmrAtomLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
       self.scene.addItem(nmrAtomLabel)
       newResidue = {'number':self.residueCount, 'H':hAtom, "N": nAtom, "CA":caAtom, "CB":cbAtom, "CO":coAtom}
@@ -100,9 +99,8 @@ class Assigner(Dock):
           self.addAssignmentLine(coAtom2, oldResidue['N'], 'grey', 1.2, 0)
           self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.2, 0)
           self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.2, 0)
-          ssText = "nmrAtom_"+str(self.residueCount)
           nmrAtomLabel = QtGui.QGraphicsTextItem()
-          nmrAtomLabel.setPlainText(ssText)
+          nmrAtomLabel.setPlainText(name)
           nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
           self.scene.addItem(nmrAtomLabel)
           newResidue = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2}
@@ -125,9 +123,8 @@ class Assigner(Dock):
           self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.2, 0)
           self.addAssignmentLine(nAtom2, oldResidue['CO'], 'grey', 1.2, 0)
           self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.2, 0)
-          ssText = "nmrAtom_"+str(self.residueCount)
           nmrAtomLabel = QtGui.QGraphicsTextItem()
-          nmrAtomLabel.setPlainText(ssText)
+          nmrAtomLabel.setPlainText(name)
           nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
           self.scene.addItem(nmrAtomLabel)
           newResidue = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2}

@@ -33,28 +33,28 @@ from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
-  def wheelEvent(self, event):
-    if event.modifiers() & QtCore.Qt.ShiftModifier:
-      for spectrumItem in self.spectrumItems:
-        if event.delta() > 0:
-            spectrumItem.raiseBaseLevel()
-            spectrumItem.update()
-        else:
-          spectrumItem.lowerBaseLevel()
-          spectrumItem.update()
-    elif not event.modifiers():
-      QtGui.QGraphicsView.wheelEvent(self, event)
-      sc = 1.001 ** event.delta()
-      #self.scale *= sc
-      #self.updateMatrix()
-      self.scale(sc, sc)
-    elif event.modifiers() & QtCore.Qt.ControlModifier:
-      if event.delta() > 0:
-         self.increaseTraceScale()
-      else:
-        self.decreaseTraceScale()
-    else:
-      event.ignore
+  # def wheelEvent(self, event):
+  #   if event.modifiers() & QtCore.Qt.ShiftModifier:
+  #     for spectrumItem in self.spectrumItems:
+  #       if event.delta() > 0:
+  #           spectrumItem.raiseBaseLevel()
+  #           spectrumItem.update()
+  #       else:
+  #         spectrumItem.lowerBaseLevel()
+  #         spectrumItem.update()
+  #   elif not event.modifiers():
+  #     QtGui.QGraphicsView.wheelEvent(self, event)
+  #     sc = 1.001 ** event.delta()
+  #     #self.scale *= sc
+  #     #self.updateMatrix()
+  #     self.scale(sc, sc)
+  #   elif event.modifiers() & QtCore.Qt.ControlModifier:
+  #     if event.delta() > 0:
+  #        self.increaseTraceScale()
+  #     else:
+  #       self.decreaseTraceScale()
+  #   else:
+  #     event.ignore
 
 
   def __init__(self):
@@ -143,16 +143,13 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     self.hideSystemSideLabel.show()
 
   def addSpinSystemSideLabel(self):
+
     dock = self.dock
     self.spinSystemSideLabel = VerticalLabel(self.dock, text='test', grid=(1, 0), gridSpan=(1, 1))
-    # spinSystemSideLabel.setText()
-    # print(dir(spinSystemSideLabel))
-    # print(spinSystemSideLabel.paintEvent())
     self.spinSystemSideLabel.setFixedWidth(30)
-    # spinSystemSideLabel.setAlignment(QtCore.Qt.AlignVCenter)
-    # spinSystemSideLabel.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Plain)
 
   def fillToolBar(self):
+
     spectrumUtilToolBar =  self.spectrumUtilToolBar
     spectrumUtilToolBar.addAction('+', self.addStrip)
     spectrumUtilToolBar.addAction('-', self.removeStrip)
@@ -183,23 +180,26 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
 
   def upBy2(self):
+
     for spectrumView in self.spectrumViews:
       spectrumView.spectrum.positiveContourBase*=spectrumView.spectrum.positiveContourFactor
       spectrumView.spectrum.negativeContourBase*=spectrumView.spectrum.positiveContourFactor
-      # spectrumItem.levels = spectrumItem.getLevels()
 
   def downBy2(self):
+
     for spectrumView in self.spectrumViews:
       spectrumView.spectrum.positiveContourBase/=spectrumView.spectrum.positiveContourFactor
       spectrumView.spectrum.negativeContourBase/=spectrumView.spectrum.negativeContourFactor
 
   def addOne(self):
+
     for spectrumView in self.spectrumViews:
       spectrumView.spectrum.positiveContourCount +=1
       spectrumView.spectrum.negativeContourCount +=1
 
 
   def subtractOne(self):
+
     for spectrumView in self.spectrumViews:
       spectrumView.spectrum.positiveContourCount -=1
       spectrumView.spectrum.negativeContourCount -=1
@@ -208,11 +208,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   def addStrip(self):
 
     newStrip = self.strips[-1].clone()
-    # print(newStrip.positions, newStrip.widths)
     newStrip.setMinimumWidth(200)
-    # self.stripFrame.layout().addWidget(newStrip)
-    # self.stripNumber+=1
-    # # self.stripFrame.layout().addWidget(self, 2, 0, 1, 1)
 
   def removeStrip(self):
     pass

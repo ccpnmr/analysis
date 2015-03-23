@@ -45,7 +45,7 @@ def _getLevels(count, base, factor):
     levels = [base]
     for n in range(count-1):
       levels.append(numpy.float32(factor * levels[-1]))
-      
+
   return levels
        
 class GuiSpectrumViewNd(GuiSpectrumView):
@@ -245,6 +245,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       
     #contourDict = self.constructContours(guiStrip, posLevels, negLevels)
     self.constructContours(posLevels, negLevels)
+
 
     posColour = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour
     negColour = Colour.scaledRgba(apiDataSource.negativeContourColour)

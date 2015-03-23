@@ -80,9 +80,6 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.stripFrame.setAcceptDrops(True)
     self.assignmentDirection = 'i-1'
 
-    self.stripsUpdated = set() # used by strips to figure out who started a resize event
-    self.changeBothDims = False # whether resize is for both (x/y) dims or just one
-
     self.scrollArea.setWidget(self.stripFrame)
 
   def fillToolBar(self):

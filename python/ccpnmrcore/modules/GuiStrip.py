@@ -45,19 +45,26 @@ def sufficientlyDifferentWidth(region1, region2):
   d = abs(w1 - w2)
   
   return d > 1.0e-5 * max(w1, w2)
+    
+def scaleRegion(otherPreviousRegion, region, previousRegion):
+
+  otherPreviousRegionWidth = abs(otherPreviousRegion[1] - otherPreviousRegion[0])
+  regionWidth = abs(region[1] - region[0])
+  previousRegionWidth = abs(previousRegion[1] - previousRegion[0])
   
-def scaledWidth(axis, axisOther, regionOther):
+  otherRegionWidth = otherPreviousRegionWidth * regionWidth / previousRegionWidth
+  otherRegionPosition = 0.5 * (otherPreviousRegion[1] + otherPreviousRegion[0])
   
-  return axis.width * axisOther.width / abs(regionOther[1]-regionOther[0])
+  return (otherRegionPosition - 0.5*otherRegionWidth, otherRegionPosition + 0.5*otherRegionWidth)
   
 class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop events are not processed
 
   sigClicked = QtCore.Signal(object, object)
 
   def __init__(self):
+    
     self.stripFrame = self._parent.stripFrame
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
-
 
     Widget.__init__(self)
     DropBase.__init__(self, self._parent._appBase, self.dropCallback)
@@ -103,7 +110,9 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
     
-    #self.eventOriginator = None
+    self.beingUpdated = False
+    self.xPreviousRegion, self.yPreviousRegion = self.viewBox.viewRange()
+    
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
 
@@ -111,64 +120,81 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     self.strips[0].clone()
 
-  def updateRegion(self, event):
+  def updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
+    
+    # this code is complicated because need to keep viewBox region and axis region in sync
+    # and there can be different viewBoxes with the same axis
 
-    spectrumDisplay = self.guiSpectrumDisplay
-    if self in spectrumDisplay.stripsUpdated:
+    assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
+    
+    if self.beingUpdated:
       return
     
-    xRegion, yRegion = self.viewBox.viewRange()
-
-    if not spectrumDisplay.stripsUpdated:
-      xRegionOld = self.orderedAxes[0].region
-      yRegionOld = self.orderedAxes[1].region
-      xDifferent = sufficientlyDifferentWidth(xRegion, xRegionOld)
-      yDifferent = sufficientlyDifferentWidth(yRegion, yRegionOld)
-      spectrumDisplay.changeBothDims = xDifferent and yDifferent
+    self.beingUpdated = True
+    
+    try:
       
-    spectrumDisplay.stripsUpdated.add(self)
+      xPreviousRegion = self.xPreviousRegion
+      yPreviousRegion = self.yPreviousRegion
+      xRegion, yRegion = viewBox.viewRange()
     
-    self.orderedAxes[0].region = xRegion
-    self.orderedAxes[1].region = yRegion
+      xIsChanged = sufficientlyDifferentWidth(xRegion, xPreviousRegion) if xPreviousRegion else True
+      yIsChanged = sufficientlyDifferentWidth(yRegion, yPreviousRegion) if yPreviousRegion else True
+      
+      spectrumDisplay = self.guiSpectrumDisplay
+      if xIsChanged and yIsChanged and spectrumDisplay.stripDirection is not None:
+        for otherStrip in spectrumDisplay.strips:
+          if otherStrip is self:
+            continue
+          otherStrip.beingUpdated = True
+          xOtherPreviousRegion, yOtherPreviousRegion = otherStrip.xPreviousRegion, otherStrip.yPreviousRegion
+          if spectrumDisplay.stripDirection == 'Y':
+            # x axis needs updating, y axis happens automatically below
+            xOtherRegion = scaleRegion(xOtherPreviousRegion, yRegion, yPreviousRegion)
+            otherStrip.viewBox.setXRange(*xOtherRegion)
+            otherStrip.viewBox.setYRange(*yRegion)
+            otherStrip.orderedAxes[0].region = otherStrip.xPreviousRegion = xOtherRegion
+            otherStrip.yPreviousRegion = yRegion
+          else: # spectrumDisplay.stripDirection == 'X'
+            # y axis needs updating, x axis happens automatically below
+            yOtherRegion = scaleRegion(yOtherPreviousRegion, xRegion, xPreviousRegion)
+            otherStrip.viewBox.setYRange(*yOtherRegion)
+            otherStrip.viewBox.setXRange(*xRegion)
+            otherStrip.orderedAxes[1].region = otherStrip.yPreviousRegion = yOtherRegion
+            otherStrip.xPreviousRegion = xRegion
     
-    spectrumDisplay.stripsUpdated.remove(self)
-    
-    if not spectrumDisplay.stripsUpdated:
-      spectrumDisplay.changeBothDims = False
+      self.orderedAxes[0].region = self.xPreviousRegion = xRegion
+      self.orderedAxes[1].region = self.yPreviousRegion = yRegion    
+              
+    finally:
+      
+      self.beingUpdated = False
+      if xIsChanged and yIsChanged and spectrumDisplay.stripDirection is not None:
+        for otherStrip in self.guiSpectrumDisplay.strips:
+          if otherStrip is self:
+            continue
+          otherStrip.beingUpdated = False
 
   def axisRegionUpdated(self, apiAxis):
     # this is called when the api region (position and/or width) is changed
     
-    spectrumDisplay = self.guiSpectrumDisplay
-    if self in spectrumDisplay.stripsUpdated:
-      return
-
     xAxis, yAxis = self.orderedAxes[:2]
     if apiAxis not in (xAxis._wrappedData, yAxis._wrappedData):
       return
       
-    doOtherAxis = spectrumDisplay.changeBothDims and spectrumDisplay.stripsUpdated
-          
-    spectrumDisplay.stripsUpdated.add(self)
-    
-    if doOtherAxis:
-      xRegionOld, yRegionOld = self.viewBox.viewRange()
-      # below is not working because viewBox region and apiAxis region seem to be mismatched
-      #if apiAxis is xAxis._wrappedData:
-      #  yAxis.width = scaledWidth(yAxis, xAxis, xRegionOld)
-      #elif apiAxis is yAxis._wrappedData:
-      #  xAxis.width = scaledWidth(xAxis, yAxis, yRegionOld)
+    if self.beingUpdated:
+      return
+      
+    self.beingUpdated = True
         
-    xRegion = xAxis.region
-    yRegion = yAxis.region
-    self.viewBox.setXRange(*xRegion)
-    self.viewBox.setYRange(*yRegion)
-
-    spectrumDisplay.stripsUpdated.remove(self)
-    
-    #if not spectrumDisplay.stripsUpdated:
-    #  spectrumDisplay.changeBothDims = False
+    try:
+      xRegion = xAxis.region
+      yRegion = yAxis.region
+      self.viewBox.setXRange(*xRegion)
+      self.viewBox.setYRange(*yRegion)
+    finally:
+      self.beingUpdated = False
 
   def addSpinSystemLabel(self):
     self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),

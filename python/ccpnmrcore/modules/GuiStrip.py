@@ -148,17 +148,16 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
           if otherStrip is self:
             continue
           otherStrip.beingUpdated = True
-          xOtherPreviousRegion, yOtherPreviousRegion = otherStrip.xPreviousRegion, otherStrip.yPreviousRegion
           if spectrumDisplay.stripDirection == 'Y':
             # x axis needs updating, y axis happens automatically below
-            xOtherRegion = scaleRegion(xOtherPreviousRegion, yRegion, yPreviousRegion)
+            xOtherRegion = scaleRegion(otherStrip.xPreviousRegion, yRegion, yPreviousRegion)
             otherStrip.viewBox.setXRange(*xOtherRegion)
             otherStrip.viewBox.setYRange(*yRegion)
             otherStrip.orderedAxes[0].region = otherStrip.xPreviousRegion = xOtherRegion
             otherStrip.yPreviousRegion = yRegion
           else: # spectrumDisplay.stripDirection == 'X'
             # y axis needs updating, x axis happens automatically below
-            yOtherRegion = scaleRegion(yOtherPreviousRegion, xRegion, xPreviousRegion)
+            yOtherRegion = scaleRegion(otherStrip.yPreviousRegion, xRegion, xPreviousRegion)
             otherStrip.viewBox.setYRange(*yOtherRegion)
             otherStrip.viewBox.setXRange(*xRegion)
             otherStrip.orderedAxes[1].region = otherStrip.yPreviousRegion = yOtherRegion

@@ -188,7 +188,7 @@ class Peak(AbstractWrapperObject):
   def dimensionNmrAtoms(self, value:Sequence):
     apiPeak = self._wrappedData
     dimResonances = []
-    for atoms in enumerate(value):
+    for atoms in value:
       if atoms is None:
         dimResonances.append(None)
 

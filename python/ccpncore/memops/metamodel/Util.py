@@ -370,7 +370,7 @@ def topObjLinksByImport(root):
 def getOperation(target, opType, inClass=None, opSubType=None):
   """ get existing operation. If none found return None
   """
-  
+
   if inClass is None:
     container = target.container
     if container.__class__.__name__ == 'MetaPackage':

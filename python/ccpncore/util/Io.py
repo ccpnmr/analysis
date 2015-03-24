@@ -91,7 +91,7 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
   logger = Logging.createLogger(applicationName, project)
   project._logger = logger
 
-  logger.info("Project is ", project)
+  logger.info("Project is %s", project)
 
   for name in repositoryNameMap.keys():
     fullPath = Path.normalisePath(Path.joinPath(path, projectName)

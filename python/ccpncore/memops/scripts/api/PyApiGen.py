@@ -302,6 +302,79 @@ if ll:
   ###########################################################################
 
   # implements ApiInterface
+  def writeUndoCode(self, op, inClass):
+
+    notifyName = op.name
+    opType = op.opType
+
+    isMemopsRoot = self.dataRoot in inClass.getAllSupertypes()
+
+
+    self.writeComment("register Undo functions")
+
+    self.write('''
+_undo = root._undo
+if _undo is not None:''')
+
+    if opType == 'init':
+
+      if isMemopsRoot:
+        self.write('''
+  _undo.clear()''')
+      else:
+        self.write('''
+  _undo.addItem(self.delete, parent.new%s, redoKwargs=attrlinks)
+''' % op.target.name)
+
+    elif opType == 'fullDelete':
+
+      if isMemopsRoot:
+        self.write('''
+  _undo.clear()''')
+      else:
+        self.write('''
+  # NBNB TBD _undelete not implemented yet
+  # _undo.addItem(self._undelete, self.delete, undoArgs=(objsToBeDeleted, topObjectsToCheck))
+  # NBNB TBD reactivate code when _undelete function is ready
+  _undo.clear()
+''')
+
+    elif opType == 'set':
+
+      var = self.valueVar(op.target, doInstance=False)
+      currentVar = self.valueVar(op.target, prefix=self.currentPrefix)
+
+      self.write('''
+  _undo.addItem(self.%s, self.%s,
+                undoArgs=(%s,), redoArgs=(%s,))
+''' % (notifyName, notifyName, currentVar, var))
+
+    elif opType in ('add', 'remove'):
+
+      var = self.valueVar(op.target, doInstance=True)
+      undoColVar = self.valueVar(op.target, prefix='undo')
+      setter =  metaUtil.getOperation(op.target, 'set', inClass=inClass)
+      setterName = metaUtil.getFuncname(setter, inClass=inClass)
+
+      if opType == 'add':
+
+        self.write('''
+  _undo.addItem(self.%s, self.%s,
+                undoArgs=(%s,), redoArgs=(%s,))
+ ''' % (setterName, notifyName, undoColVar, var))
+
+      else:
+
+        self.write('''
+  _undo.addItem(self.%s, self.%s,
+                undoArgs=(%s,), redoArgs=(%s,))
+ ''' % (setterName, notifyName, undoColVar, var))
+
+  ###########################################################################
+
+  ###########################################################################
+
+  # implements ApiInterface
   def setCheckLinkKey(self, keyVar, objVar, role):
 
     self.write("%s = (%s, '%s')" % (keyVar, objVar, role.name))

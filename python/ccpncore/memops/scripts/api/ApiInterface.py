@@ -28,6 +28,14 @@ class ApiInterface(object):
 
   ###########################################################################
 
+  def writeUndoCode(self, op, inClass):
+
+    raise MemopsError("writeUndoCode should be overridden in subclass")
+
+  ###########################################################################
+
+  ###########################################################################
+
   def writeNotifyCode(self, op, inClass):
 
     raise MemopsError("writeNotifyCode should be overridden in subclass")
@@ -39,6 +47,14 @@ class ApiInterface(object):
   def shouldDoNotifies(self, op, inClass):
 
     raise MemopsError("shouldDoNotifies should be overridden in subclass")
+
+  ###########################################################################
+
+  ###########################################################################
+
+  def shouldDoUndos(self, op, inClass):
+
+    raise MemopsError("shouldDoUndos should be overridden in subclass")
 
   ###########################################################################
 

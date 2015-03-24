@@ -61,6 +61,10 @@ class PyFileApiGen(FileApiGen, PyApiGen):
       self.setDictEntry(self.getDataDict(self.varNames['self']), 
                         self.toLiteral('memopsRoot'), 'self')
 
+      # Initialise _undo to None
+      self.setDictEntry(self.getDataDict(self.varNames['self']),
+                        self.toLiteral('_undo'), 'None')
+
     # Add _lastId attribute to topObject
     if inClass is inClass.container.topObjectClass:
       self.setDictEntry(self.getDataDict(self.varNames['self']),

@@ -509,11 +509,12 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.endTransaction(op, inClass)
 
     # TBD: should this be before endTransaction?
-    self.startIf(self.varNames['notOverride'])
-    self.startIf(self.varNames['notInConstructor'])
+    # self.startIf(self.varNames['notOverride'])
+    # self.startIf(self.varNames['notInConstructor'])
     self.doNotifies(op, inClass)
-    self.endIf()
-    self.endIf()
+    # self.endIf()
+    # self.endIf()
+
 
   ###########################################################################
 
@@ -1226,6 +1227,13 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       self.checkModifyConstraints(op, inClass)
 
     self.startTransaction(op, inClass)
+
+    # (currentVar collection is modified within function
+    if opType != 'set':
+      # Set copy of currentVar for use with undo
+      undoColVar = self.valueVar(element, prefix='undo')
+      self.newCollection(undoColVar, initValues=currentVar,
+                         **self.collectionParams(element))
 
     if not op.isImplicit:
       self.writeExternalCode(op, inClass)
@@ -1951,7 +1959,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     # currentVar
     # this is actually gotten here, not just defined
     currentVar = self.valueVar(element, prefix=self.currentPrefix)
-    
+
     # For certain TopObject elements we need explicit load
     container = element.container
     if self.topObject in container.getAllSupertypes():
@@ -2957,18 +2965,28 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
      isinstance(element,MetaModel.ClassElement) ) and 
      element.changeability != metaConstants.frozen
     ):
-      if opType == 'fullDelete':
-        s = '' # check already done in singleDelete
-      else:
-        s = self.shouldDoNotifies(op, inClass)
+      # if opType == 'fullDelete':
+      #   s = '' # check already done in singleDelete
+      # else:
+      #   s = self.shouldDoNotifies(op, inClass)
+      # if s:
+
+      self.writeNewline()
+      self.startIf(self.shouldDoNotifies(op, inClass))
+      self.writeNotifyCode(op, inClass)
+      self.endIf()
+
+    if opType in ('init', 'fullDelete') or isinstance(element,MetaModel.ClassElement):
+      s = self.shouldDoUndos(op, inClass)
       if s:
         self.writeNewline()
         self.startIf(s)
-      self.writeNotifyCode(op, inClass)
+      self.writeUndoCode(op, inClass)
       if s:
         self.endIf()
 
-  ###########################################################################
+  ####################
+  # #######################################################
 
   ###########################################################################
 

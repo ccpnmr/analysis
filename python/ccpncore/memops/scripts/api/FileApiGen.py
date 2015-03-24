@@ -877,12 +877,31 @@ class FileApiGen(ApiGen, FileApiInterface):
 
     if opType == 'init':
       return dd['notOverride']
-    elif opType == 'fullDelete':
-      return self.logicalOp(self.negate(self.getImplAttr(self.varNames['self'],
-       'inConstructor', inClass)),'and', dd['notOverride']
-      )
+    # elif opType == 'fullDelete':
+      # return self.logicalOp(self.negate(self.getImplAttr(self.varNames['self'],
+      #  'inConstructor', inClass)),'and', dd['notOverride']
+      # )
     else:
       return self.logicalOp(dd['notInConstructor'], 'and', dd['notOverride'])
+
+  ###########################################################################
+
+  ###########################################################################
+
+  # implements ApiInterface
+  def shouldDoUndos(self, op, inClass):
+
+    opType = op.opType
+    dd = self.varNames
+
+    if opType == 'init':
+      return dd['notIsReading']
+    elif opType == 'fullDelete':
+      return self.logicalOp(self.negate(self.getImplAttr(self.varNames['self'],
+       'inConstructor', inClass)),'and', dd['notIsReading']
+      )
+    else:
+      return self.logicalOp(dd['notInConstructor'], 'and', dd['notIsReading'])
 
   ###########################################################################
 

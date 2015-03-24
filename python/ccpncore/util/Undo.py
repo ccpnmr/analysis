@@ -1,5 +1,4 @@
-"""Module Documentation here
-
+"""General undo handle supporting undo/redo stack
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -21,9 +20,8 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""General undo handler"""
 
-
+from functools import partial
 from collections import deque
 
 class Undo(deque):
@@ -31,8 +29,7 @@ class Undo(deque):
      A waypoint is the level at which an undo happens, and each of them could
      consist of multiple individual undo operations.
 
-     To create a waypoint use newWaypoint().  If you don't want to use waypoints
-     then just don't use this method and then every item is in its own waypoint.
+     To create a waypoint use newWaypoint().
   """
 
   def __init__(self, maxWaypoints=20, maxOperations=10000):
@@ -43,21 +40,26 @@ class Undo(deque):
     self.nextIndex = 0   # points to next free slot (or first slot to redo)
     self.waypoints = []  # array of last item in each waypoint
     self.blocked = False
+    if maxWaypoints:
+      self.newWaypoint()
     deque.__init__(self)
 
   def newWaypoint(self):
     """Start new waypoint"""
+    if self.maxWaypoints < 1:
+      raise ValueError("Attempt to set waypoini on Undo object taht does tno allow them ")
+
     waypoints = self.waypoints
     waypoints.append(self.nextIndex-1)
 
     if len(waypoints) > self.maxWaypoints:
-      del self[:waypoints[0]+1]
+      for ii in range(waypoints[0]):
+        self.popleft()
       del waypoints[0]
 
-  def addItem(self, undoMethod, undoData, redoMethod, redoData=None):
+  def addItem(self, undoMethod, redoMethod, undoArgs=(), undoKwargs=None,
+              redoArgs=(), redoKwargs=None):
     """Add item to the undo stack.
-       Note that might not know redoData until after we do undo.
-       NBNB NO, we should know, so resetting facility disabled. Rasmus
     """
 
     if self.blocked:
@@ -68,7 +70,15 @@ class Undo(deque):
       self.pop()
 
     # add new data
-    self.append((undoMethod, undoData, redoMethod, redoData))
+    if undoKwargs is None:
+      undoCall = partial(undoMethod, *undoArgs)
+    else:
+      undoCall = partial(undoMethod, *undoArgs, **undoKwargs)
+    if redoKwargs is None:
+      redoCall = partial(redoMethod, *redoArgs)
+    else:
+      redoCall = partial(undoMethod, *redoArgs, **redoKwargs)
+    self.append((undoCall, redoCall))
 
     # fix waypoints:
     ll = self.waypoints
@@ -86,6 +96,40 @@ class Undo(deque):
           del ll[0]
     else:
       self.nextIndex += 1
+
+
+  # def addItem(self, undoMethod, undoData, redoMethod, redoData=None):
+  #   """Add item to the undo stack.
+  #      Note that might not know redoData until after we do undo.
+  #      NBNB NO, we should know, so resetting facility disabled. Rasmus
+  #   """
+  #
+  #   if self.blocked:
+  #     return
+  #
+  #   # clear out redos that are no longer going to be doable
+  #   for n in range(len(self)-self.nextIndex):
+  #     self.pop()
+  #
+  #   # add new data
+  #   self.append((undoMethod, undoData, redoMethod, redoData))
+  #
+  #   # fix waypoints:
+  #   ll = self.waypoints
+  #   while ll and ll[-1] >= self.nextIndex:
+  #     ll.pop()
+  #
+  #   # correct for maxOperations
+  #   if len(self) > self.maxOperations:
+  #     self.popleft()
+  #     ll = self.waypoints
+  #     if ll:
+  #       for n,val in enumerate(ll):
+  #         ll[n] = val - 1
+  #       if ll[0] < 0:
+  #         del ll[0]
+  #   else:
+  #     self.nextIndex += 1
 
 
   def undo(self):
@@ -112,17 +156,21 @@ class Undo(deque):
     self.blocked = True
     try:
       for n in range(self.nextIndex-1,undoTo,-1):
-        undoMethod, undoData, redoMethod, redoData = self[n]
-        if undoData is None:
-          undoMethod()
-        else:
-          undoMethod(undoData)
+        # undoMethod, undoData, redoMethod, redoData = self[n]
+        # if undoData is None:
+        #   undoMethod()
+        # else:
+        #   undoMethod(undoData)
+        undoCall, redoCall = self[n]
+        undoCall()
       self.nextIndex = undoTo + 1
-      self.blocked = False
     except:
       from ccpncore.util.Logging import getLogger
       getLogger().warning ("error while undoing. Undo is cleared")
       self.clear()
+    finally:
+      # Addded by Rasmus March 2015. Surely we need to reset self.blocked?
+      self.blocked = False
 
   def redo(self):
     """Redo one waypoint - or one operation if waypoints are not set.
@@ -149,18 +197,21 @@ class Undo(deque):
     self.blocked = True
     try:
       for n in range(self.nextIndex,redoTo+1):
-        undoMethod, undoData, redoMethod, redoData = self[n]
-        if redoData is None:
-          redoMethod()
-        else:
-          redoMethod(redoData)
+        # undoMethod, undoData, redoMethod, redoData = self[n]
+        # if redoData is None:
+        #   redoMethod()
+        # else:
+        #   redoMethod(redoData)
+        undoCall, redoCall = self[n]
+        redoCall()
       self.nextIndex = redoTo + 1
-      # Addded by Rasmus March 2015. Surely we need to reset self.blocked?
-      self.blocked = False
     except:
       from ccpncore.util.Logging import getLogger
       getLogger().warning("WARNING, error while redoing. Undo is cleared")
       self.clear()
+    finally:
+      # Addded by Rasmus March 2015. Surely we need to reset self.blocked?
+      self.blocked = False
 
   def clear(self):
     """Clear and reset undo object """
@@ -252,7 +303,7 @@ class Undo(deque):
     """function on root, to reseet """
 
 
-  #NBNB TBD: WayPoints on/off must be set explicitly.
+  #NBNB TBD: Waypoints on/off must be set explicitly.
   # NBNB Ask how they want it to work.
   # NBNB do we want undoSingleOp?
   '''

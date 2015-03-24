@@ -31,6 +31,7 @@ import sys
 import json
 
 from ccpncore.util import Path
+from ccpncore.lib import Constants as coreLibConstants
 from ccpncore.memops.metamodel import Constants as metaConstants
 
 # valid characters for file names
@@ -165,7 +166,7 @@ def parseSequenceCode(value):
 
   # sequenceCodePattern = re.compile('(\d+)?(.*?)(\+\d+|\-\d+)?$')
 
-  tt = coreConstants.sequenceCodePattern.match(value.strip()).groups()
+  tt = coreLibConstants.sequenceCodePattern.match(value.strip()).groups()
 
   if not tt[0] and not tt[1]:
     # special case: entire string matches offset modifier and is misread

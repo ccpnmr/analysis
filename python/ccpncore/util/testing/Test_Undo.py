@@ -63,14 +63,14 @@ def test_undo_add_item_one_undo():
   undoObject.undo()
 
 def test_undo_add_items_one_undo():
-  undoObject = Undo()
+  undoObject = Undo(maxWaypoints=0)
   undoDataList = range(5)
   for undoData in undoDataList:
     undoObject.addItem(_myUndoFunc, _myRedoFunc, undoArgs=(undoData,))
   undoObject.undo()
 
 def test_undo_add_items_one_undo_one_redo():
-  undoObject = Undo()
+  undoObject = Undo(maxWaypoints=0)
   undoDataList = range(5)
   for undoData in undoDataList:
     redoData = -undoData
@@ -79,7 +79,7 @@ def test_undo_add_items_one_undo_one_redo():
   undoObject.redo()
 
 def test_undo_add_items_many_undos_redos():
-  undoObject = Undo()
+  undoObject = Undo(maxWaypoints=0)
   undoMethod = _myUndoFunc
   undoDataList = range(5)
   for undoData in undoDataList:
@@ -98,7 +98,7 @@ def test_undo_add_items_many_undos_redos():
   undoObject.undo()
 
 def test_undo_add_items_many_undos_redos_add_another_item_undos_redos():
-  undoObject = Undo()
+  undoObject = Undo(maxWaypoints=0)
   undoDataList = range(5)
   for undoData in undoDataList:
     redoData = -undoData

@@ -394,7 +394,7 @@ def _makeMolecularSystemFrame(chains):
 
 
   for ll in atomPairs:
-    values = ll[0]._pid.split('.') +  ll[1]._pid.split('.')
+    values = ll[0]._id.split('.') +  ll[1]._id.split('.')
     loop.addData(values)
   #
   return saveframe

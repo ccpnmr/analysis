@@ -39,7 +39,8 @@ implTemplate = "%s.%s.%%s" % (metaConstants.modellingPackageName,
                               metaConstants.implementationPackageName)
 stringTypeName = implTemplate % 'String'
 
-ignoreTags = {'accessedPackages', 'codeStubs', 'constructorCodeStubs', 'destructorCodeStubs',
+ignoreTags = {'accessedPackages', 'codeStubs', 'constructorCodeStubs', 'postConstructorCodeStubs',
+              'destructorCodeStubs',
               'postDestructorCodeStubs', 'documentation', 'hicard', 'importedPackages',
               'isAutomatic', 'isOrdered', 'isUnique', 'partitionsChildren', 'subtypes'}
 

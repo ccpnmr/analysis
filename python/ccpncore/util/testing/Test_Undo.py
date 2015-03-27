@@ -23,6 +23,8 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpncore.util.Undo import Undo
 from ccpncore.util import Io as ioUtil
+from ccpn.testing.Testing import Testing
+
 
 def test_undo_create():
   undoObject = Undo()
@@ -252,3 +254,165 @@ def test_api_undo_delete():
   project._undo.undo()
   project._undo.redo()
 
+def test_make_molecule_undo():
+  from ccpncore.lib.molecule import MoleculeModify
+  project = ioUtil.newProject('UndoTest')
+  project._undo = Undo()
+  sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
+  molecule = MoleculeModify.makeMolecule(project, 'protein', sequence)
+  project._undo.undo()
+  project.checkAllValid()
+
+def test_make_molecule_undo_redo():
+  from ccpncore.lib.molecule import MoleculeModify
+  project = ioUtil.newProject('UndoTest')
+  project._undo = Undo()
+  sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
+  molecule = MoleculeModify.makeMolecule(project, 'protein', sequence)
+  project._undo.undo()
+  project._undo.redo()
+  project.checkAllValid()
+
+class ComplexUndoTest(Testing):
+
+  def __init__(self, *args, **kw):
+    Testing.__init__(self, 'CcpnCourse2c', *args, **kw)
+
+  def test_loaded_project(self):
+    project = self.project._wrappedData.root
+    project.checkAllValid()
+
+  def test_make_chain_undo(self):
+    project = self.project._wrappedData.root
+    project._undo = Undo()
+    project._undo.newWaypoint()
+    molSystem = project.findFirstMolSystem(code='MS1')
+    chainA = molSystem.findFirstChain(code='A')
+    chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
+    project._undo.undo()
+    project.checkAllValid()
+
+  def test_make_chain_undo_redo(self):
+    project = self.project._wrappedData.root
+    project._undo = Undo()
+    project._undo.newWaypoint()
+    molSystem = project.findFirstMolSystem(code='MS1')
+    chainA = molSystem.findFirstChain(code='A')
+    chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
+    project._undo.undo()
+    project._undo.redo()
+    project.checkAllValid()
+
+
+  def test_copy_chain_undo(self):
+    from ccpncore.util import CopyData
+    project = self.project._wrappedData.root
+    project._undo = Undo()
+    project._undo.newWaypoint()
+    molSystem = project.findFirstMolSystem(code='MS1')
+    chainA = molSystem.findFirstChain(code='A')
+    chainB = CopyData.copySubTree(chainA, molSystem, topObjectParameters={'code':'B'})
+    project._undo.undo()
+    project.checkAllValid()
+
+  def test_copy_chain_undo_redo(self):
+    from ccpncore.util import CopyData
+    project = self.project._wrappedData.root
+    project._undo = Undo()
+    project._undo.newWaypoint()
+    molSystem = project.findFirstMolSystem(code='MS1')
+    chainA = molSystem.findFirstChain(code='A')
+    chainB = CopyData.copySubTree(chainA, molSystem, topObjectParameters={'code':'B'})
+    project._undo.undo()
+    project._undo.redo()
+    project.checkAllValid()
+
+  def test_delete_residues_undo(self):
+      project = self.project._wrappedData.root
+      project._undo = Undo()
+      project._undo.newWaypoint()
+      molSystem = project.findFirstMolSystem(code='MS1')
+      residues = molSystem.findFirstChain(code='A').sortedResidues()
+      residues[22].delete()
+      residues[45].delete()
+      residues[21].delete()
+      residues[20].delete()
+      project._undo.undo()
+      project.checkAllValid()
+
+  def test_delete_residues_undo_redo(self):
+      project = self.project._wrappedData.root
+      project._undo = Undo()
+      project._undo.newWaypoint()
+      molSystem = project.findFirstMolSystem(code='MS1')
+      residues = molSystem.findFirstChain(code='A').sortedResidues()
+      residues[22].delete()
+      residues[45].delete()
+      residues[21].delete()
+      residues[20].delete()
+      project._undo.undo()
+      project._undo.redo()
+      project.checkAllValid()
+
+  def test_delete_chain_undo(self):
+      project = self.project._wrappedData.root
+      project._undo = Undo()
+      project._undo.newWaypoint()
+      molSystem = project.findFirstMolSystem(code='MS1')
+      chain = molSystem.findFirstChain(code='A')
+      chain.delete()
+      project._undo.undo()
+      project.checkAllValid()
+
+  def test_delete_chain_undo_redo(self):
+      project = self.project._wrappedData.root
+      project._undo = Undo()
+      project._undo.newWaypoint()
+      molSystem = project.findFirstMolSystem(code='MS1')
+      chain = molSystem.findFirstChain(code='A')
+      chain.delete()
+      project._undo.undo()
+      project._undo.redo()
+      project.checkAllValid()
+
+  def test_delete_molSystem_undo(self):
+      project = self.project._wrappedData.root
+      project._undo = Undo()
+      project._undo.newWaypoint()
+      molSystem = project.findFirstMolSystem(code='MS1')
+      molSystem.delete()
+      project._undo.undo()
+      project.checkAllValid()
+
+  def test_delete_molSystem_undo_redo(self):
+      project = self.project._wrappedData.root
+      project._undo = Undo()
+      project._undo.newWaypoint()
+      molSystem = project.findFirstMolSystem(code='MS1')
+      molSystem.delete()
+      project._undo.undo()
+      project._undo.redo()
+      project.checkAllValid()
+
+  def test_delete_resonances_undo(self):
+      project = self.project._wrappedData.root
+      project._undo = Undo()
+      project._undo.newWaypoint()
+      resonances = project.findFirstNmrProject().sortedResonances()
+      for ii in range(1,10):
+        resonances[ii].delete()
+        resonances[-ii].delete()
+      project._undo.undo()
+      project.checkAllValid()
+
+  def test_delete_resonances_undo_redo(self):
+      project = self.project._wrappedData.root
+      project._undo = Undo()
+      project._undo.newWaypoint()
+      resonances = project.findFirstNmrProject().sortedResonances()
+      for ii in range(1,10):
+        resonances[ii].delete()
+        resonances[-ii].delete()
+      project._undo.undo()
+      project._undo.redo()
+      project.checkAllValid()

@@ -151,10 +151,10 @@ class AbstractWrapperObject():
     self._wrappedData = wrappedData
     data2Obj[wrappedData] = self
       
-    # set _pid
+    # set _id
     parent = self._parent
     if parent is project:
-      _id = self._key
+      _id = str(self._key)
     else:
       _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
     self._id = _id
@@ -583,7 +583,7 @@ class AbstractWrapperObject():
         if self is self._project:
             key = relativeId
         else:
-            key = '%s%s%s' % (self._pid,Pid.IDSEP, relativeId)
+            key = '%s%s%s' % (self._id,Pid.IDSEP, relativeId)
         return dd.get(key)
     else:
       return None
@@ -639,7 +639,7 @@ class AbstractWrapperObject():
         obj = data2Obj.get(apiObj)
         if obj is not None:
           obj._unwrapAll()
-          del self._pid2Obj[obj.shortClassName][obj._pid]
+          del self._pid2Obj[obj.shortClassName][obj._id]
         del data2Obj[apiObj]
 
   def _setUniqueStringKey(self, apiObj:object, defaultValue:str, keyTag:str='name') -> str:

@@ -333,10 +333,7 @@ if _undo is not None:''')
   _undo.clear()''')
       else:
         self.write('''
-  # NBNB TBD _undelete not implemented yet
-  # _undo.addItem(self._undelete, self.delete, undoArgs=(objsToBeDeleted, topObjectsToCheck))
-  # NBNB TBD reactivate code when _undelete function is ready
-  _undo.clear()
+  _undo.addItem(root._unDelete, self.delete, undoArgs=(objsToBeDeleted, topObjectsToCheck))
 ''')
 
     elif opType == 'set':

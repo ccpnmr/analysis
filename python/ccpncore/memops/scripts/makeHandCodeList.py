@@ -152,6 +152,7 @@ def main():
       dataObjTypes = modelPortal.dataObjTypesAlphabetic(package)
       for dataObjType in dataObjTypes:
         outputCodeStubs(fp, dataObjType, dataObjType.constructorCodeStubs, 'constructor')
+        outputCodeStubs(fp, dataObjType, dataObjType.postConstructorCodeStubs, 'postConstructor')
         outputConstraints(fp, dataObjType)
   
         attributes = metaUtil.sortByMethodCall(dataObjType.attributes, 'qualifiedName')

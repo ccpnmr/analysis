@@ -73,10 +73,29 @@ def copySubTree(sourceObj, newParent, maySkipCrosslinks:bool=False,
   from ccpncore.memops.metamodel.MetaModel import MemopsError
   if sourceObj.root is sourceObj:
     raise MemopsError("copySubTree cannot be used to copy entire projects")
-      
-  result = _transferData(newParent, sourceObj, oldToNew=objectMap,
-                        targetObjParams=topObjectParameters,
-                        ignoreMissing=maySkipCrosslinks, useOptLinks=True)
+
+  # Copy objectMap as it is modified lower down
+  # NB topObjectParameters may be modified too if the top object has a serial key
+  # but in that case we need to keep teh modification for redo
+  oldToNew = None if objectMap is None else objectMap.copy()
+
+  undo = sourceObj.root._undo
+  if undo is not None:
+    undo.increaseBlocking()
+
+  try:
+    result = _transferData(newParent, sourceObj, oldToNew=oldToNew,
+                           targetObjParams=topObjectParameters,
+                           ignoreMissing=maySkipCrosslinks, useOptLinks=True)
+  finally:
+    if undo is not None:
+      undo.decreaseBlocking()
+
+  if undo is not None and result is not None:
+    undo.addItem(result.delete, copySubTree, redoArgs=(sourceObj, newParent),
+                 redoKwargs = {'maySkipCrosslinks':maySkipCrosslinks,
+                               'topObjectParameters':topObjectParameters,
+                               'objectMap':objectMap})
   #
   return result
   

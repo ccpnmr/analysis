@@ -114,6 +114,9 @@ class ModelAdapt(ModelTraverse):
   
   # Set of objects to be deleted (for checkDelete/singleDelete calls)
   'objsToBeDeleted':'objsToBeDeleted',
+
+  # Set of objects to be undeleted (for _fullUnDelete/_singleUnDelete calls)
+  'objsToBeUnDeleted':'objsToBeUnDeleted',
   
   # Set of objects to check for deletion (for checkDelete/singleDelete calls)
   'objsToBeChecked':'objsToBeChecked',
@@ -470,6 +473,9 @@ class ModelAdapt(ModelTraverse):
         # MemopsRoot
         
         isNotRootClass = False
+
+        # full undelete
+        self.makeOperations(inClass, 'fullUnDelete', inClass)
       
       elif not inClass.isAbstract:
         # Non-abstract non-root Implementation classes
@@ -484,6 +490,7 @@ class ModelAdapt(ModelTraverse):
       if isNotRootClass:
         self.makeOperations(inClass, 'checkDelete', inClass)
         self.makeOperations(inClass, 'singleDelete', inClass)
+        self.makeOperations(inClass, 'singleUnDelete', inClass)
  
       # checkers
       self.makeOperations(inClass, 'checkValid', inClass)
@@ -862,7 +869,7 @@ class ModelAdapt(ModelTraverse):
     isAbstract = opData.get('isAbstract')
     if isAbstract is not None:
       result['isAbstract'] = isAbstract
-    elif opType in ('getByKey', 'getFullKey', 'getLocalKey', 'fullDelete'):
+    elif opType in ('getByKey', 'getFullKey', 'getLocalKey', 'fullDelete', 'fullUnDelete'):
       result['isAbstract'] = False
     elif (isinstance(target, MetaModel.ClassElement) or
           self.operationData[opType]['targetTag'] == 'container'):

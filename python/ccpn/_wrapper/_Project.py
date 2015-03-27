@@ -114,7 +114,7 @@ class Project(AbstractWrapperObject):
       self._registerNotify(notify, apiClassName, apiFuncName)
 
   def _clearNotifiers(self):
-    """CLear all notifiers, previous to closing or deleting POroject
+    """CLear all notifiers, previous to closing or deleting Project
     """
     while self._activeNotifiers:
       tt = self._activeNotifiers.pop()
@@ -147,7 +147,7 @@ class Project(AbstractWrapperObject):
     obj = self._data2Obj.pop(wrappedData)
 
     # remove from pid2Obj
-    del self._pid2Obj[obj.shortClassName][obj._pid]
+    del self._pid2Obj[obj.shortClassName][obj._id]
 
   def delete(self):
     """Delete underlying data and cleans up the wrapper project"""

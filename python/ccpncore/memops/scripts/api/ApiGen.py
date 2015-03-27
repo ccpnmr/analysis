@@ -57,6 +57,7 @@ software development. Bioinformatics 21, 1678-1684.
 
 # NBNB TBD allow for changeability == 'add_only'
 
+import copy
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel.ModelTraverse import ModelTraverse
 from ccpncore.memops.metamodel import Constants as metaConstants
@@ -108,6 +109,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     for (opType, parName) in (
      ('checkDelete', 'objsToBeChecked'),
      ('checkDelete', 'objsToBeDeleted'),
+     ('singleUnDelete', 'objsToBeUnDeleted'),
     ):
       dd1[parName] = dd2 = self.getStdCollectionParams(opType, parName)
       dd2['collection'] = parName
@@ -201,10 +203,14 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       self.writeSetAttr(op, inClass)
     elif opType == 'fullDelete':
       self.writeDelete(op, inClass)
+    elif opType == 'fullUnDelete':
+      self.writeUnDelete(op, inClass)
     elif opType == 'checkDelete':
       self.writePreDelete(op, inClass)
     elif opType == 'singleDelete':
       self.writeDoDelete(op, inClass)
+    elif opType == 'singleUnDelete':
+      self.writeDoUnDelete(op, inClass)
     elif opType in ('checkValid', 'checkAllValid'):
       self.writeCheckClass(op, inClass)
     elif opType == 'clone':
@@ -399,6 +405,9 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     # TBD: should this be before endTransaction?
     self.doNotifies(op, inClass)
 
+    # add extra class postConstructor code, if any
+    self.writePostConstructorCode(op, inClass)
+
   ###########################################################################
 
   ###########################################################################
@@ -478,8 +487,17 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
   ###########################################################################
 
-  def writeConstructorCode(self, op, inClass):
+  def writePostConstructorCode(self, op, inClass):
   
+    if inClass.postConstructorCodeStubs:
+      self.writeHandCode(inClass, 'postConstructorCodeStubs')
+
+  ###########################################################################
+
+  ###########################################################################
+
+  def writeConstructorCode(self, op, inClass):
+
     if inClass.constructorCodeStubs:
       self.writeHandCode(inClass, 'constructorCodeStubs')
 
@@ -514,6 +532,30 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.doNotifies(op, inClass)
     # self.endIf()
     # self.endIf()
+
+
+  ###########################################################################
+
+  ###########################################################################
+
+  def writeUnDelete(self, op, inClass):
+
+
+    self.checkPermission(op, inClass)
+
+    # Check that all objects are deleted as tehy should be
+    objVar = 'obj'
+    self.startLoop(objVar, 'objsToBeUnDeleted', isUnique=True, isOrdered=False)
+    self.startIf(self.negate(self.getImplAttr(objVar, 'isDeleted')))
+    self.raiseApiError('an object in objsToBeUnDeleted is not deleted', inOp=op)
+    self.endIf()
+    self.endLoop()
+
+    self.startTransaction(op, inClass)
+
+    self.callDoUnDeletes(op, inClass)
+
+    self.endTransaction(op, inClass)
 
 
   ###########################################################################
@@ -681,6 +723,21 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
   ###########################################################################
 
+  def writeDoUnDelete(self, op, inClass):
+
+    self.setImplAttr(self.varNames['self'], 'isDeleted', False)
+
+    parentRole = inClass.parentRole
+
+    # do parentRole first. That makes everything ready for the rest
+    self.writeDoUnDeleteRole(op, inClass, parentRole)
+
+    for role in inClass.getAllRoles():
+      if role is not parentRole:
+        self.writeDoUnDeleteRole(op, inClass, role)
+
+  ###########################################################################
+
   def writeDoDelete(self, op, inClass):
 
     self.setImplAttr(self.varNames['self'], 'isDeleted', True)
@@ -717,7 +774,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
   ###########################################################################
 
-  def writeDoDeleteRole(self, op, inClass, role):
+  def writeDoUnDeleteRole(self, op, inClass, role):
 
     otherRole = role.otherRole
     
@@ -757,10 +814,15 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
                         inClass=inClass)
           self.startIf(self.logicalOp(self.valueIsNotNone(thatVar), 'and', 
            self.negate(self.isInCollection(thatVar, 
-           **self.stdCollectionParams['objsToBeDeleted'])))
+           **self.stdCollectionParams['objsToBeUnDeleted'])))
           )
-          self.setValue(thatVar, otherRole, value=None)
-          self.endIf() 
+          self.startIf(self.valueIsNotNone(self.getValue(thatVar, otherRole, None,
+                                                         lenient=True, inClass=inClass)))
+          self.raiseApiError("Error undoing delete of %s object %s link - backLink %s.%s is not None" %
+                             (inClass.name, role.name, otherRole.container.name, otherRole.name))
+          self.endIf()
+          self.setValue(thatVar, otherRole, value=self.varNames['self'])
+          self.endIf()
 
         else:
           # ONE-TO-MANY
@@ -770,8 +832,13 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
            role, lenient=True, inClass=inClass), **self.collectionParams(role)
           )
           self.startIf(self.negate(self.isInCollection(thatVar, 
-                       **self.stdCollectionParams['objsToBeDeleted'])))
-          self.setValue(thatVar, otherRole, value=None)
+                       **self.stdCollectionParams['objsToBeUnDeleted'])))
+          self.startIf(self.valueIsNotNone(self.getValue(thatVar, otherRole, None,
+                                                         lenient=True, inClass=inClass)))
+          self.raiseApiError("Error undoing delete of %s object %s link - backLink %s.%s is not None" %
+                             (inClass.name, role.name, otherRole.container.name, otherRole.name))
+          self.endIf()
+          self.setValue(thatVar, otherRole, value=self.varNames['self'])
           self.endIf() 
           self.endLoop()
 
@@ -786,13 +853,16 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
           #self.write('HERE3')
           self.getValue(self.varNames['self'], role, thatVar, lenient=True,
                         inClass=inClass)
-          self.startIf(self.logicalOp(self.valueIsNotNone(thatVar), 'and', 
-           self.negate(self.isInCollection(thatVar, 
-           **self.stdCollectionParams['objsToBeDeleted'])))
+          self.startIf(self.logicalOp(self.valueIsNotNone(thatVar), 'and',
+           self.negate(self.isInCollection(thatVar,
+           **self.stdCollectionParams['objsToBeUnDeleted'])))
           )
           self.getValue(thatVar, otherRole, var, lenient=True, inClass=inClass)
-          self.removeValue(thatVar, otherRole, self.varNames['self'], var)
-          self.endIf() 
+          # NBNB addValue is not quite the reverse of removeValue
+          # # The order can be different for ordered backlinks, but it would be
+          # a LOT of work to store teh information needed to undo that correctly, so...
+          self.addValue(thatVar, otherRole, self.varNames['self'], var)
+          self.endIf()
 
         else:
           # MANY-TO-MANY
@@ -802,14 +872,115 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
            lenient=True, inClass=inClass), **self.collectionParams(role)
           )
           self.startIf(self.negate(self.isInCollection(
-           thatVar, **self.stdCollectionParams['objsToBeDeleted']))
+           thatVar, **self.stdCollectionParams['objsToBeUnDeleted']))
           )
           self.getValue(thatVar, otherRole, var, lenient=True, inClass=inClass)
-          self.removeValue(thatVar, otherRole, self.varNames['self'], var)
+          # NBNB addValue is not quite the reverse of removeValue
+          # # The order can be different for ordered backlinks, but it would be
+          # a LOT of work to store teh information needed to undo that correctly, so...
+          self.addValue(thatVar, otherRole, self.varNames['self'], var)
           self.endIf() 
           self.endLoop()
           
     self.endBlock() 
+
+  ###########################################################################
+
+  ###########################################################################
+
+  def writeDoDeleteRole(self, op, inClass, role):
+
+    otherRole = role.otherRole
+
+    if role.hierarchy == metaConstants.child_hierarchy:
+      # always deleted
+      return
+
+    elif otherRole is None:
+      # no action needed
+      return
+
+    elif role.isDerived:
+      # no action needed
+      return
+
+    elif otherRole.changeability == metaConstants.frozen:
+      # always deleted
+      return
+
+    self.startBlock()
+    # necessary to shield internal parameters from name clashes
+
+    thatVar = role.baseName
+    var = otherRole.name
+    if var == thatVar:
+      var += '_2'
+
+    if otherRole.hicard == 1:
+
+      if otherRole.locard != 1:
+        # maybe deleted
+        if role.hicard == 1:
+          # ONE-TO-ONE
+
+          #self.write('HERE1')
+          self.getValue(self.varNames['self'], role, thatVar, lenient=True,
+                        inClass=inClass)
+          self.startIf(self.logicalOp(self.valueIsNotNone(thatVar), 'and',
+           self.negate(self.isInCollection(thatVar,
+           **self.stdCollectionParams['objsToBeDeleted'])))
+          )
+          self.setValue(thatVar, otherRole, value=None)
+          self.endIf()
+
+        else:
+          # ONE-TO-MANY
+
+          #self.write('HERE2')
+          self.startLoop(thatVar, self.getValue(self.varNames['self'],
+           role, lenient=True, inClass=inClass), **self.collectionParams(role)
+          )
+          self.startIf(self.negate(self.isInCollection(thatVar,
+                       **self.stdCollectionParams['objsToBeDeleted'])))
+          self.setValue(thatVar, otherRole, value=None)
+          self.endIf()
+          self.endLoop()
+
+    else: # otherRole.hicard != 1
+
+      if otherRole.locard != otherRole.hicard:
+        # maybe deleted
+
+        if role.hicard == 1:
+          # MANY-TO-ONE
+
+          #self.write('HERE3')
+          self.getValue(self.varNames['self'], role, thatVar, lenient=True,
+                        inClass=inClass)
+          self.startIf(self.logicalOp(self.valueIsNotNone(thatVar), 'and',
+           self.negate(self.isInCollection(thatVar,
+           **self.stdCollectionParams['objsToBeDeleted'])))
+          )
+          self.getValue(thatVar, otherRole, var, lenient=True, inClass=inClass)
+          self.removeValue(thatVar, otherRole, self.varNames['self'], var)
+          self.endIf()
+
+        else:
+          # MANY-TO-MANY
+
+          #self.write('HERE4')
+          self.startLoop(thatVar, self.getValue(self.varNames['self'], role,
+           lenient=True, inClass=inClass), **self.collectionParams(role)
+          )
+          self.startIf(self.negate(self.isInCollection(
+           thatVar, **self.stdCollectionParams['objsToBeDeleted']))
+          )
+          self.getValue(thatVar, otherRole, var, lenient=True, inClass=inClass)
+          self.removeValue(thatVar, otherRole, self.varNames['self'], var)
+          self.endIf()
+          self.endLoop()
+
+    self.endBlock()
 
   ###########################################################################
 
@@ -853,6 +1024,18 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
     self.startLoop('obj', **self.stdCollectionParams['objsToBeDeleted'])
     self.stdCallFunc('obj', 'singleDelete')
+    self.endLoop()
+
+  ###########################################################################
+
+  ###########################################################################
+
+  def callDoUnDeletes(self, op, inClass):
+
+    # dd = copy.deepcopy(self.stdCollectionParams['objsToBeDeleted'])
+    # dd['collection'] = 'objsToBeUnDeleted'
+    self.startLoop('obj', **self.stdCollectionParams['objsToBeUnDeleted'])
+    self.stdCallFunc('obj', 'singleUnDelete')
     self.endLoop()
 
   ###########################################################################

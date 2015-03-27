@@ -136,6 +136,11 @@ operationData = {
  'targetTag':'container',
  'name':'delete',
  },
+ 'fullUnDelete':{
+ 'group':'delete',
+ 'targetTag':'container',
+ 'name':'_unDelete',
+ },
  'checkDelete':{
  'group':'delete',
  'targetTag':'container',
@@ -145,6 +150,11 @@ operationData = {
  'group':'delete',
  'targetTag':'container',
  'name':'_singleDelete',
+ },
+ 'singleUnDelete':{
+ 'group':'delete',
+ 'targetTag':'container',
+ 'name':'_singleUnDelete',
  },
  'checkValid':{
  'group':'query',
@@ -465,6 +475,30 @@ operationData['getByKey']['subOps'] = {
  },
 }
 
+# fullUnDelete
+operationData['fullUnDelete']['subOps'] = {
+ None:{
+  'opDocTemplate':
+  '''unDelete for %s:
+   reverses deletion for objects in objsToBeUnDeleted.
+   *Implementation function* - should be called only by API undo machinery.''',
+  'parameters':[
+   {'name':'objsToBeUnDeleted', 'direction':metaConstants.in_direction,
+    'parDocumentation':"Set of objects to be undeleted (input/ouput)",
+    'target':'memops.Implementation.MemopsObject',
+    'hicard':metaConstants.infinity, 'locard':0,
+    'isOrdered':False, 'isUnique':True,
+   },
+   {'name':'topObjectsToCheck', 'direction':metaConstants.in_direction,
+    'parDocumentation':"Set of TopObjects to check for permissions",
+    'target':'memops.Implementation.TopObject',
+    'hicard':metaConstants.infinity, 'locard':0,
+    'isOrdered':False, 'isUnique':True,
+   },
+  ],
+ },
+}
+
 # fullDelete
 operationData['fullDelete']['subOps'] = {
  None:{'parameters':[],},
@@ -479,6 +513,23 @@ operationData['singleDelete']['subOps'] = {
   'parameters':[
    {'name':'objsToBeDeleted', 'direction':metaConstants.in_direction,
     'parDocumentation':"Set of objects to be deleted",
+    'target':'memops.Implementation.MemopsObject',
+    'hicard':metaConstants.infinity, 'locard':0,
+    'isOrdered':False, 'isUnique':True,
+   },
+  ],
+ },
+}
+
+# singleUnDelete
+operationData['singleUnDelete']['subOps'] = {
+ None:{
+  'opDocTemplate':
+  '''singleUnDelete for %s:   undeletes objects
+*Implementation function* - will CORRUPT DATA if called outside the API undo function.''',
+  'parameters':[
+   {'name':'objsToBeUnDeleted', 'direction':metaConstants.in_direction,
+    'parDocumentation':"Set of objects to be undeleted",
     'target':'memops.Implementation.MemopsObject',
     'hicard':metaConstants.infinity, 'locard':0,
     'isOrdered':False, 'isUnique':True,

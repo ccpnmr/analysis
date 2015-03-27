@@ -2,6 +2,7 @@ from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import Util as metaUtil
 
+from ccpncore.memops.scripts.api.ApiGen import ApiGen
 from ccpncore.memops.scripts.api.PyApiGen import PyApiGen
 from ccpncore.memops.scripts.api.FileApiGen import FileApiGen
 MemopsError = MetaModel.MemopsError
@@ -541,6 +542,29 @@ except ImportError:
         self.startIf(self.varNames['notIsReading'])
         FileApiGen.writeConstructorCode(self, op, inClass)
         self.endIf()
+
+  ###########################################################################
+
+  ###########################################################################
+  # overrides ApiGen
+  def writePostConstructorCode(self, op, inClass):
+
+    self.writeNewline()
+
+    if inClass.postConstructorCodeStubs:
+      supertypes = inClass.getAllSupertypes()
+
+      if self.dataRoot in supertypes:
+        raise MemopsError("MemopsRoot may not have postConstructorCode")
+
+      elif self.topObject in supertypes:
+        raise MemopsError("TopObject may not have postConstructorCode")
+
+      else:
+        self.startIf(self.varNames['notIsReading'])
+        ApiGen.writePostonstructorCode(self, op, inClass)
+        self.endIf()
+
 
   ###########################################################################
 

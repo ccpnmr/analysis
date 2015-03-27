@@ -135,6 +135,10 @@ class FileApiGen(ApiGen, FileApiInterface):
       self.checkStoragesModifiable()
       self.endIf()
 
+    elif opType == 'fullUnDelete':
+
+      self.checkStoragesModifiable()
+
     elif opType in self.operationData.keys():
 
       # TBD: is there any way of knowing what storages should be checked?
@@ -836,6 +840,10 @@ class FileApiGen(ApiGen, FileApiInterface):
 
       self.setStoragesModified(loadFirst=True)
 
+    elif opType == 'fullUnDelete':
+
+      self.setStoragesModified()
+
     elif opType in self.operationData.keys():
 
       # TBD: is there anything to do??
@@ -1040,7 +1048,7 @@ class FileApiGen(ApiGen, FileApiInterface):
   ###########################################################################
   
   def writeAddChildToParent(self, childVar, parentVar, parentRole, 
-                            inClass=None):
+                            inClass=None, inUndo=False):
     
     dictVar = 'childrenDict'
     objKeyVar = 'objKey'
@@ -1061,7 +1069,8 @@ class FileApiGen(ApiGen, FileApiInterface):
       self.startBlock()
       
       self.writeNewline()
-      self.startIf(self.varNames['notIsReading'])
+      if not inUndo:
+        self.startIf(self.varNames['notIsReading'])
       self.setVar(dictVar, 
                   self.getMemoryValue(parentVar, otherRole),
                   self.dictType)
@@ -1092,7 +1101,8 @@ class FileApiGen(ApiGen, FileApiInterface):
                          self.varNames['self'])
       self.endIf()
       self.endIf()
-      self.endIf()
+      if not inUndo:
+        self.endIf()
       
       self.endBlock()
     
@@ -1458,6 +1468,20 @@ class FileApiGen(ApiGen, FileApiInterface):
     
     ApiGen.writeDelete(self, op, inClass)
     
+  ###########################################################################
+
+  ###########################################################################
+
+  # overrides ApiGen
+  def writeUnDelete(self, op, inClass):
+
+    # set 'topObject'
+    self.defineTopObject(inClass)
+    self.getImplLink(self.varNames['self'], 'topObject',
+                     self.varNames['topObject'], inClass)
+
+    ApiGen.writeUnDelete(self, op, inClass)
+
   ###########################################################################
 
   ###########################################################################
@@ -2056,6 +2080,61 @@ class FileApiGen(ApiGen, FileApiInterface):
           
     else:
       ApiGen.writeDoDeleteRole(self, op, inClass, role)
+
+  ###########################################################################
+
+  ###########################################################################
+
+  # overrides ApiGen
+  def writeDoUnDeleteRole(self, op, inClass, role):
+    """handle special case of links to parent
+    """
+
+    otherRole = role.otherRole
+    thatVar = role.baseName
+    dictVar = 'dd'
+    objKeyVar = 'objKey'
+
+    if role.hierarchy == metaConstants.parent_hierarchy:
+
+      if otherRole.locard != otherRole.hicard:
+        # maybe delete
+
+        self.startBlock()
+        # necessary to shield internal parameters from name clashes
+
+        self.getValue(self.varNames['self'], role, thatVar, lenient=True,
+                      inClass=inClass)
+        if (self.topObject not in otherRole.container.getAllSupertypes() and
+            self.topObject not in inClass.getAllSupertypes()):
+          self.startIf(self.negate(self.isInCollection(thatVar,
+                                                 **self.stdCollectionParams['objsToBeUnDeleted'])))
+
+        # NB - the comparisons are necessary as you might get a delete called
+        # inside an incomplete create, e.g. because the keys overlap
+
+        if otherRole.hicard == 1:
+          self.startIf(self.valueIsNone(self.getValue(thatVar, otherRole,
+                                                         lenient=True, inClass=inClass)))
+          self.setValue(thatVar, otherRole, self.varNames['self'])
+          self.elseIf()
+          self.raiseApiError("Error undoing delete of %s object %s link - backLink %s.%s is not None"
+                             % (inClass.name, role.name, otherRole.container.name, otherRole.name))
+
+          self.endIf()
+
+        else: # otherRole.hicard != 1
+          self.writeAddChildToParent(self.varNames['self'], thatVar, role, inClass=inClass,
+                                     inUndo=True)
+
+        if (self.topObject not in otherRole.container.getAllSupertypes() and
+            self.topObject not in inClass.getAllSupertypes()):
+          self.endIf()
+
+        self.endBlock()
+
+    else:
+      ApiGen.writeDoUnDeleteRole(self, op, inClass, role)
 
   ###########################################################################
 

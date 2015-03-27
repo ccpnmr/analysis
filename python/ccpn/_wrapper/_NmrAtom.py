@@ -35,7 +35,7 @@ class NmrAtom(AbstractWrapperObject):
   """Nmr Atom (corresponds to ApiResonance."""
   
   #: Short class name, for PID.
-  shortClassName = 'MA'
+  shortClassName = 'NA'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'atoms'

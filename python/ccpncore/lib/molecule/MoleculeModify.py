@@ -26,6 +26,7 @@ __version__ = "$Revision$"
 from ccpncore.util import Logging
 from ccpncore.memops.ApiError import ApiError
 from ccpncore.api.ccp.molecule import Molecule
+from ccpncore.util import Undo
 from ccpncore.util import CopyData
 from ccpncore.lib.chemComp import Io as chemCompIo
 
@@ -86,7 +87,7 @@ def addMolResidues(molecule, molType, sequence, startNum=1, isCyclic=False):
   if len(sequence) > 1 and molType in ('protein','DNA','RNA'):
     # linear polymer
     
-    seqInput = zip([molType]*len(sequence),sequence)
+    seqInput = list(zip([molType]*len(sequence),sequence))
     molResidues = makeLinearSequence(molecule, seqInput, seqCodeStart=startNum, isCyclic=isCyclic)
   
   else:
@@ -126,6 +127,7 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
   
   if len(sequence) < 2:
     raise ApiError("Sequence %s too short for function" % sequence)
+
   
   # set up
   project = molecule.root
@@ -141,7 +143,12 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
   
   root = molecule.root
   root.__dict__['override'] = True
-  
+
+  # Set up for undo
+  undo = molecule.root._undo
+  if undo is not None:
+    undo.increaseBlocking()
+
   ###if 1:
   try:
     # first residue
@@ -252,7 +259,13 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
     # reset override and set isModified
     root.__dict__['override'] = False
     molecule.__dict__['isModified'] = True
+    if undo is not None:
+      undo.decreaseBlocking()
 
+  if undo is not None and (molResidues or molResLinks):
+    undo.addItem(Undo.deleteAll, makeLinearSequence, undoArgs=(molResidues+molResLinks,),
+                 redoArgs=(molecule, sequence),
+                 redoKwargs = {'seqCodeStart':seqCodeStart, 'isCyclic':isCyclic})
     
   # call notifiers:
   for clazz, objs in (
@@ -273,7 +286,7 @@ def _getLinearChemCompData(project, molType, ccpCode, linking):
   """Descrn: Implementation function, specific for makeLinearSequence()
      Inputs: Project object, and desired molType, ccpCode, linking (all strings)
      Output: (dd,ll) tuple where dd is a dictionary for passing to the 
-              MolResidue crreation (as **dd), and ll is a list of the linkCodes
+              MolResidue creation (as **dd), and ll is a list of the linkCodes
               that are different from 'next' and 'prev'
   """
   

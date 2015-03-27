@@ -402,7 +402,7 @@ def getStdResNameMap(chemComps=None):
   names are ignored if clashing, unless the ChemComp is passed in.
   NEW code
   
-  NBNB TODO change so that D-Ala is prefered over Dal (etc.)
+  NBNB TODO change so that D-Ala is preferred over Dal (etc.)
 
   Input: List of ChemComps
 

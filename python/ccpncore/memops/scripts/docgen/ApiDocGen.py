@@ -97,12 +97,12 @@ MemopsError = MetaModel.MemopsError
 mandatoryAttributes = ('apiName', 'baseDirName', 'fileSuffix', 'scriptName')
 
 attrOpTypes = ['get', 'set', 'sorted', 'add', 'remove', 'findFirst', 'findAll']
-classOpTypes = ['fullDelete', 'checkValid', 'checkAllValid', 'getByKey', 
+classOpTypes = ['fullDelete', 'fullUnDelete', 'checkValid', 'checkAllValid', 'getByKey',
                 'getFullKey', 'getLocalKey', 'getAttr', 'setAttr', 'clone']
 newOpTypes = ['new']
 otherOpTypes = ['otherQuery', 'otherModify', 'otherCreate', 'otherDelete', 
                 'other']
-ignoreOpTypes = ['init', 'checkDelete', 'singleDelete']
+ignoreOpTypes = ['init', 'checkDelete', 'singleDelete', 'singleUnDelete']
 
 # check that not missing something and that do not have any extra
 usedOpTypes = list(attrOpTypes + classOpTypes + newOpTypes + otherOpTypes + ignoreOpTypes)
@@ -1338,11 +1338,12 @@ so, you should assume that these classes are not relevant to your purpose.
       self.writeEmphasisString('Abstract Class')
       self.writeBreak()
 
-    if self.handCodeKey in clazz.constructorCodeStubs:
+    if (self.handCodeKey in clazz.constructorCodeStubs or
+       self.handCodeKey in clazz.postConstructorCodeStubs):
       self.writeEmphasisString('The %s constructor includes non-standard actions.' % clazz.name)
 
-    if self.handCodeKey in clazz.destructorCodeStubs or \
-       self.handCodeKey in clazz.postDestructorCodeStubs:
+    if (self.handCodeKey in clazz.destructorCodeStubs or
+       self.handCodeKey in clazz.postDestructorCodeStubs):
       self.writeEmphasisString('The %s destructor includes non-standard actions.' % clazz.name)
 
     # write class documentation

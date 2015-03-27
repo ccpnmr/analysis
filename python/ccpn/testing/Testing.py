@@ -48,6 +48,10 @@ class Testing(unittest.TestCase):
     if projectPath:
       self.project = ccpnIo.openProject(projectPath)
 
+  def tearDown(self):
+    if self.project:
+      self.project.delete()
+
   def getSpectrum(self):
 
     if self.project is not None and hasattr(self, 'spectrumName'):

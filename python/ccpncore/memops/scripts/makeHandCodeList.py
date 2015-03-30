@@ -152,7 +152,6 @@ def main():
       dataObjTypes = modelPortal.dataObjTypesAlphabetic(package)
       for dataObjType in dataObjTypes:
         outputCodeStubs(fp, dataObjType, dataObjType.constructorCodeStubs, 'constructor')
-        outputCodeStubs(fp, dataObjType, dataObjType.postConstructorCodeStubs, 'postConstructor')
         outputConstraints(fp, dataObjType)
   
         attributes = metaUtil.sortByMethodCall(dataObjType.attributes, 'qualifiedName')
@@ -167,6 +166,8 @@ def main():
       for clazz in classes:
         outputCodeStubs(fp, clazz, clazz.constructorCodeStubs, 'constructor')
         outputCodeStubs(fp, clazz, clazz.destructorCodeStubs, 'destructor')
+        outputCodeStubs(fp, dataObjType, dataObjType.postConstructorCodeStubs, 'postConstructor')
+        outputCodeStubs(fp, dataObjType, dataObjType.postDestructorCodeStubs, 'postDestructor')
         outputConstraints(fp, clazz)
 
         attributes = metaUtil.sortByMethodCall(clazz.attributes, 'qualifiedName')

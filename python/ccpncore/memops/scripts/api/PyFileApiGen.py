@@ -562,7 +562,7 @@ except ImportError:
 
       else:
         self.startIf(self.varNames['notIsReading'])
-        ApiGen.writePostonstructorCode(self, op, inClass)
+        ApiGen.writePostConstructorCode(self, op, inClass)
         self.endIf()
 
 

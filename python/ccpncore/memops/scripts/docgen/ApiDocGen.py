@@ -2015,7 +2015,10 @@ so, you should assume that these classes are not relevant to your purpose.
       self.writeEndRow()
 
     # Special constructor code
-    ss = complexDataType.constructorCodeStubs.get(self.handCodeKey)
+    ss = (complexDataType.constructorCodeStubs.get(self.handCodeKey, ''))
+    if isinstance(complexDataType, MetaModel.MetaClass):
+      ss +=  complexDataType.postConstructorCodeStubs.get(self.handCodeKey, '')
+
     if ss:
       #print 'CONSTRUCTOR', complexDataType.qualifiedName()
       ss = self.normaliseString(ss)

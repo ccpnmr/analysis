@@ -406,7 +406,8 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.doNotifies(op, inClass)
 
     # add extra class postConstructor code, if any
-    self.writePostConstructorCode(op, inClass)
+    if isinstance(inClass, MetaModel.MetaClass):
+      self.writePostConstructorCode(op, inClass)
 
   ###########################################################################
 
@@ -488,9 +489,8 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
   ###########################################################################
 
   def writePostConstructorCode(self, op, inClass):
-  
-    if inClass.postConstructorCodeStubs:
-      self.writeHandCode(inClass, 'postConstructorCodeStubs')
+
+    self.writeHandCode(inClass, 'postConstructorCodeStubs')
 
   ###########################################################################
 
@@ -743,7 +743,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.setImplAttr(self.varNames['self'], 'isDeleted', True)
     
     # add extra class destructor code, if any
-    # TBD: this is for code that actuall changes data
+    # TBD: this is for code that actually changes data
     self.writeHandCode(inClass, 'postDestructorCodeStubs')
     
     parentRole = inClass.parentRole

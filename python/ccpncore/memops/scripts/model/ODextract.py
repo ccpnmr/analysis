@@ -314,6 +314,7 @@ allowedTags = {
   'destructorCode:':None,
   'postDestructorCode:':None,
   'partitionsChildren':(trueString,),
+  'specificImplementation':None,
   'isDerived':(trueString,),
  },
  'MetaAttribute':{
@@ -330,6 +331,8 @@ allowedTags = {
  'MetaPackage':{
   'shortName':None,
   'documentation':None,
+  'packageGroup':None,
+  'isReferenceData':(trueString,),
   'guid':None,
  },
  'MetaAssociation':{
@@ -382,7 +385,6 @@ allowedTags = {
   'documentation':None,
   'guid':None,
   'constructorCode:':None,
-  'postConstructorCode:':None,
  }
 }
 
@@ -434,6 +436,8 @@ def modelFromOd():
   modelFromOd will create an in-memory python model corresponding all toplevel
   packages and their contents
   """
+
+  print ('Starting modelFromOd')
   
   start = time.time()
   
@@ -713,8 +717,8 @@ if (result == null) {
   
   # complete is better, but too slow for constant use. 
   # To be tried every now and then
-  #rootPackage.checkValid(complete=True)
-  rootPackage.checkValid()
+  rootPackage.checkValid(complete=True)
+  #rootPackage.checkValid()
   
   # check operator and organisation for illegal characters
   for ss in  (odUser.operator, odUser.organisation):
@@ -752,7 +756,7 @@ def objectsFromOd(odPackage, container, dataTypeObjMap):
   
   name = odPackage.name
   guid = getGuid(odPackage)
-    
+
   tagVals, extraTaggedValues = taggedValuesFromOd(odPackage, 'MetaPackage')
   
   # set packageGroup to default, if necessary
@@ -890,10 +894,6 @@ def classFromOd(metaPackage, odClass):
   if dd:
     params['constructorCodeStubs'] = dd
 
-  dd = tagVals.get('postConstructorCode')
-  if dd:
-    params['postConstructorCodeStubs'] = dd
-  
   if odClass.getStereotype().name == 'DataType':
     # create DataObjType
     
@@ -917,7 +917,10 @@ def classFromOd(metaPackage, odClass):
     dd = tagVals.get('postDestructorCode')
     if dd:
       params['postDestructorCodeStubs'] = dd
-    
+    dd = tagVals.get('postConstructorCode')
+    if dd:
+      params['postConstructorCodeStubs'] = dd
+
     # create class
     clazz = MetaModel.MetaClass(**params)
  
@@ -1394,7 +1397,7 @@ def rolesFromOd(metaClass):
           # NBNB TBD
           # Link involving DataRootClass. 
           # It is OK the class on the other end is missing. Ignore
-          print("WARNING, link between %s and %s accesses unknown package"
+          print ("WARNING, link between %s and %s accesses unknown package"
            % classNames
           )
           skipAssociation = True
@@ -1809,6 +1812,8 @@ def taggedValuesFromOd(odElement, elementType):
   """ get tag:value dictionary for an od Element,
   checking against localAllowedVals dictionary
   """
+
+  print ("taggedValuesFromOd %s %s " % (elementType, odElement))
   
   # set up
   dd = {}
@@ -1829,7 +1834,7 @@ def taggedValuesFromOd(odElement, elementType):
     dd[tt.name] = tt.getValue()
   
   for kk,vv in dd.items():
-  
+
     if localAllowedVals.has_key(kk):
       allowedVals = localAllowedVals[kk]
       
@@ -1837,8 +1842,7 @@ def taggedValuesFromOd(odElement, elementType):
         taggedValues[kk] = vv
       
       else:
-        print 'localAllowedVals', localAllowedVals
-        raise MemopsError("Illegal tagged value %s:%s for %s %s" 
+        raise MemopsError("Illegal tagged value 1 %s:%s for %s %s"
                           % (kk, repr(vv), elementType, odElement.qualifiedName))
         
     else:
@@ -1846,7 +1850,7 @@ def taggedValuesFromOd(odElement, elementType):
       for specialTag in specialAllowedTags:
         if kk.startswith(specialTag):
           allowedVals = localAllowedVals[specialTag]
-      
+
           if allowedVals is None or vv in allowedVals:
             ss = specialTag[:-1]
             dd = taggedValues.get(ss)
@@ -1855,13 +1859,13 @@ def taggedValuesFromOd(odElement, elementType):
             dd[kk[len(specialTag):]] = vv
             
           else:
-            raise MemopsError("Illegal tagged value %s:%s for %s %s" 
+            raise MemopsError("Illegal tagged value 2 %s:%s for %s %s"
                               % (kk, repr(vv), elementType, odElement.qualifiedName))
           break
           
       else:
-        # pass on as tagged value
-        extraTaggedValues[kk] = vv
+        raise MemopsError("Illegal tagged value 3 %s:%s for %s %s"
+                          % (kk, repr(vv), elementType, odElement.qualifiedName))
   
   #
   return taggedValues, extraTaggedValues
@@ -2032,7 +2036,7 @@ def metaObjFromQualName(qname):
   
   except MemopsError:
     # no result. Raise error(using full qname)
-    print("ERROR: No MetaObject corresponding to %s can be found" 
+    print ("ERROR: No MetaObject corresponding to %s can be found"
      % qname
     )
     raise

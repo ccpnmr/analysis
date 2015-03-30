@@ -395,10 +395,10 @@ class XmlModelRead(TextWriter_py_2_1.TextWriter_py_2_1):
  
           else:
             # StringDict, List, or single link
- 
+
             pData = parameterData[tag]
             pType = pData.get('type')
- 
+
             if pType == 'StringDict':
               # StringDict - convert and set attribtue
               dd = {}
@@ -484,7 +484,7 @@ no href attribute found for %s element
         )
   
   def finaliseObjects(self):
-    """ set remaining paramters from _tempData
+    """ set remaining parameters from _tempData
     """ 
     
     objMap = self.objMap

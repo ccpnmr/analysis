@@ -535,7 +535,7 @@ For languages that do not allow multiple inheritance (possibly for all
   data. It is not executed if isReading==True or override == True.
   Syntax as for MetaOperation code stubs. It is illegal for abstract 
   ComplexDataTypes.
-  postConstructorCodeStubs work like constructorCodeStubs but are
+  postConstructorCode works like constructorCodeStubs but are
   executed at the end of the function, after notifiers and undo are called.
 
  - The MetaClass attribute destructorCodeStubs contains code stubs to
@@ -817,7 +817,7 @@ def compareElements(ee, ee2, ignoreImplicit=True, language='python'):
             if ss in dd:
               del dd[ss]
 
-      # compare values - languiage-specific codes
+      # compare values - language-specific codes
       if tag in languageCoded:
         if values[0][0].get(language) == values[1][0].get(language):
           continue
@@ -2129,10 +2129,7 @@ class ComplexDataType(AbstractDataType):
   """
   parameterData = metaUtil.semideepcopy(AbstractDataType.parameterData)
   parameterData['constructorCodeStubs'] = {'type':'StringDict', 'default':{}, }
-  parameterData['postConstructorCodeStubs'] = {'type':'StringDict', 'default':{}, }
-  parameterData['attributes'] = {'type':'con'
-                                        ''
-                                        'tent',
+  parameterData['attributes'] = {'type':'content',
                                  'namelist':'_ComplexDataType__attributeNames'}
   parameterData['operations'] = {'type':'content',
                                  'namelist':'_ComplexDataType__operationNames'}
@@ -2149,7 +2146,7 @@ class ComplexDataType(AbstractDataType):
     self.__attributeNames = []
     self.__operationNames = []
 
-  def addConstructorCodeStub(self, tag, value, stubName = 'constructorCodeStubs'):
+  def addConstructorCodeStub(self, tag, value):
     """ Add constructorCodeStub
     """
 
@@ -2163,17 +2160,18 @@ class ComplexDataType(AbstractDataType):
     if tag not in metaConstants.codeStubTags:
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
 
-    self._MetaModelElement__dataDict[stubName][tag] = value
+    self._MetaModelElement__dataDict['constructorCodeStubs'][tag] = value
 
-  def removeConstructorCodeStub(self, tag, stubName='ConstructorCodeStubs'):
+
+  def removeConstructorCodeStub(self, tag):
     """Remove existing ConstructorCodeStub
     """
 
-    if self._MetaModelElement__dataDict[stubName].get(tag,
+    if self._MetaModelElement__dataDict['constructorCodeStubs'].get(tag,
                                                                     sentinel) is not sentinel:
-      del self._MetaModelElement__dataDict[stubName][tag]
+      del self._MetaModelElement__dataDict['constructorCodeStubs'][tag]
     else:
-      raise MemopsError("%s has no %s %s " % (self, stubName, tag))
+      raise MemopsError("%s has no ConstructorCodeStub %s " % (self, tag))
 
   def inheritDown(self):
     """ Copy all contained elements and constraints down to subtypes
@@ -2262,7 +2260,7 @@ class ComplexDataType(AbstractDataType):
     AbstractDataType.checkValid(self, complete=complete)
 
     # check code
-    for tag in ('constructorCode', 'postConstructorCode'):
+    for tag in ('constructorCode',):
       code = self._MetaModelElement__dataDict['%sStubs'%tag]
       if code:
 
@@ -2662,6 +2660,7 @@ class MetaClass(ComplexDataType):
                  'getterFunc':'getKeyNames', 'default':[], },
      'destructorCodeStubs':{'type':'StringDict', 'default':{}, },
      'postDestructorCodeStubs':{'type':'StringDict', 'default':{}, },
+     'postConstructorCodeStubs':{'type':'StringDict', 'default':{}, },
      'roles':{'type':'content', 'namelist':'_MetaClass__roleNames', },
      'parentRole':{'getterFunc':'getParentRole', 'setterFunc':'unsettable',
                    'default':None}, })
@@ -2753,6 +2752,22 @@ class MetaClass(ComplexDataType):
     else:
       raise MemopsError("%s has no DestructorCodeStub %s " % (self, tag))
 
+  def addPostConstructorCodeStub(self, tag, value):
+    """ Add postConstructorCodeStub
+    """
+
+    if type(tag) != StringType:
+      raise MemopsError("%s codeStub tag %s is not a string" % (self, tag))
+
+    if type(value) != StringType:
+      raise MemopsError(
+        "%s codeStub %s value %s is not a string" % (self, tag, value))
+
+    if tag not in metaConstants.codeStubTags:
+      raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
+
+    self._MetaModelElement__dataDict['postConstructorCodeStubs'][tag] = value
+
   def addPostDestructorCodeStub(self, tag, value):
     """ Add destructorCodeStub
     """
@@ -2768,6 +2783,16 @@ class MetaClass(ComplexDataType):
       raise MemopsError("%s : unsupported codeStub tag %s " % (self, tag))
 
     self._MetaModelElement__dataDict['postDestructorCodeStubs'][tag] = value
+
+  def removePostConstructorCodeStub(self, tag):
+    """Remove existing PostConstructorCodeStub
+    """
+
+    if self._MetaModelElement__dataDict['postConstructorCodeStubs'].get(tag,
+                                                                    sentinel) is not sentinel:
+      del self._MetaModelElement__dataDict['postConstructorCodeStubs'][tag]
+    else:
+      raise MemopsError("%s has no PostConstructorCodeStub %s " % (self, tag))
 
   def removePostDestructorCodeStub(self, tag):
     """Remove existing DestructorCodeStub
@@ -3137,13 +3162,13 @@ class MetaClass(ComplexDataType):
             "%s is not abstract but has abstract role %s" % (self, role.name))
 
     # check code
-    for tag in ('destructorCodeStubs', 'postDestructorCodeStubs'):
+    for tag in ('destructorCodeStubs', 'postDestructorCodeStubs', 'postConstructorCodeStubs'):
       destructorCode = self._MetaModelElement__dataDict[tag]
       if destructorCode:
 
         if self.isAbstract:
           raise MemopsError(
-            "Abstract class %s has special destructor" % self)
+            "Abstract class %s has special destructor or constructor" % self)
 
         codeTags = metaConstants.codeStubTags
         for codeTag in destructorCode.keys():

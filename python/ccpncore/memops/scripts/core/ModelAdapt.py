@@ -320,7 +320,7 @@ class ModelAdapt(ModelTraverse):
   def processClass(self, clazz):
     """ processing actions for class
     """
-    
+
     # class operations - not related to elements
     self.addClassOperations(clazz)
     

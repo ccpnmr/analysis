@@ -165,7 +165,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     upBy2Icon = Icon('icons/contourBaseUp')
     upBy2Action.setIcon(upBy2Icon)
     upBy2Action.setToolTip('Raise Contour Base Level')
-    downBy2Action = spectrumUtilToolBar.addAction("*1.4", self.downBy2)
+    downBy2Action = spectrumUtilToolBar.addAction("/1.4", self.downBy2)
     downBy2Icon = Icon('icons/contourBaseDown')
     downBy2Action.setIcon(downBy2Icon)
     downBy2Action.setToolTip('Lower Contour Base Level')
@@ -182,14 +182,14 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   def upBy2(self):
 
     for spectrumView in self.spectrumViews:
-      spectrumView.spectrum.positiveContourBase*=spectrumView.spectrum.positiveContourFactor
-      spectrumView.spectrum.negativeContourBase*=spectrumView.spectrum.positiveContourFactor
+      spectrumView.spectrum.positiveContourBase *= spectrumView.spectrum.positiveContourFactor
+      spectrumView.spectrum.negativeContourBase *= spectrumView.spectrum.negativeContourFactor
 
   def downBy2(self):
 
     for spectrumView in self.spectrumViews:
-      spectrumView.spectrum.positiveContourBase/=spectrumView.spectrum.positiveContourFactor
-      spectrumView.spectrum.negativeContourBase/=spectrumView.spectrum.negativeContourFactor
+      spectrumView.spectrum.positiveContourBase /= spectrumView.spectrum.positiveContourFactor
+      spectrumView.spectrum.negativeContourBase /= spectrumView.spectrum.negativeContourFactor
 
   def addOne(self):
 
@@ -211,7 +211,18 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     newStrip.setMinimumWidth(200)
 
   def removeStrip(self):
-    pass
+    if len(self.strips) > 1:
+      strips = self.strips
+      layout = self.stripFrame.layout()
+      if self.stripDirection == 'Y':
+        item = layout.itemAtPosition(0, len(strips)-1)
+      elif self.stripDirection == 'X':
+        item = layout.itemAtPosition(len(strips)-1, 0)
+      layout.removeItem(item)
+      strip = strips[-1]
+      for spectrumView in self.spectrumViews:
+        spectrumView.removeSpectrumItem(strip)
+      self.deleteLater()
 
 
 

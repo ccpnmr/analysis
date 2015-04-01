@@ -137,7 +137,57 @@ class Strip(GuiStrip, AbstractWrapperObject):
 
   def moveTo(self, newIndex:int):
     """Move strip to index newIndex in orderedStrips"""
+    
+    currentIndex = self._wrappedData.index
+    if currentIndex == newIndex:
+      return
+      
+    # management of API objects
     self._wrappedData.moveTo(newIndex)
+    
+    # management of Qt layout
+    # TBD: need to soup up below with extra loop when have tiles
+    spectrumDisplay = self.spectrumDisplay
+    layout = spectrumDisplay.stripFrame.layout()
+    if not layout: # should always exist but play safe:
+      return
+      
+    items = []
+    if spectrumDisplay.stripDirection == 'Y':
+      if currentIndex < newIndex:
+        for n in range(currentIndex, newIndex+1):
+          item = layout.itemAtPosition(0, n)
+          items.append(item)
+          layout.removeItem(item)
+        items = items[1:] + [items[0]]
+        for m, item in enumerate(items):
+          layout.addItem(item, 0, m+currentIndex)
+      else:
+        for n in range(newIndex, currentIndex+1):
+          item = layout.itemAtPosition(0, n)
+          items.append(item)
+          layout.removeItem(item)
+        items = [items[-1]] + items[:-1]
+        for m, item in enumerate(items):
+          layout.addItem(item, 0, m+newIndex)
+
+    elif spectrumDisplay.stripDirection == 'X':
+      if currentIndex < newIndex:
+        for n in range(currentIndex, newIndex+1):
+          item = layout.itemAtPosition(n, 0)
+          items.append(item)
+          layout.removeItem(item)
+        items = items[1:] + [items[0]]
+        for m, item in enumerate(items):
+          layout.addItem(item, m+currentIndex, 0)
+      else:
+        for n in range(newIndex, currentIndex+1):
+          item = layout.itemAtPosition(n, 0)
+          items.append(item)
+          layout.removeItem(item)
+        items = [items[-1]] + items[:-1]
+        for m, item in enumerate(items):
+          layout.addItem(item, m+newIndex, 0)
 
   def resetAxisOrder(self):
     """Reset display to original axis order"""

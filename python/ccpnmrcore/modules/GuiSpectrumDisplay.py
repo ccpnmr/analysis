@@ -84,19 +84,11 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
   def fillToolBar(self):
 
-    self.spectrumUtilToolBar.addAction('+', self.addStrip)
-    self.spectrumUtilToolBar.addAction('-', self.removeStrip)
-
-
-  def addStrip(self):
-    pass  # TBD: should raise exception if not implemented in subclass
-
+    self.spectrumUtilToolBar.addAction('+', lambda: self.orderedStrips[0].clone()) # clone first strip
+    self.spectrumUtilToolBar.addAction('-', lambda: self.orderedStrips[-1].delete()) # remove last strip
 
   def dropCallback(self, pid):
     print('pid',pid)
-
-  def removeStrip(self):
-    pass
 
   def zoomYAll(self):
     for strip in self.strips:

@@ -68,23 +68,23 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
   #     guiStrip.addSpectrum(spectrum, guiSpectrumView)
 
   def fillToolBar(self):
-    # GuiSpectrumDisplay.fillToolBar(self)
-    spectrumUtilToolBar =  self.spectrumUtilToolBar
-    spectrumUtilToolBar.addAction('+', self.addStrip)
-    spectrumUtilToolBar.addAction('-', self.removeStrip)
-    autoScaleAction = self.spectrumUtilToolBar.addAction("AutoScale", self.zoomYAll)
+    GuiSpectrumDisplay.fillToolBar(self)
+    
+    spectrumUtilToolBar = self.spectrumUtilToolBar
+    
+    autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self.zoomYAll)
     autoScaleActionIcon = Icon('icons/zoom-fit-best')
     # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
     autoScaleAction.setIcon(autoScaleActionIcon)
     # autoScaleAction.setText("AutoScale")
-    fullZoomAction = self.spectrumUtilToolBar.addAction("Full", self.zoomXAll)
+    fullZoomAction = spectrumUtilToolBar.addAction("Full", self.zoomXAll)
     fullZoomIcon = Icon('icons/zoom-full')
     fullZoomAction.setIcon(fullZoomIcon)
-    storeZoomAction = self.spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
+    storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
     storeZoomIcon = Icon('icons/zoom-store')
     storeZoomAction.setIcon(storeZoomIcon)
     storeZoomAction.setToolTip('Store Zoom')
-    restoreZoomAction = self.spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
+    restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
     restoreZoomIcon = Icon('icons/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
@@ -125,11 +125,3 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     dock.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
     # print(spinSystemSideLabel.paintEvent())
     spinSystemSideLabel.setFixedWidth(30)
-
-  def addStrip(self):
-    # self.stripNumber+=1
-    newStrip = self.strips[0].clone()
-    newStrip.setMinimumWidth(200)
-
-  def removeStrip(self):
-    self.deleteLater()

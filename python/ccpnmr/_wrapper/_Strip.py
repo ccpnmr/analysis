@@ -124,16 +124,45 @@ class Strip(GuiStrip, AbstractWrapperObject):
   def delete(self):
     """Overrides normal delete"""
     ccpnStrip = self._wrappedData
-    if len(ccpnStrip.spectrumDisplay.strips) > 1:
-
+    n = len(ccpnStrip.spectrumDisplay.strips)
+    if n > 1:
+      index = ccpnStrip.index
+      spectrumDisplay = self.spectrumDisplay
+      layout = spectrumDisplay.stripFrame.layout()
+      if layout: # should always be the case but play safe
+        # remove the item for this strip from the layout
+        # and shuffle "higher" items down in the layout
+        # (by removing them and then adding them back in)
+        items = []
+        if spectrumDisplay.stripDirection == 'Y':
+          for m in range(index, n):
+            item = layout.itemAtPosition(0, m)
+            if m > index:
+              items.append(item)
+            layout.removeItem(item)
+          for m, item in enumerate(items):
+            layout.addItem(item, 0, m+index)
+        elif spectrumDisplay.stripDirection == 'X':
+          for m in range(index, n):
+            item = layout.itemAtPosition(m, 0)
+            if m > index:
+              items.append(item)
+            layout.removeItem(item)
+          for m, item in enumerate(items):
+            layout.addItem(item, m+index, 0)
       ccpnStrip.delete()
+      #self.deleteLater()  # Qt call, is this needed???
+      
     else:
       raise  ValueError("The last strip in a display cannot be deleted")
 
   #CCPN functions
   def clone(self):
     """create new strip that duplicates this one, appending it at the end"""
-    return self._project._data2Obj.get(self._wrappedData.clone())
+    newStrip = self._project._data2Obj.get(self._wrappedData.clone())
+    newStrip.setMinimumWidth(200)
+    
+    return newStrip
 
   def moveTo(self, newIndex:int):
     """Move strip to index newIndex in orderedStrips"""

@@ -598,8 +598,6 @@ class Spectrum(AbstractWrapperObject):
     for expDim in self._wrappedData.experiment.expDims:
       if expDim.findFirstExpDimRef(axisCode=None) is not None:
         self._wrappedData.experiment.resetAxisCodes()
-        # in future can do:
-        # self._wrappedData.experiment.resetAxisCodes()
         break
 
     result = []

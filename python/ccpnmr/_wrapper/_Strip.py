@@ -123,6 +123,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
 
   def delete(self):
     """Overrides normal delete"""
+
     ccpnStrip = self._wrappedData
     n = len(ccpnStrip.spectrumDisplay.strips)
     if n > 1:
@@ -150,6 +151,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
             layout.removeItem(item)
           for m, item in enumerate(items):
             layout.addItem(item, m+index, 0)
+
       ccpnStrip.delete()
       #self.deleteLater()  # Qt call, is this needed???
       
@@ -160,6 +162,8 @@ class Strip(GuiStrip, AbstractWrapperObject):
   def clone(self):
     """create new strip that duplicates this one, appending it at the end"""
     newStrip = self._project._data2Obj.get(self._wrappedData.clone())
+
+    # NBNB TBD Why is this necessary? Presumably it should be the same width as the source?
     newStrip.setMinimumWidth(200)
     
     return newStrip

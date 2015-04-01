@@ -1812,8 +1812,6 @@ def taggedValuesFromOd(odElement, elementType):
   """ get tag:value dictionary for an od Element,
   checking against localAllowedVals dictionary
   """
-
-  print ("taggedValuesFromOd %s %s " % (elementType, odElement))
   
   # set up
   dd = {}
@@ -1849,6 +1847,7 @@ def taggedValuesFromOd(odElement, elementType):
       # check for special tags
       for specialTag in specialAllowedTags:
         if kk.startswith(specialTag):
+
           allowedVals = localAllowedVals[specialTag]
 
           if allowedVals is None or vv in allowedVals:

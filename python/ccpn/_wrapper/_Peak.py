@@ -250,6 +250,39 @@ class Peak(AbstractWrapperObject):
     # set assignments
     apiPeak.setAssignments(resonances)
 
+  def addAssignment(self, value:(NmrAtom,)):
+    """Add a peak assignment - a list of one NamrAtom or NmrAtom or pid for each dimension"""
+
+    if len(value) != self._wrappedData.peakList.numDim:
+      raise ValueError("Length of assignmetn value %s does not match peak dimensionality %s "
+      % (value, self._wrappedData.peakList.numDim))
+
+    assignedNmrAtoms = list(self.assignedNmrAtoms)
+    assignedNmrAtoms.append(value)
+    self.assignedNmrAtoms = assignedNmrAtoms
+
+  def assignDimension(self, axisCode, value):
+    """Assign dimension axisCode to Nmratom or NmrAtom.pid value
+    NBNB TBD add integer axisCode? Should it be index or cim number?"""
+
+    axisCodes = self._parent._parent.axisCodes
+    try:
+      index = axisCodes.index(axisCode)
+    except ValueError:
+      raise ValueError("axisCode %s not recognised" % axisCode)
+
+    if value is None:
+      value = []
+    elif isinstance(value, str):
+      value = [self.getById(value)]
+    else:
+      vaue = [value]
+
+    dimensionNmrAtoms = list(self.dimensionNmrAtoms)
+    dimensionNmrAtoms[index] = value
+    self.dimensionNmrAtoms = dimensionNmrAtoms
+
+
   # # NBNB TBD do we need this duplication, or it it enough to return the NmrAtom objecss?
   # @property
   # def dimensionAssignments(self) -> tuple:

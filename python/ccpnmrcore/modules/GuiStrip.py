@@ -196,10 +196,11 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
       self.beingUpdated = False
 
   def addSpinSystemLabel(self):
-    self.spinSystemLabel = Label(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
+    self.spinSystemLabel = Label(self.stripFrame, grid=(2, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                  hAlign='center', dragDrop=True, pid=self.pid)
+    self.spinSystemLabel.setContentsMargins(0, 0, 0, 0)
     self.spinSystemLabel.setText("Spin systems shown here")
-    self.spinSystemLabel.setFixedHeight(30)
+    self.spinSystemLabel.setFixedHeight(15)
     # self.spinSystemLabel.pid = self.pid
     # print(self.pid)lo
 
@@ -321,18 +322,5 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     if isinstance(dropObject, Spectrum):
       self.displaySpectrum(dropObject)
-
-    else:
-      if self._parent.assignmentDirection == 'i-1':
-
-        self.guiSpectrumDisplay.stripFrame.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.guiSpectrumDisplay.copyStrip(dropObject, newIndex=0)
-
-      else:
-        print('i+1')
-        self.guiSpectrumDisplay.stripFrame.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.guiSpectrumDisplay.copyStrip(dropObject)
-
-    # self.guiSpectrumDisplay.regridStrips()
 
         

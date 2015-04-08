@@ -37,6 +37,7 @@ from ccpncore.gui.TextEditor import TextEditor
 from ccpnmrcore.gui.Assigner import Assigner
 from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
+from ccpnmrcore.modules.ParassignPeakTable import ParassignModule
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
@@ -452,9 +453,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.dockArea.addDock(peakList, position='bottom')
 
+  def showParassignPeakTable(self, position='left', relativeTo=None):
+    peakList = ParassignModule(name="Peak Table", peakLists=self.project.peakLists)
+    if relativeTo is not None:
+      self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
+    else:
+      self.dockArea.addDock(peakList, position='bottom')
+
   def showBackboneAssignmentModule(self, position=None, relativeTo=None, assigner=None, hsqcDisplay=None):
-    module = BackboneAssignmentModule(self._project, position, relativeTo, assigner, hsqcDisplay)
-    self.dockArea.addDock(module)
+    self.bbModule = BackboneAssignmentModule(self._project, position, relativeTo, assigner, hsqcDisplay)
+    self.dockArea.addDock(self.bbModule)
 
 
   def saveProjectAs(self):

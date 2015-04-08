@@ -34,6 +34,7 @@ class Label(QtGui.QLabel, Base):
     Base.__init__(self, **kw)
     self.dragDrop = dragDrop
     self.pid = pid
+    self.setAcceptDrops(True)
 
     if textColor:
       self.setStyleSheet('QLabel {color: %s;}' % textColor)
@@ -73,6 +74,35 @@ class Label(QtGui.QLabel, Base):
         self.close()
     else:
         self.show()
+
+  def dragEnterEvent(self, event):
+    event.accept()
+  #   itemData = QtCore.QByteArray(self.pid)
+  #   mimeData = QtCore.QMimeData()
+  #   mimeData.setData('application/x-strip', itemData)
+  #
+  def dragLeaveEvent(self, event):
+    event.accept()
+
+  def dropEvent(self, event):
+    if event.mimeData().hasFormat('application/x-strip'):
+      data = event.mimeData().data('application/x-strip')
+      pidData = str(data.data(),encoding='utf-8')
+      pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
+      actualPid = ''.join(pidData)
+      wrapperObject = self.parent().getById(actualPid)
+
+      if event.keyboardModifiers() & QtCore.Qt.ShiftModifier:
+
+        sinkIndex = self.parent().getById(self.pid)._wrappedData.index
+
+      else:
+
+        sinkIndex = self.parent().getById(self.pid)._wrappedData.index + 1
+
+      wrapperObject.moveTo(sinkIndex)
+
+
 
 if __name__ == '__main__':
 

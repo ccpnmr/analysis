@@ -54,7 +54,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
   def __init__(self):
     GuiModule.__init__(self)
-    DropBase.__init__(self, self._appBase, self.dropCallback)
+    # DropBase.__init__(self, self._appBase, self.dropCallback)
     self.setAcceptDrops(True)
     self.spectrumToolBar = ToolBar(self.dock)#, grid=(0, 0), gridSpan=(1, 2))
     self.dock.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
@@ -77,6 +77,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # self.dock.addWidget(self.scrollArea, 1, 0, 1, 4)
     self.scrollArea.setWidgetResizable(True)
     self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0), appBase=self._appBase)
+    # self.stripFrame.layout().setContentsMargins(0, 0, 2, 0)
     self.stripFrame.setAcceptDrops(True)
     self.assignmentDirection = 'i-1'
 
@@ -86,9 +87,6 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
     self.spectrumUtilToolBar.addAction('+', lambda: self.orderedStrips[0].clone()) # clone first strip
     self.spectrumUtilToolBar.addAction('-', lambda: self.orderedStrips[-1].delete()) # remove last strip
-
-  def dropCallback(self, pid):
-    print('pid',pid)
 
   def zoomYAll(self):
     for strip in self.strips:

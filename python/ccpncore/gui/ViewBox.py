@@ -98,6 +98,7 @@ class ViewBox(pg.ViewBox):
               event.modifiers() & QtCore.Qt.ControlModifier) and not (
               event.modifiers() & QtCore.Qt.ShiftModifier):
       event.accept()
+      # print(event)
 
 
 

@@ -324,9 +324,8 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
 
 class PeakNd(QtGui.QGraphicsItem):
 
-  def __init__(self, strip, peak):
+  def __init__(self, scene, parent, peak):
 
-    scene = strip.plotWidget.scene()
     QtGui.QGraphicsItem.__init__(self, scene=scene)
 
     # self.glWidget = peakLayer.glWidget
@@ -335,8 +334,8 @@ class PeakNd(QtGui.QGraphicsItem):
     # self.spectrumWindow = spectrumWindow
     # self.panel = spectrumWindow.panel
     self.peakList = peak._parent
-    self.strip = strip
-    self.parent = strip.plotWidget
+    # self.strip = strip
+    self.parent = parent
     self.spectrum = self.peakList.spectrum
     self.setCacheMode(self.NoCache)
     self.setFlags(self.ItemIgnoresTransformations)
@@ -356,8 +355,9 @@ class PeakNd(QtGui.QGraphicsItem):
     # self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
     # self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
     self.drawData = (hz, sz)#, QtCore.QRectF(-hz, -hz, sz, sz))
-    self.annotation = PeakNdAnnotation(self, scene)
     self.setPos(xPpm, yPpm)
+    self.annotation = PeakNdAnnotation(scene, self)
+    print(self.annotation)
     # self.inPlane = self.isInPlane()
 
 
@@ -443,68 +443,77 @@ FONT_METRIC = QtGui.QFontMetricsF(FONT)
 NULL_COLOR = QtGui.QColor()
 NULL_RECT = QtCore.QRectF()
 
-class PeakNdAnnotation(QtGui.QGraphicsItem):
+class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
-  def __init__(self, peakItem, scene):
+  def __init__(self, scene, peakItem, text):
 
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
-
+    QtGui.QGraphicsSimpleTextItem.__init__(self, scene=scene)
+    print('annotating')
     self.setParentItem(peakItem)
-    self.setCacheMode(self.DeviceCoordinateCache)
+    # self.setCacheMode(self.DeviceCoordinateCache)
     self.setFlags(self.ItemIgnoresTransformations)
-    self.hover = False
-    self.setAcceptHoverEvents(True)
-    self.color = NULL_COLOR
-    self.brush = NULL_COLOR
+    # self.hover = False
+    # self.setAcceptHoverEvents(True)
+    # self.color = NULL_COLOR
+    # self.brush = NULL_COLOR
     self.peakItem = peakItem
-    self.text = '-, -, -'
-    self.setZValue(-1)
-    self.bbox = NULL_RECT
+    self.text = text
+    # self.setZValue(-1)
+    # self.bbox = NULL_RECT
     self.setPos(12, -12)
-    self.show()
+    # self.show()
+    # scene.addItem(self)
 
-  def hoverEnterEvent(self, event):
-
-    self.hover = True
-    self.update()
-
-  def hoverLeaveEvent(self, event):
-
-    self.hover = False
-    self.update()
+  # def hoverEnterEvent(self, event):
+  #
+  #   self.hover = True
+  #   self.update()
+  #
+  # def hoverLeaveEvent(self, event):
+  #
+  #   self.hover = False
+  #   self.update()
 
   def boundingRect(self):
 
     return self.bbox
 
-  def syncPeak(self, text, color):
-
-    self.color = color
-    self.text = text
-    rect = FONT_METRIC.boundingRect(self.text)
-    self.bbox = rect.adjusted(-2,-2, 4, 2)
-
-    r,g,b,a = color.getRgb()
-    self.brush = QtGui.QColor('white')
-    self.update()
+  # def syncPeak(self, text, color):
+  #
+  #   self.color = color
+  #   self.text = text
+  #   rect = FONT_METRIC.boundingRect(self.text)
+  #   self.bbox = rect.adjusted(-2,-2, 4, 2)
+  #
+  #   r,g,b,a = color.getRgb()
+  #   self.brush = QtGui.QColor('white')
+  #   self.update()
 
   def paint(self, painter, option, widget):
 
-    if self.text:
-      painter.setFont(FONT)
 
-      if self.hover:
-        self.setZValue(1)
-        # r, g, b, a = QtGui.QColor('white')
-        painter.setBrush(QtGui.QColor('white'))
-        painter.setPen(QtGui.QColor('white'))
-        painter.drawRect(self.bbox)
+    print('here')
 
-      else:
-        painter.setPen(QtGui.QColor('white'))
-        self.setZValue(0)
+    QtGui.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
 
-      painter.drawText(0, 0, self.text)
+
+    # if self.text:
+    #   if self.peakItem.isInPlane():
+    #     painter.setFont(FONT)
+    #     print('painting', self.text)
+    #     # if self.hover:
+    #     self.setZValue(1)
+    #     # r, g, b, a = QtGui.QColor('white')
+    #     painter.setBrush(QtGui.QColor('white'))
+    #     painter.setPen(QtGui.QColor('white'))
+    #     painter.drawRect(self.bbox)
+    #
+    #     # else:
+    #     #   painter.setPen(QtGui.QColor('white'))
+    #     #   self.setZValue(0)
+    #
+    #     painter.drawText(0, 0, self.text)
+    #     print('textDrawn')
 # class PeakItem(QtGui.QGraphicsItem):
 #
 #   def __init__(self, peak):

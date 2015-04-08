@@ -31,6 +31,7 @@ class SideBar(QtGui.QTreeWidget):
     self.header().hide()
     self.setDragEnabled(True)
     self.acceptDrops()
+    self.setFixedWidth(180)
     # self.itemDoubleClicked.connect(self.test)
     self.setDropIndicatorShown(True)
     self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
@@ -42,6 +43,11 @@ class SideBar(QtGui.QTreeWidget):
     self.restraintsItem.setText(0, "Restraint Lists")
     self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.structuresItem.setText(0, "Structures")
+    self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.samplesItem.setText(0, "Samples")
+    self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.notesItem.setText(0, "Notes")
+    self.parent = parent
     self.parent = parent
 
 
@@ -75,6 +81,8 @@ class SideBar(QtGui.QTreeWidget):
     # empty = 'empty'
     self.restraintsItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
     self.structuresItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
+    self.samplesItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
+    self.notesItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
     # newItem3 = QtGui.QTreeWidgetItem(self.restraintsItem)
     # newItem2 = self.addItem(self.structuresItem, empty)
     # newItem3 = self.addItem(self.structuresItem, empty)

@@ -53,7 +53,6 @@ class DropBase(GuiBase):
       print('actualPid',actualPid)
       wrapperObject = self.getById(actualPid)
       print(wrapperObject, 'wrapper obj')
-      # print('probablyStrip')
       self.dropCallback(wrapperObject)
     else:
       data = event.mimeData().data('application/x-qabstractitemmodeldatalist')

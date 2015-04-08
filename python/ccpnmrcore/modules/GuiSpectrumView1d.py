@@ -65,7 +65,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
       self.plot  = strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
       self.plot.curve.setClickable(True)
       self.plot.sigClicked.connect(self.clicked)
-    spectrumViewButton = ToolButton(self.spectrumDisplay, self.spectrum.sliceColour, self)
+    spectrumViewButton = ToolButton(self.spectrumDisplay, self)
 
 
 

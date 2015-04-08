@@ -160,6 +160,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.spectrumItems = {} # strip --> associated QtGui.QGraphicsItem 
     for strip in self.strips:
       self.addSpectrumItem(strip)
+
+    self.spectrumViewButton = ToolButton(self.spectrumDisplay, self)
+
+    for strip in self.strips:
+       item = self.spectrumItems[strip]
+       print(item)
+       self.newAction.toggled.connect(item.setVisible)
       #if self not in strip.plotWidget.items():
         # newItem = self
       #  strip.plotWidget.scene().addItem(self)

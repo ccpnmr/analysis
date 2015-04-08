@@ -28,8 +28,10 @@ from PyQt4 import QtGui, QtCore
 import pyqtgraph as pg
 
 import math
+import munkres
 
 from ccpncore.gui.Label import Label
+from ccpncore.gui.ListWidget import ListWidget
 from ccpncore.gui.PulldownList import PulldownList
 
 from ccpnmrcore.modules.PeakTable import PeakListSimple
@@ -55,8 +57,9 @@ class BackboneAssignmentModule(PeakListSimple):
     self.matchDisplayPulldown.setData(displays)
     self.queryLabel = Label(self, text='Query Spectra', grid=(5, 0))
     self.matchLabel = Label(self, text='Match Spectra', grid=(5, 2))
-    self.queryList = QtGui.QListWidget(self)
-    self.matchList = QtGui.QListWidget(self)
+    self.queryList = ListWidget(self, grid=(6, 0), gridSpan=(1, 2))
+    self.matchList = ListWidget(self, grid=(6, 2), gridSpan=(1, 2))
+    # QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Delete), self, self.queryList.removeItem)
     self.layout.addWidget(self.queryList, 6, 0, 1, 2)
     self.layout.addWidget(self.matchList, 6, 2, 1, 2)
 
@@ -69,21 +72,15 @@ class BackboneAssignmentModule(PeakListSimple):
     ### determine query and match windows
     queryWindow = self.project.getById(self.queryDisplayPulldown.currentText())
     matchWindow = self.project.getById(self.matchDisplayPulldown.currentText())
-
     positions = peak.position
     self.hsqcDisplay.strips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
     self.assigner.addResidue(name=peak.dimensionNmrAtoms[0][0]._parent.id)
-    # print(queryWindow.strips[-1].spinSystemLabel.text())
     if self.assigner.direction == 'left':
       queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
       queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
       line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
       line.setPos(QtCore.QPointF( positions[0], 0))
       queryWindow.orderedStrips[0].plotWidget.addItem(line)
-      # queryWindow.strips[-1].spinSystemLabel.update()
-      # print(queryWindow.strips[-1].spinSystemLabel.text())
-      # position = peak.sortedPeakDims()[1].value
-      # position1 = peak.sortedPeakDims()[0].value
     else:
       queryWindow.orderedStrips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
       queryWindow.orderedStrips[-1].changeZPlane(position=positions[1])
@@ -91,51 +88,80 @@ class BackboneAssignmentModule(PeakListSimple):
       line.setPos(QtCore.QPointF( positions[0], 0))
       queryWindow.orderedStrips[-1].plotWidget.addItem(line)
     line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    line2.setPos(QtCore.QPointF( positions[0], 0))
+    line2.setPos(QtCore.QPointF(positions[0], 0))
     line3 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
     line3.setPos(QtCore.QPointF(0, positions[1]))
     self.hsqcDisplay.strips[0].plotWidget.addItem(line2)
     self.hsqcDisplay.strips[0].plotWidget.addItem(line3)
-    # for index in range(self.queryList.count()):
-    #   queryPeakLists.append(self.project.getById(self.queryList.item(index).text()).peakLists[0])
-    #
-    # for index in range(self.matchList.count()):
-    #   matchPeakLists.append(self.project.getById(self.matchList.item(index).text()).peakLists[0])
+    queryAtom = self.project.getById(peak.dimensionNmrAtoms[0][0].pid)
 
 
+    assignedPeaks = queryAtom.assignedPeaks
 
-    # for peak1, peak2 in zip(queryPeaks, queryPeaks[1:]):
-    #   print(abs(peak1.position[1] - peak2.position[1]))
-    #     # print(peak1)
+    queryPeaks = []
 
-    # matchingNHs = []
-    # for peakList in matchPeakLists:
-    #   for peak2 in peakList.peaks:
-    #     for peak in queryPeaks:
-    #       if abs(peak2.position[1] - peak.position[1]) < 0.02:
-    #         list1 = [peak2.position, peakList]
-    #         matchingNHs.append(peak2.position[2])
-    #
-    # nPositions = set()
-    # for x, y in zip(sorted(matchingNHs), sorted(matchingNHs)[1:]):
-    #   if abs(x - y) < 0.02:
-    #     nPositions.add(x)
-    # for position in nPositions:
-    #     newStrip = matchWindow.strips[-1].clone()
-    #     newStrip.changeZPlane(position=position)
+    for i in range(self.queryList.count()):
+
+      for peak in assignedPeaks[0]:
+        if peak._parent.pid == self.queryList.item(i).text():
+          queryPeaks.append(peak)
+          line2 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+          line2.setPos(QtCore.QPointF(0, peak.position[1]))
+          queryWindow.orderedStrips[-1].plotWidget.addItem(line2)
+
+
+    matchPeakLists = [self.project.getById(self.matchList.item(i).text()) for i in range(self.matchList.count())]
+
+    assignMatrix = self.buildAssignmentMatrix(queryPeaks, matchPeakLists)
+
+    indices = self.hungarian(assignMatrix)
+
+    assignedSet = set()
+    peaksSet = set()
+
+
+    for index in indices:
+      assignedSet.add(matchPeakLists[0].peaks[index[1]].dimensionNmrAtoms[0][0]._parent)
+      peaksSet.add(matchPeakLists[0].peaks[index[1]].position)
+
+    assignmentList = list(assignedSet)
+    peaksList = list(peaksSet)
+
+    matchWindow.strips[0].changeZPlane(position=peaksList[0][2])
+    line4 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    line5 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    line6 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    line4.setPos(pg.Point(QtCore.QPointF(peaksList[0][0], 0)))
+    line5.setPos(pg.Point(QtCore.QPointF(0, peaksList[0][1])))
+    line6.setPos(pg.Point(QtCore.QPointF(0, peaksList[1][1])))
+    matchWindow.strips[0].plotWidget.addItem(line4)
+    matchWindow.strips[0].plotWidget.addItem(line5)
+    matchWindow.strips[0].plotWidget.addItem(line6)
+
 
   def qScore(self, query, match):
 
-    math.sqrt(((query-match)**2)/((query+match)**2))
+    return math.sqrt(((query-match)**2)/((query+match)**2))
 
+
+
+  def hungarian(self, matrix):
+    m = munkres.Munkres()
+    indices = m.compute(matrix)
+    return indices
 
   def buildAssignmentMatrix(self, queryPeaks, matchPeakLists):
-    pass
 
+    matrix = []
 
+    for qPeak in queryPeaks:
+      matrix.append([])
+      for peakList in matchPeakLists:
+        for mPeak in peakList.peaks:
+          score = self.qScore(qPeak.position[1], mPeak.position[1])
+          matrix[-1].append(score)
 
-
-
+    return matrix
 
 
   def selectQuerySpectrum(self, item):

@@ -93,7 +93,7 @@ class GuiStrip1d(GuiStrip):
     peakItems = []
     for peak in peakList.peaks:
      # peakItem =
-     peakItem = Peak1d(self.plotWidget.scene(), self.plotWidget, peak, peakList)
+     peakItem = PeakLayer(self.plotWidget.scene(), self.plotWidget, peakList)
      print(peakItem.pos())
     #   peakItem = PeakItem(peak)
     #   self.plotWidget.addItem(peakItem)

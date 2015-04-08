@@ -85,8 +85,8 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
   def fillToolBar(self):
 
-    self.spectrumUtilToolBar.addAction('+', lambda: self.orderedStrips[0].clone()) # clone first strip
-    self.spectrumUtilToolBar.addAction('-', lambda: self.orderedStrips[-1].delete()) # remove last strip
+    self.spectrumUtilToolBar.addAction('+', lambda self=self: self.orderedStrips[0].clone()) # clone first strip
+    self.spectrumUtilToolBar.addAction('-', lambda self=self: self.orderedStrips[-1].delete()) # remove last strip
 
   def zoomYAll(self):
     for strip in self.strips:

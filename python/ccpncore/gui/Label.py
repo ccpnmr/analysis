@@ -92,6 +92,9 @@ class Label(QtGui.QLabel, Base):
       actualPid = ''.join(pidData)
       wrapperObject = self.parent().getById(actualPid)
 
+      print(wrapperObject.pid.id)
+      print(self.pid.id)
+
       if event.keyboardModifiers() & QtCore.Qt.ShiftModifier:
 
         sinkIndex = self.parent().getById(self.pid)._wrappedData.index
@@ -100,7 +103,11 @@ class Label(QtGui.QLabel, Base):
 
         sinkIndex = self.parent().getById(self.pid)._wrappedData.index + 1
 
-      wrapperObject.moveTo(sinkIndex)
+      if wrapperObject.pid.id == self.pid.id:
+        wrapperObject.moveTo(sinkIndex)
+      else:
+        self.parent().guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
+        # wrapperObject.moveTo(sinkIndex, newSpectrumDisplay=self.parent())
 
 
 

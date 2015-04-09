@@ -178,7 +178,7 @@ class Peak1d(QtGui.QGraphicsItem):
 
     # group.addToGroup(self)
   #
-  def mousePressEvent(self, event):
+  def mouseDoubleClickEvent(self, event):
 
     self.press = True
     self.hover = True

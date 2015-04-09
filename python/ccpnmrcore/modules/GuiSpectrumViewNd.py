@@ -221,6 +221,9 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     self.xyDataDimsPrev = None
     self.posDisplayLists = []
     self.negDisplayLists = []
+    
+    #for peakListView in spectrumView._wrappedData.sortedPeakListViews():
+    #  peakListItem = GuiPeakListItemNd(self, peakListView)
  
   ##### override of superclass function
 
@@ -265,8 +268,8 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       xyDataDims = self.spectrumView.apiSpectrumView.orderedDataDims[:2]
       #xTranslate, xScale = self.getTranslateScale(guiStrip, xyDataDims[0].dim-1) # -1 because API dims start at 1
       #yTranslate, yScale = self.getTranslateScale(guiStrip, xyDataDims[1].dim-1)
-      xTranslate, xScale = self.getTranslateScale(xyDataDims[0].dim-1) # -1 because API dims start at 1
-      yTranslate, yScale = self.getTranslateScale(xyDataDims[1].dim-1)
+      xTranslate, xScale = self.getTranslateScale(xyDataDims[0].dim-1, 0) # -1 because API dims start at 1
+      yTranslate, yScale = self.getTranslateScale(xyDataDims[1].dim-1, 1)
       
       GL.glLoadIdentity()
       GL.glPushMatrix()
@@ -438,16 +441,16 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
   """
   
   #def getTranslateScale(self, guiStrip, dim):
-  def getTranslateScale(self, dim):
+  def getTranslateScale(self, dim, ind):
         
     strip = self.strip
     plotWidget = strip.plotWidget
     plotItem = plotWidget.plotItem
     viewBox = strip.viewBox
     viewRegion = plotWidget.viewRange()
-    region1, region0 = viewRegion[dim]  # TBD: relies on axes being backwards
+    region1, region0 = viewRegion[ind]  # TBD: relies on axes being backwards
 
-    if dim == 0:
+    if ind == 0:
       pixelCount = plotWidget.width()
       pixelViewBox0 = plotItem.getAxis('left').width()
       pixelViewBox1 = pixelViewBox0 + viewBox.width()
@@ -473,4 +476,27 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     self.levels = self.getLevels()
   """     
     
+class GuiPeakListItemNd(QtGui.QGraphicsItem):
+  
+  def __init__(self, spectrumViewItem, apiPeakListView):
+    """ spectrumViewItem is the QGraphicsItem parent
+        apiPeakListView is the API object
+    """
+
+    QtGui.QGraphicsItem.__init__(self, spectrumViewItem)
+
+    self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
+
+    self.apiPeakListView = apiPeakListView
+    self.peakItems = {}  # CCPN peak -> Qt peakItem
+    self.displayed = False
+    self.symbolColour = None
+    self.symbolStyle = None
+    self.isSymbolDisplayed = False
+    self.textColour = None
+    self.isTextDisplayed = False
+
+    #for peak in peakList.peaks:
+    #  self.peakItems[peak.pid] = PeakItem(self, peak)
+
 

@@ -111,8 +111,15 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
         lastArray = lastArray.astype('int32')
         regionArray = numpy.array((firstArray, lastArray))
 
-        result = Peak.fitPeaks(dataArray, regionArray, peakArray, method)
-        height, center, linewidth = result[0]
+        try:
+          result = Peak.fitPeaks(dataArray, regionArray, peakArray, method)
+          height, center, linewidth = result[0]
+        except Peak.error as e:
+          # possibly should log error??
+          dimCount = len(startPoint)
+          height = dataArray[tuple(position)]
+          center = position
+          linewidth = dimCount * [None]
         position = center + startPoint
       
       peak = peakList.newPeak()
@@ -136,7 +143,7 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
         else:
           peakDim.position = float(position[i] + 1)
         
-        if fitMethod:
+        if fitMethod and linewidth[i] is not None:
           peakDim.lineWidth = linewidth[i]
         
       peak.height = height

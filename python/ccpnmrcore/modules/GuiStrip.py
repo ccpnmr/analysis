@@ -31,7 +31,7 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn import Spectrum
 from ccpncore.gui.Label import Label
-from ccpncore.gui.PlotWidget import PlotWidget
+from ccpnmrcore.gui.PlotWidget import PlotWidget
 from ccpncore.gui.Widget import Widget
 from ccpncore.memops import Notifiers
 
@@ -83,9 +83,10 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     pg.setConfigOption('foreground', self.foreground)
     self.plotWidget.setBackground(self.background)
     self.plotWidget.plotItem.axes['top']['item']
-    self._appBase = self.guiSpectrumDisplay._appBase
+    self._appBase = self._parent._appBase
 
     self.plotItem = self.plotWidget.plotItem
+    self.plotItem.parent = self
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
     self.viewBox.setXRange(*self.orderedAxes[0].region)
@@ -100,6 +101,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotWidget.scene().addItem(self.textItem)
     self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
     self.viewBox.sigRangeChanged.connect(self.updateRegion)
+    self.viewBox.sigClicked.connect(self.mouseClicked)
     ###proxy = pg.SignalProxy(self.viewBox.sigRangeChanged, rateLimit=10, slot=self.updateRegion)
     self.grid = pg.GridItem()
     self.plotWidget.addItem(self.grid)
@@ -107,7 +109,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.createCrossHair()
     proxy2 = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
-    self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
+    # self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
     
     self.beingUpdated = False
@@ -251,7 +253,25 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     else:
       self.grid.show()
 
+  def mouseClicked(self, event):
+    print(event)
+
   def mouseMoved(self, event):
+
+    # if (event.button() == QtCore.Qt.LeftButton) and (
+    #           event.modifiers() & QtCore.Qt.ControlModifier) and (
+    #           event.modifiers() & QtCore.Qt.ShiftModifier):
+    #     # Pick in area
+    #   print('LeftDrag + Control + Shift')
+    #
+    #   if event.isFinish():
+    #
+    #     startPosition = event.buttonDownPos()
+    #     endPosition = event.pos()
+    #     print(startPosition,endPosition)
+    #
+    #   event.accept()
+    # else:
     position = event
     if self.plotWidget.sceneBoundingRect().contains(position):
         self.mousePoint = self.viewBox.mapSceneToView(position)

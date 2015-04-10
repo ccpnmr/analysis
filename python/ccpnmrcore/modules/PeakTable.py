@@ -42,7 +42,7 @@ class PeakListSimple(Dock):
       peakLists = []
       
     # QtGui.QWidget.__init__(self, parent)
-    Dock.__init__(self, name=name, size=(1100, 1300))
+    Dock.__init__(self, name=name)
     # Base.__init__(self, **kw)
 
     self.initPanel()
@@ -59,7 +59,7 @@ class PeakListSimple(Dock):
 
     self.peakTable = ObjectTable(self, self._getColumns(2), [],
                                  callback=self.selectPeak, grid=(2, 0),
-                                 gridSpan=(1, 5))
+                                 gridSpan=(1, 4))
     # self.layout().setColumnStretch(4, 1)
     self.updateContents()
     self.updatePeakLists()

@@ -185,68 +185,44 @@ class Strip(GuiStrip, AbstractWrapperObject):
     if not layout: # should always exist but play safe:
       return
       
-    items = []
-    items2 = []
-    items3 = []
-    if spectrumDisplay.stripDirection == 'Y':
-      if currentIndex < newIndex:
-        for n in range(currentIndex, newIndex+1):
-          item = layout.itemAtPosition(0, n)
-          items.append(item)
-          layout.removeItem(item)
-          item = layout.itemAtPosition(1, n)
-          items2.append(item)
-          layout.removeItem(item)
-          item = layout.itemAtPosition(2, n)
-          items3.append(item)
-          layout.removeItem(item)
-        items = [items[-1]] + items[:-1]
-        items2 = [items2[-1]] + items2[:-1]
-        items3 = [items3[-1]] + items3[:-1]
-        for m, item in enumerate(items):
-          layout.addItem(item, 0, m+newIndex, )
-        for m, item in enumerate(items2):
-          layout.addItem(item, 1, m+newIndex)
-        for m, item in enumerate(items3):
-          layout.addItem(item, 2, m+newIndex)
-      else:
-        for n in range(newIndex, currentIndex+1):
-          item = layout.itemAtPosition(0, n)
-          items.append(item)
-          layout.removeItem(item)
-          item = layout.itemAtPosition(1, n)
-          items2.append(item)
-          layout.removeItem(item)
-          item = layout.itemAtPosition(2, n)
-          items3.append(item)
-          layout.removeItem(item)
-        items = [items[-1]] + items[:-1]
-        items2 = [items2[-1]] + items2[:-1]
-        items3 = [items3[-1]] + items3[:-1]
-        for m, item in enumerate(items):
-          layout.addItem(item, 0, m+newIndex, )
-        for m, item in enumerate(items2):
-          layout.addItem(item, 1, m+newIndex)
-        for m, item in enumerate(items3):
-          layout.addItem(item, 2, m+newIndex)
+    for r in range(layout.rowCount()):
+      items = []
+      if spectrumDisplay.stripDirection == 'Y':
+        if currentIndex < newIndex:
+          for n in range(currentIndex, newIndex+1):
+            item = layout.itemAtPosition(r, n)
+            items.append(item)
+            layout.removeItem(item)
+          items = [items[-1]] + items[:-1]
+          for m, item in enumerate(items):
+            layout.addItem(item, r, m+newIndex, )
+        else:
+          for n in range(newIndex, currentIndex+1):
+            item = layout.itemAtPosition(r, n)
+            items.append(item)
+            layout.removeItem(item)
+          items = [items[-1]] + items[:-1]
+          for m, item in enumerate(items):
+            layout.addItem(item, r, m+newIndex, )
 
-    elif spectrumDisplay.stripDirection == 'X':
-      if currentIndex < newIndex:
-        for n in range(currentIndex, newIndex+1):
-          item = layout.itemAtPosition(n, 0)
-          items.append(item)
-          layout.removeItem(item)
-        items = items[1:] + [items[0]]
-        for m, item in enumerate(items):
-          layout.addItem(item, m+currentIndex, 0)
-      else:
-        for n in range(newIndex, currentIndex+1):
-          item = layout.itemAtPosition(n, 0)
-          items.append(item)
-          layout.removeItem(item)
-        items = [items[-1]] + items[:-1]
-        for m, item in enumerate(items):
-          layout.addItem(item, m+newIndex, 0)
+
+      elif spectrumDisplay.stripDirection == 'X':
+        if currentIndex < newIndex:
+          for n in range(currentIndex, newIndex+1):
+            item = layout.itemAtPosition(n, 0)
+            items.append(item)
+            layout.removeItem(item)
+          items = items[1:] + [items[0]]
+          for m, item in enumerate(items):
+            layout.addItem(item, m+currentIndex, 0)
+        else:
+          for n in range(newIndex, currentIndex+1):
+            item = layout.itemAtPosition(n, 0)
+            items.append(item)
+            layout.removeItem(item)
+          items = [items[-1]] + items[:-1]
+          for m, item in enumerate(items):
+            layout.addItem(item, m+newIndex, 0)
 
   def resetAxisOrder(self):
     """Reset display to original axis order"""

@@ -178,7 +178,7 @@ class Peak1d(QtGui.QGraphicsItem):
 
     # group.addToGroup(self)
   #
-  def mouseDoubleClickEvent(self, event):
+  def mousePressEvent(self, event):
 
     self.press = True
     self.hover = True
@@ -399,7 +399,16 @@ class PeakNd(QtGui.QGraphicsItem):
     hz = sz/2.0
     # self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
     # self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
+    self.rectItem = QtGui.QGraphicsRectItem(-hz, -hz, sz, sz, self.peakLayer, scene)
+    color = QtGui.QColor('cyan')
+    self.rectItem.setBrush(QtGui.QBrush(color))
+    self.rectItem.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+
     self.drawData = (hz, sz)#, QtCore.QRectF(-hz, -hz, sz, sz))
+    self.xDim = self.strip.spectrumViews[0].dimensionOrdering[0] - 1
+    self.yDim = self.strip.spectrumViews[0].dimensionOrdering[1] - 1
+    xPpm = self.peak.position[self.xDim]
+    yPpm = self.peak.position[self.yDim]
     self.setPos(xPpm, yPpm)
     # self.annotation = PeakNdAnnotation(self, scene, '---')
     # self.inPlane = self.isInPlane()
@@ -410,9 +419,12 @@ class PeakNd(QtGui.QGraphicsItem):
   def isInPlane(self):
 
     if len(self.strip.orderedAxes) > 2:
-      zPosition = self.peak.position[2]
+      zDim = self.strip.spectrumViews[0].dimensionOrdering[2] - 1
+      zPlaneSize = self.strip.spectrumViews[0].zPlaneSize()
+      zPosition = self.peak.position[zDim]
+
       zRegion = self.strip.orderedAxes[2].region
-      if zRegion[0] <= zPosition <= zRegion[1]:
+      if zRegion[0]-zPlaneSize <= zPosition <= zRegion[1]+zPlaneSize:
         return True
       else:
         return False
@@ -494,8 +506,8 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
     QtGui.QGraphicsSimpleTextItem.__init__(self, scene=scene)
 
-    self.setParentItem(parent)
-    self.peakItem = parent # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
+    self.setParentItem(peakItem)
+    self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setText(text)
     self.scene = scene
     # self.analysisLayout = parent.glWidget.analysisLayout
@@ -535,7 +547,6 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     if (event.button() == QtCore.Qt.LeftButton):# and (
               # event.modifiers() & QtCore.Qt.ControlModifier) and not (
               # event.modifiers() & QtCore.Qt.ShiftModifier):
-      print(event)
       event.accept()
       # self.scene.clearSelection()
       # self.setFlag(QtGui.QGraphicsSimpleTextItem.ItemIsMovable)

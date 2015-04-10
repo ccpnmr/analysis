@@ -46,7 +46,7 @@ class GuiStripNd(GuiStrip):
     self.plotWidget.setViewport(self.viewportWidget)
     self.guiSpectrumDisplay.viewportDict[self.viewportWidget] = self
     self.plotWidget.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
-    ###self.viewBox.menu = self.get2dContextMenu()
+    # self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
 
@@ -76,6 +76,13 @@ class GuiStripNd(GuiStrip):
 
     newItem = self.scene().addItem(guiSpectrumView)
 """
+
+  def mouseDragEvent(self, event):
+        if event.button() == QtCore.Qt.RightButton:
+            print(event)
+        else:
+            self.viewBox.mouseDragEvent(self, event)
+
   # def displayASpectrum(self, guiSpectrumView):
   #
   #   # resetAllAxisCodes(self.project._wrappedData)

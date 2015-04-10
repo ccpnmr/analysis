@@ -49,13 +49,20 @@ class Assigner(Dock):
     # self.dock.addWidget(self)
 
 
-  def assignLeft(self):
-    self.direction = 'left'
+  # def assignLeft(self):
+  #   self.direction = 'left'
+  #
+  # def assignRight(self):
+  #   self.direction = 'right'
 
-  def assignRight(self):
-    self.direction = 'right'
 
-  def addResidue(self, name):
+  def clearAllItems(self):
+    for item in self.scene.items():
+      self.scene.removeItem(item)
+      self.residueCount = 0
+
+
+  def addResidue(self, name, direction=None):
 
     if self.residueCount == 0:
       hAtom = self.addAtom("H", (0, self.atomSpacing))
@@ -82,7 +89,7 @@ class Assigner(Dock):
 
     else:
       if len(self.residuesShown) > 0:
-        if self.direction == 'left':
+        if direction == 'left':
           oldResidue = self.residuesShown[0]
           coAtom2 = self.addAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()-oldResidue["N"].x())-(oldResidue["N"].boundingRect().width()/2),oldResidue["CA"].y()))
           caAtom2 = self.addAtom("CA", ((coAtom2.x()-self.atomSpacing), oldResidue["N"].y()))
@@ -106,7 +113,7 @@ class Assigner(Dock):
           newResidue = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2}
           self.residuesShown.insert(0, newResidue)
 
-        if self.direction == 'right':
+        if direction == 'right':
           oldResidue = self.residuesShown[-1]
           nAtom2 = self.addAtom("N", (oldResidue["CO"].x()+self.atomSpacing+oldResidue["CO"].boundingRect().width()/2, oldResidue["CA"].y()))
           hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))

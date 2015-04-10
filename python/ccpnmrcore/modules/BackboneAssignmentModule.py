@@ -42,7 +42,7 @@ class BackboneAssignmentModule(PeakListSimple):
     PeakListSimple.__init__(self, name='Backbone Assignment', peakLists=project.peakLists)
     self.hsqcDisplay = hsqcDisplay
     self.project = project
-    self.assigner = assigner
+    # self.assigner = assigner
     self.peakTable.callback = self.findMatchingPeaks
     self.layout.setContentsMargins(4, 4, 4, 4)
     spectra = [spectrum.pid for spectrum in project.spectra]
@@ -62,81 +62,116 @@ class BackboneAssignmentModule(PeakListSimple):
     # QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Delete), self, self.queryList.removeItem)
     self.layout.addWidget(self.queryList, 6, 0, 1, 2)
     self.layout.addWidget(self.matchList, 6, 2, 1, 2)
+    # self.numberOfMatches = 7
+    self.lines = []
 
+
+  # def setAssigner(self, assigner):
+  #   self.assigner = assigner
+  #   self.project._appBase.current.assigner = assigner
+  #   # print(self.assigner)
 
   def findMatchingPeaks(self, peak, row, col):
 
-    ### add GuiNmrResidue to assigner
 
-
+    # self.assigner.clearAllItems()
     ### determine query and match windows
     queryWindow = self.project.getById(self.queryDisplayPulldown.currentText())
     matchWindow = self.project.getById(self.matchDisplayPulldown.currentText())
     positions = peak.position
     self.hsqcDisplay.strips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
-    self.assigner.addResidue(name=peak.dimensionNmrAtoms[0][0]._parent.id)
-    if self.assigner.direction == 'left':
-      queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
-      queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
+
+    queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
+    queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
+    queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
+
+    matchWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0].id))
+    matchWindow.orderedStrips[0].changeZPlane(position=positions[0])
+    matchWindow.orderedStrips[0].orderedAxes[0].position=positions[1]
+
+    if len(self.lines) == 0:
+
       line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
       line.setPos(QtCore.QPointF( positions[0], 0))
       queryWindow.orderedStrips[0].plotWidget.addItem(line)
+      line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      line2.setPos(QtCore.QPointF( positions[1], 0))
+      matchWindow.orderedStrips[0].plotWidget.addItem(line2)
+      self.lines.append(line)
+      self.lines.append(line2)
     else:
-      queryWindow.orderedStrips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
-      queryWindow.orderedStrips[-1].changeZPlane(position=positions[1])
-      line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-      line.setPos(QtCore.QPointF( positions[0], 0))
-      queryWindow.orderedStrips[-1].plotWidget.addItem(line)
-    line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    line2.setPos(QtCore.QPointF(positions[0], 0))
-    line3 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    line3.setPos(QtCore.QPointF(0, positions[1]))
-    self.hsqcDisplay.strips[0].plotWidget.addItem(line2)
-    self.hsqcDisplay.strips[0].plotWidget.addItem(line3)
-    queryAtom = self.project.getById(peak.dimensionNmrAtoms[0][0].pid)
+      self.lines[0].setPos(QtCore.QPointF( positions[0], 0))
+      self.lines[1].setPos(QtCore.QPointF( positions[1], 0))
 
 
-    assignedPeaks = queryAtom.assignedPeaks
-
-    queryPeaks = []
-
-    for i in range(self.queryList.count()):
-
-      for peak in assignedPeaks[0]:
-        if peak._parent.pid == self.queryList.item(i).text():
-          queryPeaks.append(peak)
-          line2 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-          line2.setPos(QtCore.QPointF(0, peak.position[1]))
-          queryWindow.orderedStrips[-1].plotWidget.addItem(line2)
 
 
-    matchPeakLists = [self.project.getById(self.matchList.item(i).text()) for i in range(self.matchList.count())]
+    # self.assigner.addResidue(name=peak.dimensionNmrAtoms[0][0]._parent.id)
+    # if self.assigner.direction == 'left':
+    #   queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
+    #   queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
+    #   line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    #   line.setPos(QtCore.QPointF( positions[0], 0))
+    #   queryWindow.orderedStrips[0].plotWidget.addItem(line)
+    # currentStrip = self.project._appBase.current.strip
+    # if currentStrip is None:
+    #   currentStrip = queryWindow.orderedStrips[0]
+    # queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
 
-    assignMatrix = self.buildAssignmentMatrix(queryPeaks, matchPeakLists)
+    # line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    # line2.setPos(QtCore.QPointF(positions[0], 0))
+    # line3 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    # line3.setPos(QtCore.QPointF(0, positions[1]))
+    # self.hsqcDisplay.strips[0].plotWidget.addItem(line2)
+    # self.hsqcDisplay.strips[0].plotWidget.addItem(line3)
+    # queryAtom = self.project.getById(peak.dimensionNmrAtoms[0][0].pid)
+    #
+    #
+    # assignedPeaks = queryAtom.assignedPeaks
+    #
+    # queryPeaks = []
+    #
+    # for i in range(self.queryList.count()):
+    #
+    #   for peak in assignedPeaks[0]:
+    #     if peak._parent.pid == self.queryList.item(i).text():
+    #       queryPeaks.append(peak)
+    #       line2 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    #       line2.setPos(QtCore.QPointF(0, peak.position[1]))
+    #       currentStrip.plotWidget.addItem(line2)
+    #
+    #
+    # matchPeakLists = [self.project.getById(self.matchList.item(i).text()) for i in range(self.matchList.count())]
+    #
+    # assignMatrix = self.buildAssignmentMatrix(queryPeaks, matchPeakLists)
+    #
+    # indices = self.hungarian(assignMatrix)
+    #
+    # assignedSet = set()
+    # peaksSet = set()
+    #
+    #
+    # for index in indices:
+    #   assignedSet.add(matchPeakLists[0].peaks[index[1]].dimensionNmrAtoms[0][0]._parent)
+    #   peaksSet.add(matchPeakLists[0].peaks[index[1]].position)
+    #
+    # assignmentList = list(assignedSet)
+    # peaksList = list(peaksSet)
+    #
+    # matchWindow.strips[0].changeZPlane(position=peaksList[0][2])
+    # matchWindow.strips[0].spinSystemLabel.setText(assignmentList[0].id)
+    # line4 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    # line5 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    # line6 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    # line4.setPos(pg.Point(QtCore.QPointF(peaksList[0][0], 0)))
+    # line5.setPos(pg.Point(QtCore.QPointF(0, peaksList[0][1])))
+    # line6.setPos(pg.Point(QtCore.QPointF(0, peaksList[1][1])))
+    # matchWindow.strips[0].plotWidget.addItem(line4)
+    # matchWindow.strips[0].plotWidget.addItem(line5)
+    # matchWindow.strips[0].plotWidget.addItem(line6)
 
-    indices = self.hungarian(assignMatrix)
-
-    assignedSet = set()
-    peaksSet = set()
 
 
-    for index in indices:
-      assignedSet.add(matchPeakLists[0].peaks[index[1]].dimensionNmrAtoms[0][0]._parent)
-      peaksSet.add(matchPeakLists[0].peaks[index[1]].position)
-
-    assignmentList = list(assignedSet)
-    peaksList = list(peaksSet)
-
-    matchWindow.strips[0].changeZPlane(position=peaksList[0][2])
-    line4 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    line5 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    line6 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    line4.setPos(pg.Point(QtCore.QPointF(peaksList[0][0], 0)))
-    line5.setPos(pg.Point(QtCore.QPointF(0, peaksList[0][1])))
-    line6.setPos(pg.Point(QtCore.QPointF(0, peaksList[1][1])))
-    matchWindow.strips[0].plotWidget.addItem(line4)
-    matchWindow.strips[0].plotWidget.addItem(line5)
-    matchWindow.strips[0].plotWidget.addItem(line6)
 
 
   def qScore(self, query, match):

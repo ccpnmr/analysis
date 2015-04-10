@@ -436,7 +436,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showBugReportingPopup(self):
     pass
 
-  def runMacro(self):
+  def runMacro(self, macroFile=None):
+
     macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", "/Users/simon/ccpnMacros/")
     f = open(macroFile)
     lines = f.readlines()
@@ -463,6 +464,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showBackboneAssignmentModule(self, position=None, relativeTo=None, assigner=None, hsqcDisplay=None):
     self.bbModule = BackboneAssignmentModule(self._project, position, relativeTo, assigner, hsqcDisplay)
     self.dockArea.addDock(self.bbModule)
+    return self.bbModule
 
 
   def saveProjectAs(self):

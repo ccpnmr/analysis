@@ -77,6 +77,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # self.dock.addWidget(self.scrollArea, 1, 0, 1, 4)
     self.scrollArea.setWidgetResizable(True)
     self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0), appBase=self._appBase)
+    self.stripFrame.guiSpectrumDisplay = self
     # self.stripFrame.layout().setContentsMargins(0, 0, 2, 0)
     self.stripFrame.setAcceptDrops(True)
     self.assignmentDirection = 'i-1'

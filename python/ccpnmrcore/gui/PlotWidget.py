@@ -23,10 +23,34 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-_fields = ['spectrum','spectra','peak','peaks','pane','region','position', 'strip', 'assigner']
+from ccpncore.gui.Base import Base
+from ccpnmrcore.gui import ViewBox
+from ccpnmrcore.DropBase import DropBase
 
-class Current:
+import pyqtgraph as pg
 
-  def __init__(self):
-    for field in _fields:
-      setattr(self,field,None)
+class PlotWidget(DropBase, pg.PlotWidget, Base):
+
+  def __init__(self, parent=None, appBase=None, dropCallback=None, **kw):
+
+
+    pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(current=appBase.current, parent=parent), axes=None, enableMenu=True)
+    Base.__init__(self, **kw)
+    DropBase.__init__(self, appBase, dropCallback)
+
+    self.setInteractive(True)
+    self.plotItem.setAcceptHoverEvents(True)
+
+    self.plotItem.setAcceptDrops(True)
+    self.plotItem.axes['left']['item'].hide()
+    self.plotItem.axes['right']['item'].show()
+
+
+  def addItem(self, item):
+    self.scene().addItem(item)
+    # # self.plotItem.axes['top']['item'].hide()
+    # self.plotItem.axes['bottom']['item'].show()
+    # self.plotItem.axes['right']['item'].show()
+
+
+

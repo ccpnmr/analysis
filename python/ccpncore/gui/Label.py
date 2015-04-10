@@ -98,16 +98,22 @@ class Label(QtGui.QLabel, Base):
       if event.keyboardModifiers() & QtCore.Qt.ShiftModifier:
 
         sinkIndex = self.parent().getById(self.pid)._wrappedData.index
+        direction = 'left'
 
       else:
 
         sinkIndex = self.parent().getById(self.pid)._wrappedData.index + 1
+        direction = 'right'
 
       if wrapperObject.pid.id == self.pid.id:
         wrapperObject.moveTo(sinkIndex)
       else:
         self.parent().guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
-        # wrapperObject.moveTo(sinkIndex, newSpectrumDisplay=self.parent())
+        self.parent().guiSpectrumDisplay._appBase.current.strip = self.parent().guiSpectrumDisplay.orderedStrips[sinkIndex]
+        self.parent().guiSpectrumDisplay._appBase.current.strip.spinSystemLabel.setText(wrapperObject.spinSystemLabel.text())
+        self.parent().guiSpectrumDisplay._appBase.current.assigner.addResidue(name=wrapperObject.spinSystemLabel.text(), direction=direction)
+        newHsqcPeak = self.parent().getById('NR:'+wrapperObject.spinSystemLabel.text())
+        # self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule
 
 
 

@@ -82,7 +82,7 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
   peakPoints = Peak.findPeaks(dataArray, doNeg, doPos,
                               negLevel, posLevel, exclusionBuffer,
                               nonAdj, minDropfactor, minLinewidth)
-    
+
   existingPositions = []
   for peak in peakList.peaks:
     position = numpy.array([peakDim.position for peakDim in peak.sortedPeakDims()])  # ignores aliasing

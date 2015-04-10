@@ -6,10 +6,7 @@ Sequence = collections.abc.Sequence
 
 def findPeaks(peakList:object, positions:Sequence=None, dataDims:Sequence=None):
 
-  ordering = []
-
-  for dataDim in dataDims:
-    ordering.append(dataDim.dim-1)
+  ordering = [dataDim.dim-1 for dataDim in dataDims]
 
   startPoint = []
   endPoint = []
@@ -17,9 +14,20 @@ def findPeaks(peakList:object, positions:Sequence=None, dataDims:Sequence=None):
   spectrum = peakList.spectrum
 
   for position in positions[1]:
-    endPoint.append(int(spectrum.getDimPointFromValue(ordering[positions[1].index(position)], position)))
+    dimension = ordering[positions[1].index(position)]
+    endPoint.append([dimension, int(spectrum.getDimPointFromValue(dimension, position))])
 
   for position in positions[0]:
-    startPoint.append(int(spectrum.getDimPointFromValue(ordering[positions[0].index(position)], position)))
+    dimension = ordering[positions[0].index(position)]
+    startPoint.append([dimension, int(spectrum.getDimPointFromValue(dimension, position))])
 
-  return pickNewPeaks(peakList.apiPeakList, startPoint=startPoint, endPoint=endPoint, posLevel=1.0e7)
+  startPoints = [point[1] for point in sorted(startPoint)]
+  endPoints = [point[1] for point in sorted(endPoint)]
+  print(ordering, startPoint, startPoints, endPoint, endPoints)
+
+  posLevel = spectrum.positiveContourBase*5e2
+  negLevel = spectrum.negativeContourBase*5e2
+
+  print(posLevel)
+
+  return pickNewPeaks(peakList.apiPeakList, startPoint=startPoints, endPoint=endPoints, posLevel=posLevel, negLevel=negLevel)

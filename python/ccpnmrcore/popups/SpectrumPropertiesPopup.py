@@ -209,9 +209,18 @@ class DimensionsTab(QtGui.QWidget):
 class ContoursTab(QtGui.QWidget):
   def __init__(self, spectrum, parent=None):
     super(ContoursTab, self).__init__(parent)
-    print(self)
+
+    self.spectrum = spectrum
     positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(0, 0))
     positiveContoursCheckBox = CheckBox(self, grid=(0, 1), checked=True)
+    for spectrumView in self.spectrum.spectrumViews:
+      print(dir(spectrumView))
+      if spectrumView._wrappedData.displayPositiveContours is True:
+        positiveContoursCheckBox.setChecked(True)
+      else:
+        positiveContoursCheckBox.setChecked(False)
+
+    positiveContoursCheckBox.stateChanged.connect(self.changePositiveContourDisplay)
     positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(1, 0))
     positiveBaseLevelData = DoubleSpinbox(self, grid=(1, 1))
     positiveBaseLevelData.setMaximum(1e12)
@@ -245,6 +254,7 @@ class ContoursTab(QtGui.QWidget):
 
     negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6 ,0))
     negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True)
+    negativeContoursCheckBox.stateChanged.connect(self.displayNegativeContours)
     negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0))
     negativeBaseLevelData = DoubleSpinbox(self, grid=(7, 1))
     negativeBaseLevelData.setMaximum(1e12)
@@ -274,6 +284,23 @@ class ContoursTab(QtGui.QWidget):
 
     self.negativeColourButton = Button(self, text="More...", grid=(10, 2))
     self.negativeColourButton.clicked.connect(partial(self.changeNegSpectrumColour, spectrum))
+
+
+  def changePositiveContourDisplay(self, state):
+    if state == QtCore.Qt.Checked:
+      for spectrumView in self.spectrum.spectrumViews:
+        spectrumView._wrappedData.displayPositiveContours = True
+    else:
+      for spectrumView in self.spectrum.spectrumViews:
+        spectrumView._wrappedData.displayPositiveContours = False
+
+  def displayNegativeContours(self, state):
+    if state == QtCore.Qt.Checked:
+      for spectrumView in self.spectrum.spectrumViews:
+        spectrumView.displayNegativeContours = True
+    else:
+      for spectrumView in self.spectrum.spectrumViews:
+        spectrumView.displayNegativeContours = False
 
 
   def lineEditTextChanged1(self, spectrum, value):

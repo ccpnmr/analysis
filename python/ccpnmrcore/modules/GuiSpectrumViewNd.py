@@ -247,9 +247,14 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
   def drawContours(self, painter):
     
     apiDataSource = self.spectrumView.apiDataSource
-    posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
-    negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
-
+    if self.spectrumView._wrappedData.displayPositiveContours is True:
+      posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
+    else:
+      posLevels = []
+    if self.spectrumView._wrappedData.displayNegativeContours is True:
+      negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
+    else:
+      negLevels = []
     if not posLevels and not negLevels:
       return
       

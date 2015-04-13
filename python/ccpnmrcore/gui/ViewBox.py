@@ -38,6 +38,12 @@ class ViewBox(pg.ViewBox):
     self.menu = self.getMenu()
     self.current = current
     self.parent = parent
+    self.selectionBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
+    self.selectionBox.setPen(pg.functions.mkPen((255,102,178), width=1))
+    self.selectionBox.setBrush(pg.functions.mkBrush(255,153,204,100))
+    self.selectionBox.setZValue(1e9)
+    self.selectionBox.hide()
+    self.addItem(self.selectionBox, ignoreBounds=True)
 
 
   def raiseContextMenu(self, event):
@@ -98,6 +104,15 @@ class ViewBox(pg.ViewBox):
 
     self.current.strip = self.parentObject().parent
 
+
+  def updateSelectionBox(self, p1, p2):
+    r = QtCore.QRectF(p1, p2)
+    r = self.childGroup.mapRectFromParent(r)
+    self.selectionBox.setPos(r.topLeft())
+    self.selectionBox.resetTransform()
+    self.selectionBox.scale(r.width(), r.height())
+    self.selectionBox.show()
+
   def mouseDragEvent(self, event, axis=None):
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
@@ -134,6 +149,7 @@ class ViewBox(pg.ViewBox):
 
       if event.isFinish():
 
+        self.selectionBox.hide()
         startPosition = self.mapSceneToView(event.buttonDownPos())
         endPosition = self.mapSceneToView(event.pos())
         orderedAxes = self.current.strip.orderedAxes
@@ -148,8 +164,9 @@ class ViewBox(pg.ViewBox):
           peakList = spectrumView.spectrum.peakLists[0]
           newPeaks = peakList.findPeaks(selectedRegion, spectrumView._wrappedData.orderedDataDims)
           # print(spectrumView.spectrum.peakLists[0].peaks)
-          print('newPeaks',newPeaks)
           self.current.strip.showPeaks(peakList)
+      else:
+        self.updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()
 
 
@@ -158,14 +175,24 @@ class ViewBox(pg.ViewBox):
               event.modifiers() & QtCore.Qt.ShiftModifier) and not (
               event.modifiers() & QtCore.Qt.ControlModifier):
        # Add select area
-      print('LeftDrag + Shift')
-      print(self.current.strip)
       if event.isStart():
         startPosition = event.buttonDownPos()
-        print("start ",startPosition)
       elif event.isFinish():
-        endPosition = event.pos()
-        print("end ",endPosition)
+        endPosition = self.mapSceneToView(event.pos())
+        self.selectionBox.hide()
+        self.current.peaks = []
+        startPosition = self.mapSceneToView(event.buttonDownPos())
+        xPositions = sorted(list([startPosition.x(), endPosition.x()]))
+        yPositions = sorted(list([startPosition.y(), endPosition.y()]))
+        for spectrumView in self.current.strip.spectrumViews:
+          for peakList in spectrumView.spectrum.peakLists:
+            for peak in peakList.peaks:
+              if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+               and yPositions[0] < float(peak.position[1]) <
+                  yPositions[1]):
+                self.current.peaks.append(peak)
+      else:
+        self.updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()
 
 

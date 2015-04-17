@@ -78,10 +78,10 @@ class GuiStripNd(GuiStrip):
 """
 
   def mouseDragEvent(self, event):
-        if event.button() == QtCore.Qt.RightButton:
-            print(event)
-        else:
-            self.viewBox.mouseDragEvent(self, event)
+    if event.button() == QtCore.Qt.RightButton:
+        print(event)
+    else:
+        self.viewBox.mouseDragEvent(self, event)
 
   # def displayASpectrum(self, guiSpectrumView):
   #
@@ -245,8 +245,22 @@ class GuiStripNd(GuiStrip):
   def showPeaks(self, peakList):
     from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView
     peakLayer = GuiPeakListView(self.plotWidget.scene(), self, peakList)
+    self.viewBox.addItem(peakLayer)
+    #rectItem = QtGui.QGraphicsRectItem(5, 120, 2, 10, peakLayer, self.plotWidget.scene())
+    ##color = QtGui.QColor('red')
+    #rectItem.setBrush(QtGui.QBrush(color))
+    #rectItem.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+    #rectItem.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+    ##lineItem = QtGui.QGraphicsLineItem(5, 120, 7, 130, peakLayer, self.plotWidget.scene())
+    ##pen = QtGui.QPen()
+    ##pen.setWidth(0.1)
+    ##pen.setBrush(color)
+    ##lineItem.setPen(pen)
+    ##lineItem.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+    
     for peak in peakList.peaks:
-     peakItem = PeakNd(self, peak, peakLayer)
+      peakItem = PeakNd(self, peak, peakLayer)
      # peakItem = PeakNd(self, peak)
-    self.plotWidget.addItem(peakLayer)
+    ###self.plotWidget.addItem(peakLayer)
      # self.plotWidget.addItem((peakItem.annotation))
+     

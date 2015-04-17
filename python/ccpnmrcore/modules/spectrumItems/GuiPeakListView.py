@@ -58,7 +58,7 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     self.peakList = peakList
     self.peakItems = {}  # CCPN peak -> Qt peakItem
     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
-    self.parent = parent
+    ###self.parent = parent
     # self.displayed = True
     # self.symbolColour = None
     # self.symbolStyle = None
@@ -371,26 +371,28 @@ class PeakNd(QtGui.QGraphicsItem):
   def __init__(self, strip, peak, peakLayer):
 
     scene = strip.plotWidget.scene()
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
-
+    #QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtGui.QGraphicsItem.__init__(self, peakLayer, scene=scene)
+    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
+    
     # self.glWidget = peakLayer.glWidget
-    self.setParentItem(peakLayer)
+    #self.setParentItem(peakLayer)
     self.peakLayer = peakLayer
     # self.spectrumWindow = spectrumWindow
     # self.panel = spectrumWindow.panel
-    self.peakList = peak._parent
+    #self.peakList = peak._parent
     self.strip = strip
-    self.parent = strip.plotWidget
-    self.spectrum = self.peakList.spectrum
-    self.setCacheMode(self.NoCache)
-    self.setFlags(self.ItemIgnoresTransformations)
+    #self.parent = strip.plotWidget
+    #self.spectrum = self.peakList.spectrum
+    #self.setCacheMode(self.NoCache)
+    #self.setFlags(self.ItemIgnoresTransformations)
     # self.setSelected(False)
-    self.hover = False
-    self.press = False
-    self.setAcceptHoverEvents(True)
-    self.bbox  = NULL_RECT
-    self.color = NULL_COLOR
-    self.brush = NULL_COLOR
+    #self.hover = False
+    #self.press = False
+    #self.setAcceptHoverEvents(True)
+    #self.bbox  = NULL_RECT
+    #self.color = NULL_COLOR
+    #self.brush = NULL_COLOR
     self.peak = peak
     xPpm = self.peak.position[0]
     yPpm = self.peak.position[1]
@@ -399,16 +401,18 @@ class PeakNd(QtGui.QGraphicsItem):
     hz = sz/2.0
     # self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
     # self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
+    """
     self.rectItem = QtGui.QGraphicsRectItem(-hz, -hz, sz, sz, self.peakLayer, scene)
     color = QtGui.QColor('cyan')
     self.rectItem.setBrush(QtGui.QBrush(color))
     self.rectItem.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+    """
 
     self.drawData = (hz, sz)#, QtCore.QRectF(-hz, -hz, sz, sz))
-    self.xDim = self.strip.spectrumViews[0].dimensionOrdering[0] - 1
-    self.yDim = self.strip.spectrumViews[0].dimensionOrdering[1] - 1
-    xPpm = self.peak.position[self.xDim]
-    yPpm = self.peak.position[self.yDim]
+    xDim = strip.spectrumViews[0].dimensionOrdering[0] - 1
+    yDim = strip.spectrumViews[0].dimensionOrdering[1] - 1
+    xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
+    yPpm = peak.position[yDim]
     self.setPos(xPpm, yPpm)
     # self.annotation = PeakNdAnnotation(self, scene, '---')
     # self.inPlane = self.isInPlane()
@@ -447,14 +451,14 @@ class PeakNd(QtGui.QGraphicsItem):
   #   self.annotation.hoverLeaveEvent(event)
   #   self.update()
 
-  def mousePressEvent(self, event):
+  ###def mousePressEvent(self, event):
 
-    print(event)
+    ###print(event)
     # self.setSelected(True)
     # self.press = True
     # self.hover = True
-    r, w, box = self.drawData
-    self.bbox = box.adjusted(-26,-51, 2, 51)
+    ###r, w, box = self.drawData
+    ###self.bbox = box.adjusted(-26,-51, 2, 51)
     # # self.peakLayer.showIcons(self)
     # self.update()
     # QtGui.QGraphicsItem.mousePressEvent(self, event)
@@ -462,7 +466,9 @@ class PeakNd(QtGui.QGraphicsItem):
 
   def boundingRect(self):
 
-    return self.bbox # .adjust(-2,-2, 2, 2)
+    ###return self.bbox # .adjust(-2,-2, 2, 2)
+    r, w  = self.drawData
+    return QtCore.QRectF(-r,-r,2*r,2*r)
 
   def paint(self, painter, option, widget):
 
@@ -487,6 +493,12 @@ class PeakNd(QtGui.QGraphicsItem):
         #   self.setZValue(0)
         painter.drawLine(-r,-r,r,r)
         painter.drawLine(-r,r,r,-r)
+        if self.isSelected():
+          painter.setPen(QtGui.QColor('white'))
+          painter.drawLine(-r,-r,-r,r)
+          painter.drawLine(-r,r,r,r)
+          painter.drawLine(r,r,r,-r)
+          painter.drawLine(r,-r,-r,-r)
         #
         # if self.isSelected:
         #   painter.setPen(QtGui.QColor('white'))

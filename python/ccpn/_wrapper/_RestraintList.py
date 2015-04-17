@@ -25,6 +25,7 @@ __version__ = "$Revision$"
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import RestraintSet
+from ccpncore.util import Pid
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 
 

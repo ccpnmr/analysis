@@ -6,7 +6,11 @@ Sequence = collections.abc.Sequence
 
 def findPeaks(peakList:object, positions:Sequence=None, dataDims:Sequence=None):
 
+
+  print(positions, dataDims)
+
   ordering = [dataDim.dim-1 for dataDim in dataDims]
+  isoOrdering = [dataDim.getIsotopeCodes() for dataDim in dataDims]
 
   startPoint = []
   endPoint = []
@@ -23,10 +27,10 @@ def findPeaks(peakList:object, positions:Sequence=None, dataDims:Sequence=None):
 
   startPoints = [point[1] for point in sorted(startPoint)]
   endPoints = [point[1] for point in sorted(endPoint)]
-  print(ordering, startPoint, startPoints, endPoint, endPoints)
+  print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
 
-  posLevel = spectrum.positiveContourBase*5e2
-  negLevel = spectrum.negativeContourBase*5e2
+  posLevel = spectrum.positiveContourBase*100
+  negLevel = spectrum.negativeContourBase*100
 
   print(posLevel)
 

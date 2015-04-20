@@ -53,7 +53,7 @@ class Undo(deque):
   @property
   def blocking(self):
     """Undo blocking. If true (non-zero) undo setting is blocked.
-    Allows multiple external functions to set blocking without tramling each other
+    Allows multiple external functions to set blocking without trampling each other
 
     Modify with increaseBlocking/decreaseBlocking only"""
     return self._blockingLevel
@@ -72,7 +72,7 @@ class Undo(deque):
   def newWaypoint(self):
     """Start new waypoint"""
     if self.maxWaypoints < 1:
-      raise ValueError("Attempt to set waypoini on Undo object taht does tno allow them ")
+      raise ValueError("Attempt to set waypoint on Undo object that does not allow them ")
 
     waypoints = self.waypoints
     waypoints.append(self.nextIndex-1)
@@ -158,7 +158,7 @@ class Undo(deque):
 
 
   def undo(self):
-    """Undo one operation - or one waypoinit if waypoints are not set
+    """Undo one operation - or one waypoint if waypoints are not set
 
     For now errors are handled by printing a warning and clearing the undo object"""
 

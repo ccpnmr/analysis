@@ -383,7 +383,7 @@ def fetchStdResNameMap(project, reset:bool=False):
   }
 
   nFound = 0
-  print ("CIF-TOTAL %s" % sum(len(x) for x in chemCompOverview.values()))
+  logger.debug ("CIF-TOTAL %s" % sum(len(x) for x in chemCompOverview.values()))
   for molType in molTypeOrder:
 
     # Add data for all chemComps from overview
@@ -394,13 +394,13 @@ def fetchStdResNameMap(project, reset:bool=False):
 
       if altCode == '-skip':
         # cifCode is obsoleted. kip it.
-        print("CIF-SKIP\t%s\t%s\t%s\t%s\t%s"
+        logger.debug("CIF-SKIP\t%s\t%s\t%s\t%s\t%s"
               % (molType, ccpCode, tt[0] or '-', tt[1] or '-', tt[2] or '-'))
         continue
 
       elif altCode is not None:
         # cifCode is remapped - change to alternative code
-        print("CIF-REMAP\t%s\t%s\t%s\t%s\t%s\t%s"
+        logger.debug("CIF-REMAP\t%s\t%s\t%s\t%s\t%s\t%s"
               % (molType, ccpCode, tt[0] or '-', tt[1] or '-', tt[2] or '-', altCode))
         cifCode = altCode.upper()
         ccpCode = altCode
@@ -424,7 +424,7 @@ def fetchStdResNameMap(project, reset:bool=False):
 
           if ccpCode not in result:
             # ccp code not in result. Debug message
-            print("\t".join( ('CCP-MISS', molType, ccpCode, val[0], val[1],
+            logger.debug("\t".join( ('CCP-MISS', molType, ccpCode, val[0], val[1],
                                            tt[0] or '-', tt[1] or '-', tt[2] or '-') ))
         else:
           # Value was already set
@@ -460,13 +460,13 @@ def fetchStdResNameMap(project, reset:bool=False):
               message = 'CIF-CLASH2'
 
         # Print out debug messages
-        print("\t".join((message, molType, ccpCode, val[0], val[1],
+        logger.debug("\t".join((message, molType, ccpCode, val[0], val[1],
                          tt[0] or '-', tt[1] or '-', tt[2] or '-')))
 
         if len(ccpCode) == 5 and ccpCode.startswith('D-'):
           # D- amino acid - special case.
           # for now add ccpCode as extra alias
-          print("\t".join(('CCP-D-Xyz', molType, ccpCode,val[0], val[1],
+          logger.debug("\t".join(('CCP-D-Xyz', molType, ccpCode,val[0], val[1],
                            tt[0] or '-', tt[1] or '-', tt[2] or '-')))
           result[ccpCode] = val
 
@@ -474,7 +474,7 @@ def fetchStdResNameMap(project, reset:bool=False):
   # Check for upper-case ccpCodes remaining
   for tag,val in sorted(result.items()):
     if val[1][1:] !=  val[1][1:].lower():
-      print("CCP-UPPER\t%s\t%s\t%s" % (val[1], val[0], tag))
+      logger.debug("CCP-UPPER\t%s\t%s\t%s" % (val[1], val[0], tag))
 
   # check for unused ChemComps
   for chemComp in project.sortedChemComps():
@@ -496,7 +496,7 @@ def fetchStdResNameMap(project, reset:bool=False):
       message = "CHEM-CODE-CLASH"
 
     if message is not None:
-      print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
+      logger.debug ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
 
     # Debug output checking ccpCode
     val = result.get(cifCode)
@@ -510,7 +510,7 @@ def fetchStdResNameMap(project, reset:bool=False):
       message = "CCIF-CODE-CLASH"
 
     if message is not None:
-      print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
+      logger.debug ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
 
 
     tags = set()
@@ -526,21 +526,21 @@ def fetchStdResNameMap(project, reset:bool=False):
       if prevId is None:
 
         if len(tag) == 1:
-         print ("CINFO8 Rejecting one-letter synonym %s from ChemComp %s:%s"
+         logger.debug ("CINFO8 Rejecting one-letter synonym %s from ChemComp %s:%s"
                  % (tag, cifCode, val))
 
         elif ccId == val:
-          print ("CINFO9 Adding new ccpCode synonym %s from ChemComp %s:%s"
+          logger.debug ("CINFO9 Adding new ccpCode synonym %s from ChemComp %s:%s"
                  % (tag, cifCode, ccId))
 
           result[tag] = val
 
         else:
-          print ("CWARNING clash1 for %s chemComp %s v. cifCode %s:%s"
+          logger.debug ("CWARNING clash1 for %s chemComp %s v. cifCode %s:%s"
                 % (tag, ccId, cifCode,  val))
 
       elif prevId != val:
-        print ("CWARNING clash2 for %s chemComp %s, %s v. cifCode %s:%s"
+        logger.debug ("CWARNING clash2 for %s chemComp %s, %s v. cifCode %s:%s"
               % (tag, ccId, prevId, cifCode,  val))
 
   #

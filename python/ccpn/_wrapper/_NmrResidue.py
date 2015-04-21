@@ -22,7 +22,6 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.molecule.DataMapper import DataMapper
 from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -80,7 +79,7 @@ class NmrResidue(AbstractWrapperObject):
     apiResonanceGroup.residueType = value
 
     # get chem comp ID strings from residue name
-    tt = DataMapper.pickChemCompId(self._project._residueName2chemCompIds, value)
+    tt = self._project._residueName2chemCompId.get(value)
     if tt is not None:
       apiResonanceGroup.molType, apiResonanceGroup.ccpCode = tt
   

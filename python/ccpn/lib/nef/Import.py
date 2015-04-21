@@ -27,7 +27,6 @@ import json
 import sys
 import collections
 import ccpn
-# from ccpncore.lib.molecule.DataMapper import DataMapper
 # from ccpncore.util import Common as commonUtil
 from ccpn.lib.nef import Export
 from ccpncore.lib.Bmrb import bmrb
@@ -252,31 +251,7 @@ def readMolecularSystem(frameDict, project, nmrCalcRun):
                                    chainCodes=(chain.code,), )
 
 
-# def _newResidue(chain, defaultLinking='middle', **kwargs) -> ccpn.Residue:
-#   """Utility function: Add Residue to chain and molecule using NEF loop row"""
-#
-#   linking = kwargs['linking'] or defaultLinking
-#
-#   # Set Descriptor
-#   # NBNB TBD we do NOT make use of residueVariant to get descriptor. We should.
-#   # NBNB TBD We do not fully support crossLinking either
-#   if kwargs['crossLinking'] == 'disulfide':
-#     # Find chemCompVar with sulphur link
-#     # NB this is heuristic, protonation state (if any) will be random
-#     molType, ccpCode = DataMapper.pickChemCompId(chain._project._residueName2chemCompIds,
-#                                                  kwargs['residueType'])
-#     chemComp = chain._project.ccpnProject.findFirstChemComp(molType=molType, ccpCode=ccpCode)
-#     for chemCompVar in chemComp.sortedChemCompVars():
-#       descriptor = chemCompVar.descriptor
-#       if 'link:S' in descriptor:
-#         break
-#     else:
-#       descriptor = None
-#   else:
-#     descriptor = None
-#   #
-#   return chain.newResidue(name=kwargs['residueType'], linking=linking,
-#                           sequenceCode=kwargs['sequenceCode'], descriptor=descriptor)
+
 
 def readChemicalShiftList(frame, project, nmrCalcRun):
   print ("WARNING: reading of %s saveframes not implemented yet" % frame.get("sf_category"))

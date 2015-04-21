@@ -21,8 +21,6 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
-from ccpncore.lib.molecule.DataMapper import DataMapper
 from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -77,14 +75,13 @@ class Residue(AbstractWrapperObject):
     """Residue type name string (e.g. 'ALA')"""
     return self._wrappedData.code3Letter or ''
 
-  @name.setter
-  def name(self, value:str):
-    self._wrappedData.code3Letter = value
-    molType, ccpCode = DataMapper.pickChemCompId(self._project._residueName2chemCompIds,
-                                                 value)
-    # NBNB TBD reorganise model so that code3Letter is used throughout, and change this
-    self._wrappedData.molType = molType
-    self._wrappedData.ccpCode = ccpCode
+  # @name.setter
+  # def name(self, value:str):
+  #   self._wrappedData.code3Letter = value
+  #   molType, ccpCode = self._project._residueName2chemCompId.get(value, (None,None))
+  #   # NBNB TBD reorganise model so that code3Letter is used throughout, and change this
+  #   self._wrappedData.molType = molType
+  #   self._wrappedData.ccpCode = ccpCode
 
   # @property
   # def molType(self) -> str:

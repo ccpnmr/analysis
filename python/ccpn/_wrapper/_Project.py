@@ -27,7 +27,7 @@ import functools
 from ccpn import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpncore.memops import Notifiers
-from ccpncore.lib.molecule import DataConvertLib
+from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
 from ccpncore.util import Io as utilIo
@@ -82,11 +82,6 @@ class Project(AbstractWrapperObject):
 
     # Set up pid sorting dictionary to cache pid sort keys
     self._pidSortKeys = {}
-    
-    # general residue name to ChemCompIDs tuple Map.
-    self._residueName2chemCompIds = DataConvertLib.getStdResNameMap(
-      wrappedData.root.sortedChemComps()
-    )
 
     # Set necessary values in apiProject
     if wrappedData.molSystem is None:
@@ -183,6 +178,11 @@ class Project(AbstractWrapperObject):
   def nmrProject(self) -> ApiNmrProject:
     """API equivalent to object: Nmrproject"""
     return self._wrappedData
+
+  @property
+  def  _residueName2chemCompId(self) -> dict:
+    """dict of {residueName:(molType,ccpCode)}"""
+    return MoleculeQuery.fetchStdResNameMap(self._wrappedData.root)
 
   #
   # utility functions

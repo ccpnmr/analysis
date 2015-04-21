@@ -29,6 +29,9 @@ from ccpncore.api.ccp.molecule import Molecule
 from ccpncore.util import Undo
 from ccpncore.util import CopyData
 from ccpncore.lib.chemComp import Io as chemCompIo
+from ccpncore.lib.molecule import MoleculeQuery
+
+LINEAR_POLYMER_TYPES = MoleculeQuery.LINEAR_POLYMER_TYPES
 
 ###from ccp.general.Io import getChemComp
 
@@ -38,28 +41,37 @@ from ccpncore.lib.chemComp import Io as chemCompIo
 #
 ##################################################################
 
-def makeMolecule(project, molType, sequence, molName=None, startNum=1, isCyclic=False):
+def makeMolecule(project, sequence:(list,str), molType:str='protein', name:str="Molecule",
+                 startNumber:int=1, isCyclic=False):
 
   """Descrn: Makes Molecule for a given sequence
 
-     Inputs: Project, Word (ChemComp.molType), List of Words (ChemComp.CcpCode),
+     Inputs: Project,List of Words (ChemComp.CcpCode), Word (ChemComp.molType), 
      String ( Ccp.Molecule.Molecule.name) Int (first MolResidue.seqCode)
 
      Output: Molecule
   """
 
-  if not molName:
-    i = 1
-    molName = 'Molecule %d' % i
-    while project.findFirstMolecule(name=molName):
-      i += 1
-      molName = 'Molecule %d' % i
+  # ensure name is unique
+  i = 0
+  ss = name
+  while project.findFirstMolecule(name=ss):
+    i += 1
+    ss = '%s%d' % (name,i)
+  if ss != name:
+    project._logger.warning(
+    "CCPN molecule named %s already exists. New molecule has been named %s" %
+    (name,ss))
+  name = ss
  
-  molecule =  project.newMolecule(name=molName)
+  molecule =  project.newMolecule(name=name)
 
   try:
-    addMolResidues(molecule, molType, sequence, startNum, isCyclic)
-  except ApiError as e:
+    if isinstance(sequence, str):
+      addOneLetterMolResidues(molecule, sequence, molType, startNumber, isCyclic)
+    else:
+      addMolResidues(molecule, sequence, startNumber, isCyclic)
+  except Exception as e:
     try:
       molecule.delete()
     except:
@@ -68,59 +80,126 @@ def makeMolecule(project, molType, sequence, molName=None, startNum=1, isCyclic=
 
   return molecule
 
-def addMolResidues(molecule, molType, sequence, startNum=1, isCyclic=False):
-  """Descrn: Makes MolResidues for a given sequence in a new or specified Molecule
-     Inputs: Ccp.Molecule.Molecule, Word (ChemComp.molType), List of Words (ChemComp.CcpCode),
-             Ccp.Moleule.Molecule, String ( Ccp.Molecule.Molecule.name)
+
+def addOneLetterMolResidues(molecule:Molecule, sequence:str, molType:str='protein', startNumber:int=1,
+                            isCyclic:bool=False):
+  """Descrn: Adds MolResidues for a sequence of code1Letter to Molecule, using molType.
+             Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
+     Inputs: Ccp.Molecule.Molecule,
+             Word (Sequence string, of one-letter codes),
+             Word (molType: 'protein', 'DNA', or 'RNA'
              Int (first MolResidue.seqCode)
-     Output: List of Ccp.Molecule.MolResidues
+             bool (is molecule cyclic?)
+     Output: List of new Ccp.Molecule.MolResidues
   """
-  
-  if not sequence:
-    return []
-  
+  root = molecule.root
+
   oldMolResidues = molecule.molResidues
   if oldMolResidues:
     nn = max([x.seqCode for x in oldMolResidues]) + 1
-    startNum = max(startNum, nn)
-  
-  if len(sequence) > 1 and molType in ('protein','DNA','RNA'):
-    # linear polymer
-    
-    seqInput = list(zip([molType]*len(sequence),sequence))
-    molResidues = makeLinearSequence(molecule, seqInput, seqCodeStart=startNum, isCyclic=isCyclic)
-  
+    startNumber = max(startNumber, nn)
+
+  # Sequence string. Use molType and assume one-letter codes
+  if not molType in LINEAR_POLYMER_TYPES:
+    raise ValueError("molType %s must be one of:  %s" % (molType, LINEAR_POLYMER_TYPES))
+
+  # upcase, as all one-letter codes are upper case
+  sequence = sequence.upper()
+
+  ll = [root.findFirstChemComp(molType=molType, code1Letter=x, className="StdChemComp")
+        for x in sequence]
+  if None in ll:
+    ii = ll.index(None)
+    raise ValueError("Illegal %s code %s at position %s in sequence: %s"
+                     % (molType, sequence[ii], ii, sequence))
   else:
-    # not linear polymer
-  
-    molResidues = []
-    
-    project = molecule.root
-    for i in range(len(sequence)):
-      chemComp = chemCompIo.getChemComp(project, molType, sequence[i])
-      if chemComp:
-        chemCompVar  = chemComp.findFirstChemCompVar(linking='none') or chemComp.findFirstChemCompVar() # just a default
-        descriptor   = chemCompVar.descriptor
-        linking      = chemCompVar.linking
+    seqInput= [(molType,x.ccpCode) for x in ll]
 
-        molResidue   = molecule.newMolResidue(seqCode=i+startNum, chemComp=chemComp, linking=linking, descriptor=descriptor)
-        molResidues.append(molResidue)
+  if len(seqInput) > 1:
+    molResidues = addLinearSequence(molecule, seqInput, seqCodeStart=startNumber,
+                                    isCyclic=isCyclic)
+    return molResidues
 
-      else:
-        # TBD: should be logging
-        project._logger.warning('Warning: Residue code %s cannot be found for molecule type %s.'
-                                % (sequence[i],molType))
+
+def addMolResidues(molecule:Molecule, sequence:list, startNumber:int=1, isCyclic:bool=False):
+  """Descrn: Adds MolResidues for a sequence of residueNamee to Molecule.
+             Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
+     Inputs: Ccp.Molecule.Molecule,
+             List of Words (residueName),
+             Int (first MolResidue.seqCode)
+             bool (is molecule cyclic?)
+     Output: List of new Ccp.Molecule.MolResidues
+  """
+
+  root = molecule.root
   
-  return molResidues
+  if not sequence:
+    return []
+
+  # Reset startNumber to match pre-existing MOlResidues
+  oldMolResidues = molecule.molResidues
+  if oldMolResidues:
+    nn = max([x.seqCode for x in oldMolResidues]) + 1
+    startNumber = max(startNumber, nn)
+
+  # Convert to sequence of (molType, ccpCode) and check for known residueNames
+  residueName2chemCompId = MoleculeQuery.fetchStdResNameMap(root)
+  seqInput = [residueName2chemCompId.get(x) for x in sequence]
+  if None in seqInput:
+    ii = seqInput.index(None)
+    raise ValueError("Unknown residueName %s at position %s in sequence"
+                     % (sequence[ii], ii))
+
+  # Divide molecule in stretches by type, and add the residues one stretch at a time
+  result = []
+
+  offset1 = 0
+  while offset1 < len(seqInput):
+    molType1, ccpCode = seqInput[offset1]
+
+    if molType1 in LINEAR_POLYMER_TYPES:
+      # Linear polymer stretch - add to stretch
+      offset2 = offset1 + 1
+      while offset2 < len(seqInput):
+        molType2 = seqInput[offset2][0]
+        if molType2 in LINEAR_POLYMER_TYPES and (molType1 == 'protein') == (molType2 == 'protein'):
+          # Either both protein or both RNA/DNA
+          offset2 += 1
+        else:
+          break
+
+      if offset2 - offset1 > 1:
+        result.extend(addLinearSequence(molecule, seqInput[offset1:offset2],
+                                        seqCodeStart=startNumber+offset1, isCyclic=isCyclic))
+        offset1 = offset2
+        # End of stretch. Skip ret of loop and go on to next residue
+        continue
+
+    # No linear polymer stretch was found. Deal with residue by itself
+    # assert  molType1 not in LINEAR_POLYMER_TYPES or offset2 - offset1 == 1
+    chemComp = chemCompIo.getChemComp(root, molType1, ccpCode)
+    if chemComp:
+      chemCompVar  = (chemComp.findFirstChemCompVar(linking='none') or
+                      chemComp.findFirstChemCompVar()) # just a default
+
+      result.append(molecule.newMolResidue(seqCode=startNumber+offset1, chemCompVar=chemCompVar))
+      offset1 += 1
+
+    else:
+      raise ValueError('ChemComp %s,%s cannot be found.' % (molType1, ccpCode))
+
+  #
+  return result
   
   
-def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
+def addLinearSequence(molecule:Molecule, sequence:list, seqCodeStart:int=1,
+                       isCyclic:bool=False):
   """Descrn: Add residues to molecule. Fast method, which uses 'override' mode.
              sequence is a list of (molType,ccpCode) tuples - so can make mixed-type
              linear polymers; All ChemComps must have next and prev links to fit a 
              linear polymer seqCodes start from seqCodeStart, serial from next 
-             free serial (or 1)
-     Inputs: Molecule.molecule, List of Tuples of Strings (molType, ccpCode), Int, Boolean
+             free serial (or 1). FIrst residue is 'start' and last is 'end', unlesss isCyclic
+    Inputs: Molecule.molecule, List of Tuples of Strings (molType, ccpCode), Int, Boolean
      Output: List of Molecule.MolResidues
   """
   logger = molecule.root._logger
@@ -263,7 +342,7 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
       undo.decreaseBlocking()
 
   if undo is not None and (molResidues or molResLinks):
-    undo.addItem(Undo.deleteAll, makeLinearSequence, undoArgs=(molResidues+molResLinks,),
+    undo.addItem(Undo.deleteAll, addLinearSequence, undoArgs=(molResidues+molResLinks,),
                  redoArgs=(molecule, sequence),
                  redoKwargs = {'seqCodeStart':seqCodeStart, 'isCyclic':isCyclic})
     
@@ -283,7 +362,7 @@ def makeLinearSequence(molecule, sequence, seqCodeStart=1, isCyclic=False):
   
   
 def _getLinearChemCompData(project, molType, ccpCode, linking):
-  """Descrn: Implementation function, specific for makeLinearSequence()
+  """Descrn: Implementation function, specific for addLinearSequence()
      Inputs: Project object, and desired molType, ccpCode, linking (all strings)
      Output: (dd,ll) tuple where dd is a dictionary for passing to the 
               MolResidue creation (as **dd), and ll is a list of the linkCodes
@@ -362,87 +441,87 @@ def _getLinearChemCompData(project, molType, ccpCode, linking):
 
 
 
-def setMolResidueCcpCode(molResidue,ccpCode):
-  """Descrn: Replaces a molResidue with an equivalently connected one (if possible) with a different ccpCode
-     Inputs: Ccp.Molecule.MolResidue, Word (Ccp.Molecule.MolResidue.ccpCode)
-     Output: Ccp.Molecule.MolResidue
-  """
-  
-  if molResidue.ccpCode == ccpCode:
-    return molResidue
-
-  chemComp = molResidue.root.findFirstChemComp(ccpCode=ccpCode)
-  if not chemComp:
-    return
-  
-  chemCompVar = chemComp.findFirstChemCompVar(descriptor=molResidue.descriptor,
-                                              linking=molResidue.linking)
-  if not chemCompVar:
-    chemCompVar = chemComp.findFirstChemCompVar(linking=molResidue.linking)
-    
-  if chemCompVar:
-    molResidue = setMolResidueChemCompVar(molResidue,chemCompVar)
-  
-  return molResidue
-
-def setMolResidueChemCompVar(molResidue,chemCompVar):
-  """Descrn: Replaces a molResidue with an equivalently connected one (if possible) 
-             with a different chemChemCompVar. This is a very naughty function 
-             which bypasses the API - but it does check molecule validity at the end.
-
-     Inputs: Ccp.Molecule.MolResidue, Ccp.ChemComp.ChemCompVar
-
-     Output: Ccp.Molecule.MolResidue
-
-     NBNB TBD looks broken
-  """
-  
-  if molResidue.chemCompVar is chemCompVar:
-    return molResidue
-  
-  molecule     = molResidue.molecule
-  # seqCode      = molResidue.seqCode
-  linking      = chemCompVar.linking
-  descriptor   = chemCompVar.descriptor 
-  chemComp = chemCompVar.chemComp
-    
-  links = []
-  for linkEnd in molResidue.molResLinkEnds:
-    if linkEnd.molResLink:
-      # codes = [linkEnd.linkCode]
-      for linkEnd2 in linkEnd.molResLink.molResLinkEnds:
-        if linkEnd2 is not linkEnd:
-          links.append( [linkEnd.linkCode, linkEnd2] )
-          linkEnd.molResLink.delete()
-
-  if molResidue.chemComp is not chemComp:
-    molResidue.__dict__['chemComp'] = chemComp
-
-  molResidue.__dict__['descriptor'] = descriptor
-  molResidue.__dict__['linking'] = linking
-
-  linkCodes = [] 
-  for linkEnd in chemCompVar.linkEnds:
-    linkCode = linkEnd.linkCode
-    linkCodes.append(linkCode)
-    if not molResidue.findFirstMolResLinkEnd(linkCode=linkCode):
-      molResidue.newMolResLinkEnd(linkCode=linkCode)
-  
-  for linkEnd in molResidue.molResLinkEnds:
-    if linkEnd.linkCode not in linkCodes:
-      link = linkEnd.molResLink
-      if link:
-        link.delete()
-      linkEnd.delete()  
-  
-  for (linkCodeA,linkEndB) in links:
-    linkEndA = molResidue.findFirstMolResLinkEnd(linkCode=linkCodeA)
-    if linkEndA and linkEndB:
-      molecule.newMolResLink(molResLinkEnds=(linkEndA,linkEndB))
-    
-  molecule.checkAllValid(complete=True)
- 
-  return molResidue
+# def setMolResidueCcpCode(molResidue,ccpCode):
+#   """Descrn: Replaces a molResidue with an equivalently connected one (if possible) with a different ccpCode
+#      Inputs: Ccp.Molecule.MolResidue, Word (Ccp.Molecule.MolResidue.ccpCode)
+#      Output: Ccp.Molecule.MolResidue
+#   """
+#
+#   if molResidue.ccpCode == ccpCode:
+#     return molResidue
+#
+#   chemComp = molResidue.root.findFirstChemComp(ccpCode=ccpCode)
+#   if not chemComp:
+#     return
+#
+#   chemCompVar = chemComp.findFirstChemCompVar(descriptor=molResidue.descriptor,
+#                                               linking=molResidue.linking)
+#   if not chemCompVar:
+#     chemCompVar = chemComp.findFirstChemCompVar(linking=molResidue.linking)
+#
+#   if chemCompVar:
+#     molResidue = setMolResidueChemCompVar(molResidue,chemCompVar)
+#
+#   return molResidue
+#
+# def setMolResidueChemCompVar(molResidue,chemCompVar):
+#   """Descrn: Replaces a molResidue with an equivalently connected one (if possible)
+#              with a different chemChemCompVar. This is a very naughty function
+#              which bypasses the API - but it does check molecule validity at the end.
+#
+#      Inputs: Ccp.Molecule.MolResidue, Ccp.ChemComp.ChemCompVar
+#
+#      Output: Ccp.Molecule.MolResidue
+#
+#      NBNB TBD looks broken
+#   """
+#
+#   if molResidue.chemCompVar is chemCompVar:
+#     return molResidue
+#
+#   molecule     = molResidue.molecule
+#   # seqCode      = molResidue.seqCode
+#   linking      = chemCompVar.linking
+#   descriptor   = chemCompVar.descriptor
+#   chemComp = chemCompVar.chemComp
+#
+#   links = []
+#   for linkEnd in molResidue.molResLinkEnds:
+#     if linkEnd.molResLink:
+#       # codes = [linkEnd.linkCode]
+#       for linkEnd2 in linkEnd.molResLink.molResLinkEnds:
+#         if linkEnd2 is not linkEnd:
+#           links.append( [linkEnd.linkCode, linkEnd2] )
+#           linkEnd.molResLink.delete()
+#
+#   if molResidue.chemComp is not chemComp:
+#     molResidue.__dict__['chemComp'] = chemComp
+#
+#   molResidue.__dict__['descriptor'] = descriptor
+#   molResidue.__dict__['linking'] = linking
+#
+#   linkCodes = []
+#   for linkEnd in chemCompVar.linkEnds:
+#     linkCode = linkEnd.linkCode
+#     linkCodes.append(linkCode)
+#     if not molResidue.findFirstMolResLinkEnd(linkCode=linkCode):
+#       molResidue.newMolResLinkEnd(linkCode=linkCode)
+#
+#   for linkEnd in molResidue.molResLinkEnds:
+#     if linkEnd.linkCode not in linkCodes:
+#       link = linkEnd.molResLink
+#       if link:
+#         link.delete()
+#       linkEnd.delete()
+#
+#   for (linkCodeA,linkEndB) in links:
+#     linkEndA = molResidue.findFirstMolResLinkEnd(linkCode=linkCodeA)
+#     if linkEndA and linkEndB:
+#       molecule.newMolResLink(molResLinkEnds=(linkEndA,linkEndB))
+#
+#   molecule.checkAllValid(complete=True)
+#
+#   return molResidue
 
 
 

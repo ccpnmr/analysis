@@ -259,7 +259,7 @@ def test_make_molecule_undo():
   project = ioUtil.newProject('UndoTest')
   project._undo = Undo()
   sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
-  molecule = MoleculeModify.makeMolecule(project, 'protein', sequence)
+  molecule = MoleculeModify.makeMolecule(project, sequence, 'protein')
   project._undo.undo()
   project.checkAllValid()
 
@@ -268,7 +268,7 @@ def test_make_molecule_undo_redo():
   project = ioUtil.newProject('UndoTest')
   project._undo = Undo()
   sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
-  molecule = MoleculeModify.makeMolecule(project, 'protein', sequence)
+  molecule = MoleculeModify.makeMolecule(project, sequence, 'protein')
   project._undo.undo()
   project._undo.redo()
   project.checkAllValid()

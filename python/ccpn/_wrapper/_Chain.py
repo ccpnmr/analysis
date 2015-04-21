@@ -27,8 +27,6 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpncore.lib.molecule import MoleculeModify
-from ccpncore.lib.molecule.DataMapper import DataMapper
-from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
 
 
@@ -115,78 +113,7 @@ class Chain(AbstractWrapperObject):
   def finalize(self):
     """Finalize chain so that it can no longer be modified, and add missing data."""
     self._wrappedData.molecule.isFinalised = True
-  
-  # def addResidues(self, sequence:Sequence, startNumber:int=None,
-  #                    preferredMolType:str=None):
-  #   """Add sequence to chain, without setting bonds to pre-existing residues
-  #
-  #   :param Sequence sequence: a sequence of three-letter-codes, CCPN residue type codes\
-  #   or one-letter codes if sequence contains more than one residue, it is assumed that\
-  #   the residues form a linear polymer
-  #
-  #   :param int startNumber: residue number of first residue in sequence. \
-  #   If not given, is it one  more than the last
-  #
-  #   :param str preferredMolType: MolType to use in case of ambiguity (one of 'protein', \
-  #   'DNA', 'RNA', 'carbohydrate', 'other'"""
-  #
-  #   ccpnChain = self._wrappedData
-  #   ccpnMolecule = ccpnChain.molecule
-  #
-  #   if ccpnMolecule.isFinalised or ccpnMolecule.sortedChains != [ccpnChain]:
-  #     raise ValueError("Chain {} can no longer be modified".format(self))
-  #
-  #   if not sequence:
-  #     msg = "No residues given to add to chain"
-  #     self._project._logger.warning(msg)
-  #     return
-  #
-  #   # get startNumber for new sequence
-  #   if startNumber is None:
-  #     ll = ccpnMolecule.sortedMolResidues()
-  #     if ll:
-  #       startNumber = ll[-1].serial + 1
-  #     else:
-  #       startNumber = 1
-  #
-  #   dd = self._project._residueName2chemCompIds
-  #   ccSequence = [DataMapper.pickChemCompId(dd, x, prefMolType=preferredMolType)
-  #                 for x in sequence]
-  #   if None in ccSequence:
-  #     ii = ccSequence.index(None)
-  #     msg = "Residue %s in sequence: %s not recognised" % (ii, sequence[ii])
-  #     self._project._logger.warning(msg)
-  #     return
-  #
-  #   if len(sequence) == 1:
-  #     # Single residue. Add it
-  #     tt = ccSequence[0]
-  #     if tt:
-  #       molType, ccpCode = tt
-  #     else:
-  #       msg = "No ChemComp ID found for %s" % sequence
-  #       self._project._logger.error(msg)
-  #       raise ValueError(msg)
-  #
-  #     chemComp = ccpnMolecule.root.findFirstChemComp(molType=molType, ccpCode=ccpCode)
-  #     chemCompVar = (chemComp.findFirstChemCompVar(linking='none', isDefaultVar=True) or
-  #                    chemComp.findFirstChemCompVar(linking='none'))
-  #     molResidues = [ccpnMolecule.newMolResidue(chemCompVar=chemCompVar, seqCode=startNumber)]
-  #
-  #   else:
-  #     # multiple residues, add as linear polymer
-  #
-  #     molResidues = MoleculeModify.makeLinearSequence(ccpnMolecule, ccSequence,
-  #                                                     seqCodeStart=startNumber)
-  #
-  #   # make MolSystem Residues
-  #   for molResidue in molResidues:
-  #     ccpnChain.newResidue(self, seqId=molResidue.serial,seqCode=molResidue.seqCode,
-  #                          seqInsertCode=molResidue.seqInsertCode, linking=molResidue.linking,
-  #                          descriptor=molResidue.descriptor )
-  #
-  #   # make ChainFragments
-  #   ccpnChain.createChainFragments()
+
 
   # Implementation functions
   @classmethod
@@ -198,146 +125,116 @@ class Chain(AbstractWrapperObject):
     else:
       return parent._wrappedData.molSystem.sortedChains()
 
-
-# def newChain(parent:Project, compoundName:str, shortName:str=None,
-#              role:str=None, comment:str=None) -> Chain:
-#   """Create new child Chain, empty or matching existing compound
 #
-#   :param str compoundName: Name of new compound (CCPN_Molecule) matching chain, \
-#       Will use matching molecule if one exists. If None will create dummy name.
-#   :param str shortName: shortName for new chain (optional)
-#   :param str role: role for new chain (optional)
-#   :param str comment: comment for new chain (optional)"""
+# def _makeChains(parent:Project, residueRecords) -> Chain:
+#   """Make chains from sequence of  tuples
 #
-#   ccpnMolSystem = parent.nmrProject.molSystem
-#   ccpnRoot = ccpnMolSystem.root
+#   :param Sequence residueRecords: (chainCode, sequenceCode, residueType, linking, descriptor) tuples
+#   sequenceCode defaults to the seqId of the residue;
+#   descriptor defaults to give the default variant;
+#   sequence records must be grouped by chainCode;
+#   Only records between a start and and end linking are connected as linear polymers.
+#   """
 #
-#   if shortName is None:
-#     shortName = MoleculeModify.nextChainCode(ccpnMolSystem)
+#   NBNB TBD refactor
+#   NBNB Move somewhere else (currently used only for NEF)
 #
-#   ccpnMolecule = ccpnRoot.findFirstMolecule(name=compoundName)
-#   if ccpnMolecule is None:
-#     ccpnMolecule = ccpnRoot.newMolecule(name=compoundName,
-#                                         longName=compoundName)
+#   ccpnRoot = parent._wrappedData.root
+#   ccpnMolSystem = parent._wrappedData.molSystem
+#   residueName2chemCompIds = parent._residueName2chemCompIds
+#   code2Molecule = {}
+#   ccpnMolecule = None
+#   sequence = None
+#   chains = []
 #
-#   newCcpnChain = ccpnMolSystem.newChain(molecule=ccpnMolecule,
-#                                         code=shortName,
-#                                         pdbOneLetterCode=shortName[0],
-#                                         role=role,
-#                                         details=comment)
+#   currentChainCode = None
+#   for oldRecord in residueRecords:
+#     (chainCode, sequenceCode, residueType, linking, descriptor) = oldRecord
+#     seqCode, seqInsertCode, junk = commonUtil.parseSequenceCode(sequenceCode)
+#     tt = DataMapper.pickChemCompId(residueName2chemCompIds, residueType)
+#     if tt is None:
+#       print("WARNING Skipping - no ChemComp found for record: %s" % (oldRecord,))
+#       continue
+#     else:
+#       molType, ccpCode = tt
+#     newRecord = (molType, ccpCode, linking, descriptor, seqCode, seqInsertCode)
 #
-#   return parent._project._data2Obj.get(newCcpnChain)
-  
-def _makeChains(parent:Project, residueRecords) -> Chain:
-  """Make chains from sequence of  tuples
-  
-  :param Sequence residueRecords: (chainCode, sequenceCode, residueType, linking, descriptor) tuples
-  sequenceCode defaults to the seqId of the residue;
-  descriptor defaults to give the default variant;
-  sequence records must be grouped by chainCode;
-  Only records between a start and and end linking are connected as linear polymers.
-  """
+#     if ccpnMolecule is None or chainCode != currentChainCode:
+#       if chainCode in code2Molecule:
+#         raise ValueError("Sequence must have records for each chain contiguous")
+#
+#       if sequence:
+#         raise ValueError("Chain %s ends with unfinished sequence" % chainCode)
+#
+#       currentChainCode = chainCode
+#
+#       # no molecule name. Invent one, and make molecule
+#       compoundName = 'Molecule_1'
+#       while ccpnRoot.findFirstMolecule(name=compoundName) is not None:
+#         compoundName = commonUtil.incrementName(compoundName)
+#       ccpnMolecule = ccpnRoot.newMolecule(name=compoundName, longName=compoundName)
+#       code2Molecule[chainCode] = ccpnMolecule
+#
+#     if sequence is None:
+#       if linking == 'start':
+#         sequence = [newRecord]
+#       elif linking == 'end':
+#         raise ValueError("Illegal 'end' residue linking outside of sequence: %s" % (newRecord,))
+#       else:
+#         # Linking defaults to 'non' when not in a sequence
+#         linking = linking or 'none'
+#         ccpnMolecule.newMolResidue(seqCode=seqCode, seqInsertCode=seqInsertCode,
+#                                    molType=molType, ccpCode=ccpCode, linking=linking,
+#                                    descriptor=descriptor, code3Letter=residueType)
+#     else:
+#       if linking in  ('start', 'none'):
+#         raise ValueError("Illegal residue linking in the middle of sequence: %s" % (oldRecord,))
+#
+#       sequence.append(newRecord)
+#       if linking == 'end':
+#         # Finish current sequence
+#         seqCodeStart = sequence[0][4]
+#         molResidues = MoleculeModify.addLinearSequence(ccpnMolecule,
+#                                                         [tt[:2] for tt in sequence],
+#                                                         seqCodeStart=seqCodeStart)
+#         for ii,tt in enumerate(sequence):
+#           molResidue = molResidues[ii]
+#           molResidue.seqCode = tt[4]
+#           molResidue.seqInsertCode = tt[5] or ' '
+#
+#         sequence = None
+#
+#   # Finished molecule. Make chains
+#   for chainCode,ccpnMolecule in sorted(code2Molecule.items()):
+#     useChainCode = chainCode
+#     while ccpnMolSystem.findFirstChain(code=useChainCode):
+#       useChainCode = commonUtil.incrementName(useChainCode)
+#     chain = ccpnMolSystem.newChain(molecule=ccpnMolecule, code=useChainCode,
+#                                    pdbOneLetterCode=useChainCode[0])
+#     chains.append(chain)
+#     ccpnMolecule.isFinalised = True
+#
+#   # NBNB TBD decriptors are not set.
+#   # NBNB TBD no allowance for crosslinks
+#
+#   #
+#   return chains
 
-  ccpnRoot = parent._wrappedData.root
-  ccpnMolSystem = parent._wrappedData.molSystem
-  residueName2chemCompIds = parent._residueName2chemCompIds
-  code2Molecule = {}
-  ccpnMolecule = None
-  sequence = None
-  chains = []
-
-  currentChainCode = None
-  for oldRecord in residueRecords:
-    (chainCode, sequenceCode, residueType, linking, descriptor) = oldRecord
-    seqCode, seqInsertCode, junk = commonUtil.parseSequenceCode(sequenceCode)
-    tt = DataMapper.pickChemCompId(residueName2chemCompIds, residueType)
-    if tt is None:
-      print("WARNING Skipping - no ChemComp found for record: %s" % (oldRecord,))
-      continue
-    else:
-      molType, ccpCode = DataMapper.pickChemCompId(residueName2chemCompIds, residueType)
-    newRecord = (molType, ccpCode, linking, descriptor, seqCode, seqInsertCode)
-
-    if ccpnMolecule is None or chainCode != currentChainCode:
-      if chainCode in code2Molecule:
-        raise ValueError("Sequence must have records for each chain contiguous")
-
-      if sequence:
-        raise ValueError("Chain %s ends with unfinished sequence" % chainCode)
-
-      currentChainCode = chainCode
-
-      # no molecule name. Invent one, and make molecule
-      compoundName = 'Molecule_1'
-      while ccpnRoot.findFirstMolecule(name=compoundName) is not None:
-        compoundName = commonUtil.incrementName(compoundName)
-      ccpnMolecule = ccpnRoot.newMolecule(name=compoundName, longName=compoundName)
-      code2Molecule[chainCode] = ccpnMolecule
-
-    if sequence is None:
-      if linking == 'start':
-        sequence = [newRecord]
-      elif linking == 'end':
-        raise ValueError("Illegal 'end' residue linking outside of sequence: %s" % (newRecord,))
-      else:
-        # Linking defaults to 'non' when not in a sequence
-        linking = linking or 'none'
-        ccpnMolecule.newMolResidue(seqCode=seqCode, seqInsertCode=seqInsertCode,
-                                   molType=molType, ccpCode=ccpCode, linking=linking,
-                                   descriptor=descriptor, code3Letter=residueType)
-    else:
-      if linking in  ('start', 'none'):
-        raise ValueError("Illegal residue linking in the middle of sequence: %s" % (oldRecord,))
-
-      sequence.append(newRecord)
-      if linking == 'end':
-        # Finish current sequence
-        seqCodeStart = sequence[0][4]
-        molResidues = MoleculeModify.makeLinearSequence(ccpnMolecule,
-                                                        [tt[:2] for tt in sequence],
-                                                        seqCodeStart=seqCodeStart)
-        for ii,tt in enumerate(sequence):
-          molResidue = molResidues[ii]
-          molResidue.seqCode = tt[4]
-          molResidue.seqInsertCode = tt[5] or ' '
-
-        sequence = None
-
-  # Finished molecule. Make chains
-  for chainCode,ccpnMolecule in sorted(code2Molecule.items()):
-    useChainCode = chainCode
-    while ccpnMolSystem.findFirstChain(code=useChainCode):
-      useChainCode = commonUtil.incrementName(useChainCode)
-    chain = ccpnMolSystem.newChain(molecule=ccpnMolecule, code=useChainCode,
-                                   pdbOneLetterCode=useChainCode[0])
-    chains.append(chain)
-    ccpnMolecule.isFinalised = True
-
-  # NBNB TBD decriptors are not set.
-  # NBNB TBD no allowance for crosslinks
-
-  #
-  return chains
-
-def makeSimpleChain(parent:Project, sequence, compoundName:str='Molecule_1',
-              startNumber:int=1, preferredMolType:str=None,
+def makeSimpleChain(parent:Project, sequence:(str,tuple), compoundName:str='Molecule_1',
+              startNumber:int=1, molType:str=None, isCyclic:bool=False,
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
   """Make new chain from sequence of residue codes, using default linking and variants
 
-  :param Sequence sequence: string of one-letter or sequence of three-residue type codes
-
+  :param Sequence sequence: string of one-letter codes or sequence of residueNames
   :param str compoundName: name of new CCPN_Molecule (e.g. 'Lysozyme')
-  :param str preferredMolType: preferred molType to use for ambiguous codes (mainly \
-  one-letter codes). Normal preference order is: \
-  'protein','DNA', 'RNA', 'carbohydrate', 'other'. \
+  :param str molType: molType ('protein','DNA', 'RNA'). Required only if sequence is a string.
   :param int startNumber: number of first residue in sequence
   :param str shortName: shortName for new chain (optional)
   :param str role: role for new chain (optional)
   :param str comment: comment for new chain (optional)
 
   """
-  project = parent._project
-  ccpnRoot = parent._wrappedData.root
+
   ccpnMolSystem = parent._wrappedData.molSystem
   if shortName is None:
     shortName = MoleculeModify.nextChainCode(ccpnMolSystem)
@@ -347,47 +244,13 @@ def makeSimpleChain(parent:Project, sequence, compoundName:str='Molecule_1',
   if not sequence:
     raise ValueError("makeChain requires non-empty sequence")
 
-  # rename compoundName if necessary
-  oldName = compoundName
-  while ccpnRoot.findFirstMolecule(name=compoundName):
-    compoundName = commonUtil.incrementName(compoundName)
-  if oldName != compoundName:
-    project._logger.warning(
-      "CCPN molecule named %s already exists. New molecule has been named %s" %
-      (oldName,compoundName))
-  ccpnMolecule = ccpnRoot.newMolecule(name=compoundName, longName=oldName)
-
-  dd = project._residueName2chemCompIds
-  ccSequence = [DataMapper.pickChemCompId(dd, x, prefMolType=preferredMolType)
-                for x in sequence]
-  if None in ccSequence:
-    ii = ccSequence.index(None)
-    msg = "Residue %s in sequence: %s not recognised" % (ii, sequence[ii])
-    project._logger.warning(msg)
-    return
-
-  if len(sequence) == 1:
-    # Single residue. Add it
-    tt = ccSequence[0]
-    if tt:
-      molType, ccpCode = tt
-    else:
-      msg = "No ChemComp ID found for %s" % sequence
-      parent._project._logger.error(msg)
-      raise ValueError(msg)
-
-    chemComp = ccpnMolecule.root.findFirstChemComp(molType=molType, ccpCode=ccpCode)
-    chemCompVar = (chemComp.findFirstChemCompVar(linking='none', isDefaultVar=True) or
-                   chemComp.findFirstChemCompVar(linking='none'))
-    ccpnMolecule.newMolResidue(chemCompVar=chemCompVar, seqCode=startNumber)
-
-  else:
-    # multiple residues, add as linear polymer
-    MoleculeModify.makeLinearSequence(ccpnMolecule, ccSequence, seqCodeStart=startNumber)
+  ccpnMolecule = MoleculeModify.makeMolecule(ccpnMolSystem.root, sequence, molType=molType,
+                                             name=compoundName, startNumber=startNumber,
+                                             isCyclic=isCyclic)
 
   newCcpnChain = ccpnMolSystem.newChain(molecule=ccpnMolecule, role=role, details=comment)
   #
-  return project._data2Obj[newCcpnChain]
+  return  parent._project._data2Obj[newCcpnChain]
 
 
   
@@ -400,7 +263,7 @@ Chain.clone.__annotations__['return'] = Chain
 Project._childClasses.append(Chain)
 # Project.newChain = newChain
 Project.makeSimpleChain = makeSimpleChain
-Project._makeChains = _makeChains
+# Project._makeChains = _makeChains
 
 # Notifiers:
 className = ApiChain._metaclass.qualifiedName()

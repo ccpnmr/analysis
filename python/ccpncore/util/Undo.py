@@ -243,6 +243,7 @@ class Undo(deque):
     self.nextIndex = 0
     self.waypoints.clear()
     self._blocked = False
+    self._blockingLevel = 0
     deque.clear(self)
 
   def canUndo(self) -> bool:

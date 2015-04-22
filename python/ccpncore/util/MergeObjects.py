@@ -263,193 +263,205 @@ def mergeObjects(sourceObj,targetObj):
    
   # make sure we are valid before going into the tough part
   targetObj.checkValid()
-  
-  
-  if nastyLinks:
-    root = targetObj.root
+
+
+  undo = sourceObj.root._undo
+  if nastyLinks or childLinks:
+    if undo is not None:
+      # This is not undoable - at least it would be immense work to make it so
+      undo.increaseBlocking()
     try:
-      root.override = True 
-     
-      for a in nastyLinks:
-        # links that can *NOT* be handled without bypassing API
- 
-        linkName = a.name
-        o = a.otherRole
-        backName = o.name
-        keyNames = o.container.keyNames
-        attrObjClass = a.valueType
-        downlink = attrObjClass.parentRole.otherRole.name
-        #print linkName, a.locard, a.hicard, o.locard, o.hicard
-      
-        if a.hicard == 1:
-          #print "C1", linkName
 
-          if  getattr(targetObj,linkName) is None:
+      if nastyLinks:
+        root = targetObj.root
+        try:
+          root.override = True
 
-            #do
-            childDict = {}
-            oldKey = None
-            newKey = None
-            attrObj = getattr(sourceObj,linkName)
-            if backName in keyNames:
-              oldKey = attrObj.getLocalKey()
-            setattr(sourceObj, linkName, None)
-            setattr(targetObj, linkName, attrObj)
-            if backName in keyNames:
-              newKey = attrObj.getLocalKey()
-              # this changes key for attrObj - fix it.
-              childDict = attrObj.parent.__dict__[downlink]
-              if newKey in childDict:
-                # key already taken - undo
-                setattr(targetObj, linkName, None)
-                setattr(sourceObj, linkName, attrObj)
-                raise ApiError("Merge failure: %s key %s already in use"
-                               % (attrObj.qualifiedName(), newKey))
-              else:
-                del childDict[oldKey]
-                childDict[newKey] = attrObj
+          for a in nastyLinks:
+            # links that can *NOT* be handled without bypassing API
 
-            # test
-            try:
-              attrObj.checkValid()
-              targetObj.checkValid()
+            linkName = a.name
+            o = a.otherRole
+            backName = o.name
+            keyNames = o.container.keyNames
+            attrObjClass = a.valueType
+            downlink = attrObjClass.parentRole.otherRole.name
+            #print linkName, a.locard, a.hicard, o.locard, o.hicard
 
-            # undo
-            except:
-              setattr(targetObj, linkName, None)
-              setattr(sourceObj, linkName, attrObj)
-              if backName in keyNames:
-                del childDict[newKey]
-                childDict[oldKey] = attrObj
-              print ("Merge failure: %s, %s result is not valid"
-                     % (targetObj, attrObj))
-              raise
+            if a.hicard == 1:
+              #print "C1", linkName
 
-        else:
-          #
-          # assert a.hicard != 1
-          #
-          # NB if a.locard > 0 the code below could create an illegal
-          # sourceObj. Which would not be a problem if all went well,
-          # but would render the final state illegal if the merge ran into an 
-          # error somewhere else later
-          # We ignore this as links that are locard>0 in one direction and
-          # frozen in the other direction would make both objects impossible
-          # to create except under override conditions. The problem is *very*
-          # unlikely ever to arise.
-          
-          #
-          #print "C2", linkName
-          # set up
-          keepList = list(getattr(targetObj, linkName))
-          ll = list(getattr(sourceObj, linkName))
-          
-          if a.hicard == metaConstants.infinity:
-            moveList = ll
-            ignoreList = []
-          else:
-            nSpaces = a.hicard - len(keepList)
-            if nSpaces > 0:
-              moveList = ll[:nSpaces]
-              ignoreList = ll[nSpaces:]
+              if  getattr(targetObj,linkName) is None:
+
+                #do
+                childDict = {}
+                oldKey = None
+                newKey = None
+                attrObj = getattr(sourceObj,linkName)
+                if backName in keyNames:
+                  oldKey = attrObj.getLocalKey()
+                setattr(sourceObj, linkName, None)
+                setattr(targetObj, linkName, attrObj)
+                if backName in keyNames:
+                  newKey = attrObj.getLocalKey()
+                  # this changes key for attrObj - fix it.
+                  childDict = attrObj.parent.__dict__[downlink]
+                  if newKey in childDict:
+                    # key already taken - undo
+                    setattr(targetObj, linkName, None)
+                    setattr(sourceObj, linkName, attrObj)
+                    raise ApiError("Merge failure: %s key %s already in use"
+                                   % (attrObj.qualifiedName(), newKey))
+                  else:
+                    del childDict[oldKey]
+                    childDict[newKey] = attrObj
+
+                # test
+                try:
+                  attrObj.checkValid()
+                  targetObj.checkValid()
+
+                # undo
+                except:
+                  setattr(targetObj, linkName, None)
+                  setattr(sourceObj, linkName, attrObj)
+                  if backName in keyNames:
+                    del childDict[newKey]
+                    childDict[oldKey] = attrObj
+                  print ("Merge failure: %s, %s result is not valid"
+                         % (targetObj, attrObj))
+                  raise
+
             else:
-              continue
-            
-          # do
-          oldKeys = []
-          newKeys = []
-          if backName in keyNames:
-            oldKeys = [x.getLocalKey() for x in moveList]
-          setattr(sourceObj, linkName, ignoreList)
-          setattr(targetObj, linkName, keepList + moveList)
-          if backName in keyNames:
-            newKeys = []
-            for ii, attrObj in enumerate(moveList):
-              childDict = attrObj.parent.__dict__[downlink]
-              newKey = attrObj.getLocalKey()
-              if newKey in childDict:
-                # key already taken - undo
-                setattr(targetObj, linkName, None)
-                setattr(sourceObj, linkName, attrObj)
-                for jj, nk in enumerate(newKeys):
-                  ao = moveList[jj]
-                  cd = ao.parent.__dict__[downlink]
-                  cd[oldKeys[jj]] = ao
-                  del cd[nk]
-                raise ApiError("Merge failure: %s key %s already in use"
-                               % (attrObj.qualifiedName(), newKey))
+              #
+              # assert a.hicard != 1
+              #
+              # NB if a.locard > 0 the code below could create an illegal
+              # sourceObj. Which would not be a problem if all went well,
+              # but would render the final state illegal if the merge ran into an
+              # error somewhere else later
+              # We ignore this as links that are locard>0 in one direction and
+              # frozen in the other direction would make both objects impossible
+              # to create except under override conditions. The problem is *very*
+              # unlikely ever to arise.
+
+              #
+              #print "C2", linkName
+              # set up
+              keepList = list(getattr(targetObj, linkName))
+              ll = list(getattr(sourceObj, linkName))
+
+              if a.hicard == metaConstants.infinity:
+                moveList = ll
+                ignoreList = []
               else:
-                newKeys.append(newKey)
-                # del childDict[oldKey] 
-                # TJS edit: to be checked
-                del childDict[oldKeys[ii]]
-                childDict[newKey] = attrObj
+                nSpaces = a.hicard - len(keepList)
+                if nSpaces > 0:
+                  moveList = ll[:nSpaces]
+                  ignoreList = ll[nSpaces:]
+                else:
+                  continue
 
-          # test
-          try:
-            targetObj.checkValid()
-            for attrObj in moveList:
-              attrObj.checkValid()
+              # do
+              oldKeys = []
+              newKeys = []
+              if backName in keyNames:
+                oldKeys = [x.getLocalKey() for x in moveList]
+              setattr(sourceObj, linkName, ignoreList)
+              setattr(targetObj, linkName, keepList + moveList)
+              if backName in keyNames:
+                newKeys = []
+                for ii, attrObj in enumerate(moveList):
+                  childDict = attrObj.parent.__dict__[downlink]
+                  newKey = attrObj.getLocalKey()
+                  if newKey in childDict:
+                    # key already taken - undo
+                    setattr(targetObj, linkName, None)
+                    setattr(sourceObj, linkName, attrObj)
+                    for jj, nk in enumerate(newKeys):
+                      ao = moveList[jj]
+                      cd = ao.parent.__dict__[downlink]
+                      cd[oldKeys[jj]] = ao
+                      del cd[nk]
+                    raise ApiError("Merge failure: %s key %s already in use"
+                                   % (attrObj.qualifiedName(), newKey))
+                  else:
+                    newKeys.append(newKey)
+                    # del childDict[oldKey]
+                    # TJS edit: to be checked
+                    del childDict[oldKeys[ii]]
+                    childDict[newKey] = attrObj
 
-          # undo
-          except:
-            setattr(targetObj, linkName, keepList)
-            setattr(sourceObj, linkName, moveList + ignoreList)
-            if backName in keyNames:
-              for jj, nk in enumerate(newKeys):
-                ao = moveList[jj]
-                cd = ao.parent.__dict__[downlink]
-                cd[oldKeys[jj]] = ao
-                del cd[nk]
-            raise
-          
- 
-    finally:
-      root.override = False 
-  
-  
-  if childLinks:
-    # now move children. This is a full bypass, no overrides
-    for a in childLinks:
-      parentName = a.otherRole.name
-      sourceDd = sourceObj.__dict__[a.name]
-      targetDd = targetObj.__dict__[a.name]
-      topObj = targetObj.topObject
-      
-      if a.hicard == 1:
-        # single kid (rare case)
-        targetObj.__dict__[a.name] = oo = sourceObj.__dict__[a.name]
-        sourceObj.__dict__[a.name] = None
-        oo.__dict__[parentName] = targetObj
-        oo.__dict__['topObject'] = topObj
- 
-      elif a.valueType.keyNames == ['serial']:
-        # multiple kid with serial key
-        nextSerial = targetObj.__dict__['_serialDict'][a.name] + 1
-        for junk, oo in sorted(sourceDd.items()):
-          targetDd[nextSerial] = oo
-          del sourceDd[nextSerial]
-          oo.__dict__[parentName] = targetObj
-          oo.__dict__['topObject'] = topObj
-        targetObj.__dict__['_serialDict'][a.name] = nextSerial
- 
- 
-      else:
-        # multiple kid with normal key
-        for localKey,oo in sorted(sourceDd.items()):
-          if localKey in targetDd:
-            # key is taken - skip object
-            continue
-          else:
-            targetDd[localKey] = oo
-            del sourceDd[localKey]
+              # test
+              try:
+                targetObj.checkValid()
+                for attrObj in moveList:
+                  attrObj.checkValid()
+
+              # undo
+              except:
+                setattr(targetObj, linkName, keepList)
+                setattr(sourceObj, linkName, moveList + ignoreList)
+                if backName in keyNames:
+                  for jj, nk in enumerate(newKeys):
+                    ao = moveList[jj]
+                    cd = ao.parent.__dict__[downlink]
+                    cd[oldKeys[jj]] = ao
+                    del cd[nk]
+                raise
+
+
+        finally:
+          root.override = False
+
+
+      if childLinks:
+        # now move children. This is a full bypass, no overrides
+        for a in childLinks:
+          parentName = a.otherRole.name
+          sourceDd = sourceObj.__dict__[a.name]
+          targetDd = targetObj.__dict__[a.name]
+          topObj = targetObj.topObject
+
+          if a.hicard == 1:
+            # single kid (rare case)
+            targetObj.__dict__[a.name] = oo = sourceObj.__dict__[a.name]
+            sourceObj.__dict__[a.name] = None
             oo.__dict__[parentName] = targetObj
             oo.__dict__['topObject'] = topObj
-      
-  targetObj.checkValid()
-  #print "S1", sourceObj
-  sourceObj.delete()
-  #print "S2", sourceObj
-  #print "T1", targetObj
+
+          elif a.valueType.keyNames == ['serial']:
+            # multiple kid with serial key
+            nextSerial = targetObj.__dict__['_serialDict'][a.name] + 1
+            for junk, oo in sorted(sourceDd.items()):
+              targetDd[nextSerial] = oo
+              del sourceDd[nextSerial]
+              oo.__dict__[parentName] = targetObj
+              oo.__dict__['topObject'] = topObj
+            targetObj.__dict__['_serialDict'][a.name] = nextSerial
+
+
+          else:
+            # multiple kid with normal key
+            for localKey,oo in sorted(sourceDd.items()):
+              if localKey in targetDd:
+                # key is taken - skip object
+                continue
+              else:
+                targetDd[localKey] = oo
+                del sourceDd[localKey]
+                oo.__dict__[parentName] = targetObj
+                oo.__dict__['topObject'] = topObj
+
+      targetObj.checkValid()
+      sourceObj.delete()
+    finally:
+      if undo is not None:
+        undo.clear()
+
+  else:
+    targetObj.checkValid()
+    sourceObj.delete()
+
   return targetObj
    

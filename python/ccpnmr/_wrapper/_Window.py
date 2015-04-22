@@ -25,11 +25,9 @@ from collections.abc import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
-from ccpn import Spectrum
 from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.GuiMainWindow import GuiMainWindow
-from ccpncore.lib.spectrum import Spectrum as libSpectrum
 from ccpncore.util import Pid
 
 
@@ -90,122 +88,6 @@ class Window(AbstractWrapperObject):
       return []
     else:
       return windowStore.sortedWindows()
-
-
-  # CCPN functions
-  def createSpectrumDisplay(self, spectrum:Spectrum, displayAxisCodes:Sequence=(),
-                            axisOrder:Sequence=(), name:str=None, positions:Sequence=(),
-                            widths:Sequence=(), units:Sequence=(),
-                            stripAxis:str='Y', is1d:bool=False,
-                            independentStrips:bool=False):
-
-    """
-    displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
-    axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
-    positions: axis positions in order - default to heuristic
-    widths: axis widths in order - default to heuristic
-    units: axis units in display order - default to heuristic
-    stripAxis: if 'X' or 'Y' set strip axis, if None set to non-strip display
-    is1d: If True, or spectrum passed in is 1D, do 1D display
-    independentStrips: if True do freeStrip display.
-    """
-
-    spectrum = self.getById(spectrum) if isinstance(spectrum, str) else spectrum
-
-    dataSource = spectrum._wrappedData
-
-    task = self.task
-    if task is None:
-      raise ValueError("Window %s is not attached to any Task" % self)
-
-    spectrumAxisCodes = spectrum.axisCodes
-
-    mapIndices = ()
-    if axisOrder:
-      mapIndices = libSpectrum.axisCodeMapIndices(spectrumAxisCodes, axisOrder)
-      if displayAxisCodes:
-        if not libSpectrum.doAxisCodesMatch(axisOrder, displayAxisCodes):
-          raise ValueError("AxisOrder %s do not match display axisCodes %s"
-                           % (axisOrder, displayAxisCodes))
-      else:
-        displayAxisCodes = axisOrder
-    elif displayAxisCodes:
-      mapIndices = libSpectrum.axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
-    else:
-      displayAxisCodes = list(spectrumAxisCodes)
-      mapIndices = list(range(dataSource.numDim))
-      if is1d:
-        displayAxisCodes.insert(1, 'intensity')
-        mapIndices.insert(1,None)
-
-    # Make DataDim ordering
-    sortedDataDims = dataSource.sortedDataDims()
-    orderedDataDims = []
-    for index in mapIndices:
-      if index is None:
-        orderedDataDims.append(None)
-      else:
-        orderedDataDims.append(sortedDataDims[index])
-
-    # Make dimensionOrdering
-    dimensionOrdering = [(0 if x is None else x.dim) for x in orderedDataDims]
-
-    # Add intensity dimension for 1D if necessary
-    if dataSource.numDim == 1 and len(displayAxisCodes) ==1:
-      displayAxisCodes.append('intensity')
-      dimensionOrdering.append(0)
-
-    #
-    display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripAxis,
-                                      independentStrips=independentStrips,
-                                      name=name)
-
-    # Set unit, position and width
-    orderedApiAxes = display._wrappedData.orderedAxes
-    for ii, dataDim in enumerate(orderedDataDims):
-
-      if dataDim is not None:
-        # Set values only if we have a spectrum axis
-
-        # Get unit, position and width
-        dataDimRef = dataDim.primaryDataDimRef
-        if dataDimRef:
-          # This is a FreqDataDim
-          unit = dataDimRef.expDimRef.unit
-          position = dataDimRef.pointToValue(1) - dataDimRef.spectralWidth/2
-          if ii < 2:
-            width = dataDimRef.spectralWidth
-          else:
-            width = dataDimRef.valuePerPoint
-
-        elif dataDim.className == 'SampledDataDim':
-          unit = dataDim.unit
-          width = len(dataDim.pointValues)
-          position = 1 + width // 2
-          if ii >= 2:
-            width = 1
-          # NBNB TBD this may not work, once we implement sampled axes
-
-        else:
-          # This is a FidDataDim
-          unit = dataDim.unit
-          width = dataDim.maxValue - dataDim.firstValue
-          position = width / 2
-          if ii >= 2:
-            width = dataDim.valuePerPoint
-
-        # Set values
-        apiAxis = orderedApiAxes[ii]
-        apiAxis.unit = unit
-        apiAxis.position = position
-        apiAxis.width = width
-        print(apiAxis.position, apiAxis.width)
-    # Make spectrumView
-    stripSerial = 1 if independentStrips else 0
-    display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
-                                         stripSerial=stripSerial,dataSource=dataSource,
-                                         dimensionOrdering=dimensionOrdering)
-    return display
 
 
 def newWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:

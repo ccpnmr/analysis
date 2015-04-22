@@ -118,7 +118,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:SpectrumDisplay)-> list:
-    """get wrappedData (ccp.gui.Strip) in serial number order"""
+    """get wrappedData (ccpnmr.gui.Task.Strip) in serial number order"""
     return parent._wrappedData.sortedStrips()
 
   def delete(self):

@@ -35,7 +35,7 @@ from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
 
 
 class SpectrumView(AbstractWrapperObject):
-  """Display Strip for 1D or nD spectrum"""
+  """Spectrum View for 1D or nD spectrum"""
   
   #: Short class name, for PID.
   shortClassName = 'GV'
@@ -297,7 +297,7 @@ class SpectrumView(AbstractWrapperObject):
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:SpectrumDisplay)-> list:
-    """get wrappedData (ccp.gui.Strip) in serial number order"""
+    """get wrappedData (ccpnmr.gui.Task.SpectrumView) in serial number order"""
     return parent._wrappedData.sortedSpectrumViews()
 
   #CCPN functions

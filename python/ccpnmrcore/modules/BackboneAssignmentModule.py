@@ -30,64 +30,140 @@ import pyqtgraph as pg
 import math
 import munkres
 
+from functools import partial
+
+from ccpncore.gui.Button import Button
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
 from ccpncore.gui.PulldownList import PulldownList
+from ccpncore.gui.Widget import Widget
 
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 
 class BackboneAssignmentModule(PeakListSimple):
 
   def __init__(self, project=None, name=None, peakLists=None, assigner=None, hsqcDisplay=None):
-    PeakListSimple.__init__(self, name='Backbone Assignment', peakLists=project.peakLists)
+    PeakListSimple.__init__(self, name='Backbone Assignment', peakLists=project.peakLists, grid=(1, 0), gridSpan=(2, 4))
     self.hsqcDisplay = hsqcDisplay
     self.project = project
+    self.current = project._appBase.current
     # self.assigner = assigner
     self.peakTable.callback = self.findMatchingPeaks
     self.layout.setContentsMargins(4, 4, 4, 4)
     spectra = [spectrum.pid for spectrum in project.spectra]
     displays = [display.pid for display in project.spectrumDisplays if len(display.orderedAxes) > 2]
-    self.querySpectrumPulldown = PulldownList(self, grid=(5, 1), callback=self.selectQuerySpectrum)
-    self.matchSpectrumPulldown = PulldownList(self, grid=(5, 3), callback=self.selectMatchSpectrum)
-    self.queryDisplayPulldown = PulldownList(self, grid=(4, 0))
-    self.matchDisplayPulldown = PulldownList(self, grid=(4, 2))
-    self.querySpectrumPulldown.setData([peakList.pid for peakList in project.peakLists])
-    self.matchSpectrumPulldown.setData([peakList.pid for peakList in project.peakLists])
+    # self.querySpectrumPulldown = PulldownList(self, grid=(5, 1), callback=self.selectQuerySpectrum)
+    # self.matchSpectrumPulldown = PulldownList(self, grid=(5, 3), callback=self.selectMatchSpectrum)
+    self.queryDisplayPulldown = PulldownList(self, grid=(4, 0), callback=self.selectQuerySpectrum)
+    self.matchDisplayPulldown = PulldownList(self, grid=(4, 2), callback=self.selectMatchSpectrum)
+    # self.querySpectrumPulldown.setData([peakList.pid for peakList in project.peakLists])
+    # self.matchSpectrumPulldown.setData([peakList.pid for peakList in project.peakLists])
     self.queryDisplayPulldown.setData(displays)
     self.matchDisplayPulldown.setData(displays)
-    self.queryLabel = Label(self, text='Query Spectra', grid=(5, 0))
-    self.matchLabel = Label(self, text='Match Spectra', grid=(5, 2))
-    self.queryList = ListWidget(self, grid=(6, 0), gridSpan=(1, 2))
-    self.matchList = ListWidget(self, grid=(6, 2), gridSpan=(1, 2))
+    # self.queryLabel = Label(self, text='Query Spectra', grid=(5, 0))
+    # self.matchLabel = Label(self, text='Match Spectra', grid=(5, 2))
+    self.queryList = ListWidget(self, grid=(6, 0), gridSpan=(1, 1))
+    self.matchList = ListWidget(self, grid=(6, 2), gridSpan=(1, 1))
     # QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Delete), self, self.queryList.removeItem)
     self.layout.addWidget(self.queryList, 6, 0, 1, 2)
     self.layout.addWidget(self.matchList, 6, 2, 1, 2)
     # self.numberOfMatches = 7
     self.lines = []
 
+    pickAndAssignWidget = Widget(self, grid=(0, 4), gridSpan=(6, 1))
+    headerLabel = Label(self, text='i-1', grid=(0, 0), )
+    pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
+    headerLabel = Label(pickAndAssignWidget, text='i', grid=(0, 1))
+    headerLabel = Label(pickAndAssignWidget, text='i+1', grid=(0, 2))
+    self.hButton1 = Button(pickAndAssignWidget, text='H', grid=(1, 0), callback=partial(self.pickAndAssign, '-1', 'H'))
+    self.hButton2 = Button(pickAndAssignWidget, text='H', grid=(1, 1), callback=partial(self.pickAndAssign, '', 'H'))
+    self.hButton3 = Button(pickAndAssignWidget, text='H', grid=(1, 2), callback=partial(self.pickAndAssign, '+1', 'H'))
+    self.nButton1 = Button(pickAndAssignWidget, text='N', grid=(2, 0), callback=partial(self.pickAndAssign, '-1', 'N'))
+    self.nButton2 = Button(pickAndAssignWidget, text='N', grid=(2, 1), callback=partial(self.pickAndAssign, '', 'N'))
+    self.nButton3 = Button(pickAndAssignWidget, text='N', grid=(2, 2), callback=partial(self.pickAndAssign, '+1', 'N'))
+    self.caButton1 = Button(pickAndAssignWidget, text='CA', grid=(3, 0), callback=partial(self.pickAndAssign, '-1', 'CA'))
+    self.caButton2 = Button(pickAndAssignWidget, text='CA', grid=(3, 1), callback=partial(self.pickAndAssign, '', 'CA'))
+    self.caButton3 = Button(pickAndAssignWidget, text='CA', grid=(3, 2), callback=partial(self.pickAndAssign, '+1', 'CA'))
+    self.cbButton1 = Button(pickAndAssignWidget, text='CB', grid=(4, 0), callback=partial(self.pickAndAssign, '-1', 'CB'))
+    self.cbButton2 = Button(pickAndAssignWidget, text='CB', grid=(4, 1), callback=partial(self.pickAndAssign, '', 'CB'))
+    self.cbButton3 = Button(pickAndAssignWidget, text='CB', grid=(4, 2), callback=partial(self.pickAndAssign, '+1', 'CB'))
+    self.buttons = [self.hButton1, self.hButton2, self.hButton3, self.nButton1, self.nButton2,
+                    self.nButton3, self.caButton1, self.caButton2, self.caButton3, self.cbButton1,
+                    self.cbButton2, self.cbButton3]
+    for button in self.buttons:
+      button.clicked.connect(self.returnButtonToNormal)
 
-  # def setAssigner(self, assigner):
-  #   self.assigner = assigner
-  #   self.project._appBase.current.assigner = assigner
-  #   # print(self.assigner)
+
+  def pickAndAssign(self, position, atomType):
+
+    r = self.current.nmrResidue
+    name = atomType+position
+    newNmrAtom = r.fetchNmrAtom(name=name)
+    for peak in self.current.peaks:
+      print(newNmrAtom)
+      # if len(peak.dimensionNmrAtoms[1]) > 0:
+      peak.dimensionNmrAtoms[1].append(newNmrAtom)
+      # else:
+      #   peak.dimensionNmrAtoms[1] = [newNmrAtom]
+
+
+  def returnButtonToNormal(self):
+    for button in self.buttons:
+    # print(self.sender())
+     button.setStyleSheet('background-color: None')
+
+
+
+  def predictAssignments(self, peaks):
+    values = []
+    experiments = []
+    self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
+    print(self.current.nmrResidue.atoms)
+    for peak in peaks:
+      values.append(peak.apiPeak.findFirstPeakIntensity().value)
+      experiments.append(peak.peakList.spectrum.experimentName)
+
+    for value in values:
+      if value < 0:
+        if 'HNcoCA/CB' in experiments:
+          self.cbButton1.setStyleSheet('background-color: green')
+          self.cbButton2.setStyleSheet('background-color: orange')
+        else:
+          self.cbButton2.setStyleSheet('background-color: green')
+      if value > 0:
+        if 'HNcoCA/CB' in experiments or 'HNcoCA' in experiments:
+          self.caButton1.setStyleSheet('background-color: green')
+          self.caButton2.setStyleSheet('background-color: orange')
+        else:
+          self.caButton2.setStyleSheet('background-color: green')
+
+        # palette.setColor(QtGui.QColor('orange'))
+        # self.cbButton1.setPalette(palette)
 
   def findMatchingPeaks(self, peak, row, col):
 
 
     # self.assigner.clearAllItems()
     ### determine query and match windows
-    queryWindow = self.project.getById(self.queryDisplayPulldown.currentText())
-    matchWindow = self.project.getById(self.matchDisplayPulldown.currentText())
+    queryWindows = []
+    for index in range(self.queryList.count()):
+      queryWindows.append(self.project.getById(self.queryList.item(index).text()))
+    matchWindows = []
+    for index in range(self.matchList.count()):
+      matchWindows.append(self.project.getById(self.matchList.item(index).text()))
+
     positions = peak.position
     self.hsqcDisplay.strips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
 
-    queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
-    queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
-    queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
+    for queryWindow in queryWindows:
+      queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
+      queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
+      queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
 
-    matchWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0].id))
-    matchWindow.orderedStrips[0].changeZPlane(position=positions[0])
-    matchWindow.orderedStrips[0].orderedAxes[0].position=positions[1]
+    for matchWindow in matchWindows:
+      matchWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0].id))
+      matchWindow.orderedStrips[0].changeZPlane(position=positions[0])
+      matchWindow.orderedStrips[0].orderedAxes[0].position=positions[1]
 
     if len(self.lines) == 0:
 
@@ -104,7 +180,8 @@ class BackboneAssignmentModule(PeakListSimple):
       self.lines[1].setPos(QtCore.QPointF( positions[1], 0))
 
 
-
+    self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[1][0].id)
+    print(self.current.nmrResidue)
 
     # self.assigner.addResidue(name=peak.dimensionNmrAtoms[0][0]._parent.id)
     # if self.assigner.direction == 'left':
@@ -172,6 +249,11 @@ class BackboneAssignmentModule(PeakListSimple):
 
 
 
+
+  # def setAssigner(self, assigner):
+  #   self.assigner = assigner
+  #   self.project._appBase.current.assigner = assigner
+  #   # print(self.assigner)
 
 
   def qScore(self, query, match):

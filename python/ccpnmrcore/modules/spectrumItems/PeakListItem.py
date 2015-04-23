@@ -334,18 +334,10 @@ class PeakNd(QtGui.QGraphicsItem):
     # self.spectrumWindow = spectrumWindow
     # self.panel = spectrumWindow.panel
     self.peakList = peak._parent
-    # self.strip = strip
+
     self.parent = parent
     self.spectrum = self.peakList.spectrum
-    self.setCacheMode(self.NoCache)
-    self.setFlags(self.ItemIgnoresTransformations)
-    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
-    # self.hover = False
-    # self.press = False
-    self.setAcceptHoverEvents(True)
-    self.bbox  = NULL_RECT
-    self.color = NULL_COLOR
-    self.brush = NULL_COLOR
+    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
     self.peak = peak
     xPpm = self.peak.position[0]
     yPpm = self.peak.position[1]
@@ -359,6 +351,7 @@ class PeakNd(QtGui.QGraphicsItem):
     self.annotation = PeakNdAnnotation(scene, self)
     print(self.annotation)
     # self.inPlane = self.isInPlane()
+
 
 
     #peakLayer.peakItems.append(self)
@@ -413,7 +406,7 @@ class PeakNd(QtGui.QGraphicsItem):
 
     if self.peak:
       if self.isInPlane():
-        # r, w, box = self.drawData
+        r, w, box = self.drawBox
         r, w  = self.drawData
 
         # if self.hover:
@@ -433,6 +426,7 @@ class PeakNd(QtGui.QGraphicsItem):
         painter.drawLine(-r,-r,r,r)
         painter.drawLine(-r,r,r,-r)
         #
+
         # if self.isSelected:
         #   painter.setPen(QtGui.QColor('white'))
         #   painter.drawRect(-r,-r,w,w)

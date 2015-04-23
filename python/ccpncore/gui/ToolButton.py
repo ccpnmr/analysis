@@ -50,6 +50,9 @@ class ToolButton(QtGui.QToolButton):
         for strip in spectrumView.strips:
          item = spectrumView.spectrumItems[strip]
          spectrumView.newAction.toggled.connect(item.setVisible)
+         print(spectrumView.peakListItems)
+         # for peakListView in spectrumView.peakListViews:
+         #   spectrumView.newAction.toggled.connect(peakListView.setVisible)
     spectrumView.widget = parent.spectrumToolBar.widgetForAction(spectrumView.newAction)
     spectrumView.widget.setFixedSize(60,30)
 

@@ -63,8 +63,29 @@ class ViewBox(pg.ViewBox):
   def mouseClickEvent(self, event, axis=None):
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
+
+      selectedPeaks = []
       event.accept()
-      print('Left Click Event')
+      # print('Left Click Event')
+      xPosition = self.mapSceneToView(event.pos()).x()
+      yPosition = self.mapSceneToView(event.pos()).y()
+      # print('position',xPosition, yPosition)
+      for spectrumView in self.current.strip.spectrumViews:
+        for peakList in spectrumView.spectrum.peakLists:
+          for peak in peakList.peaks:
+            # print('x',xPosition-0.05, peak.position[0], xPosition+0.05)
+            # print('y',yPosition-0.05, peak.position[1], yPosition+0.05)
+            if (xPosition-0.05 < float(peak.position[0]) < xPosition+0.05
+            and yPosition-0.05 < float(peak.position[1]) <
+                yPosition+0.05):
+              msg = 'self.current.peak = ' + peak.pid + '\n'
+              selectedPeaks.append(peak)
+              self.parent._appBase.mainWindow.pythonConsole.write(msg)
+
+      # msg = 'self.current.peaks = ' + [peak.pid for peak in selectedPeaks]+ '\n'
+      # self.parent._appBase.mainWindow.pythonConsole.write(msg)
+
+
 
 
     #
@@ -165,9 +186,11 @@ class ViewBox(pg.ViewBox):
           newPeaks = peakList.findPeaks(selectedRegion, spectrumView._wrappedData.orderedDataDims)
           # print(spectrumView.spectrum.peakLists[0].peaks)
           self.current.strip.showPeaks(peakList)
+          self.current.peaks = newPeaks
       else:
         self.updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()
+
 
 
 
@@ -184,13 +207,29 @@ class ViewBox(pg.ViewBox):
         startPosition = self.mapSceneToView(event.buttonDownPos())
         xPositions = sorted(list([startPosition.x(), endPosition.x()]))
         yPositions = sorted(list([startPosition.y(), endPosition.y()]))
+        if len(self.current.strip.orderedAxes) > 2:
+          zPositions = self.current.strip.orderedAxes[2].region
+        else:
+          zPositions = None
         for spectrumView in self.current.strip.spectrumViews:
+          # print(spectrumView._wrappedData.peakListViews)
+          # print(dir(spectrumView._wrappedData.peakListViews))
           for peakList in spectrumView.spectrum.peakLists:
             for peak in peakList.peaks:
               if (xPositions[0] < float(peak.position[0]) < xPositions[1]
                and yPositions[0] < float(peak.position[1]) <
                   yPositions[1]):
-                self.current.peaks.append(peak)
+                if zPositions is not None:
+                  if zPositions[0] < float(peak.position[2]) < zPositions[1]:
+                    self.current.peaks.append(peak)
+                else:
+                  self.current.peaks.append(peak)
+        try:
+          self.parent._appBase.mainWindow.bbModule.predictAssignments(self.current.peaks)
+          # for peak in self.current.peaks:
+        except AttributeError:
+          pass
+
       else:
         self.updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()

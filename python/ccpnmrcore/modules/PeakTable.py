@@ -33,7 +33,6 @@ from PyQt4 import QtGui, QtCore
 
 UNITS = ['ppm', 'Hz', 'point']
 
-#class PeakListSimple(Dock):
 class PeakListSimple(Dock):
 
   def __init__(self, parent=None, peakLists=None, name='Peak List', **kw):
@@ -80,7 +79,7 @@ class PeakListSimple(Dock):
     if not peak:
       return
     else:
-      peak = self.selectedPeak
+      return peak
 
   def _getColumns(self, numDim):
 

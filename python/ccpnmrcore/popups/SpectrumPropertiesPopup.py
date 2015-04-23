@@ -214,7 +214,6 @@ class ContoursTab(QtGui.QWidget):
     positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(0, 0))
     positiveContoursCheckBox = CheckBox(self, grid=(0, 1), checked=True)
     for spectrumView in self.spectrum.spectrumViews:
-      print(dir(spectrumView))
       if spectrumView._wrappedData.displayPositiveContours is True:
         positiveContoursCheckBox.setChecked(True)
       else:
@@ -254,11 +253,16 @@ class ContoursTab(QtGui.QWidget):
 
     negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6 ,0))
     negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True)
+    for spectrumView in self.spectrum.spectrumViews:
+      if spectrumView._wrappedData.displayNegativeContours is True:
+        negativeContoursCheckBox.setChecked(True)
+      else:
+        negativeContoursCheckBox.setChecked(False)
     negativeContoursCheckBox.stateChanged.connect(self.displayNegativeContours)
     negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0))
     negativeBaseLevelData = DoubleSpinbox(self, grid=(7, 1))
-    negativeBaseLevelData.setMaximum(1e12)
-    negativeBaseLevelData.setMinimum(0)
+    negativeBaseLevelData.setMaximum(0)
+    negativeBaseLevelData.setMinimum(-1e12)
     negativeBaseLevelData.setValue(spectrum.negativeContourBase)
     negativeBaseLevelData.valueChanged.connect(partial(self.lineEditTextChanged4, spectrum))
     negativeMultiplierLabel = Label(self, text="Multiplier", grid=(8, 0))

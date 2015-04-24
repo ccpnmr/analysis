@@ -411,14 +411,14 @@ def _transferData(newParent, sourceObj, oldToNew=None,
     # postprocess objects - set links now all objects are done
     if oldVersionStr is None:
       # copy subtree
-      delayedLoadLinksCopy(localOldToNew, crossLinkData, 
+      _delayedLoadLinksCopy(localOldToNew, crossLinkData,
                        ignoreMissing=ignoreMissing)
  
     else:
       # backwards compatibility.
 
       # first dereference links
-      delayedLoadLinksComp(localOldToNew, crossLinkData)
+      _delayedLoadLinksComp(localOldToNew, crossLinkData)
 
       # minor post-processing
       from ccpncore.memops.format.compatibility.Converters1 import minorPostProcess
@@ -512,7 +512,7 @@ def _transferData(newParent, sourceObj, oldToNew=None,
   #
   return targetObj
 
-def delayedLoadLinksComp(objectDict, linkData):
+def _delayedLoadLinksComp(objectDict, linkData):
   """ Set links (of whatever kind) derefencing as you go using objectDict.
   Skips objects not found in the map.
   For backwards compatibility rather than compatibility 
@@ -557,7 +557,7 @@ def delayedLoadLinksComp(objectDict, linkData):
     raise
 
 
-def delayedLoadLinksCopy(objectDict, linkData, ignoreMissing=False):
+def _delayedLoadLinksCopy(objectDict, linkData, ignoreMissing=False):
   """ Set links (of whatever kind) derefencing as you go using objectDict.
   For copySubTree rather than compatibility 
   """

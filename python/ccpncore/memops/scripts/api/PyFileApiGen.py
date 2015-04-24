@@ -593,6 +593,20 @@ except ImportError:
   ###########################################################################
 
   # overrides ApiGen
+
+  def writeDoUnDelete(self, op, inClass):
+
+    ApiGen. writeDoUnDelete(self, op, inClass)
+
+    if self.topObject in inClass.getAllSupertypes():
+      # This is the TopObject
+      self.writeOne("memopsRoot.__dict__['topObjects'][self.guid] = self")
+
+  ###########################################################################
+
+  ###########################################################################
+
+  # overrides ApiGen
   def writeStartFunc(self, op, inClass):
 
     PyApiGen.writeStartFunc(self, op, inClass)

@@ -1712,6 +1712,20 @@ def operationsFromOd(metaClass):
     
     # make operation
     metaOperation = MetaModel.MetaOperation(**params)
+
+
+
+    if params['opType'] == 'other':
+      for ss in ('override', 'isReading', '__dict__', 'dataDict'):
+        if 'codeStubs' in params.keys():
+          txt = params['codeStubs'].get('python')
+          if txt:
+            try:
+              ii = txt.index(ss)
+              print ("\n\n@~@~ %s %s\n%s" % (params['container'], params['name'], txt))
+              break
+            except ValueError:
+              pass
     
     # add parameters
     parametersFromOd(metaOperation)

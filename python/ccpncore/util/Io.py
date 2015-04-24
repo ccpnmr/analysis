@@ -431,6 +431,10 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   """
   Save the userData for a project to a location given by newPath (the url.path
   of the userData repository) if set, or the existing location if not.
+
+  NB Changes to project in the function can NOT be undone, but previous contenst of teh undo
+  queue are left active, so you can undo backwards.
+
   If userData does not exist then throws IOError.
   If newPath is not specified then it is set to oldPath.
   If newProjectName is not specified then it is set to oldProjectName if
@@ -459,6 +463,10 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   If there is no exception or early return then at end userData is pointing to newPath.
   Return True if save done, False if not (unless there is an exception)
   """
+
+  undo = project._undo
+  if undo is not None:
+    undo.increaseBlocking()
 
   logger = project._logger
 
@@ -497,6 +505,8 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
       location = ApiPath.getTopObjectPath(project)
       if not absentOrRemoved(location, removeExisting, showYesNo):
         project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
+        if undo is not None:
+          undo.decreaseBlocking()
         return False
   else: # check instead if newPath already exists
     if absentOrRemoved(newPath, removeExisting, showYesNo):
@@ -508,6 +518,8 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
     else:
       if newProjectName != oldProjectName:
         project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
+        if undo is not None:
+          undo.decreaseBlocking()
         return False
       else:
         # TBD: should we be removing it?
@@ -694,9 +706,10 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
         'Incomplete save - one or more files did not save completely, you should check them:')
       for topObject in badTopObjects:
         logger.warning("Bad save: %s - %s" % (topObject, ApiPath.getTopObjectPath(topObject)))
-      return False
+      result = False
+    else:
+      result = True
 
-    return True
 
   except:
     # saveModified failed so revert to old values
@@ -710,6 +723,12 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
         Path.removePath(newPath)
       except:
         pass
+
+    result = None
+
+  if undo is not None:
+    undo.decreaseBlocking()
+  return result
 
 
 
@@ -766,13 +785,18 @@ def createTopObjectFallback(topObject):
 def renameProject(project, newProjectName):
   """ Rename project.
   """
+  oldProjectName = project.name
+
+  undo = project._undo
+  if undo is not None:
+    undo.increaseBlocking()
 
   logger = Logging.getLogger()
 
   logger.warning('Renaming project %s to %s' % (project.name, newProjectName))
 
   # change project name
-  if newProjectName == project.name:
+  if newProjectName == oldProjectName:
     return
 
   else:
@@ -794,6 +818,10 @@ def renameProject(project, newProjectName):
       project.name = newProjectName
     finally:
       project.override = False
+      if undo is not None:
+        undo.decreaseBlocking()
+        undo.addItem(renameProject, renameProject, undoArgs=(project,oldProjectName),
+                     redoArgs=(project, newProjectName))
 
 
 def _downlinkTagsByImport(root):

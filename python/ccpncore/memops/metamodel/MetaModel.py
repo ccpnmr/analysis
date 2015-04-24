@@ -3550,6 +3550,7 @@ class MetaOperation(HasParameters):
 
     self._MetaModelElement__dataDict['codeStubs'][tag] = value
 
+
   def removeCodeStub(self, tag):
     """Remove existing codeStub
     """

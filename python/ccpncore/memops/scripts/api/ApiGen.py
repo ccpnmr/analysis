@@ -738,6 +738,9 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
   ###########################################################################
 
+  ###########################################################################
+
+
   def writeDoDelete(self, op, inClass):
 
     self.setImplAttr(self.varNames['self'], 'isDeleted', True)

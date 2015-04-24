@@ -25,6 +25,10 @@ __author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
 
+import os
+import csv
+
+
 class SideBar(QtGui.QTreeWidget):
   def __init__(self, parent=None):
     super(SideBar, self).__init__(parent)
@@ -104,9 +108,6 @@ class SideBar(QtGui.QTreeWidget):
 
     event.accept()
     data = event.mimeData()
-    print(data,"dropped")
-    print("dropped")
-    print(event.source())
     if isinstance(self.parent, QtGui.QGraphicsScene):
       event.ignore()
       return
@@ -115,19 +116,79 @@ class SideBar(QtGui.QTreeWidget):
       event.accept()
 
       filePaths = [url.path() for url in event.mimeData().urls()]
-
+      # print(filePaths)
       if filePaths:
 
-        print(filePaths)
         if len(filePaths) == 1:
 
-          self.parent.openProject(filePaths[0])
+          if filePaths[-1].split('/')[-1].endswith('.csv'):
+            csv_in = open(filePaths[-1], 'r')
+            reader = csv.reader(csv_in)
+            for row in reader:
+              if row[0].split('/')[-1] == 'procs':
+                filename = row[0].split('/')
+                filename.pop()
+                newFilename = '/'.join(filename)
+                spectrum = self.parent.project.loadSpectrum(newFilename)
+                newItem = self.addItem(self.spectrumItem, spectrum)
+                peakList = spectrum.newPeakList()
+                peakListItem = QtGui.QTreeWidgetItem(newItem)
+                peakListItem.setText(0, peakList.pid)
+
+          for dirpath, dirnames, filenames in os.walk(filePaths[0]):
+            if dirpath.endswith('memops') and 'Implementation' in dirnames:
+              self.parent._appBase.openProject(filePaths[0])
+
+          else:
+            try:
+              spectra = []
+              for filePath in filePaths:
+                for (dirpath, dirnames, filenames) in os.walk(filePath):
+                  try:
+                    spectrum = self.parent.project.loadSpectrum(dirpath)
+                    spectra.append(spectrum)
+                    newItem = self.addItem(self.spectrumItem, spectrum)
+                    peakList = spectrum.newPeakList()
+                    peakListItem = QtGui.QTreeWidgetItem(newItem)
+                    peakListItem.setText(0, peakList.pid)
+                  except:
+                    pass
+            except:
+              pass
+
+        elif len(filePaths) > 1:
+            print(filePaths)
+            spectra = []
+            for filePath in filePaths:
+              for (dirpath, dirnames, filenames) in os.walk(filePath):
+                try:
+                  spectrum = self.parent.project.loadSpectrum(dirpath)
+                  print(dirpath)
+                  spectra.append(spectrum)
+                  newItem = self.addItem(self.spectrumItem, spectrum)
+                  peakList = spectrum.newPeakList()
+                  peakListItem = QtGui.QTreeWidgetItem(newItem)
+                  peakListItem.setText(0, peakList.pid)
+                except:
+                  pass
+            msgBox = QtGui.QMessageBox()
+            msgBox.setText("Display all spectra")
+            msgBox.setInformativeText("Do you want to display all loaded spectra?")
+            msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            ret = msgBox.exec_()
+            if ret == QtGui.QMessageBox.Yes:
+              newDisplay = self.parent.createSpectrumDisplay(spectra[0])
+              for spectrum in spectra[1:]:
+                newDisplay.displaySpectrum(spectrum)
+            else:
+              pass
 
         else:
-          pass
+          print('else', filePaths)
 
       else:
         event.ignore()
 
     else:
       event.ignore()
+

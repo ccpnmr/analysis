@@ -35,7 +35,8 @@ from ccpnmrcore.gui.PlotWidget import PlotWidget
 from ccpncore.gui.Widget import Widget
 from ccpncore.memops import Notifiers
 
-from ccpnmrcore.gui.Axis import Axis
+#from ccpnmrcore.gui.Axis import Axis
+from ccpnmrcore.gui.AxisTextItem import AxisTextItem
 from ccpnmrcore.DropBase import DropBase
 
 def sufficientlyDifferentWidth(region1, region2):
@@ -79,10 +80,10 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     else:
       self.background = 'k'
       self.foreground = 'w'
-    pg.setConfigOption('background', self.background)
+    pg.setConfigOption('background', self.background)  # wb104: this has no impact at this point (I think)
     pg.setConfigOption('foreground', self.foreground)
     self.plotWidget.setBackground(self.background)
-    self.plotWidget.plotItem.axes['top']['item']
+    #self.plotWidget.plotItem.axes['top']['item']
     self._appBase = self._parent._appBase
 
     self.plotItem = self.plotWidget.plotItem
@@ -91,10 +92,17 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.viewBox = self.plotItem.vb
     self.viewBox.setXRange(*self.orderedAxes[0].region)
     self.viewBox.setYRange(*self.orderedAxes[1].region)
-    self.xAxis = Axis(self.plotWidget, orientation='top', pen=self.foreground,
-                      viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
-    self.yAxis = Axis(self.plotWidget, orientation='left', pen=self.foreground,
-                      viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
+    #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
+    #                  viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
+    #self.yAxis = Axis(self.plotWidget, orientation='left', #pen=self.foreground,
+    #                  viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
+    self.xAxisTextItem = AxisTextItem(self.plotWidget, orientation='top',
+                                  axisCode=self.orderedAxes[0].code)
+    self.yAxisTextItem = AxisTextItem(self.plotWidget, orientation='left',
+                                  axisCode=self.orderedAxes[1].code)
+    for orientation in ('left', 'top'):
+      axisItem = self.plotItem.axes[orientation]['item']
+      axisItem.hide()
     self.gridShown = True
     self.textItem = pg.TextItem(text=self.pid, color='w')
     self.textItem.setPos(self.viewBox.boundingRect().topLeft())
@@ -209,8 +217,10 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
 
   def moveAxisCodeLabels(self):
-    self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
-    self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
+    ###self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
+    ###self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
+    self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
+    self.yAxisTextItem.setPos(self.viewBox.boundingRect().topRight())
     self.textItem.setPos(self.viewBox.boundingRect().topLeft())
 
   def hideCrossHairs(self):

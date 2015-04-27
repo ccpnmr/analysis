@@ -36,7 +36,6 @@ class CreateMoleculeTest(Testing):
   def __init__(self, *args, **kwargs):
     # Testing.__init__( *args, **kwargs)
     Testing.__init__(self, 'CcpnCourse2c', *args, **kwargs)
-    print ("@~@~", self.projectPath)
     self.ccpnProject = self.project.wrappedData.root
 
   def test_create_protein_from_one_letter_string(self):
@@ -71,7 +70,6 @@ class CreateMoleculeTest(Testing):
     seq1 =  ['DA', 'DT', 'DC', 'DG', 'RT',
             '5MU', 'A', 'C', 'G', 'U', 'DU']
     molecule1 = MoleculeModify.makeMolecule(self.ccpnProject, seq1, isCyclic=True)
-    print ('@~@~ molType %s' % molecule1.molType)
     assert molecule1.isCyclic, "Molecule is not cyclic as input."
 
   def test_create_mixed_molecule(self):

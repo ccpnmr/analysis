@@ -31,9 +31,9 @@ skipElements = [
 # classElements skipped in new model, but available for simple data transfer
 # (prefix, typeName, elemName, newGuid, elemMap, valueTypeGuid)
 delayElements = [
- ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'name': 'refExpDim', 'tag': 'NMR.ExpDim.refExpDim', 'type': 'exolink', 'eType': 'cplx'}, None), 
- ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'name': 'clusterCode', 'tag': 'NMR.ResonanceGroup.clusterCode', 'type': 'attr', 'eType': 'cplx'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
- ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'name': 'isActive', 'tag': 'NMR.ResonanceGroup.isActive', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
+ ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'tag': 'NMR.ExpDim.refExpDim', 'name': 'refExpDim', 'eType': 'cplx', 'type': 'exolink'}, None), 
+ ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'tag': 'NMR.ResonanceGroup.clusterCode', 'name': 'clusterCode', 'eType': 'cplx', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
+ ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'tag': 'NMR.ResonanceGroup.isActive', 'name': 'isActive', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
 ]
 
 # MetaConstraints added in new model
@@ -43,9 +43,11 @@ newConstraints = [
  ('ccp.nmr.Nmr.AbstractMeasurementList.name.name_uniquely_identifies_MeasurementList', 'www.ccpn.ac.uk_Fogh_2015-01-30-13:54:37_00001'), 
  ('ccp.nmr.Nmr.ConnectedStretch.activeResonanceGroups_must_go_with_active_SequentialAssignments', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:49:36_00001'), 
  ('ccp.nmr.Nmr.DataSource.name.name_uniquely_identifies_spectrum', 'www.ccpn.ac.uk_Fogh_2015-01-30-13:54:37_00002'), 
+ ('ccp.nmr.Nmr.NmrChain.code.code_cannot_be_changed_for_nmrChain_with_serial_1', 'www.ccpn.ac.uk_Fogh_2015-04-27-10:54:54_00001'), 
+ ('ccp.nmr.Nmr.NmrChain.code.code_is_unique_across_nmrChains', 'www.ccpn.ac.uk_Fogh_2015-04-27-10:49:33_00002'), 
  ('ccp.nmr.Nmr.Resonance.implName.name_is_unique_in_resonanceGroup', 'www.ccpn.ac.uk_Fogh_2014-12-30-13:36:29_00001'), 
+ ('ccp.nmr.Nmr.ResonanceGroup.nmrChain_and_sequenceCode_form_unique_key', 'www.ccpn.ac.uk_Fogh_2015-04-27-11:10:21_00001'), 
  ('ccp.nmr.Nmr.ResonanceGroup.satellite_resonance_group_must_have_offset', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:38_00002'), 
- ('ccp.nmr.Nmr.ResonanceGroup.satellite_resonance_groups_must_be_unique', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:38_00001'), 
  ('ccp.nmr.NmrConstraint.AbstractConstraintList.name.name_uniquely_identifies_constraintList', 'www.ccpn.ac.uk_Fogh_2015-01-30-13:54:37_00003'), 
  ('ccp.nmr.NmrConstraint.DihedralItem.no_Dihedral_item_with_resonances_in_opposite_order', 'www.ccpn.ac.uk_Fogh_2014-07-29-12:54:23_00003'), 
  ('ccpnmr.gui.Task.BoundDisplay.axisOrder.bound_axis_order_is_contained_in_axis_codes', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:43:15_00001'), 
@@ -304,7 +306,6 @@ newElements = [
  ('NMR', 'NmrChain', None, 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:22_00001'), 
  ('NMR', 'NmrChain', 'code', 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:23_00005'), 
  ('NMR', 'NmrChain', 'details', 'www.ccpn.ac.uk_Fogh_2014-12-30-11:21:22_00001'), 
- ('NMR', 'NmrChain', 'resonanceGroups', 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:23_00002'), 
  ('NMR', 'NmrProject', 'connectedStretchs', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:49:40_00001'), 
  ('NMR', 'NmrProject', 'guiTasks', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:55_00009'), 
  ('NMR', 'NmrProject', 'molSystem', 'www.ccpn.ac.uk_Fogh_2014-07-18-18:10:34_00009'), 
@@ -321,11 +322,10 @@ newElements = [
  ('NMR', 'Resonance', 'displayAxes', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:39:39_00001'), 
  ('NMR', 'Resonance', 'implName', 'www.ccpn.ac.uk_Fogh_2014-12-30-11:21:22_00002'), 
  ('NMR', 'ResonanceGroup', 'activeStretch', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:50:06_00004'), 
- ('NMR', 'ResonanceGroup', 'mainResonanceGroup', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:41_00004'), 
- ('NMR', 'ResonanceGroup', 'nmrChain', 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:23_00001'), 
+ ('NMR', 'ResonanceGroup', 'chainSerial', 'www.ccpn.ac.uk_Fogh_2015-04-27-10:49:34_00001'), 
+ ('NMR', 'ResonanceGroup', 'mainGroupSerial', 'www.ccpn.ac.uk_Fogh_2015-04-24-18:25:48_00002'), 
  ('NMR', 'ResonanceGroup', 'relativeOffset', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:41_00006'), 
  ('NMR', 'ResonanceGroup', 'residueType', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:41_00005'), 
- ('NMR', 'ResonanceGroup', 'satelliteResonanceGroups', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:41_00003'), 
  ('NMR', 'ResonanceGroup', 'seqCode', 'www.ccpn.ac.uk_Fogh_2014-09-09-15:47:03_00001'), 
  ('NMR', 'ResonanceGroup', 'seqInsertCode', 'www.ccpn.ac.uk_Fogh_2014-09-09-15:47:03_00002'), 
  ('NMR', 'ResonanceGroup', 'spectrumDisplays', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:51:55_00008'), 
@@ -437,8 +437,8 @@ nameMatches = [
 # (oldElem.qName, newElem.name, oldGuid, newGuid, differentTags
 allDiffs = [
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
- ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'partitionsChildren', 'documentation', 'isDerived'}), 
- ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'documentation', 'isDerived'}), 
+ ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'partitionsChildren', 'isDerived', 'documentation'}), 
+ ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'isDerived', 'documentation'}), 
  ('memops.Implementation.DbMemopsRoot', 'DbMemopsRoot', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00008', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00008', {'taggedValues'}), 
  ('memops.Implementation.DbTopObject', 'DbTopObject', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00001', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00001', {'taggedValues'}), 
  ('memops.Implementation.FileMemopsRoot', 'FileMemopsRoot', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00007', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00007', {'taggedValues'}), 

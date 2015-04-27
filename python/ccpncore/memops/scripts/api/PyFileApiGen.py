@@ -75,7 +75,7 @@ class PyFileApiGen(FileApiGen, PyApiGen):
     self.write("try:")
     self.indent += self.INDENT
     self.write('''
-for %s, %s in %s.items():
+for %s, %s in sorted(%s.items()):
   try:
     func = getattr(%s.__class__, %s).fset
   except:

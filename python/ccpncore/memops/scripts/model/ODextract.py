@@ -1722,7 +1722,6 @@ def operationsFromOd(metaClass):
           if txt:
             try:
               ii = txt.index(ss)
-              print ("\n\n@~@~ %s %s\n%s" % (params['container'], params['name'], txt))
               break
             except ValueError:
               pass

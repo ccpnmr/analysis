@@ -28,7 +28,7 @@ from ccpncore.gui.Base import Base
 
 class Label(QtGui.QLabel, Base):
 
-  def __init__(self, parent, text='', pid = None, textColor=None, dragDrop=False, **kw):
+  def __init__(self, parent, text='', pid = None, textColor=None, dragDrop=False, textSize=None, **kw):
 
     QtGui.QLabel.__init__(self, text, parent)
     Base.__init__(self, **kw)
@@ -37,7 +37,9 @@ class Label(QtGui.QLabel, Base):
     self.setAcceptDrops(True)
 
     if textColor:
-      self.setStyleSheet('QLabel {color: %s;}' % textColor)
+      self.setStyleSheet('QLabel {color: %s; font-size: 30pt; font-weight: bold}' % textColor)
+    if textSize and textColor:
+      self.setStyleSheet('QLabel {font-size: %s;}' % textSize)
     
   def get(self):
 

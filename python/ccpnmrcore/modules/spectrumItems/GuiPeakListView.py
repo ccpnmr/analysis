@@ -149,8 +149,7 @@ class Peak1d(QtGui.QGraphicsItem):
     self.annotationScreenPos = []
     self.bbox  = NULL_RECT
     self.setCacheMode(self.NoCache)
-    self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
-    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
+    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
     # self.scene().sigMouseClicked.connect(self.peakClicked)
     self.pointPos = peak.pointPosition
     self.ppm = peak.position[self.dim]
@@ -376,15 +375,15 @@ class PeakNd(QtGui.QGraphicsItem):
     self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
     
     # self.glWidget = peakLayer.glWidget
-    #self.setParentItem(peakLayer)
-    self.peakLayer = peakLayer
+    self.setParentItem(peakLayer)
+    # self.peakLayer = peakLayer
     # self.spectrumWindow = spectrumWindow
     # self.panel = spectrumWindow.panel
     #self.peakList = peak._parent
     self.strip = strip
     #self.parent = strip.plotWidget
     #self.spectrum = self.peakList.spectrum
-    #self.setCacheMode(self.NoCache)
+    self.setCacheMode(self.NoCache)
     #self.setFlags(self.ItemIgnoresTransformations)
     # self.setSelected(False)
     #self.hover = False
@@ -399,6 +398,7 @@ class PeakNd(QtGui.QGraphicsItem):
     # self.setPos(self.parent.viewBox.mapSceneToView
     sz = 20
     hz = sz/2.0
+    #
     # self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
     # self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
     """
@@ -414,12 +414,12 @@ class PeakNd(QtGui.QGraphicsItem):
     xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
     yPpm = peak.position[yDim]
     self.setPos(xPpm, yPpm)
-    # self.annotation = PeakNdAnnotation(self, scene, '---')
+    self.annotation = PeakNdAnnotation(self, scene)
     # self.inPlane = self.isInPlane()
-
-
+    from ccpncore.gui.Action import Action
+    # self.deleteAction = QtGui.QAction(self, triggered=self.deletePeak, shortcut=QtCore.Qt.Key_Delete)
     #peakLayer.peakItems.append(self)
-  #
+
   def isInPlane(self):
 
     if len(self.strip.orderedAxes) > 2:
@@ -479,13 +479,13 @@ class PeakNd(QtGui.QGraphicsItem):
 
         # if self.hover:
         # self.setZValue(10)
-        painter.setBrush(NULL_COLOR)
+        painter.setBrush(QtGui.QColor('black'))
 
         # painter.setPen(QtGui.QColor('white'))
         # if self.press:
         #   painter.drawRect(self.bbox)
 
-        painter.setPen(QtGui.QColor('white'))
+        painter.setPen(QtGui.QColor('black'))
         # painter.drawEllipse(box)
 
         # else:
@@ -494,7 +494,7 @@ class PeakNd(QtGui.QGraphicsItem):
         painter.drawLine(-r,-r,r,r)
         painter.drawLine(-r,r,r,-r)
         if self.isSelected():
-          painter.setPen(QtGui.QColor('white'))
+          painter.setPen(QtGui.QColor('black'))
           painter.drawLine(-r,-r,-r,r)
           painter.drawLine(-r,r,r,r)
           painter.drawLine(r,r,r,-r)
@@ -514,23 +514,37 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
   """ A text annotation of a peak.
       The text rotation is currently always +-45 degrees (depending on peak height). """
 
-  def __init__(self, peakItem, scene, text):
+  def __init__(self, peakItem, scene):
 
     QtGui.QGraphicsSimpleTextItem.__init__(self, scene=scene)
 
     self.setParentItem(peakItem)
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
-    self.setText(text)
+    # self.setText(text)
     self.scene = scene
+    self.setColor()
     # self.analysisLayout = parent.glWidget.analysisLayout
     font = self.font()
     font.setPointSize(12)
     self.setFont(font)
     # self.setCacheMode(self.DeviceCoordinateCache)
-    self.setFlag(self.ItemIgnoresTransformations, True)
-    self.setFlag(self.ItemIsMovable, True)
-    self.setFlag(self.ItemIsSelectable, True)
-    self.setFlag(self.ItemSendsScenePositionChanges, True)
+    self.setFlag(self.ItemIgnoresTransformations)#+self.ItemIsMovable+self.ItemIsSelectable)
+    # self.setFlag(self.ItemSendsScenePositionChanges, True)
+    peakLabel = []
+    for dimension in range(peakItem.peak.peakList.spectrum.dimensionCount):
+      if len(peakItem.peak.dimensionNmrAtoms[dimension]) == 0:
+        peakLabel.append('-')
+      else:
+        for item in peakItem.peak.dimensionNmrAtoms[dimension]:
+          if len(peakLabel) > 0:
+            peakLabel.append(item.pid.id[3])
+          else:
+            peakLabel.append(item.pid.id)
+
+    self.text = ','.join(peakLabel)
+
+    # self.text = (' , ').join('-' * peakItem.peak.peakList.spectrum.dimensionCount)
+    self.setText(self.text)
     # if self.isSelected():
     #   print(self)
     self.setColor()
@@ -546,12 +560,27 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
   def paint(self, painter, option, widget):
     if self.peakItem.isInPlane():
-      QtGui.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
-    # if self.peakItem.peak in self.analysisLayout.currentPeaks:
-    painter.drawRect(self.boundingRect())
+      peakItem = self.peakItem
+      peakLabel = []
+      for dimension in range(peakItem.peak.peakList.spectrum.dimensionCount):
+        if len(peakItem.peak.dimensionNmrAtoms[dimension]) == 0:
+          peakLabel.append('-')
+        else:
+          for item in peakItem.peak.dimensionNmrAtoms[dimension]:
 
-  def sceneEventFilter(self, watched, event):
-    print(event)
+            if len(peakLabel) > 0:
+              # print(, peakLabel[-1])
+              peakLabel.append(item.pid.id.split('.')[-1])
+
+            else:
+              peakLabel.append(item.pid.id)
+
+      text = ','.join(peakLabel)
+      painter.setBrush(QtGui.QBrush(QtGui.QColor('white')))
+
+      painter.drawText(0, 0, text)
+    # if self.peakItem.peak in self.analysisLayout.currentPeaks:
+    # painter.drawText(self.boundingRect())
 
   def mousePressEvent(self, event):
 

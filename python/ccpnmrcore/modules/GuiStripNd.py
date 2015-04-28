@@ -244,7 +244,7 @@ class GuiStripNd(GuiStrip):
 
   def showPeaks(self, peakList):
     from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView
-    peakLayer = GuiPeakListView(self.plotWidget.scene(), self, peakList)
+    peakLayer = GuiPeakListView(self.plotWidget.plotItem.vb.scene(), self, peakList)
     self.viewBox.addItem(peakLayer)
     #rectItem = QtGui.QGraphicsRectItem(5, 120, 2, 10, peakLayer, self.plotWidget.scene())
     ##color = QtGui.QColor('red')

@@ -162,10 +162,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.addSpectrumItem(strip)
 
     self.spectrumViewButton = ToolButton(self.spectrumDisplay, self)
+    self.spectrumViewButton.setFixedSize(60,30)
 
     for strip in self.strips:
        item = self.spectrumItems[strip]
-       print(item)
        self.newAction.toggled.connect(item.setVisible)
       #if self not in strip.plotWidget.items():
         # newItem = self
@@ -225,8 +225,8 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     #for peakListView in spectrumView._wrappedData.sortedPeakListViews():
     #  peakListItem = GuiPeakListItemNd(self, peakListView)
     spectrum = spectrumView.spectrum
-    for peakList in spectrum.peakLists:
-      strip.showPeaks(peakList)
+    # for peakList in spectrum.peakLists:
+    #   strip.showPeaks(peakList)
  
   ##### override of superclass function
 

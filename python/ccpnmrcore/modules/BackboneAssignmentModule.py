@@ -160,48 +160,53 @@ class BackboneAssignmentModule(PeakListSimple):
       queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
       queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
 
-    for matchWindow in matchWindows:
-      matchWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0].id))
-      matchWindow.orderedStrips[0].changeZPlane(position=positions[0])
-      matchWindow.orderedStrips[0].orderedAxes[0].position=positions[1]
+    # for matchWindow in matchWindows:
+    #   matchWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
+    #   matchWindow.orderedStrips[0].changeZPlane(position=positions[1])
+    #   matchWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
 
     if len(self.lines) == 0:
 
-      line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('k', style=QtCore.Qt.DashLine))
       line.setPos(QtCore.QPointF( positions[0], 0))
       queryWindow.orderedStrips[0].plotWidget.addItem(line)
-      line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-      line2.setPos(QtCore.QPointF( positions[1], 0))
-      matchWindow.orderedStrips[0].plotWidget.addItem(line2)
-      self.lines.append(line)
-      self.lines.append(line2)
+      # line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('k', style=QtCore.Qt.DashLine))
+      # line2.setPos(QtCore.QPointF( positions[1], 0))
+      # matchWindow.orderedStrips[0].plotWidget.addItem(line2)
+      # self.lines.append(line)
+      # self.lines.append(line2)
     else:
-      self.lines[0].setPos(QtCore.QPointF( positions[0], 0))
-      self.lines[1].setPos(QtCore.QPointF( positions[1], 0))
+      self.lines[0].setPos(QtCore.QPointF(positions[0], 0))
+      # self.lines[1].setPos(QtCore.QPointF( positions[1], 0))
 
+    self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
 
-    self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[1][0].id)
-    print(self.current.nmrResidue)
+    self.assigner.addResidue(name=peak.dimensionNmrAtoms[0][0]._parent.id)
 
-    # self.assigner.addResidue(name=peak.dimensionNmrAtoms[0][0]._parent.id)
-    # if self.assigner.direction == 'left':
-    #   queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
-    #   queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
-    #   line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    #   line.setPos(QtCore.QPointF( positions[0], 0))
-    #   queryWindow.orderedStrips[0].plotWidget.addItem(line)
-    # currentStrip = self.project._appBase.current.strip
-    # if currentStrip is None:
-    #   currentStrip = queryWindow.orderedStrips[0]
-    # queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
+    intraShifts = {}
+    interShifts = {}
 
-    # line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    # line2.setPos(QtCore.QPointF(positions[0], 0))
-    # line3 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    # line3.setPos(QtCore.QPointF(0, positions[1]))
-    # self.hsqcDisplay.strips[0].plotWidget.addItem(line2)
-    # self.hsqcDisplay.strips[0].plotWidget.addItem(line3)
-    # queryAtom = self.project.getById(peak.dimensionNmrAtoms[0][0].pid)
+    for nmrResidue in self.project.nmrResidues:
+     intraShifts[nmrResidue] = []
+     interShifts[nmrResidue] = []
+     for atom in nmrResidue.atoms:
+       if atom.name == 'CA':
+        intraShifts[nmrResidue].append(atom)
+
+       if atom.name == 'CB':
+        intraShifts[nmrResidue].append(atom)
+
+       if atom.name == 'CA-1':
+        interShifts[nmrResidue].append(atom)
+
+       if atom.name == 'CB-1':
+        interShifts[nmrResidue].append(atom)
+
+    print(interShifts)
+    print(intraShifts)
+    for atom in self.current.nmrResidue.atoms:
+      if atom.apiResonance.isotopeCode == '13C':
+        print(atom.name)
     #
     #
     # assignedPeaks = queryAtom.assignedPeaks
@@ -250,10 +255,10 @@ class BackboneAssignmentModule(PeakListSimple):
 
 
 
-  # def setAssigner(self, assigner):
-  #   self.assigner = assigner
-  #   self.project._appBase.current.assigner = assigner
-  #   # print(self.assigner)
+  def setAssigner(self, assigner):
+    self.assigner = assigner
+    self.project._appBase.current.assigner = assigner
+    # print(self.assigner)
 
 
   def qScore(self, query, match):

@@ -49,12 +49,12 @@ IDENTITY.reset()
 
 class GuiPeakListView(QtGui.QGraphicsItem):
 
-  def __init__(self, scene, parent, peakList):
-    """ spectrumItem is the QGraphicsItem parent
-        peakList is the CCPN object
+  def __init__(self, scene, strip, peakList):
+    """ peakList is the CCPN wrapper object
     """
 
     QtGui.QGraphicsItem.__init__(self, scene=scene)
+    self.strip = strip
     self.peakList = peakList
     self.peakItems = {}  # CCPN peak -> Qt peakItem
     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
@@ -149,7 +149,8 @@ class Peak1d(QtGui.QGraphicsItem):
     self.annotationScreenPos = []
     self.bbox  = NULL_RECT
     self.setCacheMode(self.NoCache)
-    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
+    self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
+    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
     # self.scene().sigMouseClicked.connect(self.peakClicked)
     self.pointPos = peak.pointPosition
     self.ppm = peak.position[self.dim]
@@ -367,23 +368,27 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
 
 class PeakNd(QtGui.QGraphicsItem):
 
-  def __init__(self, strip, peak, peakLayer):
+  def __init__(self, peakLayer, peak):
 
-    scene = strip.plotWidget.scene()
+    scene = peakLayer.strip.plotWidget.scene()
     #QtGui.QGraphicsItem.__init__(self, scene=scene)
     QtGui.QGraphicsItem.__init__(self, peakLayer, scene=scene)
+    ###QtGui.QGraphicsItem.__init__(self, peakLayer)
+    ###scene.addItem(self)
+    ###strip.plotWidget.plotItem.vb.addItem(self)
     self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
     
+    self.setupPeakItem(peakLayer, peak)
     # self.glWidget = peakLayer.glWidget
-    self.setParentItem(peakLayer)
-    # self.peakLayer = peakLayer
+    #self.setParentItem(peakLayer)
+    ###self.peakLayer = peakLayer
     # self.spectrumWindow = spectrumWindow
     # self.panel = spectrumWindow.panel
     #self.peakList = peak._parent
-    self.strip = strip
+    ##self.strip = strip
     #self.parent = strip.plotWidget
     #self.spectrum = self.peakList.spectrum
-    self.setCacheMode(self.NoCache)
+    #self.setCacheMode(self.NoCache)
     #self.setFlags(self.ItemIgnoresTransformations)
     # self.setSelected(False)
     #self.hover = False
@@ -392,13 +397,12 @@ class PeakNd(QtGui.QGraphicsItem):
     #self.bbox  = NULL_RECT
     #self.color = NULL_COLOR
     #self.brush = NULL_COLOR
-    self.peak = peak
-    xPpm = self.peak.position[0]
-    yPpm = self.peak.position[1]
+    ###self.peak = peak
+    ###xPpm = peak.position[0]
+    ###yPpm = peak.position[1]
     # self.setPos(self.parent.viewBox.mapSceneToView
     sz = 20
     hz = sz/2.0
-    #
     # self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
     # self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
     """
@@ -409,25 +413,38 @@ class PeakNd(QtGui.QGraphicsItem):
     """
 
     self.drawData = (hz, sz)#, QtCore.QRectF(-hz, -hz, sz, sz))
-    xDim = strip.spectrumViews[0].dimensionOrdering[0] - 1
-    yDim = strip.spectrumViews[0].dimensionOrdering[1] - 1
-    xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
-    yPpm = peak.position[yDim]
-    self.setPos(xPpm, yPpm)
-    self.annotation = PeakNdAnnotation(self, scene)
+    ###xDim = strip.spectrumViews[0].dimensionOrdering[0] - 1
+    ###yDim = strip.spectrumViews[0].dimensionOrdering[1] - 1
+    ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
+    ###yPpm = peak.position[yDim]
+    ###self.setPos(xPpm, yPpm)
+    # self.annotation = PeakNdAnnotation(self, scene, '---')
     # self.inPlane = self.isInPlane()
-    from ccpncore.gui.Action import Action
+
+    # from ccpncore.gui.Action import Action
     # self.deleteAction = QtGui.QAction(self, triggered=self.deletePeak, shortcut=QtCore.Qt.Key_Delete)
     #peakLayer.peakItems.append(self)
-
+  #
+  
+  def setupPeakItem(self, peakLayer, peak):
+    
+    self.peakLayer = peakLayer
+    self.peak = peak
+    xDim = peakLayer.strip.spectrumViews[0].dimensionOrdering[0] - 1
+    yDim = peakLayer.strip.spectrumViews[0].dimensionOrdering[1] - 1
+    xPpm = peak.position[xDim]
+    yPpm = peak.position[yDim]
+    self.setPos(xPpm, yPpm)
+    
   def isInPlane(self):
 
-    if len(self.strip.orderedAxes) > 2:
-      zDim = self.strip.spectrumViews[0].dimensionOrdering[2] - 1
-      zPlaneSize = self.strip.spectrumViews[0].zPlaneSize()
+    strip = self.peakLayer.strip
+    if len(strip.orderedAxes) > 2:
+      zDim = strip.spectrumViews[0].dimensionOrdering[2] - 1
+      zPlaneSize = strip.spectrumViews[0].zPlaneSize()
       zPosition = self.peak.position[zDim]
 
-      zRegion = self.strip.orderedAxes[2].region
+      zRegion = strip.orderedAxes[2].region
       if zRegion[0]-zPlaneSize <= zPosition <= zRegion[1]+zPlaneSize:
         return True
       else:
@@ -479,13 +496,23 @@ class PeakNd(QtGui.QGraphicsItem):
 
         # if self.hover:
         # self.setZValue(10)
-        painter.setBrush(QtGui.QColor('black'))
+        #painter.setBrush(NULL_COLOR)
 
         # painter.setPen(QtGui.QColor('white'))
         # if self.press:
         #   painter.drawRect(self.bbox)
+        ###strip = self.strip
+        ###peak = self.peak
+        ###xDim = strip.spectrumViews[0].dimensionOrdering[0] - 1
+        ###yDim = strip.spectrumViews[0].dimensionOrdering[1] - 1
+        ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
+        ###yPpm = peak.position[yDim]
+        ###self.setPos(xPpm, yPpm)
 
-        painter.setPen(QtGui.QColor('black'))
+        if widget:
+          painter.setPen(QtGui.QColor('white'))
+        else:
+          painter.setPen(QtGui.QColor('black'))
         # painter.drawEllipse(box)
 
         # else:
@@ -493,8 +520,10 @@ class PeakNd(QtGui.QGraphicsItem):
         #   self.setZValue(0)
         painter.drawLine(-r,-r,r,r)
         painter.drawLine(-r,r,r,-r)
+        ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
+        ###painter.drawLine(xPpm-r,yPpm+r,xPpm+r,yPpm-r)
+        
         if self.isSelected():
-          painter.setPen(QtGui.QColor('black'))
           painter.drawLine(-r,-r,-r,r)
           painter.drawLine(-r,r,r,r)
           painter.drawLine(r,r,r,-r)
@@ -514,13 +543,13 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
   """ A text annotation of a peak.
       The text rotation is currently always +-45 degrees (depending on peak height). """
 
-  def __init__(self, peakItem, scene):
+  def __init__(self, peakItem, scene, text):
 
     QtGui.QGraphicsSimpleTextItem.__init__(self, scene=scene)
 
     self.setParentItem(peakItem)
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
-    # self.setText(text)
+    self.setText(text)
     self.scene = scene
     self.setColor()
     # self.analysisLayout = parent.glWidget.analysisLayout
@@ -580,7 +609,10 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
       painter.drawText(0, 0, text)
     # if self.peakItem.peak in self.analysisLayout.currentPeaks:
-    # painter.drawText(self.boundingRect())
+    # painter.drawRect(self.boundingRect())
+
+  #def sceneEventFilter(self, watched, event):
+  #  print(event)
 
   def mousePressEvent(self, event):
 

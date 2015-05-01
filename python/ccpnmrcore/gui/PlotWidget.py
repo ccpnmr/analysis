@@ -23,6 +23,8 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
+from PyQt4 import QtGui, QtOpenGL
+
 from ccpncore.gui.Base import Base
 from ccpnmrcore.gui import ViewBox
 from ccpnmrcore.DropBase import DropBase
@@ -31,9 +33,9 @@ import pyqtgraph as pg
 
 class PlotWidget(DropBase, pg.PlotWidget, Base):
 
-  def __init__(self, parent=None, appBase=None, dropCallback=None, **kw):
+  def __init__(self, parent=None, appBase=None, dropCallback=None, useOpenGL=False, **kw):
 
-
+    #pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(appBase=appBase, parent=parent), axes=None, enableMenu=True)
     pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(current=appBase.current, parent=parent), axes=None, enableMenu=True)
     Base.__init__(self, **kw)
     DropBase.__init__(self, appBase, dropCallback)
@@ -45,6 +47,9 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     self.plotItem.axes['left']['item'].hide()
     self.plotItem.axes['right']['item'].show()
 
+    if useOpenGL:
+      self.setViewport(QtOpenGL.QGLWidget())
+      self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
 
   def addItem(self, item):
     self.scene().addItem(item)

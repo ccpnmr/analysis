@@ -23,7 +23,10 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-from PyQt4 import QtGui, QtCore, QtOpenGL
+#from PyQt4 import QtGui, QtCore, QtOpenGL
+from PyQt4 import QtGui, QtCore
+
+from ccpncore.memops import Notifiers
 
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Button import Button
@@ -34,22 +37,22 @@ from ccpncore.gui.ToolBar import ToolBar
 from ccpncore.util import Colour
 
 from ccpnmrcore.modules.GuiStrip import GuiStrip
-from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
+###from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
 
 class GuiStripNd(GuiStrip):
 
   def __init__(self):
-    GuiStrip.__init__(self)
+    GuiStrip.__init__(self, useOpenGL=True)
 
-    self.plotWidget.plotItem.setAcceptDrops(True)
-    self.viewportWidget = QtOpenGL.QGLWidget()
-    self.plotWidget.setViewport(self.viewportWidget)
-    self.guiSpectrumDisplay.viewportDict[self.viewportWidget] = self
-    self.plotWidget.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+    ###self.plotWidget.plotItem.setAcceptDrops(True)
+    ###self.viewportWidget = QtOpenGL.QGLWidget()
+    ###self.plotWidget.setViewport(self.viewportWidget)
+    ###self.guiSpectrumDisplay.viewportDict[self.viewportWidget] = self
+    ###self.plotWidget.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
     # self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
-
+    
     ###self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
@@ -66,6 +69,14 @@ class GuiStripNd(GuiStrip):
         #self.plotWidget.scene().addItem(spectrumView)
       spectrumView.addSpectrumItem(self)
 
+    # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
+    self.peakLayerDict = {}  # peakList --> peakLayer
+    self.peakItemDict = {}  # peak --> peakItem
+    Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
+    Notifiers.registerNotify(self.deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
+    for func in ('setPosition', 'setWidth'):
+      Notifiers.registerNotify(self.axisRegionChanged, 'ccpnmr.gui.Task.Axis', func)
+    
   """
   def showSpectrum(self, guiSpectrumView):
     orderedAxes = self.strip.orderedAxes
@@ -242,10 +253,17 @@ class GuiStripNd(GuiStrip):
         self.planeToolbar.addWidget(self.planeLabel)
         self.planeToolbar.addWidget(nextPlaneButton)
 
-  def showPeaks(self, peakList):
+  def showPeaks(self, peakList, peaks=None):
     from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView
-    peakLayer = GuiPeakListView(self.plotWidget.plotItem.vb.scene(), self, peakList)
-    self.viewBox.addItem(peakLayer)
+    
+    if not peaks:
+      peaks = peakList.peaks
+      
+    peakLayer = self.peakLayerDict.get(peakList)
+    if not peakLayer:
+      peakLayer = GuiPeakListView(self.plotWidget.scene(), self, peakList)
+      self.viewBox.addItem(peakLayer)
+      self.peakLayerDict[peakList] = peakLayer
     #rectItem = QtGui.QGraphicsRectItem(5, 120, 2, 10, peakLayer, self.plotWidget.scene())
     ##color = QtGui.QColor('red')
     #rectItem.setBrush(QtGui.QBrush(color))
@@ -258,9 +276,55 @@ class GuiStripNd(GuiStrip):
     ##lineItem.setPen(pen)
     ##lineItem.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
     
-    for peak in peakList.peaks:
-      peakItem = PeakNd(self, peak, peakLayer)
+    peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
+    self.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
+    
+    ###for peak in peaks:
+    ###  if peak not in self.peakItemDict:
+    ###    peakItem = PeakNd(self, peak, peakLayer)
+    ###    self.peakItemDict[peak] = peakItem
+        
      # peakItem = PeakNd(self, peak)
     ###self.plotWidget.addItem(peakLayer)
      # self.plotWidget.addItem((peakItem.annotation))
      
+  def peakIsInPlane(self, peak):
+
+    if len(self.orderedAxes) > 2:
+      zDim = self.spectrumViews[0].dimensionOrdering[2] - 1
+      zPlaneSize = self.spectrumViews[0].zPlaneSize()
+      zPosition = peak.position[zDim]
+
+      zRegion = self.orderedAxes[2].region
+      if zRegion[0]-zPlaneSize <= zPosition <= zRegion[1]+zPlaneSize:
+        return True
+      else:
+        return False
+    else:
+      return True
+    
+  def newPeak(self, apiPeak):
+    peak = self._appBase.project._data2Obj[apiPeak]
+    if None in peak.position:
+      return
+    peakList = peak.parent
+    self.showPeaks(peakList, [peak])
+    
+  def deletedPeak(self, apiPeak):
+    peak = self._appBase.project._data2Obj[apiPeak]
+    peakItem = self.peakItemDict.get(peak)
+    if peakItem:
+      self.plotWidget.scene().removeItem(peakItem)
+      del self.peakItemDict[peak]
+      
+  def axisRegionChanged(self, apiAxis):
+    
+    # TBD: other axes
+    axis = self._appBase.project._data2Obj[apiAxis]
+    if len(self.orderedAxes) == 3 and axis is self.orderedAxes[2]:
+      peakLists = self.peakLayerDict.keys()
+      for peakList in peakLists:
+        peakLayer = self.peakLayerDict[peakList]
+        peaks = [peak for peak in peakList.peaks if self.peakIsInPlane(peak)]
+        self.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
+         

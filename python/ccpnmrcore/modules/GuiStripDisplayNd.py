@@ -31,6 +31,8 @@ from ccpncore.gui.VerticalLabel import VerticalLabel
 
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
+from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
+
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   # def wheelEvent(self, event):
@@ -61,9 +63,14 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     # if not apiSpectrumDisplayNd.strips:
     #   apiSpectrumDisplayNd.newStripNd()
     
-    self.viewportDict = {} # maps QGLWidget to GuiStripNd
+    ##self.viewportDict = {} # maps QGLWidget to GuiStripNd
 
+    # below are so we can reuse PeakItems and only create them as needed
+    self.activePeakItemDict = {}  # maps strip to peak to peakItem
+    self.inactivePeakItems = set()
+    
     GuiSpectrumDisplay.__init__(self)
+    
     self.fillToolBar()
     self.setAcceptDrops(True)
     self.addSpinSystemSideLabel()
@@ -204,7 +211,27 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       spectrumView.spectrum.positiveContourCount -=1
       spectrumView.spectrum.negativeContourCount -=1
 
-
-
-
+  def showPeaks(self, peakLayer, peaks):
+  
+    viewBox = peakLayer.strip.viewBox
+    activePeakItemDict = self.activePeakItemDict
+    inactivePeakItems = self.inactivePeakItems
+    peakLayerDict = activePeakItemDict.setdefault(peakLayer, {})
+    existingPeaks = set(peakLayerDict.keys())
+    unusedPeaks = existingPeaks - set(peaks)
+    for peak in unusedPeaks:
+      peakItem = peakLayerDict.pop(peak)
+      viewBox.removeItem(peakItem)
+      inactivePeakItems.add(peakItem)
+    for peak in peaks:
+      if peak in existingPeaks:
+        continue
+      if inactivePeakItems:
+        peakItem = inactivePeakItems.pop()
+        peakItem.setupPeakItem(peakLayer, peak)
+        viewBox.addItem(peakItem)
+      else:
+        peakItem = PeakNd(peakLayer, peak)
+      peakLayerDict[peak] = peakItem
+      
 

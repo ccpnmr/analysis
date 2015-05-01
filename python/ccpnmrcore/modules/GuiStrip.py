@@ -62,7 +62,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
   sigClicked = QtCore.Signal(object, object)
 
-  def __init__(self):
+  def __init__(self, useOpenGL=False):
     
     self.stripFrame = self._parent.stripFrame
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
@@ -71,7 +71,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     DropBase.__init__(self, self._parent._appBase, self.dropCallback)
 
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
-              dropCallback=self.dropCallback)#, gridSpan=(1, 1))
+              dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
     self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self))
 
     if self._parent._appBase.preferences.general.colourScheme == 'light':

@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtCore
 
 from pyqtgraph.dockarea import Dock
 
@@ -29,9 +29,7 @@ from ccpn import Spectrum
 
 from ccpncore.gui.Label import Label
 
-from ccpnmrcore.gui.Frame import Frame as GuiFrame
 from ccpnmrcore.DropBase import DropBase
-# from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 
 def _findPpmRegion(spectrum, axisDim, spectrumDim):
@@ -55,19 +53,24 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
     
     Dock.__init__(self, name='BlankDisplay', size=(1100,1300))
     dockArea.addDock(self)
-    
-    DropBase.__init__(self, dockArea.guiWindow._appBase, self.dropCallback)
-    
-    self.label = Label(self, text='Drag Spectrum Here', textColor='#999')
+
+    self.label = Label(self, text='Drag Spectrum Here', textColor='#999', dragDrop=True)
     self.label.setAlignment(QtCore.Qt.AlignCenter)
     self.layout.addWidget(self.label)
+    self.label.dropEvent = self.dropCallback
 
-
+    DropBase.__init__(self, dockArea.guiWindow._appBase, self.dropCallback)
 
   def dropCallback(self, dropObject):
     
-    if isinstance(dropObject, Spectrum):
-      spectrum = dropObject
+    dropObject.accept()
+    data = dropObject.mimeData().data('application/x-qabstractitemmodeldatalist')
+    pidData = str(data.data(),encoding='utf-8')
+    pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
+    actualPid = ''.join(pidData)
+    wrapperObject = self.getObject(actualPid)
+    if isinstance(wrapperObject, Spectrum):
+      spectrum = wrapperObject
       spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
       spectrumView = self.getWrapperObject(spectrumDisplay._wrappedData.findFirstSpectrumView(dataSource=spectrum._wrappedData))
       for strip in spectrumView.strips:

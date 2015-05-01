@@ -24,6 +24,8 @@ __version__ = "$Revision: 7686 $"
 __author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
+import pandas as pd
+
 
 import os
 import csv
@@ -130,6 +132,23 @@ class SideBar(QtGui.QTreeWidget):
                 filename.pop()
                 newFilename = '/'.join(filename)
                 spectrum = self.parent.project.loadSpectrum(newFilename)
+                newItem = self.addItem(self.spectrumItem, spectrum)
+                peakList = spectrum.newPeakList()
+                peakListItem = QtGui.QTreeWidgetItem(newItem)
+                peakListItem.setText(0, peakList.pid)
+
+          if '.xls' in filePaths[-1].split('/')[-1]:
+            xlFile = pd.ExcelFile(filePaths[-1])
+            # csv_in = open(filePaths[-1], 'r')
+            reader = xlFile.parse()
+            for row in reader['filename']:
+              print(row, row.split('/'))
+              if row.split('/')[-1] == 'procs':
+                filename = row[0:].split('/')
+                filename.pop()
+                newFilename = '/'.join(filename)
+                spectrum = self.parent.project.loadSpectrum(newFilename)
+                print(spectrum)
                 newItem = self.addItem(self.spectrumItem, spectrum)
                 peakList = spectrum.newPeakList()
                 peakListItem = QtGui.QTreeWidgetItem(newItem)

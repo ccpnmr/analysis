@@ -47,7 +47,6 @@ class BackboneAssignmentModule(PeakListSimple):
     self.hsqcDisplay = hsqcDisplay
     self.project = project
     self.current = project._appBase.current
-    # self.assigner = assigner
     self.peakTable.callback = self.findMatchingPeaks
     self.layout.setContentsMargins(4, 4, 4, 4)
     spectra = [spectrum.pid for spectrum in project.spectra]
@@ -168,7 +167,7 @@ class BackboneAssignmentModule(PeakListSimple):
     if len(self.lines) == 0:
 
       line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('k', style=QtCore.Qt.DashLine))
-      line.setPos(QtCore.QPointF( positions[0], 0))
+      line.setPos(QtCore.QPointF(positions[0], 0))
       queryWindow.orderedStrips[0].plotWidget.addItem(line)
       # line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('k', style=QtCore.Qt.DashLine))
       # line2.setPos(QtCore.QPointF( positions[1], 0))
@@ -191,44 +190,33 @@ class BackboneAssignmentModule(PeakListSimple):
      interShifts[nmrResidue] = []
      for atom in nmrResidue.atoms:
        if atom.name == 'CA':
-        intraShifts[nmrResidue].append(atom)
+        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
 
        if atom.name == 'CB':
-        intraShifts[nmrResidue].append(atom)
+        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
 
        if atom.name == 'CA-1':
-        interShifts[nmrResidue].append(atom)
+        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
 
        if atom.name == 'CB-1':
-        interShifts[nmrResidue].append(atom)
+        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
 
-    print(interShifts)
-    print(intraShifts)
+    queryShifts = []
     for atom in self.current.nmrResidue.atoms:
       if atom.apiResonance.isotopeCode == '13C':
-        print(atom.name)
-    #
-    #
-    # assignedPeaks = queryAtom.assignedPeaks
-    #
-    # queryPeaks = []
-    #
-    # for i in range(self.queryList.count()):
-    #
-    #   for peak in assignedPeaks[0]:
-    #     if peak._parent.pid == self.queryList.item(i).text():
-    #       queryPeaks.append(peak)
-    #       line2 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    #       line2.setPos(QtCore.QPointF(0, peak.position[1]))
-    #       currentStrip.plotWidget.addItem(line2)
-    #
-    #
-    # matchPeakLists = [self.project.getById(self.matchList.item(i).text()) for i in range(self.matchList.count())]
-    #
-    # assignMatrix = self.buildAssignmentMatrix(queryPeaks, matchPeakLists)
-    #
-    # indices = self.hungarian(assignMatrix)
-    #
+        print(atom, self.project.chemicalShiftLists[0].findChemicalShift(atom))
+        if '-1' in atom.name:
+          """ go through intra shifts and find matches for CB and CA shifts using hungarian
+              output results as strips ordered by 'goodness of match'
+          """
+          queryShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
+
+
+    assignMatrix = self.buildAssignmentMatrix(queryShifts, intraShifts)
+    print(assignMatrix[0])
+    # # print(list(assignMatrix[0].keys())[list(assignMatrix[0].values()).index(sorted(assignMatrix[1][0])]
+    # print(list(assignMatrix[0].keys())[list(assignMatrix[0].values()).index(sorted(assignMatrix[1][0]))])
+
     # assignedSet = set()
     # peaksSet = set()
     #
@@ -262,28 +250,38 @@ class BackboneAssignmentModule(PeakListSimple):
 
 
   def qScore(self, query, match):
+    import sys
+    if query is not None and match is not None:
+      return math.sqrt(((query.value-match.value)**2)/((query.value+match.value)**2))
+    else:
+      return 0
 
-    return math.sqrt(((query-match)**2)/((query+match)**2))
 
+  #
+  # def hungarian(self, matrix):
+  #   m = munkres.Munkres()
+  #   print(m)
+  #   indices = m.compute(matrix)
+  #   return indices
 
+  def buildAssignmentMatrix(self, queryShifts, matchShifts):
 
-  def hungarian(self, matrix):
-    m = munkres.Munkres()
-    indices = m.compute(matrix)
-    return indices
+    scores = []
+    matrix = {}
+    for res, shift in matchShifts.items():
+      if len(shift) > 1:
+        print(queryShifts[0], shift[0], queryShifts[1], shift[1],)
+        score = (self.qScore(queryShifts[0], shift[0])+self.qScore(queryShifts[1], shift[1]))/2
+        scores.append(score)
+        matrix[res] = score
+    # for qPeak in queryPeaks:
+    #   matrix.append([])
+    #   for peakList in matchPeakLists:
+    #     for mPeak in peakList.peaks:
+    #       score = self.qScore(qPeak.position[1], mPeak.position[1])
+    #       matrix[-1].append(score)
 
-  def buildAssignmentMatrix(self, queryPeaks, matchPeakLists):
-
-    matrix = []
-
-    for qPeak in queryPeaks:
-      matrix.append([])
-      for peakList in matchPeakLists:
-        for mPeak in peakList.peaks:
-          score = self.qScore(qPeak.position[1], mPeak.position[1])
-          matrix[-1].append(score)
-
-    return matrix
+    return matrix, scores
 
 
   def selectQuerySpectrum(self, item):

@@ -94,9 +94,6 @@ class Label(QtGui.QLabel, Base):
       actualPid = ''.join(pidData)
       wrapperObject = self.parent().getById(actualPid)
 
-      print(wrapperObject.pid.id)
-      print(self.pid.id)
-
       if event.keyboardModifiers() & QtCore.Qt.ShiftModifier:
 
         sinkIndex = self.parent().getById(self.pid)._wrappedData.index
@@ -116,6 +113,9 @@ class Label(QtGui.QLabel, Base):
         self.parent().guiSpectrumDisplay._appBase.current.assigner.addResidue(name=wrapperObject.spinSystemLabel.text(), direction=direction)
         newHsqcPeak = self.parent().getById('NR:'+wrapperObject.spinSystemLabel.text())
         # self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule
+    else:
+      event.acceptProposedAction()
+      print(event)
 
 
 

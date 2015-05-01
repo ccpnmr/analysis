@@ -44,6 +44,10 @@ class GuiStripNd(GuiStrip):
   def __init__(self):
     GuiStrip.__init__(self, useOpenGL=True)
 
+    # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
+    self.peakLayerDict = {}  # peakList --> peakLayer
+    self.peakItemDict = {}  # peak --> peakItem
+
     ###self.plotWidget.plotItem.setAcceptDrops(True)
     ###self.viewportWidget = QtOpenGL.QGLWidget()
     ###self.plotWidget.setViewport(self.viewportWidget)
@@ -69,9 +73,6 @@ class GuiStripNd(GuiStrip):
         #self.plotWidget.scene().addItem(spectrumView)
       spectrumView.addSpectrumItem(self)
 
-    # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
-    self.peakLayerDict = {}  # peakList --> peakLayer
-    self.peakItemDict = {}  # peak --> peakItem
     Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
     Notifiers.registerNotify(self.deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
     for func in ('setPosition', 'setWidth'):

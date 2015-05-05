@@ -182,7 +182,10 @@ class ViewBox(pg.ViewBox):
             selectedRegion[1].append(n.region[1])
         for spectrumView in self.current.strip.spectrumViews:
           peakList = spectrumView.spectrum.peakLists[0]
-          newPeaks = peakList.findPeaks(selectedRegion, spectrumView._wrappedData.orderedDataDims)
+          if spectrumView.spectrum.dimensionCount > 1:
+            newPeaks = peakList.findPeaksNd(selectedRegion, spectrumView._wrappedData.orderedDataDims)
+          else:
+            newPeaks = peakList.findPeaks1d(spectrumView)
           # print(spectrumView.spectrum.peakLists[0].peaks)
           self.current.strip.showPeaks(peakList)
           self.current.peaks = newPeaks
@@ -211,8 +214,6 @@ class ViewBox(pg.ViewBox):
         else:
           zPositions = None
         for spectrumView in self.current.strip.spectrumViews:
-          # print(spectrumView._wrappedData.peakListViews)
-          # print(dir(spectrumView._wrappedData.peakListViews))
           for peakList in spectrumView.spectrum.peakLists:
             for peak in peakList.peaks:
               if (xPositions[0] < float(peak.position[0]) < xPositions[1]
@@ -221,11 +222,13 @@ class ViewBox(pg.ViewBox):
                 if zPositions is not None:
                   if zPositions[0] < float(peak.position[2]) < zPositions[1]:
                     self.current.peaks.append(peak)
+                    # peak.isSelected(True)
                 else:
                   self.current.peaks.append(peak)
+                  # peak.isSelected(True)
 
         try:
-          self.parent._appBase.mainWindow.bbModule.predictAssignments(self.current.peaks)
+          self.parent._appBase.mainWindow.paaModule.predictAssignments(self.current.peaks)
           # for peak in self.current.peaks:
         except AttributeError:
           pass

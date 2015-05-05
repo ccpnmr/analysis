@@ -25,9 +25,12 @@ from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 
 import collections
 
+from numpy import argwhere
+from scipy.ndimage import maximum_filter
+
 Sequence = collections.abc.Sequence
 
-def findPeaks(peakList:object, positions:Sequence=None, dataDims:Sequence=None):
+def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None):
 
 
   print(positions, dataDims)
@@ -58,3 +61,27 @@ def findPeaks(peakList:object, positions:Sequence=None, dataDims:Sequence=None):
   print(posLevel)
 
   return pickNewPeaks(peakList.apiPeakList, startPoint=startPoints, endPoint=endPoints, posLevel=posLevel, negLevel=negLevel)
+
+def findPeaks1d(peakList, spectrumView, size=3, mode='wrap'):
+
+
+   peaks = []
+   spectrum = peakList.spectrum
+   data = spectrumView.data
+   threshold = spectrum.estimateNoise()
+   if (data.size == 0) or (data.max() < threshold):
+    return peaks
+   boolsVal = data[1] > threshold
+   maxFilter = maximum_filter(data[1], size=size, mode=mode)
+
+   boolsMax = data[1] == maxFilter
+
+   boolsPeak = boolsVal & boolsMax
+   indices = argwhere(boolsPeak) # True positional indices
+   for position in indices:
+     peakPosition = [float(data[0][position])]
+     height = data[1][position]
+     peakList.newPeak(height=float(height), position=peakPosition)
+   # print(self.peakListItems[peakList.pid])#.createPeakItems()
+
+   # return peakList

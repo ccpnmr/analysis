@@ -118,9 +118,10 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   #   for guiStrip in self.guiStrips:
   #     guiStrip.addSpectrum(guiSpectrumView)
   #
-  # def addStrip(self):
-  #
-  #   print('addNewStrip')
+  def addStrip(self):
+    newStrip = self.strips[0].clone()
+    return newStrip
+  # print('addNewStrip')
   #   print(self.stripFrame.layout())
   #   axisCodes = self.strips[0].axisCodes
   #   print(axisCodes)

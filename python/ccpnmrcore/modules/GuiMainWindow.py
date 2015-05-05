@@ -39,6 +39,7 @@ from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.ParassignPeakTable import ParassignModule
 from ccpnmrcore.modules.PeakTable import PeakListSimple
+from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
@@ -465,6 +466,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.bbModule = BackboneAssignmentModule(self._project, position, relativeTo, assigner, hsqcDisplay)
     self.dockArea.addDock(self.bbModule)
     return self.bbModule
+
+  def showPickAndAssignModule(self, position=None, relativeTo=None, assigner=None, hsqcDisplay=None):
+    self.paaModule = PickAndAssignModule(self._project, position, relativeTo, assigner, hsqcDisplay)
+    self.dockArea.addDock(self.paaModule)
+    return self.paaModule
 
 
   def saveProjectAs(self):

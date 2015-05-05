@@ -51,93 +51,19 @@ class BackboneAssignmentModule(PeakListSimple):
     self.layout.setContentsMargins(4, 4, 4, 4)
     spectra = [spectrum.pid for spectrum in project.spectra]
     displays = [display.pid for display in project.spectrumDisplays if len(display.orderedAxes) > 2]
-    # self.querySpectrumPulldown = PulldownList(self, grid=(5, 1), callback=self.selectQuerySpectrum)
-    # self.matchSpectrumPulldown = PulldownList(self, grid=(5, 3), callback=self.selectMatchSpectrum)
     self.queryDisplayPulldown = PulldownList(self, grid=(4, 0), callback=self.selectQuerySpectrum)
+    self.queryDisplayPulldown.insertSeparator(0)
     self.matchDisplayPulldown = PulldownList(self, grid=(4, 2), callback=self.selectMatchSpectrum)
-    # self.querySpectrumPulldown.setData([peakList.pid for peakList in project.peakLists])
-    # self.matchSpectrumPulldown.setData([peakList.pid for peakList in project.peakLists])
     self.queryDisplayPulldown.setData(displays)
+    self.queryDisplayPulldown.setCurrentIndex(1)
     self.matchDisplayPulldown.setData(displays)
-    # self.queryLabel = Label(self, text='Query Spectra', grid=(5, 0))
-    # self.matchLabel = Label(self, text='Match Spectra', grid=(5, 2))
     self.queryList = ListWidget(self, grid=(6, 0), gridSpan=(1, 1))
     self.matchList = ListWidget(self, grid=(6, 2), gridSpan=(1, 1))
-    # QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Delete), self, self.queryList.removeItem)
     self.layout.addWidget(self.queryList, 6, 0, 1, 2)
     self.layout.addWidget(self.matchList, 6, 2, 1, 2)
-    # self.numberOfMatches = 7
     self.lines = []
+    self.numberOfMatches = 5
 
-    pickAndAssignWidget = Widget(self, grid=(0, 4), gridSpan=(6, 1))
-    headerLabel = Label(self, text='i-1', grid=(0, 0), )
-    pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
-    headerLabel = Label(pickAndAssignWidget, text='i', grid=(0, 1))
-    headerLabel = Label(pickAndAssignWidget, text='i+1', grid=(0, 2))
-    self.hButton1 = Button(pickAndAssignWidget, text='H', grid=(1, 0), callback=partial(self.pickAndAssign, '-1', 'H'))
-    self.hButton2 = Button(pickAndAssignWidget, text='H', grid=(1, 1), callback=partial(self.pickAndAssign, '', 'H'))
-    self.hButton3 = Button(pickAndAssignWidget, text='H', grid=(1, 2), callback=partial(self.pickAndAssign, '+1', 'H'))
-    self.nButton1 = Button(pickAndAssignWidget, text='N', grid=(2, 0), callback=partial(self.pickAndAssign, '-1', 'N'))
-    self.nButton2 = Button(pickAndAssignWidget, text='N', grid=(2, 1), callback=partial(self.pickAndAssign, '', 'N'))
-    self.nButton3 = Button(pickAndAssignWidget, text='N', grid=(2, 2), callback=partial(self.pickAndAssign, '+1', 'N'))
-    self.caButton1 = Button(pickAndAssignWidget, text='CA', grid=(3, 0), callback=partial(self.pickAndAssign, '-1', 'CA'))
-    self.caButton2 = Button(pickAndAssignWidget, text='CA', grid=(3, 1), callback=partial(self.pickAndAssign, '', 'CA'))
-    self.caButton3 = Button(pickAndAssignWidget, text='CA', grid=(3, 2), callback=partial(self.pickAndAssign, '+1', 'CA'))
-    self.cbButton1 = Button(pickAndAssignWidget, text='CB', grid=(4, 0), callback=partial(self.pickAndAssign, '-1', 'CB'))
-    self.cbButton2 = Button(pickAndAssignWidget, text='CB', grid=(4, 1), callback=partial(self.pickAndAssign, '', 'CB'))
-    self.cbButton3 = Button(pickAndAssignWidget, text='CB', grid=(4, 2), callback=partial(self.pickAndAssign, '+1', 'CB'))
-    self.buttons = [self.hButton1, self.hButton2, self.hButton3, self.nButton1, self.nButton2,
-                    self.nButton3, self.caButton1, self.caButton2, self.caButton3, self.cbButton1,
-                    self.cbButton2, self.cbButton3]
-    for button in self.buttons:
-      button.clicked.connect(self.returnButtonToNormal)
-
-
-  def pickAndAssign(self, position, atomType):
-
-    r = self.current.nmrResidue
-    name = atomType+position
-    newNmrAtom = r.fetchNmrAtom(name=name)
-    for peak in self.current.peaks:
-      print(newNmrAtom)
-      # if len(peak.dimensionNmrAtoms[1]) > 0:
-      peak.dimensionNmrAtoms[1].append(newNmrAtom)
-      # else:
-      #   peak.dimensionNmrAtoms[1] = [newNmrAtom]
-
-
-  def returnButtonToNormal(self):
-    for button in self.buttons:
-    # print(self.sender())
-     button.setStyleSheet('background-color: None')
-
-
-
-  def predictAssignments(self, peaks):
-    values = []
-    experiments = []
-    self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
-    print(self.current.nmrResidue.atoms)
-    for peak in peaks:
-      values.append(peak.apiPeak.findFirstPeakIntensity().value)
-      experiments.append(peak.peakList.spectrum.experimentName)
-
-    for value in values:
-      if value < 0:
-        if 'HNcoCA/CB' in experiments:
-          self.cbButton1.setStyleSheet('background-color: green')
-          self.cbButton2.setStyleSheet('background-color: orange')
-        else:
-          self.cbButton2.setStyleSheet('background-color: green')
-      if value > 0:
-        if 'HNcoCA/CB' in experiments or 'HNcoCA' in experiments:
-          self.caButton1.setStyleSheet('background-color: green')
-          self.caButton2.setStyleSheet('background-color: orange')
-        else:
-          self.caButton2.setStyleSheet('background-color: green')
-
-        # palette.setColor(QtGui.QColor('orange'))
-        # self.cbButton1.setPalette(palette)
 
   def findMatchingPeaks(self, peak, row, col):
 
@@ -159,24 +85,15 @@ class BackboneAssignmentModule(PeakListSimple):
       queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
       queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
 
-    # for matchWindow in matchWindows:
-    #   matchWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
-    #   matchWindow.orderedStrips[0].changeZPlane(position=positions[1])
-    #   matchWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
 
     if len(self.lines) == 0:
 
-      line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('k', style=QtCore.Qt.DashLine))
+      line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
       line.setPos(QtCore.QPointF(positions[0], 0))
       queryWindow.orderedStrips[0].plotWidget.addItem(line)
-      # line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('k', style=QtCore.Qt.DashLine))
-      # line2.setPos(QtCore.QPointF( positions[1], 0))
-      # matchWindow.orderedStrips[0].plotWidget.addItem(line2)
-      # self.lines.append(line)
-      # self.lines.append(line2)
+
     else:
       self.lines[0].setPos(QtCore.QPointF(positions[0], 0))
-      # self.lines[1].setPos(QtCore.QPointF( positions[1], 0))
 
     self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
 
@@ -204,7 +121,6 @@ class BackboneAssignmentModule(PeakListSimple):
     queryShifts = []
     for atom in self.current.nmrResidue.atoms:
       if atom.apiResonance.isotopeCode == '13C':
-        print(atom, self.project.chemicalShiftLists[0].findChemicalShift(atom))
         if '-1' in atom.name:
           """ go through intra shifts and find matches for CB and CA shifts using hungarian
               output results as strips ordered by 'goodness of match'
@@ -212,57 +128,75 @@ class BackboneAssignmentModule(PeakListSimple):
           queryShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
 
 
+    for queryShift in queryShifts:
+      line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      line.setPos(QtCore.QPointF(0, queryShift.value))
+      for queryWindow in queryWindows:
+        queryWindow.orderedStrips[0].plotWidget.addItem(line)
+
     assignMatrix = self.buildAssignmentMatrix(queryShifts, intraShifts)
-    print(assignMatrix[0])
-    # # print(list(assignMatrix[0].keys())[list(assignMatrix[0].values()).index(sorted(assignMatrix[1][0])]
-    # print(list(assignMatrix[0].keys())[list(assignMatrix[0].values()).index(sorted(assignMatrix[1][0]))])
+    assignmentScores = sorted(assignMatrix[1])[2:2+self.numberOfMatches]
+    for assignmentScore in assignmentScores:
+      matchResidue = assignMatrix[0][assignmentScore]
+      zAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
+      xAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
+      yAtoms = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '13C' and '-1' not in atom.name]
+      print(yAtoms)
 
-    # assignedSet = set()
-    # peaksSet = set()
-    #
-    #
-    # for index in indices:
-    #   assignedSet.add(matchPeakLists[0].peaks[index[1]].dimensionNmrAtoms[0][0]._parent)
-    #   peaksSet.add(matchPeakLists[0].peaks[index[1]].position)
-    #
-    # assignmentList = list(assignedSet)
-    # peaksList = list(peaksSet)
-    #
-    # matchWindow.strips[0].changeZPlane(position=peaksList[0][2])
-    # matchWindow.strips[0].spinSystemLabel.setText(assignmentList[0].id)
-    # line4 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    # line5 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    # line6 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    # line4.setPos(pg.Point(QtCore.QPointF(peaksList[0][0], 0)))
-    # line5.setPos(pg.Point(QtCore.QPointF(0, peaksList[0][1])))
-    # line6.setPos(pg.Point(QtCore.QPointF(0, peaksList[1][1])))
-    # matchWindow.strips[0].plotWidget.addItem(line4)
-    # matchWindow.strips[0].plotWidget.addItem(line5)
-    # matchWindow.strips[0].plotWidget.addItem(line6)
+      zShift = self.project.chemicalShiftLists[0].findChemicalShift(zAtom[0]).value
+      xShift = self.project.chemicalShiftLists[0].findChemicalShift(xAtom[0]).value
+      yShifts = []
+      for atom in yAtoms:
+        if atom is not None:
+          print(atom)
+          if self.project.chemicalShiftLists[0].findChemicalShift(atom) is not None:
+            print(self.project.chemicalShiftLists[0].findChemicalShift(atom).value)
+            yShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom).value)
+      line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      line.setPos(QtCore.QPointF(xShift, 0))
+      for matchWindow in matchWindows:
+        newStrip = matchWindow.addStrip()
+        newStrip.changeZPlane(position=zShift)
+        newStrip.plotWidget.addItem(line)
+        for shift in yShifts:
+          print(shift)
+          line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+          line.setPos(QtCore.QPointF(0, shift))
+          newStrip.plotWidget.addItem(line)
 
+    firstMatchResidue = assignMatrix[0][assignmentScores[1]]
+    zAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
+    xAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
+    yAtoms = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '13C' and '-1' not in atom.name]
+    print('yAtoms',yAtoms)
+    zShift = self.project.chemicalShiftLists[0].findChemicalShift(zAtom[0]).value
+    xShift = self.project.chemicalShiftLists[0].findChemicalShift(xAtom[0]).value
+    yShifts = []
+    for atom in yAtoms:
+      if self.project.chemicalShiftLists[0].findChemicalShift(atom).value is not None:
+        yShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom).value)
 
+    line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+    line.setPos(QtCore.QPointF(xShift, 0))
+    for matchWindow in matchWindows:
+      matchWindow.orderedStrips[0].changeZPlane(position=zShift)
+      matchWindow.orderedStrips[0].plotWidget.addItem(line)
+      for shift in yShifts:
+        print(shift)
+        line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+        line.setPos(QtCore.QPointF(0, shift))
+        matchWindow.orderedStrips[0].plotWidget.addItem(line)
 
 
   def setAssigner(self, assigner):
     self.assigner = assigner
     self.project._appBase.current.assigner = assigner
-    # print(self.assigner)
-
 
   def qScore(self, query, match):
-    import sys
     if query is not None and match is not None:
       return math.sqrt(((query.value-match.value)**2)/((query.value+match.value)**2))
     else:
       return 0
-
-
-  #
-  # def hungarian(self, matrix):
-  #   m = munkres.Munkres()
-  #   print(m)
-  #   indices = m.compute(matrix)
-  #   return indices
 
   def buildAssignmentMatrix(self, queryShifts, matchShifts):
 
@@ -270,16 +204,9 @@ class BackboneAssignmentModule(PeakListSimple):
     matrix = {}
     for res, shift in matchShifts.items():
       if len(shift) > 1:
-        print(queryShifts[0], shift[0], queryShifts[1], shift[1],)
         score = (self.qScore(queryShifts[0], shift[0])+self.qScore(queryShifts[1], shift[1]))/2
         scores.append(score)
-        matrix[res] = score
-    # for qPeak in queryPeaks:
-    #   matrix.append([])
-    #   for peakList in matchPeakLists:
-    #     for mPeak in peakList.peaks:
-    #       score = self.qScore(qPeak.position[1], mPeak.position[1])
-    #       matrix[-1].append(score)
+        matrix[score] = res
 
     return matrix, scores
 

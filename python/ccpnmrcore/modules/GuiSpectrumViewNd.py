@@ -225,8 +225,8 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     #for peakListView in spectrumView._wrappedData.sortedPeakListViews():
     #  peakListItem = GuiPeakListItemNd(self, peakListView)
     spectrum = spectrumView.spectrum
-    # for peakList in spectrum.peakLists:
-    #   strip.showPeaks(peakList)
+    for peakList in spectrum.peakLists:
+      strip.showPeaks(peakList)
  
   ##### override of superclass function
 

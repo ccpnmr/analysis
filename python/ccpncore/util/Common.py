@@ -78,7 +78,7 @@ def incrementName(name:str) -> str:
   ll = name.rsplit('_',1)
   if len(ll) == 2:
     try:
-      ll[1] = int(ll[1]) + 1
+      ll[1] = str(int(ll[1]) + 1)
       return '_'.join(ll)
 
     except ValueError:

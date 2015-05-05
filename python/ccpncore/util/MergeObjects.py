@@ -53,7 +53,15 @@ def mergeObjects(sourceObj,targetObj):
   provided 1) that they are not there already, and  
   2) that there is room.
   
-  WARNING this function bypasses the API. 
+  WARNING this function bypasses the API.
+
+  WARNING Merging objects with child links or frozen links is NOT undoable
+   and undo stack is cleared
+
+  WARNING, integrated update operations, e.g. Chemical Shift averaging
+  and notifiers are NOT reliably performed during merging and must be
+  handled by the callign function
+
   WARNING This function just might leave the data in an illegal state
   The function performs a number of checks for each individual change.
   If a check fails, the latest change is undone before the error exit,

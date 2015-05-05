@@ -25,6 +25,7 @@ __version__ = "$Revision$"
 
 import re
 from ccpncore.lib.chemComp import ChemCompOverview
+from ccpncore.lib.chemComp import ObsoleteChemComps
 from ccpncore.util import Logging
 
 
@@ -326,12 +327,13 @@ def getBoundAtoms(atom):
   return atoms
 
 
-def fetchStdResNameMap(project, reset:bool=False):
+def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
   """ fetch dict of {residueName:(molType,ccpCode)},
-  using cached value if preeent and not resdet.
+  using cached value if preseent and not resdet.
   """
 
   chemCompOverview = ChemCompOverview.chemCompOverview
+  obsoleteChemComps = ObsoleteChemComps.obsoleteChemCompData
 
   logger = project._logger
 
@@ -339,142 +341,162 @@ def fetchStdResNameMap(project, reset:bool=False):
     return project._residueName2chemCompId
   else:
     result = project._residueName2chemCompId = {}
+    rejected = {}
 
   # Special cases:
 
-  # Std DNA - keep one-letter ccpCode
-  result['DA'] = result['Da'] = ('DNA', 'A')
-  result['DC'] = result['Dc'] = ('DNA', 'C')
-  result['DG'] = result['Dg'] = ('DNA', 'G')
-  result['DI'] = result['Di'] = ('DNA', 'I')
-  result['DU'] = result['Du'] = ('DNA', 'U')
-  result['DT'] = result['Dt'] = ('DNA', 'T')
+  # # Std DNA - keep one-letter ccpCode
+  result['DA'] = result['Da'] = ('DNA', 'Da')
+  result['DC'] = result['Dc'] = ('DNA', 'Dc')
+  result['DG'] = result['Dg'] = ('DNA', 'Dg')
+  result['DI'] = result['Di'] = ('DNA', 'Di')
+  result['DU'] = result['Du'] = ('DNA', 'Du')
+  result['DT'] = result['Dt'] = ('DNA', 'Dt')
 
-  # Std RNA - keep one-letter ccpCode
-  result['5MU'] = result['5mu'] = result['RT'] =  result['Rt'] = ('RNA', 'T')
-
+  # # Std RNA - keep one-letter ccpCode
+  result['5MU'] = result['5mu'] = result['RT'] =  result['Rt'] = ('RNA', '5mu')
+  #
   # Set as RNA or other, to override DNA with similar name
   for tag in ('2at', '2bt', '2gt', '2nt', '2ot', '3me', 'Ap7', 'Atl', 'Boe', 'Car',
               'Eit', 'Fnu', 'Gmu', 'Lcc', 'Lcg', 'P2t', 'S2m', 'T2t', 'Tfe', 'Tln'):
     result[tag] = result[tag.upper()] = ['RNA', tag]
 
-  result['Hob'] = result[''] = ('other', 'Hob')
-  result['Xxx'] = result[''] = ('other', 'Xxx')
+  # NBNB AAB
+  result['Aab'] = result['AAB'] = ('other', 'Aab')
+  result['Hob'] = result['HOB'] = ('other', 'Hob')
+  result['Xxx'] = result['XXX'] = ('other', 'Xxx')
 
-  # cifCodes to be replaced or skipped
-  remapRemove = {
-    '6CT':'T32',
-    '6MC':'6ma',
-    '6MT':'6ma',
-    'B1P':'Aab',
-    'DRT':'0dt',
-    'DXN':'Dxd',
-    'HDP':'Xtr',
-    'I5C':'C38',
-    'LCH':'Lcc',
-    'CB2':'-skip',
-    'DFC':'-skip',
-    'DFG':'-skip',
-    'LC':'-skip',
-    'LG':'-skip',
-    'LHU':'-skip',
-    'PG7':'-skip',
-    'PR5':'-skip',
-  }
+  for molType, ccpCode in (result.values()):
+    if ccpCode in chemCompOverview[molType]:
+      print ('\t'.join(("CPRE-FOUND", molType, ccpCode)))
+    else:
+      print ('\t'.join(("CPRE-MISS", molType, ccpCode)))
 
+  for molType,dd in sorted(chemCompOverview.items()):
+    print ("CIF-TOTAL-%s %s" % (molType, len(dd)))
+
+
+  print ("CIF-TOTAL %s" % sum(len(x) for x in chemCompOverview.values()))
+
+  remapped = {}
   nFound = 0
-  logger.debug ("CIF-TOTAL %s" % sum(len(x) for x in chemCompOverview.values()))
   for molType in molTypeOrder:
 
     # Add data for all chemComps from overview
     for ccpCode,tt in reversed(sorted(chemCompOverview[molType].items())):
+      nFound += 1
       # NB done in reversed order to ensure Xyz takes precedence over XYZ
       cifCode = tt[1]
-      altCode = remapRemove.get(cifCode)
+      dd = obsoleteChemComps.get(cifCode)
 
-      if altCode == '-skip':
-        # cifCode is obsoleted. kip it.
-        logger.debug("CIF-SKIP\t%s\t%s\t%s\t%s\t%s"
-              % (molType, ccpCode, tt[0] or '-', tt[1] or '-', tt[2] or '-'))
-        continue
+      if dd:
+        altCode = dd['cifCode']
+        if altCode is None:
+          # cifCode is obsoleted. Skip it.
+          print("CIF-SKIP\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
+                % (molType, dd['shortType'], dd['longType'], ccpCode, tt[0] or '-', tt[1] or '-', tt[2] or '-'))
+          rejected[molType, ccpCode] = None
 
-      elif altCode is not None:
-        # cifCode is remapped - change to alternative code
-        logger.debug("CIF-REMAP\t%s\t%s\t%s\t%s\t%s\t%s"
-              % (molType, ccpCode, tt[0] or '-', tt[1] or '-', tt[2] or '-', altCode))
-        cifCode = altCode.upper()
-        ccpCode = altCode
-
-      # Dummy value to allow shared diagoistics printout
-      val = ('-', '-')
-
-      if not cifCode:
-        # no cifCode - skip. debug message
-        message = 'CIF-NO'
-      elif cifCode != cifCode.upper():
-        # cifCode is not upperCase - skip. debug message
-        message = 'CIF-LOW'
-      else:
-        locif = cifCode[0] + cifCode[1:].lower()
-        val = result.get(cifCode) or result.get(locif)
-        if val is None:
-          # New value. Set the map
-          val = result[cifCode] = result[locif] =(molType, ccpCode)
-          message = 'CIF-OK'
-
-          if ccpCode not in result:
-            # ccp code not in result. Debug message
-            logger.debug("\t".join( ('CCP-MISS', molType, ccpCode, val[0], val[1],
-                                           tt[0] or '-', tt[1] or '-', tt[2] or '-') ))
         else:
-          # Value was already set
+          # Remaps are handled in another loop
+          remapped[(molType, ccpCode)] = (cifCode, altCode)
+      else:
 
-          if val[1] == cifCode and val[1] != locif:
-            # ccpCode was UPPER-CASE
-            # replace UPPERCASE ccpCode with mixed-case
-            if molType == val[0]:
-              result[cifCode] = result[locif] = (molType, ccpCode)
+        # Dummy value to allow shared diagnostics printout
+        val = ('-', '-')
 
-              # Debug messages:
-              if ccpCode.upper() == val[1].upper():
-                message = 'CIF-REPL-INTRA'
-              else:
-                message = 'CIF-REPL-CLASH1'
+        if not cifCode:
+          # no cifCode - skip. debug message
+          message = 'CIF-NO'
+          rejected[molType, ccpCode] = cifCode
 
-            elif molType == 'other' and val[0] != 'other':
-              message = 'CIF-CLASH-OTHER'
+        elif cifCode != cifCode.upper():
+          # cifCode is not upperCase - skip. debug message
+          message = 'CIF-LOW'
+          rejected[molType, ccpCode] = cifCode
+        else:
+          locif = cifCode[0] + cifCode[1:].lower()
+          val = result.get(cifCode) or result.get(locif)
+          if val is None:
+            # New value. Set the map
+            val = result[cifCode] = result[locif] =(molType, ccpCode)
+            message = 'CIF-OK'
 
-            else:
-              message = 'CIF-REPL-CLASH2'
-
+            if ccpCode not in result:
+              # ccp code not in result. Debug message
+              print("\t".join( ('CCP-MISS', molType, ccpCode, val[0], val[1],
+                                             tt[0] or '-', tt[1] or '-', tt[2] or '-') ))
           else:
-            # Simple cifCode clash. Ignore and set debug messages
-            if molType == val[0]:
-              if ccpCode.upper() == val[1].upper():
-                message = 'CIF-INTRA'
-              else:
-                message = 'CIF-CLASH1'
-            elif molType == 'other' and val[0] != 'other':
-              message = 'CIF-OTHER'
-            else:
-              message = 'CIF-CLASH2'
+            # Value was already set
 
-        # Print out debug messages
-        logger.debug("\t".join((message, molType, ccpCode, val[0], val[1],
+            if val[1] == cifCode and val[1] != locif:
+              # ccpCode was UPPER-CASE
+              # replace UPPERCASE ccpCode with mixed-case
+              if molType == val[0]:
+                result[cifCode] = result[locif] = (molType, ccpCode)
+                rejected[val[0], val[1]] = cifCode
+
+                # Debug messages:
+                if ccpCode.upper() == val[1].upper():
+                  message = 'CIF-REPL-INTRA'
+                else:
+                  message = 'CIF-REPL-CLASH1'
+
+              elif molType == 'other' and val[0] != 'other':
+                message = 'CIF-CLASH-OTHER'
+                rejected[molType, ccpCode] = cifCode
+
+              else:
+                message = 'CIF-REPL-CLASH2'
+                rejected[molType, ccpCode] = cifCode
+
+            else:
+              # Simple cifCode clash. Ignore and set debug messages
+              if molType == val[0]:
+                if ccpCode.upper() == val[1].upper():
+                  message = 'CIF-INTRA'
+                else:
+                  message = 'CIF-CLASH1'
+              elif molType == 'other' and val[0] != 'other':
+                message = 'CIF-OTHER'
+              else:
+                message = 'CIF-CLASH2'
+              rejected[molType, ccpCode] = cifCode
+
+          # Print out debug messages
+        print("\t".join((message, molType, ccpCode, val[0], val[1],
                          tt[0] or '-', tt[1] or '-', tt[2] or '-')))
 
         if len(ccpCode) == 5 and ccpCode.startswith('D-'):
           # D- amino acid - special case.
           # for now add ccpCode as extra alias
-          logger.debug("\t".join(('CCP-D-Xyz', molType, ccpCode,val[0], val[1],
+          print("\t".join(('CCP-D-Xyz', molType, ccpCode,val[0], val[1],
                            tt[0] or '-', tt[1] or '-', tt[2] or '-')))
-          result[ccpCode] = val
+          # result[ccpCode] = val
 
+
+  print("CIF-nFound %s" % nFound)
+
+  for ccId, codes in sorted(remapped.items()):
+    cifCode, altCode = codes
+    val = result.get(altCode)
+    if val is None:
+      print('\t'.join(("CIF-REMAP-ERROR1", ccId[0], ccId[1], cifCode, altCode)))
+    else:
+      locif = cifCode[0] + cifCode[1:].lower()
+      result[cifCode] = result[locif] = val
+      print('\t'.join(("CIF-REMAP-OK", ccId[0], ccId[1], cifCode, altCode, val[0], val[1])))
+      rejected[ccId] = cifCode
+
+
+  if debug:
+    for tt, cifCode in sorted(rejected.items()):
+      print("  %s:%s,  # REJECTED" % (repr(tt), repr(cifCode)))
 
   # Check for upper-case ccpCodes remaining
   for tag,val in sorted(result.items()):
     if val[1][1:] !=  val[1][1:].lower():
-      logger.debug("CCP-UPPER\t%s\t%s\t%s" % (val[1], val[0], tag))
+      print("CCP-UPPER\t%s\t%s\t%s" % (val[0], val[1], tag))
 
   # check for unused ChemComps
   for chemComp in project.sortedChemComps():
@@ -494,9 +516,11 @@ def fetchStdResNameMap(project, reset:bool=False):
       message = "CHEM-TYPE-CLASH"
     elif ccpCode != val[1]:
       message = "CHEM-CODE-CLASH"
+    else:
+      message = "CHEM-OK"
 
     if message is not None:
-      logger.debug ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
+      print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
 
     # Debug output checking ccpCode
     val = result.get(cifCode)
@@ -508,9 +532,11 @@ def fetchStdResNameMap(project, reset:bool=False):
       message = "CCIF-TYPE-CLASH"
     elif ccpCode != val[1]:
       message = "CCIF-CODE-CLASH"
+    else:
+      message = "CCIF-OK"
 
     if message is not None:
-      logger.debug ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
+      print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
 
 
     tags = set()
@@ -526,23 +552,22 @@ def fetchStdResNameMap(project, reset:bool=False):
       if prevId is None:
 
         if len(tag) == 1:
-         logger.debug ("CINFO8 Rejecting one-letter synonym %s from ChemComp %s:%s"
+         print ("CINFO8\tRejecting one-letter synonym\t%s from ChemComp %s:%s"
                  % (tag, cifCode, val))
 
         elif ccId == val:
-          logger.debug ("CINFO9 Adding new ccpCode synonym %s from ChemComp %s:%s"
+          print ("CINFO9\tAdding new ccpCode synonym\t%s from ChemComp %s:%s"
                  % (tag, cifCode, ccId))
 
           result[tag] = val
 
         else:
-          logger.debug ("CWARNING clash1 for %s chemComp %s v. cifCode %s:%s"
+          print ("CWARNING\tclash1\tfor %s chemComp %s v. cifCode %s:%s"
                 % (tag, ccId, cifCode,  val))
 
       elif prevId != val:
-        logger.debug ("CWARNING clash2 for %s chemComp %s, %s v. cifCode %s:%s"
+        print ("CWARNING\tclash2\tfor %s chemComp %s, %s v. cifCode %s:%s"
               % (tag, ccId, prevId, cifCode,  val))
-
   #
   return result
 
@@ -599,9 +624,21 @@ def fetchStdResNameMap(project, reset:bool=False):
 #
 #       print(ss1, ss2,molType, ccpCode, code1Letter, cifCode, cifclash, mixClash, ccpClash, info )
 
+# def _parseObsoleteChemCompTable(stream):
+#   result = {}
+#   for line in stream:
+#     ll = line.split()
+#     ll = [ll[0], ll[1], ' '.join(ll[2:-2]), ll[-2], ll[-1]]
+#     ll = [x if x != 'NONE' else None for x in ll]
+#     result[ll[0]] = {'cifCode':ll[-1], 'shortType':ll[1], 'typeCode':ll[-2],  'longType':ll[2]}
+#   return result
+
 
 if __name__ == '__main__':
   from ccpncore.util import Io as ioUtil
   project = ioUtil.newProject('ChemCompNameTest')
   # printCcpCodeStats(project)
-  fetchStdResNameMap(project, reset=True)
+  fetchStdResNameMap(project, reset=True, debug=True)
+  # import json
+  # data = _parseObsoleteChemCompTable(open('/home/rhf22/rhf22/Dropbox/RHFnotes/ChemComp/ResidueNameMap3.txt'))
+  # print(json.dumps(data, sort_keys=True, indent=4))

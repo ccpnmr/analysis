@@ -119,9 +119,9 @@ def absorbResonance(resonanceA:Nmr.Resonance, resonanceB:Nmr.Resonance) -> None:
   
   # Must be after resonance merge, so that links to peaks are properly set
   for shiftA in resonanceA.shifts:
-    shiftA.recalculateShiftValue()
+    shiftA.recalculateValue()
   
-  # AssognNames ar no longer used in new model
+  # AssignNames ar no longer used in new model
   # Assign names will be merged, but if assigned we only want the correct ones
   # if resonanceA.resonanceSet:
   #   assignNames = []

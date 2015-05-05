@@ -378,6 +378,7 @@ class PeakNd(QtGui.QGraphicsItem):
     ###strip.plotWidget.plotItem.vb.addItem(self)
     self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
     
+    self.annotation = PeakNdAnnotation(self, scene)
     self.setupPeakItem(peakLayer, peak)
     # self.glWidget = peakLayer.glWidget
     #self.setParentItem(peakLayer)
@@ -418,7 +419,6 @@ class PeakNd(QtGui.QGraphicsItem):
     ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
     ###yPpm = peak.position[yDim]
     ###self.setPos(xPpm, yPpm)
-    # self.annotation = PeakNdAnnotation(self, scene, '---')
     # self.inPlane = self.isInPlane()
 
     # from ccpncore.gui.Action import Action
@@ -438,6 +438,7 @@ class PeakNd(QtGui.QGraphicsItem):
     xPpm = peak.position[xDim]
     yPpm = peak.position[yDim]
     self.setPos(xPpm, yPpm)
+    self.annotation.setupPeakAnnotationItem(self)
     
   def isInPlane(self):
 
@@ -499,7 +500,7 @@ class PeakNd(QtGui.QGraphicsItem):
     
   def paint(self, painter, option, widget):
 
-    if self.peak:
+    if self.peak: # TBD: is this ever not true??
       if self.isInPlane():
         # r, w, box = self.drawData
         r, w  = self.drawData
@@ -544,52 +545,63 @@ class PeakNd(QtGui.QGraphicsItem):
         #   painter.drawRect(-r,-r,w,w)
 
 
-FONT = QtGui.QFont("DejaVu Sans Mono", 9)
-FONT_METRIC = QtGui.QFontMetricsF(FONT)
-NULL_COLOR = QtGui.QColor()
-NULL_RECT = QtCore.QRectF()
+###FONT = QtGui.QFont("DejaVu Sans Mono", 9)
+###FONT_METRIC = QtGui.QFontMetricsF(FONT)
+###NULL_COLOR = QtGui.QColor()
+###NULL_RECT = QtCore.QRectF()
 
 class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
   """ A text annotation of a peak.
       The text rotation is currently always +-45 degrees (depending on peak height). """
 
-  def __init__(self, peakItem, scene, text):
+  def __init__(self, peakItem, scene):
 
     QtGui.QGraphicsSimpleTextItem.__init__(self, scene=scene)
 
-    self.setParentItem(peakItem)
-    self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
-    self.setText(text)
-    self.scene = scene
-    self.setColor()
+    ###self.setParentItem(peakItem)
+    ###self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
+    ###self.setText(text)
+    ###self.scene = scene
+    ###self.setColor()
     # self.analysisLayout = parent.glWidget.analysisLayout
     font = self.font()
-    font.setPointSize(12)
+    font.setPointSize(18)
     self.setFont(font)
     # self.setCacheMode(self.DeviceCoordinateCache)
     self.setFlag(self.ItemIgnoresTransformations)#+self.ItemIsMovable+self.ItemIsSelectable)
     # self.setFlag(self.ItemSendsScenePositionChanges, True)
+
+    # self.text = (' , ').join('-' * peakItem.peak.peakList.spectrum.dimensionCount)
+    # if self.isSelected():
+    #   print(self)
+    color = QtGui.QColor('white')
+    self.setBrush(color)
+    ###self.setColor()
+    self.setPos(15, -15)
+    # self.updatePos()
+        
+  def setupPeakAnnotationItem(self, peakItem):
+    
+    self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
+    self.setParentItem(peakItem)
+    
+    peak = peakItem.peak
     peakLabel = []
-    for dimension in range(peakItem.peak.peakList.spectrum.dimensionCount):
-      if len(peakItem.peak.dimensionNmrAtoms[dimension]) == 0:
+    for dimension in range(peak.peakList.spectrum.dimensionCount):
+      if len(peak.dimensionNmrAtoms[dimension]) == 0:
         peakLabel.append('-')
       else:
-        for item in peakItem.peak.dimensionNmrAtoms[dimension]:
+        for item in peak.dimensionNmrAtoms[dimension]:
           if len(peakLabel) > 0:
             peakLabel.append(item.pid.id[3])
           else:
             peakLabel.append(item.pid.id)
 
-    self.text = ','.join(peakLabel)
+    text = ','.join(peakLabel)
+    
+    self.setText(text)
 
-    # self.text = (' , ').join('-' * peakItem.peak.peakList.spectrum.dimensionCount)
-    self.setText(self.text)
-    # if self.isSelected():
-    #   print(self)
-    self.setColor()
-    self.setPos(15, -15)
-    # self.updatePos()
-
+  """
   def setColor(self):
 
     color = QtGui.QColor('white')
@@ -623,7 +635,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
   #def sceneEventFilter(self, watched, event):
   #  print(event)
-
+"""
   def mousePressEvent(self, event):
 
 

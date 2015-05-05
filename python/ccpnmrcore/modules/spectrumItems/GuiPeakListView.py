@@ -430,6 +430,9 @@ class PeakNd(QtGui.QGraphicsItem):
     
     self.peakLayer = peakLayer
     self.peak = peak
+    if not hasattr(peak, 'isSelected'):
+      peak.isSelected = False
+    self.setSelected(peak.isSelected)
     xDim = peakLayer.strip.spectrumViews[0].dimensionOrdering[0] - 1
     yDim = peakLayer.strip.spectrumViews[0].dimensionOrdering[1] - 1
     xPpm = peak.position[xDim]
@@ -487,6 +490,13 @@ class PeakNd(QtGui.QGraphicsItem):
     r, w  = self.drawData
     return QtCore.QRectF(-r,-r,2*r,2*r)
 
+  def itemChange(self, change, value):
+    
+    if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
+      self.peak.isSelected = self.isSelected()
+    
+    return QtGui.QGraphicsItem.itemChange(self, change, value)
+    
   def paint(self, painter, option, widget):
 
     if self.peak:

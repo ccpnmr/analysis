@@ -210,7 +210,7 @@ class Spectrum(AbstractWrapperObject):
   @experimentType.setter
   def experimentType(self, value:str):
     for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
-      for refExperiment in nmrExpPrototype.sortedrefExperiments():
+      for refExperiment in nmrExpPrototype.sortedRefExperiments():
         if value == refExperiment.name:
           # refExperiment matches name string - set it
           self._wrappedData.experiment.refExperiment = refExperiment

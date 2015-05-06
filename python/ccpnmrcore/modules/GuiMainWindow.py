@@ -37,7 +37,7 @@ from ccpncore.gui.TextEditor import TextEditor
 from ccpnmrcore.gui.Assigner import Assigner
 from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
-from ccpnmrcore.modules.ParassignPeakTable import ParassignModule
+#from ccpnmrcore.modules.ParassignPeakTable import ParassignModule
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup

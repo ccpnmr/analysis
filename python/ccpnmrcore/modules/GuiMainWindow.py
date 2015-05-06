@@ -92,6 +92,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if len(recentFiles) >= 10:
         recentFiles.pop()
       recentFiles.insert(0, path)
+      
+    self.setWindowTitle('%s %s: %s' % (self._appBase.applicationName, self._appBase.applicationVersion, project.name))
     
   def setupWindow(self):
 
@@ -283,10 +285,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def undo(self):
-    pass
+    self._appBase.undoStack.undo()
 
   def redo(self):
-    pass
+    self._appBase.undoStack.redo()
 
   def saveLogFile(self):
     pass

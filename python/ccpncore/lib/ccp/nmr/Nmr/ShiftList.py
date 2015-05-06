@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 
 def recalculateShifts(shiftList):
   """recalculate value and error for all shifts, from assigned peaks"""
-  for shift in shiftList.shifts:
+  for shift in shiftList.measurements:
     shift.recalculateValue()
 
 

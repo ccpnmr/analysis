@@ -25,9 +25,9 @@ __version__ = "$Revision: 7686 $"
 import sys
 
 from ccpnmrcore.app.AppBase import AppBase, startProgram
+from ccpnmrcore.app.Version import applicationVersion
 
 applicationName = 'Assign'
-applicationVersion = '1.0'
 
 class Assign(AppBase):
   pass

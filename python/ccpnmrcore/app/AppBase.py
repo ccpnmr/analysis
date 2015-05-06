@@ -32,6 +32,7 @@ from ccpncore.gui.Application import Application
 
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
+from ccpncore.util.Undo import Undo
 
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.Current import Current
@@ -40,14 +41,17 @@ import os, json
 
 class AppBase(GuiBase):
 
-  def __init__(self, apiProject):
+  def __init__(self, apiProject, applicationName, applicationVersion):
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
+    self.applicationName = applicationName
+    self.applicationVersion = applicationVersion
+    
     self.setupPreferences()
     self.vLines = []
     self.hLines = []
+    self.undoStack = Undo()
     self.initProject(apiProject)
-
 
     
   def initProject(self, apiProject):
@@ -124,7 +128,9 @@ def startProgram(programClass, applicationName, applicationVersion, projectPath=
   else:
     apiProject = ioUtil.newProject('default')
 
+  # On the Mac (at least) it does not matter what you set the applicationName to be,
+  # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
-  program = programClass(apiProject)
+  program = programClass(apiProject, applicationName, applicationVersion)
   app.start()
   

@@ -72,38 +72,46 @@ def findPeaks1d(peakList, spectrumView, size=3, mode='wrap'):
    ppmValues = data[0]
    intensities = data[1]
    import numpy
-   array1 = numpy.where(ppmValues < ignoredRegions[0])[0]# or ppmValues > ignoredRegions[1])[0])
-   array2 = numpy.where(ppmValues > ignoredRegions[1])[0]
-   print(array1[0], array1[-1], array2[0], array2[-1])
-   array3 = data[array2[0]:array2[-1]+1, array2[0]:array2[-1]+1]
-   array4 = data[array1[0]:array1[-1]+1, array1[0]:array1[-1]+1]
-   print(array4)
-
-   # for datum in ppmValues:
-   #   if datum < ignoredRegions[0] or datum > ignoredRegions[1]:
-   #     print(ppmValues.index(datum), datum)
-   threshold = spectrum.estimateNoise()*10
+   array1 = numpy.where(ignoredRegions[0] > ppmValues)
+   array2 = numpy.where(ppmValues > ignoredRegions[1])# or ppmValues > ignoredRegions[1])[0])
+   print(array1, array2)
+   # print(array1[0], array1[-1], array2[0], array2[-1])
+   # print(len(data[0]))
+   # array4 = numpy.array(data[0][array1[0]:array1[1], data[1][array1[0]:array1[1]]])
+   # array3 = data[array2[0]:array2[1]+1, array2[0]:array2[-1]+1]
+   # print(len(data[0]))
+   # # array4 = data[17094:32766, 17094:32766]
+   # print('4',array4)
+   # print('3',array3)
+   #
+   #
+   # # for datum in ppmValues:
+   # #   if datum < ignoredRegions[0] or datum > ignoredRegions[1]:
+   # #     print(ppmValues.index(datum), datum)
+   # threshold = spectrum.estimateNoise()*10
    # if (data.size == 0) or (data.max() < threshold):
    #  return peaks
-   boolsVal = array3[1] > threshold
-   maxFilter = maximum_filter(array3[1], size=size, mode=mode)
-   boolsMax = array3[1] == maxFilter
-   boolsPeak = boolsVal & boolsMax
-   indices = argwhere(boolsPeak) # True positional indices
-   for position in indices:
-     peakPosition = [float(array3[0][position])]
-     height = array3[1][position]
-     peakList.newPeak(height=float(height), position=peakPosition)
-   boolsVal = array4[1] > threshold
-   maxFilter = maximum_filter(array4[1], size=size, mode=mode)
-   boolsMax = array4[1] == maxFilter
-   boolsPeak = boolsVal & boolsMax
-   indices = argwhere(boolsPeak) # True positional indices
-   for position in indices:
-     peakPosition = [float(array4[0][position])]
-     height = array4[1][position]
-     peakList.newPeak(height=float(height), position=peakPosition)
-   # print(self.peakListItems[peakList.pid])#.createPeakItems()
+   # boolsVal = array3[1] > threshold
+   # maxFilter = maximum_filter(array3[1], size=size, mode=mode)
+   # boolsMax = array3[1] == maxFilter
+   # boolsPeak = boolsVal & boolsMax
+   # indices = argwhere(boolsPeak) # True positional indices
+   # for position in indices:
+   #   peakPosition = [float(array3[0][position])]
+   #   height = array3[1][position]
+   #   peakList.newPeak(height=float(height), position=peakPosition)
+   #
+   #
+   # boolsVal = array4[1] > threshold
+   # maxFilter = maximum_filter(array4[1], size=size, mode=mode)
+   # boolsMax = array4[1] == maxFilter
+   # boolsPeak = boolsVal & boolsMax
+   # indices = argwhere(boolsPeak) # True positional indices
+   # for position in indices:
+   #   peakPosition = [float(array4[0][position])]
+   #   height = array4[1][position]
+   #   peakList.newPeak(height=float(height), position=peakPosition)
+   # # print(self.peakListItems[peakList.pid])#.createPeakItems()
 
 def findPeaks1dFiltered(peakList, spectrumView, size=3, mode='wrap'):
 
@@ -118,9 +126,10 @@ def findPeaks1dFiltered(peakList, spectrumView, size=3, mode='wrap'):
    array1 = numpy.where(ppmValues < ignoredRegions[0])[0]# or ppmValues > ignoredRegions[1])[0])
    array2 = numpy.where(ppmValues > ignoredRegions[1])[0]
    print(array1[0], array1[-1], array2[0], array2[-1])
+   # array4 = data[array1[0]:array1[-1]+1, array1[0]:array1[-1]+1]
    array3 = data[array2[0]:array2[-1]+1, array2[0]:array2[-1]+1]
-   array4 = data[array1[0]:array1[-1]+1, array1[0]:array1[-1]+1]
 
+   array4 = data[0:17465, 0:17465]
    # for datum in ppmValues:
    #   if datum < ignoredRegions[0] or datum > ignoredRegions[1]:
    #     print(ppmValues.index(datum), datum)

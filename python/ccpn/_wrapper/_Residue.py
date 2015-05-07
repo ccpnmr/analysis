@@ -75,6 +75,10 @@ class Residue(AbstractWrapperObject):
     """Residue type name string (e.g. 'ALA')"""
     return self._wrappedData.code3Letter or ''
 
+  @property
+  def shortName(self) -> str:
+    return self._wrappedData.chemCompVar.chemComp.code1Letter or '?'
+
   # @name.setter
   # def name(self, value:str):
   #   self._wrappedData.code3Letter = value

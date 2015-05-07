@@ -27,7 +27,7 @@ import math
 
 
 
-def recalculatetValue(shift, simulatedPeakScale=0.0001):
+def recalculateValue(shift, simulatedPeakScale=0.0001):
   """
   Calculates the value and error for a given shift based upon the
   peaks to which its resonance is assigned. Also sets links to

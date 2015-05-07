@@ -174,6 +174,7 @@ newConstraints = [
  ('ccp.nmr.Nmr.Resonance.implName.name_is_unique_in_resonanceGroup', 'www.ccpn.ac.uk_Fogh_2014-12-30-13:36:29_00001'), 
  ('ccp.nmr.Nmr.ResonanceGroup.nmrChain_and_sequenceCode_form_unique_key', 'www.ccpn.ac.uk_Fogh_2015-04-27-11:10:21_00001'), 
  ('ccp.nmr.Nmr.ResonanceGroup.satellite_resonance_group_must_have_offset', 'www.ccpn.ac.uk_Fogh_2014-08-01-13:41:38_00002'), 
+ ('ccp.nmr.NmrCalc.MolResidueData.Either_single_chain_code_or_residueSeqIds_match_chainCodes_one_to_one', 'www.ccpn.ac.uk_Fogh_2015-05-07-14:13:59_00001'), 
  ('ccp.nmr.NmrConstraint.AbstractConstraintList.name.name_uniquely_identifies_constraintList', 'www.ccpn.ac.uk_Fogh_2015-01-30-13:54:37_00003'), 
  ('ccp.nmr.NmrConstraint.DihedralItem.no_Dihedral_item_with_resonances_in_opposite_order', 'www.ccpn.ac.uk_Fogh_2014-07-29-12:54:23_00003'), 
  ('ccpnmr.gui.Task.BoundDisplay.axisOrder.bound_axis_order_is_contained_in_axis_codes', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:43:15_00001'), 
@@ -673,9 +674,9 @@ typeChanges = [
 # Different elements with matching qualifiedNames
 # (element.qName, differentTags, oldGuid, newGuid
 nameMatches = [
- ('cambridge.WmsProtocol.WmsProtocol.memopsRoot', ({'documentation', 'otherRole'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00061', 'ccpn_automatic_cambridge.WmsProtocol.WmsProtocol.memopsRoot')), 
+ ('cambridge.WmsProtocol.WmsProtocol.memopsRoot', ({'otherRole', 'documentation'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00061', 'ccpn_automatic_cambridge.WmsProtocol.WmsProtocol.memopsRoot')), 
  ('ccpnmr', ({'documentation'}, 'www.ccpn.ac.uk_Fogh_2006-08-17-14:16:20_00001', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:25_00001')), 
- ('memops.Implementation.MemopsRoot.wmsProtocols', ({'documentation', 'otherRole'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00062', 'ccpn_automatic_memops.Implementation.MemopsRoot.wmsProtocol')), 
+ ('memops.Implementation.MemopsRoot.wmsProtocols', ({'otherRole', 'documentation'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00062', 'ccpn_automatic_memops.Implementation.MemopsRoot.wmsProtocol')), 
 ]
 
 # Differences for matching elements, 
@@ -685,7 +686,7 @@ allDiffs = [
  ('cambridge.WmsProtocol.WmsProtocol', 'WmsProtocol', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', 'www.ccpn.ac.uk_Fogh_2010-05-06-12:26:54_00002', {'parentRole'}), 
  ('ccp.general.DataLocation.NumberType', 'NumberType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00034', {'supertype', 'supertypes'}), 
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
- ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'documentation', 'isDerived', 'partitionsChildren'}), 
+ ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'isDerived', 'documentation', 'partitionsChildren'}), 
  ('ccp.nmr.Nmr.IntensityType', 'IntensityType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00038', {'supertype', 'supertypes'}), 
  ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'documentation', 'isDerived'}), 
  ('ccp.nmr.Nmr.ShiftRefType', 'ShiftRefType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', {'supertype', 'supertypes'}), 
@@ -695,6 +696,6 @@ allDiffs = [
  ('memops.Implementation.FileStorageObject', 'FileStorageObject', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00048', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00048', {'taggedValues'}), 
  ('molsim.AnnealProtocol.ScaleFunction', 'ScaleFunction', 'www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00008', 'www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00008', {'taggedValues', 'isOpen'}), 
  ('molsim.Symmetry.MolSystemSymmetrySet', 'MolSystemSymmetrySet', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', {'parentRole'}), 
- ('utrecht.Haddock.HaddockPartner.molSystem', 'molSystem', 'www.ccpn.ac.uk_Fogh_2006-10-11-22:59:43_00010', 'www.ccpn.ac.uk_Fogh_2006-10-11-22:59:43_00010', {'taggedValues', 'partitionsChildren'}), 
+ ('utrecht.Haddock.HaddockPartner.molSystem', 'molSystem', 'www.ccpn.ac.uk_Fogh_2006-10-11-22:59:43_00010', 'www.ccpn.ac.uk_Fogh_2006-10-11-22:59:43_00010', {'partitionsChildren', 'taggedValues'}), 
  ('utrecht.Haddock.Residue.residue', 'residue', 'www.ccpn.ac.uk_Fogh_2008-02-27-16:15:25_00006', 'www.ccpn.ac.uk_Fogh_2008-02-27-16:15:25_00006', {'taggedValues'}), 
 ]

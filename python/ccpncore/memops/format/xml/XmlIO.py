@@ -230,6 +230,7 @@ def loadTopObject(repositoryPath, topObject):
   """
   filePath = ApiPath.findTopObjectPath(repositoryPath, topObject)
   topObjId = ApiPath.getTopObjIdFromFileName(filePath, mustBeMultipart=True)
+
   
   return loadFromStream(open(filePath), topObjId=topObjId, topObject=topObject)
 

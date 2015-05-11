@@ -31,28 +31,30 @@ class ToolButton(QtGui.QToolButton):
     
     QtGui.QToolButton.__init__(self, parent.spectrumToolBar)
     self.spectrumView = spectrumView
-    pix=QtGui.QPixmap(60,10)
+    pix=QtGui.QPixmap(60, 10)
     if spectrumView.spectrum.dimensionCount < 2:
       pix.fill(QtGui.QColor(spectrumView.spectrum.sliceColour))
     else:
       pix.fill(QtGui.QColor(spectrumView.spectrum.positiveContourColour))
     # spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
-    spectrumView.newAction = parent.spectrumToolBar.addAction(spectrumView.spectrum.name)#, self)
+    self.spaction = parent.spectrumToolBar.addAction(spectrumView.spectrum.name)#, self)
     newIcon = QtGui.QIcon(pix)
-    spectrumView.newAction.setIcon(newIcon)
-    spectrumView.newAction.setCheckable(True)
-    spectrumView.newAction.setChecked(True)
+    self.spaction.setIcon(newIcon)
+    self.spaction.setCheckable(True)
+    self.spaction.setChecked(True)
 
-    for spectrumView in parent.spectrumViews:
-      if spectrumView.spectrum.dimensionCount < 2:
-        spectrumView.newAction.toggled.connect(spectrumView.plot.setVisible)
-      else:
-        for strip in spectrumView.strips:
-         item = spectrumView.spectrumItems[strip]
-         spectrumView.newAction.toggled.connect(item.setVisible)
-         print(spectrumView.peakListItems)
+    # for spectrumView in parent.spectrumViews:
+    #   if spectrumView.spectrum.dimensionCount < 2:
+    #     self.spaction.toggled.connect(spectrumView.plot.setVisible)
+    #   else:
+    for strip in spectrumView.strips:
+      print(strip)
+      item = spectrumView.spectrumItems[strip]
+      print(strip, item, spectrumView, self.spaction, 'you name it!')
+      self.spaction.toggled.connect(item.setVisible)
+      print(self.spaction)
          # for peakListView in spectrumView.peakListViews:
          #   spectrumView.newAction.toggled.connect(peakListView.setVisible)
-    spectrumView.widget = parent.spectrumToolBar.widgetForAction(spectrumView.newAction)
-    spectrumView.widget.setFixedSize(60,30)
+    # spectrumView.widget = parent.spectrumToolBar.widgetForAction(self.spaction)
+    # spectrumView.widget.setFixedSize(60,30)
 

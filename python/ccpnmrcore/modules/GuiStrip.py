@@ -127,9 +127,13 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
 
-  def addStrip(self):
+  # def addStrip(self):
+  #
+  #   newStrip = self.strips[0].clone()
+  #   print('spectrumViews', newStrip.spectrumViews)
+  #   for spectrumView in newStrip.spectrumViews:
+  #     spectrumView.connectStrip(newStrip)
 
-    self.strips[0].clone()
 
   def updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
@@ -190,6 +194,9 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     # this is called when the api region (position and/or width) is changed
     
     xAxis, yAxis = self.orderedAxes[:2]
+    if not xAxis or not yAxis:
+      return
+
     if apiAxis not in (xAxis._wrappedData, yAxis._wrappedData):
       return
       
@@ -330,8 +337,8 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   def restoreZoom(self):
     if len(self.storedZooms) != 0:
       restoredZoom = self.storedZooms.pop()
-      self.setXRange(restoredZoom[0][0], restoredZoom[0][1])
-      self.setYRange(restoredZoom[1][0], restoredZoom[1][1])
+      self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1])
+      self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1])
 
   def showSpectrum(self, guiSpectrumView):
     raise Exception('should be implemented in subclass')

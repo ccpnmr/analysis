@@ -87,20 +87,27 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
   def fillToolBar(self):
 
-    self.spectrumUtilToolBar.addAction('+', lambda self=self: self.orderedStrips[0].clone()) # clone first strip
+    self.spectrumUtilToolBar.addAction('+', self.cloneStrip) #self.orderedStrips[0].clone()) # clone first strip
     self.spectrumUtilToolBar.addAction('-', lambda self=self: self.orderedStrips[-1].delete()) # remove last strip
+
+  def cloneStrip(self):
+    newStrip = self.orderedStrips[-1].clone()
+    print('spectrumViews2', newStrip.spectrumViews)
+    for spectrumView in newStrip.spectrumViews:
+      spectrumView.connectStrip(newStrip)
+
 
   def zoomYAll(self):
     for strip in self.strips:
       strip.zoomYAll()
 
   def zoomXAll(self):
-    self.currentStrip.zoomXAll()
+    self._appBase.current.strip.zoomXAll()
 
   def restoreZoom(self):
-    self.currentStrip.restoreZoom()
+    self._appBase.current.strip.restoreZoom()
 
   def storeZoom(self):
-    self.currentStrip.storeZoom()
+    self._appBase.current.strip.storeZoom()
     
     

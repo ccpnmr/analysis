@@ -164,9 +164,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.spectrumViewButton = ToolButton(self.spectrumDisplay, self)
     self.spectrumViewButton.setFixedSize(60,30)
 
-    for strip in self.strips:
-       item = self.spectrumItems[strip]
-       self.newAction.toggled.connect(item.setVisible)
+    # for strip in self.strips:
+    #   self.connectStrip(strip)
+
       #if self not in strip.plotWidget.items():
         # newItem = self
       #  strip.plotWidget.scene().addItem(self)
@@ -182,7 +182,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       item = self.spectrumItems[strip]
       strip.plotWidget.scene().removeItem(item)
       del self.spectrumItems[strip]
-      
+
+  def connectStrip(self, strip):
+    item = self.spectrumItems[strip]
+    self.spectrumViewButton.spaction.toggled.connect(item.setVisible)
   """
   def getLevels(self):
     

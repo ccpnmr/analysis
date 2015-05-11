@@ -129,10 +129,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter1.addWidget(self.dockArea)
     self.seqScrollArea = QtGui.QScrollArea()
     self.seqScrollArea.setFixedHeight(30)
-    self.seqScrollArea.setWidget(self.sequenceWidget)
-    self.dockArea.layout.addWidget(self.sequenceWidget)
-    self.sequence = ''.join([residue.shortName for residue in self._project.chains[0].residues])
-    self.sequenceWidget.setText(self.sequence)
+    # self.seqScrollArea.setWidget(self.sequenceWidget)
+    # self.dockArea.layout.addWidget(self.sequenceWidget)
+    # self.sequence = ''.join([residue.shortName for residue in self._project.chains[0].residues])
+    # self.sequenceWidget.setText(self.sequence)
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
     self.setShortcuts()
@@ -452,7 +452,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def runMacro(self, macroFile=None):
 
-    macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", "/Users/simon/ccpnMacros/")
+    macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
     f = open(macroFile)
     lines = f.readlines()
 

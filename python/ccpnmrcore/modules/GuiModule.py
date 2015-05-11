@@ -39,6 +39,7 @@ class GuiModule(QtGui.QWidget, GuiBase):
   def __init__(self, position='right'):
     
     QtGui.QWidget.__init__(self)
+    print(self.window)
     self.dockArea = self.window.dockArea
     # self.apiModule = apiModule
     self.dock = Dock(name=self._wrappedData.name, size=(1100,1300))

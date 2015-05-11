@@ -24,7 +24,6 @@ __version__ = "$Revision: 7686 $"
 from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
-from ccpncore.gui.Icon import Icon
 
 class Action(QtGui.QAction, Base):
   def __init__(self, parent, text, callback=None, shortcut=None, checkable=False, icon=None, **kw):
@@ -32,6 +31,9 @@ class Action(QtGui.QAction, Base):
     if shortcut:
       QtGui.QAction.__init__(self, text, parent, shortcut=QtGui.QKeySequence(", ".join(tuple(shortcut))),triggered=callback, checkable=checkable)
       QtGui.QAction.setShortcutContext(self, QtCore.Qt.ApplicationShortcut)
+      QtGui.QFontDatabase.addApplicationFont('/Users/simon/Downloads/Lato-Black.ttf')
+      font = QtGui.QFont('Lato-Black')
+      QtGui.QAction.setFont(self, font)
     # elif icon:
     #   QtGui.QAction.__init__(self, icon, text, parent, triggered=callback, checkable=checkable)
 

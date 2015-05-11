@@ -46,6 +46,7 @@ class GuiStrip1d(GuiStrip):
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.colourIndex = 0
     self.spectrumIndex = 0
+    self.peakItems = {}
     for spectrumView in self.spectrumViews:
       print(spectrumView)
       self.plotWidget.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour)
@@ -92,10 +93,11 @@ class GuiStrip1d(GuiStrip):
     # print(self.plotWidget.scene().items())
     peakLayer = GuiPeakListView(self.plotWidget.scene(), self.plotWidget, peakList)
     peakItems = []
+    self.peakItems[peakList] = []
     for peak in peakList.peaks:
      # peakItem =
      peakItem = Peak1d(self.plotWidget.scene(), self.plotWidget, peak,  peakList)
-     print(peakItem.pos())
+     self.peakItems[peakList].append(peakItem)
     #   peakItem = PeakItem(peak)
     #   self.plotWidget.addItem(peakItem)
      self.plotWidget.addItem(peakItem)
@@ -103,3 +105,7 @@ class GuiStrip1d(GuiStrip):
     #   self.plotWidget.addItem(peakItem.peakAnnotationItem.peakTextItem)
     #   self.plotWidget.addItem(peakItem.peakAnnotationItem.peakSymbolItem)
     # # print(self.plotWidget.scene().items())
+
+  def hidePeaks(self, peakList):
+    for item in self.peakItems[peakList]:
+      self.plotWidget.removeItem(item)

@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 
 import re
 from ccpncore.lib.chemComp import ChemCompOverview
-from ccpncore.lib.chemComp import ObsoleteChemComps
+# from ccpncore.lib.chemComp import ObsoleteChemComps
 from ccpncore.util import Logging
 
 

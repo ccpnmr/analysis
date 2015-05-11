@@ -29,13 +29,9 @@ import pandas as pd
 
 import os
 import csv
-import pandas as pd
-
-
-
-
 
 experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'Water-LOGSY.H'}
+
 
 class SideBar(QtGui.QTreeWidget):
   def __init__(self, parent=None):
@@ -68,8 +64,6 @@ class SideBar(QtGui.QTreeWidget):
     self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.notesItem.setText(0, "Notes")
     self.parent = parent
-    self.parent = parent
-
 
   def addItem(self, item, data):
     newItem = QtGui.QTreeWidgetItem(item)
@@ -83,9 +77,9 @@ class SideBar(QtGui.QTreeWidget):
     else:
       super(SideBar, self).dragEnterEvent(event)
 
-  # def dragMoveEvent(self, event):
-  #
-  #   event.accept()
+  def dragMoveEvent(self, event):
+
+    event.accept()
 
 
   def fillSideBar(self,project):
@@ -97,9 +91,7 @@ class SideBar(QtGui.QTreeWidget):
           peakListItem = QtGui.QTreeWidgetItem(newItem)
           peakListItem.setText(0, peakList.pid)
 
-    # self.restraintsItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
     self.structuresItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
-    # self.samplesItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
     self.notesItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
     # 1d
     self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
@@ -176,9 +168,6 @@ class SideBar(QtGui.QTreeWidget):
     if isinstance(self.parent, QtGui.QGraphicsScene):
       event.ignore()
       return
-
-    if isinstance(self.parent, QtGui.QTreeWidgetItem):
-      print('here111')
 
     if event.mimeData().urls():
       event.accept()
@@ -278,144 +267,6 @@ class SideBar(QtGui.QTreeWidget):
                       peakListItem = QtGui.QTreeWidgetItem(newItem)
                       peakListItem.setText(0, peakList.pid)
 
-            # for row in sheet2['filename']:
-            #
-            #   if row[0:].split('/')[-1] == 'procs':
-            #     filename = row[0:].split('/')
-            #     filename.pop()
-            #     pp = filename[:-2]
-            #     pp.append('pulseprogram')
-            #     # print(pp)
-            #     print(filename)
-            #     ppFile = open('/'.join(pp), 'r').readlines()
-            #     newFilename = '/'.join(filename)
-            #     # print(newFilename)
-            #     spectrum = self.parent.project.loadSpectrum(newFilename)
-            #     print(spectrum)
-            #     expTypes = []
-            #     peakList = spectrum.newPeakList()
-            #     for expType in experimentTypeDict.keys():
-            #       if expType in ppFile[2]:
-            #           # spectrum.experimentType = experimentTypeDict[expType]
-            #         expTypes.append(experimentTypeDict[expType])
-            #       print(expTypes, ppFile[2])
-            #     if len(expTypes) > 1 and 'T2-filtered.H' in expTypes:
-            #         expTypes.remove('T2-filtered.H')
-            #     if spectrum is not None:
-            #       if len(expTypes) > 0:
-            #         spectrum.experimentType = expTypes[0]
-            #       # spectrum.experimentType = self.getExpType(filename)
-            #         if spectrum.experimentType == "STD.H":
-            #          newItem = self.addItem(self.stdItem, spectrum)
-            #          peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #          peakListItem.setText(0, peakList.pid)
-            #
-            #         elif spectrum.experimentType == "Water-LOGSY.H":
-            #           newItem = self.addItem(self.logsyItem, spectrum)
-            #           peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #           peakListItem.setText(0, peakList.pid)
-            #
-            #         elif spectrum.experimentType == "T2-filtered.H":
-            #           newItem = self.addItem(self.t1rhoItem, spectrum)
-            #           peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #           peakListItem.setText(0, peakList.pid)
-            #
-            #       else:
-            #         newItem = self.addItem(self.onedItem, spectrum)
-            #         peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #         peakListItem.setText(0, peakList.pid)
-            # for row in sheet3['filename']:
-            #
-            #   if row[0:].split('/')[-1] == 'procs':
-            #     filename = row[0:].split('/')
-            #     filename.pop()
-            #     pp = filename[:-2]
-            #     pp.append('pulseprogram')
-            #     # print(pp)
-            #     print(filename)
-            #     ppFile = open('/'.join(pp), 'r').readlines()
-            #     newFilename = '/'.join(filename)
-            #     # print(newFilename)
-            #     spectrum = self.parent.project.loadSpectrum(newFilename)
-            #     print(spectrum)
-            #     expTypes = []
-            #     peakList = spectrum.newPeakList()
-            #     for expType in experimentTypeDict.keys():
-            #       if expType in ppFile[2]:
-            #           # spectrum.experimentType = experimentTypeDict[expType]
-            #         expTypes.append(experimentTypeDict[expType])
-            #       print(expTypes, ppFile[2])
-            #     if len(expTypes) > 1 and 'T2-filtered.H' in expTypes:
-            #         expTypes.remove('T2-filtered.H')
-            #     if spectrum is not None:
-            #       if len(expTypes) > 0:
-            #         spectrum.experimentType = expTypes[0]
-            #       # spectrum.experimentType = self.getExpType(filename)
-            #         if spectrum.experimentType == "STD.H":
-            #          newItem = self.addItem(self.stdItem, spectrum)
-            #          peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #          peakListItem.setText(0, peakList.pid)
-            #
-            #         elif spectrum.experimentType == "Water-LOGSY.H":
-            #           newItem = self.addItem(self.logsyItem, spectrum)
-            #           peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #           peakListItem.setText(0, peakList.pid)
-            #
-            #         elif spectrum.experimentType == "T2-filtered.H":
-            #           newItem = self.addItem(self.t1rhoItem, spectrum)
-            #           peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #           peakListItem.setText(0, peakList.pid)
-            #
-            #       else:
-            #         newItem = self.addItem(self.onedItem, spectrum)
-            #         peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #         peakListItem.setText(0, peakList.pid)
-            # for row in sheet4['filename']:
-            #
-            #   if row[0:].split('/')[-1] == 'procs':
-            #     filename = row[0:].split('/')
-            #     filename.pop()
-            #     pp = filename[:-2]
-            #     pp.append('pulseprogram')
-            #     # print(pp)
-            #     print(filename)
-            #     ppFile = open('/'.join(pp), 'r').readlines()
-            #     newFilename = '/'.join(filename)
-            #     # print(newFilename)
-            #     spectrum = self.parent.project.loadSpectrum(newFilename)
-            #     print(spectrum)
-            #     expTypes = []
-            #     peakList = spectrum.newPeakList()
-            #     for expType in experimentTypeDict.keys():
-            #       if expType in ppFile[2]:
-            #           # spectrum.experimentType = experimentTypeDict[expType]
-            #         expTypes.append(experimentTypeDict[expType])
-            #       print(expTypes, ppFile[2])
-            #     if len(expTypes) > 1 and 'T2-filtered.H' in expTypes:
-            #         expTypes.remove('T2-filtered.H')
-            #     if spectrum is not None:
-            #       if len(expTypes) > 0:
-            #         spectrum.experimentType = expTypes[0]
-            #       # spectrum.experimentType = self.getExpType(filename)
-            #         if spectrum.experimentType == "STD.H":
-            #          newItem = self.addItem(self.stdItem, spectrum)
-            #          peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #          peakListItem.setText(0, peakList.pid)
-            #
-            #         elif spectrum.experimentType == "Water-LOGSY.H":
-            #           newItem = self.addItem(self.logsyItem, spectrum)
-            #           peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #           peakListItem.setText(0, peakList.pid)
-            #
-            #         elif spectrum.experimentType == "T2-filtered.H":
-            #           newItem = self.addItem(self.t1rhoItem, spectrum)
-            #           peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #           peakListItem.setText(0, peakList.pid)
-            #
-            #       else:
-            #         newItem = self.addItem(self.onedItem, spectrum)
-            #         peakListItem = QtGui.QTreeWidgetItem(newItem)
-            #         peakListItem.setText(0, peakList.pid)
           for dirpath, dirnames, filenames in os.walk(filePaths[0]):
             if dirpath.endswith('memops') and 'Implementation' in dirnames:
               self.parent._appBase.openProject(filePaths[0])
@@ -492,11 +343,10 @@ class SideBar(QtGui.QTreeWidget):
               pass
 
         else:
-          print('else', filePaths)
+          event.ignore()
 
       else:
         event.ignore()
 
     else:
       event.ignore()
-

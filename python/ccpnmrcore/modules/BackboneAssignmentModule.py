@@ -65,7 +65,7 @@ class BackboneAssignmentModule(PeakListSimple):
     self.numberOfMatches = 5
 
 
-  def findMatchingPeaks(self, peak, row, col):
+  def findMatchingPeaks(self, peak=None, row=None, col=None, nmrResidue=None):
 
 
     # self.assigner.clearAllItems()
@@ -77,27 +77,31 @@ class BackboneAssignmentModule(PeakListSimple):
     for index in range(self.matchList.count()):
       matchWindows.append(self.project.getById(self.matchList.item(index).text()))
 
-    positions = peak.position
-    self.hsqcDisplay.strips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
+    if peak:
+      positions = peak.position
+      self.hsqcDisplay.strips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
 
-    for queryWindow in queryWindows:
-      queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
-      queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
-      queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
+      for queryWindow in queryWindows:
+        queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
+        queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
+        queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
 
 
-    if len(self.lines) == 0:
+        if len(self.lines) == 0:
 
-      line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-      line.setPos(QtCore.QPointF(positions[0], 0))
-      queryWindow.orderedStrips[0].plotWidget.addItem(line)
+          line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+          line.setPos(QtCore.QPointF(positions[0], 0))
+          queryWindow.orderedStrips[0].plotWidget.addItem(line)
 
-    else:
-      self.lines[0].setPos(QtCore.QPointF(positions[0], 0))
+        else:
+          self.lines[0].setPos(QtCore.QPointF(positions[0], 0))
 
-    self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
+      self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
 
-    self.assigner.addResidue(name=peak.dimensionNmrAtoms[0][0]._parent.id)
+    elif nmrResidue is not None:
+      self.current.nmrResidue = nmrResidue
+
+    self.assigner.addResidue(self.current.nmrResidue)
 
     intraShifts = {}
     interShifts = {}
@@ -127,62 +131,62 @@ class BackboneAssignmentModule(PeakListSimple):
           """
           queryShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
 
-
+    print(queryShifts)
     for queryShift in queryShifts:
       line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      print(queryShift.value)
       line.setPos(QtCore.QPointF(0, queryShift.value))
       for queryWindow in queryWindows:
         queryWindow.orderedStrips[0].plotWidget.addItem(line)
 
     assignMatrix = self.buildAssignmentMatrix(queryShifts, intraShifts)
-    assignmentScores = sorted(assignMatrix[1])[2:2+self.numberOfMatches]
-    for assignmentScore in assignmentScores:
+    assignmentScores = sorted(assignMatrix[1])[0:self.numberOfMatches]
+    print(assignmentScores)
+    for assignmentScore in assignmentScores[1:]:
       matchResidue = assignMatrix[0][assignmentScore]
+      print(matchResidue,'1')
       zAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
       xAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
       yAtoms = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '13C' and '-1' not in atom.name]
-      print(yAtoms)
 
       zShift = self.project.chemicalShiftLists[0].findChemicalShift(zAtom[0]).value
       xShift = self.project.chemicalShiftLists[0].findChemicalShift(xAtom[0]).value
       yShifts = []
       for atom in yAtoms:
         if atom is not None:
-          print(atom)
           if self.project.chemicalShiftLists[0].findChemicalShift(atom) is not None:
-            print(self.project.chemicalShiftLists[0].findChemicalShift(atom).value)
             yShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom).value)
       line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
       line.setPos(QtCore.QPointF(xShift, 0))
       for matchWindow in matchWindows:
         newStrip = matchWindow.addStrip()
         newStrip.changeZPlane(position=zShift)
+        newStrip.spinSystemLabel.setText(matchResidue.sequenceCode)
         newStrip.plotWidget.addItem(line)
         for shift in yShifts:
-          print(shift)
           line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
           line.setPos(QtCore.QPointF(0, shift))
           newStrip.plotWidget.addItem(line)
 
-    firstMatchResidue = assignMatrix[0][assignmentScores[1]]
+    firstMatchResidue = assignMatrix[0][assignmentScores[0]]
+    print(firstMatchResidue,'0')
     zAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
     xAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
     yAtoms = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '13C' and '-1' not in atom.name]
-    print('yAtoms',yAtoms)
     zShift = self.project.chemicalShiftLists[0].findChemicalShift(zAtom[0]).value
     xShift = self.project.chemicalShiftLists[0].findChemicalShift(xAtom[0]).value
     yShifts = []
     for atom in yAtoms:
-      if self.project.chemicalShiftLists[0].findChemicalShift(atom).value is not None:
+      if self.project.chemicalShiftLists[0].findChemicalShift(atom) is not None:
         yShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom).value)
 
     line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
     line.setPos(QtCore.QPointF(xShift, 0))
     for matchWindow in matchWindows:
       matchWindow.orderedStrips[0].changeZPlane(position=zShift)
+      matchWindow.orderedStrips[0].spinSystemLabel.setText(firstMatchResidue.sequenceCode)
       matchWindow.orderedStrips[0].plotWidget.addItem(line)
       for shift in yShifts:
-        print(shift)
         line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
         line.setPos(QtCore.QPointF(0, shift))
         matchWindow.orderedStrips[0].plotWidget.addItem(line)
@@ -196,7 +200,7 @@ class BackboneAssignmentModule(PeakListSimple):
     if query is not None and match is not None:
       return math.sqrt(((query.value-match.value)**2)/((query.value+match.value)**2))
     else:
-      return 0
+      return None
 
   def buildAssignmentMatrix(self, queryShifts, matchShifts):
 
@@ -204,9 +208,23 @@ class BackboneAssignmentModule(PeakListSimple):
     matrix = {}
     for res, shift in matchShifts.items():
       if len(shift) > 1:
-        score = (self.qScore(queryShifts[0], shift[0])+self.qScore(queryShifts[1], shift[1]))/2
-        scores.append(score)
-        matrix[score] = res
+        if self.qScore(queryShifts[0], shift[0]) is not None and self.qScore(queryShifts[1], shift[1]) is not None:
+
+          score = (self.qScore(queryShifts[0], shift[0])+self.qScore(queryShifts[1], shift[1]))/2
+        # else:
+        #   score = None
+          scores.append(score)
+          print(score, res)
+          matrix[score] = res
+      elif len(shift) == 1:
+        if self.qScore(queryShifts[0], shift[0]) is not None:
+
+          score = self.qScore(queryShifts[0], shift[0])
+        # else:
+        #   score = None
+          scores.append(score)
+          print(score, res)
+          matrix[score] = res
 
     return matrix, scores
 

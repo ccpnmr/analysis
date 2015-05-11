@@ -185,7 +185,7 @@ class ViewBox(pg.ViewBox):
           if spectrumView.spectrum.dimensionCount > 1:
             newPeaks = peakList.findPeaksNd(selectedRegion, spectrumView._wrappedData.orderedDataDims)
           else:
-            newPeaks = peakList.findPeaks1d(spectrumView)
+            newPeaks = peakList.findPeaks1dFiltered(spectrumView)
           # print(spectrumView.spectrum.peakLists[0].peaks)
           self.current.strip.showPeaks(peakList)
           self.current.peaks = newPeaks

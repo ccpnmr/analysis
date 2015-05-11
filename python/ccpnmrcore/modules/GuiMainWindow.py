@@ -37,6 +37,7 @@ from ccpncore.gui.TextEditor import TextEditor
 from ccpnmrcore.gui.Assigner import Assigner
 from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
+from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
 #from ccpnmrcore.modules.ParassignPeakTable import ParassignModule
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
@@ -101,7 +102,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
     
     self.namespace = {'current': self._project._appBase.current, 'openProject':self._appBase.openProject,
-                      'newProject':self._appBase.newProject, 'loadSpectrum':self.loadSpectra, 'self':self,
+                      'newProject':self._appBase.newProject, 'loadSpectrum':self.loadSpectra, 'window':self,
                       'preferences':self._appBase.preferences, 'project':self._project}
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
@@ -121,9 +122,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
     self.leftWidget.itemDoubleClicked.connect(self.raiseSpectrumProperties)
     self.splitter2.addWidget(self.pythonConsole)
+    self.sequenceWidget = QtGui.QLabel(self)
+    self.sequenceWidget.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
     self.pythonConsole.hide()
     self.splitter2.setGeometry(QtCore.QRect(1200, 1300, 100, 100))
     self.splitter1.addWidget(self.dockArea)
+    self.seqScrollArea = QtGui.QScrollArea()
+    self.seqScrollArea.setFixedHeight(30)
+    self.seqScrollArea.setWidget(self.sequenceWidget)
+    self.dockArea.layout.addWidget(self.sequenceWidget)
+    self.sequence = ''.join([residue.shortName for residue in self._project.chains[0].residues])
+    self.sequenceWidget.setText(self.sequence)
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
     self.setShortcuts()
@@ -131,7 +140,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def setupMenus(self):
 
     self._menuBar =  QtGui.QMenuBar()
-
+    QtGui.QFontDatabase.addApplicationFont('/Users/simon/Downloads/Lato-Black.ttf')
+    font = QtGui.QFont('Lato-Black')
+    self._menuBar.setFont(font)
     fileMenu = QtGui.QMenu("&Project", self)
     spectrumMenu = QtGui.QMenu("&Spectra", self)
     viewMenu = QtGui.QMenu("&View", self)
@@ -141,7 +152,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroMenu = QtGui.QMenu("Macro", self)
     helpMenu = QtGui.QMenu("&Help", self)
 
-    fileMenuAction = fileMenu.addAction(QtGui.QAction("New", self, triggered=self._appBase.newProject))
+    fileMenuAction = fileMenu.addAction(Action(self, "New", callback=self._appBase.newProject, shortcut='pn'))
     fileMenu.addAction(Action(self, "Open...", callback=self.openAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
@@ -258,12 +269,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def showAssigner(self, position, nextTo=None):
-    assigner = Assigner()
+    self.assigner = Assigner(project=self._project)
     if nextTo is not None:
-      self.dockArea.addDock(assigner, position=position, relativeTo=nextTo)
+      self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
     else:
-      self.dockArea.addDock(assigner, position=position)
-    return assigner
+      self.dockArea.addDock(self.assigner, position=position)
+    return self.assigner
     # self.dockArea.addDock(assigner)
 
   def raiseSpectrumProperties(self, item):
@@ -473,6 +484,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.paaModule = PickAndAssignModule(self._project, position, relativeTo, assigner, hsqcDisplay)
     self.dockArea.addDock(self.paaModule)
     return self.paaModule
+
+  def showDataPlottingModule(self):
+    dpModule = DataPlottingModule(self.dockArea)
+    # self.dockArea.addDock(dpModule)
 
 
   def saveProjectAs(self):

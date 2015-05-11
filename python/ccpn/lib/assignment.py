@@ -34,7 +34,7 @@ def getExptDict(project):
     exptDict[peakList.spectrum.experimentType] = []
   return exptDict
 
-def assignAlphas(nmrResidue, peaks, shiftList):
+def assignAlphas(nmrResidue, peaks):
 
   if len(peaks) > 1:
     a3 = nmrResidue.fetchNmrAtom(name='CA-1')
@@ -42,27 +42,14 @@ def assignAlphas(nmrResidue, peaks, shiftList):
     if peaks[0].height > peaks[1].height:
       peaks[0].assignDimension(axisCode='C', value=[a4])
       peaks[1].assignDimension(axisCode='C', value=[a3])
-      try:
-        shiftList.newChemicalShift(value = peaks[0].position[1], nmrAtom=a4)
-        shiftList.newChemicalShift(value = peaks[1].position[1], nmrAtom=a3)
-      except:
-        pass
     if peaks[0].height < peaks[1].height:
       peaks[0].assignDimension(axisCode='C', value=[a3])
       peaks[1].assignDimension(axisCode='C', value=[a4])
-      try:
-        shiftList.newChemicalShift(value = peaks[0].position[1], nmrAtom=a4)
-        shiftList.newChemicalShift(value = peaks[1].position[1], nmrAtom=a3)
-      except:
-        pass
   elif len(peaks) == 1:
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CA')])
-    try:
-      shiftList.newChemicalShift(value = peaks[0].position[1], nmrAtom=nmrResidue.fetchNmrAtom(name='CA'))
-    except:
-      pass
 
-def assignBetas(nmrResidue, peaks, shiftList):
+
+def assignBetas(nmrResidue, peaks):
 
   if len(peaks) > 1:
     a3 = nmrResidue.fetchNmrAtom(name='CB-1')
@@ -70,22 +57,10 @@ def assignBetas(nmrResidue, peaks, shiftList):
     if abs(peaks[0].height) > abs(peaks[1].height):
       peaks[0].assignDimension(axisCode='C', value=[a4])
       peaks[1].assignDimension(axisCode='C', value=[a3])
-      try:
-        shiftList.newChemicalShift(value = peaks[0].position[1], nmrAtom=a4)
-        shiftList.newChemicalShift(value = peaks[1].position[1], nmrAtom=a3)
-      except:
-        pass
+
     if abs(peaks[0].height) < abs(peaks[1].height):
       peaks[0].assignDimension(axisCode='C', value=[a3])
       peaks[1].assignDimension(axisCode='C', value=[a4])
-      try:
-        shiftList.newChemicalShift(value = peaks[0].position[1], nmrAtom=a4)
-        shiftList.newChemicalShift(value = peaks[1].position[1], nmrAtom=a3)
-      except:
-        pass
+
   elif len(peaks) == 1:
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
-    try:
-      shiftList.newChemicalShift(value = peaks[0].position[1], nmrAtom=nmrResidue.fetchNmrAtom(name='CB'))
-    except:
-      pass

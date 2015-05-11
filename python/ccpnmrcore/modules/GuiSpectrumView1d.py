@@ -65,6 +65,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
       self.plot  = strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
       self.plot.curve.setClickable(True)
       self.plot.sigClicked.connect(self.clicked)
+      for peakList in self.spectrum.peakLists:
+        strip.showPeaks(peakList)
     spectrumViewButton = ToolButton(self.spectrumDisplay, self)
 
 
@@ -76,9 +78,12 @@ class GuiSpectrumView1d(GuiSpectrumView):
   def clicked(self):
     print(self.plot)
 
-  def getSliceData(self):
+  def getSliceData(self, spectrum=None):
 
-    apiDataSource = self.apiDataSource
+    if spectrum is None:
+      apiDataSource = self.apiDataSource
+    else:
+      apiDataSource = spectrum.apiDataSource
     dataDimRef = apiDataSource.findFirstDataDim().findFirstDataDimRef()
     firstPoint = dataDimRef.pointToValue(0)
     pointCount = apiDataSource.findFirstDataDim().numPoints

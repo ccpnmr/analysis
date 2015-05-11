@@ -45,6 +45,7 @@ class Assigner(Dock):
     self.layout.addWidget(self.scrollArea)
     self.atomSpacing = 66
     self.residuesShown = []
+    self.predictedStretch = []
 
     # self.dock.addWidget(self)
 
@@ -62,7 +63,7 @@ class Assigner(Dock):
       self.residueCount = 0
 
 
-  def addResidue(self, name, direction=None):
+  def addResidue(self, nmrResidue, direction=None):
 
     if self.residueCount == 0:
       hAtom = self.addAtom("H", (0, self.atomSpacing))
@@ -73,16 +74,54 @@ class Assigner(Dock):
       self.scene.addItem(hAtom)
       self.scene.addItem(nAtom)
       self.scene.addItem(caAtom)
-      self.scene.addItem(cbAtom)
+      atoms = [atom.name for atom in nmrResidue.atoms]
+      if 'CB' in atoms:
+        cBetaAtom = nmrResidue.fetchNmrAtom('CB')
+      else:
+        cBetaAtom = None
+
+      if cBetaAtom is not None:
+        self.scene.addItem(cbAtom)
+        self.addAssignmentLine(caAtom, cbAtom, 'grey', 1.2, 0)
+        cbShift = self.project.chemicalShiftLists[0].findChemicalShift(cBetaAtom)
+        print('cbshift',cbShift.value)
+
       self.scene.addItem(coAtom)
       self.addAssignmentLine(hAtom, nAtom, 'grey', 1.2, 0)
-      self.addAssignmentLine(caAtom, cbAtom, 'grey', 1.2, 0)
+
       self.addAssignmentLine(nAtom, caAtom, 'grey', 1.2, 0)
       self.addAssignmentLine(coAtom, caAtom, 'grey', 1.2, 0)
       nmrAtomLabel = QtGui.QGraphicsTextItem()
-      nmrAtomLabel.setPlainText(name)
+      nmrAtomLabel.setPlainText(nmrResidue.sequenceCode)
       nmrAtomLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
       self.scene.addItem(nmrAtomLabel)
+      print(cBetaAtom,'cbeta')
+      if cBetaAtom is None:
+        predictionLabel = QtGui.QGraphicsTextItem()
+        predictionLabel.setPlainText('GLY')
+        predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
+        self.scene.addItem(predictionLabel)
+        self.predictedStretch.insert(0, 'G')
+      else:
+        if float(cbShift.value) < 25:
+          print('ALA')
+          predictionLabel = QtGui.QGraphicsTextItem()
+          predictionLabel.setPlainText('ALA')
+          predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
+          self.scene.addItem(predictionLabel)
+          self.predictedStretch.insert(0, 'A')
+        elif float(cbShift.value) > 68:
+          print('THR')
+          predictionLabel = QtGui.QGraphicsTextItem()
+          predictionLabel.setPlainText('THR')
+          predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
+          self.scene.addItem(predictionLabel)
+          self.predictedStretch.insert(0, 'T')
+        else:
+          print('here')
+          self.predictedStretch.insert(0, '.')
+
+
       newResidue = {'number':self.residueCount, 'H':hAtom, "N": nAtom, "CA":caAtom, "CB":cbAtom, "CO":coAtom}
       self.residuesShown.append(newResidue)
       self.residueCount+=1
@@ -98,18 +137,50 @@ class Assigner(Dock):
           hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
           self.scene.addItem(coAtom2)
           self.scene.addItem(caAtom2)
-          self.scene.addItem(cbAtom2)
+          atoms = [atom.name for atom in nmrResidue.atoms]
+          if 'CB' in atoms:
+            cBetaAtom = nmrResidue.fetchNmrAtom('CB')
+          else:
+            cBetaAtom = None
+
+          if cBetaAtom is not None:
+            self.scene.addItem(cbAtom2)
+            self.addAssignmentLine(caAtom2, cbAtom2, 'grey', 1.2, 0)
+            cbShift = self.project.chemicalShiftLists[0].findChemicalShift(cBetaAtom)
           self.scene.addItem(nAtom2)
           self.scene.addItem(hAtom2)
           self.addAssignmentLine(nAtom2, hAtom2, 'grey', 1.2, 0)
           self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.2, 0)
           self.addAssignmentLine(coAtom2, oldResidue['N'], 'grey', 1.2, 0)
-          self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.2, 0)
+          # self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.2, 0)
           self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.2, 0)
           nmrAtomLabel = QtGui.QGraphicsTextItem()
-          nmrAtomLabel.setPlainText(name)
+          nmrAtomLabel.setPlainText(nmrResidue.sequenceCode)
           nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
           self.scene.addItem(nmrAtomLabel)
+          if cBetaAtom is None:
+            predictionLabel = QtGui.QGraphicsTextItem()
+            predictionLabel.setPlainText('GLY')
+            predictionLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, nmrAtomLabel.y()+30)
+            self.scene.addItem(predictionLabel)
+            self.predictedStretch.insert(0, 'G')
+          else:
+            if float(cbShift.value) < 25:
+              print('ALA')
+              predictionLabel = QtGui.QGraphicsTextItem()
+              predictionLabel.setPlainText('ALA')
+              predictionLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, nmrAtomLabel.y()+30)
+              self.scene.addItem(predictionLabel)
+              self.predictedStretch.insert(0, 'A')
+            if float(cbShift.value) > 68:
+              print('THR')
+              predictionLabel = QtGui.QGraphicsTextItem()
+              predictionLabel.setPlainText('THR')
+              predictionLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, nmrAtomLabel.y()+30)
+              self.scene.addItem(predictionLabel)
+              self.predictedStretch.insert(0, 'T')
+            else:
+              self.predictedStretch.insert(0, '.')
           newResidue = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2}
           self.residuesShown.insert(0, newResidue)
 
@@ -131,12 +202,31 @@ class Assigner(Dock):
           self.addAssignmentLine(nAtom2, oldResidue['CO'], 'grey', 1.2, 0)
           self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.2, 0)
           nmrAtomLabel = QtGui.QGraphicsTextItem()
-          nmrAtomLabel.setPlainText(name)
+          nmrAtomLabel.setPlainText(nmrResidue.sequenceCode)
           nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
           self.scene.addItem(nmrAtomLabel)
           newResidue = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2}
           self.residuesShown.append(newResidue)
       self.residueCount+=1
+
+
+  def predictSequencePosition(self):
+    sequence = ''.join([residue.shortName for residue in self.project.chains[0].residues])
+    if len(self.predictedStretch) > 3:
+      string = ''.join(self.predictedStretch)
+      print(string)
+      import re
+      matcher = re.search(string, sequence)
+      print(matcher.start(), matcher.end())
+      newSequenceText = '<div>'+sequence[:matcher.start()]+'<span style="background-color: #000; ' \
+                        'color: #FFF; display: inline-block; padding: 0 3px;"><strong>'+sequence[
+                        matcher.start():matcher.end()]+'</strong></span>'+sequence[matcher.end():]+'</div>'
+      self.project._appBase.mainWindow.sequenceWidget.setText(newSequenceText)
+    else:
+      print(self.predictedStretch)
+
+
+
 
 
   def addAssignmentLine(self, atom1, atom2, colour, width, displacement):

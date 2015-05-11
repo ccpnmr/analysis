@@ -57,17 +57,11 @@ class Label(QtGui.QLabel, Base):
   def mousePressEvent(self, event):
     if self.dragDrop == True:
       itemData = QtCore.QByteArray(self.pid)
-      # dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-      # dataStream << QtCore.QByteArray(self.labelText) << QtCore.QPoint(event.pos() - self.rect().topLeft())
-
       mimeData = QtCore.QMimeData()
       mimeData.setData('application/x-strip', itemData)
-      # mimeData.setText(self.labelText)
-
       drag = QtGui.QDrag(self)
       drag.setMimeData(mimeData)
-      # drag.setHotSpot(event.pos() - self.rect().topLeft())
-      # drag.setPixmap(self.pixmap())]
+
     else:
       event.ignore()
 
@@ -107,12 +101,17 @@ class Label(QtGui.QLabel, Base):
       if wrapperObject.pid.id == self.pid.id:
         wrapperObject.moveTo(sinkIndex)
       else:
+        print('wrapperObject',wrapperObject.spinSystemLabel.text())
         self.parent().guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
         self.parent().guiSpectrumDisplay._appBase.current.strip = self.parent().guiSpectrumDisplay.orderedStrips[sinkIndex]
         self.parent().guiSpectrumDisplay._appBase.current.strip.spinSystemLabel.setText(wrapperObject.spinSystemLabel.text())
-        self.parent().guiSpectrumDisplay._appBase.current.assigner.addResidue(name=wrapperObject.spinSystemLabel.text(), direction=direction)
-        newHsqcPeak = self.parent().getById('NR:'+wrapperObject.spinSystemLabel.text())
-        # self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule
+        newNmrResidue = self.parent().getById('NR:@.'+wrapperObject.spinSystemLabel.text()+'.')
+        print(newNmrResidue)
+        self.parent().guiSpectrumDisplay._appBase.current.assigner.addResidue(nmrResidue=newNmrResidue, direction=direction)
+        # newHsqcPeak = self.parent().getById('NR:'+wrapperObject.spinSystemLabel.text())
+        print(self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule)
+        self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule.findMatchingPeaks(nmrResidue=newNmrResidue)
+        self.parent().guiSpectrumDisplay._appBase.mainWindow.assigner.predictSequencePosition()
     else:
       event.acceptProposedAction()
       print(event)

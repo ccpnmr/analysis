@@ -427,7 +427,7 @@ class PeakNd(QtGui.QGraphicsItem):
   #
   
   def setupPeakItem(self, peakLayer, peak):
-    
+
     self.peakLayer = peakLayer
     self.peak = peak
     if not hasattr(peak, 'isSelected'):
@@ -439,6 +439,7 @@ class PeakNd(QtGui.QGraphicsItem):
     yPpm = peak.position[yDim]
     self.setPos(xPpm, yPpm)
     self.annotation.setupPeakAnnotationItem(self)
+    peakLayer.peakItems[self.peak] = self
     
   def isInPlane(self):
 
@@ -565,7 +566,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     ###self.setColor()
     # self.analysisLayout = parent.glWidget.analysisLayout
     font = self.font()
-    font.setPointSize(18)
+    font.setPointSize(10)
     self.setFont(font)
     # self.setCacheMode(self.DeviceCoordinateCache)
     self.setFlag(self.ItemIgnoresTransformations)#+self.ItemIsMovable+self.ItemIsSelectable)

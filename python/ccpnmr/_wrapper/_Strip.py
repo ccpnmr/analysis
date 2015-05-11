@@ -134,25 +134,30 @@ class Strip(GuiStrip, AbstractWrapperObject):
         # remove the item for this strip from the layout
         # and shuffle "higher" items down in the layout
         # (by removing them and then adding them back in)
-        items = []
-        if spectrumDisplay.stripDirection == 'Y':
-          for m in range(index, n):
-            item = layout.itemAtPosition(0, m)
-            if m > index:
-              items.append(item)
-            layout.removeItem(item)
-          for m, item in enumerate(items):
-            layout.addItem(item, 0, m+index)
-        elif spectrumDisplay.stripDirection == 'X':
-          for m in range(index, n):
-            item = layout.itemAtPosition(m, 0)
-            if m > index:
-              items.append(item)
-            layout.removeItem(item)
-          for m, item in enumerate(items):
-            layout.addItem(item, m+index, 0)
-
+        for r in range(layout.rowCount()):
+          items = []
+          if spectrumDisplay.stripDirection == 'Y':
+            for m in range(index, n):
+              item = layout.itemAtPosition(r, m)
+              if m > index:
+                items.append(item)
+              layout.removeItem(item)
+            for m, item in enumerate(items):
+              layout.addItem(item, r, m+index)
+          elif spectrumDisplay.stripDirection == 'X':
+            for m in range(index, n):
+              item = layout.itemAtPosition(m, 0)
+              if m > index:
+                items.append(item)
+              layout.removeItem(item)
+            for m, item in enumerate(items):
+              layout.addItem(item, m+index, 0)
+      self.plotWidget.deleteLater()
+      self.spinSystemLabel.deleteLater()
+      if hasattr(self, 'planeToolbar'):
+        self.planeToolbar.deleteLater()
       ccpnStrip.delete()
+
       #self.deleteLater()  # Qt call, is this needed???
       
     else:

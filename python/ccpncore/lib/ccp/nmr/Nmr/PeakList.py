@@ -53,14 +53,24 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
 
   nonAdj = 1 if checkAllAdjacent else 0
 
-  dataArray, intRegion = dataSource.getRegionData(startPoint, endPoint)
-  startPoint, endPoint = intRegion
   startPoint = numpy.array(startPoint)
   endPoint = numpy.array(endPoint)
-  numPoint = endPoint - startPoint
+  
+  startPoint, endPoint = numpy.minimum(startPoint, endPoint), numpy.maximum(startPoint, endPoint)
+  
+  # extend region by exclusionBuffer
+  bufferArray = numpy.array(exclusionBuffer)
+  startPointBuffer = startPoint - bufferArray
+  endPointBuffer = endPoint + bufferArray
 
+  dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
+  startPointInt, endPointInt = intRegion
+  startPointInt = numpy.array(startPointInt)
+  endPointInt = numpy.array(endPointInt)
+  numPointInt = endPointInt - startPointInt
+  
   """
-  existingPeaks = getRegionPeaks(peakList, startPoint, endPoint)
+  existingPeaks = getRegionPeaks(peakList, startPointInt, endPointInt)
   existingPoints = set()
   for peak in existingPeaks:
     keys = [[],]
@@ -83,6 +93,12 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
                               negLevel, posLevel, exclusionBuffer,
                               nonAdj, minDropfactor, minLinewidth)
 
+  peakPoints = [(numpy.array(position), height) for position, height in peakPoints]
+  
+  # only keep those points which are inside original region, not extended region
+  peakPoints = [(position, height) for position, height in peakPoints if ((startPoint-startPointInt) <= position).all() and (position <= (endPoint-startPointInt)).all()]
+
+  # check new found positions against existing ones
   existingPositions = []
   for peak in peakList.peaks:
     position = numpy.array([peakDim.position for peakDim in peak.sortedPeakDims()])  # ignores aliasing
@@ -93,7 +109,7 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
   peaks = []
   for position, height in peakPoints:
     
-    position = numpy.array(position) + startPoint
+    position += startPointInt
     
     for existingPosition in existingPositions:
       delta = abs(existingPosition - position)

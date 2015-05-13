@@ -32,7 +32,7 @@ from scipy.ndimage import maximum_filter
 
 Sequence = collections.abc.Sequence
 
-def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None):
+def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None, doPos:bool=True, doNeg:bool=True):
 
 
   print(positions, dataDims)
@@ -57,8 +57,8 @@ def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None
   endPoints = [point[1] for point in sorted(endPoint)]
   print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
 
-  posLevel = spectrum.positiveContourBase*100
-  negLevel = spectrum.negativeContourBase*100
+  posLevel = spectrum.positiveContourBase*100 if doPos else None
+  negLevel = spectrum.negativeContourBase*100 if doNeg else None
 
   print(posLevel)
 

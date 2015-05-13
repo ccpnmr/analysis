@@ -26,23 +26,22 @@ __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 import pandas as pd
 
-
+import sys
 import os
 import csv
 
 experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'Water-LOGSY.H'}
 
 
+
 class SideBar(QtGui.QTreeWidget):
-  def __init__(self, parent=None):
-    super(SideBar, self).__init__(parent)
+  def __init__(self, parent=None ):
+    QtGui.QTreeWidget.__init__(self, parent)
     self.header().hide()
     self.setDragEnabled(True)
-    self.acceptDrops()
+    self.setDragDropMode(self.InternalMove)
+    # self._dragroot = self.itemRootIndex()
     self.setFixedWidth(180)
-    # self.itemDoubleClicked.connect(self.test)
-    self.setDropIndicatorShown(True)
-    self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
     self.projectItem = QtGui.QTreeWidgetItem(self)
     self.projectItem.setText(0, "Project")
     self.spectrumItem = QtGui.QTreeWidgetItem(self.projectItem)
@@ -65,21 +64,15 @@ class SideBar(QtGui.QTreeWidget):
     self.notesItem.setText(0, "Notes")
     self.parent = parent
 
+
+
   def addItem(self, item, data):
     newItem = QtGui.QTreeWidgetItem(item)
-    newItem.setText(0, data.name)
+    newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
+    newItem.setText(0, str(data.name))
     newItem.setData(0, QtCore.Qt.DisplayRole, str(data.pid))
     return newItem
 
-  def dragEnterEvent(self, event):
-    if event.mimeData().hasUrls():
-      event.accept()
-    else:
-      super(SideBar, self).dragEnterEvent(event)
-
-  def dragMoveEvent(self, event):
-
-    event.accept()
 
 
   def fillSideBar(self,project):
@@ -91,41 +84,68 @@ class SideBar(QtGui.QTreeWidget):
           peakListItem = QtGui.QTreeWidgetItem(newItem)
           peakListItem.setText(0, peakList.pid)
 
-    self.structuresItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
-    self.notesItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
+    # for mixture in project.mixtures:
+    #   newMixture = self.addItem(self.spectrumMixtures, newItem)
+
+
+
+
+    # self.structuresItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
+    # self.notesItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
+
+
     # 1d
     self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
     self.onedItem.setText(0, "1D")
-    self.onedItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    self.onedItemMixture.setText(0, "1D")
+    # self.onedItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
+    # self.onedItemMixture.setText(0, "1D")
     self.onedItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
     self.onedItemScreening.setText(0, "1D")
     # STD
     self.stdItem = QtGui.QTreeWidgetItem(self.spectrumReference)
     self.stdItem.setText(0, "STD")
-    self.stdItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    self.stdItemMixture.setText(0, "STD")
+    # self.stdItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
+    # self.stdItemMixture.setText(0, "STD")
     self.stdItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
     self.stdItemScreening.setText(0, "STD")
     # Wlogsy
     self.logsyItem = QtGui.QTreeWidgetItem(self.spectrumReference)
     self.logsyItem.setText(0, "Water-LOGSY")
-    self.logsyItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    self.logsyItemMixture.setText(0, "Water-LOGSY")
+    # self.logsyItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
+    # self.logsyItemMixture.setText(0, "Water-LOGSY")
     self.logsyItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
+    self.logsyItemScreening.setText(0, "Water-LOGSY")
     self.logsyItemScreening.setText(0, "Water-LOGSY")
     # T1rho
     self.t1rhoItem = QtGui.QTreeWidgetItem(self.spectrumReference)
     self.t1rhoItem.setText(0, "T1rho")
-    self.t1rhoItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    self.t1rhoItemMixture.setText(0, "T1rho")
+    # self.t1rhoItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
+    # self.t1rhoItemMixture.setText(0, "T1rho")
     self.t1rhoItemScreening= QtGui.QTreeWidgetItem(self.spectrumScreening)
     self.t1rhoItemScreening.setText(0, "T1rho")
-    # MX
 
-    # newItem2 = self.addItem(self.structuresItem, empty)
-    # newItem3 = self.addItem(self.structuresItem, empty)
-    # newItem3.setText(0, "empty")
+    ### Flags
+    # set dropEnable  the item you want to move. Set dragEnable  where drop is allowed
+    self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled |QtCore.Qt.ItemIsDropEnabled))
+    self.spectrumItem.setFlags(self.spectrumItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    self.spectrumReference.setFlags(self.spectrumReference.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    self.spectrumScreening.setFlags(self.spectrumScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled ))
+    self.spectrumMixtures.setFlags(self.spectrumMixtures.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # References
+    self.onedItem.setFlags(self.onedItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    self.logsyItem.setFlags(self.logsyItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    self.t1rhoItem.setFlags(self.t1rhoItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    self.t1rhoItem.setFlags(self.t1rhoItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    self.stdItem.setFlags(self.stdItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # screening
+    self.onedItemScreening.setFlags(self.onedItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
+    self.logsyItemScreening.setFlags(self.logsyItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled ))
+    self.t1rhoItemScreening.setFlags(self.t1rhoItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
+    self.stdItemScreening.setFlags(self.stdItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
+    # structures, notes, deleted
+    self.structuresItem.setFlags(self.structuresItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    self.notesItem.setFlags(self.notesItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    self.spectrumDeleted.setFlags(self.spectrumDeleted.flags() & ~(QtCore.Qt.ItemIsDragEnabled ))
 
   def clearSideBar(self):
     self.projectItem.setText(0, "Project")
@@ -133,9 +153,24 @@ class SideBar(QtGui.QTreeWidget):
     self.spectrumItem.setText(0, "Reference")
     self.spectrumItem.takeChildren()
 
+  def dragEnterEvent(self, event, enter = True):
+    if event.mimeData().hasUrls():
+      event.accept()
+    else:
+      items = []
+      item = self.itemAt(event.pos())
+      if enter:
+          QtGui.QTreeWidget.dragEnterEvent(self, event)
+      else:
+        QtGui.QTreeWidget.dragMoveEvent(self, event)
+      for item, flags in items:
+          item.setFlags(flags)
+
+  def dragMoveEvent(self, event):
+    event.accept()
 
   def getExpType(self, filename):
-    ''' if experiment type is express in the pulseprogram file, send the spectrum in the appropriate Sidebar.
+    ''' if experiment type is express in the pulseprogram file, send the spectrum in the appropriate Sidebar position.
     If more then two experiments take the first only, if not express assume is 1H
 
     '''
@@ -147,7 +182,7 @@ class SideBar(QtGui.QTreeWidget):
     for expType in experimentTypeDict.keys():
       if expType in ppFile[1]:
         expTypes.append(experimentTypeDict[expType])
-    print(expTypes, ppFile[1])
+    # print(expTypes, ppFile[1])
     if len(expTypes) > 1 and 'T2-filtered.H' in expTypes:
       expTypes.remove('T2-filtered.H')
     if len(expTypes) == 1:
@@ -163,11 +198,18 @@ class SideBar(QtGui.QTreeWidget):
       spectrumPane
       '''
 
-    event.accept()
-    data = event.mimeData()
-    if isinstance(self.parent, QtGui.QGraphicsScene):
-      event.ignore()
-      return
+    if event.mimeData().hasUrls():
+      event.setDropAction(QtCore.Qt.CopyAction)
+      event.accept()
+      links = []
+      for url in event.mimeData().urls():
+          links.append(str(url.toLocalFile()))
+      self.emit(QtCore.SIGNAL("dropped"), links)
+
+    else:
+      event.setDropAction(QtCore.Qt.MoveAction)
+      print('dropEvent else')
+      super(SideBar, self).dropEvent(event)
 
     if event.mimeData().urls():
       event.accept()
@@ -187,32 +229,45 @@ class SideBar(QtGui.QTreeWidget):
                 filename.pop()
                 pp = filename[:-2]
                 pp.append('pulseprogram')
-                # print(pp)
                 ppFile = open('/'.join(pp), 'r').readlines()
                 newFilename = '/'.join(filename)
-                # print(newFilename)
                 spectrum = self.parent.project.loadSpectrum(newFilename)
                 expTypes = []
+                peakList = spectrum.newPeakList()
                 for expType in experimentTypeDict.keys():
                   if expType in ppFile[2]:
                       # spectrum.experimentType = experimentTypeDict[expType]
                     expTypes.append(experimentTypeDict[expType])
-                  print(expTypes, ppFile[2])
+                  # print(expTypes, ppFile[2])
                 if len(expTypes) > 1 and 'T2-filtered.H' in expTypes:
                     expTypes.remove('T2-filtered.H')
                 if spectrum is not None:
+
+
                   if len(expTypes) > 0:
                     spectrum.experimentType = expTypes[0]
                   # spectrum.experimentType = self.getExpType(filename)
                     if spectrum.experimentType == "STD.H":
                      newItem = self.addItem(self.stdItem, spectrum)
+                     peakListItem = QtGui.QTreeWidgetItem(newItem)
+                     peakListItem.setText(0, peakList.pid)
+
 
                     elif spectrum.experimentType == "Water-LOGSY.H":
                       newItem = self.addItem(self.logsyItem, spectrum)
+
+                      peakListItem = QtGui.QTreeWidgetItem(newItem)
+                      peakListItem.setText(0, peakList.pid)
                     elif spectrum.experimentType == "T2-filtered.H":
                       newItem = self.addItem(self.t1rhoItem, spectrum)
+                      peakListItem = QtGui.QTreeWidgetItem(newItem)
+                      peakListItem.setText(0, peakList.pid)
                   else:
                     newItem = self.addItem(self.onedItem, spectrum)
+
+                    peakListItem = QtGui.QTreeWidgetItem(newItem)
+                    peakListItem.setText(0, peakList.pid)
+                    peakListItem.setFlags(peakListItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
 
           elif '.xls' in filePaths[-1].split('/')[-1]:
             ex = pd.ExcelFile(filePaths[-1])
@@ -228,19 +283,19 @@ class SideBar(QtGui.QTreeWidget):
                   pp = filename[:-2]
                   pp.append('pulseprogram')
                   # print(pp)
-                  print(filename)
+                  # print(filename)
                   ppFile = open('/'.join(pp), 'r').readlines()
                   newFilename = '/'.join(filename)
                   # print(newFilename)
                   spectrum = self.parent.project.loadSpectrum(newFilename)
-                  print(spectrum)
+                  # print(spectrum)
                   expTypes = []
                   peakList = spectrum.newPeakList()
                   for expType in experimentTypeDict.keys():
                     if expType in ppFile[2]:
                         # spectrum.experimentType = experimentTypeDict[expType]
                       expTypes.append(experimentTypeDict[expType])
-                    print(expTypes, ppFile[2])
+                    # print(expTypes, ppFile[2])
                   if len(expTypes) > 1 and 'T2-filtered.H' in expTypes:
                       expTypes.remove('T2-filtered.H')
                   if spectrum is not None:
@@ -278,7 +333,7 @@ class SideBar(QtGui.QTreeWidget):
                   try:
                     spectrum = self.parent.project.loadSpectrum(dirpath)
                     spectra.append(spectrum)
-                    print(spectrum, spectrum.dimensionCount)
+                    # print(spectrum, spectrum.dimensionCount)
                     if spectrum.dimensionCount == 1:
                       spectrum.experimentType = self.getExpType(dirpath.split('/'))
                       if spectrum.experimentType == "STD.H":
@@ -302,14 +357,14 @@ class SideBar(QtGui.QTreeWidget):
               pass
 
         elif len(filePaths) > 1:
-            print(filePaths)
+            # print(filePaths)
             spectra = []
             for filePath in filePaths:
               for (dirpath, dirnames, filenames) in os.walk(filePath):
                 try:
                     spectrum = self.parent.project.loadSpectrum(dirpath)
                     spectra.append(spectrum)
-                    print(spectrum, spectrum.dimensionCount)
+                    # print(spectrum, spectrum.dimensionCount)
                     if spectrum.dimensionCount == 1:
                       spectrum.experimentType = self.getExpType(dirpath.split('/'))
                       if spectrum.experimentType == "STD.H":
@@ -325,6 +380,7 @@ class SideBar(QtGui.QTreeWidget):
 
                     peakList = spectrum.newPeakList()
                     peakListItem = QtGui.QTreeWidgetItem(newItem)
+
                     peakListItem.setText(0, peakList.pid)
 
 
@@ -349,4 +405,4 @@ class SideBar(QtGui.QTreeWidget):
         event.ignore()
 
     else:
-      event.ignore()
+       event.ignore()

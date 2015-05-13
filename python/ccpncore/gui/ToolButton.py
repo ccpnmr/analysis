@@ -47,12 +47,12 @@ class ToolButton(QtGui.QToolButton):
     #   if spectrumView.spectrum.dimensionCount < 2:
     #     self.spaction.toggled.connect(spectrumView.plot.setVisible)
     #   else:
-    for strip in spectrumView.strips:
-      print(strip)
-      item = spectrumView.spectrumItems[strip]
-      print(strip, item, spectrumView, self.spaction, 'you name it!')
-      self.spaction.toggled.connect(item.setVisible)
-      print(self.spaction)
+    # for strip in spectrumView.strips:
+    #   print(strip)
+    #   item = spectrumView.spectrumItems[strip]
+    #   print(strip, item, spectrumView, self.spaction, 'you name it!')
+    #   self.spaction.toggled.connect(item.setVisible)
+    #   print(self.spaction)
          # for peakListView in spectrumView.peakListViews:
          #   spectrumView.newAction.toggled.connect(peakListView.setVisible)
     # spectrumView.widget = parent.spectrumToolBar.widgetForAction(self.spaction)

@@ -160,17 +160,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.colourIndex %= len(Colour.spectrumHexColours)
 
     self.visibilityAction = action = self.spectrumDisplay.spectrumToolBar.addAction(self.spectrum.name)
-    pix=QtGui.QPixmap(60, 10)
-    if self.spectrum.dimensionCount < 2:
-      pix.fill(QtGui.QColor(self.spectrum.sliceColour))
-    else:
-      pix.fill(QtGui.QColor(self.spectrum.positiveContourColour))
-    action.setIcon(QtGui.QIcon(pix))
+    self.setActionIconColour()
     action.setCheckable(True)
     action.setChecked(True)
     widget = self.spectrumDisplay.spectrumToolBar.widgetForAction(action)
     widget.setFixedSize(60, 30)
 
+    for func in ('setPositiveContourColour', 'setSliceColour'):
+      Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
+    
     self.spectrumItems = {} # strip --> associated QtGui.QGraphicsItem 
     for strip in self.strips:
       self.addSpectrumItem(strip)
@@ -184,6 +182,21 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         # newItem = self
       #  strip.plotWidget.scene().addItem(self)
 
+  def changedSpectrumColour(self, apiDataSource):
+    
+    if apiDataSource is self.spectrum._wrappedData:
+      self.setActionIconColour()
+    
+  def setActionIconColour(self):
+    
+    action = self.visibilityAction
+    pix=QtGui.QPixmap(60, 10)
+    if self.spectrum.dimensionCount < 2:
+      pix.fill(QtGui.QColor(self.spectrum.sliceColour))
+    else:
+      pix.fill(QtGui.QColor(self.spectrum.positiveContourColour))
+    action.setIcon(QtGui.QIcon(pix))
+    
   def addSpectrumItem(self, strip):
     if strip not in self.spectrumItems:
       item = GuiSpectrumViewItemNd(self, strip)

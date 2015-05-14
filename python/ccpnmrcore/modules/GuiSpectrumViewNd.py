@@ -26,7 +26,7 @@ import numpy
 from OpenGL import GL
 from PyQt4 import QtCore, QtGui
 
-from ccpncore.gui.ToolButton import ToolButton
+###from ccpncore.gui.ToolButton import ToolButton
 from ccpncore.util import Colour
 
 from ccpnc.contour import Contourer2d
@@ -36,6 +36,8 @@ from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 ###from ccpnmrcore.modules.spectrumPane.PeakListNdItem import PeakListNdItem
 
 # TBD: for now ignore fact that apiSpectrumView can override contour colour and/or contour levels
+
+from ccpncore.memops import Notifiers
 
 def _getLevels(count, base, factor):
   
@@ -157,13 +159,24 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.colourIndex += 1
       self.colourIndex %= len(Colour.spectrumHexColours)
 
+    self.visibilityAction = action = self.spectrumDisplay.spectrumToolBar.addAction(self.spectrum.name)
+    pix=QtGui.QPixmap(60, 10)
+    if self.spectrum.dimensionCount < 2:
+      pix.fill(QtGui.QColor(self.spectrum.sliceColour))
+    else:
+      pix.fill(QtGui.QColor(self.spectrum.positiveContourColour))
+    action.setIcon(QtGui.QIcon(pix))
+    action.setCheckable(True)
+    action.setChecked(True)
+    widget = self.spectrumDisplay.spectrumToolBar.widgetForAction(action)
+    widget.setFixedSize(60, 30)
+
     self.spectrumItems = {} # strip --> associated QtGui.QGraphicsItem 
     for strip in self.strips:
       self.addSpectrumItem(strip)
 
-    self.spectrumViewButton = ToolButton(self.spectrumDisplay, self)
-    self.spectrumViewButton.setFixedSize(60,30)
-
+    ###self.spectrumViewButton = ToolButton(self.spectrumDisplay, self)
+    ###self.spectrumViewButton.setFixedSize(60,30)
     # for strip in self.strips:
     #   self.connectStrip(strip)
 
@@ -176,6 +189,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       item = GuiSpectrumViewItemNd(self, strip)
       self.spectrumItems[strip] = item
       strip.plotWidget.scene().addItem(item)
+      self.visibilityAction.toggled.connect(item.setVisible)
     
   def removeSpectrumItem(self, strip):
     if strip in self.spectrumItems:
@@ -183,9 +197,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       strip.plotWidget.scene().removeItem(item)
       del self.spectrumItems[strip]
 
-  def connectStrip(self, strip):
-    item = self.spectrumItems[strip]
-    self.spectrumViewButton.spaction.toggled.connect(item.setVisible)
+  ###def connectStrip(self, strip):
+  ###  item = self.spectrumItems[strip]
+  ###  self.spectrumViewButton.spaction.toggled.connect(item.setVisible)
   """
   def getLevels(self):
     
@@ -216,7 +230,8 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     
     self.spectrumView = spectrumView
     self.strip = strip
-    QtGui.QGraphicsItem.__init__(self)  
+    #QtGui.QGraphicsItem.__init__(self)  
+    QtGui.QGraphicsItem.__init__(self, scene=strip.plotWidget.scene())  
     
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
     self.posLevelsPrev = []
@@ -225,12 +240,21 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     self.posDisplayLists = []
     self.negDisplayLists = []
     
-    #for peakListView in spectrumView._wrappedData.sortedPeakListViews():
-    #  peakListItem = GuiPeakListItemNd(self, peakListView)
+    #for apiPeakListView in spectrumView._wrappedData.sortedPeakListViews():
+    #  peakListItem = GuiPeakListItemNd(self, apiPeakListView)
+      
+    #Notifiers.registerNotify(self.newPeakListView, 'ccpnmr.gui.Task.PeakListView', '__init__')
+    
+    spectrum = spectrumView.spectrum
+    for peakList in spectrum.peakLists:
+      strip.showPeaks(peakList)
     spectrum = spectrumView.spectrum
     for peakList in spectrum.peakLists:
       strip.showPeaks(peakList)
  
+  def newPeakListView(self, peakListView):
+    print('HERE444', peakListView)
+    
   ##### override of superclass function
 
   def paint(self, painter, option, widget=None):
@@ -486,7 +510,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     self.baseLevel/=1.4
     self.levels = self.getLevels()
   """     
-    
+  '''
 class GuiPeakListItemNd(QtGui.QGraphicsItem):
   
   def __init__(self, spectrumViewItem, apiPeakListView):
@@ -498,6 +522,7 @@ class GuiPeakListItemNd(QtGui.QGraphicsItem):
 
     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
 
+    self.spectrumViewItem = spectrumViewItem
     self.apiPeakListView = apiPeakListView
     self.peakItems = {}  # CCPN peak -> Qt peakItem
     self.displayed = False
@@ -506,8 +531,10 @@ class GuiPeakListItemNd(QtGui.QGraphicsItem):
     self.isSymbolDisplayed = False
     self.textColour = None
     self.isTextDisplayed = False
+    
+    #self.rectItem = QtGui.QGraphicsRectItem(self, 200, 200, 200, 200)
 
     #for peak in peakList.peaks:
     #  self.peakItems[peak.pid] = PeakItem(self, peak)
 
-
+'''

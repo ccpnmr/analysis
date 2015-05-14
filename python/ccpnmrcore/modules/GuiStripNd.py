@@ -265,6 +265,9 @@ class GuiStripNd(GuiStrip):
       peakLayer = GuiPeakListView(self.plotWidget.scene(), self, peakList)
       self.viewBox.addItem(peakLayer)
       self.peakLayerDict[peakList] = peakLayer
+      for spectrumView in self.spectrumViews:
+        spectrumView.visibilityAction.toggled.connect(peakLayer.setVisible)
+      
     #rectItem = QtGui.QGraphicsRectItem(5, 120, 2, 10, peakLayer, self.plotWidget.scene())
     ##color = QtGui.QColor('red')
     #rectItem.setBrush(QtGui.QBrush(color))

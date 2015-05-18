@@ -249,7 +249,8 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
     self.posLevelsPrev = []
     self.negLevelsPrev = []
-    self.xyDataDimsPrev = None
+    self.xDataDimPrev = None
+    self.yDataDimPrev = None
     self.posDisplayLists = []
     self.negDisplayLists = []
     
@@ -354,9 +355,9 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
         The way this is done here, any change in contour level or color needs to call this function.
     """
     
-    xyDataDims = self.spectrumView.apiSpectrumView.orderedDataDims[:2]
+    xDataDim, yDataDim = self.spectrumView.apiSpectrumView.orderedDataDims[:2]
     
-    if xyDataDims is not self.xyDataDimsPrev:
+    if xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev:
       self.releaseDisplayLists(self.posDisplayLists)
       self.releaseDisplayLists(self.negDisplayLists)
       doPosLevels = doNegLevels = True
@@ -383,6 +384,9 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       negLevels = numpy.array(negLevels, numpy.float32)
       self.createDisplayLists(negLevels, self.negDisplayLists)
       
+    if not doPosLevels and not doNegLevels:
+      return
+      
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     
     #for position, dataArray in self.getPlaneData(guiStrip):
@@ -402,7 +406,8 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     
     self.posLevelsPrev = posLevels[:]
     self.negLevelsPrev = negLevels[:]
-    self.xyDataDimsPrev = xyDataDims
+    self.xDataDimPrev = xDataDim
+    self.yDataDimPrev = yDataDim
     
   def releaseDisplayLists(self, displayLists):
 

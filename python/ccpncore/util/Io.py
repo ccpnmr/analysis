@@ -79,8 +79,8 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
 
   for name in repositoryNameMap.keys():
     fullPath = Path.joinPath(path, projectName) + repositoryNameMap[name]
-    path = Path.joinPath(fullPath, 'memops', 'Implementation')
-    if not absentOrRemoved(path, removeExisting, showYesNo):
+    if not absentOrRemoved(Path.joinPath(fullPath, 'memops', 'Implementation'),
+                           removeExisting, showYesNo):
       errMsg = 'Path ("%s") contains existing project.' % fullPath
       Logging.getLogger().warning(errMsg)
       raise Exception(errMsg)

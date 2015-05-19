@@ -876,7 +876,8 @@ def getAttrMap(elem, inClass, globalMap, valueTypeGuid=None):
         if isDataType:
           if (not valueType.getAllConstraints() and valueType.length is None
               and (valueType.isOpen or not valueType.enumeration)
-              and elem.name != metaConstants.serial_attribute):
+              and elem.name != metaConstants.serial_attribute
+              and elem.name != metaConstants.id_attribute):
             # primitive, unconstrained type. set directly into memory
             result['proc'] = 'direct'
  

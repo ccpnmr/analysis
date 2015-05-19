@@ -51,8 +51,7 @@ class elements (for child links), DataObjType elements, SImple type elements,
 or out-of-package link elements.
 
 
-Every Class element has an attribute '_ID' that gives an arbitrary object ID of
-the form '_int'. Intra-package links use these IDs as object pointers. This nattribute is
+Every Class element has an attribute '_ID' that gives an arbitrary integer ID. Intra-package links use these IDs as object pointers. This attribute is
 persistent and set at creation time from version 3 onwards
 
 

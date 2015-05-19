@@ -84,7 +84,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     msg  = path + (' created' if isNew else ' opened')
     self.statusBar().showMessage(msg)
     
-    msg2 = "project = " + ('new' if isNew else 'open') + "Project("+path+")\n"
+    # msg2 = 'project = ' + ('new' if isNew else 'open') + 'Project("+path+")\n'
+    msg2 = 'project = %sProject("%s")\n' % (('new' if isNew else 'open'), path)
     self.pythonConsole.write(msg2)
     self.pythonConsole.ui.historyList.addItem(msg2)
 

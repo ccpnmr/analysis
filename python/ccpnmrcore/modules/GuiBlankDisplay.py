@@ -86,9 +86,14 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
           spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
         self.dockArea.guiWindow.removeBlankDisplay()
       else:
-        for dirpath, dirnames, filenames in os.walk(filePaths[0]):
-          if dirpath.endswith('memops') and 'Implementation' in dirnames:
-            self.dockArea.guiWindow._appBase.openProject(filePaths[0])
+        if [dirpath.endswith('memops') and 'Implementation' in dirnames for dirpath, dirnames, filenames in os.walk(filePaths[0])]:
+          self.dockArea.guiWindow._appBase.openProject(filePaths[0])
+        else:
+          spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePaths[0])
+          self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
+          spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
+          self.dockArea.guiWindow.removeBlankDisplay()
+
 
 
 

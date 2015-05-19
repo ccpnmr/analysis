@@ -68,13 +68,12 @@ class GuiWindow(GuiBase):
       self.blankDisplay.setParent(None)
       self.blankDisplay = None
           
-  def loadSpectra(self, directory=None):
-    
-    if directory is None:
-      directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
-      if not directory:
-        return
-      directory = directory[0]
+  def loadSpectra(self):
+
+
+    directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
+    if not directory:
+      return
 
     spectrum = self.project.loadSpectrum(directory)
     # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)

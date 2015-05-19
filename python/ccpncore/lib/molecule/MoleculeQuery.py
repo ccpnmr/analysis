@@ -43,6 +43,79 @@ molTypeOrder = ('protein', 'DNA', 'RNA', 'carbohydrate', 'other')
 
 LINEAR_POLYMER_TYPES = ('protein', 'DNA', 'RNA')
 
+
+# CifCode map - preset to ensure it is not overridden by obsolete ChemComps in list
+cifCodeRemap = {}
+# # Std DNA - keep one-letter ccpCode
+cifCodeRemap['DA'] = cifCodeRemap['Da'] = ('DNA', 'Da')
+cifCodeRemap['DC'] = cifCodeRemap['Dc'] = ('DNA', 'Dc')
+cifCodeRemap['DG'] = cifCodeRemap['Dg'] = ('DNA', 'Dg')
+cifCodeRemap['DI'] = cifCodeRemap['Di'] = ('DNA', 'Di')
+cifCodeRemap['DU'] = cifCodeRemap['Du'] = ('DNA', 'Du')
+cifCodeRemap['DT'] = cifCodeRemap['Dt'] = ('DNA', 'Dt')
+
+# # Std RNA - keep one-letter ccpCode
+cifCodeRemap['5MU'] = cifCodeRemap['5mu'] = cifCodeRemap['RT'] =  cifCodeRemap['Rt'] = ('RNA','5mu')
+#
+# Set as RNA or other, to override DNA with similar name
+for tag in ('2at', '2bt', '2gt', '2nt', '2ot', '3me', 'Ap7', 'Atl', 'Boe', 'Car',
+            'Eit', 'Fnu', 'Gmu', 'Lcc', 'Lcg', 'P2t', 'S2m', 'T2t', 'Tfe', 'Tln'):
+  cifCodeRemap[tag] = cifCodeRemap[tag.upper()] = ['RNA', tag]
+
+cifCodeRemap['Hob'] = cifCodeRemap['HOB'] = ('other', 'Hob')
+cifCodeRemap['Xxx'] = cifCodeRemap['XXX'] = ('other', 'Xxx')
+
+# ccpCode remaps - for upgrade convresion of 'inventive' ChemComps
+ccpCodeRemap = {
+  'DNA':{
+    'Xxx':('DNA','Dn'),
+    'A00':('DNA','Da'),
+    'A11':('DNA','Da'),
+    'C00':('DNA','Dc'),
+    'C11':('DNA','Dc'),
+    'G00':('DNA','Dg'),
+    'G11':('DNA','Dg'),
+    'I00':('DNA','Di'),
+    'I11':('DNA','Di'),
+    'U00':('DNA','Du'),
+    'U11':('DNA','Du'),
+  },
+  'protein':{
+    'Xxx':('protein','Unk'),
+  },
+  'RNA':{
+    'Xxx':('RNA','N'),
+    'A00':('RNA','A'),
+    'A11':('RNA','A'),
+    'C00':('RNA','C'),
+    'C11':('RNA','C'),
+    'G00':('RNA','G'),
+    'G11':('RNA','G'),
+    'I00':('RNA','I'),
+    'I11':('RNA','I'),
+    'U00':('RNA','U'),
+    'U11':('RNA','U'),
+  },
+  'other':{
+    'Acy':('other','Ace'),
+    'Nh3':('other','Nh2'),
+    'A01_dna':('DNA','Da'),
+    'C01_dna':('DNA','Dc'),
+    'G01_dna':('DNA','Dg'),
+    'I01_dna':('DNA','Di'),
+    'T01_dna':('DNA','Dt'),
+    'U01_dna':('DNA','Du'),
+    'A01_rna':('RNA','A'),
+    'C01_rna':('RNA','C'),
+    'G01_rna':('RNA','G'),
+    'I01_rna':('RNA','I'),
+    'T01_rna':('RNA','T'),
+    'U01_rna':('RNA','U'),
+  },
+}
+
+
+
 # STEREO_PREFIX = 'stereo_'
 # CARBOHYDRATE_MOLTYPE = 'carbohydrate'
 # PROTEIN_MOLTYPE = 'protein'
@@ -342,29 +415,7 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
   else:
     result = project._residueName2chemCompId = {}
     rejected = {}
-
-  # Special cases:
-
-  # # Std DNA - keep one-letter ccpCode
-  result['DA'] = result['Da'] = ('DNA', 'Da')
-  result['DC'] = result['Dc'] = ('DNA', 'Dc')
-  result['DG'] = result['Dg'] = ('DNA', 'Dg')
-  result['DI'] = result['Di'] = ('DNA', 'Di')
-  result['DU'] = result['Du'] = ('DNA', 'Du')
-  result['DT'] = result['Dt'] = ('DNA', 'Dt')
-
-  # # Std RNA - keep one-letter ccpCode
-  result['5MU'] = result['5mu'] = result['RT'] =  result['Rt'] = ('RNA', '5mu')
-  #
-  # Set as RNA or other, to override DNA with similar name
-  for tag in ('2at', '2bt', '2gt', '2nt', '2ot', '3me', 'Ap7', 'Atl', 'Boe', 'Car',
-              'Eit', 'Fnu', 'Gmu', 'Lcc', 'Lcg', 'P2t', 'S2m', 'T2t', 'Tfe', 'Tln'):
-    result[tag] = result[tag.upper()] = ['RNA', tag]
-
-  # NBNB AAB
-  result['Aab'] = result['AAB'] = ('other', 'Aab')
-  result['Hob'] = result['HOB'] = ('other', 'Hob')
-  result['Xxx'] = result['XXX'] = ('other', 'Xxx')
+    result.update(cifCodeRemap)
 
   for molType, ccpCode in (result.values()):
     if ccpCode in chemCompOverview[molType]:
@@ -407,8 +458,13 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
 
         if not cifCode:
           # no cifCode - skip. debug message
-          message = 'CIF-NO'
           rejected[molType, ccpCode] = cifCode
+          ccId = ccpCodeRemap.get(molType, {}).get(ccpCode)
+          if ccId:
+            val = ccId
+            message = 'CIF-CCP-REMAP'
+          else:
+            message = 'CIF-NO'
 
         elif cifCode != cifCode.upper():
           # cifCode is not upperCase - skip. debug message
@@ -424,12 +480,16 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
 
             if ccpCode not in result:
               # ccp code not in result. Debug message
-              print("\t".join( ('CCP-MISS', molType, ccpCode, val[0], val[1],
-                                             tt[0] or '-', tt[1] or '-', tt[2] or '-') ))
+              print("\t".join ('CCP-MISS', molType, ccpCode, val[0], val[1],
+                                             tt[0] or '-', tt[1] or '-', tt[2] or '-') )
           else:
             # Value was already set
 
-            if val[1] == cifCode and val[1] != locif:
+            if val[0] == molType and val[1] == ccpCode:
+              # This one was set up front
+              message = 'CIF-PRESET'
+
+            elif val[1] == cifCode and val[1] != locif:
               # ccpCode was UPPER-CASE
               # replace UPPERCASE ccpCode with mixed-case
               if molType == val[0]:
@@ -486,57 +546,56 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
       locif = cifCode[0] + cifCode[1:].lower()
       result[cifCode] = result[locif] = val
       print('\t'.join(("CIF-REMAP-OK", ccId[0], ccId[1], cifCode, altCode, val[0], val[1])))
-      rejected[ccId] = cifCode
+    rejected[ccId] = cifCode
 
 
   if debug:
     for tt, cifCode in sorted(rejected.items()):
       print("  %s:%s,  # REJECTED" % (repr(tt), repr(cifCode)))
 
-  # Check for upper-case ccpCodes remaining
-  for tag,val in sorted(result.items()):
-    if val[1][1:] !=  val[1][1:].lower():
-      print("CCP-UPPER\t%s\t%s\t%s" % (val[0], val[1], tag))
+    # Check for upper-case ccpCodes remaining
+    for tag,val in sorted(result.items()):
+      if val[1][1:] !=  val[1][1:].lower():
+        print("CCP-UPPER\t%s\t%s\t%s" % (val[0], val[1], tag))
 
-  # check for unused ChemComps
-  for chemComp in project.sortedChemComps():
+    # check for unused ChemComps
+    for chemComp in project.sortedChemComps():
+      cifCode = chemComp.code3Letter
+      ccpCode = chemComp.ccpCode
+      molType = chemComp.molType
+      val = result.get(ccpCode)
+      ccId = (chemComp.molType, ccpCode)
 
-    cifCode = chemComp.code3Letter
-    ccpCode = chemComp.ccpCode
-    molType = chemComp.molType
-    val = result.get(ccpCode)
-    ccId = (chemComp.molType, ccpCode)
+      # Debug output checking ccpCode
+      message = None
+      if not val:
+        val = (chemComp.code1Letter, cifCode)
+        message = "CHEM-MISS"
+      elif molType != val[0]:
+        message = "CHEM-TYPE-CLASH"
+      elif ccpCode != val[1]:
+        message = "CHEM-CODE-CLASH"
+      else:
+        message = "CHEM-OK"
 
-    # Debug output checking ccpCode
-    message = None
-    if not val:
-      val = (chemComp.code1Letter, cifCode)
-      message = "CHEM-MISS"
-    elif molType != val[0]:
-      message = "CHEM-TYPE-CLASH"
-    elif ccpCode != val[1]:
-      message = "CHEM-CODE-CLASH"
-    else:
-      message = "CHEM-OK"
+      if message is not None:
+        print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
 
-    if message is not None:
-      print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
+      # Debug output checking ccpCode
+      val = result.get(cifCode)
+      message = None
+      if not val:
+        val = (chemComp.code1Letter, cifCode)
+        message = "CCIF-MISS"
+      elif molType != val[0]:
+        message = "CCIF-TYPE-CLASH"
+      elif ccpCode != val[1]:
+        message = "CCIF-CODE-CLASH"
+      else:
+        message = "CCIF-OK"
 
-    # Debug output checking ccpCode
-    val = result.get(cifCode)
-    message = None
-    if not val:
-      val = (chemComp.code1Letter, cifCode)
-      message = "CCIF-MISS"
-    elif molType != val[0]:
-      message = "CCIF-TYPE-CLASH"
-    elif ccpCode != val[1]:
-      message = "CCIF-CODE-CLASH"
-    else:
-      message = "CCIF-OK"
-
-    if message is not None:
-      print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
+      if message is not None:
+        print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
 
 
     tags = set()

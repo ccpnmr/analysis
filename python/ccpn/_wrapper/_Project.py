@@ -152,6 +152,10 @@ class Project(AbstractWrapperObject):
     self._wrappedData.delete()
     del self._wrappedData
 
+  def __repr__(self):
+    """String representation"""
+    return "<ccpn.Project:name=%s>" % self.name
+
 
   # CCPN properties  
   @property

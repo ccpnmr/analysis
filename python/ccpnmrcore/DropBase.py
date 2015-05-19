@@ -37,12 +37,15 @@ class DropBase(GuiBase):
 
   def dropEvent(self, event):
     event.accept()
+    print('here110')
     if isinstance(self.parent, QtGui.QGraphicsScene):
       event.ignore()
       return
 
     if event.mimeData().urls():
+      print('here111')
       filePaths = [url.path() for url in event.mimeData().urls()]
+      print(filePaths)
       self.dropCallback(filePaths)
 
     if event.mimeData().hasFormat('application/x-strip'):

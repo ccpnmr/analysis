@@ -76,4 +76,19 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
       for strip in spectrumView.strips:
         strip.displaySpectrum(spectrum)
       self.dockArea.guiWindow.removeBlankDisplay()
+    import os
+    if dropObject.mimeData().hasUrls():
+      filePaths = [url.path() for url in dropObject.mimeData().urls()]
+      if len(filePaths) > 1:
+        for filePath in filePaths:
+          spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePath)
+          self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
+          spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
+        self.dockArea.guiWindow.removeBlankDisplay()
+      else:
+        for dirpath, dirnames, filenames in os.walk(filePaths[0]):
+          if dirpath.endswith('memops') and 'Implementation' in dirnames:
+            self.dockArea.guiWindow._appBase.openProject(filePaths[0])
+
+
 

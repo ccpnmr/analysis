@@ -169,6 +169,15 @@ class SideBar(QtGui.QTreeWidget):
   def dragMoveEvent(self, event):
     event.accept()
 
+  def addSpectrum(self, spectrum):
+    newItem = self.addItem(self.spectrumItem, spectrum)
+    peakList = spectrum.newPeakList()
+    peakListItem = QtGui.QTreeWidgetItem(newItem)
+    peakListItem.setText(0, peakList.pid)
+
+
+
+
   def getExpType(self, filename):
     ''' if experiment type is express in the pulseprogram file, send the spectrum in the appropriate Sidebar position.
     If more then two experiments take the first only, if not express assume is 1H

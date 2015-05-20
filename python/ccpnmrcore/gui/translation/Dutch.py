@@ -22,10 +22,10 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 translationDict = {
-  'New Project':  'Nieuw Project',
-  'Open Project': 'Project Openen',
-  'Save Project': 'Project Opslaan',
-  'Save Project As': 'Project Opslaan Als',
+  'New':  'Nieuw',
+  'Open...': 'Openen...',
+  'Save': 'Opslaan',
+  'Save As...': 'Opslaan Als...',
   'Close Program': 'Programma Afsluiten',
   'Preferences': 'Voorkeuren',
   'Language': 'Taal',

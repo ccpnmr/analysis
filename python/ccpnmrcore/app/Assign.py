@@ -33,18 +33,12 @@ class Assign(AppBase):
   pass
 
 if __name__ == '__main__':
-  import sys
+  import argparse  
+
+  parser = argparse.ArgumentParser(description='Process startup arguments')
+  parser.add_argument('--language', help='Language for menus, etc.')
+  parser.add_argument('projectPath', help='Project path')
+  args = parser.parse_args()
   
-  def usage():
-    print('Correct syntax: %s [projectPath]' % sys.argv[0])
-
-  if len(sys.argv) == 2:
-    projectPath = sys.argv[1]
-  elif len(sys.argv) != 1:
-    usage()
-    sys.exit(1)
-  else:
-    projectPath = None
-
-  startProgram(Assign, applicationName, applicationVersion, projectPath)
+  startProgram(Assign, applicationName, applicationVersion, args.projectPath, args.language)
 

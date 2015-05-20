@@ -32,6 +32,7 @@ from ccpncore.gui.Application import Application
 
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
+from ccpncore.util import Translation
 from ccpncore.util.Undo import Undo
 
 from ccpnmrcore.Base import Base as GuiBase
@@ -121,8 +122,12 @@ class AppBase(GuiBase):
     self.preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
     fp.close()
     
-def startProgram(programClass, applicationName, applicationVersion, projectPath=None):
+def startProgram(programClass, applicationName, applicationVersion, projectPath=None, language=None):
 
+  if language:
+    Translation.setTranslationLanguage(language)
+    Translation.updateTranslationDict('ccpnmrcore.gui')
+    
   if projectPath:
     apiProject = ioUtil.loadProject(projectPath)
   else:

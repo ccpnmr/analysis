@@ -51,7 +51,7 @@ def setTranslationLanguage(language=defaultLanguage, debug=False):
   translationDebug = debug
   translationDict = {}
   
-  ###updateTranslationDict()
+  updateTranslationDict()
 
 ### CARE: Problem is that we want to find the module in which the object is created,
 ### not the module in which the code which creates it lives.

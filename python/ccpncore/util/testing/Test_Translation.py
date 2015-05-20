@@ -47,6 +47,11 @@ def test_translateFrenchText1():
   Translation.setTranslationLanguage('French')
   assert Translation.getTranslation('Help') == 'Aidez'
 
-def test_translateFrenchText1():
-  Translation.setTranslationLanguage('French')
+def test_translateChineseText1():
+  Translation.setTranslationLanguage('Chinese')
+  assert Translation.getTranslation('New') == '新的'
+
+def test_translateChineseText2():
+  Translation.setTranslationLanguage('Chinese')
   assert Translation.getTranslation('Help Me') == 'Help Me'
+

@@ -29,7 +29,9 @@ class Action(QtGui.QAction, Base):
   def __init__(self, parent, text, callback=None, shortcut=None, checkable=False, icon=None, **kw):
     text = self.translate(text)
     if shortcut:
-      QtGui.QAction.__init__(self, text, parent, shortcut=QtGui.QKeySequence(", ".join(tuple(shortcut))),triggered=callback, checkable=checkable)
+      if type(shortcut) == type(''):
+        shortcut = QtGui.QKeySequence(", ".join(tuple(shortcut)))
+      QtGui.QAction.__init__(self, text, parent, shortcut=shortcut,triggered=callback, checkable=checkable)
       QtGui.QAction.setShortcutContext(self, QtCore.Qt.ApplicationShortcut)
       QtGui.QFontDatabase.addApplicationFont('/Users/simon/Downloads/Lato-Black.ttf')
       font = QtGui.QFont('Lato-Black')

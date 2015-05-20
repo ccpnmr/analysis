@@ -27,8 +27,8 @@ from ccpncore.gui.Action import Action
 from ccpncore.gui.Base import Base
 
 class Menu(QtGui.QMenu, Base):
-  def __init__(self, parent, isFloatWidget=False, **kw):
-    QtGui.QMenu.__init__(self, parent)
+  def __init__(self, title, parent, isFloatWidget=False, **kw):
+    QtGui.QMenu.__init__(self, self.translate(title), parent)
     Base.__init__(self, isFloatWidget=isFloatWidget, **kw)
     self.isFloatWidget = isFloatWidget
 
@@ -36,3 +36,8 @@ class Menu(QtGui.QMenu, Base):
     self.addAction(Action(self.parent(), text, callback=callback, shortcut=shortcut,
                          checkable=checkable, isFloatWidget=self.isFloatWidget))
     # print(shortcut)
+    
+  def addMenu(self, title):
+    menu = Menu(title, self)
+    QtGui.QMenu.addMenu(self, menu)
+    return menu

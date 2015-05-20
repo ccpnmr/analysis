@@ -59,7 +59,7 @@ class Base(Translation):
 
   def __init__(self, tipText=None, grid=(None, None), gridSpan=(1,1), stretch=(0,0),
                hAlign=None, vAlign=None, hPolicy=None, vPolicy=None,
-               bgColor=None, isFloatWidget=False, depth=1):
+               bgColor=None, isFloatWidget=False):
 
     # Tool tips
     if tipText:
@@ -106,8 +106,6 @@ class Base(Translation):
       self.setAutoFillBackground(True)
       rgb = QtGui.QColor(bgColor).getRgb()[:3]
       self.setStyleSheet("background-color: rgb(%d, %d, %d);" %  rgb)
-
-    Translation.__init__(self, depth+1)
 
   def _getRowCol(self, grid):
 

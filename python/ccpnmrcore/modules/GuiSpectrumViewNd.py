@@ -362,12 +362,12 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       self.releaseDisplayLists(self.negDisplayLists)
       doPosLevels = doNegLevels = True
     else:
-      if posLevels == self.posLevelsPrev:
+      if list(posLevels) == self.posLevelsPrev:
         doPosLevels = False
       else:
         self.releaseDisplayLists(self.posDisplayLists)
         doPosLevels = posLevels and True
-      if negLevels == self.negLevelsPrev:
+      if list(negLevels) == self.negLevelsPrev:
         doNegLevels = False
       else:
         self.releaseDisplayLists(self.negDisplayLists)
@@ -404,8 +404,8 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
         
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     
-    self.posLevelsPrev = posLevels[:]
-    self.negLevelsPrev = negLevels[:]
+    self.posLevelsPrev = list(posLevels)
+    self.negLevelsPrev = list(negLevels)
     self.xDataDimPrev = xDataDim
     self.yDataDimPrev = yDataDim
     

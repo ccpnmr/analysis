@@ -92,10 +92,6 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
   def cloneStrip(self):
     newStrip = self.orderedStrips[-1].clone()
-    print('spectrumViews2', newStrip.spectrumViews)
-    for spectrumView in newStrip.spectrumViews:
-      spectrumView.connectStrip(newStrip)
-
 
   def zoomYAll(self):
     for strip in self.strips:

@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(description='Process startup arguments')
   parser.add_argument('--language', help='Language for menus, etc.')
-  parser.add_argument('projectPath', help='Project path')
+  parser.add_argument('projectPath', nargs='?', help='Project path')
   args = parser.parse_args()
   
   startProgram(Assign, applicationName, applicationVersion, args.projectPath, args.language)

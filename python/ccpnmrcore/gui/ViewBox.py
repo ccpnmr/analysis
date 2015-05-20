@@ -55,7 +55,7 @@ class ViewBox(pg.ViewBox):
 
   def getMenu(self):
     if self.menu is None:
-      self.menu = Menu(self.parent(), isFloatWidget=True)
+      self.menu = Menu('', self.parent(), isFloatWidget=True)
       return self.menu
 
 

@@ -492,10 +492,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     print("project saved as...")
 
   def toggleCrossHair(self):
-    self._appBase.current.pane.toggleCrossHair()
+    self._appBase.current.strip.toggleCrossHair()
 
   def toggleGrid(self):
-    self._appBase.current.pane.toggleGrid()
+    self._appBase.current.strip.toggleGrid()
 
   def hideConsole(self):
     self.pythonConsole.hide()

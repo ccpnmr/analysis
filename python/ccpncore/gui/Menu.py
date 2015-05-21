@@ -33,8 +33,10 @@ class Menu(QtGui.QMenu, Base):
     self.isFloatWidget = isFloatWidget
 
   def addItem(self, text, shortcut=None, callback=None, checkable=False):
-    self.addAction(Action(self.parent(), text, callback=callback, shortcut=shortcut,
-                         checkable=checkable, isFloatWidget=self.isFloatWidget))
+    action = Action(self.parent(), text, callback=callback, shortcut=shortcut,
+                         checkable=checkable, isFloatWidget=self.isFloatWidget)
+    self.addAction(action)
+    return action
     # print(shortcut)
     
   def addMenu(self, title):

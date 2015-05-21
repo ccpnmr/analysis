@@ -39,6 +39,8 @@ from ccpncore.memops import Notifiers
 #from ccpnmrcore.gui.Axis import Axis
 from ccpnmrcore.gui.AxisTextItem import AxisTextItem
 from ccpnmrcore.DropBase import DropBase
+from ccpncore.gui.Menu import Menu
+
 
 def sufficientlyDifferentWidth(region1, region2):
   
@@ -243,6 +245,10 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotWidget.addItem(self.hLine, ignoreBounds=True)
     self.guiSpectrumDisplay._appBase.hLines.append(self.hLine)
     self.guiSpectrumDisplay._appBase.vLines.append(self.vLine)
+    self.crossHairShown = True
+
+
+
 
   def toggleCrossHair(self):
     if self.crossHairShown:
@@ -255,7 +261,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
         vLine.show()
       for hLine in self.guiSpectrumDisplay._appBase.hLines:
         hLine.show()
-      self.crossHairAction.setChecked(True)
+      # self.crossHairAction.setChecked(True)
       self.crossHairShown = True
 
   def hideCrossHair(self):
@@ -263,7 +269,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
         vLine.hide()
     for hLine in self.guiSpectrumDisplay._appBase.hLines:
         hLine.hide()
-    self.crossHairAction.setChecked(False)
+    # self.crossHairAction.setChecked(False)
     self.crossHairShown = False
 
   def toggleGrid(self):

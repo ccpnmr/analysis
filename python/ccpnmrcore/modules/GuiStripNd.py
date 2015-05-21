@@ -28,10 +28,12 @@ from PyQt4 import QtGui, QtCore
 
 from ccpncore.memops import Notifiers
 
-from ccpncore.gui.Icon import Icon
+
 from ccpncore.gui.Button import Button
+from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
+from ccpncore.gui.Menu import Menu
 from ccpncore.gui.ToolBar import ToolBar
 
 from ccpncore.util import Colour
@@ -53,7 +55,7 @@ class GuiStripNd(GuiStrip):
     ###self.plotWidget.setViewport(self.viewportWidget)
     ###self.guiSpectrumDisplay.viewportDict[self.viewportWidget] = self
     ###self.plotWidget.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
-    # self.viewBox.menu = self.get2dContextMenu()
+    self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
     
@@ -94,6 +96,29 @@ class GuiStripNd(GuiStrip):
         print(event)
     else:
         self.viewBox.mouseDragEvent(self, event)
+
+
+  def get2dContextMenu(self):
+
+    self.contextMenu = Menu('', self, isFloatWidget=True)
+    # self.contextMenu.addAction(self.hTraceAction)
+    # self.contextMenu.addAction(self.vTraceAction)
+    self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self.toggleCrossHair, checkable=True)
+    self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
+    # self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self.toggleCrossHair,
+    #                                      checkable=True)
+
+    if self.crossHairShown == True:
+      self.crossHairAction.setChecked(True)
+    else:
+      self.crossHairAction.setChecked(False)
+
+    if self.grid.isVisible():
+      self.gridAction.setChecked(True)
+    else:
+      self.gridAction.setChecked(False)
+    # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
+    return self.contextMenu
 
   # def displayASpectrum(self, guiSpectrumView):
   #

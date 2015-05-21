@@ -37,7 +37,6 @@ class DropBase(GuiBase):
 
   def dropEvent(self, event):
     event.accept()
-    print('here110')
     if isinstance(self.parent, QtGui.QGraphicsScene):
       event.ignore()
       return
@@ -59,9 +58,7 @@ class DropBase(GuiBase):
       pidData = str(data.data(),encoding='utf-8')
       pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
       actualPid = ''.join(pidData)
-      print('actualPid',actualPid)
       wrapperObject = self.getById(actualPid)
-      print(wrapperObject, 'wrapper obj')
       self.dropCallback(wrapperObject)
     else:
       data = event.mimeData().data('application/x-qabstractitemmodeldatalist')
@@ -69,6 +66,4 @@ class DropBase(GuiBase):
       pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
       actualPid = ''.join(pidData)
       wrapperObject = self.getObject(actualPid)
-      print(wrapperObject, 'wrapper obj')
       self.dropCallback(wrapperObject)
-      print(wrapperObject, 'wrapper obj')

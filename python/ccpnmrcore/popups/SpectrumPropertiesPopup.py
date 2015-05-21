@@ -21,6 +21,9 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+import os
+
 from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
@@ -94,6 +97,7 @@ class GeneralTab(QtGui.QWidget, Base):
     self.pathData = LineEdit(self, grid=(1, 1))
     self.pathData.setText(spectrum.filePath)
     self.pathData.editingFinished.connect(self.setSpectrumPath)
+    self.pathDataButton = Button(self, text='...', callback=self.getSpectrumFile, grid=(1, 2))
     dataTypeLabel = Label(self, text="Data Type: ", grid=(2, 0))
     dataTypeData = Label(self, text=getSpectrumFileFormat(spectrum.filePath), grid=(2, 1))
     templateLabel = Label(self, text="Template: ", grid=(3, 0))
@@ -144,6 +148,16 @@ class GeneralTab(QtGui.QWidget, Base):
         noiseLevelData.setText('None')
 
 
+
+  def getSpectrumFile(self):
+    if os.path.exists('/'.join(self.pathData.text().split('/')[:-1])):
+      currentSpectrumDirectory = '/'.join(self.pathData.text().split('/')[:-1])
+    else:
+      currentSpectrumDirectory = os.path.expanduser('~')
+    directory = QtGui.QFileDialog.getOpenFileName(self, 'Select Spectrum File', currentSpectrumDirectory)
+    if len(directory) > 0:
+      self.pathData.setText(directory)
+      self.spectrum.filePath = directory
 
   def setSpectrumPath(self):
     if self.pathData.isModified():

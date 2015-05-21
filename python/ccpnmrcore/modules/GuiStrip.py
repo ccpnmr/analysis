@@ -344,7 +344,6 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     raise Exception('should be implemented in subclass')
 
   def dropCallback(self, dropObject):
-
     if isinstance(dropObject, Spectrum):
       self.displaySpectrum(dropObject)
 

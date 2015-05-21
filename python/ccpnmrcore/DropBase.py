@@ -43,10 +43,16 @@ class DropBase(GuiBase):
       return
 
     if event.mimeData().urls():
-      print('here111')
       filePaths = [url.path() for url in event.mimeData().urls()]
-      print(filePaths)
-      self.dropCallback(filePaths)
+
+      if filePaths:
+        for filePath in filePaths:
+          try:
+            spectrum = self._appBase.project.loadSpectrum(filePath)
+            self._appBase.mainWindow.leftWidget.addSpectrum(spectrum)
+            self.dropCallback(spectrum)
+          except:
+              pass
 
     if event.mimeData().hasFormat('application/x-strip'):
       data = event.mimeData().data('application/x-strip')

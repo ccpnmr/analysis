@@ -227,14 +227,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     viewLayoutMenu.addAction(Action(self, "Save As...", callback=self.saveLayoutAs))
     viewLayoutMenu.addAction(Action(self, "Restore", callback=self.restoreLayout))
     viewMenu.addSeparator()
-    self.consoleAction = viewMenu.addAction(Action(self, "Console", callback=self.toggleConsole,
-                                         checkable=True))
-    # if self.pythonConsole.isVisible():
-    #   self.consoleAction.setChecked(True)
-    # else:
-    #   self.consoleAction.setChecked(False)
+    self.consoleAction = Action(self, "Console", callback=self.toggleConsole,
+                                         checkable=True)
+    if self.pythonConsole.isVisible():
+      self.consoleAction.setChecked(True)
+    else:
+      self.consoleAction.setChecked(False)
     # self.consoleAction.setChecked(self.pythonConsole.isVisible())
-    # viewMenu.addAction(self.consoleAction, isFloatWidget=True)
+    viewMenu.addAction(self.consoleAction)
 
     helpMenu.addAction(Action(self, "Command...", callback=self.showCommandHelp))
     helpMenu.addAction(Action(self, "Tutorials...", callback=self.showTutorials))
@@ -385,10 +385,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     if self.pythonConsole.isVisible():
       self.hideConsole()
-      # self.pythonConsoleShown = False
     else:
       self.showConsole()
-      # self.pythonConsoleShown = True
 
   def editMacro(self):
     pass
@@ -489,8 +487,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showDataPlottingModule(self):
     dpModule = DataPlottingModule(self.dockArea)
-    # self.dockArea.addDock(dpModule)
-
 
   def saveProjectAs(self):
     print("project saved as...")
@@ -507,14 +503,3 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showConsole(self):
     self.pythonConsole.show()
 
-
-# def main():
-#
-#   app = QtGui.QApplication(sys.argv)
-#   window = GuiMainWindow()
-#   window.showMaximized()
-#   window.raise_()
-#   sys.exit(app.exec_())
-#
-# if __name__ ==  "__main__":
-#   main()

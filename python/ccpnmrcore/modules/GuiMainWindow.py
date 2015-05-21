@@ -30,7 +30,6 @@ from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import Console
-from ccpncore.gui.Menu import Menu
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
@@ -44,6 +43,7 @@ from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
+from ccpncore.util import Io as ioUtil
 
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
@@ -75,7 +75,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     #   project = self._appBase.project
 
     # project = self._appBase.project
-      
+
     isNew = self.apiWindow.root.isModified  # a bit of a hack this, but should be correct
 
     project = self._project
@@ -84,7 +84,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.namespace['project'] = project
     msg  = path + (' created' if isNew else ' opened')
     self.statusBar().showMessage(msg)
-    
+
     # msg2 = 'project = ' + ('new' if isNew else 'open') + 'Project("+path+")\n'
     msg2 = 'project = %sProject("%s")\n' % (('new' if isNew else 'open'), path)
     self.pythonConsole.write(msg2)
@@ -95,26 +95,26 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if len(recentFiles) >= 10:
         recentFiles.pop()
       recentFiles.insert(0, path)
-      
+
     self.setWindowTitle('%s %s: %s' % (self._appBase.applicationName, self._appBase.applicationVersion, project.name))
-    
+
   def setupWindow(self):
 
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
-    
+
     self.namespace = {'current': self._project._appBase.current, 'openProject':self._appBase.openProject,
                       'newProject':self._appBase.newProject, 'loadSpectrum':self.loadSpectra, 'window':self,
                       'preferences':self._appBase.preferences, 'project':self._project}
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     self.pythonConsole.heightMax = 200
-    
+
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
     self.leftWidget.setGeometry(0, 0, 10, 600)
     self.leftWidget.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
-    
+
     self.splitter3.addWidget(self.leftWidget)
     self.splitter1.addWidget(self.splitter3)
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -145,14 +145,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     QtGui.QFontDatabase.addApplicationFont('/Users/simon/Downloads/Lato-Black.ttf')
     font = QtGui.QFont('Lato-Black')
     self._menuBar.setFont(font)
-    fileMenu = Menu("&Project", self)
-    spectrumMenu = Menu("&Spectra", self)
-    viewMenu = Menu("&View", self)
-    moleculeMenu = Menu("&Molecules", self)
-    restraintsMenu = Menu("&Restraints", self)
-    structuresMenu = Menu("&Structures", self)
-    macroMenu = Menu("Macro", self)
-    helpMenu = Menu("&Help", self)
+    fileMenu = QtGui.QMenu("&Project", self)
+    spectrumMenu = QtGui.QMenu("&Spectra", self)
+    viewMenu = QtGui.QMenu("&View", self)
+    moleculeMenu = QtGui.QMenu("&Molecules", self)
+    restraintsMenu = QtGui.QMenu("&Restraints", self)
+    structuresMenu = QtGui.QMenu("&Structures", self)
+    macroMenu = QtGui.QMenu("Macro", self)
+    helpMenu = QtGui.QMenu("&Help", self)
 
     fileMenuAction = fileMenu.addAction(Action(self, "New", callback=self._appBase.newProject, shortcut='pn'))
     fileMenu.addAction(Action(self, "Open...", callback=self.openAProject, shortcut="po"))
@@ -165,8 +165,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     backupOption.addAction(Action(self, "Save", callback=self.saveBackup))
     backupOption.addAction(Action(self, "Restore", callback=self.restoreBackup))
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Undo", callback=self.undo, shortcut=QtGui.QKeySequence("Ctrl+z")))
-    fileMenu.addAction(Action(self, "Redo", callback=self.redo, shortcut=QtGui.QKeySequence("Ctrl+y")))
+    fileMenu.addAction(QtGui.QAction("Undo", self, triggered=self.undo, shortcut=QtGui.QKeySequence("Ctrl+z")))
+    fileMenu.addAction(QtGui.QAction("Redo", self, triggered=self.redo, shortcut=QtGui.QKeySequence("Ctrl+y")))
     logOption = fileMenu.addMenu("Log File")
     logOption.addAction(Action(self, "Save As...", callback=self.saveLogFile))
     logOption.addAction(Action(self, "Clear", callback=self.clearLogFile))
@@ -205,7 +205,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
 
     macroMenu.addAction(Action(self, "Edit...", callback=self.editMacro))
-    macroMenu.addAction(Action(self, "New from Logfile...", callback=self.newMacroFromLog))
+    macroMenu.addAction(Action(self, "New From Logfile...", callback=self.newMacroFromLog))
     macroRecordMenu = macroMenu.addMenu("Record")
     macroRecordMenu.addAction(Action(self, "Start", callback=self.startMacroRecord))
     macroRecordMenu.addAction(Action(self, "Stop", callback=self.stopMacroRecord))
@@ -227,14 +227,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     viewLayoutMenu.addAction(Action(self, "Save As...", callback=self.saveLayoutAs))
     viewLayoutMenu.addAction(Action(self, "Restore", callback=self.restoreLayout))
     viewMenu.addSeparator()
-    self.consoleAction = Action(self, "Console", callback=self.toggleConsole, shortcut="py",
-                                         checkable=True)
+    self.consoleAction = viewMenu.addAction(Action(self, "Console", callback=self.toggleConsole,
+                                         checkable=True))
     # if self.pythonConsole.isVisible():
     #   self.consoleAction.setChecked(True)
     # else:
     #   self.consoleAction.setChecked(False)
-    self.consoleAction.setChecked(self.pythonConsole.isVisible())
-    viewMenu.addAction(self.consoleAction)
+    # self.consoleAction.setChecked(self.pythonConsole.isVisible())
+    # viewMenu.addAction(self.consoleAction, isFloatWidget=True)
 
     helpMenu.addAction(Action(self, "Command...", callback=self.showCommandHelp))
     helpMenu.addAction(Action(self, "Tutorials...", callback=self.showTutorials))
@@ -262,10 +262,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def openAProject(self, projectDir=None):
 
-
-    currentProjectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
-    # else:
-    #   currentProjectDir = projectDir
+    if projectDir is None:
+      currentProjectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
+    else:
+      currentProjectDir = projectDir
 
     self._appBase.openProject(currentProjectDir)
 

@@ -148,7 +148,6 @@ class GeneralTab(QtGui.QWidget, Base):
   def setSpectrumPath(self):
     if self.pathData.isModified():
       self.spectrum.filePath = self.pathData.text()
-      print(self.spectrum.filePath)
 
 
   def changeSpectrumColour(self, spectrum):

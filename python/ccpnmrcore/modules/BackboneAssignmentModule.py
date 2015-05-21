@@ -131,20 +131,16 @@ class BackboneAssignmentModule(PeakListSimple):
           """
           queryShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
 
-    print(queryShifts)
     for queryShift in queryShifts:
       line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-      print(queryShift.value)
       line.setPos(QtCore.QPointF(0, queryShift.value))
       for queryWindow in queryWindows:
         queryWindow.orderedStrips[0].plotWidget.addItem(line)
 
     assignMatrix = self.buildAssignmentMatrix(queryShifts, intraShifts)
     assignmentScores = sorted(assignMatrix[1])[0:self.numberOfMatches]
-    print(assignmentScores)
     for assignmentScore in assignmentScores[1:]:
       matchResidue = assignMatrix[0][assignmentScore]
-      print(matchResidue,'1')
       zAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
       xAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
       yAtoms = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '13C' and '-1' not in atom.name]
@@ -169,7 +165,6 @@ class BackboneAssignmentModule(PeakListSimple):
           newStrip.plotWidget.addItem(line)
 
     firstMatchResidue = assignMatrix[0][assignmentScores[0]]
-    print(firstMatchResidue,'0')
     zAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
     xAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
     yAtoms = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '13C' and '-1' not in atom.name]
@@ -214,7 +209,6 @@ class BackboneAssignmentModule(PeakListSimple):
         # else:
         #   score = None
           scores.append(score)
-          print(score, res)
           matrix[score] = res
       elif len(shift) == 1:
         if self.qScore(queryShifts[0], shift[0]) is not None:
@@ -223,7 +217,6 @@ class BackboneAssignmentModule(PeakListSimple):
         # else:
         #   score = None
           scores.append(score)
-          print(score, res)
           matrix[score] = res
 
     return matrix, scores

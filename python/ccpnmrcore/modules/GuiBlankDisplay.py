@@ -54,10 +54,10 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
     Dock.__init__(self, name='BlankDisplay', size=(1100,1300))
     dockArea.addDock(self)
 
-    self.label = Label(self, text='Drag Spectrum Here', textColor='#999', dragDrop=True)
-    self.label.setAlignment(QtCore.Qt.AlignCenter)
-    self.layout.addWidget(self.label)
-    self.label.dropEvent = self.dropCallback
+    self.label2 = Label(self, text='Drag Spectrum Here', textColor='#999', dragDrop=True)
+    self.label2.setAlignment(QtCore.Qt.AlignCenter)
+    self.layout.addWidget(self.label2)
+    self.label2.dropEvent = self.dropCallback
 
     DropBase.__init__(self, dockArea.guiWindow._appBase, self.dropCallback)
 

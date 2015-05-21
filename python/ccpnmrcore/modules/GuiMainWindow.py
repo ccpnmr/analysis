@@ -234,7 +234,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # else:
     #   self.consoleAction.setChecked(False)
     self.consoleAction.setChecked(self.pythonConsole.isVisible())
-    # viewMenu.addAction(self.consoleAction, isFloatWidget=True)
+    viewMenu.addAction(self.consoleAction)
 
     helpMenu.addAction(Action(self, "Command...", callback=self.showCommandHelp))
     helpMenu.addAction(Action(self, "Tutorials...", callback=self.showTutorials))

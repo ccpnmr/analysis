@@ -171,7 +171,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(self.entry.getTag("entry.Submission_date",whole_tag=True), [['Submission_date', '2006-09-07']])
 
     def test_validate(self):
-        validation = ["Value cannot be NULL but is: '_Chem_comp.Provenance':'.' on line '4'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '0 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '1 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '2 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '3 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '4 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '5 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '6 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '7 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '8 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '9 column 0'."]
+        validation = ["Value cannot be NULL but is: '_Chem_comp.Provenance':'.' on line '4'."]
         self.assertEqual(self.entry.validate(), validation)
 
     def test_saveframe(self):
@@ -275,8 +275,8 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(frame.tags, [['Sf_category', 'entry_information'], ['Sf_framecode', 'entry_information'], ['ID', '15000'], ['Title', 'Solution structure of chicken villin headpiece subdomain containing a fluorinated side chain in the core\n'], ['Type', 'macromolecule'], ['Version_type', 'original'], ['Submission_date', '2006-09-07'], ['Accession_date', '2006-09-07'], ['Last_release_date', '.'], ['Original_release_date', '.'], ['Origination', 'author'], ['NMR_STAR_version', '3.1.1.61'], ['Original_NMR_STAR_version', '.'], ['Experimental_method', 'NMR'], ['Experimental_method_subtype', 'solution'], ['BMRB_internal_directory_name', '.']])
 
         # Test validate
-        self.assertEqual(self.entry['assigned_chem_shift_list_1'].validate(), ["Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '0 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '1 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '2 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '3 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '4 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '5 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '6 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '7 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '8 column 0'.", "Value cannot be NULL but is: '_Chem_shift_experiment.Experiment_ID':'.' on line '9 column 0'."])
-
+        self.assertEqual(self.entry['assigned_chem_shift_list_1'].validate(), [])
+        
         # Test setTagPrefix
         frame.setTagPrefix("new_prefix")
         self.assertEqual(frame.tag_prefix, "_new_prefix")
@@ -315,7 +315,7 @@ class TestSequenceFunctions(unittest.TestCase):
         tmp_loop.addColumn("column3")
         self.assertRaises(ValueError, tmp_loop.__str__)
         tmp_loop.setCategory("test")
-        self.assertEqual(str(tmp_loop), "\n   loop_\n      _test.column1\n      _test.column2\n      _test.column3\n\n     true2   3    \n   stop_\n")
+        self.assertEqual(str(tmp_loop), "\n   loop_\n      _test.column1\n      _test.column2\n      _test.column3\n\n     1   2   3    \n   stop_\n")
         self.assertEqual(tmp_loop.category, "_test")
         # Check different category
         self.assertRaises(ValueError, tmp_loop.addColumn, "invalid.column")

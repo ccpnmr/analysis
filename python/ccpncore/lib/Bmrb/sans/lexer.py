@@ -45,7 +45,18 @@ class STARLexer( object ) :
     _re_saveend = re.compile( r"^save_", re.IGNORECASE )
     _re_loop = re.compile( "^loop_\s*$", re.IGNORECASE )
     _re_stop = re.compile( "^stop_", re.IGNORECASE )
-    _re_tag = re.compile( "^_[_A-Za-z0-9]+[_.A-Za-z0-9%\-\]\[]+" )
+
+# literal reading of STAR'93 doesn't work: unicode?
+#
+#    _re_tag = re.compile( "^_[\x33-\x7f]+" ) # , re.DEBUG )
+#
+# PDB regex
+#
+#    _re_tag = re.compile( "^_[_A-Za-z0-9]+[_.A-Za-z0-9%\-\]\[]+" )
+#
+# all of the above:
+#
+    _re_tag = re.compile( "^_\w[\x33-\x7f\.\w\-\]\[/%]+" )
 
     _re_bareword = re.compile( r"^[^\s\"';][^\s]*" )
     _re_odquote = re.compile( "^\"" )
@@ -73,7 +84,7 @@ class STARLexer( object ) :
         return self._text
 
     def pushBack( self, text ) :
-        if self._verbose : print("** push back |%s|, buffer=|%s|" % (text. self._buffer) )
+        if self._verbose : print("** push back |%s|, buffer=|%s|" % (text, self._buffer) )
         self._buffer = text + " " + self._buffer
         if self._verbose : print("** buffer = |%s|" % self._buffer)
 
@@ -145,6 +156,7 @@ class STARLexer( object ) :
 # tag
                 m = self._re_tag.search( self._buffer )
                 if m :
+                    if self._verbose : print("-- tag %s" % m.group( 0 ))
                     self._text = m.group( 0 )
                     self._buffer = self._buffer[len( m.group( 0 ) ):]
                     self._buffer = self._buffer.strip()

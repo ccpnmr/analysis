@@ -7,7 +7,7 @@ import os
 sys.path.append( os.path.split( __file__ )[0] )
 
 from .lexer import STARLexer
-from .handlers import ErrorHandler, ContentHandler
+from .handlers import ErrorHandler, ContentHandler, ContentHandler2
 
 #
 # returns tag/value (loop or free) pair in one callback
@@ -78,7 +78,7 @@ class parser :
                 if self._ch.comment( self._lex.getLine(), self._lex.getText() ) :
                     return True
             elif tok == STARLexer.SAVESTART :
-                if self._ch.startSaveFrame( self._lex.getLine(), self._lex.getText() ) :
+                if self._ch.startSaveframe( self._lex.getLine(), self._lex.getText() ) :
                     return True
                 if self.parseSaveFrame() :
                     return True
@@ -122,7 +122,7 @@ class parser :
                 if needvalue :
                     if self._eh.error( self._lex.getLine(), "Value expected, found \"save_\"" ) :
                         return True
-                return self._ch.endSaveFrame( self._lex.getLine(), self._lex.getText() )
+                return self._ch.endSaveframe( self._lex.getLine(), self._lex.getText() )
             elif tok == STARLexer.LOOPSTART :
                 if needvalue :
                     if self._eh.error( self._lex.getLine(), "Value expected, found \"loop_\"" ) :
@@ -348,7 +348,7 @@ class parser2 :
                 if self._ch.comment( self._lex.getLine(), self._lex.getText() ) :
                     return True
             elif tok == STARLexer.SAVESTART :
-                if self._ch.startSaveFrame( self._lex.getLine(), self._lex.getText() ) :
+                if self._ch.startSaveframe( self._lex.getLine(), self._lex.getText() ) :
                     return True
                 if self.parseSaveFrame() :
                     return True
@@ -392,7 +392,7 @@ class parser2 :
                 if needvalue :
                     if self._eh.error( self._lex.getLine(), "Value expected, found \"save_\"" ) :
                         return True
-                return self._ch.endSaveFrame( self._lex.getLine(), self._lex.getText() )
+                return self._ch.endSaveframe( self._lex.getLine(), self._lex.getText() )
             elif tok == STARLexer.LOOPSTART :
                 if needvalue :
                     if self._eh.error( self._lex.getLine(), "Value expected, found \"loop_\"" ) :

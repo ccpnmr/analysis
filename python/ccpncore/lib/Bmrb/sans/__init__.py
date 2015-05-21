@@ -1,4 +1,5 @@
 #!/usr/bin/python -u
+
 from __future__ import absolute_import
 
 # suggested by one of the PEPs, probably doesn't work
@@ -17,6 +18,7 @@ from .lexer import STARLexer
 from .handlers import ErrorHandler, ContentHandler, ContentHandler2
 from .SansParser import parser, parser2
 from .CifParser import parser as cifparser
+from .DicParser import parser as dicparser
 
 # NOTE: this should match the dictionary definition of framecode tags: varchar(127)
 # otherwise you get "invalid framecode" error for no apparent reason
@@ -192,6 +194,6 @@ def quote( value, style = None, verbose = False ) :
 
 __all__ = ["PY3","LONG_VALUE", "quote_style", "quote", "STARLexer",
            "ErrorHandler", "ContentHandler", "ContentHandler2",
-           "parser", "parser2", "cifparser" ]
+           "parser", "parser2", "cifparser", "dicparser" ]
 #
 #

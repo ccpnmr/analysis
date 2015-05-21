@@ -16,10 +16,10 @@ class Test( sans.ContentHandler, sans.ErrorHandler ) :
         return False
     def endData( self, line, name ) :
         print("End data block %s in line %s" % (name, line))
-    def startSaveFrame( self, line, name ) :
+    def startSaveframe( self, line, name ) :
         print("Start saveframe %s in line %s" % (name, line))
         return False
-    def endSaveFrame( self, line, name ) :
+    def endSaveframe( self, line, name ) :
         print("End saveframe %s in line %s" % (name, line))
         return False
     def startLoop( self, line ) :
@@ -46,7 +46,7 @@ class Test( sans.ContentHandler, sans.ErrorHandler ) :
 #
 if __name__ == "__main__" :
     l = sans.STARLexer( sys.stdin )
-    l.verbose = True
+#    l.verbose = True
     t = Test()
     p = sans.parser( l, t, t )
     p.parse()

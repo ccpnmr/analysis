@@ -7,7 +7,7 @@ import sys
 import os
 sys.path.append( os.path.split( __file__ )[0] )
 from .lexer import STARLexer
-from .handlers import ErrorHandler, ContentHandler
+from .handlers import ErrorHandler, ContentHandler, ContentHandler2
 
 class parser :
     _ch = None

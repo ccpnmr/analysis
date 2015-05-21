@@ -4,11 +4,11 @@
 
 There are five module variables you can set to control our behavior.
 
-* Setting bmrb.verbose to True will print some of what is going on to the terminal.
-* Setting bmrb.raise_parse_warnings to true will raise an exception if the parser encounters something problematic. Normally warnings are suppressed.
-* Setting skip_empty_loops to True will suppress the printing of empty loops when calling __str__ methods.
-* Adding key->value pairs to str_conversion_dict will automatically convert tags whose value matches "key" to the string "value" when printing. This allows you to set the default conversion value for Booleans or other objects.
-* Setting bmrb.allow_v2_entries will allow parsing of and printing of NMR-STAR version 2.1 entries. Most other methods will not operate correctly on parsed 2.1 entries. This is only to allow you parse and access the data in these entries - nothing else. Only set this if you have a really good reason to.
+*Setting bmrb.verbose to True will print some of what is going on to the terminal.
+*Setting bmrb.raise_parse_warnings to true will raise an exception if the parser encounters something problematic. Normally warnings are suppressed.
+*Setting skip_empty_loops to True will suppress the printing of empty loops when calling __str__ methods.
+*Adding key->value pairs to str_conversion_dict will automatically convert tags whose value matches "key" to the string "value" when printing. This allows you to set the default conversion value for Booleans or other objects.
+*Setting bmrb.allow_v2_entries will allow parsing of and printing of NMR-STAR version 2.1 entries. Most other methods will not operate correctly on parsed 2.1 entries. This is only to allow you parse and access the data in these entries - nothing else. Only set this if you have a really good reason to.
 
 Some errors will be detected and exceptions raised, but this does not implement a full validator (at least at present).
 
@@ -122,9 +122,9 @@ def cleanValue(value):
     # Allow manual specification of conversions for booleans, Nones, etc.
     if value in str_conversion_dict:
         if any(isinstance(value, type(x)) for x in str_conversion_dict):
-		# The additional check prevents numerical types from being
-		# interpreted as booleans. This is PROVIDED the dictionary 
-		# does not contain both numericals and booleans
+            # The additional check prevents numerical types from being
+            # interpreted as booleans. This is PROVIDED the dictionary
+            # does not contain both numericals and booleans
             value = str_conversion_dict[value]
 
     # Convert non-string types to string
@@ -248,12 +248,12 @@ class _entryParser(ContentHandler, ErrorHandler):
         if verbose: print("Data '%s' ended on line: %d" % (name, line))
         pass
 
-    def startSaveFrame(self, line, name):
+    def startSaveframe(self, line, name):
         if verbose: print("Saveframe '%s' started on line: %d" % (name, line))
         self.curframe = saveframe.fromScratch(saveframe_name=name)
         self.ent.addSaveframe(self.curframe)
 
-    def endSaveFrame(self, line, name):
+    def endSaveframe(self, line, name):
         if verbose: print("Saveframe '%s' ended on line: %d" % (name, line))
         self.curframe = None
 
@@ -271,12 +271,20 @@ class _entryParser(ContentHandler, ErrorHandler):
         if verbose: print("Tag / value: %s : %s ( %d : %d ) d %s" % (tag, val, tagline, valline, delim))
 
         if delim == 13:
-                val = "$"+val
+            val = "$"+val
 
         if inloop :
             # Update the columns and then add the data
             self.curloop.addColumn(tag, ignore_duplicates=True)
-            self.curloop.addDataByColumn(tag, val)
+
+            # This is needed to determine when two columns have the same name
+            try:
+                self.curloop.addDataByColumn(tag, val)
+            except ValueError as e:
+                if e.message == "You cannot add data out of column order.":
+                    raise ValueError("You cannot have two columns with the same name. Column name: %s" % tag)
+                else:
+                    raise e
         else :
             self.curframe.addTag(tag, val)
 
@@ -827,7 +835,7 @@ class saveframe:
                 if self.tag_prefix is None:
                     self.tag_prefix = prefix
                 elif self.tag_prefix != prefix:
-                    raise ValueError("One saveframe cannot have tags with different prefixes (or tags that don't match the set prefix)! '%s' vs '%s'." % (self.tag_prefix, prefix))
+                    raise ValueError("One saveframe cannot have tags with different categories (or tags that don't match the set category)! '%s' vs '%s'." % (self.tag_prefix, prefix))
                 name = name[name.index(".")+1:]
             else:
                 name = name[1:]
@@ -1140,7 +1148,10 @@ class loop:
         # Make sure that if there is data, it is the same width as the column tags
         if len(self.data) > 0:
             for row in self.data:
+                if row[0][0] in ('.','1'):
+                  print('@~@~', row)
                 if len(self.columns) != len(row):
+                    print("@~@~", len(self.columns), len(row), row)
                     raise ValueError("The number of column tags must match width of the data. Loop: '%s'." % self.category)
 
         # Start the loop
@@ -1172,12 +1183,7 @@ class loop:
             for datum in copy.deepcopy(self.data):
 
                 # Put quotes as needed on the data
-                try:
-                  datum = [cleanValue(x) for x in datum]
-                except:
-                  print(self.columns)
-                  print(datum)
-                  raise
+                datum = [cleanValue(x) for x in datum]
                 for pos, item in enumerate(datum):
                     if "\n" in item:
                         datum[pos] = "\n;\n%s;\n" % item
@@ -1441,7 +1447,7 @@ class loop:
 
         # Verify the renumbering column ID
         if renumber_column >= len(self.columns) or renumber_column < 0:
-            raise ValueError("The renumbering column ID you provided '%s' is too large or too small! Value column ids are 0-%d." % (tag, len(self.columns)-1))
+            raise ValueError("The renumbering column ID you provided '%s' is too large or too small! Value column ids are 0-%d." % (index_tag, len(self.columns)-1))
 
         # Do nothing if we have no data
         if len(self.data) == 0:

@@ -27,5 +27,12 @@ import json
 if __name__ == '__main__':
   #entry = bmrb.entry.fromFile('/home/rhf22/rhf22/Git/NEF/specification/Commented_Example.nef')
   #entry = bmrb.entry.fromFile('/home/rhf22/rhf22/Git/NEF/data/original/CCPN_CASD155.nef')
-  entry = bmrb.entry.fromFile('/home/rhf22/rhf22/Git/NEF/data/original/CCPN_H1GI.nef')
-  entry.printTree()
+
+  import sys
+  if len(sys.argv) > 1:
+    path = sys.argv[1]
+  else:
+    path = '/home/rhf22/rhf22/Git/NEF/data/original/CCPN_H1GI.nef'
+  entry = bmrb.entry.fromFile(path)
+  # entry.printTree()
+  print(entry)

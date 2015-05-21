@@ -42,6 +42,7 @@ class Test( ContentHandler, ErrorHandler ) :
 #
 if __name__ == "__main__" :
     l = STARLexer( sys.stdin )
+#    l._verbose = True
     t = Test()
     p = cifparser( l, t, t )
     p.parse()

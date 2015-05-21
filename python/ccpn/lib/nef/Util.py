@@ -592,7 +592,7 @@ def compareEntries(entry1, entry2):
 
   for name in data[0]:
     if name in data[1]:
-      compareSaveFrames(name, diffs, [data[0][name], data[1][name]], files)
+      compareSaveframes(name, diffs, [data[0][name], data[1][name]], files)
 
 
   if diffs:
@@ -600,7 +600,7 @@ def compareEntries(entry1, entry2):
   else:
     return "Files are identical\n"
 
-def compareSaveFrames(prefix, diffs, data, files):
+def compareSaveframes(prefix, diffs, data, files):
 
   oneline = "Difference: %s\t%s\t%s\t%s"
 

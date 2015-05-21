@@ -401,7 +401,7 @@ def _makeMolecularSystemFrame(chains):
 
 
 def makeShiftListFrame(shiftList):
-  """make a saveFrame for a shift list"""
+  """make a saveframe for a shift list"""
 
   sf_category = 'nef_chemical_shift_list'
   framecode = '%s_%s' % (sf_category, shiftList.name.translate(Pid.unmapSeparators))
@@ -430,7 +430,7 @@ def makeShiftListFrame(shiftList):
   return saveframe
 
 def makeRestraintListFrame(restraintList):
-  """make a saveFrame for a restraint list of whatever type."""
+  """make a saveframe for a restraint list of whatever type."""
   restraintType = restraintList.restraintType
   potentialType = restraintList.potentialType
   restraintItemLength = RestraintContribution.restraintType2Length[restraintList.restraintType]
@@ -519,7 +519,7 @@ def makeRestraintListFrame(restraintList):
   return saveframe
 
 def makePeakListFrame(peakList):
-  """make saveFrame for peakList an containing spectrum"""
+  """make saveframe for peakList an containing spectrum"""
 
   # Set up variables
   spectrum = peakList.spectrum

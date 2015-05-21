@@ -30,10 +30,14 @@ class ContentHandler :
         raise Exception( "Abstract method called" )
     def endData( self, line, name ) :
         raise Exception( "Abstract method called" )
+    def startSaveFrame( self, line, name ) :
+        raise Exception( "Abstract method called" )
     def startSaveframe( self, line, name ) :
+        return self.startSaveFrame( line, name )
+    def endSaveFrame( self, line, name ) :
         raise Exception( "Abstract method called" )
     def endSaveframe( self, line, name ) :
-        raise Exception( "Abstract method called" )
+        return self.endSaveFrame( line, name )
     def startLoop( self, line ) :
         raise Exception( "Abstract method called" )
     def endLoop( self, line ) :
@@ -51,10 +55,14 @@ class ContentHandler2 :
         raise Exception( "Abstract method called" )
     def endData( self, line, name ) :
         raise Exception( "Abstract method called" )
+    def startSaveFrame( self, line, name ) :
+        raise Exception( "Abstract method called" )
     def startSaveframe( self, line, name ) :
+        return self.startSaveFrame( line, name )
+    def endSaveFrame( self, line, name ) :
         raise Exception( "Abstract method called" )
     def endSaveframe( self, line, name ) :
-        raise Exception( "Abstract method called" )
+        return self.endSaveFrame( line, name )
     def startLoop( self, line ) :
         raise Exception( "Abstract method called" )
     def endLoop( self, line ) :

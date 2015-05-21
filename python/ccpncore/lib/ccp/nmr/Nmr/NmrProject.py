@@ -73,6 +73,14 @@ def loadDataSource(nmrProject, filePath):
     print(msg)
     return None
 
+  # NBNB TBD REDO!
+  # This way of setting DataLocationStores and DataUrls is HOPELESS, STUPID KLUDGE!!
+  # If we want each file to have an individual name with no support for grouping
+  # them, let us for Gods sake remove the fancy stuff from the model.
+  # Or at least refrain from creating individual DataLocationStores
+  # when you only ever need one!
+  # Rasmus Fogh
+
   dirName, fileName = os.path.split(specFile)
   name, fex = os.path.splitext(fileName)
 
@@ -93,6 +101,8 @@ def loadDataSource(nmrProject, filePath):
 
   dataLocationStore = nmrProject.root.newDataLocationStore(name=name)
   dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
+  # NBNB TBD - this is WRONG
+  # teh dataUrl should be made from dirName, NOT to teh filePath directory.
   blockMatrix = createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
                                     blockSizes=blockSizes, isBigEndian=isBigEndian,
                                     numberType=numberType, headerSize=headerSize,

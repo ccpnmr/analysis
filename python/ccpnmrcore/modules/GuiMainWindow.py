@@ -227,7 +227,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     viewLayoutMenu.addAction(Action(self, "Save As...", callback=self.saveLayoutAs))
     viewLayoutMenu.addAction(Action(self, "Restore", callback=self.restoreLayout))
     viewMenu.addSeparator()
-    self.consoleAction = Action(self, "Console", callback=self.toggleConsole,
+    self.consoleAction = Action(self, "Console", callback=self.toggleConsole, shortcut="py",
                                          checkable=True)
     # if self.pythonConsole.isVisible():
     #   self.consoleAction.setChecked(True)

@@ -35,6 +35,7 @@ from ccpncore.gui.TextEditor import TextEditor
 
 
 from ccpnmrcore.gui.Assigner import Assigner
+from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
@@ -126,6 +127,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter2.addWidget(self.pythonConsole)
     self.sequenceWidget = QtGui.QLabel(self)
     self.sequenceWidget.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+    font = self.sequenceWidget.font()
+    font.setPointSize(21)
+    self.sequenceWidget.setFont(font)
     self.pythonConsole.hide()
     self.splitter2.setGeometry(QtCore.QRect(1200, 1300, 100, 100))
     self.splitter1.addWidget(self.dockArea)
@@ -218,8 +222,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroMenu.addAction(Action(self, "Define User Shortcuts...", callback=self.defineUserShortcuts))
 
     viewNewMenu = viewMenu.addMenu("New")
-    viewNewMenu.addAction(Action(self, "1D Spectral Pane", callback=self.addSpectrum1dDisplay))
-    viewNewMenu.addAction(Action(self, "nD Spectral Pane", callback=self.addSpectrumNdDisplay))
+    viewNewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
+    # viewNewMenu.addAction(Action(self, "nD Spectral Pane", callback=self.addSpectrumNdDisplay))
     viewNewMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
 
     viewLayoutMenu = viewMenu.addMenu("Layout")
@@ -260,6 +264,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.setNativeMenuBar(False)
     self.show()
 
+
+  def addBlankDisplay(self):
+    if not self.blankDisplay:
+      self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
   def openAProject(self, projectDir=None):
 

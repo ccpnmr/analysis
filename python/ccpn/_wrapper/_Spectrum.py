@@ -24,13 +24,15 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
-
+import os
 from collections.abc import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+from ccpncore.api.memops.Implementation import Url
+from ccpncore.util import Path
 from ccpncore.util import Pid
 
 
@@ -235,7 +237,24 @@ class Spectrum(AbstractWrapperObject):
       return xx.fullPath
     else:
       return None
-  # NBNB TBD Should this be made modifiable? Would be a bit of work ...
+
+  @filePath.setter
+  def filePath(self, value:str):
+    #  NBNB TBD, the way of handling file paths, DataUrls, and stores ABSOLUTELY need improving
+
+    apiDataStore = self._wrappedData.dataStore
+    if apiDataStore is None:
+      raise ValueError("Spectrum is not stored, cannot change file path")
+
+    if not value:
+      raise ValueError("Spectrum file path cannot be set to None")
+
+    # NBNB TBD this is silly - no reuse of DataUrls.
+    dirName, fileName = os.path.split(Path.normalisePath(value, makeAbsolute=True))
+    apiDataLocationStore = apiDataStore.dataLocationStore
+    dataUrl = apiDataLocationStore.newDataUrl(url=Url(path=dirName))
+    apiDataStore.dataUrl = dataUrl
+    apiDataStore.path = fileName
 
   @property
   def headerSize(self) -> int:

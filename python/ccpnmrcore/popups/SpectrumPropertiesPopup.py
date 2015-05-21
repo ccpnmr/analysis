@@ -86,13 +86,14 @@ class GeneralTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, parent=None):
     super(GeneralTab, self).__init__(parent)
 
-
+    self.spectrum = spectrum
     # nameLabel = (Label(self, text="Spectrum name: ", grid=(0,0)))
     # nameData = LineEdit(self, grid=(0, 1))
     # nameData.setText(spectrum.spectrumItem.name)
     pathLabel = Label(self, text="Path:", grid=(1, 0))
-    pathData = LineEdit(self, grid=(1, 1))
-    pathData.setText(spectrum.filePath)
+    self.pathData = LineEdit(self, grid=(1, 1))
+    self.pathData.setText(spectrum.filePath)
+    self.pathData.editingFinished.connect(self.setSpectrumPath)
     dataTypeLabel = Label(self, text="Data Type: ", grid=(2, 0))
     dataTypeData = Label(self, text=getSpectrumFileFormat(spectrum.filePath), grid=(2, 1))
     templateLabel = Label(self, text="Template: ", grid=(3, 0))
@@ -142,6 +143,12 @@ class GeneralTab(QtGui.QWidget, Base):
       else:
         noiseLevelData.setText('None')
 
+
+
+  def setSpectrumPath(self):
+    if self.pathData.isModified():
+      self.spectrum.filePath = self.pathData.text()
+      print(self.spectrum.filePath)
 
 
   def changeSpectrumColour(self, spectrum):

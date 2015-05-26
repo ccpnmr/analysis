@@ -93,6 +93,8 @@ class AppBase(GuiBase):
       ioUtil.cleanupProject(self.project)
       self.project.delete()
       self.project = None
+    if self.mainWindow:
+      self.mainWindow.deleteLater()
     self.mainWindow = None
     self.current = None
 

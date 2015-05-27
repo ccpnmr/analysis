@@ -189,6 +189,8 @@ class ViewBox(pg.ViewBox):
           else:
             newPeaks = peakList.findPeaks1dFiltered(spectrumView)
           # print(spectrumView.spectrum.peakLists[0].peaks)
+          for peak in newPeaks:
+            peak.isSelected = True
           self.current.strip.showPeaks(peakList)
           self.current.peaks = newPeaks
       else:
@@ -229,6 +231,9 @@ class ViewBox(pg.ViewBox):
                   self.current.peaks.append(peak)
                   # peak.isSelected(True)
 
+        for peak in self.current.peaks:
+          peak.isSelected = True
+          
         try:
           self.parent._appBase.mainWindow.paaModule.predictAssignments(self.current.peaks)
           # for peak in self.current.peaks:

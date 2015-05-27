@@ -502,6 +502,7 @@ class PeakNd(QtGui.QGraphicsItem):
   def paint(self, painter, option, widget):
 
     if self.peak: # TBD: is this ever not true??
+      self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self.isInPlane():
         # r, w, box = self.drawData
         r, w  = self.drawData
@@ -535,7 +536,7 @@ class PeakNd(QtGui.QGraphicsItem):
         ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
         ###painter.drawLine(xPpm-r,yPpm+r,xPpm+r,yPpm-r)
         
-        if self.isSelected():
+        if self.peak.isSelected:
           painter.drawLine(-r,-r,-r,r)
           painter.drawLine(-r,r,r,r)
           painter.drawLine(r,r,r,-r)

@@ -45,6 +45,7 @@ from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpncore.util import Io as ioUtil
+from ccpncore.util import Pid
 
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
@@ -123,7 +124,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter2.heightMax = 200
     # assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
     # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
-    self.leftWidget.itemDoubleClicked.connect(self.raiseSpectrumProperties)
+    self.leftWidget.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
     self.sequenceWidget = QtGui.QLabel(self)
     self.sequenceWidget.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
@@ -288,12 +289,26 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     return self.assigner
     # self.dockArea.addDock(assigner)
 
-  def raiseSpectrumProperties(self, item):
-    dataItem = item.data(0, QtCore.Qt.DisplayRole)
-    spectrum = self._appBase.project.getById(dataItem)
-    popup = SpectrumPropertiesPopup(spectrum)
-    popup.exec_()
-    popup.raise_()
+  def raiseProperties(self, item):
+    """get object from Pid and dispatch call depending on type
+
+    NBNB TBD HOw about refactoring so that we have a shortClassNAme:Popup dictionary?"""
+    dataPid =  item.data(0, QtCore.Qt.DisplayRole)
+    project = self._appBase.project
+    obj = project.getById(dataPid)
+    if obj is None:
+      project._logger.error("No data object matching Pid %s" % dataPid)
+    elif obj.shortClassName == 'SP':
+      popup = SpectrumPropertiesPopup(obj)
+      popup.exec_()
+      popup.raise_()
+    else:
+      project._logger.error("Double-click activation not implemented for object %s" % obj)
+    # dataItem = item.data(0, QtCore.Qt.DisplayRole)
+    # spectrum = self._appBase.project.getById(dataItem)
+    # popup = SpectrumPropertiesPopup(spectrum)
+    # popup.exec_()
+    # popup.raise_()
 
   def fillRecentProjectsMenu(self):
     for recentFile in self._appBase.preferences.recentFiles:

@@ -95,7 +95,7 @@ class MainWindow(GuiMainWindow):
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
     self.splitter2.heightMax = 200
-    self.leftWidget.itemDoubleClicked.connect(self.raiseSpectrumProperties)
+    self.leftWidget.itemDoubleClicked.connect(self.raiseProperties)
     self.pythonConsole.heightMax = 200
     self.splitter2.addWidget(self.pythonConsole)
     self.pythonConsole.hide()
@@ -235,7 +235,7 @@ class MainWindow(GuiMainWindow):
     toggleCrossHairShortcut = QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHair)
     toggleGridShortcut = QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGrid)
 
-  def raiseSpectrumProperties(self, item):
+  def raiseProperties(self, item):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
     spectrum = self.project.getById(dataItem)
     self.w = SpectrumPropertiesPopup(spectrum)

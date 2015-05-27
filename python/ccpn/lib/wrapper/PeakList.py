@@ -34,9 +34,6 @@ Sequence = collections.abc.Sequence
 
 def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None, doPos:bool=True, doNeg:bool=True):
 
-
-  print(positions, dataDims)
-
   ordering = [dataDim.dim-1 for dataDim in dataDims]
   isoOrdering = [dataDim.getIsotopeCodes() for dataDim in dataDims]
 
@@ -60,12 +57,13 @@ def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None
   posLevel = spectrum.positiveContourBase*100 if doPos else None
   negLevel = spectrum.negativeContourBase*100 if doNeg else None
 
-  print(posLevel)
+  apiPeaks = pickNewPeaks(peakList.apiPeakList, startPoint=startPoints, endPoint=endPoints, posLevel=posLevel, negLevel=negLevel)
 
-  return pickNewPeaks(peakList.apiPeakList, startPoint=startPoints, endPoint=endPoints, posLevel=posLevel, negLevel=negLevel)
-
+  data2ObjDict = peakList._project._data2Obj
+  
+  return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
+  
 def findPeaks1d(peakList, spectrumView, size=3, mode='wrap'):
-
 
    peaks = []
    spectrum = peakList.spectrum

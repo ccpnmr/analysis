@@ -77,6 +77,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
   def clicked(self):
     print(self.plot)
+    
 
   def getSliceData(self, spectrum=None):
 

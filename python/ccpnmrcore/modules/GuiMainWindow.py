@@ -27,12 +27,11 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
-
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import Console
+from ccpncore.gui.Menu import Menu
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
-
 
 from ccpnmrcore.gui.Assigner import Assigner
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
@@ -44,9 +43,9 @@ from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
+
 from ccpncore.util import Io as ioUtil
 from ccpncore.util import Pid
-
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
@@ -151,14 +150,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     QtGui.QFontDatabase.addApplicationFont('/Users/simon/Downloads/Lato-Black.ttf')
     font = QtGui.QFont('Lato-Black')
     self._menuBar.setFont(font)
-    fileMenu = QtGui.QMenu("&Project", self)
-    spectrumMenu = QtGui.QMenu("&Spectra", self)
-    viewMenu = QtGui.QMenu("&View", self)
-    moleculeMenu = QtGui.QMenu("&Molecules", self)
-    restraintsMenu = QtGui.QMenu("&Restraints", self)
-    structuresMenu = QtGui.QMenu("&Structures", self)
-    macroMenu = QtGui.QMenu("Macro", self)
-    helpMenu = QtGui.QMenu("&Help", self)
+    fileMenu = Menu("&Project", self)
+    spectrumMenu = Menu("&Spectra", self)
+    viewMenu = Menu("&View", self)
+    moleculeMenu = Menu("&Molecules", self)
+    restraintsMenu = Menu("&Restraints", self)
+    structuresMenu = Menu("&Structures", self)
+    macroMenu = Menu("Macro", self)
+    helpMenu = Menu("&Help", self)
 
     fileMenuAction = fileMenu.addAction(Action(self, "New", callback=self._appBase.newProject, shortcut='pn'))
     fileMenu.addAction(Action(self, "Open...", callback=self.openAProject, shortcut="po"))
@@ -171,8 +170,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     backupOption.addAction(Action(self, "Save", callback=self.saveBackup))
     backupOption.addAction(Action(self, "Restore", callback=self.restoreBackup))
     fileMenu.addSeparator()
-    fileMenu.addAction(QtGui.QAction("Undo", self, triggered=self.undo, shortcut=QtGui.QKeySequence("Ctrl+z")))
-    fileMenu.addAction(QtGui.QAction("Redo", self, triggered=self.redo, shortcut=QtGui.QKeySequence("Ctrl+y")))
+    fileMenu.addAction(Action(self, "Undo", callback=self.undo, shortcut=QtGui.QKeySequence("Ctrl+z")))
+    fileMenu.addAction(Action(self, "Redo", callback=self.redo, shortcut=QtGui.QKeySequence("Ctrl+y")))
     logOption = fileMenu.addMenu("Log File")
     logOption.addAction(Action(self, "Save As...", callback=self.saveLogFile))
     logOption.addAction(Action(self, "Clear", callback=self.clearLogFile))
@@ -211,7 +210,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
 
     macroMenu.addAction(Action(self, "Edit...", callback=self.editMacro))
-    macroMenu.addAction(Action(self, "New From Logfile...", callback=self.newMacroFromLog))
+    macroMenu.addAction(Action(self, "New from Logfile...", callback=self.newMacroFromLog))
     macroRecordMenu = macroMenu.addMenu("Record")
     macroRecordMenu.addAction(Action(self, "Start", callback=self.startMacroRecord))
     macroRecordMenu.addAction(Action(self, "Stop", callback=self.stopMacroRecord))
@@ -233,13 +232,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     viewLayoutMenu.addAction(Action(self, "Save As...", callback=self.saveLayoutAs))
     viewLayoutMenu.addAction(Action(self, "Restore", callback=self.restoreLayout))
     viewMenu.addSeparator()
-    self.consoleAction = Action(self, "Console", callback=self.toggleConsole,
+    self.consoleAction = Action(self, "Console", callback=self.toggleConsole, shortcut="py",
                                          checkable=True)
-    if self.pythonConsole.isVisible():
-      self.consoleAction.setChecked(True)
-    else:
-      self.consoleAction.setChecked(False)
-    # self.consoleAction.setChecked(self.pythonConsole.isVisible())
+    self.consoleAction.setChecked(self.pythonConsole.isVisible())
     viewMenu.addAction(self.consoleAction)
 
     helpMenu.addAction(Action(self, "Command...", callback=self.showCommandHelp))

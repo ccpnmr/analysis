@@ -28,7 +28,7 @@ from PyQt4 import QtGui, QtCore
 import pyqtgraph as pg
 
 import math
-import munkres
+#import munkres
 
 from functools import partial
 

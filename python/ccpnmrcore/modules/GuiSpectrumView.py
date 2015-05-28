@@ -23,8 +23,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 from PyQt4 import QtCore, QtGui
 
-from OpenGL import GL
-
 from ccpncore.util.Colour import Colour
 from ccpnmrcore.Base import Base as GuiBase
 
@@ -33,14 +31,7 @@ import pyqtgraph as pg
 #from ccpnmrcore.modules.spectrumPane.PeakListItem import PeakListItem
 #from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
 
-# this class mixes both OpenGL and Qt functionality
-# it's a Qt QGraphicsItem because that means can re-order drawing of spectra peaks easily
-# and it also allows turning on and off of a spectrum easily
-# it also used OpenGL for drawing contours (ND) or lines (1D)
-
-# abstract class: subclass needs to implement drawSpectrum()
-#class GuiSpectrumView(QtGui.QGraphicsItem, GuiBase):  # abstract class
-class GuiSpectrumView(GuiBase):  # abstract class
+class GuiSpectrumView(GuiBase):
 
   #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
   def __init__(self):

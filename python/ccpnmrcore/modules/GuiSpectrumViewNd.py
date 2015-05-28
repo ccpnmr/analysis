@@ -168,7 +168,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     for func in ('setPositiveContourColour', 'setSliceColour'):
       Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
-    
+        
     self.spectrumItems = {} # strip --> associated QtGui.QGraphicsItem 
     for strip in self.strips:
       self.addSpectrumItem(strip)
@@ -196,7 +196,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     else:
       pix.fill(QtGui.QColor(self.spectrum.positiveContourColour))
     action.setIcon(QtGui.QIcon(pix))
-    
+      
   def addSpectrumItem(self, strip):
     if strip not in self.spectrumItems:
       item = GuiSpectrumViewItemNd(self, strip)
@@ -251,6 +251,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     self.negLevelsPrev = []
     self.xDataDimPrev = None
     self.yDataDimPrev = None
+    self.zRegionPrev = None
     self.posDisplayLists = []
     self.negDisplayLists = []
     
@@ -267,7 +268,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       strip.showPeaks(peakList)
  
   def newPeakListView(self, peakListView):
-    print('HERE444', peakListView)
+    pass
     
   ##### override of superclass function
 
@@ -357,7 +358,8 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     
     xDataDim, yDataDim = self.spectrumView.apiSpectrumView.orderedDataDims[:2]
     
-    if xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev:
+    if xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev \
+      or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]]):
       self.releaseDisplayLists(self.posDisplayLists)
       self.releaseDisplayLists(self.negDisplayLists)
       doPosLevels = doNegLevels = True
@@ -397,7 +399,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
         for n, contourData in enumerate(posContours):
           self.addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
         
-      if len(negLevels):
+      if doNegLevels:
         negContours = Contourer2d.contourer2d(dataArray, negLevels)
         for n, contourData in enumerate(negContours):
           self.addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
@@ -408,6 +410,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     self.negLevelsPrev = list(negLevels)
     self.xDataDimPrev = xDataDim
     self.yDataDimPrev = yDataDim
+    self.zRegionPrev = tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])
     
   def releaseDisplayLists(self, displayLists):
 

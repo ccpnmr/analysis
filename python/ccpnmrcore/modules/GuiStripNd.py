@@ -354,13 +354,12 @@ class GuiStripNd(GuiStrip):
     
     # TBD: other axes
     axis = self._appBase.project._data2Obj[apiAxis]
-    if len(self.orderedAxes) == 3 and axis is self.orderedAxes[2]:
+    if len(self.orderedAxes) >= 3 and axis in self.orderedAxes[2:]:
       peakLists = self.peakLayerDict.keys()
       for peakList in peakLists:
         peakLayer = self.peakLayerDict[peakList]
         peaks = [peak for peak in peakList.peaks if self.peakIsInPlane(peak)]
         self.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
-
 
   def addHTraceMarker(self):
     traceMarker = pg.InfiniteLine(angle=0, movable=True, pos=self.mousePoint)

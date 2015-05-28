@@ -79,7 +79,9 @@ class GuiStripNd(GuiStrip):
       #if spectrumView not in self.plotWidget.scene().items():
         # newItem = spectrumView
         #self.plotWidget.scene().addItem(spectrumView)
-      spectrumView.addSpectrumItem(self)
+      if spectrumView is not None:
+        # Check is necessary as spectrumView may be None during project loading
+        spectrumView.addSpectrumItem(self)
 
     Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
     Notifiers.registerNotify(self.deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')

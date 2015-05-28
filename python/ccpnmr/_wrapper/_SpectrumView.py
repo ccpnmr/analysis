@@ -304,14 +304,14 @@ class SpectrumView(AbstractWrapperObject):
 
 # Spectrum.spectrumViews property
 def _getSpectrumViews(spectrum:Spectrum):
-  return tuple(spectrum._project._data2Obj[x]
+  return tuple(spectrum._project._data2Obj.get(x)
                for x in spectrum._wrappedData.sortedSpectrumViews())
 Spectrum.spectrumViews = property(_getSpectrumViews, None, None,
                                    "SpectrumDisplays showing Spectrum")
 
 # Strip.spectrumViews property
 def _getSpectrumViews(strip:Strip):
-  return tuple(strip._project._data2Obj[x]
+  return tuple(strip._project._data2Obj.get(x)
                for x in strip._wrappedData.sortedSpectrumViews())
 Strip.spectrumViews = property(_getSpectrumViews, None, None,
                                    "SpectrumDisplays showing Spectrum")

@@ -287,6 +287,8 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TBD: remove hardwiring
   
   ##### functions not to be used externally #####
+  # NBNB TBD internal functoins should start with UNDERSCORE!
+  # REFACTOR
 
   #def drawContours(self, painter, guiStrip):
   def drawContours(self, painter):
@@ -304,7 +306,10 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       return
       
     #contourDict = self.constructContours(guiStrip, posLevels, negLevels)
-    self.constructContours(posLevels, negLevels)
+    try:
+      self.constructContours(posLevels, negLevels)
+    except FileNotFoundError:
+      self.spectrumView._project._logger.warning("No data file found for %s" % self)
 
 
     posColour = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour

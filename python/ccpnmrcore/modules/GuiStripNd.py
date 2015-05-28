@@ -52,7 +52,6 @@ class GuiStripNd(GuiStrip):
 
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
     self.peakLayerDict = {}  # peakList --> peakLayer
-    self.peakItemDict = {}  # peak --> peakItem
 
     ###self.plotWidget.plotItem.setAcceptDrops(True)
     ###self.viewportWidget = QtOpenGL.QGLWidget()
@@ -83,8 +82,7 @@ class GuiStripNd(GuiStrip):
         # Check is necessary as spectrumView may be None during project loading
         spectrumView.addSpectrumItem(self)
 
-    Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
-    Notifiers.registerNotify(self.deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
+    ###Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
     for func in ('setPosition', 'setWidth'):
       Notifiers.registerNotify(self.axisRegionChanged, 'ccpnmr.gui.Task.Axis', func)
     
@@ -344,14 +342,7 @@ class GuiStripNd(GuiStrip):
       return
     peakList = peak.parent
     self.showPeaks(peakList, [peak])
-    
-  def deletedPeak(self, apiPeak):
-    peak = self._appBase.project._data2Obj[apiPeak]
-    peakItem = self.peakItemDict.get(peak)
-    if peakItem:
-      self.plotWidget.scene().removeItem(peakItem)
-      del self.peakItemDict[peak]
-      
+  
   def axisRegionChanged(self, apiAxis):
     
     # TBD: other axes

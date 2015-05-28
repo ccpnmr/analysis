@@ -29,6 +29,8 @@ from PyQt4 import QtCore, QtGui
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.VerticalLabel import VerticalLabel
 
+from ccpncore.memops import Notifiers
+
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
@@ -66,8 +68,12 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     ##self.viewportDict = {} # maps QGLWidget to GuiStripNd
 
     # below are so we can reuse PeakItems and only create them as needed
-    self.activePeakItemDict = {}  # maps strip to peak to peakItem
-    self.inactivePeakItems = set()
+    self.activePeakItemDict = {}  # maps apiPeak to peakItem for peaks which are being displayed
+    # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
+    # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
+    self.inactivePeakItems = set() # containus unused peakItems
+    
+    Notifiers.registerNotify(self.deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
     
     GuiSpectrumDisplay.__init__(self)
     
@@ -217,15 +223,15 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     viewBox = peakLayer.strip.viewBox
     activePeakItemDict = self.activePeakItemDict
     inactivePeakItems = self.inactivePeakItems
-    peakLayerDict = activePeakItemDict.setdefault(peakLayer, {})
-    existingPeaks = set(peakLayerDict.keys())
-    unusedPeaks = existingPeaks - set(peaks)
-    for peak in unusedPeaks:
-      peakItem = peakLayerDict.pop(peak)
+    existingApiPeaks = set(activePeakItemDict.keys())
+    unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
+    for apiPeak in unusedApiPeaks:
+      peakItem = activePeakItemDict.pop(apiPeak)
       viewBox.removeItem(peakItem)
       inactivePeakItems.add(peakItem)
     for peak in peaks:
-      if peak in existingPeaks:
+      apiPeak = peak._wrappedData
+      if apiPeak in existingApiPeaks:
         continue
       if inactivePeakItems:
         peakItem = inactivePeakItems.pop()
@@ -233,6 +239,14 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         viewBox.addItem(peakItem)
       else:
         peakItem = PeakNd(peakLayer, peak)
-      peakLayerDict[peak] = peakItem
+      activePeakItemDict[apiPeak] = peakItem
+      
+  def deletedPeak(self, apiPeak):
+    
+    peakItem = self.activePeakItemDict.get(apiPeak)
+    if peakItem:
+      peakItem.peakLayer.strip.plotWidget.scene().removeItem(peakItem)
+      del self.activePeakItemDict[apiPeak]
+      self.inactivePeakItems.add(peakItem)
       
 

@@ -339,22 +339,26 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def quitAction(self):
     # pass
-    prefFile = open(os.path.expanduser("~/.ccpn/v3settings.json"))
-    pref = json.load(prefFile)
-    prefFile.close()
-    if pref != self._appBase.preferences:
-      msgBox = QtGui.QMessageBox()
-      msgBox.setText("Application Preferences have been changed")
-      msgBox.setInformativeText("Do you want to save your changes?")
-      msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-      ret = msgBox.exec_()
-      if ret == QtGui.QMessageBox.Yes:
-        preferencesPath = os.path.expanduser("~/.ccpn/v3settings.json")
-        prefFile = open(preferencesPath, 'w+')
-        json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-        prefFile.close()
+    prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
+    if os.path.exists(prefPath):
+      prefFile = open(prefPath)
+      pref = json.load(prefFile)
+      prefFile.close()
+      if pref == self._appBase.preferences:
+        savePref = False
       else:
-        pass
+        msgBox = QtGui.QMessageBox()
+        msgBox.setText("Application Preferences have been changed")
+        msgBox.setInformativeText("Do you want to save your changes?")
+        msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        savePref = (msgBox.exec_() == QtGui.QMessageBox.Yes)
+    else:
+      savePref = True
+      
+    if savePref:
+      prefFile = open(prefPath, 'w+')
+      json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+      prefFile.close()
 
     QtGui.QApplication.quit()
 

@@ -31,7 +31,7 @@ class Action(QtGui.QAction, Base):
     if shortcut:
       if type(shortcut) == type(''):
         shortcut = QtGui.QKeySequence(", ".join(tuple(shortcut)))
-      QtGui.QAction.__init__(self, text, parent, shortcut=shortcut,triggered=callback, checkable=checkable)
+      QtGui.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
       QtGui.QAction.setShortcutContext(self, QtCore.Qt.ApplicationShortcut)
       QtGui.QFontDatabase.addApplicationFont('/Users/simon/Downloads/Lato-Black.ttf')
       font = QtGui.QFont('Lato-Black')
@@ -40,7 +40,11 @@ class Action(QtGui.QAction, Base):
     #   QtGui.QAction.__init__(self, icon, text, parent, triggered=callback, checkable=checkable)
 
     else:
-      QtGui.QAction.__init__(self, text, parent, triggered=callback, checkable=checkable)
+      QtGui.QAction.__init__(self, text, parent, checkable=checkable)
+      
+    if callback:
+      # PyQt4 always seems to add a checked argument for Action callbacks
+      self.triggered.connect(lambda checked, *args, **kw: callback(*args, **kw))
 
     # Base.__init__(self, **kw)
 

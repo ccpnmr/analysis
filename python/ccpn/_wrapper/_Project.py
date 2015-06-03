@@ -30,7 +30,7 @@ from ccpncore.memops import Notifiers
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
-from ccpncore.util import Io as utilIo
+from ccpncore.util import Io as ioUtil
 
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to API: NmrProject"""
@@ -146,10 +146,16 @@ class Project(AbstractWrapperObject):
 
   def delete(self):
     """Delete underlying data and cleans up the wrapper project"""
+    wrappedData = self._wrappedData
+    self._close()
+    wrappedData.delete()
+
+  def _close(self):
+    """Clean up the wrapper project previous to deleting or replacing"""
+    ioUtil.cleanupProject(self)
     self._clearNotifiers()
     for tag in ('_data2Obj','_pid2Obj'):
       delattr(self,tag)
-    self._wrappedData.delete()
     del self._wrappedData
 
   def __repr__(self):
@@ -176,7 +182,7 @@ class Project(AbstractWrapperObject):
   @property
   def path(self) -> str:
     """path of/to Project"""
-    return utilIo.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
+    return ioUtil.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
   
   @property
   def nmrProject(self) -> ApiNmrProject:

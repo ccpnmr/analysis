@@ -444,6 +444,7 @@ class PeakNd(QtGui.QGraphicsItem):
   def isInPlane(self):
 
     strip = self.peakLayer.strip
+
     if len(strip.orderedAxes) > 2:
       zDim = strip.spectrumViews[0].dimensionOrdering[2] - 1
       zPlaneSize = strip.spectrumViews[0].zPlaneSize()

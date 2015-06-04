@@ -193,14 +193,15 @@ class Project(AbstractWrapperObject):
     """API equivalent to object: Nmrproject"""
     return self._wrappedData
 
+  # Undo machinery
   @property
   def _undo(self):
     """undo stack for Project. Implementation attribute"""
     return self._wrappedData._undo
 
   def _resetUndo(self, maxWaypoints=20, maxOperations=10000):
-    """Reset unod stack, using passed-in parameters.
-    NB seting eitehr parameter to 0 removes teh undo stack."""
+    """Reset undo stack, using passed-in parameters.
+    NB setting either parameter to 0 removes the undo stack."""
 
     undo = self._wrappedData._undo
     if undo is not None:
@@ -210,6 +211,15 @@ class Project(AbstractWrapperObject):
       self._wrappedData._undo = Undo(maxWaypoints=maxWaypoints, maxOperations=maxOperations)
     else:
       self._wrappedData._undo = None
+
+  def newUndoPoint(self):
+    """Set a point in the undo stack, you can undo/redo to """
+    undo = self._wrappedData._undo
+    if undo is None:
+      self._logger.warning("Trying to add undoPoint bu undo not initialised")
+    else:
+      undo.newWaypoint()
+      self._logger.info("Added undoPoint")
 
 
   @property

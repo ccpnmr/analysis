@@ -317,10 +317,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def undo(self):
-    self._appBase.undoStack.undo()
+    self._project._undo.undo()
 
   def redo(self):
-    self._appBase.undoStack.redo()
+    self._project._undo.redo()
 
   def saveLogFile(self):
     pass

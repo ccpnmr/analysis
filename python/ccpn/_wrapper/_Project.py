@@ -30,6 +30,7 @@ from ccpncore.memops import Notifiers
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
+from ccpncore.util.Undo import Undo
 from ccpncore.util import Io as ioUtil
 
 class Project(AbstractWrapperObject):
@@ -152,6 +153,9 @@ class Project(AbstractWrapperObject):
 
   def _close(self):
     """Clean up the wrapper project previous to deleting or replacing"""
+    # Remove undo stack:
+    self._resetUndo(maxWaypoints=0)
+
     ioUtil.cleanupProject(self)
     self._clearNotifiers()
     for tag in ('_data2Obj','_pid2Obj'):
@@ -188,6 +192,25 @@ class Project(AbstractWrapperObject):
   def nmrProject(self) -> ApiNmrProject:
     """API equivalent to object: Nmrproject"""
     return self._wrappedData
+
+  @property
+  def _undo(self):
+    """undo stack for Project. Implementation attribute"""
+    return self._wrappedData._undo
+
+  def _resetUndo(self, maxWaypoints=20, maxOperations=10000):
+    """Reset unod stack, using passed-in parameters.
+    NB seting eitehr parameter to 0 removes teh undo stack."""
+
+    undo = self._wrappedData._undo
+    if undo is not None:
+      undo.clear()
+
+    if maxWaypoints and maxOperations:
+      self._wrappedData._undo = Undo(maxWaypoints=maxWaypoints, maxOperations=maxOperations)
+    else:
+      self._wrappedData._undo = None
+
 
   @property
   def  _residueName2chemCompId(self) -> dict:

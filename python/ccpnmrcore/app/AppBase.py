@@ -49,7 +49,6 @@ class AppBase(GuiBase):
     self.setupPreferences()
     self.vLines = []
     self.hLines = []
-    self.undoStack = Undo()
     self.initProject(apiProject)
 
     
@@ -81,6 +80,12 @@ class AppBase(GuiBase):
     if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
       apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
                                          windows=(mainWindow._wrappedData,))
+
+    # Set up undo stack
+    # The default values are as below. They can be changed if desired
+    #project._resetUndo(maxWaypoints=20, maxOperations=10000)
+    project._resetUndo()
+
 
   def _closeProject(self):
     """Close project and clean up - should only be called when opening another"""

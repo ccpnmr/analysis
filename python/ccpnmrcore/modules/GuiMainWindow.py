@@ -97,7 +97,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         recentFiles.pop()
       recentFiles.insert(0, path)
 
-    self.setWindowTitle('%s %s: %s' % (self._appBase.applicationName, self._appBase.applicationVersion, project.name))
+    self.setWindowTitle('%s %s (%s): %s' % (self._appBase.applicationName, self._appBase.applicationVersion, __version__[1:-1].strip(), project.name))
 
   def setupWindow(self):
 
@@ -159,7 +159,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroMenu = Menu("Macro", self)
     helpMenu = Menu("&Help", self)
 
-    fileMenuAction = fileMenu.addAction(Action(self, "New", callback=self._appBase.newProject, shortcut='pn'))
+    fileMenu.addAction(Action(self, "New", callback=self._appBase.newProject, shortcut='pn'))
     fileMenu.addAction(Action(self, "Open...", callback=self.openAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
@@ -272,7 +272,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       currentProjectDir = projectDir
 
-    self._appBase.openProject(currentProjectDir)
+    if currentProjectDir:
+      self._appBase.openProject(currentProjectDir)
 
 
   def showAssigner(self, position, nextTo=None):

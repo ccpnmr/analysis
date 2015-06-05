@@ -555,10 +555,10 @@ except ImportError:
       supertypes = inClass.getAllSupertypes()
 
       if self.dataRoot in supertypes:
-        raise MemopsError("MemopsRoot may not have postConstructorCode")
+        raise MemopsError("MemopsRoot may not have postConstructorCode %s" % inClass)
 
       elif self.topObject in supertypes:
-        raise MemopsError("TopObject may not have postConstructorCode")
+        raise MemopsError("TopObject may not have postConstructorCode %s" % inClass)
 
       else:
         self.startIf(self.varNames['notIsReading'])

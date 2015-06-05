@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-_fields = ['spectrum','spectra','peak','peaks','pane','region','position', 'strip', 'assigner']
+_fields = ['project','spectrum','spectra','peak','peaks','pane','region','position', 'strip', 'assigner']
 
 class Current:
 

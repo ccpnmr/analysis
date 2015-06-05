@@ -68,7 +68,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     ##self.viewportDict = {} # maps QGLWidget to GuiStripNd
 
     # below are so we can reuse PeakItems and only create them as needed
-    self.activePeakItemDict = {}  # maps apiPeak to peakItem for peaks which are being displayed
+    self.activePeakItemDict = {}  # maps peakLayer to apiPeak to peakItem for peaks which are being displayed
     # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
     # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
     self.inactivePeakItems = set() # containus unused peakItems
@@ -222,11 +222,12 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   
     viewBox = peakLayer.strip.viewBox
     activePeakItemDict = self.activePeakItemDict
+    peakItemDict = activePeakItemDict.setdefault(peakLayer, {})
     inactivePeakItems = self.inactivePeakItems
-    existingApiPeaks = set(activePeakItemDict.keys())
+    existingApiPeaks = set(peakItemDict.keys())
     unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
     for apiPeak in unusedApiPeaks:
-      peakItem = activePeakItemDict.pop(apiPeak)
+      peakItem = peakItemDict.pop(apiPeak)
       viewBox.removeItem(peakItem)
       inactivePeakItems.add(peakItem)
     for peak in peaks:
@@ -239,14 +240,16 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         viewBox.addItem(peakItem)
       else:
         peakItem = PeakNd(peakLayer, peak)
-      activePeakItemDict[apiPeak] = peakItem
+      peakItemDict[apiPeak] = peakItem
       
   def deletedPeak(self, apiPeak):
     
-    peakItem = self.activePeakItemDict.get(apiPeak)
-    if peakItem:
-      peakItem.peakLayer.strip.plotWidget.scene().removeItem(peakItem)
-      del self.activePeakItemDict[apiPeak]
-      self.inactivePeakItems.add(peakItem)
+    for peakLayer in self.activePeakItemDict:
+      peakItemDict = self.activePeakItemDict[peakLayer]
+      peakItem = peakItemDict.get(apiPeak)
+      if peakItem:
+        peakLayer.strip.plotWidget.scene().removeItem(peakItem)
+        del peakItemDict[apiPeak]
+        self.inactivePeakItems.add(peakItem)
       
 

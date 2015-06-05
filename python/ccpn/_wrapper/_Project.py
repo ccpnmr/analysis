@@ -197,24 +197,24 @@ class Project(AbstractWrapperObject):
   @property
   def _undo(self):
     """undo stack for Project. Implementation attribute"""
-    return self._wrappedData._undo
+    return self._wrappedData.root._undo
 
   def _resetUndo(self, maxWaypoints=20, maxOperations=10000):
     """Reset undo stack, using passed-in parameters.
     NB setting either parameter to 0 removes the undo stack."""
 
-    undo = self._wrappedData._undo
+    undo = self._wrappedData.root._undo
     if undo is not None:
       undo.clear()
 
     if maxWaypoints and maxOperations:
-      self._wrappedData._undo = Undo(maxWaypoints=maxWaypoints, maxOperations=maxOperations)
+      self._wrappedData.root._undo = Undo(maxWaypoints=maxWaypoints, maxOperations=maxOperations)
     else:
-      self._wrappedData._undo = None
+      self._wrappedData.root._undo = None
 
   def newUndoPoint(self):
     """Set a point in the undo stack, you can undo/redo to """
-    undo = self._wrappedData._undo
+    undo = self._wrappedData.root._undo
     if undo is None:
       self._logger.warning("Trying to add undoPoint bu undo not initialised")
     else:

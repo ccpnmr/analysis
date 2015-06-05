@@ -189,9 +189,9 @@ class Undo(deque):
         undoCall, redoCall = self[n]
         undoCall()
       self.nextIndex = undoTo + 1
-    except:
+    except Exception as e:
       from ccpncore.util.Logging import getLogger
-      getLogger().warning ("error while undoing. Undo is cleared")
+      getLogger().warning ("Error while undoing (%s). Undo stack is cleared." % e)
       self.clear()
     finally:
       # Addded by Rasmus March 2015. Surely we need to reset self._blocked?
@@ -230,9 +230,9 @@ class Undo(deque):
         undoCall, redoCall = self[n]
         redoCall()
       self.nextIndex = redoTo + 1
-    except:
+    except Exception as e:
       from ccpncore.util.Logging import getLogger
-      getLogger().warning("WARNING, error while redoing. Undo is cleared")
+      getLogger().warning("Error while redoing (%s). Undo stack is cleared." % e)
       self.clear()
     finally:
       # Addded by Rasmus March 2015. Surely we need to reset self._blocked?

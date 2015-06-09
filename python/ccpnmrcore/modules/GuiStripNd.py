@@ -341,7 +341,7 @@ class GuiStripNd(GuiStrip):
     if None in peak.position:
       return
     peakList = peak.parent
-    self.showPeaks(peakList, [peak])
+    self.showPeaks(peakList)
   
   def axisRegionChanged(self, apiAxis):
     

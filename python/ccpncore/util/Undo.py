@@ -87,7 +87,7 @@ class Undo(deque):
     """Add item to the undo stack.
     """
 
-    if self._blocked:
+    if self._blocked or self._blockingLevel:
       return
 
     # clear out redos that are no longer going to be doable

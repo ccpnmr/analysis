@@ -23,6 +23,8 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
+from ccpncore.memops import Notifiers
+
 _fields = ['project','spectrum','spectra','peak','peaks','pane','region','position', 'strip', 'assigner']
 
 class Current:
@@ -30,3 +32,11 @@ class Current:
   def __init__(self):
     for field in _fields:
       setattr(self,field,None)
+
+    Notifiers.registerNotify(self.deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
+    
+  def deletedPeak(self, apiPeak):
+    
+    peak = self.project._data2Obj[apiPeak]
+    if peak in self.peaks:
+      self.peaks.remove(peak)

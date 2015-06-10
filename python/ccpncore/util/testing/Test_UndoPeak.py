@@ -36,7 +36,7 @@ class PeakUndoTest(Testing):
     nmrProject = project.findFirstNmrProject()
     experiment = nmrProject.findFirstExperiment(name='HSQC')
     dataSource = experiment.findFirstDataSource(name='115')
-    peakList = dataSource.findFirstPeakList()
+    peakList = dataSource.newPeakList()
     
     project._undo = Undo()
     project._undo.newWaypoint()
@@ -45,20 +45,25 @@ class PeakUndoTest(Testing):
     print('project undo stack size after newPeak: %d' % len(project._undo))
     project._undo.undo()
     print('project undo stack size after undo: %d' % len(project._undo))
+    assert len(peakList.peaks) == 0, 'len(peakList.peaks) = %d' % len(peakList.peaks)
     
-  def test_new_peaklist_undo(self):
-   
+  def test_new_peak_undo_redo(self):
+    
     project = self.project
     nmrProject = project.findFirstNmrProject()
     experiment = nmrProject.findFirstExperiment(name='HSQC')
     dataSource = experiment.findFirstDataSource(name='115')
-   
+    peakList = dataSource.newPeakList()
+    
     project._undo = Undo()
     project._undo.newWaypoint()
-    print('project undo stack size before newPeakList: %d' % len(project._undo))
-    peakList = dataSource.newPeakList()
+    print('project undo stack size before newPeak: %d' % len(project._undo))
     peak = peakList.newPeak()
     print('project undo stack size after newPeak: %d' % len(project._undo))
     project._undo.undo()
     print('project undo stack size after undo: %d' % len(project._undo))
+    project._undo.redo()
+    print('project undo stack size after redo: %d' % len(project._undo))
+    assert len(peakList.peaks) == 1, 'len(peakList.peaks) = %d' % len(peakList.peaks)
+    
  

@@ -253,6 +253,10 @@ newMandatories = [
  ('NMR', 'ConnectedStretch', 'serial', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:49:39_00005'), 
  ('NMR', 'NmrChain', 'nmrProject', 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:23_00007'), 
  ('NMR', 'NmrChain', 'serial', 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:23_00004'), 
+ ('NMR', 'Note', 'created', 'www.ccpn.ac.uk_Fogh_2015-06-11-15:41:40_00004'), 
+ ('NMR', 'Note', 'lastModified', 'www.ccpn.ac.uk_Fogh_2015-06-11-15:41:40_00005'), 
+ ('NMR', 'Note', 'nmrProject', 'www.ccpn.ac.uk_Fogh_2015-06-11-15:41:40_00001'), 
+ ('NMR', 'Note', 'serial', 'www.ccpn.ac.uk_Fogh_2015-06-11-15:41:40_00003'), 
  ('NMR', 'SequentialAssignment', 'nmrProject', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:49:39_00008'), 
  ('NMRC', 'ChemicalShiftContribution', 'constraint', 'www.ccpn.ac.uk_Fogh_2014-07-29-12:54:25_00001'), 
  ('NMRC', 'ChemicalShiftItem', 'contribution', 'www.ccpn.ac.uk_Fogh_2014-07-29-12:54:25_00003'), 
@@ -466,9 +470,12 @@ newElements = [
  ('NMR', 'NmrProject', 'guiTasks', 'www.ccpn.ac.uk_Fogh_2014-11-04-17:46:55_00009'), 
  ('NMR', 'NmrProject', 'molSystem', 'www.ccpn.ac.uk_Fogh_2014-07-18-18:10:34_00009'), 
  ('NMR', 'NmrProject', 'nmrChains', 'www.ccpn.ac.uk_Fogh_2014-07-30-17:44:23_00008'), 
+ ('NMR', 'NmrProject', 'notes', 'www.ccpn.ac.uk_Fogh_2015-06-11-15:41:40_00002'), 
  ('NMR', 'NmrProject', 'sequentialAssignments', 'www.ccpn.ac.uk_Fogh_2014-11-17-17:49:39_00009'), 
  ('NMR', 'NmrProject', 'shiftAveraging', 'www.ccpn.ac.uk_Fogh_2015-05-05-10:44:11_00001'), 
  ('NMR', 'NmrProject', 'windowStore', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:29_00002'), 
+ ('NMR', 'Note', None, 'www.ccpn.ac.uk_Fogh_2015-06-11-15:41:36_00001'), 
+ ('NMR', 'Note', 'implText', 'www.ccpn.ac.uk_Fogh_2015-06-11-15:41:40_00007'), 
  ('NMR', 'Peak', 'height', 'www.ccpn.ac.uk_Fogh_2012-04-12-17:58:12_00001'), 
  ('NMR', 'Peak', 'heightError', 'www.ccpn.ac.uk_Fogh_2014-10-21-17:40:17_00001'), 
  ('NMR', 'Peak', 'peakViews', 'www.ccpn.ac.uk_Fogh_2014-10-31-16:36:29_00005'), 
@@ -738,8 +745,8 @@ typeChanges = [
 # Different elements with matching qualifiedNames
 # (element.qName, differentTags, oldGuid, newGuid
 nameMatches = [
- ('cambridge.WmsProtocol.WmsProtocol.memopsRoot', ({'documentation', 'otherRole'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00061', 'ccpn_automatic_cambridge.WmsProtocol.WmsProtocol.memopsRoot')), 
- ('memops.Implementation.MemopsRoot.wmsProtocols', ({'documentation', 'otherRole'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00062', 'ccpn_automatic_memops.Implementation.MemopsRoot.wmsProtocol')), 
+ ('cambridge.WmsProtocol.WmsProtocol.memopsRoot', ({'otherRole', 'documentation'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00061', 'ccpn_automatic_cambridge.WmsProtocol.WmsProtocol.memopsRoot')), 
+ ('memops.Implementation.MemopsRoot.wmsProtocols', ({'otherRole', 'documentation'}, 'www.ccpn.ac.uk_Fogh_2010-05-06-13:30:17_00062', 'ccpn_automatic_memops.Implementation.MemopsRoot.wmsProtocol')), 
 ]
 
 # Differences for matching elements, 
@@ -756,7 +763,7 @@ allDiffs = [
  ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'isDerived', 'documentation'}), 
  ('ccp.nmr.Nmr.ShiftRefType', 'ShiftRefType', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:48_00033', {'supertypes', 'supertype'}), 
  ('ccp.nmr.NmrReference.ChemAtomNmrDistrib.refAtoms', 'refAtoms', 'www.ccpn.ac.uk_Fogh_2010-05-14-17:17:46_00001', 'www.ccpn.ac.uk_Fogh_2010-05-14-17:17:46_00001', {'changeability'}), 
- ('ccp.nmr.NmrScreen.NmrScreen', 'NmrScreen', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', {'supertype', 'supertypes', 'parentRole', 'partitionsChildren'}), 
+ ('ccp.nmr.NmrScreen.NmrScreen', 'NmrScreen', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00006', {'supertype', 'parentRole', 'supertypes', 'partitionsChildren'}), 
  ('ccp.nmr.NmrScreen.NmrScreen.startDate', 'startDate', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00038', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00038', {'locard'}), 
  ('ccp.nmr.NmrScreen.RefSpectrum.concentration', 'concentration', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00053', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00053', {'container'}), 
  ('ccp.nmr.NmrScreen.RefSpectrum.dataSource', 'dataSource', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00050', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:38_00050', {'container'}), 
@@ -773,7 +780,7 @@ allDiffs = [
  ('memops.Implementation.DbTopObject', 'DbTopObject', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00001', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00001', {'taggedValues'}), 
  ('memops.Implementation.FileMemopsRoot', 'FileMemopsRoot', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00007', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00007', {'taggedValues'}), 
  ('memops.Implementation.FileStorageObject', 'FileStorageObject', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00048', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00048', {'taggedValues'}), 
- ('molsim.AnnealProtocol.ScaleFunction', 'ScaleFunction', 'www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00008', 'www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00008', {'isOpen', 'taggedValues'}), 
+ ('molsim.AnnealProtocol.ScaleFunction', 'ScaleFunction', 'www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00008', 'www.ccpn.ac.uk_Fogh_2007-06-05-13:42:05_00008', {'taggedValues', 'isOpen'}), 
  ('molsim.Symmetry.MolSystemSymmetrySet', 'MolSystemSymmetrySet', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', 'www.ccpn.ac.uk_Fogh_2008-02-20-18:17:09_00001', {'parentRole'}), 
  ('utrecht.Haddock.HaddockPartner.molSystem', 'molSystem', 'www.ccpn.ac.uk_Fogh_2006-10-11-22:59:43_00010', 'www.ccpn.ac.uk_Fogh_2006-10-11-22:59:43_00010', {'taggedValues', 'partitionsChildren'}), 
  ('utrecht.Haddock.Residue.residue', 'residue', 'www.ccpn.ac.uk_Fogh_2008-02-27-16:15:25_00006', 'www.ccpn.ac.uk_Fogh_2008-02-27-16:15:25_00006', {'taggedValues'}), 

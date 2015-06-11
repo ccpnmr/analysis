@@ -102,7 +102,7 @@ class Undo(deque):
     if redoKwargs is None:
       redoCall = partial(redoMethod, *redoArgs)
     else:
-      redoCall = partial(undoMethod, *redoArgs, **redoKwargs)
+      redoCall = partial(redoMethod, *redoArgs, **redoKwargs)
     self.append((undoCall, redoCall))
 
     # fix waypoints:

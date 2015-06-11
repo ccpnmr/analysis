@@ -72,7 +72,7 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 """
 
-# Waltz to sho9ehorn this into Python 2.1 ObjectDOmain:
+# Waltz to shoehorn this into Python 2.1 ObjectDomain:
 try:
   import datetime
 

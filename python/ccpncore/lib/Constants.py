@@ -24,6 +24,10 @@ __version__ = "$Revision: 7686 $"
 
 import re
 
+# Timestamp formats
+stdTimeFormat = "%Y-%m-%d %%H:M:%S.%f"
+isoTimeFormat = "%Y-%m-%dT%%H:M:%S.%f"
+
 # sequenceCode parsing expression
 # A sequenceCOde is combined (without whitesspace) of:
 #   an optional integer

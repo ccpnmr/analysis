@@ -120,7 +120,7 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
         position -= startPoint
         numDim = len(position)
         firstArray = numpy.maximum(position - 2, 0)
-        lastArray = numpy.minimum(position + 3, numPoint)
+        lastArray = numpy.minimum(position + 3, numPointInt)
         peakArray = position.reshape((1, numDim))
         peakArray = peakArray.astype('float32')
         firstArray = firstArray.astype('int32')

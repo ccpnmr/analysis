@@ -47,6 +47,11 @@ def recalculateValue(shift, simulatedPeakScale=0.0001):
 
   # NBNB TBD spectrum dimensions weighting must be added
   # hasApp = hasattr(shift.root, 'application')
+
+
+  if shift.isDeleted:
+    return
+
   shiftList = shift.parentList
   experiments = shiftList.experiments
   resonance = shift.resonance
@@ -65,7 +70,7 @@ def recalculateValue(shift, simulatedPeakScale=0.0001):
     peakDim = contrib.peakDim
     peak = peakDim.peak
     
-    if peak.figOfMerit == 0.0:
+    if peak.isDeleted or peakDim.isDeletred or peak.figOfMerit == 0.0:
       continue
       
     peakList = peak.peakList

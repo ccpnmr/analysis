@@ -25,7 +25,7 @@ import os
 import unittest
 from ccpn.util import Io as ccpnIo
 
-from ccpncore.util.Testing import TEST_PROJECTS_PATH
+from ccpncore.testing.Testing import TEST_PROJECTS_PATH
 
 class Testing(unittest.TestCase):
   """Base class for all testing of wrapper code that requires projects."""

@@ -1148,8 +1148,8 @@ class loop:
         # Make sure that if there is data, it is the same width as the column tags
         if len(self.data) > 0:
             for row in self.data:
-                if row[0][0] in ('.','1'):
-                  print('@~@~', row)
+                # if row[0][0] in ('.','1'):
+                print('@~@~', row)
                 if len(self.columns) != len(row):
                     print("@~@~", len(self.columns), len(row), row)
                     raise ValueError("The number of column tags must match width of the data. Loop: '%s'." % self.category)

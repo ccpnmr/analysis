@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import collections
+# import collections
 
 
 def loadSpectrum(project:object, filePath:str, reReadSpectrum:object=None):

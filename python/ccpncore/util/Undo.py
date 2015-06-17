@@ -82,10 +82,15 @@ class Undo(deque):
         self.popleft()
       del waypoints[0]
 
-  def addItem(self, undoMethod, redoMethod, undoArgs=(), undoKwargs=None,
-              redoArgs=(), redoKwargs=None):
+  def addItem(self, undoMethod, redoMethod, undoArgs=None, undoKwargs=None,
+              redoArgs=None, redoKwargs=None):
     """Add item to the undo stack.
     """
+
+    if not undoArgs:
+      undoArgs = ()
+    if not redoArgs:
+      redoArgs = ()
 
     if self._blocked or self._blockingLevel:
       return

@@ -36,6 +36,10 @@ class CreateMoleculeTest(Testing):
   def __init__(self, *args, **kwargs):
     # Testing.__init__( *args, **kwargs)
     Testing.__init__(self, 'CcpnCourse2c', *args, **kwargs)
+
+  def setUp(self):
+
+    Testing.setUp(self)
     self.ccpnProject = self.project.wrappedData.root
 
   def test_create_protein_from_one_letter_string(self):

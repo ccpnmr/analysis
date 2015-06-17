@@ -33,6 +33,7 @@ from ccpncore.lib.Bmrb import bmrb
 from ccpncore.memops import Version
 from ccpncore.util import Pid
 from ccpncore.util import Path
+from ccpncore.util import Common as commonUtil
 from ccpn.util import Io as ccpnIo
 from ccpn.util import General as ccpnGeneral
 
@@ -40,7 +41,7 @@ nefExtension = 'nef'
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000
 
-formatVersion = 0.8
+formatVersion = 0.9
 
 # potential tags to use depending on potential type - underscore version
 # NBNB TBD move to more appropriate location?
@@ -72,7 +73,7 @@ def exportRestraintStore(restraintSet, dataName=None, directory=None,
                          forceFirstShiftList=False):
   """Export restraintSet and associated data to NEF
 
-  Nb forceFirstShiftList is a ahck for cases where shiftlists are not properly set"""
+  Nb forceFirstShiftList is a hack for cases where shiftlists are not properly set"""
 
   # nmrProject
   project = restraintSet._project
@@ -229,7 +230,7 @@ def _makeMetaDataFrame(programName:str='CCPN', programVersion:str=None,
   saveframe.addTags([
     ('sf_category','nef_nmr_meta_data'),
     ('sf_framecode','nef_nmr_meta_data'),
-    ('format_name','nmr_exchange_format'),
+    ('format_name','Nmr_Exchange_Format'),
     ('format_version',formatVersion),
     ('program_name',programName),
     ('program_version',programVersion),
@@ -313,28 +314,30 @@ def _makeMolecularSystemFrame(chains):
       isLinearPolymer = apiMolResidue.chemComp.isLinearPolymer
 
       # Set linking
-      linking = residue.linking
-      if linking == 'none' or not isLinearPolymer:
-        # NB: non-linear-polymer-residues will get 'single' in all cases
-        linking = 'single'
+      linking = useLinking = residue.linking
+      if not isLinearPolymer:
+        useLinking = 'nonlinear'
+
+      elif linking == 'none':
+        useLinking = 'single'
 
       elif ii == 0:
         if isCyclic:
-          linking = 'cyclic'
+          useLinking = 'cyclic'
         elif linking!= 'start':
-          linking = 'break'
+          useLinking = 'break'
 
       elif residue is residues[-1]:
         if isCyclic:
-          linking = 'cyclic'
+          useLinking = 'cyclic'
         elif linking!= 'end':
-          linking = 'break'
+          useLinking = 'break'
 
       else:
         if  apiMolResidue.nextMolResidue is not apiMolResidues[ii+1] and linking != 'end':
-          linking = 'break'
+          useLinking = 'break'
         if apiMolResidue.previousMolResidue is not apiMolResidues[ii-1] and linking != 'start':
-          linking = 'break'
+          useLinking = 'break'
 
       # NBNB TBD check residue variants - this is according to new proposal 1/3/2015
       chemCompVar = residue._wrappedData.chemCompVar
@@ -348,7 +351,7 @@ def _makeMolecularSystemFrame(chains):
         if defaultVar is None:
           defaultVar = chemComp.findFirstChemCompVar(isDefaultVar=True, linking='none')
         if defaultVar is None:
-          defaultVar = chemComp.findFirstChemCompVar(isDefaultVar=True, linking=linking)
+          defaultVar = chemComp.findFirstChemCompVar(isDefaultVar=False, linking=linking)
         if defaultVar is None:
           defaultVar = chemComp.sortedChemCompVars()[0]
 
@@ -369,21 +372,23 @@ def _makeMolecularSystemFrame(chains):
   for chain in chains:
     molecule = chain.apiChain.molecule
     for molResLink in molecule.findAllMolResLinks(isStdLinear=False):
-      atoms = []
-      atomPairs.append(atoms)
+      pair = []
+      atomPairs.append(pair)
       for molResLinkEnd in molResLink.molResLinkEnds:
         apiResidue = chain.findFirstResidue(seqId=molResLinkEnd.molResidue.serial)
         atomName = molResLinkEnd.linkEnd.boundChemAtom.name
         apiAtom = apiResidue.findFirstAtom(name=atomName)
-        atoms.append(project._data2Obj[apiAtom])
+        pair.append(project._data2Obj[apiAtom]._id.split('.'))
+      pair.sort(key=commonUtil.integerStringSortKey)
 
   for molSystemLink in project.nmrProject.molSystem.molSystemLinks:
-    atoms = []
-    atomPairs.append(atoms)
+    pair = []
+    atomPairs.append(pair)
     for molSystemLinkEnd in molSystemLink.molSystemLinkEnds:
       atomName = molSystemLinkEnd.linkEnd.boundChemAtom.name
       apiAtom = molSystemLinkEnd.residue.findFirstAtom(name=atomName)
-      atoms.append(project._data2Obj[apiAtom])
+      pair.append(project._data2Obj[apiAtom]._id.split('.'))
+    pair.sort(key=commonUtil.integerStringSortKey)
 
   # NB Loop may be empty. The entry.export_string function takes care of this
   loop = bmrb.loop.fromScratch(category='nef_covalent_links')
@@ -393,7 +398,7 @@ def _makeMolecularSystemFrame(chains):
     loop.addColumn(tag)
 
 
-  for ll in atomPairs:
+  for ll in sorted(atomPairs, key=commonUtil.integerStringSortKey):
     values = ll[0]._id.split('.') +  ll[1]._id.split('.')
     loop.addData(values)
   #

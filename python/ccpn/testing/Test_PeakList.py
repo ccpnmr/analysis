@@ -27,7 +27,7 @@ class PeakListTest(Testing):
 
   def __init__(self, *args, **kw):
     Testing.__init__(self, 'CcpnCourse1b', *args, **kw)
-    self.spectrumName = 'HSQC'
+    self.spectrumName = '115'
     
   def test_newPeakList(self):
     spectrum = self.getSpectrum()

@@ -21,9 +21,9 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import numpy
+# import numpy
 
-from ccpncore.util.Testing import Testing
+from ccpncore.testing.Testing import Testing
 
 class PeakListPickPeaksTest(Testing):
 

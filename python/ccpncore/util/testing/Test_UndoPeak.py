@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpncore.util.Undo import Undo
 from ccpncore.util import Io as ioUtil
-from ccpncore.util.Testing import Testing
+from ccpncore.testing.Testing import Testing
 
 class PeakUndoTest(Testing):
   

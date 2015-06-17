@@ -417,17 +417,17 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
     rejected = {}
     result.update(cifCodeRemap)
 
-  for molType, ccpCode in (result.values()):
-    if ccpCode in chemCompOverview[molType]:
-      print ('\t'.join(("CPRE-FOUND", molType, ccpCode)))
-    else:
-      print ('\t'.join(("CPRE-MISS", molType, ccpCode)))
+  # for molType, ccpCode in (result.values()):
+  #   if ccpCode in chemCompOverview[molType]:
+  #     print ('\t'.join(("CPRE-FOUND", molType, ccpCode)))
+  #   else:
+  #     print ('\t'.join(("CPRE-MISS", molType, ccpCode)))
+  #
+  # for molType,dd in sorted(chemCompOverview.items()):
+  #   print ("CIF-TOTAL-%s %s" % (molType, len(dd)))
 
-  for molType,dd in sorted(chemCompOverview.items()):
-    print ("CIF-TOTAL-%s %s" % (molType, len(dd)))
 
-
-  print ("CIF-TOTAL %s" % sum(len(x) for x in chemCompOverview.values()))
+  # print ("CIF-TOTAL %s" % sum(len(x) for x in chemCompOverview.values()))
 
   remapped = {}
   nFound = 0
@@ -444,8 +444,8 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
         altCode = dd['cifCode']
         if altCode is None:
           # cifCode is obsoleted. Skip it.
-          print("CIF-SKIP\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
-                % (molType, dd['shortType'], dd['longType'], ccpCode, tt[0] or '-', tt[1] or '-', tt[2] or '-'))
+          # print("CIF-SKIP\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
+          #       % (molType, dd['shortType'], dd['longType'], ccpCode, tt[0] or '-', tt[1] or '-', tt[2] or '-'))
           rejected[molType, ccpCode] = None
 
         else:
@@ -478,10 +478,10 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
             val = result[cifCode] = result[locif] =(molType, ccpCode)
             message = 'CIF-OK'
 
-            if ccpCode not in result:
+            # if ccpCode not in result:
               # ccp code not in result. Debug message
-              print("\t".join ('CCP-MISS', molType, ccpCode, val[0], val[1],
-                                             tt[0] or '-', tt[1] or '-', tt[2] or '-') )
+              # print("\t".join ('CCP-MISS', molType, ccpCode, val[0], val[1],
+              #                                tt[0] or '-', tt[1] or '-', tt[2] or '-') )
           else:
             # Value was already set
 
@@ -523,40 +523,41 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
                 message = 'CIF-CLASH2'
               rejected[molType, ccpCode] = cifCode
 
-          # Print out debug messages
-        print("\t".join((message, molType, ccpCode, val[0], val[1],
-                         tt[0] or '-', tt[1] or '-', tt[2] or '-')))
-
-        if len(ccpCode) == 5 and ccpCode.startswith('D-'):
-          # D- amino acid - special case.
-          # for now add ccpCode as extra alias
-          print("\t".join(('CCP-D-Xyz', molType, ccpCode,val[0], val[1],
-                           tt[0] or '-', tt[1] or '-', tt[2] or '-')))
+        #   # Print out debug messages
+        # print("\t".join((message, molType, ccpCode, val[0], val[1],
+        #                  tt[0] or '-', tt[1] or '-', tt[2] or '-')))
+        #
+        # if len(ccpCode) == 5 and ccpCode.startswith('D-'):
+        #   # D- amino acid - special case.
+        #   # for now add ccpCode as extra alias
+        #   print("\t".join(('CCP-D-Xyz', molType, ccpCode,val[0], val[1],
+        #                    tt[0] or '-', tt[1] or '-', tt[2] or '-')))
           # result[ccpCode] = val
 
 
-  print("CIF-nFound %s" % nFound)
+  # print("CIF-nFound %s" % nFound)
 
   for ccId, codes in sorted(remapped.items()):
     cifCode, altCode = codes
     val = result.get(altCode)
     if val is None:
-      print('\t'.join(("CIF-REMAP-ERROR1", ccId[0], ccId[1], cifCode, altCode)))
+      pass
+      # print('\t'.join(("CIF-REMAP-ERROR1", ccId[0], ccId[1], cifCode, altCode)))
     else:
       locif = cifCode[0] + cifCode[1:].lower()
       result[cifCode] = result[locif] = val
-      print('\t'.join(("CIF-REMAP-OK", ccId[0], ccId[1], cifCode, altCode, val[0], val[1])))
+      # print('\t'.join(("CIF-REMAP-OK", ccId[0], ccId[1], cifCode, altCode, val[0], val[1])))
     rejected[ccId] = cifCode
 
 
   if debug:
-    for tt, cifCode in sorted(rejected.items()):
-      print("  %s:%s,  # REJECTED" % (repr(tt), repr(cifCode)))
+    # for tt, cifCode in sorted(rejected.items()):
+    #   print("  %s:%s,  # REJECTED" % (repr(tt), repr(cifCode)))
 
     # Check for upper-case ccpCodes remaining
-    for tag,val in sorted(result.items()):
-      if val[1][1:] !=  val[1][1:].lower():
-        print("CCP-UPPER\t%s\t%s\t%s" % (val[0], val[1], tag))
+    # for tag,val in sorted(result.items()):
+      # if val[1][1:] !=  val[1][1:].lower():
+      #   print("CCP-UPPER\t%s\t%s\t%s" % (val[0], val[1], tag))
 
     # check for unused ChemComps
     for chemComp in project.sortedChemComps():
@@ -578,8 +579,8 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
       else:
         message = "CHEM-OK"
 
-      if message is not None:
-        print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
+      # if message is not None:
+      #   print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
 
       # Debug output checking ccpCode
       val = result.get(cifCode)
@@ -594,8 +595,8 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
       else:
         message = "CCIF-OK"
 
-      if message is not None:
-        print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
+      # if message is not None:
+      #   print ("\t".join(str(x) for x in (message, molType, ccpCode, val[0], val[1], cifCode)))
 
 
     tags = set()
@@ -611,22 +612,23 @@ def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
       if prevId is None:
 
         if len(tag) == 1:
-         print ("CINFO8\tRejecting one-letter synonym\t%s from ChemComp %s:%s"
-                 % (tag, cifCode, val))
+          pass
+         # print ("CINFO8\tRejecting one-letter synonym\t%s from ChemComp %s:%s"
+         #         % (tag, cifCode, val))
 
         elif ccId == val:
-          print ("CINFO9\tAdding new ccpCode synonym\t%s from ChemComp %s:%s"
-                 % (tag, cifCode, ccId))
+          # print ("CINFO9\tAdding new ccpCode synonym\t%s from ChemComp %s:%s"
+          #        % (tag, cifCode, ccId))
 
           result[tag] = val
+        #
+        # else:
+        #   print ("CWARNING\tclash1\tfor %s chemComp %s v. cifCode %s:%s"
+        #         % (tag, ccId, cifCode,  val))
 
-        else:
-          print ("CWARNING\tclash1\tfor %s chemComp %s v. cifCode %s:%s"
-                % (tag, ccId, cifCode,  val))
-
-      elif prevId != val:
-        print ("CWARNING\tclash2\tfor %s chemComp %s, %s v. cifCode %s:%s"
-              % (tag, ccId, prevId, cifCode,  val))
+      # elif prevId != val:
+      #   print ("CWARNING\tclash2\tfor %s chemComp %s, %s v. cifCode %s:%s"
+      #         % (tag, ccId, prevId, cifCode,  val))
   #
   return result
 

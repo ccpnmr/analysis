@@ -21,8 +21,8 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util import ApiFunc
-from ccpncore.util.Testing import Testing
+# from ccpncore.util import ApiFunc
+from ccpncore.testing.Testing import Testing
 
 class ApiFuncTest(Testing):
 

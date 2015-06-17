@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from operator import itemgetter
 
-from ccpncore.util.Testing import Testing
+from ccpncore.testing.Testing import Testing
 
 from ccpnc.peak import Peak
 

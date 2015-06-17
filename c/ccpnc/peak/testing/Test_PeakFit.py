@@ -24,8 +24,8 @@ __version__ = "$Revision: 7686 $"
 from operator import itemgetter
 import numpy
 
-from ccpncore.util.Testing import Testing
-from ccpncore.lib.ccp.nmr.Nmr import DataSource
+from ccpncore.testing.Testing import Testing
+# from ccpncore.lib.ccp.nmr.Nmr import DataSource
 
 from ccpnc.peak import Peak
 
@@ -36,7 +36,7 @@ class PeakFitTest(Testing):
 
   def Test_PeakFit(self, *args, **kw):
     spectrum = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()
-    data = DataSource.getPlaneData(spectrum)
+    data = spectrum.getPlaneData()
     print('data.shape = %s' % (data.shape,))
 
     haveLow = 0

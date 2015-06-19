@@ -70,7 +70,7 @@ def recalculateValue(shift, simulatedPeakScale=0.0001):
     peakDim = contrib.peakDim
     peak = peakDim.peak
     
-    if peak.isDeleted or peakDim.isDeletred or peak.figOfMerit == 0.0:
+    if peak.isDeleted or peakDim.isDeleted or peak.figOfMerit == 0.0:
       continue
       
     peakList = peak.peakList

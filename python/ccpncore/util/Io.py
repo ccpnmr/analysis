@@ -432,7 +432,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   Save the userData for a project to a location given by newPath (the url.path
   of the userData repository) if set, or the existing location if not.
 
-  NB Changes to project in the function can NOT be undone, but previous contenst of teh undo
+  NB Changes to project in the function can NOT be undone, but previous contents of the undo
   queue are left active, so you can undo backwards.
 
   If userData does not exist then throws IOError.

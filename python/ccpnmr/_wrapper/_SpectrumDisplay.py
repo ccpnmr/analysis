@@ -30,8 +30,8 @@ from ccpn import Spectrum
 from ccpnmr import Task
 from ccpnmr import Window
 from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
-from ccpncore.api.ccpnmr.gui.Task import StripDisplay1d as ApiStripDisplay1d
-from ccpncore.api.ccpnmr.gui.Task import StripDisplayNd as ApiStripDisplayNd
+from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+from ccpncore.api.ccpnmr.gui.Task import FreeDisplay as ApiFreeDisplay
 from ccpncore.util import Common as commonUtil
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
@@ -207,15 +207,15 @@ def newSpectrumDisplay(parent:Task, axisCodes:(str,), stripDirection:str='Y',
 
   # NBNB TBD recheck after classes are done
 
-  # Map to determine display type
-  displayTypeMap = {
-    (True, True,False):('newDisplay1d','newStrip1d'),
-    (True, False,False):('newStripDisplay1d','newStrip1d'),
-    (False, True,False):('newDisplayNd','newStripNd'),
-    (False, False,False):('newStripDisplayNd','newStripNd'),
-    (False, False,True):('newFreeStripDisplayNd','newFreeStripNd'),
-    (True, False,True):('newFreeStripDisplay1d','newFreeStrip1d'),
-  }
+  # # Map to determine display type
+  # displayTypeMap = {
+  #   (True, True,False):('newDisplay1d','newStrip1d'),
+  #   (True, False,False):('newStripDisplay1d','newStrip1d'),
+  #   (False, True,False):('newDisplayNd','newStripNd'),
+  #   (False, False,False):('newStripDisplayNd','newStripNd'),
+  #   (False, False,True):('newFreeStripDisplayNd','newFreeStripNd'),
+  #   (True, False,True):('newFreeStripDisplay1d','newFreeStrip1d'),
+  # }
 
   window = parent.getById(window) if isinstance(window, str) else window
   nmrResidue = parent.getById(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
@@ -225,17 +225,17 @@ def newSpectrumDisplay(parent:Task, axisCodes:(str,), stripDirection:str='Y',
   if len(axisCodes) <2:
     raise ValueError("New SpectrumDisplay must have at least two axisCodes")
 
-  # set display type discriminator and get display types
-  mapTuple = (
-    axisCodes[1] == 'intensity',   # 1d display
-    stripDirection is None,        # single=pane display
-    bool(independentStrips)        # free-strip display
-  )
-  tt = displayTypeMap.get(mapTuple)
-  if tt is None:
-    raise ValueError("stripDirection must be set if independentStrips is True")
-  else:
-    newDisplayFunc, newStripFunc = tt
+  # # set display type discriminator and get display types
+  # mapTuple = (
+  #   axisCodes[1] == 'intensity',   # 1d display
+  #   stripDirection is None,        # single=pane display
+  #   bool(independentStrips)        # free-strip display
+  # )
+  # tt = displayTypeMap.get(mapTuple)
+  # if tt is None:
+  #   raise ValueError("stripDirection must be set if independentStrips is True")
+  # else:
+  #   newDisplayFunc, newStripFunc = tt
 
   # set parameters for display
   window = window or apiTask.sortedWindows()[0]
@@ -256,16 +256,18 @@ def newSpectrumDisplay(parent:Task, axisCodes:(str,), stripDirection:str='Y',
   # Create SpectrumDisplay
   if independentStrips:
     # Create FreeStripDisplay
-    apiSpectrumDisplay = getattr(apiTask, newDisplayFunc)(**displayPars)
+    apiSpectrumDisplay = apiTask.newFreeDisplay(**displayPars)
   else:
     # Create Boundstrip/Nostrip display and first strip
     displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
-    apiSpectrumDisplay = getattr(apiTask, newDisplayFunc)(**displayPars)
+    apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
 
   # Create axes
     for ii, code in enumerate(axisCodes):
-      if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
-         not stripDirection):
+      # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
+      #    not stripDirection):
+      # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
+      if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
         stripSerial = 0
       else:
         stripSerial = 1
@@ -274,16 +276,16 @@ def newSpectrumDisplay(parent:Task, axisCodes:(str,), stripDirection:str='Y',
         apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
       elif code == 'intensity':
         apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
-      elif code.startswith('+fid'):
+      elif code.startswith('fid'):
         apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
       else:
         apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
 
   # Create first strip
   if independentStrips:
-    apiStrip = getattr(apiSpectrumDisplay, newStripFunc)(axisCodes=axisCodes, axisOrder=axisCodes)
+    apiStrip = apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
   else:
-    apiStrip = getattr(apiSpectrumDisplay, newStripFunc)()
+    apiStrip = apiSpectrumDisplay.newBoundStrip()
   #
   return parent._project._data2Obj.get(apiSpectrumDisplay)
 
@@ -302,7 +304,7 @@ def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=
   positions: axis positions in order - default to heuristic
   widths: axis widths in order - default to heuristic
   units: axis units in display order - default to heuristic
-  stripAxis: if 'X' or 'Y' set strip axis, if None set to non-strip display
+  stripAxis: if 'X' or 'Y' set strip axis
   is1d: If True, or spectrum passed in is 1D, do 1D display
   independentStrips: if True do freeStrip display.
   """
@@ -413,9 +415,9 @@ Window.createSpectrumDisplay = _createSpectrumDisplay
 
 # Define subtypes and factory function
 class StripDisplay1d(GuiStripDisplay1d, SpectrumDisplay):
-  """ND strip display"""
+  """1D bound display"""
 
-  def __init__(self, project:Project, wrappedData:ApiStripDisplay1d):
+  def __init__(self, project:Project, wrappedData:ApiBoundDisplay):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
     GuiStripDisplay1d.__init__(self)
@@ -428,9 +430,9 @@ class StripDisplay1d(GuiStripDisplay1d, SpectrumDisplay):
 
 
 class StripDisplayNd(GuiStripDisplayNd, SpectrumDisplay):
-  """ND strip display"""
+  """ND bound display"""
 
-  def __init__(self, project:Project, wrappedData:ApiStripDisplayNd):
+  def __init__(self, project:Project, wrappedData:ApiBoundDisplay):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
     GuiStripDisplayNd.__init__(self)
@@ -443,10 +445,11 @@ class StripDisplayNd(GuiStripDisplayNd, SpectrumDisplay):
 
 def _factoryFunction(project:Project, wrappedData:ApiSpectrumDisplay) -> SpectrumDisplay:
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
-  if isinstance(wrappedData, ApiStripDisplayNd):
-    return StripDisplayNd(project, wrappedData)
-  elif isinstance(wrappedData, ApiStripDisplay1d):
-    return StripDisplay1d(project, wrappedData)
+  if wrappedData.stripType == 'Bound':
+    if wrappedData.is1d:
+      return StripDisplay1d(project, wrappedData)
+    else:
+      return StripDisplayNd(project, wrappedData)
   else:
     raise ValueError("Attempt to make SpectrumDisplay from illegal object type: %s"
     % wrappedData)

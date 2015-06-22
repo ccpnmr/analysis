@@ -75,13 +75,13 @@ class CreateMoleculeTest(Testing):
                                          % (molecule1.seqString, seq1.upper()))
 
   def test_create_cyclic_dna_rna(self):
-    seq1 =  ['DA', 'DT', 'DC', 'DG', 'RT',
-            '5MU', 'A', 'C', 'G', 'U', 'DU']
+    seq1 =  ['DA', 'DT', 'DC', 'DG',
+            'A', 'C', 'G', 'U', 'DU', 'N', 'DN']
     molecule1 = MoleculeModify.makeMolecule(self.ccpnProject, seq1, isCyclic=True)
     assert molecule1.isStdCyclic, "Molecule is not cyclic as input."
 
   def test_create_mixed_molecule(self):
-    seq1 = ['Ala', 'CYS', 'DAL', 'DVA', 'THR', 'HIS', 'TRP', 'DA', 'DT', 'DC', 'DG', 'RT',
-            '5MU', 'A', 'C', 'G', 'GLC', 'U', 'Ser']
+    seq1 = ['Ala', 'CYS', 'DAL', 'DVA', 'THR', 'HIS', 'TRP', 'DA', 'DT', 'DC', 'DG',
+            'A', 'C', 'G', 'ATP', 'U', 'Ser', 'GDP', 'N', 'DN', 'UNK']
     startNumber = -1
     molecule1 = MoleculeModify.makeMolecule(self.ccpnProject, seq1, startNumber=startNumber)

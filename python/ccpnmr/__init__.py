@@ -25,9 +25,9 @@ Task = cls = importlib.import_module('ccpnmr._wrapper._Task').Task
 _wrappedClasses.append(cls)
 SpectrumDisplay = cls = importlib.import_module('ccpnmr._wrapper._SpectrumDisplay').SpectrumDisplay
 _wrappedClasses.append(cls)
-Axis = cls = importlib.import_module('ccpnmr._wrapper._Axis').Axis
-_wrappedClasses.append(cls)
 Strip = cls = importlib.import_module('ccpnmr._wrapper._Strip').Strip
+_wrappedClasses.append(cls)
+Axis = cls = importlib.import_module('ccpnmr._wrapper._Axis').Axis
 _wrappedClasses.append(cls)
 SpectrumView = cls = importlib.import_module('ccpnmr._wrapper._SpectrumView').SpectrumView
 _wrappedClasses.append(cls)

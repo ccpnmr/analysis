@@ -21,7 +21,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util import Pid
 from collections.abc import Sequence
 
 from ccpn import AbstractWrapperObject
@@ -29,7 +28,7 @@ from ccpn import Project
 from ccpn import Spectrum
 from ccpnmr import SpectrumDisplay
 from ccpnmr import Strip
-from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
+from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
 from ccpnmrcore.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
 
@@ -49,59 +48,53 @@ class SpectrumView(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiSpectrumView(self) -> ApiSpectrumView:
+  def apiStripSpectrumView(self) -> ApiStripSpectrumView:
     """ CCPN SpectrumView matching SpectrumView"""
     return self._wrappedData
 
   @property
-  def stripSerial(self) -> int:
-    """serial number, key for deriving attached Strip, part of object ke
-    stripSerial 0 signifies 'all strips'"""
-    return self._wrappedData.stripSerial
-
-  @property
   def spectrumName(self) -> str:
     """Name of connected spectrum"""
-    return self._wrappedData.spectrumName
+    return self._wrappedData.spectrumView.spectrumName
     
   @property
-  def _parent(self) -> SpectrumDisplay:
-    """SpectrumDisplay containing spectrumView."""
-    return self._project._data2Obj.get(self._wrappedData.spectrumDisplay)
+  def _parent(self) -> Strip:
+    """Strip containing stripSpectrumView."""
+    return self._project._data2Obj.get(self._wrappedData.strip)
 
-  spectrumDisplay = _parent
+  strip = _parent
 
   @property
   def experimentType(self) -> str:
     """Experiment type of attached experiment - used for reconnecting to correct spectrum"""
-    return self._wrappedData.experimentType
+    return self._wrappedData.spectrumView.experimentType
 
   @experimentType.setter
   def experimentType(self, value:str):
-    self._wrappedData.experimentType = value
+    self._wrappedData.spectrumView.experimentType = value
 
   @property
   def dimensionOrdering(self) -> tuple:
     """Display order of Spectrum dimensions (DataDim.dim). 0 for 'no spectrum axis displayed'"""
-    return self._wrappedData.dimensionOrdering
+    return self._wrappedData.spectrumView.dimensionOrdering
 
   @dimensionOrdering.setter
   def dimensionOrdering(self, value:Sequence):
-    self._wrappedData.dimensionOrdering = value
+    self._wrappedData.spectrumView.dimensionOrdering = value
 
   @property
   def isDisplayed(self) -> bool:
     """Is spectrum displayed?"""
-    return self._wrappedData.isDisplayed
+    return self._wrappedData.spectrumView.isDisplayed
 
   @isDisplayed.setter
   def isDisplayed(self, value:bool):
-    self._wrappedData.isDisplayed = value
+    self._wrappedData.spectrumView.isDisplayed = value
 
   @property
   def positiveContourColour(self) -> str:
     """Colour identifier for positive contours"""
-    wrappedData = self._wrappedData
+    wrappedData = self._wrappedData.spectrumView
     result = wrappedData.positiveContourColour
     if result is None:
       obj = wrappedData.dataSource
@@ -111,12 +104,12 @@ class SpectrumView(AbstractWrapperObject):
   @positiveContourColour.setter
   def positiveContourColour(self, value:str):
     if self.positiveContourColour != value:
-      self._wrappedData.positiveContourColour = value
+      self._wrappedData.spectrumView.positiveContourColour = value
 
   @property
   def positiveContourCount(self) -> int:
     """Number of positive contours"""
-    wrappedData = self._wrappedData
+    wrappedData = self._wrappedData.spectrumView
     result = wrappedData.positiveContourCount
     if result is None:
       obj = wrappedData.dataSource
@@ -126,12 +119,12 @@ class SpectrumView(AbstractWrapperObject):
   @positiveContourCount.setter
   def positiveContourCount(self, value:int):
     if self.positiveContourCount != value:
-      self._wrappedData.positiveContourCount = value
+      self._wrappedData.spectrumView.positiveContourCount = value
 
   @property
   def positiveContourBase(self) -> float:
     """Base level for positive contours"""
-    wrappedData = self._wrappedData
+    wrappedData = self._wrappedData.spectrumView
     result = wrappedData.positiveContourBase
     if result is None:
       obj = wrappedData.dataSource
@@ -141,12 +134,12 @@ class SpectrumView(AbstractWrapperObject):
   @positiveContourBase.setter
   def positiveContourBase(self, value:float):
     if self.positiveContourBase != value:
-      self._wrappedData.positiveContourBase = value
+      self._wrappedData.spectrumView.positiveContourBase = value
 
   @property
   def positiveContourFactor(self) -> float:
     """Level multiplication factor for positive contours"""
-    wrappedData = self._wrappedData
+    wrappedData = self._wrappedData.spectrumView
     result = wrappedData.positiveContourFactor
     if result is None:
       obj = wrappedData.dataSource
@@ -156,21 +149,21 @@ class SpectrumView(AbstractWrapperObject):
   @positiveContourFactor.setter
   def positiveContourFactor(self, value:float):
     if self.positiveContourFactor != value:
-      self._wrappedData.positiveContourFactor = value
+      self._wrappedData.spectrumView.positiveContourFactor = value
 
   @property
   def displayNegativeContours(self) -> bool:
     """Are negative contours displayed?"""
-    return self._wrappedData.displayNegativeContours
+    return self._wrappedData.spectrumView.displayNegativeContours
 
   @displayNegativeContours.setter
   def displayNegativeContours(self, value:bool):
-    self._wrappedData.displayNegativeContours = value
+    self._wrappedData.spectrumView.displayNegativeContours = value
 
   @property
   def negativeContourColour(self) -> str:
     """Colour identifier for negative contours"""
-    wrappedData = self._wrappedData
+    wrappedData = self._wrappedData.spectrumView
     result = wrappedData.negativeContourColour
     if result is None:
       obj = wrappedData.dataSource
@@ -180,12 +173,12 @@ class SpectrumView(AbstractWrapperObject):
   @negativeContourColour.setter
   def negativeContourColour(self, value:str):
     if self.negativeContourColour != value:
-      self._wrappedData.negativeContourColour = value
+      self._wrappedData.spectrumView.negativeContourColour = value
 
   @property
   def negativeContourCount(self) -> int:
     """Number of negative contours"""
-    wrappedData = self._wrappedData
+    wrappedData = self._wrappedData.spectrumView
     result = wrappedData.negativeContourCount
     if result is None:
       obj = wrappedData.dataSource
@@ -195,12 +188,12 @@ class SpectrumView(AbstractWrapperObject):
   @negativeContourCount.setter
   def negativeContourCount(self, value:int):
     if self.negativeContourCount != value:
-      self._wrappedData.negativeContourCount = value
+      self._wrappedData.spectrumView.negativeContourCount = value
 
   @property
   def negativeContourBase(self) -> float:
     """Base level for negative contours"""
-    wrappedData = self._wrappedData
+    wrappedData = self._wrappedData.spectrumView
     result = wrappedData.negativeContourBase
     if result is None:
       obj = wrappedData.dataSource
@@ -210,12 +203,12 @@ class SpectrumView(AbstractWrapperObject):
   @negativeContourBase.setter
   def negativeContourBase(self, value:float):
     if self.negativeContourBase != value:
-      self._wrappedData.negativeContourBase = value
+      self._wrappedData.spectrumView.negativeContourBase = value
 
   @property
   def negativeContourFactor(self) -> float:
     """Level multiplication factor for negative contours"""
-    wrappedData = self._wrappedData
+    wrappedData = self._wrappedData.spectrumView
     result = wrappedData.negativeContourFactor
     if result is None:
       obj = wrappedData.dataSource
@@ -225,16 +218,16 @@ class SpectrumView(AbstractWrapperObject):
   @negativeContourFactor.setter
   def negativeContourFactor(self, value:float):
     if self.negativeContourFactor != value:
-      self._wrappedData.negativeContourFactor = value
+      self._wrappedData.spectrumView.negativeContourFactor = value
 
   @property
   def displayNegativeContours(self) -> bool:
     """Are negative contours displayed?"""
-    return self._wrappedData.displayNegativeContours
+    return self._wrappedData.spectrumView.displayNegativeContours
 
   @displayNegativeContours.setter
   def displayNegativeContours(self, value:bool):
-    self._wrappedData.displayNegativeContours = value
+    self._wrappedData.spectrumView.displayNegativeContours = value
 
   @property
   def positiveLevels(self) -> tuple:
@@ -267,7 +260,7 @@ class SpectrumView(AbstractWrapperObject):
   @property
   def sliceColour(self) -> str:
     """Colour for 1D slices and 1D spectra"""
-    wrappedData = self._wrappedData
+    wrappedData = self._wrappedData.spectrumView
     result = wrappedData.sliceColour
     if result is None:
       obj = wrappedData.dataSource
@@ -277,42 +270,42 @@ class SpectrumView(AbstractWrapperObject):
   @sliceColour.setter
   def sliceColour(self, value:str):
     if self.sliceColour != value:
-      self._wrappedData.sliceColour = value
+      self._wrappedData.spectrumView.sliceColour = value
 
   @property
   def spectrum(self) -> Spectrum:
     """Spectrum that SpectrumView refers to"""
-    return self.getWrapperObject(self._wrappedData.dataSource)
+    return self.getWrapperObject(self._wrappedData.spectrumView.dataSource)
 
   @property
   def strips(self) -> Strip:
-    """Strips attached to SpectrumView -n either one, or all in Display"""
-    stripSerial = self.stripSerial
+    """Strips attached to StripSpectrumView - either one, or all in Display"""
+    stripSerial = self._wrappedData.spectrumView.stripSerial
     if stripSerial:
-      ll = tuple(self._project._data2Obj.get(
-        self._parent._wrappedData.findFirstStrip(serial=stripSerial)))
+      return (self._project._data2Obj.get(self._wrappedData.strip),)
     else:
-      return self._parent.orderedStrips
+      return self._parent._parent.orderedStrips
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:SpectrumDisplay)-> list:
+  def _getAllWrappedData(cls, parent:Strip)-> list:
     """get wrappedData (ccpnmr.gui.Task.SpectrumView) in serial number order"""
-    return parent._wrappedData.sortedSpectrumViews()
+    return parent._wrappedData.sortedStripSpectrumViews()
 
   #CCPN functions
 
 # Spectrum.spectrumViews property
 def _getSpectrumViews(spectrum:Spectrum):
-  return tuple(spectrum._project._data2Obj.get(x)
-               for x in spectrum._wrappedData.sortedSpectrumViews())
+  return tuple(spectrum._project._data2Obj.get(y)
+               for x in spectrum._wrappedData.sortedSpectrumViews()
+               for y in x.sortedStripSpectrumViews())
 Spectrum.spectrumViews = property(_getSpectrumViews, None, None,
                                    "SpectrumDisplays showing Spectrum")
 
 # Strip.spectrumViews property
 def _getSpectrumViews(strip:Strip):
   return tuple(strip._project._data2Obj.get(x)
-               for x in strip._wrappedData.sortedSpectrumViews())
+               for x in strip._wrappedData.sortedStripSpectrumViews())
 Strip.spectrumViews = property(_getSpectrumViews, None, None,
                                    "SpectrumDisplays showing Spectrum")
 del _getSpectrumViews
@@ -321,7 +314,7 @@ del _getSpectrumViews
 class SpectrumView1d(SpectrumView, GuiSpectrumView1d):
   """1D Spectrum View"""
 
-  def __init__(self, project:Project, wrappedData:ApiSpectrumView):
+  def __init__(self, project:Project, wrappedData:ApiStripSpectrumView):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
     GuiSpectrumView1d.__init__(self)
@@ -330,13 +323,13 @@ class SpectrumView1d(SpectrumView, GuiSpectrumView1d):
   @property
   def _key(self) -> str:
     """id string - combined spectrumName and stripSerial"""
-    return Pid.makeId(self.spectrumName, self.stripSerial)
+    return self._wrappedData.spectrumView.spectrumName
 
 
 class SpectrumViewNd(SpectrumView, GuiSpectrumViewNd):
   """ND Spectrum View"""
 
-  def __init__(self, project:Project, wrappedData:ApiSpectrumView):
+  def __init__(self, project:Project, wrappedData:ApiStripSpectrumView):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
     GuiSpectrumViewNd.__init__(self)
@@ -345,12 +338,12 @@ class SpectrumViewNd(SpectrumView, GuiSpectrumViewNd):
   @property
   def _key(self) -> str:
     """id string - combined spectrumName and stripSerial"""
-    return Pid.makeId(self.spectrumName, self.stripSerial)
+    return self._wrappedData.spectrumView.spectrumName
 
 
-def _factoryFunction(project:Project, wrappedData:ApiSpectrumView) -> SpectrumView:
-  """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
-  if 'intensity' in wrappedData.spectrumDisplay.axisCodes:
+def _factoryFunction(project:Project, wrappedData:ApiStripSpectrumView) -> SpectrumView:
+  """create SpectrumView, dispatching to subtype depending on wrappedData"""
+  if 'intensity' in wrappedData.strip.spectrumDisplay.axisCodes:
     # 1D display
     return SpectrumView1d(project, wrappedData)
   else:
@@ -362,7 +355,7 @@ SpectrumDisplay._childClasses.append(SpectrumView)
 SpectrumView._factoryFunction = staticmethod(_factoryFunction)
 
 # Notifiers:
-className = ApiSpectrumView._metaclass.qualifiedName()
+className = ApiStripSpectrumView._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':SpectrumView._factoryFunction}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

@@ -21,11 +21,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
-from ccpnmr import SpectrumDisplay
-from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+from ccpnmr import Strip
+from ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
 
 
 class Axis(AbstractWrapperObject):
@@ -43,62 +42,59 @@ class Axis(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiAxis(self) -> ApiAxis:
+  def apiStripAxis(self) -> ApiStripAxis:
     """ CCPN Axis matching Axis"""
     return self._wrappedData
     
   @property
   def _key(self) -> str:
     """local id, of form code.stripSerial"""
-    return Pid.makeId(self._wrappedData.code, self._wrappedData.stripSerial)
+    return self._wrappedData.axis.code
+
+  code = _key
 
     
   @property
-  def _parent(self) -> SpectrumDisplay:
+  def _parent(self) -> Strip:
     """SpectrumDisplay containing axis."""
-    return self._project._data2Obj.get(self._wrappedData.spectrumDisplay)
+    return self._project._data2Obj.get(self._wrappedData.strip)
 
-  spectrumDisplay = _parent
-
-  @property
-  def code(self) -> str:
-    """Fixed string Axis code"""
-    return self._wrappedData.code
+  strip = _parent
 
   @property
   def position(self) -> float:
     """Centre point position for displayed region, in current unit."""
-    return self._wrappedData.position
+    return self._wrappedData.axis.position
 
   @position.setter
   def position(self, value):
-    self._wrappedData.position = value
+    self._wrappedData.axis.position = value
 
   @property
   def width(self) -> float:
     """Width for displayed region, in current unit."""
-    return self._wrappedData.width
+    return self._wrappedData.axis.width
 
   @width.setter
   def width(self, value):
-    self._wrappedData.width = value
+    self._wrappedData.axis.width = value
 
   @property
   def region(self) -> tuple:
     """Display region - position +/- width/2.."""
-    position = self._wrappedData.position
-    halfwidth = self._wrappedData.width / 2.
+    position = self._wrappedData.axis.position
+    halfwidth = self._wrappedData.axis.width / 2.
     return (position - halfwidth, position + halfwidth)
 
   @region.setter
   def region(self, value):
-    self._wrappedData.position = (value[0] + value[1]) / 2.
-    self._wrappedData.width = abs(value[1] - value[0])
+    self._wrappedData.axis.position = (value[0] + value[1]) / 2.
+    self._wrappedData.axis.width = abs(value[1] - value[0])
 
   @property
   def unit(self) -> str:
     """Display unit for axis"""
-    return self._wrappedData.unit
+    return self._wrappedData.axis.unit
 
   # NBNB TBD This should be settable, but changing it requires changing the position
   # values. For now we leave it unsettable.
@@ -109,31 +105,31 @@ class Axis(AbstractWrapperObject):
   def nmrAtoms(self) -> tuple:
     """nmrAtoms connected to axis"""
     ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._wrappedData.resonances)
+    return tuple(ff(x) for x in self._wrappedData.axis.resonances)
 
   @nmrAtoms.setter
   def nmrAtoms(self, value):
     value = [self.getById(x) if isinstance(x, str) else x for x in value]
-    self._wrappedData.resonances = tuple(x._wrappedData for x in value)
+    self._wrappedData.axis.resonances = tuple(x._wrappedData for x in value)
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:SpectrumDisplay)-> list:
+  def _getAllWrappedData(cls, parent:Strip)-> list:
     """get wrappedData (ccpnmr.gui.Task.Axis) in serial number order"""
-    return parent._wrappedData.sortedAxes()
+    return parent._wrappedData.sortedStripAxes()
 
   def delete(self):
     """Overrides normal delete"""
     raise  ValueError("Axes cannot be deleted independently")
 
 # Connections to parents:
-SpectrumDisplay._childClasses.append(Axis)
+Strip._childClasses.append(Axis)
 
 # We should NOT have any newAxis functions
 
 
 # Notifiers:
-className = ApiAxis._metaclass.qualifiedName()
+className = ApiStripAxis._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Axis}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

@@ -35,6 +35,7 @@ class DropBase(GuiBase):
   def dragEnterEvent(self, event):
     event.accept()
 
+
   def dropEvent(self, event):
     event.accept()
     if isinstance(self.parent, QtGui.QGraphicsScene):
@@ -67,3 +68,74 @@ class DropBase(GuiBase):
       actualPid = ''.join(pidData)
       wrapperObject = self.getObject(actualPid)
       self.dropCallback(wrapperObject)
+
+  def rhfDropEvent(self, event):
+    """Catch dropEvent and dispatch to processing"""
+
+    from ccpnmrCore.util import Qt as qtUtil
+
+    event.accept()
+
+    dataType, data = qtUtil.interpretEvent(event)
+
+    if dataType and data:
+      self.processDropData(data, dataType)
+
+
+  def rhfProcessDropData(self, data, dataType='pids'):
+    """ Digest dropped-in data
+    Separate so it can be called from command line as well.
+    """
+    from ccpnmrCore.util import Qt as qtUtil
+
+    if dataType == 'pids':
+      # data is list-of-pids
+      commonType = qtUtil.getCommonType(data)
+      func = self.pickDispatchFunction('digest', commonType)
+      if func:
+        func(data)
+
+    elif dataType == 'ccpnmr-io':
+      # Importing (duplicating) wrapper objects from (another) project
+      raise NotImplementedError("CCPN data import not yet implemented")
+
+    elif dataType == 'urls':
+      # data is list-of-urls
+
+      urlType, urlInfo = qtUtil.analyzeUrls(data)
+      # urlInfo is list of triplets of (type, subType, modifiedUrl),
+      # e.g. ('spectrum', 'Bruker', newUrl)
+
+      multifunc = None if len(data) <= 1 else self.pickDispatchFunction('multiload', urlType)
+
+      if multifunc is None:
+        pids = []
+        for fileType, subType, useUrl in urlInfo:
+          func = self.pickDispatchFunction('load', fileType)
+          if func:
+            ll = func(useUrl, subType=subType)
+            if ll:
+              pids.extend(ll)
+
+      else:
+        pids = multifunc(urlInfo)
+
+      commonType = qtUtil.getCommonType(pids)
+      func = self.pickDispatchFunction('digest', commonType)
+      if func:
+        func(pids)
+
+    elif type == 'text':
+      # data is a text string
+      self.digestText(data)
+
+
+def pickDispatchFunction(self, prefix, dataType):
+  """Generate file name and return bound method matching name, if defined"""
+
+  funcName = prefix + dataType
+
+  if hasattr(self, funcName):
+    return getattr(self, funcName)
+  else:
+    return None

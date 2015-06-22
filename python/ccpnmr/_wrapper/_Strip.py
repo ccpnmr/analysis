@@ -28,8 +28,8 @@ from ccpn import Project
 from ccpn import Spectrum
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
-from ccpncore.api.ccpnmr.gui.Task import Strip1d as ApiStrip1d
-from ccpncore.api.ccpnmr.gui.Task import StripNd as ApiStripNd
+from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
+from ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 from ccpnmrcore.modules.GuiStrip1d import GuiStrip1d
 from ccpnmrcore.modules.GuiStripNd import GuiStripNd
@@ -320,7 +320,7 @@ SpectrumDisplay._childClasses.append(Strip)
 class Strip1d(GuiStrip1d, Strip):
   """1D strip"""
 
-  def __init__(self, project:Project, wrappedData:ApiStrip1d):
+  def __init__(self, project:Project, wrappedData:ApiBoundStrip):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
     GuiStrip1d.__init__(self)
@@ -334,7 +334,7 @@ class Strip1d(GuiStrip1d, Strip):
 class StripNd(GuiStripNd, Strip):
   """ND strip """
 
-  def __init__(self, project:Project, wrappedData:ApiStripNd):
+  def __init__(self, project:Project, wrappedData:ApiBoundStrip):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
     GuiStripNd.__init__(self)
@@ -347,10 +347,13 @@ class StripNd(GuiStripNd, Strip):
 
 def _factoryFunction(project:Project, wrappedData:ApiStrip):
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
-  if isinstance(wrappedData, ApiStripNd):
-    return StripNd(project, wrappedData)
-  elif isinstance(wrappedData, ApiStrip1d):
-    return Strip1d(project, wrappedData)
+
+  apiSpectrumDisplay = wrappedData.spectrumDisplay
+  if apiSpectrumDisplay.stripType == 'Bound':
+    if apiSpectrumDisplay.is1d:
+      return Strip1d(project, wrappedData)
+    else:
+      return StripNd(project, wrappedData)
   else:
     raise ValueError("Attempt to make SpectrumDisplay from illegal object type: %s"
     % wrappedData)

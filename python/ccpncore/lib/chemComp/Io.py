@@ -328,8 +328,6 @@ def downloadChemCompInfoFromCcpForge(repository, molType, ccpCode, sourceName=No
   Returns name of copied file, or None if unsuccessful
   """
 
-  print ("@~@~ downloading %s %s" % (molType, ccpCode))
-
   logger = repository.root._logger
     
   result = None

@@ -24,6 +24,9 @@ __version__ = "$Revision: 7686 $"
 
 from PyQt4 import QtGui
 
+
+from ccpncore.gui.DockLabel import DockLabel
+
 from ccpnmrcore.Base import Base as GuiBase
 
 from pyqtgraph.dockarea import Dock
@@ -39,10 +42,25 @@ class GuiModule(QtGui.QWidget, GuiBase):
   def __init__(self, position='right'):
     
     QtGui.QWidget.__init__(self)
-    print(self.window)
     self.dockArea = self.window.dockArea
     # self.apiModule = apiModule
+    # self.labelStyle = """DockLabel {
+    #             background-color : #bec4f3;
+    #             color : #122043;
+    #             border: 1px 1px 1px 1px solid #00092d;
+    #         }"""
     self.dock = Dock(name=self._wrappedData.name, size=(1100,1300))
+    self.dock.setStyleSheet("""
+    QWidget { background-color: #2a3358;
+    }
+    """)
+    self.dock.label.hide()
+    self.dock.label = DockLabel(self._wrappedData.name, self.dock)
+    self.dock.label.show()
+
+
+
+    # self.dock.label.updateStyle(self.labelStyle)
     self.dockArea.addDock(self.dock, position=position)
     GuiBase.__init__(self, self._project._appBase)
 

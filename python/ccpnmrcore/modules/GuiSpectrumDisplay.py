@@ -86,9 +86,9 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.scrollArea.setWidget(self.stripFrame)
 
   def fillToolBar(self):
-
-    self.spectrumUtilToolBar.addAction('+', self.cloneStrip) #self.orderedStrips[0].clone()) # clone first strip
-    self.spectrumUtilToolBar.addAction('-', lambda self=self: self.orderedStrips[-1].delete()) # remove last strip
+    pass
+    # self.spectrumUtilToolBar.addAction('+', self.cloneStrip) #self.orderedStrips[0].clone()) # clone first strip
+    # self.spectrumUtilToolBar.addAction('-', lambda self=self: self.orderedStrips[-1].delete()) # remove last strip
 
   def cloneStrip(self):
     newStrip = self.orderedStrips[-1].clone()

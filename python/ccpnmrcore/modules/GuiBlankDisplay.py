@@ -27,6 +27,7 @@ from pyqtgraph.dockarea import Dock
 
 from ccpn import Spectrum
 
+from ccpncore.gui.DockLabel import DockLabel
 from ccpncore.gui.Label import Label
 
 from ccpnmrcore.DropBase import DropBase
@@ -50,11 +51,18 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
   def __init__(self, dockArea):
     
     self.dockArea = dockArea
-    
-    Dock.__init__(self, name='BlankDisplay', size=(1100,1300))
-    dockArea.addDock(self)
 
-    self.label2 = Label(self, text='Drag Spectrum Here', textColor='#999', dragDrop=True)
+    Dock.__init__(self, name='Blank Display', size=(1100,1300))
+    dockArea.addDock(self)
+    self.setStyleSheet("""
+    QWidget { background-color: #2a3358;
+    }
+    """)
+    # self.labelhidden = True
+    self.label.hide()
+    self.label = DockLabel('Blank Display', self)
+    self.label.show()
+    self.label2 = Label(self, text='Drag Spectrum Here', textColor='#bec4f3', dragDrop=True)
     self.label2.setAlignment(QtCore.Qt.AlignCenter)
     self.layout.addWidget(self.label2)
     self.label2.dropEvent = self.dropCallback

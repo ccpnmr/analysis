@@ -22,6 +22,8 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 from ccpncore.gui.Base import Base
+from ccpncore.gui.DockLabel import DockLabel
+from ccpncore.gui.Font import Font
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Label import Label
@@ -43,22 +45,84 @@ class PeakListSimple(Dock):
     # QtGui.QWidget.__init__(self, parent)
     Dock.__init__(self, name=name)
     # Base.__init__(self, **kw)
-
+    self.setStyleSheet("""
+    QWidget { background-color: #000021;
+              border: 1px solid #00092d;
+    }
+    """)
+    self.label.hide()
+    self.label = DockLabel(name, self)
+    self.label.show()
     self.initPanel()
     self.peakLists = peakLists
     #self.initPanel()
     label = Label(self, 'Peak List:')
     self.layout.addWidget(label, 0, 0)
+    label.setStyleSheet("""QLabel {
+                            color: #f7ffff;
+                            margin: 0px 4px 0px 8px;
+    }""")
+    self.label.setFont(Font(size=12, bold=True))
     self.peakListPulldown = PulldownList(self, grid=(0, 1),
                                           callback=self.changePeakList,)
+    self.peakListPulldown.setStyleSheet(""" QComboBox{
+                                        background-color: #f7ffff;
+                                        margins: 4px 0px 4px 0px;
+                                        border: solid 1px #182548;
+                                        }
+                                        QComboBox::hover {
+                                        background-color: #e4e15b;
+                                        }
+                                        QComboBox::item {
+                                        background-color: #f7ffff;
+                                        }
+    """)
 
     label = Label(self, ' Position Unit:', grid=(0, 2))
+    label.setStyleSheet("""QLabel {
+                            color: #f7ffff;
+                            margin: 0px 4px 0px 8px;
+    }""")
     self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
                                         # callback=self._updateWhenIdle,)
+
+    self.posUnitPulldown.setStyleSheet(""" QComboBox{
+                                        background-color: #f7ffff;
+                                        margins: 4px 0px 4px 0px;
+                                        border: solid 1px #182548;
+                                        color: #122043;
+                                        }
+                                        QComboBox::hover {
+                                        background-color: #e4e15b;
+                                        color: #122043;
+                                        }
+                                        """)
 
     self.peakTable = ObjectTable(self, self._getColumns(2), [],
                                  callback=self.selectPeak, grid=(2, 0),
                                  gridSpan=(1, 4))
+    self.peakTable.setStyleSheet("""
+                                QTableView { margin-left: 4px;
+                                              border: 1px #182548;
+                                              font-family: open-sans bold;
+                                              }
+                                QTableWidget QHeaderView { background-color: #f7ffff;
+                                                  }
+                                QTableView::item { padding: 2px;
+                                                   background-color: #cccff9;
+                                                   color: #122043;
+                                                   }
+                                QTableView::item::hover { background-color: #bdbc5a;
+                                }
+                                QTableView::item::selected { background-color: #182548;
+                                                             color: #f7ffff;
+                                                             }
+
+
+
+    """)
+    # self.peakTable.header.setStyleSheet("""ObjectHeaderView { background-color: #f7ffff;
+    #                                               }""")
     # self.layout().setColumnStretch(4, 1)
     self.updateContents()
     self.updatePeakLists()

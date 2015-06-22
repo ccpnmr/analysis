@@ -29,7 +29,7 @@ from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import Console
-from ccpncore.gui.Menu import Menu
+from ccpncore.gui.Menu import Menu, MenuBar
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
@@ -121,35 +121,33 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
     self.splitter2.heightMax = 200
-    # assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
+    assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
     # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
     self.leftWidget.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
-    self.sequenceWidget = QtGui.QLabel(self)
-    self.sequenceWidget.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
-    font = self.sequenceWidget.font()
-    font.setPointSize(21)
-    self.sequenceWidget.setFont(font)
+    # self.sequenceWidget = QtGui.QLabel(self)
+    # self.sequenceWidget.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+    # font = self.sequenceWidget.font()
+    # font.setPointSize(21)
+    # self.sequenceWidget.setFont(font)
     self.pythonConsole.hide()
     self.splitter2.setGeometry(QtCore.QRect(1200, 1300, 100, 100))
     self.splitter1.addWidget(self.dockArea)
     self.seqScrollArea = QtGui.QScrollArea()
     self.seqScrollArea.setFixedHeight(30)
-    if len(self._project.chains) > 0:
-    # self.seqScrollArea.setWidget(self.sequenceWidget)
-      self.dockArea.layout.addWidget(self.sequenceWidget)
-      self.sequence = ''.join([residue.shortName for residue in self._project.chains[0].residues])
-      self.sequenceWidget.setText(self.sequence)
+    # if len(self._project.chains) > 0:
+    # # self.seqScrollArea.setWidget(self.sequenceWidget)
+    #   self.dockArea.layout.addWidget(self.sequenceWidget)
+    #   self.sequence = ''.join([residue.shortName for residue in self._project.chains[0].residues])
+    #   self.sequenceWidget.setText(self.sequence)
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
     self.setShortcuts()
 
   def setupMenus(self):
 
-    self._menuBar =  QtGui.QMenuBar()
-    QtGui.QFontDatabase.addApplicationFont('/Users/simon/Downloads/Lato-Black.ttf')
-    font = QtGui.QFont('Lato-Black')
-    self._menuBar.setFont(font)
+    self._menuBar =  MenuBar(self)
+
     fileMenu = Menu("&Project", self)
     spectrumMenu = Menu("&Spectra", self)
     viewMenu = Menu("&View", self)
@@ -276,7 +274,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self._appBase.openProject(currentProjectDir)
 
 
-  def showAssigner(self, position, nextTo=None):
+  def showAssigner(self, position='bottom', nextTo=None):
     self.assigner = Assigner(project=self._project)
     if nextTo is not None:
       self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
@@ -288,7 +286,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def raiseProperties(self, item):
     """get object from Pid and dispatch call depending on type
 
-    NBNB TBD HOw about refactoring so that we have a shortClassNAme:Popup dictionary?"""
+    NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
     dataPid =  item.data(0, QtCore.Qt.DisplayRole)
     project = self._appBase.project
     obj = project.getById(dataPid)

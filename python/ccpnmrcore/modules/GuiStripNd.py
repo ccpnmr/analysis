@@ -35,6 +35,7 @@ from ccpn.lib.wrapper import Spectrum as LibSpectrum
 from ccpncore.memops import Notifiers
 
 from ccpncore.gui.Button import Button
+from ccpncore.gui.Font import Font
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
@@ -192,7 +193,6 @@ class GuiStripNd(GuiStrip):
       if zPlaneSize is not None:
         if smallest is None or zPlaneSize < smallest:
           smallest = zPlaneSize
-
     if smallest is None:
       smallest = 1.0 # arbitrary
     #
@@ -268,16 +268,51 @@ class GuiStripNd(GuiStrip):
         # self.spinSystemLabel.setMaximumWidth(1150)
         # self.spinSystemLabel.setScaledContents(True)
         prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
-        prevPlaneButton.setFixedWidth(30)
-        prevPlaneButton.setFixedHeight(30)
+        prevPlaneButton.setFixedWidth(19)
+        prevPlaneButton.setFixedHeight(19)
+        prevPlaneButton.setStyleSheet("""
+        QPushButton {background-color: #535a83;
+                    border: 1px solid;
+                    border-color: #182548;
+                    color: #bec4f3;}
+        QPushButton::clicked {
+        color: #122043;
+        background-color: #e4e15b;
+
+        """)
+        prevPlaneButton.setFont(Font(size=14, bold=True))
         self.planeLabel = LineEdit(self)
-        self.planeLabel.setFixedHeight(30)
+        self.planeLabel.setFixedHeight(19)
         self.planeLabel.setText('%.3f' % self.positions[2])
+        self.planeLabel.setStyleSheet("""QLineEdit {
+        background-color: #f7ffff;
+        color: #122043;
+        margin: 0px 4px 4px 4px;
+        border: 1px solid #182548;
+        }
+        QLineEdit::selected {
+        background-color: #e4e15b;
+        color: #e4e15b;
+        """ )
+        self.planeLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.planeLabel.setFont(Font(normal=True))
         # self.axisCodeLabel = Label(self, text=spectrum.axisCodes[spectrumItem.dimMapping[2]])
         # self.planeLabel.textChanged.connect(self.changeZPlane)
         nextPlaneButton = Button(self,'>', callback=self.nextZPlane)
-        nextPlaneButton.setFixedWidth(30)
-        nextPlaneButton.setFixedHeight(30)
+        nextPlaneButton.setFixedWidth(19)
+        nextPlaneButton.setFixedHeight(19)
+        nextPlaneButton.setStyleSheet("""
+        QPushButton {background-color: #535a83;
+                    border: 1px solid;
+                    border-color: #182548;
+                    color: #bec4f3;
+                    }
+        QPushButton::clicked {
+        color: #122043;
+        background-color: #e4e15b;
+
+        """)
+        nextPlaneButton.setFont(Font(size=14, bold=True))
         self.planeToolbar.setContentsMargins(0,0,0,0)
         self.planeToolbar.addWidget(prevPlaneButton)
         self.planeToolbar.addWidget(self.planeLabel)

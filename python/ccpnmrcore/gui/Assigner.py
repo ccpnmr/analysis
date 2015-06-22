@@ -24,6 +24,8 @@ __version__ = "$Revision: 7686 $"
 import sys
 from PyQt4 import QtGui,QtCore
 
+from ccpncore.gui.DockLabel import DockLabel
+from ccpncore.gui.Font import Font
 
 from pyqtgraph.dockarea import Dock
 
@@ -33,6 +35,14 @@ class Assigner(Dock):
 
     super(Assigner, self).__init__(name='Assigner')
     self.project=project
+    self.setStyleSheet("""
+    QWidget { background-color: #000021;
+              border: 1px solid #00092d;
+    }
+    """)
+    self.label.hide()
+    self.label = DockLabel('Assigner', self)
+    self.label.show()
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
     self.scene = QtGui.QGraphicsScene(self)
@@ -82,17 +92,19 @@ class Assigner(Dock):
 
       if cBetaAtom is not None:
         self.scene.addItem(cbAtom)
-        self.addAssignmentLine(caAtom, cbAtom, 'grey', 1.2, 0)
+        self.addAssignmentLine(caAtom, cbAtom, 'grey', 1.0, 0)
         cbShift = self.project.chemicalShiftLists[0].findChemicalShift(cBetaAtom)
         print('cbshift',cbShift.value)
 
       self.scene.addItem(coAtom)
-      self.addAssignmentLine(hAtom, nAtom, 'grey', 1.2, 0)
+      self.addAssignmentLine(hAtom, nAtom, 'grey', 1.0, 0)
 
-      self.addAssignmentLine(nAtom, caAtom, 'grey', 1.2, 0)
-      self.addAssignmentLine(coAtom, caAtom, 'grey', 1.2, 0)
+      self.addAssignmentLine(nAtom, caAtom, 'grey', 1.0, 0)
+      self.addAssignmentLine(coAtom, caAtom, 'grey', 1.0, 0)
       nmrAtomLabel = QtGui.QGraphicsTextItem()
       nmrAtomLabel.setPlainText(nmrResidue.sequenceCode)
+      nmrAtomLabel.setFont(Font(size=12, bold=True))
+      nmrAtomLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
       nmrAtomLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
       self.scene.addItem(nmrAtomLabel)
       print(cBetaAtom,'cbeta')
@@ -145,15 +157,15 @@ class Assigner(Dock):
 
           if cBetaAtom is not None:
             self.scene.addItem(cbAtom2)
-            self.addAssignmentLine(caAtom2, cbAtom2, 'grey', 1.2, 0)
+            self.addAssignmentLine(caAtom2, cbAtom2, 'grey', 1,0, 0)
             cbShift = self.project.chemicalShiftLists[0].findChemicalShift(cBetaAtom)
           self.scene.addItem(nAtom2)
           self.scene.addItem(hAtom2)
-          self.addAssignmentLine(nAtom2, hAtom2, 'grey', 1.2, 0)
-          self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.2, 0)
-          self.addAssignmentLine(coAtom2, oldResidue['N'], 'grey', 1.2, 0)
+          self.addAssignmentLine(nAtom2, hAtom2, 'grey', 1.0, 0)
+          self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.0, 0)
+          self.addAssignmentLine(coAtom2, oldResidue['N'], 'grey', 1.0, 0)
           # self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.2, 0)
-          self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.2, 0)
+          self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.0, 0)
           nmrAtomLabel = QtGui.QGraphicsTextItem()
           nmrAtomLabel.setPlainText(nmrResidue.sequenceCode)
           nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
@@ -196,11 +208,11 @@ class Assigner(Dock):
           self.scene.addItem(cbAtom2)
           self.scene.addItem(nAtom2)
           self.scene.addItem(hAtom2)
-          self.addAssignmentLine(nAtom2, hAtom2, 'grey', 1.2, 0)
-          self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.2, 0)
-          self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.2, 0)
-          self.addAssignmentLine(nAtom2, oldResidue['CO'], 'grey', 1.2, 0)
-          self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.2, 0)
+          self.addAssignmentLine(nAtom2, hAtom2, 'grey', 1.0, 0)
+          self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.0, 0)
+          self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.0, 0)
+          self.addAssignmentLine(nAtom2, oldResidue['CO'], 'grey', 1.0, 0)
+          self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.0, 0)
           nmrAtomLabel = QtGui.QGraphicsTextItem()
           nmrAtomLabel.setPlainText(nmrResidue.sequenceCode)
           nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
@@ -305,14 +317,29 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
   def __init__(self, text, pos=None):
 
     super(GuiNmrAtom, self).__init__()
-    font = QtGui.QFont('Lucida Grande')
-    font.setPointSize(21)
-    self.setFont(font)
+    self.setFont(Font(size=17.5, normal=True))
     self.setPlainText(text)
     self.setPos(QtCore.QPointF(pos[0], pos[1]))
+    self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+    # self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+    # self.brush = QtGui.QBrush()
+    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+    # self.setBrush(self.brush)
+    if self.isSelected:
+      # self.setFont(Font(size=17.5, bold=True))
+      self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
+      self.setFont(Font(size=17.5, bold=True))
+    else:
+      self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      self.setFont(Font(size=17.5, normal=True))
+      # self.setBrush(self.brush)
 
-  def mousePressEvent(self, event):
-    self.printAtom()
+
+  def hoverEnterEvent(self, event):
+    self.setDefaultTextColor(QtGui.QColor('#e4e15b'))
+
+  def hoverLeaveEvent(self, event):
+    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
 
   def printAtom(self):
     print(self)

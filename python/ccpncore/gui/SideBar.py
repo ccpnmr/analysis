@@ -37,6 +37,24 @@ experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'W
 class SideBar(QtGui.QTreeWidget):
   def __init__(self, parent=None ):
     QtGui.QTreeWidget.__init__(self, parent)
+    self.setStyleSheet("""
+    QTreeWidget { background-color: #020F31;
+    }
+    QTreeWidget::item {background-color: #0e1a3d;
+                       color: #bec4f3;
+                       }
+    QTreeWidget::item::selected {
+                      background-color: #666e98;
+                      color: #f7ffff;
+                      }
+    QTreeWidget::item::hover {
+                      background-color: #424a71;
+                      color: #e4e15b;
+                      }
+    QTreeView:branch:{
+    background-color: #e4e15b;
+    }
+    """)
     self.header().hide()
     self.setDragEnabled(True)
     self.setDragDropMode(self.InternalMove)
@@ -62,6 +80,8 @@ class SideBar(QtGui.QTreeWidget):
     # self.samplesItem.setText(0, "Samples")
     self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.notesItem.setText(0, "Notes")
+    self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
+    self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
     self.parent = parent
 
 
@@ -179,6 +199,7 @@ class SideBar(QtGui.QTreeWidget):
 
     peakList = spectrum.newPeakList()
     if spectrum.dimensionCount == 1:
+
       if expTypes and len(expTypes) > 0:
         spectrum.experimentType = expTypes
 
@@ -199,6 +220,7 @@ class SideBar(QtGui.QTreeWidget):
 
       else:
         newItem = self.addItem(self.onedItem, spectrum)
+        print('here1d')
         peakListItem = QtGui.QTreeWidgetItem(newItem)
         peakListItem.setText(0, peakList.pid)
         peakListItem.setFlags(peakListItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
@@ -230,10 +252,10 @@ class SideBar(QtGui.QTreeWidget):
       return None
 
   def isLookupFile(self, filePath):
-    print(filePath[-1].split('/')[-1])
-    if filePath[-1].split('/')[-1].endswith('.csv'):
+    print(filePath.split('/')[-1])
+    if filePath.split('/')[-1].endswith('.csv'):
       return True
-    elif '.xls' in filePath[-1].split('/')[-1]:
+    elif '.xls' in filePath.split('/')[-1]:
       return True
     else:
       return False
@@ -241,8 +263,8 @@ class SideBar(QtGui.QTreeWidget):
 
   def parseLookupFile(self, filePath):
 
-    if filePath[-1].split('/')[-1].endswith('.csv'):
-      csv_in = open(filePath[-1], 'r')
+    if filePath.split('/')[-1].endswith('.csv'):
+      csv_in = open(filePath, 'r')
       reader = csv.reader(csv_in)
       for row in reader:
         if row[0].split('/')[-1] == 'procs':
@@ -254,8 +276,8 @@ class SideBar(QtGui.QTreeWidget):
           if spectrum is not None:
             self.addSpectrumToItem(spectrum, expType)
 
-    elif '.xls' in filePath[-1].split('/')[-1]:
-      ex = pd.ExcelFile(filePath[-1])
+    elif '.xls' in filePath.split('/')[-1]:
+      ex = pd.ExcelFile(filePath)
       for sheet in ex.sheet_names:
         excelSheet = ex.parse(sheet)
         for row in excelSheet['filename']:
@@ -264,7 +286,11 @@ class SideBar(QtGui.QTreeWidget):
             filename.pop()
             newFilename = '/'.join(filename)
             spectrum = self.parent.project.loadSpectrum(newFilename)
-            expType = self.getExpType(filename)
+            print(spectrum)
+            try:
+              expType = self.getExpType(filename)
+            except:
+              expType = 'H'
             if spectrum is not None:
               self.addSpectrumToItem(spectrum, expType)
     else:
@@ -314,6 +340,7 @@ class SideBar(QtGui.QTreeWidget):
               self.parent._appBase.mainWindow.openAProject(filePath)
 
             else:
+              spectrum = self.parent.project.loadSpectrum(filePath)
               try:
                 spectrum = self.parent.project.loadSpectrum(filePath)
                 self.addSpectrumToItem(spectrum)

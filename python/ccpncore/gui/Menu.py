@@ -25,12 +25,26 @@ from PyQt4 import QtGui
 
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Base import Base
+from ccpncore.gui.Font import Font
+
 
 class Menu(QtGui.QMenu, Base):
   def __init__(self, title, parent, isFloatWidget=False, **kw):
     QtGui.QMenu.__init__(self, self.translate(title), parent)
     Base.__init__(self, isFloatWidget=isFloatWidget, **kw)
     self.isFloatWidget = isFloatWidget
+    self.setStyleSheet("""
+    QMenu {background-color: #424a71;
+    }
+    QMenu::item {background-color: #424a71;
+                      color: #bec4f3;
+              }
+      QMenu::item::selected { color: #f7ffff;
+                                 background: #666e98;
+      }
+      QMenu::item::hover {
+      background-color: #e4e15b;
+    """)
 
   def addItem(self, text, shortcut=None, callback=None, checkable=False):
     action = Action(self.parent(), text, callback=callback, shortcut=shortcut,
@@ -43,3 +57,23 @@ class Menu(QtGui.QMenu, Base):
     menu = Menu(title, self)
     QtGui.QMenu.addMenu(self, menu)
     return menu
+
+class MenuBar(QtGui.QMenuBar):
+  def __init__(self, parent):
+
+    QtGui.QMenuBar.__init__(self, parent)
+    font = Font(normal=True, size=16)
+    self.setFont(font)
+    self.setStyleSheet("""
+      QMenuBar {
+              background-color: #424a71;
+              }
+      QMenuBar::item {background-color: #424a71;
+                      color: #bec4f3;
+              }
+      QMenuBar::item::selected { color: #f7ffff;
+                                 background: #666e98;
+      }
+      QMenuBar::item::hover {
+      background-color: #e4e15b;
+      """)

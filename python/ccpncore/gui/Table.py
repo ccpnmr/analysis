@@ -105,7 +105,7 @@ class ObjectTable(QtGui.QTableView, Base):
     header.setDefaultSectionSize(30)
     #header.setSortIndicatorShown(False)
     #header.setStyleSheet('QHeaderView::down-arrow { image: url(icons/sort-up.png);} QHeaderView::up-arrow { image: url(icons/sort-down.png);}')
-
+    self.header = header
     self.setupHeaderStretch()
 
   def sizeHint(self):

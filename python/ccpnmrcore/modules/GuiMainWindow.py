@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 import os
 import json
+import shutil
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
@@ -30,6 +31,7 @@ from PyQt4 import QtGui, QtCore
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import Console
 from ccpncore.gui.Menu import Menu, MenuBar
+from ccpncore.gui import MessageDialog
 from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
@@ -355,6 +357,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       savePref = True
       
     if savePref:
+      directory = os.path.dirname(prefPath)
+      if not os.path.exists(directory):
+        try:
+          os.makedirs(directory)
+        except Exception as e:
+          project = self._appBase.project
+          project._logger.warning('Preferences not saved: %s' % (directory, e))
+          return
+          
       prefFile = open(prefPath, 'w+')
       json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
@@ -511,7 +522,31 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     dpModule = DataPlottingModule(self.dockArea)
 
   def saveProjectAs(self):
-    print("project saved as...")
+    if not self.project:
+      return
+    dialog = QtGui.QFileDialog(self, caption='Save Project As...')
+    dialog.setFileMode(QtGui.QFileDialog.AnyFile)
+    if not dialog.exec_():
+      return
+    fileNames = dialog.selectedFiles()
+    if not fileNames:
+      return
+    newPath = fileNames[0]
+    if newPath:
+      if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
+        # should not really need to check the second and third condition above, only
+        # the Qt dialog stupidly insists a directory exists before you can select it
+        # so if it exists but is empty then don't bother asking the question
+        title = 'Overwrite path'
+        msg ='Path "%s" already exists, overwrite?' % newPath
+        if MessageDialog.showYesNo(title, msg, self):
+          if os.path.isfile(newPath):
+            os.remove(newPath)
+          else:
+            shutil.rmtree(newPath, ignore_errors=True)
+        else:
+          return
+      self._appBase.saveProject(newPath=newPath)
 
   def toggleCrossHair(self):
     self._appBase.current.strip.toggleCrossHair()

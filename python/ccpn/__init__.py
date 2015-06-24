@@ -47,8 +47,8 @@ AbstractWrapperObject = cls = importlib.import_module(
 _wrappedClasses.append(cls)
 Project = cls = importlib.import_module('ccpn._wrapper._Project').Project
 _wrappedClasses.append(cls)
-Note = cls = importlib.import_module('ccpn._wrapper._Note').Note
-_wrappedClasses.append(cls)
+# Note = cls = importlib.import_module('ccpn._wrapper._Note').Note
+# _wrappedClasses.append(cls)
 Chain = cls = importlib.import_module('ccpn._wrapper._Chain').Chain
 _wrappedClasses.append(cls)
 Residue = cls = importlib.import_module('ccpn._wrapper._Residue').Residue

@@ -82,7 +82,6 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # self.stripFrame.layout().setContentsMargins(0, 0, 2, 0)
     self.stripFrame.setAcceptDrops(True)
     self.assignmentDirection = 'i-1'
-
     self.scrollArea.setWidget(self.stripFrame)
 
   def fillToolBar(self):

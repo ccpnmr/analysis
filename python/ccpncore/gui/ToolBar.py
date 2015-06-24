@@ -33,7 +33,7 @@ class ToolBar(QtGui.QToolBar, Base):
   def __init__(self, parent, **kw):
     QtGui.QToolBar.__init__(self, parent)
     Base.__init__(self, **kw)
-    self.setStyleSheet(""" QToolBar {border: 0px;
-                                    background-color: transparent;
-    }
-    """)
+    # self.setStyleSheet(""" QToolBar {border: 0px;
+    #                                 background-color: transparent;
+    # }
+    # """)

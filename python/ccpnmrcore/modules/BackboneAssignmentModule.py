@@ -43,17 +43,17 @@ from ccpnmrcore.modules.PeakTable import PeakListSimple
 class BackboneAssignmentModule(PeakListSimple):
 
   def __init__(self, project=None, name=None, peakLists=None, assigner=None, hsqcDisplay=None):
-    PeakListSimple.__init__(self, name='Backbone Assignment', peakLists=project.peakLists, grid=(1, 0), gridSpan=(2, 4))
+    PeakListSimple.__init__(self, name='Backbone Assignment', peakLists=project.peakLists, grid=(1, 0), gridSpan=(2, 1))
     self.hsqcDisplay = hsqcDisplay
     self.project = project
     self.current = project._appBase.current
     self.peakTable.callback = self.findMatchingPeaks
-    self.layout.setContentsMargins(4, 4, 4, 4)
+    # self.layout.setContentsMargins(4, 4, 4, 4)
     spectra = [spectrum.pid for spectrum in project.spectra]
     displays = [display.pid for display in project.spectrumDisplays if len(display.orderedAxes) > 2]
-    self.queryDisplayPulldown = PulldownList(self, grid=(4, 0), callback=self.selectQuerySpectrum)
+    self.queryDisplayPulldown = PulldownList(self, grid=(4, 0), gridSpan=(1, 1), callback=self.selectQuerySpectrum)
     self.queryDisplayPulldown.insertSeparator(0)
-    self.matchDisplayPulldown = PulldownList(self, grid=(4, 2), callback=self.selectMatchSpectrum)
+    self.matchDisplayPulldown = PulldownList(self, grid=(4, 2), gridSpan=(1, 1), callback=self.selectMatchSpectrum)
     self.queryDisplayPulldown.setData(displays)
     self.queryDisplayPulldown.setCurrentIndex(1)
     self.matchDisplayPulldown.setData(displays)
@@ -61,6 +61,12 @@ class BackboneAssignmentModule(PeakListSimple):
     self.matchList = ListWidget(self, grid=(6, 2), gridSpan=(1, 1))
     self.layout.addWidget(self.queryList, 6, 0, 1, 2)
     self.layout.addWidget(self.matchList, 6, 2, 1, 2)
+    # self.setStyleSheet(""" ListWidget {background-color: #000021;
+    #          color: #f7ffff;
+    # }""")
+    # self.queryList.setMaximumHeight(70)
+    # self.matchList.setMaximumHeight(70)
+
     self.lines = []
     self.numberOfMatches = 5
 

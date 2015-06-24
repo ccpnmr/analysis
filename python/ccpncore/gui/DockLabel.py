@@ -72,7 +72,7 @@ class DockLabel(VerticalLabel):
 
     def setOrientation(self, o):
         VerticalLabel.setOrientation(self, o)
-        self.updateStyle()
+        # self.updateStyle()
 
     def mousePressEvent(self, ev):
         if ev.button() == QtCore.Qt.LeftButton:

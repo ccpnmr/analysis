@@ -37,24 +37,24 @@ experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'W
 class SideBar(QtGui.QTreeWidget):
   def __init__(self, parent=None ):
     QtGui.QTreeWidget.__init__(self, parent)
-    self.setStyleSheet("""
-    QTreeWidget { background-color: #020F31;
-    }
-    QTreeWidget::item {background-color: #0e1a3d;
-                       color: #bec4f3;
-                       }
-    QTreeWidget::item::selected {
-                      background-color: #666e98;
-                      color: #f7ffff;
-                      }
-    QTreeWidget::item::hover {
-                      background-color: #424a71;
-                      color: #e4e15b;
-                      }
-    QTreeView:branch:{
-    background-color: #e4e15b;
-    }
-    """)
+    # self.setStyleSheet("""
+    # QTreeWidget { background-color: #020F31;
+    # }
+    # QTreeWidget::item {background-color: #0e1a3d;
+    #                    color: #bec4f3;
+    #                    }
+    # QTreeWidget::item::selected {
+    #                   background-color: #666e98;
+    #                   color: #f7ffff;
+    #                   }
+    # QTreeWidget::item::hover {
+    #                   background-color: #424a71;
+    #                   color: #e4e15b;
+    #                   }
+    # QTreeView:branch:{
+    # background-color: #e4e15b;
+    # }
+    # """)
     self.header().hide()
     self.setDragEnabled(True)
     self.setDragDropMode(self.InternalMove)

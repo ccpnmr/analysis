@@ -50,10 +50,10 @@ class GuiModule(QtGui.QWidget, GuiBase):
     #             border: 1px 1px 1px 1px solid #00092d;
     #         }"""
     self.dock = Dock(name=self._wrappedData.name, size=(1100,1300))
-    self.dock.setStyleSheet("""
-    QWidget { background-color: #2a3358;
-    }
-    """)
+    # self.dock.setStyleSheet("""
+    # QWidget { background-color: #2a3358;
+    # }
+    # # """)
     self.dock.label.hide()
     self.dock.label = DockLabel(self._wrappedData.name, self.dock)
     self.dock.label.show()

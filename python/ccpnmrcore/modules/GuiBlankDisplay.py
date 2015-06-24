@@ -54,10 +54,10 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
 
     Dock.__init__(self, name='Blank Display', size=(1100,1300))
     dockArea.addDock(self)
-    self.setStyleSheet("""
-    QWidget { background-color: #2a3358;
-    }
-    """)
+    # self.setStyleSheet("""
+    # QWidget { background-color: #2a3358;
+    # }
+    # """)
     # self.labelhidden = True
     self.label.hide()
     self.label = DockLabel('Blank Display', self)

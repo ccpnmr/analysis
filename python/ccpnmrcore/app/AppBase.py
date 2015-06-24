@@ -137,9 +137,11 @@ def startProgram(programClass, applicationName, applicationVersion, projectPath=
   else:
     apiProject = ioUtil.newProject('default')
 
+  styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'DarkStyleSheet.qss')).read()
   # On the Mac (at least) it does not matter what you set the applicationName to be,
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
+  app.setStyleSheet(styleSheet)
   program = programClass(apiProject, applicationName, applicationVersion)
   app.start()
   

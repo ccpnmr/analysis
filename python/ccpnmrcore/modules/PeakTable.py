@@ -24,7 +24,8 @@ __version__ = "$Revision: 7686 $"
 from ccpncore.gui.Base import Base
 from ccpncore.gui.DockLabel import DockLabel
 from ccpncore.gui.Font import Font
-from ccpncore.gui.Table import ObjectTable, Column
+# from ccpncore.gui.Table import ObjectTable, Column
+from ccpnmrcore.modules.GuiTableGenerator import GuiTableGenerator
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Label import Label
 from pyqtgraph.dockarea import Dock
@@ -48,30 +49,34 @@ class PeakListSimple(Dock):
     self.label.hide()
     self.label = DockLabel(name, self)
     self.label.show()
-    self.initPanel()
+    # self.initPanel()
     self.peakLists = peakLists
-    label = Label(self, 'Peak List:')
-    self.layout.addWidget(label, 0, 0)
+    # label = Label(self, 'Peak List:')
+    # self.layout.addWidget(label, 0, 0)
+    #
+    # self.label.setFont(Font(size=12, bold=True))
+    # self.peakListPulldown = PulldownList(self, grid=(0, 1))#,
+    # #                                       # callback=self.changePeakList,)
+    # #
+    # #
+    # label = Label(self, ' Position Unit:', grid=(0, 2))
+    # #
+    # self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
+    # #                                     # callback=self._updateWhenIdle,)
 
-    self.label.setFont(Font(size=12, bold=True))
-    self.peakListPulldown = PulldownList(self, grid=(0, 1),
-                                          callback=self.changePeakList,)
+    columns = [('#', 'serial'),
+               ('Height', lambda pk: self._getPeakHeight(pk)),
+               ('Volume', lambda pk: self._getPeakVolume(pk)),
+                ('Details', 'comment')
+    ]
+    self.peakTable = GuiTableGenerator(self, peakLists, callback=self.selectPeak, columns=columns)
 
+    self.layout.addWidget(self.peakTable, 2, 0, 1, 4)
 
-    label = Label(self, ' Position Unit:', grid=(0, 2))
-
-    self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
-                                        # callback=self._updateWhenIdle,)
-
-
-    self.peakTable = ObjectTable(self, self._getColumns(2), [],
-                                 callback=self.selectPeak, grid=(2, 0),
-                                 gridSpan=(1, 4))
-
-    self.updateContents()
-    self.updatePeakLists()
-    if peakLists:
-      self.changePeakList(peakLists[0])
+    # self.updateContents()
+    # self.updatePeakLists()
+    # if peakLists:
+    #   self.changePeakList(peakLists[0])
 
   def initPanel(self):
     # Overwrites superclass
@@ -89,47 +94,47 @@ class PeakListSimple(Dock):
     else:
       return peak
 
-  def _getColumns(self, numDim):
+  # def _getColumns(self, numDim):
+  #
+  #   columns = []
+  #   c = (Column('#', 'serial', tipText='Peak serial number'))
+  #   columns.append(c)
+  #
+  #   for i in range(numDim):
+  #     j = i + 1
+  #     c = Column('Assign\nF%d' % j,
+  #                lambda pk, dim=i:self._getPeakAnnotation(pk, dim),
+  #                tipText='Resonance assignments of peak in dimension %d' % j)
+  #     columns.append(c)
+  #
+  #   for i in range(numDim):
+  #     j = i + 1
+  #
+  #     sampledDim = self.sampledDims.get(i)
+  #     if sampledDim:
+  #       text = 'Sampled\n%s' % sampledDim.conditionVaried
+  #       tipText='Value of sampled plane'
+  #       unit = sampledDim
+  #
+  #     else:
+  #       text = 'Pos\nF%d' % j
+  #       tipText='Peak position in dimension %d' % j
+  #       unit = 'ppm'
+  #
+  #     c = Column(text,
+  #                lambda pk, dim=i, unit=unit:self._getPeakPosition(pk, dim, unit),
+  #                tipText=tipText)
+  #     columns.append(c)
 
-    columns = []
-    c = (Column('#', 'serial', tipText='Peak serial number'))
-    columns.append(c)
 
-    for i in range(numDim):
-      j = i + 1
-      c = Column('Assign\nF%d' % j,
-                 lambda pk, dim=i:self._getPeakAnnotation(pk, dim),
-                 tipText='Resonance assignments of peak in dimension %d' % j)
-      columns.append(c)
-
-    for i in range(numDim):
-      j = i + 1
-
-      sampledDim = self.sampledDims.get(i)
-      if sampledDim:
-        text = 'Sampled\n%s' % sampledDim.conditionVaried
-        tipText='Value of sampled plane'
-        unit = sampledDim
-
-      else:
-        text = 'Pos\nF%d' % j
-        tipText='Peak position in dimension %d' % j
-        unit = 'ppm'
-
-      c = Column(text,
-                 lambda pk, dim=i, unit=unit:self._getPeakPosition(pk, dim, unit),
-                 tipText=tipText)
-      columns.append(c)
-
-
-    columns.extend([Column('Height', self._getPeakHeight,
-                           tipText='Magnitude of spectrum intensity at peak center (interpolated), unless user edited'),
-                    Column('Volume', self._getPeakVolume,
-                           tipText='Integral of spectrum intensity around peak location, according to chosen volume method'),
-                    Column('Details', 'comment',
-                           tipText='Textual notes about the peak')])
-
-    return columns
+    # columns.extend([Column('Height', self._getPeakHeight,
+    #                        tipText='Magnitude of spectrum intensity at peak center (interpolated), unless user edited'),
+    #                 Column('Volume', self._getPeakVolume,
+    #                        tipText='Integral of spectrum intensity around peak location, according to chosen volume method'),
+    #                 Column('Details', 'comment',
+    #                        tipText='Textual notes about the peak')])
+    #
+    # return columns
 
   def _getPeakPosition(self, peak, dim, unit='ppm'):
 
@@ -176,11 +181,11 @@ class PeakListSimple(Dock):
     texts = ['%s:%s:%s' % (peakList.spectrum.apiDataSource.experiment.name, peakList.spectrum.name, peakList.serial) for peakList in self.peakLists]
     self.peakListPulldown.setData(texts=texts, objects=self.peakLists)
 
-  def updateContents(self):
-    peakList = self.peakList
-    if peakList:
-      columns = self._getColumns(peakList._parent.dimensionCount)
-      self.peakTable.setObjectsAndColumns(peakList.peaks, columns)
+  # def updateContents(self):
+  #   peakList = self.peakList
+  #   if peakList:
+  #     columns = self._getColumns(peakList._parent.dimensionCount)
+  #     self.peakTable.setObjectsAndColumns(peakList.peaks, columns)
   #def updateContents(self, spectrum):
     # if len(spectrum.peakLists) > 1:
     #   for peakList in spectrum.peakLists:
@@ -189,57 +194,29 @@ class PeakListSimple(Dock):
     #     columns = self._getColumns(peakList._wrappedData.dataSource.numDim)
     #     self.peakTable.setObjectsAndColumns(peakList._wrappedData.sortedPeaks(), columns)
 
-  def changePeakList(self, peakList):
-
-    if peakList is not self.peakList:
-
-      if self.peakList:
-        numDim = self.peakList.spectrum.dimensionCount
-      else:
-        numDim = 2
-
-      self.sampledDims  = {}
-
-      if peakList:
-        dataDims = peakList.spectrum.apiDataSource.sortedDataDims()
-        for i, dataDim in enumerate(dataDims):
-          if dataDim.className == 'SampledDataDim':
-            self.sampledDims[i] = dataDim
-
-      self.peakList = peakList
-      self.peak = None
-      #self._updateWhenIdle()
-      #self.updatePeakLists()
-      self.updateContents()
+  # def changePeakList(self, peakList):
+  #
+  #   if peakList is not self.peakList:
+  #
+  #     if self.peakList:
+  #       numDim = self.peakList.spectrum.dimensionCount
+  #     else:
+  #       numDim = 2
+  #
+  #     self.sampledDims  = {}
+  #
+  #     if peakList:
+  #       dataDims = peakList.spectrum.apiDataSource.sortedDataDims()
+  #       for i, dataDim in enumerate(dataDims):
+  #         if dataDim.className == 'SampledDataDim':
+  #           self.sampledDims[i] = dataDim
+  #
+  #     self.peakList = peakList
+  #     self.peak = None
+  #     #self._updateWhenIdle()
+  #     #self.updatePeakLists()
+  #     self.updateContents()
 
       #for func in self.changePeakListCalls:
       #  func(peakList)
-
-if __name__ == '__main__':
-
-  import sys
-  
-  from ccpncore.gui.Application import TestApplication
-  from ccpncore.util.Io import loadProject
-
-  peakLists = []
-  if len(sys.argv) == 2:
-    projectPath = sys.argv[1]
-    project = loadProject(projectPath)
-    nmrProject = project.findFirstNmrProject()
-    for experiment in nmrProject.sortedExperiments():
-      for dataSource in experiment.sortedDataSources():
-        peakLists.extend(dataSource.sortedPeakLists())
-    
-  app = TestApplication()
-  peakTable = PeakListSimple(peakLists=peakLists)
-  w = QtGui.QWidget()
-  layout = QtGui.QGridLayout()
-  layout.addWidget(peakTable)
-  w.setLayout(layout)
-  w.show()
-  w.raise_()
-  app.start()
-
-
 

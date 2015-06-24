@@ -31,7 +31,9 @@ class ChemicalShiftTable(Dock):
 
     columns = [('#', '_key'), ('atom', 'nmrAtom'), ('atom type', lambda shift: shift.nmrAtom.name), ('shift', 'value')]
 
-    self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists, callback=None, columns=columns, selector=self.chemicalShiftListPulldown)
+    tipTexts = ['atom key', 'name of NmrAtom', 'Atom Type', 'value of chemical shift']
+
+    self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists, callback=None, columns=columns, selector=self.chemicalShiftListPulldown, tipTexts=tipTexts)
 
     newLabel = Label(self, '', grid=(2, 0))
 

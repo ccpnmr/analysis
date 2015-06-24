@@ -62,9 +62,14 @@ class PeakListSimple(Dock):
     columns = [('#', 'serial'), ('Height', lambda pk: self._getPeakHeight(pk)),
                ('Volume', lambda pk: self._getPeakVolume(pk)),
                ('Details', 'comment')]
-    self.peakTable = GuiTableGenerator(self, peakLists, callback=self.selectPeak, columns=columns, selector=self.peakListPulldown)
 
-    self.updatePeakLists()
+    tipTexts=['Peak serial number', 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
+              'Integral of spectrum intensity around peak location, according to chosen volume method',
+              'Textual notes about the peak']
+    self.peakTable = GuiTableGenerator(self, peakLists, callback=self.selectPeak, columns=columns,
+                                       selector=self.peakListPulldown, tipTexts=tipTexts)
+
+    # self.updatePeakLists()
     newLabel = Label(self, '', grid=(2, 0))
     self.layout.addWidget(self.peakTable, 3, 0, 1, 4)
 
@@ -95,10 +100,10 @@ class PeakListSimple(Dock):
       return peak.height
 
 
-  def updatePeakLists(self):
-
-    texts = ['%s:%s:%s' % (peakList.spectrum.apiDataSource.experiment.name, peakList.spectrum.name, peakList.serial) for peakList in self.peakLists]
-    self.peakListPulldown.setData(texts=texts, objects=self.peakLists)
+  # def updatePeakLists(self):
+  #
+  #   texts = ['%s:%s:%s' % (peakList.spectrum.apiDataSource.experiment.name, peakList.spectrum.name, peakList.serial) for peakList in self.peakLists]
+  #   self.peakListPulldown.setData(texts=texts, objects=self.peakLists)
 
 
 

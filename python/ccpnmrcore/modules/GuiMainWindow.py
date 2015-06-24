@@ -124,6 +124,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter2.addWidget(self.splitter1)
     self.splitter2.heightMax = 200
     assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
+    csShortcut = QtGui.QShortcut(QtGui.QKeySequence('c, s'), self, self.showChemicalShiftTable)
     # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
     self.leftWidget.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)

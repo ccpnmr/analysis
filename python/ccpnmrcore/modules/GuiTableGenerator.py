@@ -9,18 +9,22 @@ from PyQt4 import QtGui
 
 class GuiTableGenerator(QtGui.QWidget):
 
-  def __init__(self, parent, objectLists, callback, columns, selector, **kw):
+  def __init__(self, parent, objectLists, callback, columns, selector, tipTexts=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
 
       self.columns = columns
-      # self.table = ObjectTable(self, self._getColumns, [], callback=callback, grid=(0, 0))
       self.objectList = objectLists[0]
+      self.objectLists = objectLists
       self.sampledDims = {}
-      self._getColumns(columns)
-      self.table = ObjectTable(self, self._getColumns(columns), [], callback=callback)
+      self._getColumns(columns, tipTexts)
+      self.tipTexts = tipTexts
+      self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback)
       self.updateContents()
-      selector.setCallback(self.changeObjectList)
+      self.selector = selector
+      self.selector.setCallback(self.changeObjectList)
+      self.updateSelectorContents()
+
 
   def changeObjectList(self, objectList):
 
@@ -37,13 +41,14 @@ class GuiTableGenerator(QtGui.QWidget):
     if objectList:
       objectsName = objectList._childClasses[0]._pluralLinkName
 
-      columns = self._getColumns(self.columns)
+      columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
       self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
 
-  def _getColumns(self, columns):
+  def _getColumns(self, columns, tipTexts):
 
     tableColumns = []
-    tableColumns.append(Column(*columns[0]))
+
+    tableColumns.append(Column(*columns[0], tipText=tipTexts[0]))
 
     if self.objectList.shortClassName == 'PL':
       numDim = self.objectList._parent.dimensionCount
@@ -75,11 +80,17 @@ class GuiTableGenerator(QtGui.QWidget):
 
 
     for column in columns[1:]:
-      c = Column(column[0], column[1])
+      c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
       tableColumns.append(c)
 
     return tableColumns
 
+  def updateSelectorContents(self):
+    if self.objectList.shortClassName == 'PL':
+      texts = ['%s:%s:%s' % (peakList.spectrum.apiDataSource.experiment.name, peakList.spectrum.name, peakList.serial) for peakList in self.objectLists]
+    else:
+      texts = ['%s' % (objectList.name for objectList in self.objectLists)]
+    self.selector.setData(texts=texts, objects=self.objectLists)
 
 
 

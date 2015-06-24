@@ -501,6 +501,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.dockArea.addDock(peakList, position='bottom')
 
+
+  def showChemicalShiftTable(self, position='bottom'):
+    from ccpnmrcore.modules.ChemicalShiftTable import ChemicalShiftTable
+    chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self.project.chemicalShiftLists)
+    self.dockArea.addDock(chemicalShiftTable, position=position)
+
   def showParassignPeakTable(self, position='left', relativeTo=None):
     peakList = ParassignModule(name="Peak Table", peakLists=self.project.peakLists)
     if relativeTo is not None:

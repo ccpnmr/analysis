@@ -65,8 +65,8 @@ class PeakListSimple(Dock):
     self.peakTable = GuiTableGenerator(self, peakLists, callback=self.selectPeak, columns=columns, selector=self.peakListPulldown)
 
     self.updatePeakLists()
-
-    self.layout.addWidget(self.peakTable, 2, 0, 1, 4)
+    newLabel = Label(self, '', grid=(2, 0))
+    self.layout.addWidget(self.peakTable, 3, 0, 1, 4)
 
   def initPanel(self):
     # Overwrites superclass

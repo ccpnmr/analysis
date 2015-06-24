@@ -82,7 +82,7 @@ class Undo(deque):
         self.popleft()
       del waypoints[0]
 
-  def addItem(self, undoMethod, redoMethod, undoArgs=None, undoKwargs=None,
+  def newItem(self, undoMethod, redoMethod, undoArgs=None, undoKwargs=None,
               redoArgs=None, redoKwargs=None):
     """Add item to the undo stack.
     """
@@ -128,7 +128,7 @@ class Undo(deque):
       self.nextIndex += 1
 
 
-  # def addItem(self, undoMethod, undoData, redoMethod, redoData=None):
+  # def newItem(self, undoMethod, undoData, redoMethod, redoData=None):
   #   """Add item to the undo stack.
   #      Note that might not know redoData until after we do undo.
   #      NBNB NO, we should know, so resetting facility disabled. Rasmus

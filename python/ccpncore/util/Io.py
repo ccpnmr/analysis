@@ -820,7 +820,7 @@ def renameProject(project, newProjectName):
       project.override = False
       if undo is not None:
         undo.decreaseBlocking()
-        undo.addItem(renameProject, renameProject, undoArgs=(project,oldProjectName),
+        undo.newItem(renameProject, renameProject, undoArgs=(project,oldProjectName),
                      redoArgs=(project, newProjectName))
 
 

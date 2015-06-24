@@ -323,7 +323,7 @@ if _undo is not None:''')
   _undo.clear()''')
       else:
         self.write('''
-  _undo.addItem(self.delete, parent.new%s, redoKwargs=attrlinks)
+  _undo.newItem(self.delete, parent.new%s, redoKwargs=attrlinks)
 ''' % op.target.name)
 
     elif opType == 'fullDelete':
@@ -333,7 +333,7 @@ if _undo is not None:''')
   _undo.clear()''')
       else:
         self.write('''
-  _undo.addItem(root._unDelete, self.delete, undoArgs=(objsToBeDeleted, topObjectsToCheck))
+  _undo.newItem(root._unDelete, self.delete, undoArgs=(objsToBeDeleted, topObjectsToCheck))
 ''')
 
     elif opType == 'set':
@@ -342,7 +342,7 @@ if _undo is not None:''')
       currentVar = self.valueVar(op.target, prefix=self.currentPrefix)
 
       self.write('''
-  _undo.addItem(self.%s, self.%s,
+  _undo.newItem(self.%s, self.%s,
                 undoArgs=(%s,), redoArgs=(%s,))
 ''' % (notifyName, notifyName, currentVar, var))
 
@@ -356,14 +356,14 @@ if _undo is not None:''')
       if opType == 'add':
 
         self.write('''
-  _undo.addItem(self.%s, self.%s,
+  _undo.newItem(self.%s, self.%s,
                 undoArgs=(%s,), redoArgs=(%s,))
  ''' % (setterName, notifyName, undoColVar, var))
 
       else:
 
         self.write('''
-  _undo.addItem(self.%s, self.%s,
+  _undo.newItem(self.%s, self.%s,
                 undoArgs=(%s,), redoArgs=(%s,))
  ''' % (setterName, notifyName, undoColVar, var))
 

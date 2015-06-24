@@ -92,7 +92,7 @@ def copySubTree(sourceObj, newParent, maySkipCrosslinks:bool=False,
       undo.decreaseBlocking()
 
   if undo is not None and result is not None:
-    undo.addItem(result.delete, copySubTree, redoArgs=(sourceObj, newParent),
+    undo.newItem(result.delete, copySubTree, redoArgs=(sourceObj, newParent),
                  redoKwargs = {'maySkipCrosslinks':maySkipCrosslinks,
                                'topObjectParameters':topObjectParameters,
                                'objectMap':objectMap})

@@ -342,7 +342,7 @@ def addLinearSequence(molecule:Molecule, sequence:list, seqCodeStart:int=1,
       undo.decreaseBlocking()
 
   if undo is not None and (molResidues or molResLinks):
-    undo.addItem(Undo.deleteAll, addLinearSequence, undoArgs=(molResidues+molResLinks,),
+    undo.newItem(Undo.deleteAll, addLinearSequence, undoArgs=(molResidues+molResLinks,),
                  redoArgs=(molecule, sequence),
                  redoKwargs = {'seqCodeStart':seqCodeStart, 'isCyclic':isCyclic})
     

@@ -394,7 +394,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     if not doPosLevels and not doNegLevels:
       return
       
-    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    ###GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     
     #for position, dataArray in self.getPlaneData(guiStrip):
     for position, dataArray in self.getPlaneData():
@@ -409,7 +409,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
         for n, contourData in enumerate(negContours):
           self.addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
         
-    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    ###GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     
     self.posLevelsPrev = list(posLevels)
     self.negLevelsPrev = list(negLevels)
@@ -473,10 +473,20 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     
     GL.glNewList(displayList, GL.GL_COMPILE)
 
-    for contour in contourData:
-      GL.glVertexPointer(2, GL.GL_FLOAT, 0, contour)
-      GL.glDrawArrays(GL.GL_LINE_LOOP, 0, len(contour)//2)
+    ###for contour in contourData:
+    ###  GL.glVertexPointer(2, GL.GL_FLOAT, 0, contour)
+    ###  GL.glDrawArrays(GL.GL_LINE_LOOP, 0, len(contour)//2)
       
+    GL.glBegin(GL.GL_LINES)
+    for contour in contourData:
+      n = len(contour) // 2
+      contour = contour.reshape((n, 2))
+      for m, (x, y) in enumerate(contour):
+        GL.glVertex2f(x,y)
+        xx, yy = contour[(m+1)%n]
+        GL.glVertex2f(xx, yy)
+    GL.glEnd()
+    
     GL.glEndList()
 
   """

@@ -66,10 +66,16 @@ ChemicalShiftList = cls = importlib.import_module(
 _wrappedClasses.append(cls)
 ChemicalShift = cls = importlib.import_module('ccpn._wrapper._ChemicalShift').ChemicalShift
 _wrappedClasses.append(cls)
+Sample = cls = importlib.import_module('ccpn._wrapper._Sample').Sample
+_wrappedClasses.append(cls)
+SampleComponent = cls = importlib.import_module('ccpn._wrapper._SampleComponent').SampleComponent
+_wrappedClasses.append(cls)
 Spectrum = cls = importlib.import_module('ccpn._wrapper._Spectrum').Spectrum
 _wrappedClasses.append(cls)
 SpectrumReference = cls = importlib.import_module(
   'ccpn._wrapper._SpectrumReference').SpectrumReference
+_wrappedClasses.append(cls)
+PseudoDimension = cls = importlib.import_module('ccpn._wrapper._PseudoDimension').PseudoDimension
 _wrappedClasses.append(cls)
 PeakList = cls = importlib.import_module('ccpn._wrapper._PeakList').PeakList
 _wrappedClasses.append(cls)

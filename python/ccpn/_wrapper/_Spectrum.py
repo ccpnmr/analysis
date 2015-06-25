@@ -457,31 +457,6 @@ class Spectrum(AbstractWrapperObject):
   def phases1(self, value:Sequence):
     self._setDataDimValue('phase1', value)
 
-
-  @property
-  def sampledValues(self) -> tuple:
-    """\- *((float)\*)\*dimensionCount*, *settable*
-
-    tuples of sampled values (None except for Sampled dimensions)."""
-    return tuple(x.pointValues for x in self._wrappedData.sortedDataDims()
-                 if hasattr(x, 'pointValues'))
-
-  @sampledValues.setter
-  def sampledValues(self, value:Sequence) -> tuple:
-    self._setDataDimValue('pointValues', value)
-
-  @property
-  def sampledValueErrors(self) -> tuple:
-    """\- *((float)\*)\*dimensionCount*, *settable*
-
-    tuples of sampled value errors (None except for Sampled dimensions)."""
-    return tuple(x.pointErrors for x in self._wrappedData.sortedDataDims()
-                 if hasattr(x, 'pointErrors'))
-
-  @sampledValueErrors.setter
-  def sampledValueErrors(self, value:Sequence) -> tuple:
-    self._setDataDimValue('pointErrors', value)
-
   # Attributes belonging to ExpDimRef and DataDimRef
 
   def _mainExpDimRefs(self) -> list:

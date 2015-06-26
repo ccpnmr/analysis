@@ -477,25 +477,13 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     ###  GL.glVertexPointer(2, GL.GL_FLOAT, 0, contour)
     ###  GL.glDrawArrays(GL.GL_LINE_LOOP, 0, len(contour)//2)
       
-    """ below does not work because all contours connected together the way the C world returns the data
-        (also, not all contours are closed, some are open, and GL_LINE_LOOP assumes all are closed)
-    GL.glBegin(GL.GL_LINE_LOOP)
     for contour in contourData:
+      GL.glBegin(GL.GL_LINE_LOOP)
       n = len(contour) // 2
       contour = contour.reshape((n, 2))
       for (x, y) in contour:
         GL.glVertex2f(x,y)
-    GL.glEnd()
-"""
-    GL.glBegin(GL.GL_LINES)
-    for contour in contourData:
-      n = len(contour) // 2
-      contour = contour.reshape((n, 2))
-      for m, (x, y) in enumerate(contour):
-        GL.glVertex2f(x,y)
-        xx, yy = contour[(m+1)%n]
-        GL.glVertex2f(xx, yy)
-    GL.glEnd()
+      GL.glEnd()
     
     GL.glEndList()
     

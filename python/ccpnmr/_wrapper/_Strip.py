@@ -84,13 +84,14 @@ class Strip(GuiStrip, AbstractWrapperObject):
   @property
   def orderedAxes(self) -> tuple:
     """Axes in display order (X, Y, Z1, Z2, ...) """
+    apiStrip = self._wrappedData
     ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._wrappedData.orderedAxes)
+    return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
 
   @orderedAxes.setter
   def orderedAxes(self, value:Sequence):
     value = [self.getById(x) if isinstance(x, str) else x for x in value]
-    self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
+    self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
 
   @property
   def positions(self) -> tuple:

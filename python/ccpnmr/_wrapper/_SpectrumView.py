@@ -278,13 +278,9 @@ class SpectrumView(AbstractWrapperObject):
     return self.getWrapperObject(self._wrappedData.spectrumView.dataSource)
 
   @property
-  def strips(self) -> Strip:
-    """Strips attached to StripSpectrumView - either one, or all in Display"""
-    stripSerial = self._wrappedData.spectrumView.stripSerial
-    if stripSerial:
-      return (self._project._data2Obj.get(self._wrappedData.strip),)
-    else:
-      return self._parent._parent.orderedStrips
+  def strip(self) -> Strip:
+    """Strip attached to SpectrumView """
+    return self._project._data2Obj.get(self._wrappedData.strip)
 
   # Implementation functions
   @classmethod

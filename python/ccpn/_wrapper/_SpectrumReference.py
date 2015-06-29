@@ -226,7 +226,7 @@ class SpectrumReference(AbstractWrapperObject):
       if hasattr(ddim, 'dataDimRef'):
         result.extend(ddim.sortedDataDimRefs())
     #
-    return tuple(result)
+    return result
 
 
 def newSpectrumReference(parent:Spectrum, dimension:int, spectrometerFrequency:float,

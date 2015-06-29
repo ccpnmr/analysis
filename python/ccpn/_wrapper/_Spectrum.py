@@ -29,6 +29,7 @@ from collections.abc import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
+from ccpn import Sample
 from ccpn import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.memops.Implementation import Url
@@ -713,13 +714,19 @@ class Spectrum(AbstractWrapperObject):
         else:
           dataDimRef.dataDim.valuePerPoint *= (sw/oldsw)
 
+  @property
+  def sample(self) -> Sample:
+    """Sample used to acquire Spectrum"""
+    return self._project._data2Obj.get(self._wrappedData.experiment.sample)
+
+
   # Implementation functions
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
-    return tuple(x for y in parent._wrappedData.sortedExperiments()
-                 for x in y.sortedDataSources())
+    return [x for y in parent._wrappedData.sortedExperiments()
+            for x in y.sortedDataSources()]
 
 
 def newSpectrum(parent:Project, name:str) -> Spectrum:

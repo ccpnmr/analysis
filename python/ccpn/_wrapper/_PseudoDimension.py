@@ -154,7 +154,7 @@ class PseudoDimension(AbstractWrapperObject):
       if ddim.className == 'SampledDataDim':
         result.add(ddim)
     #
-    return tuple(result)
+    return result
 
 
 # Connections to parents:

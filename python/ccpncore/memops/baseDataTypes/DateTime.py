@@ -97,6 +97,6 @@ try:
   create = datetime.datetime.fromtimestamp
 
 except:
-  # This will not make the code work in earnetss,
-  # #but inside ObjectDomain it just needs ot be present
+  # This will not make the code work in earnest
+  # #but inside ObjectDomain it just needs to be present
   from ccpncore.memops.baseDataTypes.Float import *

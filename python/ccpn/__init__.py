@@ -77,6 +77,8 @@ SpectrumReference = cls = importlib.import_module(
 _wrappedClasses.append(cls)
 PseudoDimension = cls = importlib.import_module('ccpn._wrapper._PseudoDimension').PseudoDimension
 _wrappedClasses.append(cls)
+SpectrumHit = cls = importlib.import_module('ccpn._wrapper._SpectrumHit').SpectrumHit
+_wrappedClasses.append(cls)
 PeakList = cls = importlib.import_module('ccpn._wrapper._PeakList').PeakList
 _wrappedClasses.append(cls)
 Peak = cls = importlib.import_module('ccpn._wrapper._Peak').Peak

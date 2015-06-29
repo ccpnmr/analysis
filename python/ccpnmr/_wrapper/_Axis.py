@@ -112,6 +112,11 @@ class Axis(AbstractWrapperObject):
     value = [self.getById(x) if isinstance(x, str) else x for x in value]
     self._wrappedData.axis.resonances = tuple(x._wrappedData for x in value)
 
+  @property
+  def strip(self):
+    """Strip that Axis belongs to"""
+    return self._project._data2Obj.get(self._wrappedData.strip)
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:Strip)-> list:

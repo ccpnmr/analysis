@@ -202,7 +202,6 @@ class ObjectTableModel(TableModel):
     return len(self.objects)
 
   def columnCount(self, parent):
-  
     return len(self.columns)
   
   def numberRows(self):

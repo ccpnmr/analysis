@@ -23,49 +23,41 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-from PyQt4 import QtGui, QtCore
 
 import pyqtgraph as pg
 
-import math
-#import munkres
+from pyqtgraph.dockarea import Dock
 
-from functools import partial
+import math
 
 from ccpncore.gui.Button import Button
+from ccpncore.gui.Base import Base
 from ccpncore.gui.Label import Label
-from ccpncore.gui.ListWidget import ListWidget
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Widget import Widget
-
+from ccpncore.gui.DockLabel import DockLabel
 from ccpnmrcore.modules.PeakTable import PeakListSimple
+from ccpnmrcore.popups.InterIntraSpectrumPopup import InterIntraSpectrumPopup
+from ccpnmrcore.popups.SelectSpectrumDisplayPopup import SelectSpectrumDisplayPopup
 
-class BackboneAssignmentModule(PeakListSimple):
+class BackboneAssignmentModule(Dock, Base):
 
-  def __init__(self, project=None, name=None, peakLists=None, assigner=None, hsqcDisplay=None):
-    PeakListSimple.__init__(self, name='Backbone Assignment', peakLists=project.peakLists, grid=(1, 0), gridSpan=(2, 1))
+  def __init__(self, project=None, name=None, peakLists=None, assigner=None, hsqcDisplay=None, **kw):
+
+    Dock.__init__(self, name='Backbone Assignment')
+    self.label.hide()
+    self.label = DockLabel('Backbone Assignment', self)
+    self.label.show()
+    self.displayButton = Button(self, text='Select Modules', callback=self.showDisplayPopup)
+    self.spectrumButton = Button(self, text='Select Inter/Intra Spectra', callback=self.showInterIntraPopup)
+    self.layout.addWidget(self.displayButton, 0, 0, 1, 1)
+    self.layout.addWidget(self.spectrumButton, 0, 2, 1, 1)
     self.hsqcDisplay = hsqcDisplay
     self.project = project
     self.current = project._appBase.current
+    self.peakTable = PeakListSimple(self, peakLists=project.peakLists)
+    self.layout.addWidget(self.peakTable, 2, 0, 1, 4)
     self.peakTable.callback = self.findMatchingPeaks
-    # self.layout.setContentsMargins(4, 4, 4, 4)
-    spectra = [spectrum.pid for spectrum in project.spectra]
-    displays = [display.pid for display in project.spectrumDisplays if len(display.orderedAxes) > 2]
-    self.queryDisplayPulldown = PulldownList(self, grid=(4, 0), gridSpan=(1, 1), callback=self.selectQuerySpectrum)
-    self.queryDisplayPulldown.insertSeparator(0)
-    self.matchDisplayPulldown = PulldownList(self, grid=(4, 2), gridSpan=(1, 1), callback=self.selectMatchSpectrum)
-    self.queryDisplayPulldown.setData(displays)
-    self.queryDisplayPulldown.setCurrentIndex(1)
-    self.matchDisplayPulldown.setData(displays)
-    self.queryList = ListWidget(self, grid=(6, 0), gridSpan=(1, 1))
-    self.matchList = ListWidget(self, grid=(6, 2), gridSpan=(1, 1))
-    self.layout.addWidget(self.queryList, 6, 0, 1, 2)
-    self.layout.addWidget(self.matchList, 6, 2, 1, 2)
-    # self.setStyleSheet(""" ListWidget {background-color: #000021;
-    #          color: #f7ffff;
-    # }""")
-    # self.queryList.setMaximumHeight(70)
-    # self.matchList.setMaximumHeight(70)
+
+
 
     self.lines = []
     self.numberOfMatches = 5
@@ -77,11 +69,11 @@ class BackboneAssignmentModule(PeakListSimple):
     # self.assigner.clearAllItems()
     ### determine query and match windows
     queryWindows = []
-    for index in range(self.queryList.count()):
-      queryWindows.append(self.project.getById(self.queryList.item(index).text()))
+    for index in range(self.interList.count()):
+      queryWindows.append(self.project.getById(self.interList.item(index).text()))
     matchWindows = []
-    for index in range(self.matchList.count()):
-      matchWindows.append(self.project.getById(self.matchList.item(index).text()))
+    for index in range(self.intraList.count()):
+      matchWindows.append(self.project.getById(self.intraList.item(index).text()))
 
     if peak:
       positions = peak.position
@@ -227,12 +219,13 @@ class BackboneAssignmentModule(PeakListSimple):
 
     return matrix, scores
 
+  def showInterIntraPopup(self):
+    popup = InterIntraSpectrumPopup(project=self.project)
+    popup.exec_()
 
-  def selectQuerySpectrum(self, item):
-    self.queryList.addItem(item)
-
-  def selectMatchSpectrum(self, item):
-    self.matchList.addItem(item)
+  def showDisplayPopup(self):
+    popup = SelectSpectrumDisplayPopup(project=self.project)
+    popup.exec_()
 
 
 

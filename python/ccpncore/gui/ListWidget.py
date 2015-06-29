@@ -8,7 +8,7 @@ class ListWidget(QtGui.QListWidget, Base):
 
   def __init__(self, parent, **kw):
 
-    QtGui.QListWidget.__init__(self)
+    QtGui.QListWidget.__init__(self, parent)
     # removeItemShortcut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Delete), self, self.removeItem)
     Base.__init__(self, **kw)
     # self.setStyleSheet( """QListWidget {background-color: #000021;
@@ -24,3 +24,6 @@ class ListWidget(QtGui.QListWidget, Base):
 
     item = self.takeItem(self.currentRow())
     item = None
+
+  def mouseDoubleClickEvent(self, event):
+    self.takeItem(self.currentRow())

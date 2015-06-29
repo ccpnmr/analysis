@@ -280,7 +280,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
     obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
                                                     stripSerial=stripSerial, dataSource=dataSource,
                                                    dimensionOrdering=dimensionOrdering)
-    return self._project._data2Obj[obj]
+    return self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
 
 def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
   """Make copy of strip in SpectrumDisplay, at position newIndex - or rightmost"""

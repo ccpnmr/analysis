@@ -35,6 +35,7 @@ from functools import partial
 from ccpn.lib.assignment import isInterOnlyExpt
 
 from ccpncore.gui.Button import Button
+from ccpncore.gui.DockLabel import DockLabel
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
 from ccpncore.gui.PulldownList import PulldownList
@@ -42,28 +43,20 @@ from ccpncore.gui.Widget import Widget
 
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 
-class PickAndAssignModule(PeakListSimple):
+from pyqtgraph.dockarea import Dock
 
-  def __init__(self, project=None, name=None, peakLists=None, assigner=None, hsqcDisplay=None):
-    PeakListSimple.__init__(self, name='Pick And Assign', peakLists=project.peakLists, grid=(1, 0), gridSpan=(2, 4))
-    self.hsqcDisplay = hsqcDisplay
-    self.project = project
-    self.current = project._appBase.current
-    self.layout.setContentsMargins(4, 4, 4, 4)
-    spectra = [spectrum.pid for spectrum in project.spectra]
-    displays = [display.pid for display in project.spectrumDisplays if len(display.orderedAxes) > 2]
-    self.queryDisplayPulldown = PulldownList(self, grid=(4, 0), callback=self.selectQuerySpectrum)
-    self.matchDisplayPulldown = PulldownList(self, grid=(4, 2), callback=self.selectMatchSpectrum)
-    self.queryDisplayPulldown.setData(displays)
-    self.queryDisplayPulldown.setCurrentIndex(1)
-    self.matchDisplayPulldown.setData(displays)
-    self.queryList = ListWidget(self, grid=(6, 0), gridSpan=(1, 1))
-    self.matchList = ListWidget(self, grid=(6, 2), gridSpan=(1, 1))
-    self.layout.addWidget(self.queryList, 6, 0, 1, 2)
-    self.layout.addWidget(self.matchList, 6, 2, 1, 2)
+class PickAndAssignModule(Dock):
 
-    pickAndAssignWidget = Widget(self, grid=(0, 4), gridSpan=(6, 1))
-    headerLabel = Label(self, text='i-1', grid=(0, 0), )
+  def __init__(self, parent, project=None):
+    Dock.__init__(self, name='Atom Selector')
+    self.label.hide()
+
+    self.label = DockLabel('Atom Selector', self)
+    self.label.show()
+    self.orientation = 'vertical'
+    self.moveLabel=False
+    pickAndAssignWidget = Widget(self)
+    headerLabel = Label(self, text='i-1')
     pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
     headerLabel = Label(pickAndAssignWidget, text='i', grid=(0, 1))
     headerLabel = Label(pickAndAssignWidget, text='i+1', grid=(0, 2))
@@ -85,6 +78,7 @@ class PickAndAssignModule(PeakListSimple):
     for button in self.buttons:
       button.clicked.connect(self.returnButtonToNormal)
 
+    self.addWidget(pickAndAssignWidget)
 
   def pickAndAssign(self, position, atomType):
 
@@ -119,13 +113,6 @@ class PickAndAssignModule(PeakListSimple):
         else:
           self.caButton2.setStyleSheet('background-color: green')
 
-  def selectQuerySpectrum(self, item):
-    pass
-  #   self.queryList.addItem(item)
-  #
-  def selectMatchSpectrum(self, item):
-    pass
-  #   self.matchList.addItem(item)
 
 
 

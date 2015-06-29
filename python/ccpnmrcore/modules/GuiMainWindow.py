@@ -520,8 +520,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(self.bbModule)
     return self.bbModule
 
-  def showPickAndAssignModule(self, position=None, relativeTo=None, assigner=None, hsqcDisplay=None):
-    self.paaModule = PickAndAssignModule(self._project, position, relativeTo, assigner, hsqcDisplay)
+  def showPickAndAssignModule(self, position=None, relativeTo=None):
+    self.paaModule = PickAndAssignModule(self._project)
     self.dockArea.addDock(self.paaModule)
     return self.paaModule
 
@@ -566,4 +566,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showConsole(self):
     self.pythonConsole.show()
+
+  def showPopupGenerator(self):
+    from ccpnmrcore.modules.GuiPopupGenerator import PopupGenerator
+    popup = PopupGenerator(self)
+    popup.exec_()
+    popup.raise_()
 

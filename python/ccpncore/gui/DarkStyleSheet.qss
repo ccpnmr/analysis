@@ -28,6 +28,12 @@ QMenu::item::hover {
       background-color: #e4e15b;
       }
 
+
+QDialog {
+        background-color: #2a3358;
+        color: #f7ffff;
+        }
+
 QListWidget {background-color: #000021;
              color: #f7ffff;
              border: 1px solid #424a71;
@@ -44,22 +50,22 @@ PulldownList::hover {
                   background-color: #e4e15b;
                   color: #122043;
                   }
-QTableView { margin-left: 4px;
+ObjectTable { margin-left: 4px;
              border: 1px #182548;
              font-family: open-sans bold;
            }
-QTableWidget QHeaderView {
+QHeaderView {
                           background-color: #f7ffff;
                           }
-QTableView::item {
+ObjectTable::item {
                   padding: 2px;
                   background-color: #cccff9;
                   color: #122043;
                  }
-QTableView::item::hover {
+ObjectTable::item::hover {
                          background-color: #bdbc5a;
                          }
-QTableView::item::selected {
+ObjectTable::item::selected {
                             background-color: #182548;
                             color: #f7ffff;
                    }
@@ -83,6 +89,9 @@ Label {
 Dock ScrollArea QWidget { background-color: #2a3358;
         }
 Dock > QWidget QScrollArea { background-color: #2a3358;
+        }
+
+Dock > QWidget { background-color: #2a3358;
         }
 DockLabel  {
           background-color : #BEC4F3;

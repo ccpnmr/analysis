@@ -21,6 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+from ccpncore.gui.Base import Base
 from ccpncore.gui.DockLabel import DockLabel
 from ccpncore.gui.Font import Font
 from ccpnmrcore.modules.GuiTableGenerator import GuiTableGenerator
@@ -33,24 +34,24 @@ from PyQt4 import QtGui, QtCore
 UNITS = ['ppm', 'Hz', 'point']
 
 
-class PeakListSimple(Dock):
+class PeakListSimple(QtGui.QWidget, Base):
 
   def __init__(self, parent=None, peakLists=None, name='Peak List', **kw):
 
     if not peakLists:
       peakLists = []
       
-    # QtGui.QWidget.__init__(self, parent)
-    Dock.__init__(self, name=name)
+    QtGui.QWidget.__init__(self, parent)
+    Base.__init__(self, **kw)
 
-    self.label.hide()
-    self.label = DockLabel(name, self)
-    self.label.show()
+    # self.label.hide()
+    # self.label = DockLabel(name, self)
+    # self.label.show()
     self.peakLists = peakLists
     label = Label(self, 'Peak List:')
-    self.layout.addWidget(label, 0, 0)
+    self.layout().addWidget(label, 0, 0)
 
-    self.label.setFont(Font(size=12, bold=True))
+    # self.label.setFont(Font(size=12, bold=True))
     self.peakListPulldown = PulldownList(self, grid=(0, 1))
 
 
@@ -71,7 +72,7 @@ class PeakListSimple(Dock):
 
     # self.updatePeakLists()
     newLabel = Label(self, '', grid=(2, 0))
-    self.layout.addWidget(self.peakTable, 3, 0, 1, 4)
+    self.layout().addWidget(self.peakTable, 3, 0, 1, 4)
 
   def initPanel(self):
     # Overwrites superclass

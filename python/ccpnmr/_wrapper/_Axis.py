@@ -29,7 +29,7 @@ from ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
 
 class Axis(AbstractWrapperObject):
   """Display Axis for 1D or nD spectrum"""
-  
+
   #: Short class name, for PID.
   shortClassName = 'GA'
 

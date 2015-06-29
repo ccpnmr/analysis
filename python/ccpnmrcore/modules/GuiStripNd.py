@@ -84,19 +84,13 @@ class GuiStripNd(GuiStrip):
         spectrumView.addSpectrumItem(self)
 
     ###Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
+
+    
+  def setupAxes(self):
+    GuiStrip.setupAxes(self)
     for func in ('setPosition', 'setWidth'):
       Notifiers.registerNotify(self.axisRegionChanged, 'ccpnmr.gui.Task.Axis', func)
-    
-  """
-  def showSpectrum(self, guiSpectrumView):
-    orderedAxes = self.strip.orderedAxes
-    self.xAxis = orderedAxes[0]
-    self.yAxis = orderedAxes[1]
-    self.zAxis = orderedAxes[2:]
-    apiDataSource = guiSpectrumView.dataSource
 
-    newItem = self.scene().addItem(guiSpectrumView)
-"""
 
   def mouseDragEvent(self, event):
     if event.button() == QtCore.Qt.RightButton:
@@ -125,70 +119,14 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
 
-  # def displayASpectrum(self, guiSpectrumView):
-  #
-  #   # resetAllAxisCodes(self.project._wrappedData)
-  #   # spectrum = self.getObject(spectrumVar)
-  #   # if spectrum.dimensionCount < 1:
-  #   #   # TBD: logger message
-  #   #   return
-  #   #
-  #   # # TBD: check if dimensions make sense
-  #   # self.posColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex]
-  #   # self.negColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex+1]
-  #   # # if len(self.spectrumItems) >= 1:
-  #   # #   if self.spectrumItems[0].spectrum.axisCodes == spectrum.axisCodes:
-  #   # #     spectrumItem = SpectrumNdItem(self, spectrum, self.spectrumItems[0].dimMapping, self.region, self.posColors, self.negColors)
-  #   # #     self.spectrumItems[0].spectrum.axisCodes
-  #   # #   else:
-  #   # #     print('Axis codes do not match pane')
-  #   # #     return
-  #   # #
-  #   # # else:
-  #   # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
-  #
-  #   # Changed to guiSpectrumView.positiveContourColour, which picks up from either
-  #   # SpectrumView or DataSource
-  #   if not guiSpectrumView.positiveContourColour:
-  #     apiDataSource.positiveContourColour = Colour.spectrumHexColours[self.colourIndex]
-  #     self.colourIndex += 1
-  #     self.colourIndex %= len(Colour.spectrumHexColours)
-  #
-  #   if not guiSpectrumView.negativeContourColour:
-  #   # Changed to guiSpectrumView.negativeContourColour, which picks up from either
-  #   # SpectrumView or DataSource
-  #     apiDataSource.negativeContourColour = Colour.spectrumHexColours[self.colourIndex]
-  #     self.colourIndex += 1
-  #     self.colourIndex %= len(Colour.spectrumHexColours)
-  #
-  #   self.scene().addItem(guiSpectrumView)
-
-    # resetAllAxisCodes(self.project._wrappedData)
-    # spectrum = self.getObject(spectrumVar)
-    # if spectrum.dimensionCount < 1:
-    #   # TBD: logger message
-    #   return
-    #
-    # # TBD: check if dimensions make sense
-    # self.posColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex]
-    # self.negColors = list(SPECTRUM_COLOURS.keys())[self.colourIndex+1]
-    # # if len(self.spectrumItems) >= 1:
-    # #   if self.spectrumItems[0].spectrum.axisCodes == spectrum.axisCodes:
-    # #     spectrumItem = SpectrumNdItem(self, spectrum, self.spectrumItems[0].dimMapping, self.region, self.posColors, self.negColors)
-    # #     self.spectrumItems[0].spectrum.axisCodes
-    # #   else:
-    # #     print('Axis codes do not match pane')
-    # #     return
-    # #
-    # # else:
-    # spectrumItem = GuiSpectrumViewNd(self, spectrum, dimMapping, self.region, self.posColors, self.negColors)
 
   def changeZPlane(self, planeCount=None, position=None):
 
     zAxis = self.orderedAxes[2]
+    print(zAxis)
     smallest = None
     #take smallest inter-plane distance
-    for spectrumItem in self._parent.spectrumViews:
+    for spectrumItem in self.spectrumViews:
       zPlaneSize = spectrumItem.zPlaneSize()
       if zPlaneSize is not None:
         if smallest is None or zPlaneSize < smallest:
@@ -199,7 +137,7 @@ class GuiStripNd(GuiStrip):
     if planeCount:
       delta = smallest * planeCount
       zAxis.position = zAxis.position+delta
-    if position:
+    elif position:
       zAxis.position = position
     self.planeLabel.setText('%.3f' % zAxis.position)
 
@@ -381,7 +319,11 @@ class GuiStripNd(GuiStrip):
   def axisRegionChanged(self, apiAxis):
     
     # TBD: other axes
-    axis = self._appBase.project._data2Obj[apiAxis]
+    print(apiAxis)
+    apiStripAxis = self._wrappedData.findFirstStripAxis(axis=apiAxis)
+    if apiStripAxis is None:
+      return
+    axis = self._appBase.project._data2Obj[apiStripAxis]
     if len(self.orderedAxes) >= 3 and axis in self.orderedAxes[2:]:
       peakLists = self.peakLayerDict.keys()
       for peakList in peakLists:

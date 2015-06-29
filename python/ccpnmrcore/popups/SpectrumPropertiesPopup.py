@@ -26,6 +26,8 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn.lib.ExperimentUtil import EXPERIMENT_TYPES
+
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ColourDialog import ColourDialog
@@ -118,7 +120,7 @@ class GeneralTab(QtGui.QWidget, Base):
       spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(7, 0))
       spectrumType = PulldownList(self, grid=(7, 1))
       spectrumType.addItems(SPECTRA)
-      spectrumType.addItem(spectrum.experimentName)
+      # spectrumType.addItem(spectrum.experimentName)
       spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
       pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(8, 0))
       recordingDataLabel = Label(self, text="Date Recorded", grid=(9, 0))
@@ -132,10 +134,13 @@ class GeneralTab(QtGui.QWidget, Base):
         noiseLevelData.setText('None')
     else:
       spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(6, 0))
-      # spectrumType = PulldownList(self, grid=(6, 1))
+      self.spectrumType = PulldownList(self, grid=(6, 1))
+      print(self.spectrum.axisCodes)
+      self.axisCodes = ''.join(sorted(list(self.spectrum.axisCodes)))
+      self.spectrumType.addItems(list(EXPERIMENT_TYPES[spectrum.dimensionCount].get(self.axisCodes).keys()))
       # spectrumType.addItems(SPECTRA)
-      # spectrumType.addItem(spectrum.experimentName)
-      # spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
+      self.spectrumType.setCurrentIndex(self.spectrumType.findText(spectrum.experimentName))
+      self.spectrumType.currentIndexChanged.connect(self.changeSpectrumType)
       pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(7, 0))
       recordingDataLabel = Label(self, text="Date Recorded", grid=(8, 0))
       minimumValueLabel = Label(self, text="Minimum Value: ", grid=(9, 0))
@@ -148,6 +153,10 @@ class GeneralTab(QtGui.QWidget, Base):
         noiseLevelData.setText('None')
 
 
+
+  def changeSpectrumType(self, value):
+    expType = EXPERIMENT_TYPES[self.spectrum.dimensionCount].get(self.axisCodes).get(self.spectrumType.currentText())
+    self.spectrum.experimentType = expType
 
   def getSpectrumFile(self):
     if os.path.exists('/'.join(self.pathData.text().split('/')[:-1])):
@@ -234,7 +243,7 @@ class ContoursTab(QtGui.QWidget):
     positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(0, 0))
     positiveContoursCheckBox = CheckBox(self, grid=(0, 1), checked=True)
     for spectrumView in self.spectrum.spectrumViews:
-      if spectrumView._wrappedData.displayPositiveContours is True:
+      if spectrumView._wrappedData.spectrumView.displayPositiveContours is True:
         positiveContoursCheckBox.setChecked(True)
       else:
         positiveContoursCheckBox.setChecked(False)
@@ -274,7 +283,7 @@ class ContoursTab(QtGui.QWidget):
     negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6 ,0))
     negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True)
     for spectrumView in self.spectrum.spectrumViews:
-      if spectrumView._wrappedData.displayNegativeContours is True:
+      if spectrumView._wrappedData.spectrumView.displayNegativeContours is True:
         negativeContoursCheckBox.setChecked(True)
       else:
         negativeContoursCheckBox.setChecked(False)

@@ -19,14 +19,13 @@ class DockLabel(VerticalLabel):
         self.updateStyle()
         self.setAutoFillBackground(False)
         self.setFont(Font(semiBold=True, size=13))
-        # self.setFixedHeight(13)
 
     #def minimumSizeHint(self):
         ##sh = QtGui.QWidget.minimumSizeHint(self)
         #return QtCore.QSize(20, 20)
 
     def updateStyle(self):
-        r = '1px'
+        r = '5px'
         if self.dim:
             fg = '#122043'
             bg = '#BEC4F3'

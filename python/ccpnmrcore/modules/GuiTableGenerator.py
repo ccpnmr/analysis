@@ -1,7 +1,6 @@
 __author__ = 'simon1'
 
 from ccpncore.gui.Table import ObjectTable, Column
-from ccpncore.gui.Widget import Widget
 from ccpnmrcore.modules.peakUtils import getPeakPosition, getPeakAnnotation
 
 

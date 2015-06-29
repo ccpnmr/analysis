@@ -80,9 +80,11 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
     if isinstance(wrapperObject, Spectrum):
       spectrum = wrapperObject
       spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
-      spectrumView = self.getWrapperObject(spectrumDisplay._wrappedData.findFirstSpectrumView(dataSource=spectrum._wrappedData))
-      for strip in spectrumView.strips:
-        strip.displaySpectrum(spectrum)
+      # apiStrip = spectrumDisplay.apiSpectrumDisplay.findFirstStrip(serial=1)
+      # apiSpectrumView = spectrumDisplay.apiSpectrumDisplay.findFirstSpectrumView(name=spectrum.name)
+      # spectrumView = self.getWrapperObject(apiStrip.findFirstStripSpectrumView(spectrumView=apiSpectrumView))
+      # for strip in spectrumView.strips:
+      #   strip.displaySpectrum(spectrum)
       self.dockArea.guiWindow.removeBlankDisplay()
     import os
     if dropObject.mimeData().hasUrls():

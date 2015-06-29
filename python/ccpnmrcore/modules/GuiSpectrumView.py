@@ -31,7 +31,7 @@ import pyqtgraph as pg
 #from ccpnmrcore.modules.spectrumPane.PeakListItem import PeakListItem
 #from ccpnmrcore.modules.spectrumPane.IntegralListItem import IntegralListItem
 
-class GuiSpectrumView(GuiBase):
+class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
 
   #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
   def __init__(self):
@@ -41,15 +41,17 @@ class GuiSpectrumView(GuiBase):
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
     
-    #QtGui.QGraphicsItem.__init__(self)
+    QtGui.QGraphicsItem.__init__(self, scene=self.strip.plotWidget.scene())
     GuiBase.__init__(self, self._project._appBase)
     
-    self.apiDataSource = self._wrappedData.dataSource
+    self.apiDataSource = self._wrappedData.spectrumView.dataSource
     ##self.spectrum = self._parent # Is this necessary?
     
     ###self.setDimMapping(dimMapping)
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
 
+    strip = self._parent
+    strip.setupAxes()
     
     """
     for peakList in spectrum.peakLists:

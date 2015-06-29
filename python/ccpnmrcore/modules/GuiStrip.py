@@ -93,16 +93,12 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotItem.parent = self
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
-    self.viewBox.setXRange(*self.orderedAxes[0].region)
-    self.viewBox.setYRange(*self.orderedAxes[1].region)
+
     #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
     #                  viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
     #self.yAxis = Axis(self.plotWidget, orientation='left', #pen=self.foreground,
     #                  viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
-    self.xAxisTextItem = AxisTextItem(self.plotWidget, orientation='top',
-                                  axisCode=self.orderedAxes[0].code)
-    self.yAxisTextItem = AxisTextItem(self.plotWidget, orientation='left',
-                                  axisCode=self.orderedAxes[1].code)
+
     for orientation in ('left', 'top'):
       axisItem = self.plotItem.axes[orientation]['item']
       axisItem.hide()
@@ -110,8 +106,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.textItem = pg.TextItem(text=self.pid, color='w')
     self.textItem.setPos(self.viewBox.boundingRect().topLeft())
     self.plotWidget.scene().addItem(self.textItem)
-    self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
-    self.viewBox.sigRangeChanged.connect(self.updateRegion)
+
     self.viewBox.sigClicked.connect(self.mouseClicked)
     ###proxy = pg.SignalProxy(self.viewBox.sigRangeChanged, rateLimit=10, slot=self.updateRegion)
     self.grid = pg.GridItem()
@@ -136,6 +131,18 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   #   for spectrumView in newStrip.spectrumViews:
   #     spectrumView.connectStrip(newStrip)
 
+
+  def setupAxes(self):
+    print(self.orderedAxes)
+
+    self.viewBox.setXRange(*self.orderedAxes[0].region)
+    self.viewBox.setYRange(*self.orderedAxes[1].region)
+    self.xAxisTextItem = AxisTextItem(self.plotWidget, orientation='top',
+                                  axisCode=self.orderedAxes[0].code)
+    self.yAxisTextItem = AxisTextItem(self.plotWidget, orientation='left',
+                                  axisCode=self.orderedAxes[1].code)
+    self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
+    self.viewBox.sigRangeChanged.connect(self.updateRegion)
 
   def updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse

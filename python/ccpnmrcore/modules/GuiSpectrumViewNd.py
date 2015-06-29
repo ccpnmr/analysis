@@ -70,7 +70,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
 
     #GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
-    GuiSpectrumView.__init__(self)
+    self.posLevelsPrev = []
+    self.negLevelsPrev = []
+    self.xDataDimPrev = None
+    self.yDataDimPrev = None
+    self.zRegionPrev = None
+    self.posDisplayLists = []
+    self.negDisplayLists = []
+
+
     # self.spectralData = self.getSlices()
     
     ###xDim, yDim = apiSpectrumView.dimensionOrdering[:2]
@@ -85,68 +93,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.previousRegion = dimensionCount * [None]
 
     #self.setZValue(-1)  # this is so that the contours are drawn on the bottom
-    """
-    if dimMapping is not None:
-      self.xDim = dimMapping[0]
-      self.yDim = dimMapping[1]
-"""
-    """
-    apiStrips = apiSpectrumView.strips
-    if apiStrips:
-      # just looks at first strip, is that correct idea??
-      apiStrip = apiStrips[0]
-      guiStrip = apiStrip.guiStrip
-      viewBox = guiStrip.viewBox
-    else:
-      guiStrip = viewBox = None
-"""
-    """
-    for guiStrip in guiSpectrumDisplay.guiStrips:
-      viewBox = guiStrip.viewBox
-      apiStrip = guiStrip.apiStrip
-      for dim, axis in enumerate(apiStrip.getOrderedAxes()[:2]):
-        position = axis.position
-        width = axis.width
-        region = (position-0.5*width, position+0.5*width)
-        if dim == 0:
-          viewBox.setXRange(*region)
-        else: # dim == 1
-          viewBox.setYRange(*region)
-"""
-    """
-    if not region:
-      # chicken and egg problem, can't know xDim until after dimMapping set up
-      # and that is set up in SpectrumItem constructor, but that needs to know
-      # region; similar problem with spectrum object itself, which is set up in
-      # SpectrumItem constructor but need to have it to hand before that called
-      region = guiSpectrumDisplay.region = self.defaultRegion()
-      
-      if viewBox:
-        xDim = self.xDim
-        yDim = self.yDim
-        # TBD: below assumes axes inverted
-        viewBox.setXRange(region[xDim][1], region[xDim][0])
-        viewBox.setYRange(region[yDim][1], region[yDim][0])
-    if guiStrip: # TBD: HACK, TEMP, should be using guiStrip.positions
-      guiStrip.region = region
-      """
-      
-    """
-    self.posContoursVisible = True # this block of code TEMP
-    self.negContoursVisibleContoursVisible = True
-    self.baseLevel = 1000000.00
-    self.multiplier = 1.4
-    self.numberOfLevels = 20
-    try:
-      self.levels
-    except AttributeError:
-      self.levels = self.getLevels()
-"""
+
     #self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
     
     self.colourIndex = 0
         
-    apiDataSource = self.apiSpectrumView.dataSource
+    apiDataSource = self.apiStripSpectrumView.spectrumView.dataSource
     if not self.positiveContourColour:
       apiDataSource.positiveContourColour = Colour.spectrumHexColours[self.colourIndex]
       self.colourIndex += 1
@@ -159,28 +111,35 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.colourIndex += 1
       self.colourIndex %= len(Colour.spectrumHexColours)
 
-    self.visibilityAction = action = self.spectrumDisplay.spectrumToolBar.addAction(self.spectrum.name)
+    GuiSpectrumView.__init__(self)
+
+    self.setZValue(-1)  # this is so that the contours are drawn on the bottom
+
+    self.visibilityAction = action = self._parent.spectrumDisplay.spectrumToolBar.addAction(self.spectrum.name)
     self.setActionIconColour()
     action.setCheckable(True)
     action.setChecked(True)
-    widget = self.spectrumDisplay.spectrumToolBar.widgetForAction(action)
+    widget = self._parent.spectrumDisplay.spectrumToolBar.widgetForAction(action)
     widget.setFixedSize(60, 30)
 
     for func in ('setPositiveContourColour', 'setSliceColour'):
       Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
         
-    self.spectrumItems = {} # strip --> associated QtGui.QGraphicsItem 
-    for strip in self.strips:
-      self.addSpectrumItem(strip)
-
-    ###self.spectrumViewButton = ToolButton(self.spectrumDisplay, self)
-    ###self.spectrumViewButton.setFixedSize(60,30)
     # for strip in self.strips:
-    #   self.connectStrip(strip)
+    self.addSpectrumItem(self.strip)
 
-      #if self not in strip.plotWidget.items():
-        # newItem = self
-      #  strip.plotWidget.scene().addItem(self)
+
+
+    #for apiPeakListView in spectrumView._wrappedData.sortedPeakListViews():
+    #  peakListItem = GuiPeakListItemNd(self, apiPeakListView)
+
+    #Notifiers.registerNotify(self.newPeakListView, 'ccpnmr.gui.Task.PeakListView', '__init__')
+
+    spectrum = self.spectrum
+    strip = self.strip
+    for peakList in spectrum.peakLists:
+      strip.showPeaks(peakList)
+
 
   def changedSpectrumColour(self, apiDataSource):
     
@@ -198,17 +157,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     action.setIcon(QtGui.QIcon(pix))
       
   def addSpectrumItem(self, strip):
-    if strip not in self.spectrumItems:
-      item = GuiSpectrumViewItemNd(self, strip)
-      self.spectrumItems[strip] = item
-      strip.plotWidget.scene().addItem(item)
-      self.visibilityAction.toggled.connect(item.setVisible)
+    if self not in strip.plotWidget.scene().items():
+      strip.plotWidget.scene().addItem(self)
+      self.visibilityAction.toggled.connect(self.setVisible)
     
   def removeSpectrumItem(self, strip):
-    if strip in self.spectrumItems:
-      item = self.spectrumItems[strip]
-      strip.plotWidget.scene().removeItem(item)
-      del self.spectrumItems[strip]
+    if self not in strip.plotWidget.scene().items():
+      strip.plotWidget.scene().removeItem(self)
 
   ###def connectStrip(self, strip):
   ###  item = self.spectrumItems[strip]
@@ -230,43 +185,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if dimensionCount < 3:
       return None  # TBD
       
-    zDim = self.apiSpectrumView.orderedDataDims[2].dim - 1
+    zDim = self.apiStripSpectrumView.spectrumView.orderedDataDims[2].dim - 1
     point = (0.0, 1.0)
     value = spectrum.getDimValueFromPoint(zDim, point)
     size = abs(value[1] - value[0])
     
     return size
-   
-class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
-  
-  def __init__(self, spectrumView, strip):
-    
-    self.spectrumView = spectrumView
-    self.strip = strip
-    #QtGui.QGraphicsItem.__init__(self)  
-    QtGui.QGraphicsItem.__init__(self, scene=strip.plotWidget.scene())  
-    
-    self.setZValue(-1)  # this is so that the contours are drawn on the bottom
-    self.posLevelsPrev = []
-    self.negLevelsPrev = []
-    self.xDataDimPrev = None
-    self.yDataDimPrev = None
-    self.zRegionPrev = None
-    self.posDisplayLists = []
-    self.negDisplayLists = []
-    
-    #for apiPeakListView in spectrumView._wrappedData.sortedPeakListViews():
-    #  peakListItem = GuiPeakListItemNd(self, apiPeakListView)
-      
-    #Notifiers.registerNotify(self.newPeakListView, 'ccpnmr.gui.Task.PeakListView', '__init__')
-    
-    spectrum = spectrumView.spectrum
-    for peakList in spectrum.peakLists:
-      strip.showPeaks(peakList)
-    spectrum = spectrumView.spectrum
-    for peakList in spectrum.peakLists:
-      strip.showPeaks(peakList)
- 
+
   def newPeakListView(self, peakListView):
     pass
     
@@ -293,12 +218,12 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
   #def drawContours(self, painter, guiStrip):
   def drawContours(self, painter):
     
-    apiDataSource = self.spectrumView.apiDataSource
-    if self.spectrumView._wrappedData.displayPositiveContours is True:
+    apiDataSource = self.apiDataSource
+    if self._wrappedData.spectrumView.displayPositiveContours is True:
       posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
     else:
       posLevels = []
-    if self.spectrumView._wrappedData.displayNegativeContours is True:
+    if self._wrappedData.spectrumView.displayNegativeContours is True:
       negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
     else:
       negLevels = []
@@ -309,7 +234,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     try:
       self.constructContours(posLevels, negLevels)
     except FileNotFoundError:
-      self.spectrumView._project._logger.warning("No data file found for %s" % self)
+      self._project._logger.warning("No data file found for %s" % self)
 
 
     posColour = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour
@@ -319,23 +244,13 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
 
     try:
       
-      #spectrum = self.spectrum
-      xyDataDims = self.spectrumView.apiSpectrumView.orderedDataDims[:2]
-      #xTranslate, xScale = self.getTranslateScale(guiStrip, xyDataDims[0].dim-1) # -1 because API dims start at 1
-      #yTranslate, yScale = self.getTranslateScale(guiStrip, xyDataDims[1].dim-1)
+      xyDataDims = self.apiStripSpectrumView.spectrumView.orderedDataDims[:2]
       xTranslate, xScale = self.getTranslateScale(xyDataDims[0].dim-1, 0) # -1 because API dims start at 1
       yTranslate, yScale = self.getTranslateScale(xyDataDims[1].dim-1, 1)
       
       GL.glLoadIdentity()
       GL.glPushMatrix()
-      ### do not need the below and if you have them then the axes get zapped as well unless it has positive Z values
-      ###GL.glClearColor(1.0, 1.0, 1.0, 1.0)
-      ###GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-    
-      ###apiStrips = self.apiSpectrumView.strips
-      ###apiStrip = apiStrips[0]
-      ###guiStrip = apiStrip.guiStrip
-    
+
       # the below is because the y axis goes from top to bottom
       GL.glScale(1.0, -1.0, 1.0)
       GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
@@ -361,7 +276,7 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
         The way this is done here, any change in contour level or color needs to call this function.
     """
     
-    xDataDim, yDataDim = self.spectrumView.apiSpectrumView.orderedDataDims[:2]
+    xDataDim, yDataDim = self.apiStripSpectrumView.spectrumView.orderedDataDims[:2]
     
     if xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev \
       or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]]):
@@ -433,20 +348,14 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
   def getPlaneData(self):
     
     strip = self.strip
-    spectrum = self.spectrumView.spectrum
+    spectrum = self.spectrum
     dimensionCount = spectrum.dimensionCount
-    apiSpectrumView = self.spectrumView.apiSpectrumView
-    """ dimensionOrdering not working yet so for now hardwire
-    xDim, yDim = apiSpectrumView.dimensionOrdering[:2]
-    xDim -= 1  # dimensionOrdering starts at 1
-    yDim -= 1
-    """
-    dataDims = apiSpectrumView.orderedDataDims
+    apiStripSpectrumView = self.apiStripSpectrumView
+
+    dataDims = apiStripSpectrumView.spectrumView.orderedDataDims
     xDim = dataDims[0].dim - 1  # -1 because dataDim.dim starts at 1
     yDim = dataDims[1].dim - 1
     if dimensionCount == 2: # TBD
-      # below does not work yet
-      #planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
       planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
       position = [0, 0]
       yield position, planeData
@@ -463,8 +372,6 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       position = dimensionCount * [0]
       for z in range(*zregionPoint):  # TBD
         position[zDim] = z
-        # below does not work yet
-        #planeData = spectrum.getPlaneData(position, xDim, yDim)
         planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
         yield position, planeData
 
@@ -473,10 +380,6 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     
     GL.glNewList(displayList, GL.GL_COMPILE)
 
-    ###for contour in contourData:
-    ###  GL.glVertexPointer(2, GL.GL_FLOAT, 0, contour)
-    ###  GL.glDrawArrays(GL.GL_LINE_LOOP, 0, len(contour)//2)
-      
     for contour in contourData:
       GL.glBegin(GL.GL_LINE_LOOP)
       n = len(contour) // 2
@@ -487,29 +390,6 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
     
     GL.glEndList()
     
-  """
-  def defaultRegion(self):
-    
-    spectrum = self.spectrum
-    dimensionCount = spectrum.dimensionCount
-    pointCounts = spectrum.pointCounts
-    pntRegion = dimensionCount * [None]
-    for dim in range(dimensionCount):
-      if dim in (self.xDim, self.yDim):
-        region = (0, pointCounts[dim])
-      else:
-        n = pointCounts[dim] // 2
-        region = (n, n+1)
-      pntRegion[dim] = region
-    ppmRegion = []
-    for dim in range(dimensionCount):
-      (firstPpm, lastPpm) = spectrum.getDimValueFromPoint(dim, pntRegion[dim])
-      ppmRegion.append((firstPpm, lastPpm))
-      
-    return ppmRegion
-  """
-  
-  #def getTranslateScale(self, guiStrip, dim):
   def getTranslateScale(self, dim, ind):
         
     strip = self.strip
@@ -528,47 +408,9 @@ class GuiSpectrumViewItemNd(QtGui.QGraphicsItem):
       pixelViewBox0 = plotItem.getAxis('bottom').height()
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
     
-    (firstPoint, lastPoint) = self.spectrumView.spectrum.getDimPointFromValue(dim, (region0, region1))
+    (firstPoint, lastPoint) = self.spectrum.getDimPointFromValue(dim, (region0, region1))
 
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
     translate = pixelViewBox0 - firstPoint * scale
     
     return translate, scale
-
-  """
-  def raiseBaseLevel(self):
-    self.baseLevel*=1.4
-    self.levels = self.getLevels()
-
-  def lowerBaseLevel(self):
-    self.baseLevel/=1.4
-    self.levels = self.getLevels()
-  """     
-  '''
-class GuiPeakListItemNd(QtGui.QGraphicsItem):
-  
-  def __init__(self, spectrumViewItem, apiPeakListView):
-    """ spectrumViewItem is the QGraphicsItem parent
-        apiPeakListView is the API object
-    """
-
-    QtGui.QGraphicsItem.__init__(self, spectrumViewItem)
-
-    self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
-
-    self.spectrumViewItem = spectrumViewItem
-    self.apiPeakListView = apiPeakListView
-    self.peakItems = {}  # CCPN peak -> Qt peakItem
-    self.displayed = False
-    self.symbolColour = None
-    self.symbolStyle = None
-    self.isSymbolDisplayed = False
-    self.textColour = None
-    self.isTextDisplayed = False
-    
-    #self.rectItem = QtGui.QGraphicsRectItem(self, 200, 200, 200, 200)
-
-    #for peak in peakList.peaks:
-    #  self.peakItems[peak.pid] = PeakItem(self, peak)
-
-'''

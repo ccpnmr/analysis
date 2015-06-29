@@ -25,7 +25,7 @@ __author__ = 'simon'
 
 from ccpncore.memops import Notifiers
 
-_fields = ['project','spectrum','spectra','peak','peaks','pane','region','position', 'strip', 'assigner']
+_fields = ['project','spectrum','spectra','peak','peaks','region','position', 'strip', 'assigner']
 
 class Current:
 

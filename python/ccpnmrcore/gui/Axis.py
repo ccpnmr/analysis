@@ -27,10 +27,10 @@ import pyqtgraph as pg
 
 class Axis(pg.AxisItem):
 
-   def __init__(self, parent, orientation, viewBox=None, axisCode=None, units=None, mappedDim=None, pen=None):
+   def __init__(self, strip, orientation, viewBox=None, axisCode=None, units=None, mappedDim=None, pen=None):
 
-     self.parent = parent
-     self.plotItem = self.parent.plotItem
+     self.strip = strip
+     self.plotItem = self.strip.plotItem
      self.orientation = orientation
      pg.AxisItem.__init__(self, orientation=orientation, linkView=viewBox)
      self.axisCode = axisCode
@@ -45,7 +45,7 @@ class Axis(pg.AxisItem):
        axis = self.plotItem.axes['right']['item']
        self.textItem.setPos(viewBox.boundingRect().topRight())
        self.textItem.anchor = pg.Point(1, 0)
-     self.parent.scene().addItem(self.textItem)
+     self.strip.scene().addItem(self.textItem)
      axis.orientation = orientation
      axis.setPen(pg.functions.mkPen(pen))
      axis.show()

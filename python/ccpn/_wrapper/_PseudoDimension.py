@@ -152,7 +152,7 @@ class PseudoDimension(AbstractWrapperObject):
     result = []
     for ddim in parent._wrappedData.sortedDataDims():
       if ddim.className == 'SampledDataDim':
-        result.add(ddim)
+        result.append(ddim)
     #
     return result
 

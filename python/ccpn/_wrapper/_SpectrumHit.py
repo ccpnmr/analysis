@@ -159,7 +159,7 @@ class SpectrumHit(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (Nmr.SpectrumHit) for all SpectrumHit children of parent Spectrum"""
-    return parent.sortedSpectrumHits()
+    return parent._wrappedData.sortedSpectrumHits()
 
 # Connections to parents:
 

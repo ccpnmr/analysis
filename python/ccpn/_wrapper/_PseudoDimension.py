@@ -55,22 +55,19 @@ class PseudoDimension(AbstractWrapperObject):
   def _key(self) -> str:
     """object identifier, used for id"""
 
-    dataDim = self._wrappedData
-    result = str(dataDim.dim)
-
-    return result
+    return str(self._wrappedData.dim)
 
   @property
   def _parent(self) -> Spectrum:
     """Spectrum containing spectrumReference."""
-    return self._project._data2Obj[self._wrappedData.dataDim.dataSource]
+    return self._project._data2Obj[self._wrappedData.dataSource]
 
   spectrum = _parent
 
   @property
   def dimension(self) -> int:
     """dimension number"""
-    return self._wrappedData.dataDim.dim
+    return self._wrappedData.dim
 
   @property
   def pointCount(self) -> int:

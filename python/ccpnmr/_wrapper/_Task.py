@@ -101,7 +101,7 @@ class Task(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (ccp.gui.guiTasks) for all GuiTasks connected to NmrProject"""
     nmrProject = parent._wrappedData
-    return [nmrProject.sortedGuiTasks()]
+    return nmrProject.sortedGuiTasks()
 
   # CCPN functions
   def passivate(self):

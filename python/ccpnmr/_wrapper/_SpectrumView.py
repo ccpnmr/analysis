@@ -152,13 +152,13 @@ class SpectrumView(AbstractWrapperObject):
       self._wrappedData.spectrumView.positiveContourFactor = value
 
   @property
-  def displayNegativeContours(self) -> bool:
-    """Are negative contours displayed?"""
-    return self._wrappedData.spectrumView.displayNegativeContours
+  def displayPositiveContours(self) -> bool:
+    """Are positive contours displayed?"""
+    return self._wrappedData.spectrumView.displayPositiveContours
 
-  @displayNegativeContours.setter
-  def displayNegativeContours(self, value:bool):
-    self._wrappedData.spectrumView.displayNegativeContours = value
+  @displayPositiveContours.setter
+  def displayPositiveContours(self, value:bool):
+    self._wrappedData.spectrumView.displayPositiveContours = value
 
   @property
   def negativeContourColour(self) -> str:

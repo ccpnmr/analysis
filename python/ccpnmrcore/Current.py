@@ -24,6 +24,7 @@ __version__ = "$Revision: 7686 $"
 __author__ = 'simon'
 
 from ccpncore.memops import Notifiers
+from ccpncore.gui import MessageDialog
 
 _fields = ['project','spectrum','spectra','peak','peaks','region','position', 'strip', 'assigner']
 
@@ -33,10 +34,23 @@ class Current:
     for field in _fields:
       setattr(self,field,None)
 
-    Notifiers.registerNotify(self.deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
-    
-  def deletedPeak(self, apiPeak):
+    Notifiers.registerNotify(self._deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
+
+  def deleteSelected(self, parent=None):
+    # TBD: more general deletion
+    if self.peaks:
+      n = len(self.peaks)
+      title = 'Delete Peak%s' % ('' if n == 1 else 's')
+      msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
+      if MessageDialog.showYesNo(title, msg, parent):
+        for peak in self.peaks[:]:
+          peak.delete()
+        #self.peaks = [] # not needed since _deletedPeak notifier will clear this out
+      
+  def _deletedPeak(self, apiPeak):
     
     peak = self.project._data2Obj[apiPeak]
+    if peak is self.peak:
+      self.peak = None
     if peak in self.peaks:
       self.peaks.remove(peak)

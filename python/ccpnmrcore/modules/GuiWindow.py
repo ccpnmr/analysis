@@ -117,10 +117,12 @@ class GuiWindow(GuiBase):
 
   def setShortcuts(self):
     
-    toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
-    toggleCrossHairShortcut = QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHair)
-    toggleGridShortcut = QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGrid)
-
+    # this trampled the menu py shortcut
+    #toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
+    #toggleCrossHairShortcut = QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHair)
+    #toggleGridShortcut = QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGrid)
+    pass
+    
   def dropEvent(self, event):
     '''if object can be dropped into this area, accept dropEvent, otherwise throw an error
         spectra, projects and peak lists can be dropped into this area but nothing else

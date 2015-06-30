@@ -145,7 +145,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     #   self.sequenceWidget.setText(self.sequence)
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
-    self.setShortcuts()
+    #self.setShortcuts()
 
   def setupMenus(self):
 

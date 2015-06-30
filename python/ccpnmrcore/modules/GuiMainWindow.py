@@ -551,12 +551,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           return
       self._appBase.saveProject(newPath=newPath)
 
-  def toggleCrossHair(self):
-    self._appBase.current.strip.toggleCrossHair()
-
-  def toggleGrid(self):
-    self._appBase.current.strip.toggleGrid()
-
   def hideConsole(self):
     self.pythonConsole.hide()
 

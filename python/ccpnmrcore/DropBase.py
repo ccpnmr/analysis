@@ -25,6 +25,8 @@ from PyQt4 import QtGui, QtCore
 
 from ccpnmrcore.Base import Base as GuiBase
 
+from ccpncore.lib.Io.FastaIo import parseFastaFile, isFastaFormat
+
 class DropBase(GuiBase):
   
   def __init__(self, appBase, dropCallback, *args, **kw):
@@ -47,12 +49,22 @@ class DropBase(GuiBase):
 
       if filePaths:
         for filePath in filePaths:
-          try:
-            spectrum = self._appBase.project.loadSpectrum(filePath)
-            self._appBase.mainWindow.leftWidget.addSpectrum(spectrum)
-            self.dropCallback(spectrum)
-          except:
-              pass
+          print(filePath)
+          print('fasta test', isFastaFormat(filePath[-1]))
+          if isFastaFormat(filePath):
+            sequences = parseFastaFile(filePaths[0])
+            for sequence in sequences:
+              self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+                                                    molType='protein')
+
+
+          else:
+            try:
+              spectrum = self._appBase.project.loadSpectrum(filePath)
+              self._appBase.mainWindow.leftWidget.addSpectrum(spectrum)
+              self.dropCallback(spectrum)
+            except:
+                pass
 
     if event.mimeData().hasFormat('application/x-strip'):
       data = event.mimeData().data('application/x-strip')

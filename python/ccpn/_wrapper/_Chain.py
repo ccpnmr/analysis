@@ -248,7 +248,7 @@ def makeSimpleChain(parent:Project, sequence:(str,tuple), compoundName:str='Mole
                                              name=compoundName, startNumber=startNumber,
                                              isCyclic=isCyclic)
 
-  newCcpnChain = ccpnMolSystem.newChain(molecule=ccpnMolecule, role=role, details=comment)
+  newCcpnChain = ccpnMolSystem.newChain(molecule=ccpnMolecule, role=role, code=shortName, details=comment)
   #
   return  parent._project._data2Obj[newCcpnChain]
 

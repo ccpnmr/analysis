@@ -1,7 +1,11 @@
+* { font-family: Open-Sans;
+
+}
+
 QMenuBar {
               background-color: #424a71;
               font-family: Open-Sans;
-              font-size: 16pt;
+              font-size: 1.0em;
               }
 QMenuBar::item {
                 background-color: #424a71;
@@ -85,6 +89,21 @@ Label {
         margin: 0px 4px 0px 8px;
         }
 
+QLineEdit {
+        background-color: #f7ffff;
+        color: #122043;
+        margin: 0px 4px 4px 4px;
+        border: 1px solid #182548;
+        font-size: 1.5em;
+        }
+
+QTextEdit {
+        background-color: #f7ffff;
+        color: #122043;
+        margin: 0px 4px 4px 4px;
+        border: 1px solid #182548;
+        font-size: 1.5em;
+        }
 
 Dock ScrollArea QWidget { background-color: #2a3358;
         }
@@ -106,7 +125,7 @@ DockLabel  {
           padding-bottom: 3px;
           font-family: Open-Sans;
           font-weight: semi-bold;
-          font-size: 13pt;
+          font-size: 1.1em;
           font-color:
             }
 
@@ -128,26 +147,19 @@ background-color: #e4e15b;
 }
 
 
-QLineEdit {
-        background-color: #f7ffff;
-        color: #122043;
-        margin: 0px 4px 4px 4px;
-        border: 1px solid #182548;
-        }
+
 QLineEdit::selected {
         background-color: #e4e15b;
         color: #e4e15b;
         }
+
+
 QSplitter::handle:horizontal {
     width: 1px;
 }
 
 QSplitter::handle:vertical {
     height: 1px;
-}
-
-* { font-family: Open-Sans;
-
 }
 
 QTabWidget QWidget { background: #020F31;
@@ -161,3 +173,16 @@ Dock Assigner QWidget { background-color: #000021;
 Dock > QWidget { background-color: #000021;
               border: 1px solid #00092d;
     }
+
+QPushButton {background-color: #535a83;
+            border: 1px solid;
+            border-color: #182548;
+            color: #bec4f3;
+            }
+QPushButton::clicked {
+color: #122043;
+background-color: #e4e15b;
+
+QDialog {
+        color: #f7ffff;
+        }

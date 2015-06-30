@@ -29,6 +29,7 @@ from ccpn import Spectrum
 
 from ccpncore.gui.DockLabel import DockLabel
 from ccpncore.gui.Label import Label
+from ccpncore.lib.Io.FastaIo import parseFastaFile, isFastaFormat
 
 from ccpnmrcore.DropBase import DropBase
 
@@ -111,6 +112,13 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
         if [dirpath.endswith('memops') and 'Implementation' in dirnames for dirpath, dirnames, filenames in os.walk(filePaths[0])]:
           self.dockArea.guiWindow._appBase.openProject(filePaths[0])
           msg = 'openProject("%s")' % filePaths[0]
+
+        elif isFastaFormat(filePaths[0]):
+
+          sequences = parseFastaFile(filePaths[0])
+          for sequence in sequences:
+            self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+                                                    molType='protein')
 
         else:
           spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePaths[0])

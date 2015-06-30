@@ -25,10 +25,13 @@ import sys
 import os
 from PyQt4 import QtGui
 
-class TextEditor(QtGui.QTextEdit):
+from ccpncore.gui.Base import Base
 
-   def __init__(self, filename=None):
-      super(TextEditor, self).__init__()
+class TextEditor(QtGui.QTextEdit, Base):
+
+   def __init__(self, parent=None, filename=None, **kw):
+      super(TextEditor, self).__init__(parent)
+      Base.__init__(self, **kw)
       #font = QFont("Courier", 11)
       #self.setFont(font)
       self.filename = filename

@@ -149,52 +149,6 @@ class GuiStripNd(GuiStrip):
 
     self.changeZPlane(planeCount=1) # -1 because ppm units are backwards
 
-  # def fillToolBar(self):
-  #   spectrumUtilToolBar =  self.guiSpectrumDisplay.spectrumUtilToolBar
-  #   plusOneAction = spectrumUtilToolBar.addAction("+1", self.addOne)
-  #   plusOneIcon = Icon('icons/contourAdd')
-  #   plusOneAction.setIcon(plusOneIcon)
-  #   plusOneAction.setToolTip('Add One Level')
-  #   minusOneAction = spectrumUtilToolBar.addAction("+1", self.subtractOne)
-  #   minusOneIcon = Icon('icons/contourRemove')
-  #   minusOneAction.setIcon(minusOneIcon)
-  #   minusOneAction.setToolTip('Remove One Level ')
-  #   upBy2Action = spectrumUtilToolBar.addAction("*1.4", self.upBy2)
-  #   upBy2Icon = Icon('icons/contourBaseUp')
-  #   upBy2Action.setIcon(upBy2Icon)
-  #   upBy2Action.setToolTip('Raise Contour Base Level')
-  #   downBy2Action = spectrumUtilToolBar.addAction("*1.4", self.downBy2)
-  #   downBy2Icon = Icon('icons/contourBaseDown')
-  #   downBy2Action.setIcon(downBy2Icon)
-  #   downBy2Action.setToolTip('Lower Contour Base Level')
-  #   storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
-  #   storeZoomIcon = Icon('icons/zoom-store')
-  #   storeZoomAction.setIcon(storeZoomIcon)
-  #   storeZoomAction.setToolTip('Store Zoom')
-  #   restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
-  #   restoreZoomIcon = Icon('icons/zoom-restore')
-  #   restoreZoomAction.setIcon(restoreZoomIcon)
-  #   restoreZoomAction.setToolTip('Restore Zoom')
-  #
-  # def upBy2(self):
-  #   for spectrumItem in self.spectrumItems:
-  #     spectrumItem.baseLevel*=1.4
-  #     spectrumItem.levels = spectrumItem.getLevels()
-  #
-  # def downBy2(self):
-  #   for spectrumItem in self.spectrumItems:
-  #     spectrumItem.baseLevel/=1.4
-  #     spectrumItem.levels = spectrumItem.getLevels()
-  #
-  # def addOne(self):
-  #   self._appBase.current.spectrum.spectrumItem.numberOfLevels +=1
-  #   self._appBase.current.spectrum.spectrumItem.levels = self._appBase.current.spectrum.spectrumItem.getLevels()
-  #
-  #
-  # def subtractOne(self):
-  #   self._appBase.current.spectrum.spectrumItem.numberOfLevels -=1
-  #   self._appBase.current.spectrum.spectrumItem.levels = self._appBase.current.spectrum.spectrumItem.getLevels()
-
   def addPlaneToolbar(self):
 
     # if self._parent.spectrumViews[0]
@@ -208,49 +162,12 @@ class GuiStripNd(GuiStrip):
         prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
         prevPlaneButton.setFixedWidth(19)
         prevPlaneButton.setFixedHeight(19)
-        prevPlaneButton.setStyleSheet("""
-        QPushButton {background-color: #535a83;
-                    border: 1px solid;
-                    border-color: #182548;
-                    color: #bec4f3;}
-        QPushButton::clicked {
-        color: #122043;
-        background-color: #e4e15b;
-
-        """)
-        prevPlaneButton.setFont(Font(size=14, bold=True))
         self.planeLabel = LineEdit(self)
-        self.planeLabel.setFixedHeight(19)
         self.planeLabel.setText('%.3f' % self.positions[2])
-        self.planeLabel.setStyleSheet("""QLineEdit {
-        background-color: #f7ffff;
-        color: #122043;
-        margin: 0px 4px 4px 4px;
-        border: 1px solid #182548;
-        }
-        QLineEdit::selected {
-        background-color: #e4e15b;
-        color: #e4e15b;
-        """ )
         self.planeLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.planeLabel.setFont(Font(normal=True))
-        # self.axisCodeLabel = Label(self, text=spectrum.axisCodes[spectrumItem.dimMapping[2]])
-        # self.planeLabel.textChanged.connect(self.changeZPlane)
         nextPlaneButton = Button(self,'>', callback=self.nextZPlane)
         nextPlaneButton.setFixedWidth(19)
         nextPlaneButton.setFixedHeight(19)
-        nextPlaneButton.setStyleSheet("""
-        QPushButton {background-color: #535a83;
-                    border: 1px solid;
-                    border-color: #182548;
-                    color: #bec4f3;
-                    }
-        QPushButton::clicked {
-        color: #122043;
-        background-color: #e4e15b;
-
-        """)
-        nextPlaneButton.setFont(Font(size=14, bold=True))
         self.planeToolbar.setContentsMargins(0,0,0,0)
         self.planeToolbar.addWidget(prevPlaneButton)
         self.planeToolbar.addWidget(self.planeLabel)

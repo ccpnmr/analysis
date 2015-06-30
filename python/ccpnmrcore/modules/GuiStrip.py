@@ -359,33 +359,10 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   def dropCallback(self, dropObject):
     if isinstance(dropObject, Spectrum):
       self.displaySpectrum(dropObject)
-
-    # elif event.mimeData().hasFormat('application/x-strip'):
-    #   data = event.mimeData().data('application/x-strip')
-    #   pidData = str(data.data(),encoding='utf-8')
-    #   pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
-    #   actualPid = ''.join(pidData)
-    #   wrapperObject = self.parent().getById(actualPid)
-    #
-    #   if event.keyboardModifiers() & QtCore.Qt.ShiftModifier:
-    #
-    #     sinkIndex = self.parent().getById(self.pid)._wrappedData.index
-    #     direction = 'left'
-    #
-    #   else:
-    #
-    #     sinkIndex = self.parent().getById(self.pid)._wrappedData.index + 1
-    #     direction = 'right'
-    #
-    #   if wrapperObject.pid.id == self.pid.id:
-    #     wrapperObject.moveTo(sinkIndex)
-    #   else:
-    #     self.parent().guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
-    #     self.parent().guiSpectrumDisplay._appBase.current.strip = self.parent().guiSpectrumDisplay.orderedStrips[sinkIndex]
-    #     self.parent().guiSpectrumDisplay._appBase.current.strip.spinSystemLabel.setText(wrapperObject.spinSystemLabel.text())
-    #     self.parent().guiSpectrumDisplay._appBase.current.assigner.addResidue(name=wrapperObject.spinSystemLabel.text(), direction=direction)
-    #     newHsqcPeak = self.parent().getById('NR:'+wrapperObject.spinSystemLabel.text())
-    #     # self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule
+      print(self.pid)
+      msg = 'strip = project.getById("%s")\nstrip.displaySpectrum(project.getById("%s")\n' % \
+            (self.pid, dropObject.pid)
+      self._appBase.mainWindow.pythonConsole.write(msg)
     else:
       pass
 

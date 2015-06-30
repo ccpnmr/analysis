@@ -205,7 +205,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     newMoleculeMenu.addAction(Action(self, "From Fasta...", callback=self.createMoleculeFromFasta))
     newMoleculeMenu.addAction(Action(self, "From PDB...", callback=self.createMoleculeFromPDB))
     newMoleculeMenu.addAction(Action(self, "From NEF...", callback=self.createMoleculeFromNEF))
-    newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup))
+    newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
     moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
@@ -301,11 +301,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       popup.raise_()
     else:
       project._logger.error("Double-click activation not implemented for object %s" % obj)
-    # dataItem = item.data(0, QtCore.Qt.DisplayRole)
-    # spectrum = self._appBase.project.getById(dataItem)
-    # popup = SpectrumPropertiesPopup(spectrum)
-    # popup.exec_()
-    # popup.raise_()
 
   def fillRecentProjectsMenu(self):
     for recentFile in self._appBase.preferences.recentFiles:
@@ -455,7 +450,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def showMoleculePopup(self):
-    pass
+    from ccpnmrcore.modules.LoadSequence import LoadSequence
+    popup = LoadSequence(self, project=self.project).exec_()
 
   def inspectMolecule(self):
     pass

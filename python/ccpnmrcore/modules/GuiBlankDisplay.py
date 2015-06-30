@@ -80,28 +80,45 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
     if isinstance(wrapperObject, Spectrum):
       spectrum = wrapperObject
       spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
-      # apiStrip = spectrumDisplay.apiSpectrumDisplay.findFirstStrip(serial=1)
-      # apiSpectrumView = spectrumDisplay.apiSpectrumDisplay.findFirstSpectrumView(name=spectrum.name)
-      # spectrumView = self.getWrapperObject(apiStrip.findFirstStripSpectrumView(spectrumView=apiSpectrumView))
-      # for strip in spectrumView.strips:
-      #   strip.displaySpectrum(spectrum)
       self.dockArea.guiWindow.removeBlankDisplay()
+      msg = 'window.createSpectrumDisplay(project.getById("%s")\n' % spectrum.pid
+      self.dockArea.window().pythonConsole.write(msg)
     import os
     if dropObject.mimeData().hasUrls():
       filePaths = [url.path() for url in dropObject.mimeData().urls()]
       if len(filePaths) > 1:
-        for filePath in filePaths:
+        firstSpectrum = self.dockArea.guiWindow.project.loadSpectrum(filePaths[0])
+        self.dockArea.guiWindow.leftWidget.addSpectrum(firstSpectrum)
+        spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(firstSpectrum)
+        msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
+                % filePaths[0]
+        self.dockArea.window().pythonConsole.write(msg)
+        for filePath in filePaths[1:]:
           spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePath)
           self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
-          spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
+          if spectrum.axisCodes == firstSpectrum.axisCodes:
+            spectrumDisplay.displaySpectrum(spectrum)
+            msg = 'spectrum = project.loadSpectrum("%s")\nspectrumDisplay.displaySpectrum(spectrum)\n' \
+                    % filePath
+            self.dockArea.window().pythonConsole.write(msg)
+          else:
+            spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
+            msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
+                % filePath
+            self.dockArea.window().pythonConsole.write(msg)
         self.dockArea.guiWindow.removeBlankDisplay()
       else:
         if [dirpath.endswith('memops') and 'Implementation' in dirnames for dirpath, dirnames, filenames in os.walk(filePaths[0])]:
           self.dockArea.guiWindow._appBase.openProject(filePaths[0])
+          msg = 'openProject("%s")' % filePaths[0]
+
         else:
           spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePaths[0])
           self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
           spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
+          msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
+                % filePaths[0]
+          self.dockArea.window().pythonConsole.write(msg)
           self.dockArea.guiWindow.removeBlankDisplay()
 
 

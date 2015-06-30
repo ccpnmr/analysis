@@ -119,9 +119,8 @@ class GuiWindow(GuiBase):
     
     # this trampled the menu py shortcut
     #toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
-    #toggleCrossHairShortcut = QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHair)
-    #toggleGridShortcut = QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGrid)
-    pass
+    toggleCrossHairShortcut = QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHair)
+    toggleGridShortcut = QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGrid)
     
   def dropEvent(self, event):
     '''if object can be dropped into this area, accept dropEvent, otherwise throw an error

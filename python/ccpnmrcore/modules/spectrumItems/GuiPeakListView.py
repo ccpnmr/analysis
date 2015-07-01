@@ -503,7 +503,8 @@ class PeakNd(QtGui.QGraphicsItem):
       current = self._appBase.current
       if selected:
         current.peak = peak
-        current.peaks = [peak]
+        if peak not in current.peaks:
+          current.peaks.append(peak)
       else:
         if current.peak is peak:
           current.peak = None

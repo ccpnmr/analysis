@@ -1,11 +1,7 @@
-* { font-family: Open-Sans;
-
-}
-
 QMenuBar {
               background-color: #424a71;
-              font-family: Open-Sans;
               font-size: 1.0em;
+              border: 0px 0px 1px 0px solid #00092d;
               }
 QMenuBar::item {
                 background-color: #424a71;
@@ -15,7 +11,7 @@ QMenuBar::item::selected { color: #f7ffff;
                            background: #666e98;
       }
 QMenuBar::item::hover {
-      background-color: #e4e15b;
+     color: #e4e15b;
       }
 
 QMenu {
@@ -24,6 +20,8 @@ QMenu {
 
 QMenu::item {background-color: #424a71;
              color: #bec4f3;
+
+
               }
 QMenu::item::selected { color: #f7ffff;
                         background: #666e98;
@@ -59,16 +57,14 @@ ObjectTable { margin-left: 4px;
              font-family: open-sans bold;
            }
 QHeaderView {
-                          background-color: #f7ffff;
+                  background-color: #f7ffff;
                           }
 ObjectTable::item {
                   padding: 2px;
                   background-color: #cccff9;
                   color: #122043;
                  }
-ObjectTable::item::hover {
-                         background-color: #bdbc5a;
-                         }
+
 ObjectTable::item::selected {
                             background-color: #182548;
                             color: #f7ffff;
@@ -130,8 +126,9 @@ DockLabel  {
             }
 
 QTreeWidget { background-color: #020F31;
+
     }
-QTreeWidget::item {background-color: #0e1a3d;
+QTreeWidget::item {
                    color: #bec4f3;
                    }
 QTreeWidget::item::selected {
@@ -139,7 +136,6 @@ QTreeWidget::item::selected {
                   color: #f7ffff;
                   }
 QTreeWidget::item::hover {
-                  background-color: #424a71;
                   color: #e4e15b;
                   }
 QTreeView:branch:{
@@ -186,3 +182,7 @@ background-color: #e4e15b;
 QDialog {
         color: #f7ffff;
         }
+
+QSplitter {
+          background-color: #122043;
+          }

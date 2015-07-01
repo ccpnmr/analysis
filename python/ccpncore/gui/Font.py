@@ -12,14 +12,10 @@ class Font(QtGui.QFont):
     self.bold = bold
     self.italic = normal
     self.normal = normal
-    QtGui.QFontDatabase.addApplicationFont(os.path.join(FONT_DIR, 'open-sans/OpenSans-Regular.ttf'))
-    QtGui.QFontDatabase.addApplicationFont(os.path.join(FONT_DIR, 'open-sans/OpenSans-Bold.ttf'))
-    QtGui.QFontDatabase.addApplicationFont(os.path.join(FONT_DIR, 'open-sans/OpenSans-Italic.ttf'))
-    QtGui.QFontDatabase.addApplicationFont(os.path.join(FONT_DIR, 'open-sans/OpenSans-Semibold.ttf'))
 
 
     if self.bold is True:
-      font = 'OpenSans-Bold'
+      font = 'Lucida Grande -Bold'
 
     if self.normal is True:
       font = 'OpenSans-Regular'

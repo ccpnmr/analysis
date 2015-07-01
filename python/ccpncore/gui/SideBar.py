@@ -30,6 +30,8 @@ import sys
 import os
 import csv
 
+from ccpncore.gui.Font import Font
+
 experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'Water-LOGSY.H'}
 
 
@@ -55,6 +57,7 @@ class SideBar(QtGui.QTreeWidget):
     # background-color: #e4e15b;
     # }
     # """)
+    self.setFont(QtGui.QFont('Lucida Grande', 12))
     self.header().hide()
     self.setDragEnabled(True)
     self.setDragDropMode(self.InternalMove)

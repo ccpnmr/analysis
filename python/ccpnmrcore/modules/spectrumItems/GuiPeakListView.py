@@ -58,6 +58,7 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     self.peakList = peakList
     self.peakItems = {}  # CCPN peak -> Qt peakItem
     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
+    self._appBase = strip._appBase
     ###self.parent = parent
     # self.displayed = True
     # self.symbolColour = None
@@ -370,6 +371,7 @@ class PeakNd(QtGui.QGraphicsItem):
 
   def __init__(self, peakLayer, peak):
 
+    self._appBase = peakLayer._appBase
     scene = peakLayer.strip.plotWidget.scene()
     #QtGui.QGraphicsItem.__init__(self, scene=scene)
     QtGui.QGraphicsItem.__init__(self, peakLayer, scene=scene)
@@ -496,7 +498,17 @@ class PeakNd(QtGui.QGraphicsItem):
   def itemChange(self, change, value):
     
     if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
-      self.peak.isSelected = self.isSelected()
+      peak = self.peak
+      selected = peak.isSelected = self.isSelected()
+      current = self._appBase.current
+      if selected:
+        current.peak = peak
+        current.peaks = [peak]
+      else:
+        if current.peak is peak:
+          current.peak = None
+        if peak in current.peaks:
+          current.peaks.remove(peak)
     
     return QtGui.QGraphicsItem.itemChange(self, change, value)
     

@@ -8,6 +8,8 @@ def isFastaFormat(inputFile):
       if f.readlines()[0].startswith('>'):
         return True
 
+  return False
+
 
 def parseFastaFile(inputFile):
 

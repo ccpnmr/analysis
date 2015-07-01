@@ -549,13 +549,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         # the Qt dialog stupidly insists a directory exists before you can select it
         # so if it exists but is empty then don't bother asking the question
         title = 'Overwrite path'
-        msg ='Path "%s" already exists, overwrite?' % newPath
-        if MessageDialog.showYesNo(title, msg, self):
-          if os.path.isfile(newPath):
-            os.remove(newPath)
-          else:
-            shutil.rmtree(newPath, ignore_errors=True)
-        else:
+        msg ='Path "%s" already exists, continue?' % newPath
+        if not MessageDialog.showYesNo(title, msg, self):
           return
       self._appBase.saveProject(newPath=newPath)
 

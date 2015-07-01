@@ -43,8 +43,8 @@ colourNameToHexDict = {
   'cyan':    '#ffff00',
 }
 
-spectrumColours = OrderedDict([('#ff0000','red'),
-                                ('#00ffff','cyan'),
+spectrumColours = OrderedDict([('#D24C23','red'),
+                                ('#4F9CAA','cyan'),
                                 ('#ff8000','orange'),
                                 ('#0080ff','manganese blue'),
                                 ('#ffff00','yellow'),

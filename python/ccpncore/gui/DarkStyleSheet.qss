@@ -111,12 +111,6 @@ Dock > QWidget { background-color: #2a3358;
 DockLabel  {
           background-color : #BEC4F3;
           color : #122043;
-          border-top-right-radius: 1px;
-          border-top-left-radius: 1px;
-          border-bottom-right-radius: 0px;
-          border-bottom-left-radius: 1px;
-          border-width: 0px;
-          border-right: 1px solid #00092D;
           padding-top: 3px;
           padding-bottom: 3px;
           font-family: Open-Sans;

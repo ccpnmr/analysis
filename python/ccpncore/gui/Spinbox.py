@@ -32,7 +32,10 @@ class Spinbox(QtGui.QSpinBox, Base):
   def __init__(self, parent, value=None, min=None, max=None, **kw):
 
     QtGui.QSpinBox.__init__(self, parent)
-    self.setValue(value)
-    self.setMinimum(min)
-    self.setMaximum(max)
+    if value is not None:
+      self.setValue(value)
+    if min is not None:
+      self.setMinimum(min)
+    if max is not None:
+      self.setMaximum(max)
     Base.__init__(self, **kw)

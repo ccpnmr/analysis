@@ -35,27 +35,20 @@ from functools import partial
 from ccpn.lib.assignment import isInterOnlyExpt
 
 from ccpncore.gui.Button import Button
-from ccpncore.gui.DockLabel import DockLabel
+from ccpncore.gui.Dock import CcpnDock, CcpnDockLabel
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Widget import Widget
 
-from ccpnmrcore.modules.PeakTable import PeakListSimple
-
-from pyqtgraph.dockarea import Dock
-
-class PickAndAssignModule(Dock):
+class PickAndAssignModule(CcpnDock):
 
   def __init__(self, parent, project=None):
-    Dock.__init__(self, name='Atom Selector')
-    self.label.hide()
-
-    self.label = DockLabel('Atom Selector', self)
-    self.label.show()
+    CcpnDock.__init__(self, name='Atom Selector')
     self.orientation = 'vertical'
     self.moveLabel=False
     pickAndAssignWidget = Widget(self)
+    pickAndAssignWidget.setMaximumSize(200,150)
     headerLabel = Label(self, text='i-1')
     pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
     headerLabel = Label(pickAndAssignWidget, text='i', grid=(0, 1))

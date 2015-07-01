@@ -154,7 +154,7 @@ class GuiStripNd(GuiStrip):
     # if self._parent.spectrumViews[0]
     if len(self.orderedAxes) > 2:
       for i in range(len(self.orderedAxes)-2):
-        self.planeToolbar = ToolBar(self.stripFrame, grid=(1+i, self.guiSpectrumDisplay.orderedStrips.index(self)), hAlign='center')
+        self.planeToolbar = ToolBar(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)), hAlign='center', vAlign='c')
         self.planeToolbar.setMinimumWidth(200)
         # self.spinSystemLabel = Label(self)
         # self.spinSystemLabel.setMaximumWidth(1150)
@@ -168,7 +168,6 @@ class GuiStripNd(GuiStrip):
         nextPlaneButton = Button(self,'>', callback=self.nextZPlane)
         nextPlaneButton.setFixedWidth(19)
         nextPlaneButton.setFixedHeight(19)
-        self.planeToolbar.setContentsMargins(0,0,0,0)
         self.planeToolbar.addWidget(prevPlaneButton)
         self.planeToolbar.addWidget(self.planeLabel)
         self.planeToolbar.addWidget(nextPlaneButton)

@@ -23,11 +23,11 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from PyQt4 import QtCore
 
-from pyqtgraph.dockarea import Dock
+# from pyqtgraph.dockarea import Dock
 
 from ccpn import Spectrum
 
-from ccpncore.gui.DockLabel import DockLabel
+from ccpncore.gui.Dock import CcpnDockLabel, CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.lib.Io.FastaIo import parseFastaFile, isFastaFormat
 
@@ -47,13 +47,13 @@ def _findPpmRegion(spectrum, axisDim, spectrumDim):
 
   return 0.5*(firstPpm+lastPpm), abs(lastPpm-firstPpm)
 
-class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the drop events are not processed
+class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else the drop events are not processed
 
   def __init__(self, dockArea):
     
     self.dockArea = dockArea
 
-    Dock.__init__(self, name='Blank Display', size=(1100,1300))
+    CcpnDock.__init__(self, name='Blank Display', size=(1100,1300))
     dockArea.addDock(self)
     # self.setStyleSheet("""
     # QWidget { background-color: #2a3358;
@@ -61,14 +61,35 @@ class GuiBlankDisplay(DropBase, Dock): # DropBase needs to be first, else the dr
     # """)
     # self.labelhidden = True
     self.label.hide()
-    self.label = DockLabel('Blank Display', self)
+    # self.label = DockLabel('Blank Display', self)
     self.label.show()
+
     self.label2 = Label(self, text='Drag Spectrum Here', textColor='#bec4f3', dragDrop=True)
     self.label2.setAlignment(QtCore.Qt.AlignCenter)
     self.layout.addWidget(self.label2)
     self.label2.dropEvent = self.dropCallback
 
     DropBase.__init__(self, dockArea.guiWindow._appBase, self.dropCallback)
+
+  def setOrientation(self, o='vertical', force=True):
+        """
+        Sets the orientation of the title bar for this Dock.
+        Must be one of 'auto', 'horizontal', or 'vertical'.
+        By default ('auto'), the orientation is determined
+        based on the aspect ratio of the Dock.
+        """
+        #print self.name(), "setOrientation", o, force
+        if o == 'auto' and self.autoOrient:
+            if self.container().type() == 'tab':
+                o = 'horizontal'
+            elif self.width() > self.height()*1.5:
+                o = 'vertical'
+            else:
+                o = 'horizontal'
+        if force or self.orientation != o:
+            self.orientation = o
+            self.label.setOrientation(o)
+            self.updateStyle()
 
   def dropCallback(self, dropObject):
     

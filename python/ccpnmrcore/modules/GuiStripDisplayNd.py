@@ -248,7 +248,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       peakItemDict = self.activePeakItemDict[peakLayer]
       peakItem = peakItemDict.get(apiPeak)
       if peakItem:
+        print('111')
         peakLayer.strip.plotWidget.scene().removeItem(peakItem)
+        print('222')
         del peakItemDict[apiPeak]
         self.inactivePeakItems.add(peakItem)
       

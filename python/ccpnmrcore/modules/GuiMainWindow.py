@@ -66,6 +66,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setupWindow()
     self.setupMenus()
     self.initProject()
+    self.resize(1200, 700)
     # self.setFixedWidth(QtGui.QApplication.desktop().screenGeometry().width())
 
 
@@ -150,7 +151,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def setupMenus(self):
 
     self._menuBar =  MenuBar(self)
-
+    print(self._menuBar.font())
     fileMenu = Menu("&Project", self)
     spectrumMenu = Menu("&Spectra", self)
     viewMenu = Menu("&View", self)
@@ -248,10 +249,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu.addAction(Action(self, "Check for Upgrades...", callback=self.showUpgradePopup))
     helpMenu.addAction(Action(self, "Report Bug...", callback=self.showBugReportingPopup))
 
+    assignMenu = Menu("&Assign", self)
+    assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule))
+    assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showBackboneAssignmentModule))
+    assignMenu.addAction(Action(self, 'Show Assigner', callback=self.showAssigner))
+
     self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
     self._menuBar.addMenu(fileMenu)
     self._menuBar.addMenu(spectrumMenu)
     self._menuBar.addMenu(moleculeMenu)
+    if self._appBase.applicationName == 'Assign':
+      self._menuBar.addMenu(assignMenu)
     self._menuBar.addMenu(restraintsMenu)
     self._menuBar.addMenu(structuresMenu)
     self._menuBar.addMenu(viewMenu)

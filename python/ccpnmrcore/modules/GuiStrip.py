@@ -224,11 +224,11 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
   def addSpinSystemLabel(self):
     self.spinSystemLabel = Label(self.stripFrame, grid=(2, self.guiSpectrumDisplay.orderedStrips.index(self)),
-                                 hAlign='center', dragDrop=True, pid=self.pid)
+                                 hAlign='center', vAlign='top',dragDrop=True, pid=self.pid)
     # self.spinSystemLabel.dropEvent = self.dropCallback
-    self.spinSystemLabel.setContentsMargins(0, 0, 0, 0)
     self.spinSystemLabel.setText("Spin systems shown here")
     self.spinSystemLabel.setFixedHeight(15)
+    self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
     # self.spinSystemLabel.pid = self.pid
     # print(self.pid)lo
 

@@ -33,28 +33,28 @@ import math
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Label import Label
-from ccpncore.gui.DockLabel import DockLabel
+from ccpncore.gui.Dock import CcpnDockLabel, CcpnDock
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.popups.InterIntraSpectrumPopup import InterIntraSpectrumPopup
 from ccpnmrcore.popups.SelectSpectrumDisplayPopup import SelectSpectrumDisplayPopup
 
-class BackboneAssignmentModule(Dock, Base):
+class BackboneAssignmentModule(CcpnDock, Base):
 
   def __init__(self, project=None, name=None, peakLists=None, assigner=None, hsqcDisplay=None, **kw):
 
-    Dock.__init__(self, name='Backbone Assignment')
-    self.label.hide()
-    self.label = DockLabel('Backbone Assignment', self)
-    self.label.show()
-    self.displayButton = Button(self, text='Select Modules', callback=self.showDisplayPopup)
-    self.spectrumButton = Button(self, text='Select Inter/Intra Spectra', callback=self.showInterIntraPopup)
-    self.layout.addWidget(self.displayButton, 0, 0, 1, 1)
-    self.layout.addWidget(self.spectrumButton, 0, 2, 1, 1)
+    CcpnDock.__init__(self, name='Backbone Assignment')
+    # self.label.hide()
+    # self.label = DockLabel('Backbone Assignment', self)
+    # self.label.show()
+    # self.displayButton = Button(self, text='Select Modules', callback=self.showDisplayPopup)
+    # self.spectrumButton = Button(self, text='Select Inter/Intra Spectra', callback=self.showInterIntraPopup)
+    # self.layout.addWidget(self.displayButton, 0, 0, 1, 1)
+    # self.layout.addWidget(self.spectrumButton, 0, 2, 1, 1)
     self.hsqcDisplay = hsqcDisplay
     self.project = project
     self.current = project._appBase.current
     self.peakTable = PeakListSimple(self, peakLists=project.peakLists)
-    self.layout.addWidget(self.peakTable, 2, 0, 1, 4)
+    self.layout.addWidget(self.peakTable, 2, 0, 1, 6)
     self.peakTable.callback = self.findMatchingPeaks
 
 

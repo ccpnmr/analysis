@@ -24,12 +24,12 @@ __version__ = "$Revision: 7686 $"
 import sys
 from PyQt4 import QtGui,QtCore
 
-from ccpncore.gui.DockLabel import DockLabel
+from ccpncore.gui.Dock import CcpnDock, CcpnDockLabel
 from ccpncore.gui.Font import Font
 
 from pyqtgraph.dockarea import Dock
 
-class Assigner(Dock):
+class Assigner(CcpnDock):
 
   def __init__(self, project=None):
 
@@ -40,9 +40,9 @@ class Assigner(Dock):
               border: 1px solid #00092d;
     }
     """)
-    self.label.hide()
-    self.label = DockLabel('Assigner', self)
-    self.label.show()
+    # self.label.hide()
+    # self.label = DockLabel('Assigner', self)
+    # self.label.show()
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
     self.scene = QtGui.QGraphicsScene(self)
@@ -317,7 +317,6 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
   def __init__(self, text, pos=None):
 
     super(GuiNmrAtom, self).__init__()
-    self.setFont(Font(size=17.5, normal=True))
     self.setPlainText(text)
     self.setPos(QtCore.QPointF(pos[0], pos[1]))
     self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
@@ -328,10 +327,8 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     if self.isSelected:
       # self.setFont(Font(size=17.5, bold=True))
       self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
-      self.setFont(Font(size=17.5, bold=True))
     else:
       self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-      self.setFont(Font(size=17.5, normal=True))
       # self.setBrush(self.brush)
 
 

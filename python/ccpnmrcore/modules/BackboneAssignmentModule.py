@@ -28,6 +28,8 @@ import pyqtgraph as pg
 
 from pyqtgraph.dockarea import Dock
 
+from PyQt4 import QtCore
+
 import math
 
 from ccpncore.gui.Button import Button
@@ -46,18 +48,15 @@ class BackboneAssignmentModule(CcpnDock, Base):
     # self.label.hide()
     # self.label = DockLabel('Backbone Assignment', self)
     # self.label.show()
-    # self.displayButton = Button(self, text='Select Modules', callback=self.showDisplayPopup)
-    # self.spectrumButton = Button(self, text='Select Inter/Intra Spectra', callback=self.showInterIntraPopup)
-    # self.layout.addWidget(self.displayButton, 0, 0, 1, 1)
-    # self.layout.addWidget(self.spectrumButton, 0, 2, 1, 1)
+    self.displayButton = Button(self, text='Select Modules', callback=self.showDisplayPopup)
+    self.spectrumButton = Button(self, text='Select Inter/Intra Spectra', callback=self.showInterIntraPopup)
+    self.layout.addWidget(self.displayButton, 0, 0, 1, 1)
+    self.layout.addWidget(self.spectrumButton, 0, 2, 1, 1)
     self.hsqcDisplay = hsqcDisplay
     self.project = project
     self.current = project._appBase.current
-    self.peakTable = PeakListSimple(self, peakLists=project.peakLists)
+    self.peakTable = PeakListSimple(self, peakLists=project.peakLists, callback=self.findMatchingPeaks)
     self.layout.addWidget(self.peakTable, 2, 0, 1, 6)
-    self.peakTable.callback = self.findMatchingPeaks
-
-
 
     self.lines = []
     self.numberOfMatches = 5
@@ -68,21 +67,22 @@ class BackboneAssignmentModule(CcpnDock, Base):
 
     # self.assigner.clearAllItems()
     ### determine query and match windows
-    queryWindows = []
-    for index in range(self.interList.count()):
-      queryWindows.append(self.project.getById(self.interList.item(index).text()))
-    matchWindows = []
-    for index in range(self.intraList.count()):
-      matchWindows.append(self.project.getById(self.intraList.item(index).text()))
-
+    print(self.queryDisplay, self.matchDisplays)
     if peak:
       positions = peak.position
       self.hsqcDisplay.strips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
+      self.hsqcDisplay.strips[-1].zoomToRegion([peak.position[0]-0.2, peak.position[0]+0.2,
+                                                peak.position[1]-2, peak.position[1]+2])
 
-      for queryWindow in queryWindows:
+      for queryWindow in self.queryDisplays:
         queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
         queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
         queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
+        line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+        line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+        line1.setPos(QtCore.QPointF(positions[0], 0))
+        line2.setPos(QtCore.QPointF(0, positions[1]))
+
 
 
         if len(self.lines) == 0:
@@ -220,11 +220,11 @@ class BackboneAssignmentModule(CcpnDock, Base):
     return matrix, scores
 
   def showInterIntraPopup(self):
-    popup = InterIntraSpectrumPopup(project=self.project)
+    popup = InterIntraSpectrumPopup(self, project=self.project)
     popup.exec_()
 
   def showDisplayPopup(self):
-    popup = SelectSpectrumDisplayPopup(project=self.project)
+    popup = SelectSpectrumDisplayPopup(self, project=self.project)
     popup.exec_()
 
 

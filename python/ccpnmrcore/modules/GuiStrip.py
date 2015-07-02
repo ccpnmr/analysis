@@ -304,17 +304,17 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.guiSpectrumDisplay.positionBox.setText("X: %.3f  Y: %.3f" % (position.x(), position.y()))
 
   def zoomToRegion(self, region):
-    self.setXRange(region[0],region[1])
-    self.setYRange(region[2],region[3])
+    self.viewBox.setXRange(region[0],region[1])
+    self.viewBox.setYRange(region[2],region[3])
 
   def zoomX(self, region):
-    self.setXRange(region[0],region[1])
+    self.viewBox.setXRange(region[0],region[1])
 
   def zoomY(self, region):
-    self.setYRange(region[0],region[1])
+    self.viewBox.setYRange(region[0],region[1])
 
   def zoomAll(self):
-    self.autoRange()
+    self.viewBox.autoRange()
 
   def zoomTo(self, x1, x2, y1, y2):
     self.zoomToRegion([float(x1.text()),float(x2.text()),float(y1.text()),float(y2.text())])

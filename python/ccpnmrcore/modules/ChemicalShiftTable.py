@@ -2,25 +2,21 @@ __author__ = 'simon1'
 
 from pyqtgraph.dockarea import Dock
 
-from ccpncore.gui.DockLabel import DockLabel
+from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
 
 from ccpnmrcore.modules.GuiTableGenerator import GuiTableGenerator
 
 
-class ChemicalShiftTable(Dock):
+class ChemicalShiftTable(CcpnDock):
 
   def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Lists', **kw):
 
     if not chemicalShiftLists:
       chemicalShiftLists = []
 
-    Dock.__init__(self, name=name)
-
-    self.label.hide()
-    self.label = DockLabel(name, self)
-    self.label.show()
+    CcpnDock.__init__(self, name=name)
 
     self.chemicalShiftLists = chemicalShiftLists
 

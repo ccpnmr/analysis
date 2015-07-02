@@ -68,17 +68,23 @@ class SideBar(QtGui.QTreeWidget):
     self.spectrumItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setText(0, "Spectra")
     self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
-    self.spectrumReference.setText(0, "Reference")
-    self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
-    self.spectrumScreening.setText(0, "Screening")
-    self.spectrumMixtures = QtGui.QTreeWidgetItem(self.projectItem)
-    self.spectrumMixtures.setText(0, "Mixtures")
-    # self.restraintsItem = QtGui.QTreeWidgetItem(self.projectItem)
-    # self.restraintsItem.setText(0, "Restraint Lists")
-    self.spectrumDeleted = QtGui.QTreeWidgetItem(self.projectItem)
-    self.spectrumDeleted.setText(0, "Deleted")
-    self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
-    self.structuresItem.setText(0, "Structures")
+    self.spectrumReference.setText(0, "Chains")
+    chainA = QtGui.QTreeWidgetItem(self.spectrumReference)
+    chainA.setText(0, 'Chain A')
+    chainB = QtGui.QTreeWidgetItem(self.spectrumReference)
+    chainB.setText(0, 'Chain B')
+    chainC = QtGui.QTreeWidgetItem(self.spectrumReference)
+    chainC.setText(0, 'Chain C')
+    # self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.spectrumScreening.setText(0, "Screening")
+    # self.spectrumMixtures = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.spectrumMixtures.setText(0, "Mixtures")
+    # # self.restraintsItem = QtGui.QTreeWidgetItem(self.projectItem)
+    # # self.restraintsItem.setText(0, "Restraint Lists")
+    # self.spectrumDeleted = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.spectrumDeleted.setText(0, "Deleted")
+    # self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.structuresItem.setText(0, "Structures")
     # self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
     # self.samplesItem.setText(0, "Samples")
     self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
@@ -86,6 +92,10 @@ class SideBar(QtGui.QTreeWidget):
     self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
     self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
     self.parent = parent
+    self.moreItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.moreItem.setText(0, 'More...')
+    self.substancesItem = QtGui.QTreeWidgetItem(self.moreItem)
+    self.substancesItem.setText(0, "Substances")
 
 
 
@@ -106,6 +116,8 @@ class SideBar(QtGui.QTreeWidget):
         for peakList in spectrum.peakLists:
           peakListItem = QtGui.QTreeWidgetItem(newItem)
           peakListItem.setText(0, peakList.pid)
+        anItem = QtGui.QTreeWidgetItem(newItem)
+        anItem.setText(0, '<New>')
 
     # for mixture in project.mixtures:
     #   newMixture = self.addItem(self.spectrumMixtures, newItem)
@@ -118,57 +130,57 @@ class SideBar(QtGui.QTreeWidget):
 
 
     # 1d
-    self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
-    self.onedItem.setText(0, "1D")
-    # self.onedItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    # self.onedItemMixture.setText(0, "1D")
-    self.onedItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
-    self.onedItemScreening.setText(0, "1D")
-    # STD
-    self.stdItem = QtGui.QTreeWidgetItem(self.spectrumReference)
-    self.stdItem.setText(0, "STD")
-    # self.stdItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    # self.stdItemMixture.setText(0, "STD")
-    self.stdItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
-    self.stdItemScreening.setText(0, "STD")
-    # Wlogsy
-    self.logsyItem = QtGui.QTreeWidgetItem(self.spectrumReference)
-    self.logsyItem.setText(0, "Water-LOGSY")
-    # self.logsyItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    # self.logsyItemMixture.setText(0, "Water-LOGSY")
-    self.logsyItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
-    self.logsyItemScreening.setText(0, "Water-LOGSY")
-    self.logsyItemScreening.setText(0, "Water-LOGSY")
+    # self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
+    # self.onedItem.setText(0, "1D")
+    # # self.onedItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
+    # # self.onedItemMixture.setText(0, "1D")
+    # self.onedItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
+    # self.onedItemScreening.setText(0, "1D")
+    # # STD
+    # self.stdItem = QtGui.QTreeWidgetItem(self.spectrumReference)
+    # self.stdItem.setText(0, "STD")
+    # # self.stdItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
+    # # self.stdItemMixture.setText(0, "STD")
+    # self.stdItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
+    # self.stdItemScreening.setText(0, "STD")
+    # # Wlogsy
+    # self.logsyItem = QtGui.QTreeWidgetItem(self.spectrumReference)
+    # self.logsyItem.setText(0, "Water-LOGSY")
+    # # self.logsyItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
+    # # self.logsyItemMixture.setText(0, "Water-LOGSY")
+    # self.logsyItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
+    # self.logsyItemScreening.setText(0, "Water-LOGSY")
+    # self.logsyItemScreening.setText(0, "Water-LOGSY")
     # T1rho
-    self.t1rhoItem = QtGui.QTreeWidgetItem(self.spectrumReference)
-    self.t1rhoItem.setText(0, "T1rho")
-    # self.t1rhoItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    # self.t1rhoItemMixture.setText(0, "T1rho")
-    self.t1rhoItemScreening= QtGui.QTreeWidgetItem(self.spectrumScreening)
-    self.t1rhoItemScreening.setText(0, "T1rho")
-
-    ### Flags
-    # set dropEnable  the item you want to move. Set dragEnable  where drop is allowed
-    self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled |QtCore.Qt.ItemIsDropEnabled))
-    self.spectrumItem.setFlags(self.spectrumItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    self.spectrumReference.setFlags(self.spectrumReference.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    self.spectrumScreening.setFlags(self.spectrumScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled ))
-    self.spectrumMixtures.setFlags(self.spectrumMixtures.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # References
-    self.onedItem.setFlags(self.onedItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    self.logsyItem.setFlags(self.logsyItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    self.t1rhoItem.setFlags(self.t1rhoItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    self.t1rhoItem.setFlags(self.t1rhoItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    self.stdItem.setFlags(self.stdItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # screening
-    self.onedItemScreening.setFlags(self.onedItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
-    self.logsyItemScreening.setFlags(self.logsyItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled ))
-    self.t1rhoItemScreening.setFlags(self.t1rhoItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
-    self.stdItemScreening.setFlags(self.stdItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
-    # structures, notes, deleted
-    self.structuresItem.setFlags(self.structuresItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    self.notesItem.setFlags(self.notesItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    self.spectrumDeleted.setFlags(self.spectrumDeleted.flags() & ~(QtCore.Qt.ItemIsDragEnabled ))
+    # self.t1rhoItem = QtGui.QTreeWidgetItem(self.spectrumReference)
+    # self.t1rhoItem.setText(0, "T1rho")
+    # # self.t1rhoItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
+    # # self.t1rhoItemMixture.setText(0, "T1rho")
+    # self.t1rhoItemScreening= QtGui.QTreeWidgetItem(self.spectrumScreening)
+    # self.t1rhoItemScreening.setText(0, "T1rho")
+    #
+    # ### Flags
+    # # set dropEnable  the item you want to move. Set dragEnable  where drop is allowed
+    # self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled |QtCore.Qt.ItemIsDropEnabled))
+    # self.spectrumItem.setFlags(self.spectrumItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # self.spectrumReference.setFlags(self.spectrumReference.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # self.spectrumScreening.setFlags(self.spectrumScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled ))
+    # self.spectrumMixtures.setFlags(self.spectrumMixtures.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # # References
+    # self.onedItem.setFlags(self.onedItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # self.logsyItem.setFlags(self.logsyItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # self.t1rhoItem.setFlags(self.t1rhoItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # self.t1rhoItem.setFlags(self.t1rhoItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # self.stdItem.setFlags(self.stdItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # # screening
+    # self.onedItemScreening.setFlags(self.onedItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
+    # self.logsyItemScreening.setFlags(self.logsyItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled ))
+    # self.t1rhoItemScreening.setFlags(self.t1rhoItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
+    # self.stdItemScreening.setFlags(self.stdItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
+    # # structures, notes, deleted
+    # self.structuresItem.setFlags(self.structuresItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # self.notesItem.setFlags(self.notesItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # self.spectrumDeleted.setFlags(self.spectrumDeleted.flags() & ~(QtCore.Qt.ItemIsDragEnabled ))
 
   def clearSideBar(self):
     self.projectItem.setText(0, "Project")

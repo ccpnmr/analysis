@@ -305,7 +305,7 @@ def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
         newStrip.moveTo(newIndex)
       for ii,axis in enumerate(newStrip.orderedAxes):
         ind = mapIndices[ii]
-        if ind is not None and axis._wrappedData.stripSerial != 0:
+        if ind is not None and axis._wrappedData.axis.stripSerial != 0:
           # Override if there is a mapping and axis is not shared for all strips
           axis.position = positions[ind]
           axis.widths = widths[ind]

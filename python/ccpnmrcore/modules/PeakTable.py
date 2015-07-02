@@ -33,7 +33,7 @@ UNITS = ['ppm', 'Hz', 'point']
 
 class PeakListSimple(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, peakLists=None, name='Peak List', **kw):
+  def __init__(self, parent=None, peakLists=None, name='Peak List', callback=None, **kw):
 
     if not peakLists:
       peakLists = []
@@ -50,6 +50,8 @@ class PeakListSimple(QtGui.QWidget, Base):
     self.setContentsMargins(4, 4, 4, 4,)
     # self.label.setFont(Font(size=12, bold=True))
     self.peakListPulldown = PulldownList(self, grid=(0, 1))
+    if callback is None:
+      callback=self.selectPeak
 
 
     label = Label(self, ' Position Unit:', grid=(0, 2), hAlign='r')
@@ -64,7 +66,7 @@ class PeakListSimple(QtGui.QWidget, Base):
     tipTexts=['Peak serial number', 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
               'Integral of spectrum intensity around peak location, according to chosen volume method',
               'Textual notes about the peak']
-    self.peakTable = GuiTableGenerator(self, peakLists, callback=self.selectPeak, columns=columns,
+    self.peakTable = GuiTableGenerator(self, peakLists, callback=callback, columns=columns,
                                        selector=self.peakListPulldown, tipTexts=tipTexts)
 
     # self.updatePeakLists()

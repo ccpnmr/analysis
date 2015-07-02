@@ -48,7 +48,6 @@ class GuiStrip1d(GuiStrip):
     self.spectrumIndex = 0
     self.peakItems = {}
     for spectrumView in self.spectrumViews:
-      print(spectrumView)
       self.plotWidget.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour)
 
 

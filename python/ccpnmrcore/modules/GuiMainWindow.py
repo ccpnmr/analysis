@@ -43,6 +43,7 @@ from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
 #from ccpnmrcore.modules.ParassignPeakTable import ParassignModule
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
+from ccpnmrcore.modules.SequenceModule import SequenceModule
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
@@ -129,21 +130,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
     self.leftWidget.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
-    # self.sequenceWidget = QtGui.QLabel(self)
-    # self.sequenceWidget.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
-    # font = self.sequenceWidget.font()
-    # font.setPointSize(21)
-    # self.sequenceWidget.setFont(font)
     self.pythonConsole.hide()
     self.splitter2.setGeometry(QtCore.QRect(1200, 1300, 100, 100))
     self.splitter1.addWidget(self.dockArea)
     self.seqScrollArea = QtGui.QScrollArea()
     self.seqScrollArea.setFixedHeight(30)
-    # if len(self._project.chains) > 0:
-    # # self.seqScrollArea.setWidget(self.sequenceWidget)
-    #   self.dockArea.layout.addWidget(self.sequenceWidget)
-    #   self.sequence = ''.join([residue.shortName for residue in self._project.chains[0].residues])
-    #   self.sequenceWidget.setText(self.sequence)
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
     self.setShortcuts()
@@ -207,6 +198,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     newMoleculeMenu.addAction(Action(self, "From PDB...", callback=self.createMoleculeFromPDB))
     newMoleculeMenu.addAction(Action(self, "From NEF...", callback=self.createMoleculeFromNEF))
     newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
+    newMoleculeMenu.addAction(Action(self, 'Show Sequence', callback=self.showSequence, shortcut='ss'))
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
     moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
@@ -260,8 +252,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.addMenu(moleculeMenu)
     if self._appBase.applicationName == 'Assign':
       self._menuBar.addMenu(assignMenu)
-    self._menuBar.addMenu(restraintsMenu)
-    self._menuBar.addMenu(structuresMenu)
+    if self._appBase.applicationName == 'Structure':
+      self._menuBar.addMenu(restraintsMenu)
+      self._menuBar.addMenu(structuresMenu)
     self._menuBar.addMenu(viewMenu)
     self._menuBar.addMenu(macroMenu)
     self._menuBar.addMenu(helpMenu)
@@ -273,6 +266,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def addBlankDisplay(self):
     if not self.blankDisplay:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
+
+  def showSequence(self):
+    sequenceWidget = SequenceModule(project=self._project,)
+    self.dockArea.addDock(sequenceWidget, position='top')
 
   def openAProject(self, projectDir=None):
 

@@ -196,15 +196,15 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def upBy2(self):
 
-    for spectrumView in self.spectrumViews:
-      spectrumView.spectrum.positiveContourBase *= spectrumView.spectrum.positiveContourFactor
-      spectrumView.spectrum.negativeContourBase *= spectrumView.spectrum.negativeContourFactor
+    for spectrumView in self._wrappedData.spectrumViews:
+      spectrumView.positiveContourBase *= spectrumView.positiveContourFactor
+      spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
 
   def downBy2(self):
 
     for spectrumView in self.spectrumViews:
-      spectrumView.spectrum.positiveContourBase /= spectrumView.spectrum.positiveContourFactor
-      spectrumView.spectrum.negativeContourBase /= spectrumView.spectrum.negativeContourFactor
+      spectrumView._wrappedData.findFirstSpectrumView().positiveContourBase /= spectrumView.spectrum.positiveContourFactor
+      spectrumView._wrappedData.findFirstSpectrumView().negativeContourBase /= spectrumView.spectrum.negativeContourFactor
 
   def addOne(self):
 

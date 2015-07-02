@@ -123,7 +123,6 @@ class GuiStripNd(GuiStrip):
   def changeZPlane(self, planeCount=None, position=None):
 
     zAxis = self.orderedAxes[2]
-    print(zAxis)
     smallest = None
     #take smallest inter-plane distance
     for spectrumItem in self.spectrumViews:
@@ -235,7 +234,6 @@ class GuiStripNd(GuiStrip):
   def axisRegionChanged(self, apiAxis):
     
     # TBD: other axes
-    print(apiAxis)
     apiStripAxis = self._wrappedData.findFirstStripAxis(axis=apiAxis)
     if apiStripAxis is None:
       return
@@ -301,7 +299,6 @@ class GuiStripNd(GuiStrip):
     pntRegion = []
     for dim in range(dimensionCount):
         pnt = LibSpectrum.getDimPointFromValue(self.spectrumViews[0].spectrum, dim, ppmRegion[dim])
-        print(pnt)
         pntRegion.append(math.floor(pnt[0]))
     spectrum = self.spectrumViews[0].spectrum
     dataDimRef = spectrum.apiDataSource.sortedDataDims()[traceMarker.axis.mappedDim].findFirstDataDimRef()

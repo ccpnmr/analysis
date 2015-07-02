@@ -25,7 +25,7 @@ class CcpnDock(Dock):
 class CcpnDockLabel(DockLabel):
 
     def __init__(self, *args):
-      super(CcpnDockLabel, self).__init__(showCloseButton=True, *args)
+      super(CcpnDockLabel, self).__init__(*args)
       self.setFont(QtGui.QFont('Lucida Grande', 10))
 
 

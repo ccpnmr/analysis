@@ -67,21 +67,26 @@ class BackboneAssignmentModule(CcpnDock, Base):
 
     # self.assigner.clearAllItems()
     ### determine query and match windows
-    print(self.queryDisplay, self.matchDisplays)
+    print(self.queryDisplays, self.matchDisplays)
     if peak:
       positions = peak.position
       self.hsqcDisplay.strips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
       self.hsqcDisplay.strips[-1].zoomToRegion([peak.position[0]-0.2, peak.position[0]+0.2,
                                                 peak.position[1]-2, peak.position[1]+2])
+      line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      line1.setPos(QtCore.QPointF(0, peak.position[1]))
+      line2.setPos(QtCore.QPointF(peak.position[0], 0))
+      self.hsqcDisplay.strips[-1].viewBox.addItem(line1)
+      self.hsqcDisplay.strips[-1].viewBox.addItem(line2)
 
-      for queryWindow in self.queryDisplays:
+
+      for queryDisplay in self.queryDisplays:
+        queryWindow = self.project.getById(queryDisplay)
         queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
         queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
         queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
-        line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-        line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-        line1.setPos(QtCore.QPointF(positions[0], 0))
-        line2.setPos(QtCore.QPointF(0, positions[1]))
+
 
 
 
@@ -132,7 +137,8 @@ class BackboneAssignmentModule(CcpnDock, Base):
     for queryShift in queryShifts:
       line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
       line.setPos(QtCore.QPointF(0, queryShift.value))
-      for queryWindow in queryWindows:
+      for queryDisplay in self.queryDisplays:
+        queryWindow = self.project.getById(queryDisplay)
         queryWindow.orderedStrips[0].plotWidget.addItem(line)
 
     assignMatrix = self.buildAssignmentMatrix(queryShifts, intraShifts)
@@ -152,7 +158,8 @@ class BackboneAssignmentModule(CcpnDock, Base):
             yShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom).value)
       line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
       line.setPos(QtCore.QPointF(xShift, 0))
-      for matchWindow in matchWindows:
+      for matchDisplay in self.matchDisplays:
+        matchWindow = self.project.getById(matchDisplay)
         newStrip = matchWindow.addStrip()
         newStrip.changeZPlane(position=zShift)
         newStrip.spinSystemLabel.setText(matchResidue.sequenceCode)
@@ -175,7 +182,8 @@ class BackboneAssignmentModule(CcpnDock, Base):
 
     line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
     line.setPos(QtCore.QPointF(xShift, 0))
-    for matchWindow in matchWindows:
+    for matchDisplay in self.matchDisplays:
+      matchWindow = self.project.getById(matchDisplay)
       matchWindow.orderedStrips[0].changeZPlane(position=zShift)
       matchWindow.orderedStrips[0].spinSystemLabel.setText(firstMatchResidue.sequenceCode)
       matchWindow.orderedStrips[0].plotWidget.addItem(line)

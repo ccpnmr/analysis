@@ -157,7 +157,7 @@ class Assigner(CcpnDock):
 
           if cBetaAtom is not None:
             self.scene.addItem(cbAtom2)
-            self.addAssignmentLine(caAtom2, cbAtom2, 'grey', 1,0, 0)
+            self.addAssignmentLine(caAtom2, cbAtom2, 'grey', 1.0, 0)
             cbShift = self.project.chemicalShiftLists[0].findChemicalShift(cBetaAtom)
           self.scene.addItem(nAtom2)
           self.scene.addItem(hAtom2)

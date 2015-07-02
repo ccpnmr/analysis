@@ -64,7 +64,7 @@ apiCodeDir = 'api'
 xmlCodeDir = 'xml'
 
 # documentation directories
-imageDir = 'apidoc/graphics'
+imageDir = 'python/ccpn/doc/graphics'
 docDir = 'apidoc'
 
 configFilePath = 'data/ccpnConfig.json'

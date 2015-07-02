@@ -39,7 +39,7 @@ class Window(AbstractWrapperObject):
   shortClassName = 'GW'
 
   #: Name of plural link to instances of class
-  _pluralLinkName = 'guiWindows'
+  _pluralLinkName = 'windows'
   
   #: List of child classes.
   _childClasses = []

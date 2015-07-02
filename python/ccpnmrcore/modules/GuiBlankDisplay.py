@@ -140,7 +140,6 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
           for sequence in sequences:
             self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
                                                     molType='protein')
-
         else:
           spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePaths[0])
           self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)

@@ -57,7 +57,6 @@ class DropBase(GuiBase):
               self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
                                                     molType='protein')
 
-
           else:
             try:
               spectrum = self._appBase.project.loadSpectrum(filePath)
@@ -114,7 +113,7 @@ class DropBase(GuiBase):
     elif dataType == 'urls':
       # data is list-of-urls
 
-      urlType, urlInfo = qtUtil.analyzeUrls(data)
+      urlType, urlInfo = qtUtil.analyseUrls(data)
       # urlInfo is list of triplets of (type, subType, modifiedUrl),
       # e.g. ('spectrum', 'Bruker', newUrl)
 

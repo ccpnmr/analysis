@@ -24,6 +24,19 @@ __version__ = "$Revision$"
 
 from ccpncore.lib.spectrum import Util as spectrumUtil
 
+pidTypeMap = {}
+import ccpn
+import ccpnmr
+for package in ccpn, ccpnmr:
+  for tag in dir(package):
+    obj = getattr(package, tag)
+    if hasattr(obj, 'shortClassName'):
+      shortClassName = getattr(obj, 'shortClassName')
+      if shortClassName:
+        #NBNB TBD QTTBD FIXME - also picks up subclasses
+        pidTypeMap[shortClassName] = obj.__name__
+
+
 def interpretEvent(event):
   """ Interpret drop event and return (type, data)
   """
@@ -50,19 +63,6 @@ def interpretEvent(event):
     return('text', event.mimeData().text)
 
   return (None, None)
-
-
-pidTypeMap = {}
-import ccpn
-import ccpnmr
-for package in ccpn, ccpnmr:
-  for tag in dir(package):
-    obj = getattr(package, tag)
-    if hasattr(obj, 'shortClassName'):
-      shortClassName = getattr(obj, 'shortClassName')
-      if shortClassName:
-        #NBNB TBD QTTBD FIXME - also picks up subclasses
-        pidTypeMap[shortClassName] = obj.__name__
 
 
 def getCommonType(pids):

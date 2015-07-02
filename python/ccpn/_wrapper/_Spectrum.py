@@ -719,6 +719,9 @@ class Spectrum(AbstractWrapperObject):
     """Sample used to acquire Spectrum"""
     return self._project._data2Obj.get(self._wrappedData.experiment.sample)
 
+  @sample.setter
+  def sample(self, value:Sample):
+    self._wrappedData.experiment.sample = None if value is None else value._wrappedData
 
   # Implementation functions
 

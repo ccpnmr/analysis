@@ -299,14 +299,14 @@ def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=
                           independentStrips:bool=False):
 
   """
-  displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
-  axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
-  positions: axis positions in order - default to heuristic
-  widths: axis widths in order - default to heuristic
-  units: axis units in display order - default to heuristic
-  stripAxis: if 'X' or 'Y' set strip axis
-  is1d: If True, or spectrum passed in is 1D, do 1D display
-  independentStrips: if True do freeStrip display.
+  :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
+  :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
+  :param \*float positions: axis positions in order - default to heuristic
+  :param \*float widths: axis widths in order - default to heuristic
+  :param \*str units: axis units in display order - default to heuristic
+  :param str stripAxis: if 'X' or 'Y' set strip axis
+  :param bool is1d: If True, or spectrum passed in is 1D, do 1D display
+  :param bool independentStrips: if True do freeStrip display.
   """
 
   spectrum = window.getById(spectrum) if isinstance(spectrum, str) else spectrum

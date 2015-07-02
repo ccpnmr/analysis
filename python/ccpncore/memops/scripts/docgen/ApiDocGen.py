@@ -133,7 +133,7 @@ class ApiDocGen(Documentation, ModelTraverse):
   topApiPrefix = 'api'
   classMapPrefix = 'classMap'
   methodMapPrefix = 'methodMap'
-  indexPrefix = 'index'
+  indexPrefix = '_index'
   ###attrRoleDir = 'attributeMap'
   attributeMapPrefix = 'attributeMap'
   imageDir = metaConstants.imageDir
@@ -2131,7 +2131,7 @@ so, you should assume that these classes are not relevant to your purpose.
     elif isinstance(elem,MetaModel.MetaPackage) and elem.containedPackages:
       # branch package
       ll = diapackage.qualifiedName().split('.')
-      ll.append('index')
+      ll.append(self.indexPrefix)
       diapath = Path.joinPath(topPath,self.modelDocDir,*ll)
     else:
       # leaf package or package content
@@ -3103,14 +3103,14 @@ so, you should assume that these classes are not relevant to your purpose.
 
   ###########################################################################
 
-  def pathToTop(self, element, isDiagram = False, upDir = 0):
+  def pathToTop(self, element, isDiagram=False, upDir=0):
     """ return relative directory path from a given element to the top directory
     """
   
     # upDir is hack to get Attribute Map pages to work
 
     if isDiagram:
-      n = 1  # it's always in model directory, not in language-specific api directory
+      n = 2  # it's always in model/doc directory, not in language-specific api directory
     else:
       n = len(self.baseDirNames)
 
@@ -3281,9 +3281,9 @@ so, you should assume that these classes are not relevant to your purpose.
       raise MemopsError('getElemTypeString called with object of class %s' % elem.__class__.__name__)
 
     if self.elemHasOwnDirectory(target):
-      return '<a href ="%s/index.html">%s</a>' % (ref,name)
+      return '<a href ="%s/%s.html">%s</a>' % (ref, ApiDocGen.indexPrefix, name)
     else:
-      return '<a href ="%s.html">%s</a>' % (ref,name)
+      return '<a href ="%s.html">%s</a>' % (ref, name)
 
   ###########################################################################
 

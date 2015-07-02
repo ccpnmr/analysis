@@ -225,7 +225,7 @@ def makeSimpleChain(parent:Project, sequence:(str,tuple), compoundName:str='Mole
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
   """Make new chain from sequence of residue codes, using default linking and variants
 
-  :param Sequence sequence: string of one-letter codes or sequence of residueNames
+  :param Sequence sequence: string of one-letter codes or sequence of str residueNames
   :param str compoundName: name of new CCPN_Molecule (e.g. 'Lysozyme')
   :param str molType: molType ('protein','DNA', 'RNA'). Required only if sequence is a string.
   :param int startNumber: number of first residue in sequence
@@ -248,8 +248,9 @@ def makeSimpleChain(parent:Project, sequence:(str,tuple), compoundName:str='Mole
                                              name=compoundName, startNumber=startNumber,
                                              isCyclic=isCyclic)
 
-  newCcpnChain = ccpnMolSystem.newChain(molecule=ccpnMolecule, role=role, code=shortName, details=comment)
-  #
+  newCcpnChain = ccpnMolSystem.newChain(molecule=ccpnMolecule, role=role, details=comment)
+  newCcpnChain = ccpnMolSystem.newChain(molecule=ccpnMolecule, code=shortName, role=role,
+                                        details=comment)  #
   return  parent._project._data2Obj[newCcpnChain]
 
 

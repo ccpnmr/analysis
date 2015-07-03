@@ -25,7 +25,6 @@ __version__ = "$Revision$"
 import os
 import operator
 
-from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.chemComp.Util import getChemAtomSetFromAtoms
 
 
@@ -820,7 +819,7 @@ def _getBoundResonances(resonance, recalculate=False, contribs=None, recursiveCa
       #for atom in atomSet.atoms:
       atom = atomSet.findFirstAtom()
 
-      for atom2 in MoleculeQuery.getBoundAtoms(atom):
+      for atom2 in _getBoundAtoms(atom):
         atomSet2 = atom2.atomSet
 
         if atomSet2 and atomSet2.resonanceSets:
@@ -958,3 +957,59 @@ def _getBoundResonances(resonance, recalculate=False, contribs=None, recursiveCa
 
   return list(resonances)
 
+
+
+
+def _getBoundAtoms(atom):
+  """Get a list of atoms bound to a given atom. NB ONLYfor use in upgrade
+  .. describe:: Input
+
+  MolSystem.Atom
+
+  .. describe:: Output
+
+  List of MolSystem.Atoms
+  """
+
+  if hasattr(atom, 'boundAtoms'):
+    return atom.boundAtoms
+
+  atoms    = []
+  chemAtom = atom.chemAtom
+  residue  = atom.residue
+
+  chemAtomDict = {}
+  for atom2 in residue.atoms:
+    # Only atoms specific to ChemCompVar :-)
+    chemAtomDict[atom2.chemAtom] = atom2
+
+  for chemBond in chemAtom.chemBonds:
+    for chemAtom2 in chemBond.chemAtoms:
+      if chemAtom2 is not chemAtom:
+        atom2 = chemAtomDict.get(chemAtom2)
+        if atom2:
+          atoms.append(atom2)
+
+  linkEnd = residue.chemCompVar.findFirstLinkEnd(boundChemAtom=chemAtom)
+  if linkEnd:
+    molResLinkEnd = residue.molResidue.findFirstMolResLinkEnd(linkEnd=linkEnd)
+
+    if molResLinkEnd:
+      molResLink = molResLinkEnd.molResLink
+
+      if molResLink:
+        for molResLinkEnd2 in molResLink.molResLinkEnds:
+          if molResLinkEnd2 is not molResLinkEnd:
+            residue2 = residue.chain.findFirstResidue(molResidue=molResLinkEnd2.molResidue)
+
+            if residue2:
+              chemAtom2 = molResLinkEnd2.linkEnd.boundChemAtom
+              atom2 = residue2.findFirstAtom(chemAtom=chemAtom2)
+
+              if atom2:
+                atoms.append(atom2)
+
+            break
+
+  atom.boundAtoms = atoms
+  return atoms

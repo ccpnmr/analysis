@@ -343,61 +343,6 @@ ccpCodeRemap = {
 #   atom1.tocsyDict[atom2] = boolean
 #   atom2.tocsyDict[atom1] = boolean
 #   return boolean
-  
-
-def getBoundAtoms(atom):
-  """Get a list of atoms bound to a given atom..
-  .. describe:: Input
-
-  MolSystem.Atom
-
-  .. describe:: Output
-
-  List of MolSystem.Atoms
-  """
-
-  if hasattr(atom, 'boundAtoms'):
-    return atom.boundAtoms
-
-  atoms    = []
-  chemAtom = atom.chemAtom
-  residue  = atom.residue
-
-  chemAtomDict = {}
-  for atom2 in residue.atoms:
-    # Only atoms specific to ChemCompVar :-)
-    chemAtomDict[atom2.chemAtom] = atom2
-
-  for chemBond in chemAtom.chemBonds:
-    for chemAtom2 in chemBond.chemAtoms:
-      if chemAtom2 is not chemAtom:
-        atom2 = chemAtomDict.get(chemAtom2)
-        if atom2:
-          atoms.append(atom2)
-
-  linkEnd = residue.chemCompVar.findFirstLinkEnd(boundChemAtom=chemAtom)
-  if linkEnd:
-    molResLinkEnd = residue.molResidue.findFirstMolResLinkEnd(linkEnd=linkEnd)
-
-    if molResLinkEnd:
-      molResLink = molResLinkEnd.molResLink
-
-      if molResLink:
-        for molResLinkEnd2 in molResLink.molResLinkEnds:
-          if molResLinkEnd2 is not molResLinkEnd:
-            residue2 = residue.chain.findFirstResidue(molResidue=molResLinkEnd2.molResidue)
-
-            if residue2:
-              chemAtom2 = molResLinkEnd2.linkEnd.boundChemAtom
-              atom2 = residue2.findFirstAtom(chemAtom=chemAtom2)
-
-              if atom2:
-                atoms.append(atom2)
-
-            break
-
-  atom.boundAtoms = atoms
-  return atoms
 
 
 def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):

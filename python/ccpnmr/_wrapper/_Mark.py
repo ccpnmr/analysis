@@ -26,7 +26,7 @@ from collections.abc import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
-from ccpncore.api.ccpnmr.gui.Task import Mark as ApiMatk
+from ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 from ccpncore.api.ccpnmr.gui.Task import GuiTask as GuiTask
 from ccpncore.util import Pid
 
@@ -46,7 +46,7 @@ class Mark(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiMark(self) -> ApiMatk:
+  def apiMark(self) -> ApiMark:
     """ CCPN Mark matching Mark"""
     return self._wrappedData
 
@@ -180,7 +180,7 @@ GuiTask.newSimpleMark = newSimpleMark
 
 
 # Notifiers:
-className = ApiMatk._metaclass.qualifiedName()
+className = ApiMark._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Mark}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete')

@@ -440,6 +440,7 @@ def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=N
 
 def getSpinSystemResidueProbability(spinSystem, shiftList, ccpCode,
                                     prior=0.05, molType=PROTEIN_MOLTYPE):
+  """Get probability that Spin Ssytem matches molType and ccpCode"""
 
   ppms = []
   elements = []

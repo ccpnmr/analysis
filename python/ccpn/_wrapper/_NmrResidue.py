@@ -97,7 +97,31 @@ class NmrResidue(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
     return parent._wrappedData.sortedResonanceGroups()
-    
+
+def getter(self:NmrResidue) -> tuple:
+  apiResult = self._wrappedData.nmrChain.findAllResonanceGroups(seqCode=self.seqCode,
+                                                                seqInsertCode=self.seqinsertCode)
+  return tuple(sorted(self._project._data2Obj.get(x) for x in apiResult))
+NmrResidue.nmrResidueCluster = property(getter, None, None,
+                                        "All NmrResidues with the same sequenceCode "
+                                        "except for different offSets suffixes '_1', '+1', etc.")
+
+def getter(self:NmrResidue) -> NmrResidue:
+  obj = self._wrappedData.nextResidue
+  return None if obj is None else self._project._data2Obj.get(obj)
+def setter(self:NmrResidue, value:NmrResidue):
+  self._wrappedData.nextResidue = None if value is None else value._wrappedData
+NmrResidue.nextResidue = property(getter, setter, None, "Next NmrResidue in sequence")
+
+def getter(self:NmrResidue) -> NmrResidue:
+  obj = self._wrappedData.previousResidue
+  return None if obj is None else self._project._data2Obj.get(obj)
+def setter(self:NmrResidue, value:NmrResidue):
+  self._wrappedData.previousResidue = None if value is None else value._wrappedData
+NmrResidue.previousResidue = property(getter, setter, None, "Previous NmrResidue in sequence")
+
+del getter
+del setter
     
 def newNmrResidue(parent:NmrChain, name:str=None, sequenceCode:str=None, comment:str=None) -> NmrResidue:
   """Create new child NmrResidue"""

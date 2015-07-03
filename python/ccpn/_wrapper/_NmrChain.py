@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from collections.abc import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
@@ -80,6 +81,57 @@ class NmrChain(AbstractWrapperObject):
       return None
 
     return self._parent._data2Obj.get(apiChain)
+
+  @property
+  def connectedNmrResidues(self) -> tuple:
+    """stretch of connected NmrResidues within NmrChain - there can only be one
+    Does not include NmrResidues defined as satellites (sequenceCodes that end in '+1', '-1', etc.
+    If NmrChain matches a proper Chain, there will be an NmrResidue for each residue,
+    with None for unassigned residues """
+
+
+    apiNmrChain = self._wrappedData
+    apiChain = apiNmrChain.chain
+    if apiChain is None:
+      apiStretch = apiNmrChain.connectedStretch
+      if apiStretch is None:
+        apiResGroups = ()
+      else:
+        apiResGroups = apiStretch.activeResonanceGroups
+    else:
+      func1 = apiNmrChain.nmrProject.findFirstResonanceGroup
+      apiResGroups = [func1(seqCode=x.seqCode, seqInsertCode=x.seqInsertCode, relativeOffset=None)
+                      for x in apiChain.sortedResidues()]
+    #
+    func2 =  self._parent._data2Obj.get
+    return tuple(None if x is None else func2(x) for x in apiResGroups)
+
+  @connectedNmrResidues.setter
+  def connectedNmrResidues(self, value:Sequence):
+    apiNmrChain = self._wrappedData
+    apiChain = apiNmrChain.chain
+    if apiChain is None:
+      apiStretch = apiNmrChain.connectedStretch
+      if apiStretch is None:
+        if value:
+          apiStretch = apiNmrChain.nmrProject.activeSequentialAssignment.newConenctedStretch(
+            activeResonanceGroups= [x._wrappedData for x in value]
+          )
+      else:
+        if value:
+          apiStretch.activeResonanceGroups = [x._wrappedData for x in value]
+        else:
+          apiStretch.delete()
+    else:
+      raise ValueError("Cannot set connectedNmrResidues for NmrChain assigned to actual Chain")
+
+
+  @property
+  def mainNmrResidues(self) -> tuple:
+    """NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
+    (sequenceCode ending in '-1', '+1', etc.)"""
+    ll = self.connectedNmrResidues
+    return ll + tuple(x for x in self.nmrResidues if x not in ll)
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:

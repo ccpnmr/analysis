@@ -38,6 +38,8 @@ from ccpnmrcore.Current import Current
 
 import os, json
 
+from PyQt4 import QtGui
+
 class AppBase(GuiBase):
 
   def __init__(self, apiProject, applicationName, applicationVersion):
@@ -47,8 +49,8 @@ class AppBase(GuiBase):
     self.applicationVersion = applicationVersion
     
     self.setupPreferences()
-    self.vLines = []
-    self.hLines = []
+    ###self.vLines = []
+    ###self.hLines = []
     self.initProject(apiProject)
 
     
@@ -60,6 +62,7 @@ class AppBase(GuiBase):
     project = ccpnIo._wrapApiProject(apiProject)
     apiNmrProject = project._wrappedData
     self.project = project
+    self.current.project = project
     project._appBase = self
 
     apiWindowStore = apiNmrProject.windowStore
@@ -112,10 +115,10 @@ class AppBase(GuiBase):
     apiProject = ioUtil.newProject(name)
     self.initProject(apiProject)
 
-  def saveProject(self):
-    ioUtil.saveProject(self.project._wrappedData.root)
+  def saveProject(self, newPath=None):
+    ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)
     print("project saved")
-
+    
   def setupPreferences(self):
 
     preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?

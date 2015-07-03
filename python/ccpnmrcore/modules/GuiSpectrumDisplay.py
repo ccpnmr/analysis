@@ -105,4 +105,17 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
   def storeZoom(self):
     self._appBase.current.strip.storeZoom()
     
+  def toggleCrossHair(self):
+    # toggle crosshairs for strips in this spectrumDisplay
+    for strip in self.strips:
+      strip.toggleCrossHair()
+    
+  def toggleGrid(self):
+    # toggle grid for strips in this spectrumDisplay
+    for strip in self.strips:
+      strip.toggleGrid()
+    
+  def setCrossHairPosition(self, axisPositionDict):
+    for strip in self.strips:
+      strip.setCrossHairPosition(axisPositionDict)
     

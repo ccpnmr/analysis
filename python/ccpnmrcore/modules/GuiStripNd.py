@@ -107,10 +107,10 @@ class GuiStripNd(GuiStrip):
     self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self.toggleCrossHair, checkable=True)
     self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
 
-    if self.crossHairShown == True:
-      self.crossHairAction.setChecked(True)
-    else:
-      self.crossHairAction.setChecked(False)
+    ###if self.crossHairShown == True:
+    ###  self.crossHairAction.setChecked(True)
+    ###else:
+    ###  self.crossHairAction.setChecked(False)
 
     if self.grid.isVisible():
       self.gridAction.setChecked(True)
@@ -230,7 +230,7 @@ class GuiStripNd(GuiStrip):
       return
     peakList = peak.parent
     self.showPeaks(peakList)
-  
+      
   def axisRegionChanged(self, apiAxis):
     
     # TBD: other axes

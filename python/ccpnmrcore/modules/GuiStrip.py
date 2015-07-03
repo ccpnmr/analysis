@@ -133,7 +133,6 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
 
   def setupAxes(self):
-    print(self.orderedAxes)
 
     self.viewBox.setXRange(*self.orderedAxes[0].region)
     self.viewBox.setYRange(*self.orderedAxes[1].region)
@@ -250,41 +249,37 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
     self.plotWidget.addItem(self.vLine, ignoreBounds=True)
     self.plotWidget.addItem(self.hLine, ignoreBounds=True)
-    self.guiSpectrumDisplay._appBase.hLines.append(self.hLine)
-    self.guiSpectrumDisplay._appBase.vLines.append(self.vLine)
-    self.crossHairShown = True
-
-
-
 
   def toggleCrossHair(self):
-    if self.crossHairShown:
-      self.hideCrossHair()
-    else:
-      self.showCrossHair()
+    self.vLine.setVisible(not self.vLine.isVisible())
+    self.hLine.setVisible(not self.hLine.isVisible())
 
   def showCrossHair(self):
-      for vLine in self.guiSpectrumDisplay._appBase.vLines:
-        vLine.show()
-      for hLine in self.guiSpectrumDisplay._appBase.hLines:
-        hLine.show()
-      # self.crossHairAction.setChecked(True)
-      self.crossHairShown = True
+    self.vLine.show()
+    self.hLine.show()
 
   def hideCrossHair(self):
-    for vLine in self.guiSpectrumDisplay._appBase.vLines:
-        vLine.hide()
-    for hLine in self.guiSpectrumDisplay._appBase.hLines:
-        hLine.hide()
-    # self.crossHairAction.setChecked(False)
-    self.crossHairShown = False
+    self.vLine.hide()
+    self.hLine.hide()
 
   def toggleGrid(self):
-    if self.grid.isVisible():
-      self.grid.hide()
-    else:
-      self.grid.show()
+    self.grid.setVisible(not self.grid.isVisible())
 
+  def _crosshairCode(self, code):
+    # determines what axisCodes are compatible as far as drawing crosshair is concerned
+    return code[0] if code[0].isupper() else code
+      
+  def setCrossHairPosition(self, axisPositionDict):
+    axes = self.orderedAxes
+    
+    position = axisPositionDict.get(self._crosshairCode(axes[0].code))
+    if position is not None:
+      self.vLine.setPos(position)
+      
+    position = axisPositionDict.get(self._crosshairCode(axes[1].code))
+    if position is not None:
+      self.hLine.setPos(position)
+      
   def mouseClicked(self, event):
     print(event)
 
@@ -292,12 +287,26 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     position = event
     if self.plotWidget.sceneBoundingRect().contains(position):
-        self.mousePoint = self.viewBox.mapSceneToView(position)
-        for vLine in self.guiSpectrumDisplay._appBase.vLines:
-          vLine.setPos(self.mousePoint.x())
-        for hLine in self.guiSpectrumDisplay._appBase.hLines:
-          hLine.setPos(self.mousePoint.y())
-    return self.mousePoint
+      mousePoint = self.viewBox.mapSceneToView(position)
+      axisPositionDict = {}
+      for n, axis in enumerate(self.orderedAxes):
+        # TBD: what if x and y have the same (or related) axis codes?
+        if n == 0:
+          position = mousePoint.x()
+        elif n == 1:
+          position = mousePoint.y()
+        else:
+          position = axis.position
+        axisPositionDict[self._crosshairCode(axis.code)] = position
+      for window in self._appBase.project.windows:
+        window.setCrossHairPosition(axisPositionDict)
+      ###self.vLine.setPos(mousePoint.x())
+      ###self.hLine.setPos(mousePoint.y())
+      ###for vLine in self.guiSpectrumDisplay._appBase.vLines:
+      ###  vLine.setPos(self.mousePoint.x())
+      ###for hLine in self.guiSpectrumDisplay._appBase.hLines:
+      ###  hLine.setPos(self.mousePoint.y())
+    ###return self.mousePoint
 
   def showMousePosition(self, pos):
     position = self.viewBox.mapSceneToView(pos)

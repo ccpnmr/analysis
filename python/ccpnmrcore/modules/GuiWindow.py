@@ -33,6 +33,7 @@ from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpnmrcore.modules.GuiStripDisplay1d import GuiStripDisplay1d
 from ccpnmrcore.modules.GuiStripDisplayNd import GuiStripDisplayNd
+from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 class GuiWindow(GuiBase):
   
@@ -119,20 +120,34 @@ class GuiWindow(GuiBase):
     
     # this trampled the menu py shortcut
     #toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
-    QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHair)
-    QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGrid)
+    QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll)
+    QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll)
     QtGui.QShortcut(QtGui.QKeySequence("Del"), self, lambda: self._appBase.current.deleteSelected(self))
+   
+  def toggleCrossHairAll(self):
+    # toggle crosshairs in all windows
+    for window in self.project.windows:
+      window.toggleCrossHair()
     
-  def toggleCrossHair(self):
-    strip = self._appBase.current.strip
-    if strip:
-      strip.toggleCrossHair()
+  def toggleCrossHair(self): 
+    # toggle crosshairs for the spectrum displays in this window
+    for spectrumDisplay in self.spectrumDisplays:
+      spectrumDisplay.toggleCrossHair()
 
-  def toggleGrid(self):
-    strip = self._appBase.current.strip
-    if strip:
-      strip.toggleGrid()
+  def toggleGridAll(self):
+    # toggle grid in all windows
+    for window in self.project.windows:
+      window.toggleGrid()
     
+  def toggleGrid(self):
+    # toggle grid for the spectrum displays in this window
+    for spectrumDisplay in self.spectrumDisplays:
+      spectrumDisplay.toggleGrid()
+    
+  def setCrossHairPosition(self, axisPositionDict):
+    for spectrumDisplay in self.spectrumDisplays:
+      spectrumDisplay.setCrossHairPosition(axisPositionDict)
+  
   def dropEvent(self, event):
     '''if object can be dropped into this area, accept dropEvent, otherwise throw an error
         spectra, projects and peak lists can be dropped into this area but nothing else

@@ -86,7 +86,7 @@ class ChemicalShiftList(AbstractWrapperObject):
   @property
   def isSimulated(self) -> bool:
     """
-    is CHemicalShiftList simulated?"""
+    is ChemicalShiftList simulated?"""
     return self._wrappedData.isSimulated
 
   @isSimulated.setter

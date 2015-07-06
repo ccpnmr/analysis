@@ -615,7 +615,6 @@ class AbstractWrapperObject():
     data2Obj = project._data2Obj
 
     for childClass in self._childClasses:
-
       # recursively create children
       for apiObj in childClass._getAllWrappedData(self):
         obj = data2Obj.get(apiObj)

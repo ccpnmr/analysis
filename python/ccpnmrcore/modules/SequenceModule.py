@@ -18,6 +18,7 @@ class SequenceModule(CcpnDock):
     for chain in project.chains:
       sequenceToShow = ''.join(self.getSpacedSequence(chain))
       chainLabel = Label(widget, chain.compoundName+': '+sequenceToShow, grid=(0, 0))
+      chainLabel.chainCode = chain.compoundName
       chainLabel.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
 
     scrollArea.setWidget(widget)

@@ -33,6 +33,7 @@ from ccpn import Spectrum
 
 from ccpncore.gui.Label import Label
 from ccpnmrcore.gui.PlotWidget import PlotWidget
+from ccpncore.gui.CcpnGridItem import CcpnGridItem
 from ccpncore.gui.Widget import Widget
 from ccpncore.memops import Notifiers
 
@@ -109,7 +110,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     self.viewBox.sigClicked.connect(self.mouseClicked)
     ###proxy = pg.SignalProxy(self.viewBox.sigRangeChanged, rateLimit=10, slot=self.updateRegion)
-    self.grid = pg.GridItem()
+    self.grid = CcpnGridItem()
     self.plotWidget.addItem(self.grid)
     self.setMinimumWidth(200)
     self.createCrossHair()
@@ -225,7 +226,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.spinSystemLabel = Label(self.stripFrame, grid=(2, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                  hAlign='center', vAlign='top',dragDrop=True, pid=self.pid)
     # self.spinSystemLabel.dropEvent = self.dropCallback
-    self.spinSystemLabel.setText("Spin systems shown here")
+    # self.spinSystemLabel.setText("Spin systems shown here")
     self.spinSystemLabel.setFixedHeight(15)
     self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
     # self.spinSystemLabel.pid = self.pid

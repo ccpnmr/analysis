@@ -14,38 +14,55 @@ class InterIntraSpectrumPopup(QtGui.QDialog, Base):
     Base.__init__(self, **kw)
 
     self.project = project
-    label2a = Label(self, text="Inter-residue spectra", grid=(0, 0))
-    self.interList = ListWidget(self, grid=(2, 0))
-    self.interSpectrumPulldown = PulldownList(self, grid=(1, 0), callback=self.selectInterSpectrum)
-    self.interSpectrumPulldown.setData(self.getInterExpts()[0])
+    self.parent = parent
+
+    label2a = Label(self, text="Reference spectra", grid=(0, 0))
+
+    self.refSpectrumPulldown = PulldownList(self, grid=(1, 0), callback=self.selectRefSpectrum)
+    self.refSpectrumPulldown.addItem('')
+    spectra = [spectrum.pid for spectrum in project.spectra]
+    spectra.insert(0, '')
+    self.refSpectrumPulldown.setData(spectra)
+    self.refList = ListWidget(self, grid=(2, 0))
 
 
-    label2b = Label(self, text="Intra-residue spectra", grid=(0, 1))
-    self.intraList = ListWidget(self, grid=(2, 1))
+    label2a = Label(self, text="Intra-residue spectra", grid=(0, 1))
+
     self.intraSpectrumPulldown = PulldownList(self, grid=(1, 1), callback=self.selectIntraSpectrum)
+    threeDspectra = [spectrum.pid for spectrum in project.spectra if spectrum.dimensionCount > 2]
+    threeDspectra.insert(0, '')
+    self.intraSpectrumPulldown.setData(threeDspectra)
+    self.intraList = ListWidget(self, grid=(2, 1))
 
-    self.intraSpectrumPulldown.setData(self.getInterExpts()[1])
-    self.buttonBox = ButtonList(self, grid=(3, 1), texts=['Cancel', 'Ok'],
+
+    label2b = Label(self, text="Inter-residue spectra", grid=(0, 2))
+    self.interSpectrumPulldown = PulldownList(self, grid=(1, 2), callback=self.selectInterSpectrum)
+    self.interList = ListWidget(self, grid=(2, 2))
+    interSpectra = self.getInterExpts()
+    interSpectra.insert(0, '')
+    self.interSpectrumPulldown.setData(interSpectra)
+    self.buttonBox = ButtonList(self, grid=(3, 2), texts=['Cancel', 'Ok'],
                            callbacks=[self.reject, self.setInterIntraSpectra])
 
   def selectInterSpectrum(self, item):
     self.interList.addItem(item)
+
+  def selectRefSpectrum(self, item):
+    self.refList.addItem(item)
 
   def selectIntraSpectrum(self, item):
     self.intraList.addItem(item)
 
   def getInterExpts(self):
     interExpts = []
-    intraExpts = []
     for spectrum in self.project.spectra:
       if spectrum.dimensionCount > 2:
         if isInterOnlyExpt(spectrum.experimentType):
           interExpts.append(spectrum.pid)
-        else:
-          intraExpts.append(spectrum.pid)
-    return intraExpts, interExpts
+    return interExpts
 
   def setInterIntraSpectra(self):
-    self.parent().intraSpectra = [self.interList.item(i).text() for i in range(self.interList.count())]
-    self.parent().interSpectra = [self.intraList.item(i).text() for i in range(self.intraList.count())]
+    self.parent.refSpectra = [self.refList.item(i).text() for i in range(self.refList.count())]
+    self.parent.intraSpectra = [self.interList.item(i).text() for i in range(self.interList.count())]
+    self.parent.interSpectra = [self.intraList.item(i).text() for i in range(self.intraList.count())]
     self.accept()

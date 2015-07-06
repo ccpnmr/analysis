@@ -268,8 +268,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
   def showSequence(self):
-    sequenceWidget = SequenceModule(project=self._project,)
-    self.dockArea.addDock(sequenceWidget, position='top')
+    self.sequenceWidget = SequenceModule(project=self._project,)
+    self.dockArea.addDock(self.sequenceWidget, position='top')
 
   def openAProject(self, projectDir=None):
 

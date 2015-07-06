@@ -34,7 +34,7 @@ import math
 
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Base import Base
-from ccpncore.gui.Label import Label
+from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Dock import CcpnDockLabel, CcpnDock
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.popups.InterIntraSpectrumPopup import InterIntraSpectrumPopup
@@ -52,6 +52,8 @@ class BackboneAssignmentModule(CcpnDock, Base):
     self.spectrumButton = Button(self, text='Select Inter/Intra Spectra', callback=self.showInterIntraPopup)
     self.layout.addWidget(self.displayButton, 0, 0, 1, 1)
     self.layout.addWidget(self.spectrumButton, 0, 2, 1, 1)
+    self.directionPullDown = PulldownList(self, grid=(0, 4), callback=self.selectAssignmentDirection)
+    self.directionPullDown.setData(['', 'i-1', 'i+1'])
     self.hsqcDisplay = hsqcDisplay
     self.project = project
     self.current = project._appBase.current
@@ -73,12 +75,12 @@ class BackboneAssignmentModule(CcpnDock, Base):
       self.hsqcDisplay.strips[-1].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[0][0]._parent.id))
       self.hsqcDisplay.strips[-1].zoomToRegion([peak.position[0]-0.2, peak.position[0]+0.2,
                                                 peak.position[1]-2, peak.position[1]+2])
-      line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-      line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-      line1.setPos(QtCore.QPointF(0, peak.position[1]))
-      line2.setPos(QtCore.QPointF(peak.position[0], 0))
-      self.hsqcDisplay.strips[-1].viewBox.addItem(line1)
-      self.hsqcDisplay.strips[-1].viewBox.addItem(line2)
+      self.line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      self.line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      self.line1.setPos(QtCore.QPointF(0, peak.position[1]))
+      self.line2.setPos(QtCore.QPointF(peak.position[0], 0))
+      self.hsqcDisplay.strips[-1].viewBox.addItem(self.line1)
+      self.hsqcDisplay.strips[-1].viewBox.addItem(self.line2)
 
 
       for queryDisplay in self.queryDisplays:
@@ -88,8 +90,8 @@ class BackboneAssignmentModule(CcpnDock, Base):
         queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
 
 
-
-
+        for line in self.lines:
+          queryWindow.orderedStrips[0].plotWidget.removeItem(line)
         if len(self.lines) == 0:
 
           line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
@@ -102,8 +104,24 @@ class BackboneAssignmentModule(CcpnDock, Base):
       self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
 
     elif nmrResidue is not None:
+      self.hsqcDisplay.strips[-1].viewBox.removeItem(self.line1)
+      self.hsqcDisplay.strips[-1].viewBox.removeItem(self.line2)
       self.current.nmrResidue = nmrResidue
+      positions = [self.project.chemicalShiftLists[0].findChemicalShift(nmrResidue.fetchNmrAtom(name='H')).value,
+                   self.project.chemicalShiftLists[0].findChemicalShift(nmrResidue.fetchNmrAtom(name='N')).value]
 
+      self.hsqcDisplay.strips[-1].zoomToRegion([positions[0]-0.2, positions[0]+0.2,
+                                                positions[1]-2, positions[1]+2])
+
+
+      self.line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      self.line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+      self.line1.setPos(QtCore.QPointF(0, positions[1]))
+      self.line2.setPos(QtCore.QPointF(positions[0], 0))
+      self.hsqcDisplay.strips[-1].viewBox.addItem(self.line1)
+      self.hsqcDisplay.strips[-1].viewBox.addItem(self.line2)
+
+    self.assigner.spectra = {'ref': self.refSpectra, 'intra': self.intraSpectra, 'inter':self.interSpectra}
     self.assigner.addResidue(self.current.nmrResidue)
 
     intraShifts = {}
@@ -128,20 +146,29 @@ class BackboneAssignmentModule(CcpnDock, Base):
     queryShifts = []
     for atom in self.current.nmrResidue.atoms:
       if atom.apiResonance.isotopeCode == '13C':
-        if '-1' in atom.name:
-          """ go through intra shifts and find matches for CB and CA shifts using hungarian
-              output results as strips ordered by 'goodness of match'
-          """
-          queryShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
+        if self.direction == 'i-1':
+          if '-1' in atom.name:
+            """ go through intra shifts and find matches for CB and CA shifts using hungarian
+                output results as strips ordered by 'goodness of match'
+            """
+            queryShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
+          assignMatrix = self.buildAssignmentMatrix(queryShifts, interShifts)
+        elif self.direction == 'i+1':
+          if '-1' not in atom.name:
+            """ go through intra shifts and find matches for CB and CA shifts using hungarian
+                output results as strips ordered by 'goodness of match'
+            """
+            queryShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
+          assignMatrix = self.buildAssignmentMatrix(queryShifts, intraShifts)
 
     for queryShift in queryShifts:
       line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
       line.setPos(QtCore.QPointF(0, queryShift.value))
       for queryDisplay in self.queryDisplays:
         queryWindow = self.project.getById(queryDisplay)
-        queryWindow.orderedStrips[0].plotWidget.addItem(line)
+        # queryWindow.orderedStrips[0].plotWidget.addItem(line)
 
-    assignMatrix = self.buildAssignmentMatrix(queryShifts, intraShifts)
+    # assignMatrix = self.buildAssignmentMatrix(queryShifts, interShifts)
     assignmentScores = sorted(assignMatrix[1])[0:self.numberOfMatches]
     for assignmentScore in assignmentScores[1:]:
       matchResidue = assignMatrix[0][assignmentScore]
@@ -163,11 +190,11 @@ class BackboneAssignmentModule(CcpnDock, Base):
         newStrip = matchWindow.addStrip()
         newStrip.changeZPlane(position=zShift)
         newStrip.spinSystemLabel.setText(matchResidue.sequenceCode)
-        newStrip.plotWidget.addItem(line)
+        # newStrip.plotWidget.addItem(line)
         for shift in yShifts:
           line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
           line.setPos(QtCore.QPointF(0, shift))
-          newStrip.plotWidget.addItem(line)
+          # newStrip.plotWidget.addItem(line)
 
     firstMatchResidue = assignMatrix[0][assignmentScores[0]]
     zAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
@@ -186,11 +213,11 @@ class BackboneAssignmentModule(CcpnDock, Base):
       matchWindow = self.project.getById(matchDisplay)
       matchWindow.orderedStrips[0].changeZPlane(position=zShift)
       matchWindow.orderedStrips[0].spinSystemLabel.setText(firstMatchResidue.sequenceCode)
-      matchWindow.orderedStrips[0].plotWidget.addItem(line)
+      # matchWindow.orderedStrips[0].plotWidget.addItem(line)
       for shift in yShifts:
         line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
         line.setPos(QtCore.QPointF(0, shift))
-        matchWindow.orderedStrips[0].plotWidget.addItem(line)
+        # matchWindow.orderedStrips[0].plotWidget.addItem(line)
 
 
   def setAssigner(self, assigner):
@@ -203,10 +230,21 @@ class BackboneAssignmentModule(CcpnDock, Base):
     else:
       return None
 
+  def selectAssignmentDirection(self, value):
+    if value == 'i-1':
+      self.assigner.direction = 'left'
+      self.direction = 'i-1'
+
+    elif value == 'i+1':
+      self.assigner.direction = 'right'
+      self.direction = 'i+1'
+
+
   def buildAssignmentMatrix(self, queryShifts, matchShifts):
 
     scores = []
     matrix = {}
+    print(queryShifts)
     for res, shift in matchShifts.items():
       if len(shift) > 1:
         if self.qScore(queryShifts[0], shift[0]) is not None and self.qScore(queryShifts[1], shift[1]) is not None:

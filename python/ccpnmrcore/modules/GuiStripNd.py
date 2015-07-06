@@ -163,6 +163,10 @@ class GuiStripNd(GuiStrip):
         prevPlaneButton.setFixedHeight(19)
         self.planeLabel = LineEdit(self)
         self.planeLabel.setText('%.3f' % self.positions[2])
+        self.planeLabel.setStyleSheet(""" QLineEdit { background-color: #f7ffff;
+                                                      color: #122043;
+                                                      }
+        """)
         self.planeLabel.setAlignment(QtCore.Qt.AlignCenter)
         nextPlaneButton = Button(self,'>', callback=self.nextZPlane)
         nextPlaneButton.setFixedWidth(19)

@@ -26,6 +26,7 @@ hncacb.positiveContourCount = 8
 hncacb.negativeContourCount = 8
 hncacb.displayNegativeContours = True
 hncacb.negativeContourBase = -56568.54
+hncacb.positiveContourColour = 'cyan'
 
 hncocacb.positiveContourCount = 8
 hncocacb.positiveContourBase = 40000.00

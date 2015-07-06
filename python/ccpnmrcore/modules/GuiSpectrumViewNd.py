@@ -159,8 +159,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def addSpectrumItem(self, strip):
     if self not in strip.plotWidget.scene().items():
       strip.plotWidget.scene().addItem(self)
-      self.visibilityAction.toggled.connect(self.setVisible)
-    
+    self.visibilityAction.toggled.connect(self.setVisible) # does this ever get set twice??
+        
   def removeSpectrumItem(self, strip):
     if self not in strip.plotWidget.scene().items():
       strip.plotWidget.scene().removeItem(self)
@@ -204,7 +204,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     ##guiStrip = self.spectrumDisplay.viewportDict[widget]
     ##self.drawContours(painter, guiStrip)
-    self.drawContours(painter)
+    if self.isVisible():
+      self.drawContours(painter)
     
   def boundingRect(self):  # seems necessary to have
 

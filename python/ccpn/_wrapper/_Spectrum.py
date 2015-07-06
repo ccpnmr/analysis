@@ -732,6 +732,18 @@ class Spectrum(AbstractWrapperObject):
             for x in y.sortedDataSources()]
 
 
+def getter(self:Sample) -> tuple:
+  ff = self._project._data2Obj.get
+  return tuple(ff(y) for x in self._wrappedData.sortedNmExperiments()
+               for y in x.sortedDataSources())
+def setter(self:Sample, value:Sequence):
+  self._wrappedData.nmrExperiments =  set(x._wrappedData.experiment for x in value)
+Sample.spectra = property(getter, setter, None,
+                          "Spectra acquired using Sample (excluding multiSample spectra)")
+del getter
+del setter
+
+
 def newSpectrum(parent:Project, name:str) -> Spectrum:
   """Create new child Spectrum"""
 

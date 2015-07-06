@@ -161,7 +161,9 @@ CHEM_ATOM_REF_DICT = {}
 
 def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=None,
                           prior=0.05, molType=PROTEIN_MOLTYPE, cutoff=1e-10):
-  """Probability that data match a given ccpCode and molType"""
+  """Probability that data match a given ccpCode and molType
+  NBNB unassigned (unnamed) resonances make no differences, but named resonances
+  that do not fit a residue type WILL GIVE PROBABILITY ZERO!"""
 
   # Use refExperiment info
   # Use bound resonances info
@@ -440,7 +442,8 @@ def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=N
 
 def getSpinSystemResidueProbability(spinSystem, shiftList, ccpCode,
                                     prior=0.05, molType=PROTEIN_MOLTYPE):
-  """Get probability that Spin system matches molType and ccpCode"""
+  """Get probability that Spin system matches molType and ccpCode
+  NB to avoid rejection all atom names must be either unassigned (default) or correct!"""
 
   ppms = []
   elements = []
@@ -575,17 +578,17 @@ def _isAssignmentCompatible(assignName:str, atomName:str) -> bool:
 #
 #   elements = ['H','N','C','H','H']
 #   #atomTypes = [('CB',), ('CA',), ('N',), ('H',)]
-#   atomTypes = [ ('H',), ('N',), set(['CA']), set(), set()]
+#   atomTypes = [ 'H', 'N', 'CA', None, None]
 #   vals = {}
 #   ccpCodes = ['Ala','Cys','Asp','Glu',
-#  	      'Phe','Gly','His','Ile',
+# 	      'Phe','Gly','His','Ile',
 # 	      'Lys','Leu','Met','Asn',
-#  	      'Pro','Gln','Arg','Ser',
-#  	      'Thr','Val','Trp','Tyr',]
+# 	      'Pro','Gln','Arg','Ser',
+# 	      'Thr','Val','Trp','Tyr',]
 #
 #   for ccpCode in ccpCodes:
-#     vals[ccpCode] = getResidueProbability(shiftValues, ccpCode, elements, atomTypes, prior=0.0578512396694,
-#                                           ppmsBound=[112.28, 8.868, None, None, None])
+#     vals[ccpCode] = _getResidueProbability(shiftValues, ccpCode, elements, atomTypes, prior=0.0578512396694)
+#                                           # ppmsBound=[112.28, 8.868, None, None, None])
 #
 #
 #   tot = sum(vals.values())
@@ -594,5 +597,5 @@ def _isAssignmentCompatible(assignName:str, atomName:str) -> bool:
 #     print (ccpCode, '%.3f' % v)
 #
 #
-#
-#
+# 
+

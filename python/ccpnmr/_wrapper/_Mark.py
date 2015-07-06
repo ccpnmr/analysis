@@ -144,7 +144,7 @@ def newMark(parent:Task, colour:str, positions:Sequence, axisCodes:Sequence, sty
   :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
   :param tuple/list labels: Ruler labels for all lines in the mark. Default: None"""
 
-  apiMark = Task._wrappedData.newMark(colour=colour, style=style)
+  apiMark = parent._wrappedData.newMark(colour=colour, style=style)
 
   for ii,position in enumerate(positions):
     apiRuler = apiMark.newRuler(position=position, axisCode=axisCodes[ii])

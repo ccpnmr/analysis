@@ -23,6 +23,10 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpn.testing.Testing import Testing
 
+# NBNB These two imports are NECESSARY, as ccpnmr MUST be imported to register the Gui classes
+import ccpn
+import ccpnmr
+
 class TaskTest(Testing):
 
   def __init__(self, *args, **kw):
@@ -30,9 +34,5 @@ class TaskTest(Testing):
 
   def test_create_task(self):
     project = self.project
-    apiProject = project._wrappedData.root
-    apiNmrProject = apiProject.newNmrProject(name=apiProject.name)
-    apiTask = apiProject.newGuiTask(name='testTask', nmrProjectName=apiNmrProject.name)
-    task = project._data2Obj[apiTask]
-    
+    task = project.newTask('TestTask')
     return task

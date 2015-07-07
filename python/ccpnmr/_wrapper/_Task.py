@@ -150,9 +150,11 @@ def newTask(parent:Project, name:str, nameSpace:str=None, comment:str=None) -> T
   """Create new child Task"""
 
   nmrProject = parent.nmrProject
+  dd = {'name':name, 'nmrProject':nmrProject, 'details':comment}
+  if nameSpace is not None:
+    dd['nameSpace'] = nameSpace
 
-  newApiTask = nmrProject.root.newGuiTask(name=name, nameSpace=nameSpace,
-                                                nmrProject=nmrProject, details=comment)
+  newApiTask = nmrProject.root.newGuiTask(**dd)
 
   return parent._data2Obj.get(newApiTask)
 

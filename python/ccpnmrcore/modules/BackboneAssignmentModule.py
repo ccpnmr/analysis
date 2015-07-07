@@ -78,14 +78,11 @@ class BackboneAssignmentModule(CcpnDock, Base):
       self.line2.setPos(QtCore.QPointF(peak.position[0], 0))
       self.hsqcDisplay.strips[-1].viewBox.addItem(self.line1)
       self.hsqcDisplay.strips[-1].viewBox.addItem(self.line2)
-
-
       for queryDisplay in self.queryDisplays:
         queryWindow = self.project.getById(queryDisplay)
         queryWindow.orderedStrips[0].spinSystemLabel.setText(str(peak.dimensionNmrAtoms[1][0].id))
         queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
         queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
-
 
         for line in self.lines:
           queryWindow.orderedStrips[0].plotWidget.removeItem(line)
@@ -98,7 +95,9 @@ class BackboneAssignmentModule(CcpnDock, Base):
         else:
           self.lines[0].setPos(QtCore.QPointF(positions[0], 0))
 
+
       self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
+      print(self.current.nmrResidue, 'current.nmrResidue', peak.dimensionNmrAtoms[0][0]._parent.pid)
 
     elif nmrResidue is not None:
       self.hsqcDisplay.strips[-1].viewBox.removeItem(self.line1)
@@ -120,45 +119,44 @@ class BackboneAssignmentModule(CcpnDock, Base):
 
     self.assigner.spectra = {'ref': self.refSpectra, 'intra': self.intraSpectra, 'inter':self.interSpectra}
     self.assigner.addResidue(self.current.nmrResidue)
-
-    assignMatrix = self.getQueryShifts(nmrResidue)
+    assignMatrix = self.getQueryShifts(self.current.nmrResidue)
     self.findMatches(assignMatrix)
 
 
-  def getQueryShifts(self, nmrResidue):
+  def getQueryShifts(self, currentNmrResidue):
     intraShifts = {}
     interShifts = {}
 
     for nmrResidue in self.project.nmrResidues:
-      print(nmrResidue)
       intraShifts[nmrResidue] = []
       interShifts[nmrResidue] = []
-      for atom in nmrResidue.atoms:
-       if atom.name == 'CA' and not '-1' in nmrResidue.sequenceCode:
-        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
-
-       if atom.name == 'CB' and not '-1' in nmrResidue.sequenceCode:
-        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(atom))
       if '-1' in nmrResidue.sequenceCode:
-        prevCa = nmrResidue.fetchNmrAtom(name='CA')
-        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(prevCa))
+        # get inter residue chemical shifts for each -1 nmrResidue
+        interCa = nmrResidue.fetchNmrAtom(name='CA')
+        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(interCa))
+        interCb = nmrResidue.fetchNmrAtom(name='CB')
+        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(interCb))
 
-        prevCb = nmrResidue.fetchNmrAtom(name='CB')
-        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(prevCb))
+      if '-1' not in nmrResidue.sequenceCode:
+        # get intra residue chemical shifts for each nmrResidue
+        intraCa = nmrResidue.fetchNmrAtom(name='CA')
+        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(intraCa))
 
-    print('inter',interShifts[nmrResidue], 'intra',intraShifts[nmrResidue])
-    for atom in self.current.nmrResidue.atoms:
-      if atom.apiResonance.isotopeCode == '13C':
-        if self.direction == 'i-1':
-          matchShifts = interShifts
-          queryShifts = intraShifts[nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=nmrResidue.sequenceCode)]
-          # assignMatrix = self.buildAssignmentMatrix(queryShifts, interShifts)
-        elif self.direction == 'i+1':
-          matchShifts = intraShifts
-          queryShifts = interShifts[nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=nmrResidue.sequenceCode)]
-          # assignMatrix = self.buildAssignmentMatrix(queryShifts, intraShifts)
+        intraCb = nmrResidue.fetchNmrAtom(name='CB')
+        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(intraCb))
 
-    
+
+    if self.direction == 'i-1':
+      seqCode = currentNmrResidue.sequenceCode+'-1'
+      queryNmrResidue = currentNmrResidue.nmrChain.fetchNmrResidue(sequenceCode=seqCode)
+      queryShifts = interShifts[queryNmrResidue]
+      matchShifts=intraShifts
+
+    elif self.direction == 'i+1':
+      print(currentNmrResidue)
+      queryShifts = intraShifts[currentNmrResidue]
+      matchShifts=interShifts
+
 
     assignMatrix = self.buildAssignmentMatrix(queryShifts, matchShifts=matchShifts)
 
@@ -169,10 +167,16 @@ class BackboneAssignmentModule(CcpnDock, Base):
     assignmentScores = sorted(assignMatrix[1])[0:self.numberOfMatches]
     for assignmentScore in assignmentScores[1:]:
       matchResidue = assignMatrix[0][assignmentScore]
+      if self.direction == 'i+1':
+        seqCode = matchResidue.sequenceCode.replace('-1', '')
+        parentMatchResidue = matchResidue.nmrChain.fetchNmrResidue(sequenceCode=seqCode)
+        matchResidue = parentMatchResidue
+      else:
+        matchResidue = matchResidue
       zAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
       xAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
       yAtoms = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '13C']
-      print(zAtom)
+
       zShift = self.project.chemicalShiftLists[0].findChemicalShift(zAtom[0]).value
       xShift = self.project.chemicalShiftLists[0].findChemicalShift(xAtom[0]).value
       yShifts = []
@@ -187,13 +191,16 @@ class BackboneAssignmentModule(CcpnDock, Base):
         newStrip = matchWindow.addStrip()
         newStrip.changeZPlane(position=zShift)
         newStrip.spinSystemLabel.setText(matchResidue.sequenceCode)
-        # newStrip.plotWidget.addItem(line)
         for shift in yShifts:
           line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
           line.setPos(QtCore.QPointF(0, shift))
-          # newStrip.plotWidget.addItem(line)
 
     firstMatchResidue = assignMatrix[0][assignmentScores[0]]
+    if self.direction == 'i+1':
+      seqCode = firstMatchResidue.sequenceCode.replace('-1', '')
+      parentMatchResidue = firstMatchResidue.nmrChain.fetchNmrResidue(sequenceCode=seqCode)
+      firstMatchResidue = parentMatchResidue
+
     zAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
     xAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
     yAtoms = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '13C']
@@ -210,7 +217,7 @@ class BackboneAssignmentModule(CcpnDock, Base):
       matchWindow = self.project.getById(matchDisplay)
       matchWindow.orderedStrips[0].changeZPlane(position=zShift)
       matchWindow.orderedStrips[0].spinSystemLabel.setText(firstMatchResidue.sequenceCode)
-      # matchWindow.orderedStrips[0].plotWidget.addItem(line)
+      matchWindow.orderedStrips[0].plotWidget.addItem(line)
       for shift in yShifts:
         line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
         line.setPos(QtCore.QPointF(0, shift))
@@ -246,16 +253,12 @@ class BackboneAssignmentModule(CcpnDock, Base):
         if self.qScore(queryShifts[0], shift[0]) is not None and self.qScore(queryShifts[1], shift[1]) is not None:
 
           score = (self.qScore(queryShifts[0], shift[0])+self.qScore(queryShifts[1], shift[1]))/2
-        # else:
-        #   score = None
           scores.append(score)
           matrix[score] = res
       elif len(shift) == 1:
         if self.qScore(queryShifts[0], shift[0]) is not None:
 
           score = self.qScore(queryShifts[0], shift[0])
-        # else:
-        #   score = None
           scores.append(score)
           matrix[score] = res
 

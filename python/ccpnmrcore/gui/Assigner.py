@@ -84,11 +84,11 @@ class Assigner(CcpnDock):
 
   def getNmrResiduePrediction(self, nmrResidue):
     ccpCodes = ['Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn', 'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr']
-    print(nmrResidue.atoms)
+    # print(nmrResidue.atoms)
     spinSystem = nmrResidue._wrappedData
     shiftList = self.project.chemicalShiftLists[0]
-    for ccpCode in ccpCodes:
-      print(getSpinSystemResidueProbability(spinSystem, shiftList, ccpCode))
+    # for ccpCode in ccpCodes:
+      # print(getSpinSystemResidueProbability(spinSystem, shiftList, ccpCode))
 
     #   vals[ccpCode] =
 
@@ -106,7 +106,6 @@ class Assigner(CcpnDock):
       self.scene.addItem(nAtom)
       self.scene.addItem(caAtom)
       atoms = [atom.name for atom in nmrResidue.atoms]
-      print(atoms)
       if 'CB' in atoms:
         cBetaAtom = nmrResidue.fetchNmrAtom('CB')
       else:
@@ -129,7 +128,7 @@ class Assigner(CcpnDock):
       nmrAtomLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
       nmrAtomLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
       self.scene.addItem(nmrAtomLabel)
-      self.getNmrResiduePrediction(nmrResidue)
+      # self.getNmrResiduePrediction(nmrResidue)
 
       # print(cBetaAtom,'cbeta')
       # if cBetaAtom is None:

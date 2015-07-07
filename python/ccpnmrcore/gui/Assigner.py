@@ -24,10 +24,9 @@ __version__ = "$Revision: 7686 $"
 import sys
 from PyQt4 import QtGui,QtCore
 
-from ccpncore.gui.Dock import CcpnDock, CcpnDockLabel
+from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
-
-from pyqtgraph.dockarea import Dock
+from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability
 
 
 EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
@@ -40,7 +39,7 @@ EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
 
 class Assigner(CcpnDock):
 
-  def __init__(self, project=None, spectra=None):
+  def __init__(self, project=None):
 
     super(Assigner, self).__init__(name='Assigner')
     self.project=project
@@ -83,6 +82,17 @@ class Assigner(CcpnDock):
       self.residueCount = 0
 
 
+  def getNmrResiduePrediction(self, nmrResidue):
+    ccpCodes = ['Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn', 'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr']
+    print(nmrResidue.atoms)
+    spinSystem = nmrResidue._wrappedData
+    shiftList = self.project.chemicalShiftLists[0]
+    for ccpCode in ccpCodes:
+      print(getSpinSystemResidueProbability(spinSystem, shiftList, ccpCode))
+
+    #   vals[ccpCode] =
+
+
   def addResidue(self, nmrResidue, direction=None):
 
     if self.residueCount == 0:
@@ -96,6 +106,7 @@ class Assigner(CcpnDock):
       self.scene.addItem(nAtom)
       self.scene.addItem(caAtom)
       atoms = [atom.name for atom in nmrResidue.atoms]
+      print(atoms)
       if 'CB' in atoms:
         cBetaAtom = nmrResidue.fetchNmrAtom('CB')
       else:
@@ -105,7 +116,7 @@ class Assigner(CcpnDock):
         self.scene.addItem(cbAtom)
         self.addAssignmentLine(caAtom, cbAtom, 'grey', 1.0, 0)
         cbShift = self.project.chemicalShiftLists[0].findChemicalShift(cBetaAtom)
-        print('cbshift',cbShift.value)
+        # print('cbshift',cbShift.value)
 
       self.scene.addItem(coAtom)
       self.addAssignmentLine(hAtom, nAtom, 'grey', 1.0, 0)
@@ -118,35 +129,36 @@ class Assigner(CcpnDock):
       nmrAtomLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
       nmrAtomLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
       self.scene.addItem(nmrAtomLabel)
+      self.getNmrResiduePrediction(nmrResidue)
 
-      print(cBetaAtom,'cbeta')
-      if cBetaAtom is None:
-        predictionLabel = QtGui.QGraphicsTextItem()
-        predictionLabel.setPlainText('GLY')
-        predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-        predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
-        self.scene.addItem(predictionLabel)
-        self.predictedStretch.insert(0, 'G')
-      else:
-        if float(cbShift.value) < 25:
-          print('ALA')
-          predictionLabel = QtGui.QGraphicsTextItem()
-          predictionLabel.setPlainText('ALA')
-          predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-          predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
-          self.scene.addItem(predictionLabel)
-          self.predictedStretch.insert(0, 'A')
-        elif float(cbShift.value) > 68:
-          print('THR')
-          predictionLabel = QtGui.QGraphicsTextItem()
-          predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-          predictionLabel.setPlainText('THR')
-          predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
-          self.scene.addItem(predictionLabel)
-          self.predictedStretch.insert(0, 'T')
-        else:
-          print('here')
-          self.predictedStretch.insert(0, '.')
+      # print(cBetaAtom,'cbeta')
+      # if cBetaAtom is None:
+      #   predictionLabel = QtGui.QGraphicsTextItem()
+      #   predictionLabel.setPlainText('GLY')
+      #   predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      #   predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
+      #   self.scene.addItem(predictionLabel)
+      #   self.predictedStretch.insert(0, 'G')
+      # else:
+      #   if float(cbShift.value) < 25:
+      #     print('ALA')
+      #     predictionLabel = QtGui.QGraphicsTextItem()
+      #     predictionLabel.setPlainText('ALA')
+      #     predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      #     predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
+      #     self.scene.addItem(predictionLabel)
+      #     self.predictedStretch.insert(0, 'A')
+      #   elif float(cbShift.value) > 68:
+      #     print('THR')
+      #     predictionLabel = QtGui.QGraphicsTextItem()
+      #     predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      #     predictionLabel.setPlainText('THR')
+      #     predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
+      #     self.scene.addItem(predictionLabel)
+      #     self.predictedStretch.insert(0, 'T')
+      #   else:
+      #     print('here')
+      #     self.predictedStretch.insert(0, '.')
 
 
       newResidue = {'number':self.residueCount, 'H':hAtom, "N": nAtom, "CA":caAtom, "CB":cbAtom, "CO":coAtom}
@@ -359,27 +371,6 @@ class Assigner(CcpnDock):
             self.addAssignmentLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*2/2)
           else:
             self.addAssignmentLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*-2)
-
-
-
-
-
-      # hsqcColour = self.project.getById(self.spectra['ref'][0]).positiveContourColour
-      # self.addAssignmentLine(hAtom, nAtom, hsqcColour, 3.0, 0)
-      # interLength = len(self.spectra['inter'])
-      # for spectrum in self.spectra['inter']:
-      #   colour = self.project.getById(spectrum).positiveContourColour
-      #   self.addAssignmentLine(hAtom, nAtom, colour, 3.0, self.spectra['inter'].index(spectrum)+3)
-      #   self.addAssignmentLine(caAtom, nAtom, colour, 3.0, self.spectra['inter'].index(spectrum)+3)
-      #   self.addAssignmentLine(caAtom, cbAtom, colour, 3.0, 0)
-      #
-      # for spectrum in self.spectra['intra']:
-      #   colour = self.project.getById(spectrum).positiveContourColour
-      #   self.addAssignmentLine(hAtom, nAtom, colour, 3.0, -1*(self.spectra['intra'].index(spectrum)+3))
-      #   self.addAssignmentLine(caAtom, nAtom, colour, 3.0, 0)
-      #   self.addAssignmentLine(caAtom, cbAtom, colour, 3.0, 0)
-
-
 
 
   def addAssignmentLine(self, atom1, atom2, colour, width, displacement):

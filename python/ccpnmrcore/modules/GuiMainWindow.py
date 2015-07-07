@@ -114,7 +114,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     self.pythonConsole.heightMax = 200
-
+    self.sequenceWidget = SequenceModule(project=self._project)
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
     self.leftWidget.setGeometry(0, 0, 10, 600)
@@ -198,7 +198,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     newMoleculeMenu.addAction(Action(self, "From PDB...", callback=self.createMoleculeFromPDB))
     newMoleculeMenu.addAction(Action(self, "From NEF...", callback=self.createMoleculeFromNEF))
     newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
-    newMoleculeMenu.addAction(Action(self, 'Show Sequence', callback=self.showSequence, shortcut='ss'))
+    sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
+    sequenceAction.setChecked(self.sequenceWidget.isVisible())
+    newMoleculeMenu.addAction(sequenceAction)
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
     moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
@@ -268,8 +270,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
   def showSequence(self):
-    self.sequenceWidget = SequenceModule(project=self._project,)
+    self.sequenceWidget = SequenceModule(project=self._project)
     self.dockArea.addDock(self.sequenceWidget, position='top')
+
+  def hideSequence(self):
+    self.sequenceWidget.hide()
 
   def openAProject(self, projectDir=None):
 
@@ -422,6 +427,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.showConsole()
 
+  def toggleSequence(self):
+
+    if self.sequenceWidget.isVisible():
+      self.hideSequence()
+    else:
+      self.showSequence()
+
   def editMacro(self):
     pass
 
@@ -534,6 +546,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       return
     dialog = QtGui.QFileDialog(self, caption='Save Project As...')
     dialog.setFileMode(QtGui.QFileDialog.AnyFile)
+    dialog.setAcceptMode(1)
     if not dialog.exec_():
       return
     fileNames = dialog.selectedFiles()

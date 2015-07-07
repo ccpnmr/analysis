@@ -189,7 +189,7 @@ def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=N
     shiftName = shiftNames[i]
     ppmB = ppmsBound[i]
     n = 0
-    
+
     for j, (atomName, stats) in enumerate(atomData):
       if not atomName.startswith(element):
         continue 
@@ -205,7 +205,7 @@ def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=N
       
       e = d/sd   
       p = exp(-0.5*e*e)/(sd*ROOT_TWO_PI)
-      
+
       if bound and (ppmB is not None):
         boundData = shiftRefs.get(bound)
 	
@@ -223,9 +223,9 @@ def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=N
       
       dataAppend((i,j,p))
       n += 1
-    
+
     if n == 0:
-      return 0.0  
+      return 0.0
   
   groups = [set([node,]) for node in data if node[0] == 0]
   
@@ -247,7 +247,7 @@ def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=N
  
   probTot = 0.0
   for group in groups:
-  
+
     if len(group) != len(ppms):
       continue
     

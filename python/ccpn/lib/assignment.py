@@ -37,7 +37,10 @@ def getExptDict(project):
 def assignAlphas(nmrResidue, peaks):
 
   if len(peaks) > 1:
-    a3 = nmrResidue.fetchNmrAtom(name='CA-1')
+    chain = nmrResidue.nmrChain
+    newNmrResidue = chain.fetchNmrResidue(nmrResidue.sequenceCode+'-1')
+    print(newNmrResidue)
+    a3 = newNmrResidue.fetchNmrAtom(name='CA')
     a4 = nmrResidue.fetchNmrAtom(name='CA')
     if peaks[0].height > peaks[1].height:
       peaks[0].assignDimension(axisCode='C', value=[a4])
@@ -52,7 +55,10 @@ def assignAlphas(nmrResidue, peaks):
 def assignBetas(nmrResidue, peaks):
 
   if len(peaks) > 1:
-    a3 = nmrResidue.fetchNmrAtom(name='CB-1')
+    chain = nmrResidue.nmrChain
+    newNmrResidue = chain.fetchNmrResidue(nmrResidue.sequenceCode+'-1')
+    print(newNmrResidue)
+    a3 = newNmrResidue.fetchNmrAtom(name='CB')
     a4 = nmrResidue.fetchNmrAtom(name='CB')
     if abs(peaks[0].height) > abs(peaks[1].height):
       peaks[0].assignDimension(axisCode='C', value=[a4])

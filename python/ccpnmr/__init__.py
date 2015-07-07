@@ -23,8 +23,8 @@ Window = cls = importlib.import_module('ccpnmr._wrapper._Window').Window
 _wrappedClasses.append(cls)
 Task = cls = importlib.import_module('ccpnmr._wrapper._Task').Task
 _wrappedClasses.append(cls)
-# Mark = cls = importlib.import_module('ccpnmr._wrapper._Mark').Mark
-# _wrappedClasses.append(cls)
+Mark = cls = importlib.import_module('ccpnmr._wrapper._Mark').Mark
+_wrappedClasses.append(cls)
 SpectrumDisplay = cls = importlib.import_module('ccpnmr._wrapper._SpectrumDisplay').SpectrumDisplay
 _wrappedClasses.append(cls)
 Strip = cls = importlib.import_module('ccpnmr._wrapper._Strip').Strip
@@ -41,6 +41,8 @@ _wrappedClasses.append(cls)
 # Add class list for extended sphinx documentation to module
 _sphinxWrappedClasses = _wrappedClasses
 
+# Additional data
+RulerData = importlib.import_module('ccpnmr._wrapper._Mark').RulerData
 
 # Set up interclass links and related functions
 # HACK to link up newly imported wrapper classes only

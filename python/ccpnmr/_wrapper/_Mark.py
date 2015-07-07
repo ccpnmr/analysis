@@ -126,12 +126,14 @@ class Mark(AbstractWrapperObject):
   @property
   def rulerData(self) -> tuple:
     """tuple of RulerData ('axisCode', 'position', 'unit', 'label') for the lines in the Mark"""
-    return tuple(RulerData(getattr(x, tag) for tag in RulerData._fields)
+    return tuple(RulerData(*(getattr(x, tag) for tag in RulerData._fields))
                  for x in self._wrappedData.sortedRulers())
 
-  def newLine(self, position:float, axisCode:str, unit:str='ppm', label:str=None):
+  def newLine(self, axisCode:str, position:float, unit:str='ppm', label:str=None):
     """Add an extra line to the mark."""
-    self.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
+    if unit is  None:
+      unit = 'ppm'
+    self._wrappedData.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
 
   # Implementation functions
   @classmethod
@@ -155,16 +157,21 @@ def newMark(parent:Task, colour:str, positions:Sequence, axisCodes:Sequence, sty
   apiMark = parent._wrappedData.newMark(colour=colour, style=style)
 
   for ii,position in enumerate(positions):
-    apiRuler = apiMark.newRuler(position=position, axisCode=axisCodes[ii])
+    dd = {'position':position, 'axisCode':axisCodes[ii]}
     if units:
-      apiRuler.unit = units[ii]
+      unit = units[ii]
+      if unit is not None:
+       dd['unit'] = unit
     if labels:
-      apiRuler.label = labels[ii]
+      label = labels[ii]
+      if label is not None:
+       dd['label'] = label
+    apiRuler = apiMark.newRuler(**dd)
 
   return parent._project._data2Obj.get(apiMark)
 
 
-def newSimpleMark(parent:Task, colour:str, position:float, axisCode:str, style:str='simple',
+def newSimpleMark(parent:Task, colour:str, axisCode:str, position:float, style:str='simple',
             unit:str='ppm', label:str=None) -> Mark:
   """Create new child Mark with a single line
 
@@ -175,7 +182,9 @@ def newSimpleMark(parent:Task, colour:str, position:float, axisCode:str, style:s
   :param tuple/list unit: Axis unit. Default: all ppm
   :param tuple/list label: Line label. Default: None"""
 
-  apiMark = Task._wrappedData.newMark(colour=colour, style=style)
+  apiMark = parent._wrappedData.newMark(colour=colour, style=style)
+  if unit is None:
+    unit = 'ppm'
   apiMark.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
 
   return parent._project._data2Obj.get(apiMark)

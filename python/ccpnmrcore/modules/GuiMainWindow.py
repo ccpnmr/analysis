@@ -270,7 +270,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
   def showSequence(self):
-    self.sequenceWidget = SequenceModule(project=self._project)
+
     self.dockArea.addDock(self.sequenceWidget, position='top')
 
   def hideSequence(self):
@@ -528,9 +528,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.dockArea.addDock(peakList, position='bottom')
 
-  def showBackboneAssignmentModule(self, position=None, relativeTo=None, assigner=None, hsqcDisplay=None):
-    self.bbModule = BackboneAssignmentModule(self._project, position, relativeTo, assigner, hsqcDisplay)
-    self.dockArea.addDock(self.bbModule)
+  def showBackboneAssignmentModule(self, position=None, relativeTo=None):
+    self.bbModule = BackboneAssignmentModule(self._project)
+    self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo.dock)
     return self.bbModule
 
   def showPickAndAssignModule(self, position=None, relativeTo=None):

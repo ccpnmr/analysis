@@ -19,8 +19,7 @@ hncacbSpectrumDisplay =  window.createSpectrumDisplay(hncacb)
 hncacbSpectrumDisplay.displaySpectrum(hncocacb)
 # hncacbOrthogSpectrumDisplay = window.createSpectrumDisplay(hncacb, axisOrder=['N', 'C', 'H'])
 
-backboneAssignmentModule = window.showBackboneAssignmentModule(position='bottom',
-                           relativeTo=hsqcSpectrumDisplay, hsqcDisplay=hsqcSpectrumDisplay)
+backboneAssignmentModule = window.showBackboneAssignmentModule(position='bottom', relativeTo=hsqcSpectrumDisplay)
 
 assigner = window.showAssigner('bottom')
 backboneAssignmentModule.setAssigner(assigner)

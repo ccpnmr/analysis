@@ -153,6 +153,7 @@ def newMark(parent:Task, colour:str, positions:Sequence, axisCodes:Sequence, sty
     if labels:
       apiRuler.label = labels[ii]
 
+  return parent._data2Obj.get(apiMark)
 
 
 def newSimpleMark(parent:Task, colour:str, position:float, axisCode:str, style:str='simple',

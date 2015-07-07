@@ -36,3 +36,9 @@ class TaskTest(Testing):
     project = self.project
     task = project.newTask('TestTask')
     return task
+
+  def test_create_simple_mark(self):
+    task = self.test_create_task()
+    mark = task.newSimpleMark(position=8.76)
+    return mark
+

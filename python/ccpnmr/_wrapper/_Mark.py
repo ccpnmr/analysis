@@ -22,12 +22,14 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from collections.abc import Sequence
+from collections import namedtuple
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpnmr import Task
 from ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 
+RulerData = namedtuple('RulerData', ['axisCode', 'position', 'unit', 'label'])
 
 
 class Mark(AbstractWrapperObject):
@@ -120,6 +122,12 @@ class Mark(AbstractWrapperObject):
   def labels(self,value:Sequence):
     for ii,ruler in enumerate(self._wrappedData.sortedRulers()):
       ruler.label = value[ii]
+
+  @property
+  def rulerData(self) -> tuple:
+    """tuple of RulerData ('axisCode', 'position', 'unit', 'label') for the lines in the Mark"""
+    return tuple(RulerData(getattr(x, tag) for tag in RulerData._fields)
+                 for x in self._wrappedData.sortedRulers())
 
   def newLine(self, position:float, axisCode:str, unit:str='ppm', label:str=None):
     """Add an extra line to the mark."""

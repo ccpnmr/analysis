@@ -72,11 +72,22 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def name(self) -> str:
     """Residue type name string (e.g. 'Ala')"""
-    return self._wrappedData.residueType or ''
+    residue = self.residue
+    if residue is None:
+      return self._wrappedData.residueType or ''
+    else:
+      return residue._wrappedData.ccpCode
 
   @name.setter
   def name(self, value:str):
     apiResonanceGroup = self._wrappedData
+    apiResidue = apiResonanceGroup.assignedResidue
+    if apiResidue:
+      if apiResidue.ccpCode == value:
+        return
+      else:
+        raise ValueError("Cannot reset NmrResidue name while NmrResidue is assigned")
+
     apiResonanceGroup.residueType = value
 
     # get chem comp ID strings from residue name

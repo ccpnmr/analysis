@@ -133,6 +133,16 @@ class NmrChain(AbstractWrapperObject):
     ll = self.connectedNmrResidues
     return ll + tuple(x for x in self.nmrResidues if x not in ll)
 
+  @property
+  def chain(self) -> Chain:
+    """Chain to which NmrChain is assigned"""
+    chain = self._wrappedData.assignedResidue
+    return None if chain is None else self._project._data2Obj.get(chain)
+
+  @chain.setter
+  def chain(self, value:Chain):
+    self._wrappedData.chain = None if value is None else value._wrappedData
+
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""

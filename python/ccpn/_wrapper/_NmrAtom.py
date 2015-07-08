@@ -26,6 +26,7 @@ import operator
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import NmrResidue
+from ccpn import Atom
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.util import Pid
@@ -67,7 +68,17 @@ class NmrAtom(AbstractWrapperObject):
   def name(self) -> str:
     """Atom name string (e.g. 'HA')"""
     return self._wrappedData.name
-    
+
+  @property
+  def atom(self) -> Atom:
+    """Atom to which NmrAtom is assigned"""
+    atom = self._wrappedData.atom
+    return None if atom is None else self._project._data2Obj.get(atom)
+
+  @atom.setter
+  def chain(self, value:Atom):
+    self._wrappedData.atom = None if value is None else value._wrappedData
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: NmrResidue)-> list:

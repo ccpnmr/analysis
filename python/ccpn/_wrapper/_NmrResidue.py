@@ -26,6 +26,7 @@ from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import NmrChain
+from ccpn import Residue
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 
 
@@ -92,6 +93,16 @@ class NmrResidue(AbstractWrapperObject):
   def comment(self, value:str):
     self._wrappedData.details = value
 
+  @property
+  def residue(self) -> Residue:
+    """Residue to which NmrResidue is assigned"""
+    residue = self._wrappedData.assignedResidue
+    return None if residue is None else self._project._data2Obj.get(residue)
+
+  @residue.setter
+  def residue(self, value:Residue):
+    self._wrappedData.assignedResidue = None if value is None else value._wrappedData
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
@@ -119,6 +130,27 @@ def getter(self:NmrResidue) -> NmrResidue:
 def setter(self:NmrResidue, value:NmrResidue):
   self._wrappedData.previousResidue = None if value is None else value._wrappedData
 NmrResidue.previousResidue = property(getter, setter, None, "Previous NmrResidue in sequence")
+
+def getter(self:Residue) -> NmrResidue:
+  apiResidue = self._wrappedData
+  apiNmrProject = self._project._wrappedData
+  apiNmrChain = apiNmrProject.findFirstNmrChain(code=apiResidue.chain.code)
+  if apiNmrChain is not None:
+    obj = apiNmrProject.findFirstResonanceGroup(chainSerial=apiNmrChain.serial,
+                                                seqCode=apiResidue.seqCode,
+                                                seqInsertCode=apiResidue.seqInsertCode)
+    return None if obj is None else self._project._data2Obj.get(obj)
+  return None
+
+def setter(self:Residue, value:NmrResidue):
+  oldValue = self.nmrResidue
+  if oldValue is value:
+    return
+  elif oldValue is not None:
+    oldValue.residue = None
+
+  if value is not None:
+    value.residue = self
 
 del getter
 del setter

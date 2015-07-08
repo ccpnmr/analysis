@@ -30,11 +30,14 @@ from ccpncore.gui.Application import Application
 
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
+from ccpncore.util import Register
 from ccpncore.util import Translation
 from ccpncore.util.Undo import Undo
 
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.Current import Current
+
+from ccpnmrcore.popups.RegisterPopup import RegisterPopup
 
 import os, json
 
@@ -129,6 +132,22 @@ class AppBase(GuiBase):
     self.preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
     fp.close()
     
+def checkRegistration(applicationVersion):
+  
+  registrationDict = Register.loadDict()
+  if Register.isNewRegistration(registrationDict):
+    popup = RegisterPopup(version=applicationVersion, modal=True)
+    popup.show()
+    popup.raise_()
+    popup.exec_()
+    registrationDict = Register.loadDict()
+    if Register.isNewRegistration(registrationDict):
+      return False
+  
+  Register.updateServer(registrationDict, applicationVersion)
+  
+  return True
+  
 def startProgram(programClass, applicationName, applicationVersion, projectPath=None, language=None):
 
   if language:
@@ -145,6 +164,7 @@ def startProgram(programClass, applicationName, applicationVersion, projectPath=
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
   app.setStyleSheet(styleSheet)
-  program = programClass(apiProject, applicationName, applicationVersion)
-  app.start()
+  if checkRegistration(applicationVersion):  
+    program = programClass(apiProject, applicationName, applicationVersion)
+    app.start()
   

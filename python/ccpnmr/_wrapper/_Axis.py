@@ -132,7 +132,6 @@ Strip._childClasses.append(Axis)
 
 # We should NOT have any newAxis functions
 
-
 # Notifiers:
 className = ApiStripAxis._metaclass.qualifiedName()
 Project._apiNotifiers.extend(

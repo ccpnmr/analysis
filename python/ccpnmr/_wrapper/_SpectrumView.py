@@ -26,7 +26,6 @@ from collections.abc import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
-from ccpnmr import SpectrumDisplay
 from ccpnmr import Strip
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
@@ -333,7 +332,7 @@ class SpectrumViewNd(SpectrumView, GuiSpectrumViewNd):
   # put in subclass to make superclass abstract
   @property
   def _key(self) -> str:
-    """id string - combined spectrumName and stripSerial"""
+    """id string - spectrumName"""
     return self._wrappedData.spectrumView.spectrumName
 
 
@@ -347,7 +346,7 @@ def _factoryFunction(project:Project, wrappedData:ApiStripSpectrumView) -> Spect
     return SpectrumViewNd(project, wrappedData)
 
 # Connections to parents:
-SpectrumDisplay._childClasses.append(SpectrumView)
+Strip._childClasses.append(SpectrumView)
 SpectrumView._factoryFunction = staticmethod(_factoryFunction)
 
 # Notifiers:

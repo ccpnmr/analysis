@@ -27,9 +27,9 @@ import sys
 from ccpnmrcore.app.AppBase import AppBase, startProgram
 from ccpnmrcore.app.Version import applicationVersion
 
-applicationName = 'Assign'
+applicationName = 'Analysis3'
 
-class Assign(AppBase):
+class Analysis3(AppBase):
   pass
 
 if __name__ == '__main__':
@@ -40,5 +40,5 @@ if __name__ == '__main__':
   parser.add_argument('projectPath', nargs='?', help='Project path')
   args = parser.parse_args()
   
-  startProgram(Assign, applicationName, applicationVersion, args.projectPath, args.language)
+  startProgram(Analysis3, applicationName, applicationVersion, args.projectPath, args.language)
 

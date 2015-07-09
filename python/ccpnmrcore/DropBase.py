@@ -49,15 +49,14 @@ class DropBase(GuiBase):
 
       if filePaths:
         for filePath in filePaths:
-          print(filePath)
-          print('fasta test', isFastaFormat(filePath[-1]))
-          if isFastaFormat(filePath):
-            sequences = parseFastaFile(filePaths[0])
-            for sequence in sequences:
-              self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
-                                                    molType='protein')
+          try:
+            if isFastaFormat(filePath):
+              sequences = parseFastaFile(filePaths[0])
+              for sequence in sequences:
+                self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+                                                      molType='protein')
 
-          else:
+          except:
             try:
               spectrum = self._appBase.project.loadSpectrum(filePath)
               self._appBase.mainWindow.leftWidget.addSpectrum(spectrum)

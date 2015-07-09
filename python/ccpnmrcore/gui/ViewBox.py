@@ -234,12 +234,9 @@ class ViewBox(pg.ViewBox):
 
         for peak in self.current.peaks:
           peak.isSelected = True
-          
-        try:
-          self.parent._appBase.mainWindow.paaModule.predictAssignments(self.current.peaks)
-          # for peak in self.current.peaks:
-        except AttributeError:
-          pass
+        if hasattr(self.parent._appBase.mainWindow, 'atomSelector'):
+            self.parent._appBase.mainWindow.atomSelector.predictAssignments(self.current.peaks)
+
 
       else:
         self.updateSelectionBox(event.buttonDownPos(), event.pos())

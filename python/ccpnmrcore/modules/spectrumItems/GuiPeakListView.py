@@ -607,11 +607,21 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
       if len(peak.dimensionNmrAtoms[dimension]) == 0:
         peakLabel.append('-')
       else:
-        for item in peak.dimensionNmrAtoms[dimension]:
-          if len(peakLabel) > 0:
-            peakLabel.append(item.name)
-          else:
-            peakLabel.append(item.pid.id)
+        peakNmrResidues = [atom[0].nmrResidue.id for atom in peak.dimensionNmrAtoms]
+        if all(x==peakNmrResidues[0] for x in peakNmrResidues):
+          for item in peak.dimensionNmrAtoms[dimension]:
+            if len(peakLabel) > 0:
+              peakLabel.append(item.name)
+            else:
+              peakLabel.append(item.pid.id)
+
+        else:
+          for item in peak.dimensionNmrAtoms[dimension]:
+            label = item.nmrResidue.id+item.name
+            peakLabel.append(label)
+            print(item, item.name)
+
+
 
     text = ','.join(peakLabel)
     

@@ -42,25 +42,25 @@ class PickAndAssignModule(CcpnDock, Base):
     ndim = axisCodes.index('N')
     print(self.selectedPeak.position)
     for module in self.selectedDisplays:
-      for spectrumView in module.strips[0].spectrumViews:
-       if module.axisCodes[2] == 'N':
-        selectedRegion = [[peak.position[hdim]-0.01, peak.position[ndim]-0.05],
-                          [peak.position[hdim]+0.01, peak.position[ndim]+0.05]]
-        peakList = spectrumView.spectrum.peakLists[0]
-        if spectrumView.spectrum.dimensionCount > 1:
-          print(spectrumView.strip.orderedAxes[1].region)
-          selectedRegion[0].insert(1, spectrumView.strip.orderedAxes[1].region[0])
-          selectedRegion[1].insert(1, spectrumView.strip.orderedAxes[1].region[1])
-          print('selectedRegion',selectedRegion)
-          apiSpectrumView = spectrumView._wrappedData
-          newPeaks = peakList.findPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
-                                          doPos=apiSpectrumView.spectrumView.displayPositiveContours,
-                                          doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
-          for peak in newPeaks:
-            peak.isSelected = True
-          for strip in module.strips:
-            strip.showPeaks(peakList)
-          # module.peaks = newPeaks
+      if len(module.strip.orderedAxes) > 2:
+        for spectrumView in module.strips[0].spectrumViews:
+         if module.axisCodes[2] == 'N':
+          selectedRegion = [[peak.position[hdim]-0.01, peak.position[ndim]-0.05],
+                            [peak.position[hdim]+0.01, peak.position[ndim]+0.05]]
+          peakList = spectrumView.spectrum.peakLists[0]
+          if spectrumView.spectrum.dimensionCount > 1:
+            print(spectrumView.strip.orderedAxes[1].region)
+            selectedRegion[0].insert(1, spectrumView.strip.orderedAxes[1].region[0])
+            selectedRegion[1].insert(1, spectrumView.strip.orderedAxes[1].region[1])
+            print('selectedRegion',selectedRegion)
+            apiSpectrumView = spectrumView._wrappedData
+            newPeaks = peakList.findPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
+                                            doPos=apiSpectrumView.spectrumView.displayPositiveContours,
+                                            doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
+            for peak in newPeaks:
+              peak.isSelected = True
+            for strip in module.strips:
+              strip.showPeaks(peakList)
 
 
   def goToPositionInModules(self, peak=None, row=None, col=None):
@@ -69,24 +69,33 @@ class PickAndAssignModule(CcpnDock, Base):
     hdim = axisCodes.index('H')
     ndim = axisCodes.index('N')
     for module in self.selectedDisplays:
-      print(module.axisCodes[2])
-      if module.axisCodes[2] == 'N':
-        module.orderedStrips[0].orderedAxes[2].position = peak.position[ndim]
-        line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-        line.setPos(QtCore.QPointF(peak.position[hdim], 0))
-        module.orderedStrips[0].plotWidget.addItem(line)
-      elif module.axisCodes[2] == 'H':
-        module.orderedStrips[0].orderedAxes[2].position = peak.position[hdim]
-        line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-        line.setPos(QtCore.QPointF(peak.position[ndim], 0))
-        module.orderedStrips[0].plotWidget.addItem(line)
-
-
+      if len(module.strip.orderedAxes) == 2:
+        self.line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+        self.line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+        self.line1.setPos(QtCore.QPointF(0, peak.position[1]))
+        self.line2.setPos(QtCore.QPointF(peak.position[0], 0))
+        module.strips[-1].viewBox.addItem(self.line1)
+        module.strips[-1].viewBox.addItem(self.line2)
+        module.strips[-1].zoomToRegion([peak.position[0]-0.2, peak.position[0]+0.2,
+                                                  peak.position[1]-2, peak.position[1]+2])
       else:
-        pass
-
-      print(peak)
+        for strip in module.strips:
+          for item in strip.viewBox.scene().items():
+            if isinstance(item, pg.InfiniteLine):
+              strip.viewBox.scene().removeItem(item)
+        if module.axisCodes[2] == 'N':
+          module.orderedStrips[0].orderedAxes[2].position = peak.position[ndim]
+          line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+          line.setPos(QtCore.QPointF(peak.position[hdim], 0))
+          module.orderedStrips[0].plotWidget.addItem(line)
+        elif module.axisCodes[2] == 'H':
+          module.orderedStrips[0].orderedAxes[2].position = peak.position[hdim]
+          line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+          line.setPos(QtCore.QPointF(peak.position[ndim], 0))
+          module.orderedStrips[0].plotWidget.addItem(line)
+        else:
+          pass
 
   def showDisplayPopup(self):
-    popup = SelectDisplaysAndSpectraPopup(self, project=self.project, dim=3)
+    popup = SelectDisplaysAndSpectraPopup(self, project=self.project, dim=2)
     popup.exec_()

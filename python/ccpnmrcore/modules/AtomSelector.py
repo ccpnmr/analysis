@@ -49,6 +49,7 @@ class AtomSelector(CcpnDock):
     self.moveLabel=False
     pickAndAssignWidget = Widget(self)
     pickAndAssignWidget.setMaximumSize(200,150)
+
     headerLabel = Label(self, text='i-1')
     pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
     headerLabel = Label(pickAndAssignWidget, text='i', grid=(0, 1))
@@ -68,6 +69,9 @@ class AtomSelector(CcpnDock):
     self.buttons = [self.hButton1, self.hButton2, self.hButton3, self.nButton1, self.nButton2,
                     self.nButton3, self.caButton1, self.caButton2, self.caButton3, self.cbButton1,
                     self.cbButton2, self.cbButton3]
+    self.parent = parent
+    self.current = self.parent._appBase.current
+    self.project = project
     for button in self.buttons:
       button.clicked.connect(self.returnButtonToNormal)
 
@@ -75,12 +79,27 @@ class AtomSelector(CcpnDock):
 
   def pickAndAssign(self, position, atomType):
 
-    r = self.current.nmrResidue
-    name = atomType+position
+    name = atomType
+    if position == '-1' and '-1' not in self.current.nmrResidue.sequenceCode:
+      r = self.current.nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=self.current.nmrResidue.sequenceCode+'-1')
+    else:
+      r = self.current.nmrResidue
+
     newNmrAtom = r.fetchNmrAtom(name=name)
     for peak in self.current.peaks:
-      print(newNmrAtom)
-      peak.assignDimension(axisCode='C', value=[newNmrAtom])
+      if 'C' in atomType:
+        peak.assignDimension(axisCode='C', value=[newNmrAtom])
+      else:
+        peak.assignDimension(axisCode=atomType, value=[newNmrAtom])
+
+    for module in self.project.spectrumDisplays:
+      for strip in module.strips:
+        # strip.hidePeaks(peak.peakList)
+        peakLayer = strip.peakLayerDict.get(peak.peakList)
+        peakLayer.setVisible(False)
+        # peakLayer.setVisible(True)
+
+
 
   def returnButtonToNormal(self):
     for button in self.buttons:
@@ -89,7 +108,10 @@ class AtomSelector(CcpnDock):
 
   def predictAssignments(self, peaks):
     experiments = []
-    self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
+    try:
+      self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
+    except IndexError:
+      self.current.nmrResidue = self.project.nmrChains[0].newNmrResidue()
     values = [peak.height for peak in peaks]
     experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
     for value in values:
@@ -105,6 +127,7 @@ class AtomSelector(CcpnDock):
           self.caButton2.setStyleSheet('background-color: orange')
         else:
           self.caButton2.setStyleSheet('background-color: green')
+
 
 
 

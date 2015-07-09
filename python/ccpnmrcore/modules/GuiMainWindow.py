@@ -531,7 +531,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showBackboneAssignmentModule(self, position=None, relativeTo=None):
     self.bbModule = BackboneAssignmentModule(self._project)
-    self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo.dock)
+    self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo)
     return self.bbModule
 
   def showPickAndAssignModule(self, position=None, relativeTo=None):
@@ -540,7 +540,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     return self.paaModule
 
   def showAtomSelector(self):
-    self.atomSelector = AtomSelector(self._project)
+    self.atomSelector = AtomSelector(self, self._project)
     self.dockArea.addDock(self.atomSelector)
     return self.atomSelector
 

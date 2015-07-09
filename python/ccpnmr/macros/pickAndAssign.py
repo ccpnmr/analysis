@@ -84,7 +84,7 @@ for ssLabel in ssLabels:
           peak.height = peak.apiPeak.findFirstPeakIntensity().value
         exptDict[peak.peakList.spectrum.experimentType].append(peak)
   for exptType in exptDict.keys():
-    if isInterOnlyExpt(exptType):
+    if not isInterOnlyExpt(exptType):
       for peak in exptDict[exptType]:
         if peak.height > 0:
           peak.assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CA')])

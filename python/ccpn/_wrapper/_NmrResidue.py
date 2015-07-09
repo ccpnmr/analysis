@@ -55,7 +55,9 @@ class NmrResidue(AbstractWrapperObject):
     """Residue sequence code and id (e.g. '1', '127B', '@157+1) """
     return self._wrappedData.sequenceCode
 
-  # NBNB TBD we need rename function to set this
+  @sequenceCode.setter
+  def sequenceCode(self, value:str):
+    self._wrappedData.sequenceCode = value
 
   @property
   def _key(self) -> str:
@@ -72,11 +74,11 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def name(self) -> str:
     """Residue type name string (e.g. 'Ala')"""
-    residue = self.residue
-    if residue is None:
+    apiResidue = self._wrappedData.assignedResidue
+    if apiResidue is None:
       return self._wrappedData.residueType or ''
     else:
-      return residue._wrappedData.ccpCode
+      return apiResidue.ccpCode
 
   @name.setter
   def name(self, value:str):

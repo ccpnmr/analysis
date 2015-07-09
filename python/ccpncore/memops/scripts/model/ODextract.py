@@ -326,6 +326,7 @@ allowedTags = {
   'isUnique':(trueString, ),
   'isOrdered':(falseString,),
   'isAbstract':(trueString,),
+  'forceUndoNotify':(trueString,),
   'guid':None,
  },
  'MetaPackage':{
@@ -350,6 +351,7 @@ allowedTags = {
   'isUnique':(falseString,),
   'guid':None,
   'noDeleteIfSet':(trueString,),
+  'forceUndoNotify':(trueString,),
  },
  'MetaOperation':{
   'documentation':None,
@@ -358,7 +360,6 @@ allowedTags = {
   'guid':None,
   'throws':None,
   'code:': None,
-  'forceUndoNotify':(trueString,),
  },
  'MetaParameter':{
   'documentation':None,
@@ -1323,6 +1324,10 @@ def attributesFromOd(metaObj):
       params['isUnique'] = True
     elif tagVals.get('isUnique') == falseString:
       params['isUnique'] = False
+
+    # get forceUndoNotify
+    if tagVals.get('forceUndoNotify') == trueString:
+      params['forceUndoNotify'] = True
       
     # NB hicard defaults to 1
     hicard = params.get('hicard', defaultHicard)
@@ -1555,6 +1560,10 @@ def rolesFromOd(metaClass):
       # get noDeleteIfSet
       if tagVals.get('noDeleteIfSet') == trueString:
         dd['noDeleteIfSet'] = True
+
+      # get forceUndoNotify
+      if tagVals.get('forceUndoNotify') == trueString:
+        dd['forceUndoNotify'] = True
  
       # get isUnique
       if tagVals.get('isUnique') == trueString:

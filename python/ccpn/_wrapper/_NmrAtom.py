@@ -69,11 +69,19 @@ class NmrAtom(AbstractWrapperObject):
     """Atom name string (e.g. 'HA')"""
     return self._wrappedData.name
 
+  @name.setter
+  def name(self, value:str):
+    self._wrappedData.name = value
+
   @property
   def atom(self) -> Atom:
     """Atom to which NmrAtom is assigned"""
     atom = self._wrappedData.atom
     return None if atom is None else self._project._data2Obj.get(atom)
+
+  @atom.setter
+  def name(self, value:str):
+    self._wrappedData.atom = None if value is None else value._wrappedData
 
   @atom.setter
   def chain(self, value:Atom):

@@ -82,6 +82,10 @@ class NmrChain(AbstractWrapperObject):
 
     return self._parent._data2Obj.get(apiChain)
 
+  @chain.setter
+  def chain(self, value):
+    self._wrappedData.chain = None if value is None else value._wrappedData
+
   @property
   def connectedNmrResidues(self) -> tuple:
     """stretch of connected NmrResidues within NmrChain - there can only be one

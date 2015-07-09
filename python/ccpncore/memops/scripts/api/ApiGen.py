@@ -3142,7 +3142,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     opType = op.opType
     element = op.target
 
-    if element.isDerived and not element.taggedValues.get('forceUndoNotify'):
+    if element.isDerived and not element.forceUndoNotify:
       return
 
     self.writeNewline()

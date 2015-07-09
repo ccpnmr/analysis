@@ -1510,8 +1510,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.endTransaction(op, inClass)
 
     # TBD: should this be before endTransaction?
-    if not element.isDerived:
-      self.doNotifies(op, inClass)
+    self.doNotifies(op, inClass)
 
   ###########################################################################
 
@@ -2404,8 +2403,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     # do comparison:
     if crossRole is None:
       self.startIf(self.negate(self.comparison(xvarName, 'is', yvarName)))
-      self.raiseApiError("""Link %s between objects from separate partitions
- - %s does not match""" 
+      self.raiseApiError("Link %s between objects from separate partitions\n  - %s does not match"
                      % (role.name, uplinks[1][-1].valueType.qualifiedName()),
                         self.varNames['self'], valueVar)
       self.endIf()
@@ -3137,18 +3135,21 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
   ###########################################################################
 
   def doNotifies(self, op, inClass):
-    
-    self.writeNewline()
-    self.writeComment("doNotifies")
 
     if not isinstance(inClass, MetaModel.MetaClass):
       return
     
     opType = op.opType
     element = op.target
+
+    if element.isDerived and not element.taggedValues.get('forceUndoNotify'):
+      return
+
+    self.writeNewline()
+    self.writeComment("doNotifies")
    
-    if opType in ('init', 'fullDelete') or ((
-     isinstance(element,MetaModel.ClassElement) ) and 
+    if opType in ('init', 'fullDelete') or (
+     isinstance(element,MetaModel.ClassElement) and
      element.changeability != metaConstants.frozen
     ):
       # if opType == 'fullDelete':
@@ -3157,12 +3158,13 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       #   s = self.shouldDoNotifies(op, inClass)
       # if s:
 
+      # Notifiers
       self.writeNewline()
       self.startIf(self.shouldDoNotifies(op, inClass))
       self.writeNotifyCode(op, inClass)
       self.endIf()
 
-    if opType in ('init', 'fullDelete') or isinstance(element,MetaModel.ClassElement):
+      # Undos
       s = self.shouldDoUndos(op, inClass)
       if s:
         self.writeNewline()

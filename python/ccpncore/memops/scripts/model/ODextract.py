@@ -357,7 +357,8 @@ allowedTags = {
   'opSubType':None,
   'guid':None,
   'throws':None,
-  'code:': None
+  'code:': None,
+  'forceUndoNotify':(trueString,),
  },
  'MetaParameter':{
   'documentation':None,

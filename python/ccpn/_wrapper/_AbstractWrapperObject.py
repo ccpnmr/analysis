@@ -625,6 +625,27 @@ class AbstractWrapperObject():
             obj = childClass(project, apiObj)
         obj._initializeAll()
 
+  @classmethod
+  def _resetPid(cls, self):
+    """Reset internal attributes after values determining PID have changed"""
+    project = self._project
+    data2Obj = project._data2Obj
+    getDataObj = data2Obj.get
+    pid2Obj = project._pid2Obj
+
+    objects = [self]
+    for obj in objects:
+      # Add child objects to list
+      objects.extend(getDataObj(y) for x in obj._childClasses for y in x._getAllWrappedData(obj))
+
+      # rese pid
+
+    for childClass in self._childClasses:
+      # recursively reset pids
+      for apiObj in childClass._getAllWrappedData(self):
+        obj = data2Obj.get(apiObj)
+        obj._initializeAll()
+
   def _unwrapAll(self):
     """remove wrapper from object and child objects
     For special case where wrapper objects are removed without deleting wrappedData"""

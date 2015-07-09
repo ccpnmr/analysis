@@ -48,7 +48,7 @@ allowedTags = {
  },
  'HasParameters':{
  },
- 'MetaAttribute':{
+ 'MetaAttribute':{'forceUndoNotify':(trueString,),
  },
  'MetaClass':{
  },
@@ -73,7 +73,7 @@ allowedTags = {
                                 # else they are assumed to be normal.
                                 # In practice used for Python * and ** params
  },
- 'MetaRole':{
+ 'MetaRole':{'forceUndoNotify':(trueString,),
  },
  'MetaConstraint':{
  },

@@ -37,7 +37,7 @@ from ccpncore.util.Undo import Undo
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.Current import Current
 
-from ccpnmrcore.popups.RegisterPopup import RegisterPopup
+# from ccpnmrcore.popups.RegisterPopup import RegisterPopup
 
 import os, json
 
@@ -164,7 +164,7 @@ def startProgram(programClass, applicationName, applicationVersion, projectPath=
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
   app.setStyleSheet(styleSheet)
-  if checkRegistration(applicationVersion):  
-    program = programClass(apiProject, applicationName, applicationVersion)
-    app.start()
+  # if checkRegistration(applicationVersion):
+  program = programClass(apiProject, applicationName, applicationVersion)
+  app.start()
   

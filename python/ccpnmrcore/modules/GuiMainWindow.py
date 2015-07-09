@@ -36,6 +36,7 @@ from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
 from ccpnmrcore.gui.Assigner import Assigner
+from ccpnmrcore.modules.AtomSelector import AtomSelector
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
@@ -252,8 +253,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.addMenu(fileMenu)
     self._menuBar.addMenu(spectrumMenu)
     self._menuBar.addMenu(moleculeMenu)
-    if self._appBase.applicationName == 'Assign':
-      self._menuBar.addMenu(assignMenu)
+    # if self._appBase.applicationName == 'Assign':
+    self._menuBar.addMenu(assignMenu)
     if self._appBase.applicationName == 'Structure':
       self._menuBar.addMenu(restraintsMenu)
       self._menuBar.addMenu(structuresMenu)
@@ -534,9 +535,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     return self.bbModule
 
   def showPickAndAssignModule(self, position=None, relativeTo=None):
-    self.paaModule = PickAndAssignModule(self._project)
+    self.paaModule = PickAndAssignModule(self.dockArea, self._project)
     self.dockArea.addDock(self.paaModule)
     return self.paaModule
+
+  def showAtomSelector(self):
+    self.atomSelector = AtomSelector(self._project)
+    self.dockArea.addDock(self.atomSelector)
+    return self.atomSelector
 
   def showDataPlottingModule(self):
     dpModule = DataPlottingModule(self.dockArea)

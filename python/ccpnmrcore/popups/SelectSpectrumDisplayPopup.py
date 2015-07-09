@@ -52,7 +52,7 @@ class SelectSpectrumDisplayPopup(QtGui.QDialog, Base):
     self.matchList.addItem(item)
 
   def setSpectrumDisplays(self):
-
+    self.parent.referenceDisplays = [self.refList.item(i).text() for i in range(self.refList.count())]
     self.parent.queryDisplays = [self.queryList.item(i).text() for i in range(self.queryList.count())]
     self.parent.matchDisplays = [self.matchList.item(i).text() for i in range(self.matchList.count())]
     self.accept()

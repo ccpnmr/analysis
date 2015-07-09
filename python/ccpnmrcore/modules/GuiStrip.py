@@ -73,7 +73,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
     Widget.__init__(self)
     DropBase.__init__(self, self._parent._appBase, self.dropCallback)
-
+    self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
               dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
     self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self))

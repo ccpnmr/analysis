@@ -27,7 +27,7 @@ import importlib, os
 
 from PyQt4 import QtGui, QtCore
 
-
+from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.ToolBar import ToolBar
@@ -86,9 +86,12 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.scrollArea.setWidget(self.stripFrame)
 
   def fillToolBar(self):
-    pass
-    # self.spectrumUtilToolBar.addAction('+', self.cloneStrip) #self.orderedStrips[0].clone()) # clone first strip
-    # self.spectrumUtilToolBar.addAction('-', lambda self=self: self.orderedStrips[-1].delete()) # remove last strip
+    addStripAction = self.spectrumUtilToolBar.addAction('Add Strip', self.cloneStrip) #self.orderedStrips[0].clone()) # clone first strip
+    addStripIcon = Icon('iconsNew/plus')
+    addStripAction.setIcon(addStripIcon)
+    removeStripAction = self.spectrumUtilToolBar.addAction('Remove Strip', lambda self=self: self.orderedStrips[-1].delete()) # remove last strip
+    removeStripIcon = Icon('iconsNew/minus')
+    removeStripAction.setIcon(removeStripIcon)
 
   def cloneStrip(self):
     newStrip = self.orderedStrips[-1].clone()

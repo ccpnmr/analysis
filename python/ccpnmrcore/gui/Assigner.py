@@ -65,16 +65,8 @@ class Assigner(CcpnDock):
     self.residuesShown = []
     self.predictedStretch = []
     self.direction = None
-
-    # self.dock.addWidget(self)
-
-
-  # def assignLeft(self):
-  #   self.direction = 'left'
-  #
-  # def assignRight(self):
-  #   self.direction = 'right'
-
+    self.selectedStretch = []
+    self.scene.dragEnterEvent = self.dragEnterEvent
 
   def clearAllItems(self):
     for item in self.scene.items():
@@ -83,17 +75,46 @@ class Assigner(CcpnDock):
 
 
   def getNmrResiduePrediction(self, nmrResidue):
-    ccpCodes = ['Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn', 'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr']
-    # print(nmrResidue.atoms)
+    ccpCodes = ['Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn',
+                'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr']
+    predictions = {}
     spinSystem = nmrResidue._wrappedData
-    shiftList = self.project.chemicalShiftLists[0]
-    # for ccpCode in ccpCodes:
-      # print(getSpinSystemResidueProbability(spinSystem, shiftList, ccpCode))
+    shiftList = self.project.chemicalShiftLists[0]._wrappedData
+    for code in ccpCodes:
+      predictions[code] = float(getSpinSystemResidueProbability(spinSystem, shiftList, code))
+    tot = sum(predictions.values())
+    refinedPredictions = {}
+    for code in ccpCodes:
+      v = round(predictions[code]/tot * 100, 2)
+      if v > 0:
+        refinedPredictions[code] = v
 
-    #   vals[ccpCode] =
+    finalPredictions = []
+
+    for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
+      key = [key for key, val in refinedPredictions.items() if val==value][0]
+      finalPredictions.append([key, str(value)+' %'])
+
+    return finalPredictions
+
+  def assembleResidue(self, nmrResidue, atoms):
+    for item in atoms.values():
+      self.scene.addItem(item)
+    nmrAtoms = [atom.name for atom in nmrResidue.atoms]
+    cbLine = self.addAssignmentLine(atoms['CA'], atoms['CB'], 'grey', 1.0, 0)
+    if not 'CB' in nmrAtoms:
+      self.scene.removeItem(atoms['CB'])
+      self.scene.removeItem(cbLine)
+
+    self.addAssignmentLine(atoms['H'], atoms['N'], 'grey', 1.0, 0)
+    self.addAssignmentLine(atoms['N'], atoms['CA'], 'grey', 1.0, 0)
+    self.addAssignmentLine(atoms['CO'], atoms['CA'], 'grey', 1.0, 0)
+    nmrAtomLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
+    self.scene.addItem(nmrAtomLabel)
+    self.addResiduePredictions(nmrResidue, atoms['CA'])
 
 
-  def addResidue(self, nmrResidue, direction=None):
+  def addResidue(self, nmrResidue):
 
     if self.residueCount == 0:
       hAtom = self.addAtom("H", (0, self.atomSpacing), nmrResidue.fetchNmrAtom(name='H'))
@@ -102,73 +123,12 @@ class Assigner(CcpnDock):
       cbAtom = self.addAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='CB'))
       coAtom = self.addAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()),nmrResidue.fetchNmrAtom(name='CO'))
       coAtom.setZValue(10)
-      self.scene.addItem(hAtom)
-      self.scene.addItem(nAtom)
-      self.scene.addItem(caAtom)
-      atoms = [atom.name for atom in nmrResidue.atoms]
-      if 'CB' in atoms:
-        cBetaAtom = nmrResidue.fetchNmrAtom('CB')
-      else:
-        cBetaAtom = None
 
-      if cBetaAtom is not None:
-        self.scene.addItem(cbAtom)
-        self.addAssignmentLine(caAtom, cbAtom, 'grey', 1.0, 0)
-        cbShift = self.project.chemicalShiftLists[0].findChemicalShift(cBetaAtom)
-        # print('cbshift',cbShift.value)
+      atoms = {'H': hAtom, 'N': nAtom, 'CA': caAtom, 'CB': cbAtom, 'CO': coAtom}
 
-      self.scene.addItem(coAtom)
-      self.addAssignmentLine(hAtom, nAtom, 'grey', 1.0, 0)
-
-      self.addAssignmentLine(nAtom, caAtom, 'grey', 1.0, 0)
-      self.addAssignmentLine(coAtom, caAtom, 'grey', 1.0, 0)
-      nmrAtomLabel = QtGui.QGraphicsTextItem()
-      nmrAtomLabel.setPlainText(nmrResidue.sequenceCode)
-      nmrAtomLabel.setFont(Font(size=12, bold=True))
-      nmrAtomLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-      nmrAtomLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
-      self.scene.addItem(nmrAtomLabel)
-      # self.getNmrResiduePrediction(nmrResidue)
-
-      # print(cBetaAtom,'cbeta')
-      # if cBetaAtom is None:
-      #   predictionLabel = QtGui.QGraphicsTextItem()
-      #   predictionLabel.setPlainText('GLY')
-      #   predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-      #   predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
-      #   self.scene.addItem(predictionLabel)
-      #   self.predictedStretch.insert(0, 'G')
-      # else:
-      #   if float(cbShift.value) < 25:
-      #     print('ALA')
-      #     predictionLabel = QtGui.QGraphicsTextItem()
-      #     predictionLabel.setPlainText('ALA')
-      #     predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-      #     predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
-      #     self.scene.addItem(predictionLabel)
-      #     self.predictedStretch.insert(0, 'A')
-      #   elif float(cbShift.value) > 68:
-      #     print('THR')
-      #     predictionLabel = QtGui.QGraphicsTextItem()
-      #     predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-      #     predictionLabel.setPlainText('THR')
-      #     predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, nmrAtomLabel.y()+30)
-      #     self.scene.addItem(predictionLabel)
-      #     self.predictedStretch.insert(0, 'T')
-      #   else:
-      #     print('here')
-      #     self.predictedStretch.insert(0, '.')
-
-
-      newResidue = {'number':self.residueCount, 'H':hAtom, "N": nAtom, "CA":caAtom, "CB":cbAtom, "CO":coAtom}
-      self.addSpectrumAssignmentLines(self.project.getById(self.spectra['ref'][0]), newResidue)
-      self.addSpectrumAssignmentLines(self.project.getById(self.spectra['intra'][0]), newResidue)
-      self.addSpectrumAssignmentLines(self.project.getById(self.spectra['inter'][0]), newResidue)
-      self.residuesShown.append(newResidue)
-      self.residueCount+=1
+      self.residuesShown.append(atoms)
 
     else:
-      if len(self.residuesShown) > 0:
         if self.direction == 'left':
           oldResidue = self.residuesShown[0]
           coAtom2 = self.addAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()
@@ -183,61 +143,10 @@ class Assigner(CcpnDock):
                                 nmrResidue.fetchNmrAtom(name='N'))
           hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
                                 nmrResidue.fetchNmrAtom(name='H'))
-          self.scene.addItem(coAtom2)
-          self.scene.addItem(caAtom2)
-          atoms = [atom.name for atom in nmrResidue.atoms]
-          if 'CB' in atoms:
-            cBetaAtom = nmrResidue.fetchNmrAtom('CB')
-          else:
-            cBetaAtom = None
 
-          if cBetaAtom is not None:
-            self.scene.addItem(cbAtom2)
-            self.addAssignmentLine(caAtom2, cbAtom2, 'grey', 1.0, 0)
-            cbShift = self.project.chemicalShiftLists[0].findChemicalShift(cBetaAtom)
-          self.scene.addItem(nAtom2)
-          self.scene.addItem(hAtom2)
-          self.addAssignmentLine(nAtom2, hAtom2, 'grey', 1.0, 0)
-          self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.0, 0)
-          self.addAssignmentLine(coAtom2, oldResidue['N'], 'grey', 1.0, 0)
-          # self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.2, 0)
-          self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.0, 0)
-          nmrAtomLabel = QtGui.QGraphicsTextItem()
-          nmrAtomLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-          nmrAtomLabel.setPlainText(nmrResidue.sequenceCode)
-          nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
-          self.scene.addItem(nmrAtomLabel)
-          if cBetaAtom is None:
-            predictionLabel = QtGui.QGraphicsTextItem()
-            predictionLabel.setPlainText('GLY')
-            predictionLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, nmrAtomLabel.y()+30)
-            self.scene.addItem(predictionLabel)
-            self.predictedStretch.insert(0, 'G')
-          else:
-            if cbShift:
-              if float(cbShift.value) < 25:
-                print('ALA')
-                predictionLabel = QtGui.QGraphicsTextItem()
-                predictionLabel.setPlainText('ALA')
-                predictionLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, nmrAtomLabel.y()+30)
-                self.scene.addItem(predictionLabel)
-                predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-                self.predictedStretch.insert(0, 'A')
-              if float(cbShift.value) > 68:
-                print('THR')
-                predictionLabel = QtGui.QGraphicsTextItem()
-                predictionLabel.setPlainText('THR')
-                predictionLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, nmrAtomLabel.y()+30)
-                predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-                self.scene.addItem(predictionLabel)
-                self.predictedStretch.insert(0, 'T')
-              else:
-                self.predictedStretch.insert(0, '.')
-          newResidue = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2, 'N-1': oldResidue['N']}
-          self.addSpectrumAssignmentLines(self.project.getById(self.spectra['ref'][0]), newResidue)
-          self.addSpectrumAssignmentLines(self.project.getById(self.spectra['intra'][0]), newResidue)
-          self.addSpectrumAssignmentLines(self.project.getById(self.spectra['inter'][0]), newResidue)
-          self.residuesShown.insert(0, newResidue)
+          atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2, 'N-1': oldResidue['N']}
+
+          self.residuesShown.insert(0, atoms)
 
         if self.direction == 'right':
           oldResidue = self.residuesShown[-1]
@@ -254,46 +163,41 @@ class Assigner(CcpnDock):
           coAtom2 = self.addAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()),
                                  nmrResidue.fetchNmrAtom(name='CO'))
           coAtom2.setZValue(10)
-          self.scene.addItem(coAtom2)
-          self.scene.addItem(caAtom2)
-          self.scene.addItem(cbAtom2)
-          self.scene.addItem(nAtom2)
-          self.scene.addItem(hAtom2)
-          self.addAssignmentLine(nAtom2, hAtom2, 'grey', 1.0, 0)
-          self.addAssignmentLine(cbAtom2, caAtom2, 'grey', 1.0, 0)
-          self.addAssignmentLine(caAtom2, coAtom2, 'grey', 1.0, 0)
-          self.addAssignmentLine(nAtom2, oldResidue['CO'], 'grey', 1.0, 0)
-          self.addAssignmentLine(nAtom2, caAtom2, 'grey', 1.0, 0)
-          nmrAtomLabel = QtGui.QGraphicsTextItem()
-          nmrAtomLabel.setPlainText(nmrResidue.sequenceCode)
-          nmrAtomLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-          nmrAtomLabel.setPos(caAtom2.x()-caAtom2.boundingRect().width()/2, caAtom2.y()+30)
-          self.scene.addItem(nmrAtomLabel)
-          newResidue = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2,
-                        'CB-1': oldResidue['CB'], 'CA-1': oldResidue['CA'],}
-          self.addSpectrumAssignmentLines(self.project.getById(self.spectra['ref'][0]), newResidue)
-          self.addSpectrumAssignmentLines(self.project.getById(self.spectra['intra'][0]), newResidue)
-          self.addSpectrumAssignmentLines(self.project.getById(self.spectra['inter'][0]), newResidue)
-          self.residuesShown.append(newResidue)
 
-      self.residueCount+=1
+          atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2, 'N-1': oldResidue['N']}
 
+          self.residuesShown.append(atoms)
+
+    self.assembleResidue(nmrResidue, atoms)
+    self.addSpectrumAssignmentLines(self.project.getById(self.spectra['ref'][0]), atoms)
+    self.addSpectrumAssignmentLines(self.project.getById(self.spectra['intra'][0]), atoms)
+    self.addSpectrumAssignmentLines(self.project.getById(self.spectra['inter'][0]), atoms)
+
+    self.residueCount+=1
+
+  def addResiduePredictions(self, nmrResidue, caAtom):
+    predictions = self.getNmrResiduePrediction(nmrResidue)
+    for prediction in predictions:
+      predictionLabel = QtGui.QGraphicsTextItem()
+      predictionLabel.setPlainText(prediction[0]+' '+prediction[1])
+      predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      predictionLabel.setFont(Font(size=12, bold=True))
+      predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width(), caAtom.y()+(30*(predictions.index(prediction)+2)))
+      self.scene.addItem(predictionLabel)
 
   def predictSequencePosition(self):
     sequence = ''.join([residue.shortName for residue in self.project.chains[0].residues])
     if len(self.predictedStretch) > 3:
       string = ''.join(self.predictedStretch)
-      print(string)
       import re
       matcher = re.search(string, sequence)
-      print(matcher.start(), matcher.end())
       newSequenceText = '<div>'+sequence[:matcher.start()]+'<span style="background-color: #000; ' \
                         'color: #FFF; display: inline-block; padding: 0 3px;"><strong>'+sequence[
                         matcher.start():matcher.end()]+'</strong></span>'+sequence[matcher.end():]+'</div>'
       self.project._appBase.mainWindow.sequenceWidget.chainLabel(chainCode=self.project.chains[0].compoundName).setText(newSequenceText)
-
-    else:
-      print(self.predictedStretch)
+    #
+    # else:
+    #   print(self.predictedStretch)
 
   def addSpectrumAssignmentLines(self, spectrum, residue):
 
@@ -307,7 +211,6 @@ class Assigner(CcpnDock):
           self.addAssignmentLine(residue['H'], residue['N'], lineColour, 2.0, displacement*-2)
         residue['H'].connectedAtoms +=1
         residue['N'].connectedAtoms +=1
-        print(spectrum.experimentType)
       if 'N' and 'CA' in expectedAtoms:
         displacement = min(residue['CA'].connectedAtoms, residue['N'].connectedAtoms)
         if displacement % 2 == 0:
@@ -325,7 +228,6 @@ class Assigner(CcpnDock):
           self.addAssignmentLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*-2)
         residue['CB'].connectedAtoms +=1
         residue['N'].connectedAtoms +=1
-        print(spectrum.experimentType)
       if 'CA' and 'CB' in expectedAtoms:
         displacement = min(residue['CA'].connectedAtoms, residue['CB'].connectedAtoms)
         if displacement % 2 == 0:
@@ -336,9 +238,7 @@ class Assigner(CcpnDock):
         residue['CB'].connectedAtoms +=1
 
       if 'N-1' in residue:
-        print(residue, expectedAtoms)
         if 'CA-1' and 'N' in expectedAtoms:
-          print('here, ca-1, n')
           displacement = min(residue['CA'].connectedAtoms, residue['N-1'].connectedAtoms)
           if displacement % 2 == 0:
             self.addAssignmentLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*2/2)
@@ -346,7 +246,6 @@ class Assigner(CcpnDock):
             self.addAssignmentLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*-2)
 
         if 'CB-1' and 'N' in expectedAtoms:
-          print('here, cb-1, n')
           displacement = min(residue['CB'].connectedAtoms, residue['N-1'].connectedAtoms)
           if displacement % 2 == 0:
             self.addAssignmentLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*2/2)
@@ -355,7 +254,6 @@ class Assigner(CcpnDock):
 
       if 'CB-1' in residue:
          if 'CB-1' and 'N' in expectedAtoms:
-          print('here, cb-1, n')
           displacement = min(residue['CB-1'].connectedAtoms, residue['N'].connectedAtoms)
           if displacement % 2 == 0:
             self.addAssignmentLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*2/2)
@@ -364,7 +262,6 @@ class Assigner(CcpnDock):
 
       if 'CA-1' in residue:
          if 'CA-1' and 'N' in expectedAtoms:
-          print('here, cb-1, n')
           displacement = min(residue['CA-1'].connectedAtoms, residue['N'].connectedAtoms)
           if displacement % 2 == 0:
             self.addAssignmentLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*2/2)
@@ -438,6 +335,8 @@ class Assigner(CcpnDock):
       newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width)
       self.scene.addItem(newLine)
 
+    return newLine
+
 
   def addAtom(self, atomType, position, nmrAtom):
     atom = GuiNmrAtom(text=atomType, pos=position, nmrAtom=nmrAtom)
@@ -453,16 +352,18 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     self.nmrAtom = nmrAtom
     self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
     self.connectedAtoms = 0
-    # self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+    self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     # self.brush = QtGui.QBrush()
     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
     # self.setBrush(self.brush)
     if self.isSelected:
       # self.setFont(Font(size=17.5, bold=True))
+      print(self.nmrAtom)
       self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
     else:
       self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
       # self.setBrush(self.brush)
+
 
 
   def hoverEnterEvent(self, event):
@@ -475,7 +376,72 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     print(self)
 
 
+class GuiNmrResidue(QtGui.QGraphicsTextItem):
+
+  def __init__(self, parent, nmrResidue, caAtom):
+
+    super(GuiNmrResidue, self).__init__()
+    self.setPlainText(nmrResidue.sequenceCode)
+    self.setFont(Font(size=12, bold=True))
+    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+    self.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
+    self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+    self.parent = parent
+    self.nmrResidue = nmrResidue
+
+
+  #
+  # def dragEnterEvent(self, event, enter=True):
+  #
+  #   if event.buttons() == QtCore.Qt.LeftButton:
+  #       print("Left click drag")
+  #       aDict = {}
+  #       for item in self.parent.scene.items():
+  #         if isinstance(item, GuiNmrResidue) and item.isSelected():
+  #           aDict[item.x()] = item.toPlainText()
+  #
+  #       self.assignStretch = [aDict[key] for key in sorted(aDict.keys())]
+  #       print(self.assignStretch)
+
+  def mouseMoveEvent(self, event):
+
+    if (event.buttons() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
+        print("Left click drag")
+        aDict = {}
+        for item in self.parent.scene.items():
+          if isinstance(item, GuiNmrResidue) and item.isSelected():
+            aDict[item.x()] = item.nmrResidue.pid
+
+        assignStretch = ','.join([aDict[key] for key in sorted(aDict.keys())])
+
+        drag = QtGui.QDrag(event.widget())
+        mime = QtCore.QMimeData()
+        drag.setMimeData(mime)
+        mime.setData('application/x-assignedStretch',assignStretch)
+
+        drag.exec_()
+
+    # if (event.button() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
+    #
+    #   if event.isStart():
+    #
+    #     print('here I am')
+    #     aDict = {}
+    #     for item in self.scene.items():
+    #       if isinstance(item, self) and item.isSelected():
+    #         aDict[item.x()] = item.toPlainText()
+    #
+    #     self.assignStretch = [aDict[key] for key in sorted(aDict.keys())]
+    #   if event.isFinish():
+    #     print(self.assignStretch)
+    #
+    # elif event.button() ==  QtCore.Qt.LeftButton and event.modifiers():
+    #   event.acceptProposedAction()
+
+
+
 class AssignmentLine(QtGui.QGraphicsLineItem):
+
   def __init__(self, x1, y1, x2, y2, colour, width):
     QtGui.QGraphicsLineItem.__init__(self)
     self.pen = QtGui.QPen()

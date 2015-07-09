@@ -1,112 +1,92 @@
-"""Module Documentation here
+__author__ = 'simon1'
 
-"""
-#=========================================================================================
-# Licence, Reference and Credits
-#=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
-
-#=========================================================================================
-# Last code modification:
-#=========================================================================================
-__author__ = "$Author: rhfogh $"
-__date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__version__ = "$Revision: 7686 $"
-
-#=========================================================================================
-# Start of code
-#=========================================================================================
-__author__ = 'simon'
-
-from PyQt4 import QtGui, QtCore
 
 import pyqtgraph as pg
 
+from pyqtgraph.dockarea import Dock
+
+from PyQt4 import QtCore
+
 import math
-import munkres
-
-from functools import partial
-
-from ccpn.lib.assignment import isInterOnlyExpt
 
 from ccpncore.gui.Button import Button
-from ccpncore.gui.Dock import CcpnDock, CcpnDockLabel
-from ccpncore.gui.Label import Label
-from ccpncore.gui.ListWidget import ListWidget
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Widget import Widget
+from ccpncore.gui.Base import Base
+from ccpncore.gui.Dock import CcpnDock
+from ccpnmrcore.modules.PeakTable import PeakListSimple
+from ccpnmrcore.popups.SelectDisplaysPopup import SelectDisplaysAndSpectraPopup
 
-class PickAndAssignModule(CcpnDock):
+class PickAndAssignModule(CcpnDock, Base):
 
-  def __init__(self, parent, project=None):
-    CcpnDock.__init__(self, name='Atom Selector')
-    self.orientation = 'vertical'
-    self.moveLabel=False
-    pickAndAssignWidget = Widget(self)
-    pickAndAssignWidget.setMaximumSize(200,150)
-    headerLabel = Label(self, text='i-1')
-    pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
-    headerLabel = Label(pickAndAssignWidget, text='i', grid=(0, 1))
-    headerLabel = Label(pickAndAssignWidget, text='i+1', grid=(0, 2))
-    self.hButton1 = Button(pickAndAssignWidget, text='H', grid=(1, 0), callback=partial(self.pickAndAssign, '-1', 'H'))
-    self.hButton2 = Button(pickAndAssignWidget, text='H', grid=(1, 1), callback=partial(self.pickAndAssign, '', 'H'))
-    self.hButton3 = Button(pickAndAssignWidget, text='H', grid=(1, 2), callback=partial(self.pickAndAssign, '+1', 'H'))
-    self.nButton1 = Button(pickAndAssignWidget, text='N', grid=(2, 0), callback=partial(self.pickAndAssign, '-1', 'N'))
-    self.nButton2 = Button(pickAndAssignWidget, text='N', grid=(2, 1), callback=partial(self.pickAndAssign, '', 'N'))
-    self.nButton3 = Button(pickAndAssignWidget, text='N', grid=(2, 2), callback=partial(self.pickAndAssign, '+1', 'N'))
-    self.caButton1 = Button(pickAndAssignWidget, text='CA', grid=(3, 0), callback=partial(self.pickAndAssign, '-1', 'CA'))
-    self.caButton2 = Button(pickAndAssignWidget, text='CA', grid=(3, 1), callback=partial(self.pickAndAssign, '', 'CA'))
-    self.caButton3 = Button(pickAndAssignWidget, text='CA', grid=(3, 2), callback=partial(self.pickAndAssign, '+1', 'CA'))
-    self.cbButton1 = Button(pickAndAssignWidget, text='CB', grid=(4, 0), callback=partial(self.pickAndAssign, '-1', 'CB'))
-    self.cbButton2 = Button(pickAndAssignWidget, text='CB', grid=(4, 1), callback=partial(self.pickAndAssign, '', 'CB'))
-    self.cbButton3 = Button(pickAndAssignWidget, text='CB', grid=(4, 2), callback=partial(self.pickAndAssign, '+1', 'CB'))
-    self.buttons = [self.hButton1, self.hButton2, self.hButton3, self.nButton1, self.nButton2,
-                    self.nButton3, self.caButton1, self.caButton2, self.caButton3, self.cbButton1,
-                    self.cbButton2, self.cbButton3]
-    for button in self.buttons:
-      button.clicked.connect(self.returnButtonToNormal)
+  def __init__(self, parent=None, project=None):
 
-    self.addWidget(pickAndAssignWidget)
+    CcpnDock.__init__(self, parent=None, name='Backbone Assignment')
 
-  def pickAndAssign(self, position, atomType):
+    self.displayButton = Button(self, text='Select Modules', callback=self.showDisplayPopup)
+    self.layout.addWidget(self.displayButton, 0, 0, 1, 1)
+    self.restrictedPickButton = Button(self, text='Restricted Pick', callback=self.restrictedPick)
+    self.layout.addWidget(self.restrictedPickButton, 0, 2, 1, 1)
 
-    r = self.current.nmrResidue
-    name = atomType+position
-    newNmrAtom = r.fetchNmrAtom(name=name)
-    for peak in self.current.peaks:
-      print(newNmrAtom)
-      peak.assignDimension(axisCode='C', value=[newNmrAtom])
+    self.project = project
+    self.current = project._appBase.current
+    self.peakTable = PeakListSimple(self, peakLists=project.peakLists, callback=self.goToPositionInModules)
+    self.layout.addWidget(self.peakTable, 2, 0, 1, 6)
 
-  def returnButtonToNormal(self):
-    for button in self.buttons:
-     button.setStyleSheet('background-color: None')
+    # print((parent.window()))
+    parent.window().showAtomSelector()
 
-
-  def predictAssignments(self, peaks):
-    experiments = []
-    self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
-    values = [peak.height for peak in peaks]
-    experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
-    for value in values:
-      if value < 0:
-        if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-          self.cbButton1.setStyleSheet('background-color: green')
-          self.cbButton2.setStyleSheet('background-color: orange')
-        else:
-          self.cbButton2.setStyleSheet('background-color: green')
-      if value > 0:
-        if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-          self.caButton1.setStyleSheet('background-color: green')
-          self.caButton2.setStyleSheet('background-color: orange')
-        else:
-          self.caButton2.setStyleSheet('background-color: green')
+  def restrictedPick(self):
+    position = self.selectedPeak.position
+    peak = self.selectedPeak
+    axisCodes = self.selectedPeak.peakList.spectrum.axisCodes
+    hdim = axisCodes.index('H')
+    ndim = axisCodes.index('N')
+    print(self.selectedPeak.position)
+    for module in self.selectedDisplays:
+      for spectrumView in module.strips[0].spectrumViews:
+       if module.axisCodes[2] == 'N':
+        selectedRegion = [[peak.position[hdim]-0.01, peak.position[ndim]-0.05],
+                          [peak.position[hdim]+0.01, peak.position[ndim]+0.05]]
+        peakList = spectrumView.spectrum.peakLists[0]
+        if spectrumView.spectrum.dimensionCount > 1:
+          print(spectrumView.strip.orderedAxes[1].region)
+          selectedRegion[0].insert(1, spectrumView.strip.orderedAxes[1].region[0])
+          selectedRegion[1].insert(1, spectrumView.strip.orderedAxes[1].region[1])
+          print('selectedRegion',selectedRegion)
+          apiSpectrumView = spectrumView._wrappedData
+          newPeaks = peakList.findPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
+                                          doPos=apiSpectrumView.spectrumView.displayPositiveContours,
+                                          doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
+          for peak in newPeaks:
+            peak.isSelected = True
+          for strip in module.strips:
+            strip.showPeaks(peakList)
+          # module.peaks = newPeaks
 
 
+  def goToPositionInModules(self, peak=None, row=None, col=None):
+    self.selectedPeak = peak
+    axisCodes = peak.peakList.spectrum.axisCodes
+    hdim = axisCodes.index('H')
+    ndim = axisCodes.index('N')
+    for module in self.selectedDisplays:
+      print(module.axisCodes[2])
+      if module.axisCodes[2] == 'N':
+        module.orderedStrips[0].orderedAxes[2].position = peak.position[ndim]
+        line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+        line.setPos(QtCore.QPointF(peak.position[hdim], 0))
+        module.orderedStrips[0].plotWidget.addItem(line)
+      elif module.axisCodes[2] == 'H':
+        module.orderedStrips[0].orderedAxes[2].position = peak.position[hdim]
+        line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+        line.setPos(QtCore.QPointF(peak.position[ndim], 0))
+        module.orderedStrips[0].plotWidget.addItem(line)
 
 
+      else:
+        pass
 
+      print(peak)
+
+  def showDisplayPopup(self):
+    popup = SelectDisplaysAndSpectraPopup(self, project=self.project, dim=3)
+    popup.exec_()

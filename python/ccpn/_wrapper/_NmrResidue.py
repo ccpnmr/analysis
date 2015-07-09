@@ -68,6 +68,15 @@ class NmrResidue(AbstractWrapperObject):
   def _parent(self) -> NmrChain:
     """NmrChain containing NmrResidue."""
     return self._project._data2Obj[self._wrappedData.nmrChain]
+
+  # NBNB This VERY unusual, but we are able to reparent NmrtResidues
+  @_parent.setter
+  def _parent(self, value:NmrChain):
+    if value is None:
+      raise ValueError("%s NmrResidue.nmrChain cannot be set to None" % self)
+    else:
+      self._wrappedData.nmrChain = value._wrappedData
+
   
   nmrChain = _parent
 
@@ -79,14 +88,14 @@ class NmrResidue(AbstractWrapperObject):
     if apiResidue is None:
       return apiResonanceGroup.residueType or ''
     else:
-      return apiResidue.ccpCode
+      return apiResidue.code3Letter
 
   @name.setter
   def name(self, value:str):
     apiResonanceGroup = self._wrappedData
     apiResidue = apiResonanceGroup.assignedResidue
     if apiResidue:
-      if apiResidue.ccpCode == value:
+      if apiResidue.code3Letter == value:
         return
       else:
         raise ValueError("Cannot reset NmrResidue name while NmrResidue is assigned")
@@ -152,7 +161,8 @@ def getter(self:Residue) -> NmrResidue:
   if apiNmrChain is not None:
     obj = apiNmrProject.findFirstResonanceGroup(chainSerial=apiNmrChain.serial,
                                                 seqCode=apiResidue.seqCode,
-                                                seqInsertCode=apiResidue.seqInsertCode)
+                                                seqInsertCode=apiResidue.seqInsertCode.strip()
+                                                or None)
     return None if obj is None else self._project._data2Obj.get(obj)
   return None
 
@@ -165,6 +175,7 @@ def setter(self:Residue, value:NmrResidue):
 
   if value is not None:
     value.residue = self
+Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
 del getter
 del setter
@@ -199,9 +210,16 @@ NmrChain.newNmrResidue = newNmrResidue
 NmrChain.fetchNmrResidue = fetchNmrResidue
 
 # Notifiers:
+#NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model
 className = ApiResonanceGroup._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':NmrResidue}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_resetPid', {}, className, 'setSequenceCode'),
+    ('_resetPid', {}, className, 'setAssignedResidue'),
+    ('_resetPid', {}, className, 'setNmrChain'),
+    ('_resetPid', {}, className, 'setResidueType'),
+    ('_resetPid', {}, className, 'setResonances'),
+    ('_resetPid', {}, className, 'addResonance')
   )
 )

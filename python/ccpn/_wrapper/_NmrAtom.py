@@ -128,6 +128,8 @@ NmrResidue.fetchNmrAtom = fetchNmrAtom
 className = ApiResonance._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':NmrAtom}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_resetPid', {}, className, 'setName'),
+    ('_resetPid', {}, className, 'setResonanceGroup')
   )
 )

@@ -145,6 +145,39 @@ class Project(AbstractWrapperObject):
     # remove from pid2Obj
     del self._pid2Obj[obj.shortClassName][obj._id]
 
+  def _resetPid(self, wrappedData):
+    """Reset internal attributes after values determining PID have changed"""
+
+    getDataObj = self._data2Obj.get
+    pid2Obj = self._pid2Obj
+
+    objects = [getDataObj(wrappedData)]
+    for obj in objects:
+      # Add child objects to list
+      objects.extend(getDataObj(y) for x in obj._childClasses for y in x._getAllWrappedData(obj))
+
+      # print ('@~@~ to reset: ', obj,
+      #        obj._wrappedData.serial if hasattr(obj._wrappedData, 'serial') else None)
+
+      # reset _id
+      oldId = obj._id
+
+      parent = obj._parent
+      if parent is self:
+        _id = str(obj._key)
+      else:
+        _id = '%s%s%s'% (parent._id, Pid.IDSEP, obj._key)
+      obj._id = _id
+
+      # if oldId == 'A.2.Lys':
+      #   print ('@~@~', oldId, _id, parent, obj.__class__.__name__)
+
+      # update pid:object mapping dictionary
+      dd = pid2Obj[obj.__class__.__name__]
+      # print('@~@~', obj, sorted(x for x in dd))
+      del dd[oldId]
+      dd[_id] = obj
+
   def delete(self):
     """Delete underlying data and cleans up the wrapper project"""
     wrappedData = self._wrappedData

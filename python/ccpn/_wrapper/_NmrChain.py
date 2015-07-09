@@ -58,7 +58,11 @@ class NmrChain(AbstractWrapperObject):
   def shortName(self) -> str:
     """short form of name, key attribute"""
     return self._wrappedData.code
-    
+
+  @shortName.setter
+  def shortName(self, value:str):
+    self._wrappedData.code = value
+
   @property
   def _parent(self) -> Project:
     """Parent (containing) object."""
@@ -197,6 +201,7 @@ Project.fetchNmrChain = fetchNmrChain
 className = ApiNmrChain._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':NmrChain}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_resetPid', {}, className, 'setCode')
   )
 )

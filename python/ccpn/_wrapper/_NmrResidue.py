@@ -74,9 +74,10 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def name(self) -> str:
     """Residue type name string (e.g. 'Ala')"""
-    apiResidue = self._wrappedData.assignedResidue
+    apiResonanceGroup = self._wrappedData
+    apiResidue = apiResonanceGroup.assignedResidue
     if apiResidue is None:
-      return self._wrappedData.residueType or ''
+      return apiResonanceGroup.residueType or ''
     else:
       return apiResidue.ccpCode
 

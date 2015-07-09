@@ -40,10 +40,13 @@ class NmrResidueTest(Testing):
     res2 = nr2.residue
     res3 = self.project.chains[0].residues[2]
     print(nr1,nr2,res1,res2,res3)
+    print(nr1.name,nr2.name,res1.name,res2.name,res3.name)
     nr2.residue = None
-    print (nr2, nr2.residue)
+    print (nr2, nr2.residue, nr2.name)
     nr2.sequenceCode = '2'
-    print (nr2, nr2.residue)
+    print (nr2, nr2.residue, nr2.name)
+    nr2.residue = res3
+    print (nr2, nr2.residue, nr2.name)
     
   # def test_fetchNmrResidue(self):
   #   nmrChain = self.project.fetchNmrChain(shortName='@1')

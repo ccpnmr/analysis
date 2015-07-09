@@ -123,6 +123,8 @@ class GuiWindow(GuiBase):
     QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll)
     QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll)
     QtGui.QShortcut(QtGui.QKeySequence("Del"), self, lambda: self._appBase.current.deleteSelected(self))
+    QtGui.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark)
+    QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
    
   def toggleCrossHairAll(self):
     # toggle crosshairs in all windows
@@ -134,6 +136,16 @@ class GuiWindow(GuiBase):
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.toggleCrossHair()
 
+  def createMark(self):
+    strip = self._appBase.current.strip
+    if strip and self.task:
+      strip.createMarkAtCursorPosition(self.task)
+    
+  def clearMarks(self):
+    
+    for mark in self.task.marks[:]:
+      mark.delete()
+      
   def toggleGridAll(self):
     # toggle grid in all windows
     for window in self.project.windows:

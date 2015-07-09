@@ -73,9 +73,15 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
     self.inactivePeakItems = set() # containus unused peakItems
     
-    Notifiers.registerNotify(self.deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
-    
     GuiSpectrumDisplay.__init__(self)
+    
+    Notifiers.registerNotify(self._deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
+    Notifiers.registerNotify(self._addedSpectrumView, 'ccpnmr.gui.Task.SpectrumView', '__init__')
+    Notifiers.registerNotify(self._removedSpectrumView, 'ccpnmr.gui.Task.SpectrumView', 'delete')
+    for func in ('setPositiveContourColour', 'setSliceColour'):
+      Notifiers.registerNotify(self._setActionIconColour, 'ccp.nmr.Nmr.DataSource', func)
+    
+    self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button)
     
     self.fillToolBar()
     self.setAcceptDrops(True)
@@ -243,7 +249,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         peakItem = PeakNd(peakLayer, peak)
       peakItemDict[apiPeak] = peakItem
       
-  def deletedPeak(self, apiPeak):
+  def _deletedPeak(self, apiPeak):
     
     for peakLayer in self.activePeakItemDict:
       peakItemDict = self.activePeakItemDict[peakLayer]
@@ -253,4 +259,63 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         del peakItemDict[apiPeak]
         self.inactivePeakItems.add(peakItem)
       
+  def _apiDataSourcesInDisplay(self):
+    apiDataSources = set()
+    for strip in self.strips:
+      for spectrumView in strip.spectrumViews:
+        apiDataSources.add(spectrumView.spectrum._wrappedData)
+    return apiDataSources
+    
+  def _addedSpectrumView(self, apiSpectrumView):
+    print('HERE123411')
+    # cannot deal with wrapper spectrum object because that not ready yet when this notifier is called
+    apiDataSources = self._apiDataSourcesInDisplay()
+    apiDataSource = apiSpectrumView.dataSource
+    if apiDataSource not in apiDataSources:
+      # add toolbar action (button)
+      action = self.spectrumToolBar.addAction(apiDataSource.name)
+      self._setActionIconColour(apiDataSource)
+      action.setCheckable(True)
+      action.setChecked(True)
+      ##spectrumView = self._appBase.project._data2Obj[apiSpectrumView]  # cannot do this here because spectrumView not ready yet
+      ##action.toggled.connect(spectrumView.setVisible)
+      widget = self.spectrumToolBar.widgetForAction(action)
+      widget.setFixedSize(60, 30)
+      self.spectrumActionDict[apiDataSource] = action  # have to use wrappedData because wrapper object disappears before delete notifier is called
+      
+  def _initSpectrumView(self, spectrumView):
+    # this has to be separate from the above because the wrapper object is not ready when the above is called (a pain)
+    print('HERE123412')
+    apiStripSpectrumView = spectrumView._wrappedData
+    apiDataSource = apiStripSpectrumView.spectrumView.dataSource
+    action = self.spectrumActionDict.get(apiDataSource)
+    if action:
+      action.toggled.connect(spectrumView.setVisible)
+    
+  def _removedSpectrumView(self, apiSpectrumView):
+    # cannot deal with wrapper spectrum object because already disappears when this notifier is called
+    apiDataSources = self._apiDataSourcesInDisplay()
+    apiDataSource = apiSpectrumView.dataSource
+    if apiDataSource not in apiDataSources:
+      # remove toolbar action (button)
+      action = self.spectrumActionDict.get(apiDataSource)  # should always be not None (correct??)
+      if action:
+        self.spectrumToolBar.removeAction(action)
+        del self.spectrumActionDict[apiDataSource]
 
+  def _setActionIconColour(self, apiDataSource):
+    action = self.spectrumActionDict.get(apiDataSource)
+    if action:
+      pix=QtGui.QPixmap(60, 10)
+      if apiDataSource.numDim < 2: # irrelevant here, but need if this code moves to GuiSpectrumDisplay
+        pix.fill(QtGui.QColor(apiDataSource.sliceColour))
+      else:
+        pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
+      action.setIcon(QtGui.QIcon(pix))
+
+  def _connectPeakLayerVisibility(self, spectrumView, peakLayer):
+    apiStripSpectrumView = spectrumView._wrappedData
+    apiDataSource = apiStripSpectrumView.spectrumView.dataSource
+    action = self.spectrumActionDict.get(apiDataSource)
+    if action:
+      action.toggled.connect(peakLayer.setVisible) # TBD: need to undo this if peakLayer removed   

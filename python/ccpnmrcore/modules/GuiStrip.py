@@ -122,8 +122,17 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.beingUpdated = False
     self.xPreviousRegion, self.yPreviousRegion = self.viewBox.viewRange()
     
+    self.axisPositionDict = {}  # axisCode --> position
+    # need to keep track of mouse position because Qt shortcuts don't provide the widget or the position of where the cursor is
+    
+    self.vRulerLineDict = {}  # ruler --> vertical line for that ruler
+    self.hRulerLineDict = {}  # ruler --> horizontal line for that ruler
+    self.initRulers()
+    
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
     Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
+    Notifiers.registerNotify(self.rulerCreated, 'ccpnmr.gui.Task.Ruler', '__init__')
+    Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
 
   # def addStrip(self):
   #
@@ -135,6 +144,8 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
 
   def setupAxes(self):
 
+    # this is called from GuiSpectrumView because the axes are not ready when the strip is created
+    # TBD: but that means this is called for every spectrum in the strip, which is not what we want
     self.viewBox.setXRange(*self.orderedAxes[0].region)
     self.viewBox.setYRange(*self.orderedAxes[1].region)
     self.xAxisTextItem = AxisTextItem(self.plotWidget, orientation='top',
@@ -266,9 +277,10 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   def toggleGrid(self):
     self.grid.setVisible(not self.grid.isVisible())
 
-  def _crosshairCode(self, code):
+  def _crosshairCode(self, axisCode):
     # determines what axisCodes are compatible as far as drawing crosshair is concerned
-    return code[0] if code[0].isupper() else code
+    # TBD: the naive approach below should be improved
+    return axisCode[0] if axisCode[0].isupper() else axisCode
       
   def setCrossHairPosition(self, axisPositionDict):
     axes = self.orderedAxes
@@ -281,6 +293,43 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     if position is not None:
       self.hLine.setPos(position)
       
+  def createMarkAtCursorPosition(self, task):
+    # TBD: this creates a mark in all dims, is that what we want??
+    axisPositionDict = self.axisPositionDict
+    axisCodes = [axis.code for axis in self.orderedAxes]
+    positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
+    mark = task.newMark('black', positions, axisCodes)
+    
+  def rulerCreated(self, apiRuler):
+    axisCode = apiRuler.axisCode # TBD: use label and unit
+    position = apiRuler.position
+    # TBD: is the below correct (so the correct axes)?
+    if axisCode == self.orderedAxes[0].code:
+      line = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
+      line.setPos(position)
+      self.plotWidget.addItem(line, ignoreBounds=True)
+      self.vRulerLineDict[apiRuler] = line
+      
+    if axisCode == self.orderedAxes[1].code:
+      line = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
+      line.setPos(position)
+      self.plotWidget.addItem(line, ignoreBounds=True)
+      self.hRulerLineDict[apiRuler] = line
+    
+  def rulerDeleted(self, apiRuler):
+    for dd in self.vRulerLineDict, self.hRulerLineDict:
+      if apiRuler in dd:
+        line = dd[apiRuler]
+        del dd[apiRuler]
+        self.plotWidget.removeItem(line)
+            
+  def initRulers(self):
+    
+    for mark in self.spectrumDisplay.window.task.marks:
+      apiMark = mark._wrappedData
+      for apiRuler in apiMark.rulers:
+        self.rulerCreated(apiRuler)
+        
   def mouseClicked(self, event):
     print(event)
 
@@ -289,7 +338,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     position = event
     if self.plotWidget.sceneBoundingRect().contains(position):
       mousePoint = self.viewBox.mapSceneToView(position)
-      axisPositionDict = {}
+      axisPositionDict = self.axisPositionDict
       for n, axis in enumerate(self.orderedAxes):
         # TBD: what if x and y have the same (or related) axis codes?
         if n == 0:

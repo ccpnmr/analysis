@@ -115,6 +115,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
 
+    """
     self.visibilityAction = action = self._parent.spectrumDisplay.spectrumToolBar.addAction(self.spectrum.name)
     self.setActionIconColour()
     action.setCheckable(True)
@@ -124,11 +125,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     for func in ('setPositiveContourColour', 'setSliceColour'):
       Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
-        
+"""        
     # for strip in self.strips:
     self.addSpectrumItem(self.strip)
 
-
+    self.strip.spectrumDisplay._initSpectrumView(self)
 
     #for apiPeakListView in spectrumView._wrappedData.sortedPeakListViews():
     #  peakListItem = GuiPeakListItemNd(self, apiPeakListView)
@@ -140,7 +141,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     for peakList in spectrum.peakLists:
       strip.showPeaks(peakList)
 
-
+  """
   def changedSpectrumColour(self, apiDataSource):
     
     if apiDataSource is self.spectrum._wrappedData:
@@ -155,11 +156,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     else:
       pix.fill(QtGui.QColor(self.spectrum.positiveContourColour))
     action.setIcon(QtGui.QIcon(pix))
-      
+"""      
   def addSpectrumItem(self, strip):
     if self not in strip.plotWidget.scene().items():
       strip.plotWidget.scene().addItem(self)
-    self.visibilityAction.toggled.connect(self.setVisible) # does this ever get set twice??
+    ###self.visibilityAction.toggled.connect(self.setVisible) # does this ever get set twice??
         
   def removeSpectrumItem(self, strip):
     if self not in strip.plotWidget.scene().items():

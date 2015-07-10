@@ -52,7 +52,6 @@ class PickAndAssignModule(CcpnDock, Base):
             print(spectrumView.strip.orderedAxes[1].region)
             selectedRegion[0].insert(1, spectrumView.strip.orderedAxes[1].region[0])
             selectedRegion[1].insert(1, spectrumView.strip.orderedAxes[1].region[1])
-            print('selectedRegion',selectedRegion)
             apiSpectrumView = spectrumView._wrappedData
             newPeaks = peakList.findPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,

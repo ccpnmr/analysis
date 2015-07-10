@@ -26,6 +26,7 @@ from PyQt4 import QtGui,QtCore
 
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
+from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability
 
 
@@ -48,9 +49,6 @@ class Assigner(CcpnDock):
               border: 1px solid #00092d;
     }
     """)
-    # self.label.hide()
-    # self.label = DockLabel('Assigner', self)
-    # self.label.show()
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
     self.scene = QtGui.QGraphicsScene(self)
@@ -389,20 +387,6 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
     self.parent = parent
     self.nmrResidue = nmrResidue
 
-
-  #
-  # def dragEnterEvent(self, event, enter=True):
-  #
-  #   if event.buttons() == QtCore.Qt.LeftButton:
-  #       print("Left click drag")
-  #       aDict = {}
-  #       for item in self.parent.scene.items():
-  #         if isinstance(item, GuiNmrResidue) and item.isSelected():
-  #           aDict[item.x()] = item.toPlainText()
-  #
-  #       self.assignStretch = [aDict[key] for key in sorted(aDict.keys())]
-  #       print(self.assignStretch)
-
   def mouseMoveEvent(self, event):
 
     if (event.buttons() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
@@ -421,23 +405,6 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
 
         drag.exec_()
 
-    # if (event.button() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
-    #
-    #   if event.isStart():
-    #
-    #     print('here I am')
-    #     aDict = {}
-    #     for item in self.scene.items():
-    #       if isinstance(item, self) and item.isSelected():
-    #         aDict[item.x()] = item.toPlainText()
-    #
-    #     self.assignStretch = [aDict[key] for key in sorted(aDict.keys())]
-    #   if event.isFinish():
-    #     print(self.assignStretch)
-    #
-    # elif event.button() ==  QtCore.Qt.LeftButton and event.modifiers():
-    #   event.acceptProposedAction()
-
 
 
 class AssignmentLine(QtGui.QGraphicsLineItem):
@@ -450,12 +417,3 @@ class AssignmentLine(QtGui.QGraphicsLineItem):
     self.pen.setWidth(width)
     self.setPen(self.pen)
     self.setLine(x1, y1, x2, y2)
-
-if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
-
-    dialog = Assigner()
-    dialog.show()
-    dialog.raise_()
-
-    app.exec_()

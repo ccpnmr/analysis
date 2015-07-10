@@ -362,7 +362,6 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
-      print(self.peakItem)
       self.update()
 
 

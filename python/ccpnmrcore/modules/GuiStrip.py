@@ -298,6 +298,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     axisPositionDict = self.axisPositionDict
     axisCodes = [axis.code for axis in self.orderedAxes]
     positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
+    print(positions)
     mark = task.newMark('black', positions, axisCodes)
     
   def rulerCreated(self, apiRuler):

@@ -267,8 +267,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def addBlankDisplay(self):
-    if not self.blankDisplay:
+    if not hasattr(self, 'blankDisplay') or self.blankDisplay is None:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
+
 
   def showSequence(self):
 
@@ -531,7 +532,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showBackboneAssignmentModule(self, position=None, relativeTo=None):
     self.bbModule = BackboneAssignmentModule(self._project)
-    self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo)
+    if position is not None and relativeTo is not None:
+      self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo)
+    else:
+      self.dockArea.addDock(self.bbModule, position='bottom')
+    assigner = self.showAssigner('bottom')
+    self.bbModule.setAssigner(assigner)
     return self.bbModule
 
   def showPickAndAssignModule(self, position=None, relativeTo=None):

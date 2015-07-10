@@ -74,14 +74,14 @@ class GuiStripNd(GuiStrip):
     self.addSpinSystemLabel()
     self.addPlaneToolbar()
     ###self.setShortcuts()
-    for spectrumView in self.spectrumViews:
-    #   newSpectrumView = spectrumView
-      #if spectrumView not in self.plotWidget.scene().items():
-        # newItem = spectrumView
-        #self.plotWidget.scene().addItem(spectrumView)
-      if spectrumView is not None:
-        # Check is necessary as spectrumView may be None during project loading
-        spectrumView.addSpectrumItem(self)
+    # for spectrumView in self.spectrumViews:
+    # #   newSpectrumView = spectrumView
+    #   #if spectrumView not in self.plotWidget.scene().items():
+    #     # newItem = spectrumView
+    #     #self.plotWidget.scene().addItem(spectrumView)
+    #   if spectrumView is not None:
+    #     # Check is necessary as spectrumView may be None during project loading
+    #     spectrumView.addSpectrumItem(self)
 
     ###Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
 

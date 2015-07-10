@@ -94,7 +94,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     removeStripAction.setIcon(removeStripIcon)
 
   def cloneStrip(self):
-    newStrip = self.orderedStrips[-1].clone()
+    newStrip = self._appBase.current.strip.clone()
 
   def zoomYAll(self):
     for strip in self.strips:

@@ -52,7 +52,7 @@ def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None
 
   startPoints = [point[1] for point in sorted(startPoint)]
   endPoints = [point[1] for point in sorted(endPoint)]
-  print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
+  # print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
 
   posLevel = spectrum.positiveContourBase*100 if doPos else None
   negLevel = spectrum.negativeContourBase*100 if doNeg else None
@@ -108,7 +108,6 @@ def findPeaks1dFiltered(peakList, size=9, mode='wrap'):
    for position in indices:
      peakPosition = [float(newArray2[0][position])]
      height = newArray2[1][position]
-     print(peakPosition, height)
      peakList.newPeak(height=float(height), position=peakPosition)
 
 

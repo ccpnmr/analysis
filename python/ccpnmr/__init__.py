@@ -33,10 +33,10 @@ Axis = cls = importlib.import_module('ccpnmr._wrapper._Axis').Axis
 _wrappedClasses.append(cls)
 SpectrumView = cls = importlib.import_module('ccpnmr._wrapper._SpectrumView').SpectrumView
 _wrappedClasses.append(cls)
-PeakListView = cls = importlib.import_module('ccpnmr._wrapper._PeakListView').PeakListView
-_wrappedClasses.append(cls)
-PeakView = cls = importlib.import_module('ccpnmr._wrapper._PeakView').PeakView
-_wrappedClasses.append(cls)
+# PeakListView = cls = importlib.import_module('ccpnmr._wrapper._PeakListView').PeakListView
+# _wrappedClasses.append(cls)
+# PeakView = cls = importlib.import_module('ccpnmr._wrapper._PeakView').PeakView
+# _wrappedClasses.append(cls)
 
 # Add class list for extended sphinx documentation to module
 _sphinxWrappedClasses = _wrappedClasses

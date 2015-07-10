@@ -80,11 +80,7 @@ class NmrAtom(AbstractWrapperObject):
     return None if atom is None else self._project._data2Obj.get(atom)
 
   @atom.setter
-  def name(self, value:str):
-    self._wrappedData.atom = None if value is None else value._wrappedData
-
-  @atom.setter
-  def chain(self, value:Atom):
+  def atom(self, value:Atom):
     self._wrappedData.atom = None if value is None else value._wrappedData
 
   # Implementation functions

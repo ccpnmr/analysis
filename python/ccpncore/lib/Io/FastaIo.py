@@ -5,8 +5,11 @@ def isFastaFormat(inputFile):
     return True
   else:
     with open(inputFile, 'r') as f:
-      if f.readlines()[0].startswith('>'):
-        return True
+      try:
+        if f.readlines()[0].startswith('>'):
+          return True
+      except:
+        pass
 
   return False
 

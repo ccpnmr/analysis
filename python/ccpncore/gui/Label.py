@@ -106,10 +106,10 @@ class Label(QtGui.QLabel, Base):
         self.parent().guiSpectrumDisplay._appBase.current.strip = self.parent().guiSpectrumDisplay.orderedStrips[sinkIndex]
         self.parent().guiSpectrumDisplay._appBase.current.strip.spinSystemLabel.setText(wrapperObject.spinSystemLabel.text())
         newNmrResidue = self.parent().getById('NR:@.'+wrapperObject.spinSystemLabel.text()+'.')
-        print(newNmrResidue)
-        self.parent().guiSpectrumDisplay._appBase.current.assigner.addResidue(nmrResidue=newNmrResidue, direction=direction)
+        self.parent().guiSpectrumDisplay._appBase.current.assigner.direction=direction
+        # self.parent().guiSpectrumDisplay._appBase.current.assigner.addResidue(nmrResidue=newNmrResidue)
         # newHsqcPeak = self.parent().getById('NR:'+wrapperObject.spinSystemLabel.text())
-        print(self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule)
+        # print(self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule)
         self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule.findMatchingPeaks(nmrResidue=newNmrResidue)
         self.parent().guiSpectrumDisplay._appBase.mainWindow.assigner.predictSequencePosition()
     else:

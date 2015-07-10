@@ -192,7 +192,12 @@ class ViewBox(pg.ViewBox):
           # print(spectrumView.spectrum.peakLists[0].peaks)
           for peak in newPeaks:
             peak.isSelected = True
-          self.current.strip.showPeaks(peakList)
+          for window in self.current.project.windows:
+            for spectrumDisplay in window.spectrumDisplays:
+              for strip in spectrumDisplay.strips:
+                spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
+                if peakList.spectrum in spectra:
+                  strip.showPeaks(peakList)
           self.current.peaks = newPeaks
       else:
         self.updateSelectionBox(event.buttonDownPos(), event.pos())

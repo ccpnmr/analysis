@@ -278,7 +278,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
 
     # Make spectrumView
     obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
-                                                    stripSerial=stripSerial, dataSource=dataSource,
+                                                   stripSerial=stripSerial, dataSource=dataSource,
                                                    dimensionOrdering=dimensionOrdering)
     return self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
 

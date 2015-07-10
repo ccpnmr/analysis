@@ -115,7 +115,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     self.pythonConsole.heightMax = 200
-    self.sequenceWidget = SequenceModule(project=self._project)
+
     self.leftWidget = SideBar(parent=self)
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
     self.leftWidget.setGeometry(0, 0, 10, 600)
@@ -199,9 +199,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     newMoleculeMenu.addAction(Action(self, "From PDB...", callback=self.createMoleculeFromPDB))
     newMoleculeMenu.addAction(Action(self, "From NEF...", callback=self.createMoleculeFromNEF))
     newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
-    sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
-    sequenceAction.setChecked(self.sequenceWidget.isVisible())
-    newMoleculeMenu.addAction(sequenceAction)
+    self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
+    # sequenceAction.setChecked(self.sequenceWidget.isVisible())
+    newMoleculeMenu.addAction(self.sequenceAction)
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
     moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
@@ -271,12 +271,31 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
 
-  def showSequence(self):
+  def toggleSequenceWidget(self):
+    if self.sequenceWidget.isVisible():
+      self.hideSequence()
+      # self.sequenceAction.setCheckable(False)
+    else:
+      self.showSequence()
+    self.sequenceAction.setChecked(self.sequenceWidget.isVisible())
 
-    self.dockArea.addDock(self.sequenceWidget, position='top')
+  def showSequence(self):
+      self.sequenceWidget = SequenceModule(project=self._project)
+      self.dockArea.addDock(self.sequenceWidget, position='top')
 
   def hideSequence(self):
     self.sequenceWidget.hide()
+    delattr(self, 'sequenceWidget')
+
+
+  def toggleSequence(self):
+
+    if hasattr(self, 'sequenceWidget'):
+      if self.sequenceWidget.isVisible():
+        self.hideSequence()
+
+    else:
+      self.showSequence()
 
   def openAProject(self, projectDir=None):
 
@@ -429,12 +448,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.showConsole()
 
-  def toggleSequence(self):
-
-    if self.sequenceWidget.isVisible():
-      self.hideSequence()
-    else:
-      self.showSequence()
 
   def editMacro(self):
     pass

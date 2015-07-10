@@ -409,6 +409,13 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     if isinstance(inClass, MetaModel.MetaClass):
       self.writePostConstructorCode(op, inClass)
 
+    # Write additional postInit notifiers
+    if isinstance(inClass, MetaModel.MetaClass):
+      self.writeNewline()
+      self.startIf(self.shouldDoNotifies(op, inClass))
+      self.writeNotifyCode('postInit')
+      self.endIf()
+
   ###########################################################################
 
   ###########################################################################
@@ -522,14 +529,23 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
     self.startTransaction(op, inClass)
 
+    # Write additional postInit notifiers
+    self.writeNewline()
+    self.startIf(self.shouldDoNotifies(op, inClass))
+    self.writeNotifyCode('preDelete')
+    self.endIf()
+
     self.callDoDeletes(op, inClass)
+
+    # write normal postDelete notifiers and undo
+    self.doNotifies(op, inClass)
 
     self.endTransaction(op, inClass)
 
     # TBD: should this be before endTransaction?
     # self.startIf(self.varNames['notOverride'])
     # self.startIf(self.varNames['notInConstructor'])
-    self.doNotifies(op, inClass)
+    # self.doNotifies(op, inClass)
     # self.endIf()
     # self.endIf()
 
@@ -3161,7 +3177,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       # Notifiers
       self.writeNewline()
       self.startIf(self.shouldDoNotifies(op, inClass))
-      self.writeNotifyCode(op, inClass)
+      self.writeNotifyCode(op.name)
       self.endIf()
 
       # Undos

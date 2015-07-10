@@ -261,20 +261,33 @@ _notifies = {'':[]}
   ###########################################################################
 
   # implements ApiInterface
-  def writeNotifyCode(self, op, inClass):
+  def writeNotifyCode(self, notifyName):
 
-    notifyName = op.name
-    opType = op.opType
-
-    if opType == 'init':
+    if notifyName == '__init__':
 
       self.write('''
-ll = self.__class__._notifies.get('%s')
+ll = self.__class__._notifies.get('__init__')
 if ll:
   for notify in ll:
-    notify(self)''' % notifyName)
+    notify(self)''')
 
-    elif opType == 'fullDelete':
+    elif notifyName == 'postInit':
+
+      self.write('''
+ll = self.__class__._notifies.get('postInit')
+if ll:
+  for notify in ll:
+    notify(self)''')
+
+    elif notifyName == 'preDelete':
+
+      self.write('''
+for obj in %s:
+  for notify in obj.__class__._notifies.get('preDelete', ()):
+    notify(obj)
+''' % self.varNames['objsToBeDeleted'])
+
+    elif notifyName == 'delete':
 
       self.write('''
 for obj in %s:

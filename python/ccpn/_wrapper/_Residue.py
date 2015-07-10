@@ -160,7 +160,7 @@ def getter(self:Residue) -> Residue:
   else:
     return self._project._data2Obj.get(
       apiResidue.chain.findFirstResidue(seqId=previousApiMolResidue.serial))
-Residue.previuosResidue = property(getter, None, None, "Previous sequentially connected Residue")
+Residue.previousResidue = property(getter, None, None, "Previous sequentially connected Residue")
 
 del getter
     

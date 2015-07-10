@@ -69,7 +69,7 @@ class NmrResidue(AbstractWrapperObject):
     """NmrChain containing NmrResidue."""
     return self._project._data2Obj[self._wrappedData.nmrChain]
 
-  # NBNB This VERY unusual, but we are able to reparent NmrtResidues
+  # NBNB This VERY unusual, but it is OK, we are able to reparent NmrResidues
   @_parent.setter
   def _parent(self, value:NmrChain):
     if value is None:
@@ -145,14 +145,14 @@ def getter(self:NmrResidue) -> NmrResidue:
   return None if obj is None else self._project._data2Obj.get(obj)
 def setter(self:NmrResidue, value:NmrResidue):
   self._wrappedData.nextResidue = None if value is None else value._wrappedData
-NmrResidue.nextResidue = property(getter, setter, None, "Next NmrResidue in sequence")
+NmrResidue.nextNmrResidue = property(getter, setter, None, "Next NmrResidue in sequence")
 
 def getter(self:NmrResidue) -> NmrResidue:
   obj = self._wrappedData.previousResidue
   return None if obj is None else self._project._data2Obj.get(obj)
 def setter(self:NmrResidue, value:NmrResidue):
   self._wrappedData.previousResidue = None if value is None else value._wrappedData
-NmrResidue.previousResidue = property(getter, setter, None, "Previous NmrResidue in sequence")
+NmrResidue.previousNmrResidue = property(getter, setter, None, "Previous NmrResidue in sequence")
 
 def getter(self:Residue) -> NmrResidue:
   apiResidue = self._wrappedData

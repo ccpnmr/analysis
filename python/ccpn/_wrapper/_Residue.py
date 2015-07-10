@@ -142,6 +142,27 @@ class Residue(AbstractWrapperObject):
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
     return parent._wrappedData.sortedResidues()
 
+def getter(self:Residue) -> Residue:
+  apiResidue = self._wrappedData
+  nextApiMolResidue = apiResidue.molResidue.nextMolResidue
+  if nextApiMolResidue is None:
+    return None
+  else:
+    return self._project._data2Obj.get(
+      apiResidue.chain.findFirstResidue(seqId=nextApiMolResidue.serial))
+Residue.nextResidue = property(getter, None, None, "Next sequentially connected Residue")
+
+def getter(self:Residue) -> Residue:
+  apiResidue = self._wrappedData
+  previousApiMolResidue = apiResidue.molResidue.previousMolResidue
+  if previousApiMolResidue is None:
+    return None
+  else:
+    return self._project._data2Obj.get(
+      apiResidue.chain.findFirstResidue(seqId=previousApiMolResidue.serial))
+Residue.previuosResidue = property(getter, None, None, "Previous sequentially connected Residue")
+
+del getter
     
 # Connections to parents:
 Chain._childClasses.append(Residue)

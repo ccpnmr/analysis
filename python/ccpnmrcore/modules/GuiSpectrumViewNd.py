@@ -129,11 +129,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # for strip in self.strips:
     self.addSpectrumItem(self.strip)
 
-    self.strip.spectrumDisplay._initSpectrumView(self)
-
-    #for apiPeakListView in spectrumView._wrappedData.sortedPeakListViews():
-    #  peakListItem = GuiPeakListItemNd(self, apiPeakListView)
-
     #Notifiers.registerNotify(self.newPeakListView, 'ccpnmr.gui.Task.PeakListView', '__init__')
 
     spectrum = self.spectrum

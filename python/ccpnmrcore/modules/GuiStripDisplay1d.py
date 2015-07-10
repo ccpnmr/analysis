@@ -118,10 +118,10 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
         self.addPlaneToolbar(item, widget, newPane)
       """
 
-  def addSpinSystemSideLabel(self):
-    dock = self.dock
-    spinSystemSideLabel = VerticalLabel(dock, text=None)
-    # spinSystemSideLabel.setText()
-    dock.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
-    # print(spinSystemSideLabel.paintEvent())
-    spinSystemSideLabel.setFixedWidth(30)
+  # def addSpinSystemSideLabel(self):
+  #   dock = self.dock
+  #   # spinSystemSideLabel = VerticalLabel(dock, text=None)
+  #   # spinSystemSideLabel.setText()
+  #   dock.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
+  #   # print(spinSystemSideLabel.paintEvent())
+  #   spinSystemSideLabel.setFixedWidth(30)

@@ -46,8 +46,8 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     QtGui.QGraphicsTextItem.__init__(self)
     self.chain = chain
     self.text=chain.compoundName
-    self.setPlainText(chain.compoundName)
-    self.setFont(Font(size=12, bold=True))
+    self.setHtml('<div style=><strong>'+chain.compoundName+': </strong></div>')
+    self.setFont(Font(size=14, bold=True))
     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
     self.residueDict = {}
     i = 0
@@ -63,14 +63,14 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
     QtGui.QGraphicsTextItem.__init__(self)
     self.setPlainText(residue.shortName)
     position = labelPosition+(10*index)
-    self.setFont(Font(size=12, normal=True))
+    self.setFont(Font(size=14, normal=True))
     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
     self.setPos(QtCore.QPointF(position, 0))
     self.residueNumber = residue.sequenceCode
     if residue.nmrResidue is not None:
-      self.setHtml('<div style="background-color: red;"><strong>'+residue.shortName+'</strong></div>')
+      self.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+residue.shortName+'</strong></div>')
     else:
-      self.setPlainText(residue.shortName)
+      self.setHtml('<div style:"text-align: center;">'+residue.shortName+'</div')
     self.project = project
     self.residue = residue
     self.setAcceptDrops(True)
@@ -107,15 +107,20 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
 
 
   def hoverEnterEvent(self, event):
-    self.setDefaultTextColor(QtGui.QColor('#e4e15b'))
+    # self.setDefaultTextColor(QtGui.QColor('#e4e15b'))
+    self.setHtml('<div style="color: #e4e15b;">'+self.residue.shortName+'</div>')
 
   def hoverLeaveEvent(self, event):
     if hasattr(self.residue, 'nmrResidue'):
-      self.setFont(Font(size=12, bold=True))
-      self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      if self.residue.nmrResidue is not None:
+        self.setFont(Font(size=14, bold=True))
+        self.setHtml('<div style="color: #04C317;"><strong>'+self.residue.shortName+'<strong></div>')
+      else:
+        self.setFont(Font(size=14, normal=True))
+        self.setHtml('<div style="color: #f7ffff;">'+self.residue.shortName+'</div>')
     else:
-      self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-      self.setFont(Font(size=12, normal=True))
+      self.setHtml('<div style="color: #f7ffff;">'+self.residue.shortName+'</div>')
+      self.setFont(Font(size=14, normal=True))
 
   def dropEvent(self, event):
     res = self.scene.itemAt(event.scenePos())
@@ -124,13 +129,15 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
       data = event.mimeData().data('application/x-assignedStretch')
       nmrResidues = str(data, encoding='utf-8').split(',')
       nmrResidue = self.project.getById(nmrResidues[0])
-      res.setHtml('<div style="background-color: red;"><strong>'+res.residue.shortName+'</strong></div>')
+      res.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
+                  res.residue.shortName+'</strong></div>')
       nmrResidue.residue = res.residue
       res = res.residue
       for assignableResidue in nmrResidues[1:]:
         res = res.nextResidue
         guiResidue = self.parent.residueDict.get(res.sequenceCode)
-        guiResidue.setHtml('<div style="background-color: red;"><strong>'+res.shortName+'</strong></div>')
+        guiResidue.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
+                           res.shortName+'</strong></div>')
         nmrResidue = self.project.getById(assignableResidue)
         nmrResidue.residue = res
 

@@ -222,6 +222,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     viewNewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
     # viewNewMenu.addAction(Action(self, "nD Spectral Pane", callback=self.addSpectrumNdDisplay))
     viewNewMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
+    viewNewMenu.addAction(Action(self, "Find Peaks", callback=self.findPeaks, shortcut='pp'))
 
     viewLayoutMenu = viewMenu.addMenu("Layout")
     viewLayoutMenu.addAction(Action(self, "Default", callback=self.setLayoutToDefault))
@@ -307,6 +308,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if currentProjectDir:
       self._appBase.openProject(currentProjectDir)
 
+  def findPeaks(self):
+    from ccpnmrcore.popups.PeakFind import PeakFindPopup
+    popup = PeakFindPopup(parent=self, project=self.project)
+    popup.exec_()
 
   def showAssigner(self, position='bottom', nextTo=None):
     self.assigner = Assigner(project=self._project)

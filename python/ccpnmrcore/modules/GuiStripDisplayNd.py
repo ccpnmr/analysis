@@ -87,7 +87,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     
     self.fillToolBar()
     self.setAcceptDrops(True)
-    self.addSpinSystemSideLabel()
+    # self.addSpinSystemSideLabel()
     # self._appBase.current.pane = self
 
   # def addSpectrum(self, spectrum):

@@ -77,14 +77,13 @@ class GuiWindow(GuiBase):
       return
 
     spectrum = self.project.loadSpectrum(directory)
-    # self.leftWidget.addItem(self.leftWidget.spectrumItem,spectrum)
 
     if not spectrum:
       return
       
     msg = spectrum.name+' loaded'
     mainWindow = self._appBase.mainWindow
-    mainWindow.leftWidget.addItem(mainWindow.leftWidget.spectrumItem,spectrum)
+    spectrumItem = mainWindow.leftWidget.addSpectrumToItem(spectrum)
     mainWindow.statusBar().showMessage(msg)
     mainWindow.pythonConsole.write("project.loadSpectrum('"+directory+"')\n")
 

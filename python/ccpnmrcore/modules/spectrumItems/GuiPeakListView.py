@@ -362,6 +362,7 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
+      print(self.peakItem)
       self.update()
 
 
@@ -618,11 +619,10 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
           for item in peak.dimensionNmrAtoms[dimension]:
             label = item.nmrResidue.id+item.name
             peakLabel.append(label)
-            print(item, item.name)
 
 
 
-    text = ','.join(peakLabel)
+    text = ', '.join(peakLabel)
     
     self.setText(text)
 

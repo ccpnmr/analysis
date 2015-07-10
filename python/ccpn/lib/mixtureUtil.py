@@ -1,6 +1,7 @@
 __author__ = 'simon'
 from numpy import array, amin, amax, average, empty, nan, nanmin, fabs, subtract, where, argmax, NAN
 
+from ccpn import Sample
 
 class Mixture:
   """ This class is used for grouping and registering scores of mixtures when evaluating
@@ -11,6 +12,7 @@ class Mixture:
     self.name = name
     self.minScore = None
     self.averageScore = None
+    self.pid = None
     self.peakCollections = [] # A list of peakCollections. Each compound in the mixture has one peakCollection.
 
 class ExperimentPeakCollection:
@@ -300,15 +302,23 @@ available. You supplied %d compounds, and asked for %d compounds per mixture."""
     """
     # initialise the clusters with empty lists
     self.__clusters = []
-    for x in range(clustercount):
+    # print(clustercount, 'clustercount', type(clustercount))
+    for x in range(int(clustercount)):
       self.__clusters.append([])
 
     # distribute the items into the clusters
     count = 0
     for item in input:
+
       if len(item.peaks) > 0:
-        self.__clusters[ count % clustercount ].append(item)
+        self.__clusters[ int(count % (clustercount-1)) ].append(item)
+
+        # print('count= ', count, 'clustercount =', clustercount,
+        #       '\n int of count % clustercount)= ' , int(count % clustercount))
+
         count += 1
+        # print('count+1= ', count)
+        # print('item:', item)
 
     return count
 
@@ -392,10 +402,33 @@ def compareWithLevels(a, bList, getValue):
       If the difference is less than 0.01 or larger than 0.15 -10 or 5 is returned respectively. """
 
   value = compare(a, bList, getValue)
-  print(a, 'value', value)
+
   if not value:
     return 0
 
+  # if value > 0.15:
+  #   return 5
+  # if value > 0.10:
+  #   return 4
+  # if value > 0.08:
+  #   return 3
+  # if value > 0.06:
+  #   return 2
+  # if value > 0.04:
+  #   return 1
+  # if value < 0.01:
+  #   return -10
+
+  if value > 0.50:
+    return 10
+  if value > 0.40:
+    return 9
+  if value > 0.30:
+    return 8
+  if value > 0.20:
+    return 7
+  if value > 0.18:
+    return 6
   if value > 0.15:
     return 5
   if value > 0.10:
@@ -406,8 +439,14 @@ def compareWithLevels(a, bList, getValue):
     return 2
   if value > 0.04:
     return 1
+  if value > 0.02:
+    return 0
+  if value < 0.02:
+    return -1
   if value < 0.01:
-    return -10
+    return -2
+
+
 
   return 0
 
@@ -442,19 +481,52 @@ def setupMixtures(spectra, n, mode):
     return []
 
   for i, cluster in enumerate(clusters):
-    currentMixture = Mixture(i+1)
+
+
+    project = spectrum.project
+    currentMixture = project.newSample(name=str(i+1))
+
+
+
+
+    # currentMixture.pid = 'SA:%s' % str(i+1)
+
     mixturesData.append(currentMixture)
     currentMixture.peakCollections = cluster
     results = array([compareWithLevels(obj, cluster, 'getPeakPositions') for obj in cluster])
+    try:
+      currentMixture.minScore = amin(results)
+      currentMixture.averageScore = average(results)
+    except ValueError:
+      pass
 
-    currentMixture.minScore = amin(results)
-    currentMixture.averageScore = average(results)
-    #print "Mixture %d, %d compounds, score %.0f, %.1f:" % (currentMixture.name, len(currentMixture.peakCollections), currentMixture.minScore, currentMixture.avScore)
+
+
+    # print("Sample %d, components:  %d" % (currentMixture.name, (len(currentMixture.peakCollections)-1)))
+    #
+    # print("Sample", currentMixture.name)
+    # print("Average score", currentMixture.averageScore)
+    #
+    # if currentMixture.minScore is not None:
+    #   print("Minimum score", currentMixture.minScore)
+    #
+    # print("Mixture %d, %d compounds, score %.0f:" % (currentMixture.name, (len(currentMixture.peakCollections)-1), currentMixture.minScore ))
+
+
+    # resultMixture = ("Sample %d, %d components, score %.0f:, average %.1f:" % (currentMixture.name, (len(currentMixture.peakCollections)-1), currentMixture.minScore,  currentMixture.averageScore ))
+
+    # print([e.name for e in currentMixture.peakCollections])
+    # print(dir(currentMixture.name))
+    # "%.1f", currentMixture.avScore
+
     for obj in currentMixture.peakCollections:
       obj.mixture = currentMixture
       obj.score = compareWithLevels(obj, currentMixture.peakCollections, 'getPeakPositions')
       #print obj.name, [round(pos, 3) for pos in obj.getPeakPositions()], obj.score
     #print ""
+
+    from ccpnmrcore.modules.ScoringMixture import MixtureTable
+
 
   return mixturesData
 
@@ -468,7 +540,7 @@ def evaluateMixtures(project, mixtures):
   nMixtures = 0
 
   for name, mixture in mixtures.items():
-    currentMixture = Mixture(name = name)
+    currentMixture = Sample(name = name)
     for compound in mixture:
       # exp = getReferenceDataExperimentOfCompound(refDataStores, compound)
       # if not exp:
@@ -487,7 +559,7 @@ def evaluateMixtures(project, mixtures):
     results = array([compareWithLevels(obj, currentMixture.peakCollections, 'getPeakPositions') for obj in currentMixture.peakCollections])
     currentMixture.minScore = amin(results)
     currentMixture.averageScore = average(results)
-    #print "Mixture %d, %d compounds, score %.0f, %.1f:" % (currentMixture.name, len(currentMixture.peakCollections), currentMixture.minScore, currentMixture.averageScore)
+    print ("Mixture %d, %d compounds, score %.0f, %.1f:" % (currentMixture.name, len(currentMixture.peakCollections), currentMixture.minScore, currentMixture.averageScore))
     for obj in currentMixture.peakCollections:
       obj.score = compareWithLevels(obj, currentMixture.peakCollections, 'getPeakPositions')
       #print obj.name, [round(pos, 3) for pos in obj.getPeakPositions()], obj.score

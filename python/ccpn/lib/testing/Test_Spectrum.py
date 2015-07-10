@@ -29,7 +29,7 @@ class SpectrumTest(Testing):
 
   def __init__(self, *args, **kw):
     Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
-    self.spectrumName = '115'
+    self.spectrumName = 'HSQC-115'
 
   def test_getPlaneData(self):
     spectrum = self.getSpectrum()

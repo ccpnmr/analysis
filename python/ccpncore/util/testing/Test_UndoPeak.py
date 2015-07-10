@@ -34,8 +34,10 @@ class PeakUndoTest(Testing):
     
     project = self.project
     nmrProject = project.findFirstNmrProject()
+    print ('@~@~ Exps', [x.name for x in nmrProject.sortedExperiments()])
     experiment = nmrProject.findFirstExperiment(name='HSQC')
-    dataSource = experiment.findFirstDataSource(name='115')
+    print ('@~@~ Specs', [x.name for x in experiment.sortedDataSources()])
+    dataSource = experiment.findFirstDataSource(name='HSQC-115')
     peakList = dataSource.newPeakList()
     
     project._undo = Undo()
@@ -52,7 +54,7 @@ class PeakUndoTest(Testing):
     project = self.project
     nmrProject = project.findFirstNmrProject()
     experiment = nmrProject.findFirstExperiment(name='HSQC')
-    dataSource = experiment.findFirstDataSource(name='115')
+    dataSource = experiment.findFirstDataSource(name='HSQC-115')
     peakList = dataSource.newPeakList()
     
     project._undo = Undo()

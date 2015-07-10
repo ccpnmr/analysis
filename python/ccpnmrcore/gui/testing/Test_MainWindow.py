@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpnmrcore.testing.Testing import Testing
 
-from ccpnmrcore.gui.MainWindow import MainWindow
+from ccpnmrcore.modules.GuiMainWindow import GuiMainWindow
 
 class MainWindowTest(Testing):
 
@@ -36,4 +36,4 @@ class MainWindowTest(Testing):
 
   def test_mainWindow(self):
 
-    mainWindow = MainWindow()
+    mainWindow = GuiMainWindow()

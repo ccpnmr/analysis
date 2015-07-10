@@ -75,6 +75,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     
     GuiSpectrumDisplay.__init__(self)
     
+    Notifiers.registerNotify(self._createdPeak, 'ccp.nmr.Nmr.Peak', '__init__')
     Notifiers.registerNotify(self._deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
     Notifiers.registerNotify(self._addedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', '__init__')
     Notifiers.registerNotify(self._removedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', 'delete')
@@ -203,28 +204,33 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def upBy2(self):
 
-    for spectrumView in self._wrappedData.spectrumViews:
-      spectrumView.spectrum.positiveContourBase *= spectrumView.positiveContourFactor
-      spectrumView.spectrum.negativeContourBase *= spectrumView.negativeContourFactor
+    for apiSpectrumView in self._wrappedData.spectrumViews:
+      apiDataSource = apiSpectrumView.dataSource
+      apiDataSource.positiveContourBase *= apiDataSource.positiveContourFactor
+      apiDataSource.negativeContourBase *= apiDataSource.negativeContourFactor
 
   def downBy2(self):
 
-    for spectrumView in self.spectrumViews:
-      print(spectrumView, spectrumView.spectrum)
-      spectrumView.spectrum.positiveContourBase /= spectrumView.spectrum.positiveContourFactor
-      spectrumView.spectrum.negativeContourBase /= spectrumView.spectrum.negativeContourFactor
+    for apiSpectrumView in self._wrappedData.spectrumViews:
+      apiDataSource = apiSpectrumView.dataSource
+      apiDataSource.positiveContourBase /= apiDataSource.positiveContourFactor
+      apiDataSource.negativeContourBase /= apiDataSource.negativeContourFactor
 
   def addOne(self):
 
-    for spectrumView in self.spectrumViews:
-      spectrumView.spectrum.positiveContourCount +=1
-      spectrumView.spectrum.negativeContourCount +=1
+    for apiSpectrumView in self._wrappedData.spectrumViews:
+      apiDataSource = apiSpectrumView.dataSource
+      apiDataSource.positiveContourCount += 1
+      apiDataSource.negativeContourCount += 1
 
   def subtractOne(self):
 
-    for spectrumView in self.spectrumViews:
-      spectrumView.spectrum.positiveContourCount -=1
-      spectrumView.spectrum.negativeContourCount -=1
+    for apiSpectrumView in self._wrappedData.spectrumViews:
+      apiDataSource = apiSpectrumView.dataSource
+      if apiDataSource.positiveContourCount > 0:
+        apiDataSource.positiveContourCount -= 1
+      if apiDataSource.negativeContourCount > 0:
+        apiDataSource.negativeContourCount -= 1
 
   def showPeaks(self, peakLayer, peaks):
   
@@ -250,6 +256,18 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         peakItem = PeakNd(peakLayer, peak)
       peakItemDict[apiPeak] = peakItem
       
+  def _createdPeak(self, apiPeak):
+    pass
+    """
+    for peakLayer in self.activePeakItemDict:
+      peakItemDict = self.activePeakItemDict[peakLayer]
+      peakItem = peakItemDict.get(apiPeak)
+      if peakItem:
+        peakLayer.strip.plotWidget.scene().removeItem(peakItem)
+        del peakItemDict[apiPeak]
+        self.inactivePeakItems.add(peakItem)
+       """
+        
   def _deletedPeak(self, apiPeak):
     for peakLayer in self.activePeakItemDict:
       peakItemDict = self.activePeakItemDict[peakLayer]

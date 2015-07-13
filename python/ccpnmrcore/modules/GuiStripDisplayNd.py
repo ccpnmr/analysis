@@ -282,7 +282,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       self.spectrumActionDict[apiDataSource] = action  # have to use wrappedData because wrapper object disappears before delete notifier is called
       self._setActionIconColour(apiDataSource)
     if apiStripSpectrumView not in self.apiStripSpectrumViews:
-      spectrumView = self._appBase.project._data2Obj[apiStripSpectrumView]
+      spectrumView = self._project._data2Obj[apiStripSpectrumView]
       action.toggled.connect(spectrumView.setVisible)
       self.apiStripSpectrumViews.add(apiStripSpectrumView)
       

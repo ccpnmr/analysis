@@ -1,10 +1,10 @@
-# hsqc = project.getById('SP:HSQC-115')
-#
-# hsqcSpectrumDisplay = window.createSpectrumDisplay(hsqc)
-#
-# window.removeBlankDisplay()
-#
-# hsqcPeakList = project.getById('PL:HSQC-115.1')
+hsqc = project.getById('SP:HSQC-115')
+
+hsqcSpectrumDisplay = window.createSpectrumDisplay(hsqc)
+
+window.removeBlankDisplay()
+
+hsqcPeakList = project.getById('PL:HSQC-115.1')
 
 hnca = project.getById('SP:HNCA-110')
 hncoca = project.getById('SP:HNCOCA-111')

@@ -28,7 +28,6 @@ from PyQt4 import QtGui, QtCore
 import pyqtgraph as pg
 
 import math
-import munkres
 
 from functools import partial
 
@@ -92,12 +91,18 @@ class AtomSelector(CcpnDock):
       else:
         peak.assignDimension(axisCode=atomType, value=[newNmrAtom])
 
-    for module in self.project.spectrumDisplays:
-      for strip in module.strips:
-        # strip.hidePeaks(peak.peakList)
-        peakLayer = strip.peakLayerDict.get(peak.peakList)
-        peakLayer.setVisible(False)
-        # peakLayer.setVisible(True)
+    # for module in self.project.spectrumDisplays:
+    #   for strip in module.strips:
+    #     peakList = self.current.peaks[0].peakList
+    #
+    #     peakLayer = strip.peakLayerDict.get(peak.peakList)
+    #     print('peakLayer',peakLayer)
+    #     # strip.hidePeaks(peak.peakList)
+    #     # print(strip.showPeaks(peakList))
+    #     # peakLayer = strip.peakLayerDict.get(peak.peakList)
+    #     peakLayer.hide()
+    #     peakLayer.setVisible(false)
+    #     # peakLayer.setVisible(True)
 
 
 

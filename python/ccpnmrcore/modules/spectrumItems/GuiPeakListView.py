@@ -607,7 +607,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
       if len(peak.dimensionNmrAtoms[dimension]) == 0:
         peakLabel.append('-')
       else:
-        peakNmrResidues = [atom[0].nmrResidue.id for atom in peak.dimensionNmrAtoms]
+        peakNmrResidues = [atom[0].nmrResidue.id for atom in peak.dimensionNmrAtoms if len(atom) != 0]
         if all(x==peakNmrResidues[0] for x in peakNmrResidues):
           for item in peak.dimensionNmrAtoms[dimension]:
             if len(peakLabel) > 0:

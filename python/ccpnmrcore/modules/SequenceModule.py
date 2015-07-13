@@ -133,13 +133,17 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
                   res.residue.shortName+'</strong></div>')
       nmrResidue.residue = res.residue
       res = res.residue
+      print(nmrResidues,'nmrResidues')
       for assignableResidue in nmrResidues[1:]:
         res = res.nextResidue
+        print('res')
         guiResidue = self.parent.residueDict.get(res.sequenceCode)
         guiResidue.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
                            res.shortName+'</strong></div>')
         nmrResidue = self.project.getById(assignableResidue)
+        print(nmrResidue, 'before')
         nmrResidue.residue = res
+        print(nmrResidue, 'after')
 
 
 

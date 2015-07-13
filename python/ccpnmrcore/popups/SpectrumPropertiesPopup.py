@@ -33,10 +33,12 @@ from ccpncore.gui.Button import Button
 from ccpncore.gui.ColourDialog import ColourDialog
 from ccpncore.util.Colour import spectrumColours
 from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
+from ccpncore.gui.ButtonList import ButtonList
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
+from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 
@@ -51,7 +53,7 @@ SAMPLE_STATES = ['liquid', 'solid', 'ordered', 'powder', 'crystal']
 VOLUME_UNITS = ['μl', 'ml', 'l']
 
 
-class SpectrumPropertiesPopup(QtGui.QDialog):
+class SpectrumPropertiesPopup(QtGui.QDialog, Base):
   def __init__(self, spectrum=None, parent=None, **kw):
     super(SpectrumPropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
@@ -71,15 +73,24 @@ class SpectrumPropertiesPopup(QtGui.QDialog):
 
 
     self.setWindowTitle("Spectrum Information")
-    buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
+    buttonBox = ButtonList(self, grid=(3, 1), callbacks=[self.accept, self.reject], texts=['OK', 'Cancel'])
 
-    buttonBox.accepted.connect(self.accept)
-    buttonBox.rejected.connect(self.reject)
+    # buttonBox.accepted.connect(self.accept)
+    # buttonBox.rejected.connect(self.reject)
 
+    scrollArea = ScrollArea(self, grid=(0, 0), gridSpan=(2, 2))
+    scrollArea.setStyleSheet("""QScrollArea { background-color:  #2a3358;
+                                }
+                                QTabWidget { background-color:  #2a3358;
+                                }
+                                                        """)
     mainLayout = QtGui.QVBoxLayout()
-    mainLayout.addWidget(tabWidget)
-    mainLayout.addWidget(buttonBox)
-    self.setLayout(mainLayout)
+    scrollArea.setLayout(mainLayout)
+    scrollArea.setWidget(tabWidget)
+    # mainLayout.addWidget(tabWidget)
+    # self.addWidget(buttonBox)
+
+    # self.setLayout(mainLayout)
 
   def keyPressEvent(self, event):
     if event.key() == QtCore.Qt.Key_Enter:

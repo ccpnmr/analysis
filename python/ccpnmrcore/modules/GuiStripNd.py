@@ -204,7 +204,7 @@ class GuiStripNd(GuiStrip):
     
     peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
     self.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
-    
+
     ###for peak in peaks:
     ###  if peak not in self.peakItemDict:
     ###    peakItem = PeakNd(self, peak, peakLayer)

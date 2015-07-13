@@ -42,7 +42,7 @@ class PickAndAssignModule(CcpnDock, Base):
     ndim = axisCodes.index('N')
     print(self.selectedPeak.position)
     for module in self.selectedDisplays:
-      if len(module.strip.orderedAxes) > 2:
+      if len(module.strips[0].orderedAxes) > 2:
         for spectrumView in module.strips[0].spectrumViews:
          if module.axisCodes[2] == 'N':
           selectedRegion = [[peak.position[hdim]-0.01, peak.position[ndim]-0.05],
@@ -68,7 +68,7 @@ class PickAndAssignModule(CcpnDock, Base):
     hdim = axisCodes.index('H')
     ndim = axisCodes.index('N')
     for module in self.selectedDisplays:
-      if len(module.strip.orderedAxes) == 2:
+      if len(module.strips[0].orderedAxes) == 2:
         self.line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
         self.line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
         self.line1.setPos(QtCore.QPointF(0, peak.position[1]))

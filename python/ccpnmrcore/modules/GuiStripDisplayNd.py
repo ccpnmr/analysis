@@ -71,11 +71,10 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     self.activePeakItemDict = {}  # maps peakLayer to apiPeak to peakItem for peaks which are being displayed
     # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
     # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
-    self.inactivePeakItems = set() # containus unused peakItems
+    self.inactivePeakItems = set() # contains unused peakItems
     
     GuiSpectrumDisplay.__init__(self)
     
-    Notifiers.registerNotify(self._createdPeak, 'ccp.nmr.Nmr.Peak', '__init__')
     Notifiers.registerNotify(self._deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
     Notifiers.registerNotify(self._addedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', '__init__')
     Notifiers.registerNotify(self._removedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', 'delete')
@@ -255,19 +254,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       else:
         peakItem = PeakNd(peakLayer, peak)
       peakItemDict[apiPeak] = peakItem
-      
-  def _createdPeak(self, apiPeak):
-    pass
-    """
-    for peakLayer in self.activePeakItemDict:
-      peakItemDict = self.activePeakItemDict[peakLayer]
-      peakItem = peakItemDict.get(apiPeak)
-      if peakItem:
-        peakLayer.strip.plotWidget.scene().removeItem(peakItem)
-        del peakItemDict[apiPeak]
-        self.inactivePeakItems.add(peakItem)
-       """
-        
+    
   def _deletedPeak(self, apiPeak):
     for peakLayer in self.activePeakItemDict:
       peakItemDict = self.activePeakItemDict[peakLayer]
@@ -278,6 +265,10 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         self.inactivePeakItems.add(peakItem)
       
   def _addedStripSpectrumView(self, apiStripSpectrumView):
+    apiSpectrumDisplay = self._wrappedData
+    if apiSpectrumDisplay is not apiStripSpectrumView.strip.spectrumDisplay:
+      return
+      
     # cannot deal with wrapper spectrum object because that not ready yet when this notifier is called
     apiDataSource = apiStripSpectrumView.spectrumView.dataSource
     action = self.spectrumActionDict.get(apiDataSource)

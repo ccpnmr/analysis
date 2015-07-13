@@ -110,7 +110,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
 
     self.namespace = {'current': self._project._appBase.current, 'openProject':self._appBase.openProject,
-                      'newProject':self._appBase.newProject, 'loadSpectrum':self.loadSpectra, 'window':self,
+                      'newProject':self._appBase.newProject, 'loadData':self.loadData, 'window':self,
                       'preferences':self._appBase.preferences, 'project':self._project}
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
@@ -126,7 +126,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
     self.splitter2.heightMax = 200
-    assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
+    # assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
     csShortcut = QtGui.QShortcut(QtGui.QKeySequence('c, s'), self, self.showChemicalShiftTable)
     # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
     self.leftWidget.itemDoubleClicked.connect(self.raiseProperties)
@@ -145,7 +145,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar =  MenuBar(self)
     print(self._menuBar.font())
     fileMenu = Menu("&Project", self)
-    spectrumMenu = Menu("&Spectra", self)
+    peaksMenu = Menu("Peaks", self)
     viewMenu = Menu("&View", self)
     moleculeMenu = Menu("&Molecules", self)
     restraintsMenu = Menu("&Restraints", self)
@@ -157,9 +157,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addAction(Action(self, "Open...", callback=self.openAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
+    fileMenu.addAction(Action(self, "Load Data", callback=self.loadData, shortcut='ld'))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Save", callback=self._appBase.saveProject, shortcut="ps"))
-    fileMenu.addAction(Action(self, "Save As...", shortcut="pa", callback=self.saveProjectAs))
+    fileMenu.addAction(Action(self, "Save As...", shortcut="sa", callback=self.saveProjectAs))
     backupOption = fileMenu.addMenu("Backup")
     backupOption.addAction(Action(self, "Save", callback=self.saveBackup))
     backupOption.addAction(Action(self, "Restore", callback=self.restoreBackup))
@@ -177,22 +178,25 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Close Program", callback=self.quitAction, shortcut="qt"))
 
-    spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
-    spectrumMenu.addAction(Action(self, "Remove...", callback=self.removeSpectra))
-    spectrumMenu.addAction(Action(self, "Rename...", callback=self.renameSpectra))
-    spectrumMenu.addAction(Action(self, "Reload", callback=self.reloadSpectra))
-    spectrumMenu.addSeparator()
-    spectrumMenu.addAction(Action(self, "Print...", callback=self.printSpectrum))
-    spectrumMenu.addSeparator()
-    spectrumMenu.addAction(Action(self, "Show in Finder", callback=self.showSpectrumInFinder))
-    spectrumMenu.addAction(Action(self, "Copy into Project", callback=self.copySpectrumIntoProject))
-    spectrumMenu.addAction(Action(self, "Move out of Project", callback=self.moveSpectrumOutOfProject))
-    spectrumMenu.addSeparator()
-    spectrumPeaksMenu = spectrumMenu.addMenu("Peaks")
-    spectrumPeaksMenu.addAction(Action(self, "Import...", callback=self.importPeaksPopup))
-    spectrumPeaksMenu.addAction(Action(self, "Delete...", callback=self.deletePeaksPopup))
-    spectrumPeaksMenu.addSeparator()
-    spectrumPeaksMenu.addAction(Action(self, "Print to File", callback=self.printPeaksToFile))
+    # spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
+    # spectrumMenu.addAction(Action(self, "Remove...", callback=self.removeSpectra))
+    # spectrumMenu.addAction(Action(self, "Rename...", callback=self.renameSpectra))
+    # spectrumMenu.addAction(Action(self, "Reload", callback=self.reloadSpectra))
+    # spectrumMenu.addSeparator()
+    # spectrumMenu.addAction(Action(self, "Print...", callback=self.printSpectrum))
+    # spectrumMenu.addSeparator()
+    # spectrumMenu.addAction(Action(self, "Show in Finder", callback=self.showSpectrumInFinder))
+    # spectrumMenu.addAction(Action(self, "Copy into Project", callback=self.copySpectrumIntoProject))
+    # spectrumMenu.addAction(Action(self, "Move out of Project", callback=self.moveSpectrumOutOfProject))
+    # spectrumMenu.addSeparator()
+    # spectrumPeaksMenu = spectrumMenu.addMenu("Peaks")
+    # spectrumPeaksMenu.addAction(Action(self, "Import...", callback=self.importPeaksPopup))
+    # spectrumPeaksMenu.addAction(Action(self, "Delete...", callback=self.deletePeaksPopup))
+    # spectrumPeaksMenu.addSeparator()
+    # spectrumPeaksMenu.addAction(Action(self, "Print to File", callback=self.printPeaksToFile))
+
+    peaksMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
+    peaksMenu.addAction(Action(self, "Find Peaks", callback=self.findPeaks, shortcut='pp'))
 
     newMoleculeMenu = moleculeMenu.addMenu("New")
     newMoleculeMenu.addAction(Action(self, "From Fasta...", callback=self.createMoleculeFromFasta))
@@ -221,8 +225,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     viewNewMenu = viewMenu.addMenu("New")
     viewNewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
     # viewNewMenu.addAction(Action(self, "nD Spectral Pane", callback=self.addSpectrumNdDisplay))
-    viewNewMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
-    viewNewMenu.addAction(Action(self, "Find Peaks", callback=self.findPeaks, shortcut='pp'))
+    # viewNewMenu.
+    viewNewMenu.addAction(Action(self, "NMR Residue Table", callback=self.showNmrResidueTable, shortcut='nr'))
+
 
     viewLayoutMenu = viewMenu.addMenu("Layout")
     viewLayoutMenu.addAction(Action(self, "Default", callback=self.setLayoutToDefault))
@@ -246,13 +251,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu.addAction(Action(self, "Report Bug...", callback=self.showBugReportingPopup))
 
     assignMenu = Menu("&Assign", self)
-    assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule))
-    assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showBackboneAssignmentModule))
+    assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule, shortcut='pa'))
+    assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showBackboneAssignmentModule, shortcut='bb'))
     assignMenu.addAction(Action(self, 'Show Assigner', callback=self.showAssigner))
 
     self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
     self._menuBar.addMenu(fileMenu)
-    self._menuBar.addMenu(spectrumMenu)
+    self._menuBar.addMenu(peaksMenu)
     self._menuBar.addMenu(moleculeMenu)
     # if self._appBase.applicationName == 'Assign':
     self._menuBar.addMenu(assignMenu)
@@ -288,6 +293,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.sequenceWidget.hide()
     delattr(self, 'sequenceWidget')
 
+
+  def showNmrResidueTable(self):
+    from ccpnmrcore.modules.NmrResidueTable import NmrResidueTable
+    nmrResiduetable = NmrResidueTable(self, self._project)
+    self.dockArea.addDock(nmrResiduetable)
 
   def toggleSequence(self):
 

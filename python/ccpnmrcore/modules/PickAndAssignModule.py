@@ -44,6 +44,7 @@ class PickAndAssignModule(CcpnDock, Base):
     for module in self.selectedDisplays:
       if len(module.strips[0].orderedAxes) > 2:
         for spectrumView in module.strips[0].spectrumViews:
+         print(spectrumView)
          if module.axisCodes[2] == 'N':
           selectedRegion = [[peak.position[hdim]-0.01, peak.position[ndim]-0.05],
                             [peak.position[hdim]+0.01, peak.position[ndim]+0.05]]
@@ -54,8 +55,8 @@ class PickAndAssignModule(CcpnDock, Base):
             selectedRegion[1].insert(1, spectrumView.strip.orderedAxes[1].region[1])
             apiSpectrumView = spectrumView._wrappedData
             newPeaks = peakList.findPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
-                                            doPos=apiSpectrumView.spectrumView.displayPositiveContours,
-                                            doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
+                                            doPos=True,
+                                            doNeg=True)
             for peak in newPeaks:
               peak.isSelected = True
             for strip in module.strips:

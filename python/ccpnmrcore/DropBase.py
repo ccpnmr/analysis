@@ -25,8 +25,6 @@ from PyQt4 import QtGui, QtCore
 
 from ccpnmrcore.Base import Base as GuiBase
 
-from ccpncore.lib.Io.FastaIo import parseFastaFile, isFastaFormat
-
 class DropBase(GuiBase):
   
   def __init__(self, appBase, dropCallback, *args, **kw):

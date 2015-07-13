@@ -29,11 +29,11 @@ from PyQt4 import QtGui
 
 from pyqtgraph.dockarea import DockArea
 from ccpncore.lib.spectrum import Util as specUtil
+from ccpncore.lib.Io.FastaIo import parseFastaFile, isFastaFormat
+
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
-from ccpnmrcore.modules.GuiStripDisplay1d import GuiStripDisplay1d
-from ccpnmrcore.modules.GuiStripDisplayNd import GuiStripDisplayNd
-from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+
 
 class GuiWindow(GuiBase):
   
@@ -69,14 +69,21 @@ class GuiWindow(GuiBase):
       self.blankDisplay.setParent(None)
       self.blankDisplay = None
           
-  def loadSpectra(self):
+  def loadData(self):
 
 
-    directory = QtGui.QFileDialog.getOpenFileName(self, 'Open Spectra')
+    directory = QtGui.QFileDialog.getOpenFileName(self, 'Load Data')
     if not directory:
       return
+    try:
+      if isFastaFormat(directory):
+        sequences = parseFastaFile(directory[0])
+        for sequence in sequences:
+          self._parent._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+                                                        molType='protein')
 
-    spectrum = self.project.loadSpectrum(directory)
+    except:
+      spectrum = self.project.loadSpectrum(directory)
 
     if not spectrum:
       return

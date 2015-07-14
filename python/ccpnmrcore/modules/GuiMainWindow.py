@@ -254,6 +254,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule, shortcut='pa'))
     assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showBackboneAssignmentModule, shortcut='bb'))
     assignMenu.addAction(Action(self, 'Show Assigner', callback=self.showAssigner))
+    assignMenu.addAction(Action(self, 'Assignment Module', callback=self.showAssignmentModule, shortcut='aa'))
 
     self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
     self._menuBar.addMenu(fileMenu)
@@ -270,6 +271,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setMenuBar(self._menuBar)
     self._menuBar.setNativeMenuBar(False)
     self.show()
+
+
+  def showAssignmentModule(self):
+    from ccpnmrcore.modules.AssignmentModule import AssignmentModule
+    self.dockArea.addDock(AssignmentModule(self, self._project, self.current.peaks))
 
 
   def addBlankDisplay(self):

@@ -23,9 +23,10 @@ class GuiTableGenerator(QtGui.QWidget):
       self.tipTexts = tipTexts
       self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback)
       self.updateContents()
-      self.selector = selector
-      self.selector.setCallback(self.changeObjectList)
-      self.updateSelectorContents()
+      if selector is not None:
+        self.selector = selector
+        self.selector.setCallback(self.changeObjectList)
+        self.updateSelectorContents()
 
 
   def changeObjectList(self, objectList):

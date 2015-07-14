@@ -3,11 +3,7 @@ __author__ = 'simon1'
 
 import pyqtgraph as pg
 
-from pyqtgraph.dockarea import Dock
-
 from PyQt4 import QtCore
-
-import math
 
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Base import Base

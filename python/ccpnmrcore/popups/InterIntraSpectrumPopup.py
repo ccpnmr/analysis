@@ -29,7 +29,7 @@ class InterIntraSpectrumPopup(QtGui.QDialog, Base):
     label2a = Label(self, text="Intra-residue spectra", grid=(0, 1))
 
     self.intraSpectrumPulldown = PulldownList(self, grid=(1, 1), callback=self.selectIntraSpectrum)
-    threeDspectra = self.getInterExpts()
+    threeDspectra = self.getIntraExpts()
     threeDspectra.insert(0, '')
     self.intraSpectrumPulldown.setData(threeDspectra)
     self.intraList = ListWidget(self, grid=(2, 1))

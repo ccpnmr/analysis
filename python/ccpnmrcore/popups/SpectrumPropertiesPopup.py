@@ -148,7 +148,10 @@ class GeneralTab(QtGui.QWidget, Base):
       self.spectrumType = PulldownList(self, grid=(6, 1))
       print(self.spectrum.axisCodes)
       self.axisCodes = ''.join(sorted(list(self.spectrum.axisCodes)))
-      self.spectrumType.addItems(list(EXPERIMENT_TYPES[spectrum.dimensionCount].get(self.axisCodes).keys()))
+      try:
+        self.spectrumType.addItems(list(EXPERIMENT_TYPES[spectrum.dimensionCount].get(self.axisCodes).keys()))
+      except:
+        pass
       # spectrumType.addItems(SPECTRA)
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(spectrum.experimentName))
       self.spectrumType.currentIndexChanged.connect(self.changeSpectrumType)

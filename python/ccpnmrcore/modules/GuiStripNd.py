@@ -139,6 +139,7 @@ class GuiStripNd(GuiStrip):
     elif position:
       zAxis.position = position
     self.planeLabel.setText('%.3f' % zAxis.position)
+    self.update()
 
   def nextZPlane(self):
 

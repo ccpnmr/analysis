@@ -89,13 +89,18 @@ class ViewBox(pg.ViewBox):
 
 
     #
-    # if (event.button() == QtCore.Qt.LeftButton) and (
-    #           event.modifiers() & QtCore.Qt.ControlModifier) and not (
-    # event.modifiers() & QtCore.Qt.ShiftModifier):
-    #   position = event.scenePos()
-    #   mousePoint = self.mapSceneToView(position)
-    #   print(mousePoint)
-    #
+    if (event.button() == QtCore.Qt.LeftButton) and (
+              event.modifiers() & QtCore.Qt.ControlModifier) and not (
+    event.modifiers() & QtCore.Qt.ShiftModifier):
+      position = event.scenePos()
+      mousePoint = self.mapSceneToView(position)
+      print(mousePoint)
+      for spectrumView in self.current.strip.spectrumViews:
+        peakList = spectrumView.spectrum.peakLists[0]
+        newPeak = peakList.newPeak(position=[mousePoint.x(), mousePoint.y()])
+        # print(newPeak.position)
+        self.current.strip.showPeaks(peakList)
+
     # elif (event.button() == QtCore.Qt.LeftButton) and (
     #           event.modifiers() & QtCore.Qt.ShiftModifier) and not (
     # event.modifiers() & QtCore.Qt.ControlModifier):
@@ -112,6 +117,14 @@ class ViewBox(pg.ViewBox):
     elif event.button() == QtCore.Qt.RightButton and not event.modifiers():
       event.accept()
       print('axis Context Menu')
+    #
+    # elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ControlModifier):
+    #   position=self.mapSceneToView(event.buttonDownPos())
+    #   print(position)
+    #   # for spectrumView in self.current.strip.spectrumViews:
+    #   #     peakList = spectrumView.spectrum.peakLists[0]
+    #   #     peakList.newPeak(position=position)
+
 
     elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
       event.accept()

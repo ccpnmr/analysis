@@ -72,27 +72,30 @@ class GuiWindow(GuiBase):
   def loadData(self):
 
 
-    directory = QtGui.QFileDialog.getOpenFileName(self, 'Load Data')
-    if not directory:
+    path = QtGui.QFileDialog.getOpenFileName(self, 'Load Data')
+    if not path:
       return
-    try:
-      if isFastaFormat(directory):
-        sequences = parseFastaFile(directory[0])
+    elif isFastaFormat(path):
+      try:
+        # NBNB TBD next line does ont make sense
+        sequences = parseFastaFile(path[0])
         for sequence in sequences:
-          self._parent._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+          self._parent._appBase.project.makeSimpleChain(sequence=sequence[1],
+                                                        compoundName=sequence[0],
                                                         molType='protein')
 
-    except:
-      spectrum = self.project.loadSpectrum(directory)
+      except:
+        print("DEBUG Error loading FASTA file %s" % path)
+    else:
+      # Where we are now this can only be a spectrum
+      spectrum = self.project.loadSpectrum(path)
 
-    if not spectrum:
-      return
-      
-    msg = spectrum.name+' loaded'
-    mainWindow = self._appBase.mainWindow
-    spectrumItem = mainWindow.leftWidget.addSpectrumToItem(spectrum)
-    mainWindow.statusBar().showMessage(msg)
-    mainWindow.pythonConsole.write("project.loadSpectrum('"+directory+"')\n")
+      if spectrum:
+        msg = spectrum.name+' loaded'
+        mainWindow = self._appBase.mainWindow
+        spectrumItem = mainWindow.leftWidget.addSpectrumToItem(spectrum)
+        mainWindow.statusBar().showMessage(msg)
+        mainWindow.pythonConsole.write("project.loadSpectrum('"+path+"')\n")
 
   def addSpectrum1dDisplay(self):
       pass

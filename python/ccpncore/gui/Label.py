@@ -56,7 +56,8 @@ class Label(QtGui.QLabel, Base):
 
   def mousePressEvent(self, event):
     if self.dragDrop == True:
-      itemData = QtCore.QByteArray(self.pid)
+      # NBNB TBD pid can be None, e.g. for 'Drag Spectrum Here'
+      itemData = QtCore.QByteArray(self.pid or 'None')
       mimeData = QtCore.QMimeData()
       mimeData.setData('application/x-strip', itemData)
       drag = QtGui.QDrag(self)

@@ -143,7 +143,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def setupMenus(self):
 
     self._menuBar =  MenuBar(self)
-    print(self._menuBar.font())
+    # print(self._menuBar.font())
     fileMenu = Menu("&Project", self)
     peaksMenu = Menu("Peaks", self)
     viewMenu = Menu("&View", self)

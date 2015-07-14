@@ -29,7 +29,7 @@ class InterIntraSpectrumPopup(QtGui.QDialog, Base):
     label2a = Label(self, text="Intra-residue spectra", grid=(0, 1))
 
     self.intraSpectrumPulldown = PulldownList(self, grid=(1, 1), callback=self.selectIntraSpectrum)
-    threeDspectra = [spectrum.pid for spectrum in project.spectra if spectrum.dimensionCount > 2]
+    threeDspectra = self.getInterExpts()
     threeDspectra.insert(0, '')
     self.intraSpectrumPulldown.setData(threeDspectra)
     self.intraList = ListWidget(self, grid=(2, 1))
@@ -38,7 +38,7 @@ class InterIntraSpectrumPopup(QtGui.QDialog, Base):
     label2b = Label(self, text="Inter-residue spectra", grid=(0, 2))
     self.interSpectrumPulldown = PulldownList(self, grid=(1, 2), callback=self.selectInterSpectrum)
     self.interList = ListWidget(self, grid=(2, 2))
-    interSpectra = self.getInterExpts()
+    interSpectra = [spectrum.pid for spectrum in project.spectra if spectrum.dimensionCount > 2]
     interSpectra.insert(0, '')
     self.interSpectrumPulldown.setData(interSpectra)
     self.buttonBox = ButtonList(self, grid=(3, 2), texts=['Cancel', 'Ok'],
@@ -53,11 +53,11 @@ class InterIntraSpectrumPopup(QtGui.QDialog, Base):
   def selectIntraSpectrum(self, item):
     self.intraList.addItem(item)
 
-  def getInterExpts(self):
+  def getIntraExpts(self):
     interExpts = []
     for spectrum in self.project.spectra:
       if spectrum.dimensionCount > 2:
-        if isInterOnlyExpt(spectrum.experimentType):
+        if not isInterOnlyExpt(spectrum.experimentType):
           interExpts.append(spectrum.pid)
     return interExpts
 

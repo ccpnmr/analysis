@@ -23,7 +23,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 import os
 import json
-import shutil
 from functools import partial
 
 from PyQt4 import QtGui, QtCore

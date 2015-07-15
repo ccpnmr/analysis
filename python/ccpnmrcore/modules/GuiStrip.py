@@ -280,25 +280,23 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   def _crosshairCode(self, axisCode):
     # determines what axisCodes are compatible as far as drawing crosshair is concerned
     # TBD: the naive approach below should be improved
-    return axisCode[0] if axisCode[0].isupper() else axisCode
+    return axisCode #if axisCode[0].isupper() else axisCode
       
   def setCrossHairPosition(self, axisPositionDict):
     axes = self.orderedAxes
-    
     position = axisPositionDict.get(self._crosshairCode(axes[0].code))
     if position is not None:
       self.vLine.setPos(position)
-      
+
     position = axisPositionDict.get(self._crosshairCode(axes[1].code))
     if position is not None:
       self.hLine.setPos(position)
-      
+
   def createMarkAtCursorPosition(self, task):
     # TBD: this creates a mark in all dims, is that what we want??
     axisPositionDict = self.axisPositionDict
     axisCodes = [axis.code for axis in self.orderedAxes]
     positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
-    print(positions)
     mark = task.newMark('black', positions, axisCodes)
     
   def rulerCreated(self, apiRuler):

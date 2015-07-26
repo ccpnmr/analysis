@@ -27,6 +27,7 @@ for peak in hsqcPeakList.peaks:
   #   shiftList.newChemicalShift(value=peak.position[0], nmrAtom=a)
   #   shiftList.newChemicalShift(value=peak.position[1], nmrAtom=a2)
   atoms = [[a2], [a]]
+  print(r.pid)
   # peak.dimensionNmrAtoms = atoms
   peak.assignDimension(axisCode='N', value=[r.fetchNmrAtom(name='N')])
   peak.assignDimension(axisCode='H', value=[r.fetchNmrAtom(name='H')])
@@ -36,6 +37,7 @@ for peak in hsqcPeakList.peaks:
   if not peak.height:
     peak.height = peak.apiPeak.findFirstPeakIntensity().value
 
+print(positions, ssLabels)
 clf=svm.SVC()
 clf.fit(positions, ssLabels)
 

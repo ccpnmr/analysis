@@ -35,7 +35,7 @@ from ccpn.lib.wrapper import Spectrum as LibSpectrum
 from ccpncore.memops import Notifiers
 
 from ccpncore.gui.Button import Button
-from ccpncore.gui.Font import Font
+from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
@@ -138,7 +138,7 @@ class GuiStripNd(GuiStrip):
       zAxis.position = zAxis.position+delta
     elif position:
       zAxis.position = position
-    self.planeLabel.setText('%.3f' % zAxis.position)
+    self.planeLabel.setValue(zAxis.position)
     self.update()
 
   def nextZPlane(self):
@@ -156,18 +156,17 @@ class GuiStripNd(GuiStrip):
       for i in range(len(self.orderedAxes)-2):
         self.planeToolbar = ToolBar(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)), hAlign='center', vAlign='c')
         self.planeToolbar.setMinimumWidth(200)
-        # self.spinSystemLabel = Label(self)
-        # self.spinSystemLabel.setMaximumWidth(1150)
-        # self.spinSystemLabel.setScaledContents(True)
+        self.spinSystemLabel = Label(self)
+        self.spinSystemLabel.setMaximumWidth(1150)
+        self.spinSystemLabel.setScaledContents(True)
         prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
         prevPlaneButton.setFixedWidth(19)
         prevPlaneButton.setFixedHeight(19)
-        self.planeLabel = LineEdit(self)
-        self.planeLabel.setText('%.3f' % self.positions[2])
-        self.planeLabel.setStyleSheet(""" QLineEdit { background-color: #f7ffff;
-                                                      color: #122043;
-                                                      }
-        """)
+        self.planeLabel = DoubleSpinbox(self)
+        self.planeLabel.setFixedHeight(19)
+        self.planeLabel.setValue(self.positions[2])
+        self.planeLabel.valueChanged.connect(self.setZPlanePosition)
+        self.planeLabel.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.planeLabel.setAlignment(QtCore.Qt.AlignCenter)
         nextPlaneButton = Button(self,'>', callback=self.nextZPlane)
         nextPlaneButton.setFixedWidth(19)
@@ -175,6 +174,10 @@ class GuiStripNd(GuiStrip):
         self.planeToolbar.addWidget(prevPlaneButton)
         self.planeToolbar.addWidget(self.planeLabel)
         self.planeToolbar.addWidget(nextPlaneButton)
+
+  def setZPlanePosition(self, value):
+    if self.planeLabel.minimum() <= value <= self.planeLabel.maximum():
+      self.changeZPlane(position=value)
 
   def showPeaks(self, peakList, peaks=None):
     from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView

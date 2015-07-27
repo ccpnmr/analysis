@@ -55,7 +55,7 @@ class BackboneAssignmentModule(CcpnDock, Base):
     # hsqcDisplay = hsqcDisplay
     self.project = project
     self.current = project._appBase.current
-    self.peakTable = PeakListSimple(self, peakLists=project.peakLists, callback=self.findMatchingPeaks)
+    self.peakTable = PeakListSimple(self, project=project, callback=self.findMatchingPeaks)
     self.layout.addWidget(self.peakTable, 2, 0, 1, 6)
 
     self.lines = []

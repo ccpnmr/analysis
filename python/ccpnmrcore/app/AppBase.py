@@ -27,6 +27,7 @@ from ccpncore.util import Io as ioUtil
 from ccpn.util import Io as ccpnIo
 
 from ccpncore.gui.Application import Application
+from ccpncore.gui import resources_rc
 
 from ccpncore.memops.metamodel import Util as metaUtil
 

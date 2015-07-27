@@ -44,11 +44,6 @@ class Assigner(CcpnDock):
 
     super(Assigner, self).__init__(name='Assigner')
     self.project=project
-    self.setStyleSheet("""
-    QWidget { background-color: #000021;
-              border: 1px solid #00092d;
-    }
-    """)
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
     self.scene = QtGui.QGraphicsScene(self)

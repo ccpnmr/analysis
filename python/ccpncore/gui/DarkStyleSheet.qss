@@ -16,6 +16,28 @@ QMenuBar {
 Dock  { background-color: #2a3358;
         }
 
+DoubleSpinbox {
+              background-color: #f7ffff;
+              border: 1px solid #182548;
+              color: #122043;
+              }
+
+DoubleSpinbox::hover {
+              background-color: #e4e15b;
+              border: 1px solid #182548;
+              }
+
+Spinbox {
+              background-color: #f7ffff;
+              border: 1px solid #182548;
+              color: #122043;
+              }
+
+Spinbox::hover {
+              background-color: #e4e15b;
+              border: 1px solid #182548;
+              }
+
 PulldownList {
           background-color: #f7ffff;
           border: solid 1px #182548;
@@ -149,17 +171,27 @@ Dock > QWidget { background-color: #2a3358;
         }
 
 Dock QPushButton {
-				color: #f7ffff;
-				background-color: #2a3358;
+				color: #bec4f3;
+				background-color: #535a83;
+				border: 1px solid #182548;
 				}
 
 Dock QPushButton::clicked {
                           color: #122043;
                           background-color: #BEC4F3;
+                          border: 1px solid #182548;
                           }
+
+Dock QPushButton::pressed {
+                          color: #122043;
+                          background-color: #BEC4F3;
+                          border: 1px solid #182548;
+                          }
+
 Dock QPushButton::hover {
                           color: #122043;
-                          background-color: #BDBC5A;
+                          background-color: #e4e15b;
+                          border: 1px solid #182548;
                           }
 
 QFrame { background-color: #2a3358;}
@@ -171,9 +203,12 @@ QTreeWidget { background-color: #020F31;
 
 QTreeWidget::branch {
                     background-color: #0E1A3D;
-                    border-top: 1px solid #bec4f3;
-                    border-bottom: 1px solid #bec4f3;
+
 }
+
+QTreeWidget::branch:closed {
+                            background-color: #0E1A3D;
+                            }
 
 QTreeWidget::branch:closed::selected {
                   background-color: #666E98;
@@ -201,14 +236,14 @@ QTreeWidget::branch:closed:has-children {
 border-image: none;
 image: url(:/dark-side.png);
 padding-left: 10px;
-background-color: #020F31;
+background-color: #0E1A3D;
 }
 
 QTreeWidget::branch:open {
 border-image: none;
 image: url(:/dark-down.png);
 padding-left: 10px;
-background-color: #020F31;
+background-color: #0E1A3D;
 
 }
 
@@ -216,9 +251,7 @@ background-color: #020F31;
 QTreeWidget::item {
                    color: #bec4f3;
                    background-color: #0E1A3D;
-                   border-top: 1px solid #bec4f3;
-                   border-right: 1px solid #bec4f3;
-                   border-bottom: 1px solid #bec4f3;
+
                    }
 QTreeWidget::item::selected {
                   background-color: #666e98;
@@ -251,6 +284,4 @@ Dock Assigner QWidget { background-color: #000021;
 Dock > QWidget { background-color: #000021;
               border: 1px solid #00092d;
     }
-
-
 

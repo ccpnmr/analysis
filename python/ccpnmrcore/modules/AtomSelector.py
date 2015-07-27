@@ -23,22 +23,19 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-from PyQt4 import QtGui, QtCore
-
-import pyqtgraph as pg
-
-import math
+import os
 
 from functools import partial
 
 from ccpn.lib.assignment import isInterOnlyExpt
 
 from ccpncore.gui.Button import Button
-from ccpncore.gui.Dock import CcpnDock, CcpnDockLabel
+from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
-from ccpncore.gui.ListWidget import ListWidget
-from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Widget import Widget
+
+from ccpncore.util import Path
+
 
 class AtomSelector(CcpnDock):
 
@@ -107,8 +104,15 @@ class AtomSelector(CcpnDock):
 
 
   def returnButtonToNormal(self):
-    for button in self.buttons:
-     button.setStyleSheet('background-color: None')
+    if self.parent._appBase.preferences.general.colourScheme == 'dark':
+      self.setStyleSheet(open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'DarkStyleSheet.qss')).read())
+      self.setStyleSheet('''DockLabel  {
+                                        background-color: #BEC4F3;
+                                        color: #122043;
+                                        border: 1px solid #00092D;
+                                        }''')
+    elif self.parent._appBase.preferences.general.colourScheme == 'light':
+      self.setStyleSheet(open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'LightStyleSheet.qss')).read())
 
 
   def predictAssignments(self, peaks):

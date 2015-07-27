@@ -24,7 +24,7 @@ class PickAndAssignModule(CcpnDock, Base):
 
     self.project = project
     self.current = project._appBase.current
-    self.peakTable = PeakListSimple(self, peakLists=project.peakLists, callback=self.goToPositionInModules)
+    self.peakTable = PeakListSimple(self, project=project, callback=self.goToPositionInModules)
     self.layout.addWidget(self.peakTable, 2, 0, 1, 6)
 
     # print((parent.window()))

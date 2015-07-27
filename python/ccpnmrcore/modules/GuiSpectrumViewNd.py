@@ -365,7 +365,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       zDim = dataDims[2].dim - 1
       zregionPoint = spectrum.getDimPointFromValue(zDim, zregionValue)
       zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
-      strip.planeLabel.setText('%.3f' % position)
+      strip.planeLabel.setSingleStep(self.zPlaneSize())
+      strip.planeLabel.setMaximum(spectrum.getDimValueFromPoint(zDim, 1))
+      strip.planeLabel.setMinimum(spectrum.getDimValueFromPoint(zDim, spectrum.pointCounts[zDim]))
+      strip.planeLabel.setValue(position)
       position = dimensionCount * [0]
       for z in range(*zregionPoint):  # TBD
         position[zDim] = z

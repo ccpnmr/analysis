@@ -144,6 +144,10 @@ class MessageDialog(QtGui.QMessageBox):
     self.setInformativeText(message)
     self.setIcon(icon)
 
+    self.setStyleSheet("""  QMessageBox QLabel {
+                              color: #f7ffff;
+                          }""")
+
 
 if __name__ == '__main__':
 

@@ -26,9 +26,15 @@ EXPERIMENT_TYPES = {1:{'1D':'H',
                     },
                       'CC': {
                         'CACO': 'CACO',
-                        'CBCACO': 'CBCACO'
+                        'CBCACO': 'CBCACO',
+                        'CC (onebond)': 'CC',
+                        'CC (relayed)': 'C_C.relayed',
+                        'CC (through-space)': 'C_C.through-space',
+                        'CC (relayed-alternate)': 'C_C.relayed-alternate',
+                      },
+                      'NC': {
 
-                      }
+                      },
                     },
                     3:
                       {'CHN':{
@@ -40,7 +46,7 @@ EXPERIMENT_TYPES = {1:{'1D':'H',
                     'HNcaCO': 'HNcaCO',
                     'H-edited 13C,15N HSQC-NOESY-HSQC': 'h[C]_H[N].through-space'},
 
-                      'HH1N':{
+                    'HH1N':{
                         '15N HSQC-TOCSY': 'H[N]_H.relayed',
                         '15N TOCSY-HSQC': 'H_H[N].relayed',
                         '15N NOESY-HSQC': 'H_H[N].through-space',
@@ -64,6 +70,10 @@ EXPERIMENT_TYPES = {1:{'1D':'H',
                               'HcCH-TOCSY': 'Hc_CH.relayed',
                               '13C HSQC-NOESY': 'H[C]_H.through-space',
                               '13C NOESY-HSQC': 'H_[C]H.through-space'
+
+                      },
+                      'CC1N' : {'NCACX': '',
+                                'NCOCX': '',
 
                       },
                        },

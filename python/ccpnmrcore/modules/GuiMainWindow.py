@@ -41,7 +41,7 @@ from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
 #from ccpnmrcore.modules.ParassignPeakTable import ParassignModule
-from ccpnmrcore.modules.PeakTable import PeakListSimple
+from ccpnmrcore.modules.PeakTable import PeakTable
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.modules.SequenceModule import SequenceModule
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
@@ -107,6 +107,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
+
+    self.setStyleSheet("""QSplitter{
+                                    background-color: #bec4f3;
+                                    }
+                          QSplitter::handle:horizontal {
+                                                        width: 3px;
+                                                        }
+
+                          QSplitter::handle:vertical {
+                                                        height: 3px;
+                                                      }
+
+                                    """)
 
     self.namespace = {'current': self._project._appBase.current, 'openProject':self._appBase.openProject,
                       'newProject':self._appBase.newProject, 'loadData':self.loadData, 'window':self,
@@ -198,9 +211,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     peaksMenu.addAction(Action(self, "Find Peaks", callback=self.findPeaks, shortcut='pp'))
 
     newMoleculeMenu = moleculeMenu.addMenu("New")
-    newMoleculeMenu.addAction(Action(self, "From Fasta...", callback=self.createMoleculeFromFasta))
-    newMoleculeMenu.addAction(Action(self, "From PDB...", callback=self.createMoleculeFromPDB))
-    newMoleculeMenu.addAction(Action(self, "From NEF...", callback=self.createMoleculeFromNEF))
+    # newMoleculeMenu.addAction(Action(self, "From Fasta...", callback=self.createMoleculeFromFasta))
+    # newMoleculeMenu.addAction(Action(self, "From PDB...", callback=self.createMoleculeFromPDB))
+    # newMoleculeMenu.addAction(Action(self, "From NEF...", callback=self.createMoleculeFromNEF))
     newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
     self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
     # sequenceAction.setChecked(self.sequenceWidget.isVisible())
@@ -253,7 +266,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule, shortcut='pa'))
     assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showBackboneAssignmentModule, shortcut='bb'))
     assignMenu.addAction(Action(self, 'Show Assigner', callback=self.showAssigner))
-    assignMenu.addAction(Action(self, 'Assignment Module', callback=self.showAssignmentModule, shortcut='aa'))
+    # assignMenu.addAction(Action(self, 'Assignment Module', callback=self.showAssignmentModule, shortcut='aa'))
+    assignMenu.addAction(Action(self, 'Residue Information', callback=self.showResidueInformation, shortcut='ri'))
+
 
     self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
     self._menuBar.addMenu(fileMenu)
@@ -544,7 +559,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     f.close()
 
   def showPeakTable(self, position='left', relativeTo=None):
-    peakList = PeakListSimple(name="Peak Table", peakLists=self.project.peakLists)
+    peakList = PeakTable(project=self.project)
     if relativeTo is not None:
       self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
     else:
@@ -583,6 +598,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(self.atomSelector)
     return self.atomSelector
 
+  def showResidueInformation(self):
+    from ccpnmrcore.modules.ResidueInformation import ResidueInformation
+    self.dockArea.addDock(ResidueInformation(self, self._project))
+
   def showDataPlottingModule(self):
     dpModule = DataPlottingModule(self.dockArea)
 
@@ -607,7 +626,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         msg ='Path "%s" already exists, continue?' % newPath
         if not MessageDialog.showYesNo(title, msg, self):
           return
-      self._appBase.saveProject(newPath=newPath)
+      self._appBase.saveProject(newPath=newPath)#, newProjectName=os.path.basename(newPath))
 
   def hideConsole(self):
     self.pythonConsole.hide()

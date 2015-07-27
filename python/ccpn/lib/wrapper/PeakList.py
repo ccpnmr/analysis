@@ -112,3 +112,42 @@ def findPeaks1dFiltered(peakList, size=9, mode='wrap'):
 
 
    # # print(self.peakListItems[peakList.pid])#.createPeakItems()
+
+def _havePeakNearPosition(values, tolerances, peaks):
+
+  for peak in peaks:
+    for i, position in enumerate(peak.position):
+      if abs(position - values[i]) > tolerances[i]:
+        break
+    else:
+      return peak
+
+def subtractPeakLists(peakList1, peakList2):
+  """
+  Subtracts peaks in peakList2 from peaks in peakList1, based on position,
+  and puts those in a new peakList3.  Assumes a common spectrum for now.
+
+  .. describe:: Input
+
+  PeakList, PeakList
+
+  .. describe:: Output
+
+  PeakList
+  """
+
+  spectrum = peakList1.spectrum
+
+  assert spectrum is peakList2.spectrum, 'For now requires both peak lists to be in same spectrum'
+
+  # dataDims = spectrum.sortedDataDims()
+  tolerances = peakList1.spectrum.assignmentTolerances
+
+  peaks2 = peakList2.peaks
+  peakList3 = spectrum.newPeakList()
+
+  for peak1 in peakList1.peaks:
+    values1 = [peak1.position[dim] for dim in range(len(peak1.position))]
+    if not _havePeakNearPosition(values1, tolerances, peaks2):
+      peakList3.newPeak(height=peak1.height, volume=peak1.volume, figureOfMerit=peak1.figureOfMerit,
+                       annotation=peak1.annotation, position=peak1.position, pointPosition=peak1.pointPosition)

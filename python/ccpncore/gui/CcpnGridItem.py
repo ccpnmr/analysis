@@ -46,7 +46,7 @@ class CcpnGridItem(UIGraphicsItem):
             x = ul[1]
             ul[1] = br[1]
             br[1] = x
-        for i in [2,1,0]:   ## Draw three different scales of grid
+        for i in [1,0]:   ## Draw three different scales of grid
             dist = br-ul
             nlTarget = 10.**i
             d = 10. ** np.floor(np.log10(abs(dist/nlTarget))+0.5)
@@ -58,8 +58,8 @@ class CcpnGridItem(UIGraphicsItem):
             for ax in range(0,2):  ## Draw grid for both axes
                 ppl = dim[ax] / nl[ax]
                 c = np.clip(3.*(ppl-3), 0., 30.)
-                linePen = QtGui.QPen(QtGui.QColor(255, 255, 255, c))
-                textPen = QtGui.QPen(QtGui.QColor(255, 255, 255, c*2))
+                linePen = QtGui.QPen(QtGui.QColor(255, 255, 255, 50))
+                textPen = QtGui.QPen(QtGui.QColor(255, 255, 255, 0.5))
 
                 bx = (ax+1) % 2
                 for x in range(0, int(nl[ax])):

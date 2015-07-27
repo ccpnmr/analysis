@@ -74,6 +74,7 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
 
     self.setWindowTitle("Spectrum Information")
     buttonBox = ButtonList(self, grid=(3, 1), callbacks=[self.accept, self.reject], texts=['OK', 'Cancel'])
+    print(buttonBox.parent())
 
     # buttonBox.accepted.connect(self.accept)
     # buttonBox.rejected.connect(self.reject)
@@ -103,9 +104,9 @@ class GeneralTab(QtGui.QWidget, Base):
     super(GeneralTab, self).__init__(parent)
 
     self.spectrum = spectrum
-    # nameLabel = (Label(self, text="Spectrum name: ", grid=(0,0)))
-    # nameData = LineEdit(self, grid=(0, 1))
-    # nameData.setText(spectrum.spectrumItem.name)
+    nameLabel = (Label(self, text="Spectrum name: ", grid=(0,0)))
+    nameData = LineEdit(self, grid=(0, 1))
+    nameData.setText(spectrum.name)
     pathLabel = Label(self, text="Path:", grid=(1, 0))
     self.pathData = LineEdit(self, grid=(1, 1))
     self.pathData.setText(spectrum.filePath)
@@ -113,8 +114,13 @@ class GeneralTab(QtGui.QWidget, Base):
     self.pathDataButton = Button(self, text='...', callback=self.getSpectrumFile, grid=(1, 2))
     dataTypeLabel = Label(self, text="Data Type: ", grid=(2, 0))
     dataTypeData = Label(self, text=getSpectrumFileFormat(spectrum.filePath), grid=(2, 1))
-    templateLabel = Label(self, text="Template: ", grid=(3, 0))
+    chemicalShiftListLabel = Label(self, text="Chemical Shift List: ", grid=(3, 0))
+    self.chemicalShiftListPulldown = PulldownList(self, grid=(3, 1), texts=[csList.pid
+                                                for csList in spectrum.project.chemicalShiftLists]
+                                                +['<New>'],callback=self.setChemicalShiftList)
+
     dateLabel = Label(self, text="Date: ", grid=(4, 0))
+    dateData = LineEdit(self, grid=(4, 1))
     pidLabel = Label(self, text="PID: ", grid=(5, 0))
     pidData = Label(self, text=spectrum.pid, grid=(5, 1))
     if spectrum.dimensionCount == 1:
@@ -133,12 +139,15 @@ class GeneralTab(QtGui.QWidget, Base):
       spectrumType.addItems(SPECTRA)
       # spectrumType.addItem(spectrum.experimentName)
       spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
-      pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(8, 0))
-      recordingDataLabel = Label(self, text="Date Recorded", grid=(9, 0))
-      minimumValueLabel = Label(self, text="Minimum Value: ", grid=(10, 0))
-      maximumValueLabel = Label(self, text="Maximum Value: ", grid=(11, 0))
-      noiseLevelLabel = Label(self, text="Noise Level: ", grid=(12, 0))
-      noiseLevelData = LineEdit(self, )
+      spectrumScalingLabel = Label(self, text='Spectrum Scaling', grid=(8, 0))
+      self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), grid=(8, 1))
+      self.spectrumScalingData.editingFinished.connect(self.setSpectrumScale)
+      pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(9, 0))
+      recordingDataLabel = Label(self, text="Date Recorded", grid=(10, 0))
+      # minimumValueLabel = Label(self, text="Minimum Value: ", grid=(10, 0))
+      # maximumValueLabel = Label(self, text="Maximum Value: ", grid=(11, 0))
+      noiseLevelLabel = Label(self, text="Noise Level: ", grid=(11, 0))
+      noiseLevelData = LineEdit(self)
       if spectrum.apiDataSource.noiseLevel is not None:
         noiseLevelData.setText(str('%.3d' % spectrum.apiDataSource.noiseLevel))
       else:
@@ -146,7 +155,6 @@ class GeneralTab(QtGui.QWidget, Base):
     else:
       spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(6, 0))
       self.spectrumType = PulldownList(self, grid=(6, 1))
-      print(self.spectrum.axisCodes)
       self.axisCodes = ''.join(sorted(list(self.spectrum.axisCodes)))
       try:
         self.spectrumType.addItems(list(EXPERIMENT_TYPES[spectrum.dimensionCount].get(self.axisCodes).keys()))
@@ -156,17 +164,33 @@ class GeneralTab(QtGui.QWidget, Base):
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(spectrum.experimentName))
       self.spectrumType.currentIndexChanged.connect(self.changeSpectrumType)
       pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(7, 0))
-      recordingDataLabel = Label(self, text="Date Recorded", grid=(8, 0))
-      minimumValueLabel = Label(self, text="Minimum Value: ", grid=(9, 0))
-      maximumValueLabel = Label(self, text="Maximum Value: ", grid=(10, 0))
-      noiseLevelLabel = Label(self, text="Noise Level: ", grid=(11, 0))
-      noiseLevelData = LineEdit(self, grid=(11, 1))
+      # recordingDataLabel = Label(self, text="Date Recorded", grid=(8, 0))
+      spectrumScalingLabel = Label(self, text='Spectrum Scaling', grid=(8, 0))
+      self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), grid=(8, 1))
+      self.spectrumScalingData.editingFinished.connect(self.setSpectrumScale)
+      # minimumValueLabel = Label(self, text="Minimum Value: ", grid=(9, 0))
+      # maximumValueLabel = Label(self, text="Maximum Value: ", grid=(10, 0))
+      noiseLevelLabel = Label(self, text="Noise Level: ", grid=(9, 0))
+      noiseLevelData = LineEdit(self, grid=(9, 1))
       if spectrum.apiDataSource.noiseLevel is not None:
         noiseLevelData.setText(str('%.3d' % spectrum.apiDataSource.noiseLevel))
       else:
         noiseLevelData.setText('None')
 
 
+  def setSpectrumScale(self):
+    self.spectrum.scale = float(self.spectrumScalingData.text())
+
+  def setChemicalShiftList(self, item):
+    if item == '<New>':
+      newChemicalShiftList = self.spectrum.project.newChemicalShiftList()
+      insertionIndex = len(self.chemicalShiftListPulldown.texts)-1
+      self.chemicalShiftListPulldown.texts.insert(insertionIndex, newChemicalShiftList.pid)
+      self.chemicalShiftListPulldown.setData(self.chemicalShiftListPulldown.texts)
+      self.chemicalShiftListPulldown.setCurrentIndex(insertionIndex)
+      self.spectrum.chemicalShiftList = newChemicalShiftList
+    else:
+      self.spectrum.chemicalShiftList = self.spectrum.project.getById(item)
 
   def changeSpectrumType(self, value):
     expType = EXPERIMENT_TYPES[self.spectrum.dimensionCount].get(self.axisCodes).get(self.spectrumType.currentText())

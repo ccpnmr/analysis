@@ -4,6 +4,7 @@ from ccpncore.gui.Base import Base
 from ccpncore.gui.ButtonList import ButtonList
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
+from ccpncore.gui.MessageDialog import showRetryIgnoreCancel
 from ccpncore.gui.PulldownList import PulldownList
 
 
@@ -52,7 +53,27 @@ class SelectSpectrumDisplayPopup(QtGui.QDialog, Base):
     self.matchList.addItem(item)
 
   def setSpectrumDisplays(self):
-    self.parent.referenceDisplays = [self.refList.item(i).text() for i in range(self.refList.count())]
-    self.parent.queryDisplays = [self.queryList.item(i).text() for i in range(self.queryList.count())]
-    self.parent.matchDisplays = [self.matchList.item(i).text() for i in range(self.matchList.count())]
-    self.accept()
+    if self.refList.count() > 1 or self.queryList.count() > 1 or self.matchList.count() > 1:
+
+      if self.refList.count() > 1:
+        self.msg = "Reference Modules have not been selected, please select them to continue"
+      elif self.queryList.count() > 1:
+        msg = "Query Modules have not been selected, please select them to continue"
+      elif self.matchList.count() > 1:
+        msg = "Match Modules have not been selected, please select them to continue"
+      elif self.refList.count() > 1 and self.queryList.count() > 1:
+        msg = "Reference and Query Modules have not been selected, please select them to continue"
+      elif self.refList.count() > 1 and self.matchList.count() > 1:
+        msg = "Reference and Match Modules have not been selected, please select them to continue"
+      elif self.queryList.count() > 1 and self.matchList.count() > 1:
+        msg = "Query and Match Modules have not been selected, please select them to continue"
+      elif self.refList.count() > 1 and self.queryList.count() > 1 and self.matchList.count() > 1:
+        msg = "Reference, Query and Match Modules have not been selected, please select them to continue"
+
+      showRetryIgnoreCancel("Select Displays", msg)
+    else:
+      self.parent.referenceDisplays = [self.refList.item(i).text() for i in range(self.refList.count())]
+      self.parent.queryDisplays = [self.queryList.item(i).text() for i in range(self.queryList.count())]
+      self.parent.matchDisplays = [self.matchList.item(i).text() for i in range(self.matchList.count())]
+      self.accept()
+

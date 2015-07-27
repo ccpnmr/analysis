@@ -77,13 +77,15 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
               dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
     self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self))
-
-    if self._parent._appBase.preferences.general.colourScheme == 'light':
+    self.colourScheme = self._parent._appBase.preferences.general.colourScheme
+    if self.colourScheme == 'light':
       self.background = 'w'
       self.foreground = 'k'
+      # self.gridColour = '(255, 255, 255, c)'
     else:
       self.background = 'k'
       self.foreground = 'w'
+      # self.gridColour = '#F7FFFF'
     pg.setConfigOption('background', self.background)  # wb104: this has no impact at this point (I think)
     pg.setConfigOption('foreground', self.foreground)
     self.plotWidget.setBackground(self.background)
@@ -104,9 +106,9 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
       axisItem = self.plotItem.axes[orientation]['item']
       axisItem.hide()
     self.gridShown = True
-    self.textItem = pg.TextItem(text=self.pid, color='w')
-    self.textItem.setPos(self.viewBox.boundingRect().topLeft())
-    self.plotWidget.scene().addItem(self.textItem)
+    # self.textItem = pg.TextItem(text=self.pid, color='w')
+    # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
+    # self.plotWidget.scene().addItem(self.textItem)
 
     self.viewBox.sigClicked.connect(self.mouseClicked)
     ###proxy = pg.SignalProxy(self.viewBox.sigRangeChanged, rateLimit=10, slot=self.updateRegion)
@@ -250,7 +252,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     ###self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
     self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
     self.yAxisTextItem.setPos(self.viewBox.boundingRect().topRight())
-    self.textItem.setPos(self.viewBox.boundingRect().topLeft())
+    # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
 
   def hideCrossHairs(self):
     for strip in self.guiSpectrumDisplay.guiStrips:
@@ -292,13 +294,14 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     if position is not None:
       self.hLine.setPos(position)
 
-  def createMarkAtCursorPosition(self, task):
+  def createMarkAtCursorPosition(self, task, positions=None):
     # TBD: this creates a mark in all dims, is that what we want??
     axisPositionDict = self.axisPositionDict
     axisCodes = [axis.code for axis in self.orderedAxes]
-    positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
+    if positions is None:
+      positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
     mark = task.newMark('black', positions, axisCodes)
-    
+
   def rulerCreated(self, apiRuler):
     axisCode = apiRuler.axisCode # TBD: use label and unit
     position = apiRuler.position

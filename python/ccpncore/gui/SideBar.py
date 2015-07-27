@@ -235,7 +235,6 @@ class SideBar(QtGui.QTreeWidget):
 
       else:
         newItem = self.addItem(self.onedItem, spectrum)
-        print('here1d')
         peakListItem = QtGui.QTreeWidgetItem(newItem)
         peakListItem.setText(0, peakList.pid)
         peakListItem.setFlags(peakListItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
@@ -267,7 +266,6 @@ class SideBar(QtGui.QTreeWidget):
       return None
 
   def isLookupFile(self, filePath):
-    print(filePath.split('/')[-1])
     if filePath.split('/')[-1].endswith('.csv'):
       return True
     elif '.xls' in filePath.split('/')[-1]:
@@ -301,7 +299,6 @@ class SideBar(QtGui.QTreeWidget):
             filename.pop()
             newFilename = '/'.join(filename)
             spectrum = self.parent.project.loadSpectrum(newFilename)
-            print(spectrum)
             try:
               expType = self.getExpType(filename)
             except:
@@ -335,7 +332,6 @@ class SideBar(QtGui.QTreeWidget):
 
     else:
       event.setDropAction(QtCore.Qt.MoveAction)
-      print('dropEvent else')
       super(SideBar, self).dropEvent(event)
 
     if event.mimeData().urls():
@@ -345,7 +341,6 @@ class SideBar(QtGui.QTreeWidget):
       # print(filePaths)
       if filePaths:
         for filePath in filePaths:
-            print(filePath)
           # if len(filePaths) == 1:
             lookupFile = self.isLookupFile(filePath)
             if lookupFile:
@@ -355,7 +350,7 @@ class SideBar(QtGui.QTreeWidget):
               self.parent._appBase.mainWindow.openAProject(filePath)
 
             else:
-              spectrum = self.parent.project.loadSpectrum(filePath)
+              # spectrum = self.parent.project.loadSpectrum(filePath)
               try:
                 spectrum = self.parent.project.loadSpectrum(filePath)
                 self.addSpectrumToItem(spectrum)

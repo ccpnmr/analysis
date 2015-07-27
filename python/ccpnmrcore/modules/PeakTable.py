@@ -22,20 +22,32 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 from ccpncore.gui.Base import Base
-from ccpnmrcore.modules.GuiTableGenerator import GuiTableGenerator
-from ccpncore.gui.PulldownList import PulldownList
+from ccpncore.gui.Button import Button
+from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
+from ccpncore.gui.PulldownList import PulldownList
+
+from ccpnmrcore.modules.GuiTableGenerator import GuiTableGenerator
+from ccpnmrcore.popups.SelectObjectsPopup import SelectObjectsPopup
+
 
 from PyQt4 import QtGui, QtCore
 
 UNITS = ['ppm', 'Hz', 'point']
 
+class PeakTable(CcpnDock):
+  def __init__(self, peakLists):
+    CcpnDock.__init__(self, name='Peak List')
+
+    self.layout.addWidget(PeakListSimple(self, peakLists))
+
+
 
 class PeakListSimple(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, peakLists=None, name='Peak List', callback=None, **kw):
+  def __init__(self, parent=None, project=None,  callback=None, **kw):
 
-    if not peakLists:
+    if not project.peakLists:
       peakLists = []
       
     QtGui.QWidget.__init__(self, parent)
@@ -44,7 +56,9 @@ class PeakListSimple(QtGui.QWidget, Base):
     # self.label.hide()
     # self.label = DockLabel(name, self)
     # self.label.show()
-    self.peakLists = peakLists
+    self.project = project
+
+    self.peakLists = project.peakLists
     label = Label(self, 'Peak List:')
     self.layout().addWidget(label, 0, 0, QtCore.Qt.AlignRight)
     self.setContentsMargins(4, 4, 4, 4,)
@@ -53,10 +67,12 @@ class PeakListSimple(QtGui.QWidget, Base):
     if callback is None:
       callback=self.selectPeak
 
-
     label = Label(self, ' Position Unit:', grid=(0, 2), hAlign='r')
 
     self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
+
+    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 4),
+                                          callback=self.subtractPeakLists)
     #                                     # callback=self._updateWhenIdle,)
 
     columns = [('#', 'serial'), ('Height', lambda pk: self._getPeakHeight(pk)),
@@ -66,13 +82,27 @@ class PeakListSimple(QtGui.QWidget, Base):
     tipTexts=['Peak serial number', 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
               'Integral of spectrum intensity around peak location, according to chosen volume method',
               'Textual notes about the peak']
-    self.peakTable = GuiTableGenerator(self, peakLists, callback=callback, columns=columns,
+    self.peakTable = GuiTableGenerator(self, self.peakLists, callback=callback, columns=columns,
                                        selector=self.peakListPulldown, tipTexts=tipTexts)
 
     # self.updatePeakLists()
     # newLabel = Label(self, '', grid=(2, 0))
     # newLabel.setFixedHeight(8)
     self.layout().addWidget(self.peakTable, 3, 0, 1, 8)
+
+  def subtractPeakLists(self):
+    peakList1 = self.project.getById(self.peakListPulldown.currentText())
+
+
+    availablePeakLists = [peakList for peakList in peakList1.spectrum.peakLists
+                         if peakList is not peakList1]
+
+    selectPeakListPopup = SelectObjectsPopup(self, project=self.project, objects=availablePeakLists)
+    selectPeakListPopup.exec_()
+    print(self.objects)
+    for peakList in self.objects:
+      peakList1.subtractPeakLists(self.project.getById(peakList))
+    self.peakTable.updateSelectorContents()
 
   def initPanel(self):
     # Overwrites superclass
@@ -93,12 +123,12 @@ class PeakListSimple(QtGui.QWidget, Base):
   def _getPeakVolume(self, peak):
 
     if peak.volume:
-      return peak.volume
+      return peak.volume*peak.peakList.spectrum.scale
 
   def _getPeakHeight(self, peak):
 
     if peak.height:
-      return peak.height
+      return peak.height*peak.peakList.spectrum.scale
 
 
   # def updatePeakLists(self):

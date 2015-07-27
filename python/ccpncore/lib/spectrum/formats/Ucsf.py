@@ -75,9 +75,7 @@ def readParams(fileName):
     print(msg)
     return
   
-  print(headerData)
   numDims = ord(chr(headerData[10]))
-  print('numDims',numDims)
   headerSize = UCSF_FILE_HEADER + numDims*UCSF_DIM_HEADER
   
   dimData = fileObj.read(numDims*UCSF_DIM_HEADER)

@@ -18,13 +18,13 @@ class SelectDisplaysAndSpectraPopup(QtGui.QDialog, Base):
     displays = [display.pid for display in project.spectrumDisplays if len(display.orderedAxes) >= dim]
     self.project = project
     displays.insert(0, '  ')
-    label1a = Label(self, text="Selected Modules", grid=(0, 0))
+    label1a = Label(self, text="Reference Displays", grid=(0, 0))
     self.displayPulldown = PulldownList(self, grid=(1, 0), callback=self.selectDisplays)
     self.displayPulldown.setData(displays)
     self.displayList = ListWidget(self, grid=(2, 0))
     spectra = [spectrum.pid for spectrum in project.spectra if len(spectrum.axisCodes) >= dim]
     spectra.insert(0, '  ')
-    label1a = Label(self, text="Selected Spectra", grid=(0, 1))
+    label1a = Label(self, text="Query Spectra", grid=(0, 1))
     self.spectrumPulldown = PulldownList(self, grid=(1, 1), callback=self.selectSpectra)
     self.spectrumPulldown.setData(spectra)
     self.spectrumList = ListWidget(self, grid=(2, 1))

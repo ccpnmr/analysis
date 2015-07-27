@@ -1,0 +1,8 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+<file alias="dark-side.png">iconsNew/dark-side.png</file>
+<file alias="dark-down.png">iconsNew/dark-down.png</file>
+<file alias="light-side.png">iconsNew/dark-side.png</file>
+<file alias="light-down.png">iconsNew/dark-down.png</file>
+</qresource>
+</RCC>

@@ -199,6 +199,11 @@ class Button(QtGui.QPushButton, Base):
 
     self.callback = None
     self.setCallback(callback)
+    #
+    # self.setStyleSheet(''' Button {background-color: #535a83;
+    #         border: 1px solid #182548;
+    #         color: #bec4f3;
+    #         }''')
 
   # def mouseReleaseEvent(self, event):
   #   if not self.double_clicked:

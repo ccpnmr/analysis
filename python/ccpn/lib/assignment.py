@@ -23,6 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 
+
 def isInterOnlyExpt(string):
   expList = ['HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond']
   if(any(expType in string.upper() for expType in expList)):

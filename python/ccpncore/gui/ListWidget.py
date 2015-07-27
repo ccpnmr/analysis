@@ -3,6 +3,7 @@ __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 
 from ccpncore.gui.Base import Base
+from ccpncore.gui.Menu import Menu
 
 class ListWidget(QtGui.QListWidget, Base):
 
@@ -21,9 +22,26 @@ class ListWidget(QtGui.QListWidget, Base):
     # QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Delete), self, self.removeItem)
 
   def removeItem(self):
-
-    item = self.takeItem(self.currentRow())
-    item = None
-
-  def mouseDoubleClickEvent(self, event):
     self.takeItem(self.currentRow())
+
+  def mousePressEvent(self, event):
+    if event.button() == QtCore.Qt.RightButton:
+      event.accept()
+      self.raiseContextMenu(event)
+    else:
+      event.accept()
+      event.acceptProposedAction()
+
+
+  def raiseContextMenu(self, event):
+    """
+    Raise the context menu
+    """
+    menu = self.getContextMenu()
+    menu.popup(event.globalPos())
+
+  def getContextMenu(self):
+    contextMenu = Menu('', self, isFloatWidget=True)
+    contextMenu.addItem("Delete", callback=self.removeItem)
+    return contextMenu
+

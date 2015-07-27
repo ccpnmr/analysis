@@ -36,10 +36,10 @@ from PyQt4 import QtGui, QtCore
 UNITS = ['ppm', 'Hz', 'point']
 
 class PeakTable(CcpnDock):
-  def __init__(self, peakLists):
+  def __init__(self, project):
     CcpnDock.__init__(self, name='Peak List')
 
-    self.layout.addWidget(PeakListSimple(self, peakLists))
+    self.layout.addWidget(PeakListSimple(self, project))
 
 
 
@@ -71,7 +71,7 @@ class PeakListSimple(QtGui.QWidget, Base):
 
     self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
 
-    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 4),
+    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 5),
                                           callback=self.subtractPeakLists)
     #                                     # callback=self._updateWhenIdle,)
 

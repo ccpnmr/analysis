@@ -42,6 +42,7 @@ PulldownList {
           background-color: #f7ffff;
           border: solid 1px #182548;
           color: #122043;
+          font-weight: normal;
           }
 
 QMenuBar::item {
@@ -79,7 +80,7 @@ Dock DockLabel  {
 
 QDialog QLabel {
 				color: #f7ffff;
-				background-color: #bec4f3;
+				background-color: #2a3358;
 				}
 QDialog QPushButton {
 				color: #f7ffff;
@@ -117,12 +118,16 @@ PulldownList::hover {
 ObjectTable { margin-left: 4px;
              border: 1px #182548;
              font-family: open-sans;
+             alternate-background-color: black;
+
            }
 QHeaderView {
                   background-color: #f7ffff;
                   color: #122043;
+                  font-weight: bold;
 
                           }
+
 ObjectTable::item {
                   padding: 2px;
                   background-color: #cccff9;
@@ -133,6 +138,7 @@ ObjectTable::item::selected {
                             background-color: #182548;
                             color: #f7ffff;
                    }
+
 QToolBar {
           border: 0px;
           background-color: transparent;
@@ -146,6 +152,7 @@ Label {
         color: #f7ffff;
         background-color: #2a3358;
         margin: 0px 4px 0px 8px;
+        font-weight: bold;
         }
 
 QLineEdit {

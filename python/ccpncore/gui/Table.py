@@ -54,12 +54,12 @@ class ObjectTable(QtGui.QTableView, Base):
     self.bbox = self.fontMetric.boundingRect
     self._silenceCallback = False
     self.selectRows = selectRows
-
+    self.setAlternatingRowColors(True)
     self.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
     self.setHorizontalScrollMode(self.ScrollPerItem)
     self.setVerticalScrollMode(self.ScrollPerItem)
     self.setSortingEnabled(True)
-    self.setAutoFillBackground(True)
+    # self.setAutoFillBackground(True)
 
     #self.setSizePolicy(QtGui.QSizePolicy.Preferred,
     #                   QtGui.QSizePolicy.Preferred)

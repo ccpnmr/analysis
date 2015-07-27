@@ -155,7 +155,7 @@ class GuiStripNd(GuiStrip):
     if len(self.orderedAxes) > 2:
       for i in range(len(self.orderedAxes)-2):
         self.planeToolbar = ToolBar(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)), hAlign='center', vAlign='c')
-        self.planeToolbar.setMinimumWidth(200)
+        # self.planeToolbar.setMinimumWidth(200)
         self.spinSystemLabel = Label(self)
         self.spinSystemLabel.setMaximumWidth(1150)
         self.spinSystemLabel.setScaledContents(True)

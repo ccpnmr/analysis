@@ -9,7 +9,8 @@ QMenu {
 
 QMenuBar {
               background-color: #424a71;
-              font-size: 1.0em;
+              font-size: 1.5em;
+              font-weight: bold;
               border-bottom: 1px solid #00092d;
               }
 
@@ -76,6 +77,7 @@ Dock DockLabel  {
           background-color: #BEC4F3;
           color: #122043;
           border: 1px solid #00092D;
+          font-weight: Semibold;
             }
 
 QDialog QLabel {
@@ -288,7 +290,4 @@ Dock Assigner QWidget { background-color: #000021;
               border: 1px solid #00092d;
     }
 
-Dock > QWidget { background-color: #000021;
-              border: 1px solid #00092d;
-    }
 

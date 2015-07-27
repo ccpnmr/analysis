@@ -58,8 +58,8 @@ class CcpnGridItem(UIGraphicsItem):
             for ax in range(0,2):  ## Draw grid for both axes
                 ppl = dim[ax] / nl[ax]
                 c = np.clip(3.*(ppl-3), 0., 30.)
-                linePen = QtGui.QPen(QtGui.QColor(255, 255, 255, 50))
-                textPen = QtGui.QPen(QtGui.QColor(255, 255, 255, 0.5))
+                linePen = QtGui.QPen(QtGui.QColor(255, 255, 255, c))
+                textPen = QtGui.QPen(QtGui.QColor(255, 255, 255, c*2))
 
                 bx = (ax+1) % 2
                 for x in range(0, int(nl[ax])):

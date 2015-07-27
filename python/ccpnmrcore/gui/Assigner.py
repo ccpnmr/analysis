@@ -38,6 +38,9 @@ EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
                   'H[N[{CA|ca[Cali]}]]': ['H', 'N', 'CA-1', 'CB-1', 'CA', 'CB']
                   }
 
+CCP_CODES =  ['Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn',
+              'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr']
+
 class Assigner(CcpnDock):
 
   def __init__(self, project=None):
@@ -68,16 +71,14 @@ class Assigner(CcpnDock):
 
 
   def getNmrResiduePrediction(self, nmrResidue):
-    ccpCodes = ['Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn',
-                'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr']
     predictions = {}
     spinSystem = nmrResidue._wrappedData
     shiftList = self.project.chemicalShiftLists[0]._wrappedData
-    for code in ccpCodes:
+    for code in CCP_CODES:
       predictions[code] = float(getSpinSystemResidueProbability(spinSystem, shiftList, code))
     tot = sum(predictions.values())
     refinedPredictions = {}
-    for code in ccpCodes:
+    for code in CCP_CODES:
       v = round(predictions[code]/tot * 100, 2)
       if v > 0:
         refinedPredictions[code] = v

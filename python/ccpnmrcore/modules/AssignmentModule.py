@@ -35,7 +35,7 @@ class AssignmentModule(CcpnDock, Base):
        ('SD', 'figureOfMerit'), ('Distance', 'height')]
       tipTexts = ['','','','','']
 
-      objectTable = GuiTableGenerator(self, self.project.peakLists, callback=None, columns=columns, tipTexts=tipTexts,
+      objectTable = GuiTableGenerator(self, self.project.peakLists, callback=None, columns=columns,
                                       selector=None, tipTexts=tipTexts)
       # objectTable = PeakListSimple(self, peakLists=project.peakLists, callback=None, grid=(i, 1))
 

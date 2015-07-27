@@ -109,26 +109,33 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     if dropObject.mimeData().hasUrls():
       filePaths = [url.path() for url in dropObject.mimeData().urls()]
       if len(filePaths) > 1:
-        firstSpectrum = self.dockArea.guiWindow.project.loadSpectrum(filePaths[0])
-        self.dockArea.guiWindow.leftWidget.addSpectrum(firstSpectrum)
-        spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(firstSpectrum)
-        msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
-                % filePaths[0]
-        self.dockArea.window().pythonConsole.write(msg)
-        for filePath in filePaths[1:]:
-          spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePath)
-          self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
-          if spectrum.axisCodes == firstSpectrum.axisCodes:
-            spectrumDisplay.displaySpectrum(spectrum)
-            msg = 'spectrum = project.loadSpectrum("%s")\nspectrumDisplay.displaySpectrum(spectrum)\n' \
-                    % filePath
-            self.dockArea.window().pythonConsole.write(msg)
-          else:
-            spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
-            msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
-                % filePath
-            self.dockArea.window().pythonConsole.write(msg)
-        self.dockArea.guiWindow.removeBlankDisplay()
+        # NBNB TBD HACK FIXME
+        filePath = filePaths[0]
+        if filePath.endswith('.spc.par'):
+          filePath = filePath[:-4]
+        firstSpectrum = self.dockArea.guiWindow.project.loadSpectrum(filePath)
+        if firstSpectrum is not None:
+          self.dockArea.guiWindow.leftWidget.addSpectrum(firstSpectrum)
+          spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(firstSpectrum)
+          msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
+                  % filePaths[0]
+          self.dockArea.window().pythonConsole.write(msg)
+          for filePath in filePaths[1:]:
+            if filePath.endswith('.spc.par'):
+              filePath = filePath[:-4]
+            spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePath)
+            self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
+            if spectrum.axisCodes == firstSpectrum.axisCodes:
+              spectrumDisplay.displaySpectrum(spectrum)
+              msg = 'spectrum = project.loadSpectrum("%s")\nspectrumDisplay.displaySpectrum(spectrum)\n' \
+                      % filePath
+              self.dockArea.window().pythonConsole.write(msg)
+            else:
+              spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
+              msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
+                  % filePath
+              self.dockArea.window().pythonConsole.write(msg)
+          self.dockArea.guiWindow.removeBlankDisplay()
       else:
         if [dirpath.endswith('memops') and 'Implementation' in dirnames for dirpath, dirnames, filenames in os.walk(filePaths[0])]:
           self.dockArea.guiWindow._appBase.openProject(filePaths[0])
@@ -141,13 +148,18 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
             self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
                                                     molType='protein')
         else:
-          spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePaths[0])
-          self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
-          spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
-          msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
-                % filePaths[0]
-          self.dockArea.window().pythonConsole.write(msg)
-          self.dockArea.guiWindow.removeBlankDisplay()
+          # NBNB TBD HACK FIXME
+          filePath = filePaths[0]
+          if filePath.endswith('.spc.par'):
+            filePath = filePath[:-4]
+          spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePath)
+          if spectrum is not None:
+            self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
+            spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
+            msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
+                  % filePaths[0]
+            self.dockArea.window().pythonConsole.write(msg)
+            self.dockArea.guiWindow.removeBlankDisplay()
 
 
 

@@ -30,7 +30,32 @@ from ccpnmrcore.app.Version import applicationVersion
 applicationName = 'Analysis3'
 
 class Analysis3(AppBase):
-  pass
+  """Root class for Analysis3 application"""
+
+  def initGraphics(self):
+    """Set up graphics system after loading"""
+
+    # Initialise strips
+    project = self.project
+    for strip in project.strips:
+      project._setupGuiStrip(strip._wrappedData)
+
+    # Initialise Rulers
+    for task in project.tasks:
+      for apiMark in task._wrappedData.sortedMarks():
+        for apiRuler in apiMark.sortedRulers():
+          project._rulerCreated(apiRuler)
+
+    # Initialise SpectrumViews
+    for spectrumDisplay in project.spectrumDisplays:
+      apiSpectrumDisplay = spectrumDisplay._wrappedData
+      for apiSpectrumView in apiSpectrumDisplay.sortedSpectrumViews():
+        project._createdSpectrumView(apiSpectrumView)
+
+      for apiStrip in apiSpectrumDisplay.orderedStrips:
+        for apiStripSpectrumView in apiStrip.stripSpectrumViews:
+          project._createdStripSpectrumView(apiStripSpectrumView)
+
 
 if __name__ == '__main__':
   import argparse  

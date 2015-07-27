@@ -50,6 +50,8 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'GD'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'SpectrumDisplay'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumDisplays'

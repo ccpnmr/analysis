@@ -41,6 +41,8 @@ class Strip(GuiStrip, AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'GS'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Strip'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'strips'
@@ -368,3 +370,4 @@ Project._apiNotifiers.extend(
     ('_finaliseDelete', {}, className, 'delete')
   )
 )
+

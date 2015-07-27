@@ -26,6 +26,9 @@ __version__ = "$Revision: 7686 $"
 __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 
+from ccpn import Project
+from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
+from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.VerticalLabel import VerticalLabel
 
@@ -76,8 +79,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     GuiSpectrumDisplay.__init__(self)
     
     Notifiers.registerNotify(self._deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
-    Notifiers.registerNotify(self._addedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', '__init__')
-    Notifiers.registerNotify(self._removedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', 'delete')
+    # Notifiers.registerNotify(self._addedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', '__init__')
+    # Notifiers.registerNotify(self._removedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', 'delete')
     for func in ('setPositiveContourColour', 'setSliceColour'):
       Notifiers.registerNotify(self._setActionIconColour, 'ccp.nmr.Nmr.DataSource', func)
     
@@ -264,49 +267,49 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         del peakItemDict[apiPeak]
         self.inactivePeakItems.add(peakItem)
       
-  def _addedStripSpectrumView(self, apiStripSpectrumView):
-    apiSpectrumDisplay = self._wrappedData
-    if apiSpectrumDisplay is not apiStripSpectrumView.strip.spectrumDisplay:
-      return
-      
-    # cannot deal with wrapper spectrum object because that not ready yet when this notifier is called
-    apiDataSource = apiStripSpectrumView.spectrumView.dataSource
-    action = self.spectrumActionDict.get(apiDataSource)
-    if not action:
-      # add toolbar action (button)
-      action = self.spectrumToolBar.addAction(apiDataSource.name)
-      action.setCheckable(True)
-      action.setChecked(True)
-      widget = self.spectrumToolBar.widgetForAction(action)
-      widget.setFixedSize(60, 30)
-      self.spectrumActionDict[apiDataSource] = action  # have to use wrappedData because wrapper object disappears before delete notifier is called
-      self._setActionIconColour(apiDataSource)
-    if apiStripSpectrumView not in self.apiStripSpectrumViews:
-      spectrumView = self._project._data2Obj[apiStripSpectrumView]
-      action.toggled.connect(spectrumView.setVisible)
-      self.apiStripSpectrumViews.add(apiStripSpectrumView)
-      
-    return action
-  
-  def _apiDataSourcesInDisplay(self):
-    apiDataSources = set()
-    for strip in self.strips:
-      for spectrumView in strip.spectrumViews:
-        apiDataSources.add(spectrumView.spectrum._wrappedData)
-    return apiDataSources
-    
-  def _removedStripSpectrumView(self, apiStripSpectrumView):
-    # cannot deal with wrapper spectrum object because already disappears when this notifier is called
-    apiDataSources = self._apiDataSourcesInDisplay()
-    apiDataSource = apiStripSpectrumView.spectrumView.dataSource
-    if apiDataSource not in apiDataSources:
-      # remove toolbar action (button)
-      action = self.spectrumActionDict.get(apiDataSource)  # should always be not None (correct??)
-      if action:
-        self.spectrumToolBar.removeAction(action)
-        del self.spectrumActionDict[apiDataSource]
-      if apiStripSpectrumView in self.apiStripSpectrumViews:  # should always be the case
-        self.apiStripSpectrumViews.remove(apiStripSpectrumView)
+  # def _addedStripSpectrumView(self, apiStripSpectrumView):
+  #   apiSpectrumDisplay = self._wrappedData
+  #   if apiSpectrumDisplay is not apiStripSpectrumView.strip.spectrumDisplay:
+  #     return
+  #
+  #   # cannot deal with wrapper spectrum object because that not ready yet when this notifier is called
+  #   apiDataSource = apiStripSpectrumView.spectrumView.dataSource
+  #   action = self.spectrumActionDict.get(apiDataSource)
+  #   if not action:
+  #     # add toolbar action (button)
+  #     action = self.spectrumToolBar.addAction(apiDataSource.name)
+  #     action.setCheckable(True)
+  #     action.setChecked(True)
+  #     widget = self.spectrumToolBar.widgetForAction(action)
+  #     widget.setFixedSize(60, 30)
+  #     self.spectrumActionDict[apiDataSource] = action  # have to use wrappedData because wrapper object disappears before delete notifier is called
+  #     self._setActionIconColour(apiDataSource)
+  #   if apiStripSpectrumView not in self.apiStripSpectrumViews:
+  #     spectrumView = self._project._data2Obj[apiStripSpectrumView]
+  #     action.toggled.connect(spectrumView.setVisible)
+  #     self.apiStripSpectrumViews.add(apiStripSpectrumView)
+  #
+  #   return action
+  #
+  # def _apiDataSourcesInDisplay(self):
+  #   apiDataSources = set()
+  #   for strip in self.strips:
+  #     for spectrumView in strip.spectrumViews:
+  #       apiDataSources.add(spectrumView.spectrum._wrappedData)
+  #   return apiDataSources
+  #
+  # def _removedStripSpectrumView(self, apiStripSpectrumView):
+  #   # cannot deal with wrapper spectrum object because already disappears when this notifier is called
+  #   apiDataSources = self._apiDataSourcesInDisplay()
+  #   apiDataSource = apiStripSpectrumView.spectrumView.dataSource
+  #   if apiDataSource not in apiDataSources:
+  #     # remove toolbar action (button)
+  #     action = self.spectrumActionDict.get(apiDataSource)  # should always be not None (correct??)
+  #     if action:
+  #       self.spectrumToolBar.removeAction(action)
+  #       del self.spectrumActionDict[apiDataSource]
+  #     if apiStripSpectrumView in self.apiStripSpectrumViews:  # should always be the case
+  #       self.apiStripSpectrumViews.remove(apiStripSpectrumView)
           
   def _setActionIconColour(self, apiDataSource):
     action = self.spectrumActionDict.get(apiDataSource)
@@ -318,15 +321,67 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
       action.setIcon(QtGui.QIcon(pix))
 
-  def _spectrumViewsInDisplay(self):
-    spectrumViews = set()
-    for strip in self.strips:
-      spectrumViews.update(strip.spectrumViews)
-    return spectrumViews
-    
-  def _connectPeakLayerVisibility(self, spectrumView, peakLayer):
-    spectrumViews = self._spectrumViewsInDisplay()
-    if spectrumView in spectrumViews:
-      apiStripSpectrumView = spectrumView._wrappedData
-      action = self._addedStripSpectrumView(apiStripSpectrumView)  # have to do it this way because peakLayer can be set up before spectrum
-      action.toggled.connect(peakLayer.setVisible) # TBD: need to undo this if peakLayer removed   
+  # def _spectrumViewsInDisplay(self):
+  #   spectrumViews = set()
+  #   for strip in self.strips:
+  #     spectrumViews.update(strip.spectrumViews)
+  #   return spectrumViews
+
+
+def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+  """Set up SpectrumDisplay when new SpectrumView is created - for notifiers"""
+  getDataObj = project._data2Obj.get
+  spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+
+  apiDataSource = apiSpectrumView.dataSource
+  action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be None
+  if not action:
+    # add toolbar action (button)
+    action = spectrumDisplay.spectrumToolBar.addAction(apiDataSource.name)
+    action.setCheckable(True)
+    action.setChecked(True)
+    widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
+    widget.setFixedSize(60, 30)
+    spectrumDisplay.spectrumActionDict[apiDataSource] = action
+    # have to use wrappedData because wrapper object disappears before delete notifier is called (?)
+    spectrumDisplay._setActionIconColour(apiDataSource)
+
+  return action
+
+def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
+  """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
+
+  apiSpectrumView = apiStripSpectrumView.spectrumView
+  getDataObj = project._data2Obj.get
+  spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+  apiDataSource = apiSpectrumView.dataSource
+  action = _createdSpectrumView(project, apiSpectrumView)
+  spectrumView = getDataObj(apiStripSpectrumView)
+  action.toggled.connect(spectrumView.setVisible)
+
+  strip = spectrumView.strip
+  for apiPeakList in apiDataSource.sortedPeakLists():
+    strip.showPeaks(getDataObj(apiPeakList))
+
+def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+  """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
+  spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]
+  apiDataSource = apiSpectrumView.dataSource
+
+  # remove toolbar action (button)
+  action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be not None
+  if action:
+    spectrumDisplay.spectrumToolBar.removeAction(action)
+    del spectrumDisplay.spectrumActionDict[apiDataSource]
+
+# Add notifier functions to Project
+Project._createdSpectrumView = _createdSpectrumView
+Project._deletedSpectrumView = _deletedSpectrumView
+Project._createdStripSpectrumView = _createdStripSpectrumView
+# Register notifier for registering/unregistering
+Project._apiNotifiers.append(('_createdSpectrumView', {},
+                              ApiSpectrumView._metaclass.qualifiedName(), 'postInit'))
+Project._apiNotifiers.append(('_deletedSpectrumView', {},
+                              ApiSpectrumView._metaclass.qualifiedName(), 'preDelete'))
+Project._apiNotifiers.append(('_createdStripSpectrumView', {},
+                              ApiStripSpectrumView._metaclass.qualifiedName(), 'postInit'))

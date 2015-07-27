@@ -35,6 +35,8 @@ class NmrChain(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'NC'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'NmrChain'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'nmrChains'

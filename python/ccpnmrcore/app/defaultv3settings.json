@@ -4,7 +4,7 @@
         "autoSaveOnQuit": "True",
         "autoSaveLayoutOnQuit": "True",
         "auxiliaryFilesPath": "~/.ccpn",
-        "macroPath": "/Users/simon/ccpnMacros",
+        "macroPath": "/home/ccpn/code/svnsf/trunk/ccpnv3/python/ccpnmr/macros/",
         "language": "English-UK",
         "editor": "default",
         "colourScheme": "dark",

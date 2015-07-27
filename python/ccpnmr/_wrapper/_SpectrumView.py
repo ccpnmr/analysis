@@ -37,6 +37,8 @@ class SpectrumView(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'GV'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'SpectrumView'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumViews'

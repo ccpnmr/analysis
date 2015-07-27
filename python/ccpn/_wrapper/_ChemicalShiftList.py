@@ -33,6 +33,8 @@ class ChemicalShiftList(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'CL'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'ChemicalShiftList'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'chemicalShiftLists'

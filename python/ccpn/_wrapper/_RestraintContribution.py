@@ -36,6 +36,8 @@ class RestraintContribution(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'RC'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'RestraintContribution'
 
   # Number of atoms in a Restraint item, by restraint type
   restraintType2Length = {

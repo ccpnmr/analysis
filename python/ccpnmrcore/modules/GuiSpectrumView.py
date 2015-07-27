@@ -50,8 +50,8 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     ###self.setDimMapping(dimMapping)
     self.peakListItems = {} # CCPN peakList -> Qt peakListItem
 
-    strip = self._parent
-    strip.setupAxes()
+    # strip = self._parent
+    # strip.setupAxes()
     
     """
     for peakList in spectrum.peakLists:

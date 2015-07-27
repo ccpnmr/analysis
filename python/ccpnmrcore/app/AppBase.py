@@ -89,11 +89,17 @@ class AppBase(GuiBase):
       apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
                                          windows=(mainWindow._wrappedData,))
 
+    self.initGraphics()
     # Set up undo stack
     # The default values are as below. They can be changed if desired
     #project._resetUndo(maxWaypoints=20, maxOperations=10000)
     project._resetUndo()
 
+  def initGraphics(self):
+    """Set up graphics system after loading - to be overidden in subclasses"""
+    # for window in self.project.windows:
+    #   window.initGraphics()
+    pass
 
   def _closeProject(self):
     """Close project and clean up - should only be called when opening another"""

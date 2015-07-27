@@ -35,6 +35,8 @@ class RestraintSet(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'RS'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'RestraintSet'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'restraintSets'

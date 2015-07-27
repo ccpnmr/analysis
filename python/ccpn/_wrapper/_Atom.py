@@ -37,8 +37,10 @@ class Atom(AbstractWrapperObject):
 
   NBNB TBD rewrite - move to under Project, ... OR NOT ???"""
 
-  #: Short class name, for PID.
+  #: Class name and Short class name, for PID.
   shortClassName = 'MA'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Atom'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'atoms'

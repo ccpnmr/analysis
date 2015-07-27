@@ -38,6 +38,8 @@ class Project(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'PR'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Project'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'projects'
@@ -77,7 +79,7 @@ class Project(AbstractWrapperObject):
     self._data2Obj = {wrappedData:self}
     self._pid2Obj = {}
     
-    self._pid2Obj[self.__class__.__name__] =  dd = {}
+    self._pid2Obj[self.className] =  dd = {}
     self._pid2Obj[self.shortClassName] = dd
     dd[_id] = self
 
@@ -173,7 +175,7 @@ class Project(AbstractWrapperObject):
       #   print ('@~@~', oldId, _id, parent, obj.__class__.__name__)
 
       # update pid:object mapping dictionary
-      dd = pid2Obj[obj.__class__.__name__]
+      dd = pid2Obj[obj.className]
       # print('@~@~', obj, sorted(x for x in dd))
       del dd[oldId]
       dd[_id] = obj

@@ -34,6 +34,8 @@ class PeakView(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'GP'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'PeakView'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'peakViews'

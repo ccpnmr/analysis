@@ -2024,7 +2024,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.stdCallFunc(self.varNames['self'], 'checkValid', doOptionalPars=True)
     
     
-    # actual classs
+    # actual class
     if isinstance(inClass, MetaModel.MetaClass):
       for role in inClass.getAllRoles():
         if role.hierarchy == metaConstants.child_hierarchy:

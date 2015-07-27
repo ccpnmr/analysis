@@ -35,6 +35,8 @@ class Note(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'NO'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Note'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'notes'

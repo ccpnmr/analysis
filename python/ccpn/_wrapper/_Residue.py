@@ -33,6 +33,8 @@ class Residue(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'MR'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Residue'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'residues'

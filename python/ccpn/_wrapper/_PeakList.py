@@ -34,6 +34,8 @@ class PeakList(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'PL'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'PeakList'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'peakLists'

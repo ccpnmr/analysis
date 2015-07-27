@@ -34,6 +34,8 @@ class SampleComponent(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'SC'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'SampleComponent'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'sampleComponents'

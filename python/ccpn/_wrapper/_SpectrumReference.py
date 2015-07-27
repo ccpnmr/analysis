@@ -38,6 +38,8 @@ class SpectrumReference(AbstractWrapperObject):
 
   #: Short class name, for PID.
   shortClassName = 'SR'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'SpectrumReference'
 
   # Type of dimension. Always 'Freq' for frequency (Fourier transformed) dimension
   dimensionType = 'Freq'

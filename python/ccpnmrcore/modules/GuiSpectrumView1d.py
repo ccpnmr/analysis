@@ -65,8 +65,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
       self.plot  = strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
       self.plot.curve.setClickable(True)
       self.plot.sigClicked.connect(self.clicked)
-      for peakList in self.spectrum.peakLists:
-        strip.showPeaks(peakList)
+      # NBNB should be handled by notifiers now, but NBNB this is not tested
+      # for peakList in self.spectrum.peakLists:
+      #   strip.showPeaks(peakList)
     spectrumViewButton = ToolButton(self.spectrumDisplay, self)
 
 

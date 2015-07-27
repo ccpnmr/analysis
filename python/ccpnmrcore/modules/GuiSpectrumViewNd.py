@@ -32,6 +32,7 @@ from ccpncore.util import Colour
 from ccpnc.contour import Contourer2d
 ###from ccpnc.peak import Peak
 
+from ccpnmrcore.modules import GuiStripDisplayNd
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 ###from ccpnmrcore.modules.spectrumPane.PeakListNdItem import PeakListNdItem
 
@@ -129,12 +130,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # for strip in self.strips:
     self.addSpectrumItem(self.strip)
 
-    #Notifiers.registerNotify(self.newPeakListView, 'ccpnmr.gui.Task.PeakListView', '__init__')
-
-    spectrum = self.spectrum
-    strip = self.strip
-    for peakList in spectrum.peakLists:
-      strip.showPeaks(peakList)
+    # Notifiers.registerNotify(self.newPeakListView, 'ccpnmr.gui.Task.PeakListView', '__init__')
+    #
+    # spectrum = self.spectrum
+    # strip = self.strip
+    # for peakList in spectrum.peakLists:
+    #   strip.showPeaks(peakList)
 
   """
   def changedSpectrumColour(self, apiDataSource):
@@ -200,7 +201,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     ##guiStrip = self.spectrumDisplay.viewportDict[widget]
     ##self.drawContours(painter, guiStrip)
-    if self.isVisible():
+    # NBNB TBD this should NEVER be called if self.strip is None (i.e. selfis deleted)
+    # NBNB FIXME this needs to be fixed.
+
+    if self.isVisible() and self.strip is not None:
       self.drawContours(painter)
     
   def boundingRect(self):  # seems necessary to have
@@ -414,3 +418,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     translate = pixelViewBox0 - firstPoint * scale
     
     return translate, scale
+  def _connectPeakLayerVisibility(self, peakLayer):
+    apiDataSource = self._wrappedData.spectrumView.dataSource
+    action = self.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    action.toggled.connect(peakLayer.setVisible) # TBD: need to undo this if peakLayer removed

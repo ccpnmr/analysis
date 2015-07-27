@@ -37,6 +37,8 @@ class Mark(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'GM'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Mark'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'marks'

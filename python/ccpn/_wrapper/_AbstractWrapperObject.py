@@ -160,11 +160,10 @@ class AbstractWrapperObject():
     self._id = _id
     
     # update pid:object mapping dictionary
-    className = self.__class__.__name__
-    dd = project._pid2Obj.get(className)
+    dd = project._pid2Obj.get(self.className)
     if dd is None:
       dd = {}
-      project._pid2Obj[className] = dd 
+      project._pid2Obj[self.className] = dd
       project._pid2Obj[self.shortClassName] = dd
     dd[_id] = self
   
@@ -466,7 +465,7 @@ class AbstractWrapperObject():
   def longPid(self) -> Pid.Pid:
     """Object project-wide identifier, unique within project.
     Set automatically from full class name, and id of object and parents."""
-    return Pid.Pid(Pid.PREFIXSEP.join((type(self).__name__, self._id)))
+    return Pid.Pid(Pid.PREFIXSEP.join((self.className, self._id)))
     
   
   # CCPN abstract properties
@@ -544,7 +543,7 @@ class AbstractWrapperObject():
 
     if ancestors:
       # add getCls in all ancestors
-      funcName = 'get' + cls.__name__
+      funcName = 'get' + cls.className
       for ancestor in ancestors:
         # Add getDescendant function
         def func(self,  relativeId: str) -> cls:
@@ -561,7 +560,7 @@ class AbstractWrapperObject():
                                           descendantClasses=newAncestors[ii+1:]),
                           None, None,
                           ("\- *(%s,)*  - sorted %s type child objects" %
-                            (cls, cls.__name__)
+                            (cls, cls.className)
                           )
                         )
         setattr(ancestor, linkName, prop)
@@ -578,7 +577,7 @@ class AbstractWrapperObject():
     """Get descendant of class cls with relative key relativeId
      Implementation function, used to generate getCls functions"""
 
-    dd = self._project._pid2Obj.get(cls.__name__)
+    dd = self._project._pid2Obj.get(cls.className)
     if dd:
         if self is self._project:
             key = relativeId

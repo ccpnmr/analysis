@@ -37,6 +37,8 @@ class SpectrumHit(AbstractWrapperObject):
 
   #: Short class name, for PID.
   shortClassName = 'SH'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'SpectrumHit'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumHits'

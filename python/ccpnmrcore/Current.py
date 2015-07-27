@@ -25,6 +25,8 @@ __author__ = 'simon'
 
 from ccpncore.memops import Notifiers
 from ccpncore.gui import MessageDialog
+from ccpn import Project
+from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 
 _fields = ['project','spectrum','spectra','peak','peaks','region','position', 'strip', 'assigner']
 
@@ -34,7 +36,8 @@ class Current:
     for field in _fields:
       setattr(self,field,None)
 
-    Notifiers.registerNotify(self._deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
+    # Special case - plural attributes must be initialised to list
+    self.peaks = []
 
   def deleteSelected(self, parent=None):
     # TBD: more general deletion
@@ -47,10 +50,19 @@ class Current:
           peak.delete()
         #self.peaks = [] # not needed since _deletedPeak notifier will clear this out
       
-  def _deletedPeak(self, apiPeak):
+def _cleanupCurrentPeak(project, apiPeak):
     
-    peak = self.project._data2Obj[apiPeak]
-    if peak is self.peak:
-      self.peak = None
-    if peak in self.peaks:
-      self.peaks.remove(peak)
+  current = project._appBase.current
+  if current:
+    peak = project._data2Obj[apiPeak]
+    if peak is current.peak:
+      current.peak = None
+    if peak in current.peaks:
+      current.peaks.remove(peak)
+
+Project._cleanupCurrentPeak = _cleanupCurrentPeak
+# Register notifier for registering/unregistering
+Project._apiNotifiers.append(('_cleanupCurrentPeak', {},
+                              ApiPeak._metaclass.qualifiedName(), 'preDelete'))
+Project._apiNotifiers.append(('_cleanupCurrentPeak', {},
+                              ApiPeak._metaclass.qualifiedName(), 'preDelete'))

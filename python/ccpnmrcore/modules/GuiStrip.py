@@ -21,7 +21,6 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
 
 import pyqtgraph as pg
 import os
@@ -30,6 +29,7 @@ from functools import partial
 from PyQt4 import QtGui, QtCore
 
 from ccpn import Spectrum
+from ccpn import Project
 
 from ccpncore.gui.Label import Label
 from ccpnmrcore.gui.PlotWidget import PlotWidget
@@ -37,7 +37,12 @@ from ccpncore.gui.CcpnGridItem import CcpnGridItem
 from ccpncore.gui.Widget import Widget
 from ccpncore.memops import Notifiers
 
-#from ccpnmrcore.gui.Axis import Axis
+from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+from ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
+from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
+from ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
+from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpnmrcore.gui.AxisTextItem import AxisTextItem
 from ccpnmrcore.DropBase import DropBase
 from ccpncore.gui.Menu import Menu
@@ -131,10 +136,10 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.hRulerLineDict = {}  # ruler --> horizontal line for that ruler
     self.initRulers()
     
-    Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
-    Notifiers.registerNotify(self.axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
-    Notifiers.registerNotify(self.rulerCreated, 'ccpnmr.gui.Task.Ruler', '__init__')
-    Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
+    # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
+    # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
+    # Notifiers.registerNotify(self.rulerCreated, 'ccpnmr.gui.Task.Ruler', '__init__')
+    # Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
 
   # def addStrip(self):
   #
@@ -144,18 +149,20 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   #     spectrumView.connectStrip(newStrip)
 
 
-  def setupAxes(self):
-
-    # this is called from GuiSpectrumView because the axes are not ready when the strip is created
-    # TBD: but that means this is called for every spectrum in the strip, which is not what we want
-    self.viewBox.setXRange(*self.orderedAxes[0].region)
-    self.viewBox.setYRange(*self.orderedAxes[1].region)
-    self.xAxisTextItem = AxisTextItem(self.plotWidget, orientation='top',
-                                  axisCode=self.orderedAxes[0].code)
-    self.yAxisTextItem = AxisTextItem(self.plotWidget, orientation='left',
-                                  axisCode=self.orderedAxes[1].code)
-    self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
-    self.viewBox.sigRangeChanged.connect(self.updateRegion)
+  #
+  #
+  # def setupAxes(self):
+  #
+  #   # this is called from GuiSpectrumView because the axes are not ready when the strip is created
+  #   # TBD: but that means this is called for every spectrum in the strip, which is not what we want
+  #   self.viewBox.setXRange(*self.orderedAxes[0].region)
+  #   self.viewBox.setYRange(*self.orderedAxes[1].region)
+  #   self.xAxisTextItem = AxisTextItem(self.plotWidget, orientation='top',
+  #                                 axisCode=self.orderedAxes[0].code)
+  #   self.yAxisTextItem = AxisTextItem(self.plotWidget, orientation='left',
+  #                                 axisCode=self.orderedAxes[1].code)
+  #   self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
+  #   self.viewBox.sigRangeChanged.connect(self.updateRegion)
 
   def updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
@@ -212,28 +219,29 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
             continue
           otherStrip.beingUpdated = False
 
-  def axisRegionUpdated(self, apiAxis):
-    # this is called when the api region (position and/or width) is changed
-    
-    xAxis, yAxis = self.orderedAxes[:2]
-    if not xAxis or not yAxis:
-      return
-
-    if apiAxis not in (xAxis._wrappedData, yAxis._wrappedData):
-      return
-      
-    if self.beingUpdated:
-      return
-      
-    self.beingUpdated = True
-        
-    try:
-      xRegion = xAxis.region
-      yRegion = yAxis.region
-      self.viewBox.setXRange(*xRegion)
-      self.viewBox.setYRange(*yRegion)
-    finally:
-      self.beingUpdated = False
+  #
+  # def _axisRegionUpdated(self, apiAxis):
+  #   # this is called when the api region (position and/or width) is changed
+  #
+  #   xAxis, yAxis = self.orderedAxes[:2]
+  #   if not xAxis or not yAxis:
+  #     return
+  #
+  #   if apiAxis not in (xAxis._wrappedData, yAxis._wrappedData):
+  #     return
+  #
+  #   if self.beingUpdated:
+  #     return
+  #
+  #   self.beingUpdated = True
+  #
+  #   try:
+  #     xRegion = xAxis.region
+  #     yRegion = yAxis.region
+  #     self.viewBox.setXRange(*xRegion)
+  #     self.viewBox.setYRange(*yRegion)
+  #   finally:
+  #     self.beingUpdated = False
 
   def addSpinSystemLabel(self):
     self.spinSystemLabel = Label(self.stripFrame, grid=(2, self.guiSpectrumDisplay.orderedStrips.index(self)),
@@ -302,28 +310,29 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
       positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
     mark = task.newMark('black', positions, axisCodes)
 
-  def rulerCreated(self, apiRuler):
-    axisCode = apiRuler.axisCode # TBD: use label and unit
-    position = apiRuler.position
-    # TBD: is the below correct (so the correct axes)?
-    if axisCode == self.orderedAxes[0].code:
-      line = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
-      line.setPos(position)
-      self.plotWidget.addItem(line, ignoreBounds=True)
-      self.vRulerLineDict[apiRuler] = line
-      
-    if axisCode == self.orderedAxes[1].code:
-      line = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-      line.setPos(position)
-      self.plotWidget.addItem(line, ignoreBounds=True)
-      self.hRulerLineDict[apiRuler] = line
-    
-  def rulerDeleted(self, apiRuler):
-    for dd in self.vRulerLineDict, self.hRulerLineDict:
-      if apiRuler in dd:
-        line = dd[apiRuler]
-        del dd[apiRuler]
-        self.plotWidget.removeItem(line)
+  #
+  # def rulerCreated(self, apiRuler):
+  #   axisCode = apiRuler.axisCode # TBD: use label and unit
+  #   position = apiRuler.position
+  #   # TBD: is the below correct (so the correct axes)?
+  #   if axisCode == self.orderedAxes[0].code:
+  #     line = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
+  #     line.setPos(position)
+  #     self.plotWidget.addItem(line, ignoreBounds=True)
+  #     self.vRulerLineDict[apiRuler] = line
+  #
+  #   if axisCode == self.orderedAxes[1].code:
+  #     line = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
+  #     line.setPos(position)
+  #     self.plotWidget.addItem(line, ignoreBounds=True)
+  #     self.hRulerLineDict[apiRuler] = line
+  #
+  # def rulerDeleted(self, apiRuler):
+  #   for dd in self.vRulerLineDict, self.hRulerLineDict:
+  #     if apiRuler in dd:
+  #       line = dd[apiRuler]
+  #       del dd[apiRuler]
+  #       self.plotWidget.removeItem(line)
             
   def initRulers(self):
     
@@ -420,11 +429,122 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   def dropCallback(self, dropObject):
     if isinstance(dropObject, Spectrum):
       self.displaySpectrum(dropObject)
-      print(self.pid)
+      # print('@~@~', self.pid)
       msg = 'strip = project.getById("%s")\nstrip.displaySpectrum(project.getById("%s")\n' % \
             (self.pid, dropObject.pid)
       self._appBase.mainWindow.pythonConsole.write(msg)
     else:
       pass
 
-        
+def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
+  """Notifier function for when axis position or width changes"""
+
+  position = apiAxis.position
+  halfwidth = apiAxis.width / 2.
+  region =  (position - halfwidth, position + halfwidth)
+
+  for apiStrip in apiAxis.strips:
+    strip = project._data2Obj[apiStrip]
+
+    if not strip.beingUpdated:
+      index = apiStrip.axisOrder.index(apiAxis.code)
+
+      strip.beingUpdated = True
+
+      # print ('@~@~ regionChanged', index, position, halfwidth, region)
+
+      try:
+        if index == 0:
+          # X axis
+          strip.viewBox.setXRange(*region)
+        elif index == 1:
+          # Y axis
+          strip.viewBox.setYRange(*region)
+        else:
+          # One of the Z axes
+          peakLists = strip.peakLayerDict.keys()
+          for peakList in peakLists:
+            peakLayer = strip.peakLayerDict[peakList]
+            peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
+            strip.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
+      finally:
+        strip.beingUpdated = False
+# Add notifier function to Project
+Project._axisRegionChanged = _axisRegionChanged
+# Register notifier for registering/unregistering
+Project._apiNotifiers.append(('_axisRegionChanged', {},
+                              ApiAxis._metaclass.qualifiedName(), 'setPosition'))
+Project._apiNotifiers.append(('_axisRegionChanged', {},
+                              ApiAxis._metaclass.qualifiedName(), 'setWidth'))
+
+
+def _setupGuiStrip(project:Project, apiStrip:ApiStrip):
+  """Set up graphical parameters for completed strips - for notifiers"""
+
+  strip = project._data2Obj[apiStrip]
+  orderedAxes = strip.orderedAxes
+
+  # this is called from GuiSpectrumView because the axes are not ready when the strip is created
+  # TBD: but that means this is called for every spectrum in the strip, which is not what we want
+  strip.viewBox.setXRange(*orderedAxes[0].region)
+  strip.viewBox.setYRange(*orderedAxes[1].region)
+  strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top',
+                                axisCode=orderedAxes[0].code)
+  strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left',
+                                axisCode=orderedAxes[1].code)
+  strip.viewBox.sigStateChanged.connect(strip.moveAxisCodeLabels)
+  strip.viewBox.sigRangeChanged.connect(strip.updateRegion)
+# Add notifier function to Project
+Project._setupGuiStrip = _setupGuiStrip
+# Register notifier for registering/unregistering
+Project._apiNotifiers.append(('_setupGuiStrip', {},
+                              ApiBoundStrip._metaclass.qualifiedName(), 'postInit'))
+Project._apiNotifiers.append(('_setupGuiStrip', {},
+                              ApiFreeStrip._metaclass.qualifiedName(), 'postInit'))
+
+
+def _rulerCreated(project:Project, apiRuler:ApiRuler):
+  """Notifier function for creating rulers"""
+  axisCode = apiRuler.axisCode # TBD: use label and unit
+  position = apiRuler.position
+  task = project._data2Obj[apiRuler.mark.guiTask]
+  for strip in task.strips:
+    axisOrder = strip.axisOrder
+    # TBD: is the below correct (so the correct axes)?
+    if axisCode == axisOrder[0]:
+      line = pg.InfiniteLine(angle=90, movable=False, pen=strip.foreground)
+      line.setPos(position)
+      strip.plotWidget.addItem(line, ignoreBounds=True)
+      strip.vRulerLineDict[apiRuler] = line
+
+    elif axisCode == axisOrder[1]:
+      line = pg.InfiniteLine(angle=0, movable=False, pen=strip.foreground)
+      line.setPos(position)
+      strip.plotWidget.addItem(line, ignoreBounds=True)
+      strip.hRulerLineDict[apiRuler] = line
+
+def _rulerDeleted(project:Project, apiRuler:ApiRuler):
+  task = project._data2Obj[apiRuler.mark.guiTask]
+  for strip in task.strips:
+    for dd in strip.vRulerLineDict, strip.hRulerLineDict:
+      if apiRuler in dd:
+        line = dd.pop(apiRuler)
+        strip.plotWidget.removeItem(line)
+
+# Add notifier functions to Project
+Project._rulerCreated = _rulerCreated
+Project._rulerDeleted = _rulerDeleted
+# Register notifier for registering/unregistering
+Project._apiNotifiers.append(('_rulerCreated', {},
+                              ApiRuler._metaclass.qualifiedName(), 'postInit'))
+Project._apiNotifiers.append(('_rulerDeleted', {},
+                              ApiRuler._metaclass.qualifiedName(), 'preDelete'))
+
+
+def _refreshAllStripContours(project:Project, apiDatSource:ApiDataSource):
+  for apiSpectrumView in apiDatSource.spectrumViews:
+    for apiStrip in apiSpectrumView.strips:
+      project._data2Obj[apiStrip].update()
+Project._refreshAllStripContours = _refreshAllStripContours
+Project._apiNotifiers.append(('_refreshAllStripContours', {},
+                              ApiDataSource._metaclass.qualifiedName(), ''))

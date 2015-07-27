@@ -125,9 +125,11 @@ def decodePid(sourceObject, thePid):
         obj = obj[p]
     #end for
     # found an object, check if it is the right kind
-    if thePid.type != obj.__class__.__name__:
+    # Necessary as ccpn wrapper objects use .className insteaad of .__class__.__name__
+    objType = obj.className if hasattr(obj, 'className') else obj.__class__.__name__
+    if thePid.type != objType:
         io.error('decodePid: type "{0}" does not match object type "{1}"',
-                 thePid.type, obj.__class__.__name__)
+                 thePid.type, objType)
         return None
     return obj
 #end def

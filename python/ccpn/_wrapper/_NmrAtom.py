@@ -37,6 +37,8 @@ class NmrAtom(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'NA'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'NmrAtom'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'atoms'

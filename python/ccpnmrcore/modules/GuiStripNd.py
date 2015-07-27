@@ -86,15 +86,15 @@ class GuiStripNd(GuiStrip):
     ###Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
 
     
-  def setupAxes(self):
-    GuiStrip.setupAxes(self)
-    for func in ('setPosition', 'setWidth'):
-      Notifiers.registerNotify(self.axisRegionChanged, 'ccpnmr.gui.Task.Axis', func)
+  # def setupAxes(self):
+  #   GuiStrip.setupAxes(self)
+  #   for func in ('setPosition', 'setWidth'):
+  #     Notifiers.registerNotify(self.axisRegionChanged, 'ccpnmr.gui.Task.Axis', func)
 
 
   def mouseDragEvent(self, event):
     if event.button() == QtCore.Qt.RightButton:
-        print(event)
+        pass
     else:
         self.viewBox.mouseDragEvent(self, event)
 
@@ -181,6 +181,8 @@ class GuiStripNd(GuiStrip):
 
   def showPeaks(self, peakList, peaks=None):
     from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView
+    # NBNB TBD 1) we should not always display all peak lists together
+    # NBNB TBD 2) This should not be called for each strip
     
     if not peaks:
       peaks = peakList.peaks
@@ -190,8 +192,11 @@ class GuiStripNd(GuiStrip):
       peakLayer = GuiPeakListView(self.plotWidget.scene(), self, peakList)
       self.viewBox.addItem(peakLayer)
       self.peakLayerDict[peakList] = peakLayer
-      for spectrumView in self.spectrumViews:
-        self.spectrumDisplay._connectPeakLayerVisibility(spectrumView, peakLayer)
+      spectrumView = self.getSpectrumView(peakList.spectrum.name)
+      spectrumView._connectPeakLayerVisibility(peakLayer)
+
+      # for spectrumView in self.spectrumViews:
+      #   spectrumView._connectPeakLayerVisibility(peakLayer)
         ###spectrumView.visibilityAction.toggled.connect(peakLayer.setVisible)
       
     #rectItem = QtGui.QGraphicsRectItem(5, 120, 2, 10, peakLayer, self.plotWidget.scene())
@@ -240,19 +245,19 @@ class GuiStripNd(GuiStrip):
     peakList = peak.parent
     self.showPeaks(peakList)
       
-  def axisRegionChanged(self, apiAxis):
-    
-    # TBD: other axes
-    apiStripAxis = self._wrappedData.findFirstStripAxis(axis=apiAxis)
-    if apiStripAxis is None:
-      return
-    axis = self._appBase.project._data2Obj[apiStripAxis]
-    if len(self.orderedAxes) >= 3 and axis in self.orderedAxes[2:]:
-      peakLists = self.peakLayerDict.keys()
-      for peakList in peakLists:
-        peakLayer = self.peakLayerDict[peakList]
-        peaks = [peak for peak in peakList.peaks if self.peakIsInPlane(peak)]
-        self.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
+  # def axisRegionChanged(self, apiAxis):
+  #
+  #   # TBD: other axes
+  #   apiStripAxis = self._wrappedData.findFirstStripAxis(axis=apiAxis)
+  #   if apiStripAxis is None:
+  #     return
+  #   axis = self._appBase.project._data2Obj[apiStripAxis]
+  #   if len(self.orderedAxes) >= 3 and axis in self.orderedAxes[2:]:
+  #     peakLists = self.peakLayerDict.keys()
+  #     for peakList in peakLists:
+  #       peakLayer = self.peakLayerDict[peakList]
+  #       peaks = [peak for peak in peakList.peaks if self.peakIsInPlane(peak)]
+  #       self.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
 
   def addHTraceMarker(self):
     traceMarker = pg.InfiniteLine(angle=0, movable=True, pos=self.mousePoint)

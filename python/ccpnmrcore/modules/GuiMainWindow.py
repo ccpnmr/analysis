@@ -518,7 +518,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showMoleculePopup(self):
     from ccpnmrcore.modules.LoadSequence import LoadSequence
-    popup = LoadSequence(self, project=self.project).exec_()
+    popup = LoadSequence(self, project=self._project).exec_()
 
   def inspectMolecule(self):
     pass
@@ -559,7 +559,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     f.close()
 
   def showPeakTable(self, position='left', relativeTo=None):
-    peakList = PeakTable(project=self.project)
+    peakList = PeakTable(self._project)
     if relativeTo is not None:
       self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
     else:
@@ -568,11 +568,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showChemicalShiftTable(self, position='bottom'):
     from ccpnmrcore.modules.ChemicalShiftTable import ChemicalShiftTable
-    chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self.project.chemicalShiftLists)
+    chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self._project.chemicalShiftLists)
     self.dockArea.addDock(chemicalShiftTable, position=position)
 
   def showParassignPeakTable(self, position='left', relativeTo=None):
-    peakList = ParassignModule(name="Peak Table", peakLists=self.project.peakLists)
+    peakList = ParassignModule(name="Peak Table", peakLists=self._project.peakLists)
     if relativeTo is not None:
       self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
     else:
@@ -594,7 +594,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     return self.paaModule
 
   def showAtomSelector(self):
-    self.atomSelector = AtomSelector(self, self._project)
+    self.atomSelector = AtomSelector(self, project=self._project)
     self.dockArea.addDock(self.atomSelector)
     return self.atomSelector
 
@@ -606,7 +606,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     dpModule = DataPlottingModule(self.dockArea)
 
   def saveProjectAs(self):
-    if not self.project:
+    if not self._project:
       return
     dialog = QtGui.QFileDialog(self, caption='Save Project As...')
     dialog.setFileMode(QtGui.QFileDialog.AnyFile)

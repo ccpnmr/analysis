@@ -34,6 +34,8 @@ class PseudoDimension(AbstractWrapperObject):
 
   #: Short class name, for PID.
   shortClassName = 'SD'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'PseudoDimension'
 
   # Type of dimension. Always 'Freq' for frequency (Fourier transformed) dimension
   dimensionType = 'Sampled'

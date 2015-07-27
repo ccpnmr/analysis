@@ -36,6 +36,8 @@ class Chain(AbstractWrapperObject):
   
   #: Short class name, for PID.
   shortClassName = 'MC'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Chain'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'chains'

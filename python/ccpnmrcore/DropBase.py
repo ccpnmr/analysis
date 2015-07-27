@@ -35,8 +35,20 @@ class DropBase(GuiBase):
   def dragEnterEvent(self, event):
     event.accept()
 
+  def dropEvent(self, event):
+    """Catch dropEvent and dispatch to processing"""
+
+    from ccpnmrCore.util import Qt as qtUtil
+
+    event.accept()
+
+    dataType, data = qtUtil.interpretEvent(event)
+
+    if dataType and data:
+      self.processDropData(data, dataType)
 
   def dropEvent(self, event):
+    """NBNB FIXME, must be commented out"""
     event.accept()
     if isinstance(self.parent, QtGui.QGraphicsScene):
       event.ignore()
@@ -56,9 +68,13 @@ class DropBase(GuiBase):
 
           except:
             try:
+              if filePath.endswith('.spc.par'):
+                # NBNB TBD HACK: Should be handle properly
+                filePath = filePath[:-4]
               spectrum = self._appBase.project.loadSpectrum(filePath)
-              self._appBase.mainWindow.leftWidget.addSpectrum(spectrum)
-              self.dropCallback(spectrum)
+              if spectrum is not None:
+                self._appBase.mainWindow.leftWidget.addSpectrum(spectrum)
+                self.dropCallback(spectrum)
             except:
                 pass
 
@@ -77,20 +93,8 @@ class DropBase(GuiBase):
       wrapperObject = self.getObject(actualPid)
       self.dropCallback(wrapperObject)
 
-  def rhfDropEvent(self, event):
-    """Catch dropEvent and dispatch to processing"""
 
-    from ccpnmrCore.util import Qt as qtUtil
-
-    event.accept()
-
-    dataType, data = qtUtil.interpretEvent(event)
-
-    if dataType and data:
-      self.processDropData(data, dataType)
-
-
-  def rhfProcessDropData(self, data, dataType='pids'):
+  def processDropData(self, data, dataType='pids'):
     """ Digest dropped-in data
     Separate so it can be called from command line as well.
     """
@@ -121,9 +125,12 @@ class DropBase(GuiBase):
         for fileType, subType, useUrl in urlInfo:
           func = self.pickDispatchFunction('load', fileType)
           if func:
-            ll = func(useUrl, subType=subType)
-            if ll:
-              pids.extend(ll)
+            xx = func(useUrl, subType=subType)
+            if xx:
+              if isinstance(xx,str):
+                pids.append(xx)
+              else:
+                pids.extend(xx)
 
       else:
         pids = multifunc(urlInfo)

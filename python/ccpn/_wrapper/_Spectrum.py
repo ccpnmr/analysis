@@ -42,6 +42,8 @@ class Spectrum(AbstractWrapperObject):
 
   #: Short class name, for PID.
   shortClassName = 'SP'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Spectrum'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectra'
@@ -713,6 +715,19 @@ class Spectrum(AbstractWrapperObject):
           dataDimRef.localValuePerPoint = localValuePerPoint*sw/oldsw
         else:
           dataDimRef.dataDim.valuePerPoint *= (sw/oldsw)
+
+  @property
+  def spectralLimits(self) -> tuple:
+    """\- (*(float,float)*)\*dimensionCount
+
+    tuple of tuples of (lowerLimit, higherLimit) for spectrum """
+    ll = []
+    for ii,ddr in enumerate(self._mainDataDimRefs()):
+      if ddr is None:
+        ll.append((None,None))
+      else:
+        ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints+1)))
+    return tuple(tuple(sorted(x)) for x in ll)
 
   @property
   def sample(self) -> Sample:

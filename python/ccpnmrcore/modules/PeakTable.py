@@ -39,13 +39,13 @@ class PeakTable(CcpnDock):
   def __init__(self, project):
     CcpnDock.__init__(self, name='Peak List')
 
-    self.layout.addWidget(PeakListSimple(self, project))
+    self.layout.addWidget(PeakListSimple(project, parent=self))
 
 
 
 class PeakListSimple(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, project=None,  callback=None, **kw):
+  def __init__(self, project, parent=None, callback=None, **kw):
 
     if not project.peakLists:
       peakLists = []
@@ -71,7 +71,7 @@ class PeakListSimple(QtGui.QWidget, Base):
 
     self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
 
-    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 5),
+    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 4),
                                           callback=self.subtractPeakLists)
     #                                     # callback=self._updateWhenIdle,)
 

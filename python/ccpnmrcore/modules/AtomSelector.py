@@ -43,7 +43,7 @@ class AtomSelector(CcpnDock):
     CcpnDock.__init__(self, name='Atom Selector')
     self.orientation = 'vertical'
     self.moveLabel=False
-    pickAndAssignWidget = Widget(self)
+    pickAndAssignWidget = Widget(self)#
     pickAndAssignWidget.setMaximumSize(200,150)
 
     headerLabel = Label(self, text='i-1')

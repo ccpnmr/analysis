@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.spectrum import Util as spectrumUtil
+from ccpncore.lib.Io import Formats as ioFormats
 
 pidTypeMap = {}
 import ccpn
@@ -33,12 +33,14 @@ for package in ccpn, ccpnmr:
     if hasattr(obj, 'shortClassName'):
       shortClassName = getattr(obj, 'shortClassName')
       if shortClassName:
-        #NBNB TBD QTTBD FIXME - also picks up subclasses
-        pidTypeMap[shortClassName] = obj.__name__
+        #NBNB TBD QTTBD FIXME - also picks up subclasses. FIXED RHF.
+        pidTypeMap[shortClassName] = (obj.className if hasattr(obj, 'className')
+                                      else obj.__class__.__name__)
 
 
 def interpretEvent(event):
   """ Interpret drop event and return (type, data)
+  NBNB FIXME
   """
 
   if event.mimeData().hasUrls():
@@ -90,7 +92,7 @@ def analyseUrls(urls):
   commonTypes = set()
   for url in urls:
 
-    fileType, subType, newUrl = analyseUrl(url)
+    fileType, subType, newUrl = ioFormats.analyseUrl(url)
     if fileType is not None and newUrl.exists():
       urlInfo.append((fileType, subType, newUrl))
       commonTypes.add(fileType)
@@ -107,38 +109,39 @@ def analyseUrls(urls):
   return (tag, urlInfo)
 
 
-def analyseUrl(url):
-  """Analyse url name, location, pre-read file and analyse contents
-  Function must be able to classify ANY droppable url of ANY type that cna be handled
-  Function may convert Url to a different Url,
-  so that different inputs (e.g. .spc and .spc.par files) can lead to a standardised output.
-  """
-
-  # Analyse and pre-read file here.
-  fileType = None
-  subType = None
-  modifiedUrl = None
-
-  spectrumType = spectrumUtil.getSpectrumFileFormat(url)
-
-  if spectrumType is not None:
-
-    if spectrumType == spectrumUtil.CCPN:
-      # NBNB QTTBD TBD
-      # Expand on this
-      return ('Project', 'CCPN', url)
-
-    else:
-      # NBNB QTTBD TBD
-      # Expand on this
-      return ('Spectrum',spectrumType, url)
-
-  # e.g. ('Spectrum', 'Bruker', containingDirectory)
-  # or ('Structure', 'PDB', fileName)
-  # or ('PeakList', 'XEASY', fileName)
-  # or ('Project', 'CCPN', topProjectDirectory)
-  # or ('Project', 'SPARKY', projectFile)
-  # or ('Data', 'NEF', fileName)
-  # or ('Text', None, fileName)
-
-  return (fileType, subType, modifiedUrl)
+# def analyseUrl(url):
+#   """Analyse url name, location, pre-read file and analyse contents
+#   Function must be able to classify ANY droppable url of ANY type that cna be handled
+#   Function may convert Url to a different Url,
+#   so that different inputs (e.g. .spc and .spc.par files) can lead to a standardised output.
+#   NBNB FIXME
+#   """
+#
+#   # Analyse and pre-read file here.
+#   fileType = None
+#   subType = None
+#   modifiedUrl = None
+#
+#   spectrumType = spectrumUtil.getSpectrumFileFormat(url)
+#
+#   if spectrumType is not None:
+#
+#     if spectrumType == spectrumUtil.CCPN:
+#       # NBNB QTTBD TBD
+#       # Expand on this
+#       return ('Project', 'CCPN', url)
+#
+#     else:
+#       # NBNB QTTBD TBD
+#       # Expand on this
+#       return ('Spectrum',spectrumType, url)
+#
+#   # e.g. ('Spectrum', 'Bruker', containingDirectory)
+#   # or ('Structure', 'PDB', fileName)
+#   # or ('PeakList', 'XEASY', fileName)
+#   # or ('Project', 'CCPN', topProjectDirectory)
+#   # or ('Project', 'SPARKY', projectFile)
+#   # or ('Data', 'NEF', fileName)
+#   # or ('Text', None, fileName)
+#
+#   return (fileType, subType, modifiedUrl)

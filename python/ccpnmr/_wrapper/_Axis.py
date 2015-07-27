@@ -25,6 +25,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpnmr import Strip
 from ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
+from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 
 
 class Axis(AbstractWrapperObject):
@@ -32,6 +33,8 @@ class Axis(AbstractWrapperObject):
 
   #: Short class name, for PID.
   shortClassName = 'GA'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Axis'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'axes'

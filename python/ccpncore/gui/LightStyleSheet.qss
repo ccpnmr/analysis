@@ -92,12 +92,7 @@ QListWidget {background-color: #FFFDD1;
              border: 1px solid #EDC151;
 
     }
-PulldownList {
-          background-color: #FFFDD1;
-          border: solid 1px #EDC151;
-          color: #464E76;
 
-          }
 PulldownList::hover {
                   background-color: #FDFDFC;
                   color: #464E76;
@@ -105,7 +100,6 @@ PulldownList::hover {
 ObjectTable { margin-left: 4px;
              border: 1px #182548;
              font-family: open-sans;
-             font-weight: bold;
            }
 QHeaderView {
                   background-color: #FDFDFC;
@@ -121,6 +115,12 @@ ObjectTable::item::selected {
                             background-color: #FFFCBA;
                             color: #464E76;
                    }
+PulldownList {
+          background-color: #FFFDD1;
+          border: 1px solid #EDC151;
+          color: #464E76;
+          }
+
 QToolBar {
           background-color: #fbf4cc;
           border: 1px solid transparent;
@@ -149,9 +149,29 @@ QTextEdit {
         font-size: 1.5em;
         }
 
+Dock  QPushButton {
+				color: #fdfdfc;
+				background-color: #bd8413;
+				border: none
+				}
+
+
+Dock ScrollArea QPushButton {
+				color: #fdfdfc;
+				background-color: #bd8413;
+				border: none
+				}
+
+Dock Assigner QWidget { background-color: #FBF4CC;
+              border: 1px solid #EDC151;
+    }
+Assigner QWidget { background-color: #FBF4CC;
+    }
+
 Dock ScrollArea QWidget { background-color: #FBF4CC;
                           padding: 0px;
         }
+
 Dock > QWidget QScrollArea { background-color: #FBF4CC;
                              padding: 0px;
         }
@@ -160,16 +180,13 @@ Dock > QWidget { background-color: #FBF4CC;
                  padding: 0px;
         }
 
-
-QPushButton {
-				color: #fdfdfc;
-				background-color: #bd8413;
-				}
-
 QToolButton {
             color: #464E76;
             border: 1px solid #EDC151;
             }
+
+
+
 
 Dock QPushButton::pressed {
                           color: #fdfdfc;
@@ -216,13 +233,13 @@ QTreeWidget::branch:open::hover {
 
 
 QTreeWidget::branch:closed:has-children{
-border-image: 1px solid black;
-image: url(:/light-side.png);
+border-image: none;
+image: url(:/dark-side.png);
 }
 
 QTreeWidget::branch:open{
 border-image: none;
-image: url(:/light-down.png);
+image: url(:/dark-down.png);
 
 }
 
@@ -267,12 +284,7 @@ padding: 0px;
     }
 
 
-Dock Assigner QWidget { background-color: #FBF4CC;
-              border: 1px solid #EDC151;
-    }
-Assigner QWidget { background-color: #000021;
-              border: 1px solid #00092d;
-    }
+
 
 
 SpectrumPropertiesPopup QPushButton {background-color: #BD8413;

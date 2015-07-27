@@ -57,21 +57,18 @@ class PeakListSimple(QtGui.QWidget, Base):
     # self.label = DockLabel(name, self)
     # self.label.show()
     self.project = project
-
     self.peakLists = project.peakLists
-    label = Label(self, 'Peak List:')
-    self.layout().addWidget(label, 0, 0, QtCore.Qt.AlignRight)
-    self.setContentsMargins(4, 4, 4, 4,)
+    label = Label(self, 'Peak List:', grid=(1, 0))
     # self.label.setFont(Font(size=12, bold=True))
-    self.peakListPulldown = PulldownList(self, grid=(0, 1))
+    self.peakListPulldown = PulldownList(self, grid=(1, 1))
     if callback is None:
       callback=self.selectPeak
 
-    label = Label(self, ' Position Unit:', grid=(0, 2), hAlign='r')
+    label = Label(self, ' Position Unit:', grid=(1, 2), hAlign='r')
 
-    self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
+    self.posUnitPulldown = PulldownList(self, grid=(1, 3), texts=UNITS,)
 
-    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 4),
+    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(1, 5),
                                           callback=self.subtractPeakLists)
     #                                     # callback=self._updateWhenIdle,)
 

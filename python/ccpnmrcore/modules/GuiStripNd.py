@@ -162,6 +162,10 @@ class GuiStripNd(GuiStrip):
         prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
         prevPlaneButton.setFixedWidth(19)
         prevPlaneButton.setFixedHeight(19)
+        # prevPlaneButton.setStyleSheet('''QPushButton {
+				# color: #fdfdfc;
+				# background-color: #bd8413;
+				# }''')
         self.planeLabel = DoubleSpinbox(self)
         self.planeLabel.setFixedHeight(19)
         self.planeLabel.setValue(self.positions[2])

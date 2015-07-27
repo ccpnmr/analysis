@@ -36,6 +36,7 @@ from ccpncore.gui.Button import Button
 from ccpncore.gui.Base import Base
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Dock import CcpnDockLabel, CcpnDock
+from ccpncore.gui.Label import Label
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.popups.InterIntraSpectrumPopup import InterIntraSpectrumPopup
 from ccpnmrcore.popups.SelectSpectrumDisplayPopup import SelectSpectrumDisplayPopup
@@ -45,18 +46,24 @@ class BackboneAssignmentModule(CcpnDock, Base):
   def __init__(self, project=None):
 
     CcpnDock.__init__(self, parent=None, name='Backbone Assignment')
-
+    spacingLabel = Label(self)
+    spacingLabel.setFixedHeight(15)
     self.displayButton = Button(self, text='Select Modules', callback=self.showDisplayPopup)
     self.spectrumButton = Button(self, text='Select Inter/Intra Spectra', callback=self.showInterIntraPopup)
-    self.layout.addWidget(self.displayButton, 0, 0, 1, 1)
-    self.layout.addWidget(self.spectrumButton, 0, 2, 1, 1)
-    self.directionPullDown = PulldownList(self, grid=(0, 4), callback=self.selectAssignmentDirection)
+
+    self.directionPullDown = PulldownList(self, callback=self.selectAssignmentDirection)
+    self.layout.addWidget(self.directionPullDown, 1, 4, 1, 1)
     self.directionPullDown.setData(['', 'i-1', 'i+1'])
     # hsqcDisplay = hsqcDisplay
+    self.layout.addWidget(spacingLabel, 0, 1, 1, 1)
     self.project = project
     self.current = project._appBase.current
+
+    self.layout.addWidget(spacingLabel, 2, 1, 1, 1)
+    self.layout.addWidget(self.displayButton, 1, 0, 1, 1)
+    self.layout.addWidget(self.spectrumButton, 1, 2, 1, 1)
     self.peakTable = PeakListSimple(self, project=project, callback=self.findMatchingPeaks)
-    self.layout.addWidget(self.peakTable, 2, 0, 1, 6)
+    self.layout.addWidget(self.peakTable, 4, 0, 1, 6)
 
     self.lines = []
     self.numberOfMatches = 5

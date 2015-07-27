@@ -28,6 +28,8 @@ from ccpn.util import Io as ccpnIo
 
 from ccpncore.gui.Application import Application
 
+from ccpncore.memops.metamodel import Util as metaUtil
+
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Register
@@ -37,7 +39,7 @@ from ccpncore.util.Undo import Undo
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.Current import Current
 
-# from ccpnmrcore.popups.RegisterPopup import RegisterPopup
+from ccpnmrcore.popups.RegisterPopup import RegisterPopup
 
 import os, json
 
@@ -45,17 +47,16 @@ from PyQt4 import QtGui
 
 class AppBase(GuiBase):
 
-  def __init__(self, apiProject, applicationName, applicationVersion):
+  def __init__(self, apiProject, applicationName, applicationVersion, preferences):
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
     self.applicationName = applicationName
     self.applicationVersion = applicationVersion
+    self.preferences = preferences
     
-    self.setupPreferences()
     ###self.vLines = []
     ###self.hLines = []
     self.initProject(apiProject)
-
     
   def initProject(self, apiProject):
 
@@ -122,16 +123,27 @@ class AppBase(GuiBase):
     ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)
     print("project saved")
     
-  def setupPreferences(self):
+def getPreferences():
 
-    preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
-    if not os.path.exists(preferencesPath):
-      preferencesPath = os.path.join(Path.getPythonDirectory(), 'ccpnmrcore', 'app',
-                                     'defaultv3settings.json')
-    fp = open(preferencesPath)
-    self.preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
-    fp.close()
-    
+  preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
+  if not os.path.exists(preferencesPath):
+    preferencesPath = os.path.join(Path.getPythonDirectory(), 'ccpnmrcore', 'app',
+                                   'defaultv3settings.json')
+  fp = open(preferencesPath)
+  preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
+  fp.close()
+  
+  return preferences
+  
+def getStyleSheet(preferences):
+  
+  colourScheme = preferences.general.colourScheme
+  colourScheme = metaUtil.upperFirst(colourScheme)
+  
+  styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', '%sStyleSheet.qss' % colourScheme)).read()
+  
+  return styleSheet
+  
 def checkRegistration(applicationVersion):
   
   registrationDict = Register.loadDict()
@@ -159,12 +171,15 @@ def startProgram(programClass, applicationName, applicationVersion, projectPath=
   else:
     apiProject = ioUtil.newProject('default')
 
-  styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'DarkStyleSheet.qss')).read()
   # On the Mac (at least) it does not matter what you set the applicationName to be,
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
+  
+  preferences = getPreferences()  
+  styleSheet = getStyleSheet(preferences)
   app.setStyleSheet(styleSheet)
-  # if checkRegistration(applicationVersion):
-  program = programClass(apiProject, applicationName, applicationVersion)
-  app.start()
+  
+  if checkRegistration(applicationVersion):
+    program = programClass(apiProject, applicationName, applicationVersion, preferences)
+    app.start()
   

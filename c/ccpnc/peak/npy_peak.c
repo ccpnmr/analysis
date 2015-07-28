@@ -457,13 +457,16 @@ static CcpnBool check_linewidth(PyArrayObject *data_array, CcpnBool find_maximum
 static CcpnStatus find_peaks(PyArrayObject *data_array,
 	CcpnBool have_low, CcpnBool have_high, float low, float high,
 	long *buffer, CcpnBool nonadjacent, float drop_factor,
-	float *min_linewidth, PyObject *peak_list, char *error_msg)
+	float *min_linewidth, PyObject *peak_list,
+	PyObject *excluded_regions_obj, PyObject *diagonal_exclusion_dims_obj,
+	PyObject *diagonal_exclusion_transform_obj, char *error_msg)
 {
     int i, j, k, npoints, nadj_points, ndim, dim1, dim2;
     int cum_points[MAX_NDIM], cumulative[MAX_NDIM], points[MAX_NDIM];
     npy_intp point[MAX_NDIM];
     float v, a1, a2, b12, d, delta;
     CcpnBool find_maximum, ok_extreme, ok_drop, ok_linewidth, ok_buffer;
+    PyArrayObject *excluded_regions_array, *diagonal_exclusion_dims_array, *diagonal_exclusion_transform_array;
 
     ndim = PyArray_NDIM(data_array);
 
@@ -492,6 +495,45 @@ static CcpnStatus find_peaks(PyArrayObject *data_array,
     {
         ARRAY_OF_INDEX(point, i, cum_points, ndim);
 
+        for (j = 0; j < PyList_Size(diagonal_exclusion_dims_obj); j++)
+        {
+            diagonal_exclusion_dims_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_dims_obj, j);
+            diagonal_exclusion_transform_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_transform_obj, j);
+	    dim1 = *((int *) PyArray_GETPTR1(diagonal_exclusion_dims_array, 0));
+	    dim2 = *((int *) PyArray_GETPTR1(diagonal_exclusion_dims_array, 1));
+	    a1 = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 0));
+	    a2 = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 1));
+	    b12 = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 2));
+	    d = *((float *) PyArray_GETPTR1(diagonal_exclusion_transform_array, 3));
+	
+            delta = a1*point[dim1] - a2*point[dim2] + b12;
+            if (ABS(delta) < d)
+                break;
+        }
+
+        if (j < PyList_Size(diagonal_exclusion_dims_obj))
+            continue; /* point is in some excluded diagonal */
+
+        for (j = 0; j < PyList_Size(excluded_regions_obj); j++)
+        {
+            excluded_regions_array = (PyArrayObject *) PyList_GetItem(excluded_regions_obj, j);
+	    
+            for (k = 0; k < ndim; k++)
+            {
+		a1 = *((float *) PyArray_GETPTR2(excluded_regions_array, 0, k));
+		a2 = *((float *) PyArray_GETPTR2(excluded_regions_array, 1, k));
+                if ((point[k] < a1) ||
+                    (point[k] > a2))
+                    break; /* point is not in excluded region in this dim */
+            }
+
+            if (k == ndim)
+                break; /* point is in this excluded region */
+        }
+
+        if (j < PyList_Size(excluded_regions_obj))
+            continue; /* point is in some excluded region */
+	
 	v = get_value_at_point(data_array, point);
 //printf("i = %d, v = %f, high = %f\n", i, v, high);
 
@@ -784,16 +826,20 @@ static PyObject *findPeaks(PyObject *self, PyObject *args)
     CcpnBool nonadjacent, have_low, have_high;
     float low, high, drop_factor, min_linewidth[MAX_NDIM];
     PyObject *min_linewidth_obj, *buffer_obj, *z, *peak_list;
-    PyArrayObject *data_array;
+    PyObject *excluded_regions_obj, *diagonal_exclusion_dims_obj, *diagonal_exclusion_transform_obj;
+    PyArrayObject *data_array, *excluded_regions_array, *diagonal_exclusion_dims_array, *diagonal_exclusion_transform_array;
     char error_msg[1000];
 
-    if (!PyArg_ParseTuple(args, "O!iiffO!ifO!",
+    if (!PyArg_ParseTuple(args, "O!iiffO!ifO!O!O!O!",
 	&PyArray_Type, &data_array,
 	&have_low, &have_high, &low, &high,
 	&PyList_Type, &buffer_obj,
 	&nonadjacent, &drop_factor,
-	&PyList_Type, &min_linewidth_obj))
-        RETURN_OBJ_ERROR("need arguments: dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth");
+	&PyList_Type, &min_linewidth_obj,
+	&PyList_Type, &excluded_regions_obj,
+	&PyList_Type, &diagonal_exclusion_dims_obj,
+	&PyList_Type, &diagonal_exclusion_transform_obj))
+        RETURN_OBJ_ERROR("need arguments: dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, excludedRegions, diagonalExclusionDims, diagonalExclusionTransform");
 
     if (PyArray_TYPE(data_array) != NPY_FLOAT)
         RETURN_OBJ_ERROR("dataArray needs to be array of floats");
@@ -842,11 +888,88 @@ static PyObject *findPeaks(PyObject *self, PyObject *args)
 	min_linewidth[i] = (float) PyFloat_AsDouble(z);
     }
 
+    for (i = 0; i < PyList_Size(excluded_regions_obj); i++)
+    {
+    	excluded_regions_array = (PyArrayObject *) PyList_GetItem(excluded_regions_obj, i);
+	
+	if (!PyArray_Check(excluded_regions_array))
+	    RETURN_OBJ_ERROR("excludedRegions needs to be list of NumPy arrays");
+	
+    	if (PyArray_TYPE(excluded_regions_array) != NPY_FLOAT)
+            RETURN_OBJ_ERROR("excludedRegions needs to be list of NumPy float arrays");
+
+        if (PyArray_NDIM(excluded_regions_array) != 2)
+        {
+	    sprintf(error_msg, "excludedRegions must be list of 2 dimensional NumPy arrays");
+	    RETURN_OBJ_ERROR(error_msg);
+        }
+
+        if ((PyArray_DIM(excluded_regions_array, 0) != 2) || (PyArray_DIM(excluded_regions_array, 1) != ndim))
+        {
+	    sprintf(error_msg, "excludedRegions must be list of 2 x %ld NumPy arrays", ndim);
+	    RETURN_OBJ_ERROR(error_msg);
+        }
+    }
+ 
+    if (PyList_Size(diagonal_exclusion_dims_obj) != PyList_Size(diagonal_exclusion_transform_obj))
+    {
+	sprintf(error_msg, "diagonalExclusionDims is a list of size %ld, diagonalExclusionTransform is of size %ld, should be the same",
+	        (long) PyList_Size(diagonal_exclusion_dims_obj), (long) PyList_Size(diagonal_exclusion_transform_obj));
+	RETURN_OBJ_ERROR(error_msg);
+    }
+
+    for (i = 0; i < PyList_Size(diagonal_exclusion_dims_obj); i++)
+    {
+    	diagonal_exclusion_dims_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_dims_obj, i);
+	
+	if (!PyArray_Check(diagonal_exclusion_dims_array))
+	    RETURN_OBJ_ERROR("diagonalExclusionDims needs to be list of NumPy arrays");
+	
+    	if (PyArray_TYPE(diagonal_exclusion_dims_array) != NPY_INT)
+            RETURN_OBJ_ERROR("diagonalExclusionDims needs to be list of NumPy int arrays");
+
+        if (PyArray_NDIM(diagonal_exclusion_dims_array) != 1)
+        {
+	    sprintf(error_msg, "diagonalExclusionDims must be list of 1 dimensional NumPy arrays");
+	    RETURN_OBJ_ERROR(error_msg);
+        }
+
+        if (PyArray_DIM(diagonal_exclusion_dims_array, 0) != 2)
+        {
+	    sprintf(error_msg, "diagonalExclusionDims must be list of size 2 NumPy arrays");
+	    RETURN_OBJ_ERROR(error_msg);
+        }
+    }
+ 
+    for (i = 0; i < PyList_Size(diagonal_exclusion_transform_obj); i++)
+    {
+    	diagonal_exclusion_transform_array = (PyArrayObject *) PyList_GetItem(diagonal_exclusion_transform_obj, i);
+	
+	if (!PyArray_Check(diagonal_exclusion_transform_array))
+	    RETURN_OBJ_ERROR("diagonalExclusionTransform needs to be list of NumPy arrays");
+	
+    	if (PyArray_TYPE(diagonal_exclusion_transform_array) != NPY_FLOAT)
+            RETURN_OBJ_ERROR("diagonalExclusionTransform needs to be list of NumPy float arrays");
+
+        if (PyArray_NDIM(diagonal_exclusion_transform_array) != 1)
+        {
+	    sprintf(error_msg, "diagonalExclusionTransform must be list of 1 dimensional NumPy arrays");
+	    RETURN_OBJ_ERROR(error_msg);
+        }
+
+        if (PyArray_DIM(diagonal_exclusion_transform_array, 0) != 4)
+        {
+	    sprintf(error_msg, "diagonalExclusionTransform must be list of size 4 NumPy arrays");
+	    RETURN_OBJ_ERROR(error_msg);
+        }
+    }
+ 
     peak_list = PyList_New(0);
     if (!peak_list)
 	RETURN_OBJ_ERROR("allocating memory for peak list");
 
-    if (find_peaks(data_array, have_low, have_high, low, high, buffer, nonadjacent, drop_factor, min_linewidth, peak_list, error_msg) == CCPN_ERROR)
+    if (find_peaks(data_array, have_low, have_high, low, high, buffer, nonadjacent, drop_factor, min_linewidth, peak_list,
+                   excluded_regions_obj, diagonal_exclusion_dims_obj, diagonal_exclusion_transform_obj, error_msg) == CCPN_ERROR)
 	RETURN_OBJ_ERROR(error_msg);
 
     return peak_list;

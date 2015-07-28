@@ -27,7 +27,8 @@ import numpy
 def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
                  minLinewidth=None, exclusionBuffer=None,
                  minDropfactor=0.0, checkAllAdjacent=True,
-                 fitMethod=None):
+                 fitMethod=None, excludedRegions=None,
+                 excludedDiagonalDims=None, excludedDiagonalTransform=None):
 
   # TBD: ignores aliasing for now
   
@@ -52,6 +53,15 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
     exclusionBuffer =  [1] * numDim
 
   nonAdj = 1 if checkAllAdjacent else 0
+  
+  if not excludedRegions:
+    excludedRegions = []
+    
+  if not excludedDiagonalDims:
+    excludedDiagonalDims = []
+
+  if not excludedDiagonalTransform:
+    excludedDiagonalTransform = []
 
   startPoint = numpy.array(startPoint)
   endPoint = numpy.array(endPoint)
@@ -68,6 +78,18 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
   startPointInt = numpy.array(startPointInt)
   endPointInt = numpy.array(endPointInt)
   numPointInt = endPointInt - startPointInt
+  
+  startPointBuffer = numpy.array(startPointBuffer, dtype='float32')
+  excludedRegionsList = [numpy.array(excludedRegion, dtype='float32')-startPointBuffer for excludedRegion in excludedRegions]
+  
+  excludedDiagonalDimsList = []
+  excludedDiagonalTransformList = []
+  for n in range(len(excludedDiagonalDims)):
+    dim1, dim2 = excludedDiagonalDims[n]
+    a1, a2, b12, d = excludedDiagonalTransform[n]
+    b12 += a1*startPointBuffer[dim1] - a2*startPointBuffer[dim2]
+    excludedDiagonalDimsList.append(numpy.array((dim1, dim2), dtype='int32'))
+    excludedDiagonalTransformList.append(numpy.array((a1, a2, b12, d), dtype='float32'))
   
   """
   existingPeaks = getRegionPeaks(peakList, startPointInt, endPointInt)
@@ -89,9 +111,11 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
   doNeg = negLevel is not None
   posLevel = posLevel or 0.0
   negLevel = negLevel or 0.0
+    
   peakPoints = Peak.findPeaks(dataArray, doNeg, doPos,
                               negLevel, posLevel, exclusionBuffer,
-                              nonAdj, minDropfactor, minLinewidth)
+                              nonAdj, minDropfactor, minLinewidth,
+                              excludedRegionsList, excludedDiagonalDimsList, excludedDiagonalTransformList)
 
   peakPoints = [(numpy.array(position), height) for position, height in peakPoints]
   

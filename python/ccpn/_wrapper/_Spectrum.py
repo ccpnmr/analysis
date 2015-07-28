@@ -717,7 +717,7 @@ class Spectrum(AbstractWrapperObject):
           dataDimRef.dataDim.valuePerPoint *= (sw/oldsw)
 
   @property
-  def spectralLimits(self) -> tuple:
+  def spectrumLimits(self) -> tuple:
     """\- (*(float,float)*)\*dimensionCount
 
     tuple of tuples of (lowerLimit, higherLimit) for spectrum """

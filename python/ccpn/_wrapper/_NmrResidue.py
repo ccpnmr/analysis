@@ -128,6 +128,42 @@ class NmrResidue(AbstractWrapperObject):
   def residue(self, value:Residue):
     self._wrappedData.assignedResidue = None if value is None else value._wrappedData
 
+  @property
+  def probableResidues(self) -> tuple:
+    """tuple of (residue, probability) tuples for probable residue asignments"""
+    getObj = self._project._data2Obj.get
+    ll = [(x.weight, x.possibility) for x in self._wrappedData.residueProbs]
+    totalWeight = sum(tt[0] for tt in ll)
+    return tuple((getObj(tt[1]), tt[0]/totalWeight) for tt in ll)
+
+  @probableResidues.setter
+  def probableResidues(self, value):
+    apiResonanceGroup = self._wrappedData
+    for residueProb in apiResonanceGroup.residueProbs:
+      residueProb.delete()
+    for weight, residue in value:
+      apiResonanceGroup.newResidueProb(residue=residue._wrappedData, weight=weight)
+
+  @property
+  def probableResidueTypes(self) -> tuple:
+    """tuple of (residueType, probability) tuples for probable residue types"""
+    ll = [(x.weight, x.possibility) for x in self._wrappedData.residueTypeProbs]
+    totalWeight = sum(tt[0] for tt in ll)
+    return tuple((tt[1].code3Letter, tt[0]/totalWeight) for tt in ll)
+
+  @probableResidueTypes.setter
+  def probableResidueTypes(self, value):
+    apiResonanceGroup = self._wrappedData
+    root = apiResonanceGroup.root
+    for residueTypeProb in apiResonanceGroup.residueTypeProbs:
+      residueTypeProb.delete()
+    for weight, residueType in value:
+      chemComp = root.findFirstChemComp(code3Letter=residueType)
+      if chemComp is None:
+        print("Residue type %s not recognised - skipping" % residueType)
+      else:
+        apiResonanceGroup.newResidueTypeProb(chemComp=chemComp, weight=weight)
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:

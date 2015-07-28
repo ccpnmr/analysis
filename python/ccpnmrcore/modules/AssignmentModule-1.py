@@ -10,14 +10,12 @@ from ccpncore.gui.ListWidget import ListWidget
 #from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.CheckBox import CheckBox
-import assignmentBasic
-#reload(assignmentBasic)
-from ccpnmrcore.modules.assignmentModuleLogic import (get_all_nmrAtoms, nmrAtoms_for_peaks,
-                                                      peaks_are_on_line, intersection_of_all,
-                                                      same_axis_codes,
-                                                      get_axisCode_for_peak_dimension,
-                                                      get_isotope_code_for_peak_dimension,
-                                                      get_shift_list_for_peak)
+from ccpnmrcore.gui.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,
+                                                      peaksAreOnLine, intersectionOfAll,
+                                                      sameAxisCodes,
+                                                      getAxisCodeForPeakDimension,
+                                                      getIsotopeCodeForPeakDimension,
+                                                      getShiftlistForPeak)
 
 
 class AssignmentModule(CcpnDock, Base):
@@ -110,7 +108,7 @@ class AssignmentModule(CcpnDock, Base):
       print('Not all peaks have the same number of dimensions.')
       return False
     for dim in range(len(self.peaks[0].position)):
-      if not same_axis_codes(self.peaks, dim):
+      if not sameAxisCodes(self.peaks, dim):
         print('''The combination of axiscodes is different for multiple
                  selected peaks.''')
         return False
@@ -138,16 +136,16 @@ class AssignmentModule(CcpnDock, Base):
     peaks = self.peaks
     doubleTolerance = self.doubleToleranceCheckbox.isChecked()
     intraResidual = self.intraCheckbox.isChecked()
-    all_nmrAtoms = get_all_nmrAtoms(self.project)
-    nmrAtoms_for_tables = nmrAtoms_for_peaks(peaks, all_nmrAtoms,
+    allNmrAtoms = getAllNmrAtoms(self.project)
+    nmrAtomsForTables = nmrAtomsForPeaks(peaks, allNmrAtoms,
                                              doubleTolerance=doubleTolerance,
                                              intraResidual=intraResidual)
-    Ndimensions = len(nmrAtoms_for_tables)
+    Ndimensions = len(nmrAtomsForTables)
 
     for dim, objectTable, nmrAtoms in zip(range(Ndimensions),
                                           self.objectTables,
-                                          nmrAtoms_for_tables):
-      if peaks_are_on_line(peaks, dim):
+                                          nmrAtomsForTables):
+      if peaksAreOnLine(peaks, dim):
         objectTable.setObjects(sorted(nmrAtoms) + [NEW])
         objectTable.show()
       else:
@@ -241,7 +239,7 @@ class AssignmentModule(CcpnDock, Base):
     for dim, listWidget in zip(range(Ndimensions), self.listWidgets):
 
       nmrAtoms = [set(peak.dimensionNmrAtoms[dim]) for peak in self.peaks]
-      nmrAtoms = intersection_of_all(nmrAtoms)
+      nmrAtoms = intersectionOfAll(nmrAtoms)
       listWidget.addItems([str(a.pid) for a in nmrAtoms])
       listWidget.show()
       required_heights.append(listWidget.sizeHintForRow(0) * len(nmrAtoms))
@@ -272,11 +270,11 @@ class AssignmentModule(CcpnDock, Base):
     if nmrAtom is NOL:
       return
     elif nmrAtom is NEW:
-      isotope = get_isotope_code_for_peak_dimension(self.peaks[0], dim)
+      isotope = getIsotopeCodeForPeakDimension(self.peaks[0], dim)
       nmrAtom = self.project.newNmrChain().newNmrResidue().newNmrAtom(isotopeCode=isotope)
 
     for peak in self.peaks:
-      axisCode = get_axisCode_for_peak_dimension(peak, dim)
+      axisCode = getAxisCodeForPeakDimension(peak, dim)
 
       if nmrAtom not in peak.dimensionNmrAtoms[dim]:
         newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
@@ -297,7 +295,7 @@ class AssignmentModule(CcpnDock, Base):
 
     deltas = []
     for peak in self.peaks:
-      shiftList = get_shift_list_for_peak(peak)
+      shiftList = getShiftlistForPeak(peak)
       if shiftList:
         shift = shiftList.findChemicalShift(nmrAtom)
         if shift:

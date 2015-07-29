@@ -469,14 +469,10 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
             strip.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
       finally:
         strip.beingUpdated = False
+        
 # Add notifier function to Project
-Project._axisRegionChanged = _axisRegionChanged
-# Register notifier for registering/unregistering
-Project._apiNotifiers.append(('_axisRegionChanged', {},
-                              ApiAxis._metaclass.qualifiedName(), 'setPosition'))
-Project._apiNotifiers.append(('_axisRegionChanged', {},
-                              ApiAxis._metaclass.qualifiedName(), 'setWidth'))
-
+for apiFuncName in ('setPosition', 'setWidth'):
+  Project._setupNotifier(_axisRegionChanged, ApiAxis, apiFuncName)
 
 def _setupGuiStrip(project:Project, apiStrip:ApiStrip):
   """Set up graphical parameters for completed strips - for notifiers"""
@@ -494,14 +490,10 @@ def _setupGuiStrip(project:Project, apiStrip:ApiStrip):
                                 axisCode=orderedAxes[1].code)
   strip.viewBox.sigStateChanged.connect(strip.moveAxisCodeLabels)
   strip.viewBox.sigRangeChanged.connect(strip.updateRegion)
-# Add notifier function to Project
-Project._setupGuiStrip = _setupGuiStrip
-# Register notifier for registering/unregistering
-Project._apiNotifiers.append(('_setupGuiStrip', {},
-                              ApiBoundStrip._metaclass.qualifiedName(), 'postInit'))
-Project._apiNotifiers.append(('_setupGuiStrip', {},
-                              ApiFreeStrip._metaclass.qualifiedName(), 'postInit'))
 
+# Add notifier function to Project
+for clazz in (ApiBoundStrip, ApiFreeStrip):
+  Project._setupNotifier(_setupGuiStrip, clazz, 'postInit')
 
 def _rulerCreated(project:Project, apiRuler:ApiRuler):
   """Notifier function for creating rulers"""
@@ -532,19 +524,13 @@ def _rulerDeleted(project:Project, apiRuler:ApiRuler):
         strip.plotWidget.removeItem(line)
 
 # Add notifier functions to Project
-Project._rulerCreated = _rulerCreated
-Project._rulerDeleted = _rulerDeleted
-# Register notifier for registering/unregistering
-Project._apiNotifiers.append(('_rulerCreated', {},
-                              ApiRuler._metaclass.qualifiedName(), 'postInit'))
-Project._apiNotifiers.append(('_rulerDeleted', {},
-                              ApiRuler._metaclass.qualifiedName(), 'preDelete'))
-
+Project._setupNotifier(_rulerCreated, ApiRuler, 'postInit')
+Project._setupNotifier(_rulerDeleted, ApiRuler, 'preDelete')
 
 def _refreshAllStripContours(project:Project, apiDatSource:ApiDataSource):
   for apiSpectrumView in apiDatSource.spectrumViews:
     for apiStrip in apiSpectrumView.strips:
       project._data2Obj[apiStrip].update()
-Project._refreshAllStripContours = _refreshAllStripContours
-Project._apiNotifiers.append(('_refreshAllStripContours', {},
-                              ApiDataSource._metaclass.qualifiedName(), ''))
+
+# Add notifier function to Project
+Project._setupNotifier(_refreshAllStripContours, ApiDataSource, '')

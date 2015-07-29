@@ -28,10 +28,12 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn import Project
 
+from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 
-from ccpncore.memops import Notifiers
+#from ccpncore.memops import Notifiers
 
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.VerticalLabel import VerticalLabel
@@ -80,14 +82,14 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     
     GuiSpectrumDisplay.__init__(self)
     
-    Notifiers.registerNotify(self._deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
+    #Notifiers.registerNotify(self._deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
     # Notifiers.registerNotify(self._addedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', '__init__')
     # Notifiers.registerNotify(self._removedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', 'delete')
-    for func in ('setPositiveContourColour', 'setSliceColour'):
-      Notifiers.registerNotify(self._setActionIconColour, 'ccp.nmr.Nmr.DataSource', func)
+    # for func in ('setPositiveContourColour', 'setSliceColour'):
+    #   Notifiers.registerNotify(self._setActionIconColour, 'ccp.nmr.Nmr.DataSource', func)
     
     self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button)
-    self.apiStripSpectrumViews = set()  # set of apiStripSpectrumViews seen so far
+    # self.apiStripSpectrumViews = set()  # set of apiStripSpectrumViews seen so far
     
     self.fillToolBar()
     self.setAcceptDrops(True)
@@ -335,6 +337,8 @@ def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
   
   getDataObj = project._data2Obj.get
   spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+  if not isinstance(spectrumDisplay, GuiStripDisplayNd):
+    return
 
   apiDataSource = apiSpectrumView.dataSource
   action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be None
@@ -357,6 +361,9 @@ def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpec
   apiSpectrumView = apiStripSpectrumView.spectrumView
   getDataObj = project._data2Obj.get
   spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+  if not isinstance(spectrumDisplay, GuiStripDisplayNd):
+    return
+
   apiDataSource = apiSpectrumView.dataSource
   action = _createdSpectrumView(project, apiSpectrumView) # _createdStripSpectrumView is called before _createdSpectrumView so need this duplicate call here
   spectrumView = getDataObj(apiStripSpectrumView)
@@ -369,6 +376,9 @@ def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpec
 def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
   """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
   spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]
+  if not isinstance(spectrumDisplay, GuiStripDisplayNd):
+    return
+
   apiDataSource = apiSpectrumView.dataSource
 
   # remove toolbar action (button)
@@ -380,3 +390,26 @@ def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
 Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
 Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
 Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
+
+def _setActionIconColour(project:Project, apiDataSource:ApiDataSource):
+  
+  # TBD: the below might not be the best way to get hold of the spectrumDisplays
+  for task in project.tasks:
+    if task.status == 'active':
+      for spectrumDisplay in task.spectrumDisplays:
+        if isinstance(spectrumDisplay, GuiStripDisplayNd):
+          spectrumDisplay._setActionIconColour(apiDataSource)
+
+for apiFuncName in ('setPositiveContourColour', 'setSliceColour'):
+  Project._setupNotifier(_setActionIconColour, ApiDataSource, apiFuncName)
+
+def _deletedPeak(project:Project, apiPeak:ApiPeak):
+  
+  # TBD: the below might not be the best way to get hold of the spectrumDisplays
+  for task in project.tasks:
+    if task.status == 'active':
+      for spectrumDisplay in task.spectrumDisplays:
+        if isinstance(spectrumDisplay, GuiStripDisplayNd):
+          spectrumDisplay._deletedPeak(apiPeak)
+
+Project._setupNotifier(_deletedPeak, ApiPeak, 'delete')

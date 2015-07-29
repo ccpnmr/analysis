@@ -26,6 +26,7 @@ import ccpnmr
 from ccpncore.util import Io as ioUtil
 from ccpn.util import Io as ccpnIo
 
+
 from ccpncore.gui.Application import Application
 from ccpncore.gui import resources_rc
 
@@ -48,17 +49,17 @@ from PyQt4 import QtGui
 
 class AppBase(GuiBase):
 
-  def __init__(self, apiProject, applicationName, applicationVersion, preferences):
+  def __init__(self, apiProject, applicationName, applicationVersion,  preferences, module=None,):
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
     self.applicationName = applicationName
     self.applicationVersion = applicationVersion
     self.preferences = preferences
-    
+    self.module = module
     ###self.vLines = []
     ###self.hLines = []
     self.initProject(apiProject)
-    
+
   def initProject(self, apiProject):
 
     # Done this way to sneak the appBase in before creating the wrapper
@@ -82,6 +83,8 @@ class AppBase(GuiBase):
     # mainWindow = project.getWindow('Main')
     mainWindow = project._data2Obj[apiWindowStore.findFirstWindow(title='Main')]
     self.mainWindow = mainWindow
+    if self.module == 'screen':
+      self.mainWindow.menuBar.addMenu(self.mainWindow.screenMenu)
     mainWindow.raise_()
 
     if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):

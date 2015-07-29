@@ -116,7 +116,7 @@ def findPeaks1dFiltered(peakList, size=9, mode='wrap'):
      peakList.newPeak(height=float(height), position=peakPosition)
 
 
-   # # print(self.peakListItems[peakList.pid])#.createPeakItems()
+   # print(self.peakListItems[peakList.pid])#.createPeakItems()
 
 def _havePeakNearPosition(values, tolerances, peaks):
 

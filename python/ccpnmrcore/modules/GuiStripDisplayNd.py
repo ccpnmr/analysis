@@ -27,12 +27,14 @@ __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 
 from ccpn import Project
+
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpncore.gui.Icon import Icon
-from ccpncore.gui.VerticalLabel import VerticalLabel
 
 from ccpncore.memops import Notifiers
+
+from ccpncore.gui.Icon import Icon
+from ccpncore.gui.VerticalLabel import VerticalLabel
 
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
@@ -330,6 +332,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
 def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
   """Set up SpectrumDisplay when new SpectrumView is created - for notifiers"""
+  
   getDataObj = project._data2Obj.get
   spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
 
@@ -355,7 +358,7 @@ def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpec
   getDataObj = project._data2Obj.get
   spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
   apiDataSource = apiSpectrumView.dataSource
-  action = _createdSpectrumView(project, apiSpectrumView)
+  action = _createdSpectrumView(project, apiSpectrumView) # _createdStripSpectrumView is called before _createdSpectrumView so need this duplicate call here
   spectrumView = getDataObj(apiStripSpectrumView)
   action.toggled.connect(spectrumView.setVisible)
 
@@ -374,14 +377,6 @@ def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
     spectrumDisplay.spectrumToolBar.removeAction(action)
     del spectrumDisplay.spectrumActionDict[apiDataSource]
 
-# Add notifier functions to Project
-Project._createdSpectrumView = _createdSpectrumView
-Project._deletedSpectrumView = _deletedSpectrumView
-Project._createdStripSpectrumView = _createdStripSpectrumView
-# Register notifier for registering/unregistering
-Project._apiNotifiers.append(('_createdSpectrumView', {},
-                              ApiSpectrumView._metaclass.qualifiedName(), 'postInit'))
-Project._apiNotifiers.append(('_deletedSpectrumView', {},
-                              ApiSpectrumView._metaclass.qualifiedName(), 'preDelete'))
-Project._apiNotifiers.append(('_createdStripSpectrumView', {},
-                              ApiStripSpectrumView._metaclass.qualifiedName(), 'postInit'))
+Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
+Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
+Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')

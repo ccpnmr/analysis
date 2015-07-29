@@ -27,6 +27,10 @@ import importlib, os
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn import Project
+
+from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ScrollArea import ScrollArea
@@ -92,6 +96,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     removeStripAction = self.spectrumUtilToolBar.addAction('Remove Strip', lambda self=self: self.orderedStrips[-1].delete()) # remove last strip
     removeStripIcon = Icon('iconsNew/minus')
     removeStripAction.setIcon(removeStripIcon)
+    self.removeStripAction = removeStripAction
 
   def cloneStrip(self):
     newStrip = self._appBase.current.strip.clone()
@@ -123,3 +128,21 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     for strip in self.strips:
       strip.setCrossHairPosition(axisPositionDict)
     
+def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
+  """Update interface when a strip is created"""
+  
+  getDataObj = project._data2Obj.get
+  spectrumDisplay = getDataObj(apiStripSpectrumView.strip.spectrumDisplay)
+  enabled = len(spectrumDisplay.strips) > 1
+  spectrumDisplay.removeStripAction.setEnabled(enabled)
+  
+def _deletedStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
+  """Update interface when a strip is deleted"""
+  
+  getDataObj = project._data2Obj.get
+  spectrumDisplay = getDataObj(apiStripSpectrumView.strip.spectrumDisplay)
+  enabled = len(spectrumDisplay.strips) > 2  # 2 not 1 because this strip has not been deleted yet
+  spectrumDisplay.removeStripAction.setEnabled(enabled)
+  
+Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
+Project._setupNotifier(_deletedStripSpectrumView, ApiStripSpectrumView, 'preDelete')

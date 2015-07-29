@@ -55,20 +55,19 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
     self.data = self.getSliceData()
 
-    for strip in self.strips:
-      if self.spectrum.sliceColour is None:
-        if len(strip.spectrumViews) < 12:
-          self.spectrum.sliceColour = list(spectrumColours.keys())[len(strip.spectrumViews)-1]
-        else:
-          self.spectrum.sliceColour = list(spectrumColours.keys())[(len(strip.spectrumViews) % 12)-1]
+    # for strip in self.strips:
+    if self.spectrum.sliceColour is None:
+      if len(self.strip.spectrumViews) < 12:
+        self.spectrum.sliceColour = list(spectrumColours.keys())[len(self.strip.spectrumViews)-1]
+      else:
+        self.spectrum.sliceColour = list(spectrumColours.keys())[(len(self.strip.spectrumViews) % 12)-1]
 
-      self.plot  = strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
-      self.plot.curve.setClickable(True)
-      self.plot.sigClicked.connect(self.clicked)
-      # NBNB should be handled by notifiers now, but NBNB this is not tested
-      # for peakList in self.spectrum.peakLists:
-      #   strip.showPeaks(peakList)
-    spectrumViewButton = ToolButton(self.spectrumDisplay, self)
+    self.plot  = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
+    self.plot.curve.setClickable(True)
+    self.plot.sigClicked.connect(self.clicked)
+    for peakList in self.spectrum.peakLists:
+      self.strip.showPeaks(peakList)
+    # spectrumViewButton = ToolButton(self.spectrumDisplay, self)
 
 
 

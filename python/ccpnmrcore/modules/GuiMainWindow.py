@@ -42,11 +42,12 @@ from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
 #from ccpnmrcore.modules.ParassignPeakTable import ParassignModule
 from ccpnmrcore.modules.PeakTable import PeakTable
+from ccpnmrcore.modules.SampleComponentPeakTable import SampleComponentsPeakTable
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.modules.SequenceModule import SequenceModule
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-
+from ccpnmrcore.popups.SampleSetupPopup import SamplePopup
 from ccpncore.util import Io as ioUtil
 from ccpncore.util import Pid
 
@@ -63,12 +64,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       ##apiWindow.addModule(apiModule)
       #apiModule = apiGuiTask.newTaskModule(name=self.INITIAL_MODULE_NAME)
       #apiWindow.addModule(apiModule)
+    #
+    self.setGeometry(540,40,900,900)
+
     GuiWindow.__init__(self)
     self.setupWindow()
     self.setupMenus()
     self.initProject()
-    self.resize(1200, 700)
+
+
+
     # self.setFixedWidth(QtGui.QApplication.desktop().screenGeometry().width())
+
 
 
   def initProject(self):
@@ -129,9 +136,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.heightMax = 200
 
     self.leftWidget = SideBar(parent=self)
+
     self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
-    self.leftWidget.setGeometry(0, 0, 10, 600)
-    self.leftWidget.setSizePolicy(QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Fixed)
+    self.leftWidget.setGeometry(0, 0, 13, 600)
+    self.leftWidget.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
     self.splitter3.addWidget(self.leftWidget)
     self.splitter1.addWidget(self.splitter3)
@@ -152,11 +160,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.statusBar().showMessage('Ready')
     self.setShortcuts()
 
+
   def setupMenus(self):
 
     self._menuBar =  MenuBar(self)
     # print(self._menuBar.font())
     fileMenu = Menu("&Project", self)
+    self.screenMenu = QtGui.QMenu("&Screen", self)
     peaksMenu = Menu("Peaks", self)
     viewMenu = Menu("&View", self)
     moleculeMenu = Menu("&Molecules", self)
@@ -165,7 +175,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroMenu = Menu("Macro", self)
     helpMenu = Menu("&Help", self)
 
+
     fileMenu.addAction(Action(self, "New", callback=self._appBase.newProject, shortcut='pn'))
+
     fileMenu.addAction(Action(self, "Open...", callback=self.openAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
@@ -189,6 +201,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addAction(Action(self, "Preferences...", callback=self.showApplicationPreferences))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Close Program", callback=self.quitAction, shortcut="qt"))
+
+    # self.screenMenu.setHidden(True)
+    # self.screenMenu.addAction(Action(self, 'Empty', callback=self.showSideBar))#, shortcut="ss"))
+    self.screenMenu.addSeparator()
+    self.screenMenu.addAction(Action(self, 'Generate samples', callback=self.createSample, shortcut="cs"))
+    self.screenMenu.addSeparator()
+    self.screenMenu.addAction(Action(self, "View Sample Component peak Table", callback=self.SampleComponentTable, shortcut="st"))
+
 
     # spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
     # spectrumMenu.addAction(Action(self, "Remove...", callback=self.removeSpectra))
@@ -221,6 +241,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
     moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
+    moleculeMenu.addAction(Action(self, "Show Molecule Display", callback=self.showMoleculeDisplay, shortcut='md'))
 
     macroMenu.addAction(Action(self, "Edit...", callback=self.editMacro))
     macroMenu.addAction(Action(self, "New from Logfile...", callback=self.newMacroFromLog))
@@ -239,7 +260,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # viewNewMenu.addAction(Action(self, "nD Spectral Pane", callback=self.addSpectrumNdDisplay))
     # viewNewMenu.
     viewNewMenu.addAction(Action(self, "NMR Residue Table", callback=self.showNmrResidueTable, shortcut='nr'))
-
 
     viewLayoutMenu = viewMenu.addMenu("Layout")
     viewLayoutMenu.addAction(Action(self, "Default", callback=self.setLayoutToDefault))
@@ -273,9 +293,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
     self._menuBar.addMenu(fileMenu)
     self._menuBar.addMenu(peaksMenu)
+
+    if self._appBase.applicationName == 'Screen':
+      self._menuBar.addMenu(self.screenMenu)
+
+
     self._menuBar.addMenu(moleculeMenu)
-    # if self._appBase.applicationName == 'Assign':
-    self._menuBar.addMenu(assignMenu)
+    if self._appBase.applicationName == 'Assign':
+      self._menuBar.addMenu(assignMenu)
     if self._appBase.applicationName == 'Structure':
       self._menuBar.addMenu(restraintsMenu)
       self._menuBar.addMenu(structuresMenu)
@@ -434,6 +459,20 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     QtGui.QApplication.quit()
 
+  def createSample(self):
+    print(self.project)
+    popup = SamplePopup(parent=None, project=self.project)
+    popup.exec_()
+    popup.raise_()
+
+
+  def SampleComponentTable(self, position='left', relativeTo=None):
+    SCPT = SampleComponentsPeakTable(self._project)
+    if relativeTo is not None:
+      self.dockArea.addDock(SCPT, position=position, relativeTo=relativeTo)
+    else:
+      self.dockArea.addDock(SCPT, position='bottom')
+
   def removeSpectra(self):
     pass
 
@@ -557,6 +596,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         self.pythonConsole.runCmd(line)
 
     f.close()
+
+  def showMoleculeDisplay(self):
+    from ccpn.lib.moleculebox import MoleculeDisplay
+    self.moleculeDisplay = MoleculeDisplay(self.dockArea)
 
   def showPeakTable(self, position='left', relativeTo=None):
     peakList = PeakTable(self._project)

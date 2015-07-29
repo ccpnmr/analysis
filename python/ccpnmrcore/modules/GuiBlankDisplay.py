@@ -68,6 +68,8 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     self.label2.setAlignment(QtCore.Qt.AlignCenter)
     self.layout.addWidget(self.label2)
     self.label2.dropEvent = self.dropCallback
+    self.layout.addWidget(self.label)
+
 
     DropBase.__init__(self, dockArea.guiWindow._appBase, self.dropCallback)
 

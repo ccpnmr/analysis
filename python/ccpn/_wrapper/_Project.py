@@ -59,7 +59,20 @@ class Project(AbstractWrapperObject):
   # pid to object and ccpnData to object
   #__slots__ = ['_pid2Obj', '_data2Obj']
   
+  @staticmethod
+  def _setupNotifier(func, apiClassOrName, apiFuncName, parameterDict=None):
   
+    if parameterDict is None:
+      parameterDict = {}
+      
+    apiClassName = apiClassOrName if isinstance(apiClassOrName, str) else apiClassOrName._metaclass.qualifiedName()
+        
+    ss = '_dot_'
+    wrapperFuncName = '%s%s%s' % (func.__module__.replace('.', ss), ss, func.__name__)
+    
+    setattr(Project, wrapperFuncName, func)
+    Project._apiNotifiers.append((wrapperFuncName, parameterDict, apiClassName, apiFuncName))
+    
   # Implementation methods
   def __init__(self, wrappedData: ApiNmrProject):
     """ Special init for root (Project) object
@@ -298,5 +311,4 @@ class Project(AbstractWrapperObject):
     #
     self._pidSortKeys[key] = result
     return result
-
-
+      

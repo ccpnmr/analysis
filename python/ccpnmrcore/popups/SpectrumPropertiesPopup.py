@@ -499,6 +499,3 @@ class AcquisitionTab(QtGui.QWidget):
       spinningAngleData = LineEdit(self, grid=(6, 1))
       spinningRateLabel = Label(self, text="Spinning Rate: ", grid=(7, 0))
       spinningRateData = LineEdit(self, grid=(7, 1))
-
-
-

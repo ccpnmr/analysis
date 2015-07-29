@@ -25,6 +25,7 @@ __author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
 import pandas as pd
+from ccpncore.gui.Button import Button
 
 import sys
 import os
@@ -39,63 +40,97 @@ experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'W
 class SideBar(QtGui.QTreeWidget):
   def __init__(self, parent=None ):
     QtGui.QTreeWidget.__init__(self, parent)
-    # self.setStyleSheet("""
-    # QTreeWidget { background-color: #020F31;
-    # }
-    # QTreeWidget::item {background-color: #0e1a3d;
-    #                    color: #bec4f3;
-    #                    }
-    # QTreeWidget::item::selected {
-    #                   background-color: #666e98;
-    #                   color: #f7ffff;
-    #                   }
-    # QTreeWidget::item::hover {
-    #                   background-color: #424a71;
-    #                   color: #e4e15b;
-    #                   }
-    # QTreeView:branch:{
-    # background-color: #e4e15b;
-    # }
-    # """)
+
     self.setFont(QtGui.QFont('Lucida Grande', 12))
     self.header().hide()
     self.setDragEnabled(True)
+    self.parent = parent
     self.setDragDropMode(self.InternalMove)
     # self._dragroot = self.itemRootIndex()
     self.setFixedWidth(180)
     self.projectItem = QtGui.QTreeWidgetItem(self)
     self.projectItem.setText(0, "Project")
+    self.projectItem.setExpanded(True)
     self.spectrumItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setText(0, "Spectra")
-    self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
-    self.spectrumReference.setText(0, "Chains")
-    # chainA = QtGui.QTreeWidgetItem(self.spectrumReference)
-    # chainA.setText(0, 'Chain A')
-    # chainB = QtGui.QTreeWidgetItem(self.spectrumReference)
-    # chainB.setText(0, 'Chain B')
-    # chainC = QtGui.QTreeWidgetItem(self.spectrumReference)
-    # chainC.setText(0, 'Chain C')
-    # self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
-    # self.spectrumScreening.setText(0, "Screening")
-    # self.spectrumMixtures = QtGui.QTreeWidgetItem(self.projectItem)
-    # self.spectrumMixtures.setText(0, "Mixtures")
-    # # self.restraintsItem = QtGui.QTreeWidgetItem(self.projectItem)
-    # # self.restraintsItem.setText(0, "Restraint Lists")
-    # self.spectrumDeleted = QtGui.QTreeWidgetItem(self.projectItem)
-    # self.spectrumDeleted.setText(0, "Deleted")
-    # self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
-    # self.structuresItem.setText(0, "Structures")
-    # self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
-    # self.samplesItem.setText(0, "Samples")
-    self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
-    self.notesItem.setText(0, "Notes")
-    self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
-    self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
-    self.parent = parent
-    self.moreItem = QtGui.QTreeWidgetItem(self.projectItem)
-    self.moreItem.setText(0, 'More...')
-    self.substancesItem = QtGui.QTreeWidgetItem(self.moreItem)
-    self.substancesItem.setText(0, "Substances")
+    if self.parent._appBase.applicationName == 'Assign':
+
+      self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
+      self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
+      self.spectrumReference.setText(0, "Chains")
+      # chainA = QtGui.QTreeWidgetItem(self.spectrumReference)
+      # chainA.setText(0, 'Chain A')
+      # chainB = QtGui.QTreeWidgetItem(self.spectrumReference)
+      # chainB.setText(0, 'Chain B')
+      # chainC = QtGui.QTreeWidgetItem(self.spectrumReference)
+      # chainC.setText(0, 'Chain C')
+      # self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
+      # self.spectrumScreening.setText(0, "Screening")
+      # self.spectrumMixtures = QtGui.QTreeWidgetItem(self.projectItem)
+      # self.spectrumMixtures.setText(0, "Mixtures")
+      # # self.restraintsItem = QtGui.QTreeWidgetItem(self.projectItem)
+      # # self.restraintsItem.setText(0, "Restraint Lists")
+      # self.spectrumDeleted = QtGui.QTreeWidgetItem(self.projectItem)
+      # self.spectrumDeleted.setText(0, "Deleted")
+      # self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
+      # self.structuresItem.setText(0, "Structures")
+      # self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
+      # self.samplesItem.setText(0, "Samples")
+      self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
+      self.notesItem.setText(0, "Notes")
+      self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
+      self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
+      self.parent = parent
+      self.moreItem = QtGui.QTreeWidgetItem(self.projectItem)
+      self.moreItem.setText(0, 'More...')
+      self.substancesItem = QtGui.QTreeWidgetItem(self.moreItem)
+      self.substancesItem.setText(0, "Substances")
+
+      self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
+
+
+      self.spectrumReference.setText(0, "Chains")
+      chainA = QtGui.QTreeWidgetItem(self.spectrumReference)
+      chainA.setText(0, 'Chain A')
+      chainB = QtGui.QTreeWidgetItem(self.spectrumReference)
+      chainB.setText(0, 'Chain B')
+      chainC = QtGui.QTreeWidgetItem(self.spectrumReference)
+      chainC.setText(0, 'Chain C')
+      self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
+      self.structuresItem.setText(0, "Structures")
+      # self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
+      # self.samplesItem.setText(0, "Samples")
+      self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
+      self.notesItem.setText(0, "Notes")
+      # self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
+      # self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
+
+      self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
+      self.notesItem.setText(0, "Notes")
+      # self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
+      # self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
+      self.moreItem = QtGui.QTreeWidgetItem(self.projectItem)
+      self.moreItem.setText(0, 'More...')
+      self.substancesItem = QtGui.QTreeWidgetItem(self.moreItem)
+      self.substancesItem.setText(0, "Substances")
+
+    if self.parent._appBase.applicationName == 'Screen':
+      self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
+      self.spectrumScreening.setExpanded(True)
+      self.spectrumScreening.setText(0, "Screening")
+
+      self.spectrumReference = QtGui.QTreeWidgetItem(self.spectrumScreening)
+      self.spectrumReference.setText(0, "Reference")
+      self.spectrumReference.setExpanded(True)
+      self.spectrumSamples = QtGui.QTreeWidgetItem(self.spectrumScreening)
+      self.spectrumSamples.setText(0, "Samples")
+      self.spectrumSamples.setExpanded(True)
+      # self.restraintsItem = QtGui.QTreeWidgetItem(self.projectItem)
+      # self.restraintsItem.setText(0, "Restraint Lists")
+
+
+
+    #
 
 
 
@@ -119,43 +154,69 @@ class SideBar(QtGui.QTreeWidget):
         anItem = QtGui.QTreeWidgetItem(newItem)
         anItem.setText(0, '<New>')
 
-    # for mixture in project.mixtures:
-    #   newMixture = self.addItem(self.spectrumMixtures, newItem)
-
-
-
-
+    # for sample in project.samples:
+    #   newSample = self.addItem(self.spectrumSamples, newItem)
     # self.structuresItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
     # self.notesItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
 
+    if self.parent._appBase.applicationName == 'Screen':
+      # 1d
+      self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
+      self.onedItem.setText(0, "1D")
+      # self.onedItemSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
+      # self.onedItemSample.setText(0, "1D")
+      # self.onedItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
+      # self.onedItemScreening.setText(0, "1D")
+      # STD
+      self.stdItem = QtGui.QTreeWidgetItem(self.spectrumReference)
+      self.stdItem.setText(0, "STD")
+      # self.stdItemSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
+      # self.stdItemSample.setText(0, "STD")
+      # self.stdItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
+      # self.stdItemScreening.setText(0, "STD")
+      # Wlogsy
+      self.logsyItem = QtGui.QTreeWidgetItem(self.spectrumReference)
+      self.logsyItem.setText(0, "Water-LOGSY")
+      # self.logsyItemSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
+      # self.logsyItemSample.setText(0, "Water-LOGSY")
+      # self.logsyItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
+      # self.logsyItemScreening.setText(0, "Water-LOGSY")
+      # self.logsyItemScreening.setText(0, "Water-LOGSY")
+      # T1rho
+      self.t1rhoItem = QtGui.QTreeWidgetItem(self.spectrumReference)
+      self.t1rhoItem.setText(0, "T1rho")
+      # self.t1rhoItemSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
+      # self.t1rhoItemSample.setText(0, "T1rho")
+      # self.t1rhoItemScreening= QtGui.QTreeWidgetItem(self.spectrumScreening)
+      # self.t1rhoItemScreening.setText(0, "T1rho")
 
     # 1d
     # self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
     # self.onedItem.setText(0, "1D")
-    # # self.onedItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    # # self.onedItemMixture.setText(0, "1D")
+    # # self.onedItemSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
+    # # self.onedItemSample.setText(0, "1D")
     # self.onedItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
     # self.onedItemScreening.setText(0, "1D")
     # # STD
     # self.stdItem = QtGui.QTreeWidgetItem(self.spectrumReference)
     # self.stdItem.setText(0, "STD")
-    # # self.stdItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    # # self.stdItemMixture.setText(0, "STD")
+    # # self.stdItemSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
+    # # self.stdItemSample.setText(0, "STD")
     # self.stdItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
     # self.stdItemScreening.setText(0, "STD")
     # # Wlogsy
     # self.logsyItem = QtGui.QTreeWidgetItem(self.spectrumReference)
     # self.logsyItem.setText(0, "Water-LOGSY")
-    # # self.logsyItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    # # self.logsyItemMixture.setText(0, "Water-LOGSY")
+    # # self.logsyItemSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
+    # # self.logsyItemSample.setText(0, "Water-LOGSY")
     # self.logsyItemScreening = QtGui.QTreeWidgetItem(self.spectrumScreening)
     # self.logsyItemScreening.setText(0, "Water-LOGSY")
     # self.logsyItemScreening.setText(0, "Water-LOGSY")
     # T1rho
     # self.t1rhoItem = QtGui.QTreeWidgetItem(self.spectrumReference)
     # self.t1rhoItem.setText(0, "T1rho")
-    # # self.t1rhoItemMixture = QtGui.QTreeWidgetItem(self.spectrumMixtures)
-    # # self.t1rhoItemMixture.setText(0, "T1rho")
+    # # self.t1rhoItemSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
+    # # self.t1rhoItemSample.setText(0, "T1rho")
     # self.t1rhoItemScreening= QtGui.QTreeWidgetItem(self.spectrumScreening)
     # self.t1rhoItemScreening.setText(0, "T1rho")
     #
@@ -165,7 +226,7 @@ class SideBar(QtGui.QTreeWidget):
     # self.spectrumItem.setFlags(self.spectrumItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
     # self.spectrumReference.setFlags(self.spectrumReference.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
     # self.spectrumScreening.setFlags(self.spectrumScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled ))
-    # self.spectrumMixtures.setFlags(self.spectrumMixtures.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+    # self.spectrumSamples.setFlags(self.spectrumSamples.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
     # # References
     # self.onedItem.setFlags(self.onedItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
     # self.logsyItem.setFlags(self.logsyItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
@@ -250,6 +311,7 @@ class SideBar(QtGui.QTreeWidget):
     If more then two experiments take the first only, if not express assume is 1H
 
     '''
+
     pp = filename[:-2]
     pp.append('pulseprogram')
     ppFile = open('/'.join(pp), 'r').readlines()
@@ -285,9 +347,13 @@ class SideBar(QtGui.QTreeWidget):
           filename.pop()
           newFilename = '/'.join(filename)
           spectrum = self.parent.project.loadSpectrum(newFilename)
-          expType = self.getExpType(filename)
-          if spectrum is not None:
-            self.addSpectrumToItem(spectrum, expType)
+
+          try:
+            expType = self.getExpType(filename)
+            if spectrum is not None:
+              self.addSpectrumToItem(spectrum, expType)
+          except FileNotFoundError:
+            pass
 
     elif '.xls' in filePath.split('/')[-1]:
       ex = pd.ExcelFile(filePath)
@@ -357,6 +423,9 @@ class SideBar(QtGui.QTreeWidget):
                 spectra.append(spectrum)
               except:
                 pass
+
+
+
         # if len(spectra) > 0:
         #   msgBox = QtGui.QMessageBox()
         #   msgBox.setText("Display all spectra")
@@ -373,3 +442,5 @@ class SideBar(QtGui.QTreeWidget):
 
       else:
         event.ignore()
+
+

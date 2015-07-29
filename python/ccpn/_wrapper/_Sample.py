@@ -69,11 +69,11 @@ class Sample(AbstractWrapperObject):
   @property
   def pH(self) -> float:
     """pH of sample"""
-    return self._wrappedData.pH
+    return self._wrappedData.ph
     
   @pH.setter
   def pH(self, value:float):
-    self._wrappedData.pH = value
+    self._wrappedData.ph = value
 
   @property
   def ionicStrength(self) -> float:
@@ -113,7 +113,7 @@ class Sample(AbstractWrapperObject):
 
   @property
   def creationDate(self) -> datetime:
-    """Creatoin timestamp for sample (not for the description record)"""
+    """Creation timestamp for sample (not for the description record)"""
     return self._wrappedData.creationDate
 
   @creationDate.setter
@@ -132,29 +132,29 @@ class Sample(AbstractWrapperObject):
   @property
   def plateIdentifier(self) -> str:
     """plate identifier for sample"""
-    return self._wrappedData.plateId
+    return self._wrappedData.plateIdentifier
 
   @plateIdentifier.setter
   def plateIdentifier(self, value:str):
-    self._wrappedData.plateId = value
+    self._wrappedData.plateIdentifier = value
 
   @property
   def rowNumber(self) -> str:
     """Row number on plate"""
-    return self._wrappedData.rowNumber
+    return self._wrappedData.rowPosition
 
   @rowNumber.setter
   def rowNumber(self, value:str):
-    self._wrappedData.rowNumber = value
+    self._wrappedData.rowPosition = value
 
   @property
   def columnNumber(self) -> str:
     """Column number on plate"""
-    return self._wrappedData.colNumber
+    return self._wrappedData.colPosition
 
   @columnNumber.setter
   def columnNumber(self, value:str):
-    self._wrappedData.colNumber = value
+    self._wrappedData.colPosition = value
   
   @property
   def comment(self) -> str:
@@ -192,12 +192,12 @@ def newSample(parent:Project, name:str, pH:float=None, ionicStrength:float=None,
                       nmrProject.root.newSampleStore(name='default'))
     nmrProject.sampleStore = apiSampleStore
 
-  newApiSample = apiSampleStore.newSample(name=name, pH=pH, ionicStrength=ionicStrength,
+  newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,
                                           amount=amount, amountUnit=amountUnit,
                                           isHazardous=isHazardous, creationDate=creationDate,
                                           batchIdentifier=batchIdentifier,
-                                          plateIdentifier=plateIdentifier,rowNumber=rowNumber,
-                                          columnNumber=columnNumber, comment=comment)
+                                          plateIdentifier=plateIdentifier,rowPosition=rowNumber,
+                                          colPosition=columnNumber, comment=comment)
   #
   return parent._data2Obj.get(newApiSample)
     

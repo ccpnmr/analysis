@@ -22,7 +22,15 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
+CCP_CODES =  ['Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn',
+              'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr']
 
+ATOM_NAMES = ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3', 'CG',
+              'CG1', 'CG2', 'CH2', 'CZ', 'CZ2', 'CZ3', 'H', 'HA', 'HA2', 'HA3', 'HB', 'HB*', 'HB2',
+              'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD3', 'HE', 'HE*', 'HE1', 'HE2', 'HE21',
+              'HE22', 'HE3', 'HG', 'HG1', 'HG1*', 'HG12', 'HG13', 'HG2', 'HG2*', 'HG3', 'HH', 'HH11',
+              'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3', 'N', 'ND1', 'NE', 'NE1',
+              'NE2', 'NH1', 'NH2', 'NZ']
 
 def isInterOnlyExpt(string):
   expList = ['HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond']

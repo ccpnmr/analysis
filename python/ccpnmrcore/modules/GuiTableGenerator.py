@@ -8,22 +8,21 @@ from PyQt4 import QtGui
 
 class GuiTableGenerator(QtGui.QWidget):
 
-  def __init__(self, parent, callback, columns, selector, tipTexts=None, objects=None, objectLists=None, **kw):
+  def __init__(self, parent, objectLists, callback, columns, selector, tipTexts=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
 
       self.columns = columns
-
-      self.objectList = objects[0]
-      self.objectLists = objects
+      self.objectLists = objectLists
+      if len(self.objectLists) > 0:
+        self.objectList = objectLists[0]
+      else:
+        self.objectList = None
       self.sampledDims = {}
       self._getColumns(columns, tipTexts)
       self.tipTexts = tipTexts
-      self.table = ObjectTable(self, columns=self._getColumns(columns, tipTexts), objects=objects, callback=callback)
-      if objects:
-        self.updateContents(objects)
-      else:
-        self.updateContents(objectLists[0])
+      self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback)
+      self.updateContents()
       if selector is not None:
         self.selector = selector
         self.selector.setCallback(self.changeObjectList)
@@ -35,33 +34,25 @@ class GuiTableGenerator(QtGui.QWidget):
     if objectList is not self.objectList:
 
       self.objectList = objectList
-      print(self.objectList)
       self.updateContents()
 
 
-  def updateContents(self, objects=None, objectList=None):
+  def updateContents(self):
 
+    objectList = self.objectList
 
     if objectList:
       objectsName = objectList._childClasses[0]._pluralLinkName
-      # print('objectLists', objectList, objectList._childClasses, objectList._childClasses[0]._pluralLinkName)
-      # print(objectsName, 'objectsName')
-      print(objectList.sampleComponents)
-      print(objectList.get(objectsName), 'get')
-      columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
-      print(self.columns)
-      self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
-    elif objects:
-      columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
-      print(columns)
-      self.table.setObjectsAndColumns(objects, columns)
 
+      columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
+      self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
 
   def _getColumns(self, columns, tipTexts):
 
     tableColumns = []
-    print(*columns[0])
+
     tableColumns.append(Column(*columns[0], tipText=tipTexts[0]))
+
     if self.objectList:
       if self.objectList.shortClassName == 'PL':
         numDim = self.objectList._parent.dimensionCount
@@ -104,15 +95,6 @@ class GuiTableGenerator(QtGui.QWidget):
       #   texts = ['%s' % peakList.pid for peakList in self.objectLists]
       # else:
       texts = ['%s' % objectList.pid for objectList in self.objectLists]
-      print(texts, 'texts')
-      self.selector.setData(texts=texts, objects=self.objectLists)
-
-      texts = []
-      # texts = ['%s' % (objectList.name for objectList in self.objectLists)]
-      for objectList in self.objectLists:
-        texts.append(objectList.name)
-
-      objects = [objectList for objectList in self.objectLists]
       self.selector.setData(texts=texts, objects=self.objectLists)
 
 

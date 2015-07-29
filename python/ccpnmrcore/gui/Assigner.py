@@ -24,6 +24,8 @@ __version__ = "$Revision: 7686 $"
 import sys
 from PyQt4 import QtGui,QtCore
 
+from ccpn.lib.assignment import CCP_CODES
+
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
 from ccpncore.gui.PulldownList import PulldownList
@@ -37,9 +39,6 @@ EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
                   'h{CA|Cca}coNH': ['H', 'N', 'CA-1', 'CB-1'],
                   'H[N[{CA|ca[Cali]}]]': ['H', 'N', 'CA-1', 'CB-1', 'CA', 'CB']
                   }
-
-CCP_CODES =  ['Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn',
-              'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr']
 
 class Assigner(CcpnDock):
 

@@ -7,31 +7,28 @@ from ccpncore.gui.Menu import Menu
 
 class ListWidget(QtGui.QListWidget, Base):
 
-  def __init__(self, parent, **kw):
+  def __init__(self, parent, callback=None, **kw):
 
     QtGui.QListWidget.__init__(self, parent)
-    # removeItemShortcut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Delete), self, self.removeItem)
     Base.__init__(self, **kw)
-    # self.setStyleSheet( """QListWidget {background-color: #000021;
-    #          color: #f7ffff;
-    # }""")
+    self.callback = None
 
-    # QtGui.QAction("New", self, triggered=self.newProject))
-    # removeItemAction = QtGui.QAction('removeItem', self, triggered=self.removeItem, shortcut=QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Delete)))
+    self.itemClicked.connect(callback)
 
-    # QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Delete), self, self.removeItem)
 
   def removeItem(self):
     self.takeItem(self.currentRow())
 
-  def mousePressEvent(self, event):
-    if event.button() == QtCore.Qt.RightButton:
-      event.accept()
-      self.raiseContextMenu(event)
-    else:
-      event.accept()
-      event.acceptProposedAction()
 
+  def mousePressEvent(self, event):
+    self._mouse_button = event.button()
+    if event.button() == QtCore.Qt.RightButton:
+      self.raiseContextMenu(event)
+    elif event.button() == QtCore.Qt.LeftButton:
+      if self.itemAt(event.pos()) is None:
+        self.clearSelection()
+      else:
+        super(ListWidget, self).mousePressEvent(event)
 
   def raiseContextMenu(self, event):
     """
@@ -44,4 +41,3 @@ class ListWidget(QtGui.QListWidget, Base):
     contextMenu = Menu('', self, isFloatWidget=True)
     contextMenu.addItem("Delete", callback=self.removeItem)
     return contextMenu
-

@@ -46,6 +46,15 @@ PulldownList {
           font-weight: normal;
           }
 
+PulldownList::item {
+                   background-color: #f7ffff;
+                   color: #122043;
+                   }
+PulldownList::item::selected {
+                   background-color: #e4e15b;
+                   color: #122043;
+                   }
+
 QMenuBar::item {
                 background-color: #424a71;
                 color: #bec4f3;

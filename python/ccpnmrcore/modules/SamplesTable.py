@@ -36,14 +36,14 @@ class SampleTable(Dock):
     #                                             color: #00092d;
     #                                            }""")
 
-    samplePulldown = PulldownList(self, grid=(0, 1))
+    # samplePulldown = PulldownList(self, grid=(0, 1))
 
     columns = [('Sample spectra', 'pid')]
 
     tipTexts = ["Name of the current sample "]
 
     sampleTable = GuiTableGenerator(self, callback=self.callback(), columns=columns,
-                                       selector=samplePulldown, tipTexts=tipTexts, objects=samples)
+                                       selector=None, tipTexts=tipTexts, objects=samples)
 
 
     self.layout.addWidget(sampleTable)

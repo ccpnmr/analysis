@@ -36,16 +36,16 @@ from PyQt4 import QtGui, QtCore
 UNITS = ['ppm', 'Hz', 'point']
 
 class PeakTable(CcpnDock):
-  def __init__(self, project):
+  def __init__(self, peakLists):
     CcpnDock.__init__(self, name='Peak List')
 
-    self.layout.addWidget(PeakListSimple(project, parent=self))
+    self.layout.addWidget(PeakListSimple(self, peakLists))
 
 
 
 class PeakListSimple(QtGui.QWidget, Base):
 
-  def __init__(self, project, parent=None, callback=None, **kw):
+  def __init__(self, parent=None, project=None,  callback=None, **kw):
 
     if not project.peakLists:
       peakLists = []
@@ -57,18 +57,21 @@ class PeakListSimple(QtGui.QWidget, Base):
     # self.label = DockLabel(name, self)
     # self.label.show()
     self.project = project
+
     self.peakLists = project.peakLists
-    label = Label(self, 'Peak List:', grid=(1, 0))
+    label = Label(self, 'Peak List:')
+    self.layout().addWidget(label, 0, 0, QtCore.Qt.AlignRight)
+    self.setContentsMargins(4, 4, 4, 4,)
     # self.label.setFont(Font(size=12, bold=True))
-    self.peakListPulldown = PulldownList(self, grid=(1, 1))
+    self.peakListPulldown = PulldownList(self, grid=(0, 1))
     if callback is None:
       callback=self.selectPeak
 
-    label = Label(self, ' Position Unit:', grid=(1, 2), hAlign='r')
+    label = Label(self, ' Position Unit:', grid=(0, 2), hAlign='r')
 
-    self.posUnitPulldown = PulldownList(self, grid=(1, 3), texts=UNITS,)
+    self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
 
-    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(1, 5),
+    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 4),
                                           callback=self.subtractPeakLists)
     #                                     # callback=self._updateWhenIdle,)
 
@@ -79,7 +82,7 @@ class PeakListSimple(QtGui.QWidget, Base):
     tipTexts=['Peak serial number', 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
               'Integral of spectrum intensity around peak location, according to chosen volume method',
               'Textual notes about the peak']
-    self.peakTable = GuiTableGenerator(self, self.peakLists, callback=callback, columns=columns,
+    self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, callback=callback, columns=columns,
                                        selector=self.peakListPulldown, tipTexts=tipTexts)
 
     # self.updatePeakLists()

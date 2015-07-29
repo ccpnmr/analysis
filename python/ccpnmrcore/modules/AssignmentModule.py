@@ -1,21 +1,24 @@
 #from imp import reload
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
+
 from ccpncore.gui.Base import Base
+from ccpncore.gui.Button import Button
 from ccpncore.gui.Dock import CcpnDock
-#from ccpncore.gui.Frame import Frame
-#from ccpncore.gui.ButtonList import ButtonList
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
-#from ccpncore.gui.PulldownList import PulldownList
+from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.CheckBox import CheckBox
+
 from ccpnmrcore.gui.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,
                                                       peaksAreOnLine, intersectionOfAll,
                                                       sameAxisCodes,
                                                       getAxisCodeForPeakDimension,
                                                       getIsotopeCodeForPeakDimension,
                                                       getShiftlistForPeak)
+
+from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup
 
 
 class AssignmentModule(CcpnDock, Base):
@@ -38,12 +41,12 @@ class AssignmentModule(CcpnDock, Base):
 
     # If self.vertically_stacked = True, it looks
     # more like the v2 assignment Popup.
-    self.vertically_stacked = False
-
+    self.vertically_stacked = True
+    self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     #self.infoLabel = Label(self, text='', grid=(0, 0))
 
     # Added an extra grid layout because the amount
-    # od dimensions can not be known on forhand and in
+    # of dimensions can not be known beforehand and in
     # this way it can shrink,
     self.selectionLayout = QtGui.QGridLayout()
     self.filterLayout = QtGui.QGridLayout()
@@ -75,23 +78,34 @@ class AssignmentModule(CcpnDock, Base):
     multiCheckboxLabel = Label(self, text="Allow multiple peaks:")
     self.filterLayout.addWidget(self.multiCheckbox, 2, 1)
     self.filterLayout.addWidget(multiCheckboxLabel, 2, 0)
+    nmrResidueButton = Button(self, "Show NmrResidues", callback=self.showNmrResiduePopup)
+    self.filterLayout.addWidget(nmrResidueButton, 3, 0)
+    self.filterLayout.addItem(QtGui.QSpacerItem(0, 20), 4, 0)
 
     self.update()
+
+
+  def showNmrResiduePopup(self):
+    self.NmrResiduePopup = NmrResiduePopup(self, self.project)
+    scrollArea = ScrollArea(self)
+    scrollArea.setWidget(self.NmrResiduePopup)
+    self.filterLayout.addWidget(scrollArea, 5, 0)
+
 
   def update(self):
     '''Updates the whole widget, including recalculation
        of which nmrAtoms fit to the peaks.
 
     '''
-    self.update_peaks()
-    self.empty_all_tables_and_lists()
-    if not self.peaks or not self.peaks_are_compatible():
+    self.updatePeaks()
+    self.emptyAllTablesAndLists()
+    if not self.peaks or not self.peaksAreCompatible():
       return
-    self.create_enough_tables_and_lists()
-    self.update_tables()
-    self.update_assigned_nmrAtoms_list_widgets()
+    self.createEnoughTablesAndLists()
+    self.updateTables()
+    self.updateAssignedNmrAtomsListwidgets()
 
-  def peaks_are_compatible(self):
+  def peaksAreCompatible(self):
     '''If multiple peaks are selected, a check is performed
        to determine whether assignment of corresponding
        dimensions of a peak allowed.
@@ -114,7 +128,7 @@ class AssignmentModule(CcpnDock, Base):
         return False
     return True
 
-  def update_peaks(self, peaks=None):
+  def updatePeaks(self, peaks=None):
     '''If argument peaks is not given, the currently
        selected peaks are returned. This method is mostly
        necessary because when no peaks are selected,
@@ -127,7 +141,13 @@ class AssignmentModule(CcpnDock, Base):
     else:
       self.peaks = peaks
 
-  def update_tables(self):
+  def getNmrResidue(self, item):
+    self.project._appBase.current.nmrResidue = self.project.getById(item.text()).nmrResidue
+    if self.NmrResiduePopup:
+      self.NmrResiduePopup.update()
+
+
+  def updateTables(self):
     '''Updates the tables indicating the different assignment
        possibilities of the peak dimensions.
 
@@ -151,12 +171,12 @@ class AssignmentModule(CcpnDock, Base):
       else:
         objectTable.setObjects([NOL])
 
-  def create_enough_tables_and_lists(self):
+  def createEnoughTablesAndLists(self):
     '''Makes sure there are enough tables for the amount
        of dimensions of the currently selected peak(s).
        This method only runs when all peaks have the same
        amount of dimensions as is guaranteed by running
-       peaks_are_compatible.
+       peaksAreCompatible.
 
     '''
 
@@ -164,21 +184,21 @@ class AssignmentModule(CcpnDock, Base):
 
     # Create extra tables if needed.
     for dim in range(len(self.objectTables), Ndimensions):
-      self.create_empty_nmrAtoms_table(dim)
+      self.createEmptyNmrAtomsTable(dim)
 
-    # Hide tables that superceed the amount of peak dimensions.
+    # Hide tables that exceed the amount of peak dimensions.
     for objectTable in self.objectTables[Ndimensions:]:
       objectTable.setObjects([])
       objectTable.hide()
 
     for dim in range(len(self.listWidgets), Ndimensions):
-      self.create_empty_listWidget(dim)
+      self.createEmptyListWidget(dim)
 
     for listWidget in self.listWidgets[Ndimensions:]:
       listWidget.clear()
       listWidget.hide()
 
-  def empty_all_tables_and_lists(self):
+  def emptyAllTablesAndLists(self):
     '''Quick erase of all present information.
 
     '''
@@ -188,42 +208,49 @@ class AssignmentModule(CcpnDock, Base):
     for listWidget in self.listWidgets:
       listWidget.clear()
 
-  def create_empty_nmrAtoms_table(self, dim):
+  def createEmptyNmrAtomsTable(self, dim):
     '''Can be used to add a new table before setting
        the content.
 
     '''
 
     columns = [Column('NMR Atom', lambda nmrAtom: str(nmrAtom.pid)),
-               Column('Delta', lambda nmrAtom: self.delta_shift(nmrAtom, dim))]
+               Column('Shift', lambda nmrAtom: self.getShift(nmrAtom)),
+               Column('Delta', lambda nmrAtom: self.deltaShift(nmrAtom, dim))]
 
-    #callback = lambda nmrAtom, row, column: self.assign_nmrAtom_to_dim(nmrAtom, dim)
+    #callback = lambda nmrAtom, row, column: self.assignNmrAtomToDim(nmrAtom, dim)
     objectTable = ObjectTable(self, columns,
                               callback=None,
                               objects=[])
 
     # Needed to use this syntax because wanted double click not single.
-    objectTable.doubleClicked.connect(lambda index: self.assign_nmrAtom_to_dim(dim))
+    objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
+    objectTable.setFixedHeight(100)
     self.objectTables.append(objectTable)
     if self.vertically_stacked:
       self.selectionLayout.addWidget(objectTable, dim, 1)
+      self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
     else:
       self.selectionLayout.addWidget(objectTable, 1, dim)
+      self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
     objectTable.show()
 
-  def create_empty_listWidget(self, dim):
+  def createEmptyListWidget(self, dim):
     '''Can be used to add a new listWidget before
        setting the content.
 
     '''
-    listWidget = ListWidget(self)
+    listWidget = ListWidget(self, callback=self.getNmrResidue)
+    listWidget.setFixedHeight(100)
     self.listWidgets.append(listWidget)
     if self.vertically_stacked:
       self.selectionLayout.addWidget(listWidget, dim, 0)
+      self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
     else:
       self.selectionLayout.addWidget(listWidget, 0, dim)
+      self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
 
-  def update_assigned_nmrAtoms_list_widgets(self):
+  def updateAssignedNmrAtomsListwidgets(self):
     '''Update the listWidget showing which nmrAtoms
        are assigned to which peak dimensions. If multiple
        peaks are selected, only the assignment that they
@@ -258,7 +285,7 @@ class AssignmentModule(CcpnDock, Base):
     else:
       return None
 
-  def assign_nmrAtom_to_dim(self, dim):
+  def assignNmrAtomToDim(self, dim):
     '''Assign the nmrAtom that is clicked on to the
        the corresponding dimension of the selected
        peaks.
@@ -281,12 +308,11 @@ class AssignmentModule(CcpnDock, Base):
         peak.assignDimension(axisCode, newAssignments)
     self.update()
 
-  def delta_shift(self, nmrAtom, dim):
+  def deltaShift(self, nmrAtom, dim):
     '''Calculation of delta shift to add to the table.
 
     '''
-    print(self.peaks)
-    self.update_peaks()
+    self.updatePeaks()
     if not self.peaks:
       return ''
 
@@ -304,6 +330,24 @@ class AssignmentModule(CcpnDock, Base):
     average = sum(deltas)/len(deltas)
     return round(average, 3)
 
+  def getShift(self, nmrAtom):
+    '''Calculation of delta shift to add to the table.
+
+    '''
+    self.updatePeaks()
+    if not self.peaks:
+      return ''
+
+    if nmrAtom is NEW or nmrAtom is NOL:
+      return ''
+
+    deltas = []
+    for peak in self.peaks:
+      shiftList = getShiftlistForPeak(peak)
+      if shiftList:
+        shift = shiftList.findChemicalShift(nmrAtom)
+        if shift:
+          return shift.value
 
 class New(object):
   '''Small 'fake' object to get a non-nmrAtom in the objectTable.

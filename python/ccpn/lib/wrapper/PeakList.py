@@ -37,7 +37,7 @@ def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None
                 fitMethod:str=None, excludedRegions:Sequence=None,
                 excludedDiagonalDims:Sequence=None, excludedDiagonalTransform:Sequence=None):
 
-  ordering = [dataDim.dim-1 for dataDim in dataDims]
+  orIdering = [dataDim.dim-1 for dataDim in dataDims]
   isoOrdering = [dataDim.getIsotopeCodes() for dataDim in dataDims]
 
   startPoint = []

@@ -53,6 +53,12 @@ IDENTITY.reset()
 #   def paint(self, painter, option, widget):
 
     # return
+#
+# def peakItemNotifier(project, apiPeak):
+#   apiPeakListViews = apiPeak.PeakList.PeakListViews
+#   for apiPeakListView in apiPeakListViews:
+#     for apiStripPeakListView in apiPeakListView.apiStripPeakListViews:
+
 
 class GuiPeakListView(QtGui.QGraphicsItem):
 
@@ -90,6 +96,7 @@ class GuiPeakListView(QtGui.QGraphicsItem):
   #   self.moveIcon.hide()
   #   self.cleanIcon.hide()
   #   self.menuIcon.hide()
+
 
   def regionChanged(self):
 

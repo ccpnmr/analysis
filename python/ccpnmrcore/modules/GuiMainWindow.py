@@ -35,14 +35,14 @@ from ccpncore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
 from ccpnmrcore.gui.Assigner import Assigner
+from ccpnmrcore.modules.AssignmentModule import AssignmentModule
 from ccpnmrcore.modules.AtomSelector import AtomSelector
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
-#from ccpnmrcore.modules.ParassignPeakTable import ParassignModule
 from ccpnmrcore.modules.PeakTable import PeakTable
-from ccpnmrcore.modules.SampleComponentPeakTable import SampleComponentsPeakTable
+# from ccpnmrcore.modules.SampleComponentPeakTable import SampleComponentsPeakTable
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.modules.SequenceModule import SequenceModule
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
@@ -283,11 +283,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu.addAction(Action(self, "Report Bug...", callback=self.showBugReportingPopup))
 
     assignMenu = Menu("&Assign", self)
+    assignMenu.addAction(Action(self, "Assignment Module", callback=self.showAssignmentModule, shortcut='aa'))
     assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule, shortcut='pa'))
     assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showBackboneAssignmentModule, shortcut='bb'))
     assignMenu.addAction(Action(self, 'Show Assigner', callback=self.showAssigner))
     # assignMenu.addAction(Action(self, 'Assignment Module', callback=self.showAssignmentModule, shortcut='aa'))
     assignMenu.addAction(Action(self, 'Residue Information', callback=self.showResidueInformation, shortcut='ri'))
+    assignMenu.addAction(Action(self, 'NmrResPopup', callback=self.showNmrResiduePopup, shortcut='np'))
+
 
 
     self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
@@ -314,7 +317,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showAssignmentModule(self):
     from ccpnmrcore.modules.AssignmentModule import AssignmentModule
-    self.dockArea.addDock(AssignmentModule(self, self._project, self.current.peaks))
+    self.dockArea.addDock(AssignmentModule(self, self._project, self._project._appBase.current.peaks))
+
+  def showNmrResiduePopup(self):
+    from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup
+    NmrResiduePopup(self, self._project).exec_()
 
 
   def addBlankDisplay(self):

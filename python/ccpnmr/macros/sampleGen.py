@@ -1,5 +1,5 @@
 
-filePath = '/Users/luca/Desktop/patrick/lookup/lookupPatrick.csv'
+filePath = '/Users/simon1/patrick/lookup.xlsx'
 
 window.leftWidget.parseLookupFile(filePath)
 

@@ -294,11 +294,12 @@ class SideBar(QtGui.QTreeWidget):
           peakListItem = QtGui.QTreeWidgetItem(newItem)
           peakListItem.setText(0, peakList.pid)
 
-      else:
-        newItem = self.addItem(self.onedItem, spectrum)
-        peakListItem = QtGui.QTreeWidgetItem(newItem)
-        peakListItem.setText(0, peakList.pid)
-        peakListItem.setFlags(peakListItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
+        else:
+
+          newItem = self.addItem(self.onedItem, spectrum)
+          peakListItem = QtGui.QTreeWidgetItem(newItem)
+          peakListItem.setText(0, peakList.pid)
+          peakListItem.setFlags(peakListItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
     else:
       newItem = self.addItem(self.spectrumItem, spectrum)
       peakListItem = QtGui.QTreeWidgetItem(newItem)

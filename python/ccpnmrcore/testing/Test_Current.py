@@ -37,20 +37,16 @@ def test_current_spectra():
   assert (current.spectra == ll)
   assert (current.spectrum == 3)
 
-  def notifier(curr, spectra):
-    curr.notifiedSpectra = spectra
-
-  Current.Current.notifySpectra = notifier
-  current.registerNotify(current.notifySpectra, 'spectra')
+  def notifier(curr):
+    curr.notifiedSpectra = curr.spectra
+  current.registerNotify(notifier, 'spectra')
 
 
   current.addSpectrum(4)
-  print("@~@~", dir(Current.Current))
-  print("@~@~2", dir(current))
   assert (current.spectrum == 4)
   assert (current.spectra == ll + [4])
   assert (current.notifiedSpectra == ll + [4])
-  current.unRegisterNotify(current.notifySpectra, 'spectra')
+  current.unRegisterNotify(notifier, 'spectra')
 
   current.spectrum = 7
   assert (current.spectrum == 7)
@@ -71,19 +67,16 @@ def test_current_peaks():
   assert (current.peaks == ll)
   assert (current.peak == 5)
 
-  def notifier(curr, peaks):
-    curr.notifiedPeaks = peaks
-
-  Current.Current.notifyPeaks = notifier
-  current.registerNotify(current.notifyPeaks, 'peaks')
+  def notifier(curr):
+    curr.notifiedPeaks = curr.peaks
+  current.registerNotify(notifier, 'peaks')
 
   current.addPeak(11)
-  print("@~@~", dir(Current.Current))
-  print("@~@~2", dir(current))
+  # print("@~@~", dir(Current.Current))
   assert (current.peak == 11)
   assert (current.peaks == ll + [11])
   assert (current.notifiedPeaks == ll+ [11])
-  current.unRegisterNotify(current.notifyPeaks, 'peaks')
+  current.unRegisterNotify(notifier, 'peaks')
 
   current.peak = 27
   assert (current.peak == 27)

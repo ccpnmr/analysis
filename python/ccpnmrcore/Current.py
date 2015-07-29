@@ -56,12 +56,17 @@ class Current:
   def registerNotify(self, notify, field):
     # Notifiers are attached to the OBJECT, not to the class
     # They are therefore removed when a new project is created/loaded
-    # Otherwise it is the responsibility of teh adder to remove them when no longer relevant
+    # Otherwise it is the responsibility of the adder to remove them when no longer relevant
     # for which the notifier function object must be kept around.
-    # The function is attached to the field and is executed when the field value changes
+    # The function is attached to the field and is executed after the field value changes
     # In practice this goes through the setter for (the equivalent of) Current.spectra
-    # The notifier function takes a list of wrapper objects (eg. wrapper spectra)
-    # as their only parameter.
+    # The notifier function is pased the Current object as its only parameter,
+    # which allows you to access the project, teh value just changed or anything else.
+    # If you need a graphics object (e.g. a module) you must make and register a bound method
+    # on the module.
+
+    print ("@~@~ registering", field, notify)
+
     notifies = self._notifies
     ll = notifies.get(field)
     if ll is None:
@@ -92,7 +97,7 @@ class Current:
       raise ValueError("Current Spectra contains duplicates: %s" % value)
     self._spectra = list(value)
     for func in self._notifies.get('spectra', ()):
-      func(value)
+      func(self)
 
   @property
   def spectrum(self):
@@ -121,29 +126,28 @@ class Current:
         #self.peaks = [] # not needed since _deletedPeak notifier will clear this out
 
 
-for field in _autoFields:
-  ufield = '_' + field
-  Field = field[0].upper() + field[1:-1]
-  getField = operator.attrgetter(ufield)
+
+def  _addClassField(Current, field):
+  # getter function for _field; getField(obj) returns obj._field:
+  getField = operator.attrgetter('_' + field)
+
+  # getFieldItem(obj) returns obj[field]
   getFieldItem = operator.itemgetter(field)
-  # We should do this, but it requires Python 3.4, so we emulate it
-  # setField = functools.partialmethod(setattr, ufield)
-  def setField(self, value, field=ufield):
+
+  # setField(obj, value) sets obj._field = value and calls notifiers
+  def setField(self, value, field='_' + field):
+    if len(set(value)) != len(value):
+      msg = "Current %s contains duplicates: %%s" % field
+      raise ValueError(msg % value)
     setattr(self, field, value)
+    funcs = getFieldItem(self._notifies) or ()
+    for func in funcs:
+      func(self)
 
   def getter(self):
     return list(getField(self))
   def setter(self, value):
-    if len(set(value)) != len(value):
-      msg = "Current %s contains duplicates: %%s" % field
-      raise ValueError(msg % value)
-    # self.setField(list(value))
     setField(self, list(value))
-    print ("@~@~", self._notifies)
-    funcs = getFieldItem(self._notifies) or ()
-    # for func in self._notifies.get(field, ()):
-    for func in funcs:
-      func(value)
   #
   setattr(Current, field, property(getter, setter, None, "Current %s" % field))
 
@@ -151,29 +155,22 @@ for field in _autoFields:
     ll = getField(self)
     return ll[-1] if ll else None
   def setter(self, value):
-    # self.setField([value])
     setField(self, [value])
   #
   setattr(Current, field[:-1], property(getter, setter, None, "Current %s" % field[:-1]))
 
   def adder(self, value):
-    # self.setField(getField(self) + [value])
     setField(self, getField(self) + [value])
   #
-  setattr(Current, 'add' + Field, adder)
+  setattr(Current, 'add' + field.capitalize()[:-1], adder)
 
   def clearer(self):
     getField(self).clear()
   #
-  setattr(Current, 'clear' + Field, clearer)
-#
-del getter
-del setter
-del adder
-del clearer
-del ufield
-del Field
-del field
+  setattr(Current, 'clear' + field.capitalize(), clearer)
+
+for field in _autoFields:
+  _addClassField(Current, field)
 
 def _cleanupCurrentPeak(project, apiPeak):
     

@@ -23,7 +23,22 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from PyQt4 import QtGui, QtCore
 
+from ccpncore.util import Pid
 from ccpnmrcore.Base import Base as GuiBase
+from ccpncore.lib.Io import Formats as ioFormats
+
+
+pidTypeMap = {}
+import ccpn
+import ccpnmr
+for package in ccpn, ccpnmr:
+  for tag in dir(package):
+    obj = getattr(package, tag)
+    if hasattr(obj, 'shortClassName'):
+      shortClassName = getattr(obj, 'shortClassName')
+      if shortClassName:
+        pidTypeMap[shortClassName] = (obj.className if hasattr(obj, 'className')
+                                      else obj.__class__.__name__)
 
 class DropBase(GuiBase):
   
@@ -42,112 +57,109 @@ class DropBase(GuiBase):
 
     event.accept()
 
-    dataType, data = qtUtil.interpretEvent(event)
+    data, dataType  = qtUtil.interpretEvent(event)
 
-    if dataType and data:
+    if data and dataType:
       self.processDropData(data, dataType)
 
-  def dropEvent(self, event):
-    """NBNB FIXME, must be commented out"""
-    event.accept()
-    if isinstance(self.parent, QtGui.QGraphicsScene):
-      event.ignore()
-      return
-
-    if event.mimeData().urls():
-      filePaths = [url.path() for url in event.mimeData().urls()]
-
-      if filePaths:
-        for filePath in filePaths:
-          try:
-            if isFastaFormat(filePath):
-              sequences = parseFastaFile(filePaths[0])
-              for sequence in sequences:
-                self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
-                                                      molType='protein')
-
-          except:
-            try:
-              if filePath.endswith('.spc.par'):
-                # NBNB TBD HACK: Should be handle properly
-                filePath = filePath[:-4]
-              spectrum = self._appBase.project.loadSpectrum(filePath)
-              if spectrum is not None:
-                self._appBase.mainWindow.leftWidget.addSpectrum(spectrum)
-                self.dropCallback(spectrum)
-            except:
-                pass
-
-    if event.mimeData().hasFormat('application/x-strip'):
-      data = event.mimeData().data('application/x-strip')
-      pidData = str(data.data(),encoding='utf-8')
-      pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
-      actualPid = ''.join(pidData)
-      wrapperObject = self.getById(actualPid)
-      self.dropCallback(wrapperObject)
-    else:
-      data = event.mimeData().data('application/x-qabstractitemmodeldatalist')
-      pidData = str(data.data(),encoding='utf-8')
-      pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
-      actualPid = ''.join(pidData)
-      wrapperObject = self.getObject(actualPid)
-      self.dropCallback(wrapperObject)
+  # def dropEvent(self, event):
+  #   """NBNB FIXME, must be commented out"""
+  #   event.accept()
+  #   if isinstance(self.parent, QtGui.QGraphicsScene):
+  #     event.ignore()
+  #     return
+  #
+  #   if event.mimeData().urls():
+  #     filePaths = [url.path() for url in event.mimeData().urls()]
+  #
+  #     if filePaths:
+  #       for filePath in filePaths:
+  #         try:
+  #           if isFastaFormat(filePath):
+  #             sequences = parseFastaFile(filePaths[0])
+  #             for sequence in sequences:
+  #               self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+  #                                                     molType='protein')
+  #
+  #         except:
+  #           try:
+  #             if filePath.endswith('.spc.par'):
+  #               # NBNB TBD HACK: Should be handle properly
+  #               filePath = filePath[:-4]
+  #             spectrum = self._appBase.project.loadSpectrum(filePath)
+  #             if spectrum is not None:
+  #               self._appBase.mainWindow.leftWidget.addSpectrum(spectrum)
+  #               self.dropCallback(spectrum)
+  #           except:
+  #               pass
+  #
+  #   if event.mimeData().hasFormat('application/x-strip'):
+  #     data = event.mimeData().data('application/x-strip')
+  #     pidData = str(data.data(),encoding='utf-8')
+  #     pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
+  #     actualPid = ''.join(pidData)
+  #     wrapperObject = self.getById(actualPid)
+  #     self.dropCallback(wrapperObject)
+  #   else:
+  #     data = event.mimeData().data('application/x-qabstractitemmodeldatalist')
+  #     pidData = str(data.data(),encoding='utf-8')
+  #     pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
+  #     actualPid = ''.join(pidData)
+  #     wrapperObject = self.getObject(actualPid)
+  #     self.dropCallback(wrapperObject)
 
 
   def processDropData(self, data, dataType='pids'):
-    """ Digest dropped-in data
-    Separate so it can be called from command line as well.
+    """ Process dropped-in data
+    Separate function so it can be called from command line as well.
     """
-    from ccpnmrCore.util import Qt as qtUtil
 
-    if dataType == 'pids':
-      # data is list-of-pids
-      commonType = qtUtil.getCommonType(data)
-      func = self.pickDispatchFunction('digest', commonType)
-      if func:
-        func(data)
+    if dataType == 'text':
+      # data is a text string
+      if hasattr(self, 'processText'):
+        self.processText(data)
 
-    elif dataType == 'ccpnmr-io':
-      # Importing (duplicating) wrapper objects from (another) project
-      raise NotImplementedError("CCPN data import not yet implemented")
+    else:
+      pids = []
+      if dataType == 'pids':
+        pids = data
 
-    elif dataType == 'urls':
-      # data is list-of-urls
+      elif dataType == 'urls':
+        # data is list-of-urls
+        # Load Urls one by one with normal loaders
+        for url in data:
+          fileType, subType, useUrl = ioFormats.analyseUrl(url)
+          # urlInfo is list of triplets of (type, subType, modifiedUrl),
+          # e.g. ('Spectrum', 'Bruker', newUrl)
+          if fileType is not None and useUrl.exists():
+            method = self.pickDispatchFunction('load', fileType)
+            if method:
+              xx = method(useUrl, subType=subType)
+              if xx:
+                if isinstance(xx,str):
+                  pids.append(xx)
+                else:
+                  pids.extend(xx)
 
-      urlType, urlInfo = qtUtil.analyseUrls(data)
-      # urlInfo is list of triplets of (type, subType, modifiedUrl),
-      # e.g. ('spectrum', 'Bruker', newUrl)
-
-      multifunc = None if len(data) <= 1 else self.pickDispatchFunction('multiload', urlType)
-
-      if multifunc is None:
-        pids = []
-        for fileType, subType, useUrl in urlInfo:
-          func = self.pickDispatchFunction('load', fileType)
-          if func:
-            xx = func(useUrl, subType=subType)
-            if xx:
-              if isinstance(xx,str):
-                pids.append(xx)
-              else:
-                pids.extend(xx)
+      # process pids
+      for pid in pids:
+        method = self.pickDispatchFunction('process', pid)
+        if method:
+          method(pid)
 
       else:
-        pids = multifunc(urlInfo)
-
-      commonType = qtUtil.getCommonType(pids)
-      func = self.pickDispatchFunction('digest', commonType)
-      if func:
-        func(pids)
-
-    elif type == 'text':
-      # data is a text string
-      self.digestText(data)
+        raise ValueError("processDropData does not recognise dataType %s" % dataType)
 
 
 def pickDispatchFunction(self, prefix, dataType):
-  """Generate file name and return bound method matching name, if defined"""
+  """Generate file name and return bound method matching name, if defined
+  dataType may be either an accepted dataType, or a Pid that is used to derive it.
 
+  Accepted prefixes are 'process' and 'load'
+  DataTypes are singular, e.g. Spectrum, Peak, etc. even """
+
+  dataType = dataType.split(Pid.PREFIXSEP,1)[0]
+  dataType = pidTypeMap.get(dataType, dataType)
   funcName = prefix + dataType
 
   if hasattr(self, funcName):

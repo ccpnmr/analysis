@@ -65,7 +65,7 @@ def makeId(*args):
 
 def splitId(idString):
   """Split idString into tuple of component elements,
-  mapping altCharacter back to separator and relacing empty strings with None"""
+  mapping altCharacter back to separator and replacing empty strings with None"""
 
   # map args to corrected strings
   return tuple((val.translate(unmapSeparators) or None) for val in idString.split(IDSEP))

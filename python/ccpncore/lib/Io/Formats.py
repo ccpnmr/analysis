@@ -27,7 +27,7 @@ from collections.abc import Sequence
 from ccpncore.util.Path import checkFilePath
 
 
-WHITESPACE_AND_NULL =  set(['\x00', '\t', '\n', '\r', '\x0b', '\x0c'])
+WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
 
 AZARA = 'Azara'
@@ -44,17 +44,23 @@ AUTOASSIGN = 'AutoAssign'
 CCPN = 'CCPN'
 SPARKY = 'Sparky'
 NMRDRAW = 'NMRDraw'
-XEASY = 'XEASY'
 NMRSTAR = 'NMR-STAR'
 
+DataTypes = ['Project', 'Spectrum', 'Text', 'Sequence']
+
 def analyseUrl(filePath):
+  """ Analyse filePath, and return (dataType, subType, usePath) tuple
+
+  Note:
+  For Bruker and Varian Spectrum data, the usePath returned is the directory containing the spectrum
+  """
 
   isOk, msg = checkFilePath(filePath)
   if not isOk:
     print (msg)
-    return (None, None, None)
+    return (None, None, filePath)
 
-  # Deal with diredtories as input
+  # Deal with directories as input
   if os.path.isdir(filePath):
     # url is a directory
     fileNames = os.listdir(filePath)
@@ -71,15 +77,18 @@ def analyseUrl(filePath):
       # Varian processed spectrum
       return ('Spectrum', VARIAN, filePath)
     else:
-      return (None, None, None)
+      return (None, None, filePath)
 
-  # Check foro binary files
+  # Set up for further analysis
+  dirName, fileName = os.path.split(filePath)
+
+  # Check for binary files
   fileObj = open(filePath, 'rb')
   firstData = fileObj.read(1024)
   testData = set([c for c in firstData]) - WHITESPACE_AND_NULL
   isBinary = (min([ord(chr(c)) for c in testData]) < 32)
 
-
+  # Deal with binary files
   if isBinary:
     # probably binary
 
@@ -110,7 +119,6 @@ def analyseUrl(filePath):
       return ('Spectrum', NMRVIEW, filePath)
 
     # BRUKER file
-    dirName, fileName = os.path.split(filePath)
     if fileName in ('1r','2rr','3rrr','4rrrr'):
       return ('Spectrum', BRUKER, dirName)
 
@@ -131,21 +139,42 @@ def analyseUrl(filePath):
     if (0 < vals[0] < 6) and (vals[1] == 1):
       return ('Spectrum', FELIX, filePath)
 
+
   else:
     # Text file
-    if b'##TITLE' in firstData:
-      return BRUKER
-
-    if b'Version .....' in firstData:
-      return XEASY
+    # if b'##TITLE' in firstData:
+    #   return ('Spectrum', BRUKER, dirName)
+    #
+    # if b'Version .....' in firstData:
+    #   # NBNB TBD FIXME what data is this?
+    #   return (None, XEASY, filePath)
 
     fileObj.close()
-    fileObj = open(filePath, 'rU')
-    lines = ''.join([l.strip() for l in fileObj.readlines() if l[0] != '!'])
+    text = open(filePath, 'rU').read()
+    textblock = '\n'.join([line.strip() for line in text.splitlines() if line[0] != '!'])
 
-    if ('ndim ' in lines) and ('file ' in lines) and ('npts ' in lines) and ('block ' in lines):
-      return AZARA
+    if filePath.endswith('.fasta') or text.startswith('>'):
+      # FASTA file
+      return ('Sequence', 'Fasta', filePath)
 
-    dirName, fileName = os.path.split(filePath)
+    if textblock.startswith('##TITLE'):
+      return ('Spectrum', BRUKER, dirName)
+
+    if textblock.startswith('Version .....'):
+      # NBNB TBD FIXME what data is this?
+      return (None, XEASY, filePath)
+
     if fileName == 'procpar':
-      return VARIAN
+      return ('Spectrum', VARIAN, dirName)
+
+    if (fileName.endswith('.par') and ('ndim ' in textblock) and ('file ' in textblock) and
+        ('npts ' in textblock) and ('block ' in textblock)):
+      spectrumPath = filePath[:-4]
+      if os.path.isfile(spectrumPath):
+        return ('Spectrum', AZARA, spectrumPath)
+
+    # Default - return as plain text
+    return ('Text', None, filePath)
+
+  # No match
+  return (None, None, filePath)

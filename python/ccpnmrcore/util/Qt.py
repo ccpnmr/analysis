@@ -22,126 +22,30 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.Io import Formats as ioFormats
-
-pidTypeMap = {}
-import ccpn
-import ccpnmr
-for package in ccpn, ccpnmr:
-  for tag in dir(package):
-    obj = getattr(package, tag)
-    if hasattr(obj, 'shortClassName'):
-      shortClassName = getattr(obj, 'shortClassName')
-      if shortClassName:
-        #NBNB TBD QTTBD FIXME - also picks up subclasses. FIXED RHF.
-        pidTypeMap[shortClassName] = (obj.className if hasattr(obj, 'className')
-                                      else obj.__class__.__name__)
-
+import json
+from ccpncore.lib.Constants import ccpnmrJsonData
 
 def interpretEvent(event):
   """ Interpret drop event and return (type, data)
-  NBNB FIXME
   """
 
-  if event.mimeData().hasUrls():
+  mimeData = event.mimeData()
+
+  if mimeData.hasFormat(ccpnmrJsonData):
+    jsonData = json.loads(mimeData.text())
+    pids = jsonData.get('pids')
+
+    if pids is not None:
+      # internal data transfer - series of pids
+      return (pids, 'pids')
+
+    # NBNB TBD add here slots for between-applications transfer, and other types as needed
+
+  elif event.mimeData().hasUrls():
     filePaths = [url.path() for url in event.mimeData().urls()]
-    return ('urls', filePaths)
-
-  elif event.mimeData().hasJson():
-    # NBNB TBD QTTBD hasJson and getJson have to be emulated.
-    jsonData = event.mimeData.getJson()
-
-    data = jsonData.get('ccpnmr-pids')
-    if data is not None:
-      # data is list of string pids
-      return ('pids',data)
-
-    data = jsonData.get('ccpnmr-io')
-    if data is not None:
-      #data is nef-like json structure copying CCPN obeject content, for import
-      return ('ccpnmr-io',data)
+    return (filePaths, 'urls')
 
   elif event.mimeData().hasText():
-    return('text', event.mimeData().text)
+    return(event.mimeData().text(), 'text')
 
   return (None, None)
-
-
-def getCommonType(pids):
-
-  from ccpncore.util import Pid
-
-  types = set(pidTypeMap.get(Pid.Pid(x).type, Pid.Pid(x).type) for x in pids)
-  if len(types) == 1:
-    return types.pop()
-  else:
-    return 'mixed'
-
-
-def analyseUrls(urls):
-  """Returns list of urlInfo triplets:  (type, subType, corrected Url) """
-
-  pluralTypes = {
-    'PeakList':'PeakLists',
-    'Spectrum':'Spectra',
-    # ...
-  }
-
-  urlInfo = []
-
-  commonTypes = set()
-  for url in urls:
-
-    fileType, subType, newUrl = ioFormats.analyseUrl(url)
-    if fileType is not None and newUrl.exists():
-      urlInfo.append((fileType, subType, newUrl))
-      commonTypes.add(fileType)
-
-  if not urlInfo:
-    tag = None
-  elif len(commonTypes) == 1:
-    tag = commonTypes.pop()
-    if len(urlInfo) > 1:
-      tag = pluralTypes.get(tag, tag)
-  else:
-    tag = 'Mixed'
-
-  return (tag, urlInfo)
-
-
-# def analyseUrl(url):
-#   """Analyse url name, location, pre-read file and analyse contents
-#   Function must be able to classify ANY droppable url of ANY type that cna be handled
-#   Function may convert Url to a different Url,
-#   so that different inputs (e.g. .spc and .spc.par files) can lead to a standardised output.
-#   NBNB FIXME
-#   """
-#
-#   # Analyse and pre-read file here.
-#   fileType = None
-#   subType = None
-#   modifiedUrl = None
-#
-#   spectrumType = spectrumUtil.getSpectrumFileFormat(url)
-#
-#   if spectrumType is not None:
-#
-#     if spectrumType == spectrumUtil.CCPN:
-#       # NBNB QTTBD TBD
-#       # Expand on this
-#       return ('Project', 'CCPN', url)
-#
-#     else:
-#       # NBNB QTTBD TBD
-#       # Expand on this
-#       return ('Spectrum',spectrumType, url)
-#
-#   # e.g. ('Spectrum', 'Bruker', containingDirectory)
-#   # or ('Structure', 'PDB', fileName)
-#   # or ('PeakList', 'XEASY', fileName)
-#   # or ('Project', 'CCPN', topProjectDirectory)
-#   # or ('Project', 'SPARKY', projectFile)
-#   # or ('Data', 'NEF', fileName)
-#   # or ('Text', None, fileName)
-#
-#   return (fileType, subType, modifiedUrl)

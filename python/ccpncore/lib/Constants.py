@@ -24,6 +24,9 @@ __version__ = "$Revision: 7686 $"
 
 import re
 
+# CCPNMR data-transfer json mimetype
+ccpnmrJsonData = 'ccpnmr-json'
+
 # Timestamp formats
 stdTimeFormat = "%Y-%m-%d %%H:M:%S.%f"
 isoTimeFormat = "%Y-%m-%dT%%H:M:%S.%f"

@@ -197,7 +197,7 @@ def newSample(parent:Project, name:str, pH:float=None, ionicStrength:float=None,
                                           isHazardous=isHazardous, creationDate=creationDate,
                                           batchIdentifier=batchIdentifier,
                                           plateIdentifier=plateIdentifier,rowPosition=rowNumber,
-                                          colPosition=columnNumber, comment=comment)
+                                          colPosition=columnNumber, details=comment)
   #
   return parent._data2Obj.get(newApiSample)
     

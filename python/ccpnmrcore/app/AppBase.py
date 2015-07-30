@@ -59,6 +59,7 @@ class AppBase(GuiBase):
     ###self.vLines = []
     ###self.hLines = []
     self.initProject(apiProject)
+    self.colourIndex = 0
 
   def initProject(self, apiProject):
 

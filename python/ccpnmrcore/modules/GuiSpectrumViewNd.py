@@ -96,20 +96,20 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     #self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
     
-    self.colourIndex = 0
+
         
     apiDataSource = self.apiStripSpectrumView.spectrumView.dataSource
     if not self.positiveContourColour:
-      apiDataSource.positiveContourColour = Colour.spectrumHexColours[self.colourIndex]
-      self.colourIndex += 1
-      self.colourIndex %= len(Colour.spectrumHexColours)
+      apiDataSource.positiveContourColour = Colour.spectrumHexColours[self._parent._appBase.colourIndex]
+      self._parent._appBase.colourIndex += 1
+      self._parent._appBase.colourIndex %= len(Colour.spectrumHexColours)
 
     if not self.negativeContourColour:
     # Changed to guiSpectrumView.negativeContourColour, which picks up from either
     # SpectrumView or DataSource
-      apiDataSource.negativeContourColour = Colour.spectrumHexColours[self.colourIndex]
-      self.colourIndex += 1
-      self.colourIndex %= len(Colour.spectrumHexColours)
+      apiDataSource.negativeContourColour = Colour.spectrumHexColours[self._parent._appBase.colourIndex]
+      self._parent._appBase.colourIndex += 1
+      self._parent._appBase.colourIndex %= len(Colour.spectrumHexColours)
 
     GuiSpectrumView.__init__(self)
 

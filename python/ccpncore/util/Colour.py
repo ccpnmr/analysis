@@ -43,18 +43,28 @@ colourNameToHexDict = {
   'cyan':    '#ffff00',
 }
 
-spectrumColours = OrderedDict([('#D24C23','red'),
-                                ('#4F9CAA','cyan'),
-                                ('#ff8000','orange'),
-                                ('#0080ff','manganese blue'),
-                                ('#ffff00','yellow'),
-                                ('#0000ff','blue'),
-                                ('#80ff00','chartreuse'),
-                                ('#8000ff','purple'),
-                                ('#00ff00','green'),
-                                ('#ff00ff','magenta'),
-                                ('#00ff80','spring green'),
-                                ('#ff0080','deep pink')])
+spectrumColours = OrderedDict([('#cb1400','red'),
+                                ('#318290','pastel blue'),
+                                ('#fe6c11','orange'),
+                                ('#3a4e5c','dark grey'),
+                                ('#ecfc00','yellow'),
+                                ('#933355','midnight blue'),
+                                ('#80ff00','seashell'),
+                                ('#5846d6','purple'),
+                                ('#df2950','pastel pink'),
+                                ('#097a27','pastel green'),
+                                ('#d231cb','pink'),
+                                ('#d24c23','dark orange'),
+                                ('#4f9caa','light pastel blue'),
+                                ('#ff932e','light pastel orange'),
+                                ('#ffff5a','light yellow'),
+                                ('#2d5175','mid blue'),
+                                ('#d8e1cf','light seashell'),
+                                ('#95eff','lilac'),
+                                ('#f9609c','mid pink'),
+                                ('#50ae56','mid green'),
+                                ('#ff8eff','light pink'),
+                                ('#3fe945','light green')])
 
 spectrumHexColours = tuple(spectrumColours.keys())
 

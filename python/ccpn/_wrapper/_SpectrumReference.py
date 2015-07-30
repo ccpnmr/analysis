@@ -225,7 +225,7 @@ class SpectrumReference(AbstractWrapperObject):
     """get wrappedData (Nmr.DataDimRefs) for all Spectrum children of parent Spectrum"""
     result = []
     for ddim in parent._wrappedData.sortedDataDims():
-      if hasattr(ddim, 'dataDimRef'):
+      if hasattr(ddim, 'dataDimRefs'):
         result.extend(ddim.sortedDataDimRefs())
     #
     return result

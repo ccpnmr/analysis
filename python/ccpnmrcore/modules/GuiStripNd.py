@@ -142,7 +142,7 @@ class GuiStripNd(GuiStrip):
     return self.contextMenu
 
 
-  def changeZPlane(self, planeCount=None, position=None, planeThickness=None):
+  def changeZPlane(self, planeCount=None, position=None):
 
     zAxis = self.orderedAxes[2]
     smallest = None
@@ -162,9 +162,9 @@ class GuiStripNd(GuiStrip):
       zAxis.position = position
     self.planeLabel.setValue(zAxis.position)
 
-    if planeThickness is not None:
-      zAxis.width*=planeThickness
-    self.update()
+  def changePlaneThickness(self, value):
+    zAxis = self.orderedAxes[2]
+    zAxis.width*=value
 
   def nextZPlane(self):
 
@@ -213,10 +213,8 @@ class GuiStripNd(GuiStrip):
       self.changeZPlane(position=value)
 
   def setPlaneThickness(self, value):
-    if value < self.planeThicknessValue:
-      self.changeZPlane(planeThickness=value/(self.planeThicknessValue))
-    else:
-      self.changeZPlane(planeThickness=(value/self.planeThicknessValue))
+
+    self.changePlaneThickness((value/self.planeThicknessValue))
     self.planeThicknessValue = value
 
 

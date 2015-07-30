@@ -66,16 +66,14 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     screenWidth  = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
+
     self.spectrumUtilToolBar = ToolBar(self.dock)#, grid=(0, 2), gridSpan=(1, 2))
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     self.dock.addWidget(self.spectrumUtilToolBar, 0, 2)# grid=(0, 2), gridSpan=(1, 1))
+
     # toolBarColour = QtGui.QColor(214,215,213)
-    palette = QtGui.QPalette(self.spectrumUtilToolBar.palette())
-    palette2 = QtGui.QPalette(self.spectrumToolBar.palette())
-    # palette.setColor(QtGui.QPalette.Button,toolBarColour)
-    # palette2.setColor(QtGui.QPalette.Button,toolBarColour)
-    self.positionBox = Label(self.dock)#, grid=(0, 3  ), gridSpan=(1, 1))
+    self.positionBox = Label(self.dock)
     self.dock.addWidget(self.positionBox, 0, 3)#, grid=(0, 3), gridSpan=(1, 1))
     # self.positionBox.setFixedWidth(screenWidth*0.1)
     self.scrollArea = ScrollArea(self.dock, grid=(1, 0), gridSpan=(1, 4))
@@ -100,6 +98,9 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
   def cloneStrip(self):
     newStrip = self._appBase.current.strip.clone()
+
+  def hideUtilToolBar(self):
+    self.spectrumUtilToolBar.hide()
 
   def zoomYAll(self):
     for strip in self.strips:

@@ -129,7 +129,7 @@ def readParams(filePath):
           isotopes, specFreqs,
           specWidths, refPoints, refPpms,
           sampledValues, sampledSigmas,
-          pulseProgram, dataScale)
+            pulseProgram, dataScale)
 
   return data
 

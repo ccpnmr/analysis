@@ -53,7 +53,7 @@ class DropBase(GuiBase):
   def dropEvent(self, event):
     """Catch dropEvent and dispatch to processing"""
 
-    from ccpnmrCore.util import Qt as qtUtil
+    from ccpnmrcore.util import Qt as qtUtil
 
     event.accept()
 

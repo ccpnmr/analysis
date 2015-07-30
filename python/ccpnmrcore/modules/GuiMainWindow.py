@@ -31,7 +31,7 @@ from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import Console
 from ccpncore.gui.Menu import Menu, MenuBar
 from ccpncore.gui import MessageDialog
-from ccpncore.gui.SideBar import SideBar
+from ccpnmrcore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
 from ccpnmrcore.gui.Assigner import Assigner
@@ -92,7 +92,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     project = self._project
     path = project.path
-    self.leftWidget.fillSideBar(project)
+    self.sideBar.setProject(project)
+    self.sideBar.fillSideBar(project)
     self.namespace['project'] = project
     msg  = path + (' created' if isNew else ' opened')
     self.statusBar().showMessage(msg)
@@ -135,13 +136,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.setGeometry(1200, 700, 10, 1)
     self.pythonConsole.heightMax = 200
 
-    self.leftWidget = SideBar(parent=self)
+    self.sideBar = SideBar(parent=self)
 
-    self.leftWidget.setDragDropMode(self.leftWidget.DragDrop)
-    self.leftWidget.setGeometry(0, 0, 13, 600)
-    self.leftWidget.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    self.sideBar.setDragDropMode(self.sideBar.DragDrop)
+    self.sideBar.setGeometry(0, 0, 13, 600)
+    self.sideBar.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
-    self.splitter3.addWidget(self.leftWidget)
+    self.splitter3.addWidget(self.sideBar)
     self.splitter1.addWidget(self.splitter3)
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
@@ -149,7 +150,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
     csShortcut = QtGui.QShortcut(QtGui.QKeySequence('c, s'), self, self.showChemicalShiftTable)
     # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
-    self.leftWidget.itemDoubleClicked.connect(self.raiseProperties)
+    self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
     self.pythonConsole.hide()
     self.splitter2.setGeometry(QtCore.QRect(1200, 1300, 100, 100))
@@ -207,7 +208,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.screenMenu.addSeparator()
     self.screenMenu.addAction(Action(self, 'Generate samples', callback=self.createSample, shortcut="cs"))
     self.screenMenu.addSeparator()
-    self.screenMenu.addAction(Action(self, "View Sample Component peak Table", callback=self.SampleComponentTable, shortcut="st"))
+    # self.screenMenu.addAction(Action(self, "View Sample Component peak Table", callback=self.SampleComponentTable, shortcut="st"))
 
 
     # spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
@@ -397,6 +398,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       popup = SpectrumPropertiesPopup(obj)
       popup.exec_()
       popup.raise_()
+    elif obj.shortClassName == 'PL':
+      self.showPeakTable(self._project, selectedList=obj)
     else:
       project._logger.error("Double-click activation not implemented for object %s" % obj)
 
@@ -473,12 +476,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup.raise_()
 
 
-  def SampleComponentTable(self, position='left', relativeTo=None):
-    SCPT = SampleComponentsPeakTable(self._project)
-    if relativeTo is not None:
-      self.dockArea.addDock(SCPT, position=position, relativeTo=relativeTo)
-    else:
-      self.dockArea.addDock(SCPT, position='bottom')
+  # def SampleComponentTable(self, position='left', relativeTo=None):
+  #   SCPT = SampleComponentsPeakTable(self._project)
+  #   if relativeTo is not None:
+  #     self.dockArea.addDock(SCPT, position=position, relativeTo=relativeTo)
+  #   else:
+  #     self.dockArea.addDock(SCPT, position='bottom')
 
   def removeSpectra(self):
     pass
@@ -608,8 +611,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from ccpn.lib.moleculebox import MoleculeDisplay
     self.moleculeDisplay = MoleculeDisplay(self.dockArea)
 
-  def showPeakTable(self, position='left', relativeTo=None):
-    peakList = PeakTable(self._project)
+  def showPeakTable(self, position='left', relativeTo=None, selectedList=None):
+    peakList = PeakTable(self._project, selectedList=selectedList)
     if relativeTo is not None:
       self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
     else:

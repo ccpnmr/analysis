@@ -158,6 +158,9 @@ QToolButton {
             color: #f7ffff;
             border: 1px solid #182548;
             }
+QToolButton::checked {
+                      background-color:  #020F31;
+                      }
 
 Label {
         color: #f7ffff;

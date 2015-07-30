@@ -65,7 +65,7 @@ class MixturePopup(QtGui.QDialog):
 
  def perform(self):
 
-    sideBar = self.project._appBase.mainWindow.leftWidget
+    sideBar = self.project._appBase.mainWindow.sideBar
     refData = sideBar.spectrumReference
     refCount = sideBar.spectrumReference.childCount()
     spectra = []

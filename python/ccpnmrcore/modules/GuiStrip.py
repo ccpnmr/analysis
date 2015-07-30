@@ -244,7 +244,8 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   #     self.beingUpdated = False
 
   def addSpinSystemLabel(self):
-    self.spinSystemLabel = Label(self.stripFrame, grid=(2, self.guiSpectrumDisplay.orderedStrips.index(self)),
+    self.spinSystemLabel = Label(self.stripFrame, text='.'.join(self.pid.id.split('.')[2:]),
+                                 grid=(2, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                  hAlign='center', vAlign='top',dragDrop=True, pid=self.pid)
     # self.spinSystemLabel.dropEvent = self.dropCallback
     # self.spinSystemLabel.setText("Spin systems shown here")

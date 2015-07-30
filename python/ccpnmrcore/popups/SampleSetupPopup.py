@@ -62,7 +62,7 @@ class SamplePopup(QtGui.QDialog):
   self.Distance.setSingleStep(0.02)
   self.Distance.setSuffix(" ppm")
 
-  AverageDistanceLabel = Label(self, text="Average distance between peaks greater then:", grid=(2, 0))
+  AverageDistanceLabel = Label(self, text="Average distance between peaks greater than:", grid=(2, 0))
 
   self.performButton = Button(self, grid=(3, 2), text='Perform')
   self.performButton.clicked.connect(self.perform)
@@ -73,7 +73,7 @@ class SamplePopup(QtGui.QDialog):
 
  def perform(self):
 
-    sideBar = self.project._appBase.mainWindow.leftWidget
+    sideBar = self.project._appBase.mainWindow.sideBar
     refData = sideBar.spectrumReference
     refCount = sideBar.spectrumReference.childCount()
     spectra = []
@@ -84,14 +84,13 @@ class SamplePopup(QtGui.QDialog):
       for j in range(itemCount):
         spectrumPid = item.child(j).text(0)
         spectrum = self.project.getById(spectrumPid)
-        spectra.append(spectrum)
         spectrum.peakLists[0].findPeaks1dFiltered()
+        print(spectrum.peakLists[0].peaks)
         sampleTab = sideBar.spectrumSamples
 
     if self.setup.checkBox1.isChecked():
       value = (self.setup.spinBoxSA.value())
-      samples = setupSamples(spectra, value , 'nSamples')
-      samples = setupSamples(spectra, value , 'nSamples')
+      samples = setupSamples(self.project.samples, spectra, value , 'nSamples')
 
     elif self.setup.checkBox2.isChecked():
       value = (int(self.setup.spinBoxcomponent.value()+1))

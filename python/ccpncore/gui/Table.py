@@ -506,7 +506,6 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setObjects([])
     self.setColumns(columns)
     self.setObjects(objects)
-    print(objects, columns)
 
 
   def setObjects(self, objects, applyFilter=False):

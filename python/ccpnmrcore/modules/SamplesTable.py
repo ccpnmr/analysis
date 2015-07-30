@@ -5,12 +5,14 @@ from ccpn import AbstractWrapperObject
 
 from ccpncore.gui.Label import Label
 from ccpnmrcore.modules.GuiTableGenerator import GuiTableGenerator
+from ccpncore.gui.Table import ObjectTable, Column
 from pyqtgraph.dockarea import Dock
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.LineEdit import LineEdit
 
+from ccpn.lib.sampleUtil import compareWithLevels
 
-
+import numpy
 class SampleTable(Dock):
 
   def __init__(self, parent=None, samples=None, name='Sample Table', distancevalue=None):
@@ -38,17 +40,33 @@ class SampleTable(Dock):
 
     # samplePulldown = PulldownList(self, grid=(0, 1))
 
-    columns = [('Sample spectra', 'pid')]
+    columns = [Column('Sample', lambda sample: str(sample.pid)),
+               Column('Sample spectra', lambda sample: self.getSampleSpectra(sample))]
+               # Column('Minimum Score', lambda sample: self.getMinScore(sample)),
+               # Column('Average Score', lambda sample: self.getAverageScore(sample))]
 
-    tipTexts = ["Name of the current sample "]
 
-    sampleTable = GuiTableGenerator(self, callback=self.callback(), columns=columns,
-                                       selector=None, tipTexts=tipTexts, objects=samples)
+    sampleTable = ObjectTable(self, columns, callback=None, objects=[])
+    sampleTable.setObjects(samples)
 
 
     self.layout.addWidget(sampleTable)
 
 
+
+  def getSampleSpectra(self, sample):
+    spectra = [spectrum.pid for spectrum in sample.spectra]
+    return ', '.join(spectra)
+
+  def getMinScore(self, sample):
+    for obj in sample.spectra:
+      print(obj)
+    results = numpy.array([compareWithLevels(obj, sample) for obj in sample])
+    return numpy.amin(results)
+
+  def getAverageScore(self, sample):
+    results = numpy.array([compareWithLevels(obj, sample) for obj in sample])
+    return numpy.average(results)
 
   def callback(self):
     pass

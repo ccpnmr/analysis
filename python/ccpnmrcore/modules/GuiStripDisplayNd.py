@@ -90,9 +90,11 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     
     self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button)
     # self.apiStripSpectrumViews = set()  # set of apiStripSpectrumViews seen so far
-    
+
     self.fillToolBar()
     self.setAcceptDrops(True)
+    if self._appBase.preferences.general.ToolbarHidden == 'True':
+      GuiSpectrumDisplay.hideUtilToolBar(self)
     # self.addSpinSystemSideLabel()
     # self._appBase.current.pane = self
 
@@ -214,6 +216,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       apiDataSource = apiSpectrumView.dataSource
       apiDataSource.positiveContourBase *= apiDataSource.positiveContourFactor
       apiDataSource.negativeContourBase *= apiDataSource.negativeContourFactor
+    self.update()
 
   def downBy2(self):
 

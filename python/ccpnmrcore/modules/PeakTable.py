@@ -36,16 +36,16 @@ from PyQt4 import QtGui, QtCore
 UNITS = ['ppm', 'Hz', 'point']
 
 class PeakTable(CcpnDock):
-  def __init__(self, peakLists):
+  def __init__(self, peakLists, selectedList=None):
     CcpnDock.__init__(self, name='Peak List')
 
-    self.layout.addWidget(PeakListSimple(self, peakLists))
+    self.layout.addWidget(PeakListSimple(self, peakLists, selectedList=selectedList))
 
 
 
 class PeakListSimple(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, project=None,  callback=None, **kw):
+  def __init__(self, parent=None, project=None,  callback=None, selectedList=None, **kw):
 
     if not project.peakLists:
       peakLists = []
@@ -89,6 +89,9 @@ class PeakListSimple(QtGui.QWidget, Base):
     # newLabel = Label(self, '', grid=(2, 0))
     # newLabel.setFixedHeight(8)
     self.layout().addWidget(self.peakTable, 3, 0, 1, 8)
+    if selectedList is not None:
+      self.peakListPulldown.setCurrentIndex(self.peakListPulldown.findText(selectedList.pid))
+      # print(self.peakListPulldown.currentIndex(),self.peakListPulldown.currentIndex().text())
 
   def subtractPeakLists(self):
     peakList1 = self.project.getById(self.peakListPulldown.currentText())

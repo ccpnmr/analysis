@@ -93,7 +93,7 @@ class GuiWindow(GuiBase):
       if spectrum:
         msg = spectrum.name+' loaded'
         mainWindow = self._appBase.mainWindow
-        spectrumItem = mainWindow.leftWidget.addSpectrumToItem(spectrum)
+        spectrumItem = mainWindow.sideBar.addSpectrumToItem(spectrum)
         mainWindow.statusBar().showMessage(msg)
         mainWindow.pythonConsole.write("project.loadSpectrum('"+path+"')\n")
 

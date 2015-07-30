@@ -158,6 +158,7 @@ class ObjectClustering:
 
       for cluster in self.__clusters:
         mustMove = len(cluster) > minNComponentsPerSample
+        print('mustMove', mustMove)
         if mustMove:
           ##____  Find the worst fitting component.
           worstItem = None
@@ -222,6 +223,7 @@ class ObjectClustering:
       bestClusterDist = distanceFunction(item, bestCluster)
 
     origDist = bestClusterDist
+    print(item, bestCluster, bestClusterDist, 'ibb')
 
     if origDist == 5:
       return False
@@ -342,7 +344,6 @@ def compare(a, bList):
 
       diffs = fabs(subtract.outer(aVals, bVals))
       mins[:, i] = nanmin(diffs, 1)
-    # print(aVals, bVals)
     mins = nanmin(mins, 1)
     maxDiff = amax(mins)
 
@@ -445,12 +446,10 @@ def setupSamples(samples, n, mode):
     for sample in cluster:
       for spectrum in sample.spectra:
         spectrum.sample = newSample
-    print(newSample.spectra)
-  #   newComp = currentSample.newSampleComponent(name=str(i+1), labeling='std')
-  #   print('comps',currentSample.sampleComponents)
     samplesData.append(newSample)
-  #   newComp.peakCollections = cluster
+
     results = array([compareWithLevels(obj, cluster) for obj in cluster])
+    print(results)
     try:
       newSample.minScore = str(amin(results))
       newSample.averageScore = average(results)

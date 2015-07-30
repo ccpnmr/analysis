@@ -117,7 +117,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
           filePath = filePath[:-4]
         firstSpectrum = self.dockArea.guiWindow.project.loadSpectrum(filePath)
         if firstSpectrum is not None:
-          self.dockArea.guiWindow.leftWidget.addSpectrum(firstSpectrum)
+          self.dockArea.guiWindow.sideBar.addSpectrum(firstSpectrum)
           spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(firstSpectrum)
           msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
                   % filePaths[0]
@@ -126,7 +126,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
             if filePath.endswith('.spc.par'):
               filePath = filePath[:-4]
             spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePath)
-            self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
+            self.dockArea.guiWindow.sideBar.addSpectrum(spectrum)
             if spectrum.axisCodes == firstSpectrum.axisCodes:
               spectrumDisplay.displaySpectrum(spectrum)
               msg = 'spectrum = project.loadSpectrum("%s")\nspectrumDisplay.displaySpectrum(spectrum)\n' \
@@ -156,7 +156,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
             filePath = filePath[:-4]
           spectrum = self.dockArea.guiWindow.project.loadSpectrum(filePath)
           if spectrum is not None:
-            self.dockArea.guiWindow.leftWidget.addSpectrum(spectrum)
+            self.dockArea.guiWindow.sideBar.addSpectrum(spectrum)
             spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
             msg = 'spectrum = project.loadSpectrum("%s")\nwindow.createSpectrumDisplaySpectrum(spectrum)\n' \
                   % filePaths[0]

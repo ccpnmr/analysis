@@ -39,7 +39,7 @@ experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'W
 
 class SideBar(QtGui.QTreeWidget):
   def __init__(self, parent=None ):
-    QtGui.QTreeWidget.__init__(self, parent)
+    QtGui.QTreeWidget.__init__(self, parent,)
 
     self.setFont(QtGui.QFont('Lucida Grande', 12))
     self.header().hide()
@@ -129,19 +129,42 @@ class SideBar(QtGui.QTreeWidget):
       # self.restraintsItem.setText(0, "Restraint Lists")
 
 
-
-    #
-
-
+  def setProject(self, project):
+    self.project = project
 
   def addItem(self, item, data):
     newItem = QtGui.QTreeWidgetItem(item)
     newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
     newItem.setText(0, str(data.name))
     newItem.setData(0, QtCore.Qt.DisplayRole, str(data.pid))
+    newItem.mousePressEvent = self.mousePressEvent
     return newItem
 
 
+
+  def mousePressEvent(self, event):
+    if event.button() == QtCore.Qt.RightButton:
+      self.raiseContextMenu(event, self.itemAt(event.pos()))
+    else:
+      QtGui.QTreeWidget.mousePressEvent(self, event)
+
+
+  def raiseContextMenu(self, event, item):
+    from ccpncore.gui.Menu import Menu
+    contextMenu = Menu('', self, isFloatWidget=True)
+    from functools import partial
+    contextMenu.addAction('Delete', partial(self.removeItem, item))
+    contextMenu.popup(event.globalPos())
+
+
+
+  def removeItem(self, item):
+    import sip
+
+    print(self.project.getById(item.text(0)), 'before')
+    self.project.getById(item.text(0)).delete()
+    print(self.project.getById(item.text(0)), 'after')
+    sip.delete(item)
 
   def fillSideBar(self,project):
     self.projectItem.setText(0, project.name)

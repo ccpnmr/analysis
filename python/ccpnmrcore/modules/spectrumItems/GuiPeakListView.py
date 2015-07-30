@@ -839,7 +839,7 @@ Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 def _upDateAssignmentsPeakDimContrib(project:Project,
                                      apiPeakDimContrib:ApiAbstractPeakDimContrib):
   peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
-  peak._refresPeakAnnotation()
+  peak._refreshPeakAnnotation()
 #
 Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiAbstractPeakDimContrib, 'postInit')
 Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiAbstractPeakDimContrib, 'preDelete')

@@ -42,7 +42,6 @@ from ccpncore.memops import Notifiers
 
 def _getLevels(count, base, factor):
   
-  base *= 100.0  # TEMP
   levels = []
   if count > 0:
     levels = [base]
@@ -220,6 +219,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def drawContours(self, painter):
     
     apiDataSource = self.apiDataSource
+    if apiDataSource.positiveContourBase == 10000.0: # horrid
+      # base has not yet been set, so guess a sensible value
+      apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
+      apiDataSource.negativeContourBase = - apiDataSource.positiveContourBase
+      
     if self._wrappedData.spectrumView.displayPositiveContours is True:
       posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
     else:

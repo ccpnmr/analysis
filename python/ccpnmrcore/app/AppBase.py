@@ -65,11 +65,12 @@ class AppBase(GuiBase):
     # Done this way to sneak the appBase in before creating the wrapper
     apiProject._appBase = self
     project = ccpnIo._wrapApiProject(apiProject)
-    apiNmrProject = project._wrappedData
+    project._appBase = self
     self.project = project
     self.current = Current(project=project)
-    project._appBase = self
+    project.getById('Window:Main').nameSpace['current'] = self.current
 
+    apiNmrProject = project._wrappedData
     apiWindowStore = apiNmrProject.windowStore
     if apiWindowStore is None:
       apiProject = apiNmrProject.parent

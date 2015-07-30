@@ -34,6 +34,7 @@ from ccpn import Project
 from ccpncore.gui.Label import Label
 from ccpnmrcore.gui.PlotWidget import PlotWidget
 from ccpncore.gui.CcpnGridItem import CcpnGridItem
+from ccpncore.gui.ToolBar import ToolBar
 from ccpncore.gui.Widget import Widget
 from ccpncore.memops import Notifiers
 
@@ -244,13 +245,21 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   #     self.beingUpdated = False
 
   def addSpinSystemLabel(self):
-    self.spinSystemLabel = Label(self.stripFrame, text='.'.join(self.pid.id.split('.')[2:]),
-                                 grid=(2, self.guiSpectrumDisplay.orderedStrips.index(self)),
+    self.planeToolbar = ToolBar(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)), hAlign='center', vAlign='c')
+    self.stripLabel = Label(self, text='.'.join(self.pid.id.split('.')[2:]),
+                                 hAlign='center', vAlign='top',dragDrop=True, pid=self.pid)
+    # self.spinSystemLabel.dropEvent = self.dropCallback
+    # self.spinSystemLabel.setText("Spin systems shown here")
+    self.stripLabel.setFixedHeight(15)
+    self.stripLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+    self.spinSystemLabel = Label(self, text='',
                                  hAlign='center', vAlign='top',dragDrop=True, pid=self.pid)
     # self.spinSystemLabel.dropEvent = self.dropCallback
     # self.spinSystemLabel.setText("Spin systems shown here")
     self.spinSystemLabel.setFixedHeight(15)
     self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+    self.planeToolbar.addWidget(self.stripLabel)
+    self.planeToolbar.addWidget(self.spinSystemLabel)
     # self.spinSystemLabel.pid = self.pid
     # print(self.pid)lo
 

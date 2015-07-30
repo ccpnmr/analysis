@@ -68,7 +68,7 @@ class AppBase(GuiBase):
     project._appBase = self
     self.project = project
     self.current = Current(project=project)
-    project.getById('Window:Main').nameSpace['current'] = self.current
+
 
     apiNmrProject = project._wrappedData
     apiWindowStore = apiNmrProject.windowStore
@@ -86,6 +86,7 @@ class AppBase(GuiBase):
     self.mainWindow = mainWindow
     if self.module == 'screen':
       self.mainWindow.menuBar.addMenu(self.mainWindow.screenMenu)
+    project.getById('Window:Main').namespace['current'] = self.current
     mainWindow.raise_()
 
     if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):

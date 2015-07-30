@@ -37,11 +37,8 @@ from ccpncore.memops import Notifiers
 from ccpncore.gui.Button import Button
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Icon import Icon
-from ccpncore.gui.Label import Label
-from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.Menu import Menu
-from ccpncore.gui.ToolBar import ToolBar
-from ccpncore.util import Colour
+from ccpncore.gui.Spinbox import Spinbox
 
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 ###from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
@@ -145,7 +142,7 @@ class GuiStripNd(GuiStrip):
     return self.contextMenu
 
 
-  def changeZPlane(self, planeCount=None, position=None):
+  def changeZPlane(self, planeCount=None, position=None, planeThickness=None):
 
     zAxis = self.orderedAxes[2]
     smallest = None
@@ -157,13 +154,16 @@ class GuiStripNd(GuiStrip):
           smallest = zPlaneSize
     if smallest is None:
       smallest = 1.0 # arbitrary
-    #
+
     if planeCount:
       delta = smallest * planeCount
       zAxis.position = zAxis.position+delta
     elif position:
       zAxis.position = position
     self.planeLabel.setValue(zAxis.position)
+
+    if planeThickness is not None:
+      zAxis.width*=planeThickness
     self.update()
 
   def nextZPlane(self):
@@ -179,11 +179,8 @@ class GuiStripNd(GuiStrip):
     # if self._parent.spectrumViews[0]
     if len(self.orderedAxes) > 2:
       for i in range(len(self.orderedAxes)-2):
-        self.planeToolbar = ToolBar(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)), hAlign='center', vAlign='c')
+
         # self.planeToolbar.setMinimumWidth(200)
-        self.spinSystemLabel = Label(self)
-        self.spinSystemLabel.setMaximumWidth(1150)
-        self.spinSystemLabel.setScaledContents(True)
         prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
         prevPlaneButton.setFixedWidth(19)
         prevPlaneButton.setFixedHeight(19)
@@ -203,10 +200,25 @@ class GuiStripNd(GuiStrip):
         self.planeToolbar.addWidget(prevPlaneButton)
         self.planeToolbar.addWidget(self.planeLabel)
         self.planeToolbar.addWidget(nextPlaneButton)
+        self.planeThickness = Spinbox(self)
+        self.planeThickness.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.planeThickness.setAlignment(QtCore.Qt.AlignCenter)
+        self.planeThickness.setMinimum(1)
+        self.planeThicknessValue = 1
+        self.planeThickness.valueChanged.connect(self.setPlaneThickness)
+        self.planeToolbar.addWidget(self.planeThickness)
 
   def setZPlanePosition(self, value):
     if self.planeLabel.minimum() <= value <= self.planeLabel.maximum():
       self.changeZPlane(position=value)
+
+  def setPlaneThickness(self, value):
+    if value < self.planeThicknessValue:
+      self.changeZPlane(planeThickness=value/(self.planeThicknessValue))
+    else:
+      self.changeZPlane(planeThickness=(value/self.planeThicknessValue))
+    self.planeThicknessValue = value
+
 
   def showPeaks(self, peakList, peaks=None):
     from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView

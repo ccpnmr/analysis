@@ -57,8 +57,8 @@ def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None
   endPoints = [point[1] for point in sorted(endPoint)]
   # print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
 
-  posLevel = spectrum.positiveContourBase*100 if doPos else None
-  negLevel = spectrum.negativeContourBase*100 if doNeg else None
+  posLevel = spectrum.positiveContourBase if doPos else None
+  negLevel = spectrum.negativeContourBase if doNeg else None
 
   apiPeaks = pickNewPeaks(peakList.apiPeakList, startPoint=startPoints, endPoint=endPoints,
                  posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod, excludedRegions=excludedRegions,

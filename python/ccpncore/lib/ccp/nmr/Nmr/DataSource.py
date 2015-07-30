@@ -555,7 +555,7 @@ def estimateNoise(dataSource):
       return dataSource.noiseLevel
 
     if dataSource.numDim > 1:
-      planeData = getPlaneData([0] * dataSource.numDim, 0, 1)
+      planeData = getPlaneData(dataSource, [0] * dataSource.numDim, 0, 1)
       value = 1.1 * numpy.std(planeData.flatten()) # multiplier a guess
     else:
 

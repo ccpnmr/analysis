@@ -129,7 +129,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
                                     """)
 
-    self.namespace = {'current': self._project._appBase.current, 'openProject':self._appBase.openProject,
+    self.namespace = {'openProject':self._appBase.openProject,
                       'newProject':self._appBase.newProject, 'loadData':self.loadData, 'window':self,
                       'preferences':self._appBase.preferences, 'project':self._project}
     self.pythonConsole = Console(parent=self, namespace=self.namespace)
@@ -556,8 +556,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def defineUserShortcuts(self):
     pass
 
-  def createMoleculeFromFasta(self):
-    pass
+  # def createMoleculeFromFasta(self):
+  #   pass
 
   def createMoleculeFromPDB(self):
     pass

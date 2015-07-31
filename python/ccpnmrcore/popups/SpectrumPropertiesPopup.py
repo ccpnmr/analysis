@@ -173,10 +173,10 @@ class GeneralTab(QtGui.QWidget, Base):
       # maximumValueLabel = Label(self, text="Maximum Value: ", grid=(10, 0))
       noiseLevelLabel = Label(self, text="Noise Level: ", grid=(9, 0))
       noiseLevelData = LineEdit(self, grid=(9, 1))
-      if spectrum.apiDataSource.noiseLevel is not None:
-        noiseLevelData.setText(str('%.3d' % spectrum.apiDataSource.noiseLevel))
-      else:
-        noiseLevelData.setText('None')
+      # if spectrum.apiDataSource.noiseLevel is not None:
+      noiseLevelData.setText(str('%.3d' % spectrum.apiDataSource.estimateNoise()))
+      # else:
+      #   noiseLevelData.setText('None')
 
 
   def setSpectrumScale(self):

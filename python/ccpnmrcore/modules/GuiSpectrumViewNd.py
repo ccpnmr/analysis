@@ -129,6 +129,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # for strip in self.strips:
     self.addSpectrumItem(self.strip)
 
+
     # Notifiers.registerNotify(self.newPeakListView, 'ccpnmr.gui.Task.PeakListView', '__init__')
     #
     # spectrum = self.spectrum
@@ -158,7 +159,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ###self.visibilityAction.toggled.connect(self.setVisible) # does this ever get set twice??
         
   def removeSpectrumItem(self, strip):
-    if self not in strip.plotWidget.scene().items():
+    if self in strip.plotWidget.scene().items():
       strip.plotWidget.scene().removeItem(self)
 
   ###def connectStrip(self, strip):
@@ -200,7 +201,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     ##guiStrip = self.spectrumDisplay.viewportDict[widget]
     ##self.drawContours(painter, guiStrip)
-    # NBNB TBD this should NEVER be called if self.strip is None (i.e. selfis deleted)
+    # NBNB TBD this should NEVER be called if self.strip is None (i.e. self is deleted)
     # NBNB FIXME this needs to be fixed.
 
     if self.isVisible() and self.strip is not None:

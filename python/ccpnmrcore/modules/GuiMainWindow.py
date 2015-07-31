@@ -101,7 +101,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # msg2 = 'project = ' + ('new' if isNew else 'open') + 'Project("+path+")\n'
     msg2 = 'project = %sProject("%s")\n' % (('new' if isNew else 'open'), path)
     self.pythonConsole.write(msg2)
-    self.pythonConsole.ui.historyList.addItem(msg2)
+    # self.pythonConsole.ui.historyList.addItem(msg2)
 
     if not isNew:
       recentFiles = self._appBase.preferences.recentFiles
@@ -132,10 +132,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.namespace = {'openProject':self._appBase.openProject,
                       'newProject':self._appBase.newProject, 'loadData':self.loadData, 'window':self,
                       'preferences':self._appBase.preferences, 'project':self._project}
-    self.pythonConsole = Console(parent=self, namespace=self.namespace)
-    self.pythonConsole.setGeometry(1200, 700, 10, 1)
-    self.pythonConsole.heightMax = 200
-
+    # self.pythonConsole = Console(parent=self, namespace=self.namespace)
+    # self.pythonConsole.setGeometry(1200, 700, 10, 1)
+    # self.pythonConsole.heightMax = 200
+    from ccpncore.gui.IpythonConsole import IpythonConsole
+    self.pythonConsole = IpythonConsole(self, self.namespace)
     self.sideBar = SideBar(parent=self)
 
     self.sideBar.setDragDropMode(self.sideBar.DragDrop)
@@ -152,6 +153,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
     self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
+    # self.dockArea.addDock(self.pythonConsole)
     self.pythonConsole.hide()
     self.splitter2.setGeometry(QtCore.QRect(1200, 1300, 100, 100))
     self.splitter1.addWidget(self.dockArea)
@@ -251,7 +253,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroRecordMenu.addAction(Action(self, "Stop", callback=self.stopMacroRecord))
     macroRecordMenu.addAction(Action(self, "Save As...", callback=self.saveRecordedMacro))
     macroMenu.addSeparator()
-    macroMenu.addAction(Action(self, "Run...", shortcut="rm", callback=self.runMacro))
+    macroMenu.addAction(Action(self, "Run...", shortcut="rm", callback=self.pythonConsole.runMacro))
     macroMenu.addAction(Action(self, "Run Recent", callback=self.showRecentMacros))
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Define User Shortcuts...", callback=self.defineUserShortcuts))
@@ -294,7 +296,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
 
-    self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
+    # self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
     self._menuBar.addMenu(fileMenu)
     self._menuBar.addMenu(peaksMenu)
 

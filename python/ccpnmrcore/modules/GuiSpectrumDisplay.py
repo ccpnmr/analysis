@@ -60,7 +60,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     GuiModule.__init__(self)
     # DropBase.__init__(self, self._appBase, self.dropCallback)
     self.setAcceptDrops(True)
-    self.spectrumToolBar = ToolBar(self.dock)#, grid=(0, 0), gridSpan=(1, 2))
+    self.spectrumToolBar = ToolBar(self.dock, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
     self.dock.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
 
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -128,6 +128,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
   def setCrossHairPosition(self, axisPositionDict):
     for strip in self.strips:
       strip.setCrossHairPosition(axisPositionDict)
+
     
 def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
   """Update interface when a strip is created"""

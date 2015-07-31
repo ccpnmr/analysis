@@ -318,6 +318,20 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   #     if apiStripSpectrumView in self.apiStripSpectrumViews:  # should always be the case
   #       self.apiStripSpectrumViews.remove(apiStripSpectrumView)
           
+
+  # def raiseContextMenu(self, event):
+  #   print('event',event)
+  #   # from ccpncore.gui.Menu import Menu
+  #   # contextMenu = Menu('', self, isFloatWidget=True)
+  #   # from functools import partial
+  #   # contextMenu.addAction('Delete', partial(self.removeSpectrum, action))
+  #   # return contextMenu
+  #
+  # def removeSpectrum(self, action):
+  #   self.spectrumToolBar.removeAction(action)
+  #
+  #   # print(self, widget)
+
   def _setActionIconColour(self, apiDataSource):
     action = self.spectrumActionDict.get(apiDataSource)
     if action:
@@ -327,6 +341,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       else:
         pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
       action.setIcon(QtGui.QIcon(pix))
+
 
   # def _spectrumViewsInDisplay(self):
   #   spectrumViews = set()
@@ -351,9 +366,9 @@ def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
     action.setCheckable(True)
     action.setChecked(True)
     widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
-    widget.setFixedSize(60, 30)
+    widget.setFixedSize(80, 30)
+    widget.spectrumView = apiSpectrumView
     spectrumDisplay.spectrumActionDict[apiDataSource] = action
-    # have to use wrappedData because wrapper object disappears before delete notifier is called (?)
     spectrumDisplay._setActionIconColour(apiDataSource)
 
   return action

@@ -135,16 +135,38 @@ class AppBase(GuiBase):
     ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)
     print("project saved")
     
-def getPreferences():
+def getPreferences(skipUserPreferences):
 
-  preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
-  if not os.path.exists(preferencesPath):
-    preferencesPath = os.path.join(Path.getPythonDirectory(), 'ccpnmrcore', 'app',
-                                   'defaultv3settings.json')
-  fp = open(preferencesPath)
-  preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
-  fp.close()
+  def _readPreferencesFile(preferencesPath):
+    fp = open(preferencesPath)
+    preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
+    fp.close()
+    return preferences
+    
+  def _updateDict(d, u):
+    import collections
+    # recursive update of dictionary
+    # this deletes every key in u that is not in d
+    # if we want every key regardless, then remove first if check below 
+    for k, v in u.items():
+      if k not in d:
+        continue
+      if isinstance(v, collections.Mapping):
+        r = _updateDict(d.get(k, {}), v)
+        d[k] = r
+      else:
+        d[k] = u[k]
+    return d
+      
+  preferencesPath = os.path.join(Path.getPythonDirectory(),
+                      'ccpnmrcore', 'app', 'defaultv3settings.json')
+  preferences = _readPreferencesFile(preferencesPath)
   
+  if not skipUserPreferences:
+    preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
+    if os.path.exists(preferencesPath):
+      _updateDict(preferences, _readPreferencesFile(preferencesPath))
+      
   return preferences
   
 def getStyleSheet(preferences):
@@ -172,7 +194,7 @@ def checkRegistration(applicationVersion):
   
   return True
   
-def startProgram(programClass, applicationName, applicationVersion, projectPath=None, language=None):
+def startProgram(programClass, applicationName, applicationVersion, projectPath=None, language=None, skipUserPreferences=False):
 
   if language:
     Translation.setTranslationLanguage(language)
@@ -187,7 +209,7 @@ def startProgram(programClass, applicationName, applicationVersion, projectPath=
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
   
-  preferences = getPreferences()  
+  preferences = getPreferences(skipUserPreferences)  
   styleSheet = getStyleSheet(preferences)
   app.setStyleSheet(styleSheet)
   

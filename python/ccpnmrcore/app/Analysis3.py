@@ -62,8 +62,9 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(description='Process startup arguments')
   parser.add_argument('--language', help='Language for menus, etc.')
+  parser.add_argument('--skip-user-preferences', dest='skipUserPreferences', action='store_true', help='Skip loading user preferences')
   parser.add_argument('projectPath', nargs='?', help='Project path')
   args = parser.parse_args()
   
-  startProgram(Analysis3, applicationName, applicationVersion, args.projectPath, args.language)
+  startProgram(Analysis3, applicationName, applicationVersion, args.projectPath, args.language, args.skipUserPreferences)
 

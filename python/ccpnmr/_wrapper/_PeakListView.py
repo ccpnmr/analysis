@@ -66,7 +66,7 @@ class PeakListView(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """id string - """
-    return str(self._wrappedData.peakListView.serial)
+    return str(self._wrappedData.peakListView.peakListSerial)
 
   @property
   def symbolStyle(self) -> str:

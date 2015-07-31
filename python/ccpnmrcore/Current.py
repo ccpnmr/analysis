@@ -65,8 +65,6 @@ class Current:
     # If you need a graphics object (e.g. a module) you must make and register a bound method
     # on the module.
 
-    print ("@~@~ registering", field, notify)
-
     notifies = self._notifies
     ll = notifies.get(field)
     if ll is None:

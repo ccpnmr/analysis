@@ -834,15 +834,12 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
 def _refreshPeakAnnotation(peak:Peak):
   data2Obj = peak._project._data2Obj
+  print ("@~@~ _refreshPeakAnnotation")
   for apiPeakListView in peak._wrappedData.peakList.peakListViews:
     for apiStripPeakListView in apiPeakListView.stripPeakListViews:
       guiPeakListView = data2Obj[apiStripPeakListView]
-      peakItem = guiPeakListView.peakItems[peak]
-      print('peakItem',peakItem)
 
       # NBNB TBD add body here
-
-
 
 
 
@@ -850,6 +847,7 @@ Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
 def _upDateAssignmentsPeakDimContrib(project:Project,
                                      apiPeakDimContrib:ApiAbstractPeakDimContrib):
+  print ("@~@~ _upDateAssignmentsPeakDimContrib")
   peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
   peak._refreshPeakAnnotation()
 #

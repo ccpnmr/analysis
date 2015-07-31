@@ -26,6 +26,8 @@ import sys
 
 from ccpnmrcore.app.AppBase import AppBase, startProgram
 from ccpnmrcore.app.Version import applicationVersion
+from ccpnmrcore.modules import GuiStrip
+from ccpnmrcore.modules import GuiStripDisplayNd
 
 applicationName = 'Analysis3'
 
@@ -38,23 +40,23 @@ class Analysis3(AppBase):
     # Initialise strips
     project = self.project
     for strip in project.strips:
-      strip._setupGuiStrip(strip._wrappedData)
+      GuiStrip._setupGuiStrip(project, strip._wrappedData)
 
     # Initialise Rulers
     for task in project.tasks:
       for apiMark in task._wrappedData.sortedMarks():
         for apiRuler in apiMark.sortedRulers():
-          project._rulerCreated(apiRuler)
+          GuiStrip._rulerCreated(project, apiRuler)
 
     # Initialise SpectrumViews
     for spectrumDisplay in project.spectrumDisplays:
       apiSpectrumDisplay = spectrumDisplay._wrappedData
       for apiSpectrumView in apiSpectrumDisplay.sortedSpectrumViews():
-        project._createdSpectrumView(apiSpectrumView)
+        GuiStripDisplayNd._createdSpectrumView(project, apiSpectrumView)
 
       for apiStrip in apiSpectrumDisplay.orderedStrips:
         for apiStripSpectrumView in apiStrip.stripSpectrumViews:
-          project._createdStripSpectrumView(apiStripSpectrumView)
+          GuiStripDisplayNd._createdStripSpectrumView(project, apiStripSpectrumView)
 
 
 if __name__ == '__main__':

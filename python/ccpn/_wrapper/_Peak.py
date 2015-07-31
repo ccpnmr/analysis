@@ -189,6 +189,8 @@ class Peak(AbstractWrapperObject):
 
   @dimensionNmrAtoms.setter
   def dimensionNmrAtoms(self, value:Sequence):
+
+    print ("@~@~ set dimensionNmrAtoms")
     apiPeak = self._wrappedData
     dimResonances = []
     for atoms in value:
@@ -235,6 +237,9 @@ class Peak(AbstractWrapperObject):
 
   @assignedNmrAtoms.setter
   def assignedNmrAtoms(self, value:Sequence):
+
+    print ("@~@~ set assignedNmrAtoms")
+
     apiPeak = self._wrappedData
     peakDims = apiPeak.sortedPeakDims()
     dimensionCount = len(peakDims)
@@ -264,8 +269,8 @@ class Peak(AbstractWrapperObject):
     self.assignedNmrAtoms = assignedNmrAtoms
 
   def assignDimension(self, axisCode, value):
-    """Assign dimension axisCode to Nmratom or NmrAtom.pid value
-    NBNB TBD add integer axisCode? Should it be index or cim number?"""
+    """Assign dimension axisCode to value (NmrAtom, or Pid or sequence of eitehr, or None)
+    NBNB TBD add integer axisCode? Should it be index or dim number?"""
 
     axisCodes = self._parent._parent.axisCodes
     try:
@@ -277,9 +282,10 @@ class Peak(AbstractWrapperObject):
       value = []
     elif isinstance(value, str):
       value = [self.getById(value)]
+    elif isinstance(value, Sequence):
+      value = [(self.getById(x) if isinstance(x, str) else x) for x in value]
     else:
       value = [value]
-
     dimensionNmrAtoms = list(self.dimensionNmrAtoms)
     dimensionNmrAtoms[index] = value
     self.dimensionNmrAtoms = dimensionNmrAtoms

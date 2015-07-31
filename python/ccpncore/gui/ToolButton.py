@@ -37,11 +37,11 @@ class ToolButton(QtGui.QToolButton):
     else:
       pix.fill(QtGui.QColor(spectrumView.spectrum.positiveContourColour))
     # spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
-    self.spaction = parent.spectrumToolBar.addAction(spectrumView.spectrum.name)#, self)
-    newIcon = QtGui.QIcon(pix)
-    self.spaction.setIcon(newIcon)
-    self.spaction.setCheckable(True)
-    self.spaction.setChecked(True)
+    # self.spaction = parent.spectrumToolBar.addAction(spectrumView.spectrum.name)#, self)
+    # newIcon = QtGui.QIcon(pix)
+    # self.spaction.setIcon(newIcon)
+    # self.spaction.setCheckable(True)
+    # self.spaction.setChecked(True)
 
     # for spectrumView in parent.spectrumViews:
     #   if spectrumView.spectrum.dimensionCount < 2:

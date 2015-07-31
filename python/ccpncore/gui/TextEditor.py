@@ -35,11 +35,11 @@ class TextEditor(QtGui.QTextEdit, Base):
       #font = QFont("Courier", 11)
       #self.setFont(font)
       self.filename = filename
-      if self.filename is not None:
-
-        fileData = self.filename.read()
-        print(fileData)
-        self.setText(fileData)
-
-      self.show()
+      # if self.filename is not None:
+      #
+      #   fileData = self.filename.read()
+      #   print(fileData)
+      #   self.setText(fileData)
+      #
+      # self.show()
 

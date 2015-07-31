@@ -25,15 +25,36 @@ __author__ = 'simon'
 
 
 from ccpncore.gui.Base import Base
+from ccpncore.gui.Menu import Menu
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 class ToolBar(QtGui.QToolBar, Base):
 
-  def __init__(self, parent, **kw):
+  def __init__(self, parent, widget=None, callback=None, **kw):
     QtGui.QToolBar.__init__(self, parent)
     Base.__init__(self, **kw)
-    # self.setStyleSheet(""" QToolBar {border: 0px;
-    #                                 background-color: transparent;
-    # }
-    # """)
+    self.parent = parent
+    self.widget = widget
+
+
+  def mousePressEvent(self, event):
+    if event.button() == QtCore.Qt.RightButton:
+      button = self.childAt(event.pos())
+      menu = self.raiseContextMenu(button)
+      menu.popup(event.globalPos())
+
+  def raiseContextMenu(self, button):
+    contextMenu = Menu('', self, isFloatWidget=True)
+    from functools import partial
+    contextMenu.addAction('Delete', partial(self.removeSpectrum, button))
+    return contextMenu
+
+  def removeSpectrum(self, button):
+    self.removeAction(button.actions()[0])
+    key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+    for spectrumView in self.widget.spectrumViews:
+      if spectrumView.apiDataSource == key:
+        for strip in self.widget.strips:
+          spectrumView.removeSpectrumItem(strip)
+

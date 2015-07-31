@@ -174,7 +174,7 @@ class GeneralTab(QtGui.QWidget, Base):
       noiseLevelLabel = Label(self, text="Noise Level: ", grid=(9, 0))
       noiseLevelData = LineEdit(self, grid=(9, 1))
       # if spectrum.apiDataSource.noiseLevel is not None:
-      noiseLevelData.setText(str('%.3d' % spectrum.apiDataSource.estimateNoise()))
+      # noiseLevelData.setText(str('%.3d' % spectrum.apiDataSource.estimateNoise()))
       # else:
       #   noiseLevelData.setText('None')
 

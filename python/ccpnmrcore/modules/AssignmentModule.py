@@ -143,7 +143,7 @@ class AssignmentModule(CcpnDock, Base):
 
   def getNmrResidue(self, item):
     self.project._appBase.current.nmrResidue = self.project.getById(item.text()).nmrResidue
-    if self.NmrResiduePopup:
+    if hasattr(self, 'NmrResiduePopup'):
       self.NmrResiduePopup.update()
 
 

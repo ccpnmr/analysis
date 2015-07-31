@@ -278,7 +278,7 @@ class Peak(AbstractWrapperObject):
     elif isinstance(value, str):
       value = [self.getById(value)]
     else:
-      vaue = [value]
+      value = [value]
 
     dimensionNmrAtoms = list(self.dimensionNmrAtoms)
     dimensionNmrAtoms[index] = value

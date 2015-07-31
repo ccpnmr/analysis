@@ -38,7 +38,7 @@ class Analysis3(AppBase):
     # Initialise strips
     project = self.project
     for strip in project.strips:
-      project._setupGuiStrip(strip._wrappedData)
+      strip._setupGuiStrip(strip._wrappedData)
 
     # Initialise Rulers
     for task in project.tasks:

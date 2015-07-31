@@ -1,18 +1,18 @@
 {
     "general": {
-        "autoBackupOnOpen": "False",
-        "autoSaveOnQuit": "True",
-        "autoSaveLayoutOnQuit": "True",
+        "autoBackupOnOpen": false,
+        "autoSaveOnQuit": true,
+        "autoSaveLayoutOnQuit": true,
         "auxiliaryFilesPath": "~/.ccpn",
         "macroPath": "/home/ccpn/code/svnsf/trunk/ccpnv3/python/ccpnmr/macros/",
         "language": "English-UK",
         "editor": "default",
         "colourScheme": "dark",
         "license": "",
-        "toolbarHidden": "False"
+        "toolbarHidden": false
     },
     "spectra": {
-        "keepExternal": "True",
+        "keepExternal": true,
         "brukerTemplates": "pdata/*",
         "nmrPipeTemplates": "*ft*",
         "ucsfTemplates": [

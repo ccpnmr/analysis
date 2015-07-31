@@ -44,13 +44,13 @@ class PreferencesPopup(QtGui.QDialog):
     self.preferences = preferences
     self.oldPreferences = preferences
     self.autoBackupLabel =  Label(self, text="Auto Backup On Open: ", grid=(2, 0))
-    self.autoBackupBox = CheckBox(self, grid=(2, 1), checked=bool(self.preferences.general.autoBackupOnOpen))
+    self.autoBackupBox = CheckBox(self, grid=(2, 1), checked=self.preferences.general.autoBackupOnOpen)
     self.autoBackupBox.toggled.connect(partial(self.toggleGeneralOptions, 'autoBackupOnOpen'))
     self.autoSaveLabel = Label(self, text='Auto Save On Quit: ', grid=(4, 0))
-    self.autoSaveBox = CheckBox(self, grid=(4, 1), checked=bool(self.preferences.general.autoSaveOnQuit))
+    self.autoSaveBox = CheckBox(self, grid=(4, 1), checked=self.preferences.general.autoSaveOnQuit)
     self.autoSaveBox.toggled.connect(partial(self.toggleGeneralOptions, 'autoSaveOnQuit'))
     self.autoSaveLayoutLabel = Label(self, text="Auto Save Layout On Quit: ", grid=(6, 0))
-    self.autoSaveLayoutBox = CheckBox(self, grid=(6, 1), checked=bool(self.preferences.general.autoSaveLayoutOnQuit))
+    self.autoSaveLayoutBox = CheckBox(self, grid=(6, 1), checked=self.preferences.general.autoSaveLayoutOnQuit)
     self.autoSaveLayoutBox.toggled.connect(partial(self.toggleGeneralOptions, 'autoSaveLayoutOnQuit'))
     self.auxiliaryFilesLabel = Label(self, text="Auxiliary Files Path: ", grid=(8, 0))
     self.auxiliaryFilesData = LineEdit(self, grid=(8, 1), hAlign='l')
@@ -77,7 +77,7 @@ class PreferencesPopup(QtGui.QDialog):
     self.spectraTitle = Label(self, text='Spectra', grid=(22, 0))
     self.spectraTitle.setStyleSheet("font: bold;")
     self.keepExternalLabel = Label(self, text='Keep External:', grid=(24, 0))
-    self.keepExternalBox = CheckBox(self, grid=(24, 1), hAlign='l',checked=bool(self.preferences.spectra.keepExternal))
+    self.keepExternalBox = CheckBox(self, grid=(24, 1), hAlign='l',checked=self.preferences.spectra.keepExternal)
     self.keepExternalBox.toggled.connect(partial(self.toggleSpectralOptions, 'keepExternal'))
 
     buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)

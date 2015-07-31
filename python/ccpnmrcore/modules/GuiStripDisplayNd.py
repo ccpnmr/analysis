@@ -93,7 +93,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
     self.fillToolBar()
     self.setAcceptDrops(True)
-    if self._appBase.preferences.general.ToolbarHidden == 'True':
+    if self._appBase.preferences.general.toolbarHidden == 'True':
       GuiSpectrumDisplay.hideUtilToolBar(self)
     # self.addSpinSystemSideLabel()
     # self._appBase.current.pane = self

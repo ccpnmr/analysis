@@ -32,7 +32,7 @@ from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ColourDialog import ColourDialog
 from ccpncore.util.Colour import spectrumColours
-from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
+# from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.gui.ButtonList import ButtonList
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
@@ -112,8 +112,9 @@ class GeneralTab(QtGui.QWidget, Base):
     self.pathData.setText(spectrum.filePath)
     self.pathData.editingFinished.connect(self.setSpectrumPath)
     self.pathDataButton = Button(self, text='...', callback=self.getSpectrumFile, grid=(1, 2))
-    dataTypeLabel = Label(self, text="Data Type: ", grid=(2, 0))
-    dataTypeData = Label(self, text=getSpectrumFileFormat(spectrum.filePath), grid=(2, 1))
+    # COmmented out as function no longer exists. NBNB TBD FIXME
+    # dataTypeLabel = Label(self, text="Data Type: ", grid=(2, 0))
+    # dataTypeData = Label(self, text=getSpectrumFileFormat(spectrum.filePath), grid=(2, 1))
     chemicalShiftListLabel = Label(self, text="Chemical Shift List: ", grid=(3, 0))
     self.chemicalShiftListPulldown = PulldownList(self, grid=(3, 1), texts=[csList.pid
                                                 for csList in spectrum.project.chemicalShiftLists]

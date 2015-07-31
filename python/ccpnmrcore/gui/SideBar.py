@@ -25,19 +25,20 @@ __author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
 import pandas as pd
-from ccpncore.gui.Button import Button
+# from ccpncore.gui.Button import Button
+from ccpnmrcore.DropBase import DropBase
 
-import sys
+# import sys
 import os
 import csv
 
-from ccpncore.gui.Font import Font
+# from ccpncore.gui.Font import Font
 
 experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'Water-LOGSY.H'}
 
 
 
-class SideBar(QtGui.QTreeWidget):
+class SideBar(DropBase, QtGui.QTreeWidget):
   def __init__(self, parent=None ):
     QtGui.QTreeWidget.__init__(self, parent,)
 
@@ -160,10 +161,7 @@ class SideBar(QtGui.QTreeWidget):
 
   def removeItem(self, item):
     import sip
-
-    print(self.project.getById(item.text(0)), 'before')
     self.project.getById(item.text(0)).delete()
-    print(self.project.getById(item.text(0)), 'after')
     sip.delete(item)
 
   def fillSideBar(self,project):
@@ -404,67 +402,69 @@ class SideBar(QtGui.QTreeWidget):
         return True
 
 
-  def dropEvent(self, event):
-    '''If object can be dropped into this area, accept dropEvent, otherwise throw an error
-      spectra, projects and peak lists can be dropped into this area but nothing else.
-      If project is dropped, it is loaded.
-      If spectra/peak lists are dropped, these are displayed in the side bar but not displayed in
-      spectrumDisplay
-      '''
-
-    if event.mimeData().hasUrls():
-      event.setDropAction(QtCore.Qt.CopyAction)
-      event.accept()
-      links = []
-      for url in event.mimeData().urls():
-          links.append(str(url.toLocalFile()))
-      self.emit(QtCore.SIGNAL("dropped"), links)
-
-    else:
-      event.setDropAction(QtCore.Qt.MoveAction)
-      super(SideBar, self).dropEvent(event)
-
-    if event.mimeData().urls():
-      event.accept()
-      spectra = []
-      filePaths = [url.path() for url in event.mimeData().urls()]
-      # print(filePaths)
-      if filePaths:
-        for filePath in filePaths:
-          # if len(filePaths) == 1:
-            lookupFile = self.isLookupFile(filePath)
-            if lookupFile:
-              self.parseLookupFile(filePath)
-
-            elif self.isProject(filePath):
-              self.parent._appBase.mainWindow.openAProject(filePath)
-
-            else:
-              # spectrum = self.parent.project.loadSpectrum(filePath)
-              try:
-                spectrum = self.parent.project.loadSpectrum(filePath)
-                self.addSpectrumToItem(spectrum)
-                spectra.append(spectrum)
-              except:
-                pass
-
-
-
-        # if len(spectra) > 0:
-        #   msgBox = QtGui.QMessageBox()
-        #   msgBox.setText("Display all spectra")
-        #   msgBox.setInformativeText("Do you want to display all loaded spectra?")
-        #   msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-        #   ret = msgBox.exec_()
-        #   if ret == QtGui.QMessageBox.Yes:
-        #     newDisplay = self.parent.createSpectrumDisplay(spectra[0])
-        #     for spectrum in spectra[1:]:
-        #       newDisplay.displaySpectrum(spectrum)
-        #     self.parent.removeBlankDisplay()
-        #   else:
-        #     pass
-
-      else:
-        event.ignore()
-
+  # def dropEvent(self, event):
+  #   '''If object can be dropped into this area, accept dropEvent, otherwise throw an error
+  #     spectra, projects and peak lists can be dropped into this area but nothing else.
+  #     If project is dropped, it is loaded.
+  #     If spectra/peak lists are dropped, these are displayed in the side bar but not displayed in
+  #     spectrumDisplay
+  #     '''
+  #
+  #   print ("@~@~ Sidebar drop event")
+  #
+  #   if event.mimeData().hasUrls():
+  #     event.setDropAction(QtCore.Qt.CopyAction)
+  #     event.accept()
+  #     links = []
+  #     for url in event.mimeData().urls():
+  #         links.append(str(url.toLocalFile()))
+  #     self.emit(QtCore.SIGNAL("dropped"), links)
+  #
+  #   else:
+  #     event.setDropAction(QtCore.Qt.MoveAction)
+  #     super(SideBar, self).dropEvent(event)
+  #
+  #   if event.mimeData().urls():
+  #     event.accept()
+  #     spectra = []
+  #     filePaths = [url.path() for url in event.mimeData().urls()]
+  #     # print(filePaths)
+  #     if filePaths:
+  #       for filePath in filePaths:
+  #         # if len(filePaths) == 1:
+  #           lookupFile = self.isLookupFile(filePath)
+  #           if lookupFile:
+  #             self.parseLookupFile(filePath)
+  #
+  #           elif self.isProject(filePath):
+  #             self.parent._appBase.mainWindow.openAProject(filePath)
+  #
+  #           else:
+  #             # spectrum = self.parent.project.loadSpectrum(filePath)
+  #             try:
+  #               spectrum = self.parent.project.loadSpectrum(filePath)
+  #               self.addSpectrumToItem(spectrum)
+  #               spectra.append(spectrum)
+  #             except:
+  #               pass
+  #
+  #
+  #
+  #       # if len(spectra) > 0:
+  #       #   msgBox = QtGui.QMessageBox()
+  #       #   msgBox.setText("Display all spectra")
+  #       #   msgBox.setInformativeText("Do you want to display all loaded spectra?")
+  #       #   msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+  #       #   ret = msgBox.exec_()
+  #       #   if ret == QtGui.QMessageBox.Yes:
+  #       #     newDisplay = self.parent.createSpectrumDisplay(spectra[0])
+  #       #     for spectrum in spectra[1:]:
+  #       #       newDisplay.displaySpectrum(spectrum)
+  #       #     self.parent.removeBlankDisplay()
+  #       #   else:
+  #       #     pass
+  #
+  #     else:
+  #       event.ignore()
+  #
 

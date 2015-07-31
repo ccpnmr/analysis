@@ -23,25 +23,88 @@ __version__ = "$Revision$"
 #=========================================================================================
 # import collections
 
+import os
+from ccpncore.lib.Io import Formats as ioFormats
+from ccpncore.lib.Io import Fasta as fastaIo
 
-def loadSpectrum(project:object, filePath:str, reReadSpectrum:object=None):
-  """Load spectrum from file a filePath"""
+# def loadSpectrum(project:object, filePath:str, reReadSpectrum:object=None):
+#   """Load spectrum from file a filePath"""
+#
+#   if reReadSpectrum is not None:
+#     # NBNB TBD Rasmus - this is clearly not working yet
+#     raise NotImplementedError("reReadSpectrum parameter not implemented yet")
+#
+#   if reReadSpectrum:
+#     spectrum = reReadSpectrum
+#     # NBNB TBD BROKEN - spectrum is overwritten lower down
+#   else:
+#     dataSource = project.nmrProject.loadDataSource(filePath)
+#     if not dataSource:
+#       return None
+#
+#   # NBNB TBD BROKEN - dataSource is not always set.
+#   spectrum = project._data2Obj[dataSource]
+#
+#   return spectrum
 
-  if reReadSpectrum is not None:
-    # NBNB TBD Rasmus - this is clearly not working yet
-    raise NotImplementedError("reReadSpectrum parameter not implemented yet")
+def loadData(project:object, path:str) -> (list,None):
+  """Load data in url, determining type first."""
 
-  if reReadSpectrum:
-    spectrum = reReadSpectrum
-    # NBNB TBD BROKEN - spectrum is overwritten lower down
+  dataType, subType, usePath = ioFormats.analyseUrl(path)
+  print ("@~@~ url analysis:", dataType, subType, usePath)
+  # urlInfo is list of triplets of (type, subType, modifiedUrl),
+  # e.g. ('Spectrum', 'Bruker', newUrl)
+  if dataType is None:
+    print("Skipping: file data type not recognised for %s")
+  elif not os.path.exists(usePath):
+    print("Skipping: no file found at %s")
   else:
-    # dataSource = NmrProject.loadDataSource(project.nmrProject, filePath)
-    dataSource = project.nmrProject.loadDataSource(filePath)
-    if not dataSource:
-      return None
-  
-  # NBNB TBD BROKEN - dataSource is not always set.
-  spectrum = project._data2Obj[dataSource]
+    funcname = 'load' + dataType
+    if funcname == 'loadProject':
+      return [project.loadProject(usePath, subType)]
+    elif hasattr(project, funcname):
+      pids = getattr(project, funcname)(usePath, subType)
+      return pids
+    else:
+      print("Skipping: project has no function %s" % funcname)
+  #
+  return None
 
-  return spectrum
-  
+# Data loaders and dispatchers
+def loadSequence(project:object, path:str, subType:str) -> list:
+  """Load sequence(s) from file into Wrapper project"""
+
+  print ("@~@~ loadSequence", subType)
+
+  if subType == ioFormats.FASTA:
+    sequences = fastaIo.parseFastaFile(path)
+  else:
+    raise ValueError("Sequence file type %s is not recognised" % subType)
+
+  chains = []
+  for sequence in sequences:
+    chains.append(project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+                                          molType='protein'))
+  #
+  return chains
+
+def loadProject(project:object, path:str, subType:str):
+  """Load project from file into application and return the new project"""
+
+  print ("@~@~ loadProject", subType)
+
+  if subType == ioFormats.CCPN:
+    return project._appBase.openProject(path)
+  else:
+    raise ValueError("Sequence file type %s is not recognised" % subType)
+
+def loadSpectrum(project:object, path:str, subType:str):
+  """Load spectrum from file into application"""
+
+  print ("@~@~ loadSpectrum", subType)
+
+  apiDataSource = project._wrappedData.loadDataSource(path, subType)
+  if apiDataSource is None:
+    return []
+  else:
+    return [project._data2Obj[apiDataSource]]

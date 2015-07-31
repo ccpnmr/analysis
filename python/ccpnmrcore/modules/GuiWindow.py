@@ -29,7 +29,7 @@ from PyQt4 import QtGui
 
 from pyqtgraph.dockarea import DockArea
 from ccpncore.lib.spectrum import Util as specUtil
-from ccpncore.lib.Io.FastaIo import parseFastaFile, isFastaFormat
+# from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
@@ -71,31 +71,42 @@ class GuiWindow(GuiBase):
           
   def loadData(self):
 
+    paths = QtGui.QFileDialog.getOpenFileName(self, 'Load Data')
 
-    path = QtGui.QFileDialog.getOpenFileName(self, 'Load Data')
-    if not path:
+    # NBNB TBD I assume here that path is eitehr a string or a list lf string paths.
+    # NBNB FIXME if incorrect
+
+    if not paths:
       return
-    elif isFastaFormat(path):
-      try:
-        # NBNB TBD next line does ont make sense
-        sequences = parseFastaFile(path[0])
-        for sequence in sequences:
-          self._parent._appBase.project.makeSimpleChain(sequence=sequence[1],
-                                                        compoundName=sequence[0],
-                                                        molType='protein')
+    elif isinstance(paths,str):
+      paths = [paths]
 
-      except:
-        print("DEBUG Error loading FASTA file %s" % path)
-    else:
-      # Where we are now this can only be a spectrum
-      spectrum = self.project.loadSpectrum(path)
+    # NBNB TBD FIXME GuiWindow is not a subclass of DropBase. How to get hold of the function?
+    self.processsDropData(paths, dataType='urls')
 
-      if spectrum:
-        msg = spectrum.name+' loaded'
-        mainWindow = self._appBase.mainWindow
-        spectrumItem = mainWindow.sideBar.addSpectrumToItem(spectrum)
-        mainWindow.statusBar().showMessage(msg)
-        mainWindow.pythonConsole.write("project.loadSpectrum('"+path+"')\n")
+    # if not path:
+    #   return
+    # elif isFastaFormat(path):
+    #   try:
+    #     # NBNB TBD next line does ont make sense
+    #     sequences = parseFastaFile(path[0])
+    #     for sequence in sequences:
+    #       self._parent._appBase.project.makeSimpleChain(sequence=sequence[1],
+    #                                                     compoundName=sequence[0],
+    #                                                     molType='protein')
+    #
+    #   except:
+    #     print("DEBUG Error loading FASTA file %s" % path)
+    # else:
+    #   # Where we are now this can only be a spectrum
+    #   spectrum = self.project.loadSpectrum(path)
+    #
+    #   if spectrum:
+    #     msg = spectrum.name+' loaded'
+    #     mainWindow = self._appBase.mainWindow
+    #     spectrumItem = mainWindow.sidebar.addSpectrumToItem(spectrum)
+    #     mainWindow.statusBar().showMessage(msg)
+    #     mainWindow.pythonConsole.write("project.loadSpectrum('"+path+"')\n")
 
   def addSpectrum1dDisplay(self):
       pass
@@ -169,68 +180,68 @@ class GuiWindow(GuiBase):
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.setCrossHairPosition(axisPositionDict)
   
-  def dropEvent(self, event):
-    '''if object can be dropped into this area, accept dropEvent, otherwise throw an error
-        spectra, projects and peak lists can be dropped into this area but nothing else
-        if project is dropped, it is loaded,
-        if spectra/peak lists are dropped, these are displayed in the side bar but not displayed in
-        spectrumPane
-        '''
-
-    event.accept()
-    data = event.mimeData()
-    if isinstance(self.parent, QtGui.QGraphicsScene):
-      event.ignore()
-      return
-
-    if event.mimeData().urls():
-
-
-      filePaths = [url.path() for url in event.mimeData().urls()]
-
-      if filePaths:
-
-        if len(filePaths) == 1:
-          global project
-          currentProjectDir = filePaths[0]
-
-          self.openProject(projectDir=filePaths[0])
-                # peakListItem.setData(0, QtCore.Qt.UserRole + 1, peakList)
-                # peakListItem.setData(1, QtCore.Qt.DisplayRole, str(peakList))
-          # self.statusBar().showMessage(msg)
-          # self.pythonConsole.write("openProject('"+currentProjectDir.name+"')\n")
-          # list1 = self.spectrumItem.takeChildren()
-          # for item in list1:
-
-        else:
-          spectrumFormat = specUtil.getSpectrumFileFormat(filePaths[0])
-
-          if spectrumFormat:
-            event.acceptProposedAction()
-            dataSource = self.project.loadSpectrum(filePaths[0])
-
-
-          # if dataSource.numDim == 1:
-          #   data = Spectrum1dItem(self.current.pane,dataSource).spectralData
-          #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
-          # elif dataSource.numDim > 1:
-          #   data = SpectrumNdItem(self.spectrumPane,dataSource).spectralData
-          #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
-            msg = dataSource.name+' loaded'
-            self.statusBar().showMessage(msg)
-            self._appBase.mainWindow.pythonConsole.write("loadSpectrum('"+filePaths[0]+"')\n")
-
-          # peakListFormat = getPeakListFileFormat(filePaths[0])
-          # if peakListFormat:
-          #   event.acceptProposedAction()
-          #   self.mainApp.openPeakList(filePaths[0])
-          #   return
-
-          else:
-            event.ignore()
-
-      else:
-        event.ignore()
-
-    else:
-      event.ignore()
+  # def dropEvent(self, event):
+  #   '''if object can be dropped into this area, accept dropEvent, otherwise throw an error
+  #       spectra, projects and peak lists can be dropped into this area but nothing else
+  #       if project is dropped, it is loaded,
+  #       if spectra/peak lists are dropped, these are displayed in the side bar but not displayed in
+  #       spectrumPane
+  #       '''
+  #
+  #   event.accept()
+  #   data = event.mimeData()
+  #   if isinstance(self.parent, QtGui.QGraphicsScene):
+  #     event.ignore()
+  #     return
+  #
+  #   if event.mimeData().urls():
+  #
+  #
+  #     filePaths = [url.path() for url in event.mimeData().urls()]
+  #
+  #     if filePaths:
+  #
+  #       if len(filePaths) == 1:
+  #         global project
+  #         currentProjectDir = filePaths[0]
+  #
+  #         self.openProject(projectDir=filePaths[0])
+  #               # peakListItem.setData(0, QtCore.Qt.UserRole + 1, peakList)
+  #               # peakListItem.setData(1, QtCore.Qt.DisplayRole, str(peakList))
+  #         # self.statusBar().showMessage(msg)
+  #         # self.pythonConsole.write("openProject('"+currentProjectDir.name+"')\n")
+  #         # list1 = self.spectrumItem.takeChildren()
+  #         # for item in list1:
+  #
+  #       else:
+  #         spectrumFormat = specUtil.getSpectrumFileFormat(filePaths[0])
+  #
+  #         if spectrumFormat:
+  #           event.acceptProposedAction()
+  #           dataSource = self.project.loadSpectrum(filePaths[0])
+  #
+  #
+  #         # if dataSource.numDim == 1:
+  #         #   data = Spectrum1dItem(self.current.pane,dataSource).spectralData
+  #         #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
+  #         # elif dataSource.numDim > 1:
+  #         #   data = SpectrumNdItem(self.spectrumPane,dataSource).spectralData
+  #         #   self.widget1.plot(data, pen={'color':(random.randint(0,255),random.randint(0,255),random.randint(0,255))})
+  #           msg = dataSource.name+' loaded'
+  #           self.statusBar().showMessage(msg)
+  #           self._appBase.mainWindow.pythonConsole.write("loadSpectrum('"+filePaths[0]+"')\n")
+  #
+  #         # peakListFormat = getPeakListFileFormat(filePaths[0])
+  #         # if peakListFormat:
+  #         #   event.acceptProposedAction()
+  #         #   self.mainApp.openPeakList(filePaths[0])
+  #         #   return
+  #
+  #         else:
+  #           event.ignore()
+  #
+  #     else:
+  #       event.ignore()
+  #
+  #   else:
+  #     event.ignore()

@@ -89,6 +89,7 @@ class AppBase(GuiBase):
       self.mainWindow.menuBar.addMenu(self.mainWindow.screenMenu)
     project.getById('Window:Main').namespace['current'] = self.current
     mainWindow.raise_()
+    mainWindow.namespace['current'] = self.current
 
     if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
       apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
@@ -99,6 +100,8 @@ class AppBase(GuiBase):
     # The default values are as below. They can be changed if desired
     #project._resetUndo(maxWaypoints=20, maxOperations=10000)
     project._resetUndo()
+    #
+    return project
 
   def initGraphics(self):
     """Set up graphics system after loading - to be overidden in subclasses"""
@@ -123,13 +126,13 @@ class AppBase(GuiBase):
     """Open new project from path"""
     self._closeProject()
     apiProject = ioUtil.loadProject(path)
-    self.initProject(apiProject)
+    return self.initProject(apiProject)
 
   def newProject(self, name='default'):
     """Create new, empty project"""
     self._closeProject()
     apiProject = ioUtil.newProject(name)
-    self.initProject(apiProject)
+    return self.initProject(apiProject)
 
   def saveProject(self, newPath=None):
     ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)

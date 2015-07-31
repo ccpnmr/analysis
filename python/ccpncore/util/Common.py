@@ -87,7 +87,7 @@ def incrementName(name:str) -> str:
   return name + '_1'
 
 
-def recursiveImport(dirname, modname=None, ignoreModules = None, force=False):
+def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
   """ recursively import all .py files
   (not starting with '__' and not containing internal '.' in their name)
   from directory dirname and all its subdirectories, provided they

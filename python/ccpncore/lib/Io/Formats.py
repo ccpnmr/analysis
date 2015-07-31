@@ -22,14 +22,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 import os
-from collections.abc import Sequence
 
 from ccpncore.util.Path import checkFilePath
 
 
 WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
-
+# Spectrum formats
 AZARA = 'Azara'
 BRUKER = 'Bruker'
 FELIX = 'Felix'
@@ -46,6 +45,9 @@ SPARKY = 'Sparky'
 NMRDRAW = 'NMRDraw'
 NMRSTAR = 'NMR-STAR'
 
+# Sequence formats
+FASTA = 'Fasta'
+
 DataTypes = ['Project', 'Spectrum', 'Text', 'Sequence']
 
 def analyseUrl(filePath):
@@ -54,6 +56,8 @@ def analyseUrl(filePath):
   Note:
   For Bruker and Varian Spectrum data, the usePath returned is the directory containing the spectrum
   """
+
+  print ("@~@~ analyseUrl, isDir?", os.path.isdir(filePath))
 
   isOk, msg = checkFilePath(filePath)
   if not isOk:
@@ -88,6 +92,8 @@ def analyseUrl(filePath):
   testData = set([c for c in firstData]) - WHITESPACE_AND_NULL
   isBinary = (min([ord(chr(c)) for c in testData]) < 32)
 
+  print ("@~@~ analyseUrl, isBinary?", isBinary)
+
   # Deal with binary files
   if isBinary:
     # probably binary
@@ -113,6 +119,7 @@ def analyseUrl(filePath):
 
     if qBytes == refBytes:
       return ('Spectrum', NMRVIEW, filePath)
+
 
     qBytes.reverse()
     if qBytes == refBytes:
@@ -155,7 +162,7 @@ def analyseUrl(filePath):
 
     if filePath.endswith('.fasta') or text.startswith('>'):
       # FASTA file
-      return ('Sequence', 'Fasta', filePath)
+      return ('Sequence', FASTA, filePath)
 
     if textblock.startswith('##TITLE'):
       return ('Spectrum', BRUKER, dirName)

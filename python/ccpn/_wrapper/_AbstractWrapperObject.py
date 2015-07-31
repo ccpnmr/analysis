@@ -518,7 +518,7 @@ class AbstractWrapperObject():
 
 
   def getById(self, identifier: str):
-    """Get  object by absolute ID#
+    """Get  object by absolute ID
     in either long form ('Residue:MS1.A.127') or short form ('MR:MS1.A.127')"""
 
     tt = identifier.split(Pid.PREFIXSEP,1)

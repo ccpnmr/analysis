@@ -77,118 +77,118 @@ def checkIsotope(text):
   else:
     return ISOTOPE_DICT.get(text[0].upper(), '1H')
 
-def getSpectrumFileFormat(filePath):
+# def getSpectrumFileFormat(filePath):
+#
+#   isOk, msg = checkFilePath(filePath)
+#   if not isOk:
+#     print (msg)
+#     return
+#
+#   if os.path.isdir(filePath):
+#     fileNames = os.listdir(filePath)
+#
+#     if 'memops' in fileNames:
+#       return CCPN
+#     elif 'procs' in fileNames or 'pdata':
+#       return BRUKER
+#     elif 'procpar' in fileNames:
+#       return VARIAN
+#     else:
+#       return
+#
+#   fileObj = open(filePath, 'rb')
+#   firstData = fileObj.read(1024)
+#   testData = set([c for c in firstData]) - WHITESPACE_AND_NULL
+#   if min([ord(chr(c)) for c in testData]) < 32:
+#     # probably binary
+#
+#     if b'UCSF NMR' in firstData:
+#       return UCSF
+#
+#     refBytes = [ 0x40, 0x16, 0x14, 0x7b ]
+#     qBytes = [ ord(chr(c)) for c in firstData[8:12] ]
+#
+#     if qBytes == refBytes:
+#       return NMRPIPE
+#
+#     qBytes.reverse()
+#     if qBytes == refBytes:
+#       return NMRPIPE
+#
+#     refBytes = ['34','18','AB','CD']
+#     qBytes = ["%02X" % ord(chr(c)) for c in firstData[:4]]
+#
+#     if qBytes == refBytes:
+#       return NMRVIEW
+#
+#     qBytes.reverse()
+#     if qBytes == refBytes:
+#       return NMRVIEW
+#
+#     dirName, fileName = os.path.split(filePath)
+#     if fileName in ('1r','2rr','3rrr','4rrrr'):
+#       return BRUKER
+#
+#     if fileName == 'phasefile':
+#       return VARIAN
+#
+#     if fileName.endswith('.spc'):
+#       return AZARA
+#
+#     from array import array
+#
+#     vals = array('i')
+#     vals.fromstring(firstData[:4])
+#     if (0 < vals[0] < 6) and (vals[1] == 1):
+#       return FELIX
+#
+#     vals.byteswap()
+#     if (0 < vals[0] < 6) and (vals[1] == 1):
+#       return FELIX
+#
+#   else:
+#     if b'##TITLE' in firstData:
+#       return BRUKER
+#
+#     if b'Version .....' in firstData:
+#       return XEASY
+#
+#     fileObj.close()
+#     fileObj = open(filePath, 'rU')
+#     lines = ''.join([l.strip() for l in fileObj.readlines() if l[0] != '!'])
+#
+#     if ('ndim ' in lines) and ('file ' in lines) and ('npts ' in lines) and ('block ' in lines):
+#       return AZARA
+#
+#     dirName, fileName = os.path.split(filePath)
+#     if fileName == 'procpar':
+#       return VARIAN
 
-  isOk, msg = checkFilePath(filePath)
-  if not isOk:
-    print (msg)
-    return
+def mapAxisCodes(newCodes:Sequence, referenceCodes:Sequence) -> list:
+  """reorder newCodes so that they best match referenceCodes
+  Returns list of length referenceCodes with newCodes put in the matching slot.
+  IF newCodes are shorter than referenceCodes, the unused slots are filled with '-'
+  All newCodes must map, and if a match cannot be found returns None """
 
-  if os.path.isdir(filePath):
-    fileNames = os.listdir(filePath)
+  default = '-'
+  result = [default] * len(referenceCodes)
 
-    if 'memops' in fileNames:
-      return CCPN
-    elif 'procs' in fileNames or 'pdata':
-      return BRUKER
-    elif 'procpar' in fileNames:
-      return VARIAN
+  # NBNB TBD - this is functional but must be MUCH expanded
+
+  # map identical residues
+  remainder = []
+  for code in newCodes:
+    if code in referenceCodes:
+      result[referenceCodes.index(code)] = code
     else:
-      return
+      remainder.append(code)
 
-  fileObj = open(filePath, 'rb')
-  firstData = fileObj.read(1024)
-  testData = set([c for c in firstData]) - WHITESPACE_AND_NULL
-  if min([ord(chr(c)) for c in testData]) < 32:
-    # probably binary
-
-    if b'UCSF NMR' in firstData:
-      return UCSF
-
-    refBytes = [ 0x40, 0x16, 0x14, 0x7b ]
-    qBytes = [ ord(chr(c)) for c in firstData[8:12] ]
-
-    if qBytes == refBytes:
-      return NMRPIPE
-
-    qBytes.reverse()
-    if qBytes == refBytes:
-      return NMRPIPE
-
-    refBytes = ['34','18','AB','CD']
-    qBytes = ["%02X" % ord(chr(c)) for c in firstData[:4]]
-
-    if qBytes == refBytes:
-      return NMRVIEW
-
-    qBytes.reverse()
-    if qBytes == refBytes:
-      return NMRVIEW
-
-    dirName, fileName = os.path.split(filePath)
-    if fileName in ('1r','2rr','3rrr','4rrrr'):
-      return BRUKER
-
-    if fileName == 'phasefile':
-      return VARIAN
-
-    if fileName.endswith('.spc'):
-      return AZARA
-
-    from array import array
-
-    vals = array('i')
-    vals.fromstring(firstData[:4])
-    if (0 < vals[0] < 6) and (vals[1] == 1):
-      return FELIX
-
-    vals.byteswap()
-    if (0 < vals[0] < 6) and (vals[1] == 1):
-      return FELIX
-
-  else:
-    if b'##TITLE' in firstData:
-      return BRUKER
-
-    if b'Version .....' in firstData:
-      return XEASY
-
-    fileObj.close()
-    fileObj = open(filePath, 'rU')
-    lines = ''.join([l.strip() for l in fileObj.readlines() if l[0] != '!'])
-
-    if ('ndim ' in lines) and ('file ' in lines) and ('npts ' in lines) and ('block ' in lines):
-      return AZARA
-
-    dirName, fileName = os.path.split(filePath)
-    if fileName == 'procpar':
-      return VARIAN
-
-  def mapAxisCodes(newCodes:Sequence, referenceCodes:Sequence) -> list:
-    """reorder newCodes so that they best match referenceCodes
-    Returns list of length referenceCodes with newCodes put in the matching slot.
-    IF newCodes are shorter than referenceCodes, the unused slots are filled with '-'
-    All newCodes must map, and if a match cannot be found returns None """
-
-    default = '-'
-    result = [default] * len(referenceCodes)
-
-    # NBNB TBD - this is functional but must be MUCH expanded
-
-    # map identical residues
-    remainder = []
-    for code in newCodes:
-      if code in referenceCodes:
-        result[referenceCodes.index(code)] = code
+  # match on nuclei (based on first letter only, random choice for duplicates)
+  for code in remainder:
+    for ii, ref in referenceCodes:
+      if ref[0] == code[0] and result[ii] == default:
+        result[ii] = code
       else:
-        remainder.append(code)
-
-    # match on nuclei (based on first letter only, random choice for duplicates)
-    for code in remainder:
-      for ii, ref in referenceCodes:
-        if ref[0] == code[0] and result[ii] == default:
-          result[ii] = code
-        else:
-          return []
-    #
-        return result
+        return []
+  #
+      return result

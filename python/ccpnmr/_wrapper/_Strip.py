@@ -363,6 +363,10 @@ def _factoryFunction(project:Project, wrappedData:ApiStrip):
 
 Strip._factoryFunction = staticmethod(_factoryFunction)
 
+
+# Drag-n-drop functions:
+Strip.processSpectrum = Strip.displaySpectrum
+
 # Notifiers:
 className = ApiStrip._metaclass.qualifiedName()
 Project._apiNotifiers.extend(

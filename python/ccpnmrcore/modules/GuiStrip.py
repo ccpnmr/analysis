@@ -78,10 +78,12 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
 
     Widget.__init__(self)
-    DropBase.__init__(self, self._parent._appBase, self.dropCallback)
+    DropBase.__init__(self, self._parent._appBase)
+    # DropBase.__init__(self, self._parent._appBase, self.dropCallback)
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
-              dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
+                                 useOpenGL=useOpenGL)
+              # dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
     self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self))
     self.colourScheme = self._parent._appBase.preferences.general.colourScheme
     if self.colourScheme == 'light':
@@ -436,15 +438,15 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   def showSpectrum(self, guiSpectrumView):
     raise Exception('should be implemented in subclass')
 
-  def dropCallback(self, dropObject):
-    if isinstance(dropObject, Spectrum):
-      self.displaySpectrum(dropObject)
-      # print('@~@~', self.pid)
-      msg = 'strip = project.getById("%s")\nstrip.displaySpectrum(project.getById("%s")\n' % \
-            (self.pid, dropObject.pid)
-      self._appBase.mainWindow.pythonConsole.write(msg)
-    else:
-      pass
+  # def dropCallback(self, dropObject):
+  #   if isinstance(dropObject, Spectrum):
+  #     self.displaySpectrum(dropObject)
+  #     # print('@~@~', self.pid)
+  #     msg = 'strip = project.getById("%s")\nstrip.displaySpectrum(project.getById("%s")\n' % \
+  #           (self.pid, dropObject.pid)
+  #     self._appBase.mainWindow.pythonConsole.write(msg)
+  #   else:
+  #     pass
 
 def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
   """Notifier function for when axis position or width changes"""

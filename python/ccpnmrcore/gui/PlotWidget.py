@@ -33,12 +33,14 @@ import pyqtgraph as pg
 
 class PlotWidget(DropBase, pg.PlotWidget, Base):
 
-  def __init__(self, parent=None, appBase=None, dropCallback=None, useOpenGL=False, **kw):
+  def __init__(self, parent=None, appBase=None, useOpenGL=False, **kw):
+  # def __init__(self, parent=None, appBase=None, dropCallback=None, useOpenGL=False, **kw):
 
     #pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(appBase=appBase, parent=parent), axes=None, enableMenu=True)
     pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(current=appBase.current, parent=parent), axes=None, enableMenu=True)
     Base.__init__(self, **kw)
-    DropBase.__init__(self, appBase, dropCallback)
+    DropBase.__init__(self, appBase)
+    # DropBase.__init__(self, appBase, dropCallback)
 
     self.setInteractive(True)
     self.plotItem.setAcceptHoverEvents(True)

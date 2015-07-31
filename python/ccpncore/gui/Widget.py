@@ -36,5 +36,5 @@ class Widget(QtGui.QWidget, Base):
     layout = QtGui.QGridLayout()
     self.setLayout(layout)
 
-  def dropEvent(self, event):
-    print('dropped')
+  # def dropEvent(self, event):
+  #   print('dropped')

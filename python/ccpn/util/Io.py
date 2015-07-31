@@ -50,6 +50,9 @@ def newProject(projectName:str, path:str=None) -> Project:
 
 def _wrapApiProject(apiProject:ApiProject, nmrProjectName:str=None) -> Project:
   """convert existing MemopsRoot to wrapped Project, using nmrProjectName to select NmrProject"""
+
+  print("@~@~ in wrapApiProject")
+
   nmrProjects = apiProject.sortedNmrProjects()
   if nmrProjects:
     if nmrProjectName:

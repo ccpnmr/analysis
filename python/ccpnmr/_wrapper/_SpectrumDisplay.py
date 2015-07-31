@@ -458,6 +458,9 @@ def _factoryFunction(project:Project, wrappedData:ApiSpectrumDisplay) -> Spectru
 
 SpectrumDisplay._factoryFunction = staticmethod(_factoryFunction)
 
+# Drag-n-drop functions:
+SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum
+
 # Notifiers:
 className = ApiSpectrumDisplay._metaclass.qualifiedName()
 Project._apiNotifiers.extend(

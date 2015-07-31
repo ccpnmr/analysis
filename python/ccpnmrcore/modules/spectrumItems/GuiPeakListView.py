@@ -833,7 +833,17 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 # NmrChain.setCode - NOT setResonanceGroups, as this calls setNmrChain on the other side.
 
 def _refreshPeakAnnotation(peak:Peak):
-  pass
+  data2Obj = peak._project_data2Obj
+  for apiPeakListView in peak._wrappedData.peakList.peakListViews:
+    for apiStripPeakListView in apiPeakListView.stripPeakListViews:
+      guiPeakListView = data2Obj[apiStripPeakListView]
+
+      # NBNB TBD add body here
+
+
+
+
+
 Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
 def _upDateAssignmentsPeakDimContrib(project:Project,

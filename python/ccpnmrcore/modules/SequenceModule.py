@@ -76,7 +76,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
     self.setAcceptDrops(True)
     scene.dragLeaveEvent = self.dragLeaveEvent
     scene.dragEnterEvent = self.dragEnterEvent
-    scene.dropEvent = self.dropEvent
+    # scene.dropEvent = self.dropEvent
     self.scene = scene
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     self.parent=parent
@@ -122,28 +122,28 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
       self.setHtml('<div style="color: #f7ffff;">'+self.residue.shortName+'</div>')
       self.setFont(Font(size=14, normal=True))
 
-  def dropEvent(self, event):
-    res = self.scene.itemAt(event.scenePos())
-    event.accept()
-    if event.mimeData().hasFormat('application/x-assignedStretch'):
-      data = event.mimeData().data('application/x-assignedStretch')
-      nmrResidues = str(data, encoding='utf-8').split(',')
-      nmrResidue = self.project.getById(nmrResidues[0])
-      res.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
-                  res.residue.shortName+'</strong></div>')
-      nmrResidue.residue = res.residue
-      res = res.residue
-      print(nmrResidues,'nmrResidues')
-      for assignableResidue in nmrResidues[1:]:
-        res = res.nextResidue
-        print('res')
-        guiResidue = self.parent.residueDict.get(res.sequenceCode)
-        guiResidue.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
-                           res.shortName+'</strong></div>')
-        nmrResidue = self.project.getById(assignableResidue)
-        print(nmrResidue, 'before')
-        nmrResidue.residue = res
-        print(nmrResidue, 'after')
+  # def dropEvent(self, event):
+  #   res = self.scene.itemAt(event.scenePos())
+  #   event.accept()
+  #   if event.mimeData().hasFormat('application/x-assignedStretch'):
+  #     data = event.mimeData().data('application/x-assignedStretch')
+  #     nmrResidues = str(data, encoding='utf-8').split(',')
+  #     nmrResidue = self.project.getById(nmrResidues[0])
+  #     res.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
+  #                 res.residue.shortName+'</strong></div>')
+  #     nmrResidue.residue = res.residue
+  #     res = res.residue
+  #     print(nmrResidues,'nmrResidues')
+  #     for assignableResidue in nmrResidues[1:]:
+  #       res = res.nextResidue
+  #       print('res')
+  #       guiResidue = self.parent.residueDict.get(res.sequenceCode)
+  #       guiResidue.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
+  #                          res.shortName+'</strong></div>')
+  #       nmrResidue = self.project.getById(assignableResidue)
+  #       print(nmrResidue, 'before')
+  #       nmrResidue.residue = res
+  #       print(nmrResidue, 'after')
 
 
 

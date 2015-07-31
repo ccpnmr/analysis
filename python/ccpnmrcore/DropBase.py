@@ -24,28 +24,22 @@ __version__ = "$Revision: 7686 $"
 from PyQt4 import QtGui, QtCore
 
 from ccpncore.util import Pid
+from ccpncore.lib.Io import Formats as ioFormats
 from ccpnmrcore.Base import Base as GuiBase
 from ccpncore.lib.Io import Formats as ioFormats
 
-
+# Filled in lower down
 pidTypeMap = {}
-import ccpn
-import ccpnmr
-for package in ccpn, ccpnmr:
-  for tag in dir(package):
-    obj = getattr(package, tag)
-    if hasattr(obj, 'shortClassName'):
-      shortClassName = getattr(obj, 'shortClassName')
-      if shortClassName:
-        pidTypeMap[shortClassName] = (obj.className if hasattr(obj, 'className')
-                                      else obj.__class__.__name__)
 
 class DropBase(GuiBase):
   
-  def __init__(self, appBase, dropCallback, *args, **kw):
+  def __init__(self, appBase, *args, **kw):
+  # def __init__(self, appBase, dropCallback, *args, **kw):
+
+    print("@~@~ init dropbase", self.__class__.__name__)
     
     GuiBase.__init__(self, appBase, *args, **kw)
-    self.dropCallback = dropCallback
+    # self.dropCallback = dropCallback
     
   def dragEnterEvent(self, event):
     event.accept()
@@ -53,11 +47,13 @@ class DropBase(GuiBase):
   def dropEvent(self, event):
     """Catch dropEvent and dispatch to processing"""
 
+
     from ccpnmrcore.util import Qt as qtUtil
 
     event.accept()
 
     data, dataType  = qtUtil.interpretEvent(event)
+    print("@~@~ DropBase drop %s %s on %s" % (dataType, data, self))
 
     if data and dataType:
       self.processDropData(data, dataType)
@@ -114,6 +110,10 @@ class DropBase(GuiBase):
     Separate function so it can be called from command line as well.
     """
 
+    print ("@~@~ process drop" , dataType, data)
+
+    project = self._appBase.project
+
     if dataType == 'text':
       # data is a text string
       if hasattr(self, 'processText'):
@@ -128,18 +128,12 @@ class DropBase(GuiBase):
         # data is list-of-urls
         # Load Urls one by one with normal loaders
         for url in data:
-          fileType, subType, useUrl = ioFormats.analyseUrl(url)
-          # urlInfo is list of triplets of (type, subType, modifiedUrl),
-          # e.g. ('Spectrum', 'Bruker', newUrl)
-          if fileType is not None and useUrl.exists():
-            method = self.pickDispatchFunction('load', fileType)
-            if method:
-              xx = method(useUrl, subType=subType)
-              if xx:
-                if isinstance(xx,str):
-                  pids.append(xx)
-                else:
-                  pids.extend(xx)
+          ll = project.loadData(url)
+          if ll:
+            pids.extend(x.pid for x in ll)
+
+      else:
+        raise ValueError("processDropData does not recognise dataType %s" % dataType)
 
       # process pids
       for pid in pids:
@@ -147,22 +141,33 @@ class DropBase(GuiBase):
         if method:
           method(pid)
 
-      else:
-        raise ValueError("processDropData does not recognise dataType %s" % dataType)
 
+  def pickDispatchFunction(self, prefix:str, dataType:(str,Pid)):
+    """Generate file name and return bound method matching name, if defined
+    dataType may be either an accepted dataType, or a Pid that is used to derive it.
 
-def pickDispatchFunction(self, prefix, dataType):
-  """Generate file name and return bound method matching name, if defined
-  dataType may be either an accepted dataType, or a Pid that is used to derive it.
+    Accepted prefixes are 'process', currently
+    DataTypes are singular, e.g. Spectrum, Peak, etc. even """
 
-  Accepted prefixes are 'process' and 'load'
-  DataTypes are singular, e.g. Spectrum, Peak, etc. even """
+    if not pidTypeMap:
+      import ccpn
+      import ccpnmr
+      for package in ccpn, ccpnmr:
+        for tag in dir(package):
+          obj = getattr(package, tag)
+          if hasattr(obj, 'shortClassName'):
+            shortClassName = getattr(obj, 'shortClassName')
+            if shortClassName:
+              pidTypeMap[shortClassName] = (obj.className if hasattr(obj, 'className')
+                                            else obj.__class__.__name__)
 
-  dataType = dataType.split(Pid.PREFIXSEP,1)[0]
-  dataType = pidTypeMap.get(dataType, dataType)
-  funcName = prefix + dataType
+    ss = dataType.split(Pid.PREFIXSEP,1)[0]
+    ss = pidTypeMap.get(ss, ss)
+    funcName = prefix + ss
 
-  if hasattr(self, funcName):
-    return getattr(self, funcName)
-  else:
-    return None
+    print ("@~@~ pickDispatch", prefix, dataType, funcName, hasattr(self, funcName))
+
+    if hasattr(self, funcName):
+      return getattr(self, funcName)
+    else:
+      return None

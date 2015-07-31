@@ -24,15 +24,18 @@ __version__ = "$Revision$"
 import os
 from ccpncore.util import Common as commonUtil
 from collections.abc import Sequence
-from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
+# from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
 from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
-from ccpncore.lib.spectrum.Util import AZARA, BRUKER, CCPN, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
+from ccpncore.lib.Io.Formats import AZARA, BRUKER, CCPN, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
 from ccpncore.util.Path import checkFilePath
 
 from ccpncore.api.memops.Implementation import Url
 
-def loadDataSource(nmrProject, filePath):
+def loadDataSource(nmrProject, filePath, dataFileFormat):
+
+
+  print ("@~@~ loadDataSource", dataFileFormat)
 
   isOk, msg = checkFilePath(filePath)
 
@@ -47,7 +50,7 @@ def loadDataSource(nmrProject, filePath):
                   NMRPIPE:NmrPipe, NMRVIEW:NmrView, UCSF:Ucsf,
                   VARIAN:Varian, XEASY:Xeasy}
 
-  dataFileFormat = getSpectrumFileFormat(filePath)
+  # dataFileFormat = getSpectrumFileFormat(filePath)
   if dataFileFormat is None:
     msg = 'Spectrum data format could not be determined for %s' % filePath
     print(msg)

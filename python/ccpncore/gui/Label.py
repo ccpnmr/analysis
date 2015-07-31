@@ -25,13 +25,16 @@ from PyQt4 import QtGui, QtCore
 Qt = QtCore.Qt
 
 from ccpncore.gui.Base import Base
+from ccpnmrcore.DropBase import DropBase
 
-class Label(QtGui.QLabel, Base):
+class Label(DropBase, QtGui.QLabel, Base):
 
   def __init__(self, parent, text='', pid = None, textColor=None, dragDrop=False, textSize=None, **kw):
 
     QtGui.QLabel.__init__(self, text, parent)
     Base.__init__(self, **kw)
+    DropBase.__init__(self, self.parent().dockArea.guiWindow._appBase)
+
     self.dragDrop = dragDrop
     self.pid = pid
     self.setAcceptDrops(True)
@@ -80,42 +83,42 @@ class Label(QtGui.QLabel, Base):
   #
   def dragLeaveEvent(self, event):
     event.accept()
-
-  def dropEvent(self, event):
-    if event.mimeData().hasFormat('application/x-strip'):
-      data = event.mimeData().data('application/x-strip')
-      pidData = str(data.data(),encoding='utf-8')
-      pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
-      actualPid = ''.join(pidData)
-      wrapperObject = self.parent().getById(actualPid)
-
-      if event.keyboardModifiers() & QtCore.Qt.ShiftModifier:
-
-        sinkIndex = self.parent().getById(self.pid)._wrappedData.index
-        direction = 'left'
-
-      else:
-
-        sinkIndex = self.parent().getById(self.pid)._wrappedData.index + 1
-        direction = 'right'
-
-      if wrapperObject.pid.id == self.pid.id:
-        wrapperObject.moveTo(sinkIndex)
-      else:
-        print('wrapperObject',wrapperObject.spinSystemLabel.text())
-        self.parent().guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
-        self.parent().guiSpectrumDisplay._appBase.current.strip = self.parent().guiSpectrumDisplay.orderedStrips[sinkIndex]
-        self.parent().guiSpectrumDisplay._appBase.current.strip.spinSystemLabel.setText(wrapperObject.spinSystemLabel.text())
-        newNmrResidue = self.parent().getById('NR:@.'+wrapperObject.spinSystemLabel.text()+'.')
-        self.parent().guiSpectrumDisplay._appBase.current.assigner.direction=direction
-        # self.parent().guiSpectrumDisplay._appBase.current.assigner.addResidue(nmrResidue=newNmrResidue)
-        # newHsqcPeak = self.parent().getById('NR:'+wrapperObject.spinSystemLabel.text())
-        # print(self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule)
-        self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule.findMatchingPeaks(nmrResidue=newNmrResidue)
-        self.parent().guiSpectrumDisplay._appBase.mainWindow.assigner.predictSequencePosition()
-    else:
-      event.acceptProposedAction()
-      print(event)
+  #
+  # def dropEvent(self, event):
+  #   if event.mimeData().hasFormat('application/x-strip'):
+  #     data = event.mimeData().data('application/x-strip')
+  #     pidData = str(data.data(),encoding='utf-8')
+  #     pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
+  #     actualPid = ''.join(pidData)
+  #     wrapperObject = self.parent().getById(actualPid)
+  #
+  #     if event.keyboardModifiers() & QtCore.Qt.ShiftModifier:
+  #
+  #       sinkIndex = self.parent().getById(self.pid)._wrappedData.index
+  #       direction = 'left'
+  #
+  #     else:
+  #
+  #       sinkIndex = self.parent().getById(self.pid)._wrappedData.index + 1
+  #       direction = 'right'
+  #
+  #     if wrapperObject.pid.id == self.pid.id:
+  #       wrapperObject.moveTo(sinkIndex)
+  #     else:
+  #       print('wrapperObject',wrapperObject.spinSystemLabel.text())
+  #       self.parent().guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
+  #       self.parent().guiSpectrumDisplay._appBase.current.strip = self.parent().guiSpectrumDisplay.orderedStrips[sinkIndex]
+  #       self.parent().guiSpectrumDisplay._appBase.current.strip.spinSystemLabel.setText(wrapperObject.spinSystemLabel.text())
+  #       newNmrResidue = self.parent().getById('NR:@.'+wrapperObject.spinSystemLabel.text()+'.')
+  #       self.parent().guiSpectrumDisplay._appBase.current.assigner.direction=direction
+  #       # self.parent().guiSpectrumDisplay._appBase.current.assigner.addResidue(nmrResidue=newNmrResidue)
+  #       # newHsqcPeak = self.parent().getById('NR:'+wrapperObject.spinSystemLabel.text())
+  #       # print(self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule)
+  #       self.parent().guiSpectrumDisplay._appBase.mainWindow.bbModule.findMatchingPeaks(nmrResidue=newNmrResidue)
+  #       self.parent().guiSpectrumDisplay._appBase.mainWindow.assigner.predictSequencePosition()
+  #   else:
+  #     event.acceptProposedAction()
+  #     print(event)
 
 
 

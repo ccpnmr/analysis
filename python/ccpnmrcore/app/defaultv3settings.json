@@ -8,11 +8,12 @@
         "language": "English-UK",
         "editor": "default",
         "colourScheme": "dark",
-        "license": ""
+        "license": "",
+        "toolbarHidden": "False"
     },
     "spectra": {
         "keepExternal": "True",
-        "BrukerTemplates": "pdata/*",
+        "brukerTemplates": "pdata/*",
         "nmrPipeTemplates": "*ft*",
         "ucsfTemplates": [
             "*.ucsf",

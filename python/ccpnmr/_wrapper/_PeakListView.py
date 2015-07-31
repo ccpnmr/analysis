@@ -158,13 +158,13 @@ del _getPeakListViews
 def _peakListAddPeakListViews(project:Project, apiPeakList:ApiPeakList):
   """Add ApiPeakListVIew when ApiPeakList is created"""
   for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
-    apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial)
+    apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
 Project._setupNotifier(_peakListAddPeakListViews, ApiPeakList, 'postInit')
 
 def _SpectrumViewAddPeakListViews(project:Project, apiSpectrumView:ApiSpectrumView):
   """Add ApiPeakListView when ApiSpectrumView is created"""
   for apiPeakList in apiSpectrumView.dataSource.peakLists:
-    apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial)
+    apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
 Project._setupNotifier(_SpectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')
 
 

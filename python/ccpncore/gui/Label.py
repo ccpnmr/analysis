@@ -27,13 +27,15 @@ Qt = QtCore.Qt
 from ccpncore.gui.Base import Base
 from ccpnmrcore.DropBase import DropBase
 
-class Label(DropBase, QtGui.QLabel, Base):
+# class Label(DropBase, QtGui.QLabel, Base):
+class Label(QtGui.QLabel, Base):
 
   def __init__(self, parent, text='', pid = None, textColor=None, dragDrop=False, textSize=None, **kw):
 
     QtGui.QLabel.__init__(self, text, parent)
     Base.__init__(self, **kw)
-    DropBase.__init__(self, self.parent().dockArea.guiWindow._appBase)
+    # if dragDrop is True:
+    #   DropBase.__init__(self, self.parent().dockArea.guiWindow._appBase)
 
     self.dragDrop = dragDrop
     self.pid = pid

@@ -73,8 +73,8 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.dock.addWidget(self.spectrumUtilToolBar, 0, 2)# grid=(0, 2), gridSpan=(1, 1))
 
     # toolBarColour = QtGui.QColor(214,215,213)
-    self.positionBox = Label(self.dock)
-    self.dock.addWidget(self.positionBox, 0, 3)#, grid=(0, 3), gridSpan=(1, 1))
+    # self.positionBox = Label(self.dock)
+    # self.dock.addWidget(self.positionBox, 0, 3)#, grid=(0, 3), gridSpan=(1, 1))
     # self.positionBox.setFixedWidth(screenWidth*0.1)
     self.scrollArea = ScrollArea(self.dock, grid=(1, 0), gridSpan=(1, 4))
     self.scrollArea.setWidgetResizable(True)

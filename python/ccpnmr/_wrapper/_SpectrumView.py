@@ -65,6 +65,10 @@ class SpectrumView(AbstractWrapperObject):
 
   strip = _parent
 
+  def delete(self):
+    """Delete SpectrumView for all strips"""
+    self._wrappedData.spectrumView.delete()
+
   @property
   def experimentType(self) -> str:
     """Experiment type of attached experiment - used for reconnecting to correct spectrum"""

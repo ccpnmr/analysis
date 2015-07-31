@@ -64,6 +64,10 @@ class Axis(AbstractWrapperObject):
 
   strip = _parent
 
+  def delete(self):
+    """Axes cannot be deleted, except as a byproduct of deleting other things"""
+    raise Exception("Axes cannot be deleted directly")
+
   @property
   def position(self) -> float:
     """Centre point position for displayed region, in current unit."""

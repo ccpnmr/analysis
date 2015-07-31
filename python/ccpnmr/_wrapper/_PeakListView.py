@@ -27,6 +27,8 @@ from ccpn import Project
 from ccpn import PeakList
 from ccpnmr import SpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
+from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
+from ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 
 
 class PeakListView(AbstractWrapperObject):
@@ -56,6 +58,10 @@ class PeakListView(AbstractWrapperObject):
     return self._project._data2Obj.get(self._wrappedData.stripSpectrumView)
 
   spectrumView = _parent
+
+  def delete(self):
+    """PeakListViews cannot be deleted, except as a byproduct of deleting other things"""
+    raise Exception("PeakListViews cannot be deleted directly")
 
   @property
   def _key(self) -> str:
@@ -147,6 +153,19 @@ def _getPeakListViews(peakList:PeakList):
 PeakList.peakListViews = property(_getPeakListViews, None, None,
                                          "PeakListViews showing Spectrum")
 del _getPeakListViews
+
+# Notifiers
+def _peakListAddPeakListViews(project:Project, apiPeakList:ApiPeakList):
+  """Add ApiPeakListVIew when ApiPeakList is created"""
+  for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
+    apiSpectrumView.newPeakListView(peakList=apiPeakList)
+Project._setupNotifier(_peakListAddPeakListViews, ApiPeakList, 'postInit')
+
+def _SpectrumViewAddPeakListViews(project:Project, apiSpectrumView:ApiSpectrumView):
+  """Add ApiPeakListView when ApiSpectrumView is created"""
+  for apiPeakList in apiSpectrumView.dataSource.peakLists:
+    apiSpectrumView.newPeakListView(peakList=apiPeakList)
+Project._setupNotifier(_SpectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')
 
 
 # Connections to parents:

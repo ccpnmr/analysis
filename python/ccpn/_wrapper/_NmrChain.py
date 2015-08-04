@@ -124,8 +124,9 @@ class NmrChain(AbstractWrapperObject):
       apiStretch = apiNmrChain.connectedStretch
       if apiStretch is None:
         if value:
-          apiStretch = apiNmrChain.nmrProject.activeSequentialAssignment.newConenctedStretch(
-            activeResonanceGroups= [x._wrappedData for x in value]
+          apiStretch = apiNmrChain.nmrProject.newConnectedStretch(
+            activeResonanceGroups= [x._wrappedData for x in value],
+            sequentialAssignment=apiNmrChain.nmrProject.activeSequentialAssignment
           )
       else:
         if value:

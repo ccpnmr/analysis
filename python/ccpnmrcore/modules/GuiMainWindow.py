@@ -305,8 +305,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
     self._menuBar.addMenu(moleculeMenu)
-    if self._appBase.applicationName == 'Assign':
-      self._menuBar.addMenu(assignMenu)
+    # if self._appBase.applicationName == 'Assign':
+    self._menuBar.addMenu(assignMenu)
     if self._appBase.applicationName == 'Structure':
       self._menuBar.addMenu(restraintsMenu)
       self._menuBar.addMenu(structuresMenu)

@@ -16,7 +16,7 @@ class PickAndAssignModule(CcpnDock, Base):
 
   def __init__(self, parent=None, project=None):
 
-    CcpnDock.__init__(self, parent=None, name='Backbone Assignment')
+    CcpnDock.__init__(self, parent=None, name='Pick And Assign')
     spacingLabel = Label(self)
     spacingLabel.setFixedHeight(15)
     self.layout.addWidget(spacingLabel, 0, 1, 1, 1)
@@ -31,7 +31,7 @@ class PickAndAssignModule(CcpnDock, Base):
     self.peakTable = PeakListSimple(self, project=project, callback=self.goToPositionInModules)
     self.layout.addWidget(spacingLabel, 2, 1, 1, 1)
 
-    self.layout.addWidget(self.peakTable, 4, 0, 1, 6)
+    self.layout.addWidget(self.peakTable, 4, 0, 1, 4)
 
     # print((parent.window()))
     parent.window().showAtomSelector()
@@ -100,4 +100,4 @@ class PickAndAssignModule(CcpnDock, Base):
 
   def showDisplayPopup(self):
     popup = SelectDisplaysAndSpectraPopup(self, project=self.project, dim=2)
-    popup.exec_()
+    popup.show()

@@ -38,6 +38,7 @@ from ccpncore.gui.ToolBar import ToolBar
 
 from ccpnmrcore.DropBase import DropBase
 from ccpnmrcore.gui.Frame import Frame as GuiFrame
+from ccpnmrcore.gui.SpectrumToolBar import SpectrumToolBar
 from ccpnmrcore.modules.GuiModule import GuiModule
 
 def _findPpmRegion(spectrum, axisDim, spectrumDim):
@@ -60,7 +61,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     GuiModule.__init__(self)
     # DropBase.__init__(self, self._appBase, self.dropCallback)
     self.setAcceptDrops(True)
-    self.spectrumToolBar = ToolBar(self.dock, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
+    self.spectrumToolBar = SpectrumToolBar(self.dock, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
     self.dock.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
 
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)

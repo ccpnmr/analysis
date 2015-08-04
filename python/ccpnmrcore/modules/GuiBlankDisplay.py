@@ -65,7 +65,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     # self.label = DockLabel('Blank Display', self)
     self.label.show()
 
-    self.label2 = Label(self, text='Drag Spectrum Here', textColor='#bec4f3', dragDrop=True)
+    self.label2 = Label(self, text='Drag Spectrum Here', textColor='#bec4f3')
     self.label2.setAlignment(QtCore.Qt.AlignCenter)
     self.layout.addWidget(self.label2)
     # self.label2.dropEvent = self.dropCallback
@@ -73,7 +73,6 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
 
 
     DropBase.__init__(self, dockArea.guiWindow._appBase)
-    # DropBase.__init__(self, dockArea.guiWindow._appBase, self.dropCallback)
 
   def setOrientation(self, o='vertical', force=True):
         """
@@ -99,7 +98,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     """Process dropped spectrum"""
     spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
     self.dockArea.guiWindow.removeBlankDisplay()
-    msg = 'window.createSpectrumDisplay(project.getById("%s")\n' % spectrum.pid
+    msg = 'window.createSpectrumDisplay(project.getById("%s"))\n' % spectrum
     self.dockArea.window().pythonConsole.write(msg)
 
   # def dropCallback(self, dropObject):

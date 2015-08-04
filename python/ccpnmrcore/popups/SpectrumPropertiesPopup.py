@@ -134,19 +134,15 @@ class GeneralTab(QtGui.QWidget, Base):
       self.colourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.sliceColour))
       self.colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
       colourButton = Button(self, text="More...", grid=(6, 2), callback=partial(self.changeSpectrumColour, spectrum))
-      # colourButton.clicked.connect(partial(self.changeSpectrumColour, spectrum))
       spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(7, 0))
       spectrumType = PulldownList(self, grid=(7, 1))
       spectrumType.addItems(SPECTRA)
-      # spectrumType.addItem(spectrum.experimentName)
       spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), grid=(8, 1))
       self.spectrumScalingData.editingFinished.connect(self.setSpectrumScale)
       pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(9, 0))
       recordingDataLabel = Label(self, text="Date Recorded", grid=(10, 0))
-      # minimumValueLabel = Label(self, text="Minimum Value: ", grid=(10, 0))
-      # maximumValueLabel = Label(self, text="Maximum Value: ", grid=(11, 0))
       noiseLevelLabel = Label(self, text="Noise Level: ", grid=(11, 0))
       noiseLevelData = LineEdit(self)
       if spectrum.apiDataSource.noiseLevel is not None:
@@ -162,6 +158,7 @@ class GeneralTab(QtGui.QWidget, Base):
       except:
         pass
       # spectrumType.addItems(SPECTRA)
+      print('spType',spectrum.experimentName)
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(spectrum.experimentName))
       self.spectrumType.currentIndexChanged.connect(self.changeSpectrumType)
       pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(7, 0))
@@ -195,7 +192,9 @@ class GeneralTab(QtGui.QWidget, Base):
 
   def changeSpectrumType(self, value):
     expType = EXPERIMENT_TYPES[self.spectrum.dimensionCount].get(self.axisCodes).get(self.spectrumType.currentText())
+    print('expType', self.spectrumType.currentText())
     self.spectrum.experimentType = expType
+    print(self.spectrum.experimentType)
 
   def getSpectrumFile(self):
     if os.path.exists('/'.join(self.pathData.text().split('/')[:-1])):

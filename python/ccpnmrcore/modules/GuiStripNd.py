@@ -40,6 +40,7 @@ from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Menu import Menu
 from ccpncore.gui.Spinbox import Spinbox
 
+from ccpnmrcore.gui.PlaneToolbar import PlaneToolbar
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 ###from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
 
@@ -68,7 +69,7 @@ class GuiStripNd(GuiStrip):
     self.colourIndex = 0
     # print(guiSpectrumDisplay)
     # self.fillToolBar()
-    self.addSpinSystemLabel()
+    # self.addSpinSystemLabel()
     self.addPlaneToolbar()
     ###self.setShortcuts()
     # for spectrumView in self.spectrumViews:
@@ -160,7 +161,7 @@ class GuiStripNd(GuiStrip):
       zAxis.position = zAxis.position+delta
     elif position:
       zAxis.position = position
-    self.planeLabel.setValue(zAxis.position)
+    self.planeToolbar.planeLabel.setValue(zAxis.position)
 
   def changePlaneThickness(self, value):
     zAxis = self.orderedAxes[2]
@@ -176,40 +177,14 @@ class GuiStripNd(GuiStrip):
 
   def addPlaneToolbar(self):
 
-    # if self._parent.spectrumViews[0]
-    if len(self.orderedAxes) > 2:
-      for i in range(len(self.orderedAxes)-2):
 
-        # self.planeToolbar.setMinimumWidth(200)
-        prevPlaneButton = Button(self,'<', callback=self.prevZPlane)
-        prevPlaneButton.setFixedWidth(19)
-        prevPlaneButton.setFixedHeight(19)
-        # prevPlaneButton.setStyleSheet('''QPushButton {
-				# color: #fdfdfc;
-				# background-color: #bd8413;
-				# }''')
-        self.planeLabel = DoubleSpinbox(self)
-        self.planeLabel.setFixedHeight(19)
-        self.planeLabel.setValue(self.positions[2])
-        self.planeLabel.valueChanged.connect(self.setZPlanePosition)
-        self.planeLabel.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.planeLabel.setAlignment(QtCore.Qt.AlignCenter)
-        nextPlaneButton = Button(self,'>', callback=self.nextZPlane)
-        nextPlaneButton.setFixedWidth(19)
-        nextPlaneButton.setFixedHeight(19)
-        self.planeToolbar.addWidget(prevPlaneButton)
-        self.planeToolbar.addWidget(self.planeLabel)
-        self.planeToolbar.addWidget(nextPlaneButton)
-        self.planeThickness = Spinbox(self)
-        self.planeThickness.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.planeThickness.setAlignment(QtCore.Qt.AlignCenter)
-        self.planeThickness.setMinimum(1)
-        self.planeThicknessValue = 1
-        self.planeThickness.valueChanged.connect(self.setPlaneThickness)
-        self.planeToolbar.addWidget(self.planeThickness)
+    callbacks = [self.prevZPlane, self.nextZPlane, self.setZPlanePosition, self.changePlaneThickness]
+
+    self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
+                                     hAlign='center', vAlign='c', callbacks=callbacks)
 
   def setZPlanePosition(self, value):
-    if self.planeLabel.minimum() <= value <= self.planeLabel.maximum():
+    if self.planeToolbar.planeLabel.minimum() <= self.planeToolbar.planeLabel.value() <= self.planeToolbar.planeLabel.maximum():
       self.changeZPlane(position=value)
 
   def setPlaneThickness(self, value):

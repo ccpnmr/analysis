@@ -29,6 +29,7 @@ from ccpnmrcore.app.Version import applicationVersion
 from ccpnmrcore.modules import GuiStrip
 from ccpnmrcore.modules import GuiStripDisplayNd
 
+
 applicationName = 'Analysis3'
 
 class Analysis3(AppBase):

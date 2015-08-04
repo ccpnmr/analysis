@@ -274,14 +274,14 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     if event.mimeData().hasUrls():
       event.accept()
     else:
-      items = []
+
+      import json
+
       item = self.itemAt(event.pos())
-      if enter:
-          QtGui.QTreeWidget.dragEnterEvent(self, event)
-      else:
-        QtGui.QTreeWidget.dragMoveEvent(self, event)
-      for item, flags in items:
-          item.setFlags(flags)
+      itemData = json.dumps({'pids':[item.text(0)]})
+      event.mimeData().setData('ccpnmr-json', itemData)
+      event.mimeData().setText(itemData)
+
 
   def dragMoveEvent(self, event):
     event.accept()

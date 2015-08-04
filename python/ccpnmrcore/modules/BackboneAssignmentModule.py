@@ -77,7 +77,7 @@ class BackboneAssignmentModule(CcpnDock, Base):
         self.assigner.clearAllItems()
         positions = peak.position
         self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
-        hsqcDisplay.strips[-1].spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
+        hsqcDisplay.strips[-1].planeToolbar.spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
         hsqcDisplay.strips[-1].zoomToRegion([peak.position[0]-0.2, peak.position[0]+0.2,
                                                   peak.position[1]-2, peak.position[1]+2])
         self.line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
@@ -88,7 +88,7 @@ class BackboneAssignmentModule(CcpnDock, Base):
         hsqcDisplay.strips[-1].viewBox.addItem(self.line2)
         for queryDisplay in self.queryDisplays:
           queryWindow = self.project.getById(queryDisplay)
-          queryWindow.orderedStrips[0].spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
+          queryWindow.orderedStrips[0].planeToolbar.spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
           queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
           queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
 
@@ -198,7 +198,7 @@ class BackboneAssignmentModule(CcpnDock, Base):
         matchWindow = self.project.getById(matchDisplay)
         newStrip = matchWindow.addStrip()
         newStrip.changeZPlane(position=zShift)
-        newStrip.spinSystemLabel.setText(matchResidue.sequenceCode)
+        newStrip.planeToolbar.spinSystemLabel.setText(matchResidue.sequenceCode)
         for shift in yShifts:
           line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
           line.setPos(QtCore.QPointF(0, shift))
@@ -224,7 +224,7 @@ class BackboneAssignmentModule(CcpnDock, Base):
     for matchDisplay in self.matchDisplays:
       matchWindow = self.project.getById(matchDisplay)
       matchWindow.orderedStrips[0].changeZPlane(position=zShift)
-      matchWindow.orderedStrips[0].spinSystemLabel.setText(firstMatchResidue.sequenceCode)
+      matchWindow.orderedStrips[0].planeToolbar.spinSystemLabel.setText(firstMatchResidue.sequenceCode)
       matchWindow.orderedStrips[0].plotWidget.addItem(line)
       for shift in yShifts:
         line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))

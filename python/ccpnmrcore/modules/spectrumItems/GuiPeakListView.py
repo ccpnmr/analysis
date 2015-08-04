@@ -62,6 +62,7 @@ IDENTITY.reset()
 
 class GuiPeakListView(QtGui.QGraphicsItem):
 
+  # def __init__(self, scene, strip, peakList):
   def __init__(self, scene, strip, peakList):
     """ peakList is the CCPN wrapper object
     """
@@ -371,12 +372,10 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
               event.modifiers() & QtCore.Qt.ShiftModifier):
 
       event.accept()
-      print(event)
       self.scene.clearSelection()
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
-      print(self.peakItem)
       self.update()
 
 
@@ -834,54 +833,62 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
 def _refreshPeakAnnotation(peak:Peak):
   data2Obj = peak._project._data2Obj
-  print ("@~@~ _refreshPeakAnnotation")
+  print ("@~@~ _refreshPeakAnnotation222")
+  print('peak._wrappedData.peakList.peakListViews', peak._wrappedData.peakList.peakListViews)
   for apiPeakListView in peak._wrappedData.peakList.peakListViews:
+    print('apiPeakListView', apiPeakListView)
     for apiStripPeakListView in apiPeakListView.stripPeakListViews:
+      print('apiStripPeakListView', apiStripPeakListView)
       guiPeakListView = data2Obj[apiStripPeakListView]
+      print('g', guiPeakListView)
+      peakItem = guiPeakListView.peakItems[peak]
+      print(peakItem)
+      peakItem.annotation.setupPeakAnnotationItem(peakItem)
+
 
       # NBNB TBD add body here
 
 
 
-Peak._refreshPeakAnnotation = _refreshPeakAnnotation
-
-def _upDateAssignmentsPeakDimContrib(project:Project,
-                                     apiPeakDimContrib:ApiAbstractPeakDimContrib):
-  print ("@~@~ _upDateAssignmentsPeakDimContrib")
-  peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
-  peak._refreshPeakAnnotation()
+# Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 #
-Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiAbstractPeakDimContrib, 'postInit')
-Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiAbstractPeakDimContrib, 'preDelete')
-
-def _upDateAssignmentsResonance(project:Project, apiResonance:ApiResonance):
-  peaks = set(x.peakDim.peak
-              for x in (apiResonance.peakDimContribs + apiResonance.peakDimContribNs))
-  for peak in peaks:
-    peak._refresPeakAnnotation()
+# def _upDateAssignmentsPeakDimContrib(project:Project,
+#                                      apiPeakDimContrib:ApiAbstractPeakDimContrib):
+#   print ("@~@~ _upDateAssignmentsPeakDimContrib")
+#   peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
+#   peak._refreshPeakAnnotation()
+# #
+# Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiAbstractPeakDimContrib, 'postInit')
+# Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiAbstractPeakDimContrib, 'preDelete')
 #
-Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiResonance, 'setImplName')
-Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiResonance, 'setResonanceGroup')
-
-def _upDateAssignmentsResonanceGroup(project:Project,
-                                     apiResonanceGroup:ApiResonanceGroup):
-  peaks = set(y.peakDim.peak for x in apiResonanceGroup.resonances
-                             for y in (x.peakDimContribs + x.peakDimContribNs))
-  for peak in peaks:
-    peak._refresPeakAnnotation()
+# def _upDateAssignmentsResonance(project:Project, apiResonance:ApiResonance):
+#   peaks = set(x.peakDim.peak
+#               for x in (apiResonance.peakDimContribs + apiResonance.peakDimContribNs))
+#   for peak in peaks:
+#     peak._refresPeakAnnotation()
+# #
+# Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiResonance, 'setImplName')
+# Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiResonance, 'setResonanceGroup')
 #
-Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setResonances')
-Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setAssignedResidue')
-Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setSequenceCode')
-Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setResidueType')
-Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setNmrChain')
-
-
-def _upDateAssignmentsNmrChain(project:Project, apiNmrChain:ApiNmrChain):
-  peaks = set(z.peakDim.peak for x in apiNmrChain.resonanceGroups
-                             for y in x.resonances
-                             for z in (y.peakDimContribs + y.peakDimContribNs))
-  for peak in peaks:
-    peak._refresPeakAnnotation()
+# def _upDateAssignmentsResonanceGroup(project:Project,
+#                                      apiResonanceGroup:ApiResonanceGroup):
+#   peaks = set(y.peakDim.peak for x in apiResonanceGroup.resonances
+#                              for y in (x.peakDimContribs + x.peakDimContribNs))
+#   for peak in peaks:
+#     peak._refreshPeakAnnotation()
+# #
+# Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setResonances')
+# Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setAssignedResidue')
+# Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setSequenceCode')
+# Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setResidueType')
+# Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setNmrChain')
 #
-Project._setupNotifier(_upDateAssignmentsNmrChain, ApiNmrChain, 'setCode')
+#
+# def _upDateAssignmentsNmrChain(project:Project, apiNmrChain:ApiNmrChain):
+#   peaks = set(z.peakDim.peak for x in apiNmrChain.resonanceGroups
+#                              for y in x.resonances
+#                              for z in (y.peakDimContribs + y.peakDimContribNs))
+#   for peak in peaks:
+#     peak._refresPeakAnnotation()
+# #
+# Project._setupNotifier(_upDateAssignmentsNmrChain, ApiNmrChain, 'setCode')

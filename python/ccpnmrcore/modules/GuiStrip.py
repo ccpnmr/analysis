@@ -68,7 +68,7 @@ def scaleRegion(otherPreviousRegion, region, previousRegion):
   
   return (otherRegionPosition - 0.5*otherRegionWidth, otherRegionPosition + 0.5*otherRegionWidth)
   
-class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop events are not processed
+class GuiStrip(Widget): # DropBase needs to be first, else the drop events are not processed
 
   sigClicked = QtCore.Signal(object, object)
 
@@ -78,7 +78,7 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
 
     Widget.__init__(self)
-    DropBase.__init__(self, self._parent._appBase)
+    # DropBase.__init__(self, self._parent._appBase)
     # DropBase.__init__(self, self._parent._appBase, self.dropCallback)
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
@@ -246,23 +246,23 @@ class GuiStrip(DropBase, Widget): # DropBase needs to be first, else the drop ev
   #   finally:
   #     self.beingUpdated = False
 
-  def addSpinSystemLabel(self):
-    self.planeToolbar = ToolBar(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)), hAlign='center', vAlign='c')
-    self.stripLabel = Label(self, text='.'.join(self.pid.id.split('.')[2:]),
-                                 hAlign='center', vAlign='top',dragDrop=True, pid=self.pid)
-    # self.spinSystemLabel.dropEvent = self.dropCallback
-    # self.spinSystemLabel.setText("Spin systems shown here")
-    self.stripLabel.setFixedHeight(15)
-    self.stripLabel.setFont(QtGui.QFont('Lucida Grande', 10))
-    self.spinSystemLabel = Label(self, text='',
-                                 hAlign='center', vAlign='top',dragDrop=True, pid=self.pid)
-    # self.spinSystemLabel.dropEvent = self.dropCallback
-    # self.spinSystemLabel.setText("Spin systems shown here")
-    self.spinSystemLabel.setFixedHeight(15)
-    self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
-    self.planeToolbar.addWidget(self.stripLabel)
-    self.planeToolbar.addWidget(self.spinSystemLabel)
-    # self.spinSystemLabel.pid = self.pid
+  # def addSpinSystemLabel(self):
+  #   self.planeToolbar = ToolBar(self.stripFrame, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)), hAlign='center', vAlign='c')
+  #   self.stripLabel = Label(self, text='.'.join(self.pid.id.split('.')[2:]),
+  #                                hAlign='center', vAlign='top',dragDrop=True, pid=self.pid)
+  #   # self.spinSystemLabel.dropEvent = self.dropCallback
+  #   # self.spinSystemLabel.setText("Spin systems shown here")
+  #   self.stripLabel.setFixedHeight(15)
+  #   self.stripLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+  #   self.spinSystemLabel = Label(self, text='',
+  #                                hAlign='center', vAlign='top',dragDrop=True, pid=self.pid)
+  #   # self.spinSystemLabel.dropEvent = self.dropCallback
+  #   # self.spinSystemLabel.setText("Spin systems shown here")
+  #   self.spinSystemLabel.setFixedHeight(15)
+  #   self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+  #   self.planeToolbar.addWidget(self.stripLabel)
+  #   self.planeToolbar.addWidget(self.spinSystemLabel)
+  #   # self.spinSystemLabel.pid = self.pid
     # print(self.pid)lo
 
 

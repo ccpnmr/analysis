@@ -29,6 +29,7 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     sequenceCodes = ["%s (%s)" % (nmrResidue.sequenceCode, nmrResidue.name) for nmrResidue in project.nmrResidues]
     self.seqCodePulldown.setData(sequenceCodes)
 
+
     tentativeLabel = Label(self, "Tentative: ", grid=(3, 0))
     tentativeAssignments = Label(self, grid=(3, 1))
     residueTypeLabel = Label(self, "Residue Type: ", grid=(4, 0))

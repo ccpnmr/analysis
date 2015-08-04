@@ -110,6 +110,8 @@ class Assigner(CcpnDock):
   def addResidue(self, nmrResidue):
 
     if self.residueCount == 0:
+      self.nmrChain = self.project.newNmrChain()
+      self.nmrChain.connectedNmrResidues = [nmrResidue]
       hAtom = self.addAtom("H", (0, self.atomSpacing), nmrResidue.fetchNmrAtom(name='H'))
       nAtom = self.addAtom("N", (0, hAtom.y()-self.atomSpacing),nmrResidue.fetchNmrAtom(name='N'))
       caAtom = self.addAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()),nmrResidue.fetchNmrAtom(name='CA'))
@@ -123,6 +125,8 @@ class Assigner(CcpnDock):
 
     else:
         if self.direction == 'left':
+          newConnectedStretch = list(self.nmrChain.connectedNmrResidues).insert(0, nmrResidue)
+          self.nmrChain.connectedNmrResidues = newConnectedStretch
           oldResidue = self.residuesShown[0]
           coAtom2 = self.addAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()
           -oldResidue["N"].x())-(oldResidue["N"].boundingRect().width()/2),oldResidue["CA"].y()),
@@ -142,6 +146,8 @@ class Assigner(CcpnDock):
           self.residuesShown.insert(0, atoms)
 
         if self.direction == 'right':
+          newConnectedStretch = list(self.nmrChain.connectedNmrResidues).append(nmrResidue)
+          self.nmrChain.connectedNmrResidues = newConnectedStretch
           oldResidue = self.residuesShown[-1]
           nAtom2 = self.addAtom("N", (oldResidue["CO"].x()+self.atomSpacing+
           oldResidue["CO"].boundingRect().width()/2, oldResidue["CA"].y()),
@@ -162,11 +168,12 @@ class Assigner(CcpnDock):
           self.residuesShown.append(atoms)
 
     self.assembleResidue(nmrResidue, atoms)
-    self.addSpectrumAssignmentLines(self.project.getById(self.spectra['ref'][0]), atoms)
-    self.addSpectrumAssignmentLines(self.project.getById(self.spectra['intra'][0]), atoms)
-    self.addSpectrumAssignmentLines(self.project.getById(self.spectra['inter'][0]), atoms)
+    # self.addSpectrumAssignmentLines(self.project.getById(self.spectra['ref'][0]), atoms)
+    # self.addSpectrumAssignmentLines(self.project.getById(self.spectra['intra'][0]), atoms)
+    # self.addSpectrumAssignmentLines(self.project.getById(self.spectra['inter'][0]), atoms)
 
     self.residueCount+=1
+    print(self.nmrChain.connectedNmrResidues)
 
   def addResiduePredictions(self, nmrResidue, caAtom):
     predictions = self.getNmrResiduePrediction(nmrResidue)

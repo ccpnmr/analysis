@@ -29,7 +29,7 @@ from ccpncore.gui.Base import Base
 
 class Spinbox(QtGui.QSpinBox, Base):
 
-  def __init__(self, parent, value=None, min=None, max=None, **kw):
+  def __init__(self, parent, value=None, min=None, max=None, showButtons=True, **kw):
 
     QtGui.QSpinBox.__init__(self, parent)
     if value is not None:
@@ -39,3 +39,6 @@ class Spinbox(QtGui.QSpinBox, Base):
     if max is not None:
       self.setMaximum(max)
     Base.__init__(self, **kw)
+
+    if showButtons is False:
+      self.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)

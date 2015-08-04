@@ -29,7 +29,10 @@ from ccpncore.gui.Base import Base
 
 class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
 
-  def __init__(self, parent, **kw):
+  def __init__(self, parent, showButtons=True, **kw):
 
     QtGui.QDoubleSpinBox.__init__(self, parent)
     Base.__init__(self, **kw)
+
+    if showButtons is False:
+      self.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)

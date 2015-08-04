@@ -13,7 +13,8 @@ class ListWidget(QtGui.QListWidget, Base):
     Base.__init__(self, **kw)
     self.callback = None
 
-    self.itemClicked.connect(callback)
+    if callback is not None:
+      self.itemClicked.connect(callback)
 
 
   def removeItem(self):

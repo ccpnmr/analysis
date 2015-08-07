@@ -40,11 +40,12 @@ experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'W
 
 class SideBar(DropBase, QtGui.QTreeWidget):
   def __init__(self, parent=None ):
-    QtGui.QTreeWidget.__init__(self, parent,)
+    QtGui.QTreeWidget.__init__(self, parent)
 
     self.setFont(QtGui.QFont('Lucida Grande', 12))
     self.header().hide()
     self.setDragEnabled(True)
+    self._appBase = parent._appBase
     self.parent = parent
     self.setDragDropMode(self.InternalMove)
     # self._dragroot = self.itemRootIndex()

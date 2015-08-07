@@ -65,7 +65,7 @@ translationDict = {
   '&Structures': '結構',
   'Reference': '參考參數',
   'Screening': '篩選',
-  'Mixtures': '混和',
+  'Samples': '混和',
   'Deleted': '刪除',
   'Notes': '小結',
 

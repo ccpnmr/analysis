@@ -41,9 +41,9 @@ class SampleTable(Dock):
     # samplePulldown = PulldownList(self, grid=(0, 1))
 
     columns = [Column('Sample', lambda sample: str(sample.pid)),
-               Column('Sample spectra', lambda sample: self.getSampleSpectra(sample))]
-               # Column('Minimum Score', lambda sample: self.getMinScore(sample)),
-               # Column('Average Score', lambda sample: self.getAverageScore(sample))]
+               Column('Sample spectra', lambda sample: self.getSampleSpectra(sample)),
+               Column('Minimum Score', lambda sample: self.getMinScore(sample)),
+               Column('Average Score', lambda sample: self.getAverageScore(sample))]
 
 
     sampleTable = ObjectTable(self, columns, callback=None, objects=[])

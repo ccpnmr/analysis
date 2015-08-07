@@ -142,7 +142,7 @@ class NmrResidue(AbstractWrapperObject):
     for residueProb in apiResonanceGroup.residueProbs:
       residueProb.delete()
     for weight, residue in value:
-      apiResonanceGroup.newResidueProb(residue=residue._wrappedData, weight=weight)
+      apiResonanceGroup.newResidueProb(possibility=residue._wrappedData, weight=weight)
 
   @property
   def probableResidueTypes(self) -> tuple:

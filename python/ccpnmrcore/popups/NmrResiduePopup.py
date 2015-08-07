@@ -11,6 +11,8 @@ from ccpncore.gui.ListWidget import ListWidget
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.ScrollArea import ScrollArea
 
+from ccpn.lib.assignment import getNmrResiduePrediction, getNmrAtomPrediction
+
 
 
 class NmrResiduePopup(QtGui.QDialog, Base):
@@ -36,15 +38,25 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     self.residueTypePulldown = PulldownList(self, grid=(4, 1))
     self.residueTypePulldown.setData(CCP_CODES)
     residueTypeProbLabel = Label(self, "Residue Type Probability", grid=(5, 0))
-    residueTypeProbs = Label(self, grid=(5, 1))
+    self.residueTypeProbs = Label(self, grid=(5, 1))
     leftoverLabel = Label(self, "Leftover possibilities: ", grid=(6, 0))
     self.leftoverPoss = Label(self, grid=(6, 1))
     typePredLabel = Label(self, "Residue Type Predictions: ", grid=(7, 0))
-    typePred = Label(self, grid=(7, 1))
+    self.typePred = Label(self, grid=(7, 1))
 
 
     nmrAtomButton = Button(self, grid=(8, 1), text="Show Nmr Atoms", callback=self.showNmrAtomPopup)
     self.update()
+
+
+  def getResidueTypeProb(self, currentNmrResidue):
+    predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0]._wrappedData)
+    preds0 = ', '.join([x[0] for x in predictions])
+    preds1 = ', '.join([' '.join([x[0], x[1]]) for x in predictions])
+    print(preds0, 'preds')
+    self.residueTypeProbs.setText(preds0)
+    self.typePred.setText(preds1)
+    getNmrAtomPrediction([x[0] for x in predictions], self.project.chemicalShiftLists[0].findChemicalShift(self.project._appBase.current.nmrAtom).value)
 
 
   def update(self):
@@ -54,16 +66,19 @@ class NmrResiduePopup(QtGui.QDialog, Base):
       self.chainPulldown.setCurrentIndex(self.chainPulldown.findText(currentNmrResidue.nmrChain.pid))
       sequenceCode = "%s (%s)" % (currentNmrResidue.sequenceCode, currentNmrResidue.name)
       self.seqCodePulldown.setCurrentIndex(self.seqCodePulldown.findText(sequenceCode))
-      self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.findText(self.getCcpCodeFromNmrResidueName(currentNmrResidue.name)))
+      self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.findText(self.getCcpCodeFromNmrResidueName(currentNmrResidue)))
       self.leftoverPoss.setText(self.getLeftOverResidues(currentNmrResidue))
+      self.getResidueTypeProb(currentNmrResidue)
 
   def selectNmrChain(self, item):
     self.project._appBase.current.nmrChain = self.project.getById(item)
     print(self.project._appBase.current.nmrChain)
 
 
-  def getCcpCodeFromNmrResidueName(self, name):
-    return name[0]+name[1].lower()+name[2].lower()
+  def getCcpCodeFromNmrResidueName(self, currentNmrResidue):
+    if currentNmrResidue.residue is not None:
+      # print(currentNmrResidue.residue)
+      return currentNmrResidue.name[0]+currentNmrResidue.name[1].lower()+currentNmrResidue.name[2].lower()
 
   def showNmrAtomPopup(self):
     popup = NmrAtomPopup(self)

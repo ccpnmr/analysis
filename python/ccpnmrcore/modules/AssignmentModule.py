@@ -86,6 +86,7 @@ class AssignmentModule(CcpnDock, Base):
 
 
   def showNmrResiduePopup(self):
+
     self.NmrResiduePopup = NmrResiduePopup(self, self.project)
     scrollArea = ScrollArea(self)
     scrollArea.setWidget(self.NmrResiduePopup)
@@ -145,6 +146,7 @@ class AssignmentModule(CcpnDock, Base):
     self.project._appBase.current.nmrResidue = self.project.getById(item.text()).nmrResidue
     if hasattr(self, 'NmrResiduePopup'):
       self.NmrResiduePopup.update()
+    self.project._appBase.current.nmrAtom = self.project.getById(item.text())
 
 
   def updateTables(self):
@@ -265,11 +267,11 @@ class AssignmentModule(CcpnDock, Base):
 
     for dim, listWidget in zip(range(Ndimensions), self.listWidgets):
 
-      nmrAtoms = [set(peak.dimensionNmrAtoms[dim]) for peak in self.peaks]
-      nmrAtoms = intersectionOfAll(nmrAtoms)
-      listWidget.addItems([str(a.pid) for a in nmrAtoms])
+      self.nmrAtoms = [set(peak.dimensionNmrAtoms[dim]) for peak in self.peaks]
+      self.nmrAtoms = intersectionOfAll(self.nmrAtoms)
+      listWidget.addItems([str(a.pid) for a in self.nmrAtoms])
       listWidget.show()
-      required_heights.append(listWidget.sizeHintForRow(0) * len(nmrAtoms))
+      required_heights.append(listWidget.sizeHintForRow(0) * len(self.nmrAtoms))
 
     required_height = max(required_heights) + 5
 

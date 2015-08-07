@@ -349,7 +349,7 @@ def _factoryFunction(project:Project, wrappedData:ApiStripSpectrumView) -> Spect
     return SpectrumView1d(project, wrappedData)
   else:
     # ND display
-    return SpectrumViewNd(project, wrappedData)
+    return  SpectrumViewNd(project, wrappedData)
 
 # Connections to parents:
 Strip._childClasses.append(SpectrumView)

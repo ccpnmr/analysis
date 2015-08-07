@@ -507,6 +507,29 @@ def _isAssignmentCompatible(assignName:str, atomName:str) -> bool:
   return False
 
 
+def getAtomProbability(ccpCode, atomName, shiftValue, molType=PROTEIN_MOLTYPE):
+
+  shiftRefs = REFDB_SD_MEAN.get((molType, ccpCode))
+
+  if not shiftRefs:
+    return
+
+  stats = shiftRefs.get(atomName)
+  if not stats:
+    return
+
+  mean, sd, pMissing, bound = stats
+  d = shiftValue-mean
+  e = d/sd
+  p = exp(-0.5*e*e)/(sd*ROOT_TWO_PI)
+
+  return p
+
+
+def getResidueAtoms(ccpCode, molType=PROTEIN_MOLTYPE):
+    return REFDB_SD_MEAN.get((molType, ccpCode)).keys()
+
+
 #
 # def getChemAtomNmrRef(project, atomName, ccpCode, molType=PROTEIN_MOLTYPE,
 #                       sourceName='RefDB'):

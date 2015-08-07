@@ -5,19 +5,22 @@ from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Font import Font
+from ccpnmrcore.DropBase import DropBase
 from PyQt4 import QtCore, QtGui
 import math
 
-class SequenceModule(CcpnDock):
+class SequenceModule(DropBase, CcpnDock):
 
-  def __init__(self, project=None):
+  def __init__(self, appBase, project):
     CcpnDock.__init__(self, name='Sequence')
+
     self.project=project
     self.setStyleSheet("""
     QWidget { background-color: #000021;
               border: 1px solid #00092d;
     }
     """)
+    DropBase.__init__(self, appBase)
     self.setAcceptDrops(True)
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)

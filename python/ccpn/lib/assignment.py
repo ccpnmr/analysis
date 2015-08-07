@@ -32,6 +32,9 @@ ATOM_NAMES = ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'C
               'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3', 'N', 'ND1', 'NE', 'NE1',
               'NE2', 'NH1', 'NH2', 'NZ']
 
+from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms
+
+
 def isInterOnlyExpt(string):
   expList = ['HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond']
   if(any(expType in string.upper() for expType in expList)):
@@ -77,3 +80,46 @@ def assignBetas(nmrResidue, peaks):
 
   elif len(peaks) == 1:
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
+
+def getNmrResiduePrediction(nmrResidue, shiftList):
+    predictions = {}
+    spinSystem = nmrResidue._wrappedData
+    for code in CCP_CODES:
+      predictions[code] = float(getSpinSystemResidueProbability(spinSystem, shiftList, code))
+    tot = sum(predictions.values())
+    refinedPredictions = {}
+    for code in CCP_CODES:
+      v = round(predictions[code]/tot * 100, 2)
+      if v > 0:
+        refinedPredictions[code] = v
+
+    finalPredictions = []
+
+    for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
+      key = [key for key, val in refinedPredictions.items() if val==value][0]
+      finalPredictions.append([key, str(value)+' %'])
+
+    return finalPredictions
+
+def getNmrAtomPrediction(ccpCodes, value):
+    predictions = {}
+    for code in ccpCodes:
+      atomNames = getResidueAtoms(code)
+      for atomName in atomNames:
+        predictions[code, atomName] = getAtomProbability(code, atomName, value)
+
+    print(predictions)
+    # tot = sum(predictions.values())
+    # refinedPredictions = {}
+    # for code in CCP_CODES:
+    #   v = round(predictions[code]/tot * 100, 2)
+    #   if v > 0:
+    #     refinedPredictions[code] = v
+    #
+    # finalPredictions = []
+    #
+    # for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
+    #   key = [key for key, val in refinedPredictions.items() if val==value][0]
+    #   finalPredictions.append([key, str(value)+' %'])
+    #
+    # return finalPredictions

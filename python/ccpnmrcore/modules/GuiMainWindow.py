@@ -341,7 +341,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.sequenceAction.setChecked(self.sequenceWidget.isVisible())
 
   def showSequence(self):
-      self.sequenceWidget = SequenceModule(project=self._project)
+      self.sequenceWidget = SequenceModule(self._appBase, self._project)
       self.dockArea.addDock(self.sequenceWidget, position='top')
 
   def hideSequence(self):

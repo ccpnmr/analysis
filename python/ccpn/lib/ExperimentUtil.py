@@ -39,9 +39,9 @@ EXPERIMENT_TYPES = {1:{'1D':'H',
                     3:
                       {'CHN':{
                     'HNCA': 'H[N[CA]]',
-                    'HNcoCA': 'H[N[co[CA]]]',
-                    'HNcoCACB': 'H[N[co[{CA|ca[C]}]]]',
-                    'HNCACB': 'H[N[{CA|ca[Cali]}]]',
+                    'H-detected HNcoCA': 'H[N[co[CA]]]',
+                    'HNcoCA/CB': 'H[N[co[{CA|ca[C]}]]]',
+                    'HNCA/CB': 'H[N[{CA|ca[Cali]}]]',
                     'HNCO': 'H[N[CO]]',
                     'HNcaCO': 'HNcaCO',
                     'H-edited 13C,15N HSQC-NOESY-HSQC': 'h[C]_H[N].through-space'},

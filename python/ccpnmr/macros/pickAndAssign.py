@@ -75,27 +75,28 @@ for peakList in project.peakLists[1:]:
       peak.assignDimension(axisCode='H', value=atomDict[result[0]][0])
       peak.assignDimension(axisCode='N', value=atomDict[result[0]][1])
 
-# for ssLabel in ssLabels:
-#
-#   nmrResidue = project.getById(ssLabel)
-#   for peaks in nmrResidue.fetchNmrAtom(name='N').assignedPeaks:
-#     exptDict = getExptDict(project)
-#     for peak in peaks:
-#       if peak.peakList.spectrum.experimentType in exptDict:
-#         if not peak.height:
-#           peak.height = peak.apiPeak.findFirstPeakIntensity().value
-#         exptDict[peak.peakList.spectrum.experimentType].append(peak)
-#   for exptType in exptDict.keys():
-#     if not isInterOnlyExpt(exptType):
-#       for peak in exptDict[exptType]:
-#         if peak.height > 0:
-#           peak.assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CA')])
-#         if peak.height < 0:
-#           peak.assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
-#     else:
-#       negativePeaks = [peak for peak in exptDict[exptType] if peak.height < 0]
-#       positivePeaks = [peak for peak in exptDict[exptType] if peak.height > 0]
-#       assignAlphas(nmrResidue=nmrResidue, peaks=positivePeaks)
-#       assignBetas(nmrResidue=nmrResidue, peaks=negativePeaks)
+for ssLabel in ssLabels:
+
+  nmrResidue = project.getById(ssLabel)
+  for peaks in nmrResidue.fetchNmrAtom(name='N').assignedPeaks:
+    exptDict = getExptDict(project)
+    for peak in peaks:
+      if peak.peakList.spectrum.experimentType in exptDict:
+        if not peak.height:
+          peak.height = peak.apiPeak.findFirstPeakIntensity().value
+        exptDict[peak.peakList.spectrum.experimentType].append(peak)
+  for exptType in exptDict.keys():
+    if not isInterOnlyExpt(exptType):
+      for peak in exptDict[exptType]:
+        if peak.height > 0:
+          peak.assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CA')])
+        if peak.height < 0:
+          peak.assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
+    else:
+      negativePeaks = [peak for peak in exptDict[exptType] if peak.height < 0]
+      positivePeaks = [peak for peak in exptDict[exptType] if peak.height > 0]
+      assignAlphas(nmrResidue=nmrResidue, peaks=positivePeaks)
+      assignBetas(nmrResidue=nmrResidue, peaks=negativePeaks)
 
 print('DONE')
+

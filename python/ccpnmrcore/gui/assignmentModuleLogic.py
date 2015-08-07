@@ -194,8 +194,14 @@ def getIsotopeCodeForPeakDimension(peak, dim):
 
 
 def getAssignmentToleranceForPeakDimension(peak, dim):
-    return peak.peakList.spectrum.assignmentTolerances[dim]
-
+    spectrum = peak.peakList.spectrum
+    if spectrum.assignmentTolerances[dim] is not None:
+      return spectrum.assignmentTolerances[dim]
+    else:
+      assignmentTolerances = list(spectrum.assignmentTolerances)
+      assignmentTolerances[dim] = 0.01
+      spectrum.assignmentTolerances = assignmentTolerances
+      return spectrum.assignmentTolerances[dim]
 
 def getIsotopeCode(nmrAtom):
     return nmrAtom.apiResonance.isotopeCode

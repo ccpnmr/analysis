@@ -516,22 +516,22 @@ class Spectrum(AbstractWrapperObject):
     """\- (*float,*)\*dimensionCount, *settable*
 
      maximum possible peak frequency (in ppm) for main dimensions reference """
-    return tuple(x and x.maxAliasedFrequency for x in self._mainExpDimRefs())
+    return tuple(x and x.maxAliasedFreq for x in self._mainExpDimRefs())
 
   @maxAliasedFrequencies.setter
   def maxAliasedFrequencies(self, value):
-    self._setExpDimRefAttribute('maxAliasedFrequency', value, mandatory=False)
+    self._setExpDimRefAttribute('maxAliasedFreq', value, mandatory=False)
 
   @property
   def minAliasedFrequencies(self) -> tuple:
     """\- (*str,*)\*dimensionCount, *settable*
 
      minimum possible peak frequency (in ppm) for main dimensions reference """
-    return tuple(x and x.minAliasedFrequency for x in self._mainExpDimRefs())
+    return tuple(x and x.minAliasedFreq for x in self._mainExpDimRefs())
 
   @minAliasedFrequencies.setter
   def minAliasedFrequencies(self, value):
-    self._setExpDimRefAttribute('minAliasedFrequency', value, mandatory=False)
+    self._setExpDimRefAttribute('minAliasedFreq', value, mandatory=False)
 
 
   @property

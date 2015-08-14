@@ -34,6 +34,7 @@ ATOM_NAMES = ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'C
 
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms
 
+from sklearn import svm
 
 def isInterOnlyExpt(string):
   expList = ['HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond']
@@ -81,45 +82,200 @@ def assignBetas(nmrResidue, peaks):
   elif len(peaks) == 1:
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
 
-def getNmrResiduePrediction(nmrResidue, shiftList):
-    predictions = {}
-    spinSystem = nmrResidue._wrappedData
-    for code in CCP_CODES:
-      predictions[code] = float(getSpinSystemResidueProbability(spinSystem, shiftList, code))
-    tot = sum(predictions.values())
-    refinedPredictions = {}
-    for code in CCP_CODES:
-      v = round(predictions[code]/tot * 100, 2)
-      if v > 0:
-        refinedPredictions[code] = v
+def getNmrResiduePrediction(nmrResidue, chemicalShiftList):
+  """
+  Takes ccpnCode and chemicalShift and predicts atom type
+  :param nmrResidue:
+  :param chemicalShiftList:
+  :return: dictionary of assignments {(ccpCode, atomName): prediction probability }
+  """
 
-    finalPredictions = []
+  predictions = {}
+  spinSystem = nmrResidue._wrappedData
+  for code in CCP_CODES:
+    predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList, code))
+  tot = sum(predictions.values())
+  refinedPredictions = {}
+  for code in CCP_CODES:
+    v = round(predictions[code]/tot * 100, 2)
+    if v > 0:
+      refinedPredictions[code] = v
 
-    for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
-      key = [key for key, val in refinedPredictions.items() if val==value][0]
-      finalPredictions.append([key, str(value)+' %'])
+  finalPredictions = []
 
-    return finalPredictions
+  for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
+    key = [key for key, val in refinedPredictions.items() if val==value][0]
+    finalPredictions.append([key, str(value)+' %'])
 
-def getNmrAtomPrediction(ccpCodes, value):
-    predictions = {}
-    for code in ccpCodes:
-      atomNames = getResidueAtoms(code)
-      for atomName in atomNames:
-        predictions[code, atomName] = getAtomProbability(code, atomName, value)
+  return finalPredictions
 
-    print(predictions)
-    # tot = sum(predictions.values())
-    # refinedPredictions = {}
-    # for code in CCP_CODES:
-    #   v = round(predictions[code]/tot * 100, 2)
-    #   if v > 0:
-    #     refinedPredictions[code] = v
-    #
-    # finalPredictions = []
-    #
-    # for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
-    #   key = [key for key, val in refinedPredictions.items() if val==value][0]
-    #   finalPredictions.append([key, str(value)+' %'])
-    #
-    # return finalPredictions
+def getNmrAtomPrediction(ccpCode, value):
+  """
+  Takes ccpnCode and chemicalShift and predicts atom type
+  :param ccpCode:
+  :param value:
+  :return: dictionary of assignments {(ccpCode, atomName): prediction probability }
+  """
+  predictions = {}
+  atomNames = getResidueAtoms(ccpCode)
+  for atomName in atomNames:
+    predictions[ccpCode, atomName] = getAtomProbability(ccpCode, atomName, value)
+
+  tot = sum(predictions.values())
+  refinedPredictions = {}
+  for key, value in predictions.items():
+    v = round(value/tot * 100, 2)
+    if v > 0:
+      refinedPredictions[key] = v
+  #
+  finalPredictions = []
+  #
+  for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
+    key = [key for key, val in refinedPredictions.items() if val==value][0]
+    finalPredictions.append([key, str(value)+' %'])
+
+  return finalPredictions
+
+def getIsotopeCodeOfAxis(axisCode):
+  """
+
+  Takes an axisCode and returns the appropriate isotope code
+  Inputs:
+  :param axisCode
+  :returns isotopeCode
+  """
+  if axisCode[0] == 'C':
+    return '13C'
+  if axisCode[0] == 'N':
+    return '15N'
+  if axisCode[0] == 'H':
+    return '1H'
+
+def copyAssignments(referencePeakList, matchPeakList):
+  """
+
+  Takes a reference peakList, creates an SVM for it and uses the SVM to assign nmrAtoms to dimensions
+  of a match peakList based on matching axis codes
+  Inputs
+  :param referencePeakList:
+  :param matchPeakList:
+
+  """
+  import numpy
+  project = referencePeakList.project
+  refAxisCodes = referencePeakList.spectrum.axisCodes
+  refPositions = [numpy.array(peak.position) for peak in referencePeakList.peaks]
+  refLabels = [peak.pid for peak in referencePeakList.peaks]
+  print('refAxisCodes', refAxisCodes)
+
+  clf=svm.SVC()
+  clf.fit(refPositions, refLabels)
+
+  matchAxisCodes = matchPeakList.spectrum.axisCodes
+
+  mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes]
+
+  for peak in matchPeakList.peaks:
+    matchArray = []
+    for dim in mappingArray:
+      matchArray.append(peak.position[dim])
+
+    result = ''.join((clf.predict(numpy.array(matchArray))))
+    dimNmrAtoms = project.getById(result).dimensionNmrAtoms
+    for axisCode in refAxisCodes:
+      peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
+
+def propagateAssignments(peaks, referencePeak=None, tolerances=None):
+
+  if referencePeak:
+    peaksIn = [referencePeak, ]
+  else:
+    peaksIn = peaks
+
+  if not tolerances:
+    tolerances = []
+
+  dimNmrAtoms = {}
+
+  for peak in peaksIn:
+    for i, dimensionNmrAtom in enumerate(peak.dimensionNmrAtoms):
+
+      key = peak.peakList.spectrum.axisCodes[i]
+      if dimNmrAtoms.get(key) is None:
+        dimNmrAtoms[key] = []
+
+      if len(peak.dimensionNmrAtoms[i]) > 0:
+        for dimensionNmrAtoms in peak.dimensionNmrAtoms[i]:
+          nmrAtom = dimensionNmrAtoms
+
+          dimNmrAtoms[key].append(nmrAtom)
+
+  print('dimNmrAtoms', dimNmrAtoms)
+
+  shiftRanges = {}
+
+  for peak in peaksIn:
+    for i, axisCode in enumerate(peak.peakList.spectrum.axisCodes):
+
+      if axisCode not in shiftRanges:
+        shiftMin, shiftMax = peak.peakList.spectrum.spectrumLimits[i]
+        shiftRanges[axisCode] = (shiftMin, shiftMax)
+
+      else:
+          shiftMin, shiftMax = shiftRanges[axisCode]
+
+      if i < len(tolerances):
+        tolerance = tolerances[i]
+      else:
+        tolerance = peak.peakList.spectrum.assignmentTolerances[i]
+
+      pValue = peak.position[i]
+
+      extantNmrAtoms = []
+
+      for dimensionNmrAtom in peak.dimensionNmrAtoms:
+        extantNmrAtoms.append(dimensionNmrAtom)
+
+      assignNmrAtoms = []
+      closeNmrAtoms = []
+
+      for nmrAtom in dimNmrAtoms[axisCode]:
+        if nmrAtom not in extantNmrAtoms:
+          shiftList = peak.peakList.spectrum.chemicalShiftList
+          shift = shiftList.findChemicalShift(nmrAtom)
+
+          if shift:
+
+            sValue = shift.value
+
+            if not (shiftMin < sValue < shiftMax):
+              continue
+
+            assignNmrAtoms.append(nmrAtom)
+
+            if abs(sValue-pValue) <= tolerance:
+              closeNmrAtoms.append(nmrAtom)
+
+      # print(closeNmrAtoms)
+      if closeNmrAtoms:
+        for nmrAtom in closeNmrAtoms:
+          print(axisCode, nmrAtom)
+          peak.assignDimension(axisCode, nmrAtom)
+
+      elif not extantNmrAtoms:
+        for nmrAtom in assignNmrAtoms:
+          print(axisCode, nmrAtom)
+          peak.assignDimension(axisCode, nmrAtom)
+
+
+
+
+def getAxisCodeForPeakDimension(peak, dim):
+    return peak.peakList.spectrum.axisCodes[dim]
+
+
+
+
+
+
+

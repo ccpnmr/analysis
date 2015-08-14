@@ -245,34 +245,42 @@ class GeneralTab(QtGui.QWidget, Base):
 class DimensionsTab(QtGui.QWidget):
   def __init__(self, spectrum, dimensions, parent=None):
     super(DimensionsTab, self).__init__(parent)
+    from ccpncore.gui.Table import ObjectTable, Column
+    sampleTables = []
+    #
 
-    layout = QtGui.QGridLayout()
-    dimensionalityLabel = Label(self, text="Dimensionality", grid=(0, 0))
-    dimensionality = Label(self, text=str(dimensions)+"D", grid=(0, 1))
+
+    # sampleTable = ObjectTable(self, columns, callback=None, objects=[spectrum], grid=(0, 0), gridSpan=(2, 8))
+    # layout = QtGui.QGridLayout()
+    dimensionalityLabel = Label(self, text="Dimension : ", grid=(0, 0),hAlign='r')
+    for i in range(dimensions):
+      dimLabel = Label(self, text='%s' % str(i+1), grid =(0, i+1), hAlign='c')
     j = 2
     for i in range(dimensions):
-      axisLabel = Label(self, text=DIMENSIONS[i]+"-Label", grid=(j, 0))
-      axisLabelData = Label(self, text=str(spectrum.isotopeCodes[i]), grid=(j, 1))
-      pointsLabel = Label(self, text=DIMENSIONS[i]+"-Points", grid=(j+1, 0))
-      pointsData = Label(self, text=str(spectrum.pointCounts[i]), grid=(j+1, 1))
-      axisTypeLabel = Label(self, text=DIMENSIONS[i]+"-Type", grid=(j+2, 0))
-      axisTypeData = Label(self, text=spectrum.dimensionTypes[i], grid=(j+2, 1))
-      spectralWidthLabel = Label(self, text=DIMENSIONS[i]+"-Spectral Width (ppm)", grid=(j+3, 0))
-      spectralWidthData = Label(self, text=str("%.3f" % spectrum.spectralWidths[i]), grid=(j+3, 1))
-      spectralWidthHzLabel = Label(self, text=DIMENSIONS[i]+"-Spectral Width (Hz)", grid=(j+4, 0))
-      spectralWidthHzData = Label(self, text=str("%.3f" % spectrum.spectralWidthsHz[i]), grid=(j+4, 1))
-      spectralReferencingLabel = Label(self, text=DIMENSIONS[i]+"-Referencing", grid=(j+6, 0))
-      spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referenceValues[i]), grid=(j+6, 1))
+      axisLabel = Label(self, text="Isotope Code : ", grid=(1, 0), hAlign='r')
+      axisLabelData = Label(self, text=str(spectrum.isotopeCodes[i]), grid=(1, i+1),  hAlign='c')
+      pointsLabel = Label(self, text="Point Counts : ", grid=(2, 0), hAlign='r')
+      pointsData = Label(self, text=str(spectrum.pointCounts[i]), grid=(2, i+1), hAlign='c')
+      axisTypeLabel = Label(self, text="Dimension Type : ", grid=(3, 0), hAlign='r')
+      axisTypeData = Label(self, text=spectrum.dimensionTypes[i], grid=(3, 1), hAlign='c')
+      spectralWidthLabel = Label(self, text="Spectrum Width (ppm) : ", grid=(4, 0), hAlign='r')
+      spectralWidthData = Label(self, text=str("%.3f" % spectrum.spectralWidths[i]), grid=(4, i+1), hAlign='c')
+      spectralWidthHzLabel = Label(self, text="Spectral Width (Hz) : ", grid=(5, 0), hAlign='r')
+      spectralWidthHzData = Label(self, text=str("%.3f" % spectrum.spectralWidthsHz[i]), grid=(5, i+1), hAlign='c')
+      spectralReferencingLabel = Label(self, text="Referencing : ", grid=(6, 0), hAlign='r')
+      spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referenceValues[i]), grid=(6, i+1), hAlign='c')
       spectralReferencingData.textChanged.connect(partial(self.setDimensionReferencing, spectrum, i))
-      spectralAssignmentToleranceLabel = Label(self, text=DIMENSIONS[i]+"-Assignment Tolerance", grid=(j+7, 0))
+      spectralReferencingData.setMaximumWidth(100)
+      spectralAssignmentToleranceLabel = Label(self, text="Assignment Tolerance : ", grid=(7, 0),  hAlign='r')
 
-      spectralAssignmentToleranceData = LineEdit(self, grid=(j+7, 1))
+      spectralAssignmentToleranceData = LineEdit(self, grid=(7, i+1),  hAlign='c')
+      spectralAssignmentToleranceData.setMaximumWidth(100)
+
       if spectrum.assignmentTolerances[i] is not None:
         spectralAssignmentToleranceData.setText(str("%.3f" % spectrum.assignmentTolerances[i]))
       spectralAssignmentToleranceData.textChanged.connect(partial(self.setAssignmentTolerances, spectrum, i))
       # spectralShiftWeightingLabel = Label(self, text=DIMENSIONS[i]+"-Shift Weighting", grid=(j+8, 0))
       # spectralShiftWeightingData = LineEdit(self, grid=(j+8, 1))
-      j+=8
 
 
   def setAssignmentTolerances(self, spectrum, dim, value):
@@ -284,6 +292,8 @@ class DimensionsTab(QtGui.QWidget):
     spectrumReferencing = list(spectrum.referenceValues)
     spectrumReferencing[dim] = float(value)
     spectrum.referenceValues = spectrumReferencing
+
+
 
 class ContoursTab(QtGui.QWidget):
   def __init__(self, spectrum, parent=None):

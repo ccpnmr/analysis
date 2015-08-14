@@ -29,7 +29,7 @@ from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpn import Project
 
 # Fields that are coded automatically
-_autoFields = ['peaks','regions','positions', 'strips']
+_autoFields = ['peaks','regions','positions', 'strips','nmrResidues']
 # NB For each of these fields code is generated to match the explicit code for the 'spectra' field
 # It is assumed that each autofield is plural, ending in a plural 's'
 # Note that the singluar value (e.g. 'currentSpectrum') is the last object

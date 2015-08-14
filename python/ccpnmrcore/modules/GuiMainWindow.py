@@ -131,7 +131,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.namespace = {'openProject':self._appBase.openProject,
                       'newProject':self._appBase.newProject, 'loadData':self.loadData, 'window':self,
-                      'preferences':self._appBase.preferences, 'project':self._project}
+                      'preferences':self._appBase.preferences, 'project':self._project, 'current':self._appBase.current}
     # self.pythonConsole = Console(parent=self, namespace=self.namespace)
     # self.pythonConsole.setGeometry(1200, 700, 10, 1)
     # self.pythonConsole.heightMax = 200
@@ -352,7 +352,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showNmrResidueTable(self):
     from ccpnmrcore.modules.NmrResidueTable import NmrResidueTable
     nmrResiduetable = NmrResidueTable(self, self._project)
-    self.dockArea.addDock(nmrResiduetable)
+    self.dockArea.addDock(nmrResiduetable, 'bottom')
 
   def toggleSequence(self):
 

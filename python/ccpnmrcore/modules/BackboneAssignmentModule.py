@@ -26,26 +26,24 @@ __author__ = 'simon'
 
 import pyqtgraph as pg
 
-from pyqtgraph.dockarea import Dock
-
 from PyQt4 import QtCore
 
 import math
 
 from ccpncore.gui.Button import Button
-from ccpncore.gui.Base import Base
 from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Dock import CcpnDockLabel, CcpnDock
+from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.popups.InterIntraSpectrumPopup import InterIntraSpectrumPopup
 from ccpnmrcore.popups.SelectSpectrumDisplayPopup import SelectSpectrumDisplayPopup
 
-class BackboneAssignmentModule(CcpnDock, Base):
+class BackboneAssignmentModule(CcpnDock):
 
-  def __init__(self, project=None):
+  def __init__(self, project):
 
-    CcpnDock.__init__(self, parent=None, name='Backbone Assignment')
+    # # CcpnDock.__init__(self, parent=None, name='Backbone Assignment')
+    super(BackboneAssignmentModule, self).__init__(parent=None, name='Backbone Assignment')
     spacingLabel = Label(self)
     spacingLabel.setFixedHeight(15)
     self.displayButton = Button(self, text='Select Modules', callback=self.showDisplayPopup)
@@ -62,73 +60,70 @@ class BackboneAssignmentModule(CcpnDock, Base):
     self.layout.addWidget(spacingLabel, 2, 1, 1, 1)
     self.layout.addWidget(self.displayButton, 1, 0, 1, 1)
     self.layout.addWidget(self.spectrumButton, 1, 2, 1, 1)
-    self.peakTable = PeakListSimple(self, project=project, callback=self.findMatchingPeaks)
+    self.peakTable = PeakListSimple(self, project=project, callback=self.navigateTo)
     self.layout.addWidget(self.peakTable, 4, 0, 1, 6)
 
     self.lines = []
     self.numberOfMatches = 5
 
 
-  def findMatchingPeaks(self, peak=None, row=None, col=None, nmrResidue=None):
+  def navigateTo(self, peak=None, row=None, col=None, nmrResidue=None, selectedDisplays=None):
 
-    for display in self.referenceDisplays:
-      hsqcDisplay = self.project.getById(display)
-      if peak:
-        self.assigner.clearAllItems()
-        positions = peak.position
-        self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
-        hsqcDisplay.strips[-1].planeToolbar.spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
-        hsqcDisplay.strips[-1].zoomToRegion([peak.position[0]-0.2, peak.position[0]+0.2,
-                                                  peak.position[1]-2, peak.position[1]+2])
-        self.line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-        self.line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-        self.line1.setPos(QtCore.QPointF(0, peak.position[1]))
-        self.line2.setPos(QtCore.QPointF(peak.position[0], 0))
-        hsqcDisplay.strips[-1].viewBox.addItem(self.line1)
-        hsqcDisplay.strips[-1].viewBox.addItem(self.line2)
-        for queryDisplay in self.queryDisplays:
-          queryWindow = self.project.getById(queryDisplay)
-          queryWindow.orderedStrips[0].planeToolbar.spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
-          queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
-          queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
+    if selectedDisplays is not None:
 
-          for line in self.lines:
-            queryWindow.orderedStrips[0].plotWidget.removeItem(line)
-          if len(self.lines) == 0:
+      for display in self.referenceDisplays:
+        hsqcDisplay = self.project.getById(display)
+        if peak:
+          # self.assigner.clearAllItems()
+          positions = peak.position
+          self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
+          hsqcDisplay.strips[-1].planeToolbar.spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
+          hsqcDisplay.strips[-1].zoomToRegion([peak.position[0]-0.2, peak.position[0]+0.2,
+                                                    peak.position[1]-2, peak.position[1]+2])
 
-            line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-            line.setPos(QtCore.QPointF(positions[0], 0))
-            queryWindow.orderedStrips[0].plotWidget.addItem(line)
+          for queryDisplay in self.queryDisplays:
+            queryWindow = self.project.getById(queryDisplay)
+            queryWindow.orderedStrips[0].planeToolbar.spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
+            queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
+            queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
 
-          else:
-            self.lines[0].setPos(QtCore.QPointF(positions[0], 0))
+            for line in self.lines:
+              queryWindow.orderedStrips[0].plotWidget.removeItem(line)
+            if len(self.lines) == 0:
+
+              line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+              line.setPos(QtCore.QPointF(positions[0], 0))
+              queryWindow.orderedStrips[0].plotWidget.addItem(line)
+
+            else:
+              self.lines[0].setPos(QtCore.QPointF(positions[0], 0))
 
 
-        self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
-        print(self.current.nmrResidue, 'current.nmrResidue', peak.dimensionNmrAtoms[0][0]._parent.pid)
+          self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
+          print(self.current.nmrResidue, 'current.nmrResidue', peak.dimensionNmrAtoms[0][0]._parent.pid)
 
-      elif nmrResidue is not None:
-        hsqcDisplay.strips[-1].viewBox.removeItem(self.line1)
-        hsqcDisplay.strips[-1].viewBox.removeItem(self.line2)
-        self.current.nmrResidue = nmrResidue
-        positions = [self.project.chemicalShiftLists[0].findChemicalShift(nmrResidue.fetchNmrAtom(name='H')).value,
-                     self.project.chemicalShiftLists[0].findChemicalShift(nmrResidue.fetchNmrAtom(name='N')).value]
+        elif nmrResidue is not None:
+          hsqcDisplay.strips[-1].viewBox.removeItem(self.line1)
+          hsqcDisplay.strips[-1].viewBox.removeItem(self.line2)
+          self.current.nmrResidue = nmrResidue
+          positions = [self.project.chemicalShiftLists[0].findChemicalShift(nmrResidue.fetchNmrAtom(name='H')).value,
+                       self.project.chemicalShiftLists[0].findChemicalShift(nmrResidue.fetchNmrAtom(name='N')).value]
 
-        hsqcDisplay.strips[-1].zoomToRegion([positions[0]-0.2, positions[0]+0.2,
-                                                  positions[1]-2, positions[1]+2])
+          hsqcDisplay.strips[-1].zoomToRegion([positions[0]-0.2, positions[0]+0.2,
+                                                    positions[1]-2, positions[1]+2])
 
 
-        self.line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-        self.line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-        self.line1.setPos(QtCore.QPointF(0, positions[1]))
-        self.line2.setPos(QtCore.QPointF(positions[0], 0))
-        hsqcDisplay.strips[-1].viewBox.addItem(self.line1)
-        hsqcDisplay.strips[-1].viewBox.addItem(self.line2)
+          self.line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+          self.line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
+          self.line1.setPos(QtCore.QPointF(0, positions[1]))
+          self.line2.setPos(QtCore.QPointF(positions[0], 0))
+          hsqcDisplay.strips[-1].viewBox.addItem(self.line1)
+          hsqcDisplay.strips[-1].viewBox.addItem(self.line2)
 
-    self.assigner.spectra = {'ref': self.refSpectra, 'intra': self.intraSpectra, 'inter':self.interSpectra}
-    self.assigner.addResidue(self.current.nmrResidue)
-    assignMatrix = self.getQueryShifts(self.current.nmrResidue)
-    self.findMatches(assignMatrix)
+    # self.assigner.spectra = {'ref': self.refSpectra, 'intra': self.intraSpectra, 'inter':self.interSpectra}
+    # self.assigner.addResidue(self.current.nmrResidue)
+    # assignMatrix = self.getQueryShifts(self.current.nmrResidue)
+    # self.findMatches(assignMatrix)
 
 
   def getQueryShifts(self, currentNmrResidue):
@@ -138,6 +133,7 @@ class BackboneAssignmentModule(CcpnDock, Base):
     for nmrResidue in self.project.nmrResidues:
       intraShifts[nmrResidue] = []
       interShifts[nmrResidue] = []
+
       if '-1' in nmrResidue.sequenceCode:
         # get inter residue chemical shifts for each -1 nmrResidue
         interCa = nmrResidue.fetchNmrAtom(name='CA')
@@ -149,7 +145,6 @@ class BackboneAssignmentModule(CcpnDock, Base):
         # get intra residue chemical shifts for each nmrResidue
         intraCa = nmrResidue.fetchNmrAtom(name='CA')
         intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(intraCa))
-
         intraCb = nmrResidue.fetchNmrAtom(name='CB')
         intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(intraCb))
 
@@ -271,7 +266,7 @@ class BackboneAssignmentModule(CcpnDock, Base):
           matrix[score] = res
 
     return matrix, scores
-
+  #
   def showInterIntraPopup(self):
     popup = InterIntraSpectrumPopup(self, project=self.project)
     popup.exec_()

@@ -31,6 +31,8 @@ from pyqtgraph.dockarea import DockArea
 from ccpncore.lib.spectrum import Util as specUtil
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
+from ccpn.lib.windowUtil import navigateToNmrResidue, navigateToPeakPosition
+
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 
@@ -88,7 +90,7 @@ class GuiWindow(GuiBase):
     #   return
     # elif isFastaFormat(path):
     #   try:
-    #     # NBNB TBD next line does ont make sense
+    #     # NBNB TBD next line does not make sense
     #     sequences = parseFastaFile(path[0])
     #     for sequence in sequences:
     #       self._parent._appBase.project.makeSimpleChain(sequence=sequence[1],
@@ -139,12 +141,16 @@ class GuiWindow(GuiBase):
   def setShortcuts(self):
     
     # this trampled the menu py shortcut
+    from functools import partial
     #toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
     QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll)
     QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll)
     QtGui.QShortcut(QtGui.QKeySequence("Del"), self, lambda: self._appBase.current.deleteSelected(self))
     QtGui.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark)
     QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
+    QtGui.QShortcut(QtGui.QKeySequence("f, r"), self, partial(navigateToNmrResidue, self._parent.project))
+    QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project))
+
    
   def toggleCrossHairAll(self):
     # toggle crosshairs in all windows

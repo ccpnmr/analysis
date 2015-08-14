@@ -314,37 +314,36 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     if position is not None:
       self.hLine.setPos(position)
 
-  def createMarkAtCursorPosition(self, task, positions=None):
+  def createMarkAtCursorPosition(self, task):
     # TBD: this creates a mark in all dims, is that what we want??
     axisPositionDict = self.axisPositionDict
     axisCodes = [axis.code for axis in self.orderedAxes]
-    if positions is None:
-      positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
-    mark = task.newMark('black', positions, axisCodes)
+    positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
+    mark = task.newMark('white', positions, axisCodes)
 
   #
-  # def rulerCreated(self, apiRuler):
-  #   axisCode = apiRuler.axisCode # TBD: use label and unit
-  #   position = apiRuler.position
-  #   # TBD: is the below correct (so the correct axes)?
-  #   if axisCode == self.orderedAxes[0].code:
-  #     line = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
-  #     line.setPos(position)
-  #     self.plotWidget.addItem(line, ignoreBounds=True)
-  #     self.vRulerLineDict[apiRuler] = line
-  #
-  #   if axisCode == self.orderedAxes[1].code:
-  #     line = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-  #     line.setPos(position)
-  #     self.plotWidget.addItem(line, ignoreBounds=True)
-  #     self.hRulerLineDict[apiRuler] = line
-  #
-  # def rulerDeleted(self, apiRuler):
-  #   for dd in self.vRulerLineDict, self.hRulerLineDict:
-  #     if apiRuler in dd:
-  #       line = dd[apiRuler]
-  #       del dd[apiRuler]
-  #       self.plotWidget.removeItem(line)
+  def rulerCreated(self, apiRuler):
+    axisCode = apiRuler.axisCode # TBD: use label and unit
+    position = apiRuler.position
+    # TBD: is the below correct (so the correct axes)?
+    # if axisCode == self.orderedAxes[0].code:
+    #   line = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
+    #   line.setPos(position)
+    #   self.plotWidget.addItem(line, ignoreBounds=True)
+    #   self.vRulerLineDict[apiRuler] = line
+    #
+    # if axisCode == self.orderedAxes[1].code:
+    #   line = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
+    #   line.setPos(position)
+    #   self.plotWidget.addItem(line, ignoreBounds=True)
+    #   self.hRulerLineDict[apiRuler] = line
+
+  def rulerDeleted(self, apiRuler):
+    for dd in self.vRulerLineDict, self.hRulerLineDict:
+      if apiRuler in dd:
+        line = dd[apiRuler]
+        del dd[apiRuler]
+        self.plotWidget.removeItem(line)
             
   def initRulers(self):
     

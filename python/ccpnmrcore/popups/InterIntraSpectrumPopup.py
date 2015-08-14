@@ -7,7 +7,6 @@ from ccpncore.gui.PulldownList import PulldownList
 
 from ccpn.lib.assignment import isInterOnlyExpt
 
-
 class InterIntraSpectrumPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, **kw):
     super(InterIntraSpectrumPopup, self).__init__(parent)
@@ -57,7 +56,7 @@ class InterIntraSpectrumPopup(QtGui.QDialog, Base):
     interExpts = []
     for spectrum in self.project.spectra:
       if spectrum.dimensionCount > 2:
-        if not isInterOnlyExpt(spectrum.experimentType):
+        # if not isInterOnlyExpt(spectrum.experimentType):
           interExpts.append(spectrum.pid)
     return interExpts
 

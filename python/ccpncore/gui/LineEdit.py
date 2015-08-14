@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 __author__ = 'simon'
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
 
@@ -35,6 +35,8 @@ class LineEdit(QtGui.QLineEdit, Base):
 
     if textColor:
       self.setStyleSheet('QLabel {color: %s;}' % textColor)
+
+    self.setAlignment(QtCore.Qt.AlignHCenter)
 
   def get(self):
 

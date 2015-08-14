@@ -32,12 +32,4 @@ class CcpnDockLabel(DockLabel):
       self.setFont(Font(size=12, semiBold=True))
 
 
-    #def minimumSizeHint(self):
-        ##sh = QtGui.QWidget.minimumSizeHint(self)
-        #return QtCore.QSize(20, 20)
-
-
-
-    def updateStyle(self):
-        pass
 

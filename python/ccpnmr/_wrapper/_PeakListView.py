@@ -29,9 +29,9 @@ from ccpnmr import SpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
+from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 
-
-class PeakListView(AbstractWrapperObject):
+class PeakListView(AbstractWrapperObject, GuiPeakListView):
   """Peak List View for 1D or nD PeakList"""
   
   #: Short class name, for PID.
@@ -45,6 +45,10 @@ class PeakListView(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
   
+  def __init__(self, project:Project, wrappedData:ApiStripPeakListView):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    GuiPeakListView.__init__(self)
 
   # CCPN properties  
   @property

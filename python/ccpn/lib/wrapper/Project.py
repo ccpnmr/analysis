@@ -55,9 +55,9 @@ def loadData(project:object, path:str) -> (list,None):
   # urlInfo is list of triplets of (type, subType, modifiedUrl),
   # e.g. ('Spectrum', 'Bruker', newUrl)
   if dataType is None:
-    print("Skipping: file data type not recognised for %s")
+    print("Skipping: file data type not recognised for %s" % usePath)
   elif not os.path.exists(usePath):
-    print("Skipping: no file found at %s")
+    print("Skipping: no file found at %s" % usePath)
   else:
     funcname = 'load' + dataType
     if funcname == 'loadProject':

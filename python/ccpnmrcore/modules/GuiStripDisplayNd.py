@@ -32,6 +32,7 @@ from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
 #from ccpncore.memops import Notifiers
 
@@ -75,7 +76,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     ##self.viewportDict = {} # maps QGLWidget to GuiStripNd
 
     # below are so we can reuse PeakItems and only create them as needed
-    self.activePeakItemDict = {}  # maps peakLayer to apiPeak to peakItem for peaks which are being displayed
+    self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
     # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
     # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
     self.inactivePeakItems = set() # contains unused peakItems
@@ -241,11 +242,11 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       if apiDataSource.negativeContourCount > 0:
         apiDataSource.negativeContourCount -= 1
 
-  def showPeaks(self, peakLayer, peaks):
+  def showPeaks(self, peakListView, peaks):
   
-    viewBox = peakLayer.strip.viewBox
+    viewBox = peakListView.spectrumView.strip.viewBox
     activePeakItemDict = self.activePeakItemDict
-    peakItemDict = activePeakItemDict.setdefault(peakLayer, {})
+    peakItemDict = activePeakItemDict.setdefault(peakListView, {})
     inactivePeakItems = self.inactivePeakItems
     existingApiPeaks = set(peakItemDict.keys())
     unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
@@ -259,18 +260,18 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         continue
       if inactivePeakItems:
         peakItem = inactivePeakItems.pop()
-        peakItem.setupPeakItem(peakLayer, peak)
+        peakItem.setupPeakItem(peakListView, peak)
         viewBox.addItem(peakItem)
       else:
-        peakItem = PeakNd(peakLayer, peak)
+        peakItem = PeakNd(peakListView, peak)
       peakItemDict[apiPeak] = peakItem
     
   def _deletedPeak(self, apiPeak):
-    for peakLayer in self.activePeakItemDict:
-      peakItemDict = self.activePeakItemDict[peakLayer]
+    for peakListView in self.activePeakItemDict:
+      peakItemDict = self.activePeakItemDict[peakListView]
       peakItem = peakItemDict.get(apiPeak)
       if peakItem:
-        peakLayer.strip.plotWidget.scene().removeItem(peakItem)
+        peakListView.strip.plotWidget.scene().removeItem(peakItem)
         del peakItemDict[apiPeak]
         self.inactivePeakItems.add(peakItem)
       
@@ -387,9 +388,9 @@ def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpec
   spectrumView = getDataObj(apiStripSpectrumView)
   action.toggled.connect(spectrumView.setVisible)
 
-  strip = spectrumView.strip
-  for apiPeakList in apiDataSource.sortedPeakLists():
-    strip.showPeaks(getDataObj(apiPeakList))
+  ##strip = spectrumView.strip
+  ##for apiPeakList in apiDataSource.sortedPeakLists():
+  ##  strip.showPeaks(getDataObj(apiPeakList))
 
 def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
   """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
@@ -408,6 +409,21 @@ def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
 Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
 Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
 Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
+
+def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
+  apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
+  getDataObj = project._data2Obj.get
+  peakListView = getDataObj(apiStripPeakListView)
+  spectrumView = peakListView.spectrumView
+  action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
+  if action:
+    action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
+ 
+  strip = spectrumView.strip
+  for apiPeakList in apiDataSource.sortedPeakLists():
+    strip.showPeaks(getDataObj(apiPeakList))
+  
+Project._setupNotifier(_createdStripPeakListView, ApiStripPeakListView, 'postInit')
 
 def _setActionIconColour(project:Project, apiDataSource:ApiDataSource):
   

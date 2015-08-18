@@ -33,15 +33,14 @@ from ccpncore.lib.spectrum import Util as specUtil
 
 from ccpn.lib.windowUtil import navigateToNmrResidue, navigateToPeakPosition
 
-from ccpnmrcore.Base import Base as GuiBase
+from ccpnmrcore.DropBase import DropBase
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 
-
-class GuiWindow(GuiBase):
+class GuiWindow(DropBase):
   
   def __init__(self):
     
-    GuiBase.__init__(self, self._parent._appBase)
+    DropBase.__init__(self, self._parent._appBase)
     #self._appBase = self._project._appBase
     # self.apiWindow = apiWindow
     self.dockArea = DockArea()
@@ -83,8 +82,7 @@ class GuiWindow(GuiBase):
     elif isinstance(paths,str):
       paths = [paths]
 
-    # NBNB TBD FIXME GuiWindow is not a subclass of DropBase. How to get hold of the function?
-    self.processsDropData(paths, dataType='urls')
+    self.processDropData(paths, dataType='urls')
 
     # if not path:
     #   return

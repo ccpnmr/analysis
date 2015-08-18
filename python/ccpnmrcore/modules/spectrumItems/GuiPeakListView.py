@@ -63,16 +63,20 @@ IDENTITY.reset()
 class GuiPeakListView(QtGui.QGraphicsItem):
 
   # def __init__(self, scene, strip, peakList):
-  def __init__(self, scene, strip, peakList):
+  def __init__(self):
     """ peakList is the CCPN wrapper object
     """
 
+    strip = self.spectrumView.strip
+    scene = strip.plotWidget.scene()
     QtGui.QGraphicsItem.__init__(self, scene=scene)
-    self.strip = strip
-    self.peakList = peakList
+    ###self.strip = strip
+    ###self.peakList = peakList
     self.peakItems = {}  # CCPN peak -> Qt peakItem
     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
     self._appBase = strip._appBase
+    
+    strip.viewBox.addItem(self)
     ###self.parent = parent
     # self.displayed = True
     # self.symbolColour = None
@@ -382,19 +386,19 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
 
 class PeakNd(QtGui.QGraphicsItem):
 
-  def __init__(self, peakLayer, peak):
+  def __init__(self, peakListView, peak):
 
-    self._appBase = peakLayer._appBase
-    scene = peakLayer.strip.plotWidget.scene()
+    self._appBase = peakListView._appBase
+    scene = peakListView.spectrumView.strip.plotWidget.scene()
     #QtGui.QGraphicsItem.__init__(self, scene=scene)
-    QtGui.QGraphicsItem.__init__(self, peakLayer, scene=scene)
+    QtGui.QGraphicsItem.__init__(self, peakListView, scene=scene)
     ###QtGui.QGraphicsItem.__init__(self, peakLayer)
     ###scene.addItem(self)
     ###strip.plotWidget.plotItem.vb.addItem(self)
     self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
     
     self.annotation = PeakNdAnnotation(self, scene)
-    self.setupPeakItem(peakLayer, peak)
+    self.setupPeakItem(peakListView, peak)
     # self.glWidget = peakLayer.glWidget
     #self.setParentItem(peakLayer)
     ###self.peakLayer = peakLayer
@@ -441,24 +445,25 @@ class PeakNd(QtGui.QGraphicsItem):
     #peakLayer.peakItems.append(self)
   #
   
-  def setupPeakItem(self, peakLayer, peak):
+  def setupPeakItem(self, peakListView, peak):
 
-    self.peakLayer = peakLayer
+    self.peakListView = peakListView
     self.peak = peak
     if not hasattr(peak, 'isSelected'):
       peak.isSelected = False
     self.setSelected(peak.isSelected)
-    xDim = peakLayer.strip.spectrumViews[0].dimensionOrdering[0] - 1
-    yDim = peakLayer.strip.spectrumViews[0].dimensionOrdering[1] - 1
+    dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
+    xDim = dimensionOrdering[0] - 1
+    yDim = dimensionOrdering[1] - 1
     xPpm = peak.position[xDim]
     yPpm = peak.position[yDim]
     self.setPos(xPpm, yPpm)
     self.annotation.setupPeakAnnotationItem(self)
-    peakLayer.peakItems[self.peak] = self
+    peakListView.peakItems[self.peak] = self
     
   def isInPlane(self):
 
-    strip = self.peakLayer.strip
+    strip = self.peakListView.spectrumView.strip
 
     if len(strip.orderedAxes) > 2:
       zDim = strip.spectrumViews[0].dimensionOrdering[2] - 1

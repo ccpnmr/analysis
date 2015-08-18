@@ -66,6 +66,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         dimMapping is from spectrum numerical dimensions to guiStrip numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
+    self.drawContoursCounter = 0
 
     self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
 
@@ -218,6 +219,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   #def drawContours(self, painter, guiStrip):
   def drawContours(self, painter):
+    
+    self.drawContoursCounter += 1
+    print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
     
     apiDataSource = self.apiDataSource
     if apiDataSource.positiveContourBase == 10000.0: # horrid
@@ -423,7 +427,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     translate = pixelViewBox0 - firstPoint * scale
     
     return translate, scale
-  def _connectPeakLayerVisibility(self, peakLayer):
-    apiDataSource = self._wrappedData.spectrumView.dataSource
-    action = self.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
-    action.toggled.connect(peakLayer.setVisible) # TBD: need to undo this if peakLayer removed
+  ###def _connectPeakLayerVisibility(self, peakLayer):
+  ###  apiDataSource = self._wrappedData.spectrumView.dataSource
+  ###  action = self.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
+  ###  action.toggled.connect(peakLayer.setVisible) # TBD: need to undo this if peakLayer removed
+    
+  
+  

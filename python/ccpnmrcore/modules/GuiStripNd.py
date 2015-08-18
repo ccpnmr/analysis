@@ -50,7 +50,8 @@ class GuiStripNd(GuiStrip):
     GuiStrip.__init__(self, useOpenGL=True)
 
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
-    self.peakLayerDict = {}  # peakList --> peakLayer
+    ###self.peakLayerDict = {}  # peakList --> peakLayer
+    self.peakListViewDict = {}  # peakList --> peakListView
 
     ###self.plotWidget.plotItem.setAcceptDrops(True)
     ###self.viewportWidget = QtOpenGL.QGLWidget()
@@ -201,23 +202,32 @@ class GuiStripNd(GuiStrip):
     self.changePlaneThickness((value/self.planeThicknessValue))
     self.planeThicknessValue = value
 
-
+  def _findPeakListView(self, peakList):
+    
+    peakListView = self.peakListViewDict.get(peakList)
+    if peakListView:
+      return peakListView
+      
+    for spectrumView in self.spectrumViews:
+      for peakListView in spectrumView.peakListViews:
+        if peakList is peakListView.peakList:
+          self.peakListViewDict[peakList] = peakListView
+          return peakListView
+            
+    return None
+    
   def showPeaks(self, peakList, peaks=None):
-    from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView
+    ###from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView
     # NBNB TBD 1) we should not always display all peak lists together
     # NBNB TBD 2) This should not be called for each strip
     
     if not peaks:
       peaks = peakList.peaks
-      
-    peakLayer = self.peakLayerDict.get(peakList)
-    if not peakLayer:
-      peakLayer = GuiPeakListView(self.plotWidget.scene(), self, peakList)
-      self.viewBox.addItem(peakLayer)
-      self.peakLayerDict[peakList] = peakLayer
-      spectrumView = self.getSpectrumView(peakList.spectrum.name)
-      spectrumView._connectPeakLayerVisibility(peakLayer)
-
+         
+    peakListView = self._findPeakListView(peakList)
+    if not peakListView:
+      return
+  
       # for spectrumView in self.spectrumViews:
       #   spectrumView._connectPeakLayerVisibility(peakLayer)
         ###spectrumView.visibilityAction.toggled.connect(peakLayer.setVisible)
@@ -235,7 +245,7 @@ class GuiStripNd(GuiStrip):
     ##lineItem.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
     
     peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
-    self.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
+    self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
 
     ###for peak in peaks:
     ###  if peak not in self.peakItemDict:
@@ -261,12 +271,14 @@ class GuiStripNd(GuiStrip):
     else:
       return True
     
+  """
   def newPeak(self, apiPeak):
     peak = self._appBase.project._data2Obj[apiPeak]
     if None in peak.position:
       return
     peakList = peak.parent
     self.showPeaks(peakList)
+"""
       
   # def axisRegionChanged(self, apiAxis):
   #

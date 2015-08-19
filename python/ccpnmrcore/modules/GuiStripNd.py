@@ -188,10 +188,13 @@ class GuiStripNd(GuiStrip):
   def addPlaneToolbar(self):
 
 
-    callbacks = [self.prevZPlane, self.nextZPlane, self.setZPlanePosition, self.changePlaneThickness]
+    callbacks = [self.prevZPlane, self.nextZPlane, self.setZPlanePosition, self.setPlaneThickness]
 
     self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                      hAlign='center', vAlign='c', callbacks=callbacks)
+
+  def blankCallback(self):
+    pass
 
   def setZPlanePosition(self, value):
     if self.planeToolbar.planeLabel.minimum() <= self.planeToolbar.planeLabel.value() <= self.planeToolbar.planeLabel.maximum():
@@ -199,8 +202,8 @@ class GuiStripNd(GuiStrip):
 
   def setPlaneThickness(self, value):
 
-    self.changePlaneThickness((value/self.planeThicknessValue))
-    self.planeThicknessValue = value
+    self.changePlaneThickness((value/self.planeToolbar.planeThicknessValue))
+    self.planeToolbar.planeThicknessValue = value
 
   def _findPeakListView(self, peakList):
     

@@ -309,15 +309,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     # do the contouring and store results in display list
     if doPosLevels:
-      posLevels = numpy.array(posLevels, numpy.float32)
-      self.createDisplayLists(posLevels, self.posDisplayLists)
+      posLevelsArray = numpy.array(posLevels, numpy.float32)
+      self.createDisplayLists(posLevelsArray, self.posDisplayLists)
       
     if doNegLevels:
-      negLevels = numpy.array(negLevels, numpy.float32)
-      self.createDisplayLists(negLevels, self.negDisplayLists)
+      negLevelsArray = numpy.array(negLevels, numpy.float32)
+      self.createDisplayLists(negLevelsArray, self.negDisplayLists)
       
     if not doPosLevels and not doNegLevels:
       return
+      
       
     ###GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     
@@ -325,12 +326,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     for position, dataArray in self.getPlaneData():
       
       if doPosLevels:
-        posContours = Contourer2d.contourer2d(dataArray, posLevels)
+        posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
         for n, contourData in enumerate(posContours):
           self.addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
         
       if doNegLevels:
-        negContours = Contourer2d.contourer2d(dataArray, negLevels)
+        negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
         for n, contourData in enumerate(negContours):
           self.addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
         

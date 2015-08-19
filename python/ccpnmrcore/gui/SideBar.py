@@ -46,7 +46,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.header().hide()
     self.setDragEnabled(True)
     self._appBase = parent._appBase
-    self.parent = parent
     self.setDragDropMode(self.InternalMove)
     # self._dragroot = self.itemRootIndex()
     self.setFixedWidth(180)
@@ -55,7 +54,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.projectItem.setExpanded(True)
     self.spectrumItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setText(0, "Spectra")
-    if self.parent._appBase.applicationName == 'Assign':
+    if self._appBase.applicationName == 'Assign':
 
       self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
       self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
@@ -82,7 +81,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       self.notesItem.setText(0, "Notes")
       self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
       self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
-      self.parent = parent
       self.moreItem = QtGui.QTreeWidgetItem(self.projectItem)
       self.moreItem.setText(0, 'More...')
       self.substancesItem = QtGui.QTreeWidgetItem(self.moreItem)
@@ -116,7 +114,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       self.substancesItem = QtGui.QTreeWidgetItem(self.moreItem)
       self.substancesItem.setText(0, "Substances")
 
-    if self.parent._appBase.applicationName == 'Screen':
+    if self._appBase.applicationName == 'Screen':
       self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
       self.spectrumScreening.setExpanded(True)
       self.spectrumScreening.setText(0, "Screening")
@@ -181,7 +179,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     # self.structuresItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
     # self.notesItem.addChild(QtGui.QTreeWidgetItem(["<empty>"]))
 
-    if self.parent._appBase.applicationName == 'Screen':
+    if self._appBase.applicationName == 'Screen':
       # 1d
       self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
       self.onedItem.setText(0, "1D")
@@ -369,7 +367,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           filename = row[0].split('/')
           filename.pop()
           newFilename = '/'.join(filename)
-          spectrum = self.parent.project.loadSpectrum(newFilename)
+          spectrum = self._appBase.project.loadSpectrum(newFilename)
 
           try:
             expType = self.getExpType(filename)
@@ -387,7 +385,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
             filename = row.split('/')
             filename.pop()
             newFilename = '/'.join(filename)
-            spectrum = self.parent.project.loadSpectrum(newFilename)
+            spectrum = self._appBase.project.loadSpectrum(newFilename)
             try:
               expType = self.getExpType(filename)
             except:

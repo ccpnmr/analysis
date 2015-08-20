@@ -21,6 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+import math
 import numpy
 
 from OpenGL import GL
@@ -66,7 +67,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         dimMapping is from spectrum numerical dimensions to guiStrip numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
-    self.drawContoursCounter = 0
+    ##self.drawContoursCounter = 0
 
     self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
 
@@ -220,8 +221,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   #def drawContours(self, painter, guiStrip):
   def drawContours(self, painter):
     
-    self.drawContoursCounter += 1
-    # print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
+    ##self.drawContoursCounter += 1
+    ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
     
     apiDataSource = self.apiDataSource
     if apiDataSource.positiveContourBase == 10000.0: # horrid
@@ -255,26 +256,52 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     try:
       
       xyDataDims = self.apiStripSpectrumView.spectrumView.orderedDataDims[:2]
-      xTranslate, xScale = self.getTranslateScale(xyDataDims[0].dim-1, 0) # -1 because API dims start at 1
-      yTranslate, yScale = self.getTranslateScale(xyDataDims[1].dim-1, 1)
+      xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self.getTranslateScale(xyDataDims[0].dim-1, 0) # -1 because API dims start at 1
+      yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self.getTranslateScale(xyDataDims[1].dim-1, 1)
       
-      GL.glLoadIdentity()
-      GL.glPushMatrix()
+      xTile0 = xClipPoint0 // xTotalPointCount
+      xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
+      yTile0 = yClipPoint0 // yTotalPointCount
+      yTile1 = 1 + (yClipPoint1 // yTotalPointCount)
+      
+      GL.glEnable(GL.GL_CLIP_PLANE0)
+      GL.glEnable(GL.GL_CLIP_PLANE1)
+      GL.glEnable(GL.GL_CLIP_PLANE2)
+      GL.glEnable(GL.GL_CLIP_PLANE3)
+      
+      for xTile in range(xTile0, xTile1):
+        for yTile in range(yTile0, yTile1):
+          
+          GL.glLoadIdentity()
+          GL.glPushMatrix()
 
-      # the below is because the y axis goes from top to bottom
-      GL.glScale(1.0, -1.0, 1.0)
-      GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
+          # the below is because the y axis goes from top to bottom
+          GL.glScale(1.0, -1.0, 1.0)
+          GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
       
-      # the below makes sure that spectrum points get mapped to screen pixels correctly
-      GL.glTranslate(xTranslate, yTranslate, 0.0)
-      GL.glScale(xScale, yScale, 1.0)
+          # the below makes sure that spectrum points get mapped to screen pixels correctly
+          GL.glTranslate(xTranslate, yTranslate, 0.0)
+          GL.glScale(xScale, yScale, 1.0)
       
-      for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists), (negColour, negLevels, self.negDisplayLists)):
-        for n, level in enumerate(levels):
-          GL.glColor4f(*colour)
-          # TBD: scaling, translating, etc.
-          GL.glCallList(displayLists[n])
-      GL.glPopMatrix()
+          #print('HERE757', xTile, xClipPoint0, xClipPoint1, xClipPoint0 - xTotalPointCount*xTile, xClipPoint1 - xTotalPointCount*xTile)
+          #print('HERE758', yTile, yClipPoint0, yClipPoint1, yClipPoint0 - yTotalPointCount*yTile, yClipPoint1 - yTotalPointCount*yTile)
+          GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
+          GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
+          GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
+          GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
+          GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
+          
+          for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists), (negColour, negLevels, self.negDisplayLists)):
+            for n, level in enumerate(levels):
+              GL.glColor4f(*colour)
+              # TBD: scaling, translating, etc.
+              GL.glCallList(displayLists[n])
+          GL.glPopMatrix()
+      
+      GL.glDisable(GL.GL_CLIP_PLANE0)
+      GL.glDisable(GL.GL_CLIP_PLANE1)
+      GL.glDisable(GL.GL_CLIP_PLANE2)
+      GL.glDisable(GL.GL_CLIP_PLANE3)
 
     finally:
       
@@ -427,7 +454,22 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
     translate = pixelViewBox0 - firstPoint * scale
     
-    return translate, scale
+    totalPointCount = self.spectrum.totalPointCounts[dim]
+    minAliasedFrequency = self.spectrum.maxAliasedFrequencies[dim]
+    if minAliasedFrequency is not None:
+      minAliasedFrequencyPoint = self.spectrum.getDimPointFromValue(dim, minAliasedFrequency) # max for min and vice versa
+    else:
+      minAliasedFrequencyPoint = 0
+    maxAliasedFrequency = self.spectrum.minAliasedFrequencies[dim]
+    if maxAliasedFrequency is not None:
+      maxAliasedFrequencyPoint = self.spectrum.getDimPointFromValue(dim, maxAliasedFrequency)
+    else:
+      maxAliasedFrequency = totalPointCount - 1
+    clipPoint0 = int(math.floor(max(firstPoint, minAliasedFrequencyPoint)))
+    clipPoint1 = int(math.ceil(min(lastPoint, maxAliasedFrequencyPoint)))
+
+    return translate, scale, totalPointCount, clipPoint0, clipPoint1
+    
   ###def _connectPeakLayerVisibility(self, peakLayer):
   ###  apiDataSource = self._wrappedData.spectrumView.dataSource
   ###  action = self.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)

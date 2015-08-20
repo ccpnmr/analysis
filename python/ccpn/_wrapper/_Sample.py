@@ -48,7 +48,7 @@ class Sample(AbstractWrapperObject):
   # CCPN properties  
   @property
   def apiSample(self) -> ApiSample:
-    """ CCPN saample matching Sample"""
+    """ CCPN sample matching Sample"""
     return self._wrappedData
     
   @property

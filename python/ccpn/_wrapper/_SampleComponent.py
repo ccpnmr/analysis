@@ -69,7 +69,7 @@ class SampleComponent(AbstractWrapperObject):
   @property
   def _parent(self) -> Sample:
     """Sample containing SampleComponent."""
-    return  self._project._data2Obj[self._wrappedData.sample]
+    return  self._project._data2Obj[self._wrappedData.parent]
   
   sample = _parent
 
@@ -161,7 +161,7 @@ def newSampleComponent(parent:Sample, name:str, labeling:str, role:str=None,
                                      concentration=concentration,
                                      concentrationError=concentrationError,
                                      concentrationUnit=concentrationUnit,
-                                     purity=purity, comment=comment)
+                                     purity=purity)
   return parent._project._data2Obj.get(obj)
 
 Sample.newSampleComponent = newSampleComponent

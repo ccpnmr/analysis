@@ -846,9 +846,10 @@ def _refreshPeakAnnotation(peak:Peak):
       print('apiStripPeakListView', apiStripPeakListView)
       guiPeakListView = data2Obj[apiStripPeakListView]
       print('g', guiPeakListView)
-      peakItem = guiPeakListView.peakItems[peak]
-      print(peakItem)
-      peakItem.annotation.setupPeakAnnotationItem(peakItem)
+      peakItem = guiPeakListView.peakItems.get(peak)
+      if peakItem:
+        print(peakItem)
+        peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
 
       # NBNB TBD add body here

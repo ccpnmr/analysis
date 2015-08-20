@@ -2,7 +2,7 @@ __author__ = 'simon1'
 
 from ccpn.lib.assignment import getIsotopeCodeOfAxis
 
-def navigateToPeakPosition(project, peak=None, selectedDisplays=None):
+def navigateToPeakPosition(project, peak=None, selectedDisplays=None, markPositions=False):
 
   if selectedDisplays is None:
     selectedDisplays = project.spectrumDisplays
@@ -47,8 +47,6 @@ def navigateToNmrResidue(project, nmrResidue=None, selectedDisplays=None, markPo
     atomPositions = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes]
     if len(shiftDict[display.strips[0].orderedAxes[2].code]) > 0:
       display.strips[0].changeZPlane(position=shiftDict[display.strips[0].orderedAxes[2].code][0])
-
-    print(shiftDict)
 
     if markPositions is True:
       markPositions = []

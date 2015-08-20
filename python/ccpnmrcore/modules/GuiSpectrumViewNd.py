@@ -430,8 +430,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       zPointCount = spectrum.pointCounts[zDim]
       
       strip.planeToolbar.planeLabel.setSingleStep(self.zPlaneSize())
-      strip.planeToolbar.planeLabel.setMaximum(spectrum.getDimValueFromPoint(zDim, 1))
-      strip.planeToolbar.planeLabel.setMinimum(spectrum.getDimValueFromPoint(zDim, spectrum.pointCounts[zDim]))
+      strip.planeToolbar.planeLabel.setMaximum(spectrum.maxAliasedFrequencies[zDim])
+      strip.planeToolbar.planeLabel.setMinimum(spectrum.minAliasedFrequencies[zDim])
       strip.planeToolbar.planeLabel.setValue(position)
       
       position = dimensionCount * [0]

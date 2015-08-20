@@ -175,7 +175,6 @@ class GeneralTab(QtGui.QWidget, Base):
       # else:
       #   noiseLevelData.setText('None')
 
-
   def setSpectrumScale(self):
     self.spectrum.scale = float(self.spectrumScalingData.text())
 

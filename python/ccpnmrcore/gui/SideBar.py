@@ -238,7 +238,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
       spectrum = self.project.getById(spectrum)
       peakList = spectrum.newPeakList()
-      newItem = self.addItem(self.onedItem, spectrum)
+      newItem = self.addItem(self.spectrumItem, spectrum)
       peakListItem = QtGui.QTreeWidgetItem(newItem)
       peakListItem.setText(0, peakList.pid)
       peakListItem.setFlags(peakListItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))

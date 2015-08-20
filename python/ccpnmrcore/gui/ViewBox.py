@@ -89,17 +89,17 @@ class ViewBox(pg.ViewBox):
 
 
     #
-    if (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ControlModifier) and not (
-    event.modifiers() & QtCore.Qt.ShiftModifier):
-      position = event.scenePos()
-      mousePoint = self.mapSceneToView(position)
-      print(mousePoint)
-      for spectrumView in self.current.strip.spectrumViews:
-        peakList = spectrumView.spectrum.peakLists[0]
-        newPeak = peakList.newPeak(position=[mousePoint.x(), mousePoint.y()])
-        # print(newPeak.position)
-        self.current.strip.showPeaks(peakList)
+    # if (event.button() == QtCore.Qt.LeftButton) and (
+    #           event.modifiers() & QtCore.Qt.ControlModifier) and not (
+    # event.modifiers() & QtCore.Qt.ShiftModifier):
+    #   position = event.scenePos()
+    #   mousePoint = self.mapSceneToView(position)
+    #   print(mousePoint)
+      # for spectrumView in self.current.strip.spectrumViews:
+      #   peakList = spectrumView.spectrum.peakLists[0]
+      #   newPeak = peakList.newPeak(position=[mousePoint.x(), mousePoint.y()])
+      #   # print(newPeak.position)
+      #   self.current.strip.showPeaks(peakList)
 
     # elif (event.button() == QtCore.Qt.LeftButton) and (
     #           event.modifiers() & QtCore.Qt.ShiftModifier) and not (
@@ -248,7 +248,7 @@ class ViewBox(pg.ViewBox):
                     # peak.isSelected(True)
                 else:
                   self.current.peaks.append(peak)
-                  # peak.isSelected(True)
+                  peak.isSelected = True
 
         for peak in self.current.peaks:
           peak.isSelected = True

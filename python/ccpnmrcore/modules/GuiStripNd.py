@@ -153,8 +153,8 @@ class GuiStripNd(GuiStrip):
     #take smallest inter-plane distance
     for spectrumItem in self.spectrumViews:
       index = spectrumItem.spectrum.axisCodes.index(zAxis.code)
-      minima.append(spectrumItem.spectrum.spectrumLimits[index][0])
-      maxima.append(spectrumItem.spectrum.spectrumLimits[index][1])
+      minima.append(spectrumItem.spectrum.minAliasedFrequencies[index])
+      maxima.append(spectrumItem.spectrum.minAliasedFrequencies[index])
       zPlaneSize = spectrumItem.zPlaneSize()
       if zPlaneSize is not None:
         if smallest is None or zPlaneSize < smallest:
@@ -166,11 +166,11 @@ class GuiStripNd(GuiStrip):
       delta = smallest * planeCount
       zAxis.position = zAxis.position+delta
     elif position:
-      if min(minima) < position <= max(maxima):
+      # if min(minima) < position <= max(maxima):
         zAxis.position = position
         self.planeToolbar.planeLabel.setValue(zAxis.position)
-      else:
-        print('position is outside spectrum bounds')
+      # else:
+      #   print('position is outside spectrum bounds')
 
 
   def changePlaneThickness(self, value):

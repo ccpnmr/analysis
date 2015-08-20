@@ -1,16 +1,9 @@
-from sklearn import svm
-import numpy
-from ccpn.lib.assignment import isInterOnlyExpt, getExptDict, assignAlphas, assignBetas
-from ccpn.lib.assignment import copyAssignments
-
-
-
 if len(project.nmrChains) == 0:
   c = project.newNmrChain()
 else:
   c = project.nmrChains[0]
 
-hsqcPeakList = project.getById('PL:HSQC-115.1')
+hsqcPeakList = project.getById('PL:15N-HSQC-115^spc^par.1')
 
 shiftList = project.chemicalShiftLists[0]
 
@@ -20,13 +13,13 @@ for peak in hsqcPeakList.peaks:
   a2 = r.newNmrAtom(name='H')
   atoms = [[a2], [a]]
   # peak.dimensionNmrAtoms = atoms
-  peak.assignDimension(axisCode='N', value=[r.fetchNmrAtom(name='N')])
-  peak.assignDimension(axisCode='H', value=[r.fetchNmrAtom(name='H')])
+  peak.assignDimension(axisCode='Nh', value=[r.fetchNmrAtom(name='N')])
+  peak.assignDimension(axisCode='Hn', value=[r.fetchNmrAtom(name='H')])
 
 
 
-for peakList in project.peakLists[1:]:
-  copyAssignments(hsqcPeakList, peakList)
+# for peakList in project.peakLists[1:]:
+#   copyAssignments(hsqcPeakList, peakList)
   # if isInterOnlyExpt(peakList.spectrum.experimentType):
   #   for peak in peakList.peaks:
   #     array = [peak.position[hdim], peak.position[ndim]]

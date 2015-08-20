@@ -4,6 +4,7 @@ def isFastaFormat(inputFile):
   if inputFile.split('.')[-1] == 'fasta':
     return True
   else:
+    print("isFastaFormat else")
     with open(inputFile, 'r') as f:
       try:
         if f.readlines()[0].startswith('>'):

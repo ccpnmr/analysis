@@ -48,7 +48,11 @@ NMRSTAR = 'NMR-STAR'
 # Sequence formats
 FASTA = 'Fasta'
 
-DataTypes = ['Project', 'Spectrum', 'Text', 'Sequence']
+#  Look-up formats
+CSV = 'csv'
+XLS = 'xls'
+
+DataTypes = ['Project', 'Spectrum', 'Text', 'Sequence', 'LookupFile']
 
 def analyseUrl(filePath):
   """ Analyse filePath, and return (dataType, subType, usePath) tuple
@@ -57,7 +61,8 @@ def analyseUrl(filePath):
   For Bruker and Varian Spectrum data, the usePath returned is the directory containing the spectrum
   """
 
-  print ("@~@~ analyseUrl, isDir?", os.path.isdir(filePath))
+  # print ("@~@~ analyseUrl, isDir?", os.path.isdir(filePath))
+
 
   isOk, msg = checkFilePath(filePath)
   if not isOk:
@@ -66,25 +71,57 @@ def analyseUrl(filePath):
 
   # Deal with directories as input
   if os.path.isdir(filePath):
+
     # url is a directory
     fileNames = os.listdir(filePath)
 
+
+
     if 'memops' in fileNames:
+
       # CCPN Project
       return ('Project', CCPN, filePath)
 
-    elif 'procs' in fileNames or 'pdata':
-      # Bruker processed spectrum
+    elif 'procs' in fileNames:
+
+      # 'Bruker processed spectrum'
       return ('Spectrum', BRUKER, filePath)
 
     elif 'procpar' in fileNames:
+
       # Varian processed spectrum
       return ('Spectrum', VARIAN, filePath)
+
+
     else:
-      return (None, None, filePath)
+      print('else')
+      fileNames = os.listdir(filePath)
+
+      for dirp, dirn, file in  os.walk(filePath):
+        for name in file:
+          path = os.path.join(dirp, name)
+
+          if path.endswith('procs'):
+            filePath = path
+            print(filePath)
+            # return ('Spectrum', BRUKER, filePath)
+      #
+      # for(dirpath, dirnames, filename) in os.walk(filePath):
+      #   for name in filename:
+      #
+      #     path = os.path.join(dirpath, name)
+      #     if path.endswith('procs'):
+      #       filePath = path
+      #       return ('Spectrum', BRUKER, filePath)
+
+
+
+
+
 
   # Set up for further analysis
   dirName, fileName = os.path.split(filePath)
+
 
   # Check for binary files
   fileObj = open(filePath, 'rb')
@@ -92,7 +129,7 @@ def analyseUrl(filePath):
   testData = set([c for c in firstData]) - WHITESPACE_AND_NULL
   isBinary = (min([ord(chr(c)) for c in testData]) < 32)
 
-  print ("@~@~ analyseUrl, isBinary?", isBinary)
+  # print ("@~@~ analyseUrl, isBinary?", isBinary)
 
   # Deal with binary files
   if isBinary:
@@ -147,6 +184,29 @@ def analyseUrl(filePath):
       return ('Spectrum', FELIX, filePath)
 
 
+  # Test Lookup format
+  # import csv
+  # if filePath.endswith('.csv'):
+  #   print('is a look up csv')
+  #   csv_in = open(filePath, 'r')
+  #   reader = csv.reader(csv_in)
+  #   for row in reader:
+  #    if row[0].split('/')[-1] == 'procs':
+  #      filename = row[0].split('/')
+  #      filename.pop()
+  #      Filename = '/'.join(filename)
+  #      print(Filename, 'filename path in format.py')
+
+
+
+
+  if filePath.endswith('.csv'):
+    return ('LookupFile', CSV, filePath)
+
+  if filePath.endswith('.xls'):
+    return ('LookupFile', XLS, filePath)
+
+
   else:
     # Text file
     # if b'##TITLE' in firstData:
@@ -179,6 +239,10 @@ def analyseUrl(filePath):
       spectrumPath = filePath[:-4]
       if os.path.isfile(spectrumPath):
         return ('Spectrum', AZARA, spectrumPath)
+
+
+
+
 
     # Default - return as plain text
     return ('Text', None, filePath)

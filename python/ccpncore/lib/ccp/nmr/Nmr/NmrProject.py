@@ -35,7 +35,7 @@ from ccpncore.api.memops.Implementation import Url
 def loadDataSource(nmrProject, filePath, dataFileFormat):
 
 
-  print ("@~@~ loadDataSource", dataFileFormat)
+  # print ("@~@~ loadDataSource", dataFileFormat)
 
   isOk, msg = checkFilePath(filePath)
 

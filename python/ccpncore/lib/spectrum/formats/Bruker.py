@@ -33,7 +33,7 @@ def readParams(filePath):
   if os.path.isdir(filePath):
     procs_file = os.path.join(filePath, 'procs')
     dirName = filePath
-    
+
   else:
     dirName, file = os.path.split(filePath)
     if file == 'procs':
@@ -44,6 +44,7 @@ def readParams(filePath):
       
       if os.path.isfile(filePath):
         procs_file = filePath
+
       else:
         msg = 'Could not find Bruker "procs" file "%s"' % filePath
         # showError('Error', msg % filePath)

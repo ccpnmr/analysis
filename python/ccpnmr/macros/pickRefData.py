@@ -1,10 +1,14 @@
 __author__ = 'simon'
 
-from ccpn.lib.mixtureUtil import setupMixtures
+
+
+from ccpn.lib.sampleUtil import setupSamples
+
 
 refData = window.leftWidget.spectrumReference
 
 refCount = window.leftWidget.spectrumReference.childCount()
+
 
 spectra = []
 
@@ -17,5 +21,18 @@ for i in range(refCount):
     spectra.append(spectrum)
     spectrum.peakLists[0].findPeaks1dFiltered()
 
+sampleTab = window.leftWidget.spectrumSamples
 
-mixtures = setupMixtures(spectra, 10, 'nMixtures')
+samples = setupSamples(spectra, 4, 'nSamples')
+
+
+for sample in samples:
+  print(sample.pid)
+  newItem = window.leftWidget.addItem(sampleTab, sample)
+  for peakCollection in sample.peakCollections[1:]:
+    spectrum = project.getById('SP:'+peakCollection.name)
+    window.leftWidget.addItem(newItem, spectrum)
+
+
+
+

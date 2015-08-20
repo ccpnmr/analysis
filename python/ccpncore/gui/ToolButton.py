@@ -31,7 +31,7 @@ class ToolButton(QtGui.QToolButton):
     
     QtGui.QToolButton.__init__(self, parent.spectrumToolBar)
     self.spectrumView = spectrumView
-    pix=QtGui.QPixmap(60, 10)
+    pix=QtGui.QPixmap(120, 10)
     if spectrumView.spectrum.dimensionCount < 2:
       pix.fill(QtGui.QColor(spectrumView.spectrum.sliceColour))
     else:

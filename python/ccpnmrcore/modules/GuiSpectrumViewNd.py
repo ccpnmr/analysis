@@ -221,7 +221,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def drawContours(self, painter):
     
     self.drawContoursCounter += 1
-    print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
+    # print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
     
     apiDataSource = self.apiDataSource
     if apiDataSource.positiveContourBase == 10000.0: # horrid

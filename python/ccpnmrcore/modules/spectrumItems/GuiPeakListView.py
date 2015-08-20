@@ -268,7 +268,6 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
       self.setFlag(QtGui.QGraphicsSimpleTextItem.ItemIsMovable)
       QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
-      print(self.peakItem)
       self.update()
 
 
@@ -838,17 +837,17 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
 def _refreshPeakAnnotation(peak:Peak):
   data2Obj = peak._project._data2Obj
-  print ("@~@~ _refreshPeakAnnotation222")
-  print('peak._wrappedData.peakList.peakListViews', peak._wrappedData.peakList.peakListViews)
+  # print ("@~@~ _refreshPeakAnnotation222")
+  # print('peak._wrappedData.peakList.peakListViews', peak._wrappedData.peakList.peakListViews)
   for apiPeakListView in peak._wrappedData.peakList.peakListViews:
-    print('apiPeakListView', apiPeakListView)
+    # print('apiPeakListView', apiPeakListView)
     for apiStripPeakListView in apiPeakListView.stripPeakListViews:
-      print('apiStripPeakListView', apiStripPeakListView)
+      # print('apiStripPeakListView', apiStripPeakListView)
       guiPeakListView = data2Obj[apiStripPeakListView]
-      print('g', guiPeakListView)
+      # print('g', guiPeakListView)
       peakItem = guiPeakListView.peakItems.get(peak)
       if peakItem:
-        print(peakItem)
+        # print(peakItem)
         peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
 

@@ -44,7 +44,7 @@ class AtomSelector(CcpnDock):
     self.orientation = 'vertical'
     self.moveLabel=False
     pickAndAssignWidget = Widget(self)#
-    pickAndAssignWidget.setMaximumSize(200,150)
+    pickAndAssignWidget.setMaximumSize(300,150)
 
     headerLabel = Label(self, text='i-1')
     pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
@@ -62,9 +62,12 @@ class AtomSelector(CcpnDock):
     self.cbButton1 = Button(pickAndAssignWidget, text='CB', grid=(4, 0), callback=partial(self.pickAndAssign, '-1', 'CB'))
     self.cbButton2 = Button(pickAndAssignWidget, text='CB', grid=(4, 1), callback=partial(self.pickAndAssign, '', 'CB'))
     self.cbButton3 = Button(pickAndAssignWidget, text='CB', grid=(4, 2), callback=partial(self.pickAndAssign, '+1', 'CB'))
+    self.coButton1 = Button(pickAndAssignWidget, text='CO', grid=(5, 0), callback=partial(self.pickAndAssign, '-1', 'CO'))
+    self.coButton2 = Button(pickAndAssignWidget, text='CO', grid=(5, 1), callback=partial(self.pickAndAssign, '', 'CO'))
+    self.coButton3 = Button(pickAndAssignWidget, text='CO', grid=(5, 2), callback=partial(self.pickAndAssign, '+1', 'CO'))
     self.buttons = [self.hButton1, self.hButton2, self.hButton3, self.nButton1, self.nButton2,
                     self.nButton3, self.caButton1, self.caButton2, self.caButton3, self.cbButton1,
-                    self.cbButton2, self.cbButton3]
+                    self.cbButton2, self.cbButton3, self.coButton1, self.coButton2, self.coButton3]
     self.parent = parent
     self.current = self.parent._appBase.current
     self.project = project
@@ -80,6 +83,9 @@ class AtomSelector(CcpnDock):
       r = self.current.nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=self.current.nmrResidue.sequenceCode+'-1')
     else:
       r = self.current.nmrResidue
+
+    if self.current.nmrResidue is None:
+      r = self.current.peaks[0].dimensionNmrAtoms[0][0].nmrResidue
 
     newNmrAtom = r.fetchNmrAtom(name=name)
     for peak in self.current.peaks:

@@ -336,13 +336,12 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   def _setActionIconColour(self, apiDataSource):
     action = self.spectrumActionDict.get(apiDataSource)
     if action:
-      pix=QtGui.QPixmap(60, 10)
+      pix=QtGui.QPixmap(QtCore.QSize(60, 10))
       if apiDataSource.numDim < 2: # irrelevant here, but need if this code moves to GuiSpectrumDisplay
         pix.fill(QtGui.QColor(apiDataSource.sliceColour))
       else:
         pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
       action.setIcon(QtGui.QIcon(pix))
-
 
   # def _spectrumViewsInDisplay(self):
   #   spectrumViews = set()
@@ -363,11 +362,17 @@ def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
   action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be None
   if not action:
     # add toolbar action (button)
-    action = spectrumDisplay.spectrumToolBar.addAction(apiDataSource.name)
+    if len(apiDataSource.name) <= 12:
+      spectrumName = apiDataSource.name
+    elif len(apiDataSource.name) > 12:
+      spectrumName = apiDataSource.name[:12]+'.....'
+    action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
     action.setCheckable(True)
     action.setChecked(True)
+    action.setToolTip(apiDataSource.name)
     widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
-    widget.setFixedSize(80, 30)
+    widget.setIconSize(QtCore.QSize(120, 10))
+    widget.setFixedSize(100, 30)
     widget.spectrumView = apiSpectrumView
     spectrumDisplay.spectrumActionDict[apiDataSource] = action
     spectrumDisplay._setActionIconColour(apiDataSource)

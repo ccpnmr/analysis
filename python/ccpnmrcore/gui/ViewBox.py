@@ -202,16 +202,16 @@ class ViewBox(pg.ViewBox):
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
           else:
             newPeaks = peakList.findPeaks1dFiltered(spectrumView)
-          # print(spectrumView.spectrum.peakLists[0].peaks)
-          for peak in newPeaks:
-            peak.isSelected = True
+          # # print(spectrumView.spectrum.peakLists[0].peaks)
+          # for peak in newPeaks:
+          #   peak.isSelected = True
           for window in self.current.project.windows:
             for spectrumDisplay in window.spectrumDisplays:
               for strip in spectrumDisplay.strips:
                 spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
                 if peakList.spectrum in spectra:
                   strip.showPeaks(peakList)
-          self.current.peaks = newPeaks
+          # self.current.peaks = newPeaks
       else:
         self.updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()

@@ -15,8 +15,13 @@ def navigateToPeakPosition(project, peak=None, selectedDisplays=None):
     axisCodes = peak.peakList.spectrum.axisCodes
     axisPositions = dict(zip(axisCodes, positions))
     if len(display.orderedAxes) > 2:
-      zAxes = display.strips[0].orderedAxes[2:]
-      zAxes[0].position = axisPositions[zAxes[0].code]
+      try:
+        zAxes = display.strips[0].orderedAxes[2:]
+        zAxes[0].position = axisPositions[zAxes[0].code]
+      except KeyError:
+        zAxes = display.strips[0].orderedAxes[2:]
+        zAxes[0].position = axisPositions[zAxes[0].code[0]]
+
 
 def navigateToNmrResidue(project, nmrResidue=None, selectedDisplays=None, markPositions=False):
 

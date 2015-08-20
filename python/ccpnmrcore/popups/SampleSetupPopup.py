@@ -13,13 +13,16 @@ from ccpncore.gui.Slider import Slider
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Widget import Widget
-from ccpnmrcore.modules.SamplesTable import SampleTable
+# from ccpnmrcore.modules.SamplesTable import SampleTableSimple
+# from ccpnmrcore.modules.SamplesTable import SampleTable
 
-# from ccpn.lib.sampleUtilOld import setupSamples
-# from ccpn.lib.sampleUtilOld import compareWithLevels
+from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
+from ccpnmrcore.modules.SamplesComponentsTable import PeakListSampleComponent
+
+
 
 from ccpn.lib.sampleUtil import setupSamples
-from ccpn.lib.sampleUtil import compareWithLevels
+
 
 
 from functools import partial
@@ -57,12 +60,13 @@ class SamplePopup(QtGui.QDialog):
   self.setLayout(mainLayout)
   pickpeakscheckBox = CheckBox(self, grid=(1, 1), checked=True)
   pickpeakscheckBoxLabel =  Label(self, text="Pick peaks automatically:", grid=(1, 0))
+
   self.Distance = DoubleSpinbox(self, grid=(2, 1))
   self.Distance.setRange(0.00, 0.20)
-  self.Distance.setSingleStep(0.02)
+  self.Distance.setSingleStep(0.01)
   self.Distance.setSuffix(" ppm")
+  DistanceLabel = Label(self, text="Minimal distance between peaks greater then:", grid=(2, 0))
 
-  AverageDistanceLabel = Label(self, text="Average distance between peaks greater than:", grid=(2, 0))
 
   self.performButton = Button(self, grid=(3, 2), text='Perform')
   self.performButton.clicked.connect(self.perform)
@@ -78,45 +82,48 @@ class SamplePopup(QtGui.QDialog):
     refCount = sideBar.spectrumReference.childCount()
     spectra = []
 
+    for i, spectrum in enumerate(self.project.spectra):
+      newSample = self.project.newSample(name=str(i+1))
+      spectrum.sample = newSample
+
+
     for i in range(refCount):
       item = refData.child(i)
       itemCount = item.childCount()
       for j in range(itemCount):
         spectrumPid = item.child(j).text(0)
         spectrum = self.project.getById(spectrumPid)
+        spectra.append(spectrum)
         spectrum.peakLists[0].findPeaks1dFiltered()
-        print(spectrum.peakLists[0].peaks)
         sampleTab = sideBar.spectrumSamples
 
+    minimalDistance = self.Distance.value()
     if self.setup.checkBox1.isChecked():
       value = (self.setup.spinBoxSA.value())
-      samples = setupSamples(self.project.samples, spectra, value , 'nSamples')
+      samples = setupSamples( self.project.samples, value , 'nSamples', minimalOverlap=minimalDistance)
+
 
     elif self.setup.checkBox2.isChecked():
-      value = (int(self.setup.spinBoxcomponent.value()+1))
-      # samples = setupSamples(spectra, value, 'nComponentsPerSample')
-      samples = setupSamples(self.project.samples, value, 'nComponentsPerSample')
+      value = (int(self.setup.spinBoxcomponent.value()))
+      samples = setupSamples(self.project.samples, value, 'nComponentsPerSample', minimalOverlap=minimalDistance)
 
-    # for sample in samples:
-    #   newItem = sideBar.addItem(sampleTab, sample)
-    #   for peakCollection in sample.peakCollections[1:]:
-    #     self.spectrum = self.project.getById('SP:'+peakCollection.name)
-    #     # print(peakCollection.name)
-    #     sideBar.addItem(newItem, self.spectrum)
-    #
-    #
-    #
-    #
-    # #----- feeds the results table ----#
 
-    print(samples, 'before Table')
-    from ccpnmrcore.modules.SamplesTable import SampleTable
-    sampletable = SampleTable(samples=samples, distancevalue = self.Distance.value())
+
+    for sample in samples:
+      newItem = sideBar.addItem(sampleTab, sample)
+      for peakCollection in sample.peakCollections[0:]:
+        self.spectrum = self.project.getById('SP:'+peakCollection.name)
+        sideBar.addItem(newItem, self.spectrum)
+
+
+
+
+
+    # #----- feeds the analysis table ----#
+
+    sampletable = SampleAnalysis(self.project, samples=samples)
     self.project._appBase.mainWindow.dockArea.addDock(sampletable)
-    #
-    # from ccpnmrcore.modules.SamplesComponentsTable import SamplesComponentsTable
-    # sct = SamplesComponentsTable(sampleLists=(samples))
-    # self.project._appBase.mainWindow.dockArea.addDock(sct)
+
 
     self.accept()
 
@@ -128,7 +135,10 @@ class GeneralSetup(QtGui.QWidget):
 
     # --- Select number of Samples ---
     self.checkBox1 = CheckBox(self, grid=(0, 0), hAlign='c', checked= False)
-    nSampleLabel = Label(self, text="Select number of Samples", grid=(0, 1))
+    nSampleButton= Button(self, text="Select number of Samples", grid=(0, 1))
+    nSampleButton.setFlat(True)
+    nSampleButton.clicked.connect(self.nSampleIsChecked)
+
     self.checkBox1.toggled.connect(self.show_nSamples)
     self.sliderSA = Slider(self, startVal = 2, endVal = 100, value=None,
                direction='h', step=1, bigStep=None, grid =(1, 1))
@@ -142,18 +152,22 @@ class GeneralSetup(QtGui.QWidget):
 
     # --- Select number of Components per Sample ---
     self.checkBox2 = CheckBox(self, grid=(3, 0), hAlign='c', checked= False)
-    nComponentLabel = Label(self, text="Select number of Components", grid=(3, 1))
+    nComponentButton = Button(self, text="Select number of Components", grid=(3, 1))
+    nComponentButton.setFlat(True)
+    nComponentButton.clicked.connect(self.nComponentsIsChecked)
+
     self.checkBox2.toggled.connect(self.show_nComponents)
-    self.sliderComponent  = Slider(self, startVal = 3, endVal = 20, value=None,
+    self.sliderComponent  = Slider(self, startVal = 2, endVal = 20, value=None,
                                   direction='h', step=1, bigStep=None, grid =(5, 1))
     self.spinBoxcomponent = Spinbox(self, grid=(5, 0))
-    self.spinBoxcomponent.setRange(3, 20)
+    self.spinBoxcomponent.setRange(2, 20)
     self.sliderComponent.valueChanged.connect(self.spinBoxcomponent.setValue)
-    self.spinBoxcomponent.valueChanged.connect(self.sliderComponent .setValue)
+    self.spinBoxcomponent.valueChanged.connect(self.sliderComponent.setValue)
     self.spinBoxcomponent.hide()
     self.sliderComponent.hide()
 
-
+  def nSampleIsChecked(self):
+    self.checkBox1.setChecked(True)
 
   def show_nSamples(self):
     if self.checkBox1.isChecked():
@@ -163,6 +177,9 @@ class GeneralSetup(QtGui.QWidget):
     else:
      self.sliderSA.hide()
      self.spinBoxSA.hide()
+
+  def nComponentsIsChecked(self):
+    self.checkBox2.setChecked(True)
 
   def show_nComponents(self):
     if self.checkBox2.isChecked():

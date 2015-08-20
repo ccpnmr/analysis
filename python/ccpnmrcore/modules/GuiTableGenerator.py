@@ -41,11 +41,14 @@ class GuiTableGenerator(QtGui.QWidget):
 
     objectList = self.objectList
 
+
     if objectList:
+      print(objectList, 'objectList in TableGenerator' )
       objectsName = objectList._childClasses[0]._pluralLinkName
 
-      columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
-      self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
+
+    columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
+    self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
 
   def _getColumns(self, columns, tipTexts):
 

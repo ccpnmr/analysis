@@ -36,10 +36,11 @@ class DropBase(GuiBase):
   def __init__(self, appBase, *args, **kw):
   # def __init__(self, appBase, dropCallback, *args, **kw):
 
-    print("@~@~ init dropbase", self.__class__.__name__)
+    # print("@~@~ init dropbase", self.__class__.__name__)
     
     GuiBase.__init__(self, appBase, *args, **kw)
     # self.dropCallback = dropCallback
+    self.appBase = appBase
     
   def dragEnterEvent(self, event):
     event.accept()
@@ -110,9 +111,34 @@ class DropBase(GuiBase):
     Separate function so it can be called from command line as well.
     """
 
-    print ("@~@~ process drop" , dataType, data)
-
+    print ("@~@~  process drop" , dataType, data)
+    #
     project = self._appBase.project
+
+    # if dataType == 'text':
+    #   # data is a text string
+    #   if hasattr(self, 'processText'):
+    #     self.processText(data)
+    #
+    # else:
+    #   pids = []
+    #   if dataType == 'pids':
+    #     pids = data
+    #
+    #
+    #   elif dataType == 'urls':
+    #     # data is list-of-urls
+    #     # Load Urls one by one with normal loaders
+    #     for url in data:
+    #       print (data, 'data', url, 'url')
+    #       ll = project.loadData(url)
+    #
+    #
+    #       if ll:
+    #         pids.extend(x.pid for x in ll)
+    #
+    #   else:
+    #     raise ValueError("processDropData does not recognise dataType %s" % dataType)
 
     if dataType == 'text':
       # data is a text string
@@ -124,22 +150,57 @@ class DropBase(GuiBase):
       if dataType == 'pids':
         pids = data
 
+
       elif dataType == 'urls':
         # data is list-of-urls
         # Load Urls one by one with normal loaders
         for url in data:
-          ll = project.loadData(url)
-          if ll:
-            pids.extend(x.pid for x in ll)
+
+          if url.endswith('.csv'):
+             import csv
+             csv_in = open(url, 'r')
+             reader = csv.reader(csv_in)
+             for row in reader:
+               if row[0].split('/')[-1] == 'procs':
+                 filename = row[0].split('/')
+                 filename.pop()
+                 Filename = '/'.join(filename)
+                 loadEachRow = project.loadData(Filename)
+                 pids.extend(x.pid for x in loadEachRow)
+
+          elif url.endswith('.xls'):
+            import pandas as pd
+            ex = pd.ExcelFile(url)
+            for sheet in ex.sheet_names:
+              excelSheet = ex.parse(sheet)
+              for row in excelSheet['filename']:
+                if row.split('/')[-1] == 'procs':
+                  filename = row.split('/')
+                  filename.pop()
+                  Filename = '/'.join(filename)
+                  loadEachRow = project.loadData(Filename)
+                  pids.extend(x.pid for x in loadEachRow)
+
+          else:
+
+            ll = project.loadData(url)
+
+            if ll:
+              pids.extend(x.pid for x in ll)
 
       else:
         raise ValueError("processDropData does not recognise dataType %s" % dataType)
+
+
+      ###########
 
       # process pids
       for pid in pids:
         method = self.pickDispatchFunction('process', pid)
         if method:
           method(pid)
+
+
 
 
   def pickDispatchFunction(self, prefix:str, dataType:(str,Pid)):
@@ -168,6 +229,8 @@ class DropBase(GuiBase):
     print ("@~@~ pickDispatch", prefix, dataType, funcName, hasattr(self, funcName))
 
     if hasattr(self, funcName):
+      print(funcName)
       return getattr(self, funcName)
     else:
+
       return None

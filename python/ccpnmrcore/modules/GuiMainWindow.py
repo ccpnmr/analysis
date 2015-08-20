@@ -42,9 +42,9 @@ from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
 from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
 from ccpnmrcore.modules.PeakTable import PeakTable
-# from ccpnmrcore.modules.SampleComponentPeakTable import SampleComponentsPeakTable
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.modules.SequenceModule import SequenceModule
+from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpnmrcore.popups.SampleSetupPopup import SamplePopup
@@ -143,7 +143,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.sideBar.setGeometry(0, 0, 13, 600)
     self.sideBar.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
+    self.sideBar.setDragDropMode(self.sideBar.DragDrop)
+    self.sideBar.setGeometry(0, 0, 50, 600)
+    self.sideBar.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+
     self.splitter3.addWidget(self.sideBar)
+
     self.splitter1.addWidget(self.splitter3)
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter2.addWidget(self.splitter1)
@@ -208,9 +213,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # self.screenMenu.setHidden(True)
     # self.screenMenu.addAction(Action(self, 'Empty', callback=self.showSideBar))#, shortcut="ss"))
     self.screenMenu.addSeparator()
-    self.screenMenu.addAction(Action(self, 'Generate samples', callback=self.createSample, shortcut="cs"))
+    self.screenMenu.addAction(Action(self, 'Generate Samples', callback=self.createSample, shortcut="cs"))
     self.screenMenu.addSeparator()
-    # self.screenMenu.addAction(Action(self, "View Sample Component peak Table", callback=self.SampleComponentTable, shortcut="st"))
+    self.screenMenu.addAction(Action(self, 'Sample Analysis', callback=self.showSampleAnalysis, shortcut="st"))
 
 
     # spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
@@ -472,18 +477,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     QtGui.QApplication.quit()
 
   def createSample(self):
-    print(self.project)
     popup = SamplePopup(parent=None, project=self.project)
     popup.exec_()
     popup.raise_()
 
+  def showSampleAnalysis(self):
+    showSA = SampleAnalysis(self._project)
+    self.dockArea.addDock(showSA, position='bottom')
 
-  # def SampleComponentTable(self, position='left', relativeTo=None):
-  #   SCPT = SampleComponentsPeakTable(self._project)
-  #   if relativeTo is not None:
-  #     self.dockArea.addDock(SCPT, position=position, relativeTo=relativeTo)
-  #   else:
-  #     self.dockArea.addDock(SCPT, position='bottom')
+
+
 
   def removeSpectra(self):
     pass

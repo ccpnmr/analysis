@@ -399,22 +399,49 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       yield position, planeData
     elif dimensionCount == 3: # TBD
       apiStrip = strip.apiStrip
+      zDim = dataDims[2].dim - 1
       zAxis = apiStrip.orderedAxes[2]
       position = zAxis.position
+      zTotalPointCount = spectrum.totalPointCounts[zDim]
+      minAliasedFrequency = spectrum.minAliasedFrequencies[zDim]
+      if minAliasedFrequency is None:
+        minAliasedFrequencyPoint = 0
+      maxAliasedFrequency = spectrum.maxAliasedFrequencies[zDim]
+      if maxAliasedFrequency is None:
+        maxAliasedFrequency = zTotalPointCount - 1
+        
+      if not (minAliasedFrequency <= position <= maxAliasedFrequency):
+        return
+        
       width = zAxis.width
       zregionValue = (position+0.5*width, position-0.5*width) # Note + and - (axis backwards)
-      zDim = dataDims[2].dim - 1
-      zregionPoint = spectrum.getDimPointFromValue(zDim, zregionValue)
-      zregionPoint = (int(numpy.round(zregionPoint[0])), int(numpy.round(zregionPoint[1])))
+      zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zregionValue)
+      zPoint0, zPoint1 = (int(numpy.round(zPoint0)), int(numpy.round(zPoint1)))
+      
+      if (zPoint1 - zPoint0) >= zTotalPointCount:
+        zPoint0 = 0
+        zPoint1 = zTotalPointCount
+      else:
+        zPoint0 %= zTotalPointCount
+        zPoint1 %= zTotalPointCount
+        if zPoint1 < zPoint0:
+          zPoint1 += zTotalPointCount
+      zPointOffset = spectrum.pointOffsets[zDim]
+      zPointCount = spectrum.pointCounts[zDim]
+      
       strip.planeToolbar.planeLabel.setSingleStep(self.zPlaneSize())
       strip.planeToolbar.planeLabel.setMaximum(spectrum.getDimValueFromPoint(zDim, 1))
       strip.planeToolbar.planeLabel.setMinimum(spectrum.getDimValueFromPoint(zDim, spectrum.pointCounts[zDim]))
       strip.planeToolbar.planeLabel.setValue(position)
+      
       position = dimensionCount * [0]
-      for z in range(*zregionPoint):  # TBD
-        position[zDim] = z
-        planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
-        yield position, planeData
+      for z in range(zPoint0, zPoint1):
+        zPosition = z % zTotalPointCount
+        zPosition -= zPointOffset
+        if 0 <= z < zPointCount:
+          position[zDim] = z
+          planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
+          yield position, planeData
 
   def addContoursToDisplayList(self, displayList, contourData, level):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """

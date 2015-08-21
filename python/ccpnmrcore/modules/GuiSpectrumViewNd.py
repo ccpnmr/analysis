@@ -115,6 +115,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     GuiSpectrumView.__init__(self)
 
+    self.strip.setZWidgets() # this cannot be done in Strip constructor because Axes not set up yet
+      
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
 
     """
@@ -428,12 +430,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           zPoint1 += zTotalPointCount
       zPointOffset = spectrum.pointOffsets[zDim]
       zPointCount = spectrum.pointCounts[zDim]
-      
-      strip.planeToolbar.planeLabel.setSingleStep(self.zPlaneSize())
-      strip.planeToolbar.planeLabel.setMaximum(spectrum.maxAliasedFrequencies[zDim])
-      strip.planeToolbar.planeLabel.setMinimum(spectrum.minAliasedFrequencies[zDim])
-      strip.planeToolbar.planeLabel.setValue(position)
-      
+            
       position = dimensionCount * [0]
       for z in range(zPoint0, zPoint1):
         zPosition = z % zTotalPointCount

@@ -31,6 +31,7 @@ from ccpn import Project
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
+from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
@@ -40,6 +41,7 @@ from ccpncore.gui.Icon import Icon
 from ccpncore.gui.VerticalLabel import VerticalLabel
 
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpnmrcore.modules.GuiStripNd import GuiStripNd
 
 from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
 
@@ -452,3 +454,20 @@ def _deletedPeak(project:Project, apiPeak:ApiPeak):
           spectrumDisplay._deletedPeak(apiPeak)
 
 Project._setupNotifier(_deletedPeak, ApiPeak, 'delete')
+
+def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+
+  for apiStrip in apiSpectrumView.strips:
+    strip = project._data2Obj[apiStrip]
+    if isinstance(strip, GuiStripNd):
+      strip.setZWidgets()
+
+Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiSpectrumView, 'dimensionOrdering')
+
+def _changedAxisOrdering(project:Project, apiStrip:ApiStrip):
+
+  strip = project._data2Obj[apiStrip]
+  if isinstance(strip, GuiStripNd):
+    strip.setZWidgets()
+
+Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiStrip, 'axisOrder')

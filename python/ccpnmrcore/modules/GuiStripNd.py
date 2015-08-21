@@ -83,7 +83,6 @@ class GuiStripNd(GuiStrip):
     #     spectrumView.addSpectrumItem(self)
 
     ###Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
-
     
   # def setupAxes(self):
   #   GuiStrip.setupAxes(self)
@@ -143,32 +142,60 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
 
+  def setZWidgets(self):
+    
+    if len(self.orderedAxes) <= 2:
+      return
+      
+    zAxis = self.orderedAxes[2]
+    
+    minZPlaneSize = None
+    minAliasedFrequency = maxAliasedFrequency = None
+    for spectrumView in self.spectrumViews:
+      zDim = spectrumView.spectrum.axisCodes.index(zAxis.code)
+      
+      minFrequency = spectrumView.spectrum.minAliasedFrequencies[zDim]
+      if minFrequency is not None:
+        if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
+          minAliasedFrequency = minFrequency
+          
+      maxFrequency = spectrumView.spectrum.maxAliasedFrequencies[zDim]
+      if maxFrequency is not None:
+        if maxAliasedFrequency is None or maxFrequency < maxAliasedFrequency:
+          maxAliasedFrequency = maxFrequency
+          
+      zPlaneSize = spectrumView.zPlaneSize()
+      if zPlaneSize is not None:
+        if minZPlaneSize is None or zPlaneSize < minZPlaneSize:
+          minZPlaneSize = zPlaneSize
+          
+    if minZPlaneSize is None:
+      minZPlaneSize = 1.0 # arbitrary
+      
+    self.planeToolbar.planeLabel.setSingleStep(minZPlaneSize)
+    
+    if minAliasedFrequency is not None:
+      self.planeToolbar.planeLabel.setMinimum(minAliasedFrequency)
+      
+    if maxAliasedFrequency is not None:
+      self.planeToolbar.planeLabel.setMaximum(maxAliasedFrequency)
 
+    self.planeToolbar.planeLabel.setValue(zAxis.position)
+    
   def changeZPlane(self, planeCount=None, position=None):
 
     zAxis = self.orderedAxes[2]
-    smallest = None
-    minima = []
-    maxima = []
-    #take smallest inter-plane distance
-    for spectrumItem in self.spectrumViews:
-      index = spectrumItem.spectrum.axisCodes.index(zAxis.code)
-      minima.append(spectrumItem.spectrum.minAliasedFrequencies[index])
-      maxima.append(spectrumItem.spectrum.minAliasedFrequencies[index])
-      zPlaneSize = spectrumItem.zPlaneSize()
-      if zPlaneSize is not None:
-        if smallest is None or zPlaneSize < smallest:
-          smallest = zPlaneSize
-    if smallest is None:
-      smallest = 1.0 # arbitrary
+    planeSize = self.planeToolbar.planeLabel.singleStep()
+    position = zAxis.position
 
     if planeCount:
-      delta = smallest * planeCount
-      zAxis.position = zAxis.position+delta
-    elif position:
+      delta = planeSize * planeCount
+      zAxis.position = position + delta
+      self.planeToolbar.planeLabel.setValue(zAxis.position)
+    elif position is not None: # should always be the case
       # if min(minima) < position <= max(maxima):
-        zAxis.position = position
-        self.planeToolbar.planeLabel.setValue(zAxis.position)
+      zAxis.position = position
+      self.planeToolbar.planeLabel.setValue(zAxis.position)
       # else:
       #   print('position is outside spectrum bounds')
 

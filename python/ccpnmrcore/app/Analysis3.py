@@ -58,6 +58,8 @@ class Analysis3(AppBase):
       for apiStrip in apiSpectrumDisplay.orderedStrips:
         for apiStripSpectrumView in apiStrip.stripSpectrumViews:
           GuiStripDisplayNd._createdStripSpectrumView(project, apiStripSpectrumView)
+          for apiStripPeakListView in apiStripSpectrumView.stripPeakListViews:
+            GuiStripDisplayNd._createdStripPeakListView(project, apiStripPeakListView)
 
 
 if __name__ == '__main__':

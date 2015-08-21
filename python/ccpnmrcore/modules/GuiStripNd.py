@@ -52,6 +52,8 @@ class GuiStripNd(GuiStrip):
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
     ###self.peakLayerDict = {}  # peakList --> peakLayer
     self.peakListViewDict = {}  # peakList --> peakListView
+    
+    self.haveSetupZWidgets = False
 
     ###self.plotWidget.plotItem.setAcceptDrops(True)
     ###self.viewportWidget = QtOpenGL.QGLWidget()
@@ -143,6 +145,8 @@ class GuiStripNd(GuiStrip):
     return self.contextMenu
 
   def setZWidgets(self):
+
+    self.haveSetupZWidgets = True
     
     if len(self.orderedAxes) <= 2:
       return

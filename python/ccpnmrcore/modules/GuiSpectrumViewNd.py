@@ -407,7 +407,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       zTotalPointCount = spectrum.totalPointCounts[zDim]
       minAliasedFrequency = spectrum.minAliasedFrequencies[zDim]
       if minAliasedFrequency is None:
-        minAliasedFrequencyPoint = 0
+        minAliasedFrequency = 0
       maxAliasedFrequency = spectrum.maxAliasedFrequencies[zDim]
       if maxAliasedFrequency is None:
         maxAliasedFrequency = zTotalPointCount - 1

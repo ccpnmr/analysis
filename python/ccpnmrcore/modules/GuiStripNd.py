@@ -190,11 +190,10 @@ class GuiStripNd(GuiStrip):
 
     zAxis = self.orderedAxes[2]
     planeSize = self.planeToolbar.planeLabel.singleStep()
-    position = zAxis.position
 
     if planeCount:
       delta = planeSize * planeCount
-      zAxis.position = position + delta
+      zAxis.position += delta
       self.planeToolbar.planeLabel.setValue(zAxis.position)
     elif position is not None: # should always be the case
       # if min(minima) < position <= max(maxima):

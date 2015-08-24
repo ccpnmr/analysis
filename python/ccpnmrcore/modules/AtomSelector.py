@@ -36,6 +36,7 @@ from ccpncore.gui.Widget import Widget
 
 from ccpncore.util import Path
 
+from ccpnmrcore.gui.assignmentModuleLogic import getAxisCodeForPeakDimension, getIsotopeCodeForPeakDimension
 
 class AtomSelector(CcpnDock):
 
@@ -44,7 +45,7 @@ class AtomSelector(CcpnDock):
     self.orientation = 'vertical'
     self.moveLabel=False
     pickAndAssignWidget = Widget(self)#
-    pickAndAssignWidget.setMaximumSize(300,150)
+    pickAndAssignWidget.setMaximumSize(500, 150)
 
     headerLabel = Label(self, text='i-1')
     pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
@@ -89,42 +90,40 @@ class AtomSelector(CcpnDock):
 
     newNmrAtom = r.fetchNmrAtom(name=name)
     for peak in self.current.peaks:
-      if 'C' in atomType:
-        peak.assignDimension(axisCode='C', value=[newNmrAtom])
+      for dim in range(len(peak.dimensionNmrAtoms)):
+        isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
+        if newNmrAtom.apiResonance.isotopeCode == isotopeCode:
+          axisCode = getAxisCodeForPeakDimension(peak, dim)
+          self.assignPeakDimension(peak, dim, axisCode, newNmrAtom)
       else:
-        peak.assignDimension(axisCode=atomType, value=[newNmrAtom])
-
-    # for module in self.project.spectrumDisplays:
-    #   for strip in module.strips:
-    #     peakList = self.current.peaks[0].peakList
-    #
-    #     peakLayer = strip.peakLayerDict.get(peak.peakList)
-    #     print('peakLayer',peakLayer)
-    #     # strip.hidePeaks(peak.peakList)
-    #     # print(strip.showPeaks(peakList))
-    #     # peakLayer = strip.peakLayerDict.get(peak.peakList)
-    #     peakLayer.hide()
-    #     peakLayer.setVisible(false)
-    #     # peakLayer.setVisible(True)
-
+          pass
+    self.returnButtonToNormal()
 
 
   def returnButtonToNormal(self):
     if self.parent._appBase.preferences.general.colourScheme == 'dark':
-      self.setStyleSheet(open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'DarkStyleSheet.qss')).read())
+      styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'DarkStyleSheet.qss')).read()
       self.setStyleSheet('''DockLabel  {
                                         background-color: #BEC4F3;
                                         color: #122043;
                                         border: 1px solid #00092D;
-                                        }''')
+                                       }''')
+      for button in self.buttons:
+        button.setStyleSheet(styleSheet)
+      self.setStyleSheet(styleSheet)
+
     elif self.parent._appBase.preferences.general.colourScheme == 'light':
-      self.setStyleSheet(open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'LightStyleSheet.qss')).read())
+      styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'LightStyleSheet.qss')).read()
+      for button in self.buttons:
+        button.setStyleSheet(styleSheet)
+      self.setStyleSheet(styleSheet)
 
 
   def predictAssignments(self, peaks):
     experiments = []
     try:
       self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
+
     except IndexError:
       self.current.nmrResidue = self.project.nmrChains[0].newNmrResidue()
     values = [peak.height for peak in peaks]
@@ -145,6 +144,12 @@ class AtomSelector(CcpnDock):
 
 
 
+
+  def assignPeakDimension(self, peak, dim, axisCode, nmrAtom):
+    axisCode = getAxisCodeForPeakDimension(peak, dim)
+    peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
+    shiftList = peak.peakList.spectrum.chemicalShiftList
+    shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
 
 
 

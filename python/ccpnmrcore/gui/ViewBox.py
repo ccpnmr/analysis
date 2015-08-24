@@ -228,7 +228,6 @@ class ViewBox(pg.ViewBox):
       elif event.isFinish():
         endPosition = self.mapSceneToView(event.pos())
         self.selectionBox.hide()
-        self.current.peaks = []
         startPosition = self.mapSceneToView(event.buttonDownPos())
         xPositions = sorted(list([startPosition.x(), endPosition.x()]))
         yPositions = sorted(list([startPosition.y(), endPosition.y()]))
@@ -236,22 +235,26 @@ class ViewBox(pg.ViewBox):
           zPositions = self.current.strip.orderedAxes[2].region
         else:
           zPositions = None
+        selectedPeaks = []
         for spectrumView in self.current.strip.spectrumViews:
           for peakList in spectrumView.spectrum.peakLists:
             for peak in peakList.peaks:
               if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-               and yPositions[0] < float(peak.position[1]) <
-                  yPositions[1]):
+                and yPositions[0] < float(peak.position[1]) < yPositions[1]):
                 if zPositions is not None:
                   if zPositions[0] < float(peak.position[2]) < zPositions[1]:
-                    self.current.peaks.append(peak)
-                    # peak.isSelected(True)
+                    selectedPeaks.append(peak)
+                    peak.isSelected = True
+
                 else:
-                  self.current.peaks.append(peak)
+                  selectedPeaks.append(peak)
                   peak.isSelected = True
 
-        for peak in self.current.peaks:
-          peak.isSelected = True
+        print(selectedPeaks)
+        self.current.peaks = selectedPeaks
+        print(self.current.peaks)
+        # for peak in self.current.peaks:
+        #   peak.isSelected = True
         if hasattr(self.parent._appBase.mainWindow, 'atomSelector'):
             self.parent._appBase.mainWindow.atomSelector.predictAssignments(self.current.peaks)
 

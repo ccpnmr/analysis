@@ -258,10 +258,10 @@ class Peak(AbstractWrapperObject):
     apiPeak.setAssignments(resonances)
 
   def addAssignment(self, value:(NmrAtom,)):
-    """Add a peak assignment - a list of one NamrAtom or NmrAtom or pid for each dimension"""
+    """Add a peak assignment - a list of one NmrAtom or NmrAtom or pid for each dimension"""
 
     if len(value) != self._wrappedData.peakList.numDim:
-      raise ValueError("Length of assignmetn value %s does not match peak dimensionality %s "
+      raise ValueError("Length of assignment value %s does not match peak dimensionality %s "
       % (value, self._wrappedData.peakList.numDim))
 
     assignedNmrAtoms = list(self.assignedNmrAtoms)
@@ -269,7 +269,7 @@ class Peak(AbstractWrapperObject):
     self.assignedNmrAtoms = assignedNmrAtoms
 
   def assignDimension(self, axisCode, value):
-    """Assign dimension axisCode to value (NmrAtom, or Pid or sequence of eitehr, or None)
+    """Assign dimension axisCode to value (NmrAtom, or Pid or sequence of either, or None)
     NBNB TBD add integer axisCode? Should it be index or dim number?"""
 
     axisCodes = self._parent._parent.axisCodes
@@ -288,6 +288,7 @@ class Peak(AbstractWrapperObject):
       value = [value]
     dimensionNmrAtoms = list(self.dimensionNmrAtoms)
     dimensionNmrAtoms[index] = value
+    dimensionNmrAtoms[index]
     self.dimensionNmrAtoms = dimensionNmrAtoms
 
 

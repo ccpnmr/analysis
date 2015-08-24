@@ -160,7 +160,7 @@ def newSampleComponent(parent:Sample, name:str, labeling:str, role:str=None,
   obj = apiSample.newSampleComponent(name=name, labeling=labeling, role=role,
                                      concentration=concentration,
                                      concentrationError=concentrationError,
-                                     concentrationUnit=concentrationUnit,
+                                     concentrationUnit=concentrationUnit, details=comment,
                                      purity=purity)
   return parent._project._data2Obj.get(obj)
 

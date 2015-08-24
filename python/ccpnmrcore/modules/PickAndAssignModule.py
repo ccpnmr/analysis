@@ -35,7 +35,6 @@ class PickAndAssignModule(CcpnDock, Base):
 
     self.layout.addWidget(self.peakTable, 4, 0, 1, 4)
 
-    # print((parent.window()))
     parent.window().showAtomSelector()
 
   def restrictedPick(self):
@@ -48,8 +47,6 @@ class PickAndAssignModule(CcpnDock, Base):
         for spectrumView in module.strips[0].spectrumViews:
           selectedRegion = [['']*3, ['']*3]
 
-          # for i in range(len(module.axisCodes)):
-          #   selectedRegion.append([])
           for moduleAxisCode in module.axisCodes:
 
             if moduleAxisCode in axisCodes:
@@ -83,3 +80,5 @@ class PickAndAssignModule(CcpnDock, Base):
   def showDisplayPopup(self):
     popup = SelectDisplaysAndSpectraPopup(self, project=self.project, dim=2)
     popup.show()
+
+

@@ -13,8 +13,12 @@ for peak in hsqcPeakList.peaks:
   a2 = r.newNmrAtom(name='H')
   atoms = [[a2], [a]]
   # peak.dimensionNmrAtoms = atoms
-  peak.assignDimension(axisCode='Nh', value=[r.fetchNmrAtom(name='N')])
-  peak.assignDimension(axisCode='Hn', value=[r.fetchNmrAtom(name='H')])
+  peak.assignDimension(axisCode='Nh', value=a)
+  peak.assignDimension(axisCode='Hn', value=a2)
+  dim1 = peak.peakList.spectrum.axisCodes.index('Nh')
+  dim2 = peak.peakList.spectrum.axisCodes.index('Hn')
+  shiftList.newChemicalShift(value=peak.position[dim1], nmrAtom=a)
+  shiftList.newChemicalShift(value=peak.position[dim2], nmrAtom=a2)
 
 
 

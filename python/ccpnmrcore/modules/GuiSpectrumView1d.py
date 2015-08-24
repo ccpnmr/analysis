@@ -23,17 +23,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 import numpy
 
-# from ccpn.lib.wrapper import Spectrum as LibSpectrum  # TEMP (should be direct function call on spectrum object some day)
-
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
-
-from ccpncore.gui.ToolButton import ToolButton
 
 from ccpncore.util.Colour import spectrumColours
 
 class GuiSpectrumView1d(GuiSpectrumView):
-
-  # sigClicked = QtCore.Signal()
 
 
   #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
@@ -62,7 +56,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
       else:
         self.spectrum.sliceColour = list(spectrumColours.keys())[(len(self.strip.spectrumViews) % 12)-1]
 
-    self.plot  = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
+    self.plot = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
     self.plot.curve.setClickable(True)
     self.plot.sigClicked.connect(self.clicked)
     for peakList in self.spectrum.peakLists:

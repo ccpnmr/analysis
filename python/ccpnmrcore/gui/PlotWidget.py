@@ -25,7 +25,11 @@ __author__ = 'simon'
 
 from PyQt4 import QtGui, QtOpenGL
 
+from ccpn import Spectrum
+
 from ccpncore.gui.Base import Base
+from ccpncore.util.Pid import Pid
+
 from ccpnmrcore.gui import ViewBox
 from ccpnmrcore.DropBase import DropBase
 
@@ -41,7 +45,6 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     Base.__init__(self, **kw)
     DropBase.__init__(self, appBase)
     # DropBase.__init__(self, appBase, dropCallback)
-
     self.setInteractive(True)
     self.plotItem.setAcceptHoverEvents(True)
 
@@ -58,6 +61,9 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     # # self.plotItem.axes['top']['item'].hide()
     # self.plotItem.axes['bottom']['item'].show()
     # self.plotItem.axes['right']['item'].show()
+
+  def processSpectrum(self, spectrum:(Spectrum, Pid)):
+    self.parent().guiSpectrumDisplay.displaySpectrum(spectrum)
 
 
 

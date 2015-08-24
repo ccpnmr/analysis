@@ -23,11 +23,28 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
+from PyQt4 import QtCore, QtGui
+
+
+from ccpn import Spectrum
+
+from ccpncore.util.Pid import Pid
+
 from ccpncore.gui.Icon import Icon
 
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpnmrcore.modules.GuiStrip1d import GuiStrip1d
 
 from ccpncore.gui.VerticalLabel import VerticalLabel
+from ccpn import Project
+
+from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
+from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
+from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
+from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
+
 
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
@@ -40,6 +57,11 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     self.fillToolBar()
     self.addSpinSystemSideLabel()
     self.setAcceptDrops(True)
+    self.spectrumActionDict = {}
+    self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
+    # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
+    # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
+    self.inactivePeakItems = set() # contains unused peakItems
 
   # def addSpectrum(self, spectrum):
   #
@@ -73,19 +95,19 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     spectrumUtilToolBar = self.spectrumUtilToolBar
     
     autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self.zoomYAll)
-    autoScaleActionIcon = Icon('icons/zoom-fit-best')
+    autoScaleActionIcon = Icon('iconsNew/zoom-best-fit')
     # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
     autoScaleAction.setIcon(autoScaleActionIcon)
     # autoScaleAction.setText("AutoScale")
     fullZoomAction = spectrumUtilToolBar.addAction("Full", self.zoomXAll)
-    fullZoomIcon = Icon('icons/zoom-full')
+    fullZoomIcon = Icon('iconsNew/zoom-full')
     fullZoomAction.setIcon(fullZoomIcon)
     storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
-    storeZoomIcon = Icon('icons/zoom-store')
+    storeZoomIcon = Icon('iconsNew/zoom-store')
     storeZoomAction.setIcon(storeZoomIcon)
     storeZoomAction.setToolTip('Store Zoom')
     restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
-    restoreZoomIcon = Icon('icons/zoom-restore')
+    restoreZoomIcon = Icon('iconsNew/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
 
@@ -118,6 +140,10 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
         self.addPlaneToolbar(item, widget, newPane)
       """
 
+  def processSpectrum(self, spectrum:(Spectrum, Pid)):
+    print('processing Spectrum')
+    print(self.parent())
+
   def addSpinSystemSideLabel(self):
     dock = self.dock
     spinSystemSideLabel = VerticalLabel(dock, text=None)
@@ -125,3 +151,133 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     dock.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
     # print(spinSystemSideLabel.paintEvent())
     spinSystemSideLabel.setFixedWidth(30)
+
+  def _setActionIconColour(self, apiDataSource):
+    action = self.spectrumActionDict.get(apiDataSource)
+    if action:
+      pix=QtGui.QPixmap(QtCore.QSize(60, 10))
+      if apiDataSource.numDim < 2: # irrelevant here, but need if this code moves to GuiSpectrumDisplay
+        pix.fill(QtGui.QColor(apiDataSource.sliceColour))
+      else:
+        pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
+      action.setIcon(QtGui.QIcon(pix))
+
+def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+  """Set up SpectrumDisplay when new SpectrumView is created - for notifiers"""
+
+  getDataObj = project._data2Obj.get
+  spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+  if not isinstance(spectrumDisplay, GuiStripDisplay1d):
+    return
+
+  apiDataSource = apiSpectrumView.dataSource
+  action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be None
+  if not action:
+    # add toolbar action (button)
+    if len(apiDataSource.name) <= 12:
+      spectrumName = apiDataSource.name
+    elif len(apiDataSource.name) > 12:
+      spectrumName = apiDataSource.name[:12]+'.....'
+    action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+    action.setCheckable(True)
+    action.setChecked(True)
+    action.setToolTip(apiDataSource.name)
+    widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
+    widget.setIconSize(QtCore.QSize(120, 10))
+    widget.setFixedSize(100, 30)
+    widget.spectrumView = apiSpectrumView
+    spectrumDisplay.spectrumActionDict[apiDataSource] = action
+    spectrumDisplay._setActionIconColour(apiDataSource)
+
+  return action
+
+def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
+  """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
+
+  apiSpectrumView = apiStripSpectrumView.spectrumView
+  getDataObj = project._data2Obj.get
+  spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+  if not isinstance(spectrumDisplay, GuiStripDisplay1d):
+    return
+
+  apiDataSource = apiSpectrumView.dataSource
+  action = _createdSpectrumView(project, apiSpectrumView) # _createdStripSpectrumView is called before _createdSpectrumView so need this duplicate call here
+  spectrumView = getDataObj(apiStripSpectrumView)
+  action.toggled.connect(spectrumView.plot.setVisible)
+
+  ##strip = spectrumView.strip
+  ##for apiPeakList in apiDataSource.sortedPeakLists():
+  ##  strip.showPeaks(getDataObj(apiPeakList))
+
+def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+  """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
+  spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]
+  if not isinstance(spectrumDisplay, GuiStripDisplay1d):
+    return
+
+  apiDataSource = apiSpectrumView.dataSource
+
+  # remove toolbar action (button)
+  action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be not None
+  if action:
+    spectrumDisplay.spectrumToolBar.removeAction(action)
+    del spectrumDisplay.spectrumActionDict[apiDataSource]
+
+Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
+Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
+Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
+
+def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
+  apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
+  getDataObj = project._data2Obj.get
+  peakListView = getDataObj(apiStripPeakListView)
+  spectrumView = peakListView.spectrumView
+  action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
+  if action:
+    action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
+
+  strip = spectrumView.strip
+  for apiPeakList in apiDataSource.sortedPeakLists():
+    strip.showPeaks(getDataObj(apiPeakList))
+
+Project._setupNotifier(_createdStripPeakListView, ApiStripPeakListView, 'postInit')
+
+def _setActionIconColour(project:Project, apiDataSource:ApiDataSource):
+
+  # TBD: the below might not be the best way to get hold of the spectrumDisplays
+  for task in project.tasks:
+    if task.status == 'active':
+      for spectrumDisplay in task.spectrumDisplays:
+        if isinstance(spectrumDisplay, GuiStripDisplay1d):
+          spectrumDisplay._setActionIconColour(apiDataSource)
+
+for apiFuncName in ('setPositiveContourColour', 'setSliceColour'):
+  Project._setupNotifier(_setActionIconColour, ApiDataSource, apiFuncName)
+
+def _deletedPeak(project:Project, apiPeak:ApiPeak):
+
+  # TBD: the below might not be the best way to get hold of the spectrumDisplays
+  for task in project.tasks:
+    if task.status == 'active':
+      for spectrumDisplay in task.spectrumDisplays:
+        if isinstance(spectrumDisplay, GuiStripDisplay1d):
+          spectrumDisplay._deletedPeak(apiPeak)
+
+Project._setupNotifier(_deletedPeak, ApiPeak, 'delete')
+
+def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+
+  for apiStrip in apiSpectrumView.strips:
+    strip = project._data2Obj[apiStrip]
+    if isinstance(strip, GuiStrip1d):
+      strip.setZWidgets()
+
+Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiSpectrumView, 'dimensionOrdering')
+
+def _changedAxisOrdering(project:Project, apiStrip:ApiStrip):
+
+  strip = project._data2Obj[apiStrip]
+  if isinstance(strip, GuiStrip1d):
+    strip.setZWidgets()
+
+Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiStrip, 'axisOrder')

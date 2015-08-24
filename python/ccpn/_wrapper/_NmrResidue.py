@@ -130,7 +130,7 @@ class NmrResidue(AbstractWrapperObject):
 
   @property
   def probableResidues(self) -> tuple:
-    """tuple of (residue, probability) tuples for probable residue asignments"""
+    """tuple of (residue, probability) tuples for probable residue assignments"""
     getObj = self._project._data2Obj.get
     ll = [(x.weight, x.possibility) for x in self._wrappedData.residueProbs]
     totalWeight = sum(tt[0] for tt in ll)

@@ -288,7 +288,6 @@ class Peak(AbstractWrapperObject):
       value = [value]
     dimensionNmrAtoms = list(self.dimensionNmrAtoms)
     dimensionNmrAtoms[index] = value
-    dimensionNmrAtoms[index]
     self.dimensionNmrAtoms = dimensionNmrAtoms
 
 

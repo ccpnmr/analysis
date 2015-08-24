@@ -422,9 +422,11 @@ def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeak
   getDataObj = project._data2Obj.get
   peakListView = getDataObj(apiStripPeakListView)
   spectrumView = peakListView.spectrumView
-  action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
-  if action:
-    action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
+  spectrumDisplay = spectrumView.strip.spectrumDisplay
+  if isinstance(spectrumDisplay, GuiStripDisplayNd):
+    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    if action:
+      action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
  
   strip = spectrumView.strip
   for apiPeakList in apiDataSource.sortedPeakLists():

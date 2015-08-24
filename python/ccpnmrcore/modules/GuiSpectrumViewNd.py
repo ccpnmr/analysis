@@ -386,40 +386,48 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     for level in levels:
       displayLists.append(GL.glGenLists(1))
 
+  def _getSpectrumViewParams(self, axisDim):
+    
+    apiStripSpectrumView = self.apiStripSpectrumView
+    dataDims = apiStripSpectrumView.spectrumView.orderedDataDims
+    dim = dataDims[axisDim].dim - 1
+    axis = self.strip.apiStrip.orderedAxes[axisDim]
+    position = axis.position
+    width = axis.width
+    spectrum = self.spectrum
+    totalPointCount = spectrum.totalPointCounts[dim]
+    minAliasedFrequency = spectrum.minAliasedFrequencies[dim]
+    if minAliasedFrequency is None:
+      minAliasedFrequency = spectrum.getDimValueFromPoint(dim, 0.0)
+    maxAliasedFrequency = spectrum.maxAliasedFrequencies[dim]
+    if maxAliasedFrequency is None:
+      maxAliasedFrequency = spectrum.getDimValueFromPoint(dim, totalPointCount - 1.0)
+      
+    return position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
+    
   #def getPlaneData(self, guiStrip):
   def getPlaneData(self):
     
-    strip = self.strip
-    spectrum = self.spectrum
-    dimensionCount = spectrum.dimensionCount
     apiStripSpectrumView = self.apiStripSpectrumView
-
     dataDims = apiStripSpectrumView.spectrumView.orderedDataDims
     xDim = dataDims[0].dim - 1  # -1 because dataDim.dim starts at 1
     yDim = dataDims[1].dim - 1
-    if dimensionCount == 2: # TBD
+    spectrum = self.spectrum
+    dimensionCount = spectrum.dimensionCount
+    
+    if dimensionCount == 2:
       planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
       position = [0, 0]
       yield position, planeData
-    elif dimensionCount == 3: # TBD
-      apiStrip = strip.apiStrip
+    elif dimensionCount == 3:
       zDim = dataDims[2].dim - 1
-      zAxis = apiStrip.orderedAxes[2]
-      position = zAxis.position
-      zTotalPointCount = spectrum.totalPointCounts[zDim]
-      minAliasedFrequency = spectrum.minAliasedFrequencies[zDim]
-      if minAliasedFrequency is None:
-        minAliasedFrequency = spectrum.getDimValueFromPoint(zDim, 0.0)
-      maxAliasedFrequency = spectrum.maxAliasedFrequencies[zDim]
-      if maxAliasedFrequency is None:
-        maxAliasedFrequency = spectrum.getDimValueFromPoint(zDim, zTotalPointCount - 1.0)
+      zPosition, width, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency = self._getSpectrumViewParams(2)
         
-      if not (minAliasedFrequency <= position <= maxAliasedFrequency):
+      if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
         return
         
-      width = zAxis.width
-      zregionValue = (position+0.5*width, position-0.5*width) # Note + and - (axis backwards)
-      zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zregionValue)
+      zRegionValue = (zPosition+0.5*width, zPosition-0.5*width) # Note + and - (axis backwards)
+      zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
       zPoint0, zPoint1 = (int(numpy.round(zPoint0)), int(numpy.round(zPoint1)))
       
       if (zPoint1 - zPoint0) >= zTotalPointCount:
@@ -430,6 +438,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         zPoint1 %= zTotalPointCount
         if zPoint1 < zPoint0:
           zPoint1 += zTotalPointCount
+          
       zPointOffset = spectrum.pointOffsets[zDim]
       zPointCount = spectrum.pointCounts[zDim]
             
@@ -442,6 +451,65 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
           yield position, planeData
 
+    elif dimensionCount == 4:
+      zDim = dataDims[2].dim - 1
+      zPosition, width, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency = self._getSpectrumViewParams(2)
+        
+      if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
+        return
+        
+      zRegionValue = (zPosition+0.5*width, zPosition-0.5*width) # Note + and - (axis backwards)
+      zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
+      zPoint0, zPoint1 = (int(numpy.round(zPoint0)), int(numpy.round(zPoint1)))
+      
+      if (zPoint1 - zPoint0) >= zTotalPointCount:
+        zPoint0 = 0
+        zPoint1 = zTotalPointCount
+      else:
+        zPoint0 %= zTotalPointCount
+        zPoint1 %= zTotalPointCount
+        if zPoint1 < zPoint0:
+          zPoint1 += zTotalPointCount
+          
+      zPointOffset = spectrum.pointOffsets[zDim]
+      zPointCount = spectrum.pointCounts[zDim]
+            
+      wDim = dataDims[3].dim - 1
+      wPosition, width, wTotalPointCount, minAliasedFrequency, maxAliasedFrequency = self._getSpectrumViewParams(3)
+        
+      if not (minAliasedFrequency <= wPosition <= maxAliasedFrequency):
+        return
+        
+      wRegionValue = (wPosition+0.5*width, wPosition-0.5*width) # Note + and - (axis backwards)
+      wPoint0, wPoint1 = spectrum.getDimPointFromValue(wDim, wRegionValue)
+      wPoint0, wPoint1 = (int(numpy.round(wPoint0)), int(numpy.round(wPoint1)))
+      
+      if (wPoint1 - wPoint0) >= wTotalPointCount:
+        wPoint0 = 0
+        wPoint1 = wTotalPointCount
+      else:
+        wPoint0 %= wTotalPointCount
+        wPoint1 %= wTotalPointCount
+        if wPoint1 < wPoint0:
+          wPoint1 += wTotalPointCount
+          
+      wPointOffset = spectrum.pointOffsets[wDim]
+      wPointCount = spectrum.pointCounts[wDim]
+            
+      position = dimensionCount * [0]
+      for z in range(zPoint0, zPoint1):
+        zPosition = z % zTotalPointCount
+        zPosition -= zPointOffset
+        if 0 <= z < zPointCount:
+          position[zDim] = z
+          for w in range(wPoint0, wPoint1):
+            wPosition = w % wTotalPointCount
+            wPosition -= wPointOffset
+            if 0 <= w < wPointCount:
+              position[wDim] = w
+              planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
+              yield position, planeData
+          
   def addContoursToDisplayList(self, displayList, contourData, level):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
     
@@ -490,7 +558,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if maxAliasedFrequency is not None:
       maxAliasedFrequencyPoint = self.spectrum.getDimPointFromValue(dim, maxAliasedFrequency)
     else:
-      maxAliasedFrequency = totalPointCount - 1
+      maxAliasedFrequencyPoint = totalPointCount - 1
     clipPoint0 = int(math.floor(max(firstPoint, minAliasedFrequencyPoint)))
     clipPoint1 = int(math.ceil(min(lastPoint, maxAliasedFrequencyPoint)))
 

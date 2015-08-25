@@ -30,9 +30,13 @@ import math
 import numpy
 import pyqtgraph as pg
 
+from ccpn import Project
+
 from ccpn.lib.wrapper import Spectrum as LibSpectrum
 
 from ccpncore.memops import Notifiers
+
+from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 
 from ccpncore.gui.Button import Button
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
@@ -146,6 +150,8 @@ class GuiStripNd(GuiStrip):
 
   def setZWidgets(self):
 
+    haveSetupZWidgets = self.haveSetupZWidgets
+    
     self.haveSetupZWidgets = True
     
     if len(self.orderedAxes) <= 2:
@@ -186,8 +192,12 @@ class GuiStripNd(GuiStrip):
 
     self.planeToolbar.planeLabel.setValue(zAxis.position)
     
+    if not haveSetupZWidgets:
+        # have to set this up here, otherwise the callback is called too soon and messes up the position
+        self.planeToolbar.planeLabel.valueChanged.connect(self.setZPlanePosition)
+      
   def changeZPlane(self, planeCount=None, position=None):
-
+    
     zAxis = self.orderedAxes[2]
     planeSize = self.planeToolbar.planeLabel.singleStep()
 
@@ -409,5 +419,18 @@ class GuiStripNd(GuiStrip):
 
 
     return traceMarker
+
+"""
+def _changedAxisPosition(project:Project, apiAxis:ApiAxis):
+
+  axis = project._data2Obj[apiAxis]
+  spectrumDisplay = axis.spectrumDisplay
+  n = spectrumDisplay.orderedAxes.index(axis)
+  if n == 2:
+    for strip in axis.strips:
+      strip.planeToolbar.planeLabel.setValue(axis.position)
+
+Project._setupNotifier(_changedAxisPosition, ApiAxis, 'setPosition')
+"""
 
          

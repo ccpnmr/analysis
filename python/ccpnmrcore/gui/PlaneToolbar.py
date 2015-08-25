@@ -38,8 +38,11 @@ class PlaneToolbar(ToolBar):
         self.prevPlaneButton.setFixedHeight(19)
         self.planeLabel = DoubleSpinbox(self, showButtons=False)
         self.planeLabel.setFixedHeight(19)
-        self.planeLabel.setValue(parent.positions[2])
-        self.planeLabel.valueChanged.connect(callbacks[2])
+        # below shouldn't be needed, this is set elsewhere
+        ###self.planeLabel.setValue(parent.positions[2])
+        # below causes a problem because it calls the callback for unknown reasons
+        # right after the object is constructed, and that messes up the position shown
+        ###self.planeLabel.valueChanged.connect(callbacks[2])
         self.nextPlaneButton = Button(self,'>', callback=callbacks[1])
         self.nextPlaneButton.setFixedWidth(19)
         self.nextPlaneButton.setFixedHeight(19)

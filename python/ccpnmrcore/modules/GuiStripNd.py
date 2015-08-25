@@ -162,17 +162,23 @@ class GuiStripNd(GuiStrip):
     minZPlaneSize = None
     minAliasedFrequency = maxAliasedFrequency = None
     for spectrumView in self.spectrumViews:
-      zDim = spectrumView.spectrum.axisCodes.index(zAxis.code)
+      spectrum = spectrumView.spectrum
+      zDim = spectrum.axisCodes.index(zAxis.code)
       
-      minFrequency = spectrumView.spectrum.minAliasedFrequencies[zDim]
-      if minFrequency is not None:
-        if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
-          minAliasedFrequency = minFrequency
+      minFrequency = spectrum.minAliasedFrequencies[zDim]
+      # TBD: the below does not work for pseudo-ND data sets
+      if minFrequency is None:
+        totalPointCount = spectrum.totalPointCounts[zDim]
+        minFrequency = spectrum.getDimValueFromPoint(zDim, totalPointCount-1.0)
+      if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
+        minAliasedFrequency = minFrequency
           
       maxFrequency = spectrumView.spectrum.maxAliasedFrequencies[zDim]
-      if maxFrequency is not None:
-        if maxAliasedFrequency is None or maxFrequency < maxAliasedFrequency:
-          maxAliasedFrequency = maxFrequency
+      # TBD: the below does not work for pseudo-ND data sets
+      if maxFrequency is None:
+        maxFrequency = spectrum.getDimValueFromPoint(zDim, 0.0)
+      if maxAliasedFrequency is None or maxFrequency < maxAliasedFrequency:
+        maxAliasedFrequency = maxFrequency
           
       zPlaneSize = spectrumView.zPlaneSize()
       if zPlaneSize is not None:

@@ -398,10 +398,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     totalPointCount = spectrum.totalPointCounts[dim]
     minAliasedFrequency = spectrum.minAliasedFrequencies[dim]
     if minAliasedFrequency is None:
-      minAliasedFrequency = spectrum.getDimValueFromPoint(dim, 0.0)
+      minAliasedFrequency = spectrum.getDimValueFromPoint(dim, totalPointCount - 1.0)
     maxAliasedFrequency = spectrum.maxAliasedFrequencies[dim]
     if maxAliasedFrequency is None:
-      maxAliasedFrequency = spectrum.getDimValueFromPoint(dim, totalPointCount - 1.0)
+      maxAliasedFrequency = spectrum.getDimValueFromPoint(dim, 0.0)
       
     return position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
     
@@ -414,6 +414,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     yDim = dataDims[1].dim - 1
     spectrum = self.spectrum
     dimensionCount = spectrum.dimensionCount
+    
+    epsilon = 0.0001
     
     if dimensionCount == 2:
       planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
@@ -428,7 +430,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         
       zRegionValue = (zPosition+0.5*width, zPosition-0.5*width) # Note + and - (axis backwards)
       zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
-      zPoint0, zPoint1 = (int(numpy.round(zPoint0)), int(numpy.round(zPoint1)))
+      # the -epsilon is to avoid lower point rounding up and upper point rounding down due to numerical error
+      zPoint0, zPoint1 = (int(numpy.round(zPoint0-epsilon)), int(numpy.round(zPoint1-epsilon)))
       
       if (zPoint1 - zPoint0) >= zTotalPointCount:
         zPoint0 = 0
@@ -446,8 +449,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       for z in range(zPoint0, zPoint1):
         zPosition = z % zTotalPointCount
         zPosition -= zPointOffset
-        if 0 <= z < zPointCount:
-          position[zDim] = z
+        if 0 <= zPosition < zPointCount:
+          position[zDim] = zPosition
           planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
           yield position, planeData
 

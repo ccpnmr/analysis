@@ -28,6 +28,7 @@ from PyQt4 import QtGui, QtCore
 
 import math
 import numpy
+from functools import partial
 import pyqtgraph as pg
 
 from ccpn import Project
@@ -149,92 +150,87 @@ class GuiStripNd(GuiStrip):
     return self.contextMenu
 
   def setZWidgets(self):
+          
+    for n, zAxis in enumerate(self.orderedAxes[2:]):   
+      minZPlaneSize = None
+      minAliasedFrequency = maxAliasedFrequency = None
+      for spectrumView in self.spectrumViews:
+        spectrum = spectrumView.spectrum
+        zDim = spectrum.axisCodes.index(zAxis.code)
+      
+        minFrequency = spectrum.minAliasedFrequencies[zDim]
+        # TBD: the below does not work for pseudo-ND data sets
+        if minFrequency is None:
+          totalPointCount = spectrum.totalPointCounts[zDim]
+          minFrequency = spectrum.getDimValueFromPoint(zDim, totalPointCount-1.0)
+        if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
+          minAliasedFrequency = minFrequency
+          
+        maxFrequency = spectrumView.spectrum.maxAliasedFrequencies[zDim]
+        # TBD: the below does not work for pseudo-ND data sets
+        if maxFrequency is None:
+          maxFrequency = spectrum.getDimValueFromPoint(zDim, 0.0)
+        if maxAliasedFrequency is None or maxFrequency < maxAliasedFrequency:
+          maxAliasedFrequency = maxFrequency
+          
+        zPlaneSize = spectrumView.zPlaneSize()
+        if zPlaneSize is not None:
+          if minZPlaneSize is None or zPlaneSize < minZPlaneSize:
+            minZPlaneSize = zPlaneSize
+          
+      if minZPlaneSize is None:
+        minZPlaneSize = 1.0 # arbitrary
+      
+      planeLabel = self.planeToolbar.planeLabels[n]
+      
+      planeLabel.setSingleStep(minZPlaneSize)
+    
+      if minAliasedFrequency is not None:
+        planeLabel.setMinimum(minAliasedFrequency)
+      
+      if maxAliasedFrequency is not None:
+        planeLabel.setMaximum(maxAliasedFrequency)
 
-    haveSetupZWidgets = self.haveSetupZWidgets
+      planeLabel.setValue(zAxis.position)
+    
+      if not self.haveSetupZWidgets:
+        # have to set this up here, otherwise the callback is called too soon and messes up the position
+        planeLabel.valueChanged.connect(partial(self.setZPlanePosition, n))
     
     self.haveSetupZWidgets = True
-    
-    if len(self.orderedAxes) <= 2:
-      return
       
-    zAxis = self.orderedAxes[2]
+  def changeZPlane(self, n=0, planeCount=None, position=None):
     
-    minZPlaneSize = None
-    minAliasedFrequency = maxAliasedFrequency = None
-    for spectrumView in self.spectrumViews:
-      spectrum = spectrumView.spectrum
-      zDim = spectrum.axisCodes.index(zAxis.code)
-      
-      minFrequency = spectrum.minAliasedFrequencies[zDim]
-      # TBD: the below does not work for pseudo-ND data sets
-      if minFrequency is None:
-        totalPointCount = spectrum.totalPointCounts[zDim]
-        minFrequency = spectrum.getDimValueFromPoint(zDim, totalPointCount-1.0)
-      if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
-        minAliasedFrequency = minFrequency
-          
-      maxFrequency = spectrumView.spectrum.maxAliasedFrequencies[zDim]
-      # TBD: the below does not work for pseudo-ND data sets
-      if maxFrequency is None:
-        maxFrequency = spectrum.getDimValueFromPoint(zDim, 0.0)
-      if maxAliasedFrequency is None or maxFrequency < maxAliasedFrequency:
-        maxAliasedFrequency = maxFrequency
-          
-      zPlaneSize = spectrumView.zPlaneSize()
-      if zPlaneSize is not None:
-        if minZPlaneSize is None or zPlaneSize < minZPlaneSize:
-          minZPlaneSize = zPlaneSize
-          
-    if minZPlaneSize is None:
-      minZPlaneSize = 1.0 # arbitrary
-      
-    self.planeToolbar.planeLabel.setSingleStep(minZPlaneSize)
-    
-    if minAliasedFrequency is not None:
-      self.planeToolbar.planeLabel.setMinimum(minAliasedFrequency)
-      
-    if maxAliasedFrequency is not None:
-      self.planeToolbar.planeLabel.setMaximum(maxAliasedFrequency)
-
-    self.planeToolbar.planeLabel.setValue(zAxis.position)
-    
-    if not haveSetupZWidgets:
-        # have to set this up here, otherwise the callback is called too soon and messes up the position
-        self.planeToolbar.planeLabel.valueChanged.connect(self.setZPlanePosition)
-      
-  def changeZPlane(self, planeCount=None, position=None):
-    
-    zAxis = self.orderedAxes[2]
-    planeSize = self.planeToolbar.planeLabel.singleStep()
+    zAxis = self.orderedAxes[n+2]
+    planeLabel = self.planeToolbar.planeLabels[n]
+    planeSize = planeLabel.singleStep()
 
     if planeCount:
       delta = planeSize * planeCount
       zAxis.position += delta
-      self.planeToolbar.planeLabel.setValue(zAxis.position)
+      planeLabel.setValue(zAxis.position)
     elif position is not None: # should always be the case
       # if min(minima) < position <= max(maxima):
       zAxis.position = position
-      self.planeToolbar.planeLabel.setValue(zAxis.position)
+      planeLabel.setValue(zAxis.position)
       # else:
       #   print('position is outside spectrum bounds')
 
-
-  def changePlaneThickness(self, value):
-    zAxis = self.orderedAxes[2]
+  def changePlaneCount(self, n=0, value=1):
+    zAxis = self.orderedAxes[n+2]
     zAxis.width*=value
 
-  def nextZPlane(self):
+  def nextZPlane(self, n=0):
 
-    self.changeZPlane(planeCount=-1) # -1 because ppm units are backwards
+    self.changeZPlane(n, planeCount=-1) # -1 because ppm units are backwards
 
-  def prevZPlane(self):
+  def prevZPlane(self, n=0):
 
-    self.changeZPlane(planeCount=1) # -1 because ppm units are backwards
+    self.changeZPlane(n, planeCount=1) # -1 because ppm units are backwards
 
   def addPlaneToolbar(self):
 
-
-    callbacks = [self.prevZPlane, self.nextZPlane, self.setZPlanePosition, self.setPlaneThickness]
+    callbacks = [self.prevZPlane, self.nextZPlane, self.setZPlanePosition, self.setPlaneCount]
 
     self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                      hAlign='center', vAlign='c', callbacks=callbacks)
@@ -242,14 +238,16 @@ class GuiStripNd(GuiStrip):
   def blankCallback(self):
     pass
 
-  def setZPlanePosition(self, value):
-    if self.planeToolbar.planeLabel.minimum() <= self.planeToolbar.planeLabel.value() <= self.planeToolbar.planeLabel.maximum():
-      self.changeZPlane(position=value)
+  def setZPlanePosition(self, n, value):
+    planeLabel = self.planeToolbar.planeLabels[n]
+    if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
+      self.changeZPlane(n, position=value)
 
-  def setPlaneThickness(self, value):
+  def setPlaneCount(self, n=0, value=1):
 
-    self.changePlaneThickness((value/self.planeToolbar.planeThicknessValue))
-    self.planeToolbar.planeThicknessValue = value
+    planeCount = self.planeToolbar.planeCounts[n]
+    self.changePlaneCount(value/planeCount.value())
+    self.planeToolbar.planeCount.setValue(value)
 
   def _findPeakListView(self, peakList):
     

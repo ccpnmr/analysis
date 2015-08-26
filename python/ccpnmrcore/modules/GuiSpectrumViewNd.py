@@ -463,7 +463,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         
       zRegionValue = (zPosition+0.5*width, zPosition-0.5*width) # Note + and - (axis backwards)
       zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
-      zPoint0, zPoint1 = (int(numpy.round(zPoint0)), int(numpy.round(zPoint1)))
+      # the -epsilon is to avoid lower point rounding up and upper point rounding down due to numerical error
+      zPoint0, zPoint1 = (int(numpy.round(zPoint0-epsilon)), int(numpy.round(zPoint1-epsilon)))
       
       if (zPoint1 - zPoint0) >= zTotalPointCount:
         zPoint0 = 0
@@ -485,7 +486,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         
       wRegionValue = (wPosition+0.5*width, wPosition-0.5*width) # Note + and - (axis backwards)
       wPoint0, wPoint1 = spectrum.getDimPointFromValue(wDim, wRegionValue)
-      wPoint0, wPoint1 = (int(numpy.round(wPoint0)), int(numpy.round(wPoint1)))
+      # the -epsilon is to avoid lower point rounding up and upper point rounding down due to numerical error
+      wPoint0, wPoint1 = (int(numpy.round(wPoint0-epsilon)), int(numpy.round(wPoint1-epsilon)))
       
       if (wPoint1 - wPoint0) >= wTotalPointCount:
         wPoint0 = 0
@@ -503,13 +505,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       for z in range(zPoint0, zPoint1):
         zPosition = z % zTotalPointCount
         zPosition -= zPointOffset
-        if 0 <= z < zPointCount:
-          position[zDim] = z
+        if 0 <= zPosition < zPointCount:
+          position[zDim] = zPosition
           for w in range(wPoint0, wPoint1):
             wPosition = w % wTotalPointCount
             wPosition -= wPointOffset
-            if 0 <= w < wPointCount:
-              position[wDim] = w
+            if 0 <= wPosition < wPointCount:
+              position[wDim] = wPosition
               planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
               yield position, planeData
           

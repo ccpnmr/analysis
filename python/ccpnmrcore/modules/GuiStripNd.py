@@ -208,11 +208,11 @@ class GuiStripNd(GuiStrip):
     if planeCount:
       delta = planeSize * planeCount
       zAxis.position += delta
-      planeLabel.setValue(zAxis.position)
+      #planeLabel.setValue(zAxis.position)
     elif position is not None: # should always be the case
       # if min(minima) < position <= max(maxima):
       zAxis.position = position
-      planeLabel.setValue(zAxis.position)
+      #planeLabel.setValue(zAxis.position)
       # else:
       #   print('position is outside spectrum bounds')
 
@@ -424,17 +424,5 @@ class GuiStripNd(GuiStrip):
 
     return traceMarker
 
-"""
-def _changedAxisPosition(project:Project, apiAxis:ApiAxis):
-
-  axis = project._data2Obj[apiAxis]
-  spectrumDisplay = axis.spectrumDisplay
-  n = spectrumDisplay.orderedAxes.index(axis)
-  if n == 2:
-    for strip in axis.strips:
-      strip.planeToolbar.planeLabel.setValue(axis.position)
-
-Project._setupNotifier(_changedAxisPosition, ApiAxis, 'setPosition')
-"""
 
          

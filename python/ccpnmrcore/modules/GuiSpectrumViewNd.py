@@ -391,7 +391,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     apiStripSpectrumView = self.apiStripSpectrumView
     dataDims = apiStripSpectrumView.spectrumView.orderedDataDims
     dim = dataDims[axisDim].dim - 1
-    axis = self.strip.apiStrip.orderedAxes[axisDim]
+    axis = self.strip.orderedAxes[axisDim]
     position = axis.position
     width = axis.width
     spectrum = self.spectrum

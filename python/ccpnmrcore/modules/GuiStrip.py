@@ -478,6 +478,13 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
             peakListView = strip.peakListViewDict[peakList]
             peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
             strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+          
+          from ccpnmrcore.modules.GuiStripNd import GuiStripNd
+          if isinstance(strip, GuiStripNd):
+            n = index - 2
+            if n >= 0:
+              strip.planeToolbar.planeLabels[n].setValue(position)
+          
       finally:
         strip.beingUpdated = False
         

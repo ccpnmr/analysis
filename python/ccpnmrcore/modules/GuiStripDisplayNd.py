@@ -273,7 +273,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       peakItemDict = self.activePeakItemDict[peakListView]
       peakItem = peakItemDict.get(apiPeak)
       if peakItem:
-        peakListView.strip.plotWidget.scene().removeItem(peakItem)
+        peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
         del peakItemDict[apiPeak]
         self.inactivePeakItems.add(peakItem)
       

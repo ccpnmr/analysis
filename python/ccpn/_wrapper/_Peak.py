@@ -190,7 +190,7 @@ class Peak(AbstractWrapperObject):
   @dimensionNmrAtoms.setter
   def dimensionNmrAtoms(self, value:Sequence):
 
-    print ("@~@~ set dimensionNmrAtoms")
+    # print ("@~@~ set dimensionNmrAtoms")
     apiPeak = self._wrappedData
     dimResonances = []
     for atoms in value:

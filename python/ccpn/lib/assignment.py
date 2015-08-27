@@ -166,14 +166,14 @@ def copyAssignments(referencePeakList, matchPeakList):
   refAxisCodes = referencePeakList.spectrum.axisCodes
   refPositions = [numpy.array(peak.position) for peak in referencePeakList.peaks]
   refLabels = [peak.pid for peak in referencePeakList.peaks]
-  print('refAxisCodes', refAxisCodes)
-
+  # print('refAxisCodes', refAxisCodes)
   clf=svm.SVC()
   clf.fit(refPositions, refLabels)
 
   matchAxisCodes = matchPeakList.spectrum.axisCodes
 
-  mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes]
+
+  mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes if i in refAxisCodes]
 
   for peak in matchPeakList.peaks:
     matchArray = []
@@ -181,9 +181,17 @@ def copyAssignments(referencePeakList, matchPeakList):
       matchArray.append(peak.position[dim])
 
     result = ''.join((clf.predict(numpy.array(matchArray))))
-    dimNmrAtoms = project.getById(result).dimensionNmrAtoms
-    for axisCode in refAxisCodes:
-      peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
+    checkArray = [i-j for i,j in zip(list(project.getById(result).position), matchArray)]
+    print(project.getById(result), peak, list(project.getById(result).position), matchArray, checkArray)
+
+    if checkArray < list(referencePeakList.spectrum.assignmentTolerances):
+    # for value in checkArray:
+    #   print(abs(value), peak.peakList.spectrum.assignmentTolerances)
+      print(project.getById(result).position, peak.position)
+      dimNmrAtoms = project.getById(result).dimensionNmrAtoms
+      for axisCode in refAxisCodes:
+        # print(axisCode)
+        peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
 
 def propagateAssignments(peaks, referencePeak=None, tolerances=None):
 
@@ -273,7 +281,11 @@ def propagateAssignments(peaks, referencePeak=None, tolerances=None):
 def getAxisCodeForPeakDimension(peak, dim):
     return peak.peakList.spectrum.axisCodes[dim]
 
-
+def assignPeakDimension(peak, dim, nmrAtom):
+    axisCode = getAxisCodeForPeakDimension(peak, dim)
+    peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
+    shiftList = peak.peakList.spectrum.chemicalShiftList
+    shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
 
 
 

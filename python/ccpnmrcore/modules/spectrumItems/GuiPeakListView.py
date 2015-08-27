@@ -859,7 +859,7 @@ Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
 def _upDateAssignmentsPeakDimContrib(project:Project,
                                      apiPeakDimContrib:ApiAbstractPeakDimContrib):
-  print ("@~@~ _upDateAssignmentsPeakDimContrib")
+  # print ("@~@~ _upDateAssignmentsPeakDimContrib")
   peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
   peak._refreshPeakAnnotation()
 #

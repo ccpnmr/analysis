@@ -1,3 +1,6 @@
+from ccpn.lib.assignment import *
+
+
 if len(project.nmrChains) == 0:
   c = project.newNmrChain()
 else:
@@ -9,46 +12,113 @@ shiftList = project.chemicalShiftLists[0]
 
 for peak in hsqcPeakList.peaks:
   r = c.newNmrResidue()
-  a = r.newNmrAtom(name='N')
-  a2 = r.newNmrAtom(name='H')
+  a = r.fetchNmrAtom(name='N')
+  a2 = r.fetchNmrAtom(name='H')
   atoms = [[a2], [a]]
   # peak.dimensionNmrAtoms = atoms
   peak.assignDimension(axisCode='Nh', value=a)
   peak.assignDimension(axisCode='Hn', value=a2)
   dim1 = peak.peakList.spectrum.axisCodes.index('Nh')
   dim2 = peak.peakList.spectrum.axisCodes.index('Hn')
-  shiftList.newChemicalShift(value=peak.position[dim1], nmrAtom=a)
-  shiftList.newChemicalShift(value=peak.position[dim2], nmrAtom=a2)
+  shiftList.newChemicalShift(nmrAtom=a, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Nh')])
+  shiftList.newChemicalShift(nmrAtom=a2, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Hn')])
 
 
+peakLists2 = [project.getById('PL:CBCA(CO)NH-125^spc^par.1'), project.getById('PL:HN(CO)CA-117^spc^par.1')]
+peakLists3 = [project.getById('PL:126.1'), project.getById('PL:HNCA-120^spc^par.1')]
 
-# for peakList in project.peakLists[1:]:
-#   copyAssignments(hsqcPeakList, peakList)
-  # if isInterOnlyExpt(peakList.spectrum.experimentType):
-  #   for peak in peakList.peaks:
-  #     array = [peak.position[hdim], peak.position[ndim]]
-  #     result = clf.predict(array)
-  #     print(result)
-  #     if not peak.height:
-  #       peak.height = peak.apiPeak.findFirstPeakIntensity().value
-  #     if peak.height > 0:
-  #       name = 'CA'
-  #     else:
-  #       name = 'CB'
-  #     r = project.getById(result[0])
-  #     seqCode =  r.sequenceCode+'-1'
-  #     newNmrResidue = c.fetchNmrResidue(sequenceCode=seqCode)
-  #     newNmrAtom = newNmrResidue.fetchNmrAtom(name=name)
-  #     # try:
-  #     #   shiftList.newChemicalShift(value = peak.position[cdim], nmrAtom=newNmrAtom)
-  #     # except:
-  #     #   pass
-  #     peak.assignDimension(axisCode='C', value=[newNmrAtom])
+for peakList in peakLists2:
 
+  copyAssignments(hsqcPeakList, peakList)
+  if isInterOnlyExpt(peakList.spectrum.experimentType):
+    for peak in peakList.peaks:
+
+      # array = [peak.position[dim2], peak.position[dim1]]
+      # result = peak.dimensionNmrAtoms[0]
+      # print(result)
+      if 'CA' in peakList.spectrum.axisCodes:
+        cdim = peakList.spectrum.axisCodes.index('CA')
+      elif 'C' in peakList.spectrum.axisCodes:
+        cdim = peakList.spectrum.axisCodes.index('C')
+      elif 'Ch' in peakList.spectrum.axisCodes:
+        cdim = peakList.spectrum.axisCodes.index('Ch')
+      if not peak.height:
+        peak.height = peak.apiPeak.findFirstPeakIntensity().value
+      if peak.height > 0 and 45 < peak.position[cdim] < 66:
+        name = 'CA-1'
+      elif peak.height > 0 and 10 < peak.position[cdim] < 45:
+        name = 'CB-1'
+      else:
+        name = 'CB-1'
+      print(peak)
+      print(peak.dimensionNmrAtoms)
+      r = peak.dimensionNmrAtoms[0][0].nmrResidue
+      print(peak.dimensionNmrAtoms[0][0].nmrResidue, peak.dimensionNmrAtoms[0][0])
+      seqCode =  r.sequenceCode
+      # print(seqCode)
+      # newNmrResidue = c.fetchNmrResidue(sequenceCode=seqCode)
+      newNmrAtom = r.fetchNmrAtom(name=name)
+      try:
+        peak.assignDimension(axisCode='CA', value=newNmrAtom)
+        # print(cdim)
+        # print(newNmrAtom, peak.position[cdim])
+        # print(shiftList)
+        if shiftList.findChemicalShift(newNmrAtom) is None:
+          shiftList.newChemicalShift(value=peak.position[cdim], nmrAtom=newNmrAtom)
+          # print(shiftList.findChemicalShift(newNmrAtom))
+      except ValueError:
+        # print(peak.peakList.spectrum.axisCodes)
+        try:
+          peak.assignDimension(axisCode='C', value=newNmrAtom)
+        except ValueError:
+          peak.assignDimension(axisCode='Ch', value=newNmrAtom)
+        if shiftList.findChemicalShift(newNmrAtom) is None:
+          shiftList.newChemicalShift(value=peak.position[cdim], nmrAtom=newNmrAtom)
+          print(shiftList.findChemicalShift(newNmrAtom))
+        # shiftList.newChemicalShift(value=peak.position[cdim], nmrAtom=newNmrAtom)
+
+from sklearn import svm
+import numpy
+nmrResidueLabels = []
+nmrAtoms = []
+for nmrResidue in project.nmrResidues:
+  atoms = [shiftList.findChemicalShift(atom).value for atom in nmrResidue.atoms if atom.apiResonance.isotopeCode == '13C' and atom.name=='CA' or atom.name=='CB']
+  for atom in atoms:
+    if atom is None:
+      atoms.pop(atoms.index(atom))
+  if len(atoms) > 1:
+    nmrAtoms.append(numpy.array(atoms))
+    nmrResidueLabels.append(nmrResidue.pid)
+
+
+copyAssignments(hsqcPeakList, project.getById('PL:126.1'))
+
+pl = project.getById('PL:126.1')
+# clf = svm.SVC()
+# clf.fit(nmrAtoms, nmrResidueLabels)
+hncacbPeaks = {}
+for r in project.nmrResidues:
+    hncacbPeaks[r.pid] = []
+    for a in r.atoms:
+        for aPeak in a.assignedPeaks[0]:
+            if aPeak.peakList.pid == pl.pid:
+               print(aPeak)
+               hncacbPeaks[r.pid].append(aPeak)
+
+print(hncacbPeaks)
+
+# copyAssignments(project.getById('PL:HNCOCACB-113.1'), project.getById('PL:HNCACB-112.1'))
+# copyAssignments(project.getById('PL:HSQC-115.1'), project.getById('PL:HNCACB-112.1'))
+# copyAssignments(project.getById('PL:HNCOCA-111.1'), project.getById('PL:HNCA-110.1'))
+# copyAssignments(project.getById('PL:HSQC-115.1'), project.getById('PL:HNCA-110.1'))
+
+
+# nmrResidues2 = peakLists3.peaks
+
+
+# for nmrResidue in project.nmrResidues:
 #
-# for ssLabel in ssLabels:
-#
-#   nmrResidue = project.getById(ssLabel)
+#   # nmrResidue = project.getById(ssLabel)
 #   for peaks in nmrResidue.fetchNmrAtom(name='N').assignedPeaks:
 #     exptDict = getExptDict(project)
 #     for peak in peaks:

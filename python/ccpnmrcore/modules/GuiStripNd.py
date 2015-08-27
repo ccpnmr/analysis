@@ -210,9 +210,9 @@ class GuiStripNd(GuiStrip):
       zAxis.position += delta
       #planeLabel.setValue(zAxis.position)
     elif position is not None: # should always be the case
-      # if min(minima) < position <= max(maxima):
       zAxis.position = position
       #planeLabel.setValue(zAxis.position)
+
       # else:
       #   print('position is outside spectrum bounds')
 
@@ -234,6 +234,7 @@ class GuiStripNd(GuiStrip):
 
     self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                      hAlign='center', vAlign='c', callbacks=callbacks)
+    self.planeToolbar.setMinimumWidth(250)
 
   def blankCallback(self):
     pass

@@ -30,6 +30,8 @@ from PyQt4 import QtCore
 
 import math
 
+from ccpn.lib.windowUtil import navigateToNmrResidue, navigateToPeakPosition
+
 from ccpncore.gui.Button import Button
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Dock import CcpnDock
@@ -67,63 +69,31 @@ class BackboneAssignmentModule(CcpnDock):
     self.numberOfMatches = 5
 
 
-  def navigateTo(self, peak=None, row=None, col=None, nmrResidue=None, selectedDisplays=None):
+  def navigateTo(self, peak=None, row=None, col=None, nmrResidue=None):
 
-    if selectedDisplays is not None:
+    # if selectedDisplays is not None:
 
-      for display in self.referenceDisplays:
-        hsqcDisplay = self.project.getById(display)
-        if peak:
-          # self.assigner.clearAllItems()
-          positions = peak.position
-          self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
-          hsqcDisplay.strips[-1].planeToolbar.spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
-          hsqcDisplay.strips[-1].zoomToRegion([peak.position[0]-0.2, peak.position[0]+0.2,
-                                                    peak.position[1]-2, peak.position[1]+2])
-
-          for queryDisplay in self.queryDisplays:
-            queryWindow = self.project.getById(queryDisplay)
-            queryWindow.orderedStrips[0].planeToolbar.spinSystemLabel.setText(self.current.nmrResidue.sequenceCode)
-            queryWindow.orderedStrips[0].changeZPlane(position=positions[1])
-            queryWindow.orderedStrips[0].orderedAxes[0].position=positions[0]
-
-            for line in self.lines:
-              queryWindow.orderedStrips[0].plotWidget.removeItem(line)
-            if len(self.lines) == 0:
-
-              line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-              line.setPos(QtCore.QPointF(positions[0], 0))
-              queryWindow.orderedStrips[0].plotWidget.addItem(line)
-
-            else:
-              self.lines[0].setPos(QtCore.QPointF(positions[0], 0))
+    for display in self.referenceDisplays:
+      hsqcDisplay = self.project.getById(display)
+      if peak:
+        self.assigner.clearAllItems()
+        self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
+        navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[hsqcDisplay.pid], markPositions=True)
 
 
-          self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
-          print(self.current.nmrResidue, 'current.nmrResidue', peak.dimensionNmrAtoms[0][0]._parent.pid)
-
-        elif nmrResidue is not None:
-          hsqcDisplay.strips[-1].viewBox.removeItem(self.line1)
-          hsqcDisplay.strips[-1].viewBox.removeItem(self.line2)
-          self.current.nmrResidue = nmrResidue
-          positions = [self.project.chemicalShiftLists[0].findChemicalShift(nmrResidue.fetchNmrAtom(name='H')).value,
-                       self.project.chemicalShiftLists[0].findChemicalShift(nmrResidue.fetchNmrAtom(name='N')).value]
-
-          hsqcDisplay.strips[-1].zoomToRegion([positions[0]-0.2, positions[0]+0.2,
-                                                    positions[1]-2, positions[1]+2])
+      elif nmrResidue:
+        navigateToNmrResidue(self.project, nmrResidue=self.current.nmrResidue,
+                           selectedDisplays=[hsqcDisplay.pid], markPositions=True)
 
 
-          self.line1 = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-          self.line2 = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-          self.line1.setPos(QtCore.QPointF(0, positions[1]))
-          self.line2.setPos(QtCore.QPointF(positions[0], 0))
-          hsqcDisplay.strips[-1].viewBox.addItem(self.line1)
-          hsqcDisplay.strips[-1].viewBox.addItem(self.line2)
 
-    # self.assigner.spectra = {'ref': self.refSpectra, 'intra': self.intraSpectra, 'inter':self.interSpectra}
-    # self.assigner.addResidue(self.current.nmrResidue)
-    # assignMatrix = self.getQueryShifts(self.current.nmrResidue)
-    # self.findMatches(assignMatrix)
+      navigateToNmrResidue(self.project, nmrResidue=self.current.nmrResidue,
+                           selectedDisplays=self.queryDisplays, markPositions=True)
+
+    self.assigner.spectra = {'ref': self.refSpectra, 'intra': self.intraSpectra, 'inter':self.interSpectra}
+    self.assigner.addResidue(self.current.nmrResidue)
+    assignMatrix = self.getQueryShifts(self.current.nmrResidue)
+    self.findMatches(assignMatrix)
 
 
   def getQueryShifts(self, currentNmrResidue):
@@ -178,25 +148,16 @@ class BackboneAssignmentModule(CcpnDock):
         matchResidue = matchResidue
       zAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
       xAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
-      yAtoms = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '13C']
 
       zShift = self.project.chemicalShiftLists[0].findChemicalShift(zAtom[0]).value
       xShift = self.project.chemicalShiftLists[0].findChemicalShift(xAtom[0]).value
-      yShifts = []
-      for atom in yAtoms:
-        if atom is not None:
-          if self.project.chemicalShiftLists[0].findChemicalShift(atom) is not None:
-            yShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom).value)
-      line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-      line.setPos(QtCore.QPointF(xShift, 0))
+
       for matchDisplay in self.matchDisplays:
         matchWindow = self.project.getById(matchDisplay)
         newStrip = matchWindow.addStrip()
         newStrip.changeZPlane(position=zShift)
         newStrip.planeToolbar.spinSystemLabel.setText(matchResidue.sequenceCode)
-        for shift in yShifts:
-          line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-          line.setPos(QtCore.QPointF(0, shift))
+
 
     firstMatchResidue = assignMatrix[0][assignmentScores[0]]
     if self.direction == 'i+1':
@@ -206,25 +167,14 @@ class BackboneAssignmentModule(CcpnDock):
 
     zAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
     xAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
-    yAtoms = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '13C']
     zShift = self.project.chemicalShiftLists[0].findChemicalShift(zAtom[0]).value
     xShift = self.project.chemicalShiftLists[0].findChemicalShift(xAtom[0]).value
-    yShifts = []
-    for atom in yAtoms:
-      if self.project.chemicalShiftLists[0].findChemicalShift(atom) is not None:
-        yShifts.append(self.project.chemicalShiftLists[0].findChemicalShift(atom).value)
 
-    line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-    line.setPos(QtCore.QPointF(xShift, 0))
+
     for matchDisplay in self.matchDisplays:
       matchWindow = self.project.getById(matchDisplay)
       matchWindow.orderedStrips[0].changeZPlane(position=zShift)
       matchWindow.orderedStrips[0].planeToolbar.spinSystemLabel.setText(firstMatchResidue.sequenceCode)
-      matchWindow.orderedStrips[0].plotWidget.addItem(line)
-      for shift in yShifts:
-        line = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen('w', style=QtCore.Qt.DashLine))
-        line.setPos(QtCore.QPointF(0, shift))
-        # matchWindow.orderedStrips[0].plotWidget.addItem(line)
 
 
   def setAssigner(self, assigner):

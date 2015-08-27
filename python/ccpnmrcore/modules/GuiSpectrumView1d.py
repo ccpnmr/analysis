@@ -61,13 +61,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
     self.plot.sigClicked.connect(self.clicked)
     for peakList in self.spectrum.peakLists:
       self.strip.showPeaks(peakList)
-    # spectrumViewButton = ToolButton(self.spectrumDisplay, self)
-
-
-
-
-      # print(dir(self.spectrumDisplay))
-
 
   def clicked(self):
     print(self.plot)
@@ -90,4 +83,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
     spectrumData = numpy.array([position,scaledData], numpy.float32)
     return numpy.array(spectrumData,numpy.float32)
 
+  def update(self):
+    self.plot.curve.setData(self.data[0], self.data[1])
 

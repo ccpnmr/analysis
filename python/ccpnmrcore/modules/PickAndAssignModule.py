@@ -35,7 +35,7 @@ class PickAndAssignModule(CcpnDock, Base):
 
     self.layout.addWidget(self.peakTable, 4, 0, 1, 4)
 
-    parent.window().showAtomSelector()
+    # parent.window().showAtomSelector()
 
   def restrictedPick(self):
     position = self.selectedPeak.position
@@ -47,15 +47,15 @@ class PickAndAssignModule(CcpnDock, Base):
         for spectrumView in module.strips[0].spectrumViews:
           selectedRegion = [['']*3, ['']*3]
 
-          for moduleAxisCode in module.axisCodes:
+          for moduleAxisCode in spectrumView.spectrum.axisCodes:
 
             if moduleAxisCode in axisCodes:
               index = axisCodes.index(moduleAxisCode)
-              index2 = module.axisCodes.index(moduleAxisCode)
-              selectedRegion[0][index2] = peak.position[index]-spectrumView.spectrum.assignmentTolerances[index]
-              selectedRegion[1][index2] = peak.position[index]+spectrumView.spectrum.assignmentTolerances[index]
+              index2 = spectrumView.spectrum.axisCodes.index(moduleAxisCode)
+              selectedRegion[0][index2] = position[index]-spectrumView.spectrum.assignmentTolerances[index]
+              selectedRegion[1][index2] = position[index]+spectrumView.spectrum.assignmentTolerances[index]
             else:
-              index3 = module.axisCodes.index(moduleAxisCode)
+              index3 = spectrumView.spectrum.axisCodes.index(moduleAxisCode)
 
               selectedRegion[0][index3] = spectrumView.strip.orderedAxes[index3].region[0]
               selectedRegion[1][index3] = spectrumView.strip.orderedAxes[index3].region[1]

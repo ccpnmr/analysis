@@ -1,4 +1,4 @@
-from ccpn.lib.assignment import *
+from ccpn.lib.Assignment import *
 
 
 if len(project.nmrChains) == 0:

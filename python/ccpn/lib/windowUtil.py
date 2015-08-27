@@ -1,6 +1,6 @@
 __author__ = 'simon1'
 
-from ccpn.lib.assignment import getIsotopeCodeOfAxis
+from ccpn.lib.Assignment import getIsotopeCodeOfAxis
 
 def navigateToPeakPosition(project, peak=None, selectedDisplays=None, strip=None,  markPositions=False):
 

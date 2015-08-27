@@ -1,0 +1,211 @@
+"""Functions to be copied automatically into ccpn.api.ccp.molecule.MolSystem.Chain
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+               "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                 " or ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author$"
+__date__ = "$Date$"
+__version__ = "$Revision$"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+
+def renumberChainSeqCodes(chain, firstSeqCode:int=1, skipZeroSeqCode:bool=False):
+  """Reset chain numbering to sequential integers starting at firstSeqCode """
+
+  seqCode = firstSeqCode
+  for residue in chain.sortedResidues():
+    if seqCode == 0 and skipZeroSeqCode:
+      seqCode = 1
+    residue.seqCode = seqCode
+    residue.seqInsertCode = None
+    seqCode += 1
+
+
+def expandMolSystemAtoms(chain):
+  """Add extra atoms to chain corresponding to AtomSets
+  Called on V2 upgrade, or on finalisation of chain."""
+
+  # Set elementSymbol and add missing atoms (lest something breaks lower down)
+  for residue in chain.sortedResidues():
+    chemCompVar = residue.chemCompVar
+    for chemAtom in chemCompVar.findAllChemAtoms(className='ChemAtom'):
+      atom = residue.findFirstAtom(name=chemAtom.name)
+      if atom is None:
+        residue.newAtom(name=chemAtom.name, atomType='single',
+                        elementSymbol=chemAtom.elementSymbol)
+      else:
+        atom.elementSymbol = chemAtom.elementSymbol
+
+  # Set boundAtoms for existing atoms within residue
+  for residue in chain.sortedResidues():
+    chemCompVar = residue.chemCompVar
+    for atom in residue.atoms:
+      chemAtom = chemCompVar.findFirstChemAtom(name=atom.name, className='ChemAtom')
+      if chemAtom is not None:
+        boundChemAtoms = set(x for y in chemAtom.chemBonds for x in y.chemAtoms)
+        for boundChemAtom in boundChemAtoms:
+          if boundChemAtom is not chemAtom and boundChemAtom.className == 'ChemAtom':
+            boundAtom = residue.findFirstAtom(name=boundChemAtom.name)
+            if boundAtom is not None and boundAtom not in atom.boundAtoms:
+              atom.addBoundAtom(boundAtom)
+
+    # Add boundAtoms for MolResLinks
+      for molResLink in chain.molecule.molResLinks:
+        ff = chain.findFirstResidue
+        atoms = [ff(seqId=x.molResidue.serial).findFirstAtom(name=x.linkEnd.boundChemAtom.name)
+                 for x in molResLink.molResLinkEnds]
+        if atoms[1] not in atoms[0].boundAtoms:
+          atoms[0].addBoundAtom(atoms[1])
+
+    # Add boundAtoms for MolSystemLinks
+    for linkEnd in residue.sortedMolSystemLinkEnds():
+      molSystemLink = linkEnd.molSystemLink
+      atoms = [x.residue.findFirstAtom(name=x.linkEnd.boundChemAtom.name)
+               for x in molSystemLink.molSystemLinkEnds]
+      if atoms[1] not in  atoms[0].boundAtoms:
+        atoms[0].addBoundAtom(atoms[1])
+
+    # NB we do NOT add boundAtoms for NonCovalentBonds
+
+    # Add extra atoms corresponding to ChemAtomSets
+    chemCompVar = residue.chemCompVar
+    # AQUA is good on pseudoatom names
+    pseudoNamingSystem = chemCompVar.chemComp.findFirstNamingSystem(name='AQUA')
+
+    # Map from chemAtomSet to equivalent Atom
+    casMap = {}
+
+    # map from chemAtomSet.name to nonStereo names
+    nonStereoNames = {}
+
+    for chemAtomSet in chemCompVar.chemAtomSets:
+
+      # get nests of connected chemAtomSets
+      if not chemAtomSet.chemAtomSet:
+        # get nested chemAtomSets, starting at topmost set
+        localSets = [chemAtomSet]
+        for cas in localSets:
+          localSets.extend(cas.chemAtomSets)
+
+        # Process in reverse order, guaranteeing that contained sets are always ready
+        for cas in reversed(localSets):
+          chemContents = cas.sortedChemAtoms()
+          # NB the fact that chemAtoms and chemAtomSets are sorted (by name) is used lower down
+          if chemContents:
+            # contents are real atoms
+            components = [residue.findFirstAtom(name=x.name) for x in chemContents]
+          else:
+            chemContents = cas.sortedChemAtomSets()
+            components = [casMap[x] for x in chemContents]
+          elementSymbol = chemContents[0].elementSymbol
+
+          commonBound = frozenset.intersection(*(x.boundAtoms for x in components))
+
+          # Add 'equivalent' atom
+          newName = cas.name.replace('*', '%')
+          newAtom = residue.newAtom(name=newName, atomType='equivalent',
+                                    elementSymbol=elementSymbol,atomSetName=cas.name,
+                                    components=components, boundAtoms=commonBound)
+          casMap[cas] = newAtom
+
+          # NBNB the test on '#' count is a hack to exclude Tyr/Phe HD#|HE#
+          hackExclude = newName.count('%') >= 2
+
+          # Add 'pseudo' atom for proton
+          if elementSymbol == 'H':
+            newName = None
+            if pseudoNamingSystem:
+              atomSysName = pseudoNamingSystem.findFirstAtomSysName(atomName=cas.name,
+                                                                    atomSubType=cas.subType)
+              if atomSysName:
+                newName = atomSysName.sysName
+
+            if newName is None:
+              # No systematic pseudoatom name found - make one.
+              # NBNB this will give names like MD1, QG1, MD2 for cases like Ile delta,
+              # where the standard says MD, QG, MG.
+              # But all the standard cases are covered by the pseudoNamingSystem ('AQUA')
+              # Can we get away with this, or do we have to rename on a per-residue basis
+              # for the special cases?
+              startChar = 'Q'
+              if (len(cas.chemAtoms) == 3 and cas.isEquivalent
+                  and components[0].findFirstBoundAtom().elementSymbol == 'C'):
+                if len(set(x.findFirstBoundAtom() for x in components)) == 1:
+                  # This is a methyl group
+                  # The second 'if' is likely unnecessary in practice, but let us be correct here
+                  startChar = 'M'
+
+              newName = startChar + cas.name.strip('*')[1:]
+
+            if len(newName) > 1:
+              # Make pseudoatom, except for 'H*'
+              residue.newAtom(name=newName, atomType='pseudo', elementSymbol=elementSymbol,
+                              atomSetName=cas.name, components=components, boundAtoms=commonBound)
+
+          # Add 'nonstereo atoms
+          if not cas.isEquivalent and len(components) == 2 and not hackExclude:
+            # NB excludes cases with more than two non-equivalent components
+            # But then I do not think there are any in practice.
+            # and anyway we do not have a convention for them.
+            nonStereoNames[cas.name] = newNames = []
+            starpos = cas.name.find('*')
+            for ii,component in enumerate(components):
+              # NB components are sorted by key, which means by name
+              newChar = 'XY'[ii]
+              ll = list(component.name)
+              ll[starpos] = newChar
+              newName = ''.join(ll)
+              newNames.append(newName)
+              if residue.findFirstAtom(name=newName) is not None:
+                print ("WARNING, new atom already exists: %s %s %s %s"
+                       % (residue.chain.code, residue.seqId, residue.ccpCode, newName))
+              else:
+                residue.newAtom(name=newName, atomType='nonstereo', elementSymbol=elementSymbol,
+                                atomSetName=cas.name, components=components, boundAtoms=commonBound)
+
+
+    # NBNB Now we need to set boundAtoms for non-single Atoms.
+    # We need to set:
+    # HG*-CG* etc.
+    # HGX*-CGX etc. - can be done from previous by char substitution
+    eqvTypeAtoms = [x for x in residue.sortedAtoms() if x.atomType == 'equivalent']
+    for ii,eqvAtom in enumerate(eqvTypeAtoms):
+      components = eqvAtom.sortedComponents()
+      for eqvAtom2 in eqvTypeAtoms[ii+1:]:
+        components2 = eqvAtom2.sortedComponents()
+        if len(components) == len(components2):
+          if all((x in components2[jj].boundAtoms) for jj,x in enumerate(components)):
+            # All components of one are bound to a component of the other
+            # NB this relies on the sorted components being ordered to match the bonds
+            # but you should expect that both cases are sorted by branch index
+            # CG1,CG2 matching HG1*,HG2* etc.
+
+            # Add bond between equivalent atoms
+            eqvAtom.addBoundAtom(eqvAtom2)
+
+            nsNames1 = nonStereoNames.get(eqvAtom.atomSetName)
+            nsNames2 = nonStereoNames.get(eqvAtom2.atomSetName)
+            if nsNames1 and nsNames2:
+              # Non-stereoAtoms are defined for both - add X,Y bonds
+              # NB We rely on names being sorted (X then Y in both cases)
+              for kk,name in enumerate(nsNames1):
+                atom2 = residue.findFirstAtom(name=nsNames2[kk])
+                residue.findFirstAtom(name=name).addBoundAtom(atom2)
+
+            break
+
+

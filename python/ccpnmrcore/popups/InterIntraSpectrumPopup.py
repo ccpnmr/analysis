@@ -5,7 +5,7 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
 from ccpncore.gui.PulldownList import PulldownList
 
-from ccpn.lib.assignment import isInterOnlyExpt
+from ccpn.lib.Assignment import isInterOnlyExpt
 
 class InterIntraSpectrumPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, **kw):

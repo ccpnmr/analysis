@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 import sys
 from PyQt4 import QtGui,QtCore
 
-from ccpn.lib.assignment import CCP_CODES
+from ccpn.lib.Assignment import CCP_CODES
 
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font

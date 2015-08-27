@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -140,6 +141,7 @@ class Chain(AbstractWrapperObject):
 #
 #   NBNB TBD refactor
 #   NBNB Move somewhere else (currently used only for NEF)
+#   NBNB Needs fixing before activation
 #
 #   ccpnRoot = parent._wrappedData.root
 #   ccpnMolSystem = parent._wrappedData.molSystem
@@ -239,7 +241,7 @@ def makeSimpleChain(parent:Project, sequence:(str,tuple), compoundName:str='Mole
 
   ccpnMolSystem = parent._wrappedData.molSystem
   if shortName is None:
-    shortName = MoleculeModify.nextChainCode(ccpnMolSystem)
+    shortName = ccpnMolSystem.nextChainCode()
   elif ccpnMolSystem.findFirstChain(code=shortName) is not None:
     raise ValueError("Chain names %s already exists" % shortName)
 

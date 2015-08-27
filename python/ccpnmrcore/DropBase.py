@@ -40,7 +40,9 @@ class DropBase(GuiBase):
     
     GuiBase.__init__(self, appBase, *args, **kw)
     # self.dropCallback = dropCallback
-    self.appBase = appBase
+
+    # This should NOT be there - use self._appBase (set in GuiBase)
+    #self.appBase = appBase
     
   def dragEnterEvent(self, event):
     event.accept()
@@ -54,7 +56,7 @@ class DropBase(GuiBase):
     event.accept()
 
     data, dataType  = qtUtil.interpretEvent(event)
-    print("@~@~ DropBase drop %s %s on %s" % (dataType, data, self))
+    # print("@~@~ DropBase drop %s %s on %s" % (dataType, data, self))
 
     if data and dataType:
       self.processDropData(data, dataType)
@@ -111,7 +113,7 @@ class DropBase(GuiBase):
     Separate function so it can be called from command line as well.
     """
 
-    print ("@~@~  process drop" , dataType, data)
+    # print ("@~@~  process drop" , dataType, data)
     #
     project = self._appBase.project
 
@@ -226,7 +228,7 @@ class DropBase(GuiBase):
     ss = pidTypeMap.get(ss, ss)
     funcName = prefix + ss
 
-    print ("@~@~ pickDispatch", prefix, dataType, funcName, hasattr(self, funcName))
+    # print ("@~@~ pickDispatch", prefix, dataType, funcName, hasattr(self, funcName))
 
     if hasattr(self, funcName):
       print(funcName)

@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -23,8 +24,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.util import MergeObjects
+from ccpncore.lib.assignment import Assignment
 from ccpncore.memops.ApiError import ApiError
 from ccpncore.api.ccp.nmr import Nmr
+from ccpncore.lib.molecule.Labeling import _getIsotopomerSingleAtomFractions, _singleAtomFractions, \
+  _getIsotopomerAtomPairFractions, _atomPairFractions
 
 
 def absorbResonance(resonanceA:Nmr.Resonance, resonanceB:Nmr.Resonance) -> None:
@@ -197,10 +201,10 @@ def getBoundResonances(resonance:Nmr.Resonance) -> tuple:
     singleCodes = ('1H', '2H', '3H', '19F')
     if resonance.isotopeCode in singleCodes:
       partners = [x for x in unassigned if x.isotopeCode in singleCodes]
-      result = [x for x in partners if _doNamesMatchBound(resonanceName, x.name)]
+      result = [x for x in partners if Assignment._doNamesMatchBound(resonanceName, x.name)]
     else:
       partners = [x for x in unassigned if x.isotopeCode not in singleCodes]
-      result = [x for x in partners if _doNamesMatchBound(x.name, resonanceName)]
+      result = [x for x in partners if Assignment._doNamesMatchBound(x.name, resonanceName)]
 
     if not residue:
     # if not chemCompVar:
@@ -219,42 +223,259 @@ def getBoundResonances(resonance:Nmr.Resonance) -> tuple:
 
   #
   return tuple(result)
-
-
-def _doNamesMatchBound(lightName:str, heavyName:str) -> bool:
-  """checks if lightName matches a hydrogen atom or fluorine bound to atom named heavyName
-  NB, a name like H11 would match both C1 or C11 - cannot be helped"""
-
-  # possible names for 'light' atoms or pseudoatoms
-  lightFirstChars = 'HDTFMQ'
-  lightAppendixChars = '123XY#'
-
-  if ((lightName == "H" and heavyName == "N") or
-      (lightName == "H#" and heavyName == "N") or
-      (lightName == "H2''" and heavyName == "C2'") or
-      (lightName == "H5''" and heavyName == "C5'")):
-    # special cases for protein and DNA/RNA
-    return True
-
-  elif not lightName or len(heavyName) < 2:
-    # lightName empty or heavyName too short
-    # Single-char heavyName is only allowed in special cases above
-    return False
-
-  elif lightName[0] not in lightFirstChars or heavyName[0] in lightFirstChars:
-    # incorrect nucleus code
-    return False
-
-  elif lightName[1:] == heavyName[1:]:
-    # names match except for first character.
-    return True
-
-  elif lightName[1:-1] == heavyName[1:] and lightName[-1] in lightAppendixChars:
-    # names match except for first character, with single suffix character
-    return True
-
-  else:
-    return False
-
-def _boundNamesfromType(chemCompVar, atomName):
-  """get names of atoms bound to atom names atomName within chemComp"""
+#
+#
+# def getLabellingFraction(resonance, labelling:str):
+#   """
+#   Get the fraction of labelling for a given resonance's assignment
+#   or make a guess if it is atom typed and in a residue typed spin system.
+#   The labelling string is teh key for a labelledMixture (if a LabelledMolecule can be found)
+#   or else the name of a LabellingScheme
+#   Can work with a reference isotopomer scheme or a labeled mixture.
+#
+#   .. describe:: Input
+#
+#   Nmr.Resonance, str
+#
+#   .. describe:: Output
+#
+#   Float
+#   """
+#
+#   # Get labellingObject
+#   root = resonance.root
+#
+#   moleculeName = None
+#   resonanceGroup = resonance.resonanceGroup
+#   if resonanceGroup is not None:
+#     residue = resonanceGroup.assignedResidue
+#     if residue is not None:
+#       labelledMolecule = root.findFirstLabelledMolecule(name=residue.chain.molecule.name)
+#       if labelledMolecule is not None:
+#
+#
+#
+#   fraction = 1.0 # In the absence of any assignment
+#
+#   resonanceSet = resonance.resonanceSet
+#
+#   if labellingObject.className == 'LabelingScheme':
+#     if resonanceSet:
+#       atomSets = list(resonanceSet.atomSets)
+#       residue = atomSets[0].findFirstAtom().residue
+#       ccpCode = residue.ccpCode
+#       molType = residue.molType
+#       chemCompLabel = labellingObject.findFirstChemCompLabel(ccpCode=ccpCode,
+#                                                              molType=molType)
+#
+#       if not chemCompLabel:
+#         natAbun = resonance.root.findFirstLabelingScheme(name='NatAbun')
+#
+#         if natAbun:
+#           chemCompLabel = natAbun.findFirstChemCompLabel(ccpCode=ccpCode,
+#                                                          molType=molType)
+#
+#       if chemCompLabel:
+#         isotopomers = chemCompLabel.isotopomers
+#         isotope = resonance.isotopeCode
+#
+#         fractions = []
+#         for atomSet in atomSets:
+#           atoms = atomSet.atoms
+#           atomFrac = 0.0
+#
+#           for atom in atoms:
+#             subType = atom.chemAtom.subType
+#
+#             fracDict = _getIsotopomerSingleAtomFractions(isotopomers,
+#                                                         atom.name, subType)
+#             atomFrac += fracDict.get(isotope, 1.0)
+#
+#           atomFrac /= float(len(atoms))
+#
+#           fractions.append(atomFrac)
+#
+#         fraction = max(fractions)
+#
+#     elif resonance.assignNames:
+#       atomNames = resonance.assignNames
+#       spinSystem = resonance.resonanceGroup
+#
+#       if spinSystem and spinSystem.ccpCode:
+#         ccpCode = spinSystem.ccpCode
+#         molType = spinSystem.molType or 'protein'
+#         chemCompLabel = labellingObject.findFirstChemCompLabel(ccpCode=ccpCode,
+#                                                          molType=molType)
+#
+#         if not chemCompLabel:
+#           natAbun = resonance.root.findFirstLabelingScheme(name='NatAbun')
+#
+#           if natAbun:
+#             chemCompLabel = natAbun.findFirstChemCompLabel(ccpCode=ccpCode,
+#                                                            molType=molType)
+#
+#         if chemCompLabel:
+#           isotopomers = chemCompLabel.isotopomers
+#           isotope = resonance.isotopeCode
+#           fraction = 0.0
+#
+#           for atomName in atomNames:
+#             fracDict = _getIsotopomerSingleAtomFractions(isotopomers,
+#                                                         atomName, 1)
+#             fraction += fracDict.get(isotope, 1.0)
+#
+#           fraction /= float(len(atomNames))
+#
+#   else: # get from experiment labelled mixture
+#
+#     if resonanceSet:
+#       atomSets = list(resonanceSet.atomSets)
+#       isotope = resonance.isotopeCode
+#       labelledMixtures = labellingObject.labeledMixtures
+#       molResidue = atomSets[0].findFirstAtom().residue.molResidue
+#       molecule = molResidue.molecule
+#       resId = molResidue.serial
+#
+#       for mixture in labelledMixtures:
+#         if mixture.labeledMolecule.molecule is molecule:
+#           fractions = []
+#           for atomSet in atomSets:
+#             atoms = atomSet.atoms
+#             atomFrac = 0.0
+#
+#             for atom in atoms:
+#               fracDict = _singleAtomFractions(mixture, resId, atom.name)
+#               atomFrac += fracDict.get(isotope, 1.0)
+#
+#             atomFrac /= float(len(atoms))
+#
+#             fractions.append(atomFrac)
+#
+#           fraction = max(fractions)
+#           break
+#
+#   return fraction
+#
+#
+# def getPairLabellingFraction(resonanceA, resonanceB, labelling:str):
+#   """
+#   Get the fraction of a pair of resonances both being labelled
+#   given a labelling scheme. Considers individual isotopomers if
+#   the resonances are bound within the same residue.
+#   Can work with a reference isotopomer scheme or a labeled mixture.
+#
+#   .. describe:: Input
+#
+#   Nmr.Resonance, Nmr.Resonance, str
+#
+#   .. describe:: Output
+#
+#   Float
+#   """
+#
+#   # from ccpnmr.analysis.core.MoleculeBasic import areResonancesBound
+#
+#   fraction = 1.0 # In the absence of any assignment
+#
+#   resonanceSetA = resonanceA.resonanceSet
+#   resonanceSetB = resonanceB.resonanceSet
+#
+#   if resonanceSetA and resonanceSetB:
+#     isotopes = (resonanceA.isotopeCode, resonanceB.isotopeCode)
+#     atomA = resonanceSetA.findFirstAtomSet().findFirstAtom()
+#     atomB = resonanceSetB.findFirstAtomSet().findFirstAtom()
+#     residueA = atomA.residue
+#     residueB = atomB.residue
+#
+#     if labellingObject.className == 'LabelingScheme':
+#       findFirstChemCompLabel = labellingObject.findFirstChemCompLabel
+#
+#       subTypeA = atomA.chemAtom.subType
+#       subTypeB = atomB.chemAtom.subType
+#
+#       if residueA is residueB:
+#         chemCompLabel = findFirstChemCompLabel(ccpCode=residueA.ccpCode,
+#                                                molType=residueA.molType)
+#
+#         if not chemCompLabel:
+#           natAbun = resonanceA.root.findFirstLabelingScheme(name='NatAbun')
+#
+#           if natAbun:
+#             chemCompLabel = natAbun.findFirstChemCompLabel(ccpCode=residueA.ccpCode,
+#                                                            molType=residueA.molType)
+#         if not chemCompLabel:
+#           return 1.0 # Nothing can be done, no isotopomers
+#
+#         isotopomers  = chemCompLabel.isotopomers
+#
+#         fractions = []
+#         for atomSetA in resonanceSetA.atomSets:
+#           for atomSetB in resonanceSetB.atomSets:
+#
+#             n = 0.0
+#             pairFrac = 0.0
+#             for atomA in atomSetA.atoms:
+#               nameA = atomA.name
+#               subTypeA = atomA.chemAtom.subType
+#
+#               for atomB in atomSetB.atoms:
+#                 atomNames = (nameA, atomB.name)
+#                 subTypes  = (subTypeA, atomB.chemAtom.subType)
+#                 pairDict  = _getIsotopomerAtomPairFractions(isotopomers, atomNames, subTypes)
+#                 pairFrac += pairDict.get(isotopes, 1.0)
+#                 n += 1.0
+#
+#             pairFrac /= n
+#             fractions.append(pairFrac)
+#
+#         fraction = max(fractions)
+#
+#       else: # Assumes filly mixed
+#         fractionA = getResonanceLabellingFraction(resonanceA, labelling)
+#         fractionB = getResonanceLabellingFraction(resonanceB, labelling)
+#         fraction = fractionA * fractionB
+#
+#     else: # Get Labelling mixture from experiment
+#       molResidueA = residueA.molResidue
+#       molResidueB = residueB.molResidue
+#       resIds = (molResidueA.serial, molResidueB.serial)
+#       labelledMixtures = labellingObject.labeledMixtures
+#
+#       moleculeA = molResidueA.molecule
+#       moleculeB = molResidueA.molecule
+#
+#       if moleculeA is moleculeB:
+#         for mixture in labelledMixtures:
+#           if mixture.labeledMolecule.molecule is moleculeA:
+#             fractions = []
+#             for atomSetA in resonanceSetA.atomSets:
+#               for atomSetB in resonanceSetB.atomSets:
+#
+#                 n = 0.0
+#                 pairFrac = 0.0
+#                 for atomA in atomSetA.atoms:
+#                   nameA = atomA.name
+#
+#                   for atomB in atomSetB.atoms:
+#                     atomNames = (nameA, atomB.name)
+#
+#                     pairDict  = _atomPairFractions(mixture, resIds, atomNames)
+#                     pairFrac += pairDict.get(isotopes, 1.0)
+#                     n += 1.0
+#
+#                 pairFrac /= n
+#                 fractions.append(pairFrac)
+#
+#             fraction = max(fractions)
+#             break
+#       else:
+#         fractionA = getResonanceLabellingFraction(resonanceA, labelling)
+#         fractionB = getResonanceLabellingFraction(resonanceB, labelling)
+#         fraction = fractionA * fractionB
+#
+#   else:
+#     fractionA = getResonanceLabellingFraction(resonanceA, labelling)
+#     fractionB = getResonanceLabellingFraction(resonanceB, labelling)
+#     fraction = fractionA * fractionB
+#
+#   return fraction

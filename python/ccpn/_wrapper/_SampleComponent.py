@@ -25,6 +25,7 @@ __version__ = "$Revision$"
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Sample
+from ccpn import Chain
 from ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
 from ccpncore.util import Pid
 
@@ -126,6 +127,25 @@ class SampleComponent(AbstractWrapperObject):
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
+
+  @property
+  def chains(self) -> tuple:
+    tt = tuple(self._project.getChain(x) for x in self._wrappedData.chainCodes)
+    return tuple(x for x in tt if x is not None)
+
+
+  @chains.setter
+  def chains(self, value):
+
+    wrappedData = self._wrappedData
+    chainCodes = [x.shortName for x in value]
+    for sampleComponent in wrappedData.sample.sampleComponents:
+      if sampleComponent is not wrappedData:
+        for chainCode in chainCodes:
+          if chainCode in sampleComponent.chainCodes:
+            sampleComponent.removeChainCode(chainCode)
+
+    wrappedData.chainCodes = chainCodes
 
   # @property
   # def chemicalShiftList(self) -> ChemicalShiftList:

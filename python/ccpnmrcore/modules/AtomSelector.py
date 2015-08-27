@@ -27,7 +27,7 @@ import os
 
 from functools import partial
 
-from ccpn.lib.assignment import isInterOnlyExpt
+from ccpn.lib.Assignment import isInterOnlyExpt
 
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Dock import CcpnDock

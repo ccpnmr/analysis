@@ -105,11 +105,9 @@ def updateServer(registrationDict, version='3'):
   values['version'] = str(version)
   
   try:
-    result = Url.fetchUrl(url, values, timeout=2.0)
+    return Url.fetchUrl(url, values, timeout=2.0)
   except Exception as e:
     logger = Logging.getLogger()
     logger.warning('Could not update registration on server: %s' % e)
-    
-  return result
 
 

@@ -232,3 +232,6 @@ def integerStringSortKey(key):
           result[ii] = '%30s' % ''.join(ll) + vv[len(ll):]
 
     return result
+
+def dictionaryProduct(dict1:dict, dict2:dict) -> dict:
+  """multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary"""

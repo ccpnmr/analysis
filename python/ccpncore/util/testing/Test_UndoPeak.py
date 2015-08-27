@@ -34,9 +34,7 @@ class PeakUndoTest(Testing):
     
     project = self.project
     nmrProject = project.findFirstNmrProject()
-    print ('@~@~ Exps', [x.name for x in nmrProject.sortedExperiments()])
     experiment = nmrProject.findFirstExperiment(name='HSQC')
-    print ('@~@~ Specs', [x.name for x in experiment.sortedDataSources()])
     dataSource = experiment.findFirstDataSource(name='HSQC-115')
     peakList = dataSource.newPeakList()
     

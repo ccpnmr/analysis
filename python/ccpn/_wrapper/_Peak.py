@@ -238,7 +238,7 @@ class Peak(AbstractWrapperObject):
   @assignedNmrAtoms.setter
   def assignedNmrAtoms(self, value:Sequence):
 
-    print ("@~@~ set assignedNmrAtoms")
+    # print ("@~@~ set assignedNmrAtoms")
 
     apiPeak = self._wrappedData
     peakDims = apiPeak.sortedPeakDims()

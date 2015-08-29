@@ -69,17 +69,17 @@ class AssignmentModule(CcpnDock, Base):
     self.intraCheckbox = CheckBox(self, checked=False)
     self.intraCheckbox.stateChanged.connect(self.update)
     intraCheckboxLabel = Label(self, text="Only Intra-residual:")
-    self.filterLayout.addWidget(self.intraCheckbox, 1, 1)
-    self.filterLayout.addWidget(intraCheckboxLabel, 1, 0)
+    self.filterLayout.addWidget(self.intraCheckbox, 0, 3)
+    self.filterLayout.addWidget(intraCheckboxLabel, 0, 2)
 
     # Allow multiple peaks to be selected and assigned at same time.
     self.multiCheckbox = CheckBox(self, checked=True)
     self.multiCheckbox.stateChanged.connect(self.update)
     multiCheckboxLabel = Label(self, text="Allow multiple peaks:")
-    self.filterLayout.addWidget(self.multiCheckbox, 2, 1)
-    self.filterLayout.addWidget(multiCheckboxLabel, 2, 0)
+    self.filterLayout.addWidget(self.multiCheckbox, 0, 5)
+    self.filterLayout.addWidget(multiCheckboxLabel, 0, 4)
     nmrResidueButton = Button(self, "Show NmrResidues", callback=self.showNmrResiduePopup)
-    self.filterLayout.addWidget(nmrResidueButton, 3, 0)
+    self.filterLayout.addWidget(nmrResidueButton, 1, 0)
     self.filterLayout.addItem(QtGui.QSpacerItem(0, 20), 4, 0)
 
     self.update()
@@ -227,14 +227,14 @@ class AssignmentModule(CcpnDock, Base):
 
     # Needed to use this syntax because wanted double click not single.
     objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
-    objectTable.setFixedHeight(100)
+    objectTable.setFixedHeight(80)
     self.objectTables.append(objectTable)
     if self.vertically_stacked:
       self.selectionLayout.addWidget(objectTable, dim, 1)
-      self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
+      # self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
     else:
       self.selectionLayout.addWidget(objectTable, 1, dim)
-      self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
+      # self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
     objectTable.show()
 
   def createEmptyListWidget(self, dim):
@@ -243,14 +243,14 @@ class AssignmentModule(CcpnDock, Base):
 
     '''
     listWidget = ListWidget(self, callback=self.getNmrResidue)
-    listWidget.setFixedHeight(100)
+    listWidget.setFixedHeight(80)
     self.listWidgets.append(listWidget)
     if self.vertically_stacked:
       self.selectionLayout.addWidget(listWidget, dim, 0)
-      self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
+      # self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
     else:
       self.selectionLayout.addWidget(listWidget, 0, dim)
-      self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
+      # self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
 
   def updateAssignedNmrAtomsListwidgets(self):
     '''Update the listWidget showing which nmrAtoms

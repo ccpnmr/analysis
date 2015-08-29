@@ -60,7 +60,7 @@ class Current:
     # for which the notifier function object must be kept around.
     # The function is attached to the field and is executed after the field value changes
     # In practice this goes through the setter for (the equivalent of) Current.spectra
-    # The notifier function is pased the Current object as its only parameter,
+    # The notifier function is passed the Current object as its only parameter,
     # which allows you to access the project, teh value just changed or anything else.
     # If you need a graphics object (e.g. a module) you must make and register a bound method
     # on the module.

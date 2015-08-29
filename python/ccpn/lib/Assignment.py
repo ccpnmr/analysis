@@ -35,6 +35,7 @@ ATOM_NAMES = ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'C
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms
 
 from sklearn import svm
+from sklearn.tree import DecisionTreeClassifier
 
 def isInterOnlyExpt(string):
   expList = ['HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond']
@@ -167,7 +168,7 @@ def copyAssignments(referencePeakList, matchPeakList):
   refPositions = [numpy.array(peak.position) for peak in referencePeakList.peaks]
   refLabels = [peak.pid for peak in referencePeakList.peaks]
   # print('refAxisCodes', refAxisCodes)
-  clf=svm.SVC()
+  clf = svm.SVC(class_weight='auto', kernel='poly')
   clf.fit(refPositions, refLabels)
 
   matchAxisCodes = matchPeakList.spectrum.axisCodes
@@ -181,17 +182,14 @@ def copyAssignments(referencePeakList, matchPeakList):
       matchArray.append(peak.position[dim])
 
     result = ''.join((clf.predict(numpy.array(matchArray))))
-    checkArray = [i-j for i,j in zip(list(project.getById(result).position), matchArray)]
-    print(project.getById(result), peak, list(project.getById(result).position), matchArray, checkArray)
-
-    if checkArray < list(referencePeakList.spectrum.assignmentTolerances):
+    print(clf.predict(numpy.array(matchArray)), matchArray, peak.position)
     # for value in checkArray:
     #   print(abs(value), peak.peakList.spectrum.assignmentTolerances)
-      print(project.getById(result).position, peak.position)
-      dimNmrAtoms = project.getById(result).dimensionNmrAtoms
-      for axisCode in refAxisCodes:
-        # print(axisCode)
-        peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
+
+    dimNmrAtoms = project.getById(result).dimensionNmrAtoms
+    for axisCode in refAxisCodes:
+      # print(axisCode)
+      peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
 
 def propagateAssignments(peaks, referencePeak=None, tolerances=None):
 

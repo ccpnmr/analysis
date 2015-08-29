@@ -95,7 +95,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.sideBar.setProject(project)
     self.sideBar.fillSideBar(project)
     self.namespace['project'] = project
-    msg  = path + (' created' if isNew else ' opened')
+    msg = path + (' created' if isNew else ' opened')
     self.statusBar().showMessage(msg)
 
     # msg2 = 'project = ' + ('new' if isNew else 'open') + 'Project("+path+")\n'

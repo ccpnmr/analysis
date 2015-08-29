@@ -330,7 +330,7 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
   """Create new child Peak"""
   apiPeakList = parent._wrappedData
   apiPeak = apiPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
-                              annotation=annotation,details=comment)
+                              annotation=annotation, details=comment)
 
   # set peak position
   # NBNB TBD currently unused parameters could be added, and will have to come in here as well

@@ -152,6 +152,27 @@ def getIsotopeCodeOfAxis(axisCode):
   if axisCode[0] == 'H':
     return '1H'
 
+
+def findPeaksInPeakList(peak, peakList):
+
+  peaks = []
+
+  refAxisCodes = peak.peakList.spectrum.axisCodes
+  matchAxisCodes = peakList.spectrum.axisCodes
+
+  refIndices = [refAxisCodes.index(axisCode) for axisCode in refAxisCodes]
+  mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes if i in refAxisCodes]
+
+
+  for peak1 in peakList.peaks:
+
+    if all(abs(peak1.position[mappingArray[dim]] - peak.position[dim]) < peakList.spectrum.assignmentTolerances[mappingArray[dim]] for dim in refIndices):
+        peaks.append(peak)
+
+  return peaks
+
+
+
 def copyAssignments(referencePeakList, matchPeakList):
   """
 
@@ -162,34 +183,14 @@ def copyAssignments(referencePeakList, matchPeakList):
   :param matchPeakList:
 
   """
-  import numpy
-  project = referencePeakList.project
-  refAxisCodes = referencePeakList.spectrum.axisCodes
-  refPositions = [numpy.array(peak.position) for peak in referencePeakList.peaks]
-  refLabels = [peak.pid for peak in referencePeakList.peaks]
-  # print('refAxisCodes', refAxisCodes)
-  clf = svm.SVC(class_weight='auto', kernel='poly')
-  clf.fit(refPositions, refLabels)
+  for peak in referencePeakList.peaks:
+    assignments = peak.dimensionNmrAtoms
+    refAxisCodes = referencePeakList.spectrum.axisCodes
+    peaks = findPeaksInPeakList(peak, matchPeakList)
+    for peak in peaks:
+      for axisCode in refAxisCodes:
+        peak.assignDimension(axisCode=axisCode, value=assignments[refAxisCodes.index(axisCode)])
 
-  matchAxisCodes = matchPeakList.spectrum.axisCodes
-
-
-  mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes if i in refAxisCodes]
-
-  for peak in matchPeakList.peaks:
-    matchArray = []
-    for dim in mappingArray:
-      matchArray.append(peak.position[dim])
-
-    result = ''.join((clf.predict(numpy.array(matchArray))))
-    print(clf.predict(numpy.array(matchArray)), matchArray, peak.position)
-    # for value in checkArray:
-    #   print(abs(value), peak.peakList.spectrum.assignmentTolerances)
-
-    dimNmrAtoms = project.getById(result).dimensionNmrAtoms
-    for axisCode in refAxisCodes:
-      # print(axisCode)
-      peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
 
 def propagateAssignments(peaks, referencePeak=None, tolerances=None):
 
@@ -215,8 +216,6 @@ def propagateAssignments(peaks, referencePeak=None, tolerances=None):
           nmrAtom = dimensionNmrAtoms
 
           dimNmrAtoms[key].append(nmrAtom)
-
-  print('dimNmrAtoms', dimNmrAtoms)
 
   shiftRanges = {}
 

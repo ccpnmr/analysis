@@ -1,4 +1,4 @@
-from ccpn.lib.assignment import copyAssignments, isInterOnlyExpt
+from ccpn.lib.Assignment import copyAssignments, isInterOnlyExpt
 
 
 if len(project.nmrChains) == 0:
@@ -9,40 +9,42 @@ else:
 hsqcPeakList = project.getById('PL:15N-HSQC-115^spc^par.1')
 
 shiftList = project.chemicalShiftLists[0]
+#
+# for peak in hsqcPeakList.peaks:
+#   r = c.newNmrResidue()
+#   a = r.fetchNmrAtom(name='N')
+#   a2 = r.fetchNmrAtom(name='H')
+#   atoms = [[a2], [a]]
+#   # peak.dimensionNmrAtoms = atoms
+#   peak.assignDimension(axisCode='Nh', value=a)
+#   peak.assignDimension(axisCode='Hn', value=a2)
+#   dim1 = peak.peakList.spectrum.axisCodes.index('Nh')
+#   dim2 = peak.peakList.spectrum.axisCodes.index('Hn')
+#   shiftList.newChemicalShift(nmrAtom=a, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Nh')])
+#   shiftList.newChemicalShift(nmrAtom=a2, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Hn')])
 
-for peak in hsqcPeakList.peaks:
-  r = c.newNmrResidue()
-  a = r.fetchNmrAtom(name='N')
-  a2 = r.fetchNmrAtom(name='H')
-  atoms = [[a2], [a]]
-  # peak.dimensionNmrAtoms = atoms
-  peak.assignDimension(axisCode='Nh', value=a)
-  peak.assignDimension(axisCode='Hn', value=a2)
-  dim1 = peak.peakList.spectrum.axisCodes.index('Nh')
-  dim2 = peak.peakList.spectrum.axisCodes.index('Hn')
-  shiftList.newChemicalShift(nmrAtom=a, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Nh')])
-  shiftList.newChemicalShift(nmrAtom=a2, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Hn')])
+
+hncocacb = project.getById('PL:CBCA(CO)NH-125^spc^par.1')
+hncoca = project.getById('PL:HN(CO)CA-117^spc^par.1')
+hncacb = project.getById('PL:126.1')
+hnca =  project.getById('PL:HNCA-120^spc^par.1')
+#
+# copyAssignments(hsqcPeakList, hncocacb)
+# copyAssignments(hncocacb, hncacb)
+# copyAssignments(hncacb, hnca)
+# copyAssignments(hnca, hncoca)
 
 
-peakLists2 = [project.getById('PL:CBCA(CO)NH-125^spc^par.1'), project.getById('PL:HN(CO)CA-117^spc^par.1')]
-peakLists3 = [project.getById('PL:126.1'), project.getById('PL:HNCA-120^spc^par.1')]
+peaklists2 = [hncocacb, hncacb]
 
-copyAssignments(hsqcPeakList, peakLists3[1])
-copyAssignments(peakLists3[1], peakLists2[1])
-copyAssignments(hsqcPeakList, peakLists2[0])
-copyAssignments(peakLists2[0], peakLists3[0])
 
+# copyAssignments(peakLists2[0], project.getById('PL:126.1'))
 
 
 
 
 # copyAssignments(peakLists2[0], project.getById('PL:126.1'))
-
-
-
-
-# copyAssignments(peakLists2[0], project.getById('PL:126.1'))
-for peakList in peakLists2:
+for peakList in peaklists2:
   if isInterOnlyExpt(peakList.spectrum.experimentType):
     for peak in peakList.peaks:
 
@@ -90,6 +92,9 @@ for peakList in peakLists2:
 
 
 
+copyAssignments(hncocacb, hncacb)
+copyAssignments(hncocacb, hncoca)
+
 from sklearn import svm
 import numpy
 nmrResidueLabels = []
@@ -107,7 +112,7 @@ for nmrResidue in project.nmrResidues:
 # # copyAssignments(peakLists2[0], project.getById('PL:126.1'))
 # #
 # pl = project.getById('PL:126.1')
-# clf = svm.SVC(kernel='linear', tol=1e-7)
+# clf = svm.SVC()
 # clf.fit(nmrAtoms, nmrResidueLabels)
 # hncacbPeaks = {}
 # for r in project.nmrResidues:
@@ -121,7 +126,7 @@ for nmrResidue in project.nmrResidues:
 # # keys = []
 # for k, v in hncacbPeaks.items():
 #   print(k, len(v))
-#
+# #
 
 
 #

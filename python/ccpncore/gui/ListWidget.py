@@ -7,15 +7,19 @@ from ccpncore.gui.Menu import Menu
 
 class ListWidget(QtGui.QListWidget, Base):
 
-  def __init__(self, parent, callback=None, **kw):
+  def __init__(self, parent, callback=None, rightMouseCallback=None, **kw):
 
     QtGui.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.callback = None
-
+    self.rightMouseCallback = rightMouseCallback
     if callback is not None:
       self.itemClicked.connect(callback)
 
+
+  def contextCallback(self):
+    self.removeItem()
+    self.rightMouseCallback()
 
   def removeItem(self):
     self.takeItem(self.currentRow())
@@ -40,5 +44,8 @@ class ListWidget(QtGui.QListWidget, Base):
 
   def getContextMenu(self):
     contextMenu = Menu('', self, isFloatWidget=True)
-    contextMenu.addItem("Delete", callback=self.removeItem)
+    if self.rightMouseCallback is None:
+      contextMenu.addItem("Delete", callback=self.removeItem)
+    else:
+      contextMenu.addItem("Delete", callback=self.contextCallback)
     return contextMenu

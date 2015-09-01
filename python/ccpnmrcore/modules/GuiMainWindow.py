@@ -282,6 +282,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     helpMenu.addAction(Action(self, "Command...", callback=self.showCommandHelp))
     helpMenu.addAction(Action(self, "Tutorials...", callback=self.showTutorials))
+    helpMenu.addAction(Action(self, "Show API Documentation", callback=self.showApiDocumentation))
+    helpMenu.addAction(Action(self, "Show CCPN Documentation", callback=self.showWrapperDocumentation))
     helpMenu.addSeparator()
     helpMenu.addAction(Action(self, "About Analysis V3...", callback=self.showAboutPopup))
     helpMenu.addAction(Action(self, "About CCPN...", callback=self.showAboutCcpnPopup))
@@ -323,9 +325,31 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.show()
 
 
+  def showApiDocumentation(self):
+    from ccpncore.gui.CcpnWebView import CcpnWebView
+    from ccpncore.util import Path
+    from ccpncore.gui.Dock import CcpnDock
+    newDock = CcpnDock("API Documentation")
+    apiPath = os.path.join(Path.getPythonDirectory(), 'ccpn', 'doc', 'apidoc', 'api.html')
+    apiView = CcpnWebView(apiPath)
+    newDock.addWidget(apiView)
+    self.dockArea.addDock(newDock)
+
+  def showWrapperDocumentation(self):
+    from ccpncore.gui.CcpnWebView import CcpnWebView
+    from ccpncore.util import Path
+    from ccpncore.gui.Dock import CcpnDock
+    newDock = CcpnDock("CCPN Documentation")
+    apiPath = os.path.join(Path.getPythonDirectory(), 'ccpn', 'doc', 'build', 'html', 'index.html')
+    apiView = CcpnWebView(apiPath)
+    newDock.addWidget(apiView)
+    self.dockArea.addDock(newDock)
+
+
   def showAssignmentModule(self):
     from ccpnmrcore.modules.AssignmentModule import AssignmentModule
-    self.dockArea.addDock(AssignmentModule(self, self._project, self._project._appBase.current.peaks))
+    self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
+    self.dockArea.addDock(self.assignmentModule)
 
   def showNmrResiduePopup(self):
     from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup

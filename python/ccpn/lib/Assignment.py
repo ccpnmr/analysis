@@ -162,12 +162,13 @@ def findPeaksInPeakList(peak, peakList):
 
   refIndices = [refAxisCodes.index(axisCode) for axisCode in refAxisCodes]
   mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes if i in refAxisCodes]
-
+  print(refIndices, refAxisCodes, matchAxisCodes)
 
   for peak1 in peakList.peaks:
 
     if all(abs(peak1.position[mappingArray[dim]] - peak.position[dim]) < peakList.spectrum.assignmentTolerances[mappingArray[dim]] for dim in refIndices):
-        peaks.append(peak)
+        print(peak1.position, peak.position, peak1, peak)
+        peaks.append(peak1)
 
   return peaks
 

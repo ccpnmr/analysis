@@ -106,6 +106,7 @@ class AssignmentModule(CcpnDock, Base):
     self.updateTables()
     self.updateAssignedNmrAtomsListwidgets()
 
+
   def peaksAreCompatible(self):
     '''If multiple peaks are selected, a check is performed
        to determine whether assignment of corresponding
@@ -178,7 +179,7 @@ class AssignmentModule(CcpnDock, Base):
        of dimensions of the currently selected peak(s).
        This method only runs when all peaks have the same
        amount of dimensions as is guaranteed by running
-       peaksAreCompatible.
+       peaksAreCompatible.py
 
     '''
 
@@ -237,12 +238,14 @@ class AssignmentModule(CcpnDock, Base):
       # self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
     objectTable.show()
 
+
   def createEmptyListWidget(self, dim):
     '''Can be used to add a new listWidget before
        setting the content.
 
     '''
-    listWidget = ListWidget(self, callback=self.getNmrResidue)
+    listWidget = ListWidget(self, callback=self.getNmrResidue,
+                            rightMouseCallback=self.updateNmrAtomsFromListWidgets)
     listWidget.setFixedHeight(80)
     self.listWidgets.append(listWidget)
     if self.vertically_stacked:
@@ -257,7 +260,7 @@ class AssignmentModule(CcpnDock, Base):
        are assigned to which peak dimensions. If multiple
        peaks are selected, only the assignment that they
        have in common are shown. Maybe this should be all
-       assignments. You can see that at the peak anotation
+       assignments. You can see that at the peak annotation
        though.
 
     '''
@@ -309,6 +312,20 @@ class AssignmentModule(CcpnDock, Base):
         newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
         peak.assignDimension(axisCode, newAssignments)
     self.update()
+
+  def updateNmrAtomsFromListWidgets(self):
+
+    assignmentArray = [0] * len(self.listWidgets)
+    for listWidget in self.listWidgets:
+      assignments = [self.project.getById(listWidget.item(i).text()) for i in range(listWidget.count())]
+      index = self.listWidgets.index(listWidget)
+      assignmentArray[index] = assignments
+
+    self.peaks[0].dimensionNmrAtoms = assignmentArray
+
+
+
+
 
   def deltaShift(self, nmrAtom, dim):
     '''Calculation of delta shift to add to the table.

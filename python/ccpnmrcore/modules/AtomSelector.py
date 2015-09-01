@@ -45,7 +45,7 @@ class AtomSelector(CcpnDock):
     self.orientation = 'vertical'
     self.moveLabel=False
     pickAndAssignWidget = Widget(self)#
-    pickAndAssignWidget.setMaximumSize(500, 150)
+    pickAndAssignWidget.setMaximumSize(500, 300)
 
     headerLabel = Label(self, text='i-1')
     pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)

@@ -223,11 +223,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
-    
-    # below is crap, but leave it until Rasmus has a better suggestion
-    if not self.strip.haveSetupZWidgets:
-      self.strip.setZWidgets()
-    
+        
     apiDataSource = self.apiDataSource
     if apiDataSource.positiveContourBase == 10000.0: # horrid
       # base has not yet been set, so guess a sensible value

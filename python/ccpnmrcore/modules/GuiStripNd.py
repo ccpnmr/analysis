@@ -35,9 +35,8 @@ from ccpn import Project
 
 from ccpn.lib.wrapper import Spectrum as LibSpectrum
 
-from ccpncore.memops import Notifiers
-
 from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 
 from ccpncore.gui.Button import Button
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
@@ -141,6 +140,7 @@ class GuiStripNd(GuiStrip):
     ###  self.crossHairAction.setChecked(True)
     ###else:
     ###  self.crossHairAction.setChecked(False)
+    self.crossHairAction.setChecked(self.vLine.isVisible())
 
     if self.grid.isVisible():
       self.gridAction.setChecked(True)
@@ -425,5 +425,12 @@ class GuiStripNd(GuiStrip):
 
     return traceMarker
 
+def _spectrumViewCreated(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
+  strip = project._data2Obj[apiStripSpectrumView.strip]
+  if not strip.haveSetupZWidgets:
+    strip.setZWidgets()
+
+# Add notifier functions to Project
+Project._setupNotifier(_spectrumViewCreated, ApiStripSpectrumView, 'postInit')
 
          

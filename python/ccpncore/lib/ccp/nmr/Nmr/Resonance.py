@@ -26,12 +26,11 @@ __version__ = "$Revision$"
 from ccpncore.util import MergeObjects
 from ccpncore.lib.assignment import Assignment
 from ccpncore.memops.ApiError import ApiError
-from ccpncore.api.ccp.nmr import Nmr
-from ccpncore.lib.molecule.Labelling import _getIsotopomerSingleAtomFractions, _singleAtomFractions, \
-  _getIsotopomerAtomPairFractions, _atomPairFractions
+# from ccpncore.lib.molecule.Labelling import _getIsotopomerSingleAtomFractions, _singleAtomFractions, \
+#   _getIsotopomerAtomPairFractions, _atomPairFractions
 
 
-def absorbResonance(resonanceA:Nmr.Resonance, resonanceB:Nmr.Resonance) -> None:
+def absorbResonance(resonanceA, resonanceB) -> None:
   """
   Transfers all information from resonanceB to resonanceA and deletes resonanceB
 
@@ -137,7 +136,7 @@ def absorbResonance(resonanceA:Nmr.Resonance, resonanceB:Nmr.Resonance) -> None:
   return resonanceA
 
 
-def getBoundResonances(resonance:Nmr.Resonance) -> tuple:
+def getBoundResonances(resonance) -> tuple:
   """get resonances that are known to be directly bound to this one, using ONLY resonance assignment
   """
 

@@ -23,7 +23,6 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.api.ccp.molecule import Molecule
 from ccpncore.lib.chemComp import Io as chemCompIo
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.molecule.MoleculeModify import _getLinearChemCompData
@@ -323,6 +322,8 @@ def addLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
                  redoKwargs = {'seqCodeStart':seqCodeStart, 'isCyclic':isCyclic})
 
   # call notifiers:
+  # NBNB the im port MUST be inside a function as we can get circular import problems otherwise
+  from ccpncore.api.ccp.molecule import Molecule
   for clazz, objs in (
    (Molecule.MolResidue, molResidues),
    (Molecule.MolResLinkEnd, molResLinkEnds),

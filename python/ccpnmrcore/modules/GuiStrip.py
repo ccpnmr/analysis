@@ -355,9 +355,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   def mouseClicked(self, event):
     print(event)
 
-  def mouseMoved(self, event):
+  def mouseMoved(self, position):
 
-    position = event
     if self.plotWidget.sceneBoundingRect().contains(position):
       mousePoint = self.viewBox.mapSceneToView(position)
       axisPositionDict = self.axisPositionDict

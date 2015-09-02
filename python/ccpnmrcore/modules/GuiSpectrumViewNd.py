@@ -27,6 +27,8 @@ import numpy
 from OpenGL import GL
 from PyQt4 import QtCore, QtGui
 
+import pyqtgraph as pg
+
 ###from ccpncore.gui.ToolButton import ToolButton
 from ccpncore.util import Colour
 
@@ -99,17 +101,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
     
 
-        
-    apiDataSource = self.apiStripSpectrumView.spectrumView.dataSource
-    if not self.positiveContourColour:
-      apiDataSource.positiveContourColour = Colour.spectrumHexColours[self._parent._appBase.colourIndex]
+    positiveContourColour = self._getColour('positiveContourColour')
+    if not positiveContourColour:
+      self.spectrum.positiveContourColour = Colour.spectrumHexColours[self._parent._appBase.colourIndex]
       self._parent._appBase.colourIndex += 1
       self._parent._appBase.colourIndex %= len(Colour.spectrumHexColours)
 
-    if not self.negativeContourColour:
-    # Changed to guiSpectrumView.negativeContourColour, which picks up from either
-    # SpectrumView or DataSource
-      apiDataSource.negativeContourColour = Colour.spectrumHexColours[self._parent._appBase.colourIndex]
+    negativeContourColour = self._getColour('negativeContourColour')
+    if not negativeContourColour:
+      self.spectrum.negativeContourColour = Colour.spectrumHexColours[self._parent._appBase.colourIndex]
       self._parent._appBase.colourIndex += 1
       self._parent._appBase.colourIndex %= len(Colour.spectrumHexColours)
 
@@ -131,7 +131,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # for strip in self.strips:
     self.addSpectrumItem(self.strip)
 
-
+    self._setupTrace()
+    
     # Notifiers.registerNotify(self.newPeakListView, 'ccpnmr.gui.Task.PeakListView', '__init__')
     #
     # spectrum = self.spectrum
@@ -163,6 +164,120 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def removeSpectrumItem(self, strip):
     if self in strip.plotWidget.scene().items():
       strip.plotWidget.scene().removeItem(self)
+
+  def _getColour(self, colourAttr, defaultColour=None):
+    
+    colour = getattr(self, colourAttr)
+    if not colour:
+      colour = getattr(self.spectrum, colourAttr)
+      
+    if not colour:
+      colour = defaultColour
+      
+    colour = Colour.colourNameToHexDict.get(colour, colour)  # works even if None
+      
+    return colour
+    
+  def _setupTrace(self):
+    
+    self.traceScale = 1.0e-7 # TBD: need a better way of setting this
+        
+    self.hTrace = pg.PlotDataItem()
+    self.strip.plotWidget.scene().addItem(self.hTrace)
+    
+    self.vTrace = pg.PlotDataItem()
+    self.strip.plotWidget.scene().addItem(self.vTrace) 
+    
+  def updateTrace(self, position, positionPixel, updateHTrace=True, updateVTrace=True):
+        
+    if not (updateHTrace or updateVTrace):
+      self.hTrace.setData([], [])
+      self.vTrace.setData([], [])
+      return
+      
+    colour = self._getColour('sliceColour', '#aaaaaa')
+
+    spectrum = self.spectrum
+    orderedDataDims = self.apiStripSpectrumView.spectrumView.orderedDataDims
+    point = []
+    for n, dataDim in enumerate(orderedDataDims):
+      dim = dataDim.dim - 1
+      minFrequency = spectrum.minAliasedFrequencies[dim]
+      if minFrequency is None:
+        totalPointCount = spectrum.totalPointCounts[dim]
+        minFrequency = spectrum.getDimValueFromPoint(dim, totalPointCount-1.0)
+      maxFrequency = spectrum.maxAliasedFrequencies[dim]
+      if maxFrequency is None:
+        maxFrequency = spectrum.getDimValueFromPoint(dim, 0.0)
+      inRange = (minFrequency <= position[n] <= maxFrequency)
+      if n == 0:
+        updateVTrace = updateVTrace and inRange
+        xDim = dim
+        xMinFrequency = int(spectrum.getDimPointFromValue(dim, maxFrequency))
+        xMaxFrequency = int(spectrum.getDimPointFromValue(dim, minFrequency))
+        xNumPoints = dataDim.numPoints
+      elif n == 1:
+        updateHTrace = updateHTrace and inRange
+        yDim = dim
+        yMinFrequency = int(spectrum.getDimPointFromValue(dim, maxFrequency))
+        yMaxFrequency = int(spectrum.getDimPointFromValue(dim, minFrequency))
+        yNumPoints = dataDim.numPoints
+      elif not inRange:
+        self.hTrace.setData([], [])
+        self.vTrace.setData([], [])
+        return
+      pnt = int(spectrum.getDimPointFromValue(dim, position[n])) % dataDim.numPoints # TBD if numPointsOrig != numPoints
+      point.append(pnt)
+    
+    # unfortunately it looks like we have to work in pixels, not ppm, yuck
+    strip = self.strip
+    plotWidget = strip.plotWidget
+    plotItem = plotWidget.plotItem
+    viewBox = strip.viewBox
+    viewRegion = plotWidget.viewRange()
+    
+    if updateHTrace:
+      data = spectrum.getSliceData(point, sliceDim=xDim)
+      x = numpy.array([spectrum.getDimValueFromPoint(xDim, p) for p in range(xMinFrequency, xMaxFrequency+1)])
+      # scale from ppm to pixels
+      pixelViewBox0 = plotItem.getAxis('left').width()
+      pixelViewBox1 = pixelViewBox0 + viewBox.width()
+      region1, region0 = viewRegion[0]
+      x -= region0
+      x *= (pixelViewBox1-pixelViewBox0) / (region1-region0)
+      x += pixelViewBox0
+      
+      pixelViewBox0 = plotItem.getAxis('bottom').height()
+      pixelViewBox1 = pixelViewBox0 + viewBox.height()
+      # - sign below because ppm scale is backwards
+      v = positionPixel[1] - self.traceScale * (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
+      
+      self.hTrace.setPen({'color': colour})
+      self.hTrace.setData(x, v)
+    else:
+      self.hTrace.setData([], [])
+      
+    if updateVTrace:
+      data = spectrum.getSliceData(point, sliceDim=yDim)
+      y = numpy.array([spectrum.getDimValueFromPoint(yDim, p) for p in range(yMinFrequency, yMaxFrequency+1)])
+      # scale from ppm to pixels
+      pixelViewBox0 = plotItem.getAxis('bottom').height()
+      pixelViewBox1 = pixelViewBox0 + viewBox.height()
+      region0, region1 = viewRegion[1]
+      y -= region0
+      y *= (pixelViewBox1-pixelViewBox0) / (region1-region0)
+      ###y += pixelViewBox0  # not sure why this should be commented out...
+      
+      pixelViewBox0 = plotItem.getAxis('left').width()
+      pixelViewBox1 = pixelViewBox0 + viewBox.width()
+      # no - sign below because ppm scale is backwards and pixel y scale is also backwards
+      # (assuming that we want positive signal to point towards the right)
+      v = positionPixel[0] + self.traceScale * (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency+1)])
+      
+      self.vTrace.setPen({'color': colour})
+      self.vTrace.setData(v, y)
+    else:
+      self.vTrace.setData([], [])
 
   ###def connectStrip(self, strip):
   ###  item = self.spectrumItems[strip]
@@ -248,8 +363,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self._project._logger.warning("No data file found for %s" % self)
 
 
-    posColour = Colour.scaledRgba(apiDataSource.positiveContourColour) # TBD: for now assume only one colour
-    negColour = Colour.scaledRgba(apiDataSource.negativeContourColour)
+    posColour = Colour.scaledRgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
+    negColour = Colour.scaledRgba(self._getColour('negativeContourColour')) # and assumes these attributes are set
 
     painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
 

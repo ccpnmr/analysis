@@ -28,7 +28,8 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     self.chainPulldown.setData(nmrChains)
     self.seqCodeLabel = Label(self, "Sequence Code: ", grid=(2, 0))
     self.seqCodePulldown = PulldownList(self, grid=(2, 1))
-    sequenceCodes = ["%s (%s)" % (nmrResidue.sequenceCode, nmrResidue.name) for nmrResidue in project.nmrResidues]
+    sequenceCodes = ["%s (%s)" % (nmrResidue.sequenceCode, nmrResidue.residueType)
+                     for nmrResidue in project.nmrResidues]
     self.seqCodePulldown.setData(sequenceCodes)
 
 
@@ -64,7 +65,7 @@ class NmrResiduePopup(QtGui.QDialog, Base):
       currentNmrResidue = self.project._appBase.current.nmrResidue
       self.nmrResidueLabel.setText("NMR Residue: %s" % currentNmrResidue.id)
       self.chainPulldown.setCurrentIndex(self.chainPulldown.findText(currentNmrResidue.nmrChain.pid))
-      sequenceCode = "%s (%s)" % (currentNmrResidue.sequenceCode, currentNmrResidue.name)
+      sequenceCode = "%s (%s)" % (currentNmrResidue.sequenceCode, currentNmrResidue.residueType)
       self.seqCodePulldown.setCurrentIndex(self.seqCodePulldown.findText(sequenceCode))
       self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.findText(self.getCcpCodeFromNmrResidueName(currentNmrResidue)))
       self.leftoverPoss.setText(self.getLeftOverResidues(currentNmrResidue))
@@ -78,7 +79,7 @@ class NmrResiduePopup(QtGui.QDialog, Base):
   def getCcpCodeFromNmrResidueName(self, currentNmrResidue):
     if currentNmrResidue.residue is not None:
       # print(currentNmrResidue.residue)
-      return currentNmrResidue.name[0]+currentNmrResidue.name[1].lower()+currentNmrResidue.name[2].lower()
+      return currentNmrResidue.residueType.capitalize()
 
   def showNmrAtomPopup(self):
     popup = NmrAtomPopup(self)
@@ -88,7 +89,7 @@ class NmrResiduePopup(QtGui.QDialog, Base):
   def getLeftOverResidues(self, currentNmrResidue):
     leftovers = []
     for residue in self.project.residues:
-      if residue.name == self.residueTypePulldown.currentText().upper()\
+      if residue.residueType == self.residueTypePulldown.currentText().upper()\
               and residue.id != currentNmrResidue.id:
         leftovers.append(residue.id)
     return ", ".join(leftovers)

@@ -138,8 +138,13 @@ class Peak(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
+  def axisCodes(self) -> tuple:
+    """Spectrum axis codes in dimension order matching position."""
+    return self.peakList.spectrum.axisCodes
+
+  @property
   def position(self) -> tuple:
-    """Peak position in ppm (or other relevant unit)."""
+    """Peak position in ppm (or other relevant unit) in dimension order."""
     return tuple(x.value for x in self._wrappedData.sortedPeakDims())
 
   @position.setter
@@ -213,7 +218,7 @@ class Peak(AbstractWrapperObject):
   def assignedNmrAtoms(self) -> tuple:
     """Peak assignment - a list of lists of NmrAtom combinations
     (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None
-    Assignments per dimension are given in 'dimensionAssignments'."""
+    Assignments per dimension are given in 'dimensionNmrAtoms'."""
     data2Obj = self._project._data2Obj
     apiPeak = self._wrappedData
     peakDims = apiPeak.sortedPeakDims()
@@ -258,7 +263,7 @@ class Peak(AbstractWrapperObject):
     apiPeak.setAssignments(resonances)
 
   def addAssignment(self, value:(NmrAtom,)):
-    """Add a peak assignment - a list of one NmrAtom or NmrAtom or pid for each dimension"""
+    """Add a peak assignment - a list of one NmrAtom for each dimension"""
 
     if len(value) != self._wrappedData.peakList.numDim:
       raise ValueError("Length of assignment value %s does not match peak dimensionality %s "

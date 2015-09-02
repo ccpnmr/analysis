@@ -54,7 +54,7 @@ class NmrResidue(AbstractWrapperObject):
   
   @property
   def sequenceCode(self) -> str:
-    """Residue sequence code and id (e.g. '1', '127B', '@157+1) """
+    """Residue sequence code and id (e.g. '1', '127B', '\@157+1) """
     return self._wrappedData.sequenceCode
 
   @sequenceCode.setter
@@ -64,7 +64,7 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """Residue local ID"""
-    return Pid.makeId(self.sequenceCode, self.name)
+    return Pid.makeId(self.sequenceCode, self.residueType)
     
   @property
   def _parent(self) -> NmrChain:
@@ -83,8 +83,8 @@ class NmrResidue(AbstractWrapperObject):
   nmrChain = _parent
 
   @property
-  def name(self) -> str:
-    """Residue type name string (e.g. 'Ala')"""
+  def residueType(self) -> str:
+    """Residue type string (e.g. 'Ala')"""
     apiResonanceGroup = self._wrappedData
     apiResidue = apiResonanceGroup.assignedResidue
     if apiResidue is None:
@@ -92,19 +92,19 @@ class NmrResidue(AbstractWrapperObject):
     else:
       return apiResidue.code3Letter
 
-  @name.setter
-  def name(self, value:str):
+  @residueType.setter
+  def residueType(self, value:str):
     apiResonanceGroup = self._wrappedData
     apiResidue = apiResonanceGroup.assignedResidue
     if apiResidue:
       if apiResidue.code3Letter == value:
         return
       else:
-        raise ValueError("Cannot reset NmrResidue name while NmrResidue is assigned")
+        raise ValueError("Cannot reset NmrResidue residueType while NmrResidue is assigned")
 
     apiResonanceGroup.residueType = value
 
-    # get chem comp ID strings from residue name
+    # get chem comp ID strings from residue type
     tt = self._project._residueName2chemCompId.get(value)
     if tt is not None:
       apiResonanceGroup.molType, apiResonanceGroup.ccpCode = tt
@@ -176,7 +176,7 @@ def getter(self:NmrResidue) -> tuple:
   return tuple(sorted(self._project._data2Obj.get(x) for x in apiResult))
 NmrResidue.nmrResidueCluster = property(getter, None, None,
                                         "All NmrResidues with the same sequenceCode "
-                                        "except for different offSets suffixes '_1', '+1', etc.")
+                                        "except for different offSet suffixes '_1', '+1', etc.")
 
 def getter(self:NmrResidue) -> NmrResidue:
   obj = self._wrappedData.nextResidue
@@ -218,26 +218,27 @@ Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue
 del getter
 del setter
     
-def newNmrResidue(parent:NmrChain, name:str=None, sequenceCode:str=None, comment:str=None) -> NmrResidue:
+def newNmrResidue(parent:NmrChain, residueType:str=None, sequenceCode:str=None, comment:str=None) -> NmrResidue:
   """Create new child NmrResidue"""
   apiNmrChain = parent._wrappedData
   nmrProject = apiNmrChain.nmrProject
-  obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=name, details=comment,
-                                     nmrChain=apiNmrChain)
+  obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=residueType, details=comment,
+                                     residueType=residueType, nmrChain=apiNmrChain)
   return parent._project._data2Obj.get(obj)
 
 
-def fetchNmrResidue(parent:NmrChain, sequenceCode:str=None, name:str=None) -> NmrResidue:
-  """Fetch NmrResidue with name=name, creating it if necessary"""
+def fetchNmrResidue(parent:NmrChain, sequenceCode:str=None, residueType:str=None) -> NmrResidue:
+  """Fetch NmrResidue with residueType=residueType, creating it if necessary"""
   apiResonanceGroup = parent._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
   if apiResonanceGroup:
-    if name is not None and name != apiResonanceGroup.name:
+    if residueType is not None and residueType != apiResonanceGroup.residueType:
       raise ValueError("%s has residue type %s, not %s" % (sequenceCode,
-                                                           apiResonanceGroup.name, name))
+                                                           apiResonanceGroup.residueType,
+                                                           residueType))
     else:
       result = parent._project._data2Obj.get(apiResonanceGroup)
   else:
-    result = parent.newNmrResidue(name=name, sequenceCode=sequenceCode)
+    result = parent.newNmrResidue(residueType=residueType, sequenceCode=sequenceCode)
   #
   return result
 

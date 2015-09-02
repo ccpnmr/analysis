@@ -69,7 +69,7 @@ class SpectrumHit(AbstractWrapperObject):
 
   @property
   def substanceName(self) -> int:
-    """NAme of hit substance"""
+    """Name of hit substance"""
     return self._wrappedData.substanceName
 
   @property

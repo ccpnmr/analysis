@@ -27,7 +27,7 @@ from ccpncore.util import MergeObjects
 from ccpncore.lib.assignment import Assignment
 from ccpncore.memops.ApiError import ApiError
 from ccpncore.api.ccp.nmr import Nmr
-from ccpncore.lib.molecule.Labeling import _getIsotopomerSingleAtomFractions, _singleAtomFractions, \
+from ccpncore.lib.molecule.Labelling import _getIsotopomerSingleAtomFractions, _singleAtomFractions, \
   _getIsotopomerAtomPairFractions, _atomPairFractions
 
 

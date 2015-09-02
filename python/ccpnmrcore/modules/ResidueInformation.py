@@ -55,7 +55,7 @@ class ResidueInformation(CcpnDock):
 
     foundResidues = []
     for residue in self.selectedChain.residues:
-      if residue.name == self.selectedResidueType.upper():
+      if residue.residueType == self.selectedResidueType.upper():
         foundResidues.append([residue.previousResidue, residue, residue.nextResidue])
     print(foundResidues)
     layout = self.residueWidget.layout()

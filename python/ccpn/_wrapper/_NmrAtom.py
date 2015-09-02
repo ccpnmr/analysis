@@ -41,7 +41,7 @@ class NmrAtom(AbstractWrapperObject):
   className = 'NmrAtom'
 
   #: Name of plural link to instances of class
-  _pluralLinkName = 'atoms'
+  _pluralLinkName = 'nmrAtoms'
   
   #: List of child classes.
   _childClasses = []
@@ -90,7 +90,28 @@ class NmrAtom(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: NmrResidue)-> list:
     """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue"""
     return sorted(parent._wrappedData.resonances, key=operator.attrgetter('name'))
-    
+
+def getter(self:Atom) -> NmrAtom:
+  nmrResidue = self.residue.nmrResidue
+  if nmrResidue is None:
+    return None
+  else:
+    obj = nmrResidue._wrappedData.findFirstResonance(name=self._wrappedData.name)
+    return None if obj is None else self._project._data2Obj.get(obj)
+
+def setter(self:Atom, value:NmrAtom):
+  oldValue = self.nmrAtom
+  if oldValue is value:
+    return
+  elif oldValue is not None:
+    oldValue.atom = None
+
+  if value is not None:
+    value.atom = self
+Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
+
+del getter
+del setter
     
 def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
   """Create new child NmrAtom. If name is None, use nucleus@serial"""

@@ -309,7 +309,7 @@ def _makeMolecularSystemFrame(chains):
 
     for ii, residue in enumerate(residues):
       sequenceCode = residue.sequenceCode
-      residueType = residue.name
+      residueType = residue.residueType
       apiMolResidue = apiMolResidues[ii]
       isLinearPolymer = apiMolResidue.chemComp.isLinearPolymer
 

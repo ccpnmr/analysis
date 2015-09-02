@@ -112,7 +112,7 @@ class Project(AbstractWrapperObject):
                     else apiClassOrName._metaclass.qualifiedName())
 
     dot = '_dot_'
-    wrapperFuncName = '%s%s%s' % (func.__module__.replace('.', dot), dot, func.__name__)
+    wrapperFuncName = '_%s%s%s' % (func.__module__.replace('.', dot), dot, func.__name__)
 
     setattr(Project, wrapperFuncName, func)
     Project._apiNotifiers.append((wrapperFuncName, parameterDict, apiClassName, apiFuncName))

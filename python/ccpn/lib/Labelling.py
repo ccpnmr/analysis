@@ -1,4 +1,4 @@
-"""molecule labeling library functions
+"""molecule labelling library functions
 
 """
 #=========================================================================================
@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.molecule import Labeling
+from ccpncore.lib.molecule import Labelling
 from ccpn import Project
 from ccpn import Atom
 from ccpn import NmrAtom
@@ -31,8 +31,8 @@ from ccpncore.util.Pid import Pid
 from collections.abc import Sequence
 
 
-def atomLabelingFractions(project:Project, atom:(Atom,NmrAtom,str), labeling:str) -> dict:
-  """get {isotopeCode:labelingFraction} in given sample for atom/nmrAtom or ID string"""
+def atomLabellingFractions(project:Project, atom:(Atom,NmrAtom,str), labelling:str) -> dict:
+  """get {isotopeCode:labellingFraction} in given sample for atom/nmrAtom or ID string"""
 
   atomId = atom if isinstance(atom, str) else atom.id
 
@@ -42,20 +42,20 @@ def atomLabelingFractions(project:Project, atom:(Atom,NmrAtom,str), labeling:str
     if len(fields) == 4:
       atomName = fields[3]
       residueType = fields[2]
-      return Labeling.chemAtomLabelFractions(project, labeling, residueType, atomName)
+      return Labelling.chemAtomLabelFractions(project, labelling, residueType, atomName)
 
     else:
       # No valid parameters found, return empty dict
       return {}
 
   else:
-    return Labeling.molAtomLabelFractions(labeling, useAtom._wrappedData.residue.molResidue,
+    return Labelling.molAtomLabelFractions(labelling, useAtom._wrappedData.residue.molResidue,
                                           useAtom.name)
 
 
 
-def atomPairLabelingFractions(project:Project, atomPair:Sequence, labeling:str) -> dict:
-  """get {(isotopeCode1,isotopeCode2):labelingFraction with given labeling for atom pair
+def atomPairLabellingFractions(project:Project, atomPair:Sequence, labelling:str) -> dict:
+  """get {(isotopeCode1,isotopeCode2):labellingFraction with given labelling for atom pair
   each atom in atomPair may be an Atom, an NmrAtom, or an atom ID string """
   atomIds = tuple(x if isinstance(x, str) else x.id for x in atomPair)
 
@@ -72,68 +72,68 @@ def atomPairLabelingFractions(project:Project, atomPair:Sequence, labeling:str) 
         break
     else:
       if len(residueTypes) == 1:
-        return Labeling.chemAtomPairLabelFractions(project, labeling, residueTypes.pop(), atomNames)
+        return Labelling.chemAtomPairLabelFractions(project, labelling, residueTypes.pop(), atomNames)
 
   else:
     residues = tuple(x._wrappedData.residue.molResidue for x in useAtoms)
     atomNames = tuple(x.name for x in useAtoms)
-    return Labeling.molAtomLabelPairFractions(labeling, residues, atomNames)
+    return Labelling.molAtomLabelPairFractions(labelling, residues, atomNames)
 
   # no valid return - return empty
   return {}
 
 
-def sampleChainLabeling(sample:Sample, chainCode:str) -> str:
-  """Get labeling string for chain chainCode in sample
-  If chainCode does not match a SampleComponent, look for unambiguous global labeling:
-  Heuristics: If there is only one SampleComponent, use that labeling
-  If all SAmpleComponents with explicit chainCodes have the same labeliing, use that labeling"""
+def sampleChainLabelling(sample:Sample, chainCode:str) -> str:
+  """Get labelling string for chain chainCode in sample
+  If chainCode does not match a SampleComponent, look for unambiguous global labelling:
+  Heuristics: If there is only one SampleComponent, use that labelling
+  If all SAmpleComponents with explicit chainCodes have the same labeliing, use that labelling"""
 
-  labeling = Labeling.NULL_LABELING
+  labelling = Labelling.NULL_LABELLING
 
   sampleComponents = sample.sortedSampleComponents()
   if len(sampleComponents) == 1:
-    labeling = sampleComponents[0].labeling
+    labelling = sampleComponents[0].labelling
 
   else:
     for sampleComponent in sampleComponents:
       if chainCode in sampleComponent.chainCodes:
-        labeling = sampleComponent.labeling
+        labelling = sampleComponent.labelling
         break
 
     else:
-      labelings = [x.labeling for x in sample.sampleComponents if x.chainCodes]
-      if len(labelings) == 1:
-        # Only one labeling in use in sample - use it
-        labeling = labelings.pop()
+      labellings = [x.labelling for x in sample.sampleComponents if x.chainCodes]
+      if len(labellings) == 1:
+        # Only one labelling in use in sample - use it
+        labelling = labellings.pop()
   #
-  return labeling
+  return labelling
 
 
-def sampleLabelingFractions(sample:Sample, atom:(Atom,NmrAtom,str)) -> dict:
-  """get {isotopeCode:labelingFraction} with given labeling for atom/nmrAtom or ID string"""
+def sampleLabellingFractions(sample:Sample, atom:(Atom,NmrAtom,str)) -> dict:
+  """get {isotopeCode:labellingFraction} with given labelling for atom/nmrAtom or ID string"""
 
   atomId = atom if isinstance(atom, str) else atom.id
   fields = Pid(atomId).fields
   if len(fields) == 4:
     chainCode, dummy, residueType, atomName = fields
-    labeling = sampleChainLabeling(sample, chainCode)
-    if labeling == Labeling.NULL_LABELING:
-      # No labeling found - return empty
+    labelling = sampleChainLabelling(sample, chainCode)
+    if labelling == Labelling.NULL_LABELLING:
+      # No labelling found - return empty
       return {}
     else:
-      return atomLabelingFractions(sample._project, atomId, labeling)
+      return atomLabellingFractions(sample._project, atomId, labelling)
   else:
     # Not a valid atom ID - return empty
     return {}
 
 
-def samplePairLabelingFractions(sample:Sample, atomPair:Sequence) -> dict:
-  """get {(isotopeCode1,isotopeCode2):labelingFraction in given sample for atom pair
+def samplePairLabellingFractions(sample:Sample, atomPair:Sequence) -> dict:
+  """get {(isotopeCode1,isotopeCode2):labellingFraction in given sample for atom pair
   each atom in atomPair may be an Atom, an NmrAtom, or an atom ID string """
   atomIds = tuple(x if isinstance(x, str) else x.id for x in atomPair)
 
-  labelings = set()
+  labellings = set()
   residueTypes = set()
   atomNames = []
   for atomId in atomIds:
@@ -141,22 +141,22 @@ def samplePairLabelingFractions(sample:Sample, atomPair:Sequence) -> dict:
     if len(fields) == 4:
       atomNames.append(fields[3])
       residueTypes.add(fields[2])
-      labelings.add(sampleChainLabeling(sample, fields[0]))
+      labellings.add(sampleChainLabelling(sample, fields[0]))
     else:
       break
 
   else:
-    if len(labelings) == 1:
-      labeling = labelings.pop()
+    if len(labellings) == 1:
+      labelling = labellings.pop()
       useAtoms = tuple(sample._project.getAtom(x) for x in atomIds)
       if None in useAtoms:
         if len(residueTypes) == 1:
-          return Labeling.chemAtomPairLabelFractions(sample._project, labeling, residueTypes.pop(),
+          return Labelling.chemAtomPairLabelFractions(sample._project, labelling, residueTypes.pop(),
                                                      atomNames)
 
       else:
         residues = tuple(x._wrappedData.residue.molResidue for x in useAtoms)
-        return Labeling.molAtomLabelPairFractions(labeling, residues, atomNames)
+        return Labelling.molAtomLabelPairFractions(labelling, residues, atomNames)
 
   # No valid return found, return empty dict
   return {}

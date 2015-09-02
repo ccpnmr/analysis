@@ -143,7 +143,7 @@ def  _addClassField(Current, field):
       func(self)
 
   def getter(self):
-    return list(getField(self))
+    return tuple(getField(self))
   def setter(self, value):
     setField(self, list(value))
   #
@@ -161,6 +161,11 @@ def  _addClassField(Current, field):
     setField(self, getField(self) + [value])
   #
   setattr(Current, 'add' + field.capitalize()[:-1], adder)
+
+  def remover(self, value):
+    getField(self).remove(value)
+  #
+  setattr(Current, 'remove' + field.capitalize()[:-1], remover)
 
   def clearer(self):
     getField(self).clear()

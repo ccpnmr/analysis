@@ -35,7 +35,6 @@ ATOM_NAMES = ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'C
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms
 
 from sklearn import svm
-from sklearn.tree import DecisionTreeClassifier
 
 def isInterOnlyExpt(string):
   expList = ['HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond']
@@ -152,28 +151,6 @@ def getIsotopeCodeOfAxis(axisCode):
   if axisCode[0] == 'H':
     return '1H'
 
-
-def findPeaksInPeakList(peak, peakList):
-
-  peaks = []
-
-  refAxisCodes = peak.peakList.spectrum.axisCodes
-  matchAxisCodes = peakList.spectrum.axisCodes
-
-  refIndices = [refAxisCodes.index(axisCode) for axisCode in refAxisCodes]
-  mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes if i in refAxisCodes]
-  print(refIndices, refAxisCodes, matchAxisCodes)
-
-  for peak1 in peakList.peaks:
-
-    if all(abs(peak1.position[mappingArray[dim]] - peak.position[dim]) < peakList.spectrum.assignmentTolerances[mappingArray[dim]] for dim in refIndices):
-        print(peak1.position, peak.position, peak1, peak)
-        peaks.append(peak1)
-
-  return peaks
-
-
-
 def copyAssignments(referencePeakList, matchPeakList):
   """
 
@@ -184,14 +161,37 @@ def copyAssignments(referencePeakList, matchPeakList):
   :param matchPeakList:
 
   """
-  for peak in referencePeakList.peaks:
-    assignments = peak.dimensionNmrAtoms
-    refAxisCodes = referencePeakList.spectrum.axisCodes
-    peaks = findPeaksInPeakList(peak, matchPeakList)
-    for peak in peaks:
-      for axisCode in refAxisCodes:
-        peak.assignDimension(axisCode=axisCode, value=assignments[refAxisCodes.index(axisCode)])
+  import numpy
+  project = referencePeakList.project
+  refAxisCodes = referencePeakList.spectrum.axisCodes
+  refPositions = [numpy.array(peak.position) for peak in referencePeakList.peaks]
+  refLabels = [peak.pid for peak in referencePeakList.peaks]
+  # print('refAxisCodes', refAxisCodes)
+  clf=svm.SVC()
+  clf.fit(refPositions, refLabels)
 
+  matchAxisCodes = matchPeakList.spectrum.axisCodes
+
+
+  mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes if i in refAxisCodes]
+
+  for peak in matchPeakList.peaks:
+    matchArray = []
+    for dim in mappingArray:
+      matchArray.append(peak.position[dim])
+
+    result = ''.join((clf.predict(numpy.array(matchArray))))
+    checkArray = [i-j for i,j in zip(list(project.getById(result).position), matchArray)]
+    print(project.getById(result), peak, list(project.getById(result).position), matchArray, checkArray)
+
+    if checkArray < list(referencePeakList.spectrum.assignmentTolerances):
+    # for value in checkArray:
+    #   print(abs(value), peak.peakList.spectrum.assignmentTolerances)
+      print(project.getById(result).position, peak.position)
+      dimNmrAtoms = project.getById(result).dimensionNmrAtoms
+      for axisCode in refAxisCodes:
+        # print(axisCode)
+        peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
 
 def propagateAssignments(peaks, referencePeak=None, tolerances=None):
 
@@ -217,6 +217,8 @@ def propagateAssignments(peaks, referencePeak=None, tolerances=None):
           nmrAtom = dimensionNmrAtoms
 
           dimNmrAtoms[key].append(nmrAtom)
+
+  print('dimNmrAtoms', dimNmrAtoms)
 
   shiftRanges = {}
 

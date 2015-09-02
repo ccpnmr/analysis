@@ -95,7 +95,7 @@ class PeakList(AbstractWrapperObject):
 
   @property
   def chemicalShiftList(self) -> ChemicalShiftList:
-    """ChemicalShiftList associated with Spectrum."""
+    """ChemicalShiftList associated with PeakList."""
     return self._project._data2Obj.get(self._wrappedData.shiftList)
 
   @chemicalShiftList.setter
@@ -103,10 +103,7 @@ class PeakList(AbstractWrapperObject):
 
     value = self.getById(value) if isinstance(value, str) else value
     apiPeakList = self._wrappedData
-    if value is None:
-      apiPeakList.shiftList = None
-    else:
-      apiPeakList.shiftList = value._wrappedData
+    apiPeakList.shiftList = None if value is None else value._wrappedData
     
   # Implementation functions
   @classmethod

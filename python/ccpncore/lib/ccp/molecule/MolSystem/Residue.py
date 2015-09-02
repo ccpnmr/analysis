@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.lib.molecule import MoleculeQuery
-from ccpncore.lib.molecule import Labeling
+from ccpncore.lib.molecule import Labelling
 
 def findLinkedResidue(residue, linkCode:str='prev'):
   """find residue linked to current with link of type 'linkCode' (defaults to 'prev')
@@ -165,7 +165,7 @@ def getResidueObservableAtoms(residue, refExperiment=None, labelling=None,
         continue
 
       if isotopomers:
-        fractionDict = Labeling._getIsotopomerSingleAtomFractions(isotopomers,atom.name,
+        fractionDict = Labelling._getIsotopomerSingleAtomFractions(isotopomers,atom.name,
                                                                   chemAtom.subType)
         # Exclude if no isotope incorporation above threshold
         fraction = fractionDict.get(isotope, minFraction)
@@ -173,7 +173,7 @@ def getResidueObservableAtoms(residue, refExperiment=None, labelling=None,
           continue
 
       elif labelling:
-        fractionDict = Labeling._singleAtomFractions(labelling, resId, atom.name)
+        fractionDict = Labelling._singleAtomFractions(labelling, resId, atom.name)
         if not fractionDict:
           continue
 
@@ -318,7 +318,7 @@ def getResidueObservableAtoms(residue, refExperiment=None, labelling=None,
                   isotopomersA = isotopomerDict.get(residueA)
                   atomNames    = (atomA.name, atomB.name)
                   subTypes     = (subTypeA, subTypeB)
-                  pairDict     = Labeling._getIsotopomerAtomPairFractions(isotopomersA, atomNames,
+                  pairDict     = Labelling._getIsotopomerAtomPairFractions(isotopomersA, atomNames,
                                                                           subTypes)
                   fraction     = pairDict.get((isotopeA, isotopeB), minFraction)
 
@@ -330,9 +330,9 @@ def getResidueObservableAtoms(residue, refExperiment=None, labelling=None,
                   isotopomersB = isotopomerDict.get(residueB)
 
                   if isotopomersB and isotopomersA:
-                    fractionDictA = Labeling._getIsotopomerSingleAtomFractions(isotopomersA,
+                    fractionDictA = Labelling._getIsotopomerSingleAtomFractions(isotopomersA,
                                                                                atomA.name, subTypeA)
-                    fractionDictB = Labeling._getIsotopomerSingleAtomFractions(isotopomersB,
+                    fractionDictB = Labelling._getIsotopomerSingleAtomFractions(isotopomersB,
                                                                                atomB.name, subTypeB)
                     fraction = fractionDictA.get(isotopeA, 1.0) * fractionDictB.get(isotopeB, 1.0)
 
@@ -351,7 +351,7 @@ def getResidueObservableAtoms(residue, refExperiment=None, labelling=None,
                 resIds = (molResidueA.serial, molResidueB.serial)
                 atomNames = (atomA.name, atomB.name)
 
-                pairDict = Labeling._atomPairFractions(labelling, resIds, atomNames)
+                pairDict = Labelling._atomPairFractions(labelling, resIds, atomNames)
                 fraction = pairDict.get((isotopeA, isotopeB), minFraction)
 
                 if fraction  < minFraction:

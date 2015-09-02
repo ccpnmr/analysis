@@ -160,6 +160,24 @@ class NmrChain(AbstractWrapperObject):
     return parent._wrappedData.sortedNmrChains()
 
 
+def getter(self:Chain) -> NmrChain:
+  obj = self._project._wrappedData.findFirstNmrChain(code=self._wrappedData.code)
+  return None if obj is None else self._project._data2Obj.get(obj)
+
+def setter(self:Chain, value:NmrChain):
+  oldValue = self.nmrChain
+  if oldValue is value:
+    return
+  elif oldValue is not None:
+    oldValue.chain = None
+
+  if value is not None:
+    value.chain = self
+Chain.nmrChain = property(getter, setter, None, "NmrChain to which Chain is assigned")
+
+del getter
+del setter
+
 def newNmrChain(parent:Project, shortName:str=None, comment:str=None) -> NmrChain:
   """Create new child NmrChain
 

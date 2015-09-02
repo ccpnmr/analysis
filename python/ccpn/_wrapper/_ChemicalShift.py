@@ -112,6 +112,14 @@ class ChemicalShift(AbstractWrapperObject):
 # Connections to parents:
 ChemicalShiftList._childClasses.append(ChemicalShift)
 
+def getter(self:NmrAtom) -> tuple:
+  getObj = self._project._data2Obj.get
+  return tuple(sorted(getObj(x) for x in self._wrappedData.shifts))
+
+NmrAtom.chemicalShifts = property(getter, None, None, "Chemical shifts belonging to NmrAtom")
+
+del getter
+
 def newChemicalShift(parent:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                      valueError:float=0.0, figureOfMerit:float=1.0,
                      comment:str=None) -> ChemicalShift:

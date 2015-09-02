@@ -30,12 +30,8 @@ from ccpncore.api.ccp.molecule.MolSystem import Atom as ApiAtom
 
 # NBNB TBD add settable linkedAtoms link for non-ChemComp links ???
 
-# NBNB TBD modify to deal with StructureAtoms and RestraintAtoms CombiClass?
-
 class Atom(AbstractWrapperObject):
-  """Molecular Atom.
-
-  NBNB TBD rewrite - move to under Project, ... OR NOT ???"""
+  """Molecular Atom."""
 
   #: Class name and Short class name, for PID.
   shortClassName = 'MA'

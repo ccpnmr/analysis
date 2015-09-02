@@ -52,10 +52,10 @@ class SampleComponent(AbstractWrapperObject):
     
   @property
   def _key(self) -> str:
-    """id string - name.labeling"""
+    """id string - name.labelling"""
     obj =  self._wrappedData
     return Pid.IDSEP.join(getattr(obj,tag).translate(Pid.remapSeparators)
-                          for tag in ('name', 'labeling'))
+                          for tag in ('name', 'labelling'))
 
   @property
   def name(self) -> str:
@@ -63,9 +63,9 @@ class SampleComponent(AbstractWrapperObject):
     return self._wrappedData.name
 
   @property
-  def labeling(self) -> str:
-    """labeling descriptor of SampleComponent and corresponding substance (default is 'std')"""
-    return self._wrappedData.labeling
+  def labelling(self) -> str:
+    """labelling descriptor of SampleComponent and corresponding substance (default is 'std')"""
+    return self._wrappedData.labelling
     
   @property
   def _parent(self) -> Sample:
@@ -171,13 +171,13 @@ class SampleComponent(AbstractWrapperObject):
 # Connections to parents:
 Sample._childClasses.append(SampleComponent)
 
-def newSampleComponent(parent:Sample, name:str, labeling:str, role:str=None,
+def newSampleComponent(parent:Sample, name:str, labelling:str, role:str=None,
                        concentration:float=None, concentrationError:float=None,
                        concentrationUnit:str=None, purity:float=None, comment:str=None,
                       ) -> SampleComponent:
   """Create new child SampleComponent"""
   apiSample = parent._wrappedData
-  obj = apiSample.newSampleComponent(name=name, labeling=labeling, role=role,
+  obj = apiSample.newSampleComponent(name=name, labelling=labelling, role=role,
                                      concentration=concentration,
                                      concentrationError=concentrationError,
                                      concentrationUnit=concentrationUnit, details=comment,

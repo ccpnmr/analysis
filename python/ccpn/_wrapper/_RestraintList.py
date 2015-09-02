@@ -240,7 +240,7 @@ def newRestraintList(parent:RestraintSet,restraintType, name:str=None, comment:s
     obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType)
   return parent._project._data2Obj.get(obj)
 
-RestraintSet.newPeakList = newRestraintList
+RestraintSet.newRestraintList = newRestraintList
 
 # Notifiers:
 for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():

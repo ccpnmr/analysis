@@ -29,14 +29,21 @@ from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Console import Console
+from ccpncore.gui.CcpnWebView import CcpnWebView
+
+from ccpncore.gui.Dock import CcpnDock
+
 from ccpncore.gui.Menu import Menu, MenuBar
 from ccpncore.gui import MessageDialog
 from ccpnmrcore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
+from ccpncore.util import Path
+
 from ccpnmrcore.gui.Assigner import Assigner
 from ccpnmrcore.modules.AssignmentModule import AssignmentModule
 from ccpnmrcore.modules.AtomSelector import AtomSelector
+
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
@@ -65,7 +72,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       #apiModule = apiGuiTask.newTaskModule(name=self.INITIAL_MODULE_NAME)
       #apiWindow.addModule(apiModule)
     #
-    self.setGeometry(540,40,900,900)
+    self.setGeometry(540, 40, 900, 900)
 
     GuiWindow.__init__(self)
     self.setupWindow()
@@ -326,9 +333,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def showApiDocumentation(self):
-    from ccpncore.gui.CcpnWebView import CcpnWebView
-    from ccpncore.util import Path
-    from ccpncore.gui.Dock import CcpnDock
+
     newDock = CcpnDock("API Documentation")
     apiPath = os.path.join(Path.getPythonDirectory(), 'ccpn', 'doc', 'apidoc', 'api.html')
     apiView = CcpnWebView(apiPath)
@@ -336,9 +341,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(newDock)
 
   def showWrapperDocumentation(self):
-    from ccpncore.gui.CcpnWebView import CcpnWebView
-    from ccpncore.util import Path
-    from ccpncore.gui.Dock import CcpnDock
     newDock = CcpnDock("CCPN Documentation")
     apiPath = os.path.join(Path.getPythonDirectory(), 'ccpn', 'doc', 'build', 'html', 'index.html')
     apiView = CcpnWebView(apiPath)
@@ -347,9 +349,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def showAssignmentModule(self):
-    from ccpnmrcore.modules.AssignmentModule import AssignmentModule
     self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
     self.dockArea.addDock(self.assignmentModule)
+
 
   def showNmrResiduePopup(self):
     from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup

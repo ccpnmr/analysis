@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 
 class GuiTableGenerator(QtGui.QWidget):
 
-  def __init__(self, parent, objectLists, callback, columns, selector, tipTexts=None, **kw):
+  def __init__(self, parent, objectLists, callback, columns, selector=None, tipTexts=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
 
@@ -21,7 +21,10 @@ class GuiTableGenerator(QtGui.QWidget):
       self.sampledDims = {}
       self._getColumns(columns, tipTexts)
       self.tipTexts = tipTexts
+      layout = QtGui.QGridLayout()
+      self.setLayout(layout)
       self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback)
+      layout.addWidget(self.table, 0, 0, 1, 5)
       self.updateContents()
       if selector is not None:
         self.selector = selector
@@ -53,7 +56,8 @@ class GuiTableGenerator(QtGui.QWidget):
 
     tableColumns = []
 
-    tableColumns.append(Column(*columns[0], tipText=tipTexts[0]))
+    if len(columns) > 0:
+      tableColumns.append(Column(*columns[0], tipText=tipTexts[0]))
 
     if self.objectList:
       if self.objectList.shortClassName == 'PL':
@@ -62,7 +66,7 @@ class GuiTableGenerator(QtGui.QWidget):
           j = i + 1
           c = Column('Assign\nF%d' % j,
                      lambda pk, dim=i:getPeakAnnotation(pk, dim),
-                     tipText='Resonance assignments of peak in dimension %d' % j)
+                     tipText='Resonance assignments of peak in dimension %d' % j, stretch=True)
           tableColumns.append(c)
 
         for i in range(numDim):
@@ -84,10 +88,10 @@ class GuiTableGenerator(QtGui.QWidget):
                    tipText=tipText)
           tableColumns.append(c)
 
-
-      for column in columns[1:]:
-        c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
-        tableColumns.append(c)
+      if len(columns) > 0:
+        for column in columns[1:]:
+          c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
+          tableColumns.append(c)
 
     return tableColumns
 

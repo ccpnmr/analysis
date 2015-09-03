@@ -182,7 +182,7 @@ def sameAxisCodes(peaks, dim):
 # code less readable.
 
 def getAllNmrAtoms(project, isotope=None):
-    nmrAtoms = [nmrAtom for nmrResidue in project.nmrResidues for nmrAtom in nmrResidue.atoms]
+    nmrAtoms = [nmrAtom for nmrResidue in project.nmrResidues for nmrAtom in nmrResidue.nmrAtoms]
     if isotope:
         selected = [a for a in nmrAtoms if a.isotope == isotope]
         nmrAtoms = selected

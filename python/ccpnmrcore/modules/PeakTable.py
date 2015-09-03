@@ -75,8 +75,8 @@ class PeakListSimple(QtGui.QWidget, Base):
                                           callback=self.subtractPeakLists)
     #                                     # callback=self._updateWhenIdle,)
 
-    columns = [('#', 'serial'), ('Height', lambda pk: self._getPeakHeight(pk)),
-               ('Volume', lambda pk: self._getPeakVolume(pk)),
+    columns = [('#', 'serial'), ('Height', lambda pk: self.getPeakHeight(pk)),
+               ('Volume', lambda pk: self.getPeakVolume(pk)),
                ('Details', 'comment')]
 
     tipTexts=['Peak serial number', 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
@@ -123,12 +123,12 @@ class PeakListSimple(QtGui.QWidget, Base):
     else:
       return peak
 
-  def _getPeakVolume(self, peak):
+  def getPeakVolume(self, peak):
 
     if peak.volume:
       return peak.volume*peak.peakList.spectrum.scale
 
-  def _getPeakHeight(self, peak):
+  def getPeakHeight(self, peak):
 
     if peak.height:
       return peak.height*peak.peakList.spectrum.scale

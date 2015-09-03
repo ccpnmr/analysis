@@ -61,12 +61,14 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
 
 class GuiChainResidue(QtGui.QGraphicsTextItem):
 
+  fontSize = 20
+
   def __init__(self, parent, project, residue, scene, labelPosition, index):
 
     QtGui.QGraphicsTextItem.__init__(self)
     self.setPlainText(residue.shortName)
-    position = labelPosition+(10*index)
-    self.setFont(Font(size=14, normal=True))
+    position = labelPosition+(20*index)
+    self.setFont(Font(size=GuiChainResidue.fontSize, normal=True))
     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
     self.setPos(QtCore.QPointF(position, 0))
     self.residueNumber = residue.sequenceCode
@@ -109,21 +111,21 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
     event.accept()
 
 
-  def hoverEnterEvent(self, event):
-    # self.setDefaultTextColor(QtGui.QColor('#e4e15b'))
-    self.setHtml('<div style="color: #e4e15b;">'+self.residue.shortName+'</div>')
-
-  def hoverLeaveEvent(self, event):
-    if hasattr(self.residue, 'nmrResidue'):
-      if self.residue.nmrResidue is not None:
-        self.setFont(Font(size=14, bold=True))
-        self.setHtml('<div style="color: #04C317;"><strong>'+self.residue.shortName+'<strong></div>')
-      else:
-        self.setFont(Font(size=14, normal=True))
-        self.setHtml('<div style="color: #f7ffff;">'+self.residue.shortName+'</div>')
-    else:
-      self.setHtml('<div style="color: #f7ffff;">'+self.residue.shortName+'</div>')
-      self.setFont(Font(size=14, normal=True))
+  # def hoverEnterEvent(self, event):
+  #   # self.setDefaultTextColor(QtGui.QColor('#e4e15b'))
+  #   self.setHtml('<div style="color: #e4e15b;">'+self.residue.shortName+'</div>')
+  #
+  # def hoverLeaveEvent(self, event):
+  #   if hasattr(self.residue, 'nmrResidue'):
+  #     if self.residue.nmrResidue is not None:
+  #       self.setFont(Font(size=14, bold=True))
+  #       self.setHtml('<div style="color: #04C317;"><strong>'+self.residue.shortName+'<strong></div>')
+  #     else:
+  #       self.setFont(Font(size=14, normal=True))
+  #       self.setHtml('<div style="color: #f7ffff;">'+self.residue.shortName+'</div>')
+  #   else:
+  #     self.setHtml('<div style="color: #f7ffff;">'+self.residue.shortName+'</div>')
+  #     self.setFont(Font(size=14, normal=True))
 
   # def dropEvent(self, event):
   #   res = self.scene.itemAt(event.scenePos())

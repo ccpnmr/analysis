@@ -69,39 +69,20 @@ class Assigner(CcpnDock):
       self.residueCount = 0
 
 
-  def getNmrResiduePrediction(self, nmrResidue):
-    predictions = {}
-    spinSystem = nmrResidue._wrappedData
-    shiftList = self.project.chemicalShiftLists[0]._wrappedData
-    for code in CCP_CODES:
-      predictions[code] = float(getSpinSystemResidueProbability(spinSystem, shiftList, code))
-    tot = sum(predictions.values())
-    refinedPredictions = {}
-    for code in CCP_CODES:
-      v = round(predictions[code]/tot * 100, 2)
-      if v > 0:
-        refinedPredictions[code] = v
 
-    finalPredictions = []
-
-    for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
-      key = [key for key, val in refinedPredictions.items() if val==value][0]
-      finalPredictions.append([key, str(value)+' %'])
-
-    return finalPredictions
 
   def assembleResidue(self, nmrResidue, atoms):
     for item in atoms.values():
       self.scene.addItem(item)
     nmrAtoms = [atom.name for atom in nmrResidue.atoms]
-    cbLine = self.addAssignmentLine(atoms['CA'], atoms['CB'], 'grey', 1.0, 0)
+    cbLine = self.addConnectingLine(atoms['CA'], atoms['CB'], 'grey', 1.0, 0)
     if not 'CB' in nmrAtoms:
       self.scene.removeItem(atoms['CB'])
       self.scene.removeItem(cbLine)
 
-    self.addAssignmentLine(atoms['H'], atoms['N'], 'grey', 1.0, 0)
-    self.addAssignmentLine(atoms['N'], atoms['CA'], 'grey', 1.0, 0)
-    self.addAssignmentLine(atoms['CO'], atoms['CA'], 'grey', 1.0, 0)
+    self.addConnectingLine(atoms['H'], atoms['N'], 'grey', 1.0, 0)
+    self.addConnectingLine(atoms['N'], atoms['CA'], 'grey', 1.0, 0)
+    self.addConnectingLine(atoms['CO'], atoms['CA'], 'grey', 1.0, 0)
     nmrAtomLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
     self.scene.addItem(nmrAtomLabel)
     self.addResiduePredictions(nmrResidue, atoms['CA'])
@@ -168,15 +149,16 @@ class Assigner(CcpnDock):
           self.residuesShown.append(atoms)
 
     self.assembleResidue(nmrResidue, atoms)
-    self.addSpectrumAssignmentLines(self.project.getById(self.spectra['ref'][0]), atoms)
-    self.addSpectrumAssignmentLines(self.project.getById(self.spectra['intra'][0]), atoms)
-    self.addSpectrumAssignmentLines(self.project.getById(self.spectra['inter'][0]), atoms)
+    for spectrum in self.project.spectra:
+      self.addSpectrumAssignmentLines(spectrum, atoms)
+    # self.addSpectrumAssignmentLines(self.project.getById(self.spectra['intra'][0]), atoms)
+    # self.addSpectrumAssignmentLines(self.project.getById(self.spectra['inter'][0]), atoms)
 
     self.residueCount+=1
     print(self.nmrChain.connectedNmrResidues)
 
   def addResiduePredictions(self, nmrResidue, caAtom):
-    predictions = self.getNmrResiduePrediction(nmrResidue)
+    predictions = getNmrResiduePrediction(nmrResidue, self.project.chemicalShiftLists[0])
     for prediction in predictions:
       predictionLabel = QtGui.QGraphicsTextItem()
       predictionLabel.setPlainText(prediction[0]+' '+prediction[1])
@@ -200,76 +182,90 @@ class Assigner(CcpnDock):
     #   print(self.predictedStretch)
 
   def addSpectrumAssignmentLines(self, spectrum, residue):
+      assignedAtoms1 = []
+      if not spectrum.experimentType in EXPT_ATOM_DICT:
+        pass
+      else:
+        possibleAtoms = EXPT_ATOM_DICT[spectrum.experimentType]
+        lineColour = spectrum.positiveContourColour
+        for atom in residue.values():
+          for peak in atom.nmrAtom.assignedPeaks[0]:
+            if peak.peakList.spectrum == spectrum:
+              for atom in peak.dimensionNmrAtoms:
+                for a in atom:
+                  assignedAtoms1.append(a)
 
-      expectedAtoms = EXPT_ATOM_DICT[spectrum.experimentType]
-      lineColour = spectrum.positiveContourColour
-      if 'H' and 'N' in expectedAtoms:
-        displacement = min(residue['H'].connectedAtoms, residue['N'].connectedAtoms)
-        if displacement % 2 == 0:
-          self.addAssignmentLine(residue['H'], residue['N'], lineColour, 2.0, displacement*2/2)
-        else:
-          self.addAssignmentLine(residue['H'], residue['N'], lineColour, 2.0, displacement*-2)
-        residue['H'].connectedAtoms +=1
-        residue['N'].connectedAtoms +=1
-      if 'N' and 'CA' in expectedAtoms:
-        displacement = min(residue['CA'].connectedAtoms, residue['N'].connectedAtoms)
-        if displacement % 2 == 0:
-          self.addAssignmentLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*2/2)
-        else:
-          self.addAssignmentLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*-2)
-        self.addAssignmentLine(residue['N'], residue['CA'], lineColour, 2.0, displacement*2)
-        residue['CA'].connectedAtoms +=1
-        residue['N'].connectedAtoms +=1
-      if 'N' and 'CB' in expectedAtoms:
-        displacement = min(residue['CB'].connectedAtoms, residue['N'].connectedAtoms)
-        if displacement % 2 == 0:
-          self.addAssignmentLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*2/2)
-        else:
-          self.addAssignmentLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*-2)
-        residue['CB'].connectedAtoms +=1
-        residue['N'].connectedAtoms +=1
-      if 'CA' and 'CB' in expectedAtoms:
-        displacement = min(residue['CA'].connectedAtoms, residue['CB'].connectedAtoms)
-        if displacement % 2 == 0:
-          self.addAssignmentLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*2/2)
-        else:
-          self.addAssignmentLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*-2)
-        residue['CA'].connectedAtoms +=1
-        residue['CB'].connectedAtoms +=1
 
-      if 'N-1' in residue:
-        if 'CA-1' and 'N' in expectedAtoms:
-          displacement = min(residue['CA'].connectedAtoms, residue['N-1'].connectedAtoms)
+
+        assignedAtoms = list(set(assignedAtoms1))
+        print(spectrum, assignedAtoms)
+        if 'H' and 'N' in assignedAtoms:
+          displacement = min(residue['H'].connectedAtoms, residue['N'].connectedAtoms)
           if displacement % 2 == 0:
-            self.addAssignmentLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*2/2)
+            self.addConnectingLine(residue['H'], residue['N'], lineColour, 2.0, displacement*2/2)
           else:
-            self.addAssignmentLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*-2)
-
-        if 'CB-1' and 'N' in expectedAtoms:
-          displacement = min(residue['CB'].connectedAtoms, residue['N-1'].connectedAtoms)
+            self.addConnectingLine(residue['H'], residue['N'], lineColour, 2.0, displacement*-2)
+          residue['H'].connectedAtoms +=1
+          residue['N'].connectedAtoms +=1
+        if 'N' and 'CA' in assignedAtoms:
+          displacement = min(residue['CA'].connectedAtoms, residue['N'].connectedAtoms)
           if displacement % 2 == 0:
-            self.addAssignmentLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*2/2)
+            self.addConnectingLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*2/2)
           else:
-            self.addAssignmentLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*-2)
-
-      if 'CB-1' in residue:
-         if 'CB-1' and 'N' in expectedAtoms:
-          displacement = min(residue['CB-1'].connectedAtoms, residue['N'].connectedAtoms)
+            self.addConnectingLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*-2)
+          self.addConnectingLine(residue['N'], residue['CA'], lineColour, 2.0, displacement*2)
+          residue['CA'].connectedAtoms +=1
+          residue['N'].connectedAtoms +=1
+        if 'N' and 'CB' in assignedAtoms:
+          displacement = min(residue['CB'].connectedAtoms, residue['N'].connectedAtoms)
           if displacement % 2 == 0:
-            self.addAssignmentLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*2/2)
+            self.addConnectingLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*2/2)
           else:
-            self.addAssignmentLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*-2)
-
-      if 'CA-1' in residue:
-         if 'CA-1' and 'N' in expectedAtoms:
-          displacement = min(residue['CA-1'].connectedAtoms, residue['N'].connectedAtoms)
+            self.addConnectingLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*-2)
+          residue['CB'].connectedAtoms +=1
+          residue['N'].connectedAtoms +=1
+        if 'CA' and 'CB' in assignedAtoms:
+          displacement = min(residue['CA'].connectedAtoms, residue['CB'].connectedAtoms)
           if displacement % 2 == 0:
-            self.addAssignmentLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*2/2)
+            self.addConnectingLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*2/2)
           else:
-            self.addAssignmentLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*-2)
+            self.addConnectingLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*-2)
+          residue['CA'].connectedAtoms +=1
+          residue['CB'].connectedAtoms +=1
+
+        if 'N-1' in residue:
+          if 'CA-1' and 'N' in assignedAtoms:
+            displacement = min(residue['CA'].connectedAtoms, residue['N-1'].connectedAtoms)
+            if displacement % 2 == 0:
+              self.addConnectingLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*2/2)
+            else:
+              self.addConnectingLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*-2)
+
+          if 'CB-1' and 'N' in assignedAtoms:
+            displacement = min(residue['CB'].connectedAtoms, residue['N-1'].connectedAtoms)
+            if displacement % 2 == 0:
+              self.addConnectingLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*2/2)
+            else:
+              self.addConnectingLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*-2)
+
+        if 'CB-1' in residue:
+           if 'CB-1' and 'N' in assignedAtoms:
+            displacement = min(residue['CB-1'].connectedAtoms, residue['N'].connectedAtoms)
+            if displacement % 2 == 0:
+              self.addConnectingLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*2/2)
+            else:
+              self.addConnectingLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*-2)
+
+        if 'CA-1' in residue:
+           if 'CA-1' and 'N' in assignedAtoms:
+            displacement = min(residue['CA-1'].connectedAtoms, residue['N'].connectedAtoms)
+            if displacement % 2 == 0:
+              self.addConnectingLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*2/2)
+            else:
+              self.addConnectingLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*-2)
 
 
-  def addAssignmentLine(self, atom1, atom2, colour, width, displacement):
+  def addConnectingLine(self, atom1, atom2, colour, width, displacement):
 
     if atom1.y() > atom2.y() and atom1.x() - atom2.x() == 0:
       x1 = atom1.x() + (atom1.boundingRect().width()/2)
@@ -353,6 +349,7 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
     self.connectedAtoms = 0
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+    self.name = nmrAtom.name
     # self.brush = QtGui.QBrush()
     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
     # self.setBrush(self.brush)
@@ -381,7 +378,7 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
   def __init__(self, parent, nmrResidue, caAtom):
 
     super(GuiNmrResidue, self).__init__()
-    self.setPlainText(nmrResidue.sequenceCode)
+    self.setPlainText(nmrResidue.id)
     self.setFont(Font(size=12, bold=True))
     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
     self.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
@@ -419,3 +416,24 @@ class AssignmentLine(QtGui.QGraphicsLineItem):
     self.pen.setWidth(width)
     self.setPen(self.pen)
     self.setLine(x1, y1, x2, y2)
+
+def getNmrResiduePrediction(nmrResidue, sl):
+    predictions = {}
+    spinSystem = nmrResidue._wrappedData
+    shiftList = sl._wrappedData
+    for code in CCP_CODES:
+      predictions[code] = float(getSpinSystemResidueProbability(spinSystem, shiftList, code))
+    tot = sum(predictions.values())
+    refinedPredictions = {}
+    for code in CCP_CODES:
+      v = round(predictions[code]/tot * 100, 2)
+      if v > 0:
+        refinedPredictions[code] = v
+
+    finalPredictions = []
+
+    for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
+      key = [key for key, val in refinedPredictions.items() if val==value][0]
+      finalPredictions.append([key, str(value)+' %'])
+
+    return finalPredictions

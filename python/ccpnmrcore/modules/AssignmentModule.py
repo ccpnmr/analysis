@@ -41,7 +41,7 @@ class AssignmentModule(CcpnDock, Base):
 
     # If self.vertically_stacked = True, it looks
     # more like the v2 assignment Popup.
-    self.vertically_stacked = True
+    self.vertically_stacked = False
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     #self.infoLabel = Label(self, text='', grid=(0, 0))
 
@@ -50,13 +50,14 @@ class AssignmentModule(CcpnDock, Base):
     # this way it can shrink,
     self.selectionLayout = QtGui.QGridLayout()
     self.filterLayout = QtGui.QGridLayout()
-    self.layout.addLayout(self.selectionLayout, 0, 0)
-    self.layout.addLayout(self.filterLayout, 1, 0)
+    self.layout.addLayout(self.selectionLayout, 1, 0)
+    self.layout.addLayout(self.filterLayout, 0, 0)
     self.selectionLayout.setRowMinimumHeight(0, 0)
     self.selectionLayout.setRowStretch(0, 0)
     self.selectionLayout.setRowStretch(1, 1)
     self.listWidgets = []
     self.objectTables = []
+    self.labels = []
 
     # double tolerance
     self.doubleToleranceCheckbox = CheckBox(self, checked=False)
@@ -81,6 +82,8 @@ class AssignmentModule(CcpnDock, Base):
     nmrResidueButton = Button(self, "Show NmrResidues", callback=self.showNmrResiduePopup)
     self.filterLayout.addWidget(nmrResidueButton, 1, 0)
     self.filterLayout.addItem(QtGui.QSpacerItem(0, 20), 4, 0)
+    self.updateButton = Button(self, 'Update', callback=self.update)
+    self.filterLayout.addWidget(self.updateButton, 3, 0)
 
     self.update()
 
@@ -105,6 +108,7 @@ class AssignmentModule(CcpnDock, Base):
     self.createEnoughTablesAndLists()
     self.updateTables()
     self.updateAssignedNmrAtomsListwidgets()
+    self.updateWidgetLabels()
 
 
   def peaksAreCompatible(self):
@@ -174,6 +178,17 @@ class AssignmentModule(CcpnDock, Base):
       else:
         objectTable.setObjects([NOL])
 
+
+  def createEmptyWidgetLabel(self, dim):
+
+    positions = [peak.position[dim] for peak in self.peaks]
+    avgPos = round(sum(positions)/len(positions), 3)
+    axisCode = self.peaks[0].peakList.spectrum.axisCodes[dim]
+    text = axisCode + ' ' + str(avgPos)
+    label = Label(text=text)
+    label.setStyleSheet("border: 0px solid; color: #f7ffff;")
+    self.labels.append(label)
+
   def createEnoughTablesAndLists(self):
     '''Makes sure there are enough tables for the amount
        of dimensions of the currently selected peak(s).
@@ -189,17 +204,42 @@ class AssignmentModule(CcpnDock, Base):
     for dim in range(len(self.objectTables), Ndimensions):
       self.createEmptyNmrAtomsTable(dim)
 
-    # Hide tables that exceed the amount of peak dimensions.
-    for objectTable in self.objectTables[Ndimensions:]:
-      objectTable.setObjects([])
-      objectTable.hide()
-
     for dim in range(len(self.listWidgets), Ndimensions):
       self.createEmptyListWidget(dim)
 
-    for listWidget in self.listWidgets[Ndimensions:]:
-      listWidget.clear()
-      listWidget.hide()
+    for dim in range(len(self.labels), Ndimensions):
+      self.createEmptyWidgetLabel(dim)
+
+    self.widgetItems = list(zip(self.labels[:Ndimensions], self.listWidgets[:Ndimensions], self.objectTables[:Ndimensions]))
+    # self.putListAndTablesIntoWidgets(self.widgetItems)
+    for pair in self.widgetItems:
+      widget = QtGui.QWidget(self)
+      layout = QtGui.QGridLayout()
+      widget.setStyleSheet("border: 1px solid #bec4f3")
+      for item in range(len(pair)):
+        pair[item].setStyleSheet("border: 0px solid; color: #f7ffff;")
+        layout.addWidget(pair[item], item, 0)
+      widget.setLayout(layout)
+      self.widgets.append(widget)
+
+      self.selectionLayout.addWidget(widget, 0, self.widgetItems.index(pair))
+
+    self.refreshSelectionLayout(Ndimensions)
+
+  def refreshSelectionLayout(self, ndim):
+
+    layout = self.selectionLayout
+    rowCount = layout.rowCount()
+    colCount = layout.columnCount()
+
+    for r in range(rowCount):
+      for m in range(ndim, colCount):
+        item = layout.itemAtPosition(r, m)
+        if item:
+          if item.widget():
+            item.widget().hide()
+        layout.removeItem(item)
+
 
   def emptyAllTablesAndLists(self):
     '''Quick erase of all present information.
@@ -221,7 +261,6 @@ class AssignmentModule(CcpnDock, Base):
                Column('Shift', lambda nmrAtom: self.getShift(nmrAtom)),
                Column('Delta', lambda nmrAtom: self.deltaShift(nmrAtom, dim))]
 
-    #callback = lambda nmrAtom, row, column: self.assignNmrAtomToDim(nmrAtom, dim)
     objectTable = ObjectTable(self, columns,
                               callback=None,
                               objects=[])
@@ -230,13 +269,7 @@ class AssignmentModule(CcpnDock, Base):
     objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
     objectTable.setFixedHeight(80)
     self.objectTables.append(objectTable)
-    if self.vertically_stacked:
-      self.selectionLayout.addWidget(objectTable, dim, 1)
-      # self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
-    else:
-      self.selectionLayout.addWidget(objectTable, 1, dim)
-      # self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
-    objectTable.show()
+
 
 
   def createEmptyListWidget(self, dim):
@@ -248,12 +281,19 @@ class AssignmentModule(CcpnDock, Base):
                             rightMouseCallback=self.updateNmrAtomsFromListWidgets)
     listWidget.setFixedHeight(80)
     self.listWidgets.append(listWidget)
-    if self.vertically_stacked:
-      self.selectionLayout.addWidget(listWidget, dim, 0)
-      # self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
-    else:
-      self.selectionLayout.addWidget(listWidget, 0, dim)
-      # self.selectionLayout.addItem(QtGui.QSpacerItem(0, 10))
+
+
+  def updateWidgetLabels(self):
+    Ndimensions = len(self.peaks[0].position)
+
+    for dim, label in zip(range(Ndimensions), self.labels):
+      positions = [peak.position[dim] for peak in self.peaks]
+      avgPos = round(sum(positions)/len(positions), 3)
+      axisCode = self.peaks[0].peakList.spectrum.axisCodes[dim]
+      text = axisCode + ' ' + str(avgPos)
+      label.setText(text)
+      label.setStyleSheet("border: 0px solid; color: #f7ffff;")
+
 
   def updateAssignedNmrAtomsListwidgets(self):
     '''Update the listWidget showing which nmrAtoms

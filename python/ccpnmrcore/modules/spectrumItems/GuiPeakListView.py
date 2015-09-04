@@ -454,7 +454,7 @@ class PeakNd(QtGui.QGraphicsItem):
     # This code does not make sense - you need its ownsopectrumView, not the zero'th
     # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
     # dimensionOrdering deprecated
-    dataDims = peakListView._wrappedData.spectrumView.orderedDataDims
+    dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
     xPpm = peak.position[dataDims[0].dimensionIndex]
     yPpm = peak.position[dataDims[1].dimensionIndex]
     # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering

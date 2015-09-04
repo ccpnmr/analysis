@@ -439,7 +439,6 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   # def dropCallback(self, dropObject):
   #   if isinstance(dropObject, Spectrum):
   #     self.displaySpectrum(dropObject)
-  #     # print('@~@~', self.pid)
   #     msg = 'strip = project.getById("%s")\nstrip.displaySpectrum(project.getById("%s")\n' % \
   #           (self.pid, dropObject.pid)
   #     self._appBase.mainWindow.pythonConsole.write(msg)
@@ -460,8 +459,6 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
       index = apiStrip.axisOrder.index(apiAxis.code)
 
       strip.beingUpdated = True
-
-      # print ('@~@~ regionChanged', index, position, halfwidth, region)
 
       try:
         if index == 0:

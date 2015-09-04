@@ -124,7 +124,7 @@ def absorbResonance(resonanceA, resonanceB) -> None:
   for shiftA in resonanceA.shifts:
     shiftA.recalculateValue()
   
-  # AssignNames ar no longer used in new model
+  # AssignNames are no longer used in new model
   # Assign names will be merged, but if assigned we only want the correct ones
   # if resonanceA.resonanceSet:
   #   assignNames = []

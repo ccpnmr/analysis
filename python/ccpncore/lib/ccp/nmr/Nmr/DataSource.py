@@ -578,36 +578,36 @@ def estimateNoise(dataSource):
 
     return dataSource.noiseLevel # Qt can't serialise numpy float types
 
-def getDimPointFromValue(dataSource, dimension, value):
-  """ Convert from value (e.g. ppm) to point (counting from 0) for an arbitrary
-      number of values in a given dimension (counting from 0).  If value is a
-      number then return a number, otherwise return a list.
-  """
-  dataDim = dataSource.findFirstDataDim(dim=dimension+1)
-  dataDimRef = dataDim.findFirstDataDimRef()
+# def getDimPointFromValue(dataSource, dimension, value):
+#   """ Convert from value (e.g. ppm) to point (counting from 0) for an arbitrary
+#       number of values in a given dimension (counting from 0).  If value is a
+#       number then return a number, otherwise return a list.
+#   """
+#   dataDim = dataSource.findFirstDataDim(dim=dimension+1)
+#   dataDimRef = dataDim.findFirstDataDimRef()
+#
+#   if isinstance(value, (int, float)):
+#     point = dataDimRef.valueToPoint(value) - 1  # -1 because points in data model start from 1
+#   else:
+#     point = []
+#     for v in value:
+#       point.append(dataDimRef.valueToPoint(v) - 1)  # -1 because points in data model start from 1
+#
+#   return point
     
-  if isinstance(value, (int, float)):
-    point = dataDimRef.valueToPoint(value) - 1  # -1 because points in data model start from 1
-  else:
-    point = []
-    for v in value:
-      point.append(dataDimRef.valueToPoint(v) - 1)  # -1 because points in data model start from 1
-      
-  return point
-    
-def getDimValueFromPoint(dataSource, dimension, point):
-  """ Convert from point (counting from 0) to value (e.g. ppm) for an arbitrary
-      number of points in a given dimension (counting from 0).  If point is a
-      number then return a number, otherwise return a list.
-  """
-  dataDim = dataSource.findFirstDataDim(dim=dimension+1)
-  dataDimRef = dataDim.findFirstDataDimRef()
-
-  if isinstance(point, (int, float)):
-    value = dataDimRef.pointToValue(point+1)  # +1 because points in data model start from 1
-  else:
-    value = []
-    for p in point:
-      value.append(dataDimRef.pointToValue(p+1))  # +1 because points in data model start from 1
-      
-  return value
+# def getDimValueFromPoint(dataSource, dimension, point):
+#   """ Convert from point (counting from 0) to value (e.g. ppm) for an arbitrary
+#       number of points in a given dimension (counting from 0).  If point is a
+#       number then return a number, otherwise return a list.
+#   """
+#   dataDim = dataSource.findFirstDataDim(dim=dimension+1)
+#   dataDimRef = dataDim.findFirstDataDimRef()
+#
+#   if isinstance(point, (int, float)):
+#     value = dataDimRef.pointToValue(point+1)  # +1 because points in data model start from 1
+#   else:
+#     value = []
+#     for p in point:
+#       value.append(dataDimRef.pointToValue(p+1))  # +1 because points in data model start from 1
+#
+#   return value

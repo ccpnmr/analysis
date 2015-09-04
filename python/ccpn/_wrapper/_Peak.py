@@ -195,7 +195,6 @@ class Peak(AbstractWrapperObject):
   @dimensionNmrAtoms.setter
   def dimensionNmrAtoms(self, value:Sequence):
 
-    # print ("@~@~ set dimensionNmrAtoms")
     apiPeak = self._wrappedData
     dimResonances = []
     for atoms in value:
@@ -243,8 +242,6 @@ class Peak(AbstractWrapperObject):
   @assignedNmrAtoms.setter
   def assignedNmrAtoms(self, value:Sequence):
 
-    # print ("@~@~ set assignedNmrAtoms")
-
     apiPeak = self._wrappedData
     peakDims = apiPeak.sortedPeakDims()
     dimensionCount = len(peakDims)
@@ -262,8 +259,8 @@ class Peak(AbstractWrapperObject):
     # set assignments
     apiPeak.setAssignments(resonances)
 
-  def addAssignment(self, value:(NmrAtom,)):
-    """Add a peak assignment - a list of one NmrAtom for each dimension"""
+  def addAssignment(self, value:(str, NmrAtom)):
+    """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""
 
     if len(value) != self._wrappedData.peakList.numDim:
       raise ValueError("Length of assignment value %s does not match peak dimensionality %s "
@@ -273,7 +270,7 @@ class Peak(AbstractWrapperObject):
     assignedNmrAtoms.append(value)
     self.assignedNmrAtoms = assignedNmrAtoms
 
-  def assignDimension(self, axisCode, value):
+  def assignDimension(self, axisCode:str, value:(str, NmrAtom)):
     """Assign dimension axisCode to value (NmrAtom, or Pid or sequence of either, or None)
     NBNB TBD add integer axisCode? Should it be index or dim number?"""
 

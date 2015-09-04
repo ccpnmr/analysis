@@ -26,6 +26,7 @@ from collections.abc import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
+from ccpn import Peak
 from ccpnmr._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
@@ -283,6 +284,27 @@ class Strip(GuiStrip, AbstractWrapperObject):
                                                    stripSerial=stripSerial, dataSource=dataSource,
                                                    dimensionOrdering=dimensionOrdering)
     return self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
+
+  def peakIsInPlane(self, peak:Peak) -> bool:
+    """is peak in currently displayed planes for strip?"""
+    apiSpectrumView = self._wrappedData.findFirstSpectrumView(
+      dataSource=peak._wrappedData.peakList.dataSource)
+
+    if apiSpectrumView is None:
+      return False
+
+    orderedAxes = self.orderedAxes
+    for ii,zDataDim in enumerate(apiSpectrumView.orderedDataDims[2:]):
+      zPosition = peak.position[zDataDim.dimensionIndex]
+      # NBNB W3e do not think this should add anything - the region should be set correctly.
+      # RHF, WB
+      # zPlaneSize = zDataDim.getDefaultPlaneSize()
+      zPlaneSize = 0.
+      zRegion = orderedAxes[2+ii].region
+      if zPosition < zRegion[0]-zPlaneSize or zPosition > zRegion[1]+zPlaneSize:
+        return False
+    #
+    return True
 
 def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
   """Make copy of strip in SpectrumDisplay, at position newIndex - or rightmost"""

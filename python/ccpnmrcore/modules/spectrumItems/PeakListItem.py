@@ -355,18 +355,18 @@ class PeakNd(QtGui.QGraphicsItem):
 
 
     #peakLayer.peakItems.append(self)
+  # Replaced by Strip.peakIsInPlane
+  # def isInPlane(self):
   #
-  def isInPlane(self):
-
-    if self.strip.orderedAxes[2] is not None:
-      zPosition = self.peak.position[2]
-      zRegion = self.strip.orderedAxes[2].region
-      if zRegion[0] <= zPosition <= zRegion[1]:
-        return True
-      else:
-        return False
-    else:
-      return False
+  #   if self.strip.orderedAxes[2] is not None:
+  #     zPosition = self.peak.position[2]
+  #     zRegion = self.strip.orderedAxes[2].region
+  #     if zRegion[0] <= zPosition <= zRegion[1]:
+  #       return True
+  #     else:
+  #       return False
+  #   else:
+  #     return False
 
   # def hoverEnterEvent(self, event):
   #
@@ -405,7 +405,8 @@ class PeakNd(QtGui.QGraphicsItem):
   def paint(self, painter, option, widget):
 
     if self.peak:
-      if self.isInPlane():
+      if self.strip.peakIsInPlane(self.peak):
+      # if self.isInPlane():
         r, w, box = self.drawBox
         r, w  = self.drawData
 

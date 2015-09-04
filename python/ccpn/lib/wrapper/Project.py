@@ -55,7 +55,6 @@ def loadData(project:object, path:str) -> (list,None):
 
   dataType, subType, usePath = ioFormats.analyseUrl(path)
 
-  # print ("@~@~ url analysis:", dataType, subType, usePath)
   # urlInfo is list of triplets of (type, subType, modifiedUrl),
 
   # e.g. ('Spectrum', 'Bruker', newUrl)
@@ -84,8 +83,6 @@ def loadData(project:object, path:str) -> (list,None):
 def loadSequence(project:object, path:str, subType:str) -> list:
   """Load sequence(s) from file into Wrapper project"""
 
-  # print ("@~@~ loadSequence", subType)
-
   if subType == ioFormats.FASTA:
     sequences = fastaIo.parseFastaFile(path)
   else:
@@ -101,8 +98,6 @@ def loadSequence(project:object, path:str, subType:str) -> list:
 def loadProject(project:object, path:str, subType:str):
   """Load project from file into application and return the new project"""
 
-  # print ("@~@~ loadProject", subType)
-
   if subType == ioFormats.CCPN:
     return project._appBase.openProject(path)
   else:
@@ -111,7 +106,6 @@ def loadProject(project:object, path:str, subType:str):
 def loadSpectrum(project:object, path:str, subType:str):
   """Load spectrum from file into application"""
 
-  # print ("@~@~ loadSpectrum", subType)
   apiDataSource = project._wrappedData.loadDataSource(path, subType)
   if apiDataSource is None:
     return []

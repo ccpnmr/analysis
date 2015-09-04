@@ -97,8 +97,7 @@ class NmrChain(AbstractWrapperObject):
     """stretch of connected NmrResidues within NmrChain - there can only be one
     Does not include NmrResidues defined as satellites (sequenceCodes that end in '+1', '-1', etc.
     If NmrChain matches a proper Chain, there will be an NmrResidue for each residue,
-    with None for unassigned residues """
-
+    with None for unassigned residues. NBNB TBD draft - needs checking"""
 
     apiNmrChain = self._wrappedData
     apiChain = apiNmrChain.chain
@@ -118,6 +117,7 @@ class NmrChain(AbstractWrapperObject):
 
   @connectedNmrResidues.setter
   def connectedNmrResidues(self, value:Sequence):
+    # NBNB TBD Check validity of code.
     apiNmrChain = self._wrappedData
     apiChain = apiNmrChain.chain
     if apiChain is None:
@@ -141,8 +141,7 @@ class NmrChain(AbstractWrapperObject):
   def mainNmrResidues(self) -> tuple:
     """NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
     (sequenceCode ending in '-1', '+1', etc.)"""
-    ll = self.connectedNmrResidues
-    return ll + tuple(x for x in self.nmrResidues if x not in ll)
+    return tuple(x for x in self.nmrResidues if x._wrappedData.relativeOffset is None)
 
   @property
   def chain(self) -> Chain:

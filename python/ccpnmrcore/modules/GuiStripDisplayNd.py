@@ -31,7 +31,8 @@ from ccpn import Project
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
+from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
+from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
@@ -457,19 +458,37 @@ def _deletedPeak(project:Project, apiPeak:ApiPeak):
 
 Project._setupNotifier(_deletedPeak, ApiPeak, 'delete')
 
-def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+# Unnecessary - dimensionOrdering is frozen
+# def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+#
+#   for apiStrip in apiSpectrumView.strips:
+#     strip = project._data2Obj[apiStrip]
+#     if isinstance(strip, GuiStripNd):
+#       strip.setZWidgets()
+#
+# Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiSpectrumView, 'dimensionOrdering')
 
-  for apiStrip in apiSpectrumView.strips:
-    strip = project._data2Obj[apiStrip]
-    if isinstance(strip, GuiStripNd):
-      strip.setZWidgets()
+# Supreseded
+# def _changedAxisOrdering(project:Project, apiStrip:ApiStrip):
+#
+#   strip = project._data2Obj[apiStrip]
+#   if isinstance(strip, GuiStripNd):
+#     strip.setZWidgets()
+#
+# Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiStrip, 'axisOrder')
 
-Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiSpectrumView, 'dimensionOrdering')
 
-def _changedAxisOrdering(project:Project, apiStrip:ApiStrip):
+def _changedFreeStripAxisOrdering(project:Project, apiStrip:ApiFreeStrip):
+  """Used (and works) for either BoundDisplay of FreeStrip"""
 
-  strip = project._data2Obj[apiStrip]
-  if isinstance(strip, GuiStripNd):
+  project._data2Obj[apiStrip].setZWidgets()
+
+Project._setupNotifier(_changedFreeStripAxisOrdering, ApiFreeStrip, 'axisOrder')
+
+def _changedBoundDisplayAxisOrdering(project:Project, apiDisplay:ApiBoundDisplay):
+  """Used (and works) for either BoundDisplay of FreeStrip"""
+
+  for strip in project._data2Obj[apiDisplay].strips:
     strip.setZWidgets()
 
-Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiStrip, 'axisOrder')
+Project._setupNotifier(_changedBoundDisplayAxisOrdering, ApiBoundDisplay, 'axisOrder')

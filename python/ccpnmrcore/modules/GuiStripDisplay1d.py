@@ -41,7 +41,6 @@ from ccpn import Project
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
@@ -265,19 +264,14 @@ def _deletedPeak(project:Project, apiPeak:ApiPeak):
 
 Project._setupNotifier(_deletedPeak, ApiPeak, 'delete')
 
-def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+# Unnecessary - dimensionOrdering is frozen. RHF
+# def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+#
+#   for apiStrip in apiSpectrumView.strips:
+#     strip = project._data2Obj[apiStrip]
+#     if isinstance(strip, GuiStrip1d):
+#       strip.setZWidgets()
+#
+# Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiSpectrumView, 'dimensionOrdering')
 
-  for apiStrip in apiSpectrumView.strips:
-    strip = project._data2Obj[apiStrip]
-    if isinstance(strip, GuiStrip1d):
-      strip.setZWidgets()
-
-Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiSpectrumView, 'dimensionOrdering')
-
-def _changedAxisOrdering(project:Project, apiStrip:ApiStrip):
-
-  strip = project._data2Obj[apiStrip]
-  if isinstance(strip, GuiStrip1d):
-    strip.setZWidgets()
-
-Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiStrip, 'axisOrder')
+# NBNB notifiers are same for 1D and nD and are written in GuiStripDisplayNd

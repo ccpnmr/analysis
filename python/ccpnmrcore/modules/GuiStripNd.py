@@ -109,8 +109,6 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.hTraceAction)
     # self.contextMenu.addAction(self.vTraceAction)
     self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self.toggleCrossHair, checkable=True)
-    self.hTraceAction = self.contextMenu.addItem("H Trace", callback=self.toggleHTrace, checked=False, checkable=True)
-    self.vTraceAction = self.contextMenu.addItem("V Trace", callback=self.toggleVTrace, checked=False, checkable=True)
     self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
     plusOneAction = self.contextMenu.addAction("Add Contour Level", self.guiSpectrumDisplay.addOne)
     plusOneIcon = Icon('iconsNew/contour-add')
@@ -151,55 +149,40 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
 
-  def toggleHTrace(self):
-    self.hTraceAction.setChecked(self.hTraceAction.isChecked())
-    
-  def toggleVTrace(self):
-    self.vTraceAction.setChecked(self.vTraceAction.isChecked())
-    
-  def mouseMoved(self, positionPixel):
-
-    GuiStrip.mouseMoved(self, positionPixel) # position is in pixels
-
-    if self.plotWidget.sceneBoundingRect().contains(positionPixel):
-      updateHTrace = self.hTraceAction.isChecked()
-      updateVTrace = self.vTraceAction.isChecked()
-      positionView = self.viewBox.mapSceneToView(positionPixel) # convert to ppm (or whatever)
-      position = [axis.position for axis in self.orderedAxes]
-      position[0] = positionView.x()
-      position[1] = positionView.y()
-      positionPixel = (positionPixel.x(), positionPixel.y())
-      for spectrumView in self.spectrumViews:
-        spectrumView.updateTrace(position, positionPixel, updateHTrace, updateVTrace)
-  
   def setZWidgets(self):
           
     for n, zAxis in enumerate(self.orderedAxes[2:]):   
       minZPlaneSize = None
       minAliasedFrequency = maxAliasedFrequency = None
       for spectrumView in self.spectrumViews:
-        spectrum = spectrumView.spectrum
-        zDim = spectrum.axisCodes.index(zAxis.code)
+        # spectrum = spectrumView.spectrum
+        # zDim = spectrum.axisCodes.index(zAxis.code)
+
+        position, width, totalPointCount, minFrequency, maxFrequency = (
+          spectrumView._getSpectrumViewParams(n+2))
       
-        minFrequency = spectrum.minAliasedFrequencies[zDim]
+        # minFrequency = spectrum.minAliasedFrequencies[zDim]
         # TBD: the below does not work for pseudo-ND data sets
-        if minFrequency is None:
-          totalPointCount = spectrum.totalPointCounts[zDim]
-          minFrequency = spectrum.getDimValueFromPoint(zDim, totalPointCount-1.0)
+        # if minFrequency is None:
+        #   totalPointCount = spectrum.totalPointCounts[zDim]
+        #   minFrequency = spectrum.getDimValueFromPoint(zDim, totalPointCount-1.0)
         if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
           minAliasedFrequency = minFrequency
-          
-        maxFrequency = spectrum.maxAliasedFrequencies[zDim]
+
+        # maxFrequency = spectrumView.spectrum.maxAliasedFrequencies[zDim]
         # TBD: the below does not work for pseudo-ND data sets
-        if maxFrequency is None:
-          maxFrequency = spectrum.getDimValueFromPoint(zDim, 0.0)
+        # if maxFrequency is None:
+        #   maxFrequency = spectrum.getDimValueFromPoint(zDim, 0.0)
         if maxAliasedFrequency is None or maxFrequency < maxAliasedFrequency:
           maxAliasedFrequency = maxFrequency
-          
-        zPlaneSize = spectrumView.zPlaneSize()
-        if zPlaneSize is not None:
-          if minZPlaneSize is None or zPlaneSize < minZPlaneSize:
-            minZPlaneSize = zPlaneSize
+
+        # NBNB 1) we should use the region width for the step size. 2) the width is the same in all cases
+        # zPlaneSize = spectrumView.apiSpectrumView.spectrumView.orderedDataDims[n].getDefaultPlaneSize()
+        # zPlaneSize = spectrumView.zPlaneSize()
+        minZPlaneSize = width
+        # if zPlaneSize is not None:
+        #   if minZPlaneSize is None or zPlaneSize < minZPlaneSize:
+        #     minZPlaneSize = zPlaneSize
           
       if minZPlaneSize is None:
         minZPlaneSize = 1.0 # arbitrary
@@ -326,21 +309,23 @@ class GuiStripNd(GuiStrip):
      # peakItem = PeakNd(self, peak)
     ###self.plotWidget.addItem(peakLayer)
      # self.plotWidget.addItem((peakItem.annotation))
-     
-  def peakIsInPlane(self, peak):
 
-    if len(self.orderedAxes) > 2:
-      zDim = self.spectrumViews[0].dimensionOrdering[2] - 1
-      zPlaneSize = self.spectrumViews[0].zPlaneSize()
-      zPosition = peak.position[zDim]
 
-      zRegion = self.orderedAxes[2].region
-      if zRegion[0]-zPlaneSize <= zPosition <= zRegion[1]+zPlaneSize:
-        return True
-      else:
-        return False
-    else:
-      return True
+  # Replaced by functio in Strip proper
+  # def peakIsInPlane(self, peak):
+  #
+  #   if len(self.orderedAxes) > 2:
+  #     zDim = self.spectrumViews[0].dimensionOrdering[2] - 1
+  #     zPlaneSize = self.spectrumViews[0].zPlaneSize()
+  #     zPosition = peak.position[zDim]
+  #
+  #     zRegion = self.orderedAxes[2].region
+  #     if zRegion[0]-zPlaneSize <= zPosition <= zRegion[1]+zPlaneSize:
+  #       return True
+  #     else:
+  #       return False
+  #   else:
+  #     return True
     
   """
   def newPeak(self, apiPeak):
@@ -389,64 +374,64 @@ class GuiStripNd(GuiStrip):
     traceMarker.sigPositionChanged.connect(self.markerMoved)
     proxy = pg.SignalProxy(traceMarker.sigPositionChanged, slot=(self.markerMoved))
 
-  def plotTrace(self, position=None, traceMarker=None, phasedData=None):
-
-    positions = []
-    if position is None:
-      position = [self.mousePoint.x(),self.mousePoint.y()]
-
-    else:
-      position = [position.x(), position.y()]
-      if self.axesSwapped == True:
-        position.reverse()
-    if len(self.orderedAxes) > 2:
-      zDims = set(range(self._appBase.current.spectrum.dimensionCount)) - {self.orderedAxes[0].mappedDim, self.orderedAxes[1].mappedDim}
-      zDims = set(range(len(self.orderedAxes))) - {self.orderedAxes[0].mappedDim, self.orderedAxes[1].mappedDim}
-      zDim = zDims.pop()
-      position.append(int(self.region[zDim][0]))
-
-
-    dimensionCount = len(self.orderedAxes)
-    ppmRegion = dimensionCount * [None]
-    pointCounts = self.spectrumViews[0].spectrum.pointCounts
-    for dim in range(dimensionCount):
-      # if dim in (self._appBase.current.spectrum.spectrumItem.xDim, self._appBase.current.spectrum.spectrumItem.yDim):
-      region = self.plotWidget.viewRange()[dim]
-      # else:
-      #   n = position[dim]
-      #   region = n
-      ppmRegion[dim] = region
-    pntRegion = []
-    for dim in range(dimensionCount):
-        pnt = LibSpectrum.getDimPointFromValue(self.spectrumViews[0].spectrum, dim, ppmRegion[dim])
-        pntRegion.append(math.floor(pnt[0]))
-    spectrum = self.spectrumViews[0].spectrum
-    dataDimRef = spectrum.apiDataSource.sortedDataDims()[traceMarker.axis.mappedDim].findFirstDataDimRef()
-    data = LibSpectrum.getSliceData(spectrum.apiDataSource,position=pntRegion, sliceDim=traceMarker.axis.mappedDim)
-    firstPoint = dataDimRef.pointToValue(0)
-    pointCount = len(data)
-    lastPoint = dataDimRef.pointToValue(pointCount)
-    pointSpacing = (lastPoint-firstPoint)/pointCount
-    positions2 = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],dtype=numpy.float32)
-    # positions2 = positions2[::-1]
-    if phasedData is not None:
-      data2 = (numpy.array(phasedData)/self.traceScale)*-1
-    else:
-      data2 = (data/self.traceScale)*-1
-    if traceMarker.angle == 0:
-      data3 = numpy.array([x+ppmRegion[traceMarker.positionAxis.mappedDim] for x in data2])
-      traceMarker.spectrumItemTrace = pg.PlotDataItem(positions2, data3)
-    else:
-      # positions2 = positions2[::-1]
-      data3 = numpy.array([x+ppmRegion[traceMarker.positionAxis.mappedDim] for x in data2])
-      traceMarker.spectrumItemTrace = pg.PlotDataItem(data3,positions2)
-    traceMarker.spectrumItemTrace.dim = traceMarker.axis.mappedDim
-    traceMarker.data = data
-    traceMarker.spectrumItemTrace.position = position
-    self.addItem(traceMarker.spectrumItemTrace)
-
-
-    return traceMarker
+  # def plotTrace(self, position=None, traceMarker=None, phasedData=None):
+  #
+  #   positions = []
+  #   if position is None:
+  #     position = [self.mousePoint.x(),self.mousePoint.y()]
+  #
+  #   else:
+  #     position = [position.x(), position.y()]
+  #     if self.axesSwapped == True:
+  #       position.reverse()
+  #   if len(self.orderedAxes) > 2:
+  #     zDims = set(range(self._appBase.current.spectrum.dimensionCount)) - {self.orderedAxes[0].mappedDim, self.orderedAxes[1].mappedDim}
+  #     zDims = set(range(len(self.orderedAxes))) - {self.orderedAxes[0].mappedDim, self.orderedAxes[1].mappedDim}
+  #     zDim = zDims.pop()
+  #     position.append(int(self.region[zDim][0]))
+  #
+  #
+  #   dimensionCount = len(self.orderedAxes)
+  #   ppmRegion = dimensionCount * [None]
+  #   pointCounts = self.spectrumViews[0].spectrum.pointCounts
+  #   for dim in range(dimensionCount):
+  #     # if dim in (self._appBase.current.spectrum.spectrumItem.xDim, self._appBase.current.spectrum.spectrumItem.yDim):
+  #     region = self.plotWidget.viewRange()[dim]
+  #     # else:
+  #     #   n = position[dim]
+  #     #   region = n
+  #     ppmRegion[dim] = region
+  #   pntRegion = []
+  #   for dim in range(dimensionCount):
+  #       pnt = LibSpectrum.getDimPointFromValue(self.spectrumViews[0].spectrum, dim, ppmRegion[dim])
+  #       pntRegion.append(math.floor(pnt[0]))
+  #   spectrum = self.spectrumViews[0].spectrum
+  #   dataDimRef = spectrum.apiDataSource.sortedDataDims()[traceMarker.axis.mappedDim].findFirstDataDimRef()
+  #   data = LibSpectrum.getSliceData(spectrum.apiDataSource,position=pntRegion, sliceDim=traceMarker.axis.mappedDim)
+  #   firstPoint = dataDimRef.pointToValue(0)
+  #   pointCount = len(data)
+  #   lastPoint = dataDimRef.pointToValue(pointCount)
+  #   pointSpacing = (lastPoint-firstPoint)/pointCount
+  #   positions2 = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],dtype=numpy.float32)
+  #   # positions2 = positions2[::-1]
+  #   if phasedData is not None:
+  #     data2 = (numpy.array(phasedData)/self.traceScale)*-1
+  #   else:
+  #     data2 = (data/self.traceScale)*-1
+  #   if traceMarker.angle == 0:
+  #     data3 = numpy.array([x+ppmRegion[traceMarker.positionAxis.mappedDim] for x in data2])
+  #     traceMarker.spectrumItemTrace = pg.PlotDataItem(positions2, data3)
+  #   else:
+  #     # positions2 = positions2[::-1]
+  #     data3 = numpy.array([x+ppmRegion[traceMarker.positionAxis.mappedDim] for x in data2])
+  #     traceMarker.spectrumItemTrace = pg.PlotDataItem(data3,positions2)
+  #   traceMarker.spectrumItemTrace.dim = traceMarker.axis.mappedDim
+  #   traceMarker.data = data
+  #   traceMarker.spectrumItemTrace.position = position
+  #   self.addItem(traceMarker.spectrumItemTrace)
+  #
+  #
+  #   return traceMarker
 
 def _spectrumViewCreated(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
   strip = project._data2Obj[apiStripSpectrumView.strip]

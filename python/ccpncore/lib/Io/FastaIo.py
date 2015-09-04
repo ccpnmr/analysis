@@ -22,7 +22,7 @@ def parseFastaFile(inputFile):
     chains = []
     lines = [line.strip() for line in f.readlines()][:-1]
     for line in lines:
-      if line[0] == '>':
+      if line and line[0] == '>':
         chains.append(lines.index(line))
   for chain in chains :
     name = lines[chain].split()[0]

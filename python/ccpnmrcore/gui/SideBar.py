@@ -426,8 +426,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     #   spectrumDisplay
     #   '''
     #
-    # print ("@~@~ Sidebar drop event")
-    #
     # if event.mimeData().hasUrls():
     #   event.setDropAction(QtCore.Qt.CopyAction)
     #   event.accept()

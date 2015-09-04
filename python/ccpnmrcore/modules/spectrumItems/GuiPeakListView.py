@@ -451,31 +451,48 @@ class PeakNd(QtGui.QGraphicsItem):
     if not hasattr(peak, 'isSelected'):
       peak.isSelected = False
     self.setSelected(peak.isSelected)
-    dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
-    xDim = dimensionOrdering[0] - 1
-    yDim = dimensionOrdering[1] - 1
-    xPpm = peak.position[xDim]
-    yPpm = peak.position[yDim]
+    # This code does not make sense - you need its ownsopectrumView, not the zero'th
+    # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
+    # dimensionOrdering deprecated
+    dataDims = peakListView._wrappedData.spectrumView.orderedDataDims
+    xPpm = peak.position[dataDims[0].dimensionIndex]
+    yPpm = peak.position[dataDims[1].dimensionIndex]
+    # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
+    # xDim = dimensionOrdering[0] - 1
+    # yDim = dimensionOrdering[1] - 1
+    # xPpm = peak.position[xDim]
+    # yPpm = peak.position[yDim]
     self.setPos(xPpm, yPpm)
     self.annotation.setupPeakAnnotationItem(self)
     peakListView.peakItems[self.peak] = self
-    
-  def isInPlane(self):
 
-    strip = self.peakListView.spectrumView.strip
+  # replaced by Strip.peakIsInPlane
+  # def isInPlane(self):
+  #
+  #   orderedAxes = self.peakListView.spectrumView.strip.orderedAxes
+  #   for ii,zDataDim in enumerate(self.peakListView._wrappedData.spectrumView.orderedDataDims[2:]):
+  #     zPosition = self.peak.position[zDataDim.dimensionIndex]
+  #     zPlaneSize = zDataDim.getDefaultPlaneSize()
+  #     zRegion = orderedAxes[2+ii].region
+  #     if zPosition < zRegion[0]-zPlaneSize or zPosition > zRegion[1]+zPlaneSize:
+  #       return False
+  #   #
+  #   return True
 
-    if len(strip.orderedAxes) > 2:
-      zDim = strip.spectrumViews[0].dimensionOrdering[2] - 1
-      zPlaneSize = strip.spectrumViews[0].zPlaneSize()
-      zPosition = self.peak.position[zDim]
-
-      zRegion = strip.orderedAxes[2].region
-      if zRegion[0]-zPlaneSize <= zPosition <= zRegion[1]+zPlaneSize:
-        return True
-      else:
-        return False
-    else:
-      return True
+    # strip = self.peakListView.spectrumView.strip
+    #
+    # if len(strip.orderedAxes) > 2:
+    #   zDim = strip.spectrumViews[0].dimensionOrdering[2] - 1
+    #   zPlaneSize = strip.spectrumViews[0].zPlaneSize()
+    #   zPosition = self.peak.position[zDim]
+    #
+    #   zRegion = strip.orderedAxes[2].region
+    #   if zRegion[0]-zPlaneSize <= zPosition <= zRegion[1]+zPlaneSize:
+    #     return True
+    #   else:
+    #     return False
+    # else:
+    #   return True
 
   # def hoverEnterEvent(self, event):
   #
@@ -534,7 +551,8 @@ class PeakNd(QtGui.QGraphicsItem):
 
     if self.peak: # TBD: is this ever not true??
       self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
-      if self.isInPlane():
+      if self.peakListView.spectrumView.strip.peakIsInPlane(self.peak):
+      # if self.isInPlane():
         # r, w, box = self.drawData
         r, w  = self.drawData
 
@@ -837,17 +855,11 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
 def _refreshPeakAnnotation(peak:Peak):
   data2Obj = peak._project._data2Obj
-  # print ("@~@~ _refreshPeakAnnotation222")
-  # print('peak._wrappedData.peakList.peakListViews', peak._wrappedData.peakList.peakListViews)
   for apiPeakListView in peak._wrappedData.peakList.peakListViews:
-    # print('apiPeakListView', apiPeakListView)
     for apiStripPeakListView in apiPeakListView.stripPeakListViews:
-      # print('apiStripPeakListView', apiStripPeakListView)
       guiPeakListView = data2Obj[apiStripPeakListView]
-      # print('g', guiPeakListView)
       peakItem = guiPeakListView.peakItems.get(peak)
       if peakItem:
-        # print(peakItem)
         peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
 
@@ -859,7 +871,6 @@ Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
 def _upDateAssignmentsPeakDimContrib(project:Project,
                                      apiPeakDimContrib:ApiAbstractPeakDimContrib):
-  # print ("@~@~ _upDateAssignmentsPeakDimContrib")
   peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
   peak._refreshPeakAnnotation()
 #

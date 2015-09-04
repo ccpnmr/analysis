@@ -26,6 +26,7 @@ from collections.abc import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import RestraintList
+from ccpn import Peak
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraint as ApiAbstractConstraint
 
 class Restraint(AbstractWrapperObject):
@@ -188,6 +189,25 @@ class Restraint(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent:RestraintList)-> list:
     """get wrappedData - all Constraint children of parent ConstraintList"""
     return parent._wrappedData.sortedConstraints()
+
+
+def getter(self:Peak) -> tuple:
+  ff = self._project._data2Obj.get
+  result = []
+  apiPeak = self.wrappedData
+  for restraintList in self._project.restraintLists:
+    for apiRestraint in restraintList._wrappedData.sortedRestraints():
+      if apiPeak in apiRestraint.peaks:
+        result.append(ff(apiRestraint))
+  return tuple(result)
+def setter(self:Peak, value:Sequence):
+  apiPeak = self._wrappedData
+  for restraint in self.restraints:
+    restraint._wrappedData.removePeak(apiPeak)
+  for restraint in value:
+    restraint._wrappedData.addPeak(apiPeak)
+Peak.restraints = property(getter, setter, None,
+                          "Restraints corresponding to Peak")
 
 # Connections to parents:
 RestraintList._childClasses.append(Restraint)

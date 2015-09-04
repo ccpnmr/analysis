@@ -35,18 +35,18 @@ from ccpncore.gui.Label import Label
 from ccpnmrcore.DropBase import DropBase
 
 
-def _findPpmRegion(spectrum, axisDim, spectrumDim):
-
-  pointCount = spectrum.pointCounts[spectrumDim]
-  if axisDim < 2: # want entire region
-    region = (0, pointCount)
-  else:
-    n = pointCount // 2
-    region = (n, n+1)
-
-  firstPpm, lastPpm = spectrum.getDimValueFromPoint(spectrumDim, region)
-
-  return 0.5*(firstPpm+lastPpm), abs(lastPpm-firstPpm)
+# def _findPpmRegion(spectrum, axisDim, spectrumDim):
+#
+#   pointCount = spectrum.pointCounts[spectrumDim]
+#   if axisDim < 2: # want entire region
+#     region = (0, pointCount)
+#   else:
+#     n = pointCount // 2
+#     region = (n, n+1)
+#
+#   firstPpm, lastPpm = spectrum.getDimValueFromPoint(spectrumDim, region)
+#
+#   return 0.5*(firstPpm+lastPpm), abs(lastPpm-firstPpm)
 
 class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else the drop events are not processed
 

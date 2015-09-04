@@ -38,8 +38,6 @@ topApiModule = 'ccpncore.api'
 #       It is what is chopped off the start of the module being added
 #       to the API to get to the API equivalent. """
 #
-#   print('@~@~ addDirectory %s %s'% (moduleName, rootModuleName))
-#
 #   if rootModuleName is None:
 #     rootModuleName = moduleName
 #
@@ -67,20 +65,14 @@ topApiModule = 'ccpncore.api'
 #         apiClass =  _getApiClass(packageName)
 #         if apiClass is not None:
 #           foundModule = _addModuleFunctionsToApiClass(subModuleName, apiClass)
-#           if testRun and foundModule:
-#             print ('@~@~ Added module %s to class %s' % (subModuleName, apiClass))
 #
 #
 #
 # def loadLibraryFunctions(packageName, rootModuleName='ccpncore.lib', testRun=True):
 #   """Load utility functions into classes - to be run during first import only"""
 #   apiClass =  _getApiClass(moduleName, rootModuleName)
-#   if testRun:
-#     print ("@~@~ loadLibraryFunctions %s %s %s" % (moduleName, rootModuleName, apiClass))
 #   if apiClass is not None:
 #     foundModule = _addModuleFunctionsToApiClass(moduleName, apiClass)
-#     if testRun and foundModule:
-#       print ('@~@~ Added module %s to class %s' % (moduleName, apiClass))
 #
 # def _getApiClass(packageName):
 #
@@ -103,7 +95,6 @@ def _addModuleFunctionsToApiClass(relModuleName, apiClass, rootModuleName='ccpnc
   moduleName = '%s.%s' % (rootModuleName, relModuleName)
   try:
     module = importlib.import_module(moduleName)
-    # print ("Found   %s %s" % (moduleName, apiClass))
   except ImportError:
     # print ("Missing %s %s" % (moduleName, apiClass))
     return
@@ -118,4 +109,3 @@ def _addModuleFunctionsToApiClass(relModuleName, apiClass, rootModuleName='ccpnc
     # third condition checks whether this is a function (rather than a class, etc.)
     if hasattr(value, '__module__') and value.__module__ == moduleName and callable(value):
       setattr(apiClass, key, value)
-      # print('@~@~ Transferring %s %s %s' % (apiClass, key, value))

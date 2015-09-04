@@ -67,6 +67,8 @@ class Mark(AbstractWrapperObject):
     """Task containing Mark."""
     return  self._project._data2Obj[self._wrappedData.guiTask]
 
+  task = _parent
+
   @property
   def colour(self) -> str:
     """Mark colour"""

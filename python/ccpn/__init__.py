@@ -72,16 +72,16 @@ SampleComponent = cls = importlib.import_module('ccpn._wrapper._SampleComponent'
 _wrappedClasses.append(cls)
 Spectrum = cls = importlib.import_module('ccpn._wrapper._Spectrum').Spectrum
 _wrappedClasses.append(cls)
+PeakList = cls = importlib.import_module('ccpn._wrapper._PeakList').PeakList
+_wrappedClasses.append(cls)
+Peak = cls = importlib.import_module('ccpn._wrapper._Peak').Peak
+_wrappedClasses.append(cls)
 SpectrumReference = cls = importlib.import_module(
   'ccpn._wrapper._SpectrumReference').SpectrumReference
 _wrappedClasses.append(cls)
 PseudoDimension = cls = importlib.import_module('ccpn._wrapper._PseudoDimension').PseudoDimension
 _wrappedClasses.append(cls)
 SpectrumHit = cls = importlib.import_module('ccpn._wrapper._SpectrumHit').SpectrumHit
-_wrappedClasses.append(cls)
-PeakList = cls = importlib.import_module('ccpn._wrapper._PeakList').PeakList
-_wrappedClasses.append(cls)
-Peak = cls = importlib.import_module('ccpn._wrapper._Peak').Peak
 _wrappedClasses.append(cls)
 RestraintSet = cls = importlib.import_module('ccpn._wrapper._RestraintSet').RestraintSet
 _wrappedClasses.append(cls)

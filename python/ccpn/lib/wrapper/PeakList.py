@@ -37,21 +37,26 @@ def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None
                 fitMethod:str=None, excludedRegions:Sequence=None,
                 excludedDiagonalDims:Sequence=None, excludedDiagonalTransform:Sequence=None):
 
-  ordering = [dataDim.dim-1 for dataDim in dataDims]
-  isoOrdering = [dataDim.getIsotopeCodes() for dataDim in dataDims]
+  # ordering = [dataDim.dim-1 for dataDim in dataDims]
+  # isoOrdering = [dataDim.getIsotopeCodes() for dataDim in dataDims]
 
   startPoint = []
   endPoint = []
   
   spectrum = peakList.spectrum
 
-  for position in positions[1]:
-    dimension = ordering[positions[1].index(position)]
-    endPoint.append([dimension, int(spectrum.getDimPointFromValue(dimension, position))])
+  for ii, dataDim in dataDims:
+    startPoint.append([dataDim.dim, int(dataDim.primaryDataDimRef.valueToPoint(positions[0][ii]))])
+    endPoint.append([dataDim.dim, int(dataDim.primaryDataDimRef.valueToPoint(positions[1][ii]))])
 
-  for position in positions[0]:
-    dimension = ordering[positions[0].index(position)]
-    startPoint.append([dimension, int(spectrum.getDimPointFromValue(dimension, position))])
+
+  # for position in positions[1]:
+  #   dimension = ordering[positions[1].index(position)]
+  #   endPoint.append([dimension, int(spectrum.getDimPointFromValue(dimension, position))])
+  #
+  # for position in positions[0]:
+  #   dimension = ordering[positions[0].index(position)]
+  #   startPoint.append([dimension, int(spectrum.getDimPointFromValue(dimension, position))])
 
   startPoints = [point[1] for point in sorted(startPoint)]
   endPoints = [point[1] for point in sorted(endPoint)]

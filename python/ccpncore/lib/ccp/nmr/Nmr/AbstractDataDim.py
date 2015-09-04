@@ -109,3 +109,8 @@ def getIsotopeCodes(dataDim):
         isotopes.add(isotopeCode)
  
   return isotopes
+
+# Not needed after all
+# def getDefaultPlaneSize(dataDim):
+#   """get default plane size - currently one point"""
+#   return dataDim.primaryDataDimRef.valuePerPoint

@@ -61,9 +61,6 @@ def analyseUrl(filePath):
   For Bruker and Varian Spectrum data, the usePath returned is the directory containing the spectrum
   """
 
-  # print ("@~@~ analyseUrl, isDir?", os.path.isdir(filePath))
-
-
   isOk, msg = checkFilePath(filePath)
   if not isOk:
     print (msg)
@@ -128,8 +125,6 @@ def analyseUrl(filePath):
   firstData = fileObj.read(1024)
   testData = set([c for c in firstData]) - WHITESPACE_AND_NULL
   isBinary = (min([ord(chr(c)) for c in testData]) < 32)
-
-  # print ("@~@~ analyseUrl, isBinary?", isBinary)
 
   # Deal with binary files
   if isBinary:
@@ -218,7 +213,11 @@ def analyseUrl(filePath):
 
     fileObj.close()
     text = open(filePath, 'rU').read()
-    textblock = '\n'.join([line.strip() for line in text.splitlines() if line[0] != '!'])
+    textblock = '\n'.join([line.strip() for line in text.splitlines()
+                           if not (line and line[0] == '!')])
+
+    # NBNB FIXME TBD This assumes that comments are given by '!' in the first char.
+    # IS THAT ALWAYS THE CASE?
 
     if filePath.endswith('.fasta') or text.startswith('>'):
       # FASTA file

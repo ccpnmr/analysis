@@ -74,7 +74,7 @@ class GuiWindow(DropBase):
 
     paths = QtGui.QFileDialog.getOpenFileName(self, 'Load Data')
 
-    # NBNB TBD I assume here that path is eitehr a string or a list lf string paths.
+    # NBNB TBD I assume here that path is either a string or a list lf string paths.
     # NBNB FIXME if incorrect
 
     if not paths:

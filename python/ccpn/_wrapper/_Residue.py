@@ -63,7 +63,7 @@ class Residue(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """Residue ID. Identical to sequenceCode.residueType. Characters translated for pid"""
-    return Pid.makeId(self.sequenceCode, self.name)
+    return Pid.makeId(self.sequenceCode, self.residueType)
     
   @property
   def _parent(self) -> Chain:
@@ -73,7 +73,7 @@ class Residue(AbstractWrapperObject):
   chain = _parent
     
   @property
-  def name(self) -> str:
+  def residueType(self) -> str:
     """Residue type name string (e.g. 'ALA')"""
     return self._wrappedData.code3Letter or ''
 

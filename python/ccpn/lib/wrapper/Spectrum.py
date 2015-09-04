@@ -55,18 +55,18 @@ def automaticIntegration(spectrum, spectralData):
 def estimateNoise(spectrum):
   return spectrum.apiDataSource.estimateNoise()
 
-def getDimPointFromValue(spectrum, dimension, value):
-  """ Convert from value (e.g. ppm) to point (counting from 0) for an arbitrary
-      number of values in a given dimension (counting from 0).  If value is a
-      number then return a number, otherwise return a list.
-  """
-  return spectrum.apiDataSource.getDimPointFromValue(dimension, value)
+# def getDimPointFromValue(spectrum, dimension, value):
+#   """ Convert from value (e.g. ppm) to point (counting from 0) for an arbitrary
+#       number of values in a given dimension (counting from 0).  If value is a
+#       number then return a number, otherwise return a list.
+#   """
+#   return spectrum.apiDataSource.getDimPointFromValue(dimension, value)
     
-def getDimValueFromPoint(spectrum, dimension, point):
-  """ Convert from point (counting from 0) to value (e.g. ppm) for an arbitrary
-      number of points in a given dimension (counting from 0).  If point is a
-      number then return a number, otherwise return a list.
-  """
-  return spectrum.apiDataSource.getDimValueFromPoint(dimension, point)
+# def getDimValueFromPoint(spectrum, dimension, point):
+#   """ Convert from point (counting from 0) to value (e.g. ppm) for an arbitrary
+#       number of points in a given dimension (counting from 0).  If point is a
+#       number then return a number, otherwise return a list.
+#   """
+#   return spectrum.apiDataSource.getDimValueFromPoint(dimension, point)
 
 

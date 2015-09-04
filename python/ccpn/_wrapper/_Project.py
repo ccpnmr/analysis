@@ -172,9 +172,6 @@ class Project(AbstractWrapperObject):
       # Add child objects to list
       objects.extend(getDataObj(y) for x in obj._childClasses for y in x._getAllWrappedData(obj))
 
-      # print ('@~@~ to reset: ', obj,
-      #        obj._wrappedData.serial if hasattr(obj._wrappedData, 'serial') else None)
-
       # reset _id
       oldId = obj._id
 
@@ -185,12 +182,8 @@ class Project(AbstractWrapperObject):
         _id = '%s%s%s'% (parent._id, Pid.IDSEP, obj._key)
       obj._id = _id
 
-      # if oldId == 'A.2.Lys':
-      #   print ('@~@~', oldId, _id, parent, obj.__class__.__name__)
-
       # update pid:object mapping dictionary
       dd = pid2Obj[obj.className]
-      # print('@~@~', obj, sorted(x for x in dd))
       del dd[oldId]
       dd[_id] = obj
 

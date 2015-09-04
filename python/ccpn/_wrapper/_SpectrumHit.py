@@ -48,7 +48,7 @@ class SpectrumHit(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def apiSpectrumHits(self) -> ApiSpectrumHit:
+  def apiSpectrumHit(self) -> ApiSpectrumHit:
     """ CCPN SpectrumHit matching SpectrumHit"""
     return self._wrappedData
 
@@ -73,7 +73,7 @@ class SpectrumHit(AbstractWrapperObject):
     return self._wrappedData.substanceName
 
   @property
-  def pseudoDimension(self) -> int:
+  def pseudoDimensionNumber(self) -> int:
     """Dimension number for pseudoDimension (0 if none),
     if the Hit only refers to one point in a pseudoDimension"""
     return self._wrappedData.sampledDimension
@@ -115,7 +115,7 @@ class SpectrumHit(AbstractWrapperObject):
 
   @property
   def isConfirmed(self) -> bool:
-    """Is HIt ocnfirmed? True: yes; False; No; None: not determined"""
+    """Is Hit confirmed? True: yes; False; No; None: not determined"""
     return  self._wrappedData.isConfirmed
 
   @isConfirmed.setter

@@ -78,14 +78,15 @@ class SpectrumView(AbstractWrapperObject):
   def experimentType(self, value:str):
     self._wrappedData.spectrumView.experimentType = value
 
-  @property
-  def dimensionOrdering(self) -> tuple:
-    """Display order of Spectrum dimensions (DataDim.dim). 0 for 'no spectrum axis displayed'"""
-    return self._wrappedData.spectrumView.dimensionOrdering
-
-  @dimensionOrdering.setter
-  def dimensionOrdering(self, value:Sequence):
-    self._wrappedData.spectrumView.dimensionOrdering = value
+  # Removed - should not be used at arapper level
+  # @property
+  # def dimensionOrdering(self) -> tuple:
+  #   """Display order of Spectrum dimensions (DataDim.dim). 0 for 'no spectrum axis displayed'"""
+  #   return self._wrappedData.spectrumView.dimensionOrdering
+  #
+  # @dimensionOrdering.setter
+  # def dimensionOrdering(self, value:Sequence):
+  #   self._wrappedData.spectrumView.dimensionOrdering = value
 
   @property
   def isDisplayed(self) -> bool:
@@ -281,11 +282,6 @@ class SpectrumView(AbstractWrapperObject):
   def spectrum(self) -> Spectrum:
     """Spectrum that SpectrumView refers to"""
     return self._project._data2Obj.get(self._wrappedData.spectrumView.dataSource)
-
-  @property
-  def strip(self) -> Strip:
-    """Strip attached to SpectrumView """
-    return self._project._data2Obj.get(self._wrappedData.strip)
 
   # Implementation functions
   @classmethod

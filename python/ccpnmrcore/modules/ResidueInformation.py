@@ -69,7 +69,7 @@ class ResidueInformation(CcpnDock):
     for i  in range(len(foundResidues)):
 
       if foundResidues[j+i][0] is not None:
-        label1 = Label(self, text=foundResidues[j+i][0].sequenceCode+' '+foundResidues[j+i][0].name,
+        label1 = Label(self, text=foundResidues[j+i][0].sequenceCode+' '+foundResidues[j+i][0].residueType,
                      hAlign='c')
         label1.setMaximumHeight(20)
         if foundResidues[j+i][0].nmrResidue is not None:
@@ -77,14 +77,14 @@ class ResidueInformation(CcpnDock):
 
         self.residueWidget.layout().addWidget(label1, j+i, 0)
       if len(foundResidues[j+1]) > 1:
-        label2 = Label(self, text=foundResidues[j+i][1].sequenceCode+' '+foundResidues[j+i][1].name,
+        label2 = Label(self, text=foundResidues[j+i][1].sequenceCode+' '+foundResidues[j+i][1].residueType,
                        hAlign='c')
         if foundResidues[j+i][1].nmrResidue is not None:
           label2.setStyleSheet('Label {background-color: #f7ffff; color:#2a3358; }')
         label2.setMaximumHeight(30)
         self.residueWidget.layout().addWidget(label2, j+i, 1)
       if len(foundResidues[j+1]) > 2:
-        label3 = Label(self, text=foundResidues[j+i][2].sequenceCode+' '+foundResidues[j+i][2].name,
+        label3 = Label(self, text=foundResidues[j+i][2].sequenceCode+' '+foundResidues[j+i][2].residueType,
                        hAlign='c')
         if foundResidues[j+i][2].nmrResidue is not None:
           label3.setStyleSheet('Label {background-color: #f7ffff; color: #2a3358;}')

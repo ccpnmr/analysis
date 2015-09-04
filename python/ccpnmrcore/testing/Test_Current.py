@@ -72,7 +72,6 @@ def test_current_peaks():
   current.registerNotify(notifier, 'peaks')
 
   current.addPeak(11)
-  # print("@~@~", dir(Current.Current))
   assert (current.peak == 11)
   assert (current.peaks == ll + [11])
   assert (current.notifiedPeaks == ll+ [11])

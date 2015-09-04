@@ -510,28 +510,28 @@ class Spectrum(AbstractWrapperObject):
   @measurementTypes.setter
   def measurementTypes(self, value):
     self._setExpDimRefAttribute('measurementType', value)
-
-  @property
-  def maxAliasedFrequencies(self) -> tuple:
-    """\- (*float,*)\*dimensionCount, *settable*
-
-     maximum possible peak frequency (in ppm) for main dimensions reference """
-    return tuple(x and x.maxAliasedFreq for x in self._mainExpDimRefs())
-
-  @maxAliasedFrequencies.setter
-  def maxAliasedFrequencies(self, value):
-    self._setExpDimRefAttribute('maxAliasedFreq', value, mandatory=False)
-
-  @property
-  def minAliasedFrequencies(self) -> tuple:
-    """\- (*str,*)\*dimensionCount, *settable*
-
-     minimum possible peak frequency (in ppm) for main dimensions reference """
-    return tuple(x and x.minAliasedFreq for x in self._mainExpDimRefs())
-
-  @minAliasedFrequencies.setter
-  def minAliasedFrequencies(self, value):
-    self._setExpDimRefAttribute('minAliasedFreq', value, mandatory=False)
+  #
+  # @property
+  # def maxAliasedFrequencies(self) -> tuple:
+  #   """\- (*float,*)\*dimensionCount, *settable*
+  #
+  #    maximum possible peak frequency (in ppm) for main dimensions reference """
+  #   return tuple(x and x.maxAliasedFreq for x in self._mainExpDimRefs())
+  #
+  # @maxAliasedFrequencies.setter
+  # def maxAliasedFrequencies(self, value):
+  #   self._setExpDimRefAttribute('maxAliasedFreq', value, mandatory=False)
+  #
+  # @property
+  # def minAliasedFrequencies(self) -> tuple:
+  #   """\- (*str,*)\*dimensionCount, *settable*
+  #
+  #    minimum possible peak frequency (in ppm) for main dimensions reference """
+  #   return tuple(x and x.minAliasedFreq for x in self._mainExpDimRefs())
+  #
+  # @minAliasedFrequencies.setter
+  # def minAliasedFrequencies(self, value):
+  #   self._setExpDimRefAttribute('minAliasedFreq', value, mandatory=False)
 
 
   @property
@@ -717,6 +717,39 @@ class Spectrum(AbstractWrapperObject):
           dataDimRef.dataDim.valuePerPoint *= (sw/oldsw)
 
   @property
+  def aliasingLimits(self) -> tuple:
+    """\- (*(float,float)*)\*dimensionCount
+
+    tuple of tuples of (lowerAliasingLimit, higherAliasingLimit) for spectrum """
+    result = [(x and x.minAliasedFreq, x and x.maxAliasedFreq) for x in self._mainExpDimRefs()]
+
+    if any(None in tt for tt in result):
+      # Some values not set, or missing. Try to get them as spectrum limits
+      for ii,dataDimRef in enumerate(self._mainDataDimRefs()):
+        if None in result[ii]:
+          dataDim = dataDimRef.dataDim
+          ff = dataDimRef.pointToValue
+          point1 = 1 - dataDim.pointOffset
+          result[ii] = tuple(sorted((ff(point1), ff(point1 + dataDim.numPointsOrig))))
+    #
+    return tuple(result)
+
+  @aliasingLimits.setter
+  def aliasingLimits(self, value:tuple):
+    if len(value) != self.dimensionCount:
+      raise ValueError("length of alisingLimits must match spectrum dimension, was %s" % value)
+
+    expDimRefs = self._mainExpDimRefs()
+    for ii,tt in enumerate(value):
+      expDimRef = expDimRefs[ii]
+      if expDimRef:
+        if len(tt) != 2:
+          raise ValueError("Aliasing limits must have two value (min,max), was %s" % tt)
+        expDimRef.minAliasedFreq = tt[0]
+        expDimRef.maxAliasedFreq = tt[1]
+
+
+  @property
   def spectrumLimits(self) -> tuple:
     """\- (*(float,float)*)\*dimensionCount
 
@@ -746,6 +779,15 @@ class Spectrum(AbstractWrapperObject):
     return [x for y in parent._wrappedData.sortedExperiments()
             for x in y.sortedDataSources()]
 
+
+def getter(self:ChemicalShiftList) -> tuple:
+  ff = self._project._data2Obj.get
+  return tuple(ff(y) for x in self._wrappedData.sortedExperiments()
+               for y in x.sortedDataSources())
+def setter(self:ChemicalShiftList, value:Sequence):
+  self._wrappedData.experiments =  set(x._wrappedData.experiment for x in value)
+ChemicalShiftList.spectra = property(getter, setter, None,
+                          "Spectra using ChemicalShiftList")
 
 def getter(self:Sample) -> tuple:
   ff = self._project._data2Obj.get

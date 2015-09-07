@@ -5,6 +5,8 @@ from ccpn.util import Io as ccpnIo
 
 import unittest
 
+import os
+
 from unittest.mock import Mock, MagicMock
 
 class Test_makeNmrAtom(unittest.TestCase):
@@ -67,7 +69,8 @@ class Test_chemicalShift(unittest.TestCase):
 
   def setUp(self):
     self.newProject = ccpnIo.newProject('testProject')
-    self.spectrum = self.newProject.loadSpectrum('/Users/simon1/PycharmProjects/CCPN_V3/trunk/ccpnv3/data/testProjects/spectra/115.spc', subType='Azara')
+    specLocation = os.path.join('..', '..','..','data','testProjects','spectra','115.spc')
+    self.spectrum = self.newProject.loadSpectrum(specLocation, subType='Azara')
 
     c = self.newProject.newNmrChain()
     r = c.newNmrResidue()

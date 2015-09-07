@@ -223,7 +223,8 @@ def _cumulativeArray(array):
 def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
   """ Get plane data through position in dimensions xDim, yDim
       Returns 2D float32 NumPy array in order (y, x) 
-      Returns None if numDim < 2 or if there is no dataStore """
+      Returns None if numDim < 2 or if there is no dataStore
+      Positions are 0-based not 1-based """
 
   numDim = dataSource.numDim
   if numDim < 2:

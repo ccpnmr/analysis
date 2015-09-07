@@ -46,8 +46,9 @@ def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None
   spectrum = peakList.spectrum
 
   for ii, dataDim in enumerate(dataDims):
-    startPoint.append([dataDim.dim, int(dataDim.primaryDataDimRef.valueToPoint(positions[0][ii]))])
-    endPoint.append([dataDim.dim, int(dataDim.primaryDataDimRef.valueToPoint(positions[1][ii]))])
+    # -1 below because points start at 1 in data model
+    startPoint.append([dataDim.dim, int(dataDim.primaryDataDimRef.valueToPoint(positions[0][ii])-1)])
+    endPoint.append([dataDim.dim, int(dataDim.primaryDataDimRef.valueToPoint(positions[1][ii])-1)])
 
 
   # for position in positions[1]:

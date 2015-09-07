@@ -30,6 +30,8 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
                  fitMethod=None, excludedRegions=None,
                  excludedDiagonalDims=None, excludedDiagonalTransform=None):
 
+  # startPoint and endPoint are 0-based not 1-based
+  
   # TBD: ignores aliasing for now
   
   from ccpnc.peak import Peak

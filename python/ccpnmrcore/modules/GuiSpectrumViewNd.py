@@ -468,17 +468,17 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #for position, dataArray in self.getPlaneData(guiStrip):
     for position, dataArray in self.getPlaneData():
 
-      print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray), dataArray)
+      #print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray), dataArray)
       
       if doPosLevels:
         posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-        print("posCOntours", len(posContours))
+        #print("posCOntours", len(posContours))
         for n, contourData in enumerate(posContours):
           self.addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
         
       if doNegLevels:
         negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
-        print("negCOntours", len(negContours))
+        #print("negCOntours", len(negContours))
         for n, contourData in enumerate(negContours):
           self.addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
         
@@ -552,8 +552,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       zRegionValue = (zPosition+0.5*width, zPosition-0.5*width) # Note + and - (axis backwards)
       # zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
       valueToPoint = zDataDim.primaryDataDimRef.valueToPoint
-      zPoint0 = valueToPoint(zRegionValue[0])
-      zPoint1 = valueToPoint(zRegionValue[1])
+      # -1 below because points start at 1 in data model
+      zPoint0 = valueToPoint(zRegionValue[0]) - 1
+      zPoint1 = valueToPoint(zRegionValue[1]) - 1
       # the -epsilon is to avoid lower point rounding up and upper point rounding down due to numerical error
       zPoint0, zPoint1 = (int(numpy.round(zPoint0-epsilon)), int(numpy.round(zPoint1-epsilon)))
       
@@ -592,8 +593,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       zRegionValue = (zPosition+0.5*width, zPosition-0.5*width) # Note + and - (axis backwards)
       # zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
       valueToPoint = zDataDim.primaryDataDimRef.valueToPoint
-      zPoint0 = valueToPoint(zRegionValue[0])
-      zPoint1 = valueToPoint(zRegionValue[1])
+      # -1 below because points start at 1 in data model
+      zPoint0 = valueToPoint(zRegionValue[0]) - 1
+      zPoint1 = valueToPoint(zRegionValue[1]) - 1
       # the -epsilon is to avoid lower point rounding up and upper point rounding down due to numerical error
       zPoint0, zPoint1 = (int(numpy.round(zPoint0-epsilon)), int(numpy.round(zPoint1-epsilon)))
       
@@ -621,8 +623,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       wRegionValue = (wPosition+0.5*width, wPosition-0.5*width) # Note + and - (axis backwards)
       # wPoint0, wPoint1 = spectrum.getDimPointFromValue(wDim, wRegionValue)
       valueToPoint = wDataDim.primaryDataDimRef.valueToPoint
-      wPoint0 = valueToPoint(wRegionValue[0])
-      wPoint1 = valueToPoint(wRegionValue[1])
+      # -1 below because points start at 1 in data model
+      wPoint0 = valueToPoint(wRegionValue[0]) - 1
+      wPoint1 = valueToPoint(wRegionValue[1]) - 1
       # the -epsilon is to avoid lower point rounding up and upper point rounding down due to numerical error
       wPoint0, wPoint1 = (int(numpy.round(wPoint0-epsilon)), int(numpy.round(wPoint1-epsilon)))
       
@@ -692,8 +695,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       pixelViewBox0 = plotItem.getAxis('bottom').height()
       pixelViewBox1 = pixelViewBox0 + viewBox.height()
 
-    firstPoint = valueToPoint(region0)
-    lastPoint = valueToPoint(region1)
+    # -1 below because points start at 1 in data model
+    firstPoint = valueToPoint(region0) - 1
+    lastPoint = valueToPoint(region1) - 1
     # (firstPoint, lastPoint) = self.spectrum.getDimPointFromValue(dim, (region0, region1))
 
     scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
@@ -714,8 +718,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #   maxAliasedFrequencyPoint = self.spectrum.getDimPointFromValue(dim, maxAliasedFrequency)
     # else:
     #   maxAliasedFrequencyPoint = totalPointCount - 1
-    clipPoint0 = int(math.floor(max(firstPoint, valueToPoint(maxAliasedFrequency))))
-    clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(minAliasedFrequency))))
+    
+    # -1 below because points start at 1 in data model
+    clipPoint0 = int(math.floor(max(firstPoint, valueToPoint(maxAliasedFrequency)-1)))
+    clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(minAliasedFrequency)-1)))
 
     return translate, scale, totalPointCount, clipPoint0, clipPoint1
     

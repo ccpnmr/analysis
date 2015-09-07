@@ -246,9 +246,9 @@ class ViewBox(pg.ViewBox):
                     selectedPeaks.append(peak)
                     peak.isSelected = True
 
-        #         else:
-        #           selectedPeaks.append(peak)
-        #           peak.isSelected = True
+                else:
+                  selectedPeaks.append(peak)
+                  peak.isSelected = True
         #
         # print(selectedPeaks)
         # self.current.peaks = selectedPeaks

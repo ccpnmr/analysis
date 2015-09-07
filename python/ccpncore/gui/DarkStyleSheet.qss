@@ -106,6 +106,7 @@ QDialog QPushButton::hover {
                           background-color: #BDBC5A;
                           }
 
+
 QDialog QToolButton  {
 					background-color: #f7ffff;
 					}
@@ -214,6 +215,10 @@ Dock QPushButton::hover {
                           background-color: #e4e15b;
                           border: 1px solid #182548;
                           }
+
+Dock QPushButton::checked {
+                           background-color: #182548;
+                           }
 
 QFrame { background-color: #2a3358;}
 

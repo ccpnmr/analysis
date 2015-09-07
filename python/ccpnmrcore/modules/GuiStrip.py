@@ -510,7 +510,7 @@ for clazz in (ApiBoundStrip, ApiFreeStrip):
   Project._setupNotifier(_setupGuiStrip, clazz, 'postInit')
 
 def _rulerCreated(project:Project, apiRuler:ApiRuler):
-  """Notifier function for creating rulers"""
+  """]Notifier function for creating rulers"""
   axisCode = apiRuler.axisCode # TBD: use label and unit
   position = apiRuler.position
   task = project._data2Obj[apiRuler.mark.guiTask]

@@ -246,13 +246,12 @@ class ViewBox(pg.ViewBox):
                     selectedPeaks.append(peak)
                     peak.isSelected = True
 
-                else:
-                  selectedPeaks.append(peak)
-                  peak.isSelected = True
-
-        print(selectedPeaks)
-        self.current.peaks = selectedPeaks
-        print(self.current.peaks)
+        #         else:
+        #           selectedPeaks.append(peak)
+        #           peak.isSelected = True
+        #
+        # print(selectedPeaks)
+        # self.current.peaks = selectedPeaks
         # for peak in self.current.peaks:
         #   peak.isSelected = True
         if hasattr(self.parent._appBase.mainWindow, 'atomSelector'):

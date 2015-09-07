@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 import sys
 from PyQt4 import QtGui,QtCore
 
-from ccpn.lib.Assignment import CCP_CODES
+from ccpn.lib.Assignment import getNmrResiduePrediction
 
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
@@ -417,23 +417,23 @@ class AssignmentLine(QtGui.QGraphicsLineItem):
     self.setPen(self.pen)
     self.setLine(x1, y1, x2, y2)
 
-def getNmrResiduePrediction(nmrResidue, sl):
-    predictions = {}
-    spinSystem = nmrResidue._wrappedData
-    shiftList = sl._wrappedData
-    for code in CCP_CODES:
-      predictions[code] = float(getSpinSystemResidueProbability(spinSystem, shiftList, code))
-    tot = sum(predictions.values())
-    refinedPredictions = {}
-    for code in CCP_CODES:
-      v = round(predictions[code]/tot * 100, 2)
-      if v > 0:
-        refinedPredictions[code] = v
-
-    finalPredictions = []
-
-    for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
-      key = [key for key, val in refinedPredictions.items() if val==value][0]
-      finalPredictions.append([key, str(value)+' %'])
-
-    return finalPredictions
+# def getNmrResiduePrediction(nmrResidue, sl):
+#     predictions = {}
+#     spinSystem = nmrResidue._wrappedData
+#     shiftList = sl._wrappedData
+#     for code in CCP_CODES:
+#       predictions[code] = float(getSpinSystemResidueProbability(spinSystem, shiftList, code))
+#     tot = sum(predictions.values())
+#     refinedPredictions = {}
+#     for code in CCP_CODES:
+#       v = round(predictions[code]/tot * 100, 2)
+#       if v > 0:
+#         refinedPredictions[code] = v
+#
+#     finalPredictions = []
+#
+#     for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
+#       key = [key for key, val in refinedPredictions.items() if val==value][0]
+#       finalPredictions.append([key, str(value)+' %'])
+#
+#     return finalPredictions

@@ -537,10 +537,10 @@ class PeakNd(QtGui.QGraphicsItem):
       current = self._appBase.current
       if selected:
         if peak not in current.peaks:
-          current.peaks.append(peak)
+          current.addPeak(peak)
       else:
         if peak in current.peaks:
-          current.peaks.remove(peak)
+          current.removePeak(peak)
     
     return QtGui.QGraphicsItem.itemChange(self, change, value)
     

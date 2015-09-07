@@ -124,7 +124,7 @@ def getNmrAtomPrediction(ccpCode, value):
   tot = sum(predictions.values())
   refinedPredictions = {}
   for key, value in predictions.items():
-    v = round(value/tot * 100, 2)
+    v = int(value/tot * 100)
     if v > 0:
       refinedPredictions[key] = v
   #

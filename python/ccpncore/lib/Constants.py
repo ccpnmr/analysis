@@ -95,18 +95,18 @@ standardResidueCcpCodes = {
 
     'protein':
 
-      ['Ala','Arg','Asn','Asp','Cys',
+      ('Ala','Arg','Asn','Asp','Cys',
        'Gln','Glu','Gly','His','Ile',
        'Leu','Lys','Met','Phe','Pro',
-       'Ser','Thr','Trp','Tyr','Val'],
+       'Ser','Thr','Trp','Tyr','Val'),
 
     'DNA':
 
-      ['A','C','G','T'],
+      ('A','C','G','T'),
 
     'RNA':
 
-      ['A','C','G','U']
+      ('A','C','G','U')
 
                           }
 

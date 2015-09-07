@@ -257,11 +257,11 @@ class Strip(GuiStrip, AbstractWrapperObject):
     # make axis mapping indices
     if axisOrder and axisOrder != displayAxisCodes:
       # Map axes to axisOrder, and remap to original setting
-      ll = libSpectrum.axisCodeMapIndices(spectrum.axisCodes, axisOrder)
+      ll = libSpectrum._axisCodeMapIndices(spectrum.axisCodes, axisOrder)
       mapIndices = [ll[axisOrder.index(x)] for x in displayAxisCodes]
     else:
       # Map axes to original display setting
-      mapIndices = libSpectrum.axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
+      mapIndices = libSpectrum._axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
 
     # Make dimensionOrdering
     sortedDataDims = dataSource.sortedDataDims()
@@ -318,7 +318,7 @@ def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
       newStrip.moveTo(newIndex)
 
   else:
-    mapIndices = libSpectrum.axisCodeMapIndices(strip.axisOrder, spectrumDisplay.axisOrder)
+    mapIndices = libSpectrum._axisCodeMapIndices(strip.axisOrder, spectrumDisplay.axisOrder)
     if mapIndices is None:
       raise ValueError("Strip %s not compatible with window %s" % (strip.pid, spectrumDisplay.pid))
     else:

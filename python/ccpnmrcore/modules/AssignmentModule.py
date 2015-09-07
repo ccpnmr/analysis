@@ -372,7 +372,7 @@ class AssignmentModule(CcpnDock, Base):
     for peak in self.peaks:
       shiftList = getShiftlistForPeak(peak)
       if shiftList:
-        shift = shiftList.findChemicalShift(nmrAtom)
+        shift = shiftList.getChemicalShift(nmrAtom.id)
         if shift:
           position = peak.position[dim]
           deltas.append(abs(shift.value-position))
@@ -394,7 +394,7 @@ class AssignmentModule(CcpnDock, Base):
     for peak in self.peaks:
       shiftList = getShiftlistForPeak(peak)
       if shiftList:
-        shift = shiftList.findChemicalShift(nmrAtom)
+        shift = shiftList.getChemicalShift(nmrAtom.id)
         if shift:
           return shift.value
 

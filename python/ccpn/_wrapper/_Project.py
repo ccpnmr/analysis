@@ -232,7 +232,7 @@ class Project(AbstractWrapperObject):
   
   @property
   def nmrProject(self) -> ApiNmrProject:
-    """API equivalent to object: Nmrproject"""
+    """API equivalent to object: NmrProject"""
     return self._wrappedData
 
   # Undo machinery

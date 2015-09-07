@@ -60,13 +60,13 @@ class NmrResidueTest(Testing):
     
   def test_fetchNmrResidue(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
-    res1 = nmrChain.fetchNmrResidue(sequenceCode="127B", name="ALA")
-    res2 = nmrChain.fetchNmrResidue(sequenceCode="127B", name="ALA")
+    res1 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
+    res2 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
     assert res1 is res2, "fetchNmrResidue takes existing NmrResidue if possible"
 
   def test_fetchEmptyNmrResidue(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
-    res1 = nmrChain.fetchNmrResidue(sequenceCode=None, name="ALA")
+    res1 = nmrChain.fetchNmrResidue(sequenceCode=None, residueType="ALA")
     sequenceCode = '@%s' % res1._wrappedData.serial
     assert res1.sequenceCode == sequenceCode
     res2 = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode)
@@ -74,17 +74,17 @@ class NmrResidueTest(Testing):
 
   def test_offsetNmrResidue(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
-    res1 = nmrChain.fetchNmrResidue(sequenceCode="127B", name="ALA")
-    res2 = nmrChain.fetchNmrResidue(sequenceCode="127B-1", name="ALA")
+    res1 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
+    res2 = nmrChain.fetchNmrResidue(sequenceCode="127B-1", residueType="ALA")
     assert res2._wrappedData.mainResonanceGroup is res1._wrappedData
-    res3 = nmrChain.fetchNmrResidue(sequenceCode="127B-1", name="ALA")
+    res3 = nmrChain.fetchNmrResidue(sequenceCode="127B-1", residueType="ALA")
     assert res2 is res3, "fetchNmrResidue with offset takes existing NmrResidue if possible"
     res1.delete()
     assert res2._wrappedData.isDeleted, "Deleting main NmrResidue also deletes satellites"
 
   def test_get_by_serialName(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
-    res1 = nmrChain.fetchNmrResidue(sequenceCode=None, name="ALA")
+    res1 = nmrChain.fetchNmrResidue(sequenceCode=None, residueType="ALA")
     serialName = '@%s' % res1._wrappedData.serial
     res2 = nmrChain.fetchNmrResidue(sequenceCode=serialName)
     assert res1 is res2

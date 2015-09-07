@@ -65,10 +65,34 @@ def createBlockedMatrix(dataUrl:object, path:str, numPoints:Sequence, blockSizes
 
   return matrix
 
+def axisCodeMatch(axisCode:str, refAxisCodes:Sequence)->str:
+  """Get refAxisCode that best matches axisCode """
+  for ii,indx in enumerate(_axisCodeMapIndices([axisCode], refAxisCodes)):
+    if indx == 0:
+      # We have a match
+      return refAxisCodes[ii]
+  else:
+    return None
+
+def axisCodeMapping(axisCodes:Sequence, refAxisCodes:Sequence)->dict:
+  """get {axisCode:refAxisCode} mapping dictionary
+  all axisCodes must match, or dictionary will be empty
+  NB a series of single-letter axisCodes (e.g. 'N;, 'HCN') can be passed in as a string"""
+  result = {}
+  mapIndices =  _axisCodeMapIndices(axisCodes, refAxisCodes)
+  if mapIndices:
+    for ii, refAxisCode in enumerate(refAxisCodes):
+      indx = mapIndices[ii]
+      if indx is not None:
+        result[axisCodes[indx]] = refAxisCodes
+  #
+  return result
+
 #
-def axisCodeMapIndices(axisCodes:Sequence, refAxisCodes:Sequence)->list:
+def _axisCodeMapIndices(axisCodes:Sequence, refAxisCodes:Sequence)->list:
   """get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]
-  all axisCodes must match, but result can contain None if refAxisCodes is longer"""
+  all axisCodes must match, but result can contain None if refAxisCodes is longer
+  if axisCodes contain duplicates, youwill get one of possible matches"""
 
  # All known axisCodes: ['Br', 'C', 'CA', 'CA1', 'CO', 'CO1', 'C1', 'C2', 'Ch', 'Ch1',
  # 'F', 'H', 'H1', 'H2', 'H3', 'H4', 'Hc', 'Hc1', 'Hcn', 'Hcn1', 'Hn', 'Hn1',

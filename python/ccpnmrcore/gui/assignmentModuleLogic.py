@@ -130,7 +130,7 @@ def withinTolerance(nmrAtom, position, shiftList, tolerance):
        peak dimension.
 
     '''
-    shift = shiftList.findChemicalShift(nmrAtom)
+    shift = shiftList.getChemicalShift(nmrAtom.id)
     #delta = delta_shift(nmrAtom, position, shiftList)
     if shift and abs(position - shift.value) < tolerance:
         return True
@@ -139,7 +139,7 @@ def withinTolerance(nmrAtom, position, shiftList, tolerance):
 
 #def delta_shift(nmrAtom, position, shiftList):
 
-#    shift = shiftList.findChemicalShift(nmrAtom)
+#    shift = shiftList.getChemicalShift(nmrAtom.id)
 #    if shift:
 #        return position - shift.value
 #    return None

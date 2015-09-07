@@ -323,7 +323,7 @@ def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=
 
   mapIndices = ()
   if axisOrder:
-    mapIndices = libSpectrum.axisCodeMapIndices(spectrumAxisCodes, axisOrder)
+    mapIndices = libSpectrum._axisCodeMapIndices(spectrumAxisCodes, axisOrder)
     if displayAxisCodes:
       if not libSpectrum.doAxisCodesMatch(axisOrder, displayAxisCodes):
         raise ValueError("AxisOrder %s do not match display axisCodes %s"
@@ -331,7 +331,7 @@ def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=
     else:
       displayAxisCodes = axisOrder
   elif displayAxisCodes:
-    mapIndices = libSpectrum.axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
+    mapIndices = libSpectrum._axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
   else:
     displayAxisCodes = list(spectrumAxisCodes)
     mapIndices = list(range(dataSource.numDim))

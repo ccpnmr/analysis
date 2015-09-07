@@ -61,7 +61,7 @@ def navigateToNmrResidue(project, nmrResidue, selectedDisplays=None, markPositio
       shiftDict[axis.code] = []
       for atom in nmrResidue.atoms:
         if atom.apiResonance.isotopeCode == getIsotopeCodeOfAxis(axis.code):
-          shift = project.chemicalShiftLists[0].findChemicalShift(atom)
+          shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
           print(shift)
           if shift is not None:
             if isPositionWithinfBounds(display.strips[0], shift, axis):
@@ -102,7 +102,7 @@ def navigateToNmrResidue(project, nmrResidue, selectedDisplays=None, markPositio
   #     shiftDict[axis.code] = []
   #     for atom in nmrResidue.atoms:
   #       if atom.apiResonance.isotopeCode == getIsotopeCodeOfAxis(axis.code):
-  #         shift = project.chemicalShiftLists[0].findChemicalShift(atom)
+  #         shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
   #         print(shift)
   #         if shift is not None:
   #           if isPositionWithinfBounds(strip, shift, axis):

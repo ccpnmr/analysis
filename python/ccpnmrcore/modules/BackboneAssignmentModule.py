@@ -107,16 +107,16 @@ class BackboneAssignmentModule(CcpnDock):
       if '-1' in nmrResidue.sequenceCode:
         # get inter residue chemical shifts for each -1 nmrResidue
         interCa = nmrResidue.fetchNmrAtom(name='CA')
-        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(interCa))
+        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].getChemicalShift(interCa.id))
         interCb = nmrResidue.fetchNmrAtom(name='CB')
-        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(interCb))
+        interShifts[nmrResidue].append(self.project.chemicalShiftLists[0].getChemicalShift(interCb.id))
 
       if '-1' not in nmrResidue.sequenceCode:
         # get intra residue chemical shifts for each nmrResidue
         intraCa = nmrResidue.fetchNmrAtom(name='CA')
-        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(intraCa))
+        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].getChemicalShift(intraCa.id))
         intraCb = nmrResidue.fetchNmrAtom(name='CB')
-        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].findChemicalShift(intraCb))
+        intraShifts[nmrResidue].append(self.project.chemicalShiftLists[0].getChemicalShift(intraCb.id))
 
 
     if self.direction == 'i-1':
@@ -149,8 +149,8 @@ class BackboneAssignmentModule(CcpnDock):
       zAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
       xAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
 
-      zShift = self.project.chemicalShiftLists[0].findChemicalShift(zAtom[0]).value
-      xShift = self.project.chemicalShiftLists[0].findChemicalShift(xAtom[0]).value
+      zShift = self.project.chemicalShiftLists[0].getChemicalShift(zAtom[0].id).value
+      xShift = self.project.chemicalShiftLists[0].getChemicalShift(xAtom[0].id).value
 
       for matchDisplay in self.matchDisplays:
         matchWindow = self.project.getById(matchDisplay)
@@ -167,8 +167,8 @@ class BackboneAssignmentModule(CcpnDock):
 
     zAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
     xAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
-    zShift = self.project.chemicalShiftLists[0].findChemicalShift(zAtom[0]).value
-    xShift = self.project.chemicalShiftLists[0].findChemicalShift(xAtom[0]).value
+    zShift = self.project.chemicalShiftLists[0].getChemicalShift(zAtom[0].id).value
+    xShift = self.project.chemicalShiftLists[0].getChemicalShift(xAtom[0].id).value
 
 
     for matchDisplay in self.matchDisplays:

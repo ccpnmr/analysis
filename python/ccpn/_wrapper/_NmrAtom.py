@@ -33,7 +33,8 @@ from ccpncore.util import Pid
 
 
 class NmrAtom(AbstractWrapperObject):
-  """Nmr Atom (corresponds to ApiResonance."""
+  """Nmr Atom, used for assigning,peaks and shifts. (corresponds to ApiResonance)."""
+
   
   #: Short class name, for PID.
   shortClassName = 'NA'

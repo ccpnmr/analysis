@@ -75,17 +75,17 @@ for peakList in peaklists2:
       newNmrAtom = r.fetchNmrAtom(name=name)
       try:
         peak.assignDimension(axisCode='CA', value=newNmrAtom)
-        if shiftList.findChemicalShift(newNmrAtom) is None:
+        if shiftList.getChemicalShift(newNmrAtom.id) is None:
           shiftList.newChemicalShift(value=peak.position[cdim], nmrAtom=newNmrAtom)
       except ValueError:
         # print(peak.peakList.spectrum.axisCodes)
         try:
           peak.assignDimension(axisCode='C', value=newNmrAtom)
-          if shiftList.findChemicalShift(newNmrAtom) is None:
+          if shiftList.getChemicalShift(newNmrAtom.id) is None:
             shiftList.newChemicalShift(value=peak.position[cdim], nmrAtom=newNmrAtom)
         except ValueError:
             peak.assignDimension(axisCode='Ch', value=newNmrAtom)
-            if shiftList.findChemicalShift(newNmrAtom) is None:
+            if shiftList.getChemicalShift(newNmrAtom.id) is None:
               shiftList.newChemicalShift(value=peak.position[cdim], nmrAtom=newNmrAtom)
             # shiftList.newChemicalShift(value=peak.position[cdim], nmrAtom=newNmrAtom)
 
@@ -100,7 +100,7 @@ copyAssignments(hncocacb, hncoca)
 # nmrResidueLabels = []
 # nmrAtoms = []
 # for nmrResidue in project.nmrResidues:
-#   atoms = [shiftList.findChemicalShift(atom).value for atom in nmrResidue.atoms if atom.apiResonance.isotopeCode == '13C' and atom.name=='CA' or atom.name=='CB']
+#   atoms = [shiftList.getChemicalShift(atom.id).value for atom in nmrResidue.atoms if atom.apiResonance.isotopeCode == '13C' and atom.name=='CA' or atom.name=='CB']
 #   for atom in atoms:
 #     if atom is None:
 #       atoms.pop(atoms.index(atom))

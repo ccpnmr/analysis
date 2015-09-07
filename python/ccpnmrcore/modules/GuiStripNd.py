@@ -109,6 +109,8 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.hTraceAction)
     # self.contextMenu.addAction(self.vTraceAction)
     self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self.toggleCrossHair, checkable=True)
+    self.hTraceAction = self.contextMenu.addItem("H Trace", callback=self.toggleHTrace, checked=False, checkable=True)
+    self.vTraceAction = self.contextMenu.addItem("V Trace", callback=self.toggleVTrace, checked=False, checkable=True)
     self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
     plusOneAction = self.contextMenu.addAction("Add Contour Level", self.guiSpectrumDisplay.addOne)
     plusOneIcon = Icon('iconsNew/contour-add')
@@ -149,6 +151,27 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
 
+  def toggleHTrace(self):
+    self.hTraceAction.setChecked(self.hTraceAction.isChecked())
+
+  def toggleVTrace(self):
+    self.vTraceAction.setChecked(self.vTraceAction.isChecked())
+
+  def mouseMoved(self, positionPixel):
+
+    GuiStrip.mouseMoved(self, positionPixel) # position is in pixels
+
+    if self.plotWidget.sceneBoundingRect().contains(positionPixel):
+      updateHTrace = self.hTraceAction.isChecked()
+      updateVTrace = self.vTraceAction.isChecked()
+      positionView = self.viewBox.mapSceneToView(positionPixel) # convert to ppm (or whatever)
+      position = [axis.position for axis in self.orderedAxes]
+      position[0] = positionView.x()
+      position[1] = positionView.y()
+      positionPixel = (positionPixel.x(), positionPixel.y())
+      for spectrumView in self.spectrumViews:
+        spectrumView.updateTrace(position, positionPixel, updateHTrace, updateVTrace)
+
   def setZWidgets(self):
           
     for n, zAxis in enumerate(self.orderedAxes[2:]):   
@@ -158,7 +181,7 @@ class GuiStripNd(GuiStrip):
         # spectrum = spectrumView.spectrum
         # zDim = spectrum.axisCodes.index(zAxis.code)
 
-        position, width, totalPointCount, minFrequency, maxFrequency = (
+        position, width, totalPointCount, minFrequency, maxFrequency, dataDim = (
           spectrumView._getSpectrumViewParams(n+2))
       
         # minFrequency = spectrum.minAliasedFrequencies[zDim]

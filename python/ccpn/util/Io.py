@@ -26,21 +26,21 @@ from ccpn import Project
 from ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
 from ccpncore.util import Io as ioUtil
 
-def openProject(path:str, nmrProjectName:str=None) -> Project:
+def openProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
   """Open project (API project) stored at path.
 
   If the API project contains several NmrProjects (rare),
   nmrProjectName lets you select which one to open"""
-  apiProject = ioUtil.loadProject(path)
+  apiProject = ioUtil.loadProject(path, useFileLogger=useFileLogger)
   if apiProject is None:
     raise ValueError("No valid project loaded from %s" % path )
   else:
     return _wrapApiProject(apiProject, nmrProjectName=nmrProjectName)
 
 
-def newProject(projectName:str, path:str=None) -> Project:
+def newProject(projectName:str, path:str=None, useFileLogger:bool=True) -> Project:
   """Make new project, putting underlying data storage (API project) at path"""
-  apiProject = ioUtil.newProject(projectName, path, removeExisting=True)
+  apiProject = ioUtil.newProject(projectName, path, removeExisting=True, useFileLogger=useFileLogger)
   if apiProject is None:
     raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"
                      % (projectName, path) )

@@ -49,7 +49,7 @@ from PyQt4 import QtGui
 
 class AppBase(GuiBase):
 
-  def __init__(self, apiProject, applicationName, applicationVersion,  preferences, module=None,):
+  def __init__(self, apiProject, applicationName, applicationVersion,  preferences, module=None):
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
     self.applicationName = applicationName
@@ -199,7 +199,8 @@ def checkRegistration(applicationVersion):
   
   return True
   
-def startProgram(programClass, applicationName, applicationVersion, projectPath=None, language=None, skipUserPreferences=False):
+def startProgram(programClass, applicationName, applicationVersion, projectPath=None, language=None,
+                 skipUserPreferences=False, nologging=False):
 
   if language:
     Translation.setTranslationLanguage(language)
@@ -208,7 +209,7 @@ def startProgram(programClass, applicationName, applicationVersion, projectPath=
   if projectPath:
     apiProject = ioUtil.loadProject(projectPath)
   else:
-    apiProject = ioUtil.newProject('default')
+    apiProject = ioUtil.newProject('default', useFileLogger=(not nologging))
 
   # On the Mac (at least) it does not matter what you set the applicationName to be,
   # it will come out as the executable you are running (e.g. "python3")

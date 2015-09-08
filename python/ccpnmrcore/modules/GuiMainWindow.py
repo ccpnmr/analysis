@@ -198,7 +198,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.fillRecentProjectsMenu()
     fileMenu.addAction(Action(self, "Load Data", callback=self.loadData, shortcut='ld'))
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Save", callback=self._appBase.saveProject, shortcut="ps"))
+    fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
     fileMenu.addAction(Action(self, "Save As...", shortcut="sa", callback=self.saveProjectAs))
     backupOption = fileMenu.addMenu("Backup")
     backupOption.addAction(Action(self, "Save", callback=self.saveBackup))
@@ -469,7 +469,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     PreferencesPopup(preferences=self._appBase.preferences).exec_()
 
   def quitAction(self):
-    # pass
+    # delete temporary project directory, if there is one
+    ioUtil.removeTemporaryDirectory(self._project._wrappedData.root)
+      
     prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
     if os.path.exists(prefPath):
       prefFile = open(prefPath)
@@ -689,9 +691,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showDataPlottingModule(self):
     dpModule = DataPlottingModule(self.dockArea)
 
+  def saveProject(self):
+    
+    apiProject = self._project._wrappedData.root
+    if hasattr(apiProject, '_temporaryDirectory'):
+      self.saveProjectAs()
+    else:
+      self._appBase.saveProject()
+    
   def saveProjectAs(self):
-    if not self._project:
-      return
+    
     dialog = QtGui.QFileDialog(self, caption='Save Project As...')
     dialog.setFileMode(QtGui.QFileDialog.AnyFile)
     dialog.setAcceptMode(1)

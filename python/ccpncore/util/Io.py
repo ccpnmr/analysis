@@ -26,9 +26,10 @@ __version__ = "$Revision: 7686 $"
 
 __author__ = 'rhf22'
 
+import glob
 import os
 import shutil
-import glob
+import tempfile
 # import time
 
 from ccpncore.api.memops import Implementation
@@ -51,9 +52,24 @@ class DefaultIoHandler:
   Should be subclassed for actual functionality
   This default class simply does nothing"""
 
-
+def _createLogger(project, applicationName=None, useFileLogger=None):
+  
+  if applicationName is None:
+    applicationName = project._applicationName if hasattr(project, '_applicationName') else 'ccpn'
+    
+  if useFileLogger is None:
+    useFileLogger = project._useFileLogger
+    
+  logger = Logging.createLogger(applicationName, project) if useFileLogger else Logging.getLogger()
+  project._applicationName = applicationName
+  project._useFileLogger = useFileLogger
+  project._logger = logger
+  
+  return logger
+  
 def newProject(projectName, path:str=None, removeExisting:bool=False,
-               showYesNo:"function"=None, applicationName='ccpn') -> Implementation.MemopsRoot:
+               showYesNo:"function"=None, applicationName='ccpn',
+               useFileLogger:bool=True) -> Implementation.MemopsRoot:
   """
   Create, and return, a new project using a specified path (directory).
   If path is not specified it takes the current working directory.
@@ -74,30 +90,34 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
   # relies on knowing that repositories to move have these names, and these values for path suffix
   repositoryNameMap = {'userData': '', 'backup': '_backup'}
 
-  if not path:
-    path = os.getcwd()
-
-  for name in repositoryNameMap.keys():
-    fullPath = Path.joinPath(path, projectName) + repositoryNameMap[name]
-    if not absentOrRemoved(Path.joinPath(fullPath, 'memops', 'Implementation'),
-                           removeExisting, showYesNo):
-      errMsg = 'Path ("%s") contains existing project.' % fullPath
-      Logging.getLogger().warning(errMsg)
-      raise Exception(errMsg)
-
+  if path:
+    for name in repositoryNameMap.keys():
+      fullPath = Path.joinPath(path, projectName) + repositoryNameMap[name]
+      if not absentOrRemoved(Path.joinPath(fullPath, 'memops', 'Implementation'),
+                             removeExisting, showYesNo):
+        errMsg = 'Path ("%s") contains existing project.' % fullPath
+        Logging.getLogger().warning(errMsg)
+        raise Exception(errMsg)
+    temporaryDirectory = None
+  else:
+    temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_')
+    path = temporaryDirectory.name
+    
   project = Implementation.MemopsRoot(name=projectName)
-
-  # create logger
-  logger = Logging.createLogger(applicationName, project)
-  project._logger = logger
-
-  logger.info("Project is %s", project)
-
+  
+  if temporaryDirectory:
+    project._temporaryDirectory = temporaryDirectory
+  
   for name in repositoryNameMap.keys():
     fullPath = Path.normalisePath(Path.joinPath(path, projectName)
                              + repositoryNameMap[name], makeAbsolute=True)
     repository = project.findFirstRepository(name=name)
     repository.url = Implementation.Url(path=fullPath)
+
+  # create logger
+  logger = _createLogger(project, applicationName, useFileLogger)
+  
+  logger.info("Project is %s", project)
 
   return project
 
@@ -154,7 +174,8 @@ def absentOrRemoved(path:str, removeExisting:bool=False, showYesNo:"function"=No
 
 def loadProject(path:str, projectName:str=None, askFile:"function"=None,
                 askDir:"function"=None, suppressGeneralDataDir:bool=False,
-                fixDataStores=True, applicationName='ccpn'):
+                fixDataStores=True, applicationName='ccpn',
+                useFileLogger:bool=True) -> Implementation.MemopsRoot:
   """
   Loads a project file and checks and deletes unwanted project repositories and
   changes the project repository path if the project has moved.  Returns the project.
@@ -398,10 +419,8 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
     # Special hack for moving data of renamed packages on upgrade
     for newName, oldName in project._movedPackageNames.items():
       movePackageData(project, newName, oldName)
-
-  # make logger
-  logger = Logging.createLogger(applicationName, project)
-  project._logger = logger
+      
+  logger = _createLogger(project, applicationName, useFileLogger)
 
   if warningMessages:
     # log warnings
@@ -424,7 +443,12 @@ def cleanupProject(project):
       logger.removeHandler(handler)
 
 
-
+def removeTemporaryDirectory(project):
+  
+  if hasattr(project, '_temporaryDirectory'):  
+    project._temporaryDirectory.cleanup()
+    del project._temporaryDirectory 
+  
 def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
                 createFallback=False, removeExisting=False, showYesNo=None,
                 checkValid=False, changeDataLocations=False):
@@ -463,7 +487,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   If there is no exception or early return then at end userData is pointing to newPath.
   Return True if save done, False if not (unless there is an exception)
   """
-
+  
   undo = project._undo
   if undo is not None:
     undo.increaseBlocking()
@@ -505,6 +529,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
       location = ApiPath.getTopObjectPath(project)
       if not absentOrRemoved(location, removeExisting, showYesNo):
         project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
+        removeTemporaryDirectory(project)
         if undo is not None:
           undo.decreaseBlocking()
         return False
@@ -518,8 +543,10 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
     else:
       if newProjectName != oldProjectName:
         project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
+        removeTemporaryDirectory(project)
         if undo is not None:
           undo.decreaseBlocking()
+        logger = _createLogger(project)
         return False
       else:
         # TBD: should we be removing it?
@@ -725,12 +752,15 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
         pass
 
     result = None
+  
+  logger = _createLogger(project)
+  
+  removeTemporaryDirectory(project)
 
   if undo is not None:
     undo.decreaseBlocking()
+  
   return result
-
-
 
 def checkFileAtPath(path):
   """Check that file on disk ends correctly

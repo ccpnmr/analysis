@@ -2,11 +2,15 @@
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn.lib.Assignment import CCP_CODES, ATOM_NAMES
+
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
+from ccpnmrcore.modules.ObjectAssigner import ObjectAssigner
+from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.CheckBox import CheckBox
@@ -21,6 +25,10 @@ from ccpnmrcore.gui.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPea
 from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup
 
 from ccpnmrcore import Current
+
+
+
+from functools import partial
 
 class AssignmentModule(CcpnDock, Base):
   '''Module that can be used to assign nmrAtoms
@@ -51,8 +59,8 @@ class AssignmentModule(CcpnDock, Base):
     # this way it can shrink,
     self.selectionLayout = QtGui.QGridLayout()
     self.filterLayout = QtGui.QGridLayout()
-    self.advancedLayout = QtGui.QGridLayout()
-    self.layout.addLayout(self.advancedLayout, 2, 0)
+    # self.advancedLayout = QtGui.QGridLayout()
+    # self.layout.addLayout(self.advancedLayout, 2, 0)
     self.layout.addLayout(self.selectionLayout, 1, 0)
     self.layout.addLayout(self.filterLayout, 0, 0)
     self.selectionLayout.setRowMinimumHeight(0, 0)
@@ -61,8 +69,15 @@ class AssignmentModule(CcpnDock, Base):
     self.listWidgets = []
     self.objectTables = []
     self.labels = []
-    self.advancedButtons = []
-    self.nmrPopups = []
+    self.assignmentWidgets = []
+    self.chainPulldowns = []
+    self.seqCodePulldowns = []
+    self.resTypePulldowns = []
+    self.atomTypePulldowns = []
+    # self.nmrPopupScrollAreas = []
+    # self.nmrPopups = []
+
+
 
     # double tolerance
     self.doubleToleranceCheckbox = CheckBox(self, checked=False)
@@ -112,11 +127,11 @@ class AssignmentModule(CcpnDock, Base):
                Column('Delta', lambda nmrAtom: self.getDeltaShift(nmrAtom, dim))]
 
     objectTable = ObjectTable(self, columns,
-                              callback=None,
+                              callback=partial(self.assignNmrAtomToDim, dim),
                               objects=[])
 
     # Needed to use this syntax because wanted double click not single.
-    objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
+    # objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
     objectTable.setFixedHeight(80)
     self.objectTables.append(objectTable)
 
@@ -125,7 +140,7 @@ class AssignmentModule(CcpnDock, Base):
        setting the content.
 
     '''
-    listWidget = ListWidget(self, callback=self.getNmrResidue,
+    listWidget = ListWidget(self, callback=partial(self.getNmrAtom, dim),
                             rightMouseCallback=self.updateNmrAtomsFromListWidgets)
     listWidget.setFixedHeight(80)
     self.listWidgets.append(listWidget)
@@ -140,13 +155,103 @@ class AssignmentModule(CcpnDock, Base):
     label.setStyleSheet("border: 0px solid; color: #f7ffff;")
     self.labels.append(label)
 
-  def createAdvancedButton(self, dim):
-    advancedButton = Button(self, text="Advanced", hAlign='c')
-    advancedButton.setFixedWidth(100)
-    from functools import partial
-    advancedButton.setCheckable(True)
-    advancedButton.toggled.connect(partial(self.toggleNmrResiduePopup, dim))
-    self.advancedButtons.append(advancedButton)
+  # def createAdvancedButton(self, dim):
+  #   advancedButton = Button(self, text="Advanced", hAlign='c')
+  #   advancedButton.setFixedWidth(100)
+  #   from functools import partial
+  #   advancedButton.setCheckable(True)
+  #   advancedButton.toggled.connect(partial(self.toggleNmrResiduePopup, dim))
+  #   self.advancedButtons.append(advancedButton)
+
+  def createAssignmentWidget(self, dim):
+    newAssignmentWidget = QtGui.QWidget()
+    newLayout = QtGui.QGridLayout()
+    chainLabel = Label(self, 'Chain', hAlign='c')
+    seqCodeLabel = Label(self, 'Sequence', hAlign='c')
+    residueTypeLabel = Label(self, 'Type', hAlign='c')
+    atomTypeLabel = Label(self, 'Atom', hAlign='c')
+    chainPulldown = self.createChainPulldown(dim)
+    seqCodePulldown = self.createSeqCodePulldown(dim)
+    residueTypePulldown = self.createResTypePulldown(dim)
+    atomTypePulldown = self.createAtomTypePulldown(dim)
+    applyButton = Button(self, 'Apply', callback=partial(self.setAssignment, dim))
+    applyButton.setFixedHeight(residueTypePulldown.height())
+    applyButton.setFixedWidth(residueTypePulldown.width()*0.75)
+    newLayout.addWidget(chainLabel, 0, 0)
+    newLayout.addWidget(chainPulldown, 1, 0, QtCore.Qt.AlignCenter)
+    newLayout.addWidget(seqCodeLabel, 0, 1)
+    newLayout.addWidget(seqCodePulldown, 1, 1, QtCore.Qt.AlignCenter)
+    newLayout.addWidget(residueTypeLabel, 0, 2)
+    newLayout.addWidget(residueTypePulldown, 1, 2, QtCore.Qt.AlignCenter)
+    newLayout.addWidget(atomTypeLabel, 0, 3)
+    newLayout.addWidget(atomTypePulldown, 1, 3, QtCore.Qt.AlignCenter)
+    newLayout.addWidget(applyButton, 1, 4, QtCore.Qt.AlignCenter)
+    newAssignmentWidget.setLayout(newLayout)
+    self.assignmentWidgets.append(newAssignmentWidget)
+
+
+  def setAssignment(self, dim):
+
+    nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
+    nmrResidue = nmrChain.fetchNmrResidue(self.seqCodePulldowns[dim].currentText())
+    nmrAtom = nmrResidue.fetchNmrAtom(self.atomTypePulldowns[dim].currentText())
+    print(nmrAtom)
+    for peak in self.peaks:
+      dimNmrAtoms = peak.dimensionNmrAtoms[dim]
+      currentItem = self.listWidgets[dim].currentItem()
+      currentObject = self.project.getByPid(currentItem.text())
+      toAssign = dimNmrAtoms.index(currentObject)
+
+      dimNmrAtoms[toAssign] = nmrAtom
+      allAtoms = list(peak.dimensionNmrAtoms)
+      allAtoms[dim] = dimNmrAtoms
+      peak.dimensionNmrAtoms = allAtoms
+
+    self.updateInterface()
+
+    # currentNmrAtom.nmrResidue.nmrChain = chain
+    # currentNmrAtom.
+
+
+
+  def createChainPulldown(self, dim):
+    pulldownList = PulldownList(self)
+    pulldownList.setEditable(True)
+    pulldownList.lineEdit().editingFinished.connect(partial(self.addItemToPulldown, pulldownList))
+    # pulldownList.editTextChanged.connect(self.addItemToPulldown)
+    # pulldownList.setData([chain.pid for chain in self.project.nmrChains])
+    self.chainPulldowns.append(pulldownList)
+    return pulldownList
+
+  def createSeqCodePulldown(self, dim):
+    pulldownList = PulldownList(self)
+    pulldownList.setEditable(True)
+    # pulldownList.editTextChanged.connect(self.addItemToPulldown)
+    # sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
+    # pulldownList.setData(sorted(sequenceCodes, key=self.natural_key))
+    self.seqCodePulldowns.append(pulldownList)
+    return pulldownList
+
+
+  def createResTypePulldown(self, dim):
+    pulldownList = PulldownList(self)
+    self.resTypePulldowns.append(pulldownList)
+    pulldownList.setEditable(True)
+    # pulldownList.editTextChanged.connect(self.addItemToPulldown)
+    return pulldownList
+
+  def createAtomTypePulldown(self, dim):
+    pulldownList = PulldownList(self)
+    pulldownList.setEditable(True)
+    # pulldownList.editTextChanged.connect(self.addItemToPulldown)
+    self.atomTypePulldowns.append(pulldownList)
+    return pulldownList
+
+
+  def natural_key(self, string_):
+    import re
+    """See http://www.codinghorror.com/blog/archives/001018.html"""
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
 
   def createEnoughTablesAndLists(self):
     '''Makes sure there are enough tables for the amount
@@ -159,6 +264,7 @@ class AssignmentModule(CcpnDock, Base):
 
     Ndimensions = len(self.peaks[0].position)
 
+
     # Create extra tables if needed.
     for dim in range(len(self.objectTables), Ndimensions):
       self.createEmptyNmrAtomsTable(dim)
@@ -169,11 +275,15 @@ class AssignmentModule(CcpnDock, Base):
     for dim in range(len(self.labels), Ndimensions):
       self.createEmptyWidgetLabel(dim)
 
-    for dim in range(len(self.advancedButtons), Ndimensions):
-      self.createAdvancedButton(dim)
-      self.showNmrResiduePopup(dim)
+    for dim in range(len(self.assignmentWidgets), Ndimensions):
+      self.createAssignmentWidget(dim)
 
-    self.widgetItems = list(zip(self.labels[:Ndimensions], self.listWidgets[:Ndimensions], self.objectTables[:Ndimensions], self.advancedButtons[:Ndimensions]))
+    # for dim in range(len(self.advancedButtons), Ndimensions):
+    #   self.createAdvancedButton(dim)
+    #   self.showNmrResiduePopup(dim)
+
+    self.widgetItems = list(zip(self.labels[:Ndimensions], self.listWidgets[:Ndimensions],
+                    self.assignmentWidgets[:Ndimensions], self.objectTables[:Ndimensions]))
     # self.putListAndTablesIntoWidgets(self.widgetItems)
     for pair in self.widgetItems:
       widget = QtGui.QWidget(self)
@@ -185,23 +295,21 @@ class AssignmentModule(CcpnDock, Base):
       pair[0].setFixedHeight(10)
       for item in range(len(pair)):
         layout.addWidget(pair[item], 0, QtCore.Qt.AlignTop)
-        layout.addItem(QtGui.QSpacerItem(0, 20))
+        # layout.addItem(QtGui.QSpacerItem(0, 20))
         pair[item].setStyleSheet("border: 0px solid; color: #f7ffff;")
 
-
-
-      pair[2].setStyleSheet("color: black; border: 0px solid;")
-      pair[3].setChecked(False)
-      layout.setAlignment(pair[3], QtCore.Qt.AlignHCenter)
+      pair[2].setStyleSheet("PulldownList {color: black; border: 0px solid;}")
+      pair[2].setStyleSheet("border: 0px solid")
+      pair[3].setStyleSheet("color: black; border: 0px solid;")
+      # pair[3].setChecked(False)
+      # layout.setAlignment(pair[3], QtCore.Qt.AlignHCenter)
       widget.setLayout(layout)
       self.widgets.append(widget)
       self.selectionLayout.addWidget(widget, 0, self.widgetItems.index(pair))
 
     self.updateLayout(self.selectionLayout, Ndimensions)
-    for nmrPopup in self.nmrPopups:
-      nmrPopup.hide()
-
-    self.update()
+    #
+    # self.update()
 
 
   # Update functions
@@ -249,7 +357,7 @@ class AssignmentModule(CcpnDock, Base):
                                              doubleTolerance=doubleTolerance,
                                              intraResidual=intraResidual)
     Ndimensions = len(nmrAtomsForTables)
-
+    print(nmrAtomsForTables)
     for dim, objectTable, nmrAtoms in zip(range(Ndimensions),
                                           self.objectTables,
                                           nmrAtomsForTables):
@@ -317,25 +425,62 @@ class AssignmentModule(CcpnDock, Base):
         layout.removeItem(item)
 
 
-  # Popup functions
+  def getNmrAtom(self, dim, item):
+    # print(item.text(), self.project.getById(item.text()))
+    nmrAtom = self.project.getByPid(item.text())
+    self.project._appBase.current.nmrAtom = nmrAtom
+    chain = nmrAtom.nmrResidue.nmrChain
+    sequenceCode = nmrAtom.nmrResidue.sequenceCode
+    residueType = nmrAtom.nmrResidue.residueType
+    atomType = nmrAtom.name
+    self.chainPulldowns[dim].setData([chain.id for chain in self.project.nmrChains])
+    self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))
+    # self.chainPulldowns[dim].setCallback(partial(self.setNmrChain))
+    sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
+    self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=self.natural_key))
+    self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))
+    self.seqCodePulldowns[dim].currentIndexChanged.connect(partial(self.setResidueType, dim))
+    # self.seqCodePulldowns[dim].setCallback(partial(self.setSequenceCode))
+    residueTypes = [code.upper() for code in CCP_CODES] + ['']
+    if nmrAtom.nmrResidue.residue is not None:
+      self.resTypePulldowns[dim].disable()
+      print('here')
+    self.resTypePulldowns[dim].setData(residueTypes)
+    self.resTypePulldowns[dim].setIndex(self.resTypePulldowns[dim].texts.index(residueType.upper()))
+    # self.resTypePulldowns[dim].setCallback(partial(self.setResidueType))
+    atomPrefix = self.peaks[0].peakList.spectrum.isotopeCodes[dim][-1]
+    atomNames = [atomName for atomName in ATOM_NAMES if atomName[0] == atomPrefix] + [nmrAtom.name]
+    self.atomTypePulldowns[dim].setData(atomNames)
+    self.atomTypePulldowns[dim].setIndex(self.atomTypePulldowns[dim].texts.index(nmrAtom.name))
+    # self.atomTypePulldowns[dim].setCallback(partial(self.setAtomType))
+    # print(self.project._appBase.current.nmrResidue, 'currentNmrResidue AssignmentModule')
+    # else:
+    #   self.chainPulldowns[dim].setData([])
+    #   self.seqCodePulldowns[dim].setData([])
+    #   self.resTypePulldowns[dim].setData([])
+    #   self.atomTypePulldowns[dim].setData([])
+    # for nmrResiduePopup in self.nmrPopups:
+    #   print(nmrResiduePopup, 'nmrResiduePopup')
+    #   nmrResiduePopup.updatePopup()
+    # print(item.text(), self.project.getById(item.text()))
 
-  def showNmrResiduePopup(self, dim):
 
-    nmrResiduePopup = NmrResiduePopup(self, self.project)
-
-    scrollArea = ScrollArea(self)
-    scrollArea.setWidget(nmrResiduePopup)
-    self.nmrPopups.append(scrollArea)
-    self.selectionLayout.addWidget(self.nmrPopups[dim], 7, dim, 1, 1)
-    self.nmrPopups[dim].hide()
+  def setResidueType(self, dim, index):
+    sequenceCode = self.seqCodePulldowns[dim].texts[index]
+    nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
+    residueType = nmrChain.fetchNmrResidue(sequenceCode).residueType
+    print(residueType)
+    self.resTypePulldowns[dim].setIndex(self.resTypePulldowns[dim].texts.index(residueType.upper()))
 
 
-  def toggleNmrResiduePopup(self, dim):
 
-    if self.nmrPopups[dim].isVisible():
-      self.nmrPopups[dim].hide()
-    else:
-      self.nmrPopups[dim].show()
+  def addItemToPulldown(self, pulldown):
+    if pulldown.lineEdit().isModified():
+      print(pulldown.lineEdit().text())
+      text = pulldown.lineEdit().text()
+      if text not in pulldown.texts:
+        pulldown.addItem(text)
+
 
 
 
@@ -459,7 +604,7 @@ class AssignmentModule(CcpnDock, Base):
         newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
         peak.assignDimension(axisCode, newAssignments)
 
-    self.listWidgets[dim].addItem(nmrAtom.nmrResidue.pid)
+    self.listWidgets[dim].addItem(nmrAtom.pid)
 
 
 

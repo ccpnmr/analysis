@@ -89,9 +89,25 @@ class ViewBox(pg.ViewBox):
 
 
     #
-    # if (event.button() == QtCore.Qt.LeftButton) and (
-    #           event.modifiers() & QtCore.Qt.ControlModifier) and not (
-    # event.modifiers() & QtCore.Qt.ShiftModifier):
+    if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
+
+      selectedPeaks = []
+      event.accept()
+      # print('Left Click Event')
+      xPositions = [self.mapSceneToView(event.pos()).x()-0.05, self.mapSceneToView(event.pos()).x()+0.05]
+      yPositions = [self.mapSceneToView(event.pos()).y()-0.05, self.mapSceneToView(event.pos()).y()+0.05]
+      if len(self.current.strip.orderedAxes) > 2:
+          zPositions = self.current.strip.orderedAxes[2].region
+      else:
+        zPositions = None
+      for spectrumView in self.current.strip.spectrumViews:
+        for peakList in spectrumView.spectrum.peakLists:
+          for peak in peakList.peaks:
+            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+              and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+              if zPositions is not None:
+                if zPositions[0] < float(peak.position[2]) < zPositions[1]:
+                  peak.isSelected = True
     #   position = event.scenePos()
     #   mousePoint = self.mapSceneToView(position)
     #   print(mousePoint)
@@ -235,7 +251,7 @@ class ViewBox(pg.ViewBox):
           zPositions = self.current.strip.orderedAxes[2].region
         else:
           zPositions = None
-        selectedPeaks = []
+        # selectedPeaks = []
         for spectrumView in self.current.strip.spectrumViews:
           for peakList in spectrumView.spectrum.peakLists:
             for peak in peakList.peaks:
@@ -243,20 +259,10 @@ class ViewBox(pg.ViewBox):
                 and yPositions[0] < float(peak.position[1]) < yPositions[1]):
                 if zPositions is not None:
                   if zPositions[0] < float(peak.position[2]) < zPositions[1]:
-                    selectedPeaks.append(peak)
                     peak.isSelected = True
-
+                    print(peak)
                 else:
-                  selectedPeaks.append(peak)
                   peak.isSelected = True
-        #
-        # print(selectedPeaks)
-        # self.current.peaks = selectedPeaks
-        # for peak in self.current.peaks:
-        #   peak.isSelected = True
-        if hasattr(self.parent._appBase.mainWindow, 'atomSelector'):
-            self.parent._appBase.mainWindow.atomSelector.predictAssignments(self.current.peaks)
-
 
       else:
         self.updateSelectionBox(event.buttonDownPos(), event.pos())

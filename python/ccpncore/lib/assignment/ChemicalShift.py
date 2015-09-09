@@ -1221,7 +1221,6 @@ def getSpinSystemResidueProbability(spinSystem, shiftList, ccpCode,
         # NB, use implName to avoid default (unassigned) names.
         atomNamesAppend(resonance.implName)
 
-
   prob = _getResidueProbability(ppms, ccpCode, elements,
                                atomNames, prior=prior, molType=molType)
 

@@ -11,7 +11,7 @@ class ListWidget(QtGui.QListWidget, Base):
 
     QtGui.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
-    self.callback = None
+    self.callback = callback
     self.rightMouseCallback = rightMouseCallback
     if callback is not None:
       self.itemClicked.connect(callback)
@@ -32,7 +32,9 @@ class ListWidget(QtGui.QListWidget, Base):
     elif event.button() == QtCore.Qt.LeftButton:
       if self.itemAt(event.pos()) is None:
         self.clearSelection()
+        print('here')
       else:
+        print(self.callback, 'calling back')
         super(ListWidget, self).mousePressEvent(event)
 
   def raiseContextMenu(self, event):

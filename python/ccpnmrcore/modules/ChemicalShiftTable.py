@@ -2,6 +2,8 @@ __author__ = 'simon1'
 
 from pyqtgraph.dockarea import Dock
 
+from operator import attrgetter
+
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
@@ -29,8 +31,12 @@ class ChemicalShiftTable(CcpnDock):
 
     tipTexts = ['atom key', 'name of NmrAtom', 'Atom Type', 'value of chemical shift']
 
-    self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists, callback=None, columns=columns, selector=self.chemicalShiftListPulldown, tipTexts=tipTexts)
+    self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists, callback=self.callback, columns=columns, selector=self.chemicalShiftListPulldown, tipTexts=tipTexts)
 
     newLabel = Label(self, '', grid=(2, 0))
 
     self.layout.addWidget(self.chemicalShiftTable, 3, 0, 1, 4)
+
+  def callback(self):
+    pass
+

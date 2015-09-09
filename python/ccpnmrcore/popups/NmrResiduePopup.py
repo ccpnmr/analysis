@@ -37,31 +37,32 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     tentativeLabel = Label(self, "Tentative: ", grid=(3, 0))
     tentativeAssignments = Label(self, grid=(3, 1))
     residueTypeLabel = Label(self, "Residue Type: ", grid=(4, 0))
-    self.residueTypePulldown = PulldownList(self, grid=(4, 1))
+    self.residueTypePulldown = PulldownList(self, grid=(4, 1), callback=self.setResidueType)
     self.residueTypePulldown.setData(CCP_CODES)
+    self.residueTypePulldown.setFixedWidth(100)
     atomTypePulldownLabel = Label(self, "Atom Type", grid=(5, 0))
-    atomTypePulldown = PulldownList(self, grid=(5, 1))
-    leftoverLabel = Label(self, "Leftover possibilities: ", grid=(6, 0))
-    # self.leftoverPoss = Label(self, grid=(6, 1))
+    self.atomTypePulldown = PulldownList(self, grid=(5, 1), callback=self.setAtomType)
+    leftoverLabel = Label(self, "Leftover possibilities: ", grid=(6, 0), vAlign='c')
+    self.leftoverPoss = ListWidget(self, grid=(6, 1))
+    self.leftoverPoss.setFixedHeight(100)
 
-    self.update()
+    self.updatePopup()
 
 
   def getResidueTypeProb(self, currentNmrResidue):
     predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0]._wrappedData)
-    preds0 = ', '.join([x[0] for x in predictions])
-    preds1 = ', '.join([' '.join([x[0], x[1]]) for x in predictions])
-    residueCodes = CCP_CODES
-    print(preds1)
-    for pred in predictions:
-      residueCodes.remove(pred[0])
+    preds1 = [' '.join([x[0], x[1]]) for x in predictions]
+    remainingResidues = [x for x in CCP_CODES if x not in predictions]
 
-    print(residueCodes)
-    # self.typePred.setText(preds1)
-    # getNmrAtomPrediction([x[0] for x in predictions], self.project.chemicalShiftLists[0].findChemicalShift(self.project._appBase.current.nmrAtom).value)
+    possibilities = preds1+remainingResidues
 
+    self.residueTypePulldown.setData(possibilities)
+    selectedResidue = self.residueTypePulldown.currentText().split(' ')[0]
+    atomPredictions = getNmrAtomPrediction(selectedResidue, self.project.chemicalShiftLists[0].findChemicalShift(self.project._appBase.current.nmrAtom).value)
+    atomPossibilites = [' '.join([x[0][1], x[1]]) for x in atomPredictions]
+    self.atomTypePulldown.setData(atomPossibilites)
 
-  def update(self):
+  def updatePopup(self):
     if self.project._appBase.current.nmrResidue is not None:
       currentNmrResidue = self.project._appBase.current.nmrResidue
       if currentNmrResidue is not None:
@@ -70,12 +71,12 @@ class NmrResiduePopup(QtGui.QDialog, Base):
         sequenceCode = "%s (%s)" % (currentNmrResidue.sequenceCode, currentNmrResidue.residueType)
         self.seqCodePulldown.setCurrentIndex(self.seqCodePulldown.findText(sequenceCode))
         self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.findText(self.getCcpCodeFromNmrResidueName(currentNmrResidue)))
-        # self.leftoverPoss.setText(self.getLeftOverResidues(currentNmrResidue))
+        self.leftoverPoss.clear()
+        self.leftoverPoss.addItems(self.getLeftOverResidues(currentNmrResidue))
         self.getResidueTypeProb(currentNmrResidue)
 
   def selectNmrChain(self, item):
     self.project._appBase.current.nmrChain = self.project.getByPid(item)
-    print(self.project._appBase.current.nmrChain)
 
 
   def getCcpCodeFromNmrResidueName(self, currentNmrResidue):
@@ -86,7 +87,18 @@ class NmrResiduePopup(QtGui.QDialog, Base):
   def getLeftOverResidues(self, currentNmrResidue):
     leftovers = []
     for residue in self.project.residues:
-      if currentNmrResidue.residueType == self.residueTypePulldown.currentText().upper()\
-              and residue.id != currentNmrResidue.id:
-        leftovers.append(residue.id)
-    return ", ".join(leftovers)
+      if residue.residueType == self.residueTypePulldown.currentText().upper():
+        leftovers.append(residue)
+    leftovers.remove(currentNmrResidue.residue)
+    return [residue.id for residue in leftovers]
+
+  def setResidueType(self, item):
+    currentNmrResidue = self.project._appBase.current.nmrResidue
+    # print(item.text().split(' ')[0])
+    currentNmrResidue.residueType = item.split(' ')[0].upper()
+
+  def setAtomType(self, item):
+    pass
+    currentNmrAtom = self.project._appBase.current.nmrAtom
+    currentNmrAtom.name = item.split(' ')[0]
+

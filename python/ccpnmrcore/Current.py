@@ -29,7 +29,7 @@ from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpn import Project
 
 # Fields that are coded automatically
-_autoFields = ['peaks','regions','positions', 'strips','nmrResidues']
+_autoFields = ['peaks','regions','positions', 'strips','nmrResidues', 'nmrAtoms']
 # NB For each of these fields code is generated to match the explicit code for the 'spectra' field
 # It is assumed that each autofield is plural, ending in a plural 's'
 # Note that the singluar value (e.g. 'currentSpectrum') is the last object
@@ -182,7 +182,7 @@ def _cleanupCurrentPeak(project, apiPeak):
     peak = project._data2Obj[apiPeak]
     ll = current.peaks
     if peak in current.peaks:
-      ll.remove(peak)
+      current.removePeak(peak)
       current.peaks = ll
 
 Project._cleanupCurrentPeak = _cleanupCurrentPeak

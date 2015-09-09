@@ -72,6 +72,7 @@ class AtomSelector(CcpnDock):
     self.parent = parent
     self.current = self.parent._appBase.current
     self.project = project
+    self.project._appBase.current.registerNotify(self.predictAssignments, 'peaks')
     for button in self.buttons:
       button.clicked.connect(self.returnButtonToNormal)
 
@@ -119,28 +120,40 @@ class AtomSelector(CcpnDock):
       self.setStyleSheet(styleSheet)
 
 
-  def predictAssignments(self, peaks):
-    experiments = []
-    try:
-      self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
+  def predictAssignments(self, current):
 
-    except IndexError:
-      self.current.nmrResidue = self.project.nmrChains[0].newNmrResidue()
-    values = [peak.height for peak in peaks]
-    experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
-    for value in values:
-      if value < 0:
-        if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-          self.cbButton1.setStyleSheet('background-color: green')
-          self.cbButton2.setStyleSheet('background-color: orange')
-        else:
-          self.cbButton2.setStyleSheet('background-color: green')
-      if value > 0:
-        if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-          self.caButton1.setStyleSheet('background-color: green')
-          self.caButton2.setStyleSheet('background-color: orange')
-        else:
-          self.caButton2.setStyleSheet('background-color: green')
+    print(current.peaks)
+
+    if len(current.peaks) == 0:
+      print(len(current.peaks))
+      for button in self.buttons:
+        button.clicked.connect(self.returnButtonToNormal)
+
+    else:
+      peaks = current.peaks
+
+      experiments = []
+      try:
+        self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
+
+      except IndexError:
+        self.current.nmrResidue = self.project.nmrChains[0].newNmrResidue()
+      values = [peak.height for peak in peaks]
+      print(values)
+      experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
+      for value in values:
+        if value < 0:
+          if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+            self.cbButton1.setStyleSheet('background-color: green')
+            self.cbButton2.setStyleSheet('background-color: orange')
+          else:
+            self.cbButton2.setStyleSheet('background-color: green')
+        if value > 0:
+          if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+            self.caButton1.setStyleSheet('background-color: green')
+            self.caButton2.setStyleSheet('background-color: orange')
+          else:
+            self.caButton2.setStyleSheet('background-color: green')
 
 
 

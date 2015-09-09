@@ -95,9 +95,10 @@ def getNmrResiduePrediction(nmrResidue, chemicalShiftList):
   for code in CCP_CODES:
     predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList, code))
   tot = sum(predictions.values())
+  print(predictions)
   refinedPredictions = {}
   for code in CCP_CODES:
-    v = round(predictions[code]/tot * 100, 2)
+    v = int(predictions[code]/tot * 100)
     if v > 0:
       refinedPredictions[code] = v
 
@@ -118,6 +119,7 @@ def getNmrAtomPrediction(ccpCode, value):
   """
   predictions = {}
   atomNames = getResidueAtoms(ccpCode)
+  print(atomNames)
   for atomName in atomNames:
     predictions[ccpCode, atomName] = getAtomProbability(ccpCode, atomName, value)
 

@@ -18,11 +18,11 @@ __author__ = "$Author: rhfogh $"
 __date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __version__ = "$Revision: 7686 $"
 
-#=========================================================================================
+#=====================================================================8===================
 # Start of code
 #=========================================================================================
 import sys
-from PyQt4 import QtGui,QtCore
+from PyQt4 import QtGui, QtCore
 
 from ccpn.lib.Assignment import getNmrResiduePrediction
 
@@ -74,7 +74,7 @@ class Assigner(CcpnDock):
   def assembleResidue(self, nmrResidue, atoms):
     for item in atoms.values():
       self.scene.addItem(item)
-    nmrAtoms = [atom.name for atom in nmrResidue.atoms]
+    nmrAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
     cbLine = self.addConnectingLine(atoms['CA'], atoms['CB'], 'grey', 1.0, 0)
     if not 'CB' in nmrAtoms:
       self.scene.removeItem(atoms['CB'])
@@ -85,7 +85,7 @@ class Assigner(CcpnDock):
     self.addConnectingLine(atoms['CO'], atoms['CA'], 'grey', 1.0, 0)
     nmrAtomLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
     self.scene.addItem(nmrAtomLabel)
-    self.addResiduePredictions(nmrResidue, atoms['CA'])
+    # self.addResiduePredictions(nmrResidue, atoms['CA'])
 
 
   def addResidue(self, nmrResidue):
@@ -265,14 +265,14 @@ class Assigner(CcpnDock):
               self.addConnectingLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*-2)
 
 
-  def addConnectingLine(self, atom1, atom2, colour, width, displacement):
+  def addConnectingLine(self, atom1, atom2, colour, width, displacement, style=None):
 
     if atom1.y() > atom2.y() and atom1.x() - atom2.x() == 0:
       x1 = atom1.x() + (atom1.boundingRect().width()/2)
       y1 = atom1.y() + (atom1.boundingRect().height()*0.2)
       x2 = atom2.x() + (atom1.boundingRect().width()/2)
       y2 = atom2.y() + (atom2.boundingRect().height()*0.8)
-      newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width)
+      newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width, style)
       self.scene.addItem(newLine)
 
     elif atom1.y() < atom2.y() and atom1.x() - atom2.x() == 0:
@@ -280,7 +280,7 @@ class Assigner(CcpnDock):
       y1 = atom1.y() + (atom1.boundingRect().height()*0.8)
       x2 = atom2.x() + (atom1.boundingRect().width()/2)
       y2 = atom2.y() + (atom2.boundingRect().height()*0.2)
-      newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width)
+      newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width, style)
       self.scene.addItem(newLine)
 
     elif atom1.x() > atom2.x() and atom1.y() - atom2.y() == 0:
@@ -288,7 +288,7 @@ class Assigner(CcpnDock):
       x2 = atom2.x() + atom2.boundingRect().width()
       y1 = atom1.y() + (atom1.boundingRect().height()*0.5)
       y2 = atom2.y() + (atom2.boundingRect().height()*0.5)
-      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width)
+      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
       self.scene.addItem(newLine)
 
     elif atom1.x() < atom2.x() and atom1.y() - atom2.y() == 0:
@@ -296,7 +296,7 @@ class Assigner(CcpnDock):
       x2 = atom2.x()
       y1 = atom1.y() + (atom1.boundingRect().height()*0.5)
       y2 = atom2.y() + (atom2.boundingRect().height()*0.5)
-      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width)
+      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
       self.scene.addItem(newLine)
 
     elif atom1.y() > atom2.y() and atom1.x() > atom2.x():
@@ -304,7 +304,7 @@ class Assigner(CcpnDock):
       x2 = atom2.x() + (atom1.boundingRect().width()*1.5)
       y1 = atom1.y() + (atom1.boundingRect().height()/8)
       y2 = atom2.y() + (atom2.boundingRect().height()/2)
-      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width)
+      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
       self.scene.addItem(newLine)
 
     elif atom1.y() < atom2.y() and atom1.x() < atom2.x():
@@ -312,7 +312,7 @@ class Assigner(CcpnDock):
       x2 = atom2.x() + (atom1.boundingRect().width()*0.5)
       y1 = atom1.y() + (atom1.boundingRect().height()/2)
       y2 = atom2.y() + (atom2.boundingRect().height()/8)
-      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width)
+      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
       self.scene.addItem(newLine)
 
     elif atom1.y() > atom2.y() and atom1.x() < atom2.x():
@@ -320,7 +320,7 @@ class Assigner(CcpnDock):
       x2 = atom2.x() - (atom1.boundingRect().width()/16)
       y1 = atom1.y() + (atom1.boundingRect().height()/8)
       y2 = atom2.y() + (atom2.boundingRect().height()/2)
-      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width)
+      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
       self.scene.addItem(newLine)
 
     elif atom1.y() < atom2.y() and atom1.x() > atom2.x():
@@ -328,7 +328,7 @@ class Assigner(CcpnDock):
       x2 = atom2.x() + (atom1.boundingRect().width()*0.25)
       y1 = atom1.y() + (atom1.boundingRect().height()/2)
       y2 = atom2.y() + (atom2.boundingRect().height()/8)
-      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width)
+      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
       self.scene.addItem(newLine)
 
     return newLine
@@ -408,13 +408,17 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
 
 class AssignmentLine(QtGui.QGraphicsLineItem):
 
-  def __init__(self, x1, y1, x2, y2, colour, width):
+  def __init__(self, x1, y1, x2, y2, colour, width, style=None):
     QtGui.QGraphicsLineItem.__init__(self)
     self.pen = QtGui.QPen()
     self.pen.setColor(QtGui.QColor(colour))
     self.pen.setCosmetic(True)
     self.pen.setWidth(width)
+    if style and style == 'dash':
+      self.pen.setStyle(QtCore.Qt.DotLine)
     self.setPen(self.pen)
+    print(style)
+
     self.setLine(x1, y1, x2, y2)
 
 # def getNmrResiduePrediction(nmrResidue, sl):

@@ -53,12 +53,14 @@ class ObjectTable(QtGui.QTableView, Base):
     self.fontMetric = QtGui.QFontMetricsF(self.font())
     self.bbox = self.fontMetric.boundingRect
     self._silenceCallback = False
+    self.doubleClicked.connect(self.callback)
     self.selectRows = selectRows
     self.setAlternatingRowColors(True)
     self.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
     self.setHorizontalScrollMode(self.ScrollPerItem)
     self.setVerticalScrollMode(self.ScrollPerItem)
     self.setSortingEnabled(True)
+
     # self.setAutoFillBackground(True)
 
     #self.setSizePolicy(QtGui.QSizePolicy.Preferred,
@@ -83,7 +85,7 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setItemDelegate(delegate)
 
     model = self.selectionModel()
-    model.selectionChanged.connect(self._callback)
+    # model.selectionChanged.connect(self._callback)
     #model.currentRowChanged.connect(self._callback)
 
     header = self.verticalHeader()

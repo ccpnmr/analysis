@@ -158,7 +158,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
   def removeItem(self, item):
     import sip
-    self.project.getById(item.text(0)).delete()
+    self.project.getByPid(item.text(0)).delete()
     sip.delete(item)
 
   def fillSideBar(self,project):
@@ -236,7 +236,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
   def processSpectrum(self, spectrum:(Spectrum,Pid), expTypes=None):
 
-      spectrum = self.project.getById(spectrum)
+      spectrum = self.project.getByPid(spectrum)
       peakList = spectrum.newPeakList()
       newItem = self.addItem(self.spectrumItem, spectrum)
       peakListItem = QtGui.QTreeWidgetItem(newItem)
@@ -292,7 +292,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           filename = row[0].split('/')
           filename.pop()
           newFilename = '/'.join(filename)
-          spectrum = self._appBase.project.loadSpectrum(newFilename)
+          ll = self._appBase.project.loadSpectrum(newFilename)
+          spectrum = ll[0] if ll else None
 
           try:
             expType = self.getExpType(filename)
@@ -310,7 +311,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
             filename = row.split('/')
             filename.pop()
             newFilename = '/'.join(filename)
-            spectrum = self._appBase.project.loadSpectrum(newFilename)
+            ll = self._appBase.project.loadSpectrum(newFilename)
+            spectrum = ll[0] if ll else None
             try:
               expType = self.getExpType(filename)
             except:
@@ -416,7 +418,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
   #   """Process dropped spectrum"""
   #   spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
   #   self.dockArea.guiWindow.removeBlankDisplay()
-  #   msg = 'window.createSpectrumDisplay(project.getById("%s"))\n' % spectrum
+  #   msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % spectrum
   #   self.dockArea.window().pythonConsole.write(msg)
   # def dropEvent(self, event):
     # '''If object can be dropped into this area, accept dropEvent, otherwise throw an error

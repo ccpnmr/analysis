@@ -44,7 +44,7 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     QtGui.QGraphicsItem.__init__(self, scene=self.strip.plotWidget.scene())
     GuiBase.__init__(self, self._project._appBase)
     
-    self.apiDataSource = self._wrappedData.spectrumView.dataSource
+    self._apiDataSource = self._wrappedData.spectrumView.dataSource
     ##self.spectrum = self._parent # Is this necessary?
     
     ###self.setDimMapping(dimMapping)

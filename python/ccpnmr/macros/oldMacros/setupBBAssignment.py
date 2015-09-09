@@ -1,4 +1,4 @@
-hsqc = project.getById('SP:hsqc')
+hsqc = project.getByPid('SP:hsqc')
 
 hsqc.positiveContourCount = 5
 hsqc.positiveContourFactor = 1.4
@@ -6,12 +6,12 @@ hsqcSpectrumDisplay = self.createSpectrumDisplay(hsqc)
 
 self.removeBlankDisplay()
 
-hsqcPeakList = project.getById('PL:hsqc.1')
+hsqcPeakList = project.getByPid('PL:hsqc.1')
 
-hnca = project.getById('SP:hnca')
-hncoca = project.getById('SP:hncoca')
-hncacb = project.getById('SP:hncacb')
-hncocacb = project.getById('SP:hncocacb')
+hnca = project.getByPid('SP:hnca')
+hncoca = project.getByPid('SP:hncoca')
+hncacb = project.getByPid('SP:hncacb')
+hncocacb = project.getByPid('SP:hncocacb')
 
 hnca.positiveContourCount = 5
 hnca.positiveContourFactor = 1.4
@@ -35,7 +35,7 @@ hncaSpectrumDisplay.strips[0].showPeaks(hncacb.peakLists[0])
 hncaSpectrumDisplay.displaySpectrum(hncocacb)
 hncaSpectrumDisplay.strips[0].showPeaks(hncocacb.peakLists[0])
 
-hncocaSpectrumDisplay = self.createSpectrumDisplay(project.getById('SP:hncacb'), axisOrder=['N', 'C', 'H'])
+hncocaSpectrumDisplay = self.createSpectrumDisplay(project.getByPid('SP:hncacb'), axisOrder=['N', 'C', 'H'])
 hncocaSpectrumDisplay.strips[0].showPeaks(hncacb.peakLists[0])
 hncocaSpectrumDisplay.displaySpectrum(hncocacb)
 hncocaSpectrumDisplay.strips[0].showPeaks(hncocacb.peakLists[0])
@@ -53,7 +53,7 @@ c = project.newNmrChain()
 ssLabels = []
 positions = []
 
-hsqcPeakList = project.getById('PL:hsqc.1')
+hsqcPeakList = project.getByPid('PL:hsqc.1')
 
 atomDict = {}
 

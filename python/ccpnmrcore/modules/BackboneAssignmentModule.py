@@ -74,10 +74,10 @@ class BackboneAssignmentModule(CcpnDock):
     # if selectedDisplays is not None:
 
     for display in self.referenceDisplays:
-      hsqcDisplay = self.project.getById(display)
+      hsqcDisplay = self.project.getByPid(display)
       if peak:
         self.assigner.clearAllItems()
-        self.current.nmrResidue = self.project.getById(peak.dimensionNmrAtoms[0][0]._parent.pid)
+        self.current.nmrResidue = self.project.getByPid(peak.dimensionNmrAtoms[0][0]._parent.pid)
         navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[hsqcDisplay.pid], markPositions=True)
 
 
@@ -146,14 +146,14 @@ class BackboneAssignmentModule(CcpnDock):
         matchResidue = parentMatchResidue
       else:
         matchResidue = matchResidue
-      zAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
-      xAtom = [atom for atom in matchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
+      zAtom = [atom for atom in matchResidue.atoms if atom._apiResonance.isotopeCode == '15N']
+      xAtom = [atom for atom in matchResidue.atoms if atom._apiResonance.isotopeCode == '1H']
 
       zShift = self.project.chemicalShiftLists[0].getChemicalShift(zAtom[0].id).value
       xShift = self.project.chemicalShiftLists[0].getChemicalShift(xAtom[0].id).value
 
       for matchDisplay in self.matchDisplays:
-        matchWindow = self.project.getById(matchDisplay)
+        matchWindow = self.project.getByPid(matchDisplay)
         newStrip = matchWindow.addStrip()
         newStrip.changeZPlane(position=zShift)
         newStrip.planeToolbar.spinSystemLabel.setText(matchResidue.sequenceCode)
@@ -165,14 +165,14 @@ class BackboneAssignmentModule(CcpnDock):
       parentMatchResidue = firstMatchResidue.nmrChain.fetchNmrResidue(sequenceCode=seqCode)
       firstMatchResidue = parentMatchResidue
 
-    zAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '15N']
-    xAtom = [atom for atom in firstMatchResidue.atoms if atom.apiResonance.isotopeCode == '1H']
+    zAtom = [atom for atom in firstMatchResidue.atoms if atom._apiResonance.isotopeCode == '15N']
+    xAtom = [atom for atom in firstMatchResidue.atoms if atom._apiResonance.isotopeCode == '1H']
     zShift = self.project.chemicalShiftLists[0].getChemicalShift(zAtom[0].id).value
     xShift = self.project.chemicalShiftLists[0].getChemicalShift(xAtom[0].id).value
 
 
     for matchDisplay in self.matchDisplays:
-      matchWindow = self.project.getById(matchDisplay)
+      matchWindow = self.project.getByPid(matchDisplay)
       matchWindow.orderedStrips[0].changeZPlane(position=zShift)
       matchWindow.orderedStrips[0].planeToolbar.spinSystemLabel.setText(firstMatchResidue.sequenceCode)
 

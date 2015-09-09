@@ -181,14 +181,14 @@ def copyAssignments(referencePeakList, matchPeakList):
       matchArray.append(peak.position[dim])
 
     result = ''.join((clf.predict(numpy.array(matchArray))))
-    checkArray = [i-j for i,j in zip(list(project.getById(result).position), matchArray)]
-    print(project.getById(result), peak, list(project.getById(result).position), matchArray, checkArray)
+    checkArray = [i-j for i,j in zip(list(project.getByPid(result).position), matchArray)]
+    print(project.getByPid(result), peak, list(project.getByPid(result).position), matchArray, checkArray)
 
     if checkArray < list(referencePeakList.spectrum.assignmentTolerances):
     # for value in checkArray:
     #   print(abs(value), peak.peakList.spectrum.assignmentTolerances)
-      print(project.getById(result).position, peak.position)
-      dimNmrAtoms = project.getById(result).dimensionNmrAtoms
+      print(project.getByPid(result).position, peak.position)
+      dimNmrAtoms = project.getByPid(result).dimensionNmrAtoms
       for axisCode in refAxisCodes:
         # print(axisCode)
         peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])

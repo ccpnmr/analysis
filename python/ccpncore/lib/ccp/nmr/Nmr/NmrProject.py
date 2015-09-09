@@ -97,12 +97,13 @@ def loadDataSource(nmrProject, filePath, dataFileFormat):
 
   numberType = 'float' if isFloatData else 'int'
   experiment = nmrProject.createExperiment(name=name, numDim=len(numPoints),
-                                sf = specFreqs, isotopeCodes=isotopes)
+                                sf=specFreqs, isotopeCodes=isotopes)
+
 
   dataLocationStore = nmrProject.root.newDataLocationStore(name=name)
   dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
   # NBNB TBD - this is WRONG
-  # teh dataUrl should be made from dirName, NOT to teh filePath directory.
+  # the dataUrl should be made from dirName, NOT to the filePath directory.
   blockMatrix = createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
                                     blockSizes=blockSizes, isBigEndian=isBigEndian,
                                     numberType=numberType, headerSize=headerSize,
@@ -128,6 +129,16 @@ def createExperiment(nmrProject:object, name:str, numDim:int, sf:Sequence,
 
   if isAcquisition is None:
     isAcquisition = (False,) * numDim
+
+  if experiment.shiftList is None:
+    # Set shiftList, creating it if necessary
+    shiftLists = [x for x in nmrProject.sortedMeasurementLists() if x.className == 'ShiftList']
+    if len(shiftLists) == 1:
+      shiftList = shiftLists[0]
+    else:
+      shiftList = (nmrProject.findFirstMeasurementList(className='ShiftList', name='default') or
+                   nmrProject.newShiftList(name='default'))
+    experiment.shiftList = shiftList
 
   for n, expDim in enumerate(experiment.sortedExpDims()):
     expDim.isAcquisition = isAcquisition[n]

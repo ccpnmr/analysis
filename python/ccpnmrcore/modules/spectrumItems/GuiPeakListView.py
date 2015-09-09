@@ -57,7 +57,7 @@ IDENTITY.reset()
 # def peakItemNotifier(project, apiPeak):
 #   apiPeakListViews = apiPeak.PeakList.PeakListViews
 #   for apiPeakListView in apiPeakListViews:
-#     for apiStripPeakListView in apiPeakListView.apiStripPeakListViews:
+#     for apiStripPeakListView in apiPeakListView._apiStripPeakListViews:
 
 
 class GuiPeakListView(QtGui.QGraphicsItem):
@@ -176,7 +176,7 @@ class Peak1d(QtGui.QGraphicsItem):
     self.ppm = peak.position[self.dim]
     self.height = self.peak.height
     if not self.height:
-      height = self.peak.apiPeak.findFirstPeakIntensity(intensityType = 'height')
+      height = self.peak._apiPeak.findFirstPeakIntensity(intensityType = 'height')
       if height:
         self.height = height.value
       else:
@@ -880,8 +880,8 @@ def _upDateAssignmentsResonance(project:Project, apiResonance:ApiResonance):
   for peak in peaks:
     peak._refresPeakAnnotation()
 #
-Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiResonance, 'setImplName')
-Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiResonance, 'setResonanceGroup')
+Project._setupNotifier(_upDateAssignmentsResonance, ApiResonance, 'setImplName')
+Project._setupNotifier(_upDateAssignmentsResonance, ApiResonance, 'setResonanceGroup')
 
 def _upDateAssignmentsResonanceGroup(project:Project,
                                      apiResonanceGroup:ApiResonanceGroup):
@@ -900,7 +900,7 @@ Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'set
 def _upDateAssignmentsNmrChain(project:Project, apiNmrChain:ApiNmrChain):
   peaks = set(z.peakDim.peak for x in apiNmrChain.resonanceGroups
                              for y in x.resonances
-                             for z in (y.peakDimContribs + y.peakDimContribNs))
+                             for z in (y.peakDimContribs.union(y.peakDimContribNs)))
   for peak in peaks:
     peak._refresPeakAnnotation()
 #

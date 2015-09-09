@@ -45,6 +45,6 @@ class IntegralItem(QtGui.QGraphicsItem):
 
 
       self.position = (integral.lastPoint+integral.firstPoint)/2
-      self.integralTextItem = pg.TextItem(html=("%.1f&#x222b" % round(integral.volume*spectrum.apiDataSource.integralFactor,2)),color='k')
+      self.integralTextItem = pg.TextItem(html=("%.1f&#x222b" % round(integral.volume*spectrum._apiDataSource.integralFactor,2)),color='k')
       self.integralPointerItem = pg.LineSegmentROI([[integral.firstPoint,0],[integral.lastPoint,0]], pen='k')
       self.integralTextItem.setPos(float(self.position),-3)

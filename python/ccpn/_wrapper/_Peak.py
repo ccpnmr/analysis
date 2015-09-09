@@ -53,7 +53,7 @@ class Peak(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiPeak(self) -> ApiPeak:
+  def _apiPeak(self) -> ApiPeak:
     """ API peaks matching Peak"""
     return self._wrappedData
     
@@ -208,7 +208,7 @@ class Peak(AbstractWrapperObject):
         if not isinstance(atoms, Sequence):
           raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
 
-        atoms = tuple(self.getById(x) if isinstance(x, str) else x for x in atoms)
+        atoms = tuple(self.getByPid(x) if isinstance(x, str) else x for x in atoms)
         dimResonances.append(tuple(x._wrappedData for x in atoms if x is not None))
 
     apiPeak.setPeakDimAssignments(dimResonances)
@@ -252,7 +252,7 @@ class Peak(AbstractWrapperObject):
       ll = dimensionCount*[None]
       resonances.append(ll)
       for ii, atom in enumerate(tt):
-        atom = self.getById(atom) if isinstance(atom, str) else atom
+        atom = self.getByPid(atom) if isinstance(atom, str) else atom
         if atom is not None:
           ll[ii] = atom._wrappedData
 
@@ -283,9 +283,9 @@ class Peak(AbstractWrapperObject):
     if value is None:
       value = []
     elif isinstance(value, str):
-      value = [self.getById(value)]
+      value = [self.getByPid(value)]
     elif isinstance(value, Sequence):
-      value = [(self.getById(x) if isinstance(x, str) else x) for x in value]
+      value = [(self.getByPid(x) if isinstance(x, str) else x) for x in value]
     else:
       value = [value]
     dimensionNmrAtoms = list(self.dimensionNmrAtoms)

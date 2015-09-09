@@ -48,7 +48,7 @@ class PseudoDimension(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def apiSampledDataDim(self) -> ApiSampledDataDim:
+  def _apiSampledDataDim(self) -> ApiSampledDataDim:
     """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
 

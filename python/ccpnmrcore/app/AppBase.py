@@ -89,7 +89,7 @@ class AppBase(GuiBase):
     self.mainWindow = mainWindow
     if self.module == 'screen':
       self.mainWindow.menuBar.addMenu(self.mainWindow.screenMenu)
-    project.getById('Window:Main').namespace['current'] = self.current
+    project.getByPid('Window:Main').namespace['current'] = self.current
     mainWindow.raise_()
     mainWindow.namespace['current'] = self.current
 

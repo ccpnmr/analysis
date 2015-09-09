@@ -45,7 +45,7 @@ class PeakList(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiPeakList(self) -> ApiPeakList:
+  def _apiPeakList(self) -> ApiPeakList:
     """ API peakLists matching PeakList"""
     return self._wrappedData
     
@@ -101,7 +101,7 @@ class PeakList(AbstractWrapperObject):
   @chemicalShiftList.setter
   def chemicalShiftList(self, value):
 
-    value = self.getById(value) if isinstance(value, str) else value
+    value = self.getByPid(value) if isinstance(value, str) else value
     apiPeakList = self._wrappedData
     apiPeakList.shiftList = None if value is None else value._wrappedData
     

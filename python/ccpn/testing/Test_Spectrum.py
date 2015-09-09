@@ -49,11 +49,11 @@ class SpectrumTest(Testing):
 
   def test_dimensionCount(self):
     spectrum = self.getSpectrum()
-    assert spectrum.dimensionCount == spectrum.apiDataSource.numDim
+    assert spectrum.dimensionCount == spectrum._apiDataSource.numDim
     
   def test_pointCount(self):
     spectrum = self.getSpectrum()
-    numPoints = tuple([dataDim.numPoints for dataDim in spectrum.apiDataSource.sortedDataDims()])
+    numPoints = tuple([dataDim.numPoints for dataDim in spectrum._apiDataSource.sortedDataDims()])
     assert spectrum.pointCounts == numPoints
 
   def test_filePath(self):

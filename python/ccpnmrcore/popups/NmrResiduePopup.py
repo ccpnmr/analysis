@@ -74,7 +74,7 @@ class NmrResiduePopup(QtGui.QDialog, Base):
         self.getResidueTypeProb(currentNmrResidue)
 
   def selectNmrChain(self, item):
-    self.project._appBase.current.nmrChain = self.project.getById(item)
+    self.project._appBase.current.nmrChain = self.project.getByPid(item)
     print(self.project._appBase.current.nmrChain)
 
 

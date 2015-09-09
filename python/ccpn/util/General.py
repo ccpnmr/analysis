@@ -36,7 +36,7 @@ def dihedralName(project, restraintItem:tuple) -> str:
     for atomId in restraintItem:
       ll = Pid.splitId(atomId)
       atomNames.append(ll[-1])
-      residues.append(project.getById(Pid.makePid('Residue', *ll[:3])))
+      residues.append(project.getByPid(Pid.makePid('Residue', *ll[:3])))
 
     if None in atomNames or None in residues:
       # These are not correct atomId. Just return NOne

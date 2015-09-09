@@ -111,7 +111,7 @@ class Peak1d(QtGui.QGraphicsItem):
     self.ppm = peak.position[self.dim]
     self.height = self.peak.height
     if not self.height:
-      height = self.peak.apiPeak.findFirstPeakIntensity(intensityType = 'height')
+      height = self.peak._apiPeak.findFirstPeakIntensity(intensityType = 'height')
       if height:
         self.height = height.value
       else:

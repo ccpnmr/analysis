@@ -200,7 +200,7 @@ class GuiStripNd(GuiStrip):
           maxAliasedFrequency = maxFrequency
 
         # NBNB 1) we should use the region width for the step size. 2) the width is the same in all cases
-        # zPlaneSize = spectrumView.apiSpectrumView.spectrumView.orderedDataDims[n].getDefaultPlaneSize()
+        # zPlaneSize = spectrumView._apiSpectrumView.spectrumView.orderedDataDims[n].getDefaultPlaneSize()
         # zPlaneSize = spectrumView.zPlaneSize()
         minZPlaneSize = width
         # if zPlaneSize is not None:
@@ -429,8 +429,8 @@ class GuiStripNd(GuiStrip):
   #       pnt = LibSpectrum.getDimPointFromValue(self.spectrumViews[0].spectrum, dim, ppmRegion[dim])
   #       pntRegion.append(math.floor(pnt[0]))
   #   spectrum = self.spectrumViews[0].spectrum
-  #   dataDimRef = spectrum.apiDataSource.sortedDataDims()[traceMarker.axis.mappedDim].findFirstDataDimRef()
-  #   data = LibSpectrum.getSliceData(spectrum.apiDataSource,position=pntRegion, sliceDim=traceMarker.axis.mappedDim)
+  #   dataDimRef = spectrum._apiDataSource.sortedDataDims()[traceMarker.axis.mappedDim].findFirstDataDimRef()
+  #   data = LibSpectrum.getSliceData(spectrum._apiDataSource,position=pntRegion, sliceDim=traceMarker.axis.mappedDim)
   #   firstPoint = dataDimRef.pointToValue(0)
   #   pointCount = len(data)
   #   lastPoint = dataDimRef.pointToValue(pointCount)

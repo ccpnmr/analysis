@@ -92,7 +92,7 @@ class AtomSelector(CcpnDock):
     for peak in self.current.peaks:
       for dim in range(len(peak.dimensionNmrAtoms)):
         isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
-        if newNmrAtom.apiResonance.isotopeCode == isotopeCode:
+        if newNmrAtom._apiResonance.isotopeCode == isotopeCode:
           axisCode = getAxisCodeForPeakDimension(peak, dim)
           self.assignPeakDimension(peak, dim, axisCode, newNmrAtom)
       else:

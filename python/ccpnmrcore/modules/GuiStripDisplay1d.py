@@ -65,12 +65,12 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
   # def addSpectrum(self, spectrum):
   #
   #   apiDataSource = spectrum._wrappedData
-  #   apiSpectrumView = self.apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)
+  #   apiSpectrumView = self._apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)
   #
   #   #axisCodes = spectrum.axisCodes
   #   axisCodes = LibSpectrum.getAxisCodes(spectrum)
   #   axisCodes = axisCodes + ('intensity',)
-  #   if axisCodes != self.apiSpectrumDisplay.axisCodes:
+  #   if axisCodes != self._apiSpectrumDisplay.axisCodes:
   #     raise Exception('Cannot overlay that spectrum on this display')
   #
   #   # guiSpectrumView = GuiSpectrumView1d(self, apiStripDisplay1d)
@@ -81,7 +81,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
   #   if not apiSpectrumView:
   #     ##axisCodes=spectrum.axisCodes
   #     dimensionOrdering = (1, 0) # 0 because that is the intensity axis so gets mapped to nothing in the spectrum
-  #     apiSpectrumView = self.apiSpectrumDisplay.newSpectrumView(spectrumName=apiDataSource.name,
+  #     apiSpectrumView = self._apiSpectrumDisplay.newSpectrumView(spectrumName=apiDataSource.name,
   #                           dimensionOrdering=dimensionOrdering)
   #   guiSpectrumView = GuiSpectrumView1d(self, apiSpectrumView)
   #
@@ -112,8 +112,8 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
 
   # def addStrip(self):
   #
-  #   apiStrip = self.apiSpectrumDisplay.newStrip1d()
-  #   n = len(self.apiSpectrumDisplay.strips) - 1
+  #   apiStrip = self._apiSpectrumDisplay.newStrip1d()
+  #   n = len(self._apiSpectrumDisplay.strips) - 1
   #   guiStrip = GuiStrip1d(self.stripFrame, apiStrip, grid=(1, n), stretch=(0, 1))
   #   if n > 0:
   #     prevGuiStrip = self.guiStrips[n-1]

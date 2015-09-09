@@ -42,6 +42,8 @@ class Testing(unittest.TestCase):
     unittest.TestCase.__init__(self, *args, **kw)
 
   def setUp(self):
+
+    print("--TEST ccpn setting up", self.__class__.__name__)
       
     projectPath = self.projectPath
 
@@ -49,12 +51,13 @@ class Testing(unittest.TestCase):
       self.project = ccpnIo.openProject(projectPath)
 
   def tearDown(self):
+    print("--TEST ccpn tearing down", self.__class__.__name__)
     if self.project:
       self.project.delete()
 
   def getSpectrum(self):
 
     if self.project is not None and hasattr(self, 'spectrumName'):
-      return self.project.getById('Spectrum:'+self.spectrumName)
+      return self.project.getByPid('Spectrum:'+self.spectrumName)
     
     return None

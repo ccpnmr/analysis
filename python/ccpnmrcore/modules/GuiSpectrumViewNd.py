@@ -90,7 +90,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ###yDim -= 1
 
     # TBD: this is not correct
-    ##apiDataSource = self.apiDataSource
+    ##apiDataSource = self._apiDataSource
     # I think this fixes it - number of DISPLAY axes, rather than dataSource axes. RHF
     # dimensionCount = apiDataSource.numDim
     dimensionCount = len(self.strip.axisCodes)
@@ -295,8 +295,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   #   if dimensionCount < 3:
   #     return None  # TBD
   #
-  #   # zDim = self.apiStripSpectrumView.spectrumView.orderedDataDims[2].dim - 1
-  #   zDataDim = self.apiStripSpectrumView.spectrumView.orderedDataDims[2]
+  #   # zDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[2].dim - 1
+  #   zDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[2]
   #   point = (0.0, 1.0)
   #   # value = spectrum.getDimValueFromPoint(zDim, point)
   #   value = zDataDim.primaryDataDimRef.pointToValue(point)
@@ -337,7 +337,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
         
-    apiDataSource = self.apiDataSource
+    apiDataSource = self._apiDataSource
     if apiDataSource.positiveContourBase == 10000.0: # horrid
       # base has not yet been set, so guess a sensible value
       apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
@@ -425,7 +425,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         The way this is done here, any change in contour level or color needs to call this function.
     """
     
-    xDataDim, yDataDim = self.apiStripSpectrumView.spectrumView.orderedDataDims[:2]
+    xDataDim, yDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[:2]
     
     if xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev \
       or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]]):
@@ -503,7 +503,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     for axisDimth axis (zero-origin)"""
 
     axis = self.strip.orderedAxes[axisDim]
-    dataDim = self.apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
+    dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
     totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, "numPointsOrig")
                        else dataDim.numPoints)
     for ii,dd in enumerate(dataDim.dataSource.sortedDataDims()):
@@ -519,7 +519,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   #def getPlaneData(self, guiStrip):
   def getPlaneData(self):
     
-    apiSpectrumView = self.apiStripSpectrumView.spectrumView
+    apiSpectrumView = self._apiStripSpectrumView.spectrumView
     dataDims = apiSpectrumView.orderedDataDims
     ll = apiSpectrumView.dataSource.sortedDataDims()
     # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
@@ -672,7 +672,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def getTranslateScale(self, ind:int):
     """Get translation data for X (ind==0) or Y (ind==1) dimension"""
 
-    dataDim = self.apiStripSpectrumView.spectrumView.orderedDataDims[ind]
+    dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[ind]
     valueToPoint = dataDim.primaryDataDimRef.valueToPoint
         
     strip = self.strip

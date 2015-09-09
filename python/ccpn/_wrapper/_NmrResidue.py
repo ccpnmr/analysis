@@ -47,7 +47,7 @@ class NmrResidue(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiResonanceGroup(self) -> ApiResonanceGroup:
+  def _apiResonanceGroup(self) -> ApiResonanceGroup:
     """ CCPN resonanceGroup matching Residue"""
     return self._wrappedData
   

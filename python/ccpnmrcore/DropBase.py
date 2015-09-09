@@ -94,7 +94,7 @@ class DropBase(GuiBase):
   #     pidData = str(data.data(),encoding='utf-8')
   #     pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
   #     actualPid = ''.join(pidData)
-  #     wrapperObject = self.getById(actualPid)
+  #     wrapperObject = self.getByPid(actualPid)
   #     self.dropCallback(wrapperObject)
   #   else:
   #     data = event.mimeData().data('application/x-qabstractitemmodeldatalist')

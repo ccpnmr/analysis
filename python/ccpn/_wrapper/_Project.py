@@ -52,7 +52,7 @@ class Project(AbstractWrapperObject):
   # The function self.wrapperFuncName(**parameterDict) will be registered
   # in the CCPN api notifier system
   # api notifiers are set automatically,
-  # and are cleared by self._clearNotifiers and by self.delete()
+  # and are cleared by self._clearApiNotifiers and by self.delete()
   _apiNotifiers = []
   
   # Top level mapping dictionaries:
@@ -118,22 +118,24 @@ class Project(AbstractWrapperObject):
     Project._apiNotifiers.append((wrapperFuncName, parameterDict, apiClassName, apiFuncName))
 
   def _registerApiNotifiers(self):
-    """Register or remove notifiers"""
+    """Register notifiers"""
 
     for tt in self._apiNotifiers:
       wrapperFuncName, parameterDict, apiClassName, apiFuncName = tt
       notify = functools.partial(getattr(self,wrapperFuncName), **parameterDict)
       self._registerNotify(notify, apiClassName, apiFuncName)
 
-  def _clearNotifiers(self):
+  def _clearApiNotifiers(self):
     """CLear all notifiers, previous to closing or deleting Project
     """
     while self._activeNotifiers:
       tt = self._activeNotifiers.pop()
+      # print("@~@~ DEnotifying", tt[1:])
       Notifiers.unregisterNotify(*tt)
 
   def _registerNotify(self, notify, apiClassName, apiFuncName):
     """Register a single notifier"""
+    # print("@~@~ notifying", apiClassName, apiFuncName)
     self._activeNotifiers.append((notify, apiClassName, apiFuncName))
     Notifiers.registerNotify(notify, apiClassName, apiFuncName)
 
@@ -199,7 +201,7 @@ class Project(AbstractWrapperObject):
     self._resetUndo(maxWaypoints=0)
 
     ioUtil.cleanupProject(self)
-    self._clearNotifiers()
+    self._clearApiNotifiers()
     for tag in ('_data2Obj','_pid2Obj'):
       delattr(self,tag)
     del self._wrappedData
@@ -231,7 +233,7 @@ class Project(AbstractWrapperObject):
     return ioUtil.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
   
   @property
-  def nmrProject(self) -> ApiNmrProject:
+  def _apiNmrProject(self) -> ApiNmrProject:
     """API equivalent to object: NmrProject"""
     return self._wrappedData
 

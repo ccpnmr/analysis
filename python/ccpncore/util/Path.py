@@ -200,7 +200,7 @@ def getDirectoryFromTop(*args):
   return joinPath(getTopDirectory(), *args)
 
 
-def getDataDirectory(*args):
+def getDataDirectory():
 
   return getDirectoryFromTop('data')
 

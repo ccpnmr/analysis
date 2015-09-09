@@ -47,7 +47,7 @@ class Atom(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def apiAtom(self) -> ApiAtom:
+  def _apiAtom(self) -> ApiAtom:
     """ CCPN atom matching Atom"""
     return self._wrappedData
 

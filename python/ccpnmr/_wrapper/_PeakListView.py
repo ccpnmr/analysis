@@ -52,7 +52,7 @@ class PeakListView(AbstractWrapperObject, GuiPeakListView):
 
   # CCPN properties  
   @property
-  def apiPeakListView(self) -> ApiStripPeakListView:
+  def _apiPeakListView(self) -> ApiStripPeakListView:
     """ CCPN PeakListView matching PeakListView"""
     return self._wrappedData
     
@@ -138,7 +138,7 @@ class PeakListView(AbstractWrapperObject, GuiPeakListView):
   @property
   def peakList(self) -> PeakList:
     """PeakList that PeakListView refers to"""
-    return self.getWrapperObject(self._wrappedData.peakListView.peakList)
+    return self._getWrapperObject(self._wrappedData.peakListView.peakList)
 
   # Implementation functions
   @classmethod

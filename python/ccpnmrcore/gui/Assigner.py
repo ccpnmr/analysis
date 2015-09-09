@@ -151,8 +151,8 @@ class Assigner(CcpnDock):
     self.assembleResidue(nmrResidue, atoms)
     for spectrum in self.project.spectra:
       self.addSpectrumAssignmentLines(spectrum, atoms)
-    # self.addSpectrumAssignmentLines(self.project.getById(self.spectra['intra'][0]), atoms)
-    # self.addSpectrumAssignmentLines(self.project.getById(self.spectra['inter'][0]), atoms)
+    # self.addSpectrumAssignmentLines(self.project.getByPid(self.spectra['intra'][0]), atoms)
+    # self.addSpectrumAssignmentLines(self.project.getByPid(self.spectra['inter'][0]), atoms)
 
     self.residueCount+=1
     print(self.nmrChain.connectedNmrResidues)

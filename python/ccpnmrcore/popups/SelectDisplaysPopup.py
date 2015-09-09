@@ -40,6 +40,6 @@ class SelectDisplaysAndSpectraPopup(QtGui.QDialog, Base):
     self.spectrumList.addItem(item)
 
   def setSpectra(self):
-    self.parent.selectedDisplays = [self.project.getById(self.displayList.item(i).text()) for i in range(self.displayList.count())]
-    self.parent.spectra = [self.project.getById(self.spectrumList.item(i).text()) for i in range(self.spectrumList.count())]
+    self.parent.selectedDisplays = [self.project.getByPid(self.displayList.item(i).text()) for i in range(self.displayList.count())]
+    self.parent.spectra = [self.project.getByPid(self.spectrumList.item(i).text()) for i in range(self.spectrumList.count())]
     self.accept()

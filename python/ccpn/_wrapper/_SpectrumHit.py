@@ -48,7 +48,7 @@ class SpectrumHit(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def apiSpectrumHit(self) -> ApiSpectrumHit:
+  def _apiSpectrumHit(self) -> ApiSpectrumHit:
     """ CCPN SpectrumHit matching SpectrumHit"""
     return self._wrappedData
 

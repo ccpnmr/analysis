@@ -45,7 +45,7 @@ class Restraint(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def apiConstraint(self) -> ApiAbstractConstraint:
+  def _apiConstraint(self) -> ApiAbstractConstraint:
     """ CCPN API Constraint matching Restraint"""
     return self._wrappedData
 
@@ -83,7 +83,7 @@ class Restraint(AbstractWrapperObject):
 
   @peaks.setter
   def peaks(self, value:Sequence):
-    value = tuple(self.getById(x) if isinstance(x, str) else x for x in value)
+    value = tuple(self.getByPid(x) if isinstance(x, str) else x for x in value)
     self._wrappedData.peaks =  [x._wrappedData for x in value]
 
   @property

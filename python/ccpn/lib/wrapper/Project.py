@@ -41,7 +41,7 @@ from ccpnmrcore import DropBase
 #     spectrum = reReadSpectrum
 #     # NBNB TBD BROKEN - spectrum is overwritten lower down
 #   else:
-#     dataSource = project.nmrProject.loadDataSource(filePath)
+#     dataSource = project._apiNmrProject.loadDataSource(filePath)
 #     if not dataSource:
 #       return None
 #

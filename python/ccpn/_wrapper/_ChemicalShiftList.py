@@ -29,7 +29,8 @@ from ccpncore.util import Pid
 
 
 class ChemicalShiftList(AbstractWrapperObject):
-  """Chemical Shift list."""
+  """Chemical Shift list. A chemical shift list named 'default' is used by default for
+   new experiments, and is created if necessary."""
   
   #: Short class name, for PID.
   shortClassName = 'CL'
@@ -52,7 +53,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiShiftList(self) -> ApiShiftList:
+  def _apiShiftList(self) -> ApiShiftList:
     """ CCPN ShiftList matching ChemicalShiftList"""
     return self._wrappedData
     

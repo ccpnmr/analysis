@@ -92,7 +92,7 @@ class SamplePopup(QtGui.QDialog):
       itemCount = item.childCount()
       for j in range(itemCount):
         spectrumPid = item.child(j).text(0)
-        spectrum = self.project.getById(spectrumPid)
+        spectrum = self.project.getByPid(spectrumPid)
         spectra.append(spectrum)
         spectrum.peakLists[0].findPeaks1dFiltered()
         sampleTab = sideBar.spectrumSamples
@@ -112,7 +112,7 @@ class SamplePopup(QtGui.QDialog):
     for sample in samples:
       newItem = sideBar.addItem(sampleTab, sample)
       for peakCollection in sample.peakCollections[0:]:
-        self.spectrum = self.project.getById('SP:'+peakCollection.name)
+        self.spectrum = self.project.getByPid('SP:'+peakCollection.name)
         sideBar.addItem(newItem, self.spectrum)
 
 

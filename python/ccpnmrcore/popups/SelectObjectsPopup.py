@@ -17,12 +17,12 @@ class SelectObjectsPopup(QtGui.QDialog, Base):
     super(SelectObjectsPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.parent = parent
-    if project.getById(objects[0]._pluralLinkName) == 'spectra':
+    if project.getByPid(objects[0]._pluralLinkName) == 'spectra':
       objects = [spectrum.pid for spectrum in project.spectra if len(spectrum.axisCodes) >= dim]
     else:
       objects=[object.pid for object in objects]
 
-    label1a = Label(self, text="Selected %s" % project.getById(objects[0])._pluralLinkName, grid=(0, 0))
+    label1a = Label(self, text="Selected %s" % project.getByPid(objects[0])._pluralLinkName, grid=(0, 0))
     objects.insert(0, '  ')
     self.objectPulldown = PulldownList(self, grid=(1, 0), callback=self.selectObject)
     self.objectPulldown.setData(objects)

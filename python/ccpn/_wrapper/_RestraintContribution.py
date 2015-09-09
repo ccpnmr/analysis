@@ -39,17 +39,6 @@ class RestraintContribution(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'RestraintContribution'
 
-  # Number of atoms in a Restraint item, by restraint type
-  restraintType2Length = {
-    'Distance':2,
-    'Dihedral':4,
-    'Rdc':2,
-    'HBond':2,
-    'JCoupling':2,
-    'Csa':1,
-    'ChemicalShift':1,
-  }
-
   #: Name of plural link to instances of class
   _pluralLinkName = 'restraintContributions'
 
@@ -58,7 +47,7 @@ class RestraintContribution(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def apiContribution(self) -> ApiContribution:
+  def _apiContribution(self) -> ApiContribution:
     """ API Contribution matching Contribution"""
     return self._wrappedData
 
@@ -189,7 +178,7 @@ class RestraintContribution(AbstractWrapperObject):
   def restraintItems(self) -> tuple:
     """restraint items of contribution - given as a tuple of lists of AtomId """
 
-    itemLength = self.restraintType2Length[self._parent._parent.restraintType]
+    itemLength = self._parent._parent.restraintItemLength
 
     result = []
     sortkey = self._project._pidSortKey
@@ -211,7 +200,7 @@ class RestraintContribution(AbstractWrapperObject):
   @restraintItems.setter
   def restraintItems(self, value:Sequence):
 
-    itemLength = self.restraintType2Length[self._parent._parent.restraintType]
+    itemLength = self._parent._parent.restraintItemLength
     newItemFuncName ="new%sItem" % self._parent._parent.restraintType
 
     for ll in value:

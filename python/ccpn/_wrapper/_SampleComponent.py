@@ -46,7 +46,7 @@ class SampleComponent(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiSampleComponent(self) -> ApiSampleComponent:
+  def _apiSampleComponent(self) -> ApiSampleComponent:
     """ API sampleComponent matching SampleComponent"""
     return self._wrappedData
     
@@ -155,7 +155,7 @@ class SampleComponent(AbstractWrapperObject):
   # @chemicalShiftList.setter
   # def chemicalShiftList(self, value):
   #
-  #   value = self.getById(value) if isinstance(value, str) else value
+  #   value = self.getByPid(value) if isinstance(value, str) else value
   #   apiPeakList = self._wrappedData
   #   if value is None:
   #     apiPeakList.shiftList = None

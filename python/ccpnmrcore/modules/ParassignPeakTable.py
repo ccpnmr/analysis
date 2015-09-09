@@ -168,14 +168,14 @@ class ParassignModule(Dock):
     #self._updatePulldownList(self.peakListPulldown, self.peakLists,
     #                         self.changePeakList, self.peakList,
     #                         self._getPeakListName)
-    texts = ['%s:%s:%s' % (peakList._parent.apiDataSource.experiment.name, peakList._parent.apiDataSource.name, peakList.serial) for peakList in self.peakLists]
+    texts = ['%s:%s:%s' % (peakList._parent._apiDataSource.experiment.name, peakList._parent._apiDataSource.name, peakList.serial) for peakList in self.peakLists]
     self.diaPeakListPulldown.setData(texts=texts, objects=self.peakLists)
     self.paraPeakListPulldown.setData(texts=texts, objects=self.peakLists)
 
   def updateContents(self):
     peakList = self.peakList
     if peakList:
-      columns = self._getColumns(peakList._parent.apiDataSource.numDim)
+      columns = self._getColumns(peakList._parent._apiDataSource.numDim)
       self.peakTable.setObjectsAndColumns(peakList.peaks, columns)
   #def updateContents(self, spectrum):
     # if len(spectrum.peakLists) > 1:
@@ -190,14 +190,14 @@ class ParassignModule(Dock):
     if peakList is not self.peakList:
 
       if self.peakList:
-        numDim = self.peakList._parent.apiDataSource.numDim
+        numDim = self.peakList._parent._apiDataSource.numDim
       else:
         numDim = 2
 
       self.sampledDims  = {}
 
       if peakList:
-        dataDims = peakList._parent.apiDataSource.sortedDataDims()
+        dataDims = peakList._parent._apiDataSource.sortedDataDims()
         for i, dataDim in enumerate(dataDims):
           if dataDim.className == 'SampledDataDim':
             self.sampledDims[i] = dataDim

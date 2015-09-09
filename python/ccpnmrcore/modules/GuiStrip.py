@@ -439,7 +439,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   # def dropCallback(self, dropObject):
   #   if isinstance(dropObject, Spectrum):
   #     self.displaySpectrum(dropObject)
-  #     msg = 'strip = project.getById("%s")\nstrip.displaySpectrum(project.getById("%s")\n' % \
+  #     msg = 'strip = project.getByPid("%s")\nstrip.displaySpectrum(project.getByPid("%s")\n' % \
   #           (self.pid, dropObject.pid)
   #     self._appBase.mainWindow.pythonConsole.write(msg)
   #   else:

@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 import re
 
-# Format for inserting class doumentation in wrapper module
+# Format for inserting class documentation in wrapper module
 wrappedClassFormat= """
 
 .. _%(moduleName)s-%(className)s-ref:
@@ -67,6 +67,9 @@ def autodoc_process_docstring():
         options - the options given to the directive: an object with attributes inherited_members, undoc_members, show_inheritance and noindex that are true if the flag option of same name was given to the auto directive
         lines - the lines of the docstring, see above
     """
+
+    # # TEMP DEBUG
+    # return
 
     if isinstance(obj, property):
       if not (lines and lines[0].startswith('- ')):
@@ -124,6 +127,9 @@ def autodoc_process_signature():
     -return_annotation – function return annotation as a string of the form " -> annotation",
       or None if there is no return annotation
     """
+
+    # # TEMP DEBUG
+    # return (signature, return_annotation)
 
     if signature:
       signature = wrappedClassFullName.sub(r'\g<1>.\g<3>', signature)

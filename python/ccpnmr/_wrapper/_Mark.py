@@ -48,7 +48,7 @@ class Mark(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiMark(self) -> ApiMark:
+  def _apiMark(self) -> ApiMark:
     """ CCPN Mark matching Mark"""
     return self._wrappedData
 

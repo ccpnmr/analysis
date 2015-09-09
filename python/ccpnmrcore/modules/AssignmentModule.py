@@ -297,7 +297,7 @@ class AssignmentModule(CcpnDock, Base):
 
     assignmentArray = [0] * len(self.listWidgets)
     for listWidget in self.listWidgets:
-      assignments = [self.project.getById(listWidget.item(i).text()) for i in range(listWidget.count())]
+      assignments = [self.project.getByPid(listWidget.item(i).text()) for i in range(listWidget.count())]
       index = self.listWidgets.index(listWidget)
       assignmentArray[index] = assignments
 
@@ -342,10 +342,10 @@ class AssignmentModule(CcpnDock, Base):
 
 
   def getNmrResidue(self, item):
-    self.project._appBase.current.nmrResidue = self.project.getById(item.text()).nmrResidue
+    self.project._appBase.current.nmrResidue = self.project.getByPid(item.text()).nmrResidue
     if hasattr(self, 'NmrResiduePopup'):
       self.NmrResiduePopup.update()
-    self.project._appBase.current.nmrAtom = self.project.getById(item.text())
+    self.project._appBase.current.nmrAtom = self.project.getByPid(item.text())
 
 
   def getPeakName(self, peak, dim):

@@ -43,6 +43,17 @@ class RestraintList(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Number of atoms in a Restraint item, by restraint type
+  _restraintType2Length = {
+    'Distance':2,
+    'Dihedral':4,
+    'Rdc':2,
+    'HBond':2,
+    'JCoupling':2,
+    'Csa':1,
+    'ChemicalShift':1,
+  }
+
   def __init__(self, project, wrappedData):
 
     # NB The name will only be unique within the restraintSet, which could cause
@@ -58,7 +69,7 @@ class RestraintList(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def apiRestraintList(self) -> ApiAbstractConstraintList:
+  def _apiRestraintList(self) -> ApiAbstractConstraintList:
     """ CCPN ConstraintList matching RestraintList"""
     return self._wrappedData
 
@@ -71,6 +82,11 @@ class RestraintList(AbstractWrapperObject):
   def restraintType(self) -> str:
     """Restraint type"""
     return self._wrappedData.__class__.__name__[:-14]
+
+  @property
+  def restraintItemLength(self) -> int:
+    """Length of restraintItem - number of atom ID defining a restraint"""
+    return self.restraintType2Length[self.restraintType]
 
   @property
   def serial(self) -> int:

@@ -48,7 +48,7 @@ class Window(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiWindow(self) -> ApiWindow:
+  def _apiWindow(self) -> ApiWindow:
     """ CCPN Window matching Window"""
     return self._wrappedData
 

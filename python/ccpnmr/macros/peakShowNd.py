@@ -1,6 +1,6 @@
 
-spectrum = project.getById('SP:hsqc')
-peakList = project.getById('PL:hsqc.1')
+spectrum = project.getByPid('SP:hsqc')
+peakList = project.getByPid('PL:hsqc.1')
 
 display = self.createSpectrumDisplay(spectrum)
 

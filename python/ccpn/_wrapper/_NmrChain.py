@@ -47,7 +47,7 @@ class NmrChain(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiNmrChain(self) -> ApiNmrChain:
+  def _apiNmrChain(self) -> ApiNmrChain:
     """ CCPN NmrChain matching NmrChain"""
     return self._wrappedData
     
@@ -183,7 +183,7 @@ def newNmrChain(parent:Project, shortName:str=None, comment:str=None) -> NmrChai
   :param str shortName: shortName for new nmrChain (optional, defaults to '@n' n positive integer
   :param str comment: comment for new nmrChain (optional)"""
   
-  nmrProject = parent.nmrProject
+  nmrProject = parent._apiNmrProject
   
   if shortName is None:
     code = "@1"
@@ -203,7 +203,7 @@ def fetchNmrChain(parent:Project, shortName:str=None) -> NmrChain:
   :param str shortName: shortName for new chain (optional)
   """
 
-  nmrProject = parent.nmrProject
+  nmrProject = parent._apiNmrProject
   apiNmrChain = nmrProject.findFirstNmrChain(code=shortName)
   if apiNmrChain is None:
     apiNmrChain = nmrProject.newNmrChain(code=shortName)

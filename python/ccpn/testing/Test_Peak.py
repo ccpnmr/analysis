@@ -21,42 +21,28 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""Test code"""
+from ccpn.testing.Testing import Testing
+from ccpncore.lib.spectrum import Spectrum as libSpectrum
 
+class PeakTest(Testing):
 
-import os
-import unittest
+  def __init__(self, *args, **kw):
+    Testing.__init__(self, 'CcpnCourse1b', *args, **kw)
+    self.spectrumName = 'HSQC-115'
+    
+  def test_assignPeak(self):
+    spectrum = self.getSpectrum()
+    shiftList = self.project.newChemicalShiftList()
+    spectrum.chemicalShiftList = shiftList
+    nmrResidue = self.project.nmrChains[0].fetchNmrResidue()
+    nmrAtom = nmrResidue.fetchNmrAtom(name='N')
+    peak = spectrum.peakLists[0].peaks[0]
 
-from ccpncore.util import Path
-from ccpncore.util import Io
+    peak.assignDimension(axisCode=libSpectrum.axisCodeMatch('N', spectrum.axisCodes),
+                         value=nmrAtom)
+    # shift = shiftList.findChemicalShift(nmrAtom)
+    shift = shiftList.getChemicalShift(nmrAtom.id)
+    print("NewChemicalShift", shift, shift and shift.value)
+    assert shift is not None, "New shift must be created"
+    assert shift.value is not None, "New shift must have value"
 
-TEST_PROJECTS_PATH = os.path.join(Path.getTopDirectory(), 'data/testProjects')
-
-class Testing(unittest.TestCase):
-  """Base class for all testing code that requires projects."""
-
-  def __init__(self, projectPath:str=None, *args, **kw):
-
-    if projectPath is not None:
-      if not os.path.isabs(projectPath):
-        projectPath = os.path.join(TEST_PROJECTS_PATH, projectPath)
-
-    self.projectPath = projectPath
-    self.project = self.nmrProject = None
-
-    unittest.TestCase.__init__(self, *args, **kw)
-
-  def setUp(self):
-    print("--TEST core setting up", self.__class__.__name__)
-
-    projectPath = self.projectPath
-
-    if projectPath:
-      project = self.project = Io.loadProject(projectPath)
-      nmrProject = project.currentNmrProject
-      if not nmrProject:
-        nmrProject = project.currentNmrProject = project.findFirstNmrProject()
-      self.nmrProject = nmrProject
-
-  def tearDown(self):
-    print("--TEST core tearing down", self.__class__.__name__)

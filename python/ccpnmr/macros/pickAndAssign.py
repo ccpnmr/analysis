@@ -6,7 +6,7 @@ if len(project.nmrChains) == 0:
 else:
   c = project.nmrChains[0]
 
-hsqcPeakList = project.getById('PL:15N-HSQC-115^spc^par.1')
+hsqcPeakList = project.getByPid('PL:15N-HSQC-115^spc^par.1')
 
 shiftList = project.chemicalShiftLists[0]
 
@@ -24,10 +24,10 @@ for peak in hsqcPeakList.peaks:
   shiftList.newChemicalShift(nmrAtom=a2, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Hn')])
 
 
-hncocacb = project.getById('PL:CBCA(CO)NH-125^spc^par.1')
-hncoca = project.getById('PL:HN(CO)CA-117^spc^par.1')
-hncacb = project.getById('PL:126.1')
-hnca =  project.getById('PL:HNCA-120^spc^par.1')
+hncocacb = project.getByPid('PL:CBCA(CO)NH-125^spc^par.1')
+hncoca = project.getByPid('PL:HN(CO)CA-117^spc^par.1')
+hncacb = project.getByPid('PL:126.1')
+hnca =  project.getByPid('PL:HNCA-120^spc^par.1')
 #
 # copyAssignments(hsqcPeakList, hncocacb)
 # copyAssignments(hncocacb, hncacb)
@@ -38,12 +38,12 @@ hnca =  project.getById('PL:HNCA-120^spc^par.1')
 peaklists2 = [hncocacb, hncacb]
 
 
-# copyAssignments(peakLists2[0], project.getById('PL:126.1'))
+# copyAssignments(peakLists2[0], project.getByPid('PL:126.1'))
 
 
 
 
-# copyAssignments(peakLists2[0], project.getById('PL:126.1'))
+# copyAssignments(peakLists2[0], project.getByPid('PL:126.1'))
 for peakList in peaklists2:
   if isInterOnlyExpt(peakList.spectrum.experimentType):
     for peak in peakList.peaks:
@@ -58,7 +58,7 @@ for peakList in peaklists2:
       elif 'Ch' in peakList.spectrum.axisCodes:
         cdim = peakList.spectrum.axisCodes.index('Ch')
       if not peak.height:
-        peak.height = peak.apiPeak.findFirstPeakIntensity().value
+        peak.height = peak._apiPeak.findFirstPeakIntensity().value
       if peak.height > 0 and 45 < peak.position[cdim] < 66:
         name = 'CA'
       elif peak.height > 0 and 10 < peak.position[cdim] < 45:
@@ -100,7 +100,7 @@ copyAssignments(hncocacb, hncoca)
 # nmrResidueLabels = []
 # nmrAtoms = []
 # for nmrResidue in project.nmrResidues:
-#   atoms = [shiftList.getChemicalShift(atom.id).value for atom in nmrResidue.atoms if atom.apiResonance.isotopeCode == '13C' and atom.name=='CA' or atom.name=='CB']
+#   atoms = [shiftList.getChemicalShift(atom.id).value for atom in nmrResidue.atoms if atom._apiResonance.isotopeCode == '13C' and atom.name=='CA' or atom.name=='CB']
 #   for atom in atoms:
 #     if atom is None:
 #       atoms.pop(atoms.index(atom))
@@ -109,9 +109,9 @@ copyAssignments(hncocacb, hncoca)
 #     nmrResidueLabels.append(nmrResidue.pid)
 
 #
-# # copyAssignments(peakLists2[0], project.getById('PL:126.1'))
+# # copyAssignments(peakLists2[0], project.getByPid('PL:126.1'))
 # #
-# pl = project.getById('PL:126.1')
+# pl = project.getByPid('PL:126.1')
 # clf = svm.SVC()
 # clf.fit(nmrAtoms, nmrResidueLabels)
 # hncacbPeaks = {}
@@ -132,10 +132,10 @@ copyAssignments(hncocacb, hncoca)
 #
 #
 # print(hncacbPeaks)
-# # copyAssignments(project.getById('PL:HNCOCACB-113.1'), project.getById('PL:HNCACB-112.1'))
-# # copyAssignments(project.getById('PL:HSQC-115.1'), project.getById('PL:HNCACB-112.1'))
-# # copyAssignments(project.getById('PL:HNCOCA-111.1'), project.getById('PL:HNCA-110.1'))
-# # copyAssignments(project.getById('PL:HSQC-115.1'), project.getById('PL:HNCA-110.1'))
+# # copyAssignments(project.getByPid('PL:HNCOCACB-113.1'), project.getByPid('PL:HNCACB-112.1'))
+# # copyAssignments(project.getByPid('PL:HSQC-115.1'), project.getByPid('PL:HNCACB-112.1'))
+# # copyAssignments(project.getByPid('PL:HNCOCA-111.1'), project.getByPid('PL:HNCA-110.1'))
+# # copyAssignments(project.getByPid('PL:HSQC-115.1'), project.getByPid('PL:HNCA-110.1'))
 
 
 # nmrResidues2 = peakLists3.peaks
@@ -143,13 +143,13 @@ copyAssignments(hncocacb, hncoca)
 
 for nmrResidue in project.nmrResidues:
 
-  # nmrResidue = project.getById(ssLabel)
+  # nmrResidue = project.getByPid(ssLabel)
   for peaks in nmrResidue.fetchNmrAtom(name='N').assignedPeaks:
     exptDict = getExptDict(project)
     for peak in peaks:
       if peak.peakList.spectrum.experimentType in exptDict:
         if not peak.height:
-          peak.height = peak.apiPeak.findFirstPeakIntensity().value
+          peak.height = peak._apiPeak.findFirstPeakIntensity().value
         exptDict[peak.peakList.spectrum.experimentType].append(peak)
   for exptType in exptDict.keys():
     if not isInterOnlyExpt(exptType):

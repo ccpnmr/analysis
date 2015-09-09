@@ -60,7 +60,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiSpectrumDisplay(self) -> ApiSpectrumDisplay:
+  def _apiSpectrumDisplay(self) -> ApiSpectrumDisplay:
     """ CCPN SpectrumDisplay matching SpectrumDisplay"""
     return self._wrappedData
 
@@ -116,7 +116,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
 
   @window.setter
   def window(self, value:Window):
-    value = self.getById(value) if isinstance(value, str) else value
+    value = self.getByPid(value) if isinstance(value, str) else value
     self._wrappedData.window = value and value._wrappedData
 
   @property
@@ -126,7 +126,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
 
   @nmrResidue.setter
   def nmrResidue(self, value:NmrResidue):
-    value = self.getById(value) if isinstance(value, str) else value
+    value = self.getByPid(value) if isinstance(value, str) else value
     self._wrappedData.resonanceGroup = value and value._wrappedData
 
   @property
@@ -137,7 +137,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
 
   @orderedAxes.setter
   def orderedAxes(self, value:Sequence):
-    value = [self.getById(x) if isinstance(x, str) else x for x in value]
+    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
     self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
 
   @property
@@ -148,7 +148,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
 
   @orderedStrips.setter
   def orderedStrips(self, value:Sequence):
-    value = [self.getById(x) if isinstance(x, str) else x for x in value]
+    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
     self._wrappedData.orderedStrips = tuple(x._wrappedData for x in value)
 
   @property
@@ -193,7 +193,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
     """Display additional spectrum, with spectrum axes ordered according ton axisOrder
     """
-    spectrum = self.getById(spectrum) if isinstance(spectrum, str) else spectrum
+    spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
     self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
 
 # Window.spectrumDisplays property
@@ -219,8 +219,8 @@ def newSpectrumDisplay(parent:Task, axisCodes:(str,), stripDirection:str='Y',
   #   (True, False,True):('newFreeStripDisplay1d','newFreeStrip1d'),
   # }
 
-  window = parent.getById(window) if isinstance(window, str) else window
-  nmrResidue = parent.getById(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
+  window = parent.getByPid(window) if isinstance(window, str) else window
+  nmrResidue = parent.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
 
   apiTask = parent._wrappedData
 
@@ -311,7 +311,7 @@ def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=
   :param bool independentStrips: if True do freeStrip display.
   """
 
-  spectrum = window.getById(spectrum) if isinstance(spectrum, str) else spectrum
+  spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 
   dataSource = spectrum._wrappedData
 

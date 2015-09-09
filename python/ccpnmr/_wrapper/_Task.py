@@ -46,7 +46,7 @@ class Task(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiGuiTask(self) -> ApiGuiTask:
+  def _apiGuiTask(self) -> ApiGuiTask:
     """ CCPN GuiTask matching Task"""
     return self._wrappedData
     
@@ -84,7 +84,7 @@ class Task(AbstractWrapperObject):
 
   @windows.setter
   def windows(self, value:Sequence):
-    value = [self.getById(x) if isinstance(x, str) else x for x in value]
+    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
     self._wrappedData.windows = tuple(x._wrappedData for x in value)
 
   @property
@@ -130,7 +130,7 @@ class Task(AbstractWrapperObject):
   def loadAsTemplate(self, name:str, nameSpace:str=None, window:Window=None):
     """copy and activate template task, adapting and pruning contents to fit"""
 
-    window = self.getById(window) if isinstance(window, str) else window
+    window = self.getByPid(window) if isinstance(window, str) else window
     window=window and window._wrappedData
     newObj = self._wrappedData.adaptedCopy(nmrProject=self._project._wrappedData,
                                            window=window, name=name, nameSpace=nameSpace)
@@ -143,7 +143,7 @@ class Task(AbstractWrapperObject):
 def _getTask(window):
   return window._project._data2Obj.get(window._wrappedData.guiTask)
 def _setTask(window, value):
-  value = window.getById(value) if isinstance(value, str) else value
+  value = window.getByPid(value) if isinstance(value, str) else value
   window._wrappedData.guiTask = value and value._wrappedData
 Window.task = property(_getTask, _setTask, None, """Task shown in Window.""")
 

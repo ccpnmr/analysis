@@ -44,7 +44,7 @@ class ChemicalShift(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiShift(self) -> ApiShift:
+  def _apiShift(self) -> ApiShift:
     """ CCPN Chemical Shift matching ChemicalShift"""
     return self._wrappedData
     
@@ -125,7 +125,7 @@ def newChemicalShift(parent:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                      comment:str=None) -> ChemicalShift:
   """Create new child Shift"""
 
-  nmrAtom = parent.getById(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
+  nmrAtom = parent.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
 
   obj = parent._wrappedData.newShift(value=value,
                                      resonance=nmrAtom._wrappedData, error=valueError,

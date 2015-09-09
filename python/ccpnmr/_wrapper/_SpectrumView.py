@@ -49,7 +49,7 @@ class SpectrumView(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiStripSpectrumView(self) -> ApiStripSpectrumView:
+  def _apiStripSpectrumView(self) -> ApiStripSpectrumView:
     """ CCPN SpectrumView matching SpectrumView"""
     return self._wrappedData
 

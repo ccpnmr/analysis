@@ -47,7 +47,7 @@ class Note(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiNote(self) -> ApiNote:
+  def _apiNote(self) -> ApiNote:
     """ CCPN Project Note"""
     return self._wrappedData
 

@@ -45,7 +45,7 @@ class Residue(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiResidue(self) -> ApiResidue:
+  def _apiResidue(self) -> ApiResidue:
     """ API residue matching Residue"""
     return self._wrappedData
   

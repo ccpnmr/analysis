@@ -50,7 +50,7 @@ class NmrAtom(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiResonance(self) -> ApiResonance:
+  def _apiResonance(self) -> ApiResonance:
     """ CCPN atom matching Atom"""
     return self._wrappedData
 

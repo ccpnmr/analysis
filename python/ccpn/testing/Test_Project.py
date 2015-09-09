@@ -34,13 +34,13 @@ from ccpncore.api.ccp.nmr.Nmr import NmrProject
 #     print(self.project.id)
 #
 #   def test_nmrproject_not_none(self):
-#       assert self.project.nmrProject is not None
+#       assert self.project._apiNmrProject is not None
 #
 #   def test_project_is_nmrproject(self):
-#     assert isinstance(self.project.nmrProject, NmrProject)
+#     assert isinstance(self.project._apiNmrProject, NmrProject)
 #
 #   def test_name(self):
-#     assert self.project.name == self.project.nmrProject.name
+#     assert self.project.name == self.project._apiNmrProject.name
 #
 #   def test_spectra(self):
 #     assert len(self.project.spectra) == 3

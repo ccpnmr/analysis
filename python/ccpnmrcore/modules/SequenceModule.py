@@ -133,7 +133,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
   #   if event.mimeData().hasFormat('application/x-assignedStretch'):
   #     data = event.mimeData().data('application/x-assignedStretch')
   #     nmrResidues = str(data, encoding='utf-8').split(',')
-  #     nmrResidue = self.project.getById(nmrResidues[0])
+  #     nmrResidue = self.project.getByPid(nmrResidues[0])
   #     res.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
   #                 res.residue.shortName+'</strong></div>')
   #     nmrResidue.residue = res.residue
@@ -145,7 +145,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
   #       guiResidue = self.parent.residueDict.get(res.sequenceCode)
   #       guiResidue.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
   #                          res.shortName+'</strong></div>')
-  #       nmrResidue = self.project.getById(assignableResidue)
+  #       nmrResidue = self.project.getByPid(assignableResidue)
   #       print(nmrResidue, 'before')
   #       nmrResidue.residue = res
   #       print(nmrResidue, 'after')

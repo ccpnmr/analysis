@@ -32,7 +32,7 @@ def setupSamples(samples, n, mode, minimalOverlap):
     newSample = project.newSample(name=str(i+1+len(project.samples)))
     samplesData.append(newSample)
     newSample.peakCollections = cluster
-    newSample.spectra = [project.getById('SP:'+item.name) for item in cluster]
+    newSample.spectra = [project.getByPid('SP:'+item.name) for item in cluster]
 
     results = array([scoring(obj, cluster, 'getPeaks', minimalOverlap) for obj in cluster])
 

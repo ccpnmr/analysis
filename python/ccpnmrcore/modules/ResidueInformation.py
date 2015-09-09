@@ -8,7 +8,7 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Widget import Widget
 
-from ccpnmrcore.gui.Assigner import CCP_CODES
+from ccpn.lib.Assignment import CCP_CODES
 from ccpnmrcore.gui.Frame import Frame
 
 
@@ -21,7 +21,7 @@ class ResidueInformation(CcpnDock):
     chainLabel = Label(self, text='Chain')
     chainPulldown = PulldownList(self, callback=self.setChain)
     chainPulldown.setData([chain.pid for chain in project.chains])
-    self.selectedChain = project.getById(chainPulldown.currentText())
+    self.selectedChain = project.getByPid(chainPulldown.currentText())
     residueLabel = Label(self, text='Residue')
     residuePulldown = PulldownList(self, callback=self.setCurrentResidue)
     residuePulldown.setData(CCP_CODES)
@@ -41,7 +41,7 @@ class ResidueInformation(CcpnDock):
 
 
   def setChain(self, value):
-    self.selectedChain = self.project.getById(value)
+    self.selectedChain = self.project.getByPid(value)
     self.getResidues()
 
 

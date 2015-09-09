@@ -237,7 +237,7 @@ class MainWindow(GuiMainWindow):
 
   def raiseProperties(self, item):
     dataItem = item.data(0, QtCore.Qt.DisplayRole)
-    spectrum = self.project.getById(dataItem)
+    spectrum = self.project.getByPid(dataItem)
     self.w = SpectrumPropertiesPopup(spectrum)
     self.w.show()
 

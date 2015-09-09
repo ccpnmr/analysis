@@ -75,7 +75,7 @@ class MixturePopup(QtGui.QDialog):
       itemCount = item.childCount()
       for j in range(itemCount):
         spectrumPid = item.child(j).text(0)
-        spectrum = self.project.getById(spectrumPid)
+        spectrum = self.project.getByPid(spectrumPid)
         spectra.append(spectrum)
         spectrum.peakLists[0].findPeaks1dFiltered()
 
@@ -99,7 +99,7 @@ class MixturePopup(QtGui.QDialog):
 
       newItem = sideBar.addItem(mixtureTab, mixture)
       for peakCollection in mixture.peakCollections[1:]:
-        spectrum = self.project.getById('SP:'+peakCollection.name)
+        spectrum = self.project.getByPid('SP:'+peakCollection.name)
         sideBar.addItem(newItem, spectrum)
 
 

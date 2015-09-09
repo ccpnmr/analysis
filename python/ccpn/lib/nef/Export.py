@@ -370,7 +370,7 @@ def _makeMolecularSystemFrame(chains):
 
   atomPairs = []
   for chain in chains:
-    molecule = chain.apiChain.molecule
+    molecule = chain._apiChain.molecule
     for molResLink in molecule.findAllMolResLinks(isStdLinear=False):
       pair = []
       atomPairs.append(pair)
@@ -381,7 +381,7 @@ def _makeMolecularSystemFrame(chains):
         pair.append(project._data2Obj[apiAtom]._id.split('.'))
       pair.sort(key=commonUtil.integerStringSortKey)
 
-  for molSystemLink in project.nmrProject.molSystem.molSystemLinks:
+  for molSystemLink in project._apiNmrProject.molSystem.molSystemLinks:
     pair = []
     atomPairs.append(pair)
     for molSystemLinkEnd in molSystemLink.molSystemLinkEnds:
@@ -529,7 +529,7 @@ def makePeakListFrame(peakList):
   # Set up variables
   spectrum = peakList.spectrum
   dimensionCount = spectrum.dimensionCount
-  apiDataDims = spectrum.apiDataSource.sortedDataDims()
+  apiDataDims = spectrum._apiDataSource.sortedDataDims()
   if peakList.name is None:
     peakList.name = '%s-%s' % (spectrum.name.translate(Pid.unmapSeparators), peakList.serial)
   category = 'nef_nmr_spectrum'
@@ -550,7 +550,7 @@ def makePeakListFrame(peakList):
   ])
 
   # Experiment type
-  refExperiment = spectrum.apiDataSource.experiment.refExperiment
+  refExperiment = spectrum._apiDataSource.experiment.refExperiment
   if refExperiment is None:
     name = synonym = None
   else:

@@ -7,6 +7,9 @@ import unittest
 
 import os
 
+from ccpncore.util import Path
+from ccpncore.lib.spectrum import Spectrum as libSpectrum
+
 from unittest.mock import Mock, MagicMock
 
 class Test_makeNmrAtom(unittest.TestCase):
@@ -20,7 +23,7 @@ class Test_makeNmrAtom(unittest.TestCase):
     c = self.newProject.newNmrChain()
     r = c.newNmrResidue()
     a = r.newNmrAtom(isotopeCode='15N')
-    self.assertEqual(a.apiResonance.isotopeCode, '15N')
+    self.assertEqual(a._apiResonance.isotopeCode, '15N')
 
   def _test_createNmrAtom_withIsotopeCode(self):
     c = self.newProject.newNmrChain()
@@ -69,20 +72,23 @@ class Test_chemicalShift(unittest.TestCase):
 
   def setUp(self):
     self.newProject = ccpnIo.newProject('testProject')
-    specLocation = os.path.join('..', '..','..','data','testProjects','spectra','115.spc')
-    self.spectrum = self.newProject.loadSpectrum(specLocation, subType='Azara')
+    specLocation = Path.getDirectoryFromTop('data', 'testProjects', 'spectra', 'hsqc.spc')
+    spectra = self.newProject.loadSpectrum(specLocation, subType='Azara')
+    self.spectrum = spectra[0] if spectra else None
 
     c = self.newProject.newNmrChain()
     r = c.newNmrResidue()
     self.atom = r.newNmrAtom(isotopeCode='15N')
-    self.shiftList = self.newProject.newChemicalShiftList()
-    self.peakList = self.spectrum[0].newPeakList()
+    # NBNB The first shiftList, called 'default' is created automatically
+    self.shiftList = self.newProject.chemicalShiftLists[0]
+    self.peakList = self.spectrum.newPeakList() if spectra else None
 
   def tearDown(self):
     self.newProject.delete()
 
   def test_assignDimension(self):
-    peaks = self.peakList.findPeaksNd([[7.0, 111.75], [7.2, 112.2]], dataDims=self.spectrum[0]._wrappedData.sortedDataDims())
-    peaks[0].assignDimension(axisCode='N', value=self.atom)
-    self.assertIsNotNone(self.shiftList.findChemicalShift(self.atom))
+    peaks = self.peakList.findPeaksNd([[7.0, 111.75], [7.2, 112.2]], dataDims=self.spectrum._wrappedData.sortedDataDims())
+    peaks[0].assignDimension(axisCode=libSpectrum.axisCodeMatch('N', self.spectrum.axisCodes),
+                             value=self.atom)
+    self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom.id))
 

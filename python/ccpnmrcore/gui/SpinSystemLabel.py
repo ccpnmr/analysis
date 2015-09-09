@@ -41,12 +41,12 @@ class SpinSystemLabel(DropBase, Label):
 
     direction = pid[-2:]
     processedPid = pid[:-2]
-    wrapperObject = self._appBase.getById(processedPid)
+    wrapperObject = self._appBase.getByPid(processedPid)
 
     if direction == '-1':
-      sinkIndex = self._appBase.getById(self.strip.pid)._wrappedData.index
+      sinkIndex = self._appBase.getByPid(self.strip.pid)._wrappedData.index
     else:
-      sinkIndex = self._appBase.getById(self.strip.pid)._wrappedData.index+1
+      sinkIndex = self._appBase.getByPid(self.strip.pid)._wrappedData.index+1
     if wrapperObject.guiSpectrumDisplay.pid.id == self.strip.guiSpectrumDisplay.pid.id:
       wrapperObject.moveTo(sinkIndex)
     else:

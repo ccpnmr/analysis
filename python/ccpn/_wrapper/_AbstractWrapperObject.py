@@ -517,7 +517,7 @@ class AbstractWrapperObject():
     self._wrappedData.delete()
 
 
-  def getById(self, identifier: str):
+  def getByPid(self, identifier: str):
     """Get  object by absolute ID
     in either long form ('Residue:MS1.A.127') or short form ('MR:MS1.A.127')"""
 
@@ -529,7 +529,7 @@ class AbstractWrapperObject():
     #
     return None
 
-  def getWrapperObject(self, apiObject:DataObject):
+  def _getWrapperObject(self, apiObject:DataObject):
     """get wrapper object wrapping apiObject or None"""
     return self._project._data2Obj.get(apiObject)
     
@@ -675,4 +675,4 @@ class AbstractWrapperObject():
         setattr(self, keyTag, value)
         break
 
-AbstractWrapperObject.getById.__annotations__['return'] = AbstractWrapperObject
+AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject

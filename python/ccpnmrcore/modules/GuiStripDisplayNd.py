@@ -93,7 +93,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     #   Notifiers.registerNotify(self._setActionIconColour, 'ccp.nmr.Nmr.DataSource', func)
     
     self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button)
-    # self.apiStripSpectrumViews = set()  # set of apiStripSpectrumViews seen so far
+    # self._apiStripSpectrumViews = set()  # set of apiStripSpectrumViews seen so far
 
     self.fillToolBar()
     self.setAcceptDrops(True)
@@ -104,11 +104,11 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   # def addSpectrum(self, spectrum):
   #
-  #   apiSpectrumDisplay = self.apiSpectrumDisplay
+  #   apiSpectrumDisplay = self._apiSpectrumDisplay
   #
   #   #axisCodes = spectrum.axisCodes
   #   axisCodes = LibSpectrum.getAxisCodes(spectrum)
-  #   if axisCodes != self.apiSpectrumDisplay.axisCodes:
+  #   if axisCodes != self._apiSpectrumDisplay.axisCodes:
   #     raise Exception('Cannot overlay that spectrum on this display')
   #
   #   apiDataSource = spectrum._wrappedData
@@ -155,8 +155,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
     # self.stripFrame.layout().addWidget(newGuiStrip)
   #
-  #   apiStrip = self.apiSpectrumDisplay.newStripNd()
-  #   n = len(self.apiSpectrumDisplay.strips) - 1
+  #   apiStrip = self._apiSpectrumDisplay.newStripNd()
+  #   n = len(self._apiSpectrumDisplay.strips) - 1
   #   guiStrip = GuiStripNd(self.stripFrame, apiStrip, grid=(1, n), stretch=(0, 1))
   #   guiStrip.addPlaneToolbar(self.stripFrame, n)
   #   guiStrip.addSpinSystemLabel(self.stripFrame, n)
@@ -295,10 +295,10 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   #     widget.setFixedSize(60, 30)
   #     self.spectrumActionDict[apiDataSource] = action  # have to use wrappedData because wrapper object disappears before delete notifier is called
   #     self._setActionIconColour(apiDataSource)
-  #   if apiStripSpectrumView not in self.apiStripSpectrumViews:
+  #   if apiStripSpectrumView not in self._apiStripSpectrumViews:
   #     spectrumView = self._project._data2Obj[apiStripSpectrumView]
   #     action.toggled.connect(spectrumView.setVisible)
-  #     self.apiStripSpectrumViews.add(apiStripSpectrumView)
+  #     self._apiStripSpectrumViews.add(apiStripSpectrumView)
   #
   #   return action
   #
@@ -319,8 +319,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   #     if action:
   #       self.spectrumToolBar.removeAction(action)
   #       del self.spectrumActionDict[apiDataSource]
-  #     if apiStripSpectrumView in self.apiStripSpectrumViews:  # should always be the case
-  #       self.apiStripSpectrumViews.remove(apiStripSpectrumView)
+  #     if apiStripSpectrumView in self._apiStripSpectrumViews:  # should always be the case
+  #       self._apiStripSpectrumViews.remove(apiStripSpectrumView)
           
 
   # def raiseContextMenu(self, event):

@@ -49,7 +49,7 @@ class Chain(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiChain(self) -> ApiChain:
+  def _apiChain(self) -> ApiChain:
     """ CCPN chain matching Chain"""
     return self._wrappedData
     

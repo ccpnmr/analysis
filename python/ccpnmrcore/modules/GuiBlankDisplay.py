@@ -98,7 +98,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     """Process dropped spectrum"""
     spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
     self.dockArea.guiWindow.removeBlankDisplay()
-    msg = 'window.createSpectrumDisplay(project.getById("%s"))\n' % spectrum
+    msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % spectrum
     self.dockArea.window().pythonConsole.write(msg)
 
   # def dropCallback(self, dropObject):
@@ -113,7 +113,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
   #     spectrum = wrapperObject
   #     spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
   #     self.dockArea.guiWindow.removeBlankDisplay()
-  #     msg = 'window.createSpectrumDisplay(project.getById("%s")\n' % spectrum.pid
+  #     msg = 'window.createSpectrumDisplay(project.getByPid("%s")\n' % spectrum.pid
   #     self.dockArea.window().pythonConsole.write(msg)
   #   import os
   #   if dropObject.mimeData().hasUrls():

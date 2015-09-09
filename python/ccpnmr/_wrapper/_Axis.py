@@ -45,7 +45,7 @@ class Axis(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiStripAxis(self) -> ApiStripAxis:
+  def _apiStripAxis(self) -> ApiStripAxis:
     """ CCPN Axis matching Axis"""
     return self._wrappedData
     
@@ -116,7 +116,7 @@ class Axis(AbstractWrapperObject):
 
   @nmrAtoms.setter
   def nmrAtoms(self, value):
-    value = [self.getById(x) if isinstance(x, str) else x for x in value]
+    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
     self._wrappedData.axis.resonances = tuple(x._wrappedData for x in value)
 
   @property

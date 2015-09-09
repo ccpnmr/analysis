@@ -34,8 +34,8 @@ class NmrResidueTest(Testing):
   #     print("NmrResidues: %s: %s" % (ch.pid, [x.pid for x in ch.nmrResidues]))
 
   def test_reassign1(self):
-    nchain = self.project.getById('NC:A')
-    nchain0 = self.project.getById('NC:@')
+    nchain = self.project.getByPid('NC:A')
+    nchain0 = self.project.getByPid('NC:@')
     nr1, nr2 = nchain.nmrResidues[:2]
     res1 = nr1.residue
     res2 = nr2.residue
@@ -43,7 +43,7 @@ class NmrResidueTest(Testing):
     nr3 = res3.nmrResidue
     nr2.residue = None
     assert nr2.longPid == "NmrResidue:A.@2.ARG"
-    target =  self.project.getById('NR:A.2.LYS')
+    target =  self.project.getByPid('NR:A.2.LYS')
     target.sequenceCode = None
     assert target.longPid == "NmrResidue:A.@11.LYS"
     nr2.sequenceCode = '2'

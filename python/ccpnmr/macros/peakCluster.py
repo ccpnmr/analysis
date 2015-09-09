@@ -12,7 +12,7 @@ c = project.newNmrChain()
 ssLabels = []
 positions = []
 
-hsqcPeakList = project.getById('PL:hsqc.1')
+hsqcPeakList = project.getByPid('PL:hsqc.1')
 
 atomDict = {}
 
@@ -37,12 +37,12 @@ for peakList in project.peakLists[1:]:
     for peak in peakList.peaks:
       array = [peak.position[0], peak.position[2]]
       result = clf.predict(array)
-      if peak.apiPeak.findFirstPeakIntensity().value > 0:
+      if peak._apiPeak.findFirstPeakIntensity().value > 0:
         name = 'CA-1'
       else:
         name = 'CB-1'
         print(peak, name)
-      r = project.getById(result[0])
+      r = project.getByPid(result[0])
       newNmrAtom = r.fetchNmrAtom(name=name)
       dimNmrAtoms = [atomDict[result[0]][0], [newNmrAtom], atomDict[result[0]][1]]
       peak.dimensionNmrAtoms = dimNmrAtoms

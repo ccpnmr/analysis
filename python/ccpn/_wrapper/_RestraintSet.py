@@ -47,7 +47,7 @@ class RestraintSet(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def apiRestraintSet(self) -> ApiNmrConstraintStore:
+  def _apiRestraintSet(self) -> ApiNmrConstraintStore:
     """ CCPN NmrConstraintStore matching RestraintSet"""
     return self._wrappedData
 

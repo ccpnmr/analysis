@@ -95,7 +95,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     # project = self._appBase.project
 
-    isNew = self.apiWindow.root.isModified  # a bit of a hack this, but should be correct
+    isNew = self._apiWindow.root.isModified  # a bit of a hack this, but should be correct
 
     project = self._project
     path = project.path
@@ -424,7 +424,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
     dataPid =  item.data(0, QtCore.Qt.DisplayRole)
     project = self._appBase.project
-    obj = project.getById(dataPid)
+    obj = project.getByPid(dataPid)
     if obj is None:
       project._logger.error("No data object matching Pid %s" % dataPid)
     elif obj.shortClassName == 'SP':

@@ -65,6 +65,9 @@ def addOneLetterMolResidues(molecule, sequence:str, molType:str='protein', start
              bool (is molecule cyclic?)
      Output: List of new Ccp.Molecule.MolResidues
   """
+  if not sequence:
+    raise ValueError("Attempt to append empty residue sequence")
+
   root = molecule.root
 
   oldMolResidues = molecule.molResidues
@@ -86,13 +89,20 @@ def addOneLetterMolResidues(molecule, sequence:str, molType:str='protein', start
     ii = ll.index(None)
     raise ValueError("Illegal %s code %s at position %s in sequence: %s"
                      % (molType, sequence[ii], ii, sequence))
+
+  if len(ll) == 1:
+    chemComp = ll[0]
+    chemCompVar  = (chemComp.findFirstChemCompVar(linking='none') or
+                    chemComp.findFirstChemCompVar()) # just a default
+    molResidues = [molecule.newMolResidue(seqCode=startNumber, chemCompVar=chemCompVar)]
+
   else:
     seqInput= [(molType,x.ccpCode) for x in ll]
-
-  if len(seqInput) > 1:
     molResidues = addLinearSequence(molecule, seqInput, seqCodeStart=startNumber,
                                     isCyclic=isCyclic)
-    return molResidues
+
+  #
+  return molResidues
 
 
 def addMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=False):

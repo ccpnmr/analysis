@@ -11,7 +11,7 @@ def navigateToPeakPosition(project, peak=None, selectedDisplays=None, strip=None
     peak = project._appBase.current.peaks[0]
 
   for displayPid in selectedDisplays:
-    display = project.getById(displayPid)
+    display = project.getByPid(displayPid)
     positions = peak.position
     axisCodes = peak.peakList.spectrum.axisCodes
     axisPositions = dict(zip(axisCodes, positions))
@@ -53,14 +53,14 @@ def navigateToNmrResidue(project, nmrResidue, selectedDisplays=None, markPositio
     selectedDisplays = project.spectrumDisplays
 
   for displayPid in selectedDisplays:
-    display = project.getById(displayPid)
+    display = project.getByPid(displayPid)
     print(display)
     # for strip in display.strips:
     shiftDict = {}
     for axis in display.strips[0].orderedAxes:
       shiftDict[axis.code] = []
       for atom in nmrResidue.atoms:
-        if atom.apiResonance.isotopeCode == getIsotopeCodeOfAxis(axis.code):
+        if atom._apiResonance.isotopeCode == getIsotopeCodeOfAxis(axis.code):
           shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
           print(shift)
           if shift is not None:
@@ -101,7 +101,7 @@ def navigateToNmrResidue(project, nmrResidue, selectedDisplays=None, markPositio
   #   for axis in strip.orderedAxes:
   #     shiftDict[axis.code] = []
   #     for atom in nmrResidue.atoms:
-  #       if atom.apiResonance.isotopeCode == getIsotopeCodeOfAxis(axis.code):
+  #       if atom._apiResonance.isotopeCode == getIsotopeCodeOfAxis(axis.code):
   #         shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
   #         print(shift)
   #         if shift is not None:

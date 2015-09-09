@@ -53,7 +53,7 @@ class Spectrum(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def apiDataSource(self) -> ApiDataSource:
+  def _apiDataSource(self) -> ApiDataSource:
     """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
 
@@ -200,7 +200,7 @@ class Spectrum(AbstractWrapperObject):
   @chemicalShiftList.setter
   def chemicalShiftList(self, value:ChemicalShiftList):
 
-    value = self.getById(value) if isinstance(value, str) else value
+    value = self.getByPid(value) if isinstance(value, str) else value
     self._wrappedData.experiment.shiftList = value._wrappedData
 
   @property

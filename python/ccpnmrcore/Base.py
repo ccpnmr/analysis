@@ -31,14 +31,15 @@ class Base(CoreBase):
     
     CoreBase.__init__(self, *args, **kw)
     
-  def getById(self, pid):
+  def getByPid(self, pid):
   
-    return self._appBase.project.getById(pid)
+    return self._appBase.project.getByPid(pid)
 
   def getObject(self, pidOrObject):
   
-    return self.getById(pidOrObject) if isinstance(pidOrObject, str) else pidOrObject
+    return self.getByPid(pidOrObject) if isinstance(pidOrObject, str) else pidOrObject
   
-  def getWrapperObject(self, apiObject):
-  
-   return self._appBase.project._data2Obj[apiObject]
+  # Already defined in AbstractWrapperObject - duplicate not needed
+  # def getWrapperObject(self, apiObject):
+  #
+  #  return self._appBase.project._data2Obj[apiObject]

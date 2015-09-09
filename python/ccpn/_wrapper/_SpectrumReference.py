@@ -52,7 +52,7 @@ class SpectrumReference(AbstractWrapperObject):
 
   # CCPN properties
   @property
-  def apiSpectrumReference(self) -> ApiDataDimRef:
+  def _apiSpectrumReference(self) -> ApiDataDimRef:
     """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
 

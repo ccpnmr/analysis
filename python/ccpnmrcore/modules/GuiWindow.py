@@ -42,7 +42,7 @@ class GuiWindow(DropBase):
     
     DropBase.__init__(self, self._parent._appBase)
     #self._appBase = self._project._appBase
-    # self.apiWindow = apiWindow
+    # self._apiWindow = apiWindow
     self.dockArea = DockArea()
     self.dockArea.guiWindow = self
     self.dockArea.setGeometry(0, 0, 12000, 8000)

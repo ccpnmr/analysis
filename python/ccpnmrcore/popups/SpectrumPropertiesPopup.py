@@ -145,8 +145,8 @@ class GeneralTab(QtGui.QWidget, Base):
       recordingDataLabel = Label(self, text="Date Recorded", grid=(10, 0))
       noiseLevelLabel = Label(self, text="Noise Level: ", grid=(11, 0))
       noiseLevelData = LineEdit(self)
-      if spectrum.apiDataSource.noiseLevel is not None:
-        noiseLevelData.setText(str('%.3d' % spectrum.apiDataSource.noiseLevel))
+      if spectrum._apiDataSource.noiseLevel is not None:
+        noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.noiseLevel))
       else:
         noiseLevelData.setText('None')
     else:
@@ -170,8 +170,8 @@ class GeneralTab(QtGui.QWidget, Base):
       # maximumValueLabel = Label(self, text="Maximum Value: ", grid=(10, 0))
       noiseLevelLabel = Label(self, text="Noise Level: ", grid=(9, 0))
       noiseLevelData = LineEdit(self, grid=(9, 1))
-      # if spectrum.apiDataSource.noiseLevel is not None:
-      # noiseLevelData.setText(str('%.3d' % spectrum.apiDataSource.estimateNoise()))
+      # if spectrum._apiDataSource.noiseLevel is not None:
+      # noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.estimateNoise()))
       # else:
       #   noiseLevelData.setText('None')
 
@@ -187,7 +187,7 @@ class GeneralTab(QtGui.QWidget, Base):
       self.chemicalShiftListPulldown.setCurrentIndex(insertionIndex)
       self.spectrum.chemicalShiftList = newChemicalShiftList
     else:
-      self.spectrum.chemicalShiftList = self.spectrum.project.getById(item)
+      self.spectrum.chemicalShiftList = self.spectrum.project.getByPid(item)
 
   def changeSpectrumType(self, value):
     expType = EXPERIMENT_TYPES[self.spectrum.dimensionCount].get(self.axisCodes).get(self.spectrumType.currentText())
@@ -215,8 +215,8 @@ class GeneralTab(QtGui.QWidget, Base):
     newColour = dialog.getColor()
     # palette = QtGui.QPalette(spectrum.guispectrumView.toolBarButton.palette())
     # palette.setColor(QtGui.QPalette.Button,spectrum.spectrumView.colour)
-    spectrum.apiDataSource.setSliceColour(newColour.name())
-    spectrum.guiSpectrumView.plot.setPen(spectrum.apiDataSource.sliceColour)
+    spectrum._apiDataSource.setSliceColour(newColour.name())
+    spectrum.guiSpectrumView.plot.setPen(spectrum._apiDataSource.sliceColour)
     pix=QtGui.QPixmap(QtCore.QSize(20,20))
     pix.fill(QtGui.QColor(newColour))
     newIndex = str(len(spectrumColours.items())+1)
@@ -233,7 +233,7 @@ class GeneralTab(QtGui.QWidget, Base):
     spectrum.sliceColour = list(spectrumColours.keys())[value]
     # for spectrumView in spectrum.spectrumViews:
     #   print(dir(spectrumView))
-    #   spectrumView.plot.setPen(QtGui.QColor(spectrum.apiDataSource.sliceColour))
+    #   spectrumView.plot.setPen(QtGui.QColor(spectrum._apiDataSource.sliceColour))
     pix=QtGui.QPixmap(60,10)
     pix.fill(QtGui.QColor(spectrum.sliceColour))
     newIcon = QtGui.QIcon(pix)
@@ -322,7 +322,7 @@ class ContoursTab(QtGui.QWidget):
     positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value()*(positiveMultiplierData.value()-1))
     positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(3, 0))
     positiveContourCountData = Spinbox(self, grid=(3, 1))
-    positiveContourCountData.setValue(int(spectrum.apiDataSource.positiveContourCount))
+    positiveContourCountData.setValue(int(spectrum._apiDataSource.positiveContourCount))
     positiveContourCountData.valueChanged.connect(partial(self.lineEditTextChanged3, spectrum))
     positiveContourColourLabel = Label(self, text="Positive Contour Colour",grid=(4, 0))
     self.positiveColourBox = PulldownList(self, grid=(4, 1))
@@ -460,7 +460,7 @@ class ContoursTab(QtGui.QWidget):
   def changeNegColourComboIndex(self, spectrum, value):
 
     newColour = list(spectrumColours.keys())[value]
-    spectrum.apiDataSource.negativeContourColour = newColour
+    spectrum._apiDataSource.negativeContourColour = newColour
     pix=QtGui.QPixmap(60,10)
     pix.fill(QtGui.QColor(newColour))
     newIcon = QtGui.QIcon(pix)

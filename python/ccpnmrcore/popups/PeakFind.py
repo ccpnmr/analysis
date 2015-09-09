@@ -44,7 +44,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 3), hAlign='l', callback=self.selectPeakList)
     # self.peakListPulldown.currentIndexChanged.connect(self.selectPeakList)
     self.peakListPulldown.setData([peakList.pid for peakList in project.peakLists])
-    self.peakList = project.getById(self.peakListPulldown.currentText())
+    self.peakList = project.getByPid(self.peakListPulldown.currentText())
     self.updateContents()
 
 
@@ -55,7 +55,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
 
   def selectPeakList(self, item):
     print(item)
-    self.peakList = self.project.getById(item)
+    self.peakList = self.project.getByPid(item)
     print('here')
     self.updateContents()
 

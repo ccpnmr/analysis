@@ -34,39 +34,39 @@ Sequence = collections.abc.Sequence
 def getPlaneData(spectrum:object, position:Sequence=None, xDim:int=0, yDim:int=1):
 
   # TBD: below should instead say (but this is not implemented yet)
-  # return spectrum.apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-  return spectrum.apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+  # return spectrum._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+  return spectrum._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
   
 def getSliceData(spectrum:object, position:collections.abc.Sequence=None, sliceDim:int=0):
 
   # TBD: below should instead say (but this is not implemented yet)
-  # return spectrum.apiDataSource.getSliceData(position=position, xDim=xDim, yDim=yDim)
-  return spectrum.apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
+  # return spectrum._apiDataSource.getSliceData(position=position, xDim=xDim, yDim=yDim)
+  return spectrum._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 
 def getRegionData(spectrum:object, startPoint:collections.abc.Sequence, endPoint:collections.abc.Sequence):
   
-  return spectrum.apiDataSource.getRegionData(startPoint, endPoint)
+  return spectrum._apiDataSource.getRegionData(startPoint, endPoint)
 
 def automaticIntegration(spectrum, spectralData):
 
-  return spectrum.apiDataSource.automaticIntegration(spectralData)
+  return spectrum._apiDataSource.automaticIntegration(spectralData)
 
 
 def estimateNoise(spectrum):
-  return spectrum.apiDataSource.estimateNoise()
+  return spectrum._apiDataSource.estimateNoise()
 
 # def getDimPointFromValue(spectrum, dimension, value):
 #   """ Convert from value (e.g. ppm) to point (counting from 0) for an arbitrary
 #       number of values in a given dimension (counting from 0).  If value is a
 #       number then return a number, otherwise return a list.
 #   """
-#   return spectrum.apiDataSource.getDimPointFromValue(dimension, value)
+#   return spectrum._apiDataSource.getDimPointFromValue(dimension, value)
     
 # def getDimValueFromPoint(spectrum, dimension, point):
 #   """ Convert from point (counting from 0) to value (e.g. ppm) for an arbitrary
 #       number of points in a given dimension (counting from 0).  If point is a
 #       number then return a number, otherwise return a list.
 #   """
-#   return spectrum.apiDataSource.getDimValueFromPoint(dimension, point)
+#   return spectrum._apiDataSource.getDimValueFromPoint(dimension, point)
 
 

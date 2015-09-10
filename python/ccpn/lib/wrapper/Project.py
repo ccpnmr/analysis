@@ -26,9 +26,7 @@ __version__ = "$Revision$"
 import os
 from ccpncore.lib.Io import Formats as ioFormats
 from ccpncore.lib.Io import Fasta as fastaIo
-import csv
-import pandas as pd
-from ccpnmrcore import DropBase
+from ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
 
 # def loadSpectrum(project:object, filePath:str, reReadSpectrum:object=None):
 #   """Load spectrum from file a filePath"""
@@ -68,8 +66,8 @@ def loadData(project:object, path:str) -> (list,None):
     if funcname == 'loadProject':
       return [project.loadProject(usePath, subType)]
 
-    elif funcname == 'loadLookupFile':
-      return project.loadLookupFile(usePath, subType)
+    # elif funcname == 'loadLookupFile':
+    #   return project.loadLookupFile(usePath, subType)
 
     elif hasattr(project, funcname):
       pids = getattr(project, funcname)(usePath, subType)
@@ -112,39 +110,16 @@ def loadSpectrum(project:object, path:str, subType:str):
   else:
     return [project._data2Obj[apiDataSource]]
 
-
-
+#
+#
 def loadLookupFile(project:None, path:str, subType:str, ):
- """Load data from a look-up file, csv or xls ."""
-pass
- #
- # if subType == ioFormats.CSV:
- #   csv_in = open(path, 'r')
- #   reader = csv.reader(csv_in)
- #   for row in reader:
- #     if row[0].split('/')[-1] == 'procs':
- #       filename = row[0].split('/')
- #       filename.pop()
- #       Filename = '/'.join(filename)
- #       dataType, subType, usePath = ioFormats.analyseUrl(Filename)
+  """Load data from a look-up file, csv or xls ."""
 
+  if subType == ioFormats.CSV:
+    readCsv(project, path=path)
 
- # elif subType == ioFormats.XLS:
- #   ex = pd.ExcelFile(path)
- #   for sheet in ex.sheet_names:
- #    excelSheet = ex.parse(sheet)
- #    for row in excelSheet['filename']:
- #      if row.split('/')[-1] == 'procs':
- #        filename = row.split('/')
- #        filename.pop()
- #        Filename = '/'.join(filename)
- #        dataType, subType, usePath = ioFormats.analyseUrl(Filename)
- #      # print(dataType, subType, usePath,'load lookup in project' )
- #        funcname =  'load' + dataType
- #        pids = getattr(project, funcname)(usePath, subType)
- #        return(pids)
- #    for row in excelSheet['smiles']:
- #      print(row)
+  elif subType == ioFormats.XLS:
+    readXls(project, path=path)
 
 
 

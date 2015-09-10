@@ -7,9 +7,9 @@ from pyqtgraph.dockarea import Dock
 from ccpncore.gui.Table import ObjectTable, Column
 
 from ccpncore.gui.Dock import CcpnDock
-from ccpnmrcore.modules.SamplesComponentsTable import PeakListSampleComponent
-from ccpnmrcore.modules.SamplesComponentsView import SamplesComponentsView
-
+from ccpnmrcore.modules.SampleComponentsTable import PeakListSampleComponent
+from ccpnmrcore.modules.SampleComponentsView import SampleComponentsView
+from ccpnmrcore.modules.SampleComponentsInfo import SampleComponentInfo
 
 
 class SampleAnalysis(CcpnDock):
@@ -28,7 +28,7 @@ class SampleAnalysis(CcpnDock):
     self.setLayout(self.moduleLayout)
 
 
-    ######## ======== On The Fly Sample Table  ====== ########
+    ######## ======== On The Fly Sample Table (temporary) ====== ########
     if not samples:
       samples = []
     self.samples = samples
@@ -41,8 +41,8 @@ class SampleAnalysis(CcpnDock):
 
     ######## ========   Set Tabs  ====== ########
     self.componentPL = PeakListSampleComponent(self, project=project)
-    self.componentView = SamplesComponentsView(self, project=project)
-    self.componentInfo = componentInfo()
+    self.componentView = SampleComponentsView(self, project=project)
+    self.componentInfo = SampleComponentInfo(self, project=project)
 
     self.tabWidget.addTab(self.sampleTable, 'Sample Scoring')
     self.tabWidget.addTab(self.componentPL, 'Component Peak List')
@@ -51,9 +51,3 @@ class SampleAnalysis(CcpnDock):
 
 
 
-
-
-class componentInfo(QtGui.QWidget):
-  def __init__(self, parent=None):
-    super(componentInfo, self).__init__(parent)
-    pass

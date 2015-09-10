@@ -13,14 +13,8 @@ from ccpncore.gui.Slider import Slider
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Widget import Widget
-# from ccpnmrcore.modules.SamplesTable import SampleTableSimple
-# from ccpnmrcore.modules.SamplesTable import SampleTable
-
+# from ccpnmrcore.modules.SampleScoringTable import SampleTableSimple
 from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
-from ccpnmrcore.modules.SamplesComponentsTable import PeakListSampleComponent
-
-
-
 from ccpn.lib.sampleUtil import setupSamples
 
 
@@ -87,6 +81,7 @@ class SamplePopup(QtGui.QDialog):
       spectrum.sample = newSample
 
 
+
     for i in range(refCount):
       item = refData.child(i)
       itemCount = item.childCount()
@@ -114,6 +109,7 @@ class SamplePopup(QtGui.QDialog):
       for peakCollection in sample.peakCollections[0:]:
         self.spectrum = self.project.getByPid('SP:'+peakCollection.name)
         sideBar.addItem(newItem, self.spectrum)
+
 
 
 

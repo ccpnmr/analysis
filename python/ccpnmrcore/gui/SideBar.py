@@ -173,9 +173,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         anItem.setText(0, '<New>')
 
 
-    # for sample in project.samples:
-    #   newSample = self.addItem(self.spectrumSamples, newItem)
-
     if self._appBase.applicationName == 'Screen':
       # 1d
       self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
@@ -236,198 +233,30 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
   def processSpectrum(self, spectrum:(Spectrum,Pid), expTypes=None):
 
-      spectrum = self.project.getByPid(spectrum)
-      peakList = spectrum.newPeakList()
+    spectrum = self.project.getByPid(spectrum)
+    peakList = spectrum.newPeakList()
+
+    if self._appBase.applicationName == 'Screen':
+      newItem = self.addItem(self.onedItem, spectrum)
+      peakListItem = QtGui.QTreeWidgetItem(newItem)
+      peakListItem.setText(0, peakList.pid)
+
+    else:
       newItem = self.addItem(self.spectrumItem, spectrum)
       peakListItem = QtGui.QTreeWidgetItem(newItem)
       peakListItem.setText(0, peakList.pid)
-      peakListItem.setFlags(peakListItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
 
 
 
 
 
-    #
-    #   if expTypes and len(expTypes) > 0:
-    #
-    #     spectrum.experimentType = expTypes
-    #
-    #     if spectrum.experimentType == "STD.H":
-    #      newItem = self.addItem(self.stdItem, spectrum)
-    #      peakListItem = QtGui.QTreeWidgetItem(newItem)
-    #      peakListItem.setText(0, peakList.pid)
-    #
-    #     elif spectrum.experimentType == "Water-LOGSY.H":
-    #       newItem = self.addItem(self.logsyItem, spectrum)
-    #       peakListItem = QtGui.QTreeWidgetItem(newItem)
-    #       peakListItem.setText(0, peakList.pid)
-    #
-    #     elif spectrum.experimentType == "T2-filtered.H":
-    #       newItem = self.addItem(self.t1rhoItem, spectrum)
-    #       peakListItem = QtGui.QTreeWidgetItem(newItem)
-    #       peakListItem.setText(0, peakList.pid)
-    #
-    #     else:
-    #
-    #
-    #       newItem = self.addItem(self.onedItem, spectrum)
-    #       peakListItem = QtGui.QTreeWidgetItem(newItem)
-    #       peakListItem.setText(0, peakList.pid)
-    #       peakListItem.setFlags(peakListItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # else:
-    #
-    #   newItem = self.addItem(self.spectrumItem, spectrum)
-    #   peakListItem = QtGui.QTreeWidgetItem(newItem)
-    #   peakListItem.setText(0, peakList.pid)
-    #   peakListItem.setFlags(peakListItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-
-
-  def parseLookupFile(self, filePath):
-
-    if filePath.split('/')[-1].endswith('.csv'):
-      csv_in = open(filePath, 'r')
-      reader = csv.reader(csv_in)
-      for row in reader:
-        if row[0].split('/')[-1] == 'procs':
-          filename = row[0].split('/')
-          filename.pop()
-          newFilename = '/'.join(filename)
-          ll = self._appBase.project.loadSpectrum(newFilename)
-          spectrum = ll[0] if ll else None
-
-          try:
-            expType = self.getExpType(filename)
-            if spectrum is not None:
-              self.addSpectrumToItem(spectrum, expType)
-          except FileNotFoundError:
-            pass
-
-    elif '.xls' in filePath.split('/')[-1]:
-      ex = pd.ExcelFile(filePath)
-      for sheet in ex.sheet_names:
-        excelSheet = ex.parse(sheet)
-        for row in excelSheet['filename']:
-          if row.split('/')[-1] == 'procs':
-            filename = row.split('/')
-            filename.pop()
-            newFilename = '/'.join(filename)
-            ll = self._appBase.project.loadSpectrum(newFilename)
-            spectrum = ll[0] if ll else None
-            try:
-              expType = self.getExpType(filename)
-            except:
-              expType = 'H'
-            if spectrum is not None:
-              self.addSpectrumToItem(spectrum, expType)
-    else:
-      pass
-
-  def isProject(self, filePath):
-    for dirpath, dirnames, filenames in os.walk(filePath):
-      if dirpath.endswith('memops') and 'Implementation' in dirnames:
-        return True
-
-
-  # def dropEvent(self, event):
-  #   '''If object can be dropped into this area, accept dropEvent, otherwise throw an error
-  #     spectra, projects and peak lists can be dropped into this area but nothing else.
-  #     If project is dropped, it is loaded.
-  #     If spectra/peak lists are dropped, these are displayed in the side bar but not displayed in
-  #     spectrumDisplay
-  #     '''
-  #
-  #   '''
-  #
-  #   pp = filename[:-2]
-  #   pp.append('pulseprogram')
-  #   ppFile = open('/'.join(pp), 'r').readlines()
-  #   expTypes = []
-  #   for expType in experimentTypeDict.keys():
-  #     if expType in ppFile[1]:
-  #       expTypes.append(experimentTypeDict[expType])
-  #   # print(expTypes, ppFile[1])
-  #   if len(expTypes) > 1 and 'T2-filtered.H' in expTypes:
-  #     expTypes.remove('T2-filtered.H')
-  #   if len(expTypes) == 1:
-  #     return expTypes[0]
-  #   else:
-  #     return None
-  #
-  # def isLookupFile(self, filePath):
-  #   if filePath.split('/')[-1].endswith('.csv'):
-  #     return True
-  #   elif '.xls' in filePath.split('/')[-1]:
-  #     return True
-  #   else:
-  #     return False
-  #
-  # #
-  # def parseLookupFile(self, spectra:(Spectrum ,Pid), expTypes=None):
-  #   print('lookup')
-
-
-  #   if filePath.split('/')[-1].endswith('.csv'):
-  #     csv_in = open(filePath, 'r')
-  #
-  #     reader = csv.reader(csv_in)
-  #
-  #     for row in reader:
-  #       if row[0].split('/')[-1] == 'procs':
-  #         print('here')
-  #         filename = row[0].split('/')
-  #         filename.pop()
-  #         newFilename = '/'.join(filename)
-  #
-  #         spectrum = self.parent.project.loadSpectrum(newFilename)
-  #         print('---->',spectrum)
-  #
-  #         try:
-  #           expType = self.getExpType(filename)
-  #           if spectrum is not None:
-  #             self.addSpectrumToItem(spectrum, expType)
-  #         except FileNotFoundError:
-  #           pass
-  #
-  #   elif '.xls' in filePath.split('/')[-1]:
-  #     ex = pd.ExcelFile(filePath)
-  #     for sheet in ex.sheet_names:
-  #       excelSheet = ex.parse(sheet)
-  #       for row in excelSheet['filename']:
-  #         if row.split('/')[-1] == 'procs':
-  #
-  #           filename = row.split('/')
-  #           filename.pop()
-  #           newFilename = '/'.join(filename)
-  #
-  #           spectrum = self.parent.project.loadSpectrum(newFilename)
-  #           try:
-  #             expType = self.getExpType(filename)
-  #           except:
-  #             expType = 'H'
-  #           if spectrum is not None:
-  #             self.addSpectrumToItem(spectrum, expType)
-  #   else:
-  #     pass
-
-  # def isProject(self, filePath):
-  #   for dirpath, dirnames, filenames in os.walk(filePath):
-  #     if dirpath.endswith('memops') and 'Implementation' in dirnames:
-  #       return True
-
-  # def processSpectrum(self, spectrum:(Spectrum,Pid)):
-  #   """Process dropped spectrum"""
-  #   spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
-  #   self.dockArea.guiWindow.removeBlankDisplay()
-  #   msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % spectrum
-  #   self.dockArea.window().pythonConsole.write(msg)
   # def dropEvent(self, event):
     # '''If object can be dropped into this area, accept dropEvent, otherwise throw an error
     #   spectra, projects and peak lists can be dropped into this area but nothing else.
     #   If project is dropped, it is loaded.
     #   If spectra/peak lists are dropped, these are displayed in the side bar but not displayed in
     #   spectrumDisplay
-    #   '''
-    #
+
     # if event.mimeData().hasUrls():
     #   event.setDropAction(QtCore.Qt.CopyAction)
     #   event.accept()

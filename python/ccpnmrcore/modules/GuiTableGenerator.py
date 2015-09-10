@@ -32,6 +32,7 @@ class GuiTableGenerator(QtGui.QWidget):
         self.updateSelectorContents()
 
 
+
   def changeObjectList(self, objectList):
 
     if objectList is not self.objectList:
@@ -44,13 +45,12 @@ class GuiTableGenerator(QtGui.QWidget):
 
     objectList = self.objectList
 
-
     if objectList:
-      print(objectList, 'objectList in TableGenerator' )
-      objectsName = objectList._childClasses[0]._pluralLinkName
 
+      objectsName = objectList._childClasses[0]._pluralLinkName
       columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
       self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
+
 
   def _getColumns(self, columns, tipTexts):
 
@@ -97,11 +97,13 @@ class GuiTableGenerator(QtGui.QWidget):
 
   def updateSelectorContents(self):
     if self.objectList is not None:
+
       # if self.objectList.shortClassName == 'PL':
       #   texts = ['%s' % peakList.pid for peakList in self.objectLists]
       # else:
       texts = ['%s' % objectList.pid for objectList in self.objectLists]
       self.selector.setData(texts=texts, objects=self.objectLists)
+
 
 
 

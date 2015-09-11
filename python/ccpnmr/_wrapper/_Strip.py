@@ -374,14 +374,14 @@ def _factoryFunction(project:Project, wrappedData:ApiStrip):
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
 
   apiSpectrumDisplay = wrappedData.spectrumDisplay
-  if apiSpectrumDisplay.stripType == 'Bound':
-    if apiSpectrumDisplay.is1d:
-      return Strip1d(project, wrappedData)
-    else:
-      return StripNd(project, wrappedData)
+  # if apiSpectrumDisplay.stripType == 'Bound':
+  if apiSpectrumDisplay.is1d:
+    return Strip1d(project, wrappedData)
   else:
-    raise ValueError("Attempt to make SpectrumDisplay from illegal object type: %s"
-    % wrappedData)
+    return StripNd(project, wrappedData)
+  # else:
+  #   raise ValueError("Attempt to make SpectrumDisplay from illegal object type: %s"
+  #   % wrappedData)
 
 Strip._factoryFunction = staticmethod(_factoryFunction)
 

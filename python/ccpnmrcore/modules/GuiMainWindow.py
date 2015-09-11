@@ -305,7 +305,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showBackboneAssignmentModule, shortcut='bb'))
     assignMenu.addAction(Action(self, 'Show Assigner', callback=self.showAssigner))
     assignMenu.addAction(Action(self, 'Show Atom Selector', callback=self.showAtomSelector, shortcut='as'))
-    # assignMenu.addAction(Action(self, 'Assignment Module', callback=self.showAssignmentModule, shortcut='aa'))
     assignMenu.addAction(Action(self, 'Residue Information', callback=self.showResidueInformation, shortcut='ri'))
     assignMenu.addAction(Action(self, 'NmrResPopup', callback=self.showNmrResiduePopup, shortcut='np'))
 
@@ -352,7 +351,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showAssignmentModule(self):
     self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
     self.dockArea.addDock(self.assignmentModule)
-
 
   def showNmrResiduePopup(self):
     from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup

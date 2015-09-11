@@ -36,23 +36,7 @@ class ObjectAssigner(QtGui.QWidget, Base):
     self.objectTable = self.createEmptyNmrAtomsTable(grid=(3, 0))
     self.assignmentWidget = self.createAssignmentWidget(dim)
     self.layout().addWidget(self.assignmentWidget, 2, 0)
-    self.updateWidget(objects)
 
-
-
-  def updateWidget(self, objects):
-
-    if objects[0].shortClassName == 'PK':
-      positions = [peak.position[self.dim] for peak in objects]
-      avgPos = round(sum(positions)/len(positions), 3)
-      axisCode = objects[0].peakList.spectrum.axisCodes[self.dim]
-      text = axisCode + ' ' + str(avgPos)
-      self.label.setText(text)
-      print(text)
-      self.label.setStyleSheet("border: 0px solid; color: #f7ffff;")
-
-    else:
-      self.label.setText('')
 
 
   def createEmptyNmrAtomsTable(self, grid):
@@ -61,16 +45,18 @@ class ObjectAssigner(QtGui.QWidget, Base):
 
     '''
 
-    columns = self.opts['objectTableColumns']
-    callback = self.opts['objectTableCallBack']
 
+    columnHeadings = self.opts.get('objectTableColumnHeadings')
+    columnFunctions = self.opts.get('objectTableColumnGetValues')
+    callback = self.opts.get('objectTableCallBack')
+    if columnFunctions is not None:
+      columns = [Column(i, j) for i, j in zip(columnHeadings, columnFunctions)]
+    else:
+      columns = [Column(i, j) for i, j in zip(columnHeadings, columnHeadings)]
     objectTable = ObjectTable(self, columns, callback=callback, objects=[], grid=grid)
 
-    # Needed to use this syntax because wanted double click not single.
-    # objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
     objectTable.setFixedHeight(80)
     return objectTable
-    # self.objectTables.append(objectTable)
 
   def createEmptyListWidget(self, dim, grid):
     '''Can be used to add a new listWidget before
@@ -90,7 +76,7 @@ class ObjectAssigner(QtGui.QWidget, Base):
     axisCode = objects[0].peakList.spectrum.axisCodes[dim]
     text = axisCode + ' ' + str(avgPos)
     label = Label(self, text=text, grid=grid)
-    label.setStyleSheet("border: 0px solid; color: #f7ffff;")
+    # label.setStyleSheet("border: 0px solid; color: #f7ffff;")
     return label
     # self.labels.append(label)
 
@@ -201,6 +187,8 @@ class ObjectAssigner(QtGui.QWidget, Base):
       self.seqCodePulldowns[dim].setData([])
       self.resTypePulldowns[dim].setData([])
       self.atomTypePulldowns[dim].setData([])
+
+
 
 
 

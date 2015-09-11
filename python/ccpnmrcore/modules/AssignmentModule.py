@@ -155,13 +155,6 @@ class AssignmentModule(CcpnDock, Base):
     label.setStyleSheet("border: 0px solid; color: #f7ffff;")
     self.labels.append(label)
 
-  # def createAdvancedButton(self, dim):
-  #   advancedButton = Button(self, text="Advanced", hAlign='c')
-  #   advancedButton.setFixedWidth(100)
-  #   from functools import partial
-  #   advancedButton.setCheckable(True)
-  #   advancedButton.toggled.connect(partial(self.toggleNmrResiduePopup, dim))
-  #   self.advancedButtons.append(advancedButton)
 
   def createAssignmentWidget(self, dim):
     newAssignmentWidget = QtGui.QWidget()
@@ -195,7 +188,6 @@ class AssignmentModule(CcpnDock, Base):
     nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
     nmrResidue = nmrChain.fetchNmrResidue(self.seqCodePulldowns[dim].currentText())
     nmrAtom = nmrResidue.fetchNmrAtom(self.atomTypePulldowns[dim].currentText())
-    print(nmrAtom)
     for peak in self.peaks:
       dimNmrAtoms = peak.dimensionNmrAtoms[dim]
       currentItem = self.listWidgets[dim].currentItem()
@@ -357,7 +349,6 @@ class AssignmentModule(CcpnDock, Base):
                                              doubleTolerance=doubleTolerance,
                                              intraResidual=intraResidual)
     Ndimensions = len(nmrAtomsForTables)
-    print(nmrAtomsForTables)
     for dim, objectTable, nmrAtoms in zip(range(Ndimensions),
                                           self.objectTables,
                                           nmrAtomsForTables):
@@ -444,7 +435,6 @@ class AssignmentModule(CcpnDock, Base):
     residueTypes = [code.upper() for code in CCP_CODES] + ['']
     if nmrAtom.nmrResidue.residue is not None:
       self.resTypePulldowns[dim].disable()
-      print('here')
     self.resTypePulldowns[dim].setData(residueTypes)
     self.resTypePulldowns[dim].setIndex(self.resTypePulldowns[dim].texts.index(residueType.upper()))
     # self.resTypePulldowns[dim].setCallback(partial(self.setResidueType))
@@ -469,14 +459,12 @@ class AssignmentModule(CcpnDock, Base):
     sequenceCode = self.seqCodePulldowns[dim].texts[index]
     nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
     residueType = nmrChain.fetchNmrResidue(sequenceCode).residueType
-    print(residueType)
     self.resTypePulldowns[dim].setIndex(self.resTypePulldowns[dim].texts.index(residueType.upper()))
 
 
 
   def addItemToPulldown(self, pulldown):
     if pulldown.lineEdit().isModified():
-      print(pulldown.lineEdit().text())
       text = pulldown.lineEdit().text()
       if text not in pulldown.texts:
         pulldown.addItem(text)
@@ -606,7 +594,9 @@ class AssignmentModule(CcpnDock, Base):
 
     self.listWidgets[dim].addItem(nmrAtom.pid)
 
-
+  def closeDock(self):
+    self.project._appBase.current.unRegisterNotify(self.updateInterface, 'peaks')
+    self.close()
 
 class New(object):
   '''Small 'fake' object to get a non-nmrAtom in the objectTable.

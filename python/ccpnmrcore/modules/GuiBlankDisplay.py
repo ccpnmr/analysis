@@ -55,7 +55,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     self.dockArea = dockArea
 
     CcpnDock.__init__(self, name='Blank Display', size=(1100,1300))
-    dockArea.addDock(self)
+    dockArea.addDock(self, 'right')
     # self.setStyleSheet("""
     # QWidget { background-color: #2a3358;
     # }

@@ -216,34 +216,38 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def upBy2(self):
 
-    for apiSpectrumView in self._wrappedData.spectrumViews:
-      apiDataSource = apiSpectrumView.dataSource
-      apiDataSource.positiveContourBase *= apiDataSource.positiveContourFactor
-      apiDataSource.negativeContourBase *= apiDataSource.negativeContourFactor
+    for spectrumView in self.spectrumViews:
+      if spectrumView.isVisible():
+        apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
+        apiDataSource.positiveContourBase *= apiDataSource.positiveContourFactor
+        apiDataSource.negativeContourBase *= apiDataSource.negativeContourFactor
     self.update()
 
   def downBy2(self):
 
-    for apiSpectrumView in self._wrappedData.spectrumViews:
-      apiDataSource = apiSpectrumView.dataSource
-      apiDataSource.positiveContourBase /= apiDataSource.positiveContourFactor
-      apiDataSource.negativeContourBase /= apiDataSource.negativeContourFactor
+    for spectrumView in self.spectrumViews:
+      if spectrumView.isVisible():
+        apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
+        apiDataSource.positiveContourBase /= apiDataSource.positiveContourFactor
+        apiDataSource.negativeContourBase /= apiDataSource.negativeContourFactor
 
   def addOne(self):
 
-    for apiSpectrumView in self._wrappedData.spectrumViews:
-      apiDataSource = apiSpectrumView.dataSource
-      apiDataSource.positiveContourCount += 1
-      apiDataSource.negativeContourCount += 1
+    for spectrumView in self.spectrumViews:
+      if spectrumView.isVisible():
+        apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
+        apiDataSource.positiveContourCount += 1
+        apiDataSource.negativeContourCount += 1
 
   def subtractOne(self):
 
-    for apiSpectrumView in self._wrappedData.spectrumViews:
-      apiDataSource = apiSpectrumView.dataSource
-      if apiDataSource.positiveContourCount > 0:
-        apiDataSource.positiveContourCount -= 1
-      if apiDataSource.negativeContourCount > 0:
-        apiDataSource.negativeContourCount -= 1
+    for spectrumView in self.spectrumViews:
+      if spectrumView.isVisible():
+        apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
+        if apiDataSource.positiveContourCount > 0:
+          apiDataSource.positiveContourCount -= 1
+        if apiDataSource.negativeContourCount > 0:
+          apiDataSource.negativeContourCount -= 1
 
   def showPeaks(self, peakListView, peaks):
   

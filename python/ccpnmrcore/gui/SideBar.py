@@ -247,6 +247,20 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       peakListItem.setText(0, peakList.pid)
 
 
+  # def addSpectrum(self, spectrum):
+  #
+  #   if self._appBase.applicationName == 'Screen':
+  #     newItem = self.addItem(self.onedItem, spectrum)
+  #   else:
+  #     newItem = self.addItem(self.spectrumItem, spectrum)
+  #   if len(spectrum.peakLists) > 0:
+  #     for peakList in spectrum.peakLists:
+  #       peakListItem = QtGui.QTreeWidgetItem(newItem)
+  #       peakListItem.setText(0, peakList.pid)
+  #   else:
+  #     peakList = spectrum.newPeakList()
+  #     peakListItem = QtGui.QTreeWidgetItem(newItem)
+  #     peakListItem.setText(0, peakList.pid)
 
 
 

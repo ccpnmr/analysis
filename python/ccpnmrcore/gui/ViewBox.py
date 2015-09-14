@@ -172,7 +172,6 @@ class ViewBox(pg.ViewBox):
               event.modifiers() & QtCore.Qt.ControlModifier) and not (
               event.modifiers() & QtCore.Qt.ShiftModifier):
       event.accept()
-      # print(event)
 
 
 
@@ -194,8 +193,7 @@ class ViewBox(pg.ViewBox):
     elif (event.button() == QtCore.Qt.LeftButton) and (
               event.modifiers() & QtCore.Qt.ControlModifier) and (
               event.modifiers() & QtCore.Qt.ShiftModifier):
-        # Pick in area
-      # print('LeftDrag + Control + Shift')
+
 
       if event.isFinish():
 
@@ -204,7 +202,6 @@ class ViewBox(pg.ViewBox):
         endPosition = self.mapSceneToView(event.pos())
         orderedAxes = self.current.strip.orderedAxes
         selectedRegion = [[startPosition.x(),startPosition.y()],[endPosition.x(),endPosition.y()]]
-        # spectrumView.orderedDataDims
         if len(orderedAxes) > 2:
           for n in orderedAxes[2:]:
             selectedRegion[0].append(n.region[0])
@@ -218,16 +215,13 @@ class ViewBox(pg.ViewBox):
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
           else:
             newPeaks = peakList.findPeaks1dFiltered(spectrumView)
-          # # print(spectrumView.spectrum.peakLists[0].peaks)
-          # for peak in newPeaks:
-          #   peak.isSelected = True
+
           for window in self.current.project.windows:
             for spectrumDisplay in window.spectrumDisplays:
               for strip in spectrumDisplay.strips:
                 spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
                 if peakList.spectrum in spectra:
                   strip.showPeaks(peakList)
-          # self.current.peaks = newPeaks
       else:
         self.updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()
@@ -260,7 +254,6 @@ class ViewBox(pg.ViewBox):
                 if zPositions is not None:
                   if zPositions[0] < float(peak.position[2]) < zPositions[1]:
                     peak.isSelected = True
-                    print(peak)
                 else:
                   peak.isSelected = True
 

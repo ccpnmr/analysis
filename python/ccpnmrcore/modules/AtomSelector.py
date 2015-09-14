@@ -95,7 +95,7 @@ class AtomSelector(CcpnDock):
         isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
         if newNmrAtom._apiResonance.isotopeCode == isotopeCode:
           axisCode = getAxisCodeForPeakDimension(peak, dim)
-          self.assignPeakDimension(peak, dim, axisCode, newNmrAtom)
+          peak.assignDimension(axisCode=axisCode, value=[newNmrAtom])
       else:
           pass
     self.returnButtonToNormal()
@@ -158,11 +158,11 @@ class AtomSelector(CcpnDock):
 
 
 
-  def assignPeakDimension(self, peak, dim, axisCode, nmrAtom):
-    axisCode = getAxisCodeForPeakDimension(peak, dim)
-    peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
-    shiftList = peak.peakList.spectrum.chemicalShiftList
-    shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
+  # def assignPeakDimension(self, peak, dim, axisCode, nmrAtom):
+  #   axisCode = getAxisCodeForPeakDimension(peak, dim)
+  #   peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
+  #   shiftList = peak.peakList.spectrum.chemicalShiftList
+  #   shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
 
 
 

@@ -30,5 +30,6 @@ class SpectrumToolBar(ToolBar):
     key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
     for spectrumView in self.widget.spectrumViews:
       if spectrumView._apiDataSource == key:
-        for strip in self.widget.strips:
-          spectrumView.removeSpectrumItem(strip)
+        # for strip in self.widget.strips:
+        #   spectrumView.removeSpectrumItem(strip)
+        spectrumView._wrappedData.spectrumView.delete()

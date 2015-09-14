@@ -146,6 +146,11 @@ class DropBase(GuiBase):
         if method:
           method(pid)
 
+      # for pid in pids:
+      #   if 'SP:' in pid:
+      #     spectrum = self.getByPid(pid)
+      #     self._appBase.mainWindow.sideBar.addSpectrum(spectrum)
+
 
 
 

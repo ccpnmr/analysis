@@ -31,10 +31,12 @@ from pyqtgraph.dockarea import DockArea
 from ccpncore.lib.spectrum import Util as specUtil
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
+from ccpn.lib.Assignment import propagateAssignments
 from ccpn.lib.windowUtil import navigateToNmrResidue, navigateToPeakPosition
 
 from ccpnmrcore.DropBase import DropBase
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
+from ccpnmrcore.popups.ExperimentTypePopup import ExperimentTypePopup
 
 class GuiWindow(DropBase):
   
@@ -83,6 +85,8 @@ class GuiWindow(DropBase):
       paths = [paths]
 
     self.processDropData(paths, dataType='urls')
+
+
 
     # if not path:
     #   return
@@ -148,6 +152,8 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
     QtGui.QShortcut(QtGui.QKeySequence("f, r"), self, partial(navigateToNmrResidue, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project))
+    QtGui.QShortcut(QtGui.QKeySequence("e, t"), self, partial(self.showExptTypePopup, self._parent.project))
+    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current))
 
    
   def toggleCrossHairAll(self):
@@ -183,7 +189,10 @@ class GuiWindow(DropBase):
   def setCrossHairPosition(self, axisPositionDict):
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.setCrossHairPosition(axisPositionDict)
-  
+
+  def showExptTypePopup(self, project):
+    popup = ExperimentTypePopup(self, project)
+    popup.exec_()
   # def dropEvent(self, event):
   #   '''if object can be dropped into this area, accept dropEvent, otherwise throw an error
   #       spectra, projects and peak lists can be dropped into this area but nothing else

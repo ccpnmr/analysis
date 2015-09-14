@@ -131,7 +131,7 @@ class AssignmentModule(CcpnDock, Base):
                               objects=[])
 
     # Needed to use this syntax because wanted double click not single.
-    # objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
+    objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
     objectTable.setFixedHeight(80)
     self.objectTables.append(objectTable)
 

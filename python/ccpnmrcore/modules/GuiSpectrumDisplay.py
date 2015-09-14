@@ -63,7 +63,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.setAcceptDrops(True)
     self.spectrumToolBar = SpectrumToolBar(self.dock, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
     self.dock.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
-
+    self.dock.label.closeButton.clicked.connect(self.closeDock)
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     screenWidth  = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
@@ -85,8 +85,11 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.stripFrame.guiSpectrumDisplay = self
     # self.stripFrame.layout().setContentsMargins(0, 0, 2, 0)
     self.stripFrame.setAcceptDrops(True)
-    self.assignmentDirection = 'i-1'
     self.scrollArea.setWidget(self.stripFrame)
+
+
+  def closeDock(self):
+    self.delete()
 
   def fillToolBar(self):
     addStripAction = self.spectrumUtilToolBar.addAction('Add Strip', self.cloneStrip) #self.orderedStrips[0].clone()) # clone first strip

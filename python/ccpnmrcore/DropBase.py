@@ -142,7 +142,7 @@ class DropBase(GuiBase):
 
       # process pids
       for pid in pids:
-        method = self.pickDispatchFunction('process', pid)
+        method = self.selectDispatchFunction('process', pid)
         if method:
           method(pid)
 
@@ -154,7 +154,7 @@ class DropBase(GuiBase):
 
 
 
-  def pickDispatchFunction(self, prefix:str, dataType:(str,Pid)):
+  def selectDispatchFunction(self, prefix:str, dataType:(str,Pid)):
     """Generate file name and return bound method matching name, if defined
     dataType may be either an accepted dataType, or a Pid that is used to derive it.
 

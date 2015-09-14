@@ -195,13 +195,15 @@ def copyAssignments(referencePeakList, matchPeakList):
         # print(axisCode)
         peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
 
-def propagateAssignments(peaks, referencePeak=None, tolerances=None):
+def propagateAssignments(peaks=None, referencePeak=None, current=None, tolerances=None):
 
   if referencePeak:
     peaksIn = [referencePeak, ]
   else:
-    peaksIn = peaks
-
+    if peaks:
+      peaksIn = peaks
+    else:
+      peaksIn = current.peaks
   if not tolerances:
     tolerances = []
 
@@ -220,7 +222,6 @@ def propagateAssignments(peaks, referencePeak=None, tolerances=None):
 
           dimNmrAtoms[key].append(nmrAtom)
 
-  print('dimNmrAtoms', dimNmrAtoms)
 
   shiftRanges = {}
 
@@ -269,12 +270,10 @@ def propagateAssignments(peaks, referencePeak=None, tolerances=None):
       # print(closeNmrAtoms)
       if closeNmrAtoms:
         for nmrAtom in closeNmrAtoms:
-          print(axisCode, nmrAtom)
           peak.assignDimension(axisCode, nmrAtom)
 
       elif not extantNmrAtoms:
         for nmrAtom in assignNmrAtoms:
-          print(axisCode, nmrAtom)
           peak.assignDimension(axisCode, nmrAtom)
 
 

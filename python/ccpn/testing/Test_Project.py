@@ -21,14 +21,14 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.testing.Testing import Testing
+from ccpn.testing.WrapperTesting import WrapperTesting
 
-from ccpncore.api.ccp.nmr.Nmr import NmrProject
+# from ccpncore.api.ccp.nmr.Nmr import NmrProject
 
 # class SimpleProjectTest(Testing):
 #
-#   def __init__(self, *args, **kw):
-#     Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
+#   # Path of project to load (None for new project)
+#   projectPath = 'CcpnCourse1a'
 #
 #   def test_id(self):
 #     print(self.project.id)
@@ -53,10 +53,10 @@ from ccpncore.api.ccp.nmr.Nmr import NmrProject
 #     assert len(self.project.atoms) == 0
 
 
-class ProjectTest2c(Testing):
+class ProjectTest2c(WrapperTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse2c', *args, **kw)
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse2c'
 
   def test_id(self):
     print(self.project.id)

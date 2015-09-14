@@ -1,6 +1,7 @@
 __author__ = 'simon1'
 
 import json
+import os
 from functools import partial
 
 from ccpncore.gui.Base import Base
@@ -86,7 +87,7 @@ class PopupGenerator(QtGui.QDialog, Base):
       jsonData.append(widgetDict)
       print(jsonData)
 
-    dumpFileName = '/Users/simon1/.ccpn/' +self.lineEdit_0.text()+'.json'
+    dumpFileName =  os.path.expanduser('~simon1/.ccpn/') +self.lineEdit_0.text()+'.json'
     dumpFile = open(dumpFileName, 'w+')
     dump = json.dump(jsonData, dumpFile, indent=4, separators=(',', ': '))
     dumpFile.close()
@@ -96,7 +97,7 @@ class PopupGenerator(QtGui.QDialog, Base):
   def createPopupFromJson(self, jsonFile):
     jsonData = open(jsonFile)
     widgets = json.load(jsonData)
-    pythonFilePath = '/Users/simon1/.ccpn/%s.py' % self.popupNameBox.text()
+    pythonFilePath = os.path.expanduser('~simon1/.ccpn/') + '%s.py' % self.popupNameBox.text()
     pythonFile = open(pythonFilePath, 'w')
     pythonFile.write('from PyQt4 import QtGui\n')
     pythonFile.write('from ccpncore.gui.Base import Base\n')

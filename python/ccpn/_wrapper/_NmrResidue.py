@@ -54,7 +54,8 @@ class NmrResidue(AbstractWrapperObject):
   
   @property
   def sequenceCode(self) -> str:
-    """Residue sequence code and id (e.g. '1', '127B', '\@157+1) """
+    """Residue sequence code and id (e.g. '1', '127B', '\@157+1)
+    NB resetting sequenceDoe will rename the NmrResidue"""
     return self._wrappedData.sequenceCode
 
   @sequenceCode.setter
@@ -68,10 +69,10 @@ class NmrResidue(AbstractWrapperObject):
     
   @property
   def _parent(self) -> NmrChain:
-    """NmrChain containing NmrResidue."""
+    """NmrChain containing NmrResidue.
+    NB, exceptionally we can reset the NmrChain - this will rename the NmrResidue"""
     return self._project._data2Obj[self._wrappedData.nmrChain]
 
-  # NBNB This VERY unusual, but it is OK, we are able to reparent NmrResidues
   @_parent.setter
   def _parent(self, value:NmrChain):
     if value is None:
@@ -84,7 +85,9 @@ class NmrResidue(AbstractWrapperObject):
 
   @property
   def residueType(self) -> str:
-    """Residue type string (e.g. 'Ala')"""
+    """Residue type string (e.g. 'Ala')
+    NB resetting residueType is not possible for assigned NmrReaidues.
+    It will rename the NmrResidue"""
     apiResonanceGroup = self._wrappedData
     apiResidue = apiResonanceGroup.assignedResidue
     if apiResidue is None:
@@ -165,6 +168,19 @@ class NmrResidue(AbstractWrapperObject):
         apiResonanceGroup.newResidueTypeProb(chemComp=chemComp, weight=weight)
 
   # Implementation functions
+  def rename(self, value:str=None):
+    """Rename NmrResidue. New value must be either 'seqCode' or 'seqCode.residueType"""
+    apiResonasnceGroup = self._wrappedData
+    if value is None:
+      apiResonasnceGroup.sequenceCode = None
+      apiResonasnceGroup.residueType = None
+    else:
+      ll = value.split(Pid.IDSEP, 1)
+      sequenceCode = ll[0]
+      apiResonasnceGroup.sequenceCode = sequenceCode
+      if len(ll) > 1:
+        apiResonasnceGroup.residueType = ll[1]
+
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""

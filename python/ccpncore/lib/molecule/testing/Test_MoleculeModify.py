@@ -28,24 +28,18 @@ __author__ = 'rhf22'
 #
 
 from ccpncore.util import Io as ioUtil
-from ccpn.testing.Testing import Testing
+from ccpn.testing.WrapperTesting import WrapperTesting
 from ccpncore.lib.molecule import MoleculeModify
 
-class CreateMoleculeTest(Testing):
+class CreateMoleculeTest(WrapperTesting):
 
-  def __init__(self, *args, **kwargs):
-    # Testing.__init__( *args, **kwargs)
-    Testing.__init__(self, 'CcpnCourse2c', *args, **kwargs)
-
-  def setUp(self):
-
-    Testing.setUp(self)
-    self.ccpnProject = self.project._wrappedData.root
+  # Path of project to load (None for new project)
+  projectPath = None
 
   def test_create_protein_from_one_letter_string(self):
     seq1 = "QWERTYIPASDFGHKLCVNM"
     startNumber = 10
-    molecule1 = MoleculeModify.makeMolecule(self.ccpnProject, seq1, startNumber=startNumber)
+    molecule1 = MoleculeModify.makeMolecule(self.project._wrappedData.root, seq1, startNumber=startNumber)
     assert molecule1.seqString == seq1, ("seqString %s does not match input %s"
                                          % (molecule1.seqString, seq1))
     residues = molecule1.sortedMolResidues()
@@ -56,7 +50,7 @@ class CreateMoleculeTest(Testing):
 
   def test_create_DNA_from_one_letter_string(self):
     seq1 = "acgitu"
-    molecule1 = MoleculeModify.makeMolecule(self.ccpnProject,  seq1, molType='DNA')
+    molecule1 = MoleculeModify.makeMolecule(self.project._wrappedData.root,  seq1, molType='DNA')
     assert molecule1.seqString == seq1.upper(), ("seqString %s does not match input %s"
                                          % (molecule1.seqString, seq1.upper()))
     assert molecule1.molType == 'DNA', ("Molecule %s has non-DNA molType: %s"
@@ -66,7 +60,7 @@ class CreateMoleculeTest(Testing):
 
   def test_create_RNA_from_one_letter_string(self):
     seq1 = "acgiu"
-    molecule1 = MoleculeModify.makeMolecule(self.ccpnProject,  seq1, molType='RNA')
+    molecule1 = MoleculeModify.makeMolecule(self.project._wrappedData.root,  seq1, molType='RNA')
     assert molecule1.seqString == seq1.upper(), ("seqString %s does not match input %s"
                                          % (molecule1.seqString, seq1.upper()))
     assert molecule1.molType == 'RNA', ("Molecule %s has non-RNA molType: %s"
@@ -77,11 +71,11 @@ class CreateMoleculeTest(Testing):
   def test_create_cyclic_dna_rna(self):
     seq1 =  ['DA', 'DT', 'DC', 'DG',
             'A', 'C', 'G', 'U', 'DU', 'N', 'DN']
-    molecule1 = MoleculeModify.makeMolecule(self.ccpnProject, seq1, isCyclic=True)
+    molecule1 = MoleculeModify.makeMolecule(self.project._wrappedData.root, seq1, isCyclic=True)
     assert molecule1.isStdCyclic, "Molecule is not cyclic as input."
 
   def test_create_mixed_molecule(self):
     seq1 = ['Ala', 'CYS', 'DAL', 'DVA', 'THR', 'HIS', 'TRP', 'DA', 'DT', 'DC', 'DG',
             'A', 'C', 'G', 'ATP', 'U', 'Ser', 'GDP', 'N', 'DN', 'UNK']
     startNumber = -1
-    molecule1 = MoleculeModify.makeMolecule(self.ccpnProject, seq1, startNumber=startNumber)
+    molecule1 = MoleculeModify.makeMolecule(self.project._wrappedData.root, seq1, startNumber=startNumber)

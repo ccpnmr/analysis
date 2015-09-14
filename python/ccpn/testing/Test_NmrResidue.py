@@ -21,17 +21,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.testing.Testing import Testing
+from ccpn.testing.WrapperTesting import WrapperTesting
 
-class NmrResidueTest(Testing):
+class NmrResidueTest(WrapperTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse2c', *args, **kw)
-
-  # def test_printchains(self):
-  #   print("Residues: %s" % [x.pid for x in self.project.chains[0].residues])
-  #   for ch in self.project.nmrChains:
-  #     print("NmrResidues: %s: %s" % (ch.pid, [x.pid for x in ch.nmrResidues]))
+  # Path of project to load (None for new project
+  projectPath = 'CcpnCourse2c'
 
   def test_reassign1(self):
     nchain = self.project.getByPid('NC:A')

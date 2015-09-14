@@ -21,16 +21,16 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.testing.Testing import Testing
+from ccpn.testing.WrapperTesting import WrapperTesting
 
 # NBNB These two imports are NECESSARY, as ccpnmr MUST be imported to register the Gui classes
 import ccpn
 import ccpnmr
 
-class TaskTest(Testing):
+class TaskTest(WrapperTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1a'
 
   def test_create_task(self):
     project = self.project

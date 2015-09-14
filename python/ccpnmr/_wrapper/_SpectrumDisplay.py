@@ -21,7 +21,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from collections.abc import Sequence
+
+from ccpncore.lib.typing import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -187,7 +188,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     self._wrappedData.resetAxisOrder()
 
   def findAxis(self, axisCode):
-    """Reset display to original axis order"""
+    """Find axis """
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
   def displaySpectrum(self, spectrum, axisOrder:(str,)=()):

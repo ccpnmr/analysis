@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 from datetime import datetime
 
 from ccpn import AbstractWrapperObject
@@ -166,6 +166,14 @@ class Sample(AbstractWrapperObject):
     self._wrappedData.details = value
 
   # Implementation functions
+  def rename(self, value):
+    """Rename Sample, changing its Id and Pid"""
+    if value:
+      self._wrappedData.name = value
+    else:
+      raise ValueError("Sample name must be set")
+
+
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (Sample.Samples) for all Sample children of parent NmrProject.sampleStore
@@ -209,6 +217,7 @@ Project.newSample = newSample
 className = ApiSample._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Sample}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_resetPid', {}, className, 'setName'),
   )
 )

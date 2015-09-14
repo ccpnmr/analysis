@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
@@ -51,7 +51,6 @@ class PseudoDimension(AbstractWrapperObject):
   def _apiSampledDataDim(self) -> ApiSampledDataDim:
     """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
-
 
   @property
   def _key(self) -> str:

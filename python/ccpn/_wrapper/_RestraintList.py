@@ -231,6 +231,13 @@ class RestraintList(AbstractWrapperObject):
                                     % self.restraintType)
     
   # Implementation functions
+  def rename(self, value):
+    """rename RestraintList, changing Id and Pid"""
+    if value:
+      self._wrappedData.name = value
+    else:
+      raise ValueError("RestraintList name must be set")
+
   @classmethod
   def _getAllWrappedData(cls, parent: RestraintSet)-> list:
     """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
@@ -263,6 +270,7 @@ for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():
   className = clazz.qualifiedName()
   Project._apiNotifiers.extend(
     ( ('_newObject', {'cls':RestraintList}, className, '__init__'),
-      ('_finaliseDelete', {}, className, 'delete')
+      ('_finaliseDelete', {}, className, 'delete'),
+      ('_resetPid', {}, className, 'setName'),
     )
 )

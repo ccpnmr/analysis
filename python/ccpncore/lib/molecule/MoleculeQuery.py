@@ -34,11 +34,6 @@ from ccpncore.util import Logging
 
 ###from ccp.util.NmrExpPrototype import longRangeTransfers
 
-STANDARD_ISOTOPES = ['1H','13C','15N','31P','2H','29Si','19F','17O']
-
-DEFAULT_ISOTOPES = {'H':'1H','C':'13C','N':'15N','P':'31P','Si':'29Si',
-                    'F':'19F','O':'16O'}
-
 molTypeOrder = ('protein', 'DNA', 'RNA', 'carbohydrate', 'other')
 
 LINEAR_POLYMER_TYPES = ('protein', 'DNA', 'RNA')

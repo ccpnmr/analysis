@@ -140,7 +140,7 @@ def  _addClassField(Current, field):
     setattr(self, field, value)
     funcs = getFieldItem(self._notifies) or ()
     for func in funcs:
-      func(self)
+      func(value)
 
   def getter(self):
     return tuple(getField(self))

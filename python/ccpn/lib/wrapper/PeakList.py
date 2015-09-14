@@ -25,12 +25,10 @@ from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 
 from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
 
-import collections
+from ccpncore.lib.typing import Sequence
 
 from numpy import argwhere
 from scipy.ndimage import maximum_filter
-
-Sequence = collections.abc.Sequence
 
 def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None,
                 doPos:bool=True, doNeg:bool=True,

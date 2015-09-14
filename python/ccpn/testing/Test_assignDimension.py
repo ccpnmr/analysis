@@ -2,6 +2,7 @@ __author__ = 'simon1'
 
 
 from ccpn.util import Io as ccpnIo
+from ccpn.testing.WrapperTesting import WrapperTesting
 
 import unittest
 
@@ -12,33 +13,31 @@ from ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 from unittest.mock import Mock, MagicMock
 
-class Test_makeNmrAtom(unittest.TestCase):
+class Test_makeNmrAtom(WrapperTesting):
 
-  def setUp(self):
-    # pass
-    self.newProject = ccpnIo.newProject('testProject')
-    self.assertEqual(self.newProject.name, 'testProject')
+  # Path of project to load (None for new project)
+  projectPath = None
 
   def test_createNmrAtom_withIsotopeCode(self):
-    c = self.newProject.newNmrChain()
+    c = self.project.newNmrChain()
     r = c.newNmrResidue()
     a = r.newNmrAtom(isotopeCode='15N')
     self.assertEqual(a._apiResonance.isotopeCode, '15N')
 
   def _test_createNmrAtom_withIsotopeCode(self):
-    c = self.newProject.newNmrChain()
+    c = self.project.newNmrChain()
     r = c.newNmrResidue()
     a = r.newNmrAtom(isotopeCode='15N')
     self.assertEqual(a.isotopeCode, '15N')
 
   def test_createNmrAtom_withName(self):
-    c = self.newProject.newNmrChain()
+    c = self.project.newNmrChain()
     r = c.newNmrResidue()
     a = r.newNmrAtom(name='CA')
     self.assertEqual(a.name, 'CA')
 
   def test_fetchNmrAtom(self):
-    c = self.newProject.newNmrChain()
+    c = self.project.newNmrChain()
     r = c.newNmrResidue()
     a = r.fetchNmrAtom(name='CB')
     self.assertEqual(a.name, 'CB')
@@ -47,15 +46,16 @@ class Test_makeNmrAtom(unittest.TestCase):
 
 # class Test_nmrAtoms(unittest.TestCase):
 #
-#   def setUp(self):
-#     self.newProject = ccpnIo.newProject('testProject')
-#     c = self.newProject.newNmrChain()
-#     r = c.newNmrResidue()
-#     self.atom = r.newNmrAtom(isotopeCode='15N')
-#     self.shiftList = self.newProject.newChemicalShiftList()
+#   # Path of project to load (None for new project)
+#   projectPath = None
 #
-#   def tearDown(self):
-#     self.newProject.delete()
+#   def setUp(self):
+#     WrapperTesting.setUp(self)
+#     c = self.project.newNmrChain()
+#     r = c.newNmrResidue()
+#     self.atom = r.newNmrAtom(isotopeCode='15N')F
+#     self.shiftList = self.project.newChemicalShiftList()
+#
 #
 #   def _test_getChemicalShift(self):
 #
@@ -68,23 +68,29 @@ class Test_makeNmrAtom(unittest.TestCase):
 #     self.assertEqual(shift.value, 55)
 
 
-class Test_chemicalShift(unittest.TestCase):
+class Test_chemicalShift(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = None
 
   def setUp(self):
-    self.newProject = ccpnIo.newProject('testProject')
-    specLocation = Path.getDirectoryFromTop('data', 'testProjects', 'spectra', 'hsqc.spc')
-    spectra = self.newProject.loadSpectrum(specLocation, subType='Azara')
-    self.spectrum = spectra[0] if spectra else None
 
-    c = self.newProject.newNmrChain()
-    r = c.newNmrResidue()
-    self.atom = r.newNmrAtom(isotopeCode='15N')
-    # NBNB The first shiftList, called 'default' is created automatically
-    self.shiftList = self.newProject.chemicalShiftLists[0]
-    self.peakList = self.spectrum.newPeakList() if spectra else None
+    super().setUp()
+    try:
+      spectra = self.loadData('spectra/hsqc.spc')
+      self.spectrum = spectra[0] if spectra else None
 
-  def tearDown(self):
-    self.newProject.delete()
+      c = self.project.newNmrChain()
+      r = c.newNmrResidue()
+      self.atom = r.newNmrAtom(isotopeCode='15N')
+      # NBNB The first shiftList, called 'default' is created automatically
+      self.shiftList = self.project.chemicalShiftLists[0]
+      self.peakList = self.spectrum.newPeakList() if spectra else None
+    except:
+      # We want tearing down whether this works or not
+      self.tearDown()
+      raise
+
 
   def test_assignDimension(self):
     peaks = self.peakList.findPeaksNd([[7.0, 111.75], [7.2, 112.2]], dataDims=self.spectrum._wrappedData.sortedDataDims())

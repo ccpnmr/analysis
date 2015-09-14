@@ -78,7 +78,7 @@ def loadData(project:object, path:str) -> (list,None):
   return None
 
 # Data loaders and dispatchers
-def loadSequence(project:object, path:str, subType:str) -> list:
+def loadSequence(project:"Project", path:str, subType:str) -> list:
   """Load sequence(s) from file into Wrapper project"""
 
   if subType == ioFormats.FASTA:
@@ -93,7 +93,7 @@ def loadSequence(project:object, path:str, subType:str) -> list:
   #
   return chains
 
-def loadProject(project:object, path:str, subType:str):
+def loadProject(project:"Project", path:str, subType:str) -> "Project":
   """Load project from file into application and return the new project"""
 
   if subType == ioFormats.CCPN:
@@ -101,7 +101,7 @@ def loadProject(project:object, path:str, subType:str):
   else:
     raise ValueError("Sequence file type %s is not recognised" % subType)
 
-def loadSpectrum(project:object, path:str, subType:str):
+def loadSpectrum(project:"Project", path:str, subType:str) -> list:
   """Load spectrum from file into application"""
 
   apiDataSource = project._wrappedData.loadDataSource(path, subType)

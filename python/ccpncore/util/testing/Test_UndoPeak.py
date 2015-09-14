@@ -22,48 +22,48 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 from ccpncore.util.Undo import Undo
-from ccpncore.util import Io as ioUtil
-from ccpncore.testing.Testing import Testing
+# from ccpncore.util import Io as ioUtil
+from ccpncore.testing.CoreTesting import CoreTesting
 
-class PeakUndoTest(Testing):
-  
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1b', *args, **kw)
+class PeakUndoTest(CoreTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1b'
     
   def test_new_peak_undo(self):
     
     project = self.project
-    nmrProject = project.findFirstNmrProject()
+    nmrProject = project.currentNmrProject or project.findFirstNmrProject()
     experiment = nmrProject.findFirstExperiment(name='HSQC')
     dataSource = experiment.findFirstDataSource(name='HSQC-115')
     peakList = dataSource.newPeakList()
     
     project._undo = Undo()
     project._undo.newWaypoint()
-    print('project undo stack size before newPeak: %d' % len(project._undo))
+    print('@~@~ project undo stack size before newPeak: %d' % len(project._undo))
     peak = peakList.newPeak()
-    print('project undo stack size after newPeak: %d' % len(project._undo))
+    print('@~@~ project undo stack size after newPeak: %d' % len(project._undo))
     project._undo.undo()
-    print('project undo stack size after undo: %d' % len(project._undo))
+    print('@~@~ project undo stack size after undo: %d' % len(project._undo))
     assert len(peakList.peaks) == 0, 'len(peakList.peaks) = %d' % len(peakList.peaks)
     
   def test_new_peak_undo_redo(self):
     
     project = self.project
-    nmrProject = project.findFirstNmrProject()
+    nmrProject = project.currentNmrProject or project.findFirstNmrProject()
     experiment = nmrProject.findFirstExperiment(name='HSQC')
     dataSource = experiment.findFirstDataSource(name='HSQC-115')
     peakList = dataSource.newPeakList()
     
     project._undo = Undo()
     project._undo.newWaypoint()
-    print('project undo stack size before newPeak: %d' % len(project._undo))
+    print('@~@~ project undo stack size before newPeak: %d' % len(project._undo))
     peak = peakList.newPeak()
-    print('project undo stack size after newPeak: %d' % len(project._undo))
+    print('@~@~ project undo stack size after newPeak: %d' % len(project._undo))
     project._undo.undo()
-    print('project undo stack size after undo: %d' % len(project._undo))
+    print('@~@~ project undo stack size after undo: %d' % len(project._undo))
     project._undo.redo()
-    print('project undo stack size after redo: %d' % len(project._undo))
+    print('@~@~ project undo stack size after redo: %d' % len(project._undo))
     assert len(peakList.peaks) == 1, 'len(peakList.peaks) = %d' % len(peakList.peaks)
     
  

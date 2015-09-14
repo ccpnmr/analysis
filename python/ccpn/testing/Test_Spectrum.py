@@ -21,45 +21,62 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.testing.Testing import Testing
+from ccpn.testing.WrapperTesting import WrapperTesting
 
 from ccpncore.util import Path
 
-class SimpleSpectrumTest(Testing):
+class SimpleSpectrumTest(WrapperTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1b', *args, **kw)
-    self.spectrumName = 'HSQC-115'
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1b'
 
   def test_have_spectrum(self):
-    assert self.getSpectrum() is not None
+    assert self.project.getSpectrum('HSQC-115') is not None
   
   def test_id_is_spectrum(self):
-    assert self.getSpectrum() is self.project.getSpectrum(self.spectrumName)
+    assert self.project.getSpectrum('HSQC-115').name == 'HSQC-115'
 
-class SpectrumTest(Testing):
+class SpectrumTest(WrapperTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1b', *args, **kw)
-    self.spectrumName = 'HSQC-115'
-    
-  def test_name(self):
-    spectrum = self.getSpectrum()
-    assert spectrum.name == self.spectrumName
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1b'
 
   def test_dimensionCount(self):
-    spectrum = self.getSpectrum()
+    spectrum = self.project.getSpectrum('HSQC-115')
     assert spectrum.dimensionCount == spectrum._apiDataSource.numDim
     
   def test_pointCount(self):
-    spectrum = self.getSpectrum()
+    spectrum = self.project.getSpectrum('HSQC-115')
     numPoints = tuple([dataDim.numPoints for dataDim in spectrum._apiDataSource.sortedDataDims()])
     assert spectrum.pointCounts == numPoints
 
   def test_filePath(self):
-    spectrum = self.getSpectrum()
+    spectrum = self.project.getSpectrum('HSQC-115')
     spectrum.filePath.startswith(Path.getTopDirectory())
     
   def test_rank(self):  # not implemented yet
-    spectrum = self.getSpectrum()
+    spectrum = self.project.getSpectrum('HSQC-115')
     print(hasattr(spectrum, 'rank'))
+
+class DummySpectrumTest(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = None
+
+  def test_dummySpectrum(self):
+    axisCodes = ('CO','Hn','Nh')
+    spectrum = self.project.makeDummySpectrum(axisCodes)
+
+    self.assertEqual(spectrum.name, 'COHnNh@1')
+    self.assertEqual(spectrum.isotopeCodes, ('13C', '1H', '15N'))
+    self.assertEqual(spectrum.spectrometerFrequencies, (10.,100.,10.))
+    self.assertEqual(spectrum.spectralWidthsHz, (2560.,1280.,2560.))
+    self.assertEqual(spectrum.totalPointCounts, (256,128,256))
+    self.assertEqual(spectrum.pointCounts, (256,128,256))
+    self.assertEqual(spectrum.experimentType, None)
+    self.assertEqual(spectrum.dimensionCount, 3)
+    self.assertEqual(spectrum.axisCodes, axisCodes)
+    self.assertEqual(spectrum.referencePoints, (0.,0.,0.))
+    self.assertEqual(spectrum.referenceValues, (216, 11.8, 216))
+
+    print ('@~@~', spectrum.chemicalShiftList)

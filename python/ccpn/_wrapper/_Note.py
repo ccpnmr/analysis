@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-# from collections.abc import Sequence
+# from ccpncore.lib.typing import Sequence
 
 import datetime
 from ccpncore.lib import Constants as coreConstants

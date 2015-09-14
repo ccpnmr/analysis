@@ -22,12 +22,12 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 from ccpncore.util import Logging
-from ccpncore.testing.Testing import Testing
+from ccpncore.testing.CoreTesting import CoreTesting
 
-class LoggingTest(Testing):
+class LoggingTest(CoreTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
+  # Path of project to load (None for new project)
+  projectPath = None
 
   def _create_logger(self, name='loggingTest', mode='a'):
     return Logging.createLogger(name, self.project, mode=mode)

@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 from collections import namedtuple
 
 from ccpn import AbstractWrapperObject

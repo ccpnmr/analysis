@@ -28,7 +28,7 @@ from ccpn import Project
 from ccpn import NmrResidue
 from ccpn import Atom
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
-from ccpncore.lib.molecule import MoleculeQuery
+from ccpncore.lib.spectrum.Util import DEFAULT_ISOTOPE_DICT
 from ccpncore.util import Pid
 
 
@@ -78,7 +78,7 @@ class NmrAtom(AbstractWrapperObject):
 
   @property
   def atom(self) -> Atom:
-    """Atom to which NmrAtom is assigned"""
+    """Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom"""
     atom = self._wrappedData.atom
     return None if atom is None else self._project._data2Obj.get(atom)
 
@@ -87,6 +87,12 @@ class NmrAtom(AbstractWrapperObject):
     self._wrappedData.atom = None if value is None else value._wrappedData
 
   # Implementation functions
+  def rename(self, value:str):
+    """Rename object, changing id, Pid, and internal representation"""
+    # NB This is a VERY special case
+    # - API code and notifiers will take care of resetting id and Pid
+    self.name = value
+
   @classmethod
   def _getAllWrappedData(cls, parent: NmrResidue)-> list:
     """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue"""
@@ -121,7 +127,7 @@ def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAto
 
   if not isotopeCode:
     if name:
-      isotopeCode = MoleculeQuery.DEFAULT_ISOTOPES.get(name[0])
+      isotopeCode = DEFAULT_ISOTOPE_DICT.get(name[0])
     else:
       raise ValueError("newNmrAtom requires either name or isotopeCode as input")
 

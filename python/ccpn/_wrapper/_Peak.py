@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 import itertools
 import operator
 
@@ -30,6 +30,8 @@ from ccpn import Project
 from ccpn import PeakList
 from ccpn import NmrAtom
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
+
+from ccpncore.lib import Types
 
 class Peak(AbstractWrapperObject):
   """Peak. Includes values for per-dimension values and for assignments.
@@ -75,7 +77,7 @@ class Peak(AbstractWrapperObject):
   peakList = _parent
   
   @property
-  def height(self) -> float:
+  def height(self) -> Types.Optional[float]:
     """height of Peak"""
     return self._wrappedData.height
     
@@ -84,7 +86,7 @@ class Peak(AbstractWrapperObject):
     self._wrappedData.height = value
 
   @property
-  def heightError(self) -> float:
+  def heightError(self) -> Types.Optional[float]:
     """height error of Peak"""
     return self._wrappedData.heightError
 
@@ -93,7 +95,7 @@ class Peak(AbstractWrapperObject):
     self._wrappedData.heightError = value
 
   @property
-  def volume(self) -> float:
+  def volume(self) -> Types.Optional[float]:
     """volume of Peak"""
     return self._wrappedData.volume
 
@@ -102,7 +104,7 @@ class Peak(AbstractWrapperObject):
     self._wrappedData.volume = value
 
   @property
-  def volumeError(self) -> float:
+  def volumeError(self) -> Types.Optional[float]:
     """volume error of Peak"""
     return self._wrappedData.volumeError
 
@@ -111,7 +113,7 @@ class Peak(AbstractWrapperObject):
     self._wrappedData.volumeError = value
 
   @property
-  def figureOfMerit(self) -> float:
+  def figureOfMerit(self) -> Types.Optional[float]:
     """figureOfMerit of Peak"""
     return self._wrappedData.figOfMerit
 
@@ -120,7 +122,7 @@ class Peak(AbstractWrapperObject):
     self._wrappedData.figOfMerit = value
 
   @property
-  def annotation(self) -> str:
+  def annotation(self) -> Types.Optional[str]:
     """Peak text annotation"""
     return self._wrappedData.annotation
     
@@ -129,7 +131,7 @@ class Peak(AbstractWrapperObject):
     self._wrappedData.annotation = value
 
   @property
-  def comment(self) -> str:
+  def comment(self) -> Types.Optional[str]:
     """Free-form text comment"""
     return self._wrappedData.details
 
@@ -138,12 +140,12 @@ class Peak(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
-  def axisCodes(self) -> tuple:
+  def axisCodes(self) -> Types.Tuple[str, ...]:
     """Spectrum axis codes in dimension order matching position."""
     return self.peakList.spectrum.axisCodes
 
   @property
-  def position(self) -> tuple:
+  def position(self) -> Types.Tuple[float, ...]:
     """Peak position in ppm (or other relevant unit) in dimension order."""
     return tuple(x.value for x in self._wrappedData.sortedPeakDims())
 
@@ -154,7 +156,7 @@ class Peak(AbstractWrapperObject):
       peakDim.realValue = None
 
   @property
-  def positionError(self) -> tuple:
+  def positionError(self) -> Types.Tuple[Types.Optional[float], ...]:
     """Peak position error in ppm (or other relevant unit)."""
     return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
 
@@ -164,7 +166,7 @@ class Peak(AbstractWrapperObject):
       peakDim.valueError = value[ii]
 
   @property
-  def pointPosition(self) -> tuple:
+  def pointPosition(self) -> Types.Tuple[float, ...]:
     """Peak position in points."""
     return tuple(x.position for x in self._wrappedData.sortedPeakDims())
 
@@ -174,7 +176,7 @@ class Peak(AbstractWrapperObject):
       peakDim.position = value[ii]
 
   @property
-  def dimensionNmrAtoms(self) -> tuple:
+  def dimensionNmrAtoms(self) -> Types.Tuple[Types.Tuple[NmrAtom, ...], ...]:
     """Peak dimension assignment - a list of lists of NmrAtoms for each dimension.
     Assignments as a list of individual combinations is given in 'assignedNmrAtoms'.
     Setting dimensionAssignments implies that all combinations are possible"""
@@ -214,7 +216,7 @@ class Peak(AbstractWrapperObject):
     apiPeak.setPeakDimAssignments(dimResonances)
 
   @property
-  def assignedNmrAtoms(self) -> tuple:
+  def assignedNmrAtoms(self) -> Types.Tuple[Types.Tuple[Types.Optional[NmrAtom], ...], ...]:
     """Peak assignment - a list of lists of NmrAtom combinations
     (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None
     Assignments per dimension are given in 'dimensionNmrAtoms'."""
@@ -259,7 +261,7 @@ class Peak(AbstractWrapperObject):
     # set assignments
     apiPeak.setAssignments(resonances)
 
-  def addAssignment(self, value:(str, NmrAtom)):
+  def addAssignment(self, value:Types.Union[str, NmrAtom]):
     """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""
 
     if len(value) != self._wrappedData.peakList.numDim:
@@ -270,7 +272,8 @@ class Peak(AbstractWrapperObject):
     assignedNmrAtoms.append(value)
     self.assignedNmrAtoms = assignedNmrAtoms
 
-  def assignDimension(self, axisCode:str, value:(str, NmrAtom)):
+  def assignDimension(self, axisCode:str, value:Types.Union[Types.Union[str,NmrAtom],
+                                                            Types.Sequence[Types.Union[str,NmrAtom]]]):
     """Assign dimension axisCode to value (NmrAtom, or Pid or sequence of either, or None)
     NBNB TBD add integer axisCode? Should it be index or dim number?"""
 
@@ -318,19 +321,19 @@ class Peak(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent: PeakList)-> list:
+  def _getAllWrappedData(cls, parent: PeakList)-> Types.Tuple[ApiPeak, ...]:
     """get wrappedData (Peaks) for all Peak children of parent PeakList"""
     return parent._wrappedData.sortedPeaks()
 
 # Connections to parents:
 PeakList._childClasses.append(Peak)
 
-def newPeak(parent:PeakList,height:float=None, volume:float=None,
+def newPeak(parent:PeakList,height:Types.Optional[float]=None, volume:Types.Union[float, None]=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
-            position:Sequence=(), pointPosition:Sequence=(),
-            dimensionAssignments:Sequence=(), assignments:Sequence=()) -> Peak:
+            position:Types.Sequence[float]=(), pointPosition:Types.Sequence[float]=(),
+            dimensionAssignments:Types.Sequence[Types.Sequence[NmrAtom]]=(), assignments:Types.Sequence[Types.Sequence[Types.Optional[NmrAtom]]]=()) -> Peak:
   """Create new child Peak"""
-  apiPeakList = parent._wrappedData
+  apiPeakList = parent._apiPeakList
   apiPeak = apiPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
                               annotation=annotation, details=comment)
 
@@ -373,7 +376,7 @@ def newPeak(parent:PeakList,height:float=None, volume:float=None,
 
 PeakList.newPeak = newPeak
 
-def _atomAssignedPeaks(nmrAtom):
+def _atomAssignedPeaks(nmrAtom:NmrAtom) -> Types.Tuple[Peak]:
   """All peaks assigned to the NmrAtom"""
   apiResonance = nmrAtom._wrappedData
   apiPeaks = [x.peakDim.peak for x in apiResonance.peakDimContribs]

@@ -23,8 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 from ccpnmrcore import Current
 
-# NBNB This should obviously use teh proper objects.as
-#  But since the code does tno type check or go into te objects, this will do
+# NBNB This should obviously use the proper objects.as
+#  But since the code does not type check or go into the objects, this will do
 #
 
 def test_current_spectra():
@@ -41,12 +41,13 @@ def test_current_spectra():
     curr.notifiedSpectra = curr.spectra
   current.registerNotify(notifier, 'spectra')
 
-
-  current.addSpectrum(4)
-  assert (current.spectrum == 4)
-  assert (current.spectra == ll + [4])
-  assert (current.notifiedSpectra == ll + [4])
-  current.unRegisterNotify(notifier, 'spectra')
+  try:
+    current.addSpectrum(4)
+    assert (current.spectrum == 4)
+    assert (current.spectra == ll + [4])
+    assert (current.notifiedSpectra == ll + [4])
+  finally:
+    current.unRegisterNotify(notifier, 'spectra')
 
   current.spectrum = 7
   assert (current.spectrum == 7)
@@ -62,25 +63,27 @@ def test_current_peaks():
   assert (not current.peaks)
   assert (current.peak is None)
 
-  ll = [9,8,5]
-  current.peaks = ll
-  assert (current.peaks == ll)
+  tt = (9,8,5)
+  current.peaks = tt
+  assert (current.peaks == tt)
   assert (current.peak == 5)
 
-  def notifier(curr):
-    curr.notifiedPeaks = curr.peaks
-  current.registerNotify(notifier, 'peaks')
-
-  current.addPeak(11)
-  assert (current.peak == 11)
-  assert (current.peaks == ll + [11])
-  assert (current.notifiedPeaks == ll+ [11])
-  current.unRegisterNotify(notifier, 'peaks')
+  # def notifier(curr):
+  #   curr.notifiedPeaks = curr.peaks
+  # current.registerNotify(notifier, 'peaks')
+  #
+  # try:
+  #   current.addPeak(47)
+  #   assert (current.peak == 47)
+  #   assert (current.peaks == tt + (47,))
+  #   assert (current.notifiedPeaks == tt+ (47,))
+  # finally:
+  #   current.unRegisterNotify(notifier, 'peaks')
 
   current.peak = 27
   assert (current.peak == 27)
-  assert (current.peaks == [27])
-  assert (current.notifiedPeaks == ll+ [11])
+  assert (current.peaks == (27,))
+  # assert (current.notifiedPeaks == tt + (11,))
 
   current.clearPeaks()
   assert (not current.peaks)

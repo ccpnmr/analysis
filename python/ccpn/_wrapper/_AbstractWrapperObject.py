@@ -29,6 +29,8 @@ from ccpncore.util import Pid
 from ccpncore.util import Common as commonUtil
 from ccpncore.api.memops.Implementation import DataObject
 
+from ccpncore.lib import Types
+
 
 # PROBLEM:
 # The Mutable<MAp[p[ing superclass changes the MetaCLass, which causes
@@ -496,8 +498,9 @@ class AbstractWrapperObject():
     raise NotImplementedError("Code error: function not implemented")
 
   def rename(self, value:str):
-    """Change object id, modifying entire project to maintain consistency"""
-    raise NotImplementedError("Code error: function not implemented")
+    """Change object id, modifying entire project to maintain consistency.
+    This is not possible for all class types"""
+    raise ValueError("%s objects cannot be renamed" % self.__class__.__name__)
   
   # In addition each class (except for Project) must define a  newClass method
   # The function (e.g. Project.newMolecule), ... must create a new child object
@@ -507,6 +510,9 @@ class AbstractWrapperObject():
   # and then doing Project.newMolecule = newMolecule
 
   # CCPN functions
+
+  def _cannotRename(self, value:str):
+    """Dummy functions"""
 
   def delete(self):
     """Delete object, with all children and underlying data.
@@ -556,8 +562,10 @@ class AbstractWrapperObject():
       newAncestors = ancestors + [cls]
       for ii in range(len(newAncestors)-1):
         ancestor = newAncestors[ii]
-        prop = property(functools.partial(AbstractWrapperObject._allDescendants,
-                                          descendantClasses=newAncestors[ii+1:]),
+        func = functools.partial(AbstractWrapperObject._allDescendants,
+                                          descendantClasses=newAncestors[ii+1:])
+        # func.__annotations__['return'] = Types.Tuple[cls, ...]
+        prop = property(func,
                           None, None,
                           ("\- *(%s,)*  - sorted %s type child objects" %
                             (cls, cls.className)
@@ -643,36 +651,43 @@ class AbstractWrapperObject():
 
   def _setUniqueStringKey(self, apiObj:object, defaultValue:str, keyTag:str='name') -> str:
     """(re)set obj.keyAttr to make it a unique key, using defaultValue if not set
-    NB - is called BEFORE data2obj etc. dictionaries are set"""
+    NB - if called BEFORE data2obj etc. dictionaries are set"""
 
     wrappedData = self._wrappedData
     if not hasattr (wrappedData,keyTag):
       raise ValueError("Cannot set unique %s for %s: %s object has no attribute %s"
                        % (keyTag, self, wrappedData.__class__, keyTag))
 
-    # Set default value if present value is None
-    value = getattr(wrappedData, keyTag)
-    if value is None:
-      value = defaultValue
-      setattr(wrappedData, keyTag, value)
+    if wrappedData not in self._project._data2Obj:
+      # Necessary because otherwise we likely will have notifiers 0- that would then break
+      wrappedData.root.override = True
+    try:
+      # Set default value if present value is None
+      value = getattr(wrappedData, keyTag)
+      if value is None:
+        value = defaultValue
+        setattr(wrappedData, keyTag, value)
 
-    # Set to new, unique value if present value is a duplicate
-    apiObjects = self._getAllWrappedData(self._parent)
-    for apiSibling in apiObjects:
-      if apiSibling is wrappedData:
-        # We have reached the object itself in the list. Enough
-        break
-      elif getattr(apiSibling, keyTag) == value:
-        # Object name is duplicate of earlier object name - make unique name
+      # Set to new, unique value if present value is a duplicate
+      apiObjects = self._getAllWrappedData(self._parent)
+      for apiSibling in apiObjects:
+        if apiSibling is wrappedData:
+          # We have reached the object itself in the list. Enough
+          break
+        elif getattr(apiSibling, keyTag) == value:
+          # Object name is duplicate of earlier object name - make unique name
 
-        # First try appending serial, if possible
-        if hasattr(apiObj, 'serial'):
-          value = '%s-%s' % (value, apiObj.serial)
-        else:
-          value = commonUtil.incrementName(value)
-        while any(x for x in apiSibling if getattr(x, keyTag) == value):
-          value = commonUtil.incrementName(value)
-        setattr(self, keyTag, value)
-        break
+          # First try appending serial, if possible
+          if hasattr(apiObj, 'serial'):
+            value = '%s-%s' % (value, apiObj.serial)
+          else:
+            value = commonUtil.incrementName(value)
+          while any(x for x in apiSibling if getattr(x, keyTag) == value):
+            value = commonUtil.incrementName(value)
+          setattr(self, keyTag, value)
+          break
+    finally:
+      if wrappedData not in self._project._data2Obj:
+        wrappedData.root.override = False
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject

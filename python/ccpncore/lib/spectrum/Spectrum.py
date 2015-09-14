@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 import os
 import itertools
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 
 from ccpncore.util import Path
 from ccpncore.lib.spectrum.BlockData import determineBlockSizes

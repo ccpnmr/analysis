@@ -21,12 +21,12 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.testing.Testing import Testing
+from ccpncore.testing.CoreTesting import CoreTesting
 
-class SimpleTest(Testing):
+class SimpleTest(CoreTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1a'
 
   def test_name(self):
     assert self.project.name == 'CcpnCourse1a'

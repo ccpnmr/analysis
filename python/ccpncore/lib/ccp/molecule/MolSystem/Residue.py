@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.molecule import MoleculeQuery
+from ccpncore.lib.spectrum.Util import DEFAULT_ISOTOPE_DICT
 from ccpncore.lib.molecule import Labelling
 
 def findLinkedResidue(residue, linkCode:str='prev'):
@@ -102,7 +102,7 @@ def getResidueObservableAtoms(residue, refExperiment=None, labelling=None,
   else:
     isotopes = []
     for element in chemElements:
-      isotope = MoleculeQuery.DEFAULT_ISOTOPES.get(element)
+      isotope = DEFAULT_ISOTOPE_DICT.get(element)
 
       if isotope:
         isotopes.append(isotope)

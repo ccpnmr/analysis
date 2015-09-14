@@ -22,15 +22,14 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 # from ccpncore.util import ApiFunc
-from ccpncore.testing.Testing import Testing
+from ccpncore.testing.CoreTesting import CoreTesting
 
-class ApiFuncTest(Testing):
+class ApiFuncTest(CoreTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
-    # ApiFunc.addModuleFunctionsToApi('ccpncore.lib')
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1a'
 
   def Test_Spectrum_GetIsotopeCodesList(self, *args, **kw):
-    spectrum = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()
+    spectrum = self.nmrProject.findFirstExperiment(name='HSQC').findFirstDataSource()
     print('spectrum.getIsotopeCodesList() = %s' % spectrum.getIsotopeCodesList())
 

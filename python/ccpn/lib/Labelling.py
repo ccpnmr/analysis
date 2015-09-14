@@ -28,7 +28,7 @@ from ccpn import Atom
 from ccpn import NmrAtom
 from ccpn import Sample
 from ccpncore.util.Pid import Pid
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 
 
 def atomLabellingFractions(project:Project, atom:(Atom,NmrAtom,str), labelling:str) -> dict:

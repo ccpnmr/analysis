@@ -79,7 +79,7 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 """
 import re
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 
 # Additional functions for ccp.nmr.Nmr.Experiment
 #

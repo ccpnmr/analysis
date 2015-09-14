@@ -21,17 +21,16 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.testing.Testing import Testing
+from ccpn.testing.WrapperTesting import WrapperTesting
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 
-class PeakTest(Testing):
+class PeakTest(WrapperTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1b', *args, **kw)
-    self.spectrumName = 'HSQC-115'
+  # Path of project to load (None for new project
+  projectPath = 'CcpnCourse1b'
     
   def test_assignPeak(self):
-    spectrum = self.getSpectrum()
+    spectrum = self.project.getSpectrum('HSQC-115')
     shiftList = self.project.newChemicalShiftList()
     spectrum.chemicalShiftList = shiftList
     nmrResidue = self.project.nmrChains[0].fetchNmrResidue()

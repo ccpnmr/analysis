@@ -25,7 +25,7 @@ import os
 import sys
 import datetime
 import random
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 from ccpn import RestraintContribution
 from ccpn.lib.nef import Util as nefUtil
 from ccpncore.lib.spectrum import Spectrum as libSpectrum

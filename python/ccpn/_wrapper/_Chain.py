@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -119,6 +119,12 @@ class Chain(AbstractWrapperObject):
 
 
   # Implementation functions
+
+  def rename(self, value:str):
+    """Change object id, modifying entire project to maintain consistency.
+    NBNB TBD to be implemented"""
+    raise NotImplementedError("Chain rename not implemented yet")
+
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (MolSystem.Chains) for all Chain children of parent NmrProject.molSystem"""

@@ -1,5 +1,7 @@
 
-filePath = '/Users/simon1/patrick/lookup.xlsx'
+import os
+
+filePath = os.path.expanduser('~simon1/patrick/lookup.xlsx')
 
 window.leftWidget.parseLookupFile(filePath)
 

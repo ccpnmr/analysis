@@ -54,10 +54,3 @@ class Testing(unittest.TestCase):
     print("--TEST ccpn tearing down", self.__class__.__name__)
     if self.project:
       self.project.delete()
-
-  def getSpectrum(self):
-
-    if self.project is not None and hasattr(self, 'spectrumName'):
-      return self.project.getByPid('Spectrum:'+self.spectrumName)
-    
-    return None

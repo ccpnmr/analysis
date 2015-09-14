@@ -21,26 +21,26 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.testing.Testing import Testing
+from ccpncore.testing.CoreTesting import CoreTesting
 
-class DataSourcePlaneDataTest(Testing):
+class DataSourcePlaneDataTest(CoreTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1a'
     
   def Test_GetPlaneData(self, *args, **kw):
-    spectrum = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()
+    spectrum = self.nmrProject.findFirstExperiment(name='HSQC').findFirstDataSource()
     planeData = spectrum.getPlaneData()
     print('planeData.shape =', planeData.shape)
     print('planeData =', planeData[508:,2045:])
 
-class DataSourceSliceDataTest(Testing):
+class DataSourceSliceDataTest(CoreTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1a'
     
   def Test_GetSliceData(self, *args, **kw):
-    spectrum = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()
+    spectrum = self.nmrProject.findFirstExperiment(name='HSQC').findFirstDataSource()
     # just check an arbitrary slice
     sliceData = spectrum.getSliceData(position=(1000, 230), sliceDim=1)
     print('sliceData.shape =', sliceData.shape)

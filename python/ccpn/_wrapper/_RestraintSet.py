@@ -21,13 +21,13 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-# from collections.abc import Sequence
 
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
 from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
+from ccpncore.lib.spectrum.Util import DEFAULT_ISOTOPE_DICT
 
 
 class RestraintSet(AbstractWrapperObject):
@@ -101,7 +101,7 @@ class RestraintSet(AbstractWrapperObject):
     result = apiNmrConstraintStor.findFirstFixedResonance(**dd)
 
     if result is None:
-      dd['isotopeCode'] = MoleculeQuery.DEFAULT_ISOTOPES.get(tt[3][0])
+      dd['isotopeCode'] = DEFAULT_ISOTOPE_DICT.get(tt[3][0])
       result = apiNmrConstraintStor.newFixedResonance(**dd)
     #
     return result

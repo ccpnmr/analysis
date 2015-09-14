@@ -23,14 +23,26 @@ __version__ = "$Revision$"
 #=========================================================================================
 import os
 from ccpncore.util import Common as commonUtil
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 # from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
+from ccpncore.lib.spectrum.Util import DEFAULT_ISOTOPE_DICT
 from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
 from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
 from ccpncore.lib.Io.Formats import AZARA, BRUKER, CCPN, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
 from ccpncore.util.Path import checkFilePath
 
 from ccpncore.api.memops.Implementation import Url
+
+# Default parameters - 10Hz/pt, 0.1ppm/point for 1H; 10 Hz/pt, 1ppm/pt for 13C
+# NB this is in order to give simple numbers. it does NOT match the gyromagnetic ratios
+DEFAULT_SPECTRUM_PARAMETERS = {
+  '1H':{'numPoints':128, 'sf':100, 'sw':1280, 'refppm':11.8, 'refpt':0, },
+  '13C':{'numPoints':256, 'sf':10, 'sw':2560, 'refppm':236., 'refpt':0, }
+}
+for tag,val in DEFAULT_ISOTOPE_DICT.items():
+  # Without additional info, set other one-letter isotopes (including 15N) to match carbon 13
+  if len(tag) == 1 and tag not in DEFAULT_SPECTRUM_PARAMETERS:
+    DEFAULT_SPECTRUM_PARAMETERS[val] = DEFAULT_SPECTRUM_PARAMETERS['13C']
 
 def loadDataSource(nmrProject, filePath, dataFileFormat):
 
@@ -120,7 +132,28 @@ def loadDataSource(nmrProject, filePath, dataFileFormat):
   return dataSource
 
 
-def createExperiment(nmrProject:object, name:str, numDim:int, sf:Sequence,
+def makeDummySpectrum(nmrProject:'NmrProject', axisCodes:Sequence[str],
+                      name=None) -> 'DataSource':
+  """Make Experiment and DataSource with no data from list of standard atom axisCodes"""
+
+  # Set up parameters and make Experiment
+  numDim = len(axisCodes)
+  isotopeCodes = tuple(DEFAULT_ISOTOPE_DICT[x[0]] for x in axisCodes)
+  if name is None:
+    expName = ''.join(x for x in ''.join(axisCodes) if not x.isdigit())
+  else:
+    expName = name
+  experiment = nmrProject.createExperiment(name=expName, numDim=numDim,
+                                           sf=[DEFAULT_SPECTRUM_PARAMETERS[x]['sf'] for x in isotopeCodes],
+                                           isotopeCodes=isotopeCodes)
+  # Make dataSource with default parameters
+  params = dict((tag,[DEFAULT_SPECTRUM_PARAMETERS[x][tag] for x in isotopeCodes])
+                for tag in ('sw', 'refppm', 'refpt', 'numPoints'))
+  #
+  specName = '%s@%s' %(expName, experiment.serial) if name is None else name
+  return experiment.createDataSource(name=specName, **params)
+
+def createExperiment(nmrProject:'NmrProject', name:str, numDim:int, sf:Sequence,
                      isotopeCodes:Sequence, isAcquisition:Sequence=None, **additionalParameters):
   """Create Experiment object ExpDim, and one ExpDimRef per ExpDim.
   Additional parameters to Experiment object are passed in additionalParameters"""

@@ -21,15 +21,14 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.testing.Testing import Testing
+from ccpn.testing.WrapperTesting import WrapperTesting
 
-class PeakListTest(Testing):
+class PeakListTest(WrapperTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1b', *args, **kw)
-    self.spectrumName = 'HSQC-115'
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1b'
     
   def test_newPeakList(self):
-    spectrum = self.getSpectrum()
+    spectrum = self.project.getSpectrum('HSQC-115')
     peakList = spectrum.newPeakList()
 

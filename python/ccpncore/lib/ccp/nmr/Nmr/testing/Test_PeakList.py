@@ -23,16 +23,16 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # import numpy
 
-from ccpncore.testing.Testing import Testing
+from ccpncore.testing.CoreTesting import CoreTesting
 
-class PeakListPickPeaksTest(Testing):
+class PeakListPickPeaksTest(CoreTesting):
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1a'
 
   def Test_PickPeaks(self, *args, **kw):
     
-    dataSource = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()
+    dataSource = self.nmrProject.findFirstExperiment(name='HSQC').findFirstDataSource()
     peakList = dataSource.findFirstPeakList()
     numPoints = [dataDim.numPoints for dataDim in dataSource.sortedDataDims()]
     startPoint = [0, 0]
@@ -48,7 +48,7 @@ class PeakListPickPeaksTest(Testing):
     
   def Test_PickPeaks2(self, *args, **kw):
     
-    dataSource = self.project.findFirstNmrProject().findFirstExperiment(name='HSQC').findFirstDataSource()
+    dataSource = self.nmrProject.findFirstExperiment(name='HSQC').findFirstDataSource()
     peakList = dataSource.findFirstPeakList()
     numPoints = [dataDim.numPoints for dataDim in dataSource.sortedDataDims()]
     startPoint = [600, 100]

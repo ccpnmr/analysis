@@ -137,8 +137,14 @@ class Residue(AbstractWrapperObject):
   #   linkEnds = (fromMolResidue.findFirstMolResLinkEnd(linkCode=fromLinkCode),
   #               toMolResidue.findFirstMolResLinkEnd(linkCode=toLinkCode))
   #   fromLinkCode.molecule.newMolResLink(molResLinkEnds=linkEnds)
-    
+
   # Implementation functions
+
+  def rename(self, value:str):
+    """Change object id, modifying entire project to maintain consistency.
+    NBNB TBD to be implemented"""
+    raise NotImplementedError("Chain rename not implemented yet")
+
   @classmethod
   def _getAllWrappedData(cls, parent: Chain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""

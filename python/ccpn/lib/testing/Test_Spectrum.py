@@ -21,24 +21,25 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.testing.Testing import Testing
+from ccpn.testing.WrapperTesting import WrapperTesting
 
 # from ccpn.lib.spectrum import Spectrum
 
-class SpectrumTest(Testing):
+spectrumName = 'HSQC-115'
 
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
-    self.spectrumName = 'HSQC-115'
+class SpectrumTest(WrapperTesting):
+
+  # Path of project to load (None for new project
+  projectPath = 'CcpnCourse1a'
 
   def test_getPlaneData(self):
-    spectrum = self.getSpectrum()
+    spectrum = self.project.getSpectrum(spectrumName)
     planeData = spectrum.getPlaneData()
     print('planeData.shape =', planeData.shape)
     print('planeData =', planeData[508:,2045:])
     
   def test_getSliceData(self):
-    spectrum = self.getSpectrum()
+    spectrum = self.project.getSpectrum(spectrumName)
     sliceData = spectrum.getSliceData()
     print('sliceData.shape =', sliceData.shape)
     print('sliceData =', sliceData)

@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpncore.util.Undo import Undo
 from ccpncore.util import Io as ioUtil
-from ccpn.testing.Testing import Testing
+from ccpncore.testing.CoreTesting import CoreTesting
 
 
 def test_undo_create():
@@ -150,269 +150,132 @@ def test_undo_max_operations():
   for ii in range(6):
     undoObject.undo()
 
-def test_api_undo_init():
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  project._undo.undo()
-  project._undo.redo()
 
-def test_api_undo_set_single():
-  testValue = 'TrySomeString'
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  project._undo.newWaypoint()
-  nxp.details = testValue
-  project._undo.undo()
-  assert nxp.details is None, "set undo: details are None after undo"
+class Test_Undo(CoreTesting):
 
 
-def test_api_undo_redo_set_single():
-  testValue = 'TrySomeString'
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  project._undo.newWaypoint()
-  nxp.details = testValue
-  project._undo.undo()
-  project._undo.redo()
-  assert nxp.details == testValue, "set redo: details are back to testValue after redo"
+  # Path of project to load (None for new project)
+  projectPath = None
 
-def test_api_undo_set_multiple():
-  testValue = ('kw1', 'kw2', 'kw3')
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  project._undo.newWaypoint()
-  nxp.keywords = testValue
-  project._undo.undo()
-  assert not nxp.keywords, "multiple set undo: keywords are empty after undo"
-
-def test_api_undo_redo_set_multiple():
-  testValue = ('kw1', 'kw2', 'kw3')
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  project._undo.newWaypoint()
-  nxp.keywords = testValue
-  project._undo.undo()
-  project._undo.redo()
-  assert nxp.keywords == testValue, "multiple set redo: details are back to testValue after redo"
-
-def test_api_undo_redo_add():
-  testValue = ('kw1', 'kw2', 'kw3')
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  nxp.keywords = testValue
-  project._undo.newWaypoint()
-  nxp.addKeyword('kw4')
-  project._undo.undo()
-  project._undo.redo()
-  assert nxp.keywords == testValue + ('kw4',), "add redo: keywords should be %s, were %s" % (testValue + ('kw4',), nxp.keywords)
-
-def test_api_undo_add():
-  testValue = ('kw1', 'kw2', 'kw3')
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  nxp.keywords = testValue
-  project._undo.newWaypoint()
-  nxp.addKeyword('kw4')
-  project._undo.undo()
-  assert nxp.keywords == testValue, "add undo: keywords should be %s, were %s" % (testValue, nxp.keywords)
-
-def test_api_undo_remove():
-  testValue = ('kw1', 'kw2', 'kw3')
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  nxp.keywords = testValue
-  project._undo.newWaypoint()
-  nxp.removeKeyword('kw3')
-  project._undo.undo()
-  assert nxp.keywords == testValue,"remove undo: keywords should be %s, were %s" % (testValue, nxp.keywords)
-
-def test_api_undo_redo_remove():
-  testValue = ('kw1', 'kw2', 'kw3')
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  nxp.keywords = testValue
-  project._undo.newWaypoint()
-  nxp.removeKeyword('kw3')
-  project._undo.undo()
-  project._undo.redo()
-  assert nxp.keywords == testValue[:2], "remove redo: keywords should be %s, were %s" % (testValue[:2], nxp.keywords)
-
-def test_api_undo_delete():
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  nxp = project.newNmrExpPrototype(name='anything', category='other')
-  nxp.delete()
-  project._undo.undo()
-  project._undo.redo()
-
-def test_make_molecule_undo():
-  from ccpncore.lib.molecule import MoleculeModify
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
-  molecule = MoleculeModify.makeMolecule(project, sequence, 'protein')
-  project._undo.undo()
-  project.checkAllValid()
-
-def test_make_molecule_undo_redo():
-  from ccpncore.lib.molecule import MoleculeModify
-  project = ioUtil.newProject('UndoTest')
-  project._undo = Undo()
-  sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
-  molecule = MoleculeModify.makeMolecule(project, sequence, 'protein')
-  project._undo.undo()
-  project._undo.redo()
-  project.checkAllValid()
-
-class ComplexUndoTest(Testing):
-
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse2c', *args, **kw)
-
-  def test_loaded_project(self):
-    project = self.project._wrappedData.root
-    project.checkAllValid()
-
-  def test_make_chain_undo(self):
-    project = self.project._wrappedData.root
+  def test_api_undo_init(self):
+    project = self.project
     project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
+    project._undo.undo()
+    project._undo.redo()
+
+  def test_api_undo_set_single(self):
+    testValue = 'TrySomeString'
+    project = self.project
+    project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
     project._undo.newWaypoint()
-    molSystem = project.findFirstMolSystem(code='MS1')
-    chainA = molSystem.findFirstChain(code='A')
-    chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
+    nxp.details = testValue
+    project._undo.undo()
+    assert nxp.details is None, "set undo: details are None after undo"
+
+
+  def test_api_undo_redo_set_single(self):
+    testValue = 'TrySomeString'
+    project = self.project
+    project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
+    project._undo.newWaypoint()
+    nxp.details = testValue
+    project._undo.undo()
+    project._undo.redo()
+    assert nxp.details == testValue, "set redo: details are back to testValue after redo"
+
+  def test_api_undo_set_multiple(self):
+    testValue = ('kw1', 'kw2', 'kw3')
+    project = self.project
+    project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
+    project._undo.newWaypoint()
+    nxp.keywords = testValue
+    project._undo.undo()
+    assert not nxp.keywords, "multiple set undo: keywords are empty after undo"
+
+  def test_api_undo_redo_set_multiple(self):
+    testValue = ('kw1', 'kw2', 'kw3')
+    project = self.project
+    project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
+    project._undo.newWaypoint()
+    nxp.keywords = testValue
+    project._undo.undo()
+    project._undo.redo()
+    assert nxp.keywords == testValue, "multiple set redo: details are back to testValue after redo"
+
+  def test_api_undo_redo_add(self):
+    testValue = ('kw1', 'kw2', 'kw3')
+    project = self.project
+    project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
+    nxp.keywords = testValue
+    project._undo.newWaypoint()
+    nxp.addKeyword('kw4')
+    project._undo.undo()
+    project._undo.redo()
+    assert nxp.keywords == testValue + ('kw4',), "add redo: keywords should be %s, were %s" % (testValue + ('kw4',), nxp.keywords)
+
+  def test_api_undo_add(self):
+    testValue = ('kw1', 'kw2', 'kw3')
+    project = self.project
+    project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
+    nxp.keywords = testValue
+    project._undo.newWaypoint()
+    nxp.addKeyword('kw4')
+    project._undo.undo()
+    assert nxp.keywords == testValue, "add undo: keywords should be %s, were %s" % (testValue, nxp.keywords)
+
+  def test_api_undo_remove(self):
+    testValue = ('kw1', 'kw2', 'kw3')
+    project = self.project
+    project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
+    nxp.keywords = testValue
+    project._undo.newWaypoint()
+    nxp.removeKeyword('kw3')
+    project._undo.undo()
+    assert nxp.keywords == testValue,"remove undo: keywords should be %s, were %s" % (testValue, nxp.keywords)
+
+  def test_api_undo_redo_remove(self):
+    testValue = ('kw1', 'kw2', 'kw3')
+    project = self.project
+    project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
+    nxp.keywords = testValue
+    project._undo.newWaypoint()
+    nxp.removeKeyword('kw3')
+    project._undo.undo()
+    project._undo.redo()
+    assert nxp.keywords == testValue[:2], "remove redo: keywords should be %s, were %s" % (testValue[:2], nxp.keywords)
+
+  def test_api_undo_delete(self):
+    project = self.project
+    project._undo = Undo()
+    nxp = project.newNmrExpPrototype(name='anything', category='other')
+    nxp.delete()
+    project._undo.undo()
+    project._undo.redo()
+
+  def test_make_molecule_undo(self):
+    from ccpncore.lib.molecule import MoleculeModify
+    project = self.project
+    project._undo = Undo()
+    sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
+    molecule = MoleculeModify.makeMolecule(project, sequence, 'protein')
     project._undo.undo()
     project.checkAllValid()
 
-  def test_make_chain_undo_redo(self):
-    project = self.project._wrappedData.root
+  def test_make_molecule_undo_redo(self):
+    from ccpncore.lib.molecule import MoleculeModify
+    project = self.project
     project._undo = Undo()
-    project._undo.newWaypoint()
-    molSystem = project.findFirstMolSystem(code='MS1')
-    chainA = molSystem.findFirstChain(code='A')
-    chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
+    sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
+    molecule = MoleculeModify.makeMolecule(project, sequence, 'protein')
     project._undo.undo()
     project._undo.redo()
     project.checkAllValid()
-
-
-  def test_copy_chain_undo(self):
-    from ccpncore.util import CopyData
-    project = self.project._wrappedData.root
-    project._undo = Undo()
-    project._undo.newWaypoint()
-    molSystem = project.findFirstMolSystem(code='MS1')
-    chainA = molSystem.findFirstChain(code='A')
-    chainB = CopyData.copySubTree(chainA, molSystem, topObjectParameters={'code':'B'})
-    project._undo.undo()
-    project.checkAllValid()
-
-  def test_copy_chain_undo_redo(self):
-    from ccpncore.util import CopyData
-    project = self.project._wrappedData.root
-    project._undo = Undo()
-    project._undo.newWaypoint()
-    molSystem = project.findFirstMolSystem(code='MS1')
-    chainA = molSystem.findFirstChain(code='A')
-    chainB = CopyData.copySubTree(chainA, molSystem, topObjectParameters={'code':'B'})
-    project._undo.undo()
-    project._undo.redo()
-    project.checkAllValid()
-
-  def test_delete_residues_undo(self):
-      project = self.project._wrappedData.root
-      project._undo = Undo()
-      project._undo.newWaypoint()
-      molSystem = project.findFirstMolSystem(code='MS1')
-      residues = molSystem.findFirstChain(code='A').sortedResidues()
-      residues[22].delete()
-      residues[45].delete()
-      residues[21].delete()
-      residues[20].delete()
-      project._undo.undo()
-      project.checkAllValid()
-
-  def test_delete_residues_undo_redo(self):
-      project = self.project._wrappedData.root
-      project._undo = Undo()
-      project._undo.newWaypoint()
-      molSystem = project.findFirstMolSystem(code='MS1')
-      residues = molSystem.findFirstChain(code='A').sortedResidues()
-      residues[22].delete()
-      residues[45].delete()
-      residues[21].delete()
-      residues[20].delete()
-      project._undo.undo()
-      project._undo.redo()
-      project.checkAllValid()
-
-  def test_delete_chain_undo(self):
-      project = self.project._wrappedData.root
-      project._undo = Undo()
-      project._undo.newWaypoint()
-      molSystem = project.findFirstMolSystem(code='MS1')
-      chain = molSystem.findFirstChain(code='A')
-      chain.delete()
-      project._undo.undo()
-      project.checkAllValid()
-
-  def test_delete_chain_undo_redo(self):
-      project = self.project._wrappedData.root
-      project._undo = Undo()
-      project._undo.newWaypoint()
-      molSystem = project.findFirstMolSystem(code='MS1')
-      chain = molSystem.findFirstChain(code='A')
-      chain.delete()
-      project._undo.undo()
-      project._undo.redo()
-      project.checkAllValid()
-
-  def test_delete_molSystem_undo(self):
-      project = self.project._wrappedData.root
-      project._undo = Undo()
-      project._undo.newWaypoint()
-      molSystem = project.findFirstMolSystem(code='MS1')
-      molSystem.delete()
-      project._undo.undo()
-      project.checkAllValid()
-
-  def test_delete_molSystem_undo_redo(self):
-      project = self.project._wrappedData.root
-      project._undo = Undo()
-      project._undo.newWaypoint()
-      molSystem = project.findFirstMolSystem(code='MS1')
-      molSystem.delete()
-      project._undo.undo()
-      project._undo.redo()
-      project.checkAllValid()
-
-  def test_delete_resonances_undo(self):
-      project = self.project._wrappedData.root
-      project._undo = Undo()
-      project._undo.newWaypoint()
-      resonances = project.findFirstNmrProject().sortedResonances()
-      for ii in range(1,10):
-        resonances[ii].delete()
-        resonances[-ii].delete()
-      project._undo.undo()
-      project.checkAllValid()
-
-  def test_delete_resonances_undo_redo(self):
-      project = self.project._wrappedData.root
-      project._undo = Undo()
-      project._undo.newWaypoint()
-      resonances = project.findFirstNmrProject().sortedResonances()
-      for ii in range(1,10):
-        resonances[ii].delete()
-        resonances[-ii].delete()
-      project._undo.undo()
-      project._undo.redo()
-      project.checkAllValid()

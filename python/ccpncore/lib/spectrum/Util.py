@@ -22,20 +22,22 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 import os
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 
 from ccpncore.util.Path import checkFilePath
 
-ISOTOPE_DICT = {'H':'1H',
-                'C':'13C',
-                'N':'15N',
-                'P':'31P',
-                'Si':'29Si',
-                'F':'19F',
-                'O':'17O',
-                'Br':'79Br'}
+DEFAULT_ISOTOPE_DICT = {
+  'H':'1H',
+  'C':'13C',
+  'N':'15N',
+  'P':'31P',
+  'Si':'29Si',
+  'F':'19F',
+  'O':'17O',
+  'Br':'79Br'
+}
 
-STANDARD_ISOTOPES = set(ISOTOPE_DICT.values())
+STANDARD_ISOTOPES = set(DEFAULT_ISOTOPE_DICT.values())
 
 WHITESPACE_AND_NULL =  set(['\x00', '\t', '\n', '\r', '\x0b', '\x0c'])
 
@@ -67,15 +69,15 @@ def checkIsotope(text):
   if text in STANDARD_ISOTOPES:
     return text
 
-  if text in ISOTOPE_DICT:
-    return ISOTOPE_DICT[text]
+  if text in DEFAULT_ISOTOPE_DICT:
+    return DEFAULT_ISOTOPE_DICT[text]
 
   for isotope in STANDARD_ISOTOPES:
     if isotope in text:
       return isotope
 
   else:
-    return ISOTOPE_DICT.get(text[0].upper(), '1H')
+    return DEFAULT_ISOTOPE_DICT.get(text[0].upper(), '1H')
 
 # def getSpectrumFileFormat(filePath):
 #

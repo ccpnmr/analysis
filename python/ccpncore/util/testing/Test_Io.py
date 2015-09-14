@@ -26,12 +26,12 @@ import shutil
 
 from ccpncore.util import ApiPath
 from ccpncore.util import Io as ioUtil
-from ccpncore.testing.Testing import Testing
+from ccpncore.testing.CoreTesting import CoreTesting
 
-class IoTest(Testing):
-  
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
+class IoTest(CoreTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1a'
     
   def test_project_save(self):
     

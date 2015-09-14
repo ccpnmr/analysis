@@ -21,21 +21,21 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.testing.Testing import Testing
+from ccpn.testing.WrapperTesting import WrapperTesting
 
 # NBNB These two imports are NECESSARY, as ccpnmr MUST be imported to register the Gui classes
 import ccpn
 import ccpnmr
 
-class MarkTest(Testing):
+class MarkTest(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse1a'
 
   axisCodes = ('H', 'Hn', 'C', 'C')
   positions = (4.33, 7.92, 49.65, 17.28)
   units = ('ppm', 'ppm', 'ppm', 'Hz')
   labels = ('Proton', 'NHproton', 'carbon', 'carbonhz')
-
-  def __init__(self, *args, **kw):
-    Testing.__init__(self, 'CcpnCourse1a', *args, **kw)
 
   def test_create_mark(self):
     self.task = self.project.newTask('TestTask')

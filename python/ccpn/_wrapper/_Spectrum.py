@@ -25,7 +25,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 import os
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -773,6 +773,13 @@ class Spectrum(AbstractWrapperObject):
 
   # Implementation functions
 
+  def rename(self, value):
+    """Rename Spectrum, changing Id and Pid"""
+    if value:
+      self._wrappedData.name = value
+    else:
+      raise ValueError("Spectrum name must be set")
+
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
@@ -806,17 +813,22 @@ def newSpectrum(parent:Project, name:str) -> Spectrum:
 
   raise NotImplementedError("Not implemented. Use loadSpectrum function instead")
 
+def makeDummySpectrum(parent:Project, axisCodes:Sequence[str], name=None) -> Spectrum:
+  """Make dummy spectrum from isotopeCodes list - without data and with default parameters """
+  return parent._data2Obj[parent._wrappedData.makeDummySpectrum(axisCodes, name=name)]
 
 # Connections to parents:
 
 Project._childClasses.append(Spectrum)
 
 Project.newSpectrum = newSpectrum
+Project.makeDummySpectrum = makeDummySpectrum
 
 # Notifiers:
 className = ApiDataSource._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Spectrum}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_resetPid', {}, className, 'setName'),
   )
 )

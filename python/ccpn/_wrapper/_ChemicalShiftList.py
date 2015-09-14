@@ -74,7 +74,7 @@ class ChemicalShiftList(AbstractWrapperObject):
   
   @property
   def name(self) -> str:
-    """name of ChemicalShiftList"""
+    """name of ChemicalShiftList. Changing it will rename the ChemicalShiftList"""
     return self._wrappedData.name
 
   @property
@@ -104,9 +104,16 @@ class ChemicalShiftList(AbstractWrapperObject):
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
-    
+
     
   # Implementation functions
+  def rename(self, value):
+    """Rename ChemicalShiftList, changing Id and Pid of ChemicalShiftList"""
+    if value:
+      self._wrappedData.name = value
+    else:
+      raise ValueError("ChemicalShiftList name must be set")
+
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (MolSystems) for all Molecules children of parent Project"""
@@ -129,6 +136,7 @@ Project.newChemicalShiftList = newChemicalShiftList
 className = ApiShiftList._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':ChemicalShiftList}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_resetPid', {}, className, 'setName'),
   )
 )

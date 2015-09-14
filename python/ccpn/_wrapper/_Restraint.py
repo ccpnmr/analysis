@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import RestraintList

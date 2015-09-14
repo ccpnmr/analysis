@@ -24,6 +24,12 @@ __version__ = "$Revision: 7686 $"
 
 import re
 
+replaceInDocStrings = (
+  ('ccpncore.lib.typing.',''),
+  ('typing.', ''),
+  # ('NoneType', 'None')
+)
+
 # Format for inserting class documentation in wrapper module
 wrappedClassFormat= """
 
@@ -39,6 +45,7 @@ wrappedClassFormat= """
 wrappedClassFullName = re.compile(
   "(ccpn|ccpnmr)[.](_wrapper[.]_(?P<classname>[a-zA-Z]+)[.])(?P=classname)"
 )
+optionalType = re.compile("Union\[(.+), *NoneType\]")
 
 classRepresentation = re.compile("<class '(.*?)'>")
 
@@ -75,10 +82,13 @@ def autodoc_process_docstring():
       if not (lines and lines[0].startswith('- ')):
         if hasattr(obj.fget, '__annotations__'):
           # Necessary because functools.partial objects do note have __annotations__ attribute
-          typ = obj.fget.__annotations__.get('return')
+          typ =repr(obj.fget.__annotations__.get('return'))
+          typ = optionalType.sub(r'\g<1>=None',typ)
+          for fromText, toText in replaceInDocStrings:
+            typ = typ.replace(fromText, toText)
           ll = []
           if typ:
-            ll.append("*%s*" % str(typ))
+            ll.append("*%s*" % typ)
           if bool(obj.fset):
             # property is modifiable, add it to doc string
             ll.append('*settable*')
@@ -128,17 +138,17 @@ def autodoc_process_signature():
       or None if there is no return annotation
     """
 
-    # # TEMP DEBUG
-    # return (signature, return_annotation)
-
     if signature:
       signature = wrappedClassFullName.sub(r'\g<1>.\g<3>', signature)
       signature = classRepresentation.sub(r'\g<1>', signature)
+      for fromText, toText in replaceInDocStrings:
+        signature = signature.replace(fromText, toText)
     if return_annotation:
       return_annotation = wrappedClassFullName.sub(r'\g<1>.\g<3>', return_annotation)
       return_annotation = classRepresentation.sub(r'\g<1>', return_annotation)
+      for fromText, toText in replaceInDocStrings:
+        return_annotation = return_annotation.replace(fromText, toText)
 
-    #
     return (signature, return_annotation)
 
   #

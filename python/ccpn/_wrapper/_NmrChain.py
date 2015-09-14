@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from collections.abc import Sequence
+from ccpncore.lib.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
@@ -58,7 +58,8 @@ class NmrChain(AbstractWrapperObject):
 
   @property
   def shortName(self) -> str:
-    """short form of name, key attribute"""
+    """short form of name, key attribute.
+    NB changing this attribute will rename the NmrChain"""
     return self._wrappedData.code
 
   @shortName.setter
@@ -78,19 +79,6 @@ class NmrChain(AbstractWrapperObject):
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
-
-  @property
-  def chain(self) -> Chain:
-    """Molecule chain matching NmrChain"""
-    apiChain = self._wrappedData.chain
-    if apiChain is None:
-      return None
-
-    return self._parent._data2Obj.get(apiChain)
-
-  @chain.setter
-  def chain(self, value):
-    self._wrappedData.chain = None if value is None else value._wrappedData
 
   @property
   def connectedNmrResidues(self) -> tuple:
@@ -152,6 +140,12 @@ class NmrChain(AbstractWrapperObject):
   @chain.setter
   def chain(self, value:Chain):
     self._wrappedData.chain = None if value is None else value._wrappedData
+
+  def rename(self, value:str):
+    """Rename NmrChain, changing its Id and Pid"""
+    if not value:
+      raise ValueError("NmrChain name must be set")
+    self.shortName = value
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:

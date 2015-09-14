@@ -10,6 +10,8 @@ Welcome to CCPN's documentation!
 
    ccpn/modules.rst
    ccpnmr/modules.rst
+   ccpncore/modules.rst
+   ccpnmrcore/modules.rst
 
 Indices and tables
 ==================

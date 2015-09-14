@@ -130,12 +130,10 @@ class Project(AbstractWrapperObject):
     """
     while self._activeNotifiers:
       tt = self._activeNotifiers.pop()
-      # print("@~@~ DEnotifying", tt[1:])
       Notifiers.unregisterNotify(*tt)
 
   def _registerNotify(self, notify, apiClassName, apiFuncName):
     """Register a single notifier"""
-    # print("@~@~ notifying", apiClassName, apiFuncName)
     self._activeNotifiers.append((notify, apiClassName, apiFuncName))
     Notifiers.registerNotify(notify, apiClassName, apiFuncName)
 

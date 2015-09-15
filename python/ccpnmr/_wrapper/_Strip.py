@@ -156,7 +156,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
             for m, item in enumerate(items):
               layout.addItem(item, m+index, 0)
       self.plotWidget.deleteLater()
-      self.spinSystemLabel.deleteLater()
+      ###self.spinSystemLabel.deleteLater()
       if hasattr(self, 'planeToolbar'):
         self.planeToolbar.deleteLater()
       ccpnStrip.delete()

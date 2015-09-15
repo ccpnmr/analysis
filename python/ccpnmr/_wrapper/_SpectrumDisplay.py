@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -32,7 +32,6 @@ from ccpnmr import Task
 from ccpnmr import Window
 from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpncore.api.ccpnmr.gui.Task import FreeDisplay as ApiFreeDisplay
 from ccpncore.util import Common as commonUtil
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay

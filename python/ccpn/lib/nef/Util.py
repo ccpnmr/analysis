@@ -21,9 +21,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import json, sys, os
+import sys
+import os
 import collections
-from ccpncore.lib.Bmrb import bmrb
+
+from ccpncore.util.Bmrb import bmrb
+
 
 # Make sure we get parse eror warnings:
 bmrb.raise_parse_warnings = True

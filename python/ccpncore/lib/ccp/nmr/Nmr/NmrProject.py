@@ -22,13 +22,15 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 import os
+
 from ccpncore.util import Common as commonUtil
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
+
 # from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.lib.spectrum.Util import DEFAULT_ISOTOPE_DICT
 from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
 from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
-from ccpncore.lib.Io.Formats import AZARA, BRUKER, CCPN, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
+from ccpncore.lib.Io.Formats import AZARA, BRUKER, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
 from ccpncore.util.Path import checkFilePath
 
 from ccpncore.api.memops.Implementation import Url
@@ -36,12 +38,12 @@ from ccpncore.api.memops.Implementation import Url
 # Default parameters - 10Hz/pt, 0.1ppm/point for 1H; 10 Hz/pt, 1ppm/pt for 13C
 # NB this is in order to give simple numbers. it does NOT match the gyromagnetic ratios
 DEFAULT_SPECTRUM_PARAMETERS = {
-  '1H':{'numPoints':128, 'sf':100, 'sw':1280, 'refppm':11.8, 'refpt':0, },
-  '13C':{'numPoints':256, 'sf':10, 'sw':2560, 'refppm':236., 'refpt':0, }
+  '1H':{'numPoints':128, 'sf':100., 'sw':1280, 'refppm':11.8, 'refpt':0, },
+  '13C':{'numPoints':256, 'sf':10., 'sw':2560, 'refppm':236., 'refpt':0, }
 }
 for tag,val in DEFAULT_ISOTOPE_DICT.items():
   # Without additional info, set other one-letter isotopes (including 15N) to match carbon 13
-  if len(tag) == 1 and tag not in DEFAULT_SPECTRUM_PARAMETERS:
+  if len(tag) == 1 and val not in DEFAULT_SPECTRUM_PARAMETERS:
     DEFAULT_SPECTRUM_PARAMETERS[val] = DEFAULT_SPECTRUM_PARAMETERS['13C']
 
 def loadDataSource(nmrProject, filePath, dataFileFormat):
@@ -132,7 +134,7 @@ def loadDataSource(nmrProject, filePath, dataFileFormat):
   return dataSource
 
 
-def makeDummySpectrum(nmrProject:'NmrProject', axisCodes:Sequence[str],
+def createDummySpectrum(self:'NmrProject', axisCodes:Sequence[str],
                       name=None) -> 'DataSource':
   """Make Experiment and DataSource with no data from list of standard atom axisCodes"""
 
@@ -143,8 +145,9 @@ def makeDummySpectrum(nmrProject:'NmrProject', axisCodes:Sequence[str],
     expName = ''.join(x for x in ''.join(axisCodes) if not x.isdigit())
   else:
     expName = name
-  experiment = nmrProject.createExperiment(name=expName, numDim=numDim,
-                                           sf=[DEFAULT_SPECTRUM_PARAMETERS[x]['sf'] for x in isotopeCodes],
+  experiment = self.createExperiment(name=expName, numDim=numDim,
+                                           sf=[DEFAULT_SPECTRUM_PARAMETERS[x]['sf']
+                                               for x in isotopeCodes], axisCodes=axisCodes,
                                            isotopeCodes=isotopeCodes)
   # Make dataSource with default parameters
   params = dict((tag,[DEFAULT_SPECTRUM_PARAMETERS[x][tag] for x in isotopeCodes])
@@ -154,7 +157,8 @@ def makeDummySpectrum(nmrProject:'NmrProject', axisCodes:Sequence[str],
   return experiment.createDataSource(name=specName, **params)
 
 def createExperiment(nmrProject:'NmrProject', name:str, numDim:int, sf:Sequence,
-                     isotopeCodes:Sequence, isAcquisition:Sequence=None, **additionalParameters):
+                     isotopeCodes:Sequence, isAcquisition:Sequence=None, axisCodes=None,
+                     **additionalParameters):
   """Create Experiment object ExpDim, and one ExpDimRef per ExpDim.
   Additional parameters to Experiment object are passed in additionalParameters"""
 
@@ -177,8 +181,12 @@ def createExperiment(nmrProject:'NmrProject', name:str, numDim:int, sf:Sequence,
     expDim.isAcquisition = isAcquisition[n]
     ic = isotopeCodes[n]
     if ic:
-      if isinstance(ic, str):
-        ic = (ic,)
-      expDim.newExpDimRef(sf=sf[n], unit='ppm', isotopeCodes=ic)
+      params = {'sf':sf[n], 'unit':'ppm'}
+      params['isotopeCodes'] = (ic,) if isinstance(ic, str) else ic
+      if axisCodes:
+        ac = axisCodes[n]
+        if ac is not None:
+          params['axisCode'] = ac
+      expDim.newExpDimRef(**params)
 
   return experiment

@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import RestraintList
@@ -222,7 +222,7 @@ def newRestraint(parent:RestraintList,comment:str=None,
   result.peaks = peaks
   return result
 
-def makeSimpleRestraint(parent:RestraintList,comment:str=None,
+def createSimpleRestraint(parent:RestraintList,comment:str=None,
                         peaks:Sequence=(),  targetValue:float=None, error:float=None,
                         weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                         additionalUpperLimit:float=None, additionalLowerLimit:float=None,
@@ -238,7 +238,7 @@ def makeSimpleRestraint(parent:RestraintList,comment:str=None,
   return restraint
 
 RestraintList.newRestraint = newRestraint
-RestraintList.makeSimpleRestraint = makeSimpleRestraint
+RestraintList.createSimpleRestraint = createSimpleRestraint
 
 # Notifiers:
 for clazz in ApiAbstractConstraint._metaclass.getNonAbstractSubtypes():

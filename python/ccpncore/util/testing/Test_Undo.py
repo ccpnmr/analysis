@@ -266,7 +266,7 @@ class Test_Undo(CoreTesting):
     project = self.project
     project._undo = Undo()
     sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
-    molecule = MoleculeModify.makeMolecule(project, sequence, 'protein')
+    molecule = MoleculeModify.createMolecule(project, sequence, 'protein')
     project._undo.undo()
     project.checkAllValid()
 
@@ -275,7 +275,7 @@ class Test_Undo(CoreTesting):
     project = self.project
     project._undo = Undo()
     sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
-    molecule = MoleculeModify.makeMolecule(project, sequence, 'protein')
+    molecule = MoleculeModify.createMolecule(project, sequence, 'protein')
     project._undo.undo()
     project._undo.redo()
     project.checkAllValid()

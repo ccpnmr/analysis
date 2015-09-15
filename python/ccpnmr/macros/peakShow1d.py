@@ -6,4 +6,4 @@ display = self.createSpectrumDisplay(spectrum)
 
 display.strips[0].showPeaks(peakList)
 
-self.removeBlankDisplay()
+self.deleteBlankDisplay()

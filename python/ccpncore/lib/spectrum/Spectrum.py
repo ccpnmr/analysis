@@ -23,12 +23,13 @@ __version__ = "$Revision$"
 #=========================================================================================
 import os
 import itertools
-from ccpncore.lib.typing import Sequence
 
+from ccpncore.util.typing import Sequence
 from ccpncore.util import Path
 from ccpncore.lib.spectrum.BlockData import determineBlockSizes
 from ccpncore.memops.ApiError import ApiError
 from ccpncore.api.ccp.nmr.Nmr import ExpDimRef
+
 
 def createBlockedMatrix(dataUrl:object, path:str, numPoints:Sequence, blockSizes:Sequence=None,
                         isBigEndian:bool=True, numberType:str='float', isComplex:bool=None,

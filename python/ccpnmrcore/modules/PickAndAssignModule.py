@@ -1,10 +1,5 @@
 __author__ = 'simon1'
 
-
-import pyqtgraph as pg
-
-from PyQt4 import QtCore
-
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Dock import CcpnDock
@@ -12,7 +7,7 @@ from ccpncore.gui.Label import Label
 from ccpnmrcore.modules.PeakTable import PeakListSimple
 from ccpnmrcore.popups.SelectDisplaysPopup import SelectDisplaysAndSpectraPopup
 
-from ccpn.lib.windowUtil import navigateToPeakPosition
+from ccpnmrcore.lib.Window import navigateToPeakPosition
 
 class PickAndAssignModule(CcpnDock, Base):
 
@@ -63,7 +58,7 @@ class PickAndAssignModule(CcpnDock, Base):
           peakList = spectrumView.spectrum.peakLists[0]
           if spectrumView.spectrum.dimensionCount > 1:
             apiSpectrumView = spectrumView._wrappedData
-            newPeaks = peakList.findPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
+            newPeaks = peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
                                             doPos=True,
                                             doNeg=True)
             for peak in newPeaks:

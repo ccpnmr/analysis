@@ -26,7 +26,7 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn.lib.ExperimentUtil import EXPERIMENT_TYPES
+from ccpn.lib.Experiment import EXPERIMENT_TYPES
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button

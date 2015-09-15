@@ -21,31 +21,21 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 """
-import ccpn
-import ccpnmr
+import os
+import json
+
+from ccpn.lib import Io as ccpnIo
 from ccpncore.util import Io as ioUtil
-from ccpn.util import Io as ccpnIo
-
-
 from ccpncore.gui.Application import Application
-from ccpncore.gui import resources_rc
-
 from ccpncore.memops.metamodel import Util as metaUtil
-
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Register
 from ccpncore.util import Translation
-from ccpncore.util.Undo import Undo
-
 from ccpnmrcore.Base import Base as GuiBase
 from ccpnmrcore.Current import Current
-
 from ccpnmrcore.popups.RegisterPopup import RegisterPopup
 
-import os, json
-
-from PyQt4 import QtGui
 
 class AppBase(GuiBase):
 
@@ -124,7 +114,7 @@ class AppBase(GuiBase):
     self.mainWindow = None
     self.current = None
 
-  def openProject(self, path):
+  def loadProject(self, path):
     """Open new project from path"""
     self._closeProject()
     apiProject = ioUtil.loadProject(path)

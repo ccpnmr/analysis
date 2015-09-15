@@ -127,7 +127,7 @@ class UtilityButtonList(ButtonList):
     _icons   = []
     _tipTexts = []
     
-    _doActions = [(doClone, cloneCmd, self.clonePopup, cloneText, 'icons/window-duplicate.png', cloneTip),
+    _doActions = [(doClone, cloneCmd, self.duplicatePopup, cloneText, 'icons/window-duplicate.png', cloneTip),
                   (doHelp,   helpCmd, self.launchHelp, helpText,  'icons/system-help.png',       helpTip),
                   (doClose, closeCmd, self.closePopup, closeText, 'icons/window-close.png',     closeTip),]
     
@@ -146,7 +146,7 @@ class UtilityButtonList(ButtonList):
 
     self.addButtons(_texts, _callbacks, _icons, _tipTexts)
 
-  def clonePopup(self):
+  def duplicatePopup(self):
      
     if self.popup:
       try:

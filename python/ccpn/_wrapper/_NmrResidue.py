@@ -65,7 +65,7 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """Residue local ID"""
-    return Pid.makeId(self.sequenceCode, self.residueType)
+    return Pid.createId(self.sequenceCode, self.residueType)
     
   @property
   def _parent(self) -> NmrChain:

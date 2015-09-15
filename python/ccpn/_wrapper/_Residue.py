@@ -63,7 +63,7 @@ class Residue(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """Residue ID. Identical to sequenceCode.residueType. Characters translated for pid"""
-    return Pid.makeId(self.sequenceCode, self.residueType)
+    return Pid.createId(self.sequenceCode, self.residueType)
     
   @property
   def _parent(self) -> Chain:

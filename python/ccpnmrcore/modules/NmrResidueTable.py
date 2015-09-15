@@ -6,7 +6,7 @@ from ccpncore.gui.PulldownList import PulldownList
 
 from ccpnmrcore.modules.GuiTableGenerator import GuiTableGenerator
 
-from ccpn.lib.windowUtil import navigateToNmrResidue
+from ccpnmrcore.lib.Window import navigateToNmrResidue
 
 
 class NmrResidueTable(CcpnDock):

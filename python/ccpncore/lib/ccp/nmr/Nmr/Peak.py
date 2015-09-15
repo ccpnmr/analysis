@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
 
 def setPeakDimAssignments(peak, value:Sequence):
   """Set per-dimension assignments on peak.

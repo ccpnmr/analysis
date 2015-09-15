@@ -2,7 +2,7 @@ hsqc = project.getByPid('SP:HSQC-115')
 
 hsqcSpectrumDisplay = window.createSpectrumDisplay(hsqc)
 
-window.removeBlankDisplay()
+window.deleteBlankDisplay()
 
 hsqcPeakList = project.getByPid('PL:HSQC-115.1')
 

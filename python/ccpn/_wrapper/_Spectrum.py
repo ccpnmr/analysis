@@ -25,8 +25,8 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 import os
-from ccpncore.lib.typing import Sequence
 
+from ccpncore.util.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Sample
@@ -813,16 +813,16 @@ def newSpectrum(parent:Project, name:str) -> Spectrum:
 
   raise NotImplementedError("Not implemented. Use loadSpectrum function instead")
 
-def makeDummySpectrum(parent:Project, axisCodes:Sequence[str], name=None) -> Spectrum:
+def createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Spectrum:
   """Make dummy spectrum from isotopeCodes list - without data and with default parameters """
-  return parent._data2Obj[parent._wrappedData.makeDummySpectrum(axisCodes, name=name)]
+  return self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name)]
 
 # Connections to parents:
 
 Project._childClasses.append(Spectrum)
 
 Project.newSpectrum = newSpectrum
-Project.makeDummySpectrum = makeDummySpectrum
+Project.createDummySpectrum = createDummySpectrum
 
 # Notifiers:
 className = ApiDataSource._metaclass.qualifiedName()

@@ -2,7 +2,7 @@ __author__ = 'simon1'
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn.lib.ExperimentUtil import EXPERIMENT_TYPES
+from ccpn.lib.Experiment import EXPERIMENT_TYPES
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.ButtonList import ButtonList

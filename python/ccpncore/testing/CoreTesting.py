@@ -26,6 +26,7 @@ __version__ = "$Revision$"
 
 import os
 import unittest
+import contextlib
 
 from ccpncore.util import Path
 from ccpncore.util import Io
@@ -38,8 +39,8 @@ class CoreTesting(unittest.TestCase):
   # Path for project to load - can be overridden in subclasses
   projectPath = None
 
-  def setUp(self):
-
+  @contextlib.contextmanager
+  def initialSetup(self):
     if self.projectPath is None:
       project = self.project = Io.newProject('default', removeExisting=True)
       self.nmrProject = project.newNmrProject(name='default')
@@ -49,6 +50,15 @@ class CoreTesting(unittest.TestCase):
       if not nmrProject:
         nmrProject = project.currentNmrProject = project.findFirstNmrProject()
       self.nmrProject = nmrProject
+    try:
+      yield
+    except:
+      self.tearDown()
+      raise
+
+  def setUp(self):
+    with self.initialSetup():
+      pass
 
 
   def tearDown(self):

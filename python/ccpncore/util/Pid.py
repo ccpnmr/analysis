@@ -38,7 +38,7 @@ altCharacter = '^'
 remapSeparators = str.maketrans(IDSEP,altCharacter)
 unmapSeparators = str.maketrans(altCharacter, IDSEP)
 
-def makePid(head, *args):
+def createPid(head, *args):
   """make pid from head and list of successive keys.
   Head may be an existing pid, or a naked string
   Keys are converted to string, and illegal characters are converted to altCharacter
@@ -56,7 +56,7 @@ def makePid(head, *args):
   #
   return Pid(sep.join((head, IDSEP.join(ll))))
 
-def makeId(*args):
+def createId(*args):
   """make id from list of successive keys.
   Keys are converted to string, and illegal characters are converted to altCharacter"""
 
@@ -457,7 +457,7 @@ class Pid(str):
         return self.increment(index, -value)
     #end def
     
-    def copy(self):
+    def clone(self):
         """Return copy of pid
         """
         # Use Pid.new to pass it by any 'translater/checking routine'

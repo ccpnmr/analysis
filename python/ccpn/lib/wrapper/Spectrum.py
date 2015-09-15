@@ -21,10 +21,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import itertools
-import os
 
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
 
 # NBNB TBD Surely we do not need one-line wrappers around API-level utilities
 # If the utility is needed here and not in the API, should we not move the code here?

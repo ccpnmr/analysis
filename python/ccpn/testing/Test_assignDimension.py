@@ -1,17 +1,9 @@
 __author__ = 'simon1'
 
-
-from ccpn.util import Io as ccpnIo
 from ccpn.testing.WrapperTesting import WrapperTesting
 
-import unittest
-
-import os
-
-from ccpncore.util import Path
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 
-from unittest.mock import Mock, MagicMock
 
 class Test_makeNmrAtom(WrapperTesting):
 
@@ -75,8 +67,7 @@ class Test_chemicalShift(WrapperTesting):
 
   def setUp(self):
 
-    super().setUp()
-    try:
+    with self.initialSetup():
       spectra = self.loadData('spectra/hsqc.spc')
       self.spectrum = spectra[0] if spectra else None
 
@@ -86,14 +77,10 @@ class Test_chemicalShift(WrapperTesting):
       # NBNB The first shiftList, called 'default' is created automatically
       self.shiftList = self.project.chemicalShiftLists[0]
       self.peakList = self.spectrum.newPeakList() if spectra else None
-    except:
-      # We want tearing down whether this works or not
-      self.tearDown()
-      raise
 
 
   def test_assignDimension(self):
-    peaks = self.peakList.findPeaksNd([[7.0, 111.75], [7.2, 112.2]], dataDims=self.spectrum._wrappedData.sortedDataDims())
+    peaks = self.peakList.pickPeaksNd([[7.0, 111.75], [7.2, 112.2]], dataDims=self.spectrum._wrappedData.sortedDataDims())
     peaks[0].assignDimension(axisCode=libSpectrum.axisCodeMatch('N', self.spectrum.axisCodes),
                              value=self.atom)
     self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom.id))

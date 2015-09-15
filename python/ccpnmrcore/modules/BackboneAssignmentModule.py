@@ -23,14 +23,9 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-
-import pyqtgraph as pg
-
-from PyQt4 import QtCore
-
 import math
 
-from ccpn.lib.windowUtil import navigateToNmrResidue, navigateToPeakPosition
+from ccpnmrcore.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 
 from ccpncore.gui.Button import Button
 from ccpncore.gui.PulldownList import PulldownList

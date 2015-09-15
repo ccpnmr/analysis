@@ -3,6 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -25,17 +26,17 @@ import os
 import sys
 import datetime
 import random
-from ccpncore.lib.typing import Sequence
+
+from ccpncore.util.typing import Sequence
 from ccpn import RestraintContribution
-from ccpn.lib.nef import Util as nefUtil
+from ccpn.lib import Restraint as restraintLib
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
-from ccpncore.lib.Bmrb import bmrb
+from ccpncore.util.Bmrb import bmrb
 from ccpncore.memops import Version
 from ccpncore.util import Pid
 from ccpncore.util import Path
 from ccpncore.util import Common as commonUtil
-from ccpn.util import Io as ccpnIo
-from ccpn.util import General as ccpnGeneral
+
 
 nefExtension = 'nef'
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -188,32 +189,32 @@ def _makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=()
   entry = bmrb.entry.fromScratch(dataName)
 
   # MetaData saveframe
-  entry.addSaveframe(_makeMetaDataFrame(programName=programName, programVersion=programVersion,
+  entry.addSaveframe(_createMetaDataFrame(programName=programName, programVersion=programVersion,
                       coordinateFileName=coordinateFileName, relatedEntries=relatedEntries,
                       programScripts=programScripts, programHistory=programHistory, uuid=uuid))
 
   # Make molecular system
-  entry.addSaveframe(_makeMolecularSystemFrame(chains))
+  entry.addSaveframe(_createMolecularSystemFrame(chains))
 
   # Make shift lists
   for shiftList in shiftLists:
-    entry.addSaveframe(makeShiftListFrame(shiftList))
+    entry.addSaveframe(createShiftListFrame(shiftList))
 
   # Make restraint lists
   for restraintList in restraintLists:
-    entry.addSaveframe(makeRestraintListFrame(restraintList))
+    entry.addSaveframe(createRestraintListFrame(restraintList))
 
   # Make peak list and spectrum frames
   for peakList in peakLists:
-    entry.addSaveframe(makePeakListFrame(peakList))
+    entry.addSaveframe(createPeakListFrame(peakList))
 
   # Make Peak-restraint links frame
-  entry.addSaveframe(makePeakRestraintLinksFrame(restraintLists, peakLists))
+  entry.addSaveframe(createPeakRestraintLinksFrame(restraintLists, peakLists))
 
   return entry
 
 
-def _makeMetaDataFrame(programName:str='CCPN', programVersion:str=None,
+def _createMetaDataFrame(programName:str='CCPN', programVersion:str=None,
                       coordinateFileName:str=None, relatedEntries:Sequence=(),
                       programScripts:Sequence=(), programHistory:Sequence=(),
                       uuid=None):
@@ -273,7 +274,7 @@ def _makeMetaDataFrame(programName:str='CCPN', programVersion:str=None,
   return saveframe
 
 
-def _makeMolecularSystemFrame(chains):
+def _createMolecularSystemFrame(chains):
   """ Make molecular system frame"""
 
   project = chains[0]._project
@@ -405,7 +406,7 @@ def _makeMolecularSystemFrame(chains):
   return saveframe
 
 
-def makeShiftListFrame(shiftList):
+def createShiftListFrame(shiftList):
   """make a saveframe for a shift list"""
 
   sf_category = 'nef_chemical_shift_list'
@@ -434,7 +435,7 @@ def makeShiftListFrame(shiftList):
   #
   return saveframe
 
-def makeRestraintListFrame(restraintList):
+def createRestraintListFrame(restraintList):
   """make a saveframe for a restraint list of whatever type."""
   restraintType = restraintList.restraintType
   potentialType = restraintList.potentialType
@@ -518,12 +519,12 @@ def makeRestraintListFrame(restraintList):
         ordinal += 1
         ll = [ordinal] + row1 + row2 + row3
         if restraintType == 'Dihedral':
-          ll.append(ccpnGeneral.dihedralName(project, restraintItem))
+          ll.append(restraintLib.dihedralName(project, restraintItem))
         loop.addData(ll)
   #
   return saveframe
 
-def makePeakListFrame(peakList):
+def createPeakListFrame(peakList):
   """make saveframe for peakList an containing spectrum"""
 
   # Set up variables
@@ -654,7 +655,7 @@ def makePeakListFrame(peakList):
   return saveframe
 
 
-def makePeakRestraintLinksFrame(restraintLists, peakLists):
+def createPeakRestraintLinksFrame(restraintLists, peakLists):
   """ Make peak-constraint links frame, with links tha match both constraintLists and peakLists"""
 
   # header block
@@ -733,6 +734,8 @@ if __name__ == '__main__':
 
   if len(sys.argv) >= 3:
 
+    from ccpn.lib import Io as ccpnIo
+
     # from ccpncore.util.Io import loadProject
     # from ccpn import Project
     #
@@ -750,7 +753,7 @@ if __name__ == '__main__':
 
     # set up input
     junk, projectDir, outputDir = sys.argv[:3]
-    project = ccpnIo.openProject(projectDir)
+    project = ccpnIo.loadProject(projectDir)
     apiProject = project._wrappedData.root
 
     tt = Path.splitPath(projectDir)

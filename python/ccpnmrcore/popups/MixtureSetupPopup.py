@@ -15,8 +15,8 @@ from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Widget import Widget
 from ccpnmrcore.modules.ScoringMixture import MixtureTable
 
-from ccpn.lib.mixtureUtil import setupMixtures
-from ccpn.lib.mixtureUtil import compareWithLevels
+from ccpn.lib.Mixture import setupMixtures
+from ccpn.lib.Mixture import compareWithLevels
 from functools import partial
 
 solvents = {'Acetic Acid-d4': [0, 11.65, 2.04], 'Acetone-d6 & Water': [0, 2.05, 2.80],
@@ -77,7 +77,7 @@ class MixturePopup(QtGui.QDialog):
         spectrumPid = item.child(j).text(0)
         spectrum = self.project.getByPid(spectrumPid)
         spectra.append(spectrum)
-        spectrum.peakLists[0].findPeaks1dFiltered()
+        spectrum.peakLists[0].pickPeaks1dFiltered()
 
         mixtureTab = sideBar.spectrumMixtures
 

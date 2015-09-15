@@ -65,7 +65,7 @@ class DummySpectrumTest(WrapperTesting):
 
   def test_dummySpectrum(self):
     axisCodes = ('CO','Hn','Nh')
-    spectrum = self.project.makeDummySpectrum(axisCodes)
+    spectrum = self.project.createDummySpectrum(axisCodes)
 
     self.assertEqual(spectrum.name, 'COHnNh@1')
     self.assertEqual(spectrum.isotopeCodes, ('13C', '1H', '15N'))
@@ -77,6 +77,4 @@ class DummySpectrumTest(WrapperTesting):
     self.assertEqual(spectrum.dimensionCount, 3)
     self.assertEqual(spectrum.axisCodes, axisCodes)
     self.assertEqual(spectrum.referencePoints, (0.,0.,0.))
-    self.assertEqual(spectrum.referenceValues, (216, 11.8, 216))
-
-    print ('@~@~', spectrum.chemicalShiftList)
+    self.assertEqual(spectrum.referenceValues, (236., 11.8, 236.))

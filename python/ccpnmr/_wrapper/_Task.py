@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from ccpncore.util import Pid
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpnmr import Window
@@ -53,7 +53,7 @@ class Task(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """local id, of form nameSpace.name"""
-    return Pid.makeId(self._wrappedData.nameSpace, self._wrappedData.name)
+    return Pid.createId(self._wrappedData.nameSpace, self._wrappedData.name)
 
   @property
   def nameSpace(self) -> str:

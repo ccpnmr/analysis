@@ -136,7 +136,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
                                     """)
 
-    self.namespace = {'openProject':self._appBase.openProject,
+    self.namespace = {'loadProject':self._appBase.loadProject,
                       'newProject':self._appBase.newProject, 'loadData':self.loadData, 'window':self,
                       'preferences':self._appBase.preferences, 'project':self._project, 'current':self._appBase.current}
     # self.pythonConsole = Console(parent=self, namespace=self.namespace)
@@ -193,7 +193,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     fileMenu.addAction(Action(self, "New", callback=self._appBase.newProject, shortcut='pn'))
 
-    fileMenu.addAction(Action(self, "Open...", callback=self.openAProject, shortcut="po"))
+    fileMenu.addAction(Action(self, "Open...", callback=self.loadAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self.fillRecentProjectsMenu()
     fileMenu.addAction(Action(self, "Load Data", callback=self.loadData, shortcut='ld'))
@@ -243,7 +243,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # spectrumPeaksMenu.addAction(Action(self, "Print to File", callback=self.printPeaksToFile))
 
     peaksMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
-    peaksMenu.addAction(Action(self, "Find Peaks", callback=self.findPeaks, shortcut='pp'))
+    peaksMenu.addAction(Action(self, "Find Peaks", callback=self.pickPeaks, shortcut='pp'))
 
     newMoleculeMenu = moleculeMenu.addMenu("New")
     # newMoleculeMenu.addAction(Action(self, "From Fasta...", callback=self.createMoleculeFromFasta))
@@ -393,7 +393,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.showSequence()
 
-  def openAProject(self, projectDir=None):
+  def loadAProject(self, projectDir=None):
 
     if projectDir is None:
       currentProjectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
@@ -401,9 +401,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       currentProjectDir = projectDir
 
     if currentProjectDir:
-      self._appBase.openProject(currentProjectDir)
+      self._appBase.loadProject(currentProjectDir)
 
-  def findPeaks(self):
+  def pickPeaks(self):
     from ccpnmrcore.popups.PeakFind import PeakFindPopup
     popup = PeakFindPopup(parent=self, project=self.project)
     popup.exec_()
@@ -437,7 +437,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def fillRecentProjectsMenu(self):
     for recentFile in self._appBase.preferences.recentFiles:
-      self.action = Action(self, text=recentFile, callback=partial(self._appBase.openProject,projectDir=recentFile))
+      self.action = Action(self, text=recentFile, callback=partial(self._appBase.loadProject,projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
 
   def saveBackup(self):
@@ -469,7 +469,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def quitAction(self):
     # delete temporary project directory, if there is one
-    ioUtil.removeTemporaryDirectory(self._project._wrappedData.root)
+    ioUtil.deleteTemporaryDirectory(self._project._wrappedData.root)
       
     prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
     if os.path.exists(prefPath):
@@ -514,9 +514,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
 
-
-  def removeSpectra(self):
-    pass
+  # NBNB sholuld be renamed
+  # def removeSpectra(self):
+  #   pass
 
   def renameSpectra(self):
     pass

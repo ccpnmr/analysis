@@ -142,7 +142,7 @@ def absentOrRemoved(path:str, removeExisting:bool=False, showYesNo:"function"=No
   if os.path.exists(path):
 
     if removeExisting:
-      Path.removePath(path)
+      Path.deletePath(path)
       return True
 
     elif showYesNo:
@@ -157,14 +157,14 @@ def absentOrRemoved(path:str, removeExisting:bool=False, showYesNo:"function"=No
         if not showYesNo('Remove directory', message):
           return False
         else:
-          Path.removePath(path)
+          Path.deletePath(path)
           return True
       else:
         message = '%s already exists (not as a directory), remove it?' % path
         if not showYesNo('Remove file', message):
           return False
         else:
-          Path.removePath(path)
+          Path.deletePath(path)
           return True
     else:
       return False
@@ -443,7 +443,7 @@ def cleanupProject(project):
       logger.removeHandler(handler)
 
 
-def removeTemporaryDirectory(project):
+def deleteTemporaryDirectory(project):
   
   if hasattr(project, '_temporaryDirectory'):  
     project._temporaryDirectory.cleanup()
@@ -529,7 +529,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
       location = ApiPath.getTopObjectPath(project)
       if not absentOrRemoved(location, removeExisting, showYesNo):
         project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
-        removeTemporaryDirectory(project)
+        deleteTemporaryDirectory(project)
         if undo is not None:
           undo.decreaseBlocking()
         return False
@@ -543,14 +543,14 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
     else:
       if newProjectName != oldProjectName:
         project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
-        removeTemporaryDirectory(project)
+        deleteTemporaryDirectory(project)
         if undo is not None:
           undo.decreaseBlocking()
         logger = _createLogger(project)
         return False
       else:
         # TBD: should we be removing it?
-        Path.removePath(newPath)
+        Path.deletePath(newPath)
 
     # check if any topObject activeRepository is not either of above
     refData = project.findFirstRepository(name='refData')
@@ -590,7 +590,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
         implPath = Path.joinPath(newPath, metaConstants.modellingPackageName,
                             metaConstants.implementationPackageName)
         #implPath = pathImplDirectory(newPath)
-        Path.removePath(implPath)
+        Path.deletePath(implPath)
 
         # and need to repoint dataUrl's that were copied over
         oldPathP = oldPath + '/'
@@ -747,7 +747,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
       if changeBackup:
         backupRepository.url = oldBackupUrl
       try:
-        Path.removePath(newPath)
+        Path.deletePath(newPath)
       except:
         pass
 
@@ -755,7 +755,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   
   logger = _createLogger(project)
   
-  removeTemporaryDirectory(project)
+  deleteTemporaryDirectory(project)
 
   if undo is not None:
     undo.decreaseBlocking()
@@ -913,7 +913,7 @@ def backupProject(project, dataLocationStores = None, skipRefData = True, clearO
     dataLocationStores = set()
 
   if clearOutDir:
-    Path.removePath(backupPath)
+    Path.deletePath(backupPath)
 
   topObjects = tuple(project.topObjects) + (project,)
 

@@ -29,9 +29,9 @@ class SpectrumTest(WrapperTesting):
   # Path of project to load (None for new project)
   projectPath = None
 
-  def test_makeDummySpectrum(self, *args, **kw):
-    spectrum = self.project.makeDummySpectrum(axisCodes=['H','N','C'], name='testspec')
+  def test_createDummySpectrum(self, *args, **kw):
+    spectrum = self.project.createDummySpectrum(axisCodes=['H','N','C'], name='testspec')
     self.assertEqual(spectrum.name, 'testspec')
-    spectrum = self.project.makeDummySpectrum(axisCodes = ['Hp','F', 'Ph', 'H'])
+    spectrum = self.project.createDummySpectrum(axisCodes = ['Hp','F', 'Ph', 'H'])
     self.assertEqual(spectrum.name, 'HpFPhH@2')
 

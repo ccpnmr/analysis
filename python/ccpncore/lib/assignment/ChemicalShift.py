@@ -795,7 +795,7 @@ RESCUE2_STATS_MISSING = [('Ala','H',0.033675),
 
 
 #
-# def makeRandomCoilShiftList(molSystems):
+# def createRandomCoilShiftList(molSystems):
 #   """
 #   Make a synthetic chemical shift list using random coil values,
 #   adjusting protein backbone values for sequence where approprate.

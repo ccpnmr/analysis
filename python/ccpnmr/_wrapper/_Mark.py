@@ -21,13 +21,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.lib.typing import Sequence
 from collections import namedtuple
 
+from ccpncore.util.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpnmr import Task
 from ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
+
 
 RulerData = namedtuple('RulerData', ['axisCode', 'position', 'unit', 'label'])
 

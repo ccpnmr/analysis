@@ -134,16 +134,6 @@ def newChemicalShift(parent:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
 
 ChemicalShiftList.newChemicalShift = newChemicalShift
 
-# NBNB should be removed. Use ChemicalShiftList.getChemicalShift(atomId:str) instead.
-#
-# def findChemicalShift(parent:ChemicalShiftList, atomId:(str,NmrAtom)) -> ChemicalShift:
-#   """Get ChemicalShift matching NmrAtom"""
-#   if not isinstance(atomId, str):
-#     atomId = atomId._id
-#   return parent.getChemicalShift(atomId)
-#
-# ChemicalShiftList.findChemicalShift = findChemicalShift
-
 
 # Notifiers:
 className = ApiShift._metaclass.qualifiedName()

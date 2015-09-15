@@ -50,7 +50,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
 
 
     self.buttonBox = ButtonList(self, grid=(5, 2), gridSpan=(1, 2), texts=['Cancel', 'Find Peaks'],
-                           callbacks=[self.reject, self.findPeaks])
+                           callbacks=[self.reject, self.pickPeaks])
 
 
   def selectPeakList(self, item):
@@ -59,7 +59,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
     print('here')
     self.updateContents()
 
-  def findPeaks(self):
+  def pickPeaks(self):
     peakList = self.peakList
     spectralWidths = peakList.spectrum.spectralWidths
     offsets = peakList.spectrum.referenceValues
@@ -73,7 +73,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
 
     apiSpectrumView = peakList.spectrum.spectrumViews[0]._wrappedData
 
-    newPeaks = peakList.findPeaksNd(positions, apiSpectrumView.spectrumView.orderedDataDims,
+    newPeaks = peakList.pickPeaksNd(positions, apiSpectrumView.spectrumView.orderedDataDims,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
 

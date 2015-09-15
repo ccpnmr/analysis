@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.util import Common as commonUtil
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
 
 # Default labelling - must be treated as 'not labeled'
 NULL_LABELLING = 'std'

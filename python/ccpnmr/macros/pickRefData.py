@@ -2,7 +2,7 @@ __author__ = 'simon'
 
 
 
-from ccpn.lib.sampleUtil import setupSamples
+from ccpn.lib.Sample import setupSamples
 
 
 refData = window.leftWidget.spectrumReference
@@ -19,7 +19,7 @@ for i in range(refCount):
     spectrumPid = item.child(j).text(0)
     spectrum = project.getByPid(spectrumPid)
     spectra.append(spectrum)
-    spectrum.peakLists[0].findPeaks1dFiltered()
+    spectrum.peakLists[0].pickPeaks1dFiltered()
 
 sampleTab = window.leftWidget.spectrumSamples
 

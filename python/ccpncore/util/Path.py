@@ -204,7 +204,7 @@ def getDataDirectory():
 
   return getDirectoryFromTop('data')
 
-def removePath(path):
+def deletePath(path):
   """Removes path whether file or directory, taking into account whether symbolic link.
   """
 

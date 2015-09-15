@@ -25,11 +25,9 @@ from collections import abc
 import itertools
 import functools
 
-from ccpncore.util import Pid
+from ccpncore.util import Pid, Types
 from ccpncore.util import Common as commonUtil
 from ccpncore.api.memops.Implementation import DataObject
-
-from ccpncore.lib import Types
 
 
 # PROBLEM:

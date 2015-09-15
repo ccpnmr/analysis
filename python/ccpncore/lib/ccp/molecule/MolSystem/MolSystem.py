@@ -50,7 +50,7 @@ def nextChainCode(molSystem):
   return code
 
 
-def makeChain(molSystem,molecule,code=None):
+def createSimpleChain(molSystem,molecule,code=None):
   """Descrn: Make a molSystem chain based upon an input molecule template
      Inputs: Ccp.MolSystem.MolSystem, Ccp.Molecule.Molecule, Word
      Output: Ccp.MolSystem.Chain

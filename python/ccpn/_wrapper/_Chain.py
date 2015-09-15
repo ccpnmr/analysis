@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -113,7 +113,7 @@ class Chain(AbstractWrapperObject):
     return self._project._data2Obj[newCcpnChain]
                                   
 
-  def finalize(self):
+  def finalise(self):
     """Finalize chain so that it can no longer be modified, and add missing data."""
     self._wrappedData.molecule.isFinalised = True
 
@@ -230,7 +230,7 @@ class Chain(AbstractWrapperObject):
 #   #
 #   return chains
 
-def makeSimpleChain(parent:Project, sequence:(str,tuple), compoundName:str='Molecule_1',
+def createSimpleChain(parent:Project, sequence:(str,tuple), compoundName:str='Molecule_1',
               startNumber:int=1, molType:str=None, isCyclic:bool=False,
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
   """Make new chain from sequence of residue codes, using default linking and variants
@@ -252,9 +252,9 @@ def makeSimpleChain(parent:Project, sequence:(str,tuple), compoundName:str='Mole
     raise ValueError("Chain names %s already exists" % shortName)
 
   if not sequence:
-    raise ValueError("makeChain requires non-empty sequence")
+    raise ValueError("createSimpleChain requires non-empty sequence")
 
-  ccpnMolecule = MoleculeModify.makeMolecule(ccpnMolSystem.root, sequence, molType=molType,
+  ccpnMolecule = MoleculeModify.createMolecule(ccpnMolSystem.root, sequence, molType=molType,
                                              name=compoundName, startNumber=startNumber,
                                              isCyclic=isCyclic)
 
@@ -273,7 +273,7 @@ Chain.clone.__annotations__['return'] = Chain
 # Connections to parents:
 Project._childClasses.append(Chain)
 # Project.newChain = newChain
-Project.makeSimpleChain = makeSimpleChain
+Project.makeSimpleChain = createSimpleChain
 # Project._makeChains = _makeChains
 
 # Notifiers:

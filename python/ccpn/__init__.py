@@ -2,7 +2,7 @@
 
 The standard ways of starting a project are:
 
-- :ref:`ccpn-openProject-ref` (*path*, ...)
+- :ref:`ccpn-loadProject-ref` (*path*, ...)
 - :ref:`ccpn-newProject-ref` (*projectName*, ...)
 - :ref:`ccpn-Project-ref` (*ccpncore.api.ccp.nmr.Nmr.NmrProject*)
 
@@ -18,12 +18,12 @@ All classes in this module are subclasses of the :ref:`ccpn-AbstractWrapperObjec
 Module level functions :
 ------------------------
 
-.. _ccpn-openProject-ref:
+.. _ccpn-loadProject-ref:
 
-ccpn.openProject
+ccpn.loadProject
 ^^^^^^^^^^^^^^^^
 
-.. autofunction:: ccpn.openProject
+.. autofunction:: ccpn.loadProject
 
 .. _ccpn-newProject-ref:
 
@@ -35,7 +35,9 @@ ccpn.newProject
 """
 
 import importlib
+
 from ccpncore.util import ApiFunc
+
 
 # Import classes and set to this module
 # All classes must be imported in correct order for subsequent code
@@ -99,8 +101,8 @@ _sphinxWrappedClasses = _wrappedClasses[1:] + _wrappedClasses[:1]
 
 # set main starting functions in namespace. Must be done after setting Project
 # to avoid circular import problems
-from ccpn.util import Io as ccpnIo
-openProject = ccpnIo.openProject
+from ccpn.lib import Io as ccpnIo
+loadProject = ccpnIo.loadProject
 newProject = ccpnIo.newProject
 
 

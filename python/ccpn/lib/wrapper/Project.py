@@ -97,7 +97,7 @@ def loadProject(project:"Project", path:str, subType:str) -> "Project":
   """Load project from file into application and return the new project"""
 
   if subType == ioFormats.CCPN:
-    return project._appBase.openProject(path)
+    return project._appBase.loadProject(path)
   else:
     raise ValueError("Sequence file type %s is not recognised" % subType)
 

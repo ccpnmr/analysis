@@ -37,51 +37,53 @@ class NmrResidueTest(WrapperTesting):
     res3 = self.project.chains[0].residues[2]
     nr3 = res3.nmrResidue
     nr2.residue = None
-    assert nr2.longPid == "NmrResidue:A.@2.ARG"
+    self.assertEqual(nr2.longPid, "NmrResidue:A.@2.ARG")
     target =  self.project.getByPid('NR:A.2.LYS')
     target.sequenceCode = None
-    assert target.longPid == "NmrResidue:A.@11.LYS"
+    self.assertEqual(target.longPid, "NmrResidue:A.@11.LYS")
     nr2.sequenceCode = '2'
-    assert nr2.longPid == "NmrResidue:A.2.LYS"
+    self.assertEqual(nr2.longPid, "NmrResidue:A.2.LYS")
     newNr = nchain0.newNmrResidue()
-    assert newNr.longPid == "NmrResidue:@.@89."
+    self.assertEqual(newNr.longPid, "NmrResidue:@.@89.")
     nr3.nmrChain = nchain0
-    assert nr3.longPid == "NmrResidue:@.3.GLU"
+    self.assertEqual(nr3.longPid, "NmrResidue:@.3.GLU")
     newNr.residue = res3
-    assert newNr.longPid == "NmrResidue:A.3.GLU"
+    self.assertEqual(newNr.longPid, "NmrResidue:A.3.GLU")
     nchain.shortName = 'X'
-    assert nchain.longPid == "NmrChain:X"
-    assert nr2.longPid == "NmrResidue:X.2.ARG"
+    self.assertEqual(nchain.longPid, "NmrChain:X")
+    self.assertEqual(nr2.longPid, "NmrResidue:X.2.ARG")
+    nr2.sequenceCode = None
+    print('@~@~ NR2', nr2)
     
   def test_fetchNmrResidue(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
     res1 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
     res2 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
-    assert res1 is res2, "fetchNmrResidue takes existing NmrResidue if possible"
+    self.assertIs(res1, res2)
 
   def test_fetchEmptyNmrResidue(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
     res1 = nmrChain.fetchNmrResidue(sequenceCode=None, residueType="ALA")
     sequenceCode = '@%s' % res1._wrappedData.serial
-    assert res1.sequenceCode == sequenceCode
+    self.assertEqual(res1.sequenceCode, sequenceCode)
     res2 = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode)
-    assert res1 is res2, "empty NmrResidue: fetchNmrResidue takes existing NmrResidue if possible"
+    self.assertIs(res1, res2)
 
   def test_offsetNmrResidue(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
     res1 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
     res2 = nmrChain.fetchNmrResidue(sequenceCode="127B-1", residueType="ALA")
-    assert res2._wrappedData.mainResonanceGroup is res1._wrappedData
+    self.assertIs(res2._wrappedData.mainResonanceGroup, res1._wrappedData)
     res3 = nmrChain.fetchNmrResidue(sequenceCode="127B-1", residueType="ALA")
-    assert res2 is res3, "fetchNmrResidue with offset takes existing NmrResidue if possible"
+    self.assertIs(res2, res3)
     res1.delete()
-    assert res2._wrappedData.isDeleted, "Deleting main NmrResidue also deletes satellites"
+    self.assertTrue( res2._wrappedData.isDeleted)
 
   def test_get_by_serialName(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
     res1 = nmrChain.fetchNmrResidue(sequenceCode=None, residueType="ALA")
     serialName = '@%s' % res1._wrappedData.serial
     res2 = nmrChain.fetchNmrResidue(sequenceCode=serialName)
-    assert res1 is res2
+    self.assertIs(res1, res2)
     res3 = nmrChain.fetchNmrResidue(sequenceCode=serialName + '+0')
-    assert res3._wrappedData.mainResonanceGroup is res1._wrappedData
+    self.assertIs(res3._wrappedData.mainResonanceGroup, res1._wrappedData)

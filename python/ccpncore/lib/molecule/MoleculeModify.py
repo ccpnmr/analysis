@@ -36,7 +36,7 @@ from ccpncore.lib.chemComp import Io as chemCompIo
 #
 ##################################################################
 
-def makeMolecule(project, sequence:(list,str), molType:str='protein', name:str="Molecule",
+def createMolecule(project, sequence:(list,str), molType:str='protein', name:str="Molecule",
                  startNumber:int=1, isCyclic=False):
 
   """Descrn: Makes Molecule for a given sequence
@@ -63,9 +63,9 @@ def makeMolecule(project, sequence:(list,str), molType:str='protein', name:str="
 
   try:
     if isinstance(sequence, str):
-      molecule.addOneLetterMolResidues(sequence, molType, startNumber, isCyclic)
+      molecule.extendOneLetterMolResidues(sequence, molType, startNumber, isCyclic)
     else:
-      molecule.addMolResidues(sequence, startNumber, isCyclic)
+      molecule.extendMolResidues(sequence, startNumber, isCyclic)
   except Exception as e:
     try:
       molecule.delete()

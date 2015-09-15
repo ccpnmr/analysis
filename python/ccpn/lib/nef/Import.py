@@ -23,13 +23,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import os
-import json
 import sys
 import collections
-import ccpn
 # from ccpncore.util import Common as commonUtil
 from ccpn.lib.nef import Export
-from ccpncore.lib.Bmrb import bmrb
+from ccpncore.util.Bmrb import bmrb
 
 def bmrbEntry2Data1(entry:bmrb.entry)-> dict:
   """Convert Bmrb entry to nested OrderedDict data structure:
@@ -275,6 +273,8 @@ def readAdditionalFrame(frame, project, nmrCalcRun):
   print ("WARNING: reading of %s saveframes not implemented yet" % frame.get("sf_category"))
 
 if __name__ == '__main__':
+
+  from ccpn.lib import Io as ccpnIo
 
   if len(sys.argv) >= 2:
 

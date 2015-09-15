@@ -4,7 +4,7 @@ hsqc.positiveContourCount = 5
 hsqc.positiveContourFactor = 1.4
 hsqcSpectrumDisplay = self.createSpectrumDisplay(hsqc)
 
-self.removeBlankDisplay()
+self.deleteBlankDisplay()
 
 hsqcPeakList = project.getByPid('PL:hsqc.1')
 

@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
 from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -262,4 +262,4 @@ for clazz in ApiContribution._metaclass.getNonAbstractSubtypes():
 def _fixedResonance2AtomId(fixedResonance:ApiFixedResonance) -> str:
   """Utility function - get AtomId from FixedResonance """
   tags = ('chainCode', 'sequenceCode', 'residueType', 'name')
-  return Pid.makeId(*(getattr(fixedResonance, tag) for tag in tags))
+  return Pid.createId(*(getattr(fixedResonance, tag) for tag in tags))

@@ -21,10 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import os
-from ccpncore.lib.typing import Sequence
-
-from ccpncore.util.Path import checkFilePath
+from ccpncore.util.typing import Sequence
 
 DEFAULT_ISOTOPE_DICT = {
   'H':'1H',

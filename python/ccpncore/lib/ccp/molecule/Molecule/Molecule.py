@@ -54,7 +54,7 @@ def clone(molecule, newName:str=None):
   return newMolecule
 
 
-def addOneLetterMolResidues(molecule, sequence:str, molType:str='protein', startNumber:int=1,
+def extendOneLetterMolResidues(molecule, sequence:str, molType:str='protein', startNumber:int=1,
                             isCyclic:bool=False):
   """Descrn: Adds MolResidues for a sequence of code1Letter to Molecule, using molType.
              Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
@@ -98,14 +98,14 @@ def addOneLetterMolResidues(molecule, sequence:str, molType:str='protein', start
 
   else:
     seqInput= [(molType,x.ccpCode) for x in ll]
-    molResidues = addLinearSequence(molecule, seqInput, seqCodeStart=startNumber,
+    molResidues = extendLinearSequence(molecule, seqInput, seqCodeStart=startNumber,
                                     isCyclic=isCyclic)
 
   #
   return molResidues
 
 
-def addMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=False):
+def extendMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=False):
   """Descrn: Adds MolResidues for a sequence of residueNamee to Molecule.
              Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
      Inputs: Ccp.Molecule.Molecule,
@@ -154,7 +154,7 @@ def addMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=Fal
           break
 
       if offset2 - offset1 > 1:
-        result.extend(addLinearSequence(molecule, seqInput[offset1:offset2],
+        result.extend(extendLinearSequence(molecule, seqInput[offset1:offset2],
                                         seqCodeStart=startNumber+offset1, isCyclic=isCyclic))
         offset1 = offset2
         # End of stretch. Skip ret of loop and go on to next residue
@@ -177,7 +177,7 @@ def addMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=Fal
   return result
 
 
-def addLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
+def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
                        isCyclic:bool=False):
   """Descrn: Add residues to molecule. Fast method, which uses 'override' mode.
              sequence is a list of (molType,ccpCode) tuples - so can make mixed-type
@@ -327,7 +327,7 @@ def addLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
       undo.decreaseBlocking()
 
   if undo is not None and (molResidues or molResLinks):
-    undo.newItem(Undo.deleteAll, addLinearSequence, undoArgs=(molResidues+molResLinks,),
+    undo.newItem(Undo.deleteAll, extendLinearSequence, undoArgs=(molResidues+molResLinks,),
                  redoArgs=(molecule, sequence),
                  redoKwargs = {'seqCodeStart':seqCodeStart, 'isCyclic':isCyclic})
 

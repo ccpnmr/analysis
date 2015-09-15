@@ -92,7 +92,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.delete()
 
   def fillToolBar(self):
-    addStripAction = self.spectrumUtilToolBar.addAction('Add Strip', self.cloneStrip) #self.orderedStrips[0].clone()) # clone first strip
+    addStripAction = self.spectrumUtilToolBar.addAction('Add Strip', self.duplicateStrip) #self.orderedStrips[0].clone()) # clone first strip
     addStripIcon = Icon('iconsNew/plus')
     addStripAction.setIcon(addStripIcon)
     removeStripAction = self.spectrumUtilToolBar.addAction('Remove Strip', lambda self=self: self.orderedStrips[-1].delete()) # remove last strip
@@ -100,7 +100,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     removeStripAction.setIcon(removeStripIcon)
     self.removeStripAction = removeStripAction
 
-  def cloneStrip(self):
+  def duplicateStrip(self):
     newStrip = self._appBase.current.strip.clone()
 
   def hideUtilToolBar(self):

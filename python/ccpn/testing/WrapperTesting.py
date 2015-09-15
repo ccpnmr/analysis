@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 import os
 import unittest
+import contextlib
 import ccpn
 
 from ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
@@ -33,13 +34,21 @@ class WrapperTesting(unittest.TestCase):
   # Path for project to load - can be overridden in subclasses
   projectPath = None
 
-  def setUp(self):
-
+  @contextlib.contextmanager
+  def initialSetup(self):
     if self.projectPath is None:
       self.project = ccpn.newProject('default')
     else:
-      self.project = ccpn.openProject(os.path.join(TEST_PROJECTS_PATH,
-                                                   self.projectPath))
+      self.project = ccpn.loadProject(os.path.join(TEST_PROJECTS_PATH, self.projectPath))
+    try:
+      yield
+    except:
+      self.tearDown()
+      raise
+
+  def setUp(self):
+    with self.initialSetup():
+      pass
 
   def tearDown(self):
     if self.project:

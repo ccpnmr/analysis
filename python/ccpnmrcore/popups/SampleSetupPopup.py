@@ -15,7 +15,7 @@ from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Widget import Widget
 # from ccpnmrcore.modules.SampleScoringTable import SampleTableSimple
 from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
-from ccpn.lib.sampleUtil import setupSamples
+from ccpn.lib.Sample import setupSamples
 
 
 
@@ -89,7 +89,7 @@ class SamplePopup(QtGui.QDialog):
         spectrumPid = item.child(j).text(0)
         spectrum = self.project.getByPid(spectrumPid)
         spectra.append(spectrum)
-        spectrum.peakLists[0].findPeaks1dFiltered()
+        spectrum.peakLists[0].pickPeaks1dFiltered()
         sampleTab = sideBar.spectrumSamples
 
     minimalDistance = self.Distance.value()

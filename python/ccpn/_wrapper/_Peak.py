@@ -21,17 +21,17 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.lib.typing import Sequence
 import itertools
 import operator
 
+from ccpncore.util.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import PeakList
 from ccpn import NmrAtom
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
+from ccpncore.util import Types
 
-from ccpncore.lib import Types
 
 class Peak(AbstractWrapperObject):
   """Peak. Includes values for per-dimension values and for assignments.

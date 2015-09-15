@@ -25,12 +25,12 @@ from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 
 from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
 
-from ccpncore.lib.typing import Sequence
+from ccpncore.util.typing import Sequence
 
 from numpy import argwhere
 from scipy.ndimage import maximum_filter
 
-def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None,
+def pickPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None,
                 doPos:bool=True, doNeg:bool=True,
                 fitMethod:str=None, excludedRegions:Sequence=None,
                 excludedDiagonalDims:Sequence=None, excludedDiagonalTransform:Sequence=None):
@@ -72,7 +72,7 @@ def findPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None
   
   return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
   
-def findPeaks1d(peakList, spectrumView, size=3, mode='wrap'):
+def pickPeaks1d(peakList, spectrumView, size=3, mode='wrap'):
 
    peaks = []
    spectrum = peakList.spectrum
@@ -94,7 +94,7 @@ def findPeaks1d(peakList, spectrumView, size=3, mode='wrap'):
 
 
 
-def findPeaks1dFiltered(peakList, size=9, mode='wrap'):
+def pickPeaks1dFiltered(peakList, size=9, mode='wrap'):
 
 
    peaks = []

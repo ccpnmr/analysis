@@ -1,0 +1,75 @@
+5-7/11/14
+---------
+
+Added many more unit tests.  Unit tests are now thorough.
+A few more bug fixes found with new unit tests.
+A few documentation updates.
+Removed ability to specify cmp function in sort method, replaced with ability to specify key function.
+Removed JSON encoder since it didn't behave consistantly between python2 and python3 and because it wasn't fully implemented.
+Fixed sortTags() method in saveframe.
+
+4/11/14
+--------
+
+Removed last bit of unit testing from bmrb.py and moved it to bmrb_test.
+Added validation option when called directly.
+
+
+3/11/14
+--------
+
+Added more unit tests.
+Fixed bug in validate().
+
+31/10/14
+--------
+
+Sans library updates:
+    Converted sans code to run in python2 and python3.
+    Improved ascii detection function.
+    Converted print statements where errors were to sys.stderr.write statements
+Test code updates:
+    Moved sans and cif tests to unit_test folder
+    Updated sans and cif tests to run in python 3
+
+Fixed bug in addTag() method caused by getTag() changes in previous commit
+
+30/10/14
+--------
+
+Began implementing full unit testing. Bugs found and corrected thus far:
+    Gzipped files fetched from the internet were not decompressed
+    Schema validation failed to catch when a tag's value was too many characters long
+
+29/10/14
+--------
+
+Created python3 compatible sans3 files. (These are not fully ready for use. While they pass the basic tests they need further validation before being used in production.)
+    Modified sans3 parser/lexer to decode btye objects to strings where necessary
+
+bmrb.py
+    Moved a few methods around that were in the wrong order
+    Improvements to the way results are formatted in a loop's getTag method. (When only fetching one tag don't wrap the results in a list)
+    Added depreciated getDataByTag() method back to loop to support legacy code
+    Removed __cmp__ and replaced with __eq__ and __lt__ in entry, saveframe, and loop
+    Made several changes to turn this into a python2/python3 polyglot
+        Converted print functions to python3 style functions to minimize differences between python2 and 3 versions.
+        Converted map functions to list comprehensions where applicable
+        Modified sans module loading to check python version
+        Added some python version detecting code where necessary
+
+
+28/10/14
+--------
+Many changes to bmrb.py
+    Replaced tags from ordered dictionary to list of lists. This was a massive change that required a big overhaul of many methods.
+    Made all tags case insensitive.
+    Replaced all string additions with string formatting methods.
+    Improved code comments in several places
+    Fixed several bugs
+        __delitem__ had a bug under certain conditions in saveframe class
+        addTag would allow the addition of tags with the wrong prefix without throwing an error
+        Several other loop and saveframe methods had the same bug as addTag()
+        Now entry, saveframe, and loop have identically behaving getTag() methods
+    Reverted sortTags() to previous version that doesn't sort loops because loop sorting code was broken.
+    Added svn version tracking to help function

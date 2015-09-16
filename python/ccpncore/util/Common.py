@@ -34,6 +34,8 @@ from ccpncore.util import Path
 from ccpncore.lib import Constants as coreLibConstants
 from ccpncore.memops.metamodel import Constants as metaConstants
 
+WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
+
 # valid characters for file names
 # NB string.ascii_letters and string.digits are not compatible
 # with Python 2.1 (used in ObjectDomain)

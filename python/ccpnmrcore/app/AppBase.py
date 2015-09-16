@@ -74,8 +74,8 @@ class AppBase(GuiBase):
       else:
         apiNmrProject.windowStore = apiWindowStore
     # MainWindow must always exist at this point
-    # mainWindow = project.getWindow('Main')
-    mainWindow = project._data2Obj[apiWindowStore.findFirstWindow(title='Main')]
+    mainWindow = project.getWindow('Main')
+    # mainWindow = project._data2Obj[apiWindowStore.findFirstWindow(title='Main')]
     self.mainWindow = mainWindow
     if self.module == 'screen':
       self.mainWindow.menuBar.addMenu(self.mainWindow.screenMenu)

@@ -28,7 +28,6 @@ from ccpncore.util.typing import Sequence
 from ccpncore.util import Path
 from ccpncore.lib.spectrum.BlockData import determineBlockSizes
 from ccpncore.memops.ApiError import ApiError
-from ccpncore.api.ccp.nmr.Nmr import ExpDimRef
 
 DEFAULT_ISOTOPE_DICT = {
   'H':'1H',
@@ -231,7 +230,7 @@ def dimensionTransferType(dataDims:Sequence)->str:
   expDimRefs = [x.expDim.sortedExpDimRefs()[0] for x in dataDims]
   return _expDimRefTransferType(*expDimRefs)
 
-def _expDimRefTransferType(expDimRef1:ExpDimRef, expDimRef2:ExpDimRef)->str:
+def _expDimRefTransferType(expDimRef1:'ExpDimRef', expDimRef2:'ExpDimRef')->str:
   """Get ExpTransferType and isDirect boolean connecting two expDimRefs - uses heuristics"""
 
   # First try looking for one-bond axisCodes

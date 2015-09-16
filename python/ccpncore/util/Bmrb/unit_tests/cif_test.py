@@ -3,12 +3,20 @@
 import os
 import sys
 
-sys.path.append( os.path.join(os.path.dirname(os.path.realpath(__file__)), "..") )
+# sys.path.append( os.path.join(os.path.dirname(os.path.realpath(__file__)), "..") )
+#
+# from sans import STARLexer
+# from sans import ErrorHandler, ContentHandler
+# from sans import cifparser
+# from sans import quote
 
-from sans import STARLexer
-from sans import ErrorHandler, ContentHandler
-from sans import cifparser
-from sans import quote
+
+from ccpncore.util.Bmrb import sans
+STARLexer = sans.STARLexer
+ErrorHandler = sans.ErrorHandler
+ContentHandler = sans.ContentHandler
+cifparser = sans.cifparser
+quote = sans.quote
 
 class Test( ContentHandler, ErrorHandler ) :
     def comment( self, line, text ) :

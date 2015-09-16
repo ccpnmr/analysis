@@ -4,8 +4,9 @@
 import os
 import sys
 
-sys.path.append( os.path.join(os.path.dirname(os.path.realpath(__file__)), "..") )
-import sans
+# sys.path.append( os.path.join(os.path.dirname(os.path.realpath(__file__)), "..") )
+# import sans
+from ccpncore.util.Bmrb import sans
 
 class Test( sans.ContentHandler, sans.ErrorHandler ) :
     def comment( self, line, text ) :

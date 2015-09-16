@@ -7,9 +7,11 @@ from __future__ import absolute_import
 import sys
 import os
 
-SANS_PATH = os.path.realpath( os.path.join( os.path.split( __file__ )[0], "../" ) )
-sys.path.append( SANS_PATH )
-import sans
+# SANS_PATH = os.path.realpath( os.path.join( os.path.split( __file__ )[0], "../" ) )
+# sys.path.append( SANS_PATH )
+# import sans
+
+from ccpncore.util.Bmrb import sans
 
 class Handler( sans.ContentHandler ) :
     def startData( self, line, name ) :

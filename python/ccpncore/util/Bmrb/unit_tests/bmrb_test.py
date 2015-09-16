@@ -17,19 +17,21 @@ else:
     from urllib2 import urlopen, HTTPError
 
 # Local imports
-sys.path.append( os.path.join(os.path.dirname(os.path.realpath(__file__)), "..") )
-import bmrb
-
-# We will use this for our tests
-our_path = os.path.dirname(os.path.realpath(__file__))
-database_entry = bmrb.entry.fromDatabase(15000)
-sample_file_location = os.path.join(our_path, "sample_files","bmr15000_3.str")
-file_entry = bmrb.entry.fromFile(sample_file_location)
+# sys.path.append( os.path.join(os.path.dirname(os.path.realpath(__file__)), "..") )
+# import bmrb
+from ccpncore.util.Bmrb import bmrb
 
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
-        self.entry = copy(database_entry)
+
+        # We will use this for our tests
+        self.our_path = os.path.dirname(os.path.realpath(__file__))
+        self.database_entry = bmrb.entry.fromDatabase(15000)
+        self.sample_file_location = os.path.join(self.our_path, "sample_files","bmr15000_3.str")
+        self.file_entry = bmrb.entry.fromFile(self.sample_file_location)
+
+        self.entry = copy(self.database_entry)
 
     def test_enableNEFDefaults(self):
         bmrb.enableNEFDefaults()
@@ -69,14 +71,14 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(bmrb._formatTag("test.test"), "test")
 
     def test__InterpretFile(self):
-        with open(sample_file_location, "r") as local_file:
+        with open(self.sample_file_location, "r") as local_file:
             local_version = local_file.read()
 
         # Test reading file from local locations
-        self.assertEqual(bmrb._interpretFile(sample_file_location).read(), local_version)
-        with open(sample_file_location, "rb") as tmp:
+        self.assertEqual(bmrb._interpretFile(self.sample_file_location).read(), local_version)
+        with open(self.sample_file_location, "rb") as tmp:
             self.assertEqual(bmrb._interpretFile(tmp).read(), local_version)
-        with open(os.path.join(our_path, "sample_files","bmr15000_3.str.gz"), "rb") as tmp:
+        with open(os.path.join(self.our_path, "sample_files","bmr15000_3.str.gz"), "rb") as tmp:
             self.assertEqual(bmrb._interpretFile(tmp).read(), local_version)
 
         # Test reading from ftp and http
@@ -111,12 +113,12 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_entry_delitem(self):
         del(self.entry[0])
-        tmp_entry = copy(database_entry)
+        tmp_entry = copy(self.database_entry)
         tmp_entry.frame_list.pop(0)
         self.assertEqual(self.entry, tmp_entry)
 
     def test_entry_eq(self):
-        self.assertEqual(file_entry, database_entry)
+        self.assertEqual(self.file_entry, self.database_entry)
 
     def test_getitem(self):
         self.assertEqual(self.entry['entry_information'], self.entry.getSaveframeByName("entry_information"))
@@ -131,10 +133,10 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(str(self.entry), str(bmrb.entry.fromString(str(self.entry))))
         self.assertRaises(IOError, bmrb.entry.fromDatabase, 0)
         self.assertEqual(str(bmrb.entry.fromScratch(15000)), "data_15000\n\n")
-        self.assertEqual(bmrb.entry.fromFile(os.path.join(our_path, "sample_files","bmr15000_3.str.gz")), self.entry)
+        self.assertEqual(bmrb.entry.fromFile(os.path.join(self.our_path, "sample_files","bmr15000_3.str.gz")), self.entry)
 
     def test___setitem(self):
-        tmp_entry = copy(file_entry)
+        tmp_entry = copy(self.file_entry)
         tmp_entry[0] = tmp_entry.getSaveframeByName('entry_information')
         self.assertEqual(tmp_entry, self.entry)
         tmp_entry['entry_information'] = tmp_entry.getSaveframeByName('entry_information')
@@ -149,7 +151,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
         self.entry.bmrb_id = 14999
         self.entry.frame_list.pop()
-        self.assertEqual(file_entry.compare(self.entry), ["BMRB ID does not match between entries: '15000' vs '14999'.", "The number of saveframes in the entries are not equal: '25' vs '24'.", "No saveframe with name 'assigned_chem_shift_list_1' in other entry."])
+        self.assertEqual(self.file_entry.compare(self.entry), ["BMRB ID does not match between entries: '15000' vs '14999'.", "The number of saveframes in the entries are not equal: '25' vs '24'.", "No saveframe with name 'assigned_chem_shift_list_1' in other entry."])
 
     def test_getmethods(self):
         self.assertEqual(5, len(self.entry.getLoopsByCategory("_Vendor")))

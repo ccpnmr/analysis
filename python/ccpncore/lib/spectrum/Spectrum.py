@@ -30,11 +30,67 @@ from ccpncore.lib.spectrum.BlockData import determineBlockSizes
 from ccpncore.memops.ApiError import ApiError
 from ccpncore.api.ccp.nmr.Nmr import ExpDimRef
 
+DEFAULT_ISOTOPE_DICT = {
+  'H':'1H',
+  'C':'13C',
+  'N':'15N',
+  'P':'31P',
+  'Si':'29Si',
+  'F':'19F',
+  'O':'17O',
+  'Br':'79Br',
+  'J':None,
+  'MQ':None,
+  'delay':None,
+}
 
-def createBlockedMatrix(dataUrl:object, path:str, numPoints:Sequence, blockSizes:Sequence=None,
+# All known axisCodes: ['Br', 'C', 'CA', 'CA1', 'CO', 'CO1', 'C1', 'C2', 'Ch', 'Ch1',
+# 'F', 'H', 'H1', 'H2', 'H3', 'H4', 'Hc', 'Hc1', 'Hcn', 'Hcn1', 'Hn', 'Hn1',
+# 'Jch', 'Jhh', 'Jhn', 'Jhp', 'MQcc', 'MQhh', 'MQhhhh', 'N', 'N1', 'Nh', 'Nh1',
+# 'P', 'delay']
+#
+# 'J' matches 'Jx...'
+
+STANDARD_ISOTOPES = set(x for x in DEFAULT_ISOTOPE_DICT.values() if x is not None)
+
+def name2IsotopeCode(name:str) -> str:
+  """Get standard isotope code matching name or axisCode"""
+  if not name:
+    return None
+
+  for tag,val in sorted(DEFAULT_ISOTOPE_DICT.items()):
+    if name.startswith(tag):
+      return val
+  else:
+    return None
+
+def checkIsotope(text:str) -> str:
+  """Convert string to most probable isatope code - defaulting to '1H"""
+
+  text = text.strip()
+
+  if not text:
+    return '1H'
+
+  if text in STANDARD_ISOTOPES:
+    return text
+
+  if text in DEFAULT_ISOTOPE_DICT:
+    return DEFAULT_ISOTOPE_DICT[text]
+
+  for isotope in STANDARD_ISOTOPES:
+    if isotope in text:
+      return isotope
+
+  else:
+    return name2IsotopeCode(text) or '1H'
+    # return DEFAULT_ISOTOPE_DICT.get(text[0].upper(), '1H')
+
+
+def createBlockedMatrix(dataUrl:'Url', path:str, numPoints:Sequence, blockSizes:Sequence=None,
                         isBigEndian:bool=True, numberType:str='float', isComplex:bool=None,
                         headerSize:int=0, blockHeaderSize:int=0, nByte=4, fileType=None,
-                       **additionalParameters) -> object:
+                       **additionalParameters) -> 'BlockedBinaryMatrix':
   """Create BlockedBinaryMatrix object. Explicit parameters are the most important,
   additional parameters to BlockedBinaryMatrix are passed in additionalParameters"""
   path = Path.normalisePath(path)
@@ -93,14 +149,8 @@ def axisCodeMapping(axisCodes:Sequence, refAxisCodes:Sequence)->dict:
 def _axisCodeMapIndices(axisCodes:Sequence, refAxisCodes:Sequence)->list:
   """get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]
   all axisCodes must match, but result can contain None if refAxisCodes is longer
-  if axisCodes contain duplicates, youwill get one of possible matches"""
+  if axisCodes contain duplicates, you will get one of possible matches"""
 
- # All known axisCodes: ['Br', 'C', 'CA', 'CA1', 'CO', 'CO1', 'C1', 'C2', 'Ch', 'Ch1',
- # 'F', 'H', 'H1', 'H2', 'H3', 'H4', 'Hc', 'Hc1', 'Hcn', 'Hcn1', 'Hn', 'Hn1',
- # 'Jch', 'Jhh', 'Jhn', 'Jhp', 'MQcc', 'MQhh', 'MQhhhh', 'N', 'N1', 'Nh', 'Nh1',
- # 'P', 'delay']
-  #
-  # 'J' matches 'Jx...'
 
   lenDifference = len(refAxisCodes) - len(axisCodes)
   if lenDifference < 0 :

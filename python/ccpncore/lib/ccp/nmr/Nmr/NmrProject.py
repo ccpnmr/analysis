@@ -27,7 +27,7 @@ from ccpncore.util import Common as commonUtil
 from ccpncore.util.typing import Sequence
 
 # from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
-from ccpncore.lib.spectrum.Util import DEFAULT_ISOTOPE_DICT
+from ccpncore.lib.spectrum import Spectrum as spectrumLib
 from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
 from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
 from ccpncore.lib.Io.Formats import AZARA, BRUKER, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
@@ -41,9 +41,9 @@ DEFAULT_SPECTRUM_PARAMETERS = {
   '1H':{'numPoints':128, 'sf':100., 'sw':1280, 'refppm':11.8, 'refpt':0, },
   '13C':{'numPoints':256, 'sf':10., 'sw':2560, 'refppm':236., 'refpt':0, }
 }
-for tag,val in DEFAULT_ISOTOPE_DICT.items():
+for tag,val in spectrumLib.DEFAULT_ISOTOPE_DICT.items():
   # Without additional info, set other one-letter isotopes (including 15N) to match carbon 13
-  if len(tag) == 1 and val not in DEFAULT_SPECTRUM_PARAMETERS:
+  if len(tag) == 1 and val and val not in DEFAULT_SPECTRUM_PARAMETERS:
     DEFAULT_SPECTRUM_PARAMETERS[val] = DEFAULT_SPECTRUM_PARAMETERS['13C']
 
 def loadDataSource(nmrProject, filePath, dataFileFormat):
@@ -140,7 +140,7 @@ def createDummySpectrum(self:'NmrProject', axisCodes:Sequence[str],
 
   # Set up parameters and make Experiment
   numDim = len(axisCodes)
-  isotopeCodes = tuple(DEFAULT_ISOTOPE_DICT[x[0]] for x in axisCodes)
+  isotopeCodes = tuple(spectrumLib.name2IsotopeCode(x) for x in axisCodes)
   if name is None:
     expName = ''.join(x for x in ''.join(axisCodes) if not x.isdigit())
   else:

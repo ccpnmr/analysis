@@ -24,9 +24,7 @@ __version__ = "$Revision$"
 import os
 
 from ccpncore.util.Path import checkFilePath
-
-
-WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
+from ccpncore.util import Common as commonUtil
 
 # Spectrum formats
 AZARA = 'Azara'
@@ -123,7 +121,7 @@ def analyseUrl(filePath):
   # Check for binary files
   fileObj = open(filePath, 'rb')
   firstData = fileObj.read(1024)
-  testData = set([c for c in firstData]) - WHITESPACE_AND_NULL
+  testData = set([c for c in firstData]) - commonUtil.WHITESPACE_AND_NULL
   isBinary = (min([ord(chr(c)) for c in testData]) < 32)
 
   # Deal with binary files

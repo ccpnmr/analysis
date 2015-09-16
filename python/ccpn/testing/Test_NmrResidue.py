@@ -53,7 +53,7 @@ class NmrResidueTest(WrapperTesting):
     self.assertEqual(nchain.longPid, "NmrChain:X")
     self.assertEqual(nr2.longPid, "NmrResidue:X.2.ARG")
     nr2.sequenceCode = None
-    print('@~@~ NR2', nr2)
+    self.assertEqual(nr2.longPid, "NmrResidue:X.@2.ARG")
     
   def test_fetchNmrResidue(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')

@@ -25,7 +25,7 @@ import os, re, sys
 
 import numpy
 
-from ccpncore.lib.spectrum.Util import checkIsotope
+from ccpncore.lib.spectrum.Spectrum import checkIsotope
 # from memops.qtgui.MessageDialog import showError
 
 from array import array

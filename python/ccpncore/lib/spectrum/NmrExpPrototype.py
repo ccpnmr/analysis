@@ -98,7 +98,7 @@ def _measurementCodeMap(nmrExpPrototype, forReversed=False):
   foundCodes = {}
   # get axisCodes per expMeasurement
   for measurement in measurements:
-    code = getAxisCode(measurement)
+    code = rawAxisCode(measurement)
     indx = foundCodes.get(code)
     if indx is None:
       foundCodes[code] = 0
@@ -182,7 +182,7 @@ def _orderedMeasurements(nmrExpPrototype, forReversed=False):
   return measurements
 
 
-def getAxisCode(expMeasurement):
+def rawAxisCode(expMeasurement):
   """Get raw expMeasurement axisCode (without number suffixes) from NmrExpPrototype.ExpMeasurement"""
   tagMapping = {
   'shift':'shift',
@@ -206,7 +206,7 @@ def getAxisCode(expMeasurement):
   if tag == 'delay':
     result = tag
   elif tag == 'shift':
-    result = ''.join(sorted(getAtomSiteAxisCode(x) for x in em.atomSites))
+    result = ''.join(sorted(atomSiteAxisCode(x) for x in em.atomSites))
   else:
     result = tag + ''.join(sorted(isotope2Nucleus(x.isotopeCode).lower() for x in em.atomSites))
 
@@ -223,7 +223,7 @@ def isotope2Nucleus(isotopeCode):
   return isotopeCode[ii:]
 
 
-def getAtomSiteAxisCode(atomSite):
+def atomSiteAxisCode(atomSite):
   """Get axisCode (without number suffixes) from NmrExPrototype.AtomSite"""
 
   name = atomSite.name

@@ -28,7 +28,7 @@ from ccpn import Project
 from ccpn import NmrResidue
 from ccpn import Atom
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
-from ccpncore.lib.spectrum.Util import DEFAULT_ISOTOPE_DICT
+from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 from ccpncore.util import Pid
 
 
@@ -127,7 +127,7 @@ def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAto
 
   if not isotopeCode:
     if name:
-      isotopeCode = DEFAULT_ISOTOPE_DICT.get(name[0])
+      isotopeCode = name2IsotopeCode(name)
     else:
       raise ValueError("newNmrAtom requires either name or isotopeCode as input")
 

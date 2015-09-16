@@ -80,17 +80,16 @@ software development. Bioinformatics 21, 1678-1684.
 """
 
 import numpy
-import os
-import re
+# import os
+# import re
 
 # Additional functions for ccp.nmr.Nmr.DataSource
 #
 # NB All functions must have a mandatory DataSource as the first parameter
 # so they can be used as DataSource methods
 # from ccpncore.lib.spectrum.Integral import getIntegralRegions, setIntegrals, calculateIntegralValues
-from ccpncore.lib.spectrum.Integral import Integral as spInt
 
-from ccpncore.lib.spectrum.formats import NmrPipe
+from ccpncore.lib.spectrum.Integral import Integral as spInt
 
 def getDimCodes(dataSource):
   """ Get dimcode of form hx1, hx2, x1, x2, where the x's are directly bound to 
@@ -225,6 +224,9 @@ def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
       Returns 2D float32 NumPy array in order (y, x) 
       Returns None if numDim < 2 or if there is no dataStore
       Positions are 0-based not 1-based """
+
+  # Import moved here to avoid circular import problems
+  from ccpncore.lib.spectrum.formats import NmrPipe
 
   numDim = dataSource.numDim
   if numDim < 2:
@@ -540,8 +542,6 @@ def automaticIntegration(dataSource,spectralData):
   # for a in dataSource.integrals:
   #   # print(dataSource.integralFactor)
   #
-
-
   return dataSource.integrals
 
 
@@ -578,37 +578,3 @@ def estimateNoise(dataSource):
     dataSource.noiseLevel = float(value)
 
     return dataSource.noiseLevel # Qt can't serialise numpy float types
-
-# def getDimPointFromValue(dataSource, dimension, value):
-#   """ Convert from value (e.g. ppm) to point (counting from 0) for an arbitrary
-#       number of values in a given dimension (counting from 0).  If value is a
-#       number then return a number, otherwise return a list.
-#   """
-#   dataDim = dataSource.findFirstDataDim(dim=dimension+1)
-#   dataDimRef = dataDim.findFirstDataDimRef()
-#
-#   if isinstance(value, (int, float)):
-#     point = dataDimRef.valueToPoint(value) - 1  # -1 because points in data model start from 1
-#   else:
-#     point = []
-#     for v in value:
-#       point.append(dataDimRef.valueToPoint(v) - 1)  # -1 because points in data model start from 1
-#
-#   return point
-    
-# def getDimValueFromPoint(dataSource, dimension, point):
-#   """ Convert from point (counting from 0) to value (e.g. ppm) for an arbitrary
-#       number of points in a given dimension (counting from 0).  If point is a
-#       number then return a number, otherwise return a list.
-#   """
-#   dataDim = dataSource.findFirstDataDim(dim=dimension+1)
-#   dataDimRef = dataDim.findFirstDataDimRef()
-#
-#   if isinstance(point, (int, float)):
-#     value = dataDimRef.pointToValue(point+1)  # +1 because points in data model start from 1
-#   else:
-#     value = []
-#     for p in point:
-#       value.append(dataDimRef.pointToValue(p+1))  # +1 because points in data model start from 1
-#
-#   return value

@@ -220,8 +220,8 @@ def resetAxisCodes(experiment):
 
 
 
-def createDataSource(experiment:object, name:str, numPoints:Sequence, sw:Sequence,
-                     refppm:Sequence, refpt:Sequence, dataStore:object=None,
+def createDataSource(experiment:'Experiment', name:str, numPoints:Sequence, sw:Sequence,
+                     refppm:Sequence, refpt:Sequence, dataStore:'DataStore'=None,
                      scale:float=1.0, details:str=None, numPointsOrig:Sequence=None,
                      pointOffset:Sequence=None, isComplex:Sequence=None,
                      **additionalParameters) -> object:

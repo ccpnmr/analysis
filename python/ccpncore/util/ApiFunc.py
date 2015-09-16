@@ -96,7 +96,14 @@ def _addModuleFunctionsToApiClass(relModuleName, apiClass, rootModuleName='ccpnc
   try:
     module = importlib.import_module(moduleName)
   except ImportError:
-    # print ("Missing %s %s" % (moduleName, apiClass))
+    ll = moduleName.split('.')
+    ll[-1] += '.py'
+    if os.path.exists(os.path.join(Path.getPythonDirectory(), *ll)):
+      # The file exists, so there must be an error we should know about
+      raise
+    else:
+      # This happens when there is just no library code for a class - quite common
+      pass
     return
 
   for key in dir(module):
@@ -109,3 +116,4 @@ def _addModuleFunctionsToApiClass(relModuleName, apiClass, rootModuleName='ccpnc
     # third condition checks whether this is a function (rather than a class, etc.)
     if hasattr(value, '__module__') and value.__module__ == moduleName and callable(value):
       setattr(apiClass, key, value)
+

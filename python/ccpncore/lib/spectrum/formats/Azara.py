@@ -23,10 +23,9 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 import os, sys
 
-from ccpncore.lib.spectrum.Util import checkIsotope
+from ccpncore.lib.spectrum.Spectrum import checkIsotope
+from ccpncore.util import Common as commonUtil
 # from memops.qtgui.MessageDialog import showError
-
-WHITESPACE_AND_NULL =  set(['\x00', '\t', '\n', '\r', '\x0b', '\x0c'])
 
 FILE_TYPE = 'Azara'
 
@@ -37,7 +36,7 @@ def readParams(filePath):
   fileObj = open(filePath, 'rb')
   firstData = fileObj.read(1024)
   
-  testData = set([c for c in firstData]) - WHITESPACE_AND_NULL
+  testData = set([c for c in firstData]) - commonUtil.WHITESPACE_AND_NULL
   if min([ord(chr(c)) for c in testData]) < 32:
     dataFile = filePath
     dirName, fileName = os.path.split(filePath)

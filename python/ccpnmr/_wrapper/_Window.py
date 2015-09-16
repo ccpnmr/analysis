@@ -118,7 +118,7 @@ Project.newWindow = newWindow
 class MainWindow(Window, GuiMainWindow):
   """GUI main window, corresponds to OS window"""
 
-  def __init__(self, project:Project, wrappedData:object):
+  def __init__(self, project:Project, wrappedData:ApiWindow):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
     GuiMainWindow.__init__(self)
@@ -132,7 +132,7 @@ class MainWindow(Window, GuiMainWindow):
 class SideWindow(Window, GuiWindow):
   """GUI side window, corresponds to OS window"""
 
-  def __init__(self, project:Project, wrappedData:object):
+  def __init__(self, project:Project, wrappedData:ApiWindow):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
     GuiWindow.__init__(self)

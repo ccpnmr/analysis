@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 import os, sys, array, re
 
-from ccpncore.lib.spectrum.Util import checkIsotope
+from ccpncore.lib.spectrum.Spectrum import checkIsotope
 # from memops.qtgui.MessageDialog import showError
 
 # Varian uses convention H1, C13, etc.

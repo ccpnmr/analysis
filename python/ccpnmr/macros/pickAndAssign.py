@@ -1,6 +1,13 @@
 from ccpn.lib.Assignment import copyAssignments, isInterOnlyExpt
 
 
+
+def getExptDict(project):
+  exptDict = {}
+  for peakList in project.peakLists[1:]:
+    exptDict[peakList.spectrum.experimentType] = []
+  return exptDict
+
 if len(project.nmrChains) == 0:
   c = project.newNmrChain()
 else:
@@ -139,6 +146,7 @@ copyAssignments(hncocacb, hncoca)
 
 
 # nmrResidues2 = peakLists3.peaks
+
 
 
 for nmrResidue in project.nmrResidues:

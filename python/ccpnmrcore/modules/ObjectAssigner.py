@@ -12,13 +12,13 @@ from ccpncore.gui.Table import ObjectTable, Column
 
 from ccpn.lib.Assignment import CCP_CODES, ATOM_NAMES
 
-from ccpnmrcore.gui.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,
-                                                      peaksAreOnLine, intersectionOfAll,
-                                                      sameAxisCodes,
-                                                      getAxisCodeForPeakDimension,
-                                                      getIsotopeCodeForPeakDimension,
-                                                      getShiftlistForPeak,
-                                                      matchingNmrAtomsForDimensionOfPeaks)
+# from ccpnmrcore.gui.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,
+#                                                       peaksAreOnLine, intersectionOfAll,
+#                                                       sameAxisCodes,
+#                                                       getAxisCodeForPeakDimension,
+#                                                       getIsotopeCodeForPeakDimension,
+#                                                       getShiftlistForPeak,
+#                                                       matchingNmrAtomsForDimensionOfPeaks)
 
 class ObjectAssigner(QtGui.QWidget, Base):
   def __init__(self, parent, project, dim, objects, opts, **kw):

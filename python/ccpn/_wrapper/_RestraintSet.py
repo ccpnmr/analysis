@@ -27,7 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
 from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
-from ccpncore.lib.spectrum.Util import DEFAULT_ISOTOPE_DICT
+from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 
 
 class RestraintSet(AbstractWrapperObject):
@@ -101,7 +101,7 @@ class RestraintSet(AbstractWrapperObject):
     result = apiNmrConstraintStor.findFirstFixedResonance(**dd)
 
     if result is None:
-      dd['isotopeCode'] = DEFAULT_ISOTOPE_DICT.get(tt[3][0])
+      dd['isotopeCode'] = name2IsotopeCode(tt[3])
       result = apiNmrConstraintStor.newFixedResonance(**dd)
     #
     return result

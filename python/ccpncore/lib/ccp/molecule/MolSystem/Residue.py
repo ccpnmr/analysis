@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.lib.spectrum.Util import DEFAULT_ISOTOPE_DICT
+from ccpncore.lib.spectrum.Spectrum import DEFAULT_ISOTOPE_DICT
 from ccpncore.lib.molecule import Labelling
 
 def findLinkedResidue(residue, linkCode:str='prev'):
@@ -48,9 +48,6 @@ def findLinkedResidue(residue, linkCode:str='prev'):
     return None
   else:
     return residue.chain.findFirstResidue(seqId=newMolResidue.serial)
-
-
-
 
 
 # NBNB TBD FIXME update this to work.

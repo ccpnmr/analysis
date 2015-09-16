@@ -48,7 +48,7 @@ from ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
 #
 #   return spectrum
 
-def loadData(project:object, path:str) -> (list,None):
+def loadData(project:'Project', path:str) -> (list,None):
   """Load data in url, determining type first."""
 
   dataType, subType, usePath = ioFormats.analyseUrl(path)

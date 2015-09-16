@@ -1,4 +1,4 @@
-"""Module Documentation here
+"""General utilities
 
 """
 #=========================================================================================
@@ -22,31 +22,39 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.typing import Sequence
-
-# NBNB TBD Surely we do not need one-line wrappers around API-level utilities
-# If the utility is needed here and not in the API, should we not move the code here?
-
-# NBNB TBD parameters need renaming to distinguish api and wrapper objects
-
-def getPlaneData(spectrum:'Spectrum', position:Sequence=None, xDim:int=0, yDim:int=1):
-
-  return spectrum._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-  
-def getSliceData(spectrum:'Spectrum', position:Sequence=None, sliceDim:int=0):
-
-  return spectrum._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
-
-# Complex and not currently used. Let us keep it out. RHF
-# def getRegionData(spectrum:object, startPoint:Sequence, endPoint:Sequence):
-#
-#   return spectrum._apiDataSource.getRegionData(startPoint, endPoint)
-
-def automaticIntegration(spectrum, spectralData):
-
-  return spectrum._apiDataSource.automaticIntegration(spectralData)
+from ccpncore.util import Pid
 
 
-def estimateNoise(spectrum):
-  return spectrum._apiDataSource.estimateNoise()
+def dihedralName(project, restraintItem:tuple) -> str:
+  """Get dihedral angle name from four-element atomId tuple"""
+
+  if len(restraintItem) == 4:
+    # Dihedrals must have four atomId items
+
+    residues = []
+    atomNames = []
+    for atomId in restraintItem:
+      ll = Pid.splitId(atomId)
+      atomNames.append(ll[-1])
+      residues.append(project.getByPid(Pid.createPid('Residue', *ll[:3])))
+
+    if None in atomNames or None in residues:
+      # These are not correct atomId. Just return NOne
+      return None
+
+    if residues[0]._wrappedData.molResidue.nextMolResidue is residues[-1]._wrappedData.molResidue:
+      # last residue is sequential successor to first
+      if (atomNames == ['N', 'CA', 'C', 'N'] and
+          residues[0] is residues[1] and
+          residues[0] is residues[2]):
+        return 'PSI'
+      elif (atomNames == ['C', 'N', 'CA', 'C'] and
+          residues[1] is residues[2] and
+          residues[1] is residues[3]):
+        return 'PHI'
+  #
+  return None
+
+
+
 

@@ -30,7 +30,7 @@ from ccpncore.util.typing import Sequence
 from numpy import argwhere
 from scipy.ndimage import maximum_filter
 
-def pickPeaksNd(peakList:object, positions:Sequence=None, dataDims:Sequence=None,
+def pickPeaksNd(peakList:'PeakList', positions:Sequence=None, dataDims:Sequence=None,
                 doPos:bool=True, doNeg:bool=True,
                 fitMethod:str=None, excludedRegions:Sequence=None,
                 excludedDiagonalDims:Sequence=None, excludedDiagonalTransform:Sequence=None):

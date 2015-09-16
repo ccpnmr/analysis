@@ -33,6 +33,7 @@ ATOM_NAMES = ('C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'C
               'NE2', 'NH1', 'NH2', 'NZ')
 
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms
+from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 from sklearn import svm
 
@@ -40,12 +41,6 @@ def isInterOnlyExpt(string):
   expList = ('HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond')
   if(any(expType in string.upper() for expType in expList)):
     return True
-
-def getExptDict(project):
-  exptDict = {}
-  for peakList in project.peakLists[1:]:
-    exptDict[peakList.spectrum.experimentType] = []
-  return exptDict
 
 def assignAlphas(nmrResidue, peaks):
 
@@ -138,20 +133,21 @@ def getNmrAtomPrediction(ccpCode, value):
 
   return finalPredictions
 
-def getIsotopeCodeOfAxis(axisCode):
-  """
-
-  Takes an axisCode and returns the appropriate isotope code
-  Inputs:
-  :param axisCode
-  :returns isotopeCode
-  """
-  if axisCode[0] == 'C':
-    return '13C'
-  if axisCode[0] == 'N':
-    return '15N'
-  if axisCode[0] == 'H':
-    return '1H'
+# NBNB replaced by ccpncore.lib.spectrum.Spectrum.name2IsotopeCode
+# def getIsotopeCodeOfAxis(axisCode):
+#   """
+#
+#   Takes an axisCode and returns the appropriate isotope code
+#   Inputs:
+#   :param axisCode
+#   :returns isotopeCode
+#   """
+#   if axisCode[0] == 'C':
+#     return '13C'
+#   if axisCode[0] == 'N':
+#     return '15N'
+#   if axisCode[0] == 'H':
+#     return '1H'
 
 def copyAssignments(referencePeakList, matchPeakList):
   """
@@ -174,8 +170,9 @@ def copyAssignments(referencePeakList, matchPeakList):
 
   matchAxisCodes = matchPeakList.spectrum.axisCodes
 
-
-  mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes if i in refAxisCodes]
+  # Replaced with standard library function
+  # mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes if i in refAxisCodes]
+  mappingArray = spectrumLib._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
 
   for peak in matchPeakList.peaks:
     matchArray = []
@@ -191,9 +188,13 @@ def copyAssignments(referencePeakList, matchPeakList):
     #   print(abs(value), peak.peakList.spectrum.assignmentTolerances)
       print(project.getByPid(result).position, peak.position)
       dimNmrAtoms = project.getByPid(result).dimensionNmrAtoms
-      for axisCode in refAxisCodes:
+      for ii,refAxisCode in refAxisCodes:
         # print(axisCode)
-        peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
+        peak.assignDimension(axisCode=refAxisCode, value=dimNmrAtoms[ii])
+      # Refactored. RHF
+      # for axisCode in refAxisCodes:
+      #   # print(axisCode)
+      #   peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
 
 def propagateAssignments(peaks=None, referencePeak=None, current=None, tolerances=None):
 
@@ -277,16 +278,14 @@ def propagateAssignments(peaks=None, referencePeak=None, current=None, tolerance
           peak.assignDimension(axisCode, nmrAtom)
 
 
+# Not in use - RHF
+# def assignPeakDimension(peak, dim, nmrAtom):
+#     axisCode = getAxisCodeForPeakDimension(peak, dim)
+#     peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
 
-
-def getAxisCodeForPeakDimension(peak, dim):
-    return peak.peakList.spectrum.axisCodes[dim]
-
-def assignPeakDimension(peak, dim, nmrAtom):
-    axisCode = getAxisCodeForPeakDimension(peak, dim)
-    peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
-    shiftList = peak.peakList.spectrum.chemicalShiftList
-    shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
+    # No longer necessary
+    # shiftList = peak.peakList.spectrum.chemicalShiftList
+    # shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
 
 
 

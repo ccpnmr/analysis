@@ -42,7 +42,7 @@ from ccpncore.memops.format.xml import XmlIO
 from ccpncore.lib.Constants import standardResidueCcpCodes
 
 
-def getChemComp(project, molType, ccpCode, download=True, partialLoad=False):
+def fetchChemComp(project, molType, ccpCode, download=True, partialLoad=False):
   """ get ChemComp corresponding to molType,ccpCode, 
   looking 1) in memory, 2) in Repositories on lookup path,
   3)  downloading from PDBe ChemComp server.
@@ -203,7 +203,7 @@ def getChemCompCoordArchiveXmlFilePath(chemCompPath,sourceName,molType,ccpCode):
 #
 #   return getDataPath('pdbe','chemComp','archive','ChemCompCoord')
 
-def getChemCompCoord(project, sourceName, molType, ccpCode, download=True, partialLoad=False):
+def fetchChemCompCoord(project, sourceName, molType, ccpCode, download=True, partialLoad=False):
   """ get ChemComp corresponding to molType,ccpCode,
   looking 1) in memory, 2) in Repositories on lookup path,
   3) in allChemCompCoordPath directory, 4) downloading from PDBe ChemComp server.
@@ -422,7 +422,7 @@ def downloadChemCompInfoFromCcpForge(repository, molType, ccpCode, sourceName=No
 #
 #   return ccpCode
 
-def getStdChemComps(project,molTypes=None):
+def fetchStdChemComps(project,molTypes=None):
 
   chemComps = []
 
@@ -435,7 +435,7 @@ def getStdChemComps(project,molTypes=None):
     if standardResidueCcpCodes.has_key(molType):
   
       for ccpCode in standardResidueCcpCodes[molType]:
-        chemComp = getChemComp(project, molType, ccpCode, download=False)
+        chemComp = fetchChemComp(project, molType, ccpCode, download=False)
         if chemComp:
           chemComps.append(chemComp)
 

@@ -47,7 +47,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     # if self.spectrum.sliceColour is None:
     #   self.spectrum.sliceColour = list(spectrumColours.keys())[0]
 
-    self.data = self.getSliceData()
+    self.data = self._apiDataSource.get1dSpectrumData()
 
     # for strip in self.strips:
     if self.spectrum.sliceColour is None:
@@ -72,16 +72,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
       apiDataSource = self._apiDataSource
     else:
       apiDataSource = spectrum._apiDataSource
-    dataDimRef = apiDataSource.findFirstDataDim().findFirstDataDimRef()
-    firstPoint = dataDimRef.pointToValue(0)
-    pointCount = apiDataSource.findFirstDataDim().numPoints
-    lastPoint = dataDimRef.pointToValue(pointCount)
-    pointSpacing = (lastPoint-firstPoint)/pointCount
-    position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
-    sliceData = apiDataSource.getSliceData()
-    scaledData = sliceData*apiDataSource.scale
-    spectrumData = numpy.array([position,scaledData], numpy.float32)
-    return numpy.array(spectrumData,numpy.float32)
+    return apiDataSource.get1dSpectrumData()
 
   def update(self):
     self.plot.curve.setData(self.data[0], self.data[1])

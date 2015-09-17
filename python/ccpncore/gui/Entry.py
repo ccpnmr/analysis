@@ -260,9 +260,10 @@ class LabeledFloatEntry(LabeledEntry):
 
 if __name__ == '__main__':
 
-  from memops.qtgui.Application import Application
+  # from memops.qtgui.Application import Application
+  from ccpncore.gui.Application import Application
 
-  app = Application()
+  app = Application('test', 'test1')
 
   window = QtGui.QWidget()
   

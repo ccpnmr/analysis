@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 import os
 import operator
 
-from ccpncore.lib.chemComp.Util import getChemAtomSetFromAtoms
+from ccpncore.lib.chemComp.Util import chemAtomSetFromAtoms
 
 
 def mapAllAssignments(topObject, assignmentMap=None, molSystem=None, chainMap=None):
@@ -271,7 +271,7 @@ def mapAssignedResonances(topObject, assignmentMap, molSystem=None, chainMap=Non
     else:
       atomSets.sort(key=operator.attrgetter('name'))
     allAtoms = [x for y in atomSets for x in y.atoms]
-    chemAtomSet = getChemAtomSetFromAtoms(allAtoms)
+    chemAtomSet = chemAtomSetFromAtoms(allAtoms)
     if len(set(x.residue for x in allAtoms)) == 1:
       residue = allAtoms[0].residue
     else:

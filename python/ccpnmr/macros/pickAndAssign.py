@@ -1,5 +1,6 @@
 from ccpn.lib.Assignment import copyAssignments, isInterOnlyExpt
 
+# NBNB TBD FIXME. Looks broken. Clean up or removce? RHF
 
 
 def getExptDict(project):

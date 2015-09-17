@@ -52,12 +52,12 @@ def findLinkedResidue(residue, linkCode:str='prev'):
 
 # NBNB TBD FIXME update this to work.
 
-def getResidueObservableAtoms(residue, refExperiment=None, labelling=None,
+def findResidueObservableAtoms(residue, refExperiment=None, labelling=None,
                               minFraction:float=0.1, jCouplingBonds=(1,2,3),
                               usePermissiveShifts:bool=False,
                               chemElements=('H','C','N','F','P')):
   """
-  Determine which atoms of a chem comp varient would give rise to
+  Determine which atoms of a chem comp variant would give rise to
   observable resonances considering a given reference experiment
   and/or an isotope labelling scheme. Can specify minimum fraction of
   an isotope to consider something observable and the chemical elements which

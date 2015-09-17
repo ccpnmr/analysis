@@ -1,4 +1,28 @@
+"""Module Documentation here
 
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2015-09-16 19:00:09 +0100 (Wed, 16 Sep 2015) $"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author: rhfogh $"
+__date__ = "$Date: 2015-09-16 19:00:09 +0100 (Wed, 16 Sep 2015) $"
+__version__ = "$Revision: 8640 $"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 def nmrAtomsForPeaks(peaks, nmrAtoms, intraResidual=False, doubleTolerance=False):
     '''Get a set of nmrAtoms that fit to the dimensions of the
@@ -85,15 +109,14 @@ def matchingNmrAtomsForDimensionOfPeaks(peaks, dim, nmrAtoms,
 
     if not sameAxisCodes(peaks, dim):
         return set()
-    fittingSets = []
+    commonNmrAtoms = set()
     for peak in peaks:
         matchingNmrAtoms = matchingNmrAtomsForPeakDimension(peak, dim,
-                                                                 nmrAtoms,
-                                                                 doubleTolerance=doubleTolerance)
-        fittingSets.append(set(matchingNmrAtoms))
-    common = intersectionOfAll(fittingSets)
-
-    return common
+                                                            nmrAtoms,
+                                                            doubleTolerance=doubleTolerance)
+        # '&=' is set intersection update
+        commonNmrAtoms &= matchingNmrAtoms
+    return commonNmrAtoms
 
 
 def matchingNmrAtomsForPeakDimension(peak, dim, nmrAtoms,
@@ -103,9 +126,11 @@ def matchingNmrAtomsForPeakDimension(peak, dim, nmrAtoms,
     '''
 
     fitting_nmrAtoms = set()
-    shiftList = getShiftlistForPeak(peak)
+    # shiftList = getShiftlistForPeak(peak)
+    shiftList = peak.peakList.chemicalShiftList
     position = peak.position[dim]
-    isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
+    # isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
+    isotopeCode = peak.peakList.spectrum.isotopeCodes[dim]
     tolerance = getAssignmentToleranceForPeakDimension(peak, dim)
     if not position or not isotopeCode or not shiftList:
         return fitting_nmrAtoms
@@ -115,11 +140,9 @@ def matchingNmrAtomsForPeakDimension(peak, dim, nmrAtoms,
         tolerance *= 2
 
     for nmrAtom in nmrAtoms:
-        if not getIsotopeCode(nmrAtom) == isotopeCode:
-            continue
-        if not withinTolerance(nmrAtom, position, shiftList, tolerance):
-            continue
-        fitting_nmrAtoms.add(nmrAtom)
+        if nmrAtom.isotopeCode == isotopeCode and withinTolerance(nmrAtom, position,
+                                                                  shiftList, tolerance):
+          fitting_nmrAtoms.add(nmrAtom)
 
     return fitting_nmrAtoms
 
@@ -170,9 +193,10 @@ def sameAxisCodes(peaks, dim):
     '''
 
     if len(peaks) > 1:
-        axisCode = getAxisCodeForPeakDimension(peaks[0], dim)
+        # axisCode = getAxisCodeForPeakDimension(peaks[0], dim)
+        axisCode = peaks[0].peakList.spectrum.axisCodes[dim]
         for peak in peaks[1:]:
-            if not getAxisCodeForPeakDimension(peak, dim) == axisCode:
+            if not spectrumLib.axisCodesCompare(peak.peakList.spectrum.axisCodes[dim],axisCode):
                 return False
     return True
 
@@ -181,16 +205,18 @@ def sameAxisCodes(peaks, dim):
 # They all involve api lookups that would otherwise make the
 # code less readable.
 
-def getAllNmrAtoms(project, isotope=None):
-    nmrAtoms = [nmrAtom for nmrResidue in project.nmrResidues for nmrAtom in nmrResidue.nmrAtoms]
-    if isotope:
-        selected = [a for a in nmrAtoms if a.isotope == isotope]
-        nmrAtoms = selected
-    return nmrAtoms
+# REplaced by project.nmrAtoms.
+# For isotope filtering, filter the result on nmrAtom.isotopeCode.
+# def getAllNmrAtoms(project, isotope=None):
+#     nmrAtoms = [nmrAtom for nmrResidue in project.nmrResidues for nmrAtom in nmrResidue.nmrAtoms]
+#     if isotope:
+#         selected = [a for a in nmrAtoms if a.isotope == isotope]
+#         nmrAtoms = selected
+#     return nmrAtoms
 
-
-def getIsotopeCodeForPeakDimension(peak, dim):
-    return peak.peakList.spectrum.isotopeCodes[dim]
+# replaced by inline code
+# def getIsotopeCodeForPeakDimension(peak, dim):
+#     return peak.peakList.spectrum.isotopeCodes[dim]
 
 
 def getAssignmentToleranceForPeakDimension(peak, dim):
@@ -203,27 +229,30 @@ def getAssignmentToleranceForPeakDimension(peak, dim):
       spectrum.assignmentTolerances = assignmentTolerances
       return spectrum.assignmentTolerances[dim]
 
-def getIsotopeCode(nmrAtom):
-    return nmrAtom._apiResonance.isotopeCode
+# Replaced by nmrAtom.isotopeCode
+# def getIsotopeCode(nmrAtom):
+#     return nmrAtom._apiResonance.isotopeCode
 
 
-def getAxisCodeForPeakDimension(peak, dim):
-    return peak.peakList.spectrum.axisCodes[dim]
+# replaced by inline code
+# def getAxisCodeForPeakDimension(peak, dim):
+#     return peak.peakList.spectrum.axisCodes[dim]
 
 
-def getShiftlistForPeak(peak):
-    return peak.peakList.spectrum.chemicalShiftList
-
+# replaced by inline code
+# def getShiftlistForPeak(peak):
+#     return peak.peakList.spectrum.chemicalShiftList
 
 # Just Math
 
-def intersectionOfAll(sets):
-
-    if not sets:
-        return set()
-    if len(sets) == 1:
-        return sets[0]
-    intersection = sets[0]
-    for s in sets[1:]:
-        intersection = intersection.intersection(s)
-    return intersection
+# Replaced by set.intersection(*sets)
+# def intersectionOfAll(sets):
+#
+#     if not sets:
+#         return set()
+#     if len(sets) == 1:
+#         return sets[0]
+#     intersection = sets[0]
+#     for s in sets[1:]:
+#         intersection = intersection.intersection(s)
+#     return intersection

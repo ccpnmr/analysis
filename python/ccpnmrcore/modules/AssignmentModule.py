@@ -15,12 +15,9 @@ from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.CheckBox import CheckBox
 
-from ccpnmrcore.gui.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,
-                                                      peaksAreOnLine, intersectionOfAll,
-                                                      sameAxisCodes,
-                                                      getAxisCodeForPeakDimension,
-                                                      getIsotopeCodeForPeakDimension,
-                                                      getShiftlistForPeak)
+from ccpnmrcore.gui.assignmentModuleLogic import (nmrAtomsForPeaks,
+                                                      peaksAreOnLine,
+                                                      sameAxisCodes)
 
 from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup
 
@@ -344,8 +341,7 @@ class AssignmentModule(CcpnDock, Base):
     peaks = self.peaks
     doubleTolerance = self.doubleToleranceCheckbox.isChecked()
     intraResidual = self.intraCheckbox.isChecked()
-    allNmrAtoms = getAllNmrAtoms(self.project)
-    nmrAtomsForTables = nmrAtomsForPeaks(peaks, allNmrAtoms,
+    nmrAtomsForTables = nmrAtomsForPeaks(peaks, self.project.nmrAtoms,
                                              doubleTolerance=doubleTolerance,
                                              intraResidual=intraResidual)
     Ndimensions = len(nmrAtomsForTables)
@@ -386,11 +382,12 @@ class AssignmentModule(CcpnDock, Base):
     Ndimensions = len(self.peaks[0].position)
     required_heights = [23]
 
-    for dim, listWidget in zip(range(Ndimensions), self.listWidgets):
+    if self.peaks:
+      for dim, listWidget in zip(range(Ndimensions), self.listWidgets):
 
-      self.nmrAtoms = [set(peak.dimensionNmrAtoms[dim]) for peak in self.peaks]
-      self.nmrAtoms = intersectionOfAll(self.nmrAtoms)
-      listWidget.addItems([str(a.pid) for a in self.nmrAtoms])
+        ll = [set(peak.dimensionNmrAtoms[dim]) for peak in self.peaks]
+        self.nmrAtoms = list(sorted(set.intersection(*ll)))
+        listWidget.addItems([str(a.pid) for a in self.nmrAtoms])
 
   def updateNmrAtomsFromListWidgets(self):
 
@@ -503,7 +500,8 @@ class AssignmentModule(CcpnDock, Base):
 
     deltas = []
     for peak in self.peaks:
-      shiftList = getShiftlistForPeak(peak)
+      shiftList = peak.peakList.chemicalShiftList
+      # shiftList = getShiftlistForPeak(peak)
       if shiftList:
         shift = shiftList.getChemicalShift(nmrAtom.id)
         if shift:
@@ -525,7 +523,8 @@ class AssignmentModule(CcpnDock, Base):
 
     deltas = []
     for peak in self.peaks:
-      shiftList = getShiftlistForPeak(peak)
+      shiftList = peak.peakList.chemicalShiftList
+      # shiftList = getShiftlistForPeak(peak)
       if shiftList:
         shift = shiftList.getChemicalShift(nmrAtom.id)
         if shift:
@@ -582,14 +581,16 @@ class AssignmentModule(CcpnDock, Base):
     if nmrAtom is NOL:
       return
     elif nmrAtom is NEW:
-      isotope = getIsotopeCodeForPeakDimension(self.peaks[0], dim)
-      nmrAtom = self.project.newNmrChain().newNmrResidue().newNmrAtom(isotopeCode=isotope)
+      isotopeCode = self.peaks[0].peakList.spectrum.isotopeCodes[dim]
+      NBNB
+      nmrAtom = self.project.newNmrChain().newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)
 
     for peak in self.peaks:
-      axisCode = getAxisCodeForPeakDimension(peak, dim)
+      # axisCode = getAxisCodeForPeakDimension(peak, dim)
 
       if nmrAtom not in peak.dimensionNmrAtoms[dim]:
         newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
+        axisCode = peak.peakList.spectrum.axisCodes[dim]
         peak.assignDimension(axisCode, newAssignments)
 
     self.listWidgets[dim].addItem(nmrAtom.pid)

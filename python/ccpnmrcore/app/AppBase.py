@@ -53,6 +53,9 @@ class AppBase(GuiBase):
 
   def initProject(self, apiProject):
 
+    # # Must be done before _wrapApiProject to put all loaded classes in place
+    # import ccpnmr
+
     # Done this way to sneak the appBase in before creating the wrapper
     apiProject._appBase = self
     self.current = Current(project=None)

@@ -24,11 +24,6 @@ __version__ = "$Revision$"
 
 from ccpncore.util.typing import Sequence
 
-# NBNB TBD Surely we do not need one-line wrappers around API-level utilities
-# If the utility is needed here and not in the API, should we not move the code here?
-
-# NBNB TBD parameters need renaming to distinguish api and wrapper objects
-
 def getPlaneData(spectrum:'Spectrum', position:Sequence=None, xDim:int=0, yDim:int=1):
 
   return spectrum._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)

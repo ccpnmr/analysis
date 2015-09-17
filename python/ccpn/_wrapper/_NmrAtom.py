@@ -86,11 +86,24 @@ class NmrAtom(AbstractWrapperObject):
   def atom(self, value:Atom):
     self._wrappedData.atom = None if value is None else value._wrappedData
 
+  @property
+  def isotopeCode(self) -> str:
+    """isotopeCode of NmrAtom. Set automatically on creation (from NmrAtom name) and cannot be reset"""
+    return self._wrappedData.isotopeCode
+
   # Implementation functions
   def rename(self, value:str):
     """Rename object, changing id, Pid, and internal representation"""
     # NB This is a VERY special case
     # - API code and notifiers will take care of resetting id and Pid
+    if value:
+      isotopeCode = self._wrappedData.isotopeCode
+      newIsotopeCode = name2IsotopeCode(value)
+      if isotopeCode == 'unknown':
+        self._wrappedData.isotopeCode = newIsotopeCode
+      elif newIsotopeCode != isotopeCode:
+        raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
+
     self.name = value
 
   @classmethod
@@ -127,7 +140,7 @@ def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAto
 
   if not isotopeCode:
     if name:
-      isotopeCode = name2IsotopeCode(name)
+      isotopeCode = name2IsotopeCode(name) or 'unknown'
     else:
       raise ValueError("newNmrAtom requires either name or isotopeCode as input")
 

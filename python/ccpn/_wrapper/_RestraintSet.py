@@ -86,7 +86,7 @@ class RestraintSet(AbstractWrapperObject):
   def _fetchFixedResonance(self, assignment:Sequence) -> ApiFixedResonance:
     """Fetch FixedResonance matching assignment tuple, creating anew if needed."""
 
-    apiNmrConstraintStor = self._wrappedData
+    apiNmrConstraintStore = self._wrappedData
 
     tt = assignment
     if len(tt) != 4:
@@ -98,11 +98,11 @@ class RestraintSet(AbstractWrapperObject):
       'residueType':tt[2],
       'name':tt[3]
     }
-    result = apiNmrConstraintStor.findFirstFixedResonance(**dd)
+    result = apiNmrConstraintStore.findFirstFixedResonance(**dd)
 
     if result is None:
       dd['isotopeCode'] = name2IsotopeCode(tt[3])
-      result = apiNmrConstraintStor.newFixedResonance(**dd)
+      result = apiNmrConstraintStore.newFixedResonance(**dd)
     #
     return result
 

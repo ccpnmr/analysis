@@ -162,6 +162,8 @@ class DropBase(GuiBase):
     DataTypes are singular, e.g. Spectrum, Peak, etc. even """
 
     if not pidTypeMap:
+      # NBNB TBD FIXME: Import of ccpnmr should not be allowed here.
+      # It will not break when put in function,but in theory ccpnmrcdore should not depend on ccpnmr
       import ccpn
       import ccpnmr
       for package in ccpn, ccpnmr:

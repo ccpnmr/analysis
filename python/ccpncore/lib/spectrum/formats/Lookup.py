@@ -2,8 +2,6 @@ from PyQt4 import QtCore, QtGui
 
 import pandas as pd
 import csv
-from ccpn import Spectrum
-from ccpncore.util import Pid
 # from ccpnmrcore.gui.SideBar import SideBar
 
 FILE_TYPE = 'xls', 'csv'

@@ -395,6 +395,34 @@ def getSliceData(dataSource, position=None, sliceDim=0):
 
   return data
 
+def get1dSpectrumData(self) -> numpy.array:
+  """Get position,scaledData numpy array for 1D spectrum"""
+
+  # Code refactored:
+  # dataDimRef = self.findFirstDataDim().findFirstDataDimRef()
+  # firstPoint = dataDimRef.pointToValue(0)
+  # pointCount = self.findFirstDataDim().numPoints
+  # lastPoint = dataDimRef.pointToValue(pointCount)
+  # pointSpacing = (lastPoint-firstPoint)/pointCount
+  # position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
+  # sliceData = self.getSliceData()
+  # scaledData = sliceData*self.scale
+  # spectrumData = numpy.array([position,scaledData], numpy.float32)
+  # return numpy.array(spectrumData,numpy.float32)
+
+  # NB Points start at 1; other changes are rationalisations.
+  dataDim = self.findFirstDataDim()
+  pointCount = dataDim.numPoints
+  dataDimRef = dataDim.primaryDataDimRef
+  firstPoint = dataDimRef.pointToValue(1)
+  pointSpacing = dataDimRef.valuePerPoint
+
+  position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
+  scaledData = self.getSliceData()*self.scale
+  return numpy.array([position,scaledData], numpy.float32)
+
+
+
 def getRegionData(dataSource, startPoint, endPoint):
 
   # NBNB TBD BROKEN!!

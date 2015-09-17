@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 
 from ccpncore.util.typing import Sequence
 
-def setPeakDimAssignments(peak, value:Sequence):
+def assignByDimensions(peak, value:Sequence):
   """Set per-dimension assignments on peak.
   value is a list of lists (one per dimension) of resonances.
   NB only works for single-PeakContrib, one-ref-per-dimension assignments
@@ -60,7 +60,7 @@ def setPeakDimAssignments(peak, value:Sequence):
       peakDim.newPeakDimContrib(resonance=resonance, peakContribs=(peakContrib,))
 
 
-def setAssignments(peak, value:Sequence):
+def assignByContrbutions(peak, value:Sequence):
   """Set assignments on peak.
   value is a list of lists (one per combination) of resonances.
   NB only works for single-resonance, one-ref-per-dimension assignments
@@ -80,7 +80,7 @@ def setAssignments(peak, value:Sequence):
         dimResonances[ii].append(resonance)
 
   # reassign dimension resonances
-  setPeakDimAssignments(peak, dimResonances)
+  assignByDimensions(peak, dimResonances)
 
   # Get first PeakContrib before we add new ones
   firstPeakContrib = peak.findFirstPeakContrib()

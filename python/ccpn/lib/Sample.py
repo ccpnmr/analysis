@@ -93,6 +93,9 @@ def scoring(ExperimentPeaks, ListExperimentPeaks, getPeaks, minimalOverlap=None)
   if value < 0.00:
     return -1
 
+
+# NBNB TBD. Reorganise these classes? Talk to Rasmus?
+
 class ExperimentPeaks:
 
   def __init__(self, name, peaks):

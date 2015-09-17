@@ -23,7 +23,8 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 
-from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
+# from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
+# raise Exception("This statement must be moved - you can not import ccpnmr or ccpnmrcore into ccpn or ccpncore")
 
 from ccpncore.util.typing import Sequence
 
@@ -100,7 +101,7 @@ def pickPeaks1dFiltered(peakList, size=9, mode='wrap'):
    peaks = []
    spectrum = peakList.spectrum
    ignoredRegions = [5.4, 4.25]
-   data = GuiSpectrumView1d.getSliceData(spectrum)
+   data = spectrum._apiDataSource.get1dSpectrumData()
    ppmValues = data[0]
    import numpy
    mask = (ppmValues > ignoredRegions[0]) | (ppmValues < ignoredRegions[1])

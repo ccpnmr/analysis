@@ -162,7 +162,7 @@ def extendMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=
 
     # No linear polymer stretch was found. Deal with residue by itself
     # assert  molType1 not in LINEAR_POLYMER_TYPES or offset2 - offset1 == 1
-    chemComp = chemCompIo.getChemComp(root, molType1, ccpCode)
+    chemComp = chemCompIo.fetchChemComp(root, molType1, ccpCode)
     if chemComp:
       chemCompVar  = (chemComp.findFirstChemCompVar(linking='none') or
                       chemComp.findFirstChemCompVar()) # just a default

@@ -22,8 +22,11 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 import numpy
+from ccpncore.util.Types import Tuple
 
 class Integral:
+
+  # NBNB TBD FIXME the peaks property does nto seem to be used anywhere
 
   def __init__(self, spectrum, points, factor=1.0, peaks=None, slope=1.0, bias=0.0):
 
@@ -34,7 +37,7 @@ class Integral:
     self.lastPoint = round(self.dataDimRef.pointToValue(points[-1][0]), 3)
     # self.firstPoint = round(spectrum.pointToPpm(points[0][0], 0), 3)
     # self.lastPoint = round(spectrum.pointToPpm(points[-1][0], 0), 3)
-    self.peaks = peaks
+    self._peaks = peaks
     self.slope = slope
     self.bias = bias
     self.isSelected = False
@@ -43,18 +46,28 @@ class Integral:
       self.relativeVolume = round(self.volume * factor, 1)
     else:
       self.relativeVolume = self.volume
+  #
+  # def getPeaks(self):
+  #   return self.peaks
+  #
+  # def setPeaks(self, peaks):
+  #   self.peaks=peaks
+  #
+  # Converted to property as per standard style guide
+  @property
+  def peaks(self) -> Tuple['Peak', ...]:
+    return tuple(self._peaks())
 
-  def getPeaks(self):
-    return self.peaks
-
-  def setPeaks(self, peaks):
-    self.peaks=peaks
+  @peaks.setter
+  def peak(self, value):
+    self._peaks = list(value)
 
   def addPeak(self, peak):
-    self.peaks.append(peak)
+    self._peaks.append(peak)
 
-  def deletePeak(self, peak):
-    self.peaks.remove(peak)
+  def removePeak(self, peak):
+    # renamed from deletePeak as per style nguidelines
+    self._peaks.remove(peak)
 
   def select(self):
     self.isSelected = True
@@ -168,7 +181,7 @@ class Integral:
     starts = starts[numpy.nonzero(startFlags)]
     ends = ends[numpy.nonzero(endFlags)]
 
-    for i in xrange(len(starts)):
+    for i in range(len(starts)):
       start = max(0, starts[i]-tailLength)
       end = min(nPoints, ends[i]+tailLength)
       a = numpy.array(numpy.arange(start, end)).reshape(-1,1)

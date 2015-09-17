@@ -158,7 +158,7 @@ def _axisCodeMapIndices(axisCodes:Sequence, refAxisCodes:Sequence)->list:
   # Set up match matrix
   matches = []
   for code in axisCodes:
-    matches.append([_compareAxisCodes(code, x) for x in refAxisCodes])
+    matches.append([axisCodesCompare(code, x, mismatch=-999999) for x in refAxisCodes])
 
   # find best mapping
   maxScore = sum(len(x) for x in axisCodes)
@@ -179,7 +179,7 @@ def _axisCodeMapIndices(axisCodes:Sequence, refAxisCodes:Sequence)->list:
   #
   return result
 
-def _compareAxisCodes(code:str, code2:str, mismatch:int=-999999) -> int:
+def axisCodesCompare(code:str, code2:str, mismatch:int=0) -> int:
   """Score code, code2 for matching. Score is length of common prefix, or 'mismatch' if None"""
 
   if not code or not code2 or code[0] != code2[0]:
@@ -219,7 +219,7 @@ def doAxisCodesMatch(axisCodes:Sequence, refAxisCodes:Sequence)->bool:
     return False
 
   for ii, code in enumerate(axisCodes):
-    if _compareAxisCodes(code, refAxisCodes[ii]) < 1:
+    if not axisCodesCompare(code, refAxisCodes[ii]):
       return False
   #
   return True

@@ -25,7 +25,6 @@ from PyQt4 import QtGui, QtCore
 Qt = QtCore.Qt
 
 from ccpncore.gui.Base import Base
-from ccpnmrcore.DropBase import DropBase
 
 class Label(QtGui.QLabel, Base):
 # class Label(QtGui.QLabel, Base):

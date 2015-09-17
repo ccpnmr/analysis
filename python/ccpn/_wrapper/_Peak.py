@@ -213,7 +213,7 @@ class Peak(AbstractWrapperObject):
         atoms = tuple(self.getByPid(x) if isinstance(x, str) else x for x in atoms)
         dimResonances.append(tuple(x._wrappedData for x in atoms if x is not None))
 
-    apiPeak.setPeakDimAssignments(dimResonances)
+    apiPeak.assignByDimensions(dimResonances)
 
   @property
   def assignedNmrAtoms(self) -> Tuple[Tuple[Optional[NmrAtom], ...], ...]:
@@ -354,7 +354,7 @@ def newPeak(parent:PeakList,height:Optional[float]=None, volume:Union[float, Non
       dimResonances[ii] = tuple(x for x in dimValues if x is not None)
 
     # set dimensionAssignments
-    apiPeak.setPeakDimAssignments(dimResonances)
+    apiPeak.assignByDimensions(dimResonances)
 
   if assignments:
     peakDims = apiPeak.sortedPeakDims()

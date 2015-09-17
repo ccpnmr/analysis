@@ -96,7 +96,7 @@ def _getLinearChemCompData(project, molType, ccpCode, linking):
     chemComp = project.findFirstChemComp(molType='other', ccpCode=ccpCode)
 
   if chemComp is None:
-    chemComp = chemCompIo.getChemComp(project, molType, ccpCode)
+    chemComp = chemCompIo.fetchChemComp(project, molType, ccpCode)
 
   if chemComp is None:
     raise ApiError("No chemComp for %s residue %s" % (molType, ccpCode))

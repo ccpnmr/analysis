@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 
 
 
-def getChemAtomSetFromAtoms(atoms):
+def chemAtomSetFromAtoms(atoms):
   """ Get a ChemAtomSet that matches all atoms
 
   .. describe:: Input

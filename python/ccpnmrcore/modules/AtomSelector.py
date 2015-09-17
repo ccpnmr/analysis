@@ -36,8 +36,6 @@ from ccpncore.gui.Widget import Widget
 
 from ccpncore.util import Path
 
-from ccpnmrcore.gui.assignmentModuleLogic import getAxisCodeForPeakDimension, getIsotopeCodeForPeakDimension
-
 class AtomSelector(CcpnDock):
 
   def __init__(self, parent, project=None):
@@ -92,9 +90,11 @@ class AtomSelector(CcpnDock):
     newNmrAtom = r.fetchNmrAtom(name=name)
     for peak in self.current.peaks:
       for dim in range(len(peak.dimensionNmrAtoms)):
-        isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
+        isotopeCode = peak.peakList.spectrum.isotopeCodes[dim]
+        # isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
         if newNmrAtom._apiResonance.isotopeCode == isotopeCode:
-          axisCode = getAxisCodeForPeakDimension(peak, dim)
+          # axisCode = getAxisCodeForPeakDimension(peak, dim)
+          axisCode = peak.peakList.spectrum.axisCodes[dim]
           peak.assignDimension(axisCode=axisCode, value=[newNmrAtom])
       else:
           pass

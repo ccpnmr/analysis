@@ -36,6 +36,8 @@ from ccpncore.gui.Widget import Widget
 
 from ccpncore.util import Path
 
+from ccpnmrcore.gui.assignmentModuleLogic import peaksAreOnLine
+
 class AtomSelector(CcpnDock):
 
   def __init__(self, parent, project=None):
@@ -133,27 +135,28 @@ class AtomSelector(CcpnDock):
       peaks = current.peaks
 
       experiments = []
-      try:
-        self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
+      if peaksAreOnLine(peaks,1):
+        try:
+          self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
 
-      except IndexError:
-        self.current.nmrResidue = self.project.nmrChains[0].newNmrResidue()
-      values = [peak.height for peak in peaks]
-      print(values)
-      experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
-      for value in values:
-        if value < 0:
-          if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-            self.cbButton1.setStyleSheet('background-color: green')
-            self.cbButton2.setStyleSheet('background-color: orange')
-          else:
-            self.cbButton2.setStyleSheet('background-color: green')
-        if value > 0:
-          if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-            self.caButton1.setStyleSheet('background-color: green')
-            self.caButton2.setStyleSheet('background-color: orange')
-          else:
-            self.caButton2.setStyleSheet('background-color: green')
+        except IndexError:
+          self.current.nmrResidue = self.project.nmrChains[0].newNmrResidue()
+        values = [peak.height for peak in peaks]
+        print(values)
+        experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
+        for value in values:
+          if value < 0:
+            if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+              self.cbButton1.setStyleSheet('background-color: green')
+              self.cbButton2.setStyleSheet('background-color: orange')
+            else:
+              self.cbButton2.setStyleSheet('background-color: green')
+          if value > 0:
+            if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+              self.caButton1.setStyleSheet('background-color: green')
+              self.caButton2.setStyleSheet('background-color: orange')
+            else:
+              self.caButton2.setStyleSheet('background-color: green')
 
 
 

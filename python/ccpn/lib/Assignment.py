@@ -114,7 +114,6 @@ def getNmrAtomPrediction(ccpCode, value):
   """
   predictions = {}
   atomNames = getResidueAtoms(ccpCode)
-  print(atomNames)
   for atomName in atomNames:
     predictions[ccpCode, atomName] = getAtomProbability(ccpCode, atomName, value)
 
@@ -129,7 +128,7 @@ def getNmrAtomPrediction(ccpCode, value):
   #
   for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
     key = [key for key, val in refinedPredictions.items() if val==value][0]
-    finalPredictions.append([key, str(value)+' %'])
+    finalPredictions.append([key, value])
 
   return finalPredictions
 

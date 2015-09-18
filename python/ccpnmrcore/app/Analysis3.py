@@ -27,6 +27,7 @@ import sys
 from ccpnmrcore.app.AppBase import AppBase, startProgram
 from ccpnmrcore.app.Version import applicationVersion
 from ccpnmrcore.modules import GuiStrip
+from ccpnmrcore.modules import GuiStripNd
 from ccpnmrcore.modules import GuiStripDisplayNd
 
 
@@ -57,6 +58,7 @@ class Analysis3(AppBase):
 
       for apiStrip in apiSpectrumDisplay.orderedStrips:
         for apiStripSpectrumView in apiStrip.stripSpectrumViews:
+          GuiStripNd._spectrumViewCreated(project, apiStripSpectrumView)
           GuiStripDisplayNd._createdStripSpectrumView(project, apiStripSpectrumView)
           for apiStripPeakListView in apiStripSpectrumView.stripPeakListViews:
             GuiStripDisplayNd._createdStripPeakListView(project, apiStripPeakListView)

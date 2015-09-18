@@ -25,6 +25,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import operator
+
 def resetAllAxisCodes(nmrProject):
   """Reset all axisCodes (ExpDimRef.name) in project to be unique, match the isotope,
   and match the standard Prototype where a prototype is known"""
@@ -360,5 +362,40 @@ def testExpPrototypes(resetCodes=False):
   if resetCodes:
     project.saveModified()
 
+def experimentSynonymSummary():
+  """1) set of atomSiteNames appearing
+  2) List of dimensionCount, synonym, name, atomNames for refExperiments sorted by name """
+
+  from ccpncore.util.Io import newProject
+  project = newProject("ExpPrototypeTest", removeExisting=True)
+
+  # NBNB
+  # 1) Some refExperiments have no synonym - use the name instead for these
+
+  result= []
+  atomSiteNames = set()
+  # Sort refExperiments by name
+  refExperiments = list(sorted([x for y in project.nmrExpPrototypes for x in y.refExperiments],
+                               key=operator.attrgetter('name')))
+  for refExperiment in refExperiments:
+      # print("refExperiment: %s %s " % (refExperiment, refExperiment._ID))
+      ll = []
+      synonym = refExperiment.synonym
+      data = [len(refExperiment.refExpDims), synonym or refExperiment.name,
+              refExperiment.name, ll]
+      result.append(data)
+      for red in refExperiment.sortedRefExpDims():
+        for redr in red.sortedRefExpDimRefs():
+          ss = ','.join(tuple(x.name for x in redr.expMeasurement.atomSites))
+          ll.append(ss)
+          atomSiteNames.add(ss)
+  #
+  return atomSiteNames, result
+
+
 if __name__ == '__main__':
-  testExpPrototypes(resetCodes=True)
+  # testExpPrototypes(resetCodes=True)
+  atomSitesNames, synonymTable = experimentSynonymSummary()
+  print("AtomSite names: %s" % list(sorted(atomSitesNames)))
+  for line in synonymTable:
+    print(line)

@@ -27,6 +27,8 @@ import json
 from ccpn.lib import Io as ccpnIo
 from ccpncore.util import Io as ioUtil
 from ccpncore.gui.Application import Application
+# The following must be there even though the import is not used in this file.
+from ccpncore.gui import resources_rc
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict

@@ -38,6 +38,8 @@ DEFAULT_ISOTOPE_DICT = {
   'F':'19F',
   'O':'17O',
   'Br':'79Br',
+  'D':'2H',
+  'T':'3H',
   'J':None,
   'MQ':None,
   'delay':None,

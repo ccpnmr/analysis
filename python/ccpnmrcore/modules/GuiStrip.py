@@ -124,7 +124,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.plotWidget.addItem(self.grid)
     self.setMinimumWidth(200)
     self.createCrossHair()
-    proxy2 = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
+    #####proxy2 = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
     # self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
@@ -139,6 +139,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.hRulerLineDict = {}  # ruler --> horizontal line for that ruler
     self.initRulers()
     
+    self.mousePosition = None
+
     # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
     # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
     # Notifiers.registerNotify(self.rulerCreated, 'ccpnmr.gui.Task.Ruler', '__init__')
@@ -167,6 +169,20 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   #   self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
   #   self.viewBox.sigRangeChanged.connect(self.updateRegion)
 
+  def newHPhasingTrace(self):
+    
+    for spectrumView in self.spectrumViews:
+      spectrumView.newHPhasingTrace(self.mousePosition.y())
+      
+  def removePhasingTraces(self):
+    
+    for spectrumView in self.spectrumViews:
+      spectrumView.removePhasingTraces()
+
+  def updatePhasing(self, ph0=None, ph1=None):
+    for spectrumView in self.spectrumViews:
+      spectrumView.updatePhasing(ph0, ph1)
+      
   def updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
     
@@ -211,7 +227,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
             otherStrip.xPreviousRegion = xRegion
     
       self.orderedAxes[0].region = self.xPreviousRegion = xRegion
-      self.orderedAxes[1].region = self.yPreviousRegion = yRegion    
+      self.orderedAxes[1].region = self.yPreviousRegion = yRegion
               
     finally:
       
@@ -356,9 +372,10 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     print(event)
 
   def mouseMoved(self, position):
+    # position is in pixels
 
     if self.plotWidget.sceneBoundingRect().contains(position):
-      mousePoint = self.viewBox.mapSceneToView(position)
+      mousePoint = self.viewBox.mapSceneToView(position) # mouse point is in ppm
       axisPositionDict = self.axisPositionDict
       for n, axis in enumerate(self.orderedAxes):
         # TBD: what if x and y have the same (or related) axis codes?
@@ -369,6 +386,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
         else:
           position = axis.position
         axisPositionDict[self._crosshairCode(axis.code)] = position
+      self.mousePosition = position # position is in ppm
       for window in self._appBase.project.windows:
         window.setCrossHairPosition(axisPositionDict)
       ###self.vLine.setPos(mousePoint.x())
@@ -455,8 +473,8 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
   for apiStrip in apiAxis.strips:
     strip = project._data2Obj[apiStrip]
 
+    index = apiStrip.axisOrder.index(apiAxis.code)
     if not strip.beingUpdated:
-      index = apiStrip.axisOrder.index(apiAxis.code)
 
       strip.beingUpdated = True
 
@@ -480,10 +498,17 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
             n = index - 2
             if n >= 0:
               strip.planeToolbar.planeLabels[n].setValue(position)
-          
+        
       finally:
         strip.beingUpdated = False
-        
+    
+    if index == 1:  # ASSUMES that only do H phasing
+      phasingFrame = strip.spectrumDisplay.phasingFrame
+      if phasingFrame.isVisible():
+        strip.updatePhasing(phasingFrame.slider0.value(), phasingFrame.slider1.value())
+      else:
+        strip.updatePhasing()  
+    
 # Add notifier function to Project
 for apiFuncName in ('setPosition', 'setWidth'):
   Project._setupNotifier(_axisRegionChanged, ApiAxis, apiFuncName)

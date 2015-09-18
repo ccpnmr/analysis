@@ -58,7 +58,7 @@ class GuiStripNd(GuiStrip):
     self.peakListViewDict = {}  # peakList --> peakListView
     
     self.haveSetupZWidgets = False
-
+    
     ###self.plotWidget.plotItem.setAcceptDrops(True)
     ###self.viewportWidget = QtOpenGL.QGLWidget()
     ###self.plotWidget.setViewport(self.viewportWidget)
@@ -160,11 +160,14 @@ class GuiStripNd(GuiStrip):
   def mouseMoved(self, positionPixel):
 
     GuiStrip.mouseMoved(self, positionPixel) # position is in pixels
-
+    
     if self.plotWidget.sceneBoundingRect().contains(positionPixel):
       updateHTrace = self.hTraceAction.isChecked()
       updateVTrace = self.vTraceAction.isChecked()
       positionView = self.viewBox.mapSceneToView(positionPixel) # convert to ppm (or whatever)
+
+      self.mousePosition = positionView
+      
       position = [axis.position for axis in self.orderedAxes]
       position[0] = positionView.x()
       position[1] = positionView.y()
@@ -174,7 +177,7 @@ class GuiStripNd(GuiStrip):
 
   def setZWidgets(self):
           
-    for n, zAxis in enumerate(self.orderedAxes[2:]):   
+    for n, zAxis in enumerate(self.orderedAxes[2:]):
       minZPlaneSize = None
       minAliasedFrequency = maxAliasedFrequency = None
       for spectrumView in self.spectrumViews:
@@ -458,7 +461,7 @@ class GuiStripNd(GuiStrip):
 
 def _spectrumViewCreated(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
   strip = project._data2Obj[apiStripSpectrumView.strip]
-  if not strip.haveSetupZWidgets:
+  if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
     strip.setZWidgets()
 
 # Add notifier functions to Project

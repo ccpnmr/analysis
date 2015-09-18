@@ -62,6 +62,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
     for peakList in self.spectrum.peakLists:
       self.strip.showPeaks(peakList)
 
+  def updatePhasing(self, ph0, ph1):
+    pass
+    
   def clicked(self):
     print(self.plot)
     

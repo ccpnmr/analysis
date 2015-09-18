@@ -31,6 +31,7 @@ from ccpn import Project
 
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 
+from ccpncore.gui.Frame import Frame as CoreFrame
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ScrollArea import ScrollArea
@@ -38,6 +39,7 @@ from ccpncore.gui.ToolBar import ToolBar
 
 from ccpnmrcore.DropBase import DropBase
 from ccpnmrcore.gui.Frame import Frame as GuiFrame
+from ccpnmrcore.gui.PhasingFrame import PhasingFrame
 from ccpnmrcore.gui.SpectrumToolBar import SpectrumToolBar
 from ccpnmrcore.modules.GuiModule import GuiModule
 
@@ -72,7 +74,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     self.dock.addWidget(self.spectrumUtilToolBar, 0, 2)# grid=(0, 2), gridSpan=(1, 1))
-
+    
     # toolBarColour = QtGui.QColor(214,215,213)
     # self.positionBox = Label(self.dock)
     # self.dock.addWidget(self.positionBox, 0, 3)#, grid=(0, 3), gridSpan=(1, 1))
@@ -86,7 +88,24 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # self.stripFrame.layout().setContentsMargins(0, 0, 2, 0)
     self.stripFrame.setAcceptDrops(True)
     self.scrollArea.setWidget(self.stripFrame)
+    
+    self.setEnabled(True)
+    
+    self.phasingFrame = PhasingFrame(self.dock, callback=self.updatePhasing, grid=(2, 0), gridSpan=(1, 3))
+    self.phasingFrame.setVisible(False)
 
+  def updatePhasing(self, ph0=None, ph1=None):
+    for strip in self.strips:
+      strip.updatePhasing(ph0, ph1)
+    
+  def togglePhaseConsole(self):
+        
+    isVisible = self.phasingFrame.isVisible()
+    self.phasingFrame.setVisible(not isVisible)
+    if isVisible: # so now not visible
+      self.updatePhasing() # reset to no phasing
+    else:
+      self.updatePhasing(self.phasingFrame.slider0.value(), self.phasingFrame.slider1.value())
 
   def closeDock(self):
     self.delete()

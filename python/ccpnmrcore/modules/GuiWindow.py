@@ -121,7 +121,7 @@ class GuiWindow(DropBase):
     #toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
     QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll)
     QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll)
-    QtGui.QShortcut(QtGui.QKeySequence("Del"), self, lambda: self._appBase.current.deleteSelected(self))
+    QtGui.QShortcut(QtGui.QKeySequence("Del"), self, partial(self._appBase.current.deleteSelected, self))
     QtGui.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark)
     QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
     QtGui.QShortcut(QtGui.QKeySequence("f, r"), self, partial(navigateToNmrResidue, self._parent.project))
@@ -130,7 +130,41 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current))
     QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self.clearCurrentPeaks)
 
-   
+    QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self))
+    QtGui.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self))
+
+    QtGui.QShortcut(QtGui.QKeySequence("p, c"), self, partial(self.togglePhaseConsole, self))
+    QtGui.QShortcut(QtGui.QKeySequence("p, h"), self, self.newHPhasingTrace) # for now only do H, not V
+    QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
+
+  def traceScaleScale(self, window, scale):
+    for spectrumDisplay in window.spectrumDisplays:
+      for strip in spectrumDisplay.strips:
+        for spectrumView in strip.spectrumViews:
+          spectrumView.traceScale *= scale
+    
+  def traceScaleUp(self, window):
+    self.traceScaleScale(window, 2.0)
+    
+  def traceScaleDown(self, window):
+    self.traceScaleScale(window, 0.5)
+    
+  def togglePhaseConsole(self, window):
+    for spectrumDisplay in window.spectrumDisplays:
+      spectrumDisplay.togglePhaseConsole()
+    
+  def newHPhasingTrace(self):
+    
+    strip = self._appBase.current.strip
+    if strip and (strip.spectrumDisplay.window is self):
+      strip.newHPhasingTrace()
+      
+  def removePhasingTraces(self):
+    
+    strip = self._appBase.current.strip
+    if strip and (strip.spectrumDisplay.window is self):
+      strip.removePhasingTraces()
+    
   def clearCurrentPeaks(self):
     self._appBase.current.peaks = []
 

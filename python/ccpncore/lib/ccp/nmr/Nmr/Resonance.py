@@ -100,7 +100,7 @@ def absorbResonance(resonanceA, resonanceB) -> None:
         if objectB is not None:
           MergeObjects.mergeObjects(objectB, objectA)
   
-  # We rae not using covalentlyBound any more - removeed from model
+  # We are not using covalentlyBound any more - removed from model
   # resonanceA.setCovalentlyBound([])
   # resonanceB.setCovalentlyBound([])
         

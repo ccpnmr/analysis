@@ -171,7 +171,6 @@ def withinTolerance(nmrAtom, position, shiftList, tolerance):
 def peaksAreOnLine(peaks, dim):
     '''Returns True when multiple peaks are located
        on a line in the given dimensions.
-
     '''
 
     if not sameAxisCodes(peaks, dim):

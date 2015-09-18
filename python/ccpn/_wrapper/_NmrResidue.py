@@ -170,16 +170,85 @@ class NmrResidue(AbstractWrapperObject):
   # Implementation functions
   def rename(self, value:str=None):
     """Rename NmrResidue. New value must be either 'seqCode' or 'seqCode.residueType"""
-    apiResonasnceGroup = self._wrappedData
+    apiResonanceGroup = self._wrappedData
     if value is None:
-      apiResonasnceGroup.sequenceCode = None
-      apiResonasnceGroup.residueType = None
+      apiResonanceGroup.sequenceCode = None
+      apiResonanceGroup.residueType = None
     else:
       ll = value.split(Pid.IDSEP, 1)
-      sequenceCode = ll[0]
-      apiResonasnceGroup.sequenceCode = sequenceCode
+      apiResonanceGroup.sequenceCode =  ll[0]
       if len(ll) > 1:
-        apiResonasnceGroup.residueType = ll[1]
+        apiResonanceGroup.residueType = ll[1]
+
+  def reassign(self, residueId:str=None, chainCode:str=None, sequenceCode:str=None,
+               residueType:str=None, objectMergeAllowed=True) -> 'NmrResidue':
+    """Reassign NmrResidue to NmrResidue given by residueId or other parameters.
+    The current id is kept for parts that are not overwritten.
+    If the nmrResidue being reassigned to exists and merging is allowed,
+    the two will be merged.
+    NB Merging is NOT undoable
+    """
+    clearUndo = False
+    undo = self._apiResonanceGroup.root._undo
+
+    # Get ID parts to reassign to
+    idParts = self.id.split(Pid.IDSEP)
+    params = [chainCode, sequenceCode, residueType]
+    if residueId:
+      if any(params):
+        raise ValueError("produceNmrAtom: other parameters only allowed if atomId is None")
+      else:
+        for ii,val in enumerate(residueId.split(Pid.IDSEP)):
+          if val:
+            idParts[ii] = val
+    else:
+      for ii,val in enumerate(params):
+        if val:
+          idParts[ii] = val
+
+    # check for existing target and reassign
+    nmrChain = self._project.fetchNmrChain(chainCode)
+    newResonanceGroup = nmrChain._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
+
+    if newResonanceGroup is self._wrappedData:
+      # We are reassigning to self - either a no-op or resetting the residueType
+      result = self
+      if newResonanceGroup.residueType != residueType:
+        newResonanceGroup.residueType = residueType
+
+    elif newResonanceGroup:
+      result = self._project._data2Obj[newResonanceGroup]
+      if not objectMergeAllowed:
+        raise ValueError("New assignment clash with existing assignment,"
+                         " and merging is disallowed")
+      # We are reassigning to existing NmrResidue
+      # Move or merge the NmrAtoms across and delete the current NmrResidue
+      if not residueType or newResonanceGroup.residueType == residueType:
+        for resonance in self._wrappedData.resonances:
+          newResonance = newResonanceGroup.findFirstResonance(implName=resonance.name)
+          if newResonance is None:
+            resonance.resonanceGroup = newResonanceGroup
+          else:
+            # WARNING. This step is NOT undoable, and clears the undo stack
+            clearUndo = True
+            newResonance.absorbResonance(self.resonance)
+
+      else:
+        # We cannot reassign if it involves changing residueType on an existing NmrResidue
+        raise ValueError("Cannot assign to %s.%s.%s: NR:%s.%s.%s already exists"
+        % (chainCode, sequenceCode, residueType,
+           chainCode, sequenceCode, newResonanceGroup.residueType))
+
+    else:
+      # We are moving to new chain
+      result = self
+      self.nmrChain = nmrChain
+    #
+    if clearUndo:
+      undo.clear()
+    #
+    return result
+
 
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:

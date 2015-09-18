@@ -25,12 +25,12 @@ __version__ = "$Revision: 7686 $"
 CCP_CODES =  ('Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn',
               'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr')
 
-ATOM_NAMES = ('C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3', 'CG',
-              'CG1', 'CG2', 'CH2', 'CZ', 'CZ2', 'CZ3', 'H', 'HA', 'HA2', 'HA3', 'HB', 'HB*', 'HB2',
+ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3', 'CG',
+              'CG1', 'CG2', 'CH2', 'CZ', 'CZ2', 'CZ3'], '1H': ['H', 'HA', 'HA2', 'HA3', 'HB', 'HB*', 'HB2',
               'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD3', 'HE', 'HE*', 'HE1', 'HE2', 'HE21',
               'HE22', 'HE3', 'HG', 'HG1', 'HG1*', 'HG12', 'HG13', 'HG2', 'HG2*', 'HG3', 'HH', 'HH11',
-              'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3', 'N', 'ND1', 'NE', 'NE1',
-              'NE2', 'NH1', 'NH2', 'NZ')
+              'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3'],'15N': ['N', 'ND1', 'NE', 'NE1',
+              'NE2', 'NH1', 'NH2', 'NZ']}
 
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
@@ -105,31 +105,31 @@ def getNmrResiduePrediction(nmrResidue, chemicalShiftList):
 
   return finalPredictions
 
-def getNmrAtomPrediction(ccpCode, value):
+def getNmrAtomPrediction(ccpCode, value, isotopeCode):
   """
-  Takes ccpnCode and chemicalShift and predicts atom type
+  Takes ccpnCode, chemicalShift and isotopeCode and predicts atom type
   :param ccpCode:
   :param value:
+  :param isotopeCode:
   :return: dictionary of assignments {(ccpCode, atomName): prediction probability }
   """
   predictions = {}
-  atomNames = getResidueAtoms(ccpCode)
-  for atomName in atomNames:
-    predictions[ccpCode, atomName] = getAtomProbability(ccpCode, atomName, value)
-
+  for atomName in getResidueAtoms(ccpCode, 'protein'):
+    if atomName in ATOM_NAMES[isotopeCode]:
+      predictions[ccpCode, atomName] = getAtomProbability(ccpCode, atomName, value)
   tot = sum(predictions.values())
   refinedPredictions = {}
   for key, value in predictions.items():
-    v = int(value/tot * 100)
-    if v > 0:
-      refinedPredictions[key] = v
+    if value > 1e-2:
+      v = int(value/tot * 100)
+      if v > 0:
+        refinedPredictions[key] = v
   #
   finalPredictions = []
   #
   for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
     key = [key for key, val in refinedPredictions.items() if val==value][0]
     finalPredictions.append([key, value])
-
   return finalPredictions
 
 # NBNB replaced by ccpncore.lib.spectrum.Spectrum.name2IsotopeCode
@@ -151,7 +151,7 @@ def getNmrAtomPrediction(ccpCode, value):
 def copyAssignments(referencePeakList, matchPeakList):
   """
 
-  Takes a reference peakList, creates an SVM for it and uses the SVM to assign nmrAtoms to dimensions
+  Takes a reference peakList and assigns nmrAtoms to dimensions
   of a match peakList based on matching axis codes
   Inputs
   :param referencePeakList:
@@ -163,14 +163,11 @@ def copyAssignments(referencePeakList, matchPeakList):
   refAxisCodes = referencePeakList.spectrum.axisCodes
   refPositions = [numpy.array(peak.position) for peak in referencePeakList.peaks]
   refLabels = [peak.pid for peak in referencePeakList.peaks]
-  # print('refAxisCodes', refAxisCodes)
   clf=svm.SVC()
   clf.fit(refPositions, refLabels)
 
   matchAxisCodes = matchPeakList.spectrum.axisCodes
 
-  # Replaced with standard library function
-  # mappingArray = [matchAxisCodes.index(i) for i in refAxisCodes if i in refAxisCodes]
   mappingArray = spectrumLib._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
 
   for peak in matchPeakList.peaks:
@@ -180,14 +177,12 @@ def copyAssignments(referencePeakList, matchPeakList):
 
     result = ''.join((clf.predict(numpy.array(matchArray))))
     checkArray = [i-j for i,j in zip(list(project.getByPid(result).position), matchArray)]
-    print(project.getByPid(result), peak, list(project.getByPid(result).position), matchArray, checkArray)
 
     if checkArray < list(referencePeakList.spectrum.assignmentTolerances):
     # for value in checkArray:
     #   print(abs(value), peak.peakList.spectrum.assignmentTolerances)
-      print(project.getByPid(result).position, peak.position)
       dimNmrAtoms = project.getByPid(result).dimensionNmrAtoms
-      for ii,refAxisCode in refAxisCodes:
+      for ii, refAxisCode in refAxisCodes:
         # print(axisCode)
         peak.assignDimension(axisCode=refAxisCode, value=dimNmrAtoms[ii])
       # Refactored. RHF

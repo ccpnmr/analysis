@@ -11,7 +11,7 @@ from ccpnmrcore.lib.Window import navigateToNmrResidue
 
 class NmrResidueTable(CcpnDock):
 
-  def __init__(self, parent=None, project=None, name='Chemical Shift Lists', **kw):
+  def __init__(self, parent=None, project=None, name='Nmr Residues', **kw):
 
     # if not nmrChains:
     #   nmrChains = []
@@ -41,10 +41,10 @@ class NmrResidueTable(CcpnDock):
     self.layout.addWidget(self.nmrResidueTable, 3, 0, 1, 4)
 
   def getNmrAtoms(self, nmrResidue):
-    return ', '.join([atom.name for atom in nmrResidue.atoms])
+    return ', '.join([atom.name for atom in nmrResidue.nmrAtoms])
 
   def getNmrResiduePeaks(self, nmrResidue):
-    return sum([len(atom.assignedPeaks) for atom in nmrResidue.atoms])
+    return sum([len(atom.assignedPeaks) for atom in nmrResidue.nmrAtoms])
 
   def navigateTo(self, nmrResidue=None, row=None, col=None):
 

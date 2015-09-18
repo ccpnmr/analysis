@@ -27,7 +27,7 @@ import os
 
 from functools import partial
 
-from ccpn.lib.Assignment import isInterOnlyExpt
+from ccpn.lib.Assignment import isInterOnlyExpt, getNmrAtomPrediction, CCP_CODES, getNmrResiduePrediction
 
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Dock import CcpnDock
@@ -66,6 +66,8 @@ class AtomSelector(CcpnDock):
     self.coButton1 = Button(pickAndAssignWidget, text='CO', grid=(5, 0), callback=partial(self.pickAndAssign, '-1', 'CO'))
     self.coButton2 = Button(pickAndAssignWidget, text='CO', grid=(5, 1), callback=partial(self.pickAndAssign, '', 'CO'))
     self.coButton3 = Button(pickAndAssignWidget, text='CO', grid=(5, 2), callback=partial(self.pickAndAssign, '+1', 'CO'))
+    self.coButton3 = Button(pickAndAssignWidget, text='Clear', grid=(6, 0), gridSpan=(1, 3), callback=self.returnButtonToNormal)
+
     self.buttons = [self.hButton1, self.hButton2, self.hButton3, self.nButton1, self.nButton2,
                     self.nButton3, self.caButton1, self.caButton2, self.caButton3, self.cbButton1,
                     self.cbButton2, self.cbButton3, self.coButton1, self.coButton2, self.coButton3]
@@ -77,6 +79,7 @@ class AtomSelector(CcpnDock):
       button.clicked.connect(self.returnButtonToNormal)
 
     self.addWidget(pickAndAssignWidget)
+
 
   def pickAndAssign(self, position, atomType):
 
@@ -93,9 +96,7 @@ class AtomSelector(CcpnDock):
     for peak in self.current.peaks:
       for dim in range(len(peak.dimensionNmrAtoms)):
         isotopeCode = peak.peakList.spectrum.isotopeCodes[dim]
-        # isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
         if newNmrAtom._apiResonance.isotopeCode == isotopeCode:
-          # axisCode = getAxisCodeForPeakDimension(peak, dim)
           axisCode = peak.peakList.spectrum.axisCodes[dim]
           peak.assignDimension(axisCode=axisCode, value=[newNmrAtom])
       else:
@@ -122,41 +123,45 @@ class AtomSelector(CcpnDock):
       self.setStyleSheet(styleSheet)
 
 
-  def predictAssignments(self, current):
+  def predictAssignments(self, peaks):
 
-    print(current.peaks)
-
-    if len(current.peaks) == 0:
-      print(len(current.peaks))
+    self.returnButtonToNormal()
+    if len(peaks) == 0:
       for button in self.buttons:
         button.clicked.connect(self.returnButtonToNormal)
 
     else:
-      peaks = current.peaks
 
       experiments = []
-      if peaksAreOnLine(peaks,1):
+      if peaksAreOnLine(peaks, 1):
         try:
           self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
 
         except IndexError:
           self.current.nmrResidue = self.project.nmrChains[0].newNmrResidue()
         values = [peak.height for peak in peaks]
-        print(values)
         experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
-        for value in values:
-          if value < 0:
-            if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-              self.cbButton1.setStyleSheet('background-color: green')
-              self.cbButton2.setStyleSheet('background-color: orange')
-            else:
-              self.cbButton2.setStyleSheet('background-color: green')
-          if value > 0:
-            if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-              self.caButton1.setStyleSheet('background-color: green')
-              self.caButton2.setStyleSheet('background-color: orange')
-            else:
-              self.caButton2.setStyleSheet('background-color: green')
+        for peak in peaks:
+          predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1])[0] for ccpCode in CCP_CODES]
+          refinedPreds = [[type[0][1], type[1]] for type in predictedAtomTypes]
+          atomPredictions = set()
+          for pred in refinedPreds:
+            if pred[1] > 90:
+              atomPredictions.add(pred[0])
+
+          for atomPred in atomPredictions:
+            if atomPred == 'CB':
+              if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                self.cbButton1.setStyleSheet('background-color: green')
+                self.cbButton2.setStyleSheet('background-color: orange')
+              else:
+                self.cbButton2.setStyleSheet('background-color: green')
+            if atomPred == 'CA' and peak.position[1] > 40:
+              if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                self.caButton1.setStyleSheet('background-color: green')
+                self.caButton2.setStyleSheet('background-color: orange')
+              else:
+                self.caButton2.setStyleSheet('background-color: green')
 
 
 

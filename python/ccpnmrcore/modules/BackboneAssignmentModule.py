@@ -141,8 +141,8 @@ class BackboneAssignmentModule(CcpnDock):
         matchResidue = parentMatchResidue
       else:
         matchResidue = matchResidue
-      zAtom = [atom for atom in matchResidue.atoms if atom._apiResonance.isotopeCode == '15N']
-      xAtom = [atom for atom in matchResidue.atoms if atom._apiResonance.isotopeCode == '1H']
+      zAtom = [atom for atom in matchResidue.nmrAtoms if atom._apiResonance.isotopeCode == '15N']
+      xAtom = [atom for atom in matchResidue.nmrAtoms if atom._apiResonance.isotopeCode == '1H']
 
       zShift = self.project.chemicalShiftLists[0].getChemicalShift(zAtom[0].id).value
       xShift = self.project.chemicalShiftLists[0].getChemicalShift(xAtom[0].id).value
@@ -160,8 +160,8 @@ class BackboneAssignmentModule(CcpnDock):
       parentMatchResidue = firstMatchResidue.nmrChain.fetchNmrResidue(sequenceCode=seqCode)
       firstMatchResidue = parentMatchResidue
 
-    zAtom = [atom for atom in firstMatchResidue.atoms if atom._apiResonance.isotopeCode == '15N']
-    xAtom = [atom for atom in firstMatchResidue.atoms if atom._apiResonance.isotopeCode == '1H']
+    zAtom = [atom for atom in firstMatchResidue.nmrAtoms if atom._apiResonance.isotopeCode == '15N']
+    xAtom = [atom for atom in firstMatchResidue.nmrAtoms if atom._apiResonance.isotopeCode == '1H']
     zShift = self.project.chemicalShiftLists[0].getChemicalShift(zAtom[0].id).value
     xShift = self.project.chemicalShiftLists[0].getChemicalShift(xAtom[0].id).value
 

@@ -128,8 +128,12 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("e, t"), self, partial(self.showExptTypePopup, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current))
+    QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self.clearCurrentPeaks)
 
    
+  def clearCurrentPeaks(self):
+    self._appBase.current.peaks = []
+
   def toggleCrossHairAll(self):
     # toggle crosshairs in all windows
     for window in self.project.windows:

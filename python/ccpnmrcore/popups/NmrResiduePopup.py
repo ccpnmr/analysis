@@ -58,7 +58,8 @@ class NmrResiduePopup(QtGui.QDialog, Base):
 
     self.residueTypePulldown.setData(possibilities)
     selectedResidue = self.residueTypePulldown.currentText().split(' ')[0]
-    atomPredictions = getNmrAtomPrediction(selectedResidue, self.project.chemicalShiftLists[0].findChemicalShift(self.project._appBase.current.nmrAtom).value)
+    atomPredictions = getNmrAtomPrediction(selectedResidue, self.project.chemicalShiftLists[0],
+                                           self.project._appBase.current.nmrAtom)
     atomPossibilites = [' '.join([x[0][1], x[1]]) for x in atomPredictions]
     self.atomTypePulldown.setData(atomPossibilites)
 

@@ -201,10 +201,11 @@ def startProgram(programClass, applicationName, applicationVersion, projectPath=
     Translation.setTranslationLanguage(language)
     Translation.updateTranslationDict('ccpnmrcore.gui')
     
+  useFileLogger = not nologging
   if projectPath:
-    apiProject = ioUtil.loadProject(projectPath)
+    apiProject = ioUtil.loadProject(projectPath, useFileLogger=useFileLogger)
   else:
-    apiProject = ioUtil.newProject('default', useFileLogger=(not nologging))
+    apiProject = ioUtil.newProject('default', useFileLogger=useFileLogger)
 
   # On the Mac (at least) it does not matter what you set the applicationName to be,
   # it will come out as the executable you are running (e.g. "python3")

@@ -39,8 +39,7 @@ from ccpncore.gui.ToolBar import ToolBar
 
 from ccpnmrcore.DropBase import DropBase
 from ccpnmrcore.gui.Frame import Frame as GuiFrame
-# NBNB Temporarily removed, as PhasingFrame is missing
-# from ccpnmrcore.gui.PhasingFrame import PhasingFrame
+from ccpnmrcore.gui.PhasingFrame import PhasingFrame
 from ccpnmrcore.gui.SpectrumToolBar import SpectrumToolBar
 from ccpnmrcore.modules.GuiModule import GuiModule
 
@@ -92,9 +91,8 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     
     self.setEnabled(True)
 
-    # NBNB Temporarily removed, as PhasingFrame is missing
-    # self.phasingFrame = PhasingFrame(self.dock, callback=self.updatePhasing, grid=(2, 0), gridSpan=(1, 3))
-    # self.phasingFrame.setVisible(False)
+    self.phasingFrame = PhasingFrame(self.dock, callback=self.updatePhasing, grid=(2, 0), gridSpan=(1, 3))
+    self.phasingFrame.setVisible(False)
 
   def updatePhasing(self, ph0=None, ph1=None):
     for strip in self.strips:

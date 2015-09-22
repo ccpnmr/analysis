@@ -265,23 +265,23 @@ def newSpectrumDisplay(parent:Task, axisCodes:(str,), stripDirection:str='Y',
     apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
 
   # Create axes
-    for ii, code in enumerate(axisCodes):
-      # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
-      #    not stripDirection):
-      # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
-      if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
-        stripSerial = 0
-      else:
-        stripSerial = 1
+  for ii, code in enumerate(axisCodes):
+    # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
+    #    not stripDirection):
+    # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
+    if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
+      stripSerial = 0
+    else:
+      stripSerial = 1
 
-      if code[0].isupper():
-        apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
-      elif code == 'intensity':
-        apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
-      elif code.startswith('fid'):
-        apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
-      else:
-        apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
+    if code[0].isupper():
+      apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
+    elif code == 'intensity':
+      apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
+    elif code.startswith('fid'):
+      apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
+    else:
+      apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
 
   # Create first strip
   if independentStrips:

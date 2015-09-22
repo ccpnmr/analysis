@@ -59,8 +59,12 @@ def _createLogger(project, applicationName=None, useFileLogger=None):
     
   if useFileLogger is None:
     useFileLogger = project._useFileLogger
-    
+
   logger = Logging.createLogger(applicationName, project) if useFileLogger else Logging.getLogger()
+  # # NBNB FIXME TBD temporary redirect to stdout for debug purposes
+  # import sys
+  # logger = Logging.createLogger(applicationName, project,
+  #                               stream=sys.stdout) if useFileLogger else Logging.getLogger()
   project._applicationName = applicationName
   project._useFileLogger = useFileLogger
   project._logger = logger
@@ -111,6 +115,7 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
   for name in repositoryNameMap.keys():
     fullPath = Path.normalisePath(Path.joinPath(path, projectName)
                              + repositoryNameMap[name], makeAbsolute=True)
+    print ('@~@~ path', name, fullPath)
     repository = project.findFirstRepository(name=name)
     repository.url = Implementation.Url(path=fullPath)
 
@@ -437,6 +442,11 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
 
 def cleanupProject(project):
   """Clean up project preparatory to closing (close log handlers etc.)"""
+
+  # delete temporary project directory, if there is one
+  deleteTemporaryDirectory(project)
+
+  # clear loggers
   if hasattr(project, '_logger'):
     logger = project._logger
     for handler in logger.handlers[:]:

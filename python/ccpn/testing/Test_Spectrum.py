@@ -58,6 +58,15 @@ class SpectrumTest(WrapperTesting):
     spectrum = self.project.getSpectrum('HSQC-115')
     print(hasattr(spectrum, 'rank'))
 
+  def test_rename(self):
+    spectrum = self.project.getSpectrum('HSQC-115')
+    peakList = spectrum.peakLists[0]
+    spectrum.rename('NEWNAME')
+    self.assertEqual(spectrum.pid, 'SP:NEWNAME')
+    self.assertEqual(peakList.pid, 'PL:NEWNAME.1')
+    self.assertEqual(peakList.peaks[0].pid, 'PK:NEWNAME.1.1')
+
+
 class DummySpectrumTest(WrapperTesting):
 
   # Path of project to load (None for new project)

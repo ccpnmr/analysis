@@ -21,6 +21,11 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+import os
+import shutil
+from ccpncore.util import Io as ioUtil
+
 from ccpn.testing.WrapperTesting import WrapperTesting
 
 # from ccpncore.api.ccp.nmr.Nmr import NmrProject
@@ -61,4 +66,43 @@ class ProjectTest2c(WrapperTesting):
   def test_id(self):
     print(self.project.id)
 
+    # NBNB TEMP addition
+    root = self.project._apiNmrProject.root
+    for ccc in root.sortedChemCompCoords():
+      cc = root.findFirstChemComp(molType=ccc.molType, ccpCode=ccc.ccpCode)
+      if cc is None:
+        if len(ccc.ccpCode) == 1:
+          cc2 = root.findFirstChemComp(molType=ccc.molType, code1Letter=ccc.ccpCode)
+          if cc2 is None:
+           print("MISSING CC2:", ccc.molType, ccc.ccpCode, ccc)
+          else:
+            print("REMAP %s %s to %s" % (ccc.molType, ccc.ccpCode, cc2.ccpCode))
+        else:
+          print("MISSING CC :", ccc.molType, ccc.ccpCode, ccc)
+
+  # def test_rename(self):
+  #   print(self.project.name)
+  #   self.project.rename('NEWNAME')
+  #   print(self.project.name)
+
+class ProjectTestRename(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = None
+
+  def test_name_and_rename(self):
+    apiNmrProject = self.project._apiNmrProject
+    self.assertEqual(self.project.name, 'default')
+    self.assertEqual(apiNmrProject.root.name, 'default')
+    oldLocation =  apiNmrProject.root.findFirstRepository(name='userData').url.getDataLocation()
+    self.assertTrue(os.path.isdir(oldLocation))
+
+    # rename and check again
+    newName = '_TEMPORARY_RENAMED'
+    self.project.rename(newName)
+    self.assertEqual(apiNmrProject.root.name, newName)
+    self.assertEqual(apiNmrProject.name, newName)
+    self.assertEqual(self.project.name, newName)
+    newLocation = apiNmrProject.root.findFirstRepository(name='userData').url.getDataLocation()
+    self.assertEqual(newName, newLocation[-len(newName):])
 

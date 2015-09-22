@@ -61,6 +61,6 @@ def _wrapApiProject(apiProject:ApiProject, nmrProjectName:str=None) -> Project:
     else:
       nmrProject = nmrProjects[0]
   else:
-    nmrProject = apiProject.newNmrProject(name=nmrProjectName or 'default')
+    nmrProject = apiProject.newNmrProject(name=nmrProjectName or apiProject.name)
 
   return Project(nmrProject)

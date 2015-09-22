@@ -23,6 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 import functools
+import os
 
 from ccpn import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
@@ -176,7 +177,9 @@ class Project(AbstractWrapperObject):
       oldId = obj._id
 
       parent = obj._parent
-      if parent is self:
+      if parent is None:
+        _id = ''
+      elif parent is self:
         _id = str(obj._key)
       else:
         _id = '%s%s%s'% (parent._id, Pid.IDSEP, obj._key)
@@ -187,11 +190,16 @@ class Project(AbstractWrapperObject):
       del dd[oldId]
       dd[_id] = obj
 
-  def delete(self):
-    """Delete underlying data and cleans up the wrapper project"""
-    wrappedData = self._wrappedData
-    self._close()
-    wrappedData.delete()
+
+  # NBNB We do NOT want to delete the underlying nmrProject, in case the root
+  # hangs around and is somehow saved
+  # Anyway at this point deleting the API objects no longer delete the wrapper objects
+  # as the notifiers have been disbled
+  # def delete(self):
+  #   """Delete underlying data and cleans up the wrapper project"""
+  #   wrappedData = self._wrappedData
+  #   self._close()
+  #   wrappedData.delete()
 
   def _close(self):
     """Clean up the wrapper project previous to deleting or replacing"""
@@ -201,8 +209,13 @@ class Project(AbstractWrapperObject):
     ioUtil.cleanupProject(self)
     self._clearApiNotifiers()
     for tag in ('_data2Obj','_pid2Obj'):
-      delattr(self,tag)
-    del self._wrappedData
+      getattr(self,tag).clear()
+      # delattr(self,tag)
+    # del self._wrappedData
+    self.__dict__.clear()
+
+  # This is all we want to happen
+  delete = _close
 
   def __repr__(self):
     """String representation"""
@@ -229,7 +242,63 @@ class Project(AbstractWrapperObject):
   def path(self) -> str:
     """path of/to Project"""
     return ioUtil.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
-  
+
+  def rename(self, name:str) -> None:
+    """Rename Project, and rename the underlying API project and the directory stored on disk.
+    Name change is not undoable, but the undo stack is left untouched
+    so that previous steps can still be undone"""
+
+    apiNmrProject = self._apiNmrProject
+    apiProject = apiNmrProject.root
+    oldName = apiNmrProject.name
+
+    if apiProject.findFirstNmrProject(name=name) not in (apiNmrProject, None):
+      raise ValueError("Cannot rename to %s - name is in use for another NmrProject" % name)
+
+    if name != oldName:
+      # rename NmrProject
+
+      # Load packages that (might) have hard links to the Nmr package,
+      # to make sure the name change does not break them
+      for apiNmrEntryStore in apiProject.nmrEntryStores:
+        if not apiNmrEntryStore.isLoaded:
+          apiNmrEntryStore.load()
+      for apiNmrCalcStore in apiProject.nmrCalcStores:
+        if not apiNmrCalcStore. isLoaded:
+          apiNmrCalcStore.load()
+
+      undo = apiProject._undo
+      if undo is not None:
+        undo.increaseBlocking()
+      apiProject.override = True
+      try:
+        apiNmrProject.name = name
+        parentDict = apiProject.__dict__['nmrProjects']
+        del parentDict[oldName]
+        parentDict[name] = apiNmrProject
+        self._resetPid(apiNmrProject)
+      except:
+        apiNmrProject.name = oldName
+        parentDict[oldName] = apiNmrProject
+        print("ERROR while renaming NmrProject. Project may be left in an invalid state")
+        raise
+      finally:
+        apiProject.override = False
+        if undo is not None:
+          undo.decreaseBlocking()
+
+    if name != apiProject.name:
+      # rename and move CCPN project
+      print ('@~@~ saving project to ', name)
+      location = apiProject.findFirstRepository(name='userData').url.getDataLocation()
+      dirName, oldName = os.path.split(location)
+      print ('@~@~ saving %s to %s ' % (name, os.path.join(dirName,name)))
+      ioUtil.saveProject(apiProject, newProjectName=name, newPath=os.path.join(dirName,name),
+                         removeExisting=True, checkValid=True, createFallback=True,
+                         changeDataLocations=True, changeBackup=True)
+      print ('@~@~ saved to', apiProject.findFirstRepository(name='userData').url.getDataLocation())
+
+
   @property
   def _apiNmrProject(self) -> ApiNmrProject:
     """API equivalent to object: NmrProject"""

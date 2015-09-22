@@ -52,7 +52,7 @@ class WrapperTesting(unittest.TestCase):
 
   def tearDown(self):
     if self.project:
-      self.project.delete()
+      self.project._close()
 
   def loadData(self, dataPath):
     """load data relative to TEST_PROJECTS_PATH (unless dataPath is absolute"""

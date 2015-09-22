@@ -468,8 +468,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     PreferencesPopup(preferences=self._appBase.preferences).exec_()
 
   def quitAction(self):
-    # delete temporary project directory, if there is one
-    ioUtil.deleteTemporaryDirectory(self._project._wrappedData.root)
       
     prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
     if os.path.exists(prefPath):
@@ -500,6 +498,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       prefFile = open(prefPath, 'w+')
       json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
+
+    # NBNB TBD FIXME put code here to ask if you wnat ot save etc.
+
+    # CLose and clean up project
+    self._appBase._closeProject()
 
     QtGui.QApplication.quit()
 

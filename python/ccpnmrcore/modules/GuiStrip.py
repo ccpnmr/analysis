@@ -190,7 +190,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
     
   def updatePhasing(self):
-    self.hPhasingPivot.setPen({'color': '#ffffff'}) # TBD: where is the background stored??
+    colour = '#ffffff' if self.background == 'k' else '#000000'
+    self.hPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:
       spectrumView.updatePhasing()
       

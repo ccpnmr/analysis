@@ -140,6 +140,11 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.initRulers()
     
     self.mousePosition = None
+    
+    self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
+    self.hPhasingPivot.setVisible(False)
+    self.plotWidget.addItem(self.hPhasingPivot)
+    self.hPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self.updatePhasing())
 
     # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
     # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
@@ -179,9 +184,15 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     for spectrumView in self.spectrumViews:
       spectrumView.removePhasingTraces()
 
-  def updatePhasing(self, ph0=None, ph1=None):
+  def togglePhasingPivot(self):
+    
+    self.hPhasingPivot.setPos(self.mousePosition.x())
+    self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
+    
+  def updatePhasing(self):
+    self.hPhasingPivot.setPen({'color': '#ffffff'}) # TBD: where is the background stored??
     for spectrumView in self.spectrumViews:
-      spectrumView.updatePhasing(ph0, ph1)
+      spectrumView.updatePhasing()
       
   def updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
@@ -503,11 +514,7 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
         strip.beingUpdated = False
     
     if index == 1:  # ASSUMES that only do H phasing
-      phasingFrame = strip.spectrumDisplay.phasingFrame
-      if phasingFrame.isVisible():
-        strip.updatePhasing(phasingFrame.slider0.value(), phasingFrame.slider1.value())
-      else:
-        strip.updatePhasing()  
+      strip.updatePhasing()  
     
 # Add notifier function to Project
 for apiFuncName in ('setPosition', 'setWidth'):

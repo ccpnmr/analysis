@@ -136,6 +136,7 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("p, c"), self, partial(self.togglePhaseConsole, self))
     QtGui.QShortcut(QtGui.QKeySequence("p, h"), self, self.newHPhasingTrace) # for now only do H, not V
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
+    QtGui.QShortcut(QtGui.QKeySequence("p, i"), self, self.togglePhasingPivot)
 
   def traceScaleScale(self, window, scale):
     for spectrumDisplay in window.spectrumDisplays:
@@ -165,6 +166,12 @@ class GuiWindow(DropBase):
     if strip and (strip.spectrumDisplay.window is self):
       strip.removePhasingTraces()
     
+  def togglePhasingPivot(self):
+    
+    strip = self._appBase.current.strip
+    if strip and (strip.spectrumDisplay.window is self):
+      strip.togglePhasingPivot()
+      
   def clearCurrentPeaks(self):
     self._appBase.current.peaks = []
 

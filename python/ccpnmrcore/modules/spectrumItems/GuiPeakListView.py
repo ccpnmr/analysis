@@ -546,6 +546,9 @@ class PeakNd(QtGui.QGraphicsItem):
     
   def paint(self, painter, option, widget):
 
+    if not self.peakListView.spectrumView: # strip has been deleted
+      return
+      
     if self.peak: # TBD: is this ever not true??
       self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self.peakListView.spectrumView.strip.peakIsInPlane(self.peak):

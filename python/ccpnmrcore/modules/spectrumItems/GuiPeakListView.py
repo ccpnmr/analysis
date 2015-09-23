@@ -876,9 +876,9 @@ Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiAbstractPeakDimContr
 
 def _upDateAssignmentsResonance(project:Project, apiResonance:ApiResonance):
   peaks = set(x.peakDim.peak
-              for x in (apiResonance.peakDimContribs + apiResonance.peakDimContribNs))
+              for x in apiResonance.peakDimContribs.union(apiResonance.peakDimContribNs))
   for peak in peaks:
-    peak._refresPeakAnnotation()
+    peak._refreshPeakAnnotation()
 #
 Project._setupNotifier(_upDateAssignmentsResonance, ApiResonance, 'setImplName')
 Project._setupNotifier(_upDateAssignmentsResonance, ApiResonance, 'setResonanceGroup')
@@ -886,7 +886,7 @@ Project._setupNotifier(_upDateAssignmentsResonance, ApiResonance, 'setResonanceG
 def _upDateAssignmentsResonanceGroup(project:Project,
                                      apiResonanceGroup:ApiResonanceGroup):
   peaks = set(y.peakDim.peak for x in apiResonanceGroup.resonances
-                             for y in (x.peakDimContribs + x.peakDimContribNs))
+                             for y in x.peakDimContribs.union(x.peakDimContribNs))
   for peak in peaks:
     peak._refreshPeakAnnotation()
 #
@@ -902,6 +902,6 @@ def _upDateAssignmentsNmrChain(project:Project, apiNmrChain:ApiNmrChain):
                              for y in x.resonances
                              for z in (y.peakDimContribs.union(y.peakDimContribNs)))
   for peak in peaks:
-    peak._refresPeakAnnotation()
+    peak._refreshPeakAnnotation()
 #
 Project._setupNotifier(_upDateAssignmentsNmrChain, ApiNmrChain, 'setCode')

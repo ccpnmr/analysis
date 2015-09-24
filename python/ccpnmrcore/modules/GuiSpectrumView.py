@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 from PyQt4 import QtCore, QtGui
 
-from ccpncore.util.Colour import Colour
+from ccpncore.util import Colour
 from ccpnmrcore.Base import Base as GuiBase
 
 import pyqtgraph as pg
@@ -62,9 +62,13 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     ##for strip in self.strips:
     ##  strip.addSpectrum(self)
 
-  ##def boundingRect(self):  # seems necessary to have
+  def paint(self, painter, option, widget=None):
+    
+    pass
+    
+  def boundingRect(self):  # seems necessary to have
 
-  ##  return QtCore.QRectF(-1000, -1000, 1000, 1000)  # TBD: remove hardwiring
+    return QtCore.QRectF(-1000, -1000, 1000, 1000)  # TBD: remove hardwiring
     
   """
   def setDimMapping(self, dimMapping=None):
@@ -95,3 +99,35 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     self.xDim = xDim
     self.yDim = yDim
   """
+
+  def _getSpectrumViewParams(self, axisDim:int) -> tuple:
+    """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
+    for axisDimth axis (zero-origin)"""
+
+    axis = self.strip.orderedAxes[axisDim]
+    dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
+    totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, "numPointsOrig")
+                       else dataDim.numPoints)
+    for ii,dd in enumerate(dataDim.dataSource.sortedDataDims()):
+      # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
+      if dd is dataDim:
+        minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
+        break
+    else:
+      minAliasedFrequency = maxAliasedFrequency = dataDim = None
+
+    return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
+
+  def _getColour(self, colourAttr, defaultColour=None):
+    
+    colour = getattr(self, colourAttr)
+    if not colour:
+      colour = getattr(self.spectrum, colourAttr)
+      
+    if not colour:
+      colour = defaultColour
+      
+    colour = Colour.colourNameToHexDict.get(colour, colour)  # works even if None
+      
+    return colour
+    

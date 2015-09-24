@@ -67,9 +67,6 @@ class GuiStripNd(GuiStrip):
     self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
-    self.traceMarkers = []
-    self.traceScale = 1e6
-    self.traces = []
     ###self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
@@ -78,30 +75,12 @@ class GuiStripNd(GuiStrip):
     # self.fillToolBar()
     # self.addSpinSystemLabel()
     self.addPlaneToolbar()
-    ###self.setShortcuts()
-    # for spectrumView in self.spectrumViews:
-    # #   newSpectrumView = spectrumView
-    #   #if spectrumView not in self.plotWidget.scene().items():
-    #     # newItem = spectrumView
-    #     #self.plotWidget.scene().addItem(spectrumView)
-    #   if spectrumView is not None:
-    #     # Check is necessary as spectrumView may be None during project loading
-    #     spectrumView.addSpectrumItem(self)
-
-    ###Notifiers.registerNotify(self.newPeak, 'ccp.nmr.Nmr.Peak', '__init__')
-    
-  # def setupAxes(self):
-  #   GuiStrip.setupAxes(self)
-  #   for func in ('setPosition', 'setWidth'):
-  #     Notifiers.registerNotify(self.axisRegionChanged, 'ccpnmr.gui.Task.Axis', func)
-
 
   def mouseDragEvent(self, event):
     if event.button() == QtCore.Qt.RightButton:
-        pass
+      pass
     else:
-        self.viewBox.mouseDragEvent(self, event)
-
+      self.viewBox.mouseDragEvent(self, event)
 
   def get2dContextMenu(self):
 
@@ -165,8 +144,6 @@ class GuiStripNd(GuiStrip):
       updateHTrace = self.hTraceAction.isChecked()
       updateVTrace = self.vTraceAction.isChecked()
       positionView = self.viewBox.mapSceneToView(positionPixel) # convert to ppm (or whatever)
-
-      self.mousePosition = positionView
       
       position = [axis.position for axis in self.orderedAxes]
       position[0] = positionView.x()
@@ -307,157 +284,9 @@ class GuiStripNd(GuiStrip):
     peakListView = self._findPeakListView(peakList)
     if not peakListView:
       return
-  
-      # for spectrumView in self.spectrumViews:
-      #   spectrumView._connectPeakLayerVisibility(peakLayer)
-        ###spectrumView.visibilityAction.toggled.connect(peakLayer.setVisible)
       
-    #rectItem = QtGui.QGraphicsRectItem(5, 120, 2, 10, peakLayer, self.plotWidget.scene())
-    ##color = QtGui.QColor('red')
-    #rectItem.setBrush(QtGui.QBrush(color))
-    #rectItem.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-    #rectItem.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
-    ##lineItem = QtGui.QGraphicsLineItem(5, 120, 7, 130, peakLayer, self.plotWidget.scene())
-    ##pen = QtGui.QPen()
-    ##pen.setWidth(0.1)
-    ##pen.setBrush(color)
-    ##lineItem.setPen(pen)
-    ##lineItem.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
-    
     peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
     self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
-
-    ###for peak in peaks:
-    ###  if peak not in self.peakItemDict:
-    ###    peakItem = PeakNd(self, peak, peakLayer)
-    ###    self.peakItemDict[peak] = peakItem
-        
-     # peakItem = PeakNd(self, peak)
-    ###self.plotWidget.addItem(peakLayer)
-     # self.plotWidget.addItem((peakItem.annotation))
-
-
-  # Replaced by functio in Strip proper
-  # def peakIsInPlane(self, peak):
-  #
-  #   if len(self.orderedAxes) > 2:
-  #     zDim = self.spectrumViews[0].dimensionOrdering[2] - 1
-  #     zPlaneSize = self.spectrumViews[0].zPlaneSize()
-  #     zPosition = peak.position[zDim]
-  #
-  #     zRegion = self.orderedAxes[2].region
-  #     if zRegion[0]-zPlaneSize <= zPosition <= zRegion[1]+zPlaneSize:
-  #       return True
-  #     else:
-  #       return False
-  #   else:
-  #     return True
-    
-  """
-  def newPeak(self, apiPeak):
-    peak = self._appBase.project._data2Obj[apiPeak]
-    if None in peak.position:
-      return
-    peakList = peak.parent
-    self.showPeaks(peakList)
-"""
-      
-  # def axisRegionChanged(self, apiAxis):
-  #
-  #   # TBD: other axes
-  #   apiStripAxis = self._wrappedData.findFirstStripAxis(axis=apiAxis)
-  #   if apiStripAxis is None:
-  #     return
-  #   axis = self._appBase.project._data2Obj[apiStripAxis]
-  #   if len(self.orderedAxes) >= 3 and axis in self.orderedAxes[2:]:
-  #     peakLists = self.peakLayerDict.keys()
-  #     for peakList in peakLists:
-  #       peakLayer = self.peakLayerDict[peakList]
-  #       peaks = [peak for peak in peakList.peaks if self.peakIsInPlane(peak)]
-  #       self.stripFrame.guiSpectrumDisplay.showPeaks(peakLayer, peaks)
-
-  def addHTraceMarker(self):
-    traceMarker = pg.InfiniteLine(angle=0, movable=True, pos=self.mousePoint)
-    self._appBase.current.traceMarker = traceMarker
-    self.plotWidget.addItem(traceMarker)
-    traceMarker.axis = self.orderedAxes[0]
-    traceMarker.positionAxis = self.orderedAxes[1]
-    self.traceMarkers.append(traceMarker)
-    trace = self.plotTrace(position=self.mousePoint, traceMarker=traceMarker)
-    self.traces.append(trace)
-    traceMarker.sigPositionChanged.connect(self.markerMoved)
-    proxy = pg.SignalProxy(traceMarker.sigPositionChanged, slot=(self.markerMoved))
-
-  def addVTraceMarker(self):
-    traceMarker = pg.InfiniteLine(angle=90, movable=True, pos=self.mousePoint)
-    self._appBase.current.traceMarker = traceMarker
-    self.addItem(traceMarker)
-    traceMarker.axis = self.yAxis
-    traceMarker.positionAxis = self.xAxis
-    self.traceMarkers.append(traceMarker)
-    trace = self.plotTrace(position=self.mousePoint.toTuple(), traceMarker=traceMarker)
-    self.traces.append(trace)
-    traceMarker.sigPositionChanged.connect(self.markerMoved)
-    proxy = pg.SignalProxy(traceMarker.sigPositionChanged, slot=(self.markerMoved))
-
-  # def plotTrace(self, position=None, traceMarker=None, phasedData=None):
-  #
-  #   positions = []
-  #   if position is None:
-  #     position = [self.mousePoint.x(),self.mousePoint.y()]
-  #
-  #   else:
-  #     position = [position.x(), position.y()]
-  #     if self.axesSwapped == True:
-  #       position.reverse()
-  #   if len(self.orderedAxes) > 2:
-  #     zDims = set(range(self._appBase.current.spectrum.dimensionCount)) - {self.orderedAxes[0].mappedDim, self.orderedAxes[1].mappedDim}
-  #     zDims = set(range(len(self.orderedAxes))) - {self.orderedAxes[0].mappedDim, self.orderedAxes[1].mappedDim}
-  #     zDim = zDims.pop()
-  #     position.append(int(self.region[zDim][0]))
-  #
-  #
-  #   dimensionCount = len(self.orderedAxes)
-  #   ppmRegion = dimensionCount * [None]
-  #   pointCounts = self.spectrumViews[0].spectrum.pointCounts
-  #   for dim in range(dimensionCount):
-  #     # if dim in (self._appBase.current.spectrum.spectrumItem.xDim, self._appBase.current.spectrum.spectrumItem.yDim):
-  #     region = self.plotWidget.viewRange()[dim]
-  #     # else:
-  #     #   n = position[dim]
-  #     #   region = n
-  #     ppmRegion[dim] = region
-  #   pntRegion = []
-  #   for dim in range(dimensionCount):
-  #       pnt = LibSpectrum.getDimPointFromValue(self.spectrumViews[0].spectrum, dim, ppmRegion[dim])
-  #       pntRegion.append(math.floor(pnt[0]))
-  #   spectrum = self.spectrumViews[0].spectrum
-  #   dataDimRef = spectrum._apiDataSource.sortedDataDims()[traceMarker.axis.mappedDim].findFirstDataDimRef()
-  #   data = LibSpectrum.getSliceData(spectrum._apiDataSource,position=pntRegion, sliceDim=traceMarker.axis.mappedDim)
-  #   firstPoint = dataDimRef.pointToValue(0)
-  #   pointCount = len(data)
-  #   lastPoint = dataDimRef.pointToValue(pointCount)
-  #   pointSpacing = (lastPoint-firstPoint)/pointCount
-  #   positions2 = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],dtype=numpy.float32)
-  #   # positions2 = positions2[::-1]
-  #   if phasedData is not None:
-  #     data2 = (numpy.array(phasedData)/self.traceScale)*-1
-  #   else:
-  #     data2 = (data/self.traceScale)*-1
-  #   if traceMarker.angle == 0:
-  #     data3 = numpy.array([x+ppmRegion[traceMarker.positionAxis.mappedDim] for x in data2])
-  #     traceMarker.spectrumItemTrace = pg.PlotDataItem(positions2, data3)
-  #   else:
-  #     # positions2 = positions2[::-1]
-  #     data3 = numpy.array([x+ppmRegion[traceMarker.positionAxis.mappedDim] for x in data2])
-  #     traceMarker.spectrumItemTrace = pg.PlotDataItem(data3,positions2)
-  #   traceMarker.spectrumItemTrace.dim = traceMarker.axis.mappedDim
-  #   traceMarker.data = data
-  #   traceMarker.spectrumItemTrace.position = position
-  #   self.addItem(traceMarker.spectrumItemTrace)
-  #
-  #
-  #   return traceMarker
 
 def _spectrumViewCreated(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
   strip = project._data2Obj[apiStripSpectrumView.strip]

@@ -36,6 +36,7 @@ from ccpnmrcore.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 from ccpnmrcore.DropBase import DropBase
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpnmrcore.popups.ExperimentTypePopup import ExperimentTypePopup
+from ccpnmrcore.modules.GuiStripNd import GuiStripNd
 
 class GuiWindow(DropBase):
   
@@ -50,7 +51,6 @@ class GuiWindow(DropBase):
     if not self._wrappedData.modules:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
-    
     # apiModules = apiWindow.sortedModules()
     # if apiModules:
     #   for apiModule in apiModules:
@@ -141,8 +141,11 @@ class GuiWindow(DropBase):
   def traceScaleScale(self, window, scale):
     for spectrumDisplay in window.spectrumDisplays:
       for strip in spectrumDisplay.strips:
-        for spectrumView in strip.spectrumViews:
-          spectrumView.traceScale *= scale
+        if isinstance(strip, GuiStripNd):
+          for spectrumView in strip.spectrumViews:
+            spectrumView.traceScale *= scale
+        else:
+          pass # should this change the y region??
     
   def traceScaleUp(self, window):
     self.traceScaleScale(window, 2.0)

@@ -177,7 +177,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   def newHPhasingTrace(self):
     
     for spectrumView in self.spectrumViews:
-      spectrumView.newHPhasingTrace(self.mousePosition.y())
+      spectrumView.newHPhasingTrace(self.mousePosition[1])
       
   def removePhasingTraces(self):
     
@@ -186,7 +186,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
 
   def togglePhasingPivot(self):
     
-    self.hPhasingPivot.setPos(self.mousePosition.x())
+    self.hPhasingPivot.setPos(self.mousePosition[0])
     self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
     
   def updatePhasing(self):
@@ -383,22 +383,24 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   def mouseClicked(self, event):
     print(event)
 
-  def mouseMoved(self, position):
+  def mouseMoved(self, positionPixel):
     # position is in pixels
 
-    if self.plotWidget.sceneBoundingRect().contains(position):
-      mousePoint = self.viewBox.mapSceneToView(position) # mouse point is in ppm
+    if self.plotWidget.sceneBoundingRect().contains(positionPixel):
+      mousePoint = self.viewBox.mapSceneToView(positionPixel) # mouse point is in ppm
       axisPositionDict = self.axisPositionDict
+      position = []
       for n, axis in enumerate(self.orderedAxes):
         # TBD: what if x and y have the same (or related) axis codes?
         if n == 0:
-          position = mousePoint.x()
+          pos = mousePoint.x()
         elif n == 1:
-          position = mousePoint.y()
+          pos = mousePoint.y()
         else:
-          position = axis.position
-        axisPositionDict[self._crosshairCode(axis.code)] = position
-      self.mousePosition = position # position is in ppm
+          pos = axis.position
+        axisPositionDict[self._crosshairCode(axis.code)] = pos
+        position.append(pos)
+      self.mousePosition = tuple(position) # position is in ppm
       for window in self._appBase.project.windows:
         window.setCrossHairPosition(axisPositionDict)
       ###self.vLine.setPos(mousePoint.x())

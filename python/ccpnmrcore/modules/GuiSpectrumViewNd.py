@@ -83,7 +83,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.posDisplayLists = []
     self.negDisplayLists = []
 
-
+    self.traceScale = 1.0e-7 # TBD: need a better way of setting this
+        
     # self.spectralData = self.getSlices()
     
     ###xDim, yDim = apiSpectrumView.dimensionOrdering[:2]
@@ -166,23 +167,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if self in strip.plotWidget.scene().items():
       strip.plotWidget.scene().removeItem(self)
 
-  def _getColour(self, colourAttr, defaultColour=None):
-    
-    colour = getattr(self, colourAttr)
-    if not colour:
-      colour = getattr(self.spectrum, colourAttr)
-      
-    if not colour:
-      colour = defaultColour
-      
-    colour = Colour.colourNameToHexDict.get(colour, colour)  # works even if None
-      
-    return colour
-    
   def _setupTrace(self):
     
-    self.traceScale = 1.0e-7 # TBD: need a better way of setting this
-        
     self.hTrace = pg.PlotDataItem()
     self.strip.plotWidget.scene().addItem(self.hTrace)
     
@@ -209,7 +195,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.strip.plotWidget.scene().removeItem(trace)
       self.strip.plotWidget.removeItem(line)
     self.hPhaseTraces = []
-    self.lineTraceDict = {}
     
   def updatePhasing(self):
     if not self.isVisible():
@@ -241,11 +226,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def _getTraceParams(self, position):
     # position is in ppm
     
+    inRange = True
     point = []
     for n, pos in enumerate(position): # n = 0 is x, n = 1 is y, etc.
       spectrumPos, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
       if dataDim:
-        inRange = (minAliasedFrequency <= pos <= maxAliasedFrequency)
         if n == 0:
           xDataDim = dataDim
           # -1 below because points start at 1 in data model
@@ -257,8 +242,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           yMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxAliasedFrequency)-1)
           yMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minAliasedFrequency)-1)
           yNumPoints = totalPointCount
-        elif not inRange:
-          break
+        else:
+          inRange = (minAliasedFrequency <= pos <= maxAliasedFrequency)
+          if not inRange:
+            break
         pnt = (dataDim.primaryDataDimRef.valueToPoint(pos)-1) % totalPointCount
         pnt += (dataDim.pointOffset if hasattr(dataDim, "pointOffset") else 0)
         point.append(pnt)
@@ -465,8 +452,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           GL.glTranslate(xTranslate, yTranslate, 0.0)
           GL.glScale(xScale, yScale, 1.0)
       
-          #print('HERE757', xTile, xClipPoint0, xClipPoint1, xClipPoint0 - xTotalPointCount*xTile, xClipPoint1 - xTotalPointCount*xTile)
-          #print('HERE758', yTile, yClipPoint0, yClipPoint1, yClipPoint0 - yTotalPointCount*yTile, yClipPoint1 - yTotalPointCount*yTile)
           GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
           GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
           GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
@@ -567,24 +552,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # could create them in one go but more likely to get fragmentation that way
     for level in levels:
       displayLists.append(GL.glGenLists(1))
-
-  def _getSpectrumViewParams(self, axisDim:int) -> tuple:
-    """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
-    for axisDimth axis (zero-origin)"""
-
-    axis = self.strip.orderedAxes[axisDim]
-    dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
-    totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, "numPointsOrig")
-                       else dataDim.numPoints)
-    for ii,dd in enumerate(dataDim.dataSource.sortedDataDims()):
-      # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
-      if dd is dataDim:
-        minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
-        break
-    else:
-      minAliasedFrequency = maxAliasedFrequency = dataDim = None
-
-    return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
 
   #def getPlaneData(self, guiStrip):
   def getPlaneData(self):

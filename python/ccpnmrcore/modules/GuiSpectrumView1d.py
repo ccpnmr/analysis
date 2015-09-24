@@ -23,9 +23,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 import numpy
 
+from PyQt4 import QtCore, QtGui
+
+import pyqtgraph as pg
+
 from ccpnmrcore.modules.GuiSpectrumView import GuiSpectrumView
 
 from ccpncore.util.Colour import spectrumColours
+from ccpncore.util import Phasing
 
 class GuiSpectrumView1d(GuiSpectrumView):
 
@@ -61,10 +66,113 @@ class GuiSpectrumView1d(GuiSpectrumView):
     self.plot.sigClicked.connect(self.clicked)
     for peakList in self.spectrum.peakLists:
       self.strip.showPeaks(peakList)
+      
+    self.hPhaseTrace = None
 
-  def updatePhasing(self, ph0, ph1):
-    pass
+  def newHPhasingTrace(self, position):
+    # position is in intensity, ignore
     
+    if not self.hPhaseTrace:
+      trace = pg.PlotDataItem()
+      self.strip.plotWidget.scene().addItem(trace)
+      self.hPhaseTrace = trace
+      self.updatePhasing()
+        
+  def removePhasingTraces(self):
+    
+    trace = self.hPhaseTrace
+    if trace:
+      self.strip.plotWidget.scene().removeItem(trace)
+      self.hPhaseTrace = None
+    
+  def updatePhasing(self):
+    if not self.isVisible():
+      return
+      
+    trace = self.hPhaseTrace
+    if not trace:
+      return
+      
+    position = [axis.position for axis in self.strip.orderedAxes]
+    
+    phasingFrame = self.strip.spectrumDisplay.phasingFrame
+    ph0 = phasingFrame.slider0.value() if phasingFrame.isVisible() else 0
+    ph1 = phasingFrame.slider1.value() if phasingFrame.isVisible() else 0
+      
+    hPhasingPivot = self.strip.hPhasingPivot
+    if hPhasingPivot.isVisible():
+      dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]
+      pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())
+    else:
+      pivot = 1
+      
+    positionPoint = QtCore.QPointF(position[0], 0.0)
+    positionPixel = self.strip.viewBox.mapViewToScene(positionPoint)
+    positionPixel = (positionPixel.x(), positionPixel.y())
+    inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, = self._getTraceParams(position)        
+    if inRange:
+      self._updateHTraceData(point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, trace, ph0, ph1, pivot)
+    
+  def _getTraceParams(self, position):
+    # position is in ppm (intensity in y)
+        
+    inRange = True
+    point = []
+    for n, pos in enumerate(position): # n = 0 is x, n = 1 is y, etc.
+      if n != 1:
+        spectrumPos, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+        if dataDim:
+          if n == 0:
+            xDataDim = dataDim
+            # -1 below because points start at 1 in data model
+            xMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxAliasedFrequency)-1)
+            xMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minAliasedFrequency)-1)
+            xNumPoints = totalPointCount
+          else:
+            inRange = (minAliasedFrequency <= pos <= maxAliasedFrequency)
+            if not inRange:
+              break
+          pnt = (dataDim.primaryDataDimRef.valueToPoint(pos)-1) % totalPointCount
+          pnt += (dataDim.pointOffset if hasattr(dataDim, "pointOffset") else 0)
+          point.append(pnt)
+        
+    return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints
+    
+  def _updateHTraceData(self, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, hTrace, ph0=None, ph1=None, pivot=None):
+    
+    # unfortunately it looks like we have to work in pixels, not ppm, yuck
+    strip = self.strip
+    plotWidget = strip.plotWidget
+    plotItem = plotWidget.plotItem
+    viewBox = strip.viewBox
+    viewRegion = plotWidget.viewRange()
+    
+    pointInt = [int(pnt+0.4999) for pnt in point]
+    data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim-1)
+    if ph0 is not None and ph1 is not None and pivot is not None:
+      data0 = numpy.array(data)
+      data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+      data1 = numpy.array(data)
+    x = numpy.array([xDataDim.primaryDataDimRef.pointToValue(p+1) for p in range(xMinFrequency, xMaxFrequency+1)])
+    # scale from ppm to pixels
+    pixelViewBox0 = plotItem.getAxis('left').width()
+    pixelViewBox1 = pixelViewBox0 + viewBox.width()
+    region1, region0 = viewRegion[0]
+    x -= region0
+    x *= (pixelViewBox1-pixelViewBox0) / (region1-region0)
+    x += pixelViewBox0
+  
+    pixelViewBox1 = plotItem.getAxis('bottom').height()
+    pixelViewBox0 = pixelViewBox1 + viewBox.height()
+    
+    yintensity0, yintensity1 = viewRegion[1]
+    #v = positionPixel[1] - (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
+    v = pixelViewBox0 + (pixelViewBox1-pixelViewBox0) * (numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)]) - yintensity0) / (yintensity1 - yintensity0)
+  
+    colour = '#ffffff' if strip.background == 'k' else '#000000'
+    hTrace.setPen({'color':colour})
+    hTrace.setData(x, v)
+      
   def clicked(self):
     print(self.plot)
     

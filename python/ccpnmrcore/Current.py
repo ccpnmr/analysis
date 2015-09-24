@@ -23,17 +23,31 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 import operator
-import functools
+# import functools
 from ccpncore.gui import MessageDialog
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
+from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiNmrAtom
+from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiNmrResidue
+from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiSpectrum
+from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
+from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
 from ccpn import Project
 
 # Fields that are coded automatically
-_autoFields = ['peaks','regions','positions', 'strips','nmrResidues', 'nmrAtoms']
+_autoFields = ['peaks','regions','positions', 'strips','nmrResidues', 'nmrAtoms', 'spectrumDisplays']
 # NB For each of these fields code is generated to match the explicit code for the 'spectra' field
 # It is assumed that each autofield is plural, ending in a plural 's'
-# Note that the singluar value (e.g. 'currentSpectrum') is the last object
+# Note that the singular value (e.g. 'currentSpectrum') is the last object
 # in the plural value (That is e.g. current.spectra[-1]
+
+# Fields in this dictionary
+_notifyDeleteFields = {
+  'peaks':ApiPeak,
+  'strips':ApiStrip,
+  'nmrResidues':ApiNmrResidue,
+  'nmrAtoms':ApiNmrAtom,
+  'spectrumDisplays':ApiSpectrumDisplay
+}
 
 _fields = ['project', 'spectra'] + _autoFields
 
@@ -124,8 +138,20 @@ class Current:
         #self.peaks = [] # not needed since _deletedPeak notifier will clear this out
 
 
+# Add notifiers for deleted spectra
+def current_spectra_deletion_cleanup(self:Project, apiObj):
 
-def  _addClassField(Current, field):
+  current = self._appBase.current
+  if current:
+    obj = self._data2Obj[apiObj]
+    fieldData = current._spectra
+    if obj in fieldData:
+      fieldData.remove(obj)
+#
+Project._setupNotifier(current_spectra_deletion_cleanup, ApiSpectrum, 'preDelete')
+
+
+def  _addClassField(cls, field):
   # getter function for _field; getField(obj) returns obj._field:
   getField = operator.attrgetter('_' + field)
 
@@ -147,7 +173,7 @@ def  _addClassField(Current, field):
   def setter(self, value):
     setField(self, list(value))
   #
-  setattr(Current, field, property(getter, setter, None, "Current %s" % field))
+  setattr(cls, field, property(getter, setter, None, "Current %s" % field))
 
   def getter(self):
     ll = getField(self)
@@ -155,37 +181,37 @@ def  _addClassField(Current, field):
   def setter(self, value):
     setField(self, [value])
   #
-  setattr(Current, field[:-1], property(getter, setter, None, "Current %s" % field[:-1]))
+  setattr(cls, field[:-1], property(getter, setter, None, "Current %s" % field[:-1]))
 
   def adder(self, value):
     setField(self, getField(self) + [value])
   #
-  setattr(Current, 'add' + field.capitalize()[:-1], adder)
+  setattr(cls, 'add' + field.capitalize()[:-1], adder)
 
   def remover(self, value):
     getField(self).remove(value)
   #
-  setattr(Current, 'remove' + field.capitalize()[:-1], remover)
+  setattr(cls, 'remove' + field.capitalize()[:-1], remover)
 
   def clearer(self):
     getField(self).clear()
   #
-  setattr(Current, 'clear' + field.capitalize(), clearer)
+  setattr(cls, 'clear' + field.capitalize(), clearer)
+
+  apiClass = _notifyDeleteFields.get(field)
+  if apiClass is not None:
+    # Add notifiers for deleted objects
+    def cleanup(self:Project, apiObj):
+
+      current = self._appBase.current
+      if current:
+        obj = self._data2Obj[apiObj]
+        fieldData = getField(current)
+        if obj in fieldData:
+          fieldData.remove(obj)
+    cleanup.__name__ = 'current_%s_deletion_cleanup' % field
+    #
+    Project._setupNotifier(cleanup, apiClass, 'preDelete')
 
 for field in _autoFields:
   _addClassField(Current, field)
-
-def _cleanupCurrentPeak(project, apiPeak):
-    
-  current = project._appBase.current
-  if current:
-    peak = project._data2Obj[apiPeak]
-    ll = current.peaks
-    if peak in current.peaks:
-      current.removePeak(peak)
-      current.peaks = ll
-
-Project._cleanupCurrentPeak = _cleanupCurrentPeak
-# Register notifier for registering/unregistering
-Project._apiNotifiers.append(('_cleanupCurrentPeak', {},
-                              ApiPeak._metaclass.qualifiedName(), 'preDelete'))

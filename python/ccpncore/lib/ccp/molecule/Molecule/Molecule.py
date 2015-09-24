@@ -106,7 +106,7 @@ def extendOneLetterMolResidues(molecule, sequence:str, molType:str='protein', st
 
 
 def extendMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=False):
-  """Descrn: Adds MolResidues for a sequence of residueNamee to Molecule.
+  """Descrn: Adds MolResidues for a sequence of residueNames to Molecule.
              Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
      Inputs: Ccp.Molecule.Molecule,
              List of Words (residueName),

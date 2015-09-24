@@ -94,6 +94,9 @@ _wrappedClasses.append(cls)
 RestraintContribution = cls = importlib.import_module(
   'ccpn._wrapper._RestraintContribution').RestraintContribution
 _wrappedClasses.append(cls)
+Substance = cls = importlib.import_module(
+  'ccpn._wrapper._Substance').Substance
+_wrappedClasses.append(cls)
 
 # Add class list for extended sphinx documentation to module
 # putting AnstractWrapperObj3ct last

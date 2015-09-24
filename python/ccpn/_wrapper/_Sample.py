@@ -111,6 +111,15 @@ class Sample(AbstractWrapperObject):
     self._wrappedData.isHazard = value
 
   @property
+  def isVirtual(self) -> bool:
+    """is sample virtual? Virtual samples serve as templates and may not be linked to Spectra"""
+    return self._wrappedData.isVirtual
+
+  @isVirtual.setter
+  def isVirtual(self, value:bool):
+    self._wrappedData.isVirtual = value
+
+  @property
   def creationDate(self) -> datetime:
     """Creation timestamp for sample (not for the description record)"""
     return self._wrappedData.creationDate
@@ -177,14 +186,7 @@ class Sample(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (Sample.Samples) for all Sample children of parent NmrProject.sampleStore
     Set sampleStore to default if not set"""
-    nmrProject = parent._wrappedData
-    apiSampleStore =  nmrProject.sampleStore
-    if apiSampleStore is None:
-      apiSampleStore = (nmrProject.root.findFirstSampleStore(name='default') or
-                        nmrProject.root.newSampleStore(name='default'))
-      nmrProject.sampleStore = apiSampleStore
-
-    return apiSampleStore.sortedSamples()
+    return parent._wrappedData.sampleStore.sortedSamples()
 
 
 def newSample(parent:Project, name:str, pH:float=None, ionicStrength:float=None, amount:float=None,
@@ -194,10 +196,6 @@ def newSample(parent:Project, name:str, pH:float=None, ionicStrength:float=None,
   """Create new child Sample"""
   nmrProject = parent._wrappedData
   apiSampleStore =  nmrProject.sampleStore
-  if apiSampleStore is None:
-    apiSampleStore = (nmrProject.root.findFirstSampleStore(name='default') or
-                      nmrProject.root.newSampleStore(name='default'))
-    nmrProject.sampleStore = apiSampleStore
 
   newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,
                                           amount=amount, amountUnit=amountUnit,

@@ -865,8 +865,6 @@ def _refreshPeakAnnotation(peak:Peak):
 
       # NBNB TBD add body here
 
-
-
 Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
 def _upDateAssignmentsPeakDimContrib(project:Project,
@@ -878,20 +876,22 @@ Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiAbstractPeakDimContr
 Project._setupNotifier(_upDateAssignmentsPeakDimContrib, ApiAbstractPeakDimContrib, 'preDelete')
 
 def _upDateAssignmentsResonance(project:Project, apiResonance:ApiResonance):
+  data2Obj = project._data2Obj
   peaks = set(x.peakDim.peak
               for x in apiResonance.peakDimContribs.union(apiResonance.peakDimContribNs))
   for peak in peaks:
-    peak._refreshPeakAnnotation()
+    data2Obj[peak]._refreshPeakAnnotation()
 #
 Project._setupNotifier(_upDateAssignmentsResonance, ApiResonance, 'setImplName')
 Project._setupNotifier(_upDateAssignmentsResonance, ApiResonance, 'setResonanceGroup')
 
 def _upDateAssignmentsResonanceGroup(project:Project,
                                      apiResonanceGroup:ApiResonanceGroup):
+  data2Obj = project._data2Obj
   peaks = set(y.peakDim.peak for x in apiResonanceGroup.resonances
                              for y in x.peakDimContribs.union(x.peakDimContribNs))
   for peak in peaks:
-    peak._refreshPeakAnnotation()
+     data2Obj[peak]._refreshPeakAnnotation()
 #
 Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setResonances')
 Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setAssignedResidue')
@@ -901,10 +901,11 @@ Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'set
 
 
 def _upDateAssignmentsNmrChain(project:Project, apiNmrChain:ApiNmrChain):
+  data2Obj = project._data2Obj
   peaks = set(z.peakDim.peak for x in apiNmrChain.resonanceGroups
                              for y in x.resonances
                              for z in (y.peakDimContribs.union(y.peakDimContribNs)))
   for peak in peaks:
-    peak._refreshPeakAnnotation()
+     data2Obj[peak]._refreshPeakAnnotation()
 #
 Project._setupNotifier(_upDateAssignmentsNmrChain, ApiNmrChain, 'setCode')

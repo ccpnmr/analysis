@@ -122,5 +122,23 @@ def loadLookupFile(project:None, path:str, subType:str, ):
     readXls(project, path=path)
 
 
+def uniqueSubstanceName(self:"Project", name:str=None, defaultName:str='Molecule') -> str:
+  """add integer suffixed to name till it is unique"""
+  if name is None:
+    name = defaultName
 
+  apiComponentStore = self._wrappedData.sampleStore.refSampleCmponentStore
+  apiProject =apiComponentStore.root
 
+  # ensure substance name is unique
+  i = 0
+  result = name
+  while apiProject.findFirstMolecule(name=ss) or apiComponentStore.findFirstComponent(name=ss):
+    i += 1
+    result = '%s%d' % (name,i)
+  if result != name:
+    self._logger.warning(
+    "CCPN molecule named %s already exists. New molecule has been named %s" %
+    (name,result))
+  #
+  return result

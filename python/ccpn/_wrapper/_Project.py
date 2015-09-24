@@ -86,10 +86,30 @@ class Project(AbstractWrapperObject):
     # Set up pid sorting dictionary to cache pid sort keys
     self._pidSortKeys = {}
 
-    # Set necessary values in apiProject
+    # Set mandatory top-level objects in apiProject
+    # MolSystem
+    apiProject = wrappedData.root
     if wrappedData.molSystem is None:
-      wrappedData.root.newMolSystem(name=wrappedData.name, code=wrappedData.name,
-                                    nmrProjects = (wrappedData,))
+      apiProject.newMolSystem(name=wrappedData.name, code=wrappedData.name,
+                              nmrProjects = (wrappedData,))
+    # SampleStore
+    apiSampleStore = wrappedData.sampleStore
+    if apiSampleStore is None:
+      apiSampleStore = (apiProject.findFirstSampleStore(name='default') or
+                        apiProject.newSampleStore(name='default'))
+      wrappedData.sampleStore = apiSampleStore
+    # RefSampleComponentStore
+    apiComponentStore = apiSampleStore.refSampleComponentStore
+    if apiComponentStore is None:
+      apiComponentStore = (apiProject.findFirstRefSampleComponentStore(name='default') or
+                           apiProject.newRefSampleComponentStore(name='default'))
+      apiSampleStore.refSampleComponentStore = apiComponentStore
+
+    # Make Substances that match finalised Molecules
+    for apiMolecule in apiProject.sortedMolecules():
+      if apiMolecule.isFinalised:
+        # Create matchingMolComponent if none exists
+        apiComponentStore.fetchMolComponent(apiMolecule)
 
     self._logger = wrappedData.root._logger
 

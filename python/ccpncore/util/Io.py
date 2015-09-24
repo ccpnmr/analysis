@@ -115,7 +115,6 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
   for name in repositoryNameMap.keys():
     fullPath = Path.normalisePath(Path.joinPath(path, projectName)
                              + repositoryNameMap[name], makeAbsolute=True)
-    print ('@~@~ path', name, fullPath)
     repository = project.findFirstRepository(name=name)
     repository.url = Implementation.Url(path=fullPath)
 

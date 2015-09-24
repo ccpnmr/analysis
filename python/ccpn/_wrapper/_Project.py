@@ -309,14 +309,11 @@ class Project(AbstractWrapperObject):
 
     if name != apiProject.name:
       # rename and move CCPN project
-      print ('@~@~ saving project to ', name)
       location = apiProject.findFirstRepository(name='userData').url.getDataLocation()
       dirName, oldName = os.path.split(location)
-      print ('@~@~ saving %s to %s ' % (name, os.path.join(dirName,name)))
       ioUtil.saveProject(apiProject, newProjectName=name, newPath=os.path.join(dirName,name),
                          removeExisting=True, checkValid=True, createFallback=True,
                          changeDataLocations=True, changeBackup=True)
-      print ('@~@~ saved to', apiProject.findFirstRepository(name='userData').url.getDataLocation())
 
 
   @property

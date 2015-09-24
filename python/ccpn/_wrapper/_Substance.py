@@ -262,7 +262,7 @@ class Substance(AbstractWrapperObject):
 # Connections to parents:
 Project._childClasses.append(Substance)
 
-def newSimpleSubstance(self:Project, name:str, labeling:str, substanceType:str='Molecule',
+def _newSimpleSubstance(self:Project, name:str, labeling:str, substanceType:str='Molecule',
                        userCode:str=None, smiles:str=None, inChi:str=None, casNumber:str=None,
                        empiricalFormula:str=None, molecularMass:float=None, comment:str=None,
                        synonyms:Sequence[str]=()) -> Substance:
@@ -296,7 +296,8 @@ def newSimpleSubstance(self:Project, name:str, labeling:str, substanceType:str='
   #
   return self._data2Obj[apiResult]
 
-Project.newSimpleSubstance = newSimpleSubstance
+Project.newSimpleSubstance = _newSimpleSubstance
+del _newSimpleSubstance
 
 
 def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labeling:str='std',
@@ -343,6 +344,30 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 
 Project.createPolymerSubstance = _createPolymerSubstance
 del _createPolymerSubstance
+
+
+
+def _createChainFromSubstance(self:Project, substance:Substance, shortName:str=None, role:str=None,
+                             comment:str=None) -> Chain:
+  """Create new chain that matches Substance - throws error if Substance is not of valid type"""
+
+  if substance.substanceType != 'MolComponent':
+    raise ValueError("Only MolComponent Substances can be used to create chains")
+
+  apiMolecule = substance._apiSubstance.molecule
+  if apiMolecule is None:
+    raise ValueError("MolComponent miust have attaehed ApiMolecule in order to create chains")
+
+  apiMolSystem = self._wrappedData.molSystem
+  if shortName is None:
+    shortName = apiMolSystem.nextChainCode()
+
+  newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
+                                       details=comment)
+  #
+  return  self._project._data2Obj[newApiChain]
+Chain.createChainFromSubstance = _createChainFromSubstance
+del _createChainFromSubstance
 
 def getter(self:Chain) -> Optional[Substance]:
   apiMolecule = self._apiChain.molecule

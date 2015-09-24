@@ -230,26 +230,6 @@ class Chain(AbstractWrapperObject):
 #   #
 #   return chains
 
-def createChainFromSubstance(self:Project, substance:"Substance", shortName:str=None, role:str=None,
-                             comment:str=None) -> Chain:
-  """Create new chain that matches Substance - throws error is Substance is not of valid type"""
-
-  if substance.substanceType != 'MolComponent':
-    raise ValueError("Only MolComponent Substances can be used to create chains")
-
-  apiMolecule = substance._apiSubstance.molecule
-  if apiMolecule is None:
-    raise ValueError("MolComponent miust have attaehed ApiMolecule in order to create chains")
-
-  apiMolSystem = self._wrappedData.molSystem
-  if shortName is None:
-    shortName = apiMolSystem.nextChainCode()
-
-  newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
-                                       details=comment)
-  #
-  return  self._project._data2Obj[newApiChain]
-
 
 
 def _createSimpleChain(self:Project, sequence:(str,tuple), compoundName:str='Molecule_1',

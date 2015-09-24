@@ -574,8 +574,8 @@ def _rulerDeleted(project:Project, apiRuler:ApiRuler):
 Project._setupNotifier(_rulerCreated, ApiRuler, 'postInit')
 Project._setupNotifier(_rulerDeleted, ApiRuler, 'preDelete')
 
-def _refreshAllStripContours(project:Project, apiDatSource:ApiDataSource):
-  for apiSpectrumView in apiDatSource.spectrumViews:
+def _refreshAllStripContours(project:Project, apiDataSource:ApiDataSource):
+  for apiSpectrumView in apiDataSource.spectrumViews:
     for apiStrip in apiSpectrumView.strips:
       project._data2Obj[apiStrip].update()
 

@@ -37,15 +37,16 @@ class PhasingTest(unittest.TestCase):
     
     assert delta < 1.0e-5, 'delta = %f' % delta
 
-  def test_phasing_inverse_ph0(self):
+  #def test_phasing_inverse_ph0(self):
+  #  does not work, real data does not have inverse like this
     
-    x = numpy.random.random(1000).astype('float32')
-    y = Phasing.phaseRealData(x, ph0=130)
-    z = Phasing.phaseRealData(y, ph0=-130)
+  #  x = numpy.random.random(1000).astype('float32')
+  #  y = Phasing.phaseRealData(x, ph0=130)
+  #  z = Phasing.phaseRealData(y, ph0=-130)
     
-    delta = abs(z-x).max()
+  #  delta = abs(z-x).max()
     
-    assert delta < 1.0e-5, 'delta = %f' % delta
+  #  assert delta < 1.0e-5, 'delta = %f' % delta
 
   def test_phasing_inverse(self):
     

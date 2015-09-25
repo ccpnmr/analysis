@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.lib.spectrum.Spectrum import DEFAULT_ISOTOPE_DICT
-from ccpncore.lib.molecule import Labelling
+from ccpncore.lib.molecule import Labeling
 
 def findLinkedResidue(residue, linkCode:str='prev'):
   """find residue linked to current with link of type 'linkCode' (defaults to 'prev')
@@ -52,14 +52,14 @@ def findLinkedResidue(residue, linkCode:str='prev'):
 
 # NBNB TBD FIXME update this to work.
 
-def findResidueObservableAtoms(residue, refExperiment=None, labelling=None,
+def findResidueObservableAtoms(residue, refExperiment=None, labeling=None,
                               minFraction:float=0.1, jCouplingBonds=(1,2,3),
                               usePermissiveShifts:bool=False,
                               chemElements=('H','C','N','F','P')):
   """
   Determine which atoms of a chem comp variant would give rise to
   observable resonances considering a given reference experiment
-  and/or an isotope labelling scheme. Can specify minimum fraction of
+  and/or an isotope labeling scheme. Can specify minimum fraction of
   an isotope to consider something observable and the chemical elements which
   you are observing. Boolean option to match database min and max
   chemical shift bounds to atom sites, rather than randon coil shift
@@ -130,12 +130,12 @@ def findResidueObservableAtoms(residue, refExperiment=None, labelling=None,
       atoms = residue0.atoms
 
       # Compile isotopomers for this residue
-      if labelling and (labelling.className == 'LabelingScheme'):
+      if labeling and (labeling.className == 'LabelingScheme'):
         chemComp   = residue0.chemCompVar.chemComp
         ccpCode    = chemComp.ccpCode
         molType    = chemComp.molType
-        chemCompLabel = labelling.findFirstChemCompLabel(ccpCode=ccpCode,
-                                                         molType=molType)
+        chemCompLabel = labeling.findFirstChemCompLabel(ccpCode=ccpCode,
+                                                        molType=molType)
 
         if not chemCompLabel:
           chemCompLabel = natAbundance.findFirstChemCompLabel(ccpCode=ccpCode,
@@ -162,15 +162,15 @@ def findResidueObservableAtoms(residue, refExperiment=None, labelling=None,
         continue
 
       if isotopomers:
-        fractionDict = Labelling._getIsotopomerSingleAtomFractions(isotopomers,atom.name,
+        fractionDict = Labeling._getIsotopomerSingleAtomFractions(isotopomers,atom.name,
                                                                   chemAtom.subType)
         # Exclude if no isotope incorporation above threshold
         fraction = fractionDict.get(isotope, minFraction)
         if fraction < minFraction:
           continue
 
-      elif labelling:
-        fractionDict = Labelling._singleAtomFractions(labelling, resId, atom.name)
+      elif labeling:
+        fractionDict = Labeling._singleAtomFractions(labeling, resId, atom.name)
         if not fractionDict:
           continue
 
@@ -315,7 +315,7 @@ def findResidueObservableAtoms(residue, refExperiment=None, labelling=None,
                   isotopomersA = isotopomerDict.get(residueA)
                   atomNames    = (atomA.name, atomB.name)
                   subTypes     = (subTypeA, subTypeB)
-                  pairDict     = Labelling._getIsotopomerAtomPairFractions(isotopomersA, atomNames,
+                  pairDict     = Labeling._getIsotopomerAtomPairFractions(isotopomersA, atomNames,
                                                                           subTypes)
                   fraction     = pairDict.get((isotopeA, isotopeB), minFraction)
 
@@ -327,16 +327,16 @@ def findResidueObservableAtoms(residue, refExperiment=None, labelling=None,
                   isotopomersB = isotopomerDict.get(residueB)
 
                   if isotopomersB and isotopomersA:
-                    fractionDictA = Labelling._getIsotopomerSingleAtomFractions(isotopomersA,
+                    fractionDictA = Labeling._getIsotopomerSingleAtomFractions(isotopomersA,
                                                                                atomA.name, subTypeA)
-                    fractionDictB = Labelling._getIsotopomerSingleAtomFractions(isotopomersB,
+                    fractionDictB = Labeling._getIsotopomerSingleAtomFractions(isotopomersB,
                                                                                atomB.name, subTypeB)
                     fraction = fractionDictA.get(isotopeA, 1.0) * fractionDictB.get(isotopeB, 1.0)
 
                     if fraction < minFraction:
                       continue
 
-              elif labelling:
+              elif labeling:
                 chemAtomA = atomA.chemAtom
                 chemAtomB = atomB.chemAtom
                 isotopeA  = isotopeDict[chemAtomA.elementSymbol]
@@ -348,7 +348,7 @@ def findResidueObservableAtoms(residue, refExperiment=None, labelling=None,
                 resIds = (molResidueA.serial, molResidueB.serial)
                 atomNames = (atomA.name, atomB.name)
 
-                pairDict = Labelling._atomPairFractions(labelling, resIds, atomNames)
+                pairDict = Labeling._atomPairFractions(labeling, resIds, atomNames)
                 fraction = pairDict.get((isotopeA, isotopeB), minFraction)
 
                 if fraction  < minFraction:

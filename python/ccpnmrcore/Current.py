@@ -40,6 +40,7 @@ _autoFields = ['peaks','regions','positions', 'strips','nmrResidues', 'nmrAtoms'
 # Note that the singular value (e.g. 'currentSpectrum') is the last object
 # in the plural value (That is e.g. current.spectra[-1]
 
+
 # Fields in this dictionary
 _notifyDeleteFields = {
   'peaks':ApiPeak,

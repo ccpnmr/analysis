@@ -33,13 +33,13 @@ def fetchMolComponent(self:"RefSampleComponentStore", molecule:Molecule,
   name = molecule.name
   if labeling is None:
     # Pick any MolComponent regardless of labeling
-    result = (self.findFirstRefComponent(name=name, labeling='std') or
-              self.findFirstRefComponent(name=name))
+    result = (self.findFirstComponent(name=name, labeling='std') or
+              self.findFirstComponent(name=name))
     # Any new molComponent must be 'std'
     labeling = 'std'
   else:
     # labeling passed in. Use it.
-    result = self.findFirstRefComponent(name=name, labeling=labeling)
+    result = self.findFirstComponent(name=name, labeling=labeling)
 
   if result is None:
     # Finalise, so molecule does not change 'underneath' substance

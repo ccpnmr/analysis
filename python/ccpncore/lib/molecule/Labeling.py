@@ -1,4 +1,4 @@
-"""Library functions for molecule labelling
+"""Library functions for molecule labeling
 
 """
 #=========================================================================================
@@ -26,8 +26,8 @@ __version__ = "$Revision$"
 from ccpncore.util import Common as commonUtil
 from ccpncore.util.typing import Sequence
 
-# Default labelling - must be treated as 'not labeled'
-NULL_LABELLING = 'std'
+# Default labeling - must be treated as 'not labeled'
+NULL_LABELING = 'std'
 
 def _getIsotopomerSingleAtomFractions(isotopomers, atomName, subType=1):
   """Descrn: Get the isotope proportions for a names atom in over a set
@@ -263,24 +263,24 @@ def _molLabelFractionsDict(resLabel, atName, subType, elementName):
   #
   return result
 
-def molAtomLabelFractions(labelling:str, molResidue, atomName:str) -> dict:
-  """get isotopeCode:percentage mapping for atom in molResidue, with given labelling
-  Will use molecule specific labelling if one exists, otherwise general labelling scheme."""
+def molAtomLabelFractions(labeling:str, molResidue, atomName:str) -> dict:
+  """get isotopeCode:percentage mapping for atom in molResidue, with given labeling
+  Will use molecule specific labeling if one exists, otherwise general labeling scheme."""
   result = {}
   labeledMolecule = molResidue.root.findFirstLabeledMolecule(name=molResidue.molecule.name)
   if labeledMolecule:
-    labeledMixture = labeledMolecule.findFirstLabeledMixture(name=labelling)
+    labeledMixture = labeledMolecule.findFirstLabeledMixture(name=labeling)
     if labeledMixture:
       result =  _singleAtomFractions(labeledMixture, molResidue.serial, atomName)
 
   if not result:
-    result = chemAtomLabelFractions(molResidue.root, labelling, molResidue.ccpCode, atomName)
+    result = chemAtomLabelFractions(molResidue.root, labeling, molResidue.ccpCode, atomName)
   #
   return result
 
-def molAtomLabelPairFractions(labelling:str, molResiduePair:Sequence, atomNamePair:Sequence) -> dict:
-  """get isotopeCode:percentage mapping for atom (molResidue, atomName) pair with given labelling
-  Will use molecule specific labelling if one exists, otherwise general labelling scheme."""
+def molAtomLabelPairFractions(labeling:str, molResiduePair:Sequence, atomNamePair:Sequence) -> dict:
+  """get isotopeCode:percentage mapping for atom (molResidue, atomName) pair with given labeling
+  Will use molecule specific labeling if one exists, otherwise general labeling scheme."""
 
   assert len(molResiduePair) == 2, "molAtomLabelPairFractions: length of molResidues must be 2"
   assert len(atomNamePair) == 2, "molAtomLabelPairFractions: length of atomNames must be 2"
@@ -292,43 +292,43 @@ def molAtomLabelPairFractions(labelling:str, molResiduePair:Sequence, atomNamePa
   labeledMolecule = molResidue0.root.findFirstLabeledMolecule(name=molResidue0.molecule.name)
   if labeledMolecule:
     # There is a specifically labeled molecule - use corresponding function
-    labeledMixture = labeledMolecule.findFirstLabeledMixture(name=labelling)
+    labeledMixture = labeledMolecule.findFirstLabeledMixture(name=labeling)
     if labeledMixture:
       result =  _atomPairFractions(labeledMixture, [x.serial for x in molResiduePair], atomNamePair)
 
   if not result:
     # No specific labeled molecule
     if molResidue0 is molResiduePair[1]:
-      # intraresidue = use labelling scheme, if any
-      result = chemAtomPairLabelFractions(molResiduePair[0].root, labelling, molResidue0.ccpCode,
+      # intraresidue = use labeling scheme, if any
+      result = chemAtomPairLabelFractions(molResiduePair[0].root, labeling, molResidue0.ccpCode,
                                           atomNamePair)
     else:
       # Uncorrelated atoms - use product of fractions for each atom
       result = commonUtil.dictionaryProduct(
-        chemAtomLabelFractions(molResidue0.root, labelling, molResidue0.ccpCode, atomNamePair[0]),
-        chemAtomLabelFractions(molResidue0.root, labelling, molResiduePair[1].ccpCode, atomNamePair[1])
+        chemAtomLabelFractions(molResidue0.root, labeling, molResidue0.ccpCode, atomNamePair[0]),
+        chemAtomLabelFractions(molResidue0.root, labeling, molResiduePair[1].ccpCode, atomNamePair[1])
       )
   #
   return result
 
-def chemAtomLabelFractions(project, labelling:str, ccpCode:str, atomName:str) -> dict:
-  """get isotopeCode:percentage mapping for atom in ChemComp with given labelling"""
+def chemAtomLabelFractions(project, labeling:str, ccpCode:str, atomName:str) -> dict:
+  """get isotopeCode:percentage mapping for atom in ChemComp with given labeling"""
   result = {}
-  labellingScheme = project.findFirstLabellingScheme(name=labelling)
-  if labellingScheme:
-    chemCompLabel = labellingScheme.findFirstChemCompLabel(ccpCode=ccpCode)
+  labelingScheme = project.findFirstLabelingScheme(name=labeling)
+  if labelingScheme:
+    chemCompLabel = labelingScheme.findFirstChemCompLabel(ccpCode=ccpCode)
     if chemCompLabel:
       result =  _getIsotopomerSingleAtomFractions(chemCompLabel.isotopomers, atomName)
   #
   return result
 
-def chemAtomPairLabelFractions(project, labelling:str, ccpCode:str, atomNamePair:Sequence) -> dict:
-  """get isotopeCode:percentage mapping for atom pair in ChemComp with given labelling
+def chemAtomPairLabelFractions(project, labeling:str, ccpCode:str, atomNamePair:Sequence) -> dict:
+  """get isotopeCode:percentage mapping for atom pair in ChemComp with given labeling
   Assumes that atoms are in the same residue"""
   result = {}
-  labellingScheme = project.findFirstLabellingScheme(name=labelling)
-  if labellingScheme:
-    chemCompLabel = labellingScheme.findFirstChemCompLabel(ccpCode=ccpCode)
+  labelingScheme = project.findFirstLabelingScheme(name=labeling)
+  if labelingScheme:
+    chemCompLabel = labelingScheme.findFirstChemCompLabel(ccpCode=ccpCode)
     if chemCompLabel:
       result =  _getIsotopomerAtomPairFractions(chemCompLabel.isotopomers, atomNamePair)
   #

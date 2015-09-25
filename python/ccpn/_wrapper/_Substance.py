@@ -61,10 +61,10 @@ class Substance(AbstractWrapperObject):
     
   @property
   def _key(self) -> str:
-    """id string - name.labelling"""
+    """id string - name.labeling"""
     obj =  self._wrappedData
     return Pid.IDSEP.join(getattr(obj,tag).translate(Pid.remapSeparators)
-                          for tag in ('name', 'labelling'))
+                          for tag in ('name', 'labeling'))
 
   @property
   def name(self) -> str:
@@ -72,9 +72,9 @@ class Substance(AbstractWrapperObject):
     return self._wrappedData.name
 
   @property
-  def labelling(self) -> str:
-    """labelling descriptor of Substance (default is 'std')"""
-    return self._wrappedData.labelling
+  def labeling(self) -> str:
+    """labeling descriptor of Substance (default is 'std')"""
+    return self._wrappedData.labeling
     
   @property
   def _parent(self) -> Sample:

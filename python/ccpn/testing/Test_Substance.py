@@ -27,5 +27,11 @@ class SubstanceTest(WrapperTesting):
 
   # Path of project to load (None for new project)
   projectPath = None
+
+  def test_simple_create(self):
+    substance1 = self.project,newSimpleSubstance('MolComp1', userCode='userCode',smiles=':-)')
+    self.assertEqual(substance1.id, 'MolComp1.std')
+    self.assertEqual(substance1.smiles, ':-)')
+    self.assertEqual(substance1.substanceType, 'Molecule')
     
 

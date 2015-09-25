@@ -262,7 +262,7 @@ class Substance(AbstractWrapperObject):
 # Connections to parents:
 Project._childClasses.append(Substance)
 
-def _newSimpleSubstance(self:Project, name:str, labeling:str, substanceType:str='Molecule',
+def _newSimpleSubstance(self:Project, name:str, labeling:str='std', substanceType:str='Molecule',
                        userCode:str=None, smiles:str=None, inChi:str=None, casNumber:str=None,
                        empiricalFormula:str=None, molecularMass:float=None, comment:str=None,
                        synonyms:Sequence[str]=()) -> Substance:

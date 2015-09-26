@@ -32,7 +32,7 @@ ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', '
               'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3'],'15N': ['N', 'ND1', 'NE', 'NE1',
               'NE2', 'NH1', 'NH2', 'NZ']}
 
-from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms
+from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, getSpinSystemScore
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 from sklearn import svm
@@ -77,7 +77,7 @@ def assignBetas(nmrResidue, peaks):
   elif len(peaks) == 1:
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
 
-def getNmrResiduePrediction(nmrResidue, chemicalShiftList):
+def getNmrResiduePrediction(nmrResidue, chemicalShiftList, prior=0.05):
   """
   Takes ccpnCode and chemicalShift and predicts atom type
   :param nmrResidue:
@@ -88,9 +88,9 @@ def getNmrResiduePrediction(nmrResidue, chemicalShiftList):
   predictions = {}
   spinSystem = nmrResidue._wrappedData
   for code in CCP_CODES:
-    predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList, code))
-  tot = sum(predictions.values())
+    predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList._wrappedData, code, prior=prior))
   print(predictions)
+  tot = sum(predictions.values())
   refinedPredictions = {}
   for code in CCP_CODES:
     v = int(predictions[code]/tot * 100)
@@ -147,6 +147,20 @@ def getNmrAtomPrediction(ccpCode, value, isotopeCode):
 #     return '15N'
 #   if axisCode[0] == 'H':
 #     return '1H'
+
+def getNmrResidueChainProbabilities(nmrResidue, chain, chemicalShiftList):
+
+
+  ccpCodes = []
+  for residue in chain.residues:
+    ccpCode = residue.residueType
+    ccpCodes.append((ccpCode, residue.molType))
+
+  probDict = {}
+  getProb = getSpinSystemResidueProbability
+  priors = {}
+
+
 
 def copyAssignments(referencePeakList, matchPeakList):
   """
@@ -281,6 +295,125 @@ def propagateAssignments(peaks=None, referencePeak=None, current=None, tolerance
     # shiftList = peak.peakList.spectrum.chemicalShiftList
     # shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
 
+
+def getSpinSystemsLocation(project, nmrResidues, chain, chemicalShiftList):
+
+
+  nmrProject = project._wrappedData
+  spinSystems = [nmrResidue._wrappedData for nmrResidue in nmrResidues]
+  chain = chain._wrappedData
+  shiftList = chemicalShiftList._wrappedData
+
+  scoreMatrix = []
+
+  ccpCodes = getCcpCodes(chain)
+
+  N = len(ccpCodes)
+
+  for spinSystem0 in spinSystems:
+    scoreList = [None] * N
+
+    if spinSystem0:
+      shifts = []
+      for resonance in spinSystem0.resonances:
+        shift = resonance.findFirstShift(parentList=shiftList)
+        if shift:
+          shifts.append(shift)
+
+      scores = getSpinSystemScore(spinSystem0, shifts, chain, shiftList)
+
+      for i, ccpCode in enumerate(ccpCodes):
+        scoreList[i] = (scores[ccpCode], ccpCode)
+
+      scoreList.sort()
+      scoreList.reverse()
+
+    scoreMatrix.append(scoreList)
+
+
+  window = len(nmrResidues)
+  textMatrix = []
+  objectList = []
+
+  if chain and scoreMatrix:
+    matches = []
+
+    assignDict = {}
+    for spinSystem in nmrProject.resonanceGroups:
+      residue = spinSystem.residue
+      if residue:
+        assignDict[residue] = spinSystem
+    #
+    residues = chain.sortedResidues()
+    seq = [r.ccpCode for r in residues]
+
+    seq = [None, None] + seq + [None, None]
+    residues = [None, None] + residues + [None, None]
+    nRes = len(seq)
+
+    if nRes >= window:
+      scoreDicts = []
+      ccpCodes  = getCcpCodes(chain)
+
+      for scores in scoreMatrix:
+        scoreDict = {}
+        for ccpCode in ccpCodes:
+          scoreDict[ccpCode] = None
+
+        for data in scores:
+          if data:
+            score, ccpCode = data
+            scoreDict[ccpCode] = score
+
+        scoreDicts.append(scoreDict)
+      sumScore = 0.0
+      for i in range(nRes-window):
+
+        score = 1.0
+
+        for j in range(window):
+          ccpCode = seq[i+j]
+          score0 = scoreDicts[j].get(ccpCode)
+
+          if (ccpCode is None) and (spinSystems[j]):
+            break
+          elif score0:
+            score *= score0
+          elif score0 == 0.0:
+            break
+
+        else:
+          matches.append((score, residues[i:i+window]))
+          sumScore += score
+
+      matches.sort()
+      matches.reverse()
+
+
+      for i, data in enumerate(matches[:10]):
+        score, residues = data
+        score /= sumScore
+        datum = [i+1, 100.0*score]
+        # color = (1-score, score, 0)
+
+        # colors = [color, color]
+        for residue in residues:
+          if residue:
+            datum.append(residue.seqCode)
+            # if assignDict.get(residue):
+            #   colors.append('#8080FF')
+            # else:
+            #   colors.append(None)
+
+          else:
+            datum.append(None)
+            # colors.append(None)
+
+        textMatrix.append(datum)
+        residues2 = [project._data2Obj.get(residue) for residue in residues]
+        objectList.append([100*score, residues2])
+
+    return objectList
 
 
 

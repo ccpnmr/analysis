@@ -40,11 +40,7 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     self.residueTypePulldown = PulldownList(self, grid=(4, 1), callback=self.setResidueType)
     self.residueTypePulldown.setData(CCP_CODES)
     self.residueTypePulldown.setFixedWidth(100)
-    atomTypePulldownLabel = Label(self, "Atom Type", grid=(5, 0))
-    self.atomTypePulldown = PulldownList(self, grid=(5, 1), callback=self.setAtomType)
-    leftoverLabel = Label(self, "Leftover possibilities: ", grid=(6, 0), vAlign='c')
-    self.leftoverPoss = ListWidget(self, grid=(6, 1))
-    self.leftoverPoss.setFixedHeight(100)
+
 
     self.updatePopup()
 

@@ -16,132 +16,102 @@ def navigateToPeakPosition(project, peak=None, selectedDisplays=None, strip=None
     axisCodes = peak.peakList.spectrum.axisCodes
     axisPositions = dict(zip(axisCodes, positions))
     task = project._appBase.mainWindow.task
-    mark = task.newMark('white', positions, axisCodes)
+    # mark = task.newMark('white', positions, axisCodes)
 
     # if not strip:
     for strip in display.strips:
-      strip.orderedAxes[0].position = axisPositions[strip.orderedAxes[0].code]
-    #     strip.orderedAxes[1].position = axisPositions[strip.orderedAxes[1].code]
+      for axis in strip.orderedAxes:
+        try:
+          axisCodeMatch = spectrumLib.axisCodeMatch(axis.code, axisCodes)
+          if axisCodeMatch is not None:
+            axis.position = axisPositions[axisCodeMatch]
+            mark = task.newMark('white', [axis.position], [axisCodeMatch])
+        except TypeError:
+          pass
+    #   strip.orderedAxes[1].position = axisPositions[strip.orderedAxes[1].code]
     # elif strip:
     #   strip.orderedAxes[0].position = axisPositions[strip.orderedAxes[0].code]
     #   strip.orderedAxes[1].position = axisPositions[strip.orderedAxes[1].code]
 
-    if len(display.orderedAxes) > 2:
-      if not strip:
-        try:
-          for strip in display.strips:
-            zAxes = strip.orderedAxes[2:]
-            zAxes[0].position = axisPositions[zAxes[0].code]
-        except KeyError:
-          for strip in display.strips:
-            zAxes = strip.orderedAxes[2:]
-            zAxes[0].position = axisPositions[zAxes[0].code[0]]
-      else:
-        try:
-          for strip in display.strips:
-            zAxes = strip.orderedAxes[2:]
-            zAxes[0].position = axisPositions[zAxes[0].code]
-        except KeyError:
-          for strip in display.strips:
-            zAxes = strip.orderedAxes[2:]
-            zAxes[0].position = axisPositions[zAxes[0].code[0]]
+    # if len(display.orderedAxes) > 2:
+    #   if not strip:
+    #     try:
+    #       for strip in display.strips:
+    #         axisCodeMapping = spectrumLib.axisCodeMatch(strip.orderedAxes[2].code, axisCodes)
+    #         zAxes = strip.orderedAxes[2:]
+    #         zAxes[0].position = axisPositions[zAxes[0].code]
+    #     except KeyError:
+    #       for strip in display.strips:
+    #         zAxes = strip.orderedAxes[2:]
+    #         zAxes[0].position = axisPositions[zAxes[0].code[0]]
+    #   else:
+    #     try:
+    #       for strip in display.strips:
+    #         zAxes = strip.orderedAxes[2:]
+    #         zAxes[0].position = axisPositions[zAxes[0].code]
+    #     except KeyError:
+    #       for strip in display.strips:
+    #         zAxes = strip.orderedAxes[2:]
+    #         zAxes[0].position = axisPositions[zAxes[0].code[0]]
 
 
-def navigateToNmrResidue(project, nmrResidue, selectedDisplays=None, markPositions=False):
+def navigateToNmrResidue(project, nmrResidue, selectedDisplays=None, strip=None, markPositions=False):
 
   if selectedDisplays is None:
     selectedDisplays = project.spectrumDisplays
 
-  for displayPid in selectedDisplays:
-    display = project.getByPid(displayPid)
-    # print(display)
-    # for strip in display.strips:
+  if not strip:
+    for display in selectedDisplays:
+      shiftDict = {}
+      for axis in display.strips[0].orderedAxes:
+        shiftDict[axis.code] = []
+        for atom in nmrResidue.nmrAtoms:
+          if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
+            shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
+            if shift is not None:
+              shiftDict[axis.code].append(shift.value)
+
+
+      task = project._appBase.mainWindow.task
+
+      for strip in display.strips:
+        atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
+
+        for ii, axis in enumerate(strip.orderedAxes):
+          for atomPosition in atomPositions[ii]:
+            axis.position = atomPosition
+            if markPositions:
+              task.newMark('white', [atomPosition], [axis.code])
+  elif strip:
     shiftDict = {}
-    for axis in display.strips[0].orderedAxes:
+    for axis in strip.orderedAxes:
       shiftDict[axis.code] = []
-      for atom in nmrResidue.atoms:
+      for atom in nmrResidue.nmrAtoms:
         if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
           shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
-          # print(shift)
           if shift is not None:
-            if isPositionWithinfBounds(display.strips[0], shift, axis):
-              shiftDict[axis.code].append(shift.value)
+            shiftDict[axis.code].append(shift.value)
+
+
     task = project._appBase.mainWindow.task
-    axisCodes = [axis.code for axis in display.strips[0].orderedAxes]
-    atomPositions = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes]
-    if len(shiftDict[display.strips[0].orderedAxes[2].code]) > 0:
-      display.strips[0].changeZPlane(position=shiftDict[display.strips[0].orderedAxes[2].code][0])
-      display.orderedStrips[0].orderedAxes[0].position = shiftDict[display.strips[0].orderedAxes[0].code][0]
 
-    if markPositions is True:
-      markPositions = []
-      for pos1 in atomPositions[0]:
-        for pos2 in atomPositions[1]:
-          newMarkPosition = [pos1, pos2, atomPositions[2][0]]
-          markPositions.append(newMarkPosition)
-      for markPosition in markPositions:
-        mark = task.newMark('white', markPosition, axisCodes)
 
-    if len(shiftDict[display.strips[0].orderedAxes[2].code]) > 1:
-      shifts = shiftDict[display.strips[0].orderedAxes[2].code][1:]
-      for shift in shifts:
-        newStrip = display.strips[0].clone()
-        newStrip.changeZPlane(position=shift)
-        if markPositions is True:
-          markPositions = []
-          for pos1 in atomPositions[0]:
-            for pos2 in atomPositions[1]:
-              newMarkPosition = [pos1, pos2, atomPositions[2][shifts.index(shift)]]
-              markPositions.append(newMarkPosition)
-          for markPosition in markPositions:
-            mark = task.newMark('white', markPosition, axisCodes)
+    atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
 
-  # elif strip is not None:
-  #   shiftDict = {}
-  #   for axis in strip.orderedAxes:
-  #     shiftDict[axis.code] = []
-  #     for atom in nmrResidue.atoms:
-  #       if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
-  #         shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
-  #         print(shift)
-  #         if shift is not None:
-  #           if isPositionWithinfBounds(strip, shift, axis):
-  #             shiftDict[axis.code].append(shift.value)
-  #   task = project._appBase.mainWindow.task
-  #   axisCodes = [axis.code for axis in strip.orderedAxes]
-  #   atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
-  #   if len(shiftDict[strip.orderedAxes[2].code]) > 0:
-  #     strip.changeZPlane(position=shiftDict[strips[0].orderedAxes[2].code][0])
-  #     display.orderedStrips[0].orderedAxes[0].position = shiftDict[display.strips[0].orderedAxes[0].code][0]
-  #
-  #   if markPositions is True:
-  #     markPositions = []
-  #     for pos1 in atomPositions[0]:
-  #       for pos2 in atomPositions[1]:
-  #         newMarkPosition = [pos1, pos2, atomPositions[2][0]]
-  #         markPositions.append(newMarkPosition)
-  #     for markPosition in markPositions:
-  #       mark = task.newMark('white', markPosition, axisCodes)
-  #
-  #   if len(shiftDict[display.strips[0].orderedAxes[2].code]) > 1:
-  #     shifts = shiftDict[display.strips[0].orderedAxes[2].code][1:]
-  #     for shift in shifts:
-  #       newStrip = display.strips[0].clone()
-  #       newStrip.changeZPlane(position=shift)
-  #       if markPositions is True:
-  #         markPositions = []
-  #         for pos1 in atomPositions[0]:
-  #           for pos2 in atomPositions[1]:
-  #             newMarkPosition = [pos1, pos2, atomPositions[2][shifts.index(shift)]]
-  #             markPositions.append(newMarkPosition)
-  #         for markPosition in markPositions:
-  #           mark = task.newMark('white', markPosition, axisCodes)
+    for ii, axis in enumerate(strip.orderedAxes):
+      for atomPosition in atomPositions[ii]:
+        axis.position = atomPosition
+        if markPositions:
+          task.newMark('white', [atomPosition], [axis.code])
+
+
 
 def isPositionWithinfBounds(strip, shift, axis):
 
       minima = []
       maxima = []
       for spectrumView in strip.spectrumViews:
+        # print(spectrumLib.axisCodeMapping())
         print(axis.code, spectrumView.spectrum.axisCodes)
         index = spectrumView.spectrum.axisCodes.index(axis.code)
         minima.append(spectrumView.spectrum.spectrumLimits[index][0])

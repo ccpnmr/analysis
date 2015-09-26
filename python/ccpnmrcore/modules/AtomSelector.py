@@ -125,43 +125,45 @@ class AtomSelector(CcpnDock):
 
   def predictAssignments(self, peaks):
 
+    print('peaks in AtomSelector', peaks)
     self.returnButtonToNormal()
-    if len(peaks) == 0:
-      for button in self.buttons:
-        button.clicked.connect(self.returnButtonToNormal)
+
+
+    if not self.current.nmrResidue:
+      return
 
     else:
 
-      experiments = []
-      if peaksAreOnLine(peaks, 1):
-        try:
-          self.current.nmrResidue = peaks[0].dimensionNmrAtoms[0][0]._parent
+      if len(peaks) == 0:
+        for button in self.buttons:
+          button.clicked.connect(self.returnButtonToNormal)
 
-        except IndexError:
-          self.current.nmrResidue = self.project.nmrChains[0].newNmrResidue()
-        values = [peak.height for peak in peaks]
-        experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
-        for peak in peaks:
-          predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1])[0] for ccpCode in CCP_CODES]
-          refinedPreds = [[type[0][1], type[1]] for type in predictedAtomTypes]
-          atomPredictions = set()
-          for pred in refinedPreds:
-            if pred[1] > 90:
-              atomPredictions.add(pred[0])
+      else:
 
-          for atomPred in atomPredictions:
-            if atomPred == 'CB':
-              if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-                self.cbButton1.setStyleSheet('background-color: green')
-                self.cbButton2.setStyleSheet('background-color: orange')
-              else:
-                self.cbButton2.setStyleSheet('background-color: green')
-            if atomPred == 'CA' and peak.position[1] > 40:
-              if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-                self.caButton1.setStyleSheet('background-color: green')
-                self.caButton2.setStyleSheet('background-color: orange')
-              else:
-                self.caButton2.setStyleSheet('background-color: green')
+        if peaksAreOnLine(peaks, 1):
+          experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
+          for peak in peaks:
+            isotopeCode = peak.peakList.spectrum.isotopeCodes[1]
+            predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1], isotopeCode) for ccpCode in CCP_CODES]
+            refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomTypes if len(type) > 0]
+            atomPredictions = set()
+            for pred in refinedPreds:
+              if pred[1] > 90:
+                atomPredictions.add(pred[0])
+
+            for atomPred in atomPredictions:
+              if atomPred == 'CB':
+                if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                  self.cbButton1.setStyleSheet('background-color: green')
+                  self.cbButton2.setStyleSheet('background-color: orange')
+                else:
+                  self.cbButton2.setStyleSheet('background-color: green')
+              if atomPred == 'CA':
+                if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                  self.caButton1.setStyleSheet('background-color: green')
+                  self.caButton2.setStyleSheet('background-color: orange')
+                else:
+                  self.caButton2.setStyleSheet('background-color: green')
 
 
 

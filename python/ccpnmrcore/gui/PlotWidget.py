@@ -52,6 +52,7 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     self.plotItem.axes['left']['item'].hide()
     self.plotItem.axes['right']['item'].show()
 
+
     if useOpenGL:
       self.setViewport(QtOpenGL.QGLWidget())
       self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)

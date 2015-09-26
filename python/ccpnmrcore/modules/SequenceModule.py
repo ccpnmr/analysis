@@ -36,12 +36,24 @@ class SequenceModule(DropBase, CcpnDock):
     self.residueCount = 0
     self.layout.addWidget(self.scrollArea)
     self.scrollArea.scene.dragMoveEvent = self.dragMoveEvent
+    self.chainLabels = []
     for chain in project.chains:
       self.addChainLabel(chain)
+
+    # for chainLabel in self.chainLabels:
+    #   self.highlightPossibleStretches(chainLabel)
+
+  def highlightPossibleStretches(self, residues):
+    for residue in residues:
+      guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
+      guiResidue.setHtml('<div style="color: #e4e15b;text-align: center;">'+
+                           residue.shortName+'</div>')
+
 
   def addChainLabel(self, chain):
     chainLabel = GuiChainLabel(self.project, self.scrollArea.scene, chain)
     self.scrollArea.scene.addItem(chainLabel)
+    self.chainLabels.append(chainLabel)
 
 class GuiChainLabel(QtGui.QGraphicsTextItem):
 
@@ -50,12 +62,13 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     self.chain = chain
     self.text=chain.compoundName
     self.setHtml('<div style=><strong>'+chain.compoundName+': </strong></div>')
-    self.setFont(Font(size=14, bold=True))
-    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+    self.setFont(Font(size=20, bold=True))
+    self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
     self.residueDict = {}
     i = 0
     for residue in chain.residues:
-      newResidue = scene.addItem(GuiChainResidue(self, project, residue, scene, self.boundingRect().width(), i))
+      newResidue = GuiChainResidue(self, project, residue, scene, self.boundingRect().width(), i)
+      scene.addItem(newResidue)
       self.residueDict[residue.sequenceCode] = newResidue
       i+=1
 
@@ -69,11 +82,11 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
     self.setPlainText(residue.shortName)
     position = labelPosition+(20*index)
     self.setFont(Font(size=GuiChainResidue.fontSize, normal=True))
-    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+    self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
     self.setPos(QtCore.QPointF(position, 0))
     self.residueNumber = residue.sequenceCode
     if residue.nmrResidue is not None:
-      self.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+residue.shortName+'</strong></div>')
+      self.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+residue.shortName+'</strong></div>')
     else:
       self.setHtml('<div style:"text-align: center;">'+residue.shortName+'</div')
     self.project = project
@@ -81,10 +94,11 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
     self.setAcceptDrops(True)
     scene.dragLeaveEvent = self.dragLeaveEvent
     scene.dragEnterEvent = self.dragEnterEvent
-    # scene.dropEvent = self.dropEvent
+    scene.dropEvent = self.dropEvent
     self.scene = scene
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     self.parent=parent
+
 
 
   def setFontBold(self):
@@ -99,8 +113,6 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
 
     item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
-      print(item.residueNumber)
-
       item.setDefaultTextColor(QtGui.QColor('#e4e15b'))
     event.accept()
 
@@ -111,44 +123,26 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
     event.accept()
 
 
-  # def hoverEnterEvent(self, event):
-  #   # self.setDefaultTextColor(QtGui.QColor('#e4e15b'))
-  #   self.setHtml('<div style="color: #e4e15b;">'+self.residue.shortName+'</div>')
-  #
-  # def hoverLeaveEvent(self, event):
-  #   if hasattr(self.residue, 'nmrResidue'):
-  #     if self.residue.nmrResidue is not None:
-  #       self.setFont(Font(size=14, bold=True))
-  #       self.setHtml('<div style="color: #04C317;"><strong>'+self.residue.shortName+'<strong></div>')
-  #     else:
-  #       self.setFont(Font(size=14, normal=True))
-  #       self.setHtml('<div style="color: #f7ffff;">'+self.residue.shortName+'</div>')
-  #   else:
-  #     self.setHtml('<div style="color: #f7ffff;">'+self.residue.shortName+'</div>')
-  #     self.setFont(Font(size=14, normal=True))
 
-  # def dropEvent(self, event):
-  #   res = self.scene.itemAt(event.scenePos())
-  #   event.accept()
-  #   if event.mimeData().hasFormat('application/x-assignedStretch'):
-  #     data = event.mimeData().data('application/x-assignedStretch')
-  #     nmrResidues = str(data, encoding='utf-8').split(',')
-  #     nmrResidue = self.project.getByPid(nmrResidues[0])
-  #     res.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
-  #                 res.residue.shortName+'</strong></div>')
-  #     nmrResidue.residue = res.residue
-  #     res = res.residue
-  #     print(nmrResidues,'nmrResidues')
-  #     for assignableResidue in nmrResidues[1:]:
-  #       res = res.nextResidue
-  #       print('res')
-  #       guiResidue = self.parent.residueDict.get(res.sequenceCode)
-  #       guiResidue.setHtml('<div style="color: #04C317; text-align: center;"><strong>'+
-  #                          res.shortName+'</strong></div>')
-  #       nmrResidue = self.project.getByPid(assignableResidue)
-  #       print(nmrResidue, 'before')
-  #       nmrResidue.residue = res
-  #       print(nmrResidue, 'after')
+  def dropEvent(self, event):
+    res = self.scene.itemAt(event.scenePos())
+    event.accept()
+    if event.mimeData().hasFormat('application/x-assignedStretch'):
+      data = event.mimeData().data('application/x-assignedStretch')
+      nmrResidues = str(data, encoding='utf-8').split(',')
+      nmrResidue = self.project.getByPid(nmrResidues[0])
+      res.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
+                  res.residue.shortName+'</strong></div>')
+      nmrResidue.residue = res.residue
+      res = res.residue
+      # print(nmrResidues,'nmrResidues')
+      for assignableResidue in nmrResidues[1:]:
+        res = res.nextResidue
+        guiResidue = self.parent.residueDict.get(res.sequenceCode)
+        guiResidue.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
+                           res.shortName+'</strong></div>')
+        nmrResidue = self.project.getByPid(assignableResidue)
+        nmrResidue.residue = res
 
 
 

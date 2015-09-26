@@ -582,7 +582,7 @@ class AssignmentModule(CcpnDock, Base):
       return
     elif nmrAtom is NEW:
       isotopeCode = self.peaks[0].peakList.spectrum.isotopeCodes[dim]
-      NBNB
+      ###NBNB
       nmrAtom = self.project.newNmrChain().newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)
 
     for peak in self.peaks:

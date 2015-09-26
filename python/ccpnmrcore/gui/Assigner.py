@@ -85,77 +85,136 @@ class Assigner(CcpnDock):
     self.addConnectingLine(atoms['CO'], atoms['CA'], 'grey', 1.0, 0)
     nmrAtomLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
     self.scene.addItem(nmrAtomLabel)
-    # self.addResiduePredictions(nmrResidue, atoms['CA'])
+    self.addResiduePredictions(nmrResidue, atoms['CA'])
 
 
-  def addResidue(self, nmrResidue):
+  def addResidue(self, nmrResidue, direction):
 
+    nmrAtoms = [nmrAtom.name for nmrAtom in nmrResidue.nmrAtoms]
     if self.residueCount == 0:
-      self.nmrChain = self.project.newNmrChain()
-      self.nmrChain.connectedNmrResidues = [nmrResidue]
-      hAtom = self.addAtom("H", (0, self.atomSpacing), nmrResidue.fetchNmrAtom(name='H'))
-      nAtom = self.addAtom("N", (0, hAtom.y()-self.atomSpacing),nmrResidue.fetchNmrAtom(name='N'))
-      caAtom = self.addAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()),nmrResidue.fetchNmrAtom(name='CA'))
-      cbAtom = self.addAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='CB'))
-      coAtom = self.addAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()),nmrResidue.fetchNmrAtom(name='CO'))
+      # self.nmrChain = self.project.newNmrChain()
+      # self.nmrChain.connectedNmrResidues = [nmrResidue]
+
+      if 'H' in nmrAtoms:
+        hAtom = self.addAtom("H", (0, self.atomSpacing), nmrResidue.fetchNmrAtom(name='H'))
+      else:
+        hAtom = self.addAtom("H", (0, self.atomSpacing))
+      if 'N' in nmrAtoms:
+        nAtom = self.addAtom("N", (0, hAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='N'))
+      else:
+        nAtom = self.addAtom("N", (0, hAtom.y()-self.atomSpacing))
+      if 'CA' in nmrAtoms:
+        caAtom = self.addAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()), nmrResidue.fetchNmrAtom(name='CA'))
+      else:
+        caAtom = self.addAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()))
+      if 'CB' in nmrAtoms:
+        cbAtom = self.addAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='CB'))
+      else:
+        # cbAtom = None
+        cbAtom = self.addAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing))
+      if 'CO' in nmrAtoms:
+        coAtom = self.addAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()), nmrResidue.fetchNmrAtom(name='CO'))
+      else:
+        coAtom = self.addAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()))
       coAtom.setZValue(10)
 
       atoms = {'H': hAtom, 'N': nAtom, 'CA': caAtom, 'CB': cbAtom, 'CO': coAtom}
 
       self.residuesShown.append(atoms)
+      self.predictedStretch.append(nmrResidue)
 
     else:
-        if self.direction == 'left':
-          newConnectedStretch = list(self.nmrChain.connectedNmrResidues).insert(0, nmrResidue)
-          self.nmrChain.connectedNmrResidues = newConnectedStretch
+        if '-1' in nmrResidue.sequenceCode or direction == '-1':
+          # newConnectedStretch = list(self.nmrChain.connectedNmrResidues).insert(0, nmrResidue)
+          # self.nmrChain.connectedNmrResidues = newConnectedStretch
           oldResidue = self.residuesShown[0]
-          coAtom2 = self.addAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()
-          -oldResidue["N"].x())-(oldResidue["N"].boundingRect().width()/2),oldResidue["CA"].y()),
-                                 nmrResidue.fetchNmrAtom(name='CO'))
+          if 'CO' in nmrAtoms:
+            coAtom2 = self.addAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()
+            -oldResidue["N"].x())-(oldResidue["N"].boundingRect().width()/2),oldResidue["CA"].y()),
+                                   nmrResidue.fetchNmrAtom(name='CO'))
+          else:
+            coAtom2 = self.addAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()
+            -oldResidue["N"].x())-(oldResidue["N"].boundingRect().width()/2),oldResidue["CA"].y()))
           coAtom2.setZValue(10)
-          caAtom2 = self.addAtom("CA", ((coAtom2.x()-self.atomSpacing), oldResidue["N"].y()),
-                                 nmrResidue.fetchNmrAtom(name='CA'))
-          cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
-                                 nmrResidue.fetchNmrAtom(name='CB'))
-          nAtom2 = self.addAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()),
-                                nmrResidue.fetchNmrAtom(name='N'))
-          hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
-                                nmrResidue.fetchNmrAtom(name='H'))
+          if 'CA' in nmrAtoms:
+            caAtom2 = self.addAtom("CA", ((coAtom2.x()-self.atomSpacing), oldResidue["N"].y()),
+                                   nmrResidue.fetchNmrAtom(name='CA'))
+          else:
+            caAtom2 = self.addAtom("CA", ((coAtom2.x()-self.atomSpacing), oldResidue["N"].y()))
+          if 'CB' in nmrAtoms:
+            cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
+                                   nmrResidue.fetchNmrAtom(name='CB'))
+          else:
+            # cbAtom2 = None
+            cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
+          if 'N' in nmrAtoms:
+            nAtom2 = self.addAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()),
+                                  nmrResidue.fetchNmrAtom(name='N'))
+          else:
+            nAtom2 = self.addAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()))
+          if 'H' in nmrAtoms:
+            hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
+                                  nmrResidue.fetchNmrAtom(name='H'))
+          else:
+            hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
 
           atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2, 'N-1': oldResidue['N']}
 
           self.residuesShown.insert(0, atoms)
+          self.predictedStretch.insert(0, nmrResidue)
 
-        if self.direction == 'right':
-          newConnectedStretch = list(self.nmrChain.connectedNmrResidues).append(nmrResidue)
-          self.nmrChain.connectedNmrResidues = newConnectedStretch
+        else:
+          # newConnectedStretch = list(self.nmrChain.connectedNmrResidues).append(nmrResidue)
+          # self.nmrChain.connectedNmrResidues = newConnectedStretch
           oldResidue = self.residuesShown[-1]
-          nAtom2 = self.addAtom("N", (oldResidue["CO"].x()+self.atomSpacing+
-          oldResidue["CO"].boundingRect().width()/2, oldResidue["CA"].y()),
-                                nmrResidue.fetchNmrAtom(name='CA'))
-          hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
-                                nmrResidue.fetchNmrAtom(name='H'))
-          caAtom2 = self.addAtom("CA", (nAtom2.x()+(nAtom2.x()-oldResidue["CO"].x())
-                -(oldResidue["CO"].boundingRect().width()/2), oldResidue["CO"].y()),
-                                 nmrResidue.fetchNmrAtom(name='CA'))
-          cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
-                                 nmrResidue.fetchNmrAtom(name='CB'))
-          coAtom2 = self.addAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()),
-                                 nmrResidue.fetchNmrAtom(name='CO'))
+          if 'N' in nmrAtoms:
+            nAtom2 = self.addAtom("N", (oldResidue["CO"].x()+self.atomSpacing+
+            oldResidue["CO"].boundingRect().width()/2, oldResidue["CA"].y()),
+                                  nmrResidue.fetchNmrAtom(name='CA'))
+          else:
+            nAtom2 = self.addAtom("N", (oldResidue["CO"].x()+self.atomSpacing+
+            oldResidue["CO"].boundingRect().width()/2, oldResidue["CA"].y()))
+          if 'H' in nmrAtoms:
+            hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
+                                  nmrResidue.fetchNmrAtom(name='H'))
+          else:
+            hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
+          if 'CA' in nmrAtoms:
+            caAtom2 = self.addAtom("CA", (nAtom2.x()+(nAtom2.x()-oldResidue["CO"].x())
+                  -(oldResidue["CO"].boundingRect().width()/2), oldResidue["CO"].y()),
+                                   nmrResidue.fetchNmrAtom(name='CA'))
+          else:
+            caAtom2 = self.addAtom("CA", (nAtom2.x()+(nAtom2.x()-oldResidue["CO"].x())
+                  -(oldResidue["CO"].boundingRect().width()/2), oldResidue["CO"].y()))
+          if 'CB' in nmrAtoms:
+            cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
+                                   nmrResidue.fetchNmrAtom(name='CB'))
+          else:
+            self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
+          if 'CO' in nmrAtoms:
+            coAtom2 = self.addAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()),
+                                   nmrResidue.fetchNmrAtom(name='CO'))
+          else:
+            coAtom2 = self.addAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()))
           coAtom2.setZValue(10)
 
           atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2, 'N-1': oldResidue['N']}
 
           self.residuesShown.append(atoms)
+          self.predictedStretch.append(nmrResidue)
 
     self.assembleResidue(nmrResidue, atoms)
     for spectrum in self.project.spectra:
       self.addSpectrumAssignmentLines(spectrum, atoms)
+
+    if len(self.predictedStretch) > 2:
+      self.predictSequencePosition()
     # self.addSpectrumAssignmentLines(self.project.getByPid(self.spectra['intra'][0]), atoms)
     # self.addSpectrumAssignmentLines(self.project.getByPid(self.spectra['inter'][0]), atoms)
 
     self.residueCount+=1
-    print(self.nmrChain.connectedNmrResidues)
+
+    # print(self.nmrChain.connectedNmrResidues)
 
   def addResiduePredictions(self, nmrResidue, caAtom):
     predictions = getNmrResiduePrediction(nmrResidue, self.project.chemicalShiftLists[0])
@@ -168,15 +227,18 @@ class Assigner(CcpnDock):
       self.scene.addItem(predictionLabel)
 
   def predictSequencePosition(self):
-    sequence = ''.join([residue.shortName for residue in self.project.chains[0].residues])
-    if len(self.predictedStretch) > 3:
-      string = ''.join(self.predictedStretch)
-      import re
-      matcher = re.search(string, sequence)
-      newSequenceText = '<div>'+sequence[:matcher.start()]+'<span style="background-color: #000; ' \
-                        'color: #FFF; display: inline-block; padding: 0 3px;"><strong>'+sequence[
-                        matcher.start():matcher.end()]+'</strong></span>'+sequence[matcher.end():]+'</div>'
-      self.project._appBase.mainWindow.sequenceWidget.chainLabel(chainCode=self.project.chains[0].compoundName).setText(newSequenceText)
+    from ccpn.lib.Assignment import getSpinSystemsLocation
+
+    possibleMatches = getSpinSystemsLocation(self.project, self.predictedStretch,
+                      self.project.chains[0], self.project.chemicalShiftLists[0])
+
+    for possibleMatch in possibleMatches:
+      if possibleMatch[0] > 1:
+        print(possibleMatch)
+
+        if hasattr(self.project._appBase.mainWindow, 'sequenceWidget'):
+          self.project._appBase.mainWindow.sequenceWidget.highlightPossibleStretches(possibleMatch[1])
+
     #
     # else:
     #   print(self.predictedStretch)
@@ -189,11 +251,12 @@ class Assigner(CcpnDock):
         possibleAtoms = EXPT_ATOM_DICT[spectrum.experimentType]
         lineColour = spectrum.positiveContourColour
         for atom in residue.values():
-          for peak in atom.nmrAtom.assignedPeaks[0]:
-            if peak.peakList.spectrum == spectrum:
-              for atom in peak.dimensionNmrAtoms:
-                for a in atom:
-                  assignedAtoms1.append(a)
+          if atom.nmrAtom is not None:
+            for peak in atom.nmrAtom.assignedPeaks[0]:
+              if peak.peakList.spectrum == spectrum:
+                for atom in peak.dimensionNmrAtoms:
+                  for a in atom:
+                    assignedAtoms1.append(a)
 
 
 
@@ -334,7 +397,7 @@ class Assigner(CcpnDock):
     return newLine
 
 
-  def addAtom(self, atomType, position, nmrAtom):
+  def addAtom(self, atomType, position, nmrAtom=None):
     atom = GuiNmrAtom(text=atomType, pos=position, nmrAtom=nmrAtom)
     return(atom)
 
@@ -349,13 +412,14 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
     self.connectedAtoms = 0
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
-    self.name = nmrAtom.name
+    if nmrAtom:
+      self.name = nmrAtom.name
     # self.brush = QtGui.QBrush()
     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
     # self.setBrush(self.brush)
     if self.isSelected:
       # self.setFont(Font(size=17.5, bold=True))
-      print(self.nmrAtom)
+      # print(self.nmrAtom)
       self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
     else:
       self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
@@ -401,6 +465,7 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
         mime = QtCore.QMimeData()
         drag.setMimeData(mime)
         mime.setData('application/x-assignedStretch',assignStretch)
+        # print(assignStretch)
 
         drag.exec_()
 

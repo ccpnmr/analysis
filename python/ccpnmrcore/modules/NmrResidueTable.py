@@ -1,28 +1,28 @@
 __author__ = 'simon1'
 
-from ccpncore.gui.Dock import CcpnDock
+from PyQt4 import QtGui
+
+from ccpncore.gui.Base import Base
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
 
 from ccpnmrcore.modules.GuiTableGenerator import GuiTableGenerator
 
-from ccpnmrcore.lib.Window import navigateToNmrResidue
 
 
-class NmrResidueTable(CcpnDock):
+class NmrResidueTable(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, project=None, name='Nmr Residues', **kw):
+  def __init__(self, parent=None, project=None, callback=None, **kw):
 
     # if not nmrChains:
     #   nmrChains = []
 
-    CcpnDock.__init__(self, name=name)
+    QtGui.QWidget.__init__(self, parent)
+    Base.__init__(self, **kw)
     self.project = project
-    self.selectedDisplays = None
     self.nmrChains = project.nmrChains
 
-    label = Label(self, "Nmr Chain" )
-    self.layout.addWidget(label, 0, 0)
+    label = Label(self, "Nmr Chain", grid=(0, 0))
 
     self.nmrChainPulldown = PulldownList(self, grid=(0, 1))
 
@@ -33,12 +33,12 @@ class NmrResidueTable(CcpnDock):
     tipTexts = ['Nmr Residue key', 'Name of NmrResidue', 'Atoms in NmrResidue',
                 'Peaks assigned to Nmr Residue']
 
-    self.nmrResidueTable = GuiTableGenerator(self, self.nmrChains, callback=self.navigateTo, columns=columns,
-                                             selector=self.nmrChainPulldown, tipTexts=tipTexts)
+    self.nmrResidueTable = GuiTableGenerator(self, self.nmrChains, callback=callback, columns=columns,
+                                             selector=self.nmrChainPulldown, tipTexts=tipTexts,
+                                             selectionCallback=self.setNmrResidue)
 
-    newLabel = Label(self, '', grid=(2, 0))
+    self.layout().addWidget(self.nmrResidueTable, 3, 0, 1, 4)
 
-    self.layout.addWidget(self.nmrResidueTable, 3, 0, 1, 4)
 
   def getNmrAtoms(self, nmrResidue):
     return ', '.join([atom.name for atom in nmrResidue.nmrAtoms])
@@ -46,13 +46,11 @@ class NmrResidueTable(CcpnDock):
   def getNmrResiduePeaks(self, nmrResidue):
     return sum([len(atom.assignedPeaks) for atom in nmrResidue.nmrAtoms])
 
-  def navigateTo(self, nmrResidue=None, row=None, col=None):
-
-    navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=self.selectedDisplays)
-
   def getSequenceCode(self, nmrResidue):
     try:
       return int(nmrResidue.sequenceCode)
     except ValueError:
       return nmrResidue.sequenceCode
 
+  def setNmrResidue(self, nmrResidue, row, col):
+    self.project._appBase.current.nmrResidue = nmrResidue

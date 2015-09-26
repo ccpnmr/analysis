@@ -8,7 +8,8 @@ from PyQt4 import QtGui
 
 class GuiTableGenerator(QtGui.QWidget):
 
-  def __init__(self, parent, objectLists, callback, columns, selector=None, tipTexts=None, **kw):
+  def __init__(self, parent, objectLists, callback, columns, selector=None, tipTexts=None,
+               selectionCallback=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
 
@@ -23,7 +24,8 @@ class GuiTableGenerator(QtGui.QWidget):
       self.tipTexts = tipTexts
       layout = QtGui.QGridLayout()
       self.setLayout(layout)
-      self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback)
+      self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback,
+                               selectionCallback=selectionCallback)
       layout.addWidget(self.table, 0, 0, 1, 5)
       self.updateContents()
       if selector is not None:

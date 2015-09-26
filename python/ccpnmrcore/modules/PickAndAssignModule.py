@@ -5,9 +5,10 @@ from ccpncore.gui.Base import Base
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpnmrcore.modules.PeakTable import PeakListSimple
+from ccpnmrcore.modules.NmrResidueTable import NmrResidueTable
 from ccpnmrcore.popups.SelectDisplaysPopup import SelectDisplaysAndSpectraPopup
 
-from ccpnmrcore.lib.Window import navigateToPeakPosition
+from ccpnmrcore.lib.Window import navigateToPeakPosition, navigateToNmrResidue
 
 class PickAndAssignModule(CcpnDock, Base):
 
@@ -18,62 +19,68 @@ class PickAndAssignModule(CcpnDock, Base):
     spacingLabel.setFixedHeight(15)
     self.layout.addWidget(spacingLabel, 0, 1, 1, 1)
 
-    self.displayButton = Button(self, text='Select Modules', callback=self.showDisplayPopup)
-    self.layout.addWidget(self.displayButton, 1, 0, 1, 1)
     self.restrictedPickButton = Button(self, text='Restricted Pick', callback=self.restrictedPick)
     self.layout.addWidget(self.restrictedPickButton, 1, 2, 1, 1)
 
     self.project = project
     self.current = project._appBase.current
-    self.peakTable = PeakListSimple(self, project=project, callback=self.goToPositionInModules)
+    # self.peakTable = PeakListSimple(self, project=project, callback=self.goToPositionInModules)
+    self.nmrResidueTable = NmrResidueTable(self, project=project, callback=self.goToPositionInModules)
     self.layout.addWidget(spacingLabel, 2, 1, 1, 1)
 
-    self.layout.addWidget(self.peakTable, 4, 0, 1, 4)
+    self.layout.addWidget(self.nmrResidueTable, 4, 0, 1, 4)
+    self.moreButton = Button(self, "More...", callback=self.showNmrResiduePopup)
+    self.layout.addWidget(self.moreButton, 5, 0, 1, 1)
 
     # parent.window().showAtomSelector()
 
   def restrictedPick(self):
-    position = self.selectedPeak.position
-    peak = self.selectedPeak
-    axisCodes = self.selectedPeak.peakList.spectrum.axisCodes
-
-    for module in self.project.spectrumDisplays:
-      if len(module.strips[0].orderedAxes) > 2:
+    # position = self.selectedPeak.position
+    # axisCodes = self.selectedPeak.peakList.spectrum.axisCodes
+    if not self.current.nmrResidue:
+      print('No current nmrResidue')
+      return
+    else:
+      nmrResidueIsotopeCodes = [atom.isotopeCode for atom in self.current.nmrResidue.nmrAtoms]
+      for module in self.project.spectrumDisplays:
+        # if len(module.strips[0].orderedAxes) > 2:
         for spectrumView in module.strips[0].spectrumViews:
-          selectedRegion = [['']*3, ['']*3]
+          if spectrumView.isVisible():
+            spectrum = spectrumView.spectrum
+            shiftList = spectrum.chemicalShiftList
+            nmrResidueShifts = [shiftList.getChemicalShift(nmrAtom.id).value for nmrAtom in self.current.nmrResidue.nmrAtoms]
+            shiftDict = dict(zip(nmrResidueIsotopeCodes, nmrResidueShifts))
 
-          for moduleAxisCode in spectrumView.spectrum.axisCodes:
+            selectedRegion = [['']*len(module.axisCodes), ['']*len(module.axisCodes)]
+            spectrumViewIsotopeCodes = spectrumView.spectrum.isotopeCodes
 
-            if moduleAxisCode in axisCodes:
-              index = axisCodes.index(moduleAxisCode)
-              index2 = spectrumView.spectrum.axisCodes.index(moduleAxisCode)
-              selectedRegion[0][index2] = position[index]-spectrumView.spectrum.assignmentTolerances[index]
-              selectedRegion[1][index2] = position[index]+spectrumView.spectrum.assignmentTolerances[index]
-            else:
-              index3 = spectrumView.spectrum.axisCodes.index(moduleAxisCode)
+            for isotopeCode in spectrumViewIsotopeCodes:
+              if isotopeCode in nmrResidueIsotopeCodes:
+                index = spectrumView.spectrum.isotopeCodes.index(isotopeCode)
+                selectedRegion[0][index] = shiftDict[isotopeCode]-spectrumView.spectrum.assignmentTolerances[index]
+                selectedRegion[1][index] = shiftDict[isotopeCode]+spectrumView.spectrum.assignmentTolerances[index]
 
-              selectedRegion[0][index3] = spectrumView.strip.orderedAxes[index3].region[0]
-              selectedRegion[1][index3] = spectrumView.strip.orderedAxes[index3].region[1]
+              else:
+                index3 = spectrumViewIsotopeCodes.index(isotopeCode)
+                selectedRegion[0][index3] = spectrumView.strip.orderedAxes[index3].region[0]
+                selectedRegion[1][index3] = spectrumView.strip.orderedAxes[index3].region[1]
 
-          peakList = spectrumView.spectrum.peakLists[0]
-          if spectrumView.spectrum.dimensionCount > 1:
-            apiSpectrumView = spectrumView._wrappedData
-            newPeaks = peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
-                                            doPos=True,
-                                            doNeg=True)
-            for peak in newPeaks:
-              peak.isSelected = True
+            peakList = spectrumView.spectrum.peakLists[0]
+            if spectrumView.spectrum.dimensionCount > 1:
+              apiSpectrumView = spectrumView._wrappedData
+              peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
+                                              doPos=apiSpectrumView.spectrumView.displayPositiveContours,
+                                              doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
             for strip in module.strips:
               strip.showPeaks(peakList)
 
 
-  def goToPositionInModules(self, peak=None, row=None, col=None):
-    navigateToPeakPosition(self.project, peak,  markPositions=True)
-    self.selectedPeak = peak
+  def goToPositionInModules(self, nmrResidue=None, row=None, col=None):
+    navigateToNmrResidue(self.project, nmrResidue, markPositions=True)
+    self.current.nmrResidue = nmrResidue
 
-
-  def showDisplayPopup(self):
-    popup = SelectDisplaysAndSpectraPopup(self, project=self.project, dim=2)
-    popup.show()
+  def showNmrResiduePopup(self):
+    from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup
+    NmrResiduePopup(self, self.project).exec_()
 
 

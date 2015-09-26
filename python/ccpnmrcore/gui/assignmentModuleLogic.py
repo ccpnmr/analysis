@@ -149,7 +149,7 @@ def matchingNmrAtomsForPeakDimension(peak, dim, nmrAtoms,
 
 def withinTolerance(nmrAtom, position, shiftList, tolerance):
     '''Decides whether the shift of the nmrAtom is
-       whithin the tolerance to be assigned to the
+       within the tolerance to be assigned to the
        peak dimension.
 
     '''

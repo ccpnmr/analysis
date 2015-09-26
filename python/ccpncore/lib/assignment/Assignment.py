@@ -61,3 +61,5 @@ def _doNamesMatchBound(lightName:str, heavyName:str) -> bool:
 # def _boundNamesfromType(chemCompVar, atomName):
 #   """get names of atoms bound to atom names atomName within chemComp"""
 # NBNB TBD What is this for?
+
+

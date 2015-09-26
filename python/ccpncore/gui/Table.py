@@ -38,8 +38,8 @@ BG_COLOR = QtGui.QColor('#E0E0E0')
 
 class ObjectTable(QtGui.QTableView, Base):
 
-  def __init__(self, parent, columns, objects=None, callback=None,
-               multiSelect=True, selectRows=True, numberRows=False, **kw):
+  def __init__(self, parent, columns, objects=None, callback=None, selectionCallback=None,
+               multiSelect=False, selectRows=True, numberRows=False, **kw):
 
     QtGui.QTableView.__init__(self, parent)
     Base.__init__(self, **kw)
@@ -53,7 +53,8 @@ class ObjectTable(QtGui.QTableView, Base):
     self.fontMetric = QtGui.QFontMetricsF(self.font())
     self.bbox = self.fontMetric.boundingRect
     self._silenceCallback = False
-    self.doubleClicked.connect(self.callback)
+    self.selectionCallback = selectionCallback
+    self.doubleClicked.connect(self.actionCallback)
     self.selectRows = selectRows
     self.setAlternatingRowColors(True)
     self.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
@@ -85,7 +86,7 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setItemDelegate(delegate)
 
     model = self.selectionModel()
-    # model.selectionChanged.connect(self._callback)
+    model.selectionChanged.connect(self._callback)
     #model.currentRowChanged.connect(self._callback)
 
     header = self.verticalHeader()
@@ -163,24 +164,24 @@ class ObjectTable(QtGui.QTableView, Base):
 
     if self._silenceCallback:
       return
+    #
+    # if self.graphPanel and self.graphPanel.isVisible():
+    #   graph = self.graphPanel.graph
+    #   graph.coordsOff()
+    #   rows = self.getSelectedRows()
+    #   vLines = []
+    #   hLines = []
+    #
+    #   for row in rows:
+    #     for dataSet in graph.dataSets:
+    #       x, y = dataSet.dataPoints[row][:2]
+    #       vLines.append(x)
+    #       hLines.append(y)
+    #
+    #   graph.drawVerticalLines(vLines)
+    #   graph.drawHorizontalLines(hLines)
 
-    if self.graphPanel and self.graphPanel.isVisible():
-      graph = self.graphPanel.graph
-      graph.coordsOff()
-      rows = self.getSelectedRows()
-      vLines = []
-      hLines = []
-
-      for row in rows:
-        for dataSet in graph.dataSets:
-          x, y = dataSet.dataPoints[row][:2]
-          vLines.append(x)
-          hLines.append(y)
-
-      graph.drawVerticalLines(vLines)
-      graph.drawHorizontalLines(hLines)
-
-    elif self.callback:
+    elif self.selectionCallback:
       index = self.getCurrentIndex()
       row = index.row()
       col = index.column()
@@ -203,10 +204,36 @@ class ObjectTable(QtGui.QTableView, Base):
 
         if row >= 0:
           obj = self.objects[row]
-          self.callback(obj, row, col)
+          self.selectionCallback(obj, row, col)
 
       else:
-        self.callback(None, row, col)
+        self.selectionCallback(None, row, col)
+
+  def actionCallback(self, itemSelection):
+    index = self.getCurrentIndex()
+    row = index.row()
+    col = index.column()
+
+    model = self.selectionModel()
+
+    if self.selectRows:
+      selection = model.selectedRows(column=0)
+    else:
+      selection = model.selectedIndexes()
+
+    if selection:
+      rows = [i.row() for i in selection]
+      rows.sort()
+      if row not in rows:
+        row = rows[0]
+
+      index = self.model.index(row, 0)
+      row = self.model.mapToSource(index).row()
+
+      if row >= 0:
+        obj = self.objects[row]
+        self.callback(obj, row, col)
+
 
   def getCurrentIndex(self):
 

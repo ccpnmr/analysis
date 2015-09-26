@@ -1027,7 +1027,24 @@ def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=N
       probTot += prob
       
   return probTot
-#
+
+
+def getSpinSystemChainProbabilities(spinSystem, chain, shiftList):
+
+  probDict = {}
+  getProb = getSpinSystemResidueProbability
+  priors = getChainResTypesPriors(chain)
+
+  ccpCodes = set(getChainResidueCodes(chain))
+
+  for ccpCode, molType in ccpCodes:
+    probDict[ccpCode] = getProb(spinSystem, shiftList, ccpCode,
+                                priors[ccpCode], molType)
+
+
+  return probDict
+
+# #
 # def getShiftsChainProbabilities(shifts, chain):
 #
 #   probDict = {}
@@ -1065,44 +1082,72 @@ def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=N
 #     del probDict['Cyss']
 #
 #   return probDict
-#
-# def getSpinSystemChainProbabilities(spinSystem, chain, shiftList):
-#
-#   probDict = {}
-#   getProb = getSpinSystemResidueProbability
-#   priors = getChainResTypesPriors(chain)
-#
-#   ccpCodes = set(getChainResidueCodes(chain))
-#
-#   for ccpCode, molType in ccpCodes:
-#     probDict[ccpCode] = getProb(spinSystem, shiftList, ccpCode,
-#                                 priors[ccpCode], molType)
-#
-#   return probDict
-#
-# def getChainResidueCodes(chain):
-#
-#   ccpCodes = []
-#   for residue in chain.residues:
-#     ccpCode = residue.ccpCode
-#     if (ccpCode == 'Cys') and (residue.descriptor == 'link:SG'):
-#       ccpCode = 'Cyss'
-#
-#     ccpCodes.append((ccpCode, residue.molType))
-#
-#   return ccpCodes
-#
-# def getChainResTypesPriors(chain):
-#
-#   priors = {}
-#
-#   ccpCodes = [x[0] for x in getChainResidueCodes(chain)]
-#   n = float(len(ccpCodes))
-#
-#   for ccpCode in set(ccpCodes):
-#     priors[ccpCode] = ccpCodes.count(ccpCode)/n
-#
-#   return priors
+# #
+# # def getSpinSystemChainProbabilities(spinSystem, chain, shiftList):
+# #
+# #   probDict = {}
+# #   getProb = getSpinSystemResidueProbability
+# #   priors = getChainResTypesPriors(chain)
+# #
+# #   ccpCodes = set(getChainResidueCodes(chain))
+# #
+# #   for ccpCode, molType in ccpCodes:
+# #     probDict[ccpCode] = getProb(spinSystem, shiftList, ccpCode,
+# #                                 priors[ccpCode], molType)
+# #
+# #   return probDict
+# #
+def getChainResidueCodes(chain):
+
+  ccpCodes = []
+  for residue in chain.residues:
+    ccpCode = residue.ccpCode
+    if (ccpCode == 'Cys') and (residue.descriptor == 'link:SG'):
+      ccpCode = 'Cyss'
+
+    ccpCodes.append((ccpCode, residue.molType))
+
+  return ccpCodes
+
+
+def getSpinSystemScore(spinSystem, shifts, chain, shiftList):
+
+    scores = getSpinSystemChainProbabilities(spinSystem, chain, shiftList)
+    total = sum(scores.values())
+
+    if total:
+      for ccpCode in scores:
+        scores[ccpCode] *= 100.0/total
+
+    else:
+      return scores
+
+    return scores
+
+
+def getChainResTypesPriors(chain):
+
+  priors = {}
+
+  ccpCodes = [x[0] for x in getChainResidueCodes(chain)]
+  n = float(len(ccpCodes))
+
+  for ccpCode in set(ccpCodes):
+    priors[ccpCode] = ccpCodes.count(ccpCode)/n
+
+  return priors
+
+
+def getCcpCodes(chain):
+  codeDict = {}
+  for residue in chain.residues:
+    codeDict[residue.ccpCode] = True
+
+  ccpCodes = list(codeDict.keys())
+  ccpCodes.sort()
+
+  return ccpCodes
+
 #
 # def getShiftsResidueProbability(shifts, ccpCode, prior=0.05, molType=PROTEIN_MOLTYPE):
 #

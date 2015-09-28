@@ -237,7 +237,10 @@ def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
     return None
          
   if dataStore.fileType == 'NMRPipe': # data is not blocked but multi-file in general
-    return NmrPipe.getPlaneData(dataSource, position, xDim, yDim)
+    if not hasattr(dataStore, 'template'):
+      dataStore.template = NmrPipe.guessFileTemplate(dataStore)
+    if dataStore.template:
+      return NmrPipe.getPlaneData(dataSource, position, xDim, yDim)
     
   assert numDim == 2 or (position and len(position) == numDim), 'numDim = %d, position = %s' % (numDim, position)
   assert xDim != yDim, 'xDim = yDim = %d' % xDim

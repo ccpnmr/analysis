@@ -39,10 +39,11 @@ SF_INDEX = (218, 119, 10, 28)
 ORIGIN_INDEX = (249, 101, 12, 30)
 ISOTOPE_INDEX = (18, 16, 20, 22)
 VALUE_INDEX = 199
+NFILES_INDEX = 442
 
 FILE_TYPE = 'NMRPipe'
 
-def readParams(filePath):
+def readParams(filePath, getFileCount=False):
 
   dataFile = filePath
   wordSize = 4
@@ -97,69 +98,76 @@ def readParams(filePath):
     # showError('Error', msg)
     return
 
-  numPoints = [0] * ndim
-  blockSizes = [0] * ndim
-  refPpms = [0.0] * ndim
-  refPoints = [0.0] * ndim
-  specWidths = [1000.0] * ndim
-  specFreqs = [500.0] * ndim
-  isotopes = [None] * ndim
+  if getFileCount:
+    data = int(floatVals[NFILES_INDEX])
+    
+  else:
+    numPoints = [0] * ndim
+    blockSizes = [0] * ndim
+    refPpms = [0.0] * ndim
+    refPoints = [0.0] * ndim
+    specWidths = [1000.0] * ndim
+    specFreqs = [500.0] * ndim
+    isotopes = [None] * ndim
   
-  for i in range(ndim):
-    j = int(floatVals[ORDER_INDEX[i]]) - 1
-    c = int(floatVals[COMPLEX_INDEX[i]])
-    if c == 0:
-      msg = 'NMRPipe data is complex in dim %d, can only cope with real data at present'
-      # showError('Error', msg % (i+1))
-      return
+    for i in range(ndim):
+      j = int(floatVals[ORDER_INDEX[i]]) - 1
+      c = int(floatVals[COMPLEX_INDEX[i]])
+      if c == 0:
+        msg = 'NMRPipe data is complex in dim %d, can only cope with real data at present'
+        # showError('Error', msg % (i+1))
+        return
       
-    numPoints[i] = int(floatVals[NPTS_INDEX[i]])
+      numPoints[i] = int(floatVals[NPTS_INDEX[i]])
     
-    if i == 0:
-      blockSizes[i] = numPoints[i]
-    else:
-      blockSizes[i] = 1
+      if i == 0:
+        blockSizes[i] = numPoints[i]
+      else:
+        blockSizes[i] = 1
       
-    specWidths[i] = sw = floatVals[SW_INDEX[j]]
-    if sw == 0:
-      specWidths[i] = sw  = 1000 # ?
+      specWidths[i] = sw = floatVals[SW_INDEX[j]]
+      if sw == 0:
+        specWidths[i] = sw  = 1000 # ?
       
-    specFreqs[i] = sf = floatVals[SF_INDEX[j]]
-    o = floatVals[ORIGIN_INDEX[j]]
+      specFreqs[i] = sf = floatVals[SF_INDEX[j]]
+      o = floatVals[ORIGIN_INDEX[j]]
     
-    refPpms[i] = (sw + o) / sf
-    refPoints[i] = 0
-    n = 4 * ISOTOPE_INDEX[j]
-    isotope = headData[n:n+4].strip()
+      refPpms[i] = (sw + o) / sf
+      refPoints[i] = 0
+      n = 4 * ISOTOPE_INDEX[j]
+      isotope = headData[n:n+4].strip()
 
-    # get rid of null termination
-    m = isotope.find(0)
-    if m >= 0:
-      isotope = (isotope[:n])
-    isotopes.append( checkIsotope(isotope.decode("utf-8")) )
+      # get rid of null termination
+      m = isotope.find(0)
+      if m >= 0:
+        isotope = (isotope[:n])
+      isotopes.append( checkIsotope(isotope.decode("utf-8")) )
       
-    if isotope == 'ID': # ?
-      isotopes[i] = None
-    else:
-      isotopes[i] = checkIsotope(isotope.decode("utf-8"))
+      if isotope == 'ID': # ?
+        isotopes[i] = None
+      else:
+        isotopes[i] = checkIsotope(isotope.decode("utf-8"))
 
-  data = (FILE_TYPE, dataFile, numPoints, blockSizes,
-          wordSize, isBigEndian, isFloatData,
-          headerSize, blockHeaderSize,
-          isotopes, specFreqs,
-          specWidths, refPoints, refPpms,
-          sampledValues, sampledSigmas,
-          pulseProgram, dataScale)
+    data = (FILE_TYPE, dataFile, numPoints, blockSizes,
+            wordSize, isBigEndian, isFloatData,
+            headerSize, blockHeaderSize,
+            isotopes, specFreqs,
+            specWidths, refPoints, refPpms,
+            sampledValues, sampledSigmas,
+            pulseProgram, dataScale)
 
   return data
 
-def guessFileTemplate(dataSource):
+def guessFileTemplate(dataStore):
   
-  dataStore = dataSource.dataStore
   if not dataStore:
     return None
   
   fullPath = dataStore.fullPath
+  fileCount = readParams(fullPath, getFileCount=True)
+  if fileCount == 1: # single file
+    return None
+    
   fileName = os.path.basename(fullPath)
   numDim = dataSource.numDim
   
@@ -193,13 +201,13 @@ def _getFileData(fullPath, numPoints, headerSize, dtype):
   
 def readData(dataSource):
   
-  if not hasattr(dataSource, 'template'):
-    dataSource.template = guessFileTemplate(dataSource)
-    # TBD: for now assume that above works
-  
   dataStore = dataSource.dataStore
   if not dataStore:
     return None
+  
+  if not hasattr(dataStore, 'template'):
+    dataStore.template = guessFileTemplate(dataStore)
+    # TBD: for now assume that above works
   
   fullPath = dataStore.fullPath
   wordSize = dataStore.nByte

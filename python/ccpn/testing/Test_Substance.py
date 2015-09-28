@@ -29,9 +29,15 @@ class SubstanceTest(WrapperTesting):
   projectPath = None
 
   def test_simple_create(self):
-    substance1 = self.project,newSimpleSubstance('MolComp1', userCode='userCode',smiles=':-)')
+    substance1 = self.project.newSimpleSubstance('MolComp1', userCode='userCode',smiles=':-)')
     self.assertEqual(substance1.id, 'MolComp1.std')
     self.assertEqual(substance1.smiles, ':-)')
     self.assertEqual(substance1.substanceType, 'Molecule')
+
+    substance2 = self.project.newSimpleSubstance('Cell1', substanceType='Cell', labeling='moxy',
+                                                 smiles=':-)')
+    self.assertEqual(substance2.id, 'Cell1.moxy')
+    self.assertEqual(substance2.smiles, None)
+    self.assertEqual(substance2.substanceType, 'Cell')
     
 

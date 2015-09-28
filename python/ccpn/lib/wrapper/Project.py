@@ -127,7 +127,7 @@ def uniqueSubstanceName(self:"Project", name:str=None, defaultName:str='Molecule
   if name is None:
     name = defaultName
 
-  apiComponentStore = self._wrappedData.sampleStore.refSampleCmponentStore
+  apiComponentStore = self._wrappedData.sampleStore.refSampleComponentStore
   apiProject =apiComponentStore.root
 
   # ensure substance name is unique

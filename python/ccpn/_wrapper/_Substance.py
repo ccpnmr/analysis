@@ -82,7 +82,7 @@ class Substance(AbstractWrapperObject):
     return  self._project
 
   @property
-  def substannceType(self) -> str:
+  def substanceType(self) -> str:
     """Category of substance: Molecule, Cell, Material, or Composite"""
     result = self._wrappedData.className
     return _apiClassNameMap.get(result, result)
@@ -268,11 +268,10 @@ def _newSimpleSubstance(self:Project, name:str, labeling:str='std', substanceTyp
                        synonyms:Sequence[str]=()) -> Substance:
   """Create new substance WITHOUT attached ApiMolecule (and so not suitable for making chains)
   substanceType may be 'Molecule' (default), 'Cell', 'Material', and 'Composite'"""
-
   apiNmrProject = self._wrappedData
 
-  if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name,
-                                                                          labeling) is not None:
+  if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name,
+                                                         labeling=labeling) is not None:
     raise ValueError("Substance %s.%s already exists" % (name, labeling))
 
   elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
@@ -296,6 +295,7 @@ def _newSimpleSubstance(self:Project, name:str, labeling:str='std', substanceTyp
   #
   return self._data2Obj[apiResult]
 
+Project._childClasses.append(Substance)
 Project.newSimpleSubstance = _newSimpleSubstance
 del _newSimpleSubstance
 

@@ -74,7 +74,7 @@ def pickPeaksNd(self:'PeakList', positions:Sequence=None, dataDims:Sequence=None
   return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
   
 # def pickPeaks1d(self:'PeakList', spectrumView, size:int=3, mode:str='wrap'):
-def pickPeaks1d(self:'PeakList', data1d:'numpy.array', size:int=3, mode:str='wrap'):
+def pickPeaks1d(self:'PeakList', data1d, size:int=3, mode:str='wrap'):
    """
    NBNB refctored. Should not take a SpectrumView in ccpn/lib, should take 1d data array
    """

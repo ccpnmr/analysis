@@ -428,6 +428,7 @@ def fetchIsotopeRefExperimentMap(project:'MemopsRoot') -> Dict:
 
 
 if __name__ == '__main__':
+  pass
   # testExpPrototypes(resetCodes=True)
   # allAxisCodes, synonymTable = experimentSynonymSummary()
   # print("Axis Codes: %s" % list(sorted(allAxisCodes)))
@@ -435,10 +436,17 @@ if __name__ == '__main__':
   #   print(line)
 
 
-  from ccpncore.util.Io import newProject
-  project = newProject("ExpPrototypeTest", removeExisting=True)
-  refMap = fetchIsotopeRefExperimentMap(project)
-  for tt in sorted ((len(key), key, val) for key,val in sorted(refMap.items())):
-    print ("@~@~", tt[0], tt[1])
-    for refExp in tt[2]:
-      print ("          ", refExp.synonym, refExp.name, refExp.axisCodes)
+  # from ccpncore.util.Io import newProject
+  # project = newProject("ExpPrototypeTest", removeExisting=True)
+  # refMap = fetchIsotopeRefExperimentMap(project)
+  # for tt in sorted ((len(key), key, val) for key,val in sorted(refMap.items())):
+  #   # print ("@~@~", tt[0], tt[1])
+  #   for refExp in tt[2]:
+  #     if refExp.name == 'CO_CO[N]':
+  #       expGraph = refExp.nmrExpPrototype.findFirstExpGraph()
+  #       step2 = expGraph.findFirstExpStep(stepNumber=2)
+  #       print(step2, step2.expMeasurement)
+  #       expGraph.newExpStep(stepNumber=4, expMeasurement=step2.expMeasurement)
+  #       for step in expGraph.sortedExpSteps():
+  #         print('@~@~ CO_CO[N]',step, step.stepNumber, step.refExpDimRefs, step.expMeasurement)
+  # project.saveModified()

@@ -163,7 +163,7 @@ def _cumulativeArray(array):
   return (n, cumul)
   
 
-def getPlaneData(self:'DataSource', position:Sequence=None, xDim=0, yDim=1) -> numpy.srray:
+def getPlaneData(self:'DataSource', position:Sequence=None, xDim=0, yDim=1) -> numpy.array:
   """ Get plane data through position in dimensions xDim, yDim
       Returns 2D float32 NumPy array in order (y, x) 
       Returns None if numDim < 2 or if there is no dataStore

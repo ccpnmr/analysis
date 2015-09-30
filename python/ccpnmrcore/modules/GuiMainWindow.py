@@ -332,21 +332,21 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.show()
 
 
+  def _showDocumentation(self, title, *args):
+    
+    newDock = CcpnDock("API Documentation")
+    path = os.path.join(Path.getPythonDirectory(), 'ccpn', 'doc', *args)
+    view = CcpnWebView(path)
+    newDock.addWidget(view)
+    self.dockArea.addDock(newDock)
+    
   def showApiDocumentation(self):
 
-    newDock = CcpnDock("API Documentation")
-    apiPath = os.path.join(Path.getPythonDirectory(), 'ccpn', 'doc', 'apidoc', 'api.html')
-    apiView = CcpnWebView(apiPath)
-    newDock.addWidget(apiView)
-    self.dockArea.addDock(newDock)
+    self._showDocumentation("API Documentation", 'apidoc', 'api.html')
 
   def showWrapperDocumentation(self):
-    newDock = CcpnDock("CCPN Documentation")
-    apiPath = os.path.join(Path.getPythonDirectory(), 'ccpn', 'doc', 'build', 'html', 'index.html')
-    apiView = CcpnWebView(apiPath)
-    newDock.addWidget(apiView)
-    self.dockArea.addDock(newDock)
-
+    
+    self._showDocumentation("CCPN Documentation", 'build', 'html', 'index.html')
 
   def showAssignmentModule(self):
     self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)

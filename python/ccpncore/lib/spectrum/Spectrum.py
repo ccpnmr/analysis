@@ -24,26 +24,13 @@ __version__ = "$Revision$"
 import os
 import itertools
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence
 from ccpncore.util import Path
+from ccpncore.lib import Constants
 from ccpncore.lib.spectrum.BlockData import determineBlockSizes
 from ccpncore.memops.ApiError import ApiError
 
-DEFAULT_ISOTOPE_DICT = {
-  'H':'1H',
-  'C':'13C',
-  'N':'15N',
-  'P':'31P',
-  'Si':'29Si',
-  'F':'19F',
-  'O':'17O',
-  'Br':'79Br',
-  'D':'2H',
-  'T':'3H',
-  'J':None,
-  'MQ':None,
-  'delay':None,
-}
+_isotopeRefExperimentMap = None
 
 # All known axisCodes: ['Br', 'C', 'CA', 'CA1', 'CO', 'CO1', 'C1', 'C2', 'Ch', 'Ch1',
 # 'F', 'H', 'H1', 'H2', 'H3', 'H4', 'Hc', 'Hc1', 'Hcn', 'Hcn1', 'Hn', 'Hn1',
@@ -52,21 +39,21 @@ DEFAULT_ISOTOPE_DICT = {
 #
 # 'J' matches 'Jx...'
 
-STANDARD_ISOTOPES = set(x for x in DEFAULT_ISOTOPE_DICT.values() if x is not None)
+STANDARD_ISOTOPES = set(x for x in Constants.DEFAULT_ISOTOPE_DICT.values() if x is not None)
 
 def name2IsotopeCode(name:str) -> str:
   """Get standard isotope code matching name or axisCode"""
   if not name:
     return None
 
-  for tag,val in sorted(DEFAULT_ISOTOPE_DICT.items()):
+  for tag,val in sorted(Constants.DEFAULT_ISOTOPE_DICT.items()):
     if name.startswith(tag):
       return val
   else:
     return None
 
 def checkIsotope(text:str) -> str:
-  """Convert string to most probable isatope code - defaulting to '1H"""
+  """Convert string to most probable isotope code - defaulting to '1H"""
 
   text = text.strip()
 
@@ -76,8 +63,8 @@ def checkIsotope(text:str) -> str:
   if text in STANDARD_ISOTOPES:
     return text
 
-  if text in DEFAULT_ISOTOPE_DICT:
-    return DEFAULT_ISOTOPE_DICT[text]
+  if text in Constants.DEFAULT_ISOTOPE_DICT:
+    return Constants.DEFAULT_ISOTOPE_DICT[text]
 
   for isotope in STANDARD_ISOTOPES:
     if isotope in text:
@@ -85,7 +72,6 @@ def checkIsotope(text:str) -> str:
 
   else:
     return name2IsotopeCode(text) or '1H'
-    # return DEFAULT_ISOTOPE_DICT.get(text[0].upper(), '1H')
 
 
 def createBlockedMatrix(dataUrl:'Url', path:str, numPoints:Sequence, blockSizes:Sequence=None,
@@ -263,4 +249,3 @@ def _expDimRefTransferType(expDimRef1:'ExpDimRef', expDimRef2:'ExpDimRef')->str:
     return (ll[0].transferType, ll[0].isDirect)
   #
   return None
-

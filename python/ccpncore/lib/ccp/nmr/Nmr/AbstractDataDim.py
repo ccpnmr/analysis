@@ -88,7 +88,7 @@ software development. Bioinformatics 21, 1678-1684.
    
 # NB change from getDataDimIsotopes
 #def getDataDimIsotopes(dataDim):
-def getIsotopeCodes(dataDim):
+def getIsotopeCodes(self:'AbstractDataDim'):
   """
   Get the shift measurement isotopes for a spectrum data dim
   
@@ -103,7 +103,7 @@ def getIsotopeCodes(dataDim):
 
   isotopes = set()
     
-  for expDimRef in dataDim.expDim.expDimRefs:
+  for expDimRef in self.expDim.expDimRefs:
     if expDimRef.measurementType in ('Shift','shift'):
       for isotopeCode in expDimRef.isotopeCodes:
         isotopes.add(isotopeCode)

@@ -23,11 +23,12 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from ccpncore.util.Types import Tuple
 from ccpncore.util import MergeObjects
 from ccpncore.lib.assignment import Assignment
 from ccpncore.memops.ApiError import ApiError
 
-def absorbResonance(resonanceA, resonanceB) -> None:
+def absorbResonance(self:'Resonance', resonanceB) -> 'Resonance':
   """
   Transfers all information from resonanceB to resonanceA and deletes resonanceB
 
@@ -46,21 +47,21 @@ def absorbResonance(resonanceA, resonanceB) -> None:
   # E.g. the two resonances assigned to an HSQC peak
   # Merging a single resonance may make peak assignments inconsistent.
   
-  if resonanceB is resonanceA:
-    return resonanceA
+  if resonanceB is self:
+    return self
 
   if resonanceB.isDeleted:
-    return resonanceA
+    return self
 
-  if resonanceA.isDeleted:
-    raise ApiError("function absorbResonance call on deleted resonance: @%s" % resonanceA.serial)
+  if self.isDeleted:
+    raise ApiError("function absorbResonance call on deleted resonance: @%s" % self.serial)
   
-  isotopeA = resonanceA.isotopeCode
+  isotopeA = self.isotopeCode
   isotopeB = resonanceB.isotopeCode
   
   if isotopeA and isotopeB:
     if isotopeA != isotopeB:
-      resonanceA.root._logger.warning('Resonance Merge Failure: '
+      self.root._logger.warning('Resonance Merge Failure: '
                                       'Attempt to merge resonances with different isotope codes')
       return
   
@@ -73,7 +74,7 @@ def absorbResonance(resonanceA, resonanceB) -> None:
                 }
   for funcName in controlData:
     for attrName in controlData[funcName]:
-      for objectA in list(resonanceA.__dict__.get(attrName)):
+      for objectA in list(self.__dict__.get(attrName)):
         objectB = getattr(objectA.parent, funcName)(resonance=resonanceB)
         if objectB is not None:
           MergeObjects.mergeObjects(objectB, objectA)
@@ -87,9 +88,9 @@ def absorbResonance(resonanceA, resonanceB) -> None:
                 }
   for funcName in controlData:
     for attrName in controlData[funcName]:
-      for objectA in list(resonanceA.__dict__.get(attrName)):
+      for objectA in list(self.__dict__.get(attrName)):
         testKey = set(objectA.__dict__['resonances'])
-        testKey.remove(resonanceA)
+        testKey.remove(self)
         testKey.add(resonanceB)
         testKey = frozenset(testKey)
         objectB = getattr(objectA.parent, funcName)(resonances=testKey)
@@ -103,22 +104,22 @@ def absorbResonance(resonanceA, resonanceB) -> None:
         
   # merge shifts in the same shiftlist
   # NB must be done after other measurements 
-  for shiftA in resonanceA.shifts:
+  for shiftA in self.shifts:
     for shiftB in resonanceB.shifts:
       if shiftA.parentList is shiftB.parentList:
         shiftA = MergeObjects.mergeObjects(shiftB,shiftA)
 
   # Get rid of duplicate appData
-  for appData in resonanceA.applicationData:
+  for appData in self.applicationData:
     matchAppData = resonanceB.findFirstApplicationData(application=appData.application,
                                                        keyword=appData.keyword)
     if matchAppData:
       resonanceB.removeApplicationData(matchAppData)
   
-  MergeObjects.mergeObjects(resonanceB, resonanceA)
+  MergeObjects.mergeObjects(resonanceB, self)
   
   # Must be after resonance merge, so that links to peaks are properly set
-  for shiftA in resonanceA.shifts:
+  for shiftA in self.shifts:
     shiftA.recalculateValue()
   
   # AssignNames are no longer used in new model
@@ -130,10 +131,10 @@ def absorbResonance(resonanceA, resonanceB) -> None:
   #
   #   resonanceA.setAssignNames(assignNames)
   
-  return resonanceA
+  return self
 
 
-def getBoundResonances(resonance) -> tuple:
+def getBoundResonances(self:'Resonance') -> Tuple['Resonance', ...]:
   """get resonances that are known to be directly bound to this one, using ONLY resonance assignment
   """
 
@@ -146,9 +147,9 @@ def getBoundResonances(resonance) -> tuple:
     'CA':('C', 'N', 'CB')
   }
 
-  resonanceGroup = resonance.resonanceGroup
+  resonanceGroup = self.resonanceGroup
   chemComp = resonanceGroup.chemComp
-  resonanceName = resonance.name
+  resonanceName = self.name
   result = None
   unassigned = None
 
@@ -195,7 +196,7 @@ def getBoundResonances(resonance) -> tuple:
     # resonance is unassigned. Look for bound atoms among other unassigned resonances
 
     singleCodes = ('1H', '2H', '3H', '19F')
-    if resonance.isotopeCode in singleCodes:
+    if self.isotopeCode in singleCodes:
       partners = [x for x in unassigned if x.isotopeCode in singleCodes]
       result = [x for x in partners if Assignment._doNamesMatchBound(resonanceName, x.name)]
     else:
@@ -210,10 +211,10 @@ def getBoundResonances(resonance) -> tuple:
     # NBNB TBD when type-assigned resonanceGroups are properly handled,
     # this shoudl say 'if not chemCompVar
 
-      extraNames = genericProteinBound.get(resonance.name)
+      extraNames = genericProteinBound.get(self.name)
       resonances = [x for x in unassigned if x.name in extraNames]
       if resonances:
-        if any((x.molecule.molType == 'protein') for x in resonance.nmrProject.molSystem.chains):
+        if any((x.molecule.molType == 'protein') for x in self.nmrProject.molSystem.chains):
           # The molecule.molType call is expensive and so this 'if' should be executed last
           result.extend(resonances)
 

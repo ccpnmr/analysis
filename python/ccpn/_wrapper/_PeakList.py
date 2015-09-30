@@ -114,12 +114,12 @@ class PeakList(AbstractWrapperObject):
 # Connections to parents:
 Spectrum._childClasses.append(PeakList)
 
-def newPeakList(parent:Spectrum,name:str=None, comment:str=None,
+def newPeakList(self:Spectrum,name:str=None, comment:str=None,
              isSimulated:bool=False) -> PeakList:
   """Create new child PeakList"""
-  apiDataSource = parent._wrappedData
+  apiDataSource = self._wrappedData
   obj = apiDataSource.newPeakList(name=name, details=comment, isSimulated=isSimulated)
-  return parent._project._data2Obj.get(obj)
+  return self._project._data2Obj.get(obj)
 
 Spectrum.newPeakList = newPeakList
 

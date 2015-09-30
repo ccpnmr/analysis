@@ -22,26 +22,26 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence
 
-def getPlaneData(spectrum:'Spectrum', position:Sequence=None, xDim:int=0, yDim:int=1):
+def getPlaneData(self:'Spectrum', position:Sequence=None, xDim:int=0, yDim:int=1):
 
-  return spectrum._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+  return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
   
-def getSliceData(spectrum:'Spectrum', position:Sequence=None, sliceDim:int=0):
+def getSliceData(self:'Spectrum', position:Sequence=None, sliceDim:int=0):
 
-  return spectrum._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
+  return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 
 # Complex and not currently used. Let us keep it out. RHF
 # def getRegionData(spectrum:object, startPoint:Sequence, endPoint:Sequence):
 #
 #   return spectrum._apiDataSource.getRegionData(startPoint, endPoint)
 
-def automaticIntegration(spectrum, spectralData):
+def automaticIntegration(self:"Spectrum", spectralData):
 
-  return spectrum._apiDataSource.automaticIntegration(spectralData)
+  return self._apiDataSource.automaticIntegration(spectralData)
 
 
-def estimateNoise(spectrum):
-  return spectrum._apiDataSource.estimateNoise()
+def estimateNoise(self:'Spectrum'):
+  return self._apiDataSource.estimateNoise()
 

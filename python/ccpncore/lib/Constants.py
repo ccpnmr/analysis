@@ -31,6 +31,25 @@ ccpnmrJsonData = 'ccpnmr-json'
 stdTimeFormat = "%Y-%m-%d %%H:M:%S.%f"
 isoTimeFormat = "%Y-%m-%dT%%H:M:%S.%f"
 
+
+# default isotopes and nucleus codes
+DEFAULT_ISOTOPE_DICT = {
+  'H':'1H',
+  'C':'13C',
+  'N':'15N',
+  'P':'31P',
+  'Si':'29Si',
+  'F':'19F',
+  'O':'17O',
+  'Br':'79Br',
+  'D':'2H',
+  'T':'3H',
+  'J':None,
+  'MQ':None,
+  'delay':None,
+  'ALT':None,
+}
+
 # sequenceCode parsing expression
 # A sequenceCOde is combined (without whitesspace) of:
 #   an optional integer

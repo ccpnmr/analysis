@@ -26,12 +26,12 @@ from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 # from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
 # raise Exception("This statement must be moved - you can not import ccpnmr or ccpnmrcore into ccpn or ccpncore")
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence
 
 from numpy import argwhere
 from scipy.ndimage import maximum_filter
 
-def pickPeaksNd(peakList:'PeakList', positions:Sequence=None, dataDims:Sequence=None,
+def pickPeaksNd(self:'PeakList', positions:Sequence=None, dataDims:Sequence=None,
                 doPos:bool=True, doNeg:bool=True,
                 fitMethod:str=None, excludedRegions:Sequence=None,
                 excludedDiagonalDims:Sequence=None, excludedDiagonalTransform:Sequence=None):
@@ -42,7 +42,7 @@ def pickPeaksNd(peakList:'PeakList', positions:Sequence=None, dataDims:Sequence=
   startPoint = []
   endPoint = []
   
-  spectrum = peakList.spectrum
+  spectrum = self.spectrum
 
   for ii, dataDim in enumerate(dataDims):
     # -1 below because points start at 1 in data model
@@ -65,41 +65,45 @@ def pickPeaksNd(peakList:'PeakList', positions:Sequence=None, dataDims:Sequence=
   posLevel = spectrum.positiveContourBase if doPos else None
   negLevel = spectrum.negativeContourBase if doNeg else None
 
-  apiPeaks = pickNewPeaks(peakList._apiPeakList, startPoint=startPoints, endPoint=endPoints,
+  apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
                  posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod, excludedRegions=excludedRegions,
                  excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
 
-  data2ObjDict = peakList._project._data2Obj
+  data2ObjDict = self._project._data2Obj
   
   return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
   
-def pickPeaks1d(peakList, spectrumView, size=3, mode='wrap'):
+# def pickPeaks1d(self:'PeakList', spectrumView, size:int=3, mode:str='wrap'):
+def pickPeaks1d(self:'PeakList', data1d:'numpy.array', size:int=3, mode:str='wrap'):
+   """
+   NBNB refctored. Should not take a SpectrumView in ccpn/lib, should take 1d data array
+   """
 
    peaks = []
-   spectrum = peakList.spectrum
-   data = spectrumView.data
+   spectrum = self.spectrum
+   # data1d = spectrumView.data
    threshold = spectrum.estimateNoise()*10
-   if (data.size == 0) or (data.max() < threshold):
+   if (data1d.size == 0) or (data1d.max() < threshold):
     return peaks
-   boolsVal = data[1] > threshold
-   maxFilter = maximum_filter(data[1], size=size, mode=mode)
-   boolsMax = data[1] == maxFilter
+   boolsVal = data1d[1] > threshold
+   maxFilter = maximum_filter(data1d[1], size=size, mode=mode)
+   boolsMax = data1d[1] == maxFilter
    boolsPeak = boolsVal & boolsMax
    indices = argwhere(boolsPeak) # True positional indices
    for position in indices:
-     peakPosition = [float(data[0][position])]
-     height = data[1][position]
+     peakPosition = [float(data1d[0][position])]
+     height = data1d[1][position]
      # peakList.newPeak(height=float(height), position=peakPosition)
 
 
 
 
 
-def pickPeaks1dFiltered(peakList, size=9, mode='wrap'):
+def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap'):
 
 
    peaks = []
-   spectrum = peakList.spectrum
+   spectrum = self.spectrum
    ignoredRegions = [5.4, 4.25]
    data = spectrum._apiDataSource.get1dSpectrumData()
    ppmValues = data[0]
@@ -118,7 +122,7 @@ def pickPeaks1dFiltered(peakList, size=9, mode='wrap'):
    for position in indices:
      peakPosition = [float(newArray2[0][position])]
      height = newArray2[1][position]
-     peakList.newPeak(height=float(height), position=peakPosition)
+     self.newPeak(height=float(height), position=peakPosition)
 
 
    # print(self.peakListItems[peakList.pid])#.createPeakItems()
@@ -132,7 +136,7 @@ def _havePeakNearPosition(values, tolerances, peaks):
     else:
       return peak
 
-def subtractPeakLists(peakList1, peakList2):
+def subtractPeakLists(self:'PeakList', peakList2:'PeakList'):
   """
   Subtracts peaks in peakList2 from peaks in peakList1, based on position,
   and puts those in a new peakList3.  Assumes a common spectrum for now.
@@ -146,17 +150,17 @@ def subtractPeakLists(peakList1, peakList2):
   PeakList
   """
 
-  spectrum = peakList1.spectrum
+  spectrum = self.spectrum
 
   assert spectrum is peakList2.spectrum, 'For now requires both peak lists to be in same spectrum'
 
   # dataDims = spectrum.sortedDataDims()
-  tolerances = peakList1.spectrum.assignmentTolerances
+  tolerances = self.spectrum.assignmentTolerances
 
   peaks2 = peakList2.peaks
   peakList3 = spectrum.newPeakList()
 
-  for peak1 in peakList1.peaks:
+  for peak1 in self.peaks:
     values1 = [peak1.position[dim] for dim in range(len(peak1.position))]
     if not _havePeakNearPosition(values1, tolerances, peaks2):
       peakList3.newPeak(height=peak1.height, volume=peak1.volume, figureOfMerit=peak1.figureOfMerit,

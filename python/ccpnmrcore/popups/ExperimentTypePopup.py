@@ -2,7 +2,7 @@ __author__ = 'simon1'
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn.lib.Experiment import EXPERIMENT_TYPES
+# from ccpn.lib.Experiment import EXPERIMENT_TYPES
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.ButtonList import ButtonList
@@ -17,6 +17,7 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
     Base.__init__(self, **kw)
     self.parent = parent
     spectra = project.spectra
+    self.experimentTypes = project._experimentTypeMap
     for spectrum in spectra:
       spectrumIndex = spectra.index(spectrum)
       axisCodes = []
@@ -25,7 +26,7 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
 
 
       atomCodes = ''.join(sorted(axisCodes))
-      pulldownItems = list(EXPERIMENT_TYPES[spectrum.dimensionCount].get(atomCodes).keys())
+      pulldownItems = list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys())
       spLabel = Label(self, text=spectrum.pid, grid=(spectrumIndex, 0))
       spPulldown = PulldownList(self, grid=(spectrumIndex, 1), callback=partial(self.setExperimentType, spectrum, atomCodes), texts=pulldownItems)
       spPulldown.setCurrentIndex(spPulldown.findText(spectrum.experimentName))
@@ -34,5 +35,5 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
 
 
   def setExperimentType(self, spectrum, atomCodes, item):
-    expType = EXPERIMENT_TYPES[spectrum.dimensionCount].get(atomCodes).get(item)
+    expType = self.experimentTypes[spectrum.dimensionCount].get(atomCodes).get(item)
     spectrum.experimentType = expType

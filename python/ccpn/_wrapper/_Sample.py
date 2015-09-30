@@ -189,12 +189,12 @@ class Sample(AbstractWrapperObject):
     return parent._wrappedData.sampleStore.sortedSamples()
 
 
-def newSample(parent:Project, name:str, pH:float=None, ionicStrength:float=None, amount:float=None,
+def newSample(self:Project, name:str, pH:float=None, ionicStrength:float=None, amount:float=None,
               amountUnit:str='L', isHazardous:bool=None, creationDate:datetime=None,
               batchIdentifier:str=None, plateIdentifier:str=None, rowNumber:int=None,
               columnNumber:int=None, comment:str=None) -> Sample:
   """Create new child Sample"""
-  nmrProject = parent._wrappedData
+  nmrProject = self._wrappedData
   apiSampleStore =  nmrProject.sampleStore
 
   newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,
@@ -204,7 +204,7 @@ def newSample(parent:Project, name:str, pH:float=None, ionicStrength:float=None,
                                           plateIdentifier=plateIdentifier,rowPosition=rowNumber,
                                           colPosition=columnNumber, details=comment)
   #
-  return parent._data2Obj.get(newApiSample)
+  return self._data2Obj.get(newApiSample)
     
 # Connections to parents:
 Project._childClasses.append(Sample)

@@ -25,10 +25,9 @@ import os
 
 from ccpncore.util import Common as commonUtil
 from ccpncore.util.typing import Sequence
-
-# from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
+from ccpncore.lib import Constants
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
-from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
+# from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
 from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
 from ccpncore.lib.Io.Formats import AZARA, BRUKER, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
 from ccpncore.util.Path import checkFilePath
@@ -41,12 +40,12 @@ DEFAULT_SPECTRUM_PARAMETERS = {
   '1H':{'numPoints':128, 'sf':100., 'sw':1280, 'refppm':11.8, 'refpt':0, },
   '13C':{'numPoints':256, 'sf':10., 'sw':2560, 'refppm':236., 'refpt':0, }
 }
-for tag,val in spectrumLib.DEFAULT_ISOTOPE_DICT.items():
+for tag,val in Constants.DEFAULT_ISOTOPE_DICT.items():
   # Without additional info, set other one-letter isotopes (including 15N) to match carbon 13
   if len(tag) == 1 and val and val not in DEFAULT_SPECTRUM_PARAMETERS:
     DEFAULT_SPECTRUM_PARAMETERS[val] = DEFAULT_SPECTRUM_PARAMETERS['13C']
 
-def loadDataSource(nmrProject, filePath, dataFileFormat):
+def loadDataSource(self:'NmrProject', filePath, dataFileFormat):
 
   isOk, msg = checkFilePath(filePath)
 
@@ -106,22 +105,22 @@ def loadDataSource(nmrProject, filePath, dataFileFormat):
       rest, upper = os.path.split(rest)
       name = '%s-%s' % (upper, lower)
 
-  while any(x.findFirstDataSource(name=name) for x in nmrProject.experiments):
+  while any(x.findFirstDataSource(name=name) for x in self.experiments):
     name = commonUtil.incrementName(name)
 
   numberType = 'float' if isFloatData else 'int'
-  experiment = nmrProject.createExperiment(name=name, numDim=len(numPoints),
+  experiment = self.createExperiment(name=name, numDim=len(numPoints),
                                 sf=specFreqs, isotopeCodes=isotopes)
 
 
-  dataLocationStore = nmrProject.root.newDataLocationStore(name=name)
+  dataLocationStore = self.root.newDataLocationStore(name=name)
   dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
   # NBNB TBD - this is WRONG
   # the dataUrl should be made from dirName, NOT to the filePath directory.
-  blockMatrix = createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
-                                    blockSizes=blockSizes, isBigEndian=isBigEndian,
-                                    numberType=numberType, headerSize=headerSize,
-                                    nByte=wordSize, fileType=fileType)
+  blockMatrix = spectrumLib.createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
+                                                blockSizes=blockSizes, isBigEndian=isBigEndian,
+                                                numberType=numberType, headerSize=headerSize,
+                                                nByte=wordSize, fileType=fileType)
   dataSource = experiment.createDataSource(name=name, numPoints=numPoints, sw=specWidths,
                                 refppm=refPpms, refpt=refPoints, dataStore=blockMatrix)
 
@@ -156,25 +155,25 @@ def createDummySpectrum(self:'NmrProject', axisCodes:Sequence[str],
   specName = '%s@%s' %(expName, experiment.serial) if name is None else name
   return experiment.createDataSource(name=specName, **params)
 
-def createExperiment(nmrProject:'NmrProject', name:str, numDim:int, sf:Sequence,
+def createExperiment(self:'NmrProject', name:str, numDim:int, sf:Sequence,
                      isotopeCodes:Sequence, isAcquisition:Sequence=None, axisCodes=None,
-                     **additionalParameters):
+                     **additionalParameters) -> 'Experiment':
   """Create Experiment object ExpDim, and one ExpDimRef per ExpDim.
   Additional parameters to Experiment object are passed in additionalParameters"""
 
-  experiment = nmrProject.newExperiment(name=name, numDim=numDim, **additionalParameters)
+  experiment = self.newExperiment(name=name, numDim=numDim, **additionalParameters)
 
   if isAcquisition is None:
     isAcquisition = (False,) * numDim
 
   if experiment.shiftList is None:
     # Set shiftList, creating it if necessary
-    shiftLists = [x for x in nmrProject.sortedMeasurementLists() if x.className == 'ShiftList']
+    shiftLists = [x for x in self.sortedMeasurementLists() if x.className == 'ShiftList']
     if len(shiftLists) == 1:
       shiftList = shiftLists[0]
     else:
-      shiftList = (nmrProject.findFirstMeasurementList(className='ShiftList', name='default') or
-                   nmrProject.newShiftList(name='default'))
+      shiftList = (self.findFirstMeasurementList(className='ShiftList', name='default') or
+                   self.newShiftList(name='default'))
     experiment.shiftList = shiftList
 
   for n, expDim in enumerate(experiment.sortedExpDims()):

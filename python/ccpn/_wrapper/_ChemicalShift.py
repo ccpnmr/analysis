@@ -120,17 +120,17 @@ NmrAtom.chemicalShifts = property(getter, None, None, "Chemical shifts belonging
 
 del getter
 
-def newChemicalShift(parent:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
+def newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                      valueError:float=0.0, figureOfMerit:float=1.0,
                      comment:str=None) -> ChemicalShift:
   """Create new child Shift"""
 
-  nmrAtom = parent.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
+  nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
 
-  obj = parent._wrappedData.newShift(value=value,
-                                     resonance=nmrAtom._wrappedData, error=valueError,
-                                     figOfMerit=figureOfMerit, details=comment)
-  return parent._project._data2Obj.get(obj)
+  obj = self._wrappedData.newShift(value=value,
+                                   resonance=nmrAtom._wrappedData, error=valueError,
+                                   figOfMerit=figureOfMerit, details=comment)
+  return self._project._data2Obj.get(obj)
 
 ChemicalShiftList.newChemicalShift = newChemicalShift
 

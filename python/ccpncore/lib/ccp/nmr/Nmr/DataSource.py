@@ -21,63 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""
-======================COPYRIGHT/LICENSE START==========================
 
-DataSource.py: Utility functions for ccp.nmr.Nmr.DataSource
-
-Copyright (C) 2005-2013 Wayne Boucher, Rasmus Fogh, Tim Stevens and Wim Vranken (University of Cambridge and EBI/PDBe)
-
-=======================================================================
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-A copy of this license can be found in ../../../license/LGPL.license
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
-
-======================COPYRIGHT/LICENSE END============================
-
-for further information, please contact :
-
-- CCPN website (http://www.ccpn.ac.uk/)
-- PDBe website (http://www.ebi.ac.uk/pdbe/)
-
-=======================================================================
-
-If you are using this software for academic purposes, we suggest
-quoting the following references:
-
-===========================REFERENCE START=============================
-R. Fogh, J. Ionides, E. Ulrich, W. Boucher, W. Vranken, J.P. Linge, M.
-Habeck, W. Rieping, T.N. Bhat, J. Westbrook, K. Henrick, G. Gilliland,
-H. Berman, J. Thornton, M. Nilges, J. Markley and E. Laue (2002). The
-CCPN project: An interim report on a data model for the NMR community
-(Progress report). Nature Struct. Biol. 9, 416-418.
-
-Wim F. Vranken, Wayne Boucher, Tim J. Stevens, Rasmus
-H. Fogh, Anne Pajon, Miguel Llinas, Eldon L. Ulrich, John L. Markley, John
-Ionides and Ernest D. Laue (2005). The CCPN Data Model for NMR Spectroscopy:
-Development of a Software Pipeline. Proteins 59, 687 - 696.
-
-Rasmus H. Fogh, Wayne Boucher, Wim F. Vranken, Anne
-Pajon, Tim J. Stevens, T.N. Bhat, John Westbrook, John M.C. Ionides and
-Ernest D. Laue (2005). A framework for scientific data modeling and automated
-software development. Bioinformatics 21, 1678-1684.
-
-===========================REFERENCE END===============================
-"""
 
 import numpy
 # import os
@@ -88,19 +32,19 @@ import numpy
 # NB All functions must have a mandatory DataSource as the first parameter
 # so they can be used as DataSource methods
 # from ccpncore.lib.spectrum.Integral import getIntegralRegions, setIntegrals, calculateIntegralValues
-
+from ccpncore.util.Types import Sequence, Tuple
 from ccpncore.lib.spectrum.Integral import Integral as spInt
 
-def getDimCodes(dataSource):
+def getDimCodes(self:'DataSource'):
   """ Get dimcode of form hx1, hx2, x1, x2, where the x's are directly bound to 
   the corresponding H. suffix '1' is given to the acquisition proton dimension.
   Dimensions not matching the specs are given code None
   """
-  isotopeCodes=getIsotopeCodesList(dataSource)
+  isotopeCodes=getIsotopeCodesList(self)
   
-  acqExpDim = dataSource.experiment.getAcqExpDim()
-  dataDims = dataSource.sortedDataDims()
-  dimCodes = [None]*dataSource.numDim
+  acqExpDim = self.experiment.getAcqExpDim()
+  dataDims = self.sortedDataDims()
+  dimCodes = [None]*self.numDim
   for ii,dataDim in enumerate(dataDims):
     if isotopeCodes[ii] == '1H':
       if dataDim.expDim is acqExpDim:
@@ -109,7 +53,7 @@ def getDimCodes(dataSource):
       else:
         dimCodes[ii] = 'hx2'
         xCode = 'x2'
-      for tt in getOnebondDataDims(dataSource):
+      for tt in getOnebondDataDims(self):
         if tt[0] is dataDim:
           xDim = tt[1]
           dimCodes[dataDims.index(xDim)] = xCode
@@ -118,15 +62,15 @@ def getDimCodes(dataSource):
   return dimCodes
   
   
-def getXEasyDimCodes(dataSource):
+def getXEasyDimCodes(self:'DataSource'):
   """ Get Xeasy-style dimCodes in dim order for data Source
   For use in FormatConverter
   """
   #
   # Get isotopecode info
   #
-  isotopeCodes = getIsotopeCodesList(dataSource)
-  dimCodes = getDimCodes(dataSource)
+  isotopeCodes = getIsotopeCodesList(self)
+  dimCodes = getDimCodes(self)
   reverse = bool( 'x2' in dimCodes and not 'x1' in dimCodes)
   found = set()
   for ii,code in enumerate(dimCodes):
@@ -159,7 +103,7 @@ def getXEasyDimCodes(dataSource):
 
 # NB renamed from getSpectrumIsotopes getIsotopeCodesList
 #def getSpectrumIsotopes(dataSource):
-def getIsotopeCodesList(dataSource):
+def getIsotopeCodesList(self:'DataSource'):
   """
   Give isotope code strings pertaining to the dimensions of a given NMR dataSource
   
@@ -173,14 +117,14 @@ def getIsotopeCodesList(dataSource):
   """
 
   isotopes = []
-  for dataDim in dataSource.sortedDataDims():
+  for dataDim in self.sortedDataDims():
     isotopeCodes = list(dataDim.getIsotopeCodes())
     isotopes.append(','.join(sorted(isotopeCodes)) or None)
   
   return isotopes
   
        
-def getOnebondDataDims(dataSource):
+def getOnebondDataDims(self:'DataSource'):
   """
   Get pairs of dataSource data dimensions that are connected by onebond transfers
   
@@ -194,11 +138,11 @@ def getOnebondDataDims(dataSource):
   """
   
   dataDims = []
-  expDimRefs = dataSource.experiment.getOnebondExpDimRefs()
+  expDimRefs = self.experiment.getOnebondExpDimRefs()
 
   for expDimRef0, expDimRef1 in expDimRefs:
-    dataDim0 = dataSource.findFirstDataDim(expDim=expDimRef0.expDim)
-    dataDim1 = dataSource.findFirstDataDim(expDim=expDimRef1.expDim)
+    dataDim0 = self.findFirstDataDim(expDim=expDimRef0.expDim)
+    dataDim1 = self.findFirstDataDim(expDim=expDimRef1.expDim)
 
     if dataDim0 and dataDim1:
       dataDims.append( [dataDim0,dataDim1] )
@@ -219,7 +163,7 @@ def _cumulativeArray(array):
   return (n, cumul)
   
 
-def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
+def getPlaneData(self:'DataSource', position:Sequence=None, xDim=0, yDim=1) -> numpy.srray:
   """ Get plane data through position in dimensions xDim, yDim
       Returns 2D float32 NumPy array in order (y, x) 
       Returns None if numDim < 2 or if there is no dataStore
@@ -228,11 +172,11 @@ def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
   # Import moved here to avoid circular import problems
   from ccpncore.lib.spectrum.formats import NmrPipe
 
-  numDim = dataSource.numDim
+  numDim = self.numDim
   if numDim < 2:
     return None
     
-  dataStore = dataSource.dataStore
+  dataStore = self.dataStore
   if not dataStore:
     return None
          
@@ -240,7 +184,7 @@ def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
     if not hasattr(dataStore, 'template'):
       dataStore.template = NmrPipe.guessFileTemplate(dataStore)
     if dataStore.template:
-      return NmrPipe.getPlaneData(dataSource, position, xDim, yDim)
+      return NmrPipe.getPlaneData(self, position, xDim, yDim)
     
   assert numDim == 2 or (position and len(position) == numDim), 'numDim = %d, position = %s' % (numDim, position)
   assert xDim != yDim, 'xDim = yDim = %d' % xDim
@@ -250,7 +194,7 @@ def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
   if not position:
     position = numDim*[0]
 
-  dataDims = dataSource.sortedDataDims()
+  dataDims = self.sortedDataDims()
   numPoints = [dataDim.numPoints for dataDim in dataDims]
   xPoints = numPoints[xDim]
   yPoints = numPoints[yDim]
@@ -329,21 +273,21 @@ def getPlaneData(dataSource, position=None, xDim=0, yDim=1):
   
   return data
 
-def getSliceData(dataSource, position=None, sliceDim=0):
+def getSliceData(self:'DataSource', position:Sequence=None, sliceDim:int=0) -> numpy.array:
   # Get an actual array of data points,
   # spanning blocks as required
   # returns 1D array
-  numDim = dataSource.numDim
+  numDim = self.numDim
   if numDim < 1:
     return None
 
-  dataStore = dataSource.dataStore
+  dataStore = self.dataStore
   if not dataStore:
     return None
 
   if not position:
     position = numDim * [0]
-  dataDims = dataSource.sortedDataDims()
+  dataDims = self.sortedDataDims()
   numPoints = [dataDim.numPoints for dataDim in dataDims]
   slicePoints = numPoints[sliceDim]
 
@@ -398,7 +342,7 @@ def getSliceData(dataSource, position=None, sliceDim=0):
 
   return data
 
-def get1dSpectrumData(self) -> numpy.array:
+def get1dSpectrumData(self:'DataSource') -> numpy.array:
   """Get position,scaledData numpy array for 1D spectrum"""
 
   # Code refactored:
@@ -426,18 +370,18 @@ def get1dSpectrumData(self) -> numpy.array:
 
 
 
-def getRegionData(dataSource, startPoint, endPoint):
+def getRegionData(self:'DataSource', startPoint:Sequence, endPoint:Sequence) -> Tuple[numpy.array, tuple]:
 
   # NBNB TBD BROKEN!!
 
-  dataStore = dataSource.dataStore
+  dataStore = self.dataStore
   if not dataStore:
     return None
       
   blockSizes = dataStore.blockSizes
-  dataDims = dataSource.sortedDataDims()
+  dataDims = self.sortedDataDims()
   numPoints = [dataDim.numPoints for dataDim in dataDims]
-  numDim = dataSource.numDim
+  numDim = self.numDim
     
   blockRanges = []
   rangeSizes = []
@@ -537,43 +481,43 @@ def getRegionData(dataSource, startPoint, endPoint):
   
   return data.T, intRegion
   
-def automaticIntegration(dataSource,spectralData):
+def automaticIntegration(self:'DataSource',spectralData):
 #
-  numDim = dataSource.numDim
+  numDim = self.numDim
   if numDim != 1:
     return
-  dataStore = dataSource.dataStore
+  dataStore = self.dataStore
   if not dataStore:
     return None
   # dataSource.valueArray = [[]] * numDim
   # if len(valueArray[xDim]) != 0:
   #   valueArray = valueArray[xDim]
-  valueArray = dataSource.valueArray = spectralData
-  noise = estimateNoise(dataSource)
+  valueArray = self.valueArray = spectralData
+  noise = estimateNoise(self)
   level =  noise * 6
   # if len(self.peakList) > 0:
   #   integrals = self.getPeakIntegralRegions(valueArray[1, :], noise, level)
   # else:
   integrals = spInt.getIntegralRegions(spectralData[1, :], noise, level)
-  spInt.setIntegrals(dataSource,integrals)
+  spInt.setIntegrals(self,integrals)
 
   #
-  for integral in dataSource.integrals:
+  for integral in self.integrals:
     integral.calculateBias(spectralData[1, :], noise)
     spInt.calculateIntegralValues(integral.points, spectralData[1, :], integral.bias*-1, integral.slope)
 
-  if len(dataSource.integrals) > 0:
-    dataSource.integralFactor = 1/dataSource.integrals[0].points[-1][0]
+  if len(self.integrals) > 0:
+    self.integralFactor = 1/self.integrals[0].points[-1][0]
   else:
-    dataSource.integralFactor = None
-  for integral in dataSource.integrals:
+    self.integralFactor = None
+  for integral in self.integrals:
     integral.calculateVolume()
 
   #
   # for a in dataSource.integrals:
   #   # print(dataSource.integralFactor)
   #
-  return dataSource.integrals
+  return self.integrals
 
 
 # def setIntegrals(dataSource, dim, values, factor = 1.0):
@@ -581,20 +525,20 @@ def automaticIntegration(dataSource,spectralData):
 #     self.integrals = []
 #     # append = self.integrals.append
 
-def estimateNoise(dataSource):
+def estimateNoise(self:'DataSource') -> float:
 
-    if dataSource.noiseLevel:
-      return dataSource.noiseLevel
+    if self.noiseLevel:
+      return self.noiseLevel
 
-    if dataSource.numDim > 1:
-      planeData = getPlaneData(dataSource, [0] * dataSource.numDim, 0, 1)
+    if self.numDim > 1:
+      planeData = getPlaneData(self, [0] * self.numDim, 0, 1)
       value = 1.1 * numpy.std(planeData.flatten()) # multiplier a guess
     else:
 
-      if hasattr(dataSource, 'valueArray') and len(dataSource.valueArray) != 0:
-        sliceData = dataSource.valueArray
+      if hasattr(self, 'valueArray') and len(self.valueArray) != 0:
+        sliceData = self.valueArray
       else:
-        dataSource.valueArray = sliceData = getSliceData(dataSource)
+        self.valueArray = sliceData = getSliceData(self)
       # print(sliceData)
       # print(sliceData[1])
       sliceDataStd = numpy.std(sliceData)
@@ -606,6 +550,6 @@ def estimateNoise(dataSource):
 
     #value *= self.scale
 
-    dataSource.noiseLevel = float(value)
+    self.noiseLevel = float(value)
 
-    return dataSource.noiseLevel # Qt can't serialise numpy float types
+    return self.noiseLevel # Qt can't serialise numpy float types

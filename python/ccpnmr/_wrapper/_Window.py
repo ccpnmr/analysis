@@ -92,14 +92,14 @@ class Window(AbstractWrapperObject):
       return windowStore.sortedWindows()
 
 
-def newWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:
+def newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:
   """Create new child Window
 
   :param str title: window  title (optional, defaults to 'Wn' n positive integer
   :param tuple size: x,y size for new window in integer pixels
   :param tuple position: x,y position for new window in integer pixels"""
 
-  windowStore = parent.nmrProject.windowStore
+  windowStore = self.nmrProject.windowStore
 
   newApiWindow = windowStore.newWindow(title=title)
   if position:
@@ -107,7 +107,7 @@ def newWindow(parent:Project, title:str=None, position:tuple=(), size:tuple=()) 
   if size:
     newApiWindow.size = size
 
-  return parent._data2Obj.get(newApiWindow)
+  return self._data2Obj.get(newApiWindow)
 
 # Connections to parents:
 Project._childClasses.append(Window)

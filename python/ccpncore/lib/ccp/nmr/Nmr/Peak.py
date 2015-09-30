@@ -24,13 +24,13 @@ __version__ = "$Revision$"
 
 from ccpncore.util.typing import Sequence
 
-def assignByDimensions(peak, value:Sequence):
+def assignByDimensions(self:'Peak', value:Sequence):
   """Set per-dimension assignments on peak.
   value is a list of lists (one per dimension) of resonances.
   NB only works for single-PeakContrib, one-ref-per-dimension assignments
   NB resets PeakContribs
   """
-  numDim =  peak.peakList.dataSource.numDim
+  numDim =  self.peakList.dataSource.numDim
   if len(value) != numDim:
     raise ValueError("Assignment length does not match number of peak dimensions %s: %s"
                       % (numDim, value))
@@ -39,35 +39,35 @@ def assignByDimensions(peak, value:Sequence):
     if len(set(val)) != len(val):
       raise ValueError("Assignments contain duplicates in dimension %s: %s" % (ii+1, val))
 
-  peakContribs = peak.sortedPeakContribs()
+  peakContribs = self.sortedPeakContribs()
   if peakContribs:
     # Clear existing assignments, keeping first peakContrib
     peakContrib = peakContribs[0]
     for xx in peakContribs[1:]:
       xx.delete()
-    for peakDim in peak.peakDims:
+    for peakDim in self.peakDims:
       for peakDimContrib in peakDim.peakDimContribs:
         peakDimContrib.delete()
 
   else:
     # No assignments. Make peakContrib
-    peakContrib = peak.newPeakContrib()
+    peakContrib = self.newPeakContrib()
 
-  peakDims = peak.sortedPeakDims()
+  peakDims = self.sortedPeakDims()
   for ii,val in enumerate(value):
     peakDim = peakDims[ii]
     for resonance in val:
       peakDim.newPeakDimContrib(resonance=resonance, peakContribs=(peakContrib,))
 
 
-def assignByContrbutions(peak, value:Sequence):
+def assignByContrbutions(self:'Peak', value:Sequence):
   """Set assignments on peak.
   value is a list of lists (one per combination) of resonances.
   NB only works for single-resonance, one-ref-per-dimension assignments
   NB sets one PeakContrib per combination
   """
 
-  peakDims = peak.sortedPeakDims()
+  peakDims = self.sortedPeakDims()
   dimensionCount = len(peakDims)
   dimResonances = []
   for ii in range(dimensionCount):
@@ -80,17 +80,17 @@ def assignByContrbutions(peak, value:Sequence):
         dimResonances[ii].append(resonance)
 
   # reassign dimension resonances
-  assignByDimensions(peak, dimResonances)
+  assignByDimensions(self, dimResonances)
 
   # Get first PeakContrib before we add new ones
-  firstPeakContrib = peak.findFirstPeakContrib()
+  firstPeakContrib = self.findFirstPeakContrib()
 
   if value:
     # set PeakContribs, one per assignment tuple, skipping the first one
     for tt in value[1:]:
       ll = [peakDim.findFirstPeakDimContrib(resonance=tt[ii])
             for ii,peakDim in enumerate(peakDims)]
-      peak.newPeakContrib(peakDimContribs=ll)
+      self.newPeakContrib(peakDimContribs=ll)
 
     # reset PeakDimContribs for first PeakContrib
     ll = [peakDim.findFirstPeakDimContrib(resonance=value[0][ii])

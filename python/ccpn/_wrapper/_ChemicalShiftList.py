@@ -123,12 +123,12 @@ class ChemicalShiftList(AbstractWrapperObject):
 # Connections to parents:
 Project._childClasses.append(ChemicalShiftList)
 
-def newChemicalShiftList(parent:Project, name:str=None, unit:str='ppm',
+def newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
                          isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
   """Create new child Molecule"""
-  obj = parent._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
-                                         details=comment)
-  return parent._data2Obj.get(obj)
+  obj = self._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
+                                       details=comment)
+  return self._data2Obj.get(obj)
 
 Project.newChemicalShiftList = newChemicalShiftList
 

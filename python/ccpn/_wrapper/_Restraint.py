@@ -212,23 +212,23 @@ Peak.restraints = property(getter, setter, None,
 # Connections to parents:
 RestraintList._childClasses.append(Restraint)
 
-def newRestraint(parent:RestraintList,comment:str=None,
+def newRestraint(self:RestraintList,comment:str=None,
                          peaks:Sequence=()) -> Restraint:
   """Create new child RdcRestraint"""
-  apiConstraintList = parent._wrappedData
-  creator = apiConstraintList.getattr("new%sConstraint" % parent.restraintType)
+  apiConstraintList = self._wrappedData
+  creator = apiConstraintList.getattr("new%sConstraint" % self.restraintType)
   obj = creator(details=comment, peaks=peaks)
-  result = parent._project._data2Obj.get(creator(details=comment))
+  result = self._project._data2Obj.get(creator(details=comment))
   result.peaks = peaks
   return result
 
-def createSimpleRestraint(parent:RestraintList,comment:str=None,
+def createSimpleRestraint(self:RestraintList,comment:str=None,
                         peaks:Sequence=(),  targetValue:float=None, error:float=None,
                         weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                         additionalUpperLimit:float=None, additionalLowerLimit:float=None,
                         restraintItems:Sequence=()) -> Restraint:
 
-  restraint = parent.newRestraint(comment=comment, peaks=peaks)
+  restraint = self.newRestraint(comment=comment, peaks=peaks)
   restraint.newRestraintContribution(targetValue=targetValue,error=error, weight=weight,
                             upperLimit=upperLimit, lowerLimit=lowerLimit,
                             additionalUpperLimit=additionalUpperLimit,

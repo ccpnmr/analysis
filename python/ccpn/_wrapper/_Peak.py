@@ -328,12 +328,12 @@ class Peak(AbstractWrapperObject):
 # Connections to parents:
 PeakList._childClasses.append(Peak)
 
-def newPeak(parent:PeakList,height:Optional[float]=None, volume:Union[float, None]=None,
+def newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
             position:Sequence[float]=(), pointPosition:Sequence[float]=(),
             dimensionAssignments:Sequence[Sequence[NmrAtom]]=(), assignments:Sequence[Sequence[Optional[NmrAtom]]]=()) -> Peak:
   """Create new child Peak"""
-  apiPeakList = parent._apiPeakList
+  apiPeakList = self._apiPeakList
   apiPeak = apiPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
                               annotation=annotation, details=comment)
 
@@ -372,7 +372,7 @@ def newPeak(parent:PeakList,height:Optional[float]=None, volume:Union[float, Non
     # set assignments
     apiPeak.setAssignments(resonances)
 
-  return parent._project._data2Obj.get(apiPeak)
+  return self._project._data2Obj.get(apiPeak)
 
 PeakList.newPeak = newPeak
 

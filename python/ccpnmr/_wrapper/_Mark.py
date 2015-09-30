@@ -148,7 +148,7 @@ class Mark(AbstractWrapperObject):
     return parent._wrappedData.sortedMarks()
 
 
-def newMark(parent:Task, colour:str, positions:Sequence, axisCodes:Sequence, style:str='simple',
+def newMark(self:Task, colour:str, positions:Sequence, axisCodes:Sequence, style:str='simple',
             units:Sequence=(), labels:Sequence=()) -> Mark:
   """Create new child Mark
 
@@ -159,7 +159,7 @@ def newMark(parent:Task, colour:str, positions:Sequence, axisCodes:Sequence, sty
   :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
   :param tuple/list labels: Ruler labels for all lines in the mark. Default: None"""
 
-  apiMark = parent._wrappedData.newMark(colour=colour, style=style)
+  apiMark = self._wrappedData.newMark(colour=colour, style=style)
 
   for ii,position in enumerate(positions):
     dd = {'position':position, 'axisCode':axisCodes[ii]}
@@ -173,10 +173,10 @@ def newMark(parent:Task, colour:str, positions:Sequence, axisCodes:Sequence, sty
        dd['label'] = label
     apiRuler = apiMark.newRuler(**dd)
 
-  return parent._project._data2Obj.get(apiMark)
+  return self._project._data2Obj.get(apiMark)
 
 
-def newSimpleMark(parent:Task, colour:str, axisCode:str, position:float, style:str='simple',
+def newSimpleMark(self:Task, colour:str, axisCode:str, position:float, style:str='simple',
             unit:str='ppm', label:str=None) -> Mark:
   """Create new child Mark with a single line
 
@@ -187,12 +187,12 @@ def newSimpleMark(parent:Task, colour:str, axisCode:str, position:float, style:s
   :param tuple/list unit: Axis unit. Default: all ppm
   :param tuple/list label: Line label. Default: None"""
 
-  apiMark = parent._wrappedData.newMark(colour=colour, style=style)
+  apiMark = self._wrappedData.newMark(colour=colour, style=style)
   if unit is None:
     unit = 'ppm'
   apiMark.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
 
-  return parent._project._data2Obj.get(apiMark)
+  return self._project._data2Obj.get(apiMark)
 
 # Connections to parents:
 Task._childClasses.append(Mark)

@@ -246,13 +246,13 @@ class RestraintList(AbstractWrapperObject):
 # Connections to parents:
 RestraintSet._childClasses.append(RestraintList)
 
-def newRestraintList(parent:RestraintSet,restraintType, name:str=None, comment:str=None,
-                             unit:str=None, potentialType:str=None, tensorMagnitude:float=None,
-                             tensorRhombicity:float=None, tensorChainCode:str=None,
-                             tensorSequenceCode:str=None,
-                             tensorResidueType:str=None) -> RestraintList:
+def newRestraintList(self:RestraintSet,restraintType, name:str=None, comment:str=None,
+                     unit:str=None, potentialType:str=None, tensorMagnitude:float=None,
+                     tensorRhombicity:float=None, tensorChainCode:str=None,
+                     tensorSequenceCode:str=None,
+                     tensorResidueType:str=None) -> RestraintList:
   """Create new child RestraintList of type restraintType"""
-  apiNmrConstraintStore = parent._wrappedData
+  apiNmrConstraintStore = self._wrappedData
   creator = apiNmrConstraintStore.getattr("new%sConstraintList" % restraintType)
   if restraintType == 'Rdc':
     obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType,
@@ -261,7 +261,7 @@ def newRestraintList(parent:RestraintSet,restraintType, name:str=None, comment:s
                   tensorResidueType=tensorResidueType )
   else:
     obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType)
-  return parent._project._data2Obj.get(obj)
+  return self._project._data2Obj.get(obj)
 
 RestraintSet.newRestraintList = newRestraintList
 

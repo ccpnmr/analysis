@@ -27,7 +27,7 @@ import math
 
 
 
-def recalculateValue(shift, simulatedPeakScale=0.0001):
+def recalculateValue(self:'Shift', simulatedPeakScale:float=0.0001) -> float:
   """
   Calculates the value and error for a given shift based upon the
   peaks to which its resonance is assigned. Also sets links to
@@ -49,12 +49,12 @@ def recalculateValue(shift, simulatedPeakScale=0.0001):
   # hasApp = hasattr(shift.root, 'application')
 
 
-  if shift.isDeleted:
+  if self.isDeleted:
     return
 
-  shiftList = shift.parentList
+  shiftList = self.parentList
   experiments = shiftList.experiments
-  resonance = shift.resonance
+  resonance = self.resonance
   sum1  = 0.0
   sum2  = 0.0
   N     = 0.0
@@ -122,13 +122,12 @@ def recalculateValue(shift, simulatedPeakScale=0.0001):
     # resonance has run out of contribs
     # - leave it be, even if orphaned
     # or all dataDimWeighting are zero
-    shift.error = 0.0
+    self.error = 0.0
     return
-   
-  if shift is not None:
-    shift.value = mean
-    shift.error = sigma
-    shift.peaks = peaks
-    shift.peakDims = peakDims
+
+  self.value = mean
+  self.error = sigma
+  self.peaks = peaks
+  self.peakDims = peakDims
 
   return mean

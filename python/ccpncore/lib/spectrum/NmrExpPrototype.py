@@ -26,6 +26,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
+from ccpncore.util.Types import Dict
 
 def resetAllAxisCodes(nmrProject):
   """Reset all axisCodes (ExpDimRef.name) in project to be unique, match the isotope,
@@ -373,29 +374,71 @@ def experimentSynonymSummary():
   # 1) Some refExperiments have no synonym - use the name instead for these
 
   result= []
-  atomSiteNames = set()
+  # atomSiteNames = set()
+  allAxisCodes = set()
   # Sort refExperiments by name
   refExperiments = list(sorted([x for y in project.nmrExpPrototypes for x in y.refExperiments],
                                key=operator.attrgetter('name')))
   for refExperiment in refExperiments:
       # print("refExperiment: %s %s " % (refExperiment, refExperiment._ID))
-      ll = []
+      typ = 'NORM'
+      # siteNames = []
+      axisCodes = []
       synonym = refExperiment.synonym
-      data = [len(refExperiment.refExpDims), synonym or refExperiment.name,
-              refExperiment.name, ll]
-      result.append(data)
       for red in refExperiment.sortedRefExpDims():
-        for redr in red.sortedRefExpDimRefs():
-          ss = ','.join(tuple(x.name for x in redr.expMeasurement.atomSites))
-          ll.append(ss)
-          atomSiteNames.add(ss)
+        ll = [x.axisCode for x in red.sortedRefExpDimRefs()]
+        if len(ll) == 1:
+          axisCodes.extend(ll)
+          allAxisCodes.add(ll[0])
+        else:
+          axisCodes.append(str(ll))
+          typ = 'CPLX'
+
+      data = [typ, len(refExperiment.refExpDims), synonym or refExperiment.name,
+              refExperiment.name, axisCodes]
+      result.append(data)
+
+          # ss = ','.join(tuple(x.name for x in redr.expMeasurement.atomSites))
+          # siteNames.append(ss)
+          # atomSiteNames.add(ss)
   #
-  return atomSiteNames, result
+  return allAxisCodes, result
+
+
+
+def fetchIsotopeRefExperimentMap(project:'MemopsRoot') -> Dict:
+  """fetch {tuple(sortedNucleusCodes):RefExperiment} dictionary for project
+  The key is a tuple of element names ('C, Br, H, D, T, ...) or either of J, MQ, ALT, or delay"""
+  result = {}
+  if hasattr(project, '_isotopeRefExperimentMap'):
+    result = project._isotopeRefExperimentMap
+
+  if not result:
+
+    for expPrototype in project.sortedNmrExpPrototypes():
+      for refExperiment in expPrototype.sortedRefExperiments():
+        key = tuple(sorted(refExperiment.nucleusCodes))
+        ll = result.get(key, [])
+        ll.append(refExperiment)
+        result[key] = ll
+
+    project._isotopeRefExperimentMap = result
+
+    return result
 
 
 if __name__ == '__main__':
   # testExpPrototypes(resetCodes=True)
-  atomSitesNames, synonymTable = experimentSynonymSummary()
-  print("AtomSite names: %s" % list(sorted(atomSitesNames)))
-  for line in synonymTable:
-    print(line)
+  # allAxisCodes, synonymTable = experimentSynonymSummary()
+  # print("Axis Codes: %s" % list(sorted(allAxisCodes)))
+  # for line in synonymTable:
+  #   print(line)
+
+
+  from ccpncore.util.Io import newProject
+  project = newProject("ExpPrototypeTest", removeExisting=True)
+  refMap = fetchIsotopeRefExperimentMap(project)
+  for tt in sorted ((len(key), key, val) for key,val in sorted(refMap.items())):
+    print ("@~@~", tt[0], tt[1])
+    for refExp in tt[2]:
+      print ("          ", refExp.synonym, refExp.name, refExp.axisCodes)

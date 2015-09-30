@@ -148,17 +148,17 @@ def _setTask(window, value):
 Window.task = property(_getTask, _setTask, None, """Task shown in Window.""")
 
 
-def newTask(parent:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
+def newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
   """Create new child Task"""
 
-  nmrProject = parent.nmrProject
+  nmrProject = self.nmrProject
   dd = {'name':name, 'nmrProject':nmrProject, 'details':comment}
   if nameSpace is not None:
     dd['nameSpace'] = nameSpace
 
   newApiTask = nmrProject.root.newGuiTask(**dd)
 
-  return parent._data2Obj.get(newApiTask)
+  return self._data2Obj.get(newApiTask)
 
 # Connections to parents:
 Project._childClasses.append(Task)

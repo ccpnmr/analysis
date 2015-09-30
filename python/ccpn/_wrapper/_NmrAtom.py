@@ -202,10 +202,10 @@ Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned
 del getter
 del setter
     
-def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
+def newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
   """Create new child NmrAtom. If name is None, use nucleus@serial"""
-  nmrProject = parent._project._wrappedData
-  resonanceGroup = parent._wrappedData
+  nmrProject = self._project._wrappedData
+  resonanceGroup = self._wrappedData
 
   if not isotopeCode:
     if name:
@@ -214,9 +214,9 @@ def newNmrAtom(parent:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAto
       raise ValueError("newNmrAtom requires either name or isotopeCode as input")
 
 
-  return parent._project._data2Obj.get(nmrProject.newResonance(resonanceGroup=resonanceGroup,
-                                                               name=name,
-                                                               isotopeCode=isotopeCode))
+  return self._project._data2Obj.get(nmrProject.newResonance(resonanceGroup=resonanceGroup,
+                                                             name=name,
+                                                             isotopeCode=isotopeCode))
 
 def fetchNmrAtom(self:NmrResidue, name:str):
   """Fetch NmrAtom with name=name, creating it if necessary"""

@@ -234,17 +234,17 @@ class RestraintContribution(AbstractWrapperObject):
 # Connections to parents:
 Restraint._childClasses.append(RestraintContribution)
 
-def newRestraintContribution(parent:Restraint, targetValue:float=None, error:float=None,
+def newRestraintContribution(self:Restraint, targetValue:float=None, error:float=None,
                     weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
                     restraintItems:Sequence=()) -> RestraintContribution:
   """Create new child Contribution"""
-  constraint = parent._wrappedData
-  creator = constraint.getattr("new%sContribution" % parent._parent.restraintType)
+  constraint = self._wrappedData
+  creator = constraint.getattr("new%sContribution" % self._parent.restraintType)
   obj = creator(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
                 lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
                 additionalLowerLimit=additionalLowerLimit)
-  result = parent._project._data2Obj.get(obj)
+  result = self._project._data2Obj.get(obj)
   result.restraintItems = restraintItems
   return result
 

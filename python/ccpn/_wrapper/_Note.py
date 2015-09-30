@@ -105,12 +105,12 @@ class Note(AbstractWrapperObject):
     return parent._wrappedData.sortedNotes()
 
 
-def newNote(parent:Project, text:str=None) -> Note:
+def newNote(self:Project, text:str=None) -> Note:
   """Create new  Note
 
   :param str text: Note text"""
 
-  return parent._data2Obj.get(parent._wrappedData.newNote(text=text))
+  return self._data2Obj.get(v._wrappedData.newNote(text=text))
 
     
     

@@ -171,13 +171,13 @@ Chain.nmrChain = property(getter, setter, None, "NmrChain to which Chain is assi
 del getter
 del setter
 
-def newNmrChain(parent:Project, shortName:str=None, comment:str=None) -> NmrChain:
+def newNmrChain(self:Project, shortName:str=None, comment:str=None) -> NmrChain:
   """Create new child NmrChain
 
   :param str shortName: shortName for new nmrChain (optional, defaults to '@n' n positive integer
   :param str comment: comment for new nmrChain (optional)"""
   
-  nmrProject = parent._apiNmrProject
+  nmrProject = self._apiNmrProject
   
   if shortName is None:
     code = "@1"
@@ -189,19 +189,19 @@ def newNmrChain(parent:Project, shortName:str=None, comment:str=None) -> NmrChai
 
   newApiNmrChain = nmrProject.newNmrChain(code=shortName, details=comment)
   
-  return parent._data2Obj.get(newApiNmrChain)
+  return self._data2Obj.get(newApiNmrChain)
   
-def fetchNmrChain(parent:Project, shortName:str=None) -> NmrChain:
+def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
   """Fetch chain with given shortName; If none exists call newNmrChain to make one first
 
   :param str shortName: shortName for new chain (optional)
   """
 
-  nmrProject = parent._apiNmrProject
+  nmrProject = self._apiNmrProject
   apiNmrChain = nmrProject.findFirstNmrChain(code=shortName)
   if apiNmrChain is None:
     apiNmrChain = nmrProject.newNmrChain(code=shortName)
-  return parent._data2Obj.get(apiNmrChain)
+  return self._data2Obj.get(apiNmrChain)
 
   
 # Clean-up

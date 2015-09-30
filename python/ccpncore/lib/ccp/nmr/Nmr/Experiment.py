@@ -21,66 +21,10 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""
-======================COPYRIGHT/LICENSE START==========================
 
-Experiment.py: Utility functions for ccp.nmr.Nmr.Experiment
-
-Copyright (C) 2005-2013 Wayne Boucher, Rasmus Fogh, Tim Stevens and Wim Vranken (University of Cambridge and EBI/PDBe)
-
-=======================================================================
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-A copy of this license can be found in ../../../license/LGPL.license
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
-
-======================COPYRIGHT/LICENSE END============================
-
-for further information, please contact :
-
-- CCPN website (http://www.ccpn.ac.uk/)
-- PDBe website (http://www.ebi.ac.uk/pdbe/)
-
-=======================================================================
-
-If you are using this software for academic purposes, we suggest
-quoting the following references:
-
-===========================REFERENCE START=============================
-R. Fogh, J. Ionides, E. Ulrich, W. Boucher, W. Vranken, J.P. Linge, M.
-Habeck, W. Rieping, T.N. Bhat, J. Westbrook, K. Henrick, G. Gilliland,
-H. Berman, J. Thornton, M. Nilges, J. Markley and E. Laue (2002). The
-CCPN project: An interim report on a data model for the NMR community
-(Progress report). Nature Struct. Biol. 9, 416-418.
-
-Wim F. Vranken, Wayne Boucher, Tim J. Stevens, Rasmus
-H. Fogh, Anne Pajon, Miguel Llinas, Eldon L. Ulrich, John L. Markley, John
-Ionides and Ernest D. Laue (2005). The CCPN Data Model for NMR Spectroscopy:
-Development of a Software Pipeline. Proteins 59, 687 - 696.
-
-Rasmus H. Fogh, Wayne Boucher, Wim F. Vranken, Anne
-Pajon, Tim J. Stevens, T.N. Bhat, John Westbrook, John M.C. Ionides and
-Ernest D. Laue (2005). A framework for scientific data modeling and automated
-software development. Bioinformatics 21, 1678-1684.
-
-===========================REFERENCE END===============================
-"""
 import re
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence, List
 
 
 # Additional functions for ccp.nmr.Nmr.Experiment
@@ -90,7 +34,7 @@ from ccpncore.util.typing import Sequence
 
 
 
-def getAcqExpDim(experiment, ignorePreset=False):
+def getAcqExpDim(self:'Experiment', ignorePreset:bool=False) -> 'ExpDim':
   """
   ExpDim that corresponds to acquisition dimension. NB uses heuristics
 
@@ -103,7 +47,7 @@ def getAcqExpDim(experiment, ignorePreset=False):
   Nmr.ExpDim
   """
   
-  ll = experiment.findAllExpDims(isAcquisition=True)
+  ll = self.findAllExpDims(isAcquisition=True)
   if len(ll) == 1 and not ignorePreset:
     # acquisition dimension set - return it
     result = ll.pop()
@@ -112,7 +56,7 @@ def getAcqExpDim(experiment, ignorePreset=False):
     # no reliable acquisition dimension set
     result = None
     
-    dataSources = experiment.sortedDataSources()
+    dataSources = self.sortedDataSources()
     if dataSources:
       dataSource = dataSources[0]
       for ds in dataSources[1:]:
@@ -137,7 +81,7 @@ def getAcqExpDim(experiment, ignorePreset=False):
   
     if result is None:
       # no joy so far - just take first ExpDim
-      ll = experiment.sortedExpDims()
+      ll = self.sortedExpDims()
       if ll:
         result = ll[0]
       
@@ -145,7 +89,7 @@ def getAcqExpDim(experiment, ignorePreset=False):
   return result
   
   
-def getOnebondExpDimRefs(experiment):
+def getOnebondExpDimRefs(self:'Experiment') -> List[List['ExpDimRef']]:
   """
   Get pairs of experiment dimensions that are connected by onebond transfers
   
@@ -161,7 +105,7 @@ def getOnebondExpDimRefs(experiment):
   expDimRefs   = []
   expTransfers = []
   
-  for expTransfer in experiment.sortedExpTransfers():
+  for expTransfer in self.sortedExpTransfers():
     if expTransfer.transferType in ('onebond',):
       expTransfers.append(expTransfer)
   
@@ -171,7 +115,7 @@ def getOnebondExpDimRefs(experiment):
   return expDimRefs
 
 
-def resetAxisCodes(experiment):
+def resetAxisCodes(self:'Experiment'):
   """Set axis codes from per-dimension parameters and heuristics, e.g. for newly loaded spectrum
   NB ignores expTransfer and links to NmrExpPrototype"""
 
@@ -180,7 +124,7 @@ def resetAxisCodes(experiment):
   # NB determine acquisition dimension to decide which end to start indexing
   axisCodes = []
   usedCodes = set()
-  for expDim in experiment.sortedExpDims():
+  for expDim in self.sortedExpDims():
     for expDimRef in expDim.sortedExpDimRefs():
       elementNames = [str(re.match('\d+(\D+)', x).group(1)) for x in expDimRef.isotopeCodes]
 
@@ -220,11 +164,11 @@ def resetAxisCodes(experiment):
 
 
 
-def createDataSource(experiment:'Experiment', name:str, numPoints:Sequence, sw:Sequence,
+def createDataSource(self:'Experiment', name:str, numPoints:Sequence, sw:Sequence,
                      refppm:Sequence, refpt:Sequence, dataStore:'DataStore'=None,
                      scale:float=1.0, details:str=None, numPointsOrig:Sequence=None,
                      pointOffset:Sequence=None, isComplex:Sequence=None,
-                     **additionalParameters) -> object:
+                     **additionalParameters) -> 'DataSource':
   """Create a processed DataSource, with FreqDataDims, and one DataDimRef for each DataDim.
   NB Assumes that number and order of dimensions match the Experiment.
   Parameter names generally follow CCPN data model names. dataStore is a BlockedBinaryMatrix object
@@ -233,10 +177,10 @@ def createDataSource(experiment:'Experiment', name:str, numPoints:Sequence, sw:S
 
   numDim = len(numPoints)
 
-  if numDim != experiment.numDim:
-    raise ValueError('numDim = %d != %d = experiment.numDim' % (numDim, experiment.numDim))
+  if numDim != self.numDim:
+    raise ValueError('numDim = %d != %d = experiment.numDim' % (numDim, self.numDim))
 
-  spectrum = experiment.newDataSource(name=name, dataStore=dataStore, scale=scale, details=details,
+  spectrum = self.newDataSource(name=name, dataStore=dataStore, scale=scale, details=details,
                                       numDim=numDim, dataType='processed', **additionalParameters)
 
   # NBNB TBD This is not a CCPN attribute. Removed. Put back if you need it after all,
@@ -252,7 +196,7 @@ def createDataSource(experiment:'Experiment', name:str, numPoints:Sequence, sw:S
     isComplex = (False,) * numDim
 
 
-  for n , expDim in enumerate(experiment.sortedExpDims()):
+  for n , expDim in enumerate(self.sortedExpDims()):
     freqDataDim = spectrum.newFreqDataDim(dim=n+1, numPoints=numPoints[n],
                              isComplex=isComplex[n], numPointsOrig=numPointsOrig[n],
                              pointOffset=pointOffset[n],

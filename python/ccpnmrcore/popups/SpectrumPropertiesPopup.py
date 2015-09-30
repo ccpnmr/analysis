@@ -26,7 +26,7 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn.lib.Experiment import EXPERIMENT_TYPES
+# from ccpn.lib.Experiment import EXPERIMENT_TYPES
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
@@ -104,6 +104,7 @@ class GeneralTab(QtGui.QWidget, Base):
     super(GeneralTab, self).__init__(parent)
 
     self.spectrum = spectrum
+    self.experimentTypes = spectrum._project._experimentTypeMap
     nameLabel = (Label(self, text="Spectrum name: ", grid=(0,0)))
     nameData = LineEdit(self, grid=(0, 1))
     nameData.setText(spectrum.name)
@@ -154,7 +155,7 @@ class GeneralTab(QtGui.QWidget, Base):
       self.spectrumType = PulldownList(self, grid=(6, 1))
       self.axisCodes = ''.join(sorted(list(self.spectrum.axisCodes)))
       try:
-        self.spectrumType.addItems(list(EXPERIMENT_TYPES[spectrum.dimensionCount].get(self.axisCodes).keys()))
+        self.spectrumType.addItems(list(self.experimentTypes[spectrum.dimensionCount].get(self.axisCodes).keys()))
       except:
         pass
       # spectrumType.addItems(SPECTRA)
@@ -190,7 +191,7 @@ class GeneralTab(QtGui.QWidget, Base):
       self.spectrum.chemicalShiftList = self.spectrum.project.getByPid(item)
 
   def changeSpectrumType(self, value):
-    expType = EXPERIMENT_TYPES[self.spectrum.dimensionCount].get(self.axisCodes).get(self.spectrumType.currentText())
+    expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.axisCodes).get(self.spectrumType.currentText())
     print('expType', self.spectrumType.currentText())
     self.spectrum.experimentType = expType
     print(self.spectrum.experimentType)

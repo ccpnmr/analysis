@@ -808,7 +808,7 @@ del getter
 del setter
 
 
-def newSpectrum(parent:Project, name:str) -> Spectrum:
+def newSpectrum(self:Project, name:str) -> Spectrum:
   """Create new child Spectrum"""
 
   raise NotImplementedError("Not implemented. Use loadSpectrum function instead")

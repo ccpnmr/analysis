@@ -107,16 +107,15 @@ class RestraintSet(AbstractWrapperObject):
     return result
 
 
-def newRestraintSet(parent:Project, comment:str=None) -> RestraintSet:
+def newRestraintSet(self:Project, comment:str=None) -> RestraintSet:
   """Create new empty child NmrConstraintStores
 
   :param str comment: comment for new chain (optional)"""
   
-  nmrProject = parent._wrappedData
+  nmrProject = self._wrappedData
   newApiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
                                                          details=comment)
-  return parent._data2Obj.get(newApiNmrConstraintStore)
-
+  return self._data2Obj.get(newApiNmrConstraintStore)
     
     
 # Connections to parents:

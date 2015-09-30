@@ -27,7 +27,7 @@ import os
 from ccpncore.util import Path
 from ccpncore.api.memops import Implementation
 
-def changeDataStoreUrl(dataStore, newPath):
+def changeDataStoreUrl(self:'DataStore', newPath:str):
   """ Change the url for this dataStore, so that the end we have
   dataStore.dataUrl.url.path = newPath.  This changes all dataUrls
   with the same old path if the old path does not exist and the
@@ -35,12 +35,12 @@ def changeDataStoreUrl(dataStore, newPath):
   """
 
   newPath = Path.normalisePath(newPath, makeAbsolute=True)
-  oldDataUrl = dataStore.dataUrl
+  oldDataUrl = self.dataUrl
   oldUrl = oldDataUrl.url
   oldPath = oldUrl.dataLocation
   oldExists = os.path.exists(oldPath)
   if newPath != oldPath:
-    dataLocationStore = dataStore.dataLocationStore
+    dataLocationStore = self.dataLocationStore
     newUrl = Implementation.Url(path=newPath)  # TBD: should use oldUrl.clone(path=newPath)
 
     # first check if have a dataUrl with this path
@@ -55,7 +55,7 @@ def changeDataStoreUrl(dataStore, newPath):
     # if have found or have created newDataUrl then set dataStore to point to it
     # else just change url of oldDataUrl (which could affect other dataStores)
     if newDataUrl:
-      dataStore.dataUrl = newDataUrl
+      self.dataUrl = newDataUrl
     else:
       oldDataUrl.url = newUrl
 

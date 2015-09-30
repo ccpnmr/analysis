@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 import numpy
 
-def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
+def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=None,
                  minLinewidth=None, exclusionBuffer=None,
                  minDropfactor=0.0, checkAllAdjacent=True,
                  fitMethod=None, excludedRegions=None,
@@ -45,7 +45,7 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
   if posLevel is None and negLevel is None:
     return peaks
 
-  dataSource = peakList.dataSource
+  dataSource = self.dataSource
   numDim = dataSource.numDim
 
   if not minLinewidth:
@@ -126,7 +126,7 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
 
   # check new found positions against existing ones
   existingPositions = []
-  for peak in peakList.peaks:
+  for peak in self.peaks:
     position = numpy.array([peakDim.position for peakDim in peak.sortedPeakDims()])  # ignores aliasing
     existingPositions.append(position-1) # -1 because API position starts at 1
     
@@ -164,7 +164,7 @@ def pickNewPeaks(peakList, startPoint, endPoint, posLevel=None, negLevel=None,
           linewidth = dimCount * [None]
         position = center + startPoint
       
-      peak = peakList.newPeak()
+      peak = self.newPeak()
 
       dataDims = dataSource.sortedDataDims()
       peakDims = peak.sortedPeakDims()

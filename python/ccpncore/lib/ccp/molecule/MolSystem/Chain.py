@@ -23,11 +23,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 
-def renumberChainSeqCodes(chain, firstSeqCode:int=1, skipZeroSeqCode:bool=False):
+def renumberChainSeqCodes(self:'Chain', firstSeqCode:int=1, skipZeroSeqCode:bool=False):
   """Reset chain numbering to sequential integers starting at firstSeqCode """
 
   seqCode = firstSeqCode
-  for residue in chain.sortedResidues():
+  for residue in self.sortedResidues():
     if seqCode == 0 and skipZeroSeqCode:
       seqCode = 1
     residue.seqCode = seqCode
@@ -35,12 +35,12 @@ def renumberChainSeqCodes(chain, firstSeqCode:int=1, skipZeroSeqCode:bool=False)
     seqCode += 1
 
 
-def expandMolSystemAtoms(chain):
+def expandMolSystemAtoms(self:'Chain'):
   """Add extra atoms to chain corresponding to AtomSets
   Called on V2 upgrade, or on finalisation of chain."""
 
   # Set elementSymbol and add missing atoms (lest something breaks lower down)
-  for residue in chain.sortedResidues():
+  for residue in self.sortedResidues():
     chemCompVar = residue.chemCompVar
     for chemAtom in chemCompVar.findAllChemAtoms(className='ChemAtom'):
       atom = residue.findFirstAtom(name=chemAtom.name)
@@ -51,7 +51,7 @@ def expandMolSystemAtoms(chain):
         atom.elementSymbol = chemAtom.elementSymbol
 
   # Set boundAtoms for existing atoms within residue
-  for residue in chain.sortedResidues():
+  for residue in self.sortedResidues():
     chemCompVar = residue.chemCompVar
     for atom in residue.atoms:
       chemAtom = chemCompVar.findFirstChemAtom(name=atom.name, className='ChemAtom')
@@ -64,8 +64,8 @@ def expandMolSystemAtoms(chain):
               atom.addBoundAtom(boundAtom)
 
     # Add boundAtoms for MolResLinks
-      for molResLink in chain.molecule.molResLinks:
-        ff = chain.findFirstResidue
+      for molResLink in self.molecule.molResLinks:
+        ff = self.findFirstResidue
         atoms = [ff(seqId=x.molResidue.serial).findFirstAtom(name=x.linkEnd.boundChemAtom.name)
                  for x in molResLink.molResLinkEnds]
         if atoms[1] not in atoms[0].boundAtoms:

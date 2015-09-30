@@ -36,8 +36,6 @@ class DropBase(GuiBase):
   def __init__(self, appBase, *args, **kw):
   # def __init__(self, appBase, dropCallback, *args, **kw):
 
-    print("@~@~ init dropbase", self.__class__.__name__)
-
     GuiBase.__init__(self, appBase, *args, **kw)
     # self.dropCallback = dropCallback
 
@@ -57,7 +55,6 @@ class DropBase(GuiBase):
     print(event)
 
     data, dataType  = qtUtil.interpretEvent(event)
-    print("@~@~ DropBase drop %s %s on %s" % (dataType, data, self))
 
     if data and dataType:
       self.processDropData(data, dataType)
@@ -113,8 +110,6 @@ class DropBase(GuiBase):
     """ Process dropped-in data
     Separate function so it can be called from command line as well.
     """
-
-    # print ("@~@~  process drop" , dataType, data)
 
     project = self._appBase.project
 

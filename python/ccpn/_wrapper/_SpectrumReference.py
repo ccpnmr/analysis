@@ -231,13 +231,13 @@ class SpectrumReference(AbstractWrapperObject):
     return result
 
 
-def newSpectrumReference(parent:Spectrum, dimension:int, spectrometerFrequency:float,
+def newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:float,
                        isotopeCodes:Sequence, axisCode:str=None, measurementType:str='Shift',
                        maxAliasedFrequency:float=None, minAliasedFrequency:float=None,
                        foldingMode:str=None, axisUnit:str=None, referencePoint:float=0.0,
                        referenceValue:float=0.0) -> SpectrumReference:
   """Create new child Atom"""
-  dataSource = parent._wrappedData
+  dataSource = self._wrappedData
   dataDim = dataSource.findFirstDataDim(dim=dimension)
   if dataDim is None:
     raise ValueError("Cannot create SpectrumReference for non-existent dimension: %s" % dimension)
@@ -251,7 +251,7 @@ def newSpectrumReference(parent:Spectrum, dimension:int, spectrometerFrequency:f
   dataDimRef = dataDim.newDataDimRef(expDimRef=expDimRef, refPoint=referencePoint,
                                      refValue=referenceValue)
 
-  return parent.project._data2Obj[dataDimRef]
+  return self.project._data2Obj[dataDimRef]
 
 
 # Connections to parents:

@@ -30,7 +30,7 @@ from ccpncore.memops.ApiError import ApiError
 from ccpncore.util import CopyData, Undo
 
 
-def clone(molecule, newName:str=None):
+def clone(self:'Molecule', newName:str=None):
   """Make a new molecule based upon the sequence of an existing one
   .. describe:: Input
 
@@ -42,19 +42,19 @@ def clone(molecule, newName:str=None):
   """
   defaultString =  'Molecule %d'
 
-  project = molecule.root
+  project = self.root
   ii = len(project.molecules) + 1
   newName = newName or defaultString % ii
   while project.findFirstMolecule(name=newName) is not None:
     ii += 1
     newName = defaultString % ii
-  newMolecule = CopyData.copySubTree(molecule, project, topObjectParameters={'name':newName,},
+  newMolecule = CopyData.copySubTree(self, project, topObjectParameters={'name':newName,},
                                      maySkipCrosslinks=True )
 
   return newMolecule
 
 
-def extendOneLetterMolResidues(molecule, sequence:str, molType:str='protein', startNumber:int=1,
+def extendOneLetterMolResidues(self:'Molecule', sequence:str, molType:str='protein', startNumber:int=1,
                             isCyclic:bool=False):
   """Descrn: Adds MolResidues for a sequence of code1Letter to Molecule, using molType.
              Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
@@ -68,9 +68,9 @@ def extendOneLetterMolResidues(molecule, sequence:str, molType:str='protein', st
   if not sequence:
     raise ValueError("Attempt to append empty residue sequence")
 
-  root = molecule.root
+  root = self.root
 
-  oldMolResidues = molecule.molResidues
+  oldMolResidues = self.molResidues
   if oldMolResidues:
     nn = max([x.seqCode for x in oldMolResidues]) + 1
     startNumber = max(startNumber, nn)
@@ -94,18 +94,18 @@ def extendOneLetterMolResidues(molecule, sequence:str, molType:str='protein', st
     chemComp = ll[0]
     chemCompVar  = (chemComp.findFirstChemCompVar(linking='none') or
                     chemComp.findFirstChemCompVar()) # just a default
-    molResidues = [molecule.newMolResidue(seqCode=startNumber, chemCompVar=chemCompVar)]
+    molResidues = [self.newMolResidue(seqCode=startNumber, chemCompVar=chemCompVar)]
 
   else:
     seqInput= [(molType,x.ccpCode) for x in ll]
-    molResidues = extendLinearSequence(molecule, seqInput, seqCodeStart=startNumber,
+    molResidues = extendLinearSequence(self, seqInput, seqCodeStart=startNumber,
                                     isCyclic=isCyclic)
 
   #
   return molResidues
 
 
-def extendMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=False):
+def extendMolResidues(self:'Molecule', sequence:list, startNumber:int=1, isCyclic:bool=False):
   """Descrn: Adds MolResidues for a sequence of residueNames to Molecule.
              Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
      Inputs: Ccp.Molecule.Molecule,
@@ -115,13 +115,13 @@ def extendMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=
      Output: List of new Ccp.Molecule.MolResidues
   """
 
-  root = molecule.root
+  root = self.root
 
   if not sequence:
     return []
 
   # Reset startNumber to match pre-existing MOlResidues
-  oldMolResidues = molecule.molResidues
+  oldMolResidues = self.molResidues
   if oldMolResidues:
     nn = max([x.seqCode for x in oldMolResidues]) + 1
     startNumber = max(startNumber, nn)
@@ -154,7 +154,7 @@ def extendMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=
           break
 
       if offset2 - offset1 > 1:
-        result.extend(extendLinearSequence(molecule, seqInput[offset1:offset2],
+        result.extend(extendLinearSequence(self, seqInput[offset1:offset2],
                                         seqCodeStart=startNumber+offset1, isCyclic=isCyclic))
         offset1 = offset2
         # End of stretch. Skip ret of loop and go on to next residue
@@ -167,7 +167,7 @@ def extendMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=
       chemCompVar  = (chemComp.findFirstChemCompVar(linking='none') or
                       chemComp.findFirstChemCompVar()) # just a default
 
-      result.append(molecule.newMolResidue(seqCode=startNumber+offset1, chemCompVar=chemCompVar))
+      result.append(self.newMolResidue(seqCode=startNumber+offset1, chemCompVar=chemCompVar))
       offset1 += 1
 
     else:
@@ -177,7 +177,7 @@ def extendMolResidues(molecule, sequence:list, startNumber:int=1, isCyclic:bool=
   return result
 
 
-def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
+def extendLinearSequence(self:'Molecule', sequence:list, seqCodeStart:int=1,
                        isCyclic:bool=False):
   """Descrn: Add residues to molecule. Fast method, which uses 'override' mode.
              sequence is a list of (molType,ccpCode) tuples - so can make mixed-type
@@ -187,14 +187,14 @@ def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
     Inputs: Molecule.molecule, List of Tuples of Strings (molType, ccpCode), Int, Boolean
      Output: List of Molecule.MolResidues
   """
-  logger = molecule.root._logger
+  logger = self.root._logger
 
   if len(sequence) < 2:
     raise ApiError("Sequence %s too short for function" % sequence)
 
 
   # set up
-  project = molecule.root
+  project = self.root
   chemCompData = {}
 
   molResidues = []
@@ -202,14 +202,14 @@ def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
   molResLinks = []
 
   # get starting serial
-  serialDict = molecule.__dict__.setdefault('_serialDict', {})
+  serialDict = self.__dict__.setdefault('_serialDict', {})
   serial = serialDict.get('molResidues', 0)
 
-  root = molecule.root
+  root = self.root
   root.__dict__['override'] = True
 
   # Set up for undo
-  undo = molecule.root._undo
+  undo = self.root._undo
   if undo is not None:
     undo.increaseBlocking()
 
@@ -228,7 +228,7 @@ def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
       molResData, otherLinkCodes = _getLinearChemCompData(project, molType,
                                                         ccpCode, 'start')
 
-      molResidue = molecule.newMolResidue(seqCode=seqCode, serial=serial,
+      molResidue = self.newMolResidue(seqCode=seqCode, serial=serial,
                                           **molResData)
       molResidues.append(molResidue)
 
@@ -251,7 +251,7 @@ def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
                                                           ccpCode, 'middle')
         chemCompData[seqTuple] = (molResData,otherLinkCodes)
 
-      molResidue = molecule.newMolResidue(seqCode=seqCode, serial=serial,
+      molResidue = self.newMolResidue(seqCode=seqCode, serial=serial,
                                           **molResData)
       molResidues.append(molResidue)
 
@@ -270,7 +270,7 @@ def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
       molResData,otherLinkCodes = _getLinearChemCompData(project, molType,
                                                         ccpCode, 'end')
 
-      molResidue = molecule.newMolResidue(seqCode=seqCode, serial=serial,
+      molResidue = self.newMolResidue(seqCode=seqCode, serial=serial,
                                           **molResData)
       molResidues.append(molResidue)
 
@@ -291,7 +291,7 @@ def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
       prevLinkEnd = molResidues[second].findFirstMolResLinkEnd(linkCode='prev')
       molResLinkEnds.append(prevLinkEnd)
       molResLinks.append(
-       molecule.newMolResLink(molResLinkEnds=[nextLinkEnd,prevLinkEnd])
+       self.newMolResLink(molResLinkEnds=[nextLinkEnd,prevLinkEnd])
       )
 
     if isCyclic:
@@ -301,11 +301,11 @@ def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
       prevLinkEnd = molResidues[0].findFirstMolResLinkEnd(linkCode='prev')
       molResLinkEnds.append(prevLinkEnd)
       molResLinks.append(
-       molecule.newMolResLink(molResLinkEnds=[nextLinkEnd,prevLinkEnd])
+       self.newMolResLink(molResLinkEnds=[nextLinkEnd,prevLinkEnd])
       )
 
     # final validity check
-    molecule.checkAllValid()
+    self.checkAllValid()
 
   except:
     # clean up
@@ -322,13 +322,13 @@ def extendLinearSequence(molecule, sequence:list, seqCodeStart:int=1,
   finally:
     # reset override and set isModified
     root.__dict__['override'] = False
-    molecule.__dict__['isModified'] = True
+    self.__dict__['isModified'] = True
     if undo is not None:
       undo.decreaseBlocking()
 
   if undo is not None and (molResidues or molResLinks):
     undo.newItem(Undo.deleteAll, extendLinearSequence, undoArgs=(molResidues+molResLinks,),
-                 redoArgs=(molecule, sequence),
+                 redoArgs=(self, sequence),
                  redoKwargs = {'seqCodeStart':seqCodeStart, 'isCyclic':isCyclic})
 
   # call notifiers:

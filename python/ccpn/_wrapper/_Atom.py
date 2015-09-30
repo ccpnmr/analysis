@@ -84,10 +84,10 @@ class Atom(AbstractWrapperObject):
     return parent._wrappedData.sortedAtoms()
     
     
-def newAtom(parent:Residue, name:str) -> Atom:
+def newAtom(self:Residue, name:str) -> Atom:
   """Create new child Atom"""
-  project = parent._project
-  apiResidue = parent._wrappedData
+  project = self._project
+  apiResidue = self._wrappedData
 
   raise NotImplementedError("Creation of new Atoms not yet implemented")
 

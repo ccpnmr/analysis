@@ -28,10 +28,6 @@ class ChemicalShiftTest(WrapperTesting):
 
   # Path of project to load (None for new project
   projectPath = 'CcpnCourse2b'
-
-  # def test_shift(self):
-  #   shiftList = self.project.chemicalShiftLists[0]
-  #   print("@~@~", shiftList.chemicalShifts[:8])
     
   def test_rename_list(self):
 

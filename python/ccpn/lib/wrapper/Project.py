@@ -101,25 +101,25 @@ def loadProject(project:"Project", path:str, subType:str) -> "Project":
   else:
     raise ValueError("Sequence file type %s is not recognised" % subType)
 
-def loadSpectrum(project:"Project", path:str, subType:str) -> list:
+def loadSpectrum(self:"Project", path:str, subType:str) -> list:
   """Load spectrum from file into application"""
 
-  apiDataSource = project._wrappedData.loadDataSource(path, subType)
+  apiDataSource = self._wrappedData.loadDataSource(path, subType)
   if apiDataSource is None:
     return []
   else:
-    return [project._data2Obj[apiDataSource]]
+    return [self._data2Obj[apiDataSource]]
 
 #
 #
-def loadLookupFile(project:None, path:str, subType:str, ):
+def loadLookupFile(self:"Project", path:str, subType:str, ):
   """Load data from a look-up file, csv or xls ."""
 
   if subType == ioFormats.CSV:
-    readCsv(project, path=path)
+    readCsv(self, path=path)
 
   elif subType == ioFormats.XLS:
-    readXls(project, path=path)
+    readXls(self, path=path)
 
 
 def uniqueSubstanceName(self:"Project", name:str=None, defaultName:str='Molecule') -> str:
@@ -133,7 +133,8 @@ def uniqueSubstanceName(self:"Project", name:str=None, defaultName:str='Molecule
   # ensure substance name is unique
   i = 0
   result = name
-  while apiProject.findFirstMolecule(name=ss) or apiComponentStore.findFirstComponent(name=ss):
+  while (apiProject.findFirstMolecule(name=result) or
+         apiComponentStore.findFirstComponent(name=result)):
     i += 1
     result = '%s%d' % (name,i)
   if result != name:

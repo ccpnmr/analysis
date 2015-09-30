@@ -22,9 +22,9 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-def recalculateShifts(shiftList):
+def recalculateShifts(self:'ShiftList'):
   """recalculate value and error for all shifts, from assigned peaks"""
-  for shift in shiftList.measurements:
+  for shift in self.measurements:
     shift.recalculateValue()
 
 

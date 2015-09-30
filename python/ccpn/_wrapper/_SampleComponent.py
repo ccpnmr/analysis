@@ -171,18 +171,18 @@ class SampleComponent(AbstractWrapperObject):
 # Connections to parents:
 Sample._childClasses.append(SampleComponent)
 
-def newSampleComponent(parent:Sample, name:str, labeling:str, role:str=None,
+def newSampleComponent(self:Sample, name:str, labeling:str, role:str=None,
                        concentration:float=None, concentrationError:float=None,
                        concentrationUnit:str=None, purity:float=None, comment:str=None,
                       ) -> SampleComponent:
   """Create new child SampleComponent"""
-  apiSample = parent._wrappedData
+  apiSample = self._wrappedData
   obj = apiSample.newSampleComponent(name=name, labeling=labeling, role=role,
                                      concentration=concentration,
                                      concentrationError=concentrationError,
                                      concentrationUnit=concentrationUnit, details=comment,
                                      purity=purity)
-  return parent._project._data2Obj.get(obj)
+  return self._project._data2Obj.get(obj)
 
 Sample.newSampleComponent = newSampleComponent
 

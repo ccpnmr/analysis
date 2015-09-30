@@ -29,10 +29,12 @@ from ccpn import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib.molecule import MoleculeQuery
+from ccpncore.lib.spectrum import NmrExpPrototype
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
 from ccpncore.util.Undo import Undo
 from ccpncore.util import Io as ioUtil
+from ccpncore.util.Types import Dict
 
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to API: NmrProject"""
@@ -85,6 +87,9 @@ class Project(AbstractWrapperObject):
 
     # Set up pid sorting dictionary to cache pid sort keys
     self._pidSortKeys = {}
+
+    # Special attributes:
+    self._implExperimentTypeMap = None
 
     # Set mandatory top-level objects in apiProject
     # MolSystem
@@ -354,6 +359,31 @@ class Project(AbstractWrapperObject):
   def  _residueName2chemCompId(self) -> dict:
     """dict of {residueName:(molType,ccpCode)}"""
     return MoleculeQuery.fetchStdResNameMap(self._wrappedData.root)
+
+  @property
+  def _experimentTypeMap(self) -> Dict:
+    """{dimensionCount : {sortedNucleusCodeTuple : {experimentTypeSynonym : experimentTypeName}}}
+    dictionary"""
+    result = self._implExperimentTypeMap
+    if result is None:
+      result = {}
+      refExperimentMap = NmrExpPrototype.fetchIsotopeRefExperimentMap(self._apiNmrProject.root)
+
+      for nucleusCodes, refExperiments in refExperimentMap.items():
+
+        ndim = len(nucleusCodes)
+        dd1 = result.get(ndim, {})
+        result[ndim] = dd1
+
+        dd2 = dd1.get(nucleusCodes, {})
+        dd1[nucleusCodes] = dd2
+        for refExperiment in refExperiments:
+          name = refExperiment.name
+          dd2[refExperiment.synonym or name] = name
+
+      self._implExperimentTypeMap = result
+    #
+    return result
 
   #
   # utility functions

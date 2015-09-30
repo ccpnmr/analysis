@@ -203,7 +203,7 @@ def _getSpectrumDisplays(window:Window):
 Window.spectrumDisplays = property(_getSpectrumDisplays, None, None,
                                    "SpectrumDisplays shown in Window")
 
-def newSpectrumDisplay(parent:Task, axisCodes:(str,), stripDirection:str='Y',
+def newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
                        name:str=None, window:Window=None, comment:str=None,
                        independentStrips=False, nmrResidue=None):
 
@@ -219,10 +219,10 @@ def newSpectrumDisplay(parent:Task, axisCodes:(str,), stripDirection:str='Y',
   #   (True, False,True):('newFreeStripDisplay1d','newFreeStrip1d'),
   # }
 
-  window = parent.getByPid(window) if isinstance(window, str) else window
-  nmrResidue = parent.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
+  window = self.getByPid(window) if isinstance(window, str) else window
+  nmrResidue = self.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
 
-  apiTask = parent._wrappedData
+  apiTask = self._wrappedData
 
   if len(axisCodes) <2:
     raise ValueError("New SpectrumDisplay must have at least two axisCodes")

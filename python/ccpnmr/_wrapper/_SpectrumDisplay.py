@@ -289,7 +289,7 @@ def newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
   else:
     apiStrip = apiSpectrumDisplay.newBoundStrip()
   #
-  return parent._project._data2Obj.get(apiSpectrumDisplay)
+  return self._project._data2Obj.get(apiSpectrumDisplay)
 
 
 

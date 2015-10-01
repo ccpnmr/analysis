@@ -25,7 +25,7 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
         axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
 
       atomCodes = tuple(sorted(axisCodes))
-      pulldownItems = list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys())
+      pulldownItems = sorted(list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys()))
       spLabel = Label(self, text=spectrum.pid, grid=(spectrumIndex, 0))
       spPulldown = PulldownList(self, grid=(spectrumIndex, 1), callback=partial(self.setExperimentType, spectrum, atomCodes), texts=pulldownItems)
       spPulldown.setCurrentIndex(spPulldown.findText(spectrum.experimentName))

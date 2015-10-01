@@ -117,7 +117,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.removeStripAction = removeStripAction
 
   def duplicateStrip(self):
-    newStrip = self._appBase.current.strip.clone()
+    newStrip = self.strips[-1].clone()
 
   def hideUtilToolBar(self):
     self.spectrumUtilToolBar.hide()

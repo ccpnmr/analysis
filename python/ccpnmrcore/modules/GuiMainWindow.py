@@ -422,12 +422,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
     dataPid =  item.data(0, QtCore.Qt.DisplayRole)
+    print(item, 'item')
     project = self._appBase.project
     obj = project.getByPid(dataPid)
     if obj is None:
       project._logger.error("No data object matching Pid %s" % dataPid)
     elif obj.shortClassName == 'SP':
-      popup = SpectrumPropertiesPopup(obj)
+      popup = SpectrumPropertiesPopup(obj, item)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'PL':

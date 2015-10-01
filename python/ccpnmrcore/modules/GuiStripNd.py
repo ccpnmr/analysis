@@ -256,8 +256,8 @@ class GuiStripNd(GuiStrip):
   def setPlaneCount(self, n=0, value=1):
 
     planeCount = self.planeToolbar.planeCounts[n]
-    self.changePlaneCount(int(value/planeCount.value()))
-    self.planeToolbar.planeCount.setValue(value)
+    self.changePlaneCount(value=(value/planeCount.oldValue))
+    planeCount.oldValue = value
 
   def _findPeakListView(self, peakList):
     

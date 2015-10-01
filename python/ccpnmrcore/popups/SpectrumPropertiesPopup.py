@@ -54,18 +54,18 @@ VOLUME_UNITS = ['μl', 'ml', 'l']
 
 
 class SpectrumPropertiesPopup(QtGui.QDialog, Base):
-  def __init__(self, spectrum=None, parent=None, **kw):
+  def __init__(self, spectrum, item, parent=None, **kw):
     super(SpectrumPropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     tabWidget = QtGui.QTabWidget()
     if spectrum.dimensionCount == 1:
-      tabWidget.addTab(GeneralTab(spectrum), "General")
+      tabWidget.addTab(GeneralTab(spectrum, item=item), "General")
       tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
       tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
       tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
 
     else:
-      tabWidget.addTab(GeneralTab(spectrum), "General")
+      tabWidget.addTab(GeneralTab(spectrum, item=item), "General")
       tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
       tabWidget.addTab(ContoursTab(spectrum), "Contours")
       tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
@@ -99,14 +99,16 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
 
 
 class GeneralTab(QtGui.QWidget, Base):
-  def __init__(self, spectrum, parent=None):
+  def __init__(self, spectrum, parent=None, item=None):
     super(GeneralTab, self).__init__(parent)
-
+    self.item = item
+    print(self.item, item)
     self.spectrum = spectrum
     self.experimentTypes = spectrum._project._experimentTypeMap
     nameLabel = (Label(self, text="Spectrum name: ", grid=(0,0)))
-    nameData = LineEdit(self, grid=(0, 1))
-    nameData.setText(spectrum.name)
+    self.nameData = LineEdit(self, grid=(0, 1))
+    self.nameData.setText(spectrum.name)
+    self.nameData.editingFinished.connect(self.changeSpectrumName)
     pathLabel = Label(self, text="Path:", grid=(1, 0))
     self.pathData = LineEdit(self, grid=(1, 1))
     self.pathData.setText(spectrum.filePath)
@@ -141,7 +143,10 @@ class GeneralTab(QtGui.QWidget, Base):
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), grid=(8, 1))
       self.spectrumScalingData.editingFinished.connect(self.setSpectrumScale)
-      pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(9, 0))
+      # pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(9, 0))
+      # self.pulseProgramData = LineEdit(self, grid=(0, 1))
+      # self.pulseProgramData.setText(spectrum.name)
+      # self.pulseProgramData.editingFinished.connect(self.changeSpectrumName)
       recordingDataLabel = Label(self, text="Date Recorded", grid=(10, 0))
       noiseLevelLabel = Label(self, text="Noise Level: ", grid=(11, 0))
       noiseLevelData = LineEdit(self)
@@ -163,7 +168,7 @@ class GeneralTab(QtGui.QWidget, Base):
 
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(spectrum.experimentName))
       self.spectrumType.currentIndexChanged.connect(self.changeSpectrumType)
-      pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(7, 0))
+      # pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(7, 0))
       # recordingDataLabel = Label(self, text="Date Recorded", grid=(8, 0))
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), grid=(8, 1))
@@ -176,6 +181,16 @@ class GeneralTab(QtGui.QWidget, Base):
       # noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.estimateNoise()))
       # else:
       #   noiseLevelData.setText('None')
+
+  def changeSpectrumName(self):
+    if self.nameData.isModified():
+      self.spectrum.rename(self.nameData.text())
+      self.item.setText(0, 'SP:'+self.nameData.text())
+      for i in range(self.item.childCount()):
+        pid = self.item.child(i).text(0).split(':')[0]+':'+self.nameData.text()+"."\
+              + self.item.child(i).text(0).split('.')[1]
+        self.item.child(i).setText(0, pid)
+
 
   def setSpectrumScale(self):
     self.spectrum.scale = float(self.spectrumScalingData.text())
@@ -261,7 +276,7 @@ class DimensionsTab(QtGui.QWidget):
       pointsLabel = Label(self, text="Point Counts : ", grid=(2, 0), hAlign='r')
       pointsData = Label(self, text=str(spectrum.pointCounts[i]), grid=(2, i+1), hAlign='c')
       axisTypeLabel = Label(self, text="Dimension Type : ", grid=(3, 0), hAlign='r')
-      axisTypeData = Label(self, text=spectrum.dimensionTypes[i], grid=(3, 1), hAlign='c')
+      axisTypeData = Label(self, text=spectrum.dimensionTypes[i], grid=(3, i+1), hAlign='c')
       spectralWidthLabel = Label(self, text="Spectrum Width (ppm) : ", grid=(4, 0), hAlign='r')
       spectralWidthData = Label(self, text=str("%.3f" % spectrum.spectralWidths[i]), grid=(4, i+1), hAlign='c')
       spectralWidthHzLabel = Label(self, text="Spectral Width (Hz) : ", grid=(5, 0), hAlign='r')
@@ -473,8 +488,11 @@ class PeakListsTab(QtGui.QWidget):
     #
     i=0
     for peakList in spectrum.peakLists:
-      label = Label(self, text=str(peakList.pid), grid=(i, 1))
+      label = Label(self, text=str(peakList.pid))
+      label.setAlignment(QtCore.Qt.AlignTop)
+      self.layout().addWidget(label, i, 1, QtCore.Qt.AlignTop)
       checkBox = CheckBox(self, grid=(i, 0), checked=True)
+      self.layout().addWidget(checkBox, i, 0, QtCore.Qt.AlignTop)
     #   # if spectrum.spectrumItem.peakListItems[peakList.pid].displayed == True:
     #   #   checkBox.setChecked(True)
     #   # else:

@@ -1190,7 +1190,7 @@ def getCcpCodes(chain):
 # 	refExpDimRefs = set([])
 #
 # 	for contrib in resonance.peakDimContribs:
-# 	  refExpDimRef = contrib.peakDim.dataDimRef.expDimRef.refExpDimRef
+# 	  refExpDimRef = contrib.peakDim.dataDim.primaryDataDimRef.expDimRef.refExpDimRef
 #   	  if refExpDimRef:
 # 	    refExpDimRefs.add(refExpDimRef)
 #

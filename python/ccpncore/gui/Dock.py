@@ -31,5 +31,11 @@ class CcpnDockLabel(DockLabel):
       super(CcpnDockLabel, self).__init__(showCloseButton=True, *args)
       self.setFont(Font(size=12, semiBold=True))
 
+    def mousePressEvent(self, ev):
+        if ev.button() == QtCore.Qt.LeftButton:
+            self.pressPos = ev.pos()
+            self.startedDrag = False
+            ev.accept()
+
 
 

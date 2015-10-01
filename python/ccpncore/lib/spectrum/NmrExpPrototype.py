@@ -77,7 +77,7 @@ def resetAllAxisCodes(nmrProject):
 
 
 def refExpDimRefCodeMap(project):
-  """get RefExpDimRef: axisCode map for all NmExpPrototypes in project"""
+  """get RefExpDimRef: axisCode map for all NmrExpPrototypes in project"""
   result = {}
 
   for nxp in project.sortedNmrExpPrototypes():

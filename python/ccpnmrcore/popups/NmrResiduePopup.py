@@ -59,10 +59,10 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     atomPossibilites = [' '.join([x[0][1], x[1]]) for x in atomPredictions]
     self.atomTypePulldown.setData(atomPossibilites)
 
-  def updatePopup(self):
-    if self.project._appBase.current.nmrResidue is not None:
-      currentNmrResidue = self.project._appBase.current.nmrResidue
-      if currentNmrResidue is not None:
+  def updatePopup(self, nmrResidue):
+
+      if self.current.nmrResidue is not None:
+        currentNmrResidue = self.current.nmrResidue
         self.nmrResidueLabel.setText("NMR Residue: %s" % currentNmrResidue.id)
         self.chainPulldown.setCurrentIndex(self.chainPulldown.findText(currentNmrResidue.nmrChain.pid))
         sequenceCode = "%s (%s)" % (currentNmrResidue.sequenceCode, currentNmrResidue.residueType)

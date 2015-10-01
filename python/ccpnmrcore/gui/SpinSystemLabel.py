@@ -34,8 +34,10 @@ class SpinSystemLabel(DropBase, Label):
     drag = QtGui.QDrag(self)
     drag.setMimeData(mimeData)
     if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
-      self.close()
+      print('closing')
+      # self.close()
     else:
+      print('showing')
       self.show()
 
   def processStrip(self, pid):
@@ -65,9 +67,7 @@ class SpinSystemLabel(DropBase, Label):
         current.strip = self.strip.guiSpectrumDisplay.strips[sinkIndex]
         current.nmrResidue = project.getByPid('NR:@.'+nmrResidue+'.')
       if hasattr(self._appBase.mainWindow, 'bbModule'):
-        print(nmrResidue, 'nmrResidue')
 
-        print(current.nmrResidue, 'current.nmrResidue')
         self._appBase.mainWindow.bbModule.navigateTo(current.nmrResidue, strip=current.strip)
         current.strip.planeToolbar.spinSystemLabel.setText(nmrResidue)
 

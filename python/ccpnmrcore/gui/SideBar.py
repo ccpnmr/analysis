@@ -222,27 +222,34 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       import json
 
       item = self.itemAt(event.pos())
-      itemData = json.dumps({'pids':[item.text(0)]})
-      event.mimeData().setData('ccpnmr-json', itemData)
-      event.mimeData().setText(itemData)
+      if item:
+        itemData = json.dumps({'pids':[item.text(0)]})
+        event.mimeData().setData('ccpnmr-json', itemData)
+        event.mimeData().setText(itemData)
 
 
   def dragMoveEvent(self, event):
     event.accept()
 
+  def addSpectrum(self, spectrum:(Spectrum,Pid)):
+
+    peakList = spectrum.newPeakList()
+    newItem = self.addItem(self.spectrumItem, spectrum)
+    peakListItem = QtGui.QTreeWidgetItem(newItem)
+    peakListItem.setText(0, peakList.pid)
 
   def processSpectrum(self, spectrum:(Spectrum,Pid), expTypes=None):
 
     spectrum = self.project.getByPid(spectrum)
-    peakList = spectrum.newPeakList()
 
-    if self._appBase.applicationName == 'Screen':
-      newItem = self.addItem(self.onedItem, spectrum)
-      peakListItem = QtGui.QTreeWidgetItem(newItem)
-      peakListItem.setText(0, peakList.pid)
 
-    else:
-      newItem = self.addItem(self.spectrumItem, spectrum)
-      peakListItem = QtGui.QTreeWidgetItem(newItem)
-      peakListItem.setText(0, peakList.pid)
+    # if self._appBase.applicationName == 'Screen':
+    #   newItem = self.addItem(self.onedItem, spectrum)
+    #   peakListItem = QtGui.QTreeWidgetItem(newItem)
+    #   peakListItem.setText(0, peakList.pid)
+    #
+    # else:
+    #   newItem = self.addItem(self.spectrumItem, spectrum)
+    #   peakListItem = QtGui.QTreeWidgetItem(newItem)
+    #   peakListItem.setText(0, peakList.pid)
 

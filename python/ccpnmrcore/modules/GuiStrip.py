@@ -383,6 +383,11 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   def mouseClicked(self, event):
     print(event)
 
+
+  def mousePressEvent(self, event):
+
+    print('event')
+
   def mouseMoved(self, positionPixel):
     # position is in pixels
 

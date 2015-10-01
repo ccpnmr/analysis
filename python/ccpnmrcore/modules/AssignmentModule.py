@@ -63,6 +63,7 @@ class AssignmentModule(CcpnDock, Base):
     self.selectionLayout.setRowMinimumHeight(0, 0)
     self.selectionLayout.setRowStretch(0, 0)
     self.selectionLayout.setRowStretch(1, 1)
+    self.current = self.project._appBase.current
     self.listWidgets = []
     self.objectTables = []
     self.labels = []
@@ -106,7 +107,7 @@ class AssignmentModule(CcpnDock, Base):
     # self.updateButton = Button(self, 'Update', callback=self.update)
     # self.filterLayout.addWidget(self.updateButton, 3, 0)
 
-    self.project._appBase.current.registerNotify(self.updateInterface, 'peaks')
+    self.current.registerNotify(self.updateInterface, 'peaks')
     self.updateInterface()
 
 
@@ -144,9 +145,9 @@ class AssignmentModule(CcpnDock, Base):
 
   def createEmptyWidgetLabel(self, dim):
 
-    positions = [peak.position[dim] for peak in self.peaks]
+    positions = [peak.position[dim] for peak in self.current.peaks]
     avgPos = round(sum(positions)/len(positions), 3)
-    axisCode = self.peaks[0].peakList.spectrum.axisCodes[dim]
+    axisCode = self.current.peak.peakList.spectrum.axisCodes[dim]
     text = axisCode + ' ' + str(avgPos)
     label = Label(self, text=text)
     label.setStyleSheet("border: 0px solid; color: #f7ffff;")
@@ -185,7 +186,7 @@ class AssignmentModule(CcpnDock, Base):
     nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
     nmrResidue = nmrChain.fetchNmrResidue(self.seqCodePulldowns[dim].currentText())
     nmrAtom = nmrResidue.fetchNmrAtom(self.atomTypePulldowns[dim].currentText())
-    for peak in self.peaks:
+    for peak in self.current.peaks:
       dimNmrAtoms = peak.dimensionNmrAtoms[dim]
       currentItem = self.listWidgets[dim].currentItem()
       currentObject = self.project.getByPid(currentItem.text())
@@ -251,7 +252,7 @@ class AssignmentModule(CcpnDock, Base):
 
     '''
 
-    Ndimensions = len(self.peaks[0].position)
+    Ndimensions = len(self.current.peak.position)
 
 
     # Create extra tables if needed.
@@ -309,9 +310,9 @@ class AssignmentModule(CcpnDock, Base):
        of which nmrAtoms fit to the peaks.
 
     '''
-    self.updatePeaks()
+    # self.updatePeaks()
     self.emptyAllTablesAndLists()
-    if not self.peaks or not self.peaksAreCompatible():
+    if not self.current.peaks or not self.peaksAreCompatible():
       return
     self.createEnoughTablesAndLists()
     self.updateTables()
@@ -321,12 +322,12 @@ class AssignmentModule(CcpnDock, Base):
 
   def updateWidgetLabels(self):
 
-    Ndimensions = len(self.peaks[0].position)
+    Ndimensions = len(self.current.peak.position)
 
     for dim, label in zip(range(Ndimensions), self.labels):
-      positions = [peak.position[dim] for peak in self.peaks]
+      positions = [peak.position[dim] for peak in self.current.peaks]
       avgPos = round(sum(positions)/len(positions), 3)
-      axisCode = self.peaks[0].peakList.spectrum.axisCodes[dim]
+      axisCode = self.current.peak.peakList.spectrum.axisCodes[dim]
       text = axisCode + ' ' + str(avgPos)
       label.setText(text)
       label.setStyleSheet("border: 0px solid; color: #f7ffff;")
@@ -338,12 +339,13 @@ class AssignmentModule(CcpnDock, Base):
 
     '''
 
-    peaks = self.peaks
+    peaks = self.current.peaks
     doubleTolerance = self.doubleToleranceCheckbox.isChecked()
     intraResidual = self.intraCheckbox.isChecked()
     nmrAtomsForTables = nmrAtomsForPeaks(peaks, self.project.nmrAtoms,
                                              doubleTolerance=doubleTolerance,
                                              intraResidual=intraResidual)
+    print(nmrAtomsForTables)
     Ndimensions = len(nmrAtomsForTables)
     for dim, objectTable, nmrAtoms in zip(range(Ndimensions),
                                           self.objectTables,
@@ -354,19 +356,6 @@ class AssignmentModule(CcpnDock, Base):
       else:
         objectTable.setObjects([NOL])
 
-
-  def updatePeaks(self, peaks=None):
-    '''If argument peaks is not given, the currently
-       selected peaks are returned. This method is mostly
-       necessary because when no peaks are selected,
-       self.project._appBase.current.peaks is None instead
-       of an empty list. Which would probably be handier.
-
-    '''
-    if not peaks:
-      self.peaks = self.project._appBase.current.peaks or []
-    else:
-      self.peaks = peaks
 
 
   def updateAssignedNmrAtomsListwidgets(self):
@@ -379,13 +368,13 @@ class AssignmentModule(CcpnDock, Base):
 
     '''
 
-    Ndimensions = len(self.peaks[0].position)
+    Ndimensions = len(self.current.peak.position)
     required_heights = [23]
 
-    if self.peaks:
+    if self.current.peaks:
       for dim, listWidget in zip(range(Ndimensions), self.listWidgets):
 
-        ll = [set(peak.dimensionNmrAtoms[dim]) for peak in self.peaks]
+        ll = [set(peak.dimensionNmrAtoms[dim]) for peak in self.current.peaks]
         self.nmrAtoms = list(sorted(set.intersection(*ll)))
         listWidget.addItems([str(a.pid) for a in self.nmrAtoms])
 
@@ -397,7 +386,7 @@ class AssignmentModule(CcpnDock, Base):
       index = self.listWidgets.index(listWidget)
       assignmentArray[index] = assignments
 
-    self.peaks[0].dimensionNmrAtoms = assignmentArray
+    self.current.peak.dimensionNmrAtoms = assignmentArray
 
   def updateLayout(self, layout, ndim):
 
@@ -435,7 +424,7 @@ class AssignmentModule(CcpnDock, Base):
     self.resTypePulldowns[dim].setData(residueTypes)
     self.resTypePulldowns[dim].setIndex(self.resTypePulldowns[dim].texts.index(residueType.upper()))
     # self.resTypePulldowns[dim].setCallback(partial(self.setResidueType))
-    atomPrefix = self.peaks[0].peakList.spectrum.isotopeCodes[dim][-1]
+    atomPrefix = self.current.peak.peakList.spectrum.isotopeCodes[dim][-1]
     atomNames = [atomName for atomName in ATOM_NAMES if atomName[0] == atomPrefix] + [nmrAtom.name]
     self.atomTypePulldowns[dim].setData(atomNames)
     self.atomTypePulldowns[dim].setIndex(self.atomTypePulldowns[dim].texts.index(nmrAtom.name))
@@ -491,15 +480,14 @@ class AssignmentModule(CcpnDock, Base):
     '''Calculation of delta shift to add to the table.
 
     '''
-    self.updatePeaks()
-    if not self.peaks:
+    if not self.current.peaks:
       return ''
 
     if nmrAtom is NEW or nmrAtom is NOL:
       return ''
 
     deltas = []
-    for peak in self.peaks:
+    for peak in self.current.peaks:
       shiftList = peak.peakList.chemicalShiftList
       # shiftList = getShiftlistForPeak(peak)
       if shiftList:
@@ -514,17 +502,14 @@ class AssignmentModule(CcpnDock, Base):
     '''Calculation of delta shift to add to the table.
 
     '''
-    self.updatePeaks()
-    if not self.peaks:
+    if not self.current.peaks:
       return ''
 
     if nmrAtom is NEW or nmrAtom is NOL:
       return ''
 
-    deltas = []
-    for peak in self.peaks:
+    for peak in self.current.peaks:
       shiftList = peak.peakList.chemicalShiftList
-      # shiftList = getShiftlistForPeak(peak)
       if shiftList:
         shift = shiftList.getChemicalShift(nmrAtom.id)
         if shift:
@@ -538,17 +523,17 @@ class AssignmentModule(CcpnDock, Base):
 
     '''
 
-    if len(self.peaks) == 1:
+    if len(self.current.peaks) == 1:
       return True
     if not self.multiCheckbox.isChecked():
       print('Multiple peaks selected, not allowed.')
       return False
-    dimensionalities = set([len(peak.position) for peak in self.peaks])
+    dimensionalities = set([len(peak.position) for peak in self.current.peaks])
     if len(dimensionalities) > 1:
       print('Not all peaks have the same number of dimensions.')
       return False
-    for dim in range(len(self.peaks[0].position)):
-      if not sameAxisCodes(self.peaks, dim):
+    for dim in range(len(self.current.peak.position)):
+      if not sameAxisCodes(self.current.peaks, dim):
         print('''The combination of axiscodes is different for multiple
                  selected peaks.''')
         return False
@@ -581,11 +566,11 @@ class AssignmentModule(CcpnDock, Base):
     if nmrAtom is NOL:
       return
     elif nmrAtom is NEW:
-      isotopeCode = self.peaks[0].peakList.spectrum.isotopeCodes[dim]
+      isotopeCode = self.current.peak.peakList.spectrum.isotopeCodes[dim]
       ###NBNB
       nmrAtom = self.project.newNmrChain().newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)
 
-    for peak in self.peaks:
+    for peak in self.current.peaks:
       # axisCode = getAxisCodeForPeakDimension(peak, dim)
 
       if nmrAtom not in peak.dimensionNmrAtoms[dim]:

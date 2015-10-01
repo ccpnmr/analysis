@@ -30,9 +30,7 @@ def interpretEvent(event):
   """
 
   mimeData = event.mimeData()
-  print('mimeData', mimeData.text())
   if mimeData.hasFormat(ccpnmrJsonData):
-    print(mimeData.text(), '1111')
     jsonData = json.loads(mimeData.text())
     pids = jsonData.get('pids')
 

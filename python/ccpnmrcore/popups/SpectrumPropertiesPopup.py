@@ -74,7 +74,6 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
 
     self.setWindowTitle("Spectrum Information")
     buttonBox = ButtonList(self, grid=(3, 1), callbacks=[self.accept, self.reject], texts=['OK', 'Cancel'])
-    print(buttonBox.parent())
 
     # buttonBox.accepted.connect(self.accept)
     # buttonBox.rejected.connect(self.reject)
@@ -153,13 +152,15 @@ class GeneralTab(QtGui.QWidget, Base):
     else:
       spectrumTypeLabel = Label(self, text="Spectrum Type: ", grid=(6, 0))
       self.spectrumType = PulldownList(self, grid=(6, 1))
-      self.axisCodes = ''.join(sorted(list(self.spectrum.axisCodes)))
-      try:
-        self.spectrumType.addItems(list(self.experimentTypes[spectrum.dimensionCount].get(self.axisCodes).keys()))
-      except:
-        pass
-      # spectrumType.addItems(SPECTRA)
-      print('spType',spectrum.experimentName)
+      axisCodes = []
+      for isotopeCode in spectrum.isotopeCodes:
+        axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
+
+
+      self.atomCodes = tuple(sorted(axisCodes))
+      self.spectrumType.addItems(list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys()))
+
+
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(spectrum.experimentName))
       self.spectrumType.currentIndexChanged.connect(self.changeSpectrumType)
       pulseProgramLabel = Label(self, text="Pulse Program: ", grid=(7, 0))
@@ -191,10 +192,8 @@ class GeneralTab(QtGui.QWidget, Base):
       self.spectrum.chemicalShiftList = self.spectrum.project.getByPid(item)
 
   def changeSpectrumType(self, value):
-    expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.axisCodes).get(self.spectrumType.currentText())
-    print('expType', self.spectrumType.currentText())
+    expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).get(self.spectrumType.currentText())
     self.spectrum.experimentType = expType
-    print(self.spectrum.experimentType)
 
   def getSpectrumFile(self):
     if os.path.exists('/'.join(self.pathData.text().split('/')[:-1])):

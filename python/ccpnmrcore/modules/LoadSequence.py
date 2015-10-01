@@ -46,7 +46,7 @@ class LoadSequence(QtGui.QDialog, Base):
     self.sequenceEditor.textChanged.connect(self.setSequence)
 
   def loadSequence(self):
-    self.project.makeSimpleChain(sequence=self.sequence, compoundName=self.moleculeName,
+    self.project.createSimpleChain(sequence=self.sequence, compoundName=self.moleculeName,
                                  startNumber=self.sequenceStart, shortName=self.chainCode,
                                  molType=self.molTypePulldown.currentText())
     self.accept()

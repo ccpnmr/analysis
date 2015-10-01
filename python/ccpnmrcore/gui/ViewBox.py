@@ -62,6 +62,8 @@ class ViewBox(pg.ViewBox):
 
   def mouseClickEvent(self, event, axis=None):
 
+    self.current.strip = self.parentObject().parent
+
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
 
       selectedPeaks = []
@@ -81,7 +83,7 @@ class ViewBox(pg.ViewBox):
       #         msg = 'self.current.peak = ' + peak.pid + '\n'
       #         selectedPeaks.append(peak)
       #         self.parent._appBase.mainWindow.pythonConsole.write(msg)
-
+      #
       # msg = 'self.current.peaks = ' + [peak.pid for peak in selectedPeaks]+ '\n'
       # self.parent._appBase.mainWindow.pythonConsole.write(msg)
 
@@ -134,12 +136,17 @@ class ViewBox(pg.ViewBox):
       event.accept()
       print('axis Context Menu')
     #
-    # elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ControlModifier):
-    #   position=self.mapSceneToView(event.buttonDownPos())
-    #   print(position)
-    #   # for spectrumView in self.current.strip.spectrumViews:
-    #   #     peakList = spectrumView.spectrum.peakLists[0]
-    #   #     peakList.newPeak(position=position)
+    elif event.button() == QtCore.Qt.LeftButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
+      mousePosition=self.mapSceneToView(event.pos())
+      position = [mousePosition.x(), mousePosition.y()]
+      for spectrumView in self.current.strip.spectrumViews:
+        peakList = spectrumView.spectrum.peakLists[0]
+        orderedAxes = self.current.strip.orderedAxes
+        if len(orderedAxes) > 2:
+          for n in orderedAxes[2:]:
+            position.append(n.position)
+        peakList.newPeak(position=position)
+        self.current.strip.showPeaks(peakList)
 
 
     elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
@@ -150,9 +157,9 @@ class ViewBox(pg.ViewBox):
     #   event.accept()
     #   print("Double Click event")
 
-  def hoverEvent(self, event):
-
-    self.current.strip = self.parentObject().parent
+  # def hoverEvent(self, event):
+  #
+  #   self.current.strip = self.parentObject().parent
 
 
   def updateSelectionBox(self, p1, p2):
@@ -165,6 +172,7 @@ class ViewBox(pg.ViewBox):
 
   def mouseDragEvent(self, event, axis=None):
 
+    self.current.strip = self.parentObject().parent
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
       pg.ViewBox.mouseDragEvent(self, event)
 
@@ -212,7 +220,8 @@ class ViewBox(pg.ViewBox):
             apiSpectrumView = spectrumView._wrappedData
             newPeaks = peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
-                                            doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
+                                            doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
+                                            fitMethod=0)
           else:
             newPeaks = peakList.pickPeaks1dFiltered(spectrumView)
 

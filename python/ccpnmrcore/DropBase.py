@@ -52,7 +52,7 @@ class DropBase(GuiBase):
     from ccpnmrcore.util import Qt as qtUtil
 
     event.accept()
-    print(event)
+    # print(event)
 
     data, dataType  = qtUtil.interpretEvent(event)
 
@@ -131,6 +131,10 @@ class DropBase(GuiBase):
           ll = project.loadData(url)
           if ll:
             pids.extend(x.pid for x in ll)
+        for pid in pids:
+          if 'SP:' in pid:
+            spectrum = self.getByPid(pid)
+            self._appBase.mainWindow.sideBar.addSpectrum(spectrum)
 
       else:
         raise ValueError("processDropData does not recognise dataType %s" % dataType)
@@ -141,12 +145,6 @@ class DropBase(GuiBase):
         method = self.selectDispatchFunction('process', pid)
         if method:
           method(pid)
-
-      # for pid in pids:
-      #   if 'SP:' in pid:
-      #     spectrum = self.getByPid(pid)
-      #     self._appBase.mainWindow.sideBar.addSpectrum(spectrum)
-
 
 
 
@@ -176,7 +174,7 @@ class DropBase(GuiBase):
     funcName = prefix + ss
 
     if hasattr(self, funcName):
-      print(funcName)
+      # print(funcName)
       return getattr(self, funcName)
     else:
 

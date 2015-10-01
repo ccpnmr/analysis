@@ -737,7 +737,7 @@ class Spectrum(AbstractWrapperObject):
   @aliasingLimits.setter
   def aliasingLimits(self, value:tuple):
     if len(value) != self.dimensionCount:
-      raise ValueError("length of alisingLimits must match spectrum dimension, was %s" % value)
+      raise ValueError("length of aliasingLimits must match spectrum dimension, was %s" % value)
 
     expDimRefs = self._mainExpDimRefs()
     for ii,tt in enumerate(value):

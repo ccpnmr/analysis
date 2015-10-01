@@ -88,7 +88,7 @@ def loadSequence(project:"Project", path:str, subType:str) -> list:
 
   chains = []
   for sequence in sequences:
-    chains.append(project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+    chains.append(project.createSimpleChain(sequence=sequence[1], compoundName=sequence[0],
                                           molType='protein'))
   #
   return chains

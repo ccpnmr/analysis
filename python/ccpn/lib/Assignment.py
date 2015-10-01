@@ -183,6 +183,7 @@ def copyAssignments(referencePeakList, matchPeakList):
   matchAxisCodes = matchPeakList.spectrum.axisCodes
 
   mappingArray = spectrumLib._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
+  print(mappingArray)
 
   for peak in matchPeakList.peaks:
     matchArray = []
@@ -276,7 +277,7 @@ def propagateAssignments(peaks=None, referencePeak=None, current=None, tolerance
             if abs(sValue-pValue) <= tolerance:
               closeNmrAtoms.append(nmrAtom)
 
-      # print(closeNmrAtoms)
+      print(closeNmrAtoms)
       if closeNmrAtoms:
         for nmrAtom in closeNmrAtoms:
           peak.assignDimension(axisCode, nmrAtom)

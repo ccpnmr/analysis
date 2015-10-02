@@ -23,13 +23,42 @@ __version__ = "$Revision$"
 #=========================================================================================
 from ccpn.testing.WrapperTesting import WrapperTesting
 
-class NmrResidueTest(WrapperTesting):
+class NmrAtomTest(WrapperTesting):
 
   # Path of project to load (None for new project
   projectPath = 'CcpnCourse2c'
 
-  def test_reassign_attributes(self):
+  def test_reassign1(self):
+
     nchain = self.project.getByPid('NC:A')
+
+    arg11 = self.project.getByPid('NR:A.11.ARG')
+    atomN = arg11.fetchNmrAtom('N')
+    self.assertEqual(atomN.pid, 'NA:A.11.ARG.N')
+
+    atomNE = self.project.produceNmrAtom('NA:A.11.ARG.NE')
+    atomNE2 = self.project.produceNmrAtom(chainCode='A', sequenceCode='11', name='NE')
+    self.assertIs(atomNE, atomNE2)
+
+    atomCX = self.project.produceNmrAtom('NA:A.11.ARG.CX')
+    atomNX = arg11.newNmrAtom(name='NX')
+    with self.assertRaises(ValueError):
+      atomCX.rename('NX')
+
+    atomCX.rename('CZ')
+    self.assertEqual(atomCX.pid, 'NA:A.11.ARG.CZ')
+
+    atomCX.reassigned(chainCode='A', sequenceCode='888')
+    print('@~@~', atomCX.pid)
+    # self.assertEqual(atomCX.pid, 'NA:A.12.GLU.CZ')
+
+    atomCX.reassigned()
+    print('@~@~', atomCX.pid)
+
+
+    with self.assertRaises(ValueError):
+      atomCX = self.project.produceNmrAtom('NA:A.11.VAL.CX')
+
     nchain0 = self.project.getByPid('NC:@')
     nr1, nr2 = nchain.nmrResidues[:2]
     res1 = nr1.residue
@@ -44,7 +73,7 @@ class NmrResidueTest(WrapperTesting):
     nr2.sequenceCode = '2'
     self.assertEqual(nr2.longPid, "NmrResidue:A.2.LYS")
     newNr = nchain0.newNmrResidue()
-    self.assertEqual(newNr.longPid, "NmrResidue:@.@89.")
+    self.assertEqual(newNr.longPid, "NmrResidue:@.@90.")
     nr3.nmrChain = nchain0
     self.assertEqual(nr3.longPid, "NmrResidue:@.3.GLU")
     newNr.residue = res3
@@ -55,55 +84,22 @@ class NmrResidueTest(WrapperTesting):
     nr2.sequenceCode = None
     self.assertEqual(nr2.longPid, "NmrResidue:X.@2.ARG")
 
-  def test_rename(self):
-    nchain = self.project.getByPid('NC:A')
-    nr1, nr2 = nchain.nmrResidues[:2]
-    self.assertEqual(nr1.id, "A.10.TYR")
-    nr1.rename()
-    self.assertEqual(nr1.id, "A.@1.")
-    nr1.rename('999')
-    self.assertEqual(nr1.id, "A.999.")
-    nr1.rename('999.ALA')
-    self.assertEqual(nr1.id, "A.999.ALA")
-    nr1.rename('998.VAL')
-    self.assertEqual(nr1.id, "A.998.VAL")
-    nr1.rename('.TYR')
-    self.assertEqual(nr1.id, "A.@1.TYR")
-    nr1.rename('997')
-    self.assertEqual(nr1.id, "A.997.")
+  def test_produce_reassign(self):
+    at0 = self.project.produceNmrAtom(name='HX')
+    self.assertEqual(at0.id,'@1.@89..HX')
+    at1 = self.project.produceNmrAtom('X.101.VAL.N')
+    self.assertEqual(at1.id,'X.101.VAL.N')
+    at1 = at1.reassigned(name='NE')
+    self.assertEqual(at1.id,'X.101.VAL.NE')
+    at0 = at0.reassigned(sequenceCode=101)
+    self.assertEqual(at0.id,'@1.101..HX')
 
-  def test_reassign(self):
-    nchain = self.project.getByPid('NC:A')
-    nr1, nr2 = nchain.nmrResidues[:2]
-    self.assertEqual(nr1.id, "A.10.TYR")
-    nr1 = nr1.reassigned('A.999')
-    self.assertEqual(nr1.id, "A.999.")
-    nr1 = nr1.reassigned()
-    # This is a no-op
-    self.assertEqual(nr1.id, "A.999.")
-
-    with self.assertRaises(ValueError):
-      nr2 = nr2.reassigned(sequenceCode=15)
-
-    nr2 = nr2.reassigned(sequenceCode=515, residueType='XXX')
-    self.assertEqual(nr2.id, 'A.515.XXX')
-    obj = nchain.newNmrResidue(sequenceCode=777)
-    self.assertEqual(obj.id, 'A.777.')
-
-    self.assertTrue(len(nr1.nmrAtoms) == 2)
-    nrx = nr2.reassigned(nr1.id)
-    self.assertIs(nrx, nr1)
-    self.assertTrue(nr2._apiResonanceGroup.isDeleted)
-    self.assertTrue(len(nr1.nmrAtoms) == 4)
-
-
-  def test_fetchNmrResidue(self):
+    
+  def test_fetchNmrAtom(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
     res1 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
     res2 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
     self.assertIs(res1, res2)
-    obj = nmrChain.fetchNmrResidue(sequenceCode=515)
-    print('@~@~', obj)
 
   def test_fetchEmptyNmrResidue(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')

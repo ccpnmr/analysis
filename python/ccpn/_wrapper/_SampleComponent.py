@@ -54,8 +54,7 @@ class SampleComponent(AbstractWrapperObject):
   def _key(self) -> str:
     """id string - name.labeling"""
     obj =  self._wrappedData
-    return Pid.IDSEP.join(getattr(obj,tag).translate(Pid.remapSeparators)
-                          for tag in ('name', 'labeling'))
+    return Pid.createId(getattr(obj,tag) for tag in ('name', 'labeling'))
 
   @property
   def name(self) -> str:

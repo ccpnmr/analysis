@@ -29,6 +29,8 @@ from ccpn import NmrChain
 from ccpn import Residue
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 
+from ccpncore.util.Types import Union
+
 
 class NmrResidue(AbstractWrapperObject):
   """Nmr Residue, for assignment."""
@@ -169,82 +171,101 @@ class NmrResidue(AbstractWrapperObject):
 
   # Implementation functions
   def rename(self, value:str=None):
-    """Rename NmrResidue. New value must be either 'seqCode' or 'seqCode.residueType"""
+    """Rename NmrResidue. 'None' deassigns; partly set names ('.xyz' ir 'xyz.' partly deassign"""
     apiResonanceGroup = self._wrappedData
     if value is None:
       apiResonanceGroup.sequenceCode = None
       apiResonanceGroup.residueType = None
     else:
       ll = value.split(Pid.IDSEP, 1)
-      apiResonanceGroup.sequenceCode =  ll[0]
+      apiResonanceGroup.sequenceCode =  ll[0] or None
       if len(ll) > 1:
-        apiResonanceGroup.residueType = ll[1]
+        apiResonanceGroup.residueType = ll[1] or None
+      else:
+        apiResonanceGroup.residueType = None
 
-  def reassign(self, residueId:str=None, chainCode:str=None, sequenceCode:str=None,
+  def reassigned(self, residueId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, objectMergeAllowed=True) -> 'NmrResidue':
-    """Reassign NmrResidue to NmrResidue given by residueId or other parameters.
-    The current id is kept for parts that are not overwritten.
-    If the nmrResidue being reassigned to exists and merging is allowed,
-    the two will be merged.
+    """Get NmrResidue reassigned according to residueId or other parameters.
+    Result may be self changed in place or a copy (with self delted), so ALWAYS use the return value.
+    Setting residueId deassigns empty fields,
+    while empty parameters (e.g. chainCode=None) cause no change.
+    If the nmrResidue being reassigned to exists and merging is allowed, the two will be merged.
     NB Merging is NOT undoable
     """
+
     clearUndo = False
     undo = self._apiResonanceGroup.root._undo
 
-    # Get ID parts to reassign to
-    idParts = self.id.split(Pid.IDSEP)
-    params = [chainCode, sequenceCode, residueType]
+    sequenceCode = str(sequenceCode) if sequenceCode else None
+
+    apiResonanceGroup = self._apiResonanceGroup
+
     if residueId:
-      if any(params):
-        raise ValueError("produceNmrAtom: other parameters only allowed if atomId is None")
+      if any((chainCode, sequenceCode, residueType)):
+        raise ValueError("reassigned: assignment parameters only allowed if residueId is None")
       else:
-        for ii,val in enumerate(residueId.split(Pid.IDSEP)):
-          if val:
-            idParts[ii] = val
+        # Remove colon prefix, if any, and set parameters
+        residueId = residueId.split(Pid.PREFIXSEP,1)[-1]
+        # NB trick with setting ll first required
+        # because the pssed-in Pid may not ahve all three components
+        ll = [None, None, None]
+        for ii,val in enumerate(Pid.splitId(residueId)):
+          ll[ii] = val
+        chainCode, sequenceCode, residueType = ll
+        if chainCode is None:
+          raise ValueError("chainCode part of residueId cannot be empty'")
+
     else:
-      for ii,val in enumerate(params):
-        if val:
-          idParts[ii] = val
+      # set missing parameters to existing values
+      chainCode = chainCode or apiResonanceGroup.nmrChain.code
+      sequenceCode = sequenceCode or apiResonanceGroup.sequenceCode
+      residueType = residueType or apiResonanceGroup.residueType
 
-    # check for existing target and reassign
-    nmrChain = self._project.fetchNmrChain(chainCode)
-    newResonanceGroup = nmrChain._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
+    newNmrChain = self._project.fetchNmrChain(chainCode)
+    newApiResonanceGroup = newNmrChain._wrappedData.findFirstResonanceGroup(
+      sequenceCode=sequenceCode)
 
-    if newResonanceGroup is self._wrappedData:
+    if newApiResonanceGroup is apiResonanceGroup:
       # We are reassigning to self - either a no-op or resetting the residueType
       result = self
-      if newResonanceGroup.residueType != residueType:
-        newResonanceGroup.residueType = residueType
+      if residueType and apiResonanceGroup.residueType != residueType:
+        apiResonanceGroup.residueType = residueType
 
-    elif newResonanceGroup:
-      result = self._project._data2Obj[newResonanceGroup]
+    elif newApiResonanceGroup is None:
+      # we are moving to new, free assignment
+      result = self
+      apiResonanceGroup.nmrChain = newNmrChain._apiNmrChain
+      apiResonanceGroup.sequenceCode = sequenceCode
+      apiResonanceGroup.residueType = residueType
+
+    else:
+      #We are assigning to an existing NmrResidue
+      result = self._project._data2Obj[newApiResonanceGroup]
       if not objectMergeAllowed:
         raise ValueError("New assignment clash with existing assignment,"
                          " and merging is disallowed")
-      # We are reassigning to existing NmrResidue
+
       # Move or merge the NmrAtoms across and delete the current NmrResidue
-      if not residueType or newResonanceGroup.residueType == residueType:
+      if newApiResonanceGroup.residueType == residueType:
         for resonance in self._wrappedData.resonances:
-          newResonance = newResonanceGroup.findFirstResonance(implName=resonance.name)
+          newResonance = newApiResonanceGroup.findFirstResonance(implName=resonance.name)
           if newResonance is None:
-            resonance.resonanceGroup = newResonanceGroup
+            resonance.resonanceGroup = newApiResonanceGroup
           else:
             # WARNING. This step is NOT undoable, and clears the undo stack
             clearUndo = True
-            newResonance.absorbResonance(self.resonance)
+            newResonance.absorbResonance(resonance)
+
+        apiResonanceGroup.delete()
 
       else:
         # We cannot reassign if it involves changing residueType on an existing NmrResidue
         raise ValueError("Cannot assign to %s.%s.%s: NR:%s.%s.%s already exists"
         % (chainCode, sequenceCode, residueType,
-           chainCode, sequenceCode, newResonanceGroup.residueType))
-
-    else:
-      # We are moving to new chain
-      result = self
-      self.nmrChain = nmrChain
+           chainCode, sequenceCode, newApiResonanceGroup.residueType))
     #
-    if clearUndo:
+    if undo is not None and clearUndo:
       undo.clear()
     #
     return result
@@ -303,8 +324,9 @@ Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue
 del getter
 del setter
     
-def newNmrResidue(self:NmrChain, residueType:str=None, sequenceCode:str=None, comment:str=None) -> NmrResidue:
+def newNmrResidue(self:NmrChain, residueType:str=None, sequenceCode:Union[int,str]=None, comment:str=None) -> NmrResidue:
   """Create new child NmrResidue"""
+  sequenceCode = str(sequenceCode) if sequenceCode else None
   apiNmrChain = self._wrappedData
   nmrProject = apiNmrChain.nmrProject
   obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=residueType, details=comment,
@@ -312,8 +334,9 @@ def newNmrResidue(self:NmrChain, residueType:str=None, sequenceCode:str=None, co
   return self._project._data2Obj.get(obj)
 
 
-def fetchNmrResidue(self:NmrChain, sequenceCode:str=None, residueType:str=None) -> NmrResidue:
+def fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:str=None) -> NmrResidue:
   """Fetch NmrResidue with residueType=residueType, creating it if necessary"""
+  sequenceCode = str(sequenceCode) if sequenceCode else None
   apiResonanceGroup = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
   if apiResonanceGroup:
     if residueType is not None and residueType != apiResonanceGroup.residueType:

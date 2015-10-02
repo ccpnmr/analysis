@@ -24,6 +24,9 @@ __version__ = "$Revision: 8180 $"
 """
 Version 2/3 Pid routines
 """
+
+from ccpncore.util.Types import List, Optional, Tuple
+
 try:
   from cing import __version__
 except ImportError:
@@ -38,7 +41,7 @@ altCharacter = '^'
 remapSeparators = str.maketrans(IDSEP,altCharacter)
 unmapSeparators = str.maketrans(altCharacter, IDSEP)
 
-def createPid(head, *args):
+def createPid(head:str, *args:str) -> 'Pid':
   """make pid from head and list of successive keys.
   Head may be an existing pid, or a naked string
   Keys are converted to string, and illegal characters are converted to altCharacter
@@ -56,22 +59,22 @@ def createPid(head, *args):
   #
   return Pid(sep.join((head, IDSEP.join(ll))))
 
-def createId(*args):
+def createId(*args:str) -> str:
   """make id from list of successive keys.
   Keys are converted to string, and illegal characters are converted to altCharacter"""
 
   # map args to corrected strings
   return IDSEP.join(str(val).translate(remapSeparators) for val in args)
 
-def splitId(idString):
+def splitId(idString) -> List[str]:
   """Split idString into tuple of component elements,
   mapping altCharacter back to separator and replacing empty strings with None"""
 
   # map args to corrected strings
-  return tuple((val.translate(unmapSeparators) or None) for val in idString.split(IDSEP))
+  return list((val.translate(unmapSeparators) or None) for val in idString.split(IDSEP))
 
 
-def decodePid(sourceObject, thePid):
+def decodePid(sourceObject, thePid:'Pid') -> 'Optional[Pid]':
     """
     try to decode thePid relative to sourceObject
     return decoded pid object or None on not found or Error
@@ -215,7 +218,7 @@ class Pid(str):
         MO = 'Molecule'
     )
 
-    def __init__(self, string, **kw):
+    def __init__(self, string:str, **kw):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
         Additional arguments are converted to string with disallowed characters changed to altCharacter"""
         super().__init__(**kw)
@@ -229,7 +232,7 @@ class Pid(str):
         self._version = 'cing:%s' % __version__
 
     @property
-    def type(self):
+    def type(self) -> str:
         """
         return type part of pid
         """
@@ -242,7 +245,7 @@ class Pid(str):
         return self.split(PREFIXSEP,1)[0]
     
     @property
-    def id(self):
+    def id(self) -> str:
         """
         return id part of pid
         """
@@ -257,12 +260,12 @@ class Pid(str):
     #end def
 
     @property
-    def fields(self) -> tuple:
+    def fields(self) -> Tuple[str, ...]:
       """id part of pid as a tuple of fields"""
       return tuple(self._split()[1:])
 
     @staticmethod
-    def isValid(text):
+    def isValid(text:str) -> bool:
         # tests here
         # if self.find(PREFIXSEP) < 0:
         #     return False
@@ -360,7 +363,7 @@ class Pid(str):
     #end def
 
     @staticmethod
-    def new( *args ):
+    def new( *args:object) -> 'Pid':
         """
         Return Pid object from arguments
         Apply str() on all arguments
@@ -377,7 +380,7 @@ class Pid(str):
     #end def
 
     @staticmethod
-    def _join(*args):
+    def _join(*args:str) -> str:
         """Join args using the rules for constructing a pid
         """
         # if len(args) >= 2:
@@ -399,7 +402,7 @@ class Pid(str):
 
     #end def
 
-    def modify(self, index, newId, type=None):
+    def modify(self, index:int, newId:object, type:str=None) -> 'Pid':
         """
         Return new pid with position index modified by newId
         """
@@ -431,11 +434,11 @@ class Pid(str):
 
     #end def
 
-    def extend(self, *args):
+    def extend(self, *args:object):
       """Make copy with additional fields """
       return self._join(self._split() + [str(x) for x in args])
 
-    def increment(self, index, value):
+    def increment(self, index:str, value:int) -> 'Pid':
         """Return new pid with position index incremented by value
         Assumes integer valued id at position index
         """
@@ -447,7 +450,7 @@ class Pid(str):
         return Pid.new(*parts)
     #end def
 
-    def decrement(self, index, value):
+    def decrement(self, index:int, value:int) -> 'Pid':
         """Return new pid with position index decremented by value
         Assumes integer valued id at position index
         """
@@ -457,7 +460,7 @@ class Pid(str):
         return self.increment(index, -value)
     #end def
     
-    def clone(self):
+    def clone(self) -> 'Pid':
         """Return copy of pid
         """
         # Use Pid.new to pass it by any 'translater/checking routine'

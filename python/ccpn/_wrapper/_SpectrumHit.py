@@ -58,8 +58,7 @@ class SpectrumHit(AbstractWrapperObject):
     """object identifier, used for id"""
 
     obj =  self._wrappedData
-    return Pid.IDSEP.join((obj.substanceName.translate(Pid.remapSeparators),
-                           str(obj.sampledDimension), str(obj.sampledPoint)))
+    return Pid.createId((obj.substanceName, str(obj.sampledDimension), str(obj.sampledPoint)))
   @property
   def _parent(self) -> Spectrum:
     """Spectrum containing spectrumReference."""

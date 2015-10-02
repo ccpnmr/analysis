@@ -200,8 +200,9 @@ def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
   nmrProject = self._apiNmrProject
   apiNmrChain = nmrProject.findFirstNmrChain(code=shortName)
   if apiNmrChain is None:
-    apiNmrChain = nmrProject.newNmrChain(code=shortName)
-  return self._data2Obj.get(apiNmrChain)
+    return self._project.newNmrChain(shortName=shortName)
+  else:
+    return self._data2Obj.get(apiNmrChain)
 
   
 # Clean-up

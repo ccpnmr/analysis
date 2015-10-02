@@ -30,6 +30,7 @@ from ccpn import Atom
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 from ccpncore.util import Pid
+from ccpncore.util.Types import Union
 
 
 class NmrAtom(AbstractWrapperObject):
@@ -106,70 +107,97 @@ class NmrAtom(AbstractWrapperObject):
 
     self.name = value
 
-  def reassign(self, atomId:str=None, chainCode:str=None, sequenceCode:str=None,
+  def reassigned(self, atomId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, name:str=None, mergeToExisting=True) -> 'NmrAtom':
-    """Reassign NmrAtom to NmrAtom given by atomId or other parameters.
-    The current id is kept for parts that are not overwritten.
-    If the NmrAtom being reassigned to exists, and merging is allowed, the two will be merged.
+    """Get NmrAtom reassigned according to residueId or other parameters.
+    Result may be self changed in place or a copy (with self deleted), so ALWAYS use the return value.
+    Setting atomId deassigns empty fields,
+    while empty parameters (e.g. chainCode=None) cause no change.
+    If the nmrAtom being reassigned to exists and merging is allowed, the two will be merged.
     NB Merging is NOT undoable
     """
     clearUndo = False
     undo = self._apiResonance.root._undo
+    apiResonance = self._apiResonance
+    apiResonanceGroup = apiResonance.resonanceGroup
+    sequenceCode = str(sequenceCode) if sequenceCode else None
 
-    # Get ID parts to reassign to
-    idParts = self.id.split(Pid.IDSEP)
-    params = [chainCode, sequenceCode, residueType, name]
     if atomId:
-      if any(params):
-        raise ValueError("produceNmrAtom: other parameters only allowed if atomId is None")
+      if any((chainCode, sequenceCode, residueType, name)):
+        raise ValueError("reassigned: assignment parameters only allowed if atomId is None")
       else:
-        for ii,val in enumerate(atomId.split(Pid.IDSEP)):
-          if val:
-            idParts[ii] = val
+        # Remove colon prefix, if any, and set parameters
+        atomId = atomId.split(Pid.PREFIXSEP,1)[-1]
+        # NB trick with setting ll first required
+        # because the pssed-in Pid may not ahve all three components
+        ll = [None, None, None, None]
+        for ii,val in enumerate(Pid.splitId(atomId)):
+          ll[ii] = val
+        chainCode, sequenceCode, residueType, name = ll
+        if chainCode is None:
+          raise ValueError("chainCode part of residueId cannot be empty'")
+
     else:
-      for ii,val in enumerate(params):
-        if val:
-          idParts[ii] = val
+      # set missing parameters to existing values
+      chainCode = chainCode or apiResonanceGroup.nmrChain.code
+      sequenceCode = sequenceCode or apiResonanceGroup.sequenceCode
+      residueType = residueType or apiResonanceGroup.residueType
+      name = name or apiResonance.name
 
     oldNmrResidue = self.nmrResidue
     nmrChain = self._project.fetchNmrChain(chainCode)
-    nmrResidue = nmrChain.fetchNmrResidue(sequenceCode, residueType)
-    result = self
+    if residueType:
+      nmrResidue = nmrChain.fetchNmrResidue(sequenceCode, residueType)
+    else:
+      nmrResidue = nmrChain.fetchNmrResidue(sequenceCode)
+
+    if name:
+      # result is matching NmrAtom, or (if None) self
+      result = nmrResidue.getNmrAtom(name) or self
+    else:
+      # No NmrAtom can match, result is self
+      result = self
 
     if nmrResidue is oldNmrResidue:
       if name != self.name:
-        if name:
-          newNmrAtom = nmrResidue.getNmrAtom(name)
-          if newNmrAtom is None:
-            self.rename(name)
-          else:
-            if mergeToExisting:
-              newNmrAtom._wrappedData.absorbResonance(self._apiResonance)
-              result = newNmrAtom()
-            else:
-              raise ValueError("New assignment clash with existing assignment,"
-                               " and merging is disallowed")
+
+        if result is self:
+          # NB self.name can never be None
+          self.rename(name or None)
+
+        elif mergeToExisting:
+          clearUndo = True
+          result._wrappedData.absorbResonance(self._apiResonance)
+
         else:
-          self.name = None
+          raise ValueError("New assignment clash with existing assignment,"
+                           " and merging is disallowed")
 
     else:
-      if name:
-        newNmrAtom = nmrResidue.getNmrAtom(name)
-        if newNmrAtom is None:
+      if result is self:
+        if nmrResidue.getNmrAtom(self.name) is None:
           self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
-
+          if name != self.name:
+            self.rename(name or None)
+        elif name is None or oldNmrResidue.getNmrAtom(name) is None:
+          if name != self.name:
+            self.rename(name or None)
+          self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
         else:
-          # WARNING if we get here undo is no longer possible
-          if mergeToExisting:
-            newNmrAtom._wrappedData.absorbResonance(self._apiResonance)
-            result = newNmrAtom()
-          else:
-            raise ValueError("New assignment clash with existing assignment,"
-                             " and merging is disallowed")
+          self.name = None  # Necessary to avoid name clashes
+          self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
+          self.name = name
+
+      elif mergeToExisting:
+        # WARNING if we get here undo is no longer possible
+        clearUndo = True
+        result._wrappedData.absorbResonance(self._apiResonance)
+
       else:
-        self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
+        raise ValueError("New assignment clash with existing assignment,"
+                         " and merging is disallowed")
     #
-    if clearUndo:
+    if undo is not None and clearUndo:
       undo.clear()
     #
     return result
@@ -224,21 +252,28 @@ def fetchNmrAtom(self:NmrResidue, name:str):
   return (self._project._data2Obj.get(resonanceGroup.findFirstResonance(name=name)) or
           self.newNmrAtom(name=name))
 
-def produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None, sequenceCode:str=None,
+def produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
+                   sequenceCode:Union[int,str]=None,
                    residueType:str=None, name:str=None) -> NmrAtom:
-  """get chainCode, sequenceCode, residueType and atomName frm dot-separated  atomId
+  """get chainCode, sequenceCode, residueType and atomName from dot-separated  atomId or Pid
   or explicit parameters, and find or create an NmrAtom that matches """
 
   # Get ID parts to use
-  idParts = [chainCode, sequenceCode, residueType, name]
+  sequenceCode = str(sequenceCode) if sequenceCode else None
+  params = [chainCode, sequenceCode, residueType, name]
   if atomId:
-    if any(idParts):
+    if any(params):
       raise ValueError("produceNmrAtom: other parameters only allowed if atomId is None")
     else:
-      # NB, at this point id
-      for ii,val in atomId.split(Pid.IDSEP):
+      # Remove colon prefix, if any
+      atomId = atomId.split(Pid.PREFIXSEP,1)[-1]
+      for ii,val in enumerate(Pid.splitId(atomId)):
         if val:
-          idParts[ii] = val
+          params[ii] = val
+      chainCode, sequenceCode, residueType, name = params
+
+  if name is None:
+    raise ValueError("NmrAtom name must be set")
 
   # Produce chain
   nmrChain = self.fetchNmrChain(shortName=chainCode)
@@ -252,6 +287,8 @@ NmrResidue._childClasses.append(NmrAtom)
 
 NmrResidue.newNmrAtom = newNmrAtom
 NmrResidue.fetchNmrAtom = fetchNmrAtom
+
+Project.produceNmrAtom = produceNmrAtom
 
 # Notifiers:
 className = ApiResonance._metaclass.qualifiedName()

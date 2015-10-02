@@ -89,7 +89,6 @@ def getNmrResiduePrediction(nmrResidue, chemicalShiftList, prior=0.05):
   spinSystem = nmrResidue._wrappedData
   for code in CCP_CODES:
     predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList._wrappedData, code, prior=prior))
-  print(predictions)
   tot = sum(predictions.values())
   refinedPredictions = {}
   for code in CCP_CODES:
@@ -183,7 +182,6 @@ def copyAssignments(referencePeakList, matchPeakList):
   matchAxisCodes = matchPeakList.spectrum.axisCodes
 
   mappingArray = spectrumLib._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
-  print(mappingArray)
 
   for peak in matchPeakList.peaks:
     matchArray = []
@@ -234,7 +232,15 @@ def propagateAssignments(peaks=None, referencePeak=None, current=None, tolerance
 
 
   shiftRanges = {}
-
+  spectrum = peak.peakList.spectrum
+  assignmentTolerances = list(spectrum.assignmentTolerances)
+  for tol in assignmentTolerances:
+    if tol is None:
+      index = assignmentTolerances.index(tol)
+      tolerance = spectrum.spectralWidths[index]/spectrum.pointCounts[index]
+      spectrumTolerances = list(spectrum.assignmentTolerances)
+      spectrumTolerances[index] =  tolerance
+      spectrum.assignmentTolerances = spectrumTolerances
   for peak in peaksIn:
     for i, axisCode in enumerate(peak.peakList.spectrum.axisCodes):
 
@@ -277,7 +283,6 @@ def propagateAssignments(peaks=None, referencePeak=None, current=None, tolerance
             if abs(sValue-pValue) <= tolerance:
               closeNmrAtoms.append(nmrAtom)
 
-      print(closeNmrAtoms)
       if closeNmrAtoms:
         for nmrAtom in closeNmrAtoms:
           peak.assignDimension(axisCode, nmrAtom)

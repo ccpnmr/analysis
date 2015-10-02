@@ -67,6 +67,7 @@ class Assigner(CcpnDock):
     for item in self.scene.items():
       self.scene.removeItem(item)
       self.residueCount = 0
+      self.predictedStretch = []
 
 
 
@@ -145,7 +146,6 @@ class Assigner(CcpnDock):
             cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
                                    nmrResidue.fetchNmrAtom(name='CB'))
           else:
-            # cbAtom2 = None
             cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
           if 'N' in nmrAtoms:
             nAtom2 = self.addAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()),
@@ -190,7 +190,7 @@ class Assigner(CcpnDock):
             cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
                                    nmrResidue.fetchNmrAtom(name='CB'))
           else:
-            self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
+            cbAtom2 = None
           if 'CO' in nmrAtoms:
             coAtom2 = self.addAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()),
                                    nmrResidue.fetchNmrAtom(name='CO'))
@@ -234,7 +234,6 @@ class Assigner(CcpnDock):
 
     for possibleMatch in possibleMatches:
       if possibleMatch[0] > 1:
-        print(possibleMatch)
 
         if hasattr(self.project._appBase.mainWindow, 'sequenceWidget'):
           self.project._appBase.mainWindow.sequenceWidget.highlightPossibleStretches(possibleMatch[1])
@@ -261,7 +260,6 @@ class Assigner(CcpnDock):
 
 
         assignedAtoms = list(set(assignedAtoms1))
-        print(spectrum, assignedAtoms)
         if 'H' and 'N' in assignedAtoms:
           displacement = min(residue['H'].connectedAtoms, residue['N'].connectedAtoms)
           if displacement % 2 == 0:
@@ -453,7 +451,6 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
   def mouseMoveEvent(self, event):
 
     if (event.buttons() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
-        print("Left click drag")
         aDict = {}
         for item in self.parent.scene.items():
           if isinstance(item, GuiNmrResidue) and item.isSelected():
@@ -482,7 +479,6 @@ class AssignmentLine(QtGui.QGraphicsLineItem):
     if style and style == 'dash':
       self.pen.setStyle(QtCore.Qt.DotLine)
     self.setPen(self.pen)
-    print(style)
 
     self.setLine(x1, y1, x2, y2)
 

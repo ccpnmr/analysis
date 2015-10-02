@@ -125,7 +125,6 @@ class AtomSelector(CcpnDock):
 
   def predictAssignments(self, peaks):
 
-    print('peaks in AtomSelector', peaks)
     self.returnButtonToNormal()
 
 

@@ -252,7 +252,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
     self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
     # sequenceAction.setChecked(self.sequenceWidget.isVisible())
-    newMoleculeMenu.addAction(self.sequenceAction)
+    moleculeMenu.addAction(self.sequenceAction)
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
     moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
@@ -422,7 +422,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
     dataPid =  item.data(0, QtCore.Qt.DisplayRole)
-    print(item, 'item')
     project = self._appBase.project
     obj = project.getByPid(dataPid)
     if obj is None:

@@ -56,13 +56,17 @@ class BackboneAssignmentModule(CcpnDock):
     self.numberOfMatches = 5
     self.nmrChains = project.nmrChains
     self.matchModules = []
-    self.nmrResidueTable = NmrResidueTable(self, project, callback=self.navigateTo)
+    self.nmrResidueTable = NmrResidueTable(self, project, callback=self.startAssignment)
     self.displayButton = Button(self.nmrResidueTable, text='Select Match Modules',
                                 callback=self.showMatchDisplayPopup, grid=(0, 3))
 
     self.layout.addWidget(self.nmrResidueTable, 0, 0, 1, 3)
     self.setupShiftDicts()
 
+
+  def startAssignment(self, nmrResidue=None, row=None, col=None):
+    self.assigner.clearAllItems()
+    self.navigateTo(nmrResidue, row, col)
 
   def navigateTo(self, nmrResidue=None, row=None, col=None, strip=None):
     selectedDisplays = [display for display in self.project.spectrumDisplays if display.pid not in self.matchModules]
@@ -84,6 +88,7 @@ class BackboneAssignmentModule(CcpnDock):
 
     else:
       direction = '+1'
+      iNmrResidue = nmrResidue
       navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays, markPositions=True, strip=strip)
       queryShifts = self.intraShifts[nmrResidue]
       matchShifts = self.interShifts

@@ -102,7 +102,6 @@ class GeneralTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, parent=None, item=None):
     super(GeneralTab, self).__init__(parent)
     self.item = item
-    print(self.item, item)
     self.spectrum = spectrum
     self.experimentTypes = spectrum._project._experimentTypeMap
     nameLabel = (Label(self, text="Spectrum name: ", grid=(0,0)))

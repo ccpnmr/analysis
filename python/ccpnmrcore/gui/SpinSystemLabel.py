@@ -34,10 +34,9 @@ class SpinSystemLabel(DropBase, Label):
     drag = QtGui.QDrag(self)
     drag.setMimeData(mimeData)
     if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
-      print('closing')
+      pass
       # self.close()
     else:
-      print('showing')
       self.show()
 
   def processStrip(self, pid):

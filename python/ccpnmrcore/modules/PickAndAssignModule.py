@@ -29,8 +29,8 @@ class PickAndAssignModule(CcpnDock, Base):
     self.layout.addWidget(spacingLabel, 2, 1, 1, 1)
 
     self.layout.addWidget(self.nmrResidueTable, 4, 0, 1, 4)
-    self.moreButton = Button(self, "More...", callback=self.showNmrResiduePopup)
-    self.layout.addWidget(self.moreButton, 5, 0, 1, 1)
+    # self.moreButton = Button(self, "More...", callback=self.showNmrResiduePopup)
+    # self.layout.addWidget(self.moreButton, 5, 0, 1, 1)
 
     # parent.window().showAtomSelector()
 
@@ -56,9 +56,14 @@ class PickAndAssignModule(CcpnDock, Base):
 
             for isotopeCode in spectrumViewIsotopeCodes:
               if isotopeCode in nmrResidueIsotopeCodes:
-                index = spectrumView.spectrum.isotopeCodes.index(isotopeCode)
-                selectedRegion[0][index] = shiftDict[isotopeCode]-spectrumView.spectrum.assignmentTolerances[index]
-                selectedRegion[1][index] = shiftDict[isotopeCode]+spectrumView.spectrum.assignmentTolerances[index]
+                index = spectrum.isotopeCodes.index(isotopeCode)
+                if spectrum.assignmentTolerances[index] is None:
+                  tolerance = spectrum.spectralWidths[index]/spectrum.pointCounts[index]
+                  spectrumTolerances = list(spectrum.assignmentTolerances)
+                  spectrumTolerances[index] =  tolerance
+                  spectrum.assignmentTolerances = spectrumTolerances
+                selectedRegion[0][index] = shiftDict[isotopeCode]-spectrum.assignmentTolerances[index]
+                selectedRegion[1][index] = shiftDict[isotopeCode]+spectrum.assignmentTolerances[index]
 
               else:
                 index3 = spectrumViewIsotopeCodes.index(isotopeCode)

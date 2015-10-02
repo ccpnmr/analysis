@@ -68,11 +68,23 @@ if __name__ == '__main__':
   import argparse  
 
   parser = argparse.ArgumentParser(description='Process startup arguments')
+  for component in ('Assignment', 'Screening', 'Structure'):
+    parser.add_argument('--'+component.lower(), dest='include'+component, action='store_true',
+                        help='Show %s component' % component.lower())
   parser.add_argument('--language', help='Language for menus, etc.')
   parser.add_argument('--skip-user-preferences', dest='skipUserPreferences', action='store_true', help='Skip loading user preferences')
   parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
   parser.add_argument('projectPath', nargs='?', help='Project path')
   args = parser.parse_args()
   
-  startProgram(Analysis3, applicationName, applicationVersion, args.projectPath, args.language, args.skipUserPreferences, args.nologging)
+  components = set()
+  for component in ('Assignment', 'Screening', 'Structure'):
+    if getattr(args, 'include'+component):
+      components.add(component)
+      
+  if not components:
+    components.add('Assignment')
+  
+  startProgram(Analysis3, applicationName, applicationVersion, components, args.projectPath,
+               args.language, args.skipUserPreferences, args.nologging)
 

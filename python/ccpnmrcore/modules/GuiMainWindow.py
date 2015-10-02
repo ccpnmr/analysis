@@ -314,14 +314,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.addMenu(fileMenu)
     self._menuBar.addMenu(peaksMenu)
 
-    if self._appBase.applicationName == 'Screen':
+    if 'Screening' in self._appBase.components:
       self._menuBar.addMenu(self.screenMenu)
 
 
     self._menuBar.addMenu(moleculeMenu)
-    # if self._appBase.applicationName == 'Assign':
-    self._menuBar.addMenu(assignMenu)
-    if self._appBase.applicationName == 'Structure':
+    if 'Assignment' in self._appBase.components:
+      self._menuBar.addMenu(assignMenu)
+    if 'Structure' in self._appBase.components:
       self._menuBar.addMenu(restraintsMenu)
       self._menuBar.addMenu(structuresMenu)
     self._menuBar.addMenu(viewMenu)

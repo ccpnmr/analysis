@@ -41,13 +41,16 @@ from ccpnmrcore.popups.RegisterPopup import RegisterPopup
 
 class AppBase(GuiBase):
 
-  def __init__(self, apiProject, applicationName, applicationVersion,  preferences, module=None):
+  def __init__(self, apiProject, applicationName, applicationVersion,  preferences, components=None):
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
+    if not components:
+      components = set()
+      
     self.applicationName = applicationName
     self.applicationVersion = applicationVersion
     self.preferences = preferences
-    self.module = module
+    self.components = components
     ###self.vLines = []
     ###self.hLines = []
     self.initProject(apiProject)
@@ -82,8 +85,6 @@ class AppBase(GuiBase):
     mainWindow = project.getWindow('Main')
     # mainWindow = project._data2Obj[apiWindowStore.findFirstWindow(title='Main')]
     self.mainWindow = mainWindow
-    if self.module == 'screen':
-      self.mainWindow.menuBar.addMenu(self.mainWindow.screenMenu)
     project.getByPid('Window:Main').namespace['current'] = self.current
     mainWindow.raise_()
     mainWindow.namespace['current'] = self.current
@@ -194,8 +195,8 @@ def checkRegistration(applicationVersion):
   
   return True
   
-def startProgram(programClass, applicationName, applicationVersion, projectPath=None, language=None,
-                 skipUserPreferences=False, nologging=False):
+def startProgram(programClass, applicationName, applicationVersion, components, projectPath=None,
+                 language=None, skipUserPreferences=False, nologging=False):
 
   if language:
     Translation.setTranslationLanguage(language)
@@ -216,6 +217,6 @@ def startProgram(programClass, applicationName, applicationVersion, projectPath=
   app.setStyleSheet(styleSheet)
   
   if checkRegistration(applicationVersion):
-    program = programClass(apiProject, applicationName, applicationVersion, preferences)
+    program = programClass(apiProject, applicationName, applicationVersion, preferences, components)
     app.start()
   

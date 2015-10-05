@@ -567,9 +567,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # yDim = dataDims[1].dim - 1
     spectrum = self.spectrum
     dimensionCount = spectrum.dimensionCount
-    
-    epsilon = 0.0001
-    
+        
     if dimensionCount == 2:
       planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
       position = [0, 0]
@@ -586,10 +584,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       # zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
       valueToPoint = zDataDim.primaryDataDimRef.valueToPoint
       # -1 below because points start at 1 in data model
-      zPoint0 = valueToPoint(zRegionValue[0]) - 1
-      zPoint1 = valueToPoint(zRegionValue[1]) - 1
-      # the -epsilon is to avoid lower point rounding up and upper point rounding down due to numerical error
-      zPoint0, zPoint1 = (int(numpy.round(zPoint0-epsilon)), int(numpy.round(zPoint1-epsilon)))
+      zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
+      zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
+      
+      zPoint0, zPoint1 = (int(zPointFloat0+1), int(zPointFloat1+1)) # this gives first and 1+last integer in range
+      if zPoint0 == zPoint1:
+        if zPointFloat0-(zPoint0-1) < zPoint1-zPointFloat1: # which is closest to an integer
+          zPoint0 -= 1
+        else:
+          zPoint1 += 1
       
       if (zPoint1 - zPoint0) >= zTotalPointCount:
         zPoint0 = 0
@@ -599,7 +602,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         zPoint1 %= zTotalPointCount
         if zPoint1 < zPoint0:
           zPoint1 += zTotalPointCount
-
 
       # zPointOffset = spectrum.pointOffsets[zDim]
       # zPointCount = spectrum.pointCounts[zDim]
@@ -627,10 +629,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       # zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
       valueToPoint = zDataDim.primaryDataDimRef.valueToPoint
       # -1 below because points start at 1 in data model
-      zPoint0 = valueToPoint(zRegionValue[0]) - 1
-      zPoint1 = valueToPoint(zRegionValue[1]) - 1
-      # the -epsilon is to avoid lower point rounding up and upper point rounding down due to numerical error
-      zPoint0, zPoint1 = (int(numpy.round(zPoint0-epsilon)), int(numpy.round(zPoint1-epsilon)))
+      zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
+      zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
+      
+      zPoint0, zPoint1 = (int(zPointFloat0+1), int(zPointFloat1+1)) # this gives first and 1+last integer in range
+      if zPoint0 == zPoint1:
+        if zPointFloat0-(zPoint0-1) < zPoint1-zPointFloat1: # which is closest to an integer
+          zPoint0 -= 1
+        else:
+          zPoint1 += 1
       
       if (zPoint1 - zPoint0) >= zTotalPointCount:
         zPoint0 = 0
@@ -657,11 +664,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       # wPoint0, wPoint1 = spectrum.getDimPointFromValue(wDim, wRegionValue)
       valueToPoint = wDataDim.primaryDataDimRef.valueToPoint
       # -1 below because points start at 1 in data model
-      wPoint0 = valueToPoint(wRegionValue[0]) - 1
-      wPoint1 = valueToPoint(wRegionValue[1]) - 1
-      # the -epsilon is to avoid lower point rounding up and upper point rounding down due to numerical error
-      wPoint0, wPoint1 = (int(numpy.round(wPoint0-epsilon)), int(numpy.round(wPoint1-epsilon)))
+      wPointFloat0 = valueToPoint(wRegionValue[0]) - 1
+      wPointFloat1 = valueToPoint(wRegionValue[1]) - 1
       
+      wPoint0, wPoint1 = (int(wPointFloat0+1), int(wPointFloat1+1)) # this gives first and 1+last integer in range
+      if wPoint0 == wPoint1:
+        if wPointFloat0-(wPoint0-1) < wPoint1-wPointFloat1: # which is closest to an integer
+          wPoint0 -= 1
+        else:
+          wPoint1 += 1
+          
       if (wPoint1 - wPoint0) >= wTotalPointCount:
         wPoint0 = 0
         wPoint1 = wTotalPointCount

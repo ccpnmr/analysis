@@ -30,6 +30,7 @@ from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpncore.memops import Notifiers
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.spectrum import NmrExpPrototype
+from ccpncore.lib import Constants
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
 from ccpncore.util.Undo import Undo
@@ -91,7 +92,7 @@ class Project(AbstractWrapperObject):
     # Special attributes:
     self._implExperimentTypeMap = None
 
-    # Set mandatory top-level objects in apiProject
+    # Set mandatory top-level objects in apiProject and ApiNmrProject
     # MolSystem
     apiProject = wrappedData.root
     if wrappedData.molSystem is None:
@@ -109,12 +110,14 @@ class Project(AbstractWrapperObject):
       apiComponentStore = (apiProject.findFirstRefSampleComponentStore(name='default') or
                            apiProject.newRefSampleComponentStore(name='default'))
       apiSampleStore.refSampleComponentStore = apiComponentStore
-
     # Make Substances that match finalised Molecules
     for apiMolecule in apiProject.sortedMolecules():
       if apiMolecule.isFinalised:
         # Create matchingMolComponent if none exists
         apiComponentStore.fetchMolComponent(apiMolecule)
+    # Dfault NmrChain
+    if wrappedData.findFirstNmrChain(code=Constants.defaultNmrChainCode) is None:
+      wrappedData.newNmrChain(code=Constants.defaultNmrChainCode)
 
     self._logger = wrappedData.root._logger
 

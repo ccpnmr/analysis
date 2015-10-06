@@ -104,10 +104,6 @@ class RestraintList(AbstractWrapperObject):
   def name(self) -> str:
     """name of Restraint List"""
     return self._wrappedData.name
-    
-  @name.setter
-  def name(self, value:str):
-    self._wrappedData.name = value
   
   @property
   def comment(self) -> str:

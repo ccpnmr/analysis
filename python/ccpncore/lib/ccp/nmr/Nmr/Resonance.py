@@ -159,7 +159,7 @@ def getBoundResonances(self:'Resonance') -> Tuple['Resonance', ...]:
 
   else:
     chemCompVar = resonanceGroup.chemCompVar or chemComp.findFirstChemCopmVar(isDefaultVar=True)
-    residue = resonanceGroup.residue
+    residue = resonanceGroup.assignedResidue
 
     if residue:
       # resonanceGroup is assigned

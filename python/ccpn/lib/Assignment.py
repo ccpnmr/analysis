@@ -346,7 +346,7 @@ def getSpinSystemsLocation(project, nmrResidues, chain, chemicalShiftList):
 
     assignDict = {}
     for spinSystem in nmrProject.resonanceGroups:
-      residue = spinSystem.residue
+      residue = spinSystem.assignedResidue
       if residue:
         assignDict[residue] = spinSystem
     #

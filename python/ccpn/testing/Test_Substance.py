@@ -30,6 +30,7 @@ class SubstanceTest(WrapperTesting):
 
   def test_simple_create(self):
     substance1 = self.project.newSimpleSubstance('MolComp1', userCode='userCode',smiles=':-)')
+    print ("@~@~", substance1, type(substance1), substance1.id, type(substance1.id))
     self.assertEqual(substance1.id, 'MolComp1.std')
     self.assertEqual(substance1.smiles, ':-)')
     self.assertEqual(substance1.substanceType, 'Molecule')

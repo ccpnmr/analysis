@@ -64,8 +64,8 @@ class ChemicalShiftList(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """Shift list name"""
-    return self._wrappedData.name
+    """Shift list serial number"""
+    return self._wrappedData.serial
     
   @property
   def _parent(self) -> Project:

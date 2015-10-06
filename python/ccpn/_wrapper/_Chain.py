@@ -121,9 +121,14 @@ class Chain(AbstractWrapperObject):
   # Implementation functions
 
   def rename(self, value:str):
-    """Change object id, modifying entire project to maintain consistency.
-    NBNB TBD to be implemented"""
-    raise NotImplementedError("Chain rename not implemented yet")
+    """Rename Chain, changing its Id and Pid"""
+    if not value:
+      raise ValueError("Chain name must be set")
+    apiNmrChain = self._project._apiNmrProject.findFirstNmrChain(code=self.code)
+    self._apiChain._renameChain(value)
+    self._project._resetPid(self._apiChain)
+    self._project._resetPid(self.apiNmrChain)
+
 
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:

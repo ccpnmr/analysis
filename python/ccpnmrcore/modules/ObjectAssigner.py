@@ -164,7 +164,7 @@ class ObjectAssigner(QtGui.QWidget, Base):
     sequenceCode = nmrAtom.nmrResidue.sequenceCode
     residueType = nmrAtom.nmrResidue.residueType
     atomType = nmrAtom.name
-    if not nmrAtom.nmrResidue.residue:
+    if not nmrAtom.nmrResidue.assignedResidue:
       self.chainPulldowns[dim].setData([chain.id for chain in self.project.nmrChains])
       # self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))
       self.chainPulldowns[dim].setCallback(partial(self.setNmrChain))

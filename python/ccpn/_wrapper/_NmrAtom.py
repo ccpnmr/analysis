@@ -27,6 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import NmrResidue
 from ccpn import Atom
+from ccpncore.lib import Constants
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 from ccpncore.util import Pid
@@ -73,10 +74,6 @@ class NmrAtom(AbstractWrapperObject):
     """Atom name string (e.g. 'HA')"""
     return self._wrappedData.name
 
-  @name.setter
-  def name(self, value:str):
-    self._wrappedData.name = value
-
   @property
   def atom(self) -> Atom:
     """Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom"""
@@ -92,8 +89,7 @@ class NmrAtom(AbstractWrapperObject):
     """isotopeCode of NmrAtom. Set automatically on creation (from NmrAtom name) and cannot be reset"""
     return self._wrappedData.isotopeCode
 
-  # Implementation functions
-  def rename(self, value:str):
+  def rename(self, value:str=None):
     """Rename object, changing id, Pid, and internal representation"""
     # NB This is a VERY special case
     # - API code and notifiers will take care of resetting id and Pid
@@ -105,13 +101,13 @@ class NmrAtom(AbstractWrapperObject):
       elif newIsotopeCode != isotopeCode:
         raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
 
-    self.name = value
+    self._wrappedData.name = value or None
 
   def reassigned(self, atomId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, name:str=None, mergeToExisting=True) -> 'NmrAtom':
     """Get NmrAtom reassigned according to residueId or other parameters.
     Result may be self changed in place or a copy (with self deleted), so ALWAYS use the return value.
-    Setting atomId deassigns empty fields,
+    Setting atomId deassigns empty residueType or name fields,
     while empty parameters (e.g. chainCode=None) cause no change.
     If the nmrAtom being reassigned to exists and merging is allowed, the two will be merged.
     NB Merging is NOT undoable
@@ -135,7 +131,9 @@ class NmrAtom(AbstractWrapperObject):
           ll[ii] = val
         chainCode, sequenceCode, residueType, name = ll
         if chainCode is None:
-          raise ValueError("chainCode part of residueId cannot be empty'")
+          raise ValueError("chainCode part of atomId cannot be empty'")
+        if sequenceCode is None:
+          raise ValueError("sequenceCode part of atomId cannot be empty'")
 
     else:
       # set missing parameters to existing values
@@ -162,8 +160,8 @@ class NmrAtom(AbstractWrapperObject):
       if name != self.name:
 
         if result is self:
-          # NB self.name can never be None
-          self.rename(name or None)
+          # NB self.name can never be returned as None
+          self._wrappedData.name = name or None
 
         elif mergeToExisting:
           clearUndo = True
@@ -178,15 +176,15 @@ class NmrAtom(AbstractWrapperObject):
         if nmrResidue.getNmrAtom(self.name) is None:
           self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
           if name != self.name:
-            self.rename(name or None)
+            self._wrappedData.name = name or None
         elif name is None or oldNmrResidue.getNmrAtom(name) is None:
           if name != self.name:
-            self.rename(name or None)
+            self._wrappedData.name = name or None
           self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
         else:
-          self.name = None  # Necessary to avoid name clashes
+          self._wrappedData.name = None  # Necessary to avoid name clashes
           self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
-          self.name = name
+          self._wrappedData.name = name
 
       elif mergeToExisting:
         # WARNING if we get here undo is no longer possible
@@ -203,6 +201,7 @@ class NmrAtom(AbstractWrapperObject):
     return result
 
 
+  # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: NmrResidue)-> list:
     """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue"""
@@ -256,7 +255,8 @@ def produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
                    sequenceCode:Union[int,str]=None,
                    residueType:str=None, name:str=None) -> NmrAtom:
   """get chainCode, sequenceCode, residueType and atomName from dot-separated  atomId or Pid
-  or explicit parameters, and find or create an NmrAtom that matches """
+  or explicit parameters, and find or create an NmrAtom that matches
+  Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue"""
 
   # Get ID parts to use
   sequenceCode = str(sequenceCode) if sequenceCode else None
@@ -276,7 +276,7 @@ def produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
     raise ValueError("NmrAtom name must be set")
 
   # Produce chain
-  nmrChain = self.fetchNmrChain(shortName=chainCode)
+  nmrChain = self.fetchNmrChain(shortName=chainCode or Constants.defaultNmrChainCode)
   nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
   return nmrResidue.fetchNmrAtom(name)
 

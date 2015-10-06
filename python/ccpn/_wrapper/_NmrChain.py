@@ -27,6 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
 from ccpncore.util import Pid
+from ccpncore.lib import Constants
 from ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 
 
@@ -61,10 +62,6 @@ class NmrChain(AbstractWrapperObject):
     """short form of name, key attribute.
     NB changing this attribute will rename the NmrChain"""
     return self._wrappedData.code
-
-  @shortName.setter
-  def shortName(self, value:str):
-    self._wrappedData.code = value
 
   @property
   def _parent(self) -> Project:
@@ -143,9 +140,13 @@ class NmrChain(AbstractWrapperObject):
 
   def rename(self, value:str):
     """Rename NmrChain, changing its Id and Pid"""
+    wrappedData = self._apiNmrChain
     if not value:
       raise ValueError("NmrChain name must be set")
-    self.shortName = value
+    elif wrappedData.code == Constants.defaultNmrChainCode:
+      raise ValueError("NmrChain:%s cannot be renamed" % Constants.defaultNmrChainCode)
+    else:
+      wrappedData.code = value
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:

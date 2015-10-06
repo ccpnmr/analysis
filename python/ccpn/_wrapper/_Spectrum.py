@@ -401,9 +401,9 @@ class Spectrum(AbstractWrapperObject):
   @property
   def dimensionTypes(self) -> tuple:
     """\- (*str,*)\*dimensionCount
-
-    dimension types ('Fid' / 'Freq' / 'Sampled')."""
-    return tuple(x.className[:-7] for x in self._wrappedData.sortedDataDims())
+    dimension types ('Fid' / 'Frequency' / 'Sampled')."""
+    ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
+    return tuple('Frequency' if x == 'Freq' else x for x in ll)
 
   @property
   def spectralWidthsHz(self) -> tuple:

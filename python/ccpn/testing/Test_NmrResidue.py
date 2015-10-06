@@ -39,38 +39,42 @@ class NmrResidueTest(WrapperTesting):
     nr2.residue = None
     self.assertEqual(nr2.longPid, "NmrResidue:A.@2.ARG")
     target =  self.project.getByPid('NR:A.2.LYS')
-    target.sequenceCode = None
+    target.rename('.LYS')
     self.assertEqual(target.longPid, "NmrResidue:A.@11.LYS")
-    nr2.sequenceCode = '2'
-    self.assertEqual(nr2.longPid, "NmrResidue:A.2.LYS")
     newNr = nchain0.newNmrResidue()
     self.assertEqual(newNr.longPid, "NmrResidue:@.@89.")
     nr3.nmrChain = nchain0
     self.assertEqual(nr3.longPid, "NmrResidue:@.3.GLU")
     newNr.residue = res3
     self.assertEqual(newNr.longPid, "NmrResidue:A.3.GLU")
-    nchain.shortName = 'X'
+    nchain.rename('X')
     self.assertEqual(nchain.longPid, "NmrChain:X")
     self.assertEqual(nr2.longPid, "NmrResidue:X.2.ARG")
-    nr2.sequenceCode = None
-    self.assertEqual(nr2.longPid, "NmrResidue:X.@2.ARG")
+    target.rename(None)
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual(nr2.longPid, "NmrResidue:X.@2.")
 
   def test_rename(self):
     nchain = self.project.getByPid('NC:A')
     nr1, nr2 = nchain.nmrResidues[:2]
     self.assertEqual(nr1.id, "A.10.TYR")
-    nr1.rename()
-    self.assertEqual(nr1.id, "A.@1.")
+    nr1.deassign()
+    self.assertEqual(nr1.id, "@-.@1.")
     nr1.rename('999')
-    self.assertEqual(nr1.id, "A.999.")
+    self.assertEqual(nr1.id, "@-.999.")
     nr1.rename('999.ALA')
-    self.assertEqual(nr1.id, "A.999.ALA")
+    self.assertEqual(nr1.id, "@-.999.ALA")
     nr1.rename('998.VAL')
-    self.assertEqual(nr1.id, "A.998.VAL")
+    self.assertEqual(nr1.id, "@-.998.VAL")
     nr1.rename('.TYR')
-    self.assertEqual(nr1.id, "A.@1.TYR")
+    self.assertEqual(nr1.id, "@-.@1.TYR")
     nr1.rename('997')
-    self.assertEqual(nr1.id, "A.997.")
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual(nr1.id, "@-.997.")
 
   def test_reassign(self):
     nchain = self.project.getByPid('NC:A')
@@ -92,6 +96,9 @@ class NmrResidueTest(WrapperTesting):
 
     self.assertTrue(len(nr1.nmrAtoms) == 2)
     nrx = nr2.reassigned(nr1.id)
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
     self.assertIs(nrx, nr1)
     self.assertTrue(nr2._apiResonanceGroup.isDeleted)
     self.assertTrue(len(nr1.nmrAtoms) == 4)
@@ -103,6 +110,10 @@ class NmrResidueTest(WrapperTesting):
     res2 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
     self.assertIs(res1, res2)
     obj = nmrChain.fetchNmrResidue(sequenceCode=515)
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual(obj.pid, 'NR:@1.555.')
     print('@~@~', obj)
 
   def test_fetchEmptyNmrResidue(self):

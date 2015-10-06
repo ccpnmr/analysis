@@ -40,6 +40,7 @@ class WrapperTesting(unittest.TestCase):
       self.project = ccpn.newProject('default')
     else:
       self.project = ccpn.loadProject(os.path.join(TEST_PROJECTS_PATH, self.projectPath))
+    self.undo = self.project.undo
     try:
       yield
     except:

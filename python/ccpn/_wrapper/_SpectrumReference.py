@@ -41,8 +41,8 @@ class SpectrumReference(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'SpectrumReference'
 
-  # Type of dimension. Always 'Freq' for frequency (Fourier transformed) dimension
-  dimensionType = 'Freq'
+  # Type of dimension. Always 'Frequency' for frequency (Fourier transformed) dimension
+  dimensionType = 'Frequency'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumReferences'
@@ -60,11 +60,8 @@ class SpectrumReference(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """object identifier, used for id"""
-
     dataDimRef = self._wrappedData
-    result = '%s%s%s' % (dataDimRef.dataDim.dim, Pid.IDSEP, dataDimRef.expDimRef.serial)
-
-    return result
+    return Pid.createId(dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
 
   @property
   def _parent(self) -> Spectrum:

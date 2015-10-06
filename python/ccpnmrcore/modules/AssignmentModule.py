@@ -419,7 +419,7 @@ class AssignmentModule(CcpnDock, Base):
     self.seqCodePulldowns[dim].currentIndexChanged.connect(partial(self.setResidueType, dim))
     # self.seqCodePulldowns[dim].setCallback(partial(self.setSequenceCode))
     residueTypes = [code.upper() for code in CCP_CODES] + ['']
-    if nmrAtom.nmrResidue.residue is not None:
+    if nmrAtom.nmrResidue.assignedResidue is not None:
       self.resTypePulldowns[dim].disable()
     self.resTypePulldowns[dim].setData(residueTypes)
     self.resTypePulldowns[dim].setIndex(self.resTypePulldowns[dim].texts.index(residueType.upper()))

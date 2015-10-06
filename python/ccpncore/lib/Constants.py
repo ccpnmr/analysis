@@ -50,8 +50,11 @@ DEFAULT_ISOTOPE_DICT = {
   'ALT':None,
 }
 
+# Default NmrChain code
+defaultNmrChainCode = '@-'
+
 # sequenceCode parsing expression
-# A sequenceCOde is combined (without whitesspace) of:
+# A sequenceCOde is combined (without whitespace) of:
 #   an optional integer
 #   an optional text field, as short as possible
 #   an optional field of the form +ii of -ii, where ii is an integer

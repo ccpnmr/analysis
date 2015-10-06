@@ -14,24 +14,36 @@ class Test_makeNmrAtom(WrapperTesting):
     c = self.project.newNmrChain()
     r = c.newNmrResidue()
     a = r.newNmrAtom(isotopeCode='15N')
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
     self.assertEqual(a._apiResonance.isotopeCode, '15N')
 
   def _test_createNmrAtom_withIsotopeCode(self):
     c = self.project.newNmrChain()
     r = c.newNmrResidue()
     a = r.newNmrAtom(isotopeCode='15N')
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
     self.assertEqual(a.isotopeCode, '15N')
 
   def test_createNmrAtom_withName(self):
     c = self.project.newNmrChain()
     r = c.newNmrResidue()
     a = r.newNmrAtom(name='CA')
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
     self.assertEqual(a.name, 'CA')
 
   def test_fetchNmrAtom(self):
     c = self.project.newNmrChain()
     r = c.newNmrResidue()
     a = r.fetchNmrAtom(name='CB')
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
     self.assertEqual(a.name, 'CB')
 
 
@@ -84,5 +96,8 @@ class Test_chemicalShift(WrapperTesting):
     peaks[0].assignDimension(axisCode=libSpectrum.axisCodeMatch('N', self.spectrum.axisCodes),
                              value=self.atom)
     print(self.shiftList.getChemicalShift(self.atom.id).value)
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
     self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom.id))
 

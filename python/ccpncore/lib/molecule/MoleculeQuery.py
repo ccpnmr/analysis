@@ -340,7 +340,7 @@ ccpCodeRemap = {
 #   return boolean
 
 
-def fetchStdResNameMap(project, reset:bool=False, debug:bool=False):
+def fetchStdResNameMap(project:'MemopsRoot', reset:bool=False, debug:bool=False):
   """ fetch dict of {residueName:(molType,ccpCode)},
   using cached value if preseent and not resdet.
   """

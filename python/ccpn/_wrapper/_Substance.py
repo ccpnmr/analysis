@@ -63,7 +63,7 @@ class Substance(AbstractWrapperObject):
   def _key(self) -> str:
     """id string - name.labeling"""
     obj =  self._wrappedData
-    return Pid.createId(getattr(obj,tag) for tag in ('name', 'labeling'))
+    return Pid.createId(*(getattr(obj,tag) for tag in ('name', 'labeling')))
 
   @property
   def name(self) -> str:

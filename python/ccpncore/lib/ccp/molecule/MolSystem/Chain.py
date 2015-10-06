@@ -208,4 +208,75 @@ def expandMolSystemAtoms(self:'Chain'):
 
             break
 
+def _renameChain(self:'Chain', newCode:str):
+  """Rename chain in place, fixing all stored references to the chainCode"""
+  molSystem = self.molSystem
+  oldCode = self.code
+  if newCode == oldCode:
+    return
+  if molSystem.findFirstChain(code=newCode) is not None:
+    raise ValueError ("Cannot rename to Chain '@, chain with that name already exists")
 
+  root = self.root
+  root.__dict__['override'] = True
+
+  # Set up for undo
+  undo = self.root._undo
+  if undo is not None:
+    undo.increaseBlocking()
+
+  ###if 1:
+  try:
+    # relink StructureEnsembles
+    for structureEnsemble in molSystem.structureEnsembles:
+
+      # reset chainCode
+      for coordChain in structureEnsemble.coordChains:
+        if coordChain.code == oldCode:
+          parentDict = structureEnsemble.__dict__['coordChains']
+          del parentDict[oldCode]
+          coordChain.code = newCode
+          parentDict[newCode] = coordChain
+
+    # Fix NmrCalc instances
+    for nmrCalcStore in molSystem.root.sortedNmrCalcStores():
+      for run in nmrCalcStore.sortedRuns():
+        for obj in run.findAllData(molSystemCode=molSystem.code):
+          className = obj.className
+          if className in ('MolSystemData', 'MolResidueData'):
+            chainCodes = list(obj.chainCodes)
+            if oldCode in chainCodes:
+              for ii,code in chainCodes:
+                if code == oldCode:
+                  chainCodes[ii] = newCode
+            obj.chainCodes = chainCodes
+
+    # Fix NmrChains
+    for nmrProject in molSystem.nmrProjects:
+      nmrChain = nmrProject.findFirstNmrChain(code=oldCode)
+      if nmrChain:
+        parentDict = nmrProject.__dict__['nmrChains']
+        del parentDict[oldCode]
+        nmrChain.code = newCode
+        parentDict[newCode] = nmrChain
+
+    # Fix self
+    parentDict = molSystem.__dict__['chains']
+    del parentDict[oldCode]
+    self.code = newCode
+    parentDict[newCode] = self
+
+  finally:
+    # reset override and set isModified
+    root.__dict__['override'] = False
+    self.__dict__['isModified'] = True
+    if undo is not None:
+      undo.decreaseBlocking()
+
+  if undo is not None:
+    undo.newItem(_renameChain, _renameChain, undoArgs=(self, oldCode), redoArgs=(self,newCode))
+
+  # call notifiers:
+  # NBNB the import MUST be inside a function as we can get circular import problems otherwise
+
+  # NBNB TBD FIXME We should have notifiers here to update graphics.

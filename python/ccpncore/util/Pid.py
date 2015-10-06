@@ -66,7 +66,7 @@ def createId(*args:str) -> str:
   # map args to corrected strings
   return IDSEP.join(str(val).translate(remapSeparators) for val in args)
 
-def splitId(idString) -> List[str]:
+def splitId(idString) -> List[Optional[str]]:
   """Split idString into tuple of component elements,
   mapping altCharacter back to separator and replacing empty strings with None"""
 

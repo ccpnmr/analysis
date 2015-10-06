@@ -50,6 +50,7 @@ class CoreTesting(unittest.TestCase):
       if not nmrProject:
         nmrProject = project.currentNmrProject = project.findFirstNmrProject()
       self.nmrProject = nmrProject
+    self.undo = self.project.undo
     try:
       yield
     except:

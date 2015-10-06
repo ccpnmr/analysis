@@ -27,6 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import NmrChain
 from ccpn import Residue
+from ccpncore.lib import Constants
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 
 from ccpncore.util.Types import Union
@@ -59,10 +60,6 @@ class NmrResidue(AbstractWrapperObject):
     """Residue sequence code and id (e.g. '1', '127B', '\@157+1)
     NB resetting sequenceDoe will rename the NmrResidue"""
     return self._wrappedData.sequenceCode
-
-  @sequenceCode.setter
-  def sequenceCode(self, value:str):
-    self._wrappedData.sequenceCode = value
 
   @property
   def _key(self) -> str:
@@ -97,23 +94,6 @@ class NmrResidue(AbstractWrapperObject):
     else:
       return apiResidue.code3Letter
 
-  @residueType.setter
-  def residueType(self, value:str):
-    apiResonanceGroup = self._wrappedData
-    apiResidue = apiResonanceGroup.assignedResidue
-    if apiResidue:
-      if apiResidue.code3Letter == value:
-        return
-      else:
-        raise ValueError("Cannot reset NmrResidue residueType while NmrResidue is assigned")
-
-    apiResonanceGroup.residueType = value
-
-    # get chem comp ID strings from residue type
-    tt = self._project._residueName2chemCompId.get(value)
-    if tt is not None:
-      apiResonanceGroup.molType, apiResonanceGroup.ccpCode = tt
-  
   @property
   def comment(self) -> str:
     """Free-form text comment"""
@@ -169,20 +149,29 @@ class NmrResidue(AbstractWrapperObject):
       else:
         apiResonanceGroup.newResidueTypeProb(chemComp=chemComp, weight=weight)
 
-  # Implementation functions
+  def deassign(self):
+    """Remove sequenceCode and residueType assignment, reset to default NmrChain,
+    and remove from connected stretches"""
+    apiResonanceGroup = self._apiResonanceGroup
+    apiResonanceGroup.sequenceCode = None
+    apiResonanceGroup.resetResidueType(None)
+    apiResonanceGroup.nmrChain = apiResonanceGroup.nmrProject.findFirstNmrChain(
+      code=Constants.defaultNmrChainCode)
+    apiResonanceGroup.nextResonanceGroup = None
+    apiResonanceGroup.previousResonanceGroup = None
+
   def rename(self, value:str=None):
     """Rename NmrResidue. 'None' deassigns; partly set names ('.xyz' ir 'xyz.' partly deassign"""
-    apiResonanceGroup = self._wrappedData
-    if value is None:
-      apiResonanceGroup.sequenceCode = None
-      apiResonanceGroup.residueType = None
-    else:
+    apiResonanceGroup = self._apiResonanceGroup
+    sequenceCode = residueType = None
+    if value:
       ll = value.split(Pid.IDSEP, 1)
-      apiResonanceGroup.sequenceCode =  ll[0] or None
+      sequenceCode = ll[0] or None
       if len(ll) > 1:
-        apiResonanceGroup.residueType = ll[1] or None
-      else:
-        apiResonanceGroup.residueType = None
+        residueType = ll[1] or None
+    #
+    apiResonanceGroup.sequenceCode = sequenceCode
+    apiResonanceGroup.resetResidueType(residueType)
 
   def reassigned(self, residueId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, objectMergeAllowed=True) -> 'NmrResidue':
@@ -230,14 +219,14 @@ class NmrResidue(AbstractWrapperObject):
       # We are reassigning to self - either a no-op or resetting the residueType
       result = self
       if residueType and apiResonanceGroup.residueType != residueType:
-        apiResonanceGroup.residueType = residueType
+        apiResonanceGroup.resetResidueType(residueType)
 
     elif newApiResonanceGroup is None:
       # we are moving to new, free assignment
       result = self
       apiResonanceGroup.nmrChain = newNmrChain._apiNmrChain
       apiResonanceGroup.sequenceCode = sequenceCode
-      apiResonanceGroup.residueType = residueType
+      apiResonanceGroup.resetResidueType(residueType)
 
     else:
       #We are assigning to an existing NmrResidue
@@ -271,6 +260,7 @@ class NmrResidue(AbstractWrapperObject):
     return result
 
 
+  # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
@@ -315,10 +305,10 @@ def setter(self:Residue, value:NmrResidue):
   if oldValue is value:
     return
   elif oldValue is not None:
-    oldValue.residue = None
+    oldValue.assignedResidue = None
 
   if value is not None:
-    value.residue = self
+    value.assignedResidue = self
 Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
 del getter
@@ -331,6 +321,12 @@ def newNmrResidue(self:NmrChain, residueType:str=None, sequenceCode:Union[int,st
   nmrProject = apiNmrChain.nmrProject
   obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=residueType, details=comment,
                                      residueType=residueType, nmrChain=apiNmrChain)
+  if residueType is not None:
+    # get chem comp ID strings from residue type
+    tt = self._project._residueName2chemCompId.get(residueType)
+    if tt is not None:
+      obj.molType, obj.ccpCode = tt
+  #
   return self._project._data2Obj.get(obj)
 
 

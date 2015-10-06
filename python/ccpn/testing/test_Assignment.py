@@ -51,6 +51,10 @@ class Test_getNmrAtomPrediction(WrapperTesting):
       if pred[1] > 90:
         CBatomPredictions.add(pred[0])
 
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
+
     self.assertIn('CB', list(thrCBatomPredictions))
     self.assertNotIn('CA', list(thrCBatomPredictions))
     self.assertIn('CB', list(alaCBatomPredictions))

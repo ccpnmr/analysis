@@ -158,8 +158,10 @@ def readParams(filePath, getFileCount=False):
 
   return data
 
-def guessFileTemplate(dataStore):
+def guessFileTemplate(dataSource):
   
+  dataStore = dataSource.dataStore
+
   if not dataStore:
     return None
   
@@ -169,7 +171,7 @@ def guessFileTemplate(dataStore):
     return None
     
   fileName = os.path.basename(fullPath)
-  numDim = dataSource.numDim
+  numDim = dataSource.numDims
   
   if numDim < 3:
     template = fileName
@@ -206,7 +208,7 @@ def readData(dataSource):
     return None
   
   if not hasattr(dataStore, 'template'):
-    dataStore.template = guessFileTemplate(dataStore)
+    dataStore.template = guessFileTemplate(dataSource)
     # TBD: for now assume that above works
   
   fullPath = dataStore.fullPath

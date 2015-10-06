@@ -130,6 +130,16 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
 
+  def updateRegion(self, viewBox):
+    # this is called when the viewBox is changed on the screen via the mouse
+    
+    GuiStrip.updateRegion(self, viewBox)
+    
+    updateHTrace = self.hTraceAction.isChecked()
+    updateVTrace = self.vTraceAction.isChecked()
+    for spectrumView in self.spectrumViews:
+      spectrumView.updateTrace(self.mousePosition, self.mousePixel, updateHTrace, updateVTrace)
+    
   def toggleHTrace(self):
     self.hTraceAction.setChecked(self.hTraceAction.isChecked())
 

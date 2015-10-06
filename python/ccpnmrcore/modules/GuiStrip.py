@@ -139,6 +139,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.hRulerLineDict = {}  # ruler --> horizontal line for that ruler
     self.initRulers()
     
+    self.mousePixel = None
     self.mousePosition = None
     
     self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
@@ -392,6 +393,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # position is in pixels
 
     if self.plotWidget.sceneBoundingRect().contains(positionPixel):
+      self.mousePixel = (positionPixel.x(), positionPixel.y())
       mousePoint = self.viewBox.mapSceneToView(positionPixel) # mouse point is in ppm
       axisPositionDict = self.axisPositionDict
       position = []

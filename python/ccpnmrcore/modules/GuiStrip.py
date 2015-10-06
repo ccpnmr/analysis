@@ -180,6 +180,13 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     for spectrumView in self.spectrumViews:
       spectrumView.newHPhasingTrace(self.mousePosition[1])
       
+  """
+  def newVPhasingTrace(self):
+    
+    for spectrumView in self.spectrumViews:
+      spectrumView.newVPhasingTrace(self.mousePosition[0])
+  """
+   
   def removePhasingTraces(self):
     
     for spectrumView in self.spectrumViews:
@@ -191,7 +198,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
     
   def updatePhasing(self):
-    colour = '#ffffff' if self.background == 'k' else '#000000'
+    #colour = '#ffffff' if self.background == 'k' else '#000000'
+    colour = '#e4e15b' if self.background == 'k' else '#000000'
     self.hPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:
       spectrumView.updatePhasing()

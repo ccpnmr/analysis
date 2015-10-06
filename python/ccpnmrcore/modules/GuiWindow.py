@@ -132,9 +132,12 @@ class GuiWindow(DropBase):
 
     QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self))
     QtGui.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self))
+    QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self))
+    QtGui.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self))
 
     QtGui.QShortcut(QtGui.QKeySequence("p, c"), self, partial(self.togglePhaseConsole, self))
-    QtGui.QShortcut(QtGui.QKeySequence("p, h"), self, self.newHPhasingTrace) # for now only do H, not V
+    QtGui.QShortcut(QtGui.QKeySequence("p, h"), self, self.newHPhasingTrace)
+    #QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.newVPhasingTrace)
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
     QtGui.QShortcut(QtGui.QKeySequence("p, i"), self, self.togglePhasingPivot)
 
@@ -153,6 +156,18 @@ class GuiWindow(DropBase):
   def traceScaleDown(self, window):
     self.traceScaleScale(window, 0.5)
     
+  def toggleHTrace(self, window):
+    for spectrumDisplay in window.spectrumDisplays:
+      for strip in spectrumDisplay.strips:
+        if isinstance(strip, GuiStripNd):
+          strip.toggleHTrace()
+    
+  def toggleVTrace(self, window):
+    for spectrumDisplay in window.spectrumDisplays:
+      for strip in spectrumDisplay.strips:
+        if isinstance(strip, GuiStripNd):
+          strip.toggleVTrace()
+    
   def togglePhaseConsole(self, window):
     for spectrumDisplay in window.spectrumDisplays:
       spectrumDisplay.togglePhaseConsole()
@@ -162,6 +177,14 @@ class GuiWindow(DropBase):
     strip = self._appBase.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip.newHPhasingTrace()
+      
+  """
+  def newVPhasingTrace(self):
+    
+    strip = self._appBase.current.strip
+    if strip and (strip.spectrumDisplay.window is self):
+      strip.newVPhasingTrace()
+  """
       
   def removePhasingTraces(self):
     

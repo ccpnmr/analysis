@@ -88,8 +88,8 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.hTraceAction)
     # self.contextMenu.addAction(self.vTraceAction)
     self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self.toggleCrossHair, checkable=True)
-    self.hTraceAction = self.contextMenu.addItem("H Trace", callback=self.toggleHTrace, checked=False, checkable=True)
-    self.vTraceAction = self.contextMenu.addItem("V Trace", callback=self.toggleVTrace, checked=False, checkable=True)
+    self.hTraceAction = self.contextMenu.addItem("H Trace", checked=False, checkable=True)
+    self.vTraceAction = self.contextMenu.addItem("V Trace", checked=False, checkable=True)
     self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
     plusOneAction = self.contextMenu.addAction("Add Contour Level", self.guiSpectrumDisplay.addOne)
     plusOneIcon = Icon('iconsNew/contour-add')
@@ -134,6 +134,9 @@ class GuiStripNd(GuiStrip):
     # this is called when the viewBox is changed on the screen via the mouse
     
     GuiStrip.updateRegion(self, viewBox)
+    self.updateTraces()
+    
+  def updateTraces(self):
     
     updateHTrace = self.hTraceAction.isChecked()
     updateVTrace = self.vTraceAction.isChecked()
@@ -141,27 +144,18 @@ class GuiStripNd(GuiStrip):
       spectrumView.updateTrace(self.mousePosition, self.mousePixel, updateHTrace, updateVTrace)
     
   def toggleHTrace(self):
-    self.hTraceAction.setChecked(self.hTraceAction.isChecked())
+    self.hTraceAction.setChecked(not self.hTraceAction.isChecked())
+    self.updateTraces()
 
   def toggleVTrace(self):
-    self.vTraceAction.setChecked(self.vTraceAction.isChecked())
+    self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
+    self.updateTraces()
 
   def mouseMoved(self, positionPixel):
 
-    GuiStrip.mouseMoved(self, positionPixel) # position is in pixels
+    GuiStrip.mouseMoved(self, positionPixel)
+    self.updateTraces()
     
-    if self.plotWidget.sceneBoundingRect().contains(positionPixel):
-      updateHTrace = self.hTraceAction.isChecked()
-      updateVTrace = self.vTraceAction.isChecked()
-      positionView = self.viewBox.mapSceneToView(positionPixel) # convert to ppm (or whatever)
-      
-      position = [axis.position for axis in self.orderedAxes]
-      position[0] = positionView.x()
-      position[1] = positionView.y()
-      positionPixel = (positionPixel.x(), positionPixel.y())
-      for spectrumView in self.spectrumViews:
-        spectrumView.updateTrace(position, positionPixel, updateHTrace, updateVTrace)
-
   def setZWidgets(self):
           
     for n, zAxis in enumerate(self.orderedAxes[2:]):

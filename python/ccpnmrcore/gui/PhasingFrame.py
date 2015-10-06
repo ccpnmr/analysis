@@ -36,8 +36,8 @@ class PhasingFrame(Frame):
     self.callback = callback
 
     sliderDict = {
-      'startVal': 0,
-      'endVal': 360,
+      'startVal': -180,
+      'endVal': 180,
       'value': 0,
       #'showNumber': True,
       'tickInterval': 90,
@@ -47,6 +47,15 @@ class PhasingFrame(Frame):
     label = Label(self, text='ph0', grid=(0,0))
     self.phLabel0 = Label(self, text=value, grid=(0, 1))
     self.slider0 = Slider(self, callback=self.setPh0, grid=(0, 2), **sliderDict)
+    
+    sliderDict = {
+      'startVal': -360,
+      'endVal': 360,
+      'value': 0,
+      #'showNumber': True,
+      'tickInterval': 90,
+    }
+    value = '%4d' % sliderDict['value']
     
     label = Label(self, text='ph1', grid=(0,3))
     self.phLabel1 = Label(self, text=value, grid=(0, 4))

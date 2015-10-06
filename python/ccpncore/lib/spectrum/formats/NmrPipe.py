@@ -171,7 +171,7 @@ def guessFileTemplate(dataSource):
     return None
     
   fileName = os.path.basename(fullPath)
-  numDim = dataSource.numDims
+  numDim = dataSource.numDim
   
   if numDim < 3:
     template = fileName

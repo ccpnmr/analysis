@@ -261,7 +261,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     viewBox = strip.viewBox
     viewRegion = plotWidget.viewRange()
     
-    pointInt = [int(pnt+0.4999) for pnt in point]
+    pointInt = [int(pnt+0.5) for pnt in point]
     data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim-1)
     if ph0 is not None and ph1 is not None and pivot is not None:
       data0 = numpy.array(data)
@@ -293,7 +293,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     viewBox = strip.viewBox
     viewRegion = plotWidget.viewRange()
     
-    data = self.spectrum.getSliceData(point, sliceDim=yDataDim.dim-1)
+    pointInt = [int(pnt+0.5) for pnt in point]
+    data = self.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim-1)
     y = numpy.array([yDataDim.primaryDataDimRef.pointToValue(p+1) for p in range(yMinFrequency, yMaxFrequency+1)])
     # scale from ppm to pixels
     pixelViewBox0 = plotItem.getAxis('bottom').height()

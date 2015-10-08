@@ -20,30 +20,28 @@ Dock  { background-color: #2a3358;
 
 DoubleSpinbox {
               background-color: #f7ffff;
-              border: 1px solid #182548;
               color: #122043;
               }
 
 DoubleSpinbox::hover {
               background-color: #e4e15b;
-              border: 1px solid #182548;
               }
 
 Spinbox {
               background-color: #f7ffff;
-              border: 1px solid #182548;
               color: #122043;
               }
 
 Spinbox::hover {
               background-color: #e4e15b;
-              border: 1px solid #182548;
               }
 
 PulldownList {
           background-color: #f7ffff;
           border: solid 1px #182548;
           color: #122043;
+          margin-left: 4px;
+          padding-left: 2px;
           font-weight: normal;
           }
 
@@ -95,9 +93,10 @@ QDialog QLabel {
 				background-color: #2a3358;
 				}
 QDialog QPushButton {
-				color: #f7ffff;
-				background-color: #2a3358;
+				color:  #bec4f3;
+        background-color: #535a83;
 				}
+
 QDialog QPushButton::clicked {
                           color: #122043;
                           background-color: #BEC4F3;
@@ -168,16 +167,22 @@ Label {
         color: #f7ffff;
         background-color: #2a3358;
         margin: 0px 4px 0px 8px;
-        font-weight: bold;
         }
 
 QLineEdit {
         background-color: #f7ffff;
         color: #122043;
-        margin: 0px 4px 4px 4px;
+        margin: 0px 0px 4px 4px;
         border: 1px solid #182548;
         font-size: 1.5em;
         }
+
+QDialog QLineEdit {
+        background-color: #f7ffff;
+        color: #122043;
+        font-size: 1.5em;
+        }
+
 
 QTextEdit {
         background-color: #f7ffff;

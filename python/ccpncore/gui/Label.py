@@ -35,7 +35,7 @@ class Label(QtGui.QLabel, Base):
     Base.__init__(self, **kw)
 
     if textColor:
-      self.setStyleSheet('QLabel {color: %s; font-size: 30pt; font-weight: bold}' % textColor)
+      self.setStyleSheet('QLabel {color: %s; font-size: 30pt;}' % textColor)
     if textSize and textColor:
       self.setStyleSheet('QLabel {font-size: %s;}' % textSize)
     

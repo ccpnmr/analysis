@@ -78,6 +78,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setupWindow()
     self.setupMenus()
     self.initProject()
+    self.connect(self, QtCore.SIGNAL('triggered()'), self.closeEvent)
 
 
 
@@ -215,7 +216,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Preferences...", callback=self.showApplicationPreferences))
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Close Program", callback=self.quitAction, shortcut="qt"))
+    fileMenu.addAction(Action(self, "Close Program", callback=self.closeEvent, shortcut="qt"))
 
     # self.screenMenu.setHidden(True)
     # self.screenMenu.addAction(Action(self, 'Empty', callback=self.showSideBar))#, shortcut="ss"))
@@ -467,8 +468,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showApplicationPreferences(self):
     PreferencesPopup(preferences=self._appBase.preferences).exec_()
 
-  def quitAction(self):
+  def closeEvent(self, event=None):
       
+
     prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
     if os.path.exists(prefPath):
       prefFile = open(prefPath)
@@ -499,12 +501,39 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
 
-    # NBNB TBD FIXME put code here to ask if you wnat ot save etc.
+    # NBNB TBD FIXME put code here to ask if you want to save etc.
+    from ccpncore.gui.MessageDialog import showMulti
+    reply = showMulti("Quit Program", "Do you want to save changes before quitting?",
+                                         ['Save and Quit', 'Quit without Saving', 'Cancel'])
+    if reply == 'Save and Quit':
+      if event:
+        event.accept()
+      self.saveProject()
+      self._appBase._closeProject()
+      QtGui.QApplication.quit()
+    elif reply == 'Quit without Saving':
+      if event:
+        event.accept()
+      self._appBase._closeProject()
+      QtGui.QApplication.quit()
+    else:
+      if event:
+        event.ignore()
 
     # CLose and clean up project
-    self._appBase._closeProject()
-
-    QtGui.QApplication.quit()
+    # if reply == QtGui.QMessageBox.Yes:
+    #   if event:
+    #     event.accept()
+    #   saveMessage = QtGui.QMessageBox.question(self, "Save Project", "Do you want to save changes?",
+    #                                     ['Save and Quit', 'Quit without Saving', 'Cancel'])
+    #   print(saveMessage, 'saveMessage')
+    #   if saveMessage == QtGui.QMessageBox.Yes:
+    #     self.saveProject()
+    #   self._appBase._closeProject()
+    #   QtGui.QApplication.quit()
+    # elif reply == QtGui.QMessageBox.No:
+    #   if event:
+    #     event.ignore()
 
   def createSample(self):
     popup = SamplePopup(parent=None, project=self.project)

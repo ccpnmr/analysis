@@ -9,7 +9,7 @@ from ccpnmrcore.DropBase import DropBase
 from PyQt4 import QtCore, QtGui
 import math
 
-class SequenceModule(DropBase, CcpnDock):
+class SequenceModule(CcpnDock):
 
   def __init__(self, appBase, project):
     CcpnDock.__init__(self, name='Sequence')
@@ -20,7 +20,6 @@ class SequenceModule(DropBase, CcpnDock):
               border: 1px solid #00092d;
     }
     """)
-    DropBase.__init__(self, appBase)
     self.setAcceptDrops(True)
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
@@ -72,13 +71,14 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
       self.residueDict[residue.sequenceCode] = newResidue
       i+=1
 
-class GuiChainResidue(QtGui.QGraphicsTextItem):
+class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
   fontSize = 20
 
   def __init__(self, parent, project, residue, scene, labelPosition, index):
 
     QtGui.QGraphicsTextItem.__init__(self)
+    DropBase.__init__(self, project._appBase)
     self.setPlainText(residue.shortName)
     position = labelPosition+(20*index)
     self.setFont(Font(size=GuiChainResidue.fontSize, normal=True))
@@ -86,7 +86,8 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
     self.setPos(QtCore.QPointF(position, 0))
     self.residueNumber = residue.sequenceCode
     if residue.nmrResidue is not None:
-      self.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+residue.shortName+'</strong></div>')
+      self.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
+                   residue.shortName+'</strong></div>')
     else:
       self.setHtml('<div style:"text-align: center;">'+residue.shortName+'</div')
     self.project = project
@@ -97,16 +98,12 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
     scene.dropEvent = self.dropEvent
     self.scene = scene
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
-    self.parent=parent
-
 
 
   def setFontBold(self):
     format = QtGui.QTextCharFormat()
     format.setFontWeight(75)
     self.textCursor().mergeCharFormat(format)
-
-
 
 
   def dragEnterEvent(self, event):
@@ -123,26 +120,21 @@ class GuiChainResidue(QtGui.QGraphicsTextItem):
     event.accept()
 
 
-
-  def dropEvent(self, event):
+  def processNmrResidue(self, data, event):
     res = self.scene.itemAt(event.scenePos())
-    event.accept()
-    if event.mimeData().hasFormat('application/x-assignedStretch'):
-      data = event.mimeData().data('application/x-assignedStretch')
-      nmrResidues = str(data, encoding='utf-8').split(',')
-      nmrResidue = self.project.getByPid(nmrResidues[0])
-      res.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
+    nmrResidue = self.project.getByPid(data)
+    res.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
                   res.residue.shortName+'</strong></div>')
-      nmrResidue.residue = res.residue
-      res = res.residue
-      # print(nmrResidues,'nmrResidues')
-      for assignableResidue in nmrResidues[1:]:
-        res = res.nextResidue
-        guiResidue = self.parent.residueDict.get(res.sequenceCode)
-        guiResidue.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
-                           res.shortName+'</strong></div>')
-        nmrResidue = self.project.getByPid(assignableResidue)
-        nmrResidue.residue = res
+    nmrResidue.residue = res.residue
+  #     res = res.residue
+  #     # print(nmrResidues,'nmrResidues')
+  #     for assignableResidue in nmrResidues[1:]:
+  #       res = res.nextResidue
+  #       guiResidue = self.parent.residueDict.get(res.sequenceCode)
+  #       guiResidue.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
+  #                          res.shortName+'</strong></div>')
+  #       nmrResidue = self.project.getByPid(assignableResidue)
+  #       nmrResidue.residue = res
 
 
 

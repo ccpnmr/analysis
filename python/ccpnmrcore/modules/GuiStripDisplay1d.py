@@ -139,7 +139,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
         self.addPlaneToolbar(item, widget, newPane)
       """
 
-  def processSpectrum(self, spectrum:(Spectrum, Pid)):
+  def processSpectrum(self, spectrum:(Spectrum, Pid), event):
     print('processing Spectrum')
     print(self.parent())
 

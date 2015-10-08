@@ -94,7 +94,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
             self.label.setOrientation(o)
             self.updateStyle()
 
-  def processSpectrum(self, spectrum:(Spectrum,Pid)):
+  def processSpectrum(self, spectrum:(Spectrum,Pid), event):
     """Process dropped spectrum"""
     spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
     self.dockArea.guiWindow.deleteBlankDisplay()

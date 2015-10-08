@@ -52,12 +52,11 @@ class DropBase(GuiBase):
     from ccpnmrcore.util import Qt as qtUtil
 
     event.accept()
-    # print(event)
 
     data, dataType  = qtUtil.interpretEvent(event)
 
     if data and dataType:
-      self.processDropData(data, dataType)
+      self.processDropData(data, dataType, event)
 
   # def dropEvent(self, event):
   #   """NBNB FIXME, must be commented out"""
@@ -106,7 +105,7 @@ class DropBase(GuiBase):
   #     self.dropCallback(wrapperObject)
 
 
-  def processDropData(self, data, dataType='pids'):
+  def processDropData(self, data, dataType='pids', event=None):
     """ Process dropped-in data
     Separate function so it can be called from command line as well.
     """
@@ -144,7 +143,7 @@ class DropBase(GuiBase):
       for pid in pids:
         method = self.selectDispatchFunction('process', pid)
         if method:
-          method(pid)
+            method(pid, event)
 
 
 
@@ -157,7 +156,7 @@ class DropBase(GuiBase):
 
     if not pidTypeMap:
       # NBNB TBD FIXME: Import of ccpnmr should not be allowed here.
-      # It will not break when put in function,but in theory ccpnmrcdore should not depend on ccpnmr
+      # It will not break when put in function, but in theory ccpnmrcore should not depend on ccpnmr
       import ccpn
       import ccpnmr
       for package in ccpn, ccpnmr:

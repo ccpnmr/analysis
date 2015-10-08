@@ -39,7 +39,7 @@ class SpinSystemLabel(DropBase, Label):
     else:
       self.show()
 
-  def processStrip(self, pid):
+  def processStrip(self, pid, event):
 
     current = self._appBase.current
     project = self._appBase.project

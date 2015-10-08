@@ -25,11 +25,15 @@ import sys
 from PyQt4 import QtGui, QtCore
 
 from ccpn.lib.Assignment import getNmrResiduePrediction
-
+from ccpn import NmrAtom
+from ccpn import NmrResidue
+from ccpn import Spectrum
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
+from ccpncore.util import Types
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability
+
 
 
 EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
@@ -40,8 +44,98 @@ EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
                   'H[N[{CA|ca[Cali]}]]': ['H', 'N', 'CA-1', 'CB-1', 'CA', 'CB']
                   }
 
-class Assigner(CcpnDock):
 
+class GuiNmrAtom(QtGui.QGraphicsTextItem):
+  """
+  A graphical object specifying the position and name of an atom when created by the Assigner.
+  Can be linked to a Nmr Atom.
+  """
+
+  def __init__(self, text, pos=None, nmrAtom=None):
+
+    super(GuiNmrAtom, self).__init__()
+    self.setPlainText(text)
+    self.setPos(QtCore.QPointF(pos[0], pos[1]))
+    self.nmrAtom = nmrAtom
+    self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+    self.connectedAtoms = 0
+    self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+    if nmrAtom:
+      self.name = nmrAtom.name
+    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+    if self.isSelected:
+      self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
+    else:
+      self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+
+
+
+class GuiNmrResidue(QtGui.QGraphicsTextItem):
+
+  """
+  Object linking residues displayed in Assigner and Nmr Residues. Contains functionality for drag and
+  drop assignment in conjunction with the Sequence Module.
+  """
+
+  def __init__(self, parent, nmrResidue, caAtom):
+
+    super(GuiNmrResidue, self).__init__()
+    self.setPlainText(nmrResidue.id)
+    self.setFont(Font(size=12, bold=True))
+    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+    self.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
+    self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+    self.parent = parent
+    self.nmrResidue = nmrResidue
+
+  def mouseMoveEvent(self, event):
+
+    if (event.buttons() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
+        aDict = {}
+        for item in self.parent.scene.items():
+          if isinstance(item, GuiNmrResidue) and item.isSelected():
+            aDict[item.x()] = item.nmrResidue.pid
+
+        assignStretch = [aDict[key] for key in sorted(aDict.keys())]
+        import json
+        drag = QtGui.QDrag(event.widget())
+        mimeData = QtCore.QMimeData()
+        itemData = json.dumps({'pids':assignStretch})
+        mimeData.setData('ccpnmr-json', itemData)
+        mimeData.setText(itemData)
+        drag.setMimeData(mimeData)
+
+        if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
+          pass
+          # self.close()
+        else:
+          self.show()
+
+
+
+class AssignmentLine(QtGui.QGraphicsLineItem):
+  """
+  Object to create lines between GuiNmrAtoms with specific style, width, colour and displacement.
+  """
+
+  def __init__(self, x1, y1, x2, y2, colour, width, style=None):
+    QtGui.QGraphicsLineItem.__init__(self)
+    self.pen = QtGui.QPen()
+    self.pen.setColor(QtGui.QColor(colour))
+    self.pen.setCosmetic(True)
+    self.pen.setWidth(width)
+    if style and style == 'dash':
+      self.pen.setStyle(QtCore.Qt.DotLine)
+    self.setPen(self.pen)
+
+    self.setLine(x1, y1, x2, y2)
+
+
+class Assigner(CcpnDock):
+  """
+  A module for the display of stretches of sequentially linked and assigned stretches of
+  Nmr Residues.
+  """
   def __init__(self, project=None):
 
     super(Assigner, self).__init__(name='Assigner')
@@ -64,59 +158,72 @@ class Assigner(CcpnDock):
     self.scene.dragEnterEvent = self.dragEnterEvent
 
   def clearAllItems(self):
+    """
+    Removes all displayed residues in the assigner and resets items counts to zero.
+    """
     for item in self.scene.items():
       self.scene.removeItem(item)
       self.residueCount = 0
       self.predictedStretch = []
+      self.residuesShown = []
 
 
 
 
-  def assembleResidue(self, nmrResidue, atoms):
+  def _assembleResidue(self, nmrResidue:NmrResidue, atoms:Types.Dict[str, GuiNmrAtom]):
+    """
+    Takes an Nmr Residue and a dictionary of atom names and GuiNmrAtoms and
+    creates a graphical representation of a residue in the assigner
+    """
     for item in atoms.values():
       self.scene.addItem(item)
     nmrAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
-    cbLine = self.addConnectingLine(atoms['CA'], atoms['CB'], 'grey', 1.0, 0)
+    cbLine = self._addConnectingLine(atoms['CA'], atoms['CB'], 'grey', 1.0, 0)
     if not 'CB' in nmrAtoms:
       self.scene.removeItem(atoms['CB'])
       self.scene.removeItem(cbLine)
 
-    self.addConnectingLine(atoms['H'], atoms['N'], 'grey', 1.0, 0)
-    self.addConnectingLine(atoms['N'], atoms['CA'], 'grey', 1.0, 0)
-    self.addConnectingLine(atoms['CO'], atoms['CA'], 'grey', 1.0, 0)
+    self._addConnectingLine(atoms['H'], atoms['N'], 'grey', 1.0, 0)
+    self._addConnectingLine(atoms['N'], atoms['CA'], 'grey', 1.0, 0)
+    self._addConnectingLine(atoms['CO'], atoms['CA'], 'grey', 1.0, 0)
     nmrAtomLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
     self.scene.addItem(nmrAtomLabel)
-    self.addResiduePredictions(nmrResidue, atoms['CA'])
+    self._addResiduePredictions(nmrResidue, atoms['CA'])
 
 
-  def addResidue(self, nmrResidue, direction):
-
+  def addResidue(self, nmrResidue:NmrResidue, direction:str):
+    """
+    Takes an Nmr Residue and a direction, either '-1 or '+1', and adds a residue to the assigner
+    corresponding to the Nmr Residue.
+    Nmr Residue name displayed beneath CA of residue drawn and residue type predictions displayed
+    beneath Nmr Residue name
+    """
     nmrAtoms = [nmrAtom.name for nmrAtom in nmrResidue.nmrAtoms]
     if self.residueCount == 0:
       # self.nmrChain = self.project.newNmrChain()
       # self.nmrChain.connectedNmrResidues = [nmrResidue]
 
       if 'H' in nmrAtoms:
-        hAtom = self.addAtom("H", (0, self.atomSpacing), nmrResidue.fetchNmrAtom(name='H'))
+        hAtom = self._createGuiNmrAtom("H", (0, self.atomSpacing), nmrResidue.fetchNmrAtom(name='H'))
       else:
-        hAtom = self.addAtom("H", (0, self.atomSpacing))
+        hAtom = self._createGuiNmrAtom("H", (0, self.atomSpacing))
       if 'N' in nmrAtoms:
-        nAtom = self.addAtom("N", (0, hAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='N'))
+        nAtom = self._createGuiNmrAtom("N", (0, hAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='N'))
       else:
-        nAtom = self.addAtom("N", (0, hAtom.y()-self.atomSpacing))
+        nAtom = self._createGuiNmrAtom("N", (0, hAtom.y()-self.atomSpacing))
       if 'CA' in nmrAtoms:
-        caAtom = self.addAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()), nmrResidue.fetchNmrAtom(name='CA'))
+        caAtom = self._createGuiNmrAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()), nmrResidue.fetchNmrAtom(name='CA'))
       else:
-        caAtom = self.addAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()))
+        caAtom = self._createGuiNmrAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()))
       if 'CB' in nmrAtoms:
-        cbAtom = self.addAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='CB'))
+        cbAtom = self._createGuiNmrAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='CB'))
       else:
         # cbAtom = None
-        cbAtom = self.addAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing))
+        cbAtom = self._createGuiNmrAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing))
       if 'CO' in nmrAtoms:
-        coAtom = self.addAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()), nmrResidue.fetchNmrAtom(name='CO'))
+        coAtom = self._createGuiNmrAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()), nmrResidue.fetchNmrAtom(name='CO'))
       else:
-        coAtom = self.addAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()))
+        coAtom = self._createGuiNmrAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()))
       coAtom.setZValue(10)
 
       atoms = {'H': hAtom, 'N': nAtom, 'CA': caAtom, 'CB': cbAtom, 'CO': coAtom}
@@ -130,33 +237,33 @@ class Assigner(CcpnDock):
           # self.nmrChain.connectedNmrResidues = newConnectedStretch
           oldResidue = self.residuesShown[0]
           if 'CO' in nmrAtoms:
-            coAtom2 = self.addAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()
+            coAtom2 = self._createGuiNmrAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()
             -oldResidue["N"].x())-(oldResidue["N"].boundingRect().width()/2),oldResidue["CA"].y()),
                                    nmrResidue.fetchNmrAtom(name='CO'))
           else:
-            coAtom2 = self.addAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()
+            coAtom2 = self._createGuiNmrAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()
             -oldResidue["N"].x())-(oldResidue["N"].boundingRect().width()/2),oldResidue["CA"].y()))
           coAtom2.setZValue(10)
           if 'CA' in nmrAtoms:
-            caAtom2 = self.addAtom("CA", ((coAtom2.x()-self.atomSpacing), oldResidue["N"].y()),
+            caAtom2 = self._createGuiNmrAtom("CA", ((coAtom2.x()-self.atomSpacing), oldResidue["N"].y()),
                                    nmrResidue.fetchNmrAtom(name='CA'))
           else:
-            caAtom2 = self.addAtom("CA", ((coAtom2.x()-self.atomSpacing), oldResidue["N"].y()))
+            caAtom2 = self._createGuiNmrAtom("CA", ((coAtom2.x()-self.atomSpacing), oldResidue["N"].y()))
           if 'CB' in nmrAtoms:
-            cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
+            cbAtom2 = self._createGuiNmrAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
                                    nmrResidue.fetchNmrAtom(name='CB'))
           else:
-            cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
+            cbAtom2 = self._createGuiNmrAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
           if 'N' in nmrAtoms:
-            nAtom2 = self.addAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()),
+            nAtom2 = self._createGuiNmrAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()),
                                   nmrResidue.fetchNmrAtom(name='N'))
           else:
-            nAtom2 = self.addAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()))
+            nAtom2 = self._createGuiNmrAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()))
           if 'H' in nmrAtoms:
-            hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
+            hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
                                   nmrResidue.fetchNmrAtom(name='H'))
           else:
-            hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
+            hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
 
           atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2, 'N-1': oldResidue['N']}
 
@@ -168,34 +275,34 @@ class Assigner(CcpnDock):
           # self.nmrChain.connectedNmrResidues = newConnectedStretch
           oldResidue = self.residuesShown[-1]
           if 'N' in nmrAtoms:
-            nAtom2 = self.addAtom("N", (oldResidue["CO"].x()+self.atomSpacing+
+            nAtom2 = self._createGuiNmrAtom("N", (oldResidue["CO"].x()+self.atomSpacing+
             oldResidue["CO"].boundingRect().width()/2, oldResidue["CA"].y()),
                                   nmrResidue.fetchNmrAtom(name='CA'))
           else:
-            nAtom2 = self.addAtom("N", (oldResidue["CO"].x()+self.atomSpacing+
+            nAtom2 = self._createGuiNmrAtom("N", (oldResidue["CO"].x()+self.atomSpacing+
             oldResidue["CO"].boundingRect().width()/2, oldResidue["CA"].y()))
           if 'H' in nmrAtoms:
-            hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
+            hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
                                   nmrResidue.fetchNmrAtom(name='H'))
           else:
-            hAtom2 = self.addAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
+            hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
           if 'CA' in nmrAtoms:
-            caAtom2 = self.addAtom("CA", (nAtom2.x()+(nAtom2.x()-oldResidue["CO"].x())
+            caAtom2 = self._createGuiNmrAtom("CA", (nAtom2.x()+(nAtom2.x()-oldResidue["CO"].x())
                   -(oldResidue["CO"].boundingRect().width()/2), oldResidue["CO"].y()),
                                    nmrResidue.fetchNmrAtom(name='CA'))
           else:
-            caAtom2 = self.addAtom("CA", (nAtom2.x()+(nAtom2.x()-oldResidue["CO"].x())
+            caAtom2 = self._createGuiNmrAtom("CA", (nAtom2.x()+(nAtom2.x()-oldResidue["CO"].x())
                   -(oldResidue["CO"].boundingRect().width()/2), oldResidue["CO"].y()))
           if 'CB' in nmrAtoms:
-            cbAtom2 = self.addAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
+            cbAtom2 = self._createGuiNmrAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
                                    nmrResidue.fetchNmrAtom(name='CB'))
           else:
             cbAtom2 = None
           if 'CO' in nmrAtoms:
-            coAtom2 = self.addAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()),
+            coAtom2 = self._createGuiNmrAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()),
                                    nmrResidue.fetchNmrAtom(name='CO'))
           else:
-            coAtom2 = self.addAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()))
+            coAtom2 = self._createGuiNmrAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()))
           coAtom2.setZValue(10)
 
           atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2, 'N-1': oldResidue['N']}
@@ -203,20 +310,22 @@ class Assigner(CcpnDock):
           self.residuesShown.append(atoms)
           self.predictedStretch.append(nmrResidue)
 
-    self.assembleResidue(nmrResidue, atoms)
+    self._assembleResidue(nmrResidue, atoms)
     for spectrum in self.project.spectra:
-      self.addSpectrumAssignmentLines(spectrum, atoms)
+      self._addSpectrumAssignmentLines(spectrum, atoms)
 
     if len(self.predictedStretch) > 2:
-      self.predictSequencePosition()
-    # self.addSpectrumAssignmentLines(self.project.getByPid(self.spectra['intra'][0]), atoms)
-    # self.addSpectrumAssignmentLines(self.project.getByPid(self.spectra['inter'][0]), atoms)
+      self.predictSequencePosition(self.predictedStretch)
 
     self.residueCount+=1
 
-    # print(self.nmrChain.connectedNmrResidues)
 
-  def addResiduePredictions(self, nmrResidue, caAtom):
+  def _addResiduePredictions(self, nmrResidue:NmrResidue, caAtom:GuiNmrAtom):
+    """
+    Gets predictions for residue type based on BMRB statistics and determines label positions
+    based on caAtom position.
+    """
+
     predictions = getNmrResiduePrediction(nmrResidue, self.project.chemicalShiftLists[0])
     for prediction in predictions:
       predictionLabel = QtGui.QGraphicsTextItem()
@@ -226,10 +335,14 @@ class Assigner(CcpnDock):
       predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width(), caAtom.y()+(30*(predictions.index(prediction)+2)))
       self.scene.addItem(predictionLabel)
 
-  def predictSequencePosition(self):
+  def predictSequencePosition(self, nmrResidues):
+    """
+    Predicts sequence position for Nmr residues displayed in the Assigner and highlights appropriate
+    positions in the Sequence Module if it is displayed.
+    """
     from ccpn.lib.Assignment import getSpinSystemsLocation
 
-    possibleMatches = getSpinSystemsLocation(self.project, self.predictedStretch,
+    possibleMatches = getSpinSystemsLocation(self.project, nmrResidues,
                       self.project.chains[0], self.project.chemicalShiftLists[0])
 
     for possibleMatch in possibleMatches:
@@ -238,11 +351,13 @@ class Assigner(CcpnDock):
         if hasattr(self.project._appBase.mainWindow, 'sequenceWidget'):
           self.project._appBase.mainWindow.sequenceWidget.highlightPossibleStretches(possibleMatch[1])
 
-    #
-    # else:
-    #   print(self.predictedStretch)
 
-  def addSpectrumAssignmentLines(self, spectrum, residue):
+  def _addSpectrumAssignmentLines(self, spectrum:Spectrum, residue:Types.Dict[str, GuiNmrAtom]):
+      """
+      Adds lines to residues in the Assigner based on the positive contour colour
+      of the spectrum in which the assignment resides.
+      
+      """
       assignedAtoms1 = []
       if not spectrum.experimentType in EXPT_ATOM_DICT:
         pass
@@ -263,34 +378,34 @@ class Assigner(CcpnDock):
         if 'H' and 'N' in assignedAtoms:
           displacement = min(residue['H'].connectedAtoms, residue['N'].connectedAtoms)
           if displacement % 2 == 0:
-            self.addConnectingLine(residue['H'], residue['N'], lineColour, 2.0, displacement*2/2)
+            self._addConnectingLine(residue['H'], residue['N'], lineColour, 2.0, displacement*2/2)
           else:
-            self.addConnectingLine(residue['H'], residue['N'], lineColour, 2.0, displacement*-2)
+            self._addConnectingLine(residue['H'], residue['N'], lineColour, 2.0, displacement*-2)
           residue['H'].connectedAtoms +=1
           residue['N'].connectedAtoms +=1
         if 'N' and 'CA' in assignedAtoms:
           displacement = min(residue['CA'].connectedAtoms, residue['N'].connectedAtoms)
           if displacement % 2 == 0:
-            self.addConnectingLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*2/2)
+            self._addConnectingLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*2/2)
           else:
-            self.addConnectingLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*-2)
-          self.addConnectingLine(residue['N'], residue['CA'], lineColour, 2.0, displacement*2)
+            self._addConnectingLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*-2)
+          self._addConnectingLine(residue['N'], residue['CA'], lineColour, 2.0, displacement*2)
           residue['CA'].connectedAtoms +=1
           residue['N'].connectedAtoms +=1
         if 'N' and 'CB' in assignedAtoms:
           displacement = min(residue['CB'].connectedAtoms, residue['N'].connectedAtoms)
           if displacement % 2 == 0:
-            self.addConnectingLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*2/2)
+            self._addConnectingLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*2/2)
           else:
-            self.addConnectingLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*-2)
+            self._addConnectingLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*-2)
           residue['CB'].connectedAtoms +=1
           residue['N'].connectedAtoms +=1
         if 'CA' and 'CB' in assignedAtoms:
           displacement = min(residue['CA'].connectedAtoms, residue['CB'].connectedAtoms)
           if displacement % 2 == 0:
-            self.addConnectingLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*2/2)
+            self._addConnectingLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*2/2)
           else:
-            self.addConnectingLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*-2)
+            self._addConnectingLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*-2)
           residue['CA'].connectedAtoms +=1
           residue['CB'].connectedAtoms +=1
 
@@ -298,36 +413,39 @@ class Assigner(CcpnDock):
           if 'CA-1' and 'N' in assignedAtoms:
             displacement = min(residue['CA'].connectedAtoms, residue['N-1'].connectedAtoms)
             if displacement % 2 == 0:
-              self.addConnectingLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*2/2)
+              self._addConnectingLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*2/2)
             else:
-              self.addConnectingLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*-2)
+              self._addConnectingLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*-2)
 
           if 'CB-1' and 'N' in assignedAtoms:
             displacement = min(residue['CB'].connectedAtoms, residue['N-1'].connectedAtoms)
             if displacement % 2 == 0:
-              self.addConnectingLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*2/2)
+              self._addConnectingLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*2/2)
             else:
-              self.addConnectingLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*-2)
+              self._addConnectingLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*-2)
 
         if 'CB-1' in residue:
            if 'CB-1' and 'N' in assignedAtoms:
             displacement = min(residue['CB-1'].connectedAtoms, residue['N'].connectedAtoms)
             if displacement % 2 == 0:
-              self.addConnectingLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*2/2)
+              self._addConnectingLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*2/2)
             else:
-              self.addConnectingLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*-2)
+              self._addConnectingLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*-2)
 
         if 'CA-1' in residue:
            if 'CA-1' and 'N' in assignedAtoms:
             displacement = min(residue['CA-1'].connectedAtoms, residue['N'].connectedAtoms)
             if displacement % 2 == 0:
-              self.addConnectingLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*2/2)
+              self._addConnectingLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*2/2)
             else:
-              self.addConnectingLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*-2)
+              self._addConnectingLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*-2)
 
 
-  def addConnectingLine(self, atom1, atom2, colour, width, displacement, style=None):
-
+  def _addConnectingLine(self, atom1:GuiNmrAtom, atom2:GuiNmrAtom, colour:str, width:float, displacement:float, style:str=None):
+    """
+    Adds a line between two GuiNmrAtoms using the width, colour, displacement and style specified.
+    """
+    
     if atom1.y() > atom2.y() and atom1.x() - atom2.x() == 0:
       x1 = atom1.x() + (atom1.boundingRect().width()/2)
       y1 = atom1.y() + (atom1.boundingRect().height()*0.2)
@@ -395,110 +513,83 @@ class Assigner(CcpnDock):
     return newLine
 
 
-  def addAtom(self, atomType, position, nmrAtom=None):
+  def _createGuiNmrAtom(self, atomType:str, position:tuple, nmrAtom:NmrAtom=None):
+    """
+    Creates a GuiNmrAtom specified by the atomType and graphical position supplied.
+    GuiNmrAtom can be linked to an NmrAtom by supplying it to the function.
+    """
     atom = GuiNmrAtom(text=atomType, pos=position, nmrAtom=nmrAtom)
-    return(atom)
+    return atom
 
-class GuiNmrAtom(QtGui.QGraphicsTextItem):
-
-  def __init__(self, text, pos=None, nmrAtom=None):
-
-    super(GuiNmrAtom, self).__init__()
-    self.setPlainText(text)
-    self.setPos(QtCore.QPointF(pos[0], pos[1]))
-    self.nmrAtom = nmrAtom
-    self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
-    self.connectedAtoms = 0
-    self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
-    if nmrAtom:
-      self.name = nmrAtom.name
-    # self.brush = QtGui.QBrush()
-    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-    # self.setBrush(self.brush)
-    if self.isSelected:
-      # self.setFont(Font(size=17.5, bold=True))
-      # print(self.nmrAtom)
-      self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
-    else:
-      self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-      # self.setBrush(self.brush)
-
-
-
-  def hoverEnterEvent(self, event):
-    self.setDefaultTextColor(QtGui.QColor('#e4e15b'))
-
-  def hoverLeaveEvent(self, event):
-    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-
-  def printAtom(self):
-    print(self)
-
-
-class GuiNmrResidue(QtGui.QGraphicsTextItem):
-
-  def __init__(self, parent, nmrResidue, caAtom):
-
-    super(GuiNmrResidue, self).__init__()
-    self.setPlainText(nmrResidue.id)
-    self.setFont(Font(size=12, bold=True))
-    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-    self.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
-    self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
-    self.parent = parent
-    self.nmrResidue = nmrResidue
-
-  def mouseMoveEvent(self, event):
-
-    if (event.buttons() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
-        aDict = {}
-        for item in self.parent.scene.items():
-          if isinstance(item, GuiNmrResidue) and item.isSelected():
-            aDict[item.x()] = item.nmrResidue.pid
-
-        assignStretch = ','.join([aDict[key] for key in sorted(aDict.keys())])
-
-        drag = QtGui.QDrag(event.widget())
-        mime = QtCore.QMimeData()
-        drag.setMimeData(mime)
-        mime.setData('application/x-assignedStretch',assignStretch)
-        # print(assignStretch)
-
-        drag.exec_()
-
-
-
-class AssignmentLine(QtGui.QGraphicsLineItem):
-
-  def __init__(self, x1, y1, x2, y2, colour, width, style=None):
-    QtGui.QGraphicsLineItem.__init__(self)
-    self.pen = QtGui.QPen()
-    self.pen.setColor(QtGui.QColor(colour))
-    self.pen.setCosmetic(True)
-    self.pen.setWidth(width)
-    if style and style == 'dash':
-      self.pen.setStyle(QtCore.Qt.DotLine)
-    self.setPen(self.pen)
-
-    self.setLine(x1, y1, x2, y2)
-
-# def getNmrResiduePrediction(nmrResidue, sl):
-#     predictions = {}
-#     spinSystem = nmrResidue._wrappedData
-#     shiftList = sl._wrappedData
-#     for code in CCP_CODES:
-#       predictions[code] = float(getSpinSystemResidueProbability(spinSystem, shiftList, code))
-#     tot = sum(predictions.values())
-#     refinedPredictions = {}
-#     for code in CCP_CODES:
-#       v = round(predictions[code]/tot * 100, 2)
-#       if v > 0:
-#         refinedPredictions[code] = v
+# class GuiNmrAtom(QtGui.QGraphicsTextItem):
 #
-#     finalPredictions = []
+#   def __init__(self, text, pos=None, nmrAtom=None):
 #
-#     for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
-#       key = [key for key, val in refinedPredictions.items() if val==value][0]
-#       finalPredictions.append([key, str(value)+' %'])
+#     super(GuiNmrAtom, self).__init__()
+#     self.setPlainText(text)
+#     self.setPos(QtCore.QPointF(pos[0], pos[1]))
+#     self.nmrAtom = nmrAtom
+#     self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+#     self.connectedAtoms = 0
+#     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+#     if nmrAtom:
+#       self.name = nmrAtom.name
+#     # self.brush = QtGui.QBrush()
+#     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+#     # self.setBrush(self.brush)
+#     if self.isSelected:
+#       # self.setFont(Font(size=17.5, bold=True))
+#       # print(self.nmrAtom)
+#       self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
+#     else:
+#       self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+#       # self.setBrush(self.brush)
 #
-#     return finalPredictions
+#
+#
+# class GuiNmrResidue(QtGui.QGraphicsTextItem):
+#
+#   def __init__(self, parent, nmrResidue, caAtom):
+#
+#     super(GuiNmrResidue, self).__init__()
+#     self.setPlainText(nmrResidue.id)
+#     self.setFont(Font(size=12, bold=True))
+#     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+#     self.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
+#     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+#     self.parent = parent
+#     self.nmrResidue = nmrResidue
+#
+#   def mouseMoveEvent(self, event):
+#
+#     if (event.buttons() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
+#         aDict = {}
+#         for item in self.parent.scene.items():
+#           if isinstance(item, GuiNmrResidue) and item.isSelected():
+#             aDict[item.x()] = item.nmrResidue.pid
+#
+#         assignStretch = ','.join([aDict[key] for key in sorted(aDict.keys())])
+#
+#         drag = QtGui.QDrag(event.widget())
+#         mime = QtCore.QMimeData()
+#         drag.setMimeData(mime)
+#         mime.setData('application/x-assignedStretch',assignStretch)
+#         # print(assignStretch)
+#
+#         drag.exec_()
+#
+#
+#
+# class AssignmentLine(QtGui.QGraphicsLineItem):
+#
+#   def __init__(self, x1, y1, x2, y2, colour, width, style=None):
+#     QtGui.QGraphicsLineItem.__init__(self)
+#     self.pen = QtGui.QPen()
+#     self.pen.setColor(QtGui.QColor(colour))
+#     self.pen.setCosmetic(True)
+#     self.pen.setWidth(width)
+#     if style and style == 'dash':
+#       self.pen.setStyle(QtCore.Qt.DotLine)
+#     self.setPen(self.pen)
+#
+#     self.setLine(x1, y1, x2, y2)

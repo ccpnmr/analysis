@@ -37,7 +37,7 @@ def nmrAtomsForPeaks(peaks, nmrAtoms, intraResidual=False, doubleTolerance=False
     return selected
 
 
-def filterIntraResidual(nmrAtomsForDimenions):
+def filterIntraResidual(nmrAtomsForDimensions):
     '''Takes a N-list of lists of nmrAtoms, where N
        is the number of peak dimensions and only returns
        those which belong to residues that show up in
@@ -48,7 +48,7 @@ def filterIntraResidual(nmrAtomsForDimenions):
 
     nmrResiduesForDimensions = []
     allNmrResidues = set()
-    for nmrAtoms in nmrAtomsForDimenions:
+    for nmrAtoms in nmrAtomsForDimensions:
         nmrResidues = set([nmrAtom.nmrResidue for nmrAtom in nmrAtoms if nmrAtom.nmrResidue])
         nmrResiduesForDimensions.append(nmrResidues)
         allNmrResidues.update(nmrResidues)
@@ -64,7 +64,7 @@ def filterIntraResidual(nmrAtomsForDimenions):
             selectedNmrResidues.add(nmrResidue)
 
     nmrAtomsForDimenionsFiltered = []
-    for nmrAtoms in nmrAtomsForDimenions:
+    for nmrAtoms in nmrAtomsForDimensions:
         nmrAtoms_filtered = set()
         for nmrAtom in nmrAtoms:
             if nmrAtom.nmrResidue in selectedNmrResidues:
@@ -118,7 +118,7 @@ def matchingNmrAtomsForDimensionOfPeaks(peaks, dim, nmrAtoms,
                                                             nmrAtoms,
                                                             doubleTolerance=doubleTolerance)
         # '&=' is set intersection update
-        print(matchingNmrAtoms, 'matchNmrAToms')
+        print(matchingNmrAtoms, 'matchNmrAtoms')
         commonNmrAtoms &= matchingNmrAtoms
         print(commonNmrAtoms, 'common matching')
     return commonNmrAtoms

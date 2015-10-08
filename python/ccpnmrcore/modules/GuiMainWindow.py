@@ -509,6 +509,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if event:
         event.accept()
       self.saveProject()
+      # CLose and clean up project
       self._appBase._closeProject()
       QtGui.QApplication.quit()
     elif reply == 'Quit without Saving':

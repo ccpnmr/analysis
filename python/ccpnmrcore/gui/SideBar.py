@@ -238,7 +238,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     peakListItem = QtGui.QTreeWidgetItem(newItem)
     peakListItem.setText(0, peakList.pid)
 
-  def processSpectrum(self, spectrum:(Spectrum,Pid), expTypes=None):
+  def processSpectrum(self, spectrum:(Spectrum,Pid), event, expTypes=None):
 
     spectrum = self.project.getByPid(spectrum)
 

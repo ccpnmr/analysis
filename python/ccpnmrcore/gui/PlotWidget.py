@@ -63,7 +63,7 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     # self.plotItem.axes['bottom']['item'].show()
     # self.plotItem.axes['right']['item'].show()
 
-  def processSpectrum(self, spectrum:(Spectrum, Pid)):
+  def processSpectrum(self, spectrum:(Spectrum, Pid), event):
     self.parent().guiSpectrumDisplay.displaySpectrum(spectrum)
 
 

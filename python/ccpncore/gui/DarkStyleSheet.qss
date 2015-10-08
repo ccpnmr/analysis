@@ -1,5 +1,4 @@
-
-QDialog {
+﻿QDialog {
         background-color: #2a3358;
         color: #f7ffff;
         }
@@ -166,23 +165,16 @@ QToolButton::checked {
 Label {
         color: #f7ffff;
         background-color: #2a3358;
-        margin: 0px 4px 0px 8px;
         }
 
 QLineEdit {
         background-color: #f7ffff;
         color: #122043;
-        margin: 0px 0px 4px 4px;
-        border: 1px solid #182548;
+        /*margin: 0px 0px 4px 4px;*/
+        margin-right: 4px;
+        /*border-right: 1px solid #182548;*/
         font-size: 1.5em;
         }
-
-QDialog QLineEdit {
-        background-color: #f7ffff;
-        color: #122043;
-        font-size: 1.5em;
-        }
-
 
 QTextEdit {
         background-color: #f7ffff;

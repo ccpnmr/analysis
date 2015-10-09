@@ -41,6 +41,11 @@ _wrappedClasses.append(cls)
 # Add class list for extended sphinx documentation to module
 _sphinxWrappedClasses = _wrappedClasses
 
+# Make {shortClassName: className} map. NB may be added to by importing modules (ccpnmr wrapper)
+for cls in _wrappedClasses:
+  tag = cls.className if hasattr(cls, 'className') else cls.__class__.__name__
+  ccpn._pluralPidTypeMap[cls.shortClassName] = tag + 's'
+
 # Additional data
 RulerData = importlib.import_module('ccpnmr._wrapper._Mark').RulerData
 

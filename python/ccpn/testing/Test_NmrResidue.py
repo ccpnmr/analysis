@@ -50,7 +50,8 @@ class NmrResidueTest(WrapperTesting):
     nchain.rename('X')
     self.assertEqual(nchain.longPid, "NmrChain:X")
     self.assertEqual(nr2.longPid, "NmrResidue:X.2.ARG")
-    target.rename(None)
+    nr2.rename(None)
+    self.assertEqual(nr2.longPid, "NmrResidue:X.@2.")
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
@@ -113,8 +114,7 @@ class NmrResidueTest(WrapperTesting):
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
-    self.assertEqual(obj.pid, 'NR:@1.555.')
-    print('@~@~', obj)
+    self.assertEqual(obj.pid, 'NR:@1.515.')
 
   def test_fetchEmptyNmrResidue(self):
     nmrChain = self.project.fetchNmrChain(shortName='@1')
@@ -122,6 +122,9 @@ class NmrResidueTest(WrapperTesting):
     sequenceCode = '@%s' % res1._wrappedData.serial
     self.assertEqual(res1.sequenceCode, sequenceCode)
     res2 = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode)
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
     self.assertIs(res1, res2)
 
   def test_offsetNmrResidue(self):
@@ -132,6 +135,9 @@ class NmrResidueTest(WrapperTesting):
     res3 = nmrChain.fetchNmrResidue(sequenceCode="127B-1", residueType="ALA")
     self.assertIs(res2, res3)
     res1.delete()
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
     self.assertTrue( res2._wrappedData.isDeleted)
 
   def test_get_by_serialName(self):
@@ -141,4 +147,8 @@ class NmrResidueTest(WrapperTesting):
     res2 = nmrChain.fetchNmrResidue(sequenceCode=serialName)
     self.assertIs(res1, res2)
     res3 = nmrChain.fetchNmrResidue(sequenceCode=serialName + '+0')
+    self.assertIs(res3._wrappedData.mainResonanceGroup, res1._wrappedData)
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
     self.assertIs(res3._wrappedData.mainResonanceGroup, res1._wrappedData)

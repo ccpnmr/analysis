@@ -333,7 +333,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     if not op.isImplicit:
       # TBD: are there any examples of below? 
       # NO. Discouraged. Consider changes if a case arises.
-      # Note that have extra hand code allowed via constructorCodeStubs
+      # Note that we have extra hand code allowed via constructorCodeStubs
       self.writeExternalOp(op, inClass)
       return
     
@@ -572,6 +572,8 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.callDoUnDeletes(op, inClass)
 
     self.endTransaction(op, inClass)
+
+    self.doNotifies(op, inClass)
 
 
   ###########################################################################
@@ -3163,8 +3165,12 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
     self.writeNewline()
     self.writeComment("doNotifies")
+
+    if opType ==  'fullUnDelete':
+      self.writeNewline()
+      self.writeNotifyCode(op.name)
    
-    if opType in ('init', 'fullDelete') or (
+    elif opType in ('init', 'fullDelete') or (
      isinstance(element,MetaModel.ClassElement) and
      element.changeability != metaConstants.frozen
     ):

@@ -99,7 +99,7 @@ Substance = cls = importlib.import_module(
 _wrappedClasses.append(cls)
 
 # Add class list for extended sphinx documentation to module
-# putting AnstractWrapperObj3ct last
+# putting AbstractWrapperObj3ct last
 _sphinxWrappedClasses = _wrappedClasses[1:] + _wrappedClasses[:1]
 
 # set main starting functions in namespace. Must be done after setting Project
@@ -108,6 +108,13 @@ from ccpn.lib import Io as ccpnIo
 loadProject = ccpnIo.loadProject
 newProject = ccpnIo.newProject
 
+# Make {shortClassName: className} map. NB may be added to by importing modules (ccpnmr wrapper)
+_pluralPidTypeMap = {}
+for cls in _wrappedClasses:
+  className = cls.className if hasattr(cls, 'className') else cls.__class__.__name__
+  _pluralPidTypeMap[cls.shortClassName] = className + 's'
+#Special case, irregular plural
+_pluralPidTypeMap['SP'] = _pluralPidTypeMap['Spectrum'] = 'Spectra'
 
 # NBNB set function parameter annotations for AbstractBaseClass functions
 # MUST be done here to get correct class type

@@ -29,6 +29,7 @@ from ccpn import Spectrum
 
 from ccpncore.gui.Base import Base
 from ccpncore.util.Pid import Pid
+from ccpncore.util.Types import Sequence, Union
 
 from ccpnmrcore.gui import ViewBox
 from ccpnmrcore.DropBase import DropBase
@@ -63,8 +64,7 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     # self.plotItem.axes['bottom']['item'].show()
     # self.plotItem.axes['right']['item'].show()
 
-  def processSpectrum(self, spectrum:(Spectrum, Pid), event):
-    self.parent().guiSpectrumDisplay.displaySpectrum(spectrum)
-
-
-
+  def processSpectra(self, pids:Sequence[str], event):
+    """Display spectra defined by list of Pid strings"""
+    for ss in pids:
+      self.parent().guiSpectrumDisplay.displaySpectrum(ss)

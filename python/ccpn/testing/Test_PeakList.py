@@ -31,4 +31,7 @@ class PeakListTest(WrapperTesting):
   def test_newPeakList(self):
     spectrum = self.project.getSpectrum('HSQC-115')
     peakList = spectrum.newPeakList()
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
 

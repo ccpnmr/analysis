@@ -28,6 +28,7 @@ from PyQt4 import QtCore
 from ccpn import Spectrum
 
 from ccpncore.util.Pid import Pid
+from ccpncore.util.Types import Sequence
 from ccpncore.gui.Dock import CcpnDockLabel, CcpnDock
 from ccpncore.gui.Label import Label
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
@@ -94,9 +95,18 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
             self.label.setOrientation(o)
             self.updateStyle()
 
-  def processSpectrum(self, spectrum:(Spectrum,Pid), event):
-    """Process dropped spectrum"""
-    spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
-    self.dockArea.guiWindow.deleteBlankDisplay()
-    msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % spectrum
-    self.dockArea.window().pythonConsole.write(msg)
+
+  def processSpectra(self, pids:Sequence[str], event):
+    """Display spectra defined by list of Pid strings"""
+    for ss in pids:
+      spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(ss)
+      self.dockArea.guiWindow.deleteBlankDisplay()
+      msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
+      self.dockArea.window().pythonConsole.write(msg)
+
+  # def processSpectrum(self, spectrum:(Spectrum,Pid), event):
+  #   """Process dropped spectrum"""
+  #   spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
+  #   self.dockArea.guiWindow.deleteBlankDisplay()
+  #   msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % spectrum
+  #   self.dockArea.window().pythonConsole.write(msg)

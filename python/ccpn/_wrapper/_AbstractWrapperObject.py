@@ -656,10 +656,13 @@ class AbstractWrapperObject():
       raise ValueError("Cannot set unique %s for %s: %s object has no attribute %s"
                        % (keyTag, self, wrappedData.__class__, keyTag))
 
-    if wrappedData not in self._project._data2Obj:
-      # Necessary because otherwise we likely will have notifiers 0- that would then break
-      wrappedData.root.override = True
+    undo = self._project._undo
+    if undo is not None:
+      undo.increaseBlocking()
     try:
+      if wrappedData not in self._project._data2Obj:
+        # Necessary because otherwise we likely will have notifiers 0- that would then break
+        wrappedData.root.override = True
       # Set default value if present value is None
       value = getattr(wrappedData, keyTag)
       if value is None:
@@ -687,5 +690,7 @@ class AbstractWrapperObject():
     finally:
       if wrappedData not in self._project._data2Obj:
         wrappedData.root.override = False
+      if undo is not None:
+        undo.decreaseBlocking()
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject

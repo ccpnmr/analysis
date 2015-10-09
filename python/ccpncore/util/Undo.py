@@ -25,9 +25,49 @@ from functools import partial
 from collections import deque
 
 def deleteAll(objects):
-  """Delete each object in objects - utiliity for undoing multi-object creation functions"""
+  """Delete each object in objects - utility for undoing multi-object creation functions"""
   for obj in objects:
     obj.delete()
+
+
+def deleteAllApiObjects(objsToBeDeleted):
+  """Delete all API objects in set, together.
+  Does NOT look for additional deletes or do any checks. Programmer beware!!!
+  Does NOT do undo handling, as it is designed to be used within the Undo machinery"""
+
+  for obj in objsToBeDeleted:
+    if (obj.__dict__.get('isDeleted')):
+      raise ValueError("""%s: deleteAllApiObjects
+       called on deleted object""" % obj.qualifiedName
+      )
+
+  for obj in objsToBeDeleted:
+    for notify in obj.__class__._notifies.get('preDelete', ()):
+      notify(obj)
+
+  for obj in objsToBeDeleted:
+    obj._singleDelete(objsToBeDeleted)
+
+  # doNotifies
+  for obj in objsToBeDeleted:
+    for notify in obj.__class__._notifies.get('delete', ()):
+      notify(obj)
+
+
+def resetUndo(memopsRoot, maxWaypoints=20, maxOperations=10000,
+              debug:bool=False):
+  """Set or reset undo stack, using passed-in parameters.
+  NB setting either parameter to 0 removes the undo stack."""
+
+  undo = memopsRoot._undo
+  if undo is not None:
+    undo.clear()
+
+  if maxWaypoints and maxOperations:
+    memopsRoot._undo = Undo(maxWaypoints=maxWaypoints, maxOperations=maxOperations,
+                            debug=debug)
+  else:
+   memopsRoot._undo = None
 
 class Undo(deque):
   """Implementation of an undo and redo stack, with possibility of waypoints.
@@ -37,7 +77,7 @@ class Undo(deque):
      To create a waypoint use newWaypoint().
   """
 
-  def __init__(self, maxWaypoints=20, maxOperations=10000):
+  def __init__(self, maxWaypoints=20, maxOperations=10000, debug=False):
     """Create Undo object with maximum stack length maxUndoCount"""
 
     self.maxWaypoints = maxWaypoints
@@ -49,6 +89,9 @@ class Undo(deque):
     if maxWaypoints:
       self.newWaypoint()
     deque.__init__(self)
+
+    # Reset to True to unblank errors during undo/redo
+    self._debug = debug
 
   @property
   def blocking(self):
@@ -192,11 +235,16 @@ class Undo(deque):
         # else:
         #   undoMethod(undoData)
         undoCall, redoCall = self[n]
+        # if self._debug:
+        #   print ("@~@~ undoing", undoCall)
         undoCall()
       self.nextIndex = undoTo + 1
     except Exception as e:
       from ccpncore.util.Logging import getLogger
       getLogger().warning ("Error while undoing (%s). Undo stack is cleared." % e)
+      if self._debug:
+        print ("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
+        raise
       self.clear()
     finally:
       # Addded by Rasmus March 2015. Surely we need to reset self._blocked?
@@ -233,11 +281,16 @@ class Undo(deque):
         # else:
         #   redoMethod(redoData)
         undoCall, redoCall = self[n]
+        # if self._debug:
+        #   print ("@~@~ redoing", redoCall)
         redoCall()
       self.nextIndex = redoTo + 1
     except Exception as e:
       from ccpncore.util.Logging import getLogger
       getLogger().warning("Error while redoing (%s). Undo stack is cleared." % e)
+      if self._debug:
+        print ("REDO DEBUG: error in redo. Last redo call was:", redoCall)
+        raise
       self.clear()
     finally:
       # Addded by Rasmus March 2015. Surely we need to reset self._blocked?

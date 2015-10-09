@@ -30,6 +30,7 @@ import contextlib
 
 from ccpncore.util import Path
 from ccpncore.util import Io
+from ccpncore.util import Undo
 
 TEST_PROJECTS_PATH = os.path.join(Path.getTopDirectory(), 'data/testProjects')
 
@@ -50,7 +51,8 @@ class CoreTesting(unittest.TestCase):
       if not nmrProject:
         nmrProject = project.currentNmrProject = project.findFirstNmrProject()
       self.nmrProject = nmrProject
-    self.undo = self.project.undo
+    Undo.resetUndo(self.project, debug=True)
+    self.undo = self.project._undo
     try:
       yield
     except:

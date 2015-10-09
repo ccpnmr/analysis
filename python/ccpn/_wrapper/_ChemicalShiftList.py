@@ -125,7 +125,7 @@ Project._childClasses.append(ChemicalShiftList)
 
 def newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
                          isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
-  """Create new child Molecule"""
+  """Create new child ChemicalShiftList"""
   obj = self._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
                                        details=comment)
   return self._data2Obj.get(obj)

@@ -23,13 +23,9 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from PyQt4 import QtGui, QtCore
 
-from ccpncore.util import Pid
-from ccpncore.lib.Io import Formats as ioFormats
+from ccpn.lib import Util as ccpnUtil
 from ccpnmrcore.Base import Base as GuiBase
-from ccpncore.lib.Io import Formats as ioFormats
-
-# Filled in lower down
-pidTypeMap = {}
+# from ccpncore.lib.Io import Formats as ioFormats
 
 class DropBase(GuiBase):
 
@@ -122,7 +118,6 @@ class DropBase(GuiBase):
       if dataType == 'pids':
         pids = data
 
-
       elif dataType == 'urls':
         # data is list-of-urls
         # Load Urls one by one with normal loaders
@@ -131,50 +126,71 @@ class DropBase(GuiBase):
           if ll:
             pids.extend(x.pid for x in ll)
         for pid in pids:
-          if 'SP:' in pid:
+          pluralClassName = ccpnUtil.pid2PluralName(pid)
+
+          # NBNB Code to put other data types n side bar must go here
+
+          if pluralClassName == 'Spectra':
             spectrum = self.getByPid(pid)
             self._appBase.mainWindow.sideBar.addSpectrum(spectrum)
 
       else:
         raise ValueError("processDropData does not recognise dataType %s" % dataType)
 
-
       # process pids
-      for pid in pids:
-        method = self.selectDispatchFunction('process', pid)
-        if method:
-            method(pid, event)
+      if pids:
+
+        tags = []
+        tags = [ccpnUtil.pid2PluralName(x) for x in pids]
+        if  len(set(tags)) == 1:
+          # All pids of same type - process entire list with a single process call
+          funcName = 'process' + tags[0]
+          if hasattr(self, funcName):
+            getattr(self,funcName)(pids, event)
+          else:
+            project._logger.warning("Dropped data not processed - no %s function defined for %s"
+            % (funcName, self))
+
+        else:
+          # Treat each Pid separately (but still pass it in a list - NBNB)
+          # If we need special functions for multi-type processing they must go here.
+          for ii,tag in enumerate(tags):
+            funcName = 'process' + tag
+            if hasattr(self, funcName):
+              getattr(self,funcName)([pids[ii]], event)
+            else:
+              project._logger.warning("Dropped data %s not processed - no %s function defined for %s"
+              % (pid, funcName, self))
 
 
-
-  def selectDispatchFunction(self, prefix:str, dataType:(str,Pid)):
-    """Generate file name and return bound method matching name, if defined
-    dataType may be either an accepted dataType, or a Pid that is used to derive it.
-
-    Accepted prefixes are 'process', currently
-    DataTypes are singular, e.g. Spectrum, Peak, etc. even """
-
-    if not pidTypeMap:
-      # NBNB TBD FIXME: Import of ccpnmr should not be allowed here.
-      # It will not break when put in function, but in theory ccpnmrcore should not depend on ccpnmr
-      import ccpn
-      import ccpnmr
-      for package in ccpn, ccpnmr:
-        for tag in dir(package):
-          obj = getattr(package, tag)
-          if hasattr(obj, 'shortClassName'):
-            shortClassName = getattr(obj, 'shortClassName')
-            if shortClassName:
-              pidTypeMap[shortClassName] = (obj.className if hasattr(obj, 'className')
-                                            else obj.__class__.__name__)
-
-    ss = dataType.split(Pid.PREFIXSEP,1)[0]
-    ss = pidTypeMap.get(ss, ss)
-    funcName = prefix + ss
-
-    if hasattr(self, funcName):
-      # print(funcName)
-      return getattr(self, funcName)
-    else:
-
-      return None
+  # def selectDispatchFunction(self, prefix:str, dataType:(str,Pid)):
+  #   """Generate file name and return bound method matching name, if defined
+  #   dataType may be either an accepted dataType, or a Pid that is used to derive it.
+  #
+  #   Accepted prefixes are 'process', currently
+  #   DataTypes are singular, e.g. Spectrum, Peak, etc. even """
+  #
+  #   if not pidTypeMap:
+  #     # NBNB TBD FIXME: Import of ccpnmr should not be allowed here.
+  #     # It will not break when put in function, but in theory ccpnmrcore should not depend on ccpnmr
+  #     import ccpn
+  #     import ccpnmr
+  #     for package in ccpn, ccpnmr:
+  #       for tag in dir(package):
+  #         obj = getattr(package, tag)
+  #         if hasattr(obj, 'shortClassName'):
+  #           shortClassName = getattr(obj, 'shortClassName')
+  #           if shortClassName:
+  #             pidTypeMap[shortClassName] = (obj.className if hasattr(obj, 'className')
+  #                                           else obj.__class__.__name__)
+  #
+  #   ss = dataType.split(Pid.PREFIXSEP,1)[0]
+  #   ss = pidTypeMap.get(ss, ss)
+  #   funcName = prefix + ss
+  #
+  #   if hasattr(self, funcName):
+  #     # print(funcName)
+  #     return getattr(self, funcName)
+  #   else:
+  #
+  #     return None

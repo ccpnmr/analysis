@@ -1,6 +1,7 @@
 __author__ = 'simon1'
 
 from ccpncore.gui.Label import Label
+from ccpncore.util.Types import Sequence
 from ccpnmrcore.DropBase import DropBase
 import json
 
@@ -39,36 +40,37 @@ class SpinSystemLabel(DropBase, Label):
     else:
       self.show()
 
-  def processStrip(self, pid, event):
+  def processStrips(self, pids:Sequence[str], event):
 
-    current = self._appBase.current
-    project = self._appBase.project
-    direction = pid[-2:]
-    processedPid = pid[:-2]
-    wrapperObject = self._appBase.getByPid(processedPid)
-    nmrResidue = wrapperObject.planeToolbar.spinSystemLabel.text()
+    for pid in pids:
+      current = self._appBase.current
+      project = self._appBase.project
+      direction = pid[-2:]
+      processedPid = pid[:-2]
+      wrapperObject = self._appBase.getByPid(processedPid)
+      nmrResidue = wrapperObject.planeToolbar.spinSystemLabel.text()
 
-    if direction == '-1':
-      sinkIndex = self._appBase.getByPid(self.strip.pid)._wrappedData.index
-
-    else:
-      sinkIndex = self._appBase.getByPid(self.strip.pid)._wrappedData.index+1
-
-    if wrapperObject.guiSpectrumDisplay.pid.id == self.strip.guiSpectrumDisplay.pid.id:
-      wrapperObject.moveTo(sinkIndex)
-
-    else:
-      self.strip.guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
       if direction == '-1':
-        current.strip = self.strip.guiSpectrumDisplay.strips[-1]
-        current.nmrResidue = project.getByPid('NR:@.'+nmrResidue+'-1.')
-      else:
-        current.strip = self.strip.guiSpectrumDisplay.strips[sinkIndex]
-        current.nmrResidue = project.getByPid('NR:@.'+nmrResidue+'.')
-      if hasattr(self._appBase.mainWindow, 'bbModule'):
+        sinkIndex = self._appBase.getByPid(self.strip.pid)._wrappedData.index
 
-        self._appBase.mainWindow.bbModule.navigateTo(current.nmrResidue, strip=current.strip)
-        current.strip.planeToolbar.spinSystemLabel.setText(nmrResidue)
+      else:
+        sinkIndex = self._appBase.getByPid(self.strip.pid)._wrappedData.index+1
+
+      if wrapperObject.guiSpectrumDisplay.pid.id == self.strip.guiSpectrumDisplay.pid.id:
+        wrapperObject.moveTo(sinkIndex)
+
+      else:
+        self.strip.guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
+        if direction == '-1':
+          current.strip = self.strip.guiSpectrumDisplay.strips[-1]
+          current.nmrResidue = project.getByPid('NR:@.'+nmrResidue+'-1.')
+        else:
+          current.strip = self.strip.guiSpectrumDisplay.strips[sinkIndex]
+          current.nmrResidue = project.getByPid('NR:@.'+nmrResidue+'.')
+        if hasattr(self._appBase.mainWindow, 'bbModule'):
+
+          self._appBase.mainWindow.bbModule.navigateTo(current.nmrResidue, strip=current.strip)
+          current.strip.planeToolbar.spinSystemLabel.setText(nmrResidue)
 
 
 

@@ -33,7 +33,7 @@ from ccpncore.lib.spectrum import NmrExpPrototype
 from ccpncore.lib import Constants
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
-from ccpncore.util.Undo import Undo
+from ccpncore.util import Undo
 from ccpncore.util import Io as ioUtil
 from ccpncore.util.Types import Dict
 
@@ -115,7 +115,7 @@ class Project(AbstractWrapperObject):
       if apiMolecule.isFinalised:
         # Create matchingMolComponent if none exists
         apiComponentStore.fetchMolComponent(apiMolecule)
-    # Dfault NmrChain
+    # Default NmrChain
     if wrappedData.findFirstNmrChain(code=Constants.defaultNmrChainCode) is None:
       wrappedData.newNmrChain(code=Constants.defaultNmrChainCode)
 
@@ -335,18 +335,12 @@ class Project(AbstractWrapperObject):
     """undo stack for Project. Implementation attribute"""
     return self._wrappedData.root._undo
 
-  def _resetUndo(self, maxWaypoints=20, maxOperations=10000):
+  def _resetUndo(self, maxWaypoints:int=20, maxOperations:int=10000,
+                 debug:bool=False):
     """Reset undo stack, using passed-in parameters.
     NB setting either parameter to 0 removes the undo stack."""
-
-    undo = self._wrappedData.root._undo
-    if undo is not None:
-      undo.clear()
-
-    if maxWaypoints and maxOperations:
-      self._wrappedData.root._undo = Undo(maxWaypoints=maxWaypoints, maxOperations=maxOperations)
-    else:
-      self._wrappedData.root._undo = None
+    Undo.resetUndo(self._wrappedData.root, maxWaypoints=maxWaypoints,
+                   maxOperations=maxOperations, debug=debug)
 
   def newUndoPoint(self):
     """Set a point in the undo stack, you can undo/redo to """

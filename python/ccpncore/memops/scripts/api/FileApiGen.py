@@ -939,7 +939,10 @@ class FileApiGen(ApiGen, FileApiInterface):
         self.defineVar(vn['topObject'], self.elementVarType(self.dataRoot))
       else:
         self.defineVar(vn['topObject'], self.elementVarType(self.topObject))
- 
+
+      # make objectsCreated set containing self for use with undo/redo code
+      self.newCollection('objectsCreated', True, False, initValues='(self,)')
+
       supertypes = inClass.getAllSupertypes()
  
       if inClass is self.dataRoot:

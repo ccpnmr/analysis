@@ -295,6 +295,17 @@ for obj in %s:
     notify(obj)
 ''' % self.varNames['objsToBeDeleted'])
 
+    elif notifyName == '_unDelete':
+
+      self.write('''
+for obj in %s:
+  for notify in obj.__class__._notifies.get('__init__', ()):
+    notify(obj)
+for obj in %s:
+  for notify in obj.__class__._notifies.get('postInit', ()):
+    notify(obj)
+''' % (self.varNames['objsToBeUnDeleted'], self.varNames['objsToBeUnDeleted']))
+
     else:
 
       self.write('''
@@ -331,13 +342,15 @@ if _undo is not None:''')
 
     if opType == 'init':
 
+      # NB This is NOT enough when additional objects are created through postConstructor code.
       if isMemopsRoot:
         self.write('''
   _undo.clear()''')
       else:
         self.write('''
-  _undo.newItem(self.delete, parent.new%s, redoKwargs=attrlinks)
-''' % op.target.name)
+  _undo.newItem(deleteAllApiObjects, root._unDelete, undoArgs=(objectsCreated,),
+                redoArgs=(objectsCreated, set(x.topObject for x in objectsCreated)))
+''')
 
     elif opType == 'fullDelete':
 
@@ -705,6 +718,8 @@ import functools
 import re
 containsWhitespace = re.compile('\s').search
 containsNonAlphanumeric = re.compile('[^a-zA-Z0-9_]').search
+
+from ccpncore.util.Undo import deleteAllApiObjects
  
 from ccpncore.%s.ApiError import ApiError
 """ % metaConstants.modellingPackageName)

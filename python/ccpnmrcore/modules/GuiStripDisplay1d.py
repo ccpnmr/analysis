@@ -29,6 +29,7 @@ from PyQt4 import QtCore, QtGui
 from ccpn import Spectrum
 
 from ccpncore.util.Pid import Pid
+from ccpncore.util.Types import Sequence
 
 from ccpncore.gui.Icon import Icon
 
@@ -139,8 +140,11 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
         self.addPlaneToolbar(item, widget, newPane)
       """
 
-  def processSpectrum(self, spectrum:(Spectrum, Pid), event):
-    print('processing Spectrum')
+
+  def processSpectra(self, pids:Sequence[str], event):
+    """Display spectra defined by list of Pid strings"""
+    for ss in pids:
+      print('processing Spectrum', ss)
     print(self.parent())
 
   def addSpinSystemSideLabel(self):

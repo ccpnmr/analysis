@@ -42,6 +42,9 @@ class PeakTest(WrapperTesting):
     # shift = shiftList.findChemicalShift(nmrAtom)
     shift = shiftList.getChemicalShift(nmrAtom.id)
     print("NewChemicalShift", shift, shift and shift.value)
-    assert shift is not None, "New shift must be created"
-    assert shift.value is not None, "New shift must have value"
+    # Undo and redo all operations
+    self.undo.undo()
+    self.undo.redo()
+    self.assertTrue(shift is not None)
+    self.assertTrue(shift.value is not None)
 

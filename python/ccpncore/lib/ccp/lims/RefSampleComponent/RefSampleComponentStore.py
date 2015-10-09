@@ -28,7 +28,7 @@ def fetchMolComponent(self:"RefSampleComponentStore", apiMolecule:Molecule,
   """fetch or create new MolComponent matching Molecule name and (if not None) labeling
   labeling for new MolComponents default to std
   NB pre-existing RefComponents returned may be of other types (Cell, Substance or Composite)
-   if their names match the molecule
+  if their names match the molecule
   """
   name = apiMolecule.name
   if labeling is None:

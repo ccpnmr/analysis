@@ -58,11 +58,13 @@ def extendOneLetterMolResidues(self:'Molecule', sequence:str, molType:str='prote
                             isCyclic:bool=False):
   """Descrn: Adds MolResidues for a sequence of code1Letter to Molecule, using molType.
              Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
+
      Inputs: Ccp.Molecule.Molecule,
              Word (Sequence string, of one-letter codes),
              Word (molType: 'protein', 'DNA', or 'RNA'
              Int (first MolResidue.seqCode)
              bool (is molecule cyclic?)
+
      Output: List of new Ccp.Molecule.MolResidues
   """
   if not sequence:
@@ -108,10 +110,12 @@ def extendOneLetterMolResidues(self:'Molecule', sequence:str, molType:str='prote
 def extendMolResidues(self:'Molecule', sequence:list, startNumber:int=1, isCyclic:bool=False):
   """Descrn: Adds MolResidues for a sequence of residueNames to Molecule.
              Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
+
      Inputs: Ccp.Molecule.Molecule,
              List of Words (residueName),
              Int (first MolResidue.seqCode)
              bool (is molecule cyclic?)
+
      Output: List of new Ccp.Molecule.MolResidues
   """
 
@@ -327,9 +331,9 @@ def extendLinearSequence(self:'Molecule', sequence:list, seqCodeStart:int=1,
       undo.decreaseBlocking()
 
   if undo is not None and (molResidues or molResLinks):
-    undo.newItem(Undo.deleteAll, extendLinearSequence, undoArgs=(molResidues+molResLinks,),
-                 redoArgs=(self, sequence),
-                 redoKwargs = {'seqCodeStart':seqCodeStart, 'isCyclic':isCyclic})
+    objectsCreated = molResidues+molResLinks
+    undo.newItem(Undo.deleteAllApiObjects, self.root._unDelete,
+                 undoArgs=(objectsCreated,), redoArgs=(objectsCreated,))
 
   # call notifiers:
   # NBNB the im port MUST be inside a function as we can get circular import problems otherwise

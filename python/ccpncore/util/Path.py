@@ -234,8 +234,9 @@ def suggestFileLocations(fileNames, startDir=None):
   or in a direct subdirectory.
 
   Input: list of file names
+
   Output: Superdirectory, list of relative file names.
-          If no suitable location is found, superdirectory is returned as None
+  If no suitable location is found, superdirectory is returned as None
   """
 
   if not fileNames:

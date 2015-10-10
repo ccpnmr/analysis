@@ -36,7 +36,7 @@ class Axis(pg.AxisItem):
      self.axisCode = axisCode
      self.units = units
      self.mappedDim = mappedDim
-     self.textItem = pg.TextItem(text=axisCode, color='w')
+     # self.textItem = pg.TextItem(text=axisCode, color='w')
      if orientation == 'top':
        axis = self.plotItem.axes['bottom']['item']
        self.textItem.setPos(viewBox.boundingRect().bottomLeft())

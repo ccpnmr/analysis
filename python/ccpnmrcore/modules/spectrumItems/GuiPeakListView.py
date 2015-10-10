@@ -572,7 +572,7 @@ class PeakNd(QtGui.QGraphicsItem):
         ###self.setPos(xPpm, yPpm)
 
         if widget:
-          painter.setPen(QtGui.QColor('white'))
+          painter.setPen(QtGui.QColor('#080000'))
         else:
           painter.setPen(QtGui.QColor('black'))
         # painter.drawEllipse(box)
@@ -625,7 +625,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.text = (' , ').join('-' * peakItem.peak.peakList.spectrum.dimensionCount)
     # if self.isSelected():
     #   print(self)
-    color = QtGui.QColor('white')
+    color = QtGui.QColor('#080000')
     self.setBrush(color)
     ###self.setColor()
     self.setPos(15, -15)

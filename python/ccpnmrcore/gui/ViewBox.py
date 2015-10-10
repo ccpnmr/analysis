@@ -179,30 +179,6 @@ class ViewBox(pg.ViewBox):
     elif (event.button() == QtCore.Qt.LeftButton) and (
               event.modifiers() & QtCore.Qt.ControlModifier) and not (
               event.modifiers() & QtCore.Qt.ShiftModifier):
-      event.accept()
-
-
-
-    elif (event.button() == QtCore.Qt.RightButton) and (
-              event.modifiers() & QtCore.Qt.ShiftModifier) and not (
-              event.modifiers() & QtCore.Qt.ControlModifier) or event.button() == QtCore.Qt.MidButton:
-      if event.isFinish():  ## This is the final move in the drag; change the view scale now
-        self.rbScaleBox.hide()
-        ax = QtCore.QRectF(Point(event.buttonDownPos(event.button())), Point(event.pos()))
-        ax = self.childGroup.mapRectFromParent(ax)
-        self.showAxRect(ax)
-        self.axHistoryPointer += 1
-        self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
-      else:
-        self.updateScaleBox(event.buttonDownPos(), event.pos())
-
-      event.accept()
-
-    elif (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ControlModifier) and (
-              event.modifiers() & QtCore.Qt.ShiftModifier):
-
-
       if event.isFinish():
 
         self.selectionBox.hide()
@@ -231,8 +207,34 @@ class ViewBox(pg.ViewBox):
                 spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
                 if peakList.spectrum in spectra:
                   strip.showPeaks(peakList)
+
+
       else:
-        self.updateSelectionBox(event.buttonDownPos(), event.pos())
+          self.updateSelectionBox(event.buttonDownPos(), event.pos())
+      event.accept()
+
+
+
+    elif (event.button() == QtCore.Qt.RightButton) and (
+              event.modifiers() & QtCore.Qt.ShiftModifier) and not (
+              event.modifiers() & QtCore.Qt.ControlModifier) or event.button() == QtCore.Qt.MidButton:
+      if event.isFinish():  ## This is the final move in the drag; change the view scale now
+        self.rbScaleBox.hide()
+        ax = QtCore.QRectF(Point(event.buttonDownPos(event.button())), Point(event.pos()))
+        ax = self.childGroup.mapRectFromParent(ax)
+        self.showAxRect(ax)
+        self.axHistoryPointer += 1
+        self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
+      else:
+        self.updateScaleBox(event.buttonDownPos(), event.pos())
+
+      event.accept()
+
+    elif (event.button() == QtCore.Qt.LeftButton) and (
+              event.modifiers() & QtCore.Qt.ControlModifier) and (
+              event.modifiers() & QtCore.Qt.ShiftModifier):
+
+
       event.accept()
 
 

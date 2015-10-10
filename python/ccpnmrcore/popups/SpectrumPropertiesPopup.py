@@ -182,11 +182,16 @@ class GeneralTab(QtGui.QWidget, Base):
       # recordingDataLabel = Label(self, text="Date Recorded", vAlign='t', hAlign='l', grid=(8, 0))
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
+      self.spectrumScalingData.setFixedWidth(200)
+      self.spectrumScalingData.setFixedHeight(25)
       self.spectrumScalingData.editingFinished.connect(self.setSpectrumScale)
       # minimumValueLabel = Label(self, text="Minimum Value: ", vAlign='t', hAlign='l', grid=(9, 0))
       # maximumValueLabel = Label(self, text="Maximum Value: ", vAlign='t', hAlign='l', grid=(10, 0))
       noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(9, 0))
       noiseLevelData = LineEdit(self, vAlign='t', hAlign='l', grid=(9, 1))
+      noiseLevelData.setFixedWidth(200)
+      self.spectrumType.setFixedHeight(25)
+
       if spectrum._apiDataSource.noiseLevel is None:
         noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.estimateNoise()))
       else:

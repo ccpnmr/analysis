@@ -50,17 +50,16 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self._appBase = parent._appBase
     self.setDragDropMode(self.InternalMove)
     # self._dragroot = self.itemRootIndex()
-    self.setFixedWidth(180)
+    self.setMinimumWidth(180)
     self.projectItem = QtGui.QTreeWidgetItem(self)
     self.projectItem.setText(0, "Project")
     self.projectItem.setExpanded(True)
     self.spectrumItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setText(0, "Spectra")
-    if self._appBase.applicationName == 'Assign':
+    print(self._appBase.applicationName)
+    if self._appBase.applicationName == 'Analysis3':
 
-      self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
-      self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
-      self.spectrumReference.setText(0, "Chains")
+
       # chainA = QtGui.QTreeWidgetItem(self.spectrumReference)
       # chainA.setText(0, 'Chain A')
       # chainB = QtGui.QTreeWidgetItem(self.spectrumReference)
@@ -79,38 +78,15 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       # self.structuresItem.setText(0, "Structures")
       # self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
       # self.samplesItem.setText(0, "Samples")
+
+      self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
+      self.structuresItem.setText(0, "Structures")
+      self.substancesItem = QtGui.QTreeWidgetItem(self.projectItem)
+      self.substancesItem.setText(0, "Substances")
       self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
       self.notesItem.setText(0, "Notes")
       self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
       self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
-      self.moreItem = QtGui.QTreeWidgetItem(self.projectItem)
-      self.moreItem.setText(0, 'More...')
-      self.substancesItem = QtGui.QTreeWidgetItem(self.moreItem)
-      self.substancesItem.setText(0, "Substances")
-
-      self.spectrumReference = QtGui.QTreeWidgetItem(self.projectItem)
-
-
-      self.spectrumReference.setText(0, "Chains")
-      chainA = QtGui.QTreeWidgetItem(self.spectrumReference)
-      chainA.setText(0, 'Chain A')
-      chainB = QtGui.QTreeWidgetItem(self.spectrumReference)
-      chainB.setText(0, 'Chain B')
-      chainC = QtGui.QTreeWidgetItem(self.spectrumReference)
-      chainC.setText(0, 'Chain C')
-      self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
-      self.structuresItem.setText(0, "Structures")
-      self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
-      self.notesItem.setText(0, "Notes")
-
-      self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
-      self.notesItem.setText(0, "Notes")
-      # self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
-      # self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
-      self.moreItem = QtGui.QTreeWidgetItem(self.projectItem)
-      self.moreItem.setText(0, 'More...')
-      self.substancesItem = QtGui.QTreeWidgetItem(self.moreItem)
-      self.substancesItem.setText(0, "Substances")
 
     if self._appBase.applicationName == 'Screen':
       self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)

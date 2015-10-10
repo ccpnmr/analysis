@@ -34,8 +34,11 @@ class AxisTextItem(pg.TextItem):
     self.axisCode = axisCode
     self.units = units
     self.mappedDim = mappedDim
-
-    pg.TextItem.__init__(self, text=axisCode, color='w')
+    if plotWidget._appBase.preferences.general.colourScheme == 'dark':
+      colour = '#f7ffff'
+    else:
+      colour = '#080000'
+    pg.TextItem.__init__(self, text=axisCode, color=colour)
     if orientation == 'top':
       self.setPos(plotWidget.plotItem.vb.boundingRect().bottomLeft())
       self.anchor = pg.Point(0, 1)

@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-from PyQt4 import QtGui, QtOpenGL
+from PyQt4 import QtGui, QtOpenGL, QtCore
 
 from ccpn import Spectrum
 
@@ -48,7 +48,8 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     # DropBase.__init__(self, appBase, dropCallback)
     self.setInteractive(True)
     self.plotItem.setAcceptHoverEvents(True)
-
+    print(parent.guiSpectrumDisplay)
+    self.parent = parent
     self.plotItem.setAcceptDrops(True)
     self.plotItem.axes['left']['item'].hide()
     self.plotItem.axes['right']['item'].show()

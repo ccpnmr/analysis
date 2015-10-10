@@ -376,7 +376,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ##self.drawContours(painter, guiStrip)
     # NBNB TBD this should NEVER be called if self.strip is None (i.e. self is deleted)
     # NBNB FIXME this needs to be fixed.
-
     if self.isVisible() and self.strip is not None:
       self.drawContours(painter)
     

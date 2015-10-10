@@ -63,7 +63,7 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     ##  strip.addSpectrum(self)
 
   def paint(self, painter, option, widget=None):
-    
+
     pass
     
   def boundingRect(self):  # seems necessary to have

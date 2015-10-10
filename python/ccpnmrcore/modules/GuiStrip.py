@@ -87,15 +87,15 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self))
     self.colourScheme = self._parent._appBase.preferences.general.colourScheme
     if self.colourScheme == 'light':
-      self.background = 'w'
-      self.foreground = 'k'
-      # self.gridColour = '(255, 255, 255, c)'
+      self.background = '#f7ffff'
+      self.foreground = '#080000'
+      self.gridColour = '#080000'
     else:
-      self.background = 'k'
-      self.foreground = 'w'
-      # self.gridColour = '#F7FFFF'
-    pg.setConfigOption('background', self.background)  # wb104: this has no impact at this point (I think)
-    pg.setConfigOption('foreground', self.foreground)
+      self.background = '#080000'
+      self.foreground = '#f7ffff'
+      self.gridColour = '#f7ffff'
+    # pg.setConfigOption('background', self.background)  # wb104: this has no impact at this point (I think)
+    # pg.setConfigOption('foreground', self.foreground)
     self.plotWidget.setBackground(self.background)
     #self.plotWidget.plotItem.axes['top']['item']
     self._appBase = self._parent._appBase
@@ -113,6 +113,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     for orientation in ('left', 'top'):
       axisItem = self.plotItem.axes[orientation]['item']
       axisItem.hide()
+    for orientation in ('right', 'bottom'):
+      axisItem = self.plotItem.axes[orientation]['item']
+      axisItem.setPen(color=self.foreground)
     self.gridShown = True
     # self.textItem = pg.TextItem(text=self.pid, color='w')
     # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
@@ -120,7 +123,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
 
     self.viewBox.sigClicked.connect(self.mouseClicked)
     ###proxy = pg.SignalProxy(self.viewBox.sigRangeChanged, rateLimit=10, slot=self.updateRegion)
-    self.grid = CcpnGridItem()
+    self.grid = CcpnGridItem(self.gridColour)
     self.plotWidget.addItem(self.grid)
     self.setMinimumWidth(200)
     self.createCrossHair()

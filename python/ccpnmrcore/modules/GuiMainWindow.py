@@ -27,36 +27,36 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
-from ccpncore.gui.Action import Action
-from ccpncore.gui.Console import Console
-from ccpncore.gui.CcpnWebView import CcpnWebView
-
-from ccpncore.gui.Dock import CcpnDock
-
-from ccpncore.gui.Menu import Menu, MenuBar
 from ccpncore.gui import MessageDialog
+
+from ccpncore.gui.Action import Action
+from ccpncore.gui.CcpnWebView import CcpnWebView
+from ccpncore.gui.Dock import CcpnDock
+from ccpncore.gui.IpythonConsole import IpythonConsole
+from ccpncore.gui.Menu import Menu, MenuBar
 from ccpnmrcore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
 
 from ccpncore.util import Path
 
 from ccpnmrcore.gui.Assigner import Assigner
+
 from ccpnmrcore.modules.AssignmentModule import AssignmentModule
 from ccpnmrcore.modules.AtomSelector import AtomSelector
+from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
+from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
 
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
-from ccpnmrcore.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpnmrcore.modules.GuiWindow import GuiWindow
-from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
 from ccpnmrcore.modules.PeakTable import PeakTable
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.modules.SequenceModule import SequenceModule
 from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
+
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpnmrcore.popups.SampleSetupPopup import SamplePopup
-from ccpncore.util import Io as ioUtil
-from ccpncore.util import Pid
+
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
@@ -143,35 +143,36 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # self.pythonConsole = Console(parent=self, namespace=self.namespace)
     # self.pythonConsole.setGeometry(1200, 700, 10, 1)
     # self.pythonConsole.heightMax = 200
-    from ccpncore.gui.IpythonConsole import IpythonConsole
     self.pythonConsole = IpythonConsole(self, self.namespace)
+    # self.pythonConsole.setGeometry(1200, 700, 10, 1)
+    # self.pythonConsole.setMinimumHeight(200)
+    # self.pythonConsole.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+
     self.sideBar = SideBar(parent=self)
 
     self.sideBar.setDragDropMode(self.sideBar.DragDrop)
-    self.sideBar.setGeometry(0, 0, 13, 600)
-    self.sideBar.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-
-    self.sideBar.setDragDropMode(self.sideBar.DragDrop)
-    self.sideBar.setGeometry(0, 0, 50, 600)
-    self.sideBar.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    # self.sideBar.setGeometry(0, 0, 180, 600)
+    self.sideBar.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
 
     self.splitter3.addWidget(self.sideBar)
+    # self.splitter3.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
 
     self.splitter1.addWidget(self.splitter3)
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
+    self.splitter1.setStretchFactor(0, 2)
     self.splitter2.addWidget(self.splitter1)
-    self.splitter2.heightMax = 200
-    # assignerShorcut = QtGui.QShortcut(QtGui.QKeySequence('s, a'), self, self.showAssigner)
     csShortcut = QtGui.QShortcut(QtGui.QKeySequence('c, s'), self, self.showChemicalShiftTable)
-    # peakTableShorcut = QtGui.QShortcut(QtGui.QKeySequence('p, t'), self, self.showPeakTable)
     self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
+    self.splitter2.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Minimum)
+    self.splitter2.setStretchFactor(0, 10)
+    self.splitter2.setStretchFactor(1, 1)
+
     # self.dockArea.addDock(self.pythonConsole)
     self.pythonConsole.hide()
-    self.splitter2.setGeometry(QtCore.QRect(1200, 1300, 100, 100))
     self.splitter1.addWidget(self.dockArea)
-    self.seqScrollArea = QtGui.QScrollArea()
-    self.seqScrollArea.setFixedHeight(30)
+    # self.seqScrollArea = QtGui.QScrollArea()
+    # self.seqScrollArea.setFixedHeight(30)
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
     self.setShortcuts()
@@ -252,7 +253,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # newMoleculeMenu.addAction(Action(self, "From NEF...", callback=self.createMoleculeFromNEF))
     newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
     self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
-    # sequenceAction.setChecked(self.sequenceWidget.isVisible())
     moleculeMenu.addAction(self.sequenceAction)
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
@@ -362,14 +362,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if not hasattr(self, 'blankDisplay') or self.blankDisplay is None:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
-
-  def toggleSequenceWidget(self):
-    if self.sequenceWidget.isVisible():
-      self.hideSequence()
-      # self.sequenceAction.setCheckable(False)
-    else:
-      self.showSequence()
-    self.sequenceAction.setChecked(self.sequenceWidget.isVisible())
 
   def showSequence(self):
       self.sequenceWidget = SequenceModule(self._appBase, self._project)
@@ -631,8 +623,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def showMoleculePopup(self):
-    from ccpnmrcore.modules.LoadSequence import LoadSequence
-    popup = LoadSequence(self, project=self._project).exec_()
+    from ccpnmrcore.modules.CreateSequence import CreateSequence
+    popup = CreateSequence(self, project=self._project).exec_()
 
   def inspectMolecule(self):
     pass

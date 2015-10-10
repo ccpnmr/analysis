@@ -48,28 +48,7 @@ from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
-  # def wheelEvent(self, event):
-  #   if event.modifiers() & QtCore.Qt.ShiftModifier:
-  #     for spectrumItem in self.spectrumItems:
-  #       if event.delta() > 0:
-  #           spectrumItem.raiseBaseLevel()
-  #           spectrumItem.update()
-  #       else:
-  #         spectrumItem.lowerBaseLevel()
-  #         spectrumItem.update()
-  #   elif not event.modifiers():
-  #     QtGui.QGraphicsView.wheelEvent(self, event)
-  #     sc = 1.001 ** event.delta()
-  #     #self.scale *= sc
-  #     #self.updateMatrix()
-  #     self.scale(sc, sc)
-  #   elif event.modifiers() & QtCore.Qt.ControlModifier:
-  #     if event.delta() > 0:
-  #        self.increaseTraceScale()
-  #     else:
-  #       self.decreaseTraceScale()
-  #   else:
-  #     event.ignore
+
 
 
   def __init__(self):
@@ -221,7 +200,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
         apiDataSource.positiveContourBase *= apiDataSource.positiveContourFactor
         apiDataSource.negativeContourBase *= apiDataSource.negativeContourFactor
-    self.update()
+        spectrumView.update()
 
   def downBy2(self):
 
@@ -230,7 +209,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
         apiDataSource.positiveContourBase /= apiDataSource.positiveContourFactor
         apiDataSource.negativeContourBase /= apiDataSource.negativeContourFactor
-
+        spectrumView.update()
   def addOne(self):
 
     for spectrumView in self.spectrumViews:
@@ -282,6 +261,31 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         del peakItemDict[apiPeak]
         self.inactivePeakItems.add(peakItem)
       
+
+
+  # def wheelEvent(self, event):
+  #   event.accept()
+  #   print(event)
+  #   if event.modifiers() & QtCore.Qt.ShiftModifier:
+  #     if event.delta() > 0:
+  #         self.upBy2()
+  #     else:
+  #       self.downBy2()
+  #         # spectrumItem.update()
+  #   elif not event.modifiers():
+  #     QtGui.QGraphicsView.wheelEvent(self, event)
+  #     sc = 1.001 ** event.delta()
+  #     #self.scale *= sc
+  #     #self.updateMatrix()
+  #     self.scale(sc, sc)
+    # elif event.modifiers() & QtCore.Qt.ControlModifier:
+    #   if event.delta() > 0:
+    #      self.increaseTraceScale()
+    #   else:
+    #     self.decreaseTraceScale()
+    # else:
+    #   event.ignore
+
   # def _addedStripSpectrumView(self, apiStripSpectrumView):
   #   apiSpectrumDisplay = self._wrappedData
   #   if apiSpectrumDisplay is not apiStripSpectrumView.strip.spectrumDisplay:

@@ -1,7 +1,8 @@
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.TextEditor import TextEditor
+from IPython.qt.console.completion_widget import CompletionWidget
 from ccpncore.gui.Widget import Widget
 from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
@@ -20,8 +21,8 @@ class IpythonConsole(QtGui.QWidget, Base):
         km.kernel.gui = 'qt4'
         kc = km.client()
         kc.start_channels()
-
         ipythonWidget = RichIPythonWidget(self)
+        ipythonWidget._set_font(QtGui.QFont('Lucida Grande', 12))
 
         ipythonWidget.kernel_manager = km
         ipythonWidget.kernel_client = kc
@@ -31,8 +32,12 @@ class IpythonConsole(QtGui.QWidget, Base):
 
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)
+        self.textEditor.setFont(QtGui.QFont('Lucida Grande', 12))
+        self.textEditor.setTextColor(QtGui.QColor('black'))
+        # self.textEditor.setFontPointSize(int(10))
 
-
+        self.layout().setSpacing(1)
+        # self.layout().setContentsMargins(3, 3, 3, 3)
         self.layout().addWidget(self.textEditor, 0, 0)
         self.layout().addLayout(consoleLayout, 1, 0)
         self.layout().addLayout(buttonLayout, 2, 0)
@@ -49,7 +54,6 @@ class IpythonConsole(QtGui.QWidget, Base):
         historyButton.setText('Show History')
         buttonLayout.addWidget(historyButton, 0, 1)
         km.kernel.shell.push(namespace)
-        self.ipythonWidget = ipythonWidget
 
 
     def runMacro(self):
@@ -69,7 +73,8 @@ class IpythonConsole(QtGui.QWidget, Base):
            to the input line without executing it.
 
         '''
-        print(msg)
+        # print(self.ipythonWidget.text())
+        print(msg, 'message here')
         self.textEditor.moveCursor(QtGui.QTextCursor.End)
         if html:
             self.textEditor.textCursor().insertHtml(msg)

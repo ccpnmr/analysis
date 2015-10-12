@@ -1,19 +1,21 @@
 __author__ = 'simon1'
 from PyQt4 import QtGui, QtCore
-from pyqtgraph.graphicsItems.UIGraphicsItem import *
+from pyqtgraph.graphicsItems.UIGraphicsItem import UIGraphicsItem
 import numpy as np
 from pyqtgraph.Point import Point
 from pyqtgraph import functions as fn
+
+from ccpncore.util.Colour import hexToRgb
 
 __all__ = ['GridItem']
 
 class CcpnGridItem(UIGraphicsItem):
 
 
-    def __init__(self):
+    def __init__(self, gridColour):
         UIGraphicsItem.__init__(self)
         self.picture = None
-
+        self.gridColour = gridColour
 
     def viewRangeChanged(self):
         UIGraphicsItem.viewRangeChanged(self)
@@ -58,8 +60,10 @@ class CcpnGridItem(UIGraphicsItem):
             for ax in range(0,2):  ## Draw grid for both axes
                 ppl = dim[ax] / nl[ax]
                 c = np.clip(3.*(ppl-3), 0., 30.)
-                linePen = QtGui.QPen(QtGui.QColor(255, 255, 255, c))
-                textPen = QtGui.QPen(QtGui.QColor(255, 255, 255, c*2))
+                if self.gridColour == '#f7ffff':
+                  linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))
+                else:
+                  linePen = QtGui.QPen(QtGui.QColor(8, 0, 0, c))
 
                 bx = (ax+1) % 2
                 for x in range(0, int(nl[ax])):

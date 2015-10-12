@@ -7,6 +7,11 @@ QMenu {
       background-color: #424a71;
     }
 
+QMenu::right-arrow {
+border-image: none;
+image: url(:/dark-side.png);
+}
+
 QMenuBar {
               background-color: #424a71;
               font-size: 1.5em;

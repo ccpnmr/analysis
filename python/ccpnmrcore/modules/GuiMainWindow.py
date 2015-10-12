@@ -253,6 +253,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # newMoleculeMenu.addAction(Action(self, "From NEF...", callback=self.createMoleculeFromNEF))
     newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
     self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
+    if hasattr(self, 'sequenceWidget'):
+      self.sequenceAction.setChecked(self.sequenceWidget.isVisible())
+    else:
+      self.sequenceAction.setChecked(False)
     moleculeMenu.addAction(self.sequenceAction)
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()

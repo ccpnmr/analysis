@@ -395,7 +395,6 @@ class PeakNd(QtGui.QGraphicsItem):
       # self.setFlag(QtGui.QGraphicsSimpleTextItem.ItemIsMovable)
       # QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
-      print(self.peakItem)
 
 
   def boundingRect(self):

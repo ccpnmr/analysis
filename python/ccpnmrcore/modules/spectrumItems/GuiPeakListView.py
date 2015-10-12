@@ -390,12 +390,13 @@ class PeakNd(QtGui.QGraphicsItem):
     self._appBase = peakListView._appBase
     scene = peakListView.spectrumView.strip.plotWidget.scene()
     #QtGui.QGraphicsItem.__init__(self, scene=scene)
+    self.colourScheme =self._appBase.preferences.general.colourScheme
     QtGui.QGraphicsItem.__init__(self, peakListView, scene=scene)
     ###QtGui.QGraphicsItem.__init__(self, peakLayer)
     ###scene.addItem(self)
     ###strip.plotWidget.plotItem.vb.addItem(self)
     self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
-    
+    self.peakListView = peakListView
     self.annotation = PeakNdAnnotation(self, scene)
     self.setupPeakItem(peakListView, peak)
     # self.glWidget = peakLayer.glWidget
@@ -572,7 +573,10 @@ class PeakNd(QtGui.QGraphicsItem):
         ###self.setPos(xPpm, yPpm)
 
         if widget:
-          painter.setPen(QtGui.QColor('#080000'))
+          if self.colourScheme == 'light':
+            painter.setPen(QtGui.QColor('#080000'))
+          else:
+            painter.setPen(QtGui.QColor('#f7ffff'))
         else:
           painter.setPen(QtGui.QColor('black'))
         # painter.drawEllipse(box)
@@ -625,8 +629,12 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.text = (' , ').join('-' * peakItem.peak.peakList.spectrum.dimensionCount)
     # if self.isSelected():
     #   print(self)
-    color = QtGui.QColor('#080000')
-    self.setBrush(color)
+    self.colourScheme = peakItem.peakListView._appBase.preferences.general.colourScheme
+    if self.colourScheme == 'light':
+      colour = QtGui.QColor('#080000')
+    else:
+      colour = QtGui.QColor('#f7ffff')
+    self.setBrush(colour)
     ###self.setColor()
     self.setPos(15, -15)
     # self.updatePos()

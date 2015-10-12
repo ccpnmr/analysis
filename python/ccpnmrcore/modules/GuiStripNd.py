@@ -115,6 +115,11 @@ class GuiStripNd(GuiStrip):
     restoreZoomIcon = Icon('iconsNew/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
+    resetZoomAction = self.contextMenu.addAction("Reset Zoom", self.resetZoom)
+    resetZoomIcon = Icon('iconsNew/zoom-full')
+    resetZoomAction.setIcon(resetZoomIcon)
+    resetZoomAction.setToolTip('Reset Zoom')
+
 
 
     ###if self.crossHairShown == True:
@@ -129,6 +134,21 @@ class GuiStripNd(GuiStrip):
       self.gridAction.setChecked(False)
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
+
+  def resetZoom(self):
+    x = []
+    y = []
+    for spectrumView in self.spectrumViews:
+      xIndex = spectrumView.spectrum.axisCodes.index(self.axisCodes[0])
+      yIndex = spectrumView.spectrum.axisCodes.index(self.axisCodes[1])
+      x.append(spectrumView.spectrum.spectrumLimits[xIndex])
+      y.append(spectrumView.spectrum.spectrumLimits[yIndex])
+
+    xArray = numpy.array(x).flatten()
+    yArray = numpy.array(y).flatten()
+
+    self.zoomToRegion([min(xArray), max(xArray), min(yArray), max(yArray)])
+
 
   def updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse

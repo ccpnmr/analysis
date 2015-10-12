@@ -111,11 +111,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.write(msg2)
     # self.pythonConsole.ui.historyList.addItem(msg2)
 
-    if not isNew:
-      recentFiles = self._appBase.preferences.recentFiles
-      if len(recentFiles) >= 10:
-        recentFiles.pop()
-      recentFiles.insert(0, path)
+    # if not isNew:
+    recentFiles = self._appBase.preferences.recentFiles
+    if len(recentFiles) >= 10:
+      recentFiles.pop()
+    recentFiles.insert(0, path)
+    seen = set()
+    seen_add = seen.add
+    recentFiles = [x for x in recentFiles if x not in seen and not seen_add(x)]
+    # print(recentFiles)
+    self._appBase.preferences.recentFiles = recentFiles
+
+
 
     self.setWindowTitle('%s %s (%s): %s' % (self._appBase.applicationName, self._appBase.applicationVersion, __version__[1:-1].strip(), project.name))
 
@@ -271,7 +278,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroRecordMenu.addAction(Action(self, "Save As...", callback=self.saveRecordedMacro))
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Run...", shortcut="rm", callback=self.pythonConsole.runMacro))
-    macroMenu.addAction(Action(self, "Run Recent", callback=self.showRecentMacros))
+
+    self.recentMacrosMenu = macroMenu.addMenu("Run Recent")
+    self.fillRecentMacrosMenu()
+    # macroMenu.addAction(Action(self, "Run Recent", callback=self.showRecentMacros))
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Define User Shortcuts...", callback=self.defineUserShortcuts))
 
@@ -472,6 +482,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       prefFile = open(prefPath)
       pref = json.load(prefFile)
       prefFile.close()
+      print(pref, self._appBase.preferences)
       if pref == self._appBase.preferences:
         savePref = False
       else:
@@ -504,8 +515,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if reply == 'Save and Quit':
       if event:
         event.accept()
+      prefFile = open(prefPath, 'w+')
+      json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+      prefFile.close()
       self.saveProject()
-      # CLose and clean up project
+      # Close and clean up project
       self._appBase._closeProject()
       QtGui.QApplication.quit()
     elif reply == 'Quit without Saving':
@@ -611,8 +625,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def saveRecordedMacro(self):
     pass
 
-  def showRecentMacros(self):
-    pass
+  def fillRecentMacrosMenu(self):
+    for recentMacro in self._appBase.preferences.recentMacros:
+      print(recentMacro, 'recentMacro')
+      self.action = Action(self, text=recentMacro, callback=partial(self.runMacro,projectDir=recentMacro))
+      self.recentProjectsMenu.addAction(self.action)
 
   def defineUserShortcuts(self):
     pass
@@ -658,8 +675,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def runMacro(self, macroFile=None):
-
-    macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
+    print('here333333')
+    if macroFile is None:
+      macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
+    self._appBase.preferences.recentMacros.append(macroFile)
+    self.fillRecentMacrosMenu()
+    print(macroFile, 'macroFile')
+    import pprint
+    pprint.pprint(self._appBase.preferences)
+    # self.fillRecentMacrosMenu()
     f = open(macroFile)
     lines = f.readlines()
 

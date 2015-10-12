@@ -48,7 +48,6 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     # DropBase.__init__(self, appBase, dropCallback)
     self.setInteractive(True)
     self.plotItem.setAcceptHoverEvents(True)
-    print(parent.guiSpectrumDisplay)
     self.parent = parent
     self.plotItem.setAcceptDrops(True)
     self.plotItem.axes['left']['item'].hide()
@@ -68,4 +67,4 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
   def processSpectra(self, pids:Sequence[str], event):
     """Display spectra defined by list of Pid strings"""
     for ss in pids:
-      self.parent().guiSpectrumDisplay.displaySpectrum(ss)
+      self.parent.guiSpectrumDisplay.displaySpectrum(ss)

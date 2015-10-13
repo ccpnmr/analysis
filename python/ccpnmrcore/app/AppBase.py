@@ -136,7 +136,7 @@ class AppBase(GuiBase):
     ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)
     print("project saved")
     
-def getPreferences(skipUserPreferences):
+def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userPreferencesPath=None):
 
   def _readPreferencesFile(preferencesPath):
     fp = open(preferencesPath)
@@ -159,12 +159,12 @@ def getPreferences(skipUserPreferences):
         d[k] = u[k]
     return d
       
-  preferencesPath = os.path.join(Path.getPythonDirectory(),
+  preferencesPath = defaultPreferencesPath if defaultPreferencesPath else os.path.join(Path.getPythonDirectory(),
                       'ccpnmrcore', 'app', 'defaultv3settings.json')
   preferences = _readPreferencesFile(preferencesPath)
   
   if not skipUserPreferences:
-    preferencesPath = os.path.expanduser('~/.ccpn/v3settings.json') # TBD: where should it go?
+    preferencesPath = userPreferencesPath if userPreferencesPath else os.path.expanduser('~/.ccpn/v3settings.json')
     if os.path.exists(preferencesPath):
       _updateDict(preferences, _readPreferencesFile(preferencesPath))
       

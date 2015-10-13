@@ -32,6 +32,12 @@ def rgbaToHex(r, g, b, a=255):
 def rgbToHex(r, g, b):
 
   return '#' + ''.join([hex(x)[2:] for x in (r, g, b)])
+
+def hexToRgb(hex):
+  hex = hex.lstrip('#')
+  lv = len(hex)
+  return tuple(int(hex[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
   
 
 colourNameToHexDict = {

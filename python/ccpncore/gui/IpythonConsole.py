@@ -21,11 +21,11 @@ class IpythonConsole(QtGui.QWidget, Base):
         km.kernel.gui = 'qt4'
         kc = km.client()
         kc.start_channels()
-        ipythonWidget = RichIPythonWidget(self)
-        ipythonWidget._set_font(QtGui.QFont('Lucida Grande', 12))
+        self.ipythonWidget = RichIPythonWidget(self)
+        self.ipythonWidget._set_font(QtGui.QFont('Lucida Grande', 12))
 
-        ipythonWidget.kernel_manager = km
-        ipythonWidget.kernel_client = kc
+        self.ipythonWidget.kernel_manager = km
+        self.ipythonWidget.kernel_client = kc
 
         consoleLayout = QtGui.QGridLayout()
         buttonLayout = QtGui.QGridLayout()
@@ -42,7 +42,7 @@ class IpythonConsole(QtGui.QWidget, Base):
         self.layout().addLayout(consoleLayout, 1, 0)
         self.layout().addLayout(buttonLayout, 2, 0)
 
-        consoleLayout.addWidget(ipythonWidget)
+        consoleLayout.addWidget(self.ipythonWidget)
 
         runMacroButton = QtGui.QPushButton()
         runMacroButton.clicked.connect(self.runMacro)
@@ -66,14 +66,14 @@ class IpythonConsole(QtGui.QWidget, Base):
             self.ipythonWidget.execute('%run -i {}'.format(macroFile))
 
     def showHistory(self):
-        self.ipythonWidget.execute('%history')
+        self.self.ipythonWidget.execute('%history')
 
     def write(self, msg, html=False):
         '''Not implemented. I don't know yet how to write something
            to the input line without executing it.
 
         '''
-        # print(self.ipythonWidget.text())
+        # print(self.self.ipythonWidget.text())
         print(msg, 'message here')
         self.textEditor.moveCursor(QtGui.QTextCursor.End)
         if html:

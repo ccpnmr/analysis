@@ -139,6 +139,7 @@ ChemicalShiftList.newChemicalShift = newChemicalShift
 className = ApiShift._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':ChemicalShift}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

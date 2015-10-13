@@ -363,6 +363,7 @@ Project._apiNotifiers.extend(
     ('_resetPid', {}, className, 'setNmrChain'),
     ('_resetPid', {}, className, 'setResidueType'),
     ('_resetPid', {}, className, 'setResonances'),
-    ('_resetPid', {}, className, 'addResonance')
+    ('_resetPid', {}, className, 'addResonance'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

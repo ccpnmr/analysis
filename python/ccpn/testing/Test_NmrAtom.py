@@ -61,6 +61,7 @@ class NmrAtomTest(WrapperTesting):
     with self.assertRaises(ValueError):
       atomCX = self.project.produceNmrAtom('NA:A.11.VAL.CX')
 
+    self.assertEqual(atomCX.pid, 'NA:A.888.ARG.C@198')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
@@ -74,7 +75,9 @@ class NmrAtomTest(WrapperTesting):
     at1 = at1.reassigned(name='NE')
     self.assertEqual(at1.id,'X.101.VAL.NE')
     at0 = at0.reassigned(sequenceCode=101)
+    self.assertEqual(at0.id,'@-.101..HX')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
     self.assertEqual(at0.id,'@-.101..HX')
+    self.assertEqual(at1.id,'X.101.VAL.NE')

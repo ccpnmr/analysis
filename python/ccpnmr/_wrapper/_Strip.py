@@ -392,7 +392,8 @@ Strip.processSpectrum = Strip.displaySpectrum
 className = ApiStrip._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Strip._factoryFunction}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )
 

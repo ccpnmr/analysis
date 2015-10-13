@@ -354,6 +354,7 @@ SpectrumView._factoryFunction = staticmethod(_factoryFunction)
 className = ApiStripSpectrumView._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':SpectrumView._factoryFunction}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

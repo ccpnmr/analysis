@@ -171,6 +171,7 @@ Project.newTask = newTask
 className = ApiGuiTask._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Task}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

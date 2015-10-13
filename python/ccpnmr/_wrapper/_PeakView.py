@@ -100,6 +100,7 @@ PeakListView._childClasses.append(PeakView)
 className = ApiPeakView._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':PeakView}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

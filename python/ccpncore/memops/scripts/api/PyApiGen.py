@@ -299,12 +299,9 @@ for obj in %s:
 
       self.write('''
 for obj in %s:
-  for notify in obj.__class__._notifies.get('__init__', ()):
+  for notify in obj.__class__._notifies.get('undelete', ()):
     notify(obj)
-for obj in %s:
-  for notify in obj.__class__._notifies.get('postInit', ()):
-    notify(obj)
-''' % (self.varNames['objsToBeUnDeleted'], self.varNames['objsToBeUnDeleted']))
+''' %  self.varNames['objsToBeUnDeleted'])
 
     else:
 

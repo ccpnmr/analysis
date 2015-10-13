@@ -218,6 +218,7 @@ className = ApiNmrChain._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':NmrChain}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete'),
-    ('_resetPid', {}, className, 'setCode')
+    ('_resetPid', {}, className, 'setCode'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

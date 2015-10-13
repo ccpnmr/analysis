@@ -96,6 +96,7 @@ class Test_chemicalShift(WrapperTesting):
     peaks[0].assignDimension(axisCode=libSpectrum.axisCodeMatch('N', self.spectrum.axisCodes),
                              value=self.atom)
     # Undo and redo all operations
+    self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom.id))
     self.undo.undo()
     self.undo.redo()
     self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom.id))

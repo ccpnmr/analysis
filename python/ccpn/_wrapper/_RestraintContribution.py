@@ -255,7 +255,8 @@ for clazz in ApiContribution._metaclass.getNonAbstractSubtypes():
   className = clazz.qualifiedName()
   Project._apiNotifiers.extend(
     ( ('_newObject', {'cls':RestraintContribution}, className, '__init__'),
-      ('_finaliseDelete', {}, className, 'delete')
+      ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
     )
 )
 

@@ -465,6 +465,7 @@ SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum
 className = ApiSpectrumDisplay._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':SpectrumDisplay._factoryFunction}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

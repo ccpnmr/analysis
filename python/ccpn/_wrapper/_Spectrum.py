@@ -829,6 +829,7 @@ className = ApiDataSource._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Spectrum}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
     ('_resetPid', {}, className, 'setName'),
   )
 )

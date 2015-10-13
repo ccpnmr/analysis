@@ -116,7 +116,11 @@ class NmrAtom(AbstractWrapperObject):
     undo = self._apiResonance.root._undo
     apiResonance = self._apiResonance
     apiResonanceGroup = apiResonance.resonanceGroup
-    sequenceCode = str(sequenceCode) if sequenceCode else None
+    if isinstance(sequenceCode, int):
+      sequenceCode = str(sequenceCode)
+    elif not sequenceCode:
+      # convert empty string to None
+      sequenceCode = None
 
     if atomId:
       if any((chainCode, sequenceCode, residueType, name)):
@@ -296,6 +300,7 @@ Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':NmrAtom}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete'),
     ('_resetPid', {}, className, 'setName'),
-    ('_resetPid', {}, className, 'setResonanceGroup')
+    ('_resetPid', {}, className, 'setResonanceGroup'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

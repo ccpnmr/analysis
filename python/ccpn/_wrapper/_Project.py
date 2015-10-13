@@ -28,6 +28,7 @@ import os
 from ccpn import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpncore.memops import Notifiers
+from ccpncore.memops.ApiError import ApiError
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.spectrum import NmrExpPrototype
 from ccpncore.lib import Constants
@@ -177,7 +178,7 @@ class Project(AbstractWrapperObject):
     For use in creation notifiers"""
     return cls(self, wrappedData)
 
-  def _finaliseDelete(self, wrappedData) -> None:
+  def _finaliseDelete(self, wrappedData):
     """Clean up after object deletion - to be called from notifiers
     wrapperObject to delete is identified from wrappedData"""
 
@@ -190,8 +191,38 @@ class Project(AbstractWrapperObject):
     # remove from pid2Obj
     del self._pid2Obj[obj.shortClassName][obj._id]
 
+    # Mark object as obviously deleted, and set up for undeletion
+    obj._id += '-Deleted'
+    wrappedData._oldWrapperObject = obj
+    obj._wrappedData = None
+
+  def _finaliseUnDelete(self, wrappedData):
+    """restore undeleted wrapper object"""
+
+    if wrappedData.isDeleted:
+      raise ValueError("_finaliseUnDelete called before wrapped data are deleted: %s" % wrappedData)
+
+    try:
+      oldWrapperObject = wrappedData._oldWrapperObject
+    except AttributeError:
+      raise ApiError("Wrapper object to undelete wrongly set up - lacks _oldWrapperObject attribute")
+
+    # put back in from wrapped2Obj
+    self._data2Obj[wrappedData] = oldWrapperObject
+
+    if oldWrapperObject._id.endswith('-Deleted'):
+      oldWrapperObject._id = oldWrapperObject._id[:-8]
+
+    # put back in pid2Obj
+    self._pid2Obj[oldWrapperObject.shortClassName][oldWrapperObject._id] = oldWrapperObject
+
+    # Restore object to pre-undeletion state
+    del wrappedData._oldWrapperObject
+    oldWrapperObject._wrappedData = wrappedData
+
   def _resetPid(self, wrappedData):
     """Reset internal attributes after values determining PID have changed"""
+
 
     getDataObj = self._data2Obj.get
     pid2Obj = self._pid2Obj

@@ -267,6 +267,7 @@ for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():
   Project._apiNotifiers.extend(
     ( ('_newObject', {'cls':RestraintList}, className, '__init__'),
       ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
       ('_resetPid', {}, className, 'setName'),
     )
 )

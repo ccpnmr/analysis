@@ -247,7 +247,7 @@ class Undo(deque):
         raise
       self.clear()
     finally:
-      # Addded by Rasmus March 2015. Surely we need to reset self._blocked?
+      # Added by Rasmus March 2015. Surely we need to reset self._blocked?
       self._blocked = False
 
   def redo(self):
@@ -298,6 +298,8 @@ class Undo(deque):
 
   def clear(self):
     """Clear and reset undo object """
+    if self._debug:
+      print ('@~@~ CLEAR undo')
     self.nextIndex = 0
     self.waypoints.clear()
     self._blocked = False

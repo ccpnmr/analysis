@@ -138,5 +138,6 @@ Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':ChemicalShiftList}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete'),
     ('_resetPid', {}, className, 'setName'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

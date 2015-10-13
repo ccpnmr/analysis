@@ -393,6 +393,7 @@ NmrAtom.assignedPeaks = property(_atomAssignedPeaks, None, None)
 className = ApiPeak._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Peak}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete')
+    ('_finaliseDelete', {}, className, 'delete'),
+    ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

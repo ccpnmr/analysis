@@ -40,18 +40,10 @@ def test_get_preferences_user():
 
   preferences = AppBase.getPreferences(userPreferencesPath='userv3settingsTest.json')
   print(preferences)
-  if 'recentMacros' in preferences:
-    print('True')
-  else:
-    print('False')
 
 def test_get_preferences_default_user():
 
   preferences = AppBase.getPreferences(defaultPreferencesPath='defaultv3settingsTest.json',
                                userPreferencesPath='userv3settingsTest.json')
-  if 'recentMacros' in preferences:
-    print('True')
-  else:
-    print('Not found any macros here')
   print(preferences)
 

@@ -277,12 +277,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroRecordMenu.addAction(Action(self, "Stop", callback=self.stopMacroRecord))
     macroRecordMenu.addAction(Action(self, "Save As...", callback=self.saveRecordedMacro))
     macroMenu.addSeparator()
-    macroMenu.addAction(Action(self, "Run...", shortcut="rm", callback=self.pythonConsole.runMacro))
+    macroMenu.addAction(Action(self, "Run...", shortcut="rm", callback=self.runMacro))
 
     self.recentMacrosMenu = macroMenu.addMenu("Run Recent")
-    print('prefill')
     self.fillRecentMacrosMenu()
-    print('postfill')
     # macroMenu.addAction(Action(self, "Run Recent", callback=self.showRecentMacros))
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Define User Shortcuts...", callback=self.defineUserShortcuts))
@@ -480,35 +478,33 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       
 
     prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-    if os.path.exists(prefPath):
-      prefFile = open(prefPath)
-      pref = json.load(prefFile)
-      prefFile.close()
-      print(pref, self._appBase.preferences)
-      if pref == self._appBase.preferences:
-        savePref = False
-      else:
-        msgBox = QtGui.QMessageBox()
-        msgBox.setText("Application Preferences have been changed")
-        msgBox.setInformativeText("Do you want to save your changes?")
-        msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-        savePref = (msgBox.exec_() == QtGui.QMessageBox.Yes)
-    else:
-      savePref = True
-      
-    if savePref:
-      directory = os.path.dirname(prefPath)
-      if not os.path.exists(directory):
-        try:
-          os.makedirs(directory)
-        except Exception as e:
-          project = self._appBase.project
-          project._logger.warning('Preferences not saved: %s' % (directory, e))
-          return
+    # if os.path.exists(prefPath):
+    #   prefFile = open(prefPath)
+    #   pref = json.load(prefFile)
+    #   prefFile.close()
+    #   if pref == self._appBase.preferences:
+    #     savePref = False
+    #   else:
+    #     msgBox = QtGui.QMessageBox()
+    #     msgBox.setText("Application Preferences have been changed")
+    #     msgBox.setInformativeText("Do you want to save your changes?")
+    #     msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+    #     savePref = (msgBox.exec_() == QtGui.QMessageBox.Yes)
+    # else:
+    #   savePref = True
+    #
+    directory = os.path.dirname(prefPath)
+    if not os.path.exists(directory):
+      try:
+        os.makedirs(directory)
+      except Exception as e:
+        project = self._appBase.project
+        project._logger.warning('Preferences not saved: %s' % (directory, e))
+        return
           
-      prefFile = open(prefPath, 'w+')
-      json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-      prefFile.close()
+    prefFile = open(prefPath, 'w+')
+    json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+    prefFile.close()
 
     # NBNB TBD FIXME put code here to ask if you want to save etc.
     from ccpncore.gui.MessageDialog import showMulti
@@ -628,10 +624,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def fillRecentMacrosMenu(self):
-    print(self._appBase.preferences.recentMacros, 'are there any here?')
-    for recentMacro in self._appBase.preferences.recentMacros:
-      print(recentMacro, 'recentMacro')
-      self.action = Action(self, text=recentMacro, callback=partial(self.runMacro,projectDir=recentMacro))
+
+    seen = set()
+    seen_add = seen.add
+    recentMacros = [x for x in self._appBase.preferences.recentMacros if x not in seen and not seen_add(x)]
+
+    for recentMacro in recentMacros:
+      self.action = Action(self, text=recentMacro, callback=partial(self.runMacro, macroFile=recentMacro))
       self.recentMacrosMenu.addAction(self.action)
 
   def defineUserShortcuts(self):
@@ -682,16 +681,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
     self._appBase.preferences.recentMacros.append(macroFile)
     self.fillRecentMacrosMenu()
-    import pprint
-    pprint.pprint(self._appBase.preferences)
     # self.fillRecentMacrosMenu()
-    f = open(macroFile)
-    lines = f.readlines()
-    print('lines', lines)
-    for line in lines:
-        self.pythonConsole.runCmd(line)
-
-    f.close()
+    self.pythonConsole.runMacro(macroFile)
 
   def showMoleculeDisplay(self):
     from ccpn.lib.moleculebox import MoleculeDisplay

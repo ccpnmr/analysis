@@ -280,7 +280,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroMenu.addAction(Action(self, "Run...", shortcut="rm", callback=self.pythonConsole.runMacro))
 
     self.recentMacrosMenu = macroMenu.addMenu("Run Recent")
+    print('prefill')
     self.fillRecentMacrosMenu()
+    print('postfill')
     # macroMenu.addAction(Action(self, "Run Recent", callback=self.showRecentMacros))
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Define User Shortcuts...", callback=self.defineUserShortcuts))
@@ -626,10 +628,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def fillRecentMacrosMenu(self):
+    print(self._appBase.preferences.recentMacros, 'are there any here?')
     for recentMacro in self._appBase.preferences.recentMacros:
       print(recentMacro, 'recentMacro')
       self.action = Action(self, text=recentMacro, callback=partial(self.runMacro,projectDir=recentMacro))
-      self.recentProjectsMenu.addAction(self.action)
+      self.recentMacrosMenu.addAction(self.action)
 
   def defineUserShortcuts(self):
     pass
@@ -675,18 +678,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def runMacro(self, macroFile=None):
-    print('here333333')
     if macroFile is None:
       macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
     self._appBase.preferences.recentMacros.append(macroFile)
     self.fillRecentMacrosMenu()
-    print(macroFile, 'macroFile')
     import pprint
     pprint.pprint(self._appBase.preferences)
     # self.fillRecentMacrosMenu()
     f = open(macroFile)
     lines = f.readlines()
-
+    print('lines', lines)
     for line in lines:
         self.pythonConsole.runCmd(line)
 

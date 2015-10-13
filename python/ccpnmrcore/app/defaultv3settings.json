@@ -11,6 +11,9 @@
         "license": "",
         "toolbarHidden": false
     },
+    "recentMacros": [
+
+    ],
     "spectra": {
         "keepExternal": true,
         "brukerTemplates": "pdata/*",

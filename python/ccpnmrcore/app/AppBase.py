@@ -162,12 +162,12 @@ def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userP
   preferencesPath = defaultPreferencesPath if defaultPreferencesPath else os.path.join(Path.getPythonDirectory(),
                       'ccpnmrcore', 'app', 'defaultv3settings.json')
   preferences = _readPreferencesFile(preferencesPath)
-  
+
   if not skipUserPreferences:
     preferencesPath = userPreferencesPath if userPreferencesPath else os.path.expanduser('~/.ccpn/v3settings.json')
     if os.path.exists(preferencesPath):
       _updateDict(preferences, _readPreferencesFile(preferencesPath))
-      
+
   return preferences
   
 def getStyleSheet(preferences):
@@ -212,7 +212,7 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
   
-  preferences = getPreferences(skipUserPreferences)  
+  preferences = getPreferences(skipUserPreferences)
   styleSheet = getStyleSheet(preferences)
   app.setStyleSheet(styleSheet)
   

@@ -23,7 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 # from ccpncore.lib.typing import Sequence
 
-import datetime
+# import datetime
+from ccpncore.util import Pid
 from ccpncore.lib import Constants as coreConstants
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -51,16 +52,20 @@ class Note(AbstractWrapperObject):
     """ CCPN Project Note"""
     return self._wrappedData
 
-    
   @property
   def _key(self) -> str:
-    """id string - serial number converted to string"""
-    return str(self._wrappedData.serial)
+    """Residue local ID"""
+    return Pid.createId(self._wrappedData.serial, self._wrappedData.name)
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for RestraintSet"""
+    """serial number of note - immutable, part of identifier"""
     return self._wrappedData.serial
+
+  @property
+  def name(self) -> int:
+    """Name of note, part of identifier"""
+    return self._wrappedData.name
 
   @property
   def _parent(self) -> Project:
@@ -97,6 +102,14 @@ class Note(AbstractWrapperObject):
     #
     return None
 
+  # Implementation functions
+  def rename(self, value):
+    """Rename Note, changing its Id and Pid"""
+    if value:
+      self._wrappedData.name = value
+    else:
+      raise ValueError("Note name must be set")
+
 
   # Implementation functions
   @classmethod
@@ -105,12 +118,10 @@ class Note(AbstractWrapperObject):
     return parent._wrappedData.sortedNotes()
 
 
-def newNote(self:Project, text:str=None) -> Note:
-  """Create new  Note
+def newNote(self:Project, name:str='Note', text:str=None) -> Note:
+  """Create new Note"""
 
-  :param str text: Note text"""
-
-  return self._data2Obj.get(v._wrappedData.newNote(text=text))
+  return self._data2Obj.get(self._wrappedData.newNote(text=text, name=name))
 
     
     
@@ -124,5 +135,6 @@ Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Note}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete'),
     ('_finaliseUnDelete', {}, className, 'undelete'),
+    ('_resetPid', {}, className, 'setName'),
   )
 )

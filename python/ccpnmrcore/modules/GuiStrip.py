@@ -148,7 +148,14 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
     self.hPhasingPivot.setVisible(False)
     self.plotWidget.addItem(self.hPhasingPivot)
-    self.hPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self.updatePhasing())
+    self.hPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self.movedPivot())
+    self.haveSetHPhasingPivot = False
+
+    self.vPhasingPivot = pg.InfiniteLine(angle=0, movable=True)
+    self.vPhasingPivot.setVisible(False)
+    self.plotWidget.addItem(self.vPhasingPivot)
+    self.vPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self.movedPivot())
+    self.haveSetVPhasingPivot = False
 
     # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
     # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
@@ -178,12 +185,16 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   #   self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
   #   self.viewBox.sigRangeChanged.connect(self.updateRegion)
 
+  def newPhasingTrace(self):
+    for spectrumView in self.spectrumViews:
+      spectrumView.newPhasingTrace()
+      
+  """
   def newHPhasingTrace(self):
     
     for spectrumView in self.spectrumViews:
       spectrumView.newHPhasingTrace(self.mousePosition[1])
       
-  """
   def newVPhasingTrace(self):
     
     for spectrumView in self.spectrumViews:
@@ -195,15 +206,71 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     for spectrumView in self.spectrumViews:
       spectrumView.removePhasingTraces()
 
+  """
   def togglePhasingPivot(self):
     
     self.hPhasingPivot.setPos(self.mousePosition[0])
     self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
+  """
+  
+  def updatePivot(self): # this is called if pivot entry at bottom of display is updated and then "return" key used
+  
+    phasingFrame = self.spectrumDisplay.phasingFrame
+    position = phasingFrame.pivotEntry.get()
+    direction = phasingFrame.getDirection()
+    if direction == 0:
+      self.hPhasingPivot.setPos(position)
+    else:
+      self.vPhasingPivot.setPos(position)
+    self.updatePhasing()
+  
+  def movedPivot(self): # this is called if pivot on screen is dragged
     
+    phasingFrame = self.spectrumDisplay.phasingFrame
+    direction = phasingFrame.getDirection()
+    if direction == 0:
+      position = self.hPhasingPivot.getXPos()
+    else:
+      position = self.vPhasingPivot.getYPos()
+      
+    phasingFrame.pivotEntry.set(position)
+    self.updatePhasing()
+    
+  def turnOnPhasing(self):
+    
+    self.hPhasingPivot.setVisible(True)
+    self.vPhasingPivot.setVisible(True)
+      
+    for spectrumView in self.spectrumViews:
+      spectrumView.turnOnPhasing()
+      
+  def turnOffPhasing(self):
+    
+    self.hPhasingPivot.setVisible(False)
+    self.vPhasingPivot.setVisible(False)
+      
+    for spectrumView in self.spectrumViews:
+      spectrumView.turnOffPhasing()
+      
+  def changedPhasingDirection(self):
+    
+    phasingFrame = self.spectrumDisplay.phasingFrame
+    direction = phasingFrame.getDirection()
+    if direction == 0:
+      self.hPhasingPivot.setVisible(True)
+      self.vPhasingPivot.setVisible(False)
+    else:
+      self.hPhasingPivot.setVisible(False)
+      self.vPhasingPivot.setVisible(True)
+      
+    for spectrumView in self.spectrumViews:
+      spectrumView.changedPhasingDirection()
+      
   def updatePhasing(self):
     #colour = '#ffffff' if self.background == 'k' else '#000000'
-    colour = '#e4e15b' if self.background == 'k' else '#000000'
+    colour = '#e4e15b' if self.background == '#080000' else '#000000'
     self.hPhasingPivot.setPen({'color': colour})
+    self.vPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:
       spectrumView.updatePhasing()
       

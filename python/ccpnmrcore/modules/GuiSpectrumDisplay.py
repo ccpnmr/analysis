@@ -92,16 +92,33 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     
     self.setEnabled(True)
 
-    self.phasingFrame = PhasingFrame(self.dock, callback=lambda ph0, ph1: self.updatePhasing(), grid=(2, 0), gridSpan=(1, 3))
+    includeDirection = not self._wrappedData.is1d
+    self.phasingFrame = PhasingFrame(self.dock, includeDirection=includeDirection, callback=self.updatePhasing, returnCallback=self.updatePivot,
+                                     directionCallback=self.changedPhasingDirection, grid=(2, 0), gridSpan=(1, 3))
     self.phasingFrame.setVisible(False)
 
+  def updatePivot(self):
+    for strip in self.strips:
+      strip.updatePivot()
+    
   def updatePhasing(self):
     for strip in self.strips:
       strip.updatePhasing()
     
+  def changedPhasingDirection(self):
+    for strip in self.strips:
+      strip.changedPhasingDirection()
+    
   def togglePhaseConsole(self):
         
-    self.phasingFrame.setVisible(not self.phasingFrame.isVisible())
+    isVisible = not self.phasingFrame.isVisible()
+    self.phasingFrame.setVisible(isVisible)
+    for strip in self.strips:
+      if isVisible:
+        strip.turnOnPhasing()
+      else:
+        strip.turnOffPhasing()
+         
     self.updatePhasing()
 
   def closeDock(self):

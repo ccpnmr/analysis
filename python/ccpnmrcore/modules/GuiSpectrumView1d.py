@@ -69,15 +69,34 @@ class GuiSpectrumView1d(GuiSpectrumView):
       
     self.hPhaseTrace = None
 
-  def newHPhasingTrace(self, position):
-    # position is in intensity, ignore
+  def turnOnPhasing(self):
     
-    if not self.hPhaseTrace:
+    phasingFrame = self.strip.spectrumDisplay.phasingFrame
+    if phasingFrame.isVisible():
+      if self.hPhaseTrace:
+        self.hPhaseTrace.setVisible(True)
+      else:
+        self.newPhasingTrace()
+        
+  def turnOffPhasing(self):
+    
+    if self.hPhaseTrace:
+      self.hPhaseTrace.setVisible(False)
+      
+  def newPhasingTrace(self):
+    
+    phasingFrame = self.strip.spectrumDisplay.phasingFrame
+    if phasingFrame.isVisible() and not self.hPhaseTrace:
+      if not self.strip.haveSetHPhasingPivot:
+        posn, width, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(0)
+        self.strip.hPhasingPivot.setPos(0.5*(minAliasedFrequency+maxAliasedFrequency))
+        self.strip.hPhasingPivot.setVisible(True)
+        self.strip.haveSetHPhasingPivot = True
       trace = pg.PlotDataItem()
       self.strip.plotWidget.scene().addItem(trace)
       self.hPhaseTrace = trace
       self.updatePhasing()
-        
+            
   def removePhasingTraces(self):
     
     trace = self.hPhaseTrace
@@ -169,7 +188,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     #v = positionPixel[1] - (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
     v = pixelViewBox0 + (pixelViewBox1-pixelViewBox0) * (numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)]) - yintensity0) / (yintensity1 - yintensity0)
   
-    colour = '#ffffff' if strip.background == 'k' else '#000000'
+    colour = '#e4e15b' if strip.background == '#080000' else '#000000'
     hTrace.setPen({'color':colour})
     hTrace.setData(x, v)
       

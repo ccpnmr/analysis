@@ -23,17 +23,23 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from PyQt4 import QtGui
 
+from ccpncore.gui.Entry import FloatEntry
 from ccpncore.gui.Label import Label
+from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Slider import Slider
 from ccpncore.gui.Frame import Frame
 
+directionTexts = ('Horizontal', 'Vertical')
+
 class PhasingFrame(Frame):
 
-  def __init__(self, parent=None, callback=None, **kw):
+  def __init__(self, parent=None, includeDirection=True, callback=None, returnCallback=None, directionCallback=None, **kw):
 
     Frame.__init__(self, parent, **kw)
     
     self.callback = callback
+    self.returnCallback = returnCallback if returnCallback else self.doCallback
+    self.directionCallback = directionCallback if directionCallback else self.doCallback
 
     sliderDict = {
       'startVal': -180,
@@ -60,7 +66,21 @@ class PhasingFrame(Frame):
     label = Label(self, text='ph1', grid=(0,3))
     self.phLabel1 = Label(self, text=value, grid=(0, 4))
     self.slider1 = Slider(self, callback=self.setPh1, grid=(0, 5), **sliderDict)
- 
+    
+    label = Label(self, text='piv', grid=(0,6))
+    self.pivotEntry = FloatEntry(self, callback=lambda value: self.returnCallback(), decimals=2, grid=(0,7))
+    self.pivotEntry.setMaximumWidth(60)
+    
+    if includeDirection:
+      self.directionList = PulldownList(self, texts=directionTexts,
+                                        callback=lambda text: self.directionCallback(), grid=(0,8))
+    else:
+      self.directionList = None
+      
+  def getDirection(self):
+    
+    return directionTexts.index(self.directionList.get()) if self.directionList else 0
+    
   def setPh0(self, value):
     self.phLabel0.setText(str(value))
     self.doCallback()
@@ -71,20 +91,23 @@ class PhasingFrame(Frame):
     
   def doCallback(self):
     if self.callback:
-      self.callback(self.slider0.value(), self.slider1.value())
+      self.callback()
  
 if __name__ == '__main__':
 
   import os
   import sys
 
+  def myCallback(ph0, ph1, pivot, direction):
+    print(ph0, ph1, pivot, direction)
+    
   qtApp = QtGui.QApplication(['Test Phase Frame'])
 
   #QtCore.QCoreApplication.setApplicationName('TestPhasing')
   #QtCore.QCoreApplication.setApplicationVersion('0.1')
 
   widget = QtGui.QWidget()
-  frame = PhaseFrame(widget)
+  frame = PhasingFrame(widget, callback=myCallback)
   widget.show()
   widget.raise_()
   

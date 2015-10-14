@@ -26,6 +26,8 @@ __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 import pandas as pd
 # from ccpncore.gui.Button import Button
+from ccpncore.util.Types import Sequence
+
 from ccpnmrcore.DropBase import DropBase
 from ccpn import Spectrum
 from ccpncore.util.Pid import Pid
@@ -109,7 +111,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
   def addItem(self, item, data):
     newItem = QtGui.QTreeWidgetItem(item)
     newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
-    newItem.setText(0, str(data.name))
+    # newItem.setText(0, str(data.name))
     newItem.setData(0, QtCore.Qt.DisplayRole, str(data.pid))
     newItem.mousePressEvent = self.mousePressEvent
     return newItem
@@ -134,7 +136,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
   def removeItem(self, item):
     import sip
-    self.project.getByPid(item.text(0)).delete()
+    self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole)).delete()
     sip.delete(item)
 
   def fillSideBar(self,project):
@@ -229,4 +231,10 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     #   newItem = self.addItem(self.spectrumItem, spectrum)
     #   peakListItem = QtGui.QTreeWidgetItem(newItem)
     #   peakListItem.setText(0, peakList.pid)
+
+  def processNotes(self, pids:Sequence[str], event):
+    """Display spectra defined by list of Pid strings"""
+    for ss in pids:
+      note = self.project.getByPid(ss)
+      self.addItem(self.notesItem, note)
 

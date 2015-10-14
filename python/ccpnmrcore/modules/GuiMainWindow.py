@@ -48,6 +48,7 @@ from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
 
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpnmrcore.modules.GuiWindow import GuiWindow
+from ccpnmrcore.modules.NotesEditor import NotesEditor
 from ccpnmrcore.modules.PeakTable import PeakTable
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.modules.SequenceModule import SequenceModule
@@ -431,15 +432,24 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     dataPid =  item.data(0, QtCore.Qt.DisplayRole)
     project = self._appBase.project
     obj = project.getByPid(dataPid)
-    if obj is None:
-      project._logger.error("No data object matching Pid %s" % dataPid)
-    elif obj.shortClassName == 'SP':
-      popup = SpectrumPropertiesPopup(obj, item)
-      popup.exec_()
-      popup.raise_()
-    elif obj.shortClassName == 'PL':
-      self.showPeakTable(self._project, selectedList=obj)
+    if obj is not None:
+      if obj.shortClassName == 'SP':
+        popup = SpectrumPropertiesPopup(obj, item)
+        popup.exec_()
+        popup.raise_()
+      elif obj.shortClassName == 'PL':
+        self.showPeakTable(self._project, selectedList=obj)
+
+      elif obj.shortClassName == 'NO':
+        self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=obj)
+    elif item.data(0, QtCore.Qt.DisplayRole) == '<New Note>':
+      newNote = project.newNote()
+
+      self.sideBar.addItem(self.sideBar.notesItem, newNote)
+      self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=newNote)
+      # self.dockArea.addDock(self.notesEditor)
     else:
+      print(item.data(0), 'item data')
       project._logger.error("Double-click activation not implemented for object %s" % obj)
 
   def fillRecentProjectsMenu(self):
@@ -606,8 +616,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.showConsole()
 
 
-  def editMacro(self):
-    pass
+  def editMacro(self, filename):
+    editor = TextEditor(filename=filename)
+    editor.exec_()
 
   def newMacroFromLog(self):
 

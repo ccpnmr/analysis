@@ -50,7 +50,6 @@ class DropBase(GuiBase):
     event.accept()
 
     data, dataType  = qtUtil.interpretEvent(event)
-
     if data and dataType:
       self.processDropData(data, dataType, event)
 
@@ -122,6 +121,7 @@ class DropBase(GuiBase):
         # data is list-of-urls
         # Load Urls one by one with normal loaders
         for url in data:
+
           ll = project.loadData(url)
           if ll:
             pids.extend(x.pid for x in ll)

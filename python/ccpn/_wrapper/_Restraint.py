@@ -194,7 +194,7 @@ class Restraint(AbstractWrapperObject):
 def getter(self:Peak) -> tuple:
   ff = self._project._data2Obj.get
   result = []
-  apiPeak = self.wrappedData
+  apiPeak = self._wrappedData
   for restraintList in self._project.restraintLists:
     for apiRestraint in restraintList._wrappedData.sortedRestraints():
       if apiPeak in apiRestraint.peaks:

@@ -53,9 +53,10 @@ from ccpnmrcore.modules.PeakTable import PeakTable
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.modules.SequenceModule import SequenceModule
 from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
-
+from ccpnmrcore.modules.ScreeningSetup import ScreeningSetup
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
+from ccpnmrcore.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpnmrcore.popups.SampleSetupPopup import SamplePopup
 
 
@@ -229,9 +230,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # self.screenMenu.setHidden(True)
     # self.screenMenu.addAction(Action(self, 'Empty', callback=self.showSideBar))#, shortcut="ss"))
     self.screenMenu.addSeparator()
-    self.screenMenu.addAction(Action(self, 'Generate Samples', callback=self.createSample, shortcut="cs"))
+    self.screenMenu.addAction(Action(self, 'Generate Mixtures', callback=self.createSample, shortcut="cs"))
+    self.screenMenu.addAction(Action(self, 'Mixtures Analysis', callback=self.showSampleAnalysis, shortcut="st"))
     self.screenMenu.addSeparator()
-    self.screenMenu.addAction(Action(self, 'Sample Analysis', callback=self.showSampleAnalysis, shortcut="st"))
+    self.screenMenu.addAction(Action(self, 'Screening', callback=self.showScreeningSetup, shortcut="sc"))
+
 
 
     # spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
@@ -331,6 +334,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     if 'Screening' in self._appBase.components:
       self._menuBar.addMenu(self.screenMenu)
+
 
 
     self._menuBar.addMenu(moleculeMenu)
@@ -438,6 +442,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         popup.raise_()
       elif obj.shortClassName == 'PL':
         self.showPeakTable(self._project, selectedList=obj)
+      elif obj.shortClassName == 'SA':
+        popup = SamplePropertiesPopup(obj, item)
+        popup.exec_()
+        popup.raise_()
 
       elif obj.shortClassName == 'NO':
         self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=obj, item=item)
@@ -447,6 +455,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       newItem = self.sideBar.addItem(self.sideBar.notesItem, newNote)
       self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=newNote, item=newItem)
       # self.dockArea.addDock(self.notesEditor)
+    elif item.data(0, QtCore.Qt.DisplayRole) == '<New Sample>':
+      newSample = project.newSample(name=str('New Sample'))
+      self.sideBar.addItem(self.sideBar.spectrumSamples, newSample )
+
+
+
     else:
       project._logger.error("Double-click activation not implemented for object %s" % obj)
 
@@ -558,8 +572,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup.raise_()
 
   def showSampleAnalysis(self):
-    showSA = SampleAnalysis(self._project)
-    self.dockArea.addDock(showSA, position='bottom')
+    showSa = SampleAnalysis(self._project)
+    self.dockArea.addDock(showSa, position='bottom')
+
+  def showScreeningSetup(self):
+    showSc = ScreeningSetup(self.project)
+    self.dockArea.addDock(showSc, position='bottom')
 
 
 

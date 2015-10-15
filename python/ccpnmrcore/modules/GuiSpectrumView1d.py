@@ -54,6 +54,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
     self.data = self._apiDataSource.get1dSpectrumData()
 
+    print(self.data)
+
     # for strip in self.strips:
     if self.spectrum.sliceColour is None:
       if len(self.strip.spectrumViews) < 12:

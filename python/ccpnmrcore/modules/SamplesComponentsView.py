@@ -13,11 +13,11 @@ class SamplesComponentsView(QtGui.QWidget):
 
     self.project = project
 
-    labelSelectSample = Label(self, ' Select Sample:', grid=(0, 0), hAlign='r')
+    labelSelectSample = Label(self, ' Select Mixture:', grid=(0, 0), hAlign='r')
     self.SamplePulldown = PulldownList(self, grid=(0, 1), callback=self.pulldownSample)
     self.SamplePulldown.setData([sample.pid for sample in project.samples if len(sample.spectra) > 1])
 
-    labelSelectComponent = Label(self, 'Select Component:', grid=(0, 2), hAlign='r')
+    labelSelectComponent = Label(self, 'Select Substance:', grid=(0, 2), hAlign='r')
     self.componentsPulldown = PulldownList(self, grid=(0, 3))
 
 

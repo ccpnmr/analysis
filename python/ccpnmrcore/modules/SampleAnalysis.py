@@ -1,23 +1,16 @@
 from PyQt4 import QtCore, QtGui
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Label import Label
-from ccpncore.gui.Table import ObjectTable, Column
-from pyqtgraph.dockarea import Dock
-from ccpncore.gui.Table import ObjectTable, Column
-
 from ccpncore.gui.Dock import CcpnDock
 from ccpnmrcore.modules.SampleComponentsTable import PeakListSampleComponent
 from ccpnmrcore.modules.SampleComponentsView import SampleComponentsView
 from ccpnmrcore.modules.SampleComponentsInfo import SampleComponentInfo
-
+from ccpnmrcore.modules.SampleScoringTable import SampleTableSimple
 
 class SampleAnalysis(CcpnDock):
   ### this class creates a module to analyse the samples. It is composed by four tabs.
 
   def __init__(self, project, samples=None,):
     super(SampleAnalysis, self)
-    CcpnDock.__init__(self, name='Sample Analysis')
+    CcpnDock.__init__(self, name='Mixtures Analysis')
     self.project = project
 
     ######## ========   Set Layout  ====== ########
@@ -28,26 +21,16 @@ class SampleAnalysis(CcpnDock):
     self.setLayout(self.moduleLayout)
 
 
-    ######## ======== On The Fly Sample Table (temporary) ====== ########
-    if not samples:
-      samples = []
-    self.samples = samples
-    columns = [Column('Sample Name', lambda sample: str(sample.pid)),
-               Column('Number of components', lambda sample: str(len(sample.peakCollections))),
-               Column('Minimum Score', lambda sample: str(sample.minScore)),
-               Column('Average Score', lambda sample: str(sample.averageScore))]
-    self.sampleTable = ObjectTable(self, columns, callback=None, objects=[])
-    self.sampleTable.setObjects(samples)
-
     ######## ========   Set Tabs  ====== ########
+    self.sampleTable = SampleTableSimple(self, project=project)
     self.componentPL = PeakListSampleComponent(self, project=project)
     self.componentView = SampleComponentsView(self, project=project)
     self.componentInfo = SampleComponentInfo(self, project=project)
 
-    self.tabWidget.addTab(self.sampleTable, 'Sample Scoring')
-    self.tabWidget.addTab(self.componentPL, 'Component Peak List')
-    self.tabWidget.addTab(self.componentView, 'Component View')
-    self.tabWidget.addTab(self.componentInfo, 'Component info')
+    self.tabWidget.addTab(self.sampleTable, 'Mixtures Scoring')
+    self.tabWidget.addTab(self.componentPL, 'Substances Peak List')
+    self.tabWidget.addTab(self.componentView, 'Substances View')
+    self.tabWidget.addTab(self.componentInfo, 'Mixtures info')
 
 
 

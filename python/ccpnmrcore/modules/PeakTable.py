@@ -131,6 +131,7 @@ class PeakListSimple(QtGui.QWidget, Base):
   def getPeakHeight(self, peak):
 
     if peak.height:
+      print(peak, peak.height)
       return peak.height*peak.peakList.spectrum.scale
 
 

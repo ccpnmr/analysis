@@ -56,6 +56,7 @@ class AppBase(GuiBase):
     ###self.hLines = []
     self.initProject(apiProject)
     self.colourIndex = 0
+    self.recordingMacro = False
 
   def initProject(self, apiProject):
 

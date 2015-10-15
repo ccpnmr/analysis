@@ -50,8 +50,6 @@ class NotesEditor(DropBase, CcpnDock):
     newText = self.textBox.toPlainText()
     self.note.text = newText
     self.item.setText(0, self.note.pid)
-
-
     self.close()
 
   def reject(self):

@@ -66,8 +66,8 @@ def loadData(project:'Project', path:str) -> (list,None):
     if funcname == 'loadProject':
       return [project.loadProject(usePath, subType)]
 
-    # elif funcname == 'loadLookupFile':
-    #   return project.loadLookupFile(usePath, subType)
+    elif funcname == 'loadLookupFile':
+      return project.loadLookupFile(usePath, subType)
 
     elif hasattr(project, funcname):
       pids = getattr(project, funcname)(usePath, subType)

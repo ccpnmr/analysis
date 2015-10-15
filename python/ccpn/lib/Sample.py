@@ -2,7 +2,7 @@ __author__ = 'simon'
 
 from numpy import array, amin, amax, average, empty, nan, nanmin, fabs, subtract, where, argmax, NAN
 from ccpn import Sample
-# from ccpnmrcore.modules.SamplesTable import SampleTable
+
 import math
 
 def setupSamples(samples, n, mode, minimalOverlap):
@@ -92,9 +92,6 @@ def scoring(ExperimentPeaks, ListExperimentPeaks, getPeaks, minimalOverlap=None)
     return 0
   if value < 0.00:
     return -1
-
-
-# NBNB TBD. Reorganise these classes? Talk to Rasmus?
 
 class ExperimentPeaks:
 

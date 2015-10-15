@@ -82,7 +82,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.connect(self, QtCore.SIGNAL('triggered()'), self.closeEvent)
 
 
-
     # self.setFixedWidth(QtGui.QApplication.desktop().screenGeometry().width())
 
 
@@ -441,15 +440,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         self.showPeakTable(self._project, selectedList=obj)
 
       elif obj.shortClassName == 'NO':
-        self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=obj)
+        self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=obj, item=item)
     elif item.data(0, QtCore.Qt.DisplayRole) == '<New Note>':
       newNote = project.newNote()
 
-      self.sideBar.addItem(self.sideBar.notesItem, newNote)
-      self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=newNote)
+      newItem = self.sideBar.addItem(self.sideBar.notesItem, newNote)
+      self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=newNote, item=newItem)
       # self.dockArea.addDock(self.notesEditor)
     else:
-      print(item.data(0), 'item data')
       project._logger.error("Double-click activation not implemented for object %s" % obj)
 
   def fillRecentProjectsMenu(self):

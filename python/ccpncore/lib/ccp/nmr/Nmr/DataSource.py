@@ -345,28 +345,27 @@ def getSliceData(self:'DataSource', position:Sequence=None, sliceDim:int=0):
 def get1dSpectrumData(self:'DataSource'):
   """Get position,scaledData numpy array for 1D spectrum"""
 
-  # Code refactored:
-  # dataDimRef = self.findFirstDataDim().findFirstDataDimRef()
-  # firstPoint = dataDimRef.pointToValue(0)
-  # pointCount = self.findFirstDataDim().numPoints
-  # lastPoint = dataDimRef.pointToValue(pointCount)
-  # pointSpacing = (lastPoint-firstPoint)/pointCount
-  # position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
-  # sliceData = self.getSliceData()
-  # scaledData = sliceData*self.scale
-  # spectrumData = numpy.array([position,scaledData], numpy.float32)
-  # return numpy.array(spectrumData,numpy.float32)
+  dataDimRef = self.findFirstDataDim().findFirstDataDimRef()
+  firstPoint = dataDimRef.pointToValue(1)
+  pointCount = self.findFirstDataDim().numPoints
+  lastPoint = dataDimRef.pointToValue(pointCount)
+  pointSpacing = (lastPoint-firstPoint)/pointCount
+  position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
+  sliceData = self.getSliceData()
+  scaledData = sliceData*self.scale
+  spectrumData = numpy.array([position,scaledData], numpy.float32)
+  return numpy.array(spectrumData,numpy.float32)
 
   # NB Points start at 1; other changes are rationalisations.
-  dataDim = self.findFirstDataDim()
-  pointCount = dataDim.numPoints
-  dataDimRef = dataDim.primaryDataDimRef
-  firstPoint = dataDimRef.pointToValue(1)
-  pointSpacing = dataDimRef.valuePerPoint
-
-  position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
-  scaledData = self.getSliceData()*self.scale
-  return numpy.array([position,scaledData], numpy.float32)
+  # dataDim = self.findFirstDataDim()
+  # pointCount = dataDim.numPoints
+  # dataDimRef = dataDim.primaryDataDimRef
+  # firstPoint = dataDimRef.pointToValue(1)
+  # pointSpacing = dataDimRef.valuePerPoint
+  #
+  # position = numpy.array([firstPoint + n*pointSpacing for n in range(pointCount)],numpy.float32)
+  # scaledData = self.getSliceData()*self.scale
+  # return numpy.array([position,scaledData], numpy.float32)
 
 
 

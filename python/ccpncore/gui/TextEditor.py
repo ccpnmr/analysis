@@ -42,4 +42,3 @@ class TextEditor(QtGui.QTextEdit, Base):
       #   self.setText(fileData)
       #
       # self.show()
-

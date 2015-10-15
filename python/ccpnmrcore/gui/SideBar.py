@@ -46,13 +46,15 @@ class SideBar(DropBase, QtGui.QTreeWidget):
   def __init__(self, parent=None ):
     QtGui.QTreeWidget.__init__(self, parent)
 
+
     self.setFont(QtGui.QFont('Lucida Grande', 12))
     self.header().hide()
     self.setDragEnabled(True)
     self._appBase = parent._appBase
+
     self.setDragDropMode(self.InternalMove)
     # self._dragroot = self.itemRootIndex()
-    self.setMinimumWidth(180)
+    self.setFixedWidth(200)
     self.projectItem = QtGui.QTreeWidgetItem(self)
     self.projectItem.setText(0, "Project")
     self.projectItem.setExpanded(True)
@@ -90,7 +92,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
       self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
 
-    if self._appBase.applicationName == 'Screen':
+    if 'Screening' in self._appBase.components:
+
       self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
       self.spectrumScreening.setExpanded(True)
       self.spectrumScreening.setText(0, "Screening")
@@ -100,6 +103,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       self.spectrumReference.setExpanded(True)
       self.spectrumSamples = QtGui.QTreeWidgetItem(self.spectrumScreening)
       self.spectrumSamples.setText(0, "Samples")
+      self.newSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
+      self.newSample.setText(0, "<New Sample>")
       self.spectrumSamples.setExpanded(True)
       # self.restraintsItem = QtGui.QTreeWidgetItem(self.projectItem)
       # self.restraintsItem.setText(0, "Restraint Lists")
@@ -151,7 +156,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         anItem.setText(0, '<New>')
 
 
-    if self._appBase.applicationName == 'Screen':
+    if 'Screening' in self._appBase.components:
       # 1d
       self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
       self.onedItem.setText(0, "1D")
@@ -215,13 +220,12 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     newItem = self.addItem(self.spectrumItem, spectrum)
     peakListItem = QtGui.QTreeWidgetItem(newItem)
     peakListItem.setText(0, peakList.pid)
-  #
-  #
+
   # def processSpectrum(self, spectrum:(Spectrum,Pid), event, expTypes=None):
   #
   #   spectrum = self.project.getByPid(spectrum)
-  #
-  #
+
+
     # if self._appBase.applicationName == 'Screen':
     #   newItem = self.addItem(self.onedItem, spectrum)
     #   peakListItem = QtGui.QTreeWidgetItem(newItem)

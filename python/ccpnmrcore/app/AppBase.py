@@ -48,6 +48,7 @@ class AppBase(GuiBase):
       components = set()
       
     self.applicationName = applicationName
+
     self.applicationVersion = applicationVersion
     self.preferences = preferences
     self.components = components

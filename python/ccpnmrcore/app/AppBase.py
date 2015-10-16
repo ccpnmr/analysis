@@ -56,7 +56,7 @@ class AppBase(GuiBase):
     ###self.hLines = []
     self.initProject(apiProject)
     self.colourIndex = 0
-    self.recordingMacro = False
+
 
   def initProject(self, apiProject):
 
@@ -136,8 +136,7 @@ class AppBase(GuiBase):
 
   def saveProject(self, newPath=None):
     ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)
-    print("project saved")
-    
+
 def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userPreferencesPath=None):
 
   def _readPreferencesFile(preferencesPath):

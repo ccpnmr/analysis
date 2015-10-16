@@ -69,3 +69,6 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     """Display spectra defined by list of Pid strings"""
     for ss in pids:
       self.parent.guiSpectrumDisplay.displaySpectrum(ss)
+      displayPid = self.parent.guiSpectrumDisplay.pid
+      self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
+                                 'module.displaySpectrum', 'spectrum', [ss, displayPid])

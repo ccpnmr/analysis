@@ -32,7 +32,7 @@ from ccpncore.gui import MessageDialog
 from ccpncore.gui.Action import Action
 from ccpncore.gui.CcpnWebView import CcpnWebView
 from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.IpythonConsole import IpythonConsole
+from ccpnmrcore.gui.IpythonConsole import IpythonConsole
 from ccpncore.gui.Menu import Menu, MenuBar
 from ccpnmrcore.gui.SideBar import SideBar
 from ccpncore.gui.TextEditor import TextEditor
@@ -48,6 +48,7 @@ from ccpnmrcore.modules.DataPlottingModule import DataPlottingModule
 
 from ccpnmrcore.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpnmrcore.modules.GuiWindow import GuiWindow
+from ccpnmrcore.modules.MacroEditor import MacroEditor
 from ccpnmrcore.modules.NotesEditor import NotesEditor
 from ccpnmrcore.modules.PeakTable import PeakTable
 from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
@@ -77,6 +78,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setGeometry(540, 40, 900, 900)
 
     GuiWindow.__init__(self)
+    self.recordingMacro = False
     self.setupWindow()
     self.setupMenus()
     self.initProject()
@@ -210,15 +212,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
     fileMenu.addAction(Action(self, "Save As...", shortcut="sa", callback=self.saveProjectAs))
-    backupOption = fileMenu.addMenu("Backup")
-    backupOption.addAction(Action(self, "Save", callback=self.saveBackup))
-    backupOption.addAction(Action(self, "Restore", callback=self.restoreBackup))
+
+    #NBNB How are we going to implement this?
+    # backupOption = fileMenu.addMenu("Backup")
+    # backupOption.addAction(Action(self, "Save", callback=self.saveBackup))
+    # backupOption.addAction(Action(self, "Restore", callback=self.restoreBackup))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Undo", callback=self.undo, shortcut=QtGui.QKeySequence("Ctrl+z")))
     fileMenu.addAction(Action(self, "Redo", callback=self.redo, shortcut=QtGui.QKeySequence("Ctrl+y")))
-    logOption = fileMenu.addMenu("Log File")
-    logOption.addAction(Action(self, "Save As...", callback=self.saveLogFile))
-    logOption.addAction(Action(self, "Clear", callback=self.clearLogFile))
+
+    #NBNB do we want this facility or are logs and console output separate?
+    # logOption = fileMenu.addMenu("Log File")
+    # logOption.addAction(Action(self, "Save As...", callback=self.saveLogFile))
+    # logOption.addAction(Action(self, "Clear", callback=self.clearLogFile))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Summary...", self.displayProjectSummary))
     fileMenu.addAction(Action(self, "Archive...", self.archiveProject))
@@ -255,12 +261,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # spectrumPeaksMenu.addAction(Action(self, "Print to File", callback=self.printPeaksToFile))
 
     peaksMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
-    peaksMenu.addAction(Action(self, "Find Peaks", callback=self.pickPeaks, shortcut='pp'))
+    peaksMenu.addAction(Action(self, "Pick Peaks", callback=self.pickPeaks, shortcut='pp'))
 
     newMoleculeMenu = moleculeMenu.addMenu("New")
-    # newMoleculeMenu.addAction(Action(self, "From Fasta...", callback=self.createMoleculeFromFasta))
-    # newMoleculeMenu.addAction(Action(self, "From PDB...", callback=self.createMoleculeFromPDB))
-    # newMoleculeMenu.addAction(Action(self, "From NEF...", callback=self.createMoleculeFromNEF))
     newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
     self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
     if hasattr(self, 'sequenceWidget'):
@@ -270,15 +273,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     moleculeMenu.addAction(self.sequenceAction)
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
-    moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
-    moleculeMenu.addAction(Action(self, "Show Molecule Display", callback=self.showMoleculeDisplay, shortcut='md'))
+    # moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
+    # moleculeMenu.addAction(Action(self, "Show Molecule Display", callback=self.showMoleculeDisplay, shortcut='md'))
 
     macroMenu.addAction(Action(self, "Edit...", callback=self.editMacro))
-    macroMenu.addAction(Action(self, "New from Logfile...", callback=self.newMacroFromLog))
-    macroRecordMenu = macroMenu.addMenu("Record")
-    macroRecordMenu.addAction(Action(self, "Start", callback=self.startMacroRecord))
-    macroRecordMenu.addAction(Action(self, "Stop", callback=self.stopMacroRecord))
-    macroRecordMenu.addAction(Action(self, "Save As...", callback=self.saveRecordedMacro))
+    macroMenu.addAction(Action(self, "New from Console...", callback=self.newMacroFromConsole))
+    macroMenu.addAction(Action(self, "Record Macro...", callback=self.startMacroRecord))
+    # macroRecordMenu.addAction(Action(self, "Stop", callback=self.stopMacroRecord))
+    # macroRecordMenu.addAction(Action(self, "Save As...", callback=self.saveRecordedMacro))
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Run...", shortcut="rm", callback=self.runMacro))
 
@@ -290,15 +292,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     viewNewMenu = viewMenu.addMenu("New")
     viewNewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
-    # viewNewMenu.addAction(Action(self, "nD Spectral Pane", callback=self.addSpectrumNdDisplay))
-    # viewNewMenu.
-    viewNewMenu.addAction(Action(self, "NMR Residue Table", callback=self.showNmrResidueTable, shortcut='nr'))
 
-    viewLayoutMenu = viewMenu.addMenu("Layout")
-    viewLayoutMenu.addAction(Action(self, "Default", callback=self.setLayoutToDefault))
-    viewLayoutMenu.addAction(Action(self, "Save", callback=self.saveLayout))
-    viewLayoutMenu.addAction(Action(self, "Save As...", callback=self.saveLayoutAs))
-    viewLayoutMenu.addAction(Action(self, "Restore", callback=self.restoreLayout))
+
+    #NBNB Need to decide how we are to handle layouts if at all
+    # viewLayoutMenu = viewMenu.addMenu("Layout")
+    # viewLayoutMenu.addAction(Action(self, "Default", callback=self.setLayoutToDefault))
+    # viewLayoutMenu.addAction(Action(self, "Save", callback=self.saveLayout))
+    # viewLayoutMenu.addAction(Action(self, "Save As...", callback=self.saveLayoutAs))
+    # viewLayoutMenu.addAction(Action(self, "Restore", callback=self.restoreLayout))
     viewMenu.addSeparator()
     self.consoleAction = Action(self, "Console", callback=self.toggleConsole, shortcut="py",
                                          checkable=True)
@@ -324,11 +325,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     assignMenu.addAction(Action(self, 'Show Assigner', callback=self.showAssigner))
     assignMenu.addAction(Action(self, 'Show Atom Selector', callback=self.showAtomSelector, shortcut='as'))
     assignMenu.addAction(Action(self, 'Residue Information', callback=self.showResidueInformation, shortcut='ri'))
-    assignMenu.addAction(Action(self, 'NmrResPopup', callback=self.showNmrResiduePopup, shortcut='np'))
+    assignMenu.addAction(Action(self, "NMR Residue Table", callback=self.showNmrResidueTable, shortcut='nr'))
 
 
 
-    # self.pythonConsole.runMacroButton.clicked.connect(self.runMacro)
     self._menuBar.addMenu(fileMenu)
     self._menuBar.addMenu(peaksMenu)
 
@@ -363,6 +363,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self._showDocumentation("API Documentation", 'apidoc', 'api.html')
 
+
   def showWrapperDocumentation(self):
     
     self._showDocumentation("CCPN Documentation", 'build', 'html', 'index.html')
@@ -370,6 +371,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showAssignmentModule(self):
     self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
     self.dockArea.addDock(self.assignmentModule)
+    self.pythonConsole.writeModuleDisplay('showAssignmentModule')
 
   def showNmrResiduePopup(self):
     from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup
@@ -394,6 +396,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from ccpnmrcore.modules.NmrResidueTable import NmrResidueTable
     nmrResiduetable = NmrResidueTable(self, self._project)
     self.dockArea.addDock(nmrResiduetable, 'bottom')
+    self.pythonConsole.writeModuleDisplay('showNmrResidueTable')
 
   def toggleSequence(self):
 
@@ -403,6 +406,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     else:
       self.showSequence()
+    self.pythonConsole.writeModuleDisplayCommand('toggleSequence')
+
+
 
   def loadAProject(self, projectDir=None):
 
@@ -425,6 +431,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
     else:
       self.dockArea.addDock(self.assigner, position=position)
+    self.pythonConsole.writeModuleDisplayCommand('showAssigner')
     return self.assigner
     # self.dockArea.addDock(assigner)
 
@@ -457,7 +464,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       # self.dockArea.addDock(self.notesEditor)
     elif item.data(0, QtCore.Qt.DisplayRole) == '<New Sample>':
       newSample = project.newSample(name=str('New Sample'))
-      self.sideBar.addItem(self.sideBar.spectrumSamples, newSample )
+      self.sideBar.addItem(self.sideBar.spectrumSamples, newSample)
 
 
 
@@ -488,10 +495,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pass
 
   def displayProjectSummary(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet',
+          'This function has not been implemented in the current version')
+
 
   def archiveProject(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet',
+          'This function has not been implemented in the current version')
+
 
   def showApplicationPreferences(self):
     PreferencesPopup(preferences=self._appBase.preferences).exec_()
@@ -529,8 +540,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     prefFile.close()
 
     # NBNB TBD FIXME put code here to ask if you want to save etc.
-    from ccpncore.gui.MessageDialog import showMulti
-    reply = showMulti("Quit Program", "Do you want to save changes before quitting?",
+
+    reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
                                          ['Save and Quit', 'Quit without Saving', 'Cancel'])
     if reply == 'Save and Quit':
       if event:
@@ -570,14 +581,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup = SamplePopup(parent=None, project=self.project)
     popup.exec_()
     popup.raise_()
+    self.pythonConsole.writeModuleDisplayCommand('createSample')
 
   def showSampleAnalysis(self):
     showSa = SampleAnalysis(self._project)
     self.dockArea.addDock(showSa, position='bottom')
+    self.pythonConsole.writeModuleDisplayCommand('showSampleAnalysis')
 
   def showScreeningSetup(self):
     showSc = ScreeningSetup(self.project)
     self.dockArea.addDock(showSc, position='bottom')
+    self.pythonConsole.writeModuleDisplayCommand('showScreeningSetup')
 
 
 
@@ -585,44 +599,44 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   # def removeSpectra(self):
   #   pass
 
-  def renameSpectra(self):
-    pass
+  # def renameSpectra(self):
+  #   pass
+  #
+  # def reloadSpectra(self):
+  #   pass
+  #
+  # def printSpectrum(self):
+  #   pass
+  #
+  # def showSpectrumInFinder(self):
+  #   pass
+  #
+  # def copySpectrumIntoProject(self):
+  #   pass
+  #
+  # def moveSpectrumOutOfProject(self):
+  #   pass
+  #
+  # def importPeaksPopup(self):
+  #   pass
+  #
+  # def deletePeaksPopup(self):
+  #   pass
+  #
+  # def printPeaksToFile(self):
+  #   pass
 
-  def reloadSpectra(self):
-    pass
-
-  def printSpectrum(self):
-    pass
-
-  def showSpectrumInFinder(self):
-    pass
-
-  def copySpectrumIntoProject(self):
-    pass
-
-  def moveSpectrumOutOfProject(self):
-    pass
-
-  def importPeaksPopup(self):
-    pass
-
-  def deletePeaksPopup(self):
-    pass
-
-  def printPeaksToFile(self):
-    pass
-
-  def setLayoutToDefault(self):
-    pass
-
-  def saveLayout(self):
-    pass
-
-  def saveLayoutAs(self):
-    pass
-
-  def restoreLayout(self):
-    pass
+  # def setLayoutToDefault(self):
+  #   pass
+  #
+  # def saveLayout(self):
+  #   pass
+  #
+  # def saveLayoutAs(self):
+  #   pass
+  #
+  # def restoreLayout(self):
+  #   pass
 
   def toggleConsole(self):
 
@@ -632,23 +646,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.showConsole()
 
 
-  def editMacro(self, filename):
-    editor = TextEditor(filename=filename)
-    editor.exec_()
+  def editMacro(self):
+    editor = MacroEditor(self.dockArea, self, "Macro Editor")
 
-  def newMacroFromLog(self):
+  def newMacroFromConsole(self):
+    editor = MacroEditor(self.dockArea, self, "Macro Editor")
+    editor.textBox.setText(self.pythonConsole.textEditor.toPlainText())
 
-    editor = TextEditor(filename=self.logFile)
-    editor.exec_()
 
   def startMacroRecord(self):
-    pass
+    self.macroEditor = MacroEditor(self.dockArea, self, "Macro Editor", showRecordButtons=True)
+    self.pythonConsole.writeModuleDisplayCommand('startMacroRecord')
 
-  def stopMacroRecord(self):
-    pass
-
-  def saveRecordedMacro(self):
-    pass
 
   def fillRecentMacrosMenu(self):
 
@@ -661,47 +670,53 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.recentMacrosMenu.addAction(self.action)
 
   def defineUserShortcuts(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version')
 
-  # def createMoleculeFromFasta(self):
-  #   pass
-
-  def createMoleculeFromPDB(self):
-    pass
-
-  def createMoleculeFromNEF(self):
-    pass
 
   def showMoleculePopup(self):
     from ccpnmrcore.modules.CreateSequence import CreateSequence
     popup = CreateSequence(self, project=self._project).exec_()
+    self.pythonConsole.writeModuleDisplayCommand('showMoleculePopup')
 
   def inspectMolecule(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version')
 
-  def runChembuild(self):
-    pass
+
 
   def showCommandHelp(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version')
+
 
   def showTutorials(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version')
+
 
   def showAboutPopup(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version')
+
 
   def showAboutCcpnPopup(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version')
+
 
   def showCodeInspectionPopup(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version')
+
 
   def showUpgradePopup(self):
     pass
 
   def showBugReportingPopup(self):
-    pass
+    info = MessageDialog.showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version')
+
 
   def runMacro(self, macroFile=None):
     if macroFile is None:
@@ -711,9 +726,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # self.fillRecentMacrosMenu()
     self.pythonConsole.runMacro(macroFile)
 
-  def showMoleculeDisplay(self):
-    from ccpn.lib.moleculebox import MoleculeDisplay
-    self.moleculeDisplay = MoleculeDisplay(self.dockArea)
+  # def showMoleculeDisplay(self):
+  #   from ccpn.lib.moleculebox import MoleculeDisplay
+  #   self.moleculeDisplay = MoleculeDisplay(self.dockArea)
 
   def showPeakTable(self, position='left', relativeTo=None, selectedList=None):
     peakList = PeakTable(self._project, selectedList=selectedList)
@@ -722,11 +737,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.dockArea.addDock(peakList, position='bottom')
 
+    self.pythonConsole.writeModuleDisplayCommand('showPeakTable')
 
   def showChemicalShiftTable(self, position='bottom'):
     from ccpnmrcore.modules.ChemicalShiftTable import ChemicalShiftTable
     chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self._project.chemicalShiftLists)
     self.dockArea.addDock(chemicalShiftTable, position=position)
+    self.pythonConsole.writeModuleDisplayCommand('showChemicalShiftTable')
 
   def showParassignPeakTable(self, position='left', relativeTo=None):
     peakList = ParassignModule(name="Peak Table", peakLists=self._project.peakLists)
@@ -743,21 +760,25 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.dockArea.addDock(self.bbModule, position='bottom')
     assigner = self.showAssigner('bottom')
     self.bbModule.setAssigner(assigner)
+    self.pythonConsole.writeModuleDisplayCommand('showBackboneAssignmentModule')
     return self.bbModule
 
   def showPickAndAssignModule(self, position=None, relativeTo=None):
     self.paaModule = PickAndAssignModule(self.dockArea, self._project)
     self.dockArea.addDock(self.paaModule)
+    self.pythonConsole.writeModuleDisplayCommand('showPickAndAssignModule')
     return self.paaModule
 
   def showAtomSelector(self):
     self.atomSelector = AtomSelector(self, project=self._project)
     self.dockArea.addDock(self.atomSelector)
+    self.pythonConsole.writeModuleDisplayCommand('showAtomSelector')
     return self.atomSelector
 
   def showResidueInformation(self):
     from ccpnmrcore.modules.ResidueInformation import ResidueInformation
     self.dockArea.addDock(ResidueInformation(self, self._project))
+    self.pythonConsole.writeModuleDisplayCommand('showResidueInformation')
 
   def showDataPlottingModule(self):
     dpModule = DataPlottingModule(self.dockArea)

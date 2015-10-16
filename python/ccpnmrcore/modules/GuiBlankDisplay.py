@@ -102,7 +102,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
       spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(ss)
       self.dockArea.guiWindow.deleteBlankDisplay()
       msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
-      self.dockArea.window().pythonConsole.write(msg)
+      self.dockArea.window().pythonConsole.writeCommand('spectrum', 'window.createSpectrumDisplay', 'spectrum', pid=ss)
 
   # def processSpectrum(self, spectrum:(Spectrum,Pid), event):
   #   """Process dropped spectrum"""

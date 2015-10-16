@@ -185,19 +185,29 @@ class ViewBox(pg.ViewBox):
         startPosition = self.mapSceneToView(event.buttonDownPos())
         endPosition = self.mapSceneToView(event.pos())
         orderedAxes = self.current.strip.orderedAxes
-        selectedRegion = [[startPosition.x(),startPosition.y()],[endPosition.x(),endPosition.y()]]
+        selectedRegion = [[round(startPosition.x(), 3), round(startPosition.y(), 3)],
+                          [round(endPosition.x(), 3), round(endPosition.y(), 3)]]
         if len(orderedAxes) > 2:
           for n in orderedAxes[2:]:
             selectedRegion[0].append(n.region[0])
             selectedRegion[1].append(n.region[1])
         for spectrumView in self.current.strip.spectrumViews:
           peakList = spectrumView.spectrum.peakLists[0]
+          console = self.current.project._appBase.mainWindow.pythonConsole
+
+
           if spectrumView.spectrum.dimensionCount > 1:
+
             apiSpectrumView = spectrumView._wrappedData
             newPeaks = peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
                                             fitMethod=0)
+            console.writeCommand('peakList', 'peakList.pickPeaksNd',
+                                 'selectedRegion={0}, doPos={1}, doNeg={2}'.format(
+                                 selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
+                                 apiSpectrumView.spectrumView.displayNegativeContours),
+                                 obj=peakList)
           else:
             newPeaks = peakList.pickPeaks1dFiltered(spectrumView)
 

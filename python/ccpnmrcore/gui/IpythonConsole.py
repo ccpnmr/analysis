@@ -26,7 +26,6 @@ class IpythonConsole(QtGui.QWidget, Base):
 
         self.ipythonWidget.kernel_manager = km
         self.ipythonWidget.kernel_client = kc
-
         consoleLayout = QtGui.QGridLayout()
         buttonLayout = QtGui.QGridLayout()
 
@@ -64,7 +63,9 @@ class IpythonConsole(QtGui.QWidget, Base):
       self.ipythonWidget.execute('%run -i {}'.format(macroFile))
 
     def showHistory(self):
-        self.self.ipythonWidget.execute('%history')
+        self.ipythonWidget.execute('%history')
+
+
 
     def write(self, msg, html=False):
         '''Not implemented. I don't know yet how to write something
@@ -72,13 +73,40 @@ class IpythonConsole(QtGui.QWidget, Base):
 
         '''
         # print(self.self.ipythonWidget.text())
-        print(msg, 'message here')
         self.textEditor.moveCursor(QtGui.QTextCursor.End)
         if html:
             self.textEditor.textCursor().insertHtml(msg)
         else:
           # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
           self.textEditor.insertPlainText(msg)
+
+        if self.parent().parent().recordingMacro is True:
+          self.parent().parent().macroEditor.textBox.insertPlainText(msg)
+
+
+    def writeCommand(self, objectName, functionCall, arguments, pid=None, obj=None):
+      if pid is None:
+        pid = obj.pid
+      msg1 = "%s = project.getByPid('%s')\n" % (objectName, pid)
+      msg2 = '%s(%s)\n' % (functionCall, arguments)
+
+      self.write(msg1)
+      self.write(msg2)
+
+    def writeCompoundCommand(self, objectNames, functionCall, arguments, pids=None, objs=None):
+      if pids is None:
+        pids = [obj.pid for obj in objs]
+      msg1 = "%s = project.getByPid('%s')\n" % (objectNames[0], pids[0])
+      msg2 = "%s = project.getByPid('%s')\n" % (objectNames[1], pids[1])
+      msg3 = '%s(%s)\n' % (functionCall, arguments)
+      self.write(msg1)
+      self.write(msg2)
+      self.write(msg3)
+
+    def writeModuleDisplayCommand(self, moduleCommand):
+      msg1 = 'application.%s()\n' % moduleCommand
+      self.write(msg1)
+
 
 
 

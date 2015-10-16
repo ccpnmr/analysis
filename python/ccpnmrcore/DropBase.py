@@ -152,6 +152,9 @@ class DropBase(GuiBase):
           funcName = 'process' + tags[0]
           if hasattr(self, funcName):
             getattr(self,funcName)(pids, event)
+          elif funcName == 'processProjects':
+            # We never need to process a project
+            pass
           else:
             project._logger.warning("Dropped data not processed - no %s function defined for %s"
             % (funcName, self))

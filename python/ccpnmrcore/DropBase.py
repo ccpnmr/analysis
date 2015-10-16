@@ -122,13 +122,18 @@ class DropBase(GuiBase):
         # Load Urls one by one with normal loaders
         for url in data:
 
-          ll = project.loadData(url)
-          if ll:
-            pids.extend(x.pid for x in ll)
+          loaded = project.loadData(url)
+          if loaded:
+            if isinstance(loaded, str):
+              if hasattr(self, 'processText'):
+                self.processText(loaded)
+            else:
+              pids.extend(x.pid for x in loaded)
+
         for pid in pids:
           pluralClassName = ccpnUtil.pid2PluralName(pid)
 
-          # NBNB Code to put other data types n side bar must go here
+          # NBNB Code to put other data types in side bar must go here
 
           if pluralClassName == 'Spectra':
             spectrum = self.getByPid(pid)

@@ -60,6 +60,9 @@ def loadData(project:'Project', path:str) -> (list,None):
     print("Skipping: file data type not recognised for %s" % usePath)
   elif not os.path.exists(usePath):
     print("Skipping: no file found at %s" % usePath)
+  elif dataType == 'Text':
+    # Special case - you return the text instead of a list of Pids
+    return open(usePath).read()
   else:
 
     funcname = 'load' + dataType

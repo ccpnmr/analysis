@@ -53,6 +53,8 @@ def loadData(project:'Project', path:str) -> (list,None):
 
   dataType, subType, usePath = ioFormats.analyseUrl(path)
 
+  print(dataType, subType)
+
   # urlInfo is list of triplets of (type, subType, modifiedUrl),
 
   # e.g. ('Spectrum', 'Bruker', newUrl)
@@ -112,6 +114,8 @@ def loadSpectrum(self:"Project", path:str, subType:str) -> list:
 
 #
 #
+
+
 def loadLookupFile(self:"Project", path:str, subType:str, ):
   """Load data from a look-up file, csv or xls ."""
 
@@ -143,3 +147,10 @@ def uniqueSubstanceName(self:"Project", name:str=None, defaultName:str='Molecule
     (name,result))
   #
   return result
+
+
+def loadText(self:"Project", path:str, subType:str, ):
+  text = open(path, 'r').readlines()[0]
+  newNote = self.newNote()
+  newNote.text = text
+  return [newNote]

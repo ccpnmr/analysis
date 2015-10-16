@@ -33,9 +33,6 @@ class Action(QtGui.QAction, Base):
         shortcut = QtGui.QKeySequence(", ".join(tuple(shortcut)))
       QtGui.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
       self.setShortcutContext(QtCore.Qt.ApplicationShortcut)
-      QtGui.QFontDatabase.addApplicationFont('/Users/simon/Downloads/Lato-Black.ttf')
-      font = QtGui.QFont('Lato-Black')
-      self.setFont(font)
     # elif icon:
     #   QtGui.QAction.__init__(self, icon, text, parent, triggered=callback, checkable=checkable)
 

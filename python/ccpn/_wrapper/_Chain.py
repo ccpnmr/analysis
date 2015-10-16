@@ -26,9 +26,11 @@ from ccpncore.util.typing import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
+from ccpn import Substance
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpncore.lib.molecule import MoleculeModify
 from ccpncore.util import Pid
+from ccpncore.util.Types import Tuple, Optional
 
 
 
@@ -90,6 +92,18 @@ class Chain(AbstractWrapperObject):
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
+
+  @property
+  def substance(self) -> Optional[Substance]:
+    """ccpn.Substance corresponding to ccpn.Chain"""
+    apiMolecule = self._apiChain.molecule
+    apiRefComponentStore = self._project._apiNmrProject.sampleStore.refSampleComponentStore
+    apiComponent = (apiRefComponentStore.findFirstComponent(name=apiMolecule.name, labeling='std') or
+                    apiRefComponentStore.findFirstComponent(name=apiMolecule.name))
+    if apiComponent is None:
+      return None
+    else:
+      return self._project._data2Obj[apiComponent]
 
   # CCPN functions
   def clone(self, shortName:str):
@@ -236,7 +250,6 @@ class Chain(AbstractWrapperObject):
 #   return chains
 
 
-
 def _createSimpleChain(self:Project, sequence:(str,tuple), compoundName:str='Molecule_1',
               startNumber:int=1, molType:str=None, isCyclic:bool=False,
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
@@ -276,7 +289,45 @@ def _createSimpleChain(self:Project, sequence:(str,tuple), compoundName:str='Mol
   #
   return  self._project._data2Obj[newApiChain]
 
-  
+
+def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
+                             comment:str=None) -> Chain:
+  """Create new chain that matches ccpn.Substance"""
+
+  if self.substanceType != 'MolComponent':
+    raise ValueError("Only MolComponent Substances can be used to create chains")
+
+  apiMolecule = self._apiSubstance.molecule
+  if apiMolecule is None:
+    raise ValueError("MolComponent miust have attaehed ApiMolecule in order to create chains")
+
+  apiMolSystem = self._project._apiNmrProject.molSystem
+  if shortName is None:
+    shortName = apiMolSystem.nextChainCode()
+
+  newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
+                                       details=comment)
+  #
+  return  self._project._data2Obj[newApiChain]
+Substance.createChainFromSubstance = _createChainFromSubstance
+del _createChainFromSubstance
+
+
+def getter(self:Substance) -> Tuple[Chain, ...]:
+
+  apiSubstance = self._apiSubstance
+  apiMolecule = apiSubstance.molecule if hasattr(apiSubstance, 'molecule') else None
+  if apiMolecule is None:
+    return ()
+  else:
+    data2Obj = self._project._data2Obj
+    return tuple(data2Obj[x]
+                 for x in self._wrappedData.molSystem.sortedChains()
+                 if x.molecule is apiMolecule)
+Substance.chains = property(getter, None, None,
+                            "ccpn.Chains that correspond to ccpn.Substance")
+del getter
+
 # Clean-up
     
 Chain.clone.__annotations__['return'] = Chain

@@ -366,6 +366,10 @@ class LanguageInterface:
 
     raise NotImplementedError("Should be overridden")
 
+  def finaliseException(self):
+
+    raise NotImplementedError("Should be overridden")
+
   def endTry(self):
 
     raise NotImplementedError("Should be overridden")

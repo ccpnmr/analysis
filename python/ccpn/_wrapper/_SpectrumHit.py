@@ -26,8 +26,8 @@ from ccpncore.util.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
-from ccpn import Sample
-from ccpn import SampleComponent
+# from ccpn import Sample
+# from ccpn import SampleComponent
 from ccpncore.api.ccp.nmr.Nmr import SpectrumHit as ApiSpectrumHit
 from ccpncore.util import Pid
 
@@ -156,25 +156,17 @@ class SpectrumHit(AbstractWrapperObject):
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
+  #
+  # @property
+  # def sample(self) -> Sample:
+  #   """Sample in which SpectrumHit is found"""
+  #   return self._project._data2Obj.get(self._wrappedData.sample)
+  #
 
-  @property
-  def sample(self) -> Sample:
-    """Sample in which SpectrumHit is found"""
-    return self._project._data2Obj.get(self._wrappedData.sample)
-
-  @sample.setter
-  def sample(self, value:Sample):
-    self._wrappedData.sample = None if value is None else value._wrappedData
-
-  @property
-  def sampleComponent(self) -> SampleComponent:
-    """SampleComponent that makes upp hit"""
-    return self._project._data2Obj.get(self._wrappedData.sampleComponent)
-
-  @sampleComponent.setter
-  def sampleComponent(self, value:SampleComponent):
-    self._wrappedData.sampleComponent = None if value is None else value._wrappedData
-
+  # @property
+  # def sampleComponent(self) -> SampleComponent:
+  #   """SampleComponent that makes upp hit"""
+  #   return self._project._data2Obj.get(self._wrappedData.sampleComponent)
 
   # Implementation functions
 
@@ -183,23 +175,21 @@ class SpectrumHit(AbstractWrapperObject):
     """get wrappedData (Nmr.SpectrumHit) for all SpectrumHit children of parent Spectrum"""
     return parent._wrappedData.sortedSpectrumHits()
 
-def getter(self:Sample) -> tuple:
-  ff = self._project._data2Obj.get
-  return tuple(ff(x) for x in self._wrappedData.sortedSpectrumHits())
-def setter(self:Sample, value:Sequence):
-  self._wrappedData.spectrumHits =  [x._wrappedData for x in value]
-Sample.spectrumHits = property(getter, setter, None, "SpectrumHits found using Sample")
+# def getter(self:Sample) -> tuple:
+#   ff = self._project._data2Obj.get
+#   return tuple(ff(x) for x in self._wrappedData.sortedSpectrumHits())
+# def setter(self:Sample, value:Sequence):
+#   self._wrappedData.spectrumHits =  [x._wrappedData for x in value]
+# Sample.spectrumHits = property(getter, setter, None, "SpectrumHits found using Sample")
+#
+# def getter(self:SampleComponent) -> tuple:
+#   ff = self._project._data2Obj.get
+#   return tuple(ff(x) for x in self._wrappedData.sortedSpectrumHits())
+# def setter(self:SampleComponent, value:Sequence):
+#   self._wrappedData.spectrumHits =  [x._wrappedData for x in value]
+# SampleComponent.spectrumHits = property(getter, setter, None,
+#                                         "SpectrumHits found for SampleComponent")
 
-def getter(self:SampleComponent) -> tuple:
-  ff = self._project._data2Obj.get
-  return tuple(ff(x) for x in self._wrappedData.sortedSpectrumHits())
-def setter(self:SampleComponent, value:Sequence):
-  self._wrappedData.spectrumHits =  [x._wrappedData for x in value]
-SampleComponent.spectrumHits = property(getter, setter, None,
-                                        "SpectrumHits found for SampleComponent")
-
-del getter
-del setter
 
 
 # Connections to parents:

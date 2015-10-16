@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpncore.memops.Credits.CcpnLicense for license text")
@@ -14,9 +14,9 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
-__date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__version__ = "$Revision: 7686 $"
+__author__ = "$Author$"
+__date__ = "$Date$"
+__version__ = "$Revision$"
 
 #=========================================================================================
 # Start of code
@@ -27,8 +27,7 @@ from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 # raise Exception("This statement must be moved - you can not import ccpnmr or ccpnmrcore into ccpn or ccpncore")
 
 from ccpncore.util.Types import Sequence
-import numpy
-import numpy.ma as ma
+
 from numpy import argwhere
 from scipy.ndimage import maximum_filter
 
@@ -100,42 +99,28 @@ def pickPeaks1d(self:'PeakList', data1d, size:int=3, mode:str='wrap'):
 
 
 
-def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap', ignoredRegions=None, noiseThreshold=None ):
+def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap'):
 
-   if not ignoredRegions:
-     ignoredRegions = [[-20.1,-19.1]]
 
    peaks = []
    spectrum = self.spectrum
-
+   ignoredRegions = [5.4, 4.25]
    data = spectrum._apiDataSource.get1dSpectrumData()
-
    ppmValues = data[0]
+   import numpy
+   mask = (ppmValues > ignoredRegions[0]) | (ppmValues < ignoredRegions[1])
 
-   if noiseThreshold == 0:
-     noiseThreshold = spectrum.estimateNoise()*10
-
-   masks = []
-   for region in ignoredRegions:
-
-     mask = (ppmValues > region[0]) | (ppmValues < region[1])
-     masks.append(mask)
-
-   # mask = (ppmValues > ignoredRegions[0]) | (ppmValues < ignoredRegions[1])
-   fullmask = [all(mask) for mask in zip(*masks)]
-   newArray2 = (numpy.ma.MaskedArray(data, mask=numpy.logical_not((fullmask, fullmask))))
-
-
-   if (newArray2.size == 0) or (data.max() < noiseThreshold):
+   newArray2 = (numpy.ma.MaskedArray(data, mask=numpy.logical_not((mask, mask))))
+   threshold = spectrum.estimateNoise()
+   if (newArray2.size == 0) or (data.max() < threshold):
     return peaks
-   boolsVal = newArray2[1] > noiseThreshold
+   boolsVal = newArray2[1] > threshold
    maxFilter = maximum_filter(newArray2[1], size=size, mode=mode)
    boolsMax = newArray2[1] == maxFilter
    boolsPeak = boolsVal & boolsMax
    indices = argwhere(boolsPeak) # True positional indices
    for position in indices:
      peakPosition = [float(newArray2[0][position])]
-
      height = newArray2[1][position]
      self.newPeak(height=float(height), position=peakPosition)
 

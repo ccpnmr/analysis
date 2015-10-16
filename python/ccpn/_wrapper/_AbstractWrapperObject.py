@@ -507,9 +507,9 @@ class AbstractWrapperObject():
     raise NotImplementedError("Code error: function not implemented")
 
   def rename(self, value:str):
-    """Change key attribute(s) of object, modifying project, related identifiers, etc.
-    to maintain consistency.
-    Some Objects (Chain, Residue, Atom) cannot be renamed"""
+    """Change the object name or other key attribute(s), changing the object id, pid,
+       and all internal references to maintain consistency.
+       Some Objects (Chain, Residue, Atom) cannot be renamed"""
     raise ValueError("%s objects cannot be renamed" % self.__class__.__name__)
   
   # In addition each class (except for Project) must define a  newClass method

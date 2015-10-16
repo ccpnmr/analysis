@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-# from ccpn.lib.wrapper import Spectrum as LibSpectrum
+# from ccpn.lib._wrapper import Spectrum as LibSpectrum
 
 __author__ = 'simon'
 from PyQt4 import QtCore, QtGui

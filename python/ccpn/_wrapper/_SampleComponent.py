@@ -25,9 +25,10 @@ __version__ = "$Revision$"
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Sample
-from ccpn import Chain
+from ccpn import SpectrumHit
 from ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
 from ccpncore.util import Pid
+from ccpncore.util.Types import Tuple, Sequence
 
 
 class SampleComponent(AbstractWrapperObject):
@@ -146,6 +147,12 @@ class SampleComponent(AbstractWrapperObject):
 
     wrappedData.chainCodes = chainCodes
 
+  @property
+  def spectrumHits(self) -> Tuple[SpectrumHit, ...]:
+    """ccpn.SpectrumHits found for ccpn.SampleComponent"""
+    ff = self._project._data2Obj.get
+    return tuple(ff(x) for x in self._apiSampleComponent.sortedSpectrumHits())
+
   # @property
   # def chemicalShiftList(self) -> ChemicalShiftList:
   #   """ChemicalShiftList associated with Spectrum."""
@@ -166,6 +173,14 @@ class SampleComponent(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: Sample)-> list:
     """get wrappedData (SampleComponent) for all SampleComponent children of parent Sample"""
     return parent._wrappedData.sortedSampleComponents()
+
+
+
+def getter(self:SpectrumHit) -> SampleComponent:
+  return self._project._data2Obj.get(self._apiSpectrumHit.sampleComponent)
+SpectrumHit.sampleComponent = property(getter, None, None,
+                              "ccpn.SampleComponent in which ccpn.SpectrumHit is found")
+del getter
 
 # Connections to parents:
 Sample._childClasses.append(SampleComponent)

@@ -24,11 +24,10 @@ __version__ = "$Revision$"
 import itertools
 import operator
 
-from ccpncore.util.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import PeakList
-from ccpn import NmrAtom
+# from ccpn import NmrAtom
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpncore.util.Types import Optional, Tuple, Union, Sequence
 
@@ -176,7 +175,7 @@ class Peak(AbstractWrapperObject):
       peakDim.position = value[ii]
 
   @property
-  def dimensionNmrAtoms(self) -> Tuple[Tuple[NmrAtom, ...], ...]:
+  def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
     """Peak dimension assignment - a list of lists of NmrAtoms for each dimension.
     Assignments as a list of individual combinations is given in 'assignedNmrAtoms'.
     Setting dimensionAssignments implies that all combinations are possible"""
@@ -216,7 +215,7 @@ class Peak(AbstractWrapperObject):
     apiPeak.assignByDimensions(dimResonances)
 
   @property
-  def assignedNmrAtoms(self) -> Tuple[Tuple[Optional[NmrAtom], ...], ...]:
+  def assignedNmrAtoms(self) -> Tuple[Tuple[Optional['NmrAtom'], ...], ...]:
     """Peak assignment - a list of lists of NmrAtom combinations
     (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None
     Assignments per dimension are given in 'dimensionNmrAtoms'."""
@@ -261,7 +260,7 @@ class Peak(AbstractWrapperObject):
     # set assignments
     apiPeak.setAssignments(resonances)
 
-  def addAssignment(self, value:Union[str, NmrAtom]):
+  def addAssignment(self, value:Union[str, 'NmrAtom']):
     """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""
 
     if len(value) != self._wrappedData.peakList.numDim:
@@ -272,8 +271,8 @@ class Peak(AbstractWrapperObject):
     assignedNmrAtoms.append(value)
     self.assignedNmrAtoms = assignedNmrAtoms
 
-  def assignDimension(self, axisCode:str, value:Union[Union[str,NmrAtom],
-                                                            Sequence[Union[str,NmrAtom]]]):
+  def assignDimension(self, axisCode:str, value:Union[Union[str,'NmrAtom'],
+                                                            Sequence[Union[str,'NmrAtom']]]):
     """Assign dimension axisCode to value (NmrAtom, or Pid or sequence of either, or None)
     NBNB TBD add integer axisCode? Should it be index or dim number?"""
 
@@ -331,7 +330,7 @@ PeakList._childClasses.append(Peak)
 def newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
             position:Sequence[float]=(), pointPosition:Sequence[float]=(),
-            dimensionAssignments:Sequence[Sequence[NmrAtom]]=(), assignments:Sequence[Sequence[Optional[NmrAtom]]]=()) -> Peak:
+            dimensionAssignments:Sequence[Sequence['NmrAtom']]=(), assignments:Sequence[Sequence[Optional['NmrAtom']]]=()) -> Peak:
   """Create new child Peak"""
   apiPeakList = self._apiPeakList
   apiPeak = apiPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
@@ -375,19 +374,6 @@ def newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]
   return self._project._data2Obj.get(apiPeak)
 
 PeakList.newPeak = newPeak
-
-def _atomAssignedPeaks(nmrAtom:NmrAtom) -> Tuple[Peak]:
-  """All peaks assigned to the NmrAtom"""
-  apiResonance = nmrAtom._wrappedData
-  apiPeaks = [x.peakDim.peak for x in apiResonance.peakDimContribs]
-  apiPeaks.extend([x.peakDim.peak for x in apiResonance.peakDimContribNs])
-
-  data2Obj = nmrAtom._project._data2Obj
-  result = [sorted(data2Obj[x] for x in set(apiPeaks))]
-  #
-  return result
-
-NmrAtom.assignedPeaks = property(_atomAssignedPeaks, None, None)
 
 # Notifiers:
 className = ApiPeak._metaclass.qualifiedName()

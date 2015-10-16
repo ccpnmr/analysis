@@ -24,8 +24,11 @@ __version__ = "$Revision$"
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
+from ccpn import Spectrum
+from ccpn import PeakList
 from ccpncore.api.ccp.nmr.Nmr import ShiftList as ApiShiftList
 from ccpncore.util import Pid
+from ccpncore.util.Types import Tuple, Sequence, List
 
 
 class ChemicalShiftList(AbstractWrapperObject):
@@ -105,6 +108,16 @@ class ChemicalShiftList(AbstractWrapperObject):
   def comment(self, value:str):
     self._wrappedData.details = value
 
+  @property
+  def spectra(self) -> Tuple[Spectrum, ...]:
+    """ccpn.Spectra that use ChemicalShiftList to store chemical shifts"""
+    ff = self._project._data2Obj.get
+    return tuple(ff(y) for x in self._wrappedData.sortedExperiments()
+                 for y in x.sortedDataSources())
+
+  @spectra.setter
+  def spectra(self, value:Sequence[Spectrum]):
+    self._wrappedData.experiments =  set(x._wrappedData.experiment for x in value)
     
   # Implementation functions
   def rename(self, value):
@@ -115,13 +128,31 @@ class ChemicalShiftList(AbstractWrapperObject):
       raise ValueError("ChemicalShiftList name must be set")
 
   @classmethod
-  def _getAllWrappedData(cls, parent: Project)-> list:
-    """get wrappedData (MolSystems) for all Molecules children of parent Project"""
-    return [x for x in parent._wrappedData.sortedMeasurementLists()
+  def _getAllWrappedData(cls, parent: Project)-> List[ApiShiftList]:
+    """get wrappedData (SHiftLists) for all ShiftList children of parent Project"""
+    return [x for x in parent._apiNmrProject.sortedMeasurementLists()
             if x.className == 'ShiftList']
 
 # Connections to parents:
 Project._childClasses.append(ChemicalShiftList)
+
+def getter(self:Spectrum) -> ChemicalShiftList:
+    return self._project._data2Obj.get(self._apiDataSource.experiment.shiftList)
+def setter(self:Spectrum, value:ChemicalShiftList):
+    value = self.getByPid(value) if isinstance(value, str) else value
+    self._apiDataSource.experiment.shiftList = value._apiShiftList
+Spectrum.chemicalShiftList = property(getter, setter, None,
+                          "ccpn.ChemicalShiftList used for ccpn.Spectrum")
+
+def getter(self:PeakList) -> ChemicalShiftList:
+  return self._project._data2Obj.get(self._wrappedData.shiftList)
+def setter(self:PeakList, value:ChemicalShiftList):
+  value = self.getByPid(value) if isinstance(value, str) else value
+  self._apiPeakList.shiftList = None if value is None else value._apiShiftList
+PeakList.chemicalShiftList = property(getter, setter, None,
+                                      "ChemicalShiftList associated with PeakList.")
+del getter
+del setter
 
 def newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
                          isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
@@ -131,6 +162,8 @@ def newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
   return self._data2Obj.get(obj)
 
 Project.newChemicalShiftList = newChemicalShiftList
+
+# Backwards crosslinks
 
 # Notifiers:
 className = ApiShiftList._metaclass.qualifiedName()

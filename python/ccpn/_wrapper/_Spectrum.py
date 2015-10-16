@@ -29,8 +29,8 @@ import os
 from ccpncore.util.typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
-from ccpn import Sample
-from ccpn import ChemicalShiftList
+# from ccpn import Sample
+# from ccpn import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.memops.Implementation import Url
 from ccpncore.util import Path
@@ -192,16 +192,16 @@ class Spectrum(AbstractWrapperObject):
   def spinningRate(self, value:float):
     self._wrappedData.experiment.spinningRate = value
 
-  @property
-  def chemicalShiftList(self) -> ChemicalShiftList:
-    """ChemicalShiftList associated with Spectrum."""
-    return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
-
-  @chemicalShiftList.setter
-  def chemicalShiftList(self, value:ChemicalShiftList):
-
-    value = self.getByPid(value) if isinstance(value, str) else value
-    self._wrappedData.experiment.shiftList = value._wrappedData
+  # @property
+  # def chemicalShiftList(self) -> ChemicalShiftList:
+  #   """ChemicalShiftList associated with Spectrum."""
+  #   return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
+  #
+  # @chemicalShiftList.setter
+  # def chemicalShiftList(self, value:ChemicalShiftList):
+  #
+  #   value = self.getByPid(value) if isinstance(value, str) else value
+  #   self._wrappedData.experiment.shiftList = value._wrappedData
 
   @property
   def experimentType(self) -> str:
@@ -762,14 +762,14 @@ class Spectrum(AbstractWrapperObject):
         ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints+1)))
     return tuple(tuple(sorted(x)) for x in ll)
 
-  @property
-  def sample(self) -> Sample:
-    """Sample used to acquire Spectrum"""
-    return self._project._data2Obj.get(self._wrappedData.experiment.sample)
-
-  @sample.setter
-  def sample(self, value:Sample):
-    self._wrappedData.experiment.sample = None if value is None else value._wrappedData
+  # @property
+  # def sample(self) -> Sample:
+  #   """Sample used to acquire Spectrum"""
+  #   return self._project._data2Obj.get(self._wrappedData.experiment.sample)
+  #
+  # @sample.setter
+  # def sample(self, value:Sample):
+  #   self._wrappedData.experiment.sample = None if value is None else value._wrappedData
 
   # Implementation functions
 
@@ -787,25 +787,25 @@ class Spectrum(AbstractWrapperObject):
             for x in y.sortedDataSources()]
 
 
-def getter(self:ChemicalShiftList) -> tuple:
-  ff = self._project._data2Obj.get
-  return tuple(ff(y) for x in self._wrappedData.sortedExperiments()
-               for y in x.sortedDataSources())
-def setter(self:ChemicalShiftList, value:Sequence):
-  self._wrappedData.experiments =  set(x._wrappedData.experiment for x in value)
-ChemicalShiftList.spectra = property(getter, setter, None,
-                          "Spectra using ChemicalShiftList")
-
-def getter(self:Sample) -> tuple:
-  ff = self._project._data2Obj.get
-  return tuple(ff(y) for x in self._wrappedData.sortedNmrExperiments()
-               for y in x.sortedDataSources())
-def setter(self:Sample, value:Sequence):
-  self._wrappedData.nmrExperiments =  set(x._wrappedData.experiment for x in value)
-Sample.spectra = property(getter, setter, None,
-                          "Spectra acquired using Sample (excluding multiSample spectra)")
-del getter
-del setter
+# def getter(self:ChemicalShiftList) -> tuple:
+#   ff = self._project._data2Obj.get
+#   return tuple(ff(y) for x in self._wrappedData.sortedExperiments()
+#                for y in x.sortedDataSources())
+# def setter(self:ChemicalShiftList, value:Sequence):
+#   self._wrappedData.experiments =  set(x._wrappedData.experiment for x in value)
+# ChemicalShiftList.spectra = property(getter, setter, None,
+#                           "Spectra using ChemicalShiftList")
+#
+# def getter(self:Sample) -> tuple:
+#   ff = self._project._data2Obj.get
+#   return tuple(ff(y) for x in self._wrappedData.sortedNmrExperiments()
+#                for y in x.sortedDataSources())
+# def setter(self:Sample, value:Sequence):
+#   self._wrappedData.nmrExperiments =  set(x._wrappedData.experiment for x in value)
+# Sample.spectra = property(getter, setter, None,
+#                           "Spectra acquired using Sample (excluding multiSample spectra)")
+# del getter
+# del setter
 
 
 def newSpectrum(self:Project, name:str) -> Spectrum:

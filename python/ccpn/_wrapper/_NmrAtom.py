@@ -27,11 +27,12 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import NmrResidue
 from ccpn import Atom
+from ccpn import Peak
 from ccpncore.lib import Constants
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 from ccpncore.util import Pid
-from ccpncore.util.Types import Union
+from ccpncore.util.Types import Union, Tuple
 
 
 class NmrAtom(AbstractWrapperObject):
@@ -88,6 +89,18 @@ class NmrAtom(AbstractWrapperObject):
   def isotopeCode(self) -> str:
     """isotopeCode of NmrAtom. Set automatically on creation (from NmrAtom name) and cannot be reset"""
     return self._wrappedData.isotopeCode
+
+
+  def assignedPeaks(self) -> Tuple[Peak]:
+    """All ccn.Peaks assigned to the ccpn.NmrAtom"""
+    apiResonance = self._wrappedData
+    apiPeaks = [x.peakDim.peak for x in apiResonance.peakDimContribs]
+    apiPeaks.extend([x.peakDim.peak for x in apiResonance.peakDimContribNs])
+
+    data2Obj = self._project._data2Obj
+    result = [sorted(data2Obj[x] for x in set(apiPeaks))]
+    #
+    return result
 
   def rename(self, value:str=None):
     """Rename object, changing id, Pid, and internal representation"""

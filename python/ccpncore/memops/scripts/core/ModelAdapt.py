@@ -120,6 +120,9 @@ class ModelAdapt(ModelTraverse):
   
   # Set of objects to check for deletion (for checkDelete/singleDelete calls)
   'objsToBeChecked':'objsToBeChecked',
+
+  # Set of objects newly created (for passing to undo machinery0
+  'objectsCreated':'objectsCreated',
   
   # links-to-check dictionary (for checkDelete/singleDelete calls)
   'linkCounter':'linkCounter',
@@ -147,6 +150,9 @@ class ModelAdapt(ModelTraverse):
   
   # parent object of current object
   'parent':'parent',
+
+  # undo object
+  '_undo':'_undo',
   
   
   # Implementation attributes

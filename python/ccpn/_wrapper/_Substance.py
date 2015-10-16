@@ -28,7 +28,7 @@ from ccpn import Sample
 from ccpn import Spectrum
 from ccpncore.util.Types import Tuple, Optional, Sequence
 from ccpncore.lib.molecule import MoleculeModify
-from ccpn import Chain
+# from ccpn import Chain
 from ccpn import SampleComponent
 from ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
 from ccpncore.util import Pid
@@ -201,18 +201,18 @@ class Substance(AbstractWrapperObject):
   def comment(self, value:str):
     self._wrappedData.details = value
 
-  @property
-  def chains(self) -> Tuple[Chain, ...]:
-    """Chains that correspond to Substance"""
-    apiSubstance = self._apiSubstance
-    apiMolecule = apiSubstance.molecule if hasattr(apiSubstance, 'molecule') else None
-    if apiMolecule is None:
-      return ()
-    else:
-      data2Obj = self._project._data2Obj
-      return tuple(data2Obj[x]
-                   for x in self._wrappedData.molSystem.sortedChains()
-                   if x.molecule is apiMolecule)
+  # @property
+  # def chains(self) -> Tuple[Chain, ...]:
+  #   """Chains that correspond to Substance"""
+  #   apiSubstance = self._apiSubstance
+  #   apiMolecule = apiSubstance.molecule if hasattr(apiSubstance, 'molecule') else None
+  #   if apiMolecule is None:
+  #     return ()
+  #   else:
+  #     data2Obj = self._project._data2Obj
+  #     return tuple(data2Obj[x]
+  #                  for x in self._wrappedData.molSystem.sortedChains()
+  #                  if x.molecule is apiMolecule)
 
   @property
   def sampleComponents(self) -> Tuple[SampleComponent, ...]:
@@ -345,40 +345,18 @@ Project.createPolymerSubstance = _createPolymerSubstance
 del _createPolymerSubstance
 
 
-
-def _createChainFromSubstance(self:Project, substance:Substance, shortName:str=None, role:str=None,
-                             comment:str=None) -> Chain:
-  """Create new chain that matches Substance - throws error if Substance is not of valid type"""
-
-  if substance.substanceType != 'MolComponent':
-    raise ValueError("Only MolComponent Substances can be used to create chains")
-
-  apiMolecule = substance._apiSubstance.molecule
-  if apiMolecule is None:
-    raise ValueError("MolComponent miust have attaehed ApiMolecule in order to create chains")
-
-  apiMolSystem = self._wrappedData.molSystem
-  if shortName is None:
-    shortName = apiMolSystem.nextChainCode()
-
-  newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
-                                       details=comment)
-  #
-  return  self._project._data2Obj[newApiChain]
-Chain.createChainFromSubstance = _createChainFromSubstance
-del _createChainFromSubstance
-
-def getter(self:Chain) -> Optional[Substance]:
-  apiMolecule = self._apiChain.molecule
-  apiRefComponentStore = self._project._apiNmrProject.sampleStore.refSampleComponentStore
-  apiComponent = (apiRefComponentStore.findFirstComponent(name=apiMolecule.name, labeling='std') or
-                  apiRefComponentStore.findFirstComponent(name=apiMolecule.name))
-  if apiComponent is None:
-    return None
-  else:
-    return self._project._data2Obj[apiComponent]
 #
-Chain.substance = property(getter, None, None, "Substance corresponding to Chain")
+# def getter(self:Chain) -> Optional[Substance]:
+#   apiMolecule = self._apiChain.molecule
+#   apiRefComponentStore = self._project._apiNmrProject.sampleStore.refSampleComponentStore
+#   apiComponent = (apiRefComponentStore.findFirstComponent(name=apiMolecule.name, labeling='std') or
+#                   apiRefComponentStore.findFirstComponent(name=apiMolecule.name))
+#   if apiComponent is None:
+#     return None
+#   else:
+#     return self._project._data2Obj[apiComponent]
+# #
+# Chain.substance = property(getter, None, None, "Substance corresponding to Chain")
 
 def getter(self:SampleComponent) -> Optional[Substance]:
   apiRefComponentStore = self._parent._apiSample.sampleStore.refSampleComponentStore

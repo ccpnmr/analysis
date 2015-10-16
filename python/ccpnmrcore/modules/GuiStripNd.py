@@ -33,7 +33,7 @@ import pyqtgraph as pg
 
 from ccpn import Project
 
-from ccpn.lib.wrapper import Spectrum as LibSpectrum
+from ccpn.lib._wrapper import Spectrum as LibSpectrum
 
 from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView

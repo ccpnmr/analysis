@@ -683,6 +683,13 @@ def %s(%s):''' % (funcname, paramString))
       self.writeOne('except %s as %s:' % (exception, exceptionVar))
     self.indent += self.INDENT
 
+  # implements LanguageInterface
+  def finaliseException(self):
+
+    self.indent -= self.INDENT
+    self.writeOne('finally:')
+    self.indent += self.INDENT
+
   ###########################################################################
 
   ###########################################################################

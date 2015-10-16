@@ -1440,7 +1440,20 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
                          **self.collectionParams(element))
 
     if not op.isImplicit:
+      undoVar = self.varNames['_undo']
+      self.setVar(undoVar, self.getImplAttr(self.varNames['root'], '_undo', inClass=inClass))
+      self.startIf(self.valueIsNotNone(undoVar))
+      self.callFunc('increaseBlocking', undoVar, doWrite=True)
+      self.endIf()
+      self.startTry()
+
       self.writeExternalCode(op, inClass)
+
+      self.finaliseException()
+      self.startIf(self.valueIsNotNone(undoVar))
+      self.callFunc('decreaseBlocking', undoVar, doWrite=True)
+      self.endIf()
+      self.endTry()
     else:
       # TBD: this is not complete for roles
       if opType == 'set':

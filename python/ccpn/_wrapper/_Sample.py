@@ -25,9 +25,11 @@ from datetime import datetime
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
+from ccpn import Spectrum
+from ccpn import SpectrumHit
 from ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpncore.util import Pid
-
+from ccpncore.util.Types import Sequence, Tuple, Optional
 
 
 class Sample(AbstractWrapperObject):
@@ -173,6 +175,24 @@ class Sample(AbstractWrapperObject):
   def comment(self, value:str):
     self._wrappedData.details = value
 
+  @property
+  def spectra(self) -> Tuple[Spectrum, ...]:
+    """ccpn.Spectra acquired using ccpn.Sample (excluding multiSample spectra)"""
+    ff = self._project._data2Obj.get
+    return tuple(ff(y) for x in self._wrappedData.sortedNmrExperiments()
+                 for y in x.sortedDataSources())
+
+  @spectra.setter
+  def spectra(self, value:Sequence[Spectrum]):
+    self._wrappedData.nmrExperiments =  set(x._wrappedData.experiment for x in value)
+
+
+  @property
+  def spectrumHits(self) -> Tuple[SpectrumHit, ...]:
+    """ccpn.SpectrumHits that were found using ccpn.Sample"""
+    ff = self._project._data2Obj.get
+    return tuple(ff(x) for x in self._apiSample.sortedSpectrumHits())
+
   # Implementation functions
   def rename(self, value):
     """Rename Sample, changing its Id and Pid"""
@@ -205,7 +225,21 @@ def newSample(self:Project, name:str, pH:float=None, ionicStrength:float=None, a
                                           colPosition=columnNumber, details=comment)
   #
   return self._data2Obj.get(newApiSample)
-    
+
+def getter(self:Spectrum) -> Optional[Sample]:
+  return self._project._data2Obj.get(self._apiDataSource.experiment.sample)
+def setter(self, value:Sample):
+  self._wrappedData.experiment.sample = None if value is None else value._apiSample
+Spectrum.sample = property(getter, setter, None,
+                           "ccpn.Sample used to acquire ccpn.Spectrum")
+
+def getter(self:SpectrumHit) -> Sample:
+  return self._project._data2Obj.get(self._apiSpectrumHit.sample)
+SpectrumHit.sample = property(getter, None, None,
+                              "ccpn.Sample in which ccpn.SpectrumHit is found")
+del getter
+del setter
+
 # Connections to parents:
 Project._childClasses.append(Sample)
 Project.newSample = newSample

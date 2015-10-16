@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
-from ccpn import ChemicalShiftList
+# from ccpn import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 
 
@@ -93,17 +93,17 @@ class PeakList(AbstractWrapperObject):
   def isSimulated(self, value:bool):
     self._wrappedData.isSimulated = value
 
-  @property
-  def chemicalShiftList(self) -> ChemicalShiftList:
-    """ChemicalShiftList associated with PeakList."""
-    return self._project._data2Obj.get(self._wrappedData.shiftList)
-
-  @chemicalShiftList.setter
-  def chemicalShiftList(self, value):
-
-    value = self.getByPid(value) if isinstance(value, str) else value
-    apiPeakList = self._wrappedData
-    apiPeakList.shiftList = None if value is None else value._wrappedData
+  # @property
+  # def chemicalShiftList(self) -> ChemicalShiftList:
+  #   """ChemicalShiftList associated with PeakList."""
+  #   return self._project._data2Obj.get(self._wrappedData.shiftList)
+  #
+  # @chemicalShiftList.setter
+  # def chemicalShiftList(self, value):
+  #
+  #   value = self.getByPid(value) if isinstance(value, str) else value
+  #   apiPeakList = self._wrappedData
+  #   apiPeakList.shiftList = None if value is None else value._wrappedData
     
   # Implementation functions
   @classmethod

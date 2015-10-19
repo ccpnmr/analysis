@@ -237,3 +237,8 @@ def integerStringSortKey(key):
 
 def dictionaryProduct(dict1:dict, dict2:dict) -> dict:
   """multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary"""
+
+def uniquify(sequence):
+  seen = set()
+  seen_add = seen.add
+  return [x for x in sequence if x not in seen and not seen_add(x)]

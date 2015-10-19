@@ -46,7 +46,7 @@ class AtomSelector(CcpnDock):
     self.moveLabel=False
     pickAndAssignWidget = Widget(self)#
     pickAndAssignWidget.setMaximumSize(500, 300)
-
+    self.pythonConsole = project._appBase.mainWindow.pythonConsole
     headerLabel = Label(self, text='i-1')
     pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
     headerLabel = Label(pickAndAssignWidget, text='i', grid=(0, 1))
@@ -91,8 +91,9 @@ class AtomSelector(CcpnDock):
 
     if self.current.nmrResidue is None:
       r = self.current.peaks[0].dimensionNmrAtoms[0][0].nmrResidue
-
     newNmrAtom = r.fetchNmrAtom(name=name)
+    self.pythonConsole.writeWrapperCommand(objectNames=['nmrResidue', 'nmrAtom'],
+                                 wrapperCommand='fetchNmrResidue', pid=r.pid, args='name="%s"' % name)
     for peak in self.current.peaks:
       for dim in range(len(peak.dimensionNmrAtoms)):
         isotopeCode = peak.peakList.spectrum.isotopeCodes[dim]
@@ -145,12 +146,14 @@ class AtomSelector(CcpnDock):
             isotopeCode = peak.peakList.spectrum.isotopeCodes[1]
             predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1], isotopeCode) for ccpCode in CCP_CODES]
             refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomTypes if len(type) > 0]
+            print(refinedPreds, predictedAtomTypes)
             atomPredictions = set()
             for pred in refinedPreds:
               if pred[1] > 90:
                 atomPredictions.add(pred[0])
-
+            print(atomPredictions, 'atomPredictions')
             for atomPred in atomPredictions:
+              print(atomPred, atomPred)
               if atomPred == 'CB':
                 if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
                   self.cbButton1.setStyleSheet('background-color: green')
@@ -159,11 +162,12 @@ class AtomSelector(CcpnDock):
                   self.cbButton2.setStyleSheet('background-color: green')
               if atomPred == 'CA':
                 if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-                  self.caButton1.setStyleSheet('background-color: green')
-                  self.caButton2.setStyleSheet('background-color: orange')
+                  self.caButton1.setStyleSheet('QPushButton {background-color: green}')
+                  self.caButton2.setStyleSheet('QPushButton {background-color: orange}')
+                  print('interonly')
                 else:
-                  self.caButton2.setStyleSheet('background-color: green')
-
+                  self.caButton2.setStyleSheet('QPushButton {background-color: green}')
+                  print('inter/intra')
 
 
 

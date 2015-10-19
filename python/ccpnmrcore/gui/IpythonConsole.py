@@ -20,10 +20,9 @@ class IpythonConsole(QtGui.QWidget, Base):
         km.start_kernel()
         km.kernel.gui = 'qt4'
         kc = km.client()
-        kc.start_channels()
-        self.ipythonWidget = RichIPythonWidget(self)
-        self.ipythonWidget._set_font(QtGui.QFont('Lucida Grande', 12))
 
+        self.ipythonWidget = RichIPythonWidget(self, gui_completion='plain')
+        self.ipythonWidget._set_font(QtGui.QFont('Lucida Grande', 12))
         self.ipythonWidget.kernel_manager = km
         self.ipythonWidget.kernel_client = kc
         consoleLayout = QtGui.QGridLayout()
@@ -34,7 +33,9 @@ class IpythonConsole(QtGui.QWidget, Base):
         self.textEditor.setFont(QtGui.QFont('Lucida Grande', 12))
         self.textEditor.setTextColor(QtGui.QColor('black'))
         # self.textEditor.setFontPointSize(int(10))
-
+        self.a = {'text': ''}
+        km.kernel.shell.push(self.a)
+        kc.start_channels()
         self.layout().setSpacing(1)
         # self.layout().setContentsMargins(3, 3, 3, 3)
         self.layout().addWidget(self.textEditor, 0, 0)
@@ -57,14 +58,15 @@ class IpythonConsole(QtGui.QWidget, Base):
 
     def runMacro(self, macroFile):
       # The -i argument runs the macro within the namespace
-      # of the teminal, which can be handy. In this way you
+      # of the terminal, which can be handy. In this way you
       # have access to things like current.peaks, which the
       # user most likely expects.
+
       self.ipythonWidget.execute('%run -i {}'.format(macroFile))
+
 
     def showHistory(self):
         self.ipythonWidget.execute('%history')
-
 
 
     def write(self, msg, html=False):
@@ -79,7 +81,7 @@ class IpythonConsole(QtGui.QWidget, Base):
         else:
           # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
           self.textEditor.insertPlainText(msg)
-
+          self.parent().parent().statusBar().showMessage(msg)
         if self.parent().parent().recordingMacro is True:
           self.parent().parent().macroEditor.textBox.insertPlainText(msg)
 
@@ -107,6 +109,11 @@ class IpythonConsole(QtGui.QWidget, Base):
       msg1 = 'application.%s()\n' % moduleCommand
       self.write(msg1)
 
+    def writeWrapperCommand(self, objectNames, wrapperCommand, pid, args):
+      msg1 = "%s = project.getByPid('%s')\n" % (objectNames[0], pid)
+      msg2 = "%s = %s.%s(%s)\n" % (objectNames[1], objectNames[0], wrapperCommand, args)
+      self.write(msg1)
+      self.write(msg2)
 
 
 

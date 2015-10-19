@@ -35,9 +35,10 @@ from ccpncore.gui.Dock import CcpnDock
 from ccpnmrcore.gui.IpythonConsole import IpythonConsole
 from ccpncore.gui.Menu import Menu, MenuBar
 from ccpnmrcore.gui.SideBar import SideBar
-from ccpncore.gui.TextEditor import TextEditor
 
 from ccpncore.util import Path
+
+from ccpncore.util.Common import uniquify
 
 from ccpnmrcore.gui.Assigner import Assigner
 
@@ -119,9 +120,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if len(recentFiles) >= 10:
       recentFiles.pop()
     recentFiles.insert(0, path)
-    seen = set()
-    seen_add = seen.add
-    recentFiles = [x for x in recentFiles if x not in seen and not seen_add(x)]
+
+    recentFiles = uniquify(recentFiles)
     # print(recentFiles)
     self._appBase.preferences.recentFiles = recentFiles
 
@@ -148,25 +148,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                     """)
 
     self.namespace = {'loadProject':self._appBase.loadProject,
-                      'newProject':self._appBase.newProject, 'loadData':self.loadData, 'window':self,
+                      'newProject':self._appBase.newProject, 'loadData':self.loadData, 'application':self,
                       'preferences':self._appBase.preferences, 'project':self._project, 'current':self._appBase.current}
-    # self.pythonConsole = Console(parent=self, namespace=self.namespace)
-    # self.pythonConsole.setGeometry(1200, 700, 10, 1)
-    # self.pythonConsole.heightMax = 200
+
     self.pythonConsole = IpythonConsole(self, self.namespace)
-    # self.pythonConsole.setGeometry(1200, 700, 10, 1)
-    # self.pythonConsole.setMinimumHeight(200)
-    # self.pythonConsole.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-
     self.sideBar = SideBar(parent=self)
-
     self.sideBar.setDragDropMode(self.sideBar.DragDrop)
-    # self.sideBar.setGeometry(0, 0, 180, 600)
     self.sideBar.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-
     self.splitter3.addWidget(self.sideBar)
-    # self.splitter3.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-
     self.splitter1.addWidget(self.splitter3)
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter1.setStretchFactor(0, 2)
@@ -175,14 +164,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
     self.splitter2.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Minimum)
-    self.splitter2.setStretchFactor(0, 10)
+    self.splitter2.setStretchFactor(0, 5)
     self.splitter2.setStretchFactor(1, 1)
 
-    # self.dockArea.addDock(self.pythonConsole)
     self.pythonConsole.hide()
     self.splitter1.addWidget(self.dockArea)
-    # self.seqScrollArea = QtGui.QScrollArea()
-    # self.seqScrollArea.setFixedHeight(30)
     self.setCentralWidget(self.splitter2)
     self.statusBar().showMessage('Ready')
     self.setShortcuts()
@@ -661,9 +647,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def fillRecentMacrosMenu(self):
 
-    seen = set()
-    seen_add = seen.add
-    recentMacros = [x for x in self._appBase.preferences.recentMacros if x not in seen and not seen_add(x)]
+    recentMacros = uniquify(self._appBase.preferences.recentMacros)
 
     for recentMacro in recentMacros:
       self.action = Action(self, text=recentMacro, callback=partial(self.runMacro, macroFile=recentMacro))

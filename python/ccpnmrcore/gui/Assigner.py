@@ -311,8 +311,8 @@ class Assigner(CcpnDock):
           self.predictedStretch.append(nmrResidue)
 
     self._assembleResidue(nmrResidue, atoms)
-    for spectrum in self.project.spectra:
-      self._addSpectrumAssignmentLines(spectrum, atoms)
+    # for spectrum in self.project.spectra:
+    #   self._addSpectrumAssignmentLines(spectrum, atoms)
 
     if len(self.predictedStretch) > 2:
       self.predictSequencePosition(self.predictedStretch)
@@ -366,7 +366,7 @@ class Assigner(CcpnDock):
         lineColour = spectrum.positiveContourColour
         for atom in residue.values():
           if atom.nmrAtom is not None:
-            for peak in atom.nmrAtom.assignedPeaks[0]:
+            for peak in atom.nmrAtom.assignedPeaks()[0]:
               if peak.peakList.spectrum == spectrum:
                 for atom in peak.dimensionNmrAtoms:
                   for a in atom:

@@ -32,9 +32,7 @@ class ListWidget(QtGui.QListWidget, Base):
     elif event.button() == QtCore.Qt.LeftButton:
       if self.itemAt(event.pos()) is None:
         self.clearSelection()
-        print('here')
       else:
-        print(self.callback, 'calling back')
         super(ListWidget, self).mousePressEvent(event)
 
   def raiseContextMenu(self, event):

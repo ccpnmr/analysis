@@ -1331,6 +1331,30 @@ def getResidueAtoms(ccpCode, molType=PROTEIN_MOLTYPE):
     return REFDB_SD_MEAN.get((molType, ccpCode)).keys()
 
 
+def getCcpCodeData(nmrProject, ccpCode, molType=None, atomType=None):
+
+  dataDict = {}
+  sourceName = 'RefDB'
+
+  nmrRefStore = nmrProject.root.findFirstNmrReferenceStore(molType=molType, ccpCode=ccpCode)
+  chemCompNmrRef = nmrRefStore.findFirstChemCompNmrRef(sourceName=sourceName)
+  if chemCompNmrRef:
+
+    chemCompVarNmrRef = chemCompNmrRef.findFirstChemCompVarNmrRef(linking='any', descriptor='any')
+    if chemCompVarNmrRef:
+      for chemAtomNmrRef in chemCompVarNmrRef.chemAtomNmrRefs:
+        atomName = chemAtomNmrRef.name
+        element  = chemAtomNmrRef.findFirstChemAtom().elementSymbol
+
+        if not atomType:
+          dataDict[atomName] = chemAtomNmrRef
+
+        elif (atomType == 'Hydrogen' and element == 'H') or \
+             (atomType == 'Heavy' and element != 'H'):
+          dataDict[atomName] = chemAtomNmrRef
+
+  return dataDict
+
 #
 # def getChemAtomNmrRef(project, atomName, ccpCode, molType=PROTEIN_MOLTYPE,
 #                       sourceName='RefDB'):

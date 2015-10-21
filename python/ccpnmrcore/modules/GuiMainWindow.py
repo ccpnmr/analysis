@@ -259,6 +259,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     moleculeMenu.addAction(self.sequenceAction)
     moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
+    moleculeMenu.addAction(Action(self, "Reference Chemical Shifts", callback=self.showRefChemicalShifts, shortcut='rc'))
     # moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
     # moleculeMenu.addAction(Action(self, "Show Molecule Display", callback=self.showMoleculeDisplay, shortcut='md'))
 
@@ -357,11 +358,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showAssignmentModule(self):
     self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
     self.dockArea.addDock(self.assignmentModule)
-    self.pythonConsole.writeModuleDisplay('showAssignmentModule')
+    self.pythonConsole.writeModuleDisplayCommand('showAssignmentModule')
 
   def showNmrResiduePopup(self):
     from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup
-    NmrResiduePopup(self, self._project).exec_()
+    newDock = CcpnDock("Nmr Residue")
+    nmrResidueModule = NmrResiduePopup(newDock, self._project)
+    newDock.layout.addWidget(nmrResidueModule)
+    self.dockArea.addDock(newDock)
 
 
   def addBlankDisplay(self):
@@ -382,7 +386,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from ccpnmrcore.modules.NmrResidueTable import NmrResidueTable
     nmrResiduetable = NmrResidueTable(self, self._project)
     self.dockArea.addDock(nmrResiduetable, 'bottom')
-    self.pythonConsole.writeModuleDisplay('showNmrResidueTable')
+    self.pythonConsole.writeModuleDisplayCommand('showNmrResidueTable')
 
   def toggleSequence(self):
 
@@ -766,6 +770,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showDataPlottingModule(self):
     dpModule = DataPlottingModule(self.dockArea)
+
+  def showRefChemicalShifts(self):
+    from ccpnmrcore.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
+    self.refChemShifts = ReferenceChemicalShifts(self.project, self.dockArea)
 
   def saveProject(self):
     

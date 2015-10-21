@@ -9,6 +9,7 @@
         "editor": "default",
         "colourScheme": "dark",
         "license": "",
+        "doubleCrossHair": true,
         "toolbarHidden": false
     },
     "recentMacros": [

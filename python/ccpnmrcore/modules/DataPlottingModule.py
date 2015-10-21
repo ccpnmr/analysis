@@ -12,10 +12,10 @@ class DataPlottingModule(Dock): # DropBase needs to be first, else the drop even
 
     Dock.__init__(self, name='Data Plotting', size=(1100,1300))
 
-    plotWidget = pg.PlotWidget()
+    self.plotWidget = pg.PlotWidget()
     dockArea.addDock(self)
 
-    self.addWidget(plotWidget)
+    self.addWidget(self.plotWidget)
     x = np.array([0, 2, 4, 6, 8, 10])
     y = np.array([1500, 500, 200, 100, 50, 10])
-    plotWidget.plot(x, y, pen=(255, 0, 0), symbol='t', symbolPen=None, symbolSize=10, symbolBrush=(255, 0, 0))
+    self.plotWidget.plot(x, y, pen=(255, 0, 0), symbol='t', symbolPen=None, symbolSize=10, symbolBrush=(255, 0, 0))

@@ -84,6 +84,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
                                  useOpenGL=useOpenGL, strip=self)
               # dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
+    newSplitter = QtGui.QSplitter
     self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self))
     self.colourScheme = self._parent._appBase.preferences.general.colourScheme
     if self.colourScheme == 'light':
@@ -390,18 +391,29 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
     self.plotWidget.addItem(self.vLine, ignoreBounds=True)
     self.plotWidget.addItem(self.hLine, ignoreBounds=True)
+    self.vLine2 = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
+    self.hLine2 = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
+    if self._appBase.preferences.general.doubleCrossHair is True:
+      self.plotWidget.addItem(self.vLine2, ignoreBounds=True)
+      self.plotWidget.addItem(self.hLine2, ignoreBounds=True)
 
   def toggleCrossHair(self):
     self.vLine.setVisible(not self.vLine.isVisible())
     self.hLine.setVisible(not self.hLine.isVisible())
+    self.vLine2.setVisible(not self.vLine2.isVisible())
+    self.hLine2.setVisible(not self.hLine2.isVisible())
 
   def showCrossHair(self):
     self.vLine.show()
     self.hLine.show()
+    self.vLine2.show()
+    self.hLine2.show()
 
   def hideCrossHair(self):
     self.vLine.hide()
     self.hLine.hide()
+    self.vLine2.hide()
+    self.hLine2.hide()
 
   def toggleGrid(self):
     self.grid.setVisible(not self.grid.isVisible())
@@ -414,12 +426,17 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   def setCrossHairPosition(self, axisPositionDict):
     axes = self.orderedAxes
     position = axisPositionDict.get(self._crosshairCode(axes[0].code))
+    position2 = axisPositionDict.get(self._crosshairCode(axes[1].code))
     if position is not None:
       self.vLine.setPos(position)
+      self.vLine2.setPos(position2)
+
 
     position = axisPositionDict.get(self._crosshairCode(axes[1].code))
+    position2 = axisPositionDict.get(self._crosshairCode(axes[0].code))
     if position is not None:
       self.hLine.setPos(position)
+      self.hLine2.setPos(position2)
 
   def createMarkAtCursorPosition(self, task):
     # TBD: this creates a mark in all dims, is that what we want??

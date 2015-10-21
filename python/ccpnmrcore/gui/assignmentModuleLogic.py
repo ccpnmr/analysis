@@ -31,7 +31,6 @@ def nmrAtomsForPeaks(peaks, nmrAtoms, intraResidual=False, doubleTolerance=False
     '''
 
     selected = matchingNmrAtomsForPeaks(peaks, nmrAtoms, doubleTolerance=doubleTolerance)
-    print(selected, 'selected')
     if intraResidual:
         selected = filterIntraResidual(selected)
     return selected
@@ -83,7 +82,6 @@ def matchingNmrAtomsForPeaks(peaks, nmrAtoms, doubleTolerance=False):
     '''
 
     dimensionCount = [len(peak.position) for peak in peaks]
-    print(peaks)
     #All peaks should have the same number of dimensions.
     if not len(set(dimensionCount)) == 1:
         return []
@@ -95,9 +93,7 @@ def matchingNmrAtomsForPeaks(peaks, nmrAtoms, doubleTolerance=False):
                                                             dim,
                                                             nmrAtoms,
                                                             doubleTolerance=doubleTolerance)
-        print('matching', matching)
         dim_nmrAtoms.append(matching)
-    print(dim_nmrAtoms, 'dimnmrAtoms')
     return dim_nmrAtoms
 
 
@@ -118,9 +114,7 @@ def matchingNmrAtomsForDimensionOfPeaks(peaks, dim, nmrAtoms,
                                                             nmrAtoms,
                                                             doubleTolerance=doubleTolerance)
         # '&=' is set intersection update
-        print(matchingNmrAtoms, 'matchNmrAtoms')
         commonNmrAtoms &= matchingNmrAtoms
-        print(commonNmrAtoms, 'common matching')
     return commonNmrAtoms
 
 
@@ -200,7 +194,7 @@ def sameAxisCodes(peaks, dim):
         # axisCode = getAxisCodeForPeakDimension(peaks[0], dim)
         axisCode = peaks[0].peakList.spectrum.axisCodes[dim]
         for peak in peaks[1:]:
-            if not spectrumLib.axisCodesCompare(peak.peakList.spectrum.axisCodes[dim],axisCode):
+            if not spectrumLib.axisCodesCompare(peak.peakList.spectrum.axisCodes[dim], axisCode):
                 return False
     return True
 

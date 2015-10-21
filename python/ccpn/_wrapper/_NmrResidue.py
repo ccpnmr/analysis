@@ -58,7 +58,7 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def sequenceCode(self) -> str:
     """Residue sequence code and id (e.g. '1', '127B', '\@157+1)
-    NB resetting sequenceDoe will rename the NmrResidue"""
+    NB resetting sequenceCode will rename the NmrResidue"""
     return self._wrappedData.sequenceCode
 
   @property
@@ -85,7 +85,7 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def residueType(self) -> str:
     """Residue type string (e.g. 'Ala')
-    NB resetting residueType is not possible for assigned NmrReaidues.
+    NB resetting residueType is not possible for assigned NmrResidues.
     It will rename the NmrResidue"""
     apiResonanceGroup = self._wrappedData
     apiResidue = apiResonanceGroup.assignedResidue
@@ -161,7 +161,7 @@ class NmrResidue(AbstractWrapperObject):
     apiResonanceGroup.previousResonanceGroup = None
 
   def rename(self, value:str=None):
-    """Rename NmrResidue. 'None' deassigns; partly set names ('.xyz' ir 'xyz.' partly deassign"""
+    """Rename NmrResidue. 'None' deassigns; partly set names ('.xyz' or 'xyz.' partly deassign"""
     apiResonanceGroup = self._apiResonanceGroup
     sequenceCode = residueType = None
     if value:

@@ -104,7 +104,7 @@ def getNmrResiduePrediction(nmrResidue, chemicalShiftList, prior=0.05):
 
   return finalPredictions
 
-def getNmrAtomPrediction(ccpCode, value, isotopeCode):
+def getNmrAtomPrediction(ccpCode, value, isotopeCode, strict=False):
   """
   Takes ccpnCode, chemicalShift and isotopeCode and predicts atom type
   :param ccpCode:
@@ -119,10 +119,13 @@ def getNmrAtomPrediction(ccpCode, value, isotopeCode):
   tot = sum(predictions.values())
   refinedPredictions = {}
   for key, value in predictions.items():
-    if value > 1e-2:
+    if strict:
+      if value > 1e-2:
+        v = int(value/tot * 100)
+    else:
       v = int(value/tot * 100)
-      if v > 0:
-        refinedPredictions[key] = v
+    if v > 0:
+      refinedPredictions[key] = v
   #
   finalPredictions = []
   #

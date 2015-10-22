@@ -1274,8 +1274,8 @@ def getSpinSystemResidueProbability(spinSystem, shiftList, ccpCode,
 def _isAssignmentCompatible(assignName:str, atomName:str) -> bool:
   """Is assignName compatible with assignment to atomName?
   NB allows for non-standard assignment strings
-  NB does NOT do case conversions - upcse both parameters if you wish case-insensitive behaviour.
-  NB does NOT accept 'x' a,d 'y' as wildcards, only 'X' and 'Y'"""
+  NB does NOT do case conversions - upcase both parameters if you wish case-insensitive behaviour.
+  NB does NOT accept 'x' and 'y' as wildcards, only 'X' and 'Y'"""
 
   # convert pseudoAtom names to proton wildcard names
   if assignName[0] in 'QM':

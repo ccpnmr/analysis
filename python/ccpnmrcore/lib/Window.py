@@ -2,6 +2,20 @@ __author__ = 'simon1'
 
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
+MODULE_DICT = {'ASSIGNER':'showAssigner',
+               'ASSIGNMENT MODULE': 'showAssignmentModule',
+               'ATOM SELECTOR': 'showAtomSelector',
+               'BACKBONE ASSIGNMENT': 'showBackboneAssignmentModule',
+               'CHEMICAL SHIFT LISTS':'showChemicalShiftTable',
+               'MACRO EDITOR':'editMacro',
+               'NMR RESIDUE TABLE': 'showNmrResidueTable',
+               'PEAK LIST': 'showPeakTable',
+               'PICK AND ASSIGN': 'showPickAndAssignModule',
+               'REFERENCE CHEMICAL SHIFTS': 'showRefChemicalShifts',
+               'SEQUENCE': 'toggleSequence'
+              }
+
+
 def navigateToPeakPosition(project, peak=None, selectedDisplays=None, strip=None,  markPositions=False):
 
   if selectedDisplays is None:

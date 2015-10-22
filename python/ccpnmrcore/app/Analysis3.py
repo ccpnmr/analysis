@@ -26,6 +26,7 @@ import sys
 
 from ccpnmrcore.app.AppBase import AppBase, startProgram
 from ccpnmrcore.app.Version import applicationVersion
+from ccpnmrcore.lib.Window import MODULE_DICT
 from ccpnmrcore.modules import GuiStrip
 from ccpnmrcore.modules import GuiStripNd
 from ccpnmrcore.modules import GuiStripDisplayNd
@@ -62,6 +63,32 @@ class Analysis3(AppBase):
           GuiStripDisplayNd._createdStripSpectrumView(project, apiStripSpectrumView)
           for apiStripPeakListView in apiStripSpectrumView.stripPeakListViews:
             GuiStripDisplayNd._createdStripPeakListView(project, apiStripPeakListView)
+    self.initLayout()
+
+  def initLayout(self):
+    import yaml, os
+    with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
+      layout = yaml.load(f)
+      typ, contents, state = layout['main']
+
+      containers, docks = self._appBase.mainWindow.dockArea.findAll()
+      for item in contents:
+        if item[0] == 'dock':
+          obj = docks.get(item[1])
+          if obj is None:
+           func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
+           func()
+      for s in layout['float']:
+        typ, contents, state = s[0]['main']
+
+        containers, docks = self._appBase.mainWindow.dockArea.findAll()
+        for item in contents:
+          if item[0] == 'dock':
+            obj = docks.get(item[1])
+            if obj is None:
+              func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
+              func()
+      self._appBase.mainWindow.dockArea.restoreState(layout)
 
 
 if __name__ == '__main__':

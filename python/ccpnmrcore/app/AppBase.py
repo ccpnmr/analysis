@@ -136,6 +136,18 @@ class AppBase(GuiBase):
 
   def saveProject(self, newPath=None):
     ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)
+    layout = self.mainWindow.dockArea.saveState()
+    layoutPath = os.path.join(self.project.path, 'layouts')
+    if not os.path.exists(layoutPath):
+      os.makedirs(layoutPath)
+    import yaml
+    with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
+      yaml.dump(layout, stream)
+      stream.close()
+
+
+
+
 
 def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userPreferencesPath=None):
 

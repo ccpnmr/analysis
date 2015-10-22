@@ -129,6 +129,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.setWindowTitle('%s %s (%s): %s' % (self._appBase.applicationName, self._appBase.applicationVersion, __version__[1:-1].strip(), project.name))
 
+
   def setupWindow(self):
 
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
@@ -164,7 +165,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
     self.splitter2.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Minimum)
-    self.splitter2.setStretchFactor(0, 5)
+    self.splitter2.setStretchFactor(0, 4)
     self.splitter2.setStretchFactor(1, 1)
 
     self.pythonConsole.hide()
@@ -417,6 +418,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showAssigner(self, position='bottom', nextTo=None):
     self.assigner = Assigner(project=self._project)
+    if hasattr(self, 'bbModule'):
+      self.bbModule.setAssigner(self.assigner)
     if nextTo is not None:
       self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
     else:
@@ -746,8 +749,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo)
     else:
       self.dockArea.addDock(self.bbModule, position='bottom')
-    assigner = self.showAssigner('bottom')
-    self.bbModule.setAssigner(assigner)
+    # assigner = self.showAssigner('bottom')
+    # self.bbModule.setAssigner(assigner)
     self.pythonConsole.writeModuleDisplayCommand('showBackboneAssignmentModule')
     return self.bbModule
 

@@ -102,7 +102,6 @@ class PeakListSimple(QtGui.QWidget, Base):
 
     selectPeakListPopup = SelectObjectsPopup(self, project=self.project, objects=availablePeakLists)
     selectPeakListPopup.exec_()
-    print(self.objects)
     for peakList in self.objects:
       peakList1.subtractPeakLists(self.project.getByPid(peakList))
     self.peakTable.updateSelectorContents()
@@ -131,14 +130,8 @@ class PeakListSimple(QtGui.QWidget, Base):
   def getPeakHeight(self, peak):
 
     if peak.height:
-      print(peak, peak.height)
       return peak.height*peak.peakList.spectrum.scale
 
-
-  # def updatePeakLists(self):
-  #
-  #   texts = ['%s:%s:%s' % (peakList.spectrum._apiDataSource.experiment.name, peakList.spectrum.name, peakList.serial) for peakList in self.peakLists]
-  #   self.peakListPulldown.setData(texts=texts, objects=self.peakLists)
 
 
 

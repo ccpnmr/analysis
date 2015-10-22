@@ -20,10 +20,7 @@ class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the 
     dockArea.addDock(self)
     self.project = project
     self.addWidget(self.plotWidget, 1, 0, 1, 4)
-    self.plotWidget.plotItem.addLegend(offset=[-30, 30])
-
-    dataSets = ('Ala')
-
+    self.plotWidget.plotItem.addLegend(offset=[1, 10])
     self.residueTypeLabel = Label(self, "Residue Type")
     self.addWidget(self.residueTypeLabel, 0, 0)
     self.residueTypePulldown = PulldownList(self, callback=self.updateModule)
@@ -62,7 +59,7 @@ class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the 
   def updateModule(self, item=None):
     self.plotWidget.clear()
     self.plotWidget.plotItem.legend.items = []
-    self.plotWidget.grid.show()
+    self.plotWidget.showGrid(x=True, y=True)
     atomType = self.atomTypePulldown.currentText()
     ccpCode = self.residueTypePulldown.currentText()
     dataSets = self.getDistributionForResidue(ccpCode, atomType)

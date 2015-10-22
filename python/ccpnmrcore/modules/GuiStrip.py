@@ -429,6 +429,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     position2 = axisPositionDict.get(self._crosshairCode(axes[1].code))
     if position is not None:
       self.vLine.setPos(position)
+    if position2 is not None:
       self.vLine2.setPos(position2)
 
 
@@ -436,6 +437,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     position2 = axisPositionDict.get(self._crosshairCode(axes[0].code))
     if position is not None:
       self.hLine.setPos(position)
+    if position2 is not None:
       self.hLine2.setPos(position2)
 
   def createMarkAtCursorPosition(self, task):

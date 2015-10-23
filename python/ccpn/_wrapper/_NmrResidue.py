@@ -311,7 +311,7 @@ def setter(self:Residue, value:NmrResidue):
     oldValue._apiResonanceGroup.assignedResidue = None
 
   if value is not None:
-    value._apiResonanceGroup.assignedResidue = self
+    value._apiResonanceGroup.assignedResidue = self._apiResidue
 Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
 del getter

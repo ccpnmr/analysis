@@ -190,7 +190,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     #v = positionPixel[1] - (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
     v = pixelViewBox0 + (pixelViewBox1-pixelViewBox0) * (numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)]) - yintensity0) / (yintensity1 - yintensity0)
   
-    colour = '#e4e15b' if strip.background == '#080000' else '#000000'
+    colour = '#e4e15b' if self._appBase.preferences.general.colourScheme == 'dark' else '#000000'
     hTrace.setPen({'color':colour})
     hTrace.setData(x, v)
       

@@ -92,6 +92,7 @@ topApiModule = 'ccpncore.api'
 #     return None
 
 def _addModuleFunctionsToApiClass(relModuleName, apiClass, rootModuleName='ccpncore.lib'):
+
   moduleName = '%s.%s' % (rootModuleName, relModuleName)
   try:
     module = importlib.import_module(moduleName)

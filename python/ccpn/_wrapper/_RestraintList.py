@@ -90,12 +90,12 @@ class RestraintList(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for PeakList"""
+    """serial number, key attribute for ccpn.RestraintList"""
     return self._wrappedData.serial
     
   @property
   def _parent(self) -> RestraintSet:
-    """RestraintSet containing restraintList."""
+    """RestraintSet containing ccpn.RestraintList."""
     return  self._project._data2Obj[self._wrappedData.nmrConstraintStore]
   
   restraintSet = _parent
@@ -242,12 +242,12 @@ class RestraintList(AbstractWrapperObject):
 # Connections to parents:
 RestraintSet._childClasses.append(RestraintList)
 
-def newRestraintList(self:RestraintSet,restraintType, name:str=None, comment:str=None,
+def newRestraintList(self:RestraintSet, restraintType, name:str=None, comment:str=None,
                      unit:str=None, potentialType:str=None, tensorMagnitude:float=None,
                      tensorRhombicity:float=None, tensorChainCode:str=None,
                      tensorSequenceCode:str=None,
                      tensorResidueType:str=None) -> RestraintList:
-  """Create new child RestraintList of type restraintType"""
+  """Create new ccpn.RestraintList of type restraintType within ccpn.RestraintSet"""
   apiNmrConstraintStore = self._wrappedData
   creator = apiNmrConstraintStore.getattr("new%sConstraintList" % restraintType)
   if restraintType == 'Rdc':

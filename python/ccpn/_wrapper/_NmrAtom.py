@@ -98,7 +98,7 @@ class NmrAtom(AbstractWrapperObject):
     apiPeaks.extend([x.peakDim.peak for x in apiResonance.peakDimContribNs])
 
     data2Obj = self._project._data2Obj
-    result = [sorted(data2Obj[x] for x in set(apiPeaks))]
+    result = sorted(data2Obj[x] for x in set(apiPeaks))
     #
     return result
 
@@ -247,7 +247,7 @@ del getter
 del setter
     
 def newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
-  """Create new child NmrAtom. If name is None, use nucleus@serial"""
+  """Create new ccpn.NmrAtom within ccpn.NmrResidue. If name is None, use nucleus@serial"""
   nmrProject = self._project._wrappedData
   resonanceGroup = self._wrappedData
 

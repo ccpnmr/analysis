@@ -309,7 +309,7 @@ def atomSiteAxisCode(atomSite):
 def testExpPrototypes(resetCodes=False):
   """Test functions and make diagnostic output"""
   from ccpncore.util.Io import newProject
-  project = newProject("ExpPrototypeTest", removeExisting=True)
+  project = newProject("ExpPrototypeTest", overwriteExisting=True)
 
   codeMap = refExpDimRefCodeMap(project)
 
@@ -368,7 +368,7 @@ def experimentSynonymSummary():
   2) List of dimensionCount, synonym, name, atomNames for refExperiments sorted by name """
 
   from ccpncore.util.Io import newProject
-  project = newProject("ExpPrototypeTest", removeExisting=True)
+  project = newProject("ExpPrototypeTest", overwriteExisting=True)
 
   # NBNB
   # 1) Some refExperiments have no synonym - use the name instead for these
@@ -437,7 +437,7 @@ if __name__ == '__main__':
 
 
   # from ccpncore.util.Io import newProject
-  # project = newProject("ExpPrototypeTest", removeExisting=True)
+  # project = newProject("ExpPrototypeTest", overwriteExisting=True)
   # refMap = fetchIsotopeRefExperimentMap(project)
   # for tt in sorted ((len(key), key, val) for key,val in sorted(refMap.items())):
   #   # print ("@~@~", tt[0], tt[1])

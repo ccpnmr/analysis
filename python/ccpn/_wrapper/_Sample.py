@@ -213,7 +213,7 @@ def newSample(self:Project, name:str, pH:float=None, ionicStrength:float=None, a
               amountUnit:str='L', isHazardous:bool=None, creationDate:datetime=None,
               batchIdentifier:str=None, plateIdentifier:str=None, rowNumber:int=None,
               columnNumber:int=None, comment:str=None) -> Sample:
-  """Create new child Sample"""
+  """Create new ccpn.Sample"""
   nmrProject = self._wrappedData
   apiSampleStore =  nmrProject.sampleStore
 

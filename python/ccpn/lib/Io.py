@@ -41,7 +41,7 @@ def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> P
 
 def newProject(projectName:str, path:str=None, useFileLogger:bool=True) -> Project:
   """Make new project, putting underlying data storage (API project) at path"""
-  apiProject = ioUtil.newProject(projectName, path, removeExisting=True, useFileLogger=useFileLogger)
+  apiProject = ioUtil.newProject(projectName, path, overwriteExisting=True, useFileLogger=useFileLogger)
   if apiProject is None:
     raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"
                      % (projectName, path) )

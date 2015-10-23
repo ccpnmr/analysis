@@ -380,7 +380,7 @@ def _createMolecularSystemFrame(chains):
         atomName = molResLinkEnd.linkEnd.boundChemAtom.name
         apiAtom = apiResidue.findFirstAtom(name=atomName)
         pair.append(project._data2Obj[apiAtom]._id.split('.'))
-      pair.sort(key=commonUtil.integerStringSortKey)
+      pair.sort(key=commonUtil.numericStringSortKey)
 
   for molSystemLink in project._apiNmrProject.molSystem.molSystemLinks:
     pair = []
@@ -389,7 +389,7 @@ def _createMolecularSystemFrame(chains):
       atomName = molSystemLinkEnd.linkEnd.boundChemAtom.name
       apiAtom = molSystemLinkEnd.residue.findFirstAtom(name=atomName)
       pair.append(project._data2Obj[apiAtom]._id.split('.'))
-    pair.sort(key=commonUtil.integerStringSortKey)
+    pair.sort(key=commonUtil.numericStringSortKey)
 
   # NB Loop may be empty. The entry.export_string function takes care of this
   loop = bmrb.loop.fromScratch(category='nef_covalent_links')
@@ -399,7 +399,7 @@ def _createMolecularSystemFrame(chains):
     loop.addColumn(tag)
 
 
-  for ll in sorted(atomPairs, key=commonUtil.integerStringSortKey):
+  for ll in sorted(atomPairs, key=commonUtil.numericStringSortKey):
     values = ll[0]._id.split('.') +  ll[1]._id.split('.')
     loop.addData(values)
   #
@@ -428,10 +428,13 @@ def createShiftListFrame(shiftList):
               'value', 'value_uncertainty',):
     loop.addColumn(tag)
 
-  sortkey = shiftList._project._pidSortKey
-  for row in sorted(((Pid.splitId(x.nmrAtom._id) + (x.value, x.valueError))
-                    for x in shiftList.chemicalShifts), key=sortkey):
-    loop.addData(row)
+  for x in shiftList.chemicalShifts:
+    loop.addData((Pid.splitId(x.nmrAtom._id) + (x.value, x.valueError)))
+
+  # sortkey = shiftList._project._pidSortKey
+  # for row in sorted(((Pid.splitId(x.nmrAtom._id) + (x.value, x.valueError))
+  #                   for x in shiftList.chemicalShifts), key=sortkey):
+  #   loop.addData(row)
   #
   return saveframe
 

@@ -23,14 +23,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 from ccpncore.api.ccp.molecule.Molecule import Molecule
 
-def fetchMolComponent(self:"RefSampleComponentStore", apiMolecule:Molecule,
+def fetchMolComponent(self:"RefSampleComponentStore", molecule:Molecule,
                       labeling:str=None) -> "AbstractComponent":
   """fetch or create new MolComponent matching Molecule name and (if not None) labeling
   labeling for new MolComponents default to std
   NB pre-existing RefComponents returned may be of other types (Cell, Substance or Composite)
   if their names match the molecule
   """
-  name = apiMolecule.name
+  name = molecule.name
   if labeling is None:
     # Pick any MolComponent regardless of labeling
     result = (self.findFirstComponent(name=name, labeling='std') or
@@ -43,13 +43,16 @@ def fetchMolComponent(self:"RefSampleComponentStore", apiMolecule:Molecule,
 
   if result is None:
     # Finalise, so molecule does not change 'underneath' substance
-    apiMolecule.isFinalised = True
-    seqString = apiMolecule.seqString or '(%s)' % ','.join(x.code3Letter
-                                                        for x in apiMolecule.sortedMolResidues())
-    result = self.newMolComponent(name=name, labeling=labeling, synonyms=apiMolecule.commonNames,
-                                  details=apiMolecule.details, smiles=apiMolecule.smiles,
-                                  empiricalFormula=apiMolecule.empiricalFormula,
-                                  molecularMass=apiMolecule.molecularMass,
-                                  molType=apiMolecule.molType, seqString=seqString)
+    molecule.isFinalised = True
+    seqString = molecule.seqString or '(%s)' % ','.join(x.code3Letter
+                                                        for x in molecule.sortedMolResidues())
+    result = self.newMolComponent(name=name, labeling=labeling, synonyms=molecule.commonNames,
+                                  details=molecule.details, smiles=molecule.smiles,
+                                  empiricalFormula=molecule.empiricalFormula,
+                                  molecularMass=molecule.molecularMass,
+                                  molType=molecule.molType, seqString=seqString)
+  else:
+    self.root._logger.error("Molecule %s matches Substance of incorrect type: %s"
+    % (molecule, result))
   #
   return result

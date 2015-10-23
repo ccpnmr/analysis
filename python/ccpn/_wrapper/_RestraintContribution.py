@@ -238,7 +238,7 @@ def newRestraintContribution(self:Restraint, targetValue:float=None, error:float
                     weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
                     restraintItems:Sequence=()) -> RestraintContribution:
-  """Create new child Contribution"""
+  """Create new ccpn.RestraintContribution within ccpn.Restraint"""
   constraint = self._wrappedData
   creator = constraint.getattr("new%sContribution" % self._parent.restraintType)
   obj = creator(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,

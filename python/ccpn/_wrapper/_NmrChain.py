@@ -173,7 +173,7 @@ del getter
 del setter
 
 def newNmrChain(self:Project, shortName:str=None, comment:str=None) -> NmrChain:
-  """Create new child NmrChain
+  """Create new ccpn.NmrChain
 
   :param str shortName: shortName for new nmrChain (optional, defaults to '@n' n positive integer
   :param str comment: comment for new nmrChain (optional)"""

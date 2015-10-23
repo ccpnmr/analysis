@@ -212,6 +212,9 @@ _wrappedClasses.append(cls)
 RestraintContribution = cls = importlib.import_module(
   'ccpn._wrapper._RestraintContribution').RestraintContribution
 _wrappedClasses.append(cls)
+StructureEnsemble = cls = importlib.import_module(
+  'ccpn._wrapper._StructureEnsemble').StructureEnsemble
+_wrappedClasses.append(cls)
 Note = cls = importlib.import_module('ccpn._wrapper._Note').Note
 _wrappedClasses.append(cls)
 

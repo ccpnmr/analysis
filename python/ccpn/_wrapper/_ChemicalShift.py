@@ -101,13 +101,13 @@ class ChemicalShift(AbstractWrapperObject):
   def nmrAtom(self) -> NmrAtom:
     """NmrAtom that the shift belongs to"""
     return self._project._data2Obj.get(self._wrappedData.resonance)
-
     
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: ChemicalShiftList)-> list:
-    """get wrappedData (ChemicalShiftLists) for all Shift children of parent ChemicalShiftList"""
-    return [x for x in parent._wrappedData.sortedMeasurements()]
+    """get wrappedData (ApiShift) for all ChemicalShift children of parent ChemicalShiftList"""
+    # NB this is NOT the right sorting order, but sorting on atomId is not possible at the API level
+    return parent._wrappedData.sortedMeasurements()
 
 # Connections to parents:
 ChemicalShiftList._childClasses.append(ChemicalShift)
@@ -123,7 +123,7 @@ del getter
 def newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                      valueError:float=0.0, figureOfMerit:float=1.0,
                      comment:str=None) -> ChemicalShift:
-  """Create new child Shift"""
+  """Create new ccpn.ChemicalShift within ccpn.ChemicalShiftList"""
 
   nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
 

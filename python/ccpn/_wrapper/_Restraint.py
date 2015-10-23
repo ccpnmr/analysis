@@ -214,7 +214,7 @@ RestraintList._childClasses.append(Restraint)
 
 def newRestraint(self:RestraintList,comment:str=None,
                          peaks:Sequence=()) -> Restraint:
-  """Create new child RdcRestraint"""
+  """Create new ccpn.Restraint within ccpn.RestraintList"""
   apiConstraintList = self._wrappedData
   creator = apiConstraintList.getattr("new%sConstraint" % self.restraintType)
   obj = creator(details=comment, peaks=peaks)

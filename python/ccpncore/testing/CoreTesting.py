@@ -43,7 +43,7 @@ class CoreTesting(unittest.TestCase):
   @contextlib.contextmanager
   def initialSetup(self):
     if self.projectPath is None:
-      project = self.project = Io.newProject('default', removeExisting=True)
+      project = self.project = Io.newProject('default', overwriteExisting=True)
       self.nmrProject = project.newNmrProject(name='default')
     else:
       project = self.project = Io.loadProject(os.path.join(TEST_PROJECTS_PATH, self.projectPath))

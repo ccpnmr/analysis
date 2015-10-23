@@ -71,7 +71,7 @@ def _createLogger(project, applicationName=None, useFileLogger=None):
   
   return logger
   
-def newProject(projectName, path:str=None, removeExisting:bool=False,
+def newProject(projectName, path:str=None, overwriteExisting:bool=False,
                showYesNo:"function"=None, applicationName='ccpn',
                useFileLogger:bool=True) -> Implementation.MemopsRoot:
   """
@@ -82,7 +82,7 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
   The 'backup' repository is pointed to the path + '_backup'.
   If either of these paths already exist (either as files or as directories):
 
-  If removeExisting:
+  If overwriteExisting:
     Delete the path
   Else if showYesNo:
     Ask the user if it is ok to delete the path
@@ -98,7 +98,7 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
     for name in repositoryNameMap.keys():
       fullPath = Path.joinPath(path, projectName) + repositoryNameMap[name]
       if not absentOrRemoved(Path.joinPath(fullPath, 'memops', 'Implementation'),
-                             removeExisting, showYesNo):
+                             overwriteExisting, showYesNo):
         errMsg = 'Path ("%s") contains existing project.' % fullPath
         Logging.getLogger().warning(errMsg)
         raise Exception(errMsg)
@@ -125,11 +125,11 @@ def newProject(projectName, path:str=None, removeExisting:bool=False,
 
   return project
 
-def absentOrRemoved(path:str, removeExisting:bool=False, showYesNo:"function"=None) -> bool:
+def absentOrRemoved(path:str, overwriteExisting:bool=False, showYesNo:"function"=None) -> bool:
   """Check if file is present, possibly removing it first.
 
   If path already exists:
-    If removeExisting:
+    If overwriteExisting:
       Delete the path
       Return True
     Else if showYesNo:
@@ -145,7 +145,7 @@ def absentOrRemoved(path:str, removeExisting:bool=False, showYesNo:"function"=No
 
   if os.path.exists(path):
 
-    if removeExisting:
+    if overwriteExisting:
       Path.deletePath(path)
       return True
 
@@ -459,7 +459,7 @@ def deleteTemporaryDirectory(project):
     del project._temporaryDirectory 
   
 def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
-                createFallback=False, removeExisting=False, showYesNo=None,
+                createFallback=False, overwriteExisting=False, showYesNo=None,
                 checkValid=False, changeDataLocations=False):
   """
   Save the userData for a project to a location given by newPath (the url.path
@@ -474,27 +474,28 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   newPath==oldPath, otherwise it is set to basename(newPath).
   If changeBackup, then also changes backup URL path for project.
   If createFallback, then makes copy of existing modified topObjects
-  files (in newPath, not oldPath) before doing save.
-  If newPath != oldPath and newPath exists (either as file or as directory):
-    If removeExisting:
-      Delete the newPath.
-    Else if showYesNo:
-      Ask the user if it is ok to delete the newPath
-      If yes, delete.  If no, return without saving.
-    Else:
-      Raise an IOError
-  Elif newProjectName != oldProjectName and there exists corresponding path (file/directory):
-    If removeExisting:
-      Delete the path.
-    Else if showYesNo:
-      Ask the user if it is ok to delete the path.
-      If yes, delete.  If no, return without saving.
-    Else:
-      Raise an IOError
-  If checkValid then does checkAllValid on project
-  If changeDataLocations then copy to project directory
-  If there is no exception or early return then at end userData is pointing to newPath.
-  Return True if save done, False if not (unless there is an exception)
+  files (in newPath, not oldPath) before doing save::
+
+    If newPath != oldPath and newPath exists (either as file or as directory):
+      If overwriteExisting:
+        Delete the newPath.
+      Else if showYesNo:
+        Ask the user if it is ok to delete the newPath
+        If yes, delete.  If no, return without saving.
+      Else:
+        Raise an IOError
+    Elif newProjectName != oldProjectName and there exists corresponding path (file/directory):
+      If overwriteExisting:
+        Delete the path.
+      Else if showYesNo:
+        Ask the user if it is ok to delete the path.
+        If yes, delete.  If no, return without saving.
+      Else:
+        Raise an IOError
+    If checkValid then does checkAllValid on project
+    If changeDataLocations then copy to project directory
+    If there is no exception or early return then at end userData is pointing to newPath.
+    Return True if save done, False if not (unless there is an exception)
   """
   
   undo = project._undo
@@ -536,14 +537,14 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   if newPath == oldPath:
     if newProjectName != oldProjectName:
       location = ApiPath.getTopObjectPath(project)
-      if not absentOrRemoved(location, removeExisting, showYesNo):
+      if not absentOrRemoved(location, overwriteExisting, showYesNo):
         project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
         deleteTemporaryDirectory(project)
         if undo is not None:
           undo.decreaseBlocking()
         return False
   else: # check instead if newPath already exists
-    if absentOrRemoved(newPath, removeExisting, showYesNo):
+    if absentOrRemoved(newPath, overwriteExisting, showYesNo):
       # NBNB 2008/04/03 Rasmus Fogh. Added because it otherwise fell over when
       # target path did not exist
       upDir = os.path.dirname(newPath)

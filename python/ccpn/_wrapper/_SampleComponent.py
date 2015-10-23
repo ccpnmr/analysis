@@ -175,7 +175,6 @@ class SampleComponent(AbstractWrapperObject):
     return parent._wrappedData.sortedSampleComponents()
 
 
-
 def getter(self:SpectrumHit) -> SampleComponent:
   return self._project._data2Obj.get(self._apiSpectrumHit.sampleComponent)
 SpectrumHit.sampleComponent = property(getter, None, None,
@@ -185,13 +184,17 @@ del getter
 # Connections to parents:
 Sample._childClasses.append(SampleComponent)
 
-def newSampleComponent(self:Sample, name:str, labeling:str, role:str=None,
+def newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
                        concentration:float=None, concentrationError:float=None,
                        concentrationUnit:str=None, purity:float=None, comment:str=None,
                       ) -> SampleComponent:
-  """Create new child SampleComponent"""
+  """Create new ccpn.SampleComponent within ccpn.Sample
+
+  Automatically creates the corresponding Substance if the name is not already taken
+  """
   apiSample = self._wrappedData
-  obj = apiSample.newSampleComponent(name=name, labeling=labeling, role=role,
+  substance = self._project.fetchSubstance(name=name, labeling=labeling)
+  obj = apiSample.newSampleComponent(name=name, labeling=substance.labeling,
                                      concentration=concentration,
                                      concentrationError=concentrationError,
                                      concentrationUnit=concentrationUnit, details=comment,

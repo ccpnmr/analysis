@@ -85,11 +85,11 @@ class Atom(AbstractWrapperObject):
     
     
 def newAtom(self:Residue, name:str) -> Atom:
-  """Create new child Atom"""
+  """Create new ccpn.Atom within ccpn.Residue"""
   project = self._project
   apiResidue = self._wrappedData
 
-  raise NotImplementedError("Creation of new Atoms not yet implemented")
+  raise NotImplementedError("Creation of new Atoms not implemented")
 
   # NBNB TBD
   # requires changing of descriptor and chemCompVar,

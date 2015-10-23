@@ -208,7 +208,7 @@ def expandMolSystemAtoms(self:'Chain'):
 
             break
 
-def _renameChain(self:'Chain', newCode:str):
+def renameChain(self:'Chain', newCode:str):
   """Rename chain in place, fixing all stored references to the chainCode"""
   molSystem = self.molSystem
   oldCode = self.code
@@ -274,7 +274,7 @@ def _renameChain(self:'Chain', newCode:str):
       undo.decreaseBlocking()
 
   if undo is not None:
-    undo.newItem(_renameChain, _renameChain, undoArgs=(self, oldCode), redoArgs=(self,newCode))
+    undo.newItem(renameChain, renameChain, undoArgs=(self, oldCode), redoArgs=(self,newCode))
 
   # call notifiers:
   # NBNB the import MUST be inside a function as we can get circular import problems otherwise

@@ -7,7 +7,7 @@ from pyqtgraph import functions as fn
 
 # from ccpncore.util.Colour import hexToRgb
 
-__all__ = ['GridItem']
+__all__ = ['CcpnGridItem']
 
 class CcpnGridItem(UIGraphicsItem):
 

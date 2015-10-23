@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.util import Pid
+from ccpncore.util import Common as commonUtil
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import NmrChain
@@ -260,11 +261,13 @@ class NmrResidue(AbstractWrapperObject):
     return result
 
 
-  # Implementation functions
+  # Implementation functions numericStringSortKey
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
-    return parent._wrappedData.sortedResonanceGroups()
+    ll = [(commonUtil.numericStringSortKey(x.sequenceCode), x)
+          for x in parent._wrappedData.resonanceGroups]
+    return [tt[-1] for tt in sorted(ll)]
 
 def getter(self:NmrResidue) -> tuple:
   apiResult = self._wrappedData.nmrChain.findAllResonanceGroups(seqCode=self.seqCode,
@@ -315,7 +318,7 @@ del getter
 del setter
     
 def newNmrResidue(self:NmrChain, residueType:str=None, sequenceCode:Union[int,str]=None, comment:str=None) -> NmrResidue:
-  """Create new child NmrResidue"""
+  """Create new ccpn.NmrResidue within ccpn.NmrChain"""
   sequenceCode = str(sequenceCode) if sequenceCode else None
   apiNmrChain = self._wrappedData
   nmrProject = apiNmrChain.nmrProject

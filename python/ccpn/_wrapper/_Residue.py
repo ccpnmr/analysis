@@ -22,6 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 from ccpncore.util import Pid
+from ccpncore.util import Common as commonUtil
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
@@ -148,7 +149,9 @@ class Residue(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Chain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
-    return parent._wrappedData.sortedResidues()
+    func = commonUtil.numericStringSortKey
+    ll = [(func(x.seqCode), x.seqInsertCode, x) for x in parent._apiChain.residues]
+    return [tt[-1] for tt in sorted(ll)]
 
 def getter(self:Residue) -> Residue:
   apiResidue = self._wrappedData

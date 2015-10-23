@@ -26,6 +26,7 @@ import os
 import collections
 
 from ccpncore.util.Bmrb import bmrb
+from ccpncore.util import Common as commonUtil
 
 
 # Make sure we get parse eror warnings:
@@ -451,7 +452,7 @@ def regulariseNefFile(inPath, outPath=None):
   open(outPath, 'w').write(str(entryOut))
 
 def regulariseEntry(entryIn):
-  """Re-export file sith regular frame, tag. and column order
+  """Re-export file with regular frame, tag. and column order
   and saveframes sorted by category, frameCode
 
   Export file name has '_r' appended to main file name"""
@@ -504,7 +505,8 @@ def regulariseEntry(entryIn):
             for tag in useTags:
               obj.addColumn(tag)
             # for row in sorted(data, key=integerStringSortKey):
-            for row in sorted(([dd.get(x, '.') for x in useTags] for dd in data0), key=integerStringSortKey):
+            for row in sorted(([dd.get(x, '.') for x in useTags] for dd in data0),
+                              key=commonUtil.numericStringSortKey):
               obj.addData(row)
 
       # Add additional loops
@@ -521,7 +523,7 @@ def regulariseEntry(entryIn):
             saveframe.addLoop(obj)
             for tag in useTags:
               obj.addColumn(tag)
-            for row in sorted(data0, key=integerStringSortKey):
+            for row in sorted(data0, key=commonUtil.numericStringSortKey):
               obj.addData(row)
 
     # write out additional frames
@@ -553,7 +555,7 @@ def regulariseEntry(entryIn):
             saveframe.addLoop(obj)
             for tag in useTags:
               obj.addColumn(tag)
-            for row in sorted(data0, key=integerStringSortKey):
+            for row in sorted(data0, key=commonUtil.numericStringSortKey):
               try:
                 obj.addData(row)
               except:
@@ -661,43 +663,6 @@ def compareLoops(frameCode, prefix, diffs, data, files):
             ll.append('\t'.join(str(x) for x in row))
           ll.append('')
           diffs.append('\n'.join(ll))
-
-def integerStringSortKey(key):
-  """return sort key so that strings starting with an integer sort as if by integer
-
-  params:: key  either sequence or single string"""
-
-  if isinstance(key, str):
-    vv = key.lstrip()
-    ll = []
-    for char in vv:
-      if char.isdigit():
-        ll.append(char)
-      else:
-        break
-    if ll :
-      return '%30s' % ''.join(ll) + vv[len(ll):]
-    else:
-      return key
-
-  else:
-    result = list(key)
-
-    for ii,val in enumerate(result):
-      if isinstance(val, str):
-        vv = val.lstrip()
-        ll = []
-        for char in vv:
-          if char.isdigit():
-            ll.append(char)
-          else:
-            break
-        if ll :
-          result[ii] = '%30s' % ''.join(ll) + vv[len(ll):]
-
-    return result
-
-
 
 
 if __name__ == '__main__':

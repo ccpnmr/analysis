@@ -809,7 +809,7 @@ class Spectrum(AbstractWrapperObject):
 
 
 def newSpectrum(self:Project, name:str) -> Spectrum:
-  """Create new child Spectrum"""
+  """Create new ccpn.Spectrum"""
 
   raise NotImplementedError("Not implemented. Use loadSpectrum function instead")
 

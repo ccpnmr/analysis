@@ -233,7 +233,7 @@ def newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:flo
                        maxAliasedFrequency:float=None, minAliasedFrequency:float=None,
                        foldingMode:str=None, axisUnit:str=None, referencePoint:float=0.0,
                        referenceValue:float=0.0) -> SpectrumReference:
-  """Create new child Atom"""
+  """Create new ccpn.SpectrumReference within ccpn.Spectrum"""
   dataSource = self._wrappedData
   dataDim = dataSource.findFirstDataDim(dim=dimension)
   if dataDim is None:

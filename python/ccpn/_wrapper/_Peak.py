@@ -229,11 +229,11 @@ class Peak(AbstractWrapperObject):
       allAtoms = []
       peakDimContribs = peakContrib.peakDimContribs
       for ii,peakDim in enumerate(peakDims):
-        atoms = [data2Obj.get(x.resonance) for x in mainPeakDimContribs[ii]
+        nmrAtoms = [data2Obj.get(x.resonance) for x in mainPeakDimContribs[ii]
                 if x in peakDimContribs and hasattr(x, 'resonance')]
-        if not atoms:
-          atoms = [None]
-        allAtoms.append(atoms)
+        if not nmrAtoms:
+          nmrAtoms = [None]
+        allAtoms.append(nmrAtoms)
 
       result += itertools.product(*allAtoms)
     #
@@ -330,8 +330,9 @@ PeakList._childClasses.append(Peak)
 def newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
             position:Sequence[float]=(), pointPosition:Sequence[float]=(),
-            dimensionAssignments:Sequence[Sequence['NmrAtom']]=(), assignments:Sequence[Sequence[Optional['NmrAtom']]]=()) -> Peak:
-  """Create new child Peak"""
+            dimensionAssignments:Sequence[Sequence['NmrAtom']]=(),
+            assignments:Sequence[Sequence[Optional['NmrAtom']]]=()) -> Peak:
+  """Create new ccpn.Peak within ccpn.peakList"""
   apiPeakList = self._apiPeakList
   apiPeak = apiPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
                               annotation=annotation, details=comment)

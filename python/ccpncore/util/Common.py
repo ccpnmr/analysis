@@ -29,6 +29,8 @@ NB Must conform to PYthon 2.1. Imported in ObjectDomain.
 import os
 import sys
 import json
+import itertools
+from collections import abc as collectionClasses
 
 from ccpncore.util import Path
 from ccpncore.lib import Constants as coreLibConstants
@@ -199,46 +201,70 @@ def splitIntFromChars(value:str):
 
   return number,chars
 
-
-def integerStringSortKey(key):
-  """return sort key so that strings starting with an integer sort as if by integer
-
-  params:: key  either sequence or single string"""
-
-  if isinstance(key, str):
-    vv = key.lstrip()
-    ll = []
-    for char in vv:
-      if char.isdigit():
-        ll.append(char)
-      else:
-        break
-    if ll :
-      return '%30s' % ''.join(ll) + vv[len(ll):]
-    else:
-      return key
-
+def numericStringSortKey(key):
+  """return sort key so that string fields that start with numeric values sort by that value
+  E.g. '11a', '+1.1e1zz' or '11.0' sort as numeric 11.0"""
+  number = 0.0
+  if isinstance(key,str):
+    for ii in range(1,len(key)+1):
+      try:
+        number = float(key[:ii])
+      except:
+        pass
+    #
+    return [number, key]
+  elif isinstance(key, collectionClasses.Sequence):
+    return list(itertools.chain(numericStringSortKey(x) for x in key))
   else:
-    result = list(key)
+    return [number, key]
 
-    for ii,val in enumerate(result):
-      if isinstance(val, str):
-        vv = val.lstrip()
-        ll = []
-        for char in vv:
-          if char.isdigit():
-            ll.append(char)
-          else:
-            break
-        if ll :
-          result[ii] = '%30s' % ''.join(ll) + vv[len(ll):]
 
-    return result
+# def integerStringSortKey(key):
+#   """return sort key so that strings starting with an integer sort as if by integer
+#
+#   params:: key  either sequence or single string"""
+#
+#   if isinstance(key, str):
+#     vv = key.lstrip()
+#     ll = []
+#     for char in vv:
+#       if char.isdigit():
+#         ll.append(char)
+#       else:
+#         break
+#     if ll :
+#       return '%30s' % ''.join(ll) + vv[len(ll):]
+#     else:
+#       return key
+#
+#   else:
+#     result = list(key)
+#
+#     for ii,val in enumerate(result):
+#       if isinstance(val, str):
+#         vv = val.lstrip()
+#         ll = []
+#         for char in vv:
+#           if char.isdigit():
+#             ll.append(char)
+#           else:
+#             break
+#         if ll :
+#           result[ii] = '%30s' % ''.join(ll) + vv[len(ll):]
+#
+#     return result
 
 def dictionaryProduct(dict1:dict, dict2:dict) -> dict:
   """multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary"""
+  result = {}
+  for key1,val1 in dict1.items():
+    for key2,val2 in dict2.items():
+      result[(key1,key2)] = val1 * val2
+  #
+  return result
 
-def uniquify(sequence):
+def uniquify(sequence:collectionClasses.Sequence) -> list:
+  """Get list of unique elements in sequence, in order of first appearance"""
   seen = set()
   seen_add = seen.add
   return [x for x in sequence if x not in seen and not seen_add(x)]

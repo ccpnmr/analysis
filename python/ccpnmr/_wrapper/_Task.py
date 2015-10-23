@@ -149,7 +149,7 @@ Window.task = property(_getTask, _setTask, None, """Task shown in Window.""")
 
 
 def newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
-  """Create new child Task"""
+  """Create new ccpn.Task"""
 
   nmrProject = self.nmrProject
   dd = {'name':name, 'nmrProject':nmrProject, 'details':comment}

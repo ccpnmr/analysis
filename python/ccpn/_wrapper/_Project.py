@@ -24,6 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 import functools
 import os
+from collections.abc import Sequence as baseSequence
 
 from ccpn import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
@@ -36,7 +37,7 @@ from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
 from ccpncore.util import Undo
 from ccpncore.util import Io as ioUtil
-from ccpncore.util.Types import Dict
+from ccpncore.util.Types import Dict, Union, Sequence
 
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to API: NmrProject"""
@@ -302,6 +303,26 @@ class Project(AbstractWrapperObject):
     """path of/to Project"""
     return ioUtil.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
 
+  def _flushCachedData(self):
+    """Flush cached data to ensure up-to-date data are saved"""
+    for structureEnsemble in self.structureEnsembles:
+      for tag in ('coordinateData', 'occupancyData', 'bFactorData'):
+        val = getattr(structureEnsemble, tag)
+        if val is not None:
+          # Save cached data back to underlying storage
+          setattr(structureEnsemble, tag, val)
+
+  def save(self, newPath:str=None, newProjectName:str=None, changeBackup:bool=True,
+                  createFallback:bool=False, overwriteExisting:bool=False,
+                  checkValid:bool=False, changeDataLocations:bool=False):
+    """Save project with all data, optionally to new location or with new name.
+    Unlike lower-level functions, this function ensures that data in high level caches are also saved """
+    self._flushCachedData()
+    ioUtil.saveProject(self._wrappedData.root, newPath=newPath, newProjectName=newProjectName,
+                       changeBackup=changeBackup, createFallback=createFallback,
+                       overwriteExisting=overwriteExisting, checkValid=checkValid,
+                       changeDataLocations=changeDataLocations)
+
   def rename(self, name:str) -> None:
     """Rename Project, and rename the underlying API project and the directory stored on disk.
     Name change is not undoable, but the undo stack is left untouched
@@ -350,9 +371,9 @@ class Project(AbstractWrapperObject):
       # rename and move CCPN project
       location = apiProject.findFirstRepository(name='userData').url.getDataLocation()
       dirName, oldName = os.path.split(location)
-      ioUtil.saveProject(apiProject, newProjectName=name, newPath=os.path.join(dirName,name),
-                         removeExisting=True, checkValid=True, createFallback=True,
-                         changeDataLocations=True, changeBackup=True)
+      self.save(newProjectName=name, newPath=os.path.join(dirName,name),
+                overwriteExisting=True, checkValid=True, createFallback=True,
+                changeDataLocations=True, changeBackup=True)
 
 
   @property
@@ -417,36 +438,35 @@ class Project(AbstractWrapperObject):
   # utility functions
   #
 
-  def _pidSortKey(self, key) -> tuple:
-    """ sort key that splits pids, and sorts numerical fields numerically (e.g. '11a' before '2b').
-     A string without PREFIXSEP is treated as a pid with empty header, so that simple strings
-     sort numerically as well
+  def _pidSortKey(self, key:Union[Sequence, AbstractWrapperObject]) -> list:
+    """ Converts object PID into a composite key that sorts fields that start with a numerical value
+    in numerical order. E.g. ' 11aa', '+1.1e1qq' or '11.0--' all sort as 11.0
+    Input mut be a string, a wrapper object, or a sequence of eitehr type.
+    Results are cached to save time.
+    Objects get the same key as their longPid attribute
+    The part of the string before the PREFIXSEP is not converted.
+    Strings without PREFIXSEP are treated as having an empty string prefix"""
 
-     If 'key' is a non-string sequence,
-     directly contained strings are converted to their _pidSortKeys"""
-    PREFIXSEP = Pid.PREFIXSEP
-    IDSEP = Pid.IDSEP
+    if isinstance(key, str):
+      longPid = key
+    elif isinstance(key, baseSequence):
+      return [self._pidSortKey(x) for x in key]
+    else:
+      # key ust be a wrapper object - sort by longPid
+      longPid = key.longPid
 
-    result = self._pidSortKeys.get(key)
+    result = self._pidSortKeys.get(longPid)
 
     if result is None:
+      PREFIXSEP = Pid.PREFIXSEP
+      IDSEP = Pid.IDSEP
 
-      if isinstance(key, str):
-        ll = key.split(PREFIXSEP,1)
-        if len(ll) == 1:
-          ll = ['', key]
-        result = ll[:1] + commonUtil.integerStringSortKey(ll[1].split(IDSEP))
+      ll = longPid.split(PREFIXSEP,1)
+      if len(ll) == 1:
+        ll = ['', longPid]
 
-      else:
-        # Treat as list of pids
-        result = list(key)
-        for ii,pid in enumerate(result):
-          if isinstance(pid, str):
-            ll = pid.split(PREFIXSEP,1)
-            if len(ll) == 1:
-              ll = ['', pid]
-            result[ii] = ll[:1] + commonUtil.integerStringSortKey(ll[1].split(IDSEP))
+      result = ll[:1] + commonUtil.numericStringSortKey(ll[1].split(IDSEP))
+      self._pidSortKeys[longPid] = result
     #
-    self._pidSortKeys[key] = result
     return result
       

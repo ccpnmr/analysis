@@ -53,7 +53,7 @@ def doTest():
 
 def newProject():
 
-  project = ioUtil.newProject(projectName=projectName, removeExisting=True)
+  project = ioUtil.newProject(projectName=projectName, overwriteExisting=True)
 
   # Make molecule using API
 

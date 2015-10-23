@@ -30,7 +30,7 @@ from ccpn import Substance
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpncore.lib.molecule import MoleculeModify
 from ccpncore.util import Pid
-from ccpncore.util.Types import Tuple, Optional
+from ccpncore.util.Types import Tuple, Optional, Union
 
 
 
@@ -139,7 +139,7 @@ class Chain(AbstractWrapperObject):
     if not value:
       raise ValueError("Chain name must be set")
     apiNmrChain = self._project._apiNmrProject.findFirstNmrChain(code=self.code)
-    self._apiChain._renameChain(value)
+    self._apiChain.renameChain(value)
     self._project._resetPid(self._apiChain)
     self._project._resetPid(self.apiNmrChain)
 
@@ -250,56 +250,56 @@ class Chain(AbstractWrapperObject):
 #   return chains
 
 
-def _createSimpleChain(self:Project, sequence:(str,tuple), compoundName:str='Molecule_1',
+def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:str='Molecule_1',
               startNumber:int=1, molType:str=None, isCyclic:bool=False,
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
-  """Make new chain from sequence of residue codes, using default linking and variants
+  """Create new chain from sequence of residue codes
 
-  Automatically creates the corresponding Substance if the name is not already taken
+  Automatically creates the corresponding Substance if the compoundName is not already taken
 
-  :param Sequence sequence: string of one-letter codes or sequence of str residueNames
-  :param str compoundName: name of new CCPN_Molecule (e.g. 'Lysozyme')
-  :param str molType: molType ('protein','DNA', 'RNA'). Required only if sequence is a string.
+  :param Sequence sequence: string of one-letter codes or sequence of residue types
+  :param str compoundName: name of new Substance (e.g. 'Lysozyme')
+  :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
   :param int startNumber: number of first residue in sequence
   :param str shortName: shortName for new chain (optional)
   :param str role: role for new chain (optional)
   :param str comment: comment for new chain (optional)
 
   """
+
   apiMolSystem = self._wrappedData.molSystem
   if shortName is None:
     shortName = apiMolSystem.nextChainCode()
 
-  if not sequence:
-    raise ValueError("createSimpleChain requires non-empty sequence")
-
-  elif apiMolSystem.findFirstChain(code=shortName) is not None:
-    raise ValueError("Chain names %s already exists" % shortName)
-
   name = self.uniqueSubstanceName(compoundName)
 
-  apiMolecule = MoleculeModify.createMolecule(apiMolSystem.root, sequence, molType=molType,
-                                             name=name, startNumber=startNumber,
-                                             isCyclic=isCyclic)
+  if apiMolSystem.findFirstChain(code=shortName) is not None:
+    raise ValueError("Chain names %s already exists" % shortName)
+
+  substance = self.createPolymerSubstance(sequence=sequence, name=name,
+                                          startNumber=startNumber, molType=molType,
+                                          isCyclic=isCyclic, comment=comment)
+
+  apiMolecule = substance._apiSubstance.molecule
   apiMolecule.isFinalised = True
   # fetch to ensure creation of Substance
-  self._wrappedData.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
   newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                       details=comment)
   #
   return  self._project._data2Obj[newApiChain]
+Project.createChain = _createChain
 
 
 def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
                              comment:str=None) -> Chain:
-  """Create new chain that matches ccpn.Substance"""
+  """Create new ccpn.Chain that matches ccpn.Substance"""
 
   if self.substanceType != 'MolComponent':
     raise ValueError("Only MolComponent Substances can be used to create chains")
 
   apiMolecule = self._apiSubstance.molecule
   if apiMolecule is None:
-    raise ValueError("MolComponent miust have attaehed ApiMolecule in order to create chains")
+    raise ValueError("MolComponent must have attached ApiMolecule in order to create chains")
 
   apiMolSystem = self._project._apiNmrProject.molSystem
   if shortName is None:
@@ -309,7 +309,7 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
                                        details=comment)
   #
   return  self._project._data2Obj[newApiChain]
-Substance.createChainFromSubstance = _createChainFromSubstance
+Substance.createChain = _createChainFromSubstance
 del _createChainFromSubstance
 
 
@@ -335,8 +335,6 @@ Chain.clone.__annotations__['return'] = Chain
     
 # Connections to parents:
 Project._childClasses.append(Chain)
-# Project.newChain = newChain
-Project.createSimpleChain = _createSimpleChain
 # Project._makeChains = _makeChains
 
 # Notifiers:

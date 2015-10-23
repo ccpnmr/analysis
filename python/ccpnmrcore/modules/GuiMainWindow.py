@@ -784,7 +784,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if hasattr(apiProject, '_temporaryDirectory'):
       self.saveProjectAs()
     else:
-      self._appBase.saveProject()
+      self._project.save()
     
   def saveProjectAs(self):
     
@@ -806,7 +806,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         msg ='Path "%s" already exists, continue?' % newPath
         if not MessageDialog.showYesNo(title, msg, self):
           return
-      self._appBase.saveProject(newPath=newPath)#, newProjectName=os.path.basename(newPath))
+      self._project.save(newPath=newPath)#, newProjectName=os.path.basename(newPath))
 
   def hideConsole(self):
     self.pythonConsole.hide()

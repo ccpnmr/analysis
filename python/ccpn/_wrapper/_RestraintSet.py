@@ -108,7 +108,7 @@ class RestraintSet(AbstractWrapperObject):
 
 
 def newRestraintSet(self:Project, comment:str=None) -> RestraintSet:
-  """Create new empty child NmrConstraintStores
+  """Create new ccpn.RestraintSet
 
   :param str comment: comment for new chain (optional)"""
   

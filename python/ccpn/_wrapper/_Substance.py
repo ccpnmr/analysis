@@ -191,6 +191,120 @@ class Substance(AbstractWrapperObject):
       raise TypeError( "%s type Substance has no attribute 'molecularMass'"
                        %_apiClassNameMap.get(ss, ss))
 
+  @property
+  def atomCount(self) -> Optional[int]:
+    """Number of atoms in the molecule - for Molecular substances"""
+    apiRefComponent = self._wrappedData
+    return apiRefComponent.atomCount if hasattr(apiRefComponent, 'atomCount') else None
+
+  @atomCount.setter
+  def atomCount(self, value):
+    apiRefComponent = self._wrappedData
+    if hasattr(apiRefComponent, 'atomCount'):
+      apiRefComponent.atomCount = value
+    else:
+      ss = apiRefComponent.className
+      raise TypeError( "%s type Substance has no attribute 'atomCount'"
+                       %_apiClassNameMap.get(ss, ss))
+
+  @property
+  def bondCount(self) -> Optional[int]:
+    """Number of bonds in the molecule - for Molecular substances"""
+    apiRefComponent = self._wrappedData
+    return apiRefComponent.bondCount if hasattr(apiRefComponent, 'bondCount') else None
+
+  @bondCount.setter
+  def bondCount(self, value):
+    apiRefComponent = self._wrappedData
+    if hasattr(apiRefComponent, 'bondCount'):
+      apiRefComponent.bondCount = value
+    else:
+      ss = apiRefComponent.className
+      raise TypeError( "%s type Substance has no attribute 'bondCount'"
+                       %_apiClassNameMap.get(ss, ss))
+
+  @property
+  def ringCount(self) -> Optional[int]:
+    """Number of rings in the molecule - for Molecular substances"""
+    apiRefComponent = self._wrappedData
+    return apiRefComponent.ringCount if hasattr(apiRefComponent, 'ringCount') else None
+
+  @ringCount.setter
+  def ringCount(self, value):
+    apiRefComponent = self._wrappedData
+    if hasattr(apiRefComponent, 'ringCount'):
+      apiRefComponent.ringCount = value
+    else:
+      ss = apiRefComponent.className
+      raise TypeError( "%s type Substance has no attribute 'ringCount'"
+                       %_apiClassNameMap.get(ss, ss))
+
+  @property
+  def hBondDonorCount(self) -> Optional[int]:
+    """Number of hydrogen bond donors in the molecule - for Molecular substances"""
+    apiRefComponent = self._wrappedData
+    return apiRefComponent.hBondDonorCount if hasattr(apiRefComponent, 'hBondDonorCount') else None
+
+  @hBondDonorCount.setter
+  def hBondDonorCount(self, value):
+    apiRefComponent = self._wrappedData
+    if hasattr(apiRefComponent, 'hBondDonorCount'):
+      apiRefComponent.hBondDonorCount = value
+    else:
+      ss = apiRefComponent.className
+      raise TypeError( "%s type Substance has no attribute 'hBondDonorCount'"
+                       %_apiClassNameMap.get(ss, ss))
+
+  @property
+  def hBondAcceptorCount(self) -> Optional[int]:
+    """Number of hydrogen bond acceptors in the molecule - for Molecular substances"""
+    apiRefComponent = self._wrappedData
+    return (apiRefComponent.hBondAcceptorCount if hasattr(apiRefComponent, 'hBondAcceptorCount')
+            else None)
+
+  @hBondAcceptorCount.setter
+  def hBondAcceptorCount(self, value):
+    apiRefComponent = self._wrappedData
+    if hasattr(apiRefComponent, 'hBondAcceptorCount'):
+      apiRefComponent.hBondAcceptorCount = value
+    else:
+      ss = apiRefComponent.className
+      raise TypeError( "%s type Substance has no attribute 'hBondAcceptorCount'"
+                       %_apiClassNameMap.get(ss, ss))
+
+  @property
+  def polarSurfaceArea(self) -> Optional[float]:
+    """Polar surface area (in square Angstrom) of the molecule - for Molecular substances"""
+    apiRefComponent = self._wrappedData
+    return (apiRefComponent.polarSurfaceArea if hasattr(apiRefComponent, 'polarSurfaceArea')
+            else None)
+
+  @polarSurfaceArea.setter
+  def polarSurfaceArea(self, value):
+    apiRefComponent = self._wrappedData
+    if hasattr(apiRefComponent, 'polarSurfaceArea'):
+      apiRefComponent.polarSurfaceArea = value
+    else:
+      ss = apiRefComponent.className
+      raise TypeError( "%s type Substance has no attribute 'polarSurfaceArea'"
+                       %_apiClassNameMap.get(ss, ss))
+
+  @property
+  def logPartitionCoefficient(self) -> Optional[float]:
+    """Logarithm of the octanol-water partition coefficient (logP) - for Molecular substances"""
+    apiRefComponent = self._wrappedData
+    return (apiRefComponent.logPartitionCoefficient
+            if hasattr(apiRefComponent, 'logPartitionCoefficient') else None)
+
+  @logPartitionCoefficient.setter
+  def logPartitionCoefficient(self, value):
+    apiRefComponent = self._wrappedData
+    if hasattr(apiRefComponent, 'logPartitionCoefficient'):
+      apiRefComponent.logPartitionCoefficient = value
+    else:
+      ss = apiRefComponent.className
+      raise TypeError( "%s type Substance has no attribute 'logPartitionCoefficient'"
+                       %_apiClassNameMap.get(ss, ss))
 
   @property
   def comment(self) -> str:
@@ -261,20 +375,27 @@ class Substance(AbstractWrapperObject):
 # Connections to parents:
 Project._childClasses.append(Substance)
 
-def _newSimpleSubstance(self:Project, name:str, labeling:str='std', substanceType:str='Molecule',
-                       userCode:str=None, smiles:str=None, inChi:str=None, casNumber:str=None,
-                       empiricalFormula:str=None, molecularMass:float=None, comment:str=None,
-                       synonyms:Sequence[str]=()) -> Substance:
+def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str='Molecule',
+                  userCode:str=None, smiles:str=None, inChi:str=None, casNumber:str=None,
+                  empiricalFormula:str=None, molecularMass:float=None, comment:str=None,
+                  synonyms:Sequence[str]=(), atomCount:int=None, bondCount:int=None,
+                  ringCount:int=None, hBondDonorCount:int=None, hBondAcceptorCount:int=None,
+                  polarSurfaceArea:float=None, logPartitionCoefficient:float=None
+                 ) -> Substance:
   """Create new substance WITHOUT attached ApiMolecule (and so not suitable for making chains)
-  substanceType may be 'Molecule' (default), 'Cell', 'Material', and 'Composite'"""
+  substanceType defaults to 'Molecule'.
+  ADVANCED alternatives are 'Cell', 'Material', and 'Composite'"""
   apiNmrProject = self._wrappedData
+  apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
 
-  if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name,
-                                                         labeling=labeling) is not None:
+  if apiComponentStore.findFirstComponent(name=name, labeling=labeling) is not None:
     raise ValueError("Substance %s.%s already exists" % (name, labeling))
 
   elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
     raise ValueError("Molecule name %s is already in use for API Molecule")
+
+  else:
+    oldSubstance = apiComponentStore.findFirstComponent(name=name)
 
   params = {
     'name':name, 'labeling':labeling, 'userCode':userCode, 'synonyms':synonyms,
@@ -282,21 +403,44 @@ def _newSimpleSubstance(self:Project, name:str, labeling:str='std', substanceTyp
   }
   apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
   if substanceType == 'Material':
-    apiResult = apiComponentStore.newSubstance(**params)
+    if oldSubstance is not None and oldSubstance.className != 'Substance':
+      raise ValueError("Substance name %s clashes with substance of different type: %s"
+                        % (name, oldSubstance.className))
+    else:
+      apiResult = apiComponentStore.newSubstance(**params)
   elif substanceType == 'Cell':
-    apiResult = apiComponentStore.newCell(**params)
+    if oldSubstance is not None and oldSubstance.className != 'Cell':
+      raise ValueError("Substance name %s clashes with substance of different type: %s"
+                        % (name, oldSubstance.className))
+    else:
+      apiResult = apiComponentStore.newCell(**params)
   elif substanceType == 'Composite':
-    apiResult = apiComponentStore.newComposite(**params)
+    if oldSubstance is not None and oldSubstance.className != 'Composite':
+      raise ValueError("Substance name %s clashes with substance of different type: %s"
+                        % (name, oldSubstance.className))
+    else:
+      apiResult = apiComponentStore.newComposite(**params)
   elif substanceType == 'Molecule':
-    apiResult = apiComponentStore.newMolComponent(smiles=smiles, inChi=inChi, casNum=casNumber,
-                                                  empiricalFormula=empiricalFormula,
-                                                  molecularMass=molecularMass, **params)
+    if oldSubstance is not None and oldSubstance.className != 'MolComponent':
+      raise ValueError("Substance name %s clashes with substance of different type: %s"
+                        % (name, oldSubstance.className))
+    else:
+      apiResult = apiComponentStore.newMolComponent(smiles=smiles, inChi=inChi, casNum=casNumber,
+                                                    empiricalFormula=empiricalFormula,
+                                                    molecularMass=molecularMass,
+                                                    atomCount=atomCount, bondCount=bondCount,
+                                                    ringCount=ringCount,
+                                                    hBondDonorCount=hBondDonorCount,
+                                                    hBondAcceptorCount=hBondAcceptorCount,
+                                                    polarSurfaceArea=polarSurfaceArea,
+                                                    logPartitionCoefficient=logPartitionCoefficient,
+                                                    **params)
   #
   return self._data2Obj[apiResult]
 
 Project._childClasses.append(Substance)
-Project.newSimpleSubstance = _newSimpleSubstance
-del _newSimpleSubstance
+Project.newSubstance = _newSubstance
+del _newSubstance
 
 
 def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labeling:str='std',
@@ -344,6 +488,25 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 Project.createPolymerSubstance = _createPolymerSubstance
 del _createPolymerSubstance
 
+def _fetchSubstance(self:Project, name:str, labeling:str=None) -> Substance:
+  """get or create ccpn.Substance with given name and labeling.
+  If labeling is not set it defaults to 'std',
+  except that Substances with matching name take priority"""
+  apiRefComponentStore= self._apiNmrProject.sampleStore.refSampleComponentStore
+  apiResult = apiRefComponentStore.findFirstRefSampleComponent(name=name,
+                                                               labeling=labeling or 'std')
+  if labeling is None and apiResult is None:
+    ll = [x for x in apiRefComponentStore.sortedComponents() if x.name == name]
+    if ll:
+      apiResult = ll[0]
+
+  if apiResult:
+    return self._data2Obj[apiResult]
+  else:
+    return self.newSubstance(name=name, labeling=labeling or 'std')
+#
+Project.fetchSubstance = _fetchSubstance
+del _fetchSubstance
 
 #
 # def getter(self:Chain) -> Optional[Substance]:

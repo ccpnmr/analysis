@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import operator
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
@@ -129,9 +130,9 @@ class ChemicalShiftList(AbstractWrapperObject):
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> List[ApiShiftList]:
-    """get wrappedData (SHiftLists) for all ShiftList children of parent Project"""
-    return [x for x in parent._apiNmrProject.sortedMeasurementLists()
-            if x.className == 'ShiftList']
+    """get wrappedData (ShiftLists) for all ShiftList children of parent Project"""
+    return sorted((x for x in parent._apiNmrProject.measurementLists
+            if x.className == 'ShiftList'), key=operator.attrgetter('name'))
 
 # Connections to parents:
 Project._childClasses.append(ChemicalShiftList)
@@ -156,7 +157,7 @@ del setter
 
 def newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
                          isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
-  """Create new child ChemicalShiftList"""
+  """Create new ccpn.ChemicalShiftList"""
   obj = self._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
                                        details=comment)
   return self._data2Obj.get(obj)

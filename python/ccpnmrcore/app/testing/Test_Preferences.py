@@ -1,3 +1,7 @@
+import os
+
+from ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
+
 from ccpnmrcore.app import AppBase
 
 """Module Documentation here
@@ -32,18 +36,22 @@ def test_get_preferences():
 
 def test_get_preferences_default():
 
-  preferences = AppBase.getPreferences(defaultPreferencesPath='defaultv3settingsTest.json')
+  defaultPreferencesPath = os.path.join(TEST_PROJECTS_PATH, 'defaultv3settingsTest.json')
+  preferences = AppBase.getPreferences(defaultPreferencesPath=defaultPreferencesPath)
 
   print(preferences)
 
 def test_get_preferences_user():
 
-  preferences = AppBase.getPreferences(userPreferencesPath='userv3settingsTest.json')
+  userPreferencesPath = os.path.join(TEST_PROJECTS_PATH, 'userv3settingsTest.json')
+  preferences = AppBase.getPreferences(userPreferencesPath=userPreferencesPath)
   print(preferences)
 
 def test_get_preferences_default_user():
 
-  preferences = AppBase.getPreferences(defaultPreferencesPath='defaultv3settingsTest.json',
-                               userPreferencesPath='userv3settingsTest.json')
+  defaultPreferencesPath = os.path.join(TEST_PROJECTS_PATH, 'defaultv3settingsTest.json')
+  userPreferencesPath = os.path.join(TEST_PROJECTS_PATH, 'userv3settingsTest.json')
+  preferences = AppBase.getPreferences(defaultPreferencesPath=defaultPreferencesPath,
+                               userPreferencesPath=userPreferencesPath)
   print(preferences)
 

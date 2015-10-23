@@ -493,7 +493,7 @@ def _fetchSubstance(self:Project, name:str, labeling:str=None) -> Substance:
   If labeling is not set it defaults to 'std',
   except that Substances with matching name take priority"""
   apiRefComponentStore= self._apiNmrProject.sampleStore.refSampleComponentStore
-  apiResult = apiRefComponentStore.findFirstRefSampleComponent(name=name,
+  apiResult = apiRefComponentStore.findFirstComponent(name=name,
                                                                labeling=labeling or 'std')
   if labeling is None and apiResult is None:
     ll = [x for x in apiRefComponentStore.sortedComponents() if x.name == name]

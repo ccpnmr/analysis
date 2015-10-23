@@ -25,6 +25,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 import os
+import operator
 
 from ccpncore.util.typing import Sequence
 from ccpn import AbstractWrapperObject
@@ -783,8 +784,8 @@ class Spectrum(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
-    return [x for y in parent._wrappedData.sortedExperiments()
-            for x in y.sortedDataSources()]
+    return sorted((x for y in parent._wrappedData.sortedExperiments()
+                   for x in y.sortedDataSources()), key=operator.attrgetter('name'))
 
 
 # def getter(self:ChemicalShiftList) -> tuple:

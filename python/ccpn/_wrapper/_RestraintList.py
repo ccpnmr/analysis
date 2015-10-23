@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import operator
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import RestraintSet
@@ -237,7 +238,7 @@ class RestraintList(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: RestraintSet)-> list:
     """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
-    return parent._wrappedData.sortedConstraintLists()
+    return sorted(parent._wrappedData.constraintLists, key=operator.attrgetter('name'))
 
 # Connections to parents:
 RestraintSet._childClasses.append(RestraintList)

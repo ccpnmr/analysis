@@ -127,20 +127,24 @@ def loadLookupFile(self:"Project", path:str, subType:str, ):
 
 def uniqueSubstanceName(self:"Project", name:str=None, defaultName:str='Molecule') -> str:
   """add integer suffixed to name till it is unique"""
-  if name is None:
-    name = defaultName
 
   apiComponentStore = self._wrappedData.sampleStore.refSampleComponentStore
   apiProject =apiComponentStore.root
 
   # ensure substance name is unique
-  i = 0
-  result = name
+  if name:
+    i = 0
+    result = name
+    formstring = name + '_%d'
+  else:
+    formstring = defaultName + '_%d'
+    i = 1
+    result =  formstring % (name,i)
   while (apiProject.findFirstMolecule(name=result) or
          apiComponentStore.findFirstComponent(name=result)):
     i += 1
-    result = '%s%d' % (name,i)
-  if result != name:
+    result = '%s_%d' % (name,i)
+  if result != name and name != defaultName:
     self._logger.warning(
     "CCPN molecule named %s already exists. New molecule has been named %s" %
     (name,result))

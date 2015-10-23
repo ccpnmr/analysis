@@ -435,6 +435,8 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
                                                     polarSurfaceArea=polarSurfaceArea,
                                                     logPartitionCoefficient=logPartitionCoefficient,
                                                     **params)
+  else:
+    raise ValueError("Substance type %s not recognised" % substanceType)
   #
   return self._data2Obj[apiResult]
 
@@ -480,6 +482,7 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
                                               isCyclic=isCyclic)
   apiMolecule.commonNames =synonyms
   apiMolecule.smiles = smiles
+  apiMolecule.userCode = userCode
   apiMolecule.details=comment
 
   return self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
@@ -493,8 +496,7 @@ def _fetchSubstance(self:Project, name:str, labeling:str=None) -> Substance:
   If labeling is not set it defaults to 'std',
   except that Substances with matching name take priority"""
   apiRefComponentStore= self._apiNmrProject.sampleStore.refSampleComponentStore
-  apiResult = apiRefComponentStore.findFirstComponent(name=name,
-                                                               labeling=labeling or 'std')
+  apiResult = apiRefComponentStore.findFirstComponent(name=name, labeling=labeling or 'std')
   if labeling is None and apiResult is None:
     ll = [x for x in apiRefComponentStore.sortedComponents() if x.name == name]
     if ll:

@@ -83,6 +83,11 @@ class Chain(AbstractWrapperObject):
   @role.setter
   def role(self, value:str):
     self._wrappedData.role = value
+
+  @property
+  def isCyclic(self) -> str:
+    """Is this a cyclic polymer?"""
+    return self._wrappedData.molecule.isCyclic
   
   @property
   def comment(self) -> str:
@@ -258,7 +263,7 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
   Automatically creates the corresponding Substance if the compoundName is not already taken
 
   :param Sequence sequence: string of one-letter codes or sequence of residue types
-  :param str compoundName: name of new Substance (e.g. 'Lysozyme')
+  :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'MOlecule_n
   :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
   :param int startNumber: number of first residue in sequence
   :param str shortName: shortName for new chain (optional)
@@ -271,7 +276,15 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
   if shortName is None:
     shortName = apiMolSystem.nextChainCode()
 
-  name = self.uniqueSubstanceName(compoundName)
+  apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
+  if compoundName is None:
+    name = self.uniqueSubstanceName()
+  elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
+    name = compoundName
+  else:
+    raise ValueError(
+      "Substance named %s already exists. Try Substance.createChain function instead?"
+      % compoundName)
 
   if apiMolSystem.findFirstChain(code=shortName) is not None:
     raise ValueError("Chain names %s already exists" % shortName)
@@ -294,12 +307,12 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
                              comment:str=None) -> Chain:
   """Create new ccpn.Chain that matches ccpn.Substance"""
 
-  if self.substanceType != 'MolComponent':
-    raise ValueError("Only MolComponent Substances can be used to create chains")
+  if self.substanceType != 'Molecule':
+    raise ValueError("Only Molecule Substances can be used to create chains")
 
   apiMolecule = self._apiSubstance.molecule
   if apiMolecule is None:
-    raise ValueError("MolComponent must have attached ApiMolecule in order to create chains")
+    raise ValueError("API MolComponent must have attached ApiMolecule in order to create chains")
 
   apiMolSystem = self._project._apiNmrProject.molSystem
   if shortName is None:

@@ -67,28 +67,29 @@ class Analysis3(AppBase):
 
   def initLayout(self):
     import yaml, os
-    with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
-      layout = yaml.load(f)
-      typ, contents, state = layout['main']
-
-      containers, docks = self._appBase.mainWindow.dockArea.findAll()
-      for item in contents:
-        if item[0] == 'dock':
-          obj = docks.get(item[1])
-          if obj is None:
-           func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
-           func()
-      for s in layout['float']:
-        typ, contents, state = s[0]['main']
+    if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
+      with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
+        layout = yaml.load(f)
+        typ, contents, state = layout['main']
 
         containers, docks = self._appBase.mainWindow.dockArea.findAll()
         for item in contents:
           if item[0] == 'dock':
             obj = docks.get(item[1])
             if obj is None:
-              func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
-              func()
-      self._appBase.mainWindow.dockArea.restoreState(layout)
+             func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
+             func()
+        for s in layout['float']:
+          typ, contents, state = s[0]['main']
+
+          containers, docks = self._appBase.mainWindow.dockArea.findAll()
+          for item in contents:
+            if item[0] == 'dock':
+              obj = docks.get(item[1])
+              if obj is None:
+                func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
+                func()
+        self._appBase.mainWindow.dockArea.restoreState(layout)
 
 
 if __name__ == '__main__':

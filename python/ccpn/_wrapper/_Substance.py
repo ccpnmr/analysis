@@ -482,11 +482,13 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
                                               isCyclic=isCyclic)
   apiMolecule.commonNames =synonyms
   apiMolecule.smiles = smiles
-  apiMolecule.userCode = userCode
   apiMolecule.details=comment
 
-  return self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
+  result = self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
                           apiMolecule, labeling=labeling)]
+  result.userCode = userCode
+  #
+  return result
 
 Project.createPolymerSubstance = _createPolymerSubstance
 del _createPolymerSubstance

@@ -468,8 +468,8 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
   if not sequence:
     raise ValueError("createPolymerSubstance requires non-empty sequence")
 
-  elif apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name,
-                                                                            labeling) is not None:
+  elif apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name,
+        labeling=labeling) is not None:
     raise ValueError("Substance %s.%s already exists" % (name, labeling))
 
   elif apiNmrProject.root.findFirstMolecule(name=name) is not None:

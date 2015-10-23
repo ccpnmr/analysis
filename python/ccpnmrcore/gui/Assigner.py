@@ -159,7 +159,7 @@ class Assigner(CcpnDock):
 
   def clearAllItems(self):
     """
-    Removes all displayed residues in the assigner and resets items counts to zero.
+    Removes all displayed residues in the assigner and resets items count to zero.
     """
     for item in self.scene.items():
       self.scene.removeItem(item)
@@ -335,7 +335,7 @@ class Assigner(CcpnDock):
       predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width(), caAtom.y()+(30*(predictions.index(prediction)+2)))
       self.scene.addItem(predictionLabel)
 
-  def predictSequencePosition(self, nmrResidues):
+  def predictSequencePosition(self, nmrResidues:list):
     """
     Predicts sequence position for Nmr residues displayed in the Assigner and highlights appropriate
     positions in the Sequence Module if it is displayed.
@@ -513,7 +513,7 @@ class Assigner(CcpnDock):
     return newLine
 
 
-  def _createGuiNmrAtom(self, atomType:str, position:tuple, nmrAtom:NmrAtom=None):
+  def _createGuiNmrAtom(self, atomType:str, position:tuple, nmrAtom:NmrAtom=None) -> GuiNmrAtom:
     """
     Creates a GuiNmrAtom specified by the atomType and graphical position supplied.
     GuiNmrAtom can be linked to an NmrAtom by supplying it to the function.

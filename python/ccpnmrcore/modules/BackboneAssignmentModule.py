@@ -29,7 +29,8 @@ from collections import OrderedDict
 
 import math
 
-from ccpnmrcore.lib.Window import navigateToNmrResidue, navigateToPeakPosition
+from ccpn import ChemicalShift, NmrResidue
+
 from ccpncore.gui.Base import Base
 from ccpncore.gui.ButtonList import ButtonList
 from ccpncore.gui.Button import Button
@@ -37,19 +38,19 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
+
+from ccpncore.util import Types
+
 from ccpnmrcore.modules.NmrResidueTable import NmrResidueTable
+from ccpnmrcore.modules.GuiStrip import GuiStrip
 
 from ccpnmrcore.lib.Window import navigateToNmrResidue
-
-from ccpnmrcore.popups.InterIntraSpectrumPopup import InterIntraSpectrumPopup
-
 
 class BackboneAssignmentModule(CcpnDock):
 
   def __init__(self, project):
 
     super(BackboneAssignmentModule, self).__init__(parent=None, name='Backbone Assignment')
-
 
     self.project = project
     self.current = project._appBase.current
@@ -58,17 +59,26 @@ class BackboneAssignmentModule(CcpnDock):
     self.matchModules = []
     self.nmrResidueTable = NmrResidueTable(self, project, callback=self.startAssignment)
     self.displayButton = Button(self.nmrResidueTable, text='Select Match Modules',
-                                callback=self.showMatchDisplayPopup, grid=(0, 3))
+                                callback=self._showMatchDisplayPopup, grid=(0, 3))
 
     self.layout.addWidget(self.nmrResidueTable, 0, 0, 1, 3)
-    self.setupShiftDicts()
+    self._setupShiftDicts()
 
 
-  def startAssignment(self, nmrResidue=None, row=None, col=None):
+  def startAssignment(self, nmrResidue:NmrResidue, row:int=None, col:int=None):
+    """
+    Initiates assignment procedure when triggered by selection of an NmrResidue from the nmrResidueTable
+    inside the module.
+    """
     self.assigner.clearAllItems()
-    self.navigateTo(nmrResidue, row, col)
+    self._navigateTo(nmrResidue, row, col)
 
-  def navigateTo(self, nmrResidue=None, row=None, col=None, strip=None):
+  def _navigateTo(self, nmrResidue:NmrResidue, row:int=None, col:int=None, strip:GuiStrip=None):
+    """
+    Takes an NmrResidue and an optional GuiStrip and changes z position(s) of all available displays
+    to chemical shift value NmrAtoms in the NmrResidue. Creates assignMatrix for strip matching and
+    add strips to matchModule(s) corresponding to assignment matches.
+    """
     selectedDisplays = [display for display in self.project.spectrumDisplays if display.pid not in self.matchModules]
 
     if '-1' in nmrResidue.sequenceCode:
@@ -76,8 +86,10 @@ class BackboneAssignmentModule(CcpnDock):
       seqCode = nmrResidue.sequenceCode
       newSeqCode = seqCode.replace('-1', '')
       iNmrResidue = nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=newSeqCode)
-      navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays, markPositions=True, strip=strip)
-      navigateToNmrResidue(self.project, iNmrResidue, selectedDisplays=selectedDisplays, strip=strip)
+      navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays,
+                           markPositions=True, strip=strip)
+      navigateToNmrResidue(self.project, iNmrResidue, selectedDisplays=selectedDisplays,
+                           strip=strip)
       queryShifts = self.interShifts[nmrResidue]
       matchShifts = self.intraShifts
       for display in selectedDisplays:
@@ -99,11 +111,15 @@ class BackboneAssignmentModule(CcpnDock):
           strip.planeToolbar.spinSystemLabel.setText(nmrResidue.sequenceCode)
 
 
-    assignMatrix = self.buildAssignmentMatrix(queryShifts, matchShifts=matchShifts)
-    self.findMatches(assignMatrix)
+    assignMatrix = self._buildAssignmentMatrix(queryShifts, matchShifts=matchShifts)
+    self._createMatchStrips(assignMatrix)
     self.assigner.addResidue(iNmrResidue, direction)
 
-  def setupShiftDicts(self):
+  def _setupShiftDicts(self):
+    """
+    Creates two ordered dictionaries for the inter residue and intra residue CA and CB shifts for
+    all NmrResidues in the project.
+    """
     self.intraShifts = OrderedDict()
     self.interShifts = OrderedDict()
 
@@ -128,9 +144,10 @@ class BackboneAssignmentModule(CcpnDock):
 
 
 
-  def findMatches(self, assignMatrix):
-
-
+  def _createMatchStrips(self, assignMatrix:Types.Tuple[Types.Dict[NmrResidue, Types.List[ChemicalShift]], Types.List[float]]):
+    """
+    Creates strips in match module corresponding to the best assignment possibilities in the assignMatrix.
+    """
     assignmentScores = sorted(assignMatrix[1])[0:self.numberOfMatches]
     for assignmentScore in assignmentScores[1:]:
       matchResidue = assignMatrix[0][assignmentScore]
@@ -167,7 +184,10 @@ class BackboneAssignmentModule(CcpnDock):
       module.orderedStrips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue.sequenceCode)
 
 
-  def setAssigner(self, assigner):
+  def connectAssigner(self, assigner:CcpnDock):
+    """
+    Connects Assigner Widget to this module.
+    """
     self.assigner = assigner
     self.project._appBase.current.assigner = assigner
 
@@ -178,8 +198,12 @@ class BackboneAssignmentModule(CcpnDock):
       return None
 
 
-  def buildAssignmentMatrix(self, queryShifts, matchShifts):
-
+  def _buildAssignmentMatrix(self, queryShifts:Types.List[ChemicalShift],
+                             matchShifts:Types.Dict[NmrResidue, ChemicalShift]) -> Types.Tuple[Types.Dict[NmrResidue, Types.List[ChemicalShift]], Types.List[float]]:
+    """
+    Creates a dictionary of NmrResidues and qScores between queryShifts and matching shifts.
+    Returns dictionary and a list of the qScores.
+    """
     scores = []
     matrix = OrderedDict()
     for res, shift in matchShifts.items():
@@ -199,7 +223,7 @@ class BackboneAssignmentModule(CcpnDock):
 
     return matrix, scores
 
-  def showMatchDisplayPopup(self):
+  def _showMatchDisplayPopup(self):
     self.popup = SelectMatchDisplaysPopup(self, project=self.project)
     self.popup.exec_()
 
@@ -214,16 +238,16 @@ class SelectMatchDisplaysPopup(QtGui.QDialog, Base):
     self.project = project
     modules.insert(0, '  ')
     label1a = Label(self, text="Selected Modules", grid=(0, 0))
-    self.modulePulldown = PulldownList(self, grid=(1, 0), callback=self.selectMatchModule)
+    self.modulePulldown = PulldownList(self, grid=(1, 0), callback=self._selectMatchModule)
     self.modulePulldown.setData(modules)
     self.moduleList = ListWidget(self, grid=(2, 0))
 
     self.buttonBox = ButtonList(self, grid=(3, 0), texts=['Cancel', 'Ok'],
-                           callbacks=[self.reject, self.setMatchModules])
+                           callbacks=[self.reject, self._setMatchModules])
 
-  def selectMatchModule(self, item):
+  def _selectMatchModule(self, item):
     self.moduleList.addItem(item)
 
-  def setMatchModules(self):
+  def _setMatchModules(self):
     self.parent.matchModules = [self.moduleList.item(i).text() for i in range(self.moduleList.count())]
     self.accept()

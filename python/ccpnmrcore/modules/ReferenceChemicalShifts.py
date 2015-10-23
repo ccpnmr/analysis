@@ -31,11 +31,14 @@ class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the 
     self.atomTypePulldown = PulldownList(self, callback=self.updateModule)
     self.atomTypePulldown.setData(['Hydrogen', 'Heavy'])
     self.addWidget(self.atomTypePulldown, 0, 3)
-    self.updateModule()
+    self._updateModule()
 
 
-  def getDistributionForResidue(self, ccpCode, atomType):
-
+  def getDistributionForResidue(self, ccpCode:str, atomType:str):
+    """
+    Takes a ccpCode and an atom type (Hydrogen or Heavy) and returns a dictionary of lists
+    containing the chemical shift distribution for each atom of the specified type in the residue
+    """
     dataSets = {}
     ccpData = getCcpCodeData(self.project._apiNmrProject, ccpCode, molType='protein', atomType=atomType)
 
@@ -56,7 +59,7 @@ class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the 
 
     return dataSets
 
-  def updateModule(self, item=None):
+  def _updateModule(self, item=None):
     self.plotWidget.clear()
     self.plotWidget.plotItem.legend.items = []
     self.plotWidget.showGrid(x=True, y=True)

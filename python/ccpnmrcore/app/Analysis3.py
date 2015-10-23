@@ -66,6 +66,9 @@ class Analysis3(AppBase):
     self.initLayout()
 
   def initLayout(self):
+    """
+    Restore layout of modules from previous save after graphics have been set up.
+    """
     import yaml, os
     if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
       with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:

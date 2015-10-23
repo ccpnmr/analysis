@@ -27,6 +27,8 @@ import os
 
 from functools import partial
 
+from ccpn import Peak
+
 from ccpn.lib.Assignment import isInterOnlyExpt, getNmrAtomPrediction, CCP_CODES, getNmrResiduePrediction
 
 from ccpncore.gui.Button import Button
@@ -34,12 +36,17 @@ from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.Widget import Widget
 
+from ccpncore.util import Types
+
 from ccpncore.util import Path
 
 from ccpnmrcore.gui.assignmentModuleLogic import peaksAreOnLine
 
 class AtomSelector(CcpnDock):
-
+  """
+  Module to be used with PickAndAssignModule for prediction of nmrAtom names and assignment of nmrAtoms
+  to peak dimensions
+  """
   def __init__(self, parent, project=None):
     CcpnDock.__init__(self, name='Atom Selector')
     self.orientation = 'vertical'
@@ -66,7 +73,7 @@ class AtomSelector(CcpnDock):
     self.coButton1 = Button(pickAndAssignWidget, text='CO', grid=(5, 0), callback=partial(self.pickAndAssign, '-1', 'CO'))
     self.coButton2 = Button(pickAndAssignWidget, text='CO', grid=(5, 1), callback=partial(self.pickAndAssign, '', 'CO'))
     self.coButton3 = Button(pickAndAssignWidget, text='CO', grid=(5, 2), callback=partial(self.pickAndAssign, '+1', 'CO'))
-    self.coButton3 = Button(pickAndAssignWidget, text='Clear', grid=(6, 0), gridSpan=(1, 3), callback=self.returnButtonToNormal)
+    self.coButton3 = Button(pickAndAssignWidget, text='Clear', grid=(6, 0), gridSpan=(1, 3), callback=self._returnButtonsToNormal)
 
     self.buttons = [self.hButton1, self.hButton2, self.hButton3, self.nButton1, self.nButton2,
                     self.nButton3, self.caButton1, self.caButton2, self.caButton3, self.cbButton1,
@@ -76,12 +83,16 @@ class AtomSelector(CcpnDock):
     self.project = project
     self.project._appBase.current.registerNotify(self.predictAssignments, 'peaks')
     for button in self.buttons:
-      button.clicked.connect(self.returnButtonToNormal)
+      button.clicked.connect(self._returnButtonsToNormal)
 
     self.addWidget(pickAndAssignWidget)
 
 
-  def pickAndAssign(self, position, atomType):
+  def pickAndAssign(self, position:int, atomType:str):
+    """
+    Takes a position either -1, 0 or +1 and an atom type, fetches an NmrAtom with name corresponding
+    to the atom type and the position and assigns it to correct dimension of current.peaks
+    """
 
     name = atomType
     if position == '-1' and '-1' not in self.current.nmrResidue.sequenceCode:
@@ -102,10 +113,13 @@ class AtomSelector(CcpnDock):
           peak.assignDimension(axisCode=axisCode, value=[newNmrAtom])
       else:
           pass
-    self.returnButtonToNormal()
+    self._returnButtonsToNormal()
 
 
-  def returnButtonToNormal(self):
+  def _returnButtonsToNormal(self):
+    """
+    Returns all buttons in Atom Selector to original colours and style.
+    """
     if self.parent._appBase.preferences.general.colourScheme == 'dark':
       styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'DarkStyleSheet.qss')).read()
       self.setStyleSheet('''DockLabel  {
@@ -124,11 +138,12 @@ class AtomSelector(CcpnDock):
       self.setStyleSheet(styleSheet)
 
 
-  def predictAssignments(self, peaks):
-
-    self.returnButtonToNormal()
-
-
+  def predictAssignments(self, peaks:Types.List[Peak]):
+    """
+    Predicts atom type for selected peaks and highlights the relevant buttons with confidence of
+    that assignment prediction, green is very confident, orange is less confident.
+    """
+    self._returnButtonsToNormal()
     if not self.current.nmrResidue:
       return
 
@@ -136,7 +151,7 @@ class AtomSelector(CcpnDock):
 
       if len(peaks) == 0:
         for button in self.buttons:
-          button.clicked.connect(self.returnButtonToNormal)
+          button.clicked.connect(self._returnButtonsToNormal)
 
       else:
 
@@ -146,14 +161,11 @@ class AtomSelector(CcpnDock):
             isotopeCode = peak.peakList.spectrum.isotopeCodes[1]
             predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1], isotopeCode, strict=True) for ccpCode in CCP_CODES]
             refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomTypes if len(type) > 0]
-            print(refinedPreds, predictedAtomTypes)
             atomPredictions = set()
             for pred in refinedPreds:
               if pred[1] > 90:
                 atomPredictions.add(pred[0])
-            print(atomPredictions, 'atomPredictions')
             for atomPred in atomPredictions:
-              print(atomPred, atomPred)
               if atomPred == 'CB':
                 if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
                   self.cbButton1.setStyleSheet('background-color: green')
@@ -164,10 +176,8 @@ class AtomSelector(CcpnDock):
                 if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
                   self.caButton1.setStyleSheet('QPushButton {background-color: green}')
                   self.caButton2.setStyleSheet('QPushButton {background-color: orange}')
-                  print('interonly')
                 else:
                   self.caButton2.setStyleSheet('QPushButton {background-color: green}')
-                  print('inter/intra')
 
 
 

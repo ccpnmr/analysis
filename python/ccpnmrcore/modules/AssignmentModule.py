@@ -4,6 +4,8 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.lib.Assignment import CCP_CODES, ATOM_NAMES
 
+from ccpn import NmrAtom, Peak, Project
+
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Dock import CcpnDock
@@ -12,6 +14,8 @@ from ccpncore.gui.ListWidget import ListWidget
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.CheckBox import CheckBox
+
+from ccpncore.util import Types
 
 from ccpnmrcore.gui.assignmentModuleLogic import (nmrAtomsForPeaks,
                                                       peaksAreOnLine,
@@ -29,25 +33,12 @@ class AssignmentModule(CcpnDock, Base):
 
   #_instance = None
 
-  def __init__(self, parent=None, project=None, peaks=None, **kw):
-    '''Init.
+  def __init__(self, parent=None, project:Project=None, peaks:Types.List[Peak]=None, **kw):
 
-    '''
-
-    #self.__class__._instance = self
     CcpnDock.__init__(self, name="Assignment Module")
     Base.__init__(self, **kw)
     self.project = project
-
-    # If self.vertically_stacked = True, it looks
-    # more like the v2 assignment Popup.
-    self.vertically_stacked = False
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
-    #self.infoLabel = Label(self, text='', grid=(0, 0))
-
-    # Added an extra grid layout because the amount
-    # of dimensions can not be known beforehand and in
-    # this way it can shrink,
     self.selectionLayout = QtGui.QGridLayout()
     self.filterLayout = QtGui.QGridLayout()
     self.advancedLayout = QtGui.QGridLayout()
@@ -71,21 +62,18 @@ class AssignmentModule(CcpnDock, Base):
 
 
 
-    # double tolerance
     self.doubleToleranceCheckbox = CheckBox(self, checked=False)
     self.doubleToleranceCheckbox.stateChanged.connect(self.updateInterface)
     doubleToleranceCheckboxLabel = Label(self, text="Double Tolerances ")
     self.filterLayout.addWidget(self.doubleToleranceCheckbox, 0, 1)
     self.filterLayout.addWidget(doubleToleranceCheckboxLabel, 0, 0)
 
-    # intra-residual only
     self.intraCheckbox = CheckBox(self, checked=False)
     self.intraCheckbox.stateChanged.connect(self.updateInterface)
     intraCheckboxLabel = Label(self, text="Only Intra-residual ")
     self.filterLayout.addWidget(self.intraCheckbox, 0, 3)
     self.filterLayout.addWidget(intraCheckboxLabel, 0, 2)
 
-    # Allow multiple peaks to be selected and assigned at same time.
     self.multiCheckbox = CheckBox(self, checked=True)
     self.multiCheckbox.stateChanged.connect(self.updateInterface)
     multiCheckboxLabel = Label(self, text="Allow multiple peaks ")
@@ -95,11 +83,7 @@ class AssignmentModule(CcpnDock, Base):
     expCheckBoxLabel = Label(self, "Filter By Experiment")
     self.filterLayout.addWidget(expCheckBoxLabel, 0, 6)
     self.filterLayout.addWidget(self.expCheckBox, 0, 7)
-    # nmrResidueButton = Button(self, "Show NmrResidues", callback=self.showNmrResiduePopup)
-    # self.filterLayout.addWidget(nmrResidueButton, 1, 0)
     self.filterLayout.addItem(QtGui.QSpacerItem(0, 20), 4, 0)
-    # self.updateButton = Button(self, 'Update', callback=self.update)
-    # self.filterLayout.addWidget(self.updateButton, 3, 0)
 
     self.current.registerNotify(self.updateInterface, 'peaks')
     self.updateInterface()
@@ -108,9 +92,9 @@ class AssignmentModule(CcpnDock, Base):
 
   # functions to create empty widgets
 
-  def createEmptyNmrAtomsTable(self, dim):
-    '''Can be used to add a new table before setting
-       the content.
+  def createEmptyNmrAtomsTable(self, dim:int):
+    '''Create an empty table for the specified peak dimension to contain possible Nmr Atoms that
+    can be assigned to that peak dimension.
 
     '''
 
@@ -127,18 +111,19 @@ class AssignmentModule(CcpnDock, Base):
     objectTable.setFixedHeight(80)
     self.objectTables.append(objectTable)
 
-  def createEmptyListWidget(self, dim):
-    '''Can be used to add a new listWidget before
-       setting the content.
-
-    '''
-    listWidget = ListWidget(self, callback=partial(self.getNmrAtom, dim),
+  def createEmptyListWidget(self, dim:int):
+    """
+    Creates an empty ListWidget to contain the dimensionNmrAtoms assigned to a peak dimension.
+    """
+    listWidget = ListWidget(self, callback=partial(self.updateAssigmentWidget, dim),
                             rightMouseCallback=self.updateNmrAtomsFromListWidgets)
     listWidget.setFixedHeight(80)
     self.listWidgets.append(listWidget)
 
-  def createEmptyWidgetLabel(self, dim):
-
+  def createEmptyWidgetLabel(self, dim:int):
+    """
+    Creates an empty Label to contain peak dimension position.
+    """
     positions = [peak.position[dim] for peak in self.current.peaks]
     avgPos = round(sum(positions)/len(positions), 3)
     axisCode = self.current.peak.peakList.spectrum.axisCodes[dim]
@@ -148,7 +133,10 @@ class AssignmentModule(CcpnDock, Base):
     self.labels.append(label)
 
 
-  def createAssignmentWidget(self, dim):
+  def createAssignmentWidget(self, dim:int):
+    """
+    Creates an assignment widget consisting of three PulldownLists.
+    """
     newAssignmentWidget = QtGui.QWidget()
     newLayout = QtGui.QGridLayout()
     chainLabel = Label(self, 'Chain', hAlign='c')
@@ -168,19 +156,27 @@ class AssignmentModule(CcpnDock, Base):
     newAssignmentWidget.setLayout(newLayout)
     self.assignmentWidgets.append(newAssignmentWidget)
 
-  def createMoreButton(self, dim):
-    moreButton = Button(self, 'More...', callback=partial(self.toggleNmrPopup, dim))
+  def createMoreButton(self, dim:int):
+    """
+    Creates a Button called more for toggling display of the NmrResidue.
+    """
+    moreButton = Button(self, 'More...', callback=partial(self.toggleNmrResidueWidget, dim))
     moreButton.setFixedWidth(50)
     self.moreButtons.append(moreButton)
 
-  def createNmrResidueWidgets(self):
+  def createNmrResidueWidget(self):
+    """
+    Create the NmrResidue
+    """
     nmrWidget = NmrResiduePopup(parent=self, project=self.project)
     self.nmrResidueWidgets.append(nmrWidget)
 
 
 
-  def setAssignment(self, dim):
-
+  def setAssignment(self, dim:int):
+    """
+    Assigns dimensionNmrAtoms to peak dimension when called using Apply Button in assignment widget.
+    """
     nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
     nmrResidue = nmrChain.fetchNmrResidue(self.seqCodePulldowns[dim].currentText())
     nmrAtom = nmrResidue.fetchNmrAtom(self.atomTypePulldowns[dim].currentText())
@@ -198,28 +194,37 @@ class AssignmentModule(CcpnDock, Base):
     self.updateInterface()
 
 
-  def createChainPulldown(self, dim):
+  def createChainPulldown(self, dim:int) -> PulldownList:
+    """
+    Creates a PulldownList for selection of NmrChains.
+    """
     pulldownList = PulldownList(self)
     pulldownList.setEditable(True)
     pulldownList.lineEdit().editingFinished.connect(partial(self.addItemToPulldown, pulldownList))
     self.chainPulldowns.append(pulldownList)
     return pulldownList
 
-  def createSeqCodePulldown(self, dim):
+  def createSeqCodePulldown(self, dim:int) -> PulldownList:
+    """
+    Creates a PulldownList for selection of NmrResidue Sequence codes.
+    """
     pulldownList = PulldownList(self)
     pulldownList.setEditable(True)
     self.seqCodePulldowns.append(pulldownList)
     return pulldownList
 
 
-  def createAtomTypePulldown(self, dim):
+  def createAtomTypePulldown(self, dim:int) -> PulldownList:
+    """
+    Creates a PulldownList for selection of atom types.
+    """
     pulldownList = PulldownList(self)
     pulldownList.setEditable(True)
     self.atomTypePulldowns.append(pulldownList)
     return pulldownList
 
 
-  def natural_key(self, string_):
+  def _natural_key(self, string_):
     import re
     """See http://www.codinghorror.com/blog/archives/001018.html"""
     return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
@@ -253,7 +258,7 @@ class AssignmentModule(CcpnDock, Base):
       self.createMoreButton(dim)
 
     for dim in range(len(self.nmrResidueWidgets), Ndimensions):
-      self.createNmrResidueWidgets()
+      self.createNmrResidueWidget()
 
 
     self.widgetItems = list(zip(self.labels[:Ndimensions], self.listWidgets[:Ndimensions],
@@ -285,7 +290,7 @@ class AssignmentModule(CcpnDock, Base):
 
 
 
-  def toggleNmrPopup(self, dim):
+  def toggleNmrResidueWidget(self, dim:int):
     if self.nmrResidueWidgets[dim].isVisible():
       self.nmrResidueWidgets[dim].hide()
     else:
@@ -295,12 +300,11 @@ class AssignmentModule(CcpnDock, Base):
   # Update functions
 
 
-  def updateInterface(self, peaks=None):
-    '''Updates the whole widget, including recalculation
+  def updateInterface(self, peaks:Types.List[Peak]=None):
+    """Updates the whole module, including recalculation
        of which nmrAtoms fit to the peaks.
 
-    '''
-    # self.updatePeaks()
+    """
     self.emptyAllTablesAndLists()
     if not self.current.peaks or not self.peaksAreCompatible():
       return
@@ -378,7 +382,11 @@ class AssignmentModule(CcpnDock, Base):
 
     self.current.peak.dimensionNmrAtoms = assignmentArray
 
-  def updateLayout(self, layout, ndim):
+  def updateLayout(self, layout:QtGui.QLayout, ndim:int):
+    """
+    Remove excess assignment widgets if number of dimensions is less than number of assignment
+    widgets displayed.
+    """
 
     rowCount = layout.rowCount()
     colCount = layout.columnCount()
@@ -392,7 +400,11 @@ class AssignmentModule(CcpnDock, Base):
         layout.removeItem(item)
 
 
-  def getNmrAtom(self, dim, item):
+  def updateAssigmentWidget(self, dim:int, item:object):
+    """
+    Update all information in assignment widget when NmrAtom is selected in list widget of that
+    assignment widget.
+    """
     nmrAtom = self.project.getByPid(item.text())
     self.project._appBase.current.nmrAtom = nmrAtom
     chain = nmrAtom.nmrResidue.nmrChain
@@ -400,7 +412,7 @@ class AssignmentModule(CcpnDock, Base):
     self.chainPulldowns[dim].setData([chain.id for chain in self.project.nmrChains])
     self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))
     sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
-    self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=self.natural_key))
+    self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=self._natural_key))
     self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))
     atomPrefix = self.current.peak.peakList.spectrum.isotopeCodes[dim][-1]
     atomNames = [atomName for atomName in ATOM_NAMES if atomName[0] == atomPrefix] + [nmrAtom.name]
@@ -409,7 +421,10 @@ class AssignmentModule(CcpnDock, Base):
     self.nmrResidueWidgets[dim].updatePopup(nmrAtom.nmrResidue, nmrAtom)
 
 
-  def setResidueType(self, dim, index):
+  def setResidueType(self, dim:int, index:int):
+    """
+    Set residue type in assignment widget based on chain and sequence code.
+    """
     sequenceCode = self.seqCodePulldowns[dim].texts[index]
     nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
     residueType = nmrChain.fetchNmrResidue(sequenceCode).residueType
@@ -417,33 +432,39 @@ class AssignmentModule(CcpnDock, Base):
 
 
 
-  def addItemToPulldown(self, pulldown):
+  def addItemToPulldown(self, pulldown:object):
+    """
+    Generic function to add items to pulldown list if text in pulldown list widget is changed
+    """
     if pulldown.lineEdit().isModified():
       text = pulldown.lineEdit().text()
       if text not in pulldown.texts:
         pulldown.addItem(text)
 
 
-  def getNmrResidue(self, item):
-    self.project._appBase.current.nmrResidue = self.project.getByPid(item.text()).nmrResidue
-    if hasattr(self, 'NmrResiduePopup'):
-      self.NmrResiduePopup.update()
-    self.project._appBase.current.nmrAtom = self.project.getByPid(item.text())
+  # def getNmrResidue(self, item:object):
+  #   """
+  #   Get Nmr Residue of selected peak assignment and update the NmrResiduePopup
+  #   """
+  #   self.project._appBase.current.nmrResidue = self.project.getByPid(item.text()).nmrResidue
+  #   if hasattr(self, 'NmrResiduePopup'):
+  #     self.NmrResiduePopup.update()
+  #   self.project._appBase.current.nmrAtom = self.project.getByPid(item.text())
+
+  #
+  # def getPeakName(self, peak:Peak, dim:int) -> str:
+  #   '''Get the name of a peak, not used yet.'''
+  #
+  #   if peak.dimensionNmrAtoms[dim].name is not None:
+  #     return peak.dimensionNmrAtoms[dim].name
+  #   else:
+  #     return None
 
 
-  def getPeakName(self, peak, dim):
-    '''Get the name of a peak, not used yet.'''
-
-    if peak.dimensionNmrAtoms[dim].name is not None:
-      return peak.dimensionNmrAtoms[dim].name
-    else:
-      return None
-
-
-  def getDeltaShift(self, nmrAtom, dim):
-    '''Calculation of delta shift to add to the table.
-
-    '''
+  def getDeltaShift(self, nmrAtom:NmrAtom, dim:int) -> float:
+    """
+    Calculation of delta shift to add to the table.
+    """
     if not self.current.peaks:
       return ''
 
@@ -462,10 +483,10 @@ class AssignmentModule(CcpnDock, Base):
     average = sum(deltas)/len(deltas)
     return round(average, 3)
 
-  def getShift(self, nmrAtom):
-    '''Calculation of delta shift to add to the table.
-
-    '''
+  def getShift(self, nmrAtom:NmrAtom) -> float:
+    """
+    Calculation of chemical shift value to add to the table.
+    """
     if not self.current.peaks:
       return ''
 
@@ -480,12 +501,12 @@ class AssignmentModule(CcpnDock, Base):
           return shift.value
 
 
-  def peaksAreCompatible(self):
-    '''If multiple peaks are selected, a check is performed
-       to determine whether assignment of corresponding
-       dimensions of a peak allowed.
-
-    '''
+  def peaksAreCompatible(self) -> bool:
+    """
+    If multiple peaks are selected, a check is performed
+    to determine whether assignment of corresponding
+    dimensions of a peak allowed.
+    """
 
     if len(self.current.peaks) == 1:
       return True
@@ -505,9 +526,9 @@ class AssignmentModule(CcpnDock, Base):
 
 
   def emptyAllTablesAndLists(self):
-    '''Quick erase of all present information.
-
-    '''
+    """
+    Quick erase of all present information in ListWidgets and ObjectTables.
+    """
 
     for objectTable in self.objectTables:
       objectTable.setObjects([])
@@ -518,8 +539,8 @@ class AssignmentModule(CcpnDock, Base):
 
 
 
-  def assignNmrAtomToDim(self, row, col, obj, dim):
-    '''Assign the nmrAtom that is clicked on to the
+  def assignNmrAtomToDim(self, dim:int, row:int=None, col:int=None, obj:object=None):
+    '''Assign the nmrAtom that is double clicked on to the
        the corresponding dimension of the selected
        peaks.
 
@@ -545,28 +566,29 @@ class AssignmentModule(CcpnDock, Base):
     self.listWidgets[dim].addItem(nmrAtom.pid)
 
   def closeDock(self):
+    """
+    Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
+    """
     self.project._appBase.current.unRegisterNotify(self.updateInterface, 'peaks')
     self.close()
 
 class New(object):
-  '''Small 'fake' object to get a non-nmrAtom in the objectTable.
-     Maybe this should be solved differently. It works well though.
-
-  '''
+  """
+  Small 'fake' object to get a non-nmrAtom in the objectTable.
+  """
 
   def __init__(self):
     self.pid = 'New NMR Atom'
 
 
 class NotOnLine(object):
-  '''Small 'fake' object to get a message the user in the assignment
-     Table that a specific dimension can not be assigned in one go
-     since the frequencies of the peaks in this dimension are not on
-     one line (i.e. the C frequencies of the CA and CB in a strip for
-     instance).
-     Maybe this should be solved differently. It works well though.
-
-  '''
+  """
+  Small 'fake' object to get a message the user in the assignment
+  Table that a specific dimension can not be assigned in one go
+  since the frequencies of the peaks in this dimension are not on
+  one line (i.e. the C frequencies of the CA and CB in a strip for
+  instance).
+  """
 
   def __init__(self):
     self.pid = 'Multiple selected peaks not on line.'

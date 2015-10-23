@@ -419,7 +419,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showAssigner(self, position='bottom', nextTo=None):
     self.assigner = Assigner(project=self._project)
     if hasattr(self, 'bbModule'):
-      self.bbModule.setAssigner(self.assigner)
+      self.bbModule.connectAssigner(self.assigner)
     if nextTo is not None:
       self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
     else:

@@ -22,6 +22,7 @@ class Test_getNmrAtomPrediction(WrapperTesting):
     predictedAtomThrCB = [getNmrAtomPrediction(ccpCode, self.ThrCBShift, '13C') for ccpCode in CCP_CODES]
     refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomThrCB if len(type) > 0]
     thrCBatomPredictions = set()
+
     for pred in refinedPreds:
       if pred[1] > 90:
         thrCBatomPredictions.add(pred[0])
@@ -46,17 +47,18 @@ class Test_getNmrAtomPrediction(WrapperTesting):
 
     predictedAtomCBShift = [getNmrAtomPrediction(ccpCode, self.CBShift, '13C') for ccpCode in CCP_CODES]
     refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomCBShift if len(type) > 0]
+    print(refinedPreds)
     CBatomPredictions = set()
     for pred in refinedPreds:
       if pred[1] > 90:
         CBatomPredictions.add(pred[0])
-
-    # Undo and redo all operations
+    #
+    # # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
     self.assertIn('CB', list(thrCBatomPredictions))
-    self.assertNotIn('CA', list(thrCBatomPredictions))
+    self.assertIn('CA', list(thrCBatomPredictions))
     self.assertIn('CB', list(alaCBatomPredictions))
     self.assertNotIn('CA', list(alaCBatomPredictions))
     self.assertNotIn('CA', list(alaCBatomPredictions))

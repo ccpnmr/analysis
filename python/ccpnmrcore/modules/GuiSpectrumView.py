@@ -48,7 +48,7 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     ##self.spectrum = self._parent # Is this necessary?
     
     ###self.setDimMapping(dimMapping)
-    self.peakListItems = {} # CCPN peakList -> Qt peakListItem
+    #self.peakListItems = {} # CCPN peakList -> Qt peakListItem
 
     # strip = self._parent
     # strip.setupAxes()

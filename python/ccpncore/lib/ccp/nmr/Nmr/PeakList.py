@@ -81,7 +81,7 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
   endPointInt = numpy.array(endPointInt)
   numPointInt = endPointInt - startPointInt
   
-  startPointBuffer = numpy.array(startPointBuffer, dtype='float32')
+  #startPointBuffer = numpy.array(startPointBuffer, dtype='float32')
   excludedRegionsList = [numpy.array(excludedRegion, dtype='float32')-startPointBuffer for excludedRegion in excludedRegions]
   
   excludedDiagonalDimsList = []
@@ -135,7 +135,7 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
   peaks = []
   for position, height in peakPoints:
     
-    position += startPointInt
+    position += startPointBuffer
     
     for existingPosition in existingPositions:
       delta = abs(existingPosition - position)
@@ -143,7 +143,7 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
         break     
     else:      
       if fitMethod:
-        position -= startPoint
+        position -= startPointBuffer
         numDim = len(position)
         firstArray = numpy.maximum(position - 2, 0)
         lastArray = numpy.minimum(position + 3, numPointInt)
@@ -162,7 +162,7 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
           height = dataArray[tuple(position)]
           center = position
           linewidth = dimCount * [None]
-        position = center + startPoint
+        position = center + startPointBuffer
       
       peak = self.newPeak()
 
@@ -186,7 +186,7 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
           peakDim.position = float(position[i] + 1)
         
         if fitMethod and linewidth[i] is not None:
-          peakDim.lineWidth = linewidth[i]
+          peakDim.lineWidth = dataDim.valuePerPoint * linewidth[i] # conversion from points to Hz
         
       peak.height = height
       peaks.append(peak)

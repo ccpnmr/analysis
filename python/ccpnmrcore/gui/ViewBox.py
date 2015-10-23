@@ -202,7 +202,7 @@ class ViewBox(pg.ViewBox):
             newPeaks = peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
-                                            fitMethod=0)
+                                            fitMethod='gaussian')
             console.writeCommand('peakList', 'peakList.pickPeaksNd',
                                  'selectedRegion={0}, doPos={1}, doNeg={2}'.format(
                                  selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,

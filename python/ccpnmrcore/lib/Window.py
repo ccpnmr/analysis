@@ -3,7 +3,6 @@ __author__ = 'simon1'
 from ccpn import ChemicalShift, NmrResidue, Peak, Project
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 from ccpncore.util import Types
-from ccpnmr import Axis
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
@@ -135,7 +134,7 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
 
 
 
-def isPositionWithinfBounds(strip:GuiStrip, shift:ChemicalShift, axis:Axis):
+def isPositionWithinfBounds(strip:GuiStrip, shift:ChemicalShift, axis:object):
   """
   Determines whether a given shift if within the bounds of the specified axis of the specified
     strip.
@@ -143,8 +142,6 @@ def isPositionWithinfBounds(strip:GuiStrip, shift:ChemicalShift, axis:Axis):
   minima = []
   maxima = []
   for spectrumView in strip.spectrumViews:
-    # print(spectrumLib.axisCodeMapping())
-    print(axis.code, spectrumView.spectrum.axisCodes)
     index = spectrumView.spectrum.axisCodes.index(axis.code)
     minima.append(spectrumView.spectrum.spectrumLimits[index][0])
     maxima.append(spectrumView.spectrum.spectrumLimits[index][1])

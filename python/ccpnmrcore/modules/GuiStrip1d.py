@@ -26,6 +26,8 @@ __author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn import PeakList
+
 from ccpnmrcore.modules.GuiStrip import GuiStrip
 from ccpncore.gui.Icon import Icon
 from ccpncore.util.Colour import spectrumColours
@@ -51,7 +53,11 @@ class GuiStrip1d(GuiStrip):
       self.plotWidget.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour)
 
 
-  def get1dContextMenu(self):
+  def get1dContextMenu(self) -> Menu:
+    """
+    Creates and returns the 1d context menu
+    """
+
     self.contextMenu = Menu(self, isFloatWidget=True)
     self.contextMenu.addItem("Auto Scale", callback=self.zoomYAll)
     self.contextMenu.addSeparator()
@@ -78,16 +84,25 @@ class GuiStrip1d(GuiStrip):
     return self.contextMenu
 
   def zoomYAll(self):
+    """
+    Zooms y axis to maximum of data.
+    """
     y2 = self.viewBox.childrenBoundingRect().top()
     y1 = y2 + self.viewBox.childrenBoundingRect().height()
     self.viewBox.setYRange(y2,y1)
 
   def zoomXAll(self):
+    """
+    Zooms x axis to maximum value of data.
+    """
     x2 = self.viewBox.childrenBoundingRect().left()
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2,x1)
 
-  def showPeaks(self, peakList):
+  def showPeaks(self, peakList:PeakList):
+    """
+    Displays peaks in specified peaklist in the strip.
+    """
     # # self.plotWidget.scene().addItem(peakListItem)
     # print(self.plotWidget.scene().items())
     #peakLayer = GuiPeakListView(self.plotWidget.scene(), self.plotWidget, peakList)
@@ -105,6 +120,9 @@ class GuiStrip1d(GuiStrip):
     #   self.plotWidget.addItem(peakItem.peakAnnotationItem.peakSymbolItem)
     # # print(self.plotWidget.scene().items())
 
-  def hidePeaks(self, peakList):
+  def hidePeaks(self, peakList:PeakList):
+    """
+    Hides peaks in specified peaklist from strip.
+    """
     for item in self.peakItems[peakList]:
       self.plotWidget.removeItem(item)

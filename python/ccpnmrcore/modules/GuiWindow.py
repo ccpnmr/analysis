@@ -31,6 +31,8 @@ from pyqtgraph.dockarea import DockArea
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
 from ccpn.lib.Assignment import propagateAssignments
+
+from ccpncore.util import Types
 from ccpnmrcore.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 
 from ccpnmrcore.DropBase import DropBase
@@ -66,13 +68,17 @@ class GuiWindow(DropBase):
     #   self.blankDisplay = GuiBlankDisplay(self.dockArea)
             
   def deleteBlankDisplay(self):
-    
+    """
+    Removes blank display from main window dockarea if one is present.
+    """
     if self.blankDisplay:
       self.blankDisplay.setParent(None)
       self.blankDisplay = None
           
   def loadData(self):
-
+    """
+    Opens a file dialog box and loads data from selected file.
+    """
     paths = QtGui.QFileDialog.getOpenFileName(self, 'Load Data')
 
     # NBNB TBD I assume here that path is either a string or a list lf string paths.
@@ -115,7 +121,9 @@ class GuiWindow(DropBase):
     # return newModule
 
   def setShortcuts(self):
-    
+    """
+    Sets shortcuts for functions not specified in the main window menubar
+    """
     # this trampled the menu py shortcut
     from functools import partial
     #toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
@@ -142,7 +150,11 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace)
     ###QtGui.QShortcut(QtGui.QKeySequence("p, i"), self, self.togglePhasingPivot)
 
-  def traceScaleScale(self, window, scale):
+  def traceScaleScale(self, window:'GuiWindow', scale:float):
+    """
+    Changes the scale of a trace in all spectrum displays of the window.
+    """
+    print(window)
     for spectrumDisplay in window.spectrumDisplays:
       for strip in spectrumDisplay.strips:
         if isinstance(strip, GuiStripNd):
@@ -151,25 +163,40 @@ class GuiWindow(DropBase):
         else:
           pass # should this change the y region??
     
-  def traceScaleUp(self, window):
+  def traceScaleUp(self, window:'GuiWindow'):
+    """
+    Doubles the scale for all traces in the specified window.
+    """
     self.traceScaleScale(window, 2.0)
     
-  def traceScaleDown(self, window):
+  def traceScaleDown(self, window:'GuiWindow'):
+    """
+    Halves the scale for all traces in the specified window.
+    """
     self.traceScaleScale(window, 0.5)
     
-  def toggleHTrace(self, window):
+  def toggleHTrace(self, window:'GuiWindow'):
+    """
+    Toggles whether horizontal traces are displayed in the specified window.
+    """
     for spectrumDisplay in window.spectrumDisplays:
       for strip in spectrumDisplay.strips:
         if isinstance(strip, GuiStripNd):
           strip.toggleHTrace()
     
-  def toggleVTrace(self, window):
+  def toggleVTrace(self, window:'GuiWindow'):
+    """
+    Toggles whether vertical traces are displayed in the specified window.
+    """
     for spectrumDisplay in window.spectrumDisplays:
       for strip in spectrumDisplay.strips:
         if isinstance(strip, GuiStripNd):
           strip.toggleVTrace()
     
-  def togglePhaseConsole(self, window):
+  def togglePhaseConsole(self, window:'GuiWindow'):
+    """
+    Toggles whether the phasing console is displayed in the specified window.
+    """
     for spectrumDisplay in window.spectrumDisplays:
       spectrumDisplay.togglePhaseConsole()
       
@@ -193,7 +220,9 @@ class GuiWindow(DropBase):
   """
       
   def removePhasingTraces(self):
-    
+    """
+    Removes all phasing traces from all strips.
+    """
     strip = self._appBase.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip.removePhasingTraces()
@@ -207,42 +236,65 @@ class GuiWindow(DropBase):
   """
    
   def clearCurrentPeaks(self):
+    """
+    Sets current.peaks to an empty list.
+    """
     self._appBase.current.peaks = []
 
   def toggleCrossHairAll(self):
-    # toggle crosshairs in all windows
+    """
+    Toggles whether crosshairs are displayed in all windows.
+    """
     for window in self.project.windows:
       window.toggleCrossHair()
     
-  def toggleCrossHair(self): 
+  def toggleCrossHair(self):
+    """
+    Toggles whether crosshairs are displayed in all spectrum displays.
+    """
     # toggle crosshairs for the spectrum displays in this window
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.toggleCrossHair()
 
   def createMark(self):
+    """
+    Creates a mark at the current cursor position in the current strip.
+    """
     strip = self._appBase.current.strip
     if strip and self.task:
       strip.createMarkAtCursorPosition(self.task)
     
   def clearMarks(self):
-    
+    """
+    Clears all marks in all windows for the current task.
+    """
     for mark in self.task.marks[:]:
       mark.delete()
       
   def toggleGridAll(self):
-    # toggle grid in all windows
+    """
+    Toggles grid display in all windows
+    """
     for window in self.project.windows:
       window.toggleGrid()
     
   def toggleGrid(self):
-    # toggle grid for the spectrum displays in this window
+    """
+    toggle grid for the spectrum displays in this window.
+    """
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.toggleGrid()
     
-  def setCrossHairPosition(self, axisPositionDict):
+  def setCrossHairPosition(self, axisPositionDict:Types.Dict(str, float)):
+    """
+    Sets crosshair position in all spectrum displays using positions specified in the axisPostionDict.
+    """
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.setCrossHairPosition(axisPositionDict)
 
   def showExptTypePopup(self, project):
+    """
+    Displays experiment type popup.
+    """
     popup = ExperimentTypePopup(self, project)
     popup.exec_()

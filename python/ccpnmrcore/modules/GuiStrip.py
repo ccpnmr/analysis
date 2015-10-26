@@ -38,6 +38,8 @@ from ccpncore.gui.ToolBar import ToolBar
 from ccpncore.gui.Widget import Widget
 from ccpncore.memops import Notifiers
 
+from ccpncore.util import Types
+
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
@@ -130,7 +132,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.createCrossHair()
     #####proxy2 = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
-    # self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
+    self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
     
     self.beingUpdated = False
@@ -376,6 +378,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
 
 
   def moveAxisCodeLabels(self):
+    """
+    Puts axis code lables in the correct place on the plotwidget
+    """
     ###self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
     ###self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
     self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
@@ -383,10 +388,16 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
 
   def hideCrossHairs(self):
+    """
+    Hides all crosshairs in all strips in parent spectrum display.
+    """
     for strip in self.guiSpectrumDisplay.guiStrips:
       strip.hideCrossHair()
 
   def createCrossHair(self):
+    """
+    Creates a single or double cross hair depending on specification in application preferences.
+    """
     self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
     self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
     self.plotWidget.addItem(self.vLine, ignoreBounds=True)
@@ -398,24 +409,36 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       self.plotWidget.addItem(self.hLine2, ignoreBounds=True)
 
   def toggleCrossHair(self):
+    """
+    Toggles whether crosshair is visible.
+    """
     self.vLine.setVisible(not self.vLine.isVisible())
     self.hLine.setVisible(not self.hLine.isVisible())
     self.vLine2.setVisible(not self.vLine2.isVisible())
     self.hLine2.setVisible(not self.hLine2.isVisible())
 
   def showCrossHair(self):
+    """
+    Displays cross hair in strip.
+    """
     self.vLine.show()
     self.hLine.show()
     self.vLine2.show()
     self.hLine2.show()
 
   def hideCrossHair(self):
+    """
+    Hides cross hair in strip.
+    """
     self.vLine.hide()
     self.hLine.hide()
     self.vLine2.hide()
     self.hLine2.hide()
 
   def toggleGrid(self):
+    """
+    Toggles whether grid is visible in the strip.
+    """
     self.grid.setVisible(not self.grid.isVisible())
 
   def _crosshairCode(self, axisCode):
@@ -487,6 +510,10 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     print('event')
 
   def mouseMoved(self, positionPixel):
+    """
+    Updates the position of the crosshair when the mouse is moved.
+    """
+
     # position is in pixels
 
     if self.plotWidget.sceneBoundingRect().contains(positionPixel):
@@ -515,28 +542,46 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       ###  hLine.setPos(self.mousePoint.y())
     ###return self.mousePoint
 
-  def showMousePosition(self, pos):
+  def showMousePosition(self, pos:QtCore.QPointF):
+    """
+    Displays mouse position for both axes by axis code.
+    """
     position = self.viewBox.mapSceneToView(pos)
-    self.guiSpectrumDisplay.positionBox.setText("X: %.3f  Y: %.3f" % (position.x(), position.y()))
+    self.guiSpectrumDisplay.positionBox.setText("%s: %.3f  %s: %.3f" % (self.orderedAxes[0].code, position.x(), self.orderedAxes[1].code, position.y()))
 
-  def zoomToRegion(self, region):
+  def zoomToRegion(self, region:Types.List[float]):
+    """
+    Zooms strip to the specified region
+    """
     self.viewBox.setXRange(region[0],region[1])
     self.viewBox.setYRange(region[2],region[3])
 
-  def zoomX(self, region):
+  def zoomX(self, region:Types.List[float]):
+    """
+    Zooms x axis of strip to the specified region
+    """
     self.viewBox.setXRange(region[0],region[1])
 
-  def zoomY(self, region):
+  def zoomY(self, region:Types.List[float]):
+    """
+    Zooms y axis of strip to the specified region
+    """
     self.viewBox.setYRange(region[0],region[1])
 
   def zoomAll(self):
+    """
+    Zooms both axis of strip to the specified region
+    """
     self.viewBox.autoRange()
 
-  def zoomTo(self, x1, x2, y1, y2):
+  def _zoomTo(self, x1:Label, x2:Label, y1:Label, y2:Label):
     self.zoomToRegion([float(x1.text()),float(x2.text()),float(y1.text()),float(y2.text())])
     self.zoomPopup.close()
 
   def raiseZoomPopup(self):
+    """
+    Creates and displays a popup for zooming to a region in the strip.
+    """
     self.zoomPopup = QtGui.QDialog()
     layout = QtGui.QGridLayout()
     layout.addWidget(QtGui.QLabel(text='x1'), 0, 0)
@@ -552,7 +597,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     y2 = QtGui.QLineEdit()
     layout.addWidget(y2, 1, 3, 1, 1)
     okButton = QtGui.QPushButton(text="OK")
-    okButton.clicked.connect(partial(self.zoomTo,x1,x2,y1,y2))
+    okButton.clicked.connect(partial(self._zoomTo,x1,x2,y1,y2))
     cancelButton = QtGui.QPushButton(text='Cancel')
     layout.addWidget(okButton,2, 1)
     layout.addWidget(cancelButton, 2, 3)
@@ -561,9 +606,15 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.zoomPopup.exec_()
 
   def storeZoom(self):
+    """
+    Adds current region to the zoom stack for the strip.
+    """
     self.storedZooms.append(self.viewBox.viewRange())
 
   def restoreZoom(self):
+    """
+    Restores last saved region to the zoom stack for the strip.
+    """
     if len(self.storedZooms) != 0:
       restoredZoom = self.storedZooms.pop()
       self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1])

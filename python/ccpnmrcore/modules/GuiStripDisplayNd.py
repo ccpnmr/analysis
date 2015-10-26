@@ -27,6 +27,7 @@ __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 
 from ccpn import Project
+from ccpn import Peak
 
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
@@ -41,10 +42,12 @@ from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListVi
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.VerticalLabel import VerticalLabel
 
+from ccpncore.util import Types
+
 from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpnmrcore.modules.GuiStripNd import GuiStripNd
 
-from ccpnmrcore.modules.spectrumItems.GuiPeakListView import PeakNd
+from ccpnmrcore.modules.spectrumItems import GuiPeakListView
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
@@ -123,7 +126,10 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   #   for guiStrip in self.guiStrips:
   #     guiStrip.addSpectrum(guiSpectrumView)
   #
-  def addStrip(self):
+  def addStrip(self) -> GuiStripNd:
+    """
+    Creates a new strip by duplicating the first strip in the display.
+    """
     newStrip = self.strips[0].clone()
     return newStrip
   # print('addNewStrip')
@@ -150,19 +156,23 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     # self.spectrumUtilToolBar.addAction(QtGui.QAction("SS", self, triggered=self.showSpinSystemLabel))
 
   def showSpinSystemLabel(self):
+    """NBNB do we still need this?"""
     self.spinSystemSideLabel.show()
 
   def hideSpinSystemLabel(self):
+    """NBNB do we still need this?"""
     self.hideSystemSideLabel.show()
 
-  def addSpinSystemSideLabel(self):
-
-    dock = self.dock
-    self.spinSystemSideLabel = VerticalLabel(self.dock, text='test', grid=(1, 0), gridSpan=(1, 1))
-    self.spinSystemSideLabel.setFixedWidth(30)
+  # def addSpinSystemSideLabel(self):
+  #
+  #   dock = self.dock
+  #   self.spinSystemSideLabel = VerticalLabel(self.dock, text='test', grid=(1, 0), gridSpan=(1, 1))
+  #   self.spinSystemSideLabel.setFixedWidth(30)
 
   def fillToolBar(self):
-
+    """
+    Adds specific icons for Nd spectra to the spectrum utility toolbar.
+    """
     GuiSpectrumDisplay.fillToolBar(self)
     
     spectrumUtilToolBar = self.spectrumUtilToolBar
@@ -194,7 +204,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
 
   def upBy2(self):
-
+    """
+    Increases contour base level for all spectra visible in the display.
+    """
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
         apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
@@ -203,7 +215,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         spectrumView.update()
 
   def downBy2(self):
-
+    """
+    Decreases contour base level for all spectra visible in the display.
+    """
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
         apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
@@ -211,7 +225,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         apiDataSource.negativeContourBase /= apiDataSource.negativeContourFactor
         spectrumView.update()
   def addOne(self):
-
+    """
+    Increases number of contours by 1 for all spectra visible in the display.
+    """
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
         apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
@@ -219,7 +235,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         apiDataSource.negativeContourCount += 1
 
   def subtractOne(self):
-
+    """
+    Decreases number of contours by 1 for all spectra visible in the display.
+    """
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
         apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
@@ -228,8 +246,10 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         if apiDataSource.negativeContourCount > 0:
           apiDataSource.negativeContourCount -= 1
 
-  def showPeaks(self, peakListView, peaks):
-  
+  def showPeaks(self, peakListView:GuiPeakListView, peaks:Types.List[Peak]):
+    """
+    Displays specified peaks in all strip of the display using peakListView
+    """
     viewBox = peakListView.spectrumView.strip.viewBox
     activePeakItemDict = self.activePeakItemDict
     peakItemDict = activePeakItemDict.setdefault(peakListView, {})
@@ -249,7 +269,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         peakItem.setupPeakItem(peakListView, peak)
         viewBox.addItem(peakItem)
       else:
-        peakItem = PeakNd(peakListView, peak)
+        peakItem = GuiPeakListView.PeakNd(peakListView, peak)
       peakItemDict[apiPeak] = peakItem
     
   def _deletedPeak(self, apiPeak):

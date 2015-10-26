@@ -54,8 +54,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
     self.data = self._apiDataSource.get1dSpectrumData()
 
-    print(self.data)
-
     # for strip in self.strips:
     if self.spectrum.sliceColour is None:
       if len(self.strip.spectrumViews) < 12:
@@ -72,6 +70,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     self.hPhaseTrace = None
 
   def turnOnPhasing(self):
+
     
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible():
@@ -81,7 +80,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
         self.newPhasingTrace()
         
   def turnOffPhasing(self):
-    
+
     if self.hPhaseTrace:
       self.hPhaseTrace.setVisible(False)
       
@@ -199,7 +198,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
     
 
   def getSliceData(self, spectrum=None):
-
+    """
+    Gets slice data for drawing 1d spectrum using specified spectrum.
+    """
     if spectrum is None:
       apiDataSource = self._apiDataSource
     else:

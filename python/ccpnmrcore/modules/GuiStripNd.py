@@ -32,7 +32,8 @@ from functools import partial
 import pyqtgraph as pg
 
 from ccpn import Project
-
+from ccpn import PeakList
+from ccpn import Peak
 from ccpn.lib._wrapper import Spectrum as LibSpectrum
 
 from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
@@ -43,6 +44,8 @@ from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Menu import Menu
 from ccpncore.gui.Spinbox import Spinbox
+
+from ccpncore.util import Types
 
 from ccpnmrcore.gui.PlaneToolbar import PlaneToolbar
 from ccpnmrcore.modules.GuiStrip import GuiStrip
@@ -77,13 +80,18 @@ class GuiStripNd(GuiStrip):
     self.addPlaneToolbar()
 
   def mouseDragEvent(self, event):
+    """
+    Re-implemented mouse event to enable smooth panning.
+    """
     if event.button() == QtCore.Qt.RightButton:
       pass
     else:
       self.viewBox.mouseDragEvent(self, event)
 
-  def get2dContextMenu(self):
-
+  def get2dContextMenu(self) -> Menu:
+    """
+    Creates and returns the Nd context menu
+    """
     self.contextMenu = Menu('', self, isFloatWidget=True)
     # self.contextMenu.addAction(self.hTraceAction)
     # self.contextMenu.addAction(self.vTraceAction)
@@ -136,6 +144,9 @@ class GuiStripNd(GuiStrip):
     return self.contextMenu
 
   def resetZoom(self):
+    """
+    Resets zoom of strip axes to limits of maxima and minima of the limits of the displayed spectra.
+    """
     x = []
     y = []
     for spectrumView in self.spectrumViews:
@@ -164,10 +175,16 @@ class GuiStripNd(GuiStrip):
       spectrumView.updateTrace(self.mousePosition, self.mousePixel, updateHTrace, updateVTrace)
     
   def toggleHTrace(self):
+    """
+    Toggles whether or not horizontal trace is displayed.
+    """
     self.hTraceAction.setChecked(not self.hTraceAction.isChecked())
     self.updateTraces()
 
   def toggleVTrace(self):
+    """
+    Toggles whether or not vertical trace is displayed.
+    """
     self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
     self.updateTraces()
 
@@ -177,7 +194,10 @@ class GuiStripNd(GuiStrip):
     self.updateTraces()
     
   def setZWidgets(self):
-          
+    """
+    Sets values for the widgets in the plane toolbar.
+    """
+
     for n, zAxis in enumerate(self.orderedAxes[2:]):
       minZPlaneSize = None
       minAliasedFrequency = maxAliasedFrequency = None
@@ -232,7 +252,11 @@ class GuiStripNd(GuiStrip):
     
     self.haveSetupZWidgets = True
       
-  def changeZPlane(self, n=0, planeCount=None, position=None):
+  def changeZPlane(self, n:int=0, planeCount:int=None, position:float=None):
+    """
+    Changes the position of the z axis of the strip by number of planes or a ppm position, depending
+    on which is specified.
+    """
     
     zAxis = self.orderedAxes[n+2]
     planeLabel = self.planeToolbar.planeLabels[n]
@@ -249,20 +273,29 @@ class GuiStripNd(GuiStrip):
       # else:
       #   print('position is outside spectrum bounds')
 
-  def changePlaneCount(self, n=0, value=1):
+  def changePlaneCount(self, n:int=0, value:int=1):
+    """
+    Changes the number of planes displayed simultaneously.
+    """
     zAxis = self.orderedAxes[n+2]
     zAxis.width*=value
 
-  def nextZPlane(self, n=0):
-
+  def nextZPlane(self, n:int=0):
+    """
+    Increases z ppm position by one plane
+    """
     self.changeZPlane(n, planeCount=-1) # -1 because ppm units are backwards
 
-  def prevZPlane(self, n=0):
-
+  def prevZPlane(self, n:int=0):
+    """
+    Decreases z ppm position by one plane
+    """
     self.changeZPlane(n, planeCount=1) # -1 because ppm units are backwards
 
   def addPlaneToolbar(self):
-
+    """
+    Adds the plane toolbar to the strip.
+    """
     callbacks = [self.prevZPlane, self.nextZPlane, self.setZPlanePosition, self.setPlaneCount]
 
     self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
@@ -272,18 +305,23 @@ class GuiStripNd(GuiStrip):
   def blankCallback(self):
     pass
 
-  def setZPlanePosition(self, n, value):
+  def setZPlanePosition(self, n:int, value:float):
+    """
+    Sets the value of the z plane position box if the specified value is within the displayable limits.
+    """
     planeLabel = self.planeToolbar.planeLabels[n]
     if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
       self.changeZPlane(n, position=value)
 
-  def setPlaneCount(self, n=0, value=1):
-
+  def setPlaneCount(self, n:int=0, value:int=1):
+    """
+    Sets the number of planes to be displayed simultaneously.
+    """
     planeCount = self.planeToolbar.planeCounts[n]
     self.changePlaneCount(value=(value/planeCount.oldValue))
     planeCount.oldValue = value
 
-  def _findPeakListView(self, peakList):
+  def _findPeakListView(self, peakList:PeakList):
     
     peakListView = self.peakListViewDict.get(peakList)
     if peakListView:
@@ -297,7 +335,7 @@ class GuiStripNd(GuiStrip):
             
     return None
     
-  def showPeaks(self, peakList, peaks=None):
+  def showPeaks(self, peakList:PeakList, peaks:Types.List[Peak]=None):
     ###from ccpnmrcore.modules.spectrumItems.GuiPeakListView import GuiPeakListView
     # NBNB TBD 1) we should not always display all peak lists together
     # NBNB TBD 2) This should not be called for each strip

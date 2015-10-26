@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 
 class GuiTableGenerator(QtGui.QWidget):
 
-  def __init__(self, parent, objectLists, callback, columns, selector=None, selectorCallback=None, tipTexts=None, **kw):
+  def __init__(self, parent, objectLists, callback, columns, selector=None, tipTexts=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
 
@@ -23,8 +23,7 @@ class GuiTableGenerator(QtGui.QWidget):
       self.tipTexts = tipTexts
       layout = QtGui.QGridLayout()
       self.setLayout(layout)
-      self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback,)
-                              # selectionCallback=selectionCallback)
+      self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback)
       layout.addWidget(self.table, 0, 0, 1, 5)
       self.updateContents()
       if selector is not None:
@@ -32,18 +31,11 @@ class GuiTableGenerator(QtGui.QWidget):
         self.selector.setCallback(self.changeObjectList)
         self.updateSelectorContents()
 
-        # if selectorCallback is None:
-        #   self.selector.setCallback(self.changeObjectList)
-        #   self.updateSelectorContents()
-        #
-        # else:
-        #   self.selector.setCallback(selectorCallback)
-        #   self.updateSelectorContents()
 
-
-
-  def changeObjectList(self, objectList):
-
+  def changeObjectList(self, objectList:object):
+    """
+    Changes the objectList specified in the selector.
+    """
     if objectList is not self.objectList:
 
       self.objectList = objectList
@@ -51,7 +43,9 @@ class GuiTableGenerator(QtGui.QWidget):
 
 
   def updateContents(self):
-
+    """
+    Changes the contents of the objectTable based on the objectList specified in the selector.
+    """
     objectList = self.objectList
 
     if objectList:
@@ -105,6 +99,9 @@ class GuiTableGenerator(QtGui.QWidget):
     return tableColumns
 
   def updateSelectorContents(self):
+    """
+    Sets the contents of the selector and object table if object list is specified on instatiation.
+    """
     if self.objectList is not None:
 
       # if self.objectList.shortClassName == 'PL':

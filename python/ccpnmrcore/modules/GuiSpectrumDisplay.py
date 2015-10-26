@@ -37,6 +37,8 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.ToolBar import ToolBar
 
+from ccpncore.util import Types
+
 from ccpnmrcore.DropBase import DropBase
 from ccpnmrcore.gui.Frame import Frame as GuiFrame
 from ccpnmrcore.gui.PhasingFrame import PhasingFrame
@@ -77,8 +79,8 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.dock.addWidget(self.spectrumUtilToolBar, 0, 2)# grid=(0, 2), gridSpan=(1, 1))
     
     # toolBarColour = QtGui.QColor(214,215,213)
-    # self.positionBox = Label(self.dock)
-    # self.dock.addWidget(self.positionBox, 0, 3)#, grid=(0, 3), gridSpan=(1, 1))
+    self.positionBox = Label(self.dock)
+    self.dock.addWidget(self.positionBox, 0, 3)#, grid=(0, 3), gridSpan=(1, 1))
     # self.positionBox.setFixedWidth(screenWidth*0.1)
     self.scrollArea = ScrollArea(self.dock, grid=(1, 0), gridSpan=(1, 4))
     self.scrollArea.setWidgetResizable(True)
@@ -98,19 +100,24 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.phasingFrame.setVisible(False)
 
   def updatePivot(self):
+    """Updates pivot in all strips contained in the spectrum display."""
     for strip in self.strips:
       strip.updatePivot()
     
   def updatePhasing(self):
+    """Updates phasing in all strips contained in the spectrum display."""
     for strip in self.strips:
       strip.updatePhasing()
     
   def changedPhasingDirection(self):
+    """Changes direction of phasing from horizontal to vertical or vice versa."""
     for strip in self.strips:
       strip.changedPhasingDirection()
     
   def togglePhaseConsole(self):
-        
+    """
+    Toggles whether phasing console is displayed.
+    """
     isVisible = not self.phasingFrame.isVisible()
     self.phasingFrame.setVisible(isVisible)
     for strip in self.strips:
@@ -122,9 +129,15 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.updatePhasing()
 
   def closeDock(self):
+    """
+    Closes spectrum display and deletes it from the project.
+    """
     self.delete()
 
   def fillToolBar(self):
+    """
+    Puts icons for addition and removal of strips into the spectrum utility toolbar.
+    """
     addStripAction = self.spectrumUtilToolBar.addAction('Add Strip', self.duplicateStrip) #self.orderedStrips[0].clone()) # clone first strip
     addStripIcon = Icon('iconsNew/plus')
     addStripAction.setIcon(addStripIcon)
@@ -134,35 +147,48 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.removeStripAction = removeStripAction
 
   def duplicateStrip(self):
+    """
+    Creates a new strip identical to the last one created and adds it to right of the display.
+    """
     newStrip = self.strips[-1].clone()
 
   def hideUtilToolBar(self):
+    """
+    Hides the spectrum utility toolbar
+    """
     self.spectrumUtilToolBar.hide()
 
+
   def zoomYAll(self):
-    for strip in self.strips:
-      strip.zoomYAll()
+    """Zooms Y axis of current strip to show entire region"""
+    self._appBase.current.strip.zoomXAll()
 
   def zoomXAll(self):
+    """Zooms X axis of current strip to show entire region"""
     self._appBase.current.strip.zoomXAll()
 
   def restoreZoom(self):
+    """Restores last saved zoom of current strip."""
     self._appBase.current.strip.restoreZoom()
 
   def storeZoom(self):
+    """Saves zoomed region of current strip."""
     self._appBase.current.strip.storeZoom()
     
   def toggleCrossHair(self):
+    """Toggles whether cross hair is displayed in all strips of spectrum display."""
     # toggle crosshairs for strips in this spectrumDisplay
     for strip in self.strips:
       strip.toggleCrossHair()
     
   def toggleGrid(self):
+    """Toggles whether grid is displayed in all strips of spectrum display."""
     # toggle grid for strips in this spectrumDisplay
     for strip in self.strips:
       strip.toggleGrid()
     
-  def setCrossHairPosition(self, axisPositionDict):
+  def setCrossHairPosition(self, axisPositionDict:Types.Dict[str, float]):
+    """Sets the position of the cross in all strips of spectrum display."""
     for strip in self.strips:
       strip.setCrossHairPosition(axisPositionDict)
 

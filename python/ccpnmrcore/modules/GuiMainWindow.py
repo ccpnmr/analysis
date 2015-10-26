@@ -27,6 +27,8 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn import PeakList
+
 from ccpncore.gui import MessageDialog
 
 from ccpncore.gui.Action import Action
@@ -91,7 +93,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def initProject(self):
+    """
+    Puts relevant information from the project into the appropriate places in the main window.
 
+    """
     # No need, project already set and initialised in AppBase init
     # if project:
     #   self._appBase.initProject(project)
@@ -131,7 +136,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def setupWindow(self):
+    """
+    Sets up SideBar, python console and splitters to divide up main window properly.
 
+    """
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
 
@@ -161,7 +169,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.splitter1.setStretchFactor(0, 2)
     self.splitter2.addWidget(self.splitter1)
-    csShortcut = QtGui.QShortcut(QtGui.QKeySequence('c, s'), self, self.showChemicalShiftTable)
     self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
     self.splitter2.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Minimum)
@@ -176,7 +183,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def setupMenus(self):
-
+    """
+    Creates menu bar for main window and creates the appropriate menus according to the arguments
+    passed at startup.
+    """
     self._menuBar =  MenuBar(self)
     # print(self._menuBar.font())
     fileMenu = Menu("&Project", self)
@@ -194,7 +204,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     fileMenu.addAction(Action(self, "Open...", callback=self.loadAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
-    self.fillRecentProjectsMenu()
+    self._fillRecentProjectsMenu()
     fileMenu.addAction(Action(self, "Load Data", callback=self.loadData, shortcut='ld'))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
@@ -273,7 +283,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroMenu.addAction(Action(self, "Run...", shortcut="rm", callback=self.runMacro))
 
     self.recentMacrosMenu = macroMenu.addMenu("Run Recent")
-    self.fillRecentMacrosMenu()
+    self._fillRecentMacrosMenu()
     # macroMenu.addAction(Action(self, "Run Recent", callback=self.showRecentMacros))
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Define User Shortcuts...", callback=self.defineUserShortcuts))
@@ -348,20 +358,22 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(newDock)
     
   def showApiDocumentation(self):
-
+    """Displays API documentation in a module."""
     self._showDocumentation("API Documentation", 'apidoc', 'api.html')
 
 
   def showWrapperDocumentation(self):
-    
+    """Displays CCPN wrapper documentation in a module."""
     self._showDocumentation("CCPN Documentation", 'build', 'html', 'index.html')
 
   def showAssignmentModule(self):
+    """Displays assignment module."""
     self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
     self.dockArea.addDock(self.assignmentModule)
     self.pythonConsole.writeModuleDisplayCommand('showAssignmentModule')
 
-  def showNmrResiduePopup(self):
+  def showNmrResidueModule(self):
+    """Shows Nmr Residue Module."""
     from ccpnmrcore.popups.NmrResiduePopup import NmrResiduePopup
     newDock = CcpnDock("Nmr Residue")
     nmrResidueModule = NmrResiduePopup(newDock, self._project)
@@ -370,27 +382,33 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def addBlankDisplay(self):
+    """Adds a Blank Display to the main window if one does not already exist."""
     if not hasattr(self, 'blankDisplay') or self.blankDisplay is None:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
 
   def showSequence(self):
-      self.sequenceWidget = SequenceModule(self._appBase, self._project)
-      self.dockArea.addDock(self.sequenceWidget, position='top')
+    """
+    Displays Sequence Module at the top of the screen.
+    """
+    self.sequenceWidget = SequenceModule(self._appBase, self._project)
+    self.dockArea.addDock(self.sequenceWidget, position='top')
 
   def hideSequence(self):
+    """Hides sequence module"""
     self.sequenceWidget.hide()
     delattr(self, 'sequenceWidget')
 
 
   def showNmrResidueTable(self):
+    """Displays Nmr Residue Table"""
     from ccpnmrcore.modules.NmrResidueTable import NmrResidueTable
     nmrResiduetable = NmrResidueTable(self, self._project)
     self.dockArea.addDock(nmrResiduetable, 'bottom')
     self.pythonConsole.writeModuleDisplayCommand('showNmrResidueTable')
 
   def toggleSequence(self):
-
+    """Toggles whether Sequence Module is displayed or not"""
     if hasattr(self, 'sequenceWidget'):
       if self.sequenceWidget.isVisible():
         self.hideSequence()
@@ -401,8 +419,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
 
-  def loadAProject(self, projectDir=None):
-
+  def loadAProject(self, projectDir:str=None):
+    """
+    Opens a loadProject dialog box if not Project directory is specified.
+    Loads the selected project.
+    """
     if projectDir is None:
       currentProjectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
     else:
@@ -412,11 +433,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self._appBase.loadProject(currentProjectDir)
 
   def pickPeaks(self):
+    """
+    Displays Peak Picking Popup.
+    """
     from ccpnmrcore.popups.PeakFind import PeakFindPopup
     popup = PeakFindPopup(parent=self, project=self.project)
     popup.exec_()
 
-  def showAssigner(self, position='bottom', nextTo=None):
+  def showAssigner(self, position:str='bottom', nextTo:CcpnDock=None):
+    """
+    Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
+    """
     self.assigner = Assigner(project=self._project)
     if hasattr(self, 'bbModule'):
       self.bbModule.connectAssigner(self.assigner)
@@ -464,7 +491,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       project._logger.error("Double-click activation not implemented for object %s" % obj)
 
-  def fillRecentProjectsMenu(self):
+  def _fillRecentProjectsMenu(self):
+    """
+    Populates recent projects menu with 10 most recently loaded projects specified in the preferences file.
+    """
     for recentFile in self._appBase.preferences.recentFiles:
       self.action = Action(self, text=recentFile, callback=partial(self._appBase.loadProject,projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
@@ -498,11 +528,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def showApplicationPreferences(self):
+    """
+    Displays Application Preferences Popup.
+    """
     PreferencesPopup(preferences=self._appBase.preferences).exec_()
 
   def closeEvent(self, event=None):
-      
-
+    """
+    Saves application preferences. Displays message box asking user to save project or not.
+    Closes Application.
+    """
     prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
     # if os.path.exists(prefPath):
     #   prefFile = open(prefPath)
@@ -571,12 +606,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     #     event.ignore()
 
   def createSample(self):
+    """
+    Displays Sample creation module.
+    """
     popup = SamplePopup(parent=None, project=self.project)
     popup.exec_()
     popup.raise_()
     self.pythonConsole.writeModuleDisplayCommand('createSample')
 
   def showSampleAnalysis(self):
+    """
+    Displays Sample Analysis Module
+    """
     showSa = SampleAnalysis(self._project)
     self.dockArea.addDock(showSa, position='bottom')
     self.pythonConsole.writeModuleDisplayCommand('showSampleAnalysis')
@@ -632,6 +673,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   #   pass
 
   def toggleConsole(self):
+    """
+    Toggles whether python console is displayed at bottom of the main window.
+    """
 
     if self.pythonConsole.isVisible():
       self.hideConsole()
@@ -640,19 +684,31 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def editMacro(self):
+    """
+    Displays macro editor.
+    """
     editor = MacroEditor(self.dockArea, self, "Macro Editor")
 
   def newMacroFromConsole(self):
+    """
+    Displays macro editor with contents of python console inside.
+    """
     editor = MacroEditor(self.dockArea, self, "Macro Editor")
     editor.textBox.setText(self.pythonConsole.textEditor.toPlainText())
 
 
   def startMacroRecord(self):
+    """
+    Displays macro editor with additional buttons for recording a macro.
+    """
     self.macroEditor = MacroEditor(self.dockArea, self, "Macro Editor", showRecordButtons=True)
     self.pythonConsole.writeModuleDisplayCommand('startMacroRecord')
 
 
-  def fillRecentMacrosMenu(self):
+  def _fillRecentMacrosMenu(self):
+    """
+    Populates recent macros menu with last ten macros ran.
+    """
 
     recentMacros = uniquify(self._appBase.preferences.recentMacros)
 
@@ -666,6 +722,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def showMoleculePopup(self):
+    """
+    Displays sequence creation popup.
+    """
     from ccpnmrcore.modules.CreateSequence import CreateSequence
     popup = CreateSequence(self, project=self._project).exec_()
     self.pythonConsole.writeModuleDisplayCommand('showMoleculePopup')
@@ -709,11 +768,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           'This function has not been implemented in the current version')
 
 
-  def runMacro(self, macroFile=None):
+  def runMacro(self, macroFile:str=None):
+    """
+    Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
+    runs the selected macro.
+    """
     if macroFile is None:
       macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
     self._appBase.preferences.recentMacros.append(macroFile)
-    self.fillRecentMacrosMenu()
+    self._fillRecentMacrosMenu()
     # self.fillRecentMacrosMenu()
     self.pythonConsole.runMacro(macroFile)
 
@@ -721,7 +784,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   #   from ccpn.lib.moleculebox import MoleculeDisplay
   #   self.moleculeDisplay = MoleculeDisplay(self.dockArea)
 
-  def showPeakTable(self, position='left', relativeTo=None, selectedList=None):
+  def showPeakTable(self, position:str='left', relativeTo:CcpnDock=None, selectedList:PeakList=None):
+    """
+    Displays Peak table on left of main window with specified list selected.
+    """
     peakList = PeakTable(self._project, selectedList=selectedList)
     if relativeTo is not None:
       self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
@@ -731,19 +797,25 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.writeModuleDisplayCommand('showPeakTable')
 
   def showChemicalShiftTable(self, position='bottom'):
+    """
+    Displays Chemical Shift table.
+    """
     from ccpnmrcore.modules.ChemicalShiftTable import ChemicalShiftTable
     chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self._project.chemicalShiftLists)
     self.dockArea.addDock(chemicalShiftTable, position=position)
     self.pythonConsole.writeModuleDisplayCommand('showChemicalShiftTable')
 
-  def showParassignPeakTable(self, position='left', relativeTo=None):
-    peakList = ParassignModule(name="Peak Table", peakLists=self._project.peakLists)
-    if relativeTo is not None:
-      self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
-    else:
-      self.dockArea.addDock(peakList, position='bottom')
+  # def showParassignPeakTable(self, position='left', relativeTo=None):
+  #   peakList = ParassignModule(name="Peak Table", peakLists=self._project.peakLists)
+  #   if relativeTo is not None:
+  #     self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
+  #   else:
+  #     self.dockArea.addDock(peakList, position='bottom')
 
   def showBackboneAssignmentModule(self, position=None, relativeTo=None):
+    """
+    Displays Backbone Assignment module.
+    """
     self.bbModule = BackboneAssignmentModule(self._project)
     if position is not None and relativeTo is not None:
       self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo)
@@ -754,19 +826,22 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.writeModuleDisplayCommand('showBackboneAssignmentModule')
     return self.bbModule
 
-  def showPickAndAssignModule(self, position=None, relativeTo=None):
+  def showPickAndAssignModule(self):
+    """Displays Pick and Assign module."""
     self.paaModule = PickAndAssignModule(self.dockArea, self._project)
     self.dockArea.addDock(self.paaModule)
     self.pythonConsole.writeModuleDisplayCommand('showPickAndAssignModule')
     return self.paaModule
 
   def showAtomSelector(self):
+    """Displays Atom Selector."""
     self.atomSelector = AtomSelector(self, project=self._project)
     self.dockArea.addDock(self.atomSelector)
     self.pythonConsole.writeModuleDisplayCommand('showAtomSelector')
     return self.atomSelector
 
   def showResidueInformation(self):
+    """Displays Residue Information module."""
     from ccpnmrcore.modules.ResidueInformation import ResidueInformation
     self.dockArea.addDock(ResidueInformation(self, self._project))
     self.pythonConsole.writeModuleDisplayCommand('showResidueInformation')
@@ -775,11 +850,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     dpModule = DataPlottingModule(self.dockArea)
 
   def showRefChemicalShifts(self):
+    """Displays Reference Chemical Shifts module."""
     from ccpnmrcore.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
     self.refChemShifts = ReferenceChemicalShifts(self.project, self.dockArea)
 
   def saveProject(self):
-    
+    """Opens save Project as dialog box if project has not been saved before, otherwise saves
+    project with existing project name."""
     apiProject = self._project._wrappedData.root
     if hasattr(apiProject, '_temporaryDirectory'):
       self.saveProjectAs()
@@ -787,7 +864,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self._project.save()
     
   def saveProjectAs(self):
-    
+    """Opens save Project as dialog box and saves project with name specified in the file dialog."""
     dialog = QtGui.QFileDialog(self, caption='Save Project As...')
     dialog.setFileMode(QtGui.QFileDialog.AnyFile)
     dialog.setAcceptMode(1)
@@ -809,14 +886,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self._project.save(newPath=newPath)#, newProjectName=os.path.basename(newPath))
 
   def hideConsole(self):
+    """Hides python console"""
     self.pythonConsole.hide()
 
   def showConsole(self):
+    """Displays python console"""
     self.pythonConsole.show()
 
-  def showPopupGenerator(self):
-    from ccpnmrcore.modules.GuiPopupGenerator import PopupGenerator
-    popup = PopupGenerator(self)
-    popup.exec_()
-    popup.raise_()
+  # def showPopupGenerator(self):
+  #   from ccpnmrcore.modules.GuiPopupGenerator import PopupGenerator
+  #   popup = PopupGenerator(self)
+  #   popup.exec_()
+  #   popup.raise_()
 

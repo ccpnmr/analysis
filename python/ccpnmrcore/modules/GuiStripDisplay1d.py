@@ -55,7 +55,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
 
     GuiSpectrumDisplay.__init__(self)
     self.fillToolBar()
-    self.addSpinSystemSideLabel()
+    # self.addSpinSystemSideLabel()
     self.setAcceptDrops(True)
     self.spectrumActionDict = {}
     self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
@@ -90,6 +90,9 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
   #     guiStrip.addSpectrum(spectrum, guiSpectrumView)
 
   def fillToolBar(self):
+    """
+    Adds specific icons for 1d spectra to the spectrum utility toolbar.
+    """
     GuiSpectrumDisplay.fillToolBar(self)
     
     spectrumUtilToolBar = self.spectrumUtilToolBar
@@ -147,13 +150,13 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
       print('processing Spectrum', ss)
     print(self.parent())
 
-  def addSpinSystemSideLabel(self):
-    dock = self.dock
-    spinSystemSideLabel = VerticalLabel(dock, text=None)
-    # spinSystemSideLabel.setText()
-    dock.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
-    # print(spinSystemSideLabel.paintEvent())
-    spinSystemSideLabel.setFixedWidth(30)
+  # def addSpinSystemSideLabel(self):
+  #   dock = self.dock
+  #   spinSystemSideLabel = VerticalLabel(dock, text=None)
+  #   # spinSystemSideLabel.setText()
+  #   dock.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
+  #   # print(spinSystemSideLabel.paintEvent())
+  #   spinSystemSideLabel.setFixedWidth(30)
 
   def _setActionIconColour(self, apiDataSource):
     action = self.spectrumActionDict.get(apiDataSource)

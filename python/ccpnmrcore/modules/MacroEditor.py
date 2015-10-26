@@ -32,7 +32,7 @@ class MacroEditor(DropBase, CcpnDock):
     widget.layout().addWidget(self.textBox, 2, 0, 1, 5)
     # if self.note.text is not None:
     self.buttonBox = ButtonList(self, texts=['Start', 'Stop', 'Close', 'Save Macro'],
-            callbacks=[self.startMacroRecord, self.stopMacroRecord, self.reject, self.saveMacro])
+            callbacks=[self.startMacroRecord, self.stopMacroRecord, self._reject, self.saveMacro])
     widget.layout().addWidget(self.buttonBox, 3, 3, 1, 2)
     self.layout.addWidget(widget)
     self.buttonBox.buttons[1].setDisabled(True)
@@ -44,6 +44,10 @@ class MacroEditor(DropBase, CcpnDock):
 
 
   def saveMacro(self):
+    """
+    Saves the text inside the textbox to a file, if a file path is not specified, a save file dialog
+    appears for specification of the file path.
+    """
     if self.lineEdit1.text() == '':
       self.saveMacroAs()
     else:
@@ -55,6 +59,9 @@ class MacroEditor(DropBase, CcpnDock):
     # self.macroFile.write(newText)
 
   def saveMacroAs(self):
+    """
+    Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
+    """
     macroPath = self.mainWindow._appBase.preferences.general.macroPath
     newText = self.textBox.toPlainText()
     filePath = QtGui.QFileDialog.getSaveFileName(self, 'Save Macro As...',
@@ -68,8 +75,11 @@ class MacroEditor(DropBase, CcpnDock):
       f.close()
 
 
-
   def openMacroFile(self):
+    """
+    Opens a file dialog box at the macro path specified in the application preferences and loads the
+    contents of the macro file into the textbox.
+    """
     macroPath = self.mainWindow._appBase.preferences.general.macroPath
     filePath = QtGui.QFileDialog.getOpenFileName(self, 'Open Macro',
                                                  macroPath)
@@ -82,18 +92,22 @@ class MacroEditor(DropBase, CcpnDock):
     self.lineEdit1.setText(filePath)
 
   def startMacroRecord(self):
+    """
+    Starts recording of a macro from commands performed in the software and output to the console.
+    """
     self.mainWindow.recordingMacro = True
     self.buttonBox.buttons[1].setEnabled(True)
     self.buttonBox.buttons[0].setDisabled(True)
 
 
-
-
   def stopMacroRecord(self):
+    """
+    Stops macro recording.
+    """
     self.mainWindow.recordingMacro = False
     self.buttonBox.buttons[1].setDisabled(True)
     self.buttonBox.buttons[0].setEnabled(True)
 
-  def reject(self):
+  def _reject(self):
     self.close()
 

@@ -128,8 +128,10 @@ def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=
   refinedPredictions = {}
   for key, value in predictions.items():
     if strict:
-      if value > 1e-2:
+      if value > 1e-3:
         v = int(value/tot * 100)
+      else:
+        v = 0
     else:
       v = int(value/tot * 100)
     if v > 0:

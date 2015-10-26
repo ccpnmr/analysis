@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from ccpncore.util import Pid
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence, Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpnmr import Window
@@ -76,11 +76,11 @@ class Task(AbstractWrapperObject):
     return self._wrappedData.details
 
   @property
-  def windows(self) -> Window:
+  def windows(self) -> Tuple[Window, ...]:
     """Gui windows where Task is shown"""
 
     ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._wrappedData.windows)
+    return tuple(ff(x) for x in self._wrappedData.sortedWindows())
 
   @windows.setter
   def windows(self, value:Sequence):

@@ -3352,7 +3352,8 @@ class MetaDataType(AbstractDataType):
         containsNonAlphanumeric = re.compile('[^a-zA-Z0-9_]').search
         dd = {'value':value, 'True':True, 'False':False, 'string':string,
               'containsWhitespace':containsWhitespace,
-              'containsNonAlphanumeric':containsNonAlphanumeric, }
+              'containsNonAlphanumeric':containsNonAlphanumeric,
+              'NaN':float('NaN')}
 
         if code is None:
           isValid = True

@@ -22,13 +22,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-def nextChainCode(molSystem):
+def nextChainCode(self:"MolSystem"):
   """Descrn: Gives the first unused chain code for a molSystem, starting as close to 'A' as possible
      Inputs: Ccp.MolSystem.MolSystem
      Output: Word (Ccp.MolSystem.Chain.code)
   """
 
-  chains = molSystem.sortedChains()
+  chains = self.sortedChains()
 
   if not chains:
     return 'A'
@@ -50,16 +50,16 @@ def nextChainCode(molSystem):
   return code
 
 
-def createSimpleChain(molSystem,molecule,code=None):
+def createSimpleChain(self:"MolSystem",molecule:"Molecule",code:str=None):
   """Descrn: Make a molSystem chain based upon an input molecule template
      Inputs: Ccp.MolSystem.MolSystem, Ccp.Molecule.Molecule, Word
      Output: Ccp.MolSystem.Chain
   """
 
   if code is None:
-    code = nextChainCode(molSystem)
+    code = nextChainCode(self)
 
-  chain = molSystem.newChain(code=code, molecule=molecule)
+  chain = self.newChain(code=code, molecule=molecule)
 
   if len(molecule.molResidues) == 1:
     details = molecule.findFirstMolResidue().chemComp.name

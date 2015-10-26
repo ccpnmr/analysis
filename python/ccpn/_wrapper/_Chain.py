@@ -22,13 +22,13 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Substance
+from ccpn import SampleComponent
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
-from ccpncore.lib.molecule import MoleculeModify
 from ccpncore.util import Pid
 from ccpncore.util.Types import Tuple, Optional, Union
 
@@ -339,7 +339,27 @@ def getter(self:Substance) -> Tuple[Chain, ...]:
                  if x.molecule is apiMolecule)
 Substance.chains = property(getter, None, None,
                             "ccpn.Chains that correspond to ccpn.Substance")
+
+def getter(self:SampleComponent) -> Tuple[Chain]:
+  tt = tuple(self._project.getChain(x) for x in self._wrappedData.chainCodes)
+  return tuple(x for x in tt if x is not None)
+
+def setter(self, value):
+
+  wrappedData = self._wrappedData
+  chainCodes = [x.shortName for x in value]
+  for sampleComponent in wrappedData.sample.sampleComponents:
+    if sampleComponent is not wrappedData:
+      for chainCode in chainCodes:
+        if chainCode in sampleComponent.chainCodes:
+          sampleComponent.removeChainCode(chainCode)
+
+  wrappedData.chainCodes = chainCodes
+SampleComponent.chain = property(getter, setter, None,
+                                 "ccpn.Chains that correspond to SampleComponent")
+
 del getter
+del setter
 
 # Clean-up
     

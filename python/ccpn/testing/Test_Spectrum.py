@@ -95,6 +95,10 @@ class DummySpectrumTest(WrapperTesting):
     axisCodes = ('CO','Hn','Nh')
     spectrum = self.project.createDummySpectrum(axisCodes)
     self.assertEqual(spectrum.isotopeCodes, ('13C', '1H', '15N'))
+    spectrum1 = self.project.createDummySpectrum(axisCodes=['H','N','C'], name='testspec')
+    self.assertEqual(spectrum1.name, 'testspec')
+    spectrum2 = self.project.createDummySpectrum(axisCodes = ['Hp','F', 'Ph', 'H'])
+    self.assertEqual(spectrum2.name, 'HpFPhH@3')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()

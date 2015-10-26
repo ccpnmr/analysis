@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from ccpncore.util.Types import Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Peak
@@ -85,7 +86,7 @@ class PeakView(AbstractWrapperObject):
   #CCPN functions
 
 # Peak.peakViews property
-def _getPeakViews(peak:Peak):
+def _getPeakViews(peak:Peak) -> Tuple[PeakView]:
   return tuple(peak._project._data2Obj[x]
                for x in peak._wrappedData.sortedPeakViews())
 Peak.peakViews = property(_getPeakViews, None, None,

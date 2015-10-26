@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.util import Pid
+from ccpncore.util.Types import Tuple
 from ccpncore.util import Common as commonUtil
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -115,7 +116,7 @@ class NmrResidue(AbstractWrapperObject):
     self._wrappedData.assignedResidue = None if value is None else value._wrappedData
 
   @property
-  def probableResidues(self) -> tuple:
+  def probableResidues(self) -> Tuple[Tuple[Residue,float], ...]:
     """tuple of (residue, probability) tuples for probable residue assignments"""
     getObj = self._project._data2Obj.get
     ll = [(x.weight, x.possibility) for x in self._wrappedData.residueProbs]
@@ -131,9 +132,11 @@ class NmrResidue(AbstractWrapperObject):
       apiResonanceGroup.newResidueProb(possibility=residue._wrappedData, weight=weight)
 
   @property
-  def probableResidueTypes(self) -> tuple:
-    """tuple of (residueType, probability) tuples for probable residue types"""
-    ll = [(x.weight, x.possibility) for x in self._wrappedData.residueTypeProbs]
+  def probableResidueTypes(self) -> Tuple[Tuple[str,float]]:
+    """tuple of (residueType, probability) tuples for probable residue types
+    sorted b descending probability"""
+    ll = reversed(sorted((x.weight, x.possibility)
+                         for x in self._wrappedData.residueTypeProbs))
     totalWeight = sum(tt[0] for tt in ll)
     return tuple((tt[1].code3Letter, tt[0]/totalWeight) for tt in ll)
 
@@ -269,10 +272,11 @@ class NmrResidue(AbstractWrapperObject):
           for x in parent._wrappedData.resonanceGroups]
     return [tt[-1] for tt in sorted(ll)]
 
-def getter(self:NmrResidue) -> tuple:
+def getter(self:NmrResidue) -> Tuple[NmrResidue, ...]:
   apiResult = self._wrappedData.nmrChain.findAllResonanceGroups(seqCode=self.seqCode,
                                                                 seqInsertCode=self.seqinsertCode)
-  return tuple(sorted(self._project._data2Obj.get(x) for x in apiResult))
+  getObj = self._project._data2Obj.get
+  return tuple(sorted(getObj(x) for x in apiResult))
 NmrResidue.nmrResidueCluster = property(getter, None, None,
                                         "All NmrResidues with the same sequenceCode "
                                         "except for different offSet suffixes '_1', '+1', etc.")
@@ -314,9 +318,16 @@ def setter(self:Residue, value:NmrResidue):
     value._apiResonanceGroup.assignedResidue = self._apiResidue
 Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
+
+@property
+def getter(self:NmrChain) -> Tuple[NmrResidue]:
+  return tuple(x for x in self.nmrResidues if x._wrappedData.relativeOffset is None)
+NmrChain.mainNmrResidues = property(getter, None, None, """NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
+  (sequenceCode ending in '-1', '+1', etc.)""")
+
 del getter
 del setter
-    
+
 def newNmrResidue(self:NmrChain, residueType:str=None, sequenceCode:Union[int,str]=None, comment:str=None) -> NmrResidue:
   """Create new ccpn.NmrResidue within ccpn.NmrChain"""
   sequenceCode = str(sequenceCode) if sequenceCode else None

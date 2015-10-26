@@ -48,7 +48,7 @@ from ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
 #
 #   return spectrum
 
-def loadData(project:'Project', path:str) -> (list,None):
+def loadData(self:'Project', path:str) -> (list,None):
   """Load data in url, determining type first."""
 
   dataType, subType, usePath = ioFormats.analyseUrl(path)
@@ -67,13 +67,13 @@ def loadData(project:'Project', path:str) -> (list,None):
 
     funcname = 'load' + dataType
     if funcname == 'loadProject':
-      return [project.loadProject(usePath, subType)]
+      return [self.loadProject(usePath, subType)]
 
     # elif funcname == 'loadLookupFile':
     #   return project.loadLookupFile(usePath, subType)
 
-    elif hasattr(project, funcname):
-      pids = getattr(project, funcname)(usePath, subType)
+    elif hasattr(self, funcname):
+      pids = getattr(self, funcname)(usePath, subType)
       return pids
     else:
       print("Skipping: project has no function %s" % funcname)
@@ -81,7 +81,7 @@ def loadData(project:'Project', path:str) -> (list,None):
   return None
 
 # Data loaders and dispatchers
-def loadSequence(project:"Project", path:str, subType:str) -> list:
+def loadSequence(self:"Project", path:str, subType:str) -> list:
   """Load sequence(s) from file into Wrapper project"""
 
   if subType == ioFormats.FASTA:
@@ -91,16 +91,16 @@ def loadSequence(project:"Project", path:str, subType:str) -> list:
 
   chains = []
   for sequence in sequences:
-    chains.append(project.createSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+    chains.append(self.createSimpleChain(sequence=sequence[1], compoundName=sequence[0],
                                           molType='protein'))
   #
   return chains
 
-def loadProject(project:"Project", path:str, subType:str) -> "Project":
+def loadProject(self:"Project", path:str, subType:str) -> "Project":
   """Load project from file into application and return the new project"""
 
   if subType == ioFormats.CCPN:
-    return project._appBase.loadProject(path)
+    return self._appBase.loadProject(path)
   else:
     raise ValueError("Sequence file type %s is not recognised" % subType)
 

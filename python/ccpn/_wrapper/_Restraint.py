@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence, Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import RestraintList
@@ -76,7 +76,7 @@ class Restraint(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
-  def peaks(self) -> tuple:
+  def peaks(self) -> Tuple[Peak, ...]:
     """peaks used to derive restraint"""
     ff = self._project._data2Obj.get
     return tuple(sorted(ff(x) for x in self._wrappedData.peaks))
@@ -191,14 +191,14 @@ class Restraint(AbstractWrapperObject):
     return parent._wrappedData.sortedConstraints()
 
 
-def getter(self:Peak) -> tuple:
-  ff = self._project._data2Obj.get
+def getter(self:Peak) -> Tuple[Restraint, ...]:
+  getObj = self._project._data2Obj.get
   result = []
   apiPeak = self._wrappedData
   for restraintList in self._project.restraintLists:
     for apiRestraint in restraintList._wrappedData.sortedRestraints():
       if apiPeak in apiRestraint.peaks:
-        result.append(ff(apiRestraint))
+        result.append(getObj(apiRestraint))
   return tuple(result)
 def setter(self:Peak, value:Sequence):
   apiPeak = self._wrappedData

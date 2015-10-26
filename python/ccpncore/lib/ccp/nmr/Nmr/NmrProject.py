@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 import os
 
 from ccpncore.util import Common as commonUtil
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence
 from ccpncore.lib import Constants
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 # from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix

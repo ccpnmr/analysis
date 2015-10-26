@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 from collections import namedtuple
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence, Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpnmr import Task
@@ -89,7 +89,7 @@ class Mark(AbstractWrapperObject):
     self._wrappedData.style = value
 
   @property
-  def positions(self) -> tuple:
+  def positions(self) -> Tuple[float, ...]:
     """Mark position in  float ppm (or other relevant unit) for each ruler making up the mark."""
     return tuple(x.position for x in self._wrappedData.sortedRulers())
 
@@ -99,7 +99,7 @@ class Mark(AbstractWrapperObject):
       ruler.position = value[ii]
 
   @property
-  def axisCodes(self) -> tuple:
+  def axisCodes(self) -> Tuple[str, ...]:
     """AxisCode (string) for each ruler making up the mark."""
     return tuple(x.axisCode for x in self._wrappedData.sortedRulers())
 
@@ -109,7 +109,7 @@ class Mark(AbstractWrapperObject):
       ruler.axisCode = value[ii]
 
   @property
-  def units(self) -> tuple:
+  def units(self) -> Tuple[str, ...]:
     """Unit (string, default is ppm) for each ruler making up the mark."""
     return tuple(x.unit for x in self._wrappedData.sortedRulers())
 
@@ -119,7 +119,7 @@ class Mark(AbstractWrapperObject):
       ruler.unit = value[ii]
 
   @property
-  def labels(self) -> tuple:
+  def labels(self) -> Tuple[str, ...]:
     """Optional label (string) for each ruler making up the mark."""
     return tuple(x.label for x in self._wrappedData.sortedRulers())
 

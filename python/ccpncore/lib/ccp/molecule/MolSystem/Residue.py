@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 from ccpncore.lib.Constants import DEFAULT_ISOTOPE_DICT
 from ccpncore.lib.molecule import Labeling
 
-def findLinkedResidue(residue, linkCode:str='prev'):
+def findLinkedResidue(self:"Residue", linkCode:str='prev'):
   """find residue linked to current with link of type 'linkCode' (defaults to 'prev')
   Use 'prev' to find previous residue, 'next' to find next residue"
   .. describe:: Input
@@ -37,7 +37,7 @@ def findLinkedResidue(residue, linkCode:str='prev'):
   MolSystem.Residue
   """
   newMolResidue = None
-  linkEnd = residue.molResidue.findFirstMolResLinkEnd(linkCode=linkCode)
+  linkEnd = self.molResidue.findFirstMolResLinkEnd(linkCode=linkCode)
   if linkEnd is not None:
     for otherEnd in linkEnd.molResLink.molResLinkEnds:
       if otherEnd is not linkEnd:
@@ -47,7 +47,7 @@ def findLinkedResidue(residue, linkCode:str='prev'):
   if newMolResidue is None:
     return None
   else:
-    return residue.chain.findFirstResidue(seqId=newMolResidue.serial)
+    return self.chain.findFirstResidue(seqId=newMolResidue.serial)
 
 
 # NBNB TBD FIXME update this to work.

@@ -27,11 +27,9 @@ __version__ = "$Revision: 7686 $"
 import os
 import operator
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence, Tuple, Optional
 from ccpn import AbstractWrapperObject
 from ccpn import Project
-# from ccpn import Sample
-# from ccpn import ChemicalShiftList
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.memops.Implementation import Url
 from ccpncore.util import Path
@@ -305,7 +303,7 @@ class Spectrum(AbstractWrapperObject):
       raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
-  def pointCounts(self) -> tuple:
+  def pointCounts(self) -> Tuple[int, ...]:
     """\- (*int,*)\*dimensionCount, *settable*
 
     Number active of points
@@ -333,7 +331,7 @@ class Spectrum(AbstractWrapperObject):
                        (apiDataSource.numDim, value))
 
   @property
-  def totalPointCounts(self) -> tuple:
+  def totalPointCounts(self) -> Tuple[int, ...]:
     """\- (*int,*)\*dimensionCount, *settable*
 
     Total number of points
@@ -362,7 +360,7 @@ class Spectrum(AbstractWrapperObject):
                        (apiDataSource.numDim, value))
 
   @property
-  def pointOffsets(self) -> tuple:
+  def pointOffsets(self) -> Tuple[int, ...]:
     """\- (*int,*)\*dimensionCount, *settable*
 
      index of first active point relative to total points."""
@@ -400,19 +398,19 @@ class Spectrum(AbstractWrapperObject):
     self._setDataDimValue('isComplex', value)
 
   @property
-  def dimensionTypes(self) -> tuple:
+  def dimensionTypes(self) -> Tuple[str, ...]:
     """\- (*str,*)\*dimensionCount
     dimension types ('Fid' / 'Frequency' / 'Sampled')."""
     ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
     return tuple('Frequency' if x == 'Freq' else x for x in ll)
 
   @property
-  def spectralWidthsHz(self) -> tuple:
+  def spectralWidthsHz(self) -> Tuple[Optional[float], ...]:
     """\- (*float,*)\*dimensionCount, *settable*
 
     spectral width before correcting for spectrometer frequency (generally in Hz)."""
-    return tuple(x.spectralWidth for x in self._wrappedData.sortedDataDims()
-                 if hasattr(x, 'spectralWidth'))
+    return tuple(x.spectralWidth if hasattr(x, 'spectralWidth') else None
+                 for x in self._wrappedData.sortedDataDims())
 
   @spectralWidthsHz.setter
   def spectralWidthsHz(self, value:Sequence):
@@ -464,7 +462,7 @@ class Spectrum(AbstractWrapperObject):
   # Attributes belonging to ExpDimRef and DataDimRef
 
   def _mainExpDimRefs(self) -> list:
-    """Get main ExpDimRef (serial=1) for each dimension"""
+    """Get main API ExpDimRef (serial=1) for each dimension"""
 
     result = []
     for ii,dataDim in enumerate(self._wrappedData.sortedDataDims()):
@@ -493,7 +491,7 @@ class Spectrum(AbstractWrapperObject):
           setattr(expDimRef, attributeName, val)
 
   @property
-  def spectrometerFrequencies(self) -> tuple:
+  def spectrometerFrequencies(self) -> Tuple[Optional[float], ...]:
     """Tuple of spectrometer frequency for main dimensions reference """
     return tuple(x and x.sf for x in self._mainExpDimRefs())
 
@@ -502,7 +500,7 @@ class Spectrum(AbstractWrapperObject):
     self._setExpDimRefAttribute('sf', value)
 
   @property
-  def measurementTypes(self) -> tuple:
+  def measurementTypes(self) -> Tuple[Optional[str], ...]:
     """\- (*str,*)\*dimensionCount, *settable*
 
     measurement type for main dimensions reference """
@@ -536,7 +534,7 @@ class Spectrum(AbstractWrapperObject):
 
 
   @property
-  def isotopeCodes(self) -> tuple:
+  def isotopeCodes(self) -> Tuple[Optional[str], ...]:
     """\- (*str,*)\*dimensionCount, *settable*
 
     main ExpDimRef (serial=1) isotopeCode - None if no unique code"""
@@ -573,7 +571,7 @@ class Spectrum(AbstractWrapperObject):
       raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
-  def foldingModes(self) -> tuple:
+  def foldingModes(self) -> Tuple[Optional[bool], ...]:
     """\- (*str,*)\*dimensionCount, *settable*
 
     main ExpDimRef folding mode (values: 'circular', 'mirror', None)"""
@@ -586,7 +584,7 @@ class Spectrum(AbstractWrapperObject):
     self._setExpDimRefAttribute('isFolded', [dd[x] for x in value])
 
   @property
-  def axisCodes(self) -> tuple:
+  def axisCodes(self) -> Tuple[Optional[str], ...]:
     """\- (*str,*)\*dimensionCount, *settable*
 
     Main ExpDimRef axisCode for each dimension - None if no main ExpDimRef
@@ -614,7 +612,7 @@ class Spectrum(AbstractWrapperObject):
     self._setExpDimRefAttribute('axisCode', value, mandatory=False)
 
   @property
-  def axisUnits(self) -> tuple:
+  def axisUnits(self) -> Tuple[Optional[str], ...]:
     """\- (*str,*)\*dimensionCount, *settable*
 
     Main ExpDimRef axis unit (most commonly 'ppm') - None if no unique code
@@ -666,7 +664,7 @@ class Spectrum(AbstractWrapperObject):
       raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
-  def referencePoints(self) -> tuple:
+  def referencePoints(self) -> Tuple[Optional[float], ...]:
     """\- (*float,*)\*dimensionCount, *settable*
 
     point used for axis (chemical shift) referencing."""
@@ -677,7 +675,7 @@ class Spectrum(AbstractWrapperObject):
     self._setDataDimRefAttribute('refPoint', value)
 
   @property
-  def referenceValues(self) -> tuple:
+  def referenceValues(self) -> Tuple[Optional[float], ...]:
     """\- (*str,*)\*dimensionCount, *settable*
 
     value used for axis (chemical shift) referencing."""
@@ -688,7 +686,7 @@ class Spectrum(AbstractWrapperObject):
     self._setDataDimRefAttribute('refValue', value)
 
   @property
-  def assignmentTolerances(self) -> tuple:
+  def assignmentTolerances(self) -> Tuple[Optional[float], ...]:
     """\- (*str,*)\*dimensionCount, *settable*
 
     Assignment tolerance in axis unit (ppm)."""
@@ -699,7 +697,7 @@ class Spectrum(AbstractWrapperObject):
     self._setDataDimRefAttribute('assignmentTolerance', value)
 
   @property
-  def spectralWidths(self) -> tuple:
+  def spectralWidths(self) -> Tuple[Optional[float], ...]:
     """\- (*float,*)\*dimensionCount, *settable*
 
     spectral width after processing (generally in ppm) """
@@ -718,7 +716,7 @@ class Spectrum(AbstractWrapperObject):
           dataDimRef.dataDim.valuePerPoint *= (sw/oldsw)
 
   @property
-  def aliasingLimits(self) -> tuple:
+  def aliasingLimits(self) -> Tuple[Tuple[Optional[float], Optional[float]], ...]:
     """\- (*(float,float)*)\*dimensionCount
 
     tuple of tuples of (lowerAliasingLimit, higherAliasingLimit) for spectrum """
@@ -727,7 +725,7 @@ class Spectrum(AbstractWrapperObject):
     if any(None in tt for tt in result):
       # Some values not set, or missing. Try to get them as spectrum limits
       for ii,dataDimRef in enumerate(self._mainDataDimRefs()):
-        if None in result[ii]:
+        if None in result[ii] and dataDimRef is not None:
           dataDim = dataDimRef.dataDim
           ff = dataDimRef.pointToValue
           point1 = 1 - dataDim.pointOffset
@@ -736,7 +734,7 @@ class Spectrum(AbstractWrapperObject):
     return tuple(result)
 
   @aliasingLimits.setter
-  def aliasingLimits(self, value:tuple):
+  def aliasingLimits(self, value):
     if len(value) != self.dimensionCount:
       raise ValueError("length of aliasingLimits must match spectrum dimension, was %s" % value)
 
@@ -751,7 +749,7 @@ class Spectrum(AbstractWrapperObject):
 
 
   @property
-  def spectrumLimits(self) -> tuple:
+  def spectrumLimits(self) -> Tuple[Tuple[Optional[float], Optional[float]], ...]:
     """\- (*(float,float)*)\*dimensionCount
 
     tuple of tuples of (lowerLimit, higherLimit) for spectrum """
@@ -760,8 +758,8 @@ class Spectrum(AbstractWrapperObject):
       if ddr is None:
         ll.append((None,None))
       else:
-        ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints+1)))
-    return tuple(tuple(sorted(x)) for x in ll)
+        ll.append(tuple(sorted((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints+1)))))
+    return tuple(ll)
 
   # @property
   # def sample(self) -> Sample:

@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from ccpncore.util.Types import Sequence, List, Tuple
 from ccpncore.lib.chemComp import Io as chemCompIo
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.molecule.MoleculeModify import _getLinearChemCompData
@@ -30,7 +31,7 @@ from ccpncore.memops.ApiError import ApiError
 from ccpncore.util import CopyData, Undo
 
 
-def clone(self:'Molecule', newName:str=None):
+def clone(self:'Molecule', newName:str=None) -> "Molecule":
   """Make a new molecule based upon the sequence of an existing one
   .. describe:: Input
 
@@ -55,7 +56,7 @@ def clone(self:'Molecule', newName:str=None):
 
 
 def extendOneLetterMolResidues(self:'Molecule', sequence:str, molType:str='protein', startNumber:int=1,
-                            isCyclic:bool=False):
+                            isCyclic:bool=False) -> List["MolResidue"]:
   """Descrn: Adds MolResidues for a sequence of code1Letter to Molecule, using molType.
              Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
 
@@ -107,7 +108,8 @@ def extendOneLetterMolResidues(self:'Molecule', sequence:str, molType:str='prote
   return molResidues
 
 
-def extendMolResidues(self:'Molecule', sequence:list, startNumber:int=1, isCyclic:bool=False):
+def extendMolResidues(self:'Molecule', sequence:Sequence[str], startNumber:int=1, isCyclic:bool=False
+                      ) -> List["MolResidue"]:
   """Descrn: Adds MolResidues for a sequence of residueNames to Molecule.
              Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
 
@@ -181,13 +183,13 @@ def extendMolResidues(self:'Molecule', sequence:list, startNumber:int=1, isCycli
   return result
 
 
-def extendLinearSequence(self:'Molecule', sequence:list, seqCodeStart:int=1,
-                       isCyclic:bool=False):
+def extendLinearSequence(self:'Molecule', sequence:Sequence[Tuple[str, str]], seqCodeStart:int=1,
+                       isCyclic:bool=False) -> List["MolResidue"]:
   """Descrn: Add residues to molecule. Fast method, which uses 'override' mode.
              sequence is a list of (molType,ccpCode) tuples - so can make mixed-type
              linear polymers; All ChemComps must have next and prev links to fit a
              linear polymer seqCodes start from seqCodeStart, serial from next
-             free serial (or 1). FIrst residue is 'start' and last is 'end', unlesss isCyclic
+             free serial (or 1). First residue is 'start' and last is 'end', unlesss isCyclic
     Inputs: Molecule.molecule, List of Tuples of Strings (molType, ccpCode), Int, Boolean
      Output: List of Molecule.MolResidues
   """

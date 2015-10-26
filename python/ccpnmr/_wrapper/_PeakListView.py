@@ -22,6 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import operator
+from ccpncore.util.Types import Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import PeakList
@@ -144,18 +146,19 @@ class PeakListView(AbstractWrapperObject, GuiPeakListView):
   @classmethod
   def _getAllWrappedData(cls, parent:SpectrumView)-> list:
     """get wrappedData (ccpnmr.gui.Task.PeakListView) in serial number order"""
-    return parent._wrappedData.sortedStripPeakListViews()
+    return sorted(parent._wrappedData.stripPeakListViews,
+                  key=operator.attrgetter('peakListView.peakListSerial'))
 
   #CCPN functions
 
 # PeakList.peakListViews property
-def _getPeakListViews(peakList:PeakList):
+def _getPeakListViews(peakList:PeakList) -> Tuple[PeakListView, ...]:
   data2ObjDict = peakList._project._data2Obj
   return tuple(data2ObjDict[y]
                for x in peakList._wrappedData.sortedPeakListViews()
                for y in x.sortedStripPeakListViews())
 PeakList.peakListViews = property(_getPeakListViews, None, None,
-                                         "PeakListViews showing Spectrum")
+                                  "PeakListViews showing Spectrum")
 del _getPeakListViews
 
 # Notifiers

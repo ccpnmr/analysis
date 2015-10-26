@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence, Tuple
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -70,12 +70,12 @@ class Strip(GuiStrip, AbstractWrapperObject):
   spectrumDisplay = _parent
 
   @property
-  def axisCodes(self) -> tuple:
+  def axisCodes(self) ->  Tuple[str, ...]:
     """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
     return self._wrappedData.axisCodes
 
   @property
-  def axisOrder(self) -> tuple:
+  def axisOrder(self) ->  Tuple[str, ...]:
     """String Axis codes in display order (X, Y, Z1, Z2, ...), determine axis display order"""
     return self._wrappedData.axisOrder
 
@@ -84,19 +84,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
     self._wrappedData.axisOrder = value
 
   @property
-  def orderedAxes(self) -> tuple:
-    """Axes in display order (X, Y, Z1, Z2, ...) """
-    apiStrip = self._wrappedData
-    ff = self._project._data2Obj.get
-    return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
-
-  @orderedAxes.setter
-  def orderedAxes(self, value:Sequence):
-    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-    self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
-
-  @property
-  def positions(self) -> tuple:
+  def positions(self) ->  Tuple[float, ...]:
     """Axis centre positions, in display order"""
     return self._wrappedData.positions
 
@@ -105,7 +93,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
     self._wrappedData.positions = value
 
   @property
-  def widths(self) -> tuple:
+  def widths(self) ->  Tuple[float, ...]:
     """Axis display widths, in display order"""
     return self._wrappedData.widths
 
@@ -114,7 +102,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
     self._wrappedData.widths = value
 
   @property
-  def units(self) -> tuple:
+  def units(self) ->  Tuple[str, ...]:
     """Axis units, in display order"""
     return self._wrappedData.units
 
@@ -334,6 +322,17 @@ def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
           axis.widths = widths[ind]
 
 SpectrumDisplay.copyStrip = copyStrip
+
+def getter(self) -> Tuple[Strip, ...]:
+  ff = self._project._data2Obj.get
+  return tuple(ff(x) for x in self._wrappedData.orderedStrips)
+def setter(self, value:Sequence):
+  value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+  self._wrappedData.orderedStrips = tuple(x._wrappedData for x in value)
+SpectrumDisplay.orderedStrips = property(getter, setter, None,
+                                         "ccpn.Strips in displayed order ")
+del getter
+del setter
 
 # Connections to parents:
 SpectrumDisplay._childClasses.append(Strip)

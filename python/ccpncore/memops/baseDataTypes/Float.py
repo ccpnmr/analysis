@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""Basic data type Float (4-byte float)
+"""Basic data type Float (4-byte float) - used where NaN, Inf and -Inf are NOT allowed
 
 Correct procedure is that values of type in compatibleTypes must be 
 accepted as input, and coerced to PythonType. isValid should be applied only

@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
@@ -121,12 +121,6 @@ class NmrChain(AbstractWrapperObject):
     else:
       raise ValueError("Cannot set connectedNmrResidues for NmrChain assigned to actual Chain")
 
-
-  @property
-  def mainNmrResidues(self) -> tuple:
-    """NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
-    (sequenceCode ending in '-1', '+1', etc.)"""
-    return tuple(x for x in self.nmrResidues if x._wrappedData.relativeOffset is None)
 
   @property
   def chain(self) -> Chain:

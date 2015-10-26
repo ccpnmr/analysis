@@ -73,11 +73,12 @@ configFilePath = 'data/ccpnConfig.json'
 # names of basic data types
 int_code = 'Int'
 float_code = 'Float'
+ieee_float_code = 'IeeeFloat'
 string_code = 'String'
 boolean_code = 'Boolean'
 datetime_code = 'DateTime'
 dict_code = 'Dict'
-typeCode_enumeration = [int_code, float_code,
+typeCode_enumeration = [int_code, float_code, ieee_float_code,
  string_code, boolean_code, datetime_code, dict_code,
 ]
 typeCode_enumeration.sort()

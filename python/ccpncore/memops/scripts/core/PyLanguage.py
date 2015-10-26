@@ -136,7 +136,11 @@ class PyLanguage(LanguageInterface.LanguageInterface, TextWriter.TextWriter, obj
   def toLiteral(self, value):
 
     result = repr(value)
-    if eval(result, {}) == value:
+
+    if isinstance(value, float) and result == 'nan':
+      # special case - we have NaN defined as an API constant in all API files
+      return 'NaN'
+    elif eval(result, {}) == value:
       return result
     else:
       raise MemopsError("value cannot be converted to literal: %s" % value)

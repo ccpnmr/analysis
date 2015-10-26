@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence, Tuple
 from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -175,7 +175,7 @@ class RestraintContribution(AbstractWrapperObject):
     self._wrappedData.combinationId = value
 
   @property
-  def restraintItems(self) -> tuple:
+  def restraintItems(self) -> Tuple[str, ...]:
     """restraint items of contribution - given as a tuple of lists of AtomId """
 
     itemLength = self._parent._parent.restraintItemLength

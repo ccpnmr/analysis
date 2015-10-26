@@ -716,6 +716,9 @@ import re
 containsWhitespace = re.compile('\s').search
 containsNonAlphanumeric = re.compile('[^a-zA-Z0-9_]').search
 
+# Global NaN constant
+NaN = float('NaN')
+
 from ccpncore.util.Undo import deleteAllApiObjects
  
 from ccpncore.%s.ApiError import ApiError

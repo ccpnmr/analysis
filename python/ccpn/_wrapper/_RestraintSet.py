@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore

@@ -22,16 +22,24 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn.testing.WrapperTesting import WrapperTesting
 
-class SpectrumTest(WrapperTesting):
+from ccpncore.testing.CoreTesting import CoreTesting
+import os
+from ccpncore.util import Path
+from ccpncore.util import Io
+TEST_PROJECTS_PATH = os.path.join(Path.getTopDirectory(), 'data/testProjects')
+from ccpncore.memops.ApiError import ApiError
+
+class NaNtest(CoreTesting):
 
   # Path of project to load (None for new project)
   projectPath = None
 
-  def test_createDummySpectrum(self, *args, **kw):
-    spectrum = self.project.createDummySpectrum(axisCodes=['H','N','C'], name='testspec')
-    self.assertEqual(spectrum.name, 'testspec')
-    spectrum = self.project.createDummySpectrum(axisCodes = ['Hp','F', 'Ph', 'H'])
-    self.assertEqual(spectrum.name, 'HpFPhH@2')
+  def testNaN(self):
+    spectrum = self.nmrProject.createDummySpectrum(name='nanTest', axisCodes=('Hn', 'Nh', 'CO'))
+    self.assertEqual(spectrum.scale, 1.0)
+    self.assertEqual(spectrum.name, 'nanTest')
+
+    # test NaN
+    self.assertRaises(ApiError,setattr, spectrum, 'scale', float('NaN'))
 

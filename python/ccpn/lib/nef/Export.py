@@ -27,7 +27,7 @@ import sys
 import datetime
 import random
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence
 from ccpn import RestraintContribution
 from ccpn.lib import Restraint as restraintLib
 from ccpncore.lib.spectrum import Spectrum as libSpectrum

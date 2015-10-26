@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from ccpncore.util.Types import Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import ChemicalShiftList
@@ -112,7 +113,7 @@ class ChemicalShift(AbstractWrapperObject):
 # Connections to parents:
 ChemicalShiftList._childClasses.append(ChemicalShift)
 
-def getter(self:NmrAtom) -> tuple:
+def getter(self:NmrAtom) -> Tuple[ChemicalShift, ...]:
   getObj = self._project._data2Obj.get
   return tuple(sorted(getObj(x) for x in self._wrappedData.shifts))
 

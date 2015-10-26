@@ -98,9 +98,7 @@ class NmrAtom(AbstractWrapperObject):
     apiPeaks.extend([x.peakDim.peak for x in apiResonance.peakDimContribNs])
 
     data2Obj = self._project._data2Obj
-    result = sorted(data2Obj[x] for x in set(apiPeaks))
-    #
-    return result
+    return sorted(data2Obj[x] for x in set(apiPeaks))
 
   def rename(self, value:str=None):
     """Rename object, changing id, Pid, and internal representation"""

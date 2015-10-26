@@ -22,6 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import operator
+from ccpncore.util.Types import Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
@@ -235,7 +237,7 @@ class SpectrumView(AbstractWrapperObject):
     self._wrappedData.spectrumView.displayNegativeContours = value
 
   @property
-  def positiveLevels(self) -> tuple:
+  def positiveLevels(self) ->  Tuple[float, ...]:
     """Positive contouring levels from lowest to highest"""
     number = self.positiveContourCount
     if number < 1:
@@ -249,7 +251,7 @@ class SpectrumView(AbstractWrapperObject):
       return tuple(result)
 
   @property
-  def negativeLevels(self) -> tuple:
+  def negativeLevels(self) ->  Tuple[float, ...]:
     """Negative contouring levels from lowest to highest"""
     number = self.negativeContourCount
     if number < 1:
@@ -286,7 +288,8 @@ class SpectrumView(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Strip)-> list:
     """get wrappedData (ccpnmr.gui.Task.SpectrumView) in serial number order"""
-    return parent._wrappedData.sortedStripSpectrumViews()
+    return sorted(parent._wrappedData.stripSpectrumViews,
+                  key=operator.attrgetter('spectrumView.spectrumName'))
 
   #CCPN functions
 

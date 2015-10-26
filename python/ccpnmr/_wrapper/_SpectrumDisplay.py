@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.typing import Sequence
+from ccpncore.util.Types import Sequence, Tuple
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -96,12 +96,12 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
-  def axisCodes(self) -> tuple:
+  def axisCodes(self) -> Tuple[str, ...]:
     """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
     return self._wrappedData.axisCodes
 
   @property
-  def axisOrder(self) -> tuple:
+  def axisOrder(self) ->  Tuple[str, ...]:
     """String Axis codes in display order (X, Y, Z1, Z2, ...), determine axis display order"""
     return self._wrappedData.axisOrder
 
@@ -130,29 +130,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     self._wrappedData.resonanceGroup = value and value._wrappedData
 
   @property
-  def orderedAxes(self) -> tuple:
-    """Axes in display order (X, Y, Z1, Z2, ...) """
-    ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._wrappedData.orderedAxes)
-
-  @orderedAxes.setter
-  def orderedAxes(self, value:Sequence):
-    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-    self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
-
-  @property
-  def orderedStrips(self) -> tuple:
-    """Strips in displayed order """
-    ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._wrappedData.orderedStrips)
-
-  @orderedStrips.setter
-  def orderedStrips(self, value:Sequence):
-    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-    self._wrappedData.orderedStrips = tuple(x._wrappedData for x in value)
-
-  @property
-  def positions(self) -> (float,):
+  def positions(self) ->  Tuple[float, ...]:
     """Axis centre positions, in display order"""
     return self._wrappedData.positions
 
@@ -161,7 +139,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     self._wrappedData.positions = value
 
   @property
-  def widths(self) -> tuple:
+  def widths(self) ->  Tuple[float, ...]:
     """Axis display widths, in display order"""
     return self._wrappedData.widths
 
@@ -170,7 +148,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     self._wrappedData.widths = value
 
   @property
-  def units(self) -> tuple:
+  def units(self) ->  Tuple[str, ...]:
     """Axis units, in display order"""
     return self._wrappedData.units
 

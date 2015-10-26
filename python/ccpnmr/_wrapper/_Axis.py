@@ -21,11 +21,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+from ccpncore.util.Types import Sequence, Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
+from ccpn import NmrAtom
 from ccpnmr import Strip
+from ccpnmr import SpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
-from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+# from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 
 
 class Axis(AbstractWrapperObject):
@@ -63,10 +66,6 @@ class Axis(AbstractWrapperObject):
     return self._project._data2Obj.get(self._wrappedData.strip)
 
   strip = _parent
-
-  def delete(self):
-    """Axes cannot be deleted, except as a byproduct of deleting other things"""
-    raise Exception("Axes cannot be deleted directly")
 
   @property
   def position(self) -> float:
@@ -109,10 +108,10 @@ class Axis(AbstractWrapperObject):
   # NBNB TBD the 'regions' attribute may not be needed. leave it out
 
   @property
-  def nmrAtoms(self) -> tuple:
+  def nmrAtoms(self) -> Tuple[NmrAtom]:
     """nmrAtoms connected to axis"""
     ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._wrappedData.axis.resonances)
+    return tuple(sorted(ff(x) for x in self._wrappedData.axis.resonances))
 
   @nmrAtoms.setter
   def nmrAtoms(self, value):
@@ -128,11 +127,34 @@ class Axis(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Strip)-> list:
     """get wrappedData (ccpnmr.gui.Task.Axis) in serial number order"""
-    return parent._wrappedData.sortedStripAxes()
+    apiStrip = parent._wrappedData
+    dd = {(x.axis.code, x) for x in apiStrip.stripAxes}
+    return [dd[x] for x in apiStrip.axisCodes]
 
   def delete(self):
     """Overrides normal delete"""
     raise  ValueError("Axes cannot be deleted independently")
+
+def getter(self) -> Tuple[Axis, ...]:
+  apiStrip = self._wrappedData
+  ff = self._project._data2Obj.get
+  return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
+def setter(self, value:Sequence):
+  value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+  self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
+Strip.orderedAxes = property(getter, setter, None,
+                             "Axes in display order (X, Y, Z1, Z2, ...) ")
+
+def getter(self) -> Tuple[Axis, ...]:
+  ff = self._project._data2Obj.get
+  return tuple(ff(x) for x in self._wrappedData.orderedAxes)
+def setter(self, value:Sequence):
+  value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+  self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
+SpectrumDisplay.orderedAxes = property(getter, setter, None,
+                                       "Axes in display order (X, Y, Z1, Z2, ...) ")
+del getter
+del setter
 
 # Connections to parents:
 Strip._childClasses.append(Axis)

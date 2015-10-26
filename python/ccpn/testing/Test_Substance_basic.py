@@ -280,8 +280,10 @@ class SubstanceProperties(WrapperTesting):
 
   @unittest.skip
   def test_bareMaterialSubstanceProperties(self):
-    self.assertIsNone(s.smiles)
     s = self.project.newSubstance('test substance', substanceType='Material')
+
+    # MOved below initialisation of 's'. Rasmus.
+    self.assertIsNone(s.smiles)
 
     self.assertEqual(s.pid, 'SU:test substance.std')
     self.assertEqual(s.longPid, 'Substance:test substance.std')

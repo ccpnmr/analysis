@@ -160,7 +160,7 @@ class PyXmlMapWrite(PyLanguage, PyType, XmlMapWrite):
     
     val = elemMap.get('default')
     if val is not None:
-      self.setDictEntry(dictName, self.toLiteral('default'), repr(val))
+      self.setDictEntry(dictName, self.toLiteral('default'), self.toLiteral(val))
 
   ###########################################################################
 
@@ -174,7 +174,9 @@ class PyXmlMapWrite(PyLanguage, PyType, XmlMapWrite):
     super(PyXmlMapWrite, self).initLeafPackage(package)
     
     self.write(
-     "from ccpncore.memops.metamodel.Constants import baseDataTypeModule as basicDataTypes"
+     """
+from ccpncore.memops.metamodel.Constants import baseDataTypeModule as basicDataTypes
+NaN = float('NaN')"""
     )
     # import own API package
     self.writeComment("\n Current package api")

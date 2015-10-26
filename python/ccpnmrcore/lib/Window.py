@@ -1,6 +1,11 @@
 __author__ = 'simon1'
 
+from ccpn import ChemicalShift, NmrResidue, Peak, Project
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
+from ccpncore.util import Types
+from ccpnmr import Axis
+from ccpnmrcore.modules.GuiStrip import GuiStrip
+from ccpnmrcore.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 MODULE_DICT = {'ASSIGNER':'showAssigner',
                'ASSIGNMENT MODULE': 'showAssignmentModule',
@@ -16,7 +21,12 @@ MODULE_DICT = {'ASSIGNER':'showAssigner',
               }
 
 
-def navigateToPeakPosition(project, peak=None, selectedDisplays=None, strip=None,  markPositions=False):
+def navigateToPeakPosition(project:Project, peak:Peak=None,
+   selectedDisplays:Types.List[GuiSpectrumDisplay]=None, strip:GuiStrip=None,  markPositions:bool=False):
+  """
+  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
+  to the positions specified by the peak.
+  """
 
   if selectedDisplays is None:
     selectedDisplays = [display.pid for display in project.spectrumDisplays]
@@ -69,8 +79,13 @@ def navigateToPeakPosition(project, peak=None, selectedDisplays=None, strip=None
     #         zAxes[0].position = axisPositions[zAxes[0].code[0]]
 
 
-def navigateToNmrResidue(project, nmrResidue, selectedDisplays=None, strip=None, markPositions=False):
-
+def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
+                         selectedDisplays:Types.List[GuiSpectrumDisplay]=None,
+                         strip:GuiStrip=None,  markPositions:bool=False):
+  """
+  Takes an NmrResidue and optional spectrum displays and strips and navigates the strips and spectrum displays
+  to the positions specified by the peak.
+  """
   if selectedDisplays is None:
     selectedDisplays = project.spectrumDisplays
 
@@ -120,16 +135,19 @@ def navigateToNmrResidue(project, nmrResidue, selectedDisplays=None, strip=None,
 
 
 
-def isPositionWithinfBounds(strip, shift, axis):
-
-      minima = []
-      maxima = []
-      for spectrumView in strip.spectrumViews:
-        # print(spectrumLib.axisCodeMapping())
-        print(axis.code, spectrumView.spectrum.axisCodes)
-        index = spectrumView.spectrum.axisCodes.index(axis.code)
-        minima.append(spectrumView.spectrum.spectrumLimits[index][0])
-        maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
-      return min(minima) < shift.value <= max(maxima)
+def isPositionWithinfBounds(strip:GuiStrip, shift:ChemicalShift, axis:Axis):
+  """
+  Determines whether a given shift if within the bounds of the specified axis of the specified
+    strip.
+  """
+  minima = []
+  maxima = []
+  for spectrumView in strip.spectrumViews:
+    # print(spectrumLib.axisCodeMapping())
+    print(axis.code, spectrumView.spectrum.axisCodes)
+    index = spectrumView.spectrum.axisCodes.index(axis.code)
+    minima.append(spectrumView.spectrum.spectrumLimits[index][0])
+    maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
+  return min(minima) < shift.value <= max(maxima)
 
 

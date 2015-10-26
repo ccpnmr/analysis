@@ -3,7 +3,7 @@ from ccpncore.gui.Base import Base
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.TextEditor import TextEditor
 
-from ccpncore.util import Types, Pid
+from ccpncore.util import Types
 from IPython.qt.console.completion_widget import CompletionWidget
 from ccpncore.gui.Widget import Widget
 from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
@@ -88,7 +88,7 @@ class IpythonConsole(QtGui.QWidget, Base):
           self.parent().parent().macroEditor.textBox.insertPlainText(msg)
 
 
-    def writeCommand(self, objectName:str, functionCall:str, arguments:Types.List(str), pid:str=None,
+    def writeCommand(self, objectName:str, functionCall:str, arguments:Types.List[str], pid:str=None,
                      obj:object=None):
       """
       Writes a command specified by the arguments to the console text box.
@@ -101,8 +101,8 @@ class IpythonConsole(QtGui.QWidget, Base):
       self.write(msg1)
       self.write(msg2)
 
-    def writeCompoundCommand(self, objectNames:Types.List(str), functionCall:str,
-               arguments:Types.List(str), pids:Types.List(Pid)=None, objs:Types.List(object)=None):
+    def writeCompoundCommand(self, objectNames:Types.List[str], functionCall:str,
+               arguments:Types.List=[str], pids:Types.List[str]=None, objs:Types.List[object]=None):
       """
       Writes a command consisting of a single function call and two pids or objects specified by
       the arguments to the console text box.
@@ -123,8 +123,8 @@ class IpythonConsole(QtGui.QWidget, Base):
       msg1 = 'application.%s()\n' % moduleCommand
       self.write(msg1)
 
-    def writeWrapperCommand(self, objectNames:Types.List(str), wrapperCommand:str, pid:Pid,
-                            args:Types.List(str)):
+    def writeWrapperCommand(self, objectNames:Types.List[str], wrapperCommand:str, pid:str,
+                            args:Types.List[str]):
       """
       Writes a command dealing with ccpn objects to the console text box.
       """

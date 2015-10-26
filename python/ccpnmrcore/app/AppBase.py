@@ -40,7 +40,6 @@ from ccpnmrcore.popups.RegisterPopup import RegisterPopup
 
 
 class AppBase(GuiBase):
-  """"""
 
   def __init__(self, apiProject, applicationName, applicationVersion,  preferences, components=None):
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that

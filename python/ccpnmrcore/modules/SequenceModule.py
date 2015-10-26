@@ -6,7 +6,6 @@ from ccpn import Residue
 
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
-from ccpncore.util import Pid
 from ccpncore.util import Types
 
 from ccpnmrcore.DropBase import DropBase
@@ -48,7 +47,7 @@ class SequenceModule(CcpnDock):
     # for chainLabel in self.chainLabels:
     #   self.highlightPossibleStretches(chainLabel)
 
-  def highlightPossibleStretches(self, residues:Types.List(Residue)):
+  def highlightPossibleStretches(self, residues:Types.List[Residue]):
     """
     Highlights regions on the sequence specified by the list of residues passed in.
     """
@@ -140,7 +139,7 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     event.accept()
 
 
-  def processNmrResidues(self, data:Types.List(Pid), event:QtGui.QMouseEvent):
+  def processNmrResidues(self, data:Types.List[str], event:QtGui.QMouseEvent):
     """
     Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
     all succeeding residues according to the length of the list.

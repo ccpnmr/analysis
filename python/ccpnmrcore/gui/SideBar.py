@@ -25,6 +25,7 @@ __author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
 import pandas as pd
+from ccpn import Project
 # from ccpncore.gui.Button import Button
 from ccpncore.util.Types import Sequence
 
@@ -110,10 +111,17 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       # self.restraintsItem.setText(0, "Restraint Lists")
 
 
-  def setProject(self, project):
+  def setProject(self, project:Project):
+    """
+    Sets the specified project as a class attribute so it can be accessed from elsewhere
+    """
     self.project = project
 
-  def addItem(self, item, data):
+  def addItem(self, item:QtGui.QTreeWidgetItem, data:object):
+    """
+    Adds a QTreeWidgetItem as a child of the item specified, which corresponds to the data object
+    passed in.
+    """
     newItem = QtGui.QTreeWidgetItem(item)
     newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
     # newItem.setText(0, str(data.name))
@@ -124,13 +132,20 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
 
   def mousePressEvent(self, event):
+    """
+    Re-implementation of the mouse press event so right click can be used to delete items from the
+    sidebar.
+    """
     if event.button() == QtCore.Qt.RightButton:
       self.raiseContextMenu(event, self.itemAt(event.pos()))
     else:
       QtGui.QTreeWidget.mousePressEvent(self, event)
 
 
-  def raiseContextMenu(self, event, item):
+  def raiseContextMenu(self, event:QtGui.QMouseEvent, item:QtGui.QTreeWidgetItem):
+    """
+    Creates and raises a context menu enabling items to be deleted from the sidebar.
+    """
     from ccpncore.gui.Menu import Menu
     contextMenu = Menu('', self, isFloatWidget=True)
     from functools import partial
@@ -139,12 +154,18 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
 
 
-  def removeItem(self, item):
+  def removeItem(self, item:QtGui.QTreeWidgetItem):
+    """
+    Removes the specified item from the sidebar and the project.
+    """
     import sip
     self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole)).delete()
     sip.delete(item)
 
-  def fillSideBar(self,project):
+  def fillSideBar(self, project:Project):
+    """
+    Fills the sidebar with the relevant data from the project.
+    """
     self.projectItem.setText(0, project.name)
     for spectrum in project.spectra:
       newItem = self.addItem(self.spectrumItem, spectrum)
@@ -192,6 +213,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     # self.spectrumDeleted.setFlags(self.spectrumDeleted.flags() & ~(QtCore.Qt.ItemIsDragEnabled ))
 
   def clearSideBar(self):
+    """
+    Clears all data from the sidebar.
+    """
     self.projectItem.setText(0, "Project")
     self.spectrumItem.setText(0, "Spectra")
     self.spectrumItem.setText(0, "Reference")
@@ -211,11 +235,16 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         event.mimeData().setText(itemData)
 
 
-  def dragMoveEvent(self, event):
+  def dragMoveEvent(self, event:QtGui.QMouseEvent):
+    """
+    Required function to enable dragging and dropping within the sidebar.
+    """
     event.accept()
 
   def addSpectrum(self, spectrum:(Spectrum,Pid)):
-
+    """
+    Adds the specified spectrum to the sidebar.
+    """
     peakList = spectrum.newPeakList()
     newItem = self.addItem(self.spectrumItem, spectrum)
     peakListItem = QtGui.QTreeWidgetItem(newItem)
@@ -237,7 +266,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     #   peakListItem.setText(0, peakList.pid)
 
   def processNotes(self, pids:Sequence[str], event):
-    """Display spectra defined by list of Pid strings"""
+    """Display notes defined by list of Pid strings"""
     for ss in pids:
       note = self.project.getByPid(ss)
       self.addItem(self.notesItem, note)

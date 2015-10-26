@@ -250,7 +250,7 @@ class GuiWindow(DropBase):
     
   def toggleCrossHair(self):
     """
-    Toggles whether crosshairs are displayed in all spectrum displays.
+    Toggles whether crosshairs are displayed in all spectrum di
     """
     # toggle crosshairs for the spectrum displays in this window
     for spectrumDisplay in self.spectrumDisplays:
@@ -285,9 +285,9 @@ class GuiWindow(DropBase):
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.toggleGrid()
     
-  def setCrossHairPosition(self, axisPositionDict:Types.Dict(str, float)):
+  def setCrossHairPosition(self, axisPositionDict:Types.Dict[str, float]):
     """
-    Sets crosshair position in all spectrum displays using positions specified in the axisPostionDict.
+    Sets crosshair position in all spectrum displays using positions specified in the axisPositionDict.
     """
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.setCrossHairPosition(axisPositionDict)

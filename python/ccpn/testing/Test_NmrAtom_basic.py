@@ -136,14 +136,29 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(a.pid, 'NA:@1.@1..Br_arbitrary')
     self.assertEqual(a.isotopeCode, '79Br')
 
+  def test_CreateNmrAtomWithArbitraryNameAndXenonIsotopeCode(self):
+    a = self.nmrResidue.newNmrAtom(name='Arbitrary', isotopeCode='129Xe')
+    self.assertEqual(a.pid, 'NA:@1.@1..Arbitrary')
+
   def test_CreateNmrAtomWithArbitraryName(self):
     a = self.nmrResidue.newNmrAtom(name='Arbitrary')
     self.assertEqual(a.pid, 'NA:@1.@1..Arbitrary')
     self.assertEqual(a.isotopeCode, 'unknown')
 
-  def test_CreateNmrAtomWithArbitraryNameAndXenonIsotopeCode(self):
-    a = self.nmrResidue.newNmrAtom(name='Arbitrary', isotopeCode='129Xe')
-    self.assertEqual(a.pid, 'NA:@1.@1..Arbitrary')
+  def test_CreateNmrAtomWithArbitraryDottedName(self):
+    a = self.nmrResidue.newNmrAtom(name='Arbitrary.Name')
+    self.assertEqual(a.pid, 'NA:@1.@1..Arbitrary^Name')
+    self.assertEqual(a.isotopeCode, 'unknown')
+
+  def test_CreateNmrAtomWithArbitraryHattedName(self):
+    a = self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
+    self.assertEqual(a.pid, 'NA:@1.@1..Arbitrary^Name')
+    self.assertEqual(a.isotopeCode, 'unknown')
+
+  @unittest.expectedFailure
+  def test_CreateNmrAtomWithArbitraryDottedAndHattedNamesCollide(self):
+    self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
+    self.assertRaises(Exception, self.nmrResidue.newNmrAtom, name='Arbitrary.Name')
 
   def test_CreateNmrAtomWithArbitraryNameAndArbitraryIsotopeCode(self):
     a = self.nmrResidue.newNmrAtom(name='Arbitrary', isotopeCode='Arbitrary_Isotope')
@@ -174,6 +189,73 @@ class TestNmrAtomCreation(WrapperTesting):
     newNmrAtom = self.nmrResidue.fetchNmrAtom(name='H')
     self.assertEqual(newNmrAtom.pid, 'NA:@1.@1..H')
     self.assertEqual(self.nmrResidue.nmrAtoms, [newNmrAtom])
+
+
+  def test_CreateNmrAtomByProducingFromProjectByPid(self):
+    self.assertEqual(self.nmrResidue.nmrAtoms, [])
+
+    newNmrAtom1 = self.project.produceNmrAtom(name='HX')
+    newNmrAtom2 = self.project.produceNmrAtom(name='HX')
+
+    self.assertEqual(newNmrAtom1.pid, 'NA:@-.@2..HX')
+    self.assertEqual(newNmrAtom2.pid, 'NA:@-.@3..HX')
+
+    self.assertEqual(self.project.nmrAtoms, [newNmrAtom1, newNmrAtom2])
+
+
+  def test_CreateNmrAtomByProducingFromProjectWithParametersMismatchedType(self):
+    self.assertRaises(ValueError, self.project.produceNmrAtom, '@1.@1.ARG.NE')
+
+
+  def test_CreateNmrAtomByProducingFromProjectByPidWithChain(self):
+    self.assertEqual(self.nmrResidue.nmrAtoms, [])
+
+    newNmrAtom = self.project.produceNmrAtom('@1.@1..NE')
+
+    self.assertEqual(newNmrAtom.pid, 'NA:@1.@1..NE')
+    self.assertEqual(self.project.nmrAtoms, [newNmrAtom])
+    self.assertIs(self.nmrResidue, newNmrAtom.nmrResidue)
+    self.assertEqual(self.project.nmrResidues, [self.nmrResidue])
+
+  def test_CreateNmrAtomByProducingFromProjectByPidMismatchedType(self):
+    self.assertRaises(ValueError, self.project.produceNmrAtom, '@1.@1.ARG.NE')
+
+
+  def test_CreateNmrAtomByProducingFromProjectWithParameters(self):
+    self.assertEqual(self.nmrResidue.nmrAtoms, [])
+
+    newNmrAtom = self.project.produceNmrAtom(chainCode='@1',
+                                             sequenceCode='@1',
+                                             name='NE')
+
+    self.assertEqual(newNmrAtom.pid, 'NA:@1.@1..NE')
+    self.assertEqual(self.project.nmrAtoms, [newNmrAtom])
+    self.assertIs(self.nmrResidue, newNmrAtom.nmrResidue)
+    self.assertEqual(self.project.nmrResidues, [self.nmrResidue])
+
+
+  def test_CreateNmrAtomAndNmrResidueByProducingFromProjectWithParameters(self):
+    self.assertEqual(self.nmrResidue.nmrAtoms, [])
+    self.assertEqual(len(self.project.nmrResidues), 1)
+
+
+    newNmrAtom = self.project.produceNmrAtom(chainCode='A',
+                                             sequenceCode='11',
+                                             name='NE')
+
+    self.assertEqual(newNmrAtom.pid, 'NA:A.11..NE')
+    self.assertEqual(self.project.nmrAtoms, [newNmrAtom])
+    self.assertEqual(len(self.project.nmrResidues), 2)
+    self.assertIn(newNmrAtom.nmrResidue, self.project.nmrResidues)
+
+
+  def test_CreateNmrAtomByProducingFromProjectWithPid(self):
+    self.assertEqual(self.nmrResidue.nmrAtoms, [])
+
+    newNmrAtom = self.project.produceNmrAtom('NA:A.11.ARG.NE')
+
+    self.assertEqual(newNmrAtom.pid, 'NA:A.11.ARG.NE')
+    self.assertEqual(self.project.nmrAtoms, [newNmrAtom])
 
 
 class TestNmrAtomProperties(WrapperTesting):
@@ -230,6 +312,45 @@ class TestNmrAtomMethods(WrapperTesting):
     self.assertTrue(self.nmrAtom is self.nmrResidue.getByPid(atomPid))
     self.assertTrue(self.nmrAtom is self.nmrChain.getByPid(atomPid))
     self.assertTrue(self.nmrAtom is self.project.getByPid(atomPid))
+
+
+  def test_ReassignNmrAtomSequenceCode(self):
+    self.assertEqual(len(self.project.nmrResidues), 1)
+
+    atom1 = self.project.produceNmrAtom(name='HX')
+    res1 = atom1.nmrResidue
+    self.assertEqual(atom1.pid,'NA:@-.@2..HX')
+    self.assertEqual(res1.pid, 'NR:@-.@2.')
+
+    self.assertEqual(len(res1.nmrAtoms), 1)
+    self.assertEqual(len(self.project.nmrResidues), 2)
+
+    atom1 = atom1.reassigned(sequenceCode=101)
+
+    self.assertEqual(atom1.pid,'NA:@-.101..HX')
+    self.assertEqual(res1.pid, 'NR:@-.@2.')
+    self.assertEqual(len(res1.nmrAtoms), 0)
+    self.assertEqual(len(self.project.nmrResidues), 3)
+
+
+  def test_ReassignNmrAtomName(self):
+    self.assertEqual(len(self.project.nmrResidues), 1)
+
+    atom1 = self.project.produceNmrAtom('X.101.VAL.N')
+    res1 = atom1.nmrResidue
+    self.assertEqual(atom1.pid,'NA:X.101.VAL.N')
+    self.assertEqual(res1.pid, 'NR:X.101.VAL')
+
+    self.assertEqual(len(res1.nmrAtoms), 1)
+    self.assertEqual(len(self.project.nmrResidues), 2)
+
+    atom1 = atom1.reassigned(name='NE')
+
+    self.assertEqual(atom1.pid,'NA:X.101.VAL.NE')
+    self.assertEqual(res1.pid, 'NR:X.101.VAL')
+    self.assertEqual(len(res1.nmrAtoms), 1)
+    self.assertEqual(len(self.project.nmrResidues), 2)
+
 
   @unittest.skip
   def test_RenameAtom(self):

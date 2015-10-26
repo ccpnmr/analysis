@@ -19,14 +19,13 @@ class ResidueInformation(CcpnDock):
     CcpnDock.__init__(self, name='Residue Information')
 
     chainLabel = Label(self, text='Chain')
-    chainPulldown = PulldownList(self, callback=self.setChain)
+    chainPulldown = PulldownList(self, callback=self._setChain)
     chainPulldown.setData([chain.pid for chain in project.chains])
     self.selectedChain = project.getByPid(chainPulldown.currentText())
     residueLabel = Label(self, text='Residue')
-    residuePulldown = PulldownList(self, callback=self.setCurrentResidue)
+    residuePulldown = PulldownList(self, callback=self._setCurrentResidue)
     residuePulldown.setData(CCP_CODES)
     self.selectedResidueType = residuePulldown.currentText()
-    print(self.selectedResidueType, self.selectedChain)
     self.residueWidget= QtGui.QWidget(self)
     self.residueWidget.setLayout(QtGui.QGridLayout())
     self.project = project
@@ -40,24 +39,31 @@ class ResidueInformation(CcpnDock):
 
 
 
-  def setChain(self, value):
+  def _setChain(self, value:str):
+    """
+    Sets the selected chain to the specified value and updates the module.
+    """
     self.selectedChain = self.project.getByPid(value)
     self.getResidues()
 
 
-  def setCurrentResidue(self, value):
-    print(value)
+  def _setCurrentResidue(self, value:str):
+    """
+    Sets the selected residue to the specified value and updates the module.
+    """
     self.selectedResidueType = value
 
     self.getResidues()
 
   def getResidues(self):
-
+    """
+    Finds all residues of the selected type along with one flanking residue either side and displays
+    this information in the module.
+    """
     foundResidues = []
     for residue in self.selectedChain.residues:
       if residue.residueType == self.selectedResidueType.upper():
         foundResidues.append([residue.previousResidue, residue, residue.nextResidue])
-    print(foundResidues)
     layout = self.residueWidget.layout()
     for r in range(layout.rowCount()):
       for n in range(3):
@@ -66,7 +72,7 @@ class ResidueInformation(CcpnDock):
           item.widget().deleteLater()
 
     j = 0
-    for i  in range(len(foundResidues)):
+    for i in range(len(foundResidues)):
 
       if foundResidues[j+i][0] is not None:
         label1 = Label(self, text=foundResidues[j+i][0].sequenceCode+' '+foundResidues[j+i][0].residueType,

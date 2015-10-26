@@ -46,7 +46,7 @@ class ViewBox(pg.ViewBox):
     self.addItem(self.selectionBox, ignoreBounds=True)
 
 
-  def raiseContextMenu(self, event):
+  def raiseContextMenu(self, event:QtGui.QMouseEvent):
     """
     Raise the context menu
     """
@@ -60,8 +60,17 @@ class ViewBox(pg.ViewBox):
 
 
 
-  def mouseClickEvent(self, event, axis=None):
+  def mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
+    """
+    Re-implementation of PyQtGraph mouse drag event to allow custom actions off of  different mouse
+    click events.
 
+    Left click selects peaks in a spectrum display.
+    Shift+Left click picks a peak at the cursor position.
+    Right click raises the context menu.
+
+
+    """
     self.current.strip = self.parentObject().parent
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
@@ -134,7 +143,6 @@ class ViewBox(pg.ViewBox):
 
     elif event.button() == QtCore.Qt.RightButton and not event.modifiers():
       event.accept()
-      print('axis Context Menu')
     #
     elif event.button() == QtCore.Qt.LeftButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
       mousePosition=self.mapSceneToView(event.pos())
@@ -151,7 +159,7 @@ class ViewBox(pg.ViewBox):
 
     elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
       event.accept()
-      self.autoRange()
+      # self.autoRange()
     #
     # if event.double():
     #   event.accept()
@@ -162,7 +170,10 @@ class ViewBox(pg.ViewBox):
   #   self.current.strip = self.parentObject().parent
 
 
-  def updateSelectionBox(self, p1, p2):
+  def _updateSelectionBox(self, p1:float, p2:float):
+    """
+    Updates drawing of selection box as mouse is moved.
+    """
     r = QtCore.QRectF(p1, p2)
     r = self.childGroup.mapRectFromParent(r)
     self.selectionBox.setPos(r.topLeft())
@@ -170,7 +181,16 @@ class ViewBox(pg.ViewBox):
     self.selectionBox.scale(r.width(), r.height())
     self.selectionBox.show()
 
-  def mouseDragEvent(self, event, axis=None):
+  def mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
+    """
+    Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
+    drag events.
+
+    Left drag pans the spectrum.
+    Control+left drag picks peaks in an area specified by the mouse.
+    Shift+left drag selects peaks in an area specified by the mouse.
+    Shift+right drag/middle drag draws a zooming box and zooms the viewbox.
+    """
 
     self.current.strip = self.parentObject().parent
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
@@ -220,7 +240,7 @@ class ViewBox(pg.ViewBox):
 
 
       else:
-          self.updateSelectionBox(event.buttonDownPos(), event.pos())
+          self._updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()
 
 
@@ -279,7 +299,7 @@ class ViewBox(pg.ViewBox):
                   peak.isSelected = True
 
       else:
-        self.updateSelectionBox(event.buttonDownPos(), event.pos())
+        self._updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()
 
 

@@ -59,13 +59,16 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
       self.setViewport(QtOpenGL.QGLWidget())
       self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
 
-  def addItem(self, item):
+  def addItem(self, item:QtGui.QGraphicsObject):
+    """
+    Adds specified graphics object to the Graphics Scene of the PlotWidget.
+    """
     self.scene().addItem(item)
     # # self.plotItem.axes['top']['item'].hide()
     # self.plotItem.axes['bottom']['item'].show()
     # self.plotItem.axes['right']['item'].show()
 
-  def processSpectra(self, pids:Sequence[str], event):
+  def processSpectra(self, pids:Sequence[str], event:QtGui.QMouseEvent):
     """Display spectra defined by list of Pid strings"""
     for ss in pids:
       self.parent.guiSpectrumDisplay.displaySpectrum(ss)

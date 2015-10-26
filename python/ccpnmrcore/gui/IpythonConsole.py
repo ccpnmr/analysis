@@ -2,6 +2,8 @@ from PyQt4 import QtGui, QtCore
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.TextEditor import TextEditor
+
+from ccpncore.util import Types, Pid
 from IPython.qt.console.completion_widget import CompletionWidget
 from ccpncore.gui.Widget import Widget
 from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
@@ -56,24 +58,24 @@ class IpythonConsole(QtGui.QWidget, Base):
         km.kernel.shell.push(namespace)
 
 
-    def runMacro(self, macroFile):
-      # The -i argument runs the macro within the namespace
-      # of the terminal, which can be handy. In this way you
-      # have access to things like current.peaks, which the
-      # user most likely expects.
-
+    def runMacro(self, macroFile:str):
+      """
+      Executes the specified macro file in the python console.
+      """
       self.ipythonWidget.execute('%run -i {}'.format(macroFile))
 
 
     def showHistory(self):
-        self.ipythonWidget.execute('%history')
+      """
+      Shows the history of commands executed inside the python console.
+      """
+      self.ipythonWidget.execute('%history')
 
 
-    def write(self, msg, html=False):
-        '''Not implemented. I don't know yet how to write something
-           to the input line without executing it.
-
-        '''
+    def write(self, msg:str, html=False):
+        """
+        Writes the specified string to the python console text box.
+        """
         # print(self.self.ipythonWidget.text())
         self.textEditor.moveCursor(QtGui.QTextCursor.End)
         if html:
@@ -86,7 +88,11 @@ class IpythonConsole(QtGui.QWidget, Base):
           self.parent().parent().macroEditor.textBox.insertPlainText(msg)
 
 
-    def writeCommand(self, objectName, functionCall, arguments, pid=None, obj=None):
+    def writeCommand(self, objectName:str, functionCall:str, arguments:Types.List(str), pid:str=None,
+                     obj:object=None):
+      """
+      Writes a command specified by the arguments to the console text box.
+      """
       if pid is None:
         pid = obj.pid
       msg1 = "%s = project.getByPid('%s')\n" % (objectName, pid)
@@ -95,7 +101,12 @@ class IpythonConsole(QtGui.QWidget, Base):
       self.write(msg1)
       self.write(msg2)
 
-    def writeCompoundCommand(self, objectNames, functionCall, arguments, pids=None, objs=None):
+    def writeCompoundCommand(self, objectNames:Types.List(str), functionCall:str,
+               arguments:Types.List(str), pids:Types.List(Pid)=None, objs:Types.List(object)=None):
+      """
+      Writes a command consisting of a single function call and two pids or objects specified by
+      the arguments to the console text box.
+      """
       if pids is None:
         pids = [obj.pid for obj in objs]
       msg1 = "%s = project.getByPid('%s')\n" % (objectNames[0], pids[0])
@@ -105,11 +116,18 @@ class IpythonConsole(QtGui.QWidget, Base):
       self.write(msg2)
       self.write(msg3)
 
-    def writeModuleDisplayCommand(self, moduleCommand):
+    def writeModuleDisplayCommand(self, moduleCommand:str):
+      """
+      Writes a module display command to the console text box.
+      """
       msg1 = 'application.%s()\n' % moduleCommand
       self.write(msg1)
 
-    def writeWrapperCommand(self, objectNames, wrapperCommand, pid, args):
+    def writeWrapperCommand(self, objectNames:Types.List(str), wrapperCommand:str, pid:Pid,
+                            args:Types.List(str)):
+      """
+      Writes a command dealing with ccpn objects to the console text box.
+      """
       msg1 = "%s = project.getByPid('%s')\n" % (objectNames[0], pid)
       msg2 = "%s = %s.%s(%s)\n" % (objectNames[1], objectNames[0], wrapperCommand, args)
       self.write(msg1)

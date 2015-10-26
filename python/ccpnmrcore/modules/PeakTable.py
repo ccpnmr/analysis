@@ -21,6 +21,8 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+from ccpn import Peak
+
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Dock import CcpnDock
@@ -94,6 +96,11 @@ class PeakListSimple(QtGui.QWidget, Base):
       # print(self.peakListPulldown.currentIndex(),self.peakListPulldown.currentIndex().text())
 
   def subtractPeakLists(self):
+    """
+    Subtracts a selected peak list from the peak list currently displayed in the peak table and
+    produces a new peak list attached to the spectrum of the selected peak list.
+    """
+
     peakList1 = self.project.getByPid(self.peakListPulldown.currentText())
 
 
@@ -106,7 +113,10 @@ class PeakListSimple(QtGui.QWidget, Base):
       peakList1.subtractPeakLists(self.project.getByPid(peakList))
     self.peakTable.updateSelectorContents()
 
-  def initPanel(self):
+  def _initPanel(self):
+    """
+    Instantiates the various settings required for the peak table to function.
+    """
     # Overwrites superclass
 
     self.peakList = None
@@ -116,19 +126,26 @@ class PeakListSimple(QtGui.QWidget, Base):
     self.selectPeakCalls = []
     self.selectPeaksCalls = []
 
-  def selectPeak(self, peak, row, col):
+  def selectPeak(self, peak:Peak, row:int, col:int):
+    """
+    Sets current.peak to selected peak.
+    """
     if not peak:
       return
     else:
-      return peak
+      self.project._appBase.current.peak = peak
 
-  def getPeakVolume(self, peak):
-
+  def getPeakVolume(self, peak:Peak):
+    """
+    Returns the volume of the specified peak.
+    """
     if peak.volume:
       return peak.volume*peak.peakList.spectrum.scale
 
-  def getPeakHeight(self, peak):
-
+  def getPeakHeight(self, peak:Peak):
+    """
+    Returns the height of the specified peak.
+    """
     if peak.height:
       return peak.height*peak.peakList.spectrum.scale
 

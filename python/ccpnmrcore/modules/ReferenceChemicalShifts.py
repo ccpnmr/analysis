@@ -60,6 +60,10 @@ class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the 
     return dataSets
 
   def _updateModule(self, item=None):
+    """
+    Updates the information displayed in the module when either the residue type or the atom type
+    selectors are changed.
+    """
     self.plotWidget.clear()
     self.plotWidget.plotItem.legend.items = []
     self.plotWidget.showGrid(x=True, y=True)

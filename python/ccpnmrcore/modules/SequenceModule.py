@@ -1,17 +1,20 @@
 __author__ = 'simon1'
 
 
+from ccpn import Chain
+from ccpn import Residue
+
 from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Label import Label
-from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Font import Font
+from ccpncore.util import Pid
+from ccpncore.util import Types
+
 from ccpnmrcore.DropBase import DropBase
 from PyQt4 import QtCore, QtGui
-import math
 
 class SequenceModule(CcpnDock):
 
-  def __init__(self, appBase, project):
+  def __init__(self, project):
     CcpnDock.__init__(self, name='Sequence')
 
     self.project=project
@@ -38,26 +41,31 @@ class SequenceModule(CcpnDock):
     self.chainLabels = []
     self.widgetHeight = 0
     for chain in project.chains:
-      self.addChainLabel(chain)
+      self._addChainLabel(chain)
 
     self.setFixedHeight(2*self.widgetHeight)
     self.scrollContents.setFixedHeight(2*self.widgetHeight)
     # for chainLabel in self.chainLabels:
     #   self.highlightPossibleStretches(chainLabel)
 
-  def highlightPossibleStretches(self, residues):
+  def highlightPossibleStretches(self, residues:Types.List(Residue)):
+    """
+    Highlights regions on the sequence specified by the list of residues passed in.
+    """
     for residue in residues:
       guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
       guiResidue.setHtml('<div style="color: #e4e15b;text-align: center;">'+
                            residue.shortName+'</div>')
 
 
-  def addChainLabel(self, chain):
+  def _addChainLabel(self, chain:Chain):
+    """
+    Creates and adds a GuiChainLabel to the sequence module.
+    """
     chainLabel = GuiChainLabel(self.project, self.scrollArea.scene, chain, position=[0, self.widgetHeight])
     self.scrollArea.scene.addItem(chainLabel)
     self.chainLabels.append(chainLabel)
     self.widgetHeight+=(0.8*(chainLabel.boundingRect().height()))
-    # print(dir(chainLabel))
 
 
 class GuiChainLabel(QtGui.QGraphicsTextItem):
@@ -101,34 +109,42 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     self.residue = residue
     self.setAcceptDrops(True)
     self.parent=parent
-    scene.dragLeaveEvent = self.dragLeaveEvent
-    scene.dragEnterEvent = self.dragEnterEvent
+    scene.dragLeaveEvent = self._dragLeaveEvent
+    scene.dragEnterEvent = self._dragEnterEvent
     scene.dropEvent = self.dropEvent
     self.scene = scene
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
 
 
-  def setFontBold(self):
+  def _setFontBold(self):
+    """
+    Sets font to bold, necessary as QtGui.QGraphicsTextItem are used for display of residue
+    one letter codes.
+    """
     format = QtGui.QTextCharFormat()
     format.setFontWeight(75)
     self.textCursor().mergeCharFormat(format)
 
 
-  def dragEnterEvent(self, event):
+  def _dragEnterEvent(self, event:QtGui.QMouseEvent):
 
     item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
       item.setDefaultTextColor(QtGui.QColor('#e4e15b'))
     event.accept()
 
-  def dragLeaveEvent(self, event):
+  def _dragLeaveEvent(self, event:QtGui.QMouseEvent):
     item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
       item.setDefaultTextColor(QtGui.QColor('#f7ffff'))
     event.accept()
 
 
-  def processNmrResidues(self, data, event):
+  def processNmrResidues(self, data:Types.List(Pid), event:QtGui.QMouseEvent):
+    """
+    Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
+    all succeeding residues according to the length of the list.
+    """
     res = self.scene.itemAt(event.scenePos())
     nmrResidue = self.project.getByPid(data[0])
     res.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+

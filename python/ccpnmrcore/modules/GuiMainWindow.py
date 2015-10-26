@@ -391,7 +391,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     Displays Sequence Module at the top of the screen.
     """
-    self.sequenceWidget = SequenceModule(self._appBase, self._project)
+    self.sequenceWidget = SequenceModule(self._project)
     self.dockArea.addDock(self.sequenceWidget, position='top')
 
   def hideSequence(self):

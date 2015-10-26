@@ -34,23 +34,32 @@ class NotesEditor(DropBase, CcpnDock):
     # widget.layout().addWidget(self.menuBar, 0, 0, 1, 5)
     widget.layout().addWidget(self.label1, 1, 0)
     widget.layout().addWidget(self.lineEdit1, 1, 1, 1, 4)
-    self.lineEdit1.editingFinished.connect(self.setNoteName)
+    self.lineEdit1.editingFinished.connect(self._setNoteName)
     widget.layout().addWidget(self.textBox, 2, 0, 1, 5)
     # if self.note.text is not None:
     self.textBox.setText(note.text)
     self.lineEdit1.setText(self.note.name)
-    self.buttonBox = ButtonList(self, texts=['Close', 'Save Note'], callbacks=[self.reject, self.saveNote])
+    self.buttonBox = ButtonList(self, texts=['Close', 'Save Note'], callbacks=[self._reject, self._saveNote])
     widget.layout().addWidget(self.buttonBox, 3, 3, 1, 2)
     self.layout.addWidget(widget)
 
-  def setNoteName(self):
+  def _setNoteName(self):
+    """
+    Sets the name of the note based on the text in the Note name text box.
+    """
     self.note.rename(self.lineEdit1.text())
 
-  def saveNote(self):
+  def _saveNote(self):
+    """
+    Saves the text in the textbox to the note object.
+    """
     newText = self.textBox.toPlainText()
     self.note.text = newText
     self.item.setText(0, self.note.pid)
     self.close()
 
-  def reject(self):
+  def _reject(self):
+    """
+    Closes the note editor ignoring all changes.
+    """
     self.close()

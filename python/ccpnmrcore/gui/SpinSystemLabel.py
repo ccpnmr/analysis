@@ -22,7 +22,11 @@ class SpinSystemLabel(DropBase, Label):
 
     self.setAcceptDrops(True)
 
-  def mousePressEvent(self, event):
+  def mousePressEvent(self, event:QtGui.QMouseEvent):
+    """
+    Re-implementation of the mouse press event to enable a strip to be dragged as a json object
+    containing its pid and a modifier key to encode the direction to drop the strip.
+    """
     event.accept()
     mimeData = QtCore.QMimeData()
     # itemData = QtCore.QByteArray(self.strip.pid or 'None')
@@ -40,7 +44,11 @@ class SpinSystemLabel(DropBase, Label):
     else:
       self.show()
 
-  def processStrips(self, pids:Sequence[str], event):
+  def processStrips(self, pids:Sequence[str], event:QtGui.QMouseEvent):
+    """
+    Takes a sequence of pids and if the correspond to strip pids, a new strip is created in the correct
+    direction specified in the sequence and the data of the source strip is displayed in the new strip.
+    """
 
     for pid in pids:
       current = self._appBase.current

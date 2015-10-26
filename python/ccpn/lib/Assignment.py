@@ -32,18 +32,28 @@ ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', '
               'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3'],'15N': ['N', 'ND1', 'NE', 'NE1',
               'NE2', 'NH1', 'NH2', 'NZ']}
 
+
+from ccpn import Chain, ChemicalShiftList, NmrResidue, Peak, PeakList, Project
+
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, getSpinSystemScore
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
+from ccpncore.util import Types
+
 
 from sklearn import svm
 
-def isInterOnlyExpt(string):
+def isInterOnlyExpt(experimenttType):
+  """
+  Determines if the specified experiment is an inter-residual only experiment
+  """
   expList = ('HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond')
-  if(any(expType in string.upper() for expType in expList)):
+  if(any(expType in experimenttType.upper() for expType in expList)):
     return True
 
-def assignAlphas(nmrResidue, peaks):
-
+def assignAlphas(nmrResidue:NmrResidue, peaks:Types.List[Peak]):
+  """
+  Assigns CA and CA-1 NmrAtoms to dimensions of specified peaks.
+  """
   if len(peaks) > 1:
     chain = nmrResidue.nmrChain
     newNmrResidue = chain.fetchNmrResidue(nmrResidue.sequenceCode+'-1')
@@ -59,8 +69,10 @@ def assignAlphas(nmrResidue, peaks):
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CA')])
 
 
-def assignBetas(nmrResidue, peaks):
-
+def assignBetas(nmrResidue:NmrResidue, peaks:Types.List[Peak]):
+  """
+  Assigns CB and CB-1 NmrAtoms to dimensions of specified peaks.
+  """
   if len(peaks) > 1:
     chain = nmrResidue.nmrChain
     newNmrResidue = chain.fetchNmrResidue(nmrResidue.sequenceCode+'-1')
@@ -77,12 +89,10 @@ def assignBetas(nmrResidue, peaks):
   elif len(peaks) == 1:
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
 
-def getNmrResiduePrediction(nmrResidue, chemicalShiftList, prior=0.05):
+def getNmrResiduePrediction(nmrResidue:NmrResidue, chemicalShiftList:ChemicalShiftList, prior:float=0.05):
   """
-  Takes ccpnCode and chemicalShift and predicts atom type
-  :param nmrResidue:
-  :param chemicalShiftList:
-  :return: dictionary of assignments {(ccpCode, atomName): prediction probability }
+  Takes an NmrResidue and a ChemicalShiftList and returns a dictionary of the residue type to
+  confidence levels for that NmrResidue.
   """
 
   predictions = {}
@@ -104,14 +114,12 @@ def getNmrResiduePrediction(nmrResidue, chemicalShiftList, prior=0.05):
 
   return finalPredictions
 
-def getNmrAtomPrediction(ccpCode, value, isotopeCode, strict=False):
+def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=False):
   """
-  Takes ccpnCode, chemicalShift and isotopeCode and predicts atom type
-  :param ccpCode:
-  :param value:
-  :param isotopeCode:
-  :return: dictionary of assignments {(ccpCode, atomName): prediction probability }
+  Takes a ccpCode, a chemical shift value and an isotope code and returns a dictionary of
+  atom type predictions to confidence values..
   """
+
   predictions = {}
   for atomName in getResidueAtoms(ccpCode, 'protein'):
     if atomName in ATOM_NAMES[isotopeCode]:
@@ -150,29 +158,11 @@ def getNmrAtomPrediction(ccpCode, value, isotopeCode, strict=False):
 #   if axisCode[0] == 'H':
 #     return '1H'
 
-def getNmrResidueChainProbabilities(nmrResidue, chain, chemicalShiftList):
-
-
-  ccpCodes = []
-  for residue in chain.residues:
-    ccpCode = residue.residueType
-    ccpCodes.append((ccpCode, residue.molType))
-
-  probDict = {}
-  getProb = getSpinSystemResidueProbability
-  priors = {}
-
-
-
-def copyAssignments(referencePeakList, matchPeakList):
+def copyAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
   """
 
-  Takes a reference peakList and assigns nmrAtoms to dimensions
-  of a match peakList based on matching axis codes
-  Inputs
-  :param referencePeakList:
-  :param matchPeakList:
-
+  Takes a reference peakList and assigns NmrAtoms to dimensions
+  of a match peakList based on matching axis codes.
   """
   import numpy
   project = referencePeakList.project
@@ -206,7 +196,12 @@ def copyAssignments(referencePeakList, matchPeakList):
       #   # print(axisCode)
       #   peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
 
-def propagateAssignments(peaks=None, referencePeak=None, current=None, tolerances=None):
+def propagateAssignments(peaks:Types.List[Peak]=None, referencePeak:Peak=None, current:object=None,
+                         tolerances:Types.List[float]=None):
+  """
+  Propagates dimensionNmrAtoms for each dimension of the specified peaks to dimensions of other
+  peaks.
+  """
 
   if referencePeak:
     peaksIn = [referencePeak, ]
@@ -305,9 +300,12 @@ def propagateAssignments(peaks=None, referencePeak=None, current=None, tolerance
     # shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
 
 
-def getSpinSystemsLocation(project, nmrResidues, chain, chemicalShiftList):
-
-
+def getSpinSystemsLocation(project:Project, nmrResidues:Types.List[NmrResidue],
+                           chain:Chain, chemicalShiftList:ChemicalShiftList):
+  """
+  Determines location of a set of NmrResidues in the specified chain using residue type
+  predictions.
+  """
   nmrProject = project._wrappedData
   spinSystems = [nmrResidue._wrappedData for nmrResidue in nmrResidues]
   chain = chain._wrappedData

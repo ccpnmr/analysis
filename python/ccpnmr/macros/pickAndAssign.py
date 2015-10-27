@@ -14,7 +14,7 @@ if len(project.nmrChains) == 0:
 else:
   c = project.nmrChains[0]
 
-hsqcPeakList = project.getByPid('PL:15N-HSQC-115^spc^par.1')
+hsqcPeakList = project.getByPid('PL:hsqc.1')
 
 shiftList = project.chemicalShiftLists[0]
 
@@ -26,16 +26,16 @@ for peak in hsqcPeakList.peaks:
   # peak.dimensionNmrAtoms = atoms
   peak.assignDimension(axisCode='Nh', value=a)
   peak.assignDimension(axisCode='Hn', value=a2)
-  dim1 = peak.peakList.spectrum.axisCodes.index('Nh')
-  dim2 = peak.peakList.spectrum.axisCodes.index('Hn')
-  shiftList.newChemicalShift(nmrAtom=a, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Nh')])
-  shiftList.newChemicalShift(nmrAtom=a2, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Hn')])
+  # dim1 = peak.peakList.spectrum.axisCodes.index('Nh')
+  # dim2 = peak.peakList.spectrum.axisCodes.index('Hn')
+  # shiftList.newChemicalShift(nmrAtom=a, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Nh')])
+  # shiftList.newChemicalShift(nmrAtom=a2, value=peak.position[hsqcPeakList.spectrum.axisCodes.index('Hn')])
 
-
-hncocacb = project.getByPid('PL:CBCA(CO)NH-125^spc^par.1')
-hncoca = project.getByPid('PL:HN(CO)CA-117^spc^par.1')
-hncacb = project.getByPid('PL:126.1')
-hnca =  project.getByPid('PL:HNCA-120^spc^par.1')
+#
+# hncocacb = project.getByPid('PL:CBCA(CO)NH-125^spc^par.1')
+# hncoca = project.getByPid('PL:HN(CO)CA-117^spc^par.1')
+# hncacb = project.getByPid('PL:126.1')
+# hnca =  project.getByPid('PL:HNCA-120^spc^par.1')
 #
 # copyAssignments(hsqcPeakList, hncocacb)
 # copyAssignments(hncocacb, hncacb)
@@ -43,7 +43,7 @@ hnca =  project.getByPid('PL:HNCA-120^spc^par.1')
 # copyAssignments(hnca, hncoca)
 
 
-peaklists2 = [hncocacb, hncacb]
+# peaklists2 = [hncocacb, hncacb]
 
 
 # copyAssignments(peakLists2[0], project.getByPid('PL:126.1'))

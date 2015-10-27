@@ -48,15 +48,22 @@ backboneAssignmentModule = self.showBackboneAssignmentModule(position='bottom',
 # backboneAssignmentModule.setAssigner(assigner)
 
 import numpy
-
-c = project.newNmrChain()
+import csv
 ssLabels = []
 positions = []
-
+import re
 hsqcPeakList = project.getByPid('PL:hsqc.1')
 
-atomDict = {}
+assignmentFile = open('/Users/simon1/FedirsData/CaM10hsqc.csv', 'r')
 
+reader = csv.reader(assignmentFile)
+
+for row in reader:
+  peakPosition = [row[1], row[2]]
+  positions.append(numpy.array(peakPosition))
+  match = re.match(r"([a-z]+)([0-9]+)", row[0], re.I)
+  residuePid = 'MR:A.%s.%s'.format(match[0], match[1])
+  residue = project.getByPid(residuePid)
 for peak in hsqcPeakList.peaks:
   r = c.newNmrResidue()
   a = r.newNmrAtom(isotopeCode='15N')

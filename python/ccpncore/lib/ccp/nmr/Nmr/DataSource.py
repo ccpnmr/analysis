@@ -266,8 +266,8 @@ def getPlaneData(self:'DataSource', position:Sequence=None, xDim=0, yDim=1):
       if xDim > yDim:
         blockPlane = blockPlane.transpose()
           
-      blockPlane = blockPlane.squeeze()
-      data[ylower:yupper, xlower:xupper] = blockPlane
+      #blockPlane = blockPlane.squeeze()  # removes 1, but sometimes block size is indeed 1 so do reshape instead
+      data[ylower:yupper, xlower:xupper] = blockPlane.reshape((yupper-ylower,xupper-xlower))
     
   fp.close()
   

@@ -289,11 +289,14 @@ class ViewBox(pg.ViewBox):
         # selectedPeaks = []
         for spectrumView in self.current.strip.spectrumViews:
           for peakList in spectrumView.spectrum.peakLists:
+            xAxis = spectrumView.spectrum.axisCodes.index(self.current.strip.orderedAxes[0].code)
+            yAxis = spectrumView.spectrum.axisCodes.index(self.current.strip.orderedAxes[1].code)
             for peak in peakList.peaks:
-              if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-                and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+              if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
                 if zPositions is not None:
-                  if zPositions[0] < float(peak.position[2]) < zPositions[1]:
+                  zAxis = spectrumView.spectrum.axisCodes.index(self.current.strip.orderedAxes[2].code)
+                  if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                     peak.isSelected = True
                     print(peak, '1')
                 else:

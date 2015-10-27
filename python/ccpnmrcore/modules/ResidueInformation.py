@@ -23,6 +23,7 @@ class ResidueInformation(CcpnDock):
     chainPulldown.setData([chain.pid for chain in project.chains])
     self.selectedChain = project.getByPid(chainPulldown.currentText())
     residueLabel = Label(self, text='Residue')
+    self.colourScheme = project._appBase.preferences.general.colourScheme
     residuePulldown = PulldownList(self, callback=self._setCurrentResidue)
     residuePulldown.setData(CCP_CODES)
     self.selectedResidueType = residuePulldown.currentText()
@@ -60,6 +61,10 @@ class ResidueInformation(CcpnDock):
     Finds all residues of the selected type along with one flanking residue either side and displays
     this information in the module.
     """
+    if self.colourScheme == 'dark':
+      stylesheet = 'Label {background-color: #f7ffff; color: #2a3358;}'
+    elif self.colourScheme == 'light':
+      stylesheet = 'Label {background-color: #bd8413; color: #fdfdfc;}'
     foundResidues = []
     for residue in self.selectedChain.residues:
       if residue.residueType == self.selectedResidueType.upper():
@@ -79,21 +84,21 @@ class ResidueInformation(CcpnDock):
                      hAlign='c')
         label1.setMaximumHeight(20)
         if foundResidues[j+i][0].nmrResidue is not None:
-          label1.setStyleSheet('Label {background-color: #f7ffff; color: #2a3358;}')
+          label1.setStyleSheet(stylesheet)
 
         self.residueWidget.layout().addWidget(label1, j+i, 0)
       if len(foundResidues[j+1]) > 1:
         label2 = Label(self, text=foundResidues[j+i][1].sequenceCode+' '+foundResidues[j+i][1].residueType,
                        hAlign='c')
         if foundResidues[j+i][1].nmrResidue is not None:
-          label2.setStyleSheet('Label {background-color: #f7ffff; color:#2a3358; }')
+          label2.setStyleSheet(stylesheet)
         label2.setMaximumHeight(30)
         self.residueWidget.layout().addWidget(label2, j+i, 1)
       if len(foundResidues[j+1]) > 2:
         label3 = Label(self, text=foundResidues[j+i][2].sequenceCode+' '+foundResidues[j+i][2].residueType,
                        hAlign='c')
         if foundResidues[j+i][2].nmrResidue is not None:
-          label3.setStyleSheet('Label {background-color: #f7ffff; color: #2a3358;}')
+          label3.setStyleSheet(stylesheet)
         self.residueWidget.layout().addWidget(label3, j+i, 2)
         label3.setMaximumHeight(30)
 

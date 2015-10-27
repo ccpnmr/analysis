@@ -248,7 +248,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def showPeaks(self, peakListView:GuiPeakListView, peaks:Types.List[Peak]):
     """
-    Displays specified peaks in all strip of the display using peakListView
+    Displays specified peaks in all strips of the display using peakListView
     """
     viewBox = peakListView.spectrumView.strip.viewBox
     activePeakItemDict = self.activePeakItemDict

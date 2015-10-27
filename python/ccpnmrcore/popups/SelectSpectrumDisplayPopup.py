@@ -70,7 +70,7 @@ class SelectSpectrumDisplayPopup(QtGui.QDialog, Base):
       elif self.refList.count() > 1 and self.queryList.count() > 1 and self.matchList.count() > 1:
         msg = "Reference, Query and Match Modules have not been selected, please select them to continue"
 
-      showRetryIgnoreCancel("Select Displays", msg)
+      showRetryIgnoreCancel("Select Displays", msg, colourScheme=self.project._appBase.preferences.general.colourScheme)
     else:
       self.parent.referenceDisplays = [self.refList.item(i).text() for i in range(self.refList.count())]
       self.parent.queryDisplays = [self.queryList.item(i).text() for i in range(self.queryList.count())]

@@ -77,11 +77,18 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
 
 
     scrollArea = ScrollArea(self, grid=(0, 0), gridSpan=(2, 2))
-    scrollArea.setStyleSheet("""QScrollArea { background-color:  #2a3358;
-                                }
-                                QTabWidget { background-color:  #2a3358;
-                                }
-                                                        """)
+    if spectrum.project._appBase.preferences.general.colourScheme == 'dark':
+      scrollArea.setStyleSheet("""QScrollArea { background-color:  #2a3358;
+                                  }
+                                  QTabWidget { background-color:  #2a3358;
+                                  }
+                                                          """)
+    elif spectrum.project._appBase.preferences.general.colourScheme == 'light':
+      scrollArea.setStyleSheet("""QScrollArea { background-color:  #FBF4CC;
+                                  }
+                                  QTabWidget { background-color:  #FBF4CC;
+                                  }
+                                                          """)
     mainLayout = QtGui.QVBoxLayout()
     scrollArea.setLayout(mainLayout)
     scrollArea.setWidget(tabWidget)
@@ -115,10 +122,6 @@ class GeneralTab(QtGui.QWidget, Base):
     self.pathData.setFixedWidth(200)
     self.pathData.setFixedHeight(25)
     self.pathData.editingFinished.connect(self.setSpectrumPath)
-    # self.pathDataButton = Button(self, text='...', callback=self.getSpectrumFile, vAlign='t', hAlign='l', grid=(1, 2))
-    # COmmented out as function no longer exists. NBNB TBD FIXME
-    # dataTypeLabel = Label(self, text="Data Type: ", vAlign='t', hAlign='l', grid=(2, 0))
-    # dataTypeData = Label(self, text=getSpectrumFileFormat(spectrum.filePath), vAlign='t', hAlign='l', grid=(2, 1))
     chemicalShiftListLabel = Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(3, 0))
     self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', hAlign='l', grid=(3, 1), texts=[csList.pid
                                                 for csList in spectrum.project.chemicalShiftLists]
@@ -447,7 +450,6 @@ class ContoursTab(QtGui.QWidget, Base):
 
   def lineEditTextChanged1(self, spectrum, value):
     spectrum.positiveContourBase = float(value)
-    # spectrum.spectrumItem.levels = spectrum.spectrumItem.getLevels()
 
   def lineEditTextChanged2(self, spectrum, value):
     spectrum.positiveContourFactor = float(value)
@@ -520,21 +522,29 @@ class ContoursTab(QtGui.QWidget, Base):
 class PeakListsTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, parent=None):
     super(PeakListsTab, self).__init__(parent)
-    #
+    self.spectrum = spectrum
     i=0
     for peakList in spectrum.peakLists:
       label = Label(self, grid=(i, 1), text=str(peakList.pid), vAlign='t', hAlign='l')
-      # label.setAlignment(QtCore.Qt.AlignTop)
-      # self.layout().addWidget(label, i, 1, QtCore.Qt.AlignTop)
       checkBox = CheckBox(self, grid=(i, 0), checked=True, vAlign='t', hAlign='l')
       # self.layout().addWidget(checkBox, i, 0, QtCore.Qt.AlignTop)
-    #   # if spectrum.spectrumItem.peakListItems[peakList.pid].displayed == True:
-    #   #   checkBox.setChecked(True)
-    #   # else:
-    #   #   checkBox.setChecked(False)
+      for strip in self.spectrum.project.strips:
+        peakListView = strip.peakListViewDict.get(peakList)
+        if peakListView.isVisible():
+          checkBox.setChecked(True)
+        else:
+          checkBox.setChecked(False)
     #   #
-    #   # checkBox.stateChanged.connect(lambda: self.peakListToggle(spectrum.spectrumItem, checkBox.checkState(),peakList))
-    #   # i+=1
+        checkBox.stateChanged.connect(partial(self.peakListToggle, peakListView))
+      i+=1
+
+  def peakListToggle(self, peakListView, state):
+      if state == QtCore.Qt.Checked:
+        peakListView.setVisible(True)
+      else:
+        peakListView.setVisible(False)
+
+
 
 
 class AcquisitionTab(QtGui.QWidget):

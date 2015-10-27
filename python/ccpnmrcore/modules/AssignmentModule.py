@@ -42,7 +42,7 @@ class AssignmentModule(CcpnDock, Base):
     self.selectionLayout = QtGui.QGridLayout()
     self.filterLayout = QtGui.QGridLayout()
     self.advancedLayout = QtGui.QGridLayout()
-    self.layout.addLayout(self.advancedLayout, 2, 0)
+    # self.layout.addLayout(self.advancedLayout, 2, 0)
     self.layout.addLayout(self.selectionLayout, 1, 0)
     self.layout.addLayout(self.filterLayout, 0, 0)
     self.selectionLayout.setRowMinimumHeight(0, 0)
@@ -59,6 +59,7 @@ class AssignmentModule(CcpnDock, Base):
     self.atomTypePulldowns = []
     self.moreButtons = []
     self.nmrResidueWidgets = []
+    self.colourScheme = self.project._appBase.preferences.general.colourScheme
 
 
 
@@ -129,7 +130,10 @@ class AssignmentModule(CcpnDock, Base):
     axisCode = self.current.peak.peakList.spectrum.axisCodes[dim]
     text = axisCode + ' ' + str(avgPos)
     label = Label(self, text=text)
-    label.setStyleSheet("border: 0px solid; color: #f7ffff;")
+    if self.colourScheme == 'dark':
+      label.setStyleSheet("border: 0px solid; color: #f7ffff;")
+    elif self.colourScheme == 'light':
+      label.setStyleSheet("border: 0px solid; color: #555d85;")
     self.labels.append(label)
 
 
@@ -270,14 +274,20 @@ class AssignmentModule(CcpnDock, Base):
       layout.setSpacing(10)
       layout.setMargin(5)
       layout.setContentsMargins(4, 4, 4, 4)
-      widget.setStyleSheet("border: 1px solid #bec4f3")
+      if self.colourScheme == 'dark':
+        widget.setStyleSheet("border: 1px solid #bec4f3")
+      elif self.colourScheme == 'light':
+        widget.setStyleSheet("border: 1px solid #bd8413")
       # pair[0].setFixedHeight(10)
       for item in range(len(pair)):
         layout.addWidget(pair[item], 0, QtCore.Qt.AlignTop)
-        pair[item].setStyleSheet("border: 0px solid; color: #f7ffff;")
+        if self.colourScheme == 'dark':
+          pair[item].setStyleSheet("border: 0px solid; color: #f7ffff;")
+        elif self.colourScheme == 'light':
+          pair[item].setStyleSheet("border: 0px solid; color: #555d85;")
       layout.addWidget(self.moreButtons[self.widgetItems.index(pair)], QtCore.Qt.AlignTop)
       # self.moreButtons[self.widgetItems.index(pair)]
-      pair[2].setStyleSheet("PulldownList {color: black; border: 0px solid;}")
+      pair[2].setStyleSheet("PulldownList {border: 0px solid;}")
       pair[2].setStyleSheet("border: 0px solid")
       pair[3].setStyleSheet("color: black; border: 0px solid;")
       widget.setLayout(layout)
@@ -325,7 +335,10 @@ class AssignmentModule(CcpnDock, Base):
       axisCode = self.current.peak.peakList.spectrum.axisCodes[dim]
       text = axisCode + ' ' + str(avgPos)
       label.setText(text)
-      label.setStyleSheet("border: 0px solid; color: #f7ffff;")
+      if self.colourScheme == 'dark':
+        label.setStyleSheet("border: 0px solid; color: #f7ffff;")
+      elif self.colourScheme == 'light':
+        label.setStyleSheet("border: 0px solid; color: #555d85;")
 
 
   def updateTables(self):

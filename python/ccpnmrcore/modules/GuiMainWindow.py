@@ -125,7 +125,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if len(recentFiles) >= 10:
       recentFiles.pop()
     recentFiles.insert(0, path)
-
+    self.colourScheme = self._appBase.preferences.general.colourScheme
     recentFiles = uniquify(recentFiles)
     # print(recentFiles)
     self._appBase.preferences.recentFiles = recentFiles
@@ -519,12 +519,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def displayProjectSummary(self):
     info = MessageDialog.showInfo('Not implemented yet',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version', colourScheme=self.colourScheme)
 
 
   def archiveProject(self):
     info = MessageDialog.showInfo('Not implemented yet',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version', colourScheme=self.colourScheme)
 
 
   def showApplicationPreferences(self):
@@ -570,7 +570,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # NBNB TBD FIXME put code here to ask if you want to save etc.
 
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                         ['Save and Quit', 'Quit without Saving', 'Cancel'])
+                                         ['Save and Quit', 'Quit without Saving', 'Cancel'],
+                                          colourScheme=self.colourScheme)
     if reply == 'Save and Quit':
       if event:
         event.accept()
@@ -718,7 +719,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def defineUserShortcuts(self):
     info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
 
 
   def showMoleculePopup(self):
@@ -731,33 +733,39 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def inspectMolecule(self):
     info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
 
 
 
   def showCommandHelp(self):
     info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
 
 
   def showTutorials(self):
     info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
 
 
   def showAboutPopup(self):
     info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
 
 
   def showAboutCcpnPopup(self):
     info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
 
 
   def showCodeInspectionPopup(self):
     info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
 
 
   def showUpgradePopup(self):
@@ -765,7 +773,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showBugReportingPopup(self):
     info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version')
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
 
 
   def runMacro(self, macroFile:str=None):
@@ -881,7 +890,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         # so if it exists but is empty then don't bother asking the question
         title = 'Overwrite path'
         msg ='Path "%s" already exists, continue?' % newPath
-        if not MessageDialog.showYesNo(title, msg, self):
+        if not MessageDialog.showYesNo(title, msg, self, colourScheme=self.colourScheme):
           return
       self._project.save(newPath=newPath)#, newProjectName=os.path.basename(newPath))
 

@@ -71,9 +71,9 @@ class BackboneAssignmentModule(CcpnDock):
     inside the module.
     """
     self.assigner.clearAllItems()
-    self._navigateTo(nmrResidue, row, col)
+    self.navigateTo(nmrResidue, row, col)
 
-  def _navigateTo(self, nmrResidue:NmrResidue, row:int=None, col:int=None, strip:GuiStrip=None):
+  def navigateTo(self, nmrResidue:NmrResidue, row:int=None, col:int=None, strip:GuiStrip=None):
     """
     Takes an NmrResidue and an optional GuiStrip and changes z position(s) of all available displays
     to chemical shift value NmrAtoms in the NmrResidue. Creates assignMatrix for strip matching and

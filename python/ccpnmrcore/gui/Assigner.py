@@ -51,7 +51,7 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
   Can be linked to a Nmr Atom.
   """
 
-  def __init__(self, text, pos=None, nmrAtom=None):
+  def __init__(self, project, text, pos=None, nmrAtom=None):
 
     super(GuiNmrAtom, self).__init__()
     self.setPlainText(text)
@@ -60,13 +60,20 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
     self.connectedAtoms = 0
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+    if project._appBase.preferences.general.colourScheme == 'dark':
+      colour1 = '#f7ffff'
+      colour2 = '#bec4f3'
+    elif project._appBase.preferences.general.colourScheme == 'light':
+      colour1 = '#FDFDFC'
+      colour2 = '#555D85'
+
     if nmrAtom:
       self.name = nmrAtom.name
-    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+    self.setDefaultTextColor(QtGui.QColor(colour1))
     if self.isSelected:
-      self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
+      self.setDefaultTextColor(QtGui.QColor(colour2))
     else:
-      self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      self.setDefaultTextColor(QtGui.QColor(colour1))
 
 
 
@@ -81,8 +88,12 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
 
     super(GuiNmrResidue, self).__init__()
     self.setPlainText(nmrResidue.id)
+    project = nmrResidue.project
     self.setFont(Font(size=12, bold=True))
-    self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+    if project._appBase.preferences.general.colourScheme == 'dark':
+      self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+    elif project._appBase.preferences.general.colourScheme == 'light':
+      self.setDefaultTextColor(QtGui.QColor('#555D85'))
     self.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     self.parent = parent
@@ -175,17 +186,21 @@ class Assigner(CcpnDock):
     Takes an Nmr Residue and a dictionary of atom names and GuiNmrAtoms and
     creates a graphical representation of a residue in the assigner
     """
+    if self.project._appBase.preferences.general.colourScheme == 'dark':
+      lineColour = '#f7ffff'
+    elif self.project._appBase.preferences.general.colourScheme == 'light':
+      lineColour = ''
     for item in atoms.values():
       self.scene.addItem(item)
     nmrAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
-    cbLine = self._addConnectingLine(atoms['CA'], atoms['CB'], 'grey', 1.0, 0)
+    cbLine = self._addConnectingLine(atoms['CA'], atoms['CB'], lineColour, 1.0, 0)
     if not 'CB' in nmrAtoms:
       self.scene.removeItem(atoms['CB'])
       self.scene.removeItem(cbLine)
 
-    self._addConnectingLine(atoms['H'], atoms['N'], 'grey', 1.0, 0)
-    self._addConnectingLine(atoms['N'], atoms['CA'], 'grey', 1.0, 0)
-    self._addConnectingLine(atoms['CO'], atoms['CA'], 'grey', 1.0, 0)
+    self._addConnectingLine(atoms['H'], atoms['N'], lineColour, 1.0, 0)
+    self._addConnectingLine(atoms['N'], atoms['CA'], lineColour, 1.0, 0)
+    self._addConnectingLine(atoms['CO'], atoms['CA'], lineColour, 1.0, 0)
     nmrAtomLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
     self.scene.addItem(nmrAtomLabel)
     self._addResiduePredictions(nmrResidue, atoms['CA'])
@@ -330,7 +345,10 @@ class Assigner(CcpnDock):
     for prediction in predictions:
       predictionLabel = QtGui.QGraphicsTextItem()
       predictionLabel.setPlainText(prediction[0]+' '+prediction[1])
-      predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      if self.project._appBase.preferences.general.colourScheme == 'dark':
+        predictionLabel.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      elif self.project._appBase.preferences.general.colourScheme == 'light':
+        predictionLabel.setDefaultTextColor(QtGui.QColor('#555D85'))
       predictionLabel.setFont(Font(size=12, bold=True))
       predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width(), caAtom.y()+(30*(predictions.index(prediction)+2)))
       self.scene.addItem(predictionLabel)
@@ -518,7 +536,7 @@ class Assigner(CcpnDock):
     Creates a GuiNmrAtom specified by the atomType and graphical position supplied.
     GuiNmrAtom can be linked to an NmrAtom by supplying it to the function.
     """
-    atom = GuiNmrAtom(text=atomType, pos=position, nmrAtom=nmrAtom)
+    atom = GuiNmrAtom(self.project, text=atomType, pos=position, nmrAtom=nmrAtom)
     return atom
 
 # class GuiNmrAtom(QtGui.QGraphicsTextItem):

@@ -17,6 +17,7 @@ class SequenceModule(CcpnDock):
     CcpnDock.__init__(self, name='Sequence')
 
     self.project=project
+    self.colourScheme = project._appBase.preferences.general.colourScheme
     self.label.hide()
     self.setAcceptDrops(True)
     self.scrollArea = QtGui.QScrollArea()
@@ -51,9 +52,13 @@ class SequenceModule(CcpnDock):
     """
     Highlights regions on the sequence specified by the list of residues passed in.
     """
+    if self.project._appBase.preferences.general.colourScheme == 'dark':
+      colour = '#e4e15b'
+    elif self.project._appBase.preferences.general.colourScheme == 'light':
+      colour = '#009a00'
     for residue in residues:
       guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
-      guiResidue.setHtml('<div style="color: #e4e15b;text-align: center;">'+
+      guiResidue.setHtml('<div style="color: %s;text-align: center;">' % colour+
                            residue.shortName+'</div>')
 
 
@@ -76,7 +81,11 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     self.text=chain.compoundName
     self.setHtml('<div style=><strong>'+chain.compoundName+': </strong></div>')
     self.setFont(Font(size=20, bold=True))
-    self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
+    if project._appBase.preferences.general.colourScheme == 'dark':
+      colour = '#bec4f3'
+    elif project._appBase.preferences.general.colourScheme == 'light':
+      colour = '#bd8413'
+    self.setDefaultTextColor(QtGui.QColor(colour))
     self.residueDict = {}
     i = 0
     for residue in chain.residues:
@@ -96,11 +105,17 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     self.setPlainText(residue.shortName)
     position = labelPosition+(20*index)
     self.setFont(Font(size=GuiChainResidue.fontSize, normal=True))
-    self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
+    if project._appBase.preferences.general.colourScheme == 'dark':
+      colour1 = '#bec4f3'
+      colour2 = '#f7ffff'
+    elif project._appBase.preferences.general.colourScheme == 'light':
+      colour1 = '#bd8413'
+      colour2 = '#666e98'
+    self.setDefaultTextColor(QtGui.QColor(colour1))
     self.setPos(QtCore.QPointF(position, yPosition))
     self.residueNumber = residue.sequenceCode
     if residue.nmrResidue is not None:
-      self.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
+      self.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour2 +
                    residue.shortName+'</strong></div>')
     else:
       self.setHtml('<div style:"text-align: center;">'+residue.shortName+'</div')
@@ -127,15 +142,23 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
   def _dragEnterEvent(self, event:QtGui.QMouseEvent):
 
+    if self.project._appBase.preferences.general.colourScheme == 'dark':
+      colour = '#e4e15b'
+    elif self.project._appBase.preferences.general.colourScheme == 'light':
+      colour = '#009a00'
     item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
-      item.setDefaultTextColor(QtGui.QColor('#e4e15b'))
+      item.setDefaultTextColor(QtGui.QColor(colour))
     event.accept()
 
   def _dragLeaveEvent(self, event:QtGui.QMouseEvent):
+    if self.project._appBase.preferences.general.colourScheme == 'dark':
+      colour = '#f7ffff'
+    elif self.project._appBase.preferences.general.colourScheme == 'light':
+      colour = '#666e98'
     item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
-      item.setDefaultTextColor(QtGui.QColor('#f7ffff'))
+      item.setDefaultTextColor(QtGui.QColor(colour))
     event.accept()
 
 
@@ -144,16 +167,20 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
     all succeeding residues according to the length of the list.
     """
+    if self.project._appBase.preferences.general.colourScheme == 'dark':
+      colour = '#f7ffff'
+    elif self.project._appBase.preferences.general.colourScheme == 'light':
+      colour = '#666e98'
     res = self.scene.itemAt(event.scenePos())
     nmrResidue = self.project.getByPid(data[0])
-    res.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
+    res.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
                   res.residue.shortName+'</strong></div>')
     nmrResidue.residue = res.residue
 
     for assignableResidue in data[1:]:
       res = nmrResidue.residue.nextResidue
       guiResidue = self.parent.residueDict.get(res.sequenceCode)
-      guiResidue.setHtml('<div style="color: #f7ffff; text-align: center;"><strong>'+
+      guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour+
                          res.shortName+'</strong></div>')
       nmrResidue = self.project.getByPid(assignableResidue)
       nmrResidue.residue = res

@@ -19,33 +19,33 @@ class Test_getNmrAtomPrediction(WrapperTesting):
       self.CBShift = 35
 
   def test_nmrAtomPrediction(self):
-    predictedAtomThrCB = [getNmrAtomPrediction(ccpCode, self.ThrCBShift, '13C') for ccpCode in CCP_CODES]
+    predictedAtomThrCB = [getNmrAtomPrediction(ccpCode, self.ThrCBShift, '13C', strict=True) for ccpCode in CCP_CODES]
     refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomThrCB if len(type) > 0]
     thrCBatomPredictions = set()
 
     for pred in refinedPreds:
       if pred[1] > 90:
         thrCBatomPredictions.add(pred[0])
-    predictedAtomAlaCB = [getNmrAtomPrediction(ccpCode, self.AlaCBShift, '13C') for ccpCode in CCP_CODES]
+    predictedAtomAlaCB = [getNmrAtomPrediction(ccpCode, self.AlaCBShift, '13C', strict=True) for ccpCode in CCP_CODES]
     refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomAlaCB if len(type) > 0]
     alaCBatomPredictions = set()
     for pred in refinedPreds:
       if pred[1] > 90:
         alaCBatomPredictions.add(pred[0])
-    predictedAtomCACB = [getNmrAtomPrediction(ccpCode, self.CACBShift, '13C') for ccpCode in CCP_CODES]
+    predictedAtomCACB = [getNmrAtomPrediction(ccpCode, self.CACBShift, '13C', strict=True) for ccpCode in CCP_CODES]
     refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomCACB if len(type) > 0]
     CACBatomPredictions = set()
     for pred in refinedPreds:
       if pred[1] > 90:
         CACBatomPredictions.add(pred[0])
-    predictedAtomCAShift = [getNmrAtomPrediction(ccpCode, self.CAShift, '13C') for ccpCode in CCP_CODES]
+    predictedAtomCAShift = [getNmrAtomPrediction(ccpCode, self.CAShift, '13C', strict=True) for ccpCode in CCP_CODES]
     refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomCAShift if len(type) > 0]
     CAatomPredictions = set()
     for pred in refinedPreds:
       if pred[1] > 90:
         CAatomPredictions.add(pred[0])
 
-    predictedAtomCBShift = [getNmrAtomPrediction(ccpCode, self.CBShift, '13C') for ccpCode in CCP_CODES]
+    predictedAtomCBShift = [getNmrAtomPrediction(ccpCode, self.CBShift, '13C', strict=True) for ccpCode in CCP_CODES]
     refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomCBShift if len(type) > 0]
     print(refinedPreds)
     CBatomPredictions = set()

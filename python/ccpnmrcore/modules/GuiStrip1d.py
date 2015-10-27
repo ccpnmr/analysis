@@ -50,7 +50,8 @@ class GuiStrip1d(GuiStrip):
     self.spectrumIndex = 0
     self.peakItems = {}
     for spectrumView in self.spectrumViews:
-      self.plotWidget.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour)
+      self.plotWidget.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
+                                    strip=self)
 
 
   def get1dContextMenu(self) -> Menu:

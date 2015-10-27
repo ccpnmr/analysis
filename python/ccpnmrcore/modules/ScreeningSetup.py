@@ -112,9 +112,9 @@ class ScreeningSetup(CcpnDock, Base):
         test.append(sample)
 
     columns = [Column('Reference', lambda sample:str(sample.pid)),
-               Column('Sample', ''),
-               Column('Efficiency', ''),
-               Column('Hits','')]
+               Column('Sample', lambda sample:str(sample.pid)),
+               Column('Efficiency', lambda sample: int(sample.minScore)),
+               Column('Hits',lambda sample: (int(len(sample.peakCollections))))]
 
     screenTable = ObjectTable(self.scrollAreaWidgetContents2, columns, callback=None, objects=[], grid=(1, 0))
     screenTable.setObjects(test)
@@ -128,7 +128,7 @@ class ScreeningSetup(CcpnDock, Base):
     hitAnalysisList = []
     columnsHit= [Column('Substance',''),
                Column('Status', ''),
-               Column('Difference', '')]
+               Column('Scoring', '')]
 
     hitAnalysisTable2 = ObjectTable(self.scrollAreaWidgetContents3, columnsHit,
                                callback=self.showPeaks, objects=[],

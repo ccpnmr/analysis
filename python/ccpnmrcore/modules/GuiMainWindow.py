@@ -471,7 +471,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       elif obj.shortClassName == 'PL':
         self.showPeakTable(self._project, selectedList=obj)
       elif obj.shortClassName == 'SA':
-        popup = SamplePropertiesPopup(obj, item)
+        popup = SamplePropertiesPopup(obj, item,  project=self.project)
         popup.exec_()
         popup.raise_()
 
@@ -484,7 +484,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=newNote, item=newItem)
       # self.dockArea.addDock(self.notesEditor)
     elif item.data(0, QtCore.Qt.DisplayRole) == '<New Sample>':
-      newSample = project.newSample(name=str('New Sample'))
+      newSample = project.newSample(name=str('NewSample'))
       self.sideBar.addItem(self.sideBar.spectrumSamples, newSample)
 
 

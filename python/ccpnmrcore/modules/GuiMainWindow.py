@@ -201,7 +201,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu = Menu("&Help", self)
 
 
-    fileMenu.addAction(Action(self, "New", callback=self._appBase.newProject, shortcut='pn'))
+    fileMenu.addAction(Action(self, "New", callback=self.newProject, shortcut='pn'))
 
     fileMenu.addAction(Action(self, "Open...", callback=self.loadAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
@@ -349,7 +349,20 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.setNativeMenuBar(False)
     self.show()
 
-
+  def newProject(self):
+    
+    project = self._appBase.project
+    if project._wrappedData.parent.isProjectModified():
+      ss = ' and any changes will be lost'
+    else:
+      ss = ''
+    result = MessageDialog.showYesNo('New Project',
+          'Do you really want to create a new project (current project will be closed%s)?' % ss,
+          colourScheme=self.colourScheme)
+    
+    if result:
+      self._appBase.newProject()
+    
   def _showDocumentation(self, title, *args):
     
     newDock = CcpnDock("API Documentation")

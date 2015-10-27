@@ -97,7 +97,7 @@ class SampleComponent(AbstractWrapperObject):
   @property
   def concentrationError(self) -> float:
     """Estimated Standard error of SampleComponent.concentration"""
-    return self.swrappedData.concentrationError
+    return self._wrappedData.concentrationError
 
   @concentrationError.setter
   def concentrationError(self, value:float):

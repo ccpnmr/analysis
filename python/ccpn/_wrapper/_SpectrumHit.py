@@ -132,7 +132,7 @@ class SpectrumHit(AbstractWrapperObject):
   @property
   def concentrationError(self) -> float:
     """Estimated Standard error of SpectrumHit.concentration"""
-    return self.swrappedData.concentrationError
+    return self._wrappedData.concentrationError
 
   @concentrationError.setter
   def concentrationError(self, value:float):

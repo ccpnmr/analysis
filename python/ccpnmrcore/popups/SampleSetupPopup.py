@@ -14,7 +14,6 @@ from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Widget import Widget
 
-
 from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
 from ccpn.lib.Sample import setupSamples
 
@@ -121,10 +120,10 @@ class SamplePopup(QtGui.QDialog):
     spectra = []
 
 
-    if not self.project.samples:
-      for i, spectrum in enumerate(self.project.spectra):
-        newSample = self.project.newSample(name=str(i+1))
-        spectrum.sample = newSample
+    # if not self.project.samples:
+    #   for i, spectrum in enumerate(self.project.spectra):
+    #     newSample = self.project.newSample(name=str(i+1))
+    #     spectrum.sample = newSample
 
     for i in range(refCount):
       item = refData.child(i)
@@ -140,18 +139,20 @@ class SamplePopup(QtGui.QDialog):
     minimalDistance = self.distance.value()
     if self.setup.checkBox1.isChecked():
       value = (self.setup.spinBoxSA.value())
-      samples = setupSamples(self.project.samples, value , 'nSamples', minimalOverlap=minimalDistance)
-
+      samples = setupSamples(self.project.substances, value , 'nSamples', minimalOverlap=minimalDistance)
 
 
     elif self.setup.checkBox2.isChecked():
       value = (int(self.setup.spinBoxcomponent.value()))
-      samples = setupSamples(self.project.samples, value, 'nComponentsPerSample', minimalOverlap=minimalDistance)
+      samples = setupSamples(self.project.substances, value, 'nComponentsPerSample', minimalOverlap=minimalDistance)
 
 
 
     for sample in samples:
       newItem = sideBar.addItem(sampleTab, sample)
+
+      # for sampleComponent in sample.sampleComponents[0:]:
+      #   sideBar.addItem(newItem, sampleComponent.substance)
       for peakCollection in sample.peakCollections[0:]:
         self.spectrum = self.project.getByPid('SP:'+peakCollection.name)
         sideBar.addItem(newItem, self.spectrum)
@@ -277,9 +278,7 @@ class ExcludeRegions(QtGui.QWidget, Base):
     self.comboBoxes.append(widgetList)
     self.closebutton.clicked.connect(partial(self.deleteRegions, self.positions))
 
-  # def newValue(self, value):
-  #
-  #   print(value, ' Not Yet Implemented')
+
 
 
 

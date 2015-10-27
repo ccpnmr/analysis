@@ -295,9 +295,10 @@ class ViewBox(pg.ViewBox):
                 if zPositions is not None:
                   if zPositions[0] < float(peak.position[2]) < zPositions[1]:
                     peak.isSelected = True
+                    print(peak, '1')
                 else:
                   peak.isSelected = True
-
+                  print(peak, '2')
       else:
         self._updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()

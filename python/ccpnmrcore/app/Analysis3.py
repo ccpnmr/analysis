@@ -76,11 +76,14 @@ class Analysis3(AppBase):
         typ, contents, state = layout['main']
 
         containers, docks = self._appBase.mainWindow.dockArea.findAll()
-        for item in contents:
-          if item[0] == 'dock':
-            obj = docks.get(item[1])
-            if obj is None:
-             func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
+        flatten = lambda *n: (e for a in n
+        for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
+        flatContents = list(flatten(contents))
+        for item in flatContents:
+          if item in list(MODULE_DICT.keys()):
+            obj = docks.get(item)
+            if not obj:
+             func = getattr(self._appBase.mainWindow, MODULE_DICT[item])
              func()
         for s in layout['float']:
           typ, contents, state = s[0]['main']
@@ -88,8 +91,9 @@ class Analysis3(AppBase):
           containers, docks = self._appBase.mainWindow.dockArea.findAll()
           for item in contents:
             if item[0] == 'dock':
+              print(obj)
               obj = docks.get(item[1])
-              if obj is None:
+              if not obj:
                 func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
                 func()
         self._appBase.mainWindow.dockArea.restoreState(layout)

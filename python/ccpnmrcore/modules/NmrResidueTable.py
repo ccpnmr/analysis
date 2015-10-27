@@ -41,10 +41,10 @@ class NmrResidueTable(QtGui.QWidget, Base):
 
 
   def getNmrAtoms(self, nmrResidue):
-    return ', '.join([atom.name for atom in nmrResidue.nmrAtoms])
+    return ', '.join(list(set([atom.name for atom in nmrResidue.nmrAtoms])))
 
   def getNmrResiduePeaks(self, nmrResidue):
-    return sum([len(atom.assignedPeaks()) for atom in nmrResidue.nmrAtoms])
+    return sum(list(set([len(atom.assignedPeaks()) for atom in nmrResidue.nmrAtoms])))
 
   def getSequenceCode(self, nmrResidue):
     try:

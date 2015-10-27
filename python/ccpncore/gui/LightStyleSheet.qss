@@ -1,10 +1,63 @@
+QDialog {
+        background-color: #FBF4CC;
+        color: #555D85;
+        }
+
+QMenu {
+      background-color: #EDDFBC;
+    }
+
+QMenu::right-arrow {
+border-image: none;
+image: url(:/light-side.png);
+}
 
 QMenuBar {
               background-color: #EDDFBC;
               font-size: 1.5em;
               font-weight: bold;
-
+              border-bottom: 1px solid #fdfdfc;
               }
+
+Dock { background-color: #FBF4CC;
+     }
+
+DoubleSpinbox {
+              background-color: #fffdd1;
+              color: #464e76;
+              }
+
+DoubleSpinbox::hover {
+              background-color: #fdfdfc;
+              }
+
+Spinbox {
+              background-color: #fffdd1;
+              color: #464e76;
+              }
+
+Spinbox::hover {
+              background-color: #fdfdfc;
+              }
+
+PulldownList {
+          background-color: #FFFDD1;
+          border: 1px solid #EDC151;
+          color: #464E76;
+          margin-left: 4px;
+          padding-left: 2px;
+          font-weight: normal;
+          }
+
+
+PulldownList::item {
+                   background-color: #fffdd1;
+                   color: #464e76;
+                   }
+PulldownList::item::selected {
+                    background-color: #fdfdfc;
+                    color: #464e76;
+                    }
 QMenuBar::item {
                 background-color: #E7D8B6;
                 color: #555D85;
@@ -17,9 +70,6 @@ QMenuBar::item::hover {
      color: #009A00;
       }
 
-QMenu {
-      background-color: #EDDFBC;
-    }
 
 QMenu::item {background-color: #EDDFBC;
              color: #555D85;
@@ -33,18 +83,12 @@ QMenu::item::hover {
       color: #009A00
       }
 
-
 Dock DockLabel  {
           background-color : #8087B3;
           color : #FDFDFC;
           font-weight: Semibold;
           border: 1px solid #fdfdfc;
 }
-
-QDialog {
-        background-color: #FBF4CC;
-        color: #555D85;
-        }
 
 QDialog QLabel {
 				color: #555d85;
@@ -55,7 +99,7 @@ QDialog QPushButton {
 				color: #fdfdfc;
 				background-color: #bd8413;
 				}
-QDialog QPushButton::pressed {
+QDialog QPushButton::clicked {
                           color: #fdfdfc;
                           background-color: #8087b3;
                           }
@@ -64,34 +108,20 @@ QDialog QPushButton::hover {
                           background-color: #009a00;
                           }
 
-DoubleSpinbox {
-              background-color: #fffdd1;
-              border: 1px solid #edc151;
-              color: #464e76;
-              }
+QToolButton {
+            color: #464E76;
+            border: 1px solid #EDC151;
+            }
 
-DoubleSpinbox::hover {
-              background-color: #fdfdfc;
-              border: 1px solid #182548;
-              }
-
-Spinbox {
-              background-color: #fffdd1;
-              border: 1px solid #edc151;
-              color: #464e76;
-              }
-
-Spinbox::hover {
-              background-color: #fdfdfc;
-              border: 1px solid #182548;
-              }
+QDialog::header {
+                color:  #555d85;
+                }
 
 QListWidget {background-color: #FFFDD1;
              color: #464E76;
              font-weight: normal;
              padding: 4px;
              border: 1px solid #EDC151;
-
     }
 
 PulldownList::hover {
@@ -101,6 +131,7 @@ PulldownList::hover {
 ObjectTable { margin-left: 4px;
              border: 1px #182548;
              font-family: open-sans;
+             alternate-background-color: black;
            }
 QHeaderView {
                   background-color: #FDFDFC;
@@ -116,17 +147,17 @@ ObjectTable::item::selected {
                             background-color: #FFFCBA;
                             color: #464E76;
                    }
-PulldownList {
-          background-color: #FFFDD1;
-          border: 1px solid #EDC151;
-          color: #464E76;
-          }
+
 
 QToolBar {
           background-color: #fbf4cc;
           border: 1px solid transparent;
           }
 
+QToolButton {
+            color: #555d85;
+            border: 1px solid #182548;
+            }
 
 Label {
         color: #555D85;
@@ -137,8 +168,9 @@ Label {
 QLineEdit {
         background-color: #FFFDD1;
         color: #464E76;
-        margin: 0px 4px 4px 4px;
-        border: 1px solid #EDC151;
+        /*margin: 0px 4px 4px 4px;*/
+        margin-right: 4px;
+        /*border: 1px solid #EDC151;*/
         font-size: 1.5em;
         }
 
@@ -181,10 +213,6 @@ Dock > QWidget { background-color: #FBF4CC;
                  padding: 0px;
         }
 
-QToolButton {
-            color: #464E76;
-            border: 1px solid #EDC151;
-            }
 
 
 
@@ -235,12 +263,16 @@ QTreeWidget::branch:open::hover {
 
 QTreeWidget::branch:closed:has-children{
 border-image: none;
-image: url(:/dark-side.png);
+image: url(:/light-side.png);
+padding-left: 10px;
+background-color: #EDCF83;
+
 }
 
 QTreeWidget::branch:open{
 border-image: none;
-image: url(:/dark-down.png);
+image: url(:/light-down.png);
+background-color: #EDCF83;
 
 }
 
@@ -280,7 +312,7 @@ QSplitter::handle:vertical {
     height: 1px;
 }
 
-QTabWidget QWidget { background: #020F31;
+QTabWidget QWidget { background: #FBF4CC;
 padding: 0px;
     }
 

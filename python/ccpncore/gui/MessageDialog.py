@@ -15,41 +15,41 @@ Critical    = QtGui.QMessageBox.Critical
 Save        = QtGui.QMessageBox.Save 
 Discard     = QtGui.QMessageBox.Discard
 
-def showInfo(title, message, parent=None):
+def showInfo(title, message, parent=None, colourScheme=None):
 
   dialog = MessageDialog('Information', title, message,
-                         Information, parent)
+                         Information, colourScheme, parent)
 
   dialog.setStandardButtons(Ok)
   dialog.exec_()
   
   return 
 
-def showOkCancel(title, message, parent=None):
+def showOkCancel(title, message, parent=None, colourScheme=None):
 
   dialog = MessageDialog('Query', title, message,
-                         Question, parent)
+                         Question, colourScheme, parent)
 
   dialog.setStandardButtons(Ok | Cancel)
   dialog.setDefaultButton(Ok)
   
   return dialog.exec_() == Ok
 
-def showYesNo(title, message, parent=None):
+def showYesNo(title, message, parent=None, colourScheme=None):
 
 
   dialog = MessageDialog('Query', title, message,
-                         Question, parent)
+                         Question, colourScheme, parent)
                          
   dialog.setStandardButtons(Yes | No)
   dialog.setDefaultButton(Yes)
 
   return dialog.exec_() == Yes
 
-def showRetryIgnoreCancel(title, message, parent=None):
+def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None):
 
   dialog = MessageDialog('Retry', title, message,
-                         Question, parent)
+                         Question, colourScheme, parent)
                          
   dialog.setStandardButtons( Retry | Ignore | Cancel)
   dialog.setDefaultButton(Retry)
@@ -65,10 +65,10 @@ def showRetryIgnoreCancel(title, message, parent=None):
   else:
     return None    
 
-def showSaveDiscardCancel(title, message, parent=None):
+def showSaveDiscardCancel(title, message, parent=None, colourScheme=None):
 
   dialog = MessageDialog('Query', title, message,
-                         Question, parent)
+                         Question, colourScheme, parent)
                          
   dialog.setStandardButtons( Save | Discard | Cancel)
   dialog.setDefaultButton(Save)
@@ -84,23 +84,23 @@ def showSaveDiscardCancel(title, message, parent=None):
   else:
     return None    
 
-def showWarning(title, message, parent=None):
+def showWarning(title, message, parent=None, colourScheme=None):
 
   dialog = MessageDialog('Warning', title, message,
-                         Warning, parent)
+                         Warning, colourScheme, parent)
 
   dialog.setStandardButtons(Close)
   dialog.exec_()
  
   return
 
-def showMulti(title, message, texts, objects=None, parent=None):
+def showMulti(title, message, texts, objects=None, parent=None, colourScheme=None):
 
   if objects:
     assert len(objects) == len(texts)
 
   dialog = MessageDialog('Query', title, message,
-                         Question, parent)
+                         Question, colourScheme, parent)
   
   for text in texts:
     dialog.addButton(text, QtGui.QMessageBox.AcceptRole)
@@ -113,20 +113,20 @@ def showMulti(title, message, texts, objects=None, parent=None):
   else:
     return texts[index]  
 
-def showError(title, message, parent=None):
+def showError(title, message, parent=None, colourScheme=None):
   
   dialog = MessageDialog('Error', title, message,
-                         Critical, parent)
+                         Critical, colourScheme, parent)
 
   dialog.setStandardButtons(Close)
   dialog.exec_()
   
   return
 
-def showMessage(title, message, icon, parent=None):
+def showMessage(title, message, icon, parent=None, colourScheme=None):
   
   dialog = MessageDialog('Message', title, message,
-                         icon, parent)
+                         icon, colourScheme, parent)
 
   dialog.setStandardButtons(Close)
   dialog.exec_()
@@ -135,7 +135,7 @@ def showMessage(title, message, icon, parent=None):
   
 class MessageDialog(QtGui.QMessageBox):
 
-  def __init__(self, title, basicText, message, icon=Information, parent=None):
+  def __init__(self, title, basicText, message, icon=Information, colourScheme='dark', parent=None):
      
     QtGui.QMessageBox.__init__(self, parent)
     
@@ -144,10 +144,14 @@ class MessageDialog(QtGui.QMessageBox):
     self.setInformativeText(message)
     self.setIcon(icon)
 
-    self.setStyleSheet("""  QMessageBox QLabel {
+    if colourScheme == 'dark':
+      self.setStyleSheet("""  QMessageBox QLabel {
                               color: #f7ffff;
                           }""")
-
+    elif colourScheme == 'light':
+      self.setStyleSheet("""  QMessageBox QLabel {
+                              color: #555d85;
+                          }""")
 
 if __name__ == '__main__':
 

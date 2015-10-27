@@ -69,10 +69,7 @@ QMenuBar::item::selected { color: #f7ffff;
 QMenuBar::item::hover {
      background-color: #666E98;
      color: #e4e15b;
-
       }
-
-
 
 QMenu::item {background-color: #424a71;
              color: #bec4f3;

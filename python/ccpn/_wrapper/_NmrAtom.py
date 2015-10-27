@@ -114,13 +114,18 @@ class NmrAtom(AbstractWrapperObject):
 
     self._wrappedData.name = value or None
 
-  def reassigned(self, atomId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
+  def assignTo(self, atomId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, name:str=None, mergeToExisting=True) -> 'NmrAtom':
-    """Get NmrAtom reassigned according to residueId or other parameters.
-    Result may be self changed in place or a copy (with self deleted), so ALWAYS use the return value.
-    Setting atomId deassigns empty residueType or name fields,
+    """Assign NmrAtom to atomId (or other parameters) and get back the result
+    (either a modified self or another NmrAtom with the correct assignment, if one exists).
+
+    WARNING: Always use in the form "x = x.assignTo(...)",
+    as the call 'x.assignTo(...) may cause the source x object to become deleted.
+
+    Passing in an atomId deassigns empty residueType or name fields,
     while empty parameters (e.g. chainCode=None) cause no change.
-    If the nmrAtom being reassigned to exists and merging is allowed, the two will be merged.
+    If the target nmrAtom being reassigned to exists and mergeToExisting is True,
+    the source will be deleted, and its data merged into the target.
     NB Merging is NOT undoable
     """
     clearUndo = False

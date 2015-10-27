@@ -177,13 +177,19 @@ class NmrResidue(AbstractWrapperObject):
     apiResonanceGroup.sequenceCode = sequenceCode
     apiResonanceGroup.resetResidueType(residueType)
 
-  def reassigned(self, residueId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
+  def assignTo(self, residueId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, objectMergeAllowed=True) -> 'NmrResidue':
-    """Get NmrResidue reassigned according to residueId or other parameters.
-    Result may be self changed in place or a copy (with self delted), so ALWAYS use the return value.
-    Setting residueId deassigns empty fields,
+
+    """Assign NmrResidue to residueId (or other parameters) and get back the result
+    (either a modified self or another NmrResidue with the correct assignment, if one exists).
+
+    WARNING: Always use in the form "x = x.assignTo(...)",
+    as the call 'x.assignTo(...) may cause the source x object to become deleted.
+
+    Passing in a residueId deassigns empty residueType or name fields,
     while empty parameters (e.g. chainCode=None) cause no change.
-    If the nmrResidue being reassigned to exists and merging is allowed, the two will be merged.
+    If the target ccpn.NmrResidue being reassigned to exists and mergeToExisting is True,
+    the source will be deleted, and its data merged into the target.
     NB Merging is NOT undoable
     """
 

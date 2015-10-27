@@ -25,6 +25,7 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.lib import Util as ccpnUtil
 from ccpnmrcore.Base import Base as GuiBase
+from ccpncore.gui.MessageDialog import showWarning
 # from ccpncore.lib.Io import Formats as ioFormats
 
 class DropBase(GuiBase):
@@ -127,8 +128,19 @@ class DropBase(GuiBase):
             if isinstance(loaded, str):
               if hasattr(self, 'processText'):
                 self.processText(loaded)
+
             else:
-              pids.extend(x.pid for x in loaded)
+              newPids = [x.pid for x in loaded]
+              projects = [x for x in newPids if x.startswith('PR:')]
+              if projects:
+                pids = projects[:1]
+                if len(data) > 1 or len(newPids) > 1:
+                  showWarning('Incorrect data load',
+                              "Attempt to load project together with other data. Other data ignored",
+                              colourScheme=self._appBase.preferences.general.colourScheme)
+                break
+              else:
+                pids.extend(newPids)
 
         for pid in pids:
           pluralClassName = ccpnUtil.pid2PluralName(pid)

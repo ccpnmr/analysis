@@ -128,7 +128,7 @@ class Axis(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent:Strip)-> list:
     """get wrappedData (ccpnmr.gui.Task.Axis) in serial number order"""
     apiStrip = parent._wrappedData
-    dd = {(x.axis.code, x) for x in apiStrip.stripAxes}
+    dd = {x.axis.code:x for x in apiStrip.stripAxes}
     return [dd[x] for x in apiStrip.axisCodes]
 
   def delete(self):

@@ -104,7 +104,7 @@ class AppBase(GuiBase):
     return project
 
   def initGraphics(self):
-    """Set up graphics system after loading - to be overidden in subclasses"""
+    """Set up graphics system after loading - to be overridden in subclasses"""
     # for window in self.project.windows:
     #   window.initGraphics()
     pass

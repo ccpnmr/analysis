@@ -58,6 +58,8 @@ from ccpnmrcore.modules.PickAndAssignModule import PickAndAssignModule
 from ccpnmrcore.modules.SequenceModule import SequenceModule
 from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
 from ccpnmrcore.modules.ScreeningSetup import ScreeningSetup
+
+from ccpnmrcore.popups.FeedbackPopup import FeedbackPopup
 from ccpnmrcore.popups.PreferencesPopup import PreferencesPopup
 from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpnmrcore.popups.SamplePropertiesPopup import SamplePropertiesPopup
@@ -87,10 +89,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.initProject()
     self.connect(self, QtCore.SIGNAL('triggered()'), self.closeEvent)
 
-
     # self.setFixedWidth(QtGui.QApplication.desktop().screenGeometry().width())
 
-
+    self.feedbackPopup = None
 
   def initProject(self):
     """
@@ -314,7 +315,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu.addSeparator()
     helpMenu.addAction(Action(self, "Inspect Code...", callback=self.showCodeInspectionPopup))
     helpMenu.addAction(Action(self, "Check for Upgrades...", callback=self.showUpgradePopup))
-    helpMenu.addAction(Action(self, "Report Bug...", callback=self.showBugReportingPopup))
+    helpMenu.addAction(Action(self, "Submit Feedback...", callback=self.showFeedbackPopup))
 
     assignMenu = Menu("&Assign", self)
     assignMenu.addAction(Action(self, "Assignment Module", callback=self.showAssignmentModule, shortcut='aa'))
@@ -771,11 +772,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showUpgradePopup(self):
     pass
 
-  def showBugReportingPopup(self):
-    info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
-
+  def showFeedbackPopup(self):
+    
+    if not self.feedbackPopup:
+      self.feedbackPopup = FeedbackPopup(self)
+    self.feedbackPopup.show()
+    self.feedbackPopup.raise_()
 
   def runMacro(self, macroFile:str=None):
     """

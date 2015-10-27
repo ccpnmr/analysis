@@ -530,8 +530,11 @@ class PeakListsTab(QtGui.QWidget, Base):
       # self.layout().addWidget(checkBox, i, 0, QtCore.Qt.AlignTop)
       for strip in self.spectrum.project.strips:
         peakListView = strip.peakListViewDict.get(peakList)
-        if peakListView.isVisible():
-          checkBox.setChecked(True)
+        if peakListView is not None:
+          if peakListView.isVisible():
+            checkBox.setChecked(True)
+          else:
+            checkBox.setChecked(False)
         else:
           checkBox.setChecked(False)
     #   #

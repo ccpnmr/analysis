@@ -134,8 +134,8 @@ class AppBase(GuiBase):
     apiProject = ioUtil.newProject(name)
     return self.initProject(apiProject)
 
-  # def saveProject(self, newPath=None):
-  #   ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)
+  def saveProject(self, newPath=None):
+    ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)
     layout = self.mainWindow.dockArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
     if not os.path.exists(layoutPath):

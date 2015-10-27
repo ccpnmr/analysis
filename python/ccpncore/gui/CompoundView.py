@@ -22,7 +22,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
       self.compound = variant.compound
     else:
       self.compound = None
-    
+
     self.dustbin = set()
     self.variant = variant
     self.atomViews = {}
@@ -46,14 +46,14 @@ class CompoundView(QtGui.QGraphicsView, Base):
     self.needFurtherCheck = []
     self.contextMenu = self.setupContextMenu()
   
-    self.setGeometry(20, 40, 350, 350) #[(1) < left, (2) < up, (3)Width, (4)Height
+    # self.setGeometry(20, 40, 350, 350) #[(1) < left, (2) < up, (3)Width, (4)Height
     self.setRenderHint(QtGui.QPainter.Antialiasing)
     self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
     self.setResizeAnchor(QtGui.QGraphicsView.AnchorViewCenter)
     self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
     self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
     self.setInteractive(True)
-
+    self.resetView()
     self.scene = QtGui.QGraphicsScene(self)
     self.setScene(self.scene)
 
@@ -74,9 +74,9 @@ class CompoundView(QtGui.QGraphicsView, Base):
     self.editWidget.hide()
     self.editProxy = self.scene.addWidget(self.editWidget)
     self.editProxy.setZValue(2)
-    
+
     self.backgroundColor = QtGui.QColor(10,  1,  0, 0)
-    
+
     self.setBackgroundBrush(self.backgroundColor)
 
     # TODO: Add settings for this
@@ -1172,7 +1172,7 @@ class AtomLabel(QtGui.QGraphicsItem):
         if self.compoundView.backgroundColor == Qt.darkGray:
           painter.setPen(ATOM_NAME_FG)
         else:
-          painter.setPen(QtGui.QColor(0, 0, 0, 128))
+          painter.setPen(Qt.darkGray)
 
       painter.drawText(point, text)
     painter.setRenderHint(QtGui.QPainter.Antialiasing, False)

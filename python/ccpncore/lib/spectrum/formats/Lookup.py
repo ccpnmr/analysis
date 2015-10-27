@@ -10,34 +10,50 @@ def readXls(project, path=None):
     excelSheet = ex.parse(sheet)
     xlsDict = excelSheet.to_dict()
 
-    #NB this is for now only a hack
     header = sorted(xlsDict.keys())
 
-
-    for spectrumPath, id, expType, pH , amount, comment, ionicStrength, numAtoms, buffer\
+    # sheet 1
+    for spectrumPath, id, expType, smile , molecularMass, numHAtoms,Hacceptor, Hdonor,\
+        psa, cLogP, empiricalFormula, chemicalName, comment,numBonds, numRings\
         in zip(excelSheet['filename'], excelSheet['Id'], excelSheet['expType'],
-        excelSheet['pH'], excelSheet['amount'], excelSheet['comments'],
-        excelSheet['ionicStrength'], excelSheet['numHAtoms'],  excelSheet['buffer'] ):
+        excelSheet['smiles'], excelSheet['molecularMass'], excelSheet['numHAtoms'],
+        excelSheet['Hacceptor'], excelSheet['Hdonor'],  excelSheet['psa'],
+        excelSheet['cLogP'],  excelSheet['empiricalFormula'],excelSheet['ChemicalName'],
+        excelSheet['comments'], excelSheet['numBonds'], excelSheet['numRings']):
 
-      if spectrumPath.split('/')[-1] == 'procs':
-        filename = spectrumPath.split('/')
-        filename.pop()
-        filenamePath = '/'.join(filename)
-        for spectrum in project.loadData(filenamePath):
-          spectrum.experimentType = expType
-          loadInSideBar(project, spectrum)
+        if spectrumPath.split('/')[-1] == 'procs':
+          filename = spectrumPath.split('/')
+          filename.pop()
+          filenamePath = '/'.join(filename)
+          for spectrum in project.loadData(filenamePath):
+            spectrum.experimentType = expType
+            loadInSideBar(project, spectrum)
+            newSubstance = project.newSubstance(name=str(id)+'-1', labeling=str(expType))
 
-          # create Sample
-          newSample = project.newSample(name=str(id))
-          spectrum.sample = newSample
-          newSample.pH = pH
-          newSample.amount = amount
-          newSample.comment = comment
-          newSample.ionicStrength = ionicStrength
-          newSample.numAtoms = numAtoms
-          newSample.batchIdentifier = buffer
+            newSubstance.smiles = smile
+            newSubstance.referenceSpectra = [spectrum]
+            newSubstance.atomCount = int(numHAtoms)
+            newSubstance.hBondAcceptorCount = int(Hacceptor)
+            newSubstance.hBondDonorCount = int(Hdonor)
+            newSubstance.comment = str(comment)
+            newSubstance.logPartitionCoefficient = cLogP
+            newSubstance.empiricalFormula = str(empiricalFormula)
+            newSubstance.molecularMass = molecularMass
+            newSubstance.synonyms = str(chemicalName)
+            newSubstance.bondCount = int(numBonds)
+            newSubstance.ringCount = int(numRings)
+            newSubstance.polarSurfaceArea = float(psa)
 
-
+    #   # create Sample
+    #   print('sample')
+    #   # newSample = project.newSample(name=str(id))
+    #   # spectrum.sample = newSample
+    #   # newSample.pH = pH
+    #   # newSample.amount = amount
+    #   # newSample.comment = comment
+    #   # newSample.ionicStrength = ionicStrength
+    #   # newSample.numAtoms = numAtoms
+    #   # newSample.batchIdentifier = buffer
 
 
 

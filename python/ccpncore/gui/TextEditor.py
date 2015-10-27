@@ -29,16 +29,19 @@ from ccpncore.gui.Base import Base
 
 class TextEditor(QtGui.QTextEdit, Base):
 
-   def __init__(self, parent=None, filename=None, **kw):
-      super(TextEditor, self).__init__(parent)
-      Base.__init__(self, **kw)
-      #font = QFont("Courier", 11)
-      #self.setFont(font)
-      self.filename = filename
-      # if self.filename is not None:
-      #
-      #   fileData = self.filename.read()
-      #   print(fileData)
-      #   self.setText(fileData)
-      #
-      # self.show()
+  def __init__(self, parent=None, filename=None, **kw):
+    super(TextEditor, self).__init__(parent)
+    Base.__init__(self, **kw)
+    #font = QFont("Courier", 11)
+    #self.setFont(font)
+    self.filename = filename
+    # if self.filename is not None:
+    #
+    #   fileData = self.filename.read()
+    #   print(fileData)
+    #   self.setText(fileData)
+    #
+    # self.show()
+
+  def get(self):
+    return self.toPlainText()

@@ -5,7 +5,7 @@ from ccpn import Sample
 
 import math
 
-def setupSamples(samples, n, mode, minimalOverlap):
+def setupSamples(substances, n, mode, minimalOverlap):
   """ Analyses the peak positions in experiments (should be one reference experiment per component) and suggests samples with
       low overlap of at least one peak in each sample. ignoredRegions can be used to specify parts of the spectra that should
       be ignored. mode can be 'nSamples' or 'nComponentsPerSample' to choose if n is the number of wanted samples or the
@@ -14,10 +14,10 @@ def setupSamples(samples, n, mode, minimalOverlap):
   expPeakCollection = []
   samplesData = []
 
-  for sample in samples:
-    for spectrum in sample.spectra:
+  for substance in substances:
+    for spectrum in substance.referenceSpectra:
       expPeaks = spectrum.peaks
-      peaks = [peak.position for peak in sample.spectra[0].peaks]
+      peaks = [peak.position for peak in substance.referenceSpectra[0].peaks]
       expPeakCollection.append(ExperimentPeaks(spectrum.name, expPeaks))
 
   cl = ObjectClustering(expPeakCollection, 'getPeaks', minimalOverlap)
@@ -28,11 +28,13 @@ def setupSamples(samples, n, mode, minimalOverlap):
     clusters = cl.getNComponentsPerSample(n)
 
   for i, cluster in enumerate(clusters):
-    project = samples[0].project
-    newSample = project.newSample(name=str(i+1+len(project.samples)))
+    project = substances[0].project
+    newSample = project.newSample(name=('Mixture:'+str(i+1)))
     samplesData.append(newSample)
     newSample.peakCollections = cluster
     newSample.spectra = [project.getByPid('SP:'+item.name) for item in cluster]
+    for item in cluster:
+      newSampleComponent = newSample.newSampleComponent(name=(str(item.name)), labeling='H')
 
     results = array([scoring(obj, cluster, 'getPeaks', minimalOverlap) for obj in cluster])
 

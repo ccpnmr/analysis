@@ -525,7 +525,7 @@ def setupMixtures(spectra, n, mode):
       #print obj.name, [round(pos, 3) for pos in obj.getPeakPositions()], obj.score
     #print ""
 
-    from ccpnmrcore.modules.ScoringMixture import MixtureTable
+    from application.core.modules.ScoringMixture import MixtureTable
 
 
   return mixturesData

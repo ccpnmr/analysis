@@ -109,7 +109,7 @@ def converseSplitPath(path):
 
 def getTopDirectory():
   """
-  Returns the 'top' directory of the contaiiining repository (ccpnv3).
+  Returns the 'top' directory of the containing repository (ccpnv3).
   """
 
   return os.path.dirname(getPythonDirectory())

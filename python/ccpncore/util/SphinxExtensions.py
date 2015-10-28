@@ -43,7 +43,7 @@ wrappedClassFormat= """
 
 # Pattern for replacing (e.g.) 'ccpn._wrapper._Spectrum.Spectrum' with 'ccpn.Spectrum'
 wrappedClassFullName = re.compile(
-  "(ccpn|ccpnmr)[.](_wrapper[.]_(?P<classname>[a-zA-Z]+)[.])(?P=classname)"
+  "(ccpn|application)[.](_wrapper[.]_(?P<classname>[a-zA-Z]+)[.])(?P=classname)"
 )
 optionalType = re.compile("Union\[(.+), *NoneType\]")
 

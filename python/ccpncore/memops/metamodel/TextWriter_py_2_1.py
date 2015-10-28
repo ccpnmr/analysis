@@ -153,7 +153,7 @@ settings = {
   'endStatement': '',
   'fileSuffix': 'html',
   'packageFile': 'package',
-  'baseDirName':None,
+  'baseDirName':'doc',
   'classesInPackage':False,
    # LanguageInterface settings :
    'noneValue': '',

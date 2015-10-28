@@ -35,16 +35,16 @@ joinPath = corePath.joinPath
 
 
 # Relative path to documentation directory
-documentationPath = 'ccpn/doc'
+documentationPath = 'doc'
 
 def refreshSphinxDocumentation():
   """(Re)create sphinx documentation. Locations are hardwired"""
 
   pythonDirectory = corePath.getPythonDirectory()
-  docDirectory = joinPath(pythonDirectory, documentationPath)
+  docDirectory = joinPath(corePath.getTopDirectory(), documentationPath)
 
   # Remove sphinx-apidoc files
-  for ss in ('ccpn', 'ccpncore', 'ccpnmrcore', 'ccpnmr'):
+  for ss in ('ccpn', 'ccpncore', 'application'):
     inDirectory = joinPath(docDirectory, 'source', ss)
     if os.path.exists(inDirectory):
       print ("Removing %s" % inDirectory)
@@ -57,7 +57,7 @@ def refreshSphinxDocumentation():
   # Recreate apidoc
   # The parameters are command, option, output directory, module to document, dirs to skip
   # First ccpncore
-  ll = ['ccpn/doc/source/ccpncore', 'ccpncore',
+  ll = ['../doc/source/ccpncore', 'ccpncore',
         'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/', 'ccpncore/api',
         'ccpncore/lib/Bmrb/unit_tests']
         #'ccpncore/gui', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/']
@@ -66,24 +66,19 @@ def refreshSphinxDocumentation():
   apidoc.main(ll)
   #
   #
-  # # then ccpnmrcore
-  ll = ['ccpn/doc/source/ccpnmrcore', 'ccpnmrcore']
+  # # then application.core
+  ll = ['../doc/source/application', 'application']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
   print( '### running: ' + ' '.join(ll))
   apidoc.main(ll)
 
   # then ccpn
-  ll = ['ccpn/doc/source/ccpn', 'ccpn', 'ccpn/lib/wrapper']
+  ll = ['../doc/source/ccpn', 'ccpn', 'ccpn/lib/wrapper']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
   print( '### running: ' + ' '.join(ll))
   apidoc.main(ll)
   #subprocess.call(ll)
 
-  # then ccpnmr
-  ll = ['ccpn/doc/source/ccpnmr', 'ccpnmr']
-  ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  print( '### running: ' + ' '.join(ll))
-  apidoc.main(ll)
   #subprocess.call(ll)
 
   # rebuild docs

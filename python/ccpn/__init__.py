@@ -228,7 +228,7 @@ from ccpn.lib import Io as ccpnIo
 loadProject = ccpnIo.loadProject
 newProject = ccpnIo.newProject
 
-# Make {shortClassName: className} map. NB may be added to by importing modules (ccpnmr wrapper)
+# Make {shortClassName: className} map. NB may be added to by importing modules (application wrapper)
 _pluralPidTypeMap = {}
 for cls in _wrappedClasses:
   className = cls.className if hasattr(cls, 'className') else cls.__class__.__name__

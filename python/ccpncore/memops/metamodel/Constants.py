@@ -64,7 +64,7 @@ apiCodeDir = 'api'
 xmlCodeDir = 'xml'
 
 # documentation directories
-imageDir = 'python/ccpn/doc/graphics'
+imageDir = 'doc/graphics'
 docDir = 'apidoc'
 
 configFilePath = 'data/ccpnConfig.json'
@@ -219,9 +219,3 @@ packageLocatorRole = 'packageLocators'
 implementationClassNames = [dataRootName, baseClassName, topObjClassName,
                             dataObjClassName, implObjClassName,]
 
-#############################################################################
-# NBNB TBD Old, possibly obsolete:
-
-# # Implementation directory, file, and class names:
-# imageDir = 'doc/graphics'
-# docDir = 'doc'

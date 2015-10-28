@@ -140,8 +140,8 @@ class ApiDocGen(Documentation, ModelTraverse):
   docDir = metaConstants.docDir
   styleSheetDir = 'doc'
   docSubDirs = ['api','doc']
-  modelDocDir = 'model/doc'
-  diagImgDir = 'html/diagram'
+  modelDocDir = 'doc/apidiagram'
+  diagImgDir = 'modeldiagram'
   diagFileExt = '_Diag.gif'
   detailDiagExt = '-details'
   helpPrefix = 'help'

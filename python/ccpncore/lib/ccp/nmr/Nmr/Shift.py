@@ -42,7 +42,7 @@ def recalculateValue(self:'Shift', simulatedPeakScale:float=0.0001) -> float:
   
   Float (shift.value)
   """
-  # from ccpnmr.analysis.core.CouplingBasic import getPeakDimComponentSplitting
+  # from application.analysis.core.CouplingBasic import getPeakDimComponentSplitting
 
 
   # NBNB TBD spectrum dimensions weighting must be added

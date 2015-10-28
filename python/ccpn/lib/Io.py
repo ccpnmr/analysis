@@ -32,7 +32,9 @@ def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> P
 
   If the API project contains several NmrProjects (rare),
   nmrProjectName lets you select which one to open"""
+  print ('@~@~ in loadProject')
   apiProject = ioUtil.loadProject(path, useFileLogger=useFileLogger)
+  print ('@~@~ loaded ApiProject')
   if apiProject is None:
     raise ValueError("No valid project loaded from %s" % path )
   else:
@@ -62,5 +64,7 @@ def _wrapApiProject(apiProject:ApiProject, nmrProjectName:str=None) -> Project:
       nmrProject = nmrProjects[0]
   else:
     nmrProject = apiProject.newNmrProject(name=nmrProjectName or apiProject.name)
+
+  print ('@~@~ got nmrProject')
 
   return Project(nmrProject)

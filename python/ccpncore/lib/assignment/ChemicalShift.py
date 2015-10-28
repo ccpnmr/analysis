@@ -809,8 +809,8 @@ RESCUE2_STATS_MISSING = [('Ala','H',0.033675),
 #   Nmr.ShiftList
 #   """
 #
-#   from ccpnmr.analysis.core.AssignmentBasic import assignAtomsToRes
-#   from ccpnmr.analysis.core.MoleculeBasic import DEFAULT_ISOTOPES, getRandomCoilShift
+#   from application.analysis.core.AssignmentBasic import assignAtomsToRes
+#   from application.analysis.core.MoleculeBasic import DEFAULT_ISOTOPES, getRandomCoilShift
 #
 #   project = list(molSystems)[0].root
 #   done = set()

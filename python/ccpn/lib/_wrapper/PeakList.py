@@ -23,8 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 
-# from ccpnmrcore.modules.GuiSpectrumView1d import GuiSpectrumView1d
-# raise Exception("This statement must be moved - you can not import ccpnmr or ccpnmrcore into ccpn or ccpncore")
+# from application.core.modules.GuiSpectrumView1d import GuiSpectrumView1d
+# raise Exception("This statement must be moved - you can not import application into ccpn or ccpncore")
 
 from ccpncore.util.Types import Sequence
 import numpy

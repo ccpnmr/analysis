@@ -24,6 +24,7 @@ __version__ = "$Revision$"
 
 import operator
 from ccpncore.util.Types import Tuple
+from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
@@ -322,7 +323,7 @@ class SpectrumView1d(SpectrumView, GuiSpectrumView1d):
   @property
   def _key(self) -> str:
     """id string - combined spectrumName and stripSerial"""
-    return self._wrappedData.spectrumView.spectrumName
+    return self._wrappedData.spectrumView.spectrumName.translate(Pid.remapSeparators)
 
 
 class SpectrumViewNd(SpectrumView, GuiSpectrumViewNd):
@@ -337,7 +338,7 @@ class SpectrumViewNd(SpectrumView, GuiSpectrumViewNd):
   @property
   def _key(self) -> str:
     """id string - spectrumName"""
-    return self._wrappedData.spectrumView.spectrumName
+    return self._wrappedData.spectrumView.spectrumName.translate(Pid.remapSeparators)
 
 
 def _factoryFunction(project:Project, wrappedData:ApiStripSpectrumView) -> SpectrumView:

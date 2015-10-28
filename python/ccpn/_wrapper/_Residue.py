@@ -178,7 +178,7 @@ del getter
 # Connections to parents:
 Chain._childClasses.append(Residue)
 
-# Chain.newResidue = newResidue
+# No 'new' function - chains are made elsewhere
 
 # Notifiers:
 className = ApiResidue._metaclass.qualifiedName()

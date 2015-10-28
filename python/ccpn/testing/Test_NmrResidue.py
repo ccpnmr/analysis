@@ -81,22 +81,22 @@ class NmrResidueTest(WrapperTesting):
     nchain = self.project.getByPid('NC:A')
     nr1, nr2 = nchain.nmrResidues[9:11]
     self.assertEqual(nr1.id, "A.10.TYR")
-    nr1 = nr1.reassigned('A.999')
+    nr1 = nr1.assignTo('A.999')
     self.assertEqual(nr1.id, "A.999.")
-    nr1 = nr1.reassigned()
+    nr1 = nr1.assignTo()
     # This is a no-op
     self.assertEqual(nr1.id, "A.999.")
 
     with self.assertRaises(ValueError):
-      nr2 = nr2.reassigned(sequenceCode=15)
+      nr2 = nr2.assignTo(sequenceCode=15)
 
-    nr2 = nr2.reassigned(sequenceCode=515, residueType='XXX')
+    nr2 = nr2.assignTo(sequenceCode=515, residueType='XXX')
     self.assertEqual(nr2.id, 'A.515.XXX')
     obj = nchain.newNmrResidue(sequenceCode=777)
     self.assertEqual(obj.id, 'A.777.')
 
     self.assertTrue(len(nr1.nmrAtoms) == 2)
-    nrx = nr2.reassigned(nr1.id)
+    nrx = nr2.assignTo(nr1.id)
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()

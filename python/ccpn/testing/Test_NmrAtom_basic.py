@@ -150,15 +150,18 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(a.pid, 'NA:@1.@1..Arbitrary^Name')
     self.assertEqual(a.isotopeCode, 'unknown')
 
+  # NBNB LOOK AT ME! This now fails - hatted names cannot be set or created
+  @unittest.expectedFailure
   def test_CreateNmrAtomWithArbitraryHattedName(self):
     a = self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
     self.assertEqual(a.pid, 'NA:@1.@1..Arbitrary^Name')
     self.assertEqual(a.isotopeCode, 'unknown')
 
-  @unittest.expectedFailure
-  def test_CreateNmrAtomWithArbitraryDottedAndHattedNamesCollide(self):
-    self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
-    self.assertRaises(Exception, self.nmrResidue.newNmrAtom, name='Arbitrary.Name')
+  # NBNB now obsolete
+  # @unittest.expectedFailure
+  # def test_CreateNmrAtomWithArbitraryDottedAndHattedNamesCollide(self):
+  #   self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
+  #   self.assertRaises(Exception, self.nmrResidue.newNmrAtom, name='Arbitrary.Name')
 
   def test_CreateNmrAtomWithArbitraryNameAndArbitraryIsotopeCode(self):
     a = self.nmrResidue.newNmrAtom(name='Arbitrary', isotopeCode='Arbitrary_Isotope')
@@ -325,7 +328,7 @@ class TestNmrAtomMethods(WrapperTesting):
     self.assertEqual(len(res1.nmrAtoms), 1)
     self.assertEqual(len(self.project.nmrResidues), 2)
 
-    atom1 = atom1.reassigned(sequenceCode=101)
+    atom1 = atom1.assignTo(sequenceCode=101)
 
     self.assertEqual(atom1.pid,'NA:@-.101..HX')
     self.assertEqual(res1.pid, 'NR:@-.@2.')
@@ -344,7 +347,7 @@ class TestNmrAtomMethods(WrapperTesting):
     self.assertEqual(len(res1.nmrAtoms), 1)
     self.assertEqual(len(self.project.nmrResidues), 2)
 
-    atom1 = atom1.reassigned(name='NE')
+    atom1 = atom1.assignTo(name='NE')
 
     self.assertEqual(atom1.pid,'NA:X.101.VAL.NE')
     self.assertEqual(res1.pid, 'NR:X.101.VAL')

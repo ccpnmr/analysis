@@ -212,7 +212,7 @@ Peak.restraints = property(getter, setter, None,
 # Connections to parents:
 RestraintList._childClasses.append(Restraint)
 
-def newRestraint(self:RestraintList,comment:str=None,
+def _newRestraint(self:RestraintList,comment:str=None,
                          peaks:Sequence=()) -> Restraint:
   """Create new ccpn.Restraint within ccpn.RestraintList"""
   apiConstraintList = self._wrappedData
@@ -237,7 +237,8 @@ def createSimpleRestraint(self:RestraintList,comment:str=None,
   #
   return restraint
 
-RestraintList.newRestraint = newRestraint
+RestraintList.newRestraint = _newRestraint
+del _newRestraint
 RestraintList.createSimpleRestraint = createSimpleRestraint
 
 # Notifiers:

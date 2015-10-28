@@ -167,7 +167,7 @@ del getter
 # Connections to parents:
 Sample._childClasses.append(SampleComponent)
 
-def newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
+def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
                        concentration:float=None, concentrationError:float=None,
                        concentrationUnit:str=None, purity:float=None, comment:str=None,
                       ) -> SampleComponent:
@@ -175,6 +175,12 @@ def newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
 
   Automatically creates the corresponding Substance if the name is not already taken
   """
+
+  for ss in (name, labeling):
+    if ss and Pid.altCharacter in ss:
+      raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
+                       (Pid.altCharacter, name, labeling))
+
   apiSample = self._wrappedData
   substance = self._project.fetchSubstance(name=name, labeling=labeling)
   obj = apiSample.newSampleComponent(name=name, labeling=substance.labeling,
@@ -184,7 +190,8 @@ def newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
                                      purity=purity)
   return self._project._data2Obj.get(obj)
 
-Sample.newSampleComponent = newSampleComponent
+Sample.newSampleComponent = _newSampleComponent
+del _newSampleComponent
 
 # Notifiers:
 className = ApiSampleComponent._metaclass.qualifiedName()

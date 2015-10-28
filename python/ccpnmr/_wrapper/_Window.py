@@ -92,12 +92,15 @@ class Window(AbstractWrapperObject):
       return windowStore.sortedWindows()
 
 
-def newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:
+def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:
   """Create new child Window
 
   :param str title: window  title (optional, defaults to 'Wn' n positive integer
   :param tuple size: x,y size for new window in integer pixels
   :param tuple position: x,y position for new window in integer pixels"""
+
+  if title and Pid.altCharacter in title:
+    raise ValueError("Character %s not allowed in ccpnmr.Window.title" % Pid.altCharacter)
 
   windowStore = self.nmrProject.windowStore
 
@@ -111,7 +114,8 @@ def newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) ->
 
 # Connections to parents:
 Project._childClasses.append(Window)
-Project.newWindow = newWindow
+Project.newWindow = _newWindow
+del _newWindow
 
 
 # Define subtypes and factory function

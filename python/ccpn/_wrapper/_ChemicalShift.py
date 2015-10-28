@@ -121,7 +121,7 @@ NmrAtom.chemicalShifts = property(getter, None, None, "Chemical shifts belonging
 
 del getter
 
-def newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
+def _newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                      valueError:float=0.0, figureOfMerit:float=1.0,
                      comment:str=None) -> ChemicalShift:
   """Create new ccpn.ChemicalShift within ccpn.ChemicalShiftList"""
@@ -133,7 +133,8 @@ def newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                                    figOfMerit=figureOfMerit, details=comment)
   return self._project._data2Obj.get(obj)
 
-ChemicalShiftList.newChemicalShift = newChemicalShift
+ChemicalShiftList.newChemicalShift = _newChemicalShift
+del _newChemicalShift
 
 
 # Notifiers:

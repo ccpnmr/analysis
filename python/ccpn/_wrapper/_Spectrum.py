@@ -60,7 +60,6 @@ class Spectrum(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """name, regularised as used for id"""
-
     return self._wrappedData.name.translate(Pid.remapSeparators)
 
 
@@ -807,21 +806,28 @@ class Spectrum(AbstractWrapperObject):
 # del setter
 
 
-def newSpectrum(self:Project, name:str) -> Spectrum:
-  """Create new ccpn.Spectrum"""
+def _newSpectrum(self:Project, name:str) -> Spectrum:
+  """Creation of new ccpn.Spectrum NOT IMPLEMENTED.
+  Use ccpn.Project.loadData or ccpn.Project.createDummySpectrum instead"""
 
   raise NotImplementedError("Not implemented. Use loadSpectrum function instead")
 
-def createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Spectrum:
+def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Spectrum:
   """Make dummy spectrum from isotopeCodes list - without data and with default parameters """
+
+  if name and Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpn.Spectrum.name" % Pid.altCharacter)
+
   return self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name)]
 
 # Connections to parents:
 
 Project._childClasses.append(Spectrum)
 
-Project.newSpectrum = newSpectrum
-Project.createDummySpectrum = createDummySpectrum
+Project.newSpectrum = _newSpectrum
+del _newSpectrum
+Project.createDummySpectrum = _createDummySpectrum
+del _createDummySpectrum
 
 # Notifiers:
 className = ApiDataSource._metaclass.qualifiedName()

@@ -58,13 +58,13 @@ from ccpn.testing.WrapperTesting import WrapperTesting
 #     assert len(self.project.atoms) == 0
 
 
-class ProjectTest2c(WrapperTesting):
-
-  # Path of project to load (None for new project)
-  projectPath = 'CcpnCourse2c'
-
-  def test_id(self):
-    print(self.project.id)
+# class ProjectTest2c(WrapperTesting):
+#
+#   # Path of project to load (None for new project)
+#   projectPath = 'CcpnCourse2c'
+#
+#   def test_id(self):
+#     print(self.project.id)
 
     # # NBNB TEMP addition
     # root = self.project._apiNmrProject.root

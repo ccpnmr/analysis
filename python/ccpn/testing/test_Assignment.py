@@ -47,7 +47,7 @@ class Test_getNmrAtomPrediction(WrapperTesting):
 
     predictedAtomCBShift = [getNmrAtomPrediction(ccpCode, self.CBShift, '13C', strict=True) for ccpCode in CCP_CODES]
     refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomCBShift if len(type) > 0]
-    print(refinedPreds)
+    # print(refinedPreds)
     CBatomPredictions = set()
     for pred in refinedPreds:
       if pred[1] > 90:

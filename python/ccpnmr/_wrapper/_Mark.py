@@ -148,7 +148,7 @@ class Mark(AbstractWrapperObject):
     return parent._wrappedData.sortedMarks()
 
 
-def newMark(self:Task, colour:str, positions:Sequence, axisCodes:Sequence, style:str='simple',
+def _newMark(self:Task, colour:str, positions:Sequence, axisCodes:Sequence, style:str='simple',
             units:Sequence=(), labels:Sequence=()) -> Mark:
   """Create new ccpn.Mark
 
@@ -176,7 +176,7 @@ def newMark(self:Task, colour:str, positions:Sequence, axisCodes:Sequence, style
   return self._project._data2Obj.get(apiMark)
 
 
-def newSimpleMark(self:Task, colour:str, axisCode:str, position:float, style:str='simple',
+def _newSimpleMark(self:Task, colour:str, axisCode:str, position:float, style:str='simple',
             unit:str='ppm', label:str=None) -> Mark:
   """Create new child Mark with a single line
 
@@ -196,8 +196,10 @@ def newSimpleMark(self:Task, colour:str, axisCode:str, position:float, style:str
 
 # Connections to parents:
 Task._childClasses.append(Mark)
-Task.newMark = newMark
-Task.newSimpleMark = newSimpleMark
+Task.newMark = _newMark
+Task.newSimpleMark = _newSimpleMark
+del _newMark
+del _newSimpleMark
 
 
 # Notifiers:

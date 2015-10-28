@@ -234,7 +234,7 @@ class RestraintContribution(AbstractWrapperObject):
 # Connections to parents:
 Restraint._childClasses.append(RestraintContribution)
 
-def newRestraintContribution(self:Restraint, targetValue:float=None, error:float=None,
+def _newRestraintContribution(self:Restraint, targetValue:float=None, error:float=None,
                     weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
                     restraintItems:Sequence=()) -> RestraintContribution:
@@ -248,7 +248,8 @@ def newRestraintContribution(self:Restraint, targetValue:float=None, error:float
   result.restraintItems = restraintItems
   return result
 
-Restraint.newRestraintContribution = newRestraintContribution
+Restraint.newRestraintContribution = _newRestraintContribution
+del _newRestraintContribution
 
 # Notifiers:
 for clazz in ApiContribution._metaclass.getNonAbstractSubtypes():

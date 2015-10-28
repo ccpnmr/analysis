@@ -123,10 +123,14 @@ class ChemicalShiftList(AbstractWrapperObject):
   # Implementation functions
   def rename(self, value):
     """Rename ChemicalShiftList, changing Id and Pid of ChemicalShiftList"""
-    if value:
-      self._wrappedData.name = value
-    else:
+    if not value:
       raise ValueError("ChemicalShiftList name must be set")
+
+    elif Pid.altCharacter in value:
+      raise ValueError("Character %s not allowed in ccpn.ChemicalShiftList.name" % Pid.altCharacter)
+
+    else:
+      self._wrappedData.name = value
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> List[ApiShiftList]:
@@ -155,14 +159,19 @@ PeakList.chemicalShiftList = property(getter, setter, None,
 del getter
 del setter
 
-def newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
-                         isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
+def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
+                          isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
   """Create new ccpn.ChemicalShiftList"""
+
+  if name and Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpn.ChemicalSiftList.name" % Pid.altCharacter)
+
   obj = self._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
                                        details=comment)
   return self._data2Obj.get(obj)
 
-Project.newChemicalShiftList = newChemicalShiftList
+Project.newChemicalShiftList = _newChemicalShiftList
+del _newChemicalShiftList
 
 # Backwards crosslinks
 

@@ -148,8 +148,13 @@ def _setTask(window, value):
 Window.task = property(_getTask, _setTask, None, """Task shown in Window.""")
 
 
-def newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
+def _newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
   """Create new ccpn.Task"""
+
+  for ss in name, nameSpace:
+    if ss and Pid.altCharacter in ss:
+      raise ValueError("Character %s not allowed in ccpnmr.Task i %s.%sd"
+                       % (Pid.altCharacter, nameSpace, name))
 
   nmrProject = self.nmrProject
   dd = {'name':name, 'nmrProject':nmrProject, 'details':comment}
@@ -162,7 +167,8 @@ def newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Tas
 
 # Connections to parents:
 Project._childClasses.append(Task)
-Project.newTask = newTask
+Project.newTask = _newTask
+del _newTask
 
 # Notifiers:
 

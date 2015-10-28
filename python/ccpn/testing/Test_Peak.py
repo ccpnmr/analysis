@@ -41,7 +41,7 @@ class PeakTest(WrapperTesting):
                          value=nmrAtom)
     # shift = shiftList.findChemicalShift(nmrAtom)
     shift = shiftList.getChemicalShift(nmrAtom.id)
-    print("NewChemicalShift", shift, shift and shift.value)
+    # print("NewChemicalShift", shift, shift and shift.value)
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()

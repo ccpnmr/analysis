@@ -105,6 +105,9 @@ class NmrAtom(AbstractWrapperObject):
     # NB This is a VERY special case
     # - API code and notifiers will take care of resetting id and Pid
     if value:
+      if Pid.altCharacter in value:
+        raise ValueError("Character %s not allowed in ccpn.NmrAtom.name" % Pid.altCharacter)
+
       isotopeCode = self._wrappedData.isotopeCode
       newIsotopeCode = name2IsotopeCode(value)
       if isotopeCode == 'unknown':
@@ -140,7 +143,7 @@ class NmrAtom(AbstractWrapperObject):
 
     if atomId:
       if any((chainCode, sequenceCode, residueType, name)):
-        raise ValueError("reassigned: assignment parameters only allowed if atomId is None")
+        raise ValueError("assignTo: assignment parameters only allowed if atomId is None")
       else:
         # Remove colon prefix, if any, and set parameters
         atomId = atomId.split(Pid.PREFIXSEP,1)[-1]
@@ -161,6 +164,11 @@ class NmrAtom(AbstractWrapperObject):
       sequenceCode = sequenceCode or apiResonanceGroup.sequenceCode
       residueType = residueType or apiResonanceGroup.residueType
       name = name or apiResonance.name
+
+    for ss in chainCode, sequenceCode, residueType, name:
+      if ss and Pid.altCharacter in ss:
+        raise ValueError("Character %s not allowed in ccpn.NmrAtom id : %s.%s.%s.%s"
+                         % (Pid.altCharacter, chainCode, sequenceCode, residueType, name))
 
     oldNmrResidue = self.nmrResidue
     nmrChain = self._project.fetchNmrChain(chainCode)
@@ -249,10 +257,14 @@ Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned
 del getter
 del setter
     
-def newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
+def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
   """Create new ccpn.NmrAtom within ccpn.NmrResidue. If name is None, use nucleus@serial"""
   nmrProject = self._project._wrappedData
   resonanceGroup = self._wrappedData
+
+  if name:
+    if Pid.altCharacter in name:
+      raise ValueError("Character %s not allowed in ccpn.NmrAtom.name" % Pid.altCharacter)
 
   if not isotopeCode:
     if name:
@@ -295,6 +307,9 @@ def produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
   if name is None:
     raise ValueError("NmrAtom name must be set")
 
+  elif Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpn.NmrAtom.name" % Pid.altCharacter)
+
   # Produce chain
   nmrChain = self.fetchNmrChain(shortName=chainCode or Constants.defaultNmrChainCode)
   nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
@@ -305,7 +320,8 @@ def produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
 
 NmrResidue._childClasses.append(NmrAtom)
 
-NmrResidue.newNmrAtom = newNmrAtom
+NmrResidue.newNmrAtom = _newNmrAtom
+del _newNmrAtom
 NmrResidue.fetchNmrAtom = fetchNmrAtom
 
 Project.produceNmrAtom = produceNmrAtom

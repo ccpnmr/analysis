@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.util.Types import Sequence, Tuple
+from ccpncore.util import Pid
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -181,7 +182,7 @@ def _getSpectrumDisplays(window:Window):
 Window.spectrumDisplays = property(_getSpectrumDisplays, None, None,
                                    "SpectrumDisplays shown in Window")
 
-def newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
+def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
                        name:str=None, window:Window=None, comment:str=None,
                        independentStrips=False, nmrResidue=None):
 
@@ -229,6 +230,8 @@ def newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
       name = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
     else:
       name = ''.join([str(x) for x in axisCodes])
+  elif Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpnmr.SpectrumDisplay.name" % Pid.altCharacter)
   while apiTask.findFirstModule(name=name):
     name = commonUtil.incrementName(name)
   displayPars['name'] = name
@@ -270,7 +273,6 @@ def newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
   return self._project._data2Obj.get(apiSpectrumDisplay)
 
 
-
 # CCPN functions
 def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=(),
                           axisOrder:Sequence=(), name:str=None, positions:Sequence=(),
@@ -288,6 +290,9 @@ def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=
   :param bool is1d: If True, or spectrum passed in is 1D, do 1D display
   :param bool independentStrips: if True do freeStrip display.
   """
+
+  if name and Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpnmr.SpectrumDisplay.name" % Pid.altCharacter)
 
   spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 
@@ -387,9 +392,11 @@ def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=
 
 # Connections to parents:
 Task._childClasses.append(SpectrumDisplay)
-Task.newSpectrumDisplay = newSpectrumDisplay
+Task.newSpectrumDisplay = _newSpectrumDisplay
+del _newSpectrumDisplay
 
 Window.createSpectrumDisplay = _createSpectrumDisplay
+del _createSpectrumDisplay
 
 
 # Define subtypes and factory function
@@ -405,7 +412,7 @@ class StripDisplay1d(GuiStripDisplay1d, SpectrumDisplay):
   @property
   def _key(self) -> str:
     """short form of name, corrected to use for id"""
-    return self._wrappedData.name
+    return self._wrappedData.name.translate(Pid.remapSeparators)
 
 
 class StripDisplayNd(GuiStripDisplayNd, SpectrumDisplay):
@@ -420,7 +427,7 @@ class StripDisplayNd(GuiStripDisplayNd, SpectrumDisplay):
   @property
   def _key(self) -> str:
     """short form of name, corrected to use for id"""
-    return self._wrappedData.name
+    return self._wrappedData.name.translate(Pid.remapSeparators)
 
 def _factoryFunction(project:Project, wrappedData:ApiSpectrumDisplay) -> SpectrumDisplay:
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""

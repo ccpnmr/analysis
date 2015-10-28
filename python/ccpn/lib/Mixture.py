@@ -559,7 +559,7 @@ def evaluateMixtures(project, mixtures):
     results = array([compareWithLevels(obj, currentMixture.peakCollections, 'getPeakPositions') for obj in currentMixture.peakCollections])
     currentMixture.minScore = amin(results)
     currentMixture.averageScore = average(results)
-    print ("Mixture %d, %d compounds, score %.0f, %.1f:" % (currentMixture.name, len(currentMixture.peakCollections), currentMixture.minScore, currentMixture.averageScore))
+    # print ("Mixture %d, %d compounds, score %.0f, %.1f:" % (currentMixture.name, len(currentMixture.peakCollections), currentMixture.minScore, currentMixture.averageScore))
     for obj in currentMixture.peakCollections:
       obj.score = compareWithLevels(obj, currentMixture.peakCollections, 'getPeakPositions')
       #print obj.name, [round(pos, 3) for pos in obj.getPeakPositions()], obj.score

@@ -139,6 +139,8 @@ class NmrChain(AbstractWrapperObject):
       raise ValueError("NmrChain name must be set")
     elif wrappedData.code == Constants.defaultNmrChainCode:
       raise ValueError("NmrChain:%s cannot be renamed" % Constants.defaultNmrChainCode)
+    elif Pid.altCharacter in value:
+      raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
     else:
       wrappedData.code = value
 
@@ -166,7 +168,7 @@ Chain.nmrChain = property(getter, setter, None, "NmrChain to which Chain is assi
 del getter
 del setter
 
-def newNmrChain(self:Project, shortName:str=None, comment:str=None) -> NmrChain:
+def _newNmrChain(self:Project, shortName:str=None, comment:str=None) -> NmrChain:
   """Create new ccpn.NmrChain
 
   :param str shortName: shortName for new nmrChain (optional, defaults to '@n' n positive integer
@@ -182,6 +184,10 @@ def newNmrChain(self:Project, shortName:str=None, comment:str=None) -> NmrChain:
       code = '@%s' % ii
     shortName = code
 
+  if Pid.altCharacter in shortName:
+    raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
+
+
   newApiNmrChain = nmrProject.newNmrChain(code=shortName, details=comment)
   
   return self._data2Obj.get(newApiNmrChain)
@@ -191,6 +197,9 @@ def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
 
   :param str shortName: shortName for new chain (optional)
   """
+
+  if shortName and Pid.altCharacter in shortName:
+    raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
 
   nmrProject = self._apiNmrProject
   apiNmrChain = nmrProject.findFirstNmrChain(code=shortName)
@@ -204,7 +213,8 @@ def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
     
 # Connections to parents:
 Project._childClasses.append(NmrChain)
-Project.newNmrChain = newNmrChain
+Project.newNmrChain = _newNmrChain
+del _newNmrChain
 Project.fetchNmrChain = fetchNmrChain
 
 # Notifiers:

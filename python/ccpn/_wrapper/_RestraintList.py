@@ -230,10 +230,14 @@ class RestraintList(AbstractWrapperObject):
   # Implementation functions
   def rename(self, value):
     """rename RestraintList, changing Id and Pid"""
-    if value:
-      self._wrappedData.name = value
-    else:
+    if not value:
       raise ValueError("RestraintList name must be set")
+
+    elif Pid.altCharacter in value:
+      raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
+
+    else:
+      self._wrappedData.name = value
 
   @classmethod
   def _getAllWrappedData(cls, parent: RestraintSet)-> list:
@@ -243,12 +247,16 @@ class RestraintList(AbstractWrapperObject):
 # Connections to parents:
 RestraintSet._childClasses.append(RestraintList)
 
-def newRestraintList(self:RestraintSet, restraintType, name:str=None, comment:str=None,
+def _newRestraintList(self:RestraintSet, restraintType, name:str=None, comment:str=None,
                      unit:str=None, potentialType:str=None, tensorMagnitude:float=None,
                      tensorRhombicity:float=None, tensorChainCode:str=None,
                      tensorSequenceCode:str=None,
                      tensorResidueType:str=None) -> RestraintList:
   """Create new ccpn.RestraintList of type restraintType within ccpn.RestraintSet"""
+
+  if name and Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
+
   apiNmrConstraintStore = self._wrappedData
   creator = apiNmrConstraintStore.getattr("new%sConstraintList" % restraintType)
   if restraintType == 'Rdc':
@@ -260,7 +268,8 @@ def newRestraintList(self:RestraintSet, restraintType, name:str=None, comment:st
     obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType)
   return self._project._data2Obj.get(obj)
 
-RestraintSet.newRestraintList = newRestraintList
+RestraintSet.newRestraintList = _newRestraintList
+del _newRestraintList
 
 # Notifiers:
 for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():

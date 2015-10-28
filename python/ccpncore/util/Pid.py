@@ -59,7 +59,7 @@ def createPid(head:str, *args:str) -> 'Pid':
   #
   return Pid(sep.join((head, IDSEP.join(ll))))
 
-def createId(*args:str) -> str:
+def createId(*args) -> str:
   """make id from list of successive keys.
   Keys are converted to string, and illegal characters are converted to altCharacter"""
 

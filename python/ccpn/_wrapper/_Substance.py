@@ -385,6 +385,12 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
   """Create new substance WITHOUT attached ApiMolecule (and so not suitable for making chains)
   substanceType defaults to 'Molecule'.
   ADVANCED alternatives are 'Cell', 'Material', and 'Composite'"""
+
+  for ss in (name, labeling):
+    if ss and Pid.altCharacter in ss:
+      raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
+                       (Pid.altCharacter, name, labeling))
+
   apiNmrProject = self._wrappedData
   apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
 

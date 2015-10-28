@@ -154,7 +154,7 @@ class StructureEnsemble(AbstractWrapperObject):
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
     return parent._wrappedData.molSystem.sortedStructureEnsembles()
 
-def newStructureEnsemble(self:Project, ensembleId:int, comment:str=None) -> StructureEnsemble:
+def _newStructureEnsemble(self:Project, ensembleId:int, comment:str=None) -> StructureEnsemble:
   """Create new, empty ccpn.StructureEnsemble"""
   
   nmrProject = self._wrappedData
@@ -165,7 +165,8 @@ def newStructureEnsemble(self:Project, ensembleId:int, comment:str=None) -> Stru
     
 # Connections to parents:
 Project._childClasses.append(StructureEnsemble)
-Project.newStructureEnsemble = newStructureEnsemble
+Project.newStructureEnsemble = _newStructureEnsemble
+del _newStructureEnsemble
 
 # Notifiers:
 className = ApiStructureEnsemble._metaclass.qualifiedName()

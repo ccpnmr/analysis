@@ -55,7 +55,8 @@ class Note(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """Residue local ID"""
-    return Pid.createId(self._wrappedData.serial, self._wrappedData.name)
+    return Pid.IDSEP.join((str(self._wrappedData.serial),
+                          self._wrappedData.name.translate(Pid.remapSeparators)))
 
   @property
   def serial(self) -> int:
@@ -105,10 +106,14 @@ class Note(AbstractWrapperObject):
   # Implementation functions
   def rename(self, value):
     """Rename Note, changing its Id and Pid"""
-    if value:
-      self._wrappedData.name = value
-    else:
+    if not value:
       raise ValueError("Note name must be set")
+
+    elif Pid.altCharacter in value:
+      raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
+
+    else:
+      self._wrappedData.name = value
 
 
   # Implementation functions
@@ -118,8 +123,11 @@ class Note(AbstractWrapperObject):
     return parent._wrappedData.sortedNotes()
 
 
-def newNote(self:Project, name:str='Note', text:str=None) -> Note:
+def _newNote(self:Project, name:str='Note', text:str=None) -> Note:
   """Create new Note"""
+
+  if name and Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
 
   return self._data2Obj.get(self._wrappedData.newNote(text=text, name=name))
 
@@ -127,7 +135,8 @@ def newNote(self:Project, name:str='Note', text:str=None) -> Note:
     
 # Connections to parents:
 Project._childClasses.append(Note)
-Project.newNote = newNote
+Project.newNote = _newNote
+del _newNote
 
 # Notifiers:
 className = ApiNote._metaclass.qualifiedName()

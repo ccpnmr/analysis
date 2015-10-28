@@ -48,10 +48,10 @@ class NmrAtomTest(WrapperTesting):
     atomCX.rename('CZ')
     self.assertEqual(atomCX.pid, 'NA:A.11.ARG.CZ')
 
-    atomCX = atomCX.reassigned(chainCode='A', sequenceCode='888')
+    atomCX = atomCX.assignTo(chainCode='A', sequenceCode='888')
     self.assertEqual(atomCX.pid, 'NA:A.888.ARG.CZ')
 
-    atomCX = atomCX.reassigned()
+    atomCX = atomCX.assignTo()
     self.assertEqual(atomCX.pid, 'NA:A.888.ARG.CZ')
 
     atomCX.rename()
@@ -72,9 +72,9 @@ class NmrAtomTest(WrapperTesting):
     self.assertEqual(at0.id,'@-.@89..HX')
     at1 = self.project.produceNmrAtom('X.101.VAL.N')
     self.assertEqual(at1.id,'X.101.VAL.N')
-    at1 = at1.reassigned(name='NE')
+    at1 = at1.assignTo(name='NE')
     self.assertEqual(at1.id,'X.101.VAL.NE')
-    at0 = at0.reassigned(sequenceCode=101)
+    at0 = at0.assignTo(sequenceCode=101)
     self.assertEqual(at0.id,'@-.101..HX')
     # Undo and redo all operations
     self.undo.undo()

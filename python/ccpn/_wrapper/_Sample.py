@@ -209,13 +209,16 @@ class Sample(AbstractWrapperObject):
     return parent._wrappedData.sampleStore.sortedSamples()
 
 
-def newSample(self:Project, name:str, pH:float=None, ionicStrength:float=None, amount:float=None,
+def _newSample(self:Project, name:str, pH:float=None, ionicStrength:float=None, amount:float=None,
               amountUnit:str='L', isHazardous:bool=None, creationDate:datetime=None,
               batchIdentifier:str=None, plateIdentifier:str=None, rowNumber:int=None,
               columnNumber:int=None, comment:str=None) -> Sample:
   """Create new ccpn.Sample"""
   nmrProject = self._wrappedData
   apiSampleStore =  nmrProject.sampleStore
+
+  if name and Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
 
   newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,
                                           amount=amount, amountUnit=amountUnit,
@@ -242,7 +245,8 @@ del setter
 
 # Connections to parents:
 Project._childClasses.append(Sample)
-Project.newSample = newSample
+Project.newSample = _newSample
+del _newSample
 
 # Notifiers:
 className = ApiSample._metaclass.qualifiedName()

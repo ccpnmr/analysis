@@ -51,13 +51,13 @@ class SpectrumHit(AbstractWrapperObject):
     """ CCPN SpectrumHit matching SpectrumHit"""
     return self._wrappedData
 
-
   @property
   def _key(self) -> str:
     """object identifier, used for id"""
 
     obj =  self._wrappedData
-    return Pid.createId((obj.substanceName, str(obj.sampledDimension), str(obj.sampledPoint)))
+    return Pid.createId((obj.substanceName, obj.sampledDimension, obj.sampledPoint))
+
   @property
   def _parent(self) -> Spectrum:
     """Spectrum containing spectrumReference."""
@@ -92,6 +92,15 @@ class SpectrumHit(AbstractWrapperObject):
     self._wrappedData.figureOfMerit = value
 
   @property
+  def meritCode(self) -> str:
+    """Merit code string describing quality of hit """
+    return self._wrappedData.meritCode
+
+  @meritCode.setter
+  def meritCode(self, value:str):
+    self._wrappedData.meritCode = value
+
+  @property
   def normalisedChange(self) -> float:
     """Normalized size of effect (normally intensity change). in range -1 <= x <= 1.
     Positive values are large changes, negative values changes in the 'wrong' direction,
@@ -101,15 +110,6 @@ class SpectrumHit(AbstractWrapperObject):
   @normalisedChange.setter
   def normalisedChange(self, value:float):
     self._wrappedData.normalisedChange = value
-
-  @property
-  def meritCode(self) -> str:
-    """Merit code string describing quality of hit """
-    return self._wrappedData.meritCode
-
-  @meritCode.setter
-  def meritCode(self, value:str):
-    self._wrappedData.meritCode = value
 
   @property
   def isConfirmed(self) -> bool:
@@ -189,8 +189,23 @@ class SpectrumHit(AbstractWrapperObject):
 # SampleComponent.spectrumHits = property(getter, setter, None,
 #                                         "SpectrumHits found for SampleComponent")
 
+def _newSpectrumHit(self:Spectrum, substanceName:str, pseudoDimensionNumber:int=0, pointNumber:int=0,
+                    figureOfMerit:float=None,  meritCode:str=None, normalisedChange:float=None,
+                    isConfirmed:bool=None, concentration:float=None, concentrationError:float=None,
+                    concentrationUnit:str='M', comment:str=None):
+  """Create new ccpn.SpectrumHit within ccpn.Spectrum"""
+  obj = self._apiDataSource.newSpectrumHit(substanceName=substanceName,
+                                           sampledDimension=pseudoDimensionNumber,
+                                           sampledPoint=pointNumber, figureOfMerit=figureOfMerit,
+                                           meritCode=meritCode, normalisedChange=normalisedChange,
+                                           isConfirmed=isConfirmed, concentration=concentration,
+                                           concentrationError=concentrationError,
+                                           concentrationUnit=concentrationUnit, details=comment)
 
+  return self._data2Obj.get(obj)
 
+Spectrum.newSpectrumHit = _newSpectrumHit
+del _newSpectrumHit
 # Connections to parents:
 
 Spectrum._childClasses.append(SpectrumHit)

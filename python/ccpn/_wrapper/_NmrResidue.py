@@ -173,6 +173,11 @@ class NmrResidue(AbstractWrapperObject):
       sequenceCode = ll[0] or None
       if len(ll) > 1:
         residueType = ll[1] or None
+
+    for ss in (sequenceCode, residueType):
+      if ss and Pid.altCharacter in ss:
+        raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s" %
+                         (Pid.altCharacter, sequenceCode, residueType))
     #
     apiResonanceGroup.sequenceCode = sequenceCode
     apiResonanceGroup.resetResidueType(residueType)
@@ -202,12 +207,12 @@ class NmrResidue(AbstractWrapperObject):
 
     if residueId:
       if any((chainCode, sequenceCode, residueType)):
-        raise ValueError("reassigned: assignment parameters only allowed if residueId is None")
+        raise ValueError("assignTo: assignment parameters only allowed if residueId is None")
       else:
         # Remove colon prefix, if any, and set parameters
         residueId = residueId.split(Pid.PREFIXSEP,1)[-1]
         # NB trick with setting ll first required
-        # because the pssed-in Pid may not ahve all three components
+        # because the passed-in Pid may not have all three components
         ll = [None, None, None]
         for ii,val in enumerate(Pid.splitId(residueId)):
           ll[ii] = val
@@ -220,6 +225,11 @@ class NmrResidue(AbstractWrapperObject):
       chainCode = chainCode or apiResonanceGroup.nmrChain.code
       sequenceCode = sequenceCode or apiResonanceGroup.sequenceCode
       residueType = residueType or apiResonanceGroup.residueType
+
+    for ss in (chainCode, sequenceCode, residueType):
+      if ss and Pid.altCharacter in ss:
+        raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s.%s" %
+                         (Pid.altCharacter, chainCode, sequenceCode, residueType))
 
     newNmrChain = self._project.fetchNmrChain(chainCode)
     newApiResonanceGroup = newNmrChain._wrappedData.findFirstResonanceGroup(
@@ -334,9 +344,15 @@ NmrChain.mainNmrResidues = property(getter, None, None, """NmrResidues belonging
 del getter
 del setter
 
-def newNmrResidue(self:NmrChain, residueType:str=None, sequenceCode:Union[int,str]=None, comment:str=None) -> NmrResidue:
+def _newNmrResidue(self:NmrChain, residueType:str=None, sequenceCode:Union[int,str]=None, comment:str=None) -> NmrResidue:
   """Create new ccpn.NmrResidue within ccpn.NmrChain"""
   sequenceCode = str(sequenceCode) if sequenceCode else None
+
+  for ss in (sequenceCode, residueType):
+    if ss and Pid.altCharacter in ss:
+      raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s" %
+                       (Pid.altCharacter, sequenceCode, residueType))
+
   apiNmrChain = self._wrappedData
   nmrProject = apiNmrChain.nmrProject
   obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=residueType, details=comment,
@@ -362,6 +378,12 @@ def fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType
     else:
       result = self._project._data2Obj.get(apiResonanceGroup)
   else:
+
+    for ss in (sequenceCode, residueType):
+      if ss and Pid.altCharacter in ss:
+        raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s" %
+                         (Pid.altCharacter, sequenceCode, residueType))
+
     result = self.newNmrResidue(residueType=residueType, sequenceCode=sequenceCode)
   #
   return result
@@ -369,7 +391,8 @@ def fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType
 # Connections to parents:
 NmrChain._childClasses.append(NmrResidue)
 
-NmrChain.newNmrResidue = newNmrResidue
+NmrChain.newNmrResidue = _newNmrResidue
+del _newNmrResidue
 NmrChain.fetchNmrResidue = fetchNmrResidue
 
 # Notifiers:

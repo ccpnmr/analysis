@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from ccpncore.util.Types import Sequence, Tuple
+from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import NmrAtom
@@ -54,8 +55,8 @@ class Axis(AbstractWrapperObject):
     
   @property
   def _key(self) -> str:
-    """local id, of form code.stripSerial"""
-    return self._wrappedData.axis.code
+    """local id, equal to Axis code"""
+    return self._wrappedData.axis.code.translate(Pid.remapSeparators)
 
   code = _key
 

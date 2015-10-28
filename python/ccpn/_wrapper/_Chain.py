@@ -143,6 +143,8 @@ class Chain(AbstractWrapperObject):
     """Rename Chain, changing its Id and Pid"""
     if not value:
       raise ValueError("Chain name must be set")
+    elif Pid.altCharacter in value:
+      raise ValueError("Character %s not allowed in Chain.shortName" % Pid.altCharacter)
     apiNmrChain = self._project._apiNmrProject.findFirstNmrChain(code=self.code)
     self._apiChain.renameChain(value)
     self._project._resetPid(self._apiChain)
@@ -276,6 +278,9 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
   if shortName is None:
     shortName = apiMolSystem.nextChainCode()
 
+  if Pid.altCharacter in shortName:
+    raise ValueError("Character %s not allowed in ccpn.Chain.shortName" % Pid.altCharacter)
+
   apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
   if compoundName is None:
     name = self.uniqueSubstanceName()
@@ -317,6 +322,10 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
   apiMolSystem = self._project._apiNmrProject.molSystem
   if shortName is None:
     shortName = apiMolSystem.nextChainCode()
+
+  if Pid.altCharacter in shortName:
+    raise ValueError("Character %s not allowed in ccpn.Chain.shortName" % Pid.altCharacter)
+
 
   newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                        details=comment)
@@ -364,7 +373,8 @@ del setter
 # Clean-up
     
 Chain.clone.__annotations__['return'] = Chain
-    
+
+# No 'new' function - chains are made elsewhere
     
 # Connections to parents:
 Project._childClasses.append(Chain)

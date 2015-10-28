@@ -67,7 +67,7 @@ class Atom(AbstractWrapperObject):
   @property
   def name(self) -> str:
     """Atom name string (e.g. 'HA')"""
-    return self._wrappedData.name.translate(Pid.remapSeparators)
+    return self._wrappedData.name
 
   # Utility functions
     
@@ -76,32 +76,18 @@ class Atom(AbstractWrapperObject):
   def rename(self, value:str):
     """Change object id, modifying entire project to maintain consistency.
     NBNB TBD to be implemented"""
-    raise NotImplementedError("Chain rename not implemented yet")
+    raise NotImplementedError("Atom rename not implemented yet")
 
   @classmethod
   def _getAllWrappedData(cls, parent: Residue)-> list:
     """get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue"""
     return parent._wrappedData.sortedAtoms()
-    
-    
-def newAtom(self:Residue, name:str) -> Atom:
-  """Create new ccpn.Atom within ccpn.Residue"""
-  project = self._project
-  apiResidue = self._wrappedData
 
-  raise NotImplementedError("Creation of new Atoms not implemented")
-
-  # NBNB TBD
-  # requires changing of descriptor and chemCompVar,
-  # interaction with structure ensembles, ...
-    
-    
+# No 'new' function - chains are made elsewhere
     
 # Connections to parents:
 
 Residue._childClasses.append(Atom)
-
-Residue.newAtom = newAtom
 
 # Notifiers:
 className = ApiAtom._metaclass.qualifiedName()

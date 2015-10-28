@@ -228,7 +228,7 @@ class SpectrumReference(AbstractWrapperObject):
     return result
 
 
-def newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:float,
+def _newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:float,
                        isotopeCodes:Sequence, axisCode:str=None, measurementType:str='Shift',
                        maxAliasedFrequency:float=None, minAliasedFrequency:float=None,
                        foldingMode:str=None, axisUnit:str=None, referencePoint:float=0.0,
@@ -255,7 +255,8 @@ def newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:flo
 
 Spectrum._childClasses.append(SpectrumReference)
 
-Spectrum.newSpectrumReference = newSpectrumReference
+Spectrum.newSpectrumReference = _newSpectrumReference
+del _newSpectrumReference
 
 # Notifiers:
 className = ApiDataDimRef._metaclass.qualifiedName()

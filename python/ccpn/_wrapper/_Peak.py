@@ -175,6 +175,27 @@ class Peak(AbstractWrapperObject):
       peakDim.position = value[ii]
 
   @property
+  def boxWidths(self) -> Tuple[Optional[float], ...]:
+    """The full width of the peak footprint in points for eqach dimension,
+    i.e. the width of the area that should be considered for integration, fitting, etc. ."""
+    return tuple(x.boxWidth for x in self._wrappedData.sortedPeakDims())
+
+  @boxWidths.setter
+  def boxWidths(self,value:Sequence):
+    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+      peakDim.boxWidth = value[ii]
+
+  @property
+  def lineWidths(self) -> Tuple[Optional[float], ...]:
+    """Full-width-half-height of peak/multiplet for each dimension, in Hz. """
+    return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
+
+  @lineWidths.setter
+  def lineWidths(self,value:Sequence):
+    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+      peakDim.lineWidth = value[ii]
+
+  @property
   def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
     """Peak dimension assignment - a list of lists of NmrAtoms for each dimension.
     Assignments as a list of individual combinations is given in 'assignedNmrAtoms'.
@@ -327,7 +348,7 @@ class Peak(AbstractWrapperObject):
 # Connections to parents:
 PeakList._childClasses.append(Peak)
 
-def newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]=None,
+def _newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
             position:Sequence[float]=(), pointPosition:Sequence[float]=(),
             dimensionAssignments:Sequence[Sequence['NmrAtom']]=(),
@@ -374,7 +395,8 @@ def newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]
 
   return self._project._data2Obj.get(apiPeak)
 
-PeakList.newPeak = newPeak
+PeakList.newPeak = _newPeak
+del _newPeak
 
 # Notifiers:
 className = ApiPeak._metaclass.qualifiedName()

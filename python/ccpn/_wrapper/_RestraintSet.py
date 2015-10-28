@@ -107,7 +107,7 @@ class RestraintSet(AbstractWrapperObject):
     return result
 
 
-def newRestraintSet(self:Project, comment:str=None) -> RestraintSet:
+def _newRestraintSet(self:Project, comment:str=None) -> RestraintSet:
   """Create new ccpn.RestraintSet
 
   :param str comment: comment for new chain (optional)"""
@@ -120,7 +120,8 @@ def newRestraintSet(self:Project, comment:str=None) -> RestraintSet:
     
 # Connections to parents:
 Project._childClasses.append(RestraintSet)
-Project.newRestraintSet = newRestraintSet
+Project.newRestraintSet = _newRestraintSet
+del _newRestraintSet
 
 # Notifiers:
 className = ApiNmrConstraintStore._metaclass.qualifiedName()

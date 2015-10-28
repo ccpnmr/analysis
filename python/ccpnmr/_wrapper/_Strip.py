@@ -229,7 +229,6 @@ class Strip(GuiStrip, AbstractWrapperObject):
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
   def displaySpectrum(self, spectrum:Spectrum, axisOrder:Sequence=()):
-
     """
     Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
     """
@@ -250,6 +249,15 @@ class Strip(GuiStrip, AbstractWrapperObject):
       # Map axes to original display setting
       mapIndices = libSpectrum._axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
 
+    if mapIndices is None:
+      return
+      
+    if None in mapIndices[:2]: # make sure that x/y always mapped
+      return
+      
+    if mapIndices.count(None) + spectrum.dimensionCount != len(mapIndices):
+      return
+      
     # Make dimensionOrdering
     sortedDataDims = dataSource.sortedDataDims()
     dimensionOrdering = []

@@ -42,7 +42,7 @@ class CreateSequence(QtGui.QDialog, Base):
     """
     Creates a sequence using the values specified in the text widget.
     """
-    self.project.createSimpleChain(sequence=self.sequence, compoundName=self.moleculeName,
+    self.project.createChain(sequence=self.sequence, compoundName=self.moleculeName,
                                  startNumber=self.sequenceStart, shortName=self.chainCode,
                                  molType=self.molTypePulldown.currentText())
     self.accept()

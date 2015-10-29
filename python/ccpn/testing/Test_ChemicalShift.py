@@ -21,8 +21,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 from ccpn.testing.WrapperTesting import WrapperTesting
-# from ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 class ChemicalShiftTest(WrapperTesting):
 
@@ -41,5 +41,3 @@ class ChemicalShiftTest(WrapperTesting):
     self.undo.redo()
     self.assertEqual(shiftList.pid,'CL:RenamedList')
     self.assertEqual(shiftList.chemicalShifts[5].pid,'CS:RenamedList.A.3.GLU.CA')
-
-

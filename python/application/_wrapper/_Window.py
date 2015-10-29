@@ -30,11 +30,9 @@ from application.core.modules.GuiWindow import GuiWindow
 from application.core.modules.GuiMainWindow import GuiMainWindow
 from ccpncore.util import Pid
 
-
-
 class Window(AbstractWrapperObject):
   """GUI window, corresponds to OS window"""
-  
+
   #: Short class name, for PID.
   shortClassName = 'GW'
   # Attribute it necessary as subclasses must use superclass className
@@ -42,11 +40,11 @@ class Window(AbstractWrapperObject):
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'windows'
-  
+
   #: List of child classes.
   _childClasses = []
 
-  # CCPN properties  
+  # CCPN properties
   @property
   def _apiWindow(self) -> ApiWindow:
     """ CCPN Window matching Window"""
@@ -56,7 +54,7 @@ class Window(AbstractWrapperObject):
   def title(self) -> str:
     """Window display title"""
     return self._wrappedData.title
-    
+
   @property
   def _parent(self) -> Project:
     """Parent (containing) object."""
@@ -70,7 +68,7 @@ class Window(AbstractWrapperObject):
   @position.setter
   def position(self, value:Sequence):
     self._wrappedData.position = value
-  
+
   @property
   def size(self) -> tuple:
     """Window X,Y size in integer pixels"""
@@ -124,11 +122,8 @@ class MainWindow(Window, GuiMainWindow):
 
   def __init__(self, project:Project, wrappedData:ApiWindow):
     """Local override init for Qt subclass"""
-    print ('@~@~ in MainWIndow init')
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    print ('Done AbstractWrapperObject init')
     GuiMainWindow.__init__(self)
-    print ('Done GuiMainWindow init')
   # put in subclass to make superclass abstract
   @property
   def _key(self) -> str:

@@ -1,8 +1,3 @@
-import os
-from application.core import AppBase
-
-from ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
-
 """Module Documentation here
 
 """
@@ -26,6 +21,10 @@ __version__ = "$Revision: 8631 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+import os
+from application.core import AppBase
+
+from ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 
 def test_get_preferences():
 

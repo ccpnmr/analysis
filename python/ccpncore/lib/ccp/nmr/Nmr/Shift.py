@@ -42,8 +42,6 @@ def recalculateValue(self:'Shift', simulatedPeakScale:float=0.0001) -> float:
   
   Float (shift.value)
   """
-  # from application.analysis.core.CouplingBasic import getPeakDimComponentSplitting
-
 
   # NBNB TBD spectrum dimensions weighting must be added
   # hasApp = hasattr(shift.root, 'application')

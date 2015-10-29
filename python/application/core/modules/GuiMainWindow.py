@@ -69,9 +69,7 @@ from application.core.popups.SampleSetupPopup import SamplePopup
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def __init__(self):
-    print ('@~@~ in GuiMAinWindow init')
     QtGui.QMainWindow.__init__(self)
-    print ('@~@~ Done QMainWindow init')
     #if not apiWindow.modules:
       #apiGuiTask = apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
       ##apiModule = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=('H','intensity'), stripDirection='Y')
@@ -84,9 +82,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     #
     self.setGeometry(540, 40, 900, 900)
 
-    print ('@~@~ starting GuiWindow init')
     GuiWindow.__init__(self)
-    print ('@~@~ Done GuiWindow init')
     self.recordingMacro = False
     self.setupWindow()
     self.setupMenus()
@@ -370,7 +366,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def _showDocumentation(self, title, *args):
     
     newDock = CcpnDock("API Documentation")
-    path = os.path.join(Path.getPythonDirectory(), 'ccpn', 'doc', *args)
+    path = os.path.join(Path.getTopDirectory(), 'doc', *args)
     view = CcpnWebView(path)
     newDock.addWidget(view)
     self.dockArea.addDock(newDock)

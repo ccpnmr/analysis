@@ -525,7 +525,8 @@ def setupMixtures(spectra, n, mode):
       #print obj.name, [round(pos, 3) for pos in obj.getPeakPositions()], obj.score
     #print ""
 
-    from application.core.modules.ScoringMixture import MixtureTable
+    # NBNB CANNOT be done. You cannot import application from inside ccpn
+    # from application.core.modules.ScoringMixture import MixtureTable
 
 
   return mixturesData

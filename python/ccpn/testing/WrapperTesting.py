@@ -37,12 +37,9 @@ class WrapperTesting(unittest.TestCase):
   @contextlib.contextmanager
   def initialSetup(self):
     if self.projectPath is None:
-      print ("@~@~ making new project")
       self.project = ccpn.newProject('default')
     else:
-      print ("@~@~ loadubg new project", self.projectPath)
       self.project = ccpn.loadProject(os.path.join(TEST_PROJECTS_PATH, self.projectPath))
-    print ('@~@~ done making project')
     self.project._resetUndo(debug=True)
     self.undo = self.project._undo
     self.undo.debug = True
@@ -67,12 +64,3 @@ class WrapperTesting(unittest.TestCase):
     dataList = self.project.loadData(dataPath)
     #
     return dataList
-
-if __name__ == '__main__':
-  # test for raw porject opening, in case of setup malfunctioning
-  print('@~@~ start making new project')
-  pp = ccpn.newProject('default')
-  print('@~@~ done making new project')
-  print('@~@~ start reading old project')
-  pp = ccpn.loadProject(os.path.join(TEST_PROJECTS_PATH, 'CcpnCourse2b'))
-  print('@~@~ done reading old project')

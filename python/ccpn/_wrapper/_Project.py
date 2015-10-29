@@ -70,8 +70,6 @@ class Project(AbstractWrapperObject):
     """ Special init for root (Project) object
     """
 
-    print ('@~@~ in Project init')
-
     if not isinstance(wrappedData, ApiNmrProject):
       raise ValueError("Project initialised with %s, should be ccp.nmr.Nmr.NmrProject."
                        % wrappedData)
@@ -95,7 +93,6 @@ class Project(AbstractWrapperObject):
 
     # Special attributes:
     self._implExperimentTypeMap = None
-    print ('@~@~ in Project init 10')
 
     # Set mandatory top-level objects in apiProject and ApiNmrProject
     # MolSystem
@@ -124,8 +121,6 @@ class Project(AbstractWrapperObject):
     if wrappedData.findFirstNmrChain(code=Constants.defaultNmrChainCode) is None:
       wrappedData.newNmrChain(code=Constants.defaultNmrChainCode)
 
-    print ('@~@~ in Project init 20')
-
     self._logger = wrappedData.root._logger
 
     self._registerApiNotifiers()
@@ -135,8 +130,6 @@ class Project(AbstractWrapperObject):
       self._appBase = wrappedData.root._appBase
     else:
       self._appBase = None
-
-    print ('@~@~ in Project init start initialising')
 
     self._initializeAll()
 

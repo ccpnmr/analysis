@@ -1,5 +1,5 @@
 from application.core.AppBase import startProgram
-from application.core import AppBase
+from application.core.AppBase import AppBase
 from application.core.Version import applicationVersion
 
 applicationName = 'Screen'

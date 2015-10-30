@@ -22,11 +22,8 @@ __version__ = "$Revision: 8180 $"
 # Start of code
 #=========================================================================================
 
-### TBD: update to Python 3
+def fetchUrl(url, data=None, headers=None, timeout=None):
 
-def fetchUrl(url, values=None, headers=None, timeout=None):
-
-  import socket
   import urllib
   import urllib.parse
   import urllib.request
@@ -34,8 +31,8 @@ def fetchUrl(url, values=None, headers=None, timeout=None):
   if not headers:
     headers = {}
 
-  if values:
-    data = urllib.parse.urlencode(values)
+  if data:
+    data = urllib.parse.urlencode(data)
     data = data.encode('utf-8')
   else:
     data = None
@@ -45,4 +42,21 @@ def fetchUrl(url, values=None, headers=None, timeout=None):
   result = response.read().decode('utf-8')
 
   return result
+
+def uploadFile(url, fileName, data=None):
+  
+  import os
+  
+  if not data:
+    data = {}
+    
+  fp = open(fileName, 'rb')
+  fileData = fp.read()
+  fp.close()
+  
+  data['fileName'] = os.path.basename(fileName)
+  data['fileData'] = fileData
+  
+  return fetchUrl(url, data)
+
 

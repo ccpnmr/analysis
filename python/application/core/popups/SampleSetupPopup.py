@@ -12,9 +12,6 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Slider import Slider
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.ScrollArea import ScrollArea
-from ccpncore.gui.Widget import Widget
-from ccpnmrcore.popups.SamplePropertiesPopup import SamplePropertiesPopup
-from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
 from ccpn.lib.Sample import setupSamples
 
 
@@ -160,8 +157,8 @@ class SamplePopup(QtGui.QDialog):
 
     # #----- open the analysis table ----#
 
-    sampletable = SampleAnalysis(self.project)
-    self.project._appBase.mainWindow.dockArea.addDock(sampletable)
+    # sampletable = SampleAnalysis(self.project)
+    # self.project._appBase.mainWindow.dockArea.addDock(sampletable)
     self.accept()
 
 
@@ -189,7 +186,7 @@ class GeneralSetup(QtGui.QWidget):
 
     # --- Select number of Components per Mixtures ---
     self.checkBox2 = CheckBox(self, grid=(3, 0), hAlign='c', checked= False)
-    nComponentButton = Button(self, text="Select number of Substances", grid=(3, 1))
+    nComponentButton = Button(self, text="Select number of Components", grid=(3, 1))
     nComponentButton.setFlat(True)
     nComponentButton.clicked.connect(self.nComponentsIsChecked)
 

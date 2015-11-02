@@ -1,6 +1,5 @@
 __author__ = 'luca'
 
-
 from PyQt4 import QtGui, QtCore
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
@@ -12,8 +11,6 @@ from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.TextEditor import TextEditor
-from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 OTHER_UNIT = ['µ','m', 'n', 'p']
@@ -32,7 +29,6 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sideBar = project._appBase.mainWindow.sideBar
     self.newSampleSideBar = item
 
-
     self.sample = sample
     self.setWindowTitle("Sample Properties")
     self.area = ScrollArea(self)
@@ -47,7 +43,6 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.setMaximumSize(450, 650)
 
     # Widgets Properties:
-
     # SampleName
     sampleNameLabel = Label(self.areaContents, text="Sample name ", grid=(1, 1), hAlign='l')
     self.sampleName = LineEdit(self.areaContents, grid=(1, 2), hAlign='l' )
@@ -85,7 +80,6 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sampleExperimentType.setStyleSheet(""" background-color:  white""")
     self.sampleExperimentType.setFixedWidth(203)
     self.sampleExperimentType.setFixedHeight(25)
-    self.sampleExperimentType.activated[str].connect(self.showSampleSpectrumPropertiesPopup)
 
 # #   #Sample Spectrum  Hit
 #     spectrumHit = Label(self.areaContents, text="Spectrum Hits ", vAlign='t', hAlign='l', grid=(4, 1))
@@ -94,7 +88,6 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
 #     self.spectrumHit.setStyleSheet(""" background-color:  white""")
 #     self.spectrumHit.setFixedWidth(203)
 #     self.spectrumHit.setFixedHeight(25)
-#     self.spectrumHit.activated[str].connect(self.showSampleSpectrumPropertiesPopup)
 
 #   #Sample  State
     sampleState = Label(self.areaContents, text="Sample State ", vAlign='t', hAlign='l', grid=(5, 1))
@@ -104,7 +97,6 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sampleState.setFixedWidth(203)
     self.sampleState.setFixedHeight(25)
     self.sampleState.activated[str].connect(self.sampleStateChanged)
-
 
 #   #Sample Amount Unit
     sampleAmountUnitLabel = Label(self.areaContents, text="Sample Amount ", grid=(6, 1), hAlign='l')
@@ -126,7 +118,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
       self.sampleAmount.setValue(self.sample.amount)
     self.sampleAmount.valueChanged.connect(self.sampleAmountChanged)
 
-    # Sample pH
+#    # Sample pH
     samplepHLabel = Label(self.areaContents, text="Sample pH ", grid=(7, 1), hAlign='l')
     self.samplepH = DoubleSpinbox(self.areaContents, grid=(7, 2), hAlign='l' )
     self.samplepH.setRange(0.00, 14.00)
@@ -138,8 +130,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     if self.sample.pH is not None:
       self.samplepH.setValue(self.sample.pH)
 
-
-    # Sample Date
+#    # Sample Date
     sampleDate = Label(self.areaContents, text="Sample Creation Date ", grid=(8, 1), hAlign='l')
     self.sampleDate = DateTime(self.areaContents, grid=(8, 2), hAlign='l')
     self.sampleDate.setStyleSheet(""" background-color:  white""")
@@ -150,9 +141,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
       self.sampleDate.setDate(setToday)
       self.sampleDate.dateChanged.connect(self.sampleDateChanged)
 
-
-
-    # Sample Plate Identifier
+#    # Sample Plate Identifier
     samplePlateIdentifierLabel = Label(self.areaContents, text="Sample Plate Identifier ", grid=(9, 1), hAlign='l')
     self.plateIdentifier = LineEdit(self.areaContents, grid=(9, 2), hAlign='l' )
     self.plateIdentifier.setStyleSheet(""" background-color:  white""")
@@ -171,7 +160,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
       self.rowNumber.setText(str(sample.rowNumber))
     self.rowNumber.editingFinished.connect(self.rowNumberChanged)
 
-    # Sample Column Number
+#    # Sample Column Number
     sampleColumnNumberLabel = Label(self.areaContents, text="Sample Column Number ", grid=(11, 1), hAlign='l')
     self.columnNumber = LineEdit(self.areaContents, grid=(11, 2), hAlign='l' )
     self.columnNumber.setStyleSheet(""" background-color:  white""")
@@ -181,7 +170,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
       self.columnNumber.setText(str(sample.columnNumber))
     self.columnNumber.editingFinished.connect(self.columnNumberChanged)
 
-    # Sample Comment
+#    # Sample Comment
     sampleCommentLabel = Label(self.areaContents, text="Comment ", grid=(12, 1), hAlign='l')
     self.comment = TextEditor(self.areaContents, grid=(12, 2), hAlign='c' )
     self.comment.setStyleSheet(""" background-color: white""")
@@ -211,13 +200,6 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     popup.exec_()
     popup.raise_()
 
-  def showSampleSpectrumPropertiesPopup(self, pressed):
-
-    self.spectrum = self.project.getByPid(pressed)
-    popup = SpectrumPropertiesPopup(self.spectrum, self.project)
-    popup.exec_()
-    popup.raise_()
-
   def changeSampleName(self):
 
     if self.sampleName.isModified():
@@ -232,6 +214,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sample.pH = value
 
   def sampleStateChanged(self, pressed):
+
     if pressed == 'Liquid':
       self.sampleUnitChangedInVolume()
     elif pressed == 'Other':
@@ -458,14 +441,6 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.labelLogP.hide()
     self.logP.hide()
 
-  def showSpectrumPropertiesPopup(self, pressed):
-
-    self.spectrum = self.project.getByPid(pressed)
-    popup = SpectrumPropertiesPopup(self.spectrum, self.project)
-    popup.exec_()
-    popup.raise_()
-
-
   def moreInfoComponents(self):
     self.moreInfo.hide()
     self.lessInfo = Button(self.area, text="Less... ", grid=(22, 1),
@@ -509,7 +484,6 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.concentrationLabel2.show()
       self.concentration2.show()
 
-
   def typeComponent(self, pressed):
 
     if pressed == 'Compound':
@@ -534,6 +508,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.hideInfo()
 
   def hideInfo(self):
+
       self.moreInfo.show()
       if hasattr(self, 'lessInfo'):
         self.lessInfo.hide()

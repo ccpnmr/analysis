@@ -46,21 +46,22 @@ class SampleComponentsView(QtGui.QWidget):
 
 
   def showMolecule(self, selection):
+
     for sample in self.project.samples:
       if sample.pid  == selection:
 
         for components in sample.sampleComponents:
           smile = components.substance.smiles
           self.smileList.append(smile)
+          self.testName = components.substance.name
 
         valueCount = (len(sample.spectra))
         self.positions = [i for i in range(valueCount)]
 
 
-
-
         for smile, self.position in zip( self.smileList, self.positions):
-          self.compoundView = CompoundView(self.scrollAreaWidgetContents, grid=(0, self.position))
+          self.compoundView = CompoundView(self.scrollAreaWidgetContents, grid=(1, self.position))
+          self.chemicalName = Label(self.scrollAreaWidgetContents, text=str(smile), grid=(0, self.position))
           self.smiles = smile
           compound = importSmiles(smile)
           variant = list(compound.variants)[0]

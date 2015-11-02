@@ -21,7 +21,7 @@ class SampleTableSimple(QtGui.QWidget):
 
 
     columns = [Column('Mixture Name', lambda sample:str(sample.pid)),
-               Column('Number of Substances', lambda sample: (int(len(sample.peakCollections)))),
+               Column('Number of Substances', lambda sample: (int(len(sample.spectra)))),
                Column('Minimum Score', lambda sample: int(sample.minScore)),
                Column('Average Score', lambda sample: int(sample.averageScore))]
 
@@ -31,20 +31,17 @@ class SampleTableSimple(QtGui.QWidget):
 
 
     self.layout().addWidget(sampleTable, 3, 0, 1, 3)
-    self.exportToXls()
-
-
-
+    # self.exportToXls()
 
   def showSample(self):
     print('Not implemented yet')
 
 
-  def exportToXls(self):
-
-    sampleColumn = [str(self.project.samples)]
-    # componentsColumn = [str(self.project.sample.sampleComponents)]
-    df = DataFrame({'Mixture name': sampleColumn})
-
-
-    df.to_excel('Mixtures.xlsx', sheet_name='sheet1', index=False)
+  # def exportToXls(self):
+  #
+  #   sampleColumn = [str(self.project.samples)]
+  #   # componentsColumn = [str(self.project.sample.sampleComponents)]
+  #   df = DataFrame({'Mixture name': sampleColumn})
+  #
+  #
+  #   df.to_excel('Mixtures.xlsx', sheet_name='sheet1', index=False)

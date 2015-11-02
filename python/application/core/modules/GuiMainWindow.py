@@ -62,7 +62,7 @@ from application.core.modules.ScreeningSetup import ScreeningSetup
 from application.core.popups.FeedbackPopup import FeedbackPopup
 from application.core.popups.PreferencesPopup import PreferencesPopup
 from application.core.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup
+from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup, EditSampleComponentPopup
 from application.core.popups.SampleSetupPopup import SamplePopup
 
 
@@ -488,8 +488,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         popup.exec_()
         popup.raise_()
 
+      elif obj.shortClassName == 'SC':
+        popup = EditSampleComponentPopup(sampleComponent=obj)
+        popup.exec_()
+        popup.raise_()
+
       elif obj.shortClassName == 'NO':
         self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=obj, item=item)
+
     elif item.data(0, QtCore.Qt.DisplayRole) == '<New Note>':
       newNote = project.newNote()
 

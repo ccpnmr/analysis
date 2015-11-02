@@ -104,6 +104,16 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
       msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
       self.dockArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay', 'spectrum', pid=ss)
 
+  def processSamples(self, pids:Sequence[str], event):
+    for ss in pids:
+      spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
+      spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
+      for sp in spectrumPids[1:]:
+        spectrumDisplay.displaySpectrum(sp)
+      self.dockArea.guiWindow.deleteBlankDisplay()
+      msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
+      self.dockArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay', 'sample', pid=ss)
+
   # def processSpectrum(self, spectrum:(Spectrum,Pid), event):
   #   """Process dropped spectrum"""
   #   spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)

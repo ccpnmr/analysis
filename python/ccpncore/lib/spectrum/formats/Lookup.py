@@ -14,11 +14,11 @@ def readXls(project, path=None):
 
     # sheet 1
     for spectrumPath, id, expType, smile , molecularMass, numHAtoms,Hacceptor, Hdonor,\
-        psa, cLogP, empiricalFormula, chemicalName, comment,numBonds, numRings\
+        psa, cLogP, concentration, empiricalFormula, chemicalName, comment,numBonds, numRings\
         in zip(excelSheet['filename'], excelSheet['Id'], excelSheet['expType'],
         excelSheet['smiles'], excelSheet['molecularMass'], excelSheet['numHAtoms'],
         excelSheet['Hacceptor'], excelSheet['Hdonor'],  excelSheet['psa'],
-        excelSheet['cLogP'],  excelSheet['empiricalFormula'],excelSheet['ChemicalName'],
+        excelSheet['cLogP'],excelSheet['concentration'],  excelSheet['empiricalFormula'],excelSheet['ChemicalName'],
         excelSheet['comments'], excelSheet['numBonds'], excelSheet['numRings']):
 
         if spectrumPath.split('/')[-1] == 'procs':
@@ -43,6 +43,7 @@ def readXls(project, path=None):
             newSubstance.bondCount = int(numBonds)
             newSubstance.ringCount = int(numRings)
             newSubstance.polarSurfaceArea = float(psa)
+
 
     #   # create Sample
     #   print('sample')

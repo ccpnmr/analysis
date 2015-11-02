@@ -75,3 +75,8 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
       displayPid = self.parent.guiSpectrumDisplay.pid
       self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
                                  'module.displaySpectrum', 'spectrum', [ss, displayPid])
+
+  def processSamples(self, pids:Sequence[str], event):
+    for ss in pids:
+      spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
+      self.processSpectra(spectrumPids, event)

@@ -42,7 +42,7 @@ _isotopeRefExperimentMap = None
 STANDARD_ISOTOPES = set(x for x in Constants.DEFAULT_ISOTOPE_DICT.values() if x is not None)
 
 def name2IsotopeCode(name:str) -> str:
-  """Get standard isotope code matching name or axisCode"""
+  """Get standard isotope code matching name or axisCode string"""
   if not name:
     return None
 
@@ -51,6 +51,19 @@ def name2IsotopeCode(name:str) -> str:
       return val
   else:
     return None
+
+def name2ElementSymbol(name:str) -> str:
+  """Get standard element symbol matching name or axisCode"""
+  for tag in reversed(sorted(Constants.DEFAULT_ISOTOPE_DICT)):
+    # Reversed looping guarantees that the longer of two matches will be chosen
+    if name.startswith(tag):
+      result = tag
+      break
+  else:
+    result = None
+  #
+  return result
+
 
 def checkIsotope(text:str) -> str:
   """Convert string to most probable isotope code - defaulting to '1H"""

@@ -12,7 +12,7 @@ from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.TextEditor import TextEditor
-from functools import partial
+from ccpnmrcore.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -20,8 +20,8 @@ OTHER_UNIT = ['µ','m', 'n', 'p']
 CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
 VOLUME_UNIT = ['µL', 'mL', 'nL', 'pL']
 MASS_UNIT = ['µg','kg','g','mg', 'ng', 'pg']
-SAMPLE_STATES = ['liquid', 'solid', 'ordered', 'powder', 'crystal', 'other']
-TYPECOMPONENT =  ['Solvent', 'Compound', 'Target', 'inhibitor ', 'Other']
+SAMPLE_STATES = ['Liquid', 'Solid', 'Ordered', 'Powder', 'Crystal', 'Other']
+TYPECOMPONENT =  ['Compound', 'Solvent', 'Target', 'inhibitor ', 'Other']
 C_COMPONENT_UNIT = ['Molar', 'Mass/Volume',  'mol/Volume', ]
 
 class SamplePropertiesPopup(QtGui.QDialog, Base):
@@ -29,14 +29,16 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     super(SamplePropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.project = project
-    sideBar = project._appBase.mainWindow.sideBar
-    print(self.project)
+    self.sideBar = project._appBase.mainWindow.sideBar
+    self.newSampleSideBar = item
+
+
     self.sample = sample
     self.setWindowTitle("Sample Properties")
     self.area = ScrollArea(self)
     self.area.setWidgetResizable(True)
     self.area.setMinimumSize(450, 650)
-    self.areaContents = QtGui.QWidget() # our 'Widget' doesn't follow the layout rule
+    self.areaContents = QtGui.QWidget()
 
     self.area.setStyleSheet(""" background-color:  #2a3358; """)
     self.area.setWidget(self.areaContents)
@@ -57,43 +59,56 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
 
 #   # Sample Components
     SampleComponents = Label(self.areaContents, text="Sample Components ", grid=(2, 1), hAlign='l')
-    spPid = [sp.pid for sp in sample.spectra]
-    self.spInMixture = PulldownList(self.areaContents, grid=(2, 2), hAlign='l' )
-    self.spInMixture.setStyleSheet(""" background-color:  white""")
-    self.spInMixture.setFixedWidth(203)
-    self.spInMixture.setFixedHeight(25)
-    self.spInMixture.setData(spPid)
-    self.spInMixture.setEditable(True)
+    self.scpid = []
+    sc = [sc.pid for sc in sample.sampleComponents]
+    self.scpid.append(sc)
+    self.sc = PulldownList(self.areaContents, grid=(2, 2), hAlign='l' )
+    self.sc.setStyleSheet(""" background-color:  white""")
+    self.sc.setFixedWidth(203)
+    self.sc.setFixedHeight(25)
+    self.sc.setData(self.scpid[0])
+    self.sc.setEditable(True)
+    self.sc.activated[str].connect(self.editComponents)
 
 #   # Add component
-
     self.sampleAddComponents = Button(self.areaContents, text="Add Sample Components ", grid=(13, 1),
                                       hAlign='l', callback=self.addComponents)
     self.sampleAddComponents.setStyleSheet(""" background-color:  white""")
     self.sampleAddComponents.setFixedWidth(195)
     self.sampleAddComponents.setFixedHeight(25)
 
-
 #   #Sample Spectra
     sampleSpectra = Label(self.areaContents, text="Sample Spectra ", vAlign='t', hAlign='l', grid=(3, 1))
     self.sampleExperimentType = PulldownList(self.areaContents, hAlign='l', grid=(3, 2))#, vAlign='t'
+    spPid = [sp.pid for sp in sample.spectra]
     self.sampleExperimentType.addItems(spPid)
     self.sampleExperimentType.setStyleSheet(""" background-color:  white""")
     self.sampleExperimentType.setFixedWidth(203)
     self.sampleExperimentType.setFixedHeight(25)
+    self.sampleExperimentType.activated[str].connect(self.showSampleSpectrumPropertiesPopup)
+
+# #   #Sample Spectrum  Hit
+#     spectrumHit = Label(self.areaContents, text="Spectrum Hits ", vAlign='t', hAlign='l', grid=(4, 1))
+#     self.spectrumHit = PulldownList(self.areaContents, hAlign='l', grid=(4, 2))#, vAlign='t'
+#     self.spectrumHit.addItems(spPid)
+#     self.spectrumHit.setStyleSheet(""" background-color:  white""")
+#     self.spectrumHit.setFixedWidth(203)
+#     self.spectrumHit.setFixedHeight(25)
+#     self.spectrumHit.activated[str].connect(self.showSampleSpectrumPropertiesPopup)
 
 #   #Sample  State
-    sampleState = Label(self.areaContents, text="Sample State ", vAlign='t', hAlign='l', grid=(4, 1))
-    self.sampleState = PulldownList(self.areaContents, hAlign='l', grid=(4, 2))#, vAlign='t'
+    sampleState = Label(self.areaContents, text="Sample State ", vAlign='t', hAlign='l', grid=(5, 1))
+    self.sampleState = PulldownList(self.areaContents, hAlign='l', grid=(5, 2))#, vAlign='t'
     self.sampleState.addItems(SAMPLE_STATES)
     self.sampleState.setStyleSheet(""" background-color:  white""")
     self.sampleState.setFixedWidth(203)
     self.sampleState.setFixedHeight(25)
     self.sampleState.activated[str].connect(self.sampleStateChanged)
 
+
 #   #Sample Amount Unit
-    sampleAmountUnitLabel = Label(self.areaContents, text="Sample Amount ", grid=(5, 1), hAlign='l')
-    self.sampleAmountUnit = PulldownList(self.areaContents, grid=(5, 2), hAlign='l' )
+    sampleAmountUnitLabel = Label(self.areaContents, text="Sample Amount ", grid=(6, 1), hAlign='l')
+    self.sampleAmountUnit = PulldownList(self.areaContents, grid=(6, 2), hAlign='l' )
     self.sampleAmountUnit.setData(CONCENTRATION_UNIT)
     self.sampleAmountUnit.setFixedWidth(75)
     self.sampleAmountUnit.setFixedHeight(25)
@@ -101,14 +116,14 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sampleAmountUnit.activated[str].connect(self.sampleAmountUnitChanged)
 
 #    # Sample Amount
-#     sampleAmountLabel = Label(self.areaContents, text="Sample Amount ", grid=(6, 1), hAlign='l')
-    self.sampleAmount = DoubleSpinbox(self.areaContents, grid=(5, 2), hAlign='r' )
+    self.sampleAmount = DoubleSpinbox(self.areaContents, grid=(6, 2), hAlign='r' )
     self.sampleAmount.setRange(0.00, 1000.00)
     self.sampleAmount.setSingleStep(0.01)
     self.sampleAmount.setStyleSheet(""" background-color:  white""")
     self.sampleAmount.setFixedWidth(120)
     self.sampleAmount.setFixedHeight(25)
-    # self.sampleAmount.setValue(float(500.00))
+    if self.sample.amount is not None:
+      self.sampleAmount.setValue(self.sample.amount)
     self.sampleAmount.valueChanged.connect(self.sampleAmountChanged)
 
     # Sample pH
@@ -120,6 +135,9 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.samplepH.setStyleSheet(""" background-color:  white""")
     self.samplepH.setFixedWidth(203)
     self.samplepH.setFixedHeight(25)
+    if self.sample.pH is not None:
+      self.samplepH.setValue(self.sample.pH)
+
 
     # Sample Date
     sampleDate = Label(self.areaContents, text="Sample Creation Date ", grid=(8, 1), hAlign='l')
@@ -128,9 +146,11 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sampleDate.setFixedWidth(203)
     self.sampleDate.setFixedHeight(25)
     if sample.creationDate is None:
-     setToday = QtCore.QDate.currentDate()
-     self.sampleDate.setDate(setToday)
-    # self.sampleDate.setText(sample.creationDate)
+      setToday = QtCore.QDate.currentDate()
+      self.sampleDate.setDate(setToday)
+      self.sampleDate.dateChanged.connect(self.sampleDateChanged)
+
+
 
     # Sample Plate Identifier
     samplePlateIdentifierLabel = Label(self.areaContents, text="Sample Plate Identifier ", grid=(9, 1), hAlign='l')
@@ -138,7 +158,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.plateIdentifier.setStyleSheet(""" background-color:  white""")
     self.plateIdentifier.setFixedWidth(203)
     self.plateIdentifier.setFixedHeight(25)
-    self.plateIdentifier.setText(sample.plateIdentifier)
+    self.plateIdentifier.setText(str(sample.plateIdentifier))
     self.plateIdentifier.editingFinished.connect(self.plateIdentifierChanged)
 
     # Sample Row Number
@@ -148,10 +168,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.rowNumber.setFixedWidth(203)
     self.rowNumber.setFixedHeight(25)
     if sample.rowNumber is not None:
-      self.rowNumber.setText(sample.rowNumber)
-    # else:
-    #   self.rowNumber.setText(str('<Insert 0 + Row Num. Eg. 01 >'))
-    self.rowNumber.editingFinished.connect(self.columnNumberChanged)
+      self.rowNumber.setText(str(sample.rowNumber))
     self.rowNumber.editingFinished.connect(self.rowNumberChanged)
 
     # Sample Column Number
@@ -161,10 +178,8 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.columnNumber.setFixedWidth(203)
     self.columnNumber.setFixedHeight(25)
     if sample.columnNumber is not None:
-      self.columnNumber.setText(sample.columnNumber)
-    # else:
-    #   self.columnNumber.setText(str('< Insert 0 + Col Num. Eg. 01 >'))
-    self.rowNumber.editingFinished.connect(self.columnNumberChanged)
+      self.columnNumber.setText(str(sample.columnNumber))
+    self.columnNumber.editingFinished.connect(self.columnNumberChanged)
 
     # Sample Comment
     sampleCommentLabel = Label(self.areaContents, text="Comment ", grid=(12, 1), hAlign='l')
@@ -181,11 +196,30 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
 
   def addComponents(self):
 
-    popup = AddSampleComponentPopup(parent=None, project=self.project, sample= self.sample)
+    self.sampleComponent = self.sample.newSampleComponent(name=('NewSC'),labeling=str('H'))
+    self.sideBar.addItem(self.newSampleSideBar, self.sampleComponent)
+    scPid = self.sampleComponent.pid
+    self.scpid[0].append(scPid)
+    self.sc.setData(self.scpid[0])
+    self.editComponents(self.sampleComponent.pid)
+
+
+  def editComponents(self, pressed):
+
+    sampleComponent = self.project.getByPid(pressed)
+    popup = EditSampleComponentPopup(project=self.project, sample=self.sample, sampleComponent=sampleComponent)
+    popup.exec_()
+    popup.raise_()
+
+  def showSampleSpectrumPropertiesPopup(self, pressed):
+
+    self.spectrum = self.project.getByPid(pressed)
+    popup = SpectrumPropertiesPopup(self.spectrum, self.project)
     popup.exec_()
     popup.raise_()
 
   def changeSampleName(self):
+
     if self.sampleName.isModified():
       self.sample.rename(self.sampleName.text())
       self.item.setText(0, 'SA:'+self.sampleName.text())
@@ -196,16 +230,14 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
 
   def samplepHchanged(self, value):
     self.sample.pH = value
-    print(self.sample.pH, 'pH')
 
   def sampleStateChanged(self, pressed):
-    if pressed == 'liquid':
+    if pressed == 'Liquid':
       self.sampleUnitChangedInVolume()
-    elif pressed == 'other':
+    elif pressed == 'Other':
       self.sampleUnitChangedInConcentration()
     else:
       self.sampleUnitChangedInMass()
-
 
   def sampleUnitChangedInVolume(self):
     self.sampleAmountUnit.setData(VOLUME_UNIT)
@@ -217,29 +249,26 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sampleAmountUnit.setData(MASS_UNIT)
 
   def sampleAmountChanged(self, value):
-    self.sample.sampleAmount = value
-    print(self.sample.sampleAmount, 'sampleAmount')
+    self.sample.amount = value
 
   def sampleAmountUnitChanged(self, pressed):
     self.sample.amountUnit = str(pressed)
-    print(self.sample.amountUnit, 'unit')
+
+  def sampleDateChanged(self, pressed):
+    print(pressed)
 
   def plateIdentifierChanged(self):
     self.sample.plateIdentifier = str(self.plateIdentifier.text())
-    print(self.sample.plateIdentifier, 'plateIdentifier')
 
   def rowNumberChanged(self):
     self.sample.rowNumber = int(self.rowNumber.text())
-    print(self.sample.rowNumber, 'rowNumber')
 
   def columnNumberChanged(self):
     self.sample.columnNumber = int(self.columnNumber.text())
-    print(self.sample.columnNumber, 'columnNumber')
 
   def commentChanged(self):
     newText = self.comment.toPlainText()
     self.sample.comment = newText
-    print(self.sample.comment)
 
   def keyPressEvent(self, event):
     if event.key() == QtCore.Qt.Key_Enter:
@@ -247,74 +276,219 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
 
 
 
-class AddSampleComponentPopup(QtGui.QDialog):
-  def __init__(self, parent=None, project=None, sample=None, **kw):
-    super(AddSampleComponentPopup, self).__init__(parent)
+class EditSampleComponentPopup(QtGui.QDialog):
+  def __init__(self, parent=None, project=None, sample=None, sampleComponent=None, **kw):
+    super(EditSampleComponentPopup, self).__init__(parent, **kw)
     self.sample = sample
+    self.sampleComponent = sampleComponent
     self.project = project
-    self.sideBar = project._appBase.mainWindow.sideBar
-    self.newSampleSideBar = self.sideBar.newSample
-
-    self.setWindowTitle("Add Sample Components")
+    self.sampleProperitesPopup =  SamplePropertiesPopup
+    self.setWindowTitle("Sample Components Properties")
     self.area = ScrollArea(self)
     self.area.setWidgetResizable(True)
-    self.area.setMinimumSize(350, 350)
+    self.area.setMinimumSize(350, 499)
     self.layout().addWidget(self.area, 0, 0, 1, 0)
-    buttonBox = ButtonList(self, grid=(2, 2), callbacks=[self.addComponent, self.reject], texts=['Add', 'Close'])
+
+    buttonBox = ButtonList(self, grid=(2, 2), callbacks=[self.accept, self.reject], texts=['Apply', 'Close'])
     labelAllignLeft = Label(self.area, text="", grid=(1, 0), hAlign='l')
     labelAllignRight = Label(self.area, text="", grid=(1, 3), hAlign='l')
-    self.setMaximumSize(350, 350)
+    self.setMaximumSize(350, 700)
 
+#   #Component Type
     typeLabel = Label(self.area, text="Type ", grid=(1, 1), hAlign='l')
     self.type = PulldownList(self.area, grid=(1, 2), hAlign='l' )
     self.type.setData(TYPECOMPONENT)
-    self.type.setFixedWidth(155)
-    self.type.setFixedHeight(25)
+    self.type.setFixedWidth(129)
     self.type.activated[str].connect(self.typeComponent)
 
+#   #Component Name
     sampleComponentsLabel = Label(self.area, text="Component Name ", grid=(2, 1), hAlign='l')
     self.nameComponents = LineEdit(self.area, grid=(2, 2), hAlign='r' )
-    self.nameComponents.setText('New Sample Component')
-    self.nameComponents.setFixedWidth(155)
-    self.nameComponents.setFixedHeight(25)
+    self.nameComponents.setText(sampleComponent.name)
+    self.nameComponents.editingFinished.connect(self.changeNameComponents)
 
+#   #Labeling
     sampleComponentsLabelingLabel = Label(self.area, text="Labeling ", grid=(3, 1), hAlign='l')
     self.labeling = LineEdit(self.area, grid=(3, 2), hAlign='r' )
-    self.labeling.setText('H')
-    self.labeling.setFixedWidth(155)
-    self.labeling.setFixedHeight(25)
+    self.labeling.setText(sampleComponent.labeling)
+    self.labeling.editingFinished.connect(self.labelingChanged)
 
 #   #concentration unit
     concentrationUnitLabel = Label(self.area, text="Value Unit ", grid=(4, 1), hAlign='l')
     self.concentrationUnit = PulldownList(self.area, grid=(4, 2), hAlign='l' )
     self.concentrationUnit.setData(C_COMPONENT_UNIT)
-    self.concentrationUnit.setFixedWidth(157)
-    self.concentrationUnit.setFixedHeight(25)
+    self.concentrationUnit.setFixedWidth(128)
     self.concentrationUnit.activated[str].connect(self.setConcentrationUnit)
 
+#   #concentration Value 1
     concentrationLabel = Label(self.area, text="Value 1 ", grid=(5, 1), hAlign='l')
     self.concentrationUnit1 = PulldownList(self.area, grid=(5, 2), hAlign='l' )
-    self.concentrationUnit1.setFixedWidth(70)
-    self.concentrationUnit1.setFixedHeight(25)
-
+    self.concentrationUnit1.setFixedWidth(65)
     self.concentration = DoubleSpinbox(self.area, grid=(5, 2), hAlign='r' )
     self.concentration.setRange(0.00, 1000.00)
     self.concentration.setSingleStep(0.01)
-    self.concentration.setFixedWidth(70)
-    self.concentration.setFixedHeight(25)
+    self.concentration.setFixedWidth(65)
+    self.concentration.setFixedHeight(20)
+    self.concentration.valueChanged.connect(self.concentrationChanged)
 
+#   #concentration Value 2
     self.concentrationLabel2 = Label(self.area, text="Value 2 ", grid=(6, 1), hAlign='l')
     self.concentrationUnit2 = PulldownList(self.area, grid=(6, 2), hAlign='l' )
-    self.concentrationUnit2.setFixedWidth(70)
-    self.concentrationUnit2.setFixedHeight(25)
+    self.concentrationUnit2.setFixedWidth(65)
     self.concentration2 = DoubleSpinbox(self.area, grid=(6, 2), hAlign='r' )
     self.concentration2.setRange(0.00, 1000.00)
     self.concentration2.setSingleStep(0.01)
-    self.concentration2.setFixedWidth(70)
-    self.concentration2.setFixedHeight(25)
+    self.concentration2.setFixedWidth(65)
+    self.concentration2.setFixedHeight(20)
     self.concentrationUnit2.hide()
     self.concentrationLabel2.hide()
     self.concentration2.hide()
+    self.concentration2.valueChanged.connect(self.concentration2Changed)
+
+#   # referenceSpectra
+    referenceSpectraLabel = Label(self.area, text="Ref Spectra", grid=(7, 1), hAlign='l')
+    self.referenceSpectra = PulldownList(self.area, grid=(7, 2), hAlign='l' )
+    for referenceSpectra in sampleComponent.substance.referenceSpectra:
+      self.referenceSpectra.setData([referenceSpectra.pid])
+    self.referenceSpectra.setFixedWidth(133)
+    self.referenceSpectra.activated[str].connect(self.showSpectrumPropertiesPopup)
+
+#   # chemical Name
+    chemicalNameLabel = Label(self.area, text="Chemical Name", grid=(8, 1), hAlign='l')
+    self.chemicalName = LineEdit(self.area, grid=(8, 2), hAlign='l' )
+    self.chemicalName.editingFinished.connect(self.chemicalNameChanged)
+    # To clearify on the wrapper first
+
+#   # smiles
+    self.smileLabel = Label(self.area, text="Smiles", grid=(9, 1), hAlign='l')
+    self.smile = LineEdit(self.area, grid=(9, 2), hAlign='r')
+    self.smile.setText(sampleComponent.substance.smiles)
+    self.smile.editingFinished.connect(self.smileChanged)
+
+#   # empirical Formula
+    self.empiricalFormulaLabel = Label(self.area, text="Empirical Formula", grid=(10, 1), hAlign='l')
+    self.empiricalFormula = LineEdit(self.area, grid=(10, 2), hAlign='r' )
+    self.empiricalFormula.setText(str(sampleComponent.substance.empiricalFormula))
+    self.empiricalFormula.editingFinished.connect(self.empiricalFormulaChanged)
+
+#   # Molecular Mass
+    self.molecularMassLabel = Label(self.area, text="Molecular Mass", grid=(11, 1), hAlign='l')
+    self.molecularMass = LineEdit(self.area, grid=(11, 2), hAlign='r' )
+    self.molecularMass.setText(str(sampleComponent.substance.molecularMass))
+    self.molecularMass.editingFinished.connect(self.molecularMassChanged)
+
+#   # Comment
+    self.labelcomment = Label(self.area, text="Comment", grid=(12, 1), hAlign='l')
+    self.comment = LineEdit(self.area, grid=(12, 2), hAlign='r' )
+    self.comment.setText(self.sampleComponent.substance.comment)
+    self.comment.editingFinished.connect(self.commentChanged)
+
+    self.moreInfo = Button(self.area, text="More... ", grid=(13, 1),
+                                      hAlign='c', callback=self.moreInfoComponents)
+    self.moreInfo.setFixedHeight(20)
+
+#   # User Code
+    self.labelUserCode = Label(self.area, text="User Code", grid=(13, 1), hAlign='l')
+    self.userCode = LineEdit(self.area, grid=(13, 2), hAlign='r' )
+    self.userCode.setText(str(sampleComponent.substance.userCode))
+    self.userCode.editingFinished.connect(self.userCodeChanged)
+    self.labelUserCode.hide()
+    self.userCode.hide()
+
+#   # Cas Number
+    self.labelCasNumber = Label(self.area, text="Cas Number", grid=(14, 1), hAlign='l')
+    self.casNumber = LineEdit(self.area, grid=(14, 2), hAlign='r' )
+    self.casNumber.setText(str(sampleComponent.substance.casNumber))
+    self.casNumber.editingFinished.connect(self.casNumberChanged)
+    self.labelCasNumber.hide()
+    self.casNumber.hide()
+
+#   # Atom Count
+    self.labelAtomCount = Label(self.area, text="Atom Count", grid=(15, 1), hAlign='l')
+    self.atomCount = LineEdit(self.area, grid=(15, 2), hAlign='r' )
+    self.atomCount.setText(str(sampleComponent.substance.atomCount))
+    self.atomCount.editingFinished.connect(self.atomCountChanged)
+    self.labelAtomCount.hide()
+    self.atomCount.hide()
+
+#   # Bond Count
+    self.labelBondCount = Label(self.area, text="Bond Count", grid=(16, 1), hAlign='l')
+    self.bondCount = LineEdit(self.area, grid=(16, 2), hAlign='r' )
+    self.bondCount.setText(str(sampleComponent.substance.bondCount))
+    self.labelBondCount.hide()
+    self.bondCount.hide()
+
+#   # Ring Count
+    self.labelRingCount = Label(self.area, text="Ring Count", grid=(17, 1), hAlign='l')
+    self.ringCount = LineEdit(self.area, grid=(17, 2), hAlign='r' )
+    self.ringCount.setText(str(sampleComponent.substance.ringCount))
+    self.ringCount.editingFinished.connect(self.ringCountChanged)
+    self.labelRingCount.hide()
+    self.ringCount.hide()
+
+#   # H Bond Donor
+    self.labelHBondDonorCount = Label(self.area, text="H Bond Donors", grid=(18, 1), hAlign='l')
+    self.hBondDonorCount = LineEdit(self.area, grid=(18, 2), hAlign='r' )
+    self.hBondDonorCount.setText(str(sampleComponent.substance.hBondDonorCount))
+    self.hBondDonorCount.editingFinished.connect(self.hBondDonorCountChanged)
+    self.labelHBondDonorCount.hide()
+    self.hBondDonorCount.hide()
+
+#   # H Bond Acceptor
+    self.labelHBondAcceptorCount = Label(self.area, text="H Bond Acceptors", grid=(19, 1), hAlign='l')
+    self.hBondAcceptorCount = LineEdit(self.area, grid=(19, 2), hAlign='r' )
+    self.hBondAcceptorCount.setText(str(sampleComponent.substance.hBondAcceptorCount))
+    self.hBondAcceptorCount.editingFinished.connect(self.hBondAcceptorCountChanged)
+    self.labelHBondAcceptorCount.hide()
+    self.hBondAcceptorCount.hide()
+
+#   # Polar Surface Area
+    self.labelpolarSurfaceArea = Label(self.area, text="Polar Surface Area", grid=(20, 1), hAlign='l')
+    self.polarSurfaceArea = LineEdit(self.area, grid=(20, 2), hAlign='r' )
+    self.polarSurfaceArea.setText(str(sampleComponent.substance.polarSurfaceArea))
+    self.polarSurfaceArea.editingFinished.connect(self.polarSurfaceAreaChanged)
+    self.labelpolarSurfaceArea.hide()
+    self.polarSurfaceArea.hide()
+
+#   # LogP
+    self.labelLogP = Label(self.area, text="LogP", grid=(21, 1), hAlign='l')
+    self.logP = LineEdit(self.area, grid=(21, 2), hAlign='r' )
+    self.logP.setText(str(sampleComponent.substance.logPartitionCoefficient))
+    self.logP.editingFinished.connect(self.logPChanged)
+    self.labelLogP.hide()
+    self.logP.hide()
+
+  def showSpectrumPropertiesPopup(self, pressed):
+
+    self.spectrum = self.project.getByPid(pressed)
+    popup = SpectrumPropertiesPopup(self.spectrum, self.project)
+    popup.exec_()
+    popup.raise_()
+
+
+  def moreInfoComponents(self):
+    self.moreInfo.hide()
+    self.lessInfo = Button(self.area, text="Less... ", grid=(22, 1),
+                                      hAlign='c', callback=self.hideInfo)
+    self.lessInfo.setFixedHeight(20)
+    self.labelUserCode.show()
+    self.userCode.show()
+    self.labelCasNumber.show()
+    self.casNumber.show()
+    self.labelAtomCount.show()
+    self.atomCount.show()
+    self.labelBondCount.show()
+    self.bondCount.show()
+    self.labelRingCount.show()
+    self.ringCount.show()
+    self.labelHBondDonorCount.show()
+    self.hBondDonorCount.show()
+    self.labelHBondAcceptorCount.show()
+    self.hBondAcceptorCount.show()
+    self.labelpolarSurfaceArea.show()
+    self.polarSurfaceArea.show()
+    self.labelLogP.show()
+    self.logP.show()
 
   def setConcentrationUnit(self, pressed):
     if pressed == 'Molar':
@@ -336,56 +510,106 @@ class AddSampleComponentPopup(QtGui.QDialog):
       self.concentration2.show()
 
 
-  def typeComponent(self, pressed): #['Solvent', 'Compound', 'Target', 'inhibitor ', 'Other']
+  def typeComponent(self, pressed):
 
     if pressed == 'Compound':
-
-      referenceSpectraLabel = Label(self.area, text="Reference Spectra", grid=(7, 1), hAlign='l')
-      self.referenceSpectra = LineEdit(self.area, grid=(7, 2), hAlign='r' )
-      self.referenceSpectra.setText('<Empty>')
-      self.referenceSpectra.setFixedWidth(155)
-      self.referenceSpectra.setFixedHeight(25)
-
-
-      self.smileLabel = Label(self.area, text="Smile", grid=(8, 1), hAlign='l')
-      self.smile = LineEdit(self.area, grid=(8, 2), hAlign='r' )
-      self.smile.setText('<Empty>')
-      self.smile.setFixedWidth(155)
-      self.smile.setFixedHeight(25)
-
-      self.empiricalFormulaLabel = Label(self.area, text="Empirical Formula", grid=(9, 1), hAlign='l')
-      self.empiricalFormula = LineEdit(self.area, grid=(9, 2), hAlign='r' )
-      self.empiricalFormula.setText('<Empty>')
-      self.empiricalFormula.setFixedWidth(155)
-      self.empiricalFormula.setFixedHeight(25)
-
-      self.molecularMassLabel = Label(self.area, text="Molecular Mass", grid=(10, 1), hAlign='l')
-      self.molecularMass = LineEdit(self.area, grid=(10, 2), hAlign='r' )
-      self.molecularMass.setText('<Empty>')
-      self.molecularMass.setFixedWidth(155)
-      self.molecularMass.setFixedHeight(25)
+      self.moreInfo.show()
+      self.smileLabel.show()
+      self.smile.show()
+      self.empiricalFormulaLabel.show()
+      self.empiricalFormula.show()
+      self.molecularMassLabel.show()
+      self.molecularMass.show()
 
     elif pressed == 'Solvent':
-      pass
+      self.hideInfo()
 
     elif pressed == 'Inhibitor':
-      pass
+      self.hideInfo()
 
     elif pressed == 'Target':
-      if self.smile:
-        self.smileLabel.hide()
-        self.smile.hide()
-        self.empiricalFormulaLabel.hide()
-        self.empiricalFormula.hide()
-        self.molecularMassLabel.hide()
-        self.molecularMass.hide()
+      self.hideInfo()
 
     elif pressed == 'Other':
-      pass
+      self.hideInfo()
 
-  def addComponent(self):
+  def hideInfo(self):
+      self.moreInfo.show()
+      if hasattr(self, 'lessInfo'):
+        self.lessInfo.hide()
+      self.smileLabel.hide()
+      self.smile.hide()
+      self.empiricalFormulaLabel.hide()
+      self.empiricalFormula.hide()
+      self.molecularMassLabel.hide()
+      self.molecularMass.hide()
+      self.labelUserCode.hide()
+      self.userCode.hide()
+      self.labelCasNumber.hide()
+      self.casNumber.hide()
+      self.labelAtomCount.hide()
+      self.atomCount.hide()
+      self.labelBondCount.hide()
+      self.bondCount.hide()
+      self.labelRingCount.hide()
+      self.ringCount.hide()
+      self.labelHBondDonorCount.hide()
+      self.hBondDonorCount.hide()
+      self.labelHBondAcceptorCount.hide()
+      self.hBondAcceptorCount.hide()
+      self.labelpolarSurfaceArea.hide()
+      self.polarSurfaceArea.hide()
+      self.labelLogP.hide()
+      self.logP.hide()
 
-    sampleComponent = self.sample.newSampleComponent(name=str(self.nameComponents.text()),
-                                                      labeling=str(self.labeling.text()))
+  def changeNameComponents(self):
+    print('Not implemented Yet')
 
+  def labelingChanged(self):
+    # self.sampleComponent.labeling = str(self.labeling.text())
+    print('labeling not Changed', self.sampleComponent.labeling )
 
+  def concentrationChanged(self, value):
+    self.sampleComponent.concentration = float(value)
+
+  def concentration2Changed(self, value):
+    print(value, 'concentration2 Not implemented Yet')
+
+  def chemicalNameChanged(self):
+    print('Not implemented Yet')
+
+  def smileChanged(self):
+    self.sampleComponent.substance.smiles = str(self.smile.text())
+
+  def empiricalFormulaChanged(self):
+     self.sampleComponent.substance.empiricalFormula = str(self.empiricalFormula.text())
+
+  def molecularMassChanged(self):
+    self.sampleComponent.substance.molecularMass = float(self.molecularMass.text())
+
+  def userCodeChanged(self):
+    self.sampleComponent.substance.userCode = str(self.userCode.text())
+
+  def casNumberChanged(self):
+    self.sampleComponent.substance.casNumber = str(self.casNumber.text())
+
+  def atomCountChanged(self):
+    self.sampleComponent.substance.atomCount = int(self.atomCount.text())
+
+  def ringCountChanged(self):
+    self.sampleComponent.substance.ringCount = int(self.ringCount.text())
+
+  def hBondDonorCountChanged(self):
+    self.sampleComponent.substance.hBondDonorCount = int(self.hBondDonorCount.text())
+
+  def hBondAcceptorCountChanged(self):
+    self.sampleComponent.substance.hBondAcceptorCount = int(self.hBondAcceptorCount.text())
+
+  def polarSurfaceAreaChanged(self):
+    self.sampleComponent.substance.polarSurfaceArea = float(self.polarSurfaceArea.text())
+
+  def logPChanged(self):
+    self.sampleComponent.substance.logPartitionCoefficient = float(self.logP.text())
+
+  def commentChanged(self):
+    self.sampleComponent.substance.comment = str(self.comment.text())

@@ -13,8 +13,8 @@ from ccpncore.gui.Slider import Slider
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Widget import Widget
-
-from application.core.modules.SampleAnalysis import SampleAnalysis
+from ccpnmrcore.popups.SamplePropertiesPopup import SamplePropertiesPopup
+from ccpnmrcore.modules.SampleAnalysis import SampleAnalysis
 from ccpn.lib.Sample import setupSamples
 
 
@@ -151,11 +151,12 @@ class SamplePopup(QtGui.QDialog):
     for sample in samples:
       newItem = sideBar.addItem(sampleTab, sample)
 
-      # for sampleComponent in sample.sampleComponents[0:]:
-      #   sideBar.addItem(newItem, sampleComponent.substance)
-      for peakCollection in sample.peakCollections[0:]:
-        self.spectrum = self.project.getByPid('SP:'+peakCollection.name)
-        sideBar.addItem(newItem, self.spectrum)
+      for sampleComponent in sample.sampleComponents[0:]:
+        sideBar.addItem(newItem, sampleComponent)
+
+        # for peakCollection in sample.peakCollections[0:]:
+        #   self.spectrum = self.project.getByPid('SP:'+peakCollection.name)
+        #   sideBar.addItem(newItem, self.spectrum)
 
     # #----- open the analysis table ----#
 

@@ -147,7 +147,6 @@ class SideWindow(Window, GuiWindow):
 
 def _factoryFunction(project:Project, wrappedData:ApiWindow) ->Window:
   """create Window, dispatching to subtype depending on wrappedData"""
-  print ('@~@~ in window factory function', wrappedData.title)
   if wrappedData.title == 'Main':
     return MainWindow(project, wrappedData)
   else:

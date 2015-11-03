@@ -3,7 +3,7 @@ from ccpncore.gui.Dock import CcpnDock
 from application.core.modules.SampleComponentsTable import PeakListSampleComponent
 from application.core.modules.SampleComponentsView import SampleComponentsView
 from application.core.modules.SampleComponentsInfo import SampleComponentInfo
-from application.core.modules.SampleScoringTable import SampleTableSimple
+from application.core.modules.SampleScoringTable import  SampleTableSimple
 
 class SampleAnalysis(CcpnDock):
   ### this class creates a module to analyse the samples. It is composed by four tabs.
@@ -28,8 +28,8 @@ class SampleAnalysis(CcpnDock):
     self.componentInfo = SampleComponentInfo(self, project=project)
 
     self.tabWidget.addTab(self.sampleTable, 'Mixtures Scoring')
-    self.tabWidget.addTab(self.componentPL, 'Substances Peak List')
-    self.tabWidget.addTab(self.componentView, 'Substances View')
+    self.tabWidget.addTab(self.componentPL, 'Components Analysis')
+    self.tabWidget.addTab(self.componentView, 'Components Molecule View')
     self.tabWidget.addTab(self.componentInfo, 'Mixtures info')
 
 

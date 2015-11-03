@@ -2,14 +2,12 @@ __author__ = 'luca'
 
 from PyQt4 import QtCore, QtGui, QtSvg
 from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.InputDialog import askString
 from ccpncore.gui.Label import Label
-from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Button import Button
-from application.core.modules.GuiTableGenerator import GuiTableGenerator
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.CompoundView import CompoundView, Variant, importSmiles
 
+Qkeys = QtGui.QKeySequence
 
 class PeakListSampleComponent(QtGui.QWidget):
 
@@ -22,6 +20,7 @@ class PeakListSampleComponent(QtGui.QWidget):
     self.compound = None
     self.variant = None
     self.smiles = ''
+
 
     dataPulldownSample = [sample.pid for sample in self.samples]
     if not project.peakLists:
@@ -140,3 +139,4 @@ class PeakListSampleComponent(QtGui.QWidget):
 
   def callback(self):
     print('Not implemented yet')
+

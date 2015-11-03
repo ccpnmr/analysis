@@ -4,11 +4,11 @@ __author__ = 'luca'
 from PyQt4 import QtGui, QtCore
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Table import ObjectTable, Column
 
 
 class SampleComponentInfo(QtGui.QWidget):
+
   def __init__(self, parent=None, project=None):
     super(SampleComponentInfo, self).__init__(parent)
     self.project = project

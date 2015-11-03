@@ -13,6 +13,7 @@ from ccpncore.gui.Slider import Slider
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpn.lib.Sample import setupSamples
+from application.core.modules.SampleAnalysis import SampleAnalysis
 
 
 
@@ -116,12 +117,6 @@ class SamplePopup(QtGui.QDialog):
     refCount = sideBar.spectrumReference.childCount()
     spectra = []
 
-
-    # if not self.project.samples:
-    #   for i, spectrum in enumerate(self.project.spectra):
-    #     newSample = self.project.newSample(name=str(i+1))
-    #     spectrum.sample = newSample
-
     for i in range(refCount):
       item = refData.child(i)
       itemCount = item.childCount()
@@ -157,8 +152,8 @@ class SamplePopup(QtGui.QDialog):
 
     # #----- open the analysis table ----#
 
-    # sampletable = SampleAnalysis(self.project)
-    # self.project._appBase.mainWindow.dockArea.addDock(sampletable)
+    sampletable = SampleAnalysis(self.project)
+    self.project._appBase.mainWindow.dockArea.addDock(sampletable)
     self.accept()
 
 

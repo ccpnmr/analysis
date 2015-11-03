@@ -334,7 +334,6 @@ class EditSampleComponentPopup(QtGui.QDialog):
     for referenceSpectra in sampleComponent.substance.referenceSpectra:
       self.referenceSpectra.setData([referenceSpectra.pid])
     self.referenceSpectra.setFixedWidth(133)
-    self.referenceSpectra.activated[str].connect(self.showSpectrumPropertiesPopup)
 
 #   # chemical Name
     chemicalNameLabel = Label(self.area, text="Chemical Name", grid=(8, 1), hAlign='l')
@@ -495,17 +494,10 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.molecularMassLabel.show()
       self.molecularMass.show()
 
-    elif pressed == 'Solvent':
+    else:
       self.hideInfo()
-
-    elif pressed == 'Inhibitor':
-      self.hideInfo()
-
-    elif pressed == 'Target':
-      self.hideInfo()
-
-    elif pressed == 'Other':
-      self.hideInfo()
+      if hasattr(self, 'moreInfo'):
+        self.moreInfo.hide()
 
   def hideInfo(self):
 

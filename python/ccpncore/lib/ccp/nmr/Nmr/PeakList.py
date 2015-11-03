@@ -80,6 +80,10 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
   startPointInt = numpy.array(startPointInt)
   endPointInt = numpy.array(endPointInt)
   numPointInt = endPointInt - startPointInt
+  startPointBuffer = numpy.maximum(startPointBuffer, startPointInt)
+  endPointBuffer = numpy.minimum(endPointBuffer, endPointInt)
+  if numpy.any(numPointInt <= 0): # return if any of the dimensions has <= 0 points
+    return peaks
   
   #startPointBuffer = numpy.array(startPointBuffer, dtype='float32')
   excludedRegionsList = [numpy.array(excludedRegion, dtype='float32')-startPointBuffer for excludedRegion in excludedRegions]
@@ -159,7 +163,9 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
         except Peak.error as e:
           # possibly should log error??
           dimCount = len(startPoint)
-          height = dataArray[tuple(position)]
+          height = float(dataArray[tuple(position[::-1])])
+            # have to reverse position because dataArray backwards
+            # have to float because API does not like numpy.float32
           center = position
           linewidth = dimCount * [None]
         position = center + startPointBuffer

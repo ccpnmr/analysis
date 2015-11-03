@@ -268,3 +268,10 @@ def uniquify(sequence:collectionClasses.Sequence) -> list:
   seen = set()
   seen_add = seen.add
   return [x for x in sequence if x not in seen and not seen_add(x)]
+
+def isClose(a:float, b:float, relTolerance:float=1e-05, absTolerance=1e-08) -> bool:
+  """Are a and b identical within reasonable floating point tolerance?
+  Uses sum of relative (relTolerance) and absolute (absTolerance) difference
+
+  Inspired by numpy.isclose()"""
+  return (abs(a - b) <= (absTolerance + relTolerance * abs(b)))

@@ -215,11 +215,16 @@ _wrappedClasses.append(cls)
 StructureEnsemble = cls = importlib.import_module(
   'ccpn._wrapper._StructureEnsemble').StructureEnsemble
 _wrappedClasses.append(cls)
+# Model = cls = importlib.import_module('ccpn._wrapper._Model').Model
+# _wrappedClasses.append(cls)
 Note = cls = importlib.import_module('ccpn._wrapper._Note').Note
 _wrappedClasses.append(cls)
 
+# Add Tensor class (which is NOT a wrapper object)
+from ccpncore.util.Tensor import  Tensor
+
 # Add class list for extended sphinx documentation to module
-# putting AbstractWrapperObj3ct last
+# putting AbstractWrapperObject last
 _sphinxWrappedClasses = _wrappedClasses[1:] + _wrappedClasses[:1]
 
 # set main starting functions in namespace. Must be done after setting Project

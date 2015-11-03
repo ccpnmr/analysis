@@ -23,8 +23,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
+from ccpncore.util import Common as commonUtil
 from ccpn import AbstractWrapperObject
 from ccpn import Project
+from ccpn import Tensor
 from ccpn import RestraintSet
 from ccpncore.util import Pid
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
@@ -143,38 +145,62 @@ class RestraintList(AbstractWrapperObject):
     self._wrappedData.origin = value
 
   @property
-  def tensorMagnitude(self) -> float:
-    """magnitude of orientation tensor """
+  def tensor(self) -> Tensor:
+    """orientation tensor for restraints. Valid for RDC restraint lists only"""
     if self.restraintType == 'Rdc':
-      return self._wrappedData.tensorMagnitude
+      apiRestraintList = self._wrappedData
+      return Tensor(axial=apiRestraintList.tensorMagnitude,
+                    rhombic=apiRestraintList.tensorRhombicity)
     else:
       self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
                                     % self.restraintType)
 
-  @tensorMagnitude.setter
-  def tensorMagnitude(self, value:float):
+  @tensor.setter
+  def tensor(self, value:Tensor):
     if self.restraintType == 'Rdc':
-      self._wrappedData.tensorMagnitude = value
+      apiRestraintList = self._wrappedData
+      if commonUtil.isClose(value.isotropic, 0.0):
+        self._wrappedData.tensorMagnitude= value.axial
+        self._wrappedData.tensorRhombicity= value.rhombic
+      else:
+        raise ValueError("Tensor isotropic value %s is not zero" % value.isotropic)
     else:
       self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
                                     % self.restraintType)
 
-  @property
-  def tensorRhombicity(self) -> float:
-    """rhombicity of orientation tensor """
-    if self.restraintType == 'Rdc':
-      return self._wrappedData.tensorRhombicity
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorRhombicity"
-                                    % self.restraintType)
-
-  @tensorRhombicity.setter
-  def tensorRhombicity(self, value:float):
-    if self.restraintType == 'Rdc':
-      self._wrappedData.tensorRhombicity = value
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorRhombicity"
-                                    % self.restraintType)
+  # @property
+  # def tensorMagnitude(self) -> float:
+  #   """magnitude of orientation tensor """
+  #   if self.restraintType == 'Rdc':
+  #     return self._wrappedData.tensorMagnitude
+  #   else:
+  #     self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
+  #                                   % self.restraintType)
+  #
+  # @tensorMagnitude.setter
+  # def tensorMagnitude(self, value:float):
+  #   if self.restraintType == 'Rdc':
+  #     self._wrappedData.tensorMagnitude = value
+  #   else:
+  #     self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
+  #                                   % self.restraintType)
+  #
+  # @property
+  # def tensorRhombicity(self) -> float:
+  #   """rhombicity of orientation tensor """
+  #   if self.restraintType == 'Rdc':
+  #     return self._wrappedData.tensorRhombicity
+  #   else:
+  #     self._project._logger.warning("%sRestraintList has no attribute tensorRhombicity"
+  #                                   % self.restraintType)
+  #
+  # @tensorRhombicity.setter
+  # def tensorRhombicity(self, value:float):
+  #   if self.restraintType == 'Rdc':
+  #     self._wrappedData.tensorRhombicity = value
+  #   else:
+  #     self._project._logger.warning("%sRestraintList has no attribute tensorRhombicity"
+  #                                   % self.restraintType)
 
   @property
   def tensorChainCode(self) -> float:

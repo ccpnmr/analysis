@@ -178,8 +178,7 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
           dataDimRef = None
 
         if dataDimRef:
-          #peakDim.numAliasing = int(divmod(position[i], dataDimRef.dataDim.numPointsOrig)[0])
-          peakDim.numAliasing = 0   
+          peakDim.numAliasing = int(divmod(position[i], dataDim.numPointsOrig)[0])
           peakDim.position = float(position[i] + 1 - peakDim.numAliasing * dataDim.numPointsOrig)  # API position starts at 1
 
         else:

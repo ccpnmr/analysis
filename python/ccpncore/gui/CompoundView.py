@@ -1,6 +1,6 @@
 
 PI = 3.1415926535898
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtSvg
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -76,6 +76,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
     self.editProxy.setZValue(2)
 
     self.backgroundColor = QtGui.QColor(10,  1,  0, 0)
+    self.bondColor = Qt.white
 
     self.setBackgroundBrush(self.backgroundColor)
 
@@ -179,39 +180,26 @@ class CompoundView(QtGui.QGraphicsView, Base):
     QAction = QtGui.QAction
     menu = QtGui.QMenu(self)
 
+
     action = QAction('Reset View', self, triggered=self.resetView)
     menu.addAction(action)
-    action = QAction('Change Background Color', self)
-    menu.addAction(action)
 
-
+    subMenu = menu.addMenu('Export')
+    action = QAction('Export PDF(3D)', self, triggered=self.exportPdf)
+    subMenu.addAction(action)
+    action = QAction('Export SVG(2D)', self, triggered=self.exportSvg)
+    subMenu.addAction(action)
 
     subMenu = menu.addMenu('Edit')
-    action = QAction('Show Skeletal structure ', self)
+    action = QAction('Show Skeletal structure ', self, triggered=self.showSkeletal)
+    subMenu.addAction(action)
+    action = QAction('Show 3D structure ', self, triggered=self.show3D)
     subMenu.addAction(action)
     action = QAction('Rotate Left', self, triggered=self.rotateLeft)
     subMenu.addAction(action)
     self.needMenuAtom.append(action)
     action = QAction('Rotate Right', self, triggered=self.rotateRight)
     subMenu.addAction(action)
-
-
-
-    # self.needSelectedAtom.append(action)
-    # action = QAction('<Empty>', self, triggered=self.deleteBonds)
-    # subMenu.addAction(action)
-    # self.needSelectedAtom.append(action)
-    #
-    # subMenu = menu.addMenu('<ToSet>')
-    # action = QAction('<free>', self, triggered=self.addPosChargeAtom)
-    # subMenu.addAction(action)
-    # self.needFurtherCheck.append( (action, self.getChargeMenuAtom) )
-    # action = QAction('<free>', self, triggered=self.addNegChargeAtom)
-    # subMenu.addAction(action)
-    # self.needFurtherCheck.append( (action, self.getChargeMenuAtom) )
-    # action = QAction('<free>', self, triggered=self.setNoChargeAtom)
-    # subMenu.addAction(action)
-    # self.needFurtherCheck.append( (action, self.getChargeMenuAtom) )
 
     return menu
 
@@ -281,8 +269,6 @@ class CompoundView(QtGui.QGraphicsView, Base):
         return
 
       return atoms
-
-
 
   def setVariant(self, variant):
     
@@ -442,8 +428,80 @@ class CompoundView(QtGui.QGraphicsView, Base):
   def changeBackground(self):
     pass
 
-  def showSkeletal(self,):
-    pass
+
+  def exportPdf(self):
+
+    if self.compound:
+      printer = QtGui.QPrinter()
+      oldRes = printer.resolution()
+      newRes = 600.0
+      fRes = oldRes/newRes
+      printer.setResolution(newRes)
+
+      fType = 'PDF (*.pdf)'
+      dialog = QtGui.QFileDialog
+      filePath = dialog.getSaveFileName(self,filter=fType)
+
+      if filePath:
+        printer.setOutputFileName(filePath)
+        pdfPainter = QtGui.QPainter(printer)
+        self.bondColor = Qt.black
+        scene = self.scene
+        items = scene.items()
+        cache = [None] * len(items)
+        for i, item in enumerate(items):
+          cache[i] = item.cacheMode()
+          item.setCacheMode(item.NoCache)
+        scene.render(pdfPainter)
+        pdfPainter.end()
+        self.bondColor = Qt.white
+        for i in range(len(items)):
+          items[i].setCacheMode(cache[i])
+
+  def exportSvg(self):
+
+    if self.compound:
+      printer = QtSvg.QSvgGenerator()
+      scene = self.scene
+
+      w = scene.width()
+      h = scene.height()
+      paperWidth = 200
+      paperHeight = paperWidth * h / w
+      resolution = printer.resolution() / 25.4
+      printer.setSize(QtCore.QSize(paperWidth*resolution, paperHeight*resolution))
+
+      fType = 'SVG (*.svg)'
+      dialog = QtGui.QFileDialog
+      filePath = dialog.getSaveFileName(self,filter=fType)
+
+      if filePath:
+        self.bondColor = QtCore.Qt.black
+        printer.setFileName(filePath)
+        svgPainter = QtGui.QPainter(printer)
+        oldBackground = self.backgroundColor
+
+        items = scene.items()
+        cache = [None] * len(items)
+        for i, item in enumerate(items):
+          cache[i] = item.cacheMode()
+          item.setCacheMode(item.NoCache)
+        scene.render(svgPainter)
+        svgPainter.end()
+        self.backgroundColor = oldBackground
+        self.bondColor = QtCore.Qt.white
+
+        for i in range(len(items)):
+          items[i].setCacheMode(cache[i])
+
+
+  def showSkeletal(self):
+    self.showSkeletalFormula = True
+    self.updateAll()
+
+  def show3D(self):
+    self.showSkeletalFormula = False
+    self.updateAll()
 
   def rotateLeft(self, angle=PI*5.0/180):
     
@@ -2700,9 +2758,9 @@ class BondItem(QtGui.QGraphicsItem):
         color = Qt.black
       # Fallback
       else:
-        color = Qt.white
+        color = self.compoundView.bondColor
     else:
-      color = Qt.white
+      color = self.compoundView.bondColor
 
     style, dx, dy, xg, yg, zstep, zbase, direct = self.drawData
     bondType = self.bond.bondType

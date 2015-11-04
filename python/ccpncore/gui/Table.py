@@ -48,7 +48,7 @@ class ObjectTable(QtGui.QTableView, Base):
     self.filterPanel = None
     self.model = None
     self.columns = columns
-    self.objects = list(objects) or []
+    self.objects = list(objects or [])
     self.callback = callback
     self.fontMetric = QtGui.QFontMetricsF(self.font())
     self.bbox = self.fontMetric.boundingRect

@@ -181,7 +181,7 @@ class Pid(str):
     -> 'mol1.A' (str instance)
     
     for id in pid:
-        print id
+    ....print id
     ->
     'mol1' (str instance)
     'A'  (str instance)

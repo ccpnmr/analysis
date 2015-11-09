@@ -45,7 +45,8 @@ def writeApiDoc(modelPortal, rootFileName=None, rootDirName=None,
 class PyApiDocGen(ApiDocGen):
 
   apiName = 'Python API'
-  baseDirName = 'python/ccpn/doc'
+  # baseDirName = 'python/ccpn/doc'
+  # baseDirName = 'doc'
 
   ###########################################################################
 

@@ -81,7 +81,7 @@ class Tensor:
   @property
   def axial(self) -> float:
     """axial component of tensor (along z axis)"""
-    return (self._xx + self._yy) * 0.5  + self._zz
+    return (self._xx + self._yy) * -0.5  + self._zz
 
   @property
   def rhombic(self) -> float:

@@ -137,11 +137,11 @@ class ApiDocGen(Documentation, ModelTraverse):
   ###attrRoleDir = 'attributeMap'
   attributeMapPrefix = 'attributeMap'
   imageDir = metaConstants.imageDir
-  docDir = metaConstants.docDir
-  styleSheetDir = 'doc'
-  docSubDirs = ['api','doc']
-  modelDocDir = 'doc/apidiagram'
-  diagImgDir = 'modeldiagram'
+  # docDir = metaConstants.docDir
+  apiFileDir = 'apifiles'
+  # docSubDirs = ['api','doc']
+  # modelDiagramDir = 'doc'
+  diagImgDir = 'apidiagram'
   diagFileExt = '_Diag.gif'
   detailDiagExt = '-details'
   helpPrefix = 'help'
@@ -168,8 +168,10 @@ DRAFT - backward compatibility of future versions not guaranteed.<br>
 
     #self.codeDirName = uniIo.joinPath(genConstants.apiCodeDir, self.docDir)
     self.codeDirName = metaConstants.apiCodeDir
-    self.topDocDir = Path.joinPath(self.baseDirName, self.docDir)
-    self.baseDirName = Path.joinPath(self.baseDirName, self.docDir)
+    # self.topDocDir = Path.joinPath(self.baseDirName, self.docDir)
+    self.modelDiagramDir = Path.joinPath(self.baseDirName, self.diagImgDir)
+    # self.baseDirName = Path.joinPath(self.baseDirName, self.docDir)
+    self.topDocDir = Path.joinPath(self.baseDirName,  metaConstants.docDir)
     self.topApiFile = '%s.%s' % (self.topApiPrefix, self.fileSuffix)
     self.classMapFile = '%s.%s' % (self.classMapPrefix, self.fileSuffix)
     self.methodMapFile = '%s.%s' % (self.methodMapPrefix, self.fileSuffix)
@@ -223,7 +225,7 @@ DRAFT - backward compatibility of future versions not guaranteed.<br>
               ll.append(attr)
 
     # TBD: relies on separator being /
-    self.baseDirNames = self.baseDirName.split('/')
+    # self.baseDirNames = self.baseDirName.split('/')
 
   ###########################################################################
 
@@ -371,7 +373,8 @@ DRAFT - backward compatibility of future versions not guaranteed.<br>
     """
 
     topPath = self.pathToTop(root)
-
+    apiFileDir = Path.joinPath(self.pathToTop(root, upDir=2), self.baseDirName, self.apiFileDir)
+    diagImgDir = Path.joinPath(self.pathToTop(root, upDir=2), self.baseDirName, self.diagImgDir)
     self.writeStartSection(cellpadding=5, width='100%')
 
     self.writeHeading('%s Documentation' % self.apiName, level=1)
@@ -384,13 +387,15 @@ DRAFT - backward compatibility of future versions not guaranteed.<br>
     self.writeCell('See Also:')
     self.writeNonBreakingSpaces(4)
     self.writeStartCell()
-    self.writeLink('%s/%s/%s' % (topPath, self.modelDocDir, self.indexFile), 'Documentation', target='blank')
+    self.writeLink(Path.joinPath(diagImgDir, self.indexFile), 'Documentation', target='blank')
     self.write('for Data Model')
     self.writeBreak()
-    self.writeLink('%s/doc/quickguide.html' % topPath, 'Quick Guide', target='blank')
+    self.writeLink(Path.joinPath(apiFileDir, 'quickguide.html'), 'Quick Guide',
+                   target='blank')
     self.write('to CCP software')
     self.writeBreak()
-    self.writeLink('%s/doc/api-description.html' % topPath, 'Overview', target='blank')
+    self.writeLink(Path.joinPath(apiFileDir, 'api-description.html'), 'Overview',
+                   target='blank')
     self.write('of %s' % self.apiName)
     self.writeEndCell()
     self.writeEndRow()
@@ -860,7 +865,7 @@ so, you should assume that these classes are not relevant to your purpose.
     fileName = self.getDiagramFileName(package, isAbsolute=True)
     pathList = self.getElementPathList(package)
     topPath = self.upDir(len(pathList))
-    docDirName = Path.joinPath(self.rootDirName, self.modelDocDir)
+    docDirName = Path.joinPath(self.rootDirName, self.modelDiagramDir)
 
     self.openFile(fileName)
 
@@ -882,7 +887,8 @@ so, you should assume that these classes are not relevant to your purpose.
     if ss:
       diagNames = ss.split()
       for diagName in diagNames:
-        diagFile = Path.joinPath(self.diagImgDir, package.qualifiedName().replace('.', '_') + '_' + diagName + self.diagFileExt)
+        diagFile = Path.joinPath(package.qualifiedName().replace('.', '_') + '_' + diagName + self.diagFileExt)
+        # diagFile = Path.joinPath(self.diagImgDir, package.qualifiedName().replace('.', '_') + '_' + diagName + self.diagFileExt)
         file = Path.joinPath(docDirName, diagFile)
         if not os.path.isfile(file):
           print("WARNING1: File %s does not exist" % file)
@@ -944,7 +950,7 @@ so, you should assume that these classes are not relevant to your purpose.
     pathList = self.getElementPathList(package)
     pathList = pathList[:-1]
     topPath = self.upDir(len(pathList))
-    docDirName = Path.joinPath(self.rootDirName, self.modelDocDir)
+    docDirName = Path.joinPath(self.rootDirName, self.modelDiagramDir)
     dirName = Path.joinPath(docDirName, *pathList)
     pkgName = package.name
 
@@ -1005,9 +1011,11 @@ so, you should assume that these classes are not relevant to your purpose.
     self.writeStartCenter()
 
     # details diagram:
-    dDiagFile = Path.joinPath(self.diagImgDir,
-     package.qualifiedName().replace('.', '_') + '__' + tag + self.detailDiagExt + self.diagFileExt)
-   
+    dDiagFile = ''.join((package.qualifiedName().replace('.', '_'),
+                         '__', tag, self.detailDiagExt, self.diagFileExt))
+   # dDiagFile = Path.joinPath(self.diagImgDir,
+   #   package.qualifiedName().replace('.', '_') + '__' + tag + self.detailDiagExt + self.diagFileExt)
+
     file = Path.joinPath(docDirName, dDiagFile)
 
     if os.path.isfile(file):
@@ -1017,8 +1025,9 @@ so, you should assume that these classes are not relevant to your purpose.
       print('WARNING2: File "%s" does not exist' % file)
    
     # normal diagram
-    dDiagFile = Path.joinPath(self.diagImgDir,
-     package.qualifiedName().replace('.', '_') + '__' + tag + self.diagFileExt)
+    # dDiagFile = Path.joinPath(self.diagImgDir,
+    #  package.qualifiedName().replace('.', '_') + '__' + tag + self.diagFileExt)
+    dDiagFile = package.qualifiedName().replace('.', '_') + '__' + tag + self.diagFileExt
 
     file = Path.joinPath(docDirName, dDiagFile)
     if os.path.isfile(file):
@@ -1045,7 +1054,7 @@ so, you should assume that these classes are not relevant to your purpose.
 
   def writeDiagramHelp(self):
 
-    docDirName = Path.joinPath(self.rootDirName, self.modelDocDir)
+    docDirName = Path.joinPath(self.rootDirName, self.modelDiagramDir)
     fileName = Path.joinPath(docDirName, self.helpPrefix)
 
     self.openFile(fileName)
@@ -1077,7 +1086,7 @@ so, you should assume that these classes are not relevant to your purpose.
 
   def writeDiagramLicense(self):
 
-    docDirName = Path.joinPath(self.rootDirName, self.modelDocDir)
+    docDirName = Path.joinPath(self.rootDirName, self.modelDiagramDir)
     fileName = Path.joinPath(docDirName, self.licensePrefix)
 
     self.openFile(fileName)
@@ -2118,7 +2127,7 @@ so, you should assume that these classes are not relevant to your purpose.
     if isAbsolute:
       topPath = self.rootDirName
     else:
-      topPath = self.pathToTop(elem)
+      topPath = self.pathToTop(elem, upDir=2)
 
     # diapackage is needed to establish the ink to Diagram
     diapackage = elem
@@ -2127,16 +2136,16 @@ so, you should assume that these classes are not relevant to your purpose.
   
     if elem.container is None:
       # root package
-      diapath = Path.joinPath(topPath,'%s/%s' % (self.modelDocDir, self.indexPrefix))
+      diapath = Path.joinPath(topPath,'%s/%s' % (self.modelDiagramDir, self.indexPrefix))
     elif isinstance(elem,MetaModel.MetaPackage) and elem.containedPackages:
       # branch package
       ll = diapackage.qualifiedName().split('.')
       ll.append(self.indexPrefix)
-      diapath = Path.joinPath(topPath,self.modelDocDir,*ll)
+      diapath = Path.joinPath(topPath,self.modelDiagramDir,*ll)
     else:
       # leaf package or package content
       ll = diapackage.qualifiedName().split('.')
-      diapath = Path.joinPath(topPath,self.modelDocDir, *ll)
+      diapath = Path.joinPath(topPath,self.modelDiagramDir, *ll)
   
     return diapath
 
@@ -2159,9 +2168,11 @@ so, you should assume that these classes are not relevant to your purpose.
     self.writeCommonNavigatorBar(elem)
 
     ##topPath = self.pathToTop(elem, upDir=upDir)
-    topPath = self.pathToTop(elem)
+    topPath = self.pathToTop(elem, upDir=2)
+    topDocPath = self.pathToTop(elem)
     diapath = self.getDiagramFileName(elem, isAbsolute=False)
-    tt = Path.joinPath(topPath, self.docDir)
+    apiFileDir = Path.joinPath(topPath, self.baseDirName, self.apiFileDir)
+    apiDocDir = Path.joinPath(topPath, self.topDocDir)
 
     self.writeStartRow()
     self.writeStartCell(align='center')
@@ -2172,7 +2183,7 @@ so, you should assume that these classes are not relevant to your purpose.
     if special == 'Class Map':
       self.writeStyleString('Class Map', _class='underover')
     else:
-      self.writeLink(Path.joinPath(topPath, self.topDocDir, self.classMapFile), 'Class Map')
+      self.writeLink(Path.joinPath(apiDocDir, self.classMapFile), 'Class Map')
 
     self.writeVerticalBar()
 
@@ -2182,25 +2193,25 @@ so, you should assume that these classes are not relevant to your purpose.
       ## bit of a hack, assumes that will have something on A page
       ##ff = '%s.%s' % (attributeLetter, self.fileSuffix)
       ##self.writeLink(uniIo.joinPath(topPath, self.topDocDir, self.attrRoleDir, ff), 'Attribute Map')
-      self.writeLink(Path.joinPath(topPath, self.topDocDir, self.attributeMapFile), 'Attribute Map')
+      self.writeLink(Path.joinPath(apiDocDir, self.attributeMapFile), 'Attribute Map')
 
     self.writeVerticalBar()
 
     if special == 'Method Map':
       self.writeStyleString('Method Map', _class='underover')
     else:
-      self.writeLink(Path.joinPath(topPath, self.topDocDir, self.methodMapFile), 'Method Map')
+      self.writeLink(Path.joinPath(apiDocDir, self.methodMapFile), 'Method Map')
 
     self.writeVerticalBar()
 
-    self.writeLink("javascript:wopn('%s/%s.%s')" % (tt, self.helpPrefix, self.fileSuffix), 'Help')
+    self.writeLink("javascript:wopn('%s/%s.%s')" % (apiFileDir, self.helpPrefix, self.fileSuffix), 'Help')
 
     self.writeVerticalBar()
 
     if special == 'License':
       self.writeStyleString('License', _class='underover')
     else:
-      self.writeLink("javascript:wopn('%s/%s.%s')" % (tt, self.licensePrefix, self.fileSuffix), 'License')
+      self.writeLink("javascript:wopn('%s/%s.%s')" % (apiFileDir, self.licensePrefix, self.fileSuffix), 'License')
     self.writeEndCell()
     self.writeEndRow()
 
@@ -2227,7 +2238,7 @@ so, you should assume that these classes are not relevant to your purpose.
       self.writeLink(Path.joinPath(topPath, self.topDocDir, self.topApiFile), 'Home')
       self.writeVerticalBar()
       self.writeStyleString('Package:', _class='underover')
-      self.writePrevNextLinks(topPath, prev, foll)
+      self.writePrevNextLinks(topDocPath, prev, foll)
       self.writeVerticalBar()
       self.write('Class')
       self.writeVerticalBar()
@@ -2242,7 +2253,7 @@ so, you should assume that these classes are not relevant to your purpose.
       self.writeLink(Path.joinPath(topPath,self.fileFromTop(elem.container)), 'Package')
       self.writeVerticalBar()
       self.writeStyleString('Class:', _class='underover')
-      self.writePrevNextLinks(topPath, prev, foll)
+      self.writePrevNextLinks(topDocPath, prev, foll)
       self.writeVerticalBar()
       self.write('Attribute')
       self.writeVerticalBar()
@@ -2254,7 +2265,7 @@ so, you should assume that these classes are not relevant to your purpose.
       self.writeVerticalBar()
       self.writeLink(Path.joinPath(topPath,self.fileFromTop(elem.container.container)), 'Package')
       self.writeVerticalBar()
-      self.writeLink(Path.joinPath(topPath,self.fileFromTop(elem.container)), 'Class')
+      self.writeLink(Path.joinPath(topDocPath,self.fileFromTop(elem.container)), 'Class')
       self.writeVerticalBar()
       self.write('Attribute')
       self.writeVerticalBar()
@@ -2270,7 +2281,7 @@ so, you should assume that these classes are not relevant to your purpose.
       self.writeLink(Path.joinPath(topPath,self.fileFromTop(elem.container)), 'Class')
       self.writeVerticalBar()
       self.writeStyleString('Attribute:', _class='underover')
-      self.writePrevNextLinks(topPath, prev, foll)
+      self.writePrevNextLinks(topDocPath, prev, foll)
       self.writeVerticalBar()
       self.write('Method')
   
@@ -2301,7 +2312,7 @@ so, you should assume that these classes are not relevant to your purpose.
     self.writeCommonNavigatorBar(package, isDiagram=True)
 
     if package:
-      topPath = self.pathToTop(package, isDiagram=True)
+      topPath = self.pathToTop(package, upDir=2)
     else:
       topPath = self.upDir(2)  # HACK for Help and License
 
@@ -2311,18 +2322,22 @@ so, you should assume that these classes are not relevant to your purpose.
     self.writeVerticalBar()
     self.writeLink(Path.joinPath(topPath, self.topDocDir, self.classMapFile), 'Class Map')
 
+    apiFileDir = Path.joinPath(topPath, self.baseDirName, self.apiFileDir)
+
     self.writeVerticalBar()
-    tt = Path.joinPath(topPath, self.modelDocDir)
+    # tt = Path.joinPath(topPath, self.modelDiagramDir)
     if special == 'Help':
       self.writeStyleString('Help', _class='underover')
     else:
-      self.writeLink('%s/%s.%s' % (tt, self.helpPrefix, self.fileSuffix), 'Help')
+      self.writeLink('%s/%s.%s' % (apiFileDir, self.helpPrefix, self.fileSuffix), 'Help')
+      # self.writeLink('%s/%s.%s' % (tt, self.helpPrefix, self.fileSuffix), 'Help')
 
     self.writeVerticalBar()
     if special == 'License':
       self.writeStyleString('License', _class='underover')
     else:
-      self.writeLink('%s/%s.%s' % (tt, self.licensePrefix, self.fileSuffix), 'License')
+      self.writeLink('%s/%s.%s' % (apiFileDir, self.licensePrefix, self.fileSuffix), 'License')
+      # self.writeLink('%s/%s.%s' % (tt, self.licensePrefix, self.fileSuffix), 'License')
 
     self.writeEndCell()
     self.writeEndRow()
@@ -2344,13 +2359,16 @@ so, you should assume that these classes are not relevant to your purpose.
   ###########################################################################
 
   ###def writeCommonNavigatorBar(self, elem = None, isDiagram = False, upDir = 0):
-  def writeCommonNavigatorBar(self, elem = None, isDiagram = False):
+  def writeCommonNavigatorBar(self, elem=None, isDiagram=False):
 
     ## upDir is hack to get Attribute Map pages to work
 
     if elem:
       ##topPath = self.pathToTop(elem, isDiagram=isDiagram, upDir=upDir)
-      topPath = self.pathToTop(elem, isDiagram=isDiagram)
+      # topPath = self.pathToTop(elem, isDiagram=isDiagram, upDir=2)
+      topPath = self.pathToTop(elem, upDir=2)
+    # elif isDiagram:
+    #   topPath = self.upDir(1)
     else:
       topPath = self.upDir(2)  # HACK for Help and License
   
@@ -2367,7 +2385,7 @@ so, you should assume that these classes are not relevant to your purpose.
     self.write('Data Model version %s' % dataModelVersion)
     self.writeEndCell()
 
-    tt = Path.joinPath(topPath, self.docDir)
+    tt = Path.joinPath(topPath, self.baseDirName, self.apiFileDir)
 
     self.writeStartCell(width='80%', valign='center')
     self.writeComment('TOP BANNER BEGIN')
@@ -2711,7 +2729,7 @@ so, you should assume that these classes are not relevant to your purpose.
       supertypes = supertypes[0].supertypes
 
     # image dir
-    imgPath = Path.joinPath(self.pathToTop(complexDataType), self.imageDir)
+    imgPath = Path.joinPath(self.pathToTop(complexDataType, upDir=2), self.imageDir)
     src = '%s/%s' % (imgPath, spaceImage)
     space = self.getImageString(src=src, align='top', border=0)
 
@@ -2817,37 +2835,39 @@ so, you should assume that these classes are not relevant to your purpose.
 
   ###########################################################################
 
-  def writeBasicHeader(self, elem, title, isDiagram, upDir = 0):
+  def writeBasicHeader(self, elem, title, isDiagram):
 
     # upDir is hack to get Attribute Map pages to work
 
     # TBD: this is now producing the wrong formula so look at again
     if elem:
-      # TBD: can dirDepth be done otherwise now?
-      dirDepth = 0
+
+      if self.elemHasOwnDirectory(elem):
+        topPath = self.pathToTop(elem, upDir=2)
+      else:
+        topPath = self.pathToTop(elem.container, upDir=2)
+
       package = elem
       while not isinstance(package, MetaModel.MetaPackage):
-        dirDepth += 1
         package = package.container
-      dirDepth = dirDepth + len(package.qualifiedName().split('.')) + 3
-      if isDiagram:
-        dirDepth -= 1
-      dirDepth += upDir
-
       packageGroup = package.taggedValues['packageGroup']
-      ss = package.qualifiedName()
+      packageName = package.qualifiedName()
+
     else:
-      dirDepth = 2  # HACK for Help and License
+      topPath = self.upDir(2)  # HACK for Help and License
       packageGroup = 'core'
-      ss = 'n/a'
+      packageName = 'n/a'
+
+    apiFileDir = Path.joinPath(topPath, self.baseDirName, self.apiFileDir)
 
     dict = licenseData.licenseInfo[packageGroup].copy()
     dict['fileName'] = self.indexFile
-    dict['licenseLocation'] = self.upDir(dirDepth) + 'license'
+    # dict['licenseLocation'] = self.upDir(dirDepth) + 'license'
+    dict['licenseLocation'] = apiFileDir
     dict['programType'] = 'API documentation'
     dict['programFunction'] = (
       "%s documentation for CCPN data model, package %s"
-      % (self.apiName, ss)
+      % (self.apiName, packageName)
     )
     dict['licenseFileName'] = dict['useLicense']
     if not elem or elem != package:
@@ -2855,19 +2875,11 @@ so, you should assume that these classes are not relevant to your purpose.
       dict['references'] = ()
       dict['credits'] = None
 
-    # TBD: this affects how many ..'s you get to find stylesheet, so can be seen to be correct or not via that
-    if not elem:
-      #topPath = self.upDir(2)  # HACK for Help and License
-      topPath = self.upDir(1)  # HACK for Help and License
-    elif self.elemHasOwnDirectory(elem):
-      topPath = self.pathToTop(elem, isDiagram=isDiagram, upDir=upDir)
-    else:
-      topPath = self.pathToTop(elem.container, isDiagram=isDiagram)
 
     self.writeHeader(scriptName=self.scriptName,
       headerComment=headers.getHeader(**dict),
       title=title,
-      styleSheetDir=Path.joinPath(topPath, self.styleSheetDir))
+      styleSheetDir=apiFileDir)
 
   ###########################################################################
 
@@ -2903,7 +2915,8 @@ so, you should assume that these classes are not relevant to your purpose.
       if elem.container is elem.topPackage():
         ss = 'Root'
         # TBD: not sure this works for all implementations
-        addr = '../../../%s/%s' % (self.docDir, self.topApiFile)
+        addr = '../../../%s/%s' % (self.topDocDir, self.topApiFile)
+
       elif self.elemHasOwnDirectory(elem):
         addr = '../%s' % self.indexFile
       else:
@@ -3103,40 +3116,65 @@ so, you should assume that these classes are not relevant to your purpose.
 
   ###########################################################################
 
+  # def pathToTop(self, element, isDiagram=False, upDir=0):
+  #   """ return relative directory path from a given element to the top directory
+  #   """
+  #
+  #   # upDir is hack to get Attribute Map pages to work
+  #
+  #   if isDiagram:
+  #     n = 2  # it's always in model/doc directory, not in language-specific api directory
+  #   else:
+  #     n = len(self.baseDirNames)
+  #
+  #   if element.container is None:
+  #     if hasattr(element, 'topPackage') and element is element.topPackage():
+  #       # this is the root package
+  #       #return Path.joinPath(*(['..']*(n+1+upDir)))
+  #       return Path.joinPath(*(['..']*(n+upDir)))
+  #
+  #     raise MemopsError("path from root element not implemented for %s"
+  #      % element
+  #     )
+  #
+  #   length = len(self.getElementPathList(element))
+  #   if isDiagram:
+  #     if element.containedPackages:
+  #       length = length + n + 1
+  #     else:
+  #       length += n
+  #   elif self.elemHasOwnDirectory(element):
+  #     length = length + n + 2
+  #   else:
+  #     length = length + n + 1
+  #
+  #   #return self.upDir(length)
+  #   return self.upDir(length-2) # truing to adjust to new locations. TODO experiment
+
   def pathToTop(self, element, isDiagram=False, upDir=0):
     """ return relative directory path from a given element to the top directory
     """
-  
-    # upDir is hack to get Attribute Map pages to work
 
-    if isDiagram:
-      n = 2  # it's always in model/doc directory, not in language-specific api directory
-    else:
-      n = len(self.baseDirNames)
+    length = len(self.getElementPathList(element)) + upDir
 
     if element.container is None:
       if hasattr(element, 'topPackage') and element is element.topPackage():
         # this is the root package
-        #return Path.joinPath(*(['..']*(n+1+upDir)))
-        return Path.joinPath(*(['..']*(n+upDir)))
-    
-      raise MemopsError("path from root element not implemented for %s" 
-       % element
-      )
-  
-    length = len(self.getElementPathList(element))
-    if isDiagram:
-      if element.containedPackages:
-        length = length + n + 1
+        length = upDir
       else:
-        length += n
-    elif self.elemHasOwnDirectory(element):
-      length = length + n + 2
-    else:
-      length = length + n + 1
-  
-    #return self.upDir(length)
-    return self.upDir(length-2) # truing to adjust to new locations. TODO experiment
+        raise MemopsError("path from root element not implemented for %s"
+         % element
+        )
+
+    elif isDiagram:
+      if element.containedPackages:
+        length += 1
+
+    elif not self.elemHasOwnDirectory(element):
+      length -= 1
+
+    return self.upDir(length)
+    # return self.upDir(length-2) # truing to adjust to new locations. TODO experiment
 
   ###########################################################################
 
@@ -3168,7 +3206,8 @@ so, you should assume that these classes are not relevant to your purpose.
     """
   
     #n = len(self.baseDirNames)
-    ll = self.baseDirNames + element.qualifiedName().split('.')
+    # ll = self.baseDirNames + element.qualifiedName().split('.')
+    ll = element.qualifiedName().split('.')
     #ll[n+1:n+1] = self.docSubDirs
     if not ignoreElemType and not self.elemHasOwnDirectory(element):
       del ll[-1]
@@ -3214,7 +3253,7 @@ so, you should assume that these classes are not relevant to your purpose.
     # absolute or relative path
     if absoluteName:
       #pathList = [self.rootDirName] + self.baseDirNames
-      pathList = [self.rootDirName] + self.baseDirNames
+      pathList = [self.rootDirName, self.topDocDir]
     else:
       pathList = []
    
@@ -3237,7 +3276,6 @@ so, you should assume that these classes are not relevant to your purpose.
     # add suffix
     if addSuffix and self.fileSuffix:
       pathList[-1] = '%s.%s' % (pathList[-1], self.fileSuffix)
-
     #
     return Path.joinPath(*pathList)
 

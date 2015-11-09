@@ -387,10 +387,9 @@ class SubstanceProperties(WrapperTesting):
     self.assertIsNone(s.smiles)
     self.assertIsNone(s.userCode)
 
-
-  @unittest.expectedFailure
+  # @unittest.expectedFailure
   def test_bareUndefinedSubstanceProperties(self):
-    self.assertRaises(Exception, self.project.newSubstance, name='test substance',
+    self.assertRaises(ValueError, self.project.newSubstance, name='test substance',
                       substanceType='other')
 
   # def test_PolymerSubstanceProperties(self):
@@ -437,7 +436,7 @@ class SubstanceProperties(WrapperTesting):
                                             name='test polymer substance',
                                             molType='protein',
                                             startNumber=7)
-    print(s)
+    print('@~@~', s)
     # self.assertEqual(s.startNumber, 7)
 
   # def test_PolymerSubstanceCyclicProperties(self):

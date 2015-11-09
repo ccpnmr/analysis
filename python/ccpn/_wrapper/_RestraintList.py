@@ -26,7 +26,7 @@ import operator
 from ccpncore.util import Common as commonUtil
 from ccpn import AbstractWrapperObject
 from ccpn import Project
-from ccpn import Tensor
+from ccpncore.util.Tensor import  Tensor
 from ccpn import RestraintSet
 from ccpncore.util import Pid
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList

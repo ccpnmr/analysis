@@ -519,7 +519,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Populates recent projects menu with 10 most recently loaded projects specified in the preferences file.
     """
     for recentFile in self._appBase.preferences.recentFiles:
-      self.action = Action(self, text=recentFile, callback=partial(self._appBase.loadProject,projectDir=recentFile))
+      self.action = Action(self, text=recentFile, callback=partial(self._appBase.loadProject,path=recentFile))
       self.recentProjectsMenu.addAction(self.action)
 
   def saveBackup(self):

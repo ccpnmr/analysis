@@ -234,6 +234,11 @@ class StructureEnsemble(AbstractWrapperObject):
       else:
         raise ValueError("atomId %s matches pre-existing atom in StructureEnsemble" % atomId)
 
+  def replaceAtomIds(self, atomIds:Sequence[str]):
+    """Replace atromIds with new list of the same length,
+    without modifying coordinates and other data"""
+    raise NotImplementedError("replaceAtomIds not implemented yet")
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:

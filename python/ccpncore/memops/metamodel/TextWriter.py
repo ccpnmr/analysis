@@ -60,6 +60,7 @@ class TextWriter(TextWriter_py_2_1.TextWriter_py_2_1, object):
     self.fileName = ''
     self.indent = 0
     self.indents = []
+
     self.errorMsg = ''
 
     self.previousLineEmpty = False # used so that do not print out two '\n' in a row

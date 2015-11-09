@@ -135,7 +135,7 @@ class AppBase(GuiBase):
     return self.initProject(apiProject)
 
   def saveProject(self, newPath=None):
-    ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath)
+    ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath, createFallback=True)
     layout = self.mainWindow.dockArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
     if not os.path.exists(layoutPath):
@@ -144,9 +144,6 @@ class AppBase(GuiBase):
     with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
       yaml.dump(layout, stream)
       stream.close()
-
-
-
 
 
 def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userPreferencesPath=None):

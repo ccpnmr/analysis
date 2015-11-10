@@ -46,7 +46,9 @@ def loadDict():
 
   registrationDict = {}
   try:
-    if os.path.exists(path) and os.path.isfile(path):
+    # if os.path.exists(path) and os.path.isfile(path):
+    # exists call is reduncant with isfile call
+    if os.path.isfile(path):
       data = fp = open(path)
       data = fp.read()
       fp.close()

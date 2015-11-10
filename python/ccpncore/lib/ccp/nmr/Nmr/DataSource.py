@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 
 import numpy
-# import os
+import os
 # import re
 
 # Additional functions for ccp.nmr.Nmr.DataSource
@@ -237,6 +237,10 @@ def getPlaneData(self:'DataSource', position:Sequence=None, xDim=0, yDim=1):
   data = numpy.zeros((yPoints, xPoints), dtype=numpy.float32)
   
   fileName = dataStore.fullPath
+  if not os.path.exists(fileName):
+    self.root._logger.warning("File does not exist: %s" % fileName)
+    return data
+
   fp = open(fileName, 'rb')
   
   for xblock in range(xblocks):
@@ -324,6 +328,9 @@ def getSliceData(self:'DataSource', position:Sequence=None, sliceDim:int=0):
   blockSizes = blockSizes[::-1]  # reverse (dim ordering backwards)
 
   fileName = dataStore.fullPath
+  if not os.path.exists(fileName):
+    self.root._logger.warning("File does not exist: %s" % fileName)
+    return data
   fp = open(fileName, 'rb')
 
   for sliceBlock in range(sliceBlocks):
@@ -441,6 +448,9 @@ def getRegionData(self:'DataSource', startPoint:Sequence, endPoint:Sequence):
   blockSizesRev = blockSizes[::-1]  # reverse (dim ordering backwards)
 
   fileName = dataStore.fullPath
+  if not os.path.exists(fileName):
+    self.root._logger.warning("File does not exist: %s" % fileName)
+    return data
   fp = open(fileName, 'rb')
   
   for blockCoord in blockCoords:

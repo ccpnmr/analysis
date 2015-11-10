@@ -151,11 +151,12 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(a.isotopeCode, 'unknown')
 
   # NBNB LOOK AT ME! This now fails - hatted names cannot be set or created
-  @unittest.expectedFailure
+  # @unittest.expectedFailure
   def test_CreateNmrAtomWithArbitraryHattedName(self):
-    a = self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
-    self.assertEqual(a.pid, 'NA:@1.@1..Arbitrary^Name')
-    self.assertEqual(a.isotopeCode, 'unknown')
+    with self.assertRaises(ValueError):
+      a = self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
+    # self.assertEqual(a.pid, 'NA:@1.@1..Arbitrary^Name')
+    # self.assertEqual(a.isotopeCode, 'unknown')
 
   # NBNB now obsolete
   # @unittest.expectedFailure

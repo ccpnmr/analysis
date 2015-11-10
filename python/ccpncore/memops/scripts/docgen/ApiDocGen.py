@@ -138,7 +138,7 @@ class ApiDocGen(Documentation, ModelTraverse):
   attributeMapPrefix = 'attributeMap'
   imageDir = metaConstants.imageDir
   # docDir = metaConstants.docDir
-  apiFileDir = 'apifiles'
+  apiFileDir = 'static'
   # docSubDirs = ['api','doc']
   # modelDiagramDir = 'doc'
   diagImgDir = 'apidiagram'

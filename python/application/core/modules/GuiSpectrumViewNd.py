@@ -23,21 +23,22 @@ __version__ = "$Revision$"
 #=========================================================================================
 import math
 import numpy
+import os
 
 from OpenGL import GL
 from PyQt4 import QtCore, QtGui
 
 import pyqtgraph as pg
 
-###from ccpncore.gui.ToolButton import ToolButton
 from ccpncore.util import Colour
 from ccpncore.util import Phasing
 
 from ccpnc.contour import Contourer2d
-###from ccpnc.peak import Peak
 
 from application.core.modules import GuiStripDisplayNd
 from application.core.modules.GuiSpectrumView import GuiSpectrumView
+###from ccpncore.gui.ToolButton import ToolButton
+###from ccpnc.peak import Peak
 ###from application.core.modules.spectrumPane.PeakListNdItem import PeakListNdItem
 
 # TBD: for now ignore fact that apiSpectrumView can override contour colour and/or contour levels
@@ -459,6 +460,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     ##if not widget:
     ##  return
+    dataStore = self._apiDataSource.dataStore
+    if dataStore is None or not os.path.exists(dataStore.fullPath):
+      self.project._logger.warning("%s cannot find any data - data file misplaced?" % self )
+      return
 
     ##guiStrip = self.spectrumDisplay.viewportDict[widget]
     ##self.drawContours(painter, guiStrip)

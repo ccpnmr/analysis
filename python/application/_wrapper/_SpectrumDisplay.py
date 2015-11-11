@@ -340,12 +340,10 @@ def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=
     dimensionOrdering.append(0)
 
   if dataSource.findFirstDataDim(className='SampledDataDim') is not None:
-    window._project._logger.warning("Display of sampled dimension spectra is not implemented yet")
-    print("Display of sampled dimension spectra is not implemented yet")
-    return
+    print( "Display of sampled dimension spectra is not implemented yet")
+    raise NotImplementedError(
+      "Display of sampled dimension spectra is not implemented yet")
     # # NBNB TBD FIXME
-    # raise NotImplementedError(
-    #   "Display of sampled dimension spectra is not implemented yet")
 
   #
   display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripAxis,

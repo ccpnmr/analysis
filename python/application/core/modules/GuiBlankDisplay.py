@@ -99,10 +99,15 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
   def processSpectra(self, pids:Sequence[str], event):
     """Display spectra defined by list of Pid strings"""
     for ss in pids:
-      spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(ss)
-      self.dockArea.guiWindow.deleteBlankDisplay()
-      msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
-      self.dockArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay', 'spectrum', pid=ss)
+      try:
+        spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(ss)
+        self.dockArea.guiWindow.deleteBlankDisplay()
+        msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
+        self.dockArea.window().pythonConsole.writeCommand('spectrum',
+                                                          'application.createSpectrumDisplay',
+                                                          'spectrum', pid=ss)
+      except NotImplementedError:
+        pass
 
   def processSamples(self, pids:Sequence[str], event):
     for ss in pids:

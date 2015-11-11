@@ -14,8 +14,8 @@ in bash:
 
 alias assign="/path/to/distribution/bin/assign"
 
-After sourcing your rc file or opening a new terminal you can open assign by
-typing assign into the terminal.
+After sourcing your .cshrc (in csh) or .bashrc (in bash) file or opening a
+new terminal you can open assign by typing assign into the terminal.
 
 2. Code Structure
 

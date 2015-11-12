@@ -109,10 +109,10 @@ def analyseUrl(filePath):
       #       filePath = path
       #       return ('Spectrum', BRUKER, filePath)
 
+      # NBNB FIXME TBD this needs sorting
 
-
-
-
+    # No match
+    return (None, None, filePath)
 
   # Set up for further analysis
   dirName, fileName = os.path.split(filePath)

@@ -31,6 +31,7 @@ from ccpncore.lib.spectrum import Spectrum as spectrumLib
 from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
 from ccpncore.lib.Io.Formats import AZARA, BRUKER, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
 from ccpncore.util.Path import checkFilePath
+from ccpncore.util import Io as ioUtil
 
 from ccpncore.api.memops.Implementation import Url
 
@@ -112,11 +113,12 @@ def loadDataSource(self:'NmrProject', filePath, dataFileFormat):
   experiment = self.createExperiment(name=name, numDim=len(numPoints),
                                 sf=specFreqs, isotopeCodes=isotopes)
 
+  # dataLocationStore = self.root.newDataLocationStore(name=name)
+  # dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
+  # # NBNB TBD - this is WRONG
+  # # the dataUrl should be made from dirName, NOT to the filePath directory.
+  dataUrl = ioUtil.fetchDataUrl(self.root, dirName)
 
-  dataLocationStore = self.root.newDataLocationStore(name=name)
-  dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
-  # NBNB TBD - this is WRONG
-  # the dataUrl should be made from dirName, NOT to the filePath directory.
   blockMatrix = spectrumLib.createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
                                                 blockSizes=blockSizes, isBigEndian=isBigEndian,
                                                 numberType=numberType, headerSize=headerSize,

@@ -520,6 +520,10 @@ for (targetName,repository) in inData:
      repositories=self.findAllRepositories(name=repository)
     )
 
+# initialise DatLocationStore
+from ccpncore.util.Io import _initialiseStandardDataLocationStore
+_initialiseStandardDataLocationStore(self)
+
 # Add logger attribute
 try:
   from ccpncore.util.Logging import getLogger

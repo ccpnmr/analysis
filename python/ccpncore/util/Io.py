@@ -118,6 +118,16 @@ def newProject(projectName, path:str=None, overwriteExisting:bool=False,
     repository = project.findFirstRepository(name=name)
     repository.url = Implementation.Url(path=fullPath)
 
+  # Reset DataLocations
+  _initialiseStandardDataLocationStore(project)
+
+  # NBNB PREFERENCES
+  # Put here code to set remotedata location from preferences:
+  #
+  # remotePath = SOMETHING
+  # obj = project.findFirstDataLocationStore(name='standard').findFirstDataUrl(name='remoteData')
+  # obj.url = Implementation.Url(path=remotePath)
+
   # create logger
   logger = _createLogger(project, applicationName, useFileLogger)
   
@@ -396,6 +406,7 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
       # find DataUrls involved
       dataUrls = set(dataStore.dataUrl for dataStore in badDataStores)
       # NBNB change here to possibly start a directory higher NBNB TBD
+      # NB the following gets you the project directory (the one containing memops/)
       startDir = project.packageLocator.findFirstRepository().url.dataLocation
 
       for dataUrl in dataUrls:
@@ -426,13 +437,17 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
       
   logger = _createLogger(project, applicationName, useFileLogger)
 
+  # initialise standard DataUrls and move dataStores to standard DataUrls where possible.
+  _initialiseStandardDataLocationStore(project)
+  _compressDataLocations(project)
+
   if warningMessages:
     # log warnings
     for msg in warningMessages:
       logger.warning(msg)
 
   # NBNB Hack: do data upgrade for V2-V3transition
-  # TBD remove for future versions
+  # TBD FIXME remove for future versions
   if hasattr(project,'_isUpgraded') and project._isUpgraded:
     from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
     correctFinalResult(project)
@@ -1035,6 +1050,8 @@ def packageProject(project, filePrefix=None, includeBackups=False, includeData=F
   If includeData then also dataStores located inside project directory are included.
   """
 
+  # NBNB TBD FIXME check how many dataLocatoins to package (and make sure you reset first)
+
   import tarfile
 
   userPath = getRepositoryPath(project, 'userData')
@@ -1220,3 +1237,75 @@ def movePackageData(root, newPackageName, oldPackageName):
 #         break
 #
 #   return xmlFileName
+
+def _initialiseStandardDataLocationStore(memopsRoot:Implementation.MemopsRoot):
+  """Get or create standard DataLocationStore, and reset standard data location urls
+  to current location.
+   Called from MemopsRoot.__init__"""
+
+  result = memopsRoot.findFirstDataLocationStore(name='standard')
+  if result is None:
+    # Normal case make the DataLocationStore and contents
+    result = memopsRoot.newDataLocationStore(name='standard')
+
+  # insideData = data inside the project
+  dataUrlObject = result.findFirstDataUrl(name='insideData')
+  projectUrl = memopsRoot.findFirstRepository(name='userData').url
+  if dataUrlObject is None:
+    # make new dataUrl
+    result.newDataUrl(name='insideData', url=projectUrl)
+
+  # alongsideData - points to directory containing project directory
+  dataUrlObject = result.findFirstDataUrl(name='alongsideData')
+  path, junk = Path.splitPath(projectUrl.path)
+  if dataUrlObject is None:
+    # make new dataUrl
+    result.newDataUrl(name='alongsideData', url=Implementation.Url(path=path))
+
+  # remoteData - initialised to home directory and not reset
+  dataUrlObject = result.findFirstDataUrl(name='remoteData')
+  path = os.path.expanduser('~')
+  if dataUrlObject is None:
+    # make new dataUrl
+    result.newDataUrl(name='remoteData', url=Implementation.Url(path=path))
+  #
+  return result
+
+def _compressDataLocations(memopsRoot:Implementation.MemopsRoot):
+  """Reorganise DataLocations to use standard DataUrls"""
+  standardStore = memopsRoot.findFirstDataLocationStore(name='standard')
+  locationData = []
+  standardTags = ('insideData', 'alongsideData', 'remoteData')
+  for tag in standardTags:
+    dataUrl = standardStore.findFirstDataUrl(name=tag)
+    locationData.append((os.path.join(dataUrl.url.path, ''), dataUrl))
+
+  for dataUrl in standardStore.dataUrls:
+    if dataUrl.name not in standardTags:
+      for dataStore in dataUrl.dataStores:
+        fullPath = dataStore.fullPath
+        for directory, targetUrl in locationData:
+          if fullPath.startswith(directory):
+            dataStore.dataUrl = targetUrl
+            dataStore.path = fullPath[len(directory):]
+
+def fetchDataUrl(memopsRoot:Implementation.MemopsRoot, fullPath) -> 'DataUrl':
+  """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
+  and existing dataUrls"""
+  standardStore = memopsRoot.findFirstDataLocationStore(name='standard')
+  fullPath = Path.normalisePath(fullPath, makeAbsolute=True)
+  standardTags = ('insideData', 'alongsideData', 'remoteData')
+  # Check standard DataUrls first
+  checkUrls = [standardStore.findFirstDataUrl(name=tag) for tag in standardTags]
+  # Then check other existing DataUrls
+  checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
+  for dataUrl in checkUrls:
+    directoryPath = os.path.join(dataUrl.url.path, '')
+    if fullPath.startswith(directoryPath):
+      break
+  else:
+    # No matches found, make a new one
+    dirName, path = os.path.split(fullPath)
+    dataUrl = standardStore.newDataUrl(url=Implementation.Url(path=dirName))
+  #
+  return dataUrl

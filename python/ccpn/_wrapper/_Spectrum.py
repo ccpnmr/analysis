@@ -243,7 +243,6 @@ class Spectrum(AbstractWrapperObject):
 
   @filePath.setter
   def filePath(self, value:str):
-    #  NBNB TBD, the way of handling file paths, DataUrls, and stores ABSOLUTELY need improving
 
     apiDataStore = self._wrappedData.dataStore
     if apiDataStore is None:
@@ -253,8 +252,8 @@ class Spectrum(AbstractWrapperObject):
       raise ValueError("Spectrum file path cannot be set to None")
 
     else:
-      dataUrl=ioUtil.fetchDataUrl(self._project.root, value)
-      apiDataStore.dataUrl = dataUrl
+      dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+      apiDataStore.repointDataStoreUrl(dataUrl)
       apiDataStore.path = value[len(dataUrl.url.path)+1:]
 
       # # NBNB TBD this is silly - no reuse of DataUrls.

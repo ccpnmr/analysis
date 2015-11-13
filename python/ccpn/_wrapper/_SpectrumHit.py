@@ -56,12 +56,12 @@ class SpectrumHit(AbstractWrapperObject):
     """object identifier, used for id"""
 
     obj =  self._wrappedData
-    return Pid.createId((obj.substanceName, obj.sampledDimension, obj.sampledPoint))
+    return Pid.createId(obj.substanceName, obj.sampledDimension, obj.sampledPoint)
 
   @property
   def _parent(self) -> Spectrum:
-    """Spectrum containing spectrumReference."""
-    return self._project._data2Obj[self._wrappedData.dataDim.dataSource]
+    """Spectrum containing spectrumHit."""
+    return self._project._data2Obj[self._wrappedData.dataSource]
 
   spectrum = _parent
 
@@ -202,7 +202,7 @@ def _newSpectrumHit(self:Spectrum, substanceName:str, pseudoDimensionNumber:int=
                                            concentrationError=concentrationError,
                                            concentrationUnit=concentrationUnit, details=comment)
 
-  return self._data2Obj.get(obj)
+  return self._project._data2Obj.get(obj)
 
 Spectrum.newSpectrumHit = _newSpectrumHit
 del _newSpectrumHit

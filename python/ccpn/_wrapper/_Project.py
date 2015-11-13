@@ -292,6 +292,17 @@ class Project(AbstractWrapperObject):
   def _parent(self) -> AbstractWrapperObject:
     """Parent (containing) object."""
     return None
+
+  def save(self, newPath:str=None, newProjectName:str=None, changeBackup:bool=True,
+                  createFallback:bool=False, overwriteExisting:bool=False,
+                  checkValid:bool=False, changeDataLocations:bool=False):
+    """Save project with all data, optionally to new location or with new name.
+    Unlike lower-level functions, this function ensures that data in high level caches are also saved """
+    self._flushCachedData()
+    ioUtil.saveProject(self._wrappedData.root, newPath=newPath, newProjectName=newProjectName,
+                       changeBackup=changeBackup, createFallback=createFallback,
+                       overwriteExisting=overwriteExisting, checkValid=checkValid,
+                       changeDataLocations=changeDataLocations)
   
   @property
   def name(self) -> str:
@@ -311,17 +322,6 @@ class Project(AbstractWrapperObject):
         if val is not None:
           # Save cached data back to underlying storage
           setattr(structureEnsemble, tag, val)
-
-  def save(self, newPath:str=None, newProjectName:str=None, changeBackup:bool=True,
-                  createFallback:bool=False, overwriteExisting:bool=False,
-                  checkValid:bool=False, changeDataLocations:bool=False):
-    """Save project with all data, optionally to new location or with new name.
-    Unlike lower-level functions, this function ensures that data in high level caches are also saved """
-    self._flushCachedData()
-    ioUtil.saveProject(self._wrappedData.root, newPath=newPath, newProjectName=newProjectName,
-                       changeBackup=changeBackup, createFallback=createFallback,
-                       overwriteExisting=overwriteExisting, checkValid=checkValid,
-                       changeDataLocations=changeDataLocations)
 
   def rename(self, name:str) -> None:
     """Rename Project, and rename the underlying API project and the directory stored on disk.

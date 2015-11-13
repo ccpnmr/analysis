@@ -27,7 +27,7 @@ import os
 from ccpncore.util import Path
 from ccpncore.api.memops import Implementation
 
-def changeDataStoreUrl(self:'DataStore', newPath:str):
+def changeDataStoreUrl(self:'AbstractDataStore', newPath:str):
   """ Change the url for this dataStore, so that the end we have
   dataStore.dataUrl.url.path = newPath.  This changes all dataUrls
   with the same old path if the old path does not exist and the
@@ -68,3 +68,43 @@ def changeDataStoreUrl(self:'DataStore', newPath:str):
           if dataUrl.url == oldUrl:
             dataUrl.url = newUrl
 
+def repointDataStoreUrl(self:'AbstractDataStore', dataUrl:'DataUrl'):
+  """Set self.datUrl=dataUrl, AND move self to newDataLocationStore first if necessary"""
+  dataLocationStore = dataUrl.dataLocationStore
+  oldDataUrl = self.dataUrl
+  oldDataLocationStore = oldDataUrl.dataLocationStore
+  undo = self.root._undo
+  if undo is not None:
+    undo.increaseBlocking()
+  try:
+    if oldDataUrl is dataUrl:
+      return
+    elif oldDataLocationStore is dataLocationStore:
+      self.dataUrl = dataUrl
+    else:
+      # We need to move self to a new DataLocationStore. This bypasses the API
+
+      # get data set up
+      oldSerial = newSerial = self.serial
+      serialDict = dataLocationStore.__dict__['_serialDict']
+      previousDataStore = dataLocationStore.findFirstDataStore(serial=oldSerial)
+      if previousDataStore is not None:
+        newSerial = serialDict['dataStores'] + 1
+
+      del oldDataLocationStore.__dict__['dataStores'][oldSerial]
+      self.__dict__['dataLocationStore'] = self.__dict__['topObject'] = dataLocationStore
+      if newSerial > oldSerial:
+        serialDict['dataStores'] = newSerial
+      dataLocationStore.__dict__['dataStores'][newSerial] = self
+      self.dataUrl = dataUrl
+
+  finally:
+    # reset override and set isModified
+    # root.__dict__['override'] = False
+    # self.__dict__['isModified'] = True
+    if undo is not None:
+      undo.decreaseBlocking()
+
+  if undo is not None:
+    undo.newItem(self.repointDataStoreUrl, self.repointDataStoreUrl,
+                 undoArgs=(oldDataUrl,), redoArgs=(dataUrl,))

@@ -1289,24 +1289,3 @@ def _compressDataLocations(memopsRoot:Implementation.MemopsRoot):
           if fullPath.startswith(directory):
             dataStore.dataUrl = targetUrl
             dataStore.path = fullPath[len(directory):]
-
-def fetchDataUrl(memopsRoot:Implementation.MemopsRoot, fullPath) -> 'DataUrl':
-  """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
-  and existing dataUrls"""
-  standardStore = memopsRoot.findFirstDataLocationStore(name='standard')
-  fullPath = Path.normalisePath(fullPath, makeAbsolute=True)
-  standardTags = ('insideData', 'alongsideData', 'remoteData')
-  # Check standard DataUrls first
-  checkUrls = [standardStore.findFirstDataUrl(name=tag) for tag in standardTags]
-  # Then check other existing DataUrls
-  checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
-  for dataUrl in checkUrls:
-    directoryPath = os.path.join(dataUrl.url.path, '')
-    if fullPath.startswith(directoryPath):
-      break
-  else:
-    # No matches found, make a new one
-    dirName, path = os.path.split(fullPath)
-    dataUrl = standardStore.newDataUrl(url=Implementation.Url(path=dirName))
-  #
-  return dataUrl

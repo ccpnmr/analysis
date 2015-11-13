@@ -28,7 +28,7 @@ from ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
 from ccpncore.util import Io as ioUtil
 
 def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
-  """Open project (API project) stored at path.
+  """Open project matching the API Project stored at path.
 
   If the API project contains several NmrProjects (rare),
   nmrProjectName lets you select which one to open"""

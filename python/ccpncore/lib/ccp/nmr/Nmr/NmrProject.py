@@ -117,7 +117,7 @@ def loadDataSource(self:'NmrProject', filePath, dataFileFormat):
   # dataUrl = dataLocationStore.newDataUrl(url=Url(path=os.path.dirname(filePath)))
   # # NBNB TBD - this is WRONG
   # # the dataUrl should be made from dirName, NOT to the filePath directory.
-  dataUrl = ioUtil.fetchDataUrl(self.root, dirName)
+  dataUrl = self.root.fetchDataUrl(dirName)
 
   blockMatrix = spectrumLib.createBlockedMatrix(dataUrl, specFile, numPoints=numPoints,
                                                 blockSizes=blockSizes, isBigEndian=isBigEndian,

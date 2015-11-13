@@ -1,9 +1,13 @@
-"""CCPN data. High level interface for normal data access
+"""CCPN package. High level interface for normal data access
 
-The standard ways of starting a project are:
+All data are organised in Projects. The standard ways of starting a project are:
 
 - myProject = :ref:`ccpn-loadProject-ref` (*path*, ...)
 - myProject = :ref:`ccpn-newProject-ref` (*projectName*, ...)
+
+Projects are saved by muProject.save(path, ...)
+
+Within the CcpNMr suite there is always a project open, assigned to the variable 'project'.
 
 Module Organisation
 -------------------
@@ -35,6 +39,8 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
   |       |       RestraintList
   |       |       |       Restraint
   |       |       |       |       RestraintContribution
+  |       StructureEnsemble
+  |       |       Model
   |       Note
 
 
@@ -46,7 +52,7 @@ and inherit the following elements:
 
 **project** - *ccpn.Project*
 
-The Project (root)containing the object.
+The Project (root) containing the object.
 
 **pid** - *ccpncore.util.Pid.Pid*
 
@@ -93,9 +99,9 @@ Some Objects (Chain, Residue, Atom) cannot be renamed
 Data access
 ^^^^^^^^^^^
 
-The data of objects are accessed with the normal Python syntax (x = object.value; object.value = x'.
-There are no public getter and setter functions. For collections you will not get the internal
-collection, but an unmodifiable copy, to prevent accidental modification fo the data
+The data of objects are accessed with the normal Python syntax (x = object.value; object.value = x.
+There are no public getter and setter functions. For collections you will get an unmodifiable copy
+of the internal collection, to prevent accidental modification of the data
 (e.g. myPeakList.peaks will return a tuple, not a list)
 
 Each object has a link to the containing object (e.g. myPeakList.spectrum)
@@ -215,13 +221,10 @@ _wrappedClasses.append(cls)
 StructureEnsemble = cls = importlib.import_module(
   'ccpn._wrapper._StructureEnsemble').StructureEnsemble
 _wrappedClasses.append(cls)
-# Model = cls = importlib.import_module('ccpn._wrapper._Model').Model
-# _wrappedClasses.append(cls)
+Model = cls = importlib.import_module('ccpn._wrapper._Model').Model
+_wrappedClasses.append(cls)
 Note = cls = importlib.import_module('ccpn._wrapper._Note').Note
 _wrappedClasses.append(cls)
-
-# Add Tensor class (which is NOT a wrapper object)
-from ccpncore.util.Tensor import  Tensor
 
 # Add class list for extended sphinx documentation to module
 # putting AbstractWrapperObject last

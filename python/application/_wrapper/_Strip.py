@@ -232,7 +232,9 @@ class Strip(GuiStrip, AbstractWrapperObject):
     """
     Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
     """
+
     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+
     dataSource = spectrum._wrappedData
     apiStrip = self._wrappedData
     if apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
@@ -252,7 +254,9 @@ class Strip(GuiStrip, AbstractWrapperObject):
     if mapIndices is None:
       return
       
-    if None in mapIndices[:2]: # make sure that x/y always mapped
+    # if None in mapIndices[:2]: # make sure that x/y always mapped
+    #   return
+    if mapIndices[0] is None or mapIndices[1] is None and displayAxisCodes[1] != 'intensity':
       return
       
     if mapIndices.count(None) + spectrum.dimensionCount != len(mapIndices):

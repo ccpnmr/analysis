@@ -358,16 +358,22 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.setNativeMenuBar(False)
     self.show()
 
-  def newProject(self):
+  def _queryCloseProject(self, title, phrase):
     
     project = self._appBase.project
     if project._wrappedData.parent.isProjectModified():
       ss = ' and any changes will be lost'
     else:
       ss = ''
-    result = MessageDialog.showYesNo('New Project',
-          'Do you really want to create a new project (current project will be closed%s)?' % ss,
+    result = MessageDialog.showYesNo(title,
+          'Do you really want to %s project (current project will be closed%s)?' % (phrase, ss),
           colourScheme=self.colourScheme)
+          
+    return result
+    
+  def newProject(self):
+    
+    result = self._queryCloseProject(title='New Project', phrase='create a new')
     
     if result:
       self._appBase.newProject()
@@ -448,20 +454,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.showSequence()
     self.pythonConsole.writeModuleDisplayCommand('toggleSequence')
 
-
-
   def loadAProject(self, projectDir=None):
     """
-    Opens a loadProject dialog box if not Project directory is specified.
+    Opens a loadProject dialog box if project directory is not specified.
     Loads the selected project.
     """
-    if projectDir is None:
-      currentProjectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
-    else:
-      currentProjectDir = projectDir
+    result = self._queryCloseProject(title='Open Project', phrase='open another')
+    
+    if result:
+      if projectDir is None:
+        projectDir = QtGui.QFileDialog.getExistingDirectory(self, 'Open Project')
 
-    if currentProjectDir:
-      self._appBase.loadProject(currentProjectDir)
+      if projectDir:
+        self._appBase.loadProject(projectDir)
 
   def pickPeaks(self):
     """
@@ -533,7 +538,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Populates recent projects menu with 10 most recently loaded projects specified in the preferences file.
     """
     for recentFile in self._appBase.preferences.recentFiles:
-      self.action = Action(self, text=recentFile, callback=partial(self._appBase.loadProject,path=recentFile))
+      self.action = Action(self, text=recentFile, callback=partial(self.loadAProject, projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
 
   def saveBackup(self):
@@ -946,7 +951,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         if not MessageDialog.showYesNo(title, msg, self, colourScheme=self.colourScheme):
           return
       self._appBase.saveProject(newPath=newPath)#, newProjectName=os.path.basename(newPath))
-    
+
   def hideConsole(self):
     """Hides python console"""
     self.pythonConsole.hide()

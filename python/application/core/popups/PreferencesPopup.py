@@ -38,24 +38,25 @@ COLOUR_SCHEMES = ['light', 'dark']
 
 
 class PreferencesPopup(QtGui.QDialog):
-  def __init__(self, parent=None, preferences=None, **kw):
+  def __init__(self, parent=None, preferences=None, project=None, **kw):
     super(PreferencesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
+    self.project = project
     self.preferences = preferences
     self.oldPreferences = preferences
     self.dataPathLabel = Label(self, "Data Path", grid=(0, 0))
     self.dataPathText = LineEdit(self, grid=(0, 1))
     self.dataPathButton = Button(self, '...', grid=(0, 2))
-    self.autoBackupLabel =  Label(self, text="Auto Backup On Open: ", grid=(2, 0))
+    self.autoBackupLabel =  Label(self, text="Auto Backup On Open ", grid=(2, 0))
     # self.autoBackupBox = CheckBox(self, grid=(2, 1), checked=self.preferences.general.autoBackupOnOpen)
     # self.autoBackupBox.toggled.connect(partial(self.toggleGeneralOptions, 'autoBackupOnOpen'))
-    self.autoSaveLabel = Label(self, text='Auto Save On Quit: ', grid=(4, 0))
+    # self.autoSaveLabel = Label(self, text='Auto Save On Quit: ', grid=(4, 0))
     # self.autoSaveBox = CheckBox(self, grid=(4, 1), checked=self.preferences.general.autoSaveOnQuit)
     # self.autoSaveBox.toggled.connect(partial(self.toggleGeneralOptions, 'autoSaveOnQuit'))
-    self.autoSaveLayoutLabel = Label(self, text="Auto Save Layout On Quit: ", grid=(6, 0))
-    # self.autoSaveLayoutBox = CheckBox(self, grid=(6, 1), checked=self.preferences.general.autoSaveLayoutOnQuit)
-    # self.autoSaveLayoutBox.toggled.connect(partial(self.toggleGeneralOptions, 'autoSaveLayoutOnQuit'))
-    self.auxiliaryFilesLabel = Label(self, text="Auxiliary Files Path: ", grid=(8, 0))
+    self.autoSaveLayoutLabel = Label(self, text="ToolBar Hidden: ", grid=(6, 0))
+    self.autoSaveLayoutBox = CheckBox(self, grid=(6, 1), checked=self.preferences.general.toolbarHidden)
+    self.autoSaveLayoutBox.toggled.connect(partial(self.toggleGeneralOptions, 'toolbarHidden'))
+    self.auxiliaryFilesLabel = Label(self, text="Auxiliary Files Path ", grid=(8, 0))
     self.auxiliaryFilesData = LineEdit(self, grid=(8, 1), hAlign='l')
     self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
     self.macroPathLabel = Label(self, text="Macro Path", grid=(10, 0))
@@ -67,9 +68,9 @@ class PreferencesPopup(QtGui.QDialog):
     self.languageBox.setMinimumWidth(self.dataPathText.width())
     self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
     self.languageBox.currentIndexChanged.connect(self.changeLanguage)
-    self.editorLabel = Label(self, text="Editor: ", grid=(14, 0))
+    self.editorLabel = Label(self, text="Editor ", grid=(14, 0))
     self.editorData = LineEdit(self, text=self.preferences.general.editor, grid=(14, 1), hAlign='l', gridSpan=(1, 1))
-    self.colourSchemeLabel = Label(self, text="Colour Scheme: ", grid=(16, 0))
+    self.colourSchemeLabel = Label(self, text="Colour Scheme ", grid=(16, 0))
     self.colourSchemeBox = PulldownList(self, grid=(16, 1), hAlign='l', gridSpan=(1, 1))
     self.colourSchemeBox.setMinimumWidth(self.dataPathText.width())
     self.colourSchemeBox.addItems(COLOUR_SCHEMES)
@@ -98,7 +99,14 @@ class PreferencesPopup(QtGui.QDialog):
     self.preferences.general.colourScheme = (COLOUR_SCHEMES[value])
 
   def toggleGeneralOptions(self, preference, checked):
-    self.preferences.general[preference] = str(checked)
+    self.preferences.general[preference] = checked
+    if preference == 'toolbarHidden':
+      if checked is True:
+        for strip in self.project.strips:
+          strip.guiSpectrumDisplay.spectrumUtilToolBar.hide()
+      else:
+        for strip in self.project.strips:
+          strip.guiSpectrumDisplay.spectrumUtilToolBar.show()
 
   def toggleSpectralOptions(self, preference, checked):
     self.preferences.spectra[preference] = str(checked)

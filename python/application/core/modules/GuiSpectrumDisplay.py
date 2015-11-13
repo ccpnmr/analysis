@@ -76,10 +76,11 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.spectrumUtilToolBar = ToolBar(self.dock)#, grid=(0, 2), gridSpan=(1, 2))
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
-    self.dock.addWidget(self.spectrumUtilToolBar, 0, 2)# grid=(0, 2), gridSpan=(1, 1))
-    print(self._appBase.preferences.general.toolbarHidden)
-    if self._appBase.preferences.general.toolbarHidden == 'true':
+    # grid=(0, 2), gridSpan=(1, 1))
+    if self._appBase.preferences.general.toolbarHidden is True:
       self.spectrumUtilToolBar.hide()
+    else:
+      self.dock.addWidget(self.spectrumUtilToolBar, 0, 2)
     # toolBarColour = QtGui.QColor(214,215,213)
     self.positionBox = Label(self.dock)
     self.dock.addWidget(self.positionBox, 0, 3)#, grid=(0, 3), gridSpan=(1, 1))

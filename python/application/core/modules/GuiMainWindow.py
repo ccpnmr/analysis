@@ -580,7 +580,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     Displays Application Preferences Popup.
     """
-    PreferencesPopup(preferences=self._appBase.preferences).exec_()
+    PreferencesPopup(preferences=self._appBase.preferences, project=self._project).exec_()
 
   def closeEvent(self, event=None):
     """

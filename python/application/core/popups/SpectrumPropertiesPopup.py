@@ -58,6 +58,7 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
     super(SpectrumPropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     tabWidget = QtGui.QTabWidget()
+    tabWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     if spectrum.dimensionCount == 1:
       tabWidget.addTab(GeneralTab(spectrum, item=item), "General")
       tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
@@ -112,14 +113,14 @@ class GeneralTab(QtGui.QWidget, Base):
     self.experimentTypes = spectrum._project._experimentTypeMap
     nameLabel = Label(self, text="Spectrum name ", grid=(0, 0))
     self.nameData = LineEdit(self, vAlign='t', grid=(0, 1))
-    self.nameData.setFixedWidth(200)
+    self.nameData.setMinimumWidth(200)
     self.nameData.setFixedHeight(25)
     self.nameData.setText(spectrum.name)
     self.nameData.editingFinished.connect(self.changeSpectrumName)
     pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(1, 0))
-    self.pathData = LineEdit(self, vAlign='t', hAlign='l', grid=(1, 1), gridSpan=(1, 1))
+    self.pathData = LineEdit(self, vAlign='t', grid=(1, 1))
     self.pathData.setText(spectrum.filePath)
-    self.pathData.setFixedWidth(200)
+    self.pathData.setMinimumWidth(200)
     self.pathData.setFixedHeight(25)
     self.pathData.editingFinished.connect(self.setSpectrumPath)
     chemicalShiftListLabel = Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(3, 0))
@@ -127,12 +128,12 @@ class GeneralTab(QtGui.QWidget, Base):
                                                 for csList in spectrum.project.chemicalShiftLists]
                                                 +['<New>'],callback=self.setChemicalShiftList)
 
-    self.chemicalShiftListPulldown.setFixedWidth(200)
+    self.chemicalShiftListPulldown.setMinimumWidth(200)
     self.chemicalShiftListPulldown.setFixedHeight(25)
 
     dateLabel = Label(self, text="Date ", vAlign='t', hAlign='l', grid=(4, 0))
     dateData = LineEdit(self, vAlign='t', hAlign='l', grid=(4, 1))
-    dateData.setFixedWidth(200)
+    dateData.setMinimumWidth(200)
     dateData.setFixedHeight(25)
     pidLabel = Label(self, text="PID ", vAlign='t', hAlign='l', grid=(5, 0))
     pidData = Label(self, text=spectrum.pid, vAlign='t', hAlign='l', grid=(5, 1))
@@ -171,7 +172,7 @@ class GeneralTab(QtGui.QWidget, Base):
       for isotopeCode in spectrum.isotopeCodes:
         axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
 
-      self.spectrumType.setFixedWidth(200)
+      self.spectrumType.setMinimumWidth(200)
       self.spectrumType.setFixedHeight(25)
 
 
@@ -185,14 +186,14 @@ class GeneralTab(QtGui.QWidget, Base):
       # recordingDataLabel = Label(self, text="Date Recorded", vAlign='t', hAlign='l', grid=(8, 0))
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
-      self.spectrumScalingData.setFixedWidth(200)
+      self.spectrumScalingData.setMinimumWidth(200)
       self.spectrumScalingData.setFixedHeight(25)
       self.spectrumScalingData.editingFinished.connect(self.setSpectrumScale)
       # minimumValueLabel = Label(self, text="Minimum Value: ", vAlign='t', hAlign='l', grid=(9, 0))
       # maximumValueLabel = Label(self, text="Maximum Value: ", vAlign='t', hAlign='l', grid=(10, 0))
       noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(9, 0))
       noiseLevelData = LineEdit(self, vAlign='t', hAlign='l', grid=(9, 1))
-      noiseLevelData.setFixedWidth(200)
+      noiseLevelData.setMinimumWidth(200)
       self.spectrumType.setFixedHeight(25)
 
       if spectrum._apiDataSource.noiseLevel is None:
@@ -361,13 +362,13 @@ class ContoursTab(QtGui.QWidget, Base):
     positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(4, 0), vAlign='t', hAlign='l')
     self.positiveColourBox = PulldownList(self, grid=(4, 1), vAlign='t', hAlign='l')
 
-    self.positiveColourBox.setFixedWidth(200)
+    self.positiveColourBox.setMinimumWidth(200)
     self.positiveColourBox.setFixedHeight(25)
-    positiveBaseLevelData.setFixedWidth(200)
+    positiveBaseLevelData.setMinimumWidth(200)
     positiveBaseLevelData.setFixedHeight(25)
-    positiveMultiplierData.setFixedWidth(200)
+    positiveMultiplierData.setMinimumWidth(200)
     positiveMultiplierData.setFixedHeight(25)
-    positiveContourCountData.setFixedWidth(200)
+    positiveContourCountData.setMinimumWidth(200)
     positiveContourCountData.setFixedHeight(25)
 
     for item in spectrumColours.items():
@@ -422,13 +423,13 @@ class ContoursTab(QtGui.QWidget, Base):
     self.negativeColourButton.clicked.connect(partial(self.changeNegSpectrumColour, spectrum))
 
 
-    self.negativeColourBox.setFixedWidth(200)
+    self.negativeColourBox.setMinimumWidth(200)
     self.negativeColourBox.setFixedHeight(25)
-    negativeBaseLevelData.setFixedWidth(200)
+    negativeBaseLevelData.setMinimumWidth(200)
     negativeBaseLevelData.setFixedHeight(25)
-    negativeMultiplierData.setFixedWidth(200)
+    negativeMultiplierData.setMinimumWidth(200)
     negativeMultiplierData.setFixedHeight(25)
-    negativeContourCountData.setFixedWidth(200)
+    negativeContourCountData.setMinimumWidth(200)
     negativeContourCountData.setFixedHeight(25)
 
   def changePositiveContourDisplay(self, state):

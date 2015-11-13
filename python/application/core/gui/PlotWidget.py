@@ -77,6 +77,12 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
                                  'module.displaySpectrum', 'spectrum', [ss, displayPid])
 
   def processSamples(self, pids:Sequence[str], event):
+    """Display sample spectra defined by list of Pid strings"""
     for ss in pids:
       spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
       self.processSpectra(spectrumPids, event)
+
+  def processSampleComponents(self, pids:Sequence[str], event):
+    """Display sampleComponent spectrum defined by its Pid string"""
+    sampleComponent = self._appBase.project.getByPid(pids[0])
+    self.processSpectra([sampleComponent.substance.referenceSpectra[0].pid], event)

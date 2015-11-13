@@ -141,7 +141,7 @@ def axisCodeMapping(axisCodes:Sequence, refAxisCodes:Sequence)->dict:
     for ii, refAxisCode in enumerate(refAxisCodes):
       indx = mapIndices[ii]
       if indx is not None:
-        result[axisCodes[indx]] = refAxisCodes
+        result[axisCodes[indx]] = refAxisCode
   #
   return result
 

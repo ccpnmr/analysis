@@ -34,7 +34,7 @@ from ccpncore.gui.PulldownList import PulldownList
 
 import re
 
-BG_COLOR = QtGui.QColor('#E0E0E0')
+# BG_COLOR = QtGui.QColor('#E0E0E0')
 
 class ObjectTable(QtGui.QTableView, Base):
 

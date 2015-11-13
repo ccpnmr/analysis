@@ -32,7 +32,7 @@ from ccpncore.util import Path
 from ccpncore.util import Io
 from ccpncore.util import Undo
 
-TEST_PROJECTS_PATH = os.path.join(Path.getTopDirectory(), 'data/testProjects')
+TEST_PROJECTS_PATH = os.path.join(Path.getTopDirectory(), 'internalData/testProjects')
 
 class CoreTesting(unittest.TestCase):
   """Base class for all testing code that requires projects."""

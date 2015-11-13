@@ -29,6 +29,7 @@ __author__ = 'rhf22'
 import glob
 import os
 import shutil
+import sys
 import tempfile
 # import time
 
@@ -60,7 +61,7 @@ def _createLogger(project, applicationName=None, useFileLogger=None):
   if useFileLogger is None:
     useFileLogger = project._useFileLogger
 
-  logger = Logging.createLogger(applicationName, project) if useFileLogger else Logging.getLogger()
+  logger = Logging.createLogger(applicationName, project, stream=sys.stdout) if useFileLogger else Logging.getLogger()
   # # NBNB FIXME TBD temporary redirect to stdout for debug purposes
   # import sys
   # logger = Logging.createLogger(applicationName, project,

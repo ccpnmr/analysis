@@ -77,7 +77,9 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     self.dock.addWidget(self.spectrumUtilToolBar, 0, 2)# grid=(0, 2), gridSpan=(1, 1))
-    
+    print(self._appBase.preferences.general.toolbarHidden)
+    if self._appBase.preferences.general.toolbarHidden == 'true':
+      self.spectrumUtilToolBar.hide()
     # toolBarColour = QtGui.QColor(214,215,213)
     self.positionBox = Label(self.dock)
     self.dock.addWidget(self.positionBox, 0, 3)#, grid=(0, 3), gridSpan=(1, 1))
@@ -161,7 +163,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
   def zoomYAll(self):
     """Zooms Y axis of current strip to show entire region"""
-    self._appBase.current.strip.zoomXAll()
+    self._appBase.current.strip.zoomYAll()
 
   def zoomXAll(self):
     """Zooms X axis of current strip to show entire region"""

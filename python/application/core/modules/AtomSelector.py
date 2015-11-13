@@ -157,9 +157,10 @@ class AtomSelector(CcpnDock):
 
         if peaksAreOnLine(peaks, 1):
           experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
+
           for peak in peaks:
             isotopeCode = peak.peakList.spectrum.isotopeCodes[1]
-            predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1], isotopeCode, strict=True) for ccpCode in CCP_CODES]
+            predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1], isotopeCode) for ccpCode in CCP_CODES]
             refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomTypes if len(type) > 0]
             atomPredictions = set()
             for pred in refinedPreds:

@@ -27,6 +27,8 @@ from pyqtgraph.Point import Point
 
 from ccpncore.gui.Menu import Menu
 
+from ccpncore.lib.spectrum.Spectrum import axisCodeMapping
+
 class ViewBox(pg.ViewBox):
 
   sigClicked = QtCore.Signal(object)
@@ -289,19 +291,19 @@ class ViewBox(pg.ViewBox):
         # selectedPeaks = []
         for spectrumView in self.current.strip.spectrumViews:
           for peakList in spectrumView.spectrum.peakLists:
-            xAxis = spectrumView.spectrum.axisCodes.index(self.current.strip.orderedAxes[0].code)
-            yAxis = spectrumView.spectrum.axisCodes.index(self.current.strip.orderedAxes[1].code)
+            stripAxisCodes = [axis.code for axis in self.current.strip.orderedAxes]
+            axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
+            xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
+            yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
             for peak in peakList.peaks:
               if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
                 and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
                 if zPositions is not None:
-                  zAxis = spectrumView.spectrum.axisCodes.index(self.current.strip.orderedAxes[2].code)
+                  zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
                   if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                     peak.isSelected = True
-                    print(peak, '1')
                 else:
                   peak.isSelected = True
-                  print(peak, '2')
       else:
         self._updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()

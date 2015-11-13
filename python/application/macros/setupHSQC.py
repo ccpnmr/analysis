@@ -6,7 +6,7 @@ if len(project.nmrChains) == 0:
 else:
   c = project.nmrChains[0]
 
-hsqcPeakListName = 'PL:test.1'
+hsqcPeakListName = 'PL:hsqc.1'
 
 hsqcPeakList = project.getByPid(hsqcPeakListName)
 

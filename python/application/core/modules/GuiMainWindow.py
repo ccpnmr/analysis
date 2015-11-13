@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 import os
 import json
+import sys
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
@@ -175,8 +176,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
     self.splitter2.addWidget(self.pythonConsole)
     self.splitter2.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Minimum)
-    # self.splitter2.setStretchFactor(0, 4)
-    # self.splitter2.setStretchFactor(1, 1)
+    self.splitter2.setStretchFactor(0, 10)
+    self.splitter2.setStretchFactor(1, 1)
 
     self.pythonConsole.hide()
     self.splitter1.addWidget(self.dockArea)
@@ -308,8 +309,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.consoleAction.setChecked(self.pythonConsole.isVisible())
     viewMenu.addAction(self.consoleAction)
 
+
+
     helpMenu.addAction(Action(self, "Command...", callback=self.showCommandHelp))
-    helpMenu.addAction(Action(self, "Tutorials...", callback=self.showTutorials))
+    tutorialsMenu = helpMenu.addMenu("Tutorials")
+    tutorialsMenu.addAction(Action(self, "Beginners Tutorial", callback=self.showBeginnersTutorial))
+    tutorialsMenu.addAction(Action(self, "Backbone Tutorial", callback=self.showBackboneTutorial))
+    helpMenu.addAction(Action(self, "Show Shortcuts", callback=self.showShortcuts))
     helpMenu.addAction(Action(self, "Show API Documentation", callback=self.showApiDocumentation))
     helpMenu.addAction(Action(self, "Show CCPN Documentation", callback=self.showWrapperDocumentation))
     helpMenu.addSeparator()
@@ -383,6 +389,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Displays CCPN wrapper documentation in a module."""
     self._showDocumentation("CCPN Documentation", 'build', 'html', 'index.html')
 
+  def showShortcuts(self):
+    path = os.path.join(Path.getTopDirectory(), 'doc', 'apifiles', 'AnalysisShortcuts.pdf')
+    if sys.platform == 'linux2':
+      os.system(["xdg-open %s" % path])
+    else:
+      os.system('open %s' % path)
+
+
   def showAssignmentModule(self):
     """Displays assignment module."""
     self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
@@ -436,7 +450,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
 
-  def loadAProject(self, projectDir:str=None):
+  def loadAProject(self, projectDir=None):
     """
     Opens a loadProject dialog box if not Project directory is specified.
     Loads the selected project.
@@ -774,11 +788,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           colourScheme=self.colourScheme)
 
 
-  def showTutorials(self):
-    info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+  def showBeginnersTutorial(self):
+    path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BeginnersTutorial.doc')
+    if sys.platform == 'linux2':
+      os.system(["xdg-open %s" % path])
+    else:
+      os.system('open %s' % path)
 
+  def showBackboneTutorial(self):
+    path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BackboneAssignmentTutorial.doc')
+    if sys.platform == 'linux2':
+      os.system(["xdg-open %s" % path])
+    else:
+      os.system('open %s' % path)
 
   def showAboutPopup(self):
     info = MessageDialog.showInfo('Not implemented yet!',

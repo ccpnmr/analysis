@@ -4,6 +4,8 @@ from ccpncore.gui.Button import Button
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
+
+from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 from application.core.modules.PeakTable import PeakListSimple
 from application.core.modules.NmrResidueTable import NmrResidueTable
 from application.core.popups.SelectDisplaysPopup import SelectDisplaysAndSpectraPopup
@@ -53,29 +55,37 @@ class PickAndAssignModule(CcpnDock, Base):
 
             selectedRegion = [['']*len(module.axisCodes), ['']*len(module.axisCodes)]
             spectrumViewIsotopeCodes = spectrumView.spectrum.isotopeCodes
-
+            console = spectrum.project._appBase.mainWindow.pythonConsole
+            stripIsotopeCodes = [name2IsotopeCode(axis.code) for axis in spectrumView.strip.orderedAxes]
             for isotopeCode in spectrumViewIsotopeCodes:
               if isotopeCode in nmrResidueIsotopeCodes:
                 index = spectrum.isotopeCodes.index(isotopeCode)
+                index2 = stripIsotopeCodes.index(isotopeCode)
                 if spectrum.assignmentTolerances[index] is None:
                   tolerance = spectrum.spectralWidths[index]/spectrum.pointCounts[index]
                   spectrumTolerances = list(spectrum.assignmentTolerances)
-                  spectrumTolerances[index] =  tolerance
+                  spectrumTolerances[index] = tolerance
                   spectrum.assignmentTolerances = spectrumTolerances
-                selectedRegion[0][index] = shiftDict[isotopeCode]-spectrum.assignmentTolerances[index]
-                selectedRegion[1][index] = shiftDict[isotopeCode]+spectrum.assignmentTolerances[index]
-
+                selectedRegion[0][index2] = shiftDict[isotopeCode]-spectrum.assignmentTolerances[index]
+                selectedRegion[1][index2] = shiftDict[isotopeCode]+spectrum.assignmentTolerances[index]
               else:
-                index3 = spectrumViewIsotopeCodes.index(isotopeCode)
+                stripIsotopeCodes = [name2IsotopeCode(axis.code) for axis in spectrumView.strip.orderedAxes]
+                print(stripIsotopeCodes, isotopeCode)
+                index3 = stripIsotopeCodes.index(isotopeCode)
                 selectedRegion[0][index3] = spectrumView.strip.orderedAxes[index3].region[0]
                 selectedRegion[1][index3] = spectrumView.strip.orderedAxes[index3].region[1]
-
             peakList = spectrumView.spectrum.peakLists[0]
+            print(selectedRegion, peakList)
             if spectrumView.spectrum.dimensionCount > 1:
               apiSpectrumView = spectrumView._wrappedData
               peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
                                               doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                               doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
+              console.writeCommand('peakList', 'peakList.pickPeaksNd',
+                                 'selectedRegion={0}, doPos={1}, doNeg={2}'.format(
+                                 selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
+                                 apiSpectrumView.spectrumView.displayNegativeContours),
+                                 obj=peakList)
             for strip in module.strips:
               strip.showPeaks(peakList)
 

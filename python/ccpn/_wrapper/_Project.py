@@ -318,10 +318,10 @@ class Project(AbstractWrapperObject):
     """Flush cached data to ensure up-to-date data are saved"""
     for structureEnsemble in self.structureEnsembles:
       for tag in ('coordinateData', 'occupancyData', 'bFactorData'):
-        val = getattr(structureEnsemble, tag)
-        if val is not None:
+        _tag = '_' + tag
+        if hasattr(structureEnsemble, _tag):
           # Save cached data back to underlying storage
-          setattr(structureEnsemble, tag, val)
+          setattr(structureEnsemble, tag, getattr(structureEnsemble, _tag))
 
   def rename(self, name:str) -> None:
     """Rename Project, and rename the underlying API project and the directory stored on disk.

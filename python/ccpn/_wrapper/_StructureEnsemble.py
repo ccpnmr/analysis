@@ -110,7 +110,23 @@ class StructureEnsemble(AbstractWrapperObject):
       result = self._coordinateData = numpy.reshape(data, shape)
       return result
 
-  # NBNB TBD must be made settable - setter must reset underlying data
+
+  @coordinateData.setter
+  def coordinateData(self, value):
+    apiStructureEnsemble = self._apiStructureEnsemble
+    shape = (len(apiStructureEnsemble.models), apiStructureEnsemble.nAtoms, 3)
+    if value.shape !=  shape:
+      raise ValueError("coordinateData value does not match shape %s" % str(shape))
+
+    # Set cached copy to value. NB this is the original, NOT a copy
+    self._coordinateData = value
+
+    # Set underlying data values to match
+    apiDataMatrix = apiStructureEnsemble.findFirstDataMatrix(name='coordinates')
+    if apiDataMatrix is None:
+      apiStructureEnsemble.newDataMatrix(name='coordinates', shape=shape, data=value.flat)
+    else:
+      apiDataMatrix.data = value.flat
 
   @property
   def occupancyData(self) -> numpy.ndarray:
@@ -132,7 +148,22 @@ class StructureEnsemble(AbstractWrapperObject):
       result = self._occupancyData = numpy.reshape(data, shape)
       return result
 
-  # NBNB TBD must be made settable - setter must reset underlying data
+  @occupancyData.setter
+  def occupancyData(self, value):
+    apiStructureEnsemble = self._apiStructureEnsemble
+    shape = (len(apiStructureEnsemble.models), apiStructureEnsemble.nAtoms)
+    if value.shape !=  shape:
+      raise ValueError("occupancyData value does not match shape %s" % str(shape))
+
+    # Set cached copy to value. NB this is the original, NOT a copy
+    self._occupancyData = value
+
+    # Set underlying data values to match
+    apiDataMatrix = apiStructureEnsemble.findFirstDataMatrix(name='occupancies')
+    if apiDataMatrix is None:
+      apiStructureEnsemble.newDataMatrix(name='occupancies', shape=shape, data=value.flat)
+    else:
+      apiDataMatrix.data = value.flat
 
   @property
   def bFactorData(self) -> numpy.ndarray:
@@ -154,7 +185,35 @@ class StructureEnsemble(AbstractWrapperObject):
       result = self._bFactorData = numpy.reshape(data, shape)
       return result
 
-  # NBNB TBD must be made settable - setter must reset underlying data
+  @bFactorData.setter
+  def bFactorData(self, value):
+    apiStructureEnsemble = self._apiStructureEnsemble
+    shape = (len(apiStructureEnsemble.models), apiStructureEnsemble.nAtoms)
+    if value.shape !=  shape:
+      raise ValueError("bFactorData value does not match shape %s" % str(shape))
+
+    # Set cached copy to value. NB this is the original, NOT a copy
+    self._bFactorData = value
+
+    # Set underlying data values to match
+    apiDataMatrix = apiStructureEnsemble.findFirstDataMatrix(name='bFactors')
+    if apiDataMatrix is None:
+      apiStructureEnsemble.newDataMatrix(name='bFactors', shape=shape, data=value.flat)
+    else:
+      apiDataMatrix.data = value.flat
+
+  @property
+  def atomNameData(self) -> numpy.ndarray:
+    """modelCount * atomCount  numpy array of model-specific atom names.
+    Intended for storing IUPAC atom names that vary from model to model
+    NB the atomNameData array is a cached copy.
+    It can be modified, but modifications will be kept in cache till the attribute is
+    set or the project is saved."""
+    raise NotImplementedError("atomNameData not implemented yet")
+
+  @atomNameData.setter
+  def atomNameData(self, value):
+    raise NotImplementedError("atomNameData not implemented yet")
 
 
   @property
@@ -235,7 +294,7 @@ class StructureEnsemble(AbstractWrapperObject):
         raise ValueError("atomId %s matches pre-existing atom in StructureEnsemble" % atomId)
 
   def replaceAtomIds(self, atomIds:Sequence[str]):
-    """Replace atromIds with new list of the same length,
+    """Replace atomIds with new list of the same length,
     without modifying coordinates and other data"""
     raise NotImplementedError("replaceAtomIds not implemented yet")
 

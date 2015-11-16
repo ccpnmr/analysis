@@ -29,6 +29,7 @@ from ccpn.lib import Io as ccpnIo
 from ccpncore.util import Io as ioUtil
 from ccpncore.gui.Application import Application
 from ccpncore.memops.metamodel import Util as metaUtil
+from ccpncore.api.memops import Implementation
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Register
@@ -61,8 +62,13 @@ class AppBase(GuiBase):
 
   def initProject(self, apiProject):
 
-    # # Must be done before _wrapApiProject to put all loaded classes in place
-    # import application
+    # Reset remoteData DataStores to match preferences setting
+    dataPath = self.preferences.general.dataPath
+    if not dataPath or not os.path.isdir(dataPath):
+      dataPath = os.path.expanduser('~')
+    dataUrl = apiProject.root.findFirstDataLocationStore(name='standard').findFirstDataUrl(
+      name='remoteData')
+    dataUrl.url = Implementation.Url(path=dataPath)
 
     # Done this way to sneak the appBase in before creating the wrapper
     apiProject._appBase = self

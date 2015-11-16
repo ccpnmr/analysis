@@ -253,7 +253,7 @@ class Spectrum(AbstractWrapperObject):
 
     else:
       dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-      apiDataStore.repointDataStoreUrl(dataUrl)
+      apiDataStore.repointToDataUrl(dataUrl)
       apiDataStore.path = value[len(dataUrl.url.path)+1:]
 
       # # NBNB TBD this is silly - no reuse of DataUrls.

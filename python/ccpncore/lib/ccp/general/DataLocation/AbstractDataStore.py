@@ -68,7 +68,7 @@ def changeDataStoreUrl(self:'AbstractDataStore', newPath:str):
           if dataUrl.url == oldUrl:
             dataUrl.url = newUrl
 
-def repointDataStoreUrl(self:'AbstractDataStore', dataUrl:'DataUrl'):
+def repointToDataUrl(self:'AbstractDataStore', dataUrl:'DataUrl'):
   """Set self.datUrl=dataUrl, AND move self to newDataLocationStore first if necessary"""
   dataLocationStore = dataUrl.dataLocationStore
   oldDataUrl = self.dataUrl
@@ -106,5 +106,5 @@ def repointDataStoreUrl(self:'AbstractDataStore', dataUrl:'DataUrl'):
       undo.decreaseBlocking()
 
   if undo is not None:
-    undo.newItem(self.repointDataStoreUrl, self.repointDataStoreUrl,
+    undo.newItem(self.repointToDataUrl, self.repointDataStoreUrl,
                  undoArgs=(oldDataUrl,), redoArgs=(dataUrl,))

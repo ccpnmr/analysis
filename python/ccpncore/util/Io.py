@@ -1280,12 +1280,14 @@ def _compressDataLocations(memopsRoot:Implementation.MemopsRoot):
   for tag in standardTags:
     dataUrl = standardStore.findFirstDataUrl(name=tag)
     locationData.append((os.path.join(dataUrl.url.path, ''), dataUrl))
+  standardUrls = [tt[1] for tt in locationData]
 
-  for dataUrl in standardStore.dataUrls:
-    if dataUrl.name not in standardTags:
-      for dataStore in dataUrl.dataStores:
-        fullPath = dataStore.fullPath
-        for directory, targetUrl in locationData:
-          if fullPath.startswith(directory):
-            dataStore.dataUrl = targetUrl
-            dataStore.path = fullPath[len(directory):]
+  for dataLocationStore in memopsRoot.dataLocationStores:
+    for dataUrl in dataLocationStore.dataUrls:
+      if dataUrl not in standardUrls:
+        for dataStore in dataUrl.dataStores:
+          fullPath = dataStore.fullPath
+          for directory, targetUrl in locationData:
+            if fullPath.startswith(directory):
+              dataStore.repointToDataUrl(targetUrl)
+              dataStore.path = fullPath[len(directory):]

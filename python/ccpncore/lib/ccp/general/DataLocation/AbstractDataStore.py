@@ -93,8 +93,10 @@ def repointToDataUrl(self:'AbstractDataStore', dataUrl:'DataUrl'):
 
       del oldDataLocationStore.__dict__['dataStores'][oldSerial]
       self.__dict__['dataLocationStore'] = self.__dict__['topObject'] = dataLocationStore
-      if newSerial > oldSerial:
-        serialDict['dataStores'] = self.__dict__['serial'] = newSerial
+      if newSerial != oldSerial:
+        self.__dict__['serial'] = newSerial
+      if newSerial > serialDict['dataStores']:
+        serialDict['dataStores'] = newSerial
       dataLocationStore.__dict__['dataStores'][newSerial] = self
       self.dataUrl = dataUrl
       self.root.override = True

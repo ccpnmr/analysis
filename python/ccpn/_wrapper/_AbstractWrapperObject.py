@@ -464,7 +464,11 @@ class AbstractWrapperObject():
     Set automatically from the full class name and object.id
     E.g. 'NmrAtom:A.102.ALA.CA' """
     return Pid.Pid(Pid.PREFIXSEP.join((self.className, self._id)))
-    
+
+  @property
+  def isDeleted(self) -> bool:
+    """Is object deleted?"""
+    return (self._wrappedData is None)
   
   # CCPN abstract properties
   

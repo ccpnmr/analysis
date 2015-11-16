@@ -467,7 +467,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     # NBNB this should NEVER be called if self.strip is None (i.e. self is deleted)
     # if self.isVisible() and self.strip is not None:
-    if self.isVisible() and self._wrappedData is not None:
+    if self.isVisible() and not self.isDeleted:
       self.drawContours(painter)
     
   def boundingRect(self):  # seems necessary to have

@@ -547,7 +547,7 @@ class PeakNd(QtGui.QGraphicsItem):
     
   def paint(self, painter, option, widget):
 
-    if not self.peakListView.spectrumView: # strip has been deleted
+    if self.isDeleted: # strip has been deleted
       return
       
     if self.peak: # TBD: is this ever not true??

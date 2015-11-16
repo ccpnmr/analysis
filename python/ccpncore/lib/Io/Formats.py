@@ -89,8 +89,7 @@ def analyseUrl(filePath):
 
 
     else:
-      print('else')
-      fileNames = os.listdir(filePath)
+      # fileNames = os.listdir(filePath)
 
       for dirp, dirn, file in  os.walk(filePath):
         for name in file:
@@ -98,18 +97,7 @@ def analyseUrl(filePath):
 
           if path.endswith('procs'):
             filePath = path
-            print(filePath)
-            # return ('Spectrum', BRUKER, filePath)
-      #
-      # for(dirpath, dirnames, filename) in os.walk(filePath):
-      #   for name in filename:
-      #
-      #     path = os.path.join(dirpath, name)
-      #     if path.endswith('procs'):
-      #       filePath = path
-      #       return ('Spectrum', BRUKER, filePath)
-
-      # NBNB FIXME TBD this needs sorting
+            return ('Spectrum', BRUKER, filePath)
 
     # No match
     return (None, None, filePath)

@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 __author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
-import json
+import json, os
 from functools import partial
 from ccpncore.gui.Label import Label
 from ccpncore.gui.Base import Base
@@ -46,7 +46,8 @@ class PreferencesPopup(QtGui.QDialog):
     self.oldPreferences = preferences
     self.dataPathLabel = Label(self, "Data Path", grid=(0, 0))
     self.dataPathText = LineEdit(self, grid=(0, 1))
-    self.dataPathButton = Button(self, '...', grid=(0, 2))
+    self.dataPathText.editingFinished.connect(self.setDataPath)
+    self.dataPathButton = Button(self, '...', grid=(0, 2), callback=self.setDataPath)
     self.autoBackupLabel =  Label(self, text="Auto Backup On Open ", grid=(2, 0))
     # self.autoBackupBox = CheckBox(self, grid=(2, 1), checked=self.preferences.general.autoBackupOnOpen)
     # self.autoBackupBox.toggled.connect(partial(self.toggleGeneralOptions, 'autoBackupOnOpen'))
@@ -91,6 +92,21 @@ class PreferencesPopup(QtGui.QDialog):
 
 
     self.layout().addWidget(buttonBox, 28, 0, 1, 2)
+
+  def getDataPath(self):
+    if os.path.exists('/'.join(self.dataPathText.text().split('/')[:-1])):
+      currentDataPath = '/'.join(self.dataPathText.text().split('/')[:-1])
+    else:
+      currentDataPath = os.path.expanduser('~')
+    directory = QtGui.QFileDialog.getExistingDirectory(self, 'Select Spectrum File', currentDataPath)
+    if len(directory) > 0:
+      self.dataPathText.setText(directory)
+      self.preferences.general.dataPath = directory
+
+
+  def setDataPath(self):
+    if self.dataPathText.isModified():
+      self.preferences.general.dataPath = self.dataPathText.text()
 
   def changeLanguage(self, value):
     self.preferences.general.language = (LANGUAGES[value])

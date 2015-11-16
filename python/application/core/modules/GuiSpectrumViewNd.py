@@ -465,11 +465,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.project._logger.warning("%s cannot find any data - data file misplaced?" % self )
       return
 
-    ##guiStrip = self.spectrumDisplay.viewportDict[widget]
-    ##self.drawContours(painter, guiStrip)
-    # NBNB TBD this should NEVER be called if self.strip is None (i.e. self is deleted)
-    # NBNB FIXME this needs to be fixed.
-    if self.isVisible() and self.strip is not None:
+    # NBNB this should NEVER be called if self.strip is None (i.e. self is deleted)
+    # if self.isVisible() and self.strip is not None:
+    if self.isVisible() and self._wrappedData is not None:
       self.drawContours(painter)
     
   def boundingRect(self):  # seems necessary to have

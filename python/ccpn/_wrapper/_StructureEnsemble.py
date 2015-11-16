@@ -73,7 +73,7 @@ class StructureEnsemble(AbstractWrapperObject):
 
   @property
   def atomIds(self) -> Tuple[str, ...]:
-    """Tuple of atom id ('chainCode.sequenceCode.atomName' for atoms making up structure ensemble
+    """Tuple of atom id ('chainCode.sequenceCode.residueType.atomName' for atoms making up structure ensemble
     The atom IDs and their order is the same for all ccpn.Models in the ensemble."""
     IDSEP = Pid.IDSEP
     result = []
@@ -86,7 +86,26 @@ class StructureEnsemble(AbstractWrapperObject):
         code = residue.chain.code
         sequenceCode = str(residue.seqCode) + residue.seqInsertCode.strip()
         residueType = residue.code3Letter
-      result.append(Pid.createId( code, sequenceCode, residueType, atom.name))
+      result.append(Pid.createId(code, sequenceCode, residueType, atom.name))
+    #
+    return result
+
+  @property
+  def residueIds(self) -> Tuple[str, ...]:
+    """Tuple of atom id ('chainCode.sequenceCode.residueType' for residues making up structure ensemble
+    The residue IDs and their order is the same for all ccpn.Models in the ensemble."""
+    IDSEP = Pid.IDSEP
+    result = []
+    residue = None
+    for atom in self._wrappedData.orderedAtoms:
+      rr = atom.residue
+      if rr != residue:
+        # Done this way to save on function calls, as atoms are grouped by residue
+        residue = rr
+        code = residue.chain.code
+        sequenceCode = str(residue.seqCode) + residue.seqInsertCode.strip()
+        residueType = residue.code3Letter
+        result.append(Pid.createId(code, sequenceCode, residueType))
     #
     return result
 
@@ -258,6 +277,7 @@ class StructureEnsemble(AbstractWrapperObject):
 
     # Set up map of existing coordResidues
     coordResidues = {}
+    seqId = -1
     for coordChain in apiEnsemble.coordChains:
       code = coordChain.code
       for coordResidue in coordChain.sortedResidues():
@@ -296,7 +316,33 @@ class StructureEnsemble(AbstractWrapperObject):
   def replaceAtomIds(self, atomIds:Sequence[str]):
     """Replace atomIds with new list of the same length,
     without modifying coordinates and other data"""
-    raise NotImplementedError("replaceAtomIds not implemented yet")
+
+    oldAtomIds = self.atomIds
+    if len(oldAtomIds) != len(atomIds):
+      raise ValueError("The number of new atomds must be the same as the number they replace")
+
+    apiStructureEnsemble = self._wrappedData
+    memopsRoot = ApiStructureEnsemble.root
+    undo = memopsRoot._undo
+    memopsRoot.override = True
+    if undo is not None:
+      undo.increaseBlocking()
+    try:
+      for apiAtom in reversed(apiStructureEnsemble.orderedAtoms):
+        # Done this way to speed up deletion
+        apiAtom.delete()
+      for apiChain in apiStructureEnsemble.chains:
+        apiChain.delete()
+      self.addAtomIds(atomIds)
+    finally:
+      memopsRoot.overide = False
+      if undo is not None:
+        undo.decreaseBlocking()
+
+    if undo is not None:
+      undo.newItem(self.replaceAtomIds, self.replaceAtomIds,
+                   undoArgs=(oldAtomIds,), redoArgs=(atomIds,))
+
 
   # Implementation functions
   @classmethod

@@ -120,7 +120,17 @@ class GeneralTab(QtGui.QWidget, Base):
     pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(1, 0))
     self.pathData = LineEdit(self, vAlign='t', grid=(1, 1))
     self.pathButton = Button(self, '...', grid=(1, 2), callback=self.getSpectrumFile)
-    self.pathData.setText(spectrum.filePath)
+    apiDataStore = spectrum._apiDataSource.dataStore
+    if apiDataStore.dataLocationStore.name == 'standard':
+      dataUrlName = apiDataStore.dataUrl.name
+      if dataUrlName == 'insideData':
+        self.pathData.setText('$INSIDE/%s' % apiDataStore.path)
+      elif dataUrlName == 'alongsideData':
+        self.pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
+      elif dataUrlName == 'remoteData':
+        self.pathData.setText('$DATA/%s' % apiDataStore.path)
+      else:
+        self.pathData.setText(apiDataStore.fullPath)
     self.pathData.setMinimumWidth(200)
     self.pathData.setFixedHeight(25)
     self.pathData.editingFinished.connect(self.setSpectrumPath)
@@ -241,9 +251,32 @@ class GeneralTab(QtGui.QWidget, Base):
       self.pathData.setText(directory)
       self.spectrum.filePath = directory
 
+      apiDataStore = self.spectrum._apiDataSource.dataStore
+      if apiDataStore.dataLocationStore.name == 'standard':
+        dataUrlName = apiDataStore.dataUrl.name
+        if dataUrlName == 'insideData':
+          self.pathData.setText('$INSIDE/%s' % apiDataStore.path)
+        elif dataUrlName == 'alongsideData':
+          self.pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
+        elif dataUrlName == 'remoteData':
+          self.pathData.setText('$DATA/%s' % apiDataStore.path)
+        else:
+          self.pathData.setText(apiDataStore.fullPath)
+
   def setSpectrumPath(self):
     if self.pathData.isModified():
       self.spectrum.filePath = self.pathData.text()
+      apiDataStore = self.spectrum._apiDataSource.dataStore
+      if apiDataStore.dataLocationStore.name == 'standard':
+        dataUrlName = apiDataStore.dataUrl.name
+        if dataUrlName == 'insideData':
+          self.pathData.setText('$INSIDE/%s' % apiDataStore.path)
+        elif dataUrlName == 'alongsideData':
+          self.pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
+        elif dataUrlName == 'remoteData':
+          self.pathData.setText('$DATA/%s' % apiDataStore.path)
+        else:
+          self.pathData.setText(apiDataStore.fullPath)
 
 
   def changeSpectrumColour(self, spectrum):
@@ -544,10 +577,11 @@ class PeakListsTab(QtGui.QWidget, Base):
       i+=1
 
   def peakListToggle(self, peakListView, state):
-      if state == QtCore.Qt.Checked:
-        peakListView.setVisible(True)
-      else:
-        peakListView.setVisible(False)
+      if peakListView is not None:
+        if state == QtCore.Qt.Checked:
+          peakListView.setVisible(True)
+        else:
+          peakListView.setVisible(False)
 
 
 

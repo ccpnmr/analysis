@@ -73,6 +73,7 @@ class AppBase(GuiBase):
     # Done this way to sneak the appBase in before creating the wrapper
     apiProject._appBase = self
     self.current = Current(project=None)
+
     project = ccpnIo._wrapApiProject(apiProject)
     project._appBase = self
     self.project = project

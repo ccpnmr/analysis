@@ -253,7 +253,7 @@ class Spectrum(AbstractWrapperObject):
 
     else:
       dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-      apiDataStore.repointToDataUrl(dataUrl)
+      apiDataStore.repointDataStoreUrl(dataUrl)
       apiDataStore.path = value[len(dataUrl.url.path)+1:]
 
       # # NBNB TBD this is silly - no reuse of DataUrls.
@@ -309,9 +309,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def pointCounts(self) -> Tuple[int, ...]:
-    """\- (*int,*)\*dimensionCount, *settable*
-
-    Number active of points
+    """Number active of points per dimension
 
     NB for FidDataDims more points than these may be stored (see totalPointCount)."""
     result = []
@@ -337,9 +335,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def totalPointCounts(self) -> Tuple[int, ...]:
-    """\- (*int,*)\*dimensionCount, *settable*
-
-    Total number of points
+    """Total number of points per dimension
 
     NB for FidDataDims and SampledDataDims these are the stored points,
     for FreqDataDims these are the points after transformation before cutting down."""
@@ -366,9 +362,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def pointOffsets(self) -> Tuple[int, ...]:
-    """\- (*int,*)\*dimensionCount, *settable*
-
-     index of first active point relative to total points."""
+    """index of first active point relative to total points, per dimension"""
     result = []
     for dataDim in self._wrappedData.sortedDataDims():
       if hasattr(dataDim, 'pointOffset'):
@@ -392,10 +386,8 @@ class Spectrum(AbstractWrapperObject):
       raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
-  def isComplex(self) -> tuple:
-    """\- (*bool,*)\*dimensionCount, *settable*
-
-    Is dimension complex?"""
+  def isComplex(self) -> Tuple[bool, ...]:
+    """Is dimension complex? -  per dimension"""
     return tuple(x.isComplex for x in self._wrappedData.sortedDataDims())
 
   @isComplex.setter
@@ -404,8 +396,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def dimensionTypes(self) -> Tuple[str, ...]:
-    """\- (*str,*)\*dimensionCount
-    dimension types ('Fid' / 'Frequency' / 'Sampled')."""
+    """dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension"""
     ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
     return tuple('Frequency' if x == 'Freq' else x for x in ll)
 
@@ -453,10 +444,8 @@ class Spectrum(AbstractWrapperObject):
     self._setDataDimValue('phase0', value)
 
   @property
-  def phases1(self) -> tuple:
-    """\- (*float,*)\*dimensionCount, *settable*
-
-    first order phase correction (or None). Always None for sampled dimensions."""
+  def phases1(self) -> Tuple[Optional[float], ...]:
+    """first order phase correction (or None) per dimsnsion. Always None for sampled dimensions."""
     return tuple(x.phase1 for x in self._wrappedData.sortedDataDims()
                  if hasattr(x, 'phase1'))
 
@@ -506,9 +495,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def measurementTypes(self) -> Tuple[Optional[str], ...]:
-    """\- (*str,*)\*dimensionCount, *settable*
-
-    measurement type for main dimensions reference """
+    """measurement type for main dimensions reference, per dimension"""
     return tuple(x and x.measurementType for x in self._mainExpDimRefs())
 
   @measurementTypes.setter
@@ -516,10 +503,8 @@ class Spectrum(AbstractWrapperObject):
     self._setExpDimRefAttribute('measurementType', value)
   #
   # @property
-  # def maxAliasedFrequencies(self) -> tuple:
-  #   """\- (*float,*)\*dimensionCount, *settable*
-  #
-  #    maximum possible peak frequency (in ppm) for main dimensions reference """
+  # def maxAliasedFrequencies(self) -> Tuple[Optional[float], ...]:
+  #   """maximum possible peak frequency (in ppm) for main dimensions reference, per dimension """
   #   return tuple(x and x.maxAliasedFreq for x in self._mainExpDimRefs())
   #
   # @maxAliasedFrequencies.setter
@@ -527,10 +512,8 @@ class Spectrum(AbstractWrapperObject):
   #   self._setExpDimRefAttribute('maxAliasedFreq', value, mandatory=False)
   #
   # @property
-  # def minAliasedFrequencies(self) -> tuple:
-  #   """\- (*str,*)\*dimensionCount, *settable*
-  #
-  #    minimum possible peak frequency (in ppm) for main dimensions reference """
+  # def minAliasedFrequencies(self) -> Tuple[Optional[float], ...]:
+  #   """minimum possible peak frequency (in ppm) for main dimensions reference, per dimension"""
   #   return tuple(x and x.minAliasedFreq for x in self._mainExpDimRefs())
   #
   # @minAliasedFrequencies.setter
@@ -540,9 +523,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def isotopeCodes(self) -> Tuple[Optional[str], ...]:
-    """\- (*str,*)\*dimensionCount, *settable*
-
-    main ExpDimRef (serial=1) isotopeCode - None if no unique code"""
+    """main reference isotopeCode, per dimension - None if no unique code"""
     result = []
     for dataDim in self._wrappedData.sortedDataDims():
       expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
@@ -576,10 +557,8 @@ class Spectrum(AbstractWrapperObject):
       raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
-  def foldingModes(self) -> Tuple[Optional[bool], ...]:
-    """\- (*str,*)\*dimensionCount, *settable*
-
-    main ExpDimRef folding mode (values: 'circular', 'mirror', None)"""
+  def foldingModes(self) -> Tuple[Optional[str], ...]:
+    """main folding mode (values: 'circular', 'mirror', None), per dimension"""
     dd = {True:'mirror', False:'circular', None:None}
     return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
 
@@ -590,9 +569,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def axisCodes(self) -> Tuple[Optional[str], ...]:
-    """\- (*str,*)\*dimensionCount, *settable*
-
-    Main ExpDimRef axisCode for each dimension - None if no main ExpDimRef
+    """Main axisCode, per dimension - None if no main ExpDimRef
     """
 
     # See if axis codes are set
@@ -618,9 +595,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def axisUnits(self) -> Tuple[Optional[str], ...]:
-    """\- (*str,*)\*dimensionCount, *settable*
-
-    Main ExpDimRef axis unit (most commonly 'ppm') - None if no unique code
+    """Main axis unit (most commonly 'ppm'), per dimension - None if no unique code
 
     Uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
     return tuple(x and x.unit for x in self._mainExpDimRefs())

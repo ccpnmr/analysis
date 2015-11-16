@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Sequence
+from ccpncore.util.Types import Sequence, Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
@@ -77,9 +77,7 @@ class PseudoDimension(AbstractWrapperObject):
 
   @property
   def axisCode(self) -> str:
-    """\- (*str,*), *settable*
-
-    ExpDimRef axisCode """
+    """PseudoDimension axisCode """
 
     expDimRef =  self._wrappedData.expDim.findFirstExpDimRef(serial=1)
     return expDimRef and expDimRef.axisCode
@@ -114,9 +112,8 @@ class PseudoDimension(AbstractWrapperObject):
       expDimRef.unit = value
 
   @property
-  def pointValues(self) -> tuple:
-    """\- *((float)\*)*, *settable*
-    point values for PseudoDimension)."""
+  def pointValues(self) -> Tuple[float, ...]:
+    """point values for PseudoDimension)."""
     return tuple(self._wrappedData.pointValues)
 
   @pointValues.setter
@@ -124,9 +121,8 @@ class PseudoDimension(AbstractWrapperObject):
     self._wrappedData.pointValues = value
 
   @property
-  def pointErrors(self) -> tuple:
-    """\- *((float)\*)*, *settable*
-    point errors for PseudoDimension)."""
+  def pointErrors(self) -> Tuple[float, ...]:
+    """point errors for PseudoDimension)."""
     return tuple(self._wrappedData.pointErrors)
 
   @pointErrors.setter

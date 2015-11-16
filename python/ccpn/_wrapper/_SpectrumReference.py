@@ -126,9 +126,7 @@ class SpectrumReference(AbstractWrapperObject):
 
   @property
   def isotopeCodes(self) -> Tuple[str, ...]:
-    """\- (*str,*)\*, *settable*
-
-    Isotope identification strings for isotopes.
+    """Isotope identification strings for isotopes.
     NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence."""
 
     return self._wrappedData.expDimRef.isotopeCodes
@@ -150,9 +148,7 @@ class SpectrumReference(AbstractWrapperObject):
 
   @property
   def axisCode(self) -> str:
-    """\- (*str,*)\*dimensionCount, *settable*
-
-    ExpDimRef axisCode """
+    """Reference axisCode """
     expDimRef = self._wrappedData.expDimRef
     dataDim = self._wrappedData.dataDim
     result = expDimRef.axisCode

@@ -79,8 +79,6 @@ class AppBase(GuiBase):
     self.project = project
     self.current._project = project
 
-
-
     apiNmrProject = project._wrappedData
     apiWindowStore = apiNmrProject.windowStore
     if apiWindowStore is None:

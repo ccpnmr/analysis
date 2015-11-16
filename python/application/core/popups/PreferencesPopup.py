@@ -26,6 +26,7 @@ __author__ = 'simon'
 from PyQt4 import QtGui, QtCore
 import json, os
 from functools import partial
+from ccpncore.api.memops import Implementation
 from ccpncore.gui.Label import Label
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
@@ -103,10 +104,13 @@ class PreferencesPopup(QtGui.QDialog):
       self.dataPathText.setText(directory)
       self.preferences.general.dataPath = directory
 
-
   def setDataPath(self):
     if self.dataPathText.isModified():
-      self.preferences.general.dataPath = self.dataPathText.text()
+      newPath = self.dataPathText.text()
+      self.preferences.general.dataPath = newPath
+      dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
+        name='standard').findFirstDataUrl(name='remoteData')
+      dataUrl.url = Implementation.Url(path=newPath)
 
   def changeLanguage(self, value):
     self.preferences.general.language = (LANGUAGES[value])

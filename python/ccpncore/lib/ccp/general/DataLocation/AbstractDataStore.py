@@ -106,5 +106,5 @@ def repointToDataUrl(self:'AbstractDataStore', dataUrl:'DataUrl'):
       undo.decreaseBlocking()
 
   if undo is not None:
-    undo.newItem(self.repointToDataUrl, self.repointDataStoreUrl,
+    undo.newItem(self.repointToDataUrl, self.repointToDataUrl,
                  undoArgs=(oldDataUrl,), redoArgs=(dataUrl,))

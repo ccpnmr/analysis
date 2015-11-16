@@ -1291,3 +1291,4 @@ def _compressDataLocations(memopsRoot:Implementation.MemopsRoot):
             if fullPath.startswith(directory):
               dataStore.repointToDataUrl(targetUrl)
               dataStore.path = fullPath[len(directory):]
+              break

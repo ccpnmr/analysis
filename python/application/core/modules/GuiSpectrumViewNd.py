@@ -478,7 +478,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TBD: remove hardwiring
   
   ##### functions not to be used externally #####
-  # NBNB TBD internal functoins should start with UNDERSCORE!
+  # NBNB TBD internal functions should start with UNDERSCORE!
   # REFACTOR
 
   #def drawContours(self, painter, guiStrip):

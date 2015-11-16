@@ -119,6 +119,7 @@ class GeneralTab(QtGui.QWidget, Base):
     self.nameData.editingFinished.connect(self.changeSpectrumName)
     pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(1, 0))
     self.pathData = LineEdit(self, vAlign='t', grid=(1, 1))
+    self.pathButton = Button(self, '...', grid=(1, 2), callback=self.getSpectrumFile)
     self.pathData.setText(spectrum.filePath)
     self.pathData.setMinimumWidth(200)
     self.pathData.setFixedHeight(25)

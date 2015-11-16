@@ -167,7 +167,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole = IpythonConsole(self, self.namespace)
     self.sideBar = SideBar(parent=self)
     self.sideBar.setDragDropMode(self.sideBar.DragDrop)
-    self.sideBar.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+    self.sideBar.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.splitter3.addWidget(self.sideBar)
     self.splitter1.addWidget(self.splitter3)
     self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -265,8 +265,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     peaksMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
     peaksMenu.addAction(Action(self, "Pick Peaks", callback=self.pickPeaks, shortcut='pp'))
 
-    newMoleculeMenu = moleculeMenu.addMenu("New")
-    newMoleculeMenu.addAction(Action(self, "Interactive...", callback=self.showMoleculePopup, shortcut='ls'))
+    # newMoleculeMenu = moleculeMenu.addMenu("New")
+    moleculeMenu.addAction(Action(self, "Create Molecule...", callback=self.showMoleculePopup, shortcut='ls'))
     self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
     if hasattr(self, 'sequenceWidget'):
       self.sequenceAction.setChecked(self.sequenceWidget.isVisible())
@@ -293,8 +293,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Define User Shortcuts...", callback=self.defineUserShortcuts))
 
-    viewNewMenu = viewMenu.addMenu("New")
-    viewNewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
+    # viewNewMenu = viewMenu.addMenu("New")
+    viewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
 
 
     #NBNB Need to decide how we are to handle layouts if at all

@@ -52,13 +52,13 @@ skipElements = [
 delayElements = [
  ('COOR', 'Residue', 'seqId', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:36_00057', {'tag': 'COOR.Residue.seqId', 'name': 'seqId', 'type': 'attr', 'proc': 'direct'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00032'), 
  ('LMOL', 'LabeledMixture', 'serial', 'www.ccpn.ac.uk_Fogh_2006-10-24-11:30:57_00013', {'tag': 'LMOL.LabeledMixture.serial', 'name': 'serial', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00032'), 
- ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'eType': 'cplx', 'tag': 'NMR.ExpDim.refExpDim', 'name': 'refExpDim', 'type': 'exolink'}, None), 
- ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'eType': 'cplx', 'tag': 'NMR.ResonanceGroup.clusterCode', 'name': 'clusterCode', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
+ ('NMR', 'ExpDim', 'refExpDim', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:00_00002', {'tag': 'NMR.ExpDim.refExpDim', 'eType': 'cplx', 'name': 'refExpDim', 'type': 'exolink'}, None), 
+ ('NMR', 'ResonanceGroup', 'clusterCode', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00003', {'tag': 'NMR.ResonanceGroup.clusterCode', 'eType': 'cplx', 'name': 'clusterCode', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
  ('NMR', 'ResonanceGroup', 'isActive', 'www.ccpn.ac.uk_Fogh_2011-08-05-11:56:26_00004', {'tag': 'NMR.ResonanceGroup.isActive', 'name': 'isActive', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
  ('NMRS', 'TrialHit', 'serial', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:51:56_00022', {'tag': 'NMRS.TrialHit.serial', 'name': 'serial', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00032'), 
- ('REFS', 'MolComponent', 'molecule', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:34_00003', {'eType': 'cplx', 'tag': 'REFS.MolComponent.molecule', 'name': 'molecule', 'type': 'exotop'}, None), 
+ ('REFS', 'MolComponent', 'molecule', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:34_00003', {'tag': 'REFS.MolComponent.molecule', 'eType': 'cplx', 'name': 'molecule', 'type': 'exotop'}, None), 
  ('SAM', 'AbstractSample', 'isActive', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:22:46_00008', {'tag': 'SAM.AbstractSample.isActive', 'name': 'isActive', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
- ('SAM', 'AbstractSample', 'solvent', 'www.ccpn.ac.uk_Fogh_2012-03-28-17:22:44_00014', {'eType': 'cplx', 'tag': 'SAM.AbstractSample.solvent', 'name': 'solvent', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
+ ('SAM', 'AbstractSample', 'solvent', 'www.ccpn.ac.uk_Fogh_2012-03-28-17:22:44_00014', {'tag': 'SAM.AbstractSample.solvent', 'eType': 'cplx', 'name': 'solvent', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00033'), 
  ('SAM', 'Sample', 'amountDisplayUnit', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:22:41_00011', {'tag': 'SAM.Sample.amountDisplayUnit', 'name': 'amountDisplayUnit', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00037'), 
  ('SAM', 'Sample', 'currentAmount', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:22:41_00009', {'tag': 'SAM.Sample.currentAmount', 'name': 'currentAmount', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00031'), 
  ('SAM', 'Sample', 'currentAmountFlag', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:22:41_00012', {'tag': 'SAM.Sample.currentAmountFlag', 'name': 'currentAmountFlag', 'type': 'attr'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00028'), 
@@ -525,7 +525,7 @@ typeChanges = [
 # Different elements with matching qualifiedNames
 # (element.qName, differentTags, oldGuid, newGuid
 nameMatches = [
- ('ccp.lims.RefSampleComponent.MolComponent.molecule', ({'documentation', 'isDerived', 'otherRole', 'changeability'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:34_00003', 'www.ccpn.ac.uk_Fogh_2015-09-24-12:49:54_00001')), 
+ ('ccp.lims.RefSampleComponent.MolComponent.molecule', ({'otherRole', 'documentation', 'changeability', 'isDerived'}, 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:34_00003', 'www.ccpn.ac.uk_Fogh_2015-09-24-12:49:54_00001')), 
 ]
 
 # Differences for matching elements, 
@@ -533,7 +533,7 @@ nameMatches = [
 # (oldElem.qName, newElem.name, oldGuid, newGuid, differentTags
 allDiffs = [
  ('ccp.general.DataLocation.DataLocationStore.name', 'name', 'www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00010', 'www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00010', {'defaultValue'}), 
- ('ccp.general.DataLocation.DataUrl.name', 'name', 'www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00014', 'www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00014', {'defaultValue', 'locard', 'changeability'}), 
+ ('ccp.general.DataLocation.DataUrl.name', 'name', 'www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00014', 'www.ccpn.ac.uk_Fogh_2007-04-03-19:10:36_00014', {'locard', 'defaultValue', 'changeability'}), 
  ('ccp.general.Template.FloatMatrixObject.defaultValue', 'defaultValue', 'www.ccpn.ac.uk_Fogh_2011-03-30-18:03:29_00001', 'www.ccpn.ac.uk_Fogh_2011-03-30-18:03:29_00001', {'valueType', 'defaultValue'}), 
  ('ccp.lims.RefSampleComponent.AbstractComponent', 'AbstractComponent', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00057', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00057', {'keyNames'}), 
  ('ccp.lims.RefSampleComponent.Cell', 'Cell', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00061', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:52_00061', {'keyNames'}), 
@@ -545,18 +545,18 @@ allDiffs = [
  ('ccp.lims.RefSampleComponent.Substance', 'Substance', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00002', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00002', {'keyNames'}), 
  ('ccp.lims.Sample.ConcentrationUnit', 'ConcentrationUnit', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:44_00005', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:44_00005', {'enumeration'}), 
  ('ccp.lims.Sample.SampleComponent', 'SampleComponent', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:44_00002', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:44_00002', {'keyNames'}), 
- ('ccp.lims.Sample.SampleComponent.refComponent', 'refComponent', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:22:42_00002', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:22:42_00002', {'isDerived', 'locard'}), 
+ ('ccp.lims.Sample.SampleComponent.refComponent', 'refComponent', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:22:42_00002', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:22:42_00002', {'locard', 'isDerived'}), 
  ('ccp.molecule.LabeledMolecule.LabeledMixture', 'LabeledMixture', 'www.ccpn.ac.uk_Fogh_2006-10-24-11:28:55_00008', 'www.ccpn.ac.uk_Fogh_2006-10-24-11:28:55_00008', {'keyNames'}), 
  ('ccp.molecule.LabeledMolecule.LabeledMixture.name', 'name', 'www.ccpn.ac.uk_Fogh_2010-04-30-17:48:49_00001', 'www.ccpn.ac.uk_Fogh_2010-04-30-17:48:49_00001', {'documentation', 'locard', 'changeability'}), 
  ('ccp.molecule.MolStructure.Residue', 'Residue', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:55_00003', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:55_00003', {'keyNames'}), 
  ('ccp.molecule.MolStructure.Residue.seqCode', 'seqCode', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:36_00058', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:36_00058', {'changeability'}), 
  ('ccp.molecule.MolStructure.Residue.seqInsertCode', 'seqInsertCode', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:36_00059', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:23:36_00059', {'changeability'}), 
  ('ccp.nmr.Nmr.ExpDimRef.refExpDimRef', 'refExpDimRef', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:05_00025', {'isDerived'}), 
- ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'partitionsChildren', 'documentation', 'isDerived'}), 
- ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'documentation', 'isDerived', 'forceUndoNotify'}), 
- ('ccp.nmr.NmrScreen.TrialHit', 'SpectrumHit', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00010', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00010', {'parentRole', 'name', 'container', 'keyNames'}), 
- ('ccp.nmr.NmrScreen.TrialHit.componentName', 'substanceName', 'www.ccpn.ac.uk_Fogh_2012-03-28-17:22:44_00011', 'www.ccpn.ac.uk_Fogh_2012-03-28-17:22:44_00011', {'documentation', 'baseName', 'name', 'changeability'}), 
- ('memops.Implementation.DateTime', 'DateTime', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00029', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00029', {'supertype', 'supertypes', 'typeCodes'}), 
+ ('ccp.nmr.Nmr.Experiment.refExperiment', 'refExperiment', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:06_00008', {'documentation', 'partitionsChildren', 'isDerived'}), 
+ ('ccp.nmr.Nmr.Resonance.name', 'name', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', 'www.ccpn.ac.uk_Fogh_2006-08-16-18:20:10_00009', {'documentation', 'forceUndoNotify', 'isDerived'}), 
+ ('ccp.nmr.NmrScreen.TrialHit', 'SpectrumHit', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00010', 'www.ccpn.ac.uk_Fogh_2009-11-19-14:50:32_00010', {'keyNames', 'container', 'name', 'parentRole'}), 
+ ('ccp.nmr.NmrScreen.TrialHit.componentName', 'substanceName', 'www.ccpn.ac.uk_Fogh_2012-03-28-17:22:44_00011', 'www.ccpn.ac.uk_Fogh_2012-03-28-17:22:44_00011', {'documentation', 'name', 'changeability', 'baseName'}), 
+ ('memops.Implementation.DateTime', 'DateTime', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00029', 'www.ccpn.ac.uk_Fogh_2006-08-16-14:22:53_00029', {'typeCodes', 'supertype', 'supertypes'}), 
  ('memops.Implementation.DbMemopsRoot', 'DbMemopsRoot', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00008', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00008', {'taggedValues'}), 
  ('memops.Implementation.DbTopObject', 'DbTopObject', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00001', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00001', {'taggedValues'}), 
  ('memops.Implementation.FileMemopsRoot', 'FileMemopsRoot', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00007', 'www.ccpn.ac.uk_Fogh_2006-09-14-16:28:57_00007', {'taggedValues'}), 

@@ -253,7 +253,7 @@ class Spectrum(AbstractWrapperObject):
 
     else:
       dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-      apiDataStore.repointDataStoreUrl(dataUrl)
+      apiDataStore.repointToDataUrl(dataUrl)
       apiDataStore.path = value[len(dataUrl.url.path)+1:]
 
       # # NBNB TBD this is silly - no reuse of DataUrls.
@@ -402,9 +402,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def spectralWidthsHz(self) -> Tuple[Optional[float], ...]:
-    """\- (*float,*)\*dimensionCount, *settable*
-
-    spectral width before correcting for spectrometer frequency (generally in Hz)."""
+    """spectral width before correcting for spectrometer frequency (generally in Hz), per dimension"""
     return tuple(x.spectralWidth if hasattr(x, 'spectralWidth') else None
                  for x in self._wrappedData.sortedDataDims())
 
@@ -433,9 +431,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def phases0(self) -> tuple:
-    """\- (*float,*)\*dimensionCount, *settable*
-
-    zero order phase correction (or None). Always None for sampled dimensions."""
+    """zero order phase correction (or None), per dimension. Always None for sampled dimensions."""
     return tuple(x.phase0 for x in self._wrappedData.sortedDataDims()
                  if hasattr(x, 'phase0'))
 
@@ -645,9 +641,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def referencePoints(self) -> Tuple[Optional[float], ...]:
-    """\- (*float,*)\*dimensionCount, *settable*
-
-    point used for axis (chemical shift) referencing."""
+    """point used for axis (chemical shift) referencing, per dimension."""
     return tuple(x and x.refPoint for x in self._mainDataDimRefs())
 
   @referencePoints.setter
@@ -656,9 +650,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def referenceValues(self) -> Tuple[Optional[float], ...]:
-    """\- (*str,*)\*dimensionCount, *settable*
-
-    value used for axis (chemical shift) referencing."""
+    """value used for axis (chemical shift) referencing, per dimension."""
     return tuple(x and x.refValue for x in self._mainDataDimRefs())
 
   @referenceValues.setter
@@ -667,9 +659,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def assignmentTolerances(self) -> Tuple[Optional[float], ...]:
-    """\- (*str,*)\*dimensionCount, *settable*
-
-    Assignment tolerance in axis unit (ppm)."""
+    """Assignment tolerance in axis unit (ppm), per dimension."""
     return tuple(x and x.assignmentTolerance for x in self._mainDataDimRefs())
 
   @assignmentTolerances.setter
@@ -678,9 +668,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def spectralWidths(self) -> Tuple[Optional[float], ...]:
-    """\- (*float,*)\*dimensionCount, *settable*
-
-    spectral width after processing (generally in ppm) """
+    """spectral width after processing (generally in ppm), per dimension """
     return tuple(x and x.spectralWidth for x in self._mainDataDimRefs())
 
   @spectralWidths.setter

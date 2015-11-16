@@ -67,3 +67,9 @@ A list of all shortcuts and mouse interactions/events is available under the
 help menu using the show shortcuts function and the two tutorials provided with
 this release are accessible from the tutorials submenu of the help menu.
 
+The project keeps track of all spectral data in three standard locations, inside the project, 
+alongside the project and a remote data directory specified in the preferences. Inside the 
+SpectrumPropertiesPopup, if a spectrum path is changed that falls under either of these headings
+the path will be displayed as $INSIDE/path, $ALONGSIDE/path and $DATA/path, the latter being
+the remote data path.
+

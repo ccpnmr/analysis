@@ -49,7 +49,7 @@ class Version:
 
   def __init__(self, value):
 
-    # in case a veersion was passed in:
+    # in case a version was passed in:
     value = str(value)
 
     self._value = value
@@ -119,7 +119,7 @@ class Version:
     level = property(getLevel, None, None,"version level (None, 'a', 'b', ...)")
     release = property(getRelease, None, None,"version release number")
   except:
-    # Ignore this if imorted into Python 2.1 (e.g. ObjectDomain)
+    # Ignore this if imported into Python 2.1 (e.g. ObjectDomain)
     pass
 
   def getDirName(self):

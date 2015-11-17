@@ -717,7 +717,6 @@ def _getAmbigProchiralLabel(resonance):
         letter = chr(ord('a')+i)
 
   #keyword = 'ambigProchiralLabel'
-  #app     = 'Analysis'
   #appData = resonance.findFirstApplicationData(application=app, keyword=keyword)
   #
   #if appData and (appData.value != letter):

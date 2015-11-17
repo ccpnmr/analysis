@@ -2114,6 +2114,7 @@ class AtomItem(QtGui.QGraphicsItem):
         foregroundColor = QtGui.QColor(*self.glWidget._hexToRgba(self.compoundView.container.mainApp.colors[1]))
       # Analysis
       elif self.compoundView.glWidget:
+        raise NotImplementedError("Needs rewriting - analysisProfile does not exist")
         backgroundColor = QtGui.QColor()
         backgroundColor.setRgbF(*self.glWidget._hexToRgba(self.glWidget.spectrumWindow.analysisProfile.bgColor))
         foregroundColor = Qt.black
@@ -2753,6 +2754,7 @@ class BondItem(QtGui.QGraphicsItem):
         color = QtGui.QColor(*self.glWidget._hexToRgba(self.compoundView.container.mainApp.colors[1]))
       # Analysis
       elif self.compoundView.glWidget:
+        raise NotImplementedError("Needs rewriting - analysisProfile does not exist")
         backgroundColor = QtGui.QColor()
         backgroundColor.setRgbF(*self.glWidget._hexToRgba(self.glWidget.spectrumWindow.analysisProfile.bgColor))
         color = Qt.black

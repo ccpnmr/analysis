@@ -319,7 +319,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu.addAction(Action(self, "Show API Documentation", callback=self.showApiDocumentation))
     helpMenu.addAction(Action(self, "Show CCPN Documentation", callback=self.showWrapperDocumentation))
     helpMenu.addSeparator()
-    helpMenu.addAction(Action(self, "About Analysis V3...", callback=self.showAboutPopup))
+    helpMenu.addAction(Action(self, "About CcpNmr V3...", callback=self.showAboutPopup))
     helpMenu.addAction(Action(self, "About CCPN...", callback=self.showAboutCcpnPopup))
     helpMenu.addSeparator()
     helpMenu.addAction(Action(self, "Inspect Code...", callback=self.showCodeInspectionPopup))

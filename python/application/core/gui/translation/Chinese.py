@@ -89,7 +89,7 @@ translationDict = {
   '&Help': '求助',
   'Command...': '指令',
   'Tutorials...': '除厝指導',
-  'About Analysis V3...': '關於 V3的分析',
+  'About CcpNmr V3...': '關於 V3的分析',
   'About CCPN...': '關於 CCPN',
   'Inspect Code...': '代碼檢查',
   'Check for Upgrades...': '進行更新的檢查',

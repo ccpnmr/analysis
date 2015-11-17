@@ -62,7 +62,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.spectrumItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setText(0, "Spectra")
     print(self._appBase.applicationName)
-    if self._appBase.applicationName == 'Analysis3':
+    if self._appBase.applicationName == 'Assign':
 
 
       # chainA = QtGui.QTreeWidgetItem(self.spectrumReference)

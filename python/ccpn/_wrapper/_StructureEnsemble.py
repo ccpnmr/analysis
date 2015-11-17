@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import numpy
-from ccpncore.util.Types import Tuple, Sequence
+from ccpncore.util.Types import Tuple, Sequence, Optional
 from ccpncore.util import Pid
 from ccpncore.util import Common as commonUtil
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
@@ -33,6 +33,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
 from ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
+from ccpncore.api.ccp.molecule.MolStructure import Atom as ApiCoordAtom
 
 
 class StructureEnsemble(AbstractWrapperObject):
@@ -234,6 +235,37 @@ class StructureEnsemble(AbstractWrapperObject):
   def atomNameData(self, value):
     raise NotImplementedError("atomNameData not implemented yet")
 
+  def getAtomCoordinates(self, atomId) -> Optional[numpy.ndarray]:
+    """get nModels * 3 array of coordinates for atom atomId"""
+    apiCoordAtom = self._atomId2CoordAtom(atomId)
+    if apiCoordAtom is None:
+      return None
+    else:
+      return self.coordinateData[:,apiCoordAtom.index,:]
+
+  def getAtomOccupancies(self, atomId) -> Optional[numpy.ndarray]:
+    """get nModels array of occupancies for atom atomId"""
+    apiCoordAtom = self._atomId2CoordAtom(atomId)
+    if apiCoordAtom is None:
+      return None
+    else:
+      return self.occupancyData[:,apiCoordAtom.index,:]
+
+  def getAtomBFactors(self, atomId) -> Optional[numpy.ndarray]:
+    """get nModels array of bFactors for atom atomId"""
+    apiCoordAtom = self._atomId2CoordAtom(atomId)
+    if apiCoordAtom is None:
+      return None
+    else:
+      return self.bFactorData[:,apiCoordAtom.index,:]
+
+  def getAtomSpecificNames(self, atomId) -> Optional[numpy.ndarray]:
+    """get nModels array of model-specific names for atom atomId"""
+    apiCoordAtom = self._atomId2CoordAtom(atomId)
+    if apiCoordAtom is None:
+      return None
+    else:
+      return self.atomNameData[:,apiCoordAtom.index,:]
 
   @property
   def comment(self) -> str:
@@ -313,6 +345,21 @@ class StructureEnsemble(AbstractWrapperObject):
       else:
         raise ValueError("atomId %s matches pre-existing atom in StructureEnsemble" % atomId)
 
+  # def removeAtomId(self, atomId):
+  #   """Remove atomId from the structureEnsemble, removing coordinates etc. from the data"""
+  #   apiCoordAtom = self._atomId2CoordAtom(atomId)
+  #   if apiCoordAtom is None:
+  #     raise ValueError("Atom %s does not exist" % atomId)
+  #   else:
+  #     for tag in ('coordinateData', 'occupancyData', 'bFactorData', 'atomNameData'):
+  #       #Reset arrays to original value, to flush changes to API level
+  #       data = getattr(self, tag)
+  #       if data is not None:
+  #         setattr(self, tag, data)
+  #
+  #         NBNB not ready TBD
+
+
   def replaceAtomIds(self, atomIds:Sequence[str]):
     """Replace atomIds with new list of the same length,
     without modifying coordinates and other data"""
@@ -342,6 +389,21 @@ class StructureEnsemble(AbstractWrapperObject):
     if undo is not None:
       undo.newItem(self.replaceAtomIds, self.replaceAtomIds,
                    undoArgs=(oldAtomIds,), redoArgs=(atomIds,))
+
+  def _atomId2CoordAtom(self, atomId:str) -> Optional[ApiCoordAtom]:
+    """Convert atomId to API MolStructure.Atom"""
+    chainCode, sequenceCode, residueType, name = tuple(Pid.splitId(atomId))
+    seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
+    if seqCode is None or offset is not None:
+      raise ValueError("atomId %s contains an invalid sequenceCode" % atomId)
+    apiEnsemble = self._apiStructureEnsemble
+    apiCoordChain = apiEnsemble.findFirstChain(code=chainCode)
+    if apiCoordChain is None:
+      return None
+    apiCoordResidue = apiCoordChain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
+    if apiCoordResidue is None:
+      return None
+    return apiCoordResidue.findFirstAtom(name=name)
 
 
   # Implementation functions

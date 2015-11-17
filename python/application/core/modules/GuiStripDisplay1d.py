@@ -58,10 +58,12 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     # self.addSpinSystemSideLabel()
     self.setAcceptDrops(True)
     self.spectrumActionDict = {}
-    self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
+    # below not needed in 1D???
+    #self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
     # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
     # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
-    self.inactivePeakItems = set() # contains unused peakItems
+    #self.inactivePeakItems = set() # contains unused peakItems
+    #self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are not being displayed
 
   # def addSpectrum(self, spectrum):
   #

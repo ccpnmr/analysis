@@ -64,7 +64,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
     # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
     # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
-    self.inactivePeakItems = set() # contains unused peakItems
+    ###self.inactivePeakItems = set() # contains unused peakItems
+    self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are not being displayed
     
     GuiSpectrumDisplay.__init__(self)
     
@@ -245,21 +246,24 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           apiDataSource.positiveContourCount -= 1
         if apiDataSource.negativeContourCount > 0:
           apiDataSource.negativeContourCount -= 1
-
-  def showPeaks(self, peakListView:GuiPeakListView, peaks:Types.List[Peak]):
+    
+  def showPeaks(self, peakListView:GuiPeakListView.GuiPeakListView, peaks:Types.List[Peak]):
     """
     Displays specified peaks in all strips of the display using peakListView
     """
     viewBox = peakListView.spectrumView.strip.viewBox
     activePeakItemDict = self.activePeakItemDict
     peakItemDict = activePeakItemDict.setdefault(peakListView, {})
-    inactivePeakItems = self.inactivePeakItems
+    inactivePeakItemDict = self.inactivePeakItemDict
+    inactivePeakItems = inactivePeakItemDict.setdefault(peakListView, set())
+    ##inactivePeakItems = self.inactivePeakItems
     existingApiPeaks = set(peakItemDict.keys())
     unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
     for apiPeak in unusedApiPeaks:
       peakItem = peakItemDict.pop(apiPeak)
-      viewBox.removeItem(peakItem)
+      #viewBox.removeItem(peakItem)
       inactivePeakItems.add(peakItem)
+      peakItem.isVisible = False
     for peak in peaks:
       apiPeak = peak._wrappedData
       if apiPeak in existingApiPeaks:
@@ -267,7 +271,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       if inactivePeakItems:
         peakItem = inactivePeakItems.pop()
         peakItem.setupPeakItem(peakListView, peak)
-        viewBox.addItem(peakItem)
+        #viewBox.addItem(peakItem)
+        peakItem.isVisible = True
       else:
         peakItem = GuiPeakListView.PeakNd(peakListView, peak)
       peakItemDict[apiPeak] = peakItem
@@ -446,6 +451,7 @@ Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
 Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
 Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
 
+# looks like below is not needed, peakListView toggles on/off if spectrum does
 def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
   apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
   getDataObj = project._data2Obj.get
@@ -454,8 +460,8 @@ def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeak
   spectrumDisplay = spectrumView.strip.spectrumDisplay
   if isinstance(spectrumDisplay, GuiStripDisplayNd):
     action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-    if action:
-      action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
+    #if action:
+    #  action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
  
   strip = spectrumView.strip
   for apiPeakList in apiDataSource.sortedPeakLists():

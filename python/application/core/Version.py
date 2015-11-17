@@ -22,4 +22,4 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 revision = int(__version__.split()[1])
-applicationVersion = '3.0.0m0'
+applicationVersion = '3.0.0.m0'

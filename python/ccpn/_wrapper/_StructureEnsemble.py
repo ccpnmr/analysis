@@ -323,7 +323,7 @@ class StructureEnsemble(AbstractWrapperObject):
       coordResidue = coordResidues.get((code, sequenceCode))
       if coordResidue is None:
         coordChain = (apiEnsemble.findFirstCoordChain(code=code) or
-                      apiEnsemble.newCoordChain(code=code))
+                      apiEnsemble.newChain(code=code))
 
         # split sequenceCode in seqCode and seqInsertCode
         seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
@@ -366,7 +366,7 @@ class StructureEnsemble(AbstractWrapperObject):
 
     oldAtomIds = self.atomIds
     if len(oldAtomIds) != len(atomIds):
-      raise ValueError("The number of new atomds must be the same as the number they replace")
+      raise ValueError("The number of new atomIds must be the same as the number they replace")
 
     apiStructureEnsemble = self._wrappedData
     memopsRoot = apiStructureEnsemble.root

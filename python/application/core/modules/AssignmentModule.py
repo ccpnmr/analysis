@@ -3,6 +3,7 @@
 from PyQt4 import QtGui, QtCore
 
 from ccpn.lib.Assignment import CCP_CODES, ATOM_NAMES
+from ccpncore.lib.Constants import  defaultNmrChainCode
 
 from ccpn import NmrAtom, Peak, Project
 
@@ -566,7 +567,8 @@ class AssignmentModule(CcpnDock, Base):
     elif nmrAtom is NEW:
       isotopeCode = self.current.peak.peakList.spectrum.isotopeCodes[dim]
       ###NBNB
-      nmrAtom = self.project.fetchNmrChain(shortName='@-').newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)
+      nmrAtom = self.project.fetchNmrChain(shortName=defaultNmrChainCode
+                                           ).newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)
 
     for peak in self.current.peaks:
       # axisCode = getAxisCodeForPeakDimension(peak, dim)

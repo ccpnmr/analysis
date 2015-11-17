@@ -55,6 +55,7 @@ class StructureEnsembleTesting(WrapperTesting):
   def test_getResType(self):
     atomId = self.project.structureEnsembles[0].atomIds[0]
     residueType = atomId.split('.')[2]
+    print('@~@~', atomId)
     assert residueType != 'None'
 
   def test_replaceAtomIds(self):

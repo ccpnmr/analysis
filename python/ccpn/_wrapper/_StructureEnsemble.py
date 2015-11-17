@@ -299,12 +299,13 @@ class StructureEnsemble(AbstractWrapperObject):
       for apiAtom in apiResidue.sortedAtoms():
         coordResidue.newAtom(name=apiAtom.name, elementSymbol=apiAtom.elementSymbol,)
 
-  def addAtomIds(self, atomIds:Sequence[str]):
+  def addAtomIds(self, atomIds:Sequence[str], override:bool=False):
     """Add atoms matching atomIds (in order) to empty structureEnsemble.
-    Coordinate data to be added later"""
+    Coordinate data to be added later.
+    If override is True you can add to non-empty ensembles, and consistency is not checked."""
 
     apiEnsemble = self._apiStructureEnsemble
-    if apiEnsemble.dataMatrices:
+    if apiEnsemble.dataMatrices and not override:
       raise ValueError("You cannot add atom Ids when StructureEnsemble contains data")
 
     # Set up map of existing coordResidues
@@ -339,8 +340,8 @@ class StructureEnsemble(AbstractWrapperObject):
                          % atomId)
 
       if coordResidue.findFirstAtom(name=name) is None:
-        elementSymbol = spectrumLib.name2ElementSymbol(name) or 'unknown'
-        coordResidue.newAtom(name=name, elementSymbol=elementSymbol)
+        elementName = spectrumLib.name2ElementSymbol(name) or 'Unknown'
+        coordResidue.newAtom(name=name, elementName=elementName)
 
       else:
         raise ValueError("atomId %s matches pre-existing atom in StructureEnsemble" % atomId)
@@ -380,7 +381,7 @@ class StructureEnsemble(AbstractWrapperObject):
         apiAtom.delete()
       for apiChain in apiStructureEnsemble.coordChains:
         apiChain.delete()
-      self.addAtomIds(atomIds)
+      self.addAtomIds(atomIds, override=True)
     finally:
       memopsRoot.overide = False
       if undo is not None:

@@ -30,7 +30,7 @@ class NmrResidueTest(WrapperTesting):
 
   def test_reassign_attributes(self):
     nchain = self.project.getByPid('NC:A')
-    nchain0 = self.project.getByPid('NC:@')
+    nchain0 = self.project.getByPid('NC:@-')
 
     nr1, nr2 = nchain.nmrResidues[9:11]
     res1 = nr1.residue
@@ -43,9 +43,9 @@ class NmrResidueTest(WrapperTesting):
     target.rename('.LYS')
     self.assertEqual(target.longPid, "NmrResidue:A.@11.LYS")
     newNr = nchain0.newNmrResidue()
-    self.assertEqual(newNr.longPid, "NmrResidue:@.@89.")
+    self.assertEqual(newNr.longPid, "NmrResidue:@-.@89.")
     nr3.nmrChain = nchain0
-    self.assertEqual(nr3.longPid, "NmrResidue:@.3.GLU")
+    self.assertEqual(nr3.longPid, "NmrResidue:@-.3.GLU")
     newNr.residue = res3
     self.assertEqual(newNr.longPid, "NmrResidue:A.3.GLU")
     nchain.rename('X')

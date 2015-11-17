@@ -51,9 +51,25 @@ class StructureEnsembleTesting(WrapperTesting):
     x = self.project.structureEnsembles[0].coordinateData
     self.project.structureEnsembles[0].coordinateData = x
 
-    assert self.project.structureEnsembles[0].coordinateData == x
 
-  def test_renameAtomIds(self):
-    atomIds = self.project.structureEnsembles[0].atomIds
+  def test_getResType(self):
+    atomId = self.project.structureEnsembles[0].atomIds[0]
+    residueType = atomId.split('.')[2]
+    assert residueType != 'None'
+
+  def test_replaceAtomIds(self):
+    oldAtomIds = self.project.structureEnsembles[0].atomIds
+    newAtomId = 'A.1.LYS.N'
+    oldAtomIds[0] = newAtomId
+    self.project.structureEnsembles[0].replaceAtomIds(oldAtomIds)
+    assert self.project.structureEnsembles[0].atomIds[0] == newAtomId
+
+  def test_createEnsemble(self):
+    newEnsemble = self.project.newStructureEnsemble(ensembleId=1)
+    self.assertIsNotNone(newEnsemble)
 
 
+  def test_addAtomsToEnsemble(self):
+    newEnsemble = self.project.newStructureEnsemble(ensembleId=1)
+    atomIds = [atom.id for atom in self.project.nmrAtoms][10:13]
+    newEnsemble.addAtomIds(atomIds)

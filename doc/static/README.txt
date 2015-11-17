@@ -1,12 +1,16 @@
 Welcome to the CcpNmr V3 alpha release (version 3.0.0.m0)
 
-0. Names
---------
+0. Names and versions
+---------------------
 
 From this version on, the CcpNmr suite is divided into several components.
 Currently we only have CcpNmr-Assign, but later we will also release
 CcpNmr-Structure, CcpNmr-Screen, and others.
 The name 'Analysis' will not be used for V3 versions.
+
+CcpNmr versions like '3.2.11m4' mean 'major version 3, minor version 2, release 11,
+data model version 4. The dat model version is used to control the backwards compatibility 
+code. The revision number is given in the title bar of teh main window.
 
 
 1. Setup and installation
@@ -31,14 +35,24 @@ new terminal you can open assign by typing assign into the terminal.
 2. Code Structure
 -----------------
 
-In the top ccpnv3 directory, there are five directories:
+The release directory contains
 
-- c - contains the c code used by contouring and peak picking routines and the
-files required to compile it.
+- bin - with the scripts to run CcpNMr-Assign and other components of CcpNmr.
 
 - ccpnmodel - contains code and data for code generation and the automatic 
 reading of files from previous versions. 
 Anyone not working for CCPN is unlikely to ever need to look inside.
+
+- ccpnv3 - with the application code
+
+- scripts - with scripts used in (re)installation.
+
+
+In the ccpnv3 directory, there are five directories:
+
+- c - contains the c code used by contouring and peak picking routines and the
+files required to compile it.
+
 
 - data - data/ccp contains data required for CCPNMR, and data/testProjects contains
 projects and spectra for testing the program, and two tutorials complete with 
@@ -47,18 +61,18 @@ spectra.
 - doc - contains the html documentation for the application.
   There are two main documentation trees, one for the top data access layer ('wrapper')
   and one for the underlying data storage layer (mainly for specialists). Both are linked
-  from the top of the application. If you are interested, they can be found in 
-  'doc'build/.html' and 'doc/apidoc', respectively
+  from the release directory and accessible from the aplication 'Help'. If you are 
+  interested, they can be found in 'doc'build/.html' and 'doc/apidoc', respectively
   
 
 - python - contains the python code for the application. There are three subdirectories:
 
     - python/application
-    contains all the application level code, including popups, modules and some sample macros.
+    contains all the application specific code, including popups, modules and sample macros.
 
     - python/ccpn - contains the data access code ('wrapper') that lets you interact
     with the data (including the display modules etc. on screen), and a number of 
-    library functions to interact with it. This is the code you need to understand
+    library functions to interact with it. This is the code you need in order to understand
     the data structure, write macros, or type on the command line.
 
     - python/ccpncore - contains underlying data storage and access layer, corresponding

@@ -66,6 +66,8 @@ from application.core.popups.SpectrumPropertiesPopup import SpectrumPropertiesPo
 from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup, EditSampleComponentPopup
 from application.core.popups.SampleSetupPopup import SamplePopup
 
+from application.core.Version import revision
+
 from application.core.update.UpdatePopup import UpdatePopup
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
@@ -136,7 +138,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
 
-    self.setWindowTitle('%s %s (%s): %s' % (self._appBase.applicationName, self._appBase.applicationVersion, __version__[1:-1].strip(), project.name))
+    self.setWindowTitle('%s %s (Revision: %s): %s' % (self._appBase.applicationName,
+                                            self._appBase.applicationVersion, revision,
+                                            project.name))
 
 
   def setupWindow(self):

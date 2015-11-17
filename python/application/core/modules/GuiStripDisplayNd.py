@@ -451,7 +451,6 @@ Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
 Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
 Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
 
-# looks like below is not needed, peakListView toggles on/off if spectrum does
 def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
   apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
   getDataObj = project._data2Obj.get
@@ -460,8 +459,8 @@ def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeak
   spectrumDisplay = spectrumView.strip.spectrumDisplay
   if isinstance(spectrumDisplay, GuiStripDisplayNd):
     action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-    #if action:
-    #  action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
+    if action:
+      action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
  
   strip = spectrumView.strip
   for apiPeakList in apiDataSource.sortedPeakLists():

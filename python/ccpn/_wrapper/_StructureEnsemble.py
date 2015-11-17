@@ -397,10 +397,10 @@ class StructureEnsemble(AbstractWrapperObject):
     if seqCode is None or offset is not None:
       raise ValueError("atomId %s contains an invalid sequenceCode" % atomId)
     apiEnsemble = self._apiStructureEnsemble
-    apiCoordChain = apiEnsemble.findFirstChain(code=chainCode)
+    apiCoordChain = apiEnsemble.findFirstCoordChain(code=chainCode)
     if apiCoordChain is None:
       return None
-    apiCoordResidue = apiCoordChain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
+    apiCoordResidue = apiCoordChain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode or ' ')
     if apiCoordResidue is None:
       return None
     return apiCoordResidue.findFirstAtom(name=name)

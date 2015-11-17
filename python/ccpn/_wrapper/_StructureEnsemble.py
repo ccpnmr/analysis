@@ -369,7 +369,7 @@ class StructureEnsemble(AbstractWrapperObject):
       raise ValueError("The number of new atomds must be the same as the number they replace")
 
     apiStructureEnsemble = self._wrappedData
-    memopsRoot = ApiStructureEnsemble.root
+    memopsRoot = apiStructureEnsemble.root
     undo = memopsRoot._undo
     memopsRoot.override = True
     if undo is not None:

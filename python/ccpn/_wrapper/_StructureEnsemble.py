@@ -378,7 +378,7 @@ class StructureEnsemble(AbstractWrapperObject):
       for apiAtom in reversed(apiStructureEnsemble.orderedAtoms):
         # Done this way to speed up deletion
         apiAtom.delete()
-      for apiChain in apiStructureEnsemble.chains:
+      for apiChain in apiStructureEnsemble.coordChains:
         apiChain.delete()
       self.addAtomIds(atomIds)
     finally:

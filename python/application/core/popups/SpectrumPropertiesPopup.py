@@ -131,6 +131,8 @@ class GeneralTab(QtGui.QWidget, Base):
         self.pathData.setText('$DATA/%s' % apiDataStore.path)
       else:
         self.pathData.setText(apiDataStore.fullPath)
+    else:
+      self.pathData.setText(apiDataStore.fullPath)
     self.pathData.setMinimumWidth(200)
     self.pathData.setFixedHeight(25)
     self.pathData.editingFinished.connect(self.setSpectrumPath)

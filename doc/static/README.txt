@@ -8,9 +8,9 @@ Currently we only have CcpNmr-Assign, but later we will also release
 CcpNmr-Structure, CcpNmr-Screen, and others.
 The name 'Analysis' will not be used for V3 versions.
 
-CcpNmr versions like '3.2.11m4' mean 'major version 3, minor version 2, release 11,
-data model version 4. The dat model version is used to control the backwards compatibility 
-code. The revision number is given in the title bar of teh main window.
+CcpNmr versions like '3.2.11.m4' mean 'major version 3, minor version 2, release 11,
+data model version 4. The data model version is used to control the backwards compatibility 
+code. The revision number is given in the title bar of the main window.
 
 
 1. Setup and installation

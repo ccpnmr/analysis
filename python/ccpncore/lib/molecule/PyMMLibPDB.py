@@ -32,6 +32,15 @@ Original copyright statement:
 Modifications:
 - Changed syntax and imports to conform to Python 3
 - replaced fpformat calls by '%' formatting
+- Changed prodessing of REMARK resorcs, merging remark number into main text field
+- Changed ATOM resName records to 4-char (18-21), as some programs use
+  4-char residue types.
+
+Compared to earlier, CING-specific modified version, this:
+- uses a newer PyMMlib version, with different file I/O code
+- lacks CING-specific warning and error tracking, and progress bar handling
+- lacks wrapper I/O functionality (e.g. reading zipped files), which should be done elsewhere
+- Writes out ATOM.esNames shorter than 3 characters in accordance with the original specification.
 
 """
 
@@ -1232,6 +1241,20 @@ def ATOM_get_name(rec):
 
     return name
 
+def ATOM_get_resName(rec):
+    """format resName correctly to allow for using 4-char resName fields
+
+    CHANGED FROM ORIGINAL - added
+    """
+    resName    = rec.get("resName")    or ""
+
+    if len(resName) < 3:
+        resName = resName.rjust(3) + ' '
+    else:
+        resName = resName.ljust(4)
+
+    return resName
+
 
 class MODEL(PDBRecord):
     """The MODEL record specifies the model serial number when multiple
@@ -1259,10 +1282,10 @@ class ATOM(PDBRecord):
         ("serial", 7, 11, "integer", "rjust", None),
         ("name", 13, 16, "string", "ljust.rstrip", ATOM_get_name),
         ("altLoc", 17, 17, "string", "rjust", None),
-# CHANGED FROM ORIGINAL
+# # CHANGED FROM ORIGINAL - resName field expanded to 4 chars, including char 21
 #        ("resName", 18, 20, "string", "rjust", None),
-# gv 4 positions for cyana 1.x GLU-, ASP- etc
-        ("resName", 18, 21, "string", "ljust", None),
+# # gv 4 positions for cyana 1.x GLU-, ASP- etc
+        ("resName", 18, 21, "string", "ljust", ATOM_get_resName),
         ("chainID", 22, 22, "string", "rjust", None),
         ("resSeq", 23, 26, "integer", "rjust", None),
         ("iCode", 27, 27, "string", "rjust", None),

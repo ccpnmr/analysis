@@ -89,7 +89,7 @@ from ccpncore.util import Common as commonUtil
 # set, add, and remove notifies are disabled during delete and __init__
 
 def registerNotify(notify, classname, funcname=''):
-  """register notifiers to class clazz (maybe given as APi class or as class qualifiedName"""
+  """register notifiers to class clazz (maybe given as API class or as class qualifiedName"""
 
 
   metaClasses = commonUtil.getClassFromFullName(classname)._metaclass.getNonAbstractSubtypes()

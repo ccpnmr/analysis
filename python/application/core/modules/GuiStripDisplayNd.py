@@ -185,7 +185,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       peakItem = peakItemDict.pop(apiPeak)
       #viewBox.removeItem(peakItem)
       inactivePeakItems.add(peakItem)
-      peakItem.isVisible = False
+      peakItem.setVisible(False)
     for peak in peaks:
       apiPeak = peak._wrappedData
       if apiPeak in existingApiPeaks:
@@ -194,7 +194,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         peakItem = inactivePeakItems.pop()
         peakItem.setupPeakItem(peakListView, peak)
         #viewBox.addItem(peakItem)
-        peakItem.isVisible = True
+        peakItem.setVisible(True)
       else:
         peakItem = GuiPeakListView.PeakNd(peakListView, peak)
       peakItemDict[apiPeak] = peakItem

@@ -58,6 +58,9 @@ class IpythonConsole(QtGui.QWidget, Base):
         km.kernel.shell.push(namespace)
 
 
+    def setProject(self, project):
+      self.project = project
+
     def runMacro(self, macroFile:str):
       """
       Executes the specified macro file in the python console.
@@ -73,19 +76,25 @@ class IpythonConsole(QtGui.QWidget, Base):
 
 
     def write(self, msg:str, html=False):
-        """
-        Writes the specified string to the python console text box.
-        """
-        # print(self.self.ipythonWidget.text())
-        self.textEditor.moveCursor(QtGui.QTextCursor.End)
-        if html:
-            self.textEditor.textCursor().insertHtml(msg)
-        else:
-          # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
-          self.textEditor.insertPlainText(msg)
-          self.parent().parent().statusBar().showMessage(msg)
-        if self.parent().parent().recordingMacro is True:
-          self.parent().parent().macroEditor.textBox.insertPlainText(msg)
+      """
+      Writes the specified string to the python console text box.
+      """
+      # print(self.self.ipythonWidget.text())
+      self.textEditor.moveCursor(QtGui.QTextCursor.End)
+      if html:
+          self.textEditor.textCursor().insertHtml(msg)
+      else:
+        # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
+        self.textEditor.insertPlainText(msg)
+        self.parent().parent().statusBar().showMessage(msg)
+      if self.parent().parent().recordingMacro is True:
+        self.parent().parent().macroEditor.textBox.insertPlainText(msg)
+
+      if hasattr(self, 'project'):
+        undo = self.project._undo
+        if undo is not None:
+          undo.newWaypoint()
+
 
 
     def writeCommand(self, objectName:str, functionCall:str, arguments:Types.List[str], pid:str=None,

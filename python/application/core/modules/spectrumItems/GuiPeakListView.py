@@ -391,7 +391,7 @@ class PeakNd(QtGui.QGraphicsItem):
     scene = peakListView.spectrumView.strip.plotWidget.scene()
     #QtGui.QGraphicsItem.__init__(self, scene=scene)
     self.colourScheme =self._appBase.preferences.general.colourScheme
-    QtGui.QGraphicsItem.__init__(self, peakListView, scene=scene)
+    QtGui.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
     ###QtGui.QGraphicsItem.__init__(self, peakLayer)
     ###scene.addItem(self)
     ###strip.plotWidget.plotItem.vb.addItem(self)
@@ -452,7 +452,7 @@ class PeakNd(QtGui.QGraphicsItem):
     if not hasattr(peak, 'isSelected'):
       peak.isSelected = False
     self.setSelected(peak.isSelected)
-    # This code does not make sense - you need its ownsopectrumView, not the zero'th
+    # This code does not make sense - you need its own spectrumView, not the zero'th
     # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
     # dimensionOrdering deprecated
     dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims

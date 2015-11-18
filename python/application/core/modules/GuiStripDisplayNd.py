@@ -55,10 +55,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
 
   def __init__(self):
-    # if not apiSpectrumDisplayNd.strips:
-    #   apiSpectrumDisplayNd.newStripNd()
-    
-    ##self.viewportDict = {} # maps QGLWidget to GuiStripNd
+
 
     # below are so we can reuse PeakItems and only create them as needed
     self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
@@ -68,64 +65,16 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are not being displayed
     
     GuiSpectrumDisplay.__init__(self)
-    
-    #Notifiers.registerNotify(self._deletedPeak, 'ccp.nmr.Nmr.Peak', 'delete')
-    # Notifiers.registerNotify(self._addedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', '__init__')
-    # Notifiers.registerNotify(self._removedStripSpectrumView, 'ccpnmr.gui.Task.StripSpectrumView', 'delete')
-    # for func in ('setPositiveContourColour', 'setSliceColour'):
-    #   Notifiers.registerNotify(self._setActionIconColour, 'ccp.nmr.Nmr.DataSource', func)
+
     
     self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button)
-    # self._apiStripSpectrumViews = set()  # set of apiStripSpectrumViews seen so far
+
 
     self.fillToolBar()
     self.setAcceptDrops(True)
     if self._appBase.preferences.general.toolbarHidden:
       GuiSpectrumDisplay.hideUtilToolBar(self)
-    # self.addSpinSystemSideLabel()
-    # self._appBase.current.pane = self
 
-  # def addSpectrum(self, spectrum):
-  #
-  #   apiSpectrumDisplay = self._apiSpectrumDisplay
-  #
-  #   #axisCodes = spectrum.axisCodes
-  #   axisCodes = LibSpectrum.getAxisCodes(spectrum)
-  #   if axisCodes != self._apiSpectrumDisplay.axisCodes:
-  #     raise Exception('Cannot overlay that spectrum on this display')
-  #
-  #   apiDataSource = spectrum._wrappedData
-  #   apiSpectrumView = apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)
-  #   if apiSpectrumView:
-  #     raise Exception('Spectrum already in display')
-  #
-  #   dimensionCount = spectrum.dimensionCount
-  #   dimensionOrdering = range(1, dimensionCount+1)
-  #   apiSpectrumView = apiSpectrumDisplay.newSpectrumView(spectrumName=apiDataSource.name,
-  #                         dimensionOrdering=dimensionOrdering)
-  #   guiSpectrumView = GuiSpectrumViewNd(self, apiSpectrumView)
-  #
-  #   # at this point likely there is only one guiStrip???
-  #   if not apiSpectrumDisplay.axes: # need to create these since not done automatically
-  #     # TBD: assume all strips the same and the strip direction is the Y direction
-  #     for m, axisCode in enumerate(apiSpectrumDisplay.axisCodes):
-  #       position, width = _findPpmRegion(spectrum, m, dimensionOrdering[m]-1) # -1 because dimensionOrdering starts at 1
-  #       for n, guiStrip in enumerate(self.guiStrips):
-  #         if m == 1: # Y direction
-  #           if n == 0:
-  #             apiSpectrumDisplay.newFrequencyAxis(code=axisCode, position=position, width=width, stripSerial=1)
-  #         else: # other directions
-  #           apiSpectrumDisplay.newFrequencyAxis(code=axisCode, position=position, width=width, stripSerial=1) # TBD: non-frequency axis; TBD: should have stripSerial=0 but that not working
-  #
-  #         viewBox = guiStrip.viewBox
-  #         region = (position-0.5*width, position+0.5*width)
-  #         if m == 0:
-  #           viewBox.setXRange(*region)
-  #         elif m == 1:
-  #           viewBox.setYRange(*region)
-  #
-  #   for guiStrip in self.guiStrips:
-  #     guiStrip.addSpectrum(guiSpectrumView)
   #
   def addStrip(self) -> GuiStripNd:
     """
@@ -133,28 +82,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     newStrip = self.strips[0].clone()
     return newStrip
-  # print('addNewStrip')
-  #   print(self.stripFrame.layout())
-  #   axisCodes = self.strips[0].axisCodes
-  #   print(axisCodes)
-  #   # print(newStrip)
 
-    # self.stripFrame.layout().addWidget(newGuiStrip)
-  #
-  #   apiStrip = self._apiSpectrumDisplay.newStripNd()
-  #   n = len(self._apiSpectrumDisplay.strips) - 1
-  #   guiStrip = GuiStripNd(self.stripFrame, apiStrip, grid=(1, n), stretch=(0, 1))
-  #   guiStrip.addPlaneToolbar(self.stripFrame, n)
-  #   guiStrip.addSpinSystemLabel(self.stripFrame, n)
-  #   if n > 0:
-  #     prevGuiStrip = self.guiStrips[n-1]
-  #     prevGuiStrip.axes['right']['item'].hide()
-  #     guiStrip.setYLink(prevGuiStrip)
-
-  # def fillToolBar(self):
-  #   GuiSpectrumDisplay.fillToolBar(self)
-    # self.spectrumUtilToolBar.addAction(QtGui.QAction('HS', self, triggered=self.hideSpinSystemLabel))
-    # self.spectrumUtilToolBar.addAction(QtGui.QAction("SS", self, triggered=self.showSpinSystemLabel))
 
   def showSpinSystemLabel(self):
     """NBNB do we still need this?"""
@@ -163,12 +91,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   def hideSpinSystemLabel(self):
     """NBNB do we still need this?"""
     self.hideSystemSideLabel.show()
-
-  # def addSpinSystemSideLabel(self):
-  #
-  #   dock = self.dock
-  #   self.spinSystemSideLabel = VerticalLabel(self.dock, text='test', grid=(1, 0), gridSpan=(1, 1))
-  #   self.spinSystemSideLabel.setFixedWidth(30)
 
   def fillToolBar(self):
     """
@@ -356,18 +278,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
   #       self._apiStripSpectrumViews.remove(apiStripSpectrumView)
           
 
-  # def raiseContextMenu(self, event):
-  #   print('event',event)
-  #   # from ccpncore.gui.Menu import Menu
-  #   # contextMenu = Menu('', self, isFloatWidget=True)
-  #   # from functools import partial
-  #   # contextMenu.addAction('Delete', partial(self.removeSpectrum, action))
-  #   # return contextMenu
-  #
-  # def removeSpectrum(self, action):
-  #   self.spectrumToolBar.removeAction(action)
-  #
-  #   # print(self, widget)
 
   def _setActionIconColour(self, apiDataSource):
     action = self.spectrumActionDict.get(apiDataSource)

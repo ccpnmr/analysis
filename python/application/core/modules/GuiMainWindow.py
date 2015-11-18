@@ -135,6 +135,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     recentFiles = uniquify(recentFiles)
     # print(recentFiles)
     self._appBase.preferences.recentFiles = recentFiles
+    self.pythonConsole.setProject(project)
 
 
 
@@ -444,8 +445,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showNmrResidueTable(self):
     """Displays Nmr Residue Table"""
     from application.core.modules.NmrResidueTable import NmrResidueTable
-    nmrResiduetable = NmrResidueTable(self, self._project)
-    self.dockArea.addDock(nmrResiduetable, 'bottom')
+    nmrResidueTable = NmrResidueTable(self, self._project)
+    nmrResidueTableDock = CcpnDock(self, name='Nmr Residue Table')
+    nmrResidueTableDock.layout.addWidget(nmrResidueTable)
+    self.dockArea.addDock(nmrResidueTable, 'bottom')
     self.pythonConsole.writeModuleDisplayCommand('showNmrResidueTable')
 
   def toggleSequence(self):

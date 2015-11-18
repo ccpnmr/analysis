@@ -103,9 +103,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
         spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(ss)
         self.dockArea.guiWindow.deleteBlankDisplay()
         msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
-        self.dockArea.window().pythonConsole.writeCommand('spectrum',
-                                                          'application.createSpectrumDisplay',
-                                                          'spectrum', pid=ss)
+        self.dockArea.window().pythonConsole.write(msg)
       except NotImplementedError:
         pass
 
@@ -116,7 +114,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
       for sp in spectrumPids[1:]:
         spectrumDisplay.displaySpectrum(sp)
       self.dockArea.guiWindow.deleteBlankDisplay()
-      msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
+      # msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
       self.dockArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay', 'sample', pid=ss)
 
   # def processSpectrum(self, spectrum:(Spectrum,Pid), event):

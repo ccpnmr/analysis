@@ -142,6 +142,8 @@ def loadStructureEnsemble(molSystem:"MolSystem", fil) -> "StructureEnsemble":
     apiEnsemble.newDataMatrix(name='occupancies', shape=(modelCount, atomCount), data=occupancies)
     apiEnsemble.newDataMatrix(name='bFactors', shape=(modelCount, atomCount), data=bFactors)
 
+    #
+    return apiEnsemble
 
   else:
     print("WARNING, no ATOM data in PDB file %s - loading aborted" % fil)

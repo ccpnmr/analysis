@@ -35,6 +35,9 @@ from ccpn import Chain
 from ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
 from ccpncore.api.ccp.molecule.MolStructure import Atom as ApiCoordAtom
 
+_DATA_ARRAY_TAGS =('coordinateData', 'occupancyData', 'bFactorData')
+# NBNB atomNameData not yet implemented
+# _DATA_ARRAY_TAGS =('coordinateData', 'occupancyData', 'bFactorData', 'atomNameData')
 
 class StructureEnsemble(AbstractWrapperObject):
   """Ensemble of coordinate structures."""
@@ -235,13 +238,13 @@ class StructureEnsemble(AbstractWrapperObject):
   def atomNameData(self, value):
     raise NotImplementedError("atomNameData not implemented yet")
 
-  def getAtomCoordinates(self, atomId) -> Optional[numpy.ndarray]:
+  def getAtomCoordinates(self, atomId:str) -> Optional[numpy.ndarray]:
     """get nModels * 3 array of coordinates for atom atomId"""
     apiCoordAtom = self._atomId2CoordAtom(atomId)
     if apiCoordAtom is None:
       return None
     else:
-      return self.coordinateData[:,apiCoordAtom.index,:]
+      return self.coordinateData[:,apiCoordAtom.index]
 
   def getAtomOccupancies(self, atomId) -> Optional[numpy.ndarray]:
     """get nModels array of occupancies for atom atomId"""
@@ -249,7 +252,7 @@ class StructureEnsemble(AbstractWrapperObject):
     if apiCoordAtom is None:
       return None
     else:
-      return self.occupancyData[:,apiCoordAtom.index,:]
+      return self.occupancyData[:,apiCoordAtom.index]
 
   def getAtomBFactors(self, atomId) -> Optional[numpy.ndarray]:
     """get nModels array of bFactors for atom atomId"""
@@ -257,7 +260,7 @@ class StructureEnsemble(AbstractWrapperObject):
     if apiCoordAtom is None:
       return None
     else:
-      return self.bFactorData[:,apiCoordAtom.index,:]
+      return self.bFactorData[:,apiCoordAtom.index]
 
   def getAtomSpecificNames(self, atomId) -> Optional[numpy.ndarray]:
     """get nModels array of model-specific names for atom atomId"""
@@ -265,7 +268,7 @@ class StructureEnsemble(AbstractWrapperObject):
     if apiCoordAtom is None:
       return None
     else:
-      return self.atomNameData[:,apiCoordAtom.index,:]
+      return self.atomNameData[:,apiCoordAtom.index]
 
   @property
   def comment(self) -> str:
@@ -390,6 +393,139 @@ class StructureEnsemble(AbstractWrapperObject):
     if undo is not None:
       undo.newItem(self.replaceAtomIds, self.replaceAtomIds,
                    undoArgs=(oldAtomIds,), redoArgs=(atomIds,))
+
+  def removeAtoms(self, atomIds:Sequence[str]):
+    """Remove atoms with atomIds, adjusting data matrices to fit"""
+    for atomId in atomIds:
+      self.removeAtom(atomId)
+
+  def removeAtom(self, atomId):
+    """Remove atom with atomId, adjusting data matrices to fit"""
+    apiAtom = self._atomId2CoordAtom(atomId)
+    if apiAtom is None:
+      raise ValueError("Atom with atomId %s not found" % atomId)
+
+    # get data arrays before we starts messing with the internals
+    data = {}
+    for tag in _DATA_ARRAY_TAGS:
+      data[tag] = getattr(self, tag)
+    apiOrderedAtoms = apiAtom.topObject.__dict__['orderedAtoms']
+
+    # Make new atom record and rearrange to fit
+    root = apiAtom.root
+    root.override = True
+    undo = root._undo
+    if undo is not None:
+      undo.increaseBlocking()
+    undoData = {}
+    try:
+
+      # change atoms
+      index = apiAtom.index
+      del apiOrderedAtoms[index]
+      for atom in apiOrderedAtoms[index:]:
+        atom.__dict__['index'] -= 1
+
+      # reset data arrays
+      for tag in _DATA_ARRAY_TAGS:
+        xx = data.get(tag)
+        if xx:
+          undoData[tag] = xx[:,apiAtom.index]
+          setattr(self, tag, numpy.delete(xx, index, axis=1))
+
+    finally:
+      if undo is not None:
+        undo.decreaseBlocking()
+      root.override = False
+
+  def addAtom(self,atomId, coordinateData:numpy.ndarray=None, occupancyData:Sequence[float]=None,
+              bFactorData:Sequence[float]=None, atomNameData:Sequence[str]=None):
+    """Add atom with atomId. Atom is inserted at the end of the matching chain or residue
+    (if any) otherwise at the end of the atomId list.
+    Data matrices are filled with NaN or with the atom Name (for atomNameData)"""
+
+    # parse atomId
+    chainCode, sequenceCode, residueType, name = tuple(Pid.splitId(atomId))
+    seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
+    seqInsertCode = seqInsertCode or ' '
+    if seqCode is None or offset is not None:
+      raise ValueError("atomId %s contains an invalid sequenceCode" % atomId)
+
+    # get data arrays before we starts messing with the internals
+    data = {}
+    for tag in _DATA_ARRAY_TAGS:
+      data[tag] = getattr(self, tag)
+
+    apiEnsemble = self._apiStructureEnsemble
+    apiOrderedAtoms = apiEnsemble.__dict__['orderedAtoms']
+
+    if apiOrderedAtoms:
+      # Get insertion data
+      useChain = apiEnsemble.findFirstCoordChain(code=chainCode)
+      if useChain is None:
+        nextAtomIndex = apiOrderedAtoms[-1].index + 1
+      else:
+        useResidue = useChain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
+        if useResidue is None:
+          nextAtomIndex = max(x.index for x in useChain.sortedResidues()[-1].atoms) + 1
+        else:
+          if useResidue.findFirstAtom(name=name) is None:
+            nextAtomIndex = max(x.index for x in useResidue.atoms) + 1
+          else:
+            raise ValueError("Atom %s already in StructureEnsemble)" % atomId)
+
+      # Make new atom record and rearrange to fit
+      root = apiEnsemble.root
+      root.override = True
+      undo = root._undo
+      if undo is not None:
+        undo.increaseBlocking()
+      try:
+        if useChain is None:
+          useChain = apiEnsemble.newChain(code=chainCode)
+        if useResidue is None:
+          useResidue = useChain.newResidue(seqCode=seqCode, seqInsertCode=seqInsertCode,
+                                           code3Letter=residueType)
+        newAtom = useResidue(name=name, index=nextAtomIndex,
+                             elementName=spectrumLib.name2ElementSymbol(name) or 'Unknown')
+
+        # reset data arrays
+        for tag in _DATA_ARRAY_TAGS:
+          xx = data.get(tag)
+          if xx:
+            if tag == 'atomNameData':
+              default = name
+            else:
+              default = str('NaN')
+            values = locals().get(tag) or default
+            setattr(self, tag, numpy.insert(xx, nextAtomIndex, values, axis=1))
+
+        for atom in apiOrderedAtoms[nextAtomIndex:]:
+          atom.__dict__['index'] += 1
+        apiOrderedAtoms.insert(nextAtomIndex, newAtom)
+      finally:
+        if undo is not None:
+          undo.decreaseBlocking()
+        root.override = False
+
+        # NBNB TBD Add undo registration here
+
+    else:
+      # Empty atomIds - just add
+      nextAtomIndex = 0
+      self.addAtomIds((atomId,), override=True)
+      # reset data arrays
+      for tag in _DATA_ARRAY_TAGS:
+        xx = data.get(tag)
+        if xx:
+          if tag == 'atomNameData':
+            default = name
+          else:
+            default = str('NaN')
+          values = locals().get(tag) or default
+          setattr(self, tag, numpy.append(xx, values, axis=1))
+
+
 
   def _atomId2CoordAtom(self, atomId:str) -> Optional[ApiCoordAtom]:
     """Convert atomId to API MolStructure.Atom"""

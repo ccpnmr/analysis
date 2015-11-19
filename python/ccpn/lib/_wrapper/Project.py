@@ -26,6 +26,7 @@ __version__ = "$Revision$"
 import os
 from ccpncore.lib.Io import Formats as ioFormats
 from ccpncore.lib.Io import Fasta as fastaIo
+from ccpncore.lib.Io import Pdb as pdbIo
 from ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
 
 # def loadSpectrum(project:object, filePath:str, reReadSpectrum:object=None):
@@ -95,6 +96,16 @@ def loadSequence(self:"Project", path:str, subType:str) -> list:
                                           molType='protein'))
   #
   return chains
+
+def loadStructure(self:"Project", path:str, subType:str) -> list:
+  """Load Structure ensemble(s) from file into Wrapper project"""
+
+  if subType == ioFormats.PDB:
+    apiEnsemble = pdbIo.loadStructureEnsemble(self._apiNmrProject.molSystem, path)
+  else:
+    raise ValueError("Structure file type %s is not recognised" % subType)
+  #
+  return [self._data2Obj[apiEnsemble]]
 
 def loadProject(self:"Project", path:str, subType:str) -> "Project":
   """Load project from file into application and return the new project"""

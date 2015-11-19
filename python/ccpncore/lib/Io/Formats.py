@@ -46,11 +46,14 @@ NMRSTAR = 'NMR-STAR'
 # Sequence formats
 FASTA = 'Fasta'
 
+# Structure formats
+PDB = 'PDB'
+
 #  Look-up formats
 CSV = 'csv'
 XLS = 'xls'
 
-DataTypes = ['Project', 'Spectrum', 'Text', 'Sequence', 'LookupFile']
+DataTypes = ['Project', 'Spectrum', 'Text', 'Sequence', 'LookupFile', 'Structure']
 
 def analyseUrl(filePath):
   """ Analyse filePath, and return (dataType, subType, usePath) tuple
@@ -225,6 +228,9 @@ def analyseUrl(filePath):
       if os.path.isfile(spectrumPath):
         return ('Spectrum', AZARA, spectrumPath)
 
+    if any(line for line in textblock.splitlines() if line.startswith('ATOM  ')):
+      # Assume it is a PDB-type file
+      return ('Structure', PDB, filePath)
 
 
 

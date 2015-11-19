@@ -349,20 +349,6 @@ class StructureEnsemble(AbstractWrapperObject):
       else:
         raise ValueError("atomId %s matches pre-existing atom in StructureEnsemble" % atomId)
 
-  # def removeAtomId(self, atomId):
-  #   """Remove atomId from the structureEnsemble, removing coordinates etc. from the data"""
-  #   apiCoordAtom = self._atomId2CoordAtom(atomId)
-  #   if apiCoordAtom is None:
-  #     raise ValueError("Atom %s does not exist" % atomId)
-  #   else:
-  #     for tag in ('coordinateData', 'occupancyData', 'bFactorData', 'atomNameData'):
-  #       #Reset arrays to original value, to flush changes to API level
-  #       data = getattr(self, tag)
-  #       if data is not None:
-  #         setattr(self, tag, data)
-  #
-  #         NBNB not ready TBD
-
 
   def replaceAtomIds(self, atomIds:Sequence[str]):
     """Replace atomIds with new list of the same length,
@@ -394,12 +380,14 @@ class StructureEnsemble(AbstractWrapperObject):
       undo.newItem(self.replaceAtomIds, self.replaceAtomIds,
                    undoArgs=(oldAtomIds,), redoArgs=(atomIds,))
 
-  def removeAtoms(self, atomIds:Sequence[str]):
+  def removeAtomIds(self, atomIds:Sequence[str]):
     """Remove atoms with atomIds, adjusting data matrices to fit"""
     for atomId in atomIds:
       self.removeAtom(atomId)
 
-  def removeAtom(self, atomId):
+    # NBNB TBD Maybe add undo code
+
+  def removeAtomId(self, atomId):
     """Remove atom with atomId, adjusting data matrices to fit"""
     apiAtom = self._atomId2CoordAtom(atomId)
     if apiAtom is None:
@@ -438,7 +426,9 @@ class StructureEnsemble(AbstractWrapperObject):
         undo.decreaseBlocking()
       root.override = False
 
-  def addAtom(self,atomId, coordinateData:numpy.ndarray=None, occupancyData:Sequence[float]=None,
+    # NBNB TBD add undo code
+
+  def addAtomId(self,atomId, coordinateData:numpy.ndarray=None, occupancyData:Sequence[float]=None,
               bFactorData:Sequence[float]=None, atomNameData:Sequence[str]=None):
     """Add atom with atomId. Atom is inserted at the end of the matching chain or residue
     (if any) otherwise at the end of the atomId list.

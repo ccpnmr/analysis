@@ -70,7 +70,7 @@ def readModelRecords(fil) -> Tuple[List[PdbLib.PDBRecord], List[List[PdbLib.PDBR
       # put model into result and make a new one
       data.append(model)
       model = []
-    elif rec._name == 'ATOM':
+    elif rec._name == 'ATOM  ':
       # Always append ATOM records
       model.append(rec)
     elif not data:

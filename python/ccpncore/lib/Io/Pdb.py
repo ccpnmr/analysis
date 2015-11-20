@@ -42,6 +42,9 @@ class PdbRecordProcessor(PdbLib.RecordProcessor):
       seqId = rec['seqID'].strip()
       if len(seqId) == 1:
         rec['chainID'] = seqId
+      else:
+        # May not be necessary, but just in case
+        rec['chainID'] = ' '
 
 
 def readPdbRecorsds(fil):
@@ -70,8 +73,8 @@ def readModelRecords(fil) -> Tuple[List[PdbLib.PDBRecord], List[List[PdbLib.PDBR
       # put model into result and make a new one
       data.append(model)
       model = []
-    elif rec._name == 'ATOM  ':
-      # Always append ATOM records
+    elif rec._name in('ATOM  ', 'HETATM'):
+      # Always append ATOM and HETATM records
       model.append(rec)
     elif not data:
       # For the first model only append all records, in case we want them later

@@ -206,9 +206,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       if peakItem:
         peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
         del peakItemDict[apiPeak]
-        self.inactivePeakItems.add(peakItem)
-      
-
+        inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
+        if inactivePeakItems:
+          inactivePeakItems.add(peakItem)
 
   # def wheelEvent(self, event):
   #   event.accept()

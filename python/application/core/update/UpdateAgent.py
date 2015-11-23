@@ -29,7 +29,8 @@ FIELD_SEP = '\t'
 PATH_SEP = '__sep_'
 
 # require only . and numbers and at least one of these
-VERSION_RE = re.compile('^[.\d]+$')
+# 23 Nov 2015: remove below RE because version can have letter in it, so just do exact match
+###VERSION_RE = re.compile('^[.\d]+$')
 
 BAD_DOWNLOAD = 'Exception: '
 
@@ -210,8 +211,8 @@ class UpdateAgent(object):
     lines = data.split('\n')
     if lines:
       version = lines[0].strip()
-      if not VERSION_RE.match(version):
-        raise Exception('First line of server database file = %s, does not match a version number' % version)
+      #if not VERSION_RE.match(version):
+      #  raise Exception('First line of server database file = %s, does not match a version number' % version)
 
       if version != self.version:
         raise Exception('Server database version = %s != %s = program version' % (version, self.version))
@@ -264,7 +265,7 @@ class UpdateAgent(object):
           print('File %s already in updates' % filePath)
           existsErrorCount += 1
         else:
-          updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, shouldCommit=True, isNew=True, serverDownloadScript=serverDownloadScript, serverUploadScript=self.serverUploadScript)
+          updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, shouldCommit=True, isNew=True, serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
           self.updateFiles.append(updateFile)
           self.updateFileDict[filePath] = updateFile
       else:
@@ -396,7 +397,6 @@ class UpdateAgent(object):
           localLines = open(fullFilePath, 'rU').readlines()
           serverData = downloadFile(serverDownloadScript, self.serverDbRoot, updateFile.fileStoredAs)
           if serverData:
-            print('HERE221', serverData[:400])
             serverLines = serverData.splitlines(True)
             for line in difflib.context_diff(localLines, serverLines, fromfile='local', tofile='server'):
               haveDiff = True

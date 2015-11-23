@@ -107,7 +107,6 @@ class UpdateAdmin(QtGui.QDialog, UpdateAgent):
   def diffSelected(self):
 
     updateFiles = self.updateTable.getSelectedObjects()
-    print('HERE111', updateFiles)
     if updateFiles:
       self.diffUpdates(updateFiles)
 
@@ -122,11 +121,12 @@ class UpdateAdmin(QtGui.QDialog, UpdateAgent):
 if __name__ == '__main__':
 
   import sys
+  from application.core.Version import applicationVersion
 
   qtApp = QtGui.QApplication(['UpdateAdmin',])
 
   QtCore.QCoreApplication.setApplicationName('UpdateAdmin')
-  QtCore.QCoreApplication.setApplicationVersion('3.0')
+  QtCore.QCoreApplication.setApplicationVersion(applicationVersion)
 
   popup = UpdateAdmin()
   popup.raise_()

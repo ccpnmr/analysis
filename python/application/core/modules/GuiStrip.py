@@ -32,12 +32,14 @@ from ccpn import Spectrum
 from ccpn import Project
 
 from ccpncore.gui.Label import Label
-from application.core.gui.PlotWidget import PlotWidget
 from ccpncore.gui.CcpnGridItem import CcpnGridItem
 from ccpncore.gui.ToolBar import ToolBar
 from ccpncore.gui.Widget import Widget
+from ccpncore.gui.Menu import Menu
+
 from ccpncore.memops import Notifiers
 
+from ccpncore.util import Ticks
 from ccpncore.util import Types
 
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
@@ -46,10 +48,10 @@ from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
 from ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
+
 from application.core.gui.AxisTextItem import AxisTextItem
 from application.core.DropBase import DropBase
-from ccpncore.gui.Menu import Menu
-
+from application.core.gui.PlotWidget import PlotWidget
 
 def sufficientlyDifferentWidth(region1, region2):
   
@@ -164,6 +166,49 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
     # Notifiers.registerNotify(self.rulerCreated, 'ccpnmr.gui.Task.Ruler', '__init__')
     # Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
+
+  def printToFile(self, printer):
+         
+    for spectrumView in self.spectrumViews:
+      spectrumView.printToFile(printer)
+    
+    # print ticks
+    viewRegion = self.plotWidget.viewRange()
+    v1, v0 = viewRegion[0]  # TBD: relies on axes being backwards
+    w1, w0 = viewRegion[1]  # TBD: relies on axes being backwards, which is not true in 1D
+    xMajorTicks, xMinorTicks, xMajorFormat = Ticks.findTicks((v0, v1))
+    yMajorTicks, yMinorTicks, yMajorFormat = Ticks.findTicks((w0, w1))
+    
+    xScale = (printer.x1-printer.x0)/(v1-v0)
+    xOffset = printer.x0 - xScale*v0
+    yScale = (printer.y1-printer.y0)/(w1-w0)
+    yOffset = printer.y0 - yScale*w0
+    xMajorText = [xMajorFormat % tick for tick in xMajorTicks]
+    xMajorTicks = [tick*xScale+xOffset for tick in xMajorTicks]
+    xMinorTicks = [tick*xScale+xOffset for tick in xMinorTicks]
+    yMajorText = [xMajorFormat % tick for tick in yMajorTicks]
+    yMajorTicks = [tick*yScale+yOffset for tick in yMajorTicks]
+    yMinorTicks = [tick*yScale+yOffset for tick in yMinorTicks]
+    
+    xTickHeight = yTickHeight = max(printer.y1-printer.y0, printer.x1-printer.x0)*0.01
+    
+    for tick in xMinorTicks:
+      printer.writeLine(tick,printer.y0,tick,printer.y0+0.5*xTickHeight)
+
+    fontsize = 10
+    for n, tick in enumerate(xMajorTicks):
+      printer.writeLine(tick,printer.y0,tick,printer.y0+xTickHeight)
+      text = xMajorText[n]
+      printer.writeText(text, tick-0.5*len(text)*fontsize*0.7, printer.y0+xTickHeight+1.5*fontsize)
+
+    # output backwards for y
+    for tick in yMinorTicks:
+      printer.writeLine(printer.x0,printer.y1-tick,printer.x0+0.5*yTickHeight,printer.y1-tick)
+
+    for n, tick in enumerate(yMajorTicks):
+      printer.writeLine(printer.x0,printer.y1-tick,printer.x0+yTickHeight,printer.y1-tick)
+      text = yMajorText[n]
+      printer.writeText(text, printer.x0+yTickHeight+0.5*fontsize*0.7, printer.y1-tick+0.5*fontsize)
 
   # def addStrip(self):
   #

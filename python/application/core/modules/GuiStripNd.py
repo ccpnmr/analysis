@@ -49,7 +49,8 @@ from ccpncore.util import Types
 
 from application.core.gui.PlaneToolbar import PlaneToolbar
 from application.core.modules.GuiStrip import GuiStrip
-###from application.core.modules.spectrumItems.GuiPeakListView import PeakNd
+
+from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 
 class GuiStripNd(GuiStrip):
 
@@ -127,13 +128,11 @@ class GuiStripNd(GuiStrip):
     resetZoomIcon = Icon('iconsNew/zoom-full')
     resetZoomAction.setIcon(resetZoomIcon)
     resetZoomAction.setToolTip('Reset Zoom')
+    printAction = self.contextMenu.addAction("Print to File...", self.printToFile)
+    printIcon = Icon('iconsNew/print')
+    printAction.setIcon(printIcon)
+    printAction.setToolTip('Print Strip to File')
 
-
-
-    ###if self.crossHairShown == True:
-    ###  self.crossHairAction.setChecked(True)
-    ###else:
-    ###  self.crossHairAction.setChecked(False)
     self.crossHairAction.setChecked(self.vLine.isVisible())
 
     if self.grid.isVisible():
@@ -334,7 +333,7 @@ class GuiStripNd(GuiStrip):
           return peakListView
             
     return None
-    
+        
   def showPeaks(self, peakList:PeakList, peaks:Types.List[Peak]=None):
     ###from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView
     # NBNB TBD 1) we should not always display all peak lists together

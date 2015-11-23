@@ -454,7 +454,86 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def newPeakListView(self, peakListView):
     pass
     
-  ##### override of superclass function
+  def printToFile(self, printer):
+  
+    apiSpectrumView = self._wrappedData.spectrumView
+    apiDataSource = apiSpectrumView.dataSource
+  
+    # assume that already done on screen
+    #if apiDataSource.positiveContourBase == 10000.0: # horrid
+    #  # base has not yet been set, so guess a sensible value
+    #  apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
+    #  apiDataSource.negativeContourBase = - apiDataSource.positiveContourBase
+    
+    if apiSpectrumView.displayPositiveContours is True:
+      posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
+    else:
+      posLevels = []
+    
+    if apiSpectrumView.displayNegativeContours is True:
+      negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
+    else:
+      negLevels = []
+    
+    if not posLevels and not negLevels:
+      return
+
+    posColour = self._getColour('positiveContourColour')
+    negColour = self._getColour('negativeContourColour')
+  
+    xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self.getTranslateScale(0, pixelViewBox0=printer.x0, pixelViewBox1=printer.x1)
+    yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self.getTranslateScale(1, pixelViewBox0=printer.y0, pixelViewBox1=printer.y1)
+    
+    xTile0 = xClipPoint0 // xTotalPointCount
+    xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
+    yTile0 = yClipPoint0 // yTotalPointCount
+    yTile1 = 1 + (yClipPoint1 // yTotalPointCount)
+      
+    for position, dataArray in self.getPlaneData():
+    
+      if posLevels:
+        posLevelsArray = numpy.array(posLevels, numpy.float32)
+        posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
+        for contourData in posContours:
+          self._printContourData(printer, contourData, posColour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, yTranslate, yScale)
+      
+      if negLevels:
+        negLevelsArray = numpy.array(negLevels, numpy.float32)
+        negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
+        for contourData in negContours:
+          self._printContourData(printer, contourData, negColour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, yTranslate, yScale)
+                
+    for peakListView in self.peakListViews:
+      peakListView.printToFile(printer)
+      
+  def _printContourData(self, printer, contourData, colour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, yTranslate, yScale):
+    
+    for xTile in range(xTile0, xTile1):
+      for yTile in range(yTile0, yTile1):
+        
+        # the below is because the y axis goes from top to bottom
+        #GL.glScale(1.0, -1.0, 1.0)
+        #GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
+    
+        # the below makes sure that spectrum points get mapped to screen pixels correctly
+        #GL.glTranslate(xTranslate, yTranslate, 0.0)
+        #GL.glScale(xScale, yScale, 1.0)
+    
+        #GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
+        #GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
+        #GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
+        #GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
+        #GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
+        
+        
+        for contour in contourData:
+          n = len(contour) // 2
+          contour = contour.reshape((n, 2))
+          contour[:,0] *= xScale
+          contour[:,0] += xTranslate
+          contour[:,1] *= yScale
+          contour[:,1] += yTranslate
+          printer.writePolyline(contour, colour)
 
   def paint(self, painter, option, widget=None):
     
@@ -471,7 +550,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.drawContours(painter)
     
   def boundingRect(self):  # seems necessary to have
-
 
     return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TBD: remove hardwiring
   
@@ -507,7 +585,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.constructContours(posLevels, negLevels)
     except FileNotFoundError:
       self._project._logger.warning("No data file found for %s" % self)
-
 
     posColour = Colour.scaledRgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
     negColour = Colour.scaledRgba(self._getColour('negativeContourColour')) # and assumes these attributes are set
@@ -568,7 +645,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   #def constructContours(self, guiStrip, posLevels, negLevels):
   def constructContours(self, posLevels, negLevels):
     """ Construct the contours for this spectrum using an OpenGL display list
-        The way this is done here, any change in contour level or color needs to call this function.
+        The way this is done here, any change in contour level needs to call this function.
     """
     
     xDataDim, yDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[:2]
@@ -603,7 +680,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
     if not doPosLevels and not doNegLevels:
       return
-      
       
     ###GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     
@@ -809,7 +885,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     GL.glEndList()
     
   # def getTranslateScale(self, dim, ind:int):
-  def getTranslateScale(self, ind:int):
+  def getTranslateScale(self, ind:int, pixelViewBox0:float=None, pixelViewBox1:float=None):
     """Get translation data for X (ind==0) or Y (ind==1) dimension"""
 
     dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[ind]
@@ -822,14 +898,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     viewRegion = plotWidget.viewRange()
     region1, region0 = viewRegion[ind]  # TBD: relies on axes being backwards
 
-    if ind == 0:
-      pixelCount = plotWidget.width()
-      pixelViewBox0 = plotItem.getAxis('left').width()
-      pixelViewBox1 = pixelViewBox0 + viewBox.width()
-    else:
-      pixelCount = plotWidget.height()
-      pixelViewBox0 = plotItem.getAxis('bottom').height()
-      pixelViewBox1 = pixelViewBox0 + viewBox.height()
+    if pixelViewBox0 is None: # should then also have pixelViewBox1 = None
+      if ind == 0:
+        pixelCount = plotWidget.width()
+        pixelViewBox0 = plotItem.getAxis('left').width()
+        pixelViewBox1 = pixelViewBox0 + viewBox.width()
+      else:
+        pixelCount = plotWidget.height()
+        pixelViewBox0 = plotItem.getAxis('bottom').height()
+        pixelViewBox1 = pixelViewBox0 + viewBox.height()
 
     # -1 below because points start at 1 in data model
     firstPoint = valueToPoint(region0) - 1

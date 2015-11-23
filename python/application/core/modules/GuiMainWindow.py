@@ -218,6 +218,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
     fileMenu.addAction(Action(self, "Save As...", shortcut="sa", callback=self.saveProjectAs))
+    fileMenu.addAction(Action(self, "Print...", shortcut="pr", callback=self.printToFile))
 
     #NBNB How are we going to implement this?
     # backupOption = fileMenu.addMenu("Backup")
@@ -968,6 +969,20 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           return
       self._appBase.saveProject(newPath=newPath)#, newProjectName=os.path.basename(newPath))
 
+  def printToFile(self):
+    
+    current = self._appBase.current
+    spectrumDisplay = current.spectrumDisplay
+    if not spectrumDisplay and current.strip:
+      spectrumDisplay = current.strip.spectrumDisplay
+    if not spectrumDisplay and self.spectrumDisplays:
+      spectrumDisplay = self.spectrumDisplays[0]
+    if spectrumDisplay:
+      path = QtGui.QFileDialog.getSaveFileName(self, caption='Print to File', filter='SVG (*.svg)')
+      if not path:
+        return
+      spectrumDisplay.printToFile(path)
+    
   def hideConsole(self):
     """Hides python console"""
     self.pythonConsole.hide()

@@ -53,7 +53,10 @@ class GuiStrip1d(GuiStrip):
       self.plotWidget.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
                                     strip=self)
 
-
+  def printToFile(self, printer):
+    
+    raise Exception('1D printing not enabled yet')
+    
   def get1dContextMenu(self) -> Menu:
     """
     Creates and returns the 1d context menu

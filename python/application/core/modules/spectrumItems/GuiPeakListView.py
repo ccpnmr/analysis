@@ -59,6 +59,29 @@ IDENTITY.reset()
 #   for apiPeakListView in apiPeakListViews:
 #     for apiStripPeakListView in apiPeakListView._apiStripPeakListViews:
 
+def _getPeakAnnotation(peak):
+
+  peakLabel = []
+  for dimension in range(peak.peakList.spectrum.dimensionCount):
+    if len(peak.dimensionNmrAtoms[dimension]) == 0:
+      peakLabel.append('-')
+    else:
+      peakNmrResidues = [atom[0].nmrResidue.id for atom in peak.dimensionNmrAtoms if len(atom) != 0]
+      if all(x==peakNmrResidues[0] for x in peakNmrResidues):
+        for item in peak.dimensionNmrAtoms[dimension]:
+          if len(peakLabel) > 0:
+            peakLabel.append(item.name)
+          else:
+            peakLabel.append(item.pid.id)
+
+      else:
+        for item in peak.dimensionNmrAtoms[dimension]:
+          label = item.nmrResidue.id+item.name
+          peakLabel.append(label)
+
+  text = ', '.join(peakLabel)
+
+  return text
 
 class GuiPeakListView(QtGui.QGraphicsItem):
 
@@ -102,6 +125,40 @@ class GuiPeakListView(QtGui.QGraphicsItem):
   #   self.cleanIcon.hide()
   #   self.menuIcon.hide()
 
+  def printToFile(self, printer):
+
+    width = printer.width
+    height = printer.height
+    scale = 0.02
+    peakHalfSize = scale * max(width, height)
+    strip = self.spectrumView.strip
+    plotWidget = strip.plotWidget
+    viewRegion = plotWidget.viewRange()
+    dataDims = self.spectrumView._wrappedData.spectrumView.orderedDataDims
+    
+    x1, x0 = viewRegion[0]  # TBD: relies on axes being backwards
+    xScale = width / (x1 - x0)
+    xTranslate = printer.x0 - x0 * xScale
+    
+    y1, y0 = viewRegion[1]  # TBD: relies on axes being backwards
+    yScale = width / (y1 - y0)
+    yTranslate = printer.y0 - y0 * yScale
+        
+    for peak in self.peakList.peaks:
+      if strip.peakIsInPlane(peak):
+        xPpm = xScale*peak.position[dataDims[0].dimensionIndex] + xTranslate
+        yPpm = yScale*peak.position[dataDims[1].dimensionIndex] + yTranslate
+        a0 = xPpm - peakHalfSize
+        b0 = height - (yPpm - peakHalfSize)
+        a1 = xPpm + peakHalfSize
+        b1 = height - (yPpm + peakHalfSize)
+        printer.writeLine(a0, b0, a1, b1)
+        printer.writeLine(a0, b1, a1, b0)
+
+        text = _getPeakAnnotation(peak)
+        if text:
+          offset = 0.5 * peakHalfSize
+          printer.writeText(text, a1+offset, b1-offset)
 
   def regionChanged(self):
 
@@ -645,28 +702,8 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     self.setParentItem(peakItem)
     
     peak = peakItem.peak
-    peakLabel = []
-    for dimension in range(peak.peakList.spectrum.dimensionCount):
-      if len(peak.dimensionNmrAtoms[dimension]) == 0:
-        peakLabel.append('-')
-      else:
-        peakNmrResidues = [atom[0].nmrResidue.id for atom in peak.dimensionNmrAtoms if len(atom) != 0]
-        if all(x==peakNmrResidues[0] for x in peakNmrResidues):
-          for item in peak.dimensionNmrAtoms[dimension]:
-            if len(peakLabel) > 0:
-              peakLabel.append(item.name)
-            else:
-              peakLabel.append(item.pid.id)
-
-        else:
-          for item in peak.dimensionNmrAtoms[dimension]:
-            label = item.nmrResidue.id+item.name
-            peakLabel.append(label)
-
-
-
-    text = ', '.join(peakLabel)
-    
+    text = _getPeakAnnotation(peak)
+        
     self.setText(text)
 
   """

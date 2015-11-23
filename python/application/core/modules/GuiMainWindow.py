@@ -339,6 +339,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     assignMenu.addAction(Action(self, 'Show Atom Selector', callback=self.showAtomSelector, shortcut='as'))
     assignMenu.addAction(Action(self, 'Residue Information', callback=self.showResidueInformation, shortcut='ri'))
     assignMenu.addAction(Action(self, "NMR Residue Table", callback=self.showNmrResidueTable, shortcut='nr'))
+    assignMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
 
 
 
@@ -401,7 +402,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._showDocumentation("CCPN Documentation", 'build', 'html', 'index.html')
 
   def showShortcuts(self):
-    path = os.path.join(Path.getTopDirectory(), 'doc', 'apifiles', 'AnalysisShortcuts.pdf')
+    path = os.path.join(Path.getTopDirectory(), 'doc', 'static', 'AnalysisShortcuts.pdf')
     if sys.platform == 'linux2':
       os.system(["xdg-open %s" % path])
     else:
@@ -684,7 +685,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(showSc, position='bottom')
     self.pythonConsole.writeModuleDisplayCommand('showScreeningSetup')
 
-
+  def showParassignSetup(self):
+    try:
+      from application.plugins.PARAssign.PARAssignSetup import ParassignSetup
+      self.ps = ParassignSetup(project=self.project)
+      newDock = CcpnDock(name='PARAssign Setup')
+      newDock.addWidget(self.ps)
+      self.dockArea.addDock(newDock)
+    except ImportError:
+      print('PARAssign cannot be found')
 
   # NBNB sholuld be renamed
   # def removeSpectra(self):

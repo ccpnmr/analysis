@@ -16,7 +16,8 @@ MODULE_DICT = {'ASSIGNER':'showAssigner',
                'PEAK LIST': 'showPeakTable',
                'PICK AND ASSIGN': 'showPickAndAssignModule',
                'REFERENCE CHEMICAL SHIFTS': 'showRefChemicalShifts',
-               'SEQUENCE': 'toggleSequence'
+               'SEQUENCE': 'toggleSequence',
+               'PARASSIGN SETUP': 'showParassignSetup'
               }
 
 
@@ -39,7 +40,7 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
     axisCodes = peak.peakList.spectrum.axisCodes
     axisPositions = dict(zip(axisCodes, positions))
     task = project._appBase.mainWindow.task
-    # mark = task.newMark('white', positions, axisCodes)
+    mark = task.newMark('white', positions, axisCodes)
 
     # if not strip:
     for strip in display.strips:

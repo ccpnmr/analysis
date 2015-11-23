@@ -90,10 +90,10 @@ class IpythonConsole(QtGui.QWidget, Base):
       if self.parent().parent().recordingMacro is True:
         self.parent().parent().macroEditor.textBox.insertPlainText(msg)
 
-      if hasattr(self, 'project'):
-        undo = self.project._undo
-        if undo is not None:
-          undo.newWaypoint()
+      # if hasattr(self, 'project'):
+      #   undo = self.project._undo
+      #   if undo is not None:
+      #     undo.newWaypoint()
 
 
 

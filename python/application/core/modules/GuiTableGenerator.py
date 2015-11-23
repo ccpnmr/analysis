@@ -49,10 +49,13 @@ class GuiTableGenerator(QtGui.QWidget):
     objectList = self.objectList
 
     if objectList:
-
-      objectsName = objectList._childClasses[0]._pluralLinkName
-      columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
-      self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
+      if hasattr(objectList, '_childClasses'):
+        objectsName = objectList._childClasses[0]._pluralLinkName
+        columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
+        self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
+      else:
+        columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
+        self.table.setObjects(columns)
 
 
   def _getColumns(self, columns, tipTexts):
@@ -62,7 +65,7 @@ class GuiTableGenerator(QtGui.QWidget):
     if len(columns) > 0:
       tableColumns.append(Column(*columns[0], tipText=tipTexts[0]))
 
-    if self.objectList:
+    if self.objectList and hasattr(self.objectList, 'shortClassName'):
       if self.objectList.shortClassName == 'PL':
         numDim = self.objectList._parent.dimensionCount
         for i in range(numDim):

@@ -316,7 +316,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # position is in ppm
     
     inRange = True
-    point = []
+    point = len(position) * [0]
     for n, pos in enumerate(position): # n = 0 is x, n = 1 is y, etc.
       spectrumPos, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
       if dataDim:
@@ -337,8 +337,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             break
         pnt = (dataDim.primaryDataDimRef.valueToPoint(pos)-1) % totalPointCount
         pnt += (dataDim.pointOffset if hasattr(dataDim, "pointOffset") else 0)
-        point.append(pnt)
-        
+        point[dataDim.dim-1] = pnt
+
     return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints
     
   def _updateHTraceData(self, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, hTrace, ph0=None, ph1=None, pivot=None):

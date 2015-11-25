@@ -233,7 +233,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # logOption.addAction(Action(self, "Save As...", callback=self.saveLogFile))
     # logOption.addAction(Action(self, "Clear", callback=self.clearLogFile))
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Get Updates...", self.getUpdates))
     fileMenu.addAction(Action(self, "Summary...", self.displayProjectSummary))
     fileMenu.addAction(Action(self, "Archive...", self.archiveProject))
     fileMenu.addSeparator()
@@ -329,7 +328,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu.addAction(Action(self, "About CCPN...", callback=self.showAboutCcpnPopup))
     helpMenu.addSeparator()
     helpMenu.addAction(Action(self, "Inspect Code...", callback=self.showCodeInspectionPopup))
-    helpMenu.addAction(Action(self, "Check for Upgrades...", callback=self.showUpgradePopup))
+    helpMenu.addAction(Action(self, "Check for Updates...", callback=self.showUpdatePopup))
     helpMenu.addAction(Action(self, "Submit Feedback...", callback=self.showFeedbackPopup))
 
     assignMenu = Menu("&Assign", self)
@@ -568,13 +567,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def clearLogFile(self):
     pass
 
-  def getUpdates(self):
-    
-    if not self.updatePopup:
-      self.updatePopup = UpdatePopup(self)
-    self.updatePopup.show()
-    self.updatePopup.raise_()
-    
   def displayProjectSummary(self):
     info = MessageDialog.showInfo('Not implemented yet',
           'This function has not been implemented in the current version', colourScheme=self.colourScheme)
@@ -842,8 +834,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           colourScheme=self.colourScheme)
 
 
-  def showUpgradePopup(self):
-    pass
+  def showUpdatePopup(self):
+    
+    if not self.updatePopup:
+      self.updatePopup = UpdatePopup(self)
+    self.updatePopup.show()
+    self.updatePopup.raise_()
 
   def showFeedbackPopup(self):
     

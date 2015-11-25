@@ -436,7 +436,6 @@ class SubstanceProperties(WrapperTesting):
                                             name='test polymer substance',
                                             molType='protein',
                                             startNumber=7)
-    # print('@~@~', s)
     # self.assertEqual(s.startNumber, 7)
 
   # def test_PolymerSubstanceCyclicProperties(self):

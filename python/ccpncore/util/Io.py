@@ -555,7 +555,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
       location = ApiPath.getTopObjectPath(project)
       if not absentOrRemoved(location, overwriteExisting, showYesNo):
         project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
-        deleteTemporaryDirectory(project)
+        # deleteTemporaryDirectory(project)
         if undo is not None:
           undo.decreaseBlocking()
         return False
@@ -569,7 +569,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
     else:
       if newProjectName != oldProjectName:
         project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
-        deleteTemporaryDirectory(project)
+        # deleteTemporaryDirectory(project)
         if undo is not None:
           undo.decreaseBlocking()
         logger = _createLogger(project)
@@ -763,29 +763,29 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
     else:
       result = True
 
-
   except:
     # saveModified failed so revert to old values
+    result = None
     if newProjectName != oldProjectName:
       project.__dict__['name'] = oldProjectName  # TBD: for now name is frozen so change this way
+    print("WARNING - error saving. Save did not complete")
     if newPath != oldPath:
       userData.url = oldUrl
       if changeBackup:
         backupRepository.url = oldBackupUrl
-      try:
-        Path.deletePath(newPath)
-      except:
-        pass
+      Path.deletePath(newPath)
+    raise
 
-    result = None
+  finally:
+    if undo is not None:
+      undo.decreaseBlocking()
   
   logger = _createLogger(project)
-  
-  deleteTemporaryDirectory(project)
 
-  if undo is not None:
-    undo.decreaseBlocking()
-  
+  if result and (newProjectName != oldProjectName or newPath != oldPath):
+    # save in newlocation succeded - remove temporary directories
+    deleteTemporaryDirectory(project)
+
   return result
 
 def checkFileAtPath(path):

@@ -287,7 +287,7 @@ class PDBRecord(dict):
                     (dest, srcs) = trans
 
                     for sx in srcs:
-                        if dictx.has_key(dest):
+                        if dest in dictx:
                             try:
                                 dictx[dest].append(rec[sx])
                             except KeyError:
@@ -417,7 +417,7 @@ class CAVEAT(PDBRecord):
             ## add comment
             comment = rec.get("comment")
             if comment is not None:
-                if cav.has_key("comment"):
+                if "comment" in cav:
                     cav["comment"] += comment
                 else:
                     cav["comment"] = comment
@@ -1677,7 +1677,7 @@ class RecordProcessor(object):
         ##       files
 
         ## check for "continuation" field continuous records
-        if prev_rec.has_key("continuation") or rec.has_key("continuation"):
+        if "continuation" in prev_rec or "continuation" in rec:
             prev_continuation = prev_rec.get("continuation", 1)
             continuation = rec.get("continuation", 1)
 
@@ -1687,7 +1687,7 @@ class RecordProcessor(object):
                 return False
 
         ## check for "serNum" continuations
-        if prev_rec.has_key("serNum") or rec.has_key("serNum"):
+        if "serNum" in prev_rec or "serNum" in rec:
             prev_serial = prev_rec.get("serNum", 0)
             serial = rec.get("serNum", 0)
 

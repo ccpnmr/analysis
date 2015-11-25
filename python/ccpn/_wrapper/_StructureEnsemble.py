@@ -35,6 +35,8 @@ from ccpn import Chain
 from ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
 from ccpncore.api.ccp.molecule.MolStructure import Atom as ApiCoordAtom
 
+NaN = float('NaN')
+
 _DATA_ARRAY_TAGS =('coordinateData', 'occupancyData', 'bFactorData')
 # NBNB atomNameData not yet implemented
 # _DATA_ARRAY_TAGS =('coordinateData', 'occupancyData', 'bFactorData', 'atomNameData')
@@ -129,8 +131,8 @@ class StructureEnsemble(AbstractWrapperObject):
       if not data:
         return None
       # We have the data. make cached copy, and return it
-      shape = apiDataMatrix.shape
-      result = self._coordinateData = numpy.reshape(data, shape)
+      result = self._coordinateData = numpy.full(apiDataMatrix.shape, NaN)
+      result.flat = data
       return result
 
 
@@ -138,18 +140,20 @@ class StructureEnsemble(AbstractWrapperObject):
   def coordinateData(self, value):
     apiStructureEnsemble = self._apiStructureEnsemble
     shape = (len(apiStructureEnsemble.models), apiStructureEnsemble.nAtoms, 3)
-    if value.shape !=  shape:
-      raise ValueError("coordinateData value does not match shape %s" % str(shape))
+    data = list(commonUtil.flattenIfNumpy(value, shape=shape))
 
     # Set cached copy to value. NB this is the original, NOT a copy
-    self._coordinateData = value
+    if isinstance(value, numpy.ndarray):
+      self._coordinateData = value
+    else:
+      del self._coordinateData
 
     # Set underlying data values to match
     apiDataMatrix = apiStructureEnsemble.findFirstDataMatrix(name='coordinates')
     if apiDataMatrix is None:
-      apiStructureEnsemble.newDataMatrix(name='coordinates', shape=shape, data=value.flat)
+      apiStructureEnsemble.newDataMatrix(name='coordinates', shape=shape, data=data)
     else:
-      apiDataMatrix.data = value.flat
+      apiDataMatrix.setSubmatrixData((0,0,0), (), data)
 
   @property
   def occupancyData(self) -> numpy.ndarray:
@@ -167,26 +171,28 @@ class StructureEnsemble(AbstractWrapperObject):
       if not data:
         return None
       # We have the data. make cached copy, and return it
-      shape = apiDataMatrix.shape
-      result = self._occupancyData = numpy.reshape(data, shape)
+      result = self._occupancyData = numpy.full(apiDataMatrix.shape, NaN)
+      result.flat = data
       return result
 
   @occupancyData.setter
   def occupancyData(self, value):
     apiStructureEnsemble = self._apiStructureEnsemble
     shape = (len(apiStructureEnsemble.models), apiStructureEnsemble.nAtoms)
-    if value.shape !=  shape:
-      raise ValueError("occupancyData value does not match shape %s" % str(shape))
+    data = list(commonUtil.flattenIfNumpy(value, shape=shape))
 
     # Set cached copy to value. NB this is the original, NOT a copy
-    self._occupancyData = value
+    if isinstance(value, numpy.ndarray):
+      self._occupancyData = value
+    else:
+      del self._occupancyData
 
     # Set underlying data values to match
     apiDataMatrix = apiStructureEnsemble.findFirstDataMatrix(name='occupancies')
     if apiDataMatrix is None:
-      apiStructureEnsemble.newDataMatrix(name='occupancies', shape=shape, data=value.flat)
+      apiStructureEnsemble.newDataMatrix(name='occupancies', shape=shape, data=data)
     else:
-      apiDataMatrix.data = value.flat
+      apiDataMatrix.setSubmatrixData((0,0), (), data)
 
   @property
   def bFactorData(self) -> numpy.ndarray:
@@ -195,7 +201,7 @@ class StructureEnsemble(AbstractWrapperObject):
     It can be modified, but modifications will be kept in cache till the attribute is
     set or the project is saved."""
     if hasattr(self, '_bFactorData'):
-      return self._occupancyData
+      return self._bFactorData
     else:
       apiDataMatrix = self._apiStructureEnsemble.findFirstDataMatrix(name='bFactors')
       if apiDataMatrix is None:
@@ -204,26 +210,28 @@ class StructureEnsemble(AbstractWrapperObject):
       if not data:
         return None
       # We have the data. make cached copy, and return it
-      shape = apiDataMatrix.shape
-      result = self._bFactorData = numpy.reshape(data, shape)
+      result = self._bFactorData = numpy.full(apiDataMatrix.shape, NaN)
+      result.flat = data
       return result
 
   @bFactorData.setter
   def bFactorData(self, value):
     apiStructureEnsemble = self._apiStructureEnsemble
     shape = (len(apiStructureEnsemble.models), apiStructureEnsemble.nAtoms)
-    if value.shape !=  shape:
-      raise ValueError("bFactorData value does not match shape %s" % str(shape))
+    data = list(commonUtil.flattenIfNumpy(value, shape=shape))
 
     # Set cached copy to value. NB this is the original, NOT a copy
-    self._bFactorData = value
+    if isinstance(value, numpy.ndarray):
+      self._bFactorData = value
+    else:
+      del self._bFactorData
 
     # Set underlying data values to match
     apiDataMatrix = apiStructureEnsemble.findFirstDataMatrix(name='bFactors')
     if apiDataMatrix is None:
-      apiStructureEnsemble.newDataMatrix(name='bFactors', shape=shape, data=value.flat)
+      apiStructureEnsemble.newDataMatrix(name='bFactors', shape=shape, data=data)
     else:
-      apiDataMatrix.data = value.flat
+      apiDataMatrix.setSubmatrixData((0,0), (), data)
 
   @property
   def atomNameData(self) -> numpy.ndarray:
@@ -246,6 +254,14 @@ class StructureEnsemble(AbstractWrapperObject):
     else:
       return self.coordinateData[:,apiCoordAtom.index]
 
+  def setAtomCoordinates(self, atomId:str, value:numpy.ndarray):
+    """set nModels * 3 array of coordinates for atom atomId"""
+    apiCoordAtom = self._atomId2CoordAtom(atomId)
+    if apiCoordAtom is None:
+      raise ValueError("atomId %s not found" % atomId)
+    else:
+      self.coordinateData[:,apiCoordAtom.index] = value
+
   def getAtomOccupancies(self, atomId) -> Optional[numpy.ndarray]:
     """get nModels array of occupancies for atom atomId"""
     apiCoordAtom = self._atomId2CoordAtom(atomId)
@@ -253,6 +269,14 @@ class StructureEnsemble(AbstractWrapperObject):
       return None
     else:
       return self.occupancyData[:,apiCoordAtom.index]
+
+  def setAtomOccupancies(self, atomId:str, value:numpy.ndarray):
+    """set nModels array of occupancies for atom atomId"""
+    apiCoordAtom = self._atomId2CoordAtom(atomId)
+    if apiCoordAtom is None:
+      raise ValueError("atomId %s not found" % atomId)
+    else:
+      self.occupancyData[:,apiCoordAtom.index] = value
 
   def getAtomBFactors(self, atomId) -> Optional[numpy.ndarray]:
     """get nModels array of bFactors for atom atomId"""
@@ -262,6 +286,14 @@ class StructureEnsemble(AbstractWrapperObject):
     else:
       return self.bFactorData[:,apiCoordAtom.index]
 
+  def setAtomBFactors(self, atomId:str, value:numpy.ndarray):
+    """set nModels array of bFactors for atom atomId"""
+    apiCoordAtom = self._atomId2CoordAtom(atomId)
+    if apiCoordAtom is None:
+      raise ValueError("atomId %s not found" % atomId)
+    else:
+      self.bFactorData[:,apiCoordAtom.index] = value
+
   def getAtomSpecificNames(self, atomId) -> Optional[numpy.ndarray]:
     """get nModels array of model-specific names for atom atomId"""
     apiCoordAtom = self._atomId2CoordAtom(atomId)
@@ -269,6 +301,14 @@ class StructureEnsemble(AbstractWrapperObject):
       return None
     else:
       return self.atomNameData[:,apiCoordAtom.index]
+
+  def setAtomSpecificNames(self, atomId:str, value:numpy.ndarray):
+    """set nModels array of specific atom names for atom atomId"""
+    apiCoordAtom = self._atomId2CoordAtom(atomId)
+    if apiCoordAtom is None:
+      raise ValueError("atomId %s not found" % atomId)
+    else:
+      self.atomNameData[:,apiCoordAtom.index] = value
 
   @property
   def comment(self) -> str:
@@ -383,7 +423,7 @@ class StructureEnsemble(AbstractWrapperObject):
   def removeAtomIds(self, atomIds:Sequence[str]):
     """Remove atoms with atomIds, adjusting data matrices to fit"""
     for atomId in atomIds:
-      self.removeAtom(atomId)
+      self.removeAtomId(atomId)
 
     # NBNB TBD Maybe add undo code
 
@@ -397,7 +437,7 @@ class StructureEnsemble(AbstractWrapperObject):
     data = {}
     for tag in _DATA_ARRAY_TAGS:
       data[tag] = getattr(self, tag)
-    apiOrderedAtoms = apiAtom.topObject.__dict__['orderedAtoms']
+    # apiOrderedAtoms = apiAtom.topObject.__dict__['orderedAtoms']
 
     # Make new atom record and rearrange to fit
     root = apiAtom.root
@@ -408,16 +448,16 @@ class StructureEnsemble(AbstractWrapperObject):
     undoData = {}
     try:
 
-      # change atoms
+      # # change atoms
       index = apiAtom.index
-      del apiOrderedAtoms[index]
-      for atom in apiOrderedAtoms[index:]:
-        atom.__dict__['index'] -= 1
+      apiAtom.delete()
 
       # reset data arrays
       for tag in _DATA_ARRAY_TAGS:
         xx = data.get(tag)
-        if xx:
+        # if xx:
+        # numpy is DISGUSTING!!
+        if xx is not None and xx.size:
           undoData[tag] = xx[:,apiAtom.index]
           setattr(self, tag, numpy.delete(xx, index, axis=1))
 
@@ -476,23 +516,29 @@ class StructureEnsemble(AbstractWrapperObject):
         if useResidue is None:
           useResidue = useChain.newResidue(seqCode=seqCode, seqInsertCode=seqInsertCode,
                                            code3Letter=residueType)
-        newAtom = useResidue(name=name, index=nextAtomIndex,
-                             elementName=spectrumLib.name2ElementSymbol(name) or 'Unknown')
+        newAtom = useResidue.newAtom(name=name, index=nextAtomIndex,
+                                     elementName=spectrumLib.name2ElementSymbol(name) or 'Unknown')
 
         # reset data arrays
         for tag in _DATA_ARRAY_TAGS:
           xx = data.get(tag)
-          if xx:
+          # if xx:
+          # numpy is DISGUSTING!!
+          if xx is not None and xx.size:
             if tag == 'atomNameData':
               default = name
             else:
-              default = str('NaN')
+              default = NaN
             values = locals().get(tag) or default
-            setattr(self, tag, numpy.insert(xx, nextAtomIndex, values, axis=1))
+            vv = numpy.insert(xx, nextAtomIndex, values, axis=1)
+            setattr(self, tag, vv)
 
-        for atom in apiOrderedAtoms[nextAtomIndex:]:
-          atom.__dict__['index'] += 1
-        apiOrderedAtoms.insert(nextAtomIndex, newAtom)
+        # Move atom to preferred location
+        if nextAtomIndex < apiOrderedAtoms[-1].index:
+          for atom in apiOrderedAtoms[nextAtomIndex:]:
+            atom.__dict__['index'] += 1
+          apiOrderedAtoms.insert(nextAtomIndex, newAtom)
+          del apiOrderedAtoms[-1]
       finally:
         if undo is not None:
           undo.decreaseBlocking()
@@ -507,7 +553,9 @@ class StructureEnsemble(AbstractWrapperObject):
       # reset data arrays
       for tag in _DATA_ARRAY_TAGS:
         xx = data.get(tag)
-        if xx:
+        # if xx:
+        # numpy is DISGUSTING!!
+        if xx is not None and xx.size:
           if tag == 'atomNameData':
             default = name
           else:
@@ -539,10 +587,13 @@ class StructureEnsemble(AbstractWrapperObject):
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
     return parent._wrappedData.molSystem.sortedStructureEnsembles()
 
-def _newStructureEnsemble(self:Project, ensembleId:int, comment:str=None) -> StructureEnsemble:
+def _newStructureEnsemble(self:Project, ensembleId:int=None, comment:str=None) -> StructureEnsemble:
   """Create new, empty ccpn.StructureEnsemble"""
   
   nmrProject = self._wrappedData
+  if ensembleId is None:
+    ll = nmrProject.root.structureEnsembles
+    ensembleId = max(x.ensembleId for x in ll) + 1 if ll else 1
   newApiStructureEnsemble = nmrProject.root.newStructureEnsemble(molSystem=nmrProject.molSystem,
                                                          ensembleId=ensembleId, details=comment)
   return self._data2Obj.get(newApiStructureEnsemble)

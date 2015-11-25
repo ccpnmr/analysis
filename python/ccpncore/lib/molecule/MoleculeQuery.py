@@ -342,7 +342,9 @@ ccpCodeRemap = {
 
 def fetchStdResNameMap(project:'MemopsRoot', reset:bool=False, debug:bool=False):
   """ fetch dict of {residueName:(molType,ccpCode)},
-  using cached value if preseent and not resdet.
+  using cached value if present and not reset.
+
+  NBNB TBD Add naming variants from ChemComp naming systems
   """
 
   chemCompOverview = ChemCompOverview.chemCompOverview
@@ -639,7 +641,9 @@ if __name__ == '__main__':
   from ccpncore.util import Io as ioUtil
   project = ioUtil.newProject('ChemCompNameTest')
   # printCcpCodeStats(project)
-  fetchStdResNameMap(project, reset=True, debug=True)
+  dd = fetchStdResNameMap(project, reset=True, debug=True)
+  for key,val in sorted(dd.items()):
+    print ("%s  %s  %s" % (key, val[0], val[1]))
   # import json
   # data = _parseObsoleteChemCompTable(open('/home/rhf22/rhf22/Dropbox/RHFnotes/ChemComp/ResidueNameMap3.txt'))
   # print(json.dumps(data, sort_keys=True, indent=4))

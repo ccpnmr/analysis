@@ -62,7 +62,7 @@ defaultNmrChainCode = '@-'
 # The expression below has one error:
 # a string of the form '+12' is parsed as (None, '', '+12'}
 # whereas it should be interpreted as (None, '+12', None), but that cannot be helped
-sequenceCodePattern = re.compile('(\d+)?(.*?)(\+\d+|\-\d+)?$')
+sequenceCodePattern = re.compile('(\-?\d+)?(.*?)(\+\d+|\-\d+)?$')
 
 
 

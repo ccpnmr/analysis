@@ -303,6 +303,7 @@ class Project(AbstractWrapperObject):
                        changeBackup=changeBackup, createFallback=createFallback,
                        overwriteExisting=overwriteExisting, checkValid=checkValid,
                        changeDataLocations=changeDataLocations)
+
   
   @property
   def name(self) -> str:
@@ -314,7 +315,7 @@ class Project(AbstractWrapperObject):
     """path of/to Project"""
     return ioUtil.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
 
-  def _flushCachedData(self):
+  def _flushCachedData(self, dummy=None):
     """Flush cached data to ensure up-to-date data are saved"""
     for structureEnsemble in self.structureEnsembles:
       for tag in ('coordinateData', 'occupancyData', 'bFactorData'):
@@ -322,6 +323,7 @@ class Project(AbstractWrapperObject):
         if hasattr(structureEnsemble, _tag):
           # Save cached data back to underlying storage
           setattr(structureEnsemble, tag, getattr(structureEnsemble, _tag))
+          delattr(structureEnsemble, _tag)
 
   def rename(self, name:str) -> None:
     """Rename Project, and rename the underlying API project and the directory stored on disk.

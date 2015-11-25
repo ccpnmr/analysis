@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 """Common utilities
 
-NB Must conform to PYthon 2.1. Imported in ObjectDomain.
+NB Must conform to Python 2.1. Imported in ObjectDomain.
 """
 
 import os
@@ -275,3 +275,23 @@ def isClose(a:float, b:float, relTolerance:float=1e-05, absTolerance=1e-08) -> b
 
   Inspired by numpy.isclose()"""
   return (abs(a - b) <= (absTolerance + relTolerance * abs(b)))
+
+def flattenIfNumpy(data, shape=None):
+  """If data are Numpy, convert to flat array
+  If shape is given, check that numpy fits shape, and flat sequence fits total number of elements"""
+
+  if hasattr(data, 'flat'):
+    # Numpy array
+    if shape and data.shape != tuple(shape):
+      raise ValueError("Shape of array data is %s, should be %s" % (data.shape, shape))
+    data = data.flat
+
+  elif shape:
+      elementCount = 1
+      for x in shape:
+        elementCount *= x
+      if len(data) != elementCount:
+        raise ValueError("Number of elements in data sequence is %s, should be %s"
+                         % (len(data), elementCount))
+  #
+  return data

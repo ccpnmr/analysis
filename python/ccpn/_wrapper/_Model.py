@@ -23,12 +23,13 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import numpy
+from ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
+from ccpncore.util.Types import Sequence
+from ccpncore.util import Common as commonUtil
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import StructureEnsemble
 # from ccpncore.util import Pid
-from ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
-from ccpncore.util.Types import Sequence
 
 
 class Model(AbstractWrapperObject):
@@ -67,7 +68,7 @@ class Model(AbstractWrapperObject):
     """ccpn.StructureEnsemble containing ccpn.Model."""
     return  self._project._data2Obj[self._wrappedData.structureEnsemble]
   
-  restraintSet = _parent
+  structureEnsemble = _parent
   
   @property
   def name(self) -> str:
@@ -138,17 +139,31 @@ class Model(AbstractWrapperObject):
     """get wrappedData - all Model children of parent StructureEnsemble"""
     return parent._wrappedData.sortedModels()
 
-
 def _newModel(self:StructureEnsemble, name:str=None, comment:str=None,
               coordinateData:numpy.ndarray=None,
               bFactorData:Sequence[float]=None,
               occupancyData:Sequence[float]=None) -> Model:
-  """Create new Model"""
+  """Create new Model. coordinateData can be a numpy.ndarray of the right shape,
+  or any nested list or tuple
+   representation that contains the right number of elements"""
 
-  structureEnaemble = self._wrappedData
-  newApiModel = structureEnaemble.newModel(name=name, details=comment)
+  structureEnsemble = self._wrappedData
+
   if coordinateData:
-    newApiModel.setSubmatrixData('coordinates', coordinateData.flat)
+    atomCount = structureEnsemble.nAtoms
+    # Sanity check - filter out (most?) wrongly shaped arrays
+    if hasattr(coordinateData, 'shape'):
+      if coordinateData.shape != (atomCount,3):
+        raise ValueError("numpy.ndarray input not of correct shape (%s,3)" % atomCount)
+    else:
+      if len(coordinateData) not in (atomCount, 3*atomCount):
+        raise ValueError("nested sequence input does not match %s*3 array" % atomCount)
+
+    coordinateData = commonUtil.flattenIfNumpy(coordinateData, shape=(atomCount,3))
+
+  newApiModel = structureEnsemble.newModel(name=name, details=comment)
+  if coordinateData:
+    newApiModel.setSubmatrixData('coordinates', coordinateData)
   if occupancyData:
     newApiModel.setSubmatrixData('occupancies', occupancyData)
   if bFactorData:
@@ -158,7 +173,7 @@ def _newModel(self:StructureEnsemble, name:str=None, comment:str=None,
     if hasattr(self, tag):
       delattr(self, tag)
   #
-  return self._data2Obj.get(newApiModel)
+  return self._project._data2Obj.get(newApiModel)
 
 
 # Connections to parents:
@@ -173,6 +188,7 @@ className = ApiModel._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':Model}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete'),
+    ('_flushCachedData', {}, className, 'preDelete'),
   ('_finaliseUnDelete', {}, className, 'undelete')
   )
 )

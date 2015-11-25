@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+NaN = float('NaN')
 from ccpncore.lib.Io import PyMMLibPDB as PdbLib
 from ccpncore.util.Types import List, Tuple
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
@@ -32,14 +33,15 @@ class PdbRecordProcessor(PdbLib.RecordProcessor):
   def process_ATOM(self, rec):
     """fix atom record - make only globally acceptable changes, special-case stuff is for later"""
 
-    name = rec['name']
+    name = rec.get('name')
+    # If no name it cannot be fixed.
     if name[0].isdigit():
       # move leading digit to end of atom name
       rec['name'] = name[1:] + name[0]
 
-    if not rec['chainID'].strip():
+    if not rec.get('chainID', '').strip():
       # replace empty chainID with seqID if length is suitable
-      seqId = rec['seqID'].strip()
+      seqId = rec.get('seqID', '').strip()
       if len(seqId) == 1:
         rec['chainID'] = seqId
       else:
@@ -106,44 +108,50 @@ def loadStructureEnsemble(molSystem:"MolSystem", fil) -> "StructureEnsemble":
     # NBNB TBD check that names match in different models
 
     memopsRoot = molSystem.root
-    nextId = max(x.ensembleId for x in molSystem.structureEnsembles) + 1
-    apiEnsemble = memopsRoot.newStructureEnsemble(molSystem=molSystem, ensembleId = nextId)
+    ll = [x.ensembleId for x in molSystem.structureEnsembles]
+    nextId = max(ll) + 1 if ll else 1
+    apiEnsemble = memopsRoot.newStructureEnsemble(molSystem=molSystem, ensembleId=nextId)
 
     for rec in data[0]:
-      chain = (apiEnsemble.findFirstCoordChain(code=rec['chainID']) or
-               apiEnsemble.newChain(code=rec['chainID']))
-      residue = (chain.findFirstResidue(seqCode=rec['resSeq'], seqInsertCode=rec['iCode'] or ' ') or
-                 chain.newResidue(seqCode=rec['resSeq'], seqInsertCode=rec['iCode'] or ' ',
-                                  code3Letter=rec['resName']))
+      chain = (apiEnsemble.findFirstCoordChain(code=rec.get('chainID')) or
+               apiEnsemble.newChain(code=rec.get('chainID')))
+      residue = (chain.findFirstResidue(seqCode=rec.get('resSeq'),
+                                        seqInsertCode=rec.get('iCode', ' ')) or
+                 chain.newResidue(seqCode=rec.get('resSeq'), seqInsertCode=rec.get('iCode', ' '),
+                                  code3Letter=rec.get('resName')))
 
       # NBNB Heuristic. We need an elementName
-      elementName = rec['element'] or spectrumLib.name2ElementSymbol(rec['name']) or 'Unknown'
+      elementName = rec.get('element') or spectrumLib.name2ElementSymbol(rec.get('name')) or 'Unknown'
       # NBNB wil likely break with altLocated atoms. Meanwhile do it right
-      residue.newAtom(name=rec['name'], altLocationCode=rec['altLoc'],
+      residue.newAtom(name=rec.get('name'), altLocationCode=rec.get('altLoc', ' '),
                       elementName=elementName.title())
 
-    coordinates = []
-    addCoordinate = coordinates.append
-    occupancies = []
-    addOccupancy = occupancies.append
-    bFactors = []
-    addBFactor = bFactors.append
-    # NBNB TBD Add atomNames array
 
     # Gather data
     # NBNB TBD atomNameData need doing
-    for model in data:
-      for rec in model:
-        addCoordinate(rec['x'])
-        addCoordinate(rec['y'])
-        addCoordinate(rec['z'])
-        addOccupancy(rec['occupancy'])
-        addBFactor(rec['tempFactor'])
+    for modelData in data:
+      apiModel = apiEnsemble.newModel()
+      coordinates = []
+      addCoordinate = coordinates.append
+      occupancies = []
+      addOccupancy = occupancies.append
+      bFactors = []
+      addBFactor = bFactors.append
+      # NBNB TBD Add atomNames array
+      for rec in modelData:
+        addCoordinate(rec.get('x', NaN))
+        addCoordinate(rec.get('y', NaN))
+        addCoordinate(rec.get('z', NaN))
+        addCoordinate(rec.get('occupancy', NaN))
+        addCoordinate(rec.get('tempFactor', NaN))
+      apiModel.setSubmatrixData('coordinates', coordinates)
+      apiModel.setSubmatrixData('occupancies', occupancies)
+      apiModel.setSubmatrixData('bFactors', bFactors)
 
     # Set data
-    apiEnsemble.newDataMatrix(name='coordinates', shape=(modelCount, atomCount,3), data=coordinates)
-    apiEnsemble.newDataMatrix(name='occupancies', shape=(modelCount, atomCount), data=occupancies)
-    apiEnsemble.newDataMatrix(name='bFactors', shape=(modelCount, atomCount), data=bFactors)
+    # apiEnsemble.findFirstDataMatrix(name='coordinates', shape=(modelCount, atomCount,3), data=coordinates)
+    # apiEnsemble.newDataMatrix(name='occupancies', shape=(modelCount, atomCount), data=occupancies)
+    # apiEnsemble.newDataMatrix(name='bFactors', shape=(modelCount, atomCount), data=bFactors)
 
     #
     return apiEnsemble

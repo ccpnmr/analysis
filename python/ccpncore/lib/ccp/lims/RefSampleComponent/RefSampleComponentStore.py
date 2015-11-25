@@ -46,12 +46,13 @@ def fetchMolComponent(self:"RefSampleComponentStore", molecule:Molecule,
     molecule.isFinalised = True
     seqString = molecule.seqString or '(%s)' % ','.join(x.code3Letter
                                                         for x in molecule.sortedMolResidues())
+    # Make new MolComponent
     result = self.newMolComponent(name=name, labeling=labeling, synonyms=molecule.commonNames,
                                   details=molecule.details, smiles=molecule.smiles,
                                   empiricalFormula=molecule.empiricalFormula,
                                   molecularMass=molecule.molecularMass,
                                   molType=molecule.molType, seqString=seqString)
-  else:
+  elif result.className != 'MolComponent':
     self.root._logger.error("Molecule %s matches Substance of incorrect type: %s"
     % (molecule, result))
   #

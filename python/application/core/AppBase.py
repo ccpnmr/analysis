@@ -232,7 +232,7 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   styleSheet = getStyleSheet(preferences)
   app.setStyleSheet(styleSheet)
   
-  #if checkRegistration(applicationVersion):
-  program = programClass(apiProject, applicationName, applicationVersion, preferences, components)
-  app.start()
+  if checkRegistration(applicationVersion):
+    program = programClass(apiProject, applicationName, applicationVersion, preferences, components)
+    app.start()
   

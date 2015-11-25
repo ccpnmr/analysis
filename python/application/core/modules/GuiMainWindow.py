@@ -428,7 +428,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Adds a Blank Display to the main window if one does not already exist."""
     if not hasattr(self, 'blankDisplay') or self.blankDisplay is None:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
-
+    else:
+      self.dockArea.addDock(self.blankDisplay, 'right')
 
   def showSequence(self):
     """

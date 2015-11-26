@@ -1,19 +1,17 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from ccpncore.gui.Base import Base
-from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.TextEditor import TextEditor
 
 from ccpncore.util import Types
-from IPython.qt.console.completion_widget import CompletionWidget
 from ccpncore.gui.Widget import Widget
 from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
 
 
 
-class IpythonConsole(QtGui.QWidget, Base):
+class IpythonConsole(Widget, Base):
 
-    def __init__(self, parent=None, namespace=None, historyFile=None, **kw):
+    def __init__(self, parent=None, namespace=None, mainWindow=None, historyFile=None, **kw):
 
         Widget.__init__(self)
         Base.__init__(self, **kw)
@@ -23,6 +21,7 @@ class IpythonConsole(QtGui.QWidget, Base):
         km.kernel.gui = 'qt4'
         kc = km.client()
 
+        self.mainWindow = mainWindow
         self.ipythonWidget = RichIPythonWidget(self, gui_completion='plain')
         self.ipythonWidget._set_font(QtGui.QFont('Lucida Grande', 12))
         self.ipythonWidget.kernel_manager = km
@@ -86,9 +85,9 @@ class IpythonConsole(QtGui.QWidget, Base):
       else:
         # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
         self.textEditor.insertPlainText(msg)
-        self.parent().parent().statusBar().showMessage(msg)
-      if self.parent().parent().recordingMacro is True:
-        self.parent().parent().macroEditor.textBox.insertPlainText(msg)
+        self.mainWindow.statusBar().showMessage(msg)
+      if self.mainWindow.recordingMacro is True:
+        self.mainWindow.macroEditor.textBox.insertPlainText(msg)
 
       # if hasattr(self, 'project'):
       #   undo = self.project._undo
@@ -133,7 +132,7 @@ class IpythonConsole(QtGui.QWidget, Base):
       self.write(msg1)
 
     def writeWrapperCommand(self, objectNames:Types.List[str], wrapperCommand:str, pid:str,
-                            args:Types.List[str]):
+                            args:str):
       """
       Writes a command dealing with ccpn objects to the console text box.
       """

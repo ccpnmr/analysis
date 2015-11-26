@@ -51,15 +51,15 @@ class SpinSystemLabel(DropBase, Label):
     """
 
     for pid in pids:
-      if wrapperObject.guiSpectrumDisplay.pid == self.strip.guiSpectrumDisplay.pid:
-        return
+
       current = self._appBase.current
       project = self._appBase.project
       direction = pid[-2:]
       processedPid = pid[:-2]
       wrapperObject = self._appBase.getByPid(processedPid)
       nmrResidue = wrapperObject.planeToolbar.spinSystemLabel.text()
-
+      if wrapperObject.guiSpectrumDisplay.pid == self.strip.guiSpectrumDisplay.pid:
+        return
       if direction == '-1':
         sinkIndex = self._appBase.getByPid(self.strip.pid)._wrappedData.index
 

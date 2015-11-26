@@ -169,24 +169,28 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                       'newProject':self._appBase.newProject, 'loadData':self.loadData, 'application':self,
                       'preferences':self._appBase.preferences, 'project':self._project, 'current':self._appBase.current}
 
-    self.pythonConsole = IpythonConsole(self, self.namespace)
+    self.pythonConsole = IpythonConsole(self, self.namespace, mainWindow=self)
+
+    # self.pythonConsoleDock.layout.addWidget(self.pythonConsole)
+    # self.pythonConsoleDock.label.hide()
+    # self.dockArea.addDock(self.pythonConsoleDock, 'bottom')
+    # self.pythonConsoleDock.hide()
     self.sideBar = SideBar(parent=self)
     self.sideBar.setDragDropMode(self.sideBar.DragDrop)
     self.sideBar.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.splitter3.addWidget(self.sideBar)
     self.splitter1.addWidget(self.splitter3)
-    self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
+    # self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
     # self.splitter1.setStretchFactor(0, 2)
-    self.splitter2.addWidget(self.splitter1)
+    # self.splitter2.addWidget(self.splitter1)
     self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
-    self.splitter2.addWidget(self.pythonConsole)
-    self.splitter2.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Minimum)
-    self.splitter2.setStretchFactor(0, 10)
-    self.splitter2.setStretchFactor(1, 1)
+    # self.splitter2.addWidget(self.pythonConsole)
+    # self.splitter2.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Minimum)
+    # self.splitter2.setStretchFactor(0, 10)
+    # self.splitter2.setStretchFactor(1, 1)
 
-    self.pythonConsole.hide()
     self.splitter1.addWidget(self.dockArea)
-    self.setCentralWidget(self.splitter2)
+    self.setCentralWidget(self.splitter1)
     self.statusBar().showMessage('Ready')
     self.setShortcuts()
 
@@ -737,10 +741,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Toggles whether python console is displayed at bottom of the main window.
     """
 
-    if self.pythonConsole.isVisible():
-      self.hideConsole()
+    if hasattr(self, 'pythonConsoleDock'):
+      if self.pythonConsoleDock.isVisible():
+        self.hideConsole()
+      else:
+        self.showConsole()
     else:
-      self.showConsole()
+      self.pythonConsoleDock = CcpnDock(name='Python Console')
+      self.pythonConsoleDock.layout.addWidget(self.pythonConsole)
+      self.pythonConsoleDock.label.hide()
+      self.dockArea.addDock(self.pythonConsoleDock, 'bottom')
 
 
   def editMacro(self):
@@ -982,11 +992,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     
   def hideConsole(self):
     """Hides python console"""
-    self.pythonConsole.hide()
+    self.pythonConsoleDock.hide()
 
   def showConsole(self):
     """Displays python console"""
-    self.pythonConsole.show()
+    self.pythonConsoleDock.show()
 
   # def showPopupGenerator(self):
   #   from application.core.modules.GuiPopupGenerator import PopupGenerator

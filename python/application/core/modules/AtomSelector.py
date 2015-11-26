@@ -111,6 +111,9 @@ class AtomSelector(CcpnDock):
         if newNmrAtom._apiResonance.isotopeCode == isotopeCode:
           axisCode = peak.peakList.spectrum.axisCodes[dim]
           peak.assignDimension(axisCode=axisCode, value=[newNmrAtom])
+          self.pythonConsole.writeWrapperCommand(objectNames=['peak', 'newAssignment'],
+                                                 wrapperCommand='assignDimension', pid=peak.pid,
+                                                 args='axisCode="%s", value=[newNmrAtom]' % axisCode)
       else:
           pass
     self._returnButtonsToNormal()

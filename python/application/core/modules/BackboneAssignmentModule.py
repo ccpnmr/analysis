@@ -62,7 +62,6 @@ class BackboneAssignmentModule(CcpnDock):
                                 callback=self._showMatchDisplayPopup, grid=(0, 3))
 
     self.layout.addWidget(self.nmrResidueTable, 0, 0, 1, 3)
-    self._setupShiftDicts()
 
 
   def startAssignment(self, nmrResidue:NmrResidue, row:int=None, col:int=None):
@@ -70,7 +69,9 @@ class BackboneAssignmentModule(CcpnDock):
     Initiates assignment procedure when triggered by selection of an NmrResidue from the nmrResidueTable
     inside the module.
     """
-    self.assigner.clearAllItems()
+    self._setupShiftDicts()
+    if self.assigner:
+      self.assigner.clearAllItems()
     self.navigateTo(nmrResidue, row, col)
 
   def navigateTo(self, nmrResidue:NmrResidue, row:int=None, col:int=None, strip:GuiStrip=None):

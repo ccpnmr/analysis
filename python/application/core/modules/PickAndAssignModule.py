@@ -21,13 +21,14 @@ class PickAndAssignModule(CcpnDock, Base):
     spacingLabel.setFixedHeight(15)
     self.layout.addWidget(spacingLabel, 0, 1, 1, 1)
 
-    self.restrictedPickButton = Button(self, text='Restricted Pick', callback=self.restrictedPick)
-    self.layout.addWidget(self.restrictedPickButton, 1, 2, 1, 1)
+
 
     self.project = project
     self.current = project._appBase.current
     # self.peakTable = PeakListSimple(self, project=project, callback=self.goToPositionInModules)
     self.nmrResidueTable = NmrResidueTable(self, project=project, callback=self.goToPositionInModules)
+    self.restrictedPickButton = Button(self.nmrResidueTable, text='Restricted Pick', callback=self.restrictedPick, grid=(0, 2))
+    # self.layout.addWidget(self.restrictedPickButton, 1, 2, 1, 1)
     self.layout.addWidget(spacingLabel, 2, 1, 1, 1)
 
     self.layout.addWidget(self.nmrResidueTable, 4, 0, 1, 4)

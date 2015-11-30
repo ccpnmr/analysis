@@ -60,13 +60,13 @@ def readParams(paramFileName):
   
   intVals = array('i')
   floatVals = array('f')
-  cBuffer = array('c')
+  cBuffer = array('B')
   
   intVals.fromstring(headData)
   floatVals.fromstring(headData)
   cBuffer.fromstring(headData)
   
-  magicBytes = tuple(["%02X" % ord(byte) for byte in cBuffer[:4]])
+  magicBytes = tuple(["%02X" % byte for byte in cBuffer[:4]])
       
   if magicBytes not in byteOrderFlags:
     msg = 'NmrView file %s appears to be corrupted: does not start with the expected magic bytes'
@@ -159,7 +159,7 @@ def _guessConsistentNuclei(sf):
       bestSum  = 0
 
       for sf in sfs:          
-        best  = int(float(sys.maxint))
+        best  = int(float(sys.maxsize))
         
         for i,pair in enumerate(zip(ratios,nuclei)):
         
@@ -176,8 +176,7 @@ def _guessConsistentNuclei(sf):
       
       bestSets[bestSum] = currentSet
   
-    keys = bestSets.keys()
-    keys.sort()
+    keys = sorted(bestSets.keys())
   
     nucleiLookup = {}
     for matches in bestSets[keys[0]]:

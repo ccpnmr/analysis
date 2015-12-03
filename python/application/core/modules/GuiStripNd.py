@@ -128,10 +128,10 @@ class GuiStripNd(GuiStrip):
     resetZoomIcon = Icon('iconsNew/zoom-full')
     resetZoomAction.setIcon(resetZoomIcon)
     resetZoomAction.setToolTip('Reset Zoom')
-    printAction = self.contextMenu.addAction("Print to File...", self.printToFile)
+    printAction = self.contextMenu.addAction("Print to File...", self.printDisplayToFile)
     printIcon = Icon('iconsNew/print')
     printAction.setIcon(printIcon)
-    printAction.setToolTip('Print Strip to File')
+    printAction.setToolTip('Print Spectrum Display to File')
 
     self.crossHairAction.setChecked(self.vLine.isVisible())
 
@@ -142,6 +142,10 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
 
+  def printDisplayToFile(self):
+    
+    self.spectrumDisplay.window.printToFile()
+    
   def resetZoom(self):
     """
     Resets zoom of strip axes to limits of maxima and minima of the limits of the displayed spectra.

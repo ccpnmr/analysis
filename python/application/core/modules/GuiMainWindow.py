@@ -222,7 +222,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
     fileMenu.addAction(Action(self, "Save As...", shortcut="sa", callback=self.saveProjectAs))
-    fileMenu.addAction(Action(self, "Print...", shortcut="pr", callback=self.printToFile))
+    ###fileMenu.addAction(Action(self, "Print...", shortcut="pr", callback=self.printToFile))
 
     #NBNB How are we going to implement this?
     # backupOption = fileMenu.addMenu("Backup")

@@ -128,7 +128,7 @@ class GuiStripNd(GuiStrip):
     resetZoomIcon = Icon('iconsNew/zoom-full')
     resetZoomAction.setIcon(resetZoomIcon)
     resetZoomAction.setToolTip('Reset Zoom')
-    printAction = self.contextMenu.addAction("Print to File...", self.printDisplayToFile)
+    printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
     printIcon = Icon('iconsNew/print')
     printAction.setIcon(printIcon)
     printAction.setToolTip('Print Spectrum Display to File')
@@ -141,10 +141,6 @@ class GuiStripNd(GuiStrip):
       self.gridAction.setChecked(False)
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
-
-  def printDisplayToFile(self):
-    
-    self.spectrumDisplay.window.printToFile()
     
   def resetZoom(self):
     """

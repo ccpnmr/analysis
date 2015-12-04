@@ -976,10 +976,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           return
       self._appBase.saveProject(newPath=newPath)#, newProjectName=os.path.basename(newPath))
 
-  def printToFile(self):
+  def printToFile(self, spectrumDisplay=None):
     
     current = self._appBase.current
-    spectrumDisplay = current.spectrumDisplay
+    if not spectrumDisplay:
+      spectrumDisplay = current.spectrumDisplay
     if not spectrumDisplay and current.strip:
       spectrumDisplay = current.strip.spectrumDisplay
     if not spectrumDisplay and self.spectrumDisplays:

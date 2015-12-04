@@ -172,7 +172,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     for spectrumView in self.spectrumViews:
       spectrumView.printToFile(printer)
     
-    # print ticks
+    # print ticks and grid line
     viewRegion = self.plotWidget.viewRange()
     v1, v0 = viewRegion[0]  # TBD: relies on axes being backwards
     w1, w0 = viewRegion[1]  # TBD: relies on axes being backwards, which is not true in 1D
@@ -193,20 +193,24 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     xTickHeight = yTickHeight = max(printer.y1-printer.y0, printer.x1-printer.x0)*0.01
     
     for tick in xMinorTicks:
-      printer.writeLine(tick,printer.y0,tick,printer.y0+0.5*xTickHeight)
+      printer.writeLine(tick, printer.y0, tick, printer.y0+0.5*xTickHeight)
 
     fontsize = 10
     for n, tick in enumerate(xMajorTicks):
-      printer.writeLine(tick,printer.y0,tick,printer.y0+xTickHeight)
+      if self.grid.isVisible():
+        printer.writeLine(tick, printer.y0, tick, printer.y1, colour='#888888')
+      printer.writeLine(tick, printer.y0, tick, printer.y0+xTickHeight)
       text = xMajorText[n]
       printer.writeText(text, tick-0.5*len(text)*fontsize*0.7, printer.y0+xTickHeight+1.5*fontsize)
 
     # output backwards for y
     for tick in yMinorTicks:
-      printer.writeLine(printer.x0,printer.y1-tick,printer.x0+0.5*yTickHeight,printer.y1-tick)
+      printer.writeLine(printer.x0, printer.y1-tick, printer.x0+0.5*yTickHeight, printer.y1-tick)
 
     for n, tick in enumerate(yMajorTicks):
-      printer.writeLine(printer.x0,printer.y1-tick,printer.x0+yTickHeight,printer.y1-tick)
+      if self.grid.isVisible():
+        printer.writeLine(printer.x0, printer.y1-tick, printer.x1, printer.y1-tick, colour='#888888')
+      printer.writeLine(printer.x0, printer.y1-tick, printer.x0+yTickHeight, printer.y1-tick)
       text = yMajorText[n]
       printer.writeText(text, printer.x0+yTickHeight+0.5*fontsize*0.7, printer.y1-tick+0.5*fontsize)
 

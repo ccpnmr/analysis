@@ -218,6 +218,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addAction(Action(self, "Open...", callback=self.loadAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self._fillRecentProjectsMenu()
+    fileMenu.addAction(Action(self, "Load Spectrum", callback=lambda: self.loadData(text='Load Spectrum'), shortcut='ls'))
     fileMenu.addAction(Action(self, "Load Data", callback=self.loadData, shortcut='ld'))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))

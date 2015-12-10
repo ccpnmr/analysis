@@ -372,7 +372,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def _queryCloseProject(self, title, phrase):
     
     project = self._appBase.project
-    if project._wrappedData.parent.isProjectModified():
+    apiProject = project._wrappedData.root
+    if hasattr(apiProject, '_temporaryDirectory'):
+      return True
+    
+    if apiProject.isProjectModified():
       ss = ' and any changes will be lost'
     else:
       ss = ''

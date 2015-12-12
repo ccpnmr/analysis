@@ -102,20 +102,28 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
       try:
         spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(ss)
         self.dockArea.guiWindow.deleteBlankDisplay()
-        msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
-        self.dockArea.window().pythonConsole.write(msg)
+        # msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
+        # self.dockArea.window().pythonConsole.write(msg)
+        # self.dockArea.window().pythonConsole.writeCommand('spectrum',
+        #                                                   'application.createSpectrumDisplay',
+        #                                                   arguments=['spectrum'], pid=ss)
+        # NBNB Modified - was wrong before. RHF
+        self.pythonConsole.writeConsoleCommand("window.createSpectrumDisplay(spectrum)",
+                                               spectrum=ss, window=self.dockArea.guiWindow)
       except NotImplementedError:
         pass
 
-  def processSamples(self, pids:Sequence[str], event):
-    for ss in pids:
-      spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
-      spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
-      for sp in spectrumPids[1:]:
-        spectrumDisplay.displaySpectrum(sp)
-      self.dockArea.guiWindow.deleteBlankDisplay()
-      # msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
-      self.dockArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay', 'sample', pid=ss)
+  # NBNB TBD FIXME This function is WRONG - is displays spectra!
+  # def processSamples(self, pids:Sequence[str], event):
+  #   for ss in pids:
+  #     spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
+  #     spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
+  #     for sp in spectrumPids[1:]:
+  #       spectrumDisplay.displaySpectrum(sp)
+  #     self.dockArea.guiWindow.deleteBlankDisplay()
+  #     # msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
+  #     self.dockArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay',
+  #                                                       'sample', pid=ss)
 
   # def processSpectrum(self, spectrum:(Spectrum,Pid), event):
   #   """Process dropped spectrum"""

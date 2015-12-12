@@ -16,12 +16,123 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 __author__ = "$Author$"
 __date__ = "$Date$"
-__version__ = "$Revision$"
+__version__ = "$Revisgion: 8885 $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
 from ccpn.testing.WrapperTesting import WrapperTesting
+
+class NmrStretchTest(WrapperTesting):
+
+  # Path of project to load (None for new project
+  projectPath = None
+
+  def setUp(self):
+
+    with self.initialSetup():
+      self.chain = self.project.createChain(sequence='QWERTYIPASD', molType='protein',
+                                            shortName='X')
+
+  def test_connect_nmr_residues_1(self):
+    nmrChain = self.project.fetchNmrChain(shortName='@-')
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'GLY', 'CYS', 'GLN'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    print('@~@~', [x.sequenceCode for x in nmrResidues])
+
+    nmrResidues[0].connectPrevious(nmrResidues[1])
+    print('@~@~', nmrResidues[0].nmrChain)
+    print('@~@~', nmrResidues[0].nmrChain.mainNmrResidues)
+    print('@~@~', nmrResidues[0].nextNmrResidue)
+    print('@~@~', nmrResidues[0].previousNmrResidue)
+
+    nmrResidues[-1].connectNext(nmrResidues[-2])
+    print('@~@~', nmrResidues[-1].nmrChain)
+    print('@~@~', nmrResidues[-1].nextNmrResidue)
+    print('@~@~', nmrResidues[-1].previousNmrResidue)
+
+    nmrResidues[2].connectNext(nmrResidues[-1])
+    nmrChain2 =  nmrResidues[2].nmrChain
+    print('@~@~', nmrChain2)
+    print('@~@~', nmrResidues[2].nmrChain.mainNmrResidues)
+    nmrResidues[2].connectPrevious(nmrResidues[0])
+
+    stretch = nmrChain2.mainNmrResidues
+    print ('@~@~', stretch)
+
+    try:
+      stretch[-1].connectNext(stretch[0])
+      print ('@~@~ WARNING circular stretch', stretch)
+    except:
+      print ('@~@~ OK, cannot make circular stretch', stretch)
+
+  def test_disconnect_nmr_residues_2(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'GLY', 'CYS', 'GLN'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+
+    nmrChain.mainNmrResidues = nmrResidues
+    print ('@~@~', nmrChain.nmrResidues)
+    nmrResidues[-1].disconnectNext()
+    print ('@~@~', nmrChain.nmrResidues)
+    nmrResidues[-1].disconnectPrevious()
+    print ('@~@~', nmrChain.nmrResidues)
+    print('@~@~', nmrResidues[-1].nmrChain)
+    nmrResidues[-2].disconnect()
+    for nr in nmrResidues:
+      print('@~@~', nr.nmrChain)
+    nmrResidues[1].disconnectPrevious()
+    for nr in nmrResidues:
+      print('@~@~', nr.nmrChain)
+
+  def test_disconnect_nmr_residue_triplet(self):
+    nmrChain = self.project.fetchNmrChain(shortName='@-')
+    nmrResidues = []
+    for residueType in ('TRP', 'THR', 'TYR'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain2 = self.project.newNmrChain(isConnected=True)
+    nmrChain2.mainNmrResidues = nmrResidues
+    print ('@~@~', nmrChain2.nmrResidues)
+    nmrChain2.mainNmrResidues[1].disconnect()
+    for nr in nmrResidues:
+      print('@~@~', nr.nmrChain)
+
+  def test_assigning_connected_stretch(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    residues = self.chain.residues
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'GLY', 'CYS', 'GLN'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    try:
+      nmrResidues[1].assignTo(residues[2].id)
+      print('@~@~ WARNING assign middle of stretch', nmrResidues[1])
+    except:
+      print('@~@~ OK. cannot assign middle of stretch', nmrResidues[1])
+
+    nmrResidues[0].residue = residues[5]
+
+    try:
+      nmrChain.assignConnectedResidues(residues[3])
+      print('@~@~ WARNING assignment clash 1')
+    except:
+      print('@~@~ OK, connected stretch assign should clash 1')
+
+    try:
+      nmrChain.assignConnectedResidues(residues[-2])
+      print('@~@~ WARNING assignment clash 2')
+    except:
+      print('@~@~ OK, connected stretch assign should clash 2')
+
+    nmrChain.assignConnectedResidues(residues[1])
+    assignedNmrChain = self.project.getByPid('NC:X')
+    print ('@~@~', assignedNmrChain)
+    print ('@~@~', assignedNmrChain.nmrResidues)
+
+
+
+
 
 class NmrResidueTest(WrapperTesting):
 
@@ -44,7 +155,7 @@ class NmrResidueTest(WrapperTesting):
     self.assertEqual(target.longPid, "NmrResidue:A.@11.LYS")
     newNr = nchain0.newNmrResidue()
     self.assertEqual(newNr.longPid, "NmrResidue:@-.@89.")
-    nr3.nmrChain = nchain0
+    nr3.resetNmrChain(nchain0)
     self.assertEqual(nr3.longPid, "NmrResidue:@-.3.GLU")
     newNr.residue = res3
     self.assertEqual(newNr.longPid, "NmrResidue:A.3.GLU")
@@ -62,16 +173,17 @@ class NmrResidueTest(WrapperTesting):
     nr1, nr2 = nchain.nmrResidues[9:11]
     self.assertEqual(nr1.id, "A.10.TYR")
     nr1.deassign()
-    self.assertEqual(nr1.id, "@-.@1.")
+    self.assertEqual(nr1.id, "A.@1.")
     nr1.rename('999')
-    self.assertEqual(nr1.id, "@-.999.")
+    self.assertEqual(nr1.id, "A.999.")
     nr1.rename('999.ALA')
-    self.assertEqual(nr1.id, "@-.999.ALA")
+    self.assertEqual(nr1.id, "A.999.ALA")
     nr1.rename('998.VAL')
-    self.assertEqual(nr1.id, "@-.998.VAL")
+    self.assertEqual(nr1.id, "A.998.VAL")
     nr1.rename('.TYR')
-    self.assertEqual(nr1.id, "@-.@1.TYR")
+    self.assertEqual(nr1.id, "A.@1.TYR")
     nr1.rename('997')
+    nr1.resetNmrChain()
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
@@ -106,7 +218,7 @@ class NmrResidueTest(WrapperTesting):
 
 
   def test_fetchNmrResidue(self):
-    nmrChain = self.project.fetchNmrChain(shortName='@1')
+    nmrChain = self.project.fetchNmrChain()
     res1 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
     res2 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
     self.assertIs(res1, res2)
@@ -114,10 +226,10 @@ class NmrResidueTest(WrapperTesting):
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
-    self.assertEqual(obj.pid, 'NR:@1.515.')
+    self.assertEqual(obj.pid, 'NR:@%s.515.' % nmrChain._wrappedData.serial)
 
   def test_fetchEmptyNmrResidue(self):
-    nmrChain = self.project.fetchNmrChain(shortName='@1')
+    nmrChain = self.project.fetchNmrChain(shortName='@-')
     res1 = nmrChain.fetchNmrResidue(sequenceCode=None, residueType="ALA")
     sequenceCode = '@%s' % res1._wrappedData.serial
     self.assertEqual(res1.sequenceCode, sequenceCode)
@@ -128,7 +240,7 @@ class NmrResidueTest(WrapperTesting):
     self.assertIs(res1, res2)
 
   def test_offsetNmrResidue(self):
-    nmrChain = self.project.fetchNmrChain(shortName='@1')
+    nmrChain = self.project.fetchNmrChain(shortName='@-')
     res1 = nmrChain.fetchNmrResidue(sequenceCode="127B", residueType="ALA")
     res2 = nmrChain.fetchNmrResidue(sequenceCode="127B-1", residueType="ALA")
     self.assertIs(res2._wrappedData.mainResonanceGroup, res1._wrappedData)
@@ -141,7 +253,7 @@ class NmrResidueTest(WrapperTesting):
     self.assertIsNone( res2._wrappedData)
 
   def test_get_by_serialName(self):
-    nmrChain = self.project.fetchNmrChain(shortName='@1')
+    nmrChain = self.project.fetchNmrChain(shortName='@-')
     res1 = nmrChain.fetchNmrResidue(sequenceCode=None, residueType="ALA")
     serialName = '@%s' % res1._wrappedData.serial
     res2 = nmrChain.fetchNmrResidue(sequenceCode=serialName)

@@ -271,7 +271,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
       else:
         dimensionOrdering.append(sortedDataDims[index].dim)
 
-    # Set spectrumSerial
+    # Set stripSerial
     if 'Free' in apiStrip.className:
       # Independent strips
       stripSerial = apiStrip.serial

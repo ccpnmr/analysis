@@ -939,10 +939,10 @@ def _upDateAssignmentsResonanceGroup(project:Project,
      data2Obj[peak]._refreshPeakAnnotation()
 #
 Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setResonances')
-Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setAssignedResidue')
+# Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setAssignedResidue')
 Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setSequenceCode')
 Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setResidueType')
-Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setNmrChain')
+Project._setupNotifier(_upDateAssignmentsResonanceGroup, ApiResonanceGroup, 'setDirectNmrChain')
 
 
 def _upDateAssignmentsNmrChain(project:Project, apiNmrChain:ApiNmrChain):

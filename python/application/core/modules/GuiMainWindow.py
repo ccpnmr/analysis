@@ -122,8 +122,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.statusBar().showMessage(msg)
 
     # msg2 = 'project = ' + ('new' if isNew else 'open') + 'Project("+path+")\n'
-    msg2 = 'project = %sProject("%s")\n' % (('new' if isNew else 'open'), path)
-    self.pythonConsole.write(msg2)
+    msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
+    self.pythonConsole.writeConsoleCommand(msg2)
     # self.pythonConsole.ui.historyList.addItem(msg2)
 
     # if not isNew:
@@ -422,7 +422,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Displays assignment module."""
     self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
     self.dockArea.addDock(self.assignmentModule)
-    self.pythonConsole.writeModuleDisplayCommand('showAssignmentModule')
+    # self.pythonConsole.writeModuleDisplayCommand('showAssignmentModule')
+    self.pythonConsole.writeConsoleCommand("application.showAssignmentModule()")
 
   def showNmrResidueModule(self):
     """Shows Nmr Residue Module."""
@@ -460,7 +461,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     nmrResidueTableDock = CcpnDock(self, name='Nmr Residue Table')
     nmrResidueTableDock.layout.addWidget(nmrResidueTable)
     self.dockArea.addDock(nmrResidueTable, 'bottom')
-    self.pythonConsole.writeModuleDisplayCommand('showNmrResidueTable')
+    # self.pythonConsole.writeModuleDisplayCommand('showNmrResidueTable')
+    self.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
 
   def toggleSequence(self):
     """Toggles whether Sequence Module is displayed or not"""
@@ -470,7 +472,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     else:
       self.showSequence()
-    self.pythonConsole.writeModuleDisplayCommand('toggleSequence')
+    # self.pythonConsole.writeModuleDisplayCommand('toggleSequence')
+    self.pythonConsole.writeConsoleCommand("application.toggleSequence()")
 
   def loadAProject(self, projectDir=None):
     """
@@ -505,7 +508,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
     else:
       self.dockArea.addDock(self.assigner, position=position)
-    self.pythonConsole.writeModuleDisplayCommand('showAssigner')
+    # self.pythonConsole.writeModuleDisplayCommand('showAssigner')
+    self.pythonConsole.writeConsoleCommand("application.showAssigner()")
     return self.assigner
     # self.dockArea.addDock(assigner)
 
@@ -673,7 +677,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup = SamplePopup(parent=None, project=self.project)
     popup.exec_()
     popup.raise_()
-    self.pythonConsole.writeModuleDisplayCommand('createSample')
+    # self.pythonConsole.writeModuleDisplayCommand('createSample')
+    self.pythonConsole.writeConsoleCommand("application.createSample()")
 
   def showSampleAnalysis(self):
     """
@@ -681,12 +686,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     showSa = SampleAnalysis(self._project)
     self.dockArea.addDock(showSa, position='bottom')
-    self.pythonConsole.writeModuleDisplayCommand('showSampleAnalysis')
+    # self.pythonConsole.writeModuleDisplayCommand('showSampleAnalysis')
+    self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
 
   def showScreeningSetup(self):
     showSc = ScreeningSetup(self.project)
     self.dockArea.addDock(showSc, position='bottom')
-    self.pythonConsole.writeModuleDisplayCommand('showScreeningSetup')
+    # self.pythonConsole.writeModuleDisplayCommand('showScreeningSetup')
+    self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
 
   def showParassignSetup(self):
     try:
@@ -777,7 +784,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Displays macro editor with additional buttons for recording a macro.
     """
     self.macroEditor = MacroEditor(self.dockArea, self, "Macro Editor", showRecordButtons=True)
-    self.pythonConsole.writeModuleDisplayCommand('startMacroRecord')
+    # self.pythonConsole.writeModuleDisplayCommand('startMacroRecord')
+    self.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
 
 
   def _fillRecentMacrosMenu(self):
@@ -803,7 +811,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     from application.core.modules.CreateSequence import CreateSequence
     popup = CreateSequence(self, project=self._project).exec_()
-    self.pythonConsole.writeModuleDisplayCommand('showMoleculePopup')
+    # self.pythonConsole.writeModuleDisplayCommand('showMoleculePopup')
+    self.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
 
   def inspectMolecule(self):
     info = MessageDialog.showInfo('Not implemented yet!',
@@ -890,7 +899,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.dockArea.addDock(peakList, position='bottom')
 
-    self.pythonConsole.writeModuleDisplayCommand('showPeakTable')
+    # self.pythonConsole.writeModuleDisplayCommand('showPeakTable')
+    self.pythonConsole.writeConsoleCommand("application.showPeakTable()")
 
   def showChemicalShiftTable(self, position='bottom'):
     """
@@ -899,7 +909,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from application.core.modules.ChemicalShiftTable import ChemicalShiftTable
     chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self._project.chemicalShiftLists)
     self.dockArea.addDock(chemicalShiftTable, position=position)
-    self.pythonConsole.writeModuleDisplayCommand('showChemicalShiftTable')
+    # self.pythonConsole.writeModuleDisplayCommand('showChemicalShiftTable')
+    self.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
 
   # def showParassignPeakTable(self, position='left', relativeTo=None):
   #   peakList = ParassignModule(name="Peak Table", peakLists=self._project.peakLists)
@@ -919,28 +930,32 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.dockArea.addDock(self.bbModule, position='bottom')
     # assigner = self.showAssigner('bottom')
     # self.bbModule.setAssigner(assigner)
-    self.pythonConsole.writeModuleDisplayCommand('showBackboneAssignmentModule')
+    # self.pythonConsole.writeModuleDisplayCommand('showBackboneAssignmentModule')
+    self.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
     return self.bbModule
 
   def showPickAndAssignModule(self):
     """Displays Pick and Assign module."""
     self.paaModule = PickAndAssignModule(self.dockArea, self._project)
     self.dockArea.addDock(self.paaModule)
-    self.pythonConsole.writeModuleDisplayCommand('showPickAndAssignModule')
+    # self.pythonConsole.writeModuleDisplayCommand('showPickAndAssignModule')
+    self.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
     return self.paaModule
 
   def showAtomSelector(self):
     """Displays Atom Selector."""
     self.atomSelector = AtomSelector(self, project=self._project)
     self.dockArea.addDock(self.atomSelector)
-    self.pythonConsole.writeModuleDisplayCommand('showAtomSelector')
+    # self.pythonConsole.writeModuleDisplayCommand('showAtomSelector')
+    self.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
     return self.atomSelector
 
   def showResidueInformation(self):
     """Displays Residue Information module."""
     from application.core.modules.ResidueInformation import ResidueInformation
     self.dockArea.addDock(ResidueInformation(self, self._project))
-    self.pythonConsole.writeModuleDisplayCommand('showResidueInformation')
+    # self.pythonConsole.writeModuleDisplayCommand('showResidueInformation')
+    self.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
 
   def showDataPlottingModule(self):
     dpModule = DataPlottingModule(self.dockArea)

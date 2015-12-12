@@ -67,7 +67,7 @@ def getXEasyDimCodes(self:'DataSource'):
   For use in FormatConverter
   """
   #
-  # Get isotopecode info
+  # Get isotopeCode info
   #
   isotopeCodes = getIsotopeCodesList(self)
   dimCodes = getDimCodes(self)

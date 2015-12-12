@@ -23,6 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpncore.util import Pid
 from ccpncore.util import Common as commonUtil
+from ccpncore.util.Types import Optional
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
@@ -138,6 +139,34 @@ class Residue(AbstractWrapperObject):
   #   linkEnds = (fromMolResidue.findFirstMolResLinkEnd(linkCode=fromLinkCode),
   #               toMolResidue.findFirstMolResLinkEnd(linkCode=toLinkCode))
   #   fromLinkCode.molecule.newMolResLink(molResLinkEnds=linkEnds)
+
+  @property
+  def nextResidue(self) -> Optional['Residue']:
+    """Next residue in sequence, if any"""
+    apiResidue = self._wrappedData
+
+    molResidue = apiResidue.molResidue.nextMolResidue
+    if molResidue is None:
+      result = None
+    else:
+      result = self._project._data2Obj.get(
+        apiResidue.chain.findFirstResidue(seqId=molResidue.seqId))
+    #
+    return result
+
+  @property
+  def previousResidue(self) -> Optional['Residue']:
+    """Previous residue in sequence, if any"""
+    apiResidue = self._wrappedData
+
+    molResidue = apiResidue.molResidue.previousMolResidue
+    if molResidue is None:
+      result = None
+    else:
+      result = self._project._data2Obj.get(
+        apiResidue.chain.findFirstResidue(seqId=molResidue.seqId))
+    #
+    return result
 
   # Implementation functions
 

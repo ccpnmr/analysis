@@ -83,7 +83,10 @@ class NmrAtom(AbstractWrapperObject):
 
   @atom.setter
   def atom(self, value:Atom):
-    self._wrappedData.atom = None if value is None else value._wrappedData
+    if value is None:
+      self.deassign()
+    else:
+      self._wrappedData.atom = value._wrappedData
 
   @property
   def isotopeCode(self) -> str:
@@ -104,29 +107,38 @@ class NmrAtom(AbstractWrapperObject):
     """Rename object, changing id, Pid, and internal representation"""
     # NB This is a VERY special case
     # - API code and notifiers will take care of resetting id and Pid
-    if value:
+    if value is None:
+      self.deassign()
+
+    else:
       if Pid.altCharacter in value:
         raise ValueError("Character %s not allowed in ccpn.NmrAtom.name" % Pid.altCharacter)
 
       isotopeCode = self._wrappedData.isotopeCode
       newIsotopeCode = name2IsotopeCode(value)
-      if isotopeCode == 'unknown':
-        self._wrappedData.isotopeCode = newIsotopeCode
-      elif newIsotopeCode != isotopeCode:
-        raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
+      if newIsotopeCode is not None:
+        if isotopeCode == '?':
+          self._wrappedData.isotopeCode = newIsotopeCode
+        elif newIsotopeCode != isotopeCode:
+          raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
+      #
+      self._wrappedData.name = value
 
-    self._wrappedData.name = value or None
+  def deassign(self):
+    """Reset NmrAtom back to its originalName, cutting all assignment links"""
+    self._wrappedData.name = None
 
   def assignTo(self, atomId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, name:str=None, mergeToExisting=True) -> 'NmrAtom':
     """Assign NmrAtom to atomId (or other parameters) and get back the result
     (either a modified self or another NmrAtom with the correct assignment, if one exists).
 
-    WARNING: Always use in the form "x = x.assignTo(...)",
-    as the call 'x.assignTo(...) may cause the source x object to become deleted.
+    WARNING: is mergeToExisting is True, always use in the form "x = x.assignTo(...)",
+    as the call 'x.assignTo(...) may cause the source x object to be deleted.
 
-    Passing in an atomId deassigns empty residueType or name fields,
-    while empty parameters (e.g. chainCode=None) cause no change.
+    Passing in an atomId with empty values gives you a new, empty NmrChain or NmrResidue,
+    and deassigns the NmrAtom, depending on which value(s) is empty.
+    Passing in empty parameters (e.g. chainCode=None) gets you the current value.
     If the target nmrAtom being reassigned to exists and mergeToExisting is True,
     the source will be deleted, and its data merged into the target.
     NB Merging is NOT undoable
@@ -135,11 +147,8 @@ class NmrAtom(AbstractWrapperObject):
     undo = self._apiResonance.root._undo
     apiResonance = self._apiResonance
     apiResonanceGroup = apiResonance.resonanceGroup
-    if isinstance(sequenceCode, int):
-      sequenceCode = str(sequenceCode)
-    elif not sequenceCode:
-      # convert empty string to None
-      sequenceCode = None
+    if sequenceCode is not None:
+      sequenceCode = str(sequenceCode) or None
 
     if atomId:
       if any((chainCode, sequenceCode, residueType, name)):
@@ -148,15 +157,15 @@ class NmrAtom(AbstractWrapperObject):
         # Remove colon prefix, if any, and set parameters
         atomId = atomId.split(Pid.PREFIXSEP,1)[-1]
         # NB trick with setting ll first required
-        # because the pssed-in Pid may not ahve all three components
+        # because the passed-in Pid may not have all four components
         ll = [None, None, None, None]
         for ii,val in enumerate(Pid.splitId(atomId)):
           ll[ii] = val
         chainCode, sequenceCode, residueType, name = ll
         if chainCode is None:
           raise ValueError("chainCode part of atomId cannot be empty'")
-        if sequenceCode is None:
-          raise ValueError("sequenceCode part of atomId cannot be empty'")
+        # if sequenceCode is None:
+        #   raise ValueError("sequenceCode part of atomId cannot be empty'")
 
     else:
       # set missing parameters to existing values
@@ -186,9 +195,9 @@ class NmrAtom(AbstractWrapperObject):
 
     if nmrResidue is oldNmrResidue:
       if name != self.name:
+        # NB self.name can never be returned as None
 
         if result is self:
-          # NB self.name can never be returned as None
           self._wrappedData.name = name or None
 
         elif mergeToExisting:
@@ -200,6 +209,7 @@ class NmrAtom(AbstractWrapperObject):
                            " and merging is disallowed")
 
     else:
+
       if result is self:
         if nmrResidue.getNmrAtom(self.name) is None:
           self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
@@ -247,10 +257,11 @@ def setter(self:Atom, value:NmrAtom):
   oldValue = self.nmrAtom
   if oldValue is value:
     return
+  elif value is None:
+    raise ValueError("Cannot set Atom.nmrAtom to None")
   elif oldValue is not None:
-    oldValue.atom = None
-
-  if value is not None:
+    raise ValueError("New assignment of Atom clashes with existing assignment")
+  else:
     value.atom = self
 Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
 
@@ -268,7 +279,7 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom
 
   if not isotopeCode:
     if name:
-      isotopeCode = name2IsotopeCode(name) or 'unknown'
+      isotopeCode = name2IsotopeCode(name) or '?'
     else:
       raise ValueError("newNmrAtom requires either name or isotopeCode as input")
 
@@ -291,7 +302,8 @@ def produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
   Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue"""
 
   # Get ID parts to use
-  sequenceCode = str(sequenceCode) if sequenceCode else None
+  if sequenceCode is not None:
+    sequenceCode = str(sequenceCode) or None
   params = [chainCode, sequenceCode, residueType, name]
   if atomId:
     if any(params):
@@ -331,7 +343,7 @@ className = ApiResonance._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':NmrAtom}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete'),
-    ('_resetPid', {}, className, 'setName'),
+    ('_resetPid', {}, className, 'setImplName'),
     ('_resetPid', {}, className, 'setResonanceGroup'),
     ('_finaliseUnDelete', {}, className, 'undelete'),
   )

@@ -70,19 +70,25 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
 
   def processSpectra(self, pids:Sequence[str], event:QtGui.QMouseEvent):
     """Display spectra defined by list of Pid strings"""
+    guiSpectrumDisplay = self.parent.guiSpectrumDisplay
+    displayPid = guiSpectrumDisplay.pid
     for ss in pids:
-      self.parent.guiSpectrumDisplay.displaySpectrum(ss)
-      displayPid = self.parent.guiSpectrumDisplay.pid
-      self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
-                                 'module.displaySpectrum', 'spectrum', [ss, displayPid])
+      guiSpectrumDisplay.displaySpectrum(ss)
+      # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
+      #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
+      self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "module.displaySpectrum(spectrum)", module=displayPid, sectrum=ss
+      )
 
-  def processSamples(self, pids:Sequence[str], event):
-    """Display sample spectra defined by list of Pid strings"""
-    for ss in pids:
-      spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
-      self.processSpectra(spectrumPids, event)
 
-  def processSampleComponents(self, pids:Sequence[str], event):
-    """Display sampleComponent spectrum defined by its Pid string"""
-    sampleComponent = self._appBase.project.getByPid(pids[0])
-    self.processSpectra([sampleComponent.substance.referenceSpectra[0].pid], event)
+  # NBNB TBD FIXME These functions are WORONG - they display spectra!
+  # def processSamples(self, pids:Sequence[str], event):
+  #   """Display sample spectra defined by list of Pid strings"""
+  #   for ss in pids:
+  #     spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
+  #     self.processSpectra(spectrumPids, event)
+  #
+  # def processSampleComponents(self, pids:Sequence[str], event):
+  #   """Display sampleComponent spectrum defined by its Pid string"""
+  #   sampleComponent = self._appBase.project.getByPid(pids[0])
+  #   self.processSpectra([sampleComponent.substance.referenceSpectra[0].pid], event)

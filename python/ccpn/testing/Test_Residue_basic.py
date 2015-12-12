@@ -97,8 +97,9 @@ class TestPhysicalResidueProperties(WrapperTesting):
 
     nmrChain = self.project.newNmrChain()
 
-    self.r0.nmrResidue = nmrChain.newNmrResidue()
 
+    obj = nmrChain.newNmrResidue()
+    self.r0.nmrResidue = obj
     self.assertEqual(self.r0.nmrResidue.pid, 'NR:A.1.ALA')
     self.assertIsNone(self.r1.nmrResidue)
     self.assertIsNone(self.r2.nmrResidue)

@@ -22,10 +22,11 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Sequence
+# from ccpncore.util.Types import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
+from ccpn import Residue
 from ccpncore.util import Pid
 from ccpncore.lib import Constants
 from ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
@@ -60,8 +61,22 @@ class NmrChain(AbstractWrapperObject):
   @property
   def shortName(self) -> str:
     """short form of name, key attribute.
-    NB changing this attribute will rename the NmrChain"""
+    Names of the form '\@ijk' and '#ijk' (where ijk is an integers)
+    are reserved and cannot be set. They can be obtained by the deassign command.
+    Connected NmrChains (isConnected == True) always have canonical names of the form '#ijk'"""
     return self._wrappedData.code
+
+  @property
+  def label(self) -> str:
+    """Identifying label of NmrChain.
+
+    Defaults to the canonical name '@ijk' (for unconnected) or '#ijk' (for connected) NmrChains
+    (ijk is an integer.), but freely changeable."""
+    return self._wrappedData.label
+
+  @label.setter
+  def label(self, value:str):
+    self._wrappedData.label = value
 
   @property
   def _parent(self) -> Project:
@@ -69,80 +84,96 @@ class NmrChain(AbstractWrapperObject):
     return self._project
   
   @property
+  def isConnected(self) -> bool:
+    """Is this NmrChain a connected stretch
+    (in which case the mainNmrResidues are sequentially connected"""
+    return self._wrappedData.isConnected
+
+  @property
   def comment(self) -> str:
     """Free-form text comment"""
     return self._wrappedData.details
-    
+
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
-
-  @property
-  def connectedNmrResidues(self) -> tuple:
-    """stretch of connected NmrResidues within NmrChain - there can only be one
-    Does not include NmrResidues defined as satellites (sequenceCodes that end in '+1', '-1', etc.
-    If NmrChain matches a proper Chain, there will be an NmrResidue for each residue,
-    with None for unassigned residues. NBNB TBD draft - needs checking"""
-
-    apiNmrChain = self._wrappedData
-    apiChain = apiNmrChain.chain
-    if apiChain is None:
-      apiStretch = apiNmrChain.connectedStretch
-      if apiStretch is None:
-        apiResGroups = ()
-      else:
-        apiResGroups = apiStretch.activeResonanceGroups
-    else:
-      func1 = apiNmrChain.nmrProject.findFirstResonanceGroup
-      apiResGroups = [func1(seqCode=x.seqCode, seqInsertCode=x.seqInsertCode, relativeOffset=None)
-                      for x in apiChain.sortedResidues()]
-    #
-    func2 =  self._parent._data2Obj.get
-    return tuple(None if x is None else func2(x) for x in apiResGroups)
-
-  @connectedNmrResidues.setter
-  def connectedNmrResidues(self, value:Sequence):
-    # NBNB TBD Check validity of code.
-    apiNmrChain = self._wrappedData
-    apiChain = apiNmrChain.chain
-    if apiChain is None:
-      apiStretch = apiNmrChain.connectedStretch
-      if apiStretch is None:
-        if value:
-          apiStretch = apiNmrChain.nmrProject.newConnectedStretch(
-            activeResonanceGroups= [x._wrappedData for x in value],
-            sequentialAssignment=apiNmrChain.nmrProject.activeSequentialAssignment
-          )
-      else:
-        if value:
-          apiStretch.activeResonanceGroups = [x._wrappedData for x in value]
-        else:
-          apiStretch.delete()
-    else:
-      raise ValueError("Cannot set connectedNmrResidues for NmrChain assigned to actual Chain")
 
 
   @property
   def chain(self) -> Chain:
     """Chain to which NmrChain is assigned"""
-    chain = self._wrappedData.assignedResidue
+    chain = self._wrappedData.chain
     return None if chain is None else self._project._data2Obj.get(chain)
 
   @chain.setter
   def chain(self, value:Chain):
-    self._wrappedData.chain = None if value is None else value._wrappedData
+    if value is None:
+      if self.chain is None:
+        return
+      else:
+        self.deassign()
+    else:
+      # NB The API code will throw ValueError if there is already an NmrChain with that code
+      self.rename(value._wrappedData.code)
 
   def rename(self, value:str):
-    """Rename NmrChain, changing its Id and Pid"""
+    """Rename NmrChain, changing its Id and Pid.
+    Use the 'deassign' function if you want to revert to the canonical name"""
     wrappedData = self._apiNmrChain
-    if not value:
+    if self._wrappedData.isConnected:
+      raise ValueError("Connected NmrChain cannot be renamed")
+    elif not value:
       raise ValueError("NmrChain name must be set")
+    elif value == wrappedData.code:
+      return
     elif wrappedData.code == Constants.defaultNmrChainCode:
       raise ValueError("NmrChain:%s cannot be renamed" % Constants.defaultNmrChainCode)
     elif Pid.altCharacter in value:
       raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
     else:
+      # NB names that clash with existing NmrChains cause ValueError at the API level.
       wrappedData.code = value
+
+  def deassign(self):
+    """Reset NmrChain back to its originalName, cutting all assignment links"""
+    self._wrappedData.code = None
+
+  def assignConnectedResidues(self, firstResidue:Residue):
+    """Assign all NmrResidues in connected NmrChain sequenctially,
+    with the first NmrResidue assigned to firstResidue.
+
+    Returns ValueError if NmrChain is not connected,
+    or if any of the Residues are missing or already assigned"""
+
+    apiNmrChain = self._wrappedData
+
+    if not self.isConnected:
+      raise ValueError("assignConnectedResidues only allowed for connected NmrChains")
+
+    apiStretch = apiNmrChain.mainResonanceGroups
+    if firstResidue.nmrResidue is not None:
+      raise ValueError("Cannot assign %s NmrResidue stretch: First Residue %s is already assigned"
+      % (len(apiStretch), firstResidue.id))
+
+    residues = [firstResidue]
+    for ii in range(len(apiStretch) - 1):
+      res = residues[ii]
+      next = res.nextResidue
+      if next is None:
+        raise ValueError("Cannot assign %s NmrResidues to %s Residues from Chain"
+                         % (len(apiStretch, len(residues))))
+      elif next.nmrResidue is not None:
+        raise ValueError("Cannot assign %s NmrResidue stretch: Residue %s is already assigned"
+        % (len(apiStretch), next.id))
+
+      else:
+        residues.append(next)
+
+    # If we get here we are OK - assign residues and delete NmrChain
+    for ii,res in enumerate(residues):
+      apiStretch[ii].assignedResidue = res._wrappedData
+    apiNmrChain.delete()
+
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
@@ -155,40 +186,34 @@ def getter(self:Chain) -> NmrChain:
   return None if obj is None else self._project._data2Obj.get(obj)
 
 def setter(self:Chain, value:NmrChain):
-  oldValue = self.nmrChain
-  if oldValue is value:
-    return
-  elif oldValue is not None:
-    oldValue.chain = None
-
-  if value is not None:
-    value.chain = self
+  if value is None:
+     raise ValueError("nmrChain cannot be set to None")
+  else:
+     value.chain = self
 Chain.nmrChain = property(getter, setter, None, "NmrChain to which Chain is assigned")
 
 del getter
 del setter
 
-def _newNmrChain(self:Project, shortName:str=None, comment:str=None) -> NmrChain:
-  """Create new ccpn.NmrChain
+def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label:str='?',
+                 comment:str=None) -> NmrChain:
+  """Create new ccpn.NmrChain. Set isConnected=True to get connected NmrChain.
 
-  :param str shortName: shortName for new nmrChain (optional, defaults to '@n' n positive integer
+  :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
+  :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later
+  :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to '@ijk'/'#ijk'
   :param str comment: comment for new nmrChain (optional)"""
   
   nmrProject = self._apiNmrProject
   
-  if shortName is None:
-    code = "@1"
-    ii = 1
-    while nmrProject.findFirstNmrChain(code=code) is not None:
-      ii += 1
-      code = '@%s' % ii
-    shortName = code
+  if shortName:
+    if Pid.altCharacter in shortName:
+      raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
+  else:
+    shortName = None
 
-  if Pid.altCharacter in shortName:
-    raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
-
-
-  newApiNmrChain = nmrProject.newNmrChain(code=shortName, details=comment)
+  newApiNmrChain = nmrProject.newNmrChain(code=shortName, isConnected=isConnected, label=label,
+                                          details=comment)
   
   return self._data2Obj.get(newApiNmrChain)
   
@@ -204,7 +229,10 @@ def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
   nmrProject = self._apiNmrProject
   apiNmrChain = nmrProject.findFirstNmrChain(code=shortName)
   if apiNmrChain is None:
-    return self._project.newNmrChain(shortName=shortName)
+    if shortName and shortName[0] in '@#' and shortName[1:].isdigit():
+      raise ValueError("Cannot create new NmrChain with reserved name %s" % shortName)
+    else:
+      return self._project.newNmrChain(shortName=shortName)
   else:
     return self._data2Obj.get(apiNmrChain)
 
@@ -222,7 +250,7 @@ className = ApiNmrChain._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_newObject', {'cls':NmrChain}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete'),
-    ('_resetPid', {}, className, 'setCode'),
+    ('_resetPid', {}, className, 'setImplCode'),
     ('_finaliseUnDelete', {}, className, 'undelete'),
   )
 )

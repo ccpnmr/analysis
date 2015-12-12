@@ -49,6 +49,10 @@ DEFAULT_ISOTOPE_DICT = {
   'delay':None,
   'ALT':None,
 }
+for tag, val in list(DEFAULT_ISOTOPE_DICT.items()):
+  # Add lower-case versions of single-letter codes
+  if val and len(tag) == 1:
+    DEFAULT_ISOTOPE_DICT[tag.lower()] = val
 
 # Default NmrChain code
 defaultNmrChainCode = '@-'

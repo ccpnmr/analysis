@@ -103,17 +103,24 @@ class AtomSelector(CcpnDock):
     if self.current.nmrResidue is None:
       r = self.current.peaks[0].dimensionNmrAtoms[0][0].nmrResidue
     newNmrAtom = r.fetchNmrAtom(name=name)
-    self.pythonConsole.writeWrapperCommand(objectNames=['nmrResidue', 'nmrAtom'],
-                                 wrapperCommand='fetchNmrResidue', pid=r.pid, args='name="%s"' % name)
+    # self.pythonConsole.writeWrapperCommand(objectNames=['nmrResidue', 'nmrAtom'],
+    #                              wrapperCommand='fetchNmrAtom', pid=r.pid, args='name="%s"' % name)
+    self.pythonConsole.writeConsoleCommand(
+      "nmrAtom = nmrResidue.fetchNmrAtom(name='%s')" % name, nmrResidue=r.pid
+    )
     for peak in self.current.peaks:
       for dim in range(len(peak.dimensionNmrAtoms)):
         isotopeCode = peak.peakList.spectrum.isotopeCodes[dim]
         if newNmrAtom._apiResonance.isotopeCode == isotopeCode:
           axisCode = peak.peakList.spectrum.axisCodes[dim]
           peak.assignDimension(axisCode=axisCode, value=[newNmrAtom])
-          self.pythonConsole.writeWrapperCommand(objectNames=['peak', 'newAssignment'],
-                                                 wrapperCommand='assignDimension', pid=peak.pid,
-                                                 args='axisCode="%s", value=[newNmrAtom]' % axisCode)
+          # self.pythonConsole.writeWrapperCommand(objectNames=['peak', 'newAssignment'],
+          #                                        wrapperCommand='assignDimension', pid=peak.pid,
+          #                                        args='axisCode="%s", value=[newNmrAtom]' % axisCode)
+          self.pythonConsole.writeConsoleCommand(
+            "newAssignment = peak.assignDimension(axisCode='%s', value=[newNmrAtom])" % axisCode,
+            peak=peak.pid
+          )
       else:
           pass
     self._returnButtonsToNormal()

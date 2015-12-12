@@ -1440,6 +1440,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
                          **self.collectionParams(element))
 
     if not op.isImplicit:
+
       undoVar = self.varNames['_undo']
       self.setVar(undoVar, self.getImplAttr(self.varNames['root'], '_undo', inClass=inClass))
       self.startIf(self.valueIsNotNone(undoVar))
@@ -3169,12 +3170,16 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
     if not isinstance(inClass, MetaModel.MetaClass):
       return
-    
+
     opType = op.opType
     element = op.target
 
-    if element.isDerived and not element.forceUndoNotify:
-      return
+    if element.isDerived:
+      # Changed, so that forceUndoNotify is now true by default for derived elements
+      # Hence the contorted if statement - should only return if value is False
+      forceUndoNotify = element.forceUndoNotify
+      if not forceUndoNotify:
+        return
 
     self.writeNewline()
     self.writeComment("doNotifies")

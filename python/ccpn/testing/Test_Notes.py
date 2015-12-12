@@ -5,11 +5,11 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+               "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                 " or ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -21,24 +21,18 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+import os
 from ccpn.testing.WrapperTesting import WrapperTesting
+import ccpn
 
-class SubstanceTest(WrapperTesting):
+class NoteTest(WrapperTesting):
 
-  # Path of project to load (None for new project)
+  # Path of project to load (None for new project
   projectPath = None
 
-  def test_simple_create(self):
-    substance1 = self.project.newSubstance('MolComp1', userCode='userCode',smiles=':-)')
-    self.assertEqual(substance1.id, 'MolComp1.std')
-    self.assertEqual(substance1.smiles, ':-)')
-    self.assertEqual(substance1.substanceType, 'Molecule')
-
-    substance2 = self.project.newSubstance('Cell1', substanceType='Cell', labeling='moxy',
-                                                 smiles=':-)')
-    # Undo and redo all operations
-    self.undo.undo()
-    self.undo.redo()
-    self.assertEqual(substance2.id, 'Cell1.moxy')
-    self.assertEqual(substance2.smiles, None)
-    self.assertEqual(substance2.substanceType, 'Cell')
+  def test_make_and_save_note(self):
+    self.project.newNote(text='Balaclava')
+    self.project.save()
+    loadedProject = ccpn.loadProject(self.project.path)
+    loadedProject.delete()

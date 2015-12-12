@@ -82,11 +82,17 @@ class PickAndAssignModule(CcpnDock, Base):
               peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
                                               doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                               doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
-              console.writeCommand('peakList', 'peakList.pickPeaksNd',
-                                 'selectedRegion={0}, doPos={1}, doNeg={2}'.format(
-                                 selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
-                                 apiSpectrumView.spectrumView.displayNegativeContours),
-                                 obj=peakList)
+              # console.writeCommand('peakList', 'peakList.pickPeaksNd',
+              #                    'selectedRegion={0}, doPos={1}, doNeg={2}'.format(
+              #                    selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
+              #                    apiSpectrumView.spectrumView.displayNegativeContours),
+              #                    obj=peakList)
+              console.writeConsoleCommand(
+                "peakList.pickPeaksNd(selectedRegion={0}, doPos={1}, doNeg={2})".format(
+                  selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
+                  apiSpectrumView.spectrumView.displayNegativeContours
+                ), peakList=peakList
+              )
             for strip in module.strips:
               strip.showPeaks(peakList)
 

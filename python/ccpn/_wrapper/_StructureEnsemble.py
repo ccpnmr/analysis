@@ -497,7 +497,17 @@ class StructureEnsemble(AbstractWrapperObject):
       else:
         useResidue = useChain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
         if useResidue is None:
-          nextAtomIndex = max(x.index for x in useChain.sortedResidues()[-1].atoms) + 1
+          ll = useChain.sortedResidues()
+          for rr in ll:
+            nextAtomIndex = max(x.index for x in rr.atoms)+1
+            if (seqCode, seqInsertCode) > (rr.seqCode, rr.seqInsertCode):
+              break
+          else:
+            nextAtomIndex = min(x.index for x in ll[0].atoms)
+        elif useResidue.code3Letter != residueType:
+          raise ValueError("New residue type of %s incompatible with previous assignment %s%s.%s"
+          % (residueType, useResidue.seqCode, useResidue.seqInsertCode.strip(),
+             useResidue.code3Letter))
         else:
           if useResidue.findFirstAtom(name=name) is None:
             nextAtomIndex = max(x.index for x in useResidue.atoms) + 1
@@ -516,7 +526,7 @@ class StructureEnsemble(AbstractWrapperObject):
         if useResidue is None:
           useResidue = useChain.newResidue(seqCode=seqCode, seqInsertCode=seqInsertCode,
                                            code3Letter=residueType)
-        newAtom = useResidue.newAtom(name=name, index=nextAtomIndex,
+        newAtom = useResidue.newAtom(name=name,
                                      elementName=spectrumLib.name2ElementSymbol(name) or 'Unknown')
 
         # reset data arrays
@@ -538,6 +548,7 @@ class StructureEnsemble(AbstractWrapperObject):
           for atom in apiOrderedAtoms[nextAtomIndex:]:
             atom.__dict__['index'] += 1
           apiOrderedAtoms.insert(nextAtomIndex, newAtom)
+          newAtom.__dict__['index'] = nextAtomIndex
           del apiOrderedAtoms[-1]
       finally:
         if undo is not None:

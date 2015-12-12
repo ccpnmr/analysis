@@ -24,6 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 from ccpncore.memops.metamodel import Constants as metaConstants
 trueString = metaConstants.trueString
+falseString = metaConstants.falseString
 
 # used for packages with no packageGroup defined
 defaultPackageGroup = 'core'
@@ -48,7 +49,7 @@ allowedTags = {
  },
  'HasParameters':{
  },
- 'MetaAttribute':{'forceUndoNotify':(trueString,),
+ 'MetaAttribute':{'forceUndoNotify':(falseString,),
  },
  'MetaClass':{
  },
@@ -73,7 +74,7 @@ allowedTags = {
                                 # else they are assumed to be normal.
                                 # In practice used for Python * and ** params
  },
- 'MetaRole':{'forceUndoNotify':(trueString,),
+ 'MetaRole':{'forceUndoNotify':(falseString,),
  },
  'MetaConstraint':{
  },

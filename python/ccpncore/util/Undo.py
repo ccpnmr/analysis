@@ -237,6 +237,7 @@ class Undo(deque):
         undoCall, redoCall = self[n]
         # if self._debug:
         #   print ("@~@~ undoing", undoCall)
+
         undoCall()
       self.nextIndex = undoTo + 1
     except Exception as e:
@@ -298,8 +299,8 @@ class Undo(deque):
 
   def clear(self):
     """Clear and reset undo object """
-    if self._debug:
-      print ('@~@~ CLEAR undo')
+    # if self._debug:
+    #   print ('@~@~ CLEAR undo')
     self.nextIndex = 0
     self.waypoints.clear()
     self._blocked = False

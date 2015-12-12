@@ -3862,7 +3862,7 @@ class MetaRole(ClassElement):
                  'enumeration':metaConstants.hierarchy_enumeration, },
     'otherRole':{'default':None, 'setterFunc':'setOtherRole', },
     'partitionsChildren':{'type':'Boolean', 'default':False, },
-    'forceUndoNotify':{'type':'Boolean', 'default':False, },
+    'forceUndoNotify':{'type':'Boolean', 'default':True, },
     'noDeleteIfSet':{'type':'Boolean', 'default':False, }, })
 
   # allowed tagged values
@@ -4148,7 +4148,7 @@ class MetaAttribute(ClassElement):
     'scope':{'type':'Token', 'enumeration':metaConstants.scope_enumeration,
              'default':metaConstants.instance_level, },
     'valueType':{'type':AbstractDataType, },
-    'forceUndoNotify':{'type':'Boolean', 'default':False, },
+    'forceUndoNotify':{'type':'Boolean', 'default':True, },
     'defaultValue':{'default':[], 'hicard':infinity, }, })
 
   # allowed tagged values

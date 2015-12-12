@@ -83,57 +83,99 @@ class StructureEnsembleTesting2(WrapperTesting):
   def test_load_structure(self):
     self.loadData('../structures/2CPP.pdb')
     ensemble = self.project.structureEnsembles[0]
-    print ('@~@~1', len(ensemble.models), len(ensemble.atomIds), ensemble.coordinateData.shape,
-           ensemble.atomIds[:8])
+    self.assertEqual( len(ensemble.models), 1)
+    self.assertEqual( len(ensemble.atomIds), 3462)
+    self.assertEqual( ensemble.coordinateData.shape, (1,3462,3))
+    self.assertEqual( ensemble.atomIds[:8], ['A.10.ASN. N', 'A.10.ASN. CA', 'A.10.ASN. C',
+                                            'A.10.ASN. O', 'A.10.ASN. CB', 'A.10.ASN. CG',
+                                            'A.10.ASN. OD1', 'A.10.ASN. ND2'])
     self.project.save()
     loadedProject = ccpn.loadProject(self.project.path)
-    print ('@~@~2', len(ensemble.models), len(ensemble.atomIds), ensemble.coordinateData.shape,
-           ensemble.atomIds[:8])
+    try:
+      ensemble = loadedProject.structureEnsembles[0]
+      self.assertEqual( len(ensemble.models), 1)
+      self.assertEqual( len(ensemble.atomIds), 3462)
+      self.assertEqual( ensemble.coordinateData.shape, (1,3462,3))
+      self.assertEqual( ensemble.atomIds[:8], ['A.10.ASN. N', 'A.10.ASN. CA', 'A.10.ASN. C',
+                                              'A.10.ASN. O', 'A.10.ASN. CB', 'A.10.ASN. CG',
+                                              'A.10.ASN. OD1', 'A.10.ASN. ND2'])
+    finally:
+      loadedProject.delete()
 
   def test_modify_ensemble(self):
+    atomIds2 = ['A.1.ALA.H', 'A.2b.TYR.N', 'B.5.GLX.CA', 'A.-1.VAL.HG2%']
+    atomIds = ['@-.1.ALA.CA', '@-.2.VAL.CB', '@-.3.ASP.CG', '@-.4.LYS.CD']
     ensemble = self.project.newStructureEnsemble()
-    ensemble.addAtomIds(('A.1.ALA.H', 'A.2b.TYR.N', 'B.5.GLX.CA', 'A.-1.VAL.HG2%'))
-    mod1 = ensemble.newModel(name='blah', comment='hah', occupancyData=range(4), coordinateData=range(12))
-    mod2 = ensemble.newModel(name='blah2', comment='hah2', occupancyData=range(4))
-    mod3 = ensemble.newModel(name='blah', comment='hah3', bFactorData=range(4), coordinateData=range(12))
+    ensemble.addAtomIds(atomIds)
+    mod1 = ensemble.newModel(name='blah3', comment='hah', occupancyData=range(4), coordinateData=range(12))
+    mod2 = ensemble.newModel(name='blah1', comment='hah2', occupancyData=range(4), bFactorData=range(4))
+    mod3 = ensemble.newModel(name='blah2', comment='hah3', occupancyData=range(4), coordinateData=range(12))
+    self.assertEqual(ensemble.atomIds, atomIds)
     data = ensemble.coordinateData
-    print ('@~@~ coords-2', ensemble._wrappedData.nAtoms, data.shape,len(data.flat), list(data.flat))
+    flat = [x for x in data.flat]
+    self.assertEqual( data.shape, (3,4,3))
+    self.assertEqual(len(flat), 36)
+    self.assertEqual(flat[:12], list(range(12)))
+    self.assertEqual(flat[-12:], list(range(12)))
+    self.assertTrue(numpy.isnan(flat[18]))
+    self.assertEqual([x for x in ensemble.occupancyData.flat], [0,1,2,3]*3)
+    self.assertTrue(numpy.isnan(ensemble.bFactorData.flat[2]))
+    self.assertTrue(numpy.isnan(ensemble.bFactorData.flat[-3]))
+    self.assertEqual([x for x in ensemble.bFactorData.flat][4:-4], [0,1,2,3])
+    self.assertEqual([x.name for x in ensemble.models], ['blah3','blah1','blah2' ])
 
-    print ('@~@~1 coordinateData', ensemble.coordinateData.shape,list(ensemble.coordinateData.flat))
-    print ('@~@~1 occupancyData', ensemble.occupancyData.shape,list(ensemble.occupancyData.flat))
-    print ('@~@~1b coordinateData', ensemble.coordinateData.shape,list(ensemble.coordinateData.flat))
-    ensemble.replaceAtomIds(('@1.1.ALA.CA', '@1.2.VAL.CB', '@1.3.ASP.CG', '@1.4.LYS.CD'))
-    print ('@~@~2 coordinateData', ensemble.coordinateData.shape,list(ensemble.coordinateData.flat))
-    print ('@~@~2 occupancyData', ensemble.occupancyData.shape, list(ensemble.occupancyData.flat))
-    data = ensemble.coordinateData
-    print ('@~@~ coords-1', ensemble._wrappedData.nAtoms, data.shape,len(data.flat), list(data.flat))
-    print ('@~@~ atomIds0',ensemble.atomIds, [(x.name, x.index) for x in ensemble._wrappedData.orderedAtoms])
-    ensemble.addAtomId('@1.5.TRP.CE2')
-    data = ensemble.coordinateData
-    print ('@~@~ coords0', ensemble._wrappedData.nAtoms, data.shape,len(data.flat), list(data.flat))
-    print ('@~@~ atomIds1',ensemble.atomIds, [(x.name, x.index) for x in ensemble._wrappedData.orderedAtoms])
-    ensemble.removeAtomIds(('@1.2.VAL.CB',))
-    data = ensemble.coordinateData
-    print ('@~@~ coords1', ensemble._wrappedData.nAtoms, data.shape,len(data.flat), list(data.flat))
-    print(ensemble.occupancyData.shape, list(ensemble.occupancyData.flat))
+    ensemble.replaceAtomIds(atomIds2)
+    self.assertEqual(ensemble.atomIds, atomIds2)
+
+    ensemble.addAtomId('B.2.TRP.CE2')
+    self.assertRaises(ValueError, ensemble.addAtomId, 'B.2.GLN.CE2')
+    ll = atomIds2.copy()
+    ll.insert(2, 'B.2.TRP.CE2')
+    self.assertEqual(ensemble.atomIds, ll)
+    self.assertEqual(ensemble.coordinateData.shape, (3,5,3))
+
+    ensemble.removeAtomIds(('A.2b.TYR.N',))
+    self.assertEqual(ensemble.coordinateData.shape, (3,4,3))
+    ll.remove('A.2b.TYR.N')
+    self.assertEqual(ensemble.atomIds, ll)
+
     mod2.delete()
-    print ('@~@~ atomIds2',ensemble.atomIds, [(x.name, x.index) for x in ensemble._wrappedData.orderedAtoms])
-    data = ensemble.coordinateData
-    print ('@~@~ coords2', ensemble._wrappedData.nAtoms, data.shape,len(data.flat), list(data.flat))
-    print(ensemble.occupancyData.shape, list(ensemble.occupancyData.flat))
-    ensemble.setAtomCoordinates('@1.5.TRP.CE2', numpy.full((2,3), 9.))
-    ensemble.setAtomBFactors('@1.4.LYS.CD', [0]*2)
+    self.assertEqual(ensemble.coordinateData.shape, (2,4,3))
+
+    ensemble.setAtomCoordinates('B.2.TRP.CE2', numpy.full((2,3), 9.))
+    ensemble.setAtomBFactors('A.-1.VAL.HG2%', [0]*2)
     mod3.occupancyData = list(range(4))
     mod1.coordinateData =  numpy.full((4,3), -1.)
-    print (ensemble.coordinateData.shape,list(ensemble.coordinateData.flat))
-    print(ensemble.occupancyData.shape, list(ensemble.occupancyData.flat))
-    print(ensemble.bFactorData.shape, list(ensemble.bFactorData.flat))
+    self.assertEqual(ensemble.atomIds, ['A.1.ALA.H', 'B.2.TRP.CE2', 'B.5.GLX.CA', 'A.-1.VAL.HG2%'])
+    self.assertEqual(ensemble.coordinateData.shape, (2, 4, 3))
+    self.assertEqual(list(ensemble.coordinateData.flat), [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+                                                          -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+                                                          0.0, 1.0, 2.0, 9.0, 9.0, 9.0,
+                                                          6.0, 7.0, 8.0, 9.0, 10.0, 11.0])
+
+    self.assertEqual(ensemble.occupancyData.shape, (2, 4))
+    self.assertEqual(ensemble.bFactorData.flat[3], 0.0)
+    self.assertEqual(ensemble.bFactorData.flat[-1], 0.0)
+    self.assertTrue(all(numpy.isnan(x) for x in ensemble.bFactorData.flat[4:-1]))
+    self.assertEqual(list(ensemble.occupancyData.flat[2:]), [2.0, 3.0, 0.0, 1.0, 2.0, 3.0])
+    self.assertTrue(numpy.isnan(ensemble.occupancyData.flat[1]))
+
     self.project.save()
     loadedProject = ccpn.loadProject(self.project.path)
-    ensemble = loadedProject.structureEnsembles[0]
-    print (ensemble.atomIds)
-    print (ensemble.atomIds)
-    print (ensemble.coordinateData.shape,list(ensemble.coordinateData.flat))
-    print(ensemble.occupancyData.shape, list(ensemble.occupancyData.flat))
-    print(ensemble.bFactorData.shape, list(ensemble.bFactorData.flat))
+    try:
+      ensemble = loadedProject.structureEnsembles[0]
+      self.assertEqual(ensemble.atomIds, ['A.1.ALA.H', 'B.2.TRP.CE2', 'B.5.GLX.CA', 'A.-1.VAL.HG2%'])
+      self.assertEqual(ensemble.coordinateData.shape, (2, 4, 3))
+      self.assertEqual(list(ensemble.coordinateData.flat), [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+                                                            -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+                                                            0.0, 1.0, 2.0, 9.0, 9.0, 9.0,
+                                                            6.0, 7.0, 8.0, 9.0, 10.0, 11.0])
 
+      self.assertEqual(ensemble.occupancyData.shape, (2, 4))
+      self.assertEqual(ensemble.bFactorData.flat[3], 0.0)
+      self.assertEqual(ensemble.bFactorData.flat[-1], 0.0)
+      self.assertTrue(all(numpy.isnan(x) for x in ensemble.bFactorData.flat[4:-1]))
+      self.assertEqual(list(ensemble.occupancyData.flat[2:]), [2.0, 3.0, 0.0, 1.0, 2.0, 3.0])
+      self.assertTrue(numpy.isnan(ensemble.occupancyData.flat[1]))
+    finally:
+      loadedProject.delete()

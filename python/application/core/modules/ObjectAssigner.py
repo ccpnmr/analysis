@@ -138,7 +138,8 @@ class ObjectAssigner(QtGui.QWidget, Base):
     return pulldownList
 
   def setNmrChain(self, item):
-    self.project._appBase.current.nmrAtom.nmrResidue.nmrChain = self.project.getById(item)
+    # NBNB FIxed. Assumes that item is a chainCode. NBNB otherwise will BERAK!.  Rasmus Dec 2015
+    self.project._appBase.current.nmrAtom.nmrResidue.assignTo(chainCode=item)
 
   def setSequenceCode(self, item):
     self.project._appBase.current.nmrAtom.nmrResidue.sequenceCode = item

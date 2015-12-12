@@ -89,57 +89,91 @@ class IpythonConsole(Widget, Base):
       if self.mainWindow.recordingMacro is True:
         self.mainWindow.macroEditor.textBox.insertPlainText(msg)
 
-      # if hasattr(self, 'project'):
-      #   undo = self.project._undo
-      #   if undo is not None:
-      #     undo.newWaypoint()
+
+    def setUndoWaypoint(self):
+      """Set Undo waypoint, if undo is present"""
+      if hasattr(self, 'project'):
+        undo = self.project._undo
+        if undo is not None:
+          undo.newWaypoint()
 
 
+    # NBNB OBSOLETE
+    # def writeCommand(self, objectName:str, functionCall:str, arguments:Types.List[str], pid:str=None,
+    #                  obj:object=None):
+    #   """
+    #   Writes a command specified by the arguments to the console text box.
+    #   """
+    #   if pid is None:
+    #     pid = obj.pid
+    #   msg1 = "%s = project.getByPid('%s')\n" % (objectName, pid)
+    #   msg2 = '%s(%s)\n' % (functionCall, arguments)
+    #
+    #   self.write(msg1)
+    #   self.write(msg2)
+    #   self.setUndoWaypoint()
+    #
+    # def writeCompoundCommand(self, objectNames:Types.List[str], functionCall:str,
+    #            arguments:Types.List=[str], pids:Types.List[str]=None, objs:Types.List[object]=None):
+    #   """
+    #   Writes a command consisting of a single function call and two pids or objects specified by
+    #   the arguments to the console text box.
+    #   """
+    #   if pids is None:
+    #     pids = [obj.pid for obj in objs]
+    #   msg1 = "%s = project.getByPid('%s')\n" % (objectNames[0], pids[0])
+    #   msg2 = "%s = project.getByPid('%s')\n" % (objectNames[1], pids[1])
+    #   msg3 = '%s(%s)\n' % (functionCall, arguments)
+    #   self.write(msg1)
+    #   self.write(msg2)
+    #   self.write(msg3)
+    #   self.setUndoWaypoint()
+    #
+    # def writeModuleDisplayCommand(self, moduleCommand:str):
+    #   """
+    #   Writes a module display command to the console text box.
+    #   """
+    #   msg1 = 'application.%s()\n' % moduleCommand
+    #   self.write(msg1)
+    #   self.setUndoWaypoint()
+    #
+    # def writeWrapperCommand(self, objectNames:Types.List[str], wrapperCommand:str, pid:str,
+    #                         args:str):
+    #   """
+    #   Writes a command dealing with ccpn objects to the console text box.
+    #   """
+    #   msg1 = "%s = project.getByPid('%s')\n" % (objectNames[0], pid)
+    #   msg2 = "%s = %s.%s(%s)\n" % (objectNames[1], objectNames[0], wrapperCommand, args)
+    #   self.write(msg1)
+    #   self.write(msg2)
+    #   self.setUndoWaypoint()
 
-    def writeCommand(self, objectName:str, functionCall:str, arguments:Types.List[str], pid:str=None,
-                     obj:object=None):
-      """
-      Writes a command specified by the arguments to the console text box.
-      """
-      if pid is None:
-        pid = obj.pid
-      msg1 = "%s = project.getByPid('%s')\n" % (objectName, pid)
-      msg2 = '%s(%s)\n' % (functionCall, arguments)
 
-      self.write(msg1)
-      self.write(msg2)
+    def writeConsoleCommand(self, command:str, **objectParameters):
+      """Set keyword:value objectParameters to point to the relevant objects,
+      echo command in console, and set Undo
 
-    def writeCompoundCommand(self, objectNames:Types.List[str], functionCall:str,
-               arguments:Types.List=[str], pids:Types.List[str]=None, objs:Types.List[object]=None):
-      """
-      Writes a command consisting of a single function call and two pids or objects specified by
-      the arguments to the console text box.
-      """
-      if pids is None:
-        pids = [obj.pid for obj in objs]
-      msg1 = "%s = project.getByPid('%s')\n" % (objectNames[0], pids[0])
-      msg2 = "%s = project.getByPid('%s')\n" % (objectNames[1], pids[1])
-      msg3 = '%s(%s)\n' % (functionCall, arguments)
-      self.write(msg1)
-      self.write(msg2)
-      self.write(msg3)
+      Example calls:
 
-    def writeModuleDisplayCommand(self, moduleCommand:str):
-      """
-      Writes a module display command to the console text box.
-      """
-      msg1 = 'application.%s()\n' % moduleCommand
-      self.write(msg1)
+      writeConsoleCommand("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
 
-    def writeWrapperCommand(self, objectNames:Types.List[str], wrapperCommand:str, pid:str,
-                            args:str):
+      writeConsoleCommand(
+         "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
+         peak=peakOrPid)
       """
-      Writes a command dealing with ccpn objects to the console text box.
-      """
-      msg1 = "%s = project.getByPid('%s')\n" % (objectNames[0], pid)
-      msg2 = "%s = %s.%s(%s)\n" % (objectNames[1], objectNames[0], wrapperCommand, args)
-      self.write(msg1)
-      self.write(msg2)
+
+      # write lines getting objects by their Pids
+      for parameter in sorted(objectParameters):
+        value = objectParameters[parameter]
+        if not isinstance(value, str):
+          value = value.pid
+        self.write("%s = project.getByPid('%s')\n" % (parameter, value))
+
+      # execute command
+      self.write(command + '\n')
+
+      # set undo step
+      self.setUndoWaypoint()
 
 
 

@@ -117,10 +117,30 @@ class Project(AbstractWrapperObject):
       if apiMolecule.isFinalised:
         # Create matchingMolComponent if none exists
         apiComponentStore.fetchMolComponent(apiMolecule)
-    # Default NmrChain
-    if wrappedData.findFirstNmrChain(code=Constants.defaultNmrChainCode) is None:
-      wrappedData.newNmrChain(code=Constants.defaultNmrChainCode)
 
+    # Fix alpha or semi-broken projects. None of this should eb necessary, but hey!
+    # NB written to modify nothing for valid projects
+
+    # Get or (re)make default NmrChain
+    defaultChain = wrappedData.findFirstNmrChain(code=Constants.defaultNmrChainCode)
+    if defaultChain is None:
+      # NO default chain - probably an alpha project or upgraded from V2
+      defaultChain = wrappedData.findFirstNmrChain(code='@1')
+      if defaultChain is None:
+        defaultChain = wrappedData.newNmrChain(code=Constants.defaultNmrChainCode)
+      else:
+        defaultChain.code = '@-'
+    # Make sure all non-offset ResonanceGroups have directNmrChain set.
+    for rg in wrappedData.sortedResonanceGroups():
+      if rg.mainGroupSerial == rg.serial:
+        rg.mainGroupSerial = None
+      if rg.mainGroupSerial is None and rg.directNmrChain is None:
+        if hasattr(rg, 'chainSerial') and rg.chainSerial is not None:
+          rg.directNmrChain = wrappedData.findFirstNmrChain(serial=rg.chainSerial)
+        if rg.directNmrChain is None:
+          rg.directNmrChain = defaultChain
+      # print ('@~@~ rg', rg.serial, rg.seqCode, rg.seqInsertCode, rg.mainGroupSerial,
+      #        rg.relativeOffset, rg.directNmrChain, rg.nmrChain)
     self._logger = wrappedData.root._logger
 
     self._registerApiNotifiers()
@@ -308,7 +328,11 @@ class Project(AbstractWrapperObject):
   @property
   def name(self) -> str:
     """name of Project"""
-    return self._wrappedData.name
+    apiNmrProject = self._wrappedData
+    if len(apiNmrProject.root.nmrProjects) == 1:
+      return apiNmrProject.root.name
+    else:
+      return apiNmrProject.name
 
   @property
   def path(self) -> str:

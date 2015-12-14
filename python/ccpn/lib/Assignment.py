@@ -42,12 +42,12 @@ from ccpncore.util import Types
 
 from sklearn import svm
 
-def isInterOnlyExpt(experimenttType):
+def isInterOnlyExpt(experimentType):
   """
   Determines if the specified experiment is an inter-residual only experiment
   """
   expList = ('HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond')
-  if(any(expType in experimenttType.upper() for expType in expList)):
+  if(any(expType in experimentType.upper() for expType in expList)):
     return True
 
 def assignAlphas(nmrResidue:NmrResidue, peaks:Types.List[Peak]):

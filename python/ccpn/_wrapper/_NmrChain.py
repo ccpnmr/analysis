@@ -161,7 +161,7 @@ class NmrChain(AbstractWrapperObject):
       next = res.nextResidue
       if next is None:
         raise ValueError("Cannot assign %s NmrResidues to %s Residues from Chain"
-                         % (len(apiStretch, len(residues))))
+                         % (len(apiStretch), len(residues)))
       elif next.nmrResidue is not None:
         raise ValueError("Cannot assign %s NmrResidue stretch: Residue %s is already assigned"
         % (len(apiStretch), next.id))

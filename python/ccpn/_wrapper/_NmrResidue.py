@@ -167,17 +167,20 @@ class NmrResidue(AbstractWrapperObject):
     if apiValueNmrChain is None:
       raise ValueError("Cannot connect to offset NmrResidue")
 
-    elif apiValueNmrChain.isConnected and value.previousNmrResidue is not None:
-      raise ValueError("Cannot connect to NmrResidue in the middle of a connected NmrChain")
-
     elif apiNmrChain is None:
       raise ValueError("Cannot connect from offset residue")
+
+    elif self.nextNmrResidue is not None:
+      raise ValueError("Cannot connect from NmrResidue in the middle of a connected NmrChain")
 
     elif apiResonanceGroup.assignedResidue is not None:
       raise ValueError("Cannot connect from assigned residue")
 
-    elif self.nextNmrResidue is not None:
-      raise ValueError("Cannot connect from NmrResidue in the middle of a connected NmrChain")
+    elif apiValueNmrChain.isConnected and value.previousNmrResidue is not None:
+      raise ValueError("Cannot connect to NmrResidue in the middle of a connected NmrChain")
+
+    elif apiValueNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
+      raise ValueError("Cannot make cyclical connected NmrChain")
 
     elif apiNmrChain.isConnected:
       # At this point, self must be the last NmrResidue in a connected chain
@@ -307,17 +310,20 @@ class NmrResidue(AbstractWrapperObject):
     if apiValueNmrChain is None:
       raise ValueError("Cannot connect to offset NmrResidue")
 
-    elif apiValueNmrChain.isConnected and value.nextNmrResidue is not None:
-      raise ValueError("Cannot connect to NmrResidue in the middle of a connected NmrChain")
-
     elif apiNmrChain is None:
       raise ValueError("Cannot connect from offset residue")
+
+    elif self.previousNmrResidue is not None:
+      raise ValueError("Cannot connect from NmrResidue in the middle of a connected NmrChain")
 
     elif apiResonanceGroup.assignedResidue is not None:
       raise ValueError("Cannot connect from assigned residue")
 
-    elif self.previousNmrResidue is not None:
-      raise ValueError("Cannot connect from NmrResidue in the middle of a connected NmrChain")
+    elif apiValueNmrChain.isConnected and value.nextNmrResidue is not None:
+      raise ValueError("Cannot connect to NmrResidue in the middle of a connected NmrChain")
+
+    elif apiValueNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
+      raise ValueError("Cannot make cyclical connected NmrChain")
 
     elif apiNmrChain.isConnected:
       # At this point, self must be the first NmrResidue in a connected chain
@@ -326,7 +332,7 @@ class NmrResidue(AbstractWrapperObject):
         # Value is first NmrResidue in a connected NmrChain
         for rg in reversed(apiValueNmrChain.mainResonanceGroups):
           rg.directNmrChain = apiNmrChain
-        ll.insert(0, ll.pop())
+          ll.insert(0, ll.pop())
         apiValueNmrChain.delete()
       else:
         value._wrappedData.directNmrChain = apiNmrChain
@@ -382,7 +388,7 @@ class NmrResidue(AbstractWrapperObject):
         # make new connected NmrChain with rightmost ResonanceGroups
         newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
         for rg in stretch:
-          if rg is self:
+          if rg is apiResonanceGroup:
             break
           else:
             rg.directNmrChain = newNmrChain
@@ -649,9 +655,13 @@ class NmrResidue(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
-    ll = [(commonUtil.numericStringSortKey(x.sequenceCode), x)
-          for x in parent._wrappedData.resonanceGroups]
-    return [tt[-1] for tt in sorted(ll)]
+    if parent.isConnected:
+      # for conected NmrChains you keep the order
+      return parent._wrappedData.resonanceGroups
+    else:
+      ll = [(commonUtil.numericStringSortKey(x.sequenceCode), x)
+            for x in parent._wrappedData.resonanceGroups]
+      return [tt[-1] for tt in sorted(ll)]
 
 # def getter(self:NmrResidue) -> NmrResidue:
 #   obj = self._wrappedData.nextResidue
@@ -736,10 +746,10 @@ Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue
   #     raise ValueError("Cannot set connectedNmrResidues for NmrChain assigned to actual Chain")
 
 def getter(self:NmrChain) -> Tuple[NmrResidue]:
-  result = tuple(self._project._data2Obj.get(x)for x in self._wrappedData.mainResonanceGroups)
+  result = list(self._project._data2Obj.get(x)for x in self._wrappedData.mainResonanceGroups)
   if not self.isConnected:
     result.sort()
-  return result
+  return tuple(result)
 def setter(self:NmrChain, value):
   self._wrappedData.mainResonanceGroups = [x._wrappedData for x in value]
 NmrChain.mainNmrResidues = property(getter, setter, None, """NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue

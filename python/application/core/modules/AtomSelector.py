@@ -166,7 +166,11 @@ class AtomSelector(CcpnDock):
       else:
 
         if peaksAreOnLine(peaks, 1):
-          experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
+          # RHF 15/12/2015 bug fix. From usage elsewhere this ought to use tytpoe, nboe name.
+          # NBNB TBD CHECK THIS
+          # experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
+          types = set(peak.peakList.spectrum.experimentType for peak in peaks)
+          anyInterOnlyExperiments = any(isInterOnlyExpt(x for x in types))
 
           for peak in peaks:
             isotopeCode = peak.peakList.spectrum.isotopeCodes[1]
@@ -178,13 +182,15 @@ class AtomSelector(CcpnDock):
                 atomPredictions.add(pred[0])
             for atomPred in atomPredictions:
               if atomPred == 'CB':
-                if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                if anyInterOnlyExperiments:
                   self.cbButton1.setStyleSheet('background-color: green')
                   self.cbButton2.setStyleSheet('background-color: orange')
                 else:
                   self.cbButton2.setStyleSheet('background-color: green')
               if atomPred == 'CA':
-                if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                if anyInterOnlyExperiments:
                   self.caButton1.setStyleSheet('QPushButton {background-color: green}')
                   self.caButton2.setStyleSheet('QPushButton {background-color: orange}')
                 else:

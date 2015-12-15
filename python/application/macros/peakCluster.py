@@ -1,7 +1,8 @@
 
 import numpy
+from ccpn.lib.Assignment import isInterOnlyExpt
 
-
+# This should be imported, not duplicated. RHF 15/12/2015
 def isInterOnlyExpt(peakList):
   expList = ['HNCO', 'CONH', 'H[N[CO', 'H[N[co', 'seq.', 'HCA_NCO.Jmultibond']
   if(any(expType in peakList.spectrum.experimentType for expType in expList)):
@@ -32,7 +33,9 @@ clf=svm.SVC()
 clf.fit(positions, ssLabels)
 
 for peakList in project.peakLists[1:]:
-  if isInterOnlyExpt(peakList):
+  # if isInterOnlyExpt(peakList):
+  # Change caloling interface to avoid duplicated function
+  if isInterOnlyExpt(peakList.spectrum.experimentType):
 
     for peak in peakList.peaks:
       array = [peak.position[0], peak.position[2]]

@@ -3,11 +3,11 @@ import numpy
 from ccpn.lib.Assignment import isInterOnlyExpt
 
 # This should be imported, not duplicated. RHF 15/12/2015
-def isInterOnlyExpt(peakList):
-  expList = ['HNCO', 'CONH', 'H[N[CO', 'H[N[co', 'seq.', 'HCA_NCO.Jmultibond']
-  if(any(expType in peakList.spectrum.experimentType for expType in expList)):
-    # interExpts.append(peakList.spectrum)
-    return True
+# def isInterOnlyExpt(peakList):
+#   expList = ['HNCO', 'CONH', 'H[N[CO', 'H[N[co', 'seq.', 'HCA_NCO.Jmultibond']
+#   if(any(expType in peakList.spectrum.experimentType for expType in expList)):
+#     # interExpts.append(peakList.spectrum)
+#     return True
 
 c = project.newNmrChain()
 ssLabels = []

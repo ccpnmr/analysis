@@ -153,7 +153,10 @@ class NmrResidue(AbstractWrapperObject):
     """Connect free end of self to free end of next residue in sequence,
     and return resulting connected NmrChain
 
-    Raises error if self is assigned, of if either self or value is offset."""
+    Raises error if self is assigned, of if either self or value is offset.
+
+    NB Undoing a connection between two connected stretches
+    will get back a 'value' stretch with a new shortName"""
 
     apiResonanceGroup = self._wrappedData
     # apiResidue = apiResonanceGroup.assignedResidue
@@ -185,10 +188,20 @@ class NmrResidue(AbstractWrapperObject):
     elif apiNmrChain.isConnected:
       # At this point, self must be the last NmrResidue in a connected chain
       if apiValueNmrChain.isConnected:
-        # Value is first NmrResidue in a connected NmrChain
-        for rg in apiValueNmrChain.mainResonanceGroups:
-          rg.directNmrChain = apiNmrChain
-        apiValueNmrChain.delete()
+        undo = self._project.root._undo
+        if undo is not None:
+          undo.increaseBlocking()
+        try:
+          # Value is first NmrResidue in a connected NmrChain
+          for rg in apiValueNmrChain.mainResonanceGroups:
+            rg.directNmrChain = apiNmrChain
+          apiValueNmrChain.delete()
+        finally:
+          if undo is not None:
+            undo.decreaseBlocking()
+
+        if undo is not None:
+          undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
       else:
         value._wrappedData.directNmrChain = apiNmrChain
       return self.nmrChain
@@ -197,10 +210,21 @@ class NmrResidue(AbstractWrapperObject):
       # self is unassigned, unconnected NmrResidue
       if apiValueNmrChain.isConnected:
         # At this point value must be the first NmrResidue in a connected NmrChain
-        apiResonanceGroup.directNmrChain = apiValueNmrChain
-        # Move self from last to first in target NmrChain
-        ll = apiValueNmrChain.__dict__['mainResonanceGroups']
-        ll.insert(0, ll.pop())
+        undo = apiValueNmrChain.root._undo
+        if undo is not None:
+          undo.increaseBlocking()
+        try:
+          apiResonanceGroup.directNmrChain = apiValueNmrChain
+          # Move self from last to first in target NmrChain
+          ll = apiValueNmrChain.__dict__['mainResonanceGroups']
+          ll.insert(0, ll.pop())
+        finally:
+          if undo is not None:
+            undo.decreaseBlocking()
+
+        if undo is not None:
+          undo.newItem(apiResonanceGroup.setDirectNmrChain,
+                       self.connectNext, undoArgs=(apiNmrChain,), redoArgs=(value,))
       else:
         newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
         apiResonanceGroup.directNmrChain = newApiNmrChain
@@ -244,7 +268,7 @@ class NmrResidue(AbstractWrapperObject):
         # make new connected NmrChain with rightmost ResonanceGroups
         newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
         for rg in reversed(stretch):
-          if rg is self:
+          if rg is apiResonanceGroup:
             break
           else:
             rg.directNmrChain = newNmrChain
@@ -296,7 +320,10 @@ class NmrResidue(AbstractWrapperObject):
     """Connect free end of self to free end of previous residue in sequence,
     and return resulting connected NmrChain
 
-    Raises error if self is assigned, of if either self or value is offset."""
+    Raises error if self is assigned, of if either self or value is offset.
+
+    NB Undoing a connection between two connected stretches
+    will get back a 'value' stretch with a new shortName"""
 
     apiResonanceGroup = self._wrappedData
     # apiResidue = apiResonanceGroup.assignedResidue
@@ -327,18 +354,33 @@ class NmrResidue(AbstractWrapperObject):
 
     elif apiNmrChain.isConnected:
       # At this point, self must be the first NmrResidue in a connected chain
-      ll = apiNmrChain.__dict__['mainResonanceGroups']
-      if apiValueNmrChain.isConnected:
-        # Value is first NmrResidue in a connected NmrChain
-        for rg in reversed(apiValueNmrChain.mainResonanceGroups):
-          rg.directNmrChain = apiNmrChain
-          ll.insert(0, ll.pop())
-        apiValueNmrChain.delete()
-      else:
-        value._wrappedData.directNmrChain = apiNmrChain
-        # Move value from last to first in target NmrChain
-        ll.insert(0, ll.pop())
-      return self.nmrChain
+        undo = apiValueNmrChain.root._undo
+        if undo is not None:
+          undo.increaseBlocking()
+        try:
+          ll = apiNmrChain.__dict__['mainResonanceGroups']
+          if apiValueNmrChain.isConnected:
+            # Value is last NmrResidue in a connected NmrChain
+            for rg in reversed(apiValueNmrChain.mainResonanceGroups):
+              rg.directNmrChain = apiNmrChain
+              ll.insert(0, ll.pop())
+            apiValueNmrChain.delete()
+            if undo is not None:
+              undo.newItem(self.disconnectPrevious,
+                           self.connectPrevious, redoArgs=(value,))
+          else:
+            value._wrappedData.directNmrChain = apiNmrChain
+            # Move value from last to first in target NmrChain
+            ll.insert(0, ll.pop())
+            if undo is not None:
+              undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
+                           undoArgs=(apiValueNmrChain,), redoArgs=(value,))
+
+        finally:
+          if undo is not None:
+            undo.decreaseBlocking()
+
+        return self.nmrChain
 
     else:
       # self is unassigned, unconnected NmrResidue
@@ -417,24 +459,32 @@ class NmrResidue(AbstractWrapperObject):
       stretch = apiNmrChain.mainResonanceGroups
 
       if len(stretch) < 3 or len(stretch) == 3 and apiResonanceGroup is stretch[1]:
-        for rg in stretch:
+        for rg in reversed(stretch):
+          # reversed to add residues back in proper order (they ar added to end)
           rg.directNmrChain = defaultChain
         apiNmrChain.delete()
 
       else:
-        if apiResonanceGroup in (stretch[0],stretch[-1]):
-          pass
+        index = stretch.index(apiResonanceGroup)
+        data2Obj = self._project._data2Obj
 
-        elif apiResonanceGroup is stretch[1]:
-          stretch[0].directNmrChain = defaultChain
+        # NB operations are carefully selected to make sure they undo correctly
+        if apiResonanceGroup is stretch[-1]:
+          apiResonanceGroup.directNmrChain = defaultChain
 
         elif apiResonanceGroup is stretch[-2]:
           stretch[-1].directNmrChain = defaultChain
+          apiResonanceGroup.directNmrChain = defaultChain
 
+        elif index == 0:
+          data2Obj[stretch[1]].disconnectPrevious()
+
+        elif index == 1:
+          data2Obj[stretch[1]].disconnectPrevious()
+          data2Obj[stretch[2]].disconnectPrevious()
         else:
           self.disconnectNext()
-
-        apiResonanceGroup.directNmrChain = defaultChain
+          apiResonanceGroup.directNmrChain = defaultChain
 
     elif apiResonanceGroup.assignedResidue is not None:
       # Assigned residue with successor residue - error

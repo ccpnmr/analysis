@@ -37,7 +37,7 @@ def test_undo_add_simple_item():
   def func(*args, **kwargs):
     pass
 
-  undoObject = Undo()
+  undoObject = Undo(debug=True)
   undoObject.newItem(func, func)
 
 def test_undo_add_full_item():
@@ -45,12 +45,12 @@ def test_undo_add_full_item():
   def func(*args, **kwargs):
     pass
 
-  undoObject = Undo()
+  undoObject = Undo(debug=True)
   undoObject.newItem(func, func, undoArgs=(1,2), undoKwargs={1:2},
                      redoArgs=(3,4), redoKwargs={3:4})
 
 def test_undo_one_undo():
-  undoObject = Undo()
+  undoObject = Undo(debug=True)
   undoObject.undo()
 
 def _myUndoFunc(*args, **kwargs):
@@ -60,7 +60,7 @@ def _myRedoFunc(*args, **kwargs):
   print('_myRedoFunc:', args, kwargs)
 
 def test_undo_add_item_one_undo():
-  undoObject = Undo()
+  undoObject = Undo(debug=True)
   undoObject.newItem(_myUndoFunc, _myRedoFunc, undoArgs=(5,))
   undoObject.undo()
 
@@ -81,7 +81,7 @@ def test_undo_add_items_one_undo_one_redo():
   undoObject.redo()
 
 def test_undo_add_items_many_undos_redos():
-  undoObject = Undo(maxWaypoints=0)
+  undoObject = Undo(maxWaypoints=0, debug=True)
   undoMethod = _myUndoFunc
   undoDataList = range(5)
   for undoData in undoDataList:
@@ -100,7 +100,7 @@ def test_undo_add_items_many_undos_redos():
   undoObject.undo()
 
 def test_undo_add_items_many_undos_redos_add_another_item_undos_redos():
-  undoObject = Undo(maxWaypoints=0)
+  undoObject = Undo(maxWaypoints=0, debug=True)
   undoDataList = range(5)
   for undoData in undoDataList:
     redoData = -undoData
@@ -122,7 +122,7 @@ def test_undo_add_items_many_undos_redos_add_another_item_undos_redos():
   undoObject.undo()
 
 def test_undo_add_waypoint_one_undo():
-  undoObject = Undo()
+  undoObject = Undo(debug=True)
   undoDataList = range(5)
   undoObject.newWaypoint()
   for undoData in undoDataList:
@@ -130,7 +130,7 @@ def test_undo_add_waypoint_one_undo():
   undoObject.undo()
 
 def test_undo_max_waypoints():
-  undoObject = Undo(maxWaypoints=4)
+  undoObject = Undo(maxWaypoints=4, debug=True)
   undoDataList = range(5)
   for ii in range(6):
     undoObject.newWaypoint()
@@ -141,7 +141,7 @@ def test_undo_max_waypoints():
     undoObject.undo()
 
 def test_undo_max_operations():
-  undoObject = Undo(maxOperations=4)
+  undoObject = Undo(maxOperations=4, debug=True)
   undoDataList = range(5)
   for ii in range(6):
     for undoData in undoDataList:
@@ -159,7 +159,7 @@ class Test_Undo(CoreTesting):
 
   def test_api_undo_init(self):
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     project._undo.undo()
     project._undo.redo()
@@ -167,7 +167,7 @@ class Test_Undo(CoreTesting):
   def test_api_undo_set_single(self):
     testValue = 'TrySomeString'
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     project._undo.newWaypoint()
     nxp.details = testValue
@@ -178,7 +178,7 @@ class Test_Undo(CoreTesting):
   def test_api_undo_redo_set_single(self):
     testValue = 'TrySomeString'
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     project._undo.newWaypoint()
     nxp.details = testValue
@@ -189,7 +189,7 @@ class Test_Undo(CoreTesting):
   def test_api_undo_set_multiple(self):
     testValue = ('kw1', 'kw2', 'kw3')
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     project._undo.newWaypoint()
     nxp.keywords = testValue
@@ -199,7 +199,7 @@ class Test_Undo(CoreTesting):
   def test_api_undo_redo_set_multiple(self):
     testValue = ('kw1', 'kw2', 'kw3')
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     project._undo.newWaypoint()
     nxp.keywords = testValue
@@ -210,7 +210,7 @@ class Test_Undo(CoreTesting):
   def test_api_undo_redo_add(self):
     testValue = ('kw1', 'kw2', 'kw3')
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     nxp.keywords = testValue
     project._undo.newWaypoint()
@@ -222,7 +222,7 @@ class Test_Undo(CoreTesting):
   def test_api_undo_add(self):
     testValue = ('kw1', 'kw2', 'kw3')
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     nxp.keywords = testValue
     project._undo.newWaypoint()
@@ -233,7 +233,7 @@ class Test_Undo(CoreTesting):
   def test_api_undo_remove(self):
     testValue = ('kw1', 'kw2', 'kw3')
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     nxp.keywords = testValue
     project._undo.newWaypoint()
@@ -244,7 +244,7 @@ class Test_Undo(CoreTesting):
   def test_api_undo_redo_remove(self):
     testValue = ('kw1', 'kw2', 'kw3')
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     nxp.keywords = testValue
     project._undo.newWaypoint()
@@ -255,7 +255,7 @@ class Test_Undo(CoreTesting):
 
   def test_api_undo_delete(self):
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     nxp = project.newNmrExpPrototype(name='anything', category='other')
     nxp.delete()
     project._undo.undo()
@@ -264,7 +264,7 @@ class Test_Undo(CoreTesting):
   def test_make_molecule_undo(self):
     from ccpncore.lib.molecule import MoleculeModify
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
     molecule = MoleculeModify.createMolecule(project, sequence, 'protein')
     project._undo.undo()
@@ -273,7 +273,7 @@ class Test_Undo(CoreTesting):
   def test_make_molecule_undo_redo(self):
     from ccpncore.lib.molecule import MoleculeModify
     project = self.project
-    project._undo = Undo()
+    project._undo = Undo(debug=True)
     sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
     molecule = MoleculeModify.createMolecule(project, sequence, 'protein')
     project._undo.undo()

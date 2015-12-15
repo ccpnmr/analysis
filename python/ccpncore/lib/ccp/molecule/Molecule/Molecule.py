@@ -335,7 +335,8 @@ def extendLinearSequence(self:'Molecule', sequence:Sequence[Tuple[str, str]], se
   if undo is not None and (molResidues or molResLinks):
     objectsCreated = molResidues+molResLinks
     undo.newItem(Undo.deleteAllApiObjects, self.root._unDelete,
-                 undoArgs=(objectsCreated,), redoArgs=(objectsCreated,))
+                 undoArgs=(objectsCreated,), redoArgs=(objectsCreated,
+                                                       set(x.topObject for x in objectsCreated)))
 
   # call notifiers:
   # NBNB the im port MUST be inside a function as we can get circular import problems otherwise

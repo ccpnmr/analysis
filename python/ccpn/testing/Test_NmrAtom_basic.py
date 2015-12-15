@@ -22,6 +22,12 @@ class TestNmrAtomCreation(WrapperTesting):
                       'setDirectNmrChain': [], 'addResonance': [],
                       'setResonances': [],'setResidueType': [],'setAssignedResidue': [], 'setSequenceCode': []})
 
+  def test_deassign(self):
+    nmrAtom = self.nmrResidue.fetchNmrAtom(name='churl')
+    self.assertEquals(nmrAtom.pid, 'NA:@2.@1..churl')
+    nmrAtom.deassign()
+    self.assertEquals(nmrAtom.pid, 'NA:@2.@1..C@1')
+
 
   def test_CreateAnonymousNmrAtomWithHIsotopeCode(self):
     a = self.nmrResidue.newNmrAtom(isotopeCode='1H')

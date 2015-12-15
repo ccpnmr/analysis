@@ -46,11 +46,32 @@ class NmrChainTest(WrapperTesting):
     self.assertRaises(ValueError, nc2.rename, '@6')
 
     nc3 = self.project.newNmrChain()
+    self.undo.undo()
+    self.undo.redo()
     self.assertEqual(nc3.shortName, '@7')
     self.assertRaises(ApiError, nc3.rename, '#7')
 
   def test_NmrChain_Chain(self):
     chain = self.project.createChain(sequence='AACKC', shortName='x', molType='protein')
     nmrChain = self.project.newNmrChain(shortName='x')
+    self.undo.undo()
+    self.undo.redo()
     self.assertIs(nmrChain.chain, chain)
     self.assertIs(chain.nmrChain, nmrChain)
+
+  def test_deassign(self):
+    ncx = self.project.getNmrChain('@-')
+    self.assertRaises(ApiError, ncx.deassign)
+    self.assertEquals(ncx.pid, 'NC:@-')
+
+    ncx = self.project.fetchNmrChain('AA')
+    self.assertEquals(ncx.pid, 'NC:AA')
+    ncx.deassign()
+    self.assertEquals(ncx.pid, 'NC:@2')
+
+    ncx = self.project.newNmrChain(isConnected=True)
+    self.assertEquals(ncx.pid, 'NC:#3')
+    ncx.deassign()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEquals(ncx.pid, 'NC:#3')

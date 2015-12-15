@@ -228,6 +228,7 @@ class Undo(deque):
     # block addition of items while operating
     self._blocked = True
     try:
+      undoCall = redoCall = None
       for n in range(self.nextIndex-1,undoTo,-1):
         # undoMethod, undoData, redoMethod, redoData = self[n]
         # if undoData is None:

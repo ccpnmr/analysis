@@ -39,51 +39,37 @@ class NmrStretchTest(WrapperTesting):
     nmrResidues = []
     for residueType in ('ALA', 'VAL', 'GLY', 'CYS', 'GLN'):
       nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
-    # print('@~@~', [x.sequenceCode for x in nmrResidues])
     self.assertEqual([x.id for x in nmrChain.nmrResidues],
                      ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.GLY', '@-.@4.CYS', '@-.@5.GLN', ])
 
     nmrResidues[0].connectPrevious(nmrResidues[1])
-    # print('@~@~', nmrResidues[0].nmrChain)
-    # print('@~@~', nmrResidues[0].nmrChain.mainNmrResidues)
-    # print('@~@~', nmrResidues[0].nextNmrResidue)
-    # print('@~@~', nmrResidues[0].previousNmrResidue)
     self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@2.VAL', '#2.@1.ALA', ])
     self.assertEqual(nmrResidues[0].nextNmrResidue, None)
     self.assertEqual(nmrResidues[0].previousNmrResidue, nmrResidues[1])
 
     nmrResidues[-1].connectNext(nmrResidues[-2])
-    # print('@~@~', nmrResidues[-1].nmrChain)
-    # print('@~@~', nmrResidues[-1].nextNmrResidue)
-    # print('@~@~', nmrResidues[-1].previousNmrResidue)
     self.assertEqual([x.id for x in nmrResidues[-1].nmrChain.mainNmrResidues],
                      ['#3.@5.GLN', '#3.@4.CYS', ])
     self.assertEqual(nmrResidues[-1].nextNmrResidue, nmrResidues[-2])
     self.assertEqual(nmrResidues[-1].previousNmrResidue, None)
 
     nmrResidues[2].connectNext(nmrResidues[-1])
-    # nmrChain2 =  nmrResidues[2].nmrChain
-    # print('@~@~', nmrChain2)
-    print('@~@~', [x.id for x in nmrResidues])
+    self.undo.undo()
+    self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues[2].nmrChain.mainNmrResidues],
                      ['#3.@3.GLY', '#3.@5.GLN', '#3.@4.CYS', ])
 
     nmrResidues[2].connectPrevious(nmrResidues[0])
 
     stretch = nmrResidues[2].nmrChain.mainNmrResidues
-    # print ('@~@~', stretch)
+    stretch[-2].deassign()
     self.assertEqual([x.id for x in stretch],
-                     ['#3.@2.VAL', '#3.@1.ALA','#3.@3.GLY', '#3.@5.GLN', '#3.@4.CYS', ])
+                     ['#3.@2.VAL', '#3.@1.ALA','#3.@3.GLY', '#3.@5.', '#3.@4.CYS', ])
 
-    # try:
-    #   stretch[-1].connectNext(stretch[0])
-    #   print ('@~@~ WARNING circular stretch', stretch)
-    # except:
-    #   print ('@~@~ OK, cannot make circular stretch', stretch)
     self.assertRaises(ValueError,  stretch[-1].connectNext, stretch[0])
 
-  def test_disconnect_nmr_residues_1(self):
+  def test_connected_nmr_residues(self):
     nmrChain = self.project.newNmrChain()
     nmrResidues = []
     for residueType in ('ALA', 'VAL', 'GLY', 'CYS', 'GLN'):
@@ -94,6 +80,168 @@ class NmrStretchTest(WrapperTesting):
     self.assertRaises(ValueError, nmrResidues[2].connectNext, None)
     self.assertIs(nmrResidues[2].nextNmrResidue, None)
     self.assertIs(nmrResidues[2].previousNmrResidue, None)
+
+  def test_disconnect_triplet_1(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', None):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[1].disconnectPrevious()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['@-.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
+
+  def test_disconnect_triplet_2(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', None):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[2].disconnectPrevious()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '@-.@3.', ])
+
+  def test_disconnect_triplet_3(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', None):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[0].disconnectNext()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['@-.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
+
+  def test_disconnect_triplet_4(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', None):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[1].disconnectNext()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '@-.@3.', ])
+
+
+  def test_disconnect_triplet_5(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', None):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[0].disconnect()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['@-.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
+
+
+  def test_disconnect_triplet_6(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', None):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[1].disconnect()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.', ])
+    self.assertEquals([x.id for x in self.project.nmrChains], ['@-'])
+
+
+  def test_disconnect_triplet_7(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', None):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[2].disconnect()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '@-.@3.', ])
+
+
+  def test_disconnect_double(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[0].disconnectNext()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['@-.@1.ALA', '@-.@2.VAL'])
+
+  def test_disconnect_midchain_1(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'SER', None, 'ILE'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[1].disconnect()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['@-.@1.ALA', '@-.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
+
+  def test_disconnect_midchain_2(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'SER', None, 'ILE'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[2].disconnect()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '@-.@3.SER', '#3.@4.', '#3.@5.ILE' ])
+
+  def test_disconnect_midchain_3(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'SER', None, 'ILE'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[3].disconnect()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '@-.@4.', '@-.@5.ILE' ])
+
+  def test_disconnect_midchain_4(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'SER', None, 'ILE'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[2].disconnectNext()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#3.@4.', '#3.@5.ILE' ])
+
+  def test_disconnect_midchain_5(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'SER', None, 'ILE'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+    nmrResidues[2].disconnectPrevious()
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['#3.@1.ALA', '#3.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
+
 
   def test_disconnect_nmr_residues_2(self):
     nmrChain = self.project.newNmrChain(isConnected=True)
@@ -120,30 +268,24 @@ class NmrStretchTest(WrapperTesting):
                      ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.GLY', '@-.@4.CYS', '@-.@5.GLN', ])
 
     nmrChain.mainNmrResidues = nmrResidues
-    # print ('@~@~', nmrChain.nmrResidues)
     self.assertEqual([x.id for x in nmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.GLY', '#2.@4.CYS', '#2.@5.GLN', ])
 
     nmrResidues[-1].disconnectNext()
-    # print ('@~@~', nmrChain.nmrResidues)
     self.assertEqual([x.id for x in nmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.GLY', '#2.@4.CYS', '#2.@5.GLN', ])
 
     nmrResidues[-1].disconnectPrevious()
-    # print ('@~@~', nmrChain.nmrResidues)
-    # print('@~@~', nmrResidues[-1].nmrChain)
     self.assertEqual([x.id for x in nmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.GLY', '#2.@4.CYS', '@-.@5.GLN'])
 
     nmrResidues[2].disconnect()
-    # for nr in nmrResidues:
-    #   print('@~@~', nr.nmrChain)
     self.assertEqual([x.id for x in nmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '@-.@3.GLY', '@-.@4.CYS', '@-.@5.GLN'])
 
     nmrResidues[1].disconnectPrevious()
-    # for nr in nmrResidues:
-    #   print('@~@~', nr.nmrChain)
+    self.undo.undo()
+    self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
                      ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.GLY', '@-.@4.CYS', '@-.@5.GLN'])
     self.assertEqual([x.id for x in self.project.nmrChains], ['@-'])
@@ -162,8 +304,27 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@3.',  '#2.@2.THR', '#2.@1.TRP',])
 
     nmrChain2.mainNmrResidues[1].disconnect()
-    # for nr in nmrResidues:
-    #   print('@~@~', nr.nmrChain)
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrChain.nmrResidues],
+                     ['@-.@1.TRP', '@-.@2.THR', '@-.@3.', ])
+
+  def test_disconnect_nmr_residue_triplet2(self):
+    nmrChain = self.project.fetchNmrChain(shortName='@-')
+    nmrResidues = []
+    for residueType in ('TRP', 'THR', None):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['@-.@1.TRP', '@-.@2.THR', '@-.@3.', ])
+
+    nmrChain2 = self.project.newNmrChain(isConnected=True)
+    nmrChain2.mainNmrResidues = reversed(nmrResidues)
+    self.assertEqual([x.id for x in nmrChain2.nmrResidues],
+                     ['#2.@3.',  '#2.@2.THR', '#2.@1.TRP',])
+
+    nmrChain2.mainNmrResidues[1].resetNmrChain(nmrChain)
+    self.undo.undo()
+    self.undo.redo()
     self.assertEqual([x.id for x in nmrChain.nmrResidues],
                      ['@-.@1.TRP', '@-.@2.THR', '@-.@3.', ])
 
@@ -174,33 +335,18 @@ class NmrStretchTest(WrapperTesting):
     for residueType in ('ALA', 'VAL', 'GLY', 'CYS', 'GLN'):
       nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
 
-    # try:
-    #   nmrResidues[1].assignTo(residues[2].id)
-    #   print('@~@~ WARNING assign middle of stretch', nmrResidues[1])
-    # except:
-    #   print('@~@~ OK. cannot assign middle of stretch', nmrResidues[1])
     self.assertRaises(ValueError,  nmrResidues[1].assignTo, residues[2].id)
 
     nmrResidues[0].residue = residues[5]
 
-    # try:
-    #   nmrChain.assignConnectedResidues(residues[3])
-    #   print('@~@~ WARNING assignment clash 1')
-    # except:
-    #   print('@~@~ OK, connected stretch assign should clash 1')
     self.assertRaises(ValueError,  nmrChain.assignConnectedResidues, residues[3])
 
-    # try:
-    #   nmrChain.assignConnectedResidues(residues[-2])
-    #   print('@~@~ WARNING assignment clash 2')
-    # except:
-    #   print('@~@~ OK, connected stretch assign should clash 2')
     self.assertRaises(ValueError,  nmrChain.assignConnectedResidues, residues[-2])
 
     nmrChain.assignConnectedResidues(residues[1])
     assignedNmrChain = self.project.getByPid('NC:X')
-    # print ('@~@~', assignedNmrChain)
-    # print ('@~@~', assignedNmrChain.nmrResidues)
+    self.undo.undo()
+    self.undo.redo()
     self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
                      ['X.2.TRP', 'X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR',])
 

@@ -662,7 +662,8 @@ class AbstractWrapperObject():
           del self._pid2Obj[obj.shortClassName][obj._id]
         del data2Obj[apiObj]
 
-  def _setUniqueStringKey(self, apiObj:'ccpn.api.memops.Implementation.DataObject', defaultValue:str, keyTag:str='name') -> str:
+  def _setUniqueStringKey(self, apiObj:'ccpn.api.memops.Implementation.DataObject',
+                          defaultValue:str, keyTag:str='name') -> str:
     """(re)set obj.keyAttr to make it a unique key, using defaultValue if not set
     NB - if called BEFORE data2obj etc. dictionaries are set"""
 
@@ -676,7 +677,7 @@ class AbstractWrapperObject():
       undo.increaseBlocking()
     try:
       if wrappedData not in self._project._data2Obj:
-        # Necessary because otherwise we likely will have notifiers 0- that would then break
+        # Necessary because otherwise we likely will have notifiers - that would then break
         wrappedData.root.override = True
       # Set default value if present value is None
       value = getattr(wrappedData, keyTag)

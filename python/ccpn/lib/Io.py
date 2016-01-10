@@ -26,6 +26,16 @@ __version__ = "$Revision$"
 from ccpn import Project
 from ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
 from ccpncore.util import Io as ioUtil
+from ccpncore.lib import V2Upgrade
+
+def _fixLoadedProject(apiProject:ApiProject):
+  """Ad hoc fixes, for reading temporary in-house data model versions etc.
+
+  No-op for regular projects"""
+  for nmrConstraintStore in apiProject.sortedNmrConstraintStores():
+    for constraintList in nmrConstraintStore.sortedConstraintLists():
+      if constraintList.className != 'GenericConstraintList':
+        newConstraaintList = V2Upgrade.upgradeConstraintList(constraintList)
 
 def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
   """Open project matching the API Project stored at path.
@@ -33,6 +43,10 @@ def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> P
   If the API project contains several NmrProjects (rare),
   nmrProjectName lets you select which one to open"""
   apiProject = ioUtil.loadProject(path, useFileLogger=useFileLogger)
+
+  # Ad hoc fixes for temporary internal versions (etc.).
+  _fixLoadedProject(apiProject)
+
   if apiProject is None:
     raise ValueError("No valid project loaded from %s" % path )
   else:

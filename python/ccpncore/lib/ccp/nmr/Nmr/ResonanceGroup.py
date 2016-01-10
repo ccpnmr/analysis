@@ -45,12 +45,12 @@ def resetNmrChain(self, newNmrChain:'NmrChain'=None):
   defaultNmrChain = self.nmrProject.findFirstNmrChain(code=Constants.defaultNmrChainCode)
   newNmrChain = newNmrChain or defaultNmrChain
 
+  if newNmrChain is nmrChain:
+    return
 
-  if self.mainResonanceGroup is not self:
+  elif self.mainResonanceGroup is not self:
     raise ValueError("Cannot disconnect nmrChain for satellite ResonanceGroup")
 
-  elif newNmrChain is nmrChain:
-    return
 
   elif nmrChain.isConnected:
     stretch = nmrChain.mainResonanceGroups
@@ -62,19 +62,41 @@ def resetNmrChain(self, newNmrChain:'NmrChain'=None):
       index = stretch.index(self)
       # The tricky case - we have to make a new NmrChain
       extraNmrChain = self.nmrProject.newNmrChain(isConnected=True)
+      dummyNmrChain = self.nmrProject.newNmrChain()
       ll = stretch[index+1:]
+      # NB We have to do this in two steps in order to avoid 1) breaking the connect chain
+      # 2) overriding the API and having to do independent undo handling
       for resonanceGroup in reversed(ll):
+        resonanceGroup.directNmrChain = dummyNmrChain
+      for resonanceGroup in ll:
         resonanceGroup.directNmrChain = extraNmrChain
-      # We cannot loop in normal order without breaking the stretch as we go
-      extraNmrChain.__dict__['mainResonanceGroups'].reverse()
+      dummyNmrChain.delete()
 
   #
   self.directNmrChain = newNmrChain
 
-  # clean out single-residue connected stretches adn delete empty ones
+  # clean out single-residue connected stretches and delete empty ones
   if nmrChain.isConnected:
     ll = nmrChain.mainResonanceGroups
     if len(ll) == 1:
       ll[0].directNmrChain = defaultNmrChain
     if not nmrChain.mainResonanceGroups:
       nmrChain.delete()
+
+def resetAssignment(self, nmrChain:'NmrChain', sequenceCode:str):
+  """Reset nmrChain and sequenceCode at the same time, while avoiding name clashes"""
+  oldNmrChain = self.nmrChain
+  oldSequenceCode = self.sequenceCode
+  previous = nmrChain.findFirstResonanceGroup(sequenceCode=sequenceCode)
+  if previous is self:
+    return
+  elif previous is None:
+    self.sequenceCode = None
+    self.directNmrChain = nmrChain
+    try:
+      self.sequenceCode = sequenceCode
+    except:
+      # error - probably to do with offset. Set back to initial state
+      self.directNmrChain = oldNmrChain
+      self.sequenceCode = oldSequenceCode
+      raise ValueError("Could not set to sequenceCode %s in nmrChain %s" % (sequenceCode, nmrChain))

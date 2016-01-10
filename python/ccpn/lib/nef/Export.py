@@ -442,14 +442,14 @@ def createRestraintListFrame(restraintList):
   """make a saveframe for a restraint list of whatever type."""
   restraintType = restraintList.restraintType
   potentialType = restraintList.potentialType
-  restraintItemLength = RestraintContribution.restraintType2Length[restraintList.restraintType]
+  restraintItemLength = restraintList.itemLength
 
-  if restraintType == 'HBond':
-    restraintListTag = 'distance'
-    if restraintList.origin is None:
-      restraintList.origin = 'hbond'
-  else:
-    restraintListTag = restraintType.lower()
+  # if restraintType == 'HBond':
+  #   restraintListTag = 'distance'
+  #   if restraintList.origin is None:
+  #     restraintList.origin = 'hbond'
+  # else:
+  restraintListTag = restraintType.lower()
   sf_category = 'nef_%s_restraint_list' % restraintListTag
   framecode = '%s_%s' % (sf_category, restraintList.name.translate(Pid.unmapSeparators))
 

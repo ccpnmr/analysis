@@ -23,13 +23,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
-from ccpncore.util import Common as commonUtil
-from ccpn import AbstractWrapperObject
-from ccpn import Project
-from ccpncore.util.Tensor import  Tensor
-from ccpn import RestraintSet
+# from ccpncore.util import Common as commonUtil
+from ccpncore.lib import Constants as coreConstants
+from ccpncore.util.Tensor import Tensor
 from ccpncore.util import Pid
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn import RestraintSet
 
 
 class RestraintList(AbstractWrapperObject):
@@ -46,16 +47,16 @@ class RestraintList(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
-  # Number of atoms in a Restraint item, by restraint type
-  _restraintType2Length = {
-    'Distance':2,
-    'Dihedral':4,
-    'Rdc':2,
-    'HBond':2,
-    'JCoupling':2,
-    'Csa':1,
-    'ChemicalShift':1,
-  }
+  # # Number of atoms in a Restraint item, by restraint type
+  # _restraintType2Length = {
+  #   'Distance':2,
+  #   'Dihedral':4,
+  #   'Rdc':2,
+  #   'HBond':2,
+  #   'JCoupling':2,
+  #   'Csa':1,
+  #   'ChemicalShift':1,
+  # }
 
   def __init__(self, project, wrappedData):
 
@@ -65,8 +66,8 @@ class RestraintList(AbstractWrapperObject):
 
     self._wrappedData = wrappedData
     self._project = project
-    defaultName = ('%ss-%s' %
-                   (self._wrappedData.__class__.__name__[:-14], wrappedData.serial))
+    defaultName = ('%ss%s' %
+                   (self._wrappedData.constraintType, wrappedData.serial))
     self._setUniqueStringKey(wrappedData, defaultName)
     super().__init__(project, wrappedData)
 
@@ -83,13 +84,15 @@ class RestraintList(AbstractWrapperObject):
 
   @property
   def restraintType(self) -> str:
-    """Restraint type"""
-    return self._wrappedData.__class__.__name__[:-14]
+    """Restraint type.
+
+    Allowed types are Distance, Rdc, JCoupling, ChemicalShift, Csa, Dihedral"""
+    return self._wrappedData.constraintType
 
   @property
   def restraintItemLength(self) -> int:
     """Length of restraintItem - number of atom ID defining a restraint"""
-    return self.restraintType2Length[self.restraintType]
+    return self._wrappedData.itemLength
 
   @property
   def serial(self) -> int:
@@ -150,23 +153,27 @@ class RestraintList(AbstractWrapperObject):
     if self.restraintType == 'Rdc':
       apiRestraintList = self._wrappedData
       return Tensor(axial=apiRestraintList.tensorMagnitude,
-                    rhombic=apiRestraintList.tensorRhombicity)
+                    rhombic=apiRestraintList.tensorRhombicity,
+                    isotropic=apiRestraintList.tensorIsotropicValue)
     else:
       self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
                                     % self.restraintType)
 
   @tensor.setter
   def tensor(self, value:Tensor):
-    if self.restraintType == 'Rdc':
-      apiRestraintList = self._wrappedData
-      if commonUtil.isClose(value.isotropic, 0.0):
-        self._wrappedData.tensorMagnitude= value.axial
-        self._wrappedData.tensorRhombicity= value.rhombic
-      else:
-        raise ValueError("Tensor isotropic value %s is not zero" % value.isotropic)
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
-                                    % self.restraintType)
+      self._wrappedData.tensorIsotropicValue= value.isotropic
+      self._wrappedData.tensorMagnitude= value.axial
+      self._wrappedData.tensorRhombicity= value.rhombic
+    # if self.restraintType == 'Rdc':
+    #   apiRestraintList = self._wrappedData
+    #   if commonUtil.isClose(value.isotropic, 0.0):
+    #     self._wrappedData.tensorMagnitude= value.axial
+    #     self._wrappedData.tensorRhombicity= value.rhombic
+    #   else:
+    #     raise ValueError("Tensor isotropic value %s is not zero" % value.isotropic)
+    # else:
+    #   self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
+    #                                 % self.restraintType)
 
   # @property
   # def tensorMagnitude(self) -> float:
@@ -205,53 +212,59 @@ class RestraintList(AbstractWrapperObject):
   @property
   def tensorChainCode(self) -> float:
     """tensorChainCode of orientation tensor """
-    if self.restraintType == 'Rdc':
-      return self._wrappedData.tensorChainCode
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorChainCode"
-                                    % self.restraintType)
+    # if self.restraintType == 'Rdc':
+    #   return self._wrappedData.tensorChainCode
+    # else:
+    #   self._project._logger.warning("%sRestraintList has no attribute tensorChainCode"
+    #                                 % self.restraintType)
+    return self._wrappedData.tensorChainCode
 
   @tensorChainCode.setter
   def tensorChainCode(self, value:float):
-    if self.restraintType == 'Rdc':
-      self._wrappedData.tensorChainCode = value
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorChainCode"
-                                    % self.restraintType)
+    # if self.restraintType == 'Rdc':
+    #   self._wrappedData.tensorChainCode = value
+    # else:
+    #   self._project._logger.warning("%sRestraintList has no attribute tensorChainCode"
+    #                                 % self.restraintType)
+    self._wrappedData.tensorChainCode = value
 
   @property
   def tensorSequenceCode(self) -> float:
     """tensorSequenceCode of orientation tensor """
-    if self.restraintType == 'Rdc':
-      return self._wrappedData.tensorSequenceCode
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorSequenceCode"
-                                    % self.restraintType)
+    # if self.restraintType == 'Rdc':
+    #   return self._wrappedData.tensorSequenceCode
+    # else:
+    #   self._project._logger.warning("%sRestraintList has no attribute tensorSequenceCode"
+    #                                 % self.restraintType)
+    return self._wrappedData.tensorSequenceCode
 
   @tensorSequenceCode.setter
   def tensorSequenceCode(self, value:float):
-    if self.restraintType == 'Rdc':
-      self._wrappedData.tensorSequenceCode = value
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorSequenceCode"
-                                    % self.restraintType)
+    # if self.restraintType == 'Rdc':
+    #   self._wrappedData.tensorSequenceCode = value
+    # else:
+    #   self._project._logger.warning("%sRestraintList has no attribute tensorSequenceCode"
+    #                                 % self.restraintType)
+    self._wrappedData.tensorSequenceCode = value
 
   @property
   def tensorResidueType(self) -> float:
     """tensorResidueType of orientation tensor """
-    if self.restraintType == 'Rdc':
-      return self._wrappedData.tensorResidueType
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorResidueType"
-                                    % self.restraintType)
+    # if self.restraintType == 'Rdc':
+    #   return self._wrappedData.tensorResidueType
+    # else:
+    #   self._project._logger.warning("%sRestraintList has no attribute tensorResidueType"
+    #                                 % self.restraintType)
+    return self._wrappedData.tensorResidueType
 
   @tensorResidueType.setter
   def tensorResidueType(self, value:float):
-    if self.restraintType == 'Rdc':
-      self._wrappedData.tensorResidueType = value
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorResidueType"
-                                    % self.restraintType)
+    # if self.restraintType == 'Rdc':
+    #   self._wrappedData.tensorResidueType = value
+    # else:
+    #   self._project._logger.warning("%sRestraintList has no attribute tensorResidueType"
+    #                                 % self.restraintType)
+    self._wrappedData.tensorResidueType = value
     
   # Implementation functions
   def rename(self, value):
@@ -273,25 +286,39 @@ class RestraintList(AbstractWrapperObject):
 # Connections to parents:
 RestraintSet._childClasses.append(RestraintList)
 
-def _newRestraintList(self:RestraintSet, restraintType, name:str=None, comment:str=None,
-                     unit:str=None, potentialType:str=None, tensorMagnitude:float=None,
-                     tensorRhombicity:float=None, tensorChainCode:str=None,
-                     tensorSequenceCode:str=None,
-                     tensorResidueType:str=None) -> RestraintList:
+def _newRestraintList(self:RestraintSet, restraintType, name:str=None,
+                      comment:str=None, unit:str=None, potentialType:str=None,
+                      tensorMagnitude:float=None, tensorRhombicity:float=None,
+                      tensorIsotropicValue:float=0.0, tensorChainCode:str=None,
+                      tensorSequenceCode:str=None, tensorResidueType:str=None) -> RestraintList:
   """Create new ccpn.RestraintList of type restraintType within ccpn.RestraintSet"""
 
   if name and Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
 
-  apiNmrConstraintStore = self._wrappedData
-  creator = apiNmrConstraintStore.getattr("new%sConstraintList" % restraintType)
-  if restraintType == 'Rdc':
-    obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType,
-                  tensorMagnitude=tensorMagnitude, tensorRhombicity=tensorRhombicity,
-                  tensorChainCode=tensorChainCode,tensorSequenceCode=tensorSequenceCode,
-                  tensorResidueType=tensorResidueType )
-  else:
-    obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType)
+  itemLength = coreConstants.constraintListType2ItemLength.get(restraintType)
+  if itemLength is None:
+    raise ValueError("restraintType %s not recognised" % restraintType)
+
+  obj = self._wrappedData.newGenericConstraintList(name=name, details=comment, unit=unit,
+                                                   constraintType=restraintType,
+                                                   itemLength=itemLength,
+                                                   potentialType=potentialType,
+                                                   tensorMagnitude=tensorMagnitude,
+                                                   tensorRhombicity=tensorRhombicity,
+                                                   tensorIsotropicValue=tensorIsotropicValue,
+                                                   tensorChainCode=tensorChainCode,
+                                                   tensorSequenceCode=tensorSequenceCode,
+                                                   tensorResidueType=tensorResidueType )
+  # apiNmrConstraintStore = self._wrappedData
+  # creator = apiNmrConstraintStore.getattr("new%sConstraintList" % restraintType)
+  # if restraintType == 'Rdc':
+  #   obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType,
+  #                 tensorMagnitude=tensorMagnitude, tensorRhombicity=tensorRhombicity,
+  #                 tensorChainCode=tensorChainCode,tensorSequenceCode=tensorSequenceCode,
+  #                 tensorResidueType=tensorResidueType )
+  # else:
+  #   obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType)
   return self._project._data2Obj.get(obj)
 
 RestraintSet.newRestraintList = _newRestraintList

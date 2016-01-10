@@ -57,6 +57,16 @@ for tag, val in list(DEFAULT_ISOTOPE_DICT.items()):
 # Default NmrChain code
 defaultNmrChainCode = '@-'
 
+# Constraint list constraintType to itemLength map
+constraintListType2ItemLength = {
+  'Csa':1,
+  'ChemicalShift':1,
+  'Distance':2,
+  'Rdc':2,
+  'JCoupling':2,
+  'Dihedral':4,
+}
+
 # sequenceCode parsing expression
 # A sequenceCOde is combined (without whitespace) of:
 #   an optional integer

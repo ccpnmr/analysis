@@ -167,7 +167,11 @@ def expandMolSystemAtoms(self:'Chain'):
               # NB components are sorted by key, which means by name
               newChar = 'XY'[ii]
               ll = list(component.name)
-              ll[starpos] = newChar
+              if len(ll) > starpos:
+                ll[starpos] = newChar
+              else:
+                # Necessary for cases like H2'/H2''
+                ll.append(newChar)
               newName = ''.join(ll)
               newNames.append(newName)
               if residue.findFirstAtom(name=newName) is not None:

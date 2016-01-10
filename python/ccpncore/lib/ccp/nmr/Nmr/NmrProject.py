@@ -27,13 +27,13 @@ from ccpncore.util import Common as commonUtil
 from ccpncore.util.Types import Sequence
 from ccpncore.lib import Constants
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
-# from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
 from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
 from ccpncore.lib.Io.Formats import AZARA, BRUKER, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
 from ccpncore.util.Path import checkFilePath
-from ccpncore.util import Io as ioUtil
+# from ccpncore.util import Io as ioUtil
 
-from ccpncore.api.memops.Implementation import Url
+# from ccpncore.api.memops.Implementation import Url
+# from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
 
 # Default parameters - 10Hz/pt, 0.1ppm/point for 1H; 10 Hz/pt, 1ppm/pt for 13C
 # NB this is in order to give simple numbers. it does NOT match the gyromagnetic ratios

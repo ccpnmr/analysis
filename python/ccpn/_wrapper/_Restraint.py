@@ -63,7 +63,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for Peak"""
+    """serial number, key attribute for Restraint"""
     return self._wrappedData.serial
 
   @property
@@ -183,6 +183,20 @@ class Restraint(AbstractWrapperObject):
   def additionalLowerLimit(self, value:float):
     for contribution in self._wrappedData.contributions:
       contribution.additionalLowerLimit = value
+
+  @property
+  def vectorLength(self) -> float:
+    """Reference vector length, where applicable. (Mainly?) for Rdc"""
+    aSet = set(x.vectorLength for x in self._wrappedData.contributions)
+    if len(aSet) == 1:
+      return aSet.pop()
+    else:
+      return None
+
+  @vectorLength.setter
+  def vectorLength(self, value:float):
+    for contribution in self._wrappedData.contributions:
+      contribution.vectorLength = value
     
   # Implementation functions
   @classmethod
@@ -226,14 +240,14 @@ def createSimpleRestraint(self:RestraintList,comment:str=None,
                         peaks:Sequence=(),  targetValue:float=None, error:float=None,
                         weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                         additionalUpperLimit:float=None, additionalLowerLimit:float=None,
-                        restraintItems:Sequence=()) -> Restraint:
+                        vectorLength=None, restraintItems:Sequence=()) -> Restraint:
 
   restraint = self.newRestraint(comment=comment, peaks=peaks)
   restraint.newRestraintContribution(targetValue=targetValue,error=error, weight=weight,
                             upperLimit=upperLimit, lowerLimit=lowerLimit,
                             additionalUpperLimit=additionalUpperLimit,
                             additionalLowerLimit=additionalLowerLimit,
-                            restraintItems=restraintItems)
+                            vectorLength=vectorLength, restraintItems=restraintItems)
   #
   return restraint
 

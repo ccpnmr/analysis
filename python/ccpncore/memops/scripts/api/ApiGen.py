@@ -424,10 +424,11 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     
     self.writeNewline()
 
-    if self.topObject in inClass.getAllSupertypes():
-
-      self.setImplAttr(self.varNames['self'], metaConstants.lastid_attribute,
-                       self.toLiteral(0))
+    # Unnecessary - done below
+    # if self.topObject in inClass.getAllSupertypes():
+    #
+    #   self.setImplAttr(self.varNames['self'], metaConstants.lastid_attribute,
+    #                    self.toLiteral(0))
 
     for attr in inClass.getAllAttributes():
       if not attr.isDerived and not attr.isImplementation:

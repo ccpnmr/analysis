@@ -125,7 +125,7 @@ class Project(AbstractWrapperObject):
     defaultChain = wrappedData.findFirstNmrChain(code=Constants.defaultNmrChainCode)
     if defaultChain is None:
       # NO default chain - probably an alpha project or upgraded from V2
-      defaultChain = wrappedData.findFirstNmrChain(code='@1')
+      defaultChain = wrappedData.findFirstNmrChain(code='@-')
       if defaultChain is None:
         defaultChain = wrappedData.newNmrChain(code=Constants.defaultNmrChainCode)
       else:

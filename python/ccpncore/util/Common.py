@@ -30,7 +30,10 @@ import os
 import sys
 import json
 import itertools
+import numpy
+from numbers import Real
 from collections import abc as collectionClasses
+from functools import total_ordering
 
 from ccpncore.util import Path
 from ccpncore.lib import Constants as coreLibConstants
@@ -49,6 +52,18 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
 apiTopModule = 'ccpncore.api'
+
+
+@total_ordering
+class __MinType(object):
+    def __le__(self, other):
+        return True
+
+    def __eq__(self, other):
+        return (self is other)
+
+__smallest = __MinType()
+
 
 
 def getClassFromFullName(qualifiedName):
@@ -201,9 +216,65 @@ def splitIntFromChars(value:str):
 
   return number,chars
 
+def universalSortKey(key):
+  """"Universal sort key function. Works in nested sequences"""
+  smallest = float('-inf')
+  if key is None:
+    # First None
+    return ('',)
+
+  elif isinstance(key, bool):
+    # Then bools
+    return (chr(1), key)
+
+  elif isinstance(key, Real):
+    # Then real numbers
+    return (chr(2), key)
+
+  elif isinstance(key,str):
+    # Then strings - strings starting with 'real values' are last, sorted by the real value
+    for ii in range(len(key)-1, 0, -1):
+      try:
+        val = float(key[:ii])
+        break
+      except:
+        pass
+    else:
+      val = smallest
+    #
+    return (chr(3), val, key)
+
+  elif isinstance(key, numpy.ndarray):
+    # Numpy special case, as 1) it might be as sequence, 2) it has __lt__ but does not compare
+    return (key.__class__.__name__, key.size(), repr(key))
+
+  elif isinstance(key, bytes) or isinstance(key, bytearray):
+    return (key.__class__.__name__, key)
+
+  elif isinstance(key, collectionClasses.Sequence):
+    # NBNB TBD FIXME
+    # This will BREAK for nested sequences
+    return (key.__class__.__name__, [universalSortKey(x) for x in key])
+
+  else:
+    if hasattr(key, '__len__'):
+      val = len(key)
+    else:
+      val = smallest
+
+    if not hasattr(key, '__lt__'):
+      key = repr(key)
+
+    return (key.__class__.__name__, val, key)
+
 def numericStringSortKey(key):
-  """return sort key so that string fields that start with numeric values sort by that value
-  E.g. '11a', '+1.1e1zz' or '11.0' sort as numeric 11.0"""
+  """
+  Returns customized sort key
+  1) Works on single values or sequences
+  2) sorts None as smallest value of whatever type.
+  3) string fields that start with numeric values sort by that value
+  E.g. '11a', '+1.1e1zz' or '11.0' sort as numeric 11.0
+  """
   number = 0.0
   if isinstance(key,str):
     for ii in range(1,len(key)+1):
@@ -213,8 +284,13 @@ def numericStringSortKey(key):
         pass
     #
     return [number, key]
+
+  elif key is None:
+    return [number, __smallest]
+
   elif isinstance(key, collectionClasses.Sequence):
     return list(itertools.chain(numericStringSortKey(x) for x in key))
+
   else:
     return [number, key]
 

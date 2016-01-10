@@ -133,37 +133,41 @@ class RestraintContribution(AbstractWrapperObject):
 
   @property
   def scale(self) -> float:
-    """scaling factor (RDC only) to be multiplied with targetValue to get scaled value """
-    if hasattr(self._wrappedData, 'scale'):
-      return self._wrappedData.scale
-    else:
-      raise AttributeError("%s RestraintContribution has no attribute 'scale'" %
-      self._parent._parent.restraintType)
+    """scaling factor (relevant mainly for RDC) to be multiplied with targetValue to get scaled value """
+    # if hasattr(self._wrappedData, 'scale'):
+    #   return self._wrappedData.scale
+    # else:
+    #   raise AttributeError("%s RestraintContribution has no attribute 'scale'" %
+    #   self._parent._parent.restraintType)
+    return self._wrappedData.scale
 
   @scale.setter
   def scale(self, value:float):
-    if hasattr(self._wrappedData, 'scale'):
-      self._wrappedData.scale = value
-    else:
-      raise AttributeError("%s RestraintContribution has no attribute 'scale'" %
-      self._parent._parent.restraintType)
+    # if hasattr(self._wrappedData, 'scale'):
+    #   self._wrappedData.scale = value
+    # else:
+    #   raise AttributeError("%s RestraintContribution has no attribute 'scale'" %
+    #   self._parent._parent.restraintType)
+    self._wrappedData.scale = value
 
   @property
   def isDistanceDependent(self) -> float:
-    """Does targetValue depend on a variable distance (RDC only) """
-    if hasattr(self._wrappedData, 'isDistanceDependent'):
-      return self._wrappedData.isDistanceDependent
-    else:
-      raise AttributeError("%s RestraintContribution has no attribute 'isDistanceDependent'" %
-      self._parent._parent.restraintType)
+    """Does targetValue depend on a variable distance (where this is relevant, e.g. for Rdc) """
+    # if hasattr(self._wrappedData, 'isDistanceDependent'):
+    #   return self._wrappedData.isDistanceDependent
+    # else:
+    #   raise AttributeError("%s RestraintContribution has no attribute 'isDistanceDependent'" %
+    #   self._parent._parent.restraintType)
+    return self._wrappedData.isDistanceDependent
 
   @isDistanceDependent.setter
   def isDistanceDependent(self, value:float):
-    if hasattr(self._wrappedData, 'isDistanceDependent'):
-      self._wrappedData.isDistanceDependent = value
-    else:
-      raise AttributeError("%s RestraintContribution has no attribute 'isDistanceDependent'" %
-      self._parent._parent.restraintType)
+    # if hasattr(self._wrappedData, 'isDistanceDependent'):
+    #   self._wrappedData.isDistanceDependent = value
+    # else:
+    #   raise AttributeError("%s RestraintContribution has no attribute 'isDistanceDependent'" %
+    #   self._parent._parent.restraintType)
+    self._wrappedData.isDistanceDependent = value
 
   @property
   def combinationId(self) -> int:
@@ -178,12 +182,14 @@ class RestraintContribution(AbstractWrapperObject):
   def restraintItems(self) -> Tuple[str, ...]:
     """restraint items of contribution - given as a tuple of lists of AtomId """
 
-    itemLength = self._parent._parent.restraintItemLength
-
+    itemLength = self._wrappedData.constraint.parentList.itemLength
     result = []
     sortkey = self._project._pidSortKey
 
-    if itemLength > 1:
+    if itemLength == 1:
+      for apiItem in self._wrappedData.items:
+        result.append((_fixedResonance2AtomId(apiItem.resonance),))
+    else:
       for apiItem in self._wrappedData.items:
         atomIds = [_fixedResonance2AtomId(x) for x in apiItem.resonances]
         if sortkey(atomIds[0]) > sortkey(atomIds[-1]):
@@ -191,21 +197,17 @@ class RestraintContribution(AbstractWrapperObject):
           # NB This assumes that assignments are either length 2 or ordered (as is so far the case)
           atomIds.reverse()
         result.append(tuple(atomIds))
-    else:
-      for apiItem in self._wrappedData.items:
-        result.append((_fixedResonance2AtomId(apiItem.resonance),))
     #
     return tuple(sorted(result, key=sortkey))
 
   @restraintItems.setter
   def restraintItems(self, value:Sequence):
 
-    itemLength = self._parent._parent.restraintItemLength
-    newItemFuncName ="new%sItem" % self._parent._parent.restraintType
+    itemLength = self._wrappedData.constraint.parentList.itemLength
 
     for ll in value:
       # make new items
-      if len(ll) != self.restraintItemLength:
+      if len(ll) != itemLength:
         raise ValueError("RestraintItems must have length %s: %s" % (itemLength, ll))
 
     apiContribution = self._wrappedData
@@ -214,16 +216,19 @@ class RestraintContribution(AbstractWrapperObject):
       item.delete()
 
     fetchFixedResonance = self._parent._parent._parent._fetchFixedResonance
-    if itemLength > 1:
+    if itemLength == 1:
       for ll in value:
         # make new items
-        getattr(apiContribution, newItemFuncName)(
-          resonances=tuple(fetchFixedResonance(Pid.splitId(x)) for x in ll))
-    else:
-      for ll in value:
-        # make new items
-        getattr(apiContribution, newItemFuncName)(
+        apiContribution.newSingleAtomItem(
           resonance=fetchFixedResonance(Pid.splitId(ll[0])))
+    else:
+      if itemLength == 4:
+        func = apiContribution.newFourAtomItem
+      else:
+        func = apiContribution.newAtomPairItem
+      for ll in value:
+        # make new items
+        func(resonances=tuple(fetchFixedResonance(Pid.splitId(x)) for x in ll))
     
   # Implementation functions
   @classmethod
@@ -237,13 +242,14 @@ Restraint._childClasses.append(RestraintContribution)
 def _newRestraintContribution(self:Restraint, targetValue:float=None, error:float=None,
                     weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
+                    scale:float=1.0, isDistanceDependent:bool=None,
                     restraintItems:Sequence=()) -> RestraintContribution:
   """Create new ccpn.RestraintContribution within ccpn.Restraint"""
-  constraint = self._wrappedData
-  creator = constraint.getattr("new%sContribution" % self._parent.restraintType)
-  obj = creator(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
-                lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
-                additionalLowerLimit=additionalLowerLimit)
+  func = self._wrappedData.constraint.newGenericContribution
+  obj = func(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
+             lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
+             additionalLowerLimit=additionalLowerLimit, scale=scale,
+             isDistanceDependent=isDistanceDependent)
   result = self._project._data2Obj.get(obj)
   result.restraintItems = restraintItems
   return result
@@ -257,7 +263,7 @@ for clazz in ApiContribution._metaclass.getNonAbstractSubtypes():
   Project._apiNotifiers.extend(
     ( ('_newObject', {'cls':RestraintContribution}, className, '__init__'),
       ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+      ('_finaliseUnDelete', {}, className, 'undelete'),
     )
 )
 

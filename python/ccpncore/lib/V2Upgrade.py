@@ -185,7 +185,7 @@ def addOffsetResonanceGroup(addToGroup:'ResonanceGroup', addGroup:'ResonanceGrou
     # set offset residueType
     residueType = addGroup.residueType
     if residueType is None:
-      chemComp = addToGroup.nmrProject.findFirstChemComp(molType=addGroup.molType,
+      chemComp = addToGroup.root.findFirstChemComp(molType=addGroup.molType,
                                                          ccpCode=addGroup.ccpCode)
       if chemComp:
         addGroup.residueType = chemComp.code3Letter
@@ -521,43 +521,49 @@ def mapAssignedResonances(topObject, molSystem=None, chainMap=None):
 
             # assert len(resonances) == 1
             resonance = resonances[0]
-            for ii in range(2):
-              if (resonance.name in(atomSetNames[ii], newNames[ii]) or
-                  resonance.name.upper() in(atomSetNames[ii], newNames[ii])):
-                # name matches one of the atomSets - use matching name
-                indx = ii
-                break
+
+            if resonance.name is None:
+              # Aribtratily pck the first one. Wnat else?
+              indx = 0
 
             else:
-              # Name did not match either possibility, so these are non-standard. Try anyway
-              if 'b' in resonance.name or '3' in resonance.name:
-                # Heuristic - these names are likely to be second in sorting
-                # e.g. 'HBb' or 'HB3'
-                indx = 1
-              elif 'a' in resonance.name or '1' in resonance.name:
-                # Heuristic = this name is likely to be first in sorting (e.g. 'HBa'
-                # NB both XY1, XY1*, XY11, XY21 (Asn, Gln,Arg) XY12 (Ile) should sort first
-                # Arg HH12 should sort second, but this cannot be helped
-                indx = 0
-              elif '2' in resonance.name:
-                # This will not sort second for e,g, HB2/HB3, but that cannot be helped.
-                # The only one that matters is
-                # where e.g. HD1 must bind to CD1 and HD2 to CD2, and it gets those right
-                # Anyway the real atom names are caught before this
-                indx = 1
+              for ii in range(2):
+                if (resonance.name in(atomSetNames[ii], newNames[ii]) or
+                    resonance.name.upper() in(atomSetNames[ii], newNames[ii])):
+                  # name matches one of the atomSets - use matching name
+                  indx = ii
+                  break
+
               else:
-                realResonance = resonance.resonance
-                if realResonance:
-                  # We can not be sure that assignments have not changed, but
-                  # better have it match the resonance than not
-                  if _getAmbigProchiralLabel(realResonance) == 'a':
-                    indx = 0
-                  else:
-                    indx = 1
-                else:
-                  # Stuff it. We just do not know and pick the first one.
-                  # Anyway the cases where is makes a difference are cared for above.
+                # Name did not match either possibility, so these are non-standard. Try anyway
+                if 'b' in resonance.name or '3' in resonance.name:
+                  # Heuristic - these names are likely to be second in sorting
+                  # e.g. 'HBb' or 'HB3'
+                  indx = 1
+                elif 'a' in resonance.name or '1' in resonance.name:
+                  # Heuristic = this name is likely to be first in sorting (e.g. 'HBa'
+                  # NB both XY1, XY1*, XY11, XY21 (Asn, Gln,Arg) XY12 (Ile) should sort first
+                  # Arg HH12 should sort second, but this cannot be helped
                   indx = 0
+                elif '2' in resonance.name:
+                  # This will not sort second for e,g, HB2/HB3, but that cannot be helped.
+                  # The only one that matters is
+                  # where e.g. HD1 must bind to CD1 and HD2 to CD2, and it gets those right
+                  # Anyway the real atom names are caught before this
+                  indx = 1
+                else:
+                  realResonance = resonance.resonance
+                  if realResonance:
+                    # We can not be sure that assignments have not changed, but
+                    # better have it match the resonance than not
+                    if _getAmbigProchiralLabel(realResonance) == 'a':
+                      indx = 0
+                    else:
+                      indx = 1
+                  else:
+                    # Stuff it. We just do not know and pick the first one.
+                    # Anyway the cases where is makes a difference are cared for above.
+                    indx = 0
 
             resonanceName = newNames[indx]
             result[resonance] = (residue, resonanceName.replace('*','%'))
@@ -685,30 +691,25 @@ def regularisedResonanceName(resonance):
   else:
     elementCode = isotope.chemElement.symbol.upper()
 
-  upperName = resonanceName.upper()
+  if resonanceName:
+    if elementCode and resonanceName.upper().startswith(elementCode):
+      # name is OK except possibly for casing - fix the casing
+      ss = resonanceName[len(elementCode):]
 
-  result = None
-  if elementCode and upperName.startswith(elementCode):
-    # name is OK
-    if resonanceName.startswith(elementCode):
-      result = resonanceName
+      if 'X' in ss or 'Y' in ss:
+        # Necessary to avoid potential clashes with XY names set above
+        # No actual assigned names contain 'X' or 'Y' anyway
+        result = '%s@%s-%s' % (elementCode, resonance.serial, resonanceName)
+      else:
+        # Name might be proper assignment name. Change to new wildcard convention
+       result = (elementCode + ss).replace('*', '%')
+
     else:
-      # except for casing - fix the casing
-      result = elementCode + resonanceName[len(elementCode):]
-
-    if 'X' in result or 'Y' in result:
-      # Necessary to avoid potential clashes with XY names set above
-      # No actual assigned names contain 'X' or 'Y' anyway
-      result = '%s@%s' % (result, resonance.serial)
-    else:
-      # Name might be proper assignment name. Change to new wildcard convention
-      result.replace('*', '%')
-
+      # Set unique default name
+      result = '%s@%s-%s' % (elementCode, resonance.serial, resonanceName)
 
   else:
-    # Set unique default name
-    result = '%s%s@%s' % (elementCode, resonanceName, resonance.serial)
-
+    result = '%s@%s' % (elementCode, resonance.serial)
   #
   return result
 

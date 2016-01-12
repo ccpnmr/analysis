@@ -2212,6 +2212,17 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
         if element.hicard == 1 or op.opType != 'remove':
           self.defineVar(self.oldSelfVar, varType=self.elementVarType(element.container))
 
+      # Make oldValue dictionary for later undo
+      otherRole = hasattr(element, 'otherRole') and element.otherRole
+      if (otherRole and element.hicard != 1 and otherRole.hicard == 1 and otherRole.locard == 0
+            and not (element.isDerived or  element.changeability == 'frozen' or
+                     otherRole.isDerived or otherRole.changeability == 'frozen')
+          ):
+        self.startIf(self.varNames['notIsReading'])
+        self.write("undoValueDict = dict((x, x.%s) for x in (currentValues | values))"
+        % otherRole.name)
+        self.endIf()
+
   ###########################################################################
 
   ###########################################################################
@@ -3206,13 +3217,13 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
       self.endIf()
 
       # Undos
-      s = self.shouldDoUndos(op, inClass)
-      if s:
-        self.writeNewline()
-        self.startIf(s)
+      # s = self.shouldDoUndos(op, inClass)
+      # if s:
+      #   self.writeNewline()
+      #   self.startIf(s)
       self.writeUndoCode(op, inClass)
-      if s:
-        self.endIf()
+      # if s:
+      #   self.endIf()
 
   ####################
   # #######################################################

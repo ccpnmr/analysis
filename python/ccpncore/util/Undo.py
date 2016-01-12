@@ -53,6 +53,14 @@ def deleteAllApiObjects(objsToBeDeleted):
     for notify in obj.__class__._notifies.get('delete', ()):
       notify(obj)
 
+def restoreOriginalLinks(obj2Value, linkName):
+  """Set obj values using obj2Value dictionary"""
+  for obj, val in obj2Value.items():
+    setattr(obj, linkName, val)
+
+def no_op():
+  """Does nothing - for special undo situations where only one direction must act"""
+  return
 
 def resetUndo(memopsRoot, maxWaypoints=20, maxOperations=10000,
               debug:bool=False):
@@ -230,11 +238,6 @@ class Undo(deque):
     try:
       undoCall = redoCall = None
       for n in range(self.nextIndex-1,undoTo,-1):
-        # undoMethod, undoData, redoMethod, redoData = self[n]
-        # if undoData is None:
-        #   undoMethod()
-        # else:
-        #   undoMethod(undoData)
         undoCall, redoCall = self[n]
         # if self._debug:
         #   print ("@~@~ undoing", undoCall)

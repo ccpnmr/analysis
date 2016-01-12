@@ -139,8 +139,6 @@ class Project(AbstractWrapperObject):
           rg.directNmrChain = wrappedData.findFirstNmrChain(serial=rg.chainSerial)
         if rg.directNmrChain is None:
           rg.directNmrChain = defaultChain
-      # print ('@~@~ rg', rg.serial, rg.seqCode, rg.seqInsertCode, rg.mainGroupSerial,
-      #        rg.relativeOffset, rg.directNmrChain, rg.nmrChain)
     self._logger = wrappedData.root._logger
 
     self._registerApiNotifiers()

@@ -28,7 +28,7 @@ __author__ = 'rhf22'
 
 import glob
 import os
-import shutil
+# import shutil
 import sys
 import tempfile
 # import time
@@ -45,6 +45,9 @@ from ccpncore.memops.ApiError import ApiError
 
 from ccpncore.api.ccp.general.DataLocation import AbstractDataStore
 
+# Necessary because shutil fails in permission copying for windows file systems,
+# and the error is not properly caught on some VMs.
+import ccpncore.util.LocalShutil as shutil
 
 printWarning = None
 

@@ -379,7 +379,7 @@ class ModelAdapt(ModelTraverse):
         elem.documentation = 'parent link'
       elif hier == metaConstants.child_hierarchy:
         elem.documentation = 'child link to class %s' % elem.valueType.name
-      
+
     if elem.container is inClass:
       #get 
       self.addGetters(elem, inClass)

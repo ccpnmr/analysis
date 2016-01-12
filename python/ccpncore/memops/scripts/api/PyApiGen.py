@@ -327,9 +327,22 @@ if ll:
 
     notifyName = op.name
     opType = op.opType
+    elem = op.target
+    otherRole = hasattr(elem, 'otherRole') and elem.otherRole
 
     isMemopsRoot = self.dataRoot in inClass.getAllSupertypes()
 
+    if (otherRole and elem.hicard != 1 and otherRole.hicard == 1 and otherRole.locard == 0
+          and not (elem.isDerived or  elem.changeability == 'frozen' or
+                   otherRole.isDerived or otherRole.changeability == 'frozen')
+        ):
+      iftext = 'notIsReading'
+    else:
+      iftext = self.shouldDoUndos(op, inClass)
+
+    if iftext:
+      self.writeNewline()
+      self.startIf(iftext)
 
     self.writeComment("register Undo functions")
 
@@ -364,7 +377,17 @@ if _undo is not None:''')
       var = self.valueVar(op.target, doInstance=False)
       currentVar = self.valueVar(op.target, prefix=self.currentPrefix)
 
-      self.write('''
+      if (otherRole and elem.hicard != 1 and otherRole.hicard == 1 and otherRole.locard == 0
+            and not (elem.isDerived or  elem.changeability == 'frozen' or
+                     otherRole.isDerived or otherRole.changeability == 'frozen')
+          ):
+            # Write special undo code for N<->1 links to reset oldSelves links on undo
+            self.write('''
+  _undo.newItem(restoreOriginalLinks, self.%s, undoArgs=(undoValueDict, %s),  redoArgs=(%s,))
+''' % (notifyName, repr(otherRole.name), var))
+
+      else:
+        self.write('''
   _undo.newItem(self.%s, self.%s,
                 undoArgs=(%s,), redoArgs=(%s,))
 ''' % (notifyName, notifyName, currentVar, var))
@@ -389,6 +412,9 @@ if _undo is not None:''')
   _undo.newItem(self.%s, self.%s,
                 undoArgs=(%s,), redoArgs=(%s,))
  ''' % (setterName, notifyName, undoColVar, var))
+
+    if iftext:
+      self.endIf()
 
   ###########################################################################
 
@@ -719,7 +745,7 @@ containsNonAlphanumeric = re.compile('[^a-zA-Z0-9_]').search
 # Global NaN constant
 NaN = float('NaN')
 
-from ccpncore.util.Undo import deleteAllApiObjects
+from ccpncore.util.Undo import deleteAllApiObjects, restoreOriginalLinks, no_op
  
 from ccpncore.%s.ApiError import ApiError
 """ % metaConstants.modellingPackageName)

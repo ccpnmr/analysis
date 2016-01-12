@@ -72,29 +72,27 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     # self.label2.dropEvent = self.dropCallback
     # self.layout.addWidget(self.label)
 
-
     DropBase.__init__(self, dockArea.guiWindow._appBase)
 
   def setOrientation(self, o='vertical', force=True):
-        """
-        Sets the orientation of the title bar for this Dock.
-        Must be one of 'auto', 'horizontal', or 'vertical'.
-        By default ('auto'), the orientation is determined
-        based on the aspect ratio of the Dock.
-        """
-        #print self.name(), "setOrientation", o, force
-        if o == 'auto' and self.autoOrient:
-            if self.container().type() == 'tab':
-                o = 'horizontal'
-            elif self.width() > self.height()*1.5:
-                o = 'vertical'
-            else:
-                o = 'horizontal'
-        if force or self.orientation != o:
-            self.orientation = o
-            self.label.setOrientation(o)
-            self.updateStyle()
-
+    """
+    Sets the orientation of the title bar for this Dock.
+    Must be one of 'auto', 'horizontal', or 'vertical'.
+    By default ('auto'), the orientation is determined
+    based on the aspect ratio of the Dock.
+    """
+    #print self.name(), "setOrientation", o, force
+    if o == 'auto' and self.autoOrient:
+      if self.container().type() == 'tab':
+        o = 'horizontal'
+      elif self.width() > self.height()*1.5:
+        o = 'vertical'
+      else:
+        o = 'horizontal'
+    if force or self.orientation != o:
+      self.orientation = o
+      self.label.setOrientation(o)
+      self.updateStyle()
 
   def processSpectra(self, pids:Sequence[str], event):
     """Display spectra defined by list of Pid strings"""
@@ -107,8 +105,8 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
         # self.dockArea.window().pythonConsole.writeCommand('spectrum',
         #                                                   'application.createSpectrumDisplay',
         #                                                   arguments=['spectrum'], pid=ss)
-        # NBNB Modified - was wrong before. RHF
-        self.pythonConsole.writeConsoleCommand("window.createSpectrumDisplay(spectrum)",
+        # NBNB Modified - was wrong before. RHF (wb104: fixed the fix)
+        self.dockArea.guiWindow.pythonConsole.writeConsoleCommand("window.createSpectrumDisplay(spectrum)",
                                                spectrum=ss, window=self.dockArea.guiWindow)
       except NotImplementedError:
         pass

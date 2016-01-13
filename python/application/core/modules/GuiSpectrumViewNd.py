@@ -495,18 +495,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         posLevelsArray = numpy.array(posLevels, numpy.float32)
         posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
         for contourData in posContours:
-          self._printContourData(printer, contourData, posColour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, yTranslate, yScale)
+          self._printContourData(printer, contourData, posColour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale, yTotalPointCount)
       
       if negLevels:
         negLevelsArray = numpy.array(negLevels, numpy.float32)
         negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
         for contourData in negContours:
-          self._printContourData(printer, contourData, negColour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, yTranslate, yScale)
+          self._printContourData(printer, contourData, negColour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale, yTotalPointCount)
                 
     for peakListView in self.peakListViews:
       peakListView.printToFile(printer)
       
-  def _printContourData(self, printer, contourData, colour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, yTranslate, yScale):
+  def _printContourData(self, printer, contourData, colour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale, yTotalPointCount):
     
     for xTile in range(xTile0, xTile1):
       for yTile in range(yTile0, yTile1):
@@ -528,9 +528,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         
         for contour in contourData:
           n = len(contour) // 2
+          contour = contour.copy()
           contour = contour.reshape((n, 2))
+          contour[:,0] += xTotalPointCount*xTile
           contour[:,0] *= xScale
           contour[:,0] += xTranslate
+          contour[:,1] += yTotalPointCount*yTile
           contour[:,1] *= yScale
           contour[:,1] += yTranslate
           printer.writePolyline(contour, colour)

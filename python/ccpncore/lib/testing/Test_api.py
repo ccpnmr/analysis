@@ -83,3 +83,16 @@ class CrosslinkUndoTest(CoreTesting):
   # Which is not in use, so it is not worth teh hassle
 
 
+  def test_many_to_one_add(self):
+    root = self.nmrProject.root
+    nmrProjects = [root.newNmrProject(name=str(x)) for x in range(4)]
+    ms0, ms1 = [root.newMolSystem(code=str(x)) for x in range(2)]
+    ms0.nmrProjects = nmrProjects[:2]
+    ms1.nmrProjects = nmrProjects[2:4]
+    self.undo.newWaypoint()
+    ms1.addNmrProject(nmrProjects[1])
+    self.assertEquals(ms0.nmrProjects, frozenset((nmrProjects[0],)))
+    self.assertEquals(ms1.nmrProjects, frozenset(nmrProjects[1:4]))
+    self.undo.undo()
+    self.assertEquals(ms0.nmrProjects, frozenset(nmrProjects[:2]))
+    self.assertEquals(ms1.nmrProjects, frozenset(nmrProjects[2:4]))

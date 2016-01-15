@@ -455,6 +455,7 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
   if hasattr(project,'_isUpgraded') and project._isUpgraded:
     from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
     correctFinalResult(project)
+    project.checkAllValid()
   #
   return project
 
@@ -613,7 +614,9 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
         logger.warning(
           'Copying directory %s to %s (this might take some time if there are big files)'
           % (oldPath, newPath))
+        print ('@~@~ starting to shutil')
         shutil.copytree(oldPath, newPath)
+        print ('@~@~ done shutil')
 
         # but need to remove all implementation files
         implPath = Path.joinPath(newPath, metaConstants.modellingPackageName,

@@ -126,12 +126,23 @@ class Undo(deque):
       raise ValueError("Attempt to set waypoint on Undo object that does not allow them ")
 
     waypoints = self.waypoints
-    waypoints.append(self.nextIndex-1)
+
+    if self.nextIndex < 1:
+      return
+
+    elif waypoints and waypoints[-1] == self.nextIndex -1:
+      return
 
     if len(waypoints) > self.maxWaypoints:
-      for ii in range(waypoints[0]):
+      nRemove = waypoints[0]
+      self.nextIndex -= nRemove
+      for ii in range(nRemove):
         self.popleft()
       del waypoints[0]
+      for ii , junk in enumerate(waypoints):
+        waypoints[ii] -= nRemove
+
+    waypoints.append(self.nextIndex-1)
 
   def newItem(self, undoMethod, redoMethod, undoArgs=None, undoKwargs=None,
               redoArgs=None, redoKwargs=None):
@@ -214,7 +225,7 @@ class Undo(deque):
 
 
   def undo(self):
-    """Undo one operation - or one waypoint if waypoints are not set
+    """Undo one operation - or one waypoint if waypoints are set
 
     For now errors are handled by printing a warning and clearing the undo object"""
 

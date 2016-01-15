@@ -401,7 +401,18 @@ if _undo is not None:''')
 
       if opType == 'add':
 
-        self.write('''
+
+        if (otherRole and elem.hicard != 1 and otherRole.hicard == 1 and otherRole.locard == 0
+              and not (elem.isDerived or  elem.changeability == 'frozen' or
+                       otherRole.isDerived or otherRole.changeability == 'frozen')
+            ):
+              # Write special undo code for N<->1 links to reset oldSelves links on undo
+          self.write('''
+  _undo.newItem(restoreOriginalLinks, self.%s, undoArgs=(undoValueDict, %s),  redoArgs=(%s,))
+''' % (notifyName, repr(otherRole.name), var))
+        else:
+
+          self.write('''
   _undo.newItem(self.%s, self.%s,
                 undoArgs=(%s,), redoArgs=(%s,))
  ''' % (setterName, notifyName, undoColVar, var))

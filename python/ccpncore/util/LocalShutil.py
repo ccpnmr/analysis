@@ -27,7 +27,10 @@ __version__ = "$Revision$"
 from shutil import *
 import os
 # Override copytree to ignore copystat erroes:
-def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy2,
+# def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy2,
+#              ignore_dangling_symlinks=False):
+# Replaced copy2 (which uses copystat) with copy (which uses copymode)
+def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy,
              ignore_dangling_symlinks=False):
     """Recursively copy a directory tree.
 
@@ -84,8 +87,12 @@ def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy2,
                     # code with a custom `copy_function` may rely on copytree
                     # doing the right thing.
                     os.symlink(linkto, dstname)
-                    copystat(srcname, dstname, follow_symlinks=not symlinks)
-                else:
+                    # copystat(srcname, dstname, follow_symlinks=not symlinks)
+                    try:
+                      copystat(srcname, dstname, follow_symlinks=not symlinks)
+                    except OSError as why:
+                      print('WARNING from symlink copying: file permissions could not be copied. '
+                            'Ignored - known problem on Windows-type file systems')
                     # ignore dangling symlink if the flag is on
                     if not os.path.exists(linkto) and ignore_dangling_symlinks:
                         continue

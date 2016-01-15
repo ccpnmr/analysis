@@ -63,7 +63,7 @@ class Axis(AbstractWrapperObject):
     
   @property
   def _parent(self) -> Strip:
-    """SpectrumDisplay containing axis."""
+    """Strip containing axis."""
     return self._project._data2Obj.get(self._wrappedData.strip)
 
   strip = _parent

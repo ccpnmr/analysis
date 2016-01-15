@@ -2218,10 +2218,17 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
             and not (element.isDerived or  element.changeability == 'frozen' or
                      otherRole.isDerived or otherRole.changeability == 'frozen')
           ):
-        self.startIf(self.varNames['notIsReading'])
-        self.write("undoValueDict = dict((x, x.%s) for x in (currentValues | values))"
-        % otherRole.name)
-        self.endIf()
+        if op.opType == 'set':
+          self.startIf(self.varNames['notIsReading'])
+          self.write("undoValueDict = dict((x, x.%s) for y in (currentValues, values) for x in y)"
+                     % otherRole.name)
+          self.endIf()
+        elif op.opType == 'add':
+          self.startIf(self.varNames['notIsReading'])
+          self.write("undoValueDict = {value:value.%s}"
+                     % otherRole.name)
+          self.endIf()
+
 
   ###########################################################################
 

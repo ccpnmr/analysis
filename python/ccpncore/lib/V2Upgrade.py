@@ -642,13 +642,22 @@ def regularisedResonanceName(resonance):
 
   resonanceName = resonance.name or ''
 
+  # get elementCode
+  isotope = resonance.isotope
+  if isotope is None:
+    elementCode = '?'
+  else:
+    elementCode = isotope.chemElement.symbol.upper()
+
+  result = None
+
   if resonance.className == 'Resonance':
     # Exclude fixedResonances
     assignNames = list(set(resonance.assignNames))
     if len(assignNames) == 1:
       # One assignName - use for assignment
       name = assignNames[0]
-      return name.replace('*', '%')
+      result =  name.replace('*', '%')
 
 
     elif len(assignNames) == 2:
@@ -680,36 +689,30 @@ def regularisedResonanceName(resonance):
           if newChar is not None:
             ll = list(assignNames[0])
             ll[lenPrefix] = newChar
-            return ''.join(ll).replace('*', '%')
+            result = ''.join(ll).replace('*', '%')
 
-  # If we are still here, assignNames did not help. Use resonanceName only
+  if result is None:
+    # If we are still here, assignNames did not help. Use resonanceName only
 
-  # get elementCode
-  isotope = resonance.isotope
-  if isotope is None:
-    elementCode = ''
-  else:
-    elementCode = isotope.chemElement.symbol.upper()
+    if resonanceName:
+      if elementCode and resonanceName.upper().startswith(elementCode):
+        # name is OK except possibly for casing - fix the casing
+        ss = resonanceName[len(elementCode):]
 
-  if resonanceName:
-    if elementCode and resonanceName.upper().startswith(elementCode):
-      # name is OK except possibly for casing - fix the casing
-      ss = resonanceName[len(elementCode):]
+        if 'X' in ss or 'Y' in ss:
+          # Necessary to avoid potential clashes with XY names set above
+          # No actual assigned names contain 'X' or 'Y' anyway
+          result = '%s@%s-%s' % (elementCode, resonance.serial, resonanceName)
+        else:
+          # Name might be proper assignment name. Change to new wildcard convention
+         result = (elementCode + ss).replace('*', '%')
 
-      if 'X' in ss or 'Y' in ss:
-        # Necessary to avoid potential clashes with XY names set above
-        # No actual assigned names contain 'X' or 'Y' anyway
-        result = '%s@%s-%s' % (elementCode, resonance.serial, resonanceName)
       else:
-        # Name might be proper assignment name. Change to new wildcard convention
-       result = (elementCode + ss).replace('*', '%')
+        # Set unique default name
+        result = '%s@%s-%s' % (elementCode, resonance.serial, resonanceName)
 
     else:
-      # Set unique default name
-      result = '%s@%s-%s' % (elementCode, resonance.serial, resonanceName)
-
-  else:
-    result = '%s@%s' % (elementCode, resonance.serial)
+      result = '%s@%s' % (elementCode, resonance.serial)
   #
   return result
 

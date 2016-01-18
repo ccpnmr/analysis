@@ -675,6 +675,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # do the contouring and store results in display list
     if doPosLevels:
       posLevelsArray = numpy.array(posLevels, numpy.float32)
+      # print(posLevelsArray)
       self.createDisplayLists(posLevelsArray, self.posDisplayLists)
       
     if doNegLevels:
@@ -693,9 +694,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
       if doPosLevels:
         posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-        #print("posCOntours", len(posContours))
+        # print("posCOntours", posContours)
         for n, contourData in enumerate(posContours):
           self.addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
+          # print(contourData)
         
       if doNegLevels:
         negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
@@ -876,16 +878,23 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
     
     GL.glNewList(displayList, GL.GL_COMPILE)
-
+    xData = []
+    yData = []
     for contour in contourData:
       GL.glBegin(GL.GL_LINE_LOOP)
       n = len(contour) // 2
+
       contour = contour.reshape((n, 2))
+
       for (x, y) in contour:
+        xData.append(x)
+        yData.append(y)
         GL.glVertex2f(x,y)
+
       GL.glEnd()
-    
+
     GL.glEndList()
+
     
   # def getTranslateScale(self, dim, ind:int):
   def getTranslateScale(self, ind:int, pixelViewBox0:float=None, pixelViewBox1:float=None):

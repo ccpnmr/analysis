@@ -450,7 +450,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def hideSequence(self):
     """Hides sequence module"""
-    self.sequenceWidget.hide()
+    self.sequenceWidget.close()
     delattr(self, 'sequenceWidget')
 
 

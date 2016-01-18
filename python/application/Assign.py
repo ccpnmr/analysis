@@ -99,7 +99,13 @@ class Assign(AppBase):
 
 if __name__ == '__main__':
   import argparse  
-
+  # from PyQt4 import QtGui, QtCore
+  # import os
+  # from ccpncore.util import Path
+  # splashPng = os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'ccpnmr-splash-screen.png')
+  # splash_pix = QtGui.QPixmap(splashPng)
+  # splash = QtGui.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+  # splash.show()
   parser = argparse.ArgumentParser(description='Process startup arguments')
   for component in ('Assignment', 'Screening', 'Structure'):
     parser.add_argument('--'+component.lower(), dest='include'+component, action='store_true',
@@ -120,4 +126,5 @@ if __name__ == '__main__':
   
   startProgram(Assign, applicationName, applicationVersion, components, args.projectPath,
                args.language, args.skipUserPreferences, args.nologging)
+  # splash.hide()
 

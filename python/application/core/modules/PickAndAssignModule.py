@@ -10,7 +10,7 @@ from application.core.modules.PeakTable import PeakListSimple
 from application.core.modules.NmrResidueTable import NmrResidueTable
 from application.core.popups.SelectDisplaysPopup import SelectDisplaysAndSpectraPopup
 
-from application.core.lib.Window import navigateToPeakPosition, navigateToNmrResidue
+from application.core.lib.Window import navigateToNmrResidue
 
 class PickAndAssignModule(CcpnDock, Base):
 
@@ -37,10 +37,12 @@ class PickAndAssignModule(CcpnDock, Base):
 
     # parent.window().showAtomSelector()
 
-  def restrictedPick(self):
+  def restrictedPick(self, nmrResidue=None):
     # position = self.selectedPeak.position
     # axisCodes = self.selectedPeak.peakList.spectrum.axisCodes
-    if not self.current.nmrResidue:
+    if nmrResidue:
+      self.current.nmrResidue = nmrResidue
+    elif not self.current.nmrResidue:
       print('No current nmrResidue')
       return
     else:
@@ -71,12 +73,12 @@ class PickAndAssignModule(CcpnDock, Base):
                 selectedRegion[1][index2] = shiftDict[isotopeCode]+spectrum.assignmentTolerances[index]
               else:
                 stripIsotopeCodes = [name2IsotopeCode(axis.code) for axis in spectrumView.strip.orderedAxes]
-                print(stripIsotopeCodes, isotopeCode)
+                # print(stripIsotopeCodes, isotopeCode)
                 index3 = stripIsotopeCodes.index(isotopeCode)
                 selectedRegion[0][index3] = spectrumView.strip.orderedAxes[index3].region[0]
                 selectedRegion[1][index3] = spectrumView.strip.orderedAxes[index3].region[1]
             peakList = spectrumView.spectrum.peakLists[0]
-            print(selectedRegion, peakList)
+            # print(selectedRegion, peakList)
             if spectrumView.spectrum.dimensionCount > 1:
               apiSpectrumView = spectrumView._wrappedData
               peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,

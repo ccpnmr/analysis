@@ -168,17 +168,17 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
 
   def printToFile(self, printer):
-         
+
     for spectrumView in self.spectrumViews:
       spectrumView.printToFile(printer)
-    
+
     # print ticks and grid line
     viewRegion = self.plotWidget.viewRange()
     v1, v0 = viewRegion[0]  # TBD: relies on axes being backwards
     w1, w0 = viewRegion[1]  # TBD: relies on axes being backwards, which is not true in 1D
     xMajorTicks, xMinorTicks, xMajorFormat = Ticks.findTicks((v0, v1))
     yMajorTicks, yMinorTicks, yMajorFormat = Ticks.findTicks((w0, w1))
-    
+
     xScale = (printer.x1-printer.x0)/(v1-v0)
     xOffset = printer.x0 - xScale*v0
     yScale = (printer.y1-printer.y0)/(w1-w0)
@@ -189,9 +189,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     yMajorText = [xMajorFormat % tick for tick in yMajorTicks]
     yMajorTicks = [tick*yScale+yOffset for tick in yMajorTicks]
     yMinorTicks = [tick*yScale+yOffset for tick in yMinorTicks]
-    
+
     xTickHeight = yTickHeight = max(printer.y1-printer.y0, printer.x1-printer.x0)*0.01
-    
+
     for tick in xMinorTicks:
       printer.writeLine(tick, printer.y0, tick, printer.y0+0.5*xTickHeight)
 

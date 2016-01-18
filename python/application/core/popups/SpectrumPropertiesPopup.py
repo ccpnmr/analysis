@@ -26,13 +26,10 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
-# from ccpn.lib.Experiment import EXPERIMENT_TYPES
-
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ColourDialog import ColourDialog
 from ccpncore.util.Colour import spectrumColours
-# from ccpncore.lib.spectrum.Util import getSpectrumFileFormat
 from ccpncore.gui.ButtonList import ButtonList
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
@@ -328,7 +325,7 @@ class DimensionsTab(QtGui.QWidget, Base):
     j = 2
     for i in range(dimensions):
       axisLabel = Label(self, text="Axis Code ", grid=(1, 0), vAlign='t', hAlign='l')
-      axisLabelData = Label(self, text=str(spectrum.axisCodes[i]), grid=(1, i+1),  hAlign='l')
+      axisLabelData = Label(self, text=str(spectrum.axisCodes[i]), grid=(1, i+1),  hAlign='l', vAlign='t',)
       pointsLabel = Label(self, text="Point Counts ", grid=(2, 0), vAlign='t', hAlign='l')
       pointsData = Label(self, text=str(spectrum.pointCounts[i]), grid=(2, i+1), vAlign='t', hAlign='l')
       axisTypeLabel = Label(self, text="Dimension Type ", grid=(3, 0), vAlign='t', hAlign='l')

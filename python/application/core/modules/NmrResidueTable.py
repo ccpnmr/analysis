@@ -33,7 +33,7 @@ class NmrResidueTable(QtGui.QWidget, Base):
     tipTexts = ['Nmr Residue key', 'Name of NmrResidue', 'Atoms in NmrResidue',
                 'Peaks assigned to Nmr Residue']
 
-    self.nmrResidueTable = GuiTableGenerator(self, self.nmrChains, callback=callback, columns=columns,
+    self.nmrResidueTable = GuiTableGenerator(self, self.project.nmrChains, callback=callback, columns=columns,
                                              selector=self.nmrChainPulldown, tipTexts=tipTexts,
                                              selectionCallback=self.setNmrResidue)
 
@@ -55,3 +55,5 @@ class NmrResidueTable(QtGui.QWidget, Base):
 
   def setNmrResidue(self, nmrResidue, row, col):
     self.project._appBase.current.nmrResidue = nmrResidue
+
+

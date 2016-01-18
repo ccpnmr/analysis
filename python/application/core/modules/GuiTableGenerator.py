@@ -106,6 +106,7 @@ class GuiTableGenerator(QtGui.QWidget):
     Sets the contents of the selector and object table if object list is specified on instatiation.
     """
     if self.objectList is not None:
+      print(self.objectLists)
 
       # if self.objectList.shortClassName == 'PL':
       #   texts = ['%s' % peakList.pid for peakList in self.objectLists]
@@ -113,6 +114,10 @@ class GuiTableGenerator(QtGui.QWidget):
       texts = ['%s' % objectList.pid for objectList in self.objectLists]
       self.selector.setData(texts=texts, objects=self.objectLists)
 
+
+  def updateTable(self):
+    self.updateSelectorContents()
+    self.updateContents()
 
 
 

@@ -16,8 +16,11 @@ MODULE_DICT = {'ASSIGNER':'showAssigner',
                'PEAK LIST': 'showPeakTable',
                'PICK AND ASSIGN': 'showPickAndAssignModule',
                'REFERENCE CHEMICAL SHIFTS': 'showRefChemicalShifts',
+               'RESIDUE INFORMATION': 'showResidueInformation',
                'SEQUENCE': 'toggleSequence',
-               'PARASSIGN SETUP': 'showParassignSetup'
+               'PARASSIGN SETUP': 'showParassignSetup',
+               'API DOCUMENTATION': 'showApiDocumentation',
+               'PYTHON CONSOLE': 'toggleConsole',
               }
 
 

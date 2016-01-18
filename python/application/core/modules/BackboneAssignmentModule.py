@@ -72,6 +72,7 @@ class BackboneAssignmentModule(CcpnDock):
     self._setupShiftDicts()
     if self.assigner:
       self.assigner.clearAllItems()
+    print(nmrResidue)
     self.navigateTo(nmrResidue, row, col)
 
   def navigateTo(self, nmrResidue:NmrResidue, row:int=None, col:int=None, strip:GuiStrip=None):
@@ -80,6 +81,7 @@ class BackboneAssignmentModule(CcpnDock):
     to chemical shift value NmrAtoms in the NmrResidue. Creates assignMatrix for strip matching and
     add strips to matchModule(s) corresponding to assignment matches.
     """
+    self.nmrResidueTable.nmrResidueTable.updateTable()
     selectedDisplays = [display for display in self.project.spectrumDisplays if display.pid not in self.matchModules]
 
     if '-1' in nmrResidue.sequenceCode:
@@ -105,6 +107,7 @@ class BackboneAssignmentModule(CcpnDock):
       navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays, markPositions=True, strip=strip)
       queryShifts = self.intraShifts[nmrResidue]
       matchShifts = self.interShifts
+      print(queryShifts, matchShifts)
       for display in selectedDisplays:
         if not strip:
           display.strips[0].planeToolbar.spinSystemLabel.setText(nmrResidue.sequenceCode)
@@ -115,6 +118,9 @@ class BackboneAssignmentModule(CcpnDock):
     assignMatrix = self._buildAssignmentMatrix(queryShifts, matchShifts=matchShifts)
     self._createMatchStrips(assignMatrix)
     self.assigner.addResidue(iNmrResidue, direction)
+
+
+
 
   def _setupShiftDicts(self):
     """

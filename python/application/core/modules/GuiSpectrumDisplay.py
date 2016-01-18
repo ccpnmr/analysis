@@ -44,7 +44,7 @@ from application.core.gui.Frame import Frame as GuiFrame
 from application.core.gui.PhasingFrame import PhasingFrame
 from application.core.gui.SpectrumToolBar import SpectrumToolBar
 from application.core.modules.GuiModule import GuiModule
-from application.core.util.Svg import Svg
+# from application.core.util.Svg import Svg
 
 # def _findPpmRegion(spectrum, axisDim, spectrumDim):
 #
@@ -121,32 +121,32 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     nstrips = len(self.strips)
     if nstrips == 0:
       return
-    with open(path, 'wt') as fp:
-      printer = Svg(fp, width, height) # TBD: more general
-      
-      # box
-      printer.writeLine(0, 0, width, 0)
-      printer.writeLine(width, 0, width, height)
-      printer.writeLine(width, height, 0, height)
-      printer.writeLine(0, height, 0, 0)
-      
-      for n, strip in enumerate(self.strips):
-        # TBD need to calculate offset, etc., for coords, and pass those along
-        if self.stripDirection == 'X':
-          xOutputRegion = (0, width)
-          yOutputRegion = (n*height/nstrips, (n+1)*height/nstrips)
-          if n > 0:
-            # strip separator
-            printer.writeLine(0, yOutputRegion[0], width, yOutputRegion[0])
-        else:
-          xOutputRegion = (n*width/nstrips, (n+1)*width/nstrips)
-          yOutputRegion = (0, height)
-          if n > 0:
-            # strip separator
-            printer.writeLine(xOutputRegion[0], 0, xOutputRegion[0], height)
-        printer.startRegion(xOutputRegion, yOutputRegion)
-        strip.printToFile(printer)
-      printer.close()
+    # with open(path, 'wt') as fp:
+    #   printer = Svg(fp, width, height) # TBD: more general
+    #
+    #   # box
+    #   printer.writeLine(0, 0, width, 0)
+    #   printer.writeLine(width, 0, width, height)
+    #   printer.writeLine(width, height, 0, height)
+    #   printer.writeLine(0, height, 0, 0)
+    #
+    #   for n, strip in enumerate(self.strips):
+    #     # TBD need to calculate offset, etc., for coords, and pass those along
+    #     if self.stripDirection == 'X':
+    #       xOutputRegion = (0, width)
+    #       yOutputRegion = (n*height/nstrips, (n+1)*height/nstrips)
+    #       if n > 0:
+    #         # strip separator
+    #         printer.writeLine(0, yOutputRegion[0], width, yOutputRegion[0])
+    #     else:
+    #       xOutputRegion = (n*width/nstrips, (n+1)*width/nstrips)
+    #       yOutputRegion = (0, height)
+    #       if n > 0:
+    #         # strip separator
+    #         printer.writeLine(xOutputRegion[0], 0, xOutputRegion[0], height)
+    #     printer.startRegion(xOutputRegion, yOutputRegion)
+    #     strip.printToFile(printer)
+    #   printer.close()
       
   def updatePivot(self):
     """Updates pivot in all strips contained in the spectrum display."""

@@ -155,6 +155,7 @@ class AtomSelector(CcpnDock):
     """
     self._returnButtonsToNormal()
     if not self.current.nmrResidue:
+      print('here')
       return
 
     else:
@@ -165,7 +166,7 @@ class AtomSelector(CcpnDock):
 
       else:
 
-        if peaksAreOnLine(peaks, 1):
+        # if peaksAreOnLine(peaks, 1):
           # RHF 15/12/2015 bug fix. From usage elsewhere this ought to use tytpoe, nboe name.
           # NBNB TBD CHECK THIS
           # experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
@@ -174,7 +175,7 @@ class AtomSelector(CcpnDock):
 
           for peak in peaks:
             isotopeCode = peak.peakList.spectrum.isotopeCodes[1]
-            predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1], isotopeCode) for ccpCode in CCP_CODES]
+            predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1], isotopeCode, strict=True) for ccpCode in CCP_CODES]
             refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomTypes if len(type) > 0]
             atomPredictions = set()
             for pred in refinedPreds:
@@ -191,10 +192,10 @@ class AtomSelector(CcpnDock):
               if atomPred == 'CA':
                 # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
                 if anyInterOnlyExperiments:
-                  self.caButton1.setStyleSheet('QPushButton {background-color: green}')
-                  self.caButton2.setStyleSheet('QPushButton {background-color: orange}')
+                  self.caButton1.setStyleSheet('background-color: green')
+                  self.caButton2.setStyleSheet('background-color: orange')
                 else:
-                  self.caButton2.setStyleSheet('QPushButton {background-color: green}')
+                  self.caButton2.setStyleSheet('background-color: green')
 
 
 

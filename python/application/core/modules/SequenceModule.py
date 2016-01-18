@@ -185,6 +185,11 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
       nmrResidue = self.project.getByPid(assignableResidue)
       nmrResidue.residue = res
 
+    if hasattr(self.project._appBase.mainWindow, 'bbModule'):
+      nmrResidueTable = self.project._appBase.mainWindow.bbModule.nmrResidueTable.nmrResidueTable
+      nmrResidueTable.objectLists = self.project.nmrChains
+      nmrResidueTable.updateTable()
+
 
 
 

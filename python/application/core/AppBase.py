@@ -30,6 +30,8 @@ from ccpncore.util import Io as ioUtil
 from ccpncore.gui.Application import Application
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.api.memops import Implementation
+from ccpncore.gui import iconsNew
+from ccpncore.gui.MessageDialog import showMessage
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Register
@@ -150,6 +152,13 @@ class AppBase(GuiBase):
     with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
       yaml.dump(layout, stream)
       stream.close()
+    saveIconPath = os.path.join(Path.getPythonDirectory(),
+                      'ccpncore', 'gui', 'iconsNew', 'save.png')
+    showMessage('Project saved', 'Project successfully saved!',
+                colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
+
+
+
 
 
 def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userPreferencesPath=None):
@@ -227,12 +236,40 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   # On the Mac (at least) it does not matter what you set the applicationName to be,
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
-  
+  from PyQt4 import QtGui, QtCore
+  import os, time
+  from ccpncore.util import Path
+  splashPng = os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'ccpnmr-splash-screen.png')
+  splashPix = QtGui.QPixmap(splashPng)
+  splashImage = QtGui.QImage(splashPix.size(), QtGui.QImage.Format_ARGB32)
+  splashImage.fill(QtCore.Qt.transparent)
+
+  painter = QtGui.QPainter(splashImage)
+  painter.setOpacity(0.1)
+  painter.drawPixmap(0, 0, splashPix)
+  painter.end()
+  # splashPix2 = QtGui.QPixmap.fromImage(splashImage)
+  # splash_pix.scaled(QtCore.QSize))
+
+  # splash_pix.fill(QtGui.QColor('white'))
+  # print(splashPng)
+  # splashPix = QtGui.QPixmap(splashPng)
+  splash = QtGui.QSplashScreen(splashPix)
+  # splash.show()
+  # app.processEvents()
+  # time.sleep(10)
+
+
+  splash.show()
+  app.processEvents()
+  time.sleep(3)
+
+  splash.close()
   preferences = getPreferences(skipUserPreferences)
   styleSheet = getStyleSheet(preferences)
   app.setStyleSheet(styleSheet)
-  
   if checkRegistration(applicationVersion):
     program = programClass(apiProject, applicationName, applicationVersion, preferences, components)
-    app.start()
-  
+
+  app.start()
+

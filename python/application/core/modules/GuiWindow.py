@@ -75,11 +75,12 @@ class GuiWindow(DropBase):
       self.blankDisplay.setParent(None)
       self.blankDisplay = None
           
-  def loadData(self, text='Load Data'):
+  def loadData(self, paths=None):
     """
     Opens a file dialog box and loads data from selected file.
     """
-    paths = QtGui.QFileDialog.getOpenFileName(self, text)
+    if paths is None:
+      paths = QtGui.QFileDialog.getOpenFileName(self, 'Load Data')
 
     # NBNB TBD I assume here that path is either a string or a list lf string paths.
     # NBNB FIXME if incorrect
@@ -154,7 +155,6 @@ class GuiWindow(DropBase):
     """
     Changes the scale of a trace in all spectrum displays of the window.
     """
-    print(window)
     for spectrumDisplay in window.spectrumDisplays:
       for strip in spectrumDisplay.strips:
         if isinstance(strip, GuiStripNd):

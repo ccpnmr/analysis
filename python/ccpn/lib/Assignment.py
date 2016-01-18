@@ -170,11 +170,12 @@ def copyAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
   of a match peakList based on matching axis codes.
   """
   import numpy
+  from sklearn.ensemble import RandomForestClassifier
   project = referencePeakList.project
   refAxisCodes = referencePeakList.spectrum.axisCodes
   refPositions = [numpy.array(peak.position) for peak in referencePeakList.peaks]
   refLabels = [peak.pid for peak in referencePeakList.peaks]
-  clf=svm.SVC()
+  clf=RandomForestClassifier()
   clf.fit(refPositions, refLabels)
 
   matchAxisCodes = matchPeakList.spectrum.axisCodes
@@ -187,14 +188,15 @@ def copyAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
       matchArray.append(peak.position[dim])
 
     result = ''.join((clf.predict(numpy.array(matchArray))))
-    checkArray = [i-j for i,j in zip(list(project.getByPid(result).position), matchArray)]
 
-    if checkArray < list(referencePeakList.spectrum.assignmentTolerances):
     # for value in checkArray:
-    #   print(abs(value), peak.peakList.spectrum.assignmentTolerances)
-      dimNmrAtoms = project.getByPid(result).dimensionNmrAtoms
-      for ii, refAxisCode in refAxisCodes:
-        # print(axisCode)
+    tolerances = peak.peakList.spectrum.assignmentTolerances
+    dimNmrAtoms = project.getByPid(result).dimensionNmrAtoms
+    refPositions = project.getByPid(result).position
+    for ii, refAxisCode in enumerate(refAxisCodes):
+      # print(axisCode)
+      # print(refPositions[ii], peak.position[ii], refPositions[ii] - peak.position[ii])
+      if abs(refPositions[ii] - peak.position[ii]) < tolerances[ii]:
         peak.assignDimension(axisCode=refAxisCode, value=dimNmrAtoms[ii])
       # Refactored. RHF
       # for axisCode in refAxisCodes:

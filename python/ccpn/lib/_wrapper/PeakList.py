@@ -40,7 +40,6 @@ def pickPeaksNd(self:'PeakList', positions:Sequence=None, dataDims:Sequence=None
   endPoint = []
   
   spectrum = self.spectrum
-
   for ii, dataDim in enumerate(dataDims):
     # -1 below because points start at 1 in data model
     startPoint.append([dataDim.dim, int(dataDim.primaryDataDimRef.valueToPoint(positions[0][ii])-1)])
@@ -67,7 +66,7 @@ def pickPeaksNd(self:'PeakList', positions:Sequence=None, dataDims:Sequence=None
                  excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
 
   data2ObjDict = self._project._data2Obj
-  
+
   return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
   
 # def pickPeaks1d(self:'PeakList', spectrumView, size:int=3, mode:str='wrap'):

@@ -36,7 +36,6 @@ class Application(QtGui.QApplication):
     self.setOrganizationDomain(organizationDomain)
 
   def start(self):
-
     sys.exit(self.exec_())
 
 class TestApplication(Application):

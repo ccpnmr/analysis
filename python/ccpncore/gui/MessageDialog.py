@@ -15,10 +15,10 @@ Critical    = QtGui.QMessageBox.Critical
 Save        = QtGui.QMessageBox.Save 
 Discard     = QtGui.QMessageBox.Discard
 
-def showInfo(title, message, parent=None, colourScheme=None):
+def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
 
   dialog = MessageDialog('Information', title, message,
-                         Information, colourScheme, parent)
+                         Information, iconPath, colourScheme, parent)
 
   dialog.setStandardButtons(Ok)
   dialog.exec_()
@@ -123,10 +123,10 @@ def showError(title, message, parent=None, colourScheme=None):
   
   return
 
-def showMessage(title, message, icon, parent=None, colourScheme=None):
+def showMessage(title, message, parent=None, colourScheme=None, iconPath=None):
   
   dialog = MessageDialog('Message', title, message,
-                         icon, colourScheme, parent)
+                         Information, iconPath, colourScheme, parent)
 
   dialog.setStandardButtons(Close)
   dialog.exec_()
@@ -135,7 +135,7 @@ def showMessage(title, message, icon, parent=None, colourScheme=None):
   
 class MessageDialog(QtGui.QMessageBox):
 
-  def __init__(self, title, basicText, message, icon=Information, colourScheme='dark', parent=None):
+  def __init__(self, title, basicText, message, icon=Information, iconPath=None, colourScheme='dark', parent=None):
      
     QtGui.QMessageBox.__init__(self, parent)
     
@@ -143,6 +143,11 @@ class MessageDialog(QtGui.QMessageBox):
     self.setText(basicText)
     self.setInformativeText(message)
     self.setIcon(icon)
+    if iconPath:
+      image = QtGui.QPixmap(iconPath)
+      scaledImage = image.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
+      self.setIconPixmap(scaledImage)
+
 
     if colourScheme == 'dark':
       self.setStyleSheet("""  QMessageBox QLabel {

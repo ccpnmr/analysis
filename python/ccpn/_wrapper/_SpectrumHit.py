@@ -60,7 +60,7 @@ class SpectrumHit(AbstractWrapperObject):
 
   @property
   def _parent(self) -> Spectrum:
-    """Spectrum containing spectrumHit."""
+    """Spectrum containing spectrumReference."""
     return self._project._data2Obj[self._wrappedData.dataSource]
 
   spectrum = _parent

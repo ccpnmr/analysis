@@ -59,7 +59,7 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
     if spectrum.dimensionCount == 1:
       tabWidget.addTab(GeneralTab(spectrum, item=item), "General")
       tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
-      tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
+      # tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
       tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
 
     else:

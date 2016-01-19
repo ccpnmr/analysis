@@ -11,6 +11,7 @@ from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.TextEditor import TextEditor
+from ccpncore.gui.CompoundView import CompoundView, Variant, importSmiles
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 OTHER_UNIT = ['µ','m', 'n', 'p']
@@ -22,6 +23,8 @@ TYPECOMPONENT =  ['Compound', 'Solvent', 'Target', 'inhibitor ', 'Other']
 C_COMPONENT_UNIT = ['Molar', 'Mass/Volume',  'mol/Volume', ]
 
 class SamplePropertiesPopup(QtGui.QDialog, Base):
+  ''' This popup will allow to view and edit the sample properties '''
+
   def __init__(self, sample, item, parent=None, project=None, **kw):
     super(SamplePropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
@@ -184,6 +187,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     labelAllignRight = Label(self.areaContents, text="", grid=(1, 3), hAlign='l')
 
   def addComponents(self):
+    ''' This adds components to the sample, to the sideBar and pulldown '''
 
     self.sampleComponent = self.sample.newSampleComponent(name=('NewSC'),labeling=str('H'))
     self.sideBar.addItem(self.newSampleSideBar, self.sampleComponent)
@@ -194,6 +198,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
 
 
   def editComponents(self, pressed):
+    ''' This opens the sample component editor '''
 
     sampleComponent = self.project.getByPid(pressed)
     popup = EditSampleComponentPopup(project=self.project, sample=self.sample, sampleComponent=sampleComponent)
@@ -260,7 +265,12 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
 
 
 class EditSampleComponentPopup(QtGui.QDialog):
+  ''' This popup will allow to view and edit the sample Component properties
+
+  '''
+
   def __init__(self, parent=None, project=None, sample=None, sampleComponent=None, **kw):
+
     super(EditSampleComponentPopup, self).__init__(parent, **kw)
     self.sample = sample
     self.sampleComponent = sampleComponent
@@ -271,6 +281,11 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.area.setWidgetResizable(True)
     self.area.setMinimumSize(350, 499)
     self.layout().addWidget(self.area, 0, 0, 1, 0)
+    self.smiles = ''
+    self.compound = None
+    self.variant = None
+
+
 
     buttonBox = ButtonList(self, grid=(2, 2), callbacks=[self.accept, self.reject], texts=['Apply', 'Close'])
     labelAllignLeft = Label(self.area, text="", grid=(1, 0), hAlign='l')
@@ -368,7 +383,11 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.moreInfo = Button(self.area, text="More... ", grid=(13, 1),
                                       hAlign='c', callback=self.moreInfoComponents)
     self.moreInfo.setFixedHeight(20)
-
+    self.showSmiles = Button(self.area, text="Display Compound", grid=(13, 2),
+                                      hAlign='c', callback=self.showCompound)
+    self.hideSmiles = Button(self.area, text="Hide Compound", grid=(13, 2),
+                                      hAlign='c', callback=self.hideCompound)
+    self.hideSmiles.hide()
 #   # User Code
     self.labelUserCode = Label(self.area, text="User Code", grid=(13, 1), hAlign='l')
     self.userCode = LineEdit(self.area, grid=(13, 2), hAlign='r' )
@@ -442,6 +461,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
 
   def moreInfoComponents(self):
     self.moreInfo.hide()
+    self.showSmiles.hide()
     self.lessInfo = Button(self.area, text="Less... ", grid=(22, 1),
                                       hAlign='c', callback=self.hideInfo)
     self.lessInfo.setFixedHeight(20)
@@ -493,14 +513,16 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.empiricalFormula.show()
       self.molecularMassLabel.show()
       self.molecularMass.show()
+      self.showSmiles.show()
 
     else:
       self.hideInfo()
       if hasattr(self, 'moreInfo'):
         self.moreInfo.hide()
+        self.showSmiles.hide()
 
   def hideInfo(self):
-
+      self.showSmiles.show()
       self.moreInfo.show()
       if hasattr(self, 'lessInfo'):
         self.lessInfo.hide()
@@ -580,3 +602,78 @@ class EditSampleComponentPopup(QtGui.QDialog):
 
   def commentChanged(self):
     self.sampleComponent.substance.comment = str(self.comment.text())
+
+
+  def showCompound(self):
+    self.moreInfo.hide()
+    self.showSmiles.hide()
+    self.hideSmiles.show()
+
+
+    self.compoundView = CompoundView(self.area, grid=(14, 1) , gridSpan=(14,2))
+    # self.compoundView = compoundView
+
+    smile = self.sampleComponent.substance.smiles
+    self.smiles = smile
+    compound = importSmiles(smile)
+    variant = list(compound.variants)[0]
+    self.setCompound(compound, replace = True)
+    x, y = self.getAddPoint()
+    variant.snapAtomsToGrid(ignoreHydrogens=False)
+    self.compoundView.centerView()
+    # self.compoundView.resetView()
+    self.compoundView.updateAll()
+
+  def setCompound(self, compound, replace=True):
+    ''' Set the compound on the graphic scene. '''
+
+    if compound is not self.compound:
+      if replace or not self.compound:
+        self.compound = compound
+        variants = list(compound.variants)
+        if variants:
+          for variant2 in variants:
+            if (variant2.polyLink == 'none') and (variant2.descriptor == 'neutral'):
+              variant = variant2
+              break
+          else:
+            for variant2 in variants:
+              if variant2.polyLink == 'none':
+                variant = variant2
+                break
+            else:
+              variant = variants[0]
+        else:
+          variant =  Variant(compound)
+          print(variant)
+        self.variant = variant
+        self.compoundView.setVariant(variant)
+
+      else:
+        variant = list(compound.variants)[0]
+        x, y = self.getAddPoint()
+        self.compound.copyVarAtoms(variant.varAtoms, (x,y))
+        self.compoundView.centerView()
+        self.compoundView.updateAll()
+
+  def getAddPoint(self):
+    ''' Set the compound on the specific position on the graphic scene. '''
+
+    compoundView = self.compoundView
+    globalPos = QtGui.QCursor.pos()
+    pos = compoundView.mapFromGlobal(globalPos)
+    widget = compoundView.childAt(pos)
+    if widget:
+      x = pos.x()
+      y = pos.y()
+    else:
+      x = compoundView.width()/2.0
+      y = compoundView.height()/2.0
+    point = compoundView.mapToScene(x, y)
+    return point.x(), point.y()
+
+  def hideCompound(self):
+    self.compoundView.hide()
+    self.moreInfo.show()
+    self.showSmiles.show()
+    self.hideSmiles.hide()

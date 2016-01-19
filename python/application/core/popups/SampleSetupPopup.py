@@ -15,9 +15,6 @@ from ccpncore.gui.ScrollArea import ScrollArea
 from ccpn.lib.Sample import setupSamples
 from application.core.modules.SampleAnalysis import SampleAnalysis
 
-
-
-
 from functools import partial
 
 solvents = {'Acetic Acid-d4': [0,0, 2.14,2.0, 11.75,11.65],
@@ -74,7 +71,7 @@ class SamplePopup(QtGui.QDialog):
 
   noiseLabel = Label(self, text="Noise threshold", grid=(3, 0), hAlign='r')
   self.noise = DoubleSpinbox(self, grid=(3, 1), hAlign='l')
-  self.noise.setValue(10000)
+  # self.noise.setValue(10000)
   self.noise.setMaximum(10000000)
 
 
@@ -86,6 +83,10 @@ class SamplePopup(QtGui.QDialog):
 
 
  def perform(self):
+    '''
+    This function gets all the setting given by the user and runs the mixture generation algorithm ('setupSamples')
+
+    '''
 
     excludedRegions = []
     noiseThreshold = self.noise.value()
@@ -118,13 +119,15 @@ class SamplePopup(QtGui.QDialog):
     spectra = []
 
     for i in range(refCount):
+      print(i)
       item = refData.child(i)
       itemCount = item.childCount()
       for j in range(itemCount):
         spectrumPid = item.child(j).text(0)
         spectrum = self.project.getByPid(spectrumPid)
-        spectra.append(spectrum)
 
+        spectra.append(spectrum)
+        print(spectrum.peakLists[0])
         spectrum.peakLists[0].pickPeaks1dFiltered(ignoredRegions=excludedRegions, noiseThreshold=noiseThreshold)
         sampleTab = sideBar.spectrumSamples
 
@@ -137,7 +140,6 @@ class SamplePopup(QtGui.QDialog):
     elif self.setup.checkBox2.isChecked():
       value = (int(self.setup.spinBoxcomponent.value()))
       samples = setupSamples(self.project.substances, value, 'nComponentsPerSample', minimalOverlap=minimalDistance)
-
 
 
     for sample in samples:
@@ -156,9 +158,11 @@ class SamplePopup(QtGui.QDialog):
     self.project._appBase.mainWindow.dockArea.addDock(sampletable)
     self.accept()
 
-
                                      # ----- tab1 Sample setup -----
 class GeneralSetup(QtGui.QWidget):
+  '''  This creates the first tab with settings to create virtual samples (Mixtures)
+  '''
+
   def __init__(self, parent=None):
     super(GeneralSetup, self).__init__(parent)
 
@@ -219,18 +223,21 @@ class GeneralSetup(QtGui.QWidget):
      self.sliderComponent.hide()
      self.spinBoxcomponent.hide()
 
-                                   # ----- tab2 Exclude Regions from Spectrum -----
+                                   # ----- -----
 class ExcludeRegions(QtGui.QWidget, Base):
+  '''This create the second tab to exclude Regions from Spectrum when peak picking '''
+
   def __init__(self, parent=None,**kw):
     super(ExcludeRegions, self).__init__(parent)
     Base.__init__(self, **kw)
 
-    self.pulldownSolvents = PulldownList(self, grid=(1, 0), hAlign='c')
+    self.pulldownSolvents = PulldownList(self, grid=(0, 1), hAlign='r')
+    self.pulldownSolvents.setFixedWidth(105)
     self.pulldownSolvents.activated[str].connect(self.addRegions)
     for solvent in sorted(solvents):
       self.pulldownSolvents.addItem(solvent)
-    self.SolventsLabel = Label(self, "Select solvents to exclude or new regions", grid=(0, 0), hAlign='c')
-    self.scrollArea = ScrollArea(self, grid=(2, 0))
+    self.SolventsLabel = Label(self, "Select Regions or \nsolvents to exclude", grid=(0, 0), hAlign='l')
+    self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2,2))
     self.scrollArea.setWidgetResizable(True)
     self.scrollAreaWidgetContents = QtGui.QWidget()
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -238,9 +245,8 @@ class ExcludeRegions(QtGui.QWidget, Base):
     self.excludedRegions = []
     self.comboBoxes = []
 
-
-
   def addRegions(self, pressed):
+
     widgetList = []
     for solvent in sorted(solvents):
       if pressed == ('%s' %solvent):
@@ -250,7 +256,6 @@ class ExcludeRegions(QtGui.QWidget, Base):
         self.selectedSolventValue = sorted(values)
         self.new_list = [values[i:i+2] for i in range(0, len(values), 2)]
         del self.new_list[0:1]  #delete [0,0] used only to set the layout
-
 
         self.excludedRegions.append(self.new_list)
 
@@ -267,13 +272,8 @@ class ExcludeRegions(QtGui.QWidget, Base):
           self.spin.setPrefix('ppm')
           self.spin.setValue(values)
           widgetList.append(self.spin)
-          # self.spin.valueChanged.connect(self.newValue)
     self.comboBoxes.append(widgetList)
     self.closebutton.clicked.connect(partial(self.deleteRegions, self.positions))
-
-
-
-
 
   def deleteRegions(self, positions):
 

@@ -59,6 +59,7 @@ from application.core.modules.PickAndAssignModule import PickAndAssignModule
 from application.core.modules.SequenceModule import SequenceModule
 from application.core.modules.SampleAnalysis import SampleAnalysis
 from application.core.modules.ScreeningSetup import ScreeningSetup
+from application.core.modules.Metabolomics import MetabolomicsModule
 
 from application.core.popups.FeedbackPopup import FeedbackPopup
 from application.core.popups.PreferencesPopup import PreferencesPopup
@@ -204,6 +205,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # print(self._menuBar.font())
     fileMenu = Menu("&Project", self)
     self.screenMenu = QtGui.QMenu("&Screen", self)
+    self.metabolomicsMenu = QtGui.QMenu("&Metabolomics", self)
     peaksMenu = Menu("Peaks", self)
     viewMenu = Menu("&View", self)
     moleculeMenu = Menu("&Molecules", self)
@@ -245,15 +247,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Close Program", callback=self.closeEvent, shortcut="qt"))
 
-    # self.screenMenu.setHidden(True)
-    # self.screenMenu.addAction(Action(self, 'Empty', callback=self.showSideBar))#, shortcut="ss"))
+
     self.screenMenu.addSeparator()
     self.screenMenu.addAction(Action(self, 'Generate Mixtures', callback=self.createSample, shortcut="cs"))
     self.screenMenu.addAction(Action(self, 'Mixtures Analysis', callback=self.showSampleAnalysis, shortcut="st"))
     self.screenMenu.addSeparator()
     self.screenMenu.addAction(Action(self, 'Screening', callback=self.showScreeningSetup, shortcut="sc"))
 
-
+    self.metabolomicsMenu.addSeparator()
+    self.metabolomicsMenu.addAction(Action(self, 'Analyse Metabolite', callback=self.showMetabolomicsModule, shortcut="mm"))
 
     # spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
     # spectrumMenu.addAction(Action(self, "Remove...", callback=self.removeSpectra))
@@ -351,14 +353,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.addMenu(fileMenu)
     self._menuBar.addMenu(peaksMenu)
 
-    if 'Screening' in self._appBase.components:
+    if self._appBase.applicationName == 'Screen' :
       self._menuBar.addMenu(self.screenMenu)
-
-
-
     self._menuBar.addMenu(moleculeMenu)
+
+    if self._appBase.applicationName == 'Metabolomics':
+      self._menuBar.addMenu(self.metabolomicsMenu)
+
     if 'Assignment' in self._appBase.components:
       self._menuBar.addMenu(assignMenu)
+
     if 'Structure' in self._appBase.components:
       self._menuBar.addMenu(restraintsMenu)
       self._menuBar.addMenu(structuresMenu)
@@ -692,8 +696,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showScreeningSetup(self):
     showSc = ScreeningSetup(self.project)
     self.dockArea.addDock(showSc, position='bottom')
-    # self.pythonConsole.writeModuleDisplayCommand('showScreeningSetup')
     self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
+
+  def showMetabolomicsModule(self):
+    showMm = MetabolomicsModule(self.project)
+    self.dockArea.addDock(showMm, position='bottom')
+
 
   def showParassignSetup(self):
     try:

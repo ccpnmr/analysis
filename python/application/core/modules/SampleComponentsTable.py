@@ -10,6 +10,7 @@ from ccpncore.gui.CompoundView import CompoundView, Variant, importSmiles
 Qkeys = QtGui.QKeySequence
 
 class PeakListSampleComponent(QtGui.QWidget):
+  ''' Visualise the sample components peak Lists and the relative molecule structure. '''
 
   def __init__(self, parent=None, project=None, callback=None):
 
@@ -53,6 +54,7 @@ class PeakListSampleComponent(QtGui.QWidget):
       self.compoundView.setStyleSheet(""" background-color:  #EDCF83;""")
 
   def pulldownSample(self, selection):
+    ''' Fill the pulldown with the mixture names. If selected will update the components pulldown '''
 
     for sample in self.project.samples:
       if sample.pid  == selection:
@@ -62,37 +64,41 @@ class PeakListSampleComponent(QtGui.QWidget):
 
 
   def showPLOnTable(self, selection):
+    ''' Fill the pulldown with the components names. If selected will display the peakLists table
+    and create the molecule structure from smiles '''
 
     for sample in self.project.samples:
       for spectrum in sample.spectra:
-          for peakList in spectrum.peakLists:
-            pl = peakList.pid
-            if selection == pl:
-              peakLs = peakList.peaks
-              self.peakListObjects.append(peakLs)
-              self.peakTable.setObjects(self.peakListObjects[-1])
-              peak = self.project.getByPid(selection)
-              self.selection = peak
-              sampleComponents = peak.spectrum.sample.sampleComponents
-              for sampleComponent in sampleComponents:
-                selectionOfPeaks = sampleComponent.substance.referenceSpectra[0].peakLists[0]
-                if self.selection == selectionOfPeaks:
-                  smile = sampleComponent.substance.smiles
-                  self.smiles = smile
-                  compound = importSmiles(smile)
-                  variant = list(compound.variants)[0]
-                  self.setCompound(compound, replace = True)
-                  x, y = self.getAddPoint()
-                  variant.snapAtomsToGrid(ignoreHydrogens=False)
-                  self.compoundView.centerView()
-                  # self.compoundView.resetView()
-                  self.compoundView.updateAll()
+        print(sample.spectra)
+        for peakList in spectrum.peakLists:
+          pl = peakList.pid
+          if selection == pl:
+            peakLs = peakList.peaks
+            self.peakListObjects.append(peakLs)
+            self.peakTable.setObjects(self.peakListObjects[-1])
+            peak = self.project.getByPid(selection)
+            self.selection = peak
+            sampleComponents = peak.spectrum.sample.sampleComponents
+            for sampleComponent in sampleComponents:
+              selectionOfPeaks = sampleComponent.substance.referenceSpectra[0].peakLists[0]
+              if self.selection == selectionOfPeaks:
+                smile = sampleComponent.substance.smiles
+                self.smiles = smile
+                compound = importSmiles(smile)
+                variant = list(compound.variants)[0]
+                self.setCompound(compound, replace = True)
+                x, y = self.getAddPoint()
+                variant.snapAtomsToGrid(ignoreHydrogens=False)
+                self.compoundView.centerView()
+                # self.compoundView.resetView()
+                self.compoundView.updateAll()
 
   def _getPeakHeight(self, peak):
     if peak.height:
       return peak.height*peak.peakList.spectrum.scale
 
   def setCompound(self, compound, replace=True):
+    ''' Set the compound on the graphic scene. '''
 
     if compound is not self.compound:
       if replace or not self.compound:
@@ -124,6 +130,8 @@ class PeakListSampleComponent(QtGui.QWidget):
         self.compoundView.updateAll()
 
   def getAddPoint(self):
+    ''' Set the compound on the specific position on the graphic scene. '''
+
     compoundView = self.compoundView
     globalPos = QtGui.QCursor.pos()
     pos = compoundView.mapFromGlobal(globalPos)

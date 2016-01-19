@@ -7,6 +7,7 @@ from ccpncore.gui.Button import Button
 
 
 class SampleTableSimple(QtGui.QWidget):
+  ''' Visualise the mixtures scoring in an object table. '''
 
   def __init__(self, parent=None, project=None, callback=None):
     QtGui.QWidget.__init__(self, parent)
@@ -17,7 +18,10 @@ class SampleTableSimple(QtGui.QWidget):
     listOfSample = []
 
     for sample in self.project.samples:
+      if hasattr(sample, 'minScore'):
+
         listOfSample.append(sample)
+
 
     columns = [Column('Mixture Name', lambda sample:str(sample.pid)),
                Column('Number of Components', lambda sample: (int(len(sample.spectra)))),
@@ -26,8 +30,9 @@ class SampleTableSimple(QtGui.QWidget):
 
 
     sampleTable = ObjectTable(self, columns, callback=self.showSample, objects=[])
-    sampleTable.setObjects(listOfSample)
 
+    if len(listOfSample) > 0:
+      sampleTable.setObjects(listOfSample)
 
     self.layout().addWidget(sampleTable, 3, 0, 1, 3)
 
@@ -36,6 +41,7 @@ class SampleTableSimple(QtGui.QWidget):
     print('Not implemented yet')
 
   def exportToXls(self):
+    ''' Export a simple xlxs file from the results '''
     self.nameAndPath = ''
     fType = 'XLS (*.xlsx)'
     dialog = QtGui.QFileDialog
@@ -44,6 +50,5 @@ class SampleTableSimple(QtGui.QWidget):
 
     sampleColumn = [str(sample.pid) for sample in self.project.samples]
     sampleComponents = [str(sample.spectra) for sample in self.project.samples]
-    # print([sampleComponent.name for sample in self.project.samples for sampleComponent in sample.sampleComponents ])
     df = DataFrame({'Mixture name': sampleColumn, 'Sample Components': sampleComponents})
     df.to_excel(self.nameAndPath, sheet_name='sheet1', index=False)

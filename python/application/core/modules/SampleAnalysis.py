@@ -6,8 +6,10 @@ from application.core.modules.SampleComponentsInfo import SampleComponentInfo
 from application.core.modules.SampleScoringTable import  SampleTableSimple
 
 class SampleAnalysis(CcpnDock):
-  ### this class creates a module to analyse the samples. It is composed by four tabs.
 
+  '''Creates a module of four tabs on the dock to analyse the mixtures.
+
+  '''
   def __init__(self, project, samples=None,):
     super(SampleAnalysis, self)
     CcpnDock.__init__(self, name='Mixtures Analysis')

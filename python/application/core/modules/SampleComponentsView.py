@@ -3,16 +3,15 @@ __author__ = 'luca'
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.ScrollArea import ScrollArea
-from PyQt4 import QtGui, QtCore, QtSvg
+from PyQt4 import QtGui, QtCore
 from ccpncore.gui.CompoundView import CompoundView, Variant, importSmiles
 
-Qt = QtCore.Qt
-Qkeys = QtGui.QKeySequence
 
 
 class SampleComponentsView(QtGui.QWidget):
 
   def __init__(self, parent=None, project=None, callback=None, selectedList=None):
+    ''' Visualise all the molecule structure present in a mixture. '''
 
     QtGui.QWidget.__init__(self, parent)
 
@@ -21,8 +20,8 @@ class SampleComponentsView(QtGui.QWidget):
     self.compound = None
     self.variant = None
     self.smiles = ''
-    self.smileList = []
-    self.chemicalNameList = []
+    # self.smileList = []
+    # self.chemicalNameList = []
     self.regioncount = 0
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
 
@@ -30,8 +29,6 @@ class SampleComponentsView(QtGui.QWidget):
     self.scrollArea.setStyleSheet(""" background-color:  transparent; """)
     self.scrollArea.setWidgetResizable(True)
     self.scrollAreaWidgetContents = QtGui.QWidget()
-    # self.scrollAreaWidgetContents.setMaximumWidth(700)
-    # self.scrollAreaWidgetContents.setMinimumWidth(700)
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
     self.layout().addWidget(self.scrollArea, 3, 0, 1, 5)
@@ -41,13 +38,14 @@ class SampleComponentsView(QtGui.QWidget):
     dataSamplePuldown = [sample.pid for sample in self.samples]
     self.SamplePulldown.setData(dataSamplePuldown)
 
-    QtGui.QShortcut(Qkeys("ctrl + i"), self, self.exportSvg)
-
-
   def showMolecule(self, selection):
+    ''' Fill the pulldown with the mixture names. If selected will create and display the molecule structure from smiles '''
 
     for sample in self.project.samples:
+
       if sample.pid  == selection:
+        self.smileList = []
+        self.chemicalNameList = []
 
         for components in sample.sampleComponents:
           smile = components.substance.smiles
@@ -55,12 +53,14 @@ class SampleComponentsView(QtGui.QWidget):
           self.chemicalNameList.append(chemicalName)
           self.smileList.append(smile)
 
-        valueCount = (len(sample.spectra))
+        # valueCount = (len(sample.spectra))
+        valueCount = (len(sample.sampleComponents))
         self.positions = [i for i in range(valueCount)]
 
         for smile, name, self.position in zip( self.smileList, self.chemicalNameList, self.positions):
           self.compoundView = CompoundView(self.scrollAreaWidgetContents, grid=(1, self.position))
-          self.chemicalName = Label(self.scrollAreaWidgetContents, text=str(name), grid=(0, self.position), hAlign='c')
+          self.chemicalName = Label(self.scrollAreaWidgetContents, grid=(0, self.position), hAlign='c')
+          self.chemicalName.setText(name)
           self.smiles = smile
           compound = importSmiles(smile)
           variant = list(compound.variants)[0]
@@ -77,6 +77,7 @@ class SampleComponentsView(QtGui.QWidget):
             self.compoundView.setStyleSheet(""" background-color:  #EDCF83;""")
 
   def setCompound(self, compound, replace=True):
+    ''' Set the compound on the graphic scene. '''
 
     if compound is not self.compound:
       if replace or not self.compound:
@@ -108,6 +109,8 @@ class SampleComponentsView(QtGui.QWidget):
         self.compoundView.updateAll()
 
   def getAddPoint(self):
+    ''' Set the compound on the specific position on the graphic scene. '''
+
     compoundView = self.compoundView
     globalPos = QtGui.QCursor.pos()
     pos = compoundView.mapFromGlobal(globalPos)
@@ -121,37 +124,4 @@ class SampleComponentsView(QtGui.QWidget):
     point = compoundView.mapToScene(x, y)
     return point.x(), point.y()
 
-  def exportSvg(self):
-    print(' Export as Svg ' )
 
-    # if self.compound:
-    #   printer = QtSvg.QSvgGenerator()
-    #
-    #   scene = self.compoundView.scene
-    #
-    #   w = scene.width()
-    #   h = scene.height()
-    #   paperWidth = 200
-    #   paperHeight = paperWidth * h / w
-    #   resolution = printer.resolution() / 25.4 # Convert the resolution to dpmm
-    #   printer.setSize(QtCore.QSize(paperWidth*resolution, paperHeight*resolution))
-    #
-    #   fType = 'SVG (*.svg)'
-    #   dialog = QtGui.QFileDialog
-    #   filePath, filtr = dialog.getSaveFileName(self,filter=fType)
-    #
-    #   if filePath:
-    #     printer.setFileName(filePath)
-    #     svgPainter = QtGui.QPainter(printer)
-    #     oldBackground = self.compoundView.backgroundColor
-    #     self.compoundView.backgroundColor = Qt.white
-    #     items = scene.items()
-    #     cache = [None] * len(items)
-    #     for i, item in enumerate(items):
-    #       cache[i] = item.cacheMode()
-    #       item.setCacheMode(item.NoCache)
-    #     scene.render(svgPainter)
-    #     svgPainter.end()
-    #     self.compoundView.backgroundColor = oldBackground
-    #     for i in range(len(items)):
-    #       items[i].setCacheMode(cache[i])

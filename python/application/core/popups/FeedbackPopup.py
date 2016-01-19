@@ -14,6 +14,7 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui import MessageDialog
 from ccpncore.gui.TextEditor import TextEditor
 
+from ccpncore.util import Io
 from ccpncore.util import Logging
 from ccpncore.util import Register
 from ccpncore.util import Url
@@ -72,19 +73,12 @@ class FeedbackPopup(QtGui.QDialog):
     
     if includeProject:
       # cannot use tempfile because that always hands back open object and tarfile needs actual path
-      fileName = 'feedback%s.tgz' % random.randint(1, 10000000)
-      try:
-        projectPath = appBase.project.path
-        directory = os.path.dirname(projectPath)
-        pathToTar = os.path.basename(projectPath)
-        cwd = os.getcwd()
-        os.chdir(directory)
-        tarFp = tarfile.open(fileName, 'w:gz')
-        tarFp.add(pathToTar)
-      finally:
-        os.chdir(cwd)
-        tarFp.close()
-      fileName = os.path.join(directory, fileName)
+      filePrefix = 'feedback%s' % random.randint(1, 10000000)
+      project = appBase.project
+      projectPath = project.path
+      directory = os.path.dirname(projectPath)
+      filePrefix = os.path.join(directory, filePrefix)
+      fileName = Io.packageProject(project._wrappedData.parent, filePrefix, includeBackups=True, includeLogs=includeLog)
     elif includeLog:
       logger = Logging.getLogger()
       if not hasattr(logger, 'logPath'):

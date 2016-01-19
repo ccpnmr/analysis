@@ -17,6 +17,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
     Base.__init__(self, **kw)
 
     self.parent = parent
+    # self.setCompound = self.setCompound
     self.rotatePos = None
     if variant:
       self.compound = variant.compound
@@ -94,6 +95,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
       self.updateAll()
 
     self.show()
+
 
   def resizeEvent(self, event):
 
@@ -730,6 +732,20 @@ class CompoundView(QtGui.QGraphicsView, Base):
   def getStats(self):
     pass
 
+# def getAddPoint(self):
+#     ''' Set the compound on the specific position on the graphic scene. '''
+#     compoundView = CompoundView
+#     globalPos = QtGui.QCursor.pos()
+#     pos = compoundView.mapFromGlobal(globalPos)
+#     widget = compoundView.childAt(pos)
+#     if widget:
+#       x = pos.x()
+#       y = pos.y()
+#     else:
+#       x = compoundView.width()/2.0
+#       y = compoundView.height()/2.0
+#     point = compoundView.mapToScene(x, y)
+#     return point.x(), point.y()
 
 
 
@@ -3349,6 +3365,43 @@ def importSmiles(smilesString):
 
   return compound
 
+def setCompound(self, compound, replace=True):
+    ''' Set the compound on the graphic scene. '''
+    if compound is not self.compound:
+
+      if replace or not self.compound:
+        self.compound = compound
+        variants = list(compound.variants)
+        if variants:
+          for variant2 in variants:
+            if (variant2.polyLink == 'none') and (variant2.descriptor == 'neutral'):
+              variant = variant2
+              break
+          else:
+            for variant2 in variants:
+              if variant2.polyLink == 'none':
+                variant = variant2
+                break
+            else:
+              variant = variants[0]
+        else:
+          variant =  Variant(compound)
+        self.variant = variant
+        self.compoundView.centerView()
+        self.compoundView.resetView()
+        self.compoundView.updateAll()
+
+      else:
+        variant = list(compound.variants)[0]
+        x, y = self.getAddPoint()
+        self.compound.copyVarAtoms(variant.varAtoms, (x,y))
+        self.compoundView.centerView()
+        self.compoundView.resetView()
+        self.compoundView.updateAll()
+
+    self.compoundView.centerView()
+    self.compoundView.resetView()
+    self.compoundView.updateAll()
 
 
 

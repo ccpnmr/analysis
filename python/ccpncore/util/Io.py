@@ -480,7 +480,7 @@ def deleteTemporaryDirectory(project):
   
 def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
                 createFallback=False, overwriteExisting=False, showYesNo=None,
-                checkValid=False, changeDataLocations=False):
+                checkValid=False, changeDataLocations=False, useFileLogger:bool=True):
   """
   Save the userData for a project to a location given by newPath (the url.path
   of the userData repository) if set, or the existing location if not.
@@ -576,7 +576,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
         # deleteTemporaryDirectory(project)
         if undo is not None:
           undo.decreaseBlocking()
-        logger = _createLogger(project)
+        logger = _createLogger(project, useFileLogger=useFileLogger)
         return False
       else:
         # TBD: should we be removing it?
@@ -786,7 +786,8 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
     if undo is not None:
       undo.decreaseBlocking()
   
-  logger = _createLogger(project)
+  if newPath == oldPath:
+    logger = _createLogger(project, useFileLogger=useFileLogger)
 
   if result and (newProjectName != oldProjectName or newPath != oldPath):
     # save in newlocation succeded - remove temporary directories
@@ -1047,7 +1048,7 @@ def modifyPackageLocators(project,repositoryName,repositoryPath,packageNames,res
 
   return repository
 
-def packageProject(project, filePrefix=None, includeBackups=False, includeData=False):
+def packageProject(project, filePrefix=None, includeBackups=False, includeData=False, includeLogs=False):
   """
   Package up project userData into one gzipped tar file.
   If filePrefix is None then instead use the userData path.
@@ -1087,6 +1088,8 @@ def packageProject(project, filePrefix=None, includeBackups=False, includeData=F
         include = True
       elif includeBackups and relfile.endswith('.xml.bak'):
         include = True
+      elif includeLogs and relfile.endswith('.txt') and os.path.basename(directory) == 'logs':
+        include = True
       elif includeData and fullfile in includedDataPaths:
         include = True
 
@@ -1102,19 +1105,21 @@ def packageProject(project, filePrefix=None, includeBackups=False, includeData=F
   if not filePrefix:
     filePrefix = userPath
 
-  tarFile = '%s.tgz' % filePrefix
-  tarFp = tarfile.open(tarFile, 'w:gz')
+  tarFileName = '%s.tgz' % filePrefix
+  tarFp = tarfile.open(tarFileName, 'w:gz')
 
   cwd = os.getcwd()
   os.chdir(userDir)
   try:
-    project._logger.nfo('Files included in tar file:')
+    project._logger.info('Files included in tar file:')
     files = visitDir(userPath)
     for tarFile in files:
       tarFp.add(tarFile, recursive=False)
   finally:
     os.chdir(cwd)
     tarFp.close()
+
+  return tarFileName
 
 # def logMemoryStats(project, path):
 #   """

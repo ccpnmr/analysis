@@ -93,12 +93,10 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
       self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
 
-    if 'Screening' in self._appBase.components:
-
+    if self._appBase.applicationName == 'Screen' :
       self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
       self.spectrumScreening.setExpanded(True)
       self.spectrumScreening.setText(0, "Screening")
-
       self.spectrumReference = QtGui.QTreeWidgetItem(self.spectrumScreening)
       self.spectrumReference.setText(0, "Reference")
       self.spectrumReference.setExpanded(True)
@@ -109,6 +107,14 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       self.spectrumSamples.setExpanded(True)
       # self.restraintsItem = QtGui.QTreeWidgetItem(self.projectItem)
       # self.restraintsItem.setText(0, "Restraint Lists")
+
+    if self._appBase.applicationName == 'Metabolomics':
+      self.metabolomicsTree = QtGui.QTreeWidgetItem(self.projectItem)
+      self.metabolomicsTree.setExpanded(True)
+      self.metabolomicsTree.setText(0, "Metabolomics")
+      self.metabolomicsSamples = QtGui.QTreeWidgetItem(self.metabolomicsTree)
+      self.metabolomicsSamples.setText(0, "Samples")
+
 
 
   def setProject(self, project:Project):
@@ -177,7 +183,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         anItem.setText(0, '<New>')
 
 
-    if 'Screening' in self._appBase.components:
+    if self._appBase.applicationName == 'Screen' :
       # 1d
       self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
       self.onedItem.setText(0, "1D")

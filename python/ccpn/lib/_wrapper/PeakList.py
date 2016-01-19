@@ -104,10 +104,11 @@ def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap', ignoredReg
 
    data = spectrum._apiDataSource.get1dSpectrumData()
 
+
    ppmValues = data[0]
 
    if noiseThreshold == 0:
-     noiseThreshold = spectrum.estimateNoise()*10
+     noiseThreshold = spectrum.estimateNoise()*5
 
    masks = []
    for region in ignoredRegions:
@@ -122,13 +123,18 @@ def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap', ignoredReg
     return peaks
    boolsVal = newArray2[1] > noiseThreshold
    maxFilter = maximum_filter(newArray2[1], size=size, mode=mode)
+
+
    boolsMax = newArray2[1] == maxFilter
    boolsPeak = boolsVal & boolsMax
    indices = argwhere(boolsPeak) # True positional indices
    for position in indices:
      peakPosition = [float(newArray2[0][position])]
+     print([float(newArray2[0][ position])])
      height = newArray2[1][position]
      self.newPeak(height=float(height), position=peakPosition)
+
+
 
 def _havePeakNearPosition(values, tolerances, peaks):
 

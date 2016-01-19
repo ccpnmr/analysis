@@ -53,16 +53,21 @@ def setupSamples(substances, n, mode, minimalOverlap):
 def scoring(ExperimentPeaks, ListExperimentPeaks, getPeaks, minimalOverlap=None):
 
   """ The score is given by the distance of the best resolved peak to its closest neighbour. value =  Distance in ppm to
-   closest peak. Smaller is the distance and consequently lower the score and more overalapped is that component to its neighbour. """
+   closest peak. Smaller is the distance and consequently lower the score and more overlapped is that component to its neighbour. """
+
 
   ExperimentPeaksVals = array(getattr(ExperimentPeaks, getPeaks)()[:10])
+
   mins = empty((len(ExperimentPeaksVals), len(ListExperimentPeaks)))
   for i, b in enumerate(ListExperimentPeaks):
     if ExperimentPeaks == b:
       mins[:, i] = nan
       continue
     bVals = array(getattr(b, getPeaks)())
+
+
     diffs = fabs(subtract.outer(ExperimentPeaksVals, bVals))
+
     mins[:, i] = nanmin(diffs, 1)
   mins = nanmin(mins, 1)
   value = amax(mins)
@@ -93,6 +98,7 @@ def scoring(ExperimentPeaks, ListExperimentPeaks, getPeaks, minimalOverlap=None)
   if value < 0.02:
     return 0
   if value < 0.00:
+
     return -1
 
 class ExperimentPeaks:

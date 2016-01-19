@@ -21,6 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+import datetime
 import os
 import json
 import sys
@@ -39,6 +40,7 @@ from application.core.gui.IpythonConsole import IpythonConsole
 from ccpncore.gui.Menu import Menu, MenuBar
 from application.core.gui.SideBar import SideBar
 
+from ccpncore.util import Io
 from ccpncore.util import Path
 
 from ccpncore.util.Common import uniquify
@@ -241,7 +243,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # logOption.addAction(Action(self, "Clear", callback=self.clearLogFile))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Summary...", self.displayProjectSummary))
-    fileMenu.addAction(Action(self, "Archive...", self.archiveProject))
+    fileMenu.addAction(Action(self, "Archive", self.archiveProject))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Preferences...", callback=self.showApplicationPreferences))
     fileMenu.addSeparator()
@@ -589,12 +591,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     info = MessageDialog.showInfo('Not implemented yet',
           'This function has not been implemented in the current version', colourScheme=self.colourScheme)
 
-
   def archiveProject(self):
-    info = MessageDialog.showInfo('Not implemented yet',
-          'This function has not been implemented in the current version', colourScheme=self.colourScheme)
 
-
+    project = self._project
+    apiProject = project._wrappedData.parent
+    projectPath = project.path
+    now = datetime.datetime.now().strftime('%y%m%d%H%M%S')
+    filePrefix = '%s_%s' % (os.path.basename(projectPath), now)
+    filePrefix = os.path.join(os.path.dirname(projectPath), filePrefix)
+    fileName = Io.packageProject(apiProject, filePrefix, includeBackups=True, includeLogs=True)
+    
+    MessageDialog.showInfo('Project Archived',
+          'Project archived to %s' % fileName, colourScheme=self.colourScheme)
+    
   def showApplicationPreferences(self):
     """
     Displays Application Preferences Popup.

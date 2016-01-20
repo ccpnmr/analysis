@@ -55,7 +55,6 @@ from application.core.modules.DataPlottingModule import DataPlottingModule
 from application.core.modules.GuiBlankDisplay import GuiBlankDisplay
 from application.core.modules.GuiWindow import GuiWindow
 from application.core.modules.MacroEditor import MacroEditor
-from application.core.modules.NotesEditor import NotesEditor
 from application.core.modules.PeakTable import PeakTable
 from application.core.modules.PickAndAssignModule import PickAndAssignModule
 from application.core.modules.SequenceModule import SequenceModule
@@ -65,8 +64,6 @@ from application.core.modules.Metabolomics import MetabolomicsModule
 
 from application.core.popups.FeedbackPopup import FeedbackPopup
 from application.core.popups.PreferencesPopup import PreferencesPopup
-from application.core.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup, EditSampleComponentPopup
 from application.core.popups.SampleSetupPopup import SamplePopup
 
 from application.core.Version import revision
@@ -523,40 +520,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """get object from Pid and dispatch call depending on type
 
     NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
-    dataPid =  item.data(0, QtCore.Qt.DisplayRole)
+    dataPid = item.data(0, QtCore.Qt.DisplayRole)
     project = self._appBase.project
     obj = project.getByPid(dataPid)
+    print(obj)
     if obj is not None:
-      if obj.shortClassName == 'SP':
-        popup = SpectrumPropertiesPopup(obj, item)
-        popup.exec_()
-        popup.raise_()
-      elif obj.shortClassName == 'PL':
-        self.showPeakTable(self._project, selectedList=obj)
-      elif obj.shortClassName == 'SA':
-        popup = SamplePropertiesPopup(obj, item,  project=self.project)
-        popup.exec_()
-        popup.raise_()
-
-      elif obj.shortClassName == 'SC':
-        popup = EditSampleComponentPopup(sampleComponent=obj)
-        popup.exec_()
-        popup.raise_()
-
-      elif obj.shortClassName == 'NO':
-        self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=obj, item=item)
-
-    elif item.data(0, QtCore.Qt.DisplayRole) == '<New Note>':
-      newNote = project.newNote()
-
-      newItem = self.sideBar.addItem(self.sideBar.notesItem, newNote)
-      self.notesEditor = NotesEditor(self.dockArea, name='Notes Editor', note=newNote, item=newItem)
-      # self.dockArea.addDock(self.notesEditor)
-    elif item.data(0, QtCore.Qt.DisplayRole) == '<New Sample>':
-      newSample = project.newSample(name=str('NewSample'))
-      self.sideBar.addItem(self.sideBar.spectrumSamples, newSample)
-
-
+      self.sideBar.raisePopup(obj, item)
+    elif item.data(0, QtCore.Qt.DisplayRole) == '<New>':
+      self.sideBar.createNewObject(item)
 
     else:
       project._logger.error("Double-click activation not implemented for object %s" % obj)

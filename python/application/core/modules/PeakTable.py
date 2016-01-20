@@ -140,14 +140,14 @@ class PeakListSimple(QtGui.QWidget, Base):
     Returns the volume of the specified peak.
     """
     if peak.volume:
-      return peak.volume*peak.peakList.spectrum.scale
+      return '%7.2E' % float(peak.volume*peak.peakList.spectrum.scale)
 
   def getPeakHeight(self, peak:Peak):
     """
     Returns the height of the specified peak.
     """
     if peak.height:
-      return peak.height*peak.peakList.spectrum.scale
+      return '%7.2E' % float(peak.height*peak.peakList.spectrum.scale)
 
 
 

@@ -1,4 +1,3 @@
-__author__ = 'simon1'
 
 def getPeakPosition(peak, dim, unit='ppm'):
 
@@ -19,9 +18,9 @@ def getPeakPosition(peak, dim, unit='ppm'):
     else: # sampled
       value = unit.pointValues[int(peak.sortedPeakDims()[dim].position)-1]
 
-    return value
+    return '%7.2f' % float(value)
 
 def getPeakAnnotation(peak, dim):
 
-    if len(peak.dimensionNmrAtoms[dim]) > 0:
-      return peak.dimensionNmrAtoms[dim][0].pid.id
+  if len(peak.dimensionNmrAtoms[dim]) > 0:
+    return peak.dimensionNmrAtoms[dim][0].pid.id

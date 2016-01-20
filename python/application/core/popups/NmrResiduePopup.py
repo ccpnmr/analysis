@@ -15,32 +15,32 @@ from ccpn.lib.Assignment import getNmrResiduePrediction, getNmrAtomPrediction
 
 
 
-class NmrResiduePopup(QtGui.QWidget, Base):
-  def __init__(self, parent=None, project=None, nmrResidue=None, nmrAtom=None, **kw):
+class NmrResiduePopup(QtGui.QDialog, Base):
+  def __init__(self, parent=None, nmrResidue=None, nmrAtom=None, **kw):
     super(NmrResiduePopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.setStyleSheet("border: 0px solid")
     self.parent = parent
-    self.project = project
-    self.current = project._appBase.current
+    self.project = nmrResidue.project
+    self.current = self.project._appBase.current
     self.nmrAtom = nmrAtom
     self.nmrResidueLabel = Label(self, grid=(0, 0), gridSpan=(1, 1))
     chainLabel = Label(self, "Chain ", grid=(1, 0))
     self.chainPulldown = PulldownList(self, grid=(1, 1), callback=self.selectNmrChain)
-    nmrChains = [nmrChain.pid for nmrChain in project.nmrChains] + [chain.pid for chain in project.chains]
+    nmrChains = [nmrChain.pid for nmrChain in self.project.nmrChains] + [chain.pid for chain in self.project.chains]
     self.chainPulldown.setData(nmrChains)
     self.seqCodeLabel = Label(self, "Sequence Code ", grid=(1, 2))
     self.seqCodePulldown = PulldownList(self, grid=(1, 3), callback=self.getResidueType)
 
     residueTypeLabel = Label(self, "Residue Type ", grid=(2, 0))
-    self.residueTypePulldown = PulldownList(self, grid=(2, 1), callback=self.getAtomType)
+    self.residueTypePulldown = PulldownList(self, grid=(2, 1))
     self.residueTypePulldown.setData(CCP_CODES)
     self.residueTypePulldown.setFixedWidth(100)
 
-    atomTypeLabel = Label(self, "Atom Type ", grid=(2, 2))
-    self.atomTypePulldown = PulldownList(self, grid=(2, 3))
+    # atomTypeLabel = Label(self, "Atom Type ", grid=(2, 2))
+    # self.atomTypePulldown = PulldownList(self, grid=(2, 3))
 
-    leftOverLabel = Label(self, "Leftover Possibilities", grid=(5, 0))
+    leftOverLabel = Label(self, "Leftover Possibilities ", grid=(5, 0))
     leftOvers = Label(self, grid=(5, 1))
     applyButton = Button(self, grid=(6, 1), text='Apply', callback=self.assignResidue)
 

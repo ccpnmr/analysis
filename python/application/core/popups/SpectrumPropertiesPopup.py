@@ -51,23 +51,23 @@ VOLUME_UNITS = ['μl', 'ml', 'l']
 
 
 class SpectrumPropertiesPopup(QtGui.QDialog, Base):
-  def __init__(self, spectrum, item, parent=None, **kw):
+  def __init__(self, spectrum, parent=None, **kw):
     super(SpectrumPropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     tabWidget = QtGui.QTabWidget()
     tabWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     if spectrum.dimensionCount == 1:
-      tabWidget.addTab(GeneralTab(spectrum, item=item), "General")
+      tabWidget.addTab(GeneralTab(spectrum), "General")
       tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
       # tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
-      tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
+      # tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
 
     else:
-      tabWidget.addTab(GeneralTab(spectrum, item=item), "General")
+      tabWidget.addTab(GeneralTab(spectrum), "General")
       tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
       tabWidget.addTab(ContoursTab(spectrum), "Contours")
-      tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
-      tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
+      # tabWidget.addTab(PeakListsTab(spectrum), "Peak Lists")
+      # tabWidget.addTab(AcquisitionTab(spectrum), "Spectrometer")
 
 
     self.setWindowTitle("Spectrum Information")
@@ -551,61 +551,3 @@ class ContoursTab(QtGui.QWidget, Base):
     pix.fill(QtGui.QColor(newColour))
     newIcon = QtGui.QIcon(pix)
     # spectrum.spectrumItem.newAction.setIcon(newIcon)
-
-
-class PeakListsTab(QtGui.QWidget, Base):
-  def __init__(self, spectrum, parent=None):
-    super(PeakListsTab, self).__init__(parent)
-    self.spectrum = spectrum
-    i=0
-    for peakList in spectrum.peakLists:
-      label = Label(self, grid=(i, 1), text=str(peakList.pid), vAlign='t', hAlign='l')
-      checkBox = CheckBox(self, grid=(i, 0), checked=True, vAlign='t', hAlign='l')
-      # self.layout().addWidget(checkBox, i, 0, QtCore.Qt.AlignTop)
-      for strip in self.spectrum.project.strips:
-        peakListView = strip.peakListViewDict.get(peakList)
-        if peakListView is not None:
-          if peakListView.isVisible():
-            checkBox.setChecked(True)
-          else:
-            checkBox.setChecked(False)
-        else:
-          checkBox.setChecked(False)
-    #   #
-        checkBox.stateChanged.connect(partial(self.peakListToggle, peakListView))
-      i+=1
-
-  def peakListToggle(self, peakListView, state):
-      if peakListView is not None:
-        if state == QtCore.Qt.Checked:
-          peakListView.setVisible(True)
-        else:
-          peakListView.setVisible(False)
-
-
-
-
-class AcquisitionTab(QtGui.QWidget):
-  def __init__(self, spectrum, parent=None):
-      super(AcquisitionTab, self).__init__(parent)
-
-      spectrometerLabel = Label(self, text="Acquisition ", grid=(0, 0), vAlign='t', hAlign='l')
-      spectrometerData = LineEdit(self, grid=(0, 1), vAlign='t', hAlign='l')
-      probeLabel = Label(self, text="Probe ", grid=(1, 0), vAlign='t', hAlign='l')
-      probeData = LineEdit(self, grid=(1, 1), vAlign='t', hAlign='l')
-      numberScansLabel = Label(self, text="Number of Scans ", grid=(2, 0), vAlign='t', hAlign='l')
-      numberScansData = LineEdit(self, grid=(2, 1), vAlign='t', hAlign='l')
-      sampleStateLabel = Label(self, text="Sample State ", grid=(3, 0), vAlign='t', hAlign='l')
-      sampleStateData = PulldownList(self, grid=(3, 1), vAlign='t', hAlign='l')
-      sampleStateData.addItems(SAMPLE_STATES)
-      sampleVolumeLabel = Label(self, text="Sample Volume ", grid=(4, 0), vAlign='t', hAlign='l')
-      sampleVolumeData = LineEdit(self, grid=(4, 1), vAlign='t', hAlign='l')
-      volumeUnitLabel = Label(self, text="Volume Unit ", grid=(5, 0), vAlign='t', hAlign='l')
-      volumeUnitData = PulldownList(self, grid=(5, 1), vAlign='t', hAlign='l')
-      volumeUnitData.addItems(VOLUME_UNITS)
-      tubeTypeLabel = Label(self, text="NMR Tube Type ", grid=(6, 0), vAlign='t', hAlign='l')
-      tubeTypeData = LineEdit(self, grid=(6, 1), vAlign='t', hAlign='l')
-      spinningAngleLabel = Label(self, text="Spinning Angle ", grid=(7, 0), vAlign='t', hAlign='l')
-      spinningAngleData = LineEdit(self, grid=(7, 1), vAlign='t', hAlign='l')
-      spinningRateLabel = Label(self, text="Spinning Rate ", grid=(8, 0), vAlign='t', hAlign='l')
-      spinningRateData = LineEdit(self, grid=(8, 1), vAlign='t', hAlign='l')

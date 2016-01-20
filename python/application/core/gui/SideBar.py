@@ -21,99 +21,91 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
-import pandas as pd
-from ccpn import Project
-# from ccpncore.gui.Button import Button
-from ccpncore.util.Types import Sequence
 
 from application.core.DropBase import DropBase
+from application.core.modules.CreateSequence import CreateSequence
+from application.core.modules.NotesEditor import NotesEditor
+from application.core.popups.NmrAtomPopup import NmrAtomPopup
+from application.core.popups.NmrChainPopup import NmrChainPopup
+from application.core.popups.NmrResiduePopup import NmrResiduePopup
+from application.core.popups.PeakListPropertesPopup import PeakListPropertiesPopup
+from application.core.popups.RestraintTypePopup import RestraintTypePopup
+from application.core.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
+from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup, EditSampleComponentPopup
+
+
+from ccpn import Project
 from ccpn import Spectrum
+
 from ccpncore.util.Pid import Pid
+from ccpncore.util.Types import Sequence
 
-# import sys
-import os
-import csv
-
-# from ccpncore.gui.Font import Font
-
-experimentTypeDict = {'zg':'H', 'cpmg':'T2-filtered.H', 'STD':'STD.H', 'bdwl':'Water-LOGSY.H'}
-
+NEW_ITEM_DICT = {
+  'SP': 'newPeakList',
+  'NC': 'newNmrResidue',
+  'NR': 'newNmrAtom',
+  'RS': 'newRestraintList',
+  'RL': 'newRestraint',
+  'SE': 'newModel',
+  'Notes': 'newNote',
+  'Structures': 'newStructureEnsemble',
+  'Samples': 'newSample',
+  'NmrChains': 'newNmrChain',
+  'Chains': 'CreateSequence',
+  'Substances': 'newSubstance',
+  'Chemical Shift Lists': 'newChemicalShiftList',
+  'Restraint Sets': 'newRestraintSet',
+}
 
 
 class SideBar(DropBase, QtGui.QTreeWidget):
   def __init__(self, parent=None ):
     QtGui.QTreeWidget.__init__(self, parent)
 
-
     self.setFont(QtGui.QFont('Lucida Grande', 12))
     self.header().hide()
     self.setDragEnabled(True)
     self._appBase = parent._appBase
-
+    self.setExpandsOnDoubleClick(False)
     self.setDragDropMode(self.InternalMove)
-    # self._dragroot = self.itemRootIndex()
     self.setFixedWidth(200)
     self.projectItem = QtGui.QTreeWidgetItem(self)
     self.projectItem.setText(0, "Project")
     self.projectItem.setExpanded(True)
     self.spectrumItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setText(0, "Spectra")
-    print(self._appBase.applicationName)
-    if self._appBase.applicationName == 'Assign':
-
-
-      # chainA = QtGui.QTreeWidgetItem(self.spectrumReference)
-      # chainA.setText(0, 'Chain A')
-      # chainB = QtGui.QTreeWidgetItem(self.spectrumReference)
-      # chainB.setText(0, 'Chain B')
-      # chainC = QtGui.QTreeWidgetItem(self.spectrumReference)
-      # chainC.setText(0, 'Chain C')
-      # self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
-      # self.spectrumScreening.setText(0, "Screening")
-      # self.spectrumMixtures = QtGui.QTreeWidgetItem(self.projectItem)
-      # self.spectrumMixtures.setText(0, "Mixtures")
-      # # self.restraintsItem = QtGui.QTreeWidgetItem(self.projectItem)
-      # # self.restraintsItem.setText(0, "Restraint Lists")
-      # self.spectrumDeleted = QtGui.QTreeWidgetItem(self.projectItem)
-      # self.spectrumDeleted.setText(0, "Deleted")
-      # self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
-      # self.structuresItem.setText(0, "Structures")
-      # self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
-      # self.samplesItem.setText(0, "Samples")
-
-      self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
-      self.structuresItem.setText(0, "Structures")
-      self.substancesItem = QtGui.QTreeWidgetItem(self.projectItem)
-      self.substancesItem.setText(0, "Substances")
-      self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
-      self.notesItem.setText(0, "Notes")
-      self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
-      self.newNoteItem.setData(0, QtCore.Qt.DisplayRole, '<New Note>')
-
-    if self._appBase.applicationName == 'Screen' :
-      self.spectrumScreening = QtGui.QTreeWidgetItem(self.projectItem)
-      self.spectrumScreening.setExpanded(True)
-      self.spectrumScreening.setText(0, "Screening")
-      self.spectrumReference = QtGui.QTreeWidgetItem(self.spectrumScreening)
-      self.spectrumReference.setText(0, "Reference")
-      self.spectrumReference.setExpanded(True)
-      self.spectrumSamples = QtGui.QTreeWidgetItem(self.spectrumScreening)
-      self.spectrumSamples.setText(0, "Samples")
-      self.newSample = QtGui.QTreeWidgetItem(self.spectrumSamples)
-      self.newSample.setText(0, "<New Sample>")
-      self.spectrumSamples.setExpanded(True)
-      # self.restraintsItem = QtGui.QTreeWidgetItem(self.projectItem)
-      # self.restraintsItem.setText(0, "Restraint Lists")
-
-    if self._appBase.applicationName == 'Metabolomics':
-      self.metabolomicsTree = QtGui.QTreeWidgetItem(self.projectItem)
-      self.metabolomicsTree.setExpanded(True)
-      self.metabolomicsTree.setText(0, "Metabolomics")
-      self.metabolomicsSamples = QtGui.QTreeWidgetItem(self.metabolomicsTree)
-      self.metabolomicsSamples.setText(0, "Samples")
+    self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.samplesItem.setText(0, 'Samples')
+    self.newSample = QtGui.QTreeWidgetItem(self.samplesItem)
+    self.newSample.setText(0, "<New>")
+    self.substancesItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.substancesItem.setText(0, "Substances")
+    self.newSubstanceItem = QtGui.QTreeWidgetItem(self.substancesItem)
+    self.newSubstanceItem.setText(0, '<New>')
+    self.chainItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.chainItem.setText(0, "Chains")
+    self.newChainItem = QtGui.QTreeWidgetItem(self.chainItem)
+    self.newChainItem.setText(0, '<New>')
+    self.nmrChainItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.nmrChainItem.setText(0, "NmrChains")
+    self.newNmrChainItem = QtGui.QTreeWidgetItem(self.nmrChainItem)
+    self.newNmrChainItem.setText(0, '<New>')
+    self.chemicalShiftListsItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.chemicalShiftListsItem.setText(0, "Chemical Shift Lists")
+    self.newChemicalShiftListItem = QtGui.QTreeWidgetItem(self.chemicalShiftListsItem)
+    self.newChemicalShiftListItem.setText(0, '<New>')
+    self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.structuresItem.setText(0, "Structures")
+    self.restraintSetsItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.restraintSetsItem.setText(0, "Restraint Sets")
+    self.newRestraintSetItem = QtGui.QTreeWidgetItem(self.restraintSetsItem)
+    self.newRestraintSetItem.setText(0, '<New>')
+    self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.notesItem.setText(0, "Notes")
+    self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
+    self.newNoteItem.setText(0, '<New>')
 
 
 
@@ -130,12 +122,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """
     newItem = QtGui.QTreeWidgetItem(item)
     newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
-    # newItem.setText(0, str(data.name))
     newItem.setData(0, QtCore.Qt.DisplayRole, str(data.pid))
     newItem.mousePressEvent = self.mousePressEvent
     return newItem
-
-
 
   def mousePressEvent(self, event):
     """
@@ -147,7 +136,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     else:
       QtGui.QTreeWidget.mousePressEvent(self, event)
 
-
   def raiseContextMenu(self, event:QtGui.QMouseEvent, item:QtGui.QTreeWidgetItem):
     """
     Creates and raises a context menu enabling items to be deleted from the sidebar.
@@ -157,8 +145,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     from functools import partial
     contextMenu.addAction('Delete', partial(self.removeItem, item))
     contextMenu.popup(event.globalPos())
-
-
 
   def removeItem(self, item:QtGui.QTreeWidgetItem):
     """
@@ -176,24 +162,38 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     for spectrum in project.spectra:
       newItem = self.addItem(self.spectrumItem, spectrum)
       if spectrum is not None:
+        anItem = QtGui.QTreeWidgetItem(newItem)
+        anItem.setText(0, '<New>')
         for peakList in spectrum.peakLists:
           peakListItem = QtGui.QTreeWidgetItem(newItem)
           peakListItem.setText(0, peakList.pid)
-        anItem = QtGui.QTreeWidgetItem(newItem)
-        anItem.setText(0, '<New>')
 
+    for chain in project.chains:
+      newItem = self.addItem(self.chainItem, chain)
+    for nmrChain in project.nmrChains:
+      newItem = self.addItem(self.nmrChainItem, nmrChain)
+      for nmrResidue in nmrChain.nmrResidues:
+        newItem3 = self.addItem(newItem, nmrResidue)
+        for nmrAtom in nmrResidue.nmrAtoms:
+          newItem5 = self.addItem(newItem3, nmrAtom)
+    for chemicalShiftList in project.chemicalShiftLists:
+      newItem = self.addItem(self.chemicalShiftListsItem, chemicalShiftList)
 
-    if self._appBase.applicationName == 'Screen' :
-      # 1d
-      self.onedItem = QtGui.QTreeWidgetItem(self.spectrumReference)
-      self.onedItem.setText(0, "1D")
-      self.stdItem = QtGui.QTreeWidgetItem(self.spectrumReference)
-      self.stdItem.setText(0, "STD")
-      self.logsyItem = QtGui.QTreeWidgetItem(self.spectrumReference)
-      self.logsyItem.setText(0, "Water-LOGSY")
-      self.t1rhoItem = QtGui.QTreeWidgetItem(self.spectrumReference)
-      self.t1rhoItem.setText(0, "T1rho")
+    for restraintSet in project.restraintSets:
+      newItem = self.addItem(self.restraintSetsItem, restraintSet)
+      newItem2 = QtGui.QTreeWidgetItem(newItem)
+      newItem2.setText(0, '<New>')
+      for restraintList in restraintSet.restraintLists:
+        newItem4 = self.addItem(newItem, restraintList)
+        newItem3 = QtGui.QTreeWidgetItem(newItem4)
+        newItem3.setText(0, '<New>')
+        for restraint in restraintList.restraints:
+          newItem5 = self.addItem(newItem4, restraint)
 
+    for structureEnsemble in project.structureEnsembles:
+      newItem = self.addItem(self.structuresItem, structureEnsemble)
+      for model in structureEnsemble.models:
+        newItem3 = self.addItem(newItem, model)
 
     # ### Flags
     # # set dropEnable  the item you want to move. Set dragEnable  where drop is allowed
@@ -227,19 +227,16 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.spectrumItem.setText(0, "Reference")
     self.spectrumItem.takeChildren()
 
-  def dragEnterEvent(self, event, enter = True):
+  def dragEnterEvent(self, event, enter=True):
     if event.mimeData().hasUrls():
       event.accept()
     else:
-
       import json
-
       item = self.itemAt(event.pos())
       if item:
         itemData = json.dumps({'pids':[item.text(0)]})
         event.mimeData().setData('ccpnmr-json', itemData)
         event.mimeData().setText(itemData)
-
 
   def dragMoveEvent(self, event:QtGui.QMouseEvent):
     """
@@ -256,24 +253,84 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     peakListItem = QtGui.QTreeWidgetItem(newItem)
     peakListItem.setText(0, peakList.pid)
 
-  # def processSpectrum(self, spectrum:(Spectrum,Pid), event, expTypes=None):
-  #
-  #   spectrum = self.project.getByPid(spectrum)
-
-
-    # if self._appBase.applicationName == 'Screen':
-    #   newItem = self.addItem(self.onedItem, spectrum)
-    #   peakListItem = QtGui.QTreeWidgetItem(newItem)
-    #   peakListItem.setText(0, peakList.pid)
-    #
-    # else:
-    #   newItem = self.addItem(self.spectrumItem, spectrum)
-    #   peakListItem = QtGui.QTreeWidgetItem(newItem)
-    #   peakListItem.setText(0, peakList.pid)
-
   def processNotes(self, pids:Sequence[str], event):
     """Display notes defined by list of Pid strings"""
     for ss in pids:
       note = self.project.getByPid(ss)
       self.addItem(self.notesItem, note)
 
+  def raisePopup(self, obj, item):
+    if obj.shortClassName == 'SP':
+      popup = SpectrumPropertiesPopup(obj)
+      popup.exec_()
+      popup.raise_()
+    elif obj.shortClassName == 'PL':
+      popup = PeakListPropertiesPopup(peakList=obj)
+      popup.exec_()
+      popup.raise_()
+
+    elif obj.shortClassName == 'SA':
+      popup = SamplePropertiesPopup(obj, project=self.project)
+      popup.exec_()
+      popup.raise_()
+
+    elif obj.shortClassName == 'SC':
+      popup = EditSampleComponentPopup(sampleComponent=obj)
+      popup.exec_()
+      popup.raise_()
+    elif obj.shortClassName == 'SU':
+      pass
+    elif obj.shortClassName == 'NC':
+      popup = NmrChainPopup(nmrChain=obj)
+      popup.exec_()
+      popup.raise_()
+    elif obj.shortClassName == 'NR':
+      popup = NmrResiduePopup(nmrResidue=obj)
+      popup.exec_()
+      popup.raise_()
+    elif obj.shortClassName == 'NA':
+      popup = NmrAtomPopup(nmrAtom=obj)
+      popup.exec_()
+      popup.raise_()
+    elif obj.shortClassName == 'CS':
+      pass
+    elif obj.shortClassName == 'SE':
+      pass #to be decided when we design structure
+    elif obj.shortClassName == 'MD':
+      pass #to be decided when we design structure
+    elif obj.shortClassName == 'RS':
+      pass #to be decided when we design structure
+    elif obj.shortClassName == 'RL':
+      pass #to be decided when we design structure
+    elif obj.shortClassName == 'RE':
+      pass #to be decided when we design structure
+    elif obj.shortClassName == 'NO':
+      self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, name='Notes Editor', note=obj, item=item)
+
+  def createNewObject(self, item):
+
+    itemParent = self.project.getByPid(item.parent().text(0))
+    if itemParent is not None:
+      if itemParent.shortClassName == 'RS':
+        popup = RestraintTypePopup()
+        popup.exec_()
+        popup.raise_()
+        restraintType = popup.restraintType
+        funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
+        newItem = getattr(itemParent, funcName)(restraintType)
+        self.addItem(item.parent(), newItem)
+      else:
+        funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
+
+    else:
+      if item.parent().text(0) == 'Chains':
+        popup = CreateSequence(project=self.project)
+        popup.exec_()
+        popup.raise_()
+        return
+      else:
+        itemParent = self.project
+        funcName = NEW_ITEM_DICT.get(item.parent().text(0))
+
+    newItem = getattr(itemParent, funcName)()
+    self.addItem(item.parent(), newItem)

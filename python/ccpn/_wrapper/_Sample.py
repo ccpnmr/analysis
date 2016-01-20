@@ -209,12 +209,13 @@ class Sample(AbstractWrapperObject):
         raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
       else:
         commonUtil._resetParentLink(self._wrappedData, 'samples', 'name', value)
-        undo.newItem(self.rename, self.rename, undoArgs=(oldName),redoArgs=(value))
         self._project._resetPid(self._wrappedData)
 
     finally:
       if undo is not None:
         undo.decreaseBlocking()
+
+    undo.newItem(self.rename, self.rename, undoArgs=(oldName,),redoArgs=(value,))
 
 
   @classmethod

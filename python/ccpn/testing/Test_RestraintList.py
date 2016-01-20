@@ -24,49 +24,66 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpn.testing.WrapperTesting import WrapperTesting
 
-class PeakListTest(WrapperTesting):
+class RestraintListTest(WrapperTesting):
 
   # Path of project to load (None for new project)
-  projectPath = 'CcpnCourse2b'
+  projectPath = None
 
   def test_newDistanceRestraintList(self):
-    restraintSet = self.project.getByPid('RS:20')
-    newDistanceRestraintlist = restraintSet.newRestraintList('Distance')
+    restraintSet = self.project.newRestraintSet()
+    newList = restraintSet.newRestraintList('Distance')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newDihedralRestraintList(self):
-    restraintSet = self.project.getByPid('RS:20')
-    newDihedralRestraintList = restraintSet.newRestraintList('Dihedral')
+    restraintSet = self.project.newRestraintSet()
+    newList = restraintSet.newRestraintList('Dihedral')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newCsaRestraintList(self):
-    restraintSet = self.project.getByPid('RS:20')
-    newCsaRestraintList = restraintSet.newRestraintList('Csa')
+    restraintSet = self.project.newRestraintSet()
+    newList = restraintSet.newRestraintList('Csa')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newRdcRestraintList(self):
-    restraintSet = self.project.getByPid('RS:20')
-    newRdcRestraintList = restraintSet.newRestraintList('Rdc')
+    restraintSet = self.project.newRestraintSet()
+    newList = restraintSet.newRestraintList('Rdc')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newChemicalShiftRestraintList(self):
-    restraintSet = self.project.getByPid('RS:20')
-    newChemicalShiftRestraintList = restraintSet.newRestraintList('ChemicalShift')
+    restraintSet = self.project.newRestraintSet()
+    newList = restraintSet.newRestraintList('ChemicalShift')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newJCouplingRestraintList(self):
-    restraintSet = self.project.getByPid('RS:20')
-    newJCouplingRestraintList = restraintSet.newRestraintList('JCoupling')
+    restraintSet = self.project.newRestraintSet()
+    newList = restraintSet.newRestraintList('JCoupling')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
+
+  def test_renameDistanceRestraintList(self):
+    restraintSet = self.project.newRestraintSet()
+    newList = restraintSet.newRestraintList('Distance', name='Boom', comment='blah', unit='A',
+                                            potentialType='logNormal', tensorMagnitude=1.0,
+                                            tensorRhombicity=1.0, tensorIsotropicValue=0.0,
+                                            tensorChainCode='A', tensorSequenceCode='11',
+                                            tensorResidueType='TENSOR', origin='NOE')
+    self.undo.newWaypoint()
+    # Undo and redo all operations
+    newList.rename('Chikka')
+    self.undo.undo()
+    self.assertEqual(newList.name, 'Boom')
+    self.undo.undo()
+    self.undo.redo()
+    self.undo.redo()
+    self.assertEqual(newList.name, 'Chikka')

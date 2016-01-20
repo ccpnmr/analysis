@@ -36,3 +36,15 @@ class NoteTest(WrapperTesting):
     self.project.save()
     loadedProject = ccpn.loadProject(self.project.path)
     loadedProject.delete()
+
+  def test_rename_note(self):
+    note = self.project.newNote(name='patty')
+    undo = self.project._undo
+    undo.newWaypoint()
+    note.rename('cake')
+    self.assertEqual(note.name, 'cake')
+    undo.undo()
+    self.assertEqual(note.name, 'patty')
+    undo.redo()
+    self.assertEqual(note.name, 'cake')
+

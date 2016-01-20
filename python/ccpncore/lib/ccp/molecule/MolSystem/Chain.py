@@ -259,10 +259,10 @@ def renameChain(self:'Chain', newCode:str):
     for nmrProject in molSystem.nmrProjects:
       nmrChain = nmrProject.findFirstNmrChain(code=oldCode)
       if nmrChain:
-        parentDict = nmrProject.__dict__['nmrChains']
-        del parentDict[oldCode]
+        # parentDict = nmrProject.__dict__['nmrChains']
+        # del parentDict[oldCode]
         nmrChain.code = newCode
-        parentDict[newCode] = nmrChain
+        # parentDict[newCode] = nmrChain
 
     # Fix self
     parentDict = molSystem.__dict__['chains']

@@ -145,7 +145,7 @@ class Chain(AbstractWrapperObject):
       raise ValueError("Chain name must be set")
     elif Pid.altCharacter in value:
       raise ValueError("Character %s not allowed in Chain.shortName" % Pid.altCharacter)
-    apiNmrChain = self._project._apiNmrProject.findFirstNmrChain(code=self.code)
+    apiNmrChain = self._project._apiNmrProject.findFirstNmrChain(code=self.shortName)
     self._apiChain.renameChain(value)
     self._project._resetPid(self._apiChain)
     if apiNmrChain is not None:

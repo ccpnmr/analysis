@@ -286,9 +286,9 @@ class RestraintList(AbstractWrapperObject):
 # Connections to parents:
 RestraintSet._childClasses.append(RestraintList)
 
-def _newRestraintList(self:RestraintSet, restraintType, name:str=None,
-                      comment:str=None, unit:str=None, potentialType:str=None,
-                      tensorMagnitude:float=None, tensorRhombicity:float=None,
+def _newRestraintList(self:RestraintSet, restraintType, name:str=None, origin:str=None,
+                      comment:str=None, unit:str=None, potentialType:str='unknown',
+                      tensorMagnitude:float=0.0, tensorRhombicity:float=0.0,
                       tensorIsotropicValue:float=0.0, tensorChainCode:str=None,
                       tensorSequenceCode:str=None, tensorResidueType:str=None) -> RestraintList:
   """Create new ccpn.RestraintList of type restraintType within ccpn.RestraintSet"""
@@ -301,6 +301,7 @@ def _newRestraintList(self:RestraintSet, restraintType, name:str=None,
     raise ValueError("restraintType %s not recognised" % restraintType)
 
   obj = self._wrappedData.newGenericConstraintList(name=name, details=comment, unit=unit,
+                                                   origin=origin,
                                                    constraintType=restraintType,
                                                    itemLength=itemLength,
                                                    potentialType=potentialType,
@@ -330,7 +331,7 @@ for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():
   Project._apiNotifiers.extend(
     ( ('_newObject', {'cls':RestraintList}, className, '__init__'),
       ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+      ('_finaliseUnDelete', {}, className, 'undelete'),
       ('_resetPid', {}, className, 'setName'),
     )
 )

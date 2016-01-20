@@ -721,7 +721,7 @@ def upgradeConstraintList(constraintList):
   """Upgrade ConstraintList from early V3 to newer V3 - this avoids redoing earlier function
   and anyway data must be copied to a new set of objects
 
-  Will also work if called on old-type V3 ConstraintLists (unse only internally)"""
+  Will also work if called on old-type V3 ConstraintLists (use only internally)"""
 
   constraintStore = constraintList.nmrConstraintStore
 
@@ -757,7 +757,7 @@ def upgradeConstraintList(constraintList):
 
   newList = constraintStore.newGenericConstraintList(**params)
 
-  constraintStore.__dict__['isReading'] = True
+  constraintStore.root.override = True
   constraintTags = ('serial', 'origData', 'details')
   contributionTags = ('serial', 'weight', 'targetValue', 'error',
                       'upperLimit', 'lowerLimit', 'additionalUpperLimit', 'additionalLowerLimit',
@@ -811,7 +811,7 @@ def upgradeConstraintList(constraintList):
     del constraintStore.__dict__['constraintLists'][tempSerial]
     constraintStore.__dict__['_serialDict']['constraintLists'] -= 1
   finally:
-    constraintStore.__dict__['isReading'] = False
+    constraintStore.root.override = False
 
 # def _mapUnAssignedResonances(nmrProject, assignmentMap, molSystem, chainMap=None):
 #   """Map part- or un-assigned resonances for NmrProject"""

@@ -41,11 +41,17 @@ class ViewBox(pg.ViewBox):
     self.current = current
     self.parent = parent
     self.selectionBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
-    self.selectionBox.setPen(pg.functions.mkPen((255,102,178), width=1))
-    self.selectionBox.setBrush(pg.functions.mkBrush(255,153,204,100))
+    self.selectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
+    self.selectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
     self.selectionBox.setZValue(1e9)
     self.selectionBox.hide()
     self.addItem(self.selectionBox, ignoreBounds=True)
+    self.pickBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
+    self.pickBox.setPen(pg.functions.mkPen((0, 255, 255), width=1))
+    self.pickBox.setBrush(pg.functions.mkBrush(100, 255, 255, 100))
+    self.pickBox.setZValue(1e9)
+    self.pickBox.hide()
+    self.addItem(self.pickBox, ignoreBounds=True)
 
 
   def raiseContextMenu(self, event:QtGui.QMouseEvent):
@@ -183,6 +189,17 @@ class ViewBox(pg.ViewBox):
     self.selectionBox.scale(r.width(), r.height())
     self.selectionBox.show()
 
+  def _updatePickBox(self, p1:float, p2:float):
+    """
+    Updates drawing of selection box as mouse is moved.
+    """
+    r = QtCore.QRectF(p1, p2)
+    r = self.childGroup.mapRectFromParent(r)
+    self.pickBox.setPos(r.topLeft())
+    self.pickBox.resetTransform()
+    self.pickBox.scale(r.width(), r.height())
+    self.pickBox.show()
+
   def mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
     Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
@@ -203,7 +220,7 @@ class ViewBox(pg.ViewBox):
               event.modifiers() & QtCore.Qt.ShiftModifier):
       if event.isFinish():
 
-        self.selectionBox.hide()
+        self.pickBox.hide()
         startPosition = self.mapSceneToView(event.buttonDownPos())
         endPosition = self.mapSceneToView(event.pos())
         orderedAxes = self.current.strip.orderedAxes
@@ -248,7 +265,7 @@ class ViewBox(pg.ViewBox):
 
 
       else:
-          self._updateSelectionBox(event.buttonDownPos(), event.pos())
+          self._updatePickBox(event.buttonDownPos(), event.pos())
       event.accept()
 
 

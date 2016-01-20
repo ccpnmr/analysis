@@ -319,6 +319,12 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
         newItem = getattr(itemParent, funcName)(restraintType)
         self.addItem(item.parent(), newItem)
+      elif item.parent.shortClassName == 'SA':
+        newComponent = itemParent.newSampleComponent()
+        popup = EditSampleComponentPopup(sampleComponent=newComponent)
+        popup.exec_()
+        popup.raise_()
+        return
       else:
         funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
 

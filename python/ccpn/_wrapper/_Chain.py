@@ -148,7 +148,8 @@ class Chain(AbstractWrapperObject):
     apiNmrChain = self._project._apiNmrProject.findFirstNmrChain(code=self.code)
     self._apiChain.renameChain(value)
     self._project._resetPid(self._apiChain)
-    self._project._resetPid(self.apiNmrChain)
+    if apiNmrChain is not None:
+      self._project._resetPid(apiNmrChain)
 
 
   @classmethod

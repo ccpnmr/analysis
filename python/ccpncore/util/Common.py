@@ -267,6 +267,9 @@ def universalSortKey(key):
 
     return (key.__class__.__name__, val, key)
 
+# NBNB TBD consider 1) updrading sorting to sort internal ints by number,
+# 2) upgrading to universal sort key
+
 def numericStringSortKey(key):
   """
   Returns customized sort key
@@ -371,3 +374,42 @@ def flattenIfNumpy(data, shape=None):
                          % (len(data), elementCount))
   #
   return data
+
+def _resetParentLink(apiObject, downLink:str, tag:str, value):
+  """Change single-attribute key of apiObject with property name tag to value
+
+  downLink is the name of the link from parent to obj"""
+
+  parent = apiObject.parent
+  siblings = getattr(parent, downLink)
+  if any(x for x in siblings if x is not apiObject and getattr(x, tag) == value):
+    raise ValueError("Cannot rename %s - pre-existing object with key %s:%s"
+        % apiObject, tag, value)
+
+  oldKey = getattr(apiObject, tag)
+  root = apiObject.root
+  root.__dict__['override'] = True
+
+  # Set up for undo
+  undo = root._undo
+  if undo is not None:
+    undo.increaseBlocking()
+
+  try:
+    parentDict = parent.__dict__[downLink]
+    del parentDict[oldKey]
+    setattr(apiObject, tag, value)
+    parentDict[value] = apiObject
+
+  finally:
+    # reset override and set isModified
+    root.__dict__['override'] = False
+    apiObject.topObject.__dict__['isModified'] = True
+    if undo is not None:
+      undo.decreaseBlocking()
+
+  if undo is not None:
+    undo.newItem(_resetParentLink, _resetParentLink, undoArgs=(apiObject, downLink, tag, oldKey),
+                 redoArgs=(apiObject, downLink, tag, value))
+
+  # call notifiers:

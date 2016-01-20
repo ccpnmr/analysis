@@ -28,6 +28,7 @@ from ccpn import Project
 from ccpn import Spectrum
 from ccpn import SpectrumHit
 from ccpncore.api.ccp.lims.Sample import Sample as ApiSample
+from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
 from ccpncore.util.Types import Sequence, Tuple, Optional
 
@@ -196,10 +197,24 @@ class Sample(AbstractWrapperObject):
   # Implementation functions
   def rename(self, value):
     """Rename Sample, changing its Id and Pid"""
-    if value:
-      self._wrappedData.name = value
-    else:
-      raise ValueError("Sample name must be set")
+    oldName = self.name
+    undo = self._project._undo
+    if undo is not None:
+      undo.increaseBlocking()
+
+    try:
+      if not value:
+        raise ValueError("Sample name must be set")
+      elif Pid.altCharacter in value:
+        raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+      else:
+        commonUtil._resetParentLink(self._wrappedData, 'samples', 'name', value)
+        undo.newItem(self.rename, self.rename, undoArgs=(oldName),redoArgs=(value))
+        self._project._resetPid(self._wrappedData)
+
+    finally:
+      if undo is not None:
+        undo.decreaseBlocking()
 
 
   @classmethod

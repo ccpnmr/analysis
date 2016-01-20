@@ -278,7 +278,7 @@ def renameChain(self:'Chain', newCode:str):
       undo.decreaseBlocking()
 
   if undo is not None:
-    undo.newItem(renameChain, renameChain, undoArgs=(self, oldCode), redoArgs=(self,newCode))
+    undo.newItem(renameChain, renameChain, undoArgs=(self, oldCode), redoArgs=(self, newCode))
 
   # call notifiers:
   # NBNB the import MUST be inside a function as we can get circular import problems otherwise

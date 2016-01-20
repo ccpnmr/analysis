@@ -543,15 +543,13 @@ class NmrResidue(AbstractWrapperObject):
     apiResonanceGroup = self._apiResonanceGroup
     sequenceCode = residueType = None
     if value:
+      if Pid.altCharacter in value:
+        raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s" %
+                         (Pid.altCharacter, value))
       ll = value.split(Pid.IDSEP, 1)
       sequenceCode = ll[0] or None
       if len(ll) > 1:
         residueType = ll[1] or None
-
-    for ss in (sequenceCode, residueType):
-      if ss and Pid.altCharacter in ss:
-        raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s" %
-                         (Pid.altCharacter, sequenceCode, residueType))
 
     # Check if name is free
     if sequenceCode is not None:

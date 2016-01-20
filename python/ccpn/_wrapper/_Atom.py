@@ -73,11 +73,6 @@ class Atom(AbstractWrapperObject):
     
   # Implementation functions
 
-  def rename(self, value:str):
-    """Change object id, modifying entire project to maintain consistency.
-    NBNB TBD to be implemented"""
-    raise NotImplementedError("Atom rename not implemented yet")
-
   @classmethod
   def _getAllWrappedData(cls, parent: Residue)-> list:
     """get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue"""

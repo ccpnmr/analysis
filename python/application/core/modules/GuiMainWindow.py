@@ -62,6 +62,7 @@ from application.core.modules.SampleAnalysis import SampleAnalysis
 from application.core.modules.ScreeningSetup import ScreeningSetup
 from application.core.modules.Metabolomics import MetabolomicsModule
 
+from application.core.popups.BackupPopup import BackupPopup
 from application.core.popups.FeedbackPopup import FeedbackPopup
 from application.core.popups.PreferencesPopup import PreferencesPopup
 from application.core.popups.SampleSetupPopup import SamplePopup
@@ -97,6 +98,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.feedbackPopup = None
     self.updatePopup = None
+    self.backupPopup = None
+
+    self.backupTimer = QtCore.QTimer()
+    self.connect(self.backupTimer, QtCore.SIGNAL('timeout()'), self.backupProject)
+    if self._appBase.preferences.general.autoBackupEnabled:
+      self.startBackupTimer()
 
   def initProject(self):
     """
@@ -137,12 +144,22 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._appBase.preferences.recentFiles = recentFiles
     self.pythonConsole.setProject(project)
 
-
-
     self.setWindowTitle('%s %s (Revision: %s): %s' % (self._appBase.applicationName,
                                             self._appBase.applicationVersion, revision,
                                             project.name))
 
+  def startBackupTimer(self):
+
+    self.backupTimer.start(60000 * self._appBase.preferences.general.autoBackupFrequency)
+
+  def stopBackupTimer(self):
+
+    if self.backupTimer.isActive():
+      self.backupTimer.stop()
+
+  def backupProject(self):
+    
+    Io.backupProject(self._appBase.project._wrappedData.parent)
 
   def setupWindow(self):
     """
@@ -241,6 +258,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Summary...", self.displayProjectSummary))
     fileMenu.addAction(Action(self, "Archive", self.archiveProject))
+    fileMenu.addAction(Action(self, "Backup...", self.showBackupPopup))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Preferences...", callback=self.showApplicationPreferences))
     fileMenu.addSeparator()
@@ -575,6 +593,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     MessageDialog.showInfo('Project Archived',
           'Project archived to %s' % fileName, colourScheme=self.colourScheme)
     
+  def showBackupPopup(self):
+    
+    if not self.backupPopup:
+      self.backupPopup = BackupPopup(self)
+    self.backupPopup.show()
+    self.backupPopup.raise_()
+  
   def showApplicationPreferences(self):
     """
     Displays Application Preferences Popup.

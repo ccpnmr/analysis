@@ -11,7 +11,9 @@
         "license": "",
         "dataPath": "",
         "doubleCrossHair": true,
-        "toolbarHidden": false
+        "toolbarHidden": false,
+        "autoBackupEnabled": false,
+        "autoBackupFrequency": 30
     },
     "recentMacros": [
 

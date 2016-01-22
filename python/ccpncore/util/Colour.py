@@ -131,6 +131,10 @@ class Colour(str):
 
     return (self.r / 255.0, self.g / 255.0, self.b / 255.0, self.a / 255.0)
 
+  def hex(self):
+
+    return '#' + ''.join([hex(x)[2:] for x in (self.r, self.g, self.b)])
+
   def __repr__(self):
 
     return self.name
@@ -146,3 +150,7 @@ def rgba(value):
 def scaledRgba(value):
 
   return Colour(value).scaledRgba()
+
+def hex(value):
+
+  return Colour(value).hex()

@@ -253,6 +253,14 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       spectrumView.newVPhasingTrace(self.mousePosition[0])
   """
    
+  def setPhasingPivot(self):
+    
+    phasingFrame = self.spectrumDisplay.phasingFrame
+    direction = phasingFrame.getDirection()
+    position = self.mousePosition[0] if direction == 0 else self.mousePosition[1]
+    phasingFrame.pivotEntry.set(position)
+    self.updatePivot()
+      
   def removePhasingTraces(self):
     
     for spectrumView in self.spectrumViews:

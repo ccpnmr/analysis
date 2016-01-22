@@ -147,6 +147,7 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("p, c"), self, partial(self.togglePhaseConsole, self))
     ###QtGui.QShortcut(QtGui.QKeySequence("p, h"), self, self.newHPhasingTrace)
     #QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.newVPhasingTrace)
+    QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot)
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace)
     ###QtGui.QShortcut(QtGui.QKeySequence("p, i"), self, self.togglePhasingPivot)
@@ -219,6 +220,12 @@ class GuiWindow(DropBase):
       strip.newVPhasingTrace()
   """
       
+  def setPhasingPivot(self):
+    
+    strip = self._appBase.current.strip
+    if strip and (strip.spectrumDisplay.window is self):
+      strip.setPhasingPivot()
+    
   def removePhasingTraces(self):
     """
     Removes all phasing traces from all strips.

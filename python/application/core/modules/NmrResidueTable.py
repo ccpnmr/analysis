@@ -26,7 +26,7 @@ class NmrResidueTable(QtGui.QWidget, Base):
 
     self.nmrChainPulldown = PulldownList(self, grid=(0, 1))
 
-    columns = [('#', lambda nmrResidue: self.getSequenceCode(nmrResidue)), ('Nmr Residue', '_key'),
+    columns = [('NmrChain', lambda nmrResidue: nmrResidue._parent.id), ('Sequence Code', 'sequenceCode'),
                ('NmrAtoms', lambda nmrResidue: self.getNmrAtoms(nmrResidue)),
                ('Number of Peaks', lambda nmrResidue: self.getNmrResiduePeaks(nmrResidue))]
 
@@ -34,7 +34,7 @@ class NmrResidueTable(QtGui.QWidget, Base):
                 'Peaks assigned to Nmr Residue']
 
     self.nmrResidueTable = GuiTableGenerator(self, self.project.nmrChains, callback=callback, columns=columns,
-                                             selector=self.nmrChainPulldown, tipTexts=tipTexts,
+                                             selector=self.nmrChainPulldown, tipTexts=tipTexts, objectType='nmrResidues',
                                              selectionCallback=self.setNmrResidue)
 
     self.layout().addWidget(self.nmrResidueTable, 3, 0, 1, 4)
@@ -46,12 +46,6 @@ class NmrResidueTable(QtGui.QWidget, Base):
   def getNmrResiduePeaks(self, nmrResidue):
     l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks()]
     return len(set(l1))
-
-  def getSequenceCode(self, nmrResidue):
-    try:
-      return int(nmrResidue.sequenceCode)
-    except ValueError:
-      return nmrResidue.sequenceCode
 
   def setNmrResidue(self, nmrResidue, row, col):
     self.project._appBase.current.nmrResidue = nmrResidue

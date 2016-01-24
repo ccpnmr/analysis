@@ -6,13 +6,24 @@ from application.core.modules.peakUtils import getPeakPosition, getPeakAnnotatio
 
 from PyQt4 import QtGui
 
+class All(object):
+  def __init__(self, project, objectType):
+    self.pid = '<ALL>'
+    setattr(self, objectType, getattr(project, objectType))
+    self.objects = getattr(project, objectType)
+
+
+
 class GuiTableGenerator(QtGui.QWidget):
 
-  def __init__(self, parent, objectLists, callback, columns, selector=None, tipTexts=None, **kw):
+  def __init__(self, parent, objectLists, callback, columns, selector=None, tipTexts=None, objectType=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
-
+      self.project = objectLists[0].project
+      allList = All(self.project, objectType)
+      objectLists.append(allList)
       self.columns = columns
+      self.objectType = objectType
       self.objectLists = objectLists
       if len(self.objectLists) > 0:
         self.objectList = objectLists[0]
@@ -36,7 +47,10 @@ class GuiTableGenerator(QtGui.QWidget):
     """
     Changes the objectList specified in the selector.
     """
-    if objectList is not self.objectList:
+    if self.selector.currentText() == '<ALL>':
+      self.table.setObjects(getattr(self.project, self.objectType))
+
+    elif objectList is not self.objectList:
 
       self.objectList = objectList
       self.updateContents()
@@ -53,6 +67,9 @@ class GuiTableGenerator(QtGui.QWidget):
         objectsName = objectList._childClasses[0]._pluralLinkName
         columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
         self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
+      elif objectList.pid == '<ALL>':
+        columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
+        self.table.setObjects(objectList.objects)
       else:
         columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
         self.table.setObjects(columns)
@@ -106,11 +123,13 @@ class GuiTableGenerator(QtGui.QWidget):
     Sets the contents of the selector and object table if object list is specified on instatiation.
     """
     if self.objectList is not None:
-      print(self.objectLists)
 
+      self.objectLists += getattr(self.project, self.objectLists[0]._pluralLinkName)
+      self.objectLists = list(set(self.objectLists))
       # if self.objectList.shortClassName == 'PL':
       #   texts = ['%s' % peakList.pid for peakList in self.objectLists]
       # else:
+      # texts = ['<ALL>']
       texts = ['%s' % objectList.pid for objectList in self.objectLists]
       self.selector.setData(texts=texts, objects=self.objectLists)
 
@@ -118,6 +137,9 @@ class GuiTableGenerator(QtGui.QWidget):
   def updateTable(self):
     self.updateSelectorContents()
     self.updateContents()
+
+
+
 
 
 

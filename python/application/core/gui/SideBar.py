@@ -195,6 +195,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       for model in structureEnsemble.models:
         newItem3 = self.addItem(newItem, model)
 
+    for note in project.notes:
+      newItem = self.addItem(self.notesItem, note)
+
     # ### Flags
     # # set dropEnable  the item you want to move. Set dragEnable  where drop is allowed
     # self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled |QtCore.Qt.ItemIsDropEnabled))
@@ -305,7 +308,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     elif obj.shortClassName == 'RE':
       pass #to be decided when we design structure
     elif obj.shortClassName == 'NO':
-      self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, name='Notes Editor', note=obj, item=item)
+      self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, self.project, name='Notes Editor', note=obj, item=item)
 
   def createNewObject(self, item):
 

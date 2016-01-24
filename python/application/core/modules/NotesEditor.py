@@ -14,10 +14,11 @@ from PyQt4 import QtGui
 
 class NotesEditor(DropBase, CcpnDock):
 
-  def __init__(self, parent, note, name, item=None):
+  def __init__(self, parent, project, name='Notes Editor', note=None, item=None):
     CcpnDock.__init__(self, name=name)
     widget = QtGui.QWidget()
-    self._appBase = note.project._appBase
+    self._appBase = project._appBase
+    self.project = project
     self.parent = parent
     self.parent.addDock(self)
     self.textBox = TextEditor()
@@ -37,8 +38,9 @@ class NotesEditor(DropBase, CcpnDock):
     self.lineEdit1.editingFinished.connect(self._setNoteName)
     widget.layout().addWidget(self.textBox, 2, 0, 1, 5)
     # if self.note.text is not None:
-    self.textBox.setText(note.text)
-    self.lineEdit1.setText(self.note.name)
+    if note:
+      self.textBox.setText(note.text)
+      self.lineEdit1.setText(self.note.name)
     self.buttonBox = ButtonList(self, texts=['Close', 'Save Note'], callbacks=[self._reject, self._saveNote])
     widget.layout().addWidget(self.buttonBox, 3, 3, 1, 2)
     self.layout.addWidget(widget)
@@ -47,6 +49,8 @@ class NotesEditor(DropBase, CcpnDock):
     """
     Sets the name of the note based on the text in the Note name text box.
     """
+    if not self.note:
+      self.note = self.project.newNote(name=self.lineEdit1.text())
     self.note.rename(self.lineEdit1.text())
 
   def _saveNote(self):
@@ -55,7 +59,9 @@ class NotesEditor(DropBase, CcpnDock):
     """
     newText = self.textBox.toPlainText()
     self.note.text = newText
-    self.item.setText(0, self.note.pid)
+
+    if self.item:
+      self.item.setText(0, self.note.pid)
     self.close()
 
   def _reject(self):
@@ -63,3 +69,10 @@ class NotesEditor(DropBase, CcpnDock):
     Closes the note editor ignoring all changes.
     """
     self.close()
+
+  def processText(self, text, event):
+    if not self.note:
+      self.note = self.project.newNote()
+    self.textBox.setText(text)
+    self.overlay.hide()
+

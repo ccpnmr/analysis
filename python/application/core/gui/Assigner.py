@@ -102,16 +102,15 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
   def mouseMoveEvent(self, event):
 
     if (event.buttons() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
-        aDict = {}
         for item in self.parent.scene.items():
           if isinstance(item, GuiNmrResidue) and item.isSelected():
-            aDict[item.x()] = item.nmrResidue.pid
+            nmrChain = item.nmrResidue.nmrChain
 
-        assignStretch = [aDict[key] for key in sorted(aDict.keys())]
+        # assignStretch = [aDict[key] for key in sorted(aDict.keys())]
         import json
         drag = QtGui.QDrag(event.widget())
         mimeData = QtCore.QMimeData()
-        itemData = json.dumps({'pids':assignStretch})
+        itemData = json.dumps({'pids': [nmrChain.pid]})
         mimeData.setData('ccpnmr-json', itemData)
         mimeData.setText(itemData)
         drag.setMimeData(mimeData)
@@ -193,10 +192,11 @@ class Assigner(CcpnDock):
     for item in atoms.values():
       self.scene.addItem(item)
     nmrAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
-    cbLine = self._addConnectingLine(atoms['CA'], atoms['CB'], lineColour, 1.0, 0)
-    if not 'CB' in nmrAtoms:
-      self.scene.removeItem(atoms['CB'])
-      self.scene.removeItem(cbLine)
+    if "CB" in list(atoms.keys()):
+      self._addConnectingLine(atoms['CA'], atoms['CB'], lineColour, 1.0, 0)
+    # if not 'CB' in nmrAtoms:
+    #   self.scene.removeItem(atoms['CB'])
+    #   self.scene.removeItem(cbLine)
 
     self._addConnectingLine(atoms['H'], atoms['N'], lineColour, 1.0, 0)
     self._addConnectingLine(atoms['N'], atoms['CA'], lineColour, 1.0, 0)
@@ -215,8 +215,6 @@ class Assigner(CcpnDock):
     """
     nmrAtoms = [nmrAtom.name for nmrAtom in nmrResidue.nmrAtoms]
     if self.residueCount == 0:
-      # self.nmrChain = self.project.newNmrChain()
-      # self.nmrChain.connectedNmrResidues = [nmrResidue]
 
       if 'H' in nmrAtoms:
         hAtom = self._createGuiNmrAtom("H", (0, self.atomSpacing), nmrResidue.fetchNmrAtom(name='H'))
@@ -248,6 +246,7 @@ class Assigner(CcpnDock):
 
     else:
         if '-1' in nmrResidue.sequenceCode or direction == '-1':
+
           # newConnectedStretch = list(self.nmrChain.connectedNmrResidues).insert(0, nmrResidue)
           # self.nmrChain.connectedNmrResidues = newConnectedStretch
           oldResidue = self.residuesShown[0]
@@ -320,11 +319,13 @@ class Assigner(CcpnDock):
             coAtom2 = self._createGuiNmrAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()))
           coAtom2.setZValue(10)
 
-          atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2, 'N-1': oldResidue['N']}
+
+          atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CO":coAtom2, 'N-1': oldResidue['N']}
+          if cbAtom2:
+            atoms["CB"] = cbAtom2
 
           self.residuesShown.append(atoms)
           self.predictedStretch.append(nmrResidue)
-
     self._assembleResidue(nmrResidue, atoms)
     # for spectrum in self.project.spectra:
     #   self._addSpectrumAssignmentLines(spectrum, atoms)

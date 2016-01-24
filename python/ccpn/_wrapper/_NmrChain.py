@@ -139,7 +139,7 @@ class NmrChain(AbstractWrapperObject):
     self._wrappedData.code = None
 
   def assignConnectedResidues(self, firstResidue:Residue):
-    """Assign all NmrResidues in connected NmrChain sequenctially,
+    """Assign all NmrResidues in connected NmrChain sequentially,
     with the first NmrResidue assigned to firstResidue.
 
     Returns ValueError if NmrChain is not connected,

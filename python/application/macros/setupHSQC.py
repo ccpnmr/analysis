@@ -20,16 +20,16 @@ for peak in hsqcPeakList.peaks:
   atoms = [[a2], [a]]
   peak.assignDimension(axisCode='Nh', value=a)
   peak.assignDimension(axisCode='Hn', value=a2)
-  newPeaks = restrictedPick(project=project, nmrResidue=r)
-  newPeaks.append(peak)
-  propagateAssignments(newPeaks)
-
-for nmrResidue in project.nmrResidues:
-  for display in project.spectrumDisplays:
-    if len(display.orderedAxes) > 2:
-      strip = display.addStrip()
-      navigateToNmrResidue(project, nmrResidue, strip=strip)
-      strip.planeToolbar.spinSystemLabel.setText(nmrResidue.sequenceCode)
+#   newPeaks = restrictedPick(project=project, nmrResidue=r)
+#   newPeaks.append(peak)
+#   propagateAssignments(newPeaks)
+#
+# for nmrResidue in project.nmrResidues:
+#   for display in project.spectrumDisplays:
+#     if len(display.orderedAxes) > 2:
+#       strip = display.addStrip()
+#       navigateToNmrResidue(project, nmrResidue, strip=strip)
+#       strip.planeToolbar.spinSystemLabel.setText(nmrResidue.sequenceCode)
 
 
 

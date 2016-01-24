@@ -21,6 +21,7 @@ MODULE_DICT = {'ASSIGNER':'showAssigner',
                'PARASSIGN SETUP': 'showParassignSetup',
                'API DOCUMENTATION': 'showApiDocumentation',
                'PYTHON CONSOLE': 'toggleConsole',
+               'NOTES EDITOR': 'showNotesEditor'
               }
 
 

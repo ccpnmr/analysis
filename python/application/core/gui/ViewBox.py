@@ -83,36 +83,14 @@ class ViewBox(pg.ViewBox):
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
 
-      selectedPeaks = []
       event.accept()
-      # print('Left Click Event')
       xPosition = self.mapSceneToView(event.pos()).x()
       yPosition = self.mapSceneToView(event.pos()).y()
-      # print('position',xPosition, yPosition)
-      # for spectrumView in self.current.strip.spectrumViews:
-      #   for peakList in spectrumView.spectrum.peakLists:
-      #     for peak in peakList.peaks:
-      #       # print('x',xPosition-0.05, peak.position[0], xPosition+0.05)
-      #       # print('y',yPosition-0.05, peak.position[1], yPosition+0.05)
-      #       if (xPosition-0.05 < float(peak.position[0]) < xPosition+0.05
-      #       and yPosition-0.05 < float(peak.position[1]) <
-      #           yPosition+0.05):
-      #         msg = 'self.current.peak = ' + peak.pid + '\n'
-      #         selectedPeaks.append(peak)
-      #         self.parent._appBase.mainWindow.pythonConsole.write(msg)
-      #
-      # msg = 'self.current.peaks = ' + [peak.pid for peak in selectedPeaks]+ '\n'
-      # self.parent._appBase.mainWindow.pythonConsole.write(msg)
+      self.current.positions = [xPosition, yPosition]
 
-
-
-
-    #
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
 
-      selectedPeaks = []
       event.accept()
-      # print('Left Click Event')
       xPositions = [self.mapSceneToView(event.pos()).x()-0.05, self.mapSceneToView(event.pos()).x()+0.05]
       yPositions = [self.mapSceneToView(event.pos()).y()-0.05, self.mapSceneToView(event.pos()).y()+0.05]
       if len(self.current.strip.orderedAxes) > 2:
@@ -127,23 +105,6 @@ class ViewBox(pg.ViewBox):
               if zPositions is not None:
                 if zPositions[0] < float(peak.position[2]) < zPositions[1]:
                   peak.isSelected = True
-    #   position = event.scenePos()
-    #   mousePoint = self.mapSceneToView(position)
-    #   print(mousePoint)
-      # for spectrumView in self.current.strip.spectrumViews:
-      #   peakList = spectrumView.spectrum.peakLists[0]
-      #   newPeak = peakList.newPeak(position=[mousePoint.x(), mousePoint.y()])
-      #   # print(newPeak.position)
-      #   self.current.strip.showPeaks(peakList)
-
-    # elif (event.button() == QtCore.Qt.LeftButton) and (
-    #           event.modifiers() & QtCore.Qt.ShiftModifier) and not (
-    # event.modifiers() & QtCore.Qt.ControlModifier):
-    #   print('Add Select')
-    #
-    # elif event.button() == QtCore.Qt.MiddleButton and not event.modifiers():
-    #   event.accept()
-    #   print('Pick and Assign')
 
     if event.button() == QtCore.Qt.RightButton and not event.modifiers() and axis is None:
       event.accept()
@@ -167,16 +128,6 @@ class ViewBox(pg.ViewBox):
 
     elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
       event.accept()
-      # self.autoRange()
-    #
-    # if event.double():
-    #   event.accept()
-    #   print("Double Click event")
-
-  # def hoverEvent(self, event):
-  #
-  #   self.current.strip = self.parentObject().parent
-
 
   def _updateSelectionBox(self, p1:float, p2:float):
     """
@@ -242,11 +193,7 @@ class ViewBox(pg.ViewBox):
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
                                             fitMethod='gaussian')
-            # console.writeCommand('peakList', 'peakList.pickPeaksNd',
-            #                      'selectedRegion={0}, doPos={1}, doNeg={2}'.format(
-            #                      selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
-            #                      apiSpectrumView.spectrumView.displayNegativeContours),
-            #                      obj=peakList)
+
             console.writeConsoleCommand(
               "peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
                 selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,

@@ -139,8 +139,9 @@ class Undo(deque):
       for ii in range(nRemove):
         self.popleft()
       del waypoints[0]
-      for ii , junk in enumerate(waypoints):
+      for ii, junk in enumerate(waypoints):
         waypoints[ii] -= nRemove
+    waypoints.append(self.nextIndex-1)
 
     waypoints.append(self.nextIndex-1)
 

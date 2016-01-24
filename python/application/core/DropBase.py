@@ -24,6 +24,7 @@ __version__ = "$Revision: 7686 $"
 from PyQt4 import QtGui, QtCore
 
 from ccpn.lib import Util as ccpnUtil
+from ccpncore.gui.Dock import CcpnDock
 from application.core.Base import Base as GuiBase
 from ccpncore.gui.MessageDialog import showWarning
 # from ccpncore.lib.Io import Formats as ioFormats
@@ -122,12 +123,11 @@ class DropBase(GuiBase):
         # data is list-of-urls
         # Load Urls one by one with normal loaders
         for url in data:
-
           loaded = project.loadData(url)
           if loaded:
             if isinstance(loaded, str):
               if hasattr(self, 'processText'):
-                self.processText(loaded)
+                self.processText(loaded, event)
 
             else:
               newPids = [x.pid for x in loaded]
@@ -141,6 +141,9 @@ class DropBase(GuiBase):
                 break
               else:
                 pids.extend(newPids)
+          else:
+            if isinstance(self, CcpnDock):
+              self.overlay.hide()
 
         for pid in pids:
           pluralClassName = ccpnUtil.pid2PluralName(pid)

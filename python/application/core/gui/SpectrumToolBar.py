@@ -29,6 +29,15 @@ class SpectrumToolBar(ToolBar):
     """
     contextMenu = Menu('', self, isFloatWidget=True)
     from functools import partial
+    peakListViews = self.widget.peakListViews
+    key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+    for peakListView in peakListViews:
+      if peakListView.spectrumView._apiDataSource == key:
+        action = contextMenu.addAction(peakListView.peakList.id)
+        action.setCheckable(True)
+        if peakListView.isVisible():
+          action.setChecked(True)
+        action.toggled.connect(peakListView.setVisible)
     contextMenu.addAction('Delete', partial(self.removeSpectrum, button))
     return contextMenu
 

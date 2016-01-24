@@ -41,17 +41,19 @@ class PulldownList(QtGui.QComboBox, Base):
     Base.__init__(self, **kw)
     
     self.text = None
-    self.object = None   
-    
+    self.object = None
     self.texts = []
     self.objects = []
     
     self.setIconSize(QtCore.QSize(22,22))
-    
+
     PulldownList.setData(self, texts, objects, index, icons)
     self.setCallback(callback)
 
     self.connect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)
+
+  def showPopup(self):
+    super(PulldownList, self).showPopup()
 
   def currentObject(self):
 
@@ -157,7 +159,7 @@ class PulldownList(QtGui.QComboBox, Base):
     
     if index is not None:  
       self.setCurrentIndex(index)
-  
+
   def addItem(self, text, object=NULL, icon=None):
     
     if icon:
@@ -170,7 +172,7 @@ class PulldownList(QtGui.QComboBox, Base):
     
     self.texts.append(text)  
     self.objects.append(object)
-  
+
   def setItemText(self, index, text):
   
     QtGui.QComboBox.setItemText(self, index, text)
@@ -205,7 +207,6 @@ class PulldownList(QtGui.QComboBox, Base):
     
     if index < 0:
       return
-    
     self.index = index
     
     if self.objects:

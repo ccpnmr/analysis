@@ -72,8 +72,14 @@ class BackboneAssignmentModule(CcpnDock):
     self._setupShiftDicts()
     if self.assigner:
       self.assigner.clearAllItems()
-    print(nmrResidue)
+    # self.navigateTo(nmrResidue, row, col)
+    self.current.nmrChain = nmrResidue.nmrChain
+    if self.current.nmrChain.isConnected:
+      nmrResidues = [nmrResidue for nmrResidue in self.current.nmrChain.nmrResidues if not '-1' in nmrResidue.sequenceCode]
+      for nmrResidue in nmrResidues:
+        self.assigner.addResidue(nmrResidue, '+1')
     self.navigateTo(nmrResidue, row, col)
+
 
   def navigateTo(self, nmrResidue:NmrResidue, row:int=None, col:int=None, strip:GuiStrip=None):
     """
@@ -89,6 +95,7 @@ class BackboneAssignmentModule(CcpnDock):
       seqCode = nmrResidue.sequenceCode
       newSeqCode = seqCode.replace('-1', '')
       iNmrResidue = nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=newSeqCode)
+      self.current.nmrResidue = iNmrResidue
       navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays,
                            markPositions=True, strip=strip)
       navigateToNmrResidue(self.project, iNmrResidue, selectedDisplays=selectedDisplays,
@@ -97,22 +104,22 @@ class BackboneAssignmentModule(CcpnDock):
       matchShifts = self.intraShifts
       for display in selectedDisplays:
         if not strip:
-          display.strips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue.sequenceCode)
+          display.strips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue._key)
         else:
-          strip.planeToolbar.spinSystemLabel.setText(iNmrResidue.sequenceCode)
+          strip.planeToolbar.spinSystemLabel.setText(iNmrResidue._key)
 
     else:
       direction = '+1'
       iNmrResidue = nmrResidue
+      self.current.nmrResidue = iNmrResidue
       navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays, markPositions=True, strip=strip)
       queryShifts = self.intraShifts[nmrResidue]
       matchShifts = self.interShifts
-      print(queryShifts, matchShifts)
       for display in selectedDisplays:
         if not strip:
-          display.strips[0].planeToolbar.spinSystemLabel.setText(nmrResidue.sequenceCode)
+          display.strips[0].planeToolbar.spinSystemLabel.setText(nmrResidue._key)
         else:
-          strip.planeToolbar.spinSystemLabel.setText(nmrResidue.sequenceCode)
+          strip.planeToolbar.spinSystemLabel.setText(nmrResidue._key)
 
 
     assignMatrix = self._buildAssignmentMatrix(queryShifts, matchShifts=matchShifts)
@@ -188,7 +195,7 @@ class BackboneAssignmentModule(CcpnDock):
     for matchModule in self.matchModules:
       module = self.project.getByPid(matchModule)
       navigateToNmrResidue(self.project, iNmrResidue, strip=module.orderedStrips[0])
-      module.orderedStrips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue.sequenceCode)
+      module.orderedStrips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue._key)
 
 
   def connectAssigner(self, assigner:CcpnDock):

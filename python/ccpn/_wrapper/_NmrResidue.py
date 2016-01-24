@@ -108,7 +108,7 @@ class NmrResidue(AbstractWrapperObject):
   def offsetNmrResidues(self) -> Tuple['NmrResidue', ...]:
     """"All other NmrResidues with the same sequenceCode sorted by offSet suffix '-1', '+1', etc."""
     getObj = self._project._data2Obj.get
-    return tuple(getObj(x) for x in self._wrappedDatasatelliteResonanceGroups)
+    return tuple(getObj(x) for x in self._wrappedData.offsetResonanceGroups)
 
   @property
   def mainNmrResidue(self) -> Optional['NmrResidue']:
@@ -157,7 +157,7 @@ class NmrResidue(AbstractWrapperObject):
 
     NB Undoing a connection between two connected stretches
     will get back a 'value' stretch with a new shortName"""
-
+    print(value, 'value')
     apiResonanceGroup = self._wrappedData
     # apiResidue = apiResonanceGroup.assignedResidue
     apiNmrChain = apiResonanceGroup.directNmrChain

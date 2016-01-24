@@ -55,6 +55,7 @@ from application.core.modules.DataPlottingModule import DataPlottingModule
 from application.core.modules.GuiBlankDisplay import GuiBlankDisplay
 from application.core.modules.GuiWindow import GuiWindow
 from application.core.modules.MacroEditor import MacroEditor
+from application.core.modules.NotesEditor import NotesEditor
 from application.core.modules.PeakTable import PeakTable
 from application.core.modules.PickAndAssignModule import PickAndAssignModule
 from application.core.modules.SequenceModule import SequenceModule
@@ -818,6 +819,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           colourScheme=self.colourScheme)
 
 
+  def showNotesEditor(self):
+    self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, self._project, name='Notes Editor')
+
   def showMoleculePopup(self):
     """
     Displays sequence creation popup.
@@ -855,15 +859,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       os.system('open %s' % path)
 
   def showAboutPopup(self):
-    info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+    from application.core.popups.AboutPopup import AboutPopup
+    popup = AboutPopup()
+    popup.exec_()
+    popup.raise_()
 
 
   def showAboutCcpnPopup(self):
-    info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+    import webbrowser
+    webbrowser.open('http://www.ccpn.ac.uk')
 
 
   def showCodeInspectionPopup(self):

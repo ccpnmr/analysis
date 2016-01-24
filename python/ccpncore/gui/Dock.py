@@ -23,8 +23,6 @@ class CcpnDock(Dock):
   def closeDock(self):
     self.close()
 
-
-
 class CcpnDockLabel(DockLabel):
 
     def __init__(self, *args):

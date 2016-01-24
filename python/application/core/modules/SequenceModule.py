@@ -162,7 +162,35 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     event.accept()
 
 
-  def processNmrResidues(self, data:Types.List[str], event:QtGui.QMouseEvent):
+  # def processNmrResidues(self, data:Types.List[str], event:QtGui.QMouseEvent):
+  #   """
+  #   Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
+  #   all succeeding residues according to the length of the list.
+  #   """
+  #   if self.project._appBase.preferences.general.colourScheme == 'dark':
+  #     colour = '#f7ffff'
+  #   elif self.project._appBase.preferences.general.colourScheme == 'light':
+  #     colour = '#666e98'
+  #   res = self.scene.itemAt(event.scenePos())
+  #   nmrResidue = self.project.getByPid(data[0])
+  #   res.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
+  #                 res.residue.shortName+'</strong></div>')
+  #   nmrResidue.residue = res.residue
+  #
+  #   for assignableResidue in data[1:]:
+  #     res = nmrResidue.residue.nextResidue
+  #     guiResidue = self.parent.residueDict.get(res.sequenceCode)
+  #     guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour+
+  #                        res.shortName+'</strong></div>')
+  #     nmrResidue = self.project.getByPid(assignableResidue)
+  #     nmrResidue.residue = res
+  #
+  #   if hasattr(self.project._appBase.mainWindow, 'bbModule'):
+  #     nmrResidueTable = self.project._appBase.mainWindow.bbModule.nmrResidueTable.nmrResidueTable
+  #     nmrResidueTable.objectLists = self.project.nmrChains
+  #     nmrResidueTable.updateTable()
+
+  def processNmrChains(self, data:Types.List[str], event:QtGui.QMouseEvent):
     """
     Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
     all succeeding residues according to the length of the list.
@@ -171,19 +199,20 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
       colour = '#f7ffff'
     elif self.project._appBase.preferences.general.colourScheme == 'light':
       colour = '#666e98'
-    res = self.scene.itemAt(event.scenePos())
-    nmrResidue = self.project.getByPid(data[0])
-    res.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
-                  res.residue.shortName+'</strong></div>')
-    nmrResidue.residue = res.residue
+    guiRes = self.scene.itemAt(event.scenePos())
+    nmrChain = self.project.getByPid(data[0])
+    residues = [guiRes.residue]
+    toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
 
-    for assignableResidue in data[1:]:
-      res = nmrResidue.residue.nextResidue
+    for ii in range(len(toAssign)-1):
+      resid = residues[ii]
+      next = resid.nextResidue
+      residues.append(next)
+    nmrChain.assignConnectedResidues(guiRes.residue)
+    for ii, res in enumerate(residues):
       guiResidue = self.parent.residueDict.get(res.sequenceCode)
-      guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour+
-                         res.shortName+'</strong></div>')
-      nmrResidue = self.project.getByPid(assignableResidue)
-      nmrResidue.residue = res
+      guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
+                           res.shortName+'</strong></div>')
 
     if hasattr(self.project._appBase.mainWindow, 'bbModule'):
       nmrResidueTable = self.project._appBase.mainWindow.bbModule.nmrResidueTable.nmrResidueTable

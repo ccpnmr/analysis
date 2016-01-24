@@ -49,7 +49,6 @@ PulldownList {
           font-weight: normal;
           }
 
-
 PulldownList::item {
                    background-color: #fffdd1;
                    color: #464e76;
@@ -236,7 +235,6 @@ QTreeWidget { background-color: #EDC151;
     }
 
 QTreeWidget::branch {
-                    background-color: #EDCF83;
                     border-top: 1px solid #EDC151;
                     border-bottom: 1px solid #EDC151;
 }
@@ -265,20 +263,17 @@ QTreeWidget::branch:closed:has-children{
 border-image: none;
 image: url(:/light-side.png);
 padding-left: 10px;
-background-color: #EDCF83;
 
 }
 
 QTreeWidget::branch:open{
 border-image: none;
 image: url(:/light-down.png);
-background-color: #EDCF83;
 
 }
 
 
 QTreeWidget::item {
-                   background-color: #EDCF83;
                    color: #555D85;
                    border-top: 1px solid #EDC151;
                    border-right: 1px solid #EDC151;
@@ -329,3 +324,4 @@ SpectrumPropertiesPopup QPushButton {background-color: #BD8413;
 QSplitter {
           background-color: #122043;
           }
+

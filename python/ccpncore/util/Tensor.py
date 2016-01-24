@@ -53,7 +53,7 @@ class Tensor:
     else:
       mm = numpy.array(orientationMatrix).reshape((3,3))
       # NBNB TBD we also need to check that mm.transpose() == mm.inverse()
-      if commonUtil.isClose(numpy.linalg.det(mm), -1.0):
+      if commonUtil.isClose(numpy.linalg.det(mm), 1.0):
         self._orientationMatrix = numpy.array(orientationMatrix).reshape((3,3))
       else:
         raise ValueError ("Invalid data for orientation matrix: %s" % orientationMatrix)

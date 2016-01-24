@@ -27,13 +27,12 @@ from PyQt4 import QtGui, QtCore
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ButtonList import ButtonList
+from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Label import Label
+from ccpncore.gui.Widget import Widget
 
 from ccpncore.gui.PulldownList import PulldownList
-
-LANGUAGES = ['English-UK', 'English-US', 'Nederlands', 'Deutsch', 'Español', 'Français', 'Dansk']
-COLOUR_SCHEMES = ['light', 'dark']
 
 
 class PeakFindPopup(QtGui.QDialog, Base):
@@ -42,10 +41,34 @@ class PeakFindPopup(QtGui.QDialog, Base):
     Base.__init__(self, **kw)
     self.project = project
     self.peakListLabel =  Label(self, text="PeakList: ", grid=(0, 0))
-    self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 3), hAlign='l', callback=self.selectPeakList)
+    self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self.selectPeakList)
     # self.peakListPulldown.currentIndexChanged.connect(self.selectPeakList)
     self.peakListPulldown.setData([peakList.pid for peakList in project.peakLists])
     self.peakList = project.getByPid(self.peakListPulldown.currentText())
+    self.checkBoxWidget = QtGui.QWidget()
+    layout = QtGui.QGridLayout()
+    self.checkBoxWidget.setLayout(layout)
+    self.layout().addWidget(self.checkBoxWidget, 1, 0, 1, 4)
+    self.checkBox1 = CheckBox(self)
+    self.checkBox1.toggled.connect(self.controlCheckBoxes)
+    self.checkBoxWidget.layout().addWidget(self.checkBox1, 0, 0)
+    self.checkBox1Label = Label(self, 'Positive only')
+    self.checkBoxWidget.layout().addWidget(self.checkBox1Label, 0, 1)
+    self.checkBox2 = CheckBox(self)
+    self.checkBox2.toggled.connect(self.controlCheckBoxes)
+    self.checkBoxWidget.layout().addWidget(self.checkBox2, 0, 2)
+    self.checkBox2Label = Label(self, 'Negative only')
+    self.checkBoxWidget.layout().addWidget(self.checkBox2Label, 0, 3)
+    self.checkBox3 = CheckBox(self)
+    self.checkBox3.toggled.connect(self.controlCheckBoxes)
+    self.checkBoxWidget.layout().addWidget(self.checkBox3, 0, 4)
+    self.checkBox3Label = Label(self, 'Both')
+    self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
+    self.checkBox3.setChecked(True)
+    # self.checkBox2 = CheckBox(self.checkBoxWidget)
+    # self.checkBox2Label = Label(self.checkBoxWidget, 'Negative only')
+    # self.checkBox3 = CheckBox(self.checkBoxWidget)
+    # self.checkBox3Label = Label(self.checkBoxWidget, 'Both')
     self.updateContents()
     # self.excludedRegionsButton = Button(self, grid=(4, 0), text='Exclude Regions')
     # self.excludedRegionsButton.setCheckable(True)
@@ -54,10 +77,20 @@ class PeakFindPopup(QtGui.QDialog, Base):
 
 
 
-    self.buttonBox = ButtonList(self, grid=(15, 2), gridSpan=(1, 2), texts=['Cancel', 'Find Peaks'],
+    self.buttonBox = ButtonList(self, grid=(15, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
                            callbacks=[self.reject, self.pickPeaks])
 
 
+  def controlCheckBoxes(self):
+    if self.checkBox3.isChecked():
+      self.checkBox1.setChecked(False)
+      self.checkBox2.setChecked(False)
+    if self.checkBox1.isChecked():
+      self.checkBox3.setChecked(False)
+      self.checkBox2.setChecked(False)
+    if self.checkBox2.isChecked():
+      self.checkBox1.setChecked(False)
+      self.checkBox3.setChecked(False)
   def selectPeakList(self, item):
     self.peakList = self.project.getByPid(item)
     self.updateContents()
@@ -74,10 +107,18 @@ class PeakFindPopup(QtGui.QDialog, Base):
       positions[0].append(self.dim3MinDoubleSpinBox.value())
       positions[1].append(self.dim3MaxDoubleSpinBox.value())
     apiSpectrumView = peakList.spectrum.spectrumViews[0]._wrappedData
-
+    if self.checkBox1.isChecked():
+      doPos=True
+      doNeg=False
+    if self.checkBox2.isChecked():
+      doPos=True
+      doNeg=True
+    if self.checkBox3.isChecked():
+      doPos=True
+      doNeg=True
     newPeaks = peakList.pickPeaksNd(positions, apiSpectrumView.spectrumView.orderedDataDims,
-                                            doPos=apiSpectrumView.spectrumView.displayPositiveContours,
-                                            doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
+                                            doPos=doPos,
+                                            doNeg=doNeg)
 
     for strip in self.project.strips:
       strip.showPeaks(peakList)
@@ -92,34 +133,34 @@ class PeakFindPopup(QtGui.QDialog, Base):
     except AttributeError:
       pass
 
-    self.dim1MinLabel = Label(self, text='F1 '+ self.peakList.spectrum.axisCodes[0]+' min', grid=(1, 0))
-    self.dim1MinDoubleSpinBox = DoubleSpinbox(self, grid=(1, 1))
+    self.dim1MinLabel = Label(self, text='F1 '+ self.peakList.spectrum.axisCodes[0]+' min', grid=(2, 0))
+    self.dim1MinDoubleSpinBox = DoubleSpinbox(self, grid=(2, 1))
     self.dim1MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[0][0])
     self.dim1MinDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[0][1])
     self.dim1MinDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[0][0])
-    self.dim1MaxLabel = Label(self, text='F1 '+ self.peakList.spectrum.axisCodes[0]+' max', grid=(1, 2))
-    self.dim1MaxDoubleSpinBox = DoubleSpinbox(self, grid=(1, 3))
+    self.dim1MaxLabel = Label(self, text='F1 '+ self.peakList.spectrum.axisCodes[0]+' max', grid=(2, 2))
+    self.dim1MaxDoubleSpinBox = DoubleSpinbox(self, grid=(2, 3))
     self.dim1MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[0][0])
     self.dim1MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[0][1])
     self.dim1MaxDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[0][1])
-    self.dim2MinLabel = Label(self, text='F2 '+ self.peakList.spectrum.axisCodes[1]+' min', grid=(2, 0))
-    self.dim2MinDoubleSpinBox = DoubleSpinbox(self, grid=(2, 1))
+    self.dim2MinLabel = Label(self, text='F2 '+ self.peakList.spectrum.axisCodes[1]+' min', grid=(3, 0))
+    self.dim2MinDoubleSpinBox = DoubleSpinbox(self, grid=(3, 1))
     self.dim2MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[1][0])
     self.dim2MinDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[1][1])
     self.dim2MinDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[1][0])
-    self.dim2MaxLabel = Label(self, text='F2 '+ self.peakList.spectrum.axisCodes[1]+' max', grid=(2, 2))
-    self.dim2MaxDoubleSpinBox = DoubleSpinbox(self, grid=(2, 3))
+    self.dim2MaxLabel = Label(self, text='F2 '+ self.peakList.spectrum.axisCodes[1]+' max', grid=(3, 2))
+    self.dim2MaxDoubleSpinBox = DoubleSpinbox(self, grid=(3, 3))
     self.dim2MaxDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[1][0])
     self.dim2MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[1][1])
     self.dim2MaxDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[1][1])
     if self.peakList.spectrum.dimensionCount > 2:
-      self.dim3MinLabel = Label(self, text='F3 '+ self.peakList.spectrum.axisCodes[2]+' min', grid=(3, 0))
-      self.dim3MinDoubleSpinBox = DoubleSpinbox(self, grid=(3, 1))
+      self.dim3MinLabel = Label(self, text='F3 '+ self.peakList.spectrum.axisCodes[2]+' min', grid=(4, 0))
+      self.dim3MinDoubleSpinBox = DoubleSpinbox(self, grid=(4, 1))
       self.dim3MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[2][0])
       self.dim3MinDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[2][1])
       self.dim3MinDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[2][0])
-      self.dim3MaxLabel = Label(self, text='F3 '+ self.peakList.spectrum.axisCodes[2]+' max', grid=(3, 2))
-      self.dim3MaxDoubleSpinBox = DoubleSpinbox(self, grid=(3, 3))
+      self.dim3MaxLabel = Label(self, text='F3 '+ self.peakList.spectrum.axisCodes[2]+' max', grid=(4, 2))
+      self.dim3MaxDoubleSpinBox = DoubleSpinbox(self, grid=(4, 3))
       self.dim3MaxDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[2][0])
       self.dim3MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[2][1])
       self.dim3MaxDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[2][1])

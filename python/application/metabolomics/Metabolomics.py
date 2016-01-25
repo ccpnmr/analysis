@@ -16,6 +16,7 @@ from ccpncore.gui.GroupBox import GroupBox
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Label import Label
 from functools import partial
+from application.metabolomics.GuiPipeLine import PolyBaseline
 
 
 
@@ -28,17 +29,16 @@ class MetabolomicsModule(CcpnDock, Base):
     CcpnDock.__init__(self, name='Metabolomics')
     Base.__init__(self, **kw)
     self.project = project
-
-    self.layout.addWidget(PipelineWidgets())
+    self.layout.addWidget(PipelineWidgets(self, project))
 
 
 class PipelineWidgets(QtGui.QWidget, Base):
   '''This create the second tab to exclude Regions from Spectrum when peak picking '''
 
-  def __init__(self, parent=None,**kw):
+  def __init__(self, parent=None, project=None, **kw):
     super(PipelineWidgets, self).__init__(parent)
     Base.__init__(self, **kw)
-
+    self.project = project
     self.pullDownData = {'< Select Method >' : '',
                 'Reference': '',
                 'Fit': '',
@@ -85,7 +85,8 @@ class PipelineWidgets(QtGui.QWidget, Base):
     self.middle.setFixedHeight(90)
     self.groupBoxMainLayout.addWidget(self.middle,0,1)
     self.middle_layout = QtGui.QHBoxLayout(self.middle)
-
+    polyBL = PolyBaseline(self, self.project._appBase.current)
+    self.middle_layout.addWidget(polyBL)
 
     self.right = GroupBox()
     self.right.setFixedWidth(120)

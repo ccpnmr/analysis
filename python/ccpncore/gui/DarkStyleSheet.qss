@@ -223,6 +223,9 @@ Dock QPushButton::checked {
 QFrame { background-color: #2a3358;}
 
 
+GroupBox { background-color: #2a3358;}
+
+
 QTreeWidget { background-color: #020F31;
 
     }

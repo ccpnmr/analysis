@@ -37,6 +37,8 @@ class ButtonList(QtGui.QWidget, Base):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
+
+
     if commands:
       print("qtgui.ButtonList.commands is deprecated; use .callbacks")
       callbacks = commands

@@ -25,12 +25,12 @@ C_COMPONENT_UNIT = ['Molar', 'Mass/Volume',  'mol/Volume', ]
 class SamplePropertiesPopup(QtGui.QDialog, Base):
   ''' This popup will allow to view and edit the sample properties '''
 
-  def __init__(self, sample, item, parent=None, project=None, **kw):
+  def __init__(self, sample, parent=None, project=None, **kw):
     super(SamplePropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.project = project
     self.sideBar = project._appBase.mainWindow.sideBar
-    self.newSampleSideBar = item
+    # self.newSampleSideBar = item
 
     self.sample = sample
     self.setWindowTitle("Sample Properties")

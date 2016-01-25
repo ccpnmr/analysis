@@ -113,23 +113,46 @@ class SamplePopup(QtGui.QDialog):
         excludedRegions.remove(i)
 
 
+    # sideBar = self.project._appBase.mainWindow.sideBar
+    #
+    # refData = sideBar.spectrumItem
+    # refCount = sideBar.spectrumReference.childCount()
+    # spectra = []
+    #
+    # for i in range(refCount):
+    #   print(i)
+    #   item = refData.child(i)
+    #   itemCount = item.childCount()
+    #   for j in range(itemCount):
+    #     spectrumPid = item.child(j).text(0)
+    #     spectrum = self.project.getByPid(spectrumPid)
+    #
+    #     spectra.append(spectrum)
+    #     spectrum.peakLists[0].pickPeaks1dFiltered(ignoredRegions=excludedRegions, noiseThreshold=noiseThreshold)
+    #     sampleTab = sideBar.SamplesItems
+
     sideBar = self.project._appBase.mainWindow.sideBar
-    refData = sideBar.spectrumReference
-    refCount = sideBar.spectrumReference.childCount()
+
+    refData = sideBar.spectrumItem
+    refCount = sideBar.spectrumItem.childCount() #  item under sidebar spectra tree
+
     spectra = []
 
     for i in range(refCount):
-      print(i)
       item = refData.child(i)
+
       itemCount = item.childCount()
       for j in range(itemCount):
         spectrumPid = item.child(j).text(0)
-        spectrum = self.project.getByPid(spectrumPid)
+        peakList = self.project.getByPid(spectrumPid)
+        spectrum = peakList.spectrum
 
         spectra.append(spectrum)
-        print(spectrum.peakLists[0])
         spectrum.peakLists[0].pickPeaks1dFiltered(ignoredRegions=excludedRegions, noiseThreshold=noiseThreshold)
-        sampleTab = sideBar.spectrumSamples
+        sampleTab = sideBar.samplesItem
+
+
+
 
     minimalDistance = self.distance.value()
     if self.setup.checkBox1.isChecked():

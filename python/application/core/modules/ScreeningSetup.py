@@ -292,24 +292,24 @@ class ScreeningSetup(CcpnDock, Base):
           peakList.append(peak.position[0])
         newPeakPositionsSampleComponents = list(self.nearPeaks(peakList))
         offPositions = [stdOff.position[0] for stdOff in matchedStdOffPeak]
-        offPositions2 = [(stdOff.pid, stdOff.position[0]) for stdOff in matchedStdOffPeak]
-        for i, stdOff in enumerate(matchedStdOffPeak):
-          print((stdOff.height - matchedStdOnPeak[i].height)/stdOff.height, component)
+        # offPositions2 = [(stdOff.pid, stdOff.position[0]) for stdOff in matchedStdOffPeak]
+        # for i, stdOff in enumerate(matchedStdOffPeak):
+        #   print((stdOff.height - matchedStdOnPeak[i].height)/stdOff.height, component)
 
         peakList2 = component.substance.referenceSpectra[0].peakLists[0]
         self.matching = self.matchPeak.value()
-        from sklearn import svm
-        import numpy
-        clf = svm.SVC()
-        positions = numpy.array([peak.position for peak in peakList2.peaks])
-        labels = numpy.array([peak.pid for peak in peakList2.peaks])
-        clf.fit(positions, labels)
-        tol = 0.008
-        for position in offPositions2:
-          result = clf.predict(numpy.array(position[1]))
-          matchedPosition = self.project.getByPid(result[0]).position
-          if abs(matchedPosition[0]-position[1]) < tol:
-            print(matchedPosition[0]-position[1], result[0], position[0])
+        # from sklearn import svm
+        # import numpy
+        # clf = svm.SVC()
+        # positions = numpy.array([peak.position for peak in peakList2.peaks])
+        # labels = numpy.array([peak.pid for peak in peakList2.peaks])
+        # clf.fit(positions, labels)
+        # tol = 0.008
+        # for position in offPositions2:
+        #   result = clf.predict(numpy.array(position[1]))
+        #   matchedPosition = self.project.getByPid(result[0]).position
+        #   if abs(matchedPosition[0]-position[1]) < tol:
+        #     print(matchedPosition[0]-position[1], result[0], position[0])
 
         matchedPositions = [offPosition for scPosition in newPeakPositionsSampleComponents
                             for offPosition in offPositions if abs(offPosition-scPosition)<=0.025]
@@ -317,6 +317,8 @@ class ScreeningSetup(CcpnDock, Base):
         newPeakList = component.substance.referenceSpectra[0].newPeakList(name='1HmatchedStdOffResonance')
 
         differenceHeightList = []
+        efficiency = []
+
         positions = []
 
         for position in set(list(matchedPositions)):
@@ -324,6 +326,9 @@ class ScreeningSetup(CcpnDock, Base):
             for stdOnPosition in set(list(matchedStdOnPeak)):
               if abs(stdOffPosition.position[0] - stdOnPosition.position[0]) <= 0.01 and stdOffPosition.position[0] == position:
                 differenceHeight = abs(stdOffPosition.height - stdOnPosition.height)
+                eff = (abs(stdOffPosition.height - stdOnPosition.height))/stdOffPosition.height
+                efficiency.append(eff)
+
                 differenceHeightList.append(differenceHeight)
 
                 newPeakListPosition = component.substance.referenceSpectra[0].peakLists[1].newPeak(position=[position], height=differenceHeight)
@@ -338,6 +343,7 @@ class ScreeningSetup(CcpnDock, Base):
           self.hit = sample.spectra[0].newSpectrumHit(substanceName=str(substance.name))
           self.hit.meritCode = 'Binding'
           self.scoringStd(self.hit, meanIntensityChange)
+          print(efficiency, component)
 
 
 

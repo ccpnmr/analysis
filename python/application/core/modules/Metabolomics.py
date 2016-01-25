@@ -1,119 +1,163 @@
-__author__ = 'luca'
+from application.core.popups.SampleSetupPopup import solvents, SamplePopup, ExcludeRegions
 
 from PyQt4 import QtCore, QtGui
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Base import Base
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Table import ObjectTable, Column
-from ccpncore.gui.CompoundView import CompoundView, Variant, importSmiles
+from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
+from ccpncore.gui.Frame import Frame
+from ccpncore.gui.CheckBox import CheckBox
+from ccpncore.gui.ButtonList import ButtonList
+from ccpncore.gui.Button import Button
+from ccpncore.gui.Icon import Icon
+from ccpncore.gui.GroupBox import GroupBox
+from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Label import Label
+from functools import partial
 
-pullDown1 = ["PQN"]
-pullDown2 = ["Pareto Scale"]
+
+
 #
 class MetabolomicsModule(CcpnDock, Base):
+
   def __init__(self, project, **kw):
+
     super(MetabolomicsModule, self)
     CcpnDock.__init__(self, name='Metabolomics')
+    Base.__init__(self, **kw)
     self.project = project
-    self.smiles = ''
-    self.compound = None
-    self.variant = None
-    self.colourScheme = self.project._appBase.preferences.general.colourScheme
 
-  # 1st Area:
-    self.metaboliteArea = ScrollArea(self)
-    self.setOrientation('vertical', force=True)
-    self.metaboliteArea.setWidgetResizable(True)
-    self.metaboliteArea.setMaximumSize(400,900)
-    self.metaboliteAreaWidget = QtGui.QWidget()
-    self.metaboliteArea.setWidget(self.metaboliteAreaWidget)
-    self.layout.addWidget(self.metaboliteArea, 0, 0, 9, 1)
-    self.metaboliteArea.setStyleSheet("border-style: outset; border-width: 1px; border-color: beige;""border-radius: 1px;")
+    self.layout.addWidget(PipelineWidgets())
 
 
-  # widget 1st Area: HACKED to create the module mock
-    self.listOfMetabolites = []
-    for sample in self.project.samples:
-        sampleComponents = [metabolite for metabolite in sample.sampleComponents]
-        for sc in sampleComponents:
-          self.listOfMetabolites.append(sc.substance)
+class PipelineWidgets(QtGui.QWidget, Base):
+  '''This create the second tab to exclude Regions from Spectrum when peak picking '''
 
-    columns = [Column('Metabolite', ''),
-               Column('Concentration',''),
-               Column('Error', '')]
+  def __init__(self, parent=None,**kw):
+    super(PipelineWidgets, self).__init__(parent)
+    Base.__init__(self, **kw)
 
-
-    self.metaboliteTable = ObjectTable(self.metaboliteAreaWidget, columns,callback=self.showMolecule,  grid=(0, 0))
-    self.metaboliteTable.setObjects(self.listOfMetabolites)
-    self.compoundView  = CompoundView(self.metaboliteAreaWidget,  grid=(2, 0))
+    self.pullDownData = {'< Select Method >' : '',
+                'Reference': '',
+                'Fit': '',
+                 'Baseline': '',
+               'Auto-scale': '',
+                'Exclude Regions': ExcludeRegions(self)}
 
 
 
+    self.moveUpRowIcon = Icon('iconsNew/sort-up')
+    self.moveDownRowIcon = Icon('iconsNew/sort-down')
+    self.addRowIcon = Icon('iconsNew/plus')
+    self.removeRowIcon = Icon('iconsNew/minus')
 
-  def showMolecule(self, row:int=None, col:int=None, obj:object=None):
+    # Main layout: a scrollable group box with a gridLayout layout. 3 different areas inside:
+    # left: method selection(groupbox, hLayout);
+    # middle: actions (groupbox, GridLayout);
+    # right: layout management(groupbox, hLayout).
+    # This proposed solution will allow to have every time the left and right widgets aligned within the the main layout.
 
-    objectTable = self.metaboliteTable
-    metabolite = objectTable.getCurrentObject()
 
-    smiles = metabolite.smiles
-    self.smiles = smiles
-    compound = importSmiles(smiles)
-    variant = list(compound.variants)[0]
-    self.setCompound(compound, replace = True)
-    x, y = self.getAddPoint()
-    variant.snapAtomsToGrid(ignoreHydrogens=False)
-    self.compoundView.centerView()
-    self.compoundView.updateAll()
-    if self.colourScheme == 'dark':
-      self.compoundView.setStyleSheet(""" background-color:  #040000;""")
-    else:
-      self.compoundView.setStyleSheet(""" background-color:  #A9BCF5;""")
+    self.pipelineGroupBox = GroupBox('Pipeline')
+    self.groupBoxMainLayout = QtGui.QGridLayout()
+    self.groupBoxMainLayout.setAlignment(QtCore.Qt.AlignTop)
+    self.setLayout(self.groupBoxMainLayout)
 
-  def setCompound(self, compound, replace=True):
-    ''' Set the compound on the graphic scene. '''
-    if compound is not self.compound:
-      if replace or not self.compound:
-        self.compound = compound
-        variants = list(compound.variants)
-        if variants:
-          for variant2 in variants:
-            if (variant2.polyLink == 'none') and (variant2.descriptor == 'neutral'):
-              variant = variant2
-              break
-          else:
-            for variant2 in variants:
-              if variant2.polyLink == 'none':
-                variant = variant2
-                break
-            else:
-              variant = variants[0]
-        else:
-          variant =  Variant(compound)
-          print(variant)
-        self.variant = variant
-        self.compoundView.setVariant(variant)
 
-      else:
-        variant = list(compound.variants)[0]
-        x, y = self.getAddPoint()
-        self.compound.copyVarAtoms(variant.varAtoms, (x,y))
-        self.compoundView.centerView()
-        self.compoundView.updateAll()
+    self.pipelineGroupBox.setLayout(self.groupBoxMainLayout)
+    self.scrollArea = ScrollArea(self)
+    self.scrollArea.setWidget(self.pipelineGroupBox)
+    self.scrollArea.setWidgetResizable(True)
 
-  def getAddPoint(self):
-    ''' Set the compound on the specific position on the graphic scene. '''
-    compoundView = self.compoundView
-    globalPos = QtGui.QCursor.pos()
-    pos = compoundView.mapFromGlobal(globalPos)
-    widget = compoundView.childAt(pos)
-    if widget:
-      x = pos.x()
-      y = pos.y()
-    else:
-      x = compoundView.width()/2.0
-      y = compoundView.height()/2.0
-    point = compoundView.mapToScene(x, y)
-    return point.x(), point.y()
+
+
+
+    self.left = GroupBox()
+    self.left.setFixedWidth(220)
+    self.left.setFixedHeight(90)
+    self.groupBoxMainLayout.addWidget(self.left,0,0)
+    self.left_layout = QtGui.QHBoxLayout(self.left)
+
+
+    self.middle = GroupBox()
+    self.middle.setFixedHeight(90)
+    self.groupBoxMainLayout.addWidget(self.middle,0,1)
+    self.middle_layout = QtGui.QHBoxLayout(self.middle)
+
+
+    self.right = GroupBox()
+    self.right.setFixedWidth(120)
+    self.right.setFixedHeight(90)
+    self.right_layout = QtGui.QHBoxLayout(self.right)
+    self.groupBoxMainLayout.addWidget(self.right,0,2)
+
+
+
+    self.pulldownAction = PulldownList(self,)
+    self.pulldownAction.setFixedWidth(130)
+    self.pulldownAction.setFixedHeight(30)
+    for item in sorted( self.pullDownData):
+      self.pulldownAction.addItem(item)
+    self.pulldownAction.activated[str].connect(self.addMethod)
+
+    # self.pulldownAction.setData(PullDownData)
+    self.checkBox = CheckBox(self, text='active')
+
+    self.moveUpDownButtons = ButtonList(self, texts = ['︎','︎︎'], callbacks=[self.moveRowUp, self.moveRowDown], icons=[self.moveUpRowIcon,self.moveDownRowIcon],
+                                       tipTexts=['Move row up', 'Move row down'], direction='h', hAlign='r')
+    self.moveUpDownButtons.setMaximumSize(90, 70) #Lenght,Height
+    self.moveUpDownButtons.setStyleSheet('font-size: 10pt')
+
+    self.addRemoveButtons = ButtonList(self, texts = ['',''], callbacks=[self.addRow, self.removeRow],icons=[self.addRowIcon,self.removeRowIcon],
+                                       tipTexts=['Add new row', 'Remove row '], direction='H', hAlign='l')
+    self.addRemoveButtons.setStyleSheet('font-size: 10pt')
+    self.addRemoveButtons.setMaximumSize(90, 70)
+
+    self.left_layout.addWidget(self.pulldownAction)
+    self.left_layout.addWidget(self.checkBox)
+
+
+    self.right_layout.addWidget(self.moveUpDownButtons)
+    self.right_layout.addWidget(self.addRemoveButtons)
+
+
+
+    # self.layout.addWidget(self.scrollArea)
+
+
+
+  def addMethod(self, selected):
+
+    for method in sorted(self.pullDownData):
+      if selected == ('%s' %method):
+        obj = (self.pullDownData[method])
+        self.middle_layout.addWidget(obj)
+
+
+
+  def addRow (self):
+    print('addRow')
+
+  def removeRow (self):
+    print('removeRow')
+
+  def moveRowUp (self):
+    print('moveRowUp')
+
+  def moveRowDown (self):
+    print('moveRowDown')
+
+
+
+
+
+
+
+
+
+
+
+
 

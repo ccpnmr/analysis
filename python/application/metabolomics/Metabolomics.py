@@ -16,7 +16,7 @@ from ccpncore.gui.GroupBox import GroupBox
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Label import Label
 from functools import partial
-from application.metabolomics.GuiPipeLine import PolyBaseline
+from application.metabolomics import GuiPipeLine as gp
 
 
 
@@ -39,11 +39,18 @@ class PipelineWidgets(QtGui.QWidget, Base):
     super(PipelineWidgets, self).__init__(parent)
     Base.__init__(self, **kw)
     self.project = project
-    self.pullDownData = {'< Select Method >' : '',
-                'Reference': '',
-                'Fit': '',
-                 'Baseline': '',
-               'Auto-scale': '',
+    self.pullDownData = {
+                'Poly Baseline': gp.PolyBaseline(self, self.project),
+                'Align To Reference': gp.AlignToReference(self, self.project),
+                'Align Spectra': gp.AlignSpectra(self, self.project),
+                'Scale': gp.Scale(self, self.project),
+                'Segmental Align': gp.SegmentalAlign(self, self.project),
+                'Whittaker Baseline': gp.WhittakerBaseline(self, self.project),
+                'Whittaker Smooth': gp.WhittakerSmooth(self, self.project),
+                'Bin': gp.Bin(self, self.project),
+                'Exclude Baseline Points': gp.ExcludeBaselinePoints(self, self.project),
+                'Normalise Spectra': gp.NormaliseSpectra(self, self.project),
+                'Exclude Signal Free Regions': gp.ExcludeSignalFreeRegions(self, self.project),
                 'Exclude Regions': ExcludeRegions(self)}
 
 
@@ -85,7 +92,7 @@ class PipelineWidgets(QtGui.QWidget, Base):
     self.middle.setFixedHeight(90)
     self.groupBoxMainLayout.addWidget(self.middle,0,1)
     self.middle_layout = QtGui.QHBoxLayout(self.middle)
-    polyBL = PolyBaseline(self, self.project._appBase.current)
+    polyBL = Bin(self, self.project)
     self.middle_layout.addWidget(polyBL)
 
     self.right = GroupBox()

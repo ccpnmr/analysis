@@ -61,7 +61,7 @@ from application.core.modules.PickAndAssignModule import PickAndAssignModule
 from application.core.modules.SequenceModule import SequenceModule
 from application.core.modules.SampleAnalysis import SampleAnalysis
 from application.core.modules.ScreeningSetup import ScreeningSetup
-from application.core.modules.Metabolomics import MetabolomicsModule
+from application.metabolomics.Metabolomics import MetabolomicsModule
 
 from application.core.popups.BackupPopup import BackupPopup
 from application.core.popups.FeedbackPopup import FeedbackPopup

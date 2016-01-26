@@ -56,8 +56,8 @@ class AtomSelector(CcpnDock):
     self.pythonConsole = project._appBase.mainWindow.pythonConsole
     headerLabel = Label(self, text='i-1')
     pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
-    headerLabel = Label(pickAndAssignWidget, text='i', grid=(0, 1))
-    headerLabel = Label(pickAndAssignWidget, text='i+1', grid=(0, 2))
+    headerLabel2 = Label(pickAndAssignWidget, text='i', grid=(0, 1))
+    headerLabel3 = Label(pickAndAssignWidget, text='i+1', grid=(0, 2))
     self.hButton1 = Button(pickAndAssignWidget, text='H', grid=(1, 0), callback=partial(self.pickAndAssign, '-1', 'H'))
     self.hButton2 = Button(pickAndAssignWidget, text='H', grid=(1, 1), callback=partial(self.pickAndAssign, '', 'H'))
     self.hButton3 = Button(pickAndAssignWidget, text='H', grid=(1, 2), callback=partial(self.pickAndAssign, '+1', 'H'))

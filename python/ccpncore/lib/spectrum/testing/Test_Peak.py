@@ -39,7 +39,8 @@ class PeakTest(CoreTesting):
     peakList = dataSource.findFirstPeakList()
     print('peakList = %s' % peakList)
     peak = peakList.findFirstPeak(serial=42)
+    print('peak = %s, peak.height = %f' % (peak, peak.height))
     peaks = [peak]
-    result = Peak.fitExistingPeaks(peaks, fitMethod='gaussian')
-    print('result = %s' % result)
+    Peak.fitExistingPeaks(peaks, fitMethod='gaussian')
+    print('peak.height = %f' % peak.height)
     

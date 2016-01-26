@@ -33,6 +33,7 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Spinbox import Spinbox
 import pyqtgraph as pg
 
+from functools import partial
 
 
 class PolyBaseline(QtGui.QWidget, Base):
@@ -125,6 +126,10 @@ class PolyBaseline(QtGui.QWidget, Base):
     self.controlPointBoxList[lineIndex].setValue(line.pos().x())
 
 
+  def getParams(self):
+    return {'controlPoints': [x.value() for x in self.controlPointBoxList]}
+
+
 class NormaliseSpectra(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
     QtGui.QWidget.__init__(self, parent)
@@ -135,12 +140,13 @@ class NormaliseSpectra(QtGui.QWidget, Base):
       spectra = [spectrum.pid for spectrum in project.spectra]
     self.lenSpectra = len(spectra)
     self.methodPulldownList = PulldownList(self, grid=(0, 1))
-    self.coeffsLabel = Label(self, 'Coefficients', grid=(0, 2))
-    self.coeffBoxes = []
     methods = ['Reference Peak',
                'Total Area',
                'PQN']
     self.methodPulldownList.setData(methods)
+
+  def getParams(self):
+    return {'method': self.methodPulldownList.currentText()}
 
 class AlignToReference(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
@@ -156,6 +162,9 @@ class AlignToReference(QtGui.QWidget, Base):
     self.regionBoxes = [self.region1, self.region2]
     self.linePoints = []
     self.lr = None
+    self.referenceLabel = Label(self, "Reference", grid=(0, 3))
+    self.referencePulldown = PulldownList(self, grid=(0, 4))
+    self.referenceBox = DoubleSpinbox(self, grid=(0, 5))
 
 
   def togglePicking(self):
@@ -194,16 +203,25 @@ class AlignToReference(QtGui.QWidget, Base):
     self.regionBoxes[0].setValue(region[1])
     self.regionBoxes[1].setValue(region[0])
 
+  def getParams(self):
+    return {'window': (self.region1.value(), self.region2.value()),
+            'referencePpm': self.referenceBox.value()}
+
+
 
 class AlignSpectra(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     spectrumLabel = Label(self, 'Spectrum', grid=(0, 0))
-    spectrumPulldown = PulldownList(self, grid=(0, ))
+    self.spectrumPulldown = PulldownList(self, grid=(0, ))
     spectra = [spectrum.pid for spectrum in project.spectra]
     spectra.insert(0, '<All>')
-    spectrumPulldown.setData(spectra)
+    self.spectrumPulldown.setData(spectra)
+
+  def getParams(self):
+    return {'target': self.spectrumPulldown.currentText()
+            }
 
 class WhittakerBaseline(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
@@ -248,6 +266,12 @@ class WhittakerBaseline(QtGui.QWidget, Base):
     self.linePoints.append(line)
     self.points.append(line.pos().x())
 
+  def getParams(self):
+    return {'controlPoints': self.points,
+            'a': self.aBox.value(),
+            'lam': self.lamBox.value()
+            }
+
 class SegmentalAlign(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
     QtGui.QWidget.__init__(self, parent)
@@ -284,24 +308,35 @@ class SegmentalAlign(QtGui.QWidget, Base):
     self.linePoints.append(line)
     self.points.append(line.pos().x())
 
+  def getParams(self):
+    return {'regions': [self.points[i:i+1] for i in range(0, len(self.points), 1)]}
+
+
 class ExcludeBaselinePoints(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
-    self.pointLabel = Label(self, 'Exclusion Point ', grid=(0, 0))
-    self.pointBox = Spinbox(self, grid=(0, 1), max=100000000000, min=-100000000000)
-    self.pointBox.valueChanged.connect(self.setLinePosition)
+    self.pointLabel = Label(self, 'Exclusion Points ', grid=(0, 0))
+    self.pointBox1 = Spinbox(self, grid=(0, 1), max=100000000000, min=-100000000000)
+    self.pointBox2 = Spinbox(self, grid=(0, 2), max=100000000000, min=-100000000000)
     self.current = project._appBase.current
     self.pickOnSpectrumButton = Button(self, 'pick', grid=(0, 2), toggle=True)
     self.pickOnSpectrumButton.setChecked(False)
     self.multiplierLabel = Label(self, 'Baseline Multipler', grid=(0, 3))
-    self.multiplierLabel = DoubleSpinbox(self, grid=(0, 4))
+    self.multiplierBox = DoubleSpinbox(self, grid=(0, 4))
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
-    self.linePoint = pg.InfiniteLine(angle=0, pos=self.pointBox.value(), movable=True, pen=(255, 0, 100))
-    self.current.strip.plotWidget.addItem(self.linePoint)
-    self.pointBox.setValue(self.linePoint.pos().y())
-    self.linePoint.hide()
-    self.linePoint.sigPositionChanged.connect(self.lineMoved)
+    self.linePoint1 = pg.InfiniteLine(angle=0, pos=self.pointBox.value(), movable=True, pen=(255, 0, 100))
+    self.linePoint2 = pg.InfiniteLine(angle=0, pos=self.pointBox.value(), movable=True, pen=(255, 0, 100))
+    self.current.strip.plotWidget.addItem(self.linePoint1)
+    self.current.strip.plotWidget.addItem(self.linePoint2)
+    self.pointBox1.setValue(self.linePoint1.pos().y())
+    self.pointBox2.setValue(self.linePoint2.pos().y())
+    self.linePoint1.hide()
+    self.linePoint1.sigPositionChanged.connect(partial(self.lineMoved, self.pointBox1))
+    self.linePoint2.hide()
+    self.linePoint2.sigPositionChanged.connect(partial(self.lineMoved, self.pointBox2))
+    self.pointBox1.valueChanged.connect(partial(self.setLinePosition, self.linePoint1))
+    self.pointBox2.valueChanged.connect(partial(self.setLinePosition, self.linePoint2))
 
 
   def togglePicking(self):
@@ -312,20 +347,23 @@ class ExcludeBaselinePoints(QtGui.QWidget, Base):
 
   def turnOnPositionPicking(self):
     print('picking on')
-    self.linePoint.show()
+    self.linePoint1.show()
+    self.linePoint2.show()
 
   def turnOffPositionPicking(self):
     print('picking off')
-    self.linePoint.hide()
+    self.linePoint1.hide()
+    self.linePoint2.hide()
 
-  def lineMoved(self):
-    self.pointBox.setValue(self.linePoint.pos().y())
+  def lineMoved(self, box):
+    box.setValue(self.linePoint.pos().y())
 
-  def setLinePosition(self):
-    self.linePoint.setPos(self.pointBox.value())
+  def setLinePosition(self, linePoint):
+    linePoint.setPos(self.pointBox.value())
 
   def getParams(self):
-    pass
+    return {'baselineRegion': [self.pointBox1.value(), self.pointBox2.value()],
+            'baselineMultiplier': self.multiplierBox.value()}
 
 
 class AlignSpectra(QtGui.QWidget, Base):
@@ -338,6 +376,10 @@ class AlignSpectra(QtGui.QWidget, Base):
     spectra.insert(0, '<All>')
     self.targetPulldown.setData(spectra)
 
+  def getParams(self):
+    return {'targetSpectrum': self.targetPulldown.currentText()}
+
+
 
 class Bin(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
@@ -345,6 +387,9 @@ class Bin(QtGui.QWidget, Base):
     Base.__init__(self, **kw)
     self.binWidthLabel = Label(self, 'Bin Width (ppm) ', grid=(0, 0))
     self.binWidth = DoubleSpinbox(self, grid=(0, 1))
+
+  def getParams(self):
+    return {'binWidth': self.binWidth.value()}
 
 
 class Scale(QtGui.QWidget, Base):
@@ -356,12 +401,18 @@ class Scale(QtGui.QWidget, Base):
     methods = ['Unit Variance', 'Pareto']
     self.methodPulldown.setData(methods)
 
+  def getParams(self):
+    return {'method': self.methodPulldown.currentText()}
+
 class ExcludeSignalFreeRegions(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.lamLabel = Label(self, 'lam ', grid=(0, 0))
     self.lamBox = DoubleSpinbox(self, grid=(0, 1))
+
+  def getParams(self):
+    return {'lam': self.lamBox.value()}
 
 class WhittakerSmooth(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
@@ -403,3 +454,7 @@ class WhittakerSmooth(QtGui.QWidget, Base):
     self.current.strip.plotWidget.addItem(line)
     self.linePoints.append(line)
     self.points.append(line.pos().x())
+
+  def getParams(self):
+    return {'a': self.aBox.value(),
+            'controlPoints': self.points}

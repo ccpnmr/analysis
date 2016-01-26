@@ -24,17 +24,22 @@ __version__ = "$Revision: 7686 $"
 
 import numpy
 
-def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=None,
+from ccpncore.api.ccp.nmr.Nmr import PeakList
+
+from ccpncore.util.Types import Sequence
+
+def pickNewPeaks(self:PeakList, startPoint:Sequence[int], endPoint:Sequence[int],
+                 posLevel:float=None, negLevel:float=None,
                  minLinewidth=None, exclusionBuffer=None,
-                 minDropfactor=0.0, checkAllAdjacent=True,
-                 fitMethod=None, excludedRegions=None,
+                 minDropfactor:float=0.0, checkAllAdjacent:bool=True,
+                 fitMethod:str=None, excludedRegions=None,
                  excludedDiagonalDims=None, excludedDiagonalTransform=None):
 
   # startPoint and endPoint are 0-based not 1-based
   
   # TBD: ignores aliasing for now
   
-  from ccpnc.peak import Peak
+  from ccpnc.peak import Peak as CPeak
 
   if fitMethod:
     assert fitMethod in ('gaussian', 'lorentzian'), 'fitMethod = %s, must be one of ("gaussian", "lorentzian")' % fitMethod
@@ -118,10 +123,10 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
   posLevel = posLevel or 0.0
   negLevel = negLevel or 0.0
     
-  peakPoints = Peak.findPeaks(dataArray, doNeg, doPos,
-                              negLevel, posLevel, exclusionBuffer,
-                              nonAdj, minDropfactor, minLinewidth,
-                              excludedRegionsList, excludedDiagonalDimsList, excludedDiagonalTransformList)
+  peakPoints = CPeak.findPeaks(dataArray, doNeg, doPos,
+                               negLevel, posLevel, exclusionBuffer,
+                               nonAdj, minDropfactor, minLinewidth,
+                               excludedRegionsList, excludedDiagonalDimsList, excludedDiagonalTransformList)
 
   peakPoints = [(numpy.array(position), height) for position, height in peakPoints]
   
@@ -158,7 +163,7 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
         regionArray = numpy.array((firstArray, lastArray))
 
         try:
-          result = Peak.fitPeaks(dataArray, regionArray, peakArray, method)
+          result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
           height, center, linewidth = result[0]
         except Peak.error as e:
           # possibly should log error??
@@ -198,3 +203,9 @@ def pickNewPeaks(self:'PeakList', startPoint, endPoint, posLevel=None, negLevel=
     
   return peaks
 
+def fitExistingPeakList(self:PeakList, fitMethod:str=None):
+
+  if fitMethod:
+    # import has to be inside function because of circular imports
+    from ccpncore.lib.spectrum import Peak as LibPeak
+    LibPeak.fitExistingPeaks(self.sortedPeaks(), fitMethod)

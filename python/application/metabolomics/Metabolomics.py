@@ -1,5 +1,5 @@
 from application.core.popups.SampleSetupPopup import solvents, SamplePopup, ExcludeRegions
-
+from application.metabolomics.GuiPipeLine import PolyBaseline
 from PyQt4 import QtCore, QtGui
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Base import Base
@@ -29,15 +29,30 @@ class MetabolomicsModule(CcpnDock, Base):
     CcpnDock.__init__(self, name='Metabolomics')
     Base.__init__(self, **kw)
     self.project = project
-    self.layout.addWidget(PipelineWidgets(self, project))
 
 
-class PipelineWidgets(QtGui.QWidget, Base):
-  '''This create the second tab to exclude Regions from Spectrum when peak picking '''
+    self.pipelineMainGroupBox = GroupBox('Pipeline')
+    self.pipelineMainVLayout = QtGui.QVBoxLayout()
+    self.pipelineMainVLayout.setAlignment(QtCore.Qt.AlignTop)
+    self.setLayout(self.pipelineMainVLayout)
+
+    self.pipelineMainGroupBox.setLayout(self.pipelineMainVLayout)
+    self.scrollArea = ScrollArea(self)
+    self.scrollArea.setWidget(self.pipelineMainGroupBox)
+    self.scrollArea.setWidgetResizable(True)
+    self.layout.addWidget(self.scrollArea, 0,0)
+
+    widget = (PipelineWidgets(self, project))
+    self.pipelineMainVLayout.addWidget(widget)
+
+
+class PipelineWidgets(QtGui.QWidget):
+  '''
+  '''
 
   def __init__(self, parent=None, project=None, **kw):
     super(PipelineWidgets, self).__init__(parent)
-    Base.__init__(self, **kw)
+    # Base.__init__(self, **kw)
     self.project = project
     self.pullDownData = {
                 'Poly Baseline': gp.PolyBaseline(self, self.project),
@@ -50,117 +65,117 @@ class PipelineWidgets(QtGui.QWidget, Base):
                 'Bin': gp.Bin(self, self.project),
                 'Exclude Baseline Points': gp.ExcludeBaselinePoints(self, self.project),
                 'Normalise Spectra': gp.NormaliseSpectra(self, self.project),
-                'Exclude Signal Free Regions': gp.ExcludeSignalFreeRegions(self, self.project),
-                'Exclude Regions': ExcludeRegions(self)}
-
-
+                'Exclude Signal Free Regions': gp.ExcludeSignalFreeRegions(self, self.project)}
 
     self.moveUpRowIcon = Icon('iconsNew/sort-up')
     self.moveDownRowIcon = Icon('iconsNew/sort-down')
     self.addRowIcon = Icon('iconsNew/plus')
     self.removeRowIcon = Icon('iconsNew/minus')
 
-    # Main layout: a scrollable group box with a gridLayout layout. 3 different areas inside:
-    # left: method selection(groupbox, hLayout);
-    # middle: actions (groupbox, GridLayout);
-    # right: layout management(groupbox, hLayout).
-    # This proposed solution will allow to have every time the left and right widgets aligned within the the main layout.
-
-
-    self.pipelineGroupBox = GroupBox('Pipeline')
-    self.groupBoxMainLayout = QtGui.QGridLayout()
-    self.groupBoxMainLayout.setAlignment(QtCore.Qt.AlignTop)
-    self.setLayout(self.groupBoxMainLayout)
-
-
-    self.pipelineGroupBox.setLayout(self.groupBoxMainLayout)
-    self.scrollArea = ScrollArea(self)
-    self.scrollArea.setWidget(self.pipelineGroupBox)
-    self.scrollArea.setWidgetResizable(True)
-
-
-
-
-    self.left = GroupBox()
-    self.left.setFixedWidth(220)
-    self.left.setFixedHeight(90)
-    self.groupBoxMainLayout.addWidget(self.left,0,0)
-    self.left_layout = QtGui.QHBoxLayout(self.left)
-
-
-    self.middle = GroupBox()
-    self.middle.setFixedHeight(90)
-    self.groupBoxMainLayout.addWidget(self.middle,0,1)
-    self.middle_layout = QtGui.QHBoxLayout(self.middle)
-    polyBL = Bin(self, self.project)
-    self.middle_layout.addWidget(polyBL)
-
-    self.right = GroupBox()
-    self.right.setFixedWidth(120)
-    self.right.setFixedHeight(90)
-    self.right_layout = QtGui.QHBoxLayout(self.right)
-    self.groupBoxMainLayout.addWidget(self.right,0,2)
-
-
+    self.mainWidgets = GroupBox(self)
+    self.mainWidgets.setFixedHeight(90)
+    self.mainWidgets_layout = QtGui.QHBoxLayout(self.mainWidgets)
 
     self.pulldownAction = PulldownList(self,)
     self.pulldownAction.setFixedWidth(130)
-    self.pulldownAction.setFixedHeight(30)
-    for item in sorted( self.pullDownData):
-      self.pulldownAction.addItem(item)
+    self.pulldownAction.setFixedHeight(25)
+
+    pdData = list(self.pullDownData.keys())
+    pdData.insert(0, '< Select Method >')
+
+    self.pulldownAction.setData(pdData)
     self.pulldownAction.activated[str].connect(self.addMethod)
 
-    # self.pulldownAction.setData(PullDownData)
     self.checkBox = CheckBox(self, text='active')
 
     self.moveUpDownButtons = ButtonList(self, texts = ['︎','︎︎'], callbacks=[self.moveRowUp, self.moveRowDown], icons=[self.moveUpRowIcon,self.moveDownRowIcon],
                                        tipTexts=['Move row up', 'Move row down'], direction='h', hAlign='r')
-    self.moveUpDownButtons.setMaximumSize(90, 70) #Lenght,Height
+    self.moveUpDownButtons.setFixedHeight(40)
+    self.moveUpDownButtons.setFixedWidth(40)
     self.moveUpDownButtons.setStyleSheet('font-size: 10pt')
 
     self.addRemoveButtons = ButtonList(self, texts = ['',''], callbacks=[self.addRow, self.removeRow],icons=[self.addRowIcon,self.removeRowIcon],
-                                       tipTexts=['Add new row', 'Remove row '], direction='H', hAlign='l')
+                                       tipTexts=['Add new row', 'Remove row '],  direction='H', hAlign='l' )
     self.addRemoveButtons.setStyleSheet('font-size: 10pt')
-    self.addRemoveButtons.setMaximumSize(90, 70)
+    self.addRemoveButtons.setFixedHeight(40)
+    self.addRemoveButtons.setFixedWidth(40)
 
-    self.left_layout.addWidget(self.pulldownAction)
-    self.left_layout.addWidget(self.checkBox)
+    self.mainWidgets_layout.addWidget(self.pulldownAction,)
+    self.mainWidgets_layout.addWidget(self.checkBox,)
 
-
-    self.right_layout.addWidget(self.moveUpDownButtons)
-    self.right_layout.addWidget(self.addRemoveButtons)
-
-
-
-    # self.layout.addWidget(self.scrollArea)
-
+    self.mainWidgets_layout.addWidget(self.moveUpDownButtons,)
+    self.mainWidgets_layout.addWidget(self.addRemoveButtons,)
+    self.addRemoveButtons.buttons[0].setEnabled(False)
 
 
   def addMethod(self, selected):
+     self.updateLayout()
+     if selected != '< Select Method >':
+      self.addRemoveButtons.buttons[0].setEnabled(True)
+      obj = self.pullDownData[selected]
+      self.mainWidgets_layout.insertWidget(2, obj, 1)
 
-    for method in sorted(self.pullDownData):
-      if selected == ('%s' %method):
-        obj = (self.pullDownData[method])
-        self.middle_layout.addWidget(obj)
+
+  def updateLayout(self):
+    layout = self.mainWidgets_layout
+    item = layout.itemAt(2)
+    if item:
+      if item.widget():
+        item.widget().hide()
+      layout.removeItem(item)
 
 
+  def moveRowUp(self):
+    '''
+    obj => sender = button, parent1= buttonList, parent2= GroupBox1, parent3=PipelineWidgets obj
+    objLayout is the main parent layout (VLayout)
+    '''
+    obj = self.sender().parent().parent().parent()
+    objLayout = obj.parent().layout()
+    currentPosition = objLayout.indexOf(obj)
+    newPosition = max(currentPosition-1, 0)
+    objLayout.insertWidget(newPosition, obj)
 
-  def addRow (self):
-    print('addRow')
+  def moveRowDown(self):
+    '''
+    obj as above
+    objLayout is the main parent layout (VLayout)
+    '''
+
+    obj = self.sender().parent().parent().parent()
+    objLayout = obj.parent().layout()
+    currentPosition = objLayout.indexOf(obj)
+    newPosition = min(currentPosition+1, objLayout.count()-1)
+    objLayout.insertWidget(newPosition, obj)
+
+  def addRow(self):
+    '''
+    This function will add a new Pipelinewidgets obj in the next row below the clicked button
+    '''
+
+    newObj = (PipelineWidgets(self, self.project))
+    obj = self.sender().parent().parent().parent()
+    objLayout = obj.parent().layout()
+    currentPosition = objLayout.indexOf(obj)
+    newPosition = min(currentPosition+1, objLayout.count()-1)
+    objLayout.insertWidget(newPosition, newObj)
+
+
 
   def removeRow (self):
-    print('removeRow')
+    '''
+    This function will remove the Pipelinewidgets selected from the main parent layout (VLayout)
+    '''
 
-  def moveRowUp (self):
-    print('moveRowUp')
+    obj = self.sender().parent().parent().parent()
+    objLayout = obj.parent().layout()
+    currentPosition = objLayout.indexOf(obj)
 
-  def moveRowDown (self):
-    print('moveRowDown')
+    if objLayout.count() == 1 and currentPosition == 0:
+      pass
 
-
-
-
-
+    else:
+      obj.deleteLater()
 
 
 

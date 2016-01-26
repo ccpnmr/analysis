@@ -354,7 +354,7 @@ class Scale(QtGui.QWidget, Base):
     self.methodLabel = Label(self, 'Method ', grid=(0, 0))
     self.methodPulldown = PulldownList(self, grid=(0, 1))
     methods = ['Unit Variance', 'Pareto']
-    self.targetPulldown.setData(methods)
+    self.methodPulldown.setData(methods)
 
 class ExcludeSignalFreeRegions(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):

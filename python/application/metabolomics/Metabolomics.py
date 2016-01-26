@@ -110,6 +110,7 @@ class PipelineWidgets(QtGui.QWidget):
 
   def addMethod(self, selected):
      self.updateLayout()
+
      if selected != '< Select Method >':
       self.addRemoveButtons.buttons[0].setEnabled(True)
       obj = self.pullDownData[selected]
@@ -119,9 +120,8 @@ class PipelineWidgets(QtGui.QWidget):
   def updateLayout(self):
     layout = self.mainWidgets_layout
     item = layout.itemAt(2)
-    if item:
-      if item.widget():
-        item.widget().hide()
+    if item.widget() is not self.moveUpDownButtons:
+      item.widget().hide()
       layout.removeItem(item)
 
 
@@ -157,8 +157,12 @@ class PipelineWidgets(QtGui.QWidget):
     obj = self.sender().parent().parent().parent()
     objLayout = obj.parent().layout()
     currentPosition = objLayout.indexOf(obj)
-    newPosition = min(currentPosition+1, objLayout.count()-1)
+    newPosition = min(currentPosition+1, objLayout.count())
     objLayout.insertWidget(newPosition, newObj)
+
+    for item in range(objLayout.count()):
+      print(item)
+
 
 
 

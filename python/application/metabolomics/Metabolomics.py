@@ -35,15 +35,26 @@ class MetabolomicsModule(CcpnDock, Base):
     self.pipelineMainVLayout = QtGui.QVBoxLayout()
     self.pipelineMainVLayout.setAlignment(QtCore.Qt.AlignTop)
     self.setLayout(self.pipelineMainVLayout)
-
+    self.goArea = GoArea(self, project)
+    self.layout.addWidget(self.goArea, 0, 0)
     self.pipelineMainGroupBox.setLayout(self.pipelineMainVLayout)
     self.scrollArea = ScrollArea(self)
     self.scrollArea.setWidget(self.pipelineMainGroupBox)
     self.scrollArea.setWidgetResizable(True)
-    self.layout.addWidget(self.scrollArea, 0,0)
+    self.layout.addWidget(self.scrollArea, 1, 0)
 
     widget = (PipelineWidgets(self, project))
     self.pipelineMainVLayout.addWidget(widget)
+
+
+class GoArea(QtGui.QWidget):
+
+  def __init__(self, parent=None, project=None, **kw):
+    super(GoArea, self).__init__(parent)
+    self.spectrumGroupLabel = Label(self, 'Input Data ', grid=(0, 0))
+    self.spectrumGroupPulldown = PulldownList(self, grid=(0, 1))
+    self.autoUpdateLabel = Label(self, 'Auto Update', grid=(0, 2))
+    self.autoUpdateBox = CheckBox(self, grid=(0, 3))
 
 
 class PipelineWidgets(QtGui.QWidget):
@@ -106,6 +117,8 @@ class PipelineWidgets(QtGui.QWidget):
     self.mainWidgets_layout.addWidget(self.moveUpDownButtons,)
     self.mainWidgets_layout.addWidget(self.addRemoveButtons,)
     self.addRemoveButtons.buttons[0].setEnabled(False)
+    self.goBox = self.parent().goArea.autoUpdateBox
+    self.goBox.toggled.connect(self.runPipeline)
 
 
   def addMethod(self, selected):
@@ -180,6 +193,16 @@ class PipelineWidgets(QtGui.QWidget):
 
     else:
       obj.deleteLater()
+
+  def runPipeline(self):
+    if self.goBox.isChecked():
+      items = [self.mainWidgets_layout.itemAt(i) for i in range(self.mainWidgets_layout.count())]
+      # for item in items:
+      if isinstance(items[0].widget(), PulldownList):
+          print(items[0].widget().currentText())
+          if items[1].widget().isChecked():
+            print(items[2].widget().getParams())
+
 
 
 

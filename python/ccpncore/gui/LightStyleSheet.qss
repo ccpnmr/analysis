@@ -186,6 +186,10 @@ Dock  QPushButton {
 				background-color: #bd8413;
 				border: none
 				}
+Dock  QPushButton::checked {
+				color: #fdfdfc;
+				background-color: #8087b3;
+				}
 
 
 Dock ScrollArea QPushButton {

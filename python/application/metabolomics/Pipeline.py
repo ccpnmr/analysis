@@ -25,7 +25,10 @@ __version__ = ": 7686 $"
 from ccpncore.util import Types
 
 
-def runPipeLine(self, functions):
+def createPipeline(self, functions):
+  pass
+
+def runPipeLine(self, pipeline):
   pass
 
 def alignToReference(spectrumArrays:dict, window:tuple, referencePosition:float):

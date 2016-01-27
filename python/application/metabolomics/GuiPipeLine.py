@@ -39,10 +39,10 @@ from functools import partial
 class PolyBaseline(QtGui.QWidget, Base):
 
 
-  def __init__(self, parent=None, current=None, **kw):
+  def __init__(self, parent=None, project=None, **kw):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
-    self.current = current
+    self.current = project._appBase.current
     self.orderLabel = Label(self, 'Order ', grid=(0, 0))
     self.orderBox = Spinbox(self, grid=(0, 1))
     self.orderBox.setMinimum(2)
@@ -154,7 +154,7 @@ class AlignToReference(QtGui.QWidget, Base):
     Base.__init__(self, **kw)
     self.windowBoxes = []
     self.current = project._appBase.current
-    self.pickOnSpectrumButton = Button(self, 'pick', grid=(0, 0), toggle=True)
+    self.pickOnSpectrumButton = Button(self, grid=(0, 0), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
     self.region1 = DoubleSpinbox(self, grid=(0, 1))
@@ -184,6 +184,7 @@ class AlignToReference(QtGui.QWidget, Base):
     self.current.unRegisterNotify(self.setPositions, 'positions')
     self.current.strip.plotWidget.removeItem(self.lr)
 
+
   def setPositions(self, positions):
     if len(self.linePoints) < 2:
       line = pg.InfiniteLine(angle=90, pos=self.current.positions[0], movable=True, pen=(0, 0, 100))
@@ -192,6 +193,8 @@ class AlignToReference(QtGui.QWidget, Base):
       for i, line in enumerate(self.linePoints):
         self.regionBoxes[i].setValue(line.pos().x())
     if len(self.linePoints) == 2:
+      for linePoint in self.linePoints:
+        self.current.strip.plotWidget.removeItem(linePoint)
       if not self.lr:
         self.lr = pg.LinearRegionItem(values=[self.linePoints[0].pos().x(), self.linePoints[1].pos().x()])
 
@@ -325,8 +328,8 @@ class ExcludeBaselinePoints(QtGui.QWidget, Base):
     self.multiplierLabel = Label(self, 'Baseline Multipler', grid=(0, 3))
     self.multiplierBox = DoubleSpinbox(self, grid=(0, 4))
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
-    self.linePoint1 = pg.InfiniteLine(angle=0, pos=self.pointBox.value(), movable=True, pen=(255, 0, 100))
-    self.linePoint2 = pg.InfiniteLine(angle=0, pos=self.pointBox.value(), movable=True, pen=(255, 0, 100))
+    self.linePoint1 = pg.InfiniteLine(angle=0, pos=self.pointBox1.value(), movable=True, pen=(255, 0, 100))
+    self.linePoint2 = pg.InfiniteLine(angle=0, pos=self.pointBox2.value(), movable=True, pen=(255, 0, 100))
     self.current.strip.plotWidget.addItem(self.linePoint1)
     self.current.strip.plotWidget.addItem(self.linePoint2)
     self.pointBox1.setValue(self.linePoint1.pos().y())

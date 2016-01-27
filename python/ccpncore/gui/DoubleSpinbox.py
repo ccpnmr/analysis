@@ -39,7 +39,14 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
     if max is not None:
       self.setMaximum(max)
     Base.__init__(self, **kw)
+    self.isSelected = False
 
 
     if showButtons is False:
       self.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+
+  def setSelected(self):
+    self.isSelected = True
+
+  def focusInEvent(self, QFocusEvent):
+    self.setSelected()

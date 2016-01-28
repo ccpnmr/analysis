@@ -45,7 +45,7 @@ class MetabolomicsModule(CcpnDock, Base):
 
     widget = (PipelineWidgets(self, project))
     self.pipelineMainVLayout.addWidget(widget)
-
+    # self.checkBox = CheckBox(self, text='Auto-Update')
 
 class GoArea(QtGui.QWidget):
 
@@ -60,6 +60,7 @@ class GoArea(QtGui.QWidget):
 class PipelineWidgets(QtGui.QWidget):
   '''
   '''
+
 
   def __init__(self, parent=None, project=None, **kw):
     super(PipelineWidgets, self).__init__(parent)
@@ -78,13 +79,15 @@ class PipelineWidgets(QtGui.QWidget):
                 'Normalise Spectra': gp.NormaliseSpectra(self, self.project),
                 'Exclude Signal Free Regions': gp.ExcludeSignalFreeRegions(self, self.project)}
 
+
+
     self.moveUpRowIcon = Icon('iconsNew/sort-up')
     self.moveDownRowIcon = Icon('iconsNew/sort-down')
     self.addRowIcon = Icon('iconsNew/plus')
     self.removeRowIcon = Icon('iconsNew/minus')
 
     self.mainWidgets = GroupBox(self)
-    self.mainWidgets.setFixedHeight(90)
+    self.mainWidgets.setFixedHeight(80)
     self.mainWidgets_layout = QtGui.QHBoxLayout(self.mainWidgets)
 
     self.pulldownAction = PulldownList(self,)
@@ -93,11 +96,14 @@ class PipelineWidgets(QtGui.QWidget):
 
     pdData = list(self.pullDownData.keys())
     pdData.insert(0, '< Select Method >')
+    self.selectMethod = '< Select Method >'
+
 
     self.pulldownAction.setData(pdData)
     self.pulldownAction.activated[str].connect(self.addMethod)
 
     self.checkBox = CheckBox(self, text='active')
+
 
     self.moveUpDownButtons = ButtonList(self, texts = ['︎','︎︎'], callbacks=[self.moveRowUp, self.moveRowDown], icons=[self.moveUpRowIcon,self.moveDownRowIcon],
                                        tipTexts=['Move row up', 'Move row down'], direction='h', hAlign='r')
@@ -121,13 +127,17 @@ class PipelineWidgets(QtGui.QWidget):
     self.goBox.toggled.connect(self.runPipeline)
 
 
+
+
   def addMethod(self, selected):
      self.updateLayout()
 
      if selected != '< Select Method >':
-      self.addRemoveButtons.buttons[0].setEnabled(True)
       obj = self.pullDownData[selected]
       self.mainWidgets_layout.insertWidget(2, obj, 1)
+      mainVboxLayout = obj.parent().parent().parent().layout()
+      items = [mainVboxLayout.itemAt(i) for i in range(mainVboxLayout.count())]
+      self.enableAddButton(items)
 
 
   def updateLayout(self):
@@ -163,7 +173,7 @@ class PipelineWidgets(QtGui.QWidget):
 
   def addRow(self):
     '''
-    This function will add a new Pipelinewidgets obj in the next row below the clicked button
+    This function will add a new Pipelinewidgets obj in the next row below the clicked button.
     '''
 
     newObj = (PipelineWidgets(self, self.project))
@@ -173,10 +183,25 @@ class PipelineWidgets(QtGui.QWidget):
     newPosition = min(currentPosition+1, objLayout.count())
     objLayout.insertWidget(newPosition, newObj)
 
-    for item in range(objLayout.count()):
-      print(item)
+    items = [objLayout.itemAt(i) for i in range(objLayout.count())]
+    self.disableAddButton(items)
 
 
+  def disableAddButton(self, items):
+    '''
+    If there is empty row with no method selected, will disable all the addButtons in each other row
+    '''
+    for i in items:
+      if i.widget().pulldownAction.getText() == '< Select Method >':
+        for i in items:
+          i.widget().addRemoveButtons.buttons[0].setEnabled(False)
+
+  def enableAddButton(self, items):
+    '''
+    If a method is selected, will enable all the addButtons in each other row
+    '''
+    for i in items:
+      i.widget().addRemoveButtons.buttons[0].setEnabled(True)
 
 
   def removeRow (self):
@@ -197,7 +222,6 @@ class PipelineWidgets(QtGui.QWidget):
   def runPipeline(self):
     if self.goBox.isChecked():
       items = [self.mainWidgets_layout.itemAt(i) for i in range(self.mainWidgets_layout.count())]
-      # for item in items:
       if isinstance(items[0].widget(), PulldownList):
           print(items[0].widget().currentText())
           if items[1].widget().isChecked():

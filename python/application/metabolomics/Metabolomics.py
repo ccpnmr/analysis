@@ -1,21 +1,39 @@
-from application.core.popups.SampleSetupPopup import solvents, SamplePopup, ExcludeRegions
-from application.metabolomics.GuiPipeLine import PolyBaseline
+"""Module Documentation here
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - : 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+               "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                 " or ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = ": rhfogh $"
+__date__ = ": 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
+__version__ = ": 7686 $"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
 from PyQt4 import QtCore, QtGui
-from ccpncore.gui.Dock import CcpnDock
+
 from ccpncore.gui.Base import Base
-from ccpncore.gui.ScrollArea import ScrollArea
-from ccpncore.gui.Table import ObjectTable, Column
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Frame import Frame
-from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Icon import Icon
+from ccpncore.gui.Dock import CcpnDock
+from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.GroupBox import GroupBox
-from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
+from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
-from functools import partial
+from ccpncore.gui.PulldownList import PulldownList
+from ccpncore.gui.ScrollArea import ScrollArea
+
 from application.metabolomics import GuiPipeLine as gp
 
 

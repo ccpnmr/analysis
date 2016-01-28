@@ -24,48 +24,104 @@ __version__ = ": 7686 $"
 
 from ccpncore.util import Types
 
+from functools import reduce
+#
+# class Pipeline(object):
+#   def __init__(self, *args):
+#     if args:
+#       self._func_list=args
+#     else:
+#       self._func_list=[]
+#
+#   def __call__(self, *args, **kwargs):
+#     (fargs,fkwargs) = (args,kwargs)
+#     for f in self:
+#       results = f(*fargs, **fkwargs)
+#       if isinstance(results, tuple) and len(results) == 2 and \
+#               isinstance(results[0],list) and isinstance(results[1],dict):
+#         fargs,kwargs = results
+#       else:
+#         fargs = [results]
+#         fkwargs = {}
+#     return results
+#
+#   def __iter__(self):
+#     for f in self._func_list:
+#       yield f
+#     raise StopIteration
+#
+#   def __eq__(self, other):
+#     return self._func_list == other._func_list
+#
+#   def __add__(self, other):
+#     funcs = other
+#     if callable(other):
+#        funcs = [other]
+#     args = list(self._func_list) + list(funcs)
+#     return Pipeline(*args)
+#
+#   def push(self, f):
+#     return self._func_list.insert(0, f)
+#
+#   def pop(self, *args, **kwargs):
+#     return self._func_list.pop(*args, **kwargs)
+#
+#   def append(self, *args, **kwargs):
+#     return self._func_list.append(*args, **kwargs)
+#
+#
+#
+#
+# def add_1(x, y):
+#   return x+y
+#
+# def mul_2(x):
+#     return (x * 2)
+#
+# def identity(x):
+#     return x
 
-def createPipeline(self, functions):
-  pass
 
-def runPipeLine(self, pipeline):
-  pass
 
-def alignToReference(spectrumArrays:dict, window:tuple, referencePosition:float):
-  pass
+def alignSpectra(self, inputData, **args):
+  print('alignSpectra', args)
 
-def excludeRegions(spectrumArrays:dict, regions:list):
-  pass
+def alignToReference(self, inputData, **args):
+  print('alignToReference', args)
 
-def polyBaseLine(spectrumArrays:dict, controlPoints:list):
-  pass
+def excludeRegions(self, inputData, **args):
+  print('excludeRegions', args)
 
-def whittakerBaseline(spectrumArrays:dict, a:float, lam:float, controlPoints:list=None):
-  pass
+def polyBaseLine(self, inputData, **args):
+  print('polyBaseLine', args)
 
-def segmentalAlign(spectrumArrays:dict, regions:list):
-  pass
+def whittakerBaseline(self, inputData, **args):
+  print('whittakerBaseline', args)
 
-def bin(spectrumArrays:dict, binWidth:float):
-  pass
+def segmentalAlign(self, inputData, **args):
+  print('segmentalAlign', args)
 
-def excludeSignalFreeRegions(spectrumArrays:dict, lam:float):
-  pass
+def bin(self, inputData, **args):
+  print('bin', args)
 
-def whittakerSmooth(spectrumArrays:dict, a:float, lam:float, controlPoints:list=None):
-  pass
+def excludeSignalFreeRegions(self, inputData, **args):
+  print('excludeSignalFreeRegions', args)
 
-def excludeBaselinePointss(spectrumArrays:dict, baselineRegion:tuple, baselineMultipler:float):
-  pass
+def whittakerSmooth(self, inputData, **args):
+  print('whittakerSmooth', args)
 
-def normalise(spectrumArrays:dict, method:str, coeffs:list=None):
-  pass
+def excludeBaselinePoints(self, inputData, **args):
+  print('excludeBaselinePoints', args)
 
-def autoScale(spectrumArrays:dict):
-  pass
+def normalise(self, inputData, **args):
+  print('normalise', args)
 
-def meanCentre(spectrumArrays:dict):
-  pass
+def autoScale(self, inputData, **args):
+  print('autoScale', args)
 
-def scale(spectrumArrays:dict, method:str):
-  pass
+
+def meanCentre(self, inputData, **args):
+  print('meanCentre', args)
+
+def scale(self, inputData, **args):
+  print('scale', args)

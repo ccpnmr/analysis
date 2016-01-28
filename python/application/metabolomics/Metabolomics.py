@@ -20,7 +20,15 @@ from application.metabolomics import GuiPipeLine as gp
 
 
 
-#
+class MyThread(QtCore.QThread):
+    updated = QtCore.pyqtSignal(str)
+
+    def run( self ):
+        # do some functionality
+        for i in range(10000):
+            self.updated.emit(str(i))
+
+
 class MetabolomicsModule(CcpnDock, Base):
 
   def __init__(self, project, **kw):
@@ -43,9 +51,28 @@ class MetabolomicsModule(CcpnDock, Base):
     self.scrollArea.setWidgetResizable(True)
     self.layout.addWidget(self.scrollArea, 1, 0)
 
-    widget = (PipelineWidgets(self, project))
-    self.pipelineMainVLayout.addWidget(widget)
+    self.widget = (PipelineWidgets(self, project))
+    self.pipelineMainVLayout.addWidget(self.widget)
+    self._thread = MyThread(self)
+    self._thread.updated.connect(self.updatePipeline)
+    self.goArea.autoUpdateBox.toggled.connect(self._thread.start)
     # self.checkBox = CheckBox(self, text='Auto-Update')
+
+  def runPipeline(self):
+    pipelineFunctions = []
+    # for i in range(self.widget.mainWidgets_layout.count()):
+    for i in range(self.pipelineMainVLayout.count()):
+      widget = self.pipelineMainVLayout.itemAt(i).widget()
+      if widget.mainWidgets_layout.itemAt(1).widget().isChecked():
+        params = widget.mainWidgets_layout.itemAt(2).widget().getParams()
+        pipelineFunctions.append(params)
+
+    print(pipelineFunctions)
+
+
+  def updatePipeline(self):
+    if self.goArea.autoUpdateBox.isChecked():
+      self.runPipeline()
 
 class GoArea(QtGui.QWidget):
 
@@ -123,8 +150,8 @@ class PipelineWidgets(QtGui.QWidget):
     self.mainWidgets_layout.addWidget(self.moveUpDownButtons,)
     self.mainWidgets_layout.addWidget(self.addRemoveButtons,)
     self.addRemoveButtons.buttons[0].setEnabled(False)
-    self.goBox = self.parent().goArea.autoUpdateBox
-    self.goBox.toggled.connect(self.runPipeline)
+    # self.goBox = self.parent().goArea.autoUpdateBox
+    # self.goBox.toggled.connect(self.runPipeline)
 
 
 
@@ -218,17 +245,6 @@ class PipelineWidgets(QtGui.QWidget):
 
     else:
       obj.deleteLater()
-
-  def runPipeline(self):
-    if self.goBox.isChecked():
-      items = [self.mainWidgets_layout.itemAt(i) for i in range(self.mainWidgets_layout.count())]
-      if isinstance(items[0].widget(), PulldownList):
-          print(items[0].widget().currentText())
-          if items[1].widget().isChecked():
-            print(items[2].widget().getParams())
-
-
-
 
 
 

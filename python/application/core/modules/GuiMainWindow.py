@@ -705,8 +705,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
 
   def showMetabolomicsModule(self):
-    showMm = MetabolomicsModule(self.project)
-    self.dockArea.addDock(showMm, position='bottom')
+    self.showMm = MetabolomicsModule(self.project)
+    self.dockArea.addDock(self.showMm, position='bottom')
 
 
   def showParassignSetup(self):

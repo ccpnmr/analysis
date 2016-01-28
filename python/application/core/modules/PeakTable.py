@@ -38,10 +38,10 @@ from PyQt4 import QtGui, QtCore
 UNITS = ['ppm', 'Hz', 'point']
 
 class PeakTable(CcpnDock):
-  def __init__(self, peakLists, selectedList=None):
+  def __init__(self, project, selectedList=None):
     CcpnDock.__init__(self, name='Peak List')
 
-    self.layout.addWidget(PeakListSimple(self, peakLists, selectedList=selectedList))
+    self.layout.addWidget(PeakListSimple(self, project.peakLists, selectedList=selectedList))
 
 
 
@@ -63,7 +63,7 @@ class PeakListSimple(QtGui.QWidget, Base):
     self.peakLists = project.peakLists
     label = Label(self, 'Peak List:')
     self.layout().addWidget(label, 0, 0, QtCore.Qt.AlignRight)
-    self.setContentsMargins(4, 4, 4, 4,)
+    self.setContentsMargins(0, 4, 0, 4,)
     # self.label.setFont(Font(size=12, bold=True))
     self.peakListPulldown = PulldownList(self, grid=(0, 1))
     if callback is None:

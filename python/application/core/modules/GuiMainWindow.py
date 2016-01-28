@@ -709,6 +709,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(self.showMm, position='bottom')
 
 
+
+  def showPCAModule(self):
+    from application.metabolomics.Pca import PcaModule
+    self.pcaModule = PcaModule(self.project)
+    self.dockArea.addDock(self.pcaModule, position='bottom')
+    spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
+    self.dockArea.moveDock(spectrumDisplay.dock, position='bottom', neighbor=self.pcaModule)
+
+  def showPickandFitModule(self):
+    spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
+    from application.metabolomics.PickandFit import PickandFit
+    PickandFit(spectrumDisplay.dock, grid=(2, 0), gridSpan=(1, 4))
+
   def showParassignSetup(self):
     try:
       from application.plugins.PARAssign.PARAssignSetup import ParassignSetup

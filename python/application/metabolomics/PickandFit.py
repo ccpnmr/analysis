@@ -126,36 +126,36 @@ class PickandFitTable(QtGui.QWidget, Base):
     centrePoint = 5.0
     self.positions1 = [centrePoint+2, centrePoint-2]
     self.positions2 = [centrePoint+2.5, centrePoint-2.5]
-    self.positions3 = [1e5, 1e9]
+    self.positions3 = [1e9, 1e5]
     brush = QtGui.QBrush(QtGui.QColor(0, 0, 0, 0))
     self.lr1 = pg.LinearRegionItem(values=[self.positions1[0], self.positions1[1]], brush=brush)
     dashedLine1 = pg.InfiniteLine(angle=90, pos=self.positions2[0], movable=True)
     dashedLine2 = pg.InfiniteLine(angle=90, pos=self.positions2[1], movable=True)
-    # self.lr3 = pg.LinearRegionItem(values=[self.positions3[0], self.positions3[1]], orientation=pg.LinearRegionItem.Horizontal, brush=brush)
+    self.lr3 = pg.LinearRegionItem(values=[self.positions3[0], self.positions3[1]], orientation=pg.LinearRegionItem.Horizontal, brush=brush)
     dashedLine1.setPen(style=QtCore.Qt.DashLine, color='g')
     dashedLine2.setPen(style=QtCore.Qt.DashLine, color='g')
     for line in self.lr1.lines:
       line.setPen(color='b')
     self.fitModule.strip.plotWidget.addItem(self.lr1)
-    print([line.pos().x() for line in self.lr1.lines])
     self.fitModule.strip.plotWidget.addItem(dashedLine1)
     self.fitModule.strip.plotWidget.addItem(dashedLine2)
-    # self.fitModule.strip.plotWidget.addItem(self.lr3)
+    self.fitModule.strip.plotWidget.addItem(self.lr3)
     self.lr1.sigRegionChanged.connect(self.lr1Moved)
+    self.lr3.sigRegionChanged.connect(self.lr3Moved)
+    self.lr1.setBounds([self.positions2[1]+0.5, self.positions2[0]-0.5])
+    self.lr1.sigRegionChangeFinished.connect(self.setDashedLineBoundaries)
+    dashedLine1.setBounds([self.positions1[0], None])
+    dashedLine2.setBounds([None, self.positions1[1]])
     dashedLine1.sigPositionChanged.connect(self.lr2Moved)
     dashedLine2.sigPositionChanged.connect(self.lr2Moved)
+    dashedLine1.sigPositionChangeFinished.connect(self.setRegionLimits)
+    dashedLine2.sigPositionChangeFinished.connect(self.setRegionLimits)
     self.dashedLines = [dashedLine1, dashedLine2]
 
   #
   def lr1Moved(self):
 
-    if self.lr1.lines[0].pos().x() - self.dashedLines[1].pos().x() < 0.05 or \
-      abs(self.lr1.lines[1].pos().x() - self.dashedLines[0].pos().x()) < 0.05:
-      print('1', self.lr1.lines[0].pos().x(), self.dashedLines[1].pos().x(), '2',
-            self.lr1.lines[1].pos().x(), self.dashedLines[0].pos().x())
-      return
-    # if self.lr1.lines[0].pos().x()
-    else:
+    if self.lr1.lines[0].pos().x() !=  self.lr1.lines[1].pos().x():
       if self.lr1.lines[0].pos().x() < self.positions1[1]:
         diff = self.positions1[1] - self.lr1.lines[0].pos().x()
         self.positions1[1] -= diff
@@ -179,7 +179,6 @@ class PickandFitTable(QtGui.QWidget, Base):
         self.positions1[1] += diff
         self.positions1[0] -= diff
         self.lr1.lines[0].setPos(self.positions1[1])
-      # self.lr1.setBounds([self.positions2[1]+0.05, self.positions1[0]-0.05])
 
   def lr2Moved(self):
     if self.dashedLines[0].pos().x() < self.positions2[1]:
@@ -206,7 +205,35 @@ class PickandFitTable(QtGui.QWidget, Base):
       self.positions2[0] -= diff
       self.dashedLines[0].setPos(self.positions2[1])
 
+  def setDashedLineBoundaries(self):
+    self.dashedLines[0].setBounds([self.positions1[0], None])
+    self.dashedLines[1].setBounds([None, self.positions1[1]])
 
+  def setRegionLimits(self):
+    self.lr1.setBounds([self.positions2[0]-0.5, self.positions2[1]+0.5])
 
+  def lr3Moved(self):
 
+    if self.lr3.lines[0].pos().y() < self.positions3[1]:
+      diff = self.positions3[1] - self.lr3.lines[0].pos().y()
+      self.positions3[1] -= diff
+      self.positions3[0] += diff
+      self.lr3.lines[1].setPos(self.positions3[0])
 
+    if self.lr3.lines[0].pos().y() > self.positions3[1]:
+      diff = self.positions3[1] - self.lr3.lines[0].pos().y()
+      self.positions3[1] -= diff
+      self.positions3[0] += diff
+      self.lr3.lines[1].setPos(self.positions3[0])
+
+    if self.lr3.lines[1].pos().y() > self.positions3[0]:
+      diff = self.positions3[0] - self.lr3.lines[1].pos().y()
+      self.positions3[1] += diff
+      self.positions3[0] -= diff
+      self.lr3.lines[0].setPos(self.positions3[1])
+
+    if self.lr3.lines[1].pos().y() < self.positions3[0]:
+      diff = self.positions3[0] - self.lr3.lines[1].pos().y()
+      self.positions3[1] += diff
+      self.positions3[0] -= diff
+      self.lr3.lines[0].setPos(self.positions3[1])

@@ -64,7 +64,7 @@ class Note(AbstractWrapperObject):
     return self._wrappedData.serial
 
   @property
-  def name(self) -> int:
+  def name(self) -> str:
     """Name of note, part of identifier"""
     return self._wrappedData.name
 

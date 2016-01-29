@@ -501,7 +501,7 @@ class TextWriter_py_2_1:
     if addSuffix and self.fileSuffix:
       pathList[-1] = '%s.%s' % (pathList[-1], self.fileSuffix)
     
-    # 
+    #
     return Path.joinPath(*pathList)
 
   ###########################################################################

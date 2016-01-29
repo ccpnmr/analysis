@@ -28,10 +28,10 @@ from ccpn import Sample
 from ccpn import Spectrum
 from ccpncore.util.Types import Tuple, Optional, Sequence
 from ccpncore.lib.molecule import MoleculeModify
-# from ccpn import Chain
 from ccpn import SampleComponent
 from ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
 from ccpncore.util import Pid
+# from ccpn import Chain
 
 
 _apiClassNameMap = {

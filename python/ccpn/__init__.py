@@ -174,6 +174,8 @@ Project = cls = importlib.import_module('ccpn._wrapper._Project').Project
 _wrappedClasses.append(cls)
 Spectrum = cls = importlib.import_module('ccpn._wrapper._Spectrum').Spectrum
 _wrappedClasses.append(cls)
+SpectrumGroup = cls = importlib.import_module('ccpn._wrapper._SpectrumGroup').SpectrumGroup
+_wrappedClasses.append(cls)
 PeakList = cls = importlib.import_module('ccpn._wrapper._PeakList').PeakList
 _wrappedClasses.append(cls)
 Peak = cls = importlib.import_module('ccpn._wrapper._Peak').Peak

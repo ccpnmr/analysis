@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""General path handling utilities. NB must be python 2.1 complieant!!!"""
+"""General path handling utilities. NB must be python 2.1 compliant!!!"""
 
 
 #

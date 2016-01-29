@@ -21,6 +21,7 @@ def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
                          Information, iconPath, colourScheme, parent)
 
   dialog.setStandardButtons(Ok)
+  dialog.raise_()
   dialog.exec_()
   
   return 
@@ -33,6 +34,7 @@ def showOkCancel(title, message, parent=None, colourScheme=None):
   dialog.setStandardButtons(Ok | Cancel)
   dialog.setDefaultButton(Ok)
   
+  dialog.raise_()
   return dialog.exec_() == Ok
 
 def showYesNo(title, message, parent=None, colourScheme=None):
@@ -44,6 +46,7 @@ def showYesNo(title, message, parent=None, colourScheme=None):
   dialog.setStandardButtons(Yes | No)
   dialog.setDefaultButton(Yes)
 
+  dialog.raise_()
   return dialog.exec_() == Yes
 
 def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None):
@@ -54,6 +57,7 @@ def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None):
   dialog.setStandardButtons( Retry | Ignore | Cancel)
   dialog.setDefaultButton(Retry)
   
+  dialog.raise_()
   result = dialog.exec_()
   
   if result == Retry:
@@ -73,6 +77,7 @@ def showSaveDiscardCancel(title, message, parent=None, colourScheme=None):
   dialog.setStandardButtons( Save | Discard | Cancel)
   dialog.setDefaultButton(Save)
   
+  dialog.raise_()
   result = dialog.exec_()
   
   if result == Save:
@@ -90,6 +95,7 @@ def showWarning(title, message, parent=None, colourScheme=None):
                          Warning, colourScheme, parent)
 
   dialog.setStandardButtons(Close)
+  dialog.raise_()
   dialog.exec_()
  
   return
@@ -105,6 +111,7 @@ def showMulti(title, message, texts, objects=None, parent=None, colourScheme=Non
   for text in texts:
     dialog.addButton(text, QtGui.QMessageBox.AcceptRole)
   
+  dialog.raise_()
   index = dialog.exec_()
 
   if objects:
@@ -119,6 +126,7 @@ def showError(title, message, parent=None, colourScheme=None):
                          Critical, colourScheme, parent)
 
   dialog.setStandardButtons(Close)
+  dialog.raise_()
   dialog.exec_()
   
   return
@@ -129,6 +137,7 @@ def showMessage(title, message, parent=None, colourScheme=None, iconPath=None):
                          Information, iconPath, colourScheme, parent)
 
   dialog.setStandardButtons(Close)
+  dialog.raise_()
   dialog.exec_()
   
   return

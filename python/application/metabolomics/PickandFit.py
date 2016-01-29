@@ -30,51 +30,183 @@ from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
+from ccpncore.gui.RadioButton import RadioButton
+from ccpncore.gui.Spinbox import Spinbox
 
 from application.core.modules.PeakTable import PeakListSimple
 
+import pyqtgraph as pg
 
-class PickandFit(QtGui.QWidget, Base):
+class AutoPick(QtGui.QWidget, Base):
 
   def __init__(self, parent=None, **kw):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
-    self.pickingLabel = Label(self, 'Picking', grid=(0, 0), hAlign='l')
-    self.pickingButton = Button(self, 'Pick', grid=(0, 1))
-    self.autoPickingLabel = Label(self, 'Autopicking', grid=(1, 0), gridSpan=(1, 2))
-    self.methodPulldown = PulldownList(self, grid=(2, 0))
-    self.methodBox1 = DoubleSpinbox(self, grid=(2, 1))
-    self.methodBox1 = DoubleSpinbox(self, grid=(3, 0))
-    self.methodBox1 = DoubleSpinbox(self, grid=(3, 1))
-    self.methodBox1 = DoubleSpinbox(self, grid=(2, 2))
-    self.methodBox1 = DoubleSpinbox(self, grid=(3, 2))
-    self.fitLabel = Label(self, 'Fit', grid=(0, 3), hAlign='l')
-    self.lineShapeLabel = Label(self, 'Lineshape ', grid=(0, 5))
-    self.lineShapePulldown = PulldownList(self, grid=(0, 6), gridSpan=(1, 3))
-    self.ppmLabel1 = Label(self, 'ppm', grid=(1, 3))
-    self.ppmLabel2 = Label(self, 'ppm', grid=(2, 3))
-    self.ppmLabel3 = Label(self, 'ppm', grid=(3, 3))
-    self.ppmBox1 = DoubleSpinbox(self, grid=(1, 4))
-    self.ppmBox2 = DoubleSpinbox(self, grid=(2, 4))
-    self.ppmBox3 = DoubleSpinbox(self, grid=(3, 4))
-    self.lineWidthLabel1 = Label(self, 'Linewidth', grid=(1, 5))
-    self.lineWidthLabel2 = Label(self, 'Linewidth', grid=(2, 5))
-    self.lineWidthLabel3 = Label(self, 'Linewidth', grid=(3, 5))
-    self.lineWidthBox1 = DoubleSpinbox(self, grid=(1, 6))
-    self.lineWidthBox2 = DoubleSpinbox(self, grid=(2, 6))
-    self.lineWidthBox3 = DoubleSpinbox(self, grid=(3, 6))
-    self.intensityLabel1 = Label(self, 'Intensity', grid=(1, 7))
-    self.intensityLabel1 = Label(self, 'Intensity', grid=(2, 7))
-    self.intensityLabel1 = DoubleSpinbox(self, grid=(1, 8))
-    self.intensityLabel1 = DoubleSpinbox(self, grid=(2, 8))
-    self.fitSelectedButton = Button(self, 'Fit Selected', grid=(3, 7), gridSpan=(1, 2))
+    self.pickingLabel = Label(self, 'Autopick method', grid=(0, 0))
+    self.methodPulldown = PulldownList(self, grid=(0, 1))
+    self.goButton = Button(self, 'Go', grid=(2, 0), gridSpan=(1, 2))
+    self.baselineLabel = Label(self, 'Baseline ', grid=(0, 2))
+    self.baselineBox = Spinbox(self, grid=(0, 3))
+    self.baselineLabel = Label(self, 'Gap ', grid=(0, 4))
+    self.gapBox = DoubleSpinbox(self, grid=(0, 5))
+    self.updateLayout()
+
+
+  def updateLayout(self):
+    for k in range(1, self.layout().columnCount()):
+      item = self.layout().itemAtPosition(2, k)
+      if item:
+        if item.widget():
+          item.widget().hide()
+        self.layout().removeItem(item)
+    for i in range(0, 8, 2):
+      self.label1 = Label(self, 'Label 1', grid=(2, i))
+      self.box1 = DoubleSpinbox(self, grid=(2, i+1))
+
+
+class Fit(QtGui.QWidget, Base):
+
+  def __init__(self, parent=None, strip=None, **kw):
+    QtGui.QWidget.__init__(self, parent)
+    Base.__init__(self, **kw)
+
+    self.lineShapeLabel = Label(self, 'Lineshape ', grid=(0, 0))
+    self.lineShapePulldown = PulldownList(self, grid=(0, 1))
+    self.autoFitButton = Button(self, 'Autofit Selected', grid=(1, 0), gridSpan=(1, 2))
+    self.ppmLabel = Label(self, 'ppm', grid=(0, 2))
+    self.ppmBox = DoubleSpinbox(self, grid=(0, 3))
+    self.linewidthLabel = Label(self, 'linewidth', grid=(0, 4))
+    self.linewidthBox = DoubleSpinbox(self, grid=(0, 5))
+    self.intensityLabel = Label(self, 'intensity', grid=(0, 6))
+    self.intensityBox = Spinbox(self, grid=(0, 7))
+    self.updateLayout()
+
+  def updateLayout(self):
+    for k in range(2, self.layout().columnCount()):
+      item = self.layout().itemAtPosition(1, k)
+      if item:
+        if item.widget():
+          item.widget().hide()
+        self.layout().removeItem(item)
+    for i in range(2, 8, 2):
+      self.label1 = Label(self, 'Label 1', grid=(1, i))
+      self.box1 = DoubleSpinbox(self, grid=(1, i+1))
+
+
+class PickandFit(QtGui.QWidget, Base):
+  def __init__(self, parent=None, strip=None, **kw):
+    QtGui.QWidget.__init__(self, parent)
+    Base.__init__(self, **kw)
+    self.strip = strip
+    tabWidget = QtGui.QTabWidget()
+    tabWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+    tabWidget.addTab(AutoPick(self), "Autopick")
+    tabWidget.addTab(Fit(self, strip), "Fit")
+    self.layout().addWidget(tabWidget)
 
 
 class PickandFitTable(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, project=None, **kw):
+  def __init__(self, parent=None, project=None, fitModule=None, **kw):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
-    self.peakList = PeakListSimple
+    # self.radioButton1 = RadioButton(self, grid=(0, 0))
+    # self.label1 = Label(self, 'By Spectrum', grid=(0, 1))
+    # self.radioButton2 = RadioButton(self, grid=(0, 2))
+    # self.label2 = Label(self, 'By Area', grid=(0, 1))
+    self.peakList = PeakListSimple(self, project, grid=(0, 0), gridSpan=(1, 4), callback=self.tableCallback)
+    self.peakList.subtractPeakListsButton.hide()
+    self.fitModule = fitModule
+
+  def tableCallback(self, peak, row:int, col:int):
+    if not peak:
+      return
+    centrePoint = 5.0
+    self.positions1 = [centrePoint+2, centrePoint-2]
+    self.positions2 = [centrePoint+2.5, centrePoint-2.5]
+    self.positions3 = [1e5, 1e9]
+    brush = QtGui.QBrush(QtGui.QColor(0, 0, 0, 0))
+    self.lr1 = pg.LinearRegionItem(values=[self.positions1[0], self.positions1[1]], brush=brush)
+    dashedLine1 = pg.InfiniteLine(angle=90, pos=self.positions2[0], movable=True)
+    dashedLine2 = pg.InfiniteLine(angle=90, pos=self.positions2[1], movable=True)
+    # self.lr3 = pg.LinearRegionItem(values=[self.positions3[0], self.positions3[1]], orientation=pg.LinearRegionItem.Horizontal, brush=brush)
+    dashedLine1.setPen(style=QtCore.Qt.DashLine, color='g')
+    dashedLine2.setPen(style=QtCore.Qt.DashLine, color='g')
+    for line in self.lr1.lines:
+      line.setPen(color='b')
+    self.fitModule.strip.plotWidget.addItem(self.lr1)
+    print([line.pos().x() for line in self.lr1.lines])
+    self.fitModule.strip.plotWidget.addItem(dashedLine1)
+    self.fitModule.strip.plotWidget.addItem(dashedLine2)
+    # self.fitModule.strip.plotWidget.addItem(self.lr3)
+    self.lr1.sigRegionChanged.connect(self.lr1Moved)
+    dashedLine1.sigPositionChanged.connect(self.lr2Moved)
+    dashedLine2.sigPositionChanged.connect(self.lr2Moved)
+    self.dashedLines = [dashedLine1, dashedLine2]
+
+  #
+  def lr1Moved(self):
+
+    if self.lr1.lines[0].pos().x() - self.dashedLines[1].pos().x() < 0.05 or \
+      abs(self.lr1.lines[1].pos().x() - self.dashedLines[0].pos().x()) < 0.05:
+      print('1', self.lr1.lines[0].pos().x(), self.dashedLines[1].pos().x(), '2',
+            self.lr1.lines[1].pos().x(), self.dashedLines[0].pos().x())
+      return
+    # if self.lr1.lines[0].pos().x()
+    else:
+      if self.lr1.lines[0].pos().x() < self.positions1[1]:
+        diff = self.positions1[1] - self.lr1.lines[0].pos().x()
+        self.positions1[1] -= diff
+        self.positions1[0] += diff
+        self.lr1.lines[1].setPos(self.positions1[0])
+
+      if self.lr1.lines[0].pos().x() > self.positions1[1]:
+        diff = self.positions1[1] - self.lr1.lines[0].pos().x()
+        self.positions1[1] -= diff
+        self.positions1[0] += diff
+        self.lr1.lines[1].setPos(self.positions1[0])
+
+      if self.lr1.lines[1].pos().x() > self.positions1[0]:
+        diff = self.positions1[0] - self.lr1.lines[1].pos().x()
+        self.positions1[1] += diff
+        self.positions1[0] -= diff
+        self.lr1.lines[0].setPos(self.positions1[1])
+
+      if self.lr1.lines[1].pos().x() < self.positions1[0]:
+        diff = self.positions1[0] - self.lr1.lines[1].pos().x()
+        self.positions1[1] += diff
+        self.positions1[0] -= diff
+        self.lr1.lines[0].setPos(self.positions1[1])
+      # self.lr1.setBounds([self.positions2[1]+0.05, self.positions1[0]-0.05])
+
+  def lr2Moved(self):
+    if self.dashedLines[0].pos().x() < self.positions2[1]:
+      diff = self.positions2[1] - self.dashedLines[0].pos().x()
+      self.positions2[1] -= diff
+      self.positions2[0] += diff
+      self.dashedLines[1].setPos(self.positions2[0])
+
+    if self.dashedLines[0].pos().x() > self.positions2[1]:
+      diff = self.positions2[1] - self.dashedLines[0].pos().x()
+      self.positions2[1] -= diff
+      self.positions2[0] += diff
+      self.dashedLines[1].setPos(self.positions2[0])
+
+    if self.dashedLines[1].pos().x() > self.positions2[0]:
+      diff = self.positions2[0] - self.dashedLines[1].pos().x()
+      self.positions2[1] += diff
+      self.positions2[0] -= diff
+      self.dashedLines[0].setPos(self.positions1[1])
+
+    if self.dashedLines[1].pos().x() < self.positions2[0]:
+      diff = self.positions2[0] - self.dashedLines[1].pos().x()
+      self.positions2[1] += diff
+      self.positions2[0] -= diff
+      self.dashedLines[0].setPos(self.positions2[1])
+
+
+
+
+

@@ -201,7 +201,7 @@ class ViewBox(pg.ViewBox):
               ), peakList=peakList
             )
           else:
-            newPeaks = peakList.pickPeaks1dFiltered(spectrumView)
+            newPeaks = peakList.pickPeaks1d(spectrumView)
 
           for window in self.current.project.windows:
             for spectrumDisplay in window.spectrumDisplays:

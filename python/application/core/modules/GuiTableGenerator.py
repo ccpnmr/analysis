@@ -6,11 +6,11 @@ from application.core.modules.peakUtils import getPeakPosition, getPeakAnnotatio
 
 from PyQt4 import QtGui
 
-class All(object):
-  def __init__(self, project, objectType):
-    self.pid = '<ALL>'
-    setattr(self, objectType, getattr(project, objectType))
-    self.objects = getattr(project, objectType)
+# class All(object):
+#   def __init__(self, project, objectType):
+#     self.pid = '<ALL>'
+#     setattr(self, objectType, getattr(project, objectType))
+#     self.objects = getattr(project, objectType)
 
 
 
@@ -20,8 +20,8 @@ class GuiTableGenerator(QtGui.QWidget):
 
       QtGui.QWidget.__init__(self, parent)
       self.project = objectLists[0].project
-      allList = All(self.project, objectType)
-      objectLists.append(allList)
+      # allList = All(self.project, objectType)
+      # objectLists.append(allList)
       self.columns = columns
       self.objectType = objectType
       self.objectLists = objectLists

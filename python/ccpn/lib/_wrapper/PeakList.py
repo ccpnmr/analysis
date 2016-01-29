@@ -77,7 +77,7 @@ def pickPeaks1d(self:'PeakList', data1d, size:int=3, mode:str='wrap'):
 
    peaks = []
    spectrum = self.spectrum
-   # data1d = spectrumView.data
+   data1d =  spectrum._apiDataSource.get1dSpectrumData()
    threshold = spectrum.estimateNoise()*10
    if (data1d.size == 0) or (data1d.max() < threshold):
     return peaks
@@ -89,7 +89,7 @@ def pickPeaks1d(self:'PeakList', data1d, size:int=3, mode:str='wrap'):
    for position in indices:
      peakPosition = [float(data1d[0][position])]
      height = data1d[1][position]
-     # peakList.newPeak(height=float(height), position=peakPosition)
+     self.newPeak(height=float(height), position=peakPosition)
 
 
 

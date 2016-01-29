@@ -719,8 +719,23 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showPickandFitModule(self):
     spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-    from application.metabolomics.PickandFit import PickandFit
-    PickandFit(spectrumDisplay.dock, grid=(2, 0), gridSpan=(1, 4))
+    from application.metabolomics.PickandFit import PickandFit, PickandFitTable
+    fitModule = PickandFit(spectrumDisplay.dock, strip=spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
+    PickandFitTable(spectrumDisplay.dock, project=self._project, fitModule=fitModule, grid=(0, 4), gridSpan=(3, 1))
+    if self.blankDisplay:
+      self.blankDisplay.setParent(None)
+      self.blankDisplay = None
+
+
+  def showIntegrationModule(self):
+    spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
+    from application.metabolomics.Integration import IntegrationTable, IntegrationWidget
+    IntegrationWidget(spectrumDisplay.dock, project=self._project, grid=(2, 0), gridSpan=(1, 4))
+    IntegrationTable(spectrumDisplay.dock, project=self._project, grid=(0, 4), gridSpan=(3, 1))
+    if self.blankDisplay:
+      self.blankDisplay.setParent(None)
+      self.blankDisplay = None
+
 
   def showParassignSetup(self):
     try:

@@ -200,6 +200,8 @@ Residue = cls = importlib.import_module('ccpn._wrapper._Residue').Residue
 _wrappedClasses.append(cls)
 Atom = cls = importlib.import_module('ccpn._wrapper._Atom').Atom
 _wrappedClasses.append(cls)
+Bond = cls = importlib.import_module('ccpn._wrapper._Bond').Bond
+_wrappedClasses.append(cls)
 NmrChain = cls = importlib.import_module('ccpn._wrapper._NmrChain').NmrChain
 _wrappedClasses.append(cls)
 NmrResidue = cls = importlib.import_module('ccpn._wrapper._NmrResidue').NmrResidue

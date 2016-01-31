@@ -104,8 +104,8 @@ class Colour(str):
       b = int(value[5:7], 16)
       a = int(value[7:9], 16) if len(value) == 9 else 255
     else:
-      assert isinstance(value, list) or isinstance(value, tuple), 'value must be list or tuple if it is not a string'
-      assert len(value) in (3, 4), 'len(value) = %d, should be 3 or 4' % len(value)
+      assert isinstance(value, list) or isinstance(value, tuple), 'value must be list or tuple if it is not a string, was %s' % (value,)
+      assert len(value) in (3, 4), 'value=%s, len(value) = %d, should be 3 or 4' % (value,len(value))
       r, g, b = value[:3]
       if len(value) == 4:
         a = value[3]

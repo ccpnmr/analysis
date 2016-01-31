@@ -52,7 +52,7 @@ class SpectrumGroup(AbstractWrapperObject):
   # CCPN properties  
   @property
   def _apiSpectrumGroup(self) -> ApiSpectrumGroup:
-    """ CCPN Project Note"""
+    """ CCPN Project SpectrumGroup"""
     return self._wrappedData
 
   @property
@@ -128,7 +128,6 @@ del _newSpectrumGroup
 
 # reverse link Spectrum.spectrumGroups
 def getter(self:Spectrum) -> Tuple[SpectrumGroup, ...]:
-  """Spectra that make up SpectrumGroup."""
   data2Obj = self._project._data2Obj
   return tuple(data2Obj[x] for x in self._wrappedData.sortedSpectrumGroups())
 def setter(self:Spectrum, value):

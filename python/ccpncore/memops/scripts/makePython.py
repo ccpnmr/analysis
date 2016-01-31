@@ -172,6 +172,7 @@ def makePython(modelPortal, rootDirName=None, rootFileName=None,
   """ % (end-start))
 
   start = time.time()
+  # print ('@~@~ NBNB TBD sphinxDocumentation temporarily suppressed!!!')
   sphinxDocumentation.refreshSphinxDocumentation()
   end = time.time()
   print("""

@@ -40,7 +40,7 @@ from application.core.gui.IpythonConsole import IpythonConsole
 from ccpncore.gui.Menu import Menu, MenuBar
 from application.core.gui.SideBar import SideBar
 
-from ccpncore.util import Io
+from ccpncore.util import Io as ioUtil
 from ccpncore.util import Path
 
 from ccpncore.util.Common import uniquify
@@ -160,7 +160,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def backupProject(self):
     
-    Io.backupProject(self._appBase.project._wrappedData.parent)
+    ioUtil.backupProject(self._appBase.project._wrappedData.parent)
 
   def setupWindow(self):
     """
@@ -589,7 +589,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     now = datetime.datetime.now().strftime('%y%m%d%H%M%S')
     filePrefix = '%s_%s' % (os.path.basename(projectPath), now)
     filePrefix = os.path.join(os.path.dirname(projectPath), filePrefix)
-    fileName = Io.packageProject(apiProject, filePrefix, includeBackups=True, includeLogs=True)
+    fileName = ioUtil.packageProject(apiProject, filePrefix, includeBackups=True, includeLogs=True)
     
     MessageDialog.showInfo('Project Archived',
           'Project archived to %s' % fileName, colourScheme=self.colourScheme)
@@ -1021,25 +1021,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project with name specified in the file dialog."""
-    dialog = QtGui.QFileDialog(self, caption='Save Project As...')
-    dialog.setFileMode(QtGui.QFileDialog.AnyFile)
-    dialog.setAcceptMode(1)
-    if not dialog.exec_():
-      return
-    fileNames = dialog.selectedFiles()
-    if not fileNames:
-      return
-    newPath = fileNames[0]
+    from application import AppBase  # has to be here because of circular import
+    apiProject = self._project._wrappedData.root
+    newPath = AppBase.getSaveDirectory(apiProject, self._appBase.preferences)
     if newPath:
-      if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
-        # should not really need to check the second and third condition above, only
-        # the Qt dialog stupidly insists a directory exists before you can select it
-        # so if it exists but is empty then don't bother asking the question
-        title = 'Overwrite path'
-        msg ='Path "%s" already exists, continue?' % newPath
-        if not MessageDialog.showYesNo(title, msg, self, colourScheme=self.colourScheme):
-          return
-      self._appBase.saveProject(newPath=newPath)#, newProjectName=os.path.basename(newPath))
+      newProjectPath = ioUtil.ccpnProjectPath(newPath)
+      self._appBase.saveProject(newPath=newProjectPath, newProjectName=os.path.basename(newPath), createFallback=False)
 
   def printToFile(self, spectrumDisplay=None):
     

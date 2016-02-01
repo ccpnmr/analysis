@@ -24,6 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 import os
 import json
+import tempfile
 
 from ccpn.lib import Io as ccpnIo
 from ccpncore.util import Io as ioUtil
@@ -31,7 +32,7 @@ from ccpncore.gui.Application import Application
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.api.memops import Implementation
 from ccpncore.gui import iconsNew
-from ccpncore.gui.MessageDialog import showMessage
+from ccpncore.gui import MessageDialog
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Register
@@ -60,7 +61,6 @@ class AppBase(GuiBase):
     ###self.hLines = []
     self.initProject(apiProject)
     self.colourIndex = 0
-
 
   def initProject(self, apiProject):
 
@@ -142,8 +142,8 @@ class AppBase(GuiBase):
     apiProject = ioUtil.newProject(name)
     return self.initProject(apiProject)
 
-  def saveProject(self, newPath=None):
-    ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath, createFallback=True)
+  def saveProject(self, newPath=None, newProjectName=None, createFallback=True):
+    ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName, createFallback=createFallback)
     layout = self.mainWindow.dockArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
     if not os.path.exists(layoutPath):
@@ -154,12 +154,8 @@ class AppBase(GuiBase):
       stream.close()
     saveIconPath = os.path.join(Path.getPythonDirectory(),
                       'ccpncore', 'gui', 'iconsNew', 'save.png')
-    showMessage('Project saved', 'Project successfully saved!',
-                colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
-
-
-
-
+    MessageDialog.showMessage('Project saved', 'Project successfully saved!',
+                              colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 
 def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userPreferencesPath=None):
 
@@ -220,19 +216,74 @@ def checkRegistration(applicationVersion):
   
   return True
   
+def getSaveDirectory(apiProject, preferences):
+  """Opens save Project as dialog box and gets directory specified in the file dialog."""
+  dialog = QtGui.QFileDialog(self, caption='Save Project As...')
+  dialog.setFileMode(QtGui.QFileDialog.AnyFile)
+  dialog.setAcceptMode(1)
+  if not dialog.exec_():
+    return ''
+  fileNames = dialog.selectedFiles()
+  if not fileNames:
+    return ''
+  newPath = fileNames[0]
+  if newPath:
+    newPath = ioUtil.ccpnProjectPath(newPath)
+    if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
+      # should not really need to check the second and third condition above, only
+      # the Qt dialog stupidly insists a directory exists before you can select it
+      # so if it exists but is empty then don't bother asking the question
+      title = 'Overwrite path'
+      msg ='Path "%s" already exists, continue?' % newPath
+      if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
+        newPath = ''
+    
+  return newPath
+    
+def saveV2ToV3(apiProject, projectPath, preferences):
+    
+  projectPath = ioUtil.ccpnProjectPath(projectPath)
+  
+  if os.path.exists(projectPath) and (os.path.isfile(projectPath) or os.listdir(projectPath)):
+    # should not really need to check the second and third condition above, only
+    # the Qt dialog stupidly insists a directory exists before you can select it
+    # so if it exists but is empty then don't bother asking the question
+    title = 'Overwrite path'
+    msg ='Converting to v3 format, path "%s" already exists, overwrite?' % projectPath
+    if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
+      projectPath = ''
+
+  if projectPath:
+    try:
+      ioUtil.saveProject(apiProject, newPath=projectPath)
+      MessageDialog.showMessage('Project save', 'Project saved in v3 format at %s' % projectPath,
+                                colourScheme=preferences.general.colourScheme)
+    except IOError as e:
+      temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_', suffix=ioUtil.CCPN_DIRECTORY_SUFFIX)
+      MessageDialog.showMessage('Project save', 'Project could not be saved in v3 format at %s, instead using temporary location %s (you then must save it somewhere else if you want it to persist)' % (projectPath, temporaryDirectory.name),
+                                colourScheme=preferences.general.colourScheme)
+      projectPath = temporaryDirectory.name
+      ioUtil.saveProject(apiProject, newPath=projectPath)
+  else:
+    temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_', suffix=ioUtil.CCPN_DIRECTORY_SUFFIX)
+    MessageDialog.showMessage('Project save', 'Saving project in temporary location %s (you then must save it somewhere else if you want it to persist)' % temporaryDirectory.name,
+                              colourScheme=preferences.general.colourScheme)
+    projectPath = temporaryDirectory.name
+    ioUtil.saveProject(apiProject, newPath=projectPath)
+    
+  return projectPath
+  
 def startProgram(programClass, applicationName, applicationVersion, components, projectPath=None,
                  language=None, skipUserPreferences=False, nologging=False):
 
+  preferences = getPreferences(skipUserPreferences)
+  
   if language:
     Translation.setTranslationLanguage(language)
     Translation.updateTranslationDict('application.core.gui')
     
   useFileLogger = not nologging
-  if projectPath:
-    apiProject = ioUtil.loadProject(projectPath, useFileLogger=useFileLogger)
-  else:
-    apiProject = ioUtil.newProject('default', useFileLogger=useFileLogger)
-
+  
   # On the Mac (at least) it does not matter what you set the applicationName to be,
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
@@ -265,9 +316,18 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   time.sleep(3)
 
   splash.close()
-  preferences = getPreferences(skipUserPreferences)
   styleSheet = getStyleSheet(preferences)
   app.setStyleSheet(styleSheet)
+  
+  if projectPath:
+    apiProject = ioUtil.loadProject(projectPath, useFileLogger=useFileLogger)
+    if not projectPath.endswith(ioUtil.CCPN_DIRECTORY_SUFFIX):
+      newProjectPath = saveV2ToV3(apiProject, projectPath, preferences)        
+      apiProject = ioUtil.loadProject(newProjectPath, useFileLogger=useFileLogger)
+      projectPath = newProjectPath
+  else:
+    apiProject = ioUtil.newProject('default', useFileLogger=useFileLogger)
+
   if checkRegistration(applicationVersion):
     program = programClass(apiProject, applicationName, applicationVersion, preferences, components)
 

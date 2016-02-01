@@ -23,21 +23,22 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 __author__ = 'simon'
 
-import ast
-
 from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
 
 class CheckBox(QtGui.QCheckBox, Base):
 
-  def __init__(self, parent, checked=False, text='', **kw):
+  def __init__(self, parent, checked=False, text='', callback=None, **kw):
 
     QtGui.QCheckBox.__init__(self, parent)
     self.setChecked(checked)
     if text:
       self.setText(text)
     Base.__init__(self, **kw)
+
+    if callback:
+      self.connect(self, QtCore.SIGNAL('clicked()'), callback)
 
   def get(self):
 

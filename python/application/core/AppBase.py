@@ -24,7 +24,9 @@ __version__ = "$Revision: 7686 $"
 
 import os
 import json
-import tempfile
+import time
+
+from PyQt4 import QtGui, QtCore
 
 from ccpn.lib import Io as ccpnIo
 from ccpncore.util import Io as ioUtil
@@ -218,7 +220,7 @@ def checkRegistration(applicationVersion):
   
 def getSaveDirectory(apiProject, preferences):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
-  dialog = QtGui.QFileDialog(self, caption='Save Project As...')
+  dialog = QtGui.QFileDialog(caption='Save Project As...')
   dialog.setFileMode(QtGui.QFileDialog.AnyFile)
   dialog.setAcceptMode(1)
   if not dialog.exec_():
@@ -244,32 +246,35 @@ def saveV2ToV3(apiProject, projectPath, preferences):
     
   projectPath = ioUtil.ccpnProjectPath(projectPath)
   
+  needNewDirectory = False
   if os.path.exists(projectPath) and (os.path.isfile(projectPath) or os.listdir(projectPath)):
     # should not really need to check the second and third condition above, only
     # the Qt dialog stupidly insists a directory exists before you can select it
     # so if it exists but is empty then don't bother asking the question
     title = 'Overwrite path'
-    msg ='Converting to v3 format, path "%s" already exists, overwrite?' % projectPath
+    msg ='Converting to V3 format, path "%s" already exists, overwrite?' % projectPath
     if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
-      projectPath = ''
+      needNewDirectory = True
 
-  if projectPath:
+  if not needNewDirectory:
     try:
       ioUtil.saveProject(apiProject, newPath=projectPath)
       MessageDialog.showMessage('Project save', 'Project saved in v3 format at %s' % projectPath,
                                 colourScheme=preferences.general.colourScheme)
     except IOError as e:
-      temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_', suffix=ioUtil.CCPN_DIRECTORY_SUFFIX)
-      MessageDialog.showMessage('Project save', 'Project could not be saved in v3 format at %s, instead using temporary location %s (you then must save it somewhere else if you want it to persist)' % (projectPath, temporaryDirectory.name),
+      needNewDirectory = True
+      MessageDialog.showMessage('Project save', 'Project could not be saved in V3 format at %s' % projectPath,
                                 colourScheme=preferences.general.colourScheme)
-      projectPath = temporaryDirectory.name
-      ioUtil.saveProject(apiProject, newPath=projectPath)
-  else:
-    temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_', suffix=ioUtil.CCPN_DIRECTORY_SUFFIX)
-    MessageDialog.showMessage('Project save', 'Saving project in temporary location %s (you then must save it somewhere else if you want it to persist)' % temporaryDirectory.name,
-                              colourScheme=preferences.general.colourScheme)
-    projectPath = temporaryDirectory.name
-    ioUtil.saveProject(apiProject, newPath=projectPath)
+    
+  if needNewDirectory:
+    projectPath = getSaveDirectory(apiProject, preferences)
+    if projectPath:
+      try:
+        ioUtil.saveProject(apiProject, newPath=projectPath, overwriteExisting=True)
+      except IOError as e:
+        MessageDialog.showMessage('Project save', 'Project could not be saved in V3 format at %s, quitting' % projectPath,
+                                  colourScheme=preferences.general.colourScheme)
+        projectPath = ''
     
   return projectPath
   
@@ -287,9 +292,6 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   # On the Mac (at least) it does not matter what you set the applicationName to be,
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
-  from PyQt4 import QtGui, QtCore
-  import os, time
-  from ccpncore.util import Path
   splashPng = os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'ccpnmr-splash-screen.png')
   splashPix = QtGui.QPixmap(splashPng)
   splashImage = QtGui.QImage(splashPix.size(), QtGui.QImage.Format_ARGB32)
@@ -310,7 +312,6 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   # app.processEvents()
   # time.sleep(10)
 
-
   splash.show()
   app.processEvents()
   time.sleep(3)
@@ -322,9 +323,10 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   if projectPath:
     apiProject = ioUtil.loadProject(projectPath, useFileLogger=useFileLogger)
     if not projectPath.endswith(ioUtil.CCPN_DIRECTORY_SUFFIX):
-      newProjectPath = saveV2ToV3(apiProject, projectPath, preferences)        
-      apiProject = ioUtil.loadProject(newProjectPath, useFileLogger=useFileLogger)
-      projectPath = newProjectPath
+      projectPath = saveV2ToV3(apiProject, projectPath, preferences)
+      if not projectPath:
+        return
+      apiProject = ioUtil.loadProject(projectPath, useFileLogger=useFileLogger)
   else:
     apiProject = ioUtil.newProject('default', useFileLogger=useFileLogger)
 

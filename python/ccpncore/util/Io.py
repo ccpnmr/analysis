@@ -24,8 +24,6 @@ __version__ = "$Revision: 7686 $"
 """Io-related utilities
 """
 
-__author__ = 'rhf22'
-
 import glob
 import os
 # import shutil
@@ -48,6 +46,8 @@ from ccpncore.api.ccp.general.DataLocation import AbstractDataStore
 # Necessary because shutil fails in permission copying for windows file systems,
 # and the error is not properly caught on some VMs.
 import ccpncore.util.LocalShutil as shutil
+
+CCPN_DIRECTORY_SUFFIX = '.ccpn'
 
 printWarning = None
 
@@ -75,6 +75,11 @@ def _createLogger(project, applicationName=None, useFileLogger=None):
   
   return logger
   
+def ccpnProjectPath(path:str):
+  if not path.endswith(CCPN_DIRECTORY_SUFFIX):
+    path += CCPN_DIRECTORY_SUFFIX
+  return path
+
 def newProject(projectName, path:str=None, overwriteExisting:bool=False,
                showYesNo:"function"=None, applicationName='ccpn',
                useFileLogger:bool=True) -> Implementation.MemopsRoot:
@@ -83,7 +88,7 @@ def newProject(projectName, path:str=None, overwriteExisting:bool=False,
   If path is not specified it takes the current working directory.
   The path can be either absolute or relative.
   The 'userData' repository is pointed to the path.
-  The 'backup' repository is pointed to the path + '_backup'.
+  The 'backup' repository is pointed to the path + '_backup' + CCPN_DIRECTORY_SUFFIX.
   If either of these paths already exist (either as files or as directories):
 
   If overwriteExisting:
@@ -101,14 +106,16 @@ def newProject(projectName, path:str=None, overwriteExisting:bool=False,
   if path:
     for name in repositoryNameMap.keys():
       fullPath = Path.joinPath(path, projectName) + repositoryNameMap[name]
+      fullPath = ccpnProjectPath(fullPath)
       if not absentOrRemoved(Path.joinPath(fullPath, 'memops', 'Implementation'),
                              overwriteExisting, showYesNo):
         errMsg = 'Path ("%s") contains existing project.' % fullPath
         Logging.getLogger().warning(errMsg)
         raise Exception(errMsg)
     temporaryDirectory = None
+    path = ccpnProjectPath(path)
   else:
-    temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_')
+    temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_', suffix=CCPN_DIRECTORY_SUFFIX)
     path = temporaryDirectory.name
     
   project = Implementation.MemopsRoot(name=projectName)
@@ -539,6 +546,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
   if newPath:
     # normalise newPath
     newPath = Path.normalisePath(newPath, makeAbsolute=True)
+    newPath = ccpnProjectPath(newPath)
   else:
     newPath = oldPath
 
@@ -548,8 +556,13 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
       newProjectName = oldProjectName
     else:
       newProjectName = os.path.basename(newPath)
-      # below is because of data model limit
-      newProjectName = newProjectName[:32]
+
+  if newProjectName and newProjectName.endswith(CCPN_DIRECTORY_SUFFIX):
+    newProjectName = newProjectName[:-5]
+
+  # below is because of data model limit
+  newProjectName = newProjectName[:32]
+
   if newProjectName != project.name:
     renameProject(project, newProjectName)
 
@@ -646,7 +659,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
 
       if changeBackup:
         # change project backup repository url to point to new path
-        backupRepository.url = Implementation.Url(path=newPath+'_backup')
+        backupRepository.url = Implementation.Url(path=newPath+'_backup'+CCPN_DIRECTORY_SUFFIX)
 
     # change project name
     if newProjectName != oldProjectName:

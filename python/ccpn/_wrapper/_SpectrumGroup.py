@@ -75,11 +75,11 @@ class SpectrumGroup(AbstractWrapperObject):
   def spectra(self) -> Tuple[Spectrum, ...]:
     """Spectra that make up SpectrumGroup."""
     data2Obj = self._project._data2Obj
-    return tuple(data2Obj[x] for x in self._wrappedData.sortedSpectra())
+    return tuple(data2Obj[x] for x in self._wrappedData.sortedDataSources())
 
   @spectra.setter
   def spectra(self, value):
-    self._wrappedData.spectra = [x._wrappedData for x in value]
+    self._wrappedData.dataSources = [x._wrappedData for x in value]
 
   # Implementation functions
   def rename(self, value):

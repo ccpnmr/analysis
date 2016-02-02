@@ -25,6 +25,7 @@ __version__ = ": 7686 $"
 from PyQt4 import QtCore, QtGui
 
 from ccpncore.gui.Base import Base
+from ccpncore.gui.Button import Button
 from ccpncore.gui.ButtonList import ButtonList
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.CheckBox import CheckBox
@@ -74,6 +75,7 @@ class MetabolomicsModule(CcpnDock, Base):
     self._thread = MyThread(self)
     self._thread.updated.connect(self.updatePipeline)
     self.goArea.autoUpdateBox.toggled.connect(self._thread.start)
+    self.goArea.goButton.clicked.connect(self.runPipeline)
     # self.checkBox = CheckBox(self, text='Auto-Update')
 
   def runPipeline(self):
@@ -84,8 +86,13 @@ class MetabolomicsModule(CcpnDock, Base):
       if widget.mainWidgets_layout.itemAt(1).widget().isChecked():
         params = widget.mainWidgets_layout.itemAt(2).widget().getParams()
         pipelineFunctions.append(params)
-
+    data = self.project.getByPid(self.goArea.spectrumGroupPulldown.currentText())
+    # spectrumPids = [spectrum.pid for spectrum in data.spectra]
+    spectraByPid = {spectrum.pid: spectrum._apiDataSource.get1dSpectrumData() for spectrum in data.spectra}
+    print(spectraByPid.keys())
     print(pipelineFunctions)
+
+
 
 
   def updatePipeline(self):
@@ -98,8 +105,12 @@ class GoArea(QtGui.QWidget):
     super(GoArea, self).__init__(parent)
     self.spectrumGroupLabel = Label(self, 'Input Data ', grid=(0, 0))
     self.spectrumGroupPulldown = PulldownList(self, grid=(0, 1))
+    spectrumGroups = [spectrumGroup.pid for spectrumGroup in project.spectrumGroups]
+    self.spectrumGroupPulldown.setData(spectrumGroups)
     self.autoUpdateLabel = Label(self, 'Auto Update', grid=(0, 2))
     self.autoUpdateBox = CheckBox(self, grid=(0, 3))
+    self.autoUpdateBox.setChecked(True)
+    self.goButton = Button(self, 'Go', grid=(0, 4))
 
 
 class PipelineWidgets(QtGui.QWidget):

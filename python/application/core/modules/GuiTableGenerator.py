@@ -1,5 +1,7 @@
 __author__ = 'simon1'
 
+
+from ccpncore.gui.Entry import Entry
 from ccpncore.gui.Table import ObjectTable, Column
 from application.core.modules.peakUtils import getPeakPosition, getPeakAnnotation
 
@@ -24,6 +26,8 @@ class GuiTableGenerator(QtGui.QWidget):
       # objectLists.append(allList)
       self.columns = columns
       self.objectType = objectType
+      self.detailsEntry = Entry(self, text='',
+                               callback=self.setPeakDetails)
       self.objectLists = objectLists
       if len(self.objectLists) > 0:
         self.objectList = objectLists[0]
@@ -75,6 +79,18 @@ class GuiTableGenerator(QtGui.QWidget):
         self.table.setObjects(columns)
 
 
+
+
+
+
+  def setPeakDetails(self, event, obj):
+    print(obj)
+
+
+
+    self.detailsExp.nmrTubeType = self.tubeEntry.get() or None
+
+
   def _getColumns(self, columns, tipTexts):
 
     tableColumns = []
@@ -89,7 +105,7 @@ class GuiTableGenerator(QtGui.QWidget):
           j = i + 1
           c = Column('Assign\nF%d' % j,
                      lambda pk, dim=i:getPeakAnnotation(pk, dim),
-                     tipText='Resonance assignments of peak in dimension %d' % j, stretch=True)
+                     tipText='Resonance assignments of peak in dimension %d' % j)
           tableColumns.append(c)
 
         for i in range(numDim):
@@ -116,7 +132,10 @@ class GuiTableGenerator(QtGui.QWidget):
           c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
           tableColumns.append(c)
 
+      detailsColumn = Column('Details', 'comment', setEditValue=lambda obj, val: self.setPeakDetails(obj), editClass=self.detailsEntry)
+      tableColumns.append(detailsColumn)
     return tableColumns
+
 
   def updateSelectorContents(self):
     """

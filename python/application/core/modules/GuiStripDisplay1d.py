@@ -57,6 +57,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     self.fillToolBar()
     # self.addSpinSystemSideLabel()
     self.setAcceptDrops(True)
+    self.isGrouped = False
     self.spectrumActionDict = {}
     # below not needed in 1D???
     #self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed

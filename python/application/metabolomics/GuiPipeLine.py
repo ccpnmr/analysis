@@ -285,7 +285,8 @@ class SegmentalAlign(QtGui.QWidget, Base):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.linePoints = []
-    self.points = []
+    # self.points = []
+    self.current = project._appBase.current
     self.pickOnSpectrumButton =  Button(self, grid=(0, 0), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
@@ -311,12 +312,13 @@ class SegmentalAlign(QtGui.QWidget, Base):
 
   def setPositions(self, positions):
     line = pg.InfiniteLine(angle=90, pos=self.current.positions[0], movable=True, pen=(0, 0, 100))
-    line.sigPositionChanged.connect(self.lineMoved)
+    # line.sigPositionChanged.connect(self.lineMoved)
     self.current.strip.plotWidget.addItem(line)
     self.linePoints.append(line)
-    self.points.append(line.pos().x())
+    # self.points.append(line.pos().x())
 
   def getParams(self):
+    self.points = [line.pos().x() for line in self.linePoints]
     return {'function': 'segmentalAlign',
             'regions': [self.points[i:i+1] for i in range(0, len(self.points), 1)]}
 

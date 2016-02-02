@@ -76,6 +76,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.projectItem.setExpanded(True)
     self.spectrumItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setText(0, "Spectra")
+    self.spectrumGroupItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.spectrumGroupItem.setText(0, "Spectrum Groups")
     self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
     self.samplesItem.setText(0, 'Samples')
     self.newSample = QtGui.QTreeWidgetItem(self.samplesItem)
@@ -167,6 +169,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         for peakList in spectrum.peakLists:
           peakListItem = QtGui.QTreeWidgetItem(newItem)
           peakListItem.setText(0, peakList.pid)
+
+    for spectrumGroup in project.spectrumGroups:
+      newItem = self.addItem(self.spectrumGroupItem, spectrumGroup)
 
     for chain in project.chains:
       newItem = self.addItem(self.chainItem, chain)

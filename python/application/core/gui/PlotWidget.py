@@ -55,6 +55,7 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     self.plotItem.axes['right']['item'].show()
 
 
+
     if useOpenGL:
       self.setViewport(QtOpenGL.QGLWidget())
       self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
@@ -72,13 +73,29 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     """Display spectra defined by list of Pid strings"""
     guiSpectrumDisplay = self.parent.guiSpectrumDisplay
     displayPid = guiSpectrumDisplay.pid
-    for ss in pids:
-      guiSpectrumDisplay.displaySpectrum(ss)
-      # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
-      #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
-      self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
-        "module.displaySpectrum(spectrum)", module=displayPid, sectrum=ss
-      )
+    if hasattr(guiSpectrumDisplay, 'isGrouped'):
+      if guiSpectrumDisplay.isGrouped:
+        print('single spectra cannot be dropped onto grouped displays')
+        return
+      else:
+        for ss in pids:
+          guiSpectrumDisplay.displaySpectrum(ss)
+          # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
+          #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
+          self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+            "module.displaySpectrum(spectrum)", module=displayPid, sectrum=ss
+          )
+
+  def processSpectrumGroups(self, pids:Sequence[str], event:QtGui.QMouseEvent):
+    guiSpectrumDisplay = self.parent.guiSpectrumDisplay
+    displayPid = guiSpectrumDisplay.pid
+    if hasattr(guiSpectrumDisplay, 'isGrouped'):
+      if guiSpectrumDisplay.isGrouped:
+        pass
+      else:
+        for ss in pids:
+          for spectrum in ss.spectra:
+            guiSpectrumDisplay.displaySpectrum(spectrum)
 
   def processSamples(self, pids:Sequence[str], event):
     """Display sample spectra defined by list of Pid strings"""

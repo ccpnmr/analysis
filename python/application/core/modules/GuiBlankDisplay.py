@@ -26,6 +26,7 @@ from PyQt4 import QtCore
 # from pyqtgraph.dockarea import Dock
 
 from ccpn import Spectrum
+from ccpn import SpectrumGroup
 
 from ccpncore.util.Pid import Pid
 from ccpncore.util.Types import Sequence
@@ -130,3 +131,16 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     self.dockArea.guiWindow.deleteBlankDisplay()
     msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % spectrum
     self.dockArea.window().pythonConsole.write(msg)
+
+
+  def processSpectrumGroups(self, pids:Sequence[str], event):
+    for ss in pids:
+      spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
+      spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
+      for spectrum in spectrumPids[1:]:
+        spectrumDisplay.displaySpectrum(spectrum)
+      spectrumDisplay.isGrouped = True
+      from application.metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
+      SpectrumGroupsWidget(spectrumDisplay.dock, self._appBase.project, spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
+      spectrumDisplay.spectrumToolBar.hide()
+    self.dockArea.guiWindow.deleteBlankDisplay()

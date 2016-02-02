@@ -41,7 +41,7 @@ class PeakTable(CcpnDock):
   def __init__(self, project, selectedList=None):
     CcpnDock.__init__(self, name='Peak List')
 
-    self.layout.addWidget(PeakListSimple(self, project.peakLists, selectedList=selectedList))
+    self.layout.addWidget(PeakListSimple(self, project, selectedList=selectedList))
 
 
 
@@ -78,8 +78,8 @@ class PeakListSimple(QtGui.QWidget, Base):
     #                                     # callback=self._updateWhenIdle,)
 
     columns = [('#', 'serial'), ('Height', lambda pk: self.getPeakHeight(pk)),
-               ('Volume', lambda pk: self.getPeakVolume(pk)),
-               ('Details', 'comment')]
+               ('Volume', lambda pk: self.getPeakVolume(pk))]
+
 
     tipTexts=['Peak serial number', 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
               'Integral of spectrum intensity around peak location, according to chosen volume method',

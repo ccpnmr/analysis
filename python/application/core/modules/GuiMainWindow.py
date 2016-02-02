@@ -736,6 +736,34 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.blankDisplay.setParent(None)
       self.blankDisplay = None
 
+  def showIntegralAssigmentModule(self):
+    spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
+    from application.metabolomics.IntegralAssignment import IntegralAssignment
+    IntegralAssignment(spectrumDisplay.dock, grid=(2, 0), gridSpan=(1, 4))
+    if self.blankDisplay:
+      self.blankDisplay.setParent(None)
+      self.blankDisplay = None
+
+  def showPeakAssigmentModule(self):
+    spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
+    from application.metabolomics.PeakAssignment import PeakAssignment
+    PeakAssignment(spectrumDisplay.dock, self._project, grid=(2, 0), gridSpan=(1, 4))
+    if self.blankDisplay:
+      self.blankDisplay.setParent(None)
+      self.blankDisplay = None
+
+  def showSpectrumGroupModule(self):
+    spectra = [spectrum for group in self.project.spectrumGroups for spectrum in group.spectra]
+    spectrumDisplay = self.createSpectrumDisplay(spectra[0])
+    for spectrum in spectra[1:]:
+      spectrumDisplay.displaySpectrum(spectrum)
+    from application.metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
+    SpectrumGroupsWidget(spectrumDisplay.dock, self._project, spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
+    spectrumDisplay.spectrumToolBar.hide()
+    if self.blankDisplay:
+      self.blankDisplay.setParent(None)
+      self.blankDisplay = None
+
 
   def showParassignSetup(self):
     try:

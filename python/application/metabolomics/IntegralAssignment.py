@@ -39,11 +39,12 @@ from application.core.modules.PeakTable import PeakListSimple
 
 import pyqtgraph as pg
 
-class IntegralAssignment(QtGui.QWidget, Base):
+class IntegralAssignment(QtGui.QWidget):
 
-  def __init__(self, parent=None, **kw):
+  def __init__(self, parent=None):
     QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
+
+
     self.integratedAreasLabel = Label(self, 'IntegratedAreas', grid=(0, 0), gridSpan=(1, 3))
     self.assignLabel = Label(self, 'Assign', grid=(1, 4))
     self.assignButton = Button(self, '<--', grid=(2, 4), callback=self.assignIntegral)
@@ -53,7 +54,7 @@ class IntegralAssignment(QtGui.QWidget, Base):
     self.deassignAndMoveButton = Button(self, '<-- + X', grid=(3, 5), callback=self.deassignAndMove)
     self.suggestionSourceLabel = Label(self, 'Suggestion Source ', grid=(0, 6), gridSpan=(1, 1))
     self.suggestionSourcePulldown = PulldownList(self, grid=(0, 7), gridSpan=(1, 2))
-    self.integralTable = IntegralTable(self, grid=(1, 0), gridSpan=(4, 3))
+    self.integralTable = IntegralTable(self,  grid=(1, 0), gridSpan=(4, 3))
     self.substanceTable = SubstanceTable(self, grid=(1, 6), gridSpan=(4, 3))
 
 
@@ -87,11 +88,10 @@ class IntegralAssignment(QtGui.QWidget, Base):
 
 
 
-class IntegralTable(QtGui.QWidget, Base):
+class IntegralTable(QtGui.QWidget):
 
   def __init__(self, parent=None, **kw):
     QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
 
     integralTableColumns = [Column('ID', 'id'), Column('range', 'range'), Column('slope', 'slope'), Column('bias','bias'),
                  Column('area', 'area')]
@@ -99,7 +99,7 @@ class IntegralTable(QtGui.QWidget, Base):
     integralList = [Integral('1', '2', '3', '4', '5'), Integral('qr', '2', '3', '4', '5'), Integral('8', '2', '3', '4', '5'),
                     Integral('a', '2', '3', '4', '5'), Integral('b', '2', '3', '4', '5'), Integral('d', '2', '3', '4', '5')]
     self.integralLists = [integralList]
-    self.integralTable = ObjectTable(self, callback=self.integralCallback, columns=integralTableColumns, objects=integralList)
+    self.integralTable = ObjectTable(self, callback=self.integralCallback, columns=integralTableColumns, objects=integralList, grid=(1, 0))
 
   def integralCallback(self):
     pass

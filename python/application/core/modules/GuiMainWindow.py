@@ -744,7 +744,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showIntegralAssigmentModule(self):
     spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
     from application.metabolomics.IntegralAssignment import IntegralAssignment
-    IntegralAssignment(spectrumDisplay.dock, grid=(2, 0), gridSpan=(1, 4))
+    self.iaModule = IntegralAssignment(self)
+    spectrumDisplay.dock.layout.addWidget(self.iaModule, 2, 0, 1, 4)
     if self.blankDisplay:
       self.blankDisplay.setParent(None)
       self.blankDisplay = None

@@ -122,10 +122,12 @@ class GuiTableGenerator(QtGui.QWidget):
           c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
           tableColumns.append(c)
 
-      # detailsColumn = Column('Details', 'comment', setEditValue=lambda obj, val: self.setPeakDetails(obj), editClass=self.detailsEntry)
-      # tableColumns.append(detailsColumn)
+      detailsColumn = Column('Details', 'comment', setEditValue=lambda pk, value: self.setPeakDetails(pk, value))
+      tableColumns.append(detailsColumn)
     return tableColumns
 
+  def setPeakDetails(self, peak, value):
+    peak.comment = value
 
   def updateSelectorContents(self):
     """

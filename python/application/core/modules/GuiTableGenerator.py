@@ -26,8 +26,8 @@ class GuiTableGenerator(QtGui.QWidget):
       # objectLists.append(allList)
       self.columns = columns
       self.objectType = objectType
-      self.detailsEntry = Entry(self, text='',
-                               callback=self.setPeakDetails)
+      # self.detailsEntry = Entry(self, text='',
+      #                          callback=self.setPeakDetails)
       self.objectLists = objectLists
       if len(self.objectLists) > 0:
         self.objectList = objectLists[0]
@@ -81,16 +81,6 @@ class GuiTableGenerator(QtGui.QWidget):
 
 
 
-
-
-  def setPeakDetails(self, event, obj):
-    print(obj)
-
-
-
-    self.detailsExp.nmrTubeType = self.tubeEntry.get() or None
-
-
   def _getColumns(self, columns, tipTexts):
 
     tableColumns = []
@@ -132,8 +122,8 @@ class GuiTableGenerator(QtGui.QWidget):
           c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
           tableColumns.append(c)
 
-      detailsColumn = Column('Details', 'comment', setEditValue=lambda obj, val: self.setPeakDetails(obj), editClass=self.detailsEntry)
-      tableColumns.append(detailsColumn)
+      # detailsColumn = Column('Details', 'comment', setEditValue=lambda obj, val: self.setPeakDetails(obj), editClass=self.detailsEntry)
+      # tableColumns.append(detailsColumn)
     return tableColumns
 
 

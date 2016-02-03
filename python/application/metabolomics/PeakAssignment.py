@@ -86,6 +86,32 @@ class PeakAssignment(QtGui.QWidget, Base):
     pass
 
 
+  def assignPeak(self):
+    peakObject = self.peakTable.peakTable.getCurrentObject()
+    substanceObject = self.substanceTable.substanceTable.getCurrentObject()
+    peakObject.assignDimension(axisCode='H', value=[substanceObject.substance])
+
+  def deassignPeak(self):
+    peakObject = self.peakTable.peakTable.getCurrentObject()
+    peakObject.dimensionNmrAtoms = [[]]
+
+  def assignAndMove(self):
+    self.assignPeak()
+    if self.peakTable.peakTable.getCurrentRow() == 0:
+      currentRow = 1
+    else:
+      currentRow = self.peakTable.peakTable.getCurrentRow()
+    self.peakTable.peakTable.selectRow(currentRow)
+
+  def deassignAndMove(self):
+    self.deassignPeak()
+    if self.peakTable.peakTable.getCurrentRow() == 0:
+      currentRow = 1
+    else:
+      currentRow = self.peakTable.peakTable.getCurrentRow()
+    self.peakTable.peakTable.selectRow(currentRow)
+
+
 class SubstanceTable(QtGui.QWidget, Base):
   def __init__(self, parent=None, **kw):
     QtGui.QWidget.__init__(self, parent)

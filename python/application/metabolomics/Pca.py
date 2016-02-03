@@ -26,6 +26,7 @@ __version__ = ": 7686 $"
 from PyQt4 import QtCore, QtGui
 
 from ccpncore.gui.Base import Base
+from ccpncore.gui.Button import Button
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Label import Label
@@ -43,10 +44,20 @@ class PcaModule(CcpnDock, Base):
     self.project = project
 
     self.decomposeLabel = Label(self, 'Decompose Method ')
-    self.layout.addWidget(self.decomposeLabel, 0, 0)
-    self.decomposePulldown = PulldownList(self, grid=(0, 1))
-    self.sourceLabel = Label(self, 'Source', grid=(0, 2))
-    self.sourcePulldown = PulldownList(self, grid=(0, 3))
+
+    self.layout.addWidget(self.decomposeLabel, 0, 0, 1, 1)
+    self.decomposePulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 1))
+    self.decomposePulldown.setData(['PCA'])
+    self.sourceLabel = Label(self, 'Source', grid=(0, 2), gridSpan=(1, 1))
+    self.sourcePulldown = PulldownList(self, grid=(0, 3), gridSpan=(1, 1))
+    self.sourcePulldown.setData([group.pid for group in project.spectrumGroups])
+    self.goButton = Button(self, 'GO', grid=(0, 5), gridSpan=(1, 1))
+
+    self.plottingWidget = QtGui.QWidget()
+    self.plottingWidgetLayout = QtGui.QGridLayout()
+    self.plottingWidget.setLayout(self.plottingWidgetLayout)
+
+    self.layout.addWidget(self.plottingWidget, 1, 0, 4, 6)
 
     self.loadingPlot = PlotWidget(self, appBase=project._appBase)
     self.loadingPlot.plotItem.axes['left']['item'].show()
@@ -67,7 +78,7 @@ class PcaModule(CcpnDock, Base):
     self.loadingWidgetLayout.addWidget(self.loadingColourLabel, 1, 5, 1, 1)
     self.loadingWidgetLayout.addWidget(self.loadingColourPulldown, 1, 6, 1, 1)
     self.loadingWidget.setLayout(self.loadingWidgetLayout)
-    self.layout.addWidget(self.loadingWidget, 1, 0, 2, 2)
+    self.plottingWidget.layout().addWidget(self.loadingWidget, 1, 0, 2, 2)
 
     self.plot2 = PlotWidget(self, appBase=project._appBase)
     self.plot2.plotItem.axes['left']['item'].show()
@@ -88,5 +99,13 @@ class PcaModule(CcpnDock, Base):
     self.plot2WidgetLayout.addWidget(self.plot2ColourLabel, 1, 5, 1, 1)
     self.plot2WidgetLayout.addWidget(self.plot2ColourPulldown, 1, 6, 1, 1)
     self.plot2Widget.setLayout(self.plot2WidgetLayout)
-    self.layout.addWidget(self.plot2Widget, 1, 2, 2, 2)
+    self.plottingWidget.layout().addWidget(self.plot2Widget, 1, 2, 2, 2)
+
+  def setSpectrumDisplay(self, spectrumDisplay):
+    self.spectrumDisplay = spectrumDisplay
+
+  def runPca(self):
+    params = {'method': self.decomposePulldown.currentText(),
+              'source': self.sourcePulldown.currentText()}
+
 

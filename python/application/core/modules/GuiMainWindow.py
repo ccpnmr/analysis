@@ -274,6 +274,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.metabolomicsMenu.addSeparator()
     self.metabolomicsMenu.addAction(Action(self, 'Analyse Metabolite', callback=self.showMetabolomicsModule, shortcut="mm"))
+    self.metabolomicsMenu.addAction(Action(self, 'Integral Assignment', callback=self.showIntegralAssigmentModule, shortcut="ia"))
+    self.decompMenu = self.metabolomicsMenu.addMenu('Decomposition')
+    self.decompMenu.addAction(Action(self, 'Run PCA', callback=self.showPCAModule))
+
 
     # spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
     # spectrumMenu.addAction(Action(self, "Remove...", callback=self.removeSpectra))
@@ -665,7 +669,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if event:
         event.ignore()
 
-    # CLose and clean up project
+    # Close and clean up project
     # if reply == QtGui.QMessageBox.Yes:
     #   if event:
     #     event.accept()
@@ -714,11 +718,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from application.metabolomics.Pca import PcaModule
     self.pcaModule = PcaModule(self.project)
     self.dockArea.addDock(self.pcaModule, position='bottom')
-    spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
+    spectrumDisplay = self.createSpectrumDisplay()
+    self.pcaModule.setSpectrumDisplay(spectrumDisplay)
     self.dockArea.moveDock(spectrumDisplay.dock, position='bottom', neighbor=self.pcaModule)
 
   def showPickandFitModule(self):
-    spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
+    spectrumDisplay = self.createSpectrumDisplay()
     from application.metabolomics.PickandFit import PickandFit, PickandFitTable
     fitModule = PickandFit(spectrumDisplay.dock, strip=spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
     PickandFitTable(spectrumDisplay.dock, project=self._project, fitModule=fitModule, grid=(0, 4), gridSpan=(3, 1))

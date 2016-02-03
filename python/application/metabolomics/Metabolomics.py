@@ -22,11 +22,14 @@ __version__ = ": 7686 $"
 # Start of code
 #=========================================================================================
 
+from collections import OrderedDict
+
 from PyQt4 import QtCore, QtGui
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ButtonList import ButtonList
+from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.GroupBox import GroupBox
@@ -36,6 +39,8 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.ScrollArea import ScrollArea
 
 from application.metabolomics import GuiPipeLine as gp
+
+from ccpncore.lib.metabolomics.pipeline import pipeline
 
 
 
@@ -88,9 +93,11 @@ class MetabolomicsModule(CcpnDock, Base):
         pipelineFunctions.append(params)
     data = self.project.getByPid(self.goArea.spectrumGroupPulldown.currentText())
     # spectrumPids = [spectrum.pid for spectrum in data.spectra]
-    spectraByPid = {spectrum.pid: spectrum._apiDataSource.get1dSpectrumData() for spectrum in data.spectra}
-    print(spectraByPid.keys())
-    print(pipelineFunctions)
+    spectraByPid = OrderedDict(((spectrum.pid, spectrum._apiDataSource.get1dSpectrumData())
+                                for spectrum in data.spectra))
+    # print(pipelineFunctions)
+    print(self.goArea.pipelineName)
+    resultingSpectraByPid = pipeline(spectraByPid, pipelineFunctions)
 
 
 
@@ -103,15 +110,23 @@ class GoArea(QtGui.QWidget):
 
   def __init__(self, parent=None, project=None, **kw):
     super(GoArea, self).__init__(parent)
-    self.spectrumGroupLabel = Label(self, 'Input Data ', grid=(0, 0))
-    self.spectrumGroupPulldown = PulldownList(self, grid=(0, 1))
+    self.label = Label(self, 'Pipeline Name', grid=(0,0))
+    self.lineEdit = LineEdit(self, grid=(0,1))
+    self.lineEdit.setText('ds1')
+    self.pipelineName = self.lineEdit.text()
+    self.lineEdit.editingFinished.connect(self.renamePipeline)
+    self.spectrumGroupLabel = Label(self, 'Input Data ', grid=(0, 2))
+    self.spectrumGroupPulldown = PulldownList(self, grid=(0, 3))
     spectrumGroups = [spectrumGroup.pid for spectrumGroup in project.spectrumGroups]
     self.spectrumGroupPulldown.setData(spectrumGroups)
-    self.autoUpdateLabel = Label(self, 'Auto Update', grid=(0, 2))
-    self.autoUpdateBox = CheckBox(self, grid=(0, 3))
+    self.autoUpdateLabel = Label(self, 'Auto', grid=(0, 4))
+    self.autoUpdateBox = CheckBox(self, grid=(0, 5))
     self.autoUpdateBox.setChecked(True)
-    self.goButton = Button(self, 'Go', grid=(0, 4))
+    self.goButton = Button(self, 'Go', grid=(0, 6))
 
+
+  def renamePipeline(self):
+    self.pipelineName = self.lineEdit.text()
 
 class PipelineWidgets(QtGui.QWidget):
   '''
@@ -274,9 +289,3 @@ class PipelineWidgets(QtGui.QWidget):
 
     else:
       obj.deleteLater()
-
-
-
-
-
-

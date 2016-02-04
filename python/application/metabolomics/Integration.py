@@ -64,6 +64,7 @@ class IntegrationWidget(QtGui.QWidget, Base):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.pickButtonLabel = Label(self, 'Pick', grid=(0, 0))
+    self.current = project._appBase.current
     self.pickOnSpectrumButton = Button(self, grid=(0, 1), toggle=True, icon='iconsNew/target3+',hPolicy='fixed', callback=self.togglePicking, )
     self.currentAreaLabel = Label(self, 'Current Area ID ', grid=(0, 2))
     self.idLineEdit = LineEdit(self, grid=(0, 3))

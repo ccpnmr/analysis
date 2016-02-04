@@ -3,48 +3,42 @@ from .centering import meanCenter
 
 
 def varianceScale(spectrumCluster, power):
-
   stdevs = np.std(spectrumCluster, axis=0)
   scaled = spectrumCluster / (stdevs ** power)
   return scaled
 
 
-def unitVarianceScale(spectrumCluster):
-
-  return varianceScale(spectrumCluster, power=1)
-
-
-def paretoScale(spectrumCluster):
-
-  return varianceScale(spectrumCluster, power=0.5)
+def unitVarianceScale(spectra):
+  return varianceScale(spectra, power=1)
 
 
-def rangeScale(spectrumCluster):
+def paretoScale(spectra):
+  return varianceScale(spectra, power=0.5)
 
-  specMins = spectrumCluster.min(axis=0)
-  specMaxs = spectrumCluster.max(axis=0)
+
+def rangeScale(spectra):
+  specMins = spectra.min(axis=0)
+  specMaxs = spectra.max(axis=0)
   diffs = specMaxs - specMins
-  scaled = spectrumCluster / diffs
+  scaled = spectra / diffs
   return scaled
 
 
-def vastScale(spectrumCluster):
-
-  means = np.mean(spectrumCluster, axis=0)
-  stdevs = np.std(spectrumCluster, axis=0)
+def vastScale(spectra):
+  means = np.mean(spectra, axis=0)
+  stdevs = np.std(spectra, axis=0)
   vScale = means / stdevs
-  scaled = unitVarianceScale(spectrumCluster) * vScale
+  scaled = unitVarianceScale(spectra) * vScale
   return scaled
 
 
-def levelScale(spectrumCluster):
-
-  means = np.mean(spectrumCluster, axis=0)
-  scaled = spectrumCluster / means
+def levelScale(spectra):
+  means = np.mean(spectra, axis=0)
+  scaled = spectra / means
   return scaled
 
 
-def autoScale(spectrumCluster):
-  mc = meanCenter(spectrumCluster)
+def autoScale(spectra):
+  mc = meanCenter(spectra)
   scaled = unitVarianceScale(mc)
   return scaled

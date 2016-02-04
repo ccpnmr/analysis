@@ -405,12 +405,24 @@ class Bin(QtGui.QWidget, Base):
     return {'function':'bin',
             'binWidth': self.binWidth.value()}
 
+class Centre(QtGui.QWidget, Base):
+  def __init__(self, parent, project, spectra=None, **kw):
+    QtGui.QWidget.__init__(self, parent)
+    Base.__init__(self, **kw)
+    self.methodLabel = Label(self, 'Method ', grid=(0, 0), hAlign='r')
+    self.methodPulldown = PulldownList(self, grid=(0, 1))
+    methods = ['Mean', 'Median']
+    self.methodPulldown.setData(methods)
+
+  def getParams(self):
+    return {'function': 'centre',
+            'method': self.methodPulldown.currentText()}
 
 class Scale(QtGui.QWidget, Base):
   def __init__(self, parent, project, spectra=None, **kw):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
-    self.methodLabel = Label(self, 'Method ', grid=(0, 0))
+    self.methodLabel = Label(self, 'Method ', grid=(0, 0), hAlign='r')
     self.methodPulldown = PulldownList(self, grid=(0, 1))
     methods = ['Unit Variance', 'Pareto']
     self.methodPulldown.setData(methods)

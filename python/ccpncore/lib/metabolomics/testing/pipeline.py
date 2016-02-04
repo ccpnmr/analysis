@@ -30,8 +30,8 @@ class TestPipeline(unittest.TestCase):
 
     self.assertEqual(len(output), len(self.spectra))
     for k,v in output.items():
-      input = self.spectra[k]
-      npt.assert_array_equal(v, input)
+      inSpec = self.spectra[k]
+      npt.assert_array_equal(v, inSpec)
 
 
   def test_pipeline_with_single_tsa_command(self):

@@ -2,7 +2,9 @@ __author__ = 'TJ Ragan'
 
 import numpy as np
 
-from ccpncore.lib.metabolomics import *
+from ccpncore.lib.metabolomics import centering
+from ccpncore.lib.metabolomics import normalisation
+from ccpncore.lib.metabolomics import scaling
 
 
 def pipeline(spectra, commands):
@@ -28,16 +30,16 @@ def pipeline(spectra, commands):
 
 
 def _tsa(osn, oss, osi):
-  print('tsa')
+  # print('tsa')
   return osn, oss, normalisation.tsa(np.asarray(osi))
 
 def _pqn(osn, oss, osi):
-  print('pqn')
+  # print('pqn')
   return osn, oss, normalisation.pqn(np.asarray(osi))
 
 
 def _polyBaseLine(osn, oss, osi, controlPoints):
-  print('polybaseline', controlPoints)
+  # print('polybaseline', controlPoints)
   return osn, oss, osi
 
 
@@ -74,7 +76,7 @@ def _bin(osn, oss, osi, binWidth):
 
 def _paretoScale(osn, oss, osi):
   print('Pareto')
-  return osn, oss, osi
+  return osn, oss, scaling.paretoScale(osi)
 
 def _unitVarianceScale(osn, oss, osi):
   print('Unit Variance Scaling')
@@ -84,6 +86,12 @@ def _refPeakNormalise(osn, oss, osi, peak):
   print('Normalise to reference peak')
   return osn, oss, osi
 
+def _meanCentre(osn, oss, osi):
+  return osn, oss, centering.meanCenter(osi)
+
+def _medianCentre(osn, oss, osi):
+  print('Median')
+  return osn, oss, centering.medianCenter(osi)
 
 functionMap = {
   'normalise': {
@@ -93,6 +101,10 @@ functionMap = {
   'scale': {
     'Unit Variance': _unitVarianceScale,
     'Pareto': _paretoScale,
+  },
+  'centre': {
+    'Mean': _meanCentre,
+    'Median': _medianCentre,
   },
   'Reference Peak': _refPeakNormalise,
   'polyBaseLine': _polyBaseLine,

@@ -34,6 +34,12 @@ from ccpncore.gui.PulldownList import PulldownList
 
 from application.core.gui.PlotWidget import PlotWidget
 
+from ccpncore.lib.metabolomics.persistence import MetabolomicsPersistenceDict
+from ccpncore.lib.metabolomics.decomposition import PCA
+
+import pyqtgraph as pg
+
+
 class PcaModule(CcpnDock, Base):
 
   def __init__(self, project, **kw):
@@ -42,6 +48,7 @@ class PcaModule(CcpnDock, Base):
     CcpnDock.__init__(self, name='PCA')
     Base.__init__(self, **kw)
     self.project = project
+    self.mDict = MetabolomicsPersistenceDict()
 
     self.decomposeLabel = Label(self, 'Decompose Method ')
 
@@ -52,6 +59,7 @@ class PcaModule(CcpnDock, Base):
     self.sourcePulldown = PulldownList(self, grid=(0, 3), gridSpan=(1, 1))
     self.sourcePulldown.setData([group.pid for group in project.spectrumGroups])
     self.goButton = Button(self, 'GO', grid=(0, 5), gridSpan=(1, 1))
+    self.goButton.clicked.connect(self.runPca)
 
     self.plottingWidget = QtGui.QWidget()
     self.plottingWidgetLayout = QtGui.QGridLayout()
@@ -59,53 +67,64 @@ class PcaModule(CcpnDock, Base):
 
     self.layout.addWidget(self.plottingWidget, 1, 0, 4, 6)
 
-    self.loadingPlot = PlotWidget(self, appBase=project._appBase)
-    self.loadingPlot.plotItem.axes['left']['item'].show()
-    self.loadingPlot.plotItem.axes['right']['item'].hide()
-    self.loadingWidget = QtGui.QWidget(self)
-    self.loadingWidgetLayout = QtGui.QGridLayout()
-    self.loadingWidgetLayout.addWidget(self.loadingPlot, 0, 0, 1, 7)
-    self.loadingXLabel = Label(self, 'x ')
-    self.loadingXBox = DoubleSpinbox(self)
-    self.loadingYLabel = Label(self, 'y ')
-    self.loadingYBox = DoubleSpinbox(self)
-    self.loadingColourLabel = Label(self, 'Colour')
-    self.loadingColourPulldown = PulldownList(self)
-    self.loadingWidgetLayout.addWidget(self.loadingXLabel, 1, 0, 1, 1)
-    self.loadingWidgetLayout.addWidget(self.loadingXBox, 1, 2, 1, 1)
-    self.loadingWidgetLayout.addWidget(self.loadingYLabel, 1, 3, 1, 1)
-    self.loadingWidgetLayout.addWidget(self.loadingYBox, 1, 4, 1, 1)
-    self.loadingWidgetLayout.addWidget(self.loadingColourLabel, 1, 5, 1, 1)
-    self.loadingWidgetLayout.addWidget(self.loadingColourPulldown, 1, 6, 1, 1)
-    self.loadingWidget.setLayout(self.loadingWidgetLayout)
-    self.plottingWidget.layout().addWidget(self.loadingWidget, 1, 0, 2, 2)
+    self.scoresPlot = pg.ScatterPlotWidget(self)
+    self.scoresPlot.scatterPlot.axes['left']['item'].show()
+    self.scoresPlot.plotItem.axes['right']['item'].hide()
+    self.scoresWidget = QtGui.QWidget(self)
+    self.scoresWidgetLayout = QtGui.QGridLayout()
+    self.scoresWidgetLayout.addWidget(self.scoresPlot, 0, 0, 1, 7)
+    self.scoresXLabel = Label(self, 'x ')
+    self.scoresXBox = DoubleSpinbox(self)
+    self.scoresYLabel = Label(self, 'y ')
+    self.scoresYBox = DoubleSpinbox(self)
+    self.scoresColourLabel = Label(self, 'Colour')
+    self.scoresColourPulldown = PulldownList(self)
+    self.scoresWidgetLayout.addWidget(self.scoresXLabel, 1, 0, 1, 1)
+    self.scoresWidgetLayout.addWidget(self.scoresXBox, 1, 2, 1, 1)
+    self.scoresWidgetLayout.addWidget(self.scoresYLabel, 1, 3, 1, 1)
+    self.scoresWidgetLayout.addWidget(self.scoresYBox, 1, 4, 1, 1)
+    self.scoresWidgetLayout.addWidget(self.scoresColourLabel, 1, 5, 1, 1)
+    self.scoresWidgetLayout.addWidget(self.scoresColourPulldown, 1, 6, 1, 1)
+    self.scoresWidget.setLayout(self.scoresWidgetLayout)
+    self.plottingWidget.layout().addWidget(self.scoresWidget, 1, 0, 2, 2)
 
-    self.plot2 = PlotWidget(self, appBase=project._appBase)
-    self.plot2.plotItem.axes['left']['item'].show()
-    self.plot2.plotItem.axes['right']['item'].hide()
-    self.plot2WidgetLayout = QtGui.QGridLayout()
-    self.plot2Widget = QtGui.QWidget(self)
-    self.plot2XLabel = Label(self, 'x ')
-    self.plot2XBox = DoubleSpinbox(self)
-    self.plot2YLabel = Label(self, 'y ')
-    self.plot2YBox = DoubleSpinbox(self)
-    self.plot2ColourLabel = Label(self, 'Colour')
-    self.plot2ColourPulldown = PulldownList(self)
-    self.plot2WidgetLayout.addWidget(self.plot2, 0, 0, 1, 7)
-    self.plot2WidgetLayout.addWidget(self.plot2XLabel, 1, 0, 1, 1)
-    self.plot2WidgetLayout.addWidget(self.plot2XBox, 1, 2, 1, 1)
-    self.plot2WidgetLayout.addWidget(self.plot2YLabel, 1, 3, 1, 1)
-    self.plot2WidgetLayout.addWidget(self.plot2YBox, 1, 4, 1, 1)
-    self.plot2WidgetLayout.addWidget(self.plot2ColourLabel, 1, 5, 1, 1)
-    self.plot2WidgetLayout.addWidget(self.plot2ColourPulldown, 1, 6, 1, 1)
-    self.plot2Widget.setLayout(self.plot2WidgetLayout)
-    self.plottingWidget.layout().addWidget(self.plot2Widget, 1, 2, 2, 2)
+    self.evPlot = PlotWidget(self, appBase=project._appBase)
+    self.evPlot.plotItem.axes['left']['item'].show()
+    self.evPlot.plotItem.axes['right']['item'].hide()
+    self.evPlotWidgetLayout = QtGui.QGridLayout()
+    self.evPlotWidget = QtGui.QWidget(self)
+    self.evPlotXLabel = Label(self, 'x ')
+    self.evPlotXBox = DoubleSpinbox(self)
+    self.evPlotYLabel = Label(self, 'y ')
+    self.evPlotYBox = DoubleSpinbox(self)
+    self.evPlotColourLabel = Label(self, 'Colour')
+    self.evPlotColourPulldown = PulldownList(self)
+    self.evPlotWidgetLayout.addWidget(self.evPlot, 0, 0, 1, 7)
+    self.evPlotWidgetLayout.addWidget(self.evPlotXLabel, 1, 0, 1, 1)
+    self.evPlotWidgetLayout.addWidget(self.evPlotXBox, 1, 2, 1, 1)
+    self.evPlotWidgetLayout.addWidget(self.evPlotYLabel, 1, 3, 1, 1)
+    self.evPlotWidgetLayout.addWidget(self.evPlotYBox, 1, 4, 1, 1)
+    self.evPlotWidgetLayout.addWidget(self.evPlotColourLabel, 1, 5, 1, 1)
+    self.evPlotWidgetLayout.addWidget(self.evPlotColourPulldown, 1, 6, 1, 1)
+    self.evPlotWidget.setLayout(self.evPlotWidgetLayout)
+    self.plottingWidget.layout().addWidget(self.evPlotWidget, 1, 2, 2, 2)
 
   def setSpectrumDisplay(self, spectrumDisplay):
     self.spectrumDisplay = spectrumDisplay
 
   def runPca(self):
+    '''
+    For now, we ignore the params dict and use the hard-wired pipeline output.
+    '''
     params = {'method': self.decomposePulldown.currentText(),
               'source': self.sourcePulldown.currentText()}
-
+    preProcessedData = self.mDict['pipelineName']['output']
+    self.pca = PCA(preProcessedData)
+    scores = self.pca.scores
+    xValues, yValues = 'PC1', 'PC2'
+    x = scores[xValues].values
+    y = scores[yValues].values
+    self.scoresPlot.setData(x, y)
+    # self.scoresPlot.plotItem.vb.invertX()
+    self.scoresYLabel = yValues
 

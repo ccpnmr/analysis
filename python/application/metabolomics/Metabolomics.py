@@ -41,6 +41,7 @@ from ccpncore.gui.ScrollArea import ScrollArea
 from application.metabolomics import GuiPipeLine as gp
 
 from ccpncore.lib.metabolomics.pipeline import pipeline
+from ccpncore.lib.metabolomics.persistence import MetabolomicsPersistenceDict
 
 
 
@@ -61,7 +62,7 @@ class MetabolomicsModule(CcpnDock, Base):
     CcpnDock.__init__(self, name='Metabolomics')
     Base.__init__(self, **kw)
     self.project = project
-
+    self.mDict = MetabolomicsPersistenceDict()
 
     self.pipelineMainGroupBox = GroupBox('Pipeline')
     self.pipelineMainVLayout = QtGui.QVBoxLayout()
@@ -97,8 +98,9 @@ class MetabolomicsModule(CcpnDock, Base):
                                 for spectrum in data.spectra))
     # print(pipelineFunctions)
     print(self.goArea.pipelineName)
-    resultingSpectraByPid = pipeline(spectraByPid, pipelineFunctions)
-
+    pipelineOutputByPid = pipeline(spectraByPid, pipelineFunctions)
+    self.mDict['pipelineName'] = {}
+    self.mDict['pipelineName']['output'] = pipelineOutputByPid
 
 
 
@@ -119,9 +121,9 @@ class GoArea(QtGui.QWidget):
     self.spectrumGroupPulldown = PulldownList(self, grid=(0, 3))
     spectrumGroups = [spectrumGroup.pid for spectrumGroup in project.spectrumGroups]
     self.spectrumGroupPulldown.setData(spectrumGroups)
-    self.autoUpdateLabel = Label(self, 'Auto', grid=(0, 4))
-    self.autoUpdateBox = CheckBox(self, grid=(0, 5))
-    self.autoUpdateBox.setChecked(True)
+    self.autoUpdateBox = CheckBox(self, grid=(0, 4), checked=False)
+    # self.autoUpdateBox.setChecked(True)
+    self.autoUpdateLabel = Label(self, 'Auto', grid=(0, 5))
     self.goButton = Button(self, 'Go', grid=(0, 6))
 
 
@@ -137,18 +139,20 @@ class PipelineWidgets(QtGui.QWidget):
     super(PipelineWidgets, self).__init__(parent)
     # Base.__init__(self, **kw)
     self.project = project
-    self.pullDownData = {
-                'Poly Baseline': gp.PolyBaseline(self, self.project),
-                'Align To Reference': gp.AlignToReference(self, self.project),
-                'Align Spectra': gp.AlignSpectra(self, self.project),
-                'Scale': gp.Scale(self, self.project),
-                'Segmental Align': gp.SegmentalAlign(self, self.project),
-                'Whittaker Baseline': gp.WhittakerBaseline(self, self.project),
-                'Whittaker Smooth': gp.WhittakerSmooth(self, self.project),
-                'Bin': gp.Bin(self, self.project),
-                'Exclude Baseline Points': gp.ExcludeBaselinePoints(self, self.project),
-                'Normalise Spectra': gp.NormaliseSpectra(self, self.project),
-                'Exclude Signal Free Regions': gp.ExcludeSignalFreeRegions(self, self.project)}
+    self.pullDownData = OrderedDict((
+      ('Centre', gp.Centre(self, self.project)),
+      ('Scale', gp.Scale(self, self.project)),
+      ('Poly Baseline', gp.PolyBaseline(self, self.project)),
+      ('Align To Reference', gp.AlignToReference(self, self.project)),
+      ('Align Spectra', gp.AlignSpectra(self, self.project)),
+      ('Segmental Align', gp.SegmentalAlign(self, self.project)),
+      ('Whittaker Baseline', gp.WhittakerBaseline(self, self.project)),
+      ('Whittaker Smooth', gp.WhittakerSmooth(self, self.project)),
+      ('Bin', gp.Bin(self, self.project)),
+      ('Exclude Baseline Points', gp.ExcludeBaselinePoints(self, self.project)),
+      ('Normalise Spectra', gp.NormaliseSpectra(self, self.project)),
+      ('Exclude Signal Free Regions', gp.ExcludeSignalFreeRegions(self, self.project)),
+    ))
 
 
 
@@ -173,8 +177,7 @@ class PipelineWidgets(QtGui.QWidget):
     self.pulldownAction.setData(pdData)
     self.pulldownAction.activated[str].connect(self.addMethod)
 
-    self.checkBox = CheckBox(self, text='active')
-
+    self.checkBox = CheckBox(self, text='active', checked=True)
 
     self.moveUpDownButtons = ButtonList(self, texts = ['︎','︎︎'], callbacks=[self.moveRowUp, self.moveRowDown], icons=[self.moveUpRowIcon,self.moveDownRowIcon],
                                        tipTexts=['Move row up', 'Move row down'], direction='h', hAlign='r')

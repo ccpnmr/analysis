@@ -743,6 +743,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from application.metabolomics.Integration import IntegrationTable, IntegrationWidget
     IntegrationWidget(spectrumDisplay.dock, project=self._project, grid=(2, 0), gridSpan=(1, 4))
     IntegrationTable(spectrumDisplay.dock, project=self._project, grid=(0, 4), gridSpan=(3, 1))
+    self._appBase.current.strip = spectrumDisplay.strips[0]
     if self.blankDisplay:
       self.blankDisplay.setParent(None)
       self.blankDisplay = None

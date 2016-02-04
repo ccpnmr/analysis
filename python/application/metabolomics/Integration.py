@@ -57,6 +57,8 @@ from ccpncore.gui.RadioButton import RadioButton
 from application.core.modules.GuiTableGenerator import GuiTableGenerator
 from application.core.modules.PeakTable import PeakListSimple
 
+import pyqtgraph as pg
+
 
 class IntegrationWidget(QtGui.QWidget, Base):
 
@@ -65,6 +67,7 @@ class IntegrationWidget(QtGui.QWidget, Base):
     Base.__init__(self, **kw)
     self.pickButtonLabel = Label(self, 'Pick', grid=(0, 0))
     self.current = project._appBase.current
+    self.linePoints = []
     self.pickOnSpectrumButton = Button(self, grid=(0, 1), toggle=True, icon='iconsNew/target3+',hPolicy='fixed', callback=self.togglePicking, )
     self.currentAreaLabel = Label(self, 'Current Area ID ', grid=(0, 2))
     self.idLineEdit = LineEdit(self, grid=(0, 3))

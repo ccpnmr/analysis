@@ -61,8 +61,8 @@ class PeakListSimple(QtGui.QWidget, Base):
     self.project = project
 
     self.peakLists = project.peakLists
-    label = Label(self, 'Peak List:')
-    self.layout().addWidget(label, 0, 0, QtCore.Qt.AlignRight)
+    self.label = Label(self, 'Peak List:')
+    self.layout().addWidget(self.label, 0, 0, QtCore.Qt.AlignRight)
     self.setContentsMargins(0, 4, 0, 4,)
     # self.label.setFont(Font(size=12, bold=True))
     self.peakListPulldown = PulldownList(self, grid=(0, 1))

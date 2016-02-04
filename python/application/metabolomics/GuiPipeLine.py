@@ -220,7 +220,7 @@ class AlignToReference(QtGui.QWidget, Base):
     self.regionBoxes[1].setValue(region[0])
 
   def getParams(self):
-    return {'function':'alignToReference',
+    return {'function': 'alignToReference',
             'window': (self.region1.value(), self.region2.value()),
             'referencePpm': self.referenceBox.value()}
 

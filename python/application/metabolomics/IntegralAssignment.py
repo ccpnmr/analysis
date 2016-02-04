@@ -97,7 +97,7 @@ class IntegralAssignment(QtGui.QWidget):
 
 class IntegralTable(QtGui.QWidget):
 
-  def __init__(self, parent=None, **kw):
+  def __init__(self, parent=None, project=None, **kw):
     QtGui.QWidget.__init__(self, parent)
 
     integralTableColumns = [Column('ID', 'id'), Column('range', 'range'), Column('slope', 'slope'), Column('bias','bias'),
@@ -106,7 +106,7 @@ class IntegralTable(QtGui.QWidget):
     integralList = [Integral('1', '2', '3', '4', '5'), Integral('qr', '2', '3', '4', '5'), Integral('8', '2', '3', '4', '5'),
                     Integral('a', '2', '3', '4', '5'), Integral('b', '2', '3', '4', '5'), Integral('d', '2', '3', '4', '5')]
     self.integralLists = [integralList]
-    self.integralTable = ObjectTable(self, callback=self.integralCallback, columns=integralTableColumns, objects=integralList, grid=(1, 0))
+    self.integralTable = ObjectTable(self, callback=self.integralCallback, columns=integralTableColumns, objects=integralList, grid=(1, 0), gridSpan=(2, 2))
 
   def integralCallback(self):
     pass

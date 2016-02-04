@@ -22,7 +22,7 @@ __version__ = ": 7686 $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
@@ -32,10 +32,8 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.RadioButton import RadioButton
 from application.metabolomics.IntegralAssignment import IntegralTable
 from application.core.modules.GuiTableGenerator import GuiTableGenerator
-from application.core.modules.PeakTable import PeakListSimple
 
 import pyqtgraph as pg
-
 
 class IntegrationWidget(QtGui.QWidget, Base):
 
@@ -88,7 +86,6 @@ class IntegrationWidget(QtGui.QWidget, Base):
     else:
       newIntegrationArea = pg.LinearRegionItem(values=[self.linePoints[-1].pos().x(), self.current.positions[0]])
       line = pg.InfiniteLine(angle=90, pos=self.current.positions[0], movable=True, pen=(0, 0, 100))
-      # self.current.strip.plotWidget.addItem(line)
       self.current.strip.plotWidget.addItem(newIntegrationArea)
       self.current.strip.plotWidget.removeItem(self.linePoints[-1])
       self.integrationRegions.append(newIntegrationArea)
@@ -98,7 +95,7 @@ class IntegrationWidget(QtGui.QWidget, Base):
     pass
 
   def getParams(self):
-    print([(i.lines[0].pos().x(), i.lines[1].pos().x()) for i in self.integrationRegions])
+
     return [(i.lines[0].pos().x(), i.lines[1].pos().x()) for i in self.integrationRegions]
 
 class IntegrationTable(QtGui.QWidget, Base):

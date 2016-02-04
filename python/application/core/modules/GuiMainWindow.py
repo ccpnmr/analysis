@@ -718,9 +718,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from application.metabolomics.Pca import PcaModule
     self.pcaModule = PcaModule(self.project)
     self.dockArea.addDock(self.pcaModule, position='bottom')
-    spectrumDisplay = self.createSpectrumDisplay()
-    self.pcaModule.setSpectrumDisplay(spectrumDisplay)
-    self.dockArea.moveDock(spectrumDisplay.dock, position='bottom', neighbor=self.pcaModule)
+    # spectrumDisplay = self.createSpectrumDisplay()
+    # self.pcaModule.setSpectrumDisplay(spectrumDisplay)
+    # self.dockArea.moveDock(spectrumDisplay.dock, position='bottom', neighbor=self.pcaModule)
 
   def showPickandFitModule(self):
     spectrumDisplay = self.createSpectrumDisplay()

@@ -34,7 +34,7 @@ from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
 from ccpn import Project
 
 # Fields that are coded automatically
-_autoFields = ['peaks','regions','positions', 'strips', 'nmrChains', 'nmrResidues', 'nmrAtoms', 'spectrumDisplays']
+_autoFields = ['peaks','regions','positions', 'strips', 'nmrChains', 'nmrResidues', 'nmrAtoms', 'spectrumDisplays', 'spectrumGroups']
 # NB For each of these fields code is generated to match the explicit code for the 'spectra' field
 # It is assumed that each autofield is plural, ending in a plural 's'
 # Note that the singular value (e.g. 'currentSpectrum') is the last object

@@ -64,12 +64,13 @@ class IntegrationWidget(QtGui.QWidget, Base):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.pickButtonLabel = Label(self, 'Pick', grid=(0, 0))
-    self.pickOnSpectrumButton = Button(self, grid=(0, 1), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
+    self.pickOnSpectrumButton = Button(self, grid=(0, 1), toggle=True, icon='iconsNew/target3+',hPolicy='fixed', callback=self.togglePicking, )
     self.currentAreaLabel = Label(self, 'Current Area ID ', grid=(0, 2))
     self.idLineEdit = LineEdit(self, grid=(0, 3))
     self.rangeLabel1 = Label(self, 'range ', grid=(0, 4))
     self.rangeLabel2 = Label(self, 'Insert range here', grid=(0, 5))
     self.peakInAreaLabel = Label(self, 'Peaks in Area ', grid=(1, 0))
+    self.integralPositions = []
     columns = [('#', 'serial'), ('Height', lambda pk: self.getPeakHeight(pk)),
                ('Volume', lambda pk: self.getPeakVolume(pk)),
                ('Details', 'comment')]
@@ -81,8 +82,35 @@ class IntegrationWidget(QtGui.QWidget, Base):
                                        selector=None, tipTexts=tipTexts, callback=self.tableCallback)
     self.layout().addWidget(self.peakTable, 1, 1, 3, 5)
 
+  def togglePicking(self):
+    if self.pickOnSpectrumButton.isChecked():
+      self.turnOnPositionPicking()
+    elif not self.pickOnSpectrumButton.isChecked():
+      self.turnOffPositionPicking()
+
+  def turnOnPositionPicking(self):
+    print('picking on')
+    self.current.registerNotify(self.setPositions, 'positions')
+    for linePoint in self.linePoints:
+      self.current.strip.plotWidget.addItem(linePoint)
+
+  def turnOffPositionPicking(self):
+    print('picking off')
+    self.current.unRegisterNotify(self.setPositions, 'positions')
+    for linePoint in self.linePoints:
+      self.current.strip.plotWidget.removeItem(linePoint)
+
+  def setPositions(self, positions):
+    line = pg.InfiniteLine(angle=90, pos=self.current.positions[0], movable=True, pen=(0, 0, 100))
+    self.current.strip.plotWidget.addItem(line)
+    self.linePoints.append(line)
+    self.integralPositions.append(line.pos().x())
+
   def tableCallback(self):
     pass
+
+  def getParams(self):
+    return [(i, i+1) for i in range(len(self.integralPositions), 2)]
 
 class IntegrationTable(QtGui.QWidget, Base):
 

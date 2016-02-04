@@ -277,6 +277,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.metabolomicsMenu.addAction(Action(self, 'Integral Assignment', callback=self.showIntegralAssigmentModule, shortcut="ia"))
     self.decompMenu = self.metabolomicsMenu.addMenu('Decomposition')
     self.decompMenu.addAction(Action(self, 'Run PCA', callback=self.showPCAModule))
+    self.metabolomicsMenu.addAction(Action(self, 'Integration', callback=self.showIntegrationModule))
+    self.metabolomicsMenu.addAction(Action(self, 'Peak Assignment', callback=self.showPeakAssigmentModule))
+    self.metabolomicsMenu.addAction(Action(self, 'Pick and Fit', callback=self.showPickandFitModule))
+    self.metabolomicsMenu.addAction(Action(self, 'Spectrum Groups', callback=self.showSpectrumGroupModule))
+
+
 
 
     # spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))

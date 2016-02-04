@@ -100,6 +100,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     for ss in pids:
       try:
         spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(ss)
+        self._appBase.current.strip = spectrumDisplay.strips[0]
         self.dockArea.guiWindow.deleteBlankDisplay()
         # msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
         # self.dockArea.window().pythonConsole.write(msg)
@@ -143,4 +144,5 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
       from application.metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
       SpectrumGroupsWidget(spectrumDisplay.dock, self._appBase.project, spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
       spectrumDisplay.spectrumToolBar.hide()
+      self._appBase.current.strip = spectrumDisplay.strips[0]
     self.dockArea.guiWindow.deleteBlankDisplay()

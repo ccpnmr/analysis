@@ -47,7 +47,7 @@ class PolyBaseline(QtGui.QWidget, Base):
     self.orderBox = Spinbox(self, grid=(0, 1))
     self.orderBox.setMinimum(2)
     self.orderBox.setMaximum(5)
-    self.controlPointMaximum = max([spectrum.spectrumLimits[0][0] for spectrum in self.current.spectrumGroup.spectra])
+    self.controlPointMaximum = max([spectrum.spectrumLimits[0][1] for spectrum in self.current.spectrumGroup.spectra])
     self.controlPointMinimum = min([spectrum.spectrumLimits[0][0] for spectrum in self.current.spectrumGroup.spectra])
     self.controlPointStepSize = 0.01
     # self.orderBox.setValue(2)
@@ -354,11 +354,11 @@ class ExcludeBaselinePoints(QtGui.QWidget, Base):
     self.pointBox1.setValue(self.linePoint1.pos().y())
     self.pointBox2.setValue(self.linePoint2.pos().y())
     self.linePoint1.hide()
-    self.linePoint1.sigPositionChanged.connect(partial(self.lineMoved, self.pointBox1))
+    self.linePoint1.sigPositionChanged.connect(partial(self.lineMoved, self.pointBox1, self.linePoint1))
     self.linePoint2.hide()
-    self.linePoint2.sigPositionChanged.connect(partial(self.lineMoved, self.pointBox2))
-    self.pointBox1.valueChanged.connect(partial(self.setLinePosition, self.linePoint1))
-    self.pointBox2.valueChanged.connect(partial(self.setLinePosition, self.linePoint2))
+    self.linePoint2.sigPositionChanged.connect(partial(self.lineMoved, self.pointBox2, self.linePoint2))
+    self.pointBox1.valueChanged.connect(partial(self.setLinePosition, self.linePoint1, self.pointBox1))
+    self.pointBox2.valueChanged.connect(partial(self.setLinePosition, self.linePoint2, self.pointBox2))
 
 
   def togglePicking(self):
@@ -377,11 +377,11 @@ class ExcludeBaselinePoints(QtGui.QWidget, Base):
     self.linePoint1.hide()
     self.linePoint2.hide()
 
-  def lineMoved(self, box):
-    box.setValue(self.linePoint.pos().y())
+  def lineMoved(self, box, linePoint):
+    box.setValue(linePoint.pos().y())
 
-  def setLinePosition(self, linePoint):
-    linePoint.setPos(self.pointBox.value())
+  def setLinePosition(self, linePoint, pointBox):
+    linePoint.setPos(pointBox.value())
 
   def getParams(self):
     return {'function': 'excludeBaselinePoints',

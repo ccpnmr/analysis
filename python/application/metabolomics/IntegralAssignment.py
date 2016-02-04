@@ -53,10 +53,17 @@ class IntegralAssignment(QtGui.QWidget):
     self.deassignButton = Button(self, 'X', grid=(2, 5), callback=self.deassignIntegral)
     self.deassignAndMoveButton = Button(self, '<-- + X', grid=(3, 5), callback=self.deassignAndMove)
     self.suggestionSourceLabel = Label(self, 'Suggestion Source ', grid=(0, 6), gridSpan=(1, 1))
-    self.suggestionSourcePulldown = PulldownList(self, grid=(0, 7), gridSpan=(1, 2))
+    self.suggestionSourcePulldown = PulldownList(self, grid=(0, 7), gridSpan=(1, 2), callback=self.fillSubstanceTable)
+    self.suggestionSourcePulldown.setData()
     self.integralTable = IntegralTable(self,  grid=(1, 0), gridSpan=(4, 3))
     self.substanceTable = SubstanceTable(self, grid=(1, 6), gridSpan=(4, 3))
 
+
+  def fillSubstanceTable(self, value):
+    source = value
+    substances = [['1', '2', '3']]
+    substanceList = [Substance[subs] for subs in substances]
+    self.substanceTable.setObjects(substanceList)
 
   def assignIntegral(self):
     integralObject = self.integralTable.integralTable.getCurrentObject()

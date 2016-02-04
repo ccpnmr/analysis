@@ -51,7 +51,7 @@ class TestPipeline(unittest.TestCase):
     npt.assert_array_equal(np.asarray(o), normalisation.pqn(self.orderedSpectralIntensities))
 
 
-  def test_pipeline_with_single_polyBaseline_command(self):
+  def _test_pipeline_with_single_polyBaseline_command(self):
     commands = [{'function': 'polyBaseLine', 'controlPoints': [2.0, 1.0, 0.0]}]
     output = pipeline(self.spectra, commands)
 

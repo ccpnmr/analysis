@@ -57,7 +57,9 @@ class PcaModule(CcpnDock, Base):
     self.decomposePulldown.setData(['PCA'])
     self.sourceLabel = Label(self, 'Source', grid=(0, 2), gridSpan=(1, 1))
     self.sourcePulldown = PulldownList(self, grid=(0, 3), gridSpan=(1, 1))
-    self.sourcePulldown.setData([group.pid for group in project.spectrumGroups])
+    # self.sourcePulldown.setData([group.pid for group in project.spectrumGroups])
+    self.sourcePulldown.setData(list(self.mDict['Pipelines'].keys()))
+
     self.goButton = Button(self, 'GO', grid=(0, 5), gridSpan=(1, 1))
     self.goButton.clicked.connect(self.runPca)
 
@@ -67,7 +69,7 @@ class PcaModule(CcpnDock, Base):
 
     self.layout.addWidget(self.plottingWidget, 1, 0, 4, 6)
 
-    self.scoresPlot = pg.PlotWidget(self, self.project_appBase)
+    self.scoresPlot = PlotWidget(self, appBase=project._appBase)
     self.scoresPlot.plotItem.axes['left']['item'].show()
     self.scoresPlot.plotItem.axes['right']['item'].hide()
     self.scoresWidget = QtGui.QWidget(self)
@@ -114,22 +116,24 @@ class PcaModule(CcpnDock, Base):
     self.spectrumDisplay = spectrumDisplay
 
   def runPca(self):
-    '''
-    For now, we ignore the params dict and use the hard-wired pipeline output.
-    '''
     params = {'method': self.decomposePulldown.currentText(),
               'source': self.sourcePulldown.currentText()}
-    preProcessedData = self.mDict['pipelineName']['output']
+    preProcessedData = self.mDict['Pipelines'][self.sourcePulldown.currentText()]['output']
+
     self.pca = PCA(preProcessedData)
+
     scores = self.pca.scores
     xValues, yValues = 'PC1', 'PC2'
     x = scores[xValues].values
     y = scores[yValues].values
-    self.scoresPlot.plotItem.plot(x, y, pen=None, symbol='o')
-    self.scoresPlot.plotItem.vb.invertX()
+    self.scoresPlot.plot(x, y, pen=None, symbol='o')
     self.scoresYLabel = yValues
+
+    ev = self.pca.explainedVariance
+    xValues = list(range(1, 1+len(ev)))
+    self.evPlot.plot(xValues, ev, symbol='o')
+
     if self.spectrum:
       spectrumDisplay = self.createSpectrumDisplay(spectrum=None)
       self.setSpectrumDisplay(spectrumDisplay)
       self.project._appBase.mainWindow.dockArea.moveDock(spectrumDisplay.dock, position='bottom', neighbor=self)
-

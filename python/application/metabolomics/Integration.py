@@ -114,6 +114,7 @@ class IntegrationWidget(QtGui.QWidget, Base):
     pass
 
   def getParams(self):
+    print([(i, i+1) for i in range(len(self.integralPositions), 2)])
     return [(i, i+1) for i in range(len(self.integralPositions), 2)]
 
 class IntegrationTable(QtGui.QWidget, Base):

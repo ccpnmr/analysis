@@ -37,5 +37,6 @@ class TestPCA(unittest.TestCase):
     npt.assert_array_almost_equal(self.pca.loadings['PC1'], [0.838492, 0.544914])
     npt.assert_array_almost_equal(self.pca.loadings['PC2'], [0.544914, -0.838492])
 
+
 if __name__ == '__main__':
   unittest.main()

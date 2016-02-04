@@ -99,8 +99,14 @@ class MetabolomicsModule(CcpnDock, Base):
     # print(pipelineFunctions)
     print(self.goArea.pipelineName)
     pipelineOutputByPid = pipeline(spectraByPid, pipelineFunctions)
-    self.mDict['pipelineName'] = {}
-    self.mDict['pipelineName']['output'] = pipelineOutputByPid
+
+    try:
+      pipelines = self.mDict['Pipelines']
+    except KeyError:
+      pipelines = self.mDict['Pipelines'] = {}
+
+    pl = pipelines[self.goArea.pipelineName] = {}
+    pl['output'] = pipelineOutputByPid
 
 
 
@@ -146,8 +152,11 @@ class PipelineWidgets(QtGui.QWidget):
     # Base.__init__(self, **kw)
     self.project = project
     self.pullDownData = OrderedDict((
+      ('< Select Method >', None),
+      ('Normalise Spectra', gp.NormaliseSpectra(self, self.project)),
       ('Centre', gp.Centre(self, self.project)),
       ('Scale', gp.Scale(self, self.project)),
+      (' -- Not Implemented -- ', None),
       ('Poly Baseline', gp.PolyBaseline(self, self.project)),
       ('Align To Reference', gp.AlignToReference(self, self.project)),
       ('Align Spectra', gp.AlignSpectra(self, self.project)),
@@ -156,7 +165,6 @@ class PipelineWidgets(QtGui.QWidget):
       ('Whittaker Smooth', gp.WhittakerSmooth(self, self.project)),
       ('Bin', gp.Bin(self, self.project)),
       ('Exclude Baseline Points', gp.ExcludeBaselinePoints(self, self.project)),
-      ('Normalise Spectra', gp.NormaliseSpectra(self, self.project)),
       ('Exclude Signal Free Regions', gp.ExcludeSignalFreeRegions(self, self.project)),
     ))
 
@@ -176,9 +184,7 @@ class PipelineWidgets(QtGui.QWidget):
     self.pulldownAction.setFixedHeight(25)
 
     pdData = list(self.pullDownData.keys())
-    pdData.insert(0, '< Select Method >')
     self.selectMethod = '< Select Method >'
-
 
     self.pulldownAction.setData(pdData)
     self.pulldownAction.activated[str].connect(self.addMethod)
@@ -210,10 +216,10 @@ class PipelineWidgets(QtGui.QWidget):
 
 
   def addMethod(self, selected):
-     self.updateLayout()
+    self.updateLayout()
 
-     if selected != '< Select Method >':
-      obj = self.pullDownData[selected]
+    obj = self.pullDownData[selected]
+    if obj is not None:
       self.mainWidgets_layout.insertWidget(2, obj, 1)
       mainVboxLayout = obj.parent().parent().parent().layout()
       items = [mainVboxLayout.itemAt(i) for i in range(mainVboxLayout.count())]

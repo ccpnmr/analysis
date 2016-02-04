@@ -30,16 +30,14 @@ def pipeline(spectra, commands):
 
 
 def _tsa(osn, oss, osi):
-  # print('tsa')
   return osn, oss, normalisation.tsa(np.asarray(osi))
 
 def _pqn(osn, oss, osi):
-  # print('pqn')
   return osn, oss, normalisation.pqn(np.asarray(osi))
 
 
 def _polyBaseLine(osn, oss, osi, controlPoints):
-  # print('polybaseline', controlPoints)
+  print('polybaseline', controlPoints)
   return osn, oss, osi
 
 
@@ -75,23 +73,20 @@ def _bin(osn, oss, osi, binWidth):
   return osn, oss, osi
 
 def _paretoScale(osn, oss, osi):
-  print('Pareto')
   return osn, oss, scaling.paretoScale(osi)
 
 def _unitVarianceScale(osn, oss, osi):
-  print('Unit Variance Scaling')
-  return osn, oss, osi
+  return osn, oss, scaling.unitVarianceScale(np.asarray(osi))
 
 def _refPeakNormalise(osn, oss, osi, peak):
   print('Normalise to reference peak')
   return osn, oss, osi
 
 def _meanCentre(osn, oss, osi):
-  return osn, oss, centering.meanCenter(osi)
+  return osn, oss, centering.meanCenter(np.asarray(osi))
 
 def _medianCentre(osn, oss, osi):
-  print('Median')
-  return osn, oss, centering.medianCenter(osi)
+  return osn, oss, centering.medianCenter(np.asarray(osi))
 
 functionMap = {
   'normalise': {

@@ -47,6 +47,5 @@ class PCA:
 
 
   def _fitPcaModel(self):
-
     self._fittedPcaModel = sklearn.decomposition.PCA(n_components=self.nComponents)
     self._fittedPcaModel.fit(self._inputDF)

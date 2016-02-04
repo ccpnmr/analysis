@@ -113,18 +113,23 @@ class GoArea(QtGui.QWidget):
   def __init__(self, parent=None, project=None, **kw):
     super(GoArea, self).__init__(parent)
     self.label = Label(self, 'Pipeline Name', grid=(0,0))
+    self.current = project._appBase.current
     self.lineEdit = LineEdit(self, grid=(0,1))
     self.lineEdit.setText('ds1')
     self.pipelineName = self.lineEdit.text()
     self.lineEdit.editingFinished.connect(self.renamePipeline)
     self.spectrumGroupLabel = Label(self, 'Input Data ', grid=(0, 2))
-    self.spectrumGroupPulldown = PulldownList(self, grid=(0, 3))
+    self.spectrumGroupPulldown = PulldownList(self, grid=(0, 3), callback=self.currentSpectrumGroup)
     spectrumGroups = [spectrumGroup.pid for spectrumGroup in project.spectrumGroups]
     self.spectrumGroupPulldown.setData(spectrumGroups)
+    self.spectrumGroupPulldown.connect()
     self.autoUpdateBox = CheckBox(self, grid=(0, 4), checked=False)
     # self.autoUpdateBox.setChecked(True)
     self.autoUpdateLabel = Label(self, 'Auto', grid=(0, 5))
     self.goButton = Button(self, 'Go', grid=(0, 6))
+
+  def currentSpectrumGroup(self):
+    self.current.spectrumGroup = self.project.getByPid(self.spectrumGroupPulldown.currentText())
 
 
   def renamePipeline(self):

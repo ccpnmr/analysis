@@ -47,10 +47,13 @@ class PolyBaseline(QtGui.QWidget, Base):
     self.orderBox = Spinbox(self, grid=(0, 1))
     self.orderBox.setMinimum(2)
     self.orderBox.setMaximum(5)
+    self.controlPointMaximum = max([spectrum.spectrumLimits[0][0] for spectrum in self.current.spectrumGroup.spectra])
+    self.controlPointMinimum = min([spectrum.spectrumLimits[0][0] for spectrum in self.current.spectrumGroup.spectra])
+    self.controlPointStepSize = 0.01
     # self.orderBox.setValue(2)
     self.orderBox.valueChanged.connect(self.updateLayout)
     self.controlPointsLabel = Label(self, 'Control Points ', grid=(0, 2))
-    self.pickOnSpectrumButton =  Button(self, grid=(0, 9), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
+    self.pickOnSpectrumButton = Button(self, grid=(0, 9), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
     # self.mySignal1.connect(self.setSpinBoxSelected)
@@ -72,19 +75,27 @@ class PolyBaseline(QtGui.QWidget, Base):
               item.widget().hide()
             self.layout().removeItem(item)
       self.controlPointBoxList = []
-      self.controlPointBox1 = DoubleSpinbox(self, grid=(0, 3), showButtons=False)
+      self.controlPointBox1 = DoubleSpinbox(self, grid=(0, 3), showButtons=False,
+                                            max=self.controlPointMaximum, min=self.controlPointMinimum)
+      self.controlPointBox1.setSingleStep(self.controlPointStepSize)
       self.controlPointBoxList.append(self.controlPointBox1)
       self.ppmLabel = Label(self, 'ppm', grid=(0, 4))
-      self.controlPointBox2 = DoubleSpinbox(self, grid=(0, 5), showButtons=False)
+      self.controlPointBox2 = DoubleSpinbox(self, grid=(0, 5), showButtons=False,
+                                            max=self.controlPointMaximum, min=self.controlPointMinimum)
+      self.controlPointBox2.setSingleStep(self.controlPointStepSize)
       self.controlPointBoxList.append(self.controlPointBox2)
       self.ppmLabel = Label(self, 'ppm', grid=(0, 6))
-      self.controlPointBox3 = DoubleSpinbox(self, grid=(0, 7), showButtons=False)
+      self.controlPointBox3 = DoubleSpinbox(self, grid=(0, 7), showButtons=False,
+                                            max=self.controlPointMaximum, min=self.controlPointMinimum)
+      self.controlPointBox3.setSingleStep(self.controlPointStepSize)
       self.controlPointBoxList.append(self.controlPointBox3)
       self.ppmLabel = Label(self, 'ppm', grid=(0, 8))
       if 2 < value <= 5:
         gridArray = [3+x for x in range(2*(value-2))]
         for i in range(0, len(gridArray), 2):
-          self.controlPointBox = DoubleSpinbox(self, grid=(1, gridArray[i]), showButtons=False)
+          self.controlPointBox = DoubleSpinbox(self, grid=(1, gridArray[i]), showButtons=False,
+                                               max=self.controlPointMaximum, min=self.controlPointMinimum)
+          self.controlPointBox.setSingleStep(self.controlPointStepSize)
           self.controlPointBoxList.append(self.controlPointBox)
           self.ppmLabel = Label(self, 'ppm', grid=(1, gridArray[i+1]))
     else:

@@ -67,8 +67,8 @@ class PcaModule(CcpnDock, Base):
 
     self.layout.addWidget(self.plottingWidget, 1, 0, 4, 6)
 
-    self.scoresPlot = pg.ScatterPlotWidget(self)
-    self.scoresPlot.scatterPlot.axes['left']['item'].show()
+    self.scoresPlot = pg.PlotWidget(self, self.project_appBase)
+    self.scoresPlot.plotItem.axes['left']['item'].show()
     self.scoresPlot.plotItem.axes['right']['item'].hide()
     self.scoresWidget = QtGui.QWidget(self)
     self.scoresWidgetLayout = QtGui.QGridLayout()
@@ -124,7 +124,11 @@ class PcaModule(CcpnDock, Base):
     xValues, yValues = 'PC1', 'PC2'
     x = scores[xValues].values
     y = scores[yValues].values
-    self.scoresPlot.setData(x, y)
-    # self.scoresPlot.plotItem.vb.invertX()
+    self.scoresPlot.plotItem.plot(x, y, pen=None, symbol='o')
+    self.scoresPlot.plotItem.vb.invertX()
     self.scoresYLabel = yValues
+    if self.spectrum:
+      spectrumDisplay = self.createSpectrumDisplay(spectrum=None)
+      self.setSpectrumDisplay(spectrumDisplay)
+      self.project._appBase.mainWindow.dockArea.moveDock(spectrumDisplay.dock, position='bottom', neighbor=self)
 

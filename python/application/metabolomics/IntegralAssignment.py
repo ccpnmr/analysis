@@ -111,7 +111,8 @@ class SubstanceTable(QtGui.QWidget, Base):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
-    substanceTableColumns = [Column('substance', 'substance'), Column('atom', 'atom'), Column('cs', 'cs')]
+    substanceTableColumns = [Column('substance', 'name', setEditValue=lambda substance, value: self.setSubstanceName(substance, value)),
+                             Column('atom', 'atom'), Column('cs', 'cs')]
 
     tipTexts2 = ['substance Id', 'substance atom', 'substance cs']
     substanceList = [Substance('load', '2', '3'), Substance('1', '2', '3'), Substance('1', '2', '3')]
@@ -120,6 +121,9 @@ class SubstanceTable(QtGui.QWidget, Base):
     self.substanceTable = ObjectTable(self, columns=substanceTableColumns,
                               callback=self.substanceCallback,
                               objects=substanceList)
+
+  def setSubstancename(self, substance, value):
+    substance.name = value
 
   def substanceCallback(self):
     pass
@@ -135,7 +139,7 @@ class Integral(object):
     self.area = area
 
 class Substance(object):
-  def __init__(self, substance, atom, cs):
-    self.substance = substance
+  def __init__(self, name, atom, cs):
+    self.name = name
     self.atom = atom
     self.cs = cs

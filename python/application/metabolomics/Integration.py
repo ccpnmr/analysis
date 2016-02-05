@@ -24,6 +24,8 @@ __version__ = ": 7686 $"
 
 from PyQt4 import QtGui
 
+import numpy
+
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Label import Label
@@ -49,7 +51,8 @@ class IntegrationWidget(QtGui.QWidget, Base):
     self.currentAreaLabel = Label(self, 'Current Area ID ', grid=(0, 2))
     self.idLineEdit = LineEdit(self, grid=(0, 3))
     self.rangeLabel1 = Label(self, 'range ', grid=(0, 4))
-    self.rangeLabel2 = Label(self, 'Insert range here', grid=(0, 5))
+    # self.rangeLabel2 = Label(self, 'Insert range here', grid=(0, 5))
+    self.goButton = Button(self, 'GO', grid=(0, 5), callback=self.getParams)
     self.peakInAreaLabel = Label(self, 'Peaks in Area ', grid=(1, 0))
     columns = [('#', 'serial'), ('Height', lambda pk: self.getPeakHeight(pk)),
                ('Volume', lambda pk: self.getPeakVolume(pk)),
@@ -72,11 +75,15 @@ class IntegrationWidget(QtGui.QWidget, Base):
     self.current.registerNotify(self.setPositions, 'positions')
     for linePoint in self.linePoints:
       self.current.strip.plotWidget.addItem(linePoint)
+    for integrationRegion in self.integrationRegions:
+      self.current.strip.plotWidget.addItem(integrationRegion)
 
   def turnOffPositionPicking(self):
     self.current.unRegisterNotify(self.setPositions, 'positions')
     for linePoint in self.linePoints:
       self.current.strip.plotWidget.removeItem(linePoint)
+    for integrationRegion in self.integrationRegions:
+      self.current.strip.plotWidget.removeItem(integrationRegion)
 
   def setPositions(self, positions):
     if len(self.linePoints) % 2 == 0 or len(self.linePoints) == 0:
@@ -95,8 +102,18 @@ class IntegrationWidget(QtGui.QWidget, Base):
     pass
 
   def getParams(self):
+    integralLines = [(i.lines[0].pos().x(), i.lines[1].pos().x()) for i in self.integrationRegions]
+    spectra = [spectrumView.spectrum for spectrumView in self.current.strip.spectrumViews]
+    for spectrum in spectra:
+      spectrumData = spectrum._apiDataSource.get1dSpectrumData()
+      for integralPair in integralLines:
+        xPositions = numpy.where(numpy.logical_and(numpy.array(spectrumData[0])<integralPair[0], numpy.array(spectrumData[0])>integralPair[1]))
+        yData = numpy.cumsum(spectrumData[1][xPositions[0]])
+        xData = spectrumData[0][xPositions]
+        self.current.strip.plotWidget.plot(xData, yData, pen=(0, 128, 0))
 
-    return [(i.lines[0].pos().x(), i.lines[1].pos().x()) for i in self.integrationRegions]
+
+
 
 class IntegrationTable(QtGui.QWidget, Base):
 

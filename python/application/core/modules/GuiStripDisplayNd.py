@@ -62,7 +62,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
     # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
     ###self.inactivePeakItems = set() # contains unused peakItems
-    self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are not being displayed
+    self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
     
     GuiSpectrumDisplay.__init__(self)
 
@@ -345,10 +345,11 @@ def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpec
 
 def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
   """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
+  
   spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]
   if not isinstance(spectrumDisplay, GuiStripDisplayNd):
     return
-
+  
   apiDataSource = apiSpectrumView.dataSource
 
   # remove toolbar action (button)
@@ -376,7 +377,28 @@ def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeak
   for apiPeakList in apiDataSource.sortedPeakLists():
     strip.showPeaks(getDataObj(apiPeakList))
   
+def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
+  
+  apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
+  getDataObj = project._data2Obj.get
+  peakListView = getDataObj(apiStripPeakListView)
+  spectrumView = peakListView.spectrumView
+  strip = spectrumView.strip
+  spectrumDisplay = strip.spectrumDisplay
+  scene = strip.plotWidget.scene()
+ 
+  peakItemDict = spectrumDisplay.activePeakItemDict[peakListView]
+  peakItems = set(spectrumDisplay.inactivePeakItemDict[peakListView])
+  for apiPeak in peakItemDict:
+    peakItem = peakItemDict[apiPeak]
+    peakItems.add(peakItem)
+  for peakItem in peakItems:
+    scene.removeItem(peakItem.annotation)
+    scene.removeItem(peakItem)
+  scene.removeItem(peakListView)
+  
 Project._setupNotifier(_createdStripPeakListView, ApiStripPeakListView, 'postInit')
+Project._setupNotifier(_deletedStripPeakListView, ApiStripPeakListView, 'preDelete')
 
 def _setActionIconColour(project:Project, apiDataSource:ApiDataSource):
   
@@ -399,7 +421,7 @@ def _deletedPeak(project:Project, apiPeak:ApiPeak):
         if isinstance(spectrumDisplay, GuiStripDisplayNd):
           spectrumDisplay._deletedPeak(apiPeak)
 
-Project._setupNotifier(_deletedPeak, ApiPeak, 'delete')
+Project._setupNotifier(_deletedPeak, ApiPeak, 'preDelete')
 
 # Unnecessary - dimensionOrdering is frozen
 # def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):

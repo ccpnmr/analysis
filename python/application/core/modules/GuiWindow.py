@@ -75,12 +75,14 @@ class GuiWindow(DropBase):
       self.blankDisplay.setParent(None)
       self.blankDisplay = None
           
-  def loadData(self, paths=None):
+  def loadData(self, paths=None, text=None):
     """
     Opens a file dialog box and loads data from selected file.
     """
+    if text is None:
+      text='Load Data'
     if paths is None:
-      paths = QtGui.QFileDialog.getOpenFileName(self, 'Load Data')
+      paths = QtGui.QFileDialog.getOpenFileName(self, text)
 
     # NBNB TBD I assume here that path is either a string or a list lf string paths.
     # NBNB FIXME if incorrect

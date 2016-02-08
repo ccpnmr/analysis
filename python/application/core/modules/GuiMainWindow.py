@@ -306,7 +306,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     peaksMenu.addAction(Action(self, "Pick Peaks", callback=self.pickPeaks, shortcut='pp'))
 
     # newMoleculeMenu = moleculeMenu.addMenu("New")
-    moleculeMenu.addAction(Action(self, "Create Molecule...", callback=self.showMoleculePopup, shortcut='ls'))
+    moleculeMenu.addAction(Action(self, "Create Molecule...", callback=self.showMoleculePopup, shortcut='cm'))
     self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
     if hasattr(self, 'sequenceWidget'):
       self.sequenceAction.setChecked(self.sequenceWidget.isVisible())
@@ -1062,7 +1062,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project with name specified in the file dialog."""
-    from application import AppBase  # has to be here because of circular import
+    from application.core import AppBase  # has to be here because of circular import
     apiProject = self._project._wrappedData.root
     newPath = AppBase.getSaveDirectory(apiProject, self._appBase.preferences)
     if newPath:

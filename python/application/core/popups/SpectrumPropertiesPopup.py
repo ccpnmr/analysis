@@ -435,7 +435,9 @@ class ContoursTab(QtGui.QWidget, Base):
     negativeMultiplierData = DoubleSpinbox(self, grid=(8, 1), vAlign='t', hAlign='l')
     negativeMultiplierData.setValue(spectrum.negativeContourFactor)
     negativeMultiplierData.setSingleStep(0.1)
+
     negativeMultiplierData.valueChanged.connect(partial(self.lineEditTextChanged5, spectrum))
+    negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value()*-1)*negativeMultiplierData.value()-1)
     negativeContourCountLabel = Label(self, text="Number of contours", grid=(9, 0), vAlign='t', hAlign='l')
     negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t', hAlign='l')
     negativeContourCountData.setValue(spectrum.negativeContourCount)
@@ -493,6 +495,7 @@ class ContoursTab(QtGui.QWidget, Base):
 
   def lineEditTextChanged4(self, spectrum, value):
     spectrum.negativeContourBase = float(value)
+    print(value)
     # spectrum.spectrumItem.levels = spectrum.spectrumItem.getLevels()
 
   def lineEditTextChanged5(self, spectrum, value):

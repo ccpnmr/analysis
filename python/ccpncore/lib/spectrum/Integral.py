@@ -131,7 +131,7 @@ class Integral:
   def delete(self):
     self.spectrum.integrals.remove(self)
 
-  def getIntegralRegions(values, noise, peakPickLevel):
+  def getIntegralRegions(self, values, noise, peakPickLevel):
 # If no peaks are selected integrals are determined automatically.
 # Integrals are added if there is at least one point above the peak picking threshold and three above noise.
 # Tails are added to each end of the integral and integrals are merged if overlapping.
@@ -193,7 +193,7 @@ class Integral:
 
     return integrals
 
-  def setIntegrals(spectrum, values, factor = 1.0):
+  def setIntegrals(self, spectrum, values, factor = 1.0):
 
     spectrum.integrals = []
     append = spectrum.integrals.append
@@ -201,7 +201,7 @@ class Integral:
     for value in values:
       append(Integral(spectrum, value, factor))
 
-  def calculateIntegralValues( integral, values, bias=0.0, slope=1.0):
+  def calculateIntegralValues(self, integral, values, bias=0.0, slope=1.0):
 
       integral[:,1] = numpy.cumsum(values[int(integral[0,0]): int(integral[-1,0]+1)] * slope + bias)
       return integral[-1,1]

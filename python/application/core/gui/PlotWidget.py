@@ -77,14 +77,15 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
       if guiSpectrumDisplay.isGrouped:
         print('single spectra cannot be dropped onto grouped displays')
         return
-      else:
-        for ss in pids:
-          guiSpectrumDisplay.displaySpectrum(ss)
-          # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
-          #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
-          self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
-            "module.displaySpectrum(spectrum)", module=displayPid, sectrum=ss
-          )
+    else:
+      for ss in pids:
+        print(ss)
+        guiSpectrumDisplay.displaySpectrum(ss)
+        # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
+        #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
+        self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+          "module.displaySpectrum(spectrum)", module=displayPid, sectrum=ss
+        )
 
   def processSpectrumGroups(self, pids:Sequence[str], event:QtGui.QMouseEvent):
     guiSpectrumDisplay = self.parent.guiSpectrumDisplay

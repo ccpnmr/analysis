@@ -604,7 +604,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     Displays mouse position for both axes by axis code.
     """
     position = self.viewBox.mapSceneToView(pos)
-    # self.guiSpectrumDisplay.positionBox.setText("%s: %.3f  %s: %.3f" % (self.orderedAxes[0].code, position.x(), self.orderedAxes[1].code, position.y()))
+    self.guiSpectrumDisplay.positionBox.setText("%s: %.3f  %s: %.3f" % (self.orderedAxes[0].code, position.x(), self.orderedAxes[1].code, position.y()))
 
   def zoomToRegion(self, region:Types.List[float]):
     """
@@ -676,6 +676,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       restoredZoom = self.storedZooms.pop()
       self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1])
       self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1])
+    else:
+      self.resetZoom()
 
   def showSpectrum(self, guiSpectrumView):
     raise Exception('should be implemented in subclass')

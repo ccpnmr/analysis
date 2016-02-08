@@ -157,7 +157,9 @@ class GuiStripNd(GuiStrip):
     xArray = numpy.array(x).flatten()
     yArray = numpy.array(y).flatten()
 
-    self.zoomToRegion([min(xArray), max(xArray), min(yArray), max(yArray)])
+    zoomArray = ([min(xArray), max(xArray), min(yArray), max(yArray)])
+    self.zoomToRegion(zoomArray)
+    return zoomArray
 
 
   def updateRegion(self, viewBox):

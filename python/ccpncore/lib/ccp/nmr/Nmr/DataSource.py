@@ -490,7 +490,7 @@ def getRegionData(self:'DataSource', startPoint:Sequence, endPoint:Sequence):
   
   return data.T, intRegion
   
-def automaticIntegration(self:'DataSource',spectralData):
+def automaticIntegration(self:'DataSource',spectralData, regions):
 #
   numDim = self.numDim
   if numDim != 1:

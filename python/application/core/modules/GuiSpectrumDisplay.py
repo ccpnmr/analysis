@@ -245,18 +245,20 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
   """Update interface when a strip is created"""
   
-  getDataObj = project._data2Obj.get
-  spectrumDisplay = getDataObj(apiStripSpectrumView.strip.spectrumDisplay)
+  spectrumDisplay = project._data2Obj[apiStripSpectrumView.strip.spectrumDisplay]
   enabled = len(spectrumDisplay.strips) > 1
   spectrumDisplay.removeStripAction.setEnabled(enabled)
   
 def _deletedStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
   """Update interface when a strip is deleted"""
   
-  getDataObj = project._data2Obj.get
-  spectrumDisplay = getDataObj(apiStripSpectrumView.strip.spectrumDisplay)
+  spectrumView = project._data2Obj[apiStripSpectrumView]
+  strip = spectrumView.strip
+  strip.plotWidget.scene().removeItem(spectrumView)
+  spectrumDisplay = strip.spectrumDisplay
   enabled = len(spectrumDisplay.strips) > 2  # 2 not 1 because this strip has not been deleted yet
   spectrumDisplay.removeStripAction.setEnabled(enabled)
+  
   
 Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
 Project._setupNotifier(_deletedStripSpectrumView, ApiStripSpectrumView, 'preDelete')

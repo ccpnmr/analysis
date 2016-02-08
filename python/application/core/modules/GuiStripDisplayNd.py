@@ -379,7 +379,6 @@ def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeak
   
 def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
   
-  apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
   getDataObj = project._data2Obj.get
   peakListView = getDataObj(apiStripPeakListView)
   spectrumView = peakListView.spectrumView

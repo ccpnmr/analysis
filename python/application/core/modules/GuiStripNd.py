@@ -59,7 +59,7 @@ class GuiStripNd(GuiStrip):
 
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
     ###self.peakLayerDict = {}  # peakList --> peakLayer
-    self.peakListViewDict = {}  # peakList --> peakListView
+    ###self.peakListViewDict = {}  # peakList --> peakListView
     
     self.haveSetupZWidgets = False
     
@@ -324,14 +324,14 @@ class GuiStripNd(GuiStrip):
 
   def _findPeakListView(self, peakList:PeakList):
     
-    peakListView = self.peakListViewDict.get(peakList)
-    if peakListView:
-      return peakListView
+    #peakListView = self.peakListViewDict.get(peakList)
+    #if peakListView:
+    #  return peakListView
       
     for spectrumView in self.spectrumViews:
       for peakListView in spectrumView.peakListViews:
         if peakList is peakListView.peakList:
-          self.peakListViewDict[peakList] = peakListView
+          #self.peakListViewDict[peakList] = peakListView
           return peakListView
             
     return None

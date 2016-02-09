@@ -715,11 +715,18 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
           strip.viewBox.setYRange(*region)
         else:
           # One of the Z axes
-          peakLists = strip.peakListViewDict.keys()
-          for peakList in peakLists:
-            peakListView = strip.peakListViewDict[peakList]
-            peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
-            strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+          #peakLists = strip.peakListViewDict.keys()
+          #for peakList in peakLists:
+          #  peakListView = strip.peakListViewDict[peakList]
+          #  peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
+          #  strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+          for spectrumView in strip.spectrumViews:
+            if spectrumView.isVisible():
+              for peakListView in spectrumView.peakListViews:
+                if peakListView.isVisible():
+                  peakList = peakListView.peakList
+                  peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
+                  strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
           
           from application.core.modules.GuiStripNd import GuiStripNd
           if isinstance(strip, GuiStripNd):

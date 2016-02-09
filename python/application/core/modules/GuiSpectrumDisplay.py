@@ -257,6 +257,8 @@ def _deletedStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpec
   spectrumDisplay = strip.spectrumDisplay
   scene = strip.plotWidget.scene()
   scene.removeItem(spectrumView)
+  if hasattr(spectrumView, 'plot'):  # 1d
+    scene.removeItem(spectrumView.plot)
   
   enabled = len(spectrumDisplay.strips) > 2  # 2 not 1 because this strip has not been deleted yet
   spectrumDisplay.removeStripAction.setEnabled(enabled)

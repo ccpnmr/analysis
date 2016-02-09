@@ -49,9 +49,10 @@ class GuiStrip1d(GuiStrip):
     self.colourIndex = 0
     self.spectrumIndex = 0
     self.peakItems = {}
-    for spectrumView in self.spectrumViews:
-      self.plotWidget.plotItem.plot(spectrumView.data[0], spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
-                                    strip=self)
+    for spectrumView in self.spectrumViews:  # are there ever any??
+      spectrumView.plot = self.plotWidget.plotItem.plot(spectrumView.data[0],
+                            spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
+                            strip=self)
 
   def printToFile(self, printer):
     
@@ -130,3 +131,4 @@ class GuiStrip1d(GuiStrip):
     """
     for item in self.peakItems[peakList]:
       self.plotWidget.removeItem(item)
+      

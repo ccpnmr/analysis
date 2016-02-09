@@ -386,6 +386,9 @@ def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeak
   spectrumDisplay = strip.spectrumDisplay
   scene = strip.plotWidget.scene()
  
+  if not hasattr(spectrumDisplay, 'activePeakItemDict'):
+    return  # 1d
+    
   peakItemDict = spectrumDisplay.activePeakItemDict[peakListView]
   peakItems = set(spectrumDisplay.inactivePeakItemDict[peakListView])
   for apiPeak in peakItemDict:
@@ -395,6 +398,8 @@ def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeak
     scene.removeItem(peakItem.annotation)
     scene.removeItem(peakItem)
   scene.removeItem(peakListView)
+  del spectrumDisplay.activePeakItemDict[peakListView]
+  del spectrumDisplay.inactivePeakItemDict[peakListView]
   
 Project._setupNotifier(_createdStripPeakListView, ApiStripPeakListView, 'postInit')
 Project._setupNotifier(_deletedStripPeakListView, ApiStripPeakListView, 'preDelete')

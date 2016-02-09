@@ -27,6 +27,7 @@ from application.core.Version import applicationVersion
 from application.core.lib.Window import MODULE_DICT
 from application.core.modules import GuiStrip
 from application.core.modules import GuiStripNd
+from application.core.modules import GuiSpectrumDisplay
 from application.core.modules import GuiStripDisplayNd
 
 
@@ -60,7 +61,7 @@ class Assign(AppBase):
           GuiStripNd._spectrumViewCreated(project, apiStripSpectrumView)
           GuiStripDisplayNd._createdStripSpectrumView(project, apiStripSpectrumView)
           for apiStripPeakListView in apiStripSpectrumView.stripPeakListViews:
-            GuiStripDisplayNd._createdStripPeakListView(project, apiStripPeakListView)
+            GuiSpectrumDisplay._createdStripPeakListView(project, apiStripPeakListView)
     self.initLayout()
 
   def initLayout(self):

@@ -94,7 +94,14 @@ class Project(AbstractWrapperObject):
     # Special attributes:
     self._implExperimentTypeMap = None
 
-    # Set mandatory top-level objects in apiProject and ApiNmrProject
+    # Set required objects in apiProject and ApiNmrProject
+
+    # PeakLists
+    for experiment in wrappedData.experiments:
+      for dataSource in experiment.dataSources:
+        if not dataSource.peakLists:
+          dataSource.newPeakList()
+
     # MolSystem
     apiProject = wrappedData.root
     if wrappedData.molSystem is None:
@@ -195,7 +202,17 @@ class Project(AbstractWrapperObject):
   def _newObject(self, wrappedData, cls):
     """Create new wrapper object of class cls, associated with wrappedData.
     For use in creation notifiers"""
-    return cls(self, wrappedData)
+
+    result = cls(self, wrappedData)
+
+    # put object in sidebar, if any
+    appBase = self._appBase
+    mainWindow = appBase and appBase.mainWindow
+    if mainWindow is not None:
+      mainWindow.sideBar._createItem(result)
+
+    #
+    return result
 
   def _finaliseDelete(self, wrappedData):
     """Clean up after object deletion - to be called from notifiers
@@ -204,8 +221,17 @@ class Project(AbstractWrapperObject):
     if not wrappedData.isDeleted:
       raise ValueError("_finaliseDelete called before wrapped data are deleted: %s" % wrappedData)
 
+    # get object
+    obj = self._data2Obj.get(wrappedData)
+
+    # Remove from GUI sidebar - if any
+    appBase = self._appBase
+    mainWindow = appBase and appBase.mainWindow
+    if mainWindow is not None:
+      mainWindow.sideBar._removeItem(obj)
+
     # remove from wrapped2Obj
-    obj = self._data2Obj.pop(wrappedData)
+    del self._data2Obj[wrappedData]
 
     # remove from pid2Obj
     del self._pid2Obj[obj.shortClassName][obj._id]
@@ -239,9 +265,20 @@ class Project(AbstractWrapperObject):
     del wrappedData._oldWrapperObject
     oldWrapperObject._wrappedData = wrappedData
 
+    # Put back in GUI sidebar - if any
+    appBase = self._appBase
+    mainWindow = appBase and appBase.mainWindow
+    if mainWindow is not None:
+      appBase.mainWindow.sideBar._createItem(oldWrapperObject)
+
   def _resetPid(self, wrappedData):
     """Reset internal attributes after values determining PID have changed"""
 
+    mainWindow = self._appBase and self._appBase.mainWindow
+    if mainWindow is None:
+      sideBar = None
+    else:
+      sideBar = mainWindow.sideBar
 
     getDataObj = self._data2Obj.get
     pid2Obj = self._pid2Obj
@@ -267,6 +304,12 @@ class Project(AbstractWrapperObject):
       dd = pid2Obj[obj.className]
       del dd[oldId]
       dd[_id] = obj
+
+      # Refresh sidebar item if any
+      if sideBar is not None:
+        sidebarItem = sideBar._findItem(obj)
+        if sidebarItem is not None:
+          sideBar._renameItem(sidebarItem, obj)
 
 
   # NBNB We do NOT want to delete the underlying nmrProject, in case the root

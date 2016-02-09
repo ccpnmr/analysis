@@ -152,7 +152,7 @@ class DropBase(GuiBase):
 
           if pluralClassName == 'Spectra':
             spectrum = self.getByPid(pid)
-            self._appBase.mainWindow.sideBar.addSpectrum(spectrum)
+            # self._appBase.mainWindow.sideBar.addSpectrum(spectrum)
 
       else:
         raise ValueError("processDropData does not recognise dataType %s" % dataType)

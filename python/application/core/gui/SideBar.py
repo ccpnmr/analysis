@@ -38,6 +38,7 @@ from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup,
 
 from ccpn import Project
 from ccpn import Spectrum
+from ccpn import AbstractWrapperObject
 
 from ccpncore.util.Pid import Pid
 from ccpncore.util.Types import Sequence
@@ -145,16 +146,75 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     from ccpncore.gui.Menu import Menu
     contextMenu = Menu('', self, isFloatWidget=True)
     from functools import partial
-    contextMenu.addAction('Delete', partial(self.removeItem, item))
+    # contextMenu.addAction('Delete', partial(self.removeItem, item))
+    contextMenu.addAction('Delete', partial(self._deleteItemObject, item))
     contextMenu.popup(event.globalPos())
 
-  def removeItem(self, item:QtGui.QTreeWidgetItem):
+  # NBNB TBD FIXME. Sorry, but this will need refactoring.
+  # 1) semantically, removeItem should only remove the item, not delete the underlying object
+  # 2) If deleting the object triggers item removal, item removal cannot trigger item deletion
+  # I think I have refactored this by changing raiseContextMenu, but you need to double check
+  #
+  # You can rename the new functions (probably remove the underscore)
+  # I just wanted to give them distinctive names to avoid confusion
+
+  # RHF: Removed and replaced by _deleteItemObject
+  # def removeItem(self, item:QtGui.QTreeWidgetItem):
+  #   """
+  #   Removes the specified item from the sidebar and the project.
+  #
+  #    NBNB TBD this function should be retired and replaced by the new _deleteItemObject
+  #    Note that _removeItem does SOMETHInG ELSE
+  #   """
+  #   import sip
+  #   self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole)).delete()
+  #   sip.delete(item)
+
+  def _deleteItemObject(self,  item:QtGui.QTreeWidgetItem):
+    """Removes the specified item from the sidebar and deletes it from the project.
+    NB, the clean-up of the side bar is doen through notifiers
     """
-    Removes the specified item from the sidebar and the project.
-    """
-    import sip
     self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole)).delete()
+
+  def _createItem(self, obj:AbstractWrapperObject):
+    """Create a new sidebar item from a new object.
+    Called by notifier when a new object is created (so need to check for duplicates).
+    NB Obj may be of a type that does not have an item"""
+
+    # get itemType from passed-in object
+    itemType = None
+    # Write code here to get itemType - notice that it may be None if object not in sidebar
+
+    if itemType is None:
+      return
+    else:
+      self.addItem(itemType, obj)
+
+  def _renameItem(self, item, obj:AbstractWrapperObject):
+    """rename item to match object"""
+    item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))
+
+  def _removeItem(self, item:QtGui.QTreeWidgetItem):
+    """Removes item WITHOUT deleting underlying object. Called when objects are deleted"""
+    import sip
     sip.delete(item)
+
+  def _findItem(self, obj:AbstractWrapperObject) -> QtGui.QTreeWidgetItem:
+    """Find item that matches obj. NB Obj may be of a type that does not have an item"""
+
+    acceptableObjects = ()  # NBNB TBD fill this in
+
+    if acceptableObjects and isinstance(obj, acceptableObjects):
+      # Put finditem code here
+      raise NotImplementedError("Not written yet")
+
+    elif isinstance(obj, AbstractWrapperObject):
+      result = None
+
+    else:
+      raise ValueError("Function findItem requires a wrapper object as input")
+    #
+    return result
 
   def fillSideBar(self, project:Project):
     """
@@ -252,20 +312,22 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """
     event.accept()
 
-  def addSpectrum(self, spectrum:(Spectrum,Pid)):
-    """
-    Adds the specified spectrum to the sidebar.
-    """
-    peakList = spectrum.newPeakList()
-    newItem = self.addItem(self.spectrumItem, spectrum)
-    peakListItem = QtGui.QTreeWidgetItem(newItem)
-    peakListItem.setText(0, peakList.pid)
+  # RHF 9/2/2016: Function no longer used
+  # def addSpectrum(self, spectrum:(Spectrum,Pid)):
+  #   """
+  #   Adds the specified spectrum to the sidebar.
+  #   """
+  #   peakList = spectrum.newPeakList()
+  #   newItem = self.addItem(self.spectrumItem, spectrum)
+  #   peakListItem = QtGui.QTreeWidgetItem(newItem)
+  #   peakListItem.setText(0, peakList.pid)
 
-  def processNotes(self, pids:Sequence[str], event):
-    """Display notes defined by list of Pid strings"""
-    for ss in pids:
-      note = self.project.getByPid(ss)
-      self.addItem(self.notesItem, note)
+  # RHF 9/2/2016: Function no longer used
+  # def processNotes(self, pids:Sequence[str], event):
+  #   """Display notes defined by list of Pid strings"""
+  #   for ss in pids:
+  #     note = self.project.getByPid(ss)
+  #     self.addItem(self.notesItem, note)
 
   def raisePopup(self, obj, item):
     if obj.shortClassName == 'SP':
@@ -325,8 +387,11 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         popup.raise_()
         restraintType = popup.restraintType
         funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
-        newItem = getattr(itemParent, funcName)(restraintType)
-        self.addItem(item.parent(), newItem)
+        # Naughty - this is a wrapper object, not an item
+        # newItem = getattr(itemParent, funcName)(restraintType)
+        getattr(itemParent, funcName)(restraintType)
+        # No longer necessary
+        # self.addItem(item.parent(), newItem)
       elif item.parent.shortClassName == 'SA':
         newComponent = itemParent.newSampleComponent()
         popup = EditSampleComponentPopup(sampleComponent=newComponent)
@@ -346,5 +411,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         itemParent = self.project
         funcName = NEW_ITEM_DICT.get(item.parent().text(0))
 
-    newItem = getattr(itemParent, funcName)()
-    self.addItem(item.parent(), newItem)
+    # Naughty - this is a wrapper object, not an item
+    # newItem = getattr(itemParent, funcName)()
+    getattr(itemParent, funcName)()
+    # No longer necessary
+    # self.addItem(item.parent(), newItem)

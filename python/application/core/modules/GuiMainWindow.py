@@ -123,8 +123,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     project = self._project
     path = project.path
-    self.sideBar.setProject(project)
-    self.sideBar.fillSideBar(project)
+    # Moved to AppBAse.initProject. 9/2/29016 Rasmus Fogh
+    # self.sideBar.setProject(project)
+    # self.sideBar.fillSideBar(project)
     self.namespace['project'] = project
     msg = path + (' created' if isNew else ' opened')
     self.statusBar().showMessage(msg)

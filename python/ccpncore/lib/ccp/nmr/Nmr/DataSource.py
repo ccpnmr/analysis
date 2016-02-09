@@ -536,29 +536,42 @@ def automaticIntegration(self:'DataSource',spectralData, regions):
 
 def estimateNoise(self:'DataSource') -> float:
 
-    if self.noiseLevel:
-      return self.noiseLevel
+  if self.noiseLevel:
+    return self.noiseLevel
 
-    if self.numDim > 1:
-      planeData = getPlaneData(self, [0] * self.numDim, 0, 1)
-      value = 1.1 * numpy.std(planeData.flatten()) # multiplier a guess
+  if self.numDim > 1:
+    planeData = getPlaneData(self, [0] * self.numDim, 0, 1)
+    value = 1.1 * numpy.std(planeData.flatten()) # multiplier a guess
+  else:
+
+    if hasattr(self, 'valueArray') and len(self.valueArray) != 0:
+      sliceData = self.valueArray
     else:
+      self.valueArray = sliceData = getSliceData(self)
+    # print(sliceData)
+    # print(sliceData[1])
+    sliceDataStd = numpy.std(sliceData)
+    sliceData = numpy.array(sliceData,numpy.float32)
+    # Clip the data to remove outliers
+    sliceData = sliceData.clip(-sliceDataStd, sliceDataStd)
 
-      if hasattr(self, 'valueArray') and len(self.valueArray) != 0:
-        sliceData = self.valueArray
-      else:
-        self.valueArray = sliceData = getSliceData(self)
-      # print(sliceData)
-      # print(sliceData[1])
-      sliceDataStd = numpy.std(sliceData)
-      sliceData = numpy.array(sliceData,numpy.float32)
-      # Clip the data to remove outliers
-      sliceData = sliceData.clip(-sliceDataStd, sliceDataStd)
+    value = 1.1 * numpy.std(sliceData) # multiplier a guess
 
-      value = 1.1 * numpy.std(sliceData) # multiplier a guess
+  #value *= self.scale
 
-    #value *= self.scale
+  self.noiseLevel = float(value)
 
-    self.noiseLevel = float(value)
+  return self.noiseLevel # Qt can't serialise numpy float types
 
-    return self.noiseLevel # Qt can't serialise numpy float types
+def _getDefaultColours(self:'DataSource') -> Tuple[str,str]:
+  """Get default positive,negative contour colour pair for Spectrum
+  (calculated by hashing spectrum properties to avoid always getting the same coulours"""
+
+  from ccpncore.util.Colour import spectrumHexColours
+
+  # The formula gives 0 for DataSource(1,1)
+  # and puts DataSource 2 reasonably far away from dataSource 1 within an experiment
+  ii = ((2 * self.experiment.serial + 10 * self.serial - 12)
+        % len(spectrumHexColours))
+  #
+  return (spectrumHexColours[ii], spectrumHexColours[ii+1])

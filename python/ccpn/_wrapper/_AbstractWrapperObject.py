@@ -26,12 +26,8 @@ import itertools
 import functools
 
 from ccpncore.util import Pid
-from ccpncore.util.Types import Dict, Union
 from ccpncore.util import Common as commonUtil
 from ccpncore.api.memops import Implementation as ApiImplementation
-
-# Tag used to identify applicationData set by wrapper
-_APPDATATAG = '_CcpnWrapper'
 
 # PROBLEM:
 # The MutableMapping superclass changes the MetaClass, which causes
@@ -524,72 +520,6 @@ class AbstractWrapperObject():
   # and then doing Project.newMolecule = newMolecule
 
   # CCPN functions
-
-  @property
-  def applicationData(self) -> Dict[str,Union[str,int,float,bool]]:
-    """Get key:value dictionary for object
-    values are str/float/int/bool"""
-    return dict((x.keyword, x.value) for x in self._wrappedData.applicationData
-              if x.application == _APPDATATAG)
-
-  @applicationData.setter
-  def applicationData(self, value):
-
-    wrappedData = self._wrappedData
-
-    # check correctness of values:
-    if any(not isinstance(x,str) for x in value.keys()):
-      raise ValueError("applicationData contained non-string key: %s" % value)
-    if any (x for x in value.values()
-            if all(not isinstance(x, y) for y in (str, int, float, bool))):
-      raise ValueError("applicationData contained value of unsupported type: %s" % value)
-
-    wrappedData.applicationData = [x for x in wrappedData.applicationData
-                                   if x.application != _APPDATATAG ]
-
-    for key, val in sorted(value.items()):
-      self.setApplicationData(key, val)
-
-  def deleteApplicationData(self, keyword:str):
-    """Delete applicationData matching keyWord"""
-    wrappedData = self._wrappedData
-    oldAppData = wrappedData.applicationData
-    newAppData = [x for x in oldAppData
-                  if x.application != _APPDATATAG and x.keyword != keyword]
-    if len(oldAppData) == len(newAppData):
-      raise ValueError("No applicationData with keyword %s" % keyword)
-    else:
-      wrappedData.applicationData = newAppData
-
-  def setApplicationData(self, keyword:str, value:Union[str,int,float,bool]):
-    """Set applicationData[keyword] to value"""
-
-    # NB, cannot be implemented as dictionary, as we want to compare in order
-    type2class = [
-      (str, ApiImplementation.AppDataString),
-      (bool,ApiImplementation.AppDataBoolean),
-      (int,ApiImplementation.AppDataInt),
-      (float,ApiImplementation.AppDataFloat),
-    ]
-
-    if not isinstance(keyword, str):
-      raise ValueError("keyword must be string, was %s" % keyword)
-
-    for typ, cls in type2class:
-      if isinstance(value, typ):
-        apiAppData = cls(application=_APPDATATAG, keyword=keyword, value=value)
-        apiAppData.endOveride()
-        break
-    else:
-      raise ValueError("value of unsupported type %s : %s" % (type(value), value))
-
-    try:
-      self.deleteApplicationData(keyword)
-    except ValueError:
-      pass
-    self._wrappedData.addApplicationData(apiAppData)
-
-
 
 
   def delete(self):

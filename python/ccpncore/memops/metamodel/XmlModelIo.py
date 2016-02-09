@@ -147,15 +147,15 @@ def readModel(versionTag=None, rootFileName=None, rootDirName=None,
   topPackage = xmlModelRead.readModel()
   
   end = time.time()
-  print('Model read finished. Duration %s ' % (end-start))
+  # print('Model read finished. Duration %s ' % (end-start))
   
   if checkValidity:
     start = time.time()
     topPackage.checkValid()
     end = time.time()
     print("Model validity checked. Duration %s" % (end-start))
-  else:
-    print("Model validity check skipped")
+  # else:
+  #   print("Model validity check skipped")
     
   
   #

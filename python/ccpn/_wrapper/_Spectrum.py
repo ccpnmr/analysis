@@ -295,11 +295,12 @@ class Spectrum(AbstractWrapperObject):
 
   # Attributes belonging to AbstractDataDim
 
-  def _setDataDimValue(self, attributeName, value:Sequence):
+  def _setStdDataDimValue(self, attributeName, value:Sequence):
+    """Set value for non-Sampled DataDims only"""
     apiDataSource = self._wrappedData
     if len(value) == apiDataSource.numDim:
       for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
-        if hasattr (dataDim, attributeName):
+        if dataDim.className != 'SampledDataDim':
           setattr(dataDim, attributeName, value[ii])
         elif value[ii] is not None:
           raise ValueError("Attempt to set value for invalid attribute %s in dimension %s: %s" %
@@ -363,27 +364,12 @@ class Spectrum(AbstractWrapperObject):
   @property
   def pointOffsets(self) -> Tuple[int, ...]:
     """index of first active point relative to total points, per dimension"""
-    result = []
-    for dataDim in self._wrappedData.sortedDataDims():
-      if hasattr(dataDim, 'pointOffset'):
-        result.append(dataDim.pointOffset)
-      else:
-        result.append(0)
-    return tuple(result)
+    return tuple(x.pointOffset if x.className != 'SampledDataDim' else None
+             for x in self._wrappedData.sortedDataDims())
 
   @pointOffsets.setter
   def pointOffsets(self, value:Sequence):
-    apiDataSource = self._wrappedData
-    attributeName = 'pointOffset'
-    if len(value) == apiDataSource.numDim:
-      for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
-        if hasattr (dataDim, attributeName):
-          setattr(dataDim, attributeName, value[ii])
-        elif value[ii]:
-          raise ValueError("Attempt to set value for %s in dimension %s: %s" %
-                           (attributeName, ii+1, value))
-    else:
-      raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+    self._setStdDataDimValue('pointOffset', value)
 
   @property
   def isComplex(self) -> Tuple[bool, ...]:
@@ -392,7 +378,12 @@ class Spectrum(AbstractWrapperObject):
 
   @isComplex.setter
   def isComplex(self, value:Sequence):
-    self._setDataDimValue('isComplex', value)
+    apiDataSource = self._wrappedData
+    if len(value) == apiDataSource.numDim:
+      for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
+        dataDim.isComplex = value[ii]
+    else:
+      raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
   @property
   def dimensionTypes(self) -> Tuple[str, ...]:
@@ -432,22 +423,63 @@ class Spectrum(AbstractWrapperObject):
   @property
   def phases0(self) -> tuple:
     """zero order phase correction (or None), per dimension. Always None for sampled dimensions."""
-    return tuple(x.phase0 for x in self._wrappedData.sortedDataDims()
-                 if hasattr(x, 'phase0'))
+    return tuple(x.phase0 if x.className != 'SampledDataDim' else None
+                 for x in self._wrappedData.sortedDataDims())
 
   @phases0.setter
   def phases0(self, value:Sequence):
-    self._setDataDimValue('phase0', value)
+    self._setStdDataDimValue('phase0', value)
 
   @property
   def phases1(self) -> Tuple[Optional[float], ...]:
-    """first order phase correction (or None) per dimsnsion. Always None for sampled dimensions."""
-    return tuple(x.phase1 for x in self._wrappedData.sortedDataDims()
-                 if hasattr(x, 'phase1'))
+    """first order phase correction (or None) per dimension. Always None for sampled dimensions."""
+    return tuple(x.phase1 if x.className != 'SampledDataDim' else None
+                 for x in self._wrappedData.sortedDataDims())
 
   @phases1.setter
   def phases1(self, value:Sequence):
-    self._setDataDimValue('phase1', value)
+    self._setStdDataDimValue('phase1', value)
+
+  @property
+  def windowFunctions(self) -> Tuple[Optional[str], ...]:
+    """Window function name (or None) per dimension - e.g. 'EM', 'GM', 'SINE', 'QSINE', ....
+    Always None for sampled dimensions."""
+    return tuple(x.windowFunction if x.className != 'SampledDataDim' else None
+                 for x in self._wrappedData.sortedDataDims())
+
+  @windowFunctions.setter
+  def windowFunctions(self, value:Sequence):
+    self._setStdDataDimValue('windowFunction', value)
+
+  @property
+  def lorentzianBroadenings(self) -> Tuple[Optional[float], ...]:
+    """Lorenzian broadening in Hz per dimension. Always None for sampled dimensions."""
+    return tuple(x.lorentzianBroadening if x.className != 'SampledDataDim' else None
+                 for x in self._wrappedData.sortedDataDims())
+
+  @lorentzianBroadenings.setter
+  def lorentzianBroadenings(self, value:Sequence):
+    self._setStdDataDimValue('lorentzianBroadening', value)
+
+  @property
+  def gaussianBroadenings(self) -> Tuple[Optional[float], ...]:
+    """Gaussian broadening per dimension. Always None for sampled dimensions."""
+    return tuple(x.gaussianBroadening if x.className != 'SampledDataDim' else None
+                 for x in self._wrappedData.sortedDataDims())
+
+  @gaussianBroadenings.setter
+  def gaussianBroadenings(self, value:Sequence):
+    self._setStdDataDimValue('gaussianBroadening', value)
+
+  @property
+  def sineWindowShifts(self) -> Tuple[Optional[float], ...]:
+    """Shift of sine/sine-square window function in degrees. Always None for sampled dimensions."""
+    return tuple(x.sineWindowShift if x.className != 'SampledDataDim' else None
+                 for x in self._wrappedData.sortedDataDims())
+
+  @sineWindowShifts.setter
+  def sineWindowShifts(self, value:Sequence):
+    self._setStdDataDimValue('sineWindowShift', value)
 
   # Attributes belonging to ExpDimRef and DataDimRef
 
@@ -789,6 +821,20 @@ def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Sp
 
   return self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name)]
 
+def _initialiseSpectrumColours(self:Project, dataSource:ApiDataSource):
+  if not dataSource.positiveContourColour or not dataSource.negativeContourColour:
+    dataSource.positiveContourColour, dataSource.negativeContourColour = (
+      dataSource._getDefaultColours()
+    )
+    Project._initialiseSpectrumColours = _initialiseSpectrumColours
+
+# Create PeakList when new DataSource is created
+def _SpectrumMakeFirstPeakList(project:Project, apiDataSource:ApiDataSource):
+  """Add PeakList if none is present"""
+  if not apiDataSource.peakLists:
+    apiDataSource.newPeakList()
+Project._setupNotifier(_SpectrumMakeFirstPeakList, ApiDataSource, 'postInit')
+
 # Connections to parents:
 
 Project._childClasses.append(Spectrum)
@@ -805,5 +851,6 @@ Project._apiNotifiers.extend(
     ('_finaliseDelete', {}, className, 'delete'),
     ('_finaliseUnDelete', {}, className, 'undelete'),
     ('_resetPid', {}, className, 'setName'),
+    ('_initialiseSpectrumColours', {}, className, '__init__'),
   )
 )

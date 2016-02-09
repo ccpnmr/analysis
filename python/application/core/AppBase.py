@@ -61,6 +61,9 @@ class AppBase(GuiBase):
     self.components = components
     ###self.vLines = []
     ###self.hLines = []
+
+    # Necessary as attribute is queried during initialisation:
+    self.mainWindow = None
     self.colourIndex = 0
     self.initProject(apiProject)
 
@@ -97,6 +100,10 @@ class AppBase(GuiBase):
     mainWindow = project.getWindow('Main')
     # mainWindow = project._data2Obj[apiWindowStore.findFirstWindow(title='Main')]
     self.mainWindow = mainWindow
+    # Next two lines moved from MainWindow.initProject,
+    # as sidebar filling should be after setup is complete.
+    mainWindow.sideBar.setProject(project)
+    mainWindow.sideBar.fillSideBar(project)
     project.getByPid('Window:Main').namespace['current'] = self.current
     mainWindow.raise_()
     mainWindow.namespace['current'] = self.current

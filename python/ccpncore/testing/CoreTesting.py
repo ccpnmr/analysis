@@ -16,7 +16,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 __author__ = "$Author$"
 __date__ = "$Date$"
-__version__ = "$Revision$"
+__version__ = "$Revision$"c
 
 #=========================================================================================
 # Start of code

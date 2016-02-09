@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Sequence
+from ccpncore.util.Types import Sequence, Tuple
 
 def getPlaneData(self:'Spectrum', position:Sequence=None, xDim:int=0, yDim:int=1):
 
@@ -44,4 +44,3 @@ def automaticIntegration(self:"Spectrum", spectralData):
 
 def estimateNoise(self:'Spectrum'):
   return self._apiDataSource.estimateNoise()
-

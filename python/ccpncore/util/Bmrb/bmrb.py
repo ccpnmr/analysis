@@ -44,7 +44,8 @@ else:
 
 # Local libraries
 from ccpncore.util.Bmrb.sans import STARLexer
-from ccpncore.util.Bmrb.sans import SansParser
+# from ccpncore.util.Bmrb.sans import SansParser
+from ccpncore.util.Bmrb.sans import DicParser as SansParser
 from ccpncore.util.Bmrb.sans import ErrorHandler, ContentHandler
 
 #############################################

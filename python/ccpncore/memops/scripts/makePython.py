@@ -93,11 +93,15 @@ from ccpncore.memops.scripts.docgen import PyApiDocGen
 
 from ccpncore.util import Path
 from ccpnmodel.util import Path as modelPath
-from ccpncore.util import Common as commonUtil
+from ccpncore.util.recursive_import_test import importAllPyfiles
 
 from ccpncore.memops.scripts.docgen import sphinxDocumentation
 
+# from ccpncore.util import Common as commonUtil
 defaultIgnoreModules = []
+
+ignoreDirs = ('.svn', 'CVS','macros', 'oldMacros', 'tmp')
+ignoreFiles = ('ODextract.py', 'junk.py')
 
 def getModelPortal(dataModelVersion=None, includePackageNames=None,
                    excludePackageNames=None):
@@ -172,7 +176,6 @@ def makePython(modelPortal, rootDirName=None, rootFileName=None,
   """ % (end-start))
 
   start = time.time()
-  # print ('@~@~ NBNB TBD sphinxDocumentation temporarily suppressed!!!')
   sphinxDocumentation.refreshSphinxDocumentation()
   end = time.time()
   print("""
@@ -184,10 +187,12 @@ def makePython(modelPortal, rootDirName=None, rootFileName=None,
   Memops start test importing
   """)
   start = time.time()
-  commonUtil.recursiveImport(Path.getPythonDirectory(),ignoreModules=ignoreModules,
-                         force=True)
-  commonUtil.recursiveImport(modelPath.getPythonDirectory(),ignoreModules=ignoreModules,
-                         force=True)
+  # commonUtil.recursiveImport(Path.getPythonDirectory(),ignoreModules=ignoreModules,
+  #                        force=True)
+  # commonUtil.recursiveImport(modelPath.getPythonDirectory(),ignoreModules=ignoreModules,
+  #                        force=True)
+  importAllPyfiles(Path.getPythonDirectory(), ignoreDirs=ignoreDirs, ignoreFiles=ignoreFiles)
+  importAllPyfiles(modelPath.getPythonDirectory(), ignoreDirs=ignoreDirs, ignoreFiles=ignoreFiles)
   end = time.time()
   print("""
   Memops done Test Importing, time %s

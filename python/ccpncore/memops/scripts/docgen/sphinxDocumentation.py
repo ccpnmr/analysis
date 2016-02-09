@@ -43,6 +43,8 @@ def refreshSphinxDocumentation():
   pythonDirectory = corePath.getPythonDirectory()
   docDirectory = joinPath(corePath.getTopDirectory(), documentationPath)
 
+  print ('@~@~ docDirectory', docDirectory)
+
   # Remove sphinx-apidoc files
   for ss in ('ccpn', 'ccpncore', 'application'):
     inDirectory = joinPath(docDirectory, 'source', ss)
@@ -62,20 +64,20 @@ def refreshSphinxDocumentation():
         'ccpncore/lib/Bmrb/unit_tests']
         #'ccpncore/gui', 'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  print( '### running: ' + ' '.join(ll))
+  print( '@~@~ sphinx  running: ' + ' '.join(ll))
   apidoc.main(ll)
   #
   #
   # # then application.core
   ll = ['../doc/source/application', 'application']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  print( '### running: ' + ' '.join(ll))
+  print( '@~@~ sphinx  running: ' + ' '.join(ll))
   apidoc.main(ll)
 
   # then ccpn
   ll = ['../doc/source/ccpn', 'ccpn', 'ccpn/lib/wrapper']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  print( '### running: ' + ' '.join(ll))
+  print( '@~@~ sphinx  running: ' + ' '.join(ll))
   apidoc.main(ll)
   #subprocess.call(ll)
 

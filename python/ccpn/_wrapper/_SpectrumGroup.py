@@ -111,13 +111,15 @@ class SpectrumGroup(AbstractWrapperObject):
     return parent._wrappedData.sortedSpectrumGroups()
 
 
-def _newSpectrumGroup(self:Project, name:str) -> SpectrumGroup:
+def _newSpectrumGroup(self:Project, name:str, spectra=()) -> SpectrumGroup:
   """Create new SpectrumGroup"""
 
   if name and Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
 
-  return self._data2Obj.get(self._wrappedData.newSpectrumGroup(name=name))
+  apiDataSources = [x._wrappedData for x in spectra]
+  return self._data2Obj.get(self._wrappedData.newSpectrumGroup(name=name,
+                                                               dataSources=apiDataSources))
 
     
 # Connections to parents:

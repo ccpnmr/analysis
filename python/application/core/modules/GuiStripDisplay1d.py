@@ -39,12 +39,8 @@ from application.core.modules.GuiStrip1d import GuiStrip1d
 from ccpncore.gui.VerticalLabel import VerticalLabel
 from ccpn import Project
 
-from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
-
 
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
@@ -235,44 +231,6 @@ def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
 Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
 Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
 Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
-
-def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
-  apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
-  getDataObj = project._data2Obj.get
-  peakListView = getDataObj(apiStripPeakListView)
-  spectrumView = peakListView.spectrumView
-  action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
-  if action:
-    action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
-
-  strip = spectrumView.strip
-  for apiPeakList in apiDataSource.sortedPeakLists():
-    strip.showPeaks(getDataObj(apiPeakList))
-
-Project._setupNotifier(_createdStripPeakListView, ApiStripPeakListView, 'postInit')
-
-def _setActionIconColour(project:Project, apiDataSource:ApiDataSource):
-
-  # TBD: the below might not be the best way to get hold of the spectrumDisplays
-  for task in project.tasks:
-    if task.status == 'active':
-      for spectrumDisplay in task.spectrumDisplays:
-        if isinstance(spectrumDisplay, GuiStripDisplay1d):
-          spectrumDisplay._setActionIconColour(apiDataSource)
-
-for apiFuncName in ('setPositiveContourColour', 'setSliceColour'):
-  Project._setupNotifier(_setActionIconColour, ApiDataSource, apiFuncName)
-
-def _deletedPeak(project:Project, apiPeak:ApiPeak):
-
-  # TBD: the below might not be the best way to get hold of the spectrumDisplays
-  for task in project.tasks:
-    if task.status == 'active':
-      for spectrumDisplay in task.spectrumDisplays:
-        if isinstance(spectrumDisplay, GuiStripDisplay1d):
-          spectrumDisplay._deletedPeak(apiPeak)
-
-Project._setupNotifier(_deletedPeak, ApiPeak, 'delete')
 
 # Unnecessary - dimensionOrdering is frozen. RHF
 # def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):

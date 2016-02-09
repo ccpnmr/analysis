@@ -30,7 +30,7 @@ from ccpn import Project
 from ccpn import Peak
 
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
+
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
 from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
@@ -361,21 +361,6 @@ def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
 Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
 Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
 Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
-
-def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
-  apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
-  getDataObj = project._data2Obj.get
-  peakListView = getDataObj(apiStripPeakListView)
-  spectrumView = peakListView.spectrumView
-  spectrumDisplay = spectrumView.strip.spectrumDisplay
-  # if isinstance(spectrumDisplay, GuiStripDisplayNd):
-  #   action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-    # if action:
-    #   action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
- 
-  strip = spectrumView.strip
-  for apiPeakList in apiDataSource.sortedPeakLists():
-    strip.showPeaks(getDataObj(apiPeakList))
   
 def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
   
@@ -384,48 +369,26 @@ def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeak
   spectrumView = peakListView.spectrumView
   strip = spectrumView.strip
   spectrumDisplay = strip.spectrumDisplay
-  scene = strip.plotWidget.scene()
  
-  if not hasattr(spectrumDisplay, 'activePeakItemDict'):
-    return  # 1d
+  if not isinstance(spectrumDisplay, GuiStripDisplayNd):
+    return
     
   peakItemDict = spectrumDisplay.activePeakItemDict[peakListView]
   peakItems = set(spectrumDisplay.inactivePeakItemDict[peakListView])
   for apiPeak in peakItemDict:
     peakItem = peakItemDict[apiPeak]
     peakItems.add(peakItem)
+    
+  scene = strip.plotWidget.scene()
   for peakItem in peakItems:
     scene.removeItem(peakItem.annotation)
     scene.removeItem(peakItem)
   scene.removeItem(peakListView)
+  
   del spectrumDisplay.activePeakItemDict[peakListView]
   del spectrumDisplay.inactivePeakItemDict[peakListView]
   
-Project._setupNotifier(_createdStripPeakListView, ApiStripPeakListView, 'postInit')
 Project._setupNotifier(_deletedStripPeakListView, ApiStripPeakListView, 'preDelete')
-
-def _setActionIconColour(project:Project, apiDataSource:ApiDataSource):
-  
-  # TBD: the below might not be the best way to get hold of the spectrumDisplays
-  for task in project.tasks:
-    if task.status == 'active':
-      for spectrumDisplay in task.spectrumDisplays:
-        if isinstance(spectrumDisplay, GuiStripDisplayNd):
-          spectrumDisplay._setActionIconColour(apiDataSource)
-
-for apiFuncName in ('setPositiveContourColour', 'setSliceColour'):
-  Project._setupNotifier(_setActionIconColour, ApiDataSource, apiFuncName)
-
-def _deletedPeak(project:Project, apiPeak:ApiPeak):
-  
-  # TBD: the below might not be the best way to get hold of the spectrumDisplays
-  for task in project.tasks:
-    if task.status == 'active':
-      for spectrumDisplay in task.spectrumDisplays:
-        if isinstance(spectrumDisplay, GuiStripDisplayNd):
-          spectrumDisplay._deletedPeak(apiPeak)
-
-Project._setupNotifier(_deletedPeak, ApiPeak, 'preDelete')
 
 # Unnecessary - dimensionOrdering is frozen
 # def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):

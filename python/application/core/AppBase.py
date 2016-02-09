@@ -64,7 +64,6 @@ class AppBase(GuiBase):
 
     # Necessary as attribute is queried during initialisation:
     self.mainWindow = None
-    self.colourIndex = 0
     self.initProject(apiProject)
 
   def initProject(self, apiProject):

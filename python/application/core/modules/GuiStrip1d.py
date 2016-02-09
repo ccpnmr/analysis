@@ -46,7 +46,6 @@ class GuiStrip1d(GuiStrip):
     self.autoIntegration = True
     # self.viewBox.menu = self.get1dContextMenu()
     self.plotWidget.plotItem.setAcceptDrops(True)
-    self.colourIndex = 0
     self.spectrumIndex = 0
     self.peakItems = {}
     for spectrumView in self.spectrumViews:  # are there ever any??

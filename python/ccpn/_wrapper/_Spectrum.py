@@ -821,13 +821,6 @@ def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Sp
 
   return self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name)]
 
-def _initialiseSpectrumColours(self:Project, dataSource:ApiDataSource):
-  if not dataSource.positiveContourColour or not dataSource.negativeContourColour:
-    dataSource.positiveContourColour, dataSource.negativeContourColour = (
-      dataSource._getDefaultColours()
-    )
-    Project._initialiseSpectrumColours = _initialiseSpectrumColours
-
 # Create PeakList when new DataSource is created
 def _SpectrumMakeFirstPeakList(project:Project, apiDataSource:ApiDataSource):
   """Add PeakList if none is present"""
@@ -851,6 +844,5 @@ Project._apiNotifiers.extend(
     ('_finaliseDelete', {}, className, 'delete'),
     ('_finaliseUnDelete', {}, className, 'undelete'),
     ('_resetPid', {}, className, 'setName'),
-    ('_initialiseSpectrumColours', {}, className, '__init__'),
   )
 )

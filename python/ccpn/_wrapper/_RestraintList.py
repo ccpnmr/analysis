@@ -34,7 +34,10 @@ from ccpn import RestraintSet
 
 
 class RestraintList(AbstractWrapperObject):
-  """ RestraintList - All restraints lists, with type determined by the restraintType attribute."""
+  """ RestraintList - All restraints lists, with type determined by the restraintType attribute.
+  NB This class (and descendants) is also used for Measurements like T1, T2,
+  Hydrogen exchange protection, ... and for Chemical Shifts (if used as restraints
+  or as calculation input)"""
   
   #: Short class name, for PID.
   shortClassName = 'RL'
@@ -86,7 +89,8 @@ class RestraintList(AbstractWrapperObject):
   def restraintType(self) -> str:
     """Restraint type.
 
-    Allowed types are Distance, Rdc, JCoupling, ChemicalShift, Csa, Dihedral"""
+    Recommended types are Distance, Rdc, JCoupling, ChemicalShift, Csa, Dihedral
+    Freely settable for now - further enumerations will eventually be introduced."""
     return self._wrappedData.constraintType
 
   @property
@@ -137,6 +141,17 @@ class RestraintList(AbstractWrapperObject):
   @potentialType.setter
   def potentialType(self, value:str):
     self._wrappedData.potentialType = value
+
+  @property
+  def measurementType(self) -> str:
+    """Type of measurements giving rise to Restraints.
+    Used for restraintTypes like T1 (types z, zz), T2 (types SQ, DQ),
+    Freely settable for now - precise enumerations will eventually be introduced."""
+    return self._wrappedData.measurementType
+
+  @measurementType.setter
+  def measurementType(self, value:str):
+    self._wrappedData.measurementType = value
 
   @property
   def origin(self) -> str:

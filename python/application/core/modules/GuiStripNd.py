@@ -74,7 +74,6 @@ class GuiStripNd(GuiStrip):
     ###self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
-    self.colourIndex = 0
     # print(guiSpectrumDisplay)
     # self.fillToolBar()
     # self.addSpinSystemLabel()

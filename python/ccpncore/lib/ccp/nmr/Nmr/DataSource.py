@@ -569,9 +569,12 @@ def _getDefaultColours(self:'DataSource') -> Tuple[str,str]:
 
   from ccpncore.util.Colour import spectrumHexColours
 
-  # The formula gives 0 for DataSource(1,1)
+  # The formula gives 0 for DataSource(1,1)    (22//2 -1)//2 *2
   # and puts DataSource 2 reasonably far away from dataSource 1 within an experiment
-  ii = ((2 * self.experiment.serial + 10 * self.serial - 12)
-        % len(spectrumHexColours))
+
+  colorCount = len(spectrumHexColours)
+  step = ((colorCount//2 -1) //2)
+
+  ii = (2 * (self.experiment.serial - 1 + step * (self.serial -1))) % colorCount
   #
   return (spectrumHexColours[ii], spectrumHexColours[ii+1])

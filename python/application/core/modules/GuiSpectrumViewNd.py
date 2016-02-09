@@ -102,19 +102,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #self.setZValue(-1)  # this is so that the contours are drawn on the bottom
 
     #self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
-    
-
-    positiveContourColour = self._getColour('positiveContourColour')
-    if not positiveContourColour:
-      self.spectrum.positiveContourColour = Colour.spectrumHexColours[self._parent._appBase.colourIndex]
-      self._parent._appBase.colourIndex += 1
-      self._parent._appBase.colourIndex %= len(Colour.spectrumHexColours)
-
-    negativeContourColour = self._getColour('negativeContourColour')
-    if not negativeContourColour:
-      self.spectrum.negativeContourColour = Colour.spectrumHexColours[self._parent._appBase.colourIndex]
-      self._parent._appBase.colourIndex += 1
-      self._parent._appBase.colourIndex %= len(Colour.spectrumHexColours)
 
     GuiSpectrumView.__init__(self)
 

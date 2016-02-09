@@ -95,12 +95,22 @@ class Project(AbstractWrapperObject):
     self._implExperimentTypeMap = None
 
     # Set required objects in apiProject and ApiNmrProject
+    #
+    # NBNB TBD All this should probably be moved to either AppBase initiation or V2 upgrade
+    # preferably the latter.
 
-    # PeakLists
+    # PeakLists and Spectrum contour colours
     for experiment in wrappedData.experiments:
       for dataSource in experiment.dataSources:
+
         if not dataSource.peakLists:
+          # Set a peakList for every spectrum
           dataSource.newPeakList()
+
+        if not dataSource.positiveContourColour or not dataSource.negativeContourColour:
+          # set contour colours for every spectrum
+          (dataSource.positiveContourColour,
+           dataSource.negativeContourColour) = dataSource._getDefaultColours()
 
     # MolSystem
     apiProject = wrappedData.root
@@ -146,6 +156,8 @@ class Project(AbstractWrapperObject):
           rg.directNmrChain = wrappedData.findFirstNmrChain(serial=rg.chainSerial)
         if rg.directNmrChain is None:
           rg.directNmrChain = defaultChain
+    # End of API object fixing
+
     self._logger = wrappedData.root._logger
 
     self._registerApiNotifiers()

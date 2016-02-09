@@ -58,8 +58,16 @@ for tag, val in list(DEFAULT_ISOTOPE_DICT.items()):
 defaultNmrChainCode = '@-'
 
 # Constraint list constraintType to itemLength map
+# NB these data determine which constraintListTypes are legal.
+# To add new ones, just add them here.
+#
+# NBNB TBD we should constrain origin and measurementType depending on the constraintListType
 constraintListType2ItemLength = {
   'Csa':1,
+  'T1':1,
+  'T2':1,
+  'T1rho':1,
+  'pKa':1,
   'ChemicalShift':1,
   'Distance':2,
   'Rdc':2,

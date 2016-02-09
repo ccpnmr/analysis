@@ -61,8 +61,8 @@ class AppBase(GuiBase):
     self.components = components
     ###self.vLines = []
     ###self.hLines = []
-    self.initProject(apiProject)
     self.colourIndex = 0
+    self.initProject(apiProject)
 
   def initProject(self, apiProject):
 

@@ -303,8 +303,7 @@ def _deletedPeak(project:Project, apiPeak:ApiPeak):
   for task in project.tasks:
     if task.status == 'active':
       for spectrumDisplay in task.spectrumDisplays:
-        if isinstance(spectrumDisplay, GuiStripDisplayNd):
-          spectrumDisplay._deletedPeak(apiPeak)
+        spectrumDisplay._deletedPeak(apiPeak)
 
 Project._setupNotifier(_deletedPeak, ApiPeak, 'preDelete')
 

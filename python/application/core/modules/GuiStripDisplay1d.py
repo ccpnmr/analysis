@@ -167,6 +167,9 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
         pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
       action.setIcon(QtGui.QIcon(pix))
 
+  def _deletedPeak(self, apiPeak):
+    pass  # does anything need doing??
+    
 def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
   """Set up SpectrumDisplay when new SpectrumView is created - for notifiers"""
 

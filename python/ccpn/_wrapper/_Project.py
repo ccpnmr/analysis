@@ -110,7 +110,7 @@ class Project(AbstractWrapperObject):
         if not dataSource.positiveContourColour or not dataSource.negativeContourColour:
           # set contour colours for every spectrum
           (dataSource.positiveContourColour,
-           dataSource.negativeContourColour) = dataSource._getDefaultColours()
+           dataSource.negativeContourColour) = dataSource.getDefaultColours()
 
     # MolSystem
     apiProject = wrappedData.root

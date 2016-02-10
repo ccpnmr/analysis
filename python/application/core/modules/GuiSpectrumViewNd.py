@@ -530,7 +530,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ##if not widget:
     ##  return
     dataStore = self._apiDataSource.dataStore
-    print ('@~@~', dataStore and dataStore.fullPath)
     if dataStore is None or not os.path.exists(dataStore.fullPath):
       self.project._logger.warning("%s cannot find any data - data file misplaced?" % self )
       return

@@ -627,9 +627,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
         logger.warning(
           'Copying directory %s to %s (this might take some time if there are big files)'
           % (oldPath, newPath))
-        print ('@~@~ starting to shutil')
         shutil.copytree(oldPath, newPath)
-        print ('@~@~ done shutil')
 
         # but need to remove all implementation files
         implPath = Path.joinPath(newPath, metaConstants.modellingPackageName,

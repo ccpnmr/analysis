@@ -65,6 +65,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
   def __init__(self, parent=None ):
     QtGui.QTreeWidget.__init__(self, parent)
 
+    self._typeToItem = dd = {}
+
     self.setFont(QtGui.QFont('Lucida Grande', 12))
     self.header().hide()
     self.setDragEnabled(True)
@@ -72,40 +74,40 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.setExpandsOnDoubleClick(False)
     self.setDragDropMode(self.InternalMove)
     self.setFixedWidth(200)
-    self.projectItem = QtGui.QTreeWidgetItem(self)
+    self.projectItem = dd['PR'] = QtGui.QTreeWidgetItem(self)
     self.projectItem.setText(0, "Project")
     self.projectItem.setExpanded(True)
-    self.spectrumItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.spectrumItem = dd['SP'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setText(0, "Spectra")
-    self.spectrumGroupItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.spectrumGroupItem = dd['SG'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumGroupItem.setText(0, "Spectrum Groups")
-    self.samplesItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.samplesItem = dd['SA'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.samplesItem.setText(0, 'Samples')
     self.newSample = QtGui.QTreeWidgetItem(self.samplesItem)
     self.newSample.setText(0, "<New>")
-    self.substancesItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.substancesItem = dd['SU'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.substancesItem.setText(0, "Substances")
     self.newSubstanceItem = QtGui.QTreeWidgetItem(self.substancesItem)
     self.newSubstanceItem.setText(0, '<New>')
-    self.chainItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.chainItem = dd['MC'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.chainItem.setText(0, "Chains")
     self.newChainItem = QtGui.QTreeWidgetItem(self.chainItem)
     self.newChainItem.setText(0, '<New>')
-    self.nmrChainItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.nmrChainItem = dd['NC'] =  QtGui.QTreeWidgetItem(self.projectItem)
     self.nmrChainItem.setText(0, "NmrChains")
     self.newNmrChainItem = QtGui.QTreeWidgetItem(self.nmrChainItem)
     self.newNmrChainItem.setText(0, '<New>')
-    self.chemicalShiftListsItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.chemicalShiftListsItem = dd['CL'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.chemicalShiftListsItem.setText(0, "Chemical Shift Lists")
     self.newChemicalShiftListItem = QtGui.QTreeWidgetItem(self.chemicalShiftListsItem)
     self.newChemicalShiftListItem.setText(0, '<New>')
-    self.structuresItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.structuresItem = dd['SE'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.structuresItem.setText(0, "Structures")
-    self.restraintSetsItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.restraintSetsItem = dd['RS'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.restraintSetsItem.setText(0, "Restraint Sets")
     self.newRestraintSetItem = QtGui.QTreeWidgetItem(self.restraintSetsItem)
     self.newRestraintSetItem.setText(0, '<New>')
-    self.notesItem = QtGui.QTreeWidgetItem(self.projectItem)
+    self.notesItem = dd['NO'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.notesItem.setText(0, "Notes")
     self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
     self.newNoteItem.setText(0, '<New>')
@@ -182,8 +184,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     NB Obj may be of a type that does not have an item"""
 
     # get itemType from passed-in object
-    itemType = None
-    # Write code here to get itemType - notice that it may be None if object not in sidebar
+    itemType = self._typeToItem.get(obj.shortClassName)
 
     if itemType is None:
       return

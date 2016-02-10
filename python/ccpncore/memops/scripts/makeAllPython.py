@@ -91,6 +91,14 @@ import importlib
 from ccpncore.memops import Version
 from ccpncore.memops.scripts import makePython
 from ccpncore.memops.scripts.xmlio import CompatibilityGen
+from ccpncore.util.recursive_import_test import importAllPyfiles
+
+from ccpncore.util import Path
+from ccpnmodel.util import Path as modelPath
+
+# Ignore for test import:
+ignoreDirs = ('.svn', 'CVS','macros', 'oldMacros', 'tmp')
+ignoreFiles = ('ODextract.py', 'junk.py')
 
 # Default situation - upgrade from all old versions to current one
 currentVersion = Version.currentModelVersion
@@ -112,3 +120,19 @@ if __name__ == '__main__':
   
   # make rest of code
   makePython.makePython(modelPortal)
+
+  # check for compile errors
+  print("""
+  Memops start test importing
+  """)
+  start = time.time()
+  # commonUtil.recursiveImport(Path.getPythonDirectory(),ignoreModules=ignoreModules,
+  #                        force=True)
+  # commonUtil.recursiveImport(modelPath.getPythonDirectory(),ignoreModules=ignoreModules,
+  #                        force=True)
+  importAllPyfiles(Path.getPythonDirectory(), ignoreDirs=ignoreDirs, ignoreFiles=ignoreFiles)
+  importAllPyfiles(modelPath.getPythonDirectory(), ignoreDirs=ignoreDirs, ignoreFiles=ignoreFiles)
+  end = time.time()
+  print("""
+  Memops done Test Importing, time %s
+  """ % (end-start))

@@ -563,7 +563,7 @@ def estimateNoise(self:'DataSource') -> float:
 
   return self.noiseLevel # Qt can't serialise numpy float types
 
-def _getDefaultColours(self:'DataSource') -> Tuple[str,str]:
+def getDefaultColours(self:'DataSource') -> Tuple[str,str]:
   """Get default positive,negative contour colour pair for Spectrum
   (calculated by hashing spectrum properties to avoid always getting the same coulours"""
 

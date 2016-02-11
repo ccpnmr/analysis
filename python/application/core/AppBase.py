@@ -327,6 +327,7 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   app.setStyleSheet(styleSheet)
   
   if projectPath:
+    projectPath = os.path.normpath(projectPath)
     apiProject = ioUtil.loadProject(projectPath, useFileLogger=useFileLogger)
     if not projectPath.endswith(ioUtil.CCPN_DIRECTORY_SUFFIX):
       projectPath = saveV2ToV3(apiProject, projectPath, preferences)

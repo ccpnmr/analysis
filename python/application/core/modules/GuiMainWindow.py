@@ -789,48 +789,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     except ImportError:
       print('PARAssign cannot be found')
 
-  # NBNB sholuld be renamed
-  # def removeSpectra(self):
-  #   pass
-
-  # def renameSpectra(self):
-  #   pass
-  #
-  # def reloadSpectra(self):
-  #   pass
-  #
-  # def printSpectrum(self):
-  #   pass
-  #
-  # def showSpectrumInFinder(self):
-  #   pass
-  #
-  # def copySpectrumIntoProject(self):
-  #   pass
-  #
-  # def moveSpectrumOutOfProject(self):
-  #   pass
-  #
-  # def importPeaksPopup(self):
-  #   pass
-  #
-  # def deletePeaksPopup(self):
-  #   pass
-  #
-  # def printPeaksToFile(self):
-  #   pass
-
-  # def setLayoutToDefault(self):
-  #   pass
-  #
-  # def saveLayout(self):
-  #   pass
-  #
-  # def saveLayoutAs(self):
-  #   pass
-  #
-  # def restoreLayout(self):
-  #   pass
 
   def toggleConsole(self):
     """

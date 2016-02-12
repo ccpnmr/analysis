@@ -59,7 +59,7 @@ NEW_ITEM_DICT = {
   'Chemical Shift Lists': 'newChemicalShiftList',
   'Restraint Sets': 'newRestraintSet',
 }
-
+### Flag example code removed in revision 7686
 
 class SideBar(DropBase, QtGui.QTreeWidget):
   def __init__(self, parent=None ):
@@ -104,7 +104,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.structuresItem = dd['SE'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.structuresItem.setText(0, "Structures")
     self.restraintSetsItem = dd['RS'] = QtGui.QTreeWidgetItem(self.projectItem)
-    self.restraintSetsItem.setText(0, "Restraint Sets")
+    self.restraintSetsItem.setText(0, "Datasets")
     self.newRestraintSetItem = QtGui.QTreeWidgetItem(self.restraintSetsItem)
     self.newRestraintSetItem.setText(0, '<New>')
     self.notesItem = dd['NO'] = QtGui.QTreeWidgetItem(self.projectItem)
@@ -130,6 +130,12 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     newItem.setData(0, QtCore.Qt.DisplayRole, str(data.pid))
     newItem.mousePressEvent = self.mousePressEvent
     return newItem
+
+  def renameItem(self, pid):
+    # item = FindItem
+    pass
+
+
 
   def mousePressEvent(self, event):
     """
@@ -200,20 +206,21 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     import sip
     sip.delete(item)
 
-  def _findItem(self, obj:AbstractWrapperObject) -> QtGui.QTreeWidgetItem:
+  def _findItem(self, objPid:str) -> QtGui.QTreeWidgetItem:
     """Find item that matches obj. NB Obj may be of a type that does not have an item"""
 
-    acceptableObjects = ()  # NBNB TBD fill this in
+    acceptableObjects = ('SP', 'PL', 'SG', 'SA' 'SC', 'SU', 'MC', 'NC', 'NR', 'NA', 'CL', 'SE',
+                         'MO', 'DS', 'NO')
+    if acceptableObjects and objPid[:2] in acceptableObjects:
+      result = self.findItems(objPid, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)[0]
+      # raise NotImplementedError("Not written yet")
 
-    if acceptableObjects and isinstance(obj, acceptableObjects):
-      # Put finditem code here
-      raise NotImplementedError("Not written yet")
-
-    elif isinstance(obj, AbstractWrapperObject):
+    # elif isinstance(obj, AbstractWrapperObject):
+    else:
       result = None
 
-    else:
-      raise ValueError("Function findItem requires a wrapper object as input")
+    # else:
+    #   raise ValueError("Function findItem requires a wrapper object as input")
     #
     return result
 
@@ -264,28 +271,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     for note in project.notes:
       newItem = self.addItem(self.notesItem, note)
 
-    # ### Flags
-    # # set dropEnable  the item you want to move. Set dragEnable  where drop is allowed
-    # self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled |QtCore.Qt.ItemIsDropEnabled))
-    # self.spectrumItem.setFlags(self.spectrumItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # self.spectrumReference.setFlags(self.spectrumReference.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # self.spectrumScreening.setFlags(self.spectrumScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled ))
-    # self.spectrumSamples.setFlags(self.spectrumSamples.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # # References
-    # self.onedItem.setFlags(self.onedItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # self.logsyItem.setFlags(self.logsyItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # self.t1rhoItem.setFlags(self.t1rhoItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # self.t1rhoItem.setFlags(self.t1rhoItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # self.stdItem.setFlags(self.stdItem.flags() & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # # screening
-    # self.onedItemScreening.setFlags(self.onedItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
-    # self.logsyItemScreening.setFlags(self.logsyItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled ))
-    # self.t1rhoItemScreening.setFlags(self.t1rhoItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
-    # self.stdItemScreening.setFlags(self.stdItemScreening.flags() & ~(QtCore.Qt.ItemIsDragEnabled))
-    # # structures, notes, deleted
-    # self.structuresItem.setFlags(self.structuresItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # self.notesItem.setFlags(self.notesItem.flags()  & ~(QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled))
-    # self.spectrumDeleted.setFlags(self.spectrumDeleted.flags() & ~(QtCore.Qt.ItemIsDragEnabled ))
+
 
   def clearSideBar(self):
     """
@@ -376,7 +362,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     elif obj.shortClassName == 'RE':
       pass #to be decided when we design structure
     elif obj.shortClassName == 'NO':
-      self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, self.project, name='Notes Editor', note=obj, item=item)
+      self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, self.project, name='Notes Editor', note=obj)
 
   def createNewObject(self, item):
 

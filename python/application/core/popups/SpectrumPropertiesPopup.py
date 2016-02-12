@@ -215,11 +215,6 @@ class GeneralTab(QtGui.QWidget, Base):
   def changeSpectrumName(self):
     if self.nameData.isModified():
       self.spectrum.rename(self.nameData.text())
-      self.item.setText(0, 'SP:'+self.nameData.text())
-      for i in range(self.item.childCount()):
-        pid = self.item.child(i).text(0).split(':')[0]+':'+self.nameData.text()+"."\
-              + self.item.child(i).text(0).split('.')[1]
-        self.item.child(i).setText(0, pid)
 
 
   def setSpectrumScale(self):

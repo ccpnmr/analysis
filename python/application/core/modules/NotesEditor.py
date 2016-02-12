@@ -14,7 +14,7 @@ from PyQt4 import QtGui
 
 class NotesEditor(DropBase, CcpnDock):
 
-  def __init__(self, parent, project, name='Notes Editor', note=None, item=None):
+  def __init__(self, parent, project, name='Notes Editor', note=None):
     CcpnDock.__init__(self, name=name)
     widget = QtGui.QWidget()
     self._appBase = project._appBase
@@ -23,7 +23,6 @@ class NotesEditor(DropBase, CcpnDock):
     self.parent.addDock(self)
     self.textBox = TextEditor()
     self.note = note
-    self.item = item
     widgetLayout = QtGui.QGridLayout()
     widget.setLayout(widgetLayout)
     # self.menuBar = MenuBar(self)
@@ -59,9 +58,6 @@ class NotesEditor(DropBase, CcpnDock):
     """
     newText = self.textBox.toPlainText()
     self.note.text = newText
-
-    if self.item:
-      self.item.setText(0, self.note.pid)
     self.close()
 
   def _reject(self):

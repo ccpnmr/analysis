@@ -113,7 +113,8 @@ class ViewBox(pg.ViewBox):
     elif event.button() == QtCore.Qt.RightButton and not event.modifiers():
       event.accept()
     #
-    elif event.button() == QtCore.Qt.LeftButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
+    elif event.button() == QtCore.Qt.LeftButton and (event.modifiers() & QtCore.Qt.ShiftModifier) and (
+              event.modifiers() & QtCore.Qt.ShiftModifier):
       mousePosition=self.mapSceneToView(event.pos())
       position = [mousePosition.x(), mousePosition.y()]
       for spectrumView in self.current.strip.spectrumViews:
@@ -167,7 +168,7 @@ class ViewBox(pg.ViewBox):
       pg.ViewBox.mouseDragEvent(self, event)
 
     elif (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ControlModifier) and not (
+              event.modifiers() & QtCore.Qt.ControlModifier) and (
               event.modifiers() & QtCore.Qt.ShiftModifier):
       if event.isFinish():
 
@@ -243,7 +244,7 @@ class ViewBox(pg.ViewBox):
 
 
     elif (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ShiftModifier) and not (
+              event.modifiers() & QtCore.Qt.ShiftModifier) or  (
               event.modifiers() & QtCore.Qt.ControlModifier):
        # Add select area
       if event.isStart():

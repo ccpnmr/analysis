@@ -118,8 +118,7 @@ def _newSpectrumGroup(self:Project, name:str, spectra=()) -> SpectrumGroup:
     raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
 
   apiDataSources = [x._wrappedData for x in spectra]
-  return self._data2Obj.get(self._wrappedData.newSpectrumGroup(name=name,
-                                                               dataSources=apiDataSources))
+  return self._data2Obj.get(self._wrappedData.newSpectrumGroup(name=name, dataSources=apiDataSources))
 
     
 # Connections to parents:

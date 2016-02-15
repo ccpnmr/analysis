@@ -91,6 +91,15 @@ class ChemicalShiftList(AbstractWrapperObject):
     self._wrappedData.unit = value
 
   @property
+  def autoUpdate(self) -> bool:
+    """Automatically update Chemical Shifts from assigned peak - yes/no??"""
+    return self._wrappedData.autoUpdate
+
+  @autoUpdate.setter
+  def autoUpdate(self, value:bool):
+    self._wrappedData.autoUpdate = value
+
+  @property
   def isSimulated(self) -> bool:
     """
     is ChemicalShiftList simulated?"""

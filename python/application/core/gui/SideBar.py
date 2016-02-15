@@ -40,7 +40,7 @@ from ccpn import Project
 from ccpn import Spectrum
 from ccpn import AbstractWrapperObject
 
-from ccpncore.util.Pid import Pid
+from ccpncore.util import Pid
 from ccpncore.util.Types import Sequence
 
 NEW_ITEM_DICT = {
@@ -120,14 +120,14 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """
     self.project = project
 
-  def addItem(self, item:QtGui.QTreeWidgetItem, data:object):
+  def addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
     """
     Adds a QTreeWidgetItem as a child of the item specified, which corresponds to the data object
     passed in.
     """
     newItem = QtGui.QTreeWidgetItem(item)
     newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
-    newItem.setData(0, QtCore.Qt.DisplayRole, str(data.pid))
+    newItem.setData(0, QtCore.Qt.DisplayRole, pid)
     newItem.mousePressEvent = self.mousePressEvent
     return newItem
 
@@ -186,42 +186,53 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
   def _createItem(self, obj:AbstractWrapperObject):
     """Create a new sidebar item from a new object.
-    Called by notifier when a new object is created (so need to check for duplicates).
+    Called by notifier when a new object is created or undeleted (so need to check for duplicates).
     NB Obj may be of a type that does not have an item"""
 
-    # get itemType from passed-in object
-    itemType = self._typeToItem.get(obj.shortClassName)
-
-    if itemType is None:
+    if not isinstance(obj, AbstractWrapperObject):
       return
-    else:
-      self.addItem(itemType, obj)
 
-  def _renameItem(self, item, obj:AbstractWrapperObject):
-    """rename item to match object"""
-    item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))
+    shortClassName = obj.shortClassName
 
-  def _removeItem(self, item:QtGui.QTreeWidgetItem):
-    """Removes item WITHOUT deleting underlying object. Called when objects are deleted"""
+    if shortClassName == 'SP':
+      # Spectrum - special behaviour - appear under SpectrumGroups, if any
+      spectrumGroups = obj.spectrumGroups
+      if spectrumGroups:
+        for sg in spectrumGroups:
+          for sgitem in self._findItems(sg.pid):
+            self.addItem(sgitem, obj.pid)
+
+        return
+
+    # If we get to here we have only one object to deal with
+    # get itemType from passed-in object
+    itemParent = self._typeToItem.get(shortClassName)
+    if itemParent is not None:
+      self.addItem(itemParent, obj.pid)
+
+  def _renameItem(self, oldPid:str, newPid:str):
+    """rename item(s) from object pdi oldPid to object pid newPid"""
+    for item in self._findItems(oldPid):
+      item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
+
+  def _removeItem(self, objPid):
+    """Removes sidebar item(s) for objec with pid objPid, but does NOT delete the object.
+    Called when objects are deleted"""
     import sip
-    sip.delete(item)
+    for item in self._findItems(objPid):
+      sip.delete(item)
 
-  def _findItem(self, objPid:str) -> QtGui.QTreeWidgetItem:
-    """Find item that matches obj. NB Obj may be of a type that does not have an item"""
+  def _findItems(self, objPid:str) -> QtGui.QTreeWidgetItem:
+    """Find items that match objPid - returns empty list if no matches"""
 
-    acceptableObjects = ('SP', 'PL', 'SG', 'SA' 'SC', 'SU', 'MC', 'NC', 'NR', 'NA', 'CL', 'SE',
+    acceptableObjects = set('SP', 'PL', 'SG', 'SA' 'SC', 'SU', 'MC', 'NC', 'NR', 'NA', 'CL', 'SE',
                          'MO', 'DS', 'NO')
-    if acceptableObjects and objPid[:2] in acceptableObjects:
-      result = self.findItems(objPid, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)[0]
-      # raise NotImplementedError("Not written yet")
+    if objPid[:2] in acceptableObjects:
+      result = self.findItems(objPid, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
 
-    # elif isinstance(obj, AbstractWrapperObject):
     else:
-      result = None
+      result = []
 
-    # else:
-    #   raise ValueError("Function findItem requires a wrapper object as input")
-    #
     return result
 
   def fillSideBar(self, project:Project):

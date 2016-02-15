@@ -305,9 +305,9 @@ class Undo(deque):
     except Exception as e:
       from ccpncore.util.Logging import getLogger
       getLogger().warning("Error while redoing (%s). Undo stack is cleared." % e)
-      if self._debug:
-        print ("REDO DEBUG: error in redo. Last redo call was:", redoCall)
-        raise
+      # if self._debug:
+      #   print ("REDO DEBUG: error in redo. Last redo call was:", redoCall)
+      #   raise
       self.clear()
     finally:
       # Addded by Rasmus March 2015. Surely we need to reset self._blocked?

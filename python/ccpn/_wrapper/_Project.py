@@ -217,12 +217,9 @@ class Project(AbstractWrapperObject):
 
     result = cls(self, wrappedData)
 
-    # put object in sidebar, if any
-    appBase = self._appBase
-    mainWindow = appBase and appBase.mainWindow
-    if mainWindow is not None:
-      mainWindow.sideBar._createItem(result)
-
+    sideBar = self._getApplicationSidebar()
+    if sideBar is not None:
+      sideBar._createItem(result)
     #
     return result
 
@@ -237,10 +234,9 @@ class Project(AbstractWrapperObject):
     obj = self._data2Obj.get(wrappedData)
 
     # Remove from GUI sidebar - if any
-    appBase = self._appBase
-    mainWindow = appBase and appBase.mainWindow
-    if mainWindow is not None:
-      mainWindow.sideBar._removeItem(obj)
+    sideBar = self._getApplicationSidebar()
+    if sideBar is not None:
+      sideBar._removeItem(obj.pid)
 
     # remove from wrapped2Obj
     del self._data2Obj[wrappedData]
@@ -278,19 +274,13 @@ class Project(AbstractWrapperObject):
     oldWrapperObject._wrappedData = wrappedData
 
     # Put back in GUI sidebar - if any
-    appBase = self._appBase
-    mainWindow = appBase and appBase.mainWindow
-    if mainWindow is not None:
-      appBase.mainWindow.sideBar._createItem(oldWrapperObject)
+    sideBar = self._getApplicationSidebar()
+    if sideBar is not None:
+      sideBar._createItem(oldWrapperObject)
 
   def _resetPid(self, wrappedData):
     """Reset internal attributes after values determining PID have changed"""
-
-    mainWindow = self._appBase and self._appBase.mainWindow
-    if mainWindow is None:
-      sideBar = None
-    else:
-      sideBar = mainWindow.sideBar
+    sideBar = self._getApplicationSidebar()
 
     getDataObj = self._data2Obj.get
     pid2Obj = self._pid2Obj
@@ -302,6 +292,7 @@ class Project(AbstractWrapperObject):
 
       # reset _id
       oldId = obj._id
+      oldPid = obj.pid
 
       parent = obj._parent
       if parent is None:
@@ -317,12 +308,58 @@ class Project(AbstractWrapperObject):
       del dd[oldId]
       dd[_id] = obj
 
-      # Refresh sidebar item if any
+      # Refresh sidebar items if any
       if sideBar is not None:
-        sidebarItem = sideBar._findItem(obj)
-        if sidebarItem is not None:
-          sideBar._renameItem(sidebarItem, obj)
+        sideBar._renameItem(oldPid, obj.pid)
 
+  def _getApplicationSidebar(self):
+    """Get Appliction sidebar, if any.
+
+     Used as preliminary in sidebar reset functions"""
+    mainWindow = self._appBase and self._appBase.mainWindow
+    if mainWindow is not None:
+      return mainWindow.sideBar
+
+    return None
+
+  def _resetSpectrumInSidebar(self, dataSource:'ApiDataSource'):
+    """Reset application sidebar when spectrum<->SpectrumGroup link changes
+    Called by notifiers.
+    No-op if there is no application and thus no sidebar
+    """
+
+    sideBar = self._getApplicationSidebar()
+    if sideBar is not None:
+      spectrum = self._data2Obj[dataSource]
+      sideBar._removeItem(spectrum.pid)
+      sideBar._createItem(spectrum)
+
+  def _resetSpectrumGroupInSidebar(self, apiSpectrumGroup:'ApiSpectrumGroup'):
+    """Reset application sidebar when spectrum<->SpectrumGroup link changes
+    Called by notifiers for addDataSource, __init__, and undelete, where all affected
+    dataSources are attached after the operation.
+    No-op if there is no application and thus no sidebar
+    """
+
+    sideBar = self._getApplicationSidebar()
+    if sideBar is not None:
+      for dataSource in apiSpectrumGroup.sortedDataSources():
+        spectrum = self._data2Obj[dataSource]
+        sideBar._removeItem(spectrum.pid)
+        sideBar._createItem(spectrum)
+
+  def _resetAllSpectraInSidebar(self, dummyObj:AbstractWrapperObject):
+    """Reset application sidebar when spectrum<->SpectrumGroup link changes
+    Called by notifiers for SpectrumGroup.delete, .setDataSources, and .removeDataSource
+    where NOT all affected dataSources are attached after the operation.
+    No-op if there is no application and thus no sidebar
+    """
+
+    sideBar = self._getApplicationSidebar()
+    if sideBar is not None:
+      for spectrum in self.spectra:
+        sideBar._removeItem(spectrum.pid)
+        sideBar._createItem(spectrum)
 
   # NBNB We do NOT want to delete the underlying nmrProject, in case the root
   # hangs around and is somehow saved

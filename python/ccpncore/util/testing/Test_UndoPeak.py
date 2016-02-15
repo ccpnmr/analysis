@@ -40,11 +40,8 @@ class PeakUndoTest(CoreTesting):
     
     project._undo = Undo()
     project._undo.newWaypoint()
-    print('@~@~ project undo stack size before newPeak: %d' % len(project._undo))
     peak = peakList.newPeak()
-    print('@~@~ project undo stack size after newPeak: %d' % len(project._undo))
     project._undo.undo()
-    print('@~@~ project undo stack size after undo: %d' % len(project._undo))
     assert len(peakList.peaks) == 0, 'len(peakList.peaks) = %d' % len(peakList.peaks)
     
   def test_new_peak_undo_redo(self):
@@ -57,13 +54,9 @@ class PeakUndoTest(CoreTesting):
     
     project._undo = Undo()
     project._undo.newWaypoint()
-    print('@~@~ project undo stack size before newPeak: %d' % len(project._undo))
     peak = peakList.newPeak()
-    print('@~@~ project undo stack size after newPeak: %d' % len(project._undo))
     project._undo.undo()
-    print('@~@~ project undo stack size after undo: %d' % len(project._undo))
     project._undo.redo()
-    print('@~@~ project undo stack size after redo: %d' % len(project._undo))
     assert len(peakList.peaks) == 1, 'len(peakList.peaks) = %d' % len(peakList.peaks)
     
  

@@ -84,6 +84,14 @@ def repointToDataUrl(self:'AbstractDataStore', dataUrl:'DataUrl'):
     else:
       # We need to move self to a new DataLocationStore. This bypasses the API
 
+
+      # First load NmrProjects and set to modified
+      # - necessary to avoid broken exoLinks in non-loaded files
+      for topObject in set(x.topObject for x in self.nmrDataSources):
+        if not topObject.isLoaded:
+          topObject.load()
+        topObject.touch()
+
       # get data set up
       oldSerial = newSerial = self.serial
       serialDict = dataLocationStore.__dict__['_serialDict']
@@ -99,6 +107,7 @@ def repointToDataUrl(self:'AbstractDataStore', dataUrl:'DataUrl'):
         serialDict['dataStores'] = newSerial
       dataLocationStore.__dict__['dataStores'][newSerial] = self
       self.dataUrl = dataUrl
+
       self.root.override = True
       try:
         self.set_ID(-1)

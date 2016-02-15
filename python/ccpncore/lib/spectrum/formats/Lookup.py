@@ -73,7 +73,7 @@ def newSpectrumGroup(project, groupNameDicts):
     newGroupsDict[groupName] = [d[groupName] for d in groupNameDicts if groupName in d]
   for groupName, spectra in newGroupsDict.items():
     newSpectrumGroup = project.newSpectrumGroup(name=groupName, spectra=spectra)
-    loadSpectrumGroupInSideBar(project, newSpectrumGroup)
+    # loadSpectrumGroupInSideBar(project, newSpectrumGroup)
 
 def createSampleDicts(project, secondSheetExcel):
   sampleDicts = []
@@ -119,7 +119,7 @@ def dispatchSubstanceProperties(substance, data):
 def dispatchSampleProperties(project, sample, data):
   addSampleSpectra(project, sample, data)
   addSampleComponents(sample, data)
-  loadSampleInSideBar(project, sample)
+  # loadSampleInSideBar(project, sample)
   setSamplepH(sample, data)
   setSampleIonicStrength(sample, data)
   setSampleAmount(sample, data)
@@ -340,26 +340,28 @@ def setSubstanceLogPartitionCoefficient(substance, data):
 
 ### Loading obj in SideBar
 
-def loadSpectrumInSideBar(project, spectrum):
-  ''' load the spectrum in the sidebar '''
-  peakList = spectrum.newPeakList()
-  sideBar = project._appBase.mainWindow.sideBar
-  spectra = sideBar.spectrumItem
-  newSpectrumItem = sideBar.addItem(spectra, spectrum)
-  peakListItem = QtGui.QTreeWidgetItem(newSpectrumItem)
-  peakListItem.setText(0, peakList.pid)
+# Feb 2106 Rasmus Fogh. No longer needed
 
-def loadSampleInSideBar(project, sample):
-  sideBar = project._appBase.mainWindow.sideBar
-  sampleSideBar = sideBar.samplesItem
-  sampleItem =  sideBar.addItem(sampleSideBar, sample)
-  for sampleComponent in sample.sampleComponents[0:]:
-    sideBar.addItem(sampleItem, sampleComponent)
+# def loadSpectrumInSideBar(project, spectrum):
+#   ''' load the spectrum in the sidebar '''
+#   peakList = spectrum.newPeakList()
+#   sideBar = project._appBase.mainWindow.sideBar
+#   spectra = sideBar.spectrumItem
+#   newSpectrumItem = sideBar.addItem(spectra, spectrum)
+#   peakListItem = QtGui.QTreeWidgetItem(newSpectrumItem)
+#   peakListItem.setText(0, peakList.pid)
 
-def loadSpectrumGroupInSideBar(project, newSpectrumGroup):
-  sideBar = project._appBase.mainWindow.sideBar
-  spectrumGroupItem = sideBar.spectrumGroupItem
-  newGroupItem =  sideBar.addItem(spectrumGroupItem, newSpectrumGroup)
-  for spectrum in newSpectrumGroup.spectra:
-    sideBar.addItem(newGroupItem, spectrum)
-    peakList = spectrum.newPeakList()
+# def loadSampleInSideBar(project, sample):
+#   sideBar = project._appBase.mainWindow.sideBar
+#   sampleSideBar = sideBar.samplesItem
+#   sampleItem =  sideBar.addItem(sampleSideBar, sample)
+#   for sampleComponent in sample.sampleComponents[0:]:
+#     sideBar.addItem(sampleItem, sampleComponent)
+#
+# def loadSpectrumGroupInSideBar(project, newSpectrumGroup):
+#   sideBar = project._appBase.mainWindow.sideBar
+#   spectrumGroupItem = sideBar.spectrumGroupItem
+#   newGroupItem =  sideBar.addItem(spectrumGroupItem, newSpectrumGroup)
+#   for spectrum in newSpectrumGroup.spectra:
+#     sideBar.addItem(newGroupItem, spectrum)
+#     peakList = spectrum.newPeakList()

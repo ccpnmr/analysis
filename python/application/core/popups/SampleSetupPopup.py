@@ -112,68 +112,35 @@ class SamplePopup(QtGui.QDialog):
       if len(i) == 0:
         excludedRegions.remove(i)
 
-
-    # sideBar = self.project._appBase.mainWindow.sideBar
-    #
-    # refData = sideBar.spectrumItem
-    # refCount = sideBar.spectrumReference.childCount()
-    # spectra = []
-    #
-    # for i in range(refCount):
-    #   print(i)
-    #   item = refData.child(i)
-    #   itemCount = item.childCount()
-    #   for j in range(itemCount):
-    #     spectrumPid = item.child(j).text(0)
-    #     spectrum = self.project.getByPid(spectrumPid)
-    #
-    #     spectra.append(spectrum)
-    #     spectrum.peakLists[0].pickPeaks1dFiltered(ignoredRegions=excludedRegions, noiseThreshold=noiseThreshold)
-    #     sampleTab = sideBar.SamplesItems
-
     sideBar = self.project._appBase.mainWindow.sideBar
-
-    refData = sideBar.spectrumItem
-    refCount = sideBar.spectrumItem.childCount() #  item under sidebar spectra tree
-
+    spectrumGroupItem = sideBar.spectrumGroupItem
+    refCount = sideBar.spectrumGroupItem.childCount()
     spectra = []
 
     for i in range(refCount):
-      item = refData.child(i)
-
+      item = spectrumGroupItem.child(i)
       itemCount = item.childCount()
       for j in range(itemCount):
         spectrumPid = item.child(j).text(0)
-        peakList = self.project.getByPid(spectrumPid)
-        spectrum = peakList.spectrum
-
+        spectrum = self.project.getByPid(spectrumPid)
         spectra.append(spectrum)
         spectrum.peakLists[0].pickPeaks1dFiltered(ignoredRegions=excludedRegions, noiseThreshold=noiseThreshold)
         sampleTab = sideBar.samplesItem
-
-
-
 
     minimalDistance = self.distance.value()
     if self.setup.checkBox1.isChecked():
       value = (self.setup.spinBoxSA.value())
       samples = setupSamples(self.project.substances, value , 'nSamples', minimalOverlap=minimalDistance)
 
-
     elif self.setup.checkBox2.isChecked():
       value = (int(self.setup.spinBoxcomponent.value()))
       samples = setupSamples(self.project.substances, value, 'nComponentsPerSample', minimalOverlap=minimalDistance)
 
-
     for sample in samples:
       newItem = sideBar.addItem(sampleTab, sample)
-
       for sampleComponent in sample.sampleComponents[0:]:
         sideBar.addItem(newItem, sampleComponent)
 
-        # for peakCollection in sample.peakCollections[0:]:
-        #   self.spectrum = self.project.getByPid('SP:'+peakCollection.name)
-        #   sideBar.addItem(newItem, self.spectrum)
 
     # #----- open the analysis table ----#
 

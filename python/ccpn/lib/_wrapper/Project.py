@@ -119,6 +119,7 @@ def loadSpectrum(self:"Project", path:str, subType:str) -> list:
   """Load spectrum from file into application"""
 
   apiDataSource = self._wrappedData.loadDataSource(path, subType)
+  self.resetAssignmentTolerances(apiDataSource)
   if apiDataSource is None:
     return []
   else:
@@ -134,6 +135,24 @@ def loadLookupFile(self:"Project", path:str, subType:str, ):
 
   elif subType == ioFormats.XLS:
     readXls(self, path=path)
+
+
+def resetAssignmentTolerances(self:"Project", apiDataSource):
+
+  spectrum = self._data2Obj[apiDataSource]
+  tolerances = [[]] * spectrum.dimensionCount
+  for ii, isotopeCode in enumerate(spectrum.isotopeCodes):
+    if isotopeCode == '1H':
+      tolerance = max([0.02, spectrum.spectralWidths[ii]/spectrum.pointCounts[ii]])
+      tolerances[ii] = tolerance
+    elif isotopeCode == '13C' or isotopeCode == '15N':
+      tolerance = max([0.2, spectrum.spectralWidths[ii]/spectrum.pointCounts[ii]])
+      tolerances[ii] = tolerance
+    else:
+      tolerance = max([0.2, spectrum.spectralWidths[ii]/spectrum.pointCounts[ii]])
+      tolerances[ii] = tolerance
+
+  spectrum.assignmentTolerances = tolerances
 
 
 def uniqueSubstanceName(self:"Project", name:str=None, defaultName:str='Molecule') -> str:

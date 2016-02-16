@@ -127,7 +127,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """
     newItem = QtGui.QTreeWidgetItem(item)
     newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
-    newItem.setData(0, QtCore.Qt.DisplayRole, pid)
+    newItem.setData(0, QtCore.Qt.DisplayRole, str(pid))
     newItem.mousePressEvent = self.mousePressEvent
     return newItem
 

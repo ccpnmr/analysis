@@ -184,8 +184,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
                                     """)
 
-    self.namespace = {'loadProject':self._appBase.loadProject,
-                      'newProject':self._appBase.newProject, 'loadData':self.loadData, 'application':self,
+    self.namespace = {'loadProject': self._appBase.loadProject,
+                      'newProject': self._appBase.newProject, 'loadData':self.loadData, 'application':self,
                       'preferences':self._appBase.preferences, 'project':self._project, 'current':self._appBase.current}
 
     self.pythonConsole = IpythonConsole(self, self.namespace, mainWindow=self)
@@ -196,7 +196,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # self.pythonConsoleDock.hide()
     self.sideBar = SideBar(parent=self)
     self.sideBar.setDragDropMode(self.sideBar.DragDrop)
-    self.sideBar.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    # self.sideBar.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.splitter3.addWidget(self.sideBar)
     self.splitter1.addWidget(self.splitter3)
     # self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)

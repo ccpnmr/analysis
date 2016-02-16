@@ -73,7 +73,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self._appBase = parent._appBase
     self.setExpandsOnDoubleClick(False)
     self.setDragDropMode(self.InternalMove)
-    self.setFixedWidth(200)
+    self.setMinimumWidth(200)
     self.projectItem = dd['PR'] = QtGui.QTreeWidgetItem(self)
     self.projectItem.setText(0, "Project")
     self.projectItem.setExpanded(True)
@@ -180,7 +180,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
   def _deleteItemObject(self,  item:QtGui.QTreeWidgetItem):
     """Removes the specified item from the sidebar and deletes it from the project.
-    NB, the clean-up of the side bar is doen through notifiers
+    NB, the clean-up of the side bar is done through notifiers
     """
     self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole)).delete()
 

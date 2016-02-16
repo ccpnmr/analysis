@@ -155,7 +155,6 @@ class AtomSelector(CcpnDock):
     """
     self._returnButtonsToNormal()
     if not self.current.nmrResidue:
-      print('here')
       return
 
     else:
@@ -171,7 +170,7 @@ class AtomSelector(CcpnDock):
           # NBNB TBD CHECK THIS
           # experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
           types = set(peak.peakList.spectrum.experimentType for peak in peaks)
-          anyInterOnlyExperiments = any(isInterOnlyExpt(x for x in types))
+          anyInterOnlyExperiments = any([isInterOnlyExpt(x) for x in types])
 
           for peak in peaks:
             isotopeCode = peak.peakList.spectrum.isotopeCodes[1]

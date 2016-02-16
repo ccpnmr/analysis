@@ -41,7 +41,17 @@ class PeakTable(CcpnDock):
   def __init__(self, project, selectedList=None):
     CcpnDock.__init__(self, name='Peak List')
 
-    self.layout.addWidget(PeakListSimple(self, project, selectedList=selectedList))
+    self.peakList = PeakListSimple(self, project, selectedList=selectedList)
+    self.layout.addWidget(self.peakList)
+    self.current = project._appBase.current
+    self.current.registerNotify(self.peakList.selectPeakInTable, 'peaks')
+
+  def closeDock(self):
+    """
+    Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
+    """
+    self.project._appBase.current.unRegisterNotify(self.peakList.selectPeakInTable, 'peaks')
+    self.close()
 
 
 
@@ -60,6 +70,7 @@ class PeakListSimple(QtGui.QWidget, Base):
     # self.label.show()
     self.project = project
 
+
     self.peakLists = project.peakLists
     self.label = Label(self, 'Peak List:')
     self.layout().addWidget(self.label, 0, 0, QtCore.Qt.AlignRight)
@@ -72,6 +83,8 @@ class PeakListSimple(QtGui.QWidget, Base):
     label = Label(self, ' Position Unit:', grid=(0, 2), hAlign='r')
 
     self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
+
+
 
     self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 4),
                                           callback=self.subtractPeakLists)
@@ -141,6 +154,11 @@ class PeakListSimple(QtGui.QWidget, Base):
     """
     if peak.volume:
       return '%7.2E' % float(peak.volume*peak.peakList.spectrum.scale)
+
+  def selectPeakInTable(self, peaks=None):
+    peakList = self.project.getByPid(self.peakListPulldown.currentText())
+    if peaks[-1] in peakList.peaks:
+      self.peakTable.table.selectObject(peaks[-1])
 
   def getPeakHeight(self, peak:Peak):
     """

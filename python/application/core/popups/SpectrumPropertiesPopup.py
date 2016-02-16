@@ -502,32 +502,35 @@ class ContoursTab(QtGui.QWidget, Base):
   def changePosSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
-    spectrum.positiveContourColour = newColour.name()
-    pix=QtGui.QPixmap(QtCore.QSize(20,20))
-    pix.fill(QtGui.QColor(newColour))
-    newIndex = str(len(spectrumColours.items())+1)
-    self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-    self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-    spectrumColours[newColour.name()] = 'Colour %s' % newIndex
-    self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
-    pix=QtGui.QPixmap(60,10)
-    pix.fill(newColour)
-    newIcon = QtGui.QIcon(pix)
-    for spectrumView in spectrum.spectrumViews:
-      spectrumView.newAction.setIcon(newIcon)
+    if newColour is not None:
+      spectrum.positiveContourColour = newColour.name()
+      pix=QtGui.QPixmap(QtCore.QSize(20,20))
+      pix.fill(QtGui.QColor(newColour))
+      newIndex = str(len(spectrumColours.items())+1)
+      self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+      self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+      spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+      self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
+      pix=QtGui.QPixmap(60,10)
+      pix.fill(newColour)
+      newIcon = QtGui.QIcon(pix)
+      # 16/2/2016 RHF The newAction function does not exist and threw an error. Commented out
+      # for spectrumView in spectrum.spectrumViews:
+      #   spectrumView.newAction.setIcon(newIcon)
     
 
   def changeNegSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
-    spectrum.negativeContourColour = newColour.name()
-    pix=QtGui.QPixmap(QtCore.QSize(20,20))
-    pix.fill(QtGui.QColor(newColour))
-    newIndex = str(len(spectrumColours.items())+1)
-    self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
-    self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
-    spectrumColours[newColour.name()] = 'Colour %s' % newIndex
-    self.negativeColourBox.setCurrentIndex(int(newIndex)-1)
+    if newColour is not None:
+      spectrum.negativeContourColour = newColour.name()
+      pix=QtGui.QPixmap(QtCore.QSize(20,20))
+      pix.fill(QtGui.QColor(newColour))
+      newIndex = str(len(spectrumColours.items())+1)
+      self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
+      self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
+      spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+      self.negativeColourBox.setCurrentIndex(int(newIndex)-1)
 
 
   def changePosColourComboIndex(self, spectrum, value):

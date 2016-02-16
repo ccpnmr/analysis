@@ -119,10 +119,10 @@ def loadSpectrum(self:"Project", path:str, subType:str) -> list:
   """Load spectrum from file into application"""
 
   apiDataSource = self._wrappedData.loadDataSource(path, subType)
-  self.resetAssignmentTolerances(apiDataSource)
   if apiDataSource is None:
     return []
   else:
+    self.resetAssignmentTolerances(apiDataSource)
     return [self._data2Obj[apiDataSource]]
 
 #

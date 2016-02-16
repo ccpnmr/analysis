@@ -43,9 +43,9 @@ from ccpn import AbstractWrapperObject
 # NB RestraintList ('RL') is not in for the moment. Needs to be added later
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
+# Also parents must appear before their children
 classesInSideBar = ('SG', 'SP', 'PL', 'SA', 'SC', 'SU', 'MC', 'NC', 'NR', 'NA',
                     'CL', 'SE', 'MO', 'DS',
-                    # 'NO')
                     'RL' , 'NO')
 
 classesInTopLevel =('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')

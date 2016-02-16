@@ -170,7 +170,9 @@ class DropBase(GuiBase):
           elif funcName == 'processProjects':
             # We never need to process a project
             pass
-          else:
+          elif dataType != 'urls':
+            # Added RHF 16/2/2016. If we have loaded data that is OK, and no warning needed.
+            # Why warn if we drop a spectrum file on the side bar?
             project._logger.warning("Dropped data not processed - no %s function defined for %s"
             % (funcName, self))
 
@@ -181,7 +183,9 @@ class DropBase(GuiBase):
             funcName = 'process' + tag
             if hasattr(self, funcName):
               getattr(self,funcName)([pids[ii]], event)
-            else:
+            elif dataType != 'urls':
+              # Added RHF 16/2/2016. If we have loaded data that is OK, and no warning needed.
+              # Why warn if we drop a spectrum file on the side bar?
               project._logger.warning("Dropped data %s not processed - no %s function defined for %s"
               % (pid, funcName, self))
 

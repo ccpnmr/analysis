@@ -225,8 +225,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
   def _findItems(self, objPid:str) -> QtGui.QTreeWidgetItem:
     """Find items that match objPid - returns empty list if no matches"""
 
-    acceptableObjects = set('SP', 'PL', 'SG', 'SA' 'SC', 'SU', 'MC', 'NC', 'NR', 'NA', 'CL', 'SE',
-                         'MO', 'DS', 'NO')
+    acceptableObjects = set(('SP', 'PL', 'SG', 'SA' 'SC', 'SU', 'MC', 'NC', 'NR', 'NA', 'CL', 'SE',
+                         'MO', 'DS', 'NO'))
     if objPid[:2] in acceptableObjects:
       result = self.findItems(objPid, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
 
@@ -241,7 +241,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """
     self.projectItem.setText(0, project.name)
     for spectrum in project.spectra:
-      newItem = self.addItem(self.spectrumItem, spectrum)
+      newItem = self.addItem(self.spectrumItem, spectrum.pid)
       if spectrum is not None:
         anItem = QtGui.QTreeWidgetItem(newItem)
         anItem.setText(0, '<New>')
@@ -250,37 +250,37 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           peakListItem.setText(0, peakList.pid)
 
     for spectrumGroup in project.spectrumGroups:
-      newItem = self.addItem(self.spectrumGroupItem, spectrumGroup)
+      newItem = self.addItem(self.spectrumGroupItem, spectrumGroup.pid)
 
     for chain in project.chains:
-      newItem = self.addItem(self.chainItem, chain)
+      newItem = self.addItem(self.chainItem, chain.pid)
     for nmrChain in project.nmrChains:
-      newItem = self.addItem(self.nmrChainItem, nmrChain)
+      newItem = self.addItem(self.nmrChainItem, nmrChain.pid)
       for nmrResidue in nmrChain.nmrResidues:
-        newItem3 = self.addItem(newItem, nmrResidue)
+        newItem3 = self.addItem(newItem, nmrResidue.pid)
         for nmrAtom in nmrResidue.nmrAtoms:
-          newItem5 = self.addItem(newItem3, nmrAtom)
+          newItem5 = self.addItem(newItem3, nmrAtom.pid)
     for chemicalShiftList in project.chemicalShiftLists:
-      newItem = self.addItem(self.chemicalShiftListsItem, chemicalShiftList)
+      newItem = self.addItem(self.chemicalShiftListsItem, chemicalShiftList.pid)
 
     for restraintSet in project.restraintSets:
-      newItem = self.addItem(self.restraintSetsItem, restraintSet)
+      newItem = self.addItem(self.restraintSetsItem, restraintSet.pid)
       newItem2 = QtGui.QTreeWidgetItem(newItem)
       newItem2.setText(0, '<New>')
       for restraintList in restraintSet.restraintLists:
-        newItem4 = self.addItem(newItem, restraintList)
+        newItem4 = self.addItem(newItem, restraintList.pid)
         newItem3 = QtGui.QTreeWidgetItem(newItem4)
         newItem3.setText(0, '<New>')
         for restraint in restraintList.restraints:
-          newItem5 = self.addItem(newItem4, restraint)
+          newItem5 = self.addItem(newItem4, restraint.pid)
 
     for structureEnsemble in project.structureEnsembles:
-      newItem = self.addItem(self.structuresItem, structureEnsemble)
+      newItem = self.addItem(self.structuresItem, structureEnsemble.pid)
       for model in structureEnsemble.models:
-        newItem3 = self.addItem(newItem, model)
+        newItem3 = self.addItem(newItem, model.pid)
 
     for note in project.notes:
-      newItem = self.addItem(self.notesItem, note)
+      newItem = self.addItem(self.notesItem, note.pid)
 
 
 

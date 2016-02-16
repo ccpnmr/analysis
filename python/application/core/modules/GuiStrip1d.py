@@ -26,9 +26,13 @@ __author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn import Project
 from ccpn import PeakList
 
+from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
+
 from application.core.modules.GuiStrip import GuiStrip
+
 from ccpncore.gui.Icon import Icon
 from ccpncore.util.Colour import spectrumColours
 from ccpncore.gui.Menu import Menu
@@ -131,3 +135,22 @@ class GuiStrip1d(GuiStrip):
     for item in self.peakItems[peakList]:
       self.plotWidget.removeItem(item)
       
+def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
+  
+  getDataObj = project._data2Obj.get
+  peakListView = getDataObj(apiStripPeakListView)
+  spectrumView = peakListView.spectrumView
+  strip = spectrumView.strip
+ 
+  if not isinstance(strip, GuiStrip1d):
+    return
+    
+  scene = strip.plotWidget.scene()
+  peakList = peakListView.peakList
+  for peakItem in strip.peakItems[peakList]:
+    scene.removeItem(peakItem.annotation)
+    scene.removeItem(peakItem.symbol)
+    scene.removeItem(peakItem)
+  
+Project._setupNotifier(_deletedStripPeakListView, ApiStripPeakListView, 'preDelete')
+

@@ -30,50 +30,50 @@ class RestraintListTest(WrapperTesting):
   projectPath = None
 
   def test_newDistanceRestraintList(self):
-    restraintSet = self.project.newRestraintSet()
-    newList = restraintSet.newRestraintList('Distance')
+    dataSet = self.project.newDataSet()
+    newList = dataSet.newRestraintList('Distance')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newDihedralRestraintList(self):
-    restraintSet = self.project.newRestraintSet()
-    newList = restraintSet.newRestraintList('Dihedral')
+    dataSet = self.project.newDataSet()
+    newList = dataSet.newRestraintList('Dihedral')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newCsaRestraintList(self):
-    restraintSet = self.project.newRestraintSet()
-    newList = restraintSet.newRestraintList('Csa')
+    dataSet = self.project.newDataSet()
+    newList = dataSet.newRestraintList('Csa')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newRdcRestraintList(self):
-    restraintSet = self.project.newRestraintSet()
-    newList = restraintSet.newRestraintList('Rdc')
+    dataSet = self.project.newDataSet()
+    newList = dataSet.newRestraintList('Rdc')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newChemicalShiftRestraintList(self):
-    restraintSet = self.project.newRestraintSet()
-    newList = restraintSet.newRestraintList('ChemicalShift')
+    dataSet = self.project.newDataSet()
+    newList = dataSet.newRestraintList('ChemicalShift')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_newJCouplingRestraintList(self):
-    restraintSet = self.project.newRestraintSet()
-    newList = restraintSet.newRestraintList('JCoupling')
+    dataSet = self.project.newDataSet()
+    newList = dataSet.newRestraintList('JCoupling')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
 
   def test_renameDistanceRestraintList(self):
-    restraintSet = self.project.newRestraintSet()
-    newList = restraintSet.newRestraintList('Distance', name='Boom', comment='blah', unit='A',
+    dataSet = self.project.newDataSet()
+    newList = dataSet.newRestraintList('Distance', name='Boom', comment='blah', unit='A',
                                             potentialType='logNormal', tensorMagnitude=1.0,
                                             tensorRhombicity=1.0, tensorIsotropicValue=0.0,
                                             tensorChainCode='A', tensorSequenceCode='11',

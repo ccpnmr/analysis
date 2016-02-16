@@ -30,16 +30,16 @@ from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonan
 from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 
 
-class RestraintSet(AbstractWrapperObject):
+class DataSet(AbstractWrapperObject):
   """Restraint set."""
   
   #: Short class name, for PID.
-  shortClassName = 'RS'
+  shortClassName = 'DS'
   # Attribute it necessary as subclasses must use superclass className
-  className = 'RestraintSet'
+  className = 'DataSet'
 
   #: Name of plural link to instances of class
-  _pluralLinkName = 'restraintSets'
+  _pluralLinkName = 'dataSets'
   
   #: List of child classes.
   _childClasses = []
@@ -47,8 +47,8 @@ class RestraintSet(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def _apiRestraintSet(self) -> ApiNmrConstraintStore:
-    """ CCPN NmrConstraintStore matching RestraintSet"""
+  def _apiDataSet(self) -> ApiNmrConstraintStore:
+    """ CCPN NmrConstraintStore matching DataSet"""
     return self._wrappedData
 
     
@@ -59,7 +59,7 @@ class RestraintSet(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for RestraintSet"""
+    """serial number, key attribute for DataSet"""
     return self._wrappedData.serial
 
   @property
@@ -107,8 +107,8 @@ class RestraintSet(AbstractWrapperObject):
     return result
 
 
-def _newRestraintSet(self:Project, comment:str=None) -> RestraintSet:
-  """Create new ccpn.RestraintSet
+def _newDataSet(self:Project, comment:str=None) -> DataSet:
+  """Create new ccpn.DataSet
 
   :param str comment: comment for new chain (optional)"""
   
@@ -119,14 +119,14 @@ def _newRestraintSet(self:Project, comment:str=None) -> RestraintSet:
     
     
 # Connections to parents:
-Project._childClasses.append(RestraintSet)
-Project.newRestraintSet = _newRestraintSet
-del _newRestraintSet
+Project._childClasses.append(DataSet)
+Project.newDataSet = _newDataSet
+del _newDataSet
 
 # Notifiers:
 className = ApiNmrConstraintStore._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':RestraintSet}, className, '__init__'),
+  ( ('_newObject', {'cls':DataSet}, className, '__init__'),
     ('_finaliseDelete', {}, className, 'delete'),
     ('_finaliseUnDelete', {}, className, 'undelete'),
   )

@@ -364,7 +364,7 @@ class Project(AbstractWrapperObject):
   # NBNB We do NOT want to delete the underlying nmrProject, in case the root
   # hangs around and is somehow saved
   # Anyway at this point deleting the API objects no longer delete the wrapper objects
-  # as the notifiers have been disbled
+  # as the notifiers have been disabled
   # def delete(self):
   #   """Delete underlying data and cleans up the wrapper project"""
   #   wrappedData = self._wrappedData

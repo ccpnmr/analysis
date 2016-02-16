@@ -37,17 +37,32 @@ from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup,
 
 
 from ccpn import Project
-from ccpn import Spectrum
 from ccpn import AbstractWrapperObject
 
-from ccpncore.util import Pid
-from ccpncore.util.Types import Sequence
 
+# NB RestraintList ('RL') is not in for the moment. Needs to be added later
+# NB the order matters!
+# NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
+classesInSideBar = ('SG', 'SP', 'PL', 'SA', 'SC', 'SU', 'MC', 'NC', 'NR', 'NA',
+                    'CL', 'SE', 'MO', 'DS',
+                    # 'NO')
+                    'RL' , 'NO')
+
+classesInTopLevel =('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
+
+# NBNB TBD FIXME
+# 1)This function (and the NEW_ITEM_DICT) it uses gets the create_new
+# function from the shortClassName of the PARENT!!!
+#
+# 2) <New> in makes a new SampleComponent. This is counterintuitive!
+# Anyway, how do you make a new Sample?
+#
+# Try putting in e.g. <New PeakList>, <New SampleComponent> etc.
 NEW_ITEM_DICT = {
   'SP': 'newPeakList',
   'NC': 'newNmrResidue',
   'NR': 'newNmrAtom',
-  'RS': 'newRestraintList',
+  'DS': 'newRestraintList',
   'RL': 'newRestraint',
   'SE': 'newModel',
   'Notes': 'newNote',
@@ -57,7 +72,7 @@ NEW_ITEM_DICT = {
   'Chains': 'CreateSequence',
   'Substances': 'newSubstance',
   'Chemical Shift Lists': 'newChemicalShiftList',
-  'Restraint Sets': 'newRestraintSet',
+  'Data Sets': 'newDataSet',
 }
 ### Flag example code removed in revision 7686
 
@@ -103,10 +118,10 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.newChemicalShiftListItem.setText(0, '<New>')
     self.structuresItem = dd['SE'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.structuresItem.setText(0, "Structures")
-    self.restraintSetsItem = dd['RS'] = QtGui.QTreeWidgetItem(self.projectItem)
-    self.restraintSetsItem.setText(0, "Datasets")
-    self.newRestraintSetItem = QtGui.QTreeWidgetItem(self.restraintSetsItem)
-    self.newRestraintSetItem.setText(0, '<New>')
+    self.dataSetsItem = dd['DS'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.dataSetsItem.setText(0, "DataSets")
+    self.newDataSetItem = QtGui.QTreeWidgetItem(self.dataSetsItem)
+    self.newDataSetItem.setText(0, '<New>')
     self.notesItem = dd['NO'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.notesItem.setText(0, "Notes")
     self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
@@ -158,25 +173,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     contextMenu.addAction('Delete', partial(self._deleteItemObject, item))
     contextMenu.popup(event.globalPos())
 
-  # NBNB TBD FIXME. Sorry, but this will need refactoring.
-  # 1) semantically, removeItem should only remove the item, not delete the underlying object
-  # 2) If deleting the object triggers item removal, item removal cannot trigger item deletion
-  # I think I have refactored this by changing raiseContextMenu, but you need to double check
-  #
-  # You can rename the new functions (probably remove the underscore)
-  # I just wanted to give them distinctive names to avoid confusion
-
-  # RHF: Removed and replaced by _deleteItemObject
-  # def removeItem(self, item:QtGui.QTreeWidgetItem):
-  #   """
-  #   Removes the specified item from the sidebar and the project.
-  #
-  #    NBNB TBD this function should be retired and replaced by the new _deleteItemObject
-  #    Note that _removeItem does SOMETHInG ELSE
-  #   """
-  #   import sip
-  #   self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole)).delete()
-  #   sip.delete(item)
 
   def _deleteItemObject(self,  item:QtGui.QTreeWidgetItem):
     """Removes the specified item from the sidebar and deletes it from the project.
@@ -189,26 +185,54 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     Called by notifier when a new object is created or undeleted (so need to check for duplicates).
     NB Obj may be of a type that does not have an item"""
 
+
     if not isinstance(obj, AbstractWrapperObject):
       return
 
     shortClassName = obj.shortClassName
 
     if shortClassName == 'SP':
-      # Spectrum - special behaviour - appear under SpectrumGroups, if any
+      # Spectrum - special behaviour - put them under SpectrumGroups, if any
       spectrumGroups = obj.spectrumGroups
       if spectrumGroups:
         for sg in spectrumGroups:
-          for sgitem in self._findItems(sg.pid):
-            self.addItem(sgitem, obj.pid)
+          for sgitem in self._findItems(str(sg.pid)):
+            self.addItem(sgitem, str(obj.pid))
 
         return
 
-    # If we get to here we have only one object to deal with
-    # get itemType from passed-in object
-    itemParent = self._typeToItem.get(shortClassName)
-    if itemParent is not None:
+    if shortClassName in classesInTopLevel:
+      itemParent = self._typeToItem.get(shortClassName)
       self.addItem(itemParent, obj.pid)
+
+    elif shortClassName == 'PL':
+      for itemParent in self._findItems(obj.spectrum.pid):
+        self.addItem(itemParent, obj.pid)
+
+    elif shortClassName == 'SC':
+      for itemParent in self._findItems(obj.sample.pid):
+        self.addItem(itemParent, obj.pid)
+
+    elif shortClassName == 'NR':
+      for itemParent in self._findItems(obj.nmrChain.pid):
+        self.addItem(itemParent, obj.pid)
+
+    elif shortClassName == 'NA':
+      for itemParent in self._findItems(obj.nmrResidue.pid):
+        self.addItem(itemParent, obj.pid)
+
+    elif shortClassName == 'RL':
+      for itemParent in self._findItems(obj.dataSet.pid):
+        self.addItem(itemParent, obj.pid)
+
+    elif shortClassName == 'MO':
+      for itemParent in self._findItems(obj.structureEnsemble.pid):
+        self.addItem(itemParent, obj.pid)
+
+    else:
+      # Object type is not in sidebar
+      return None
+
 
   def _renameItem(self, oldPid:str, newPid:str):
     """rename item(s) from object pdi oldPid to object pid newPid"""
@@ -216,7 +240,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
 
   def _removeItem(self, objPid):
-    """Removes sidebar item(s) for objec with pid objPid, but does NOT delete the object.
+    """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.
     Called when objects are deleted"""
     import sip
     for item in self._findItems(objPid):
@@ -225,9 +249,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
   def _findItems(self, objPid:str) -> QtGui.QTreeWidgetItem:
     """Find items that match objPid - returns empty list if no matches"""
 
-    acceptableObjects = set(('SP', 'PL', 'SG', 'SA' 'SC', 'SU', 'MC', 'NC', 'NR', 'NA', 'CL', 'SE',
-                         'MO', 'DS', 'NO'))
-    if objPid[:2] in acceptableObjects:
+    if objPid[:2] in classesInSideBar:
       result = self.findItems(objPid, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
 
     else:
@@ -239,59 +261,25 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """
     Fills the sidebar with the relevant data from the project.
     """
+
     self.projectItem.setText(0, project.name)
-    for spectrum in project.spectra:
-      newItem = self.addItem(self.spectrumItem, spectrum.pid)
-      if spectrum is not None:
-        anItem = QtGui.QTreeWidgetItem(newItem)
-        anItem.setText(0, '<New>')
-        for peakList in spectrum.peakLists:
-          peakListItem = QtGui.QTreeWidgetItem(newItem)
-          peakListItem.setText(0, peakList.pid)
+    pid2Obj = project._pid2Obj
+    for className in classesInSideBar:
+      dd = pid2Obj.get(className)
+      if dd:
+        for obj in dd.values():
+          self._createItem(obj)
 
-    for spectrumGroup in project.spectrumGroups:
-      newItem = self.addItem(self.spectrumGroupItem, spectrumGroup.pid)
-
-    for chain in project.chains:
-      newItem = self.addItem(self.chainItem, chain.pid)
-    for nmrChain in project.nmrChains:
-      newItem = self.addItem(self.nmrChainItem, nmrChain.pid)
-      for nmrResidue in nmrChain.nmrResidues:
-        newItem3 = self.addItem(newItem, nmrResidue.pid)
-        for nmrAtom in nmrResidue.nmrAtoms:
-          newItem5 = self.addItem(newItem3, nmrAtom.pid)
-    for chemicalShiftList in project.chemicalShiftLists:
-      newItem = self.addItem(self.chemicalShiftListsItem, chemicalShiftList.pid)
-
-    for restraintSet in project.restraintSets:
-      newItem = self.addItem(self.restraintSetsItem, restraintSet.pid)
-      newItem2 = QtGui.QTreeWidgetItem(newItem)
-      newItem2.setText(0, '<New>')
-      for restraintList in restraintSet.restraintLists:
-        newItem4 = self.addItem(newItem, restraintList.pid)
-        newItem3 = QtGui.QTreeWidgetItem(newItem4)
-        newItem3.setText(0, '<New>')
-        for restraint in restraintList.restraints:
-          newItem5 = self.addItem(newItem4, restraint.pid)
-
-    for structureEnsemble in project.structureEnsembles:
-      newItem = self.addItem(self.structuresItem, structureEnsemble.pid)
-      for model in structureEnsemble.models:
-        newItem3 = self.addItem(newItem, model.pid)
-
-    for note in project.notes:
-      newItem = self.addItem(self.notesItem, note.pid)
-
-
-
-  def clearSideBar(self):
-    """
-    Clears all data from the sidebar.
-    """
-    self.projectItem.setText(0, "Project")
-    self.spectrumItem.setText(0, "Spectra")
-    self.spectrumItem.setText(0, "Reference")
-    self.spectrumItem.takeChildren()
+  # Not used. NBNB would need complete rewrite if used.
+  # RHF 16/2/2016
+  # def clearSideBar(self):
+  #   """
+  #   Clears all data from the sidebar.
+  #   """
+  #   self.projectItem.setText(0, "Project")
+  #   self.spectrumItem.setText(0, "Spectra")
+  #   self.spectrumItem.setText(0, "Reference")
+  #   self.spectrumItem.takeChildren()
 
   def dragEnterEvent(self, event, enter=True):
     if event.mimeData().hasUrls():
@@ -309,23 +297,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     Required function to enable dragging and dropping within the sidebar.
     """
     event.accept()
-
-  # RHF 9/2/2016: Function no longer used
-  # def addSpectrum(self, spectrum:(Spectrum,Pid)):
-  #   """
-  #   Adds the specified spectrum to the sidebar.
-  #   """
-  #   peakList = spectrum.newPeakList()
-  #   newItem = self.addItem(self.spectrumItem, spectrum)
-  #   peakListItem = QtGui.QTreeWidgetItem(newItem)
-  #   peakListItem.setText(0, peakList.pid)
-
-  # RHF 9/2/2016: Function no longer used
-  # def processNotes(self, pids:Sequence[str], event):
-  #   """Display notes defined by list of Pid strings"""
-  #   for ss in pids:
-  #     note = self.project.getByPid(ss)
-  #     self.addItem(self.notesItem, note)
 
   def raisePopup(self, obj, item):
     if obj.shortClassName == 'SP':
@@ -366,7 +337,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       pass #to be decided when we design structure
     elif obj.shortClassName == 'MD':
       pass #to be decided when we design structure
-    elif obj.shortClassName == 'RS':
+    elif obj.shortClassName == 'DS':
       pass #to be decided when we design structure
     elif obj.shortClassName == 'RL':
       pass #to be decided when we design structure
@@ -376,30 +347,22 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, self.project, name='Notes Editor', note=obj)
 
   def createNewObject(self, item):
+    """Create new object starting form the <New> item
+    """
+
+    # NBNB TBD FIXME
+    # This function (and the NEW_ITEM_DICT) it uses gets the create_new
+    # function from the shortClassName of the PARENT!!!
+    # The assumes that each parent can have only ONE kind of new child.
+    # This is true as of 16/2/2016, but may NOT remain true
+    # (e.g. Spectrum has multiple children).
+
 
     itemParent = self.project.getByPid(item.parent().text(0))
-    if itemParent is not None:
-      if itemParent.shortClassName == 'RS':
-        popup = RestraintTypePopup()
-        popup.exec_()
-        popup.raise_()
-        restraintType = popup.restraintType
-        funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
-        # Naughty - this is a wrapper object, not an item
-        # newItem = getattr(itemParent, funcName)(restraintType)
-        getattr(itemParent, funcName)(restraintType)
-        # No longer necessary
-        # self.addItem(item.parent(), newItem)
-      elif item.parent.shortClassName == 'SA':
-        newComponent = itemParent.newSampleComponent()
-        popup = EditSampleComponentPopup(sampleComponent=newComponent)
-        popup.exec_()
-        popup.raise_()
-        return
-      else:
-        funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
 
-    else:
+    funcName = None
+    if itemParent is None:
+      # Top level object - parent is project
       if item.parent().text(0) == 'Chains':
         popup = CreateSequence(project=self.project)
         popup.exec_()
@@ -409,8 +372,24 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         itemParent = self.project
         funcName = NEW_ITEM_DICT.get(item.parent().text(0))
 
-    # Naughty - this is a wrapper object, not an item
-    # newItem = getattr(itemParent, funcName)()
-    getattr(itemParent, funcName)()
-    # No longer necessary
-    # self.addItem(item.parent(), newItem)
+    else:
+      # Lower level object - get parent from parentItem
+      if itemParent.shortClassName == 'DS':
+        popup = RestraintTypePopup()
+        popup.exec_()
+        popup.raise_()
+        restraintType = popup.restraintType
+        ff = NEW_ITEM_DICT.get(itemParent.shortClassName)
+        getattr(itemParent, ff)(restraintType)
+        return
+      elif item.parent.shortClassName == 'SA':
+        newComponent = itemParent.newSampleComponent()
+        popup = EditSampleComponentPopup(sampleComponent=newComponent)
+        popup.exec_()
+        popup.raise_()
+        return
+      else:
+        funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
+
+    if funcName is not None:
+      getattr(itemParent, funcName)()

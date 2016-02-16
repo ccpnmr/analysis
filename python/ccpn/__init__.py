@@ -35,7 +35,7 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
   |       |       |       NmrAtom
   |       ChemicalShiftList
   |       |       ChemicalShift
-  |       RestraintSet
+  |       DataSet
   |       |       RestraintList
   |       |       |       Restraint
   |       |       |       |       RestraintContribution
@@ -213,7 +213,7 @@ ChemicalShiftList = cls = importlib.import_module(
 _wrappedClasses.append(cls)
 ChemicalShift = cls = importlib.import_module('ccpn._wrapper._ChemicalShift').ChemicalShift
 _wrappedClasses.append(cls)
-RestraintSet = cls = importlib.import_module('ccpn._wrapper._RestraintSet').RestraintSet
+DataSet = cls = importlib.import_module('ccpn._wrapper._DataSet').DataSet
 _wrappedClasses.append(cls)
 RestraintList = cls = importlib.import_module('ccpn._wrapper._RestraintList').RestraintList
 _wrappedClasses.append(cls)

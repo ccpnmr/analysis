@@ -30,7 +30,7 @@ from ccpncore.util import Pid
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpn import AbstractWrapperObject
 from ccpn import Project
-from ccpn import RestraintSet
+from ccpn import DataSet
 
 
 class RestraintList(AbstractWrapperObject):
@@ -63,9 +63,9 @@ class RestraintList(AbstractWrapperObject):
 
   def __init__(self, project, wrappedData):
 
-    # NB The name will only be unique within the restraintSet, which could cause
+    # NB The name will only be unique within the DataSet, which could cause
     # problems if anyone was silly enough to write out restraintLists from
-    # different RestraintSets to the same NEF file.
+    # different DataSets to the same NEF file.
 
     self._wrappedData = wrappedData
     self._project = project
@@ -104,11 +104,11 @@ class RestraintList(AbstractWrapperObject):
     return self._wrappedData.serial
     
   @property
-  def _parent(self) -> RestraintSet:
-    """RestraintSet containing ccpn.RestraintList."""
+  def _parent(self) -> DataSet:
+    """DataSet containing ccpn.RestraintList."""
     return  self._project._data2Obj[self._wrappedData.nmrConstraintStore]
   
-  restraintSet = _parent
+  dataSet = _parent
   
   @property
   def name(self) -> str:
@@ -294,19 +294,19 @@ class RestraintList(AbstractWrapperObject):
       self._wrappedData.name = value
 
   @classmethod
-  def _getAllWrappedData(cls, parent: RestraintSet)-> list:
+  def _getAllWrappedData(cls, parent: DataSet)-> list:
     """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
     return sorted(parent._wrappedData.constraintLists, key=operator.attrgetter('name'))
 
 # Connections to parents:
-RestraintSet._childClasses.append(RestraintList)
+DataSet._childClasses.append(RestraintList)
 
-def _newRestraintList(self:RestraintSet, restraintType, name:str=None, origin:str=None,
+def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=None,
                       comment:str=None, unit:str=None, potentialType:str='unknown',
                       tensorMagnitude:float=0.0, tensorRhombicity:float=0.0,
                       tensorIsotropicValue:float=0.0, tensorChainCode:str=None,
                       tensorSequenceCode:str=None, tensorResidueType:str=None) -> RestraintList:
-  """Create new ccpn.RestraintList of type restraintType within ccpn.RestraintSet"""
+  """Create new ccpn.RestraintList of type restraintType within ccpn.DataSet"""
 
   if name and Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
@@ -337,7 +337,7 @@ def _newRestraintList(self:RestraintSet, restraintType, name:str=None, origin:st
   #   obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType)
   return self._project._data2Obj.get(obj)
 
-RestraintSet.newRestraintList = _newRestraintList
+DataSet.newRestraintList = _newRestraintList
 del _newRestraintList
 
 # Notifiers:

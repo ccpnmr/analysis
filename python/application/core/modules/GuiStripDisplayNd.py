@@ -51,11 +51,7 @@ from application.core.modules.spectrumItems import GuiPeakListView
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
-
-
-
   def __init__(self):
-
 
     # below are so we can reuse PeakItems and only create them as needed
     self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
@@ -66,9 +62,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     
     GuiSpectrumDisplay.__init__(self)
 
+    self.isGrouped = False
     
     self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button)
-
 
     self.fillToolBar()
     self.setAcceptDrops(True)

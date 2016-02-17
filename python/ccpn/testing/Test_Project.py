@@ -107,7 +107,8 @@ class ProjectTestRename(WrapperTesting):
     self.assertEqual(apiNmrProject.name, newName)
     self.assertEqual(self.project.name, newName)
     newLocation = apiNmrProject.root.findFirstRepository(name='userData').url.getDataLocation()
-    self.assertEqual(newName, newLocation[-len(newName):])
+    nn = len(ioUtil.CCPN_DIRECTORY_SUFFIX)
+    self.assertEqual(newName, newLocation[-len(newName)-nn:-nn])
 
 class ProjectTestExperimentTypeMap(WrapperTesting):
 

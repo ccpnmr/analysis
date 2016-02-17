@@ -41,6 +41,7 @@ class IoTest(CoreTesting):
     
     newPath = os.environ.get('HOME') or os.getcwd()
     newPath = os.path.join(newPath, 'tmpCcpnTestProject')
+    newPath = ioUtil.ccpnProjectPath(newPath)
     if os.path.exists(newPath):
       shutil.rmtree(newPath)
     ioUtil.saveProject(self.project, newPath)

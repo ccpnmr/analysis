@@ -70,16 +70,16 @@ nef2CcpnTags = {
 
 # NBNB TBD we might want an exportNmrCalc2Nef wrapper as well
 
-def exportRestraintStore(restraintSet, dataName=None, directory=None,
+def exportRestraintStore(dataSet, dataName=None, directory=None,
                          forceFirstShiftList=False):
-  """Export restraintSet and associated data to NEF
+  """Export dataSet and associated data to NEF
 
   Nb forceFirstShiftList is a hack for cases where shiftlists are not properly set"""
 
   # nmrProject
-  project = restraintSet._project
+  project = dataSet._project
 
-  restraintLists = restraintSet.restraintLists
+  restraintLists = dataSet.restraintLists
 
   # PeakLists
   # Now objects are not hashable we need to do all this to remove duplicates
@@ -108,7 +108,7 @@ def exportRestraintStore(restraintSet, dataName=None, directory=None,
       dataName = ll[0]
   else:
     dataName = project.name.translate(Pid.remapSeparators)
-    dataName = '%s-%s' % (dataName, restraintSet.serial)
+    dataName = '%s-%s' % (dataName, dataSet.serial)
 
   entry = _makeStarEntry(project, dataName, project.chains, peakLists,
                         restraintLists, shiftList=shiftList)
@@ -176,12 +176,12 @@ def _makeStarEntry(project, dataName, chains=(), peakLists=(), restraintLists=()
                        % (chain, project))
 
   # restraint list check
-  aSet = set(x.restraintSet.id for x in restraintLists)
+  aSet = set(x.dataSet.id for x in restraintLists)
   if len(aSet) == 1:
-    if restraintLists[0].restraintSet._project is not project:
+    if restraintLists[0].dataSet._project is not project:
       raise ValueError("Restraint lists do not match Project")
   else:
-    raise ValueError("Restraint lists are not from a single RestraintSet")
+    raise ValueError("Restraint lists are not from a single DataSet")
 
   # Make BMRB object tree :
 

@@ -151,6 +151,3 @@ def scaledRgba(value):
 
   return Colour(value).scaledRgba()
 
-def hex(value):
-
-  return Colour(value).hex()

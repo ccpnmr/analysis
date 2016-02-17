@@ -245,6 +245,18 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     for strip in self.strips:
       strip.setCrossHairPosition(axisPositionDict)
 
+  def _setActionIconColour(self, apiDataSource):
+    action = self.spectrumActionDict.get(apiDataSource)
+    if action:
+      pix=QtGui.QPixmap(QtCore.QSize(60, 10))
+      if apiDataSource.numDim < 2:
+        pix.fill(QtGui.QColor(apiDataSource.sliceColour))
+        for strip in self.strips:
+          for spectrumView in strip.spectrumViews:
+            spectrumView.plot.setPen(apiDataSource.sliceColour)
+      else:
+        pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
+      action.setIcon(QtGui.QIcon(pix))
     
 def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
   """Update interface when a strip is created"""

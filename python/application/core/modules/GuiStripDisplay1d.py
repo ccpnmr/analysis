@@ -25,8 +25,10 @@ __author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
 
-
+from ccpn import Project
 from ccpn import Spectrum
+
+from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 
 from ccpncore.util.Pid import Pid
 from ccpncore.util.Types import Sequence
@@ -37,7 +39,6 @@ from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from application.core.modules.GuiStrip1d import GuiStrip1d
 
 from ccpncore.gui.VerticalLabel import VerticalLabel
-from ccpn import Project
 
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
@@ -157,16 +158,15 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
   #   # print(spinSystemSideLabel.paintEvent())
   #   spinSystemSideLabel.setFixedWidth(30)
 
-  def _setActionIconColour(self, apiDataSource):
+  def _updatePlotColour(self, spectrum):
+    apiDataSource = spectrum._wrappedData
     action = self.spectrumActionDict.get(apiDataSource)
     if action:
-      pix=QtGui.QPixmap(QtCore.QSize(60, 10))
-      if apiDataSource.numDim < 2: # irrelevant here, but need if this code moves to GuiSpectrumDisplay
-        pix.fill(QtGui.QColor(apiDataSource.sliceColour))
-      else:
-        pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
-      action.setIcon(QtGui.QIcon(pix))
-
+      for strip in self.strips:
+        for spectrumView in strip.spectrumViews:
+          if spectrumView.spectrum is spectrum:
+            spectrumView.plot.setPen(apiDataSource.sliceColour)
+  
   def _deletedPeak(self, apiPeak):
     pass  # does anything need doing??
     
@@ -234,6 +234,20 @@ def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
 Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
 Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
 Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
+
+def _updatePlotColour(project:Project, apiDataSource:ApiDataSource):
+
+    
+  getDataObj = project._data2Obj.get
+  spectrum = getDataObj(apiDataSource)
+  for task in project.tasks:
+    if task.status == 'active':
+      for spectrumDisplay in task.spectrumDisplays:
+        if isinstance(spectrumDisplay, GuiStripDisplay1d):
+          spectrumDisplay._updatePlotColour(spectrum)
+
+Project._setupNotifier(_updatePlotColour, ApiDataSource, 'setSliceColour')
+
 
 # Unnecessary - dimensionOrdering is frozen. RHF
 # def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):

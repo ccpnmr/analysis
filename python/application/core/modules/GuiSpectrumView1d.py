@@ -62,7 +62,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
         self.spectrum.sliceColour = list(spectrumColours.keys())[(len(self.strip.spectrumViews) % 12)-1]
 
     self.plot = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
-    print(self.plot)
     self.plot.curve.setClickable(True)
     self.plot.sigClicked.connect(self.clicked)
     for peakList in self.spectrum.peakLists:

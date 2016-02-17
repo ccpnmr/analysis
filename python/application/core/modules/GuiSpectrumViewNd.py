@@ -86,6 +86,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     self.traceScale = 1.0e-7 # TBD: need a better way of setting this
         
+    self.okDataFile = True  # used to keep track of warning message that data file does not exist
+    
     # self.spectralData = self.getSlices()
     
     ###xDim, yDim = apiSpectrumView.dimensionOrdering[:2]
@@ -531,9 +533,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ##  return
     dataStore = self._apiDataSource.dataStore
     if dataStore is None or not os.path.exists(dataStore.fullPath):
-      self.project._logger.warning("%s cannot find any data - data file misplaced?" % self )
+      if self.okDataFile:
+        self.project._logger.warning("%s cannot find any data - data file misplaced?" % self )
+        self.okDataFile = False
       return
 
+    self.okDataFile = True
+    
     # NBNB this should NEVER be called if self.strip is None (i.e. self is deleted)
     # if self.isVisible() and self.strip is not None:
     if self.isVisible() and not self.isDeleted:

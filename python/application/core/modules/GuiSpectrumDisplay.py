@@ -251,9 +251,6 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
       pix=QtGui.QPixmap(QtCore.QSize(60, 10))
       if apiDataSource.numDim < 2:
         pix.fill(QtGui.QColor(apiDataSource.sliceColour))
-        for strip in self.strips:
-          for spectrumView in strip.spectrumViews:
-            spectrumView.plot.setPen(apiDataSource.sliceColour)
       else:
         pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
       action.setIcon(QtGui.QIcon(pix))

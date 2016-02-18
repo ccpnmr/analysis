@@ -38,6 +38,7 @@ from functools import total_ordering
 from ccpncore.util import Path
 from ccpncore.lib import Constants as coreLibConstants
 from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpncore.util.Types import Sequence, Optional, List
 
 WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
@@ -413,3 +414,26 @@ def _resetParentLink(apiObject, downLink:str, tag:str, value):
                  redoArgs=(apiObject, downLink, tag, value))
 
   # call notifiers:
+
+
+def extractMatchingNameSequence(name:str, matchNames:Sequence[str]) -> Optional[List[str]]:
+  """Get list of matchNames matching 'name_1', 'name_2', ..., in order."""
+  ll =[]
+  for tag in matchNames:
+    tt = tag.split('_',1)
+    if name == tt[0] and len(tt) > 1 and tt[1].isdigit():
+      ll.append((int(tt[1]), tag))
+  ll.sort()
+
+  if [ll[0] for x in ll] == list(range(1, len(ll)+1)):
+    return [x[1] for x in ll]
+  else:
+    return None
+
+
+def stringToIdentifier(value:str) -> str:
+  """Convert string to identifier, replacing non-alphanumeric values by underscore"""
+  if value.isidentifier():
+    return value
+  else:
+    return ''.join(x if x.isalnum() else '_' for x in value)

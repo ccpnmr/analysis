@@ -114,7 +114,7 @@ class ViewBox(pg.ViewBox):
       event.accept()
     #
     elif event.button() == QtCore.Qt.LeftButton and (event.modifiers() & QtCore.Qt.ShiftModifier) and (
-              event.modifiers() & QtCore.Qt.ShiftModifier):
+              event.modifiers() & QtCore.Qt.ControlModifier):
       mousePosition=self.mapSceneToView(event.pos())
       position = [mousePosition.x(), mousePosition.y()]
       for spectrumView in self.current.strip.spectrumViews:
@@ -202,7 +202,7 @@ class ViewBox(pg.ViewBox):
               ), peakList=peakList
             )
           else:
-            newPeaks = peakList.pickPeaks1d(spectrumView)
+            newPeaks = peakList.pickPeaks1d(spectrumView,  [startPosition.x(), endPosition.x()])
 
           for window in self.current.project.windows:
             for spectrumDisplay in window.spectrumDisplays:

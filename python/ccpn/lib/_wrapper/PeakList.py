@@ -70,31 +70,32 @@ def pickPeaksNd(self:'PeakList', positions:Sequence=None, dataDims:Sequence=None
   return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
   
 # def pickPeaks1d(self:'PeakList', spectrumView, size:int=3, mode:str='wrap'):
-def pickPeaks1d(self:'PeakList', data1d, size:int=3, mode:str='wrap'):
+def pickPeaks1d(self:'PeakList', data1d, dataRange, size:int=3, mode:str='wrap'):
    """
    NBNB refctored. Should not take a SpectrumView in ccpn/lib, should take 1d data array
    """
 
    peaks = []
    spectrum = self.spectrum
-   data1d =  spectrum._apiDataSource.get1dSpectrumData()
-   threshold = spectrum.estimateNoise()*10
-   if (data1d.size == 0) or (data1d.max() < threshold):
+   data1d = spectrum._apiDataSource.get1dSpectrumData()
+   selectedData = data1d[:, (data1d[0] < dataRange[0]) * (data1d[0] > dataRange[1])]
+   threshold = spectrum.estimateNoise()
+   if (selectedData.size == 0) or (selectedData.max() < threshold):
     return peaks
-   boolsVal = data1d[1] > threshold
-   maxFilter = maximum_filter(data1d[1], size=size, mode=mode)
-   boolsMax = data1d[1] == maxFilter
+   boolsVal = selectedData[1] > threshold
+   maxFilter = maximum_filter(selectedData[1], size=size, mode=mode)
+   boolsMax = selectedData[1] == maxFilter
    boolsPeak = boolsVal & boolsMax
    indices = argwhere(boolsPeak) # True positional indices
    for position in indices:
-     peakPosition = [float(data1d[0][position])]
-     height = data1d[1][position]
+     peakPosition = [float(selectedData[0][position])]
+     height = selectedData[1][position]
      self.newPeak(height=float(height), position=peakPosition)
 
 
 
 
-def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap', ignoredRegions=None, noiseThreshold=None ):
+def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap', ignoredRegions=None, noiseThreshold=None):
 
    if not ignoredRegions:
      ignoredRegions = [[-20.1,-19.1]]

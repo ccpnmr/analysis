@@ -64,7 +64,10 @@ def _getPeakAnnotation(peak):
   peakLabel = []
   for dimension in range(peak.peakList.spectrum.dimensionCount):
     if len(peak.dimensionNmrAtoms[dimension]) == 0:
-      peakLabel.append('-')
+      if len(peak.dimensionNmrAtoms) == 1:
+        peakLabel.append('1H')
+      else:
+        peakLabel.append('-')
     else:
       peakNmrResidues = [atom[0].nmrResidue.id for atom in peak.dimensionNmrAtoms if len(atom) != 0]
       if all(x==peakNmrResidues[0] for x in peakNmrResidues):
@@ -208,53 +211,77 @@ class Peak1d(QtGui.QGraphicsItem):
   """ A GraphicsItem that is not actually drawn itself, but is the parent of the peak symbol and peak annotation.
       TODO: Add hover effect for 1D peaks. """
 
-  def __init__(self, scene, parent, peak, peakList):
+  def __init__(self, scene, parent, peak, peakListView):
 
     QtGui.QGraphicsItem.__init__(self, scene=scene)
 
     self.parent = parent
+    self.peakHeight = peak.height
     self.peak = peak
-    self.peakList = peakList
-    self.spectrum = peakList.spectrum
+    self.peakListView = peakListView
     self.dim = 0
-    self.spectrumDisplay = parent
+    self.spectrum = peak.peakList.spectrum
     # self.spectrumView, spectrumMapping = self.spectrumWindow.getViewMapping(analysisSpectrum)
     # self.setZValue(10)
     self.screenPos = []
+
+    self.annotation = Peak1dAnnotation(self, scene)
+    self.setupPeakItem(peakListView, peak)
     self.press = False
     self.setAcceptHoverEvents(True)
     self.annotationScreenPos = []
-    self.bbox  = NULL_RECT
+    self.bbox = NULL_RECT
     self.setCacheMode(self.NoCache)
     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
     self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
     # self.scene().sigMouseClicked.connect(self.peakClicked)
     self.pointPos = peak.pointPosition
     self.ppm = peak.position[self.dim]
-    self.height = self.peak.height
-    if not self.height:
-      height = self.peak._apiPeak.findFirstPeakIntensity(intensityType = 'height')
-      if height:
-        self.height = height.value
-      else:
-        self.height = 0
-    # self.height *= self.spectrum.scale
 
-    # if peakDims[dim].numAliasing:
-    #   self.isAliased = True
-    # else:
-    #   self.isAliased = False
-    if self.ppm and self.height:
-      self.setPos(self.ppm, self.height)
+    # self.height = self.peak.height
+    # if not self.height:
+    #   height = self.peak._apiPeak.findFirstPeakIntensity(intensityType = 'height')
+    #   if height:
+    #     self.height = height.value
+    #   else:
+    #     self.height = 0
+    # # self.height *= self.spectrum.scale
+    #
+    # # if peakDims[dim].numAliasing:
+    # #   self.isAliased = True
+    # # else:
+    # #   self.isAliased = False
+    # if self.ppm and self.height:
+    #   self.setPos(self.ppm, self.height)
 
     # try:
-    self.annotation = Peak1dAnnotation(scene, self, 'H1')
     self.symbol = Peak1dSymbol(scene, self)
     # except AttributeError:
     #   return
 
     # group.addToGroup(self)
   #
+  def setupPeakItem(self, peakListView, peak):
+
+    self.peakListView = peakListView
+    self.peak = peak
+    if not hasattr(peak, 'isSelected'):
+      peak.isSelected = False
+    self.setSelected(peak.isSelected)
+    # This code does not make sense - you need its own spectrumView, not the zero'th
+    # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
+    # dimensionOrdering deprecated
+    dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
+    xPpm = peak.position[dataDims[0].dimensionIndex]
+    # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
+    # xDim = dimensionOrdering[0] - 1
+    # yDim = dimensionOrdering[1] - 1
+    # xPpm = peak.position[xDim]
+    # yPpm = peak.position[yDim]
+    self.setPos(xPpm, peak.height)
+    self.annotation.setupPeakAnnotation(self)
+    peakListView.peakItems[self.peak] = self
+
   def mousePressEvent(self, event):
 
     self.press = True
@@ -288,15 +315,13 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
   """ A text annotation of a peak.
       The text rotation is currently always +-45 degrees (depending on peak height). """
 
-  def __init__(self, scene, parent, text):
+  def __init__(self, peakItem, scene):
 
     QtGui.QGraphicsSimpleTextItem.__init__(self, scene=scene)
 
-    self.setParentItem(parent)
-    self.peakItem = parent # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
-    self.setText(text)
+    self.setParentItem(peakItem)
+    self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.scene = scene
-    # self.analysisLayout = parent.glWidget.analysisLayout
     font = self.font()
     font.setPointSize(10)
     self.setFont(font)
@@ -307,9 +332,11 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.setFlag(self.ItemSendsScenePositionChanges, True)
     # if self.isSelected():
     #   print(self)
-    self.setColor()
-
+    self.colourScheme = peakItem.peakListView._appBase.preferences.general.colourScheme
+    # color.setRgbF(*self.peakItem.glWidget._hexToRgba(textColor))
+    self.setColour()
     self.updatePos()
+    self.setupPeakAnnotation(peakItem)
 
   def sceneEventFilter(self, watched, event):
     print(event)
@@ -328,10 +355,18 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
       self.update()
 
 
+  def setupPeakAnnotation(self, peakItem):
+    self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
+    self.setParentItem(peakItem)
+
+    peak = peakItem.peak
+    text = _getPeakAnnotation(peak)
+    self.setText(text)
+
   def updatePos(self):
 
     peakItem = self.peakItem
-    if peakItem.height >= 0:
+    if peakItem.peakHeight >= 0:
       # Translate first to rotate around bottom left corner
       self.translate(0, -self.boundingRect().height())
       self.setRotation(0)
@@ -341,12 +376,13 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
       self.setPos(0, min(peakItem.pos().y()*0.75, -peakItem.spectrum.positiveContourBase * peakItem.spectrum.scale))
       self.setRotation(45)
 
-  def setColor(self):
-
-    color = QtGui.QColor('white')
-    textColor = color
-    # color.setRgbF(*self.peakItem.glWidget._hexToRgba(textColor))
-    self.setBrush(QtGui.QBrush(color))
+  def setColour(self):
+    if self.colourScheme == 'light':
+      colour = QtGui.QColor('#080000')
+    else:
+      colour = QtGui.QColor('#f7ffff')
+    self.setBrush(colour)
+    textColor = colour
 
   def paint(self, painter, option, widget):
 
@@ -411,14 +447,19 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
     pen = painter.pen()
     pen.setStyle(QtCore.Qt.DashLine)
     pen.setWidth(self.lineWidth)
-    color = QtGui.QColor('white')
+    self.colourScheme = peakItem.peakListView._appBase.preferences.general.colourScheme
+    if self.colourScheme == 'light':
+      colour = QtGui.QColor('#080000')
+    else:
+      colour = QtGui.QColor('#f7ffff')
+    # self.setBrush(colour)
     # lineColor = peakItem.analysisPeakList.symbolColor
     # color.setRgbF(*peakItem.glWidget._hexToRgba(lineColor))
     #
     # if peakItem.peak not in self.analysisLayout.currentPeaks:
     #   color.setAlphaF(0.5)
 
-    pen.setColor(color)
+    pen.setColor(colour)
     painter.setPen(pen)
 
     painter.drawLine(pos, annotationPos)

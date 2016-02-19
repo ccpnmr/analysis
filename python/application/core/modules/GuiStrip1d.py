@@ -115,11 +115,13 @@ class GuiStrip1d(GuiStrip):
     # print(self.plotWidget.scene().items())
     #peakLayer = GuiPeakListView(self.plotWidget.scene(), self.plotWidget, peakList)
     peakItems = []
+    peakListView = self._findPeakListView(peakList)
     self.peakItems[peakList] = []
     for peak in peakList.peaks:
      # peakItem =
-     peakItem = Peak1d(self.plotWidget.scene(), self.plotWidget, peak,  peakList)
+     peakItem = Peak1d(self.plotWidget.scene(), self.plotWidget.plotItem, peak,  peakListView)
      self.peakItems[peakList].append(peakItem)
+     print(peakItem)
     #   peakItem = PeakItem(peak)
     #   self.plotWidget.addItem(peakItem)
      self.plotWidget.addItem(peakItem)
@@ -134,6 +136,18 @@ class GuiStrip1d(GuiStrip):
     """
     for item in self.peakItems[peakList]:
       self.plotWidget.removeItem(item)
+
+  def _findPeakListView(self, peakList:PeakList):
+
+    #peakListView = self.peakListViewDict.get(peakList)
+    #if peakListView:
+    #  return peakListView
+
+    for spectrumView in self.spectrumViews:
+      for peakListView in spectrumView.peakListViews:
+        if peakList is peakListView.peakList:
+          #self.peakListViewDict[peakList] = peakListView
+          return peakListView
       
 def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
   

@@ -67,9 +67,10 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     # self.label = DockLabel('Blank Display', self)
     # self.label.show()
 
-    self.label2 = Label(self, text='Drag Spectrum Here', textColor='#bec4f3')
+    self.label2 = Label(self.widget1, text='Drag Spectrum Here', textColor='#bec4f3')
     self.label2.setAlignment(QtCore.Qt.AlignCenter)
-    self.layout.addWidget(self.label2)
+    self.widget2.hide()
+    # self.widget1.layout().addWidget(self.label2)
     # self.label2.dropEvent = self.dropCallback
     # self.layout.addWidget(self.label)
 

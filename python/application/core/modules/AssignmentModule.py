@@ -22,8 +22,6 @@ from application.core.gui.assignmentModuleLogic import (nmrAtomsForPeaks,
                                                       peaksAreOnLine,
                                                       sameAxisCodes)
 
-from application.core.popups.NmrResiduePopup import NmrResiduePopup
-
 from functools import partial
 
 class AssignmentModule(CcpnDock, Base):
@@ -42,10 +40,11 @@ class AssignmentModule(CcpnDock, Base):
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.selectionLayout = QtGui.QGridLayout()
     self.filterLayout = QtGui.QGridLayout()
+    self.widget1.setLayout(QtGui.QGridLayout())
     self.advancedLayout = QtGui.QGridLayout()
     # self.layout.addLayout(self.advancedLayout, 2, 0)
-    self.layout.addLayout(self.selectionLayout, 1, 0)
-    self.layout.addLayout(self.filterLayout, 0, 0)
+    self.widget1.layout().addLayout(self.selectionLayout, 1, 0)
+    self.widget1.layout().addLayout(self.filterLayout, 0, 0)
     self.selectionLayout.setRowMinimumHeight(0, 0)
     self.selectionLayout.setRowStretch(0, 0)
     self.selectionLayout.setRowStretch(1, 1)
@@ -58,31 +57,29 @@ class AssignmentModule(CcpnDock, Base):
     self.seqCodePulldowns = []
     self.resTypePulldowns = []
     self.atomTypePulldowns = []
-    self.moreButtons = []
-    self.nmrResidueWidgets = []
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
 
 
 
-    self.doubleToleranceCheckbox = CheckBox(self, checked=False)
+    self.doubleToleranceCheckbox = CheckBox(self.widget1, checked=False)
     self.doubleToleranceCheckbox.stateChanged.connect(self.updateInterface)
-    doubleToleranceCheckboxLabel = Label(self, text="Double Tolerances ")
+    doubleToleranceCheckboxLabel = Label(self.widget1, text="Double Tolerances ")
     self.filterLayout.addWidget(self.doubleToleranceCheckbox, 0, 1)
     self.filterLayout.addWidget(doubleToleranceCheckboxLabel, 0, 0)
 
-    self.intraCheckbox = CheckBox(self, checked=False)
+    self.intraCheckbox = CheckBox(self.widget1, checked=False)
     self.intraCheckbox.stateChanged.connect(self.updateInterface)
-    intraCheckboxLabel = Label(self, text="Only Intra-residual ")
+    intraCheckboxLabel = Label(self.widget1, text="Only Intra-residual ")
     self.filterLayout.addWidget(self.intraCheckbox, 0, 3)
     self.filterLayout.addWidget(intraCheckboxLabel, 0, 2)
 
-    self.multiCheckbox = CheckBox(self, checked=True)
+    self.multiCheckbox = CheckBox(self.widget1, checked=True)
     self.multiCheckbox.stateChanged.connect(self.updateInterface)
-    multiCheckboxLabel = Label(self, text="Allow multiple peaks ")
+    multiCheckboxLabel = Label(self.widget1, text="Allow multiple peaks ")
     self.filterLayout.addWidget(self.multiCheckbox, 0, 5)
     self.filterLayout.addWidget(multiCheckboxLabel, 0, 4)
-    self.expCheckBox = CheckBox(self, checked=True)
-    expCheckBoxLabel = Label(self, "Filter By Experiment")
+    self.expCheckBox = CheckBox(self.widget1, checked=True)
+    expCheckBoxLabel = Label(self.widget1, "Filter By Experiment")
     self.filterLayout.addWidget(expCheckBoxLabel, 0, 6)
     self.filterLayout.addWidget(self.expCheckBox, 0, 7)
     self.filterLayout.addItem(QtGui.QSpacerItem(0, 20), 4, 0)
@@ -100,7 +97,7 @@ class AssignmentModule(CcpnDock, Base):
 
     '''
 
-    columns = [Column('NMR Atom', lambda nmrAtom: str(nmrAtom.pid)),
+    columns = [Column('NMR Atom', lambda nmrAtom: str(nmrAtom.id)),
                Column('Shift', lambda nmrAtom: self.getShift(nmrAtom)),
                Column('Delta', lambda nmrAtom: self.getDeltaShift(nmrAtom, dim))]
 
@@ -160,22 +157,6 @@ class AssignmentModule(CcpnDock, Base):
     newLayout.addWidget(applyButton, 1, 3)
     newAssignmentWidget.setLayout(newLayout)
     self.assignmentWidgets.append(newAssignmentWidget)
-
-  def createMoreButton(self, dim:int):
-    """
-    Creates a Button called more for toggling display of the NmrResidue.
-    """
-    moreButton = Button(self, 'More...', callback=partial(self.toggleNmrResidueWidget, dim))
-    moreButton.setFixedWidth(50)
-    self.moreButtons.append(moreButton)
-
-  def createNmrResidueWidget(self):
-    """
-    Create the NmrResidue
-    """
-    nmrWidget = NmrResiduePopup(parent=self, project=self.project)
-    self.nmrResidueWidgets.append(nmrWidget)
-
 
 
   def setAssignment(self, dim:int):
@@ -259,13 +240,6 @@ class AssignmentModule(CcpnDock, Base):
     for dim in range(len(self.assignmentWidgets), Ndimensions):
       self.createAssignmentWidget(dim)
 
-    for dim in range(len(self.moreButtons), Ndimensions):
-      self.createMoreButton(dim)
-
-    for dim in range(len(self.nmrResidueWidgets), Ndimensions):
-      self.createNmrResidueWidget()
-
-
     self.widgetItems = list(zip(self.labels[:Ndimensions], self.listWidgets[:Ndimensions],
                     self.assignmentWidgets[:Ndimensions], self.objectTables[:Ndimensions]))
 
@@ -286,27 +260,14 @@ class AssignmentModule(CcpnDock, Base):
           pair[item].setStyleSheet("border: 0px solid; color: #f7ffff;")
         elif self.colourScheme == 'light':
           pair[item].setStyleSheet("border: 0px solid; color: #555d85;")
-      layout.addWidget(self.moreButtons[self.widgetItems.index(pair)], QtCore.Qt.AlignTop)
-      # self.moreButtons[self.widgetItems.index(pair)]
       pair[2].setStyleSheet("PulldownList {border: 0px solid;}")
       pair[2].setStyleSheet("border: 0px solid")
       pair[3].setStyleSheet("color: black; border: 0px solid;")
       widget.setLayout(layout)
       self.widgets.append(widget)
       self.selectionLayout.addWidget(widget, 0, self.widgetItems.index(pair))
-      layout.addWidget(self.nmrResidueWidgets[self.widgetItems.index(pair)])
-      # self.nmrResidueWidgets[self.widgetItems.index(pair)].setStyleSheet("border: 1px solid #bec4f3")
-      self.nmrResidueWidgets[self.widgetItems.index(pair)].hide()
+
     self.updateLayout(self.selectionLayout, Ndimensions)
-
-
-
-  def toggleNmrResidueWidget(self, dim:int):
-    if self.nmrResidueWidgets[dim].isVisible():
-      self.nmrResidueWidgets[dim].hide()
-    else:
-      self.nmrResidueWidgets[dim].show()
-
 
   # Update functions
 
@@ -432,7 +393,6 @@ class AssignmentModule(CcpnDock, Base):
     atomNames = [atomName for atomName in ATOM_NAMES if atomName[0] == atomPrefix] + [nmrAtom.name]
     self.atomTypePulldowns[dim].setData(atomNames)
     self.atomTypePulldowns[dim].setIndex(self.atomTypePulldowns[dim].texts.index(nmrAtom.name))
-    self.nmrResidueWidgets[dim].updatePopup(nmrAtom.nmrResidue, nmrAtom)
 
 
   def setResidueType(self, dim:int, index:int):
@@ -525,15 +485,15 @@ class AssignmentModule(CcpnDock, Base):
     if len(self.current.peaks) == 1:
       return True
     if not self.multiCheckbox.isChecked():
-      print('Multiple peaks selected, not allowed.')
+      self.project._logger.warning("Multiple peaks selected, not allowed.")
       return False
     dimensionalities = set([len(peak.position) for peak in self.current.peaks])
     if len(dimensionalities) > 1:
-      print('Not all peaks have the same number of dimensions.')
+      self.project._logger.warning('Not all peaks have the same number of dimensions.')
       return False
     for dim in range(len(self.current.peak.position)):
       if not sameAxisCodes(self.current.peaks, dim):
-        print('''The combination of axiscodes is different for multiple
+        self.project._logger.warning('''The combination of axiscodes is different for multiple
                  selected peaks.''')
         return False
     return True
@@ -594,6 +554,7 @@ class New(object):
 
   def __init__(self):
     self.pid = 'New NMR Atom'
+    self.id = 'New NMR Atom'
 
 
 class NotOnLine(object):
@@ -607,6 +568,7 @@ class NotOnLine(object):
 
   def __init__(self):
     self.pid = 'Multiple selected peaks not on line.'
+    self.id = 'Multiple selected peaks not on line.'
 
 NEW = New()
 NOL = NotOnLine()

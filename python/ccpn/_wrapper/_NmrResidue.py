@@ -276,7 +276,7 @@ class NmrResidue(AbstractWrapperObject):
 
     elif apiResonanceGroup.assignedResidue is not None:
       # Assigned residue with successor residue - error
-      raise ValueError("Assigned NmrtResidue cannot be disconnected")
+      raise ValueError("Assigned NmrResidue cannot be disconnected")
 
     else:
       # NextResidue is always None. OK.

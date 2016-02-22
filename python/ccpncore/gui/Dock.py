@@ -5,6 +5,7 @@ from PyQt4 import QtCore, QtGui
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 
 from ccpncore.gui.Font import Font
+from ccpncore.gui.Button import Button
 
 class CcpnDock(Dock):
   def __init__(self, name, **kw):
@@ -15,6 +16,12 @@ class CcpnDock(Dock):
     self.label.closeButton.clicked.connect(self.closeDock)
     self.label.fixedWidth = True
     self.autoOrientation = False
+    self.widget1 = QtGui.QWidget(self)
+    self.widget2 = QtGui.QWidget(self)
+    self.addWidget(self.widget1, 0, 0)
+    self.addWidget(self.widget2, 1, 0)
+
+
 
   def resizeEvent(self, event):
     self.setOrientation('vertical', force=True)

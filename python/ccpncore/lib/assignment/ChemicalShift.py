@@ -24,6 +24,7 @@ __version__ = "$Revision$"
 
 import os
 from math import exp
+from collections import OrderedDict
 
 # TBD DNA/RNA residue probs
 #
@@ -40,7 +41,7 @@ CHEM_ATOM_REF_DICT = {}
 # Moved here from deleted ChemicalShiftRef :
 
 REFDB_SD_MEAN =  {
-  ('protein', 'Ala') : {
+  ('protein',  'Ala') : {
        "C":(177.828848,2.109680,0.452147,None),
        "CA":(53.352984,1.902676,0.210713,"HA"),
        "CB":(19.222672,1.746981,0.258369,"HB*"),
@@ -379,7 +380,7 @@ Below values from ftp://ftp.cbs.cnrs.fr/pub/RESCUE2
 
 For reference see:
 
-J Biomol NMR. 2004 Sep;30(1):47-60
+J Biomol NMR. 2004 Sep;30(1:47-60
 From NMR chemical shifts to amino acid types: investigation of the predictive power
 carried by nuclei.
 Marin A, Malliavin TE, Nicolas P, Delsuc MA.
@@ -659,8 +660,70 @@ RESCUE2_STATS_MISSING = [('Ala','H',0.033675),
                          ('Val','CG1',0.477960),
                          ('Val','CG2',0.509808),
                          ('Val','N',0.144242)]
+
+
+PROTEIN_ATOM_NAMES = {
+  'ALA': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB%'],
+  'ARG': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'HGx', 'HGy',
+          'HG2', 'HG3', 'CD', 'HDx', 'HDy', 'HD2', 'HD3', 'NE', 'HE', 'CZ', 'NHx', 'NHy',
+          'NH1', 'NH2', 'HH1x', 'HH1y', 'HH11', 'HH12', 'HH2x', 'HH2y', 'HH21', 'HH22'],
+  'ASN': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'ND2',
+          'HD2x', 'HD2y', 'HD21', 'HD22'],
+  'ASP': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG'],
+  'CYS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HG'],
+  'GLN': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'HGx', 'HGy',
+          'HG2', 'HG3', 'CD', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22'],
+  'GLU': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'HGx', 'HGy',
+          'HG2', 'HG3', 'CD'],
+  'GLY': ['H', 'N', 'C', 'CA', 'HAx', 'HAy', 'HA2', 'HA3'],
+  'HIS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'ND1', 'HD1',
+          'CD2', 'HD2', 'CE1', 'HE1', 'NE2', 'HE2'],
+  'ILE': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CG1', 'HG1x', 'HG1y',
+          'HG12', 'HG13', 'CG2', 'HG2%', 'CD1', 'HD1%'],
+  'LEU': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'HG', 'CDx',
+          'CDy', 'CD1', 'CD2', 'HDx%', 'HDy%', 'HD1%', 'HD2%'],
+  'LYS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'HGx', 'HGy',
+          'HG2', 'HG3', 'CD', 'HDx', 'HDy', 'HD2', 'HD3', 'CE', 'HEx', 'HEy', 'HE2', 'HE3',
+          'NZ', 'HZ%'],
+  'MET': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'HGx', 'HGy',
+          'HG2', 'HG3', 'CE', 'HE%'],
+  'PHE': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'CDx', 'CDy',
+          'CD1', 'CD2', 'HDx', 'HDy', 'HD1', 'HD2', 'CEx', 'CEy', 'CE1', 'CE2', 'HEx', 'HEy',
+          'HE1', 'HE2', 'CZ', 'HZ'],
+  'PRO': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'HGx', 'HGy',
+          'HG2', 'HG3', 'CD', 'HDx', 'HDy', 'HD2', 'HD3'],
+  'SER': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HG'],
+  'THR': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CG2', 'HG1', 'HG2%'],
+  'TRP': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'CD1', 'CD2', 'HD1',
+          'NE1', 'HE1', 'CE2', 'CE3', 'HE3', 'CZ2', 'CZ3', 'HZ2', 'HZ3', 'CH2', 'HH2'],
+  'TYR': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'CG', 'CDx', 'CDy', 'CD1',
+          'CD2', 'HDx', 'HDy', 'HD2', 'HD3', 'CEx', 'CEy', 'CE1', 'CE2', 'HEx', 'HEy', 'HE2', 'HE3',
+          'CZ', 'HH'],
+  'VAL': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CGx', 'CGy', 'CG1', 'CG2',
+          'HGx%', 'HGy%', 'HG1%', 'HG2%']
+}
+
+
+ALL_ATOMS_SORTED = {'alphas': ['CA', 'HA', 'HAx', 'HAy', 'HA2', 'HA3'],
+                    'betas':  ['CB', 'HB', 'HBx', 'HBy', 'HB%', 'HB2', 'HB3'],
+                    'gammas': ['CG', 'CGx', 'CGy', 'CG1', 'CG2', 'HG', 'HGx', 'HGy', 'HG2', 'HG3',
+                               'HGx%', 'HGy%'],
+                    'moreGammas': ['HG1', 'HG1x', 'HG1y', 'HG12', 'HG13', 'HG1%', 'HG2%'],
+                    'deltas': ['CD', 'CDx', 'CDy', 'CD1', 'CD2', 'HDx', 'HDy', 'HD1', 'HD2', 'HD3',
+                               'HDx%', 'HDy%'],
+                    'moreDeltas': ['ND1', 'ND2', 'HD1%', 'HD2%', 'HD2x', 'HD2y', 'HD21', 'HD22'],
+                    'epsilons': ['CE', 'CEx', 'CEy', 'CE1', 'CE2', 'HE', 'HEx', 'HEy', 'HE1', 'HE2',
+                                 'HE2x', 'HE2y'],
+                    'moreEpsilons': ['CE3', 'NE', 'NE1', 'NE2', 'HE1', 'HE2', 'HE3', 'HE21', 'HE22',
+                                     'HE%'],
+                    'zetas': ['CZ', 'CZ2', 'CZ3', 'HZ', 'HZ2', 'HZ3', 'HZ%', 'NZ'],
+                    'etas': ['CH2', 'HH2', 'HH1x', 'HH1y', 'HH2x', 'HH2y', 'NH1', 'NH2',
+                             'NHx', 'NHy', 'HH21', 'HH22'],
+                    'moreEtas': ['HH', 'HH11', 'HH12']
+                    }
+
 #
-# def buildAvailAtomsDict(project, elements=set(['C','H','N','P'])):
+# def buildAvailAtomsDict(project, elements=set(['C','H','N','P']):
 #
 #   availAtomsDict = {}
 #
@@ -684,7 +747,7 @@ RESCUE2_STATS_MISSING = [('Ala','H',0.033675),
 #
 #   return availAtomsDict
 #
-# def chemShiftRefMacro(argServer):
+# def chemShiftRefMacro(argServer:
 #
 #   shiftRefDict = buildSdMeanRefDict(argServer.getProject())
 #
@@ -712,7 +775,7 @@ RESCUE2_STATS_MISSING = [('Ala','H',0.033675),
 #     print '   },'
 #
 #
-# def buildSdMeanRefDict(project, sourceName='RefDB'):
+# def buildSdMeanRefDict(project, sourceName='RefDB':
 #
 #   # TBD: deal with aromatic HD*,HE*,CD*,CE* properly
 #
@@ -779,7 +842,7 @@ RESCUE2_STATS_MISSING = [('Ala','H',0.033675),
 # 	       pMissing, boundName)
 #       atomDict[atomName] = value
 #
-#     if ccpCode in ('Phe','Ptr','Tyr'):
+#     if ccpCode in ('Phe','Ptr','Tyr':
 #       atomDict['CD*'] = atomDict['CD1'][:3] + ['HD*']
 #       atomDict['CE*'] = atomDict['CE1'][:3] + ['HE*']
 #       atomDict['HD*'] = atomDict['HD1'][:3] + ['CD*']
@@ -892,7 +955,7 @@ def _getResidueProbability(ppms, ccpCode, elements, shiftNames=None, ppmsBound=N
       found.add(j)  
       prob *= p
     
-    #for k, datum in enumerate(atomData):
+    #for k, datum in enumerate(atomData:
     #  atomName, stats = datum
     #  pMissing = stats[2]
     #  
@@ -923,7 +986,7 @@ def getSpinSystemChainProbabilities(spinSystem, chain, shiftList):
   return probDict
 
 # #
-# def getShiftsChainProbabilities(shifts, chain):
+# def getShiftsChainProbabilities(shifts, chain:
 #
 #   probDict = {}
 #   getProb = getShiftsResidueProbability
@@ -961,7 +1024,7 @@ def getSpinSystemChainProbabilities(spinSystem, chain, shiftList):
 #
 #   return probDict
 # #
-# # def getSpinSystemChainProbabilities(spinSystem, chain, shiftList):
+# # def getSpinSystemChainProbabilities(spinSystem, chain, shiftList:
 # #
 # #   probDict = {}
 # #   getProb = getSpinSystemResidueProbability
@@ -1027,7 +1090,7 @@ def getCcpCodes(chain):
   return ccpCodes
 
 #
-# def getShiftsResidueProbability(shifts, ccpCode, prior=0.05, molType=PROTEIN_MOLTYPE):
+# def getShiftsResidueProbability(shifts, ccpCode, prior=0.05, molType=PROTEIN_MOLTYPE:
 #
 #   ppms = []
 #   boundPpms = []
@@ -1082,23 +1145,23 @@ def getCcpCodes(chain):
 #   	    if name == 'CO':
 #   	      name == 'C'
 #
-#   	    elif name in ('H','N',): # Not specific sites
+#   	    elif name in ('H','N',: # Not specific sites
 #   	      continue
 #
-#   	    elif (name == 'HA') and (ccpCode == 'Gly'):
+#   	    elif (name == 'HA') and (ccpCode == 'Gly':
 #   	      name = 'HA2'
 #
-#   	    elif (name == 'HB') and (ccpCode not in betaBranch):
+#   	    elif (name == 'HB') and (ccpCode not in betaBranch:
 #   	      name = 'HB2'
 #
-#   	    elif name in ('C','Cali'):
+#   	    elif name in ('C','Cali':
 #   	      for expTransfer in atomSite.expTransfers:
-#   	        if expTransfer.transferType in ('onebond','CP'):
+#   	        if expTransfer.transferType in ('onebond','CP':
 #   	          atomSites2 = list(expTransfer.atomSites)
 #   	          atomSites2.remove(atomSite)
 #   	          name2 = atomSites2[0].name
 #
-#   	          if (name2 == 'CA') and (ccpCode != 'Gly'):
+#   	          if (name2 == 'CA') and (ccpCode != 'Gly':
 #   	            name = 'CB'
 #   	            break
 #   	          elif name2 == 'CO':

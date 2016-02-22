@@ -37,7 +37,7 @@ class NmrResidueTable(QtGui.QWidget, Base):
                                              selector=self.nmrChainPulldown, tipTexts=tipTexts, objectType='nmrResidues',
                                              selectionCallback=self.setNmrResidue)
 
-    self.layout().addWidget(self.nmrResidueTable, 3, 0, 1, 4)
+    self.layout().addWidget(self.nmrResidueTable, 1, 0, 1, 6)
 
 
   def getNmrAtoms(self, nmrResidue):

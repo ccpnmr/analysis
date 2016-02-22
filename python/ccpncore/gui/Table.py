@@ -102,14 +102,14 @@ class ObjectTable(QtGui.QTableView, Base):
     else:
       header.setVisible(False)
 
-    header = ObjectHeaderView(QtCore.Qt.Horizontal, self)
-    header.setMovable(True)
-    header.setMinimumSectionSize(30)
-    header.setDefaultSectionSize(30)
-    #header.setSortIndicatorShown(False)
-    #header.setStyleSheet('QHeaderView::down-arrow { image: url(icons/sort-up.png);} QHeaderView::up-arrow { image: url(icons/sort-down.png);}')
-    self.header = header
-    self.setupHeaderStretch()
+    # header = ObjectHeaderView(QtCore.Qt.Horizontal, self)
+    # header.setMovable(True)
+    # header.setMinimumSectionSize(30)
+    # header.setDefaultSectionSize(30)
+    # #header.setSortIndicatorShown(False)
+    # #header.setStyleSheet('QHeaderView::down-arrow { image: url(icons/sort-up.png);} QHeaderView::up-arrow { image: url(icons/sort-down.png);}')
+    # self.header = header
+    # self.setupHeaderStretch()
 
   def sizeHint(self):
 
@@ -846,7 +846,7 @@ class ObjectTableExport(BasePopup):
 
     self.table = table
 
-    label = Label(self, 'Columns to export:', grid=(0,0), gridSpan=(1,2))
+    label = Label(self, 'Columns to export:', grid=(0, 0), gridSpan=(1, 2))
 
     labels = ['Row Number',] + [c.heading.replace('\n', ' ') for c in table.columns]
     values = [True] * len(labels)

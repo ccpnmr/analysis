@@ -186,10 +186,14 @@ QTextEdit {
         font-size: 1.5em;
         }
 
+
 Dock > QWidget QScrollArea { background-color: #2a3358;
         }
 
 Dock > QWidget { background-color: #2a3358;
+        }
+
+QWidget { background-color: #2a3358;
         }
 
 Dock QPushButton {
@@ -309,5 +313,4 @@ QTabWidget QWidget { background: #020F31;
 Dock Assigner QWidget { background-color: #000021;
               border: 1px solid #00092d;
     }
-
 

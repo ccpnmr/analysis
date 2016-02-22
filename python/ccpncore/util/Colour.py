@@ -87,7 +87,7 @@ class Colour(str):
   
   def __init__(self, value):
     """ value can be name or #rrggbb or #rrggbbaa or (r, g, b) or (r, g, b, a) tuple/list """
-    
+    # print(value, 'color init')
     if not value:
       raise Exception('not allowed blank colour')
     
@@ -148,6 +148,6 @@ def rgba(value):
   return Colour(value).rgba()
   
 def scaledRgba(value):
-
+  # print(value, 'scaledRgba')
   return Colour(value).scaledRgba()
 

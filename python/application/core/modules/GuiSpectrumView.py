@@ -119,14 +119,14 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
 
   def _getColour(self, colourAttr, defaultColour=None):
-    
+
     colour = getattr(self, colourAttr)
     if not colour:
       colour = getattr(self.spectrum, colourAttr)
       
     if not colour:
       colour = defaultColour
-      
+
     colour = Colour.colourNameToHexDict.get(colour, colour)  # works even if None
       
     return colour

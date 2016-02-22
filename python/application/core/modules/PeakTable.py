@@ -50,7 +50,7 @@ class PeakTable(CcpnDock):
     """
     Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
     """
-    self.project._appBase.current.unRegisterNotify(self.peakList.selectPeakInTable, 'peaks')
+    self.current.unRegisterNotify(self.peakList.selectPeakInTable, 'peaks')
     self.close()
 
 

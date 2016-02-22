@@ -79,14 +79,21 @@ class GuiTableGenerator(QtGui.QWidget):
         self.table.setObjects(columns)
 
 
+  def orderFunc(self, objA, objB):
+    list1 = sorted([objA.id, objB.id], key=self._natural_key)
+    return list1[0] > list1[1]
 
+  def _natural_key(self, string_):
+    import re
+    """See http://www.codinghorror.com/blog/archives/001018.html"""
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
 
   def _getColumns(self, columns, tipTexts):
 
     tableColumns = []
 
     if len(columns) > 0:
-      tableColumns.append(Column(*columns[0], tipText=tipTexts[0]))
+      tableColumns.append(Column(*columns[0], tipText=tipTexts[0], orderFunc=self.orderFunc))
 
     if self.objectList and hasattr(self.objectList, 'shortClassName'):
       if self.objectList.shortClassName == 'PL':
@@ -119,7 +126,7 @@ class GuiTableGenerator(QtGui.QWidget):
 
       if len(columns) > 0:
         for column in columns[1:]:
-          c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
+          c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)], orderFunc=self.orderFunc)
           tableColumns.append(c)
 
       detailsColumn = Column('Details', 'comment', setEditValue=lambda pk, value: self.setPeakDetails(pk, value))

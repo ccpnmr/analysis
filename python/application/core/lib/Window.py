@@ -104,14 +104,22 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
             if shift is not None:
               shiftDict[axis.code].append(shift.value)
 
-
       task = project._appBase.mainWindow.task
 
-      for strip in display.strips:
-        atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
+      atomPositions = shiftDict[display.strips[0].orderedAxes[2].code]
+      display.strips[0].orderedAxes[2].position = atomPositions[0]
+      for atomPosition in atomPositions[1:]:
+        newStrip = display.addStrip()
+        newStrip.orderedAxes[2].position = atomPosition
+      # for strip in display.strips:
 
-        for ii, axis in enumerate(strip.orderedAxes):
-          for atomPosition in atomPositions[ii]:
+        #
+        #
+        #
+      for strip in display.strips:
+        atomPositions2 = [shiftDict[axis.code] for axis in strip.orderedAxes[:2]]
+        for ii, axis in enumerate(strip.orderedAxes[:2]):
+          for atomPosition in atomPositions2[ii]:
             axis.position = atomPosition
             if markPositions:
               task.newMark('white', [atomPosition], [axis.code])
@@ -124,6 +132,7 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
           shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
           if shift is not None:
             shiftDict[axis.code].append(shift.value)
+
 
 
     task = project._appBase.mainWindow.task

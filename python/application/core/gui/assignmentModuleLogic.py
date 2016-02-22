@@ -54,7 +54,6 @@ def filterIntraResidual(nmrAtomsForDimensions:Types.List[NmrAtom]):
         nmrResidues = set([nmrAtom.nmrResidue for nmrAtom in nmrAtoms if nmrAtom.nmrResidue])
         nmrResiduesForDimensions.append(nmrResidues)
         allNmrResidues.update(nmrResidues)
-    #nmrResidues = intersectionOfAll(nmrResidues_for_dimensions)
 
     selectedNmrResidues = set()
     for nmrResidue in allNmrResidues:
@@ -111,14 +110,14 @@ def matchingNmrAtomsForDimensionOfPeaks(peaks:Types.List[Peak], dim:int, nmrAtom
 
     if not sameAxisCodes(peaks, dim):
         return set()
-    commonNmrAtoms = set()
+    fittingSets = []
     for peak in peaks:
         matchingNmrAtoms = matchingNmrAtomsForPeakDimension(peak, dim,
                                                             nmrAtoms,
                                                             doubleTolerance=doubleTolerance)
         # '&=' is set intersection update
-        commonNmrAtoms &= matchingNmrAtoms
-    return commonNmrAtoms
+        common = intersectionOfAll(fittingSets)
+    return matchingNmrAtoms
 
 
 def matchingNmrAtomsForPeakDimension(peak:Peak, dim:int, nmrAtoms:Types.List[NmrAtom],
@@ -133,11 +132,11 @@ def matchingNmrAtomsForPeakDimension(peak:Peak, dim:int, nmrAtoms:Types.List[Nmr
     position = peak.position[dim]
     # isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
     isotopeCode = peak.peakList.spectrum.isotopeCodes[dim]
-    tolerance = getAssignmentToleranceForPeakDimension(peak, dim)
+    tolerance = peak.peakList.spectrum.assignmentTolerances[dim]
     if not position or not isotopeCode or not shiftList:
         return fitting_nmrAtoms
     if not tolerance:
-        tolerance = 0.5
+        tolerance = 0.05
     if doubleTolerance:
         tolerance *= 2
 
@@ -247,13 +246,13 @@ def getAssignmentToleranceForPeakDimension(peak:Peak, dim:int):
 # Just Math
 
 # Replaced by set.intersection(*sets)
-# def intersectionOfAll(sets):
-#
-#     if not sets:
-#         return set()
-#     if len(sets) == 1:
-#         return sets[0]
-#     intersection = sets[0]
-#     for s in sets[1:]:
-#         intersection = intersection.intersection(s)
-#     return intersection
+def intersectionOfAll(sets):
+
+    if not sets:
+        return set()
+    if len(sets) == 1:
+        return sets[0]
+    intersection = sets[0]
+    for s in sets[1:]:
+        intersection = intersection.intersection(s)
+    return intersection

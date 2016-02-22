@@ -50,7 +50,7 @@ POLICY_DICT = {
   'minimum': QtGui.QSizePolicy.Minimum,
   'maximum': QtGui.QSizePolicy.Maximum,
   'preferred': QtGui.QSizePolicy.Preferred,
-  'expanding': QtGui.QSizePolicy.Expanding,
+    'expanding': QtGui.QSizePolicy.Expanding,
   'minimumExpanding': QtGui.QSizePolicy.MinimumExpanding,
   'ignored': QtGui.QSizePolicy.Ignored,
 }

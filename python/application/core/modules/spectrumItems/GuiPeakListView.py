@@ -493,7 +493,9 @@ class PeakNd(QtGui.QGraphicsItem):
     ###QtGui.QGraphicsItem.__init__(self, peakLayer)
     ###scene.addItem(self)
     ###strip.plotWidget.plotItem.vb.addItem(self)
-    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
+    # turn off ItemIsSelectable because it fails miserably when you zoom in (have to pick exactly in the centre)
+    ###self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
+    self.setFlag(self.ItemIgnoresTransformations)
     self.peakListView = peakListView
     self.annotation = PeakNdAnnotation(self, scene)
     self.setupPeakItem(peakListView, peak)
@@ -519,7 +521,7 @@ class PeakNd(QtGui.QGraphicsItem):
     ###xPpm = peak.position[0]
     ###yPpm = peak.position[1]
     # self.setPos(self.parent.viewBox.mapSceneToView
-    sz = 20
+    sz = peakListView.spectrumView.strip.viewBox.peakWidthPixels
     hz = sz/2.0
     # self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
     # self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
@@ -625,7 +627,9 @@ class PeakNd(QtGui.QGraphicsItem):
   def boundingRect(self):
 
     ###return self.bbox # .adjust(-2,-2, 2, 2)
+    
     r, w  = self.drawData
+    
     return QtCore.QRectF(-r,-r,2*r,2*r)
 
   def itemChange(self, change, value):

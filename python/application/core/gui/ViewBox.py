@@ -53,6 +53,7 @@ class ViewBox(pg.ViewBox):
     self.pickBox.hide()
     self.addItem(self.pickBox, ignoreBounds=True)
 
+    self.peakWidthPixels = 20  # for ND peaks
 
   def raiseContextMenu(self, event:QtGui.QMouseEvent):
     """
@@ -88,6 +89,31 @@ class ViewBox(pg.ViewBox):
       yPosition = self.mapSceneToView(event.pos()).y()
       self.current.positions = [xPosition, yPosition]
 
+      xPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(self.peakWidthPixels, 0)).x() - self.mapSceneToView(QtCore.QPoint(0, 0)).x())
+      yPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(0, self.peakWidthPixels)).y() - self.mapSceneToView(QtCore.QPoint(0, 0)).y())
+      xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
+      yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
+      if len(self.current.strip.orderedAxes) > 2:
+          zPositions = self.current.strip.orderedAxes[2].region
+      else:
+        zPositions = None
+      # first deselect (do we want this always??)
+      for spectrumView in self.current.strip.spectrumViews:
+        for peakList in spectrumView.spectrum.peakLists:
+          for peak in peakList.peaks:
+            peak.isSelected = False
+      # now select (take first one within range)
+      for spectrumView in self.current.strip.spectrumViews:
+        if spectrumView.spectrum.dimensionCount == 1:
+          continue
+        for peakList in spectrumView.spectrum.peakLists:
+          for peak in peakList.peaks:
+            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+              and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+              if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
+                peak.isSelected = True
+                break
+    """ 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
 
       event.accept()
@@ -105,6 +131,7 @@ class ViewBox(pg.ViewBox):
               if zPositions is not None:
                 if zPositions[0] < float(peak.position[2]) < zPositions[1]:
                   peak.isSelected = True
+"""
 
     if event.button() == QtCore.Qt.RightButton and not event.modifiers() and axis is None:
       event.accept()

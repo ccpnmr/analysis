@@ -85,7 +85,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.negDisplayLists = []
 
     self.traceScale = 1.0e-7 # TBD: need a better way of setting this
-        
+            
     self.okDataFile = True  # used to keep track of warning message that data file does not exist
     
     # self.spectralData = self.getSlices()
@@ -546,7 +546,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.drawContours(painter)
     
   def boundingRect(self):  # seems necessary to have
-
+      
     return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TBD: remove hardwiring
   
   ##### functions not to be used externally #####

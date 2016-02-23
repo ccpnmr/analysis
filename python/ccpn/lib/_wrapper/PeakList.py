@@ -22,7 +22,9 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
+from ccpncore.lib.spectrum.Spectrum import doAxisCodesMatch
 
+from ccpncore.util.CopyData import copySubTree
 from ccpncore.util.Types import Sequence
 import numpy
 from numpy import argwhere
@@ -175,3 +177,17 @@ def subtractPeakLists(self:'PeakList', peakList2:'PeakList'):
     if not _havePeakNearPosition(values1, tolerances, peaks2):
       peakList3.newPeak(height=peak1.height, volume=peak1.volume, figureOfMerit=peak1.figureOfMerit,
                        annotation=peak1.annotation, position=peak1.position, pointPosition=peak1.pointPosition)
+
+
+def copyPeaks(self:'PeakList', sinkSpectrum:'Spectrum', fitPositions:bool=False):
+  refAxisCodes = self.spectrum.axisCodes
+  sinkAxisCodes = sinkSpectrum.axisCodes
+
+  if not doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
+    print('axis codes of the source and sink peaklists do not match')
+    return
+
+  if not fitPositions:
+    copySubTree(self, sinkSpectrum)
+
+  # else:

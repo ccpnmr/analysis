@@ -212,6 +212,8 @@ def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpec
   action = _createdSpectrumView(project, apiSpectrumView) # _createdStripSpectrumView is called before _createdSpectrumView so need this duplicate call here
   spectrumView = getDataObj(apiStripSpectrumView)
   action.toggled.connect(spectrumView.plot.setVisible)
+  action.toggled.connect(spectrumView.setVisible)
+
 
   ##strip = spectrumView.strip
   ##for apiPeakList in apiDataSource.sortedPeakLists():

@@ -78,6 +78,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
     self.resize(self.sizeHint())
 
+
     self.spectrumUtilToolBar = ToolBar(self.dock)#, grid=(0, 2), gridSpan=(1, 2))
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
@@ -107,6 +108,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.phasingFrame = PhasingFrame(self.dock, includeDirection=includeDirection, callback=self.updatePhasing, returnCallback=self.updatePivot,
                                      directionCallback=self.changedPhasingDirection, grid=(2, 0), gridSpan=(1, 3))
     self.phasingFrame.setVisible(False)
+
 
   def printToFile(self, path, width=800, height=800):
 

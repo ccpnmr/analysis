@@ -952,6 +952,15 @@ def _refreshPeakAnnotation(peak:Peak):
       if peakItem:
         peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
+def _refreshPeakPosition(peak:Peak):
+  data2Obj = peak._project._data2Obj
+  for apiPeakListView in peak._wrappedData.peakList.peakListViews:
+    for apiStripPeakListView in apiPeakListView.stripPeakListViews:
+      guiPeakListView = data2Obj[apiStripPeakListView]
+      peakItem = guiPeakListView.peakItems.get(peak)
+      if peakItem:
+        peakItem.setPos(*peak.position)
+
 
       # NBNB TBD add body here
 

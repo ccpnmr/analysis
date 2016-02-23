@@ -279,7 +279,13 @@ class GuiWindow(DropBase):
     """
     for mark in self.task.marks[:]:
       mark.delete()
-      
+    for spectrumDisplay in self.spectrumDisplays:
+      for strip in spectrumDisplay.strips:
+        for atomLabel in strip.xAxisAtomLabels:
+          strip.plotWidget.removeItem(atomLabel)
+        for atomLabel in strip.yAxisAtomLabels:
+          strip.plotWidget.removeItem(atomLabel)
+
   def toggleGridAll(self):
     """
     Toggles grid display in all windows

@@ -39,6 +39,7 @@ from ccpncore.gui.Menu import Menu
 
 from ccpncore.memops import Notifiers
 
+from ccpncore.util.Colour import Colour
 from ccpncore.util import Ticks
 from ccpncore.util import Types
 
@@ -109,6 +110,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.plotItem.parent = self
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
+    self.xAxisAtomLabels = []
+    self.yAxisAtomLabels = []
 
     #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
     #                  viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
@@ -436,12 +439,20 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
 
   def moveAxisCodeLabels(self):
     """
-    Puts axis code lables in the correct place on the plotwidget
+    Puts axis code labels in the correct place on the PlotWidget
     """
     ###self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
     ###self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
     self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
     self.yAxisTextItem.setPos(self.viewBox.boundingRect().topRight())
+    for item in self.xAxisAtomLabels:
+      y = self.plotWidget.plotItem.vb.mapSceneToView(self.viewBox.boundingRect().bottomLeft()).y()
+      x = item.pos().x()
+      item.setPos(x, y)
+    for item in self.yAxisAtomLabels:
+      x = self.plotWidget.plotItem.vb.mapSceneToView(self.viewBox.boundingRect().bottomLeft()).x()
+      y = item.pos().y()
+      item.setPos(x, y)
     # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
 
   def hideCrossHairs(self):
@@ -769,18 +780,27 @@ def _rulerCreated(project:Project, apiRuler:ApiRuler):
   """]Notifier function for creating rulers"""
   axisCode = apiRuler.axisCode # TBD: use label and unit
   position = apiRuler.position
+  colour = None
+  if apiRuler.mark.colour[0] == '#':
+    colour = Colour(apiRuler.mark.colour)
   task = project._data2Obj[apiRuler.mark.guiTask]
   for strip in task.strips:
     axisOrder = strip.axisOrder
     # TBD: is the below correct (so the correct axes)?
     if axisCode == axisOrder[0]:
-      line = pg.InfiniteLine(angle=90, movable=False, pen=strip.foreground)
+      if colour:
+        line = pg.InfiniteLine(angle=90, movable=False, pen=colour)
+      else:
+        line = pg.InfiniteLine(angle=90, movable=False, pen=strip.foreground)
       line.setPos(position)
       strip.plotWidget.addItem(line, ignoreBounds=True)
       strip.vRulerLineDict[apiRuler] = line
 
     elif axisCode == axisOrder[1]:
-      line = pg.InfiniteLine(angle=0, movable=False, pen=strip.foreground)
+      if colour:
+        line = pg.InfiniteLine(angle=0, movable=False, pen=colour)
+      else:
+        line = pg.InfiniteLine(angle=0, movable=False, pen=strip.foreground)
       line.setPos(position)
       strip.plotWidget.addItem(line, ignoreBounds=True)
       strip.hRulerLineDict[apiRuler] = line

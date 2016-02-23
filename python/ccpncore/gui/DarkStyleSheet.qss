@@ -193,8 +193,6 @@ Dock > QWidget QScrollArea { background-color: #2a3358;
 Dock > QWidget { background-color: #2a3358;
         }
 
-QWidget { background-color: #2a3358;
-        }
 
 Dock QPushButton {
 				color: #bec4f3;

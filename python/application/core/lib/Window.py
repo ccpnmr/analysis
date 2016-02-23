@@ -1,12 +1,14 @@
 __author__ = 'simon1'
 
+import pyqtgraph as pg
+
 from ccpn import ChemicalShift, NmrResidue, Peak, Project
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 from ccpncore.util import Types
 from application.core.modules.GuiStrip import GuiStrip
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
-MODULE_DICT = {'ASSIGNER':'showAssigner',
+MODULE_DICT = {'ASSIGNER': 'showAssigner',
                'ASSIGNMENT MODULE': 'showAssignmentModule',
                'ATOM SELECTOR': 'showAtomSelector',
                'BACKBONE ASSIGNMENT': 'showBackboneAssignmentModule',
@@ -25,9 +27,36 @@ MODULE_DICT = {'ASSIGNER':'showAssigner',
               }
 
 
+LINE_COLOURS = {
+  'CA': '#0000FF',
+  'CB': '#2400FF',
+  'CG': '#4800FF',
+  'CD': '#6D00FF',
+  'CE': '#9100FF',
+  'CZ': '#B600FF',
+  'CH': '#DA00FF',
+  'C': '#FF00FF',
+  'HA': '#FF0000',
+  'HB': '#DA2400',
+  'HG': '#B64800',
+  'HD': '#916D00',
+  'HE': '#6D9100',
+  'HZ': '#48B600',
+  'HH': '#24DA00',
+  'H': '#00FF00',
+  'N': '#00FFFF',
+  'ND': '#3FFFBF',
+  'NE': '#7FFF7F',
+  'NZ': '#BFFF3F',
+  'NH': '#FFFF00',
+}
+
 def navigateToPeakPosition(project:Project, peak:Peak=None,
    selectedDisplays:Types.List[GuiSpectrumDisplay]=None, strip:GuiStrip=None,  markPositions:bool=False):
   """
+  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
+  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
+  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
   Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
   to the positions specified by the peak.
   """
@@ -56,31 +85,6 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
             mark = task.newMark('white', [axis.position], [axisCodeMatch])
         except TypeError:
           pass
-    #   strip.orderedAxes[1].position = axisPositions[strip.orderedAxes[1].code]
-    # elif strip:
-    #   strip.orderedAxes[0].position = axisPositions[strip.orderedAxes[0].code]
-    #   strip.orderedAxes[1].position = axisPositions[strip.orderedAxes[1].code]
-
-    # if len(display.orderedAxes) > 2:
-    #   if not strip:
-    #     try:
-    #       for strip in display.strips:
-    #         axisCodeMapping = spectrumLib.axisCodeMatch(strip.orderedAxes[2].code, axisCodes)
-    #         zAxes = strip.orderedAxes[2:]
-    #         zAxes[0].position = axisPositions[zAxes[0].code]
-    #     except KeyError:
-    #       for strip in display.strips:
-    #         zAxes = strip.orderedAxes[2:]
-    #         zAxes[0].position = axisPositions[zAxes[0].code[0]]
-    #   else:
-    #     try:
-    #       for strip in display.strips:
-    #         zAxes = strip.orderedAxes[2:]
-    #         zAxes[0].position = axisPositions[zAxes[0].code]
-    #     except KeyError:
-    #       for strip in display.strips:
-    #         zAxes = strip.orderedAxes[2:]
-    #         zAxes[0].position = axisPositions[zAxes[0].code[0]]
 
 
 def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
@@ -101,28 +105,47 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
         for atom in nmrResidue.nmrAtoms:
           if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
             shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
-            if shift is not None:
-              shiftDict[axis.code].append(shift.value)
+            if shift is not None and isPositionWithinfBounds(display.strips[0], shift, axis):
+              shiftDict[axis.code].append(shift)
 
       task = project._appBase.mainWindow.task
 
-      atomPositions = shiftDict[display.strips[0].orderedAxes[2].code]
-      display.strips[0].orderedAxes[2].position = atomPositions[0]
-      for atomPosition in atomPositions[1:]:
-        newStrip = display.addStrip()
-        newStrip.orderedAxes[2].position = atomPosition
-      # for strip in display.strips:
+      if len(display.axisCodes) > 2:
+        atomPositions = shiftDict[display.strips[0].orderedAxes[2].code]
+        display.strips[0].orderedAxes[2].position = atomPositions[0].value
+        for atomPosition in atomPositions[1:]:
+          newStrip = display.addStrip()
+          newStrip.orderedAxes[2].position = atomPosition.value
+          atomPositions2 = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes[:2]]
 
-        #
-        #
-        #
-      for strip in display.strips:
-        atomPositions2 = [shiftDict[axis.code] for axis in strip.orderedAxes[:2]]
-        for ii, axis in enumerate(strip.orderedAxes[:2]):
+      else:
+        atomPositions2 = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes[:2]]
+
+
+      for guiStrip in display.strips:
+        for ii, axis in enumerate(guiStrip.orderedAxes[:2]):
           for atomPosition in atomPositions2[ii]:
-            axis.position = atomPosition
+            axis.position = atomPosition.value
             if markPositions:
-              task.newMark('white', [atomPosition], [axis.code])
+              atomName = atomPosition.nmrAtom.name
+              if atomName[:2] in LINE_COLOURS.keys():
+                task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axis.code])
+                textItem = pg.TextItem(atomName, color=LINE_COLOURS[atomName[:2]])
+                if ii == 0:
+                  y = guiStrip.plotWidget.plotItem.vb.mapSceneToView(guiStrip.viewBox.boundingRect().bottomLeft()).y()
+                  textItem.anchor = pg.Point(0, 1)
+                  textItem.setPos(atomPosition.value, y)
+                  guiStrip.plotWidget.addItem(textItem)
+                  guiStrip.xAxisAtomLabels.append(textItem)
+                if ii == 1:
+                  x = guiStrip.plotWidget.plotItem.vb.mapSceneToView(guiStrip.viewBox.boundingRect().bottomLeft()).x()
+                  textItem.anchor = pg.Point(0, 0)
+                  textItem.setPos(x, atomPosition.value)
+                  guiStrip.plotWidget.addItem(textItem)
+                  guiStrip.yAxisAtomLabels.append(textItem)
+              else:
+                task.newMark('white', [atomPosition.value], [axis.code])
+
   elif strip:
     shiftDict = {}
     for axis in strip.orderedAxes:

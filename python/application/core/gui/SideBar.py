@@ -267,19 +267,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     for className in classesInSideBar:
       dd = pid2Obj.get(className)
       if dd:
-        for obj in dd.values():
+        for obj in sorted(dd.values()):
           self._createItem(obj)
-
-  # Not used. NBNB would need complete rewrite if used.
-  # RHF 16/2/2016
-  # def clearSideBar(self):
-  #   """
-  #   Clears all data from the sidebar.
-  #   """
-  #   self.projectItem.setText(0, "Project")
-  #   self.spectrumItem.setText(0, "Spectra")
-  #   self.spectrumItem.setText(0, "Reference")
-  #   self.spectrumItem.takeChildren()
 
   def dragEnterEvent(self, event, enter=True):
     if event.mimeData().hasUrls():

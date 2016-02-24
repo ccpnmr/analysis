@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.util.Types import Sequence, Tuple
+from ccpncore.lib.Io import Formats
 
 def getPlaneData(self:'Spectrum', position:Sequence=None, xDim:int=0, yDim:int=1):
 
@@ -44,3 +45,9 @@ def automaticIntegration(self:"Spectrum", spectralData):
 
 def estimateNoise(self:'Spectrum'):
   return self._apiDataSource.estimateNoise()
+
+def projectedPlaneData(self:'Spectrum', xDim:int=1, yDim:int=2):
+  return self._apiDataSource.projectedPlaneData(xDim, yDim)
+
+def projectedToFile(self:'Spectrum', path:str, xDim:int=1, yDim:int=2, format:str=Formats.NMRPIPE):
+  return self._apiDataSource.projectedToFile(path, xDim, yDim, format)

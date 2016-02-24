@@ -22,10 +22,11 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
-
+import array
 import numpy
 import os
 # import re
+import sys
 
 # Additional functions for ccp.nmr.Nmr.DataSource
 #
@@ -34,6 +35,7 @@ import os
 # from ccpncore.lib.spectrum.Integral import getIntegralRegions, setIntegrals, calculateIntegralValues
 from ccpncore.util.Types import Sequence, Tuple
 from ccpncore.lib.spectrum.Integral import Integral as spInt
+from ccpncore.lib.Io import Formats
 
 def getDimCodes(self:'DataSource'):
   """ Get dimcode of form hx1, hx2, x1, x2, where the x's are directly bound to 
@@ -582,3 +584,120 @@ def getDefaultColours(self:'DataSource') -> Tuple[str,str]:
     ii = (2 * index) % colorCount
   #
   return (spectrumHexColours[ii], spectrumHexColours[ii+1])
+
+def _saveNmrPipe2DHeader(self:'DataSource', fp:'file', xDim:int=1, yDim:int=2):
+
+  xDim -= 1
+  yDim -= 1
+
+  ndim_index = 9
+  npts_index = (99, 219, 15, 32)
+  complex_index = (55, 56, 51, 54)
+  order_index = (24, 25, 26, 27)
+  sw_index = (229, 100, 11, 29)
+  sf_index = (218, 119, 10, 28)
+  origin_index = (249, 101, 12, 30)
+  nuc_index = (18, 16, 20, 22)
+
+  value_index = 199
+
+  head = 512
+
+  x = array.array('B') # unsigned char
+  for i in range(8):
+    x.append(0)
+
+  bytes = [ 0x40, 0x16, 0x14, 0x7b ]
+  if sys.byteorder != 'big':
+    bytes.reverse()
+  
+  for byte in bytes:
+    x.append(byte)
+
+  y = array.array('f') # float
+  for n in range(head):
+    y.append(0)
+
+  y[ndim_index] = 2
+
+  for n in range(2):
+    y[order_index[n]] = n+1
+
+  dataDims = self.sortedDataDims()
+  dataDims2D = (dataDims[xDim], dataDims[yDim])
+  for n, dataDim in enumerate(dataDims2D):
+    dataDimRef = dataDim.getPrimaryDataDimRef()  # will fail if a sampled data set
+    expDimRef = dataDimRef.expDimRef
+    y[npts_index[n]] = dataDim.numPoints
+    y[complex_index[n]] = 1  # real
+    y[sf_index[n]] = expDimRef.sf
+    y[sw_index[n]] = dataDimRef.spectralWidth * expDimRef.sf
+    # wb104: I don't understand the -2 below, but in Analysis v2 the fundamental regions and the contours
+    # do not line up unless you have this
+    y[origin_index[n]] = (dataDimRef.refValue - ((dataDimRef.refPoint-2)/dataDim.numPoints)*dataDimRef.spectralWidth) * expDimRef.sf
+    if expDimRef.isotopeCodes:
+      isotopeCode = expDimRef.isotopeCodes[0][:4]
+      isotopeCode += (4 - len(isotopeCode)) * ' '
+      z = array.array('B') # unsigned char
+      # does this need swapping if not big endian??
+      z.fromstring(isotopeCode)
+      w = array.array('f')
+      w.frombytes(z)
+      y[nuc_index[n]] = w[0]
+
+  x.tofile(fp)
+  y[3:].tofile(fp)
+
+def projectedPlaneData(self:'DataSource', xDim:int=1, yDim:int=2):
+
+  numDim = self.numDim
+
+  if numDim != 3:
+    raise Exception('Can only project from 3D currently')
+
+  if not (1 <= xDim <= numDim):
+    raise Exception('For projection, xDim = %d, must be in range 1 to $d' % (xDim, numDim))
+
+  if not (1 <= yDim <= numDim):
+    raise Exception('For projection, yDim = %d, must be in range 1 to $d' % (yDim, numDim))
+  
+  if xDim == yDim:
+    raise Exception('For projection, must have xDim != yDim')
+
+  xDim -= 1
+  yDim -= 1
+
+  dims = set(range(numDim))
+  dims.remove(xDim)
+  dims.remove(yDim)
+  zDim = dims.pop()
+
+  position = [0] * numDim
+  projectedData = None
+  dataDims = self.sortedDataDims()
+  numZPoints = dataDims[zDim].numPoints
+
+  for zPos in range(numZPoints):
+    position[zDim] = zPos
+    planeData = getPlaneData(self, position, xDim, yDim)
+    if projectedData is None:
+      projectedData = planeData
+    else:
+      projectedData += planeData
+
+  ##projectedData /= numZPoints  # average
+
+  return projectedData
+
+def projectedToFile(self:'DataSource', path:str, xDim:int=1, yDim:int=2, format:str=Formats.NMRPIPE):
+
+  if format != Formats.NMRPIPE:
+    raise Exception('Can only project to %s format currently' % Formats.NMRPIPE)
+
+  projectedData = projectedPlaneData(self, xDim, yDim)
+
+  fp = open(path, 'wb')
+  _saveNmrPipe2DHeader(self, fp, xDim, yDim)
+  projectedData.tofile(fp)
+  fp.close()
+

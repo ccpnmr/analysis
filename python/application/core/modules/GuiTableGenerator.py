@@ -19,7 +19,7 @@ from PyQt4 import QtGui
 class GuiTableGenerator(QtGui.QWidget):
 
   def __init__(self, parent, objectLists, callback, columns, selector=None, tipTexts=None, objectType=None,
-               multiSelect=False, **kw):
+               multiSelect=False, unitPulldown=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
       self.project = objectLists[0].project
@@ -35,10 +35,12 @@ class GuiTableGenerator(QtGui.QWidget):
       else:
         self.objectList = None
       self.sampledDims = {}
+      self.unitPulldown = unitPulldown
       self._getColumns(columns, tipTexts)
       self.tipTexts = tipTexts
       layout = QtGui.QGridLayout()
       self.setLayout(layout)
+
       self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback,
                                multiSelect=multiSelect)
       layout.addWidget(self.table, 0, 0, 1, 5)
@@ -119,7 +121,7 @@ class GuiTableGenerator(QtGui.QWidget):
           else:
             text = 'Pos\nF%d' % j
             tipText='Peak position in dimension %d' % j
-            unit = 'ppm'
+            unit = self.unitPulldown.currentText()
           c = Column(text,
 
                    lambda pk, dim=i, unit=unit:getPeakPosition(pk, dim, unit),

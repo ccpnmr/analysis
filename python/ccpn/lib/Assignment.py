@@ -173,35 +173,29 @@ def copyAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
   from sklearn.ensemble import RandomForestClassifier
   project = referencePeakList.project
   refAxisCodes = referencePeakList.spectrum.axisCodes
-  refPositions = [numpy.array(peak.position) for peak in referencePeakList.peaks]
-  refLabels = [peak.pid for peak in referencePeakList.peaks]
+  matchAxisCodes = matchPeakList.spectrum.axisCodes
+  if len(refAxisCodes) < len(matchAxisCodes):
+    mappingArray = spectrumLib._axisCodeMapIndices(refAxisCodes, matchAxisCodes)
+  else:
+    mappingArray = spectrumLib._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
+  refPositions = [numpy.array([peak.position[dim] for dim in mappingArray if dim is not None]) for peak in referencePeakList.peaks]
+  refLabels = [[peak.pid] for peak in referencePeakList.peaks]
   clf=RandomForestClassifier()
   clf.fit(refPositions, refLabels)
-
-  matchAxisCodes = matchPeakList.spectrum.axisCodes
-
-  mappingArray = spectrumLib._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
 
   for peak in matchPeakList.peaks:
     matchArray = []
     for dim in mappingArray:
-      matchArray.append(peak.position[dim])
+      if dim is not None:
+        matchArray.append(peak.position[dim])
 
     result = ''.join((clf.predict(numpy.array(matchArray))))
 
-    # for value in checkArray:
     tolerances = peak.peakList.spectrum.assignmentTolerances
     dimNmrAtoms = project.getByPid(result).dimensionNmrAtoms
     refPositions = project.getByPid(result).position
-    for ii, refAxisCode in enumerate(refAxisCodes):
-      # print(axisCode)
-      # print(refPositions[ii], peak.position[ii], refPositions[ii] - peak.position[ii])
-      if abs(refPositions[ii] - peak.position[ii]) < tolerances[ii]:
-        peak.assignDimension(axisCode=refAxisCode, value=dimNmrAtoms[ii])
-      # Refactored. RHF
-      # for axisCode in refAxisCodes:
-      #   # print(axisCode)
-      #   peak.assignDimension(axisCode=axisCode, value=dimNmrAtoms[refAxisCodes.index(axisCode)])
+    if all([abs(refPositions[ii] - peak.position[ii]) < tolerances[ii] for ii in mappingArray if ii is not None]):
+      [peak.assignDimension(axisCode=refAxisCodes[ii], value=dimNmrAtoms[ii]) for ii in mappingArray if ii is not None]
 
 def propagateAssignments(peaks:Types.List[Peak]=None, referencePeak:Peak=None, current:object=None,
                          tolerances:Types.List[float]=None):

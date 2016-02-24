@@ -24,7 +24,6 @@ __version__ = "$Revision: 7686 $"
 
 import os
 import json
-import time
 
 from PyQt4 import QtGui, QtCore
 
@@ -33,7 +32,6 @@ from ccpncore.util import Io as ioUtil
 from ccpncore.gui.Application import Application
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.api.memops import Implementation
-from ccpncore.gui import iconsNew
 from ccpncore.gui import MessageDialog
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
@@ -59,8 +57,6 @@ class AppBase(GuiBase):
     self.applicationVersion = applicationVersion
     self.preferences = preferences
     self.components = components
-    ###self.vLines = []
-    ###self.hLines = []
 
     # Necessary as attribute is queried during initialisation:
     self.mainWindow = None
@@ -97,7 +93,6 @@ class AppBase(GuiBase):
         apiNmrProject.windowStore = apiWindowStore
     # MainWindow must always exist at this point
     mainWindow = project.getWindow('Main')
-    # mainWindow = project._data2Obj[apiWindowStore.findFirstWindow(title='Main')]
     self.mainWindow = mainWindow
     # Next two lines moved from MainWindow.initProject,
     # as sidebar filling should be after setup is complete.
@@ -128,7 +123,7 @@ class AppBase(GuiBase):
   def _closeProject(self):
     """Close project and clean up - should only be called when opening another"""
 
-    # NBNB TBD add code to save first, ask, etd. Somewhere
+    # NBNB TBD add code to save first, ask, etc. Somewhere
 
     if self.project is not None:
       self.project._close()
@@ -301,28 +296,16 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   splashPng = os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'ccpnmr-splash-screen.png')
   splashPix = QtGui.QPixmap(splashPng)
   splashImage = QtGui.QImage(splashPix.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
-  # splashImage.fill(QtCore.Qt.transparent)
 
   painter = QtGui.QPainter(splashImage)
-  # painter.setOpacity(0.1)
+  painter.setOpacity(0.5)
   painter.drawPixmap(0, 0, splashPix)
   painter.end()
-  # splashPix2 = QtGui.QPixmap.fromImage(splashImage)
-  # splash_pix.scaled(QtCore.QSize))
-
-  # splash_pix.fill(QtGui.QColor('white'))
-  # print(splashPng)
-  # splashPix = QtGui.QPixmap(splashPng)
-  splash = QtGui.QSplashScreen(splashPix)
-  # splash.show()
-  # app.processEvents()
-  # time.sleep(10)
+  splash = QtGui.QSplashScreen(splashPix, QtCore.Qt.WindowStaysOnTopHint)
 
   splash.show()
   app.processEvents()
-  time.sleep(3)
 
-  splash.close()
   styleSheet = getStyleSheet(preferences)
   app.setStyleSheet(styleSheet)
   
@@ -339,6 +322,6 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
 
   if checkRegistration(applicationVersion):
     program = programClass(apiProject, applicationName, applicationVersion, preferences, components)
-
+  splash.close()
   app.start()
 

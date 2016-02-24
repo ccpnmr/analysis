@@ -211,11 +211,12 @@ class Peak1d(QtGui.QGraphicsItem):
   """ A GraphicsItem that is not actually drawn itself, but is the parent of the peak symbol and peak annotation.
       TODO: Add hover effect for 1D peaks. """
 
-  def __init__(self, scene, parent, peak, peakListView):
+  def __init__(self, peakListView, peak):
 
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
 
-    self.parent = parent
+    scene = peakListView.spectrumView.strip.plotWidget.scene()
+    QtGui.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
+
     self.peakHeight = peak.height
     self.peak = peak
     self.peakListView = peakListView

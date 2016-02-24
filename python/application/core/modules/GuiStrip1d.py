@@ -107,7 +107,7 @@ class GuiStrip1d(GuiStrip):
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2,x1)
 
-  def showPeaks(self, peakList:PeakList):
+  def showPeaks(self, peakList:PeakList, peaks=None):
     """
     Displays peaks in specified peaklist in the strip.
     """
@@ -115,27 +115,36 @@ class GuiStrip1d(GuiStrip):
     # print(self.plotWidget.scene().items())
     #peakLayer = GuiPeakListView(self.plotWidget.scene(), self.plotWidget, peakList)
     peakItems = []
-    peakListView = self._findPeakListView(peakList)
-    self.peakItems[peakList] = []
-    for peak in peakList.peaks:
-     # peakItem =
-     peakItem = Peak1d(self.plotWidget.scene(), self.plotWidget.plotItem, peak,  peakListView)
-     self.peakItems[peakList].append(peakItem)
-     print(peakItem)
-    #   peakItem = PeakItem(peak)
-    #   self.plotWidget.addItem(peakItem)
-     self.plotWidget.addItem(peakItem)
-    # print(self.plotWidget.scene().items())
-    #   self.plotWidget.addItem(peakItem.peakAnnotationItem.peakTextItem)
-    #   self.plotWidget.addItem(peakItem.peakAnnotationItem.peakSymbolItem)
+    # peakListView = self._findPeakListView(peakList)
+    # self.peakItems[peakList] = []
+    # for peak in peakList.peaks:
+    #  # peakItem =
+    #  peakItem = Peak1d(peak,  peakListView)
+    #  self.peakItems[peakList].append(peakItem)
+    #  print(peakItem)
+    # #   peakItem = PeakItem(peak)
+    # #   self.plotWidget.addItem(peakItem)
+    #  self.plotWidget.addItem(peakItem)
     # # print(self.plotWidget.scene().items())
+    # #   self.plotWidget.addItem(peakItem.peakAnnotationItem.peakTextItem)
+    # #   self.plotWidget.addItem(peakItem.peakAnnotationItem.peakSymbolItem)
+    # # # print(self.plotWidget.scene().items())
+    if not peaks:
+      peaks = peakList.peaks
 
-  def hidePeaks(self, peakList:PeakList):
-    """
-    Hides peaks in specified peaklist from strip.
-    """
-    for item in self.peakItems[peakList]:
-      self.plotWidget.removeItem(item)
+    peakListView = self._findPeakListView(peakList)
+    if not peakListView:
+      return
+
+    peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
+    self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+  #
+  # def hidePeaks(self, peakList:PeakList):
+  #   """
+  #   Hides peaks in specified peaklist from strip.
+  #   """
+  #   for item in self.peakItems[peakList]:
+  #     self.plotWidget.removeItem(item)
 
   def _findPeakListView(self, peakList:PeakList):
 

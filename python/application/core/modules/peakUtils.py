@@ -13,10 +13,10 @@ def getPeakPosition(peak, dim, unit='ppm'):
       value = peak.pointPosition[dim]
 
     elif unit == 'Hz':
-      value = peak.position[dim]*peak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf
+      value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf
 
     else: # sampled
-      value = unit.pointValues[int(peak.sortedPeakDims()[dim].position)-1]
+      value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]
 
     return '%7.2f' % float(value)
 

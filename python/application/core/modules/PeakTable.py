@@ -82,7 +82,7 @@ class PeakListSimple(QtGui.QWidget, Base):
 
     label = Label(self, ' Position Unit:', grid=(0, 2), hAlign='r')
 
-    self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
+    self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS, callback=self.refreshTable)
 
     self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 4),
                                           callback=self.subtractPeakLists)
@@ -99,7 +99,7 @@ class PeakListSimple(QtGui.QWidget, Base):
 
     self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, callback=callback,
                                        columns=columns, selector=self.peakListPulldown,
-                                       tipTexts=tipTexts, multiSelect=True)
+                                       tipTexts=tipTexts, multiSelect=True, unitPulldown=self.posUnitPulldown)
 
     self.layout().addWidget(self.peakTable, 3, 0, 1, 8)
     if selectedList is not None:
@@ -157,6 +157,9 @@ class PeakListSimple(QtGui.QWidget, Base):
     if peak.height:
       return '%7.2E' % float(peak.height*peak.peakList.spectrum.scale)
 
+
+  def refreshTable(self, item):
+    self.peakTable.updateContents()
 
 
 

@@ -36,7 +36,7 @@ from ccpncore.util.Types import Sequence
 from ccpncore.gui.Icon import Icon
 
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from application.core.modules.GuiStrip1d import GuiStrip1d
+from application.core.modules.spectrumItems import GuiPeakListView
 
 from ccpncore.gui.VerticalLabel import VerticalLabel
 
@@ -56,6 +56,11 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     self.setAcceptDrops(True)
     self.isGrouped = False
     self.spectrumActionDict = {}
+    self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
+    # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
+    # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
+    ###self.inactivePeakItems = set() # contains unused peakItems
+    self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
     # below not needed in 1D???
     #self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
     # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
@@ -89,6 +94,35 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
   #   for guiStrip in self.guiStrips:
   #     guiStrip.addSpectrum(spectrum, guiSpectrumView)
 
+  def showPeaks(self, peakListView, peaks):
+    """
+    Displays specified peaks in all strips of the display using peakListView
+    """
+    viewBox = peakListView.spectrumView.strip.viewBox
+    activePeakItemDict = self.activePeakItemDict
+    peakItemDict = activePeakItemDict.setdefault(peakListView, {})
+    inactivePeakItemDict = self.inactivePeakItemDict
+    inactivePeakItems = inactivePeakItemDict.setdefault(peakListView, set())
+    ##inactivePeakItems = self.inactivePeakItems
+    existingApiPeaks = set(peakItemDict.keys())
+    unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
+    for apiPeak in unusedApiPeaks:
+      peakItem = peakItemDict.pop(apiPeak)
+      #viewBox.removeItem(peakItem)
+      inactivePeakItems.add(peakItem)
+      peakItem.setVisible(False)
+    for peak in peaks:
+      apiPeak = peak._wrappedData
+      if apiPeak in existingApiPeaks:
+        continue
+      if inactivePeakItems:
+        peakItem = inactivePeakItems.pop()
+        peakItem.setupPeakItem(peakListView, peak)
+        #viewBox.addItem(peakItem)
+        peakItem.setVisible(True)
+      else:
+        peakItem = GuiPeakListView.Peak1d(peakListView, peak)
+      peakItemDict[apiPeak] = peakItem
   def fillToolBar(self):
     """
     Adds specific icons for 1d spectra to the spectrum utility toolbar.

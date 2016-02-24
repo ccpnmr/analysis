@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
+from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks, fitExistingPeakList
 from ccpncore.lib.spectrum.Spectrum import doAxisCodesMatch
 
 from ccpncore.util.CopyData import copySubTree
@@ -191,3 +191,6 @@ def copyPeaks(self:'PeakList', sinkSpectrum:'Spectrum', fitPositions:bool=False)
     copySubTree(self, sinkSpectrum)
 
   # else:
+
+def refit(self:'PeakList', method:str='gaussian'):
+  fitExistingPeakList(self._apiPeakList, method)

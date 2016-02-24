@@ -84,29 +84,26 @@ class PeakListSimple(QtGui.QWidget, Base):
 
     self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS,)
 
-
-
     self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 4),
                                           callback=self.subtractPeakLists)
-    #                                     # callback=self._updateWhenIdle,)
+
+    self.deletePeakButton = Button(self, 'Delete Selected', grid=(0, 5), callback=self.deleteSelectedPeaks)
 
     columns = [('#', 'serial'), ('Height', lambda pk: self.getPeakHeight(pk)),
                ('Volume', lambda pk: self.getPeakVolume(pk))]
 
-
-    tipTexts=['Peak serial number', 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
+    tipTexts=['Peak serial number',
+              'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
               'Integral of spectrum intensity around peak location, according to chosen volume method',
               'Textual notes about the peak']
-    self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, callback=callback, columns=columns,
-                                       selector=self.peakListPulldown, tipTexts=tipTexts)
 
-    # self.updatePeakLists()
-    # newLabel = Label(self, '', grid=(2, 0))
-    # newLabel.setFixedHeight(8)
+    self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, callback=callback,
+                                       columns=columns, selector=self.peakListPulldown,
+                                       tipTexts=tipTexts, multiSelect=True)
+
     self.layout().addWidget(self.peakTable, 3, 0, 1, 8)
     if selectedList is not None:
       self.peakListPulldown.setCurrentIndex(self.peakListPulldown.findText(selectedList.pid))
-      # print(self.peakListPulldown.currentIndex(),self.peakListPulldown.currentIndex().text())
 
   def subtractPeakLists(self):
     """
@@ -115,7 +112,6 @@ class PeakListSimple(QtGui.QWidget, Base):
     """
 
     peakList1 = self.project.getByPid(self.peakListPulldown.currentText())
-
 
     availablePeakLists = [peakList for peakList in peakList1.spectrum.peakLists
                          if peakList is not peakList1]
@@ -126,18 +122,12 @@ class PeakListSimple(QtGui.QWidget, Base):
       peakList1.subtractPeakLists(self.project.getByPid(peakList))
     self.peakTable.updateSelectorContents()
 
-  def _initPanel(self):
-    """
-    Instantiates the various settings required for the peak table to function.
-    """
-    # Overwrites superclass
+  def deleteSelectedPeaks(self):
 
-    self.peakList = None
-    self.peak = None
-    self.sampledDims = {}
-    self.changePeakListCalls = []
-    self.selectPeakCalls = []
-    self.selectPeaksCalls = []
+    for peakObject in self.peakTable.table.getSelectedObjects():
+      peakObject.delete()
+    self.peakTable.updateTable()
+
 
   def selectPeak(self, peak:Peak, row:int, col:int):
     """

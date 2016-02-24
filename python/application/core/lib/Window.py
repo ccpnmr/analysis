@@ -55,9 +55,6 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
    selectedDisplays:Types.List[GuiSpectrumDisplay]=None, strip:GuiStrip=None,  markPositions:bool=False):
   """
   Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
-  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
-  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
-  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
   to the positions specified by the peak.
   """
 

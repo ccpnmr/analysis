@@ -42,12 +42,11 @@ def automaticIntegration(self:"Spectrum", spectralData):
 
   return self._apiDataSource.automaticIntegration(spectralData)
 
-
 def estimateNoise(self:'Spectrum'):
   return self._apiDataSource.estimateNoise()
 
-def projectedPlaneData(self:'Spectrum', xDim:int=1, yDim:int=2):
-  return self._apiDataSource.projectedPlaneData(xDim, yDim)
+def projectedPlaneData(self:'Spectrum', xDim:int=1, yDim:int=2, method:str='max'):
+  return self._apiDataSource.projectedPlaneData(xDim, yDim, method)
 
-def projectedToFile(self:'Spectrum', path:str, xDim:int=1, yDim:int=2, format:str=Formats.NMRPIPE):
-  return self._apiDataSource.projectedToFile(path, xDim, yDim, format)
+def projectedToFile(self:'Spectrum', path:str, xDim:int=1, yDim:int=2, method:str='max', format:str=Formats.NMRPIPE):
+  return self._apiDataSource.projectedToFile(path, xDim, yDim, method, format)

@@ -28,6 +28,7 @@ class IpythonConsole(Widget, Base):
         self.ipythonWidget.kernel_client = kc
         consoleLayout = QtGui.QGridLayout()
         buttonLayout = QtGui.QGridLayout()
+        self.setMinimumHeight(100)
 
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)

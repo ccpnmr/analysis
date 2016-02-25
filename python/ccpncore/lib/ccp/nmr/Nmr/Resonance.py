@@ -66,6 +66,7 @@ def absorbResonance(self:'Resonance', resonanceB) -> 'Resonance':
       return
   
   # attributes where we have object.resonance
+  # NB Shifts are handled separately below
   controlData = {'findFirstMeasurement':('shiftDifferences', 'hExchRates',
                                          'hExchProtections', 'shiftAnisotropies',
                                          't1s', 't1Rhos', 't2s'),

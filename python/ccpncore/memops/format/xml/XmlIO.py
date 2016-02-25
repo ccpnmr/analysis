@@ -230,8 +230,17 @@ def loadTopObject(repositoryPath, topObject):
   filePath = ApiPath.findTopObjectPath(repositoryPath, topObject)
   topObjId = ApiPath.getTopObjIdFromFileName(filePath, mustBeMultipart=True)
 
+  try:
+    stream = open(filePath)
+  except FileNotFoundError:
+    if len(filePath) > 256:
+      print ("""ERROR FileNotFoundError
+  - if on a Windows file system, the error may be caused by a file path length of %s,
+  longer than the 256 chars Windows file systems can handle
+  Moving the project to directory with a shorter path may help.""" % len(filePath))
+      raise
   
-  return loadFromStream(open(filePath), topObjId=topObjId, topObject=topObject)
+  return loadFromStream(stream, topObjId=topObjId, topObject=topObject)
 
 
 def loadFromFile(memopsRoot, filePath, partialLoad=False):
@@ -239,7 +248,15 @@ def loadFromFile(memopsRoot, filePath, partialLoad=False):
   """
   
   # open file
-  stream = open(filePath)
+  try:
+    stream = open(filePath)
+  except FileNotFoundError:
+    if len(filePath) > 256:
+      print ("""ERROR FileNotFoundError
+  - if on a Windows file system, the error may be caused by a file path length of %s,
+  longer than the 256 chars Windows file systems can handle
+  Moving the project to directory with a shorter path may help.""" % len(filePath))
+      raise
    
   # load file
   try:

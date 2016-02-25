@@ -27,10 +27,15 @@ import pyqtgraph as pg
 
 from ccpn import Project
 from ccpn import Peak
+from ccpn import PeakList
 from ccpncore.api.ccp.nmr.Nmr import AbstractPeakDimContrib as ApiAbstractPeakDimContrib
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
+from ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
+from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
+from ccpncore.api.ccp.nmr.Nmr import DataDimRef as ApiDataDimRef
+from ccpncore.api.ccp.nmr.Nmr import FreqDataDim as ApiFreqDataDim
 
 NULL_RECT = QtCore.QRectF()
 IDENTITY = QtGui.QTransform()
@@ -801,139 +806,6 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
       # print(self.peakItem)
       # self.update()
 
-# class PeakNdAnnotation(QtGui.QGraphicsItem):
-#
-#   def __init__(self, peakItem, scene):
-#
-#     QtGui.QGraphicsItem.__init__(self, scene=scene)
-#
-#     self.setParentItem(peakItem)
-#     self.setCacheMode(self.DeviceCoordinateCache)
-#     self.setFlags(self.ItemIgnoresTransformations)
-#     self.hover = False
-#     self.setAcceptHoverEvents(True)
-#     self.color = NULL_COLOR
-#     self.brush = NULL_COLOR
-#     self.peakItem = peakItem
-#     self.text = '-, -, -'
-#     self.setZValue(-1)
-#     self.bbox = NULL_RECT
-#     self.setPos(self.peakItem.pos())
-#     # self.show()
-#     print(self.pos())
-#
-#   def hoverEnterEvent(self, event):
-#
-#     self.hover = True
-#     self.update()
-#
-#   def hoverLeaveEvent(self, event):
-#
-#     self.hover = False
-#     self.update()
-#
-#   def boundingRect(self):
-#
-#     return self.bbox
-#
-#   def syncPeak(self, text, color):
-#
-#     self.color = color
-#     self.text = text
-#     rect = FONT_METRIC.boundingRect(self.text)
-#     self.bbox = rect.adjusted(-2,-2, 4, 2)
-#
-#     r,g,b,a = color.getRgb()
-#     self.brush = QtGui.QColor('white')
-#     self.update()
-#
-#   def paint(self, painter, option, widget):
-#
-#     if self.text:
-#       painter.setFont(FONT)
-#       # if self.hover:
-#       self.setZValue(-1)
-#         # r, g, b, a = QtGui.QColor('white')
-#       painter.setBrush(QtGui.QColor('white'))
-#       painter.setPen(QtGui.QColor('white'))
-#       painter.drawRect(self.bbox)
-#
-#       # else:
-#       #   painter.setPen(QtGui.QColor('white'))
-#       #   self.setZValue(0)
-#
-#       painter.drawText(0, 0, self.text)
-# class PeakItem(QtGui.QGraphicsItem):
-#
-#   def __init__(self, peak):
-#     """ peakListItem is the QGraphicsItem parent
-#         peak is the CCPN object
-#     """
-#
-#     QtGui.QGraphicsItem.__init__(self)
-#
-#     self.peak = peak
-#     # TBD: symbol and annotation
-#     # self.peakSymbolItem = PeakSymbolItem(self, peak)
-#
-#     self.peakAnnotationItem = PeakAnnotationItem(peak)  #(this in turn has peakTextItem, peakPointerItem)
-
-# class PeakSymbolItem(QtGui.QGraphicsLineItem):
-#
-#   def __init__(self, x1, y1, x2, y2):
-#     QtGui.QGraphicsLineItem.__init__(self)
-#     self.pen = QtGui.QPen()
-#     self.pen.setColor(QtGui.QColor('white'))
-#     self.pen.setCosmetic(True)
-#     self.setPen(self.pen)
-#     self.setLine(x1, y1, x2, y2)
-#   #   def viewRangeChanged(self):
-#   #       self.updatePosition(peakMarker)
-#   #
-#   #
-#   # def updatePosition(self, peakMarker):
-#   #   br = peakMarker.boundingRect()
-#   #   apos = peakMarker.mapToParent(pg.Point(br.width()*peakMarker.anchor.x(), br.height()*peakMarker.y()))
-#   #   print(apos.x(), apos.y())
-
-
-
-
-# class PeakAnnotationItem(QtGui.QGraphicsTextItem):
-#
-#   def __init__(self, parent, peak):
-#
-#     super(PeakAnnotationItem, self).__init__()
-#
-#     if peak.height is not None:
-#       peakHeight = peak.height
-#     else:
-#       peakHeight = peak._wrappedData.findFirstPeakIntensity(intensityType='height').value
-#     text=str("%.3f" % peak.position[0])
-#     # self.peak = peak
-#     self.peakItem = parent
-#     self.peakTextItem = pg.TextItem(text=text, color='w', anchor=(-0.9,1.0))#, color='w')
-#     # self.peakPointerItem =  pg.ArrowItem(pos=(peak.position[0],peakHeight), angle = -45, headLen=60, tipAngle=5)
-#     self.peakTextItem.setPos(pg.Point(peak.position[0]+self.peakTextItem.anchor.x()*0.1, peakHeight+self.peakTextItem.anchor.y()*0.1))
-#     # print(self.peakTextItem.sceneBoundingRect())
-#     # self.peakSymbolItem = PeakSymbolItem(peak.position[0], peakHeight, peak.position[0], peakHeight+self.peakTextItem.anchor.y()*0.1)
-#     # print(peak.position[0], peakHeight, self.peakTextItem.anchor.x(), self.peakTextItem.anchor.y())
-#     # self.displayed = True
-#
-#
-#   # def updatePos(self):
-#   #
-#   #   peakItem = self.peakItem
-#   #   if peakItem.height >= 0:
-#   #     # Translate first to rotate around bottom left corner
-#   #     self.translate(0, -self.boundingRect().height())
-#   #     self.setRotation(0)
-#   #     self.peakTextItem.setPos(0, min(peakItem.pos().y()*0.75, peakItem.spectrum.positiveContourBase * peakItem.spectrum.scale))
-#   #     print(peakItem.height, max(peakItem.pos().y()*0.75, peakItem.spectrum.positiveContourBase * peakItem.spectrum.scale))
-#   #   else:
-#   #     self.setPos(0, min(peakItem.pos().y()*0.75, -peakItem.spectrum.positiveContourBase * peakItem.spectrum.scale))
-#   #     self.setRotation(45)
-
 
 
 # Notifiers for assignment annotation change
@@ -952,18 +824,6 @@ def _refreshPeakAnnotation(peak:Peak):
       peakItem = guiPeakListView.peakItems.get(peak)
       if peakItem:
         peakItem.annotation.setupPeakAnnotationItem(peakItem)
-
-def _refreshPeakPosition(peak:Peak):
-  data2Obj = peak._project._data2Obj
-  for apiPeakListView in peak._wrappedData.peakList.peakListViews:
-    for apiStripPeakListView in apiPeakListView.stripPeakListViews:
-      guiPeakListView = data2Obj[apiStripPeakListView]
-      peakItem = guiPeakListView.peakItems.get(peak)
-      if peakItem:
-        peakItem.setPos(*peak.position)
-
-
-      # NBNB TBD add body here
 
 Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
@@ -1009,3 +869,48 @@ def _upDateAssignmentsNmrChain(project:Project, apiNmrChain:ApiNmrChain):
      data2Obj[peak]._refreshPeakAnnotation()
 #
 Project._setupNotifier(_upDateAssignmentsNmrChain, ApiNmrChain, 'setCode')
+
+# Notifiers for peak positin change.
+# Needed for:
+# PeakDim.position, PeakDim.dataDimRef (will not be used but does not cost anything to add
+# PeakDim.numAliasing, DataDim.numPointsOrig
+# DataDimRef.refPopint, refValue, valuePerPint
+# Also changes in DimensinScaling, but that REALLY will nver be used in V3, so we skip it
+
+
+def _refreshPeakPosition(peak:Peak):
+  for peakListView in peak.peakList.peakListViews:
+    peakItem = peakListView.peakItems.get(peak)
+    if peakItem:
+      peakItem.setPos(*peak.position)
+Peak._refreshPeakPosition = _refreshPeakPosition
+
+def _refreshPeakListPosition(peakList:PeakList):
+  for peakListView in peakList.peakListViews:
+    peakItems = peakListView.peakItems
+    for peak in peakList.peaks:
+      peakItem = peakItems.get(peak)
+      if peakItem:
+        peakItem.setPos(*peak.position)
+PeakList._refreshPeakListPosition = _refreshPeakListPosition
+
+def _updatePositionPeakDim(project:Project, apiPeakDim:ApiPeakDim):
+  project._data2Obj[apiPeakDim.peak]._refreshPeakPosition()
+Project._setupNotifier(_updatePositionPeakDim, ApiPeakDim, 'setPosition')
+Project._setupNotifier(_updatePositionPeakDim, ApiPeakDim, 'setDataDimRef')
+Project._setupNotifier(_updatePositionPeakDim, ApiPeakDim, 'setNumAliasing')
+
+def _updatePositionDataDimRef(project:Project, apiDataDimRef:ApiDataDimRef):
+  data2Obj = project._data2Obj
+  for apiPeakList in apiDataDimRef.dataDim.dataSource.sortedPeakLists():
+    data2Obj[apiPeakList]._refreshPeakListPosition()
+Project._setupNotifier(_updatePositionDataDimRef, ApiDataDimRef, 'setValuePerPoint')
+Project._setupNotifier(_updatePositionDataDimRef, ApiDataDimRef, 'setRefPoint')
+Project._setupNotifier(_updatePositionDataDimRef, ApiDataDimRef, 'setRefValue')
+
+
+def _updatePositionDataDim(project:Project, apiDataDim:ApiFreqDataDim):
+  data2Obj = project._data2Obj
+  for apiPeakList in apiDataDim.dataSource.sortedPeakLists():
+    data2Obj[apiPeakList]._refreshPeakListPosition()
+Project._setupNotifier(_updatePositionDataDim, ApiFreqDataDim, 'setNumPointsOrig')

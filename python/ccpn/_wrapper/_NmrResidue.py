@@ -595,7 +595,7 @@ class NmrResidue(AbstractWrapperObject):
     while empty parameters (e.g. chainCode=None) cause no change.
     If the target ccpn.NmrResidue being reassigned to exists and mergeToExisting is True,
     the source will be deleted, and its data merged into the target.
-    NB Merging is NOT undoa
+    NB Merging is NOT undoable
     """
 
     clearUndo = False

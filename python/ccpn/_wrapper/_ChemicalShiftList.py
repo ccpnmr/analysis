@@ -173,7 +173,7 @@ def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
   """Create new ccpn.ChemicalShiftList"""
 
   if name and Pid.altCharacter in name:
-    raise ValueError("Character %s not allowed in ccpn.ChemicalSiftList.name" % Pid.altCharacter)
+    raise ValueError("Character %s not allowed in ccpn.ChemicalShiftList.name" % Pid.altCharacter)
 
   obj = self._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
                                        details=comment)

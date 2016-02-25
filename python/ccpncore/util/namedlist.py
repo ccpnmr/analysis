@@ -337,7 +337,8 @@ Python class, you create instances as you would with any Python class.
 
 Modifications
 =============
-Added bases parameter to namedlist function to allow passing in superclasses for additional functionality
+Added bases parameter to namedlist function
+to allow passing in superclasses for additional functionality
 
 Rasmus Fogh, ccpn project http://www.ccpn.ac.uk 18/2/2016
 

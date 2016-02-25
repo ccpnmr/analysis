@@ -803,7 +803,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.pythonConsoleDock = CcpnDock(name='Python Console')
       self.pythonConsoleDock.layout.addWidget(self.pythonConsole)
-      self.pythonConsoleDock.label.hide()
       self.dockArea.addDock(self.pythonConsoleDock, 'bottom')
 
 

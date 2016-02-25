@@ -648,7 +648,7 @@ def _saveNmrPipe2DHeader(self:'DataSource', fp:'file', xDim:int=1, yDim:int=2):
   x.tofile(fp)
   y[3:].tofile(fp)
 
-def projectedPlaneData(self:'DataSource', xDim:int=1, yDim:int=2):
+def projectedPlaneData(self:'DataSource', xDim:int=1, yDim:int=2, method:str='max'):
 
   numDim = self.numDim
 
@@ -663,6 +663,15 @@ def projectedPlaneData(self:'DataSource', xDim:int=1, yDim:int=2):
   
   if xDim == yDim:
     raise Exception('For projection, must have xDim != yDim')
+
+  METHODS = ('max', 'sum', 'sum above noise')
+  if method not in METHODS:
+    raise Exception('For projection, method must be one of %s' % (METHODS,))
+
+  if method == 'sum above noise':
+    threshold = self.noiseLevel
+    if threshold is None:
+      threshold = estimateNoise(self)
 
   xDim -= 1
   yDim -= 1
@@ -680,24 +689,27 @@ def projectedPlaneData(self:'DataSource', xDim:int=1, yDim:int=2):
   for zPos in range(numZPoints):
     position[zDim] = zPos
     planeData = getPlaneData(self, position, xDim, yDim)
+    if method == 'sum above noise':
+      lowIndices = planeData < threshold
+      planeData[lowIndices] = 0
     if projectedData is None:
       projectedData = planeData
     else:
-      projectedData += planeData
-
-  ##projectedData /= numZPoints  # average
+      if method == 'max':
+        projectedData = numpy.maximum(projectedData, planeData)
+      else:
+        projectedData += planeData
 
   return projectedData
 
-def projectedToFile(self:'DataSource', path:str, xDim:int=1, yDim:int=2, format:str=Formats.NMRPIPE):
+def projectedToFile(self:'DataSource', path:str, xDim:int=1, yDim:int=2, method:str='max', format:str=Formats.NMRPIPE):
 
   if format != Formats.NMRPIPE:
     raise Exception('Can only project to %s format currently' % Formats.NMRPIPE)
 
-  projectedData = projectedPlaneData(self, xDim, yDim)
+  projectedData = projectedPlaneData(self, xDim, yDim, method)
 
-  fp = open(path, 'wb')
-  _saveNmrPipe2DHeader(self, fp, xDim, yDim)
-  projectedData.tofile(fp)
-  fp.close()
+  with open(path, 'wb') as fp:
+    _saveNmrPipe2DHeader(self, fp, xDim, yDim)
+    projectedData.tofile(fp)
 

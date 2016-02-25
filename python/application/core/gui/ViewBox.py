@@ -102,6 +102,7 @@ class ViewBox(pg.ViewBox):
         for peakList in spectrumView.spectrum.peakLists:
           for peak in peakList.peaks:
             peak.isSelected = False
+      self.current.peak = None
       # now select (take first one within range)
       for spectrumView in self.current.strip.spectrumViews:
         if spectrumView.spectrum.dimensionCount == 1:
@@ -112,6 +113,7 @@ class ViewBox(pg.ViewBox):
               and yPositions[0] < float(peak.position[1]) < yPositions[1]):
               if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
                 peak.isSelected = True
+                self.current.peak = peak
                 break
     """ 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
@@ -287,6 +289,7 @@ class ViewBox(pg.ViewBox):
         else:
           zPositions = None
         # selectedPeaks = []
+        self.current.peak = None
         for spectrumView in self.current.strip.spectrumViews:
           for peakList in spectrumView.spectrum.peakLists:
             stripAxisCodes = [axis.code for axis in self.current.strip.orderedAxes]
@@ -300,8 +303,10 @@ class ViewBox(pg.ViewBox):
                   zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
                   if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                     peak.isSelected = True
+                    self.current.addPeak(peak)
                 else:
                   peak.isSelected = True
+                  self.current.addPeak(peak)
       else:
         self._updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()

@@ -705,9 +705,10 @@ class Spectrum(AbstractWrapperObject):
 
   @spectralWidths.setter
   def spectralWidths(self, value):
+    oldValues = self.spectralWidths
     for ii,dataDimRef in enumerate(self._mainDataDimRefs()):
       if dataDimRef is not None:
-        oldsw = dataDimRef[ii]
+        oldsw = oldValues[ii]
         sw = value[ii]
         localValuePerPoint = dataDimRef.localValuePerPoint
         if localValuePerPoint:

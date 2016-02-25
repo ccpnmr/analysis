@@ -150,7 +150,7 @@ class Residue(AbstractWrapperObject):
       result = None
     else:
       result = self._project._data2Obj.get(
-        apiResidue.chain.findFirstResidue(seqId=molResidue.seqId))
+        apiResidue.chain.findFirstResidue(seqId=molResidue.serial))
     #
     return result
 
@@ -164,7 +164,7 @@ class Residue(AbstractWrapperObject):
       result = None
     else:
       result = self._project._data2Obj.get(
-        apiResidue.chain.findFirstResidue(seqId=molResidue.seqId))
+        apiResidue.chain.findFirstResidue(seqId=molResidue.serial))
     #
     return result
 

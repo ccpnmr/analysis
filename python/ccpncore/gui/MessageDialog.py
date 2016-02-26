@@ -157,15 +157,21 @@ class MessageDialog(QtGui.QMessageBox):
       scaledImage = image.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
       self.setIconPixmap(scaledImage)
 
-
+    palette = QtGui.QPalette()
     if colourScheme == 'dark':
       self.setStyleSheet("""  QMessageBox QLabel {
                               color: #f7ffff;
                           }""")
+
+      palette.setColor(QtGui.QPalette.Background, QtGui.QColor('#2a3358'));
+
     elif colourScheme == 'light':
       self.setStyleSheet("""  QMessageBox QLabel {
                               color: #555d85;
                           }""")
+      palette.setColor(QtGui.QPalette.Background, QtGui.QColor('#fbf4cc'));
+
+    self.setPalette(palette);
 
 if __name__ == '__main__':
 

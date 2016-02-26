@@ -29,7 +29,6 @@ from PyQt4 import QtCore, QtGui
 from ccpn import Project
 from ccpn import Peak
 
-from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
@@ -37,16 +36,12 @@ from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
-#from ccpncore.memops import Notifiers
-
 from ccpncore.gui.Icon import Icon
-from ccpncore.gui.VerticalLabel import VerticalLabel
 
 from ccpncore.util import Types
 
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from application.core.modules.GuiStripNd import GuiStripNd
-
 from application.core.modules.spectrumItems import GuiPeakListView
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):

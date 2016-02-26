@@ -100,18 +100,18 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       self.background = '#080000'
       self.foreground = '#f7ffff'
       self.gridColour = '#f7ffff'
-    # pg.setConfigOption('background', self.background)  # wb104: this has no impact at this point (I think)
-    # pg.setConfigOption('foreground', self.foreground)
     self.plotWidget.setBackground(self.background)
-    #self.plotWidget.plotItem.axes['top']['item']
     self._appBase = self._parent._appBase
-
+    self.current = self._appBase.current
+    self.current.registerNotify(self.highlightCurrentStrip, 'strips')
     self.plotItem = self.plotWidget.plotItem
     self.plotItem.parent = self
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
     self.xAxisAtomLabels = []
     self.yAxisAtomLabels = []
+
+
 
     #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
     #                  viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
@@ -125,17 +125,13 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       axisItem = self.plotItem.axes[orientation]['item']
       axisItem.setPen(color=self.foreground)
     self.gridShown = True
-    # self.textItem = pg.TextItem(text=self.pid, color='w')
-    # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
-    # self.plotWidget.scene().addItem(self.textItem)
+
 
     self.viewBox.sigClicked.connect(self.mouseClicked)
-    ###proxy = pg.SignalProxy(self.viewBox.sigRangeChanged, rateLimit=10, slot=self.updateRegion)
     self.grid = CcpnGridItem(self.gridColour)
     self.plotWidget.addItem(self.grid)
     self.setMinimumWidth(200)
     self.createCrossHair()
-    #####proxy2 = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self.showMousePosition)
     self.storedZooms = []
@@ -169,6 +165,16 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
     # Notifiers.registerNotify(self.rulerCreated, 'ccpnmr.gui.Task.Ruler', '__init__')
     # Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
+
+  def highlightCurrentStrip(self, strips=None):
+    if self is self.current.strips[0]:
+      for orientation in ('right', 'bottom'):
+        axisItem = self.plotItem.axes[orientation]['item']
+        axisItem.setPen(color='#00ff00')
+    else:
+      for orientation in ('right', 'bottom'):
+        axisItem = self.plotItem.axes[orientation]['item']
+        axisItem.setPen(color=self.foreground)
 
   def printToFile(self, printer):
 

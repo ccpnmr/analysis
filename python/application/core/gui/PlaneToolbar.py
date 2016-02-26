@@ -35,9 +35,9 @@ class PlaneToolbar(ToolBar):
     self.planeLabels = []
     self.planeCounts = []
     for i in range(len(strip.orderedAxes)-2):
-      prevPlaneButton = Button(self,'<', callback=partial(callbacks[0], i))
-      prevPlaneButton.setFixedWidth(19)
-      prevPlaneButton.setFixedHeight(19)
+      self.prevPlaneButton = Button(self,'<', callback=partial(callbacks[0], i))
+      self.prevPlaneButton.setFixedWidth(19)
+      self.prevPlaneButton.setFixedHeight(19)
       planeLabel = DoubleSpinbox(self, showButtons=False)
       planeLabel.setFixedHeight(19)
       # below shouldn't be needed, this is set elsewhere
@@ -45,17 +45,17 @@ class PlaneToolbar(ToolBar):
       # below causes a problem because it calls the callback for unknown reasons
       # right after the object is constructed, and that messes up the position shown
       ###self.planeLabel.valueChanged.connect(callbacks[2])
-      nextPlaneButton = Button(self,'>', callback=partial(callbacks[1], i))
-      nextPlaneButton.setFixedWidth(19)
-      nextPlaneButton.setFixedHeight(19)
+      self.nextPlaneButton = Button(self,'>', callback=partial(callbacks[1], i))
+      self.nextPlaneButton.setFixedWidth(19)
+      self.nextPlaneButton.setFixedHeight(19)
       planeCount = Spinbox(self, showButtons=False, hAlign='c')
       planeCount.setMinimum(1)
       planeCount.setValue(1)
       planeCount.oldValue = 1
       planeCount.valueChanged.connect(partial(callbacks[3], i))
-      self.addWidget(prevPlaneButton)
+      self.addWidget(self.prevPlaneButton)
       self.addWidget(planeLabel)
-      self.addWidget(nextPlaneButton)
+      self.addWidget(self.nextPlaneButton)
       self.addWidget(planeCount)
       self.planeLabels.append(planeLabel)
       self.planeCounts.append(planeCount)

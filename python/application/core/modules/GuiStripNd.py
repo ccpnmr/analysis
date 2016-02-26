@@ -62,21 +62,12 @@ class GuiStripNd(GuiStrip):
     ###self.peakListViewDict = {}  # peakList --> peakListView
     
     self.haveSetupZWidgets = False
-    
-    ###self.plotWidget.plotItem.setAcceptDrops(True)
-    ###self.viewportWidget = QtOpenGL.QGLWidget()
-    ###self.plotWidget.setViewport(self.viewportWidget)
-    ###self.guiSpectrumDisplay.viewportDict[self.viewportWidget] = self
-    ###self.plotWidget.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
     self.viewBox.menu = self.get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
     ###self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
-    # print(guiSpectrumDisplay)
-    # self.fillToolBar()
-    # self.addSpinSystemLabel()
     self.addPlaneToolbar()
 
   def mouseDragEvent(self, event):
@@ -93,8 +84,6 @@ class GuiStripNd(GuiStrip):
     Creates and returns the Nd context menu
     """
     self.contextMenu = Menu('', self, isFloatWidget=True)
-    # self.contextMenu.addAction(self.hTraceAction)
-    # self.contextMenu.addAction(self.vTraceAction)
     self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self.toggleCrossHair, checkable=True)
     self.hTraceAction = self.contextMenu.addItem("H Trace", checked=False, checkable=True)
     self.vTraceAction = self.contextMenu.addItem("V Trace", checked=False, checkable=True)

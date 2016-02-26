@@ -152,14 +152,6 @@ def subtractPeakLists(self:'PeakList', peakList2:'PeakList'):
   """
   Subtracts peaks in peakList2 from peaks in peakList1, based on position,
   and puts those in a new peakList3.  Assumes a common spectrum for now.
-
-  .. describe:: Input
-
-  PeakList, PeakList
-
-  .. describe:: Output
-
-  PeakList
   """
 
   spectrum = self.spectrum

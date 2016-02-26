@@ -26,10 +26,10 @@ def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
   
   return 
 
-def showOkCancel(title, message, parent=None, colourScheme=None):
+def showOkCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
   dialog = MessageDialog('Query', title, message,
-                         Question, colourScheme, parent)
+                         Question, iconPath, colourScheme, parent)
 
   dialog.setStandardButtons(Ok | Cancel)
   dialog.setDefaultButton(Ok)
@@ -37,11 +37,11 @@ def showOkCancel(title, message, parent=None, colourScheme=None):
   dialog.raise_()
   return dialog.exec_() == Ok
 
-def showYesNo(title, message, parent=None, colourScheme=None):
+def showYesNo(title, message, parent=None, colourScheme=None, iconPath=None):
 
 
   dialog = MessageDialog('Query', title, message,
-                         Question, colourScheme, parent)
+                         Question, iconPath, colourScheme, parent)
                          
   dialog.setStandardButtons(Yes | No)
   dialog.setDefaultButton(Yes)
@@ -49,10 +49,10 @@ def showYesNo(title, message, parent=None, colourScheme=None):
   dialog.raise_()
   return dialog.exec_() == Yes
 
-def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None):
+def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
   dialog = MessageDialog('Retry', title, message,
-                         Question, colourScheme, parent)
+                         Question, iconPath, colourScheme, parent)
                          
   dialog.setStandardButtons( Retry | Ignore | Cancel)
   dialog.setDefaultButton(Retry)
@@ -69,10 +69,10 @@ def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None):
   else:
     return None    
 
-def showSaveDiscardCancel(title, message, parent=None, colourScheme=None):
+def showSaveDiscardCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
   dialog = MessageDialog('Query', title, message,
-                         Question, colourScheme, parent)
+                         Question, iconPath, colourScheme, parent)
                          
   dialog.setStandardButtons( Save | Discard | Cancel)
   dialog.setDefaultButton(Save)
@@ -89,10 +89,10 @@ def showSaveDiscardCancel(title, message, parent=None, colourScheme=None):
   else:
     return None    
 
-def showWarning(title, message, parent=None, colourScheme=None):
+def showWarning(title, message, parent=None, colourScheme=None, iconPath=None):
 
   dialog = MessageDialog('Warning', title, message,
-                         Warning, colourScheme, parent)
+                         Warning, iconPath, colourScheme, parent)
 
   dialog.setStandardButtons(Close)
   dialog.raise_()
@@ -100,13 +100,13 @@ def showWarning(title, message, parent=None, colourScheme=None):
  
   return
 
-def showMulti(title, message, texts, objects=None, parent=None, colourScheme=None):
+def showMulti(title, message, texts, objects=None, parent=None, colourScheme=None, iconPath=None):
 
   if objects:
     assert len(objects) == len(texts)
 
   dialog = MessageDialog('Query', title, message,
-                         Question, colourScheme, parent)
+                         Question, iconPath, colourScheme, parent)
   
   for text in texts:
     dialog.addButton(text, QtGui.QMessageBox.AcceptRole)
@@ -120,10 +120,10 @@ def showMulti(title, message, texts, objects=None, parent=None, colourScheme=Non
   else:
     return texts[index]  
 
-def showError(title, message, parent=None, colourScheme=None):
+def showError(title, message, parent=None, colourScheme=None, iconPath=None):
   
   dialog = MessageDialog('Error', title, message,
-                         Critical, colourScheme, parent)
+                         Critical, iconPath, colourScheme, parent)
 
   dialog.setStandardButtons(Close)
   dialog.raise_()
@@ -152,26 +152,23 @@ class MessageDialog(QtGui.QMessageBox):
     self.setText(basicText)
     self.setInformativeText(message)
     self.setIcon(icon)
+    palette = QtGui.QPalette()
     if iconPath:
       image = QtGui.QPixmap(iconPath)
       scaledImage = image.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
       self.setIconPixmap(scaledImage)
 
-    palette = QtGui.QPalette()
     if colourScheme == 'dark':
       self.setStyleSheet("""  QMessageBox QLabel {
                               color: #f7ffff;
                           }""")
-
-      palette.setColor(QtGui.QPalette.Background, QtGui.QColor('#2a3358'));
-
+      palette.setColor(QtGui.QPalette.Background, QtGui.QColor('#2a3358'))
     elif colourScheme == 'light':
       self.setStyleSheet("""  QMessageBox QLabel {
                               color: #555d85;
                           }""")
-      palette.setColor(QtGui.QPalette.Background, QtGui.QColor('#fbf4cc'));
-
-    self.setPalette(palette);
+      palette.setColor(QtGui.QPalette.Background, QtGui.QColor('#fbf4cc'))
+    self.setPalette(palette)
 
 if __name__ == '__main__':
 

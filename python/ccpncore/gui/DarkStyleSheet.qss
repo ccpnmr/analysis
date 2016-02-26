@@ -1,4 +1,8 @@
-﻿QDialog {
+﻿QColorDialog {
+    background-color: #2a3358;
+}
+
+QDialog {
         background-color: #2a3358;
         color: #f7ffff;
         }
@@ -312,3 +316,6 @@ Dock Assigner QWidget { background-color: #000021;
               border: 1px solid #00092d;
     }
 
+ColorDialog {
+              background-color: #2a3358;
+              }

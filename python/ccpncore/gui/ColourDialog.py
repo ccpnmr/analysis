@@ -51,6 +51,7 @@ class ColourDialog(QtGui.QColorDialog):
     self.aborted = False
     self.rejected.connect(self.quit)
 
+
   def set(self, colour):
 
     self.setColour(colour)

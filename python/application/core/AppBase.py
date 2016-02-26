@@ -293,7 +293,7 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   # On the Mac (at least) it does not matter what you set the applicationName to be,
   # it will come out as the executable you are running (e.g. "python3")
   app = Application(applicationName, applicationVersion)
-  splashPng = os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'ccpnmr-splash-screen.png')
+  splashPng = os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'ccpnmr-splash-screen.jpg')
   splashPix = QtGui.QPixmap(splashPng)
   splashImage = QtGui.QImage(splashPix.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
 

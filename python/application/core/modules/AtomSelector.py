@@ -179,10 +179,10 @@ class AtomSelector(CcpnDock):
       [self.getAtomsForButtons(atomList, 'C') for atomList in atomButtonList]
 
     if not self.hCheckBox.isChecked():
-      [self.getAtomsForButtons(atomList, 'C') for atomList in atomButtonList]
+      [self.getAtomsForButtons(atomList, 'H') for atomList in atomButtonList]
 
     if not self.nCheckBox.isChecked():
-      [self.getAtomsForButtons(atomList, 'C') for atomList in atomButtonList]
+      [self.getAtomsForButtons(atomList, 'N') for atomList in atomButtonList]
 
     rowCount = self.pickAndAssignWidget.layout().rowCount()
     colCount = self.pickAndAssignWidget.layout().columnCount()

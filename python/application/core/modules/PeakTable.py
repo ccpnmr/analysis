@@ -73,21 +73,36 @@ class PeakListSimple(QtGui.QWidget, Base):
 
     self.peakLists = project.peakLists
     self.label = Label(self, 'Peak List:')
-    self.layout().addWidget(self.label, 0, 0, QtCore.Qt.AlignRight)
-    self.setContentsMargins(0, 4, 0, 4,)
-    # self.label.setFont(Font(size=12, bold=True))
-    self.peakListPulldown = PulldownList(self, grid=(0, 1))
+    widget1 = QtGui.QWidget(self)
+    l = QtGui.QGridLayout()
+    widget1.setLayout(l)
+    widget1.layout().addWidget(self.label, 0, 0, QtCore.Qt.AlignLeft)
+
+    self.peakListPulldown = PulldownList(self)
+    widget1.layout().addWidget(self.peakListPulldown, 0, 1)
+    self.layout().addWidget(widget1, 0, 0)
     if callback is None:
       callback=self.selectPeak
+    widget2 = QtGui.QWidget(self)
+    l2 = QtGui.QGridLayout()
+    widget2.setLayout(l2)
 
-    label = Label(self, ' Position Unit:', grid=(0, 2), hAlign='r')
+    label = Label(self, ' Position Unit:')
+    widget2.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
+    self.posUnitPulldown = PulldownList(self, texts=UNITS, callback=self.refreshTable)
+    widget2.layout().addWidget(self.posUnitPulldown , 0, 1, QtCore.Qt.AlignLeft)
+    self.layout().addWidget(widget2, 0, 1)
 
-    self.posUnitPulldown = PulldownList(self, grid=(0, 3), texts=UNITS, callback=self.refreshTable)
-
-    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists', grid=(0, 4),
+    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists',
                                           callback=self.subtractPeakLists)
 
-    self.deletePeakButton = Button(self, 'Delete Selected', grid=(0, 5), callback=self.deleteSelectedPeaks)
+    self.deletePeakButton = Button(self, 'Delete Selected', callback=self.deleteSelectedPeaks)
+    self.widget3 = QtGui.QWidget(self)
+    l3 = QtGui.QGridLayout()
+    self.widget3.setLayout(l3)
+    self.widget3.layout().addWidget(self.subtractPeakListsButton, 0, 0)
+    self.widget3.layout().addWidget(self.deletePeakButton, 0, 1)
+    self.layout().addWidget(self.widget3, 0, 6, 1, 2)
 
     columns = [('#', 'serial'), ('Height', lambda pk: self.getPeakHeight(pk)),
                ('Volume', lambda pk: self.getPeakVolume(pk))]
@@ -101,7 +116,7 @@ class PeakListSimple(QtGui.QWidget, Base):
                                        columns=columns, selector=self.peakListPulldown,
                                        tipTexts=tipTexts, multiSelect=True, unitPulldown=self.posUnitPulldown)
 
-    self.layout().addWidget(self.peakTable, 3, 0, 1, 8)
+    self.layout().addWidget(self.peakTable, 1, 0, 1, 8)
     if selectedList is not None:
       self.peakListPulldown.setCurrentIndex(self.peakListPulldown.findText(selectedList.pid))
 

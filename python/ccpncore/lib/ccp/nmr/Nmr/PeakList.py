@@ -165,7 +165,7 @@ def pickNewPeaks(self:PeakList, startPoint:Sequence[int], endPoint:Sequence[int]
         try:
           result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
           height, center, linewidth = result[0]
-        except Peak.error as e:
+        except:
           # possibly should log error??
           dimCount = len(startPoint)
           height = float(dataArray[tuple(position[::-1])])

@@ -1,7 +1,7 @@
 __author__ = 'simon1'
 
 
-from ccpncore.gui.Entry import Entry
+from ccpncore.gui.Base import Base
 from ccpncore.gui.Table import ObjectTable, Column
 from application.core.modules.peakUtils import getPeakPosition, getPeakAnnotation
 
@@ -16,12 +16,13 @@ from PyQt4 import QtGui
 
 
 
-class GuiTableGenerator(QtGui.QWidget):
+class GuiTableGenerator(QtGui.QWidget, Base):
 
   def __init__(self, parent, objectLists, callback, columns, selector=None, tipTexts=None, objectType=None,
                multiSelect=False, unitPulldown=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
+      Base.__init__(self, **kw)
       self.project = objectLists[0].project
       # allList = All(self.project, objectType)
       # objectLists.append(allList)
@@ -38,12 +39,9 @@ class GuiTableGenerator(QtGui.QWidget):
       self.unitPulldown = unitPulldown
       self._getColumns(columns, tipTexts)
       self.tipTexts = tipTexts
-      layout = QtGui.QGridLayout()
-      self.setLayout(layout)
-
       self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback,
-                               multiSelect=multiSelect)
-      layout.addWidget(self.table, 0, 0, 1, 5)
+                               multiSelect=multiSelect, grid=(0, 0), gridSpan=(1, 5))
+
       self.updateContents()
       if selector is not None:
         self.selector = selector
@@ -104,7 +102,7 @@ class GuiTableGenerator(QtGui.QWidget):
         numDim = self.objectList._parent.dimensionCount
         for i in range(numDim):
           j = i + 1
-          c = Column('Assign\nF%d' % j,
+          c = Column('Assign F%d' % j,
                      lambda pk, dim=i:getPeakAnnotation(pk, dim),
                      tipText='Resonance assignments of peak in dimension %d' % j)
           tableColumns.append(c)
@@ -119,7 +117,7 @@ class GuiTableGenerator(QtGui.QWidget):
             unit = sampledDim
 
           else:
-            text = 'Pos\nF%d' % j
+            text = 'Pos F%d' % j
             tipText='Peak position in dimension %d' % j
             unit = self.unitPulldown.currentText()
           c = Column(text,

@@ -266,7 +266,7 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
   Automatically creates the corresponding Substance if the compoundName is not already taken
 
   :param Sequence sequence: string of one-letter codes or sequence of residue types
-  :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'MOlecule_n
+  :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
   :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
   :param int startNumber: number of first residue in sequence
   :param str shortName: shortName for new chain (optional)

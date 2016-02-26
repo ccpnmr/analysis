@@ -500,7 +500,7 @@ class PeakNd(QtGui.QGraphicsItem):
     ###scene.addItem(self)
     ###strip.plotWidget.plotItem.vb.addItem(self)
     # turn off ItemIsSelectable because it fails miserably when you zoom in (have to pick exactly in the centre)
-    ###self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
+    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
     self.setFlag(self.ItemIgnoresTransformations)
     self.peakListView = peakListView
     self.annotation = PeakNdAnnotation(self, scene)
@@ -535,9 +535,7 @@ class PeakNd(QtGui.QGraphicsItem):
     self.rectItem = QtGui.QGraphicsRectItem(-hz, -hz, sz, sz, self.peakLayer, scene)
     color = QtGui.QColor('cyan')
     self.rectItem.setBrush(QtGui.QBrush(color))
-    self.rectItem.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
     """
-
     self.drawData = (hz, sz)#, QtCore.QRectF(-hz, -hz, sz, sz))
     ###xDim = strip.spectrumViews[0].dimensionOrdering[0] - 1
     ###yDim = strip.spectrumViews[0].dimensionOrdering[1] - 1
@@ -663,7 +661,7 @@ class PeakNd(QtGui.QGraphicsItem):
       if self.peakListView.spectrumView.strip.peakIsInPlane(self.peak):
       # if self.isInPlane():
         # r, w, box = self.drawData
-        r, w  = self.drawData
+        r, w = self.drawData
 
         # if self.hover:
         # self.setZValue(10)

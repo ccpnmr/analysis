@@ -128,7 +128,6 @@ PulldownList::hover {
                   color: #464E76;
                   }
 ObjectTable { margin-left: 4px;
-             border: 1px #182548;
              font-family: open-sans;
              alternate-background-color: black;
            }

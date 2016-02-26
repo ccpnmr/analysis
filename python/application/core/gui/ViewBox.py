@@ -115,7 +115,7 @@ class ViewBox(pg.ViewBox):
                 peak.isSelected = True
                 self.current.peak = peak
                 break
-    """ 
+    """
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
 
       event.accept()

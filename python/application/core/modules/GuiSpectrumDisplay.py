@@ -216,11 +216,13 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
   def zoomYAll(self):
     """Zooms Y axis of current strip to show entire region"""
-    self._appBase.current.strip.zoomYAll()
+    for strip in self.strips:
+      strip.zoomYAll()
 
   def zoomXAll(self):
     """Zooms X axis of current strip to show entire region"""
-    self._appBase.current.strip.zoomXAll()
+    for strip in self.strips:
+      strip.zoomXAll()
 
   def restoreZoom(self):
     """Restores last saved zoom of current strip."""

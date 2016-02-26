@@ -92,11 +92,9 @@ def readParams(fileName):
   
   intVals.fromstring(dimData)
   floatVals.fromstring(dimData)
-  print(intVals)
   if sys.byteorder != 'big':
     intVals.byteswap()
     floatVals.byteswap()
-  print(intVals)
   for dim in range(numDims):
     base = int(((numDims - dim - 1)*UCSF_DIM_HEADER) / 4)
     numPoint = intVals[base+2]

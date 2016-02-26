@@ -97,7 +97,7 @@ class GuiStrip1d(GuiStrip):
     """
     y2 = self.viewBox.childrenBoundingRect().top()
     y1 = y2 + self.viewBox.childrenBoundingRect().height()
-    self.viewBox.setYRange(y2,y1)
+    self.viewBox.setYRange(y2, y1)
 
   def zoomXAll(self):
     """
@@ -105,7 +105,7 @@ class GuiStrip1d(GuiStrip):
     """
     x2 = self.viewBox.childrenBoundingRect().left()
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
-    self.viewBox.setXRange(x2,x1)
+    self.viewBox.setXRange(x2, x1)
 
   def showPeaks(self, peakList:PeakList, peaks=None):
     """

@@ -24,6 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 import os
 import json
+import platform
 
 from PyQt4 import QtGui, QtCore
 
@@ -200,7 +201,9 @@ def getStyleSheet(preferences):
   colourScheme = metaUtil.upperFirst(colourScheme)
   
   styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', '%sStyleSheet.qss' % colourScheme)).read()
-  
+  if platform.system() == 'Linux':
+    additions = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', '%sAdditionsLinux.qss' % colourScheme)).read()
+    styleSheet += additions
   return styleSheet
   
 def checkRegistration(applicationVersion):

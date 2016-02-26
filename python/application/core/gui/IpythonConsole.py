@@ -2,7 +2,6 @@ from PyQt4 import QtGui
 from ccpncore.gui.Base import Base
 from ccpncore.gui.TextEditor import TextEditor
 
-from ccpncore.util import Types
 from ccpncore.gui.Widget import Widget
 from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
@@ -169,6 +168,7 @@ class IpythonConsole(Widget, Base):
         if not isinstance(value, str):
           value = value.pid
         self.write("%s = project.getByPid('%s')\n" % (parameter, value))
+        self.project._logger.info("%s = project.getByPid('%s')" % (parameter, value))
 
       # execute command
       self.write(command + '\n')

@@ -147,3 +147,12 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
       spectrumDisplay.spectrumToolBar.hide()
       self._appBase.current.strip = spectrumDisplay.strips[0]
     self.dockArea.guiWindow.deleteBlankDisplay()
+
+
+  def closeDock(self):
+    """
+    Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
+    """
+    print('Cannot close blank display')
+    return
+

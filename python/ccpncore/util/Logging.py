@@ -96,6 +96,11 @@ def createLogger(loggerName, project, stream=None, level=None, mode='a', removeO
   logger.logPath = logPath  # just for convenience
   logger.shutdown = logging.shutdown  # just for convenience but tricky
 
+  if level is None:
+    level = defaultLogLevel
+
+  logger.setLevel(level)
+
   handler = logging.FileHandler(logPath, mode=mode)
   _setupHandler(handler, level)
 
@@ -105,11 +110,8 @@ def createLogger(loggerName, project, stream=None, level=None, mode='a', removeO
 
   return logger
 
-def _setupHandler(handler, level=None):
+def _setupHandler(handler, level):
   """Add a stream handler for this logger."""
-
-  if level is None:
-    level = defaultLogLevel
 
   # handler = logging.StreamHandler(stream)
   handler.setLevel(level)

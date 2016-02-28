@@ -322,6 +322,7 @@ class XmlGen(ModelTraverse):
     self.stringType = self.implPackage.getElement(metaConstants.string_code)
     self.intType = self.implPackage.getElement(metaConstants.int_code)
     self.anyType = self.implPackage.getElement('Any')
+    self.multipleType = self.implPackage.getElement('Multiple')
     self.dataObject = self.implPackage.getElement(metaConstants.dataObjClassName)
     self.topObject = self.implPackage.getElement(metaConstants.topObjClassName)
     self.dataRoot = self.implPackage.getElement(metaConstants.dataRootName)

@@ -58,6 +58,24 @@ class Tensor:
       else:
         raise ValueError ("Invalid data for orientation matrix: %s" % orientationMatrix)
 
+  def _toDict(self) -> dict:
+    """return dict representation of tensor - for use in persistence"""
+    om = self._orientationMatrix
+    if om is not None:
+      om = om.toList()
+    #
+    return {'xx':self._xx, 'yy':self._yy, 'zz':self._zz, 'orientationMatrix':om}
+
+  @classmethod
+  def _fromDict(cls, dd):
+    """Create Tensor from dict representation - for use in persistence"""
+    dd = dd.copy()
+    om = dd.get('orientationMatrix')
+    if om is not None:
+      dd['orientationMatrix'] = numpy.ndarray(om)
+    #
+    return cls(**dd)
+
   @property
   def xx(self) -> float:
     """xx component of tensor"""

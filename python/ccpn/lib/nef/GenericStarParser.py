@@ -31,7 +31,7 @@ The object structure returned is:
 DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional 'name' attribute
 DataBlocks and SaveFrames are entered in their container using their name as the key.
 
-Loop is an object with a 'columns' list, a 'data' list-of-row-lists, and a name attribute
+Loop is an object with a 'columns' list, a 'data' list-of-row-OrderedDict, and a name attribute
 set equal to the name of the first column. A loop is entered in its container under each
 column name, so that e.g. aSaveFrame['_Loopx.loopcol1'] and aSaveFrame['_Loopx.loopcol2'] both
 exist and both correspond to the same loop object.
@@ -101,9 +101,9 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import sys
-import collections
-from .StarTokeniser import getTokenIterator
 import re
+from collections import OrderedDict
+from .StarTokeniser import getTokenIterator
 
 # Constants for converting values to string
 # NB - these can be overridden by pre-converting all values to
@@ -118,7 +118,7 @@ _containsSingleEndQuote =  re.compile("'\s").search
 _containsDoubleEndQuote =  re.compile('"\s').search
 _floatingPointFormat = '%.3g'
 _defaultIndent = ' '  * 3
-_defaultSeparator = ' '  * 3
+_defaultSeparator = ' '  * 2
 # Options corresponding to the supported parser modes: 'standard', 'lenient', 'strict', and 'IUCr'
 parserModeOptions = {
   'lenient': {
@@ -162,7 +162,7 @@ FALSESTRING = UnquotedValue('false')
 class StarSyntaxError(ValueError):
   pass
 
-class NamedOrderedDict(collections.OrderedDict):
+class NamedOrderedDict(OrderedDict):
 
   def __init__(self, name=None):
     super(NamedOrderedDict, self).__init__()
@@ -176,6 +176,11 @@ class NamedOrderedDict(collections.OrderedDict):
       raise ValueError("%s: duplicate key name %s" % (self, tag))
     else:
       self[tag] = value
+
+  def _get(self, name):
+    """Synonym for get, for convenience if working with both OrderedDicts and
+    namedlists"""
+    return self.get(name)
 
 def parse(text, mode='standard'):
   """Parse STAR text string 'text'.
@@ -200,38 +205,143 @@ def parse(text, mode='standard'):
   #
   return _GeneralStarParser(text, **options).parse()
 
+class StarContainer(NamedOrderedDict):
+  """DataBlock or SaveFrame containing items and loops"""
+
+  def multiColumnValues(self, columns) -> list:
+    """get tuple of orderedDict of values for columns.
+    WIll work whether columns are in a loop or siungle values
+    If columns match a single loop or nothing, return the loop data.
+    Otherwise return a tuple with a single OrderedDict.
+    If no column matches return None
+    If columns match more than one loop throw an error"""
+    valueDict = OrderedDict((x, self.get(x)) for x in columns)
+    testSet = set(x for x in valueDict.values() if x is not None)
+    if not testSet:
+      # None of the column names match
+      return None
+    elif any(isinstance(x,Loop) for x in testSet):
+      if len(testSet) == 1:
+        # All columns match a single loop (or nothing) return the loop data
+        return tuple(testSet.pop().data)
+      else:
+        raise ValueError("%s columns %s must match either multiple items or a single loop"
+        % (self, columns))
+    else:
+      # No column matches a loop. return a single dict
+      return (valueDict,)
+
+  def  _contentToString(self, indent:str=_defaultIndent, separator:str=_defaultSeparator) -> str:
+    """Returns content of either DataBlock or SaveFrame"""
+
+    lines = []
+
+    # Set item formatting
+    # tagwidth = max(len(tt[0]) for tt in self.items()
+    #                if isinstance(tt[1], str) and '\n' not in tt[1])
+    tagwidth = max((len(tt[0]) for tt in self.items() if isinstance(tt[1], str) ), default=1)
+    tagPrefix = self.tagPrefix
+    if tagPrefix:
+      # tagwidth += len(tagPrefix)
+      itemFormat = '%s%s%%-%ss%s%%s\n' % (indent, tagPrefix, tagwidth, separator)
+    else:
+      itemFormat = '%s%%-%ss%s%%s\n' % (indent, tagwidth, separator)
+
+    # convert contents
+    for tag, obj in self.items():
+
+      if isinstance(obj, SaveFrame):
+        lines.append(obj.toString(indent=indent+_defaultIndent, separator=separator))
+
+      elif isinstance(obj, Loop):
+        if tag == obj.name:
+          # NB Loops can be contained in self once for each column.
+          # This if statement ensures we only get them once
+          lines.append(obj.toString(indent=indent, separator=separator))
+
+      else:
+        lines.append(itemFormat % (tag, valueToString(obj)))
+    #
+    return ''.join(lines)
+
 class DataExtent(NamedOrderedDict):
   """Top level container for general STAR object tree"""
   def __init__(self, name='Root'):
     super(DataExtent, self).__init__(name=name)
 
-  def toString(self, indent:str=_defaultIndent, separator:str=_defaultSeparator) -> str:
+  def toString(self, indent:str='', separator:str=_defaultSeparator) -> str:
     blockSeparator = '\n\n\n\n'
     return blockSeparator.join(x.toString(indent=indent, separator=separator) for x in self.values())
 
-class DataBlock(NamedOrderedDict):
+class DataBlock(StarContainer):
   """DataBlock for general STAR object tree"""
 
   # Tag prefix for string output, which is prefixed to item names before writing.
   # Can be set in subclass instances
   tagPrefix = None
 
-  def toString(self, indent:str=_defaultIndent, separator:str=_defaultSeparator) -> str:
 
+  def toString(self, indent:str='', separator:str=_defaultSeparator) -> str:
+
+    name = self.name
+    if not name.startswith('data_'):
+      name = 'data_' + name
     return ('%s\n\n%s\n# End of %s\n'
-            % self.name, _contentToString(self, indent=indent, separator=separator), self.name)
+            % (name, self._contentToString(indent=indent,
+                                           separator=separator), name))
 
-class SaveFrame(NamedOrderedDict):
+class SaveFrame(StarContainer):
   """SaveFrame for general STAR object tree"""
 
   # Tag prefix for string output, which is prefixed to item names before writing.
   # Can be set in subclass instances
   tagPrefix = None
 
+
   def toString(self, indent:str=_defaultIndent, separator:str=_defaultSeparator) -> str:
 
-    return ('%s\n\n%s\nsave_\n'
-            % self.name, _contentToString(self, indent=indent, separator=separator))
+
+    name = self.name
+    if not name.startswith('save_'):
+      name = 'save_' + name
+    return ('\n%s%s\n\n%s%ssave_\n\n'
+            % (indent, name, self._contentToString(indent=indent+_defaultIndent,
+                                                   separator=separator), indent))
+
+class LoopRow(OrderedDict):
+  """Loop row - OrderedDict with additional functionality"""
+
+  def _get(self, name:str):
+    """Returns value of attribute 'name', or None if attribute is not defined
+
+    Will treat a series of attributes 'foo_1', 'foo_2', 'foo+_3', etc. as a single
+    tuple attribute 'foo' """
+
+    if  not name in self and (name + '_1') in self:
+      tags = extractMatchingNameSequence(name, list(self.keys()))
+      if tags:
+        return tuple(self.get(x) for x in tags)
+    #
+    return self.get(name)
+
+  def _set(self, name:str, value:object):
+    """Sets attribute 'name' to value
+
+    Will treat a series of attributes 'foo_1', 'foo_2', 'foo+_3', etc. as a single
+    tuple attribute 'foo' """
+
+    if name in self:
+      self[name] = value
+      return
+
+    elif (name + '_1') in self:
+      tags = extractMatchingNameSequence(name, list(self.keys()))
+      if tags and len(tags) == len(value):
+        for ii, val in enumerate(value):
+          self[tags[ii]] = val
+        return
+    #
+    raise KeyError("%s has no attribute(s) matching %s" % (self.__class__.__name__, name))
 
 class Loop:
   """Loop for general STAR object tree
@@ -241,7 +351,7 @@ class Loop:
 
   - columns:  List of string column headers
 
-  - data: List-of-rows, where rows can be lists, tuples, or OrderedDicts (but must be consistent)"""
+  - data: List-of-rows, where rows are OrderedDicts """
 
   # Tag prefix for string output, which is prefixed to column names before writing.
   # Can be set in subclass instances.
@@ -253,38 +363,55 @@ class Loop:
     self.data = []
 
     if columns:
-      self.columns = list(columns)
+      self._columns = list(columns)
     else:
-      self.columns = []
+      self._columns = []
 
   def __str__(self):
     return '<%s:%s>' % (self.__class__.__name__, self.name)
 
-  def addRow(self, row:list):
-    columnCount = len(self.columns)
-    data = self.data
-    if data and len(data[-1]) != columnCount:
-      raise ValueError("%s: Cannot add row - previous row is incomplete" % self)
-    elif len(row) != columnCount:
-      raise ValueError("%s: Wrong row length - was %s, should be %s"
-                       % (self, len(row),  columnCount))
-    else:
-      self.data.append(list(row))
+  @property
+  def columns(self) -> list:
+    """Column names"""
+    return tuple(self._columns)
 
-  def addValue(self, value:str):
-    data = self.data
-    if data:
-      row = data[-1]
-      if len(row) >= len(self.columns):
-        row = []
-        data.append(row)
+  def newRow(self, values=None) -> LoopRow:
+    """Add new row, initialised from values"""
+
+    if values is None:
+      row = LoopRow((x,None) for x in self.columns)
+
+    elif isinstance(values, dict):
+      ll = tuple(x for x in values if x not in self.columns)
+      if ll:
+        raise ValueError("Illegal fields in row input: %s" % ll)
+      else:
+        row = LoopRow((x,values.get(x)) for x in self.columns)
+
     else:
-      row = []
-      data.append(row)
-    row.append(value)
+      if len(values) > len(self.columns):
+        raise ValueError("Row passed %s values for %s columns" % (len(values), len(self.columns)))
+      row = LoopRow(zip(self.columns,values))
+    #
+    self.data.append(row)
+    return row
+
+  def _addValue(self, value:str):
+    """Put value in first slot in current row where previous value is None
+    Add new row if necessary"""
+    data = self.data
+
+    if data and None in data[-1].values():
+      row = data[-1]
+      index = list(row.values()).index(None)
+    else:
+      row = self.newRow()
+      index = 0
+    #
+    row[self.columns[index]] = value
 
   def addColumn(self, value:str):
-    columns = self.columns
+    columns = self._columns
     if value in columns:
       raise ValueError("%s: duplicate column name: %s" % (self, value))
     elif self.data:
@@ -303,7 +430,7 @@ class Loop:
     lineFormat = indent + _defaultIndent + '%s\n'
 
     # Start tag
-    lines = [indent + 'loop_\n']
+    lines = ['\n' + indent + 'loop_\n']
 
     # Write column headers
     if self.tagPrefix:
@@ -318,52 +445,23 @@ class Loop:
     # First convert to strings to get correct columns widths
     data = self.data
     if data:
-      if isinstance(data[0], (list, tuple)):
+
+      if isinstance((data[0]), OrderedDict):
+        data = [[valueToString(y) for y in list(x.values())] for x in self.data]
+      else:
+        # Must be a sequence of some kind. This will break for non-ordered dicts
         data = [[valueToString(y) for y in x] for x in self.data]
-      elif isinstance((data[0]), collections.OrderedDict):
-        data = [[valueToString(y) for y in x.values()] for x in self.data]
-      columnWidths = [max(len(x) for x in col) for col in zip(data)]
+
+      columnWidths = [max(len(x) for x in col) for col in zip(*data)]
       for row in data:
         lines.append(lineFormat %
-          separator.join('%-*s' % (row[ii], wdth) for ii,wdth in enumerate(columnWidths))
+          separator.join('%-*s' % (wdth, row[ii]) for ii,wdth in enumerate(columnWidths))
         )
 
     # Add stop_
-    lines.append( indent + 'stop_\n\n')
+    lines.append( indent + 'stop_\n')
 
     return ''.join(lines)
-
-
-def  _contentToString(container, indent:str=_defaultIndent, separator:str=_defaultSeparator) -> str:
-  """Returns content of either DataBlock or SaveFrame"""
-
-  lines = []
-
-  # Set item formatting
-  tagwidth = max(len(x) for x in container)
-  tagPrefix = container.tagPrefix
-  if tagPrefix:
-    tagwidth += len(tagPrefix)
-    itemFormat = '  %s %%-%ss%s\n' % (tagPrefix, tagwidth, separator)
-  else:
-    itemFormat = '   %%-%ss%s\n' % (tagwidth, separator)
-
-  # convert contents
-  for tag, obj in container:
-
-    if isinstance(obj, SaveFrame):
-      lines.append(obj.toString(indent=indent+_defaultIndent, separator=separator))
-
-    elif isinstance(obj. Loop):
-      if tag == obj.name:
-        # NB Loops can be contained in self once for each column.
-        # This if statement ensures we only get them once
-        lines.append(obj.toString(indent=indent, separator=separator))
-
-    else:
-      lines.append(itemFormat % (tag, valueToString(obj)))
-  #
-  return ''.join(lines)
 
 
 def valueToString(value):
@@ -420,9 +518,9 @@ def valueToString(value):
           # NB CHANGES VALUE
           value =  '\n'.join(' ' + x for x in lines)
       if value[-1] == '\n':
-        value = '\n;%s; '
+        value = '\n;%s; '  % value
       else:
-        value = '\n;%s\n; '
+        value = '\n;%s\n; '  % value
     #
     return value
 
@@ -489,27 +587,30 @@ class _GeneralStarParser:
   def _closeLoop(self, value):
     loop = self.stack[-1]
     if not isinstance(loop, Loop):
-      raise StarSyntaxError(self._errorMessage("Loop stop_ %s outside loop" % value))
+      raise StarSyntaxError(self._errorMessage("Loop stop_ %s outside loop" % value, value))
 
     columns = loop.columns
     data = loop.data
     if not columns:
-      raise StarSyntaxError(self._errorMessage(" loop lacks column names" ))
+      raise StarSyntaxError(self._errorMessage(" loop lacks column names" , value))
 
     if data:
-      missingValueCount = len(columns) - len(data[-1])
-      if missingValueCount > 0:
+      row = data[-1]
+      if None in row.values():
+        missingValueCount = len([x for x in row.values() if x is None])
         if self.padIncompleteLoops:
           print("WARNING Token %s: %s in %s is missing %s values. Last row was: %s"
                 % (self.counter, loop, self.stack[-2], missingValueCount, data[-1]))
           # for row in data:
           #   print( ' - ', *row)
-
-          data[-1].extend([UnquotedValue('.')] * missingValueCount)
+          for key,val in row.items():
+            if val is None:
+              row[key] = NULL
         else:
           raise StarSyntaxError(
-            self._errorMessage("loop %s is missing %s values"% (loop, missingValueCount))
+            self._errorMessage("loop %s is missing %s values" % (loop, missingValueCount), value)
           )
+
     else:
       # empty loops appear here. We allow them, but that could change
       pass
@@ -523,7 +624,7 @@ class _GeneralStarParser:
     if loop.data:
       if self.enforceLoopStop:
         raise StarSyntaxError(
-          self._errorMessage("Illegal token %s in unclosed loop" % value)
+          self._errorMessage("Illegal token %s in unclosed loop" % value, value)
         )
       else:
         # Dataname among loop values. Interpreted as loop stop followed by new item start
@@ -561,7 +662,7 @@ class _GeneralStarParser:
     if isinstance(stack[-1], Loop):
       if self.enforceLoopStop:
         raise StarSyntaxError(
-          self._errorMessage("Loop terminated by %s instead of stop_" % value)
+          self._errorMessage("Loop terminated by %s instead of stop_" % value, value)
         )
       else:
         # Close loop and pop it off the stack
@@ -570,7 +671,7 @@ class _GeneralStarParser:
     if isinstance(stack[-1], SaveFrame):
       if self.enforceSaveFrameStop:
         raise StarSyntaxError(
-          self._errorMessage("SaveFrame terminated by %s instead of save_" % value)
+          self._errorMessage("SaveFrame terminated by %s instead of save_" % value, value)
         )
       else:
         stack.pop()
@@ -584,7 +685,7 @@ class _GeneralStarParser:
         value = value.lower()
       self._addDataBlock(value)
     else:
-      raise StarSyntaxError(self._errorMessage("Parser error at token %s" % value))
+      raise StarSyntaxError(self._errorMessage("Parser error at token %s" % value, value))
 
 
   def _closeSaveFrame(self, value:str):
@@ -597,7 +698,7 @@ class _GeneralStarParser:
     if isinstance(stack[-1], Loop):
       if self.enforceLoopStop:
         raise StarSyntaxError(
-          self._errorMessage("Loop terminated by %s instead of stop_" % value)
+          self._errorMessage("Loop terminated by %s instead of stop_" % value, value)
         )
       else:
         # Close loop and pop it off the stack
@@ -610,7 +711,7 @@ class _GeneralStarParser:
           stack.pop()#
 
       elif self.enforceSaveFrameStop:
-        self._errorMessage("SaveFrame terminated by %s instead of save_" % value)
+        self._errorMessage("SaveFrame terminated by %s instead of save_" % value, value)
 
       else:
         # New saveframe start. We are missing the terminator, but close and continue anyway
@@ -618,7 +719,7 @@ class _GeneralStarParser:
 
     if not isinstance((stack[-1]), DataBlock):
       if lowerValue == 'save_':
-        raise StarSyntaxError(self._errorMessage("'%s' found out of context" % value))
+        raise StarSyntaxError(self._errorMessage("'%s' found out of context" % value, value))
 
   def _openSaveFrame(self, value:str):
 
@@ -631,7 +732,7 @@ class _GeneralStarParser:
       self._addSaveFrame(value)
     else:
       raise StarSyntaxError(
-        self._errorMessage("saveframe start out of context: %s" % value)
+        self._errorMessage("saveframe start out of context: %s" % value, value)
       )
 
   def _openLoop(self, value:str):
@@ -643,11 +744,11 @@ class _GeneralStarParser:
       if not stack[-1].data:
         # NB, nested loops are not supported
         raise StarSyntaxError(
-          self._errorMessage("Loop terminated by %s instead of stop_" % value)
+          self._errorMessage("Loop terminated by %s instead of stop_" % value, value)
         )
       elif self.enforceLoopStop:
         raise StarSyntaxError(
-          self._errorMessage("Loop terminated by %s instead of stop_"%  value)
+          self._errorMessage("Loop terminated by %s instead of stop_"%  value, value)
         )
       else:
         # Close loop and pop it off the stack
@@ -658,39 +759,38 @@ class _GeneralStarParser:
       stack.append(Loop(name='loop_'))
 
     else:
-      raise StarSyntaxError(self._errorMessage("loop_ out of context"))
+      raise StarSyntaxError(self._errorMessage("loop_ out of context", value))
 
-  def processBadToken(self, value, typ):
-    if not typ == 'SQUARE_BRACKET' and self.allowSquareBracketStrings:
-      raise StarSyntaxError(self._errorMessage("Illegal token of type% s:  %s" % (typ, value)))
+  def _processBadToken(self, value, typ):
+    raise StarSyntaxError(self._errorMessage("Illegal token of type% s:  %s" % (typ, value), value))
 
-def processDataName(self, value):
+  def processDataName(self, value):
 
-  stack = self.stack
+    stack = self.stack
 
-  useValue = value.lower() if self.lowerCaseTags else value
-  if isinstance(stack[-1], (SaveFrame, DataBlock)):
-    stack.append(useValue)
-  elif isinstance(stack[-1], Loop):
-    self._addLoopField(useValue)
-  else:
-    raise StarSyntaxError(self._errorMessage(
-      "Found item name %s: Must be in DataBlock, SaveFrame, or Loop header)"% value)
-    )
+    useValue = value.lower() if self.lowerCaseTags else value
+    if isinstance(stack[-1], (SaveFrame, DataBlock)):
+      stack.append(useValue)
+    elif isinstance(stack[-1], Loop):
+      self._addLoopField(useValue)
+    else:
+      raise StarSyntaxError(self._errorMessage(
+        "Found item name %s: Must be in DataBlock, SaveFrame, or Loop header)"% value, value)
+      )
 
 
-def processValue(self, value):
-  stack = self.stack
-  last = stack[-1]
-  if isinstance(last, str):
-    # Value half of tag, value pair
-    stack.pop()
-    stack[-1].addItem(last, value)
-  elif isinstance(last, Loop):
-    last.addValue(value)
-  else:
-    raise StarSyntaxError(self._errorMessage("Data value %s must be in item or loop_"
-                                             % value))
+  def processValue(self, value):
+    stack = self.stack
+    last = stack[-1]
+    if isinstance(last, str):
+      # Value half of tag, value pair
+      stack.pop()
+      stack[-1].addItem(last, value)
+    elif isinstance(last, Loop):
+      last._addValue(value)
+    else:
+      raise StarSyntaxError(self._errorMessage("Data value %s must be in item or loop_" % value,
+                                               value))
 
   def parse(self):
 
@@ -720,13 +820,18 @@ def processValue(self, value):
         elif typ == 'LOOP':
           self._openLoop(value)
         elif typ == 'LOOP_STOP':
-            self._closeLoop()
-        elif typ in ('BAD_CONSTRUCT', 'SQUARE_BRACKET', 'BAD_TOKEN'):
-          self.processBadToken(value, typ)
+            self._closeLoop(value)
+        elif typ in ('BAD_CONSTRUCT', 'BAD_TOKEN'):
+          self._processBadToken(value, typ)
+        elif typ == 'SQUARE_BRACKET':
+          if self.allowSquareBracketStrings:
+            self.processValue(UnquotedValue(value))
+          else:
+            self._processBadToken(value, typ)
         elif typ == 'DATA_NAME':
           self.processDataName(value)
         else:
-          if typ in ('NULL', 'UNKNOWN', 'SAVE_FRAME_REF', 'STRING', 'SQUARE_BRACKET'):
+          if typ in ('NULL', 'UNKNOWN', 'SAVE_FRAME_REF', 'STRING'):
             # Set to 'UnquotedValue string subtype
             value = UnquotedValue(value)
           else:
@@ -736,7 +841,7 @@ def processValue(self, value):
 
       # End of data - clean up stack
       if isinstance(stack[-1], str):
-        raise StarSyntaxError(self._errorMessage("File ends with item name"))
+        raise StarSyntaxError(self._errorMessage("File ends with item name", value))
 
       if isinstance(stack[-1], Loop):
         self._closeLoop('<End-of-File>')
@@ -751,26 +856,26 @@ def processValue(self, value):
         stack.pop()
 
       if stack:
-        raise RuntimeError(self._errorMessage("stack not empty at end of file"))
+        raise RuntimeError(self._errorMessage("stack not empty at end of file", value))
     except:
       print("ERROR at token %s" % self.counter)
       raise
     #
     return result
 
-  def _errorMessage(self, msg):
+  def _errorMessage(self, msg, value):
     """Make standard error message"""
-    template = "Error in context: %s, at line: %s\n%s"
-    tags = [(x if isinstance(x, str) else x.name) for x in self.stack[1:]]
+    template = "Error in context: %s, at token %s, line: %s\n%s"
+    tags = [(x if isinstance(x, str) else x.name) for x in self.stack[1:]] + [value]
 
-    lines = self.text.splitLines()
+    lines = self.text.splitlines()
     lineCount = len(lines)
     ii = 0
     if tags:
       jj = 0
       tag = tags[jj]
       while ii < lineCount:
-        if tag in lines[ii].split():
+        if tag in lines[ii].lower().split():
           # This line contains the current tag - go to the next tag
           jj += 1
           if jj < len(tags):
@@ -782,7 +887,22 @@ def processValue(self, value):
           # nothing found here - try next line
           ii += 1
     #
-    return template % (tags, ii, msg)
+    return template % (tags[:-1], tags[-1], ii+1, msg)#
+
+
+def extractMatchingNameSequence(name:str, matchNames:list) -> list:
+  """Get list of matchNames matching 'name_1', 'name_2', ..., in order."""
+  ll =[]
+  for tag in matchNames:
+    tt = tag.split('_',1)
+    if name == tt[0] and len(tt) > 1 and tt[1].isdigit():
+      ll.append((int(tt[1]), tag))
+  ll.sort()
+
+  if [ll[0] for x in ll] == list(range(1, len(ll)+1)):
+    return [x[1] for x in ll]
+  else:
+    return None
 
 
 def loadGenericStarFile(fileName:str, mode:str='standard') -> DataExtent:
@@ -790,9 +910,6 @@ def loadGenericStarFile(fileName:str, mode:str='standard') -> DataExtent:
 
   text = open(fileName).read()
   return parse(text, mode=mode)
-
-
-
 
 
 if __name__ == "__main__":

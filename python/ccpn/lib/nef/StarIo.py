@@ -35,8 +35,10 @@ __version__ = "$Revision$"
 # NBNB some longer variable names;
 
 import os
-from collections import OrderedDict
+import keyword
 from . import GenericStarParser
+from ccpncore.util.Types import Union, Sequence, Optional
+from ccpncore.util import Common as commonUtil
 
 class StarValidationError(ValueError):
   pass
@@ -45,8 +47,22 @@ class NmrDataExtent(GenericStarParser.DataExtent):
   """Top level container (OrderedDict) for NMRSTAR/NEF object tree"""
   pass
 
-class NmrDataBlock(GenericStarParser.DataBlock):
-  """DataBlock (OrderedDict)for NMRSTAR/NEF object tree"""
+class NmrLoop(GenericStarParser.Loop):
+  """Loop for NMRSTAR/NEF object tree
+
+  The contents, self.datal is a list of namedlist objects matching the column names.
+  rows can be modified or deleted from data, but adding new rows directly is likely to
+  break - use the newRow function."""
+
+  @property
+  def category(self) -> str:
+    """Loop category tag - synonym for name (unlike the case of SaveFrame)"""
+    return self.name
+
+  @property
+  def tagPrefix(self) -> str:
+    """Prefix to use before item tags on output"""
+    return '_%s.' % self.name
 
 class NmrSaveFrame(GenericStarParser.SaveFrame):
   """SaveFrame (OrderedDict)for NMRSTAR/NEF object tree"""
@@ -56,30 +72,29 @@ class NmrSaveFrame(GenericStarParser.SaveFrame):
     self.category = category
 
   @property
-  def tagPrefix(self):
+  def tagPrefix(self) -> str:
     """Prefix to use before item tags on output"""
     return '_%s.' % self.category
 
-class NmrLoop(GenericStarParser.Loop):
-  """Loop for NMRSTAR/NEF object tree"""
+  def newLoop(self, name, columns) -> NmrLoop:
+    """Make new NmrLoop and add it to the NmrSaveFrame"""
+    loop = NmrLoop(name, columns)
+    self.addItem(name, loop)
+    return loop
 
-  @property
-  def category(self) -> str:
-    """Loop category tag - synonym for name (unlike the case of SaveFrame)"""
-    return self.name
+class NmrDataBlock(GenericStarParser.DataBlock):
+  """DataBlock (OrderedDict)for NMRSTAR/NEF object tree"""
 
-  @property
-  def tagPrefix(self):
-    """Prefix to use before item tags on output"""
-    return '_%s.' % self.name
+  def newSaveFrame(self, name:str, category:str) -> NmrSaveFrame:
+    """Make new NmrSaveFrame and add it to the DataBlock"""
+    saveFrame = NmrSaveFrame(name, category=category)
+    self.addItem(name, saveFrame)
+    saveFrame.addItem('sf_framecode', name)
+    saveFrame.addItem('sf_category', category)
+    return saveFrame
 
-  # Add e.g. newEmptyRow
-
-class NmrLoopRow(OrderedDict):
-  """Row for Loop - OrderedDIct with additional functions"""
+class NmrLoopRow(GenericStarParser.LoopRow):
   pass
-
-# Add here e.g. getValueList, setValueList, ...
 
 
 class _StarDataConverter:
@@ -92,7 +107,7 @@ class _StarDataConverter:
   validFileTypes = ('nef', 'star')
 
   def __init__(self, dataExtent:GenericStarParser.DataExtent, fileType='star',
-               specification=None):
+               specification=None, convertColumnNames=True):
 
     # Set option settings
     if specification is None:
@@ -103,6 +118,8 @@ class _StarDataConverter:
     if fileType not in self.validFileTypes:
       raise StarValidationError("fileType %s must be one of %s" % (fileType, self.validFileTypes))
     self.fileType = fileType
+
+    self.convertColumnNames = convertColumnNames
 
     self.dataExtent = dataExtent
 
@@ -193,7 +210,7 @@ class _StarDataConverter:
         % [tt[0] for tt in saveFrame.items() if isinstance(tt[1], str)]
       )
 
-    sf_category = saveFrame.get( prefix + 'sf_category')
+    sf_category = saveFrame.get(prefix + 'sf_category')
     if sf_category is None:
       self.raiseValidationError("SaveFrame lacks .sf_category item")
     sf_framecode = saveFrame.get( prefix + 'sf_framecode')
@@ -234,7 +251,7 @@ class _StarDataConverter:
 
     self.stack.append(saveFrame)
 
-    #Get common dot-separted prefix from non-loop items
+    #Get common dot-separated prefix from non-loop items
     commonPrefix = os.path.commonprefix([tt[0] for tt in saveFrame.items()
                                          if isinstance(tt[1], str)])
     tt = commonPrefix.split('.', 1)
@@ -255,13 +272,13 @@ class _StarDataConverter:
 
     newSaveFrame = NmrSaveFrame(name=sf_framecode, category=sf_category)
 
-    lowercategory = newSaveFrame.category.lower()
+    lowerCaseCategory = newSaveFrame.category.lower()
     for tag, value in saveFrame.items():
 
       self.stack.append(tag)
 
       if isinstance(value, str):
-        value = self.convertValue(value, category=lowercategory, tag=tag)
+        value = self.convertValue(value, category=lowerCaseCategory, tag=tag)
         objname = tag[len(prefix):]
         newSaveFrame.addItem(objname, value)
 
@@ -306,27 +323,44 @@ class _StarDataConverter:
                                                                                     oldColumns)
       )
 
-    columns = [x[lenPrefix:] for x in oldColumns]
-    newLoop = NmrLoop(category, columns=columns)
-    newData = newLoop.data
-    ff = self.convertValue #convertValue(value, category=lowercategory, tag=tag)
+    columns = []
+    for ss in oldColumns:
+      tag = ss[lenPrefix:]
+
+      # Check for valid field names
+      if tag.startswith('_') or not tag.isidentifier():
+        if self.convertColumnNames:
+          # make the name valid
+          tag = ''.join(x if x.isalnum() else '_' for x in tag)
+          while tag.startswith('_'):
+            tag = tag[1:]
+        else:
+          raise ValueError("Invalid column name: %s" % ss)
+
+      if keyword.iskeyword(tag):
+        raise ValueError("column name (as modified) clashes with Python keyword: %s" % ss)
+
+      columns.append(tag)
+
+    newLoop = NmrLoop(category, columns)
+    ff = self.convertValue #convertValue(value, category=lowerCaseCategory, tag=tag)
     for row in loop.data:
-      newData.append(NmrLoopRow((tag, ff(row[ii], category, tag))
-                                for ii,tag in enumerate(columns)))
+      values = [ff(x, category, columns[ii]) for ii,x in enumerate(row.values()) ]
+      newLoop.newRow(values)
 
     #
     self.stack.pop()
     return newLoop
 
   def convertValue(self, value, category=None, tag=None):
-    """NB category is needed when we want to use self.speicfication"""
+    """NB category and tag are needed when we want to use self.specification"""
 
     if self.specification:
       # Add specification-dependent processing here
       #
       return value
 
-    if isinstance(value, GenericStarParser.UnquotedValue) and self.fileType == 'nef':
+    if isinstance(value, GenericStarParser.UnquotedValue):
       # Convert special values
       if value == GenericStarParser.NULL :
         # null  value

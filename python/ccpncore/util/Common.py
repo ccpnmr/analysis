@@ -38,7 +38,6 @@ from functools import total_ordering
 from ccpncore.util import Path
 from ccpncore.lib import Constants as coreLibConstants
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.util.Types import Sequence, Optional, List
 
 WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 

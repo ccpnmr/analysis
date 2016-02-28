@@ -120,6 +120,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.booleanType = self.elementVarType(impl.getElement('Boolean'))
     self.intType = self.elementVarType(impl.getElement('Int'))
     self.anyType = self.elementVarType(impl.getElement('Any'))
+    self.multipleType = self.elementVarType(impl.getElement('Multiple'))
     self.stringType = self.elementVarType(impl.getElement('String'))
     self.stringKeyDictType = self.elementVarType(impl.getElement(
                                                 'StringKeyDict'))
@@ -3045,7 +3046,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
         self.endIf()
 
       elif dataType is self.anyObject:
-        # a pass necessary ass this is within a loop
+        # a pass necessary as this is within a loop
         self.noStatement()
         
       else:

@@ -78,11 +78,13 @@ string_code = 'String'
 boolean_code = 'Boolean'
 datetime_code = 'DateTime'
 dict_code = 'Dict'
+multiple_code = 'Multiple'
 typeCode_enumeration = [int_code, float_code, ieee_float_code,
- string_code, boolean_code, datetime_code, dict_code,
+ string_code, boolean_code, datetime_code, dict_code, multiple_code,
 ]
 typeCode_enumeration.sort()
 
+# NB it might be better to avoid this as it puts (can cause circular imports with 'Multiple' data type)
 baseDataTypeModule = __import__(
  'ccpncore.memops.baseDataTypes', globals(), locals(), typeCode_enumeration
 )

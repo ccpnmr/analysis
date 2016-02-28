@@ -219,8 +219,6 @@ def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label
   
 def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
   """Fetch chain with given shortName; If none exists call newNmrChain to make one first
-
-  :param str shortName: shortName for new chain (optional)
   """
 
   if shortName and Pid.altCharacter in shortName:

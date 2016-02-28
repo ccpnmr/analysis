@@ -26,12 +26,11 @@ __version__ = "$Revision$"
 # import datetime
 from ccpncore.util import Pid
 # from ccpncore.lib import Constants as coreConstants
-from ccpncore.util import Common as commonUtil
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Atom
 from ccpncore.api.ccp.molecule.MolSystem import GenericBond as ApiGenericBond
-from ccpncore.util.Types import Tuple, Sequence
+from ccpncore.util.Types import Tuple
 
 
 class Bond(AbstractWrapperObject):

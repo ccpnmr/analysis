@@ -274,9 +274,6 @@ class ViewBox(pg.ViewBox):
 
       event.accept()
 
-
-
-
     elif (event.button() == QtCore.Qt.LeftButton) and (
               event.modifiers() & QtCore.Qt.ShiftModifier) or  (
               event.modifiers() & QtCore.Qt.ControlModifier):
@@ -297,21 +294,31 @@ class ViewBox(pg.ViewBox):
         self.current.clearPeaks()
         for spectrumView in self.current.strip.spectrumViews:
           for peakList in spectrumView.spectrum.peakLists:
-            stripAxisCodes = [axis.code for axis in self.current.strip.orderedAxes]
-            axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
-            xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
-            yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
-            for peak in peakList.peaks:
-              if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-                if zPositions is not None:
-                  zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
-                  if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                    peak.isSelected = True
-                    self.current.addPeak(peak)
-                else:
+            stripAxisCodes = self.current.strip.axisOrder
+            # TODO: Special casing 1D here, seems like a hack.
+            if len(spectrumView.spectrum.axisCodes) == 1:
+              # TODO: because 1d peaks only have an x-axis, this will not select based on intensity!!!
+              xAxis = 0
+              for peak in peakList.peaks:
+                if xPositions[0] < float(peak.position[xAxis]) < xPositions[1]:
                   peak.isSelected = True
                   self.current.addPeak(peak)
+            else:
+              # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
+              axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
+              xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
+              yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
+              for peak in peakList.peaks:
+                if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                  and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+                  if zPositions is not None:
+                    zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+                    if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                      peak.isSelected = True
+                      self.current.addPeak(peak)
+                  else:
+                    peak.isSelected = True
+                    self.current.addPeak(peak)
       else:
         self._updateSelectionBox(event.buttonDownPos(), event.pos())
       event.accept()

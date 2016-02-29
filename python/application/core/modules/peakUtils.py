@@ -18,7 +18,7 @@ def getPeakPosition(peak, dim, unit='ppm'):
 
     else: # sampled
       # value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]
-     raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
+      raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
                      % unit)
 
     return '%7.2f' % float(value)

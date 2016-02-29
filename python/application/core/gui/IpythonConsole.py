@@ -168,7 +168,6 @@ class IpythonConsole(Widget, Base):
         if not isinstance(value, str):
           value = value.pid
         self.write("%s = project.getByPid('%s')\n" % (parameter, value))
-        self.project._logger.info("%s = project.getByPid('%s')" % (parameter, value))
 
       # execute command
       self.write(command + '\n')

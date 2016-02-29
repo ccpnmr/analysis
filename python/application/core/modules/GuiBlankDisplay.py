@@ -103,14 +103,16 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
         spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(ss)
         self._appBase.current.strip = spectrumDisplay.strips[0]
         self.dockArea.guiWindow.deleteBlankDisplay()
-        # msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
-        # self.dockArea.window().pythonConsole.write(msg)
-        # self.dockArea.window().pythonConsole.writeCommand('spectrum',
-        #                                                   'application.createSpectrumDisplay',
-        #                                                   arguments=['spectrum'], pid=ss)
-        # NBNB Modified - was wrong before. RHF (wb104: fixed the fix)
-        self.dockArea.guiWindow.pythonConsole.writeConsoleCommand("window.createSpectrumDisplay(spectrum)",
+        self.dockArea.guiWindow.pythonConsole.writeConsoleCommand("application.createSpectrumDisplay(spectrum)",
                                                spectrum=ss, window=self.dockArea.guiWindow)
+        self.dockArea.guiWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
+
+        self._appBase.project._logger.info('spectrum = project.getByPid("%s")' % ss)
+        self._appBase.project._logger.info('application.createSpectrumDisplay(spectrum)')
+        self._appBase.project._logger.info('application.deleteBlankDisplay()')
+        self.dockArea.guiWindow.deleteBlankDisplay()
+
+
       except NotImplementedError:
         pass
 
@@ -123,9 +125,9 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
       for sp in spectrumPids[1:]:
         spectrumDisplay.displaySpectrum(sp)
       self.dockArea.guiWindow.deleteBlankDisplay()
-      # msg = 'application.createSpectrumDisplay(project.getByPid("%s"))\n' % ss
       self.dockArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay',
                                                         'sample', pid=ss)
+    self.dockArea.guiWindow.deleteBlankDisplay()
 
   def processSpectrum(self, spectrum:(Spectrum,Pid), event):
     """Process dropped spectrum"""
@@ -133,6 +135,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     self.dockArea.guiWindow.deleteBlankDisplay()
     msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % spectrum
     self.dockArea.window().pythonConsole.write(msg)
+    self.dockArea.guiWindow.deleteBlankDisplay()
 
 
   def processSpectrumGroups(self, pids:Sequence[str], event):
@@ -153,6 +156,5 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     """
     Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
     """
-    print('Cannot close blank display')
-    return
+    self._appBase.project._logger.info('Cannot close blank display')
 

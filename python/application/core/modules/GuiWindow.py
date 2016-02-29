@@ -37,7 +37,6 @@ from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosi
 
 from application.core.DropBase import DropBase
 from application.core.modules.GuiBlankDisplay import GuiBlankDisplay
-from application.core.popups.ExperimentTypePopup import ExperimentTypePopup
 from application.core.modules.GuiStripNd import GuiStripNd
 
 class GuiWindow(DropBase):
@@ -137,7 +136,7 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
     QtGui.QShortcut(QtGui.QKeySequence("f, r"), self, partial(navigateToNmrResidue, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project))
-    QtGui.QShortcut(QtGui.QKeySequence("e, t"), self, partial(self.showExptTypePopup, self._parent.project))
+
     QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current))
     QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self.clearCurrentPeaks)
 
@@ -307,9 +306,3 @@ class GuiWindow(DropBase):
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.setCrossHairPosition(axisPositionDict)
 
-  def showExptTypePopup(self, project):
-    """
-    Displays experiment type popup.
-    """
-    popup = ExperimentTypePopup(self, project)
-    popup.exec_()

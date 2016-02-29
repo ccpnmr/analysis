@@ -124,6 +124,8 @@ class DropBase(GuiBase):
         # Load Urls one by one with normal loaders
         for url in data:
           loaded = project.loadData(url)
+          self._appBase.mainWindow.pythonConsole.writeConsoleCommand('project.loadData(%s)' % url)
+          project._logger.info('project.loadData(%s)' % url)
           if loaded:
             if isinstance(loaded, str):
               if hasattr(self, 'processText'):

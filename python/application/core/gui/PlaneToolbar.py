@@ -35,7 +35,7 @@ class PlaneToolbar(ToolBar):
     self.planeLabels = []
     self.planeCounts = []
     for i in range(len(strip.orderedAxes)-2):
-      self.prevPlaneButton = Button(self,'<', callback=partial(callbacks[0], i))
+      self.prevPlaneButton = Button(self, '<', callback=partial(callbacks[0], i))
       self.prevPlaneButton.setFixedWidth(19)
       self.prevPlaneButton.setFixedHeight(19)
       planeLabel = DoubleSpinbox(self, showButtons=False)

@@ -64,6 +64,7 @@ from application.core.modules.ScreeningSetup import ScreeningSetup
 from application.metabolomics.Metabolomics import MetabolomicsModule
 
 from application.core.popups.BackupPopup import BackupPopup
+from application.core.popups.ExperimentTypePopup import ExperimentTypePopup
 from application.core.popups.FeedbackPopup import FeedbackPopup
 from application.core.popups.PreferencesPopup import PreferencesPopup
 from application.core.popups.SampleSetupPopup import SamplePopup
@@ -190,24 +191,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.pythonConsole = IpythonConsole(self, self.namespace, mainWindow=self)
 
-    # self.pythonConsoleDock.layout.addWidget(self.pythonConsole)
-    # self.pythonConsoleDock.label.hide()
-    # self.dockArea.addDock(self.pythonConsoleDock, 'bottom')
-    # self.pythonConsoleDock.hide()
+
     self.sideBar = SideBar(parent=self)
     self.sideBar.setDragDropMode(self.sideBar.DragDrop)
-    # self.sideBar.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.splitter3.addWidget(self.sideBar)
     self.splitter1.addWidget(self.splitter3)
-    # self.splitter2 = QtGui.QSplitter(QtCore.Qt.Vertical)
-    # self.splitter1.setStretchFactor(0, 2)
-    # self.splitter2.addWidget(self.splitter1)
     self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
-    # self.splitter2.addWidget(self.pythonConsole)
-    # self.splitter2.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Minimum)
-    # self.splitter2.setStretchFactor(0, 10)
-    # self.splitter2.setStretchFactor(1, 1)
-
     self.splitter1.addWidget(self.dockArea)
     self.setCentralWidget(self.splitter1)
     self.statusBar().showMessage('Ready')
@@ -220,13 +209,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     passed at startup.
     """
     self._menuBar =  MenuBar(self)
-    # print(self._menuBar.font())
     fileMenu = Menu("&Project", self)
-    self.screenMenu = QtGui.QMenu("&Screen", self)
-    self.metabolomicsMenu = QtGui.QMenu("&Metabolomics", self)
-    peaksMenu = Menu("Peaks", self)
+    self.screenMenu = Menu("&Screen", self)
+    self.metabolomicsMenu = Menu("&Metabolomics", self)
+    spectrumMenu = Menu("Spectrum", self)
     viewMenu = Menu("&View", self)
-    moleculeMenu = Menu("&Molecules", self)
+    moleculeMenu = Menu("&Stuff", self)
     restraintsMenu = Menu("&Restraints", self)
     structuresMenu = Menu("&Structures", self)
     macroMenu = Menu("Macro", self)
@@ -303,8 +291,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # spectrumPeaksMenu.addSeparator()
     # spectrumPeaksMenu.addAction(Action(self, "Print to File", callback=self.printPeaksToFile))
 
-    peaksMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
-    peaksMenu.addAction(Action(self, "Pick Peaks", callback=self.pickPeaks, shortcut='pp'))
+    spectrumMenu.addAction(Action(self, "Make Projection...", callback=self.showProjectionPopup, shortcut='pj'))
+    spectrumMenu.addAction(Action(self, "Set Experiment Types...", callback=self.showExptTypePopup, shortcut='et'))
+    spectrumMenu.addAction(Action(self, "Pick Peaks...", callback=self.pickPeaks, shortcut='pp'))
 
     # newMoleculeMenu = moleculeMenu.addMenu("New")
     moleculeMenu.addAction(Action(self, "Create Molecule...", callback=self.showMoleculePopup, shortcut='cm'))
@@ -330,12 +319,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.recentMacrosMenu = macroMenu.addMenu("Run Recent")
     self._fillRecentMacrosMenu()
-    # macroMenu.addAction(Action(self, "Run Recent", callback=self.showRecentMacros))
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Define User Shortcuts...", callback=self.defineUserShortcuts))
 
     # viewNewMenu = viewMenu.addMenu("New")
     viewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
+    viewMenu.addSeparator()
+    viewMenu.addAction(Action(self, "Chemical Shift Table", callback=self.showChemicalShiftTable, shortcut="ct"))
+    viewMenu.addAction(Action(self, "NmrResidue Table", callback=self.showNmrResidueTable, shortcut="nt"))
+    viewMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
 
 
     #NBNB Need to decide how we are to handle layouts if at all
@@ -374,13 +366,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     assignMenu.addAction(Action(self, 'Show Assigner', callback=self.showAssigner))
     assignMenu.addAction(Action(self, 'Show Atom Selector', callback=self.showAtomSelector, shortcut='as'))
     assignMenu.addAction(Action(self, 'Residue Information', callback=self.showResidueInformation, shortcut='ri'))
-    assignMenu.addAction(Action(self, "NMR Residue Table", callback=self.showNmrResidueTable, shortcut='nr'))
     assignMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
 
 
 
     self._menuBar.addMenu(fileMenu)
-    self._menuBar.addMenu(peaksMenu)
+    self._menuBar.addMenu(spectrumMenu)
 
     if self._appBase.applicationName == 'Screen' :
       self._menuBar.addMenu(self.screenMenu)
@@ -438,6 +429,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Displays API documentation in a module."""
     self._showDocumentation("API Documentation", 'apidoc', 'api.html')
 
+  def showExptTypePopup(self):
+    """
+    Displays experiment type popup.
+    """
+    popup = ExperimentTypePopup(self, self._project)
+    popup.exec_()
+
 
   def showWrapperDocumentation(self):
     """Displays CCPN wrapper documentation in a module."""
@@ -467,12 +465,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(newDock)
 
 
+  def showProjectionPopup(self):
+    pass
+
   def addBlankDisplay(self):
     """Adds a Blank Display to the main window if one does not already exist."""
     if not hasattr(self, 'blankDisplay') or self.blankDisplay is None:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
     else:
       self.dockArea.addDock(self.blankDisplay, 'right')
+    self.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
+    self._project._logger.info("application.addBlankDisplay()")
 
   def showSequence(self):
     """
@@ -491,9 +494,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Displays Nmr Residue Table"""
     from application.core.modules.NmrResidueTable import NmrResidueTable
     nmrResidueTable = NmrResidueTable(self, self._project)
-    nmrResidueTableDock = CcpnDock(self, name='Nmr Residue Table')
+    nmrResidueTableDock = CcpnDock(name='Nmr Residue Table')
     nmrResidueTableDock.layout.addWidget(nmrResidueTable)
-    self.dockArea.addDock(nmrResidueTable, 'bottom')
+    self.dockArea.addDock(nmrResidueTableDock, 'bottom')
     # self.pythonConsole.writeModuleDisplayCommand('showNmrResidueTable')
     self.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
 

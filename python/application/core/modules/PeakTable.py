@@ -112,7 +112,7 @@ class PeakListSimple(QtGui.QWidget, Base):
               'Integral of spectrum intensity around peak location, according to chosen volume method',
               'Textual notes about the peak']
 
-    self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, callback=callback,
+    self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, actionCallback=callback, selectionCallback=self.selectPeak,
                                        columns=columns, selector=self.peakListPulldown,
                                        tipTexts=tipTexts, multiSelect=True, unitPulldown=self.posUnitPulldown)
 
@@ -151,7 +151,9 @@ class PeakListSimple(QtGui.QWidget, Base):
     if not peak:
       return
     else:
+      self.project._appBase.current.unRegisterNotify(self.selectPeakInTable, 'peaks')
       self.project._appBase.current.peak = peak
+      self.project._appBase.current.registerNotify(self.selectPeakInTable, 'peaks')
 
   def getPeakVolume(self, peak:Peak):
     """

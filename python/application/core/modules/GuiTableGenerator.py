@@ -18,12 +18,11 @@ from PyQt4 import QtGui
 
 class GuiTableGenerator(QtGui.QWidget, Base):
 
-  def __init__(self, parent, objectLists, callback, columns, selector=None, tipTexts=None, objectType=None,
-               multiSelect=False, unitPulldown=None, **kw):
+  def __init__(self, parent, objectLists, actionCallback, columns, selector=None, tipTexts=None,
+               objectType=None, multiSelect=False, unitPulldown=None, selectionCallback=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
       Base.__init__(self, **kw)
-      self.project = objectLists[0].project
       # allList = All(self.project, objectType)
       # objectLists.append(allList)
       self.columns = columns
@@ -39,8 +38,9 @@ class GuiTableGenerator(QtGui.QWidget, Base):
       self.unitPulldown = unitPulldown
       self._getColumns(columns, tipTexts)
       self.tipTexts = tipTexts
-      self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], callback=callback,
-                               multiSelect=multiSelect, grid=(0, 0), gridSpan=(1, 5))
+      self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], actionCallback=actionCallback,
+                               multiSelect=multiSelect, selectionCallback=selectionCallback,
+                               grid=(0, 0), gridSpan=(1, 5))
 
       self.updateContents()
       if selector is not None:
@@ -54,7 +54,7 @@ class GuiTableGenerator(QtGui.QWidget, Base):
     Changes the objectList specified in the selector.
     """
     if self.selector.currentText() == '<ALL>':
-      self.table.setObjects(getattr(self.project, self.objectType))
+      self.table.setObjects(getattr(self.objectList.project, self.objectType))
 
     elif objectList is not self.objectList:
 
@@ -142,9 +142,10 @@ class GuiTableGenerator(QtGui.QWidget, Base):
     """
     Sets the contents of the selector and object table if object list is specified on instatiation.
     """
+
     if self.objectList is not None:
 
-      self.objectLists += getattr(self.project, self.objectLists[0]._pluralLinkName)
+      self.objectLists += getattr(self.objectLists[0].project, self.objectLists[0]._pluralLinkName)
       self.objectLists = list(set(self.objectLists))
       # if self.objectList.shortClassName == 'PL':
       #   texts = ['%s' % peakList.pid for peakList in self.objectLists]

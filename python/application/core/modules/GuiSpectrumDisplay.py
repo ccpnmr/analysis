@@ -90,15 +90,12 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
       self.spectrumUtilToolBar.show()
     # toolBarColour = QtGui.QColor(214,215,213)
     self.positionBox = Label(self.dock)
-    self.dock.addWidget(self.positionBox, 0, 3)#, grid=(0, 3), gridSpan=(1, 1))
-    # self.positionBox.setFixedWidth(screenWidth*0.1)
+    self.dock.addWidget(self.positionBox, 0, 3)
     self.scrollArea = ScrollArea(self.dock, grid=(1, 0), gridSpan=(1, 4))
     self.scrollArea.setWidgetResizable(True)
-    # self.dock.addWidget(self.scrollArea, 1, 0, 1, 4)
     self.scrollArea.setWidgetResizable(True)
     self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0), appBase=self._appBase)
     self.stripFrame.guiSpectrumDisplay = self
-    # self.stripFrame.layout().setContentsMargins(0, 0, 2, 0)
     self.stripFrame.setAcceptDrops(True)
     self.scrollArea.setWidget(self.stripFrame)
     
@@ -187,7 +184,12 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     """
     Closes spectrum display and deletes it from the project.
     """
-    self.delete()
+    print('spdlen', len(self._appBase.project.spectrumDisplays))
+    if len(self._appBase.project.spectrumDisplays) == 1:
+      print('adding new display')
+      self._appBase.mainWindow.addBlankDisplay()
+    # self.dock.close()
+
 
   def fillToolBar(self):
     """

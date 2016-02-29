@@ -52,7 +52,5 @@ class GuiModule(QtGui.QWidget, GuiBase):
     GuiBase.__init__(self, self._project._appBase)
 
 
-
   def hoverEvent(self, event):
     event.accept()
-    print(self)

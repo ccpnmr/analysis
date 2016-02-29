@@ -52,6 +52,7 @@ class ViewBox(pg.ViewBox):
     self.pickBox.setZValue(1e9)
     self.pickBox.hide()
     self.addItem(self.pickBox, ignoreBounds=True)
+    self.project = current._project
 
     self.peakWidthPixels = 20  # for ND peaks
 
@@ -59,7 +60,7 @@ class ViewBox(pg.ViewBox):
     """
     Raise the context menu
     """
-    position  = event.screenPos()
+    position = event.screenPos()
     self.menu.popup(QtCore.QPoint(position.x(), position.y()))
 
   def getMenu(self):
@@ -230,6 +231,10 @@ class ViewBox(pg.ViewBox):
                 apiSpectrumView.spectrumView.displayNegativeContours
               ), peakList=peakList
             )
+            self.project._logger.info('peakList = project.getByPid("%s")', peakList.pid)
+            self.project._logger.info("peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
+                                       selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
+                apiSpectrumView.spectrumView.displayNegativeContours))
           else:
             newPeaks = peakList.pickPeaks1d(spectrumView,  [startPosition.x(), endPosition.x()])
 

@@ -127,6 +127,14 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         apiDataSource.positiveContourBase *= apiDataSource.positiveContourFactor
         apiDataSource.negativeContourBase *= apiDataSource.negativeContourFactor
         spectrumView.update()
+        spectrum = spectrumView.spectrum
+        self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
+        self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
+        self.project._logger.info("spectrum = project.getByPid(%s)" % spectrum.pid)
+        self.project._logger.info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
+        self.project._logger.info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
   def downBy2(self):
     """
@@ -138,6 +146,16 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         apiDataSource.positiveContourBase /= apiDataSource.positiveContourFactor
         apiDataSource.negativeContourBase /= apiDataSource.negativeContourFactor
         spectrumView.update()
+        spectrum = spectrumView.spectrum
+        self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
+        self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
+        self.project._logger.info("spectrum = project.getByPid(%s)" % spectrum.pid)
+        self.project._logger.info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
+        self.project._logger.info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
+
+
   def addOne(self):
     """
     Increases number of contours by 1 for all spectra visible in the display.
@@ -147,6 +165,15 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
         apiDataSource.positiveContourCount += 1
         apiDataSource.negativeContourCount += 1
+        spectrum = spectrumView.spectrum
+        self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
+        self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
+        self.project._logger.info("spectrum = project.getByPid(%s)" % spectrum.pid)
+        self.project._logger.info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
+        self.project._logger.info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
+
 
   def subtractOne(self):
     """
@@ -159,6 +186,14 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           apiDataSource.positiveContourCount -= 1
         if apiDataSource.negativeContourCount > 0:
           apiDataSource.negativeContourCount -= 1
+        spectrum = spectrumView.spectrum
+        self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
+        self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
+        self.project._logger.info("spectrum = project.getByPid(%s)" % spectrum.pid)
+        self.project._logger.info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
+        self.project._logger.info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
     
   def showPeaks(self, peakListView:GuiPeakListView.GuiPeakListView, peaks:Types.List[Peak]):
     """

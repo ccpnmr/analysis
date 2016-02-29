@@ -103,7 +103,7 @@ class ViewBox(pg.ViewBox):
         for peakList in spectrumView.spectrum.peakLists:
           for peak in peakList.peaks:
             peak.isSelected = False
-      self.current.peak = None
+      self.current.clearPeaks()
       # now select (take first one within range)
       for spectrumView in self.current.strip.spectrumViews:
         if spectrumView.spectrum.dimensionCount == 1:
@@ -294,7 +294,7 @@ class ViewBox(pg.ViewBox):
         else:
           zPositions = None
         # selectedPeaks = []
-        self.current.peak = None
+        self.current.clearPeaks()
         for spectrumView in self.current.strip.spectrumViews:
           for peakList in spectrumView.spectrum.peakLists:
             stripAxisCodes = [axis.code for axis in self.current.strip.orderedAxes]

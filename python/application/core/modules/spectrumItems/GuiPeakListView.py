@@ -821,7 +821,7 @@ def _refreshPeakAnnotation(peak:Peak):
       guiPeakListView = data2Obj[apiStripPeakListView]
       peakItem = guiPeakListView.peakItems.get(peak)
       if peakItem:
-        peakItem.annotation.setupPeakAnnotationItem(peakItem)
+        peakItem.annotation.setupPeakAnnotation(peakItem)
 
 Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 

@@ -38,7 +38,7 @@ import re
 
 class ObjectTable(QtGui.QTableView, Base):
 
-  def __init__(self, parent, columns, objects=None, callback=None, selectionCallback=None,
+  def __init__(self, parent, columns, objects=None, actionCallback=None, selectionCallback=None,
                multiSelect=False, selectRows=True, numberRows=False, **kw):
 
     QtGui.QTableView.__init__(self, parent)
@@ -49,7 +49,7 @@ class ObjectTable(QtGui.QTableView, Base):
     self.model = None
     self.columns = columns
     self.objects = list(objects or [])
-    self.callback = callback
+    self.callback = actionCallback
     self.fontMetric = QtGui.QFontMetricsF(self.font())
     self.bbox = self.fontMetric.boundingRect
     self._silenceCallback = False

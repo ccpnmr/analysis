@@ -92,11 +92,16 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     guiSpectrumDisplay = self.parent.guiSpectrumDisplay
     displayPid = guiSpectrumDisplay.pid
     if hasattr(guiSpectrumDisplay, 'isGrouped'):
+    #   if guiSpectrumDisplay.isGrouped:
+    #     pass
+    #   else:
+    #     for ss in pids:
+    #       for spectrum in ss.spectra:
+    #         guiSpectrumDisplay.displaySpectrum(spectrum)
+
       if guiSpectrumDisplay.isGrouped:
-        pass
-      else:
         for ss in pids:
-          for spectrum in ss.spectra:
+          for spectrum in self._appBase.project.getByPid(ss).spectra:
             guiSpectrumDisplay.displaySpectrum(spectrum)
 
   def processSamples(self, pids:Sequence[str], event):

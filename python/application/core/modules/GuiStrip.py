@@ -556,15 +556,19 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   def rulerCreated(self, apiRuler):
     axisCode = apiRuler.axisCode # TBD: use label and unit
     position = apiRuler.position
+    if apiRuler.mark.colour[0] == '#':
+      colour = Colour(apiRuler.mark.colour)
+    else:
+      colour = self.foreground
     # TBD: is the below correct (so the correct axes)?
     if axisCode == self.axisOrder[0]:
-      line = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
+      line = pg.InfiniteLine(angle=90, movable=False, pen=colour)
       line.setPos(position)
       self.plotWidget.addItem(line, ignoreBounds=True)
       self.vRulerLineDict[apiRuler] = line
 
     if axisCode == self.axisOrder[1]:
-      line = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
+      line = pg.InfiniteLine(angle=0, movable=False, pen=colour)
       line.setPos(position)
       self.plotWidget.addItem(line, ignoreBounds=True)
       self.hRulerLineDict[apiRuler] = line

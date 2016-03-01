@@ -87,6 +87,9 @@ class BackboneAssignmentModule(CcpnDock):
     to chemical shift value NmrAtoms in the NmrResidue. Creates assignMatrix for strip matching and
     add strips to matchModule(s) corresponding to assignment matches.
     """
+    self._setupShiftDicts()
+    self.project._appBase.mainWindow.clearMarks()
+
     self.nmrResidueTable.nmrResidueTable.updateTable()
     selectedDisplays = [display for display in self.project.spectrumDisplays if display.pid not in self.matchModules]
 
@@ -103,6 +106,7 @@ class BackboneAssignmentModule(CcpnDock):
 
       queryShifts = self.interShifts[nmrResidue]
       matchShifts = self.intraShifts
+      print(nmrResidue.nmrAtoms, 'nmrAtoms')
       for display in selectedDisplays:
         if not strip:
           strip = display.strips[0]
@@ -120,6 +124,7 @@ class BackboneAssignmentModule(CcpnDock):
               shift = self.project.chemicalShiftLists[0].getChemicalShift(atom.id)
               if shift is not None:
                 shiftDict[axis.code].append(shift)
+        print('shiftDict', shiftDict)
         atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
         markPositionsInStrips(self.project, strip, strip.orderedAxes[:2], atomPositions)
 

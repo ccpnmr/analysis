@@ -106,7 +106,7 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
 
       if len(display.axisCodes) > 2:
 
-        atomPositions = shiftDict[display.strips[0].orderedAxes[2].code]
+        atomPositions = shiftDict[display.strips[0].axisOrder[2]]
 
         display.strips[0].orderedAxes[2].position = atomPositions[0].value
         if len(atomPositions) > 1:

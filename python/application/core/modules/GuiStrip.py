@@ -633,7 +633,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     Displays mouse position for both axes by axis code.
     """
     position = self.viewBox.mapSceneToView(pos)
-    self.guiSpectrumDisplay.positionBox.setText("%s: %.3f  %s: %.3f" % (self.orderedAxes[0].code, position.x(), self.orderedAxes[1].code, position.y()))
+    self.guiSpectrumDisplay.positionBox.setText("%s: %.3f  %s: %.3f" %
+      (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
+    )
 
   def zoomToRegion(self, region:Types.List[float]):
     """
@@ -770,15 +772,16 @@ def _setupGuiStrip(project:Project, apiStrip:ApiStrip):
 
   strip = project._data2Obj[apiStrip]
   orderedAxes = strip.orderedAxes
+  axisOrder = strip.axisOrder
 
   # this is called from GuiSpectrumView because the axes are not ready when the strip is created
   # TBD: but that means this is called for every spectrum in the strip, which is not what we want
   strip.viewBox.setXRange(*orderedAxes[0].region)
   strip.viewBox.setYRange(*orderedAxes[1].region)
   strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top',
-                                axisCode=orderedAxes[0].code)
+                                axisCode=axisOrder[0])
   strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left',
-                                axisCode=orderedAxes[1].code)
+                                axisCode=axisOrder[1])
   strip.viewBox.sigStateChanged.connect(strip.moveAxisCodeLabels)
   strip.viewBox.sigRangeChanged.connect(strip.updateRegion)
 

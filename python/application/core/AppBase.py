@@ -200,9 +200,11 @@ def getStyleSheet(preferences):
   colourScheme = preferences.general.colourScheme
   colourScheme = metaUtil.upperFirst(colourScheme)
   
-  styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', '%sStyleSheet.qss' % colourScheme)).read()
+  styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui',
+                                 '%sStyleSheet.qss' % colourScheme)).read()
   if platform.system() == 'Linux':
-    additions = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', '%sAdditionsLinux.qss' % colourScheme)).read()
+    additions = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui',
+                                  '%sAdditionsLinux.qss' % colourScheme)).read()
     styleSheet += additions
   return styleSheet
   

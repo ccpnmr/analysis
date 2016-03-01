@@ -24,8 +24,7 @@ MODULE_DICT = {'ASSIGNER': 'showAssigner',
                'API DOCUMENTATION': 'showApiDocumentation',
                'PYTHON CONSOLE': 'toggleConsole',
                'NOTES EDITOR': 'showNotesEditor'
-              }
-
+               }
 
 LINE_COLOURS = {
   'CA': '#0000FF',
@@ -86,7 +85,7 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
 
 def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
                          selectedDisplays:Types.List[GuiSpectrumDisplay]=None,
-                         strip:GuiStrip=None,  markPositions:bool=False):
+                         strip:GuiStrip=None,  markPositions:bool=False, direction:str=None):
   """
   Takes an NmrResidue and optional spectrum displays and strips and navigates the strips and spectrum displays
   to the positions specified by the peak.
@@ -105,43 +104,22 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
             if shift is not None and isPositionWithinfBounds(display.strips[0], shift, axis):
               shiftDict[axis.code].append(shift)
 
-      task = project._appBase.mainWindow.task
-
       if len(display.axisCodes) > 2:
+
         atomPositions = shiftDict[display.strips[0].orderedAxes[2].code]
+
         display.strips[0].orderedAxes[2].position = atomPositions[0].value
-        for atomPosition in atomPositions[1:]:
-          newStrip = display.addStrip()
-          newStrip.orderedAxes[2].position = atomPosition.value
-          atomPositions2 = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes[:2]]
+        if len(atomPositions) > 1:
+          for i in range(len(atomPositions[1:])):
+            display.addStrip()
 
-      else:
-        atomPositions2 = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes[:2]]
-
-
+      atomPositions2 = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes[:2]]
       for guiStrip in display.strips:
         for ii, axis in enumerate(guiStrip.orderedAxes[:2]):
           for atomPosition in atomPositions2[ii]:
             axis.position = atomPosition.value
-            if markPositions:
-              atomName = atomPosition.nmrAtom.name
-              if atomName[:2] in LINE_COLOURS.keys():
-                task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axis.code])
-                textItem = pg.TextItem(atomName, color=LINE_COLOURS[atomName[:2]])
-                if ii == 0:
-                  y = guiStrip.plotWidget.plotItem.vb.mapSceneToView(guiStrip.viewBox.boundingRect().bottomLeft()).y()
-                  textItem.anchor = pg.Point(0, 1)
-                  textItem.setPos(atomPosition.value, y)
-                  guiStrip.plotWidget.addItem(textItem)
-                  guiStrip.xAxisAtomLabels.append(textItem)
-                if ii == 1:
-                  x = guiStrip.plotWidget.plotItem.vb.mapSceneToView(guiStrip.viewBox.boundingRect().bottomLeft()).x()
-                  textItem.anchor = pg.Point(0, 0)
-                  textItem.setPos(x, atomPosition.value)
-                  guiStrip.plotWidget.addItem(textItem)
-                  guiStrip.yAxisAtomLabels.append(textItem)
-              else:
-                task.newMark('white', [atomPosition.value], [axis.code])
+        if markPositions:
+          markPositionsInStrips(project, guiStrip, guiStrip.orderedAxes[:2], atomPositions2)
 
   elif strip:
     shiftDict = {}
@@ -151,20 +129,40 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
         if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
           shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
           if shift is not None:
-            shiftDict[axis.code].append(shift.value)
-
-
-
-    task = project._appBase.mainWindow.task
-
+            shiftDict[axis.code].append(shift)
 
     atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
-
     for ii, axis in enumerate(strip.orderedAxes):
       for atomPosition in atomPositions[ii]:
-        axis.position = atomPosition
-        if markPositions:
-          task.newMark('white', [atomPosition], [axis.code])
+        axis.position = atomPosition.value
+    if markPositions:
+      markPositionsInStrips(project, strip, strip.orderedAxes, atomPositions)
+
+
+def markPositionsInStrips(project, strip, axes, atomPositions):
+
+    task = project._appBase.mainWindow.task
+    for ii, axis in enumerate(axes):
+      for atomPosition in atomPositions[ii]:
+
+        atomName = atomPosition.nmrAtom.name
+        if atomName[:2] in LINE_COLOURS.keys():
+          task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axis.code])
+          textItem = pg.TextItem(atomName, color=LINE_COLOURS[atomName[:2]])
+          if ii == 0:
+            y = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).y()
+            textItem.anchor = pg.Point(0, 1)
+            textItem.setPos(atomPosition.value, y)
+            strip.plotWidget.addItem(textItem)
+            strip.xAxisAtomLabels.append(textItem)
+          if ii == 1:
+            x = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).x()
+            textItem.anchor = pg.Point(0, 0)
+            textItem.setPos(x, atomPosition.value)
+            strip.plotWidget.addItem(textItem)
+            strip.yAxisAtomLabels.append(textItem)
+        else:
+          task.newMark('white', [atomPosition.value], [axis.code])
 
 
 
@@ -176,9 +174,13 @@ def isPositionWithinfBounds(strip:GuiStrip, shift:ChemicalShift, axis:object):
   minima = []
   maxima = []
   for spectrumView in strip.spectrumViews:
-    index = spectrumView.spectrum.axisCodes.index(axis.code)
-    minima.append(spectrumView.spectrum.spectrumLimits[index][0])
-    maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
-  return min(minima) < shift.value <= max(maxima)
+    if axis.code in spectrumView.spectrum.axisCodes:
+      index = spectrumView.spectrum.axisCodes.index(axis.code)
+      minima.append(spectrumView.spectrum.spectrumLimits[index][0])
+      maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
+  if len(maxima) < 1:
+    return True
+  else:
+    return min(minima) < shift.value <= max(maxima)
 
 

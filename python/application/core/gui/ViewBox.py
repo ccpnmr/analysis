@@ -72,7 +72,7 @@ class ViewBox(pg.ViewBox):
 
   def mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
-    Re-implementation of PyQtGraph mouse drag event to allow custom actions off of  different mouse
+    Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
     click events.
 
     Left click selects peaks in a spectrum display.
@@ -100,22 +100,24 @@ class ViewBox(pg.ViewBox):
         zPositions = None
       # first deselect (do we want this always??)
       for spectrumView in self.current.strip.spectrumViews:
-        for peakList in spectrumView.spectrum.peakLists:
-          for peak in peakList.peaks:
-            peak.isSelected = False
+        if spectrumView.isVisible():
+          for peakList in spectrumView.spectrum.peakLists:
+            for peak in peakList.peaks:
+              peak.isSelected = False
       self.current.clearPeaks()
       # now select (take first one within range)
       for spectrumView in self.current.strip.spectrumViews:
         if spectrumView.spectrum.dimensionCount == 1:
           continue
-        for peakList in spectrumView.spectrum.peakLists:
-          for peak in peakList.peaks:
-            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-              and yPositions[0] < float(peak.position[1]) < yPositions[1]):
-              if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
-                peak.isSelected = True
-                self.current.peak = peak
-                break
+        if spectrumView.isVisible():
+          for peakList in spectrumView.spectrum.peakLists:
+            for peak in peakList.peaks:
+              if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+                and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+                if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
+                  peak.isSelected = True
+                  self.current.peak = peak
+                  break
     """
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
 
@@ -231,8 +233,8 @@ class ViewBox(pg.ViewBox):
                 apiSpectrumView.spectrumView.displayNegativeContours
               ), peakList=peakList
             )
-            self.project._logger.info('peakList = project.getByPid("%s")', peakList.pid)
-            self.project._logger.info("peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
+            self.current.project._logger.info('peakList = project.getByPid("%s")', peakList.pid)
+            self.current.project._logger.info("peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
                                        selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
                 apiSpectrumView.spectrumView.displayNegativeContours))
           else:

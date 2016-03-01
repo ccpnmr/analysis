@@ -208,7 +208,7 @@ class GeneralTab(QtGui.QWidget, Base):
     expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).get(self.spectrumType.currentText())
     self.spectrum.experimentType = expType
     self.pythonConsole.writeConsoleCommand('spectrum.experimentType = experimentType', experimentType=expType, spectrum=self.spectrum)
-    self.writeLoggingMessage("spectrum.experimentType = %s" % expType)
+    self.writeLoggingMessage("spectrum.experimentType = '%s'" % expType)
 
   def getSpectrumFile(self):
     if os.path.exists('/'.join(self.pathData.text().split('/')[:-1])):
@@ -277,6 +277,7 @@ class GeneralTab(QtGui.QWidget, Base):
 class DimensionsTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, dimensions, parent=None):
     super(DimensionsTab, self).__init__(parent)
+    self.spectrum = spectrum
     self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
     dimensionalityLabel = Label(self, text="Dimension ", grid=(0, 0),hAlign='l', vAlign='t',)

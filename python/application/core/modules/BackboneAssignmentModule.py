@@ -38,13 +38,13 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
-
+from ccpncore.lib.spectrum import Spectrum as spectrumLib
 from ccpncore.util import Types
 
 from application.core.modules.NmrResidueTable import NmrResidueTable
 from application.core.modules.GuiStrip import GuiStrip
 
-from application.core.lib.Window import navigateToNmrResidue
+from application.core.lib.Window import navigateToNmrResidue, markPositionsInStrips
 
 class BackboneAssignmentModule(CcpnDock):
 
@@ -96,23 +96,38 @@ class BackboneAssignmentModule(CcpnDock):
       newSeqCode = seqCode.replace('-1', '')
       iNmrResidue = nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=newSeqCode)
       self.current.nmrResidue = iNmrResidue
-      navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays,
-                           markPositions=True, strip=strip)
+      # navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays,
+      #                      markPositions=True, strip=strip)
       navigateToNmrResidue(self.project, iNmrResidue, selectedDisplays=selectedDisplays,
-                           strip=strip)
+                           strip=strip, markPositions=False)
+
       queryShifts = self.interShifts[nmrResidue]
       matchShifts = self.intraShifts
       for display in selectedDisplays:
         if not strip:
-          display.strips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue._key)
-        else:
-          strip.planeToolbar.spinSystemLabel.setText(iNmrResidue._key)
+          strip = display.strips[0]
+        strip.planeToolbar.spinSystemLabel.setText(iNmrResidue._key)
+        shiftDict = {}
+        for axis in strip.orderedAxes:
+          shiftDict[axis.code] = []
+          for atom in nmrResidue.nmrAtoms:
+            if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
+              shift = self.project.chemicalShiftLists[0].getChemicalShift(atom.id)
+              if shift is not None:
+                shiftDict[axis.code].append(shift)
+          for atom in iNmrResidue.nmrAtoms:
+            if (atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code) and atom._apiResonance.isotopeCode != '13C'):
+              shift = self.project.chemicalShiftLists[0].getChemicalShift(atom.id)
+              if shift is not None:
+                shiftDict[axis.code].append(shift)
+        atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
+        markPositionsInStrips(self.project, strip, strip.orderedAxes[:2], atomPositions)
 
     else:
       direction = '+1'
       iNmrResidue = nmrResidue
       self.current.nmrResidue = iNmrResidue
-      navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays, markPositions=True, strip=strip)
+      navigateToNmrResidue(self.project, iNmrResidue, selectedDisplays=selectedDisplays, markPositions=True, strip=strip)
       queryShifts = self.intraShifts[nmrResidue]
       matchShifts = self.interShifts
       for display in selectedDisplays:

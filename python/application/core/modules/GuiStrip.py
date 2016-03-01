@@ -167,10 +167,18 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
 
   def highlightCurrentStrip(self, strips=None):
+
+    if self._appBase.preferences.general.colourScheme == 'light':
+      axisColour = '#3333ff'
+    elif self._appBase.preferences.general.colourScheme == 'dark':
+      axisColour = '#00ff00'
+    else:
+      return
+
     if self is self.current.strips[0]:
       for orientation in ('right', 'bottom'):
         axisItem = self.plotItem.axes[orientation]['item']
-        axisItem.setPen(color='#00ff00')
+        axisItem.setPen(color=axisColour)
     else:
       for orientation in ('right', 'bottom'):
         axisItem = self.plotItem.axes[orientation]['item']
@@ -549,17 +557,17 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     axisCode = apiRuler.axisCode # TBD: use label and unit
     position = apiRuler.position
     # TBD: is the below correct (so the correct axes)?
-    # if axisCode == self.orderedAxes[0].code:
-    #   line = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
-    #   line.setPos(position)
-    #   self.plotWidget.addItem(line, ignoreBounds=True)
-    #   self.vRulerLineDict[apiRuler] = line
-    #
-    # if axisCode == self.orderedAxes[1].code:
-    #   line = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-    #   line.setPos(position)
-    #   self.plotWidget.addItem(line, ignoreBounds=True)
-    #   self.hRulerLineDict[apiRuler] = line
+    if axisCode == self.axisOrder[0]:
+      line = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
+      line.setPos(position)
+      self.plotWidget.addItem(line, ignoreBounds=True)
+      self.vRulerLineDict[apiRuler] = line
+
+    if axisCode == self.axisOrder[1]:
+      line = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
+      line.setPos(position)
+      self.plotWidget.addItem(line, ignoreBounds=True)
+      self.hRulerLineDict[apiRuler] = line
 
   def rulerDeleted(self, apiRuler):
     for dd in self.vRulerLineDict, self.hRulerLineDict:
@@ -699,14 +707,6 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   def showSpectrum(self, guiSpectrumView):
     raise Exception('should be implemented in subclass')
 
-  # def dropCallback(self, dropObject):
-  #   if isinstance(dropObject, Spectrum):
-  #     self.displaySpectrum(dropObject)
-  #     msg = 'strip = project.getByPid("%s")\nstrip.displaySpectrum(project.getByPid("%s")\n' % \
-  #           (self.pid, dropObject.pid)
-  #     self._appBase.mainWindow.pythonConsole.write(msg)
-  #   else:
-  #     pass
 
 def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
   """Notifier function for when axis position or width changes"""

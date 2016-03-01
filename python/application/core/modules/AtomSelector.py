@@ -42,6 +42,8 @@ from ccpncore.gui.Widget import Widget
 
 from ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, ALL_ATOMS_SORTED
 
+from ccpncore.lib.spectrum import Spectrum as spectrumLib
+
 from ccpncore.util import Types
 
 from ccpncore.util import Path
@@ -358,19 +360,17 @@ class AtomSelector(CcpnDock):
     Takes a position either -1, 0 or +1 and an atom type, fetches an NmrAtom with name corresponding
     to the atom type and the position and assigns it to correct dimension of current.peaks
     """
-
+    if not self.current.nmrResidue:
+      return
     name = atomType
     if position == '-1' and '-1' not in self.current.nmrResidue.sequenceCode:
-      r = self.current.nmrResidue.residue.previousResidue.nmrResidue
-      # r = self.current.nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=self.current.nmrResidue.sequenceCode+'-1')
+      r = self.current.nmrResidue.previousNmrResidue
+      if not r:
+        r = self.current.nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=self.current.nmrResidue.sequenceCode+'-1')
     else:
       r = self.current.nmrResidue
 
-    if self.current.nmrResidue is None:
-      r = self.current.peaks[0].dimensionNmrAtoms[0][0].nmrResidue
     newNmrAtom = r.fetchNmrAtom(name=name)
-    # self.pythonConsole.writeWrapperCommand(objectNames=['nmrResidue', 'nmrAtom'],
-    #                              wrapperCommand='fetchNmrAtom', pid=r.pid, args='name="%s"' % name)
     self.pythonConsole.writeConsoleCommand(
       "nmrAtom = nmrResidue.fetchNmrAtom(name='%s')" % name, nmrResidue=r.pid
     )
@@ -378,27 +378,10 @@ class AtomSelector(CcpnDock):
       for strip in self.project.strips:
         for peakListView in strip.peakListViews:
           if peak in peakListView.peakItems.keys():
-            index = peak.peakList.spectrum.axisCodes.index(strip.axisCodes[1])
-            axisCode = peak.peakList.spectrum.axisCodes[index]
+            axisCode = spectrumLib.axisCodeMatch(strip.axisCodes[1], peak.peakList.spectrum.axisCodes)
+            index = peak.peakList.spectrum.axisCodes.index(axisCode)
             nmrAtoms = peak.dimensionNmrAtoms[index] + [newNmrAtom]
             peak.assignDimension(axisCode, nmrAtoms)
-
-
-    # for peak in self.current.peaks:
-    #   for dim in range(len(peak.dimensionNmrAtoms)):
-    #     isotopeCode = peak.peakList.spectrum.isotopeCodes[dim]
-    #     if newNmrAtom._apiResonance.isotopeCode == isotopeCode:
-    #       axisCode = peak.peakList.spectrum.axisCodes[dim]
-    #       peak.assignDimension(axisCode=axisCode, value=[newNmrAtom])
-    #       # self.pythonConsole.writeWrapperCommand(objectNames=['peak', 'newAssignment'],
-    #       #                                        wrapperCommand='assignDimension', pid=peak.pid,
-    #       #                                        args='axisCode="%s", value=[newNmrAtom]' % axisCode)
-    #       self.pythonConsole.writeConsoleCommand(
-    #         "newAssignment = peak.assignDimension(axisCode='%s', value=[newNmrAtom])" % axisCode,
-    #         peak=peak.pid
-    #       )
-    #   else:
-    #       pass
     self._returnButtonsToNormal()
 
 
@@ -430,7 +413,7 @@ class AtomSelector(CcpnDock):
     that assignment prediction, green is very confident, orange is less confident.
     """
     self._returnButtonsToNormal()
-    if not self.current.nmrResidue:
+    if not self.current.nmrResidue or None in peaks:
       return
 
     else:
@@ -473,14 +456,5 @@ class AtomSelector(CcpnDock):
                   self.caButton2.setStyleSheet('background-color: orange')
                 else:
                   self.caButton2.setStyleSheet('background-color: green')
-
-
-
-  # def assignPeakDimension(self, peak, dim, axisCode, nmrAtom):
-  #   axisCode = getAxisCodeForPeakDimension(peak, dim)
-  #   peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
-  #   shiftList = peak.peakList.spectrum.chemicalShiftList
-  #   shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
-
 
 

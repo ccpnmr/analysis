@@ -36,7 +36,6 @@ from ccpncore.gui import MessageDialog
 from ccpncore.gui.Action import Action
 from ccpncore.gui.CcpnWebView import CcpnWebView
 from ccpncore.gui.Dock import CcpnDock
-from application.core.gui.IpythonConsole import IpythonConsole
 from ccpncore.gui.Menu import Menu, MenuBar
 from application.core.gui.SideBar import SideBar
 
@@ -46,12 +45,15 @@ from ccpncore.util import Path
 from ccpncore.util.Common import uniquify
 
 from application.core.gui.Assigner import Assigner
+from application.core.gui.IpythonConsole import IpythonConsole
+
+
+from application.metabolomics.Metabolomics import MetabolomicsModule
 
 from application.core.modules.AssignmentModule import AssignmentModule
 from application.core.modules.AtomSelector import AtomSelector
 from application.core.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from application.core.modules.DataPlottingModule import DataPlottingModule
-
 from application.core.modules.GuiBlankDisplay import GuiBlankDisplay
 from application.core.modules.GuiWindow import GuiWindow
 from application.core.modules.MacroEditor import MacroEditor
@@ -61,13 +63,13 @@ from application.core.modules.PickAndAssignModule import PickAndAssignModule
 from application.core.modules.SequenceModule import SequenceModule
 from application.core.modules.SampleAnalysis import SampleAnalysis
 from application.core.modules.ScreeningSetup import ScreeningSetup
-from application.metabolomics.Metabolomics import MetabolomicsModule
 
 from application.core.popups.BackupPopup import BackupPopup
 from application.core.popups.ExperimentTypePopup import ExperimentTypePopup
 from application.core.popups.FeedbackPopup import FeedbackPopup
 from application.core.popups.PreferencesPopup import PreferencesPopup
 from application.core.popups.SampleSetupPopup import SamplePopup
+from application.core.popups.SetupNmrResiduesPopup import SetupNmrResiduesPopup
 
 from application.core.Version import revision
 
@@ -186,8 +188,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                     """)
 
     self.namespace = {'loadProject': self._appBase.loadProject,
-                      'newProject': self._appBase.newProject, 'loadData':self.loadData, 'application':self,
-                      'preferences':self._appBase.preferences, 'project':self._project, 'current':self._appBase.current}
+                      'newProject': self._appBase.newProject, 'loadData': self.loadData, 'application': self,
+                      'preferences': self._appBase.preferences, 'project': self._project, 'current': self._appBase.current}
 
     self.pythonConsole = IpythonConsole(self, self.namespace, mainWindow=self)
 
@@ -360,6 +362,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu.addAction(Action(self, "Submit Feedback...", callback=self.showFeedbackPopup))
 
     assignMenu = Menu("&Assign", self)
+    assignMenu.addAction(Action(self, "Assignment Module", callback=self.showSetupNmrResiduesPopup, shortcut='sn'))
     assignMenu.addAction(Action(self, "Assignment Module", callback=self.showAssignmentModule, shortcut='aa'))
     assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule, shortcut='pa'))
     assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showBackboneAssignmentModule, shortcut='bb'))
@@ -434,6 +437,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Displays experiment type popup.
     """
     popup = ExperimentTypePopup(self, self._project)
+    popup.exec_()
+
+  def showSetupNmrResiduesPopup(self):
+    popup = SetupNmrResiduesPopup(self, self._project)
     popup.exec_()
 
 

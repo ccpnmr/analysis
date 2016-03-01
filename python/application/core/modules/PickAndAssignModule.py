@@ -12,7 +12,6 @@ from ccpncore.gui.ListWidget import ListWidget
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.ScrollArea import ScrollArea
 
-from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 from application.core.modules.NmrResidueTable import NmrResidueTable
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
@@ -43,12 +42,6 @@ class PickAndAssignModule(CcpnDock, Base):
     self.spectrumSelectionWidget = SpectrumSelectionWidget(self.scrollArea, project, self.displayList)
     self.scrollArea.setWidget(self.spectrumSelectionWidget)
     self.displayList.removeItem = self.removeListWidgetItem
-
-    # self.layout.addWidget(self.nmrResidueTable, 4, 0, 1, 4)
-    # # self.moreButton = Button(self, "More...", callback=self.showNmrResiduePopup)
-    # # self.layout.addWidget(self.moreButton, 5, 0, 1, 1)
-
-    # parent.window().showAtomSelector()
 
   def updateListWidget(self, item):
     if self.displayList.count() == 1 and self.displayList.item(0).text() == '<All>':
@@ -87,16 +80,16 @@ class PickAndAssignModule(CcpnDock, Base):
         if atom.isotopeCode in shiftDict.keys():
           shiftDict[nmrAtom.isotopeCode].append((nmrAtom, shiftList.getChemicalShift(nmrAtom.id).value))
       for ii, isotopeCode in enumerate(spectrum.isotopeCodes):
-        for shift in shiftDict[isotopeCode]:
-          sValue = shift[1]
-          pValue = peak.position[ii]
-          if abs(sValue-pValue) <= spectrum.assignmentTolerances[ii]:
-            peak.assignDimension(spectrum.axisCodes[ii], [shift[0]])
+        if isotopeCode in shiftDict.keys():
+          for shift in shiftDict[isotopeCode]:
+            sValue = shift[1]
+            pValue = peak.position[ii]
+            if abs(sValue-pValue) <= spectrum.assignmentTolerances[ii]:
+              peak.assignDimension(spectrum.axisCodes[ii], [shift[0]])
 
 
   def restrictedPick(self, nmrResidue=None):
-    # position = self.selectedPeak.position
-    # axisCodes = self.selectedPeak.peakList.spectrum.axisCodes
+
     if nmrResidue:
       self.current.nmrResidue = nmrResidue
     elif not self.current.nmrResidue:
@@ -121,15 +114,15 @@ class PickAndAssignModule(CcpnDock, Base):
             for ii, stripAxisCode in enumerate(stripAxisCodes):
               if len(module.axisCodes) >= 3:
                 if ii != 1:
-                    isotopeCode = name2IsotopeCode(stripAxisCodes[ii])
+                    isotopeCode = spectrumLib.name2IsotopeCode(stripAxisCodes[ii])
                     tol = spectrum.assignmentTolerances[ii]
                     selectedRegion[0][ii] = shiftDict[isotopeCode]-tol
                     selectedRegion[1][ii] = shiftDict[isotopeCode]+tol
                 else:
-                    selectedRegion[0][ii] = spectrum.spectrumLimits[mappingArray[ii]][0]
-                    selectedRegion[1][ii] = spectrum.spectrumLimits[mappingArray[ii]][1]
+                    selectedRegion[0][ii] = spectrum.spectrumLimits[ii][0]
+                    selectedRegion[1][ii] = spectrum.spectrumLimits[ii][1]
               else:
-                isotopeCode = name2IsotopeCode(stripAxisCodes[ii])
+                isotopeCode = spectrumLib.name2IsotopeCode(stripAxisCodes[ii])
                 tol = spectrum.assignmentTolerances[ii]
                 selectedRegion[0][ii] = shiftDict[isotopeCode]-tol
                 selectedRegion[1][ii] = shiftDict[isotopeCode]+tol
@@ -149,10 +142,10 @@ class PickAndAssignModule(CcpnDock, Base):
             if len(peaks) > 0:
               for strip in module.strips:
                 strip.showPeaks(peakList)
-                for peakListView in strip.peakListViews:
-                  peakItems = [peakListView.peakItems[peak] for peak in peaks]
-                  for peakItem in peakItems:
-                    peakItem.setSelected(True)
+              for peakListView in module.peakListViews:
+                peakItems = [peakListView.peakItems[peak] for peak in peaks if peak in peakListView.peakItems.keys()]
+                for peakItem in peakItems:
+                  peakItem.setSelected(True)
 
 
 

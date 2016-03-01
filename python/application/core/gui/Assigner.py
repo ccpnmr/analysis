@@ -62,7 +62,7 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     if project._appBase.preferences.general.colourScheme == 'dark':
       colour1 = '#f7ffff'
-      colour2 = '#bec4f3'
+      colour2 = '#BEC4F3'
     elif project._appBase.preferences.general.colourScheme == 'light':
       colour1 = '#FDFDFC'
       colour2 = '#555D85'
@@ -98,6 +98,10 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     self.parent = parent
     self.nmrResidue = nmrResidue
+
+  def update(self):
+    self.setPlainText(self.nmrResidue.id)
+
 
   def mouseMoveEvent(self, event):
 
@@ -178,8 +182,6 @@ class Assigner(CcpnDock):
       self.residuesShown = []
 
 
-
-
   def _assembleResidue(self, nmrResidue:NmrResidue, atoms:Types.Dict[str, GuiNmrAtom]):
     """
     Takes an Nmr Residue and a dictionary of atom names and GuiNmrAtoms and
@@ -201,8 +203,8 @@ class Assigner(CcpnDock):
     self._addConnectingLine(atoms['H'], atoms['N'], lineColour, 1.0, 0)
     self._addConnectingLine(atoms['N'], atoms['CA'], lineColour, 1.0, 0)
     self._addConnectingLine(atoms['CO'], atoms['CA'], lineColour, 1.0, 0)
-    nmrAtomLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
-    self.scene.addItem(nmrAtomLabel)
+    self.nmrResidueLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
+    self.scene.addItem(self.nmrResidueLabel)
     self._addResiduePredictions(nmrResidue, atoms['CA'])
 
 
@@ -245,6 +247,8 @@ class Assigner(CcpnDock):
       self.predictedStretch.append(nmrResidue)
 
     else:
+        if self.residueCount == 1:
+          self.nmrResidueLabel.update()
         if '-1' in nmrResidue.sequenceCode or direction == '-1':
 
           # newConnectedStretch = list(self.nmrChain.connectedNmrResidues).insert(0, nmrResidue)
@@ -540,75 +544,3 @@ class Assigner(CcpnDock):
     atom = GuiNmrAtom(self.project, text=atomType, pos=position, nmrAtom=nmrAtom)
     return atom
 
-# class GuiNmrAtom(QtGui.QGraphicsTextItem):
-#
-#   def __init__(self, text, pos=None, nmrAtom=None):
-#
-#     super(GuiNmrAtom, self).__init__()
-#     self.setPlainText(text)
-#     self.setPos(QtCore.QPointF(pos[0], pos[1]))
-#     self.nmrAtom = nmrAtom
-#     self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
-#     self.connectedAtoms = 0
-#     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
-#     if nmrAtom:
-#       self.name = nmrAtom.name
-#     # self.brush = QtGui.QBrush()
-#     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-#     # self.setBrush(self.brush)
-#     if self.isSelected:
-#       # self.setFont(Font(size=17.5, bold=True))
-#       # print(self.nmrAtom)
-#       self.setDefaultTextColor(QtGui.QColor('#bec4f3'))
-#     else:
-#       self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-#       # self.setBrush(self.brush)
-#
-#
-#
-# class GuiNmrResidue(QtGui.QGraphicsTextItem):
-#
-#   def __init__(self, parent, nmrResidue, caAtom):
-#
-#     super(GuiNmrResidue, self).__init__()
-#     self.setPlainText(nmrResidue.id)
-#     self.setFont(Font(size=12, bold=True))
-#     self.setDefaultTextColor(QtGui.QColor('#f7ffff'))
-#     self.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
-#     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
-#     self.parent = parent
-#     self.nmrResidue = nmrResidue
-#
-#   def mouseMoveEvent(self, event):
-#
-#     if (event.buttons() == QtCore.Qt.LeftButton) and (event.modifiers() & QtCore.Qt.ShiftModifier):
-#         aDict = {}
-#         for item in self.parent.scene.items():
-#           if isinstance(item, GuiNmrResidue) and item.isSelected():
-#             aDict[item.x()] = item.nmrResidue.pid
-#
-#         assignStretch = ','.join([aDict[key] for key in sorted(aDict.keys())])
-#
-#         drag = QtGui.QDrag(event.widget())
-#         mime = QtCore.QMimeData()
-#         drag.setMimeData(mime)
-#         mime.setData('application/x-assignedStretch',assignStretch)
-#         # print(assignStretch)
-#
-#         drag.exec_()
-#
-#
-#
-# class AssignmentLine(QtGui.QGraphicsLineItem):
-#
-#   def __init__(self, x1, y1, x2, y2, colour, width, style=None):
-#     QtGui.QGraphicsLineItem.__init__(self)
-#     self.pen = QtGui.QPen()
-#     self.pen.setColor(QtGui.QColor(colour))
-#     self.pen.setCosmetic(True)
-#     self.pen.setWidth(width)
-#     if style and style == 'dash':
-#       self.pen.setStyle(QtCore.Qt.DotLine)
-#     self.setPen(self.pen)
-#
-#     self.setLine(x1, y1, x2, y2)

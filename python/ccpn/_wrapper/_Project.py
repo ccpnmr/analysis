@@ -587,4 +587,3 @@ class Project(AbstractWrapperObject):
       self._pidSortKeys[longPid] = result
     #
     return result
-      

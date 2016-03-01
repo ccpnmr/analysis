@@ -8,7 +8,6 @@ from PyQt4 import QtCore, QtGui
 # if project._appBase.applicationName == 'Screen':
 # if project._appBase.applicationName == 'Metabolomics':
 
-
 def readXls(project, path=None):
   ex = pd.ExcelFile(path)
   for p,f in screenExcelSheetProcessors.items():
@@ -16,7 +15,6 @@ def readXls(project, path=None):
       e = ex.parse(p)
       e.fillna('Empty',inplace=True)
       f(project, e)
-
 
 # def readXls(project, path=None):
 #   ex = pd.ExcelFile(path)
@@ -30,6 +28,7 @@ def readXls(project, path=None):
 #     createSampleDicts(project, secondSheetExcel)
 
 def readCsv(project, path=None):
+
   csv_in = open(path, 'r')
   reader = csv.reader(csv_in)
   for row in reader:
@@ -85,7 +84,8 @@ def createSampleDicts(project, secondSheetExcel):
 def getSampleObj(project, sampleDicts):
   for sampleDict in sampleDicts:
     for sample, data in sampleDict.items():
-      dispatchSampleProperties(project, sample, data)
+      addSampleSpectra(project, sample, data)
+      dispatchSampleProperties(sample, data)
 
 def createNewSubstance(project, dataDicts):
   for dataDict in dataDicts:
@@ -99,36 +99,13 @@ screenExcelSheetProcessors = OrderedDict([('Reference', createDataDict),
                                           ('STD_Samples', createSampleDicts),
                                          ])
 
-
 def dispatchSubstanceProperties(substance, data):
-  setSubstanceType(substance, data)
-  setSubstanceComment(substance, data)
-  setSubstanceSynonyms(substance, data)
-  setSubstanceUserCode(substance, data)
-  setSubstanceSmiles(substance, data)
-  setSubstanceInChi(substance, data)
-  setSubstanceCasNumber(substance, data)
-  setSubstanceEmpiricalFormula(substance, data)
-  setSubstanceMolecularMass(substance, data)
-  setSubstanceHAtomCount(substance, data)
-  setSubstanceBondCount(substance, data)
-  setSubstanceRingCount(substance, data)
-  setSubstanceHBondDonorCount(substance, data)
-  setSubstanceHBondAcceptorCount(substance, data)
+  for substanceProperty in substanceProperties:
+    substanceProperty(substance, data)
 
-def dispatchSampleProperties(project, sample, data):
-  addSampleSpectra(project, sample, data)
-  addSampleComponents(sample, data)
-  # loadSampleInSideBar(project, sample)
-  setSamplepH(sample, data)
-  setSampleIonicStrength(sample, data)
-  setSampleAmount(sample, data)
-  setSampleAmountUnit(sample, data)
-  setSampleCreationDate(sample, data)
-  setSampleBatchIdentifier(sample, data)
-  setSampleRowNumber(sample, data)
-  setSampleColumnNumberr(sample, data)
-  setSampleComment(sample, data)
+def dispatchSampleProperties(sample, data):
+  for sampleProperty in sampleProperties:
+    sampleProperty(sample, data)
 
 def addSampleComponents(sample, data):
   sampleComponents = [[header, sampleComponentName] for header, sampleComponentName in data.items() if header == 'sampleComponents']
@@ -165,14 +142,14 @@ def addSampleSpectra(project, sample, data):
 
   if len(sampleSpectrum1Path)>0:
     sampleSpectrum1 = project.loadData(sampleSpectrum1Path[0][1])
-    sampleSpectrum1[0].newPeakList()
+    # sampleSpectrum1[0].newPeakList()
     sampleSpectrum1[0].experimentType = sampleSpectrum1ExpType[0][1]
     sampleSpectrum1[0].comment = sampleSpectrum1Comment[0][1]
     sampleSpectra.append(sampleSpectrum1[0])
 
   if len(sampleSpectrum2Path)>0:
     sampleSpectrum2 = project.loadData(sampleSpectrum2Path[0][1])
-    sampleSpectrum2[0].newPeakList()
+    # sampleSpectrum2[0].newPeakList()
     sampleSpectrum2[0].experimentType = sampleSpectrum2ExpType[0][1]
     sampleSpectrum2[0].comment = sampleSpectrum2Comment[0][1]
     sampleSpectra.append(sampleSpectrum2[0])
@@ -239,6 +216,10 @@ def setSampleComment(sample, data):
   if len(comments)>0:
     sample.comments = comments[0][1]
 
+sampleProperties = [addSampleComponents, setSamplepH,
+  setSampleIonicStrength, setSampleAmount, setSampleAmountUnit, setSampleCreationDate,
+  setSampleBatchIdentifier, setSampleRowNumber, setSampleColumnNumberr, setSampleComment]
+
 ### Setting Substance properties
 
 def setSubstanceType(substance, data):
@@ -271,7 +252,6 @@ def setSubstanceSmiles(substance, data):
   if len(smiles)>0:
     substance.smiles = smiles[0][1]
 
-
 def setSubstanceInChi(substance, data):
   inChi = [[excelHeader, value] for excelHeader, value in data.items()
            if excelHeader == 'substanceInChi' and value != 'Empty']
@@ -292,7 +272,7 @@ def setSubstanceEmpiricalFormula(substance, data):
 
 def setSubstanceMolecularMass(substance, data):
   substanceMolecularMass = [[excelHeader, value] for excelHeader, value in data.items()
-                            if excelHeader == 'substanceMolecularMass' and value != 'Empty']
+                            if excelHeader == 'molecularMass' and value != 'Empty']
   if len(substanceMolecularMass)>0:
     substance.molecularMass = substanceMolecularMass[0][1]
 
@@ -337,6 +317,12 @@ def setSubstanceLogPartitionCoefficient(substance, data):
                                       if excelHeader == 'cLogP' and value != 'Empty']
   if len(substanceLogPartitionCoefficient)>0:
     substance.logPartitionCoefficient = substanceLogPartitionCoefficient[0][1]
+
+substanceProperties = [setSubstanceType, setSubstanceComment, setSubstanceSynonyms, setSubstanceUserCode,
+  setSubstanceSmiles, setSubstanceInChi, setSubstanceCasNumber, setSubstanceEmpiricalFormula,
+  setSubstanceMolecularMass, setSubstanceHAtomCount, setSubstanceBondCount, setSubstanceRingCount,
+  setSubstanceHBondDonorCount, setSubstanceHBondAcceptorCount]
+
 
 ### Loading obj in SideBar
 

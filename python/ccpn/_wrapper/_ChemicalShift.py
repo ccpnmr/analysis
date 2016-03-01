@@ -28,6 +28,7 @@ from ccpn import Project
 from ccpn import ChemicalShiftList
 from ccpn import NmrAtom
 from ccpncore.api.ccp.nmr.Nmr import Shift as ApiShift
+from ccpncore.util.Types import List
 
 class ChemicalShift(AbstractWrapperObject):
   """Chemical Shift."""
@@ -136,6 +137,16 @@ def _newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
 ChemicalShiftList.newChemicalShift = _newChemicalShift
 del _newChemicalShift
 
+
+def _getPidDependentObjects(self:NmrAtom) -> List[AbstractWrapperObject]:
+  """Get list of objects whose Pid must change for Atom if the pid of the Atom object changes.
+  In addition to the normal child objects we need to change the Pids for the ChemicalShifts"""
+  data2Obj = self._project._data2Obj
+  return (super(NmrAtom, self)._getPidDependentObjects()
+          + sorted(data2Obj[x] for x in self._wrappedData.shifts))
+
+NmrAtom._getPidDependentObjects = _getPidDependentObjects
+del _getPidDependentObjects
 
 # Notifiers:
 className = ApiShift._metaclass.qualifiedName()

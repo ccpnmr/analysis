@@ -289,8 +289,8 @@ class Project(AbstractWrapperObject):
 
     objects = [getDataObj(wrappedData)]
     for obj in objects:
-      # Add child objects to list
-      objects.extend(getDataObj(y) for x in obj._childClasses for y in x._getAllWrappedData(obj))
+      # Add objects to list whose Pid needs to change in tandem
+      objects.extend(obj._getPidDependentObjects())
 
       # reset _id
       oldId = obj._id

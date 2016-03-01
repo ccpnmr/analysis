@@ -26,6 +26,7 @@ import itertools
 import functools
 
 from ccpncore.util import Pid
+from ccpncore.util.Types import List
 from ccpncore.util import Common as commonUtil
 from ccpncore.api.memops import Implementation as ApiImplementation
 
@@ -708,4 +709,13 @@ class AbstractWrapperObject():
       if undo is not None:
         undo.decreaseBlocking()
 
+  def _getPidDependentObjects(self):
+    """Get list of objects whose Pid must change if the pid of this object changes.
+    Generally these are chile objects, but soem objects must ov erride this function
+    to add additional objects"""
+
+    getDataObj = self._project._data2Obj.get
+    return list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
+
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
+AbstractWrapperObject._getPidDependentObjects.__annotations__['return'] = List[AbstractWrapperObject]

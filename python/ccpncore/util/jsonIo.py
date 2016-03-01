@@ -1,4 +1,7 @@
-"""Local enhancementst to json, adding additional types
+"""Local enhancementst to json, adding support for reading and writing
+pandas.Seies, pandas.DataFrame, pandas.Panel, numpy.ndarray, OrderedDict,
+and ccpncore.Tensor
+
 
 """
 #=========================================================================================
@@ -27,8 +30,24 @@ import numpy
 import pandas
 from collections import OrderedDict
 
+def load(fp, **kw):
+  """Load json from file fp with extended object type support"""
+  return json.load(fp, object_pairs_hook=_ccpnObjectPairHook, **kw)
 
-class CcpnMultiEncoder(json.JSONEncoder):
+def loads(s:str, **kw):
+  """Load json from string s with extended object type support"""
+  return json.loads(s, object_pairs_hook=_ccpnObjectPairHook, **kw)
+
+def dump(obj:object, fp:str, indent:int=2, **kw):
+  """Dump object to json file with extended object type support"""
+  return json.dump(obj, fp, indent=indent, cls=_CcpnMultiEncoder, **kw)
+
+def dumps(obj:object, indent:int=2, **kw):
+  """Dump object to json string with extended object type support"""
+  return json.dumps(obj, indent=indent, cls=_CcpnMultiEncoder, **kw)
+
+
+class _CcpnMultiEncoder(json.JSONEncoder):
   """Overrides normal JSON encoder, supporting additional types.
   """
   def default(self, obj):
@@ -83,7 +102,7 @@ class CcpnMultiEncoder(json.JSONEncoder):
       return OrderedDict(('__type__',typ),('__data__',data))
 
 
-def ccpnObjectPairHook(pairs):
+def _ccpnObjectPairHook(pairs):
   if len(pairs) == 2:
     tag1,typ = pairs[0]
     tag2, data = pairs[1]
@@ -117,19 +136,3 @@ def ccpnObjectPairHook(pairs):
 
   # default option, std json behaviouor
   return dict(pairs)
-
-def load(fp):
-  """Load json from file fp with extended object type support"""
-  return json.load(fp, object_pairs_hook=ccpnObjectPairHook)
-
-def loads(s:str):
-  """Load json from string s with extended object type support"""
-  return json.loads(s, object_pairs_hook=ccpnObjectPairHook)
-
-def dump(obj:object, fp:str, indent:int=2, **kw):
-  """Dump object to json file with extended object type support"""
-  return json.dump(obj, fp, indent=indent, cls=CcpnMultiEncoder)
-
-def dumps(obj:object, indent:int=2, **kw):
-  """Dump object to json string with extended object type support"""
-  return json.dumps(obj, indent=indent, cls=CcpnMultiEncoder)

@@ -78,6 +78,7 @@ class Project(AbstractWrapperObject):
     self._project = self
     self._wrappedData = wrappedData
     self._id = _id = ''
+    self._old_id = None
     self._activeNotifiers = []
     
     # setup object handling dictionaries
@@ -304,6 +305,7 @@ class Project(AbstractWrapperObject):
       else:
         _id = '%s%s%s'% (parent._id, Pid.IDSEP, obj._key)
       obj._id = _id
+      obj._old_id = oldId
 
       # update pid:object mapping dictionary
       dd = pid2Obj[obj.className]

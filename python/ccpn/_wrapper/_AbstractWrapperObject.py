@@ -158,6 +158,7 @@ class AbstractWrapperObject():
     else:
       _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
     self._id = _id
+    self._old_id = None
     
     # update pid:object mapping dictionary
     dd = project._pid2Obj.get(self.className)
@@ -457,6 +458,17 @@ class AbstractWrapperObject():
     Set automatically from the short class name and object.id
     E.g. 'NA:A.102.ALA.CA' """
     return Pid.Pid(Pid.PREFIXSEP.join((self.shortClassName, self._id)))
+
+  @property
+  def _oldPid(self) -> Pid.Pid:
+    """Identifier for the object, unique within the project.
+    Set automatically from the short class name and object.id
+    E.g. 'NA:A.102.ALA.CA' """
+    oldId = self._old_id
+    if oldId is None:
+      return None
+    else:
+      return Pid.Pid(Pid.PREFIXSEP.join((self.shortClassName, oldId)))
   
   @property
   def longPid(self) -> Pid.Pid:

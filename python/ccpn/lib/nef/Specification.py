@@ -86,10 +86,10 @@ class CifDicConverter:
                                                        '_item_type_list.detail'))
     # Strip off spaces
     for row in typeLoop.data:
-      detail = row.detail.strip()
+      detail = row['detail'].strip()
       if detail:
         ll = detail.splitlines()
-        row.detail = '\n'.join(x.strip() for x in ll) + '\n'
+        row['detail'] = '\n'.join(x.strip() for x in ll) + '\n'
     #
     return saveFrame
 

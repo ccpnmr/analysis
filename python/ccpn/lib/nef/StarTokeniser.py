@@ -38,15 +38,15 @@ STAR file tokenizer
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#
-# Modified by Rasmus Fogh, CCPN project, 5/2/2016
-#
-
 '''
 Created on 25 Nov 2013
 
 @author: pkeller
 '''
+
+#
+# Modified by Rasmus Fogh, CCPN project, 5/2/2016
+#
 
 """
 

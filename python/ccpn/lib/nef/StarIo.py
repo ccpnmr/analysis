@@ -30,6 +30,7 @@ __version__ = "$Revision$"
 # - loopcategories share a namespace with tags within a saveframe
 # - DataBlocks can contain only saveframes.
 # - tag prefixes ('_', 'save_', 'data_' are stripped
+# - to
 
 
 # NBNB some longer variable names;
@@ -40,6 +41,43 @@ from . import GenericStarParser
 from ccpncore.util.Types import Union, Sequence, Optional
 from ccpncore.util import Common as commonUtil
 
+
+def parseNmrStar(text:str, mode='standard'):
+  """load NMRSTAR file"""
+  dataExtent = GenericStarParser.parse(text, mode)
+  converter = _StarDataConverter(dataExtent)
+  converter.preValidate()
+  result = converter.convert()
+  #
+  return result
+
+def parseNef(text:str, mode='standard'):
+  """load NEF from string"""
+  dataExtent = GenericStarParser.parse(text, mode)
+  converter = _StarDataConverter(dataExtent, fileType='nef')
+  converter.preValidate()
+  result = converter.convert()
+  #
+  return result
+
+def parseNmrStarFile(fileName:str, mode:str='standard'):
+  """parse NMRSTAR from file"""
+  dataExtent = GenericStarParser.parseFile(fileName, mode)
+  converter = _StarDataConverter(dataExtent)
+  converter.preValidate()
+  result = converter.convert()
+  #
+  return result
+
+def parseNefFile(fileName:str, mode:str='standard'):
+  """parse NEF from file"""
+  dataExtent = GenericStarParser.parseFile(fileName, mode)
+  converter = _StarDataConverter(dataExtent, fileType='nef')
+  converter.preValidate()
+  result = converter.convert()
+  #
+  return result
+
 class StarValidationError(ValueError):
   pass
 
@@ -47,10 +85,17 @@ class NmrDataExtent(GenericStarParser.DataExtent):
   """Top level container (OrderedDict) for NMRSTAR/NEF object tree"""
   pass
 
+# We insert these afterwards as we want the functions at the top of the file
+# but can only annotate after DataExtent is created
+parseNef.__annotations__['return'] = NmrDataExtent
+parseNefFile.__annotations__['return'] = NmrDataExtent
+parseNmrStar.__annotations__['return'] = NmrDataExtent
+parseNmrStarFile.__annotations__['return'] = NmrDataExtent
+
 class NmrLoop(GenericStarParser.Loop):
   """Loop for NMRSTAR/NEF object tree
 
-  The contents, self.datal is a list of namedlist objects matching the column names.
+  The contents, self.data is a list of namedlist objects matching the column names.
   rows can be modified or deleted from data, but adding new rows directly is likely to
   break - use the newRow function."""
 
@@ -100,7 +145,7 @@ class NmrLoopRow(GenericStarParser.LoopRow):
 class _StarDataConverter:
   """Converter from output of a GeneralStarParser to a NEF or NMRSTAR nested data structure
 
-  NB Function assumes valid data as output from _GeneralStarParser with lowerCaseTags settings
+  NB Function assumes valid data as output from GeneralStarParser with lowerCaseTags settings
   and does not double check validity."""
 
 
@@ -353,7 +398,7 @@ class _StarDataConverter:
     return newLoop
 
   def convertValue(self, value, category=None, tag=None):
-    """NB category and tag are needed when we want to use self.specification"""
+    """NB category and tag are needed if  we want to use self.specification"""
 
     if self.specification:
       # Add specification-dependent processing here
@@ -362,7 +407,7 @@ class _StarDataConverter:
 
     if isinstance(value, GenericStarParser.UnquotedValue):
       # Convert special values
-      if value == GenericStarParser.NULL :
+      if value == GenericStarParser.NULLSTRING :
         # null  value
         value = None
       elif value == GenericStarParser.TRUESTRING:
@@ -371,7 +416,7 @@ class _StarDataConverter:
       elif value == GenericStarParser.FALSESTRING:
         # Boolean False
         value = False
-      elif value == GenericStarParser.UNKNOWN:
+      elif value == GenericStarParser.UNKNOWNSTRING:
         value = None
       elif value[0] == '$':
         # SaveFrame reference
@@ -397,23 +442,4 @@ class _StarDataConverter:
 
   def raiseValidationError(self, msg):
     raise StarValidationError(self._errorMessage(msg))
-
-
-def loadNmrStarFile(fileName, mode='standard') -> NmrDataExtent:
-  """load NMRSTAR file"""
-  dataExtent = GenericStarParser.loadGenericStarFile(fileName, mode)
-  converter = _StarDataConverter(dataExtent)
-  converter.preValidate()
-  result = converter.convert()
-  #
-  return result
-
-def loadNefFile(fileName, mode='standard') -> NmrDataExtent:
-  """load NEF file"""
-  dataExtent = GenericStarParser.loadGenericStarFile(fileName, mode)
-  converter = _StarDataConverter(dataExtent, fileType='nef')
-  converter.preValidate()
-  result = converter.convert()
-  #
-  return result
 

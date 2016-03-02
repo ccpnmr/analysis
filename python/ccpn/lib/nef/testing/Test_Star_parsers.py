@@ -32,21 +32,21 @@ TEST_FILE_PATH = os.path.join(Path.getTopDirectory(), 'internalData/starExamples
 def _loadGeneralFile(path:str):
   usePath = path if path.startswith('/') else os.path.join(TEST_FILE_PATH, path)
   t0 = time.time()
-  entry = GenericStarParser.loadGenericStarFile(usePath) # 'lenient')
+  entry = GenericStarParser.parseFile(usePath) # 'lenient')
   print ("Parsing time %s for %s" % (time.time() - t0, path))
   return entry
 
 def _loadNmrStarFile(path:str):
   usePath = path if path.startswith('/') else os.path.join(TEST_FILE_PATH, path)
   t0 = time.time()
-  entry = StarIo.loadNmrStarFile(usePath) # 'lenient')
+  entry = StarIo.parseNmrStarFile(usePath) # 'lenient')
   print ("Parsing time %s for %s" % (time.time() - t0, path))
   return entry
 
 def _loadNefFile(path:str):
   usePath = path if path.startswith('/') else os.path.join(TEST_FILE_PATH, path)
   t0 = time.time()
-  entry = StarIo.loadNefFile(usePath) # 'lenient')
+  entry = StarIo.parseNefFile(usePath) # 'lenient')
   print ("Parsing time %s for %s" % (time.time() - t0, path))
   return entry
 

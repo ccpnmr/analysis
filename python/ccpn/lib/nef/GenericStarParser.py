@@ -1,6 +1,14 @@
 """Star-type file parser, agnostic between cif, mmcif, star, nef, etc.
-Returns a nested data structures that matches the file,
+Returns a nested data structure that matches the file,
 with DataExtent, DataBlock, SaveFrame, and Loop objects.
+Additional support for distinguishing between None, True, False, and int/float values
+and the strings that match their representations.
+
+Usage:
+
+parse(text, mode) to parse a text representation
+
+parseFile(fileName, mode) to load and parse a file
 
 
 Reading behaviour
@@ -22,11 +30,11 @@ The object structure returned is:
 
     DataExtent
       DataBlock
-        Loop
         Item
-      SaveFrame
         Loop
-        Item
+        SaveFrame
+          Item
+          Loop
 
 DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional 'name' attribute
 DataBlocks and SaveFrames are entered in their container using their name as the key.
@@ -56,7 +64,7 @@ follows the specification in
 International Tables for Crystallography volume G section 2.1
 with the following exceptions and additions.
 
-  - Strings of type UnquotedValue are written as-is, without quotinng them.
+  - Strings of type UnquotedValue are written as-is, without quoting them.
 
   - Note that e.g. ' "say" 'what'?'    or    " 'say"'"what"?" are
     valid quoted strings according to the standard, since  the end-quote marker
@@ -65,14 +73,21 @@ with the following exceptions and additions.
   - Strings that cannot be quoted on one line (e.g.   ''' "say" 'what' '''   )
     are converted to  multiline strings by appending a newline
 
+  - Strings with internal linebreaks but no terminal linebreak
+  are converted by appending a linebreak
+
   - Strings that cannot be quoted as multiline strings because they contain
   a line starting with ';' are converted by prepending a space (' ') to each line
 
-  - Values None, True, and False are converted to UNQUOTED strings ., true, and false, respectively
+  - Values None, True, False, NaN, Infinity and -Infinity are converted to
+  UNQUOTED strings '.', 'true', 'false', 'NaN', 'Infinity' and '-Infinity', respectively.
 
-  - The literal strings 'true' and 'false' are always written in quotes.
-    This makes it possible (but NOT mandatory) to use unquoted true and false
-    to denote a boolean instead of a string.
+  - Normal (not unquoted) strings that evaluate to a float are written in quotes.
+    Also the literal strings '.', 'true', 'false', 'NaN', 'Infinity' and '-Infinity'
+    are always written in quotes.
+
+    This makes it possible (but NOT mandatory) to distinguish the null,  boolean and float values
+    from the equivalent strings
 
 The toString functions in this module will work with loop rows implemented as
 either tuples, lists, or OrderedDicts, and accept an optional tag prefix for
@@ -102,25 +117,26 @@ __version__ = "$Revision$"
 
 import sys
 import re
+import math
 from collections import OrderedDict
 from .StarTokeniser import getTokenIterator
 
 # Constants for converting values to string
 # NB - these can be overridden by pre-converting all values to
 # UnquotedValue containing proper quotation marks
-# NBNB TBD: Consider quoting strings that evaluate to floats or ints
 _quoteStartStrings = [
   '_', '[', ']', '$', '"', "'", 'save_', 'loop_', 'stop_', 'data_', 'global_'
-  'true', 'false'
 ]
+_quoteStrings = ['true', 'false', 'NaN', 'Infinity', '-Infinity']
 _containsWhiteSpace = re.compile('\s').search
 _containsSingleEndQuote =  re.compile("'\s").search
 _containsDoubleEndQuote =  re.compile('"\s').search
 _floatingPointFormat = '%.3g'
 _defaultIndent = ' '  * 3
 _defaultSeparator = ' '  * 2
+
 # Options corresponding to the supported parser modes: 'standard', 'lenient', 'strict', and 'IUCr'
-parserModeOptions = {
+_parserModeOptions = {
   'lenient': {
     'enforceSaveFrameStop':False,
     'enforceLoopStop':False,
@@ -146,6 +162,37 @@ parserModeOptions = {
     'allowSquareBracketStrings':False},
 }
 
+
+def parse(text, mode='standard'):
+  """Parse STAR text string 'text'.
+  Standard settings allow skipping 'stop_' tags and strings starting with '[' or ']',
+  but require 'save_' termination of SaveFrames and throw an error if the number of loop
+  values do not match the number of columns.
+
+  'strict' and 'lenient' modes are available; mode='IUCr' follows the IUCr standard, which
+  is like standard except that strings starting with '[' and ']' are not allowed
+
+  See GeneralStarParser class for details and control of individual settings
+  """
+
+  try:
+    options = _parserModeOptions[mode]
+  except KeyError:
+    raise ValueError(
+      "illegal parser mode : %s  Only modes 'lenient', 'strict', 'standard', 'IUCr' allowed"
+      %  repr(mode)
+    )
+
+  #
+  return GeneralStarParser(text, **options).parse()
+
+
+def parseFile(fileName:str, mode:str='standard'):
+  """load generic STAR file"""
+
+  text = open(fileName).read()
+  return parse(text, mode=mode)
+
 class UnquotedValue(str):
   """A plain string - the only difference is the type: 'UnquotedValue'.
   Used to distinguish values from STAR files that were not quoted.
@@ -153,10 +200,13 @@ class UnquotedValue(str):
   pass
 
 # Constants for I/O of standard values
-NULL = UnquotedValue('.')
-UNKNOWN = UnquotedValue('?')
+NULLSTRING = UnquotedValue('.')
+UNKNOWNSTRING = UnquotedValue('?')
 TRUESTRING = UnquotedValue('true')
 FALSESTRING = UnquotedValue('false')
+NANSTRING = UnquotedValue('NaN')
+PLUSINFINITYSTRING = UnquotedValue('Infinity')
+MINUSINFINITYSTRING = UnquotedValue('-Infinity')
 
 
 class StarSyntaxError(ValueError):
@@ -169,41 +219,16 @@ class NamedOrderedDict(OrderedDict):
     self.name = name
 
   def __str__(self):
-    return '<%s:%s>' % (self.__class__.__name__, self.name)
+    return '%s(name=%s)' % (self.__class__.__name__, self.name)
+
+  def __repr__(self):
+    return '%s(%s, name=%s)' % (self.__class__.__name__, list(tt for tt in self.items()), self.name)
 
   def addItem(self, tag:str, value):
     if tag in self:
       raise ValueError("%s: duplicate key name %s" % (self, tag))
     else:
       self[tag] = value
-
-  def _get(self, name):
-    """Synonym for get, for convenience if working with both OrderedDicts and
-    namedlists"""
-    return self.get(name)
-
-def parse(text, mode='standard'):
-  """Parse STAR text string 'text'.
-  Standard settings allow skipping 'stop_' tags and strings starting with '[' or ']',
-  but require 'save_' termination of SaveFrames and throw an error if the number of loop values
-  do not match the number of columns.
-
-  'strict' and 'lenient' modes are available; mode='IUCr' follows the IUCr standard, which
-  is like standard except that strings startingwith '[' and ']' are not allowed
-
-  See Parser.parse() for details and control of individual settings
-  """
-
-  try:
-    options = parserModeOptions[mode]
-  except KeyError:
-    raise ValueError(
-      "illegal mode : %s  Only modes 'lenient', 'strict', 'standard' allowed"
-      %  repr(mode)
-    )
-
-  #
-  return _GeneralStarParser(text, **options).parse()
 
 class StarContainer(NamedOrderedDict):
   """DataBlock or SaveFrame containing items and loops"""
@@ -272,6 +297,11 @@ class DataExtent(NamedOrderedDict):
   def toString(self, indent:str='', separator:str=_defaultSeparator) -> str:
     blockSeparator = '\n\n\n\n'
     return blockSeparator.join(x.toString(indent=indent, separator=separator) for x in self.values())
+
+# We insert these afterwards as we want the functions at the top of the file
+# but can only annotate after DataExtent is created
+parse.__annotations__['return'] = DataExtent
+parseFile.__annotations__['return'] = DataExtent
 
 class DataBlock(StarContainer):
   """DataBlock for general STAR object tree"""
@@ -465,11 +495,10 @@ class Loop:
 
 
 def valueToString(value):
-  """ Convert value to properly quotes STAR string"""
-
+  """ Convert value to properly quoted STAR string"""
 
   if value is None:
-    return NULL
+    return NULLSTRING
 
   elif value is True:
     return TRUESTRING
@@ -481,7 +510,18 @@ def valueToString(value):
     return value
 
   elif isinstance(value, float):
-    return _floatingPointFormat % value
+
+    if math.isnan(value):
+      return NANSTRING
+
+    elif math.isinf(value):
+      if value > 0:
+        value = PLUSINFINITYSTRING
+      else:
+        value = MINUSINFINITYSTRING
+
+    else:
+      return _floatingPointFormat % value
 
   elif isinstance(value, int):
     return str(value)
@@ -490,10 +530,16 @@ def valueToString(value):
     value = str(value)
 
     # quote, depending on content
+    try:
+      junk = float(value)
+      matchesNumber = True
+    except ValueError:
+      matchesNumber = False
 
     if '\n' not in value:
 
-      if _containsWhiteSpace(value) or any(value.startswith(x) for x in _quoteStartStrings):
+      if (_containsWhiteSpace(value) or matchesNumber or value in _quoteStrings or
+            any(value.startswith(x) for x in _quoteStartStrings)):
         if not "'" in value:
           value = "'%s'" % value
         elif not '"' in value:
@@ -526,7 +572,7 @@ def valueToString(value):
 
 
 
-class _GeneralStarParser:
+class GeneralStarParser:
   """ Parser for text corresponding to a STAR file with one or more data blocks,
   producing a nested object structure matching the file (see module documentation for details:
 
@@ -565,7 +611,6 @@ class _GeneralStarParser:
     self.allowSquareBracketStrings = allowSquareBracketStrings
     self.lowerCaseTags = lowerCaseTags
 
-    # self.tokeniser = StarTokeniser(text)
     self.tokeniser = getTokenIterator(text)
     self.text = text
 
@@ -605,7 +650,7 @@ class _GeneralStarParser:
           #   print( ' - ', *row)
           for key,val in row.items():
             if val is None:
-              row[key] = NULL
+              row[key] = NULLSTRING
         else:
           raise StarSyntaxError(
             self._errorMessage("loop %s is missing %s values" % (loop, missingValueCount), value)
@@ -903,13 +948,6 @@ def extractMatchingNameSequence(name:str, matchNames:list) -> list:
     return [x[1] for x in ll]
   else:
     return None
-
-
-def loadGenericStarFile(fileName:str, mode:str='standard') -> DataExtent:
-  """load generic STAR file"""
-
-  text = open(fileName).read()
-  return parse(text, mode=mode)
 
 
 if __name__ == "__main__":

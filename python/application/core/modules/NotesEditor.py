@@ -25,18 +25,11 @@ class NotesEditor(DropBase, CcpnDock):
     self.note = note
     widgetLayout = QtGui.QGridLayout()
     widget.setLayout(widgetLayout)
-    # self.menuBar = MenuBar(self)
-    # self.menuBar.setNativeMenuBar(False)
-    # self.fileMenu = self.menuBar.addMenu('File')
-    # self.editMenu = self.menuBar.addMenu('Edit')
     self.label1 = Label(self, text='Note name')
     self.lineEdit1 = LineEdit(self)
-    # widget.layout().addWidget(self.menuBar, 0, 0, 1, 5)
     widget.layout().addWidget(self.label1, 1, 0)
     widget.layout().addWidget(self.lineEdit1, 1, 1, 1, 4)
-    # self.lineEdit1.editingFinished.connect(self._setNoteName)
     widget.layout().addWidget(self.textBox, 2, 0, 1, 5)
-    # if self.note.text is not None:
     if note:
       self.textBox.setText(note.text)
       self.lineEdit1.setText(self.note.name)

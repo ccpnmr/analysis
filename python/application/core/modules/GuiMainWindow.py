@@ -473,6 +473,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(self.assignmentModule)
     # self.pythonConsole.writeModuleDisplayCommand('showAssignmentModule')
     self.pythonConsole.writeConsoleCommand("application.showAssignmentModule()")
+    self.project._logger.info("application.showAssignmentModule()")
 
   def showNmrResidueModule(self):
     """Shows Nmr Residue Module."""
@@ -517,6 +518,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(nmrResidueTableDock, 'bottom')
     # self.pythonConsole.writeModuleDisplayCommand('showNmrResidueTable')
     self.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
+    self.project._logger.info("application.showNmrResidueTable()")
 
   def toggleSequence(self):
     """Toggles whether Sequence Module is displayed or not"""
@@ -528,6 +530,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.showSequence()
     # self.pythonConsole.writeModuleDisplayCommand('toggleSequence')
     self.pythonConsole.writeConsoleCommand("application.toggleSequence()")
+    self.project._logger.info("application.toggleSequence()")
 
   def loadAProject(self, projectDir=None):
     """
@@ -564,6 +567,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.dockArea.addDock(self.assigner, position=position)
     # self.pythonConsole.writeModuleDisplayCommand('showAssigner')
     self.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
+    self.project._logger.info("application.showSequenceGraph()")
     return self.assigner
     # self.dockArea.addDock(assigner)
 
@@ -720,6 +724,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup.raise_()
     # self.pythonConsole.writeModuleDisplayCommand('createSample')
     self.pythonConsole.writeConsoleCommand("application.createSample()")
+    self.project._logger.info("application.createSample()")
 
   def showSampleAnalysis(self):
     """
@@ -729,11 +734,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(showSa, position='bottom')
     # self.pythonConsole.writeModuleDisplayCommand('showSampleAnalysis')
     self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
+    self.project._logger.info("application.showSampleAnalysis()")
 
   def showScreeningSetup(self):
     showSc = ScreeningSetup(self.project)
     self.dockArea.addDock(showSc, position='bottom')
     self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
+    self.project._logger.info("application.showScreeningSetup()")
 
   def showMetabolomicsModule(self):
     self.showMm = MetabolomicsModule(self.project)
@@ -847,6 +854,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.macroEditor = MacroEditor(self.dockArea, self, "Macro Editor", showRecordButtons=True)
     # self.pythonConsole.writeModuleDisplayCommand('startMacroRecord')
     self.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
+    self.project._logger.info("application.startMacroRecord()")
 
 
   def _fillRecentMacrosMenu(self):
@@ -877,6 +885,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup = CreateSequence(self, project=self._project).exec_()
     # self.pythonConsole.writeModuleDisplayCommand('showMoleculePopup')
     self.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
+    self.project._logger.info("application.showMoleculePopup()")
 
   def inspectMolecule(self):
     info = MessageDialog.showInfo('Not implemented yet!',
@@ -965,6 +974,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     # self.pythonConsole.writeModuleDisplayCommand('showPeakTable')
     self.pythonConsole.writeConsoleCommand("application.showPeakTable()")
+    self.project._logger.info("application.showPeakTable()")
 
   def showChemicalShiftTable(self, position='bottom'):
     """
@@ -975,6 +985,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(chemicalShiftTable, position=position)
     # self.pythonConsole.writeModuleDisplayCommand('showChemicalShiftTable')
     self.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
+    self.project._logger.info("application.showChemicalShiftTable()")
 
   # def showParassignPeakTable(self, position='left', relativeTo=None):
   #   peakList = ParassignModule(name="Peak Table", peakLists=self._project.peakLists)
@@ -996,6 +1007,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # self.bbModule.setAssigner(assigner)
     # self.pythonConsole.writeModuleDisplayCommand('showBackboneAssignmentModule')
     self.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
+    self.project._logger.info("application.showBackboneAssignmentModule()")
+
     return self.bbModule
 
   def showPickAndAssignModule(self):
@@ -1004,6 +1017,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(self.paaModule)
     # self.pythonConsole.writeModuleDisplayCommand('showPickAndAssignModule')
     self.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
+    self.project._logger.info("application.showPickAndAssignModule()")
     return self.paaModule
 
   def showAtomSelector(self):
@@ -1012,6 +1026,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(self.atomSelector)
     # self.pythonConsole.writeModuleDisplayCommand('showAtomSelector')
     self.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
+    self.project._logger.info("application.showAtomSelector()")
     return self.atomSelector
 
   def showResidueInformation(self):
@@ -1020,6 +1035,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.addDock(ResidueInformation(self, self._project))
     # self.pythonConsole.writeModuleDisplayCommand('showResidueInformation')
     self.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
+    self.project._logger.info("application.showResidueInformation()")
 
   def showDataPlottingModule(self):
     dpModule = DataPlottingModule(self.dockArea)

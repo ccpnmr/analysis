@@ -37,7 +37,7 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-
+0
 
 from functools import partial
 
@@ -420,44 +420,55 @@ class ContoursTab(QtGui.QWidget, Base):
   def changePositiveContourDisplay(self, state):
     if state == QtCore.Qt.Checked:
       for spectrumView in self.spectrum.spectrumViews:
-        spectrumView._wrappedData.displayPositiveContours = True
+        spectrumView.displayPositiveContours = True
+        self.logger.info("spectrumView.displayPositiveContours = True")
 
     else:
       for spectrumView in self.spectrum.spectrumViews:
-        spectrumView._wrappedData.displayPositiveContours = False
+        spectrumView.displayPositiveContours = False
+        self.logger.info("spectrumView.displayPositiveContours = False")
 
   def displayNegativeContours(self, state):
     if state == QtCore.Qt.Checked:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayNegativeContours = True
+        self.logger.info("spectrumView.displayNegativeContours = True")
     else:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayNegativeContours = False
+        self.logger.info("spectrumView.displayNegativeContours = False")
 
 
   def lineEditTextChanged1(self, spectrum, value):
     spectrum.positiveContourBase = float(value)
+    self.writeLoggingMessage("spectrum.positiveContourBase = %f" % float(value))
 
   def lineEditTextChanged2(self, spectrum, value):
     spectrum.positiveContourFactor = float(value)
+    self.writeLoggingMessage("spectrum.positiveContourFactor = %f" % float(value))
 
   def lineEditTextChanged3(self, spectrum, value):
     spectrum.positiveContourCount = int(value)
+    self.writeLoggingMessage("spectrum.positiveContourCount = %f" % int(value))
 
   def lineEditTextChanged4(self, spectrum, value):
     spectrum.negativeContourBase = float(value)
+    self.writeLoggingMessage("spectrum.negativeContourBase = %f" % float(value))
 
   def lineEditTextChanged5(self, spectrum, value):
     spectrum.negativeContourFactor = float(value)
+    self.writeLoggingMessage("spectrum.negativeContourFactor = %f" % float(value))
 
   def lineEditTextChanged6(self, spectrum, value):
     spectrum.negativeContourCount = int(value)
+    self.writeLoggingMessage("spectrum.negativeContourCount = %f" % int(value))
 
   def changePosSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
     if newColour is not None:
       spectrum.positiveContourColour = newColour.name()
+      self.writeLoggingMessage("spectrum.positiveContourColour = %s" % newColour.name())
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(newColour))
       newIndex = str(len(spectrumColours.items())+1)
@@ -472,6 +483,7 @@ class ContoursTab(QtGui.QWidget, Base):
     newColour = dialog.getColor()
     if newColour is not None:
       spectrum.negativeContourColour = newColour.name()
+      self.writeLoggingMessage("spectrum.negativeContourColour = %s" % newColour.name())
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(newColour))
       newIndex = str(len(spectrumColours.items())+1)
@@ -485,9 +497,12 @@ class ContoursTab(QtGui.QWidget, Base):
 
     newColour = list(spectrumColours.keys())[value]
     spectrum.positiveContourColour = newColour
+    self.writeLoggingMessage("spectrum.positiveContourColour = %s" % newColour)
 
   def changeNegColourComboIndex(self, spectrum, value):
 
     newColour = list(spectrumColours.keys())[value]
     spectrum._apiDataSource.negativeContourColour = newColour
+    self.writeLoggingMessage("spectrum.negativeContourColour = %s" % newColour)
+
 

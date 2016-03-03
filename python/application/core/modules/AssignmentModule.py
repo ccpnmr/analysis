@@ -34,7 +34,7 @@ class AssignmentModule(CcpnDock, Base):
 
   def __init__(self, parent=None, project:Project=None, peaks:Types.List[Peak]=None, **kw):
 
-    CcpnDock.__init__(self, name="Assignment Module")
+    CcpnDock.__init__(self, name="Peak Assigner")
     Base.__init__(self, **kw)
     self.project = project
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)

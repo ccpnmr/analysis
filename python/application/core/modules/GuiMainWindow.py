@@ -216,23 +216,24 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.metabolomicsMenu = Menu("&Metabolomics", self)
     spectrumMenu = Menu("Spectrum", self)
     viewMenu = Menu("&View", self)
-    moleculeMenu = Menu("&Stuff", self)
+    moleculeMenu = Menu("&Molecules", self)
     restraintsMenu = Menu("&Restraints", self)
     structuresMenu = Menu("&Structures", self)
     macroMenu = Menu("Macro", self)
+    pluginsMenu = Menu("Plugins", self)
     helpMenu = Menu("&Help", self)
 
 
     fileMenu.addAction(Action(self, "New", callback=self.newProject, shortcut='pn'))
 
-    fileMenu.addAction(Action(self, "Open...", callback=self.loadAProject, shortcut="po"))
+    fileMenu.addAction(Action(self, "Open ...", callback=self.loadAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
     self._fillRecentProjectsMenu()
     fileMenu.addAction(Action(self, "Load Spectrum", callback=lambda: self.loadData(text='Load Spectrum'), shortcut='ls'))
     fileMenu.addAction(Action(self, "Load Data", callback=self.loadData, shortcut='ld'))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
-    fileMenu.addAction(Action(self, "Save As...", shortcut="sa", callback=self.saveProjectAs))
+    fileMenu.addAction(Action(self, "Save As ...", shortcut="sa", callback=self.saveProjectAs))
     ###fileMenu.addAction(Action(self, "Print...", shortcut="pr", callback=self.printToFile))
 
     #NBNB How are we going to implement this?
@@ -248,11 +249,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # logOption.addAction(Action(self, "Save As...", callback=self.saveLogFile))
     # logOption.addAction(Action(self, "Clear", callback=self.clearLogFile))
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Summary...", self.displayProjectSummary))
+    fileMenu.addAction(Action(self, "Summary ...", self.displayProjectSummary))
     fileMenu.addAction(Action(self, "Archive", self.archiveProject))
-    fileMenu.addAction(Action(self, "Backup...", self.showBackupPopup))
+    fileMenu.addAction(Action(self, "Backup ...", self.showBackupPopup))
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Preferences...", callback=self.showApplicationPreferences))
+    fileMenu.addAction(Action(self, "Preferences ...", callback=self.showApplicationPreferences))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Close Program", callback=self.closeEvent, shortcut="qt"))
 
@@ -268,7 +269,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.metabolomicsMenu.addAction(Action(self, 'Integral Assignment', callback=self.showIntegralAssigmentModule, shortcut="ia"))
     self.decompMenu = self.metabolomicsMenu.addMenu('Decomposition')
     self.decompMenu.addAction(Action(self, 'Run PCA', callback=self.showPCAModule))
-    self.metabolomicsMenu.addAction(Action(self, 'Integration', callback=self.showIntegrationModule))
     self.metabolomicsMenu.addAction(Action(self, 'Peak Assignment', callback=self.showPeakAssigmentModule))
     self.metabolomicsMenu.addAction(Action(self, 'Pick and Fit', callback=self.showPickandFitModule))
     self.metabolomicsMenu.addAction(Action(self, 'Spectrum Groups', callback=self.showSpectrumGroupModule))
@@ -293,9 +293,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # spectrumPeaksMenu.addSeparator()
     # spectrumPeaksMenu.addAction(Action(self, "Print to File", callback=self.printPeaksToFile))
 
-    spectrumMenu.addAction(Action(self, "Make Projection...", callback=self.showProjectionPopup, shortcut='pj'))
-    spectrumMenu.addAction(Action(self, "Set Experiment Types...", callback=self.showExptTypePopup, shortcut='et'))
-    spectrumMenu.addAction(Action(self, "Pick Peaks...", callback=self.pickPeaks, shortcut='pp'))
+    spectrumMenu.addAction(Action(self, "Spectrum Groups ...", callback=self.showProjectionPopup, shortcut='ss'))
+    spectrumMenu.addAction(Action(self, "Set Experiment Types ...", callback=self.showExptTypePopup, shortcut='et'))
+    spectrumMenu.addSeparator()
+    spectrumMenu.addAction(Action(self, "Pick Peaks ...", callback=self.pickPeaks, shortcut='pp'))
+    spectrumMenu.addAction(Action(self, 'Integration', callback=self.showIntegrationModule, shortcut='it'))
+    spectrumMenu.addSeparator()
+    spectrumMenu.addAction(Action(self, "Make Projection ...", callback=self.showProjectionPopup, shortcut='pj'))
+    spectrumMenu.addAction(Action(self, "Phasing Console", partial(self.togglePhaseConsole, self), shortcut='pc'))
 
     # newMoleculeMenu = moleculeMenu.addMenu("New")
     moleculeMenu.addAction(Action(self, "Create Molecule...", callback=self.showMoleculePopup, shortcut='cm'))
@@ -305,24 +310,24 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.sequenceAction.setChecked(False)
     moleculeMenu.addAction(self.sequenceAction)
-    moleculeMenu.addAction(Action(self, "Inspect...", callback=self.inspectMolecule))
+    moleculeMenu.addAction(Action(self, "Inspect ...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
     moleculeMenu.addAction(Action(self, "Reference Chemical Shifts", callback=self.showRefChemicalShifts, shortcut='rc'))
     # moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
     # moleculeMenu.addAction(Action(self, "Show Molecule Display", callback=self.showMoleculeDisplay, shortcut='md'))
 
-    macroMenu.addAction(Action(self, "Edit...", callback=self.editMacro))
-    macroMenu.addAction(Action(self, "New from Console...", callback=self.newMacroFromConsole))
-    macroMenu.addAction(Action(self, "Record Macro...", callback=self.startMacroRecord))
+    macroMenu.addAction(Action(self, "Edit ...", callback=self.editMacro))
+    macroMenu.addAction(Action(self, "New from Console ...", callback=self.newMacroFromConsole))
+    macroMenu.addAction(Action(self, "Record Macro ...", callback=self.startMacroRecord))
     # macroRecordMenu.addAction(Action(self, "Stop", callback=self.stopMacroRecord))
     # macroRecordMenu.addAction(Action(self, "Save As...", callback=self.saveRecordedMacro))
     macroMenu.addSeparator()
-    macroMenu.addAction(Action(self, "Run...", shortcut="rm", callback=self.runMacro))
+    macroMenu.addAction(Action(self, "Run ...", shortcut="rm", callback=self.runMacro))
 
     self.recentMacrosMenu = macroMenu.addMenu("Run Recent")
     self._fillRecentMacrosMenu()
     macroMenu.addSeparator()
-    macroMenu.addAction(Action(self, "Define User Shortcuts...", callback=self.defineUserShortcuts))
+    macroMenu.addAction(Action(self, "Define User Shortcuts ...", callback=self.defineUserShortcuts))
 
     # viewNewMenu = viewMenu.addMenu("New")
     viewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
@@ -330,6 +335,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     viewMenu.addAction(Action(self, "Chemical Shift Table", callback=self.showChemicalShiftTable, shortcut="ct"))
     viewMenu.addAction(Action(self, "NmrResidue Table", callback=self.showNmrResidueTable, shortcut="nt"))
     viewMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
+    viewMenu.addSeparator()
+    viewMenu.addAction(Action(self, 'Sequence Graph', callback=self.showSequenceGraph, shortcut='sg'))
+    viewMenu.addAction(Action(self, 'Atom Selector', callback=self.showAtomSelector, shortcut='as'))
 
 
     #NBNB Need to decide how we are to handle layouts if at all
@@ -346,31 +354,32 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
 
-    helpMenu.addAction(Action(self, "Command...", callback=self.showCommandHelp))
+    helpMenu.addAction(Action(self, "Command ...", callback=self.showCommandHelp))
     tutorialsMenu = helpMenu.addMenu("Tutorials")
     tutorialsMenu.addAction(Action(self, "Beginners Tutorial", callback=self.showBeginnersTutorial))
     tutorialsMenu.addAction(Action(self, "Backbone Tutorial", callback=self.showBackboneTutorial))
     helpMenu.addAction(Action(self, "Show Shortcuts", callback=self.showShortcuts))
+    helpMenu.addAction(Action(self, "Show CcpNmr V3 Documentation", callback=self.showWrapperDocumentation))
     helpMenu.addAction(Action(self, "Show API Documentation", callback=self.showApiDocumentation))
-    helpMenu.addAction(Action(self, "Show CCPN Documentation", callback=self.showWrapperDocumentation))
     helpMenu.addSeparator()
-    helpMenu.addAction(Action(self, "About CcpNmr V3...", callback=self.showAboutPopup))
-    helpMenu.addAction(Action(self, "About CCPN...", callback=self.showAboutCcpnPopup))
+    helpMenu.addAction(Action(self, "About CcpNmr V3 ...", callback=self.showAboutPopup))
+    helpMenu.addAction(Action(self, "About CCPN ...", callback=self.showAboutCcpnPopup))
     helpMenu.addSeparator()
-    helpMenu.addAction(Action(self, "Inspect Code...", callback=self.showCodeInspectionPopup))
-    helpMenu.addAction(Action(self, "Check for Updates...", callback=self.showUpdatePopup))
-    helpMenu.addAction(Action(self, "Submit Feedback...", callback=self.showFeedbackPopup))
+    helpMenu.addAction(Action(self, "Inspect Code ...", callback=self.showCodeInspectionPopup))
+    helpMenu.addAction(Action(self, "Check for Updates ...", callback=self.showUpdatePopup))
+    helpMenu.addAction(Action(self, "Submit Feedback ...", callback=self.showFeedbackPopup))
 
     assignMenu = Menu("&Assign", self)
     assignMenu.addAction(Action(self, "Setup NmrResidues", callback=self.showSetupNmrResiduesPopup, shortcut='sn'))
-    assignMenu.addAction(Action(self, "Assignment Module", callback=self.showAssignmentModule, shortcut='aa'))
     assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule, shortcut='pa'))
-    assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showPickAndAssignModule, shortcut='sc'))
-    assignMenu.addAction(Action(self, 'Sidechain Assignment', callback=self.showBackboneAssignmentModule, shortcut='bb'))
-    assignMenu.addAction(Action(self, 'Show Assigner', callback=self.showAssigner))
-    assignMenu.addAction(Action(self, 'Show Atom Selector', callback=self.showAtomSelector, shortcut='as'))
+    assignMenu.addSeparator()
+    assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showPickAndAssignModule, shortcut='bb'))
+    assignMenu.addAction(Action(self, 'Sidechain Assignment', callback=self.showBackboneAssignmentModule, shortcut='sc'))
+    assignMenu.addSeparator()
+    assignMenu.addAction(Action(self, "Peak Assigner", callback=self.showAssignmentModule, shortcut='aa'))
     assignMenu.addAction(Action(self, 'Residue Information', callback=self.showResidueInformation, shortcut='ri'))
-    assignMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
+
+    pluginsMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
 
 
 
@@ -391,6 +400,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self._menuBar.addMenu(restraintsMenu)
       self._menuBar.addMenu(structuresMenu)
     self._menuBar.addMenu(viewMenu)
+    self._menuBar.addMenu(pluginsMenu)
     self._menuBar.addMenu(macroMenu)
     self._menuBar.addMenu(helpMenu)
     self.setMenuBar(self._menuBar)
@@ -541,7 +551,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup = PeakFindPopup(parent=self, project=self.project)
     popup.exec_()
 
-  def showAssigner(self, position:str='bottom', nextTo:CcpnDock=None):
+  def showSequenceGraph(self, position:str='bottom', nextTo:CcpnDock=None):
     """
     Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
     """
@@ -553,7 +563,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.dockArea.addDock(self.assigner, position=position)
     # self.pythonConsole.writeModuleDisplayCommand('showAssigner')
-    self.pythonConsole.writeConsoleCommand("application.showAssigner()")
+    self.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
     return self.assigner
     # self.dockArea.addDock(assigner)
 
@@ -564,7 +574,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     dataPid = item.data(0, QtCore.Qt.DisplayRole)
     project = self._appBase.project
     obj = project.getByPid(dataPid)
-    print(obj)
     if obj is not None:
       self.sideBar.raisePopup(obj, item)
     elif item.data(0, QtCore.Qt.DisplayRole) == '<New>':

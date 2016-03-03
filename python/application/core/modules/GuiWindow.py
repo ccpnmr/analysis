@@ -145,7 +145,6 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self))
     QtGui.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self))
 
-    QtGui.QShortcut(QtGui.QKeySequence("p, c"), self, partial(self.togglePhaseConsole, self))
     ###QtGui.QShortcut(QtGui.QKeySequence("p, h"), self, self.newHPhasingTrace)
     #QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.newVPhasingTrace)
     QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot)

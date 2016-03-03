@@ -159,7 +159,7 @@ class Assigner(CcpnDock):
   """
   def __init__(self, project=None):
 
-    super(Assigner, self).__init__(name='Assigner')
+    super(Assigner, self).__init__(name='Sequence Graph')
     self.project=project
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)

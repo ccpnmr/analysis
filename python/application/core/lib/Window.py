@@ -8,7 +8,7 @@ from ccpncore.util import Types
 from application.core.modules.GuiStrip import GuiStrip
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
-MODULE_DICT = {'ASSIGNER': 'showAssigner',
+MODULE_DICT = {'ASSIGNER': 'showSequenceGraph',
                'ASSIGNMENT MODULE': 'showAssignmentModule',
                'ATOM SELECTOR': 'showAtomSelector',
                'BACKBONE ASSIGNMENT': 'showBackboneAssignmentModule',

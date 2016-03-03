@@ -21,24 +21,18 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui, QtCore
 
 from ccpn.lib import Util as ccpnUtil
 from ccpncore.gui.Dock import CcpnDock
 from application.core.Base import Base as GuiBase
 from ccpncore.gui.MessageDialog import showWarning
-# from ccpncore.lib.Io import Formats as ioFormats
+
 
 class DropBase(GuiBase):
 
   def __init__(self, appBase, *args, **kw):
-  # def __init__(self, appBase, dropCallback, *args, **kw):
 
     GuiBase.__init__(self, appBase, *args, **kw)
-    # self.dropCallback = dropCallback
-
-    # This should NOT be there - use self._appBase (set in GuiBase)
-    #self.appBase = appBase
 
   def dragEnterEvent(self, event):
     event.accept()
@@ -54,52 +48,6 @@ class DropBase(GuiBase):
     data, dataType  = qtUtil.interpretEvent(event)
     if data and dataType:
       self.processDropData(data, dataType, event)
-
-  # def dropEvent(self, event):
-  #   """NBNB FIXME, must be commented out"""
-  #   event.accept()
-  #   if isinstance(self.parent, QtGui.QGraphicsScene):
-  #     event.ignore()
-  #     return
-  #
-  #   if event.mimeData().urls():
-  #     filePaths = [url.path() for url in event.mimeData().urls()]
-  #
-  #     if filePaths:
-  #       for filePath in filePaths:
-  #         try:
-  #           if isFastaFormat(filePath):
-  #             sequences = parseFastaFile(filePaths[0])
-  #             for sequence in sequences:
-  #               self._appBase.project.makeSimpleChain(sequence=sequence[1], compoundName=sequence[0],
-  #                                                     molType='protein')
-  #
-  #         except:
-  #           try:
-  #             if filePath.endswith('.spc.par'):
-  #               # NBNB TBD HACK: Should be handle properly
-  #               filePath = filePath[:-4]
-  #             spectrum = self._appBase.project.loadSpectrum(filePath)
-  #             if spectrum is not None:
-  #               self._appBase.mainWindow.leftWidget.addSpectrum(spectrum)
-  #               self.dropCallback(spectrum)
-  #           except:
-  #               pass
-  #
-  #   if event.mimeData().hasFormat('application/x-strip'):
-  #     data = event.mimeData().data('application/x-strip')
-  #     pidData = str(data.data(),encoding='utf-8')
-  #     pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
-  #     actualPid = ''.join(pidData)
-  #     wrapperObject = self.getByPid(actualPid)
-  #     self.dropCallback(wrapperObject)
-  #   else:
-  #     data = event.mimeData().data('application/x-qabstractitemmodeldatalist')
-  #     pidData = str(data.data(),encoding='utf-8')
-  #     pidData = [ch for ch in pidData if 32 < ord(ch) < 127]  # strip out junk
-  #     actualPid = ''.join(pidData)
-  #     wrapperObject = self.getObject(actualPid)
-  #     self.dropCallback(wrapperObject)
 
 
   def processDropData(self, data, dataType='pids', event=None):
@@ -190,36 +138,3 @@ class DropBase(GuiBase):
               # Why warn if we drop a spectrum file on the side bar?
               project._logger.warning("Dropped data %s not processed - no %s function defined for %s"
               % (pid, funcName, self))
-
-
-  # def selectDispatchFunction(self, prefix:str, dataType:(str,Pid)):
-  #   """Generate file name and return bound method matching name, if defined
-  #   dataType may be either an accepted dataType, or a Pid that is used to derive it.
-  #
-  #   Accepted prefixes are 'process', currently
-  #   DataTypes are singular, e.g. Spectrum, Peak, etc. even """
-  #
-  #   if not pidTypeMap:
-  #     # NBNB TBD FIXME: Import of application should not be allowed here.
-  #     # It will not break when put in function, but in theory application.core should not depend on ccpnmr
-  #     import ccpn
-  #     import ccpnmr
-  #     for package in ccpn, ccpnmr:
-  #       for tag in dir(package):
-  #         obj = getattr(package, tag)
-  #         if hasattr(obj, 'shortClassName'):
-  #           shortClassName = getattr(obj, 'shortClassName')
-  #           if shortClassName:
-  #             pidTypeMap[shortClassName] = (obj.className if hasattr(obj, 'className')
-  #                                           else obj.__class__.__name__)
-  #
-  #   ss = dataType.split(Pid.PREFIXSEP,1)[0]
-  #   ss = pidTypeMap.get(ss, ss)
-  #   funcName = prefix + ss
-  #
-  #   if hasattr(self, funcName):
-  #     # print(funcName)
-  #     return getattr(self, funcName)
-  #   else:
-  #
-  #     return None

@@ -31,7 +31,7 @@ class ChemicalShiftTable(CcpnDock):
 
     tipTexts = ['atom key', 'name of NmrAtom', 'Atom Type', 'value of chemical shift']
 
-    self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists, callback=self.callback, columns=columns, selector=self.chemicalShiftListPulldown, tipTexts=tipTexts)
+    self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists, actionCallback=self.callback, columns=columns, selector=self.chemicalShiftListPulldown, tipTexts=tipTexts)
 
     newLabel = Label(self, '', grid=(2, 0))
 

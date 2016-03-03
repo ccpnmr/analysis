@@ -22,18 +22,25 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 import sys
+
 from PyQt4 import QtGui, QtCore
+
+from ccpn import Project
 
 from ccpn.lib.Assignment import getNmrResiduePrediction
 from ccpn import NmrAtom
 from ccpn import NmrResidue
 from ccpn import Spectrum
+
+from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
-from ccpncore.util import Types
 from ccpncore.gui.PulldownList import PulldownList
+
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability
 
+from ccpncore.util import Types
 
 
 EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
@@ -170,6 +177,8 @@ class Assigner(CcpnDock):
     self.direction = None
     self.selectedStretch = []
     self.scene.dragEnterEvent = self.dragEnterEvent
+    global guiNmrResidues
+    guiNmrResidues = []
 
   def clearAllItems(self):
     """
@@ -180,6 +189,7 @@ class Assigner(CcpnDock):
       self.residueCount = 0
       self.predictedStretch = []
       self.residuesShown = []
+      guiNmrResidues = []
 
 
   def _assembleResidue(self, nmrResidue:NmrResidue, atoms:Types.Dict[str, GuiNmrAtom]):
@@ -204,6 +214,7 @@ class Assigner(CcpnDock):
     self._addConnectingLine(atoms['N'], atoms['CA'], lineColour, 1.0, 0)
     self._addConnectingLine(atoms['CO'], atoms['CA'], lineColour, 1.0, 0)
     self.nmrResidueLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
+    guiNmrResidues.append(self.nmrResidueLabel)
     self.scene.addItem(self.nmrResidueLabel)
     self._addResiduePredictions(nmrResidue, atoms['CA'])
 
@@ -375,95 +386,6 @@ class Assigner(CcpnDock):
           self.project._appBase.mainWindow.sequenceWidget.highlightPossibleStretches(possibleMatch[1])
 
 
-  def _addSpectrumAssignmentLines(self, spectrum:Spectrum, residue:Types.Dict[str, GuiNmrAtom]):
-      """
-      Adds lines to residues in the Assigner based on the positive contour colour
-      of the spectrum in which the assignment resides.
-      
-      """
-      assignedAtoms1 = []
-      if not spectrum.experimentType in EXPT_ATOM_DICT:
-        pass
-      else:
-        possibleAtoms = EXPT_ATOM_DICT[spectrum.experimentType]
-        lineColour = spectrum.positiveContourColour
-        for atom in residue.values():
-          if atom.nmrAtom is not None:
-            for peak in atom.nmrAtom.assignedPeaks()[0]:
-              if peak.peakList.spectrum == spectrum:
-                for atom in peak.dimensionNmrAtoms:
-                  for a in atom:
-                    assignedAtoms1.append(a)
-
-
-
-        assignedAtoms = list(set(assignedAtoms1))
-        if 'H' and 'N' in assignedAtoms:
-          displacement = min(residue['H'].connectedAtoms, residue['N'].connectedAtoms)
-          if displacement % 2 == 0:
-            self._addConnectingLine(residue['H'], residue['N'], lineColour, 2.0, displacement*2/2)
-          else:
-            self._addConnectingLine(residue['H'], residue['N'], lineColour, 2.0, displacement*-2)
-          residue['H'].connectedAtoms +=1
-          residue['N'].connectedAtoms +=1
-        if 'N' and 'CA' in assignedAtoms:
-          displacement = min(residue['CA'].connectedAtoms, residue['N'].connectedAtoms)
-          if displacement % 2 == 0:
-            self._addConnectingLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*2/2)
-          else:
-            self._addConnectingLine(residue['CA'], residue['N'], lineColour, 2.0, displacement*-2)
-          self._addConnectingLine(residue['N'], residue['CA'], lineColour, 2.0, displacement*2)
-          residue['CA'].connectedAtoms +=1
-          residue['N'].connectedAtoms +=1
-        if 'N' and 'CB' in assignedAtoms:
-          displacement = min(residue['CB'].connectedAtoms, residue['N'].connectedAtoms)
-          if displacement % 2 == 0:
-            self._addConnectingLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*2/2)
-          else:
-            self._addConnectingLine(residue['N'], residue['CB'], lineColour, 2.0, displacement*-2)
-          residue['CB'].connectedAtoms +=1
-          residue['N'].connectedAtoms +=1
-        if 'CA' and 'CB' in assignedAtoms:
-          displacement = min(residue['CA'].connectedAtoms, residue['CB'].connectedAtoms)
-          if displacement % 2 == 0:
-            self._addConnectingLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*2/2)
-          else:
-            self._addConnectingLine(residue['CA'], residue['CB'], lineColour, 2.0, displacement*-2)
-          residue['CA'].connectedAtoms +=1
-          residue['CB'].connectedAtoms +=1
-
-        if 'N-1' in residue:
-          if 'CA-1' and 'N' in assignedAtoms:
-            displacement = min(residue['CA'].connectedAtoms, residue['N-1'].connectedAtoms)
-            if displacement % 2 == 0:
-              self._addConnectingLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*2/2)
-            else:
-              self._addConnectingLine(residue['N-1'], residue['CA'], lineColour, 2.0, displacement*-2)
-
-          if 'CB-1' and 'N' in assignedAtoms:
-            displacement = min(residue['CB'].connectedAtoms, residue['N-1'].connectedAtoms)
-            if displacement % 2 == 0:
-              self._addConnectingLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*2/2)
-            else:
-              self._addConnectingLine(residue['N-1'], residue['CB'], lineColour, 2.0, displacement*-2)
-
-        if 'CB-1' in residue:
-           if 'CB-1' and 'N' in assignedAtoms:
-            displacement = min(residue['CB-1'].connectedAtoms, residue['N'].connectedAtoms)
-            if displacement % 2 == 0:
-              self._addConnectingLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*2/2)
-            else:
-              self._addConnectingLine(residue['N'], residue['CB-1'], lineColour, 2.0, displacement*-2)
-
-        if 'CA-1' in residue:
-           if 'CA-1' and 'N' in assignedAtoms:
-            displacement = min(residue['CA-1'].connectedAtoms, residue['N'].connectedAtoms)
-            if displacement % 2 == 0:
-              self._addConnectingLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*2/2)
-            else:
-              self._addConnectingLine(residue['N'], residue['CA-1'], lineColour, 2.0, displacement*-2)
-
-
   def _addConnectingLine(self, atom1:GuiNmrAtom, atom2:GuiNmrAtom, colour:str, width:float, displacement:float, style:str=None):
     """
     Adds a line between two GuiNmrAtoms using the width, colour, displacement and style specified.
@@ -543,4 +465,18 @@ class Assigner(CcpnDock):
     """
     atom = GuiNmrAtom(self.project, text=atomType, pos=position, nmrAtom=nmrAtom)
     return atom
+
+def _resetNmrResiduePidForAssigner(project:Project, apiResonanceGroup:ApiResonanceGroup):
+  """Reset pid for NmrResidue and all offset NmrResidues"""
+  getDataObj = project._data2Obj.get
+  obj = getDataObj(apiResonanceGroup)
+  for guiNmrResidue in guiNmrResidues:
+    guiNmrResidue.update()
+
+
+Project._setupNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setSequenceCode')
+Project._setupNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setDirectNmrChain')
+Project._setupNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setResidueType')
+Project._setupNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setAssignedResidue')
+
 

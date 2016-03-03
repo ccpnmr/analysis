@@ -141,7 +141,6 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
 
 def markPositionsInStrips(project, strip, axes, atomPositions):
 
-    print('adding marks to strip %s' % strip.pid, atomPositions)
     task = project._appBase.mainWindow.task
     for ii, axis in enumerate(axes):
       for atomPosition in atomPositions[ii]:

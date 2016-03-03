@@ -120,7 +120,6 @@ class BackboneAssignmentModule(CcpnDock):
       matchShifts=intraShifts
 
     elif self.direction == 'i+1':
-      print(currentNmrResidue)
       queryShifts = intraShifts[currentNmrResidue]
       matchShifts=interShifts
 

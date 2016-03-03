@@ -87,7 +87,6 @@ class BackboneAssignmentModule(CcpnDock):
     to chemical shift value NmrAtoms in the NmrResidue. Creates assignMatrix for strip matching and
     add strips to matchModule(s) corresponding to assignment matches.
     """
-    self._setupShiftDicts()
     self.project._appBase.mainWindow.clearMarks()
 
     self.nmrResidueTable.nmrResidueTable.updateTable()
@@ -106,11 +105,10 @@ class BackboneAssignmentModule(CcpnDock):
 
       queryShifts = self.interShifts[nmrResidue]
       matchShifts = self.intraShifts
-      print(nmrResidue.nmrAtoms, 'nmrAtoms')
       for display in selectedDisplays:
         if not strip:
           strip = display.strips[0]
-        strip.planeToolbar.spinSystemLabel.setText(iNmrResidue._key)
+        strip.planeToolbar.spinSystemLabel.setText(iNmrResidue._id)
         shiftDict = {}
         for axis in strip.orderedAxes:
           shiftDict[axis.code] = []
@@ -124,7 +122,6 @@ class BackboneAssignmentModule(CcpnDock):
               shift = self.project.chemicalShiftLists[0].getChemicalShift(atom.id)
               if shift is not None:
                 shiftDict[axis.code].append(shift)
-        print('shiftDict', shiftDict)
         atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
         markPositionsInStrips(self.project, strip, strip.orderedAxes[:2], atomPositions)
 
@@ -137,9 +134,9 @@ class BackboneAssignmentModule(CcpnDock):
       matchShifts = self.interShifts
       for display in selectedDisplays:
         if not strip:
-          display.strips[0].planeToolbar.spinSystemLabel.setText(nmrResidue._key)
+          display.strips[0].planeToolbar.spinSystemLabel.setText(nmrResidue._id)
         else:
-          strip.planeToolbar.spinSystemLabel.setText(nmrResidue._key)
+          strip.planeToolbar.spinSystemLabel.setText(nmrResidue._id)
 
 
     assignMatrix = self._buildAssignmentMatrix(queryShifts, matchShifts=matchShifts)
@@ -215,7 +212,7 @@ class BackboneAssignmentModule(CcpnDock):
     for matchModule in self.matchModules:
       module = self.project.getByPid(matchModule)
       navigateToNmrResidue(self.project, iNmrResidue, strip=module.orderedStrips[0])
-      module.orderedStrips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue._key)
+      module.orderedStrips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue._id)
 
 
   def connectAssigner(self, assigner:CcpnDock):

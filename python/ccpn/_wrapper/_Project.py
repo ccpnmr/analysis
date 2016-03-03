@@ -316,6 +316,7 @@ class Project(AbstractWrapperObject):
       if sideBar is not None:
         sideBar._renameItem(oldPid, obj.pid)
 
+
   def _getApplicationSidebar(self):
     """Get Appliction sidebar, if any.
 

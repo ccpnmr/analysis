@@ -585,7 +585,7 @@ class NmrResidue(AbstractWrapperObject):
     """Assign NmrResidue to residueId (or other parameters) and get back the result
     (either a modified self or another NmrResidue with the correct assignment, if one exists).
 
-    NB resetting teh NmrChain for an NmrResieue in the middle of a conneted NmrChain
+    NB resetting the NmrChain for an NmrResidue in the middle of a connected NmrChain
     will cause an error. Use resetNmrChain(newNmrChainOrPid) instead
 
     WARNING: If mergeToExisting, always use in the form "x = x.assignTo(...)",

@@ -150,6 +150,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     # item = FindItem
     pass
 
+  def processText(self, text, event=None):
+    newNote = self.project.newNote()
+    newNote.text = text
 
 
   def mousePressEvent(self, event):

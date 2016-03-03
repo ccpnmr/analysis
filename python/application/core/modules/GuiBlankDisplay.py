@@ -58,21 +58,10 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
 
     CcpnDock.__init__(self, name='Blank Display')
     dockArea.addDock(self, 'right')
-    # self.setStyleSheet("""
-    # QWidget { background-color: #2a3358;
-    # }
-    # """)
-    # self.labelhidden = True
-    # self.label.hide()
-    # self.label = DockLabel('Blank Display', self)
-    # self.label.show()
 
     self.label2 = Label(self.widget1, text='Drag Spectrum Here', textColor='#bec4f3')
     self.label2.setAlignment(QtCore.Qt.AlignCenter)
     self.widget2.hide()
-    # self.widget1.layout().addWidget(self.label2)
-    # self.label2.dropEvent = self.dropCallback
-    # self.layout.addWidget(self.label)
 
     DropBase.__init__(self, dockArea.guiWindow._appBase)
 
@@ -111,7 +100,6 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
         self._appBase.project._logger.info('application.createSpectrumDisplay(spectrum)')
         self._appBase.project._logger.info('application.deleteBlankDisplay()')
         self.dockArea.guiWindow.deleteBlankDisplay()
-
 
       except NotImplementedError:
         pass

@@ -37,6 +37,8 @@ class LineEdit(QtGui.QLineEdit, Base):
       self.setStyleSheet('QLabel {color: %s;}' % textColor)
 
     self.setAlignment(QtCore.Qt.AlignHCenter)
+    self.setMinimumWidth(150)
+    self.setFixedHeight(25)
 
   def get(self):
 

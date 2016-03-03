@@ -42,7 +42,6 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.project = project
     self.peakListLabel =  Label(self, text="PeakList: ", grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self.selectPeakList)
-    # self.peakListPulldown.currentIndexChanged.connect(self.selectPeakList)
     self.peakListPulldown.setData([peakList.pid for peakList in project.peakLists])
     self.peakList = project.getByPid(self.peakListPulldown.currentText())
     self.checkBoxWidget = QtGui.QWidget()
@@ -65,19 +64,11 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.checkBox3Label = Label(self, 'Both')
     self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
     self.checkBox3.setChecked(True)
-    # self.checkBox2 = CheckBox(self.checkBoxWidget)
-    # self.checkBox2Label = Label(self.checkBoxWidget, 'Negative only')
-    # self.checkBox3 = CheckBox(self.checkBoxWidget)
-    # self.checkBox3Label = Label(self.checkBoxWidget, 'Both')
     self.updateContents()
-    # self.excludedRegionsButton = Button(self, grid=(4, 0), text='Exclude Regions')
-    # self.excludedRegionsButton.setCheckable(True)
-    # self.excludedRegionsButton.toggled.connect(self.toggleExcludedRegionsPopup)
 
 
 
-
-    self.buttonBox = ButtonList(self, grid=(15, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
+    self.buttonBox = ButtonList(self, grid=(7, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
                            callbacks=[self.reject, self.pickPeaks])
 
 
@@ -97,16 +88,10 @@ class PeakFindPopup(QtGui.QDialog, Base):
 
   def pickPeaks(self):
     peakList = self.peakList
-    spectralWidths = peakList.spectrum.spectralWidths
-    offsets = peakList.spectrum.referenceValues
     apiSpectrumView = peakList.spectrum.spectrumViews[0]._wrappedData
-    positions = [[self.dim1MinDoubleSpinBox.value(), self.dim2MinDoubleSpinBox.value()],
-                 [self.dim1MaxDoubleSpinBox.value(), self.dim2MaxDoubleSpinBox.value()]]
+    positions = [[spinBox.value() for spinBox in self.minPositionBoxes],
+                 [spinBox.value() for spinBox in self.maxPositionBoxes]]
 
-    if self.peakList.spectrum.dimensionCount > 2:
-      positions[0].append(self.dim3MinDoubleSpinBox.value())
-      positions[1].append(self.dim3MaxDoubleSpinBox.value())
-    apiSpectrumView = peakList.spectrum.spectrumViews[0]._wrappedData
     if self.checkBox1.isChecked():
       doPos=True
       doNeg=False
@@ -116,7 +101,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
     if self.checkBox3.isChecked():
       doPos=True
       doNeg=True
-    newPeaks = peakList.pickPeaksNd(positions, apiSpectrumView.spectrumView.orderedDataDims,
+    peakList.pickPeaksNd(positions, apiSpectrumView.spectrumView.orderedDataDims,
                                             doPos=doPos,
                                             doNeg=doNeg)
 
@@ -126,44 +111,38 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.accept()
 
   def updateContents(self):
-    try:
-      for column in range(4):
-        for row in range(1, 4):
-          self.layout().itemAtPosition(row, column).widget().deleteLater()
-    except AttributeError:
-      pass
 
-    self.dim1MinLabel = Label(self, text='F1 '+ self.peakList.spectrum.axisCodes[0]+' min', grid=(2, 0))
-    self.dim1MinDoubleSpinBox = DoubleSpinbox(self, grid=(2, 1))
-    self.dim1MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[0][0])
-    self.dim1MinDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[0][1])
-    self.dim1MinDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[0][0])
-    self.dim1MaxLabel = Label(self, text='F1 '+ self.peakList.spectrum.axisCodes[0]+' max', grid=(2, 2))
-    self.dim1MaxDoubleSpinBox = DoubleSpinbox(self, grid=(2, 3))
-    self.dim1MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[0][0])
-    self.dim1MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[0][1])
-    self.dim1MaxDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[0][1])
-    self.dim2MinLabel = Label(self, text='F2 '+ self.peakList.spectrum.axisCodes[1]+' min', grid=(3, 0))
-    self.dim2MinDoubleSpinBox = DoubleSpinbox(self, grid=(3, 1))
-    self.dim2MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[1][0])
-    self.dim2MinDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[1][1])
-    self.dim2MinDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[1][0])
-    self.dim2MaxLabel = Label(self, text='F2 '+ self.peakList.spectrum.axisCodes[1]+' max', grid=(3, 2))
-    self.dim2MaxDoubleSpinBox = DoubleSpinbox(self, grid=(3, 3))
-    self.dim2MaxDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[1][0])
-    self.dim2MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[1][1])
-    self.dim2MaxDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[1][1])
-    if self.peakList.spectrum.dimensionCount > 2:
-      self.dim3MinLabel = Label(self, text='F3 '+ self.peakList.spectrum.axisCodes[2]+' min', grid=(4, 0))
-      self.dim3MinDoubleSpinBox = DoubleSpinbox(self, grid=(4, 1))
-      self.dim3MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[2][0])
-      self.dim3MinDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[2][1])
-      self.dim3MinDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[2][0])
-      self.dim3MaxLabel = Label(self, text='F3 '+ self.peakList.spectrum.axisCodes[2]+' max', grid=(4, 2))
-      self.dim3MaxDoubleSpinBox = DoubleSpinbox(self, grid=(4, 3))
-      self.dim3MaxDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[2][0])
-      self.dim3MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[2][1])
-      self.dim3MaxDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[2][1])
+    rowCount = self.layout().rowCount()
+    colCount = self.layout().columnCount()
+
+    for r in range(2, 7):
+      for m in range(0, colCount):
+        item = self.layout().itemAtPosition(r, m)
+        if item:
+          if item.widget():
+            item.widget().hide()
+        self.layout().removeItem(item)
+
+    self.minPositionBoxes = []
+    self.maxPositionBoxes = []
+
+
+    for ii in range(self.peakList.spectrum.dimensionCount):
+      dim1MinLabel = Label(self, text='F%s ' % str (ii+1) + self.peakList.spectrum.axisCodes[ii]+' min', grid=(2+ii, 0), vAlign='t')
+      dim1MinDoubleSpinBox = DoubleSpinbox(self, grid=(2+ii, 1), vAlign='t')
+      dim1MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[ii][0])
+      dim1MinDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[ii][1])
+      dim1MinDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[ii][0])
+      dim1MaxLabel = Label(self, text='F%s ' % str (ii+1) + self.peakList.spectrum.axisCodes[ii]+' max', grid=(2+ii, 2), vAlign='t')
+      dim1MaxDoubleSpinBox = DoubleSpinbox(self, grid=(2+ii, 3))
+      dim1MaxDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[ii][0])
+      dim1MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[ii][1])
+      dim1MaxDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[ii][1])
+      self.minPositionBoxes.append(dim1MinDoubleSpinBox)
+      self.maxPositionBoxes.append(dim1MaxDoubleSpinBox)
+    # self.excludedRegionsButton = Button(self, grid=(self.peakList.spectrum.dimensionCount+3, 0), text='Exclude Regions')
+    # self.excludedRegionsButton.setCheckable(True)
+    # self.excludedRegionsButton.toggled.connect(self.toggleExcludedRegionsPopup)
 
 
   def toggleExcludedRegionsPopup(self):
@@ -180,37 +159,37 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.excludedRegionsPopup = ExcludeRegions(self, self.peakList)
     self.layout().addWidget(self.excludedRegionsPopup, 5, 0, 1, 4)
 
-class ExcludeRegions(QtGui.QWidget):
+class ExcludeRegions(QtGui.QWidget, Base):
   def __init__(self, parent, peakList):
     super(ExcludeRegions, self).__init__(parent)
-    self.label1 = Label(self, text='Dim', grid=(0, 0))
-    self.pulldownSolvents = PulldownList(self, grid=(0, 1))
-    self.pulldownSolvents.setFixedWidth(100)
+    self.regionCount = 0
     self.peakList = peakList
-    axisCodes = peakList.spectrum.axisCodes
-    # self.pulldownSolvents.activated[str].connect(self.addRegions)
-    self.pulldownSolvents.addItems(axisCodes)
-    self.label2 = Label(self, text='min', grid=(0, 2))
-    self.label2 = Label(self, text='max', grid=(0, 4))
-    self.regionSpinBox1 = DoubleSpinbox(self, grid=(0, 3))
-    self.regionSpinBox2 = DoubleSpinbox(self, grid=(0, 5))
-    self.regionCount = 1
     self.addRegionButton = Button(self, text='Add Region', callback=self.addRegion, grid=(20, 0), gridSpan=(1, 3))
     self.removeRegionButton = Button(self, text='Remove Region', callback=self.removeRegion, grid=(20, 3), gridSpan=(1, 3))
-    # print(self.layout(), self.layout().items())
+    self.excludedRegions = []
 
   def addRegion(self):
+    self.regionCount+=1
+    minRegion = []
+    maxRegion = []
+    for ii in range(self.peakList.spectrum.dimensionCount):
+      print(self.peakList.spectrum.dimensionCount)
+      dim1MinLabel = Label(self, text='F%s ' % str (1+ii) + self.peakList.spectrum.axisCodes[ii]+' min', grid=(1+ii*self.regionCount, 0), vAlign='t')
+      dim1MinDoubleSpinBox = DoubleSpinbox(self, grid=(1+ii*self.regionCount, 1), vAlign='t')
+      dim1MinDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[ii][0])
+      dim1MinDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[ii][1])
+      dim1MinDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[ii][0])
+      minRegion.append(dim1MinDoubleSpinBox)
+      dim1MaxLabel = Label(self, text='F%s ' % str (1+ii) + self.peakList.spectrum.axisCodes[ii]+' max', grid=(1+ii*self.regionCount, 2), vAlign='t')
+      dim1MaxDoubleSpinBox = DoubleSpinbox(self, grid=(1+ii*self.regionCount, 3))
+      dim1MaxDoubleSpinBox.setMinimum(self.peakList.spectrum.spectrumLimits[ii][0])
+      dim1MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.spectrumLimits[ii][1])
+      dim1MaxDoubleSpinBox.setValue(self.peakList.spectrum.spectrumLimits[ii][1])
+      maxRegion.append(dim1MaxDoubleSpinBox)
 
-    self.label1 = Label(self, text='Dim', grid=(self.regionCount, 0))
-    self.pulldownSolvents = PulldownList(self, grid=(self.regionCount, 1))
-    self.pulldownSolvents.setFixedWidth(100)
-    axisCodes = self.peakList.spectrum.axisCodes
-    # self.pulldownSolvents.activated[str].connect(self.addRegions)
-    self.pulldownSolvents.addItems(axisCodes)
-    self.label2 = Label(self, text='min', grid=(self.regionCount, 2))
-    self.label2 = Label(self, text='max', grid=(self.regionCount, 4))
-    self.regionSpinBox1 = DoubleSpinbox(self, grid=(self.regionCount, 3))
-    self.regionSpinBox2 = DoubleSpinbox(self, grid=(self.regionCount, 5))
+      # self.minPositionBoxes.append(dim1MinDoubleSpinBox)
+      # self.maxPositionBoxes.append(dim1MaxDoubleSpinBox)
+    self.excludedRegions.append([minRegion, maxRegion])
     self.regionCount+=1
 
   def removeRegion(self):

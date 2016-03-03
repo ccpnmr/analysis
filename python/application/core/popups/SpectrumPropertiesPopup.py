@@ -83,14 +83,11 @@ class GeneralTab(QtGui.QWidget, Base):
     self.experimentTypes = spectrum._project._experimentTypeMap
     nameLabel = Label(self, text="Spectrum name ", grid=(0, 0))
     self.nameData = LineEdit(self, vAlign='t', grid=(0, 1))
-
-
     self.nameData.setText(spectrum.name)
     self.nameData.editingFinished.connect(self.changeSpectrumName)
     pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(1, 0))
     self.pathData = LineEdit(self, vAlign='t', grid=(1, 1))
-    self.pathButton = Button(self, grid=(1, 2), callback=self.getSpectrumFile, icon='iconsNew/applications-system',
-                             hPolicy='fixed')
+    self.pathButton = Button(self, grid=(1, 2), callback=self.getSpectrumFile, icon='iconsNew/applications-system')
 
     self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
@@ -110,14 +107,11 @@ class GeneralTab(QtGui.QWidget, Base):
       self.pathData.setText(apiDataStore.fullPath)
     self.pathData.editingFinished.connect(self.setSpectrumPath)
     chemicalShiftListLabel = Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(3, 0))
-    self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', hAlign='l', grid=(3, 1), texts=[csList.pid
+    self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(3, 1), texts=[csList.pid
                                                 for csList in spectrum.project.chemicalShiftLists]
                                                 +['<New>'],callback=self.setChemicalShiftList)
-
-    dateLabel = Label(self, text="Date ", vAlign='t', hAlign='l', grid=(4, 0))
-    dateData = LineEdit(self, vAlign='t', hAlign='l', grid=(4, 1))
     pidLabel = Label(self, text="PID ", vAlign='t', hAlign='l', grid=(5, 0))
-    pidData = Label(self, text=spectrum.pid, vAlign='t', hAlign='l', grid=(5, 1))
+    pidData = Label(self, text=spectrum.pid, vAlign='t', grid=(5, 1))
     if spectrum.dimensionCount == 1:
       colourLabel = Label(self, text="Colour", vAlign='t', hAlign='l', grid=(6, 0))
       self.colourBox = PulldownList(self, vAlign='t', hAlign='l', grid=(6, 1))
@@ -133,6 +127,7 @@ class GeneralTab(QtGui.QWidget, Base):
       spectrumType = PulldownList(self, vAlign='t', hAlign='l', grid=(7, 1))
       spectrumType.addItems(SPECTRA)
       spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
+      spectrumType.setMinimumWidth(self.pathData.width()*1.95)
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
       self.spectrumScalingData.editingFinished.connect(self.setSpectrumScale)
@@ -146,7 +141,7 @@ class GeneralTab(QtGui.QWidget, Base):
         noiseLevelData.setText('None')
     else:
       spectrumTypeLabel = Label(self, text="Spectrum Type ", vAlign='t', hAlign='l', grid=(6, 0))
-      self.spectrumType = PulldownList(self, vAlign='t', hAlign='l', grid=(6, 1))
+      self.spectrumType = PulldownList(self, vAlign='t', grid=(6, 1))
       axisCodes = []
       for isotopeCode in spectrum.isotopeCodes:
         axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
@@ -155,11 +150,13 @@ class GeneralTab(QtGui.QWidget, Base):
       self.spectrumType.addItems(sorted(list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys())))
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(spectrum.experimentName))
       self.spectrumType.currentIndexChanged.connect(self.changeSpectrumType)
-      spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
-      self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
+      self.spectrumType.setMinimumWidth(self.pathData.width()*1.95)
+      self.spectrumType.setFixedHeight(25)
+      spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(8, 0))
+      self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', grid=(8, 1))
       self.spectrumScalingData.editingFinished.connect(self.setSpectrumScale)
       noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(9, 0))
-      noiseLevelData = LineEdit(self, vAlign='t', hAlign='l', grid=(9, 1))
+      noiseLevelData = LineEdit(self, vAlign='t', grid=(9, 1))
 
 
       if spectrum._apiDataSource.noiseLevel is None:
@@ -345,31 +342,23 @@ class ContoursTab(QtGui.QWidget, Base):
 
     positiveContoursCheckBox.stateChanged.connect(self.changePositiveContourDisplay)
     positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(1, 0), vAlign='t', hAlign='l')
-    positiveBaseLevelData = DoubleSpinbox(self, grid=(1, 1), vAlign='t', hAlign='l')
+    positiveBaseLevelData = DoubleSpinbox(self, grid=(1, 1), vAlign='t')
     positiveBaseLevelData.setMaximum(1e12)
     positiveBaseLevelData.setMinimum(0)
     positiveBaseLevelData.setValue(spectrum.positiveContourBase)
     positiveBaseLevelData.valueChanged.connect(partial(self.lineEditTextChanged1, spectrum))
     positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(2, 0), vAlign='t', hAlign='l')
-    positiveMultiplierData = DoubleSpinbox(self, grid=(2, 1), vAlign='t', hAlign='l')
+    positiveMultiplierData = DoubleSpinbox(self, grid=(2, 1), vAlign='t')
     positiveMultiplierData.setSingleStep(0.1)
     positiveMultiplierData.setValue(float(spectrum.positiveContourFactor))
     positiveMultiplierData.valueChanged.connect(partial(self.lineEditTextChanged2, spectrum))
     positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value()*(positiveMultiplierData.value()-1))
     positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(3, 0), vAlign='t', hAlign='l')
-    positiveContourCountData = Spinbox(self, grid=(3, 1), vAlign='t', hAlign='l')
+    positiveContourCountData = Spinbox(self, grid=(3, 1), vAlign='t')
     positiveContourCountData.setValue(int(spectrum._apiDataSource.positiveContourCount))
     positiveContourCountData.valueChanged.connect(partial(self.lineEditTextChanged3, spectrum))
     positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(4, 0), vAlign='t', hAlign='l')
-    self.positiveColourBox = PulldownList(self, grid=(4, 1), vAlign='t', hAlign='l')
-    self.positiveColourBox.setMinimumWidth(200)
-    self.positiveColourBox.setFixedHeight(25)
-    positiveBaseLevelData.setMinimumWidth(200)
-    positiveBaseLevelData.setFixedHeight(25)
-    positiveMultiplierData.setMinimumWidth(200)
-    positiveMultiplierData.setFixedHeight(25)
-    positiveContourCountData.setMinimumWidth(200)
-    positiveContourCountData.setFixedHeight(25)
+    self.positiveColourBox = PulldownList(self, grid=(4, 1), vAlign='t')
 
     for item in spectrumColours.items():
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
@@ -394,24 +383,24 @@ class ContoursTab(QtGui.QWidget, Base):
         negativeContoursCheckBox.setChecked(False)
     negativeContoursCheckBox.stateChanged.connect(self.displayNegativeContours)
     negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='t', hAlign='l')
-    negativeBaseLevelData = DoubleSpinbox(self, grid=(7, 1), vAlign='t', hAlign='l')
+    negativeBaseLevelData = DoubleSpinbox(self, grid=(7, 1), vAlign='t')
     negativeBaseLevelData.setMaximum(0)
     negativeBaseLevelData.setMinimum(-1e12)
     negativeBaseLevelData.setValue(spectrum.negativeContourBase)
     negativeBaseLevelData.valueChanged.connect(partial(self.lineEditTextChanged4, spectrum))
-    negativeMultiplierLabel = Label(self, text="Multiplier", grid=(8, 0), vAlign='t', hAlign='l')
-    negativeMultiplierData = DoubleSpinbox(self, grid=(8, 1), vAlign='t', hAlign='l')
+    negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(8, 0), vAlign='t', hAlign='l')
+    negativeMultiplierData = DoubleSpinbox(self, grid=(8, 1), vAlign='t')
     negativeMultiplierData.setValue(spectrum.negativeContourFactor)
     negativeMultiplierData.setSingleStep(0.1)
 
     negativeMultiplierData.valueChanged.connect(partial(self.lineEditTextChanged5, spectrum))
     negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value()*-1)*negativeMultiplierData.value()-1)
-    negativeContourCountLabel = Label(self, text="Number of contours", grid=(9, 0), vAlign='t', hAlign='l')
-    negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t', hAlign='l')
+    negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(9, 0), vAlign='t', hAlign='l')
+    negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t')
     negativeContourCountData.setValue(spectrum.negativeContourCount)
     negativeContourCountData.valueChanged.connect(partial(self.lineEditTextChanged6, spectrum))
     negativeContourColourLabel = Label(self, text="Colour",grid=(10, 0), vAlign='t', hAlign='l')
-    self.negativeColourBox = PulldownList(self, grid=(10, 1), vAlign='t', hAlign='l')
+    self.negativeColourBox = PulldownList(self, grid=(10, 1), vAlign='t')
     for item in spectrumColours.items():
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(item[0]))
@@ -426,15 +415,6 @@ class ContoursTab(QtGui.QWidget, Base):
                                        vAlign='t', hAlign='l')
     self.negativeColourButton.clicked.connect(partial(self.changeNegSpectrumColour, spectrum))
 
-
-    self.negativeColourBox.setMinimumWidth(200)
-    self.negativeColourBox.setFixedHeight(25)
-    negativeBaseLevelData.setMinimumWidth(200)
-    negativeBaseLevelData.setFixedHeight(25)
-    negativeMultiplierData.setMinimumWidth(200)
-    negativeMultiplierData.setFixedHeight(25)
-    negativeContourCountData.setMinimumWidth(200)
-    negativeContourCountData.setFixedHeight(25)
 
   def writeLoggingMessage(self, command):
     self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
@@ -488,13 +468,7 @@ class ContoursTab(QtGui.QWidget, Base):
       self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
       spectrumColours[newColour.name()] = 'Colour %s' % newIndex
       self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
-      pix=QtGui.QPixmap(60,10)
-      pix.fill(newColour)
-      newIcon = QtGui.QIcon(pix)
-      # 16/2/2016 RHF The newAction function does not exist and threw an error. Commented out
-      # for spectrumView in spectrum.spectrumViews:
-      #   spectrumView.newAction.setIcon(newIcon)
-    
+
 
   def changeNegSpectrumColour(self, spectrum):
     dialog = ColourDialog()
@@ -514,18 +488,9 @@ class ContoursTab(QtGui.QWidget, Base):
 
     newColour = list(spectrumColours.keys())[value]
     spectrum.positiveContourColour = newColour
-    pix=QtGui.QPixmap(60,10)
-    pix.fill(QtGui.QColor(newColour))
-    newIcon = QtGui.QIcon(pix)
-    # spectrum.spectrumItem.newAction.setIcon(newIcon)
-
-
 
   def changeNegColourComboIndex(self, spectrum, value):
 
     newColour = list(spectrumColours.keys())[value]
     spectrum._apiDataSource.negativeContourColour = newColour
-    pix=QtGui.QPixmap(60,10)
-    pix.fill(QtGui.QColor(newColour))
-    newIcon = QtGui.QIcon(pix)
-    # spectrum.spectrumItem.newAction.setIcon(newIcon)
+

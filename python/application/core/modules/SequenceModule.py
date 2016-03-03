@@ -16,7 +16,7 @@ class SequenceModule(CcpnDock):
   def __init__(self, project):
     CcpnDock.__init__(self, name='Sequence')
 
-    self.project=project
+    self.project = project
     self.colourScheme = project._appBase.preferences.general.colourScheme
     self.label.hide()
     self.setAcceptDrops(True)
@@ -27,7 +27,6 @@ class SequenceModule(CcpnDock):
     self.scrollContents = QtGui.QGraphicsView(self.scrollArea.scene, self)
     self.scrollContents.setAcceptDrops(True)
     self.scrollContents.setAlignment(QtCore.Qt.AlignLeft)
-    # self.scrollContents.setInteractive(True)
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
     self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
@@ -45,13 +44,15 @@ class SequenceModule(CcpnDock):
 
     self.setFixedHeight(2*self.widgetHeight)
     self.scrollContents.setFixedHeight(2*self.widgetHeight)
-    # for chainLabel in self.chainLabels:
-    #   self.highlightPossibleStretches(chainLabel)
+
 
   def highlightPossibleStretches(self, residues:Types.List[Residue]):
     """
     Highlights regions on the sequence specified by the list of residues passed in.
     """
+    for residue in residues:
+      guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
+      guiResidue._styleResidue()
     if self.project._appBase.preferences.general.colourScheme == 'dark':
       colour = '#e4e15b'
     elif self.project._appBase.preferences.general.colourScheme == 'light':
@@ -66,19 +67,20 @@ class SequenceModule(CcpnDock):
     """
     Creates and adds a GuiChainLabel to the sequence module.
     """
-    chainLabel = GuiChainLabel(self.project, self.scrollArea.scene, chain, position=[0, self.widgetHeight])
+    chainLabel = GuiChainLabel(self, self.project, self.scrollArea.scene, chain, position=[0, self.widgetHeight])
     self.scrollArea.scene.addItem(chainLabel)
     self.chainLabels.append(chainLabel)
-    self.widgetHeight+=(0.8*(chainLabel.boundingRect().height()))
+    self.widgetHeight += (0.8*(chainLabel.boundingRect().height()))
 
 
 class GuiChainLabel(QtGui.QGraphicsTextItem):
 
-  def __init__(self, project, scene, chain, position):
+  def __init__(self, parent, project, scene, chain, position):
     QtGui.QGraphicsTextItem.__init__(self)
     self.chain = chain
     self.setPos(QtCore.QPointF(position[0], position[1]))
-    self.text=chain.compoundName
+    self.text = chain.compoundName
+    self.parent = parent
     self.setHtml('<div style=><strong>'+chain.compoundName+': </strong></div>')
     self.setFont(Font(size=20, bold=True))
     if project._appBase.preferences.general.colourScheme == 'dark':
@@ -92,7 +94,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
       newResidue = GuiChainResidue(self, project, residue, scene, self.boundingRect().width(), i, position[1])
       scene.addItem(newResidue)
       self.residueDict[residue.sequenceCode] = newResidue
-      i+=1
+      i += 1
 
 class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
@@ -106,28 +108,32 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     position = labelPosition+(20*index)
     self.setFont(Font(size=GuiChainResidue.fontSize, normal=True))
     if project._appBase.preferences.general.colourScheme == 'dark':
-      colour1 = '#bec4f3'
-      colour2 = '#f7ffff'
+      self.colour1 = '#bec4f3'
+      self.colour2 = '#f7ffff'
     elif project._appBase.preferences.general.colourScheme == 'light':
-      colour1 = '#bd8413'
-      colour2 = '#666e98'
-    self.setDefaultTextColor(QtGui.QColor(colour1))
+      self.colour1 = '#bd8413'
+      self.colour2 = '#666e98'
+    self.setDefaultTextColor(QtGui.QColor(self.colour1))
     self.setPos(QtCore.QPointF(position, yPosition))
     self.residueNumber = residue.sequenceCode
-    if residue.nmrResidue is not None:
-      self.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour2 +
-                   residue.shortName+'</strong></div>')
-    else:
-      self.setHtml('<div style:"text-align: center;">'+residue.shortName+'</div')
     self.project = project
     self.residue = residue
     self.setAcceptDrops(True)
-    self.parent=parent
+    self.parent = parent
     scene.dragLeaveEvent = self._dragLeaveEvent
     scene.dragEnterEvent = self._dragEnterEvent
     scene.dropEvent = self.dropEvent
     self.scene = scene
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+    self._styleResidue()
+
+
+  def _styleResidue(self):
+    if self.residue.nmrResidue is not None:
+      self.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colour2 +
+                   self.residue.shortName+'</strong></div>')
+    else:
+      self.setHtml('<div style:"text-align: center;">'+self.residue.shortName+'</div')
 
 
   def _setFontBold(self):
@@ -162,34 +168,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     event.accept()
 
 
-  # def processNmrResidues(self, data:Types.List[str], event:QtGui.QMouseEvent):
-  #   """
-  #   Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
-  #   all succeeding residues according to the length of the list.
-  #   """
-  #   if self.project._appBase.preferences.general.colourScheme == 'dark':
-  #     colour = '#f7ffff'
-  #   elif self.project._appBase.preferences.general.colourScheme == 'light':
-  #     colour = '#666e98'
-  #   res = self.scene.itemAt(event.scenePos())
-  #   nmrResidue = self.project.getByPid(data[0])
-  #   res.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
-  #                 res.residue.shortName+'</strong></div>')
-  #   nmrResidue.residue = res.residue
-  #
-  #   for assignableResidue in data[1:]:
-  #     res = nmrResidue.residue.nextResidue
-  #     guiResidue = self.parent.residueDict.get(res.sequenceCode)
-  #     guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour+
-  #                        res.shortName+'</strong></div>')
-  #     nmrResidue = self.project.getByPid(assignableResidue)
-  #     nmrResidue.residue = res
-  #
-  #   if hasattr(self.project._appBase.mainWindow, 'bbModule'):
-  #     nmrResidueTable = self.project._appBase.mainWindow.bbModule.nmrResidueTable.nmrResidueTable
-  #     nmrResidueTable.objectLists = self.project.nmrChains
-  #     nmrResidueTable.updateTable()
-
   def processNmrChains(self, data:Types.List[str], event:QtGui.QMouseEvent):
     """
     Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
@@ -203,7 +181,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     nmrChain = self.project.getByPid(data[0])
     residues = [guiRes.residue]
     toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
-
     for ii in range(len(toAssign)-1):
       resid = residues[ii]
       next = resid.nextResidue
@@ -218,6 +195,9 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
       nmrResidueTable = self.project._appBase.mainWindow.bbModule.nmrResidueTable.nmrResidueTable
       nmrResidueTable.objectLists = self.project.nmrChains
       nmrResidueTable.updateTable()
+
+    event.accept()
+    self.parent.parent.overlay.hide()
 
 
 

@@ -184,9 +184,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     """
     Closes spectrum display and deletes it from the project.
     """
-    print('spdlen', len(self._appBase.project.spectrumDisplays))
     if len(self._appBase.project.spectrumDisplays) == 1:
-      print('adding new display')
       self._appBase.mainWindow.addBlankDisplay()
     # self.dock.close()
 
@@ -198,10 +196,15 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     addStripAction = self.spectrumUtilToolBar.addAction('Add Strip', self.duplicateStrip) #self.orderedStrips[0].clone()) # clone first strip
     addStripIcon = Icon('iconsNew/plus')
     addStripAction.setIcon(addStripIcon)
-    removeStripAction = self.spectrumUtilToolBar.addAction('Remove Strip', lambda self=self: self.orderedStrips[-1].delete()) # remove last strip
+    removeStripAction = self.spectrumUtilToolBar.addAction('Remove Strip', self.removeStrip) # remove last strip
     removeStripIcon = Icon('iconsNew/minus')
     removeStripAction.setIcon(removeStripIcon)
     self.removeStripAction = removeStripAction
+
+
+  def removeStrip(self):
+    self.orderedStrips[-1].unregisterStrip()
+    self.orderedStrips[-1].delete()
 
   def duplicateStrip(self):
     """

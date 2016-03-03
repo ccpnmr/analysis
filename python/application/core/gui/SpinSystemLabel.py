@@ -1,9 +1,15 @@
 __author__ = 'simon1'
 
+from ccpn import Project
+
+from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpncore.gui.Label import Label
 from ccpncore.util.Types import Sequence
 from application.core.DropBase import DropBase
 import json
+
+
 
 from PyQt4 import QtGui, QtCore
 
@@ -60,7 +66,7 @@ class SpinSystemLabel(DropBase, Label):
       nmrResidue = wrapperObject.planeToolbar.spinSystemLabel.text()
       masterNmrChain = project.getByPid('NC:@-')
       nr1 = current.nmrResidue
-      if wrapperObject.guiSpectrumDisplay.pid == self.strip.guiSpectrumDisplay.pid:
+      if wrapperObject.pid == self.strip.pid:
         return
       if direction == '-1':
         sinkIndex = self._appBase.getByPid(self.strip.pid)._wrappedData.index
@@ -74,20 +80,35 @@ class SpinSystemLabel(DropBase, Label):
       else:
         self.strip.guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
         if direction == '-1':
-          nr2 = masterNmrChain.getNmrResidue(nmrResidue)
+          nr2 = project.getByPid('NR:%s' % nmrResidue)
+          print(nr2, nmrResidue)
           nr1.connectPrevious(nr2)
           current.strip = self.strip.guiSpectrumDisplay.strips[-1]
           current.nmrResidue = nr2.offsetNmrResidues[0]
           current.nmrChain = nr2.nmrChain
         else:
-          nr2 = masterNmrChain.getNmrResidue(nmrResidue)
+          nr2 = project.getByPid('NR:%s' % nmrResidue)
           nr1.connectPrevious(nr2)
           current.strip = self.strip.guiSpectrumDisplay.strips[sinkIndex]
           current.nmrResidue = nr2
           current.nmrChain = nr2.nmrChain
         if hasattr(self._appBase.mainWindow, 'bbModule'):
           self._appBase.mainWindow.bbModule.navigateTo(current.nmrResidue, strip=current.strip)
-          current.strip.planeToolbar.spinSystemLabel.setText(current.nmrResidue._key)
+          current.strip.planeToolbar.spinSystemLabel.setText(current.nmrResidue._id)
 
 
 
+def _resetNmrResiduePidForGraphics(project:Project, apiResonanceGroup:ApiResonanceGroup):
+  """Reset pid for NmrResidue and all offset NmrResidues"""
+  getDataObj = project._data2Obj.get
+  obj = getDataObj(apiResonanceGroup)
+  for strip in project.strips:
+    if strip.planeToolbar.spinSystemLabel.text() == obj._old_id:
+      strip.planeToolbar.spinSystemLabel.setText(obj._id)
+
+
+
+Project._setupNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setSequenceCode')
+Project._setupNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setDirectNmrChain')
+Project._setupNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setResidueType')
+Project._setupNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setAssignedResidue')

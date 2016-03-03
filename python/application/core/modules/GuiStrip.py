@@ -166,6 +166,10 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # Notifiers.registerNotify(self.rulerCreated, 'ccpnmr.gui.Task.Ruler', '__init__')
     # Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
 
+
+  def unregisterStrip(self):
+    self.current.unRegisterNotify(self.highlightCurrentStrip, 'strips')
+
   def highlightCurrentStrip(self, strips=None):
 
     if self._appBase.preferences.general.colourScheme == 'light':

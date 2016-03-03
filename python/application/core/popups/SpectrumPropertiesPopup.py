@@ -35,14 +35,11 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
-from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 
 
 from functools import partial
-
-import sys
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
@@ -123,11 +120,11 @@ class GeneralTab(QtGui.QWidget, Base):
       self.colourBox.currentIndexChanged.connect(partial(self.changedColourComboIndex, spectrum))
       colourButton = Button(self, vAlign='t', hAlign='l', grid=(6, 2), hPolicy='fixed',
                     callback=partial(self.changeSpectrumColour, spectrum), icon='iconsNew/colours')
-      spectrumTypeLabel = Label(self, text="Spectrum Type ", vAlign='t', hAlign='l', grid=(7, 0))
-      spectrumType = PulldownList(self, vAlign='t', hAlign='l', grid=(7, 1))
+      spectrumTypeLabel = Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
+      spectrumType = PulldownList(self, vAlign='t', grid=(7, 1))
       spectrumType.addItems(SPECTRA)
+      print(spectrumType.findText(spectrum.experimentName))
       spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
-      spectrumType.setMinimumWidth(self.pathData.width()*1.95)
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
       self.spectrumScalingData.editingFinished.connect(self.setSpectrumScale)

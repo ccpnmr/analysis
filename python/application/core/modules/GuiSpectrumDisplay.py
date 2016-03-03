@@ -187,6 +187,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     if len(self._appBase.project.spectrumDisplays) == 1:
       self._appBase.mainWindow.addBlankDisplay()
     # self.dock.close()
+    self.delete()
 
 
   def fillToolBar(self):

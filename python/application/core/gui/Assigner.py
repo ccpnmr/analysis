@@ -468,10 +468,11 @@ class Assigner(CcpnDock):
 
 def _resetNmrResiduePidForAssigner(project:Project, apiResonanceGroup:ApiResonanceGroup):
   """Reset pid for NmrResidue and all offset NmrResidues"""
-  getDataObj = project._data2Obj.get
-  obj = getDataObj(apiResonanceGroup)
-  for guiNmrResidue in guiNmrResidues:
-    guiNmrResidue.update()
+  if hasattr(project._appBase.mainWindow, 'assigner'):
+    getDataObj = project._data2Obj.get
+    obj = getDataObj(apiResonanceGroup)
+    for guiNmrResidue in guiNmrResidues:
+      guiNmrResidue.update()
 
 
 Project._setupNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setSequenceCode')

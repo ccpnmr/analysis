@@ -48,6 +48,8 @@ from ccpncore.util import Types
 
 from ccpncore.util import Path
 
+from application.core.gui.assignmentModuleLogic import peaksAreOnLine
+
 class AtomSelector(CcpnDock):
   """
   Module to be used with PickAndAssignModule for prediction of nmrAtom names and assignment of nmrAtoms
@@ -63,6 +65,7 @@ class AtomSelector(CcpnDock):
     self.parent = parent
     self.current = self.parent._appBase.current
     self.project = project
+    self.current.registerNotify(self.predictAssignments, 'peaks')
     self.current.registerNotify(self.predictAssignments, 'peaks')
     nmrResidueLabel = Label(self, 'Current NmrResidue', grid=(0, 0))
     self.currentNmrResidueLabel = Label(self, grid=(0, 1))
@@ -85,6 +88,7 @@ class AtomSelector(CcpnDock):
     self.close()
 
   def updateWidget(self, nmrResidues=None):
+    self.currentNmrResidueLabel.setText(nmrResidues[0].id)
     if self.radioButton1.isChecked():
       self.createBackBoneButtons()
     elif self.radioButton2.isChecked():
@@ -424,7 +428,7 @@ class AtomSelector(CcpnDock):
 
       else:
 
-        # if peaksAreOnLine(peaks, 1):
+        if peaksAreOnLine(peaks, 1):
           # RHF 15/12/2015 bug fix. From usage elsewhere this ought to use tytpoe, nboe name.
           # NBNB TBD CHECK THIS
           # experiments = [peak.peakList.spectrum.experimentName for peak in peaks]

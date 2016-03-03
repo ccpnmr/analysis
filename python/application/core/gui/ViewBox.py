@@ -156,6 +156,8 @@ class ViewBox(pg.ViewBox):
           for n in orderedAxes[2:]:
             position.append(n.position)
         peakList.newPeak(position=position)
+        self.current.addPeak(peak)
+        peak.isSelected = True
         self.current.strip.showPeaks(peakList)
 
 
@@ -277,7 +279,6 @@ class ViewBox(pg.ViewBox):
       event.accept()
 
     elif (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ShiftModifier) or  (
               event.modifiers() & QtCore.Qt.ControlModifier):
        # Add select area
       if event.isStart():

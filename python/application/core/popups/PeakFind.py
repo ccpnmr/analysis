@@ -27,7 +27,7 @@ from PyQt4 import QtGui, QtCore
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.CheckBox import CheckBox
+from ccpncore.gui.RadioButton import RadioButton
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Label import Label
 from ccpncore.gui.Widget import Widget
@@ -40,7 +40,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
     super(PeakFindPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.project = project
-    self.peakListLabel =  Label(self, text="PeakList: ", grid=(0, 0))
+    self.peakListLabel = Label(self, text="PeakList: ", grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self.selectPeakList)
     self.peakListPulldown.setData([peakList.pid for peakList in project.peakLists])
     self.peakList = project.getByPid(self.peakListPulldown.currentText())
@@ -48,18 +48,18 @@ class PeakFindPopup(QtGui.QDialog, Base):
     layout = QtGui.QGridLayout()
     self.checkBoxWidget.setLayout(layout)
     self.layout().addWidget(self.checkBoxWidget, 1, 0, 1, 4)
-    self.checkBox1 = CheckBox(self)
-    self.checkBox1.toggled.connect(self.controlCheckBoxes)
+    self.checkBox1 = RadioButton(self)
+    # self.checkBox1.toggled.connect(self.controlCheckBoxes)
     self.checkBoxWidget.layout().addWidget(self.checkBox1, 0, 0)
     self.checkBox1Label = Label(self, 'Positive only')
     self.checkBoxWidget.layout().addWidget(self.checkBox1Label, 0, 1)
-    self.checkBox2 = CheckBox(self)
-    self.checkBox2.toggled.connect(self.controlCheckBoxes)
+    self.checkBox2 = RadioButton(self)
+    # self.checkBox2.toggled.connect(self.controlCheckBoxes)
     self.checkBoxWidget.layout().addWidget(self.checkBox2, 0, 2)
     self.checkBox2Label = Label(self, 'Negative only')
     self.checkBoxWidget.layout().addWidget(self.checkBox2Label, 0, 3)
-    self.checkBox3 = CheckBox(self)
-    self.checkBox3.toggled.connect(self.controlCheckBoxes)
+    self.checkBox3 = RadioButton(self)
+    # self.checkBox3.toggled.connect(self.controlCheckBoxes)
     self.checkBoxWidget.layout().addWidget(self.checkBox3, 0, 4)
     self.checkBox3Label = Label(self, 'Both')
     self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
@@ -71,17 +71,17 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.buttonBox = ButtonList(self, grid=(7, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
                            callbacks=[self.reject, self.pickPeaks])
 
-
-  def controlCheckBoxes(self):
-    if self.checkBox3.isChecked():
-      self.checkBox1.setChecked(False)
-      self.checkBox2.setChecked(False)
-    if self.checkBox1.isChecked():
-      self.checkBox3.setChecked(False)
-      self.checkBox2.setChecked(False)
-    if self.checkBox2.isChecked():
-      self.checkBox1.setChecked(False)
-      self.checkBox3.setChecked(False)
+  #
+  # def controlCheckBoxes(self):
+  #   if self.checkBox3.isChecked():
+  #     self.checkBox1.setChecked(False)
+  #     self.checkBox2.setChecked(False)
+  #   if self.checkBox1.isChecked():
+  #     self.checkBox3.setChecked(False)
+  #     self.checkBox2.setChecked(False)
+  #   if self.checkBox2.isChecked():
+  #     self.checkBox1.setChecked(False)
+  #     self.checkBox3.setChecked(False)
   def selectPeakList(self, item):
     self.peakList = self.project.getByPid(item)
     self.updateContents()
@@ -93,12 +93,15 @@ class PeakFindPopup(QtGui.QDialog, Base):
                  [spinBox.value() for spinBox in self.maxPositionBoxes]]
 
     if self.checkBox1.isChecked():
+      print('checkbox1 checked')
       doPos=True
       doNeg=False
-    if self.checkBox2.isChecked():
-      doPos=True
+    elif self.checkBox2.isChecked():
+      print('checkbox2 checked')
+      doPos=False
       doNeg=True
-    if self.checkBox3.isChecked():
+    elif self.checkBox3.isChecked():
+      print('checkbox3 checked')
       doPos=True
       doNeg=True
     peakList.pickPeaksNd(positions, apiSpectrumView.spectrumView.orderedDataDims,

@@ -135,6 +135,9 @@ class Current:
       msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
       if MessageDialog.showYesNo(title, msg, parent):
         for peak in self.peaks[:]:
+
+          self.project._appBase.mainWindow.pythonConsole.writeConsoleCommand('peak.delete()',
+                                                                    peak=peak)
           peak.delete()
         #self.peaks = [] # not needed since _deletedPeak notifier will clear this out
 

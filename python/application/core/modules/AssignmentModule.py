@@ -102,7 +102,7 @@ class AssignmentModule(CcpnDock, Base):
                Column('Delta', lambda nmrAtom: self.getDeltaShift(nmrAtom, dim))]
 
     objectTable = ObjectTable(self, columns,
-                              callback=partial(self.assignNmrAtomToDim, dim),
+                              actionCallback=partial(self.assignNmrAtomToDim, dim),
                               objects=[])
 
     # Needed to use this syntax because wanted double click not single.

@@ -70,7 +70,7 @@ class BackboneAssignmentModule(CcpnDock):
     inside the module.
     """
     self._setupShiftDicts()
-    if self.assigner:
+    if hasattr(self, 'assigner'):
       self.assigner.clearAllItems()
     # self.navigateTo(nmrResidue, row, col)
     self.current.nmrChain = nmrResidue.nmrChain
@@ -141,7 +141,8 @@ class BackboneAssignmentModule(CcpnDock):
 
     assignMatrix = self._buildAssignmentMatrix(queryShifts, matchShifts=matchShifts)
     self._createMatchStrips(assignMatrix)
-    self.assigner.addResidue(iNmrResidue, direction)
+    if hasattr(self, 'assigner'):
+      self.assigner.addResidue(iNmrResidue, direction)
 
 
 

@@ -42,14 +42,13 @@ class PickAndAssignModule(CcpnDock, Base):
     self.spectrumSelectionWidget = SpectrumSelectionWidget(self.scrollArea, project, self.displayList)
     self.scrollArea.setWidget(self.spectrumSelectionWidget)
     self.displayList.removeItem = self.removeListWidgetItem
+    self.refreshButton.hide()
 
   def updateListWidget(self, item):
     if self.displayList.count() == 1 and self.displayList.item(0).text() == '<All>':
       self.displayList.takeItem(0)
     self.displayList.addItem(self.project.getByPid(item).pid)
     self.spectrumSelectionWidget.update()
-
-
 
   def removeListWidgetItem(self):
     self.displayList.takeItem(self.displayList.currentRow())
@@ -150,7 +149,9 @@ class PickAndAssignModule(CcpnDock, Base):
 
 
   def goToPositionInModules(self, nmrResidue=None, row=None, col=None):
+    self.project._appBase.mainWindow.clearMarks()
     navigateToNmrResidue(self.project, nmrResidue, markPositions=True)
+
     self.current.nmrResidue = nmrResidue
 
   def showNmrResiduePopup(self):

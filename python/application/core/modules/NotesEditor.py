@@ -34,7 +34,7 @@ class NotesEditor(DropBase, CcpnDock):
     # widget.layout().addWidget(self.menuBar, 0, 0, 1, 5)
     widget.layout().addWidget(self.label1, 1, 0)
     widget.layout().addWidget(self.lineEdit1, 1, 1, 1, 4)
-    self.lineEdit1.editingFinished.connect(self._setNoteName)
+    # self.lineEdit1.editingFinished.connect(self._setNoteName)
     widget.layout().addWidget(self.textBox, 2, 0, 1, 5)
     # if self.note.text is not None:
     if note:
@@ -57,6 +57,7 @@ class NotesEditor(DropBase, CcpnDock):
     Saves the text in the textbox to the note object.
     """
     newText = self.textBox.toPlainText()
+    self._setNoteName()
     self.note.text = newText
     self.close()
 

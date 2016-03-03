@@ -396,7 +396,10 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
 
   def paint(self, painter, option, widget):
 
+    if self.peak: # TBD: is this ever not true??
+      self.setSelected(self.peak.isSelected)
     QtGui.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
+
     # if self.peakItem.peak in self.analysisLayout.currentPeaks:
     # painter.drawRect(self.boundingRect())
 

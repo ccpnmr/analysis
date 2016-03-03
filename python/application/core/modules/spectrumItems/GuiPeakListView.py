@@ -289,7 +289,6 @@ class Peak1d(QtGui.QGraphicsItem):
     peakListView.peakItems[self.peak] = self
 
   def mousePressEvent(self, event):
-
     self.press = True
     self.hover = True
     print('pressed')
@@ -334,7 +333,7 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.setCacheMode(self.DeviceCoordinateCache)
     self.setFlag(self.ItemIgnoresTransformations, True)
     # self.setFlag(self.ItemIsMovable, True)
-    # self.setFlag(self.ItemIsSelectable, True)
+    self.setFlag(self.ItemIsSelectable, True)
     # self.setFlag(self.ItemSendsScenePositionChanges, True)
     # if self.isSelected():
     #   print(self)
@@ -348,17 +347,21 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     print(event)
 
   def mousePressEvent(self, event):
+    # super(Peak1dAnnotation, self).mousePressEvent(event)
 
-    if (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ControlModifier) and not (
-              event.modifiers() & QtCore.Qt.ShiftModifier):
+    if event.button() == QtCore.Qt.LeftButton:
+    # if (event.button() == QtCore.Qt.LeftButton) and (
+    #           event.modifiers() & QtCore.Qt.ControlModifier) and not (
+    #           event.modifiers() & QtCore.Qt.ShiftModifier):
 
-      event.accept()
       self.scene.clearSelection()
       self.setFlag(QtGui.QGraphicsSimpleTextItem.ItemIsMovable)
       QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
+      self.peakItem.setSelected(True)
       self.update()
+      print('selected:', self)
+      print('peak item:', self.peakItem.pos())
 
 
   def setupPeakAnnotation(self, peakItem):
@@ -367,6 +370,7 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
 
     peak = peakItem.peak
     text = _getPeakAnnotation(peak)
+    text = text + "*"
     self.setText(text)
 
   def updatePos(self):
@@ -473,7 +477,7 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
     self.setBbox()
 
   def mousePressEvent(self, event):
-
+    print('symbol')
     if (event.button() == QtCore.Qt.LeftButton) and (
               event.modifiers() & QtCore.Qt.ControlModifier) and not (
               event.modifiers() & QtCore.Qt.ShiftModifier):
@@ -752,6 +756,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     
     peak = peakItem.peak
     text = _getPeakAnnotation(peak)
+    text = text
         
     self.setText(text)
 

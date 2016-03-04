@@ -216,7 +216,7 @@ class Peak1d(QtGui.QGraphicsItem):
   """ A GraphicsItem that is not actually drawn itself, but is the parent of the peak symbol and peak annotation.
       TODO: Add hover effect for 1D peaks. """
 
-  def __init__(self, peakListView, peak):
+  def __init__(self, peak, peakListView):
 
 
     scene = peakListView.spectrumView.strip.plotWidget.scene()
@@ -244,14 +244,14 @@ class Peak1d(QtGui.QGraphicsItem):
     self.pointPos = peak.pointPosition
     self.ppm = peak.position[self.dim]
 
-    # self.height = self.peak.height
-    # if not self.height:
-    #   height = self.peak._apiPeak.findFirstPeakIntensity(intensityType = 'height')
-    #   if height:
-    #     self.height = height.value
-    #   else:
-    #     self.height = 0
-    # # self.height *= self.spectrum.scale
+    self.height = self.peak.height
+    if not self.height:
+      height = self.peak._apiPeak.findFirstPeakIntensity(intensityType = 'height')
+      if height:
+        self.height = height.value
+      else:
+        self.height = 0
+    self.height *= self.spectrum.scale
     #
     # # if peakDims[dim].numAliasing:
     # #   self.isAliased = True
@@ -327,6 +327,7 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     self.setParentItem(peakItem)
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.scene = scene
+    self.peak = peakItem.peak
     font = self.font()
     font.setPointSize(10)
     self.setFont(font)
@@ -374,6 +375,7 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     self.setText(text)
 
   def updatePos(self):
+    pass
 
     peakItem = self.peakItem
     if peakItem.peakHeight >= 0:

@@ -37,11 +37,13 @@ from ccpncore.gui.Icon import Icon
 
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from application.core.modules.spectrumItems import GuiPeakListView
-
+from application.core.modules.GuiStrip1d import GuiStrip1d
 from ccpncore.gui.VerticalLabel import VerticalLabel
 
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
+
 
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
@@ -121,7 +123,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
         #viewBox.addItem(peakItem)
         peakItem.setVisible(True)
       else:
-        peakItem = GuiPeakListView.Peak1d(peakListView, peak)
+        peakItem = GuiPeakListView.Peak1d(peak, peakListView)
       peakItemDict[apiPeak] = peakItem
   def fillToolBar(self):
     """
@@ -200,7 +202,17 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
         for spectrumView in strip.spectrumViews:
           if spectrumView.spectrum is spectrum:
             spectrumView.plot.setPen(apiDataSource.sliceColour)
-  
+  # def _setActionIconColour(self, apiDataSource):
+  #   action = self.spectrumActionDict.get(apiDataSource)
+  #   if action:
+  #     pix=QtGui.QPixmap(QtCore.QSize(60, 10))
+  #     if apiDataSource.numDim < 2: # irrelevant here, but need if this code moves to GuiSpectrumDisplay
+  #       pix.fill(QtGui.QColor(apiDataSource.sliceColour))
+  #     else:
+  #       pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
+  #     action.setIcon(QtGui.QIcon(pix))
+
+
   def _deletedPeak(self, apiPeak):
     pass  # does anything need doing??
     
@@ -270,6 +282,37 @@ def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
 Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
 Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
 Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
+
+def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
+
+  getDataObj = project._data2Obj.get
+  peakListView = getDataObj(apiStripPeakListView)
+  spectrumView = peakListView.spectrumView
+  strip = spectrumView.strip
+  spectrumDisplay = strip.spectrumDisplay
+
+  if not isinstance(strip, GuiStrip1d):
+    return
+  scene = strip.plotWidget.scene()
+  peakList = peakListView.peakList
+  peakItemDict = spectrumDisplay.activePeakItemDict[peakListView]
+  peakItems = set(spectrumDisplay.inactivePeakItemDict[peakListView])
+  for apiPeak in peakItemDict:
+    peakItem = peakItemDict[apiPeak]
+    peakItems.add(peakItem)
+
+  scene = strip.plotWidget.scene()
+  for peakItem in peakItems:
+    scene.removeItem(peakItem.annotation)
+    scene.removeItem(peakItem.symbol)
+    scene.removeItem(peakItem)
+  scene.removeItem(peakListView)
+
+  del spectrumDisplay.activePeakItemDict[peakListView]
+  del spectrumDisplay.inactivePeakItemDict[peakListView]
+
+Project._setupNotifier(_deletedStripPeakListView, ApiStripPeakListView, 'preDelete')
+
 
 def _updatePlotColour(project:Project, apiDataSource:ApiDataSource):
 

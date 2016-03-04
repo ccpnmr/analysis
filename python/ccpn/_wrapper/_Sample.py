@@ -225,7 +225,7 @@ class Sample(AbstractWrapperObject):
     return parent._wrappedData.sampleStore.sortedSamples()
 
 
-def _newSample(self:Project, name:str, pH:float=None, ionicStrength:float=None, amount:float=None,
+def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=None, amount:float=None,
               amountUnit:str='L', isHazardous:bool=None, creationDate:datetime=None,
               batchIdentifier:str=None, plateIdentifier:str=None, rowNumber:int=None,
               columnNumber:int=None, comment:str=None) -> Sample:
@@ -233,7 +233,14 @@ def _newSample(self:Project, name:str, pH:float=None, ionicStrength:float=None, 
   nmrProject = self._wrappedData
   apiSampleStore =  nmrProject.sampleStore
 
-  if name and Pid.altCharacter in name:
+  if not name:
+    # Make default name
+    nextNumber = len(apiSampleStore.samples) + 1
+    name = 'Sample_%s' % nextNumber
+    while apiSampleStore.findFirstSample(name=name) is not None:
+      name = commonUtil.incrementName(name)
+
+  if Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
 
   newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,

@@ -111,24 +111,6 @@ class GuiStrip1d(GuiStrip):
     """
     Displays peaks in specified peaklist in the strip.
     """
-    # # self.plotWidget.scene().addItem(peakListItem)
-    # print(self.plotWidget.scene().items())
-    #peakLayer = GuiPeakListView(self.plotWidget.scene(), self.plotWidget, peakList)
-    peakItems = []
-    # peakListView = self._findPeakListView(peakList)
-    # self.peakItems[peakList] = []
-    # for peak in peakList.peaks:
-    #  # peakItem =
-    #  peakItem = Peak1d(peak,  peakListView)
-    #  self.peakItems[peakList].append(peakItem)
-    #  print(peakItem)
-    # #   peakItem = PeakItem(peak)
-    # #   self.plotWidget.addItem(peakItem)
-    #  self.plotWidget.addItem(peakItem)
-    # # print(self.plotWidget.scene().items())
-    # #   self.plotWidget.addItem(peakItem.peakAnnotationItem.peakTextItem)
-    # #   self.plotWidget.addItem(peakItem.peakAnnotationItem.peakSymbolItem)
-    # # # print(self.plotWidget.scene().items())
     if not peaks:
       peaks = peakList.peaks
 
@@ -138,13 +120,13 @@ class GuiStrip1d(GuiStrip):
 
     peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
     self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
-  #
-  # def hidePeaks(self, peakList:PeakList):
-  #   """
-  #   Hides peaks in specified peaklist from strip.
-  #   """
-  #   for item in self.peakItems[peakList]:
-  #     self.plotWidget.removeItem(item)
+
+  def hidePeaks(self, peakList:PeakList):
+    """
+    Hides peaks in specified peaklist from strip.
+    """
+    peakListView = self._findPeakListView(peakList)
+    peakListView.setVisible(False)
 
   def _findPeakListView(self, peakList:PeakList):
 
@@ -152,28 +134,11 @@ class GuiStrip1d(GuiStrip):
     #if peakListView:
     #  return peakListView
 
-    for spectrumView in self.spectrumViews:
-      for peakListView in spectrumView.peakListViews:
-        if peakList is peakListView.peakList:
-          #self.peakListViewDict[peakList] = peakListView
-          return peakListView
-      
-def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
-  
-  getDataObj = project._data2Obj.get
-  peakListView = getDataObj(apiStripPeakListView)
-  spectrumView = peakListView.spectrumView
-  strip = spectrumView.strip
- 
-  if not isinstance(strip, GuiStrip1d):
-    return
-    
-  scene = strip.plotWidget.scene()
-  peakList = peakListView.peakList
-  for peakItem in strip.peakItems[peakList]:
-    scene.removeItem(peakItem.annotation)
-    scene.removeItem(peakItem.symbol)
-    scene.removeItem(peakItem)
-  
-Project._setupNotifier(_deletedStripPeakListView, ApiStripPeakListView, 'preDelete')
+
+    for peakListView in self.peakListViews:
+      if peakList is peakListView.peakList:
+        #self.peakListViewDict[peakList] = peakListView
+        return peakListView
+
+
 

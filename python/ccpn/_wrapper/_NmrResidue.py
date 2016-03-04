@@ -25,6 +25,7 @@ __version__ = "$Revision$"
 from ccpncore.util import Pid
 from ccpncore.util.Types import Tuple, Optional
 from ccpncore.util import Common as commonUtil
+from ccpncore.util import Sorting
 from ccpncore.lib import Constants
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -699,7 +700,7 @@ class NmrResidue(AbstractWrapperObject):
     return result
 
 
-  # Implementation functions numericStringSortKey
+  # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
@@ -707,9 +708,9 @@ class NmrResidue(AbstractWrapperObject):
       # for conected NmrChains you keep the order
       return parent._wrappedData.resonanceGroups
     else:
-      ll = [(commonUtil.numericStringSortKey(x.sequenceCode), x)
-            for x in parent._wrappedData.resonanceGroups]
-      return [tt[-1] for tt in sorted(ll)]
+      ll = list((x.sequenceCode, x) for x in parent._wrappedData.resonanceGroups)
+      return list(tt[-1] for tt in sorted(ll, key=Sorting.ccpnOrdering))
+
 
 # def getter(self:NmrResidue) -> NmrResidue:
 #   obj = self._wrappedData.nextResidue

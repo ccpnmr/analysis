@@ -34,6 +34,7 @@ from ccpncore.lib.spectrum import Spectrum as libSpectrum
 from ccpncore.util.Bmrb import bmrb
 from ccpncore.memops import Version
 from ccpncore.util import Pid
+from ccpncore.util import Sorting
 from ccpncore.util import Path
 from ccpncore.util import Common as commonUtil
 
@@ -380,7 +381,7 @@ def _createMolecularSystemFrame(chains):
         atomName = molResLinkEnd.linkEnd.boundChemAtom.name
         apiAtom = apiResidue.findFirstAtom(name=atomName)
         pair.append(project._data2Obj[apiAtom]._id.split('.'))
-      pair.sort(key=commonUtil.numericStringSortKey)
+      pair.sort(key=Sorting.ccpnOrdering)
 
   for molSystemLink in project._apiNmrProject.molSystem.molSystemLinks:
     pair = []
@@ -389,7 +390,7 @@ def _createMolecularSystemFrame(chains):
       atomName = molSystemLinkEnd.linkEnd.boundChemAtom.name
       apiAtom = molSystemLinkEnd.residue.findFirstAtom(name=atomName)
       pair.append(project._data2Obj[apiAtom]._id.split('.'))
-    pair.sort(key=commonUtil.numericStringSortKey)
+    pair.sort(key=Sorting.ccpnOrdering)
 
   # NB Loop may be empty. The entry.export_string function takes care of this
   loop = bmrb.loop.fromScratch(category='nef_covalent_links')
@@ -399,7 +400,7 @@ def _createMolecularSystemFrame(chains):
     loop.addColumn(tag)
 
 
-  for ll in sorted(atomPairs, key=commonUtil.numericStringSortKey):
+  for ll in sorted(atomPairs, key=Sorting.ccpnOrdering):
     values = ll[0]._id.split('.') +  ll[1]._id.split('.')
     loop.addData(values)
   #

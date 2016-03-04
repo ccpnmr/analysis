@@ -34,6 +34,7 @@ from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.spectrum import NmrExpPrototype
 from ccpncore.lib import Constants
 from ccpncore.util import Common as commonUtil
+from ccpncore.util import Sorting
 from ccpncore.util import Pid
 from ccpncore.util import Undo
 from ccpncore.util import Io as ioUtil
@@ -560,33 +561,27 @@ class Project(AbstractWrapperObject):
   #
 
   def _pidSortKey(self, key:Union[Sequence, AbstractWrapperObject]) -> list:
-    """ Converts object PID into a composite key that sorts fields that start with a numerical value
-    in numerical order. E.g. ' 11aa', '+1.1e1qq' or '11.0--' all sort as 11.0
-    Input mut be a string, a wrapper object, or a sequence of eitehr type.
-    Results are cached to save time.
-    Objects get the same key as their longPid attribute
-    The part of the string before the PREFIXSEP is not converted.
-    Strings without PREFIXSEP are treated as having an empty string prefix"""
+    """ Sort key for either Pid string or Wrapper object by stringNumericOrdering on the split Pid.
+    Caches the result for speed."""
 
     if isinstance(key, str):
       longPid = key
-    elif isinstance(key, baseSequence):
-      return [self._pidSortKey(x) for x in key]
-    else:
-      # key ust be a wrapper object - sort by longPid
+    elif isinstance(key, AbstractWrapperObject):
       longPid = key.longPid
+    else:
+      raise ValueError("Sorted object must be wither a string or a CCPN Wrapper object, was %s"
+                       % key)
 
     result = self._pidSortKeys.get(longPid)
 
     if result is None:
-      PREFIXSEP = Pid.PREFIXSEP
-      IDSEP = Pid.IDSEP
-
-      ll = longPid.split(PREFIXSEP,1)
-      if len(ll) == 1:
-        ll = ['', longPid]
-
-      result = ll[:1] + commonUtil.numericStringSortKey(ll[1].split(IDSEP))
+      tt1 = longPid.split(Pid.PREFIXSEP, 1)
+      if len(tt1) == 2:
+        tt2 = tt1[1].split(Pid.IDSEP)
+        result = tuple(Sorting.stringNumericOrdering(x) for x in [tt1[0]] + tt2)
+      else:
+        result = (Sorting.stringNumericOrdering(tt1[0]))
+      #
       self._pidSortKeys[longPid] = result
     #
     return result

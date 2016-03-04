@@ -634,8 +634,8 @@ class AbstractWrapperObject():
       ll = itertools.chain(*(func(x) for x in objects))
       # objects is all wrapper objects for next child level down
       objects = [data2Obj[x] for x in ll]
-      if cls.className == 'ChemicalShift':
-        # This one cannot be correctly sorted at the API level
+      if cls.className in ('ChemicalShift', 'Bond', 'Residue'):
+        # These cannot be correctly sorted at the API level
         objects.sort()
     #
     return objects

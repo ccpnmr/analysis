@@ -118,13 +118,17 @@ class Current:
 
   @spectrum.setter
   def spectrum(self, value):
-    self._spectra = [value]
+    self.spectra = [value]
 
   def addSpectrum(self, value):
     self.spectra = self._spectra + [value]
 
+  def removeSpectrum(self, value):
+    self._spectra.remove(value)
+    self.spectra = self._spectra + [value]
+
   def clearSpectra(self):
-    del self._spectra[:]
+    self.spectra = []
 
 
   def deleteSelected(self, parent=None):
@@ -193,12 +197,14 @@ def  _addClassField(cls, field):
   setattr(cls, 'add' + field.capitalize()[:-1], adder)
 
   def remover(self, value):
-    getField(self).remove(value)
+    ll = getField(self)
+    ll.remove(value)
+    setField(self, ll)
   #
   setattr(cls, 'remove' + field.capitalize()[:-1], remover)
 
   def clearer(self):
-    getField(self).clear()
+    setField(self, [])
   #
   setattr(cls, 'clear' + field.capitalize(), clearer)
 

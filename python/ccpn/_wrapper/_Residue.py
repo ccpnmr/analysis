@@ -178,9 +178,8 @@ class Residue(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Chain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
-    func = commonUtil.numericStringSortKey
-    ll = [(func(x.seqCode), x.seqInsertCode, x) for x in parent._apiChain.residues]
-    return [tt[-1] for tt in sorted(ll)]
+    # NB this is not the sort we want - sorted elsewhere
+    return parent._apiChain.sortedResidues()
 
 def getter(self:Residue) -> Residue:
   apiResidue = self._wrappedData

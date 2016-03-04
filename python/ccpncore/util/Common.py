@@ -28,15 +28,15 @@ NB Must conform to Python 2.1. Imported in ObjectDomain.
 
 import os
 import sys
-import re
+# import re
 import json
-import itertools
-import numpy
-import math
-from numbers import Real
+# import itertools
+# import numpy
+# import math
+# from numbers import Real
 from collections import abc as collectionClasses
-from collections import OrderedDict
-from numbers import Real
+# from collections import OrderedDict
+# from numbers import Real
 from functools import total_ordering
 
 from ccpncore.util import Path
@@ -44,9 +44,6 @@ from ccpncore.lib import Constants as coreLibConstants
 from ccpncore.memops.metamodel import Constants as metaConstants
 
 WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
-NEGINFINITY = float('-Infinity')
-POSINFINITY = float('Infinity')
-NUMERICSPLIT = re.compile("([ ]*[+-]?\d+)")
 
 # valid characters for file names
 # NB string.ascii_letters and string.digits are not compatible
@@ -222,266 +219,6 @@ def splitIntFromChars(value:str):
     chars = value
 
   return number,chars
-
-# def _natural_key(string_):
-#   import re
-#   """See http://www.codinghorror.com/blog/archives/001018.html"""
-#   return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
-#
-# def _natural_key2(string_):
-#   import re
-#   """See http://www.codinghorror.com/blog/archives/001018.html"""
-#   result = [int(s) if s.isdigit() else s for s in re.split(r'([+-]?\d+)', string_)]
-#   print ('@~@~', result)
-#   return result
-#   # return [int(s) if s.isdigit() else s for s in re.split(r'([+-]?\d+)', string_)]
-
-def stringNumericOrder(key):
-  """Sort key for strings, for human viewing
-
-Strings that evaluate to floats are sorted by float value.
-Strings with embedded, signed integers are split and the integer parts sorted by integer value"""
-
-
-  if key == '':
-    # Put empty string at the very beginning
-    return ((NEGINFINITY, '', ''),)
-
-  else:
-
-    try:
-      # first put strings that evaluate to floats
-      localkey = float(key)
-      if math.isnan(localkey):
-        # Put NaN before -Infinity
-        return ((NEGINFINITY, '', key),)
-      else:
-        return ((localkey, key),)
-
-    except ValueError:
-      # String did not evaluate to float - split by embedded integers
-
-      ll = []
-      for ss in re.split(key):
-        if any (x for x in ss if x.isdigit()):
-          # This is a numeric group. Convert to int
-          ll.append((int(ss), ss))
-        else:
-          # Non-numeric group. Put at the end and sort by string value only
-          ll.append((POSINFINITY, ss))
-      #
-      return tuple(ll)
-
-def mixedTypeViewOrder(key):
-  """Sort mixed types by type, then value or id, for human viewing. Works for ALL object types.
-
-  Strings are sorted by the stringNumericOrder function."""
-
-  _sortOrder = [
-    'None',
-    'bool',
-    'NaN',
-    'Real',
-    'str',
-    'CcpnWrapperObject',
-    'CcpnApiObject',
-    'tuple',
-    'list',
-    'OrderedDict'
-    'bytes',
-    'other'
-  ]
-  sortOrder = dict((tt[1],tt[0]) for tt in enumerate(_sortOrder))
-
-  if key is None:
-    category = 'None'
-
-  elif isinstance(key, bool):
-    category = 'bool'
-
-  elif isinstance(key, Real):
-    if math.isnan(key):
-      category = 'NaN'
-      key = None
-    else:
-      category = 'Real'
-
-  elif isinstance(key, str):
-    category = 'str'
-    key = stringNumericOrder(key)
-
-  elif hasattr(key, 'longPid'):
-    # CCPN WrapperObject
-    try:
-      category = 'CcpnWrapperObject'
-      tt = key.longPid.split(':',1)
-      key = (tt[0], stringNumericOrder(tt[1]))
-    except:
-      # treating as CCPN Wrapper object went wrong - treat as generic object
-      category = 'other'
-      key = (key.__class__.__name__, id(key))
-
-  elif hasattr(key, 'getExpandedKey'):
-    # CCPN API Object
-    try:
-      ll = getattr(key, 'getExpandedKey')()
-      category = 'CcpnApiObject'
-      key = mixedTypeViewOrder(ll)[1]
-    except:
-      # treating as CCPN API object went wrong - treat as generic object
-      category = 'other'
-      key = (key.__class__.__name__, id(key))
-
-  elif isinstance(key, tuple):
-    category = 'tuple'
-    key = tuple(mixedTypeViewOrder(x) for x in key)
-
-  elif isinstance(key, list):
-    category = 'list'
-    try:
-      key = tuple(mixedTypeViewOrder(x) for x in key)
-    except RuntimeError:
-      # Should be RecursionError from version 3.5
-      # We have infinite recursion - give custom key
-      key = ((key.__class__.__name__, id(key)),)
-
-  elif isinstance(key, OrderedDict):
-    category = 'OrderedDict'
-    try:
-      key = (tuple(mixedTypeViewOrder(x) for x in key.keys()),
-             tuple(mixedTypeViewOrder(x) for x in key.values()))
-    except RuntimeError:
-      # Should be RecursionError from version 3.5 onwards
-      # We have infinite recursion - give custom key
-      key = ((key.__class__.__name__, id(key)),)
-
-  elif isinstance(key, (bytes, bytearray)):
-    category = 'bytes'
-
-  else:
-    category = 'other'
-    key = (key.__class__.__name__, id(key))
-
-  #
-  return (sortOrder[category], key)
-
-
-# def universalSortKey(key):
-#   """"Universal sort key function. Works in nested sequences"""
-#   smallest = float('-inf')
-#   if key is None:
-#     # First None
-#     return ('',)
-#
-#   elif isinstance(key, bool):
-#     # Then bools
-#     return (chr(1), key)
-#
-#   elif isinstance(key, Real):
-#     # Then real numbers
-#     return (chr(2), key)
-#
-#   elif isinstance(key,str):
-#     # Then strings - strings starting with 'real values' are last, sorted by the real value
-#     for ii in range(len(key)-1, 0, -1):
-#       try:
-#         val = float(key[:ii])
-#         break
-#       except:
-#         pass
-#     else:
-#       val = smallest
-#     #
-#     return (chr(3), val, key)
-#
-#   elif isinstance(key, numpy.ndarray):
-#     # Numpy special case, as 1) it might be as sequence, 2) it has __lt__ but does not compare
-#     return (key.__class__.__name__, key.size(), repr(key))
-#
-#   elif isinstance(key, bytes) or isinstance(key, bytearray):
-#     return (key.__class__.__name__, key)
-#
-#   elif isinstance(key, collectionClasses.Sequence):
-#     # NBNB TBD FIXME
-#     # This will BREAK for nested sequences
-#     return (key.__class__.__name__, [universalSortKey(x) for x in key])
-#
-#   else:
-#     if hasattr(key, '__len__'):
-#       val = len(key)
-#     else:
-#       val = smallest
-#
-#     if not hasattr(key, '__lt__'):
-#       key = repr(key)
-#
-#     return (key.__class__.__name__, val, key)
-#
-# # NBNB TBD consider 1) updrading sorting to sort internal ints by number,
-# # 2) upgrading to universal sort key
-
-def numericStringSortKey(key):
-  """
-  Returns customized sort key
-  1) Works on single values or sequences
-  2) sorts None as smallest value of whatever type.
-  3) string fields that start with numeric values sort by that value
-  E.g. '11a', '+1.1e1zz' or '11.0' sort as numeric 11.0
-  """
-  number = 0.0
-  if isinstance(key,str):
-    for ii in range(1,len(key)+1):
-      try:
-        number = float(key[:ii])
-      except:
-        pass
-    #
-    return [number, key]
-
-  elif key is None:
-    return [number, __smallest]
-
-  elif isinstance(key, collectionClasses.Sequence):
-    return list(itertools.chain(numericStringSortKey(x) for x in key))
-
-  else:
-    return [number, key]
-
-
-# def integerStringSortKey(key):
-#   """return sort key so that strings starting with an integer sort as if by integer
-#
-#   params:: key  either sequence or single string"""
-#
-#   if isinstance(key, str):
-#     vv = key.lstrip()
-#     ll = []
-#     for char in vv:
-#       if char.isdigit():
-#         ll.append(char)
-#       else:
-#         break
-#     if ll :
-#       return '%30s' % ''.join(ll) + vv[len(ll):]
-#     else:
-#       return key
-#
-#   else:
-#     result = list(key)
-#
-#     for ii,val in enumerate(result):
-#       if isinstance(val, str):
-#         vv = val.lstrip()
-#         ll = []
-#         for char in vv:
-#           if char.isdigit():
-#             ll.append(char)
-#           else:
-#             break
-#         if ll :
-#           result[ii] = '%30s' % ''.join(ll) + vv[len(ll):]
-#
-#     return result
 
 def dictionaryProduct(dict1:dict, dict2:dict) -> dict:
   """multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary"""

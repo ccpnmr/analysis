@@ -69,6 +69,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
       
     self.hPhaseTrace = None
 
+    # self.strip.viewBox.autoRange()
+    # self.strip.zoomYAll()
+
   def turnOnPhasing(self):
 
     

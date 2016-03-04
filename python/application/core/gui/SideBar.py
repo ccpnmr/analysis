@@ -30,7 +30,7 @@ from application.core.modules.NotesEditor import NotesEditor
 from application.core.popups.NmrAtomPopup import NmrAtomPopup
 from application.core.popups.NmrChainPopup import NmrChainPopup
 from application.core.popups.NmrResiduePopup import NmrResiduePopup
-from application.core.popups.PeakListPropertesPopup import PeakListPropertiesPopup
+from application.core.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from application.core.popups.RestraintTypePopup import RestraintTypePopup
 from application.core.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup, EditSampleComponentPopup

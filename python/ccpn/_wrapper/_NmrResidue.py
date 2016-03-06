@@ -24,8 +24,7 @@ __version__ = "$Revision$"
 
 from ccpncore.util import Pid
 from ccpncore.util.Types import Tuple, Optional
-from ccpncore.util import Common as commonUtil
-from ccpncore.util import Sorting
+from ccpn.lib import CcpnSorting
 from ccpncore.lib import Constants
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -709,7 +708,7 @@ class NmrResidue(AbstractWrapperObject):
       return parent._wrappedData.resonanceGroups
     else:
       ll = list((x.sequenceCode, x) for x in parent._wrappedData.resonanceGroups)
-      return list(tt[-1] for tt in sorted(ll, key=Sorting.ccpnOrdering))
+      return list(tt[-1] for tt in sorted(ll, key=CcpnSorting.universalSortKey))
 
 
 # def getter(self:NmrResidue) -> NmrResidue:

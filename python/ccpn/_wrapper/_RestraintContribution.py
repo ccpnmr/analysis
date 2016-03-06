@@ -27,6 +27,7 @@ from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Restraint
+from ccpn.lib import CcpnSorting
 from ccpncore.api.ccp.nmr.NmrConstraint import ConstraintContribution as ApiContribution
 from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
 
@@ -184,7 +185,7 @@ class RestraintContribution(AbstractWrapperObject):
 
     itemLength = self._wrappedData.constraint.parentList.itemLength
     result = []
-    sortkey = self._project._pidSortKey
+    sortkey = CcpnSorting.universalSortKey
 
     if itemLength == 1:
       for apiItem in self._wrappedData.items:

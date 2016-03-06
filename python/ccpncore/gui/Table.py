@@ -25,6 +25,8 @@ __author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn.lib.CcpnSorting import universalSortKey
+
 from ccpncore.gui.Base import Base
 from ccpncore.gui.BasePopup import BasePopup
 from ccpncore.gui.Splitter import Splitter
@@ -974,8 +976,9 @@ class Column:
   def __init__(self, heading, getValue, getEditValue=None, setEditValue=None,
                editClass=None, editArgs=None, editKw=None, tipText=None,
                getColor=None, getIcon=None, stretch=False, format=None,
-               editDecimals=None, editStep=None, alignment=QtCore.Qt.AlignLeft,
-               orderFunc=None):
+               editDecimals=None, editStep=None, alignment=QtCore.Qt.AlignLeft):
+               # editDecimals=None, editStep=None, alignment=QtCore.Qt.AlignLeft,
+               # orderFunc=None):
 
     self.heading = heading
     self.getValue = getValue or self._defaultText
@@ -993,13 +996,17 @@ class Column:
     # Alignment combinations broken in PyQt4 v1.1.1
     # Use better default than top left
     self.alignment = QtCore.Qt.AlignCenter
-    self.orderFunc = orderFunc
+    # self.orderFunc = orderFunc
 
     self.getIcon = getIcon or self._defaultIcon
     self.getColor = getColor or self._defaultColor
     self.tipText = tipText
 
     self._checkTextAttrs()
+
+  def orderFunc(self, objA, objB):
+    return ( universalSortKey(self.getValue(objA)) < universalSortKey(self.getValue(objB)) )
+
 
   def getFormatValue(self, obj):
 

@@ -65,21 +65,36 @@ def _unorderedKey(key):
   return key
 
 
-def stringNumericOrdering(key):
+def stringSortKey(key):
   """Sort key for strings.
 
+  If the entire string evaluates to a float, the result is ('', '(floatVal, stringVal), '')
+
+  Otherwise returns _numericSplitString(key)
+
+  Example of sorting order:
+  ['', 'NaN', '-1', '-1A', '0.0', '1', '2', '15', '3.2e12', 'Inf',
+  'Ahh', 'b',  'b2', 'b12', 'bb', 'ciao'] """
+
+  return _floatStringKey(key) or  _numericSplitString(key)
+
+def _numericSplitString(key):
+  """
   Returns an alternating tuple of (possibly empty) strings interspersed with (float,string) tuples,
   where the float is the converted value of the substring.
   First and last element are always strings.
 
-  If the entire string evaluates to a float, the result is ('', '(floatVal, stringVal), '')
-  Otherwise the numeric tuples are (intVal, subStringVal).
+  The numeric tuples are (intVal, subStringVal).
   Substrings recognised as integers are an optional series of ' ',
-  an optional sign, and a seris of digits - or REGEX '[ ]*[+-]?\d+'
-  Example of sorting order
-  ['', 'NaN', '-1', '-1A', '0.0', '1', '2', '15', '3.2e12', 'Inf',
-   'Ahh', 'b',  'b2', 'b12', 'bb', 'ciao'] """
+  an optional sign, and a seris of digits - or REGEX '[ ]*[+-]?\d+'"""
+  matches = list(NUMERICSPLIT.split(key))
+  for ii in range(1, len(matches), 2):
+    matches[ii] = (int(matches[ii]), matches[ii])
+  #
+  return tuple(matches)
 
+def _floatStringKey(key:str) -> tuple:
+  """Get key if string evaluates to a float, empty tuple otherwise"""
   try:
     # first strings that evaluate to floats
     floatkey = float(key)
@@ -90,16 +105,10 @@ def stringNumericOrdering(key):
       return ('',(floatkey, key), '')
 
   except ValueError:
-    # String did not evaluate to float - split by embedded signed integers
+    # String did not evaluate to float - return empty tuple
+    return ()
 
-    matches = list(NUMERICSPLIT.split(key))
-    for ii in range(1, len(matches), 2):
-      matches[ii] = (int(matches[ii]), matches[ii])
-    #
-    return tuple(matches)
-
-
-def universalOrdering(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey,
+def universalSortKey(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey,
                       _unorderedKeyHook=_unorderedKey):
   """Sort mixed types by type, then value or id. Should work for all object types.
 
@@ -153,8 +162,8 @@ def universalOrdering(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey
     # Not identical to the Python 2 behaviour
     # Compares by keys, then by values. Unordered dicts are sorted first.
     try:
-      items = list((universalOrdering(tt[0], **params),
-                    universalOrdering(tt[1], **params)) for tt in key.items())
+      items = list((universalSortKey(tt[0], **params),
+                    universalSortKey(tt[1], **params)) for tt in key.items())
       if not isinstance(key, OrderedDict):
         items.sort()
       # key = tuple(tt[0] for tt in items), tuple(tt[1] for tt in items))
@@ -168,7 +177,7 @@ def universalOrdering(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey
 
   elif isinstance(key, list):
     try:
-      key = tuple(universalOrdering(x, **params) for x in key)
+      key = tuple(universalSortKey(x, **params) for x in key)
       category = 'list'
     except RuntimeError:
       # Should be RecursionError from version 3.5
@@ -178,7 +187,7 @@ def universalOrdering(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey
 
   elif isinstance(key, tuple):
     try:
-      key = tuple(universalOrdering(x, **params) for x in key)
+      key = tuple(universalSortKey(x, **params) for x in key)
       category = 'tuple'
     except RuntimeError:
       # Should be RecursionError from version 3.5 onwards
@@ -214,21 +223,6 @@ def universalOrdering(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey
   #
   return (_sortOrderDict[category], key)
 
-
-def _ccpnOrderedKey(key):
-  """Special case sorting key for CCPN - groups CCPN AbstractWrapperObjects together
-  before sorting by class name"""
-  cls = key.__class__
-
-  ordering = 0
-  if hasattr(cls, 'longPid') and hasattr(key, '_id'):
-    # CCPN wrapper object - we just do not want to import the class to check
-    ordering = -1
-  #
-  return (ordering, cls.__name__, id(cls), key)
-
-def ccpnOrdering(key):
-  """Custom universalOrdering with stringNumericOrdering for strings and
-  CCPN WrapperObjects sorted together"""
-  return universalOrdering(key, _stringOrderingHook=stringNumericOrdering,
-                           _orderedKeyHook=_ccpnOrderedKey)
+def universalNaturalSortKey(key):
+  """Universla sort key, useing stringSOrtKey for strings"""
+  return universalSortKey(key, _stringOrderingHook=stringSortKey)

@@ -24,7 +24,6 @@ __version__ = "$Revision: 7686 $"
 
 import functools
 import os
-from collections.abc import Sequence as baseSequence
 
 from ccpn import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
@@ -33,12 +32,10 @@ from ccpncore.memops.ApiError import ApiError
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.spectrum import NmrExpPrototype
 from ccpncore.lib import Constants
-from ccpncore.util import Common as commonUtil
-from ccpncore.util import Sorting
 from ccpncore.util import Pid
 from ccpncore.util import Undo
 from ccpncore.util import Io as ioUtil
-from ccpncore.util.Types import Dict, Union, Sequence
+from ccpncore.util.Types import Dict
 
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to API: NmrProject"""
@@ -558,30 +555,3 @@ class Project(AbstractWrapperObject):
 
   #
   # utility functions
-  #
-
-  def _pidSortKey(self, key:Union[Sequence, AbstractWrapperObject]) -> list:
-    """ Sort key for either Pid string or Wrapper object by stringNumericOrdering on the split Pid.
-    Caches the result for speed."""
-
-    if isinstance(key, str):
-      longPid = key
-    elif isinstance(key, AbstractWrapperObject):
-      longPid = key.longPid
-    else:
-      raise ValueError("Sorted object must be wither a string or a CCPN Wrapper object, was %s"
-                       % key)
-
-    result = self._pidSortKeys.get(longPid)
-
-    if result is None:
-      tt1 = longPid.split(Pid.PREFIXSEP, 1)
-      if len(tt1) == 2:
-        tt2 = tt1[1].split(Pid.IDSEP)
-        result = tuple(Sorting.stringNumericOrdering(x) for x in [tt1[0]] + tt2)
-      else:
-        result = (Sorting.stringNumericOrdering(tt1[0]))
-      #
-      self._pidSortKeys[longPid] = result
-    #
-    return result

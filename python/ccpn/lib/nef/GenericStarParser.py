@@ -74,13 +74,13 @@ with the following exceptions and additions.
     are converted to  multiline strings by appending a newline
 
   - Strings with internal linebreaks but no terminal linebreak
-  are converted by appending a linebreak
+    are converted by appending a linebreak
 
   - Strings that cannot be quoted as multiline strings because they contain
-  a line starting with ';' are converted by prepending a space (' ') to each line
+    a line starting with ';' are converted by prepending a space (' ') to each line
 
   - Values None, True, False, NaN, Infinity and -Infinity are converted to
-  UNQUOTED strings '.', 'true', 'false', 'NaN', 'Infinity' and '-Infinity', respectively.
+    UNQUOTED strings '.', 'true', 'false', 'NaN', 'Infinity' and '-Infinity', respectively.
 
   - Normal (not unquoted) strings that evaluate to a float are written in quotes.
     Also the literal strings '.', 'true', 'false', 'NaN', 'Infinity' and '-Infinity'
@@ -452,9 +452,10 @@ class Loop:
 
   def toString(self, indent:str=_defaultIndent, separator:str=_defaultSeparator) -> str:
     """Stringifier function for loop.
+
     Accepts (subtypes of) Loop with data as sequence of rows,
-     where rows can be tuples, lists, or OrderedDicts.
-     In all cases the values must be in the order given by the columns attribute"""
+    where rows can be tuples, lists, or OrderedDicts.
+    In all cases the values must be in the order given by the columns attribute"""
 
     # main body format
     lineFormat = indent + _defaultIndent + '%s\n'

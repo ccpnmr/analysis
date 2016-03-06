@@ -26,8 +26,7 @@ import os
 import collections
 
 from ccpncore.util.Bmrb import bmrb
-from ccpncore.util import Common as commonUtil
-from ccpncore.util import Sorting
+from ccpn.lib import CcpnSorting
 
 
 # Make sure we get parse eror warnings:
@@ -507,7 +506,7 @@ def regulariseEntry(entryIn):
               obj.addColumn(tag)
             # for row in sorted(data, key=integerStringSortKey):
             for row in sorted(([dd.get(x, '.') for x in useTags] for dd in data0),
-                              key=Sorting.ccpnOrdering):
+                              key=CcpnSorting.universalSortKey):
               obj.addData(row)
 
       # Add additional loops
@@ -524,7 +523,7 @@ def regulariseEntry(entryIn):
             saveframe.addLoop(obj)
             for tag in useTags:
               obj.addColumn(tag)
-            for row in sorted(data0, key=Sorting.ccpnOrdering):
+            for row in sorted(data0, key=CcpnSorting.universalSortKey):
               obj.addData(row)
 
     # write out additional frames
@@ -556,7 +555,7 @@ def regulariseEntry(entryIn):
             saveframe.addLoop(obj)
             for tag in useTags:
               obj.addColumn(tag)
-            for row in sorted(data0, key=Sorting.ccpnOrdering):
+            for row in sorted(data0, key=CcpnSorting.universalSortKey):
               try:
                 obj.addData(row)
               except:

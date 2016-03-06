@@ -233,7 +233,7 @@ def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=N
   nmrProject = self._wrappedData
   apiSampleStore =  nmrProject.sampleStore
 
-  if not name:
+  if name is None:
     # Make default name
     nextNumber = len(apiSampleStore.samples) + 1
     name = 'Sample_%s' % nextNumber

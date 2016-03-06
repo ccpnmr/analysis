@@ -16,6 +16,7 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.CheckBox import CheckBox
 
+from ccpn.lib import CcpnSorting
 from ccpncore.util import Types
 
 from application.core.gui.assignmentModuleLogic import (nmrAtomsForPeaks,
@@ -210,10 +211,10 @@ class AssignmentModule(CcpnDock, Base):
     return pulldownList
 
 
-  def _natural_key(self, string_):
-    import re
-    """See http://www.codinghorror.com/blog/archives/001018.html"""
-    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
+  # def _natural_key(self, string_):
+  #   import re
+  #   """See http://www.codinghorror.com/blog/archives/001018.html"""
+  #   return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
 
   def createEnoughTablesAndLists(self):
     '''Makes sure there are enough tables for the amount
@@ -387,7 +388,8 @@ class AssignmentModule(CcpnDock, Base):
     self.chainPulldowns[dim].setData([chain.id for chain in self.project.nmrChains])
     self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))
     sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
-    self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=self._natural_key))
+    # self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=self._natural_key))
+    self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=CcpnSorting.stringSortKey()))
     self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))
     atomPrefix = self.current.peak.peakList.spectrum.isotopeCodes[dim][-1]
     atomNames = [atomName for atomName in ATOM_NAMES if atomName[0] == atomPrefix] + [nmrAtom.name]

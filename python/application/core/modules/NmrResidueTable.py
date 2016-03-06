@@ -1,10 +1,12 @@
 __author__ = 'simon1'
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
+
+from ccpn.lib import CcpnSorting
 
 from application.core.modules.GuiTableGenerator import GuiTableGenerator
 
@@ -22,16 +24,32 @@ class NmrResidueTable(QtGui.QWidget, Base):
     self.project = project
     self.nmrChains = project.nmrChains
 
-    label = Label(self, "Nmr Chain", grid=(0, 0))
+    # label = Label(self, "Nmr Chain", grid=(0, 0))
+    # self.nmrChainPulldown = PulldownList(self, grid=(0, 1))
 
+
+    label = Label(self, "Nmr Chain:")
+    widget1 = QtGui.QWidget(self)
+    widget1.setLayout(QtGui.QGridLayout())
+    widget1.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
     self.nmrChainPulldown = PulldownList(self, grid=(0, 1))
+    widget1.layout().addWidget(self.nmrChainPulldown, 0, 1)
+    self.layout().addWidget(widget1, 0, 0)
+    # if callback is None:
+    #   callback=self.selectPeak
 
-    columns = [('NmrChain', lambda nmrResidue: nmrResidue._parent.id), ('Sequence Code', 'sequenceCode'),
+
+
+
+    columns = [('NmrChain', lambda nmrResidue: nmrResidue._parent.id),
+               ('Sequence','sequenceCode'),
+               # ('Sequence',lambda nmrResidue: '%-8s' % nmrResidue.sequenceCode),
+               ('Type', 'residueType'),
                ('NmrAtoms', lambda nmrResidue: self.getNmrAtoms(nmrResidue)),
-               ('Number of Peaks', lambda nmrResidue: self.getNmrResiduePeaks(nmrResidue))]
+               ('Peak count', lambda nmrResidue: '%3d ' % self.getNmrResiduePeaks(nmrResidue))]
 
-    tipTexts = ['Nmr Residue key', 'Name of NmrResidue', 'Atoms in NmrResidue',
-                'Peaks assigned to Nmr Residue']
+    tipTexts = ['Nmr Residue key', 'Sequence code of NmrResidue',  'Type of NmrResidue',
+                'Atoms in NmrResidue', 'Number of peaks assigned to Nmr Residue']
 
     self.nmrResidueTable = GuiTableGenerator(self, self.project.nmrChains, actionCallback=callback, columns=columns,
                                              selector=self.nmrChainPulldown, tipTexts=tipTexts, objectType='nmrResidues',
@@ -41,7 +59,8 @@ class NmrResidueTable(QtGui.QWidget, Base):
 
 
   def getNmrAtoms(self, nmrResidue):
-    return ', '.join(list(set([atom.name for atom in nmrResidue.nmrAtoms])))
+    return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms]),
+                            key=CcpnSorting.stringSortKey))
 
   def getNmrResiduePeaks(self, nmrResidue):
     l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks()]

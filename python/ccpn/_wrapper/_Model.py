@@ -143,9 +143,10 @@ def _newModel(self:StructureEnsemble, name:str=None, comment:str=None,
               coordinateData:numpy.ndarray=None,
               bFactorData:Sequence[float]=None,
               occupancyData:Sequence[float]=None) -> Model:
-  """Create new Model. coordinateData can be a numpy.ndarray of the right shape,
-  or any nested list or tuple
-   representation that contains the right number of elements"""
+  """Create new Model
+
+  CoordinateData can be a numpy.ndarray of the right shape,
+  or any nested list or tuple representation that contains the right number of elements"""
 
   structureEnsemble = self._wrappedData
 

@@ -73,20 +73,20 @@ class PeakListSimple(QtGui.QWidget, Base):
 
     self.peakLists = project.peakLists
     self.label = Label(self, 'Peak List:')
+
     widget1 = QtGui.QWidget(self)
     l = QtGui.QGridLayout()
     widget1.setLayout(l)
     widget1.layout().addWidget(self.label, 0, 0, QtCore.Qt.AlignLeft)
-
     self.peakListPulldown = PulldownList(self)
     widget1.layout().addWidget(self.peakListPulldown, 0, 1)
     self.layout().addWidget(widget1, 0, 0)
     if callback is None:
       callback=self.selectPeak
+
     widget2 = QtGui.QWidget(self)
     l2 = QtGui.QGridLayout()
     widget2.setLayout(l2)
-
     label = Label(self, ' Position Unit:')
     widget2.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
     self.posUnitPulldown = PulldownList(self, texts=UNITS, callback=self.refreshTable)

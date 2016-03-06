@@ -29,6 +29,7 @@ from ccpncore.util import Pid
 from ccpncore.util.Types import List
 from ccpncore.util import Common as commonUtil
 from ccpncore.api.memops import Implementation as ApiImplementation
+from ccpn.lib import CcpnSorting
 
 # PROBLEM:
 # The MutableMapping superclass changes the MetaClass, which causes
@@ -421,11 +422,16 @@ class AbstractWrapperObject():
   def __lt__(self, other):
     """Ordering implementation function, necessary for making lists sortable.
     """
-    project = self._project
-    if project is other._project:
-      return (project._pidSortKey(self) < project._pidSortKey(other))
+    if self._project is other._project:
+      className1 = self.className
+      className2 = other.className
+      if className1 == className2:
+        return (CcpnSorting.stringSortKey(self._id) < CcpnSorting.stringSortKey(other._id))
+      else:
+        return (className1 < className2)
     else:
-      return (project._key < other._project._key)
+      return (id(self._project) < id(other._project))
+
 
   def __repr__(self):
     """String representation"""
@@ -728,6 +734,7 @@ class AbstractWrapperObject():
 
     getDataObj = self._project._data2Obj.get
     return list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
+
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
 AbstractWrapperObject._getPidDependentObjects.__annotations__['return'] = List[AbstractWrapperObject]

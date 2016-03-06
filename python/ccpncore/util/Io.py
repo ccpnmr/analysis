@@ -886,7 +886,8 @@ def renameProject(project, newProjectName):
         else:
           isValid = True
       if not isValid:
-        raise ApiError('project name must only have characters that are alphanumeric or underscore')
+        raise ApiError('Illegal project name: %s\n Only alphanumeric or underscore allowed'
+                       % newProjectName)
 
       # below checks for length of name as well
       project.name = newProjectName

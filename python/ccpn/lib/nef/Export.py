@@ -28,15 +28,13 @@ import datetime
 import random
 
 from ccpncore.util.Types import Sequence
-from ccpn import RestraintContribution
 from ccpn.lib import Restraint as restraintLib
+from ccpn.lib import CcpnSorting
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 from ccpncore.util.Bmrb import bmrb
 from ccpncore.memops import Version
 from ccpncore.util import Pid
-from ccpncore.util import Sorting
 from ccpncore.util import Path
-from ccpncore.util import Common as commonUtil
 
 
 nefExtension = 'nef'
@@ -381,7 +379,7 @@ def _createMolecularSystemFrame(chains):
         atomName = molResLinkEnd.linkEnd.boundChemAtom.name
         apiAtom = apiResidue.findFirstAtom(name=atomName)
         pair.append(project._data2Obj[apiAtom]._id.split('.'))
-      pair.sort(key=Sorting.ccpnOrdering)
+      pair.sort(key=CcpnSorting.universalSortKey)
 
   for molSystemLink in project._apiNmrProject.molSystem.molSystemLinks:
     pair = []
@@ -390,7 +388,7 @@ def _createMolecularSystemFrame(chains):
       atomName = molSystemLinkEnd.linkEnd.boundChemAtom.name
       apiAtom = molSystemLinkEnd.residue.findFirstAtom(name=atomName)
       pair.append(project._data2Obj[apiAtom]._id.split('.'))
-    pair.sort(key=Sorting.ccpnOrdering)
+    pair.sort(key=CcpnSorting.universalSortKey)
 
   # NB Loop may be empty. The entry.export_string function takes care of this
   loop = bmrb.loop.fromScratch(category='nef_covalent_links')
@@ -400,7 +398,7 @@ def _createMolecularSystemFrame(chains):
     loop.addColumn(tag)
 
 
-  for ll in sorted(atomPairs, key=Sorting.ccpnOrdering):
+  for ll in sorted(atomPairs, key=CcpnSorting.universalSortKey):
     values = ll[0]._id.split('.') +  ll[1]._id.split('.')
     loop.addData(values)
   #
@@ -432,7 +430,7 @@ def createShiftListFrame(shiftList):
   for x in shiftList.chemicalShifts:
     loop.addData((Pid.splitId(x.nmrAtom._id) + (x.value, x.valueError)))
 
-  # sortkey = shiftList._project._pidSortKey
+  # sortkey = shiftList._project.universalSortKey
   # for row in sorted(((Pid.splitId(x.nmrAtom._id) + (x.value, x.valueError))
   #                   for x in shiftList.chemicalShifts), key=sortkey):
   #   loop.addData(row)

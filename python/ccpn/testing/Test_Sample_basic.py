@@ -7,8 +7,11 @@ from ccpncore.memops.ApiError import ApiError
 class TestSampleCreation(WrapperTesting):
 
   def test_newSampleWithoutName(self):
-    self.assertRaises(TypeError, self.project.newSample)
-    self.assertEqual(len(self.project.samples), 0)
+    # Creation function changed to provide default name
+    # self.assertRaises(TypeError, self.project.newSample)
+    newSample =  self.project.newSample()
+    self.assertEqual(newSample.name, 'Sample_1')
+    self.assertEqual(len(self.project.samples), 1)
 
   def test_newSampleEmptyName(self):
     self.assertRaises(ApiError, self.project.newSample, '')

@@ -80,32 +80,25 @@ class GuiTableGenerator(QtGui.QWidget, Base):
         columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
         self.table.setObjects(columns)
 
-
-  def orderFunc(self, objA, objB):
-    list1 = sorted([objA.id, objB.id], key=self._natural_key)
-    return list1[0] > list1[1]
-
-  def _natural_key(self, string_):
-    import re
-    """See http://www.codinghorror.com/blog/archives/001018.html"""
-    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
-
   def _getColumns(self, columns, tipTexts):
 
     tableColumns = []
 
     if len(columns) > 0:
-      tableColumns.append(Column(*columns[0], tipText=tipTexts[0], orderFunc=self.orderFunc))
+      # tableColumns.append(Column(*columns[0], tipText=tipTexts[0], orderFunc=self.orderFunc))
+      tableColumns.append(Column(*columns[0], tipText=tipTexts[0]))
 
     if self.objectList and hasattr(self.objectList, 'shortClassName'):
       if self.objectList.shortClassName == 'PL':
         numDim = self.objectList._parent.dimensionCount
-        for i in range(numDim):
-          j = i + 1
-          c = Column('Assign F%d' % j,
-                     lambda pk, dim=i:getPeakAnnotation(pk, dim),
-                     tipText='Resonance assignments of peak in dimension %d' % j)
-          tableColumns.append(c)
+
+        # 6/3/2016 - Rasmus: Proposed swap order of columns
+        # for i in range(numDim):
+        #   j = i + 1
+        #   c = Column('Assign F%d' % j,
+        #              lambda pk, dim=i:getPeakAnnotation(pk, dim),
+        #              tipText='Resonance assignments of peak in dimension %d' % j)
+        #   tableColumns.append(c)
 
         for i in range(numDim):
           j = i + 1
@@ -126,9 +119,18 @@ class GuiTableGenerator(QtGui.QWidget, Base):
                    tipText=tipText)
           tableColumns.append(c)
 
+        for i in range(numDim):
+          j = i + 1
+          c = Column('Assign F%d' % j,
+                     lambda pk, dim=i:getPeakAnnotation(pk, dim),
+                     tipText='Resonance assignments of peak in dimension %d' % j)
+          tableColumns.append(c)
+
+
       if len(columns) > 0:
         for column in columns[1:]:
-          c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)], orderFunc=self.orderFunc)
+          # c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)], orderFunc=self.orderFunc)
+          c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
           tableColumns.append(c)
 
       detailsColumn = Column('Details', 'comment', setEditValue=lambda pk, value: self.setPeakDetails(pk, value))

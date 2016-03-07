@@ -92,13 +92,12 @@ class GuiTableGenerator(QtGui.QWidget, Base):
       if self.objectList.shortClassName == 'PL':
         numDim = self.objectList._parent.dimensionCount
 
-        # 6/3/2016 - Rasmus: Proposed swap order of columns
-        # for i in range(numDim):
-        #   j = i + 1
-        #   c = Column('Assign F%d' % j,
-        #              lambda pk, dim=i:getPeakAnnotation(pk, dim),
-        #              tipText='Resonance assignments of peak in dimension %d' % j)
-        #   tableColumns.append(c)
+        for i in range(numDim):
+          j = i + 1
+          c = Column('Assign F%d' % j,
+                     lambda pk, dim=i:getPeakAnnotation(pk, dim),
+                     tipText='Resonance assignments of peak in dimension %d' % j)
+          tableColumns.append(c)
 
         for i in range(numDim):
           j = i + 1
@@ -118,14 +117,6 @@ class GuiTableGenerator(QtGui.QWidget, Base):
                    lambda pk, dim=i, unit=unit:getPeakPosition(pk, dim, unit),
                    tipText=tipText)
           tableColumns.append(c)
-
-        for i in range(numDim):
-          j = i + 1
-          c = Column('Assign F%d' % j,
-                     lambda pk, dim=i:getPeakAnnotation(pk, dim),
-                     tipText='Resonance assignments of peak in dimension %d' % j)
-          tableColumns.append(c)
-
 
       if len(columns) > 0:
         for column in columns[1:]:

@@ -68,7 +68,7 @@ class ChemicalShiftTable(CcpnDock):
 class NmrAtomShiftTable(ChemicalShiftTable):
   """Alternative proposal to the ChemicalShiftTable"""
 
-  def __init__(self, parent=None, chemicalShiftLists=None, name='NmrAtom Table', **kw):
+  def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Lists', **kw):
 
     if not chemicalShiftLists:
       chemicalShiftLists = []
@@ -113,6 +113,6 @@ class NmrAtomShiftTable(ChemicalShiftTable):
                                                 actionCallback=self.callback, columns=columns,
                                                 selector=self.chemicalShiftListPulldown,
                                                 tipTexts=tipTexts)
-    newLabel = Label(self, 'NmrAtomShiftTable', grid=(2, 0))
+    newLabel = Label(self, '', grid=(2, 0))
 
     self.layout.addWidget(self.chemicalShiftTable, 3, 0, 1, 4)

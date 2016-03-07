@@ -479,9 +479,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if result:
       if projectDir is None:
         dialog = QtGui.QFileDialog()
-        dialog.setOptions(QtGui.QFileDialog.DontUseNativeDialog)
-        dialog.setOptions(QtGui.QFileDialog.DontUseSheet)
-        projectDir = dialog.getExistingDirectory(self, 'Open Project', )
+        dialog.setFileMode(QtGui.QFileDialog.Directory)
+        dialog.setWindowTitle("Open Project")
+        if self._appBase.preferences.general.colourScheme == 'dark':
+          dialog.setStyleSheet("QFileDialog QWidget {color: #f7ffff; }")
+        elif self._appBase.preferences.general.colourScheme == 'light':
+          dialog.setStyleSheet("QFileDialog QWidget {color: ##464e76; }")
+        dialog.exec_()
+        projectDir = dialog.selectedFiles()
 
       if projectDir:
         self._appBase.loadProject(projectDir)

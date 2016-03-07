@@ -20,6 +20,11 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+# NBNB TBD 1) Add SMALLEST and LARGEST sorting sentinels
+
+# NBNB TBD 2) Support circular data structures by making circular keys for them
+
+
 import math
 import re
 from numbers import Real

@@ -35,7 +35,7 @@ from ccpncore.gui.Label import Label
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
 from application.core.DropBase import DropBase
-
+from application.metabolomics.SpectrumGroupsWidget import SpectrumGroupsToolBar
 
 # def _findPpmRegion(spectrum, axisDim, spectrumDim):
 #
@@ -127,16 +127,20 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
 
 
   def processSpectrumGroups(self, pids:Sequence[str], event):
+
     for ss in pids:
       spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
       spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
+
       for spectrum in spectrumPids[1:]:
         spectrumDisplay.displaySpectrum(spectrum)
       spectrumDisplay.isGrouped = True
-      from application.metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
-      SpectrumGroupsWidget(spectrumDisplay.dock, self._appBase.project, spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
       spectrumDisplay.spectrumToolBar.hide()
+      SpectrumGroupsToolBar(spectrumDisplay.dock, self._appBase.project, spectrumDisplay.strips[0],ss, grid=(0, 0))
+
       self._appBase.current.strip = spectrumDisplay.strips[0]
+      self._appBase.current.strip.viewBox.autoRange()
+
     self.dockArea.guiWindow.deleteBlankDisplay()
 
 

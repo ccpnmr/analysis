@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 import os
 from ccpncore.util import Path
 
-def isProjectModified(self):
+def isProjectModified(self:'MemopsRoot') -> bool:
   """
   Checks whether any of project has been modified.
   """
@@ -37,7 +37,7 @@ def isProjectModified(self):
 
   return False
 
-def fetchDataUrl(self, fullPath) -> 'DataUrl':
+def fetchDataUrl(self:'MemopsRoot', fullPath:str) -> 'DataUrl':
   """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
   and existing dataUrls"""
   from ccpncore.api.memops.Implementation import Url
@@ -58,3 +58,24 @@ def fetchDataUrl(self, fullPath) -> 'DataUrl':
     dataUrl = standardStore.newDataUrl(url=Url(path=dirName))
   #
   return dataUrl
+
+def fetchNmrProject(self:'MemopsRoot', name:str=None) -> 'NmrProject':
+  """Get existing NmrProject from MemopsRoot, or create one if there are no NmrProjects.
+
+  If name i s passeed in, the function will return a matching NmrProject or throw an error
+  If no name is passed, function takes the first nMrProject,
+  or creates an NmrProject with same name as the project
+  """
+
+  nmrProjects = self.sortedNmrProjects()
+  if nmrProjects:
+    if name:
+      nmrProject = self.findFirstNmrProject(name=name)
+      if nmrProject is None:
+        raise ValueError("No NmrProject found with name: %s" % name)
+    else:
+      nmrProject = nmrProjects[0]
+  else:
+    nmrProject = self.newNmrProject(name=name or self.name)
+
+  return nmrProject

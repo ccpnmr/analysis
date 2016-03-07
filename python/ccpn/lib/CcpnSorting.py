@@ -36,13 +36,18 @@ def stringSortKey(key:str) -> tuple:
   First and last element are always strings.
 
   If the entire string evaluates to a float, the result is ('', '(floatVal, stringVal), '')
+
   Otherwise the numeric tuples are (intVal, subStringVal).
   Substrings recognised as integers are an optional series of ' ',
   an optional sign, and a series of digits - or REGEX '[ ]*[+-]?\d+'
+  For this type the key tuple is extended by (0,''),
+  # so that end-of-key sorts as 0 rather thn coming first.
 
   Example of sorting order
   ['', 'NaN', '-1', '-1A', '0.0', '1', '2', '15', '3.2e12', 'Inf',
   'Ahh', 'b',  'b2', 'b12', 'bb', 'ciao'] """
+
+  keyEnd = ((0,''),'')
 
   global _keyCache
   result = _keyCache.get(key)
@@ -50,15 +55,22 @@ def stringSortKey(key:str) -> tuple:
   if result is None:
     tt = Sorting._floatStringKey(key)
     if tt:
-      # Read as floating point numbr if possible
+      # Read as floating point number if possible
       result = (tt,)
     elif '.'  in key:
       # Otherwise treat dot ('.') as a field separator
-      ll = [x for x in SPLITONDOTS.split(key) if x != '']
-      result =  tuple(Sorting._numericSplitString(x) for x in  ll)
+      ll = [Sorting._numericSplitString(x) for x in SPLITONDOTS.split(key) if x != '']
+      # result = tuple(x if x[-1] else x + keyEnd for x in ll)
+      result = tuple(x + keyEnd for x in ll)
     else:
       # Simple string
-      result = (Sorting._numericSplitString(key),)
+      result = Sorting._numericSplitString(key)
+      # if len(result) > 1 and result[-1] == '':
+      if len(result) > 1:
+        # String ended with a numeric field. Add keyEnd so that this sorts as 0
+        # against keys where the next field is also numeric
+        result += keyEnd
+      result = (result,)
     #
     _keyCache[key] = result
   #

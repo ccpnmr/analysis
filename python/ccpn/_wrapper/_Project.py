@@ -165,7 +165,9 @@ class Project(AbstractWrapperObject):
 
     # set appBase attribute - for gui applications
     if hasattr(wrappedData.root, '_appBase'):
-      self._appBase = wrappedData.root._appBase
+      appBase = wrappedData.root._appBase
+      self._appBase = appBase
+      appBase.project = self
     else:
       self._appBase = None
 

@@ -50,7 +50,8 @@ def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> P
   if apiProject is None:
     raise ValueError("No valid project loaded from %s" % path )
   else:
-    return _wrapApiProject(apiProject, nmrProjectName=nmrProjectName)
+    apiNmrProject = apiProject.fetchNmrProject(name=nmrProjectName)
+    return Project(apiNmrProject)
 
 
 def newProject(projectName:str, path:str=None, useFileLogger:bool=True) -> Project:
@@ -63,18 +64,18 @@ def newProject(projectName:str, path:str=None, useFileLogger:bool=True) -> Proje
     return Project(apiProject.newNmrProject(name=projectName))
 
 
-def _wrapApiProject(apiProject:ApiProject, nmrProjectName:str=None) -> Project:
-  """convert existing MemopsRoot to wrapped Project, using nmrProjectName to select NmrProject"""
-
-  nmrProjects = apiProject.sortedNmrProjects()
-  if nmrProjects:
-    if nmrProjectName:
-      nmrProject = apiProject.findFirstNmrProject(name=nmrProjectName)
-      if nmrProject is None:
-        raise ValueError("No NmrProject found with name: %s" % nmrProjectName)
-    else:
-      nmrProject = nmrProjects[0]
-  else:
-    nmrProject = apiProject.newNmrProject(name=nmrProjectName or apiProject.name)
-
-  return Project(nmrProject)
+# def _wrapApiProject(apiProject:ApiProject, nmrProjectName:str=None) -> Project:
+#   """convert existing MemopsRoot to wrapped Project, using nmrProjectName to select NmrProject"""
+#
+#   nmrProjects = apiProject.sortedNmrProjects()
+#   if nmrProjects:
+#     if nmrProjectName:
+#       nmrProject = apiProject.findFirstNmrProject(name=nmrProjectName)
+#       if nmrProject is None:
+#         raise ValueError("No NmrProject found with name: %s" % nmrProjectName)
+#     else:
+#       nmrProject = nmrProjects[0]
+#   else:
+#     nmrProject = apiProject.newNmrProject(name=nmrProjectName or apiProject.name)
+#
+#   return Project(nmrProject)

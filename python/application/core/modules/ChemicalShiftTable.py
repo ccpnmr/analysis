@@ -64,3 +64,55 @@ class ChemicalShiftTable(CcpnDock):
   def callback(self):
     pass
 
+
+class NmrAtomShiftTable(ChemicalShiftTable):
+  """Alternative proposal to the ChemicalShiftTable"""
+
+  def __init__(self, parent=None, chemicalShiftLists=None, name='NmrAtom Table', **kw):
+
+    if not chemicalShiftLists:
+      chemicalShiftLists = []
+
+    CcpnDock.__init__(self, name=name)
+
+    self.chemicalShiftLists = chemicalShiftLists
+
+    label = Label(self, "NmrAtom List:")
+    widget1 = QtGui.QWidget(self)
+    widget1.setLayout(QtGui.QGridLayout())
+    widget1.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
+    self.chemicalShiftListPulldown = PulldownList(self, grid=(0, 1))
+    widget1.layout().addWidget(self.chemicalShiftListPulldown, 0, 1)
+    self.layout.addWidget(widget1, 0, 0)
+
+    # Temporary - for testing
+    label1 = Label(self, 'Show from all ChemicalShiftLists? Yes/No')
+    self.layout.addWidget(label1, 0, 2, QtCore.Qt.AlignRight)
+
+    columns = [('NmrResidue', lambda chemicalShift: chemicalShift._key.rsplit('.',1)[0]),
+               ('Name', lambda chemicalShift: chemicalShift._key.rsplit('.',1)[-1]),
+               ('Shift', lambda chemicalShift: '%8.3f' % chemicalShift.value),
+               ('Std. Dev.', lambda chemicalShift: ('%6.3f' % chemicalShift.valueError
+               if chemicalShift.valueError else '   0   ')),
+               ('Shift list peaks',
+                lambda chemicalShift: '%3d ' % self.getShiftPeakCount(chemicalShift)),
+               ('All peaks',
+                  lambda chemicalShift: '%3d ' % len(set(x for x in
+                                                         chemicalShift.nmrAtom.assignedPeaks()))
+                )
+              ]
+
+    tipTexts = ['NmrResidue Id',
+                'NmrAtom name',
+                'Value of chemical shift, in selected ChemicalShiftList',
+                'Standard deviation of chemical shift, in selected ChemicalShiftList',
+                'Number of peaks assigned to this NmrAtom in PeakLists associated with this ChemicalShiftList',
+                'Number of peaks assigned to this NmrAtom across all PeakLists']
+
+    self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists,
+                                                actionCallback=self.callback, columns=columns,
+                                                selector=self.chemicalShiftListPulldown,
+                                                tipTexts=tipTexts)
+    newLabel = Label(self, 'NmrAtomShiftTable', grid=(2, 0))
+
+    self.layout.addWidget(self.chemicalShiftTable, 3, 0, 1, 4)

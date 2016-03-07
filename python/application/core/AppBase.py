@@ -28,7 +28,7 @@ import platform
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn.lib import Io as ccpnIo
+from ccpn import Project
 from ccpncore.util import Io as ioUtil
 from ccpncore.gui.Application import Application
 from ccpncore.memops.metamodel import Util as metaUtil
@@ -73,33 +73,29 @@ class AppBase(GuiBase):
       name='remoteData')
     dataUrl.url = Implementation.Url(path=dataPath)
 
-    # Done this way to sneak the appBase in before creating the wrapper
+    # ApiProject to appBase - Done this way to sneak the appBase in before creating the wrapper
     apiProject._appBase = self
     self.current = Current(project=None)
 
-    project = ccpnIo._wrapApiProject(apiProject)
-    project._appBase = self
-    self.project = project
-    self.current._project = project
-
-    apiNmrProject = project._wrappedData
+    # Make sure we have a WindowStore attached to the NmrProject - that guarantees a mainWindow
+    apiNmrProject = apiProject.fetchNmrProject()
     apiWindowStore = apiNmrProject.windowStore
     if apiWindowStore is None:
-      apiProject = apiNmrProject.parent
       apiWindowStore = apiProject.findFirstWindowStore()
       if apiWindowStore is None:
-        apiWindowStore = apiProject.newWindowStore(nmrProject=apiProject.findFirstNmrProject())
-
+        apiWindowStore = apiProject.newWindowStore(nmrProject=apiNmrProject)
       else:
         apiNmrProject.windowStore = apiWindowStore
-    # MainWindow must always exist at this point
-    mainWindow = project.getWindow('Main')
-    self.mainWindow = mainWindow
-    # Next two lines moved from MainWindow.initProject,
-    # as sidebar filling should be after setup is complete.
+
+    # Wrap ApiNmrProject
+    project = Project(apiNmrProject)
+
+    self.current._project = project
+
+    # Set up mainWindow (link is set from mainWindow init
+    mainWindow = self.mainWindow
     mainWindow.sideBar.setProject(project)
     mainWindow.sideBar.fillSideBar(project)
-    project.getByPid('Window:Main').namespace['current'] = self.current
     mainWindow.raise_()
     mainWindow.namespace['current'] = self.current
 

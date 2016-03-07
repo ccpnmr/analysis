@@ -622,7 +622,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
         axisPositionDict[self._crosshairCode(axis.code)] = pos
         position.append(pos)
       self.mousePosition = tuple(position) # position is in ppm
-      for window in self._appBase.project.windows:
+      for window in self._project.windows:
         window.setCrossHairPosition(axisPositionDict)
       ###self.vLine.setPos(mousePoint.x())
       ###self.hLine.setPos(mousePoint.y())

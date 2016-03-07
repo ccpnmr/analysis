@@ -123,6 +123,9 @@ class MainWindow(Window, GuiMainWindow):
   def __init__(self, project:Project, wrappedData:ApiWindow):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
+    appBase = self._project._appBase
+    if appBase is not None:
+      appBase.mainWindow = self
     GuiMainWindow.__init__(self)
   # put in subclass to make superclass abstract
   @property

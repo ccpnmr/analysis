@@ -70,7 +70,7 @@ class GuiStripNd(GuiStrip):
     self.axesSwapped = False
     self.addPlaneToolbar()
     self.pythonConsole = self._appBase.mainWindow.pythonConsole
-    self.logger = self._appBase.project._logger
+    self.logger = self._project._logger
 
   def mouseDragEvent(self, event):
     """

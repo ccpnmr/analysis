@@ -139,7 +139,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def backupProject(self):
     
-    ioUtil.backupProject(self._appBase.project._wrappedData.parent)
+    ioUtil.backupProject(self._project._wrappedData.parent)
 
   def setupWindow(self):
     """
@@ -349,9 +349,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.show()
 
   def _queryCloseProject(self, title, phrase):
-    
-    project = self._appBase.project
-    apiProject = project._wrappedData.root
+
+    apiProject = self._project._wrappedData.root
     if hasattr(apiProject, '_temporaryDirectory'):
       return True
     
@@ -515,7 +514,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
     dataPid = item.data(0, QtCore.Qt.DisplayRole)
-    project = self._appBase.project
+    project = self._project
     obj = project.getByPid(dataPid)
     if obj is not None:
       self.sideBar.raisePopup(obj, item)
@@ -593,8 +592,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       try:
         os.makedirs(directory)
       except Exception as e:
-        project = self._appBase.project
-        project._logger.warning('Preferences not saved: %s' % (directory, e))
+        self._project._logger.warning('Preferences not saved: %s' % (directory, e))
         return
           
     prefFile = open(prefPath, 'w+')
@@ -898,8 +896,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     Displays Chemical Shift table.
     """
-    from application.core.modules.ChemicalShiftTable import ChemicalShiftTable
-    chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self._project.chemicalShiftLists)
+    from application.core.modules.ChemicalShiftTable import NmrAtomShiftTable as Table
+    # from application.core.modules.ChemicalShiftTable import ChemicalShiftTable as Table
+    chemicalShiftTable = Table(chemicalShiftLists=self._project.chemicalShiftLists)
     self.dockArea.addDock(chemicalShiftTable, position=position)
     self.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     self.project._logger.info("application.showChemicalShiftTable()")

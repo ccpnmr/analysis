@@ -33,6 +33,7 @@ from ccpncore.util.Types import Sequence, Union
 
 from application.core.gui import ViewBox
 from application.core.DropBase import DropBase
+from application.metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
 
 import pyqtgraph as pg
 
@@ -89,20 +90,24 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
       self.project._logger.info("module.displaySpectrum(spectrum)")
 
   def processSpectrumGroups(self, pids:Sequence[str], event:QtGui.QMouseEvent):
-    guiSpectrumDisplay = self.parent.guiSpectrumDisplay
-    displayPid = guiSpectrumDisplay.pid
-    if hasattr(guiSpectrumDisplay, 'isGrouped'):
-    #   if guiSpectrumDisplay.isGrouped:
-    #     pass
-    #   else:
-    #     for ss in pids:
-    #       for spectrum in ss.spectra:
-    #         guiSpectrumDisplay.displaySpectrum(spectrum)
+    '''
+    Plot spectrumGroups in a grouped display if not already plotted and create its button on spectrumGroups toolBar
+    '''
 
-      if guiSpectrumDisplay.isGrouped:
-        for ss in pids:
-          for spectrum in self._appBase.project.getByPid(ss).spectra:
-            guiSpectrumDisplay.displaySpectrum(spectrum)
+    guiSpectrumDisplay = self.parent.guiSpectrumDisplay
+    displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0] for spectrumView in guiSpectrumDisplay.spectrumViews]
+
+    if hasattr(guiSpectrumDisplay, 'isGrouped'):
+
+      spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
+                 if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
+
+      if len(spectrumGroups)>0:
+        spectrumGroupToolBar = guiSpectrumDisplay.strips[0].spectrumDisplay.dock.children()[2].children()[-1]
+        spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
+        spectrumGroupToolBar.addWidget(spectrumGroupButton)
+        for spectrum in spectrumGroups[0].spectra:
+          guiSpectrumDisplay.displaySpectrum(spectrum)
 
   def processSamples(self, pids:Sequence[str], event):
     """Display sample spectra defined by list of Pid strings"""

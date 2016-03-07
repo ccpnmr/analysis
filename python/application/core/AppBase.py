@@ -222,9 +222,15 @@ def checkRegistration(applicationVersion):
   
 def getSaveDirectory(apiProject, preferences):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
+  preferences = getPreferences()
   dialog = QtGui.QFileDialog(caption='Save Project As...')
   dialog.setFileMode(QtGui.QFileDialog.AnyFile)
   dialog.setAcceptMode(1)
+  if preferences.general.colourScheme == 'dark':
+      dialog.setStyleSheet("QFileDialog QWidget {color: #f7ffff; }")
+  elif preferences.general.colourScheme == 'light':
+    dialog.setStyleSheet("QFileDialog QWidget {color: ##464e76; }")
+  
   if not dialog.exec_():
     return ''
   fileNames = dialog.selectedFiles()

@@ -7,10 +7,6 @@ QDialog {
         color: #f7ffff;
         }
 
-QDialog QFileDialog {
-        color: #f7ffff;
-        }
-
 QMenu {
       background-color: #424a71;
     }

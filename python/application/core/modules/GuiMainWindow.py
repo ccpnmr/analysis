@@ -327,7 +327,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.addMenu(fileMenu)
     self._menuBar.addMenu(spectrumMenu)
 
-    if self._appBase.applicationName == 'Screen' :
+    if self._appBase.applicationName == 'Screen':
       self._menuBar.addMenu(self.screenMenu)
     self._menuBar.addMenu(moleculeMenu)
 
@@ -614,6 +614,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     elif reply == 'Quit without Saving':
       if event:
         event.accept()
+      prefFile = open(prefPath, 'w+')
+      json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+      prefFile.close()
       self._appBase._closeProject()
       QtGui.QApplication.quit()
     else:
@@ -826,7 +829,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showBackboneTutorial(self):
     path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BackboneAssignmentTutorial.doc')
-    if sys.platform == 'Linux':
+    if sys.platform == 'Linux' or sys.platform == 'linux':
       os.system(["xdg-open %s" % path])
     else:
       os.system('open %s' % path)

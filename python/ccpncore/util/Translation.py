@@ -35,7 +35,7 @@ from ccpncore.util import Logging
 
 # there are translation dictionaries associated with this module for really common words like "Help"
 
-defaultLanguage = 'English'
+defaultLanguage = 'English-UK'
 translationDirectory = 'translation'  # assumes that all translations are in sub-directory with this name in a file language.py
 
 translationLanguage = defaultLanguage

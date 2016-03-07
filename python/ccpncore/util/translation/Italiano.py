@@ -52,7 +52,7 @@ translationDict = {
   "Decomposition": "Decomposizione",
   "Run PCA": "Lancia PCA",
   "Peak Assignment": "Assegna picchi",
-  "Pick and Fit": "Mappa e assegna picchi",
+  "Pick and Fit": "Mappa e associa picchi",
   
   "Spectrum": "Spettro",
   "Spectrum Groups ...": "Gruppi ...",
@@ -110,4 +110,6 @@ translationDict = {
 
   "Plugins": "Plugin",
   "PARAssign Setup": "Imposta PARAssign",
+
+  "Spectra": "Spettra"
 }

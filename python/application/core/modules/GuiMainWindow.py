@@ -480,7 +480,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if result:
       if projectDir is None:
         dialog = QtGui.QFileDialog()
-        dialog.setStyleSheet('QDialog { background-color: red;}')
+        dialog.setOptions(QtGui.QFileDialog.DontUseNativeDialog)
+        dialog.setOptions(QtGui.QFileDialog.DontUseSheet)
         projectDir = dialog.getExistingDirectory(self, 'Open Project', )
 
       if projectDir:

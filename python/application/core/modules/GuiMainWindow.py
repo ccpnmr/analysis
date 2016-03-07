@@ -482,11 +482,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         dialog.setFileMode(QtGui.QFileDialog.Directory)
         dialog.setWindowTitle("Open Project")
         if self._appBase.preferences.general.colourScheme == 'dark':
-          dialog.setStyleSheet("""QFileDialog QWidget {color: #f7ffff; }
-                                  QFileDialog QLineEdit {color: #00092d;}
+          dialog.setStyleSheet("""
+                                  QFileDialog QWidget {
+                                                      background-color: #2a3358
+                                                      color: #f7ffff;
+                                                      }
                               """)
         elif self._appBase.preferences.general.colourScheme == 'light':
-          dialog.setStyleSheet("QFileDialog QWidget {color: ##464e76; }")
+          dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
         dialog.exec_()
         projectDir = dialog.selectedFiles()
 

@@ -313,7 +313,7 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
 
   styleSheet = getStyleSheet(preferences)
   app.setStyleSheet(styleSheet)
-  
+  print('==> I\'m starting up!')
   if projectPath:
     projectPath = os.path.normpath(projectPath)
     apiProject = ioUtil.loadProject(projectPath, useFileLogger=useFileLogger)

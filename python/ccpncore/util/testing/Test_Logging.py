@@ -47,7 +47,7 @@ class LoggingTest(CoreTesting):
 
     logLines = open(logPath).readlines()
 
-    assert len(logLines) == 1
+    assert len(logLines) == 2
 
     logLine = logLines[0].rstrip()
     n = logLine.rindex(':')

@@ -93,7 +93,7 @@ def getTranslation(text):
     return text
     
   translatedText = translationDict.get(text)
-  
+
   if translatedText is None:
     logger = Logging.getLogger()
     logger.warning('text "%s" not in %s translation dictionary' % (text, translationLanguage))

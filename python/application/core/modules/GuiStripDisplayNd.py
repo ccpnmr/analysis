@@ -66,12 +66,15 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     if self._appBase.preferences.general.toolbarHidden:
       GuiSpectrumDisplay.hideUtilToolBar(self)
 
-  #
+
   def addStrip(self) -> GuiStripNd:
     """
     Creates a new strip by duplicating the first strip in the display.
     """
     newStrip = self.strips[0].clone()
+    self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "strip.clone()", strip=self.strips[0].clone())
+    self.project._logger.info("strip = project.getByPid('%s')\nstrip.clone()" % self.strips[0].pid)
     return newStrip
 
 

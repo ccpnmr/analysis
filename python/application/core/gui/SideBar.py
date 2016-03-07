@@ -46,7 +46,7 @@ from ccpn import AbstractWrapperObject
 # Also parents must appear before their children
 classesInSideBar = ('SG', 'SP', 'PL', 'SA', 'SC', 'SU', 'MC', 'NC', 'NR', 'NA',
                     'CL', 'SE', 'MO', 'DS',
-                    'RL' , 'NO')
+                    'RL', 'NO')
 
 classesInTopLevel =('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
 
@@ -204,6 +204,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
         return
 
+
     if shortClassName in classesInTopLevel:
       itemParent = self._typeToItem.get(shortClassName)
       self.addItem(itemParent, obj.pid)
@@ -211,6 +212,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     elif shortClassName == 'PL':
       for itemParent in self._findItems(obj.spectrum.pid):
         self.addItem(itemParent, obj.pid)
+      # newPeakListItem = QtGui.QTreeWidgetItem(itemParent)
+      # newPeakListItem.setText(0, '<New>')
+
 
     elif shortClassName == 'SC':
       for itemParent in self._findItems(obj.sample.pid):
@@ -339,7 +343,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, self.project, name='Notes Editor', note=obj)
 
   def createNewObject(self, item):
-    """Create new object starting form the <New> item
+    """Create new object starting from the <New> item
     """
 
     # NBNB TBD FIXME

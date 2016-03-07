@@ -69,6 +69,8 @@ class GuiStripNd(GuiStrip):
     self.planeLabel = None
     self.axesSwapped = False
     self.addPlaneToolbar()
+    self.pythonConsole = self._appBase.mainWindow.pythonConsole
+    self.logger = self._appBase.project._logger
 
   def mouseDragEvent(self, event):
     """
@@ -147,6 +149,8 @@ class GuiStripNd(GuiStrip):
 
     zoomArray = ([min(xArray), max(xArray), min(yArray), max(yArray)])
     self.zoomToRegion(zoomArray)
+    self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
+    self.logger.info("strip = project.getByPid('%s')\nstrip.resetZoom()" % self.pid)
     return zoomArray
 
 
@@ -257,6 +261,8 @@ class GuiStripNd(GuiStrip):
       #planeLabel.setValue(zAxis.position)
     elif position is not None: # should always be the case
       zAxis.position = position
+      self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
+      self.logger.info("strip = project.getByPid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
       #planeLabel.setValue(zAxis.position)
 
       # else:
@@ -274,12 +280,16 @@ class GuiStripNd(GuiStrip):
     Increases z ppm position by one plane
     """
     self.changeZPlane(n, planeCount=-1) # -1 because ppm units are backwards
+    self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
+    self.logger.info("strip = project.getByPid('%s')\nstrip.nextZPlane()" % self.pid)
 
   def prevZPlane(self, n:int=0):
     """
     Decreases z ppm position by one plane
     """
     self.changeZPlane(n, planeCount=1) # -1 because ppm units are backwards
+    self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
+    self.logger.info("strip = project.getByPid('%s')\nstrip.prevZPlane()" % self.pid)
 
   def addPlaneToolbar(self):
     """

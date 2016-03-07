@@ -79,16 +79,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def __init__(self):
     QtGui.QMainWindow.__init__(self)
-    #if not apiWindow.modules:
-      #apiGuiTask = apiWindow.windowStore.memopsRoot.findFirstGuiTask(name='Ccpn') # constant should be stored somewhere
-      ##apiModule = apiGuiTask.newStripDisplay1d(name='Module1_1D', axisCodes=('H','intensity'), stripDirection='Y')
-      ##apiWindow.addModule(apiModule)
-      ##codes = ('H','N')
-      ##apiModule = apiGuiTask.newStripDisplayNd(name='Module2_ND', axisCodes=codes, axisOrder=codes, stripDirection='Y')
-      ##apiWindow.addModule(apiModule)
-      #apiModule = apiGuiTask.newTaskModule(name=self.INITIAL_MODULE_NAME)
-      #apiWindow.addModule(apiModule)
-    #
+
     self.setGeometry(540, 40, 900, 900)
 
     GuiWindow.__init__(self)
@@ -97,8 +88,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setupMenus()
     self.initProject()
     self.connect(self, QtCore.SIGNAL('triggered()'), self.closeEvent)
-
-    # self.setFixedWidth(QtGui.QApplication.desktop().screenGeometry().width())
 
     self.feedbackPopup = None
     self.updatePopup = None
@@ -114,29 +103,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Puts relevant information from the project into the appropriate places in the main window.
 
     """
-    # No need, project already set and initialised in AppBase init
-    # if project:
-    #   self._appBase.initProject(project)
-    # else:
-    #   project = self._appBase.project
-
-    # project = self._appBase.project
-
     isNew = self._apiWindow.root.isModified  # a bit of a hack this, but should be correct
 
     project = self._project
     path = project.path
-    # Moved to AppBAse.initProject. 9/2/29016 Rasmus Fogh
-    # self.sideBar.setProject(project)
-    # self.sideBar.fillSideBar(project)
     self.namespace['project'] = project
     msg = path + (' created' if isNew else ' opened')
     self.statusBar().showMessage(msg)
 
-    # msg2 = 'project = ' + ('new' if isNew else 'open') + 'Project("+path+")\n'
     msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
     self.pythonConsole.writeConsoleCommand(msg2)
-    # self.pythonConsole.ui.historyList.addItem(msg2)
 
     # if not isNew:
     recentFiles = self._appBase.preferences.recentFiles
@@ -145,7 +121,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     recentFiles.insert(0, path)
     self.colourScheme = self._appBase.preferences.general.colourScheme
     recentFiles = uniquify(recentFiles)
-    # print(recentFiles)
     self._appBase.preferences.recentFiles = recentFiles
     self.pythonConsole.setProject(project)
 
@@ -211,17 +186,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     passed at startup.
     """
     self._menuBar =  MenuBar(self)
-    fileMenu = Menu("&Project", self)
-    self.screenMenu = Menu("&Screen", self)
-    self.metabolomicsMenu = Menu("&Metabolomics", self)
+    fileMenu = Menu("Project", self)
+    self.screenMenu = Menu("Screen", self)
+    self.metabolomicsMenu = Menu("Metabolomics", self)
     spectrumMenu = Menu("Spectrum", self)
-    viewMenu = Menu("&View", self)
-    moleculeMenu = Menu("&Molecules", self)
-    restraintsMenu = Menu("&Restraints", self)
-    structuresMenu = Menu("&Structures", self)
+    viewMenu = Menu("View", self)
+    moleculeMenu = Menu("Molecules", self)
+    restraintsMenu = Menu("Restraints", self)
+    structuresMenu = Menu("Structures", self)
     macroMenu = Menu("Macro", self)
     pluginsMenu = Menu("Plugins", self)
-    helpMenu = Menu("&Help", self)
+    helpMenu = Menu("Help", self)
 
 
     fileMenu.addAction(Action(self, "New", callback=self.newProject, shortcut='pn'))
@@ -234,20 +209,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
     fileMenu.addAction(Action(self, "Save As ...", shortcut="sa", callback=self.saveProjectAs))
-    ###fileMenu.addAction(Action(self, "Print...", shortcut="pr", callback=self.printToFile))
-
-    #NBNB How are we going to implement this?
-    # backupOption = fileMenu.addMenu("Backup")
-    # backupOption.addAction(Action(self, "Save", callback=self.saveBackup))
-    # backupOption.addAction(Action(self, "Restore", callback=self.restoreBackup))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Undo", callback=self.undo, shortcut=QtGui.QKeySequence("Ctrl+z")))
     fileMenu.addAction(Action(self, "Redo", callback=self.redo, shortcut=QtGui.QKeySequence("Ctrl+y")))
 
-    #NBNB do we want this facility or are logs and console output separate?
-    # logOption = fileMenu.addMenu("Log File")
-    # logOption.addAction(Action(self, "Save As...", callback=self.saveLogFile))
-    # logOption.addAction(Action(self, "Clear", callback=self.clearLogFile))
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Summary ...", self.displayProjectSummary))
     fileMenu.addAction(Action(self, "Archive", self.archiveProject))
@@ -262,7 +227,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.screenMenu.addAction(Action(self, 'Generate Mixtures', callback=self.createSample, shortcut="cs"))
     self.screenMenu.addAction(Action(self, 'Mixtures Analysis', callback=self.showSampleAnalysis, shortcut="st"))
     self.screenMenu.addSeparator()
-    self.screenMenu.addAction(Action(self, 'Screening', callback=self.showScreeningSetup, shortcut="sc"))
+    self.screenMenu.addAction(Action(self, 'Screening Settings', callback=self.showScreeningSetup, shortcut="sc"))
 
     self.metabolomicsMenu.addSeparator()
     self.metabolomicsMenu.addAction(Action(self, 'Analyse Metabolite', callback=self.showMetabolomicsModule, shortcut="mm"))
@@ -271,27 +236,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.decompMenu.addAction(Action(self, 'Run PCA', callback=self.showPCAModule))
     self.metabolomicsMenu.addAction(Action(self, 'Peak Assignment', callback=self.showPeakAssigmentModule))
     self.metabolomicsMenu.addAction(Action(self, 'Pick and Fit', callback=self.showPickandFitModule))
-    self.metabolomicsMenu.addAction(Action(self, 'Spectrum Groups', callback=self.showSpectrumGroupModule))
-
-
-
-
-    # spectrumMenu.addAction(Action(self, "Add...", callback=self.loadSpectra, shortcut="fo"))
-    # spectrumMenu.addAction(Action(self, "Remove...", callback=self.removeSpectra))
-    # spectrumMenu.addAction(Action(self, "Rename...", callback=self.renameSpectra))
-    # spectrumMenu.addAction(Action(self, "Reload", callback=self.reloadSpectra))
-    # spectrumMenu.addSeparator()
-    # spectrumMenu.addAction(Action(self, "Print...", callback=self.printSpectrum))
-    # spectrumMenu.addSeparator()
-    # spectrumMenu.addAction(Action(self, "Show in Finder", callback=self.showSpectrumInFinder))
-    # spectrumMenu.addAction(Action(self, "Copy into Project", callback=self.copySpectrumIntoProject))
-    # spectrumMenu.addAction(Action(self, "Move out of Project", callback=self.moveSpectrumOutOfProject))
-    # spectrumMenu.addSeparator()
-    # spectrumPeaksMenu = spectrumMenu.addMenu("Peaks")
-    # spectrumPeaksMenu.addAction(Action(self, "Import...", callback=self.importPeaksPopup))
-    # spectrumPeaksMenu.addAction(Action(self, "Delete...", callback=self.deletePeaksPopup))
-    # spectrumPeaksMenu.addSeparator()
-    # spectrumPeaksMenu.addAction(Action(self, "Print to File", callback=self.printPeaksToFile))
+    self.metabolomicsMenu.addAction(Action(self, 'Spectrum Groups ...', callback=self.showSpectrumGroupModule))
 
     spectrumMenu.addAction(Action(self, "Spectrum Groups ...", callback=self.showProjectionPopup, shortcut='ss'))
     spectrumMenu.addAction(Action(self, "Set Experiment Types ...", callback=self.showExptTypePopup, shortcut='et'))
@@ -302,8 +247,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     spectrumMenu.addAction(Action(self, "Make Projection ...", callback=self.showProjectionPopup, shortcut='pj'))
     spectrumMenu.addAction(Action(self, "Phasing Console", partial(self.togglePhaseConsole, self), shortcut='pc'))
 
-    # newMoleculeMenu = moleculeMenu.addMenu("New")
-    moleculeMenu.addAction(Action(self, "Create Molecule...", callback=self.showMoleculePopup, shortcut='cm'))
+    moleculeMenu.addAction(Action(self, "Create Molecule ...", callback=self.showMoleculePopup, shortcut='cm'))
     self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
     if hasattr(self, 'sequenceWidget'):
       self.sequenceAction.setChecked(self.sequenceWidget.isVisible())
@@ -313,14 +257,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     moleculeMenu.addAction(Action(self, "Inspect ...", callback=self.inspectMolecule))
     moleculeMenu.addSeparator()
     moleculeMenu.addAction(Action(self, "Reference Chemical Shifts", callback=self.showRefChemicalShifts, shortcut='rc'))
-    # moleculeMenu.addAction(Action(self, "Run ChemBuild", callback=self.runChembuild))
-    # moleculeMenu.addAction(Action(self, "Show Molecule Display", callback=self.showMoleculeDisplay, shortcut='md'))
 
     macroMenu.addAction(Action(self, "Edit ...", callback=self.editMacro))
     macroMenu.addAction(Action(self, "New from Console ...", callback=self.newMacroFromConsole))
+    macroMenu.addAction(Action(self, "New from Log ...", callback=self.newMacroFromLog))
     macroMenu.addAction(Action(self, "Record Macro ...", callback=self.startMacroRecord))
-    # macroRecordMenu.addAction(Action(self, "Stop", callback=self.stopMacroRecord))
-    # macroRecordMenu.addAction(Action(self, "Save As...", callback=self.saveRecordedMacro))
     macroMenu.addSeparator()
     macroMenu.addAction(Action(self, "Run ...", shortcut="rm", callback=self.runMacro))
 
@@ -369,15 +310,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu.addAction(Action(self, "Check for Updates ...", callback=self.showUpdatePopup))
     helpMenu.addAction(Action(self, "Submit Feedback ...", callback=self.showFeedbackPopup))
 
-    assignMenu = Menu("&Assign", self)
+    assignMenu = Menu("Assign", self)
     assignMenu.addAction(Action(self, "Setup NmrResidues", callback=self.showSetupNmrResiduesPopup, shortcut='sn'))
     assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule, shortcut='pa'))
     assignMenu.addSeparator()
-    assignMenu.addAction(Action(self, 'Backbone Assignment', callback=self.showPickAndAssignModule, shortcut='bb'))
-    assignMenu.addAction(Action(self, 'Sidechain Assignment', callback=self.showBackboneAssignmentModule, shortcut='sc'))
+    assignMenu.addAction(Action(self, "Backbone Assignment", callback=self.showPickAndAssignModule, shortcut='bb'))
+    assignMenu.addAction(Action(self, "Sidechain Assignment", callback=self.showBackboneAssignmentModule, shortcut='sc'))
     assignMenu.addSeparator()
     assignMenu.addAction(Action(self, "Peak Assigner", callback=self.showAssignmentModule, shortcut='aa'))
-    assignMenu.addAction(Action(self, 'Residue Information', callback=self.showResidueInformation, shortcut='ri'))
+    assignMenu.addAction(Action(self, "Residue Information", callback=self.showResidueInformation, shortcut='ri'))
 
     pluginsMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
 
@@ -471,7 +412,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Displays assignment module."""
     self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
     self.dockArea.addDock(self.assignmentModule)
-    # self.pythonConsole.writeModuleDisplayCommand('showAssignmentModule')
     self.pythonConsole.writeConsoleCommand("application.showAssignmentModule()")
     self.project._logger.info("application.showAssignmentModule()")
 
@@ -516,7 +456,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     nmrResidueTableDock = CcpnDock(name='Nmr Residue Table')
     nmrResidueTableDock.layout.addWidget(nmrResidueTable)
     self.dockArea.addDock(nmrResidueTableDock, 'bottom')
-    # self.pythonConsole.writeModuleDisplayCommand('showNmrResidueTable')
     self.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
 
@@ -528,7 +467,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     else:
       self.showSequence()
-    # self.pythonConsole.writeModuleDisplayCommand('toggleSequence')
     self.pythonConsole.writeConsoleCommand("application.toggleSequence()")
     self.project._logger.info("application.toggleSequence()")
 
@@ -565,11 +503,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
     else:
       self.dockArea.addDock(self.assigner, position=position)
-    # self.pythonConsole.writeModuleDisplayCommand('showAssigner')
     self.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
     self.project._logger.info("application.showSequenceGraph()")
     return self.assigner
-    # self.dockArea.addDock(assigner)
 
   def raiseProperties(self, item):
     """get object from Pid and dispatch call depending on type
@@ -593,6 +529,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     for recentFile in self._appBase.preferences.recentFiles:
       self.action = Action(self, text=recentFile, callback=partial(self.loadAProject, projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
+    self.recentProjectsMenu.addAction(Action(self, text='Clear', callback=self.clearRecentProjectsMenu))
 
   def saveBackup(self):
     pass
@@ -648,21 +585,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Closes Application.
     """
     prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-    # if os.path.exists(prefPath):
-    #   prefFile = open(prefPath)
-    #   pref = json.load(prefFile)
-    #   prefFile.close()
-    #   if pref == self._appBase.preferences:
-    #     savePref = False
-    #   else:
-    #     msgBox = QtGui.QMessageBox()
-    #     msgBox.setText("Application Preferences have been changed")
-    #     msgBox.setInformativeText("Do you want to save your changes?")
-    #     msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-    #     savePref = (msgBox.exec_() == QtGui.QMessageBox.Yes)
-    # else:
-    #   savePref = True
-    #
     directory = os.path.dirname(prefPath)
     if not os.path.exists(directory):
       try:
@@ -675,8 +597,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     prefFile = open(prefPath, 'w+')
     json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
     prefFile.close()
-
-    # NBNB TBD FIXME put code here to ask if you want to save etc.
 
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
                                          ['Save and Quit', 'Quit without Saving', 'Cancel'],
@@ -700,21 +620,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if event:
         event.ignore()
 
-    # Close and clean up project
-    # if reply == QtGui.QMessageBox.Yes:
-    #   if event:
-    #     event.accept()
-    #   saveMessage = QtGui.QMessageBox.question(self, "Save Project", "Do you want to save changes?",
-    #                                     ['Save and Quit', 'Quit without Saving', 'Cancel'])
-    #   print(saveMessage, 'saveMessage')
-    #   if saveMessage == QtGui.QMessageBox.Yes:
-    #     self.saveProject()
-    #   self._appBase._closeProject()
-    #   QtGui.QApplication.quit()
-    # elif reply == QtGui.QMessageBox.No:
-    #   if event:
-    #     event.ignore()
-
   def createSample(self):
     """
     Displays Sample creation module.
@@ -722,7 +627,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup = SamplePopup(parent=None, project=self.project)
     popup.exec_()
     popup.raise_()
-    # self.pythonConsole.writeModuleDisplayCommand('createSample')
     self.pythonConsole.writeConsoleCommand("application.createSample()")
     self.project._logger.info("application.createSample()")
 
@@ -732,7 +636,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     showSa = SampleAnalysis(self._project)
     self.dockArea.addDock(showSa, position='bottom')
-    # self.pythonConsole.writeModuleDisplayCommand('showSampleAnalysis')
     self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
     self.project._logger.info("application.showSampleAnalysis()")
 
@@ -752,9 +655,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from application.metabolomics.Pca import PcaModule
     self.pcaModule = PcaModule(self.project)
     self.dockArea.addDock(self.pcaModule, position='bottom')
-    # spectrumDisplay = self.createSpectrumDisplay()
-    # self.pcaModule.setSpectrumDisplay(spectrumDisplay)
-    # self.dockArea.moveDock(spectrumDisplay.dock, position='bottom', neighbor=self.pcaModule)
 
   def showPickandFitModule(self):
     spectrumDisplay = self.createSpectrumDisplay()
@@ -846,13 +746,20 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     editor = MacroEditor(self.dockArea, self, "Macro Editor")
     editor.textBox.setText(self.pythonConsole.textEditor.toPlainText())
 
+  def newMacroFromLog(self):
+    """
+    Displays macro editor with contents of log.
+    """
+    editor = MacroEditor(self.dockArea, self, "Macro Editor")
+    l = open(self.project._logger.logPath, 'r').readlines()
+    text = ''.join([line.strip().split(':', 6)[-1]+'\n' for line in l])
+    editor.textBox.setText(text)
 
   def startMacroRecord(self):
     """
     Displays macro editor with additional buttons for recording a macro.
     """
     self.macroEditor = MacroEditor(self.dockArea, self, "Macro Editor", showRecordButtons=True)
-    # self.pythonConsole.writeModuleDisplayCommand('startMacroRecord')
     self.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
     self.project._logger.info("application.startMacroRecord()")
 
@@ -867,6 +774,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     for recentMacro in recentMacros:
       self.action = Action(self, text=recentMacro, callback=partial(self.runMacro, macroFile=recentMacro))
       self.recentMacrosMenu.addAction(self.action)
+    self.recentMacrosMenu.addAction(Action(self, text='Clear', callback=self.clearRecentMacros))
+
+
+  def clearRecentMacros(self):
+    self.recentMacrosMenu.clear()
+    self._appBase.preferences.recentMacros = []
+
+  def clearRecentProjectsMenu(self):
+    self.recentProjectsMenu.clear()
+    self._appBase.preferences.recentFiles = []
+
 
   def defineUserShortcuts(self):
     info = MessageDialog.showInfo('Not implemented yet!',
@@ -883,7 +801,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     from application.core.modules.CreateSequence import CreateSequence
     popup = CreateSequence(self, project=self._project).exec_()
-    # self.pythonConsole.writeModuleDisplayCommand('showMoleculePopup')
     self.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
     self.project._logger.info("application.showMoleculePopup()")
 
@@ -902,14 +819,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showBeginnersTutorial(self):
     path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BeginnersTutorial.doc')
-    if sys.platform == 'linux2':
+    if sys.platform == 'Linux':
       os.system(["xdg-open %s" % path])
     else:
       os.system('open %s' % path)
 
   def showBackboneTutorial(self):
     path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BackboneAssignmentTutorial.doc')
-    if sys.platform == 'linux2':
+    if sys.platform == 'Linux':
       os.system(["xdg-open %s" % path])
     else:
       os.system('open %s' % path)
@@ -955,12 +872,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
     self._appBase.preferences.recentMacros.append(macroFile)
     self._fillRecentMacrosMenu()
-    # self.fillRecentMacrosMenu()
     self.pythonConsole.runMacro(macroFile)
 
-  # def showMoleculeDisplay(self):
-  #   from ccpn.lib.moleculebox import MoleculeDisplay
-  #   self.moleculeDisplay = MoleculeDisplay(self.dockArea)
 
   def showPeakTable(self, position:str='left', relativeTo:CcpnDock=None, selectedList:PeakList=None):
     """
@@ -972,7 +885,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       self.dockArea.addDock(peakList, position='bottom')
 
-    # self.pythonConsole.writeModuleDisplayCommand('showPeakTable')
     self.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
 
@@ -983,16 +895,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from application.core.modules.ChemicalShiftTable import ChemicalShiftTable
     chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self._project.chemicalShiftLists)
     self.dockArea.addDock(chemicalShiftTable, position=position)
-    # self.pythonConsole.writeModuleDisplayCommand('showChemicalShiftTable')
     self.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     self.project._logger.info("application.showChemicalShiftTable()")
 
-  # def showParassignPeakTable(self, position='left', relativeTo=None):
-  #   peakList = ParassignModule(name="Peak Table", peakLists=self._project.peakLists)
-  #   if relativeTo is not None:
-  #     self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
-  #   else:
-  #     self.dockArea.addDock(peakList, position='bottom')
 
   def showBackboneAssignmentModule(self, position=None, relativeTo=None):
     """
@@ -1003,9 +908,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo)
     else:
       self.dockArea.addDock(self.bbModule, position='bottom')
-    # assigner = self.showAssigner('bottom')
-    # self.bbModule.setAssigner(assigner)
-    # self.pythonConsole.writeModuleDisplayCommand('showBackboneAssignmentModule')
     self.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
     self.project._logger.info("application.showBackboneAssignmentModule()")
 
@@ -1015,7 +917,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Displays Pick and Assign module."""
     self.paaModule = PickAndAssignModule(self.dockArea, self._project)
     self.dockArea.addDock(self.paaModule)
-    # self.pythonConsole.writeModuleDisplayCommand('showPickAndAssignModule')
     self.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
     self.project._logger.info("application.showPickAndAssignModule()")
     return self.paaModule
@@ -1024,7 +925,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Displays Atom Selector."""
     self.atomSelector = AtomSelector(self, project=self._project)
     self.dockArea.addDock(self.atomSelector)
-    # self.pythonConsole.writeModuleDisplayCommand('showAtomSelector')
     self.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
     self.project._logger.info("application.showAtomSelector()")
     return self.atomSelector
@@ -1033,7 +933,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Displays Residue Information module."""
     from application.core.modules.ResidueInformation import ResidueInformation
     self.dockArea.addDock(ResidueInformation(self, self._project))
-    # self.pythonConsole.writeModuleDisplayCommand('showResidueInformation')
     self.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
     self.project._logger.info("application.showResidueInformation()")
 
@@ -1085,10 +984,3 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showConsole(self):
     """Displays python console"""
     self.pythonConsoleDock.show()
-
-  # def showPopupGenerator(self):
-  #   from application.core.modules.GuiPopupGenerator import PopupGenerator
-  #   popup = PopupGenerator(self)
-  #   popup.exec_()
-  #   popup.raise_()
-

@@ -206,12 +206,18 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
   def removeStrip(self):
     self.orderedStrips[-1].unregisterStrip()
     self.orderedStrips[-1].delete()
+    self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "strip.delete()", strip=self.orderedStrips[-1])
+    self.project._logger.info("strip = project.getByPid('%s')\nstrip.delete()" % self.orderedStrips[-1].pid)
 
   def duplicateStrip(self):
     """
     Creates a new strip identical to the last one created and adds it to right of the display.
     """
     newStrip = self.strips[-1].clone()
+    self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+        "strip.clone()", strip=self.strips[-1].clone())
+    self.project._logger.info("strip = project.getByPid('%s')\nstrip.clone()" % self.strips[-1].pid)
 
   def hideUtilToolBar(self):
     """
@@ -224,6 +230,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     """Zooms Y axis of current strip to show entire region"""
     for strip in self.strips:
       strip.zoomYAll()
+
 
   def zoomXAll(self):
     """Zooms X axis of current strip to show entire region"""

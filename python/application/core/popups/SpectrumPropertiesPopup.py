@@ -329,6 +329,8 @@ class ContoursTab(QtGui.QWidget, Base):
     super(ContoursTab, self).__init__(parent)
 
     self.spectrum = spectrum
+    self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
+    self.logger = self.spectrum.project._logger
     positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(0, 0), vAlign='t', hAlign='l')
     positiveContoursCheckBox = CheckBox(self, grid=(0, 1), checked=True, vAlign='t', hAlign='l')
     for spectrumView in self.spectrum.spectrumViews:
@@ -421,54 +423,65 @@ class ContoursTab(QtGui.QWidget, Base):
     if state == QtCore.Qt.Checked:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayPositiveContours = True
+        self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayPositiveContours = True")
 
     else:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayPositiveContours = False
+        self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayPositiveContours = False")
 
   def displayNegativeContours(self, state):
     if state == QtCore.Qt.Checked:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayNegativeContours = True
+        self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayNegativeContours = True")
     else:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayNegativeContours = False
+        self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayNegativeContours = False")
 
 
   def lineEditTextChanged1(self, spectrum, value):
     spectrum.positiveContourBase = float(value)
     self.writeLoggingMessage("spectrum.positiveContourBase = %f" % float(value))
+    self.pythonConsole.writeConsoleCommand("spectrum.positiveContourBase = %f" % float(value), spectrum=spectrum)
 
   def lineEditTextChanged2(self, spectrum, value):
     spectrum.positiveContourFactor = float(value)
     self.writeLoggingMessage("spectrum.positiveContourFactor = %f" % float(value))
+    self.pythonConsole.writeConsoleCommand("spectrum.positiveContourFactor = %f" % float(value), spectrum=spectrum)
 
   def lineEditTextChanged3(self, spectrum, value):
     spectrum.positiveContourCount = int(value)
     self.writeLoggingMessage("spectrum.positiveContourCount = %f" % int(value))
+    self.pythonConsole.writeConsoleCommand("spectrum.positiveContourCount = %f" % int(value), spectrum=spectrum)
 
   def lineEditTextChanged4(self, spectrum, value):
     spectrum.negativeContourBase = float(value)
     self.writeLoggingMessage("spectrum.negativeContourBase = %f" % float(value))
+    self.pythonConsole.writeConsoleCommand("spectrum.negativeContourBase = %f" % float(value), spectrum=spectrum)
 
   def lineEditTextChanged5(self, spectrum, value):
     spectrum.negativeContourFactor = float(value)
     self.writeLoggingMessage("spectrum.negativeContourFactor = %f" % float(value))
+    self.pythonConsole.writeConsoleCommand("spectrum.negativeContourFactor = %f" % float(value), spectrum=spectrum)
 
   def lineEditTextChanged6(self, spectrum, value):
     spectrum.negativeContourCount = int(value)
     self.writeLoggingMessage("spectrum.negativeContourCount = %f" % int(value))
+    self.pythonConsole.writeConsoleCommand("spectrum.negativeContourCount = %f" % int(value), spectrum=spectrum)
 
   def changePosSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
     if newColour is not None:
       spectrum.positiveContourColour = newColour.name()
-      self.writeLoggingMessage("spectrum.positiveContourColour = %s" % newColour.name())
+      self.writeLoggingMessage("spectrum.positiveContourColour = '%s'" % newColour.name())
+      self.pythonConsole.writeConsoleCommand("spectrum.positiveContourColour = '%s'" % newColour.name(), spectrum=spectrum)
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(newColour))
       newIndex = str(len(spectrumColours.items())+1)
@@ -484,6 +497,7 @@ class ContoursTab(QtGui.QWidget, Base):
     if newColour is not None:
       spectrum.negativeContourColour = newColour.name()
       self.writeLoggingMessage("spectrum.negativeContourColour = %s" % newColour.name())
+      self.pythonConsole.writeConsoleCommand("spectrum.negativeContourColour = '%s'" % newColour.name(), spectrum=spectrum)
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(newColour))
       newIndex = str(len(spectrumColours.items())+1)
@@ -497,12 +511,12 @@ class ContoursTab(QtGui.QWidget, Base):
 
     newColour = list(spectrumColours.keys())[value]
     spectrum.positiveContourColour = newColour
-    self.writeLoggingMessage("spectrum.positiveContourColour = %s" % newColour)
+    self.writeLoggingMessage("spectrum.positiveContourColour = '%s'" % newColour)
+    self.pythonConsole.writeConsoleCommand("spectrum.positiveContourColour = '%s'" % newColour, spectrum=spectrum)
 
   def changeNegColourComboIndex(self, spectrum, value):
 
     newColour = list(spectrumColours.keys())[value]
     spectrum._apiDataSource.negativeContourColour = newColour
     self.writeLoggingMessage("spectrum.negativeContourColour = %s" % newColour)
-
-
+    self.pythonConsole.writeConsoleCommand("spectrum.negativeContourColour = '%s'" % newColour, spectrum=spectrum)

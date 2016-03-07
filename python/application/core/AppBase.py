@@ -230,7 +230,7 @@ def getSaveDirectory(apiProject, preferences):
       dialog.setStyleSheet("QFileDialog QWidget {color: #f7ffff; }")
   elif preferences.general.colourScheme == 'light':
     dialog.setStyleSheet("QFileDialog QWidget {color: ##464e76; }")
-  
+
   if not dialog.exec_():
     return ''
   fileNames = dialog.selectedFiles()

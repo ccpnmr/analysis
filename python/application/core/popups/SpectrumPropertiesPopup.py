@@ -63,7 +63,7 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
 
     self.setWindowTitle("Spectrum Information")
     self.layout().addWidget(tabWidget, 0, 0, 2, 2)
-    buttonBox = ButtonList(self, grid=(3, 1), callbacks=[self.accept, self.reject], texts=['OK', 'Cancel'],
+    buttonBox = Button(self, grid=(3, 1), callback=self.accept, text='Close',
                            vPolicy='fixed')
 
   def keyPressEvent(self, event):

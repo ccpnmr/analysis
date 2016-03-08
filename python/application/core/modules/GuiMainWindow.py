@@ -401,8 +401,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showShortcuts(self):
     path = os.path.join(Path.getTopDirectory(), 'doc', 'static', 'AnalysisShortcuts.pdf')
-    if sys.platform == 'linux2':
-      os.system(["xdg-open %s" % path])
+    if 'linux' in sys.platform.lower():
+      os.system("xdg-open %s" % path)
     else:
       os.system('open %s' % path)
 
@@ -832,16 +832,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def showBeginnersTutorial(self):
-    path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BeginnersTutorial.doc')
-    if sys.platform == 'Linux':
-      os.system(["xdg-open %s" % path])
+    path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BeginnersTutorial.pdf')
+    if 'linux' in sys.platform.lower():
+      os.system("xdg-open %s" % path)
     else:
       os.system('open %s' % path)
 
   def showBackboneTutorial(self):
-    path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BackboneAssignmentTutorial.doc')
-    if sys.platform == 'Linux' or sys.platform == 'linux':
-      os.system(["xdg-open %s" % path])
+    path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BackboneAssignmentTutorial.pdf')
+    if 'linux' in sys.platform.lower():
+      os.system("xdg-open %s" % path)
     else:
       os.system('open %s' % path)
 

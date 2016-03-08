@@ -95,7 +95,8 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     '''
 
     guiSpectrumDisplay = self.parent.guiSpectrumDisplay
-    displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0] for spectrumView in guiSpectrumDisplay.spectrumViews]
+    displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0]
+                               for spectrumView in guiSpectrumDisplay.spectrumViews]
 
     if hasattr(guiSpectrumDisplay, 'isGrouped'):
 

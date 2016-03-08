@@ -33,7 +33,8 @@ class NotesEditor(DropBase, CcpnDock):
     if note:
       self.textBox.setText(note.text)
       self.lineEdit1.setText(self.note.name)
-    self.buttonBox = ButtonList(self, texts=['Close', 'Save Note'], callbacks=[self._reject, self._saveNote])
+    self.buttonBox = ButtonList(self, texts=['Save', 'Cancel'],
+                                callbacks=[self._saveNote, self._reject])
     widget.layout().addWidget(self.buttonBox, 3, 3, 1, 2)
     self.layout.addWidget(widget)
 

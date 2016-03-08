@@ -31,8 +31,6 @@ class AssignmentModule(CcpnDock, Base):
 
   '''
 
-  #_instance = None
-
   def __init__(self, parent=None, project:Project=None, peaks:Types.List[Peak]=None, **kw):
 
     CcpnDock.__init__(self, name="Peak Assigner")
@@ -83,7 +81,7 @@ class AssignmentModule(CcpnDock, Base):
     expCheckBoxLabel = Label(self.widget1, "Filter By Experiment")
     self.filterLayout.addWidget(expCheckBoxLabel, 0, 6)
     self.filterLayout.addWidget(self.expCheckBox, 0, 7)
-    self.filterLayout.addItem(QtGui.QSpacerItem(0, 20), 4, 0)
+    # self.filterLayout.addItem(QtGui.QSpacerItem(0, 20), 4, 0)
 
     self.current.registerNotify(self.updateInterface, 'peaks')
     self.updateInterface()
@@ -117,7 +115,7 @@ class AssignmentModule(CcpnDock, Base):
     """
     listWidget = ListWidget(self, callback=partial(self.updateAssigmentWidget, dim),
                             rightMouseCallback=self.updateNmrAtomsFromListWidgets)
-    listWidget.setFixedHeight(80)
+    # listWidget.setFixedHeight(80)
     self.listWidgets.append(listWidget)
 
   def createEmptyWidgetLabel(self, dim:int):
@@ -148,14 +146,16 @@ class AssignmentModule(CcpnDock, Base):
     chainPulldown = self.createChainPulldown(dim)
     seqCodePulldown = self.createSeqCodePulldown(dim)
     atomTypePulldown = self.createAtomTypePulldown(dim)
-    applyButton = Button(self, 'Apply', callback=partial(self.setAssignment, dim))
+    applyButton = Button(self, 'New', callback=partial(self.setAssignment, dim))
+    self.reassignButton = Button(self, 'Assign', callback=partial(self.setAssignment, dim))
     newLayout.addWidget(chainLabel, 0, 0)
-    newLayout.addWidget(chainPulldown, 1, 0)
-    newLayout.addWidget(seqCodeLabel, 0, 1)
+    newLayout.addWidget(chainPulldown, 0, 1)
+    newLayout.addWidget(seqCodeLabel, 1, 0)
     newLayout.addWidget(seqCodePulldown, 1, 1)
-    newLayout.addWidget(atomTypeLabel, 0, 2)
-    newLayout.addWidget(atomTypePulldown, 1, 2)
-    newLayout.addWidget(applyButton, 1, 3)
+    newLayout.addWidget(atomTypeLabel, 2, 0)
+    newLayout.addWidget(atomTypePulldown, 2, 1)
+    newLayout.addWidget(applyButton, 3, 0, 1, 1)
+    newLayout.addWidget(self.reassignButton, 3, 1, 1, 1)
     newAssignmentWidget.setLayout(newLayout)
     self.assignmentWidgets.append(newAssignmentWidget)
 
@@ -246,7 +246,7 @@ class AssignmentModule(CcpnDock, Base):
 
     for pair in self.widgetItems:
       widget = QtGui.QWidget(self)
-      layout = QtGui.QVBoxLayout()
+      layout = QtGui.QGridLayout()
       layout.setSpacing(10)
       layout.setMargin(5)
       layout.setContentsMargins(4, 4, 4, 4)
@@ -254,20 +254,19 @@ class AssignmentModule(CcpnDock, Base):
         widget.setStyleSheet("border: 1px solid #bec4f3")
       elif self.colourScheme == 'light':
         widget.setStyleSheet("border: 1px solid #bd8413")
-      # pair[0].setFixedHeight(10)
-      for item in range(len(pair)):
-        layout.addWidget(pair[item], 0, QtCore.Qt.AlignTop)
-        if self.colourScheme == 'dark':
-          pair[item].setStyleSheet("border: 0px solid; color: #f7ffff;")
-        elif self.colourScheme == 'light':
-          pair[item].setStyleSheet("border: 0px solid; color: #555d85;")
+      # for item in range(len(pair)):
+      layout.addWidget(pair[0], 0, 0, 1, 1)
+      layout.addWidget(pair[1], 1, 0, 2, 1)
+      layout.addWidget(pair[2], 1, 1, 2, 1)
+      layout.addWidget(pair[3], 3, 0, 1, 2)
+
       pair[2].setStyleSheet("PulldownList {border: 0px solid;}")
       pair[2].setStyleSheet("border: 0px solid")
       pair[3].setStyleSheet("color: black; border: 0px solid;")
       widget.setLayout(layout)
       self.widgets.append(widget)
       self.selectionLayout.addWidget(widget, 0, self.widgetItems.index(pair))
-
+    #
     self.updateLayout(self.selectionLayout, Ndimensions)
 
   # Update functions
@@ -339,7 +338,6 @@ class AssignmentModule(CcpnDock, Base):
     '''
 
     Ndimensions = len(self.current.peak.position)
-    required_heights = [23]
 
     if self.current.peaks:
       for dim, listWidget in zip(range(Ndimensions), self.listWidgets):
@@ -381,6 +379,7 @@ class AssignmentModule(CcpnDock, Base):
     Update all information in assignment widget when NmrAtom is selected in list widget of that
     assignment widget.
     """
+    self.reassignButton.setText('Reassign')
     nmrAtom = self.project.getByPid(item.text())
     self.project._appBase.current.nmrAtom = nmrAtom
     chain = nmrAtom.nmrResidue.nmrChain
@@ -388,7 +387,6 @@ class AssignmentModule(CcpnDock, Base):
     self.chainPulldowns[dim].setData([chain.id for chain in self.project.nmrChains])
     self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))
     sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
-    # self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=self._natural_key))
     self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=CcpnSorting.stringSortKey()))
     self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))
     atomPrefix = self.current.peak.peakList.spectrum.isotopeCodes[dim][-1]
@@ -510,8 +508,6 @@ class AssignmentModule(CcpnDock, Base):
       objectTable.setObjects([])
     for listWidget in self.listWidgets:
       listWidget.clear()
-
-
 
 
 

@@ -484,7 +484,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         if self._appBase.preferences.general.colourScheme == 'dark':
           dialog.setStyleSheet("""
                                   QFileDialog QWidget {
-                                                      background-color: #2a3358
+                                                      background-color: #2a3358;
                                                       color: #f7ffff;
                                                       }
                               """)

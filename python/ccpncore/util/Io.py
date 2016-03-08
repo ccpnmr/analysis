@@ -964,10 +964,7 @@ def backupProject(project, dataLocationStores=None, skipRefData=True, clearOutDi
     return
 
   backupUrl = backupRepository.url
-  backupPath = backupUrl.path
-  
-  backupRepository.url = Implementation.Url(path=newPath+'_backup'+CCPN_DIRECTORY_SUFFIX)
-  
+  backupPath = backupUrl.path  
 
   if not dataLocationStores:
     dataLocationStores = set()

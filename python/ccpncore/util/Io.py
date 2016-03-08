@@ -80,6 +80,12 @@ def ccpnProjectPath(path:str):
     path += CCPN_DIRECTORY_SUFFIX
   return path
 
+def ccpnProjectPathPrefix(path:str):
+  if path.endswith(CCPN_DIRECTORY_SUFFIX):
+    path = path[:-len(CCPN_DIRECTORY_SUFFIX)]
+    
+  return path
+  
 def newProject(projectName, path:str=None, overwriteExisting:bool=False,
                showYesNo:"function"=None, applicationName='ccpn',
                useFileLogger:bool=True) -> Implementation.MemopsRoot:
@@ -305,17 +311,23 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
   backupRepository = project.findFirstRepository(name="backup")
   if backupRepository:
     backupUrl = backupRepository.url
-    oldBackupPath = backupUrl.path
-    newBackupPath = path + '_backup'
-    if oldBackupPath.startswith(oldPath): # hopefully true
+    oldBackupPath = ccpnProjectPathPrefix(backupUrl.path)
+    newBackupPath = ccpnProjectPathPrefix(path) + '_backup'
+    oldPathPrefix = ccpnProjectPathPrefix(oldPath)
+    if oldBackupPath.startswith(oldPathPrefix): # hopefully true
       if path != oldPath:
+        oldBackupPath = ccpnProjectPath(oldBackupPath)
+        newBackupPath = ccpnProjectPath(newBackupPath)
         warningMessages.append('Backup is being changed from\n"%s"\nto\n"%s"' %
                                (oldBackupPath, newBackupPath))
         backupRepository.url = Implementation.Url(path=newBackupPath)
-    elif not os.path.exists(oldBackupPath):
-      warningMessages.append('Backup is being changed from\n"%s"\nto\n"%s"' %
-                             (oldBackupPath, newBackupPath))
-      backupRepository.url = Implementation.Url(path=newBackupPath)
+    else:
+      oldBackupPath = ccpnProjectPath(oldBackupPath)
+      if not os.path.exists(oldBackupPath):
+        newBackupPath = ccpnProjectPath(newBackupPath)
+        warningMessages.append('Backup is being changed from\n"%s"\nto\n"%s"' %
+                               (oldBackupPath, newBackupPath))
+        backupRepository.url = Implementation.Url(path=newBackupPath)
 
   # check if project repository is called 'userData'
   if projectRepository.name != 'userData':
@@ -557,8 +569,7 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
     else:
       newProjectName = os.path.basename(newPath)
 
-  if newProjectName and newProjectName.endswith(CCPN_DIRECTORY_SUFFIX):
-    newProjectName = newProjectName[:-5]
+  newProjectName = ccpnProjectPathPrefix(newProjectName)
 
   # below is because of data model limit
   newProjectName = newProjectName[:32]
@@ -657,7 +668,8 @@ def saveProject(project, newPath=None, newProjectName=None, changeBackup=True,
 
       if changeBackup:
         # change project backup repository url to point to new path
-        backupRepository.url = Implementation.Url(path=newPath+'_backup'+CCPN_DIRECTORY_SUFFIX)
+        path = ccpnProjectPathPrefix(newPath)
+        backupRepository.url = Implementation.Url(path=path+'_backup'+CCPN_DIRECTORY_SUFFIX)
 
     # change project name
     if newProjectName != oldProjectName:
@@ -940,7 +952,7 @@ def loadAllData(root):
 
 
 
-def backupProject(project, dataLocationStores = None, skipRefData = True, clearOutDir = False):
+def backupProject(project, dataLocationStores=None, skipRefData=True, clearOutDir=False):
 
   def modificationTime(path):
     return os.stat(path)[8]
@@ -953,6 +965,9 @@ def backupProject(project, dataLocationStores = None, skipRefData = True, clearO
 
   backupUrl = backupRepository.url
   backupPath = backupUrl.path
+  
+  backupRepository.url = Implementation.Url(path=newPath+'_backup'+CCPN_DIRECTORY_SUFFIX)
+  
 
   if not dataLocationStores:
     dataLocationStores = set()

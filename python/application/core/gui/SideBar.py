@@ -284,9 +284,11 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       import json
       item = self.itemAt(event.pos())
       if item:
-        itemData = json.dumps({'pids':[item.text(0)]})
-        event.mimeData().setData('ccpnmr-json', itemData)
-        event.mimeData().setText(itemData)
+        text = item.text(0)
+        if ':' in text:
+          itemData = json.dumps({'pids':[text]})
+          event.mimeData().setData('ccpnmr-json', itemData)
+          event.mimeData().setText(itemData)
 
   def dragMoveEvent(self, event:QtGui.QMouseEvent):
     """

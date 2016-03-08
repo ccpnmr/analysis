@@ -95,7 +95,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.spectrumItem = dd['SP'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setText(0, "Spectra")
     self.spectrumGroupItem = dd['SG'] = QtGui.QTreeWidgetItem(self.projectItem)
-    self.spectrumGroupItem.setText(0, "Spectrum Groups")
+    self.spectrumGroupItem.setText(0, "SpectrumGroups")
     self.samplesItem = dd['SA'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.samplesItem.setText(0, 'Samples')
     self.newSample = QtGui.QTreeWidgetItem(self.samplesItem)

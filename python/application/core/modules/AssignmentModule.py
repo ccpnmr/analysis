@@ -146,7 +146,7 @@ class AssignmentModule(CcpnDock, Base):
     chainPulldown = self.createChainPulldown(dim)
     seqCodePulldown = self.createSeqCodePulldown(dim)
     atomTypePulldown = self.createAtomTypePulldown(dim)
-    applyButton = Button(self, 'New', callback=partial(self.setAssignment, dim))
+    applyButton = Button(self, 'New', callback=partial(self.createNewNmrAtom, dim))
     self.reassignButton = Button(self, 'Assign', callback=partial(self.setAssignment, dim))
     newLayout.addWidget(chainLabel, 0, 0)
     newLayout.addWidget(chainPulldown, 0, 1)
@@ -162,14 +162,18 @@ class AssignmentModule(CcpnDock, Base):
 
   def setAssignment(self, dim:int):
     """
-    Assigns dimensionNmrAtoms to peak dimension when called using Apply Button in assignment widget.
+    Assigns dimensionNmrAtoms to peak dimension when called using Assign Button in assignment widget.
     """
+
     nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
     nmrResidue = nmrChain.fetchNmrResidue(self.seqCodePulldowns[dim].currentText())
     nmrAtom = nmrResidue.fetchNmrAtom(self.atomTypePulldowns[dim].currentText())
     for peak in self.current.peaks:
       dimNmrAtoms = peak.dimensionNmrAtoms[dim]
       currentItem = self.listWidgets[dim].currentItem()
+      if not currentItem:
+        self.listWidgets[dim].addItem(nmrAtom.pid)
+        currentItem = self.listWidgets[dim].item(self.listWidgets[dim].count()-1)
       currentObject = self.project.getByPid(currentItem.text())
       toAssign = dimNmrAtoms.index(currentObject)
 
@@ -254,12 +258,10 @@ class AssignmentModule(CcpnDock, Base):
         widget.setStyleSheet("border: 1px solid #bec4f3")
       elif self.colourScheme == 'light':
         widget.setStyleSheet("border: 1px solid #bd8413")
-      # for item in range(len(pair)):
       layout.addWidget(pair[0], 0, 0, 1, 1)
       layout.addWidget(pair[1], 1, 0, 2, 1)
       layout.addWidget(pair[2], 1, 1, 2, 1)
       layout.addWidget(pair[3], 3, 0, 1, 2)
-
       pair[2].setStyleSheet("PulldownList {border: 0px solid;}")
       pair[2].setStyleSheet("border: 0px solid")
       pair[3].setStyleSheet("color: black; border: 0px solid;")
@@ -320,7 +322,6 @@ class AssignmentModule(CcpnDock, Base):
                                           self.objectTables,
                                           nmrAtomsForTables):
       if peaksAreOnLine(peaks, dim):
-        objectTable.setObjects(sorted(nmrAtoms) + [NEW])
         objectTable.show()
       else:
         objectTable.setObjects([NOL])
@@ -442,7 +443,7 @@ class AssignmentModule(CcpnDock, Base):
     if not self.current.peaks:
       return ''
 
-    if nmrAtom is NEW or nmrAtom is NOL:
+    if nmrAtom is NOL:
       return ''
 
     deltas = []
@@ -465,7 +466,7 @@ class AssignmentModule(CcpnDock, Base):
     if not self.current.peaks:
       return ''
 
-    if nmrAtom is NEW or nmrAtom is NOL:
+    if nmrAtom is NOL:
       return ''
 
     for peak in self.current.peaks:
@@ -511,6 +512,21 @@ class AssignmentModule(CcpnDock, Base):
       listWidget.clear()
 
 
+  def createNewNmrAtom(self, dim):
+    isotopeCode = self.current.peak.peakList.spectrum.isotopeCodes[dim]
+    nmrAtom = self.project.fetchNmrChain(shortName=defaultNmrChainCode
+                                           ).newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)
+
+
+    for peak in self.current.peaks:
+      if nmrAtom not in peak.dimensionNmrAtoms[dim]:
+        newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
+        axisCode = peak.peakList.spectrum.axisCodes[dim]
+        peak.assignDimension(axisCode, newAssignments)
+    self.listWidgets[dim].addItem(nmrAtom.pid)
+    self.updateTables()
+
+
 
   def assignNmrAtomToDim(self, dim:int, row:int=None, col:int=None, obj:object=None):
     '''Assign the nmrAtom that is double clicked on to the
@@ -523,11 +539,6 @@ class AssignmentModule(CcpnDock, Base):
 
     if nmrAtom is NOL:
       return
-    elif nmrAtom is NEW:
-      isotopeCode = self.current.peak.peakList.spectrum.isotopeCodes[dim]
-      ###NBNB
-      nmrAtom = self.project.fetchNmrChain(shortName=defaultNmrChainCode
-                                           ).newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)
 
     for peak in self.current.peaks:
       # axisCode = getAxisCodeForPeakDimension(peak, dim)
@@ -546,14 +557,14 @@ class AssignmentModule(CcpnDock, Base):
     self.project._appBase.current.unRegisterNotify(self.updateInterface, 'peaks')
     self.close()
 
-class New(object):
-  """
-  Small 'fake' object to get a non-nmrAtom in the objectTable.
-  """
-
-  def __init__(self):
-    self.pid = 'New NMR Atom'
-    self.id = 'New NMR Atom'
+# class New(object):
+#   """
+#   Small 'fake' object to get a non-nmrAtom in the objectTable.
+#   """
+#
+#   def __init__(self):
+#     self.pid = 'New NMR Atom'
+#     self.id = 'New NMR Atom'
 
 
 class NotOnLine(object):
@@ -569,5 +580,5 @@ class NotOnLine(object):
     self.pid = 'Multiple selected peaks not on line.'
     self.id = 'Multiple selected peaks not on line.'
 
-NEW = New()
+# NEW = New()
 NOL = NotOnLine()

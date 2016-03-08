@@ -8,6 +8,6 @@ QMessageBox QLabel { color: #f7ffff;
 QDialog {
               background-color: #2a3358;
                }
-QFileDialog {
+QFileDialog QTreeView {
             color: #f7ffff;
             }

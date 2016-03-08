@@ -100,15 +100,18 @@ QDialog QLabel {
 QDialog QPushButton {
 				color:  #bec4f3;
         background-color: #535a83;
+        padding: 2px;
 				}
 
 QDialog QPushButton::clicked {
                           color: #122043;
                           background-color: #BEC4F3;
+                          padding: 2px;
                           }
 QDialog QPushButton::hover {
                           color: #122043;
                           background-color: #BDBC5A;
+                          padding: 2px;
                           }
 
 
@@ -202,28 +205,33 @@ Dock QPushButton {
 				color: #bec4f3;
 				background-color: #535a83;
 				border: 1px solid #182548;
+				padding: 2px;
 				}
 
 Dock QPushButton::clicked {
                           color: #122043;
                           background-color: #BEC4F3;
                           border: 1px solid #182548;
+                          padding: 2px;
                           }
 
 Dock QPushButton::pressed {
                           color: #122043;
                           background-color: #BEC4F3;
                           border: 1px solid #182548;
+                          padding: 2px;
                           }
 
 Dock QPushButton::hover {
                           color: #122043;
                           background-color: #e4e15b;
                           border: 1px solid #182548;
+                          padding: 2px;
                           }
 
 Dock QPushButton::checked {
                            background-color: #182548;
+                           padding: 2px;
                            }
 
 QFrame { background-color: #2a3358;}

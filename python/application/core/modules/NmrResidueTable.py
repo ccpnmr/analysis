@@ -41,14 +41,16 @@ class NmrResidueTable(QtGui.QWidget, Base):
 
 
 
-    columns = [('NmrChain', lambda nmrResidue: nmrResidue._parent.id),
+    columns = [('#', lambda nmrResidue: nmrResidue.serial),
+               ('NmrChain', lambda nmrResidue: nmrResidue._parent.id),
                ('Sequence','sequenceCode'),
                # ('Sequence',lambda nmrResidue: '%-8s' % nmrResidue.sequenceCode),
                ('Type', 'residueType'),
                ('NmrAtoms', lambda nmrResidue: self.getNmrAtoms(nmrResidue)),
                ('Peak count', lambda nmrResidue: '%3d ' % self.getNmrResiduePeaks(nmrResidue))]
 
-    tipTexts = ['Nmr Residue key', 'Sequence code of NmrResidue',  'Type of NmrResidue',
+    tipTexts = ['NmrResidue serial number', 'Nmr Residue key',
+                'Sequence code of NmrResidue',  'Type of NmrResidue',
                 'Atoms in NmrResidue', 'Number of peaks assigned to Nmr Residue']
 
     self.nmrResidueTable = GuiTableGenerator(self, self.project.nmrChains, actionCallback=callback, columns=columns,

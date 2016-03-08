@@ -76,6 +76,11 @@ class NmrAtom(AbstractWrapperObject):
     return self._wrappedData.name
 
   @property
+  def serial(self) -> int:
+    """NmrAtom serial number - set at creation and unchangeable"""
+    return self._wrappedData.serial
+
+  @property
   def atom(self) -> Atom:
     """Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom"""
     atom = self._wrappedData.atom

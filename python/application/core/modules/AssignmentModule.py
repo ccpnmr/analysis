@@ -106,7 +106,7 @@ class AssignmentModule(CcpnDock, Base):
 
     # Needed to use this syntax because wanted double click not single.
     # objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
-    objectTable.setFixedHeight(80)
+    # objectTable.setFixedHeight(80)
     self.objectTables.append(objectTable)
 
   def createEmptyListWidget(self, dim:int):
@@ -387,7 +387,7 @@ class AssignmentModule(CcpnDock, Base):
     self.chainPulldowns[dim].setData([chain.id for chain in self.project.nmrChains])
     self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))
     sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
-    self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=CcpnSorting.stringSortKey()))
+    self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=CcpnSorting.stringSortKey))
     self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))
     atomPrefix = self.current.peak.peakList.spectrum.isotopeCodes[dim][-1]
     atomNames = [atomName for atomName in ATOM_NAMES if atomName[0] == atomPrefix] + [nmrAtom.name]
@@ -455,7 +455,8 @@ class AssignmentModule(CcpnDock, Base):
           position = peak.position[dim]
           deltas.append(abs(shift.value-position))
     average = sum(deltas)/len(deltas)
-    return round(average, 3)
+    # return round(average, 3)
+    return '%6.3f' % average
 
   def getShift(self, nmrAtom:NmrAtom) -> float:
     """
@@ -472,7 +473,7 @@ class AssignmentModule(CcpnDock, Base):
       if shiftList:
         shift = shiftList.getChemicalShift(nmrAtom.id)
         if shift:
-          return shift.value
+          return '%8.3f' % shift.value
 
 
   def peaksAreCompatible(self) -> bool:

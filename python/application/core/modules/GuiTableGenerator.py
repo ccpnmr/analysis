@@ -80,6 +80,8 @@ class GuiTableGenerator(QtGui.QWidget, Base):
         columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
         self.table.setObjects(columns)
 
+    self.table.resizeColumnsToContents()
+
   def _getColumns(self, columns, tipTexts):
 
     tableColumns = []

@@ -64,6 +64,11 @@ class NmrResidue(AbstractWrapperObject):
     return self._wrappedData.sequenceCode
 
   @property
+  def serial(self) -> int:
+    """NmrResidue serial number - set at creation and unchangeable"""
+    return self._wrappedData.serial
+
+  @property
   def _key(self) -> str:
     """Residue local ID"""
     return Pid.createId(self.sequenceCode, self.residueType)

@@ -89,7 +89,8 @@ class NmrAtomShiftTable(ChemicalShiftTable):
     label1 = Label(self, 'Show from all ChemicalShiftLists? Yes/No')
     self.layout.addWidget(label1, 0, 2, QtCore.Qt.AlignRight)
 
-    columns = [('NmrResidue', lambda chemicalShift: chemicalShift._key.rsplit('.',1)[0]),
+    columns = [('#', lambda chemicalShift: chemicalShift.nmrAtom.serial),
+               ('NmrResidue', lambda chemicalShift: chemicalShift._key.rsplit('.',1)[0]),
                ('Name', lambda chemicalShift: chemicalShift._key.rsplit('.',1)[-1]),
                ('Shift', lambda chemicalShift: '%8.3f' % chemicalShift.value),
                ('Std. Dev.', lambda chemicalShift: ('%6.3f' % chemicalShift.valueError
@@ -102,7 +103,8 @@ class NmrAtomShiftTable(ChemicalShiftTable):
                 )
               ]
 
-    tipTexts = ['NmrResidue Id',
+    tipTexts = ['NmrAtom serial number',
+                'NmrResidue Id',
                 'NmrAtom name',
                 'Value of chemical shift, in selected ChemicalShiftList',
                 'Standard deviation of chemical shift, in selected ChemicalShiftList',

@@ -1037,7 +1037,7 @@ class Column:
 
   def _defaultText(self, obj):
 
-    return None
+    return ' '
 
   def _defaultColor(self, obj):
 

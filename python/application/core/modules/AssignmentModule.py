@@ -174,6 +174,7 @@ class AssignmentModule(CcpnDock, Base):
       if not currentItem:
         self.listWidgets[dim].addItem(nmrAtom.pid)
         currentItem = self.listWidgets[dim].item(self.listWidgets[dim].count()-1)
+      print(currentItem.text(), 'current Item')
       currentObject = self.project.getByPid(currentItem.text())
       toAssign = dimNmrAtoms.index(currentObject)
 
@@ -380,7 +381,6 @@ class AssignmentModule(CcpnDock, Base):
     Update all information in assignment widget when NmrAtom is selected in list widget of that
     assignment widget.
     """
-    self.reassignButton.setText('Reassign')
     nmrAtom = self.project.getByPid(item.text())
     self.project._appBase.current.nmrAtom = nmrAtom
     chain = nmrAtom.nmrResidue.nmrChain

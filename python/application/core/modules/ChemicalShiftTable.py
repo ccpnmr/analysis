@@ -10,7 +10,7 @@ from PyQt4 import QtGui, QtCore
 
 class ChemicalShiftTable(CcpnDock):
 
-  def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Lists', **kw):
+  def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Table', **kw):
 
     if not chemicalShiftLists:
       chemicalShiftLists = []
@@ -68,7 +68,7 @@ class ChemicalShiftTable(CcpnDock):
 class NmrAtomShiftTable(ChemicalShiftTable):
   """Alternative proposal to the ChemicalShiftTable"""
 
-  def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Lists', **kw):
+  def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Table', **kw):
 
     if not chemicalShiftLists:
       chemicalShiftLists = []
@@ -77,7 +77,7 @@ class NmrAtomShiftTable(ChemicalShiftTable):
 
     self.chemicalShiftLists = chemicalShiftLists
 
-    label = Label(self, "NmrAtom List:")
+    label = Label(self, "ChemicalShift List:")
     widget1 = QtGui.QWidget(self)
     widget1.setLayout(QtGui.QGridLayout())
     widget1.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
@@ -85,9 +85,9 @@ class NmrAtomShiftTable(ChemicalShiftTable):
     widget1.layout().addWidget(self.chemicalShiftListPulldown, 0, 1)
     self.layout.addWidget(widget1, 0, 0)
 
-    # Temporary - for testing
-    label1 = Label(self, 'Show from all ChemicalShiftLists? Yes/No')
-    self.layout.addWidget(label1, 0, 2, QtCore.Qt.AlignRight)
+    # # Temporary - for testing
+    # label1 = Label(self, 'Show from all ChemicalShiftLists? Yes/No')
+    # self.layout.addWidget(label1, 0, 2, QtCore.Qt.AlignRight)
 
     columns = [('#', lambda chemicalShift: chemicalShift.nmrAtom.serial),
                ('NmrResidue', lambda chemicalShift: chemicalShift._key.rsplit('.',1)[0]),

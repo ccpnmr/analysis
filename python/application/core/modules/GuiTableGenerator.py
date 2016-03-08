@@ -8,14 +8,6 @@ from application.core.modules.peakUtils import getPeakPosition, getPeakAnnotatio
 
 from PyQt4 import QtGui
 
-# class All(object):
-#   def __init__(self, project, objectType):
-#     self.pid = '<ALL>'
-#     setattr(self, objectType, getattr(project, objectType))
-#     self.objects = getattr(project, objectType)
-
-
-
 class GuiTableGenerator(QtGui.QWidget, Base):
 
   def __init__(self, parent, objectLists, actionCallback, columns, selector=None, tipTexts=None,
@@ -23,12 +15,8 @@ class GuiTableGenerator(QtGui.QWidget, Base):
 
       QtGui.QWidget.__init__(self, parent)
       Base.__init__(self, **kw)
-      # allList = All(self.project, objectType)
-      # objectLists.append(allList)
       self.columns = columns
       self.objectType = objectType
-      # self.detailsEntry = Entry(self, text='',
-      #                          callback=self.setPeakDetails)
       self.objectLists = objectLists
       if len(self.objectLists) > 0:
         self.objectList = objectLists[0]
@@ -42,8 +30,9 @@ class GuiTableGenerator(QtGui.QWidget, Base):
                                multiSelect=multiSelect, selectionCallback=selectionCallback,
                                grid=(0, 0), gridSpan=(1, 5))
 
-      self.updateContents()
+
       if selector is not None:
+        self.updateContents()
         self.selector = selector
         self.selector.setCallback(self.changeObjectList)
         self.updateSelectorContents()
@@ -53,7 +42,7 @@ class GuiTableGenerator(QtGui.QWidget, Base):
     """
     Changes the objectList specified in the selector.
     """
-    if self.selector.currentText() == '<ALL>':
+    if self.selector.currentText() == '<All>':
       self.table.setObjects(getattr(self.objectList.project, self.objectType))
 
     elif objectList is not self.objectList:
@@ -73,7 +62,7 @@ class GuiTableGenerator(QtGui.QWidget, Base):
         objectsName = objectList._childClasses[0]._pluralLinkName
         columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
         self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
-      elif objectList.pid == '<ALL>':
+      elif objectList.pid == '<All>':
         columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
         self.table.setObjects(objectList.objects)
       else:
@@ -122,16 +111,22 @@ class GuiTableGenerator(QtGui.QWidget, Base):
 
       if len(columns) > 0:
         for column in columns[1:]:
-          # c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)], orderFunc=self.orderFunc)
           c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
           tableColumns.append(c)
 
-      detailsColumn = Column('Details', 'comment', setEditValue=lambda pk, value: self.setPeakDetails(pk, value))
+      detailsColumn = Column('Details', lambda obj: self.getCommentText(obj), setEditValue=lambda obj, value: self.setObjectDetails(obj, value))
       tableColumns.append(detailsColumn)
     return tableColumns
 
-  def setPeakDetails(self, peak, value):
-    peak.comment = value
+  def setObjectDetails(self, obj, value):
+    obj.comment = value
+
+
+  def getCommentText(self, obj):
+    if obj.comment == '' or not obj.comment:
+      return ' '
+    else:
+      return obj.comment
 
   def updateSelectorContents(self):
     """
@@ -139,15 +134,13 @@ class GuiTableGenerator(QtGui.QWidget, Base):
     """
 
     if self.objectList is not None:
-
-      self.objectLists += getattr(self.objectLists[0].project, self.objectLists[0]._pluralLinkName)
       self.objectLists = list(set(self.objectLists))
-      # if self.objectList.shortClassName == 'PL':
-      #   texts = ['%s' % peakList.pid for peakList in self.objectLists]
-      # else:
-      # texts = ['<ALL>']
       texts = ['%s' % objectList.pid for objectList in self.objectLists]
+
       self.selector.setData(texts=texts, objects=self.objectLists)
+    if not self.objectList.shortClassName == 'PL':
+     if '<All>' not in self.selector.texts:
+       self.selector.addItem('<All>')
 
 
   def updateTable(self):

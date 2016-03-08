@@ -93,6 +93,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.projectItem.setText(0, "Project")
     self.projectItem.setExpanded(True)
     self.spectrumItem = dd['SP'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.spectrumItem.setFlags(self.spectrumItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.spectrumItem.setText(0, "Spectra")
     self.spectrumGroupItem = dd['SG'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumGroupItem.setText(0, "SpectrumGroups")
@@ -108,7 +109,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.chainItem.setText(0, "Chains")
     self.newChainItem = QtGui.QTreeWidgetItem(self.chainItem)
     self.newChainItem.setText(0, '<New>')
-    self.nmrChainItem = dd['NC'] =  QtGui.QTreeWidgetItem(self.projectItem)
+    self.nmrChainItem = dd['NC'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.nmrChainItem.setText(0, "NmrChains")
     self.newNmrChainItem = QtGui.QTreeWidgetItem(self.nmrChainItem)
     self.newNmrChainItem.setText(0, '<New>')
@@ -289,6 +290,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           itemData = json.dumps({'pids':[text]})
           event.mimeData().setData('ccpnmr-json', itemData)
           event.mimeData().setText(itemData)
+
 
   def dragMoveEvent(self, event:QtGui.QMouseEvent):
     """

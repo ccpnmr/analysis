@@ -24,10 +24,6 @@ class NmrResidueTable(QtGui.QWidget, Base):
     self.project = project
     self.nmrChains = project.nmrChains
 
-    # label = Label(self, "Nmr Chain", grid=(0, 0))
-    # self.nmrChainPulldown = PulldownList(self, grid=(0, 1))
-
-
     label = Label(self, "Nmr Chain:")
     widget1 = QtGui.QWidget(self)
     widget1.setLayout(QtGui.QGridLayout())
@@ -35,11 +31,6 @@ class NmrResidueTable(QtGui.QWidget, Base):
     self.nmrChainPulldown = PulldownList(self, grid=(0, 1))
     widget1.layout().addWidget(self.nmrChainPulldown, 0, 1)
     self.layout().addWidget(widget1, 0, 0)
-    # if callback is None:
-    #   callback=self.selectPeak
-
-
-
 
     columns = [('#', lambda nmrResidue: nmrResidue.serial),
                ('NmrChain', lambda nmrResidue: nmrResidue._parent.id),

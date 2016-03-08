@@ -43,11 +43,11 @@ class DropBase(GuiBase):
 
     from application.core.util import Qt as qtUtil
 
-    event.accept()
-
-    data, dataType  = qtUtil.interpretEvent(event)
+    data, dataType = qtUtil.interpretEvent(event)
     if data and dataType:
+      event.accept()
       self.processDropData(data, dataType, event)
+
 
 
   def processDropData(self, data, dataType='pids', event=None):

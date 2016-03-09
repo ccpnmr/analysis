@@ -196,8 +196,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         phaseTraces = self.hPhaseTraces
         position = self.strip.mousePosition[1]
         if not self.strip.haveSetHPhasingPivot:
-          posn, width, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(0)
-          self.strip.hPhasingPivot.setPos(0.5*(minAliasedFrequency+maxAliasedFrequency))
+          viewParams = self._getSpectrumViewParams(0)
+          # valuePerPoint, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(0)
+          self.strip.hPhasingPivot.setPos(0.5*(viewParams.minAliasedFrequency +
+                                               viewParams.maxAliasedFrequency))
           self.strip.hPhasingPivot.setVisible(True)
           self.strip.haveSetHPhasingPivot = True
       else:
@@ -205,8 +207,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         phaseTraces = self.vPhaseTraces
         position = self.strip.mousePosition[0]
         if not self.strip.haveSetVPhasingPivot:
-          posn, width, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(1)
-          self.strip.vPhasingPivot.setPos(0.5*(minAliasedFrequency+maxAliasedFrequency))
+          viewParams = self._getSpectrumViewParams(1)
+          # valuePerPoint, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(1)
+          self.strip.vPhasingPivot.setPos(0.5*(viewParams.minAliasedFrequency +
+                                               viewParams.maxAliasedFrequency))
           self.strip.vPhasingPivot.setVisible(True)
           self.strip.haveSetVPhasingPivot = True
         
@@ -307,7 +311,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     inRange = True
     point = len(position) * [0]
     for n, pos in enumerate(position): # n = 0 is x, n = 1 is y, etc.
-      spectrumPos, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+      # spectrumPos, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+      valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
       if dataDim:
         if n == 0:
           xDataDim = dataDim
@@ -722,6 +727,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def getPlaneData(self):
     
     apiSpectrumView = self._apiStripSpectrumView.spectrumView
+    orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
     dataDims = apiSpectrumView.orderedDataDims
     ll = apiSpectrumView.dataSource.sortedDataDims()
     # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
@@ -739,9 +745,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       yield position, planeData
     elif dimensionCount == 3:
       # zDim = dataDims[2].dim - 1
-      zDataDim = dataDims[2]
-      zPosition, width, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(2)
-        
+      # zDataDim = dataDims[2]
+      # zPosition, width, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(2)
+      valuePerPoint, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, zDataDim = self._getSpectrumViewParams(2)
+      zPosition = orderedAxes[2].position
+      width =  orderedAxes[2].width
+
       if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
         return
         
@@ -784,8 +793,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     elif dimensionCount == 4:
       # zDim = dataDims[2].dim - 1
-      zDataDim = dataDims[2]
-      zPosition, width, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(2)
+      # zDataDim = dataDims[2]
+      # zPosition, width, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(2)
+      valuePerPoint, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, zDataDim = self._getSpectrumViewParams(2)
+      zPosition = orderedAxes[2].position
+      width =  orderedAxes[2].width
         
       if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
         return
@@ -819,8 +831,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       zPointCount = zDataDim.numPoints
             
       # wDim = dataDims[3].dim - 1
-      wDataDim = dataDims[3]
-      wPosition, width, wTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(3)
+      # wDataDim = dataDims[3]
+      # wPosition, width, wTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(3)
+      valuePerPoint, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, wDataDim = self._getSpectrumViewParams(3)
+      wPosition = orderedAxes[3].position
+      width =  orderedAxes[3].width
         
       if not (minAliasedFrequency <= wPosition <= maxAliasedFrequency):
         return
@@ -922,32 +937,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     translate = pixelViewBox0 - firstPoint * scale
 
     # dataDim2 should be same as dataDim
-    position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim2 = (
-      self._getSpectrumViewParams(ind))
-
-
-    # totalPointCount = self.spectrum.totalPointCounts[dim]
-    # minAliasedFrequency = self.spectrum.maxAliasedFrequencies[dim]
-    # if minAliasedFrequency is not None:
-    #   minAliasedFrequencyPoint = self.spectrum.getDimPointFromValue(dim, minAliasedFrequency) # max for min and vice versa
-    # else:
-    #   minAliasedFrequencyPoint = 0
-    # maxAliasedFrequency = self.spectrum.minAliasedFrequencies[dim]
-    # if maxAliasedFrequency is not None:
-    #   maxAliasedFrequencyPoint = self.spectrum.getDimPointFromValue(dim, maxAliasedFrequency)
-    # else:
-    #   maxAliasedFrequencyPoint = totalPointCount - 1
+    # position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim2 = (
+    #   self._getSpectrumViewParams(ind))
+    viewParams = self._getSpectrumViewParams(ind)
     
     # -1 below because points start at 1 in data model
-    clipPoint0 = int(math.floor(max(firstPoint, valueToPoint(maxAliasedFrequency)-1)))
-    clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(minAliasedFrequency)-1)))
+    clipPoint0 = int(math.floor(max(firstPoint, valueToPoint(viewParams.maxAliasedFrequency)-1)))
+    clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(viewParams.minAliasedFrequency)-1)))
 
-    return translate, scale, totalPointCount, clipPoint0, clipPoint1
-    
-  ###def _connectPeakLayerVisibility(self, peakLayer):
-  ###  apiDataSource = self._wrappedData.spectrumView.dataSource
-  ###  action = self.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
-  ###  action.toggled.connect(peakLayer.setVisible) # TBD: need to undo this if peakLayer removed
-    
-  
+    return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
+
   

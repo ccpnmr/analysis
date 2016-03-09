@@ -168,29 +168,29 @@ class GuiPeakListView(QtGui.QGraphicsItem):
           offset = 0.5 * peakHalfSize
           printer.writeText(text, a1+offset, b1-offset)
 
-  def regionChanged(self):
-
-    parent = self.parent
-    xValRange = parent.orderedAxes[0].region
-    yValRange = parent.orderedAxes[1].region
-
-    xr1, xr2 = xValRange
-    yr1, yr2 = yValRange
-
-    dx = xr1-xr2
-    dy = yr1-yr2
-
-    w, h, = self.parent.geometry()[:2]
-
-    self.setTransform(IDENTITY)
-    self.scale(-w/dx, h/dy)
-
-    xPos = w * xr1/dx
-    yPos = h - (h * yr1/dy)
-
-    inverse, isOk = self.transform().inverted()
-
-    self.setPos(xPos, yPos)
+  # def regionChanged(self):
+  #
+  #   parent = self.parent
+  #   xValRange = parent.orderedAxes[0].region
+  #   yValRange = parent.orderedAxes[1].region
+  #
+  #   xr1, xr2 = xValRange
+  #   yr1, yr2 = yValRange
+  #
+  #   dx = xr1-xr2
+  #   dy = yr1-yr2
+  #
+  #   w, h, = self.parent.geometry()[:2]
+  #
+  #   self.setTransform(IDENTITY)
+  #   self.scale(-w/dx, h/dy)
+  #
+  #   xPos = w * xr1/dx
+  #   yPos = h - (h * yr1/dy)
+  #
+  #   inverse, isOk = self.transform().inverted()
+  #
+  #   self.setPos(xPos, yPos)
 
     # for peak in peakList.peaks:
     #   peakItem = Peak1d(scene, parent, peak, peakList)

@@ -92,8 +92,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible() and not self.hPhaseTrace:
       if not self.strip.haveSetHPhasingPivot:
-        posn, width, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(0)
-        self.strip.hPhasingPivot.setPos(0.5*(minAliasedFrequency+maxAliasedFrequency))
+        viewParams = self._getSpectrumViewParams(0)
+        # valuePerPoint, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(0)
+        self.strip.hPhasingPivot.setPos(0.5*(viewParams.minAliasedFrequency +
+                                             viewParams.maxAliasedFrequency))
         self.strip.hPhasingPivot.setVisible(True)
         self.strip.haveSetHPhasingPivot = True
       trace = pg.PlotDataItem()
@@ -143,7 +145,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     point = []
     for n, pos in enumerate(position): # n = 0 is x, n = 1 is y, etc.
       if n != 1:
-        spectrumPos, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+        valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
         if dataDim:
           if n == 0:
             xDataDim = dataDim

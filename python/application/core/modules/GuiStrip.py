@@ -722,8 +722,8 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
   """Notifier function for when axis position or width changes"""
 
   position = apiAxis.position
-  halfwidth = apiAxis.width / 2.
-  region =  (position - halfwidth, position + halfwidth)
+  width = apiAxis.width
+  region =  (position - width/2., position + width/2.)
 
   for apiStrip in apiAxis.strips:
     strip = project._data2Obj[apiStrip]
@@ -742,11 +742,6 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
           strip.viewBox.setYRange(*region)
         else:
           # One of the Z axes
-          #peakLists = strip.peakListViewDict.keys()
-          #for peakList in peakLists:
-          #  peakListView = strip.peakListViewDict[peakList]
-          #  peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
-          #  strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
           for spectrumView in strip.spectrumViews:
             if spectrumView.isVisible():
               for peakListView in spectrumView.peakListViews:
@@ -759,7 +754,10 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
           if isinstance(strip, GuiStripNd):
             n = index - 2
             if n >= 0:
-              strip.planeToolbar.planeLabels[n].setValue(position)
+              planeLabel = strip.planeToolbar.planeLabels[n]
+              planeSize = planeLabel.singleStep()
+              planeLabel.setValue(position)
+              strip.planeToolbar.planeCounts[n].setValue(width/planeSize)
         
       finally:
         strip.beingUpdated = False

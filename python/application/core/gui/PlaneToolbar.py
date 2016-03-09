@@ -18,8 +18,9 @@ class PlaneToolbar(ToolBar):
 
     ToolBar.__init__(self, strip.stripFrame, **kw)
 
-    self.stripLabel = SpinSystemLabel(self, text='.'.join(strip.pid.id.split('.')[2:]), appBase=strip._parent._appBase,
-                                 hAlign='center', vAlign='top', strip=strip)
+    self.stripLabel = SpinSystemLabel(self, text='.'.join(strip.pid.id.split('.')[2:]),
+                                      appBase=strip._parent._appBase,
+                                      hAlign='center', vAlign='top', strip=strip)
     self.stripLabel.setFixedHeight(15)
     self.stripLabel.setFont(QtGui.QFont('Lucida Grande', 10))
     self.spinSystemLabel = Label(self, text='',

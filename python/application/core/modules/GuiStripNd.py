@@ -198,34 +198,29 @@ class GuiStripNd(GuiStrip):
         # spectrum = spectrumView.spectrum
         # zDim = spectrum.axisCodes.index(zAxis.code)
 
-        position, width, totalPointCount, minFrequency, maxFrequency, dataDim = (
-          spectrumView._getSpectrumViewParams(n+2))
-      
-        # minFrequency = spectrum.minAliasedFrequencies[zDim]
-        # TBD: the below does not work for pseudo-ND data sets
-        # if minFrequency is None:
-        #   totalPointCount = spectrum.totalPointCounts[zDim]
-        #   minFrequency = spectrum.getDimValueFromPoint(zDim, totalPointCount-1.0)
-        if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
-          minAliasedFrequency = minFrequency
+        # position, width, totalPointCount, minFrequency, maxFrequency, dataDim = (
+        #   spectrumView._getSpectrumViewParams(n+2))
+        viewParams = spectrumView._getSpectrumViewParams(n+2)
 
-        # maxFrequency = spectrumView.spectrum.maxAliasedFrequencies[zDim]
-        # TBD: the below does not work for pseudo-ND data sets
-        # if maxFrequency is None:
-        #   maxFrequency = spectrum.getDimValueFromPoint(zDim, 0.0)
-        if maxAliasedFrequency is None or maxFrequency < maxAliasedFrequency:
-          maxAliasedFrequency = maxFrequency
+        minFrequency = viewParams.minAliasedFrequency
+        if minFrequency is not None:
+         if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
+           minAliasedFrequency = minFrequency
 
-        # NBNB 1) we should use the region width for the step size. 2) the width is the same in all cases
-        # zPlaneSize = spectrumView._apiSpectrumView.spectrumView.orderedDataDims[n].getDefaultPlaneSize()
-        # zPlaneSize = spectrumView.zPlaneSize()
-        minZPlaneSize = width
-        # if zPlaneSize is not None:
-        #   if minZPlaneSize is None or zPlaneSize < minZPlaneSize:
-        #     minZPlaneSize = zPlaneSize
+        maxFrequency = viewParams.maxAliasedFrequency
+        if maxFrequency is not None:
+          if maxAliasedFrequency is None or maxFrequency < maxAliasedFrequency:
+            maxAliasedFrequency = maxFrequency
+
+        width = viewParams.valuePerPoint
+        if minZPlaneSize is None or width < minZPlaneSize:
+          minZPlaneSize = width
           
       if minZPlaneSize is None:
         minZPlaneSize = 1.0 # arbitrary
+      else:
+        # Necessary, otherwise it does not know what width it should have
+        zAxis.width = minZPlaneSize
       
       planeLabel = self.planeToolbar.planeLabels[n]
       
@@ -273,7 +268,8 @@ class GuiStripNd(GuiStrip):
     Changes the number of planes displayed simultaneously.
     """
     zAxis = self.orderedAxes[n+2]
-    zAxis.width*=value
+    planeLabel = self.planeToolbar.planeLabels[n]
+    zAxis.width = value * planeLabel.singleStep()
 
   def nextZPlane(self, n:int=0):
     """
@@ -295,7 +291,7 @@ class GuiStripNd(GuiStrip):
     """
     Adds the plane toolbar to the strip.
     """
-    callbacks = [self.prevZPlane, self.nextZPlane, self.setZPlanePosition, self.setPlaneCount]
+    callbacks = [self.prevZPlane, self.nextZPlane, self.setZPlanePosition, self.changePlaneCount]
 
     self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                      hAlign='center', vAlign='c', callbacks=callbacks)
@@ -309,16 +305,18 @@ class GuiStripNd(GuiStrip):
     Sets the value of the z plane position box if the specified value is within the displayable limits.
     """
     planeLabel = self.planeToolbar.planeLabels[n]
-    if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
+    # 8/3/2016 RAsmus Fogh. Fixed untested (obvious bug)
+    # if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
+    if planeLabel.minimum() <= value <= planeLabel.maximum():
       self.changeZPlane(n, position=value)
 
-  def setPlaneCount(self, n:int=0, value:int=1):
-    """
-    Sets the number of planes to be displayed simultaneously.
-    """
-    planeCount = self.planeToolbar.planeCounts[n]
-    self.changePlaneCount(value=(value/planeCount.oldValue))
-    planeCount.oldValue = value
+  # def setPlaneCount(self, n:int=0, value:int=1):
+  #   """
+  #   Sets the number of planes to be displayed simultaneously.
+  #   """
+  #   planeCount = self.planeToolbar.planeCounts[n]
+  #   self.changePlaneCount(value=(value/planeCount.oldValue))
+  #   planeCount.oldValue = value
 
   def _findPeakListView(self, peakList:PeakList):
     

@@ -23,6 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 from PyQt4 import QtCore, QtGui
 
+import collections
+
 from ccpncore.util import Colour
 from application.core.Base import Base as GuiBase
 
@@ -30,6 +32,12 @@ import pyqtgraph as pg
 
 #from application.core.modules.spectrumPane.PeakListItem import PeakListItem
 #from application.core.modules.spectrumPane.IntegralListItem import IntegralListItem
+
+SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoint',
+                                                                   'totalPointCount',
+                                                                   'minAliasedFrequency',
+                                                                   'maxAliasedFrequency',
+                                                                   'dataDim'))
 
 class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
 
@@ -104,7 +112,7 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
     for axisDimth axis (zero-origin)"""
 
-    axis = self.strip.orderedAxes[axisDim]
+    # axis = self.strip.orderedAxes[axisDim]
     dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
     totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, "numPointsOrig")
                        else dataDim.numPoints)
@@ -116,7 +124,20 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     else:
       minAliasedFrequency = maxAliasedFrequency = dataDim = None
 
-    return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
+    if hasattr(dataDim, 'primaryDataDimRef'):
+      # FreqDataDim - get ppm valuePerPoint
+      ddr = dataDim.primaryDataDimRef
+      valuePerPoint = ddr and ddr.valuePerPoint
+    elif hasattr(dataDim, 'valuePerPoint'):
+      # FidDataDim - get time valuePerPoint
+      valuePerPoint = dataDim.valuePerPoint
+    else:
+      # Sampled DataDim - return None
+      valuePerPoint = None
+
+    # return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
+    return SpectrumViewParams(valuePerPoint, totalPointCount,
+                              minAliasedFrequency, maxAliasedFrequency, dataDim)
 
   def _getColour(self, colourAttr, defaultColour=None):
 

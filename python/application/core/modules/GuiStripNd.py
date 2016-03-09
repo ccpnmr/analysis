@@ -131,7 +131,7 @@ class GuiStripNd(GuiStrip):
       self.gridAction.setChecked(False)
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
-    
+
   def resetZoom(self):
     """
     Resets zoom of strip axes to limits of maxima and minima of the limits of the displayed spectra.
@@ -156,17 +156,17 @@ class GuiStripNd(GuiStrip):
 
   def updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
-    
+
     GuiStrip.updateRegion(self, viewBox)
     self.updateTraces()
-    
+
   def updateTraces(self):
-    
+
     updateHTrace = self.hTraceAction.isChecked()
     updateVTrace = self.vTraceAction.isChecked()
     for spectrumView in self.spectrumViews:
       spectrumView.updateTrace(self.mousePosition, self.mousePixel, updateHTrace, updateVTrace)
-    
+
   def toggleHTrace(self):
     """
     Toggles whether or not horizontal trace is displayed.
@@ -185,7 +185,7 @@ class GuiStripNd(GuiStrip):
 
     GuiStrip.mouseMoved(self, positionPixel)
     self.updateTraces()
-    
+
   def setZWidgets(self):
     """
     Sets values for the widgets in the plane toolbar.
@@ -215,37 +215,37 @@ class GuiStripNd(GuiStrip):
         width = viewParams.valuePerPoint
         if minZPlaneSize is None or width < minZPlaneSize:
           minZPlaneSize = width
-          
+
       if minZPlaneSize is None:
         minZPlaneSize = 1.0 # arbitrary
       else:
         # Necessary, otherwise it does not know what width it should have
         zAxis.width = minZPlaneSize
-      
+
       planeLabel = self.planeToolbar.planeLabels[n]
-      
+
       planeLabel.setSingleStep(minZPlaneSize)
-    
+
       if minAliasedFrequency is not None:
         planeLabel.setMinimum(minAliasedFrequency)
-      
+
       if maxAliasedFrequency is not None:
         planeLabel.setMaximum(maxAliasedFrequency)
 
       planeLabel.setValue(zAxis.position)
-    
+
       if not self.haveSetupZWidgets:
         # have to set this up here, otherwise the callback is called too soon and messes up the position
-        planeLabel.valueChanged.connect(partial(self.setZPlanePosition, n))
-    
+        planeLabel.editingFinished.connect(partial(self.setZPlanePosition, n, planeLabel.value()))
+
     self.haveSetupZWidgets = True
-      
+
   def changeZPlane(self, n:int=0, planeCount:int=None, position:float=None):
     """
     Changes the position of the z axis of the strip by number of planes or a ppm position, depending
     on which is specified.
     """
-    
+
     zAxis = self.orderedAxes[n+2]
     planeLabel = self.planeToolbar.planeLabels[n]
     planeSize = planeLabel.singleStep()
@@ -304,7 +304,11 @@ class GuiStripNd(GuiStrip):
     """
     Sets the value of the z plane position box if the specified value is within the displayable limits.
     """
+    print(value)
     planeLabel = self.planeToolbar.planeLabels[n]
+    if planeLabel.valueChanged:
+      value = planeLabel.value()
+    print(value)
     # 8/3/2016 RAsmus Fogh. Fixed untested (obvious bug)
     # if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
     if planeLabel.minimum() <= value <= planeLabel.maximum():

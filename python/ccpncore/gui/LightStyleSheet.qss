@@ -97,15 +97,18 @@ QDialog QLabel {
 QDialog QPushButton {
 				color: #fdfdfc;
 				background-color: #bd8413;
+        padding: 2px;
 				}
 QDialog QPushButton::clicked {
                           color: #fdfdfc;
                           background-color: #8087b3;
-                          }
+                          padding: 2px;
+				                  }
 QDialog QPushButton::hover {
                           color: #fdfdfc;
                           background-color: #009a00;
-                          }
+                          padding: 2px;
+				                  }
 
 QToolButton {
             color: #464E76;
@@ -113,7 +116,7 @@ QToolButton {
             }
 
 QToolButton::checked {
-                      background-color:  #bd8413;
+                      background-color:  #EDC151;
                       }
 
 QDialog::header {
@@ -183,18 +186,22 @@ QTextEdit {
 Dock  QPushButton {
 				color: #fdfdfc;
 				background-color: #bd8413;
-				border: none
+				border: 1px solid #EDC151;
+				padding: 2px;
 				}
+
 Dock  QPushButton::checked {
 				color: #fdfdfc;
 				background-color: #8087b3;
+				padding: 2px;
 				}
 
 
 Dock ScrollArea QPushButton {
 				color: #fdfdfc;
 				background-color: #bd8413;
-				border: none
+				border: 1px solid #EDC151;
+				padding: 2px;
 				}
 
 Dock Assigner QWidget { background-color: #FBF4CC;
@@ -222,10 +229,13 @@ Dock > QWidget { background-color: #FBF4CC;
 Dock QPushButton::pressed {
                           color: #fdfdfc;
                           background-color: #8087b3;
+                          padding: 2px;
+
                           }
 Dock QPushButton::hover {
                           color: #fdfdfc;
                           background-color: #009a00;
+                          padding: 2px;
                           }
 
 Dock {
@@ -302,6 +312,7 @@ QLineEdit::selected {
         }
 
 
+
 QSplitter::handle:horizontal {
     width: 1px;
 }
@@ -318,7 +329,7 @@ padding: 0px;
 SpectrumPropertiesPopup QPushButton {background-color: #BD8413;
             border: 1px solid #EDC151;
             color: #FDFDFC;
-            padding: 0px;
+            padding: 2px;
             }
 
 QSplitter {

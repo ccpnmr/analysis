@@ -54,6 +54,7 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     self.plotItem.setAcceptDrops(True)
     self.plotItem.axes['left']['item'].hide()
     self.plotItem.axes['right']['item'].show()
+    self.hideButtons()
 
 
 

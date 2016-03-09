@@ -43,11 +43,15 @@ class SetupNmrResiduesPopup(QtGui.QDialog, Base):
     label1a = Label(self, text="NmrChain ", grid=(0, 2))
     self.nmrChainPulldown = PulldownList(self, grid=(0, 3))
     self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in project.nmrChains])
-    self.assignmentCheckBox = CheckBox(self, grid=(1, 0))
-    assignmentLabel = Label(self, "Keep existing assignments", grid=(1, 1))
+    newWidget = QtGui.QWidget()
+    newWidget.setLayout(QtGui.QGridLayout())
+    self.assignmentCheckBox = CheckBox(newWidget)
+    assignmentLabel = Label(newWidget, "Keep existing assignments")
+    newWidget.layout().addWidget(self.assignmentCheckBox, 0, 0)
+    newWidget.layout().addWidget(assignmentLabel, 0, 1)
+    self.layout().addWidget(newWidget, 1, 0, 1, 2)
 
-
-    self.buttonBox = ButtonList(self, grid=(3, 0), texts=['Cancel', 'Ok'],
+    self.buttonBox = ButtonList(self, grid=(1, 3), texts=['Cancel', 'Ok'],
                            callbacks=[self.reject, self.setupNmrResidues])
 
 

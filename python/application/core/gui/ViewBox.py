@@ -110,6 +110,7 @@ class ViewBox(pg.ViewBox):
         if spectrumView.spectrum.dimensionCount == 1:
           continue
         if spectrumView.isVisible():
+          print('here1111')
           for peakList in spectrumView.spectrum.peakLists:
             for peak in peakList.peaks:
               if (xPositions[0] < float(peak.position[0]) < xPositions[1]

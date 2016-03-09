@@ -337,7 +337,7 @@ def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
     action.setToolTip(apiDataSource.name)
     widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
     widget.setIconSize(QtCore.QSize(120, 10))
-    widget.setFixedSize(100, 30)
+    widget.setFixedSize(75, 30)
     widget.spectrumView = apiSpectrumView
     spectrumDisplay.spectrumActionDict[apiDataSource] = action
     spectrumDisplay._setActionIconColour(apiDataSource)

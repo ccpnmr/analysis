@@ -112,6 +112,10 @@ QToolButton {
             border: 1px solid #EDC151;
             }
 
+QToolButton::checked {
+                      background-color:  #bd8413;
+                      }
+
 QDialog::header {
                 color:  #555d85;
                 }
@@ -152,10 +156,6 @@ QToolBar {
           border: 1px solid transparent;
           }
 
-QToolButton {
-            color: #555d85;
-            border: 1px solid #182548;
-            }
 
 Label {
         color: #555D85;
@@ -310,12 +310,9 @@ QSplitter::handle:vertical {
     height: 1px;
 }
 
-QTabWidget QWidget { background: #FBF4CC;
+QTabWidget  QWidget { background: #FBF4CC;
 padding: 0px;
     }
-
-
-
 
 
 SpectrumPropertiesPopup QPushButton {background-color: #BD8413;

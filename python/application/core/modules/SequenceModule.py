@@ -6,6 +6,7 @@ from ccpn import Residue
 
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
+from ccpncore.gui.MessageDialog import showYesNo
 from ccpncore.util import Types
 
 from application.core.DropBase import DropBase
@@ -14,7 +15,7 @@ from PyQt4 import QtCore, QtGui
 class SequenceModule(CcpnDock):
 
   def __init__(self, project):
-    CcpnDock.__init__(self, name='Sequence')
+    CcpnDock.__init__(self, size=(10, 30), name='Sequence')
 
     self.project = project
     self.colourScheme = project._appBase.preferences.general.colourScheme
@@ -173,6 +174,8 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
     all succeeding residues according to the length of the list.
     """
+
+
     if self.project._appBase.preferences.general.colourScheme == 'dark':
       colour = '#f7ffff'
     elif self.project._appBase.preferences.general.colourScheme == 'light':
@@ -181,22 +184,25 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     nmrChain = self.project.getByPid(data[0])
     residues = [guiRes.residue]
     toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
-    for ii in range(len(toAssign)-1):
-      resid = residues[ii]
-      next = resid.nextResidue
-      residues.append(next)
-    nmrChain.assignConnectedResidues(guiRes.residue)
-    for ii, res in enumerate(residues):
-      guiResidue = self.parent.residueDict.get(res.sequenceCode)
-      guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
-                           res.shortName+'</strong></div>')
+    print(toAssign, residues)
+    result = showYesNo('Assignment', 'Assign %s to residue %s?' % (toAssign[0].id, residues[0].id, ))
+    if result:
+      for ii in range(len(toAssign)-1):
+        resid = residues[ii]
+        next = resid.nextResidue
+        residues.append(next)
+      nmrChain.assignConnectedResidues(guiRes.residue)
+      for ii, res in enumerate(residues):
+        guiResidue = self.parent.residueDict.get(res.sequenceCode)
+        guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
+                             res.shortName+'</strong></div>')
 
-    if hasattr(self.project._appBase.mainWindow, 'bbModule'):
-      nmrResidueTable = self.project._appBase.mainWindow.bbModule.nmrResidueTable.nmrResidueTable
-      nmrResidueTable.objectLists = self.project.nmrChains
-      nmrResidueTable.updateTable()
+      if hasattr(self.project._appBase.mainWindow, 'bbModule'):
+        nmrResidueTable = self.project._appBase.mainWindow.bbModule.nmrResidueTable.nmrResidueTable
+        nmrResidueTable.objectLists = self.project.nmrChains
+        nmrResidueTable.updateTable()
 
-    event.accept()
+      event.accept()
     self.parent.parent.overlay.hide()
 
 

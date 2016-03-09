@@ -61,11 +61,13 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
       tabWidget.addTab(ContoursTab(spectrum), "Contours")
 
 
-    self.setWindowTitle("Spectrum Information")
     self.layout().addWidget(tabWidget, 0, 0, 2, 2)
     buttonBox = Button(self, grid=(3, 1), callback=self.accept, text='Close',
                            vPolicy='fixed')
-
+    if spectrum.project._appBase.preferences.general.colourScheme == 'dark':
+      self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358;}")
+    elif spectrum.project._appBase.preferences.general.colourScheme == 'light':
+      self.setStyleSheet("QTabWidget > QWidget { background-color: #fbf4cc;} QTabWidget { background-color: #fbf4cc;}")
   def keyPressEvent(self, event):
     if event.key() == QtCore.Qt.Key_Enter:
       pass
@@ -88,6 +90,8 @@ class GeneralTab(QtGui.QWidget, Base):
 
     self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
+
+    self.setWindowTitle("Spectrum Information")
 
     apiDataStore = spectrum._apiDataSource.dataStore
     if apiDataStore.dataLocationStore.name == 'standard':
@@ -229,20 +233,24 @@ class GeneralTab(QtGui.QWidget, Base):
 
   def setSpectrumPath(self):
     if self.pathData.isModified():
-      self.spectrum.filePath = self.pathData.text()
-      self.writeLoggingMessage("spectrum.filePath = '%s'" % self.pathData.text())
-      self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % self.pathData.text(), spectrum=self.spectrum)
-      apiDataStore = self.spectrum._apiDataSource.dataStore
-      if apiDataStore.dataLocationStore.name == 'standard':
-        dataUrlName = apiDataStore.dataUrl.name
-        if dataUrlName == 'insideData':
-          self.pathData.setText('$INSIDE/%s' % apiDataStore.path)
-        elif dataUrlName == 'alongsideData':
-          self.pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
-        elif dataUrlName == 'remoteData':
-          self.pathData.setText('$DATA/%s' % apiDataStore.path)
-        else:
-          self.pathData.setText(apiDataStore.fullPath)
+      if os.path.exists(self.pathData.text()):
+        self.spectrum.filePath = self.pathData.text()
+        self.writeLoggingMessage("spectrum.filePath = '%s'" % self.pathData.text())
+        self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % self.pathData.text(), spectrum=self.spectrum)
+        apiDataStore = self.spectrum._apiDataSource.dataStore
+        if apiDataStore.dataLocationStore.name == 'standard':
+          dataUrlName = apiDataStore.dataUrl.name
+          if dataUrlName == 'insideData':
+            self.pathData.setText('$INSIDE/%s' % apiDataStore.path)
+          elif dataUrlName == 'alongsideData':
+            self.pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
+          elif dataUrlName == 'remoteData':
+            self.pathData.setText('$DATA/%s' % apiDataStore.path)
+          else:
+            self.pathData.setText(apiDataStore.fullPath)
+      else:
+        self.logger.error('Cannot set spectrum path to %s. Path does not exist' % self.pathData.text())
+        return
 
 
   def changeSpectrumColour(self, spectrum):
@@ -261,7 +269,7 @@ class GeneralTab(QtGui.QWidget, Base):
 
   def changedColourComboIndex(self, spectrum, value):
     spectrum.sliceColour = list(spectrumColours.keys())[value]
-    pix = QtGui.QPixmap(60,10)
+    pix = QtGui.QPixmap(60, 10)
     pix.fill(QtGui.QColor(spectrum.sliceColour))
     self.writeLoggingMessage("spectrum.sliceColour = '%s'" % list(spectrumColours.keys())[value])
     self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % list(spectrumColours.keys())[value], spectrum=self.spectrum)

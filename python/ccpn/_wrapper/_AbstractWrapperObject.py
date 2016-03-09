@@ -486,7 +486,7 @@ class AbstractWrapperObject():
   @property
   def isDeleted(self) -> bool:
     """Is object deleted?"""
-    return (self._wrappedData is None)
+    return (not hasattr(self, '_wrappedData') or self._wrappedData is None)
   
   # CCPN abstract properties
   

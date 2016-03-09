@@ -379,6 +379,8 @@ class Project(AbstractWrapperObject):
   def _close(self):
     """Clean up the wrapper project previous to deleting or replacing"""
     # Remove undo stack:
+    self._logger.info("project._close()")
+
     self._resetUndo(maxWaypoints=0)
 
     ioUtil.cleanupProject(self)
@@ -394,7 +396,10 @@ class Project(AbstractWrapperObject):
 
   def __repr__(self):
     """String representation"""
-    return "<ccpn.Project:name=%s>" % self.name
+    if self.isDeleted:
+      return "<ccpn.Project:isDeleted=True>"
+    else:
+      return "<ccpn.Project:name=%s>" % self.name
 
 
   # CCPN properties  

@@ -72,8 +72,14 @@ class DropBase(GuiBase):
         # Load Urls one by one with normal loaders
         for url in data:
           loaded = project.loadData(url)
+
+          if loaded and loaded[0] is self._appBase.project:
+            # We have loaded a new project
+            return
+
           self._appBase.mainWindow.pythonConsole.writeConsoleCommand("project.loadData('%s')" % url)
           project._logger.info("project.loadData('%s')" % url)
+
           if loaded:
             if isinstance(loaded, str):
               if hasattr(self, 'processText'):
@@ -91,6 +97,7 @@ class DropBase(GuiBase):
                 break
               else:
                 pids.extend(newPids)
+
           else:
             if isinstance(self, CcpnDock):
               self.overlay.hide()

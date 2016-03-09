@@ -155,7 +155,7 @@ class ViewBox(pg.ViewBox):
         if len(orderedAxes) > 2:
           for n in orderedAxes[2:]:
             position.append(n.position)
-        peakList.newPeak(position=position)
+        peak = peakList.newPeak(position=position)
         self.current.addPeak(peak)
         peak.isSelected = True
         self.current.strip.showPeaks(peakList)

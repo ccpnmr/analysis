@@ -110,7 +110,6 @@ class ViewBox(pg.ViewBox):
         if spectrumView.spectrum.dimensionCount == 1:
           continue
         if spectrumView.isVisible():
-          print('here1111')
           for peakList in spectrumView.spectrum.peakLists:
             for peak in peakList.peaks:
               if (xPositions[0] < float(peak.position[0]) < xPositions[1]
@@ -297,6 +296,8 @@ class ViewBox(pg.ViewBox):
         # selectedPeaks = []
         self.current.clearPeaks()
         for spectrumView in self.current.strip.spectrumViews:
+          if not spectrumView.isVisible():
+            continue
           for peakList in spectrumView.spectrum.peakLists:
             stripAxisCodes = self.current.strip.axisOrder
             # TODO: Special casing 1D here, seems like a hack.

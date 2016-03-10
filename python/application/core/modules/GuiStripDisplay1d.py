@@ -125,21 +125,32 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
       else:
         peakItem = GuiPeakListView.Peak1d(peak, peakListView)
       peakItemDict[apiPeak] = peakItem
+
+
   def fillToolBar(self):
     """
     Adds specific icons for 1d spectra to the spectrum utility toolbar.
     """
-    GuiSpectrumDisplay.fillToolBar(self)
-    
     spectrumUtilToolBar = self.spectrumUtilToolBar
-    
+    spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64))
+
+    GuiSpectrumDisplay.fillToolBar(self)
+
+
+    # Disable add and remove strips, as they're broken
+    spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
+    spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
+    # spectrumUtilToolBar.actions()[0].setDisabled(True)
+
+    # Why does asking for the icon size fix it?  I don't know, but it does!
+
     autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self.zoomYAll)
-    autoScaleActionIcon = Icon('iconsNew/zoom-best-fit')
+    autoScaleActionIcon = Icon('iconsNew/zoom-best-fit-1d')
     # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
     autoScaleAction.setIcon(autoScaleActionIcon)
     # autoScaleAction.setText("AutoScale")
     fullZoomAction = spectrumUtilToolBar.addAction("Full", self.zoomXAll)
-    fullZoomIcon = Icon('iconsNew/zoom-full')
+    fullZoomIcon = Icon('iconsNew/zoom-full-1d')
     fullZoomAction.setIcon(fullZoomIcon)
     storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
     storeZoomIcon = Icon('iconsNew/zoom-store')
@@ -272,6 +283,8 @@ def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
     return
 
   apiDataSource = apiSpectrumView.dataSource
+  # spectrumView = project._data2Obj[apiSpectrumView]
+  # spectrumDisplay.plotWidget.removeItem(spectrumView.plot)
 
   # remove toolbar action (button)
   action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be not None

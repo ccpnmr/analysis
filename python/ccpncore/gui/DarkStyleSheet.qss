@@ -62,6 +62,8 @@ PulldownList::item::selected {
                    color: #122043;
                    }
 
+PulldownList QListView { background-color: #f7ffff; }
+
 QMenuBar::item {
                 background-color: #424a71;
                 color: #bec4f3;

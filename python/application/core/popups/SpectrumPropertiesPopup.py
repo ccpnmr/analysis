@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
-import os
+import os, sys
 
 from PyQt4 import QtGui, QtCore
 
@@ -37,7 +37,7 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-0
+
 
 from functools import partial
 
@@ -64,10 +64,11 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
     self.layout().addWidget(tabWidget, 0, 0, 2, 2)
     buttonBox = Button(self, grid=(3, 1), callback=self.accept, text='Close',
                            vPolicy='fixed')
-    if spectrum.project._appBase.preferences.general.colourScheme == 'dark':
-      self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358; color: #f7ffff;} QTabBar::tab {background-color:  #2a3358; color: #f7ffff;} ")
-    elif spectrum.project._appBase.preferences.general.colourScheme == 'light':
-      self.setStyleSheet("QTabWidget > QWidget { background-color: #fbf4cc;} QTabWidget { background-color: #fbf4cc;}")
+    if sys.platform.lower() == 'linux':
+      if spectrum.project._appBase.preferences.general.colourScheme == 'dark':
+        self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358; color: #f7ffff;} QTabBar::tab {background-color:  #2a3358; color: #f7ffff;} ")
+      elif spectrum.project._appBase.preferences.general.colourScheme == 'light':
+        self.setStyleSheet("QTabWidget > QWidget { background-color: #fbf4cc;} QTabWidget { background-color: #fbf4cc;}")
   def keyPressEvent(self, event):
     if event.key() == QtCore.Qt.Key_Enter:
       pass

@@ -99,6 +99,13 @@ QDialog QLabel {
 				color: #f7ffff;
 				background-color: #2a3358;
 				}
+
+QTabWidget QPushButton {
+				color:  #bec4f3;
+        background-color: #535a83;
+        padding: 0px;
+				}
+
 QDialog QPushButton {
 				color:  #bec4f3;
         background-color: #535a83;

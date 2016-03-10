@@ -136,16 +136,28 @@ class SamplePopup(QtGui.QDialog):
       value = (int(self.setup.spinBoxcomponent.value()))
       samples = setupSamples(self.project.substances, value, 'nComponentsPerSample', minimalOverlap=minimalDistance)
 
-    for sample in samples:
-      newItem = sideBar.addItem(sampleTab, sample)
-      for sampleComponent in sample.sampleComponents[0:]:
-        sideBar.addItem(newItem, sampleComponent)
+    # for sample in samples:
+    #   newItem = sideBar.addItem(sampleTab, sample)
+    #   for sampleComponent in sample.sampleComponents[0:]:
+    #     sideBar.addItem(newItem, sampleComponent)
 
 
     # #----- open the analysis table ----#
+    from application.screening.MixtureAnalysis import MixtureAnalysis
+    mixtureAnalysis = MixtureAnalysis(self.project)
+    self.mainWindow = self.project._appBase.mainWindow
+    mixtureAnalysisDock = self.mainWindow.dockArea.addDock(mixtureAnalysis, position='bottom')
+    spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
 
-    sampletable = SampleAnalysis(self.project)
-    self.project._appBase.mainWindow.dockArea.addDock(sampletable)
+    self.mainWindow.dockArea.moveDock(spectrumDisplay.dock, position='top', neighbor=mixtureAnalysisDock)
+    self.mainWindow.dockArea.guiWindow.deleteBlankDisplay()
+    self.project.strips[0].viewBox.autoRange()
+
+    currentDisplayed = self.project.strips[0]
+    for spectrumView in currentDisplayed.spectrumViews:
+      spectrumView.delete()
+
+
     self.accept()
 
                                      # ----- tab1 Sample setup -----

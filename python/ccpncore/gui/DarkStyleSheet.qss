@@ -104,12 +104,14 @@ QTabWidget QPushButton {
 				color:  #bec4f3;
         background-color: #535a83;
         padding: 0px;
+        border: 1px solid #182548;
 				}
 
 QDialog QPushButton {
 				color:  #bec4f3;
         background-color: #535a83;
         padding: 2px;
+        border: 1px solid #182548;
 				}
 
 QDialog QPushButton::clicked {

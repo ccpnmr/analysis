@@ -79,6 +79,7 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
       print('single spectra cannot be dropped onto grouped displays')
       return
 
+
     for ss in pids:
       print(ss)
       guiSpectrumDisplay.displaySpectrum(ss)
@@ -92,24 +93,28 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
 
   def processSpectrumGroups(self, pids:Sequence[str], event:QtGui.QMouseEvent):
     '''
-    Plot spectrumGroups in a grouped display if not already plotted and create its button on spectrumGroups toolBar
+    Plots spectrumGroups in a grouped display if not already plotted and create its button on spectrumGroups toolBar.
+    If a spectrum is already plotted in a display and a group is dropped, all its spectra will be displayed except the
+    one already in.
     '''
-
     guiSpectrumDisplay = self.parent.guiSpectrumDisplay
     displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0]
                                for spectrumView in guiSpectrumDisplay.spectrumViews]
 
-    if hasattr(guiSpectrumDisplay, 'isGrouped'):
+    for spectrum in self._appBase.project.getByPid(pids[0]).spectra:
+      guiSpectrumDisplay.displaySpectrum(spectrum)
 
-      spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
+    spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
                  if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
 
+    if hasattr(guiSpectrumDisplay, 'isGrouped'):
       if len(spectrumGroups)>0:
         spectrumGroupToolBar = guiSpectrumDisplay.strips[0].spectrumDisplay.dock.children()[2].children()[-1]
         spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
         spectrumGroupToolBar.addWidget(spectrumGroupButton)
         for spectrum in spectrumGroups[0].spectra:
           guiSpectrumDisplay.displaySpectrum(spectrum)
+
 
   def processSamples(self, pids:Sequence[str], event):
     """Display sample spectra defined by list of Pid strings"""

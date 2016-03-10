@@ -34,7 +34,7 @@ from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
 
-LANGUAGES = ['English-UK', 'English-US', 'Nederlands', 'Deutsch', 'Español', 'Français', 'Dansk']
+LANGUAGES = ['English-UK', 'Italiano']
 COLOUR_SCHEMES = ['light', 'dark']
 
 
@@ -48,58 +48,50 @@ class PreferencesPopup(QtGui.QDialog):
     self.dataPathLabel = Label(self, "Data Path", grid=(0, 0))
     self.dataPathText = LineEdit(self, grid=(0, 1))
     self.dataPathText.editingFinished.connect(self.setDataPath)
-    self.dataPathButton = Button(self, '...', grid=(0, 2), callback=self.setDataPath)
-    self.autoBackupLabel =  Label(self, text="Auto Backup On Open ", grid=(2, 0))
-    # self.autoBackupBox = CheckBox(self, grid=(2, 1), checked=self.preferences.general.autoBackupOnOpen)
-    # self.autoBackupBox.toggled.connect(partial(self.toggleGeneralOptions, 'autoBackupOnOpen'))
-    # self.autoSaveLabel = Label(self, text='Auto Save On Quit: ', grid=(4, 0))
-    # self.autoSaveBox = CheckBox(self, grid=(4, 1), checked=self.preferences.general.autoSaveOnQuit)
-    # self.autoSaveBox.toggled.connect(partial(self.toggleGeneralOptions, 'autoSaveOnQuit'))
-    self.autoSaveLayoutLabel = Label(self, text="ToolBar Hidden: ", grid=(6, 0))
-    self.autoSaveLayoutBox = CheckBox(self, grid=(6, 1), checked=self.preferences.general.toolbarHidden)
+    self.dataPathText.setText(self.preferences.general.dataPath)
+    self.dataPathButton = Button(self, grid=(0, 2), callback=self.getDataPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.autoSaveLayoutLabel = Label(self, text="ToolBar Hidden: ", grid=(1, 0))
+    self.autoSaveLayoutBox = CheckBox(self, grid=(1, 1), checked=self.preferences.general.toolbarHidden)
     self.autoSaveLayoutBox.toggled.connect(partial(self.toggleGeneralOptions, 'toolbarHidden'))
-    self.auxiliaryFilesLabel = Label(self, text="Auxiliary Files Path ", grid=(8, 0))
-    self.auxiliaryFilesData = LineEdit(self, grid=(8, 1), hAlign='l')
+    self.auxiliaryFilesLabel = Label(self, text="Auxiliary Files Path ", grid=(2, 0))
+    self.auxiliaryFilesData = LineEdit(self, grid=(2, 1))
+    self.auxiliaryFilesDataButton = Button(self, grid=(2, 2), callback=self.setDataPath, icon='iconsNew/directory', hPolicy='fixed')
     self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
-    self.macroPathLabel = Label(self, text="Macro Path", grid=(10, 0))
-    self.macroPathData = LineEdit(self, grid=(10, 1), hAlign='l')
+    self.macroPathLabel = Label(self, text="Macro Path", grid=(3, 0))
+    self.macroPathData = LineEdit(self, grid=(3, 1))
     self.macroPathData.setText(self.preferences.general.macroPath)
-    self.languageLabel = Label(self, text="Language", grid=(12, 0))
-    self.languageBox = PulldownList(self, grid=(12, 1), hAlign='l', gridSpan=(1, 1))
+    self.macroPathDataButton = Button(self, grid=(3, 2), callback=self.setDataPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.languageLabel = Label(self, text="Language", grid=(4, 0))
+    self.languageBox = PulldownList(self, grid=(4, 1), gridSpan=(1, 1))
     self.languageBox.addItems(LANGUAGES)
     self.languageBox.setMinimumWidth(self.dataPathText.width())
     self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
     self.languageBox.currentIndexChanged.connect(self.changeLanguage)
-    self.editorLabel = Label(self, text="Editor ", grid=(14, 0))
-    self.editorData = LineEdit(self, text=self.preferences.general.editor, grid=(14, 1), hAlign='l', gridSpan=(1, 1))
-    self.colourSchemeLabel = Label(self, text="Colour Scheme ", grid=(16, 0))
-    self.colourSchemeBox = PulldownList(self, grid=(16, 1), hAlign='l', gridSpan=(1, 1))
+    # self.editorLabel = Label(self, text="Editor ", grid=(5, 0))
+    # self.editorData = LineEdit(self, text=self.preferences.general.editor, grid=(5, 1), gridSpan=(1, 1))
+    self.colourSchemeLabel = Label(self, text="Colour Scheme ", grid=(5, 0))
+    self.colourSchemeBox = PulldownList(self, grid=(5, 1), gridSpan=(1, 1))
     self.colourSchemeBox.setMinimumWidth(self.dataPathText.width())
     self.colourSchemeBox.addItems(COLOUR_SCHEMES)
     self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
       self.preferences.general.colourScheme))
     self.colourSchemeBox.currentIndexChanged.connect(self.changeColourScheme)
-
-    self.licenceLabel = Label(self, text='Licence', grid=(18, 0))
-    self.licenceButton = Button(self,text='Show Licence', grid=(18, 1), hAlign='l')
-    self.spectraTitle = Label(self, text='Spectra', grid=(22, 0))
-    self.spectraTitle.setStyleSheet("font: bold;")
-    self.keepExternalLabel = Label(self, text='Keep External:', grid=(24, 0))
+    self.licenceLabel = Label(self, text='Licence', grid=(6, 0))
+    self.licenceButton = Button(self, text='Show Licence', grid=(6, 1), gridSpan=(1, 1), callback=self.showLicenceInfo)
+    # self.spectraTitle = Label(self, text='Spectra', grid=(8, 0))
+    # self.spectraTitle.setStyleSheet("font: bold;")
+    # self.keepExternalLabel = Label(self, text='Keep External:', grid=(8, 0))
     # self.keepExternalBox = CheckBox(self, grid=(24, 1), hAlign='l',checked=self.preferences.spectra.keepExternal)
     # self.keepExternalBox.toggled.connect(partial(self.toggleSpectralOptions, 'keepExternal'))
 
-    buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)
-    buttonBox.accepted.connect(self.accept)
-
-
-    self.layout().addWidget(buttonBox, 28, 0, 1, 2)
+    buttonBox = Button(self, grid=(7, 1), text='Close', callback=self.accept)
 
   def getDataPath(self):
     if os.path.exists('/'.join(self.dataPathText.text().split('/')[:-1])):
       currentDataPath = '/'.join(self.dataPathText.text().split('/')[:-1])
     else:
       currentDataPath = os.path.expanduser('~')
-    directory = QtGui.QFileDialog.getExistingDirectory(self, 'Select Spectrum File', currentDataPath)
+    directory = QtGui.QFileDialog.getExistingDirectory(self, 'Select Data File', currentDataPath)
     if len(directory) > 0:
       self.dataPathText.setText(directory)
       self.preferences.general.dataPath = directory
@@ -130,6 +122,10 @@ class PreferencesPopup(QtGui.QDialog):
 
   def toggleSpectralOptions(self, preference, checked):
     self.preferences.spectra[preference] = str(checked)
+
+  def showLicenceInfo(self):
+    import webbrowser
+    webbrowser.open('http://www.ccpn.ac.uk/industry/licencefees')
 
 
 

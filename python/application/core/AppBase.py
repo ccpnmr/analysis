@@ -299,6 +299,10 @@ def startProgram(programClass, applicationName, applicationVersion, components, 
   if language:
     Translation.setTranslationLanguage(language)
     Translation.updateTranslationDict('application.core.gui')
+  elif preferences.general.language != 'English-UK':
+    Translation.setTranslationLanguage(preferences.general.language)
+    Translation.updateTranslationDict('application.core.gui')
+
     
   useFileLogger = not nologging
   

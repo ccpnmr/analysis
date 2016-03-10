@@ -1,5 +1,5 @@
-"""Local enhancementst to json, adding support for reading and writing
-pandas.Seies, pandas.DataFrame, pandas.Panel, numpy.ndarray, OrderedDict,
+"""Local enhancements to json, adding support for reading and writing
+pandas.Series, pandas.DataFrame, pandas.Panel, numpy.ndarray, OrderedDict,
 and ccpncore.Tensor
 
 

@@ -39,6 +39,7 @@ from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup,
 from ccpn import Project
 from ccpn import AbstractWrapperObject
 
+from ccpncore.gui.MessageDialog import showInfo
 
 # NB RestraintList ('RL') is not in for the moment. Needs to be added later
 # NB the order matters!
@@ -99,6 +100,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.spectrumGroupItem = dd['SG'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumGroupItem.setFlags(self.spectrumGroupItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.spectrumGroupItem.setText(0, "SpectrumGroups")
+    self.newSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)
+    self.newSpectrumGroup.setFlags(self.newSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    self.newSpectrumGroup.setText(0, "<New>")
     self.samplesItem = dd['SA'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.samplesItem.setFlags(self.samplesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.samplesItem.setText(0, 'Samples')
@@ -108,9 +112,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.substancesItem = dd['SU'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.substancesItem.setFlags(self.substancesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.substancesItem.setText(0, "Substances")
-    self.newSubstanceItem = QtGui.QTreeWidgetItem(self.substancesItem)
-    self.newSubstanceItem.setFlags(self.newSubstanceItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newSubstanceItem.setText(0, '<New>')
     self.chainItem = dd['MC'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.chainItem.setFlags(self.chainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.chainItem.setText(0, "Chains")
@@ -152,6 +153,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     Sets the specified project as a class attribute so it can be accessed from elsewhere
     """
     self.project = project
+    self.colourScheme = project._appBase.preferences.general.colourScheme
 
   def addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
     """
@@ -225,14 +227,16 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
     if shortClassName in classesInTopLevel:
       itemParent = self._typeToItem.get(shortClassName)
-      self.addItem(itemParent, obj.pid)
+      newItem = self.addItem(itemParent, obj.pid)
+
+      if shortClassName in ['SP', 'SA', 'NC']:
+        newObjectItem = QtGui.QTreeWidgetItem(newItem)
+        newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+        newObjectItem.setText(0, "<New>")
 
     elif shortClassName == 'PL':
       for itemParent in self._findItems(obj.spectrum.pid):
         self.addItem(itemParent, obj.pid)
-      # newPeakListItem = QtGui.QTreeWidgetItem(itemParent)
-      # newPeakListItem.setText(0, '<New>')
-
 
     elif shortClassName == 'SC':
       for itemParent in self._findItems(obj.sample.pid):
@@ -316,6 +320,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     event.accept()
 
   def raisePopup(self, obj, item):
+
     if obj.shortClassName == 'SP':
       popup = SpectrumPropertiesPopup(obj)
       popup.exec_()
@@ -325,8 +330,12 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       popup.exec_()
       popup.raise_()
 
+    elif obj.shortClassName == 'SG':
+      info = showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
+
     elif obj.shortClassName == 'SA':
-      print(obj)
       popup = SamplePropertiesPopup(obj, project=self.project)
       popup.exec_()
       popup.raise_()
@@ -342,25 +351,52 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NR':
-      popup = NmrResiduePopup(nmrResidue=obj)
-      popup.exec_()
-      popup.raise_()
+      info = showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
+      # popup = NmrResiduePopup(nmrResidue=obj)
+      # popup.exec_()
+      # popup.raise_()
     elif obj.shortClassName == 'NA':
-      popup = NmrAtomPopup(nmrAtom=obj)
-      popup.exec_()
-      popup.raise_()
-    elif obj.shortClassName == 'CS':
-      pass
+      info = showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
+      # popup = NmrAtomPopup(nmrAtom=obj)
+      # popup.exec_()
+      # popup.raise_()
+    elif obj.shortClassName == 'CL':
+      info = showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
     elif obj.shortClassName == 'SE':
-      pass #to be decided when we design structure
+      info = showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
+    elif obj.shortClassName == 'MC':
+      #to be decided when we design structure
+      info = showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
     elif obj.shortClassName == 'MD':
-      pass #to be decided when we design structure
+      #to be decided when we design structure
+      showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
     elif obj.shortClassName == 'DS':
-      pass #to be decided when we design structure
+      #to be decided when we design structure
+      showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
     elif obj.shortClassName == 'RL':
-      pass #to be decided when we design structure
+      #to be decided when we design structure
+      showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
     elif obj.shortClassName == 'RE':
-      pass #to be decided when we design structure
+      #to be decided when we design structure
+      showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
     elif obj.shortClassName == 'NO':
       self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, self.project, name='Notes Editor', note=obj)
 
@@ -411,3 +447,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
     if funcName is not None:
       getattr(itemParent, funcName)()
+    else:
+      info = showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)

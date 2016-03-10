@@ -41,7 +41,6 @@ class AssignmentModule(CcpnDock, Base):
     self.filterLayout = QtGui.QGridLayout()
     self.widget1.setLayout(QtGui.QGridLayout())
     self.advancedLayout = QtGui.QGridLayout()
-    # self.layout.addLayout(self.advancedLayout, 2, 0)
     self.widget1.layout().addLayout(self.selectionLayout, 1, 0)
     self.widget1.layout().addLayout(self.filterLayout, 0, 0)
     self.selectionLayout.setRowMinimumHeight(0, 0)
@@ -57,8 +56,6 @@ class AssignmentModule(CcpnDock, Base):
     self.resTypePulldowns = []
     self.atomTypePulldowns = []
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
-
-
 
     self.doubleToleranceCheckbox = CheckBox(self.widget1, checked=False)
     self.doubleToleranceCheckbox.stateChanged.connect(self.updateInterface)
@@ -81,7 +78,6 @@ class AssignmentModule(CcpnDock, Base):
     expCheckBoxLabel = Label(self.widget1, "Filter By Experiment")
     self.filterLayout.addWidget(expCheckBoxLabel, 0, 6)
     self.filterLayout.addWidget(self.expCheckBox, 0, 7)
-    # self.filterLayout.addItem(QtGui.QSpacerItem(0, 20), 4, 0)
 
     self.current.registerNotify(self.updateInterface, 'peaks')
     self.updateInterface()
@@ -104,9 +100,6 @@ class AssignmentModule(CcpnDock, Base):
                               actionCallback=partial(self.assignNmrAtomToDim, dim),
                               objects=[])
 
-    # Needed to use this syntax because wanted double click not single.
-    # objectTable.doubleClicked.connect(lambda index: self.assignNmrAtomToDim(dim))
-    # objectTable.setFixedHeight(80)
     self.objectTables.append(objectTable)
 
   def createEmptyListWidget(self, dim:int):
@@ -115,7 +108,7 @@ class AssignmentModule(CcpnDock, Base):
     """
     listWidget = ListWidget(self, callback=partial(self.updateAssigmentWidget, dim),
                             rightMouseCallback=self.updateNmrAtomsFromListWidgets)
-    # listWidget.setFixedHeight(80)
+
     self.listWidgets.append(listWidget)
 
   def createEmptyWidgetLabel(self, dim:int):
@@ -174,7 +167,6 @@ class AssignmentModule(CcpnDock, Base):
       if not currentItem:
         self.listWidgets[dim].addItem(nmrAtom.pid)
         currentItem = self.listWidgets[dim].item(self.listWidgets[dim].count()-1)
-      print(currentItem.text(), 'current Item')
       currentObject = self.project.getByPid(currentItem.text())
       toAssign = dimNmrAtoms.index(currentObject)
 
@@ -215,11 +207,6 @@ class AssignmentModule(CcpnDock, Base):
     self.atomTypePulldowns.append(pulldownList)
     return pulldownList
 
-
-  # def _natural_key(self, string_):
-  #   import re
-  #   """See http://www.codinghorror.com/blog/archives/001018.html"""
-  #   return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
 
   def createEnoughTablesAndLists(self):
     '''Makes sure there are enough tables for the amount
@@ -417,25 +404,6 @@ class AssignmentModule(CcpnDock, Base):
         pulldown.addItem(text)
 
 
-  # def getNmrResidue(self, item:object):
-  #   """
-  #   Get Nmr Residue of selected peak assignment and update the NmrResiduePopup
-  #   """
-  #   self.project._appBase.current.nmrResidue = self.project.getByPid(item.text()).nmrResidue
-  #   if hasattr(self, 'NmrResiduePopup'):
-  #     self.NmrResiduePopup.update()
-  #   self.project._appBase.current.nmrAtom = self.project.getByPid(item.text())
-
-  #
-  # def getPeakName(self, peak:Peak, dim:int) -> str:
-  #   '''Get the name of a peak, not used yet.'''
-  #
-  #   if peak.dimensionNmrAtoms[dim].name is not None:
-  #     return peak.dimensionNmrAtoms[dim].name
-  #   else:
-  #     return None
-
-
   def getDeltaShift(self, nmrAtom:NmrAtom, dim:int) -> float:
     """
     Calculation of delta shift to add to the table.
@@ -449,14 +417,12 @@ class AssignmentModule(CcpnDock, Base):
     deltas = []
     for peak in self.current.peaks:
       shiftList = peak.peakList.chemicalShiftList
-      # shiftList = getShiftlistForPeak(peak)
       if shiftList:
         shift = shiftList.getChemicalShift(nmrAtom.id)
         if shift:
           position = peak.position[dim]
           deltas.append(abs(shift.value-position))
     average = sum(deltas)/len(deltas)
-    # return round(average, 3)
     return '%6.3f' % average
 
   def getShift(self, nmrAtom:NmrAtom) -> float:
@@ -541,7 +507,6 @@ class AssignmentModule(CcpnDock, Base):
       return
 
     for peak in self.current.peaks:
-      # axisCode = getAxisCodeForPeakDimension(peak, dim)
 
       if nmrAtom not in peak.dimensionNmrAtoms[dim]:
         newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
@@ -557,16 +522,6 @@ class AssignmentModule(CcpnDock, Base):
     self.project._appBase.current.unRegisterNotify(self.updateInterface, 'peaks')
     self.close()
 
-# class New(object):
-#   """
-#   Small 'fake' object to get a non-nmrAtom in the objectTable.
-#   """
-#
-#   def __init__(self):
-#     self.pid = 'New NMR Atom'
-#     self.id = 'New NMR Atom'
-
-
 class NotOnLine(object):
   """
   Small 'fake' object to get a message the user in the assignment
@@ -580,5 +535,4 @@ class NotOnLine(object):
     self.pid = 'Multiple selected peaks not on line.'
     self.id = 'Multiple selected peaks not on line.'
 
-# NEW = New()
 NOL = NotOnLine()

@@ -21,9 +21,11 @@ class CreateSequence(QtGui.QDialog, Base):
     molTypes = ['protein','DNA', 'RNA']
     self.molTypePulldown.setData(molTypes)
     label3a = Label(self, text="sequence", grid=(3, 0))
-    self.sequenceEditor = TextEditor(self, grid=(3, 1), gridSpan=(1, 3))
+    tipText = """Sequence may be entered a set of one letter codes without
+                 spaces or a set of three letter codes with spaces inbetween"""
+    self.sequenceEditor = TextEditor(self, grid=(3, 1), gridSpan=(1, 3), tipText=tipText)
     label4a = Label(self, 'Sequence Start', grid=(4, 0))
-    lineEdit1a = Spinbox(self, grid=(4, 1), value=1, min=-100, max=1000000)
+    lineEdit1a = Spinbox(self, grid=(4, 1), value=1, min=-1000000, max=1000000)
     label5a = Label(self, 'Chain code', grid=(4, 2))
     lineEdit2a = LineEdit(self, grid=(4, 3), text='A')
 

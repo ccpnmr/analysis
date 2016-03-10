@@ -291,7 +291,7 @@ class DimensionsTab(QtGui.QWidget, Base):
       dimLabel = Label(self, text='%s' % str(i+1), grid =(1, i+1), vAlign='t', hAlign='l')
     for i in range(dimensions):
       axisLabel = Label(self, text="Axis Code ", grid=(2, 0), vAlign='t', hAlign='l')
-      axisLabelData = Label(self, text=str(spectrum.axisCodes[i]), grid=(1, i+1),  hAlign='l', vAlign='t',)
+      axisLabelData = Label(self, text=str(spectrum.axisCodes[i]), grid=(2, i+1),  hAlign='l', vAlign='t',)
       pointsLabel = Label(self, text="Point Counts ", grid=(3, 0), vAlign='t', hAlign='l')
       pointsData = Label(self, text=str(spectrum.pointCounts[i]), grid=(3, i+1), vAlign='t', hAlign='l')
       axisTypeLabel = Label(self, text="Dimension Type ", grid=(4, 0), vAlign='t', hAlign='l')
@@ -300,13 +300,16 @@ class DimensionsTab(QtGui.QWidget, Base):
       spectralWidthData = Label(self, text=str("%.3f" % spectrum.spectralWidths[i]), grid=(5, i+1), vAlign='t', hAlign='l')
       spectralWidthHzLabel = Label(self, text="Spectral Width (Hz) ", grid=(6, 0), vAlign='t', hAlign='l')
       spectralWidthHzData = Label(self, text=str("%.3f" % spectrum.spectralWidthsHz[i]), grid=(6, i+1), vAlign='t', hAlign='l')
-      spectralReferencingLabel = Label(self, text="Referencing ", grid=(7, 0), vAlign='t', hAlign='l')
+      spectralReferencingLabel = Label(self, text="Referencing (ppm) ", grid=(7, 0), vAlign='t', hAlign='l')
       spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referenceValues[i]), grid=(7, i+1), vAlign='t', hAlign='l')
       spectralReferencingData.textChanged.connect(partial(self.setDimensionReferencing, spectrum, i))
+      spectralPointReferencingLabel = Label(self, text="Referencing (points)", grid=(8, 0), vAlign='t', hAlign='l')
+      spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referencePoints[i]), grid=(8, i+1), vAlign='t', hAlign='l')
+      spectralReferencingData.textChanged.connect(partial(self.setPointDimensionReferencing, spectrum, i))
       spectralReferencingData.setMaximumWidth(100)
-      spectralAssignmentToleranceLabel = Label(self, text="Assignment Tolerance ", grid=(8, 0),  hAlign='l')
+      spectralAssignmentToleranceLabel = Label(self, text="Assignment Tolerance ", grid=(9, 0),  hAlign='l')
 
-      spectralAssignmentToleranceData = LineEdit(self, grid=(8, i+1),  hAlign='l')
+      spectralAssignmentToleranceData = LineEdit(self, grid=(9, i+1),  hAlign='l')
       spectralAssignmentToleranceData.setMaximumWidth(100)
 
       if spectrum.assignmentTolerances[i] is not None:
@@ -333,6 +336,13 @@ class DimensionsTab(QtGui.QWidget, Base):
     spectrum.referenceValues = spectrumReferencing
     self.pythonConsole.writeConsoleCommand("spectrum.referenceValues = {0}".format(spectrumReferencing), spectrum=spectrum)
     self.writeLoggingMessage("spectrum.referenceValues = {0}".format(spectrumReferencing))
+
+  def setPointDimensionReferencing(self, spectrum, dim, value):
+    spectrumReferencing = list(spectrum.referencePoints)
+    spectrumReferencing[dim] = float(value)
+    spectrum.referencePoints = spectrumReferencing
+    self.pythonConsole.writeConsoleCommand("spectrum.referencePoints = {0}".format(spectrumReferencing), spectrum=spectrum)
+    self.writeLoggingMessage("spectrum.referencePoints = {0}".format(spectrumReferencing))
 
 
 

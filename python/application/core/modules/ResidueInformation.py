@@ -6,37 +6,39 @@ from PyQt4 import QtGui
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Widget import Widget
+from ccpncore.gui.Base import Base
 
 from ccpn.lib.Assignment import CCP_CODES
 from application.core.gui.Frame import Frame
 
 
 
-class ResidueInformation(CcpnDock):
+class ResidueInformation(CcpnDock, Base):
 
-  def __init__(self, parent=None, project=None):
+  def __init__(self, parent=None, project=None, **kw):
     CcpnDock.__init__(self, name='Residue Information')
+    Base.__init__(self, **kw)
 
     chainLabel = Label(self, text='Chain')
-    chainPulldown = PulldownList(self, callback=self._setChain, hAlign='l')
+    self.layout.addWidget(chainLabel, 0, 0)
+    chainPulldown = PulldownList(self, callback=self._setChain, grid=(0, 1))
     chainPulldownData = [chain.pid for chain in project.chains]
     chainPulldownData.append('<All>')
     chainPulldown.setData(chainPulldownData)
     self.selectedChain = project.getByPid(chainPulldown.currentText())
-    residueLabel = Label(self, text='Residue')
+    residueLabel = Label(self, text='Residue ', grid=(0, 3))
     self.colourScheme = project._appBase.preferences.general.colourScheme
-    residuePulldown = PulldownList(self, callback=self._setCurrentResidue, hAlign='l')
+    residuePulldown = PulldownList(self, callback=self._setCurrentResidue, grid=(0, 4))
     residuePulldown.setData(CCP_CODES)
     self.selectedResidueType = residuePulldown.currentText()
     self.residueWidget = QtGui.QWidget(self)
     self.residueWidget.setLayout(QtGui.QGridLayout())
     self.project = project
-    self.layout.addWidget(chainLabel, 0, 0, 1, 1)
-    self.layout.addWidget(chainPulldown, 0, 1, 1, 1)
-    self.layout.addWidget(residueLabel, 0, 2, 1, 1)
-    self.layout.addWidget(residuePulldown, 0, 3, 1, 1)
-    self.layout.addWidget(self.residueWidget, 1, 0, 1, 4)
+
+    # self.layout.addWidget(chainPulldown, 0, 1, 1, 1)
+    # self.layout.addWidget(residueLabel, 0, 2, 1, 1)
+    # self.layout.addWidget(residuePulldown, 0, 3, 1, 1)
+    self.layout.addWidget(self.residueWidget, 1, 0, 1, 5)
     self.getResidues()
 
 

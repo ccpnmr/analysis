@@ -144,7 +144,7 @@ class GuiTableGenerator(QtGui.QWidget, Base):
 
 
   def updateTable(self):
-    self.updateSelectorContents()
+    # self.updateSelectorContents()
     self.updateContents()
 
 

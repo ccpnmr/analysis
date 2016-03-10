@@ -80,13 +80,13 @@ class GeneralTab(QtGui.QWidget, Base):
     self.item = item
     self.spectrum = spectrum
     self.experimentTypes = spectrum._project._experimentTypeMap
-    nameLabel = Label(self, text="Spectrum name ", grid=(0, 0))
-    self.nameData = LineEdit(self, vAlign='t', grid=(0, 1))
+    nameLabel = Label(self, text="Spectrum name ", grid=(1, 0))
+    self.nameData = LineEdit(self, vAlign='t', grid=(1, 1))
     self.nameData.setText(spectrum.name)
     self.nameData.editingFinished.connect(self.changeSpectrumName)
-    pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(1, 0))
-    self.pathData = LineEdit(self, vAlign='t', grid=(1, 1))
-    self.pathButton = Button(self, grid=(1, 2), callback=self.getSpectrumFile, icon='iconsNew/applications-system')
+    pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(2, 0))
+    self.pathData = LineEdit(self, vAlign='t', grid=(2, 1))
+    self.pathButton = Button(self, grid=(2, 2), callback=self.getSpectrumFile, icon='iconsNew/applications-system')
 
     self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger

@@ -34,10 +34,6 @@ class ResidueInformation(CcpnDock, Base):
     self.residueWidget = QtGui.QWidget(self)
     self.residueWidget.setLayout(QtGui.QGridLayout())
     self.project = project
-
-    # self.layout.addWidget(chainPulldown, 0, 1, 1, 1)
-    # self.layout.addWidget(residueLabel, 0, 2, 1, 1)
-    # self.layout.addWidget(residuePulldown, 0, 3, 1, 1)
     self.layout.addWidget(self.residueWidget, 1, 0, 1, 5)
     self.getResidues()
 

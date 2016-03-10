@@ -81,7 +81,20 @@ class GuiWindow(DropBase):
     if text is None:
       text='Load Data'
     if paths is None:
-      paths = QtGui.QFileDialog.getOpenFileName(self, text)
+      dialog = QtGui.QFileDialog(self, caption=text)
+      if self._appBase.preferences.general.colourScheme == 'dark':
+          dialog.setStyleSheet("""
+                                  QFileDialog QWidget {
+                                                      background-color: #2a3358;
+                                                      color: #f7ffff;
+                                                      }
+                              """)
+      elif self._appBase.preferences.general.colourScheme == 'light':
+        dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+      dialog.exec_()
+      paths = dialog.selectedFiles()[0]
+
+
 
     # NBNB TBD I assume here that path is either a string or a list lf string paths.
     # NBNB FIXME if incorrect

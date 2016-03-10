@@ -491,7 +491,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         elif self._appBase.preferences.general.colourScheme == 'light':
           dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
         dialog.exec_()
-        projectDir = dialog.selectedFiles()
+        projectDir = dialog.selectedFiles()[0]
 
       if projectDir:
         self._appBase.loadProject(projectDir)

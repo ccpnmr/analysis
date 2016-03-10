@@ -65,7 +65,7 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
     buttonBox = Button(self, grid=(3, 1), callback=self.accept, text='Close',
                            vPolicy='fixed')
     if spectrum.project._appBase.preferences.general.colourScheme == 'dark':
-      self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358;}")
+      self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358; color: #f7ffff}")
     elif spectrum.project._appBase.preferences.general.colourScheme == 'light':
       self.setStyleSheet("QTabWidget > QWidget { background-color: #fbf4cc;} QTabWidget { background-color: #fbf4cc;}")
   def keyPressEvent(self, event):

@@ -161,7 +161,15 @@ class MessageDialog(QtGui.QMessageBox):
     if colourScheme == 'dark':
       self.setStyleSheet("""  QMessageBox QLabel {
                               color: #f7ffff;
-                          }""")
+                          }
+                          QMessageBox QPushButton {
+                            color:  #bec4f3;
+                            background-color: #535a83;
+                            padding: 2px;
+                            border: 1px solid #182548;
+                            }
+
+                          """)
       palette.setColor(QtGui.QPalette.Background, QtGui.QColor('#2a3358'))
     elif colourScheme == 'light':
       self.setStyleSheet("""  QMessageBox QLabel {

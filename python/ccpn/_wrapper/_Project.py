@@ -24,6 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 import functools
 import os
+from collections import OrderedDict
 
 from ccpn import AbstractWrapperObject
 from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
@@ -536,12 +537,16 @@ class Project(AbstractWrapperObject):
     return MoleculeQuery.fetchStdResNameMap(self._wrappedData.root)
 
   @property
-  def _experimentTypeMap(self) -> Dict:
-    """{dimensionCount : {sortedNucleusCodeTuple : {experimentTypeSynonym : experimentTypeName}}}
-    dictionary"""
+  def _experimentTypeMap(self) -> OrderedDict:
+    """{dimensionCount : {sortedNucleusCodeTuple :
+                          OrderedDict(experimentTypeSynonym : experimentTypeName)}}
+    dictionary
+
+    NB The OrderedDicts are ordered ad-hoc, with the most common experiments (hopefully) first
+    """
     result = self._implExperimentTypeMap
     if result is None:
-      result = {}
+      result = OrderedDict()
       refExperimentMap = NmrExpPrototype.fetchIsotopeRefExperimentMap(self._apiNmrProject.root)
 
       for nucleusCodes, refExperiments in refExperimentMap.items():
@@ -550,7 +555,7 @@ class Project(AbstractWrapperObject):
         dd1 = result.get(ndim, {})
         result[ndim] = dd1
 
-        dd2 = dd1.get(nucleusCodes, {})
+        dd2 = dd1.get(nucleusCodes, OrderedDict())
         dd1[nucleusCodes] = dd2
         for refExperiment in refExperiments:
           name = refExperiment.name

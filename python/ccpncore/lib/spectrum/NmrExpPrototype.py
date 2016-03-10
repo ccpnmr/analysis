@@ -408,23 +408,92 @@ def experimentSynonymSummary():
 
 def fetchIsotopeRefExperimentMap(project:'MemopsRoot') -> Dict:
   """fetch {tuple(sortedNucleusCodes):RefExperiment} dictionary for project
-  The key is a tuple of element names ('C, Br, H, D, T, ...) or either of J, MQ, ALT, or delay"""
+  The key is a tuple of element names ('C, Br, H, D, T, ...) or either of J, MQ, ALT, or delay
+
+  NB, each list value is sorted ad-hoc to bring the most common experiments to the top.
+  Do NOT sort or reorder the result"""
   result = {}
   if hasattr(project, '_isotopeRefExperimentMap'):
     result = project._isotopeRefExperimentMap
 
   if not result:
 
+    tuples = []
     for expPrototype in project.sortedNmrExpPrototypes():
+      expGraph = expPrototype.sortedExpGraphs()[0]
+      expSteps = sorted(expGraph.expSteps, key=operator.attrgetter('stepNumber'))
+      atomSiteCount = len(expPrototype.atomSites)
       for refExperiment in expPrototype.sortedRefExperiments():
+
+        # ExpSteps in order of traversal
+        expMeasurements = list(x.expMeasurement for x in expSteps)
+        if refExperiment.isReversed:
+          expMeasurements.reverse()
+        # We now have expMeasurements in traversal order, from start to acquisition
+
+        # Sort key for simple (e.g. shift)
+        # versus compound (e.g. coupling, MQ, or reduced-dimensionality) axes
+        axisCodes = refExperiment.axisCodes
+        multiAxisCodeSort = 100 if None in axisCodes else max(x.count(',') for x in axisCodes)
+
+        # Sort key for start and acquisition dimensions
+        ss = expMeasurements[-1].atomSites[0].isotopeCode
+        for acqNucleusCode in ss:
+          if not acqNucleusCode.isdigit():
+            break
+        if acqNucleusCode == 'H':
+          ll = list(expMeasurements[0].atomSites)
+          startsOnProton = (ll[0].isotopeCode == '1H' if len(ll) == 1 else False)
+          if startsOnProton:
+            # Proton start and end -= sort first
+            nucleusAcquisitionSort = -30
+          else:
+            # Proton end only - sort third
+            nucleusAcquisitionSort = -10
+        elif acqNucleusCode == 'C':
+          # Carbon detection - sort second
+          nucleusAcquisitionSort = -20
+        else:
+          # Other. Sort last, grouping by acquisition nucleus
+          nucleusAcquisitionSort = ord(acqNucleusCode)
+
+        refExperimentName = refExperiment.name
+
+        # Ad hoc modifications - to get more common experiments first:
+        downgrade = ('(', 'base','coupling', '[n')
+        adhoc = any(x in refExperimentName for x in downgrade)
+        if '{C' in refExperimentName:
+          # Give higher priority to CA|Cca experiments
+          atomSiteCountMod = atomSiteCount -1
+          if 'co' in refExperimentName.lower():
+            # Move CB/CA CO experiments yet one more level up
+            atomSiteCountMod -= 0.5
+        else:
+          atomSiteCountMod = atomSiteCount
+
+        # Put result on tuples list, with sorting keys in position
         key = tuple(sorted(refExperiment.nucleusCodes))
-        ll = result.get(key, [])
-        ll.append(refExperiment)
-        result[key] = ll
+        tt = (key, multiAxisCodeSort, nucleusAcquisitionSort, adhoc, atomSiteCountMod,
+              len(refExperimentName),refExperiment)
+        tuples.append(tt)
+
+    # Sort tuples by arranged sort codes
+    tuples.sort()
+    for tt in tuples:
+      # Get actual result out and in dict
+
+      refExperiment = tt[-1]
+      key = tt[0]
+      ll = result.get(key, [])
+      ll.append(refExperiment)
+      result[key] = ll
+
+      # print(key, refExperiment.name, refExperiment.synonym)
 
     project._isotopeRefExperimentMap = result
 
-    return result
+  #
+  return result
 
 
 if __name__ == '__main__':
@@ -435,10 +504,10 @@ if __name__ == '__main__':
   # for line in synonymTable:
   #   print(line)
 
-
   # from ccpncore.util.Io import newProject
   # project = newProject("ExpPrototypeTest", overwriteExisting=True)
   # refMap = fetchIsotopeRefExperimentMap(project)
+
   # for tt in sorted ((len(key), key, val) for key,val in sorted(refMap.items())):
   #   # print ("@~@~", tt[0], tt[1])
   #   for refExp in tt[2]:

@@ -130,7 +130,7 @@ class GeneralTab(QtGui.QWidget, Base):
       spectrumTypeLabel = Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
       spectrumType = PulldownList(self, vAlign='t', grid=(7, 1))
       spectrumType.addItems(SPECTRA)
-      print(spectrumType.findText(spectrum.experimentName))
+
       spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
@@ -151,8 +151,13 @@ class GeneralTab(QtGui.QWidget, Base):
         axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
 
       self.atomCodes = tuple(sorted(axisCodes))
-      self.spectrumType.addItems(sorted(list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys())))
-      self.spectrumType.setCurrentIndex(self.spectrumType.findText(spectrum.experimentName))
+      self.spectrumType.addItems(list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys()))
+
+      # Get the text that was used in the pulldown from the refExperiment
+      apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
+      text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
+      self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
+
       self.spectrumType.currentIndexChanged.connect(self.changeSpectrumType)
       self.spectrumType.setMinimumWidth(self.pathData.width()*1.95)
       self.spectrumType.setFixedHeight(25)

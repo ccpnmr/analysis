@@ -18,17 +18,21 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
     self.parent = parent
     spectra = project.spectra
     self.experimentTypes = project._experimentTypeMap
-    for spectrum in spectra:
-      spectrumIndex = spectra.index(spectrum)
+    for spectrumIndex, spectrum in enumerate(spectra):
       axisCodes = []
       for isotopeCode in spectrum.isotopeCodes:
-        axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
+        axisCodes.append(''.join([char for char in isotopeCode if not char.isdigit()]))
 
       atomCodes = tuple(sorted(axisCodes))
-      pulldownItems = sorted(list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys()))
+      pulldownItems = list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys())
       spLabel = Label(self, text=spectrum.pid, grid=(spectrumIndex, 0))
       spPulldown = PulldownList(self, grid=(spectrumIndex, 1), callback=partial(self.setExperimentType, spectrum, atomCodes), texts=pulldownItems)
-      spPulldown.setCurrentIndex(spPulldown.findText(spectrum.experimentName))
+
+      # Get the text that was used in the pulldown from the refExperiment
+      apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
+      text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
+      spPulldown.setCurrentIndex(spPulldown.findText(text))
+
     self.buttonBox = ButtonList(self, grid=(len(project.spectra)+1, 1), texts=['Cancel', 'Ok'],
                            callbacks=[self.reject, self.accept])
 

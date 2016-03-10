@@ -106,7 +106,7 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     self.peakItems = {}  # CCPN peak -> Qt peakItem
     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
     self._appBase = strip._appBase
-    
+
     strip.viewBox.addItem(self)
     ###self.parent = parent
     # self.displayed = True
@@ -143,15 +143,15 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     plotWidget = strip.plotWidget
     viewRegion = plotWidget.viewRange()
     dataDims = self.spectrumView._wrappedData.spectrumView.orderedDataDims
-    
+
     x1, x0 = viewRegion[0]  # TBD: relies on axes being backwards
     xScale = width / (x1 - x0)
     xTranslate = printer.x0 - x0 * xScale
-    
+
     y1, y0 = viewRegion[1]  # TBD: relies on axes being backwards
     yScale = width / (y1 - y0)
     yTranslate = printer.y0 - y0 * yScale
-        
+
     for peak in self.peakList.peaks:
       if strip.peakIsInPlane(peak):
         xPpm = xScale*peak.position[dataDims[0].dimensionIndex] + xTranslate
@@ -205,6 +205,7 @@ class GuiPeakListView(QtGui.QGraphicsItem):
   #     self.peakItems[peak.pid] = PeakItem(self, peak)
   def boundingRect(self):
 
+
     return NULL_RECT
 
 
@@ -230,13 +231,16 @@ class Peak1d(QtGui.QGraphicsItem):
     # self.spectrumView, spectrumMapping = self.spectrumWindow.getViewMapping(analysisSpectrum)
     # self.setZValue(10)
     self.screenPos = []
+    # print(scene.itemsBoundingRect)
 
     self.annotation = Peak1dAnnotation(self, scene)
     self.setupPeakItem(peakListView, peak)
-    self.press = False
+    self.press = True
     self.setAcceptHoverEvents(True)
     self.annotationScreenPos = []
+
     self.bbox = NULL_RECT
+
     self.setCacheMode(self.NoCache)
     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
     self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
@@ -266,7 +270,9 @@ class Peak1d(QtGui.QGraphicsItem):
     #   return
 
     # group.addToGroup(self)
-  #
+  # def peakClicked(self, event):
+  #   print(self, 'click', event)
+
   def setupPeakItem(self, peakListView, peak):
 
     self.peakListView = peakListView
@@ -291,7 +297,7 @@ class Peak1d(QtGui.QGraphicsItem):
   def mousePressEvent(self, event):
     self.press = True
     self.hover = True
-    print('pressed')
+    print('pressed', 'GuiPeakListView L 300')
 
   # def mousePressEvent(self, event):
   #
@@ -308,7 +314,6 @@ class Peak1d(QtGui.QGraphicsItem):
 
 
   def boundingRect(self):
-
     return NULL_RECT
 
 
@@ -344,13 +349,16 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     self.updatePos()
     self.setupPeakAnnotation(peakItem)
 
+
   def sceneEventFilter(self, watched, event):
     print(event)
 
   def mousePressEvent(self, event):
-    # super(Peak1dAnnotation, self).mousePressEvent(event)
+    super(Peak1dAnnotation, self).mousePressEvent(event)
+
 
     if event.button() == QtCore.Qt.LeftButton:
+
     # if (event.button() == QtCore.Qt.LeftButton) and (
     #           event.modifiers() & QtCore.Qt.ControlModifier) and not (
     #           event.modifiers() & QtCore.Qt.ShiftModifier):
@@ -360,19 +368,27 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
       QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
       self.peakItem.setSelected(True)
+      self.peak._project._appBase.current.peak = self.peak
       self.update()
-      print('selected:', self)
-      print('peak item:', self.peakItem.pos())
+      # print('selected:', self.peak)
+
+      # print('peak item:', self.peakItem.pos())
 
 
   def setupPeakAnnotation(self, peakItem):
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setParentItem(peakItem)
 
+
     peak = peakItem.peak
+    spectrumId = peakItem.peak.peakList.spectrum.id
+
     text = _getPeakAnnotation(peak)
-    text = text + "*"
+    # text = text + "*"
+    text = spectrumId
     self.setText(text)
+
+
 
   def updatePos(self):
     pass
@@ -414,6 +430,8 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
 
     QtGui.QGraphicsItem.__init__(self, scene=scene)
 
+
+
     self.setParentItem(parent)
     self.peakItem = parent
     self.setCacheMode(self.DeviceCoordinateCache)
@@ -432,6 +450,7 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
 
     peakItem = self.peakItem
 
+
     if self.pos().x() < peakItem.annotation.pos().x():
       left = self.pos().x()
       right = peakItem.annotation.pos().x()
@@ -445,12 +464,12 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
     else:
       upper = peakItem.annotation.pos().y()
       lower = self.pos().y()
-    # print(left, right)
     self.bbox = QtCore.QRectF(QtCore.QPointF(left, upper), QtCore.QPointF(right, lower))
 
   def paint(self, painter, option, widget):
 
     peakItem = self.peakItem
+
 
     pos = QtCore.QPointF(0, 0) # When exporting to e.g. pdf the symbol has no parent item, which means that its position is its screen pos.
                                # To compensate for that the line pos needs to be explicitly (0, 0).
@@ -467,6 +486,7 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
       colour = QtGui.QColor('#080000')
     else:
       colour = QtGui.QColor('#f7ffff')
+
     # self.setBrush(colour)
     # lineColor = peakItem.analysisPeakList.symbolColor
     # color.setRgbF(*peakItem.glWidget._hexToRgba(lineColor))
@@ -482,13 +502,13 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
     self.setBbox()
 
   def mousePressEvent(self, event):
-    print('symbol')
+    # print('symbol')
     if (event.button() == QtCore.Qt.LeftButton) and (
               event.modifiers() & QtCore.Qt.ControlModifier) and not (
               event.modifiers() & QtCore.Qt.ShiftModifier):
 
       event.accept()
-      self.scene.clearSelection()
+      # self.scene.clearSelection()
       self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
       QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
@@ -557,7 +577,7 @@ class PeakNd(QtGui.QGraphicsItem):
     # self.deleteAction = QtGui.QAction(self, triggered=self.deletePeak, shortcut=QtCore.Qt.Key_Delete)
     #peakLayer.peakItems.append(self)
   #
-  
+
   def setupPeakItem(self, peakListView, peak):
 
     self.peakListView = peakListView
@@ -640,13 +660,13 @@ class PeakNd(QtGui.QGraphicsItem):
   def boundingRect(self):
 
     ###return self.bbox # .adjust(-2,-2, 2, 2)
-    
+
     r, w  = self.drawData
-    
+
     return QtCore.QRectF(-r,-r,2*r,2*r)
 
   def itemChange(self, change, value):
-    
+
     if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
       peak = self.peak
       selected = peak.isSelected = self.isSelected()
@@ -657,14 +677,14 @@ class PeakNd(QtGui.QGraphicsItem):
       else:
         if peak in current.peaks:
           current.removePeak(peak)
-    
+
     return QtGui.QGraphicsItem.itemChange(self, change, value)
-    
+
   def paint(self, painter, option, widget):
 
     if self.peakListView.isDeleted: # strip has been deleted
       return
-      
+
     if self.peak: # TBD: is this ever not true??
       self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self.peakListView.spectrumView.strip.peakIsInPlane(self.peak):
@@ -703,7 +723,7 @@ class PeakNd(QtGui.QGraphicsItem):
         painter.drawLine(-r,r,r,-r)
         ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
         ###painter.drawLine(xPpm-r,yPpm+r,xPpm+r,yPpm-r)
-        
+
         if self.peak.isSelected:
           painter.drawLine(-r,-r,-r,r)
           painter.drawLine(-r,r,r,r)
@@ -753,16 +773,16 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     ###self.setColor()
     self.setPos(15, -15)
     # self.updatePos()
-        
+
   def setupPeakAnnotationItem(self, peakItem):
-    
+
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setParentItem(peakItem)
-    
+
     peak = peakItem.peak
     text = _getPeakAnnotation(peak)
     text = text
-        
+
     self.setText(text)
 
   """

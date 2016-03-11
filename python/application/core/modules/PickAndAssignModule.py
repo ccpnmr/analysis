@@ -129,8 +129,9 @@ class PickAndAssignModule(CcpnDock, Base):
             if spectrumView.spectrum.dimensionCount > 1:
               apiSpectrumView = spectrumView._wrappedData
               peaks = peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
-                                              doPos=apiSpectrumView.spectrumView.displayPositiveContours,
-                                              doNeg=apiSpectrumView.spectrumView.displayNegativeContours)
+                                           doPos=apiSpectrumView.spectrumView.displayPositiveContours,
+                                           doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
+                                           fitMethod='gaussian')
 
               console.writeConsoleCommand(
                 "peakList.pickPeaksNd(selectedRegion={0}, doPos={1}, doNeg={2})".format(

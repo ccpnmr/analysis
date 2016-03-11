@@ -92,21 +92,18 @@ class PeakFindPopup(QtGui.QDialog, Base):
     positions = [[spinBox.value() for spinBox in self.minPositionBoxes],
                  [spinBox.value() for spinBox in self.maxPositionBoxes]]
 
+
+    doPos=True
+    doNeg=True
     if self.checkBox1.isChecked():
-      print('checkbox1 checked')
-      doPos=True
+      # Positive only
       doNeg=False
     elif self.checkBox2.isChecked():
-      print('checkbox2 checked')
+      # negative only
       doPos=False
-      doNeg=True
-    elif self.checkBox3.isChecked():
-      print('checkbox3 checked')
-      doPos=True
-      doNeg=True
+    # Checking the third box turns the others off and sete both. Hence default
     peakList.pickPeaksNd(positions, apiSpectrumView.spectrumView.orderedDataDims,
-                                            doPos=doPos,
-                                            doNeg=doNeg)
+                        doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
 
     for strip in self.project.strips:
       strip.showPeaks(peakList)

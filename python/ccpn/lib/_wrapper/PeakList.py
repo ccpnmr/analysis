@@ -32,7 +32,7 @@ from scipy.ndimage import maximum_filter
 
 def pickPeaksNd(self:'PeakList', positions:Sequence=None, dataDims:Sequence=None,
                 doPos:bool=True, doNeg:bool=True,
-                fitMethod:str=None, excludedRegions:Sequence=None,
+                fitMethod:str='gaussian', excludedRegions:Sequence=None,
                 excludedDiagonalDims:Sequence=None, excludedDiagonalTransform:Sequence=None):
 
   # ordering = [dataDim.dim-1 for dataDim in dataDims]

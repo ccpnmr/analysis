@@ -44,14 +44,23 @@ def fitExistingPeaks(peaks:Sequence[ApiPeak], fitMethod:str=None):
     dataDims = dataSource.sortedDataDims()
 
     peakDims = peak.sortedPeakDims()
+
+    # generate a numpy array with the position of the peak in points rounded to integers
     position = [peakDim.position - 1 for peakDim in peakDims] # API position starts at 1
-    numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]
     position = numpy.round(numpy.array(position))
+
+    # generate a numpy array with the number of points per dimension
+    numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]
     numPoints = numpy.array(numPoints)
 
+    # consider for each dimension on the interval [point-2,point+3>, account for min and max
+    # of each dimension
     firstArray = numpy.maximum(position-2, 0)
     lastArray = numpy.minimum(position+3, numPoints)
+
+    # Get the data; note that arguments has to be castable to int?
     dataArray, intRegion = dataSource.getRegionData(firstArray, lastArray)
+    # Cast to int for subsequent call
     firstArray = firstArray.astype('int32')
     lastArray = lastArray.astype('int32')
     peakArray = (position-firstArray).reshape((1, numDim))
@@ -61,8 +70,10 @@ def fitExistingPeaks(peaks:Sequence[ApiPeak], fitMethod:str=None):
       result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
       height, center, linewidth = result[0]
     except CPeak.error as e:
+      logger = peak.root._logger
+      if logger:
+        logger.error("Aborting peak fit, Error for peak: %s:\n\n%s " % (peak, e))
       return
-      # possibly should log error??
 
     position = firstArray + center
 

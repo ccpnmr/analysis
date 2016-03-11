@@ -460,7 +460,7 @@ class AtomSelector(CcpnDock):
                 if anyInterOnlyExperiments:
                   self.caButton1.setStyleSheet('background-color: green')
                 else:
-                  self.cbButton1.setStyleSheet('background-color: orange')
+                  self.caButton1.setStyleSheet('background-color: orange')
                   self.caButton2.setStyleSheet('background-color: green')
 
 

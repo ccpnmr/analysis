@@ -602,7 +602,7 @@ class ScreeningSetup(CcpnDock, Base):
     ''' Export a simple xlxs file from the results '''
     self.nameAndPath = ''
     fType = 'XLS (*.xlsx)'
-    dialog = FileDialog(self, fileMode=1, acceptMode=0, preferences=self.preferences, filter=fType)
+    dialog = FileDialog(self, fileMode=0, acceptMode=1, preferences=self.preferences, filter=fType)
     filePath = dialog.selectedFiles()[0]
     self.nameAndPath = filePath
 

@@ -443,7 +443,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
       printer.setResolution(newRes)
 
       fType = 'PDF (*.pdf)'
-      dialog = FileDialog(self, filter=fType, preferences=self.preferences)
+      dialog = FileDialog(self, acceptMode=1, fileMode=0, filter=fType, preferences=self.preferences)
       filePath = dialog.selectedFiles[0]
 
       if filePath:

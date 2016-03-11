@@ -529,7 +529,7 @@ class PeakNd(QtGui.QGraphicsItem):
     ###scene.addItem(self)
     ###strip.plotWidget.plotItem.vb.addItem(self)
     # turn off ItemIsSelectable because it fails miserably when you zoom in (have to pick exactly in the centre)
-    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
+    ###self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
     self.setFlag(self.ItemIgnoresTransformations)
     self.peakListView = peakListView
     self.annotation = PeakNdAnnotation(self, scene)
@@ -665,6 +665,7 @@ class PeakNd(QtGui.QGraphicsItem):
 
     return QtCore.QRectF(-r,-r,2*r,2*r)
 
+  """
   def itemChange(self, change, value):
 
     if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
@@ -679,6 +680,7 @@ class PeakNd(QtGui.QGraphicsItem):
           current.removePeak(peak)
 
     return QtGui.QGraphicsItem.itemChange(self, change, value)
+"""
 
   def paint(self, painter, option, widget):
 
@@ -820,6 +822,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
   #def sceneEventFilter(self, watched, event):
   #  print(event)
 """
+  
   def mousePressEvent(self, event):
 
 
@@ -833,7 +836,6 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
       # self.setSelected(True)
       # print(self.peakItem)
       # self.update()
-
 
 
 # Notifiers for assignment annotation change

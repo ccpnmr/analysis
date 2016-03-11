@@ -84,7 +84,6 @@ class ViewBox(pg.ViewBox):
     self.current.strip = self.parentObject().parent
 
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
-
       event.accept()
       xPosition = self.mapSceneToView(event.pos()).x()
       yPosition = self.mapSceneToView(event.pos()).y()
@@ -294,7 +293,7 @@ class ViewBox(pg.ViewBox):
         else:
           zPositions = None
         # selectedPeaks = []
-        self.current.clearPeaks()
+        #self.current.clearPeaks()
         for spectrumView in self.current.strip.spectrumViews:
           if not spectrumView.isVisible():
             continue

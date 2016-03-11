@@ -49,7 +49,8 @@ def isInterOnlyExpt(experimentType:str) -> bool:
   if not experimentType:
     return False
   expList = ('HNCO', 'CONH', 'CONN', 'H[N[CO', 'seq.', 'HCA_NCO.Jmultibond')
-  if(any(expType in experimentType.upper() for expType in expList)):
+  experimentTypeUpper = experimentType.upper()
+  if(any(expType in experimentTypeUpper for expType in expList)):
     return True
   return False
 

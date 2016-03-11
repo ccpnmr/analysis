@@ -431,11 +431,11 @@ class AtomSelector(CcpnDock):
       else:
 
         if peaksAreOnLine(peaks, 1):
-          # RHF 15/12/2015 bug fix. From usage elsewhere this ought to use tytpoe, nboe name.
+          # RHF 15/12/2015 bug fix. From usage elsewhere this ought to use types, not name.
           # NBNB TBD CHECK THIS
           # experiments = [peak.peakList.spectrum.experimentName for peak in peaks]
           types = set(peak.peakList.spectrum.experimentType for peak in peaks)
-          anyInterOnlyExperiments = any([isInterOnlyExpt(x) for x in types])
+          anyInterOnlyExperiments = any(isInterOnlyExpt(x) for x in types)
 
           for peak in peaks:
 
@@ -452,15 +452,15 @@ class AtomSelector(CcpnDock):
                 # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
                 if anyInterOnlyExperiments:
                   self.cbButton1.setStyleSheet('background-color: green')
-                  self.cbButton2.setStyleSheet('background-color: orange')
                 else:
+                  self.cbButton1.setStyleSheet('background-color: orange')
                   self.cbButton2.setStyleSheet('background-color: green')
               if atomPred == 'CA':
                 # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
                 if anyInterOnlyExperiments:
                   self.caButton1.setStyleSheet('background-color: green')
-                  self.caButton2.setStyleSheet('background-color: orange')
                 else:
+                  self.cbButton1.setStyleSheet('background-color: orange')
                   self.caButton2.setStyleSheet('background-color: green')
 
 

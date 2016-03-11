@@ -225,7 +225,7 @@ def getSaveDirectory(apiProject, preferences):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
   preferences = getPreferences()
   dialog = FileDialog(fileMode=0, acceptMode=1, text='Save Project As...',
-                      colourScheme=preferences.general.colourScheme)
+                      preferences=preferences.general)
 
   if not dialog.exec_():
     return ''

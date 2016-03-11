@@ -5,7 +5,7 @@ from PyQt4 import QtGui, QtCore
 # from ccpn.lib.Experiment import EXPERIMENT_TYPES
 
 from ccpncore.gui.Base import Base
-from ccpncore.gui.ButtonList import ButtonList
+from ccpncore.gui.Button import Button
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
 
@@ -33,8 +33,8 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
       text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
       spPulldown.setCurrentIndex(spPulldown.findText(text))
 
-    self.buttonBox = ButtonList(self, grid=(len(project.spectra)+1, 1), texts=['Cancel', 'Ok'],
-                           callbacks=[self.reject, self.accept])
+    self.buttonBox = Button(self, grid=(len(project.spectra)+1, 1), text='Close',
+                           callback=self.accept)
 
 
   def setExperimentType(self, spectrum, atomCodes, item):

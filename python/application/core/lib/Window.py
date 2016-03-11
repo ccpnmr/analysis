@@ -116,15 +116,16 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
       atomPositions2 = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes[:2]]
       for guiStrip in display.strips:
         for ii, axis in enumerate(guiStrip.orderedAxes[:2]):
-          if len(atomPositions2[ii]) == 1:
-            for atomPosition in atomPositions2[ii]:
-              axis.position = atomPosition.value
-          else:
-            atomPositionValues = [a.value for a in atomPositions2[ii]]
-            width = max(atomPositionValues) - min(atomPositionValues)
-            position = min(atomPositionValues) + (width/2)
-            axis.position = position
-            axis.width = width
+          if len(atomPositions2[ii]) < 0:
+            if len(atomPositions2[ii]) == 1:
+              for atomPosition in atomPositions2[ii]:
+                axis.position = atomPosition.value
+            else:
+              atomPositionValues = [a.value for a in atomPositions2[ii]]
+              width = max(atomPositionValues) - min(atomPositionValues)
+              position = min(atomPositionValues) + (width/2)
+              axis.position = position
+              axis.width = width
 
         if markPositions:
           markPositionsInStrips(project, guiStrip, guiStrip.orderedAxes[:2], atomPositions2)
@@ -141,15 +142,16 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
 
     atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
     for ii, axis in enumerate(strip.orderedAxes):
-      if len(atomPositions[ii]) == 1:
-        for atomPosition in atomPositions[ii]:
-          axis.position = atomPosition.value
-      else:
-        atomPositionValues = [a.value for a in atomPositions[ii]]
-        width = max(atomPositionValues) - min(atomPositionValues)
-        position = min(atomPositionValues) + (width/2)
-        axis.position = position
-        axis.width = width
+      if len(atomPositions[ii]) < 0:
+        if len(atomPositions[ii]) == 1:
+          for atomPosition in atomPositions[ii]:
+            axis.position = atomPosition.value
+        else:
+          atomPositionValues = [a.value for a in atomPositions[ii]]
+          width = max(atomPositionValues) - min(atomPositionValues)
+          position = min(atomPositionValues) + (width/2)
+          axis.position = position
+          axis.width = width
     if markPositions:
       markPositionsInStrips(project, strip, strip.orderedAxes, atomPositions)
 

@@ -723,7 +723,7 @@ def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
 
   position = apiAxis.position
   width = apiAxis.width
-  region =  (position - width/2., position + width/2.)
+  region = (position - width/2., position + width/2.)
 
   for apiStrip in apiAxis.strips:
     strip = project._data2Obj[apiStrip]

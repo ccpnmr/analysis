@@ -188,6 +188,7 @@ Label {
         }
 
 QCheckBox {
+        background-color: #2a3358;
         color: #f7ffff;
         }
 

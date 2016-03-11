@@ -11,7 +11,7 @@
         "license": "",
         "dataPath": "",
         "doubleCrossHair": true,
-        "useNative": true,
+        "useNative": false,
         "toolbarHidden": false,
         "autoBackupEnabled": false,
         "autoBackupFrequency": 30

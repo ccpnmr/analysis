@@ -58,7 +58,7 @@ class SampleComponentsView(QtGui.QWidget):
         self.positions = [i for i in range(valueCount)]
 
         for smile, name, self.position in zip( self.smileList, self.chemicalNameList, self.positions):
-          self.compoundView = CompoundView(self.scrollAreaWidgetContents, grid=(1, self.position))
+          self.compoundView = CompoundView(self.scrollAreaWidgetContents, grid=(1, self.position), preferences=self.project._appBase.preferences.general)
           self.chemicalName = Label(self.scrollAreaWidgetContents, grid=(0, self.position), hAlign='c')
           self.chemicalName.setText(name)
           self.smiles = smile

@@ -610,7 +610,8 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.hideSmiles.show()
 
 
-    self.compoundView = CompoundView(self.area, grid=(14, 1) , gridSpan=(14,2))
+    self.compoundView = CompoundView(self.area, grid=(14, 1) , gridSpan=(14,2),
+                                     preferences=self.project._appBase.preferences.general)
     # self.compoundView = compoundView
 
     smile = self.sampleComponent.substance.smiles

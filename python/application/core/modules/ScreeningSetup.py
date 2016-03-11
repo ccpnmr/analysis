@@ -1,10 +1,8 @@
 __author__ = 'luca'
 
-import sys
-import itertools
+
 from functools import partial
 import numpy as np
-from collections import namedtuple
 from PyQt4 import QtCore, QtGui
 from pandas import DataFrame
 
@@ -14,7 +12,7 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.Button import Button
 from ccpncore.gui.Spinbox import Spinbox
-from ccpncore.gui.ButtonList import ButtonList
+from ccpncore.gui.FileDialog import FileDialog
 
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
@@ -191,7 +189,8 @@ class ScreeningSetup(CcpnDock, Base):
     self.referenceTable.setMaximumSize(400,200)
 
     # Molecule view
-    self.compoundView  = CompoundView(self.peaksMoleculeAreaWidget,  grid=(2,2), gridSpan=(3,3), hAlign='c')
+    self.compoundView = CompoundView(self.peaksMoleculeAreaWidget,  grid=(2,2), gridSpan=(3,3), hAlign='c',
+                                      preferences=self.project._appBase.preferences.general)
     self.compoundView.setMinimumSize(350,100)
     self.compoundView.setMaximumSize(400,200)
     if self.colourScheme == 'dark':
@@ -603,8 +602,8 @@ class ScreeningSetup(CcpnDock, Base):
     ''' Export a simple xlxs file from the results '''
     self.nameAndPath = ''
     fType = 'XLS (*.xlsx)'
-    dialog = QtGui.QFileDialog
-    filePath = dialog.getSaveFileName(self,filter=fType)
+    dialog = FileDialog(self, fileMode=1, acceptMode=0, preferences=self.preferences, filter=fType)
+    filePath = dialog.selectedFiles()[0]
     self.nameAndPath = filePath
 
     sampleColumn = [str(sample.pid) for sample in self.project.samples]

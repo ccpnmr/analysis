@@ -6,10 +6,11 @@ QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
 from math import atan2, sin, cos, sqrt, degrees, radians, hypot, pi
 from ccpncore.gui.Base import Base
+from ccpncore.gui.FileDialog import FileDialog
 
 class CompoundView(QtGui.QGraphicsView, Base):
 
-  def __init__(self, parent, variant=None,  **kw):
+  def __init__(self, parent, variant=None, preferences=None, **kw):
 
 
     QtGui.QGraphicsView.__init__(self, parent)
@@ -17,6 +18,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
     Base.__init__(self, **kw)
 
     self.parent = parent
+    self.preferences = preferences
     # self.setCompound = self.setCompound
     self.rotatePos = None
     if variant:
@@ -441,8 +443,8 @@ class CompoundView(QtGui.QGraphicsView, Base):
       printer.setResolution(newRes)
 
       fType = 'PDF (*.pdf)'
-      dialog = QtGui.QFileDialog
-      filePath = dialog.getSaveFileName(self,filter=fType)
+      dialog = FileDialog(self, filter=fType, preferences=self.preferences)
+      filePath = dialog.selectedFiles[0]
 
       if filePath:
         printer.setOutputFileName(filePath)

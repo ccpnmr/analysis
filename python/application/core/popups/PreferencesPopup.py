@@ -30,6 +30,7 @@ from ccpncore.api.memops import Implementation
 from ccpncore.gui.Label import Label
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
+from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
@@ -55,12 +56,14 @@ class PreferencesPopup(QtGui.QDialog):
     self.autoSaveLayoutBox.toggled.connect(partial(self.toggleGeneralOptions, 'toolbarHidden'))
     self.auxiliaryFilesLabel = Label(self, text="Auxiliary Files Path ", grid=(2, 0))
     self.auxiliaryFilesData = LineEdit(self, grid=(2, 1))
-    self.auxiliaryFilesDataButton = Button(self, grid=(2, 2), callback=self.setDataPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.auxiliaryFilesDataButton = Button(self, grid=(2, 2), callback=self.getAuxiliaryFilesPath, icon='iconsNew/directory', hPolicy='fixed')
     self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
+    self.auxiliaryFilesData.editingFinished.connect(self.setAuxiliaryFilesPath)
     self.macroPathLabel = Label(self, text="Macro Path", grid=(3, 0))
     self.macroPathData = LineEdit(self, grid=(3, 1))
     self.macroPathData.setText(self.preferences.general.macroPath)
-    self.macroPathDataButton = Button(self, grid=(3, 2), callback=self.setDataPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.macroPathDataButton = Button(self, grid=(3, 2), callback=self.getMacroFilesPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.macroPathData.editingFinished.connect(self.setMacroFilesPath)
     self.languageLabel = Label(self, text="Language", grid=(4, 0))
     self.languageBox = PulldownList(self, grid=(4, 1), gridSpan=(1, 1))
     self.languageBox.addItems(LANGUAGES)
@@ -78,11 +81,9 @@ class PreferencesPopup(QtGui.QDialog):
     self.colourSchemeBox.currentIndexChanged.connect(self.changeColourScheme)
     self.licenceLabel = Label(self, text='Licence', grid=(6, 0))
     self.licenceButton = Button(self, text='Show Licence', grid=(6, 1), gridSpan=(1, 1), callback=self.showLicenceInfo)
-    # self.spectraTitle = Label(self, text='Spectra', grid=(8, 0))
-    # self.spectraTitle.setStyleSheet("font: bold;")
-    # self.keepExternalLabel = Label(self, text='Keep External:', grid=(8, 0))
-    # self.keepExternalBox = CheckBox(self, grid=(24, 1), hAlign='l',checked=self.preferences.spectra.keepExternal)
-    # self.keepExternalBox.toggled.connect(partial(self.toggleSpectralOptions, 'keepExternal'))
+    self.useNativeLabel = Label(self, text="Use Native File Dialogs: ", grid=(7, 0))
+    self.useNativeBox = CheckBox(self, grid=(7, 1), checked=self.preferences.general.useNative)
+    self.useNativeBox.toggled.connect(partial(self.toggleGeneralOptions, 'toolbarHidden'))
 
     buttonBox = Button(self, grid=(7, 1), text='Close', callback=self.accept)
 
@@ -91,7 +92,9 @@ class PreferencesPopup(QtGui.QDialog):
       currentDataPath = '/'.join(self.dataPathText.text().split('/')[:-1])
     else:
       currentDataPath = os.path.expanduser('~')
-    directory = QtGui.QFileDialog.getExistingDirectory(self, 'Select Data File', currentDataPath)
+    dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+                           preferences=self.preferences.general)
+    directory = dialog.selectedFiles()[0]
     if len(directory) > 0:
       self.dataPathText.setText(directory)
       self.preferences.general.dataPath = directory
@@ -103,6 +106,39 @@ class PreferencesPopup(QtGui.QDialog):
       dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
         name='standard').findFirstDataUrl(name='remoteData')
       dataUrl.url = Implementation.Url(path=newPath)
+
+  def getAuxiliaryFilesPath(self):
+    if os.path.exists(os.path.expanduser(self.auxiliaryFilesData.text())):
+      currentDataPath = os.path.expanduser(self.auxiliaryFilesData.text())
+    else:
+      currentDataPath = os.path.expanduser('~')
+    dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+                           preferences=self.preferences.general)
+    directory = dialog.selectedFiles()
+    if len(directory) > 0:
+      self.auxiliaryFilesData.setText(directory[0])
+      self.preferences.general.auxiliaryFilesPath = directory[0]
+
+  def setAuxiliaryFilesPath(self):
+      newPath = self.auxiliaryFilesData.text()
+      self.preferences.general.auxiliaryFilesPath = newPath
+
+
+  def getMacroFilesPath(self):
+    if os.path.exists(os.path.expanduser(self.macroPathData.text())):
+      currentDataPath = os.path.expanduser(self.macroPathData.text())
+    else:
+      currentDataPath = os.path.expanduser('~')
+    dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+                           preferences=self.preferences.general)
+    directory = dialog.selectedFiles()
+    if len(directory) > 0:
+      self.macroPathData.setText(directory[0])
+      self.preferences.general.macroPath = directory[0]
+
+  def setMacroFilesPath(self):
+      newPath = self.macroPathData.text()
+      self.preferences.general.macroPath = newPath
 
   def changeLanguage(self, value):
     self.preferences.general.language = (LANGUAGES[value])

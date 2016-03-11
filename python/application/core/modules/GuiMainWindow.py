@@ -36,6 +36,7 @@ from ccpncore.gui import MessageDialog
 from ccpncore.gui.Action import Action
 from ccpncore.gui.CcpnWebView import CcpnWebView
 from ccpncore.gui.Dock import CcpnDock
+from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui.Menu import Menu, MenuBar
 from application.core.gui.SideBar import SideBar
 
@@ -478,19 +479,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     
     if result:
       if projectDir is None:
-        dialog = QtGui.QFileDialog()
-        dialog.setFileMode(QtGui.QFileDialog.Directory)
-        dialog.setWindowTitle("Open Project")
-        if self._appBase.preferences.general.colourScheme == 'dark':
-          dialog.setStyleSheet("""
-                                  QFileDialog QWidget {
-                                                      background-color: #2a3358;
-                                                      color: #f7ffff;
-                                                      }
-                              """)
-        elif self._appBase.preferences.general.colourScheme == 'light':
-          dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
-        dialog.exec_()
+        dialog = FileDialog(self, fileMode=2, text="Open Project", acceptMode=0, preferences=self._appBase.preferences.general)
+        # dialog.exec_()
         projectDir = dialog.selectedFiles()[0]
 
       if projectDir:

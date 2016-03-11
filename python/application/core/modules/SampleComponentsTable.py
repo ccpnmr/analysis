@@ -37,7 +37,7 @@ class PeakListSampleComponent(QtGui.QWidget):
     self.layout().addWidget(labelSelectComponent, 1, 3, QtCore.Qt.AlignRight)
     self.peakListPulldown = PulldownList(self, grid=(1, 4), callback= self.showPLOnTable)
 
-    compoundView = CompoundView(self, grid=(3,0), gridSpan=(3,2))
+    compoundView = CompoundView(self, grid=(3,0), gridSpan=(3,2), preferences=self.project._appBase.preferences.general)
     self.compoundView = compoundView
 
     self.peakListObjects = []

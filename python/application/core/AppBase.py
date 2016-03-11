@@ -30,9 +30,10 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn import Project
 from ccpncore.util import Io as ioUtil
-from ccpncore.gui.Application import Application
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.api.memops import Implementation
+from ccpncore.gui.Application import Application
+from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui import MessageDialog
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
@@ -223,18 +224,8 @@ def checkRegistration(applicationVersion):
 def getSaveDirectory(apiProject, preferences):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
   preferences = getPreferences()
-  dialog = QtGui.QFileDialog(caption='Save Project As...')
-  dialog.setFileMode(QtGui.QFileDialog.AnyFile)
-  dialog.setAcceptMode(1)
-  if preferences.general.colourScheme == 'dark':
-    dialog.setStyleSheet("""
-                        QFileDialog QWidget {
-                                            background-color: #2a3358;
-                                            color: #f7ffff;
-                                            }
-                        """)
-  elif preferences.general.colourScheme == 'light':
-    dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+  dialog = FileDialog(fileMode=0, acceptMode=1, text='Save Project As...',
+                      colourScheme=preferences.general.colourScheme)
 
   if not dialog.exec_():
     return ''

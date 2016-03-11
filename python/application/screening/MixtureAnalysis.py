@@ -30,7 +30,7 @@ class MixtureAnalysis(CcpnDock):
     self.compound = None
     self.variant = None
     self.smiles = ''
-    self.compoundView  = CompoundView(self)
+    self.compoundView  = CompoundView(self, preferences=self.project._appBase.preferences.general)
 
 
     # self.clearDisplayView()
@@ -149,7 +149,7 @@ class MixtureAnalysis(CcpnDock):
     for component in sample.sampleComponents:
       chemicalName = (''.join(str(x) for x in component.substance.synonyms))
       smiles = component.substance.smiles
-      self.compoundView2 = CompoundView(self)
+      self.compoundView2 = CompoundView(self, preferences=self.project._appBase.preferences.general)
       self.tabMoleculeViewLayout.addWidget(self.compoundView2)
       compound = importSmiles(smiles)
       variant = list(compound.variants)[0]

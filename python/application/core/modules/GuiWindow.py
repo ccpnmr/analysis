@@ -31,7 +31,7 @@ from pyqtgraph.dockarea import DockArea
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
 from ccpn.lib.Assignment import propagateAssignments
-
+from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.util import Types
 from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 
@@ -44,27 +44,13 @@ class GuiWindow(DropBase):
   def __init__(self):
     
     DropBase.__init__(self, self._parent._appBase)
-    #self._appBase = self._project._appBase
-    # self._apiWindow = apiWindow
+
     self.dockArea = DockArea()
     self.dockArea.guiWindow = self
     self.dockArea.setGeometry(0, 0, 12000, 8000)
     if not self._wrappedData.modules:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
 
-    # apiModules = apiWindow.sortedModules()
-    # if apiModules:
-    #   for apiModule in apiModules:
-    #     if isinstance(apiModule, SpectrumDisplay):
-    #       className = apiModule.className
-    #       classModule = importlib.import_module('application.core.modules.Gui' + className)
-    #       clazz = getattr(classModule, 'Gui'+className)
-    #       guiModule = clazz(self.dockArea, apiModule)
-    #     else:
-    #       raise Exception("Don't know how to deal with this yet")
-    #   self.blankDisplay = None
-    # else:
-    #   self.blankDisplay = GuiBlankDisplay(self.dockArea)
             
   def deleteBlankDisplay(self):
     """
@@ -81,20 +67,8 @@ class GuiWindow(DropBase):
     if text is None:
       text='Load Data'
     if paths is None:
-      dialog = QtGui.QFileDialog(self, caption=text)
-      if self._appBase.preferences.general.colourScheme == 'dark':
-          dialog.setStyleSheet("""
-                                  QFileDialog QWidget {
-                                                      background-color: #2a3358;
-                                                      color: #f7ffff;
-                                                      }
-                              """)
-      elif self._appBase.preferences.general.colourScheme == 'light':
-        dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
-      dialog.exec_()
+      dialog = FileDialog(self, mode=0, text=text, prefernces=self._appBase.preferences.general)
       paths = dialog.selectedFiles()[0]
-
-
 
     # NBNB TBD I assume here that path is either a string or a list lf string paths.
     # NBNB FIXME if incorrect
@@ -107,41 +81,12 @@ class GuiWindow(DropBase):
     self.processDropData(paths, dataType='urls')
 
 
-  # def addSpectrum1dDisplay(self):
-  #     pass
-    # #newModule = Spectrum1dPane(parent=self, title='Module %s' % str(self.moduleCount+1),
-    # newModule = Spectrum1dDisplay(title='Module %s_1D' % str(self.moduleCount+1),
-    #                            current=self.current, pid='QP:%s' % str(self.moduleCount+1),
-    #                            preferences=self.preferences, mainWindow=self)
-    # self.panes[newModule.pid] = newModule
-    # newModule.project = self.project
-    # newModule.current = self.current
-    # self.moduleCount+=1
-    #
-    # self.dockArea.addDock(newModule.dock)
-    # return newModule
-
-  # def addSpectrumNdDisplay(self):
-  #   pass
-    # #newModule = SpectrumNdPane(parent=self, title='Module %s' % str(self.moduleCount+1),
-    # newModule = SpectrumNdDisplay(title='Module %s_Nd' % str(self.moduleCount+1),
-    #                            current=self.current, pid='QP:%s' % str(self.moduleCount+1),
-    #                            preferences=self.preferences, mainWindow=self)
-    # self.panes[newModule.pid] = newModule
-    # newModule.project = self.project
-    # newModule.current = self.current
-    # self.moduleCount+=1
-    #
-    # self.dockArea.addDock(newModule.dock)
-    # return newModule
-
   def setShortcuts(self):
     """
     Sets shortcuts for functions not specified in the main window menubar
     """
     # this trampled the menu py shortcut
     from functools import partial
-    #toggleConsoleShortcut = QtGui.QShortcut(QtGui.QKeySequence("p, y"), self, self.toggleConsole)
     QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll)
     QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll)
     QtGui.QShortcut(QtGui.QKeySequence("Del"), self, partial(self._appBase.current.deleteSelected, self))
@@ -149,21 +94,15 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
     QtGui.QShortcut(QtGui.QKeySequence("f, r"), self, partial(navigateToNmrResidue, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project))
-
     QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current))
     QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self.clearCurrentPeaks)
-
     QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self))
     QtGui.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self))
     QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self))
     QtGui.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self))
-
-    ###QtGui.QShortcut(QtGui.QKeySequence("p, h"), self, self.newHPhasingTrace)
-    #QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.newVPhasingTrace)
     QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot)
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace)
-    ###QtGui.QShortcut(QtGui.QKeySequence("p, i"), self, self.togglePhasingPivot)
 
   def traceScaleScale(self, window:'GuiWindow', scale:float):
     """

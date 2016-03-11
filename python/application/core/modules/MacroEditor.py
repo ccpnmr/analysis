@@ -3,6 +3,7 @@ __author__ = 'simon1'
 from ccpncore.gui.Button import Button
 from ccpncore.gui.ButtonList import ButtonList
 from ccpncore.gui.Dock import CcpnDock
+from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.TextEditor import TextEditor
@@ -19,6 +20,7 @@ class MacroEditor(DropBase, CcpnDock):
     widget = QtGui.QWidget()
     self.parent = parent
     self.parent.addDock(self)
+    self.preferences = mainWindow._appBase.preferences.general
     self.textBox = TextEditor()
     self.mainWindow = mainWindow
     widgetLayout = QtGui.QGridLayout()
@@ -62,10 +64,11 @@ class MacroEditor(DropBase, CcpnDock):
     """
     Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
     """
-    macroPath = self.mainWindow._appBase.preferences.general.macroPath
+    macroPath = self.preferences.macroPath
+    colourScheme = self.preferences.colourScheme
     newText = self.textBox.toPlainText()
-    filePath = QtGui.QFileDialog.getSaveFileName(self, 'Save Macro As...',
-                                                 macroPath, selectedFilter='*.py')
+    filePath = FileDialog(self, text='Save Macro As...', acceptMode=1, fileMode=0, colourScheme=colourScheme,
+                           directory=macroPath, selectedFilter='*.py')
 
     if not filePath:
       return
@@ -80,9 +83,10 @@ class MacroEditor(DropBase, CcpnDock):
     Opens a file dialog box at the macro path specified in the application preferences and loads the
     contents of the macro file into the textbox.
     """
-    macroPath = self.mainWindow._appBase.preferences.general.macroPath
-    filePath = QtGui.QFileDialog.getOpenFileName(self, 'Open Macro',
-                                                 macroPath)
+    macroPath = self.preferences.macroPath
+    colourScheme = self.preferences.colourScheme
+    filePath = FileDialog(self, text='Open Macro', fileMode=1, acceptMode=0, directory=macroPath,
+                          colourScheme=colourScheme)
 
     with open(filePath, 'r') as f:
       for line in f.readlines():

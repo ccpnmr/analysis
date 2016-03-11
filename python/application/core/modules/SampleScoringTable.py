@@ -4,6 +4,7 @@ from PyQt4 import QtCore, QtGui
 from ccpncore.gui.Table import ObjectTable, Column
 from pandas import DataFrame
 from ccpncore.gui.Button import Button
+from ccpncore.gui.FileDialog import FileDialog
 
 
 class SampleTableSimple(QtGui.QWidget):
@@ -13,6 +14,7 @@ class SampleTableSimple(QtGui.QWidget):
     QtGui.QWidget.__init__(self, parent)
 
     self.project = project
+    self.preferences = project._appBase.preferences.general
     exportButton = Button(self, text = 'Export Results', grid=(5,1), callback= self.exportToXls)
 
     listOfSample = []
@@ -44,8 +46,8 @@ class SampleTableSimple(QtGui.QWidget):
     ''' Export a simple xlxs file from the results '''
     self.nameAndPath = ''
     fType = 'XLS (*.xlsx)'
-    dialog = QtGui.QFileDialog
-    filePath = dialog.getSaveFileName(self,filter=fType)
+    dialog = FileDialog(self, fileMode=1, acceptMode=0, preferences=self.preferences, filter=fType)
+    filePath = dialog.selectedFiles()[0]
     self.nameAndPath = filePath
 
     sampleColumn = [str(sample.pid) for sample in self.project.samples]

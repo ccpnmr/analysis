@@ -39,7 +39,8 @@ class SetupNmrResiduesPopup(QtGui.QDialog, Base):
     self.project = project
     label1a = Label(self, text="Source PeakList ", grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1))
-    self.peakListPulldown.setData([peakList.pid for peakList in project.peakLists])
+    self.peakListPulldown.setData([peakList.pid for peakList in project.peakLists
+      if peakList.spectrum.experimentType == 'H[N]' or peakList.spectrum.experimentType == 'H[N[CO]]'])
     label1a = Label(self, text="NmrChain ", grid=(0, 2))
     self.nmrChainPulldown = PulldownList(self, grid=(0, 3))
     self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in project.nmrChains])

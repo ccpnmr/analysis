@@ -28,16 +28,17 @@ from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
+from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.ColourDialog import ColourDialog
-from ccpncore.util.Colour import spectrumColours
-from ccpncore.gui.ButtonList import ButtonList
+from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
+from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui.Label import Label
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.Spinbox import Spinbox
-from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 
+
+from ccpncore.util.Colour import spectrumColours
 
 from functools import partial
 
@@ -221,10 +222,12 @@ class GeneralTab(QtGui.QWidget, Base):
       currentSpectrumDirectory = '/'.join(self.pathData.text().split('/')[:-1])
     else:
       currentSpectrumDirectory = os.path.expanduser('~')
-    directory = QtGui.QFileDialog.getOpenFileName(self, 'Select Spectrum File', currentSpectrumDirectory)
+    dialog = FileDialog(self, text='Select Spectrum File', directory=currentSpectrumDirectory,
+                           fileMode=1, acceptMode=0)
+    directory = dialog.selectedFiles()
     if len(directory) > 0:
-      self.pathData.setText(directory)
-      self.spectrum.filePath = directory
+      self.pathData.setText(directory[0])
+      self.spectrum.filePath = directory[0]
 
 
       apiDataStore = self.spectrum._apiDataSource.dataStore

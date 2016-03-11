@@ -229,5 +229,5 @@ def universalSortKey(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey,
   return (_sortOrderDict[category], key)
 
 def universalNaturalSortKey(key):
-  """Universla sort key, useing stringSOrtKey for strings"""
+  """Universal sort key, using stringSortKey for strings"""
   return universalSortKey(key, _stringOrderingHook=stringSortKey)

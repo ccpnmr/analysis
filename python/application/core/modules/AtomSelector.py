@@ -81,6 +81,8 @@ class AtomSelector(CcpnDock):
     self.layout.addWidget(self.pickAndAssignWidget, 1, 0, 3, 8)
     self.current.registerNotify(self.updateWidget, 'nmrResidues')
     # self.createBackBoneButtons()
+
+    self.buttons = []
     
   def closeDock(self):
     self.current.unRegisterNotify(self.predictAssignments, 'peaks')

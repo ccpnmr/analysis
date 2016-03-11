@@ -45,7 +45,7 @@ class PeakTable(CcpnDock):
     self.layout.addWidget(self.peakList)
     self.current = project._appBase.current
     self.current.registerNotify(self.peakList.selectPeakInTable, 'peaks')
-    if hasattr(self.current, 'strip'):
+    if self.current.strip:
       peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
       self.peakList.peakListPulldown.setCurrentIndex(self.peakList.peakListPulldown.findText(peakList.pid))
 

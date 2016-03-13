@@ -285,6 +285,18 @@ class SpectrumView(AbstractWrapperObject):
     """Spectrum that SpectrumView refers to"""
     return self._project._data2Obj.get(self._wrappedData.spectrumView.dataSource)
 
+  @property
+  def _displayOrderSpectrumDimensionIndices(self) -> Tuple[int, ...]:
+    """Indices of spectrum dimensions in display order (x, y, Z1, ...)"""
+    apiStripSpectrumView = self._wrappedData
+    apiStrip = apiStripSpectrumView.strip
+
+    axisCodes = apiStrip.axisCodes
+    dimensionOrdering = apiStripSpectrumView.spectrumView.dimensionOrdering
+
+    return tuple(dimensionOrdering[axisCodes.index(x)] for x in apiStrip.axisOrder)
+
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:Strip)-> list:

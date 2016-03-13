@@ -102,6 +102,7 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
           if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
             shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
             if shift is not None:# and isPositionWithinfBounds(display.strips[0], shift, axis):
+              # NBNB TBD consider adding extra check back in. Function called has been fixed
               shiftDict[axis.code].append(shift)
 
       if len(display.axisCodes) > 2:
@@ -187,15 +188,24 @@ def isPositionWithinfBounds(strip:GuiStrip, shift:ChemicalShift, axis:object):
   """
   Determines whether a given shift if within the bounds of the specified axis of the specified
     strip.
+
+    NBNB Bug Fixed by Rasmus 13/3/2016.
+    This was not ued then. Maybe it should be?
   """
   minima = []
   maxima = []
+
+  axisIndex = strip.axisOrder.index(axis.code)
   for spectrumView in strip.spectrumViews:
-    print(shift, strip, axis.code)
-    if axis.code in spectrumView.spectrum.axisCodes:
-      index = spectrumView.spectrum.axisCodes.index(axis.code)
-      minima.append(spectrumView.spectrum.spectrumLimits[index][0])
-      maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
+    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    index = spectrumIndices[axisIndex]
+    minima.append(spectrumView.spectrum.spectrumLimits[index][0])
+    maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
+    # print(shift, strip, axis.code)
+    # if axis.code in spectrumView.spectrum.axisCodes:
+    #   index = spectrumView.spectrum.axisCodes.index(axis.code)
+    #   minima.append(spectrumView.spectrum.spectrumLimits[index][0])
+    #   maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
   if len(maxima) < 1:
     return True
   else:

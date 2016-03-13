@@ -90,7 +90,8 @@ class BackboneAssignmentModule(CcpnDock):
     self.project._appBase.mainWindow.clearMarks()
 
     self.nmrResidueTable.nmrResidueTable.updateTable()
-    selectedDisplays = [display for display in self.project.spectrumDisplays if display.pid not in self.matchModules]
+    selectedDisplays = [display for display in self.project.spectrumDisplays
+                        if display.pid not in self.matchModules]
 
     if '-1' in nmrResidue.sequenceCode:
       direction = '-1'
@@ -152,6 +153,9 @@ class BackboneAssignmentModule(CcpnDock):
     Creates two ordered dictionaries for the inter residue and intra residue CA and CB shifts for
     all NmrResidues in the project.
     """
+
+    # NBNB FIXME TBD This hardwires the use of self.project.chemicalShiftLists[0]. NOT OK!
+
     self.intraShifts = OrderedDict()
     self.interShifts = OrderedDict()
 
@@ -246,7 +250,9 @@ class BackboneAssignmentModule(CcpnDock):
           score = (self.qScore(queryShifts[0], shift[0])+self.qScore(queryShifts[1], shift[1]))/2
           scores.append(score)
           matrix[score] = res
-      elif len(queryShifts) == 1:
+      # elif len(queryShifts) == 1:
+      # NBNB FIXME TBD needs refactoring to make sure the comparisons are the right ones.
+      elif len(queryShifts) == 1 and shift:
         if self.qScore(queryShifts[0], shift[0]) is not None:
 
           score = self.qScore(queryShifts[0], shift[0])

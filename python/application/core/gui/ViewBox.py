@@ -309,14 +309,20 @@ class ViewBox(pg.ViewBox):
                   self.current.addPeak(peak)
             else:
               # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
-              axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
-              xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
-              yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
+              # Fixed 13/3/2016 Rasmus Fogh
+              # Avoid comparing spectrum AxisCodes to display acisCodes - they are not identical
+              spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+              xAxis = spectrumIndices[0]
+              yAxis = spectrumIndices[1]
+              # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
+              # xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
+              # yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
               for peak in peakList.peaks:
                 if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
                   and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
                   if zPositions is not None:
-                    zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+                    zAxis = spectrumIndices[2]
+                    # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
                     if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                       peak.isSelected = True
                       self.current.addPeak(peak)

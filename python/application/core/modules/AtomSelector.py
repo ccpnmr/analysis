@@ -384,6 +384,8 @@ class AtomSelector(CcpnDock):
       for strip in self.project.strips:
         for peakListView in strip.peakListViews:
           if peak in peakListView.peakItems.keys():
+            # NBNB TBD FIXME consider using new _displayOrderSpectrumDimensionIndices
+            # function to map display axes to spectrum axes
             axisCode = spectrumLib.axisCodeMatch(strip.axisCodes[1], peak.peakList.spectrum.axisCodes)
             index = peak.peakList.spectrum.axisCodes.index(axisCode)
             nmrAtoms = peak.dimensionNmrAtoms[index] + [newNmrAtom]

@@ -1290,13 +1290,18 @@ def _initialiseStandardDataLocationStore(memopsRoot:Implementation.MemopsRoot):
   if dataUrlObject is None:
     # make new dataUrl
     result.newDataUrl(name='insideData', url=projectUrl)
+  else:
+    dataUrlObject.url = projectUrl
 
   # alongsideData - points to directory containing project directory
   dataUrlObject = result.findFirstDataUrl(name='alongsideData')
   path, junk = Path.splitPath(projectUrl.path)
+  newUrl = Implementation.Url(path=path)
   if dataUrlObject is None:
     # make new dataUrl
-    result.newDataUrl(name='alongsideData', url=Implementation.Url(path=path))
+    result.newDataUrl(name='alongsideData', url=newUrl)
+  else:
+    dataUrlObject.url = newUrl
 
   # remoteData - initialised to home directory and not reset
   dataUrlObject = result.findFirstDataUrl(name='remoteData')

@@ -39,6 +39,7 @@ from ccpncore.gui.Spinbox import Spinbox
 
 
 from ccpncore.util.Colour import spectrumColours
+from ccpncore.util import Path as pathUtil
 
 from functools import partial
 
@@ -245,11 +246,20 @@ class GeneralTab(QtGui.QWidget, Base):
 
   def setSpectrumPath(self):
     if self.pathData.isModified():
-      if os.path.exists(self.pathData.text()):
-        self.spectrum.filePath = self.pathData.text()
-        self.writeLoggingMessage("spectrum.filePath = '%s'" % self.pathData.text())
-        self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % self.pathData.text(), spectrum=self.spectrum)
-        apiDataStore = self.spectrum._apiDataSource.dataStore
+      filePath = self.pathData.text()
+
+      # Convert from custom repository names to full names
+      apiDataSource = self.spectrum._apiDataSource
+      apiDataLocationStore = apiDataSource.root.findFirstDataLocationStore(name='standard')
+      if apiDataLocationStore is not None:
+        filePath = pathUtil.expandDollarFilePath(apiDataLocationStore, filePath)
+
+      if os.path.exists(filePath):
+        self.spectrum.filePath = filePath
+        self.writeLoggingMessage("spectrum.filePath = '%s'" % filePath)
+        self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % filePath,
+                                               spectrum=self.spectrum)
+        apiDataStore = apiDataSource.dataStore
         if apiDataStore.dataLocationStore.name == 'standard':
           dataUrlName = apiDataStore.dataUrl.name
           if dataUrlName == 'insideData':

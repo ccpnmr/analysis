@@ -323,3 +323,31 @@ def checkFilePath(filePath, allowDir=aliasTrue):
     isOk = aliasFalse
 
   return isOk, msg
+
+def expandDollarFilePath(dataLocationStore:'DataLocationStore', filePath:str) -> str:
+  """Expand paths that start with $REPOSITORY to full path
+
+  NBNB Should be moved to ccpncore.lib.ccp.general.DataLocation.DataLocationstore"""
+
+  # Convert from custom repository names to full names
+  stdRepositoryNames = {
+    '$INSIDE/':'insideData',
+    '$ALONGSIDE/':'alongsideData',
+    '$DATA/':'remoteData',
+  }
+
+  if not filePath.startswith('$'):
+    # Nothing to expand
+    return filePath
+
+  if dataLocationStore is None:
+    # No DataLocationStore to work with
+    return
+
+  for prefix,dataUrlName in stdRepositoryNames.items():
+    if filePath.startswith(prefix):
+      dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+      if dataUrl is not None:
+        return joinPath(dataUrl.url.path, filePath[len(prefix):])
+  #
+  return filePath

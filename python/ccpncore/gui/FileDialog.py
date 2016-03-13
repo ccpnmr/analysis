@@ -46,17 +46,20 @@ class FileDialog(QtGui.QFileDialog):
 
     self.setFileMode(fileMode)
     self.setAcceptMode(acceptMode)
-    if preferences.colourScheme == 'dark':
-      self.setStyleSheet("""
-                         QFileDialog QWidget {
-                                             background-color: #2a3358;
-                                             color: #f7ffff;
-                                             }
-                        """)
-    elif preferences.colourScheme == 'light':
-      self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
 
-    if preferences.useNative and not sys.platform.lower() == 'linux':
+    if preferences:
+
+      if preferences.colourScheme == 'dark':
+        self.setStyleSheet("""
+                           QFileDialog QWidget {
+                                               background-color: #2a3358;
+                                               color: #f7ffff;
+                                               }
+                          """)
+      elif preferences.colourScheme == 'light':
+        self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+
+    if preferences and preferences.useNative and not sys.platform.lower() == 'linux':
       funcName = staticFunctionDict[(acceptMode, fileMode)]
       getattr(self, funcName)(caption=text, **kw)
     else:

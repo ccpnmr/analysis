@@ -223,7 +223,8 @@ class GeneralTab(QtGui.QWidget, Base):
     else:
       currentSpectrumDirectory = os.path.expanduser('~')
     dialog = FileDialog(self, text='Select Spectrum File', directory=currentSpectrumDirectory,
-                           fileMode=1, acceptMode=0)
+                        fileMode=1, acceptMode=0,
+                        preferences=self.spectrum.project._appBase.mainWindow.preferences.general)
     directory = dialog.selectedFiles()
     if len(directory) > 0:
       self.pathData.setText(directory[0])

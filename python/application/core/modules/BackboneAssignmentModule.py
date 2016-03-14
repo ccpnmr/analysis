@@ -69,6 +69,9 @@ class BackboneAssignmentModule(CcpnDock):
     Initiates assignment procedure when triggered by selection of an NmrResidue from the nmrResidueTable
     inside the module.
     """
+
+    #  NBNB TBD FIXME you should check only for sequenceCodes that END in '-1' or '+1'
+
     self._setupShiftDicts()
     if hasattr(self, 'assigner'):
       self.assigner.clearAllItems()
@@ -87,6 +90,9 @@ class BackboneAssignmentModule(CcpnDock):
     to chemical shift value NmrAtoms in the NmrResidue. Creates assignMatrix for strip matching and
     add strips to matchModule(s) corresponding to assignment matches.
     """
+
+    #  NBNB TBD FIXME you should check only for sequenceCodes that END in '-1' or '+1'
+
     self.project._appBase.mainWindow.clearMarks()
 
     self.nmrResidueTable.nmrResidueTable.updateTable()
@@ -130,7 +136,8 @@ class BackboneAssignmentModule(CcpnDock):
       direction = '+1'
       iNmrResidue = nmrResidue
       self.current.nmrResidue = iNmrResidue
-      navigateToNmrResidue(self.project, iNmrResidue, selectedDisplays=selectedDisplays, markPositions=True, strip=strip)
+      navigateToNmrResidue(self.project, iNmrResidue, selectedDisplays=selectedDisplays,
+                           markPositions=True, strip=strip)
       queryShifts = self.intraShifts[nmrResidue]
       matchShifts = self.interShifts
       for display in selectedDisplays:

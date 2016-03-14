@@ -106,6 +106,12 @@ class ViewBox(pg.ViewBox):
           for peakList in spectrumView.spectrum.peakLists:
             for peak in peakList.peaks:
               peak.isSelected = False
+
+      # NBNB TBD FIXME this isSelected stuff is a dogs breakfast and needs refactoring.
+      # Meanwhile at least deselect current peaks
+      for peak in self.current.peaks:
+        peak.isSelected = False
+
       self.current.clearPeaks()
       # now select (take first one within range)
       for spectrumView in self.current.strip.spectrumViews:

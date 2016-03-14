@@ -123,6 +123,8 @@ class BackboneAssignmentModule(CcpnDock):
     selectedDisplays = [display for display in self.project.spectrumDisplays
                         if display.pid not in self.matchModules]
 
+    chemicalShiftList = self.project.getByPid(self.chemicalShiftListPulldown.currentText())
+
     if '-1' in nmrResidue.sequenceCode:
       direction = '-1'
       seqCode = nmrResidue.sequenceCode
@@ -143,12 +145,12 @@ class BackboneAssignmentModule(CcpnDock):
           shiftDict[axis.code] = []
           for atom in nmrResidue.nmrAtoms:
             if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
-              shift = self.project.chemicalShiftLists[0].getChemicalShift(atom.id)
+              shift = chemicalShiftList.getChemicalShift(atom.id)
               if shift is not None:
                 shiftDict[axis.code].append(shift)
           for atom in iNmrResidue.nmrAtoms:
             if (atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code) and atom._apiResonance.isotopeCode != '13C'):
-              shift = self.project.chemicalShiftLists[0].getChemicalShift(atom.id)
+              shift = chemicalShiftList.getChemicalShift(atom.id)
               if shift is not None:
                 shiftDict[axis.code].append(shift)
         atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
@@ -226,11 +228,11 @@ class BackboneAssignmentModule(CcpnDock):
       for matchModule in self.matchModules:
         if len(self.project.getByPid(matchModule).strips) < self.numberOfMatches:
           newStrip = self.project.getByPid(matchModule).addStrip()
-          newStrip.planeToolbar.spinSystemLabel.setText(iNmrResidue.sequenceCode)
+          newStrip.planeToolbar.spinSystemLabel.setText(iNmrResidue._id)
           navigateToNmrResidue(self.project, iNmrResidue, strip=newStrip)
         else:
           strip = self.project.getByPid(matchModule).orderedStrips[assignmentScores.index(assignmentScore)]
-          strip.planeToolbar.spinSystemLabel.setText(iNmrResidue.sequenceCode)
+          strip.planeToolbar.spinSystemLabel.setText(iNmrResidue._id)
           navigateToNmrResidue(self.project, iNmrResidue, strip=strip)
 
     firstMatchResidue = assignMatrix[0][assignmentScores[0]]
@@ -288,11 +290,6 @@ class BackboneAssignmentModule(CcpnDock):
           matrix[score] = res
 
     return matrix, scores
-
-  def _showMatchDisplayPopup(self):
-    self.popup = SelectMatchDisplaysPopup(self, project=self.project)
-    self.popup.exec_()
-
 
 
 

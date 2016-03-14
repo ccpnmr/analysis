@@ -92,7 +92,7 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("Del"), self, partial(self._appBase.current.deleteSelected, self))
     QtGui.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark)
     QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
-    QtGui.QShortcut(QtGui.QKeySequence("f, r"), self, partial(navigateToNmrResidue, self._parent.project))
+    QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current))
     QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self.clearCurrentPeaks)

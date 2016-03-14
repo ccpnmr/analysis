@@ -29,6 +29,8 @@ from PyQt4 import QtCore, QtGui
 from ccpncore.gui.Menu import Menu
 from ccpncore.gui.ToolBar import ToolBar
 
+from functools import partial
+
 class SpectrumToolBar(ToolBar):
 
   def __init__(self, parent, widget=None, **kw):
@@ -52,7 +54,6 @@ class SpectrumToolBar(ToolBar):
     button from the toolbar.
     """
     contextMenu = Menu('', self, isFloatWidget=True)
-    from functools import partial
     peakListViews = self.widget.peakListViews
     key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
     for peakListView in peakListViews:
@@ -62,7 +63,7 @@ class SpectrumToolBar(ToolBar):
         if peakListView.isVisible():
           action.setChecked(True)
         action.toggled.connect(peakListView.setVisible)
-    contextMenu.addAction('Delete', partial(self.removeSpectrum, button))
+    contextMenu.addAction('Remove', partial(self.removeSpectrum, button))
     return contextMenu
 
   def removeSpectrum(self, button:QtGui.QToolButton):
@@ -73,6 +74,4 @@ class SpectrumToolBar(ToolBar):
     key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
     for spectrumView in self.widget.spectrumViews:
       if spectrumView._apiDataSource == key:
-        # for strip in self.widget.strips:
-        #   spectrumView.removeSpectrumItem(strip)
         spectrumView._wrappedData.spectrumView.delete()

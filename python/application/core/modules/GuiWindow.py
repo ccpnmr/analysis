@@ -67,7 +67,7 @@ class GuiWindow(DropBase):
     if text is None:
       text='Load Data'
     if paths is None:
-      dialog = FileDialog(self, mode=0, text=text, preferences=self._appBase.preferences.general)
+      dialog = FileDialog(self, fileMode=0, text=text, preferences=self._appBase.preferences.general)
       paths = dialog.selectedFiles()[0]
 
     # NBNB TBD I assume here that path is either a string or a list lf string paths.

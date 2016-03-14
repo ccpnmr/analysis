@@ -455,14 +455,16 @@ class AtomSelector(CcpnDock):
                 if anyInterOnlyExperiments:
                   self.cbButton1.setStyleSheet('background-color: green')
                 else:
-                  self.cbButton1.setStyleSheet('background-color: orange')
+                  # self.cbButton1.setStyleSheet('background-color: orange')
+                  self.cbButton1.setStyleSheet('background-color: green')
                   self.cbButton2.setStyleSheet('background-color: green')
               if atomPred == 'CA':
                 # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
                 if anyInterOnlyExperiments:
                   self.caButton1.setStyleSheet('background-color: green')
                 else:
-                  self.caButton1.setStyleSheet('background-color: orange')
+                  # self.caButton1.setStyleSheet('background-color: orange')
+                  self.caButton1.setStyleSheet('background-color: green')
                   self.caButton2.setStyleSheet('background-color: green')
 
 

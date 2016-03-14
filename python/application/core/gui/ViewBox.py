@@ -76,7 +76,7 @@ class ViewBox(pg.ViewBox):
     click events.
 
     Left click selects peaks in a spectrum display.
-    Shift+Left click picks a peak at the cursor position.
+    Cmd-Shift+Left click picks a peak at the cursor position.
     Right click raises the context menu.
 
 
@@ -94,10 +94,13 @@ class ViewBox(pg.ViewBox):
       xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
       yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
       if len(self.current.strip.orderedAxes) > 2:
-          zPositions = self.current.strip.orderedAxes[2].region
+        # NBNB TBD FIXME what about 4D peaks?
+        zPositions = self.current.strip.orderedAxes[2].region
       else:
         zPositions = None
       # first deselect (do we want this always??)
+
+      # NBNB TBD FIXME. We need to deselect ALL peaks
       for spectrumView in self.current.strip.spectrumViews:
         if spectrumView.isVisible():
           for peakList in spectrumView.spectrum.peakLists:
@@ -115,7 +118,9 @@ class ViewBox(pg.ViewBox):
                 and yPositions[0] < float(peak.position[1]) < yPositions[1]):
                 if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
                   peak.isSelected = True
-                  self.current.peak = peak
+                  # Bug fix - Rasmus 14/3/2016
+                  # self.current.peak = peak
+                  self.current.addPeak(peak)
                   break
     """
     if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
@@ -310,7 +315,7 @@ class ViewBox(pg.ViewBox):
             else:
               # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
               # Fixed 13/3/2016 Rasmus Fogh
-              # Avoid comparing spectrum AxisCodes to display acisCodes - they are not identical
+              # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
               spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
               xAxis = spectrumIndices[0]
               yAxis = spectrumIndices[1]

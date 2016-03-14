@@ -292,9 +292,13 @@ class SpectrumView(AbstractWrapperObject):
     apiStrip = apiStripSpectrumView.strip
 
     axisCodes = apiStrip.axisCodes
+
+    # DImensionOrdering is one-origin (first dim is dim 1)
     dimensionOrdering = apiStripSpectrumView.spectrumView.dimensionOrdering
 
-    return tuple(dimensionOrdering[axisCodes.index(x)] for x in apiStrip.axisOrder)
+    # Convert to zero-origin (for indices) and return
+    ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in apiStrip.axisOrder)
+    return tuple(None if x is None else x-1 for x in ll)
 
 
   # Implementation functions

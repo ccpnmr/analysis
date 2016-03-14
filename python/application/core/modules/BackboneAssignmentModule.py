@@ -104,7 +104,8 @@ class BackboneAssignmentModule(CcpnDock):
     if self.current.nmrChain.isConnected:
       nmrResidues = [nmrResidue for nmrResidue in self.current.nmrChain.nmrResidues if not '-1' in nmrResidue.sequenceCode]
       for nmrResidue in nmrResidues:
-        self.assigner.addResidue(nmrResidue, '+1')
+        if self.assigner:
+          self.assigner.addResidue(nmrResidue, '+1')
     self.navigateTo(nmrResidue, row, col)
 
 

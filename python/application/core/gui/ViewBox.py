@@ -83,96 +83,83 @@ class ViewBox(pg.ViewBox):
     """
     self.current.strip = self.parentObject().parent
 
-    if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
-      event.accept()
-      xPosition = self.mapSceneToView(event.pos()).x()
-      yPosition = self.mapSceneToView(event.pos()).y()
-      self.current.positions = [xPosition, yPosition]
-
-      xPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(self.peakWidthPixels, 0)).x() - self.mapSceneToView(QtCore.QPoint(0, 0)).x())
-      yPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(0, self.peakWidthPixels)).y() - self.mapSceneToView(QtCore.QPoint(0, 0)).y())
-      xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
-      yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
-      if len(self.current.strip.orderedAxes) > 2:
-        # NBNB TBD FIXME what about 4D peaks?
-        zPositions = self.current.strip.orderedAxes[2].region
-      else:
-        zPositions = None
-      # first deselect (do we want this always??)
-
-      # NBNB TBD FIXME. We need to deselect ALL peaks
-      for spectrumView in self.current.strip.spectrumViews:
-        if spectrumView.isVisible():
-          for peakList in spectrumView.spectrum.peakLists:
-            for peak in peakList.peaks:
-              peak.isSelected = False
-
-      # NBNB TBD FIXME this isSelected stuff is a dogs breakfast and needs refactoring.
-      # Meanwhile at least deselect current peaks
-      for peak in self.current.peaks:
-        peak.isSelected = False
-
-      self.current.clearPeaks()
-      # now select (take first one within range)
-      for spectrumView in self.current.strip.spectrumViews:
-        if spectrumView.spectrum.dimensionCount == 1:
-          continue
-        if spectrumView.isVisible():
-          for peakList in spectrumView.spectrum.peakLists:
-            for peak in peakList.peaks:
-              if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-                and yPositions[0] < float(peak.position[1]) < yPositions[1]):
-                if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
-                  peak.isSelected = True
-                  # Bug fix - Rasmus 14/3/2016
-                  # self.current.peak = peak
-                  self.current.addPeak(peak)
-                  break
-    """
-    if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
-
-      event.accept()
-      xPositions = [self.mapSceneToView(event.pos()).x()-0.05, self.mapSceneToView(event.pos()).x()+0.05]
-      yPositions = [self.mapSceneToView(event.pos()).y()-0.05, self.mapSceneToView(event.pos()).y()+0.05]
-      if len(self.current.strip.orderedAxes) > 2:
-          zPositions = self.current.strip.orderedAxes[2].region
-      else:
-        zPositions = None
-      for spectrumView in self.current.strip.spectrumViews:
-        for peakList in spectrumView.spectrum.peakLists:
-          for peak in peakList.peaks:
-            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-              and yPositions[0] < float(peak.position[1]) < yPositions[1]):
-              if zPositions is not None:
-                if zPositions[0] < float(peak.position[2]) < zPositions[1]:
-                  peak.isSelected = True
-"""
-
-    if event.button() == QtCore.Qt.RightButton and not event.modifiers() and axis is None:
-      event.accept()
-      self.raiseContextMenu(event)
-
-    elif event.button() == QtCore.Qt.RightButton and not event.modifiers():
-      event.accept()
+    if event.button() == QtCore.Qt.LeftButton:
     #
-    elif event.button() == QtCore.Qt.LeftButton and (event.modifiers() & QtCore.Qt.ShiftModifier) and (
-              event.modifiers() & QtCore.Qt.ControlModifier):
-      mousePosition=self.mapSceneToView(event.pos())
-      position = [mousePosition.x(), mousePosition.y()]
-      for spectrumView in self.current.strip.spectrumViews:
-        peakList = spectrumView.spectrum.peakLists[0]
-        orderedAxes = self.current.strip.orderedAxes
-        if len(orderedAxes) > 2:
-          for n in orderedAxes[2:]:
-            position.append(n.position)
-        peak = peakList.newPeak(position=position)
-        self.current.addPeak(peak)
-        peak.isSelected = True
-        self.current.strip.showPeaks(peakList)
+      if (event.modifiers() & QtCore.Qt.ShiftModifier):
+        if  (event.modifiers() & QtCore.Qt.ControlModifier):
+          # SHift Ctrl drag - pick oeaks
+          mousePosition=self.mapSceneToView(event.pos())
+          position = [mousePosition.x(), mousePosition.y()]
+          for spectrumView in self.current.strip.spectrumViews:
+            peakList = spectrumView.spectrum.peakLists[0]
+            orderedAxes = self.current.strip.orderedAxes
+            if len(orderedAxes) > 2:
+              for n in orderedAxes[2:]:
+                position.append(n.position)
+            peak = peakList.newPeak(position=position)
+            self.current.addPeak(peak)
+            peak.isSelected = True
+            self.current.strip.showPeaks(peakList)
 
+      else:
+        # Left button either Ctrl or no modifier
+        event.accept()
+        xPosition = self.mapSceneToView(event.pos()).x()
+        yPosition = self.mapSceneToView(event.pos()).y()
+        self.current.positions = [xPosition, yPosition]
 
-    elif event.button() == QtCore.Qt.RightButton and (event.modifiers() & QtCore.Qt.ShiftModifier):
-      event.accept()
+        xPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(self.peakWidthPixels, 0)).x() - self.mapSceneToView(QtCore.QPoint(0, 0)).x())
+        yPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(0, self.peakWidthPixels)).y() - self.mapSceneToView(QtCore.QPoint(0, 0)).y())
+        xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
+        yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
+        if len(self.current.strip.orderedAxes) > 2:
+          # NBNB TBD FIXME what about 4D peaks?
+          zPositions = self.current.strip.orderedAxes[2].region
+        else:
+          zPositions = None
+
+        if not (event.modifiers() & QtCore.Qt.ControlModifier):
+          # First deselect current peaks - but not if we are in Ctrl mode
+
+          # NBNB TBD FIXME. We need to deselect ALL peaks
+          for spectrumView in self.current.strip.spectrumViews:
+            if spectrumView.isVisible():
+              for peakList in spectrumView.spectrum.peakLists:
+                for peak in peakList.peaks:
+                  peak.isSelected = False
+
+          # NBNB TBD FIXME this isSelected stuff is a dogs breakfast and needs refactoring.
+          # Probably we should replace 'peak.isSelected' with 'peak in current.peaks'
+          # Meanwhile at least deselect current peaks
+          for peak in self.current.peaks:
+            peak.isSelected = False
+
+          self.current.clearPeaks()
+
+        # now select (take first one within range)
+        for spectrumView in self.current.strip.spectrumViews:
+          if spectrumView.spectrum.dimensionCount == 1:
+            continue
+          if spectrumView.isVisible():
+            for peakList in spectrumView.spectrum.peakLists:
+              for peak in peakList.peaks:
+                if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+                  and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+                  if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
+                    peak.isSelected = True
+                    # Bug fix - Rasmus 14/3/2016
+                    # self.current.peak = peak
+                    self.current.addPeak(peak)
+                    break
+
+    elif event.button() == QtCore.Qt.RightButton:
+      if not event.modifiers():
+        event.accept()
+        if axis is None:
+          self.raiseContextMenu(event)
+
+      elif (event.modifiers() & QtCore.Qt.ShiftModifier):
+        event.accept()
 
   def _updateSelectionBox(self, p1:float, p2:float):
     """

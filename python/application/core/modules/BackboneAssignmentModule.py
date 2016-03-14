@@ -57,11 +57,35 @@ class BackboneAssignmentModule(CcpnDock):
     self.numberOfMatches = 5
     self.nmrChains = project.nmrChains
     self.matchModules = []
-    self.nmrResidueTable = NmrResidueTable(self, project, callback=self.startAssignment)
-    self.displayButton = Button(self.nmrResidueTable, text='Select Match Modules',
-                                callback=self._showMatchDisplayPopup, grid=(0, 3))
+    self.nmrResidueTable = NmrResidueTable(self.widget1, project, callback=self.startAssignment)
+
+    self.settingsButton = Button(self.nmrResidueTable, icon='iconsNew/applications-system',
+                                grid=(0, 5), hPolicy='fixed', toggle=True)
 
     self.layout.addWidget(self.nmrResidueTable, 0, 0, 1, 3)
+    self.settingsButton.toggled.connect(self.toggleWidget2)
+    modules = [display.pid for display in project.spectrumDisplays]
+    modules.insert(0, '  ')
+    modulesLabel = Label(self.widget2, text="Selected Modules", grid=(1, 0))
+    self.modulePulldown = PulldownList(self.widget2, grid=(2, 0), callback=self._selectMatchModule)
+    self.modulePulldown.setData(modules)
+    self.moduleList = ListWidget(self.widget2, grid=(3, 0))
+    chemicalShiftListLabel = Label(self.widget2, text='Chemical Shift List', grid=(1, 1))
+    self.chemicalShiftListPulldown = PulldownList(self.widget2, grid=(2, 1), callback=self._setupShiftDicts)
+    self.chemicalShiftListPulldown.setData([shiftlist.pid for shiftlist in project.chemicalShiftLists])
+    self.settingsButton.setChecked(False)
+
+
+  def toggleWidget2(self):
+    if self.settingsButton.isChecked():
+      self.widget2.show()
+    else:
+      self.widget2.hide()
+
+  def _selectMatchModule(self, item):
+    self.moduleList.addItem(item)
+    self.matchModules.append(item)
+
 
 
   def startAssignment(self, nmrResidue:NmrResidue, row:int=None, col:int=None):
@@ -105,8 +129,6 @@ class BackboneAssignmentModule(CcpnDock):
       newSeqCode = seqCode.replace('-1', '')
       iNmrResidue = nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=newSeqCode)
       self.current.nmrResidue = iNmrResidue
-      # navigateToNmrResidue(self.project, nmrResidue, selectedDisplays=selectedDisplays,
-      #                      markPositions=True, strip=strip)
       navigateToNmrResidue(self.project, iNmrResidue, selectedDisplays=selectedDisplays,
                            strip=strip, markPositions=False)
 
@@ -161,10 +183,9 @@ class BackboneAssignmentModule(CcpnDock):
     all NmrResidues in the project.
     """
 
-    # NBNB FIXME TBD This hardwires the use of self.project.chemicalShiftLists[0]. NOT OK!
-
     self.intraShifts = OrderedDict()
     self.interShifts = OrderedDict()
+    chemicalShiftList = self.project.getByPid(self.chemicalShiftListPulldown.currentText())
 
     for nmrResidue in self.project.nmrResidues:
       nmrAtoms = [nmrAtom.name for nmrAtom in nmrResidue.nmrAtoms]
@@ -174,11 +195,11 @@ class BackboneAssignmentModule(CcpnDock):
 
       if 'CA' in nmrAtoms:
         interCa = nmrResidue.fetchNmrAtom(name='CA')
-        shift1 = self.project.chemicalShiftLists[0].getChemicalShift(interCa.id)
+        shift1 = chemicalShiftList.getChemicalShift(interCa.id)
         shifts.append(shift1)
       if 'CB' in nmrAtoms:
         interCb = nmrResidue.fetchNmrAtom(name='CB')
-        shift2 = self.project.chemicalShiftLists[0].getChemicalShift(interCb.id)
+        shift2 = chemicalShiftList.getChemicalShift(interCb.id)
         shifts.append(shift2)
       if '-1' in nmrResidue.sequenceCode:
         self.interShifts[nmrResidue] = shifts
@@ -274,25 +295,4 @@ class BackboneAssignmentModule(CcpnDock):
 
 
 
-class SelectMatchDisplaysPopup(QtGui.QDialog, Base):
-  def __init__(self, parent=None, project=None, **kw):
-    super(SelectMatchDisplaysPopup, self).__init__(parent)
-    Base.__init__(self, **kw)
-    self.parent = parent
-    modules = [display.pid for display in project.spectrumDisplays]
-    self.project = project
-    modules.insert(0, '  ')
-    label1a = Label(self, text="Selected Modules", grid=(0, 0))
-    self.modulePulldown = PulldownList(self, grid=(1, 0), callback=self._selectMatchModule)
-    self.modulePulldown.setData(modules)
-    self.moduleList = ListWidget(self, grid=(2, 0))
 
-    self.buttonBox = ButtonList(self, grid=(3, 0), texts=['Cancel', 'Ok'],
-                           callbacks=[self.reject, self._setMatchModules])
-
-  def _selectMatchModule(self, item):
-    self.moduleList.addItem(item)
-
-  def _setMatchModules(self):
-    self.parent.matchModules = [self.moduleList.item(i).text() for i in range(self.moduleList.count())]
-    self.accept()

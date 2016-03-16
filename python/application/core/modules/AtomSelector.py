@@ -73,16 +73,14 @@ class AtomSelector(CcpnDock):
     self.radioButton1.setChecked(True)
     self.label1 = Label(self, 'Backbone', grid=(0, 3), hAlign='l')
     self.radioButton2 = RadioButton(self, grid=(0, 4), hAlign='r', callback=self.createSideChainButtons)
-    # self.radioButton2.setChecked(True)
     self.label2 = Label(self, 'Side chain', grid=(0, 5), hAlign='l')
     self.molTypeLabel = Label(self, 'Molecule Type', grid=(0, 6))
     self.molTypePulldown = PulldownList(self, grid=(0, 7))
     self.molTypePulldown.setData(['protein', 'DNA', 'RNA', 'carbohydrate', 'other'])
     self.layout.addWidget(self.pickAndAssignWidget, 1, 0, 3, 8)
     self.current.registerNotify(self.updateWidget, 'nmrResidues')
-    # self.createBackBoneButtons()
 
-    self.buttons = []
+    self.buttons = {}
     
   def closeDock(self):
     self.current.unRegisterNotify(self.predictAssignments, 'peaks')
@@ -105,37 +103,19 @@ class AtomSelector(CcpnDock):
     self.pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
     headerLabel2 = Label(self.pickAndAssignWidget, text='i', grid=(0, 1))
     headerLabel3 = Label(self.pickAndAssignWidget, text='i+1', grid=(0, 2))
-    self.hButton1 = Button(self.pickAndAssignWidget, text='H', grid=(1, 0), callback=partial(self.pickAndAssign, '-1', 'H'))
-    self.hButton2 = Button(self.pickAndAssignWidget, text='H', grid=(1, 1), callback=partial(self.pickAndAssign, '', 'H'))
-    self.hButton3 = Button(self.pickAndAssignWidget, text='H', grid=(1, 2), callback=partial(self.pickAndAssign, '+1', 'H'))
-    self.nButton1 = Button(self.pickAndAssignWidget, text='N', grid=(2, 0), callback=partial(self.pickAndAssign, '-1', 'N'))
-    self.nButton2 = Button(self.pickAndAssignWidget, text='N', grid=(2, 1), callback=partial(self.pickAndAssign, '', 'N'))
-    self.nButton3 = Button(self.pickAndAssignWidget, text='N', grid=(2, 2), callback=partial(self.pickAndAssign, '+1', 'N'))
-    self.caButton1 = Button(self.pickAndAssignWidget, text='CA', grid=(3, 0), callback=partial(self.pickAndAssign, '-1', 'CA'))
-    self.caButton2 = Button(self.pickAndAssignWidget, text='CA', grid=(3, 1), callback=partial(self.pickAndAssign, '', 'CA'))
-    self.caButton3 = Button(self.pickAndAssignWidget, text='CA', grid=(3, 2), callback=partial(self.pickAndAssign, '+1', 'CA'))
-    self.cbButton1 = Button(self.pickAndAssignWidget, text='CB', grid=(4, 0), callback=partial(self.pickAndAssign, '-1', 'CB'))
-    self.cbButton2 = Button(self.pickAndAssignWidget, text='CB', grid=(4, 1), callback=partial(self.pickAndAssign, '', 'CB'))
-    self.cbButton3 = Button(self.pickAndAssignWidget, text='CB', grid=(4, 2), callback=partial(self.pickAndAssign, '+1', 'CB'))
-    self.coButton1 = Button(self.pickAndAssignWidget, text='CO', grid=(5, 0), callback=partial(self.pickAndAssign, '-1', 'CO'))
-    self.coButton2 = Button(self.pickAndAssignWidget, text='CO', grid=(5, 1), callback=partial(self.pickAndAssign, '', 'CO'))
-    self.coButton3 = Button(self.pickAndAssignWidget, text='CO', grid=(5, 2), callback=partial(self.pickAndAssign, '+1', 'CO'))
-    self.haButton1 = Button(self.pickAndAssignWidget, text='HA', grid=(6, 0), callback=partial(self.pickAndAssign, '-1', 'HA'))
-    self.haButton2 = Button(self.pickAndAssignWidget, text='HA', grid=(6, 1), callback=partial(self.pickAndAssign, '', 'HA'))
-    self.haButton3 = Button(self.pickAndAssignWidget, text='HA', grid=(6, 2), callback=partial(self.pickAndAssign, '+1', 'HA'))
-    self.hbButton1 = Button(self.pickAndAssignWidget, text='HB', grid=(7, 0), callback=partial(self.pickAndAssign, '-1', 'HB'))
-    self.hbButton2 = Button(self.pickAndAssignWidget, text='HB', grid=(7, 1), callback=partial(self.pickAndAssign, '', 'HB'))
-    self.hbButton3 = Button(self.pickAndAssignWidget, text='HB', grid=(7, 2), callback=partial(self.pickAndAssign, '+1', 'HB'))
-    self.returnButton = Button(self.pickAndAssignWidget, text='Clear', grid=(8, 0), gridSpan=(1, 3), callback=self._returnButtonsToNormal)
+    self.buttons = {}
+    atoms = ['H', 'N', 'CA', 'CB', 'CO', 'HA', 'HB']
+    for ii, atom in enumerate(atoms):
+      self.buttons[atom] = []
+      button1 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 0), callback=partial(self.pickAndAssign, '-1', atom))
+      button2 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 1), callback=partial(self.pickAndAssign, '', atom))
+      button3 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 2), callback=partial(self.pickAndAssign, '+1', atom))
+      self.buttons[atom].append(button1)
+      self.buttons[atom].append(button2)
 
-    self.buttons = [self.hButton1, self.hButton2, self.hButton3, self.nButton1, self.nButton2,
-                    self.nButton3, self.caButton1, self.caButton2, self.caButton3, self.cbButton1,
-                    self.cbButton2, self.cbButton3, self.coButton1, self.coButton2, self.coButton3,
-                    self.haButton1, self.haButton2, self.haButton3, self.hbButton1, self.haButton1,
-                    self.hbButton2, self.hbButton3]
-
-    for button in self.buttons:
-      button.clicked.connect(self._returnButtonsToNormal)
+    for buttons in self.buttons.values():
+      for button in buttons:
+        button.clicked.connect(self._returnButtonsToNormal)
 
 
 
@@ -158,13 +138,11 @@ class AtomSelector(CcpnDock):
 
 
   def toggleBox(self):
-    if self.cCheckBox.isChecked():
-      self.updateLayout()
-    else:
-      self.updateLayout()
+    self.updateLayout()
 
   def getAtomsForButtons(self, atomList, atomName):
     [atomList.remove(atom) for atom in sorted(atomList) if atom[0] == atomName]
+
   def updateLayout(self):
 
     # group atoms in useful categories based on usage
@@ -206,60 +184,15 @@ class AtomSelector(CcpnDock):
     if self.current.nmrResidue:
       self.currentNmrResidueLabel.setText(self.current.nmrResidue.id)
       if self.current.nmrResidue.residueType == '':
-        alphaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(1, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(alphaAtoms)]
-        betaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(2, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(betaAtoms)]
-        [button.setMinimumSize(45, 20) for button in alphaButtons]
-        [button.setMinimumSize(45, 20) for button in betaButtons]
-        gammaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(3, ii),  hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(gammaAtoms)]
-        if len(moreGammaAtoms) > 0:
-          moreGammaAtomButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(4, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(moreGammaAtoms)]
-          [button.hide() for button in moreGammaAtomButtons]
-          moreGammaButton = Button(self.pickAndAssignWidget, text='More...', grid=(3, len(gammaAtoms)), toggle=True)
-          moreGammaButton.setChecked(False)
-          moreGammaButton.setMinimumSize(45, 20)
-          moreGammaButton.toggled.connect(lambda: self.showMoreAtomButtons(moreGammaAtomButtons, moreGammaButton))
-          [button.setMinimumSize(45, 20) for button in moreGammaAtomButtons]
-        [button.setMinimumSize(45, 20) for button in gammaButtons]
+        for ii, atomList in enumerate(atomButtonList):
 
-        deltaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(5, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(deltaAtoms)]
-        if len(moreDeltaAtoms) > 0:
-          moreDeltaAtomButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(6, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(moreDeltaAtoms)]
-          [button.hide() for button in moreDeltaAtomButtons]
-          moreDeltaButton = Button(self.pickAndAssignWidget, text=' More... ', grid=(5, len(deltaAtoms)), toggle=True)
-          moreDeltaButton.setChecked(False)
-          moreDeltaButton.toggled.connect(lambda: self.showMoreAtomButtons(moreDeltaAtomButtons, moreDeltaButton))
-          moreDeltaButton.setMinimumSize(45, 20)
-          [button.setMinimumSize(45, 20) for button in moreDeltaAtomButtons]
-        [button.setMinimumSize(45, 20) for button in deltaButtons]
+          for jj, atom in enumerate(atomList):
+            button = Button(self.pickAndAssignWidget, text=atom, grid=(ii+1, jj), hAlign='t', callback=partial(self.pickAndAssign, '0', atom))
+            button.setMinimumSize(45, 20)
 
-
-        epsilonButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(7, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(epsilonAtoms)]
-        if len(moreEpsilonAtoms) > 0:
-          moreEpsilonAtomButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(8, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(moreEpsilonAtoms)]
-          [button.hide() for button in moreEpsilonAtomButtons]
-          moreEpsilonButton = Button(self.pickAndAssignWidget, text=' More... ', grid=(7, len(epsilonAtoms)), toggle=True)
-          moreEpsilonButton.setChecked(False)
-          moreEpsilonButton.setMinimumSize(45, 20)
-          moreEpsilonButton.toggled.connect(lambda: self.showMoreAtomButtons(moreEpsilonAtomButtons, moreEpsilonButton))
-          [button.setMinimumSize(45, 20) for button in moreEpsilonAtomButtons]
-        [button.setMinimumSize(45, 20) for button in epsilonButtons]
-
-
-        zetaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(9, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(zetaAtoms)]
-        [button.setMinimumSize(45, 20) for button in zetaButtons]
-
-        etaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(10, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(etaAtoms)]
-        if len(moreEtaAtoms) > 0:
-          moreEtaAtomButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(11, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(moreEtaAtoms)]
-          [button.hide() for button in moreEtaAtomButtons]
-          moreEtaButton = Button(self.pickAndAssignWidget, text=' More... ', grid=(10, len(etaAtoms)), toggle=True)
-          moreEtaButton.setChecked(False)
-          moreEtaButton.setMinimumSize(45, 20)
-          moreEtaButton.toggled.connect(lambda: self.showMoreAtomButtons(moreEtaAtomButtons, moreEtaButton))
-          [button.setMinimumSize(45, 20) for button in moreEtaAtomButtons]
-        [button.setMinimumSize(45, 20) for button in etaButtons]
 
       else:
+        self.buttons = {}
         residueType = self.current.nmrResidue.residueType.upper()
         residueAtoms = PROTEIN_ATOM_NAMES[residueType]
         residueAlphas = [atom for atom in alphaAtoms if atom in residueAtoms]
@@ -273,75 +206,14 @@ class AtomSelector(CcpnDock):
         residueZetas = [atom for atom in zetaAtoms if atom in residueAtoms]
         residueEtas = [atom for atom in etaAtoms if atom in residueAtoms]
         residueMoreEtas = [atom for atom in moreEtaAtoms if atom in residueAtoms]
-
-        alphaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(1, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueAlphas)]
-        betaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(2, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueBetas)]
-        [button.setMinimumSize(45, 20) for button in alphaButtons]
-        [button.setMinimumSize(45, 20) for button in betaButtons]
-        if len(residueGammas) + len(residueMoreGammas) < 12:
-          combinedGammas = residueGammas+residueMoreGammas
-          gammaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(3, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(combinedGammas)]
-        else:
-          gammaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(3, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueGammas)]
-          if len(residueMoreGammas) > 0:
-            moreGammaAtomButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(4, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueMoreGammas)]
-            [button.hide() for button in moreGammaAtomButtons]
-            moreGammaButton = Button(self.pickAndAssignWidget, text='More...', grid=(3, len(residueGammas)), toggle=True)
-            moreGammaButton.setChecked(False)
-            moreGammaButton.setMinimumSize(45, 20)
-            moreGammaButton.toggled.connect(lambda: self.showMoreAtomButtons(moreGammaAtomButtons, moreGammaButton))
-            [button.setMinimumSize(45, 20) for button in moreGammaAtomButtons]
-        [button.setMinimumSize(45, 20) for button in gammaButtons]
-        if len(residueDeltas) + len(residueMoreDeltas) < 12:
-          combinedDeltas = residueDeltas+residueMoreDeltas
-          deltaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(5, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(combinedDeltas)]
-        else:
-          deltaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(5, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueDeltas)]
-          if len(residueMoreDeltas) > 0:
-            moreDeltaAtomButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(6, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueMoreDeltas)]
-            [button.hide() for button in moreDeltaAtomButtons]
-            moreDeltaButton = Button(self.pickAndAssignWidget, text=' More... ', grid=(5, len(residueDeltas)), toggle=True)
-            moreDeltaButton.setChecked(False)
-            moreDeltaButton.toggled.connect(lambda: self.showMoreAtomButtons(moreDeltaAtomButtons, moreDeltaButton))
-            moreDeltaButton.setMinimumSize(45, 20)
-            [button.setMinimumSize(45, 20) for button in moreDeltaAtomButtons]
-        [button.setMinimumSize(45, 20) for button in deltaButtons]
-
-        if len(residueEpsilons) + len(residueMoreEpsilons) < 12:
-          combinedEpsilons = residueEpsilons+residueMoreEpsilons
-          epsilonButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(7, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(combinedEpsilons)]
-        else:
-          epsilonButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(7, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueEpsilons)]
-          if len(residueMoreEpsilons) > 0:
-            moreEpsilonAtomButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(8, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueMoreEpsilons)]
-            [button.hide() for button in moreEpsilonAtomButtons]
-            moreEpsilonButton = Button(self.pickAndAssignWidget, text=' More... ', grid=(7, len(residueEpsilons)), toggle=True)
-            moreEpsilonButton.setChecked(False)
-            moreEpsilonButton.setMinimumSize(45, 20)
-            moreEpsilonButton.toggled.connect(lambda: self.showMoreAtomButtons(moreEpsilonAtomButtons, moreEpsilonButton))
-            [button.setMinimumSize(45, 20) for button in moreEpsilonAtomButtons]
-        [button.setMinimumSize(45, 20) for button in epsilonButtons]
-
-
-        zetaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(9, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueZetas)]
-        [button.setMinimumSize(45, 20) for button in zetaButtons]
-
-
-        if len(residueEtas) + len(residueMoreEtas) < 12:
-          combinedEtas = residueEpsilons+residueMoreEpsilons
-          etaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(10, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(combinedEtas)]
-        else:
-          etaButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(10, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueEtas)]
-          if len(residueMoreEtas) > 0:
-            moreEtaAtomButtons = [Button(self.pickAndAssignWidget, text=atom, grid=(11, ii), hAlign='t', callback=partial(self.pickAndAssign, '0', atom)) for ii, atom in enumerate(residueMoreEtas)]
-            [button.hide() for button in moreEtaAtomButtons]
-            moreEtaButton = Button(self.pickAndAssignWidget, text=' More... ', grid=(10, len(residueEtas)), toggle=True)
-            moreEtaButton.setChecked(False)
-            moreEtaButton.setMinimumSize(45, 20)
-            moreEtaButton.toggled.connect(lambda: self.showMoreAtomButtons(moreEtaAtomButtons, moreEtaButton))
-            [button.setMinimumSize(45, 20) for button in moreEtaAtomButtons]
-        [button.setMinimumSize(45, 20) for button in etaButtons]
-
+        atomButtonList2 = [residueAlphas, residueBetas, residueGammas, residueMoreGammas, residueDeltas, residueMoreDeltas,
+                      residueEpsilons, residueMoreEpsilons, residueZetas, residueEtas, residueMoreEtas]
+        for ii, atomList in enumerate(atomButtonList2):
+          for jj, atom in enumerate(atomList):
+            self.buttons[atom] = []
+            button = Button(self.pickAndAssignWidget, text=atom, grid=(ii+1, jj), hAlign='t', callback=partial(self.pickAndAssign, '0', atom))
+            button.setMinimumSize(45, 20)
+            self.buttons[atom].append(button)
 
   def showMoreAtomButtons(self, buttons, moreButton):
     if moreButton.isChecked():
@@ -404,14 +276,16 @@ class AtomSelector(CcpnDock):
                                         color: #122043;
                                         border: 1px solid #00092D;
                                        }''')
-      for button in self.buttons:
-        button.setStyleSheet(styleSheet)
+      for buttons in self.buttons.values():
+        for button in buttons:
+          button.setStyleSheet(styleSheet)
       self.setStyleSheet(styleSheet)
 
     elif self.parent._appBase.preferences.general.colourScheme == 'light':
       styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'LightStyleSheet.qss')).read()
-      for button in self.buttons:
-        button.setStyleSheet(styleSheet)
+      for buttons in self.buttons.values():
+        for button in buttons:
+          button.setStyleSheet(styleSheet)
       self.setStyleSheet(styleSheet)
 
 
@@ -427,8 +301,9 @@ class AtomSelector(CcpnDock):
     else:
 
       if len(peaks) == 0:
-        for button in self.buttons:
-          button.clicked.connect(self._returnButtonsToNormal)
+        for buttons in self.buttons.values():
+          for button in buttons:
+            button.clicked.connect(self._returnButtonsToNormal)
 
       else:
 
@@ -440,31 +315,49 @@ class AtomSelector(CcpnDock):
           anyInterOnlyExperiments = any(isInterOnlyExpt(x) for x in types)
 
           for peak in peaks:
+            peakListViews = [peakListView for peakListView in self.project.peakListViews if peakListView.peakList == peak.peakList]
+            axisCodes = [peakListView.spectrumView._parent.axisOrder for peakListView in peakListViews]
+            mapping = spectrumLib._axisCodeMapIndices(axisCodes[0], peak.peakList.spectrum.axisCodes)
+            isotopeCode = peak.peakList.spectrum.isotopeCodes[mapping[1]]
+            if self.radioButton1.isChecked():
+              predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[mapping[1]], isotopeCode, strict=True) for ccpCode in CCP_CODES]
+              refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomTypes if len(type) > 0]
+              atomPredictions = set()
+              for pred in refinedPreds:
+                if pred[1] > 90:
+                  atomPredictions.add(pred[0])
+              for atomPred in atomPredictions:
+                if atomPred == 'CB':
+                  # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                  if anyInterOnlyExperiments:
+                    self.buttons['CB'][0].setStyleSheet('background-color: green')
+                  else:
+                    # self.cbButton1.setStyleSheet('background-color: orange')
+                    self.buttons['CB'][0].setStyleSheet('background-color: green')
+                    self.buttons['CB'][1].setStyleSheet('background-color: green')
+                if atomPred == 'CA':
+                  # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
+                  if anyInterOnlyExperiments:
+                    self.buttons['CA'][0].setStyleSheet('background-color: green')
+                  else:
+                    # self.caButton1.setStyleSheet('background-color: orange')
+                    self.buttons['CA'][0].setStyleSheet('background-color: green')
+                    self.buttons['CA'][1].setStyleSheet('background-color: green')
+            elif self.radioButton2.isChecked():
+              if self.current.nmrResidue.residueType == '':
+                predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[mapping[1]], isotopeCode) for ccpCode in CCP_CODES]
+              else:
+                predictedAtomTypes = getNmrAtomPrediction(self.current.nmrResidue.residueType.title(), peak.position[mapping[1]], isotopeCode)
+              for type in predictedAtomTypes:
+                for atomType, buttons in self.buttons.items():
+                  if type[0][1] == atomType:
+                    for button in buttons:
+                      if type[1] > 85:
+                        button.setStyleSheet('background-color: green')
+                      elif 50 < type[1] < 85:
+                        button.setStyleSheet('background-color: orange')
+                      if type[1] < 50:
+                        button.setStyleSheet('background-color: red')
 
-
-            isotopeCode = peak.peakList.spectrum.isotopeCodes[1]
-            predictedAtomTypes = [getNmrAtomPrediction(ccpCode, peak.position[1], isotopeCode, strict=True) for ccpCode in CCP_CODES]
-            refinedPreds = [[type[0][0][1], type[0][1]] for type in predictedAtomTypes if len(type) > 0]
-            atomPredictions = set()
-            for pred in refinedPreds:
-              if pred[1] > 90:
-                atomPredictions.add(pred[0])
-            for atomPred in atomPredictions:
-              if atomPred == 'CB':
-                # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-                if anyInterOnlyExperiments:
-                  self.cbButton1.setStyleSheet('background-color: green')
-                else:
-                  # self.cbButton1.setStyleSheet('background-color: orange')
-                  self.cbButton1.setStyleSheet('background-color: green')
-                  self.cbButton2.setStyleSheet('background-color: green')
-              if atomPred == 'CA':
-                # if(any(isInterOnlyExpt(experiment) for experiment in experiments)):
-                if anyInterOnlyExperiments:
-                  self.caButton1.setStyleSheet('background-color: green')
-                else:
-                  # self.caButton1.setStyleSheet('background-color: orange')
-                  self.caButton1.setStyleSheet('background-color: green')
-                  self.caButton2.setStyleSheet('background-color: green')
 
 

@@ -145,7 +145,7 @@ class PickAndAssignModule(CcpnDock, Base):
               for peakListView in module.peakListViews:
                 peakItems = [peakListView.peakItems[peak] for peak in peaks if peak in peakListView.peakItems.keys()]
                 for peakItem in peakItems:
-                  peakItem.setSelected(True)
+                  peakItem.isSelected = True
 
 
 

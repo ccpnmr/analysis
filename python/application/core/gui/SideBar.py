@@ -326,12 +326,12 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'PL':
-      # popup = PeakListPropertiesPopup(peakList=obj)
-      # popup.exec_()
-      # popup.raise_()
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+      popup = PeakListPropertiesPopup(peakList=obj)
+      popup.exec_()
+      popup.raise_()
+      # info = showInfo('Not implemented yet!',
+      #     'This function has not been implemented in the current version',
+      #     colourScheme=self.colourScheme)
 
     elif obj.shortClassName == 'SG':
       info = showInfo('Not implemented yet!',

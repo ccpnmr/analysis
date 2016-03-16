@@ -93,7 +93,6 @@ def _getPeakAnnotation(peak):
 
 class GuiPeakListView(QtGui.QGraphicsItem):
 
-  # def __init__(self, scene, strip, peakList):
   def __init__(self):
     """ peakList is the CCPN wrapper object
     """

@@ -93,7 +93,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
         self._appBase.current.strip = spectrumDisplay.strips[0]
         self.dockArea.guiWindow.deleteBlankDisplay()
         self.dockArea.guiWindow.pythonConsole.writeConsoleCommand("application.createSpectrumDisplay(spectrum)",
-                                               spectrum=ss, window=self.dockArea.guiWindow)
+                                               spectrum=ss)
         self.dockArea.guiWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
 
         self._appBase.project._logger.info('spectrum = project.getByPid("%s")' % ss)

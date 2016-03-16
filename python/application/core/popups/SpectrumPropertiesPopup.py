@@ -304,7 +304,7 @@ class DimensionsTab(QtGui.QWidget, Base):
     self.spectrum = spectrum
     self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
-    dimensionalityLabel = Label(self, text="Dimension ", grid=(1, 0),hAlign='l', vAlign='t',)
+    dimensionalityLabel = Label(self, text="Dimension ", grid=(1, 0), hAlign='l', vAlign='t',)
     self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
     for i in range(dimensions):
       dimLabel = Label(self, text='%s' % str(i+1), grid =(1, i+1), vAlign='t', hAlign='l')
@@ -325,11 +325,11 @@ class DimensionsTab(QtGui.QWidget, Base):
       spectralPointReferencingLabel = Label(self, text="Referencing (points)", grid=(8, 0), vAlign='t', hAlign='l')
       spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referencePoints[i]), grid=(8, i+1), vAlign='t', hAlign='l')
       spectralReferencingData.textChanged.connect(partial(self.setPointDimensionReferencing, spectrum, i))
-      spectralReferencingData.setMaximumWidth(100)
+      # spectralReferencingData.setMaximumWidth(100)
       spectralAssignmentToleranceLabel = Label(self, text="Assignment Tolerance ", grid=(9, 0),  hAlign='l')
 
       spectralAssignmentToleranceData = LineEdit(self, grid=(9, i+1),  hAlign='l')
-      spectralAssignmentToleranceData.setMaximumWidth(100)
+      # spectralAssignmentToleranceData.setMaximumWidth(100)
 
       if spectrum.assignmentTolerances[i] is not None:
         spectralAssignmentToleranceData.setText(str("%.3f" % spectrum.assignmentTolerances[i]))

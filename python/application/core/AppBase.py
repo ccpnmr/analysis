@@ -227,8 +227,8 @@ def getSaveDirectory(apiProject, preferences):
   dialog = FileDialog(fileMode=0, acceptMode=1, text='Save Project As...',
                       preferences=preferences.general)
 
-  if not dialog.exec_():
-    return ''
+  # if not dialog.exec_():
+  #   return ''
   fileNames = dialog.selectedFiles()
   if not fileNames:
     return ''

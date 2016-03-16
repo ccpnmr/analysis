@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks, fitExistingPeakList
-from ccpncore.lib.spectrum.Spectrum import doAxisCodesMatch
+from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 from ccpncore.util.CopyData import copySubTree
 from ccpncore.util.Types import Sequence
@@ -175,7 +175,7 @@ def copyPeaks(self:'PeakList', sinkSpectrum:'Spectrum', fitPositions:bool=False)
   refAxisCodes = self.spectrum.axisCodes
   sinkAxisCodes = sinkSpectrum.axisCodes
 
-  if not doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
+  if not spectrumLib.doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
     print('axis codes of the source and sink peaklists do not match')
     return
 

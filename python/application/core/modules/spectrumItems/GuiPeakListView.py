@@ -707,12 +707,13 @@ class PeakNd(QtGui.QGraphicsItem):
         ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
         ###yPpm = peak.position[yDim]
         ###self.setPos(xPpm, yPpm)
-
+        colour = self.peakListView.symbolColour
         if widget:
-          if self.colourScheme == 'light':
-            painter.setPen(QtGui.QColor('#080000'))
-          else:
-            painter.setPen(QtGui.QColor('#f7ffff'))
+          painter.setPen(QtGui.QColor(colour))
+          # if self.colourScheme == 'light':
+          #   painter.setPen(QtGui.QColor('#080000'))
+          # else:
+          #   painter.setPen(QtGui.QColor('#f7ffff'))
         else:
           painter.setPen(QtGui.QColor('black'))
         # painter.drawEllipse(box)
@@ -766,11 +767,12 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     # if self.isSelected():
     #   print(self)
     self.colourScheme = peakItem.peakListView._appBase.preferences.general.colourScheme
-    if self.colourScheme == 'light':
-      colour = QtGui.QColor('#080000')
-    else:
-      colour = QtGui.QColor('#f7ffff')
-    self.setBrush(colour)
+    colour = peakItem.peakListView.textColour
+    # if self.colourScheme == 'light':
+    #   colour = QtGui.QColor('#080000')
+    # else:
+    #   colour = QtGui.QColor('#f7ffff')
+    self.setBrush(QtGui.QColor(colour))
     ###self.setColor()
     self.setPos(15, -15)
     # self.updatePos()
@@ -779,7 +781,8 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setParentItem(peakItem)
-
+    colour = peakItem.peakListView.textColour
+    self.setBrush(QtGui.QColor(colour))
     peak = peakItem.peak
     text = _getPeakAnnotation(peak)
     text = text

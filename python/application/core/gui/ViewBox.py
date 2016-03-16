@@ -161,6 +161,12 @@ class ViewBox(pg.ViewBox):
       elif (event.modifiers() & QtCore.Qt.ShiftModifier):
         event.accept()
 
+
+  def hoverEvent(self, event):
+    self.current.viewBox = self
+    if hasattr(event, '_scenePos'):
+      self.position = self.mapSceneToView(event.pos())
+
   def _updateSelectionBox(self, p1:float, p2:float):
     """
     Updates drawing of selection box as mouse is moved.
@@ -182,6 +188,8 @@ class ViewBox(pg.ViewBox):
     self.pickBox.resetTransform()
     self.pickBox.scale(r.width(), r.height())
     self.pickBox.show()
+
+
 
   def mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
     """

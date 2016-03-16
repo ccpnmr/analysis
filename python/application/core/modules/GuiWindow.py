@@ -103,6 +103,22 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot)
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace)
+    QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip)
+
+
+
+  def getCurrentPositionAndStrip(self):
+    current = self._appBase.current
+    current.strip = current.viewBox.parentObject().parent
+    position = [current.viewBox.position.x(),
+                current.viewBox.position.y()]
+    if len(current.strip.axisOrder) > 2:
+      for axis in current.strip.orderedAxes[2:]:
+        position.append(axis.position)
+    current.position = tuple(position)
+    print(current.strip, current.position)
+
+
 
   def traceScaleScale(self, window:'GuiWindow', scale:float):
     """

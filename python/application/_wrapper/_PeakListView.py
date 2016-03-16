@@ -102,7 +102,7 @@ class PeakListView(AbstractWrapperObject, GuiPeakListView):
   @symbolColour.setter
   def symbolColour(self, value:str):
     if self.symbolColour != value:
-      self._wrappedData.spectrumView.symbolColour = value
+      self._wrappedData.peakListView.symbolColour = value
 
   @property
   def textColour(self) -> str:
@@ -117,7 +117,7 @@ class PeakListView(AbstractWrapperObject, GuiPeakListView):
   @textColour.setter
   def textColour(self, value:str):
     if self.textColour != value:
-      self._wrappedData.spectrumView.textColour = value
+      self._wrappedData.peakListView.textColour = value
 
   @property
   def isSymbolDisplayed(self) -> bool:

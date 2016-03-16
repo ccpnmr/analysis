@@ -113,6 +113,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
 
 
 
+
     #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
     #                  viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
     #self.yAxis = Axis(self.plotWidget, orientation='left', #pen=self.foreground,
@@ -593,6 +594,10 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
         
   def mouseClicked(self, event):
     print(event)
+
+
+  def setStripToCurrent(self):
+    position = self.viewBox.mapSceneToView(pos)
 
 
   def mousePressEvent(self, event):

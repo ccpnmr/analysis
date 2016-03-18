@@ -225,6 +225,18 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
 
 
   def _deletedPeak(self, apiPeak):
+    for peakListView in self.activePeakItemDict:
+      peakItemDict = self.activePeakItemDict[peakListView]
+      peakItem = peakItemDict.get(apiPeak)
+      if peakItem:
+        peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
+        del peakItemDict[apiPeak]
+        inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
+        if inactivePeakItems:
+          inactivePeakItems.add(peakItem)
+    
+    
+  def _createdPeak(self, apiPeak):
     pass  # does anything need doing??
     
 def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):

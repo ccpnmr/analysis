@@ -61,7 +61,11 @@ class GuiSpectrumView1d(GuiSpectrumView):
       else:
         self.spectrum.sliceColour = list(spectrumColours.keys())[(len(self.strip.spectrumViews) % 12)-1]
 
-    self.plot = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
+    # have to add in two steps because simple plot() command draws all other data even if currently not visible
+    ##self.plot = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
+    self.plot = pg.PlotDataItem(x=self.data[0], y=self.data[1], pen=self.spectrum.sliceColour)
+    self.strip.viewBox.addItem(self.plot)
+
     self.plot.curve.setClickable(True)
     self.plot.sigClicked.connect(self.clicked)
     for peakList in self.spectrum.peakLists:

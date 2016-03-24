@@ -22,7 +22,9 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from application.core.AppBase import AppBase, startProgram
+import sys
+
+from application.core.AppBase import AppBase, defineProgramArguments, printProgramText
 from application.core.Version import applicationVersion
 from application.core.lib.Window import MODULE_DICT
 from application.core.modules import GuiStrip
@@ -31,10 +33,14 @@ from application.core.modules import GuiSpectrumDisplay
 from application.core.modules import GuiStripDisplayNd
 
 
-applicationName = 'Assign'
+applicationName = 'AnalysisAssign'
 
 class Assign(AppBase):
   """Root class for Assign application"""
+
+  def __init__(self, applicationName, applicationVersion, commandLineArguments):
+    AppBase.__init__(self, applicationName, applicationVersion, commandLineArguments)
+    self.components.add('Assignment')
 
   def initGraphics(self):
     """Set up graphics system after loading"""
@@ -99,33 +105,12 @@ class Assign(AppBase):
 
 
 if __name__ == '__main__':
-  import argparse  
-  # from PyQt4 import QtGui, QtCore
-  # import os
-  # from ccpncore.util import Path
-  # splashPng = os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'ccpnmr-splash-screen.png')
-  # splash_pix = QtGui.QPixmap(splashPng)
-  # splash = QtGui.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
-  # splash.show()
-  parser = argparse.ArgumentParser(description='Process startup arguments')
-  for component in ('Assignment', 'Screening', 'Structure'):
-    parser.add_argument('--'+component.lower(), dest='include'+component, action='store_true',
-                        help='Show %s component' % component.lower())
-  parser.add_argument('--language', help='Language for menus, etc.')
-  parser.add_argument('--skip-user-preferences', dest='skipUserPreferences', action='store_true', help='Skip loading user preferences')
-  parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
-  parser.add_argument('projectPath', nargs='?', help='Project path')
-  args = parser.parse_args()
-  
-  components = set()
-  for component in ('Assignment', 'Screening', 'Structure'):
-    if getattr(args, 'include'+component):
-      components.add(component)
-      
-  if not components:
-    components.add('Assignment')
-  
-  startProgram(Assign, applicationName, applicationVersion, components, args.projectPath,
-               args.language, args.skipUserPreferences, args.nologging)
-  # splash.hide()
+
+  # argument parser
+  parser = defineProgramArguments()
+  # add any additional commandline argument here
+  commandLineArguments = parser.parse_args()
+
+  program = Assign(applicationName, applicationVersion, commandLineArguments)
+  program.start()
 

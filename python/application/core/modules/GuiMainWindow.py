@@ -44,6 +44,7 @@ from ccpncore.util import Io as ioUtil
 from ccpncore.util import Path
 
 from ccpncore.util.Common import uniquify
+from ccpncore.util.Translation import translator
 
 from application.core.gui.Assigner import Assigner
 from application.core.gui.IpythonConsole import IpythonConsole
@@ -528,9 +529,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     Populates recent projects menu with 10 most recently loaded projects specified in the preferences file.
     """
+    translator.setSilent()
     for recentFile in self._appBase.preferences.recentFiles:
       self.action = Action(self, text=recentFile, callback=partial(self.loadAProject, projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
+    translator.setLoud()
     self.recentProjectsMenu.addAction(Action(self, text='Clear', callback=self.clearRecentProjectsMenu))
 
   def saveBackup(self):
@@ -775,9 +778,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     recentMacros = uniquify(self._appBase.preferences.recentMacros)
 
+    translator.setSilent()
     for recentMacro in recentMacros:
       self.action = Action(self, text=recentMacro, callback=partial(self.runMacro, macroFile=recentMacro))
       self.recentMacrosMenu.addAction(self.action)
+    translator.setLoud()
     self.recentMacrosMenu.addAction(Action(self, text='Clear', callback=self.clearRecentMacros))
 
 

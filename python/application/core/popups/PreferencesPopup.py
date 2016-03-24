@@ -34,8 +34,8 @@ from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
+from ccpncore.util.Translation import languages
 
-LANGUAGES = ['English-UK', 'Italiano']
 COLOUR_SCHEMES = ['light', 'dark']
 
 
@@ -46,46 +46,66 @@ class PreferencesPopup(QtGui.QDialog):
     self.project = project
     self.preferences = preferences
     self.oldPreferences = preferences
-    self.dataPathLabel = Label(self, "Data Path", grid=(0, 0))
-    self.dataPathText = LineEdit(self, grid=(0, 1))
+
+    row=0
+
+    self.dataPathLabel = Label(self, "Data Path", grid=(row, 0))
+    self.dataPathText = LineEdit(self, grid=(row, 1))
     self.dataPathText.editingFinished.connect(self.setDataPath)
     self.dataPathText.setText(self.preferences.general.dataPath)
-    self.dataPathButton = Button(self, grid=(0, 2), callback=self.getDataPath, icon='iconsNew/directory', hPolicy='fixed')
-    self.autoSaveLayoutLabel = Label(self, text="ToolBar Hidden: ", grid=(1, 0))
-    self.autoSaveLayoutBox = CheckBox(self, grid=(1, 1), checked=self.preferences.general.toolbarHidden)
-    self.autoSaveLayoutBox.toggled.connect(partial(self.toggleGeneralOptions, 'toolbarHidden'))
-    self.auxiliaryFilesLabel = Label(self, text="Auxiliary Files Path ", grid=(2, 0))
-    self.auxiliaryFilesData = LineEdit(self, grid=(2, 1))
-    self.auxiliaryFilesDataButton = Button(self, grid=(2, 2), callback=self.getAuxiliaryFilesPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.dataPathButton = Button(self, grid=(row, 2), callback=self.getDataPath, icon='iconsNew/directory', hPolicy='fixed')
+    row += 1
+
+    self.auxiliaryFilesLabel = Label(self, text="Auxiliary Files Path ", grid=(row, 0))
+    self.auxiliaryFilesData = LineEdit(self, grid=(row, 1))
+    self.auxiliaryFilesDataButton = Button(self, grid=(row, 2), callback=self.getAuxiliaryFilesPath, icon='iconsNew/directory', hPolicy='fixed')
     self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
     self.auxiliaryFilesData.editingFinished.connect(self.setAuxiliaryFilesPath)
-    self.macroPathLabel = Label(self, text="Macro Path", grid=(3, 0))
-    self.macroPathData = LineEdit(self, grid=(3, 1))
+    row += 1
+
+    self.macroPathLabel = Label(self, text="Macro Path", grid=(row, 0))
+    self.macroPathData = LineEdit(self, grid=(row, 1))
     self.macroPathData.setText(self.preferences.general.macroPath)
-    self.macroPathDataButton = Button(self, grid=(3, 2), callback=self.getMacroFilesPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.macroPathDataButton = Button(self, grid=(row, 2), callback=self.getMacroFilesPath, icon='iconsNew/directory', hPolicy='fixed')
     self.macroPathData.editingFinished.connect(self.setMacroFilesPath)
-    self.languageLabel = Label(self, text="Language", grid=(4, 0))
-    self.languageBox = PulldownList(self, grid=(4, 1), gridSpan=(1, 1))
-    self.languageBox.addItems(LANGUAGES)
+    row += 1
+
+    self.languageLabel = Label(self, text="Language", grid=(row, 0))
+    self.languageBox = PulldownList(self, grid=(row, 1), gridSpan=(1, 1))
+    self.languageBox.addItems(languages)
     self.languageBox.setMinimumWidth(self.dataPathText.width())
     self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
     self.languageBox.currentIndexChanged.connect(self.changeLanguage)
+    row += 1
+
     # self.editorLabel = Label(self, text="Editor ", grid=(5, 0))
-    # self.editorData = LineEdit(self, text=self.preferences.general.editor, grid=(5, 1), gridSpan=(1, 1))
-    self.colourSchemeLabel = Label(self, text="Colour Scheme ", grid=(5, 0))
-    self.colourSchemeBox = PulldownList(self, grid=(5, 1), gridSpan=(1, 1))
+    # self.edi
+    # torData = LineEdit(self, text=self.preferences.general.editor, grid=(5, 1), gridSpan=(1, 1))
+    self.colourSchemeLabel = Label(self, text="Colour Scheme ", grid=(row, 0))
+    self.colourSchemeBox = PulldownList(self, grid=(row, 1), gridSpan=(1, 1))
     self.colourSchemeBox.setMinimumWidth(self.dataPathText.width())
     self.colourSchemeBox.addItems(COLOUR_SCHEMES)
     self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
-      self.preferences.general.colourScheme))
+                                         self.preferences.general.colourScheme))
     self.colourSchemeBox.currentIndexChanged.connect(self.changeColourScheme)
-    self.licenceLabel = Label(self, text='Licence', grid=(6, 0))
-    self.licenceButton = Button(self, text='Show Licence', grid=(6, 1), gridSpan=(1, 1), callback=self.showLicenceInfo)
-    self.useNativeLabel = Label(self, text="Use Native File Dialogs: ", grid=(7, 0))
-    self.useNativeBox = CheckBox(self, grid=(7, 1), checked=self.preferences.general.useNative)
-    self.useNativeBox.toggled.connect(partial(self.toggleGeneralOptions, 'toolbarHidden'))
+    row += 1
 
-    buttonBox = Button(self, grid=(7, 1), text='Close', callback=self.accept)
+    self.autoSaveLayoutLabel = Label(self, text="Hide ToolBar(s): ", grid=(row, 0))
+    self.autoSaveLayoutBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.toolbarHidden)
+    self.autoSaveLayoutBox.toggled.connect(partial(self.toggleGeneralOptions, 'toolbarHidden'))
+    row += 1
+
+    self.useNativeLabel = Label(self, text="Use Native File Dialogs: ", grid=(row, 0))
+    self.useNativeBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.useNative)
+    self.useNativeBox.toggled.connect(partial(self.toggleGeneralOptions, 'useNative'))
+    row += 1
+
+    self.licenceLabel = Label(self, text='Licence', grid=(row, 0))
+    self.licenceButton = Button(self, text='Show', grid=(row, 1), gridSpan=(1, 1), callback=self.showLicenceInfo)
+    row += 1
+
+    buttonBox = Button(self, grid=(row, 1), text='Save', callback=self.accept)
+    row += 1
 
   def getDataPath(self):
     if os.path.exists('/'.join(self.dataPathText.text().split('/')[:-1])):

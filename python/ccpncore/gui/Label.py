@@ -25,11 +25,13 @@ from PyQt4 import QtGui, QtCore
 Qt = QtCore.Qt
 
 from ccpncore.gui.Base import Base
+from ccpncore.util.Translation import translator
 
 class Label(QtGui.QLabel, Base):
-# class Label(QtGui.QLabel, Base):
 
   def __init__(self, parent, text='', textColor=None, textSize=None, **kw):
+
+    text = translator.translate(text)
 
     QtGui.QLabel.__init__(self, text, parent)
     Base.__init__(self, **kw)
@@ -45,7 +47,9 @@ class Label(QtGui.QLabel, Base):
 
   def set(self, text=''):
 
-    self.setText(self.translate(text))
+    text = translator.translate(text)
+
+    self.setText(text)
 
 
 if __name__ == '__main__':

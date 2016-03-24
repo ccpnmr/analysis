@@ -51,8 +51,8 @@ class PulldownList(QtGui.QComboBox, Base):
     self.setCallback(callback)
     self.setStyleSheet("""QCombobox { padding: 0;}
                           QCombobox QAbstractItemView::item {
-                           padding-top: 10px;
-                           padding-bottom: 10px;
+                           padding-top: 2px;
+                           padding-bottom: 2px;
                           }
                           """)
     self.setMinimumWidth(100)

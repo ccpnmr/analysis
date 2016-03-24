@@ -26,11 +26,13 @@ from PyQt4 import QtGui
 from ccpncore.gui.Action import Action
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Font import Font
+from ccpncore.util.Translation import translator
 
 
 class Menu(QtGui.QMenu, Base):
   def __init__(self, title, parent, isFloatWidget=False, **kw):
-    QtGui.QMenu.__init__(self, self.translate(title), parent)
+    title = translator.translate(title)
+    QtGui.QMenu.__init__(self, title, parent)
     Base.__init__(self, isFloatWidget=isFloatWidget, **kw)
     self.isFloatWidget = isFloatWidget
     # self.setStyleSheet("""

@@ -24,10 +24,13 @@ __version__ = "$Revision: 7686 $"
 from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
+from ccpncore.util.Translation import translator
 
 class Action(QtGui.QAction, Base):
   def __init__(self, parent, text, callback=None, shortcut=None, checked=True, checkable=False, icon=None, **kw):
-    text = self.translate(text)
+
+    text = translator.translate(text)
+
     if shortcut:
       if type(shortcut) == type(''):
         shortcut = QtGui.QKeySequence(", ".join(tuple(shortcut)))

@@ -1,4 +1,20 @@
-"""Module Documentation here
+"""
+Translation and translation dictionary handling
+
+the application can import the translator instance for translation and use:
+
+translator.setLanguage(language)
+translator.translate(text)
+
+To silence the message, e.g. when initiating dynamical menus with recent files use:
+translator.setSilent()
+translator.setLoud()
+
+To have both defaultLanguage and translated language:
+translator.setDebug(True)
+
+there are translation dictionaries associated with this module for really common words like "Help"
+
 
 """
 #=========================================================================================
@@ -14,96 +30,108 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
+__author__ = "$Author: gvuister $"
 __date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __version__ = "$Revision: 7686 $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""Translation and translation dictionary handling"""
 
 import importlib
 import sys
 
 from ccpncore.util import Logging
 
-# the application should call setTranslationLanguage() before doing anything else
-# the other two functions should be called by modules as and when the modules are used
-# updateTranslationDict() should be called as objects are created (but only needs to be called once per directory)
-# getTranslation() should be called as needed
-
-# there are translation dictionaries associated with this module for really common words like "Help"
-
 defaultLanguage = 'English-UK'
 translationDirectory = 'translation'  # assumes that all translations are in sub-directory with this name in a file language.py
 
-translationLanguage = defaultLanguage
-translationDebug = False
-translationDict = {}  # maps from default language text to translated text
+#languages = ['English-UK', 'Italiano']
+import pkgutil
+import ccpncore.util.translation as tModule
+languages = [defaultLanguage] + [name for _, name, _ in pkgutil.iter_modules(tModule.__path__)]
+if 'rude' in languages:
+  languages.remove('rude')
 
-def setTranslationLanguage(language=defaultLanguage, debug=False):
-  """ Set the translation language """
-  
-  global translationLanguage, translationDict, translationDebug
-
-  translationLanguage = language
-  translationDebug = debug
-  translationDict = {}
-  
-  updateTranslationDict()
-
-### CARE: Problem is that we want to find the module in which the object is created,
-### not the module in which the code which creates it lives.
-### The code below is dangerous and could not work in some Python implementations.
-
-def updateTranslationDict(moduleName=None):
-  """ Add all the translations for directory in which this object is located.
-      The depth is how far up calling stack to go (not including this function itself).
-  """
-
-  if translationLanguage == defaultLanguage:
-    return
-  
-  if moduleName is None:
-    moduleName = 'ccpncore.util'
-    
-  translationModuleName = '%s.%s.%s' % (moduleName, translationDirectory, translationLanguage)
-    
-  try:
-    module = importlib.import_module(translationModuleName)
-  except ImportError as e:
-    logger = Logging.getLogger()
-    logger.warning('translation for module "%s" not available for language "%s"' % (moduleName, translationLanguage))
-    return
-    
-  try:
-    moduleTranslationDict = module.translationDict
-  except AttributeError as e:
-    logger = Logging.getLogger()
-    logger.warning('translation module "%s" does not have a translationDict' % moduleName)
-    return
-  
-  translationDict.update(moduleTranslationDict)
-  
-def getTranslation(text):
-  """ Translate a specific text into the previously specified language. """
-
-  if translationLanguage == defaultLanguage:
-    return text
-    
-  translatedText = translationDict.get(text)
-
-  if translatedText is None:
-    logger = Logging.getLogger()
-    logger.warning('text "%s" not in %s translation dictionary' % (text, translationLanguage))
-    translatedText = text
-  
-  if translationDebug:
-    translatedText += ' (%s)' % text
-    
-  return translatedText
 
 class Translation:
+
+  # class variables as the class is used in many instances and there is only one language!
+  _language = defaultLanguage
+  _translationDict = {}  # maps from default language text to translated text
+  _silentTranslation = False
+  _translationDebug = False
+
+  def __init__(self):
+    pass
+
+  def setLanguage(self, language = defaultLanguage):
+    """Set the language. Return True on error
+    """
+    if language == defaultLanguage: return
+    if language == Translation._language: return
+
+    translationModuleName = '%s.%s' % (tModule.__package__, language)
+    #print(translationModuleName)
+
+    try:
+      module = importlib.import_module(translationModuleName)
+    except ImportError as e:
+      logger = Logging.getLogger()
+      logger.warning('translation for language "%s" not available' % (language))
+      return True
+
+    try:
+      moduleTranslationDict = module.translationDict
+    except AttributeError as e:
+      logger = Logging.getLogger()
+      logger.warning('translation module "%s" does not have a translationDict' % translationModuleName)
+      return True
+
+    Translation._translationDict.update(moduleTranslationDict)
+    Translation._language = language
+    return False
+
   def translate(self, text):
-    return getTranslation(text)
+    """ Translate a specific text into the previously specified language. """
+
+    if len(text) == 0:
+      return text
+
+    # default language;
+    if Translation._language == defaultLanguage:
+      return text
+
+    translatedText = Translation._translationDict.get(text)
+
+    #print('>>translate: "%s" -> "%s"' % (text,translatedText))
+
+    if translatedText is None:
+      translatedText = text
+      if not Translation._silentTranslation:
+        logger = Logging.getLogger()
+        logger.warning('text "%s" not in "%s" translation dictionary' % (text, Translation._language))
+        # only warn once for 'text' by putting the string in the translation dictionary
+        Translation._translationDict[text] = translatedText
+
+    if Translation._translationDebug:
+      translatedText += ' (%s)' % text
+
+    return translatedText
+
+  def setSilent(self):
+    Translation._silentTranslation = True
+
+  def setLoud(self):
+    Translation._silentTranslation = False
+
+  def setDebug(self, value):
+    Translation._translationDebug = value
+
+translator = Translation()
+
+if __name__ == '__main__':
+
+  tr = Translation()
+  tr.setLanguage('Italiano')
+  print(tr.translate("New"))

@@ -25,10 +25,13 @@ __author__ = 'simon'
 from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
+from ccpncore.util.Translation import translator
 
 class LineEdit(QtGui.QLineEdit, Base):
 
   def __init__(self, parent, text='', textColor=None, **kw):
+
+    #text = translator.translate(text)
 
     QtGui.QLineEdit.__init__(self, text, parent)
     Base.__init__(self, **kw)
@@ -46,4 +49,5 @@ class LineEdit(QtGui.QLineEdit, Base):
 
   def set(self, text=''):
 
-    self.setText(self.translate(text))
+    #text = translator.translate(text)
+    self.setText(text)

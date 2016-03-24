@@ -14,44 +14,52 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
+__author__ = "$Author: gvuister $"
 __date__ = "$Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __version__ = "$Revision: 7686 $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util import Translation
+from ccpncore.util.Translation import Translation
 
 def test_setLanguageDefault():
-  Translation.setTranslationLanguage()
+  tr = Translation()
+  tr.setLanguage()
 
 def test_setLanguageEnglish():
-  Translation.setTranslationLanguage('English')
+  tr = Translation()
+  tr.setLanguage('English-UK')
 
 def test_setLanguageFrench():
-  Translation.setTranslationLanguage('French')
+  tr = Translation()
+  tr.setLanguage('French')
 
 def test_setLanguageGerman():
-  Translation.setTranslationLanguage('German')
+  tr = Translation()
+  tr.setLanguage('German')
 
 def test_translateDefaultText():
-  Translation.setTranslationLanguage()
-  assert Translation.getTranslation('Help') == 'Help'
+  tr = Translation()
+  assert tr.translate('Help') == 'Help'
 
 def test_translateEnglishText():
-  Translation.setTranslationLanguage('English')
-  assert Translation.getTranslation('Help') == 'Help'
+  tr = Translation()
+  tr.setLanguage('English-UK')
+  assert tr.translate('Help') == 'Help'
 
 def test_translateFrenchText1():
-  Translation.setTranslationLanguage('French')
-  assert Translation.getTranslation('Help') == 'Aidez'
+  tr = Translation()
+  tr.setLanguage('French')
+  assert tr.translate('Help') == 'Aidez'
 
 def test_translateChineseText1():
-  Translation.setTranslationLanguage('Chinese')
-  assert Translation.getTranslation('New') == '新的'
+  tr = Translation()
+  tr.setLanguage('Chinese')
+  assert tr.translate('New') == '新的'
 
 def test_translateChineseText2():
-  Translation.setTranslationLanguage('Chinese')
-  assert Translation.getTranslation('Help Me') == 'Help Me'
+  tr = Translation()
+  tr.setLanguage('Chinese')
+  assert tr.translate('Help Me') == 'Help Me'
 

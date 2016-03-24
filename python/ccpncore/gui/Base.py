@@ -55,7 +55,8 @@ POLICY_DICT = {
   'ignored': QtGui.QSizePolicy.Ignored,
 }
 
-class Base(Translation):
+#class Base(Translation):
+class Base():
 
   def __init__(self, tipText=None, grid=(None, None), gridSpan=(1,1), stretch=(0,0),
                hAlign=None, vAlign=None, hPolicy=None, vPolicy=None,

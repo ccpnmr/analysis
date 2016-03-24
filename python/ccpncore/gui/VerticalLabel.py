@@ -25,10 +25,15 @@ __author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
 from ccpncore.gui.Base import Base
+from ccpncore.util.Translation import translator
+
 
 class VerticalLabel(QtGui.QWidget, Base):
 
     def __init__(self, parent, text, **kwargs):
+
+      text = translator.translate(text)
+
       QtGui.QWidget.__init__(self, parent)
       self.text = text
       self.setText(text)
@@ -44,5 +49,8 @@ class VerticalLabel(QtGui.QWidget, Base):
         painter.end()
 
     def setText(self, text):
+
+      text = translator.translate(text)
+
       self.text = text
       self.repaint()

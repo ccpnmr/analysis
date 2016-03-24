@@ -2,12 +2,15 @@
 from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
+from ccpncore.util.Translation import translator
 
 
 
 class RadioButton(QtGui.QRadioButton, Base):
 
   def __init__(self, parent, text='', textColor=None, textSize=None, callback=None, **kw):
+
+    text = translator.translate(text)
 
     QtGui.QRadioButton.__init__(self, text, parent)
     Base.__init__(self,  **kw)
@@ -24,7 +27,10 @@ class RadioButton(QtGui.QRadioButton, Base):
 
   def set(self, text=''):
 
-    self.setText(self.translate(text))
+    if len(text) > 0:
+      text = translator.translate(text)
+
+    self.setText(text)
 
   def setCallback(self, callback):
     #

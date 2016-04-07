@@ -37,7 +37,7 @@ from ccpn import Chain, ChemicalShiftList, NmrResidue, Peak, PeakList, Project
 
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, getSpinSystemScore
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
-from ccpncore.util import Types
+import typing
 
 
 from sklearn import svm
@@ -54,7 +54,7 @@ def isInterOnlyExpt(experimentType:str) -> bool:
     return True
   return False
 
-def assignAlphas(nmrResidue:NmrResidue, peaks:Types.List[Peak]):
+def assignAlphas(nmrResidue:NmrResidue, peaks:typing.List[Peak]):
   """
   Assigns CA and CA-1 NmrAtoms to dimensions of specified peaks.
   """
@@ -73,7 +73,7 @@ def assignAlphas(nmrResidue:NmrResidue, peaks:Types.List[Peak]):
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CA')])
 
 
-def assignBetas(nmrResidue:NmrResidue, peaks:Types.List[Peak]):
+def assignBetas(nmrResidue:NmrResidue, peaks:typing.List[Peak]):
   """
   Assigns CB and CB-1 NmrAtoms to dimensions of specified peaks.
   """
@@ -199,8 +199,8 @@ def copyAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
     if all([abs(refPositions[ii] - peak.position[ii]) < tolerances[ii] for ii in mappingArray if ii is not None]):
       [peak.assignDimension(axisCode=refAxisCodes[ii], value=dimNmrAtoms[ii]) for ii in mappingArray if ii is not None]
 
-def propagateAssignments(peaks:Types.List[Peak]=None, referencePeak:Peak=None, current:object=None,
-                         tolerances:Types.List[float]=None):
+def propagateAssignments(peaks:typing.List[Peak]=None, referencePeak:Peak=None, current:object=None,
+                         tolerances:typing.List[float]=None):
   """
   Propagates dimensionNmrAtoms for each dimension of the specified peaks to dimensions of other
   peaks.
@@ -303,7 +303,7 @@ def propagateAssignments(peaks:Types.List[Peak]=None, referencePeak:Peak=None, c
     # shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
 
 
-def getSpinSystemsLocation(project:Project, nmrResidues:Types.List[NmrResidue],
+def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
                            chain:Chain, chemicalShiftList:ChemicalShiftList):
   """
   Determines location of a set of NmrResidues in the specified chain using residue type

@@ -38,7 +38,7 @@ __version__ = "$Revision$"
 import os
 import keyword
 from . import GenericStarParser
-from ccpncore.util.Types import Union, Sequence, Optional
+from typing import Union, Sequence, Optional
 from ccpncore.util import Common as commonUtil
 
 
@@ -134,9 +134,13 @@ class NmrDataBlock(GenericStarParser.DataBlock):
     """Make new NmrSaveFrame and add it to the DataBlock"""
     saveFrame = NmrSaveFrame(name, category=category)
     self.addItem(name, saveFrame)
-    saveFrame.addItem('sf_framecode', name)
     saveFrame.addItem('sf_category', category)
+    saveFrame.addItem('sf_framecode', name)
     return saveFrame
+
+  def addSaveFrame(self, saveFrame:NmrSaveFrame):
+    """Add existing NmrSaveFrame to the DataBlock"""
+    self.addItem(saveFrame['sf_framecode'], saveFrame)
 
 class NmrLoopRow(GenericStarParser.LoopRow):
   pass

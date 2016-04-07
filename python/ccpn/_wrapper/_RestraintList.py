@@ -74,6 +74,20 @@ class RestraintList(AbstractWrapperObject):
     self._setUniqueStringKey(wrappedData, defaultName)
     super().__init__(project, wrappedData)
 
+  # Special error-raising functions for people who think RestraintList is a list
+  def __iter__(self):
+    raise TypeError("'RestraintList object is not iterable"
+                    " - for a list of restraints use RestraintList.restraints")
+
+  def __getitem__(self, index):
+    raise TypeError("'RestraintList object does not support indexing"
+                    " - for a list of restraints use RestraintList.restraints")
+
+  def __len__(self):
+    raise TypeError("'RestraintList object has no length"
+                    " - for a list of restraints use RestraintList.restraints")
+
+
   # CCPN properties
   @property
   def _apiRestraintList(self) -> ApiAbstractConstraintList:

@@ -121,7 +121,7 @@ _DESCRIPTIVE_TOKEN_TYPES = [
 # # Modified Tokeniser to
 # - use namedtuples instead of custom objects
 # - to use descriptive token types instead of integer codes
-# - to use a string input instead of a memory map (which gave string/byte ocnflict errors)
+# - to use a string input instead of a memory map (which gave string/byte conflict errors)
 # - to wrap the regex iterator without a wrapping class.
 
 #

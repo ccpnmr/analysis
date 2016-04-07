@@ -25,9 +25,9 @@ __version__ = "$Revision: 8640 $"
 from ccpn import ChemicalShiftList, NmrAtom, Peak
 
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
-from ccpncore.util import Types
+import typing
 
-def nmrAtomsForPeaks(peaks:Types.List[Peak], nmrAtoms:Types.List[NmrAtom], intraResidual:bool=False, doubleTolerance:bool=False):
+def nmrAtomsForPeaks(peaks:typing.List[Peak], nmrAtoms:typing.List[NmrAtom], intraResidual:bool=False, doubleTolerance:bool=False):
     '''Get a set of nmrAtoms that fit to the dimensions of the
        peaks.
 
@@ -39,7 +39,7 @@ def nmrAtomsForPeaks(peaks:Types.List[Peak], nmrAtoms:Types.List[NmrAtom], intra
     return selected
 
 
-def filterIntraResidual(nmrAtomsForDimensions:Types.List[NmrAtom]):
+def filterIntraResidual(nmrAtomsForDimensions:typing.List[NmrAtom]):
     '''Takes a N-list of lists of nmrAtoms, where N
        is the number of peak dimensions and only returns
        those which belong to residues that show up in
@@ -75,7 +75,7 @@ def filterIntraResidual(nmrAtomsForDimensions:Types.List[NmrAtom]):
     return nmrAtomsForDimenionsFiltered
 
 
-def matchingNmrAtomsForPeaks(peaks:Types.List[Peak], nmrAtoms:Types.List[NmrAtom], doubleTolerance:bool=False):
+def matchingNmrAtomsForPeaks(peaks:typing.List[Peak], nmrAtoms:typing.List[NmrAtom], doubleTolerance:bool=False):
     '''Get a set of nmrAtoms that fit to the dimensions of the
        peaks. This function does the actual calculation and does
        not involve filtering like in nmrAtoms_for_peaks, where
@@ -99,7 +99,7 @@ def matchingNmrAtomsForPeaks(peaks:Types.List[Peak], nmrAtoms:Types.List[NmrAtom
     return dim_nmrAtoms
 
 
-def matchingNmrAtomsForDimensionOfPeaks(peaks:Types.List[Peak], dim:int, nmrAtoms:Types.List[NmrAtom],
+def matchingNmrAtomsForDimensionOfPeaks(peaks:typing.List[Peak], dim:int, nmrAtoms:typing.List[NmrAtom],
                                              doubleTolerance:bool=False):
     '''Finds out which nmrAtom can be assigned to a specific
        dimension of all the peaks, the N dimension for instance.
@@ -120,7 +120,7 @@ def matchingNmrAtomsForDimensionOfPeaks(peaks:Types.List[Peak], dim:int, nmrAtom
     return matchingNmrAtoms
 
 
-def matchingNmrAtomsForPeakDimension(peak:Peak, dim:int, nmrAtoms:Types.List[NmrAtom],
+def matchingNmrAtomsForPeakDimension(peak:Peak, dim:int, nmrAtoms:typing.List[NmrAtom],
                                          doubleTolerance:bool=False):
     '''Just finds the nmrAtoms that fit a dimension of one peak.
 
@@ -169,7 +169,7 @@ def withinTolerance(nmrAtom:NmrAtom, position:float, shiftList:ChemicalShiftList
 #    return None
 
 
-def peaksAreOnLine(peaks:Types.List[Peak], dim:int):
+def peaksAreOnLine(peaks:typing.List[Peak], dim:int):
     '''Returns True when multiple peaks are located
        on a line in the given dimensions.
     '''
@@ -186,7 +186,7 @@ def peaksAreOnLine(peaks:Types.List[Peak], dim:int):
     return False
 
 
-def sameAxisCodes(peaks:Types.List[Peak], dim:int):
+def sameAxisCodes(peaks:typing.List[Peak], dim:int):
     '''Checks whether all peaks have the same axisCode
        for in the given dimension.
 

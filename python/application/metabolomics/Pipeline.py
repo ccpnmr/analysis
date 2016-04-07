@@ -22,7 +22,7 @@ __version__ = ": 7686 $"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util import Types
+import typing
 
 from functools import reduce
 #

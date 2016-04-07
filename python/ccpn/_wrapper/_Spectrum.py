@@ -24,19 +24,18 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
-import os
 import operator
-
-from ccpncore.util.Types import Sequence, Tuple, Optional
+import collections
+from typing import Sequence, Tuple, Optional
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from ccpncore.api.memops.Implementation import Url
-from ccpncore.util import Path
 from ccpncore.util import Pid
-from ccpncore.util import Io as ioUtil
 
-
+# MagnetisationTransferTuple
+MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
+  ['dimension1', 'dimension2', 'transferType', 'isIndirect']
+)
 
 class Spectrum(AbstractWrapperObject):
   """NMR spectrum."""
@@ -393,7 +392,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def spectralWidthsHz(self) -> Tuple[Optional[float], ...]:
-    """spectral width before correcting for spectrometer frequency (generally in Hz), per dimension"""
+    """spectral width before correcting for spectrometer frequency (mostly in Hz), per dimension"""
     return tuple(x.spectralWidth if hasattr(x, 'spectralWidth') else None
                  for x in self._wrappedData.sortedDataDims())
 
@@ -622,6 +621,32 @@ class Spectrum(AbstractWrapperObject):
     self._setExpDimRefAttribute('axisCode', value, mandatory=False)
 
   @property
+  def acquisitionAxisCode(self) -> Optional[str]:
+    """Axis code of acquisition axis - None if not known"""
+    for dataDim in self._wrappedData.sortedDataDims():
+      expDim = dataDim.expDim
+      if expDim.isAcquisition:
+        expDimRef = expDim.findFirstExpDimRef(serial=1)
+        axisCode = expDimRef.axisCode
+        if axisCode is None:
+          self._wrappedData.experiment.resetAxisCodes()
+          axisCode = expDimRef.axisCode
+        return axisCode
+    #
+    return None
+
+  @acquisitionAxisCode.setter
+  def acquisitionAxisCode(self, value):
+
+    if value is None:
+      index = None
+    else:
+      index = self.axisCodes.index(value)
+
+    for ii,dataDim in enumerate( self._wrappedData.sortedDataDims()):
+      dataDim.expDim.isAcquisition = (ii == index)
+
+  @property
   def axisUnits(self) -> Tuple[Optional[str], ...]:
     """Main axis unit (most commonly 'ppm'), per dimension - None if no unique code
 
@@ -762,14 +787,36 @@ class Spectrum(AbstractWrapperObject):
         ll.append(tuple(sorted((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints+1)))))
     return tuple(ll)
 
-  # @property
-  # def sample(self) -> Sample:
-  #   """Sample used to acquire Spectrum"""
-  #   return self._project._data2Obj.get(self._wrappedData.experiment.sample)
-  #
-  # @sample.setter
-  # def sample(self, value:Sample):
-  #   self._wrappedData.experiment.sample = None if value is None else value._wrappedData
+  @property
+  def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
+    """tuple of MagnetisationTransferTuple describing magnetisation transfer between
+    the spectrum dimensions.
+
+    MagnetisationTransferTuple is a namedtuple with the fields
+    ['dimension1', 'dimension2', 'transferType', 'isIndirect'] of types [int, int, str, bool]
+    The dimensions are dimension numbers (one-origin]
+    transfertype is one of (in order of increasing priority):
+    'onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'relayed-alternate', 'through-space'
+    isIndirect is used where there is more than one successive transfer step;
+     it is combined with the highest-priority transferType in the transfer path.
+    """
+
+    result = []
+    apiRefExperiment = self._wrappedData.experiment.refExperiment
+    if apiRefExperiment:
+      magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
+      refExpDimRefs = [x if x is None else x.refExpDimRef for x in self._mainExpDimRefs()]
+      for ii, rxdr in enumerate(refExpDimRefs):
+        dim1 = ii + 1
+        if rxdr is not None:
+          for jj in range(dim1, len(refExpDimRefs)):
+            rxdr2 = refExpDimRefs[jj]
+            if rxdr2 is not None:
+              tt = magnetisationTransferDict.get(frozenset((rxdr, rxdr2)))
+              if tt:
+                result.append(MagnetisationTransferTuple(dim1, jj+1, tt[0], tt[1]))
+    #
+    return tuple(result)
 
   # Implementation functions
 
@@ -785,27 +832,6 @@ class Spectrum(AbstractWrapperObject):
     """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
     return sorted((x for y in parent._wrappedData.sortedExperiments()
                    for x in y.sortedDataSources()), key=operator.attrgetter('name'))
-
-
-# def getter(self:ChemicalShiftList) -> tuple:
-#   ff = self._project._data2Obj.get
-#   return tuple(ff(y) for x in self._wrappedData.sortedExperiments()
-#                for y in x.sortedDataSources())
-# def setter(self:ChemicalShiftList, value:Sequence):
-#   self._wrappedData.experiments =  set(x._wrappedData.experiment for x in value)
-# ChemicalShiftList.spectra = property(getter, setter, None,
-#                           "Spectra using ChemicalShiftList")
-#
-# def getter(self:Sample) -> tuple:
-#   ff = self._project._data2Obj.get
-#   return tuple(ff(y) for x in self._wrappedData.sortedNmrExperiments()
-#                for y in x.sortedDataSources())
-# def setter(self:Sample, value:Sequence):
-#   self._wrappedData.nmrExperiments =  set(x._wrappedData.experiment for x in value)
-# Sample.spectra = property(getter, setter, None,
-#                           "Spectra acquired using Sample (excluding multiSample spectra)")
-# del getter
-# del setter
 
 
 def _newSpectrum(self:Project, name:str) -> Spectrum:

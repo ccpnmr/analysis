@@ -29,7 +29,7 @@ from ccpn import Spectrum
 from ccpn import SpectrumGroup
 
 from ccpncore.util.Pid import Pid
-from ccpncore.util.Types import Sequence
+from typing import Sequence
 from ccpncore.gui.Dock import CcpnDockLabel, CcpnDock
 from ccpncore.gui.Label import Label
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat

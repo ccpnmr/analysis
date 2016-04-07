@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 
 import numpy
 from ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
-from ccpncore.util.Types import Sequence
+from typing import Sequence
 from ccpncore.util import Common as commonUtil
 from ccpn import AbstractWrapperObject
 from ccpn import Project

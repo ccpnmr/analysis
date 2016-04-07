@@ -38,7 +38,7 @@ from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListVi
 
 from ccpncore.gui.Icon import Icon
 
-from ccpncore.util import Types
+import typing
 
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from application.core.modules.GuiStripNd import GuiStripNd
@@ -198,7 +198,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         self.project._logger.info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
         self.project._logger.info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
     
-  def showPeaks(self, peakListView:GuiPeakListView.GuiPeakListView, peaks:Types.List[Peak]):
+  def showPeaks(self, peakListView:GuiPeakListView.GuiPeakListView, peaks:typing.List[Peak]):
     """
     Displays specified peaks in all strips of the display using peakListView
     """

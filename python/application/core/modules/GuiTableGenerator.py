@@ -10,6 +10,15 @@ from PyQt4 import QtGui
 
 class GuiTableGenerator(QtGui.QWidget, Base):
 
+  # NBNB TBD FIXME  This should be cleaned up and made less ahcky:
+  # Special cases like extra columns for peak tabels should NOT be done in the general class
+  # but e.g. by overriding a function in a subclass.
+  # You should not do things like 'objectList._childClasses[0]', but pass in the #
+  # type of the class ( like PeakList or Peak, and take it from there
+  # You should allow for cses where you did not have just a list class and its only child
+  #
+  # If you make these special assumnptions, you should say them CLEARLY in the class comment
+
   def __init__(self, parent, objectLists, actionCallback, columns, selector=None, tipTexts=None,
                objectType=None, multiSelect=False, unitPulldown=None, selectionCallback=None, **kw):
 
@@ -61,7 +70,7 @@ class GuiTableGenerator(QtGui.QWidget, Base):
       if hasattr(objectList, '_childClasses'):
         objectsName = objectList._childClasses[0]._pluralLinkName
         columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
-        self.table.setObjectsAndColumns(objectList.get(objectsName), columns)
+        self.table.setObjectsAndColumns(getattr(objectList,objectsName), columns)
       elif objectList.pid == '<All>':
         columns = self._getColumns(self.columns, tipTexts=self.tipTexts)
         self.table.setObjects(objectList.objects)

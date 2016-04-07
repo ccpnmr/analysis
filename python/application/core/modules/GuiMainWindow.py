@@ -28,30 +28,21 @@ import sys
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
-
 from ccpn import PeakList
-
 from ccpncore.gui import MessageDialog
-
 from ccpncore.gui.Action import Action
 from ccpncore.gui.CcpnWebView import CcpnWebView
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui.Menu import Menu, MenuBar
 from application.core.gui.SideBar import SideBar
-
 from ccpncore.util import Io as ioUtil
 from ccpncore.util import Path
-
 from ccpncore.util.Common import uniquify
 from ccpncore.util.Translation import translator
-
 from application.core.gui.Assigner import Assigner
 from application.core.gui.IpythonConsole import IpythonConsole
-
-
 from application.metabolomics.Metabolomics import MetabolomicsModule
-
 from application.core.modules.AssignmentModule import AssignmentModule
 from application.core.modules.AtomSelector import AtomSelector
 from application.core.modules.BackboneAssignmentModule import BackboneAssignmentModule
@@ -65,17 +56,15 @@ from application.core.modules.PickAndAssignModule import PickAndAssignModule
 from application.core.modules.SequenceModule import SequenceModule
 from application.core.modules.SampleAnalysis import SampleAnalysis
 from application.core.modules.ScreeningSetup import ScreeningSetup
-
 from application.core.popups.BackupPopup import BackupPopup
 from application.core.popups.ExperimentTypePopup import ExperimentTypePopup
 from application.core.popups.FeedbackPopup import FeedbackPopup
 from application.core.popups.PreferencesPopup import PreferencesPopup
 from application.core.popups.SampleSetupPopup import SamplePopup
 from application.core.popups.SetupNmrResiduesPopup import SetupNmrResiduesPopup
-
-from application.core.Version import revision
-
+from ccpn.lib.Version import revision
 from application.core.update.UpdatePopup import UpdatePopup
+
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 

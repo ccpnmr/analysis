@@ -25,7 +25,7 @@ from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks, fitExistingPeakList
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 from ccpncore.util.CopyData import copySubTree
-from ccpncore.util.Types import Sequence
+from typing import Sequence
 import numpy
 from numpy import argwhere
 from scipy.ndimage import maximum_filter

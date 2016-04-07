@@ -27,10 +27,57 @@ import sys
 from ccpn.lib.nef import GenericStarParser
 from ccpn.lib.nef import StarIo
 
-class CifDicConverter:
+def getCcpnSpecification(filePath) -> StarIo.NmrDataBlock:
+  """Get NEF specification summary with ccpn-specific additions"""
 
-  def __init__(self, inputText, skipExamples=True):
-    self.rcsbDataBlock = list(GenericStarParser.parse(inputText).values())[0]
+  converter = CifDicConverter(open(filePath).read(),
+                              additionalBlocks=('ccpn_additions',))
+  #
+  return converter.convertToNef()
+
+class CifDicConverter:
+  """Converts mmcif .dic file, with program-specific additions datablocks
+  into a single NEF data structure, containing:
+
+  1) a nef_speification sveframe, containing a dictionary)history loop and a
+  item_type_list loop
+
+  2) A saveframe for each saveframe_dategory in the specification. Each saveframe contains
+
+      items:
+      _nef_saveframe.sf_framecode
+      _nef_saveframe.sf_category
+      _nef_saveframe.is_mandatory
+      _nef_saveframe.description
+      _nef_saveframe.example
+
+      A table for contained loops:
+
+      loop_
+         _nef_loop.category
+         _nef_loop.is_mandatory
+         _nef_loop.description
+         _nef_loop.example
+
+        And a table for contained items and loop columns:
+
+      loop_
+         _nef_item.name
+         _nef_item.loop_category
+         _nef_item.type_code
+         _nef_item.is_mandatory
+         _nef_item.is_key
+         _nef_item.example_1
+         _nef_item.example_2
+         _nef_item.description
+
+         The loop_category defiens which loop the item belongs to
+         (if empty it belongs directly inside teh saveframe)
+      """
+
+  def __init__(self, inputText, skipExamples=True, additionalBlocks=()):
+    self.specification = GenericStarParser.parse(inputText)
+    self.additionalBlocks = additionalBlocks
     self.keyTags = {}
     self.result = None
     self.skipExamples = skipExamples
@@ -42,23 +89,31 @@ class CifDicConverter:
     # NB this assumes a single datablock.
 
     # set up
-    rcsbDataBlock = self.rcsbDataBlock
+    rcsbDataBlock =  list(self.specification.values())[0]
     result = self.result = StarIo.NmrDataBlock(name='specification')
 
-    self.extractGeneralDataFrame()
-
     # make specific content saveframes
-    toSaveFrames, toLoops, toItems = extractByCategories(rcsbDataBlock)
-    print ('@~@~ %s SAVEFRAMES' % len(toSaveFrames))
-    for xx in toSaveFrames:
-      self.extractSaveFrameDescription(xx)
-    print ('@~@~ saveframes are', list(self.result.keys()))
-    print ('@~@~ %s LOOPS' % len(toLoops))
-    for xx in toLoops:
-      self.extractLoopDescription(xx)
-    print ('@~@~ %s ITEMS' % len(toItems))
-    for xx in toItems:
-      self.extractItemDescription(xx)
+    self.extractGeneralDataFrame(rcsbDataBlock)
+
+    dataBlocks = [rcsbDataBlock] + list(self.specification.get(tag)
+                                        for tag in self.additionalBlocks)
+    if None in dataBlocks:
+      ii = dataBlocks.index(None)
+      raise ValueError("SPecification file has no data block matciing %s"
+      % repr(self.additionalBlocks[ii-1]))
+
+    for dataBlock in dataBlocks:
+      toSaveFrames, toLoops, toItems = extractByCategories(dataBlock)
+      print ('@~@~ %s SAVEFRAMES' % len(toSaveFrames))
+      for xx in toSaveFrames:
+        self.extractSaveFrameDescription(xx)
+      print ('@~@~ saveframes are', list(self.result.keys()))
+      print ('@~@~ %s LOOPS' % len(toLoops))
+      for xx in toLoops:
+        self.extractLoopDescription(xx)
+      print ('@~@~ %s ITEMS' % len(toItems))
+      for xx in toItems:
+        self.extractItemDescription(xx)
 
     # error check:
     if self.keyTags:
@@ -67,10 +122,12 @@ class CifDicConverter:
         print(tt)
       print()
 
-  def extractGeneralDataFrame(self):
+    #
+    return result
+
+  def extractGeneralDataFrame(self,rcsbDataBlock ):
     """extract general data saveframe
     """
-    rcsbDataBlock = self.rcsbDataBlock
 
     saveFrame = self.result.newSaveFrame('nef_specification', category='nef_specification')
     saveFrame.addItem('version', rcsbDataBlock.get('_dictionary.version'))
@@ -292,7 +349,7 @@ if __name__ == '__main__':
 
   args = sys.argv
   if len(args) < 2:
-    print ("Error, input file name is mandatory, output file name is optional")
+    print ("Error, input file name is mandatory")
   else:
     infile = sys.argv[1]
 

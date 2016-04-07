@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Tuple
+from typing import Tuple
 from ccpncore.util import MergeObjects
 from ccpncore.lib.assignment import Assignment
 from ccpncore.memops.ApiError import ApiError

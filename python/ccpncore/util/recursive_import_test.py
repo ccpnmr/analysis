@@ -73,7 +73,7 @@ def main():
 
 def find_all_pyfiles(topDirectory, ignoreDirs=(), ignoreFiles=()):
     """
-    Find all the files ending with .py
+    Find all the files ending with .py inside topDirectory
     """
     dn = packroot = abspath(topDirectory)
     for root, dirs, files in os.walk(dn):

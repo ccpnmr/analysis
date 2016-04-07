@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpncore.util import Pid
 from ccpncore.util import Common as commonUtil
-from ccpncore.util.Types import Optional
+from typing import Optional
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
@@ -98,13 +98,69 @@ class Residue(AbstractWrapperObject):
   
   @property
   def linking(self) -> str:
-    """linking (substitution pattern) code for residue"""
+    """linking (substitution pattern) code for residue
+    NB uses 'single' for unlinked protein, DNA or RNA residues (instead ot the API 'none'
+    and 'break' for residues with linking 'middle' that do not have """
+
+    molType = self._wrappedData.molType
+    if molType in ('protein', 'DNA', 'RNA'):
+      linkString = self._wrappedData.linking
+      if linkString == 'none':
+        return 'single'
+      elif linkString in ('start', 'end'):
+        return linkString
+      else:
+        assert linkString == 'middle', ("Illegal API linking value for linear polymer: %s"
+                                        % linkString)
+
+         # NBNB TBD FIXME - This does (MAY?) not deal properly with capped residues
+
+        nextResidue = self.nextResidue
+        previousResidue = self.previousResidue
+        if previousResidue is None:
+          if nextResidue is None:
+            return 'single'
+          else:
+            return 'break'
+        elif nextResidue is None:
+          return 'break'
+        else:
+
+          # NBNB The detection of 'cyclic' only works if residues are given in
+          # sequential order. This is not given - but is unlikely eer to break.
+
+          seqId = self._wrappedData.seqId
+          if (previousResidue._wrappedData.seqId > seqId
+              and previousResidue._wrappedData.linking == 'middle'):
+            return 'cyclic'
+          elif (nextResidue._wrappedData.seqId < seqId
+              and nextResidue._wrappedData.linking == 'middle'):
+            return 'cyclic'
+          else:
+            return 'middle'
+
+    else:
+      # All other types have linking 'non-linear' in the wrapper
+      return 'nonlinear'
     return self._wrappedData.linking
     
   @linking.setter
   def linking(self, value:str):
+
+    # NBNB TBD FIXME - this will not work as intended when value is 'nonlinear'
+
+    if value in ('break', 'cyclic'):
+      value = 'middle'
+    elif value == 'single':
+      value = 'none'
     self._wrappedData.linking = value
-  
+
+  @property
+  def residueVariant(self) -> Optional[str]:
+    """NEF convention Residue variant descriptor (protonation state etc.) for residue"""
+    # NBNB TBD FIXME not implemented yet, pending sorting out the NEF standard on this point
+    return None
+
   @property
   def descriptor(self) -> str:
     """variant descriptor (protonation state etc.) for residue"""

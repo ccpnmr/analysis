@@ -22,7 +22,6 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util.Types import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -30,7 +29,7 @@ from ccpn import Substance
 from ccpn import SampleComponent
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpncore.util import Pid
-from ccpncore.util.Types import Tuple, Optional, Union
+from typing import Tuple, Optional, Union, Sequence
 
 
 

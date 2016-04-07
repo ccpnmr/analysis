@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Sequence, Tuple
+from typing import Sequence, Tuple
 from ccpncore.lib.Io import Formats
 
 def getPlaneData(self:'Spectrum', position:Sequence=None, xDim:int=0, yDim:int=1):

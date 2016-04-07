@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Sequence, Tuple
+from typing import Sequence, Tuple
 from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -135,39 +135,19 @@ class RestraintContribution(AbstractWrapperObject):
   @property
   def scale(self) -> float:
     """scaling factor (relevant mainly for RDC) to be multiplied with targetValue to get scaled value """
-    # if hasattr(self._wrappedData, 'scale'):
-    #   return self._wrappedData.scale
-    # else:
-    #   raise AttributeError("%s RestraintContribution has no attribute 'scale'" %
-    #   self._parent._parent.restraintType)
     return self._wrappedData.scale
 
   @scale.setter
   def scale(self, value:float):
-    # if hasattr(self._wrappedData, 'scale'):
-    #   self._wrappedData.scale = value
-    # else:
-    #   raise AttributeError("%s RestraintContribution has no attribute 'scale'" %
-    #   self._parent._parent.restraintType)
     self._wrappedData.scale = value
 
   @property
   def isDistanceDependent(self) -> float:
     """Does targetValue depend on a variable distance (where this is relevant, e.g. for Rdc) """
-    # if hasattr(self._wrappedData, 'isDistanceDependent'):
-    #   return self._wrappedData.isDistanceDependent
-    # else:
-    #   raise AttributeError("%s RestraintContribution has no attribute 'isDistanceDependent'" %
-    #   self._parent._parent.restraintType)
     return self._wrappedData.isDistanceDependent
 
   @isDistanceDependent.setter
   def isDistanceDependent(self, value:float):
-    # if hasattr(self._wrappedData, 'isDistanceDependent'):
-    #   self._wrappedData.isDistanceDependent = value
-    # else:
-    #   raise AttributeError("%s RestraintContribution has no attribute 'isDistanceDependent'" %
-    #   self._parent._parent.restraintType)
     self._wrappedData.isDistanceDependent = value
 
   @property

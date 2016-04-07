@@ -235,7 +235,7 @@ class StarContainer(NamedOrderedDict):
 
   def multiColumnValues(self, columns) -> list:
     """get tuple of orderedDict of values for columns.
-    WIll work whether columns are in a loop or siungle values
+    WIll work whether columns are in a loop or single values
     If columns match a single loop or nothing, return the loop data.
     Otherwise return a tuple with a single OrderedDict.
     If no column matches return None
@@ -370,8 +370,11 @@ class LoopRow(OrderedDict):
         for ii, val in enumerate(value):
           self[tags[ii]] = val
         return
-    #
-    raise KeyError("%s has no attribute(s) matching %s" % (self.__class__.__name__, name))
+      else:
+        raise ValueError("tag %s, values %s do not match columns: %s" % (name, value, tags))
+    else:
+      #
+      raise KeyError("%s has no attribute(s) matching %s" % (self.__class__.__name__, name))
 
 class Loop:
   """Loop for general STAR object tree
@@ -393,6 +396,7 @@ class Loop:
     self.data = []
 
     if columns:
+      # print ('@~~@~', type(columns), list(columns), list(columns) == list(x for x in columns))
       self._columns = list(columns)
     else:
       self._columns = []
@@ -449,6 +453,14 @@ class Loop:
     else:
       columns.append(value)
 
+  def removeColumn(self, value:str):
+    columns = self._columns
+    if value not in columns:
+      raise ValueError("%s: column named %s does not exist" % (self, value))
+    elif self.data:
+      raise ValueError("%s: Cannot remove columns when loop contains data" % self)
+    else:
+      columns.remove(value)
 
   def toString(self, indent:str=_defaultIndent, separator:str=_defaultSeparator) -> str:
     """Stringifier function for loop.
@@ -597,7 +609,7 @@ class GeneralStarParser:
 
   - *padIncompleteLoops* : False.  Pad final loop row with '.' for missing values - Yes/No
 
-  - *allowSquareBracketStrings* : False.  Allow values starting '[' or ']' without raising an error - Yes/No
+  - *allowSquareBracketStrings* : False.  Allow values starting '[' or ']' - Yes/No
 
   - *lowerCaseTags* : True. Convert all data and object names to lower case
 
@@ -938,15 +950,16 @@ class GeneralStarParser:
 
 def extractMatchingNameSequence(name:str, matchNames:list) -> list:
   """Get list of matchNames matching 'name_1', 'name_2', ..., in order."""
+
   ll =[]
   for tag in matchNames:
-    tt = tag.split('_',1)
-    if name == tt[0] and len(tt) > 1 and tt[1].isdigit():
+    tt = tag.rsplit('_',1)
+    if name == tt[0] and tt[-1].isdigit():
       ll.append((int(tt[1]), tag))
   ll.sort()
 
-  if [ll[0] for x in ll] == list(range(1, len(ll)+1)):
-    return [x[1] for x in ll]
+  if [tt[0] for tt in ll] == list(range(1, len(ll)+1)):
+    return [tt[1] for tt in ll]
   else:
     return None
 

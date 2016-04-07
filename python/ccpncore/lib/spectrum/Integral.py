@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 import numpy
-from ccpncore.util.Types import Tuple
+from typing import Tuple
 
 class Integral:
 

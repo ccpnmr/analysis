@@ -26,7 +26,7 @@ import itertools
 import functools
 
 from ccpncore.util import Pid
-from ccpncore.util.Types import List
+from typing import List
 from ccpncore.util import Common as commonUtil
 from ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.lib import CcpnSorting
@@ -168,256 +168,257 @@ class AbstractWrapperObject():
       project._pid2Obj[self.className] = dd
       project._pid2Obj[self.shortClassName] = dd
     dd[_id] = self
-  
+  #
   # NBNB TBD we have a loophole
-  # Code like setattr(obj, 'Atom:N', value) would still work. 
+  # Code like setattr(obj, 'Atom:N', value) would still work.
   # NBNB consider __setattr__ function ???
-
+  #
   # Classes needed to complement abc.MutableMapping mixin abstract class
-
-  def __getitem__(self, tag:str):
-    """Dictionary implementation method: get item"""
-    
-    if not isinstance(tag, str):
-      raise KeyError(tag)   
-      
-    elif tag.startswith('_'):
-      # Attributes starting with '_' are not included in the dictionary representation
-      raise KeyError(tag)   
-    
-    elif isinstance(getattr(self.__class__, tag), property):
-      # get attribute defined by property
-      return getattr(self, tag)
-    
-    # getting children
-    project = self._project
-    tt = tag.split(Pid.PREFIXSEP, 1)
-    if len(tt) == 2:
-      # String of form '{prefix}:{pid}'
-      dd = project._pid2Obj.get(tt[0])
-      if dd:
-        # prefix matches a known class name. Child or bust!
-        key = tt[1] 
-        if Pid.IDSEP in key:
-          # not a direct child
-          raise KeyError(tag)
-          
-        else:
-          # this is then a direct child
-          if project is not self:
-            key = Pid.IDSEP.join((self._id,key))
-          #    
-          return dd[key]
-      else:
-        # prefix is not a child type. Treat as error
-          raise KeyError("No child named " + tag)
-          
-    else:
-      # get normal attribute
-      return self.__dict__[tag]
-      
-  def __setitem__(self, tag:str, value):
-    """Dictionary implementation method: set item"""
-    
-    if not isinstance(tag, str):
-      raise AttributeError(
-        "{} can't set non-string attribute: {}".format(
-        self.__class__.__name__, tag))
-      
-    elif tag.startswith('_'):
-      # check for implementation attribute
-      raise AttributeError(
-        "{} can't set attribute starting with '_': {}".format(
-        self.__class__.__name__, tag))
-    
-    # check for child wrapperclass type attribute
-    if Pid.PREFIXSEP in tag:
-      # String of form '{prefix}:{pid}'. Unsettable
-      raise AttributeError(
-         "{} can't set attribute with name of form 'xy:abcd': {}".
-        format(self.__class__.__name__, tag)
-      )
-    
-    else:
-      # No exception encountered. Try to set attribute
-      setattr(self, tag, value)
-      
-  def __delitem__(self, tag:str):
-    """Dictionary implementation method: delete item"""
-    
-    if not isinstance(tag, str):
-      raise AttributeError(
-        "{} can't delete non-string attribute: {}".format(
-        self.__class__.__name__, tag))
-    
-    elif tag.startswith('_'):
-      # check for implementation attribute
-      raise AttributeError(
-        "{} can't delete attribute starting with '_': {}".format(
-        self.__class__.__name__, tag))
-    
-    # check for child wrapperclass type attribute
-    if Pid.PREFIXSEP in tag:
-      # String of form '{prefix}:{pid}' undeletable
-      raise AttributeError(
-        "{} can't delete attribute of form 'xy:abcd: {}".
-        format(self.__class__.__name__, tag)
-      )
-    
-    # No exception encountered. Try to delete attribute
-    delattr(self, tag)
-  
-  def __iter__(self):
-    """Dictionary implementation method: iteration"""
-    
-    cls = self.__class__
-    propertyAttrs = (x for x in sorted(dir(cls))
-                     if (not x.startswith('_') and  isinstance(getattr(cls,x), property)))
-    
-    prefix = self._id + Pid.IDSEP
-    childAttrs = (y for x in self._childClasses
-                  for y in self._project._pid2Obj[x.shortClassName]
-                  if y.startswith(prefix))
-    
-    dd = self.__dict__
-    extraAttrs = (x for x in sorted(dd)
-                  if not x.startswith('_') and Pid.PREFIXSEP not in x)
-    
-    #
-    return itertools.chain(propertyAttrs, childAttrs, extraAttrs)
-
-    
-  def __len__(self):
-    """Dictionary implementation method: length"""
-    # return len(list(self))
-
-    # Calling list(self) seems to give an infinite loop, so let us try sounting elements directly
-
-    cls = self.__class__
-    prefix = self._id + Pid.IDSEP
-    dd = self.__dict__
-    return (
-      len(list(x for x in sorted(dir(cls))
-          if (not x.startswith('_') and  isinstance(getattr(cls,x), property))))
-      + len(list((y for x in cls._childClasses for y in self._project._pid2Obj[x.shortClassName]
-             if y.startswith(prefix))))
-      + len(list(x for x in sorted(dd) if not x.startswith('_')
-                 and Pid.PREFIXSEP not in x)))
-
-
-  def __bool__(self):
-    """Truth value: true - wrapper classes are never empty"""
-    return True
+  #
+  # def __getitem__(self, tag:str):
+  #   """Dictionary implementation method: get item"""
+  #
+  #   if not isinstance(tag, str):
+  #     raise KeyError(tag)
+  #
+  #   elif tag.startswith('_'):
+  #     # Attributes starting with '_' are not included in the dictionary representation
+  #     raise KeyError(tag)
+  #
+  #   elif isinstance(getattr(self.__class__, tag), property):
+  #     # get attribute defined by property
+  #     return getattr(self, tag)
+  #
+  #   # getting children
+  #   project = self._project
+  #   tt = tag.split(Pid.PREFIXSEP, 1)
+  #   if len(tt) == 2:
+  #     # String of form '{prefix}:{pid}'
+  #     dd = project._pid2Obj.get(tt[0])
+  #     if dd:
+  #       # prefix matches a known class name. Child or bust!
+  #       key = tt[1]
+  #       if Pid.IDSEP in key:
+  #         # not a direct child
+  #         raise KeyError(tag)
+  #
+  #       else:
+  #         # this is then a direct child
+  #         if project is not self:
+  #           key = Pid.IDSEP.join((self._id,key))
+  #         #
+  #         return dd[key]
+  #     else:
+  #       # prefix is not a child type. Treat as error
+  #         raise KeyError("No child named " + tag)
+  #
+  #   else:
+  #     # get normal attribute
+  #     return self.__dict__[tag]
+  #
+  # def __setitem__(self, tag:str, value):
+  #   """Dictionary implementation method: set item"""
+  #
+  #   if not isinstance(tag, str):
+  #     raise AttributeError(
+  #       "{} can't set non-string attribute: {}".format(
+  #       self.__class__.__name__, tag))
+  #
+  #   elif tag.startswith('_'):
+  #     # check for implementation attribute
+  #     raise AttributeError(
+  #       "{} can't set attribute starting with '_': {}".format(
+  #       self.__class__.__name__, tag))
+  #
+  #   # check for child wrapperclass type attribute
+  #   if Pid.PREFIXSEP in tag:
+  #     # String of form '{prefix}:{pid}'. Unsettable
+  #     raise AttributeError(
+  #        "{} can't set attribute with name of form 'xy:abcd': {}".
+  #       format(self.__class__.__name__, tag)
+  #     )
+  #
+  #   else:
+  #     # No exception encountered. Try to set attribute
+  #     setattr(self, tag, value)
+  #
+  # def __delitem__(self, tag:str):
+  #   """Dictionary implementation method: delete item"""
+  #
+  #   if not isinstance(tag, str):
+  #     raise AttributeError(
+  #       "{} can't delete non-string attribute: {}".format(
+  #       self.__class__.__name__, tag))
+  #
+  #   elif tag.startswith('_'):
+  #     # check for implementation attribute
+  #     raise AttributeError(
+  #       "{} can't delete attribute starting with '_': {}".format(
+  #       self.__class__.__name__, tag))
+  #
+  #   # check for child wrapperclass type attribute
+  #   if Pid.PREFIXSEP in tag:
+  #     # String of form '{prefix}:{pid}' undeletable
+  #     raise AttributeError(
+  #       "{} can't delete attribute of form 'xy:abcd: {}".
+  #       format(self.__class__.__name__, tag)
+  #     )
+  #
+  #   # No exception encountered. Try to delete attribute
+  #   delattr(self, tag)
+  #
+  # def __iter__(self):
+  #   """Dictionary implementation method: iteration"""
+  #
+  #   cls = self.__class__
+  #   propertyAttrs = (x for x in sorted(dir(cls))
+  #                    if (not x.startswith('_') and  isinstance(getattr(cls,x), property)))
+  #
+  #   prefix = self._id + Pid.IDSEP
+  #   childAttrs = (y for x in self._childClasses
+  #                 for y in self._project._pid2Obj[x.shortClassName]
+  #                 if y.startswith(prefix))
+  #
+  #   dd = self.__dict__
+  #   extraAttrs = (x for x in sorted(dd)
+  #                 if not x.startswith('_') and Pid.PREFIXSEP not in x)
+  #
+  #   #
+  #   return itertools.chain(propertyAttrs, childAttrs, extraAttrs)
+  #
+  #
+  # def __len__(self):
+  #   """Dictionary implementation method: length"""
+  #   # return len(list(self))
+  #
+  #   # Calling list(self) seems to give an infinite loop, so let us try sounting elements directly
+  #
+  #   cls = self.__class__
+  #   prefix = self._id + Pid.IDSEP
+  #   dd = self.__dict__
+  #   return (
+  #     len(list(x for x in sorted(dir(cls))
+  #         if (not x.startswith('_') and  isinstance(getattr(cls,x), property))))
+  #     + len(list((y for x in cls._childClasses for y in self._project._pid2Obj[x.shortClassName]
+  #            if y.startswith(prefix))))
+  #     + len(list(x for x in sorted(dd) if not x.startswith('_')
+  #                and Pid.PREFIXSEP not in x)))
 
 
-  # Classes lifted from collections.abc.MutableMapping inheriting from it causes metaclass clash
-
-  # sentinel
-  __marker = object()
-
-  def pop(self, key, default=__marker):
-    """D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
-      If key is not found, d is returned if given, otherwise KeyError is raised.
-    """
-    try:
-        value = self[key]
-    except KeyError:
-        if default is self.__marker:
-            raise
-        return default
-    else:
-        del self[key]
-        return value
-
-  def popitem(self):
-    """D.popitem() -> (k, v), remove and return some (key, value) pair
-       as a 2-tuple; but raise KeyError if D is empty.
-    """
-    try:
-        key = next(iter(self))
-    except StopIteration:
-        raise KeyError
-    value = self[key]
-    del self[key]
-    return key, value
-
-  def clear(self):
-    """D.clear() -> None.  Remove all items from D."""
-    try:
-        while True:
-            self.popitem()
-    except KeyError:
-        pass
-
-  def update(*args, **kwds):
-    """ D.update([E, ]**F) -> None.  Update D from mapping/iterable E and F.
-        If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
-        If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
-        In either case, this is followed by: for k, v in F.items(): D[k] = v
-    """
-    if len(args) > 2:
-        raise TypeError("update() takes at most 2 positional "
-                        "arguments ({} given)".format(len(args)))
-    elif not args:
-        raise TypeError("update() takes at least 1 argument (0 given)")
-    self = args[0]
-    other = args[1] if len(args) >= 2 else ()
-
-    if isinstance(other, abc.Mapping):
-        for key in other:
-            self[key] = other[key]
-    elif hasattr(other, "keys"):
-        for key in other.keys():
-            self[key] = other[key]
-    else:
-        for key, value in other:
-            self[key] = value
-    for key, value in kwds.items():
-        self[key] = value
-
-  def setdefault(self, key, default=None):
-    """D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"""
-    try:
-        return self[key]
-    except KeyError:
-        self[key] = default
-    return default
-
-
-  # Functions lifted from collections.abc.Mapping
-
-  def get(self, key, default=None):
-      """D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
-      try:
-          return self[key]
-      except KeyError:
-          return default
-
-  def __contains__(self, key):
-      try:
-          self[key]
-      except KeyError:
-          return False
-      else:
-          return True
-
-  def keys(self):
-      """D.keys() -> a set-like object providing a view on D's keys"""
-      return abc.KeysView(self)
-
-  def items(self):
-      """D.items() -> a set-like object providing a view on D's items"""
-      return abc.ItemsView(self)
-
-  def values(self):
-      """D.values() -> an object providing a view on D's values"""
-      return abc.ValuesView(self)
+  #
+  # # Classes lifted from collections.abc.MutableMapping inheriting from it causes metaclass clash
+  #
+  # # sentinel
+  # __marker = object()
+  #
+  # def pop(self, key, default=__marker):
+  #   """D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+  #     If key is not found, d is returned if given, otherwise KeyError is raised.
+  #   """
+  #   try:
+  #       value = self[key]
+  #   except KeyError:
+  #       if default is self.__marker:
+  #           raise
+  #       return default
+  #   else:
+  #       del self[key]
+  #       return value
+  #
+  # def popitem(self):
+  #   """D.popitem() -> (k, v), remove and return some (key, value) pair
+  #      as a 2-tuple; but raise KeyError if D is empty.
+  #   """
+  #   try:
+  #       key = next(iter(self))
+  #   except StopIteration:
+  #       raise KeyError
+  #   value = self[key]
+  #   del self[key]
+  #   return key, value
+  #
+  # def clear(self):
+  #   """D.clear() -> None.  Remove all items from D."""
+  #   try:
+  #       while True:
+  #           self.popitem()
+  #   except KeyError:
+  #       pass
+  #
+  # def update(*args, **kwds):
+  #   """ D.update([E, ]**F) -> None.  Update D from mapping/iterable E and F.
+  #       If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
+  #       If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+  #       In either case, this is followed by: for k, v in F.items(): D[k] = v
+  #   """
+  #   if len(args) > 2:
+  #       raise TypeError("update() takes at most 2 positional "
+  #                       "arguments ({} given)".format(len(args)))
+  #   elif not args:
+  #       raise TypeError("update() takes at least 1 argument (0 given)")
+  #   self = args[0]
+  #   other = args[1] if len(args) >= 2 else ()
+  #
+  #   if isinstance(other, abc.Mapping):
+  #       for key in other:
+  #           self[key] = other[key]
+  #   elif hasattr(other, "keys"):
+  #       for key in other.keys():
+  #           self[key] = other[key]
+  #   else:
+  #       for key, value in other:
+  #           self[key] = value
+  #   for key, value in kwds.items():
+  #       self[key] = value
+  #
+  # def setdefault(self, key, default=None):
+  #   """D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"""
+  #   try:
+  #       return self[key]
+  #   except KeyError:
+  #       self[key] = default
+  #   return default
+  #
+  #
+  # # Functions lifted from collections.abc.Mapping
+  #
+  # def get(self, key, default=None):
+  #     """D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
+  #     try:
+  #         return self[key]
+  #     except KeyError:
+  #         return default
+  #
+  # def __contains__(self, key):
+  #     try:
+  #         self[key]
+  #     except KeyError:
+  #         return False
+  #     else:
+  #         return True
+  #
+  # def keys(self):
+  #     """D.keys() -> a set-like object providing a view on D's keys"""
+  #     return abc.KeysView(self)
+  #
+  # def items(self):
+  #     """D.items() -> a set-like object providing a view on D's items"""
+  #     return abc.ItemsView(self)
+  #
+  # def values(self):
+  #     """D.values() -> an object providing a view on D's values"""
+  #     return abc.ValuesView(self)
 
   
   # equality: We use the default Python behavior, 
   #           which is that an object is equal only to itself.
   
   # hashing: We use the default Python behavior,
+
+
+  def __bool__(self):
+    """Truth value: true - wrapper classes are never empty"""
+    return True
   
   def __lt__(self, other):
     """Ordering implementation function, necessary for making lists sortable.
@@ -435,21 +436,18 @@ class AbstractWrapperObject():
 
   def __repr__(self):
     """String representation"""
-    return "<%s.%s>" % (self.__module__.split('.')[0], self.longPid)
+    return "<ccpn.%s>" % self.longPid
 
   def __eq__(self, other):
-    """Python 2 behaviour - objects equal only to themselves.
-    Necessary to avoid dictionary-type behaviour"""
+    """Python 2 behaviour - objects equal only to themselves."""
     return self is other
 
   def __ne__(self, other):
-    """Python 2 behaviour - objects equal only to themselves.
-    Necessary to avoid dictionary-type behaviour"""
+    """Python 2 behaviour - objects equal only to themselves."""
     return self is not other
 
   def __hash__(self):
-    """Python 2 behaviour - objects equal only to themselves.
-    Necessary to avoid dictionary-type behaviour"""
+    """Python 2 behaviour - objects equal only to themselves."""
     return hash(id(self))
   
   # CCPN properties 
@@ -465,16 +463,16 @@ class AbstractWrapperObject():
     E.g. 'NA:A.102.ALA.CA' """
     return Pid.Pid(Pid.PREFIXSEP.join((self.shortClassName, self._id)))
 
-  @property
-  def _oldPid(self) -> Pid.Pid:
-    """Identifier for the object, unique within the project.
-    Set automatically from the short class name and object.id
-    E.g. 'NA:A.102.ALA.CA' """
-    oldId = self._old_id
-    if oldId is None:
-      return None
-    else:
-      return Pid.Pid(Pid.PREFIXSEP.join((self.shortClassName, oldId)))
+  # @property
+  # def _oldPid(self) -> Pid.Pid:
+  #   """Previous value of pid
+  #
+  #   NBNB TBD remove when no onger needed for notifiers"""
+  #   oldId = self._old_id
+  #   if oldId is None:
+  #     return None
+  #   else:
+  #     return Pid.Pid(Pid.PREFIXSEP.join((self.shortClassName, oldId)))
   
   @property
   def longPid(self) -> Pid.Pid:
@@ -591,7 +589,7 @@ class AbstractWrapperObject():
         ancestor = newAncestors[ii]
         func = functools.partial(AbstractWrapperObject._allDescendants,
                                           descendantClasses=newAncestors[ii+1:])
-        # func.__annotations__['return'] = Types.Tuple[cls, ...]
+        # func.__annotations__['return'] = typing.Tuple[cls, ...]
         prop = property(func,
                           None, None,
                           ("\- *(%s,)*  - contained %s objects sorted by id" %

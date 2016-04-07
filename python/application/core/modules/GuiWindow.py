@@ -32,7 +32,7 @@ from pyqtgraph.dockarea import DockArea
 
 from ccpn.lib.Assignment import propagateAssignments
 from ccpncore.gui.FileDialog import FileDialog
-from ccpncore.util import Types
+import typing
 from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 
 from application.core.DropBase import DropBase
@@ -266,7 +266,7 @@ class GuiWindow(DropBase):
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.toggleGrid()
     
-  def setCrossHairPosition(self, axisPositionDict:Types.Dict[str, float]):
+  def setCrossHairPosition(self, axisPositionDict:typing.Dict[str, float]):
     """
     Sets crosshair position in all spectrum displays using positions specified in the axisPositionDict.
     """

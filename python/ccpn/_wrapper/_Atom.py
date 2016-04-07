@@ -23,6 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 from ccpncore.util import Pid
+from ccpn.lib.Util import AtomIdTuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Residue
@@ -63,6 +64,13 @@ class Atom(AbstractWrapperObject):
   def _key(self) -> str:
     """Atom name string (e.g. 'HA') regularised as used for ID"""
     return self._wrappedData.name.translate(Pid.remapSeparators)
+
+  @property
+  def _idTuple(self) -> AtomIdTuple:
+    """ID as chainCode, sequenceCode, residueType, atomName namedtuple
+    NB Unlike the _id and key, these do NOT have reserved characters maped to '^'"""
+    parent = self._parent
+    return AtomIdTuple(parent._parent.shortName, parent.sequenceCode, parent.residueType, self.name)
 
   @property
   def name(self) -> str:

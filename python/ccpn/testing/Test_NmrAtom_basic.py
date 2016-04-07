@@ -285,23 +285,23 @@ class TestNmrAtomProperties(WrapperTesting):
     self.assertEqual(self.nmrAtom.longPid,    'NmrAtom:@2.@1..H@1')
 
   def test_AnonoymousNmrAtom_project(self):
-    self.assertTrue(self.project is self.nmrAtom['project'])
+    self.assertTrue(self.project is self.nmrAtom.project)
 
   def test_AnonoymousNmrAtom_nmrResidue(self):
-    self.assertTrue(self.nmrResidue is self.nmrAtom['nmrResidue'])
+    self.assertTrue(self.nmrResidue is self.nmrAtom.nmrResidue)
 
   @unittest.expectedFailure
   def test_AnonoymousNmrAtom_name(self):
     self.assertTrue('name' not in self.nmrAtom.keys())
 
   def _test_AnonoymousNmrAtom_apiResonance(self):
-    print(self.nmrAtom['apiResonance'])
+    print(self.nmrAtom.apiResonance)
 
   def _test_AnonoymousNmrAtom_atom(self):
-    print(self.nmrAtom['atom'])
+    print(self.nmrAtom.atom)
 
   def _test_AnonoymousNmrAtom_assignedPeaks(self):
-    self.assertEqual(self.nmrAtom['assignedPeaks'], [[]])
+    self.assertEqual(self.nmrAtom.assignedPeaks, [[]])
 
 
 
@@ -314,7 +314,7 @@ class TestNmrAtomMethods(WrapperTesting):
 
 
   def test_NmrAtom_Get(self):
-    self.assertEqual(self.nmrAtom['id'], self.nmrAtom.get('id'))
+    self.assertEqual(self.nmrAtom.id, self.nmrAtom.id)
 
   def test_NmrAtom_GetByPid(self):
     atomPid = self.nmrAtom.pid

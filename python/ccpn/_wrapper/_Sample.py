@@ -30,7 +30,7 @@ from ccpn import SpectrumHit
 from ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
-from ccpncore.util.Types import Sequence, Tuple, Optional
+from typing import Sequence, Tuple, Optional
 
 
 class Sample(AbstractWrapperObject):

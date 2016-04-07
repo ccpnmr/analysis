@@ -21,16 +21,13 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-# from ccpncore.lib.typing import Sequence
 
-# import datetime
 from ccpncore.util import Pid
-# from ccpncore.lib import Constants as coreConstants
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Atom
 from ccpncore.api.ccp.molecule.MolSystem import GenericBond as ApiGenericBond
-from ccpncore.util.Types import Tuple, List
+from typing import Tuple, List
 
 
 class Bond(AbstractWrapperObject):

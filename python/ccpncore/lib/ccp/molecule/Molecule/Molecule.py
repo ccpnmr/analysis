@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Sequence, List, Tuple
+from typing import Sequence, List, Tuple
 from ccpncore.lib.chemComp import Io as chemCompIo
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.molecule.MoleculeModify import _getLinearChemCompData

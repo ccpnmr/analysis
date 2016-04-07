@@ -24,7 +24,7 @@ __version__ = "$Revision: 8180 $"
 import numpy
 from scipy import signal
 
-from ccpncore.util.Types import Sequence
+from typing import Sequence
 
 def phaseRealData(data:Sequence, ph0:float=0.0, ph1:float=0.0, pivot:float=1.0) -> Sequence:
   # data is the (1D) spectrum data (real)

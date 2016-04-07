@@ -41,7 +41,7 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.ScrollArea import ScrollArea
 from ccpncore.gui.ToolBar import ToolBar
 
-from ccpncore.util import Types
+import typing
 
 from application.core.DropBase import DropBase
 from application.core.gui.Frame import Frame as GuiFrame
@@ -250,7 +250,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     for strip in self.strips:
       strip.toggleGrid()
     
-  def setCrossHairPosition(self, axisPositionDict:Types.Dict[str, float]):
+  def setCrossHairPosition(self, axisPositionDict:typing.Dict[str, float]):
     """Sets the position of the cross in all strips of spectrum display."""
     for strip in self.strips:
       strip.setCrossHairPosition(axisPositionDict)

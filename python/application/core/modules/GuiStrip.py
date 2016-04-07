@@ -41,7 +41,7 @@ from ccpncore.memops import Notifiers
 
 from ccpncore.util.Colour import Colour
 from ccpncore.util import Ticks
-from ccpncore.util import Types
+import typing
 
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
@@ -646,20 +646,20 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
     )
 
-  def zoomToRegion(self, region:Types.List[float]):
+  def zoomToRegion(self, region:typing.List[float]):
     """
     Zooms strip to the specified region
     """
     self.viewBox.setXRange(region[0],region[1])
     self.viewBox.setYRange(region[2],region[3])
 
-  def zoomX(self, region:Types.List[float]):
+  def zoomX(self, region:typing.List[float]):
     """
     Zooms x axis of strip to the specified region
     """
     self.viewBox.setXRange(region[0],region[1])
 
-  def zoomY(self, region:Types.List[float]):
+  def zoomY(self, region:typing.List[float]):
     """
     Zooms y axis of strip to the specified region
     """

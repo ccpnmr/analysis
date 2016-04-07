@@ -31,7 +31,7 @@ from ccpn import Spectrum
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 
 from ccpncore.util.Pid import Pid
-from ccpncore.util.Types import Sequence
+from typing import Sequence
 
 from ccpncore.gui.Icon import Icon
 

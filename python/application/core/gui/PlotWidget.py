@@ -29,7 +29,7 @@ from ccpn import Spectrum
 
 from ccpncore.gui.Base import Base
 from ccpncore.util.Pid import Pid
-from ccpncore.util.Types import Sequence, Union
+from typing import Sequence, Union
 
 from application.core.gui import ViewBox
 from application.core.DropBase import DropBase

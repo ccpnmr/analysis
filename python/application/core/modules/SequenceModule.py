@@ -7,7 +7,7 @@ from ccpn import Residue
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
 from ccpncore.gui.MessageDialog import showYesNo
-from ccpncore.util import Types
+import typing
 
 from application.core.DropBase import DropBase
 from PyQt4 import QtCore, QtGui
@@ -47,7 +47,7 @@ class SequenceModule(CcpnDock):
     self.scrollContents.setFixedHeight(2*self.widgetHeight)
 
 
-  def highlightPossibleStretches(self, residues:Types.List[Residue]):
+  def highlightPossibleStretches(self, residues:typing.List[Residue]):
     """
     Highlights regions on the sequence specified by the list of residues passed in.
     """
@@ -169,7 +169,7 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     event.accept()
 
 
-  def processNmrChains(self, data:Types.List[str], event:QtGui.QMouseEvent):
+  def processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
     """
     Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
     all succeeding residues according to the length of the list.

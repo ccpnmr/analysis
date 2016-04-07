@@ -39,7 +39,7 @@ from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ListWidget import ListWidget
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
-from ccpncore.util import Types
+import typing
 
 from application.core.modules.NmrResidueTable import NmrResidueTable
 from application.core.modules.GuiStrip import GuiStrip
@@ -211,7 +211,7 @@ class BackboneAssignmentModule(CcpnDock):
 
 
 
-  def _createMatchStrips(self, assignMatrix:Types.Tuple[Types.Dict[NmrResidue, Types.List[ChemicalShift]], Types.List[float]]):
+  def _createMatchStrips(self, assignMatrix:typing.Tuple[typing.Dict[NmrResidue, typing.List[ChemicalShift]], typing.List[float]]):
     """
     Creates strips in match module corresponding to the best assignment possibilities in the assignMatrix.
     """
@@ -265,8 +265,8 @@ class BackboneAssignmentModule(CcpnDock):
       return None
 
 
-  def _buildAssignmentMatrix(self, queryShifts:Types.List[ChemicalShift],
-                             matchShifts:Types.Dict[NmrResidue, ChemicalShift]) -> Types.Tuple[Types.Dict[NmrResidue, Types.List[ChemicalShift]], Types.List[float]]:
+  def _buildAssignmentMatrix(self, queryShifts:typing.List[ChemicalShift],
+                             matchShifts:typing.Dict[NmrResidue, ChemicalShift]) -> typing.Tuple[typing.Dict[NmrResidue, typing.List[ChemicalShift]], typing.List[float]]:
     """
     Creates a dictionary of NmrResidues and qScores between queryShifts and matching shifts.
     Returns dictionary and a list of the qScores.

@@ -29,8 +29,7 @@ from ccpn import Project
 from ccpn import PeakList
 # from ccpn import NmrAtom
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
-from ccpncore.util.Types import Optional, Tuple, Union, Sequence
-
+from typing import Optional, Tuple, Union, Sequence
 
 class Peak(AbstractWrapperObject):
   """Peak. Includes values for per-dimension values and for assignments.
@@ -237,8 +236,8 @@ class Peak(AbstractWrapperObject):
 
   @property
   def assignedNmrAtoms(self) -> Tuple[Tuple[Optional['NmrAtom'], ...], ...]:
-    """Peak assignment - a list of lists of NmrAtom combinations
-    (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None
+    """Peak assignment - a tuple of tuples of NmrAtom combinations
+    (e.g. a tuple of triplets for a 3D spectrum). Missing assignments are entered as None
     Assignments per dimension are given in 'dimensionNmrAtoms'."""
     data2Obj = self._project._data2Obj
     apiPeak = self._wrappedData

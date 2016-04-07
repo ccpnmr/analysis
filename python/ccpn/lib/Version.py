@@ -1,15 +1,15 @@
-"""CCPN-level utility code independent of model content
+"""Top level application version file
 
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-               "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                 " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -21,16 +21,5 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
-from collections import namedtuple
-from ccpncore.util import Pid
-
-def pid2PluralName(pid:str) -> str:
-  """Get plural class name, (e.g. 'Peaks', 'Spectra' from short-form or long-form, Pid string
-  Unrecognised strings are returned unchanged"""
-  from ccpn import _pluralPidTypeMap as pluralPidTypeMap
-  tag = pid.split(Pid.PREFIXSEP, 1)[0]
-  return pluralPidTypeMap.get(tag, tag)
-
-# Atom ID
-AtomIdTuple = namedtuple('AtomIdTuple', ['chainCode', 'sequenceCode', 'residueType', 'atomName', ])
+revision = int(__version__.split()[1])
+applicationVersion = '3.0.0.m0'

@@ -31,7 +31,7 @@ from ccpn import Project
 from ccpn import Spectrum
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as ApiSpectrumGroup
-from ccpncore.util.Types import Tuple
+from typing import Tuple
 
 
 class SpectrumGroup(AbstractWrapperObject):

@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 import os
 import itertools
 
-from ccpncore.util.Types import Sequence
+from typing import Sequence
 from ccpncore.util import Path
 from ccpncore.lib import Constants
 from ccpncore.lib.spectrum.BlockData import determineBlockSizes

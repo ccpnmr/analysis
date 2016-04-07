@@ -28,15 +28,9 @@ NB Must conform to Python 2.1. Imported in ObjectDomain.
 
 import os
 import sys
-# import re
+import datetime
 import json
-# import itertools
-# import numpy
-# import math
-# from numbers import Real
 from collections import abc as collectionClasses
-# from collections import OrderedDict
-# from numbers import Real
 from functools import total_ordering
 
 from ccpncore.util import Path
@@ -309,3 +303,7 @@ def stringToIdentifier(value:str) -> str:
     return value
   else:
     return ''.join(x if x.isalnum() else '_' for x in value)
+
+def getTimeStamp() -> str:
+  """Get iso-formtted timestamp"""
+  return datetime.datetime.today().isoformat()

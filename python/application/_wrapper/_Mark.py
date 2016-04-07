@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 from collections import namedtuple
 
-from ccpncore.util.Types import Sequence, Tuple
+from typing import Sequence, Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from application import Task

@@ -26,7 +26,7 @@ import numpy
 
 from ccpncore.api.ccp.nmr.Nmr import PeakList
 
-from ccpncore.util.Types import Sequence
+from typing import Sequence
 
 def pickNewPeaks(self:PeakList, startPoint:Sequence[int], endPoint:Sequence[int],
                  posLevel:float=None, negLevel:float=None,

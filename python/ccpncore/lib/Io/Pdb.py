@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 
 NaN = float('NaN')
 from ccpncore.lib.Io import PyMMLibPDB as PdbLib
-from ccpncore.util.Types import List, Tuple
+from typing import List, Tuple
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 class PdbRecordProcessor(PdbLib.RecordProcessor):

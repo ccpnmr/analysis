@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util.Types import Sequence
+from typing import Sequence
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project

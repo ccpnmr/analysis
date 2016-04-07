@@ -4,7 +4,7 @@ import pyqtgraph as pg
 
 from ccpn import ChemicalShift, NmrResidue, Peak, Project
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
-from ccpncore.util import Types
+import typing
 from application.core.modules.GuiStrip import GuiStrip
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
@@ -51,7 +51,7 @@ LINE_COLOURS = {
 }
 
 def navigateToPeakPosition(project:Project, peak:Peak=None,
-   selectedDisplays:Types.List[GuiSpectrumDisplay]=None, strip:GuiStrip=None,  markPositions:bool=False):
+   selectedDisplays:typing.List[GuiSpectrumDisplay]=None, strip:GuiStrip=None,  markPositions:bool=False):
   """
   Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
   to the positions specified by the peak.
@@ -84,7 +84,7 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
 
 
 def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
-                         selectedDisplays:Types.List[GuiSpectrumDisplay]=None,
+                         selectedDisplays:typing.List[GuiSpectrumDisplay]=None,
                          strip:GuiStrip=None,  markPositions:bool=False, direction:str=None):
   """
   Takes an NmrResidue and optional spectrum displays and strips and navigates the strips and spectrum displays

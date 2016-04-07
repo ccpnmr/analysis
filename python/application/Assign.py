@@ -22,10 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import sys
-
-from application.core.AppBase import AppBase, defineProgramArguments, printProgramText
-from application.core.Version import applicationVersion
+from application.core.AppBase import AppBase, defineProgramArguments
+from ccpn.lib.Version import applicationVersion
 from application.core.lib.Window import MODULE_DICT
 from application.core.modules import GuiStrip
 from application.core.modules import GuiStripNd

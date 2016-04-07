@@ -43,6 +43,16 @@ class PeakList(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Special error-raising functions for people who think PeakList is a list
+  def __iter__(self):
+    raise TypeError("'PeakList object is not iterable - for a list of peaks use Peaklist.peaks")
+
+  def __getitem__(self, index):
+    raise TypeError("'PeakList object does not support indexing - for a list of peaks use Peaklist.peaks")
+
+  def __len__(self):
+    raise TypeError("'PeakList object has no length - for a list of peaks use Peaklist.peaks")
+
   # CCPN properties  
   @property
   def _apiPeakList(self) -> ApiPeakList:

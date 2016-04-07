@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Sequence, Tuple
+from typing import Sequence, Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import RestraintList
@@ -185,18 +185,22 @@ class Restraint(AbstractWrapperObject):
       contribution.additionalLowerLimit = value
 
   @property
-  def vectorLength(self) -> float:
+  def vectorLength(self) -> str:
     """Reference vector length, where applicable. (Mainly?) for Rdc"""
-    aSet = set(x.vectorLength for x in self._wrappedData.contributions)
-    if len(aSet) == 1:
-      return aSet.pop()
-    else:
-      return None
+    return self._wrappedData.vectorLength
 
   @vectorLength.setter
   def vectorLength(self, value:float):
-    for contribution in self._wrappedData.contributions:
-      contribution.vectorLength = value
+    self._wrappedData.vectorLength = value
+
+  @property
+  def figureOfMerit(self) -> str:
+    """Restraint figure of merit"""
+    return self._wrappedData.figureOfMerit
+
+  @figureOfMerit.setter
+  def figureOfMerit(self, value:float):
+    self._wrappedData.figureOfMerit = value
     
   # Implementation functions
   @classmethod
@@ -222,6 +226,8 @@ def setter(self:Peak, value:Sequence):
     restraint._wrappedData.addPeak(apiPeak)
 Peak.restraints = property(getter, setter, None,
                           "Restraints corresponding to Peak")
+del getter
+del setter
 
 # Connections to parents:
 RestraintList._childClasses.append(Restraint)
@@ -231,7 +237,6 @@ def _newRestraint(self:RestraintList,comment:str=None,
   """Create new ccpn.Restraint within ccpn.RestraintList"""
   apiConstraintList = self._wrappedData
   creator = apiConstraintList.getattr("new%sConstraint" % self.restraintType)
-  obj = creator(details=comment, peaks=peaks)
   result = self._project._data2Obj.get(creator(details=comment))
   result.peaks = peaks
   return result

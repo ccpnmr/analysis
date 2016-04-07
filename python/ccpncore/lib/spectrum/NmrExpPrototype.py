@@ -26,7 +26,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
-from ccpncore.util.Types import Dict
+from typing import Dict
 
 def resetAllAxisCodes(nmrProject):
   """Reset all axisCodes (ExpDimRef.name) in project to be unique, match the isotope,

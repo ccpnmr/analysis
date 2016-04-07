@@ -15,7 +15,7 @@ Module Organisation
 Class Hierarchy
 ^^^^^^^^^^^^^^^
 
-Classes are organised in a hierarchy, with all data objects ultimately contained within the Project::
+Classes are organised in a hierarchy, with all data objects ultimately contained within the Project:
 
   Project
   |       Spectrum
@@ -24,6 +24,7 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
   |       |       SpectrumReference
   |       |       PseudoDimension
   |       |       SpectrumHit
+  |       SpectrumGroup
   |       Sample
   |       |       SampleComponent
   |       Substance

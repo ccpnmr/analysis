@@ -44,7 +44,7 @@ from ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, ALL_ATOMS_
 
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
-from ccpncore.util import Types
+import typing
 
 from ccpncore.util import Path
 
@@ -66,7 +66,7 @@ class AtomSelector(CcpnDock):
     self.current = self.parent._appBase.current
     self.project = project
     self.current.registerNotify(self.predictAssignments, 'peaks')
-    self.current.registerNotify(self.predictAssignments, 'peaks')
+    # self.current.registerNotify(self.predictAssignments, 'peaks')
     nmrResidueLabel = Label(self, 'Current NmrResidue', grid=(0, 0))
     self.currentNmrResidueLabel = Label(self, grid=(0, 1))
     self.radioButton1 = RadioButton(self, grid=(0, 2), hAlign='r', callback=self.createBackBoneButtons)
@@ -289,7 +289,7 @@ class AtomSelector(CcpnDock):
       self.setStyleSheet(styleSheet)
 
 
-  def predictAssignments(self, peaks:Types.List[Peak]):
+  def predictAssignments(self, peaks:typing.List[Peak]):
     """
     Predicts atom type for selected peaks and highlights the relevant buttons with confidence of
     that assignment prediction, green is very confident, orange is less confident.

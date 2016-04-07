@@ -24,7 +24,9 @@ __version__ = "$Revision: 7686 $"
 
 import re
 
-from ccpncore.util.Types import Sequence, List
+from typing import Sequence, List
+
+import collections
 
 
 # Additional functions for ccp.nmr.Nmr.Experiment

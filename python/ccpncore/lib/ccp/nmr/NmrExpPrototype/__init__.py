@@ -22,14 +22,5 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-# Get typing (from mypy or Python >= 3.5, or default to backup copy
-# NBNB TBD FIXME  better to import explicitly what we need
-try:
-  from typing import *
-except ImportError:
-  from ccpncore.util.typing import *
-
-# Put local type definitions here:
-
 
 

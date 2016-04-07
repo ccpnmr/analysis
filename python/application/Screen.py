@@ -1,6 +1,6 @@
 from application.core.AppBase import startProgram
 from application.core.AppBase import AppBase
-from application.core.Version import applicationVersion
+from ccpn.lib.Version import applicationVersion
 
 applicationName = 'Screen'
 

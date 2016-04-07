@@ -17,7 +17,7 @@ from ccpncore.gui.Table import ObjectTable, Column
 from ccpncore.gui.CheckBox import CheckBox
 
 from ccpn.lib import CcpnSorting
-from ccpncore.util import Types
+import typing
 
 from application.core.gui.assignmentModuleLogic import (nmrAtomsForPeaks,
                                                       peaksAreOnLine,
@@ -31,7 +31,7 @@ class AssignmentModule(CcpnDock, Base):
 
   '''
 
-  def __init__(self, parent=None, project:Project=None, peaks:Types.List[Peak]=None, **kw):
+  def __init__(self, parent=None, project:Project=None, peaks:typing.List[Peak]=None, **kw):
 
     CcpnDock.__init__(self, name="Peak Assigner")
     Base.__init__(self, **kw)
@@ -262,7 +262,7 @@ class AssignmentModule(CcpnDock, Base):
   # Update functions
 
 
-  def updateInterface(self, peaks:Types.List[Peak]=None):
+  def updateInterface(self, peaks:typing.List[Peak]=None):
     """Updates the whole module, including recalculation
        of which nmrAtoms fit to the peaks.
 

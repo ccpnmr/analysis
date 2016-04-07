@@ -22,15 +22,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
-from ccpn import Sample
 from ccpn import Sample
 from ccpn import SpectrumHit
 from ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
 from ccpncore.util import Pid
-from ccpncore.util.Types import Tuple, Sequence
+from typing import Tuple
 
 
 class SampleComponent(AbstractWrapperObject):

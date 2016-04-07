@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import numpy
-from ccpncore.util.Types import Tuple, Sequence, Optional
+from typing import Tuple, Sequence, Optional
 from ccpncore.util import Pid
 from ccpncore.util import Common as commonUtil
 from ccpncore.lib.spectrum import Spectrum as spectrumLib

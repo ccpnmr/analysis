@@ -22,13 +22,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Tuple
+from typing import Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import ChemicalShiftList
 from ccpn import NmrAtom
 from ccpncore.api.ccp.nmr.Nmr import Shift as ApiShift
-from ccpncore.util.Types import List
+from typing import List
 
 class ChemicalShift(AbstractWrapperObject):
   """Chemical Shift."""

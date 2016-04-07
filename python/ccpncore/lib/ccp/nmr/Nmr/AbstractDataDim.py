@@ -27,7 +27,7 @@ __version__ = "$Revision: 7686 $"
 # NB All functions must have a mandatory DataSource as the first parameter
 # so they can be used as AbstractDataDim methods
 
-from ccpncore.util.Types import Set
+from typing import Set
 
 
    

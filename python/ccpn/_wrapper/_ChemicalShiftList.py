@@ -29,7 +29,7 @@ from ccpn import Spectrum
 from ccpn import PeakList
 from ccpncore.api.ccp.nmr.Nmr import ShiftList as ApiShiftList
 from ccpncore.util import Pid
-from ccpncore.util.Types import Tuple, Sequence, List
+from typing import Tuple, Sequence, List
 
 
 class ChemicalShiftList(AbstractWrapperObject):

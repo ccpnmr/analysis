@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.util import Pid
-from ccpncore.util.Types import Tuple, Optional
+from typing import Tuple, Optional
 from ccpn.lib import CcpnSorting
 from ccpncore.lib import Constants
 from ccpn import AbstractWrapperObject
@@ -32,7 +32,7 @@ from ccpn import NmrChain
 from ccpn import Residue
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 
-from ccpncore.util.Types import Union
+from typing import Union
 
 
 class NmrResidue(AbstractWrapperObject):

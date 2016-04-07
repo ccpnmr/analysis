@@ -26,7 +26,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Sample
 from ccpn import Spectrum
-from ccpncore.util.Types import Tuple, Optional, Sequence
+from typing import Tuple, Optional, Sequence
 from ccpncore.lib.molecule import MoleculeModify
 from ccpn import SampleComponent
 from ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
@@ -315,18 +315,6 @@ class Substance(AbstractWrapperObject):
   def comment(self, value:str):
     self._wrappedData.details = value
 
-  # @property
-  # def chains(self) -> Tuple[Chain, ...]:
-  #   """Chains that correspond to Substance"""
-  #   apiSubstance = self._apiSubstance
-  #   apiMolecule = apiSubstance.molecule if hasattr(apiSubstance, 'molecule') else None
-  #   if apiMolecule is None:
-  #     return ()
-  #   else:
-  #     data2Obj = self._project._data2Obj
-  #     return tuple(data2Obj[x]
-  #                  for x in self._wrappedData.molSystem.sortedChains()
-  #                  if x.molecule is apiMolecule)
 
   @property
   def sampleComponents(self) -> Tuple[SampleComponent, ...]:

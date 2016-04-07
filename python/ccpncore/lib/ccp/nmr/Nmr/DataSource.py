@@ -33,7 +33,7 @@ import sys
 # NB All functions must have a mandatory DataSource as the first parameter
 # so they can be used as DataSource methods
 # from ccpncore.lib.spectrum.Integral import getIntegralRegions, setIntegrals, calculateIntegralValues
-from ccpncore.util.Types import Sequence, Tuple
+from typing import Sequence, Tuple
 from ccpncore.lib.spectrum.Integral import Integral as spInt
 from ccpncore.lib.Io import Formats
 

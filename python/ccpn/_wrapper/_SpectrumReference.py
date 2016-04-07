@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Types import Sequence, Tuple
+from typing import Sequence, Tuple
 from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
@@ -210,6 +210,16 @@ class SpectrumReference(AbstractWrapperObject):
         dataDimRef.localValuePerPoint *= (value/swold)
       else:
         dataDimRef.dataDim.valuePerPoint *= (value/swold)
+
+  @property
+  def isAcquisition(self) -> bool:
+    """Is this dimension the acquisition dimension?"""
+    return self._wrappedData.dataDim.expDim.isAquisition
+
+  @isAcquisition.setter
+  def isAcquisition(self, value):
+    self._wrappedData.dataDim.expDim.isAquisition = value
+
 
   # Implementation functions
 

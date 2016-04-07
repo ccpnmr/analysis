@@ -11,7 +11,6 @@ class TestPhysicalResidueCreation(WrapperTesting):
     ch = self.project.createChain(sequence='a', molType='protein')
     self.assertEqual(len(ch.residues), 1)
 
-  @unittest.expectedFailure
   def test_MakeTwoResidueChain_Length(self):
     ch = self.project.createChain(sequence='ga', molType='protein')
     self.assertRaises(Exception, len, ch)

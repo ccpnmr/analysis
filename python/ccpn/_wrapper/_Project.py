@@ -36,7 +36,7 @@ from ccpncore.lib import Constants
 from ccpncore.util import Pid
 from ccpncore.util import Undo
 from ccpncore.util import Io as ioUtil
-from ccpncore.util.Types import Dict
+from typing import Dict
 
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to API: NmrProject"""

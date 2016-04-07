@@ -45,7 +45,7 @@ from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Menu import Menu
 from ccpncore.gui.Spinbox import Spinbox
 
-from ccpncore.util import Types
+import typing
 
 from application.core.gui.PlaneToolbar import PlaneToolbar
 from application.core.modules.GuiStrip import GuiStrip
@@ -343,7 +343,7 @@ class GuiStripNd(GuiStrip):
             
     return None
         
-  def showPeaks(self, peakList:PeakList, peaks:Types.List[Peak]=None):
+  def showPeaks(self, peakList:PeakList, peaks:typing.List[Peak]=None):
     ###from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView
     # NBNB TBD 1) we should not always display all peak lists together
     # NBNB TBD 2) This should not be called for each strip

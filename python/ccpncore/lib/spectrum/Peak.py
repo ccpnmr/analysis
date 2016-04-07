@@ -26,7 +26,7 @@ import numpy
 
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 
-from ccpncore.util.Types import Sequence
+from typing import Sequence
 
 def fitExistingPeaks(peaks:Sequence[ApiPeak], fitMethod:str=None):
 

@@ -25,7 +25,7 @@ __version__ = "$Revision: 8180 $"
 Version 2/3 Pid routines
 """
 
-from ccpncore.util.Types import List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 try:
   from cing import __version__
@@ -139,7 +139,8 @@ def decodePid(sourceObject, thePid:'Pid') -> 'Optional[Pid]':
 
 
 class Pid(str):
-    """Pid routines, adapted from path idea in: Python Cookbook, A. Martelli and D. Ascher (eds), O'Reilly 2002, pgs 140-142
+    """Pid routines, adapted from path idea in: Python Cookbook,
+    A. Martelli and D. Ascher (eds), O'Reilly 2002, pgs 140-142
     Features:
     - newpid = pid1 + id1 
     - slicing to address elements of pid
@@ -468,5 +469,4 @@ class Pid(str):
         return Pid.new(*parts)
     #end def
 #end class
-#--------------------------------------------------------------------------------------------------------------
 

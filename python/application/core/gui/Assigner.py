@@ -40,7 +40,7 @@ from ccpncore.gui.PulldownList import PulldownList
 
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability
 
-from ccpncore.util import Types
+import typing
 
 
 EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
@@ -172,6 +172,7 @@ class Assigner(CcpnDock):
     self.residueCount = 0
     self.layout.addWidget(self.scrollArea)
     self.atomSpacing = 66
+    # NBNB TBD FIXME wrong parameter name - suggests a list of residue objects
     self.residuesShown = []
     self.predictedStretch = []
     self.direction = None
@@ -192,7 +193,7 @@ class Assigner(CcpnDock):
       guiNmrResidues = []
 
 
-  def _assembleResidue(self, nmrResidue:NmrResidue, atoms:Types.Dict[str, GuiNmrAtom]):
+  def _assembleResidue(self, nmrResidue:NmrResidue, atoms:typing.Dict[str, GuiNmrAtom]):
     """
     Takes an Nmr Residue and a dictionary of atom names and GuiNmrAtoms and
     creates a graphical representation of a residue in the assigner
@@ -264,6 +265,7 @@ class Assigner(CcpnDock):
 
           # newConnectedStretch = list(self.nmrChain.connectedNmrResidues).insert(0, nmrResidue)
           # self.nmrChain.connectedNmrResidues = newConnectedStretch
+          # NBNB TBD FIXME wrong parameter name - suggests a residue object
           oldResidue = self.residuesShown[0]
           if 'CO' in nmrAtoms:
             coAtom2 = self._createGuiNmrAtom("CO", (oldResidue["N"].x()-abs(oldResidue["CA"].x()

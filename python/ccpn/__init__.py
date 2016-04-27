@@ -40,6 +40,8 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
   |       |       RestraintList
   |       |       |       Restraint
   |       |       |       |       RestraintContribution
+  |       |       CalculationStep
+  |       |       |       Data
   |       StructureEnsemble
   |       |       Model
   |       Note
@@ -222,6 +224,10 @@ Restraint = cls = importlib.import_module('ccpn._wrapper._Restraint').Restraint
 _wrappedClasses.append(cls)
 RestraintContribution = cls = importlib.import_module(
   'ccpn._wrapper._RestraintContribution').RestraintContribution
+_wrappedClasses.append(cls)
+CalculationStep = cls = importlib.import_module('ccpn._wrapper._CalculationStep').CalculationStep
+_wrappedClasses.append(cls)
+Data = cls = importlib.import_module('ccpn._wrapper._Data').Data
 _wrappedClasses.append(cls)
 StructureEnsemble = cls = importlib.import_module(
   'ccpn._wrapper._StructureEnsemble').StructureEnsemble

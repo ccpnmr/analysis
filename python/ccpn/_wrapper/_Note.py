@@ -139,3 +139,5 @@ Project.newNote = _newNote
 del _newNote
 
 # Notifiers:
+Project._apiNotifiers.append(('_finaliseApiRename', {},
+                              ApiNote._metaclass.qualifiedName(), 'setName'))

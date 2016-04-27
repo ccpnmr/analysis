@@ -154,10 +154,10 @@ class ChemicalShiftList(AbstractWrapperObject):
 Project._childClasses.append(ChemicalShiftList)
 
 def getter(self:Spectrum) -> ChemicalShiftList:
-    return self._project._data2Obj.get(self._apiDataSource.experiment.shiftList)
+  return self._project._data2Obj.get(self._apiDataSource.experiment.shiftList)
 def setter(self:Spectrum, value:ChemicalShiftList):
-    value = self.getByPid(value) if isinstance(value, str) else value
-    self._apiDataSource.experiment.shiftList = value._apiShiftList
+  value = self.getByPid(value) if isinstance(value, str) else value
+  self._apiDataSource.experiment.shiftList = value._apiShiftList
 Spectrum.chemicalShiftList = property(getter, setter, None,
                           "ccpn.ChemicalShiftList used for ccpn.Spectrum")
 

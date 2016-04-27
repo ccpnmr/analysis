@@ -22,7 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence
+import datetime
+from typing import Sequence, Optional
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
@@ -71,6 +72,60 @@ class DataSet(AbstractWrapperObject):
     return self._project
 
   @property
+  def title(self) -> str:
+    """Title of DataSet"""
+    return self._wrappedData.name
+
+  @title.setter
+  def title(self, value:str):
+    self._wrappedData.name = value
+
+  @property
+  def programName(self) -> str:
+    """Name of program doing calculation"""
+    return self._wrappedData.programName
+
+  @programName.setter
+  def programName(self, value:str):
+    self._wrappedData.programName = value
+
+  @property
+  def programVersion(self) -> Optional[str]:
+    """Version of program doing calculation"""
+    return self._wrappedData.programVersion
+
+  @programVersion.setter
+  def programVersion(self, value:str):
+    self._wrappedData.programVersion = value
+
+  @property
+  def dataPath(self) -> Optional[str]:
+    """File path where dataSet is stored"""
+    return self._wrappedData.dataPath
+
+  @dataPath.setter
+  def dataPath(self, value:str):
+    self._wrappedData.dataPath = value
+
+  @property
+  def creationDate(self) -> Optional[datetime.datetime]:
+    """Creation timestamp for DataSet"""
+    return self._wrappedData.creationDate
+
+  @creationDate.setter
+  def creationDate(self, value:datetime.datetime):
+    self._wrappedData.creationDate = value
+
+  @property
+  def uuid(self) -> Optional[str]:
+    """Univcersal identifier for dataSet"""
+    return self._wrappedData.uuid
+
+  @uuid.setter
+  def uuid(self, value:str):
+    self._wrappedData.uuid = value
+
+  @property
   def comment(self) -> str:
     """Free-form text comment"""
     return self._wrappedData.details
@@ -110,14 +165,22 @@ class DataSet(AbstractWrapperObject):
     return result
 
 
-def _newDataSet(self:Project, comment:str=None) -> DataSet:
+def _newDataSet(self:Project, title:str=None, programName:str=None, programVersion:str=None,
+                dataPath:str=None, creationDate:datetime=None, uuid:str=None,
+                comment:str=None) -> DataSet:
   """Create new ccpn.DataSet
 
   :param str comment: comment for new chain (optional)"""
   
   nmrProject = self._wrappedData
   newApiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
-                                                         details=comment)
+                                                                   name=title,
+                                                                   programName=programName,
+                                                                   programVersion=programVersion,
+                                                                   dataPath=dataPath,
+                                                                   creationDate=creationDate,
+                                                                   uuid=uuid,
+                                                                   details=comment)
   return self._data2Obj.get(newApiNmrConstraintStore)
     
     

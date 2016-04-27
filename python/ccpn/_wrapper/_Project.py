@@ -775,6 +775,12 @@ class Project(AbstractWrapperObject):
     """path of/to Project"""
     return ioUtil.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
 
+  @property
+  def programName(self) -> str:
+    """Name of running program - defaults to 'CcoNmr'"""
+    appBase = self._appBase if hasattr(self, '_appBase') else None
+    return 'CcpNmr' if appBase is None else appBase.applicationName
+
   def _flushCachedData(self, dummy=None):
     """Flush cached data to ensure up-to-date data are saved"""
 

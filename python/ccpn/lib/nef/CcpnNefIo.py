@@ -361,9 +361,7 @@ class CcpnNefIo:
       # NBNB TBD reconsider whether we want the spec summary or something else
       self.specification = Specification.getCcpnSpecification(specificationFile)
 
-    appBase = project._appBase if hasattr(project, '_appBase') else None
-    if programName is None:
-      self.programName = 'CcpNmr' if appBase is None else appBase.applicationName
+    programName = programName or project.programName
     if programVersion is None:
       self.programVersion = ('%s-%s' % (Version.applicationVersion, Version.revision)
                              if appBase is None else project._appBase.applicationVersion)

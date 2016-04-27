@@ -26,31 +26,31 @@ __author__ = 'simon'
 #from PyQt4 import QtGui, QtCore, QtOpenGL
 from PyQt4 import QtGui, QtCore
 
-import math
+# import math
 import numpy
 from functools import partial
-import pyqtgraph as pg
+# import pyqtgraph as pg
 
-from ccpn import Project
+# from ccpn import Project
 from ccpn import PeakList
 from ccpn import Peak
-from ccpn.lib._wrapper import Spectrum as LibSpectrum
+# from ccpn.lib._wrapper import Spectrum as LibSpectrum
 
-from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
-from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+# from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+# from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 
-from ccpncore.gui.Button import Button
-from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
+# from ccpncore.gui.Button import Button
+# from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Menu import Menu
-from ccpncore.gui.Spinbox import Spinbox
+# from ccpncore.gui.Spinbox import Spinbox
 
 import typing
 
 from application.core.gui.PlaneToolbar import PlaneToolbar
 from application.core.modules.GuiStrip import GuiStrip
 
-from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView
+# from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 
 class GuiStripNd(GuiStrip):
 
@@ -358,12 +358,15 @@ class GuiStripNd(GuiStrip):
     peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
     self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
 
-def _spectrumViewCreated(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
-  strip = project._data2Obj[apiStripSpectrumView.strip]
-  if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
-    strip.setZWidgets()
+# Notifiers
 
 # Add notifier functions to Project
-Project._setupNotifier(_spectrumViewCreated, ApiStripSpectrumView, 'postInit')
+# def _spectrumViewCreated(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
+#   strip = project._data2Obj[apiStripSpectrumView.strip]
+#   if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
+#     strip.setZWidgets()
+#
+# # Add notifier functions to Project
+# Project._setupApiNotifier(_spectrumViewCreated, ApiStripSpectrumView, 'postInit')
 
          

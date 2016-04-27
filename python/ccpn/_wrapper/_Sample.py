@@ -28,6 +28,7 @@ from ccpn import Project
 from ccpn import Spectrum
 from ccpn import SpectrumHit
 from ccpncore.api.ccp.lims.Sample import Sample as ApiSample
+from ccpncore.api.ccp.nmr import Nmr
 from ccpncore.util import Common as commonUtil
 from ccpncore.util import Pid
 from typing import Sequence, Tuple, Optional
@@ -46,6 +47,9 @@ class Sample(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiSample._metaclass.qualifiedName()
 
   # CCPN properties  
   @property
@@ -209,7 +213,7 @@ class Sample(AbstractWrapperObject):
         raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
       else:
         commonUtil._resetParentLink(self._wrappedData, 'samples', 'name', value)
-        self._project._resetPid(self._wrappedData)
+        self._finaliseRename()
 
     finally:
       if undo is not None:
@@ -271,12 +275,30 @@ Project._childClasses.append(Sample)
 Project.newSample = _newSample
 del _newSample
 
-# Notifiers:
+# Notifiers - added to trigger crosslink changes
+className = Nmr.Experiment._metaclass.qualifiedName()
+Project._apiNotifiers.extend(
+  ( ('_modifiedLink', {'classNames':('Sample','Spectrum')}, className, 'setSample'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'setSample'),
+  )
+)
 className = ApiSample._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Sample}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-    ('_resetPid', {}, className, 'setName'),
+  ( ('_modifiedLink', {'classNames':('Sample','Spectrum')}, className, 'addNmrExperiment'),
+    ('_modifiedLink', {'classNames':('Sample','Spectrum')}, className, 'removeNmrExperiment'),
+    ('_modifiedLink', {'classNames':('Sample','Spectrum')}, className, 'setNmrExperiments'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'addNmrExperiment'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'removeNmrExperiment'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'setNmrExperiments'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'addSampledDataDim'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'removeSampledDataDim'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'setSampledDataDims'),
+  )
+)
+className = Nmr.SampledDataDim._metaclass.qualifiedName()
+Project._apiNotifiers.extend(
+  ( ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'addSample'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'removeSample'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'setSamples'),
   )
 )

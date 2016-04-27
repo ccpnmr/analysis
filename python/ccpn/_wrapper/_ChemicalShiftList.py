@@ -27,7 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
 from ccpn import PeakList
-from ccpncore.api.ccp.nmr.Nmr import ShiftList as ApiShiftList
+from ccpncore.api.ccp.nmr import Nmr
 from ccpncore.util import Pid
 from typing import Tuple, Sequence, List
 
@@ -47,7 +47,10 @@ class ChemicalShiftList(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
-  def __init__(self, project:Project, wrappedData:ApiShiftList):
+  # Qualified name of matching API class
+  _apiClassQualifiedName = Nmr.ShiftList._metaclass.qualifiedName()
+
+  def __init__(self, project:Project, wrappedData:Nmr.ShiftList):
 
     self._wrappedData = wrappedData
     self._project = project
@@ -57,7 +60,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def _apiShiftList(self) -> ApiShiftList:
+  def _apiShiftList(self) -> Nmr.ShiftList:
     """ CCPN ShiftList matching ChemicalShiftList"""
     return self._wrappedData
     
@@ -142,7 +145,7 @@ class ChemicalShiftList(AbstractWrapperObject):
       self._wrappedData.name = value
 
   @classmethod
-  def _getAllWrappedData(cls, parent: Project)-> List[ApiShiftList]:
+  def _getAllWrappedData(cls, parent: Project)-> List[Nmr.ShiftList]:
     """get wrappedData (ShiftLists) for all ShiftList children of parent Project"""
     return sorted((x for x in parent._apiNmrProject.measurementLists
             if x.className == 'ShiftList'), key=operator.attrgetter('name'))
@@ -182,14 +185,25 @@ def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
 Project.newChemicalShiftList = _newChemicalShiftList
 del _newChemicalShiftList
 
-# Backwards crosslinks
-
-# Notifiers:
-className = ApiShiftList._metaclass.qualifiedName()
+# Notifiers
+className = Nmr.ShiftList._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':ChemicalShiftList}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_resetPid', {}, className, 'setName'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+  ( ('_finaliseApiRename', {}, className, 'setName'),
+    ('_modifiedLink', {'classNames':('ChemicalShiftList', 'Spectrum')}, className, 'addExperiment'),
+    ('_modifiedLink', {'classNames':('ChemicalShiftList', 'Spectrum')}, className,
+     'removeExperiment'),
+    ('_modifiedLink', {'classNames':('ChemicalShiftList', 'Spectrum')}, className, 'setExperiments'),
+    ('_modifiedLink', {'classNames':('ChemicalShiftList', 'PeakList')}, className, 'addPeakList'),
+    ('_modifiedLink', {'classNames':('ChemicalShiftList', 'PeakList')}, className, 'removePeakList'),
+    ('_modifiedLink', {'classNames':('ChemicalShiftList', 'PeakList')}, className, 'setPeakLists'),
+  )
+)
+Project._apiNotifiers.append(('_modifiedLink', {'classNames':('ChemicalShiftList', 'PeakList')},
+                              Nmr.PeakList._metaclass.qualifiedName(), 'setSpecificShiftList')
+                             )
+className = Nmr.Experiment._metaclass.qualifiedName()
+Project._apiNotifiers.extend(
+  ( ('_modifiedLink', {'classNames':('ChemicalShiftList', 'Spectrum')},className, 'setShiftList'),
+    ('_modifiedLink', {'classNames':('ChemicalShiftList', 'PeakList')},className, 'setShiftList'),
   )
 )

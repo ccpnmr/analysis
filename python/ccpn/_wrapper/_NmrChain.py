@@ -45,6 +45,9 @@ class NmrChain(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiNmrChain._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -246,9 +249,11 @@ Project.fetchNmrChain = fetchNmrChain
 # Notifiers:
 className = ApiNmrChain._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':NmrChain}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_resetPid', {}, className, 'setImplCode'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+  ( ('_finaliseApiRename', {}, className, 'setImplCode'),
   )
 )
+Chain.setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
+                          {'pathToObject':'nmrChain', 'action':'rename'})
+
+# NB Chain<->NmrChain link depends solely on the NmrChain name.
+# So no notifiers on the link - notify on the NmrChain rename instead.

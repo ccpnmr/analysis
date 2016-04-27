@@ -97,11 +97,11 @@ del _getPeakViews
 # Connections to parents:
 PeakListView._childClasses.append(PeakView)
 
-# Notifiers:
-className = ApiPeakView._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':PeakView}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)
+# # Notifiers:
+# className = ApiPeakView._metaclass.qualifiedName()
+# Project._apiNotifiers.extend(
+#   ( ('_newApiObject', {'cls':PeakView}, className, '__init__'),
+#     ('_finaliseApiDelete', {}, className, 'delete'),
+#     ('_finaliseApiUnDelete', {}, className, 'undelete'),
+#   )
+# )

@@ -26,9 +26,9 @@ import operator
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
+from ccpn import SpectrumReference
 from ccpn import PeakList
-# from ccpn import NmrAtom
-from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
+from ccpncore.api.ccp.nmr import Nmr
 from typing import Optional, Tuple, Union, Sequence
 
 class Peak(AbstractWrapperObject):
@@ -49,11 +49,14 @@ class Peak(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = Nmr.Peak._metaclass.qualifiedName()
   
 
   # CCPN properties  
   @property
-  def _apiPeak(self) -> ApiPeak:
+  def _apiPeak(self) -> Nmr.Peak:
     """ API peaks matching Peak"""
     return self._wrappedData
     
@@ -315,7 +318,7 @@ class Peak(AbstractWrapperObject):
     self.dimensionNmrAtoms = dimensionNmrAtoms
 
 
-  # # NBNB TBD do we need this duplication, or it it enough to return the NmrAtom objecss?
+  # # NBNB TBD do we need this duplication, or it it enough to return the NmrAtom objects?
   # @property
   # def dimensionAssignments(self) -> tuple:
   #   """Peak dimension assignments - a list of lists of NmrAtom.id for each dimension.
@@ -340,7 +343,7 @@ class Peak(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent: PeakList)-> Tuple[ApiPeak, ...]:
+  def _getAllWrappedData(cls, parent: PeakList)-> Tuple[Nmr.Peak, ...]:
     """get wrappedData (Peaks) for all Peak children of parent PeakList"""
     return parent._wrappedData.sortedPeaks()
 
@@ -353,55 +356,90 @@ def _newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None
             dimensionAssignments:Sequence[Sequence['NmrAtom']]=(),
             assignments:Sequence[Sequence[Optional['NmrAtom']]]=()) -> Peak:
   """Create new ccpn.Peak within ccpn.peakList"""
-  apiPeakList = self._apiPeakList
-  apiPeak = apiPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
-                              annotation=annotation, details=comment)
 
-  # set peak position
-  # NBNB TBD currently unused parameters could be added, and will have to come in here as well
-  if position:
-    for ii,peakDim in enumerate(apiPeak.sortedPeakDims()):
-      peakDim.value = position[ii]
-  elif pointPosition:
-    for ii,peakDim in enumerate(apiPeak.sortedPeakDims()):
-      peakDim.position = pointPosition[ii]
+  undo = self._project._undo
+  if undo is not None:
+    undo.increaseBlocking()
+  self._project.blankNotification()
+  try:
+    apiPeakList = self._apiPeakList
+    apiPeak = apiPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
+                                annotation=annotation, details=comment)
 
-  # Setting assignments
-  if dimensionAssignments:
-    dimResonances = list(dimensionAssignments)
-    for ii, atoms in enumerate(dimResonances):
-      dimValues = tuple(x._wrappedData for x in dimensionAssignments[ii])
-      dimResonances[ii] = tuple(x for x in dimValues if x is not None)
+    # set peak position
+    # NBNB TBD currently unused parameters could be added, and will have to come in here as well
+    if position:
+      for ii,peakDim in enumerate(apiPeak.sortedPeakDims()):
+        peakDim.value = position[ii]
+    elif pointPosition:
+      for ii,peakDim in enumerate(apiPeak.sortedPeakDims()):
+        peakDim.position = pointPosition[ii]
 
-    # set dimensionAssignments
-    apiPeak.assignByDimensions(dimResonances)
+    # Setting assignments
+    if dimensionAssignments:
+      dimResonances = list(dimensionAssignments)
+      for ii, atoms in enumerate(dimResonances):
+        dimValues = tuple(x._wrappedData for x in dimensionAssignments[ii])
+        dimResonances[ii] = tuple(x for x in dimValues if x is not None)
 
-  if assignments:
-    peakDims = apiPeak.sortedPeakDims()
-    dimensionCount = len(peakDims)
+      # set dimensionAssignments
+      apiPeak.assignByDimensions(dimResonances)
 
-    # get resonance, all tuples and per dimension
-    resonances = []
-    for tt in assignments:
-      ll = dimensionCount*[None]
-      resonances.append(ll)
-      for ii,atom in enumerate(tt):
-        if atom is not None:
-          ll[ii] = atom._wrappedData
+    if assignments:
+      peakDims = apiPeak.sortedPeakDims()
+      dimensionCount = len(peakDims)
 
-    # set assignments
-    apiPeak.setAssignments(resonances)
+      # get resonance, all tuples and per dimension
+      resonances = []
+      for tt in assignments:
+        ll = dimensionCount*[None]
+        resonances.append(ll)
+        for ii,atom in enumerate(tt):
+          if atom is not None:
+            ll[ii] = atom._wrappedData
 
-  return self._project._data2Obj.get(apiPeak)
+      # set assignments
+      apiPeak.setAssignments(resonances)
+
+  finally:
+    self._project.unblankNotification()
+    if undo is not None:
+      undo.decreaseBlocking()
+
+  if undo is not None:
+    undo.newItem(apiPeak.delete, self.newPeak, redoKwargs={
+      'height':height, 'volume':volume, 'figureOfMerit':figureOfMerit,
+      'annotation':annotation, 'comment':comment, 'position':position,
+      'pointPosition':pointPosition,  'dimensionAssignments':dimensionAssignments,
+      'assignments':assignments})
+
+  result = self._project._data2Obj.get(apiPeak)
+
+  # DO creation notifications
+  result._finaliseAction('create')
+
+  return result
 
 PeakList.newPeak = _newPeak
 del _newPeak
 
-# Notifiers:
-className = ApiPeak._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Peak}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
+# Additional Notifiers:
+className = Nmr.PeakDim._metaclass.qualifiedName()
+Project._apiNotifiers.append(
+  ('_notifyRelatedApiObject', {'pathToObject':'peak', 'action':'change'}, className, ''),
 )
+for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
+  className = clazz.qualifiedName()
+  # NB - relies on PeakDimContrib.peakDim.peak still working for deleted peak. Should work.
+  Project._apiNotifiers.extend( (
+      ('_notifyRelatedApiObject', {'pathToObject':'peakDim.peak',  'action':'change'},
+       className, 'postInit'),
+      ('_notifyRelatedApiObject', {'pathToObject':'peakDim.peak',  'action':'change'},
+       className, 'delete'),
+    )
+  )
+
+# Notify Peaks change when SpectrumReference changes
+# (That means DataDimRef referencing information)
+SpectrumReference.setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+                          {'pathToObject':'spectrum.peaks', 'action':'change'})

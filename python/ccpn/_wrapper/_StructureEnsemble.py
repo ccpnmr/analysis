@@ -54,6 +54,9 @@ class StructureEnsemble(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiStructureEnsemble._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -79,9 +82,9 @@ class StructureEnsemble(AbstractWrapperObject):
 
   @property
   def atomIds(self) -> Tuple[str, ...]:
-    """Tuple of atom id ('chainCode.sequenceCode.residueType.atomName' for atoms making up structure ensemble
+    """Tuple of atom id ('chainCode.sequenceCode.residueType.atomName' for atoms making up
+    structure ensemble
     The atom IDs and their order is the same for all ccpn.Models in the ensemble."""
-    IDSEP = Pid.IDSEP
     result = []
     residue = None
     for atom in self._wrappedData.orderedAtoms:
@@ -98,9 +101,9 @@ class StructureEnsemble(AbstractWrapperObject):
 
   @property
   def residueIds(self) -> Tuple[str, ...]:
-    """Tuple of atom id ('chainCode.sequenceCode.residueType' for residues making up structure ensemble
+    """Tuple of atom id ('chainCode.sequenceCode.residueType' for residues making up
+    structure ensemble
     The residue IDs and their order is the same for all ccpn.Models in the ensemble."""
-    IDSEP = Pid.IDSEP
     result = []
     residue = None
     for atom in self._wrappedData.orderedAtoms:
@@ -353,7 +356,6 @@ class StructureEnsemble(AbstractWrapperObject):
 
     # Set up map of existing coordResidues
     coordResidues = {}
-    seqId = -1
     for coordChain in apiEnsemble.coordChains:
       code = coordChain.code
       for coordResidue in coordChain.sortedResidues():
@@ -591,6 +593,16 @@ class StructureEnsemble(AbstractWrapperObject):
       return None
     return apiCoordResidue.findFirstAtom(name=name)
 
+  def _flushCachedData(self):
+    """Flush cached data to ensure up-to-date data are saved"""
+
+    for tag in ('coordinateData', 'occupancyData', 'bFactorData'):
+      _tag = '_' + tag
+      if hasattr(self, _tag):
+        # Save cached data back to underlying storage
+        setattr(self, tag, getattr(self, _tag))
+        delattr(self, _tag)
+
 
   # Implementation functions
   @classmethod
@@ -616,10 +628,3 @@ Project.newStructureEnsemble = _newStructureEnsemble
 del _newStructureEnsemble
 
 # Notifiers:
-className = ApiStructureEnsemble._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':StructureEnsemble}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)

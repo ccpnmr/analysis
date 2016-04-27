@@ -23,10 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpn import AbstractWrapperObject
-from ccpn import Project
 from ccpn import Spectrum
-# from ccpn import Sample
-# from ccpn import SampleComponent
 from ccpncore.api.ccp.nmr.Nmr import SpectrumHit as ApiSpectrumHit
 from ccpncore.util import Pid
 
@@ -44,6 +41,9 @@ class SpectrumHit(AbstractWrapperObject):
 
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiSpectrumHit._metaclass.qualifiedName()
 
   # CCPN properties
   @property
@@ -155,39 +155,11 @@ class SpectrumHit(AbstractWrapperObject):
   @comment.setter
   def comment(self, value:str):
     self._wrappedData.details = value
-  #
-  # @property
-  # def sample(self) -> Sample:
-  #   """Sample in which SpectrumHit is found"""
-  #   return self._project._data2Obj.get(self._wrappedData.sample)
-  #
-
-  # @property
-  # def sampleComponent(self) -> SampleComponent:
-  #   """SampleComponent that makes upp hit"""
-  #   return self._project._data2Obj.get(self._wrappedData.sampleComponent)
-
-  # Implementation functions
 
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (Nmr.SpectrumHit) for all SpectrumHit children of parent Spectrum"""
     return parent._wrappedData.sortedSpectrumHits()
-
-# def getter(self:Sample) -> tuple:
-#   ff = self._project._data2Obj.get
-#   return tuple(ff(x) for x in self._wrappedData.sortedSpectrumHits())
-# def setter(self:Sample, value:Sequence):
-#   self._wrappedData.spectrumHits =  [x._wrappedData for x in value]
-# Sample.spectrumHits = property(getter, setter, None, "SpectrumHits found using Sample")
-#
-# def getter(self:SampleComponent) -> tuple:
-#   ff = self._project._data2Obj.get
-#   return tuple(ff(x) for x in self._wrappedData.sortedSpectrumHits())
-# def setter(self:SampleComponent, value:Sequence):
-#   self._wrappedData.spectrumHits =  [x._wrappedData for x in value]
-# SampleComponent.spectrumHits = property(getter, setter, None,
-#                                         "SpectrumHits found for SampleComponent")
 
 def _newSpectrumHit(self:Spectrum, substanceName:str, pseudoDimensionNumber:int=0, pointNumber:int=0,
                     figureOfMerit:float=None,  meritCode:str=None, normalisedChange:float=None,
@@ -210,11 +182,4 @@ del _newSpectrumHit
 
 Spectrum._childClasses.append(SpectrumHit)
 
-# Notifiers:
-className = ApiSpectrumHit._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':SpectrumHit}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)
+# Additional Notifiers:

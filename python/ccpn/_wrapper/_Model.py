@@ -47,6 +47,9 @@ class Model(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiModel._metaclass.qualifiedName()
+
   # CCPN properties
   @property
   def _apiModel(self) -> ApiModel:
@@ -185,11 +188,12 @@ del _newModel
 # NBNB TBD add New function
 
 # Notifiers:
-className = ApiModel._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Model}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_flushCachedData', {}, className, 'preDelete'),
-  ('_finaliseUnDelete', {}, className, 'undelete')
-  )
+
+# Must be done with API notifiers as it rewuires a predelete notifier.
+def _flushCachedData(project:Project, apiModel:ApiModel):
+  """Flush cached data to ensure up-to-date data are saved"""
+  structureEnsemble = project._data2Obj[apiModel].structureEnsemble
+  structureEnsemble._flushCachedData()
+Project._apiNotifiers.append(
+  ('_flushCachedData', {},  ApiModel._metaclass.qualifiedName(), 'preDelete'),
 )

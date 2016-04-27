@@ -28,8 +28,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Restraint
 from ccpn.lib import CcpnSorting
-from ccpncore.api.ccp.nmr.NmrConstraint import ConstraintContribution as ApiContribution
-from ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
+from ccpncore.api.ccp.nmr import NmrConstraint
 
 
 class RestraintContribution(AbstractWrapperObject):
@@ -46,9 +45,12 @@ class RestraintContribution(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = NmrConstraint.GenericContribution._metaclass.qualifiedName()
+
   # CCPN properties
   @property
-  def _apiContribution(self) -> ApiContribution:
+  def _apiContribution(self) -> NmrConstraint.GenericContribution:
     """ API Contribution matching Contribution"""
     return self._wrappedData
 
@@ -239,16 +241,26 @@ Restraint.newRestraintContribution = _newRestraintContribution
 del _newRestraintContribution
 
 # Notifiers:
-for clazz in ApiContribution._metaclass.getNonAbstractSubtypes():
+# Change RestraintContribution when Api RestraintItems are created or deleted
+for clazz in NmrConstraint.ConstraintItem._metaclass.getNonAbstractSubtypes():
   className = clazz.qualifiedName()
   Project._apiNotifiers.extend(
-    ( ('_newObject', {'cls':RestraintContribution}, className, '__init__'),
-      ('_finaliseDelete', {}, className, 'delete'),
-      ('_finaliseUnDelete', {}, className, 'undelete'),
+    ( ('_notifyRelatedApiObject', {'pathToObject':'contribution', 'action':'change'},
+  className, 'delete'),
+      ('_notifyRelatedApiObject', {'pathToObject':'contribution', 'action':'change'},
+  className, 'create'),
     )
 )
 
-def _fixedResonance2AtomId(fixedResonance:ApiFixedResonance) -> str:
+def _fixedResonance2AtomId(fixedResonance:NmrConstraint.FixedResonance) -> str:
   """Utility function - get AtomId from FixedResonance """
   tags = ('chainCode', 'sequenceCode', 'residueType', 'name')
   return Pid.createId(*(getattr(fixedResonance, tag) for tag in tags))
+
+# Change constraint when ConstraintContribution is creted, deleted, or changed
+RestraintContribution.setupCoreNotifier('create', AbstractWrapperObject._finaliseRelatedObject,
+                          {'pathToObject':'restraint', 'action':'change'})
+RestraintContribution.setupCoreNotifier('delete', AbstractWrapperObject._finaliseRelatedObject,
+                          {'pathToObject':'restraint', 'action':'change'})
+RestraintContribution.setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+                          {'pathToObject':'restraint', 'action':'change'})

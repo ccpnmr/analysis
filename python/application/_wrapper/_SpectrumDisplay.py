@@ -31,8 +31,10 @@ from ccpn import NmrResidue
 from ccpn import Spectrum
 from application import Task
 from application import Window
+from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpncore.util import Common as commonUtil
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
@@ -58,6 +60,9 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   _pluralLinkName = 'spectrumDisplays'
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiSpectrumDisplay._metaclass.qualifiedName()
 
   # CCPN properties  
   @property
@@ -109,6 +114,12 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   @axisOrder.setter
   def axisOrder(self, value:Sequence):
     self._wrappedData.axisOrder = value
+
+  @property
+  def is1D(self) -> bool:
+    """Is this a 1D display"""
+    tt = self.axisCodes
+    return bool(tt and tt[1] == 'intensity')
 
   @property
   def window(self) -> Window:
@@ -454,10 +465,30 @@ SpectrumDisplay._factoryFunction = staticmethod(_factoryFunction)
 SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum
 
 # Notifiers:
-className = ApiSpectrumDisplay._metaclass.qualifiedName()
+
+# crosslinks window, nmrResidue
+Project._apiNotifiers.append(
+  ('_modifiedLink', {'classNames':('Spectrum','SpectrumDisplay')},
+  ApiSpectrumDisplay._metaclass.qualifiedName(), 'setWindow'),
+)
+Project._apiNotifiers.append(
+  ('_modifiedLink', {'classNames':('NmrResidue','SpectrumDisplay')},
+  ApiSpectrumDisplay._metaclass.qualifiedName(), 'setResonanceGroup'),
+)
+className = ApiWindow._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':SpectrumDisplay._factoryFunction}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+  ( ('_modifiedLink', {'classNames':('SpectrumDisplay','Window')}, className, 'addModule'),
+    ('_modifiedLink', {'classNames':('SpectrumDisplay','Window')}, className, 'removeModule'),
+    ('_modifiedLink', {'classNames':('SpectrumDisplay','Window')}, className, 'addNmrExperiment'),
+  )
+)
+className = ApiResonanceGroup._metaclass.qualifiedName()
+Project._apiNotifiers.extend(
+  ( ('_modifiedLink', {'classNames':('SpectrumDisplay','NmrResidue')}, className,
+     'addSpectrumDisplay'),
+    ('_modifiedLink', {'classNames':('SpectrumDisplay','NmrResidue')}, className,
+     'removeSpectrumDisplay'),
+    ('_modifiedLink', {'classNames':('SpectrumDisplay','NmrResidue')}, className,
+     'setSpectrumDisplays'),
   )
 )

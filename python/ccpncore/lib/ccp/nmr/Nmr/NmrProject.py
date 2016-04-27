@@ -146,6 +146,7 @@ def createDummySpectrum(self:'NmrProject', axisCodes:Sequence[str],
     expName = ''.join(x for x in ''.join(axisCodes) if not x.isdigit())
   else:
     expName = name
+
   experiment = self.createExperiment(name=expName, numDim=numDim,
                                            sf=[DEFAULT_SPECTRUM_PARAMETERS[x]['sf']
                                                for x in isotopeCodes], axisCodes=axisCodes,
@@ -155,6 +156,7 @@ def createDummySpectrum(self:'NmrProject', axisCodes:Sequence[str],
                 for tag in ('sw', 'refppm', 'refpt', 'numPoints'))
   #
   specName = '%s@%s' %(expName, experiment.serial) if name is None else name
+
   return experiment.createDataSource(name=specName, **params)
 
 def createExperiment(self:'NmrProject', name:str, numDim:int, sf:Sequence,

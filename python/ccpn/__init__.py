@@ -19,9 +19,9 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
 
   Project
   |       Spectrum
+  |       |       SpectrumReference
   |       |       PeakList
   |       |       |       Peak
-  |       |       SpectrumReference
   |       |       PseudoDimension
   |       |       SpectrumHit
   |       SpectrumGroup
@@ -175,14 +175,14 @@ Project = cls = importlib.import_module('ccpn._wrapper._Project').Project
 _wrappedClasses.append(cls)
 Spectrum = cls = importlib.import_module('ccpn._wrapper._Spectrum').Spectrum
 _wrappedClasses.append(cls)
+SpectrumReference = cls = importlib.import_module(
+  'ccpn._wrapper._SpectrumReference').SpectrumReference
+_wrappedClasses.append(cls)
 SpectrumGroup = cls = importlib.import_module('ccpn._wrapper._SpectrumGroup').SpectrumGroup
 _wrappedClasses.append(cls)
 PeakList = cls = importlib.import_module('ccpn._wrapper._PeakList').PeakList
 _wrappedClasses.append(cls)
 Peak = cls = importlib.import_module('ccpn._wrapper._Peak').Peak
-_wrappedClasses.append(cls)
-SpectrumReference = cls = importlib.import_module(
-  'ccpn._wrapper._SpectrumReference').SpectrumReference
 _wrappedClasses.append(cls)
 PseudoDimension = cls = importlib.import_module('ccpn._wrapper._PseudoDimension').PseudoDimension
 _wrappedClasses.append(cls)
@@ -254,17 +254,12 @@ _pluralPidTypeMap['SP'] = _pluralPidTypeMap['Spectrum'] = 'Spectra'
 AbstractWrapperObject.__init__.__annotations__['project'] = Project
 AbstractWrapperObject.project.fget.__annotations__['return'] = Project
 
-
-# Set up interclass links and related functions
 Project._linkWrapperClasses()
 
 # Load in additional utility functions int wrapper classes
 # NB this does NOT pick up utility functions in non-child classes
 # (e.g. AbstractWrapperObject or MainWindow) so these must be avoided
 libModule = 'ccpn.lib._wrapper'
-allActiveClasses = [Project]
-for cls in allActiveClasses:
-  # moduleName = '%s.%s' % (libModule, cls.__name__)
+for cls in Project._allLinkedWrapperClasses:
   ApiFunc._addModuleFunctionsToApiClass( cls.__name__, cls, rootModuleName=libModule)
-  allActiveClasses.extend(cls._childClasses)
 

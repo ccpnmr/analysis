@@ -44,6 +44,9 @@ class Window(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiWindow._metaclass.qualifiedName()
+
   # CCPN properties
   @property
   def _apiWindow(self) -> ApiWindow:
@@ -159,10 +162,3 @@ def _factoryFunction(project:Project, wrappedData:ApiWindow) ->Window:
 Window._factoryFunction = staticmethod(_factoryFunction)
 
 # Notifiers:
-className = ApiWindow._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Window._factoryFunction}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)

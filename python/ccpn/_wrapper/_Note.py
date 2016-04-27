@@ -42,7 +42,9 @@ class Note(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
-  
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiNote._metaclass.qualifiedName()
 
   # CCPN properties  
   @property
@@ -137,11 +139,3 @@ Project.newNote = _newNote
 del _newNote
 
 # Notifiers:
-className = ApiNote._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Note}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-    ('_resetPid', {}, className, 'setName'),
-  )
-)

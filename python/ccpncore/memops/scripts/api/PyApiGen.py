@@ -746,6 +746,7 @@ import traceback
 import types
 import operator
 import functools
+import collections
 
 # special function for fast whitespace checking.
 # used in DataType Word and Token handcode

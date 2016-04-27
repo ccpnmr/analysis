@@ -27,13 +27,14 @@ from PyQt4 import QtCore, QtGui
 from application.core.DropBase import DropBase
 from application.core.modules.CreateSequence import CreateSequence
 from application.core.modules.NotesEditor import NotesEditor
-from application.core.popups.NmrAtomPopup import NmrAtomPopup
+# from application.core.popups.NmrAtomPopup import NmrAtomPopup
 from application.core.popups.NmrChainPopup import NmrChainPopup
-from application.core.popups.NmrResiduePopup import NmrResiduePopup
+# from application.core.popups.NmrResiduePopup import NmrResiduePopup
 from application.core.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from application.core.popups.RestraintTypePopup import RestraintTypePopup
 from application.core.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup, EditSampleComponentPopup
+from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup
+from application.core.popups.SamplePropertiesPopup import EditSampleComponentPopup
 
 
 from ccpn import Project
@@ -155,6 +156,25 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.project = project
     self.colourScheme = project._appBase.preferences.general.colourScheme
 
+    # Register notifiers to maintain sidebar
+    notifier = project.registerNotifier('AbstractWrapperObject', 'create', self._createItem)
+    notifier = project.registerNotifier('AbstractWrapperObject', 'delete', self._removeItem)
+    notifier = project.registerNotifier('AbstractWrapperObject', 'rename', self._renameItem)
+    notifier = project.registerNotifier('SpectrumGroup', 'Spectrum', self.refreshSidebarSpectra,
+                                        onceOnly=True)
+    project.duplicateNotifier('SpectrumGroup', 'create', notifier)
+    project.duplicateNotifier('SpectrumGroup', 'delete', notifier)
+
+
+  def refreshSidebarSpectra(self, dummy:Project):
+    """Reset spectra in sidebar - to be called from notifiers
+    """
+    for spectrum in self.project.spectra:
+      self._removeItem( self.project, spectrum)
+      self._createItem(spectrum)
+
+
+
   def addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
     """
     Adds a QTreeWidgetItem as a child of the item specified, which corresponds to the data object
@@ -263,16 +283,19 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       return None
 
 
-  def _renameItem(self, oldPid:str, newPid:str):
-    """rename item(s) from object pdi oldPid to object pid newPid"""
+  def _renameItem(self, obj:AbstractWrapperObject, oldPid:str):
+    """rename item(s) from previous pid oldPid to current object pid"""
+    newPid = obj.pid
     for item in self._findItems(oldPid):
       item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
 
-  def _removeItem(self, objPid):
+  def _removeItem(self, wrapperObject:AbstractWrapperObject):
+  # def _removeItem(self, parent, objPid):
     """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.
-    Called when objects are deleted"""
+    Called when objects are deleted.
+    The parent parameter is necessary to match the standard calling interface of notifiers"""
     import sip
-    for item in self._findItems(objPid):
+    for item in self._findItems(wrapperObject.pid):
       sip.delete(item)
 
   def _findItems(self, objPid:str) -> QtGui.QTreeWidgetItem:

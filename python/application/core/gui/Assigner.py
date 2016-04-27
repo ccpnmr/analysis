@@ -30,15 +30,15 @@ from ccpn import Project
 from ccpn.lib.Assignment import getNmrResiduePrediction
 from ccpn import NmrAtom
 from ccpn import NmrResidue
-from ccpn import Spectrum
+# from ccpn import Spectrum
 
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Font import Font
-from ccpncore.gui.PulldownList import PulldownList
+# from ccpncore.gui.PulldownList import PulldownList
 
-from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability
+# from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability
 
 import typing
 
@@ -180,6 +180,18 @@ class Assigner(CcpnDock):
     self.scene.dragEnterEvent = self.dragEnterEvent
     global guiNmrResidues
     guiNmrResidues = []
+
+    # self.project.registerNotifier('NmrResidue', 'rename', self._resetNmrResiduePidForAssigner,)
+
+  # def _resetNmrResiduePidForAssigner(self, nmrResidue):
+  #   """Reset pid for NmrResidue and all offset NmrResidues"""
+  #   # NB This does what it says in the comment. Up to Simon to see what it ought to do
+  #   for nr in [nmrResidue] + nmrResidue.offsetNmrResidues:
+  #     for guiNmrResidue in self.guiNmrResidues:
+  #       if guiNmrResidue.nmrResidue is nr:
+  #         guiNmrResidue.update()
+
+
 
   def clearAllItems(self):
     """
@@ -468,6 +480,13 @@ class Assigner(CcpnDock):
     atom = GuiNmrAtom(self.project, text=atomType, pos=position, nmrAtom=nmrAtom)
     return atom
 
+
+
+#NBNB TBD:
+# The below should be replaced. See commented-out code at the end fo Assigner.__init__
+# After refactoring, guiNmrResidues should not be global
+
+
 def _resetNmrResiduePidForAssigner(project:Project, apiResonanceGroup:ApiResonanceGroup):
   """Reset pid for NmrResidue and all offset NmrResidues"""
   if hasattr(project._appBase.mainWindow, 'assigner'):
@@ -477,9 +496,9 @@ def _resetNmrResiduePidForAssigner(project:Project, apiResonanceGroup:ApiResonan
       guiNmrResidue.update()
 
 
-Project._setupNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setSequenceCode')
-Project._setupNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setDirectNmrChain')
-Project._setupNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setResidueType')
-Project._setupNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setAssignedResidue')
+Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setSequenceCode')
+Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setDirectNmrChain')
+Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setResidueType')
+Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setAssignedResidue')
 
 

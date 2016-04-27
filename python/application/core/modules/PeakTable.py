@@ -167,7 +167,7 @@ class PeakListSimple(QtGui.QWidget, Base):
 
   def selectPeakInTable(self, peaks=None):
     peakList = self.project.getByPid(self.peakListPulldown.currentText())
-    if peaks[-1] in peakList.peaks:
+    if peaks and peaks[-1] in peakList.peaks:
       self.peakTable.table.selectObject(peaks[-1])
 
   def getPeakHeight(self, peak:Peak):

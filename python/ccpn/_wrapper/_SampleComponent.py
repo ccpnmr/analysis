@@ -27,6 +27,8 @@ from ccpn import Project
 from ccpn import Sample
 from ccpn import SpectrumHit
 from ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
+from ccpncore.api.ccp.lims.Sample import Sample as ApiSample
+from ccpncore.api.ccp.nmr import Nmr
 from ccpncore.util import Pid
 from typing import Tuple
 
@@ -44,6 +46,9 @@ class SampleComponent(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiSampleComponent._metaclass.qualifiedName()
 
   # CCPN properties  
   @property
@@ -134,20 +139,6 @@ class SampleComponent(AbstractWrapperObject):
     ff = self._project._data2Obj.get
     return tuple(ff(x) for x in self._apiSampleComponent.sortedSpectrumHits())
 
-  # @property
-  # def chemicalShiftList(self) -> ChemicalShiftList:
-  #   """ChemicalShiftList associated with Spectrum."""
-  #   return self._project._data2Obj.get(self._wrappedData.shiftList)
-  #
-  # @chemicalShiftList.setter
-  # def chemicalShiftList(self, value):
-  #
-  #   value = self.getByPid(value) if isinstance(value, str) else value
-  #   apiPeakList = self._wrappedData
-  #   if value is None:
-  #     apiPeakList.shiftList = None
-  #   else:
-  #     apiPeakList.shiftList = value._wrappedData
     
   # Implementation functions
   @classmethod
@@ -191,11 +182,18 @@ def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
 Sample.newSampleComponent = _newSampleComponent
 del _newSampleComponent
 
-# Notifiers:
-className = ApiSampleComponent._metaclass.qualifiedName()
+# Notifiers - to notify SampleComponent - SpectrumHit link:
+className = Nmr.Experiment._metaclass.qualifiedName()
+Project._apiNotifiers.append(
+  ('_modifiedLink', {'classNames':('SampleComponent','SpectrumHit')}, className, 'setSample'),
+)
+className = ApiSample._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':SampleComponent}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+  ( ('_modifiedLink', {'classNames':('SampleComponent','SpectrumHit')}, className,
+     'addNmrExperiment'),
+    ('_modifiedLink', {'classNames':('SampleComponent','SpectrumHit')}, className,
+     'removeNmrExperiment'),
+    ('_modifiedLink', {'classNames':('SampleComponent','SpectrumHit')}, className,
+     'setNmrExperiments'),
   )
 )

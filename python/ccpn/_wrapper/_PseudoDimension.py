@@ -27,6 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
 from ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
+from ccpncore.api.ccp.nmr.Nmr import ExpDimRef as ApiExpDimRef
 
 
 class PseudoDimension(AbstractWrapperObject):
@@ -45,6 +46,9 @@ class PseudoDimension(AbstractWrapperObject):
 
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiSampledDataDim._metaclass.qualifiedName()
 
   # CCPN properties
   @property
@@ -157,10 +161,10 @@ class PseudoDimension(AbstractWrapperObject):
 Spectrum._childClasses.append(PseudoDimension)
 
 # Notifiers:
-className = ApiSampledDataDim._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':PseudoDimension}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)
+def _expDimRefHasChanged(project:Project, apiExpDimRef:ApiExpDimRef):
+  """Refresh PseudoDimension when ExpDimRef has changed"""
+  for dataDim in apiExpDimRef.expDim.dataDims:
+    if isinstance(dataDim, ApiSampledDataDim):
+      project._modifiedApiObject(dataDim)
+Project._setupApiNotifier(_expDimRefHasChanged, ApiExpDimRef, '')
+del _expDimRefHasChanged

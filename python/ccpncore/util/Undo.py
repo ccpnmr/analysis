@@ -143,7 +143,7 @@ class Undo(deque):
         waypoints[ii] -= nRemove
     waypoints.append(self.nextIndex-1)
 
-    waypoints.append(self.nextIndex-1)
+    # waypoints.append(self.nextIndex-1)
 
   def newItem(self, undoMethod, redoMethod, undoArgs=None, undoKwargs=None,
               redoArgs=None, redoKwargs=None):
@@ -232,19 +232,22 @@ class Undo(deque):
 
     # TBD: what should we do if undoMethod() throws an exception?
 
+    # print('@~@~ Undo.undo', self.nextIndex, self.maxWaypoints, self.waypoints, self._debug)
+
     if self.nextIndex == 0:
       return
 
     elif self.maxWaypoints:
       undoTo = -1
       for val in self.waypoints:
-        if val < self.nextIndex:
+        if val < self.nextIndex -1:
           undoTo = val
         else:
           break
     else:
       undoTo = max(self.nextIndex - 2, -1)
 
+    # print('@~@~ undoTo', self.nextIndex-1, undoTo)
     # block addition of items while operating
     self._blocked = True
     try:

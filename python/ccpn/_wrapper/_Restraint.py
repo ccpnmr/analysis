@@ -27,7 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import RestraintList
 from ccpn import Peak
-from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraint as ApiAbstractConstraint
+from ccpncore.api.ccp.nmr import NmrConstraint
 
 class Restraint(AbstractWrapperObject):
   """Restraint, of type given in restraintType."""
@@ -43,9 +43,12 @@ class Restraint(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = NmrConstraint.AbstractConstraint._metaclass.qualifiedName()
+
   # CCPN properties
   @property
-  def _apiConstraint(self) -> ApiAbstractConstraint:
+  def _apiConstraint(self) -> NmrConstraint.AbstractConstraint:
     """ CCPN API Constraint matching Restraint"""
     return self._wrappedData
 
@@ -261,11 +264,10 @@ del _newRestraint
 RestraintList.createSimpleRestraint = createSimpleRestraint
 
 # Notifiers:
-for clazz in ApiAbstractConstraint._metaclass.getNonAbstractSubtypes():
+for clazz in NmrConstraint.ConstraintPeakContrib._metaclass.getNonAbstractSubtypes():
   className = clazz.qualifiedName()
   Project._apiNotifiers.extend(
-    ( ('_newObject', {'cls':RestraintList}, className, '__init__'),
-      ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+    ( ('_modifiedLink', {'classNames':('Peak', 'Restraint')}, className, 'delete'),
+      ('_modifiedLink', {'classNames':('Peak', 'Restraint')}, className, 'create'),
     )
-)
+  )

@@ -21,12 +21,14 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from collections import abc
+
 import itertools
 import functools
+import typing
+import operator
+from collections import OrderedDict
 
 from ccpncore.util import Pid
-from typing import List
 from ccpncore.util import Common as commonUtil
 from ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.lib import CcpnSorting
@@ -119,6 +121,7 @@ class AbstractWrapperObject():
   #: Short class name, for PID. Must be overridden for each subclass
   shortClassName = None
 
+  className = 'AbstractWrapperObject'
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'abstractWrapperClasses'
@@ -131,6 +134,11 @@ class AbstractWrapperObject():
   # only when necessary.
   #__slots__ = ['_project', '_wrappedData', 'id', '__dict__']
 
+
+
+  # Wrapper-level notifiers that are set up on code import and
+  # registered afresh for every new project
+  _coreNotifiers = []
   
   # Implementation methods
   
@@ -566,44 +574,61 @@ class AbstractWrapperObject():
     
   # CCPN Implementation methods
 
-
   @classmethod
-  def _linkWrapperClasses(cls, ancestors:list=None):
-    """Recursively set up links and functions involving children for wrapper classes"""
+  def _linkWrapperClasses(cls, ancestors:list=None, Project:'Project'=None):
+    """Recursively set up links and functions involving children for wrapper classes
+
+    NB classes that have already been linked are ignored, but their children are still processed"""
     import ccpn
 
-    if ancestors:
-      # add getCls in all ancestors
-      funcName = 'get' + cls.className
-      for ancestor in ancestors:
-        # Add getDescendant function
-        def func(self,  relativeId: str) -> cls:
-          return cls._getDescendant(self, relativeId)
-        func.__doc__= "Get contained %s object by relative ID" % cls
-        setattr(ancestor, funcName, func)
-
-      # Add descendant links
-      linkName = cls._pluralLinkName
+    if Project:
+      assert ancestors, "Code errors, _linkWrapperClasses called with Project but no ancestors"
       newAncestors = ancestors + [cls]
-      for ii in range(len(newAncestors)-1):
-        ancestor = newAncestors[ii]
-        func = functools.partial(AbstractWrapperObject._allDescendants,
-                                          descendantClasses=newAncestors[ii+1:])
-        # func.__annotations__['return'] = typing.Tuple[cls, ...]
-        prop = property(func,
-                          None, None,
-                          ("\- *(%s,)*  - contained %s objects sorted by id" %
-                            (cls, cls.className)
+      if cls not in Project._allLinkedWrapperClasses:
+        Project._allLinkedWrapperClasses.append(cls)
+        # add getCls in all ancestors
+        funcName = 'get' + cls.className
+        #  NB Ancestors is never None at this point
+        for ancestor in ancestors:
+          # Add getDescendant function
+          def func(self,  relativeId: str) -> cls:
+            return cls._getDescendant(self, relativeId)
+          func.__doc__= "Get contained %s object by relative ID" % cls
+          setattr(ancestor, funcName, func)
+
+        # Add descendant links
+        linkName = cls._pluralLinkName
+        for ii in range(len(newAncestors)-1):
+          ancestor = newAncestors[ii]
+          func = functools.partial(AbstractWrapperObject._allDescendants,
+                                            descendantClasses=newAncestors[ii+1:])
+          # func.__annotations__['return'] = typing.Tuple[cls, ...]
+          prop = property(func,
+                            None, None,
+                            ("\- *(%s,)*  - contained %s objects sorted by id" %
+                              (cls, cls.className)
+                            )
                           )
-                        )
-        setattr(ancestor, linkName, prop)
+          setattr(ancestor, linkName, prop)
+
+
+        # Add standard Notifiers:
+        className = cls._apiClassQualifiedName
+        Project._apiNotifiers[:0] = [
+          ('_newApiObject', {'cls':cls}, className, '__init__'),
+          ('_finaliseApiDelete', {}, className, 'delete'),
+          ('_finaliseApiUnDelete', {}, className, 'undelete'),
+          ('_modifiedApiObject', {}, className, ''),
+        ]
     else:
       # Project class. Start generation here
       newAncestors = [cls]
+      Project = cls
+      Project._allLinkedWrapperClasses.append(Project)
 
     # recursively call next level down the tree
     for cc in cls._childClasses:
-      cc._linkWrapperClasses(newAncestors)
+      cc._linkWrapperClasses(newAncestors, Project=Project)
 
   @classmethod
   def _getDescendant(cls, self,  relativeId: str):
@@ -725,14 +750,135 @@ class AbstractWrapperObject():
       if undo is not None:
         undo.decreaseBlocking()
 
-  def _getPidDependentObjects(self):
-    """Get list of objects whose Pid must change if the pid of this object changes.
-    Generally these are chile objects, but soem objects must ov erride this function
-    to add additional objects"""
+  def _getDirectChildren(self):
+    """Get list of objects that have self as a parent"""
 
     getDataObj = self._project._data2Obj.get
     return list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
 
+  # NOtifiers and related functions:
+
+  @classmethod
+  def setupCoreNotifier(cls, target:str, func:typing.Callable,
+                       parameterDict:dict={}, onceOnly:bool=False):
+    """Set up notifiers for class cls that do not depend on individual objects -
+    These will be registered whenever a new project is initialised.
+    Parameters are eventually passed to the project.registerNotifier() function
+    (with cls converted to cls.className). Please see the registerNotifier
+    documentation for a precise parameter description
+
+    Note that these notifiers are NOT cleared once set up.
+    """
+
+    cls._coreNotifiers.append((cls.className, target, func, parameterDict, onceOnly))
+
+
+  def _finaliseRename(self):
+    """Reset internal attributes and call notifiers after values determining PID have changed
+    """
+
+    # reset id
+    project = self._project
+    oldId = self._id
+    parent = self._parent
+    if parent is None:
+      _id = ''
+    elif parent is project:
+      _id = str(self._key)
+    else:
+      _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
+    self._id = _id
+    self._old_id = oldId
+
+    # update pid:object mapping dictionary
+    dd = project._pid2Obj[self.className]
+    del dd[oldId]
+    dd[_id] = self
+
+  def _finaliseRelatedObjectFromRename(self, oldPid, pathToObject:str, action:str):
+    """Finalise related objects after rename
+    Alternative to _finaliseRelatedObject for calling from rename notifier.
+    """
+    target = operator.attrgetter(pathToObject)(self)
+    if not target:
+      pass
+    elif isinstance(target, AbstractWrapperObject):
+      target._finaliseAction(action)
+    else:
+      # This must be an iterable
+      for obj in target:
+        obj._finaliseAction(action)
+
+  def _finaliseRelatedObject(self, pathToObject:str, action:str):
+    """ Finalise 'action' type notifiers for getattribute(pathToObject)(self)
+    pathToObject is a navigation path (may contain dots) and must yield an object
+    or an iterable of objects. Can NOT be called from a rename notifier"""
+
+    target = operator.attrgetter(pathToObject)(self)
+    if not target:
+      pass
+    elif isinstance(target, AbstractWrapperObject):
+      target._finaliseAction(action)
+    else:
+      # This must be an iterable
+      for obj in target:
+        obj._finaliseAction(action)
+
+  def _finaliseAction(self, action:str):
+    """Do wrapper level finalisation, and execute all notifiers
+
+    action is one of: 'create', 'delete', 'change', 'rename'"""
+
+    project = self.project
+    if project._notificationBlanking:
+      return
+
+    className = self.className
+    iterator = (project._context2Notifiers.setdefault((name, action), OrderedDict())
+               for name in (className, 'AbstractWrapperObject'))
+    ll = project._pendingNotifications
+
+    if action == 'rename':
+      # Special case
+
+      oldPid = self.pid
+
+      # Wrapper-level processing
+      self._finaliseRename()
+
+      # Call notifiers with special signature
+      if project._notificationSuspension:
+        for dd in iterator:
+          for notifier, onceOnly in dd.items():
+            ll.append((notifier, onceOnly, self, oldPid))
+      else:
+        for dd in iterator:
+          for notifier in dd:
+            notifier(self, oldPid)
+
+      # call rename on children
+      for obj in self._getDirectChildren():
+        obj._finaliseAction('rename')
+
+    else:
+      # Normal case - just call notifiers
+      if project._notificationSuspension:
+        for dd in iterator:
+          for notifier, onceOnly in dd.items():
+            ll.append((notifier, onceOnly, self))
+      else:
+        for dd in iterator:
+          for notifier in dd:
+            notifier(self)
+
+  # def _getPidDependentObjects(self):
+  #   """Get list of objects whose Pid must change if the pid of this object changes.
+  #   Generally these are child objects, but some objects must override this function
+  #   to add additional objects"""
+  #
+  #   getDataObj = self._project._data2Obj.get
+  #   return list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
+
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
-AbstractWrapperObject._getPidDependentObjects.__annotations__['return'] = List[AbstractWrapperObject]
+# AbstractWrapperObject._getPidDependentObjects.__annotations__['return'] = List[AbstractWrapperObject]

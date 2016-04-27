@@ -29,7 +29,8 @@ import collections
 from typing import Sequence, Tuple, Optional
 from ccpn import AbstractWrapperObject
 from ccpn import Project
-from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+from ccpncore.api.ccp.nmr import Nmr
+from ccpncore.api.ccp.general import DataLocation
 from ccpncore.util import Pid
 
 # MagnetisationTransferTuple
@@ -51,9 +52,12 @@ class Spectrum(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
+
   # CCPN properties
   @property
-  def _apiDataSource(self) -> ApiDataSource:
+  def _apiDataSource(self) -> Nmr.DataSource:
     """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
 
@@ -848,12 +852,11 @@ def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Sp
 
   return self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name)]
 
-# Create PeakList when new DataSource is created
-def _SpectrumMakeFirstPeakList(project:Project, apiDataSource:ApiDataSource):
+def _SpectrumMakeFirstPeakList(project:Project, dataSource:Nmr.DataSource):
   """Add PeakList if none is present"""
-  if not apiDataSource.peakLists:
-    apiDataSource.newPeakList()
-Project._setupNotifier(_SpectrumMakeFirstPeakList, ApiDataSource, 'postInit')
+  if not dataSource.peakLists:
+    dataSource.newPeakList()
+Project._setupApiNotifier(_SpectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')
 
 # Connections to parents:
 
@@ -864,12 +867,21 @@ del _newSpectrum
 Project.createDummySpectrum = _createDummySpectrum
 del _createDummySpectrum
 
-# Notifiers:
-className = ApiDataSource._metaclass.qualifiedName()
+# Additional Notifiers:
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Spectrum}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-    ('_resetPid', {}, className, 'setName'),
+  (
+    ('_finaliseApiRename', {}, Nmr.DataSource._metaclass.qualifiedName(), 'setName'),
+    ('_notifyRelatedApiObject', {'pathToObject':'dataSources', 'action':'change'},
+     Nmr.Experiment._metaclass.qualifiedName(), ''),
+    ('_notifyRelatedApiObject', {'pathToObject':'dataSource', 'action':'change'},
+     Nmr.AbstractDataDim._metaclass.qualifiedName(), ''),
+    ('_notifyRelatedApiObject', {'pathToObject':'dataDim.dataSource', 'action':'change'},
+     Nmr.DataDimRef._metaclass.qualifiedName(), ''),
+    ('_notifyRelatedApiObject', {'pathToObject':'experiment.dataSources', 'action':'change'},
+     Nmr.ExpDim._metaclass.qualifiedName(), ''),
+    ('_notifyRelatedApiObject', {'pathToObject':'expDim.experiment.dataSources', 'action':'change'},
+     Nmr.ExpDimRef._metaclass.qualifiedName(), ''),
+    ('_notifyRelatedApiObject', {'pathToObject':'nmrDataSources', 'action':'change'},
+     DataLocation.AbstractDataStore._metaclass.qualifiedName(), ''),
   )
 )

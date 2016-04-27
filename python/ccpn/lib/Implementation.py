@@ -154,6 +154,7 @@ class MutablePropertyView:
     for key, value in chained:
       setattr(self, key, value)
 
-class ListView(MutableSequence):
-  """This class provides a list that is a view of underlying API data"""
-  raise NotImplementedError("Not implemented yet)")
+# class ListView(MutableSequence):
+#   """This class provides a list that is a view of underlying API data"""
+#   def __init__(self):
+#     raise NotImplementedError("Not implemented yet)")

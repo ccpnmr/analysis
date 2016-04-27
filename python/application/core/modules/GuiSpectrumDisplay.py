@@ -28,14 +28,16 @@ import importlib, os
 from PyQt4 import QtGui, QtCore
 
 from ccpn import Project
+from ccpn import Peak
 
-from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
+# from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+# from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 
-from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
+from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
+# from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+# from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
-from ccpncore.gui.Frame import Frame as CoreFrame
+# from ccpncore.gui.Frame import Frame as CoreFrame
 from ccpncore.gui.Icon import Icon
 from ccpncore.gui.Label import Label
 from ccpncore.gui.ScrollArea import ScrollArea
@@ -254,75 +256,113 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     """Sets the position of the cross in all strips of spectrum display."""
     for strip in self.strips:
       strip.setCrossHairPosition(axisPositionDict)
+  #
+  # def _setActionIconColour(self, apiDataSource):
+  #   action = self.spectrumActionDict.get(apiDataSource)
+  #   if action:
+  #     pix=QtGui.QPixmap(QtCore.QSize(60, 10))
+  #     if apiDataSource.numDim < 2:
+  #       pix.fill(QtGui.QColor(apiDataSource.sliceColour))
+  #     else:
+  #       pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
+  #     action.setIcon(QtGui.QIcon(pix))
 
-  def _setActionIconColour(self, apiDataSource):
-    action = self.spectrumActionDict.get(apiDataSource)
-    if action:
-      pix=QtGui.QPixmap(QtCore.QSize(60, 10))
-      if apiDataSource.numDim < 2:
-        pix.fill(QtGui.QColor(apiDataSource.sliceColour))
-      else:
-        pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
-      action.setIcon(QtGui.QIcon(pix))
-    
-def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
-  """Update interface when a strip is created"""
-  
-  spectrumDisplay = project._data2Obj[apiStripSpectrumView.strip.spectrumDisplay]
-  enabled = len(spectrumDisplay.strips) > 1
-  spectrumDisplay.removeStripAction.setEnabled(enabled)
-  
-def _deletedStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
-  """Update interface when a strip is deleted"""
-  
-  spectrumView = project._data2Obj[apiStripSpectrumView]
-  strip = spectrumView.strip
-  spectrumDisplay = strip.spectrumDisplay
-  scene = strip.plotWidget.scene()
-  scene.removeItem(spectrumView)
-  if hasattr(spectrumView, 'plot'):  # 1d
-    scene.removeItem(spectrumView.plot)
-  
-  enabled = len(spectrumDisplay.strips) > 2  # 2 not 1 because this strip has not been deleted yet
-  spectrumDisplay.removeStripAction.setEnabled(enabled)
-  
-  
-Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
-Project._setupNotifier(_deletedStripSpectrumView, ApiStripSpectrumView, 'preDelete')
+  def _deletedPeak(self, peak):
+    apiPeak = peak._wrappedData
+    # NBNB TBD FIXME rewrite this to not use API peaks
+    # ALSO move this machinery from subclasses to this class.
+    for peakListView in self.activePeakItemDict:
+      peakItemDict = self.activePeakItemDict[peakListView]
+      peakItem = peakItemDict.get(apiPeak)
+      if peakItem:
+        peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
+        del peakItemDict[apiPeak]
+        inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
+        if inactivePeakItems:
+          inactivePeakItems.add(peakItem)
 
-def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
-  apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
-  getDataObj = project._data2Obj.get
-  peakListView = getDataObj(apiStripPeakListView)
-  spectrumView = peakListView.spectrumView
-  action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
+
+
+# def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
+#   """Update interface when a strip is created"""
+#
+#   spectrumDisplay = project._data2Obj[apiStripSpectrumView.strip.spectrumDisplay]
+#   enabled = len(spectrumDisplay.strips) > 1
+#   spectrumDisplay.removeStripAction.setEnabled(enabled)
+  
+# def _deletedStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
+#   """Update interface when a strip is deleted"""
+#
+#   spectrumView = project._data2Obj[apiStripSpectrumView]
+#   strip = spectrumView.strip
+#   spectrumDisplay = strip.spectrumDisplay
+#   scene = strip.plotWidget.scene()
+#   scene.removeItem(spectrumView)
+#   if hasattr(spectrumView, 'plot'):  # 1d
+#     scene.removeItem(spectrumView.plot)
+#
+#   enabled = len(spectrumDisplay.strips) > 2  # 2 not 1 because this strip has not been deleted yet
+#   spectrumDisplay.removeStripAction.setEnabled(enabled)
+#
+#
+# Project._setupApiNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
+# Project._setupApiNotifier(_deletedStripSpectrumView, ApiStripSpectrumView, 'preDelete')
+
+
+#
+# def _createdStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
+#   apiDataSource = apiStripPeakListView.stripSpectrumView.spectrumView.dataSource
+#   getDataObj = project._data2Obj.get
+#   peakListView = getDataObj(apiStripPeakListView)
+#   spectrumView = peakListView.spectrumView
+#   action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(apiDataSource)
+#   if action:
+#     action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
+#
+#   strip = spectrumView.strip
+#   for apiPeakList in apiDataSource.sortedPeakLists():
+#     strip.showPeaks(getDataObj(apiPeakList))
+#
+# Project._setupApiNotifier(_createdStripPeakListView, ApiStripPeakListView, 'postInit')
+
+# def _setActionIconColour(project:Project, apiDataSource:ApiDataSource):
+#
+#   # TBD: the below might not be the best way to get hold of the spectrumDisplays
+#   for task in project.tasks:
+#     if task.status == 'active':
+#       for spectrumDisplay in task.spectrumDisplays:
+#         spectrumDisplay._setActionIconColour(apiDataSource)
+#
+# for apiFuncName in ('setPositiveContourColour', 'setSliceColour'):
+#   Project._setupApiNotifier(_setActionIconColour, ApiDataSource, apiFuncName)
+
+
+# def _deletedPeak(project:Project, apiPeak:ApiPeak):
+#
+#   # TBD: the below might not be the best way to get hold of the spectrumDisplays
+#   for task in project.tasks:
+#     if task.status == 'active':
+#       for spectrumDisplay in task.spectrumDisplays:
+#         spectrumDisplay._deletedPeak(apiPeak)
+#
+# Project._setupApiNotifier(_deletedPeak, ApiPeak, 'preDelete')
+
+
+def _deletedPeak(peak:Peak):
+
+  for spectrumView in peak.peakList.spectrum.spectrumViews:
+    spectrumView.strip.spectrumDisplay._deletedPeak(peak)
+Peak.setupCoreNotifier('delete', _deletedPeak)
+
+def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+  """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
+  spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]
+  apiDataSource = apiSpectrumView.dataSource
+
+  # remove toolbar action (button)
+  # NBNB TBD FIXME get rid of API object from code
+  action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be not None
   if action:
-    action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
-
-  strip = spectrumView.strip
-  for apiPeakList in apiDataSource.sortedPeakLists():
-    strip.showPeaks(getDataObj(apiPeakList))
-
-Project._setupNotifier(_createdStripPeakListView, ApiStripPeakListView, 'postInit')
-
-def _setActionIconColour(project:Project, apiDataSource:ApiDataSource):
-
-  # TBD: the below might not be the best way to get hold of the spectrumDisplays
-  for task in project.tasks:
-    if task.status == 'active':
-      for spectrumDisplay in task.spectrumDisplays:
-        spectrumDisplay._setActionIconColour(apiDataSource)
-
-for apiFuncName in ('setPositiveContourColour', 'setSliceColour'):
-  Project._setupNotifier(_setActionIconColour, ApiDataSource, apiFuncName)
-
-def _deletedPeak(project:Project, apiPeak:ApiPeak):
-  
-  # TBD: the below might not be the best way to get hold of the spectrumDisplays
-  for task in project.tasks:
-    if task.status == 'active':
-      for spectrumDisplay in task.spectrumDisplays:
-        spectrumDisplay._deletedPeak(apiPeak)
-
-Project._setupNotifier(_deletedPeak, ApiPeak, 'preDelete')
-
+    spectrumDisplay.spectrumToolBar.removeAction(action)
+    del spectrumDisplay.spectrumActionDict[apiDataSource]
+Project._setupApiNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')

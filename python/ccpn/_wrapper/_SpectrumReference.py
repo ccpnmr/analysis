@@ -27,7 +27,7 @@ from ccpncore.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
-from ccpncore.api.ccp.nmr.Nmr import DataDimRef as ApiDataDimRef
+from ccpncore.api.ccp.nmr import Nmr
 
 
 class SpectrumReference(AbstractWrapperObject):
@@ -50,9 +50,12 @@ class SpectrumReference(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = Nmr.DataDimRef._metaclass.qualifiedName()
+
   # CCPN properties
   @property
-  def _apiSpectrumReference(self) -> ApiDataDimRef:
+  def _apiSpectrumReference(self) -> Nmr.DataDimRef:
     """ CCPN DataSource matching Spectrum"""
     return self._wrappedData
 
@@ -265,10 +268,20 @@ Spectrum.newSpectrumReference = _newSpectrumReference
 del _newSpectrumReference
 
 # Notifiers:
-className = ApiDataDimRef._metaclass.qualifiedName()
+def _isAcquisitionHasChanged(project:Project, apiExpDim:Nmr.ExpDim):
+  """Refresh SpectrumReference when ExpDim.isAcquisition has changed"""
+  for dataDim in apiExpDim.dataDims:
+    for dataDimRef in dataDim.dataDimRefs:
+      project._modifiedApiObject(dataDimRef)
+Project._setupApiNotifier(_isAcquisitionHasChanged, Nmr.ExpDim, '')
+del _isAcquisitionHasChanged
+
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':SpectrumReference}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+  ( ('_notifyRelatedApiObject', {'pathToObject':'dataDimRefs', 'action':'change'},
+     Nmr.ExpDimRef._metaclass.qualifiedName(), ''),
   )
+)
+className = Nmr.FreqDataDim._metaclass.qualifiedName()
+Project._apiNotifiers.append(
+  ('_notifyRelatedApiObject', {'pathToObject':'dataDimRefs', 'action':'change'}, className, ''),
 )

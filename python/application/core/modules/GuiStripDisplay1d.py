@@ -26,23 +26,23 @@ __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 
 from ccpn import Project
-from ccpn import Spectrum
+# from ccpn import Spectrum
 
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 
-from ccpncore.util.Pid import Pid
+# from ccpncore.util.Pid import Pid
 from typing import Sequence
 
 from ccpncore.gui.Icon import Icon
 
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from application.core.modules.spectrumItems import GuiPeakListView
-from application.core.modules.GuiStrip1d import GuiStrip1d
-from ccpncore.gui.VerticalLabel import VerticalLabel
+# from application.core.modules.spectrumItems import GuiPeakListView
+# from application.core.modules.GuiStrip1d import GuiStrip1d
+# from ccpncore.gui.VerticalLabel import VerticalLabel
 
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
+# from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+# from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
 
 
@@ -100,6 +100,10 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     """
     Displays specified peaks in all strips of the display using peakListView
     """
+
+    # NB should not be imported at top of file to avoid potential cyclic imports
+    from application.core.modules.spectrumItems import GuiPeakListView
+
     viewBox = peakListView.spectrumView.strip.viewBox
     activePeakItemDict = self.activePeakItemDict
     peakItemDict = activePeakItemDict.setdefault(peakListView, {})
@@ -224,133 +228,139 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
   #     action.setIcon(QtGui.QIcon(pix))
 
 
-  def _deletedPeak(self, apiPeak):
-    for peakListView in self.activePeakItemDict:
-      peakItemDict = self.activePeakItemDict[peakListView]
-      peakItem = peakItemDict.get(apiPeak)
-      if peakItem:
-        peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
-        del peakItemDict[apiPeak]
-        inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
-        if inactivePeakItems:
-          inactivePeakItems.add(peakItem)
+  # def _deletedPeak(self, apiPeak):
+  #   for peakListView in self.activePeakItemDict:
+  #     peakItemDict = self.activePeakItemDict[peakListView]
+  #     peakItem = peakItemDict.get(apiPeak)
+  #     if peakItem:
+  #       peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
+  #       del peakItemDict[apiPeak]
+  #       inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
+  #       if inactivePeakItems:
+  #         inactivePeakItems.add(peakItem)
     
     
-  def _createdPeak(self, apiPeak):
-    pass  # does anything need doing??
-    
-def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
-  """Set up SpectrumDisplay when new SpectrumView is created - for notifiers"""
+  # def _createdPeak(self, apiPeak):
+  #   pass  # does anything need doing??
+#
+# def _createdSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+#   """Set up SpectrumDisplay when new SpectrumView is created - for notifiers"""
+#
+#   getDataObj = project._data2Obj.get
+#   spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+#   if not isinstance(spectrumDisplay, GuiStripDisplay1d):
+#     return
+#
+#   apiDataSource = apiSpectrumView.dataSource
+#   action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be None
+#   if not action:
+#     # add toolbar action (button)
+#     if len(apiDataSource.name) <= 12:
+#       spectrumName = apiDataSource.name
+#     elif len(apiDataSource.name) > 12:
+#       spectrumName = apiDataSource.name[:12]+'.....'
+#     action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+#     action.setCheckable(True)
+#     action.setChecked(True)
+#     action.setToolTip(apiDataSource.name)
+#     widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
+#     widget.setIconSize(QtCore.QSize(120, 10))
+#     widget.setFixedSize(100, 30)
+#     widget.spectrumView = apiSpectrumView
+#     spectrumDisplay.spectrumActionDict[apiDataSource] = action
+#     spectrumDisplay._setActionIconColour(apiDataSource)
+#
+#   return action
+#
+# def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
+#   """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
+#
+#   apiSpectrumView = apiStripSpectrumView.spectrumView
+#   getDataObj = project._data2Obj.get
+#   spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+#   if not isinstance(spectrumDisplay, GuiStripDisplay1d):
+#     return
+#
+#   apiDataSource = apiSpectrumView.dataSource
+#   action = _createdSpectrumView(project, apiSpectrumView) # _createdStripSpectrumView is called before _createdSpectrumView so need this duplicate call here
+#   spectrumView = getDataObj(apiStripSpectrumView)
+#   action.toggled.connect(spectrumView.plot.setVisible)
+#   action.toggled.connect(spectrumView.setVisible)
+#
+#
+#   ##strip = spectrumView.strip
+#   ##for apiPeakList in apiDataSource.sortedPeakLists():
+#   ##  strip.showPeaks(getDataObj(apiPeakList))
+#
+# def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+#   """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
+#   spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]
+#   if not isinstance(spectrumDisplay, GuiStripDisplay1d):
+#     return
+#
+#   apiDataSource = apiSpectrumView.dataSource
+#   # spectrumView = project._data2Obj[apiSpectrumView]
+#   # spectrumDisplay.plotWidget.removeItem(spectrumView.plot)
+#
+#   # remove toolbar action (button)
+#   action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be not None
+#   if action:
+#     spectrumDisplay.spectrumToolBar.removeAction(action)
+#     del spectrumDisplay.spectrumActionDict[apiDataSource]
+#
+# Project._setupApiNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
+# Project._setupApiNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
+# Project._setupApiNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
 
-  getDataObj = project._data2Obj.get
-  spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
-  if not isinstance(spectrumDisplay, GuiStripDisplay1d):
-    return
-
-  apiDataSource = apiSpectrumView.dataSource
-  action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be None
-  if not action:
-    # add toolbar action (button)
-    if len(apiDataSource.name) <= 12:
-      spectrumName = apiDataSource.name
-    elif len(apiDataSource.name) > 12:
-      spectrumName = apiDataSource.name[:12]+'.....'
-    action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
-    action.setCheckable(True)
-    action.setChecked(True)
-    action.setToolTip(apiDataSource.name)
-    widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
-    widget.setIconSize(QtCore.QSize(120, 10))
-    widget.setFixedSize(100, 30)
-    widget.spectrumView = apiSpectrumView
-    spectrumDisplay.spectrumActionDict[apiDataSource] = action
-    spectrumDisplay._setActionIconColour(apiDataSource)
-
-  return action
-
-def _createdStripSpectrumView(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
-  """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
-
-  apiSpectrumView = apiStripSpectrumView.spectrumView
-  getDataObj = project._data2Obj.get
-  spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
-  if not isinstance(spectrumDisplay, GuiStripDisplay1d):
-    return
-
-  apiDataSource = apiSpectrumView.dataSource
-  action = _createdSpectrumView(project, apiSpectrumView) # _createdStripSpectrumView is called before _createdSpectrumView so need this duplicate call here
-  spectrumView = getDataObj(apiStripSpectrumView)
-  action.toggled.connect(spectrumView.plot.setVisible)
-  action.toggled.connect(spectrumView.setVisible)
+# def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
+#
+#   getDataObj = project._data2Obj.get
+#   peakListView = getDataObj(apiStripPeakListView)
+#   spectrumView = peakListView.spectrumView
+#   strip = spectrumView.strip
+#   spectrumDisplay = strip.spectrumDisplay
+#
+#   if not isinstance(strip, GuiStrip1d):
+#     return
+#   scene = strip.plotWidget.scene()
+#   peakList = peakListView.peakList
+#   peakItemDict = spectrumDisplay.activePeakItemDict[peakListView]
+#   peakItems = set(spectrumDisplay.inactivePeakItemDict[peakListView])
+#   for apiPeak in peakItemDict:
+#     peakItem = peakItemDict[apiPeak]
+#     peakItems.add(peakItem)
+#
+#   scene = strip.plotWidget.scene()
+#   for peakItem in peakItems:
+#     scene.removeItem(peakItem.annotation)
+#     scene.removeItem(peakItem.symbol)
+#     scene.removeItem(peakItem)
+#   scene.removeItem(peakListView)
+#
+#   del spectrumDisplay.activePeakItemDict[peakListView]
+#   del spectrumDisplay.inactivePeakItemDict[peakListView]
+#
+# Project._setupApiNotifier(_deletedStripPeakListView, ApiStripPeakListView, 'preDelete')
 
 
-  ##strip = spectrumView.strip
-  ##for apiPeakList in apiDataSource.sortedPeakLists():
-  ##  strip.showPeaks(getDataObj(apiPeakList))
-
-def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
-  """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
-  spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]
-  if not isinstance(spectrumDisplay, GuiStripDisplay1d):
-    return
-
-  apiDataSource = apiSpectrumView.dataSource
-  # spectrumView = project._data2Obj[apiSpectrumView]
-  # spectrumDisplay.plotWidget.removeItem(spectrumView.plot)
-
-  # remove toolbar action (button)
-  action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be not None
-  if action:
-    spectrumDisplay.spectrumToolBar.removeAction(action)
-    del spectrumDisplay.spectrumActionDict[apiDataSource]
-
-Project._setupNotifier(_createdSpectrumView, ApiSpectrumView, 'postInit')
-Project._setupNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')
-Project._setupNotifier(_createdStripSpectrumView, ApiStripSpectrumView, 'postInit')
-
-def _deletedStripPeakListView(project:Project, apiStripPeakListView:ApiStripPeakListView):
-
-  getDataObj = project._data2Obj.get
-  peakListView = getDataObj(apiStripPeakListView)
-  spectrumView = peakListView.spectrumView
-  strip = spectrumView.strip
-  spectrumDisplay = strip.spectrumDisplay
-
-  if not isinstance(strip, GuiStrip1d):
-    return
-  scene = strip.plotWidget.scene()
-  peakList = peakListView.peakList
-  peakItemDict = spectrumDisplay.activePeakItemDict[peakListView]
-  peakItems = set(spectrumDisplay.inactivePeakItemDict[peakListView])
-  for apiPeak in peakItemDict:
-    peakItem = peakItemDict[apiPeak]
-    peakItems.add(peakItem)
-
-  scene = strip.plotWidget.scene()
-  for peakItem in peakItems:
-    scene.removeItem(peakItem.annotation)
-    scene.removeItem(peakItem.symbol)
-    scene.removeItem(peakItem)
-  scene.removeItem(peakListView)
-
-  del spectrumDisplay.activePeakItemDict[peakListView]
-  del spectrumDisplay.inactivePeakItemDict[peakListView]
-
-Project._setupNotifier(_deletedStripPeakListView, ApiStripPeakListView, 'preDelete')
-
-
-def _updatePlotColour(project:Project, apiDataSource:ApiDataSource):
-
-    
+def _updateSpectrumPlotColour(project:Project, apiDataSource:ApiDataSource):
   getDataObj = project._data2Obj.get
   spectrum = getDataObj(apiDataSource)
   for task in project.tasks:
     if task.status == 'active':
       for spectrumDisplay in task.spectrumDisplays:
-        if isinstance(spectrumDisplay, GuiStripDisplay1d):
+        if spectrumDisplay.is1D:
           spectrumDisplay._updatePlotColour(spectrum)
+Project._setupApiNotifier(_updateSpectrumPlotColour, ApiDataSource, 'setSliceColour')
 
-Project._setupNotifier(_updatePlotColour, ApiDataSource, 'setSliceColour')
+def _updateSpectrumViewPlotColour(project:Project, apiSpectrumView:ApiSpectrumView):
+  getDataObj = project._data2Obj.get
+  spectrum = getDataObj(apiSpectrumView.dataSource)
+  if spectrum:
+    spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+    if spectrumDisplay.is1D:
+      spectrumDisplay._updatePlotColour(spectrum)
+Project._setupApiNotifier(_updateSpectrumViewPlotColour, ApiSpectrumView, 'setSliceColour')
 
 
 # Unnecessary - dimensionOrdering is frozen. RHF

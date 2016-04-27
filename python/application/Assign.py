@@ -26,9 +26,9 @@ from application.core.AppBase import AppBase, defineProgramArguments
 from ccpn.lib.Version import applicationVersion
 from application.core.lib.Window import MODULE_DICT
 from application.core.modules import GuiStrip
-from application.core.modules import GuiStripNd
-from application.core.modules import GuiSpectrumDisplay
-from application.core.modules import GuiStripDisplayNd
+# from application.core.modules import GuiStripNd
+# from application.core.modules import GuiSpectrumDisplay
+# from application.core.modules import GuiStripDisplayNd
 
 
 applicationName = 'AnalysisAssign'
@@ -48,6 +48,9 @@ class Assign(AppBase):
     for strip in project.strips:
       GuiStrip._setupGuiStrip(project, strip._wrappedData)
 
+      # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
+      #   strip.setZWidgets()
+
     # Initialise Rulers
     for task in project.tasks:
       for apiMark in task._wrappedData.sortedMarks():
@@ -56,16 +59,21 @@ class Assign(AppBase):
 
     # Initialise SpectrumViews
     for spectrumDisplay in project.spectrumDisplays:
-      apiSpectrumDisplay = spectrumDisplay._wrappedData
-      for apiSpectrumView in apiSpectrumDisplay.sortedSpectrumViews():
-        GuiStripDisplayNd._createdSpectrumView(project, apiSpectrumView)
-
-      for apiStrip in apiSpectrumDisplay.orderedStrips:
-        for apiStripSpectrumView in apiStrip.stripSpectrumViews:
-          GuiStripNd._spectrumViewCreated(project, apiStripSpectrumView)
-          GuiStripDisplayNd._createdStripSpectrumView(project, apiStripSpectrumView)
-          for apiStripPeakListView in apiStripSpectrumView.stripPeakListViews:
-            GuiSpectrumDisplay._createdStripPeakListView(project, apiStripPeakListView)
+      for strip in spectrumDisplay.strips:
+        for spectrumView in strip.spectrumViews:
+          spectrumView._createdSpectrumView
+    # for spectrumDisplay in project.spectrumDisplays:
+    #   apiSpectrumDisplay = spectrumDisplay._wrappedData
+    #   for apiSpectrumView in apiSpectrumDisplay.sortedSpectrumViews():
+    #     GuiStripDisplayNd._createdSpectrumView(project, apiSpectrumView)
+    #
+    #   for apiStrip in apiSpectrumDisplay.orderedStrips:
+    #     for apiStripSpectrumView in apiStrip.stripSpectrumViews:
+    #       # GuiStripNd._spectrumViewCreated(project, apiStripSpectrumView)
+    #       GuiStripDisplayNd._createdStripSpectrumView(project, apiStripSpectrumView)
+    #       for apiStripPeakListView in apiStripSpectrumView.stripPeakListViews:
+    #         #  NBNB TBD change to PeakListView._createdPeakListView()
+    #         GuiSpectrumDisplay._createdStripPeakListView(project, apiStripPeakListView)
     self.initLayout()
 
   def initLayout(self):

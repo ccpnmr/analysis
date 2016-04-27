@@ -50,6 +50,9 @@ class RestraintList(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiAbstractConstraintList._metaclass.qualifiedName()
+
   # # Number of atoms in a Restraint item, by restraint type
   # _restraintType2Length = {
   #   'Distance':2,
@@ -193,106 +196,32 @@ class RestraintList(AbstractWrapperObject):
       self._wrappedData.tensorIsotropicValue= value.isotropic
       self._wrappedData.tensorMagnitude= value.axial
       self._wrappedData.tensorRhombicity= value.rhombic
-    # if self.restraintType == 'Rdc':
-    #   apiRestraintList = self._wrappedData
-    #   if commonUtil.isClose(value.isotropic, 0.0):
-    #     self._wrappedData.tensorMagnitude= value.axial
-    #     self._wrappedData.tensorRhombicity= value.rhombic
-    #   else:
-    #     raise ValueError("Tensor isotropic value %s is not zero" % value.isotropic)
-    # else:
-    #   self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
-    #                                 % self.restraintType)
-
-  # @property
-  # def tensorMagnitude(self) -> float:
-  #   """magnitude of orientation tensor """
-  #   if self.restraintType == 'Rdc':
-  #     return self._wrappedData.tensorMagnitude
-  #   else:
-  #     self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
-  #                                   % self.restraintType)
-  #
-  # @tensorMagnitude.setter
-  # def tensorMagnitude(self, value:float):
-  #   if self.restraintType == 'Rdc':
-  #     self._wrappedData.tensorMagnitude = value
-  #   else:
-  #     self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
-  #                                   % self.restraintType)
-  #
-  # @property
-  # def tensorRhombicity(self) -> float:
-  #   """rhombicity of orientation tensor """
-  #   if self.restraintType == 'Rdc':
-  #     return self._wrappedData.tensorRhombicity
-  #   else:
-  #     self._project._logger.warning("%sRestraintList has no attribute tensorRhombicity"
-  #                                   % self.restraintType)
-  #
-  # @tensorRhombicity.setter
-  # def tensorRhombicity(self, value:float):
-  #   if self.restraintType == 'Rdc':
-  #     self._wrappedData.tensorRhombicity = value
-  #   else:
-  #     self._project._logger.warning("%sRestraintList has no attribute tensorRhombicity"
-  #                                   % self.restraintType)
 
   @property
   def tensorChainCode(self) -> float:
     """tensorChainCode of orientation tensor """
-    # if self.restraintType == 'Rdc':
-    #   return self._wrappedData.tensorChainCode
-    # else:
-    #   self._project._logger.warning("%sRestraintList has no attribute tensorChainCode"
-    #                                 % self.restraintType)
     return self._wrappedData.tensorChainCode
 
   @tensorChainCode.setter
   def tensorChainCode(self, value:float):
-    # if self.restraintType == 'Rdc':
-    #   self._wrappedData.tensorChainCode = value
-    # else:
-    #   self._project._logger.warning("%sRestraintList has no attribute tensorChainCode"
-    #                                 % self.restraintType)
     self._wrappedData.tensorChainCode = value
 
   @property
   def tensorSequenceCode(self) -> float:
     """tensorSequenceCode of orientation tensor """
-    # if self.restraintType == 'Rdc':
-    #   return self._wrappedData.tensorSequenceCode
-    # else:
-    #   self._project._logger.warning("%sRestraintList has no attribute tensorSequenceCode"
-    #                                 % self.restraintType)
     return self._wrappedData.tensorSequenceCode
 
   @tensorSequenceCode.setter
   def tensorSequenceCode(self, value:float):
-    # if self.restraintType == 'Rdc':
-    #   self._wrappedData.tensorSequenceCode = value
-    # else:
-    #   self._project._logger.warning("%sRestraintList has no attribute tensorSequenceCode"
-    #                                 % self.restraintType)
     self._wrappedData.tensorSequenceCode = value
 
   @property
   def tensorResidueType(self) -> float:
     """tensorResidueType of orientation tensor """
-    # if self.restraintType == 'Rdc':
-    #   return self._wrappedData.tensorResidueType
-    # else:
-    #   self._project._logger.warning("%sRestraintList has no attribute tensorResidueType"
-    #                                 % self.restraintType)
     return self._wrappedData.tensorResidueType
 
   @tensorResidueType.setter
   def tensorResidueType(self, value:float):
-    # if self.restraintType == 'Rdc':
-    #   self._wrappedData.tensorResidueType = value
-    # else:
-    #   self._project._logger.warning("%sRestraintList has no attribute tensorResidueType"
-    #                                 % self.restraintType)
     self._wrappedData.tensorResidueType = value
     
   # Implementation functions
@@ -340,15 +269,6 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
                                                    tensorChainCode=tensorChainCode,
                                                    tensorSequenceCode=tensorSequenceCode,
                                                    tensorResidueType=tensorResidueType )
-  # apiNmrConstraintStore = self._wrappedData
-  # creator = apiNmrConstraintStore.getattr("new%sConstraintList" % restraintType)
-  # if restraintType == 'Rdc':
-  #   obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType,
-  #                 tensorMagnitude=tensorMagnitude, tensorRhombicity=tensorRhombicity,
-  #                 tensorChainCode=tensorChainCode,tensorSequenceCode=tensorSequenceCode,
-  #                 tensorResidueType=tensorResidueType )
-  # else:
-  #   obj = creator(name=name, details=comment, unit=unit, potentialType=potentialType)
   return self._project._data2Obj.get(obj)
 
 DataSet.newRestraintList = _newRestraintList
@@ -358,9 +278,6 @@ del _newRestraintList
 for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():
   className = clazz.qualifiedName()
   Project._apiNotifiers.extend(
-    ( ('_newObject', {'cls':RestraintList}, className, '__init__'),
-      ('_finaliseDelete', {}, className, 'delete'),
-      ('_finaliseUnDelete', {}, className, 'undelete'),
-      ('_resetPid', {}, className, 'setName'),
+    ( ('_finaliseApiRename', {}, className, 'setName'),
     )
 )

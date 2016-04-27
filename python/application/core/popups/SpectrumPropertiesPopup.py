@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -26,6 +27,8 @@ import os, sys
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn.lib import Util as ccpnUtil
+
 from ccpncore.gui.Base import Base
 from ccpncore.gui.Button import Button
 from ccpncore.gui.CheckBox import CheckBox
@@ -39,7 +42,6 @@ from ccpncore.gui.Spinbox import Spinbox
 
 
 from ccpncore.util.Colour import spectrumColours
-from ccpncore.util import Path as pathUtil
 
 from functools import partial
 
@@ -252,7 +254,7 @@ class GeneralTab(QtGui.QWidget, Base):
       apiDataSource = self.spectrum._apiDataSource
       apiDataLocationStore = apiDataSource.root.findFirstDataLocationStore(name='standard')
       if apiDataLocationStore is not None:
-        filePath = pathUtil.expandDollarFilePath(apiDataLocationStore, filePath)
+        filePath = ccpnUtil.expandDollarFilePath(apiDataLocationStore, filePath)
 
       if os.path.exists(filePath):
         self.spectrum.filePath = filePath

@@ -29,8 +29,9 @@ from ccpn import Project
 from ccpn import PeakList
 from application import SpectrumView
 from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
+# from ccpncore.api.ccpnmr.gui.Task import PeakListView as ApiPeakListView
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-from ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
+from ccpncore.api.ccp.nmr import Nmr
 from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 
 class PeakListView(AbstractWrapperObject, GuiPeakListView):
@@ -46,6 +47,9 @@ class PeakListView(AbstractWrapperObject, GuiPeakListView):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiStripPeakListView._metaclass.qualifiedName()
   
   def __init__(self, project:Project, wrappedData:ApiStripPeakListView):
     """Local override init for Qt subclass"""
@@ -87,7 +91,7 @@ class PeakListView(AbstractWrapperObject, GuiPeakListView):
   @symbolStyle.setter
   def symbolStyle(self, value:str):
     if self.symbolStyle != value:
-      self._wrappedData.spectrumView.symbolStyle = value
+      self._wrappedData.peakListView.symbolStyle = value
 
   @property
   def symbolColour(self) -> str:
@@ -161,28 +165,72 @@ PeakList.peakListViews = property(_getPeakListViews, None, None,
                                   "PeakListViews showing Spectrum")
 del _getPeakListViews
 
-# Notifiers
-def _peakListAddPeakListViews(project:Project, apiPeakList:ApiPeakList):
-  """Add ApiPeakListVIew when ApiPeakList is created"""
+# Connections to parents:
+SpectrumView._childClasses.append(PeakListView)
+
+# Notifiers:
+Project._apiNotifiers.append(
+  ('_notifyRelatedApiObject', {'pathToObject':'stripPeakListViews', 'action':'change'},
+   ApiStripPeakListView._metaclass.qualifiedName(), '')
+)
+
+def _createdPeakListView(peakListView:PeakListView):
+  spectrumView = peakListView.spectrumView
+  spectrum = spectrumView.spectrum
+  # NBNB TBD FIXME we should get rid of this API-level access
+  # But that requires refactoring the spectrumActionDict
+  action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(spectrum._wrappedData)
+  if action:
+    action.toggled.connect(peakListView.setVisible) # TBD: need to undo this if peakListView removed
+
+  strip = spectrumView.strip
+  for peakList in spectrum.peakLists:
+    strip.showPeaks(peakList)
+PeakListView.setupCoreNotifier('create', _createdPeakListView)
+
+# Notify PeakListView change when PeakList changes
+PeakList.setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+                          {'pathToObject':'peakListViews', 'action':'change'})
+
+def _peakListAddPeakListViews(project:Project, apiPeakList:Nmr.PeakList):
+  """Add ApiPeakListView when ApiPeakList is created"""
   for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
     apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
-Project._setupNotifier(_peakListAddPeakListViews, ApiPeakList, 'postInit')
+Project._setupApiNotifier(_peakListAddPeakListViews, Nmr.PeakList, 'postInit')
+del _peakListAddPeakListViews
 
 def _SpectrumViewAddPeakListViews(project:Project, apiSpectrumView:ApiSpectrumView):
   """Add ApiPeakListView when ApiSpectrumView is created"""
   for apiPeakList in apiSpectrumView.dataSource.peakLists:
     apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
-Project._setupNotifier(_SpectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')
+Project._setupApiNotifier(_SpectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')
+del _SpectrumViewAddPeakListViews
+
+# Links to PeakListView and PeakList are fixed after creation - any notifiers should be put in
+# create/destroy
 
 
-# Connections to parents:
-SpectrumView._childClasses.append(PeakListView)
+def _deletedStripPeakListView(peakListView:PeakListView):
 
-# Notifiers:
-className = ApiStripPeakListView._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':PeakListView}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)
+  spectrumView = peakListView.spectrumView
+  strip = spectrumView.strip
+  spectrumDisplay = strip.spectrumDisplay
+
+  peakItemDict = spectrumDisplay.activePeakItemDict[peakListView]
+  peakItems = set(spectrumDisplay.inactivePeakItemDict[peakListView])
+  for apiPeak in peakItemDict:
+    # NBNB TBD FIXME change to get rid of API peaks here
+    peakItem = peakItemDict[apiPeak]
+    peakItems.add(peakItem)
+
+  scene = strip.plotWidget.scene()
+  for peakItem in peakItems:
+    scene.removeItem(peakItem.annotation)
+    if spectrumDisplay.is1D:
+      scene.removeItem(peakItem.symbol)
+    scene.removeItem(peakItem)
+  scene.removeItem(peakListView)
+
+  del spectrumDisplay.activePeakItemDict[peakListView]
+  del spectrumDisplay.inactivePeakItemDict[peakListView]
+PeakListView.setupCoreNotifier('delete', _deletedStripPeakListView)

@@ -28,6 +28,8 @@ from ccpn import Project
 from ccpn import Substance
 from ccpn import SampleComponent
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
+from ccpncore.api.ccp.molecule import Molecule
+from ccpncore.api.ccp.lims import Sample
 from ccpncore.util import Pid
 from typing import Tuple, Optional, Union, Sequence
 
@@ -46,6 +48,9 @@ class Chain(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiChain._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -144,11 +149,8 @@ class Chain(AbstractWrapperObject):
       raise ValueError("Chain name must be set")
     elif Pid.altCharacter in value:
       raise ValueError("Character %s not allowed in Chain.shortName" % Pid.altCharacter)
-    apiNmrChain = self._project._apiNmrProject.findFirstNmrChain(code=self.shortName)
     self._apiChain.renameChain(value)
-    self._project._resetPid(self._apiChain)
-    if apiNmrChain is not None:
-      self._project._resetPid(apiNmrChain)
+    self._finaliseRename()
 
 
   @classmethod
@@ -286,10 +288,18 @@ Project._childClasses.append(Chain)
 # Project._makeChains = _makeChains
 
 # Notifiers:
-className = ApiChain._metaclass.qualifiedName()
+# Crosslinks: substance
+className = Molecule.Molecule._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Chain}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+  ( ('_modifiedLink', {'classNames':('Chain','Substance')}, className, 'create'),
+    ('_modifiedLink', {'classNames':('Chain','Substance')}, className, 'delete'),
+  )
+)
+# Crosslinks: sampleComponent
+className = Sample.SampleComponent._metaclass.qualifiedName()
+Project._apiNotifiers.extend(
+  ( ('_modifiedLink', {'classNames':('Chain','SampleComponent')}, className, 'addChainCode'),
+    ('_modifiedLink', {'classNames':('Chain','SampleComponent')}, className, 'removeChainCode'),
+    ('_modifiedLink', {'classNames':('Chain','SampleComponent')}, className, 'setChainCodes'),
   )
 )

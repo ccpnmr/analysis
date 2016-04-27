@@ -45,6 +45,9 @@ class Bond(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiGenericBond._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -115,11 +118,7 @@ Atom._getPidDependentObjects = _getPidDependentObjects
 del _getPidDependentObjects
 
 # Notifiers:
-className = ApiGenericBond._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Bond}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-    ('_resetPid', {}, className, 'setName'),
-  )
-)
+# NB The link to NmrAtom is immutable - does need a link notifier
+# rename bonds when atom is renamed
+Atom.setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
+                          {'pathToObject':'bonds', 'action':'rename'})

@@ -42,6 +42,9 @@ class Task(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiGuiTask._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -174,10 +177,3 @@ del _newTask
 
 # NBNB TBD Add notifiers, one way or the other, for activating and passivating tasks
 
-className = ApiGuiTask._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Task}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)

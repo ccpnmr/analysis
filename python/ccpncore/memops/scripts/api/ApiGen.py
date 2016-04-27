@@ -2221,7 +2221,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
           ):
         if op.opType == 'set':
           self.startIf(self.varNames['notIsReading'])
-          self.write("undoValueDict = dict((x, x.%s) for y in (currentValues, values) for x in y)"
+          self.write("undoValueDict = collections.OrderedDict((x, x.%s) for y in (currentValues, values) for x in y)"
                      % otherRole.name)
           self.endIf()
         elif op.opType == 'add':

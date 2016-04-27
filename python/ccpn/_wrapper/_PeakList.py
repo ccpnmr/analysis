@@ -43,6 +43,9 @@ class PeakList(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiPeakList._metaclass.qualifiedName()
+
   # Special error-raising functions for people who think PeakList is a list
   def __iter__(self):
     raise TypeError("'PeakList object is not iterable - for a list of peaks use Peaklist.peaks")
@@ -103,18 +106,6 @@ class PeakList(AbstractWrapperObject):
   def isSimulated(self, value:bool):
     self._wrappedData.isSimulated = value
 
-  # @property
-  # def chemicalShiftList(self) -> ChemicalShiftList:
-  #   """ChemicalShiftList associated with PeakList."""
-  #   return self._project._data2Obj.get(self._wrappedData.shiftList)
-  #
-  # @chemicalShiftList.setter
-  # def chemicalShiftList(self, value):
-  #
-  #   value = self.getByPid(value) if isinstance(value, str) else value
-  #   apiPeakList = self._wrappedData
-  #   apiPeakList.shiftList = None if value is None else value._wrappedData
-    
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
@@ -135,10 +126,3 @@ Spectrum.newPeakList = _newPeakList
 del _newPeakList
 
 # Notifiers:
-className = ApiPeakList._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':PeakList}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)

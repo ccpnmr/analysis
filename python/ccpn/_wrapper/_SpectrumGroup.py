@@ -21,9 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-# from ccpncore.lib.typing import Sequence
 
-# import datetime
 from ccpncore.util import Pid
 from ccpncore.util import Common as commonUtil
 from ccpn import AbstractWrapperObject
@@ -47,6 +45,9 @@ class SpectrumGroup(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiSpectrumGroup._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -96,7 +97,7 @@ class SpectrumGroup(AbstractWrapperObject):
         raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
       else:
         commonUtil._resetParentLink(self._wrappedData, 'spectrumGroups', 'name', value)
-        self._project._resetPid(self._wrappedData)
+        self._finaliseRename(self)
 
     finally:
       if undo is not None:
@@ -140,28 +141,18 @@ Spectrum.spectrumGroups = property(getter, setter, None,
 del getter
 del setter
 
-# Notifiers:
-# Standard creation/destruction notifiers
+# Extra Notifiers to notify changes in Spectrum-SpectrumGroup link
 className = ApiSpectrumGroup._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':SpectrumGroup}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-    ('_resetPid', {}, className, 'setName'),
-    ('_resetSpectrumGroupInSidebar', {}, className, 'addDataSource'),
-    ('_resetAllSpectraInSidebar', {}, className, 'removeDataSource'),
-    ('_resetAllSpectraInSidebar', {}, className, 'setDataSources'),
-    ('_resetSpectrumGroupInSidebar', {}, className, 'postInit'),
-    ('_resetSpectrumGroupInSidebar', {}, className, 'undelete'),
-    ('_resetAllSpectraInSidebar', {}, className, 'delete'),
+  ( ('_modifiedLink', {'classNames':('Spectrum','SpectrumGroup')}, className, 'addDataSource'),
+    ('_modifiedLink', {'classNames':('Spectrum','SpectrumGroup')}, className, 'removeDataSource'),
+    ('_modifiedLink', {'classNames':('Spectrum','SpectrumGroup')}, className, 'setDataSources'),
   )
 )
-
-# Notifiers to handle application sidebar when Spectrum<->SpectrumGroup link changes.
 className = ApiDataSource._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_resetSpectrumInSidebar', {}, className, 'addSpectrumGroup'),
-    ('_resetSpectrumInSidebar', {}, className, 'removeSpectrumGroup'),
-    ('_resetSpectrumInSidebar', {}, className, 'setSpectrumGroups'),
+  ( ('_modifiedLink', {'classNames':('Spectrum','SpectrumGroup')}, className, 'addSpectrumGroup'),
+    ('_modifiedLink', {'classNames':('Spectrum','SpectrumGroup')}, className, 'removeSpectrumGroup'),
+    ('_modifiedLink', {'classNames':('Spectrum','SpectrumGroup')}, className, 'setSpectrumGroups'),
   )
 )

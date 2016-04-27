@@ -49,6 +49,9 @@ class NmrResidue(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiResonanceGroup._metaclass.qualifiedName()
+
   # CCPN properties  
   @property
   def _apiResonanceGroup(self) -> ApiResonanceGroup:
@@ -162,7 +165,6 @@ class NmrResidue(AbstractWrapperObject):
 
     NB Undoing a connection between two connected stretches
     will get back a 'value' stretch with a new shortName"""
-    print(value, 'value')
     apiResonanceGroup = self._wrappedData
     # apiResidue = apiResonanceGroup.assignedResidue
     apiNmrChain = apiResonanceGroup.directNmrChain
@@ -193,7 +195,7 @@ class NmrResidue(AbstractWrapperObject):
     elif apiNmrChain.isConnected:
       # At this point, self must be the last NmrResidue in a connected chain
       if apiValueNmrChain.isConnected:
-        undo = self._project.root._undo
+        undo = self._project._undo
         if undo is not None:
           undo.increaseBlocking()
         try:
@@ -716,20 +718,6 @@ class NmrResidue(AbstractWrapperObject):
       return list(tt[-1] for tt in sorted(ll, key=CcpnSorting.universalSortKey))
 
 
-# def getter(self:NmrResidue) -> NmrResidue:
-#   obj = self._wrappedData.nextResidue
-#   return None if obj is None else self._project._data2Obj.get(obj)
-# def setter(self:NmrResidue, value:NmrResidue):
-#   self._wrappedData.nextResidue = None if value is None else value._wrappedData
-# NmrResidue.nextNmrResidue = property(getter, setter, None, "Next NmrResidue in sequence")
-#
-# def getter(self:NmrResidue) -> NmrResidue:
-#   obj = self._wrappedData.previousResidue
-#   return None if obj is None else self._project._data2Obj.get(obj)
-# def setter(self:NmrResidue, value:NmrResidue):
-#   self._wrappedData.previousResidue = None if value is None else value._wrappedData
-# NmrResidue.previousNmrResidue = property(getter, setter, None, "Previous NmrResidue in sequence")
-
 def getter(self:Residue) -> NmrResidue:
   apiResidue = self._wrappedData
   apiNmrProject = self._project._wrappedData
@@ -753,50 +741,6 @@ def setter(self:Residue, value:NmrResidue):
     value._apiResonanceGroup.assignedResidue = self._apiResidue
 Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
-
-  # @property
-  # def connectedNmrResidues(self) -> tuple:
-  #   """stretch of connected NmrResidues within NmrChain - there can only be one
-  #   Does not include NmrResidues defined as satellites (sequenceCodes that end in '+1', '-1', etc.
-  #   If NmrChain matches a proper Chain, there will be an NmrResidue for each residue,
-  #   with None for unassigned residues. NBNB TBD draft - needs checking"""
-  #
-  #   apiNmrChain = self._wrappedData
-  #   apiChain = apiNmrChain.chain
-  #   if apiChain is None:
-  #     apiStretch = apiNmrChain.connectedStretch
-  #     if apiStretch is None:
-  #       apiResGroups = ()
-  #     else:
-  #       apiResGroups = apiStretch.activeResonanceGroups
-  #   else:
-  #     func1 = apiNmrChain.nmrProject.findFirstResonanceGroup
-  #     apiResGroups = [func1(seqCode=x.seqCode, seqInsertCode=x.seqInsertCode, relativeOffset=None)
-  #                     for x in apiChain.sortedResidues()]
-  #   #
-  #   func2 =  self._parent._data2Obj.get
-  #   return tuple(None if x is None else func2(x) for x in apiResGroups)
-  #
-  # @connectedNmrResidues.setter
-  # def connectedNmrResidues(self, value:Sequence):
-  #   # NBNB TBD Check validity of code.
-  #   apiNmrChain = self._wrappedData
-  #   apiChain = apiNmrChain.chain
-  #   if apiChain is None:
-  #     apiStretch = apiNmrChain.connectedStretch
-  #     if apiStretch is None:
-  #       if value:
-  #         apiStretch = apiNmrChain.nmrProject.newConnectedStretch(
-  #           activeResonanceGroups= [x._wrappedData for x in value],
-  #           sequentialAssignment=apiNmrChain.nmrProject.activeSequentialAssignment
-  #         )
-  #     else:
-  #       if value:
-  #         apiStretch.activeResonanceGroups = [x._wrappedData for x in value]
-  #       else:
-  #         apiStretch.delete()
-  #   else:
-  #     raise ValueError("Cannot set connectedNmrResidues for NmrChain assigned to actual Chain")
 
 def getter(self:NmrChain) -> Tuple[NmrResidue]:
   result = list(self._project._data2Obj.get(x)for x in self._wrappedData.mainResonanceGroups)
@@ -865,29 +809,28 @@ NmrChain.newNmrResidue = _newNmrResidue
 del _newNmrResidue
 NmrChain.fetchNmrResidue = fetchNmrResidue
 
-def _resetNmrResiduePid(self:Project, apiResonanceGroup:ApiResonanceGroup):
+def _renameNmrResidue(self:Project, apiResonanceGroup:ApiResonanceGroup):
   """Reset pid for NmrResidue and all offset NmrResidues"""
-  self._resetPid(apiResonanceGroup)
-  for xx in apiResonanceGroup.offsetResonanceGroups:
-    self._resetPid(xx)
+  nmrResidue =  self._data2Obj.get(apiResonanceGroup)
+  nmrResidue._finaliseRename()
+  for xx in nmrResidue.offsetNmrResidues:
+    xx._finaliseRename()
 
 # Notifiers:
 #NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model
-Project._setupNotifier(_resetNmrResiduePid, ApiResonanceGroup, 'setSequenceCode')
-Project._setupNotifier(_resetNmrResiduePid, ApiResonanceGroup, 'setDirectNmrChain')
-Project._setupNotifier(_resetNmrResiduePid, ApiResonanceGroup, 'setResidueType')
-Project._setupNotifier(_resetNmrResiduePid, ApiResonanceGroup, 'setAssignedResidue')
+Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setSequenceCode')
+Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setDirectNmrChain')
+Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setResidueType')
+Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setAssignedResidue')
+del _renameNmrResidue
 
+# Rename notifiers put in to ensure renaming of NmrAtoms:
 className = ApiResonanceGroup._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':NmrResidue}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    # ('_resetPid', {}, className, 'setSequenceCode'),
-    # ('_resetPid', {}, className, 'setAssignedResidue'),
-    # ('_resetPid', {}, className, 'setDirectNmrChain'),
-    # ('_resetPid', {}, className, 'setResidueType'),
-    ('_resetPid', {}, className, 'setResonances'),
-    ('_resetPid', {}, className, 'addResonance'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+  ( ('_finaliseApiRename', {}, className, 'setResonances'),
+    ('_finaliseApiRename', {}, className, 'addResonance'),
   )
 )
+
+# NB Residue<->NmrResidue link depends solely on the NmrResidue name.
+# So no notifiers on the link - notify on the NmrResidue rename instead.

@@ -131,7 +131,8 @@ _quoteStrings = ['true', 'false', 'NaN', 'Infinity', '-Infinity']
 _containsWhiteSpace = re.compile('\s').search
 _containsSingleEndQuote =  re.compile("'\s").search
 _containsDoubleEndQuote =  re.compile('"\s').search
-_floatingPointFormat = '%.3g'
+# _floatingPointFormat = '%.3g'
+_floatingPointFormat = '%.10g'
 _defaultIndent = ' '  * 3
 _defaultSeparator = ' '  * 2
 
@@ -507,8 +508,11 @@ class Loop:
     return ''.join(lines)
 
 
-def valueToString(value):
-  """ Convert value to properly quoted STAR string"""
+def valueToString(value, quoteNumberStrings=False):
+  """ Convert value to properly quoted STAR string
+
+  if quoteNumberStrings, strings that evaluate to a float (e.g. '1', '2.7e5', ...)
+  are put in quotes"""
 
   if value is None:
     return NULLSTRING
@@ -529,9 +533,9 @@ def valueToString(value):
 
     elif math.isinf(value):
       if value > 0:
-        value = PLUSINFINITYSTRING
+        return PLUSINFINITYSTRING
       else:
-        value = MINUSINFINITYSTRING
+        return MINUSINFINITYSTRING
 
     else:
       return _floatingPointFormat % value
@@ -542,11 +546,16 @@ def valueToString(value):
   else:
     value = str(value)
 
-    # quote, depending on content
-    try:
-      junk = float(value)
-      matchesNumber = True
-    except ValueError:
+    # if quoteNumberStrings is true: quote, depending on content
+    #
+    if quoteNumberStrings:
+      try:
+        junk = float(value)
+      except ValueError:
+        matchesNumber = False
+      else:
+        matchesNumber = True
+    else:
       matchesNumber = False
 
     if '\n' not in value:

@@ -30,8 +30,8 @@ from typing import Tuple, Optional, Sequence
 from ccpncore.lib.molecule import MoleculeModify
 from ccpn import SampleComponent
 from ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
+from ccpncore.api.ccp.nmr import Nmr
 from ccpncore.util import Pid
-# from ccpn import Chain
 
 
 _apiClassNameMap = {
@@ -52,6 +52,9 @@ class Substance(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiRefComponent._metaclass.qualifiedName()
 
   # CCPN properties  
   @property
@@ -434,7 +437,6 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
   #
   return self._data2Obj[apiResult]
 
-Project._childClasses.append(Substance)
 Project.newSubstance = _newSubstance
 del _newSubstance
 
@@ -506,18 +508,6 @@ def _fetchSubstance(self:Project, name:str, labeling:str=None) -> Substance:
 Project.fetchSubstance = _fetchSubstance
 del _fetchSubstance
 
-#
-# def getter(self:Chain) -> Optional[Substance]:
-#   apiMolecule = self._apiChain.molecule
-#   apiRefComponentStore = self._project._apiNmrProject.sampleStore.refSampleComponentStore
-#   apiComponent = (apiRefComponentStore.findFirstComponent(name=apiMolecule.name, labeling='std') or
-#                   apiRefComponentStore.findFirstComponent(name=apiMolecule.name))
-#   if apiComponent is None:
-#     return None
-#   else:
-#     return self._project._data2Obj[apiComponent]
-# #
-# Chain.substance = property(getter, None, None, "Substance corresponding to Chain")
 
 def getter(self:SampleComponent) -> Optional[Substance]:
   apiRefComponentStore = self._parent._apiSample.sampleStore.refSampleComponentStore
@@ -543,10 +533,11 @@ del getter
 del setter
 
 # Notifiers:
-className = ApiRefComponent._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Substance}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
+
+# Substance - SampleComponent link is derived through the keys of the linked objects
+# There is therefore no need to monitor the link, and notifiers should be put
+# on object creation and renaming
+className = Nmr.Experiment._metaclass.qualifiedName()
+Project._apiNotifiers.append(
+  ('_modifiedLink', {'classNames':('Spectrum','Substance')}, className, 'setRefComponentName'),
 )

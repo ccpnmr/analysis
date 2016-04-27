@@ -29,6 +29,7 @@ from ccpn import NmrAtom
 from application import Strip
 from application import SpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
+from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 # from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 
 
@@ -45,6 +46,9 @@ class Axis(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiStripAxis._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -146,14 +150,6 @@ def setter(self, value:Sequence):
 Strip.orderedAxes = property(getter, setter, None,
                              "Axes in display order (X, Y, Z1, Z2, ...) ")
 
-def getter(self) -> Tuple[Axis, ...]:
-  ff = self._project._data2Obj.get
-  return tuple(ff(x) for x in self._wrappedData.orderedAxes)
-def setter(self, value:Sequence):
-  value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-  self._wrappedData.orderedAxes = tuple(x._wrappedData for x in value)
-SpectrumDisplay.orderedAxes = property(getter, setter, None,
-                                       "Axes in display order (X, Y, Z1, Z2, ...) ")
 del getter
 del setter
 
@@ -163,10 +159,54 @@ Strip._childClasses.append(Axis)
 # We should NOT have any newAxis functions
 
 # Notifiers:
-className = ApiStripAxis._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Axis}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
+Project._apiNotifiers.append(
+  ('_notifyRelatedApiObject', {'pathToObject':'stripAxes', 'action':'change'},
+   ApiAxis._metaclass.qualifiedName(), '')
 )
+
+def _axisRegionChanged(axis:Axis):
+  """Notifier function: Update strips etc. for when axis position or width changes"""
+
+  position = axis.position
+  width = axis.width
+  region = (position - width/2., position + width/2.)
+
+  strip = axis.strip
+
+  index = strip.axisOrder.index(axis.code)
+  if not strip.beingUpdated:
+
+    strip.beingUpdated = True
+
+    try:
+      if index == 0:
+        # X axis
+        strip.viewBox.setXRange(*region)
+      elif index == 1:
+        # Y axis
+        strip.viewBox.setYRange(*region)
+      else:
+        # One of the Z axes
+        for spectrumView in strip.spectrumViews:
+          if spectrumView.isVisible():
+            for peakListView in spectrumView.peakListViews:
+              if peakListView.isVisible():
+                peakList = peakListView.peakList
+                peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
+                strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+
+        if len(strip.axisOrder) > 2:
+          n = index - 2
+          if n >= 0:
+            planeLabel = strip.planeToolbar.planeLabels[n]
+            planeSize = planeLabel.singleStep()
+            planeLabel.setValue(position)
+            strip.planeToolbar.planeCounts[n].setValue(width/planeSize)
+
+    finally:
+      strip.beingUpdated = False
+
+  if index == 1:  # ASSUMES that only do H phasing
+    strip.updatePhasing()
+
+Axis.setupCoreNotifier('change', _axisRegionChanged)

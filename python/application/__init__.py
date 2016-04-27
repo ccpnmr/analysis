@@ -4,6 +4,25 @@ All classes in this module are subclasses of the :ref:`ccpn-AbstractWrapperObjec
 
 .. currentmodule:: ccpnmr
 
+
+Class Hierarchy
+^^^^^^^^^^^^^^^
+
+Classes are organised in a hierarchy, with all data objects ultimately contained within the Project:
+
+  Project
+
+  ...
+
+  |       Window
+  |       Task
+  |       |       Mark
+  |       |       SpectrumDisplay
+  |       |       |       Strip
+  |       |       |       |       Axis
+  |       |       |       |       SpectrumView
+  |       |       |       |       |       PeakListView
+
 """
 
 import importlib
@@ -14,8 +33,8 @@ import ccpn
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
 
-# Keep chilcClasses shapshot for later comparison
-_previousChildClasses = list(ccpn.Project._childClasses)
+# # Keep childClasses snapshot for later comparison
+# _previousChildClasses = list(ccpn.Project._childClasses)
 
 # _wrappedClassNames gives import order
 _wrappedClasses = []
@@ -25,7 +44,8 @@ Task = cls = importlib.import_module('application._wrapper._Task').Task
 _wrappedClasses.append(cls)
 Mark = cls = importlib.import_module('application._wrapper._Mark').Mark
 _wrappedClasses.append(cls)
-SpectrumDisplay = cls = importlib.import_module('application._wrapper._SpectrumDisplay').SpectrumDisplay
+SpectrumDisplay = cls = importlib.import_module(
+  'application._wrapper._SpectrumDisplay').SpectrumDisplay
 _wrappedClasses.append(cls)
 Strip = cls = importlib.import_module('application._wrapper._Strip').Strip
 _wrappedClasses.append(cls)
@@ -49,9 +69,5 @@ for cls in _wrappedClasses:
 # Additional data
 RulerData = importlib.import_module('application._wrapper._Mark').RulerData
 
-# Set up interclass links and related functions
-# HACK to link up newly imported wrapper classes only
-_childClasses = ccpn.Project._childClasses
-ccpn.Project._childClasses = [x for x in _childClasses if x not in _previousChildClasses]
+# # Set up interclass links and related functions
 ccpn.Project._linkWrapperClasses()
-ccpn.Project._childClasses = _childClasses

@@ -43,6 +43,9 @@ class DataSet(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiNmrConstraintStore._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -124,10 +127,3 @@ Project.newDataSet = _newDataSet
 del _newDataSet
 
 # Notifiers:
-className = ApiNmrConstraintStore._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':DataSet}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)

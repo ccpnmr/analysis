@@ -24,6 +24,8 @@ __version__ = "$Revision: 7686 $"
 
 import functools
 import os
+import typing
+import operator
 from collections import OrderedDict
 
 from ccpn import AbstractWrapperObject
@@ -36,7 +38,6 @@ from ccpncore.lib import Constants
 from ccpncore.util import Pid
 from ccpncore.util import Undo
 from ccpncore.util import Io as ioUtil
-from typing import Dict
 
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to API: NmrProject"""
@@ -52,6 +53,9 @@ class Project(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # All non-abstractWrapperClasses - filled in by
+  _allLinkedWrapperClasses = []
+
   # List of CCPN api notifiers
   # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName
   # The function self.wrapperFuncName(**parameterDict) will be registered
@@ -59,6 +63,9 @@ class Project(AbstractWrapperObject):
   # api notifiers are set automatically,
   # and are cleared by self._clearApiNotifiers and by self.delete()
   _apiNotifiers = []
+
+  # Actions you can notify
+  _notifierActions = ('create', 'delete', 'rename', 'change')
   
   # Top level mapping dictionaries:
   # pid to object and ccpnData to object
@@ -78,7 +85,6 @@ class Project(AbstractWrapperObject):
     self._wrappedData = wrappedData
     self._id = _id = ''
     self._old_id = None
-    self._activeNotifiers = []
     
     # setup object handling dictionaries
     self._data2Obj = {wrappedData:self}
@@ -90,6 +96,33 @@ class Project(AbstractWrapperObject):
 
     # Set up pid sorting dictionary to cache pid sort keys
     self._pidSortKeys = {}
+
+    # Set up notification machinery
+
+    # Old - to be removed eventually
+    self._activeNotifiers = []
+
+    # list or None. When set used to accumulate pending notifiers
+    # Optional list. Elements are (func, onceOnly, wrapperObject, optional oldPid)
+    self._pendingNotifications = []
+
+    # Notification suspension level - to allow for nested notification suspension
+    self._notificationSuspension = 0
+
+    # Notification blanking level - to allow for nested notification disabling
+    self._notificationBlanking = 0
+
+    # {(className,action):OrderedDict(notifier:onceOnly)}
+    self._context2Notifiers = {}
+
+
+    #{(className,action):notifierId} dictionary
+    # Actions are: ('rename', 'create', 'delete', 'change')
+    # self._notifierContext2Id = OrderedDict()
+
+    # {notifierId:(func, parameterDict, onceOnly)} dictionary
+    # self._notifierId2funcdata = {}
+
 
     # Special attributes:
     self._implExperimentTypeMap = None
@@ -164,6 +197,9 @@ class Project(AbstractWrapperObject):
 
     self._registerApiNotifiers()
 
+    for tt in self._coreNotifiers:
+      self.registerNotifier(*tt)
+
     # set appBase attribute - for gui applications
     if hasattr(wrappedData.root, '_appBase'):
       appBase = wrappedData.root._appBase
@@ -174,8 +210,14 @@ class Project(AbstractWrapperObject):
 
     self._initializeAll()
 
+  #
+  #  Notifiers system
+  #
+
+  # Old, API-level functions:
+
   @staticmethod
-  def _setupNotifier(func, apiClassOrName, apiFuncName, parameterDict=None):
+  def _setupApiNotifier(func, apiClassOrName, apiFuncName, parameterDict=None):
 
     if parameterDict is None:
       parameterDict = {}
@@ -195,7 +237,9 @@ class Project(AbstractWrapperObject):
     for tt in self._apiNotifiers:
       wrapperFuncName, parameterDict, apiClassName, apiFuncName = tt
       notify = functools.partial(getattr(self,wrapperFuncName), **parameterDict)
-      self._registerNotify(notify, apiClassName, apiFuncName)
+      # self._registerNotify(notify, apiClassName, apiFuncName)
+      self._activeNotifiers.append((notify, apiClassName, apiFuncName))
+      Notifiers.registerNotify(notify, apiClassName, apiFuncName)
 
   def _clearApiNotifiers(self):
     """CLear all notifiers, previous to closing or deleting Project
@@ -204,43 +248,246 @@ class Project(AbstractWrapperObject):
       tt = self._activeNotifiers.pop()
       Notifiers.unregisterNotify(*tt)
 
-  def _registerNotify(self, notify, apiClassName, apiFuncName):
-    """Register a single notifier"""
-    self._activeNotifiers.append((notify, apiClassName, apiFuncName))
-    Notifiers.registerNotify(notify, apiClassName, apiFuncName)
+  # def _registerNotify(self, notify, apiClassName, apiFuncName):
+  #   """Register a single notifier"""
+  #   self._activeNotifiers.append((notify, apiClassName, apiFuncName))
+  #   Notifiers.registerNotify(notify, apiClassName, apiFuncName)
 
-  def _unregisterNotify(self, notify, apiClassName, apiFuncName):
-    """Unregister a single notifier"""
-    self._activeNotifiers.remove((notify, apiClassName, apiFuncName))
-    Notifiers.unregisterNotify(notify, apiClassName, apiFuncName)
+  # def _unregisterNotify(self, notify, apiClassName, apiFuncName):
+  #   """Unregister a single notifier"""
+  #   self._activeNotifiers.remove((notify, apiClassName, apiFuncName))
+  #   Notifiers.unregisterNotify(notify, apiClassName, apiFuncName)
+
+  # New notifier system
 
 
-  def _newObject(self, wrappedData, cls):
-    """Create new wrapper object of class cls, associated with wrappedData.
-    For use in creation notifiers"""
 
-    result = cls(self, wrappedData)
+  def registerNotifier(self, className:str, target:str, func:typing.Callable,
+                       parameterDict:dict={}, onceOnly:bool=False) -> typing.Callable:
+    """
+    Register notifiers to be triggered when data change
 
-    sideBar = self._getApplicationSidebar()
-    if sideBar is not None:
-      sideBar._createItem(result)
+    :param str className: className of wrapper class to monitor (AbstractWrapperObject for 'all')
+
+    :param str target: can have the following values
+
+      *'create'* is called after the creation (or undeletion) of the object and its wrapper.
+      Notifier functions are called with the created wrapper object as the only parameter.
+
+      *'delete'* is called after the object is deleted, but before the .id and .pid attributes
+      are modified. Notifier functions are called with the deleted wrapper object as the only
+      parameter.
+
+      *'rename'* is called after the id and pid of an object has changed
+      Notifier functions are called with the renamed wrapper object and the old pid as parameters.
+
+      *'change'* when any object attribute changes value.
+      Notifier functions are called with the created wrapper object as the only parameter.
+      rename and crosslink notifiers (see below) may also trigger change notifiers.
+
+      Any other value is interpreted as the name of a wrapper class, and the notifier
+      is triggered when a cross link (NOT a parent-child link) between the className and
+      the target class is modified
+
+    param: Callable func: The function to call when the notifier is triggered.
+      for actions 'create', 'delete' and 'change' the function is called with the object
+      created (deleted, undeleted, changed) as the only parameter
+
+      For action 'rename' the function is called with an additional parameter: oldPid,
+      the value of the pid before renaming.
+
+      If target is a second className, the function is called with the project as the only
+      parameter.
+
+    param: dict parameterDict: Parameters passed to the notifier function before execution.
+    This allows you to use the same function with different parameters in different contexts
+
+    param: bool onceOnly: If True, only one of multiple copies is executed
+      when notifiers are resumed after a suspension.
+
+    return: The registered notifier (which can be passed to removeNotifier or duplicateNotifier)
+
+    """
+
+    if target in self._notifierActions:
+      tt = (className, target)
+    else:
+      tt = tuple(sorted([className, target]))
+
+    od = self._context2Notifiers.setdefault(tt, OrderedDict())
+    if parameterDict:
+      notifier = functools.partial(func, **parameterDict)
+    else:
+      notifier = func
+    od[notifier] = onceOnly
     #
-    return result
+    return notifier
 
-  def _finaliseDelete(self, wrappedData):
-    """Clean up after object deletion - to be called from notifiers
-    wrapperObject to delete is identified from wrappedData"""
+  def duplicateNotifier(self,  className:str, target:str,
+                        notifier:typing.Callable):
+    """register copy of notifier for a new className and target.
+    Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
+     interface matches the action"""
+    if target in self._notifierActions:
+      tt = (className, target)
+    else:
+      tt = tuple(sorted([className, target]))
+
+    for od in self._context2Notifiers.values():
+      onceOnly = od.get(notifier)
+      if onceOnly is not None:
+        self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
+        break
+    else:
+      raise ValueError("Unknown notifier: %s" % notifier)
+
+
+  def unRegisterNotifier(self,  className:str, target:str, notifier:typing.Callable):
+    """Unregister the notifier from this className, and target"""
+    if target in self._notifierActions:
+      tt = (className, target)
+    else:
+      tt = tuple(sorted([className, target]))
+    od = self._context2Notifiers.get((tt), {})
+    try:
+      del od[notifier]
+    except KeyError:
+      raise KeyError("Notifier %s not found for %s" % (notifier, (className, action)))
+
+
+  def removeNotifier(self, notifier:typing.Callable):
+    """Unregister the the notifier from all places where it appears."""
+    found = False
+    for od in self._context2Notifiers.values():
+      if notifier in od:
+        del od[notifier]
+        found = True
+    if not found:
+      raise ValueError("Unknown notifier: %s" % notifier)
+
+  def blankNotification(self):
+    """Disable notifiers temporarily
+    e.g. to disable 'object modified' notifiers during object creation
+
+    Caller is responsible to make sure necessary notifiers are called, and to unblank after use"""
+    self._notificationBlanking += 1
+
+  def unblankNotification(self):
+    """Resume notifier execution after blanking"""
+    self._notificationBlanking -= 1
+
+  def suspendNotification(self):
+    """Suspend notifier execution and accumulate notifiers for later execution"""
+    self._notificationSuspension += 1
+
+  def resumeNotification(self):
+    """Execute accumulated notifiers and resume immediate notifier execution"""
+    self._notificationSuspension -= 1
+    if self._notificationSuspension <= 0:
+      scheduledNotifiers = set()
+      executeNotifications = []
+      ll = self._pendingNotifications
+      while ll:
+        notification = ll.pop()
+        notifier = notification[0]
+        onceOnly = notification[1]
+        if onceOnly:
+          if notifier not in scheduledNotifiers:
+            scheduledNotifiers.add(notifier)
+            executeNotifications.append((notifier, notification[2:]))
+        else:
+          executeNotifications.append((notifier, notification[2:]))
+      #
+      for notifier, params in reversed(executeNotifications):
+        notifier(*params)
+
+
+  # Functions notified
+
+  # def _executeNotifiers(self:AbstractWrapperObject, target:str):
+  #   """Execute all notifiers
+  #
+  #   target is one of: 'create', 'delete', 'change', """
+  #   className = self.className
+  #   project = self.project
+  #   iterator = (project._context2Notifiers.setdefault((name, target), OrderedDict())
+  #              for name in (className, 'AbstractWrapperObject'))
+  #   ll = project._pendingNotifications
+  #
+  #   if ll is None:
+  #     for dd in iterator:
+  #       for notifier in dd:
+  #         notifier(obj)
+  #   else:
+  #     for dd in iterator:
+  #       for notifier, onceOnly in dd.items():
+  #         ll.append(notifier, onceOnly, obj)
+
+  # def _doNotification(self, className, target:str, obj:AbstractWrapperObject):
+  #   iterator = (self._context2Notifiers.setdefault((name, target), OrderedDict())
+  #              for name in (className, 'AbstractWrapperObject'))
+  #   ll = self._pendingNotifications
+  #   if ll is None:
+  #     for dd in iterator:
+  #       for notifier in dd:
+  #         notifier(obj)
+  #   else:
+  #     for dd in iterator:
+  #       for notifier, onceOnly in dd.items():
+  #         ll.append(notifier, onceOnly, obj)
+
+  # def _doNotificationWithPid(self, className, action:str, obj:AbstractWrapperObject, pid:str):
+  #   iterator = (self._context2Notifiers.setdefault((name, action), OrderedDict())
+  #              for name in (className, 'AbstractWrapperObject'))
+  #   ll = self._pendingNotifications
+  #   if ll is None:
+  #     for dd in iterator:
+  #       for notifier in dd:
+  #         notifier(obj, pid)
+  #   else:
+  #     for dd in iterator:
+  #       for notifier, onceOnly in dd.items():
+  #         ll.append(notifier, onceOnly, obj, pid)
+
+
+  def _newApiObject(self, wrappedData, cls:AbstractWrapperObject):
+    """Create new wrapper object of class cls, associated with wrappedData.
+    and call creation notifiers"""
+
+    if hasattr(cls, '_factoryFunction'):
+      # Necessary for classes where you ned to instantiate a subclass instead
+      result = cls._factoryFunction(self, wrappedData)
+    else:
+      result = cls(self, wrappedData)
+    result._finaliseAction('create')
+
+
+  def _modifiedApiObject(self, wrappedData):
+    """ call object-has-changed notifiers
+    """
+    obj = self._data2Obj[wrappedData]
+    obj._finaliseAction('change')
+
+  # def _preDelete(self, wrappedData):
+  #   """ call pre-deletion notifiers
+  #   """
+  #   # get object
+  #   obj = self._data2Obj.get(wrappedData)
+  #   obj._executeNotifiers('preDelete')
+
+  def _finaliseApiDelete(self, wrappedData):
+    """Clean up after object deletion - and call deletion notifiers
+    Notifiers are called AFTER wrappedData are deleted, but BEFORE  wrapper objects are modified
+    """
 
     if not wrappedData.isDeleted:
-      raise ValueError("_finaliseDelete called before wrapped data are deleted: %s" % wrappedData)
+      raise ValueError("_finaliseApiDelete called before wrapped data are deleted: %s" % wrappedData)
 
     # get object
     obj = self._data2Obj.get(wrappedData)
+    pid = obj.pid
 
-    # Remove from GUI sidebar - if any
-    sideBar = self._getApplicationSidebar()
-    if sideBar is not None:
-      sideBar._removeItem(obj.pid)
+    obj._finaliseAction('delete')
 
     # remove from wrapped2Obj
     del self._data2Obj[wrappedData]
@@ -253,11 +500,12 @@ class Project(AbstractWrapperObject):
     wrappedData._oldWrapperObject = obj
     obj._wrappedData = None
 
-  def _finaliseUnDelete(self, wrappedData):
-    """restore undeleted wrapper object"""
+  def _finaliseApiUnDelete(self, wrappedData):
+    """restore undeleted wrapper object, and call creation notifiers,
+    same as _newObject"""
 
     if wrappedData.isDeleted:
-      raise ValueError("_finaliseUnDelete called before wrapped data are deleted: %s" % wrappedData)
+      raise ValueError("_finaliseApiUnDelete called before wrapped data are deleted: %s" % wrappedData)
 
     try:
       oldWrapperObject = wrappedData._oldWrapperObject
@@ -277,105 +525,192 @@ class Project(AbstractWrapperObject):
     del wrappedData._oldWrapperObject
     oldWrapperObject._wrappedData = wrappedData
 
-    # Put back in GUI sidebar - if any
-    sideBar = self._getApplicationSidebar()
-    if sideBar is not None:
-      sideBar._createItem(oldWrapperObject)
+    oldWrapperObject._finaliseAction('create')
 
-  def _resetPid(self, wrappedData):
-    """Reset internal attributes after values determining PID have changed"""
-    sideBar = self._getApplicationSidebar()
+
+  def _notifyRelatedApiObject(self, wrappedData, pathToObject:str, action:str):
+    """ call 'action' type notifiers for getattribute(pathToObject)(wrappedData)
+    pathToObject is a navigation path (may contain dots) and must yield an API object
+    or an iterable of API objects"""
 
     getDataObj = self._data2Obj.get
-    pid2Obj = self._pid2Obj
 
-    objects = [getDataObj(wrappedData)]
-    for obj in objects:
-      # Add objects to list whose Pid needs to change in tandem
-      objects.extend(obj._getPidDependentObjects())
+    target = operator.attrgetter(pathToObject)(wrappedData)
+    if not target:
+      pass
+    elif hasattr(target, '_metaclass'):
+      # Hack. This is an API object
+      getDataObj(target)._finaliseAction(action)
+    else:
+      # This must be an iterable
+      for obj in target:
+        getDataObj(obj)._finaliseAction(action)
 
-      # reset _id
-      oldId = obj._id
-      oldPid = obj.pid
-
-      parent = obj._parent
-      if parent is None:
-        _id = ''
-      elif parent is self:
-        _id = str(obj._key)
-      else:
-        _id = '%s%s%s'% (parent._id, Pid.IDSEP, obj._key)
-      obj._id = _id
-      obj._old_id = oldId
-
-      # update pid:object mapping dictionary
-      dd = pid2Obj[obj.className]
-      del dd[oldId]
-      dd[_id] = obj
-
-      # Refresh sidebar items if any
-      if sideBar is not None:
-        sideBar._renameItem(oldPid, obj.pid)
-
-
-  def _getApplicationSidebar(self):
-    """Get Appliction sidebar, if any.
-
-     Used as preliminary in sidebar reset functions"""
-    mainWindow = self._appBase and self._appBase.mainWindow
-    if mainWindow is not None:
-      return mainWindow.sideBar
-
-    return None
-
-  def _resetSpectrumInSidebar(self, dataSource:'ApiDataSource'):
-    """Reset application sidebar when spectrum<->SpectrumGroup link changes
-    Called by notifiers.
-    No-op if there is no application and thus no sidebar
+  def _finaliseApiRename(self, wrappedData):
+    """Reset Finalise rename - called from APi object (for API notifiers)
     """
 
-    sideBar = self._getApplicationSidebar()
-    if sideBar is not None:
-      spectrum = self._data2Obj[dataSource]
-      sideBar._removeItem(spectrum.pid)
-      sideBar._createItem(spectrum)
+    obj = self._data2Obj.get(wrappedData)
+    obj._finaliseAction('rename')
 
-  def _resetSpectrumGroupInSidebar(self, apiSpectrumGroup:'ApiSpectrumGroup'):
-    """Reset application sidebar when spectrum<->SpectrumGroup link changes
-    Called by notifiers for addDataSource, __init__, and undelete, where all affected
-    dataSources are attached after the operation.
-    No-op if there is no application and thus no sidebar
-    """
 
-    sideBar = self._getApplicationSidebar()
-    if sideBar is not None:
-      for dataSource in apiSpectrumGroup.sortedDataSources():
-        spectrum = self._data2Obj[dataSource]
-        sideBar._removeItem(spectrum.pid)
-        sideBar._createItem(spectrum)
 
-  def _resetAllSpectraInSidebar(self, dummyObj:AbstractWrapperObject):
-    """Reset application sidebar when spectrum<->SpectrumGroup link changes
-    Called by notifiers for SpectrumGroup.delete, .setDataSources, and .removeDataSource
-    where NOT all affected dataSources are attached after the operation.
-    No-op if there is no application and thus no sidebar
-    """
+  # def _finaliseRename(self):
+  #   """Reset internal attributes after values determining PID have changed
+  #   """
+  #
+  #   project = self.project
+  #
+  #   # reset id
+  #   oldId = self._id
+  #   oldPid = self.pid
+  #   parent = self._parent
+  #   if parent is None:
+  #     _id = ''
+  #   elif parent is self:
+  #     _id = str(self._key)
+  #   else:
+  #     _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
+  #   self._id = _id
+  #   self._old_id = oldId
+  #
+  #   # update pid:object mapping dictionary
+  #   dd = project._pid2Obj[self.className]
+  #   del dd[oldId]
+  #   dd[_id] = self
+  #
+  #   # Execute rename notifiers
+  #   className = self.className
+  #   iterator = (project._context2Notifiers.setdefault((name, target), OrderedDict())
+  #              for name in (className, 'AbstractWrapperObject'))
+  #   ll = project._pendingNotifications
+  #   if ll is None:
+  #     for dd in iterator:
+  #       for notifier in dd:
+  #         notifier(self)
+  #   else:
+  #     for dd in iterator:
+  #       for notifier, onceOnly in dd.items():
+  #         ll.append(notifier, onceOnly, self)
+  #
+  #   # call rename on children
+  #   for obj in self._getDirectChildren():
+  #     obj._finaliseRename()
 
-    sideBar = self._getApplicationSidebar()
-    if sideBar is not None:
-      for spectrum in self.spectra:
-        sideBar._removeItem(spectrum.pid)
-        sideBar._createItem(spectrum)
+    #     def _finaliseRename(self, wrappedData):
+    # """Reset internal attributes after values determining PID have changed
+    # """
+    #
+    # getDataObj = self._data2Obj.get
+    # pid2Obj = self._pid2Obj
+    #
+    # objects = [getDataObj(wrappedData)]
+    # for obj in objects:
+    #   # Add objects to list whose Pid needs to change in tandem
+    #   objects.extend(obj._getDirectChildren)
+    #
+    #   # reset _id
+    #   oldId = obj._id
+    #   oldPid = obj.pid
+    #
+    #   parent = obj._parent
+    #   if parent is None:
+    #     _id = ''
+    #   elif parent is self:
+    #     _id = str(obj._key)
+    #   else:
+    #     _id = '%s%s%s'% (parent._id, Pid.IDSEP, obj._key)
+    #   obj._id = _id
+    #   obj._old_id = oldId
+    #
+    #   # update pid:object mapping dictionary
+    #   dd = pid2Obj[obj.className]
+    #   del dd[oldId]
+    #   dd[_id] = obj
+    #
+    #   obj._executeRenameNotifiers(oldPid)
 
-  # NBNB We do NOT want to delete the underlying nmrProject, in case the root
-  # hangs around and is somehow saved
-  # Anyway at this point deleting the API objects no longer delete the wrapper objects
-  # as the notifiers have been disabled
-  # def delete(self):
-  #   """Delete underlying data and cleans up the wrapper project"""
-  #   wrappedData = self._wrappedData
-  #   self._close()
-  #   wrappedData.delete()
+
+
+  def _modifiedLink(self, dummy, classNames:typing.Tuple[str,str]):
+    """ call link-has-changed notifiers
+    The notifier function called must have the signature
+    func(project, **parameterDict)
+
+    NB
+    1) calls to this function must be set up explicitly in the wrapper for each crosslink
+    2) This function is only called when the link is changed explicitly, not when
+    a linked object is created or deleted"""
+
+    if self._notificationBlanking:
+      return
+
+    # get object
+    className, target = tuple(sorted(classNames))
+    # self._doNotification(classNames[0], classNames[1], self)
+    iterator = (self._context2Notifiers.setdefault((name, target), OrderedDict())
+               for name in (className, 'AbstractWrapperObject'))
+    if self._notificationSuspension:
+      ll = self._pendingNotifications
+      for dd in iterator:
+        for notifier, onceOnly in dd.items():
+          ll.append((notifier, onceOnly, self))
+    else:
+      for dd in iterator:
+        for notifier in dd:
+          notifier(self)
+
+
+
+  # def _getApplicationSidebar(self):
+  #   """Get Application sidebar, if any.
+  #
+  #    Used as preliminary in sidebar reset functions"""
+  #   mainWindow = self._appBase and self._appBase.mainWindow
+  #   if mainWindow is not None:
+  #     return mainWindow.sideBar
+  #
+  #   return None
+
+  # def _resetSpectrumInSidebar(self, dataSource:'ApiDataSource'):
+  #   """Reset application sidebar when spectrum<->SpectrumGroup link changes
+  #   Called by notifiers.
+  #   No-op if there is no application and thus no sidebar
+  #   """
+  #
+  #   sideBar = self._getApplicationSidebar()
+  #   if sideBar is not None:
+  #     spectrum = self._data2Obj[dataSource]
+  #     sideBar._removeItem(spectrum.pid)
+  #     sideBar._createItem(spectrum)
+  #
+  # def _resetSpectrumGroupInSidebar(self, apiSpectrumGroup:'ApiSpectrumGroup'):
+  #   """Reset application sidebar when spectrum<->SpectrumGroup link changes
+  #   Called by notifiers for addDataSource, __init__, and undelete, where all affected
+  #   dataSources are attached after the operation.
+  #   No-op if there is no application and thus no sidebar
+  #   """
+  #
+  #   sideBar = self._getApplicationSidebar()
+  #   if sideBar is not None:
+  #     for dataSource in apiSpectrumGroup.sortedDataSources():
+  #       spectrum = self._data2Obj[dataSource]
+  #       sideBar._removeItem(spectrum.pid)
+  #       sideBar._createItem(spectrum)
+  #
+  # def _resetAllSpectraInSidebar(self, dummyObj:AbstractWrapperObject):
+  #   """Reset application sidebar when spectrum<->SpectrumGroup link changes
+  #   Called by notifiers for SpectrumGroup.delete, .setDataSources, and .removeDataSource
+  #   where NOT all affected dataSources are attached after the operation.
+  #   No-op if there is no application and thus no sidebar
+  #   """
+  #
+  #   sideBar = self._getApplicationSidebar()
+  #   if sideBar is not None:
+  #     for spectrum in self.spectra:
+  #       sideBar._removeItem(spectrum.pid)
+  #       sideBar._createItem(spectrum)
+
 
   def _close(self):
     """Clean up the wrapper project previous to deleting or replacing"""
@@ -442,13 +777,9 @@ class Project(AbstractWrapperObject):
 
   def _flushCachedData(self, dummy=None):
     """Flush cached data to ensure up-to-date data are saved"""
+
     for structureEnsemble in self.structureEnsembles:
-      for tag in ('coordinateData', 'occupancyData', 'bFactorData'):
-        _tag = '_' + tag
-        if hasattr(structureEnsemble, _tag):
-          # Save cached data back to underlying storage
-          setattr(structureEnsemble, tag, getattr(structureEnsemble, _tag))
-          delattr(structureEnsemble, _tag)
+      structureEnsemble._flushCachedData()
 
   def rename(self, name:str) -> None:
     """Rename Project, and rename the underlying API project and the directory stored on disk.
@@ -483,7 +814,7 @@ class Project(AbstractWrapperObject):
         parentDict = apiProject.__dict__['nmrProjects']
         del parentDict[oldName]
         parentDict[name] = apiNmrProject
-        self._resetPid(apiNmrProject)
+        self._finaliseRename()
       except:
         apiNmrProject.name = oldName
         parentDict[oldName] = apiNmrProject
@@ -525,7 +856,7 @@ class Project(AbstractWrapperObject):
     """Set a point in the undo stack, you can undo/redo to """
     undo = self._wrappedData.root._undo
     if undo is None:
-      self._logger.warning("Trying to add undoPoint bu undo not initialised")
+      self._logger.warning("Trying to add undoPoint but undo is not initialised")
     else:
       undo.newWaypoint()
       self._logger.info("Added undoPoint")

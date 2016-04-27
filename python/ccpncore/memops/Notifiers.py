@@ -91,7 +91,6 @@ from ccpncore.util import Common as commonUtil
 def registerNotify(notify, classname, funcname=''):
   """register notifiers to class clazz (maybe given as API class or as class qualifiedName"""
 
-
   metaClasses = commonUtil.getClassFromFullName(classname)._metaclass.getNonAbstractSubtypes()
 
   for metaClass in metaClasses:

@@ -23,35 +23,35 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 
 import pyqtgraph as pg
-import os
+# import os
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn import Spectrum
+# from ccpn import Spectrum
 from ccpn import Project
 
 from ccpncore.gui.Label import Label
 from ccpncore.gui.CcpnGridItem import CcpnGridItem
-from ccpncore.gui.ToolBar import ToolBar
+# from ccpncore.gui.ToolBar import ToolBar
 from ccpncore.gui.Widget import Widget
-from ccpncore.gui.Menu import Menu
+# from ccpncore.gui.Menu import Menu
 
-from ccpncore.memops import Notifiers
+# from ccpncore.memops import Notifiers
 
 from ccpncore.util.Colour import Colour
 from ccpncore.util import Ticks
 import typing
 
-from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+# from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
-from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
-from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
-from ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
+# from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+# from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
+# from ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 
 from application.core.gui.AxisTextItem import AxisTextItem
-from application.core.DropBase import DropBase
+# from application.core.DropBase import DropBase
 from application.core.gui.PlotWidget import PlotWidget
 
 def sufficientlyDifferentWidth(region1, region2):
@@ -89,8 +89,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
                                  useOpenGL=useOpenGL, strip=self)
               # dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
-    newSplitter = QtGui.QSplitter
-    self.stripFrame.layout().addWidget(self.plotWidget, 0, self.guiSpectrumDisplay.orderedStrips.index(self))
+    newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
+    self.stripFrame.layout().addWidget(self.plotWidget, 0,
+                                       self.guiSpectrumDisplay.orderedStrips.index(self))
     self.colourScheme = self._parent._appBase.preferences.general.colourScheme
     if self.colourScheme == 'light':
       self.background = '#f7ffff'
@@ -596,8 +597,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     print(event)
 
 
-  def setStripToCurrent(self):
-    position = self.viewBox.mapSceneToView(pos)
+  # def setStripToCurrent(self):
+  #   position = self.viewBox.mapSceneToView(pos)
 
 
   def mousePressEvent(self, event):
@@ -723,78 +724,88 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     raise Exception('should be implemented in subclass')
 
 
-def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
-  """Notifier function for when axis position or width changes"""
+# Notifiers:
 
-  position = apiAxis.position
-  width = apiAxis.width
-  region = (position - width/2., position + width/2.)
 
-  for apiStrip in apiAxis.strips:
-    strip = project._data2Obj[apiStrip]
+# def _axisRegionChanged(project:Project, apiAxis:ApiAxis):
+#   """Notifier function for when axis position or width changes"""
+#
+#   position = apiAxis.position
+#   width = apiAxis.width
+#   region = (position - width/2., position + width/2.)
+#
+#   for apiStrip in apiAxis.strips:
+#     strip = project._data2Obj[apiStrip]
+#
+#     index = apiStrip.axisOrder.index(apiAxis.code)
+#     if not strip.beingUpdated:
+#
+#       strip.beingUpdated = True
+#
+#       try:
+#         if index == 0:
+#           # X axis
+#           strip.viewBox.setXRange(*region)
+#         elif index == 1:
+#           # Y axis
+#           strip.viewBox.setYRange(*region)
+#         else:
+#           # One of the Z axes
+#           for spectrumView in strip.spectrumViews:
+#             if spectrumView.isVisible():
+#               for peakListView in spectrumView.peakListViews:
+#                 if peakListView.isVisible():
+#                   peakList = peakListView.peakList
+#                   peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
+#                   strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+#
+#           from application.core.modules.GuiStripNd import GuiStripNd
+#           if isinstance(strip, GuiStripNd):
+#             n = index - 2
+#             if n >= 0:
+#               planeLabel = strip.planeToolbar.planeLabels[n]
+#               planeSize = planeLabel.singleStep()
+#               planeLabel.setValue(position)
+#               strip.planeToolbar.planeCounts[n].setValue(width/planeSize)
+#
+#       finally:
+#         strip.beingUpdated = False
+#
+#     if index == 1:  # ASSUMES that only do H phasing
+#       strip.updatePhasing()
+#
+# # Add notifier function to Project
+# for apiFuncName in ('setPosition', 'setWidth'):
+#   Project._setupApiNotifier(_axisRegionChanged, ApiAxis, apiFuncName)
+#
+#
+# Strip.setupCoreNotifier('create', GuiStrip._setupGuiStrip)
 
-    index = apiStrip.axisOrder.index(apiAxis.code)
-    if not strip.beingUpdated:
+# def _setupGuiStrip(project:Project, apiStrip:ApiStrip):
+#   """Set up graphical parameters for completed strips - for notifiers"""
+#
+#   strip = project._data2Obj[apiStrip]
+#   orderedAxes = strip.orderedAxes
+#   axisOrder = strip.axisOrder
+#
+#   # this is called from GuiSpectrumView because the axes are not ready when the strip is created
+#   # TBD: but that means this is called for every spectrum in the strip, which is not what we want
+#   strip.viewBox.setXRange(*orderedAxes[0].region)
+#   strip.viewBox.setYRange(*orderedAxes[1].region)
+#   strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top',
+#                                 axisCode=axisOrder[0])
+#   strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left',
+#                                 axisCode=axisOrder[1])
+#   strip.viewBox.sigStateChanged.connect(strip.moveAxisCodeLabels)
+#   strip.viewBox.sigRangeChanged.connect(strip.updateRegion)
+#
+# # Add notifier function to Project
+# for clazz in (ApiBoundStrip, ApiFreeStrip):
+#   Project._setupApiNotifier(_setupGuiStrip, clazz, 'postInit')
 
-      strip.beingUpdated = True
 
-      try:
-        if index == 0:
-          # X axis
-          strip.viewBox.setXRange(*region)
-        elif index == 1:
-          # Y axis
-          strip.viewBox.setYRange(*region)
-        else:
-          # One of the Z axes
-          for spectrumView in strip.spectrumViews:
-            if spectrumView.isVisible():
-              for peakListView in spectrumView.peakListViews:
-                if peakListView.isVisible():
-                  peakList = peakListView.peakList
-                  peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
-                  strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
-          
-          from application.core.modules.GuiStripNd import GuiStripNd
-          if isinstance(strip, GuiStripNd):
-            n = index - 2
-            if n >= 0:
-              planeLabel = strip.planeToolbar.planeLabels[n]
-              planeSize = planeLabel.singleStep()
-              planeLabel.setValue(position)
-              strip.planeToolbar.planeCounts[n].setValue(width/planeSize)
-        
-      finally:
-        strip.beingUpdated = False
-    
-    if index == 1:  # ASSUMES that only do H phasing
-      strip.updatePhasing()  
-    
-# Add notifier function to Project
-for apiFuncName in ('setPosition', 'setWidth'):
-  Project._setupNotifier(_axisRegionChanged, ApiAxis, apiFuncName)
-
-def _setupGuiStrip(project:Project, apiStrip:ApiStrip):
-  """Set up graphical parameters for completed strips - for notifiers"""
-
-  strip = project._data2Obj[apiStrip]
-  orderedAxes = strip.orderedAxes
-  axisOrder = strip.axisOrder
-
-  # this is called from GuiSpectrumView because the axes are not ready when the strip is created
-  # TBD: but that means this is called for every spectrum in the strip, which is not what we want
-  strip.viewBox.setXRange(*orderedAxes[0].region)
-  strip.viewBox.setYRange(*orderedAxes[1].region)
-  strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top',
-                                axisCode=axisOrder[0])
-  strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left',
-                                axisCode=axisOrder[1])
-  strip.viewBox.sigStateChanged.connect(strip.moveAxisCodeLabels)
-  strip.viewBox.sigRangeChanged.connect(strip.updateRegion)
-
-# Add notifier function to Project
-for clazz in (ApiBoundStrip, ApiFreeStrip):
-  Project._setupNotifier(_setupGuiStrip, clazz, 'postInit')
+# NB The follow8ing two notifiers could be replaced by wrapper notifiers on
+# Mark, 'change'. But it would be rather more clumsy, so leave it as it is.
 
 def _rulerCreated(project:Project, apiRuler:ApiRuler):
   """]Notifier function for creating rulers"""
@@ -834,13 +845,36 @@ def _rulerDeleted(project:Project, apiRuler:ApiRuler):
         strip.plotWidget.removeItem(line)
 
 # Add notifier functions to Project
-Project._setupNotifier(_rulerCreated, ApiRuler, 'postInit')
-Project._setupNotifier(_rulerDeleted, ApiRuler, 'preDelete')
+Project._setupApiNotifier(_rulerCreated, ApiRuler, 'postInit')
+Project._setupApiNotifier(_rulerDeleted, ApiRuler, 'preDelete')
 
-def _refreshAllStripContours(project:Project, apiDataSource:ApiDataSource):
-  for apiSpectrumView in apiDataSource.spectrumViews:
-    for apiStrip in apiSpectrumView.strips:
-      project._data2Obj[apiStrip].update()
 
-# Add notifier function to Project
-Project._setupNotifier(_refreshAllStripContours, ApiDataSource, '')
+# def _refreshAllStripContours(project:Project, apiDataSource:ApiDataSource):
+#   for apiSpectrumView in apiDataSource.spectrumViews:
+#     for apiStrip in apiSpectrumView.strips:
+#       project._data2Obj[apiStrip].update()
+#
+# # Add notifier function to Project
+# Project._setupApiNotifier(_refreshAllStripContours, ApiDataSource, '')
+# Notifier moved to SpectrumView
+
+
+
+# NB This notifier must be implemented as an API postInint notiier,
+# As it relies on Axs that are not yet created when 'created' notifiers are executed
+def _setupGuiStrip(project:Project, apiStrip:ApiStrip):
+  """Set up graphical parameters for completed strips - for notifiers"""
+  strip = project._data2Obj[apiStrip]
+
+  orderedAxes = strip.orderedAxes
+  axisOrder = strip.axisOrder
+
+  strip.viewBox.setXRange(*orderedAxes[0].region)
+  strip.viewBox.setYRange(*orderedAxes[1].region)
+  strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top',
+                                    axisCode=axisOrder[0])
+  strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left',
+                                    axisCode=axisOrder[1])
+  strip.viewBox.sigStateChanged.connect(strip.moveAxisCodeLabels)
+  strip.viewBox.sigRangeChanged.connect(strip.updateRegion)
+Project._setupApiNotifier(_setupGuiStrip, ApiStrip, 'postInit')

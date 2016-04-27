@@ -151,4 +151,3 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     colour = Colour.colourNameToHexDict.get(colour, colour)  # works even if None
       
     return colour
-    

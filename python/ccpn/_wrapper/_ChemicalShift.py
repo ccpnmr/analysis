@@ -27,7 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import ChemicalShiftList
 from ccpn import NmrAtom
-from ccpncore.api.ccp.nmr.Nmr import Shift as ApiShift
+from ccpncore.api.ccp.nmr import Nmr
 from typing import List
 
 class ChemicalShift(AbstractWrapperObject):
@@ -44,9 +44,12 @@ class ChemicalShift(AbstractWrapperObject):
   #: List of child classes.
   _childClasses = []
 
+  # Qualified name of matching API class
+  _apiClassQualifiedName = Nmr.Shift._metaclass.qualifiedName()
+
   # CCPN properties  
   @property
-  def _apiShift(self) -> ApiShift:
+  def _apiShift(self) -> Nmr.Shift:
     """ CCPN Chemical Shift matching ChemicalShift"""
     return self._wrappedData
     
@@ -137,22 +140,8 @@ def _newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
 ChemicalShiftList.newChemicalShift = _newChemicalShift
 del _newChemicalShift
 
-
-def _getPidDependentObjects(self:NmrAtom) -> List[AbstractWrapperObject]:
-  """Get list of objects whose Pid must change for Atom if the pid of the Atom object changes.
-  In addition to the normal child objects we need to change the Pids for the ChemicalShifts"""
-  data2Obj = self._project._data2Obj
-  return (super(NmrAtom, self)._getPidDependentObjects()
-          + sorted(data2Obj[x] for x in self._wrappedData.shifts))
-
-NmrAtom._getPidDependentObjects = _getPidDependentObjects
-del _getPidDependentObjects
-
 # Notifiers:
-className = ApiShift._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':ChemicalShift}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)
+# rename chemicalShifts when atom is renamed
+NmrAtom.setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
+                          {'pathToObject':'chemicalShifts', 'action':'rename'})
+# NB The link to NmrAtom is immutable - does need a link notifier

@@ -34,7 +34,8 @@ from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
 from ccpn import Project
 
 # Fields that are coded automatically
-_autoFields = ['peaks','regions','positions', 'strips', 'nmrChains', 'nmrResidues', 'nmrAtoms', 'spectrumDisplays', 'spectrumGroups']
+_autoFields = ['peaks','regions','positions', 'strips', 'nmrChains', 'nmrResidues', 'nmrAtoms',
+               'spectrumDisplays', 'spectrumGroups']
 # NB For each of these fields code is generated to match the explicit code for the 'spectra' field
 # It is assumed that each autofield is plural, ending in a plural 's'
 # Note that the singular value (e.g. 'currentSpectrum') is the last object
@@ -156,7 +157,7 @@ def current_spectra_deletion_cleanup(self:Project, apiObj):
     if obj in fieldData:
       fieldData.remove(obj)
 #
-Project._setupNotifier(current_spectra_deletion_cleanup, ApiSpectrum, 'preDelete')
+Project._setupApiNotifier(current_spectra_deletion_cleanup, ApiSpectrum, 'preDelete')
 
 
 def  _addClassField(cls, field):
@@ -221,7 +222,7 @@ def  _addClassField(cls, field):
           fieldData.remove(obj)
     cleanup.__name__ = 'current_%s_deletion_cleanup' % field
     #
-    Project._setupNotifier(cleanup, apiClass, 'preDelete')
+    Project._setupApiNotifier(cleanup, apiClass, 'preDelete')
 
 for field in _autoFields:
   _addClassField(Current, field)

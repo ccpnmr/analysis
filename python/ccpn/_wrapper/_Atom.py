@@ -44,6 +44,9 @@ class Atom(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiAtom._metaclass.qualifiedName()
   
 
   # CCPN properties
@@ -93,10 +96,3 @@ class Atom(AbstractWrapperObject):
 Residue._childClasses.append(Atom)
 
 # Notifiers:
-className = ApiAtom._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Atom}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)

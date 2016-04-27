@@ -37,7 +37,6 @@ from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosi
 
 from application.core.DropBase import DropBase
 from application.core.modules.GuiBlankDisplay import GuiBlankDisplay
-from application.core.modules.GuiStripNd import GuiStripNd
 
 class GuiWindow(DropBase):
   
@@ -125,12 +124,10 @@ class GuiWindow(DropBase):
     Changes the scale of a trace in all spectrum displays of the window.
     """
     for spectrumDisplay in window.spectrumDisplays:
-      for strip in spectrumDisplay.strips:
-        if isinstance(strip, GuiStripNd):
+      if not spectrumDisplay.is1D:
+        for strip in spectrumDisplay.strips:
           for spectrumView in strip.spectrumViews:
             spectrumView.traceScale *= scale
-        else:
-          pass # should this change the y region??
     
   def traceScaleUp(self, window:'GuiWindow'):
     """
@@ -149,8 +146,8 @@ class GuiWindow(DropBase):
     Toggles whether horizontal traces are displayed in the specified window.
     """
     for spectrumDisplay in window.spectrumDisplays:
-      for strip in spectrumDisplay.strips:
-        if isinstance(strip, GuiStripNd):
+      if not spectrumDisplay.is1D:
+        for strip in spectrumDisplay.strips:
           strip.toggleHTrace()
     
   def toggleVTrace(self, window:'GuiWindow'):
@@ -158,8 +155,8 @@ class GuiWindow(DropBase):
     Toggles whether vertical traces are displayed in the specified window.
     """
     for spectrumDisplay in window.spectrumDisplays:
-      for strip in spectrumDisplay.strips:
-        if isinstance(strip, GuiStripNd):
+      if not spectrumDisplay.is1D:
+        for strip in spectrumDisplay.strips:
           strip.toggleVTrace()
     
   def togglePhaseConsole(self, window:'GuiWindow'):

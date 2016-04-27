@@ -33,9 +33,9 @@ class ToolButton(QtGui.QToolButton):
     self.spectrumView = spectrumView
     pix=QtGui.QPixmap(120, 10)
     if spectrumView.spectrum.dimensionCount < 2:
-      pix.fill(QtGui.QColor(spectrumView.spectrum.sliceColour))
+      pix.fill(QtGui.QColor(spectrumView.sliceColour))
     else:
-      pix.fill(QtGui.QColor(spectrumView.spectrum.positiveContourColour))
+      pix.fill(QtGui.QColor(spectrumView.positiveContourColour))
     # spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
     # self.spaction = parent.spectrumToolBar.addAction(spectrumView.spectrum.name)#, self)
     # newIcon = QtGui.QIcon(pix)

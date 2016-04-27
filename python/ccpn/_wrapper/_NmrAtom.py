@@ -30,7 +30,7 @@ from ccpn import NmrResidue
 from ccpn import Atom
 from ccpn import Peak
 from ccpncore.lib import Constants
-from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
+from ccpncore.api.ccp.nmr import Nmr
 from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 from ccpncore.util import Pid
 from typing import Union, Tuple, List
@@ -50,11 +50,14 @@ class NmrAtom(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = Nmr.Resonance._metaclass.qualifiedName()
   
 
   # CCPN properties  
   @property
-  def _apiResonance(self) -> ApiResonance:
+  def _apiResonance(self) -> Nmr.Resonance:
     """ CCPN atom matching Atom"""
     return self._wrappedData
 
@@ -351,12 +354,19 @@ NmrResidue.fetchNmrAtom = fetchNmrAtom
 Project.produceNmrAtom = produceNmrAtom
 
 # Notifiers:
-className = ApiResonance._metaclass.qualifiedName()
+className = Nmr.Resonance._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':NmrAtom}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_resetPid', {}, className, 'setImplName'),
-    ('_resetPid', {}, className, 'setResonanceGroup'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+  ( ('_finaliseApiRename', {}, className, 'setImplName'),
+    ('_finaliseApiRename', {}, className, 'setResonanceGroup'),
   )
 )
+for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
+  className = clazz.qualifiedName()
+  Project._apiNotifiers.extend(
+    ( ('_modifiedLink', {'classNames':('NmrAtom','Peak')}, className, 'create'),
+      ('_modifiedLink', {'classNames':('NmrAtom','Peak')}, className, 'delete'),
+    )
+  )
+
+# NB Atom<->NmrAtom link depends solely on the NmrAtom name.
+# So no notifiers on the link - notify on the NmrAtom rename instead.

@@ -53,7 +53,7 @@ maxRandomInt =  2000000000
 # Saveframe map for generic restraint - later modified for the official versions
 _RestraintListMap = OD((
   ('potential_type','potentialType'),
-  ('restraint_origin', 'origin'),
+  ('origin', 'origin'),
   ('tensor_magnitude', None),
   ('tensor_rhombicity', None),
   ('tensor_chain_code', 'tensorChainCode'),
@@ -79,8 +79,9 @@ _RestraintColumns = OD((                   # Matching class: RestraintContributi
   ('chain_code_4', None), ('sequence_code_4', None), ('residue_type_4', None), ('atom_name_4',None),
   ('weight', 'weight'), ('target_value', 'targetValue'), ('target_value_uncertainty', 'error'),
   ('lower_linear_limit', 'additionalLowerLimit'), ('lower_limit', 'lowerLimit'),
-  ('upper_linear_limit', 'additionalUpperLimit'), ('upper_limit', 'upperLimit'),
-  ('ccpn_scale', 'scale'), ('ccpn_is_distance_dependent', 'isDistanceDependent'),
+  ('upper_limit', 'upperLimit'), ('upper_linear_limit', 'additionalUpperLimit'),
+  ('scale', 'scale'), ('distance_dependent', 'isDistanceDependent'),
+  ('name', None),
   ('ccpn_vector_length', 'restraint.vectorLength'),
   ('ccpn_figure_of_merit', 'restraint.figureOfMerit')
 ))
@@ -88,15 +89,15 @@ _RestraintColumns = OD((                   # Matching class: RestraintContributi
 # NEF supported restraint list maps:
 
 _removeCcpnItems = ('ccpn_restraint_type', 'ccpn_restraint_item_length', 'ccpn_measurement_type')
-_removeRdcColumns = ('ccpn_scale', 'ccpn_is_distance_dependent', 'ccpn_vector_length', )
+_removeRdcColumns = ('ccpn_vector_length', )
+_removeDihedralColumns = ('name', )
 
 # Distance restraint list Map
 _DistanceRestraintListMap = OD(tt for tt in _RestraintListMap.items()
-                               if not 'tensor' in tt[0])
-for tag in _removeCcpnItems:
-  del _DistanceRestraintListMap[tag]
+                               if not 'tensor' in tt[0] and tt[0] not in _removeCcpnItems)
 columns = OD(tt for tt in _RestraintColumns.items()
-             if tt[0][-2:] not in ('_3', '_4') and tt[0] not in _removeRdcColumns)
+             if tt[0][-2:] not in ('_3', '_4')
+             and tt[0] not in (_removeRdcColumns + _removeDihedralColumns))
 _DistanceRestraintListMap['nef_distance_restraint'] = columns
 
 # Dihedral restraint list Map
@@ -105,21 +106,21 @@ _DihedralRestraintListMap = OD(tt for tt in _RestraintListMap.items()
 for tag in _removeCcpnItems:
   del _DihedralRestraintListMap[tag]
 columns = OD(tt for tt in _RestraintColumns.items() if tt[0] not in _removeRdcColumns)
-columns['name'] = None
 _DihedralRestraintListMap['nef_dihedral_restraint'] = columns
 
 # Rdc restraint list Map
 _RdcRestraintListMap = _RestraintListMap.copy()
 for tag in _removeCcpnItems:
   del _RdcRestraintListMap[tag]
-columns = OD(tt for tt in _RestraintColumns.items() if tt[0][-2:] not in ('_3', '_4'))
+columns = OD(tt for tt in _RestraintColumns.items() if tt[0][-2:] not in ('_3', '_4')
+             and tt[0] not in _removeDihedralColumns)
 _RdcRestraintListMap['nef_rdc_restraint'] = columns
 
 _RestraintListMap['ccpn_restraint'] = _RestraintColumns
 
 
 def convert2NefString(project):
-  """COnvert project ot NEF string"""
+  """Convert project ot NEF string"""
   converter = CcpnNefIo(project)
   dataBlock = converter.exportProject()
   return dataBlock.toString()
@@ -203,7 +204,8 @@ class CcpnNefIo:
       ('ccpn_peaklist_comment', 'comment'),
       ('ccpn_peaklist_name', 'name'),
       ('ccpn_peaklist_is_simulated', 'isSimulated'),
-      ('ccpn_master_spectrum_frame', None),
+      ('ccpn_spectrum_name', 'spectrum.name'),
+      ('ccpn_complete_spectrum_data', None),
       ('nef_spectrum_dimension', OD((            # No Matching class
         ('dimension_id', None), ('axis_unit', None), ('axis_code', None),
         ('spectrometer_frequency', None), ('spectral_width', None), ('value_first_point', None),
@@ -445,9 +447,6 @@ class CcpnNefIo:
     if saveFrame:
       saveFrames.append(saveFrame)
 
-    # reorder to export order
-    saveFrames = self._saveFrameNefOrder(saveFrames)
-
     # make and return dataBlock with sameframes in export order
     result = StarIo.NmrDataBlock(name=self.project.name)
     for saveFrame in self._saveFrameNefOrder(saveFrames):
@@ -465,7 +464,7 @@ class CcpnNefIo:
     result = self._newNefSaveFrame(headObject, category, category)
 
     # NBNB TBD FIXME add proper values for format version from specification file
-    result['format_name'] = 'Nmr_Exchange_Format'
+    result['format_name'] = 'nmr_exchange_format'
     # format_version=None
     result['coordinate_file_name'] = coordinateFileName
     if headObject.className == 'Project':
@@ -517,17 +516,23 @@ class CcpnNefIo:
           loop.newRow(rowdata)
 
       loop = result['nef_covalent_links']
-      columns = ['chain_code_1', 'sequence_code_1', 'residue_type_1', 'atom_name_1',
-                 'chain_code_2', 'sequence_code_2', 'residue_type_2', 'atom_name_2',
-                 'ccpn_bond_type']
-      for bond in chains[0].project.bonds:
-        atoms = bond.atoms
-        if all(atom.residue.chain in chains for atom in atoms):
-          # Bond is between selected chains - add it to the loop
-          data = list(atoms[0]._idTuple)
-          data.extend(atoms[1]._idTuple)
-          data.append(bond.bondType)
-          loop.newRow(dict(zip(columns, data)))
+      bonds = chains[0].project.bonds
+      if bonds:
+        columns = ['chain_code_1', 'sequence_code_1', 'residue_type_1', 'atom_name_1',
+                   'chain_code_2', 'sequence_code_2', 'residue_type_2', 'atom_name_2',
+                   'ccpn_bond_type']
+        for bond in bonds:
+          atoms = bond.atoms
+          if all(atom.residue.chain in chains for atom in atoms):
+            # Bond is between selected chains - add it to the loop
+            data = list(atoms[0]._idTuple)
+            data.extend(atoms[1]._idTuple)
+            data.append(bond.bondType)
+            loop.newRow(dict(zip(columns, data)))
+      else:
+        del result['nef_covalent_links']
+      #
+      return result
 
     else:
       return self._newNefSaveFrame(None, category, category)
@@ -537,10 +542,9 @@ class CcpnNefIo:
 
     # Set up frame
     category = 'nef_chemical_shift_list'
-    name = '%s_%s' % (category, chemicalShiftList.name)
-    result = self._newNefSaveFrame(chemicalShiftList, category, name)
+    result = self._newNefSaveFrame(chemicalShiftList, category, chemicalShiftList.name)
 
-    self.ccpn2SaveFrameName[chemicalShiftList] = name
+    self.ccpn2SaveFrameName[chemicalShiftList] = result['sf_framecode']
 
     # Fill in loop - use dictionary rather than list as this is more robust against reorderings
     loopName = 'nef_chemical_shift'
@@ -575,10 +579,9 @@ class CcpnNefIo:
       loopName = 'ccpn_restraint'
 
 
-    name = '%s_%s' % (category, restraintList.name)
-    result = self._newNefSaveFrame(restraintList, category, name)
+    result = self._newNefSaveFrame(restraintList, category, restraintList.name)
 
-    self.ccpn2SaveFrameName[restraintList] = name
+    self.ccpn2SaveFrameName[restraintList] = result['sf_framecode']
 
     if category in ('nef_rdc_restraint_list', 'ccpn_restraint_list'):
       tensor = restraintList.tensor
@@ -613,6 +616,8 @@ class CcpnNefIo:
         assignments = list(zip(*(x.split('.') for x in item)))
         for ii,tag in enumerate(('chain_code', 'sequence_code', 'residue_type', 'atom_name',)):
           row._set(tag, assignments[ii])
+    #
+    return result
 
   def spectrum2Nef(self, spectrum:'ccpn.Spectrum') -> StarIo.NmrSaveFrame:
     """Convert spectrum to NEF saveframes - one per peaklist
@@ -624,18 +629,14 @@ class CcpnNefIo:
       peakLists = [spectrum.newPeakList()]
 
     result = [self.peakList2Nef(peakLists[0], exportCompleteSpectrum=True)]
-    masterSpectrumFrame = result[0]['sf_framecode']
     for peakList in peakLists[1:]:
-      result.append(self.peakList2Nef(peakList, masterSpectrumFrame=masterSpectrumFrame))
+      result.append(self.peakList2Nef(peakList))
     #
     return result
 
-  def peakList2Nef(self, peakList:'ccpn.peakList', masterSpectrumFrame=None,
+  def peakList2Nef(self, peakList:'ccpn.peakList',
                    exportCompleteSpectrum=False) -> StarIo.NmrSaveFrame:
     """Convert PeakList to CCPN NEF saveframe
-
-    masterSpectrumFrame is the frameCode for the saveFrame with the full spectrum description
-    (for export of spectra with multiple peakLists
     """
 
     spectrum = peakList.spectrum
@@ -647,20 +648,27 @@ class CcpnNefIo:
         % spectrum.dimensionTypes
       )
 
+    # Get unique frame name
+    name = spectrum.name
+    if len(spectrum.peakLists) > 1:
+      ss = '_'
+      name = '%s%s%s' % (name ,ss, peakList.serial)
+      while spectrum.project.getSpectrum(name):
+        # This name is taken - modify it
+        ss += '_'
+        name = '%s%s%s' % (name ,ss, peakList.serial)
+
     # Set up frame
     category = 'nef_nmr_spectrum'
-    name = '%s_%s.%s' % (category, spectrum.name, peakList.serial)
+    print('@~@~ spec. PL, exp, ds', spectrum.name, peakList.name,
+          spectrum._wrappedData.experiment.name, spectrum._wrappedData.name)
     result = self._newNefSaveFrame(peakList, category, name)
 
-    self.ccpn2SaveFrameName[peakList] = name
+    self.ccpn2SaveFrameName[peakList] = result['sf_framecode']
 
     result['chemical_shift_list'] = self.ccpn2SaveFrameName.get(peakList.chemicalShiftList)
 
-    if exportCompleteSpectrum:
-      # NB do later
-      pass
-    else:
-      result['ccpn_master_spectrum_frame'] = masterSpectrumFrame
+    result['ccpn_complete_spectrum_data'] = exportCompleteSpectrum
 
     # NBNB TBD FIXME assumes ppm unit and Frequency dimensions for now
     # WIll give wrong values for Hz or pointNumber units, and
@@ -673,7 +681,7 @@ class CcpnNefIo:
     data['axis_code'] = spectrum.isotopeCodes
     data['spectrometer_frequency'] = spectrum.spectrometerFrequencies
     data['spectral_width'] = spectrum.spectralWidths
-    data['value_first_point'] = [tt[0] for tt in spectrum.spectrumLimits]
+    data['value_first_point'] = [tt[1] for tt in spectrum.spectrumLimits]
     data['folding'] = spectrum.foldingModes
     # NBNB All CCPN peaks are in principle at the correct unaliased positions
     # Whether they are set correctly is another matter.
@@ -737,11 +745,13 @@ class CcpnNefIo:
         row._set('position_uncertainty', peak.positionError)
 
 
-    if exportCompleteSpectrum:
+    if exportCompleteSpectrum and spectrum.spectrumHits:
       loopName = 'ccpn_spectrum_hit'
       loop = result[loopName]
       for spectrumHit in spectrum.spectrumHits:
         loop.newRow(self._loopRowData(category, loopName, spectrumHit))
+    else:
+      del result['ccpn_spectrum_hit']
 
       # NB do more later (e.g. SpectrumReference)
 
@@ -783,10 +793,9 @@ class CcpnNefIo:
 
     # Set up frame
     category = 'ccpn_sample'
-    name = '%s_%s' % (category, sample.name)
-    result = self._newNefSaveFrame(sample, category, name)
+    result = self._newNefSaveFrame(sample, category, sample.name)
 
-    self.ccpn2SaveFrameName[sample] = name
+    self.ccpn2SaveFrameName[sample] = result['sf_framecode']
 
     # Fill in loop
     loopName = 'ccpn_sample_component'
@@ -801,10 +810,10 @@ class CcpnNefIo:
 
     # Set up frame
     category = 'ccpn_substance'
-    name = '%s_%s.%s' % (category, substance.name, substance.labeling)
+    name = '%s.%s' % (substance.name, substance.labeling)
     result = self._newNefSaveFrame(substance, category, name)
 
-    self.ccpn2SaveFrameName[substance] = name
+    self.ccpn2SaveFrameName[substance] = result['sf_framecode']
 
     loopName = 'ccpn_substance_synonyms'
     loop = result[loopName]

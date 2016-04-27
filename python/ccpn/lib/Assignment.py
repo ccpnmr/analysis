@@ -125,7 +125,6 @@ def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=
   """
 
   predictions = {}
-  print(ccpCode)
   for atomName in getResidueAtoms(ccpCode, 'protein'):
     if atomName in ATOM_NAMES[isotopeCode]:
       predictions[ccpCode, atomName] = getAtomProbability(ccpCode, atomName, value)

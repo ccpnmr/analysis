@@ -28,6 +28,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from application import Task
 from ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
+from ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
 
 RulerData = namedtuple('RulerData', ['axisCode', 'position', 'unit', 'label'])
@@ -46,6 +47,9 @@ class Mark(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiMark._metaclass.qualifiedName()
 
   # CCPN properties  
   @property
@@ -203,10 +207,11 @@ del _newSimpleMark
 
 
 # Notifiers:
-className = ApiMark._metaclass.qualifiedName()
+# Mark changes when rulers are created or deleted
 Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Mark}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
+  ( ('_notifyRelatedApiObject', {'pathToObject':'mark', 'action':'change'},
+    ApiRuler._metaclass.qualifiedName(), 'postInit'),
+    ('_notifyRelatedApiObject', {'pathToObject':'mark', 'action':'change'},
+     ApiRuler._metaclass.qualifiedName(), 'preDelete'),
   )
 )

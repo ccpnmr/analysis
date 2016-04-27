@@ -38,7 +38,6 @@ from ccpncore.gui import MessageDialog
 from ccpncore.util import Path
 from ccpncore.util.AttrDict import AttrDict
 from ccpncore.util import Register
-#from ccpncore.util import Translation
 from ccpncore.util.Translation import languages, defaultLanguage
 from ccpncore.util.Translation import translator
 from application.core.Base import Base as GuiBase
@@ -279,7 +278,7 @@ class AppBase(GuiBase):
     # Set up undo stack
     # The default values are as below. They can be changed if desired
     #project._resetUndo(maxWaypoints=20, maxOperations=10000)
-    project._resetUndo()
+    project._resetUndo(debug=True)
     #
     return project
 

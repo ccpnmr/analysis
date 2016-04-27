@@ -26,6 +26,7 @@ from typing import Sequence, Tuple
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
+from ccpn import NmrResidue
 from ccpn import Peak
 from application._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
@@ -49,6 +50,9 @@ class Strip(GuiStrip, AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiStrip._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -400,11 +404,14 @@ Strip._factoryFunction = staticmethod(_factoryFunction)
 Strip.processSpectrum = Strip.displaySpectrum
 
 # Notifiers:
-className = ApiStrip._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Strip._factoryFunction}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)
 
+def _resetRemoveStripAction(strip:Strip):
+  """Update interface when a strip is created or deleted.
+
+    NB notifier is executed after deletion is final but before the wrapper is updated.
+    len() > 1 check is correct also for delete
+  """
+  spectrumDisplay = strip.spectrumDisplay
+  spectrumDisplay.removeStripAction.setEnabled(len(spectrumDisplay.strips) > 1)
+NmrResidue.setupCoreNotifier('create', _resetRemoveStripAction)
+NmrResidue.setupCoreNotifier('delete', _resetRemoveStripAction)

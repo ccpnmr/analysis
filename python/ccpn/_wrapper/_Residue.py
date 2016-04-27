@@ -43,6 +43,9 @@ class Residue(AbstractWrapperObject):
   
   #: List of child classes.
   _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiResidue._metaclass.qualifiedName()
   
 
   # CCPN properties  
@@ -127,7 +130,7 @@ class Residue(AbstractWrapperObject):
         else:
 
           # NBNB The detection of 'cyclic' only works if residues are given in
-          # sequential order. This is not given - but is unlikely eer to break.
+          # sequential order. This is not given - but is unlikely ever to break.
 
           seqId = self._wrappedData.seqId
           if (previousResidue._wrappedData.seqId > seqId
@@ -179,23 +182,6 @@ class Residue(AbstractWrapperObject):
   def comment(self, value:str):
     self._wrappedData.details = value
 
-  # CCPN functions
-  # def linkToResidue(self, targetResidue, fromLinkCode, toLinkCode=None):
-  #   """Link residue to targetResidue, using linkCodes given
-  #   NBNB TBD currently function only set Molecule-level links and assumes that
-  #   ChemCompVar fits. Expand later"""
-  #   linkCodeMap = {'prev':'next', 'next':'prev'}
-  #   if toLinkCode is None:
-  #     toLinkCode = linkCodeMap.get(fromLinkCode)
-  #   if toLinkCode is None:
-  #     raise ValueError("toLinkCode missing for link type: %s" % fromLinkCode)
-  #
-  #   fromMolResidue = self._wrappedData.molResidue
-  #   toMolResidue = targetResidue._wrappedData.molResidue
-  #   linkEnds = (fromMolResidue.findFirstMolResLinkEnd(linkCode=fromLinkCode),
-  #               toMolResidue.findFirstMolResLinkEnd(linkCode=toLinkCode))
-  #   fromLinkCode.molecule.newMolResLink(molResLinkEnds=linkEnds)
-
   @property
   def nextResidue(self) -> Optional['Residue']:
     """Next residue in sequence, if any"""
@@ -225,11 +211,6 @@ class Residue(AbstractWrapperObject):
     return result
 
   # Implementation functions
-
-  def rename(self, value:str):
-    """Change object id, modifying entire project to maintain consistency.
-    NBNB TBD to be implemented"""
-    raise NotImplementedError("Chain rename not implemented yet")
 
   @classmethod
   def _getAllWrappedData(cls, parent: Chain)-> list:
@@ -265,10 +246,3 @@ Chain._childClasses.append(Residue)
 # No 'new' function - chains are made elsewhere
 
 # Notifiers:
-className = ApiResidue._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-  ( ('_newObject', {'cls':Residue}, className, '__init__'),
-    ('_finaliseDelete', {}, className, 'delete'),
-    ('_finaliseUnDelete', {}, className, 'undelete'),
-  )
-)

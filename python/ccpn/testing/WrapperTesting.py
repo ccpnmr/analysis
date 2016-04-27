@@ -64,3 +64,10 @@ class WrapperTesting(unittest.TestCase):
     dataList = self.project.loadData(dataPath)
     #
     return dataList
+
+  def raiseDelayedError(self, *args, **kwargs):
+    """Debugging tool. To raise an error the """
+    if hasattr(self, 'delayedError') and self.delayedError:
+      self.delayedError -= 1
+    else:
+      raise Exception('Deliberate delayed error!!')

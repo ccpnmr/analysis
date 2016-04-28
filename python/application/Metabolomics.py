@@ -1,19 +1,27 @@
-__author__ = 'luca'
+__author__ = 'TJ'
 
-
-from application.core.AppBase import startProgram
-from application.core.AppBase import AppBase
+from application.core.AppBase import defineProgramArguments, AppBase
 from ccpn.lib.Version import applicationVersion
+
 
 applicationName = 'Metabolomics'
 
-class Metabolomics(AppBase):
-  pass
-if __name__ == '__main__':
-  import argparse
 
-  parser = argparse.ArgumentParser(description='Process startup arguments')
-  parser.add_argument('--language', help='Language for menus, etc.')
-  parser.add_argument('projectPath', nargs='?', help='Project path')
-  args = parser.parse_args()
-  startProgram(Metabolomics, applicationName, applicationVersion, args.projectPath, args.language)
+class Metabolomics(AppBase):
+  """Root class for Assign application"""
+
+  def __init__(self, applicationName, applicationVersion, commandLineArguments):
+    AppBase.__init__(self, applicationName, applicationVersion, commandLineArguments)
+    self.components.add('Metabolomics')
+
+
+if __name__ == '__main__':
+
+  # argument parser
+  parser = defineProgramArguments()
+
+  # add any additional commandline argument here
+  commandLineArguments = parser.parse_args()
+
+  program = Metabolomics(applicationName, applicationVersion, commandLineArguments)
+  program.start()

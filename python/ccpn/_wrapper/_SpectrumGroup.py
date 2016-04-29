@@ -97,7 +97,7 @@ class SpectrumGroup(AbstractWrapperObject):
         raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
       else:
         commonUtil._resetParentLink(self._wrappedData, 'spectrumGroups', 'name', value)
-        self._finaliseRename(self)
+        self._finaliseRename()
 
     finally:
       if undo is not None:

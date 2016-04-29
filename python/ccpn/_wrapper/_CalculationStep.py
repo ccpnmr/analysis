@@ -126,7 +126,6 @@ class CalculationStep(AbstractWrapperObject):
   @property
   def inputDataSet(self) -> Optional[DataSet]:
     """Calculation input data set."""
-    print ('@~@~ inputDAtaSet', list((x.serial, x.uuid) for x in self.project.dataSets))
     uuid = self._wrappedData.inputDataUuid
     apiDataSet = self._project._wrappedData.findFirstNmrConstraintStore(uuid=uuid)
     if apiDataSet:

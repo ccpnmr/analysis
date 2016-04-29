@@ -351,6 +351,7 @@ class Peak(AbstractWrapperObject):
 PeakList._childClasses.append(Peak)
 
 def _newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]=None,
+             heightError:Optional[float]=None, volumeError:Union[float, None]=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
             position:Sequence[float]=(), pointPosition:Sequence[float]=(),
             dimensionAssignments:Sequence[Sequence['NmrAtom']]=(),
@@ -363,8 +364,9 @@ def _newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None
   self._project.blankNotification()
   try:
     apiPeakList = self._apiPeakList
-    apiPeak = apiPeakList.newPeak(height=height, volume=volume, figOfMerit=figureOfMerit,
-                                annotation=annotation, details=comment)
+    apiPeak = apiPeakList.newPeak(height=height, volume=volume,
+                                  heightError=heightError, volumeError=volumeError,
+                                  figOfMerit=figureOfMerit, annotation=annotation, details=comment)
 
     # set peak position
     # NBNB TBD currently unused parameters could be added, and will have to come in here as well
@@ -408,7 +410,8 @@ def _newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None
 
   if undo is not None:
     undo.newItem(apiPeak.delete, self.newPeak, redoKwargs={
-      'height':height, 'volume':volume, 'figureOfMerit':figureOfMerit,
+      'height':height, 'volume':volume, 'heightError':heightError, 'volumeError':volumeError,
+      'figureOfMerit':figureOfMerit,
       'annotation':annotation, 'comment':comment, 'position':position,
       'pointPosition':pointPosition,  'dimensionAssignments':dimensionAssignments,
       'assignments':assignments})
@@ -424,6 +427,8 @@ PeakList.newPeak = _newPeak
 del _newPeak
 
 # Additional Notifiers:
+#
+# NB Thes API notifiers will be called for API peaks - which match both Peaks and Integrals
 className = Nmr.PeakDim._metaclass.qualifiedName()
 Project._apiNotifiers.append(
   ('_notifyRelatedApiObject', {'pathToObject':'peak', 'action':'change'}, className, ''),

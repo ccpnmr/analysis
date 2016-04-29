@@ -854,7 +854,7 @@ def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Sp
 
 def _SpectrumMakeFirstPeakList(project:Project, dataSource:Nmr.DataSource):
   """Add PeakList if none is present"""
-  if not dataSource.peakLists:
+  if not dataSource.findFirstPeakList(dataType='Peak'):
     dataSource.newPeakList()
 Project._setupApiNotifier(_SpectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')
 

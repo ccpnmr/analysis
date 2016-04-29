@@ -22,6 +22,8 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
   |       |       SpectrumReference
   |       |       PeakList
   |       |       |       Peak
+  |       |       IntegralList
+  |       |       |       Integral
   |       |       PseudoDimension
   |       |       SpectrumHit
   |       SpectrumGroup
@@ -185,6 +187,10 @@ _wrappedClasses.append(cls)
 PeakList = cls = importlib.import_module('ccpn._wrapper._PeakList').PeakList
 _wrappedClasses.append(cls)
 Peak = cls = importlib.import_module('ccpn._wrapper._Peak').Peak
+_wrappedClasses.append(cls)
+IntegralList = cls = importlib.import_module('ccpn._wrapper._IntegralList').IntegralList
+_wrappedClasses.append(cls)
+Integral = cls = importlib.import_module('ccpn._wrapper._Integral').Integral
 _wrappedClasses.append(cls)
 PseudoDimension = cls = importlib.import_module('ccpn._wrapper._PseudoDimension').PseudoDimension
 _wrappedClasses.append(cls)

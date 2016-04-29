@@ -84,7 +84,6 @@ class Project(AbstractWrapperObject):
     self._project = self
     self._wrappedData = wrappedData
     self._id = _id = ''
-    self._old_id = None
     
     # setup object handling dictionaries
     self._data2Obj = {wrappedData:self}
@@ -136,7 +135,7 @@ class Project(AbstractWrapperObject):
     for experiment in wrappedData.experiments:
       for dataSource in experiment.dataSources:
 
-        if not dataSource.peakLists:
+        if not dataSource.findFirstPeakList(dataType='Peak'):
           # Set a peakList for every spectrum
           dataSource.newPeakList()
 
@@ -352,7 +351,7 @@ class Project(AbstractWrapperObject):
     try:
       del od[notifier]
     except KeyError:
-      raise KeyError("Notifier %s not found for %s" % (notifier, (className, action)))
+      raise self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, action)))
 
 
   def removeNotifier(self, notifier:typing.Callable):
@@ -363,7 +362,7 @@ class Project(AbstractWrapperObject):
         del od[notifier]
         found = True
     if not found:
-      raise ValueError("Unknown notifier: %s" % notifier)
+      raise self._logger.warning("Attempt to remove unknown notifier: %s" % notifier)
 
   def blankNotification(self):
     """Disable notifiers temporarily
@@ -455,10 +454,18 @@ class Project(AbstractWrapperObject):
     and call creation notifiers"""
 
     if hasattr(cls, '_factoryFunction'):
-      # Necessary for classes where you ned to instantiate a subclass instead
-      result = cls._factoryFunction(self, wrappedData)
+      # Necessary for classes where you need to instantiate a subclass instead
+
+      result = self._data2Obj.get(wrappedData)
+      # There are cases where _newApiObject is registered twice,
+      # when two wrapper classes share teh same API class
+      # (Peak,Integral; PeakList, IntegralList)
+      # In those cases only the notifiers are done the second time
+      if result is None:
+        result = cls._factoryFunction(self, wrappedData)
     else:
       result = cls(self, wrappedData)
+    #
     result._finaliseAction('create')
 
 
@@ -555,80 +562,6 @@ class Project(AbstractWrapperObject):
 
 
 
-  # def _finaliseRename(self):
-  #   """Reset internal attributes after values determining PID have changed
-  #   """
-  #
-  #   project = self.project
-  #
-  #   # reset id
-  #   oldId = self._id
-  #   oldPid = self.pid
-  #   parent = self._parent
-  #   if parent is None:
-  #     _id = ''
-  #   elif parent is self:
-  #     _id = str(self._key)
-  #   else:
-  #     _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
-  #   self._id = _id
-  #   self._old_id = oldId
-  #
-  #   # update pid:object mapping dictionary
-  #   dd = project._pid2Obj[self.className]
-  #   del dd[oldId]
-  #   dd[_id] = self
-  #
-  #   # Execute rename notifiers
-  #   className = self.className
-  #   iterator = (project._context2Notifiers.setdefault((name, target), OrderedDict())
-  #              for name in (className, 'AbstractWrapperObject'))
-  #   ll = project._pendingNotifications
-  #   if ll is None:
-  #     for dd in iterator:
-  #       for notifier in dd:
-  #         notifier(self)
-  #   else:
-  #     for dd in iterator:
-  #       for notifier, onceOnly in dd.items():
-  #         ll.append(notifier, onceOnly, self)
-  #
-  #   # call rename on children
-  #   for obj in self._getDirectChildren():
-  #     obj._finaliseRename()
-
-    #     def _finaliseRename(self, wrappedData):
-    # """Reset internal attributes after values determining PID have changed
-    # """
-    #
-    # getDataObj = self._data2Obj.get
-    # pid2Obj = self._pid2Obj
-    #
-    # objects = [getDataObj(wrappedData)]
-    # for obj in objects:
-    #   # Add objects to list whose Pid needs to change in tandem
-    #   objects.extend(obj._getDirectChildren)
-    #
-    #   # reset _id
-    #   oldId = obj._id
-    #   oldPid = obj.pid
-    #
-    #   parent = obj._parent
-    #   if parent is None:
-    #     _id = ''
-    #   elif parent is self:
-    #     _id = str(obj._key)
-    #   else:
-    #     _id = '%s%s%s'% (parent._id, Pid.IDSEP, obj._key)
-    #   obj._id = _id
-    #   obj._old_id = oldId
-    #
-    #   # update pid:object mapping dictionary
-    #   dd = pid2Obj[obj.className]
-    #   del dd[oldId]
-    #   dd[_id] = obj
-    #
-    #   obj._executeRenameNotifiers(oldPid)
 
 
 
@@ -659,58 +592,6 @@ class Project(AbstractWrapperObject):
       for dd in iterator:
         for notifier in dd:
           notifier(self)
-
-
-
-  # def _getApplicationSidebar(self):
-  #   """Get Application sidebar, if any.
-  #
-  #    Used as preliminary in sidebar reset functions"""
-  #   mainWindow = self._appBase and self._appBase.mainWindow
-  #   if mainWindow is not None:
-  #     return mainWindow.sideBar
-  #
-  #   return None
-
-  # def _resetSpectrumInSidebar(self, dataSource:'ApiDataSource'):
-  #   """Reset application sidebar when spectrum<->SpectrumGroup link changes
-  #   Called by notifiers.
-  #   No-op if there is no application and thus no sidebar
-  #   """
-  #
-  #   sideBar = self._getApplicationSidebar()
-  #   if sideBar is not None:
-  #     spectrum = self._data2Obj[dataSource]
-  #     sideBar._removeItem(spectrum.pid)
-  #     sideBar._createItem(spectrum)
-  #
-  # def _resetSpectrumGroupInSidebar(self, apiSpectrumGroup:'ApiSpectrumGroup'):
-  #   """Reset application sidebar when spectrum<->SpectrumGroup link changes
-  #   Called by notifiers for addDataSource, __init__, and undelete, where all affected
-  #   dataSources are attached after the operation.
-  #   No-op if there is no application and thus no sidebar
-  #   """
-  #
-  #   sideBar = self._getApplicationSidebar()
-  #   if sideBar is not None:
-  #     for dataSource in apiSpectrumGroup.sortedDataSources():
-  #       spectrum = self._data2Obj[dataSource]
-  #       sideBar._removeItem(spectrum.pid)
-  #       sideBar._createItem(spectrum)
-  #
-  # def _resetAllSpectraInSidebar(self, dummyObj:AbstractWrapperObject):
-  #   """Reset application sidebar when spectrum<->SpectrumGroup link changes
-  #   Called by notifiers for SpectrumGroup.delete, .setDataSources, and .removeDataSource
-  #   where NOT all affected dataSources are attached after the operation.
-  #   No-op if there is no application and thus no sidebar
-  #   """
-  #
-  #   sideBar = self._getApplicationSidebar()
-  #   if sideBar is not None:
-  #     for spectrum in self.spectra:
-  #       sideBar._removeItem(spectrum.pid)
-  #       sideBar._createItem(spectrum)
-
 
   def _close(self):
     """Clean up the wrapper project previous to deleting or replacing"""

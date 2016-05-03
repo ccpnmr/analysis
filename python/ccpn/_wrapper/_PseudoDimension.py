@@ -64,7 +64,7 @@ class PseudoDimension(AbstractWrapperObject):
 
   @property
   def _parent(self) -> Spectrum:
-    """Spectrum containing spectrumReference."""
+    """Spectrum containing PseudoDimension."""
     return self._project._data2Obj[self._wrappedData.dataSource]
 
   spectrum = _parent

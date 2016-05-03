@@ -33,6 +33,7 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
   |       Chain
   |       |       Residue
   |       |       |       Atom
+  |       Bond
   |       NmrChain
   |       |       NmrResidue
   |       |       |       NmrAtom
@@ -43,7 +44,7 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
   |       |       |       Restraint
   |       |       |       |       RestraintContribution
   |       |       CalculationStep
-  |       |       |       Data
+  |       |       Data
   |       StructureEnsemble
   |       |       Model
   |       Note

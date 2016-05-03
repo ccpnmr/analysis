@@ -319,6 +319,54 @@ class SpectrumView(AbstractWrapperObject):
     # Update strip
     self.strip.update()
 
+  def _createdSpectrumView(self):
+    """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
+
+    # NBNB TBD FIXME get rid of API objects
+
+    spectrumDisplay = self.strip.spectrumDisplay
+    spectrum = self.spectrum
+
+    # Set Z widgets for nD strips
+    if not spectrumDisplay.is1D:
+      strip = self.strip
+      if not strip.haveSetupZWidgets:
+        strip.setZWidgets()
+
+    # Handle action buttons
+    apiDataSource = spectrum._wrappedData
+    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    if not action:
+      # add toolbar action (button)
+      spectrumName = spectrum.name
+      if len(spectrumName) > 12:
+        spectrumName = spectrumName[:12]+'.....'
+      action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+      action.setCheckable(True)
+      action.setChecked(True)
+      action.setToolTip(spectrum.name)
+      widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
+      widget.setIconSize(QtCore.QSize(120, 10))
+      if spectrumDisplay.is1D:
+        widget.setFixedSize(100, 30)
+      else:
+        widget.setFixedSize(75, 30)
+      widget.spectrumView = self._wrappedData
+      spectrumDisplay.spectrumActionDict[apiDataSource] = action
+      # The following call sets the ico colours:
+      self._spectrumViewHasChanged()
+
+    if spectrumDisplay.is1D:
+      action.toggled.connect(self.plot.setVisible)
+    action.toggled.connect(self.setVisible)
+
+
+  def _deletedSpectrumView(self):
+    """Update interface when a spectrumView is deleted"""
+    scene = self.strip.plotWidget.scene()
+    scene.removeItem(self)
+    if hasattr(self, 'plot'):  # 1d
+      scene.removeItem(self.plot)
 
   # Implementation functions
   @classmethod
@@ -406,55 +454,9 @@ Spectrum.setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObjec
 # # Update Strip when SpectrumView changes
 # SpectrumView.setupCoreNotifier('change', Strip.update)
 
-def _deletedSpectrumView(spectrumView:SpectrumView):
-  """Update interface when a spectrumView is deleted"""
-  scene = spectrumView.strip.plotWidget.scene()
-  scene.removeItem(spectrumView)
-  if hasattr(spectrumView, 'plot'):  # 1d
-    scene.removeItem(spectrumView.plot)
-SpectrumView.setupCoreNotifier('delete', _deletedSpectrumView)
+SpectrumView.setupCoreNotifier('delete', SpectrumView._deletedSpectrumView)
 
-def _createdSpectrumView(spectrumView:SpectrumView):
-  """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
-
-  # NBNB TBD FIXME get rid of API objects
-
-  spectrumDisplay = spectrumView.strip.spectrumDisplay
-  spectrum = spectrumView.spectrum
-
-  # Set Z widgets for nD strips
-  if not spectrumDisplay.is1D:
-    strip = spectrumView.strip
-    if not strip.haveSetupZWidgets:
-      strip.setZWidgets()
-
-  # Handle action buttons
-  apiDataSource = spectrum._wrappedData
-  action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-  if not action:
-    # add toolbar action (button)
-    spectrumName = spectrum.name
-    if len(spectrumName) > 12:
-      spectrumName = spectrumName[:12]+'.....'
-    action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
-    action.setCheckable(True)
-    action.setChecked(True)
-    action.setToolTip(spectrum.name)
-    widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
-    widget.setIconSize(QtCore.QSize(120, 10))
-    if spectrumDisplay.is1D:
-      widget.setFixedSize(100, 30)
-    else:
-      widget.setFixedSize(75, 30)
-    widget.spectrumView = spectrumView._wrappedData
-    spectrumDisplay.spectrumActionDict[apiDataSource] = action
-    # The following call sets the ico colours:
-    spectrumView._spectrumViewHasChanged()
-
-  if spectrumDisplay.is1D:
-    action.toggled.connect(spectrumView.plot.setVisible)
-  action.toggled.connect(spectrumView.setVisible)
-SpectrumView.setupCoreNotifier('create', _createdSpectrumView)
+SpectrumView.setupCoreNotifier('create', SpectrumView._createdSpectrumView)
 
 
 SpectrumView.setupCoreNotifier('change', SpectrumView._spectrumViewHasChanged)

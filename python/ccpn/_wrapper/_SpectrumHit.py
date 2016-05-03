@@ -22,8 +22,10 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from typing import List
 from ccpn import AbstractWrapperObject
 from ccpn import Spectrum
+from ccpn import PseudoDimension
 from ccpncore.api.ccp.nmr.Nmr import SpectrumHit as ApiSpectrumHit
 from ccpncore.util import Pid
 
@@ -75,6 +77,16 @@ class SpectrumHit(AbstractWrapperObject):
     """Dimension number for pseudoDimension (0 if none),
     if the Hit only refers to one point in a pseudoDimension"""
     return self._wrappedData.sampledDimension
+
+  @property
+  def pseudoDimension(self) -> PseudoDimension:
+    """PseudoDimension,
+    if the Hit only refers to one point in a pseudoDimension"""
+    dimensionNumber = self._wrappedData.sampledDimension
+    if dimensionNumber == 0:
+      return None
+    else:
+      return self.spectrum.getPseudoDimension(dimensionNumer)
 
   @property
   def pointNumber(self) -> int:
@@ -181,5 +193,13 @@ del _newSpectrumHit
 # Connections to parents:
 
 Spectrum._childClasses.append(SpectrumHit)
+
+def getter(self:PseudoDimension) -> List[SpectrumHit]:
+  dimensionNumber = self.dimension
+  return list(x for x in self.spectrum.spectrumHits if x.dimensionNumber == dimensionNumber)
+PseudoDimension.spectrumHits = property(getter, None, None,
+  "SpectrumHits that r3fer to individual points in the PseudoDimension"
+)
+del getter
 
 # Additional Notifiers:

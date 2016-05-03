@@ -450,7 +450,7 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 
   :param Sequence sequence: string of one-letter codes or sequence of str residueNames
   :param str name: name of new substance
-  :param str labeling: labeling for new substance
+  :param str labeling: labeling for new substance (mandatory, defaults to 'std')
   :param str userCode: user code for new substance (optional)
   :param str smiles: smiles string for new substance (optional)
   :param Sequence[str] synonyms: synonyms for Substance name

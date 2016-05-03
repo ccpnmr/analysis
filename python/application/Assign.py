@@ -61,7 +61,7 @@ class Assign(AppBase):
     for spectrumDisplay in project.spectrumDisplays:
       for strip in spectrumDisplay.strips:
         for spectrumView in strip.spectrumViews:
-          spectrumView._createdSpectrumView
+          spectrumView._createdSpectrumView()
     # for spectrumDisplay in project.spectrumDisplays:
     #   apiSpectrumDisplay = spectrumDisplay._wrappedData
     #   for apiSpectrumView in apiSpectrumDisplay.sortedSpectrumViews():

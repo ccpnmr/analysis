@@ -104,15 +104,26 @@ class Chain(AbstractWrapperObject):
 
   @property
   def substance(self) -> Optional[Substance]:
-    """ccpn.Substance corresponding to ccpn.Chain"""
-    apiMolecule = self._apiChain.molecule
-    apiRefComponentStore = self._project._apiNmrProject.sampleStore.refSampleComponentStore
-    apiComponent = (apiRefComponentStore.findFirstComponent(name=apiMolecule.name, labeling='std') or
-                    apiRefComponentStore.findFirstComponent(name=apiMolecule.name))
-    if apiComponent is None:
-      return None
-    else:
-      return self._project._data2Obj[apiComponent]
+    """ccpn.Substance with sequence matching to ccpn.Chain
+
+    If there are multiple matches, select labeling=='std'
+    or, failing that, the first found (sorting alphabetically on labeling)"""
+    compoundName = self.compoundName
+    substances = [x for x in self.project.substances if x.name == compoundName]
+
+    # Select 'std' labeling if present
+    substances = [x for x in substances if x.labeling == 'std'] or substances
+
+    return substances[0] if substances else None
+
+    # apiMolecule = self._apiChain.molecule
+    # apiRefComponentStore = self._project._apiNmrProject.sampleStore.refSampleComponentStore
+    # apiComponent = (apiRefComponentStore.findFirstComponent(name=apiMolecule.name, labeling='std') or
+    #                 apiRefComponentStore.findFirstComponent(name=apiMolecule.name))
+    # if apiComponent is None:
+    #   return None
+    # else:
+    #   return self._project._data2Obj[apiComponent]
 
   # CCPN functions
   def clone(self, shortName:str):
@@ -254,7 +265,8 @@ def getter(self:Substance) -> Tuple[Chain, ...]:
                  for x in self._wrappedData.molSystem.sortedChains()
                  if x.molecule is apiMolecule)
 Substance.chains = property(getter, None, None,
-                            "ccpn.Chains that correspond to ccpn.Substance")
+  "ccpn.Chains that correspond to the sequence of ccpn.Substance (if defined)"
+)
 
 def getter(self:SampleComponent) -> Tuple[Chain]:
   tt = tuple(self._project.getChain(x) for x in self._wrappedData.chainCodes)
@@ -271,7 +283,7 @@ def setter(self, value):
           sampleComponent.removeChainCode(chainCode)
 
   wrappedData.chainCodes = chainCodes
-SampleComponent.chain = property(getter, setter, None,
+SampleComponent.chains = property(getter, setter, None,
                                  "ccpn.Chains that correspond to SampleComponent")
 
 del getter

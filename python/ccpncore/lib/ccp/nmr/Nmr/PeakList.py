@@ -137,7 +137,7 @@ def pickNewPeaks(self:PeakList, startPoint:Sequence[int], endPoint:Sequence[int]
     peakPoints = [(numpy.array(position), height) for position, height in peakPoints]
 
     # only keep those points which are inside original region, not extended region
-    peakPoints = [(position, height) for position, height in peakPoints if ((startPoint-startPointInt) <= position).all() and (position <= (endPoint-startPointInt)).all()]
+    peakPoints = [(position, height) for position, height in peakPoints if ((startPoint-startPointInt) <= position).all() and (position < (endPoint-startPointInt)).all()]
 
     # check new found positions against existing ones
     existingPositions = []

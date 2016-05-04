@@ -592,4 +592,3 @@ class AbstractWrapperObject():
             notifier(self)
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
-# AbstractWrapperObject._getPidDependentObjects.__annotations__['return'] = List[AbstractWrapperObject]

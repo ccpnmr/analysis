@@ -192,22 +192,11 @@ def _getSpectrumDisplays(window:Window):
   return tuple(window._project._data2Obj[x] for x in ll)
 Window.spectrumDisplays = property(_getSpectrumDisplays, None, None,
                                    "SpectrumDisplays shown in Window")
+del _getSpectrumDisplays
 
 def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
                        name:str=None, window:Window=None, comment:str=None,
                        independentStrips=False, nmrResidue=None):
-
-  # NBNB TBD recheck after classes are done
-
-  # # Map to determine display type
-  # displayTypeMap = {
-  #   (True, True,False):('newDisplay1d','newStrip1d'),
-  #   (True, False,False):('newStripDisplay1d','newStrip1d'),
-  #   (False, True,False):('newDisplayNd','newStripNd'),
-  #   (False, False,False):('newStripDisplayNd','newStripNd'),
-  #   (False, False,True):('newFreeStripDisplayNd','newFreeStripNd'),
-  #   (True, False,True):('newFreeStripDisplay1d','newFreeStrip1d'),
-  # }
 
   window = self.getByPid(window) if isinstance(window, str) else window
   nmrResidue = self.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
@@ -216,18 +205,6 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
 
   if len(axisCodes) <2:
     raise ValueError("New SpectrumDisplay must have at least two axisCodes")
-
-  # # set display type discriminator and get display types
-  # mapTuple = (
-  #   axisCodes[1] == 'intensity',   # 1d display
-  #   stripDirection is None,        # single=pane display
-  #   bool(independentStrips)        # free-strip display
-  # )
-  # tt = displayTypeMap.get(mapTuple)
-  # if tt is None:
-  #   raise ValueError("stripDirection must be set if independentStrips is True")
-  # else:
-  #   newDisplayFunc, newStripFunc = tt
 
   # set parameters for display
   window = window or apiTask.sortedWindows()[0]
@@ -285,7 +262,7 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
 
 
 # CCPN functions
-def _createSpectrumDisplay(window, spectrum:Spectrum, displayAxisCodes:Sequence=(),
+def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Sequence=(),
                           axisOrder:Sequence=(), name:str=None, positions:Sequence=(),
                           widths:Sequence=(), units:Sequence=(),
                           stripAxis:str='Y', is1d:bool=False,

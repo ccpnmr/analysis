@@ -109,9 +109,9 @@ class NmrAtom(AbstractWrapperObject):
     """isotopeCode of NmrAtom. Set automatically on creation (from NmrAtom name) and cannot be reset"""
     return self._wrappedData.isotopeCode
 
-
+  @property
   def assignedPeaks(self) -> Tuple[Peak]:
-    """All ccn.Peaks assigned to the ccpn.NmrAtom"""
+    """All ccpn.Peaks assigned to the ccpn.NmrAtom"""
     apiResonance = self._wrappedData
     apiPeaks = [x.peakDim.peak for x in apiResonance.peakDimContribs]
     apiPeaks.extend([x.peakDim.peak for x in apiResonance.peakDimContribNs])

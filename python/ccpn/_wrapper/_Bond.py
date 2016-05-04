@@ -107,16 +107,6 @@ def getter(self:Atom) -> Tuple[Bond, ...]:
 Atom.bonds = property(getter, None, None, "Non-standard bonds involving Atom.")
 del getter
 
-def _getPidDependentObjects(self:Atom) -> List[AbstractWrapperObject]:
-  """Get list of objects whose Pid must change for Atom if the pid of the Atom object changes.
-  In addition to the normal child objects we need to change the Pids for the bonds"""
-  data2Obj = self._project._data2Obj
-  return (super(Atom, self)._getPidDependentObjects()
-          + sorted(data2Obj[x] for x in self._wrappedData.genericBonds))
-
-Atom._getPidDependentObjects = _getPidDependentObjects
-del _getPidDependentObjects
-
 # Notifiers:
 # NB The link to NmrAtom is immutable - does need a link notifier
 # rename bonds when atom is renamed

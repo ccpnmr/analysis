@@ -27,6 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
 from ccpn import SpectrumHit
+from ccpn import PseudoDimension
 from ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpncore.api.ccp.nmr import Nmr
 from ccpncore.util import Common as commonUtil
@@ -198,6 +199,12 @@ class Sample(AbstractWrapperObject):
     ff = self._project._data2Obj.get
     return tuple(ff(x) for x in self._apiSample.sortedSpectrumHits())
 
+  @property
+  def pseudoDimensions(self) -> PseudoDimension:
+    """Pseudodimensions where sample is used for only one point along the sampled dimension"""
+    ff = self._project._data2Obj.get
+    return tuple(ff(x) for x in self._apiSample.sortedSampledDataDims())
+
   # Implementation functions
   def rename(self, value):
     """Rename Sample, changing its Id and Pid"""
@@ -267,6 +274,15 @@ def getter(self:SpectrumHit) -> Sample:
   return self._project._data2Obj.get(self._apiSpectrumHit.sample)
 SpectrumHit.sample = property(getter, None, None,
                               "ccpn.Sample in which ccpn.SpectrumHit is found")
+
+def getter(self:PseudoDimension) -> Tuple[Sample, ...]:
+  ff = self._project._data2Obj.get
+  return tuple(ff(x) for x in self._wrappedData.samples())
+def setter(self:PseudoDimension, value) -> Tuple[Sample, ...]:
+  self._wrappedData.sample = [x._wrappedDAta for x in value]
+PseudoDimension.orderedSamples = property(getter, setter, None,
+   "Samples used to acquire the individual points in this sampled dimension"
+)
 del getter
 del setter
 
@@ -293,11 +309,17 @@ Project._apiNotifiers.extend(
     ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'addSampledDataDim'),
     ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'removeSampledDataDim'),
     ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'setSampledDataDims'),
+    ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className, 'addSampledDataDim'),
+    ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className, 'removeSampledDataDim'),
+    ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className, 'setSampledDataDims'),
   )
 )
 className = Nmr.SampledDataDim._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'addSample'),
+  ( ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className, 'addSample'),
+    ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className, 'removeSample'),
+    ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className, 'setSamples'),
+    ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'addSample'),
     ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'removeSample'),
     ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'setSamples'),
   )

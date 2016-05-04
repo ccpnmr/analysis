@@ -375,6 +375,7 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
                  ) -> Substance:
   """Create new substance WITHOUT attached ApiMolecule (and so not suitable for making chains)
   substanceType defaults to 'Molecule'.
+
   ADVANCED alternatives are 'Cell', 'Material', and 'Composite'"""
 
   for ss in (name, labeling):
@@ -445,8 +446,8 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
               userCode:str=None, smiles:str=None, synonyms:Sequence[str]=(),comment:str=None,
               startNumber:int=1, molType:str=None, isCyclic:bool=False) -> Substance:
   """Make new Substance from sequence of residue codes, using default linking and variants
-  NB: For more complex substances, create ccpncore.api.ccp.molecule.Molecule.Molecule
-  and use the RefSampleComponentStore.fetchMolComponent to generate the Substance.
+
+  NB: For more complex substances, you must use advanced, API-level commands.
 
   :param Sequence sequence: string of one-letter codes or sequence of str residueNames
   :param str name: name of new substance

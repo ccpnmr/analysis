@@ -33,17 +33,10 @@ from ccpncore.util import Common as commonUtil
 from ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.lib import CcpnSorting
 
-# PROBLEM:
-# The MutableMapping superclass changes the MetaClass, which causes
-# trouble with multiple inheritance with GUI classes.
-# To avoid it, we would need to explicitly implement:
-# __contains__, keys, items, values, get, __eq__, and __ne__
-# pop, popitem, clear, update, and setdefault
-# We should already have __getitem__, __setitem__, __delitem__, __iter__, __len__
 
 @functools.total_ordering
 class AbstractWrapperObject():
-  """Abstract class containing common functionality for wrapper classes.
+  """Abstract class containing common functionality for subclasses.
 
   ADVANCED. Core programmers only.
 
@@ -56,35 +49,15 @@ class AbstractWrapperObject():
   Non-child collection attributes must have addElement() and removeElement 
   functions as appropriate.
   
-  For each child class there will be a newChild factory function, wrapping the
-  normal class creator. There will be a collection attribute for each child, 
-  grandchild, and generally descendant. We may decide that the relevant
-  attribute can be defined as an abstract class, e.g. to have a single 
-  restraintLists attribute that includes different classes for distance 
-  restraint lists, dihedral restraint lists etc. subclassing an 
-  AbstractRestraintList class.
+  For each child class there will be a newChild factory function, to crate
+  the child object. There will be a collection attribute for each child,
+  grandchild, and generally descendant.
   
-  The object id is given as NM:key1.key2.key3 ... where NM is the shortClassName,
-  and key1, key2, etc. are the keys of the parent classes starting at the top. 
+  The object pid is given as NM:key1.key2.key3 ... where NM is the shortClassName,
+  and the combination of key1, key2, etc. forms the id, which is the keys of the parent
+  classes starting at the top.
   The pid is the object id relative to the project; keys relative to objects lower
   in the hierarchy will omit successively more keys.
-
-  Classes behave as dictionaries containing their child objects (NOT grandchildren
-  or other descendants), using the relative object id as key. 
-  The ID will use the form with full length class names as prefix.
-  
-  **Example:**
-
-  There will be a link to the Atom class from both the Residue class, the Chain class,
-  the Molecule class, and the Project. The relative keys for each object might be:
-  
-  ===============  =================
-  From object:      relative id:
-  ===============  =================
-  Project           'MA.A.127.N'
-  Chain             'MA:127.N'
-  Residue           'MA:N'
-  ===============  =================
 
 
   **Code organisation:**
@@ -94,33 +67,34 @@ class AbstractWrapperObject():
   All import must be through the ccpn module, where it is guaranteed that
   all modules are imported in the right order. 
   
-  This is organised as a wrapper API, which means that all actual data live 
-  in the wrapped data and are derived where needed. All data storage is done
-  at the wrapped data, not at the wrapper level, and there is no mechanism for
+  All actual data live
+  in the data layer underneath these (wrapper) classes and are derived where needed.
+  All data storage is done
+  at the lower level, not at the wrapper level, and there is no mechanism for
   storing attributes that have been added at the wrapper level. Key and uniqueness
-  checking, type checking etc.  is also done in the wrapped data, not at the 
-  wrapper level.
+  checking, type checking etc.  is also done at teh lower level.
   
-  Initialising happens by passing in an NmrProject instance to the Project __init__;
+  Initialising happens by passing in a (lower-level) NmrProject instance to the Project
+   __init__;
   all wrapper instances are created automatically starting from there. Unless we change this,
   this means we assume that all data can be found by navigating from an
   NmrProject.
   
   New classes can be added, provided they match the requirements. All classes 
   must form a parent-child tree with the root at Project. All classes must
-  must have class-level attributes shortClassName, _childClasses, and _pluralLinkName.
+  must have teh standard class-level attributes, such as  shortClassName, _childClasses,
+  and _pluralLinkName.
   Each class must implement the properties id and _parent, and the methods 
   _getAllWrappedData,  and rename. Note that the
   properties and the _getAllWrappedData function
   must work from the underlying data, as they will be called before the pid
-  and object dictionary data are set up. New classes must also set the _apiNotifiers
-  data to ensure that objetcs are created adn deleted according to teh wrapped (CCPN API)
-  objects
+  and object dictionary data are set up.
   """
 
   #: Short class name, for PID. Must be overridden for each subclass
   shortClassName = None
 
+  # Class name - necessary since the actual objects may be of a subclass.
   className = 'AbstractWrapperObject'
 
   #: Name of plural link to instances of class
@@ -128,12 +102,6 @@ class AbstractWrapperObject():
 
   #: List of child classes. Must be overridden for each subclass.
   _childClasses = []
-  
-  # limits attributes to those declared.
-  # The __dict__ slot allows setting of new attributes, but is instantiated
-  # only when necessary.
-  #__slots__ = ['_project', '_wrappedData', 'id', '__dict__']
-
 
 
   # Wrapper-level notifiers that are set up on code import and
@@ -141,7 +109,7 @@ class AbstractWrapperObject():
   _coreNotifiers = []
 
   # Should notifiers be registered separately for this class?
-  # Used if multiple wrapper classes wrap the same API class (e.g. PeakList, IntegralList;
+  # Set to False if multiple wrapper classes wrap the same API class (e.g. PeakList, IntegralList;
   # Peak, Integral) so that API level notifiers are only registered once.
   _registerClassNotifiers = True
   
@@ -263,10 +231,15 @@ class AbstractWrapperObject():
     with the value of one or more key attributes that uniquely identify the object in context.::
 
       E.g. the id for an Atom, 'A.55.VAL.HA' is generated from:
+
       - 'A' *Chain.shortName*
+
       - '55' *Residue.sequenceCode*
+
       - 'VAL' *Residue.residueType*
+
       - 'HA' *Atom.name*"""
+
     return self._id
   
   # Abstract methods
@@ -617,15 +590,6 @@ class AbstractWrapperObject():
         for dd in iterator:
           for notifier in dd:
             notifier(self)
-
-  # def _getPidDependentObjects(self):
-  #   """Get list of objects whose Pid must change if the pid of this object changes.
-  #   Generally these are child objects, but some objects must override this function
-  #   to add additional objects"""
-  #
-  #   getDataObj = self._project._data2Obj.get
-  #   return list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
-
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
 # AbstractWrapperObject._getPidDependentObjects.__annotations__['return'] = List[AbstractWrapperObject]

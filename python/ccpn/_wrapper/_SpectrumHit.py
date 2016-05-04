@@ -173,11 +173,20 @@ class SpectrumHit(AbstractWrapperObject):
     """get wrappedData (Nmr.SpectrumHit) for all SpectrumHit children of parent Spectrum"""
     return parent._wrappedData.sortedSpectrumHits()
 
-def _newSpectrumHit(self:Spectrum, substanceName:str, pseudoDimensionNumber:int=0, pointNumber:int=0,
+def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
+                     pseudoDimensionNumber:int=0, pseudoDimension:PseudoDimension=None,
                     figureOfMerit:float=None,  meritCode:str=None, normalisedChange:float=None,
                     isConfirmed:bool=None, concentration:float=None, concentrationError:float=None,
                     concentrationUnit:str='M', comment:str=None):
   """Create new ccpn.SpectrumHit within ccpn.Spectrum"""
+
+  if pseudoDimension is not None:
+    if not pseudoDimensionNumber:
+      pseudoDimensionNumber = pseudoDimension,pseudoDimensionNumber
+    elif pseudoDimensionNumber != pseudoDimension.dimension:
+      raise ValueError("pseudoDimension %s incompatible with pseudoDimensionNumber %s"
+                       % (pseudoDimensionNumber, pseudoDimension))
+
   obj = self._apiDataSource.newSpectrumHit(substanceName=substanceName,
                                            sampledDimension=pseudoDimensionNumber,
                                            sampledPoint=pointNumber, figureOfMerit=figureOfMerit,

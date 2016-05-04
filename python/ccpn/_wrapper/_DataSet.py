@@ -166,11 +166,9 @@ class DataSet(AbstractWrapperObject):
 
 
 def _newDataSet(self:Project, title:str=None, programName:str=None, programVersion:str=None,
-                dataPath:str=None, creationDate:datetime=None, uuid:str=None,
+                dataPath:str=None, creationDate:datetime.datetime=None, uuid:str=None,
                 comment:str=None) -> DataSet:
-  """Create new ccpn.DataSet
-
-  :param str comment: comment for new chain (optional)"""
+  """Create new ccpn.DataSet"""
   
   nmrProject = self._wrappedData
   newApiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,

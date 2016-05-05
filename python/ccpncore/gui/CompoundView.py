@@ -1,3 +1,9 @@
+"""
+This widget is based on the CcpNmr ChemBuild.
+Copyright Tim Stevens, University of Cambridge December 2010-2012
+"""
+
+
 
 PI = 3.1415926535898
 from PyQt4 import QtCore, QtGui, QtSvg
@@ -10,7 +16,7 @@ from ccpncore.gui.FileDialog import FileDialog
 
 class CompoundView(QtGui.QGraphicsView, Base):
 
-  def __init__(self, parent, variant=None, preferences=None, **kw):
+  def __init__(self, parent, smiles=None, variant=None, preferences=None, **kw):
 
 
     QtGui.QGraphicsView.__init__(self, parent)
@@ -43,7 +49,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
     self.movePos = None
     self.zoomLevel = 1.0
     # Context menu
-        
+
     self.needMenuAtom = []
     self.needSelectedAtom = []
     self.needFurtherCheck = []
@@ -96,6 +102,16 @@ class CompoundView(QtGui.QGraphicsView, Base):
       self.variant.snapAtomsToGrid(50.0)
       self.updateAll()
 
+    self.smiles = smiles
+    compound = importSmiles(smiles)
+    variant = list(compound.variants)[0]
+    self.setVariant(variant)
+    variant.snapAtomsToGrid(ignoreHydrogens=False)
+
+    self.centerView()
+    self.resetView()
+    self.updateAll()
+
     self.show()
 
 
@@ -113,6 +129,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
       return
     
     text = self.editWidget.text().strip()
+    print(text, 'text', atom.name)
 
     if text and (text != atom.name):
       used = set([a.name for a in atom.compound.atoms])
@@ -1153,6 +1170,8 @@ class AtomLabel(QtGui.QGraphicsItem):
     self.drawData = ()
     self.syncLabel()
     self.setCacheMode(self.DeviceCoordinateCache)
+
+
 
   def hoverEnterEvent(self, event):
 
@@ -6626,11 +6645,12 @@ class Compound:
 
   def getAtom(self, element, name, isVariable=False):
 
-    atom = self.atomDict.get(name)
 
+    atom = self.atomDict.get(name)
+    print(atom, 'atom')
     if not atom:
       atom = Atom(self, element, name, isVariable)
-
+    print('atomatom',atom)
     return atom
 
   def getCcpMolType(self):
@@ -6857,3 +6877,4 @@ class Compound:
           Bond((varAtom, newAtom), autoVar=True)
 
     return hydrogens
+

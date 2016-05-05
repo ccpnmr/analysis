@@ -70,11 +70,14 @@ def createSample(cluster):
   project = cluster.mixtures[0][0].project
   samplesData = []
   for sample in project.samples:
-    text, space, serialMixture, = sample.name.partition('-')
-    clusterNum, mixtureNum = serialMixture.split('-')
-    clusterNum = int(clusterNum)
-    clusterNum +=1
-    cluster.name = text+space+str(clusterNum)
+    print(sample)
+    # text, space, serialMixture, = sample.name.partition('-')
+    #
+    # clusterNum, mixtureNum = serialMixture.split('-')
+    # clusterNum = int(clusterNum)
+    # clusterNum +=1
+    # cluster.name = text+space+str(clusterNum)
+    # cluster.name =
 
 
   for i, mixture in enumerate(cluster.mixtures):
@@ -124,7 +127,7 @@ def scoring(spectrum, mixtureSpectra, minimalOverlap=None):
       continue
 
     spectrumBpositions = [peak.position[0] for peak in spectrumB.peaks]
-    global spectrumBpositions
+    # global spectrumBpositions
     peakPositionArray = array([peak.position[0] for peak in spectrumB.peaks])
     diffs = fabs(subtract.outer(peakPosArray, peakPositionArray))
     mins[:, i] = nanmin(diffs, 1)

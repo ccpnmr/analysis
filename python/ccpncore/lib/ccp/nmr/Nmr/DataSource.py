@@ -579,7 +579,7 @@ def getDefaultColours(self:'DataSource') -> Tuple[str,str]:
   index = self.experiment.serial - 1 + step * (self.serial -1)
 
   if self.numDim == 1:
-    ii = index % colorCount
+    ii = (2 * index) % colorCount
   else:
     ii = (2 * index) % colorCount
   #

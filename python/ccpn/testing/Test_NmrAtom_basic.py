@@ -433,7 +433,7 @@ class TestNmrAtomReceivedProperties(WrapperTesting):
     self.assertEqual(self.nmrAtom.shortClassName, 'NA')
 
   def test_AssignedPeaks(self):
-    self.assertEqual(self.nmrAtom.assignedPeaks(), [])
+    self.assertEqual(self.nmrAtom.assignedPeaks, [])
 
 
 class TestAtomShifts(WrapperTesting):

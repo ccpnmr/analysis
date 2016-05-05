@@ -9,12 +9,16 @@ from PyQt4 import QtCore, QtGui
 # if project._appBase.applicationName == 'Metabolomics':
 
 def readXls(project, path=None):
+
+  newSpectrumGroup = project.newSpectrumGroup('STD')
   ex = pd.ExcelFile(path)
   for p,f in screenExcelSheetProcessors.items():
     if p in ex.sheet_names:
       e = ex.parse(p)
       e.fillna('Empty',inplace=True)
       f(project, e)
+
+
 
 # def readXls(project, path=None):
 #   ex = pd.ExcelFile(path)
@@ -92,6 +96,7 @@ def createNewSubstance(project, dataDicts):
     for spectrum, data in dataDict.items():
       expType = ([[key, value] for key, value in data.items() if key == 'expType'])
       newSubstance = project.newSubstance(name=spectrum.name, labeling=str(expType[0][1]))
+      # newChain = project.createChain(sequence=str('A'),compoundName=str(spectrum.name), molType='protein')
       newSubstance.referenceSpectra = [spectrum]
       dispatchSubstanceProperties(newSubstance, data)
 
@@ -124,6 +129,9 @@ def addSampleComponents(sample, data):
 #     sampleSpectra.append(sampleSpectrum[0])
 #   sample.spectra = sampleSpectra
 
+# To fix soon:
+
+
 def addSampleSpectra(project, sample, data):
   sampleSpectra = []
   sampleSpectrum1Path = [[header, sampleSpectra] for header, sampleSpectra in data.items()
@@ -155,6 +163,19 @@ def addSampleSpectra(project, sample, data):
     sampleSpectra.append(sampleSpectrum2[0])
 
   sample.spectra = sampleSpectra
+
+  # allSpectra.append(sample.spectra)
+  createStdSpectrumGroup(project)
+
+def createStdSpectrumGroup(project,):
+  spectra = []
+  for sample in project.samples:
+    for spectrum in sample.spectra:
+      spectra.append(spectrum)
+  for spectrumGroup in project.spectrumGroups:
+    if spectrumGroup.name == 'STD':
+      spectrumGroup.spectra = spectra
+
 
 def setSamplepH(sample, data):
   samplePH = [[excelHeader, value] for excelHeader, value in data.items()
@@ -212,7 +233,7 @@ def setSampleColumnNumberr(sample, data):
 
 def setSampleComment(sample, data):
   comments = [[excelHeader, value] for excelHeader, value in data.items()
-              if excelHeader == 'comments' and value != 'Empty']
+              if excelHeader == 'sampleComments' and value != 'Empty']
   if len(comments)>0:
     sample.comments = comments[0][1]
 
@@ -321,6 +342,7 @@ def setSubstanceLogPartitionCoefficient(substance, data):
 substanceProperties = [setSubstanceType, setSubstanceComment, setSubstanceSynonyms, setSubstanceUserCode,
   setSubstanceSmiles, setSubstanceInChi, setSubstanceCasNumber, setSubstanceEmpiricalFormula,
   setSubstanceMolecularMass, setSubstanceHAtomCount, setSubstanceBondCount, setSubstanceRingCount,
+  setSubstanceLogPartitionCoefficient,setSubstancePolarSurfaceArea,
   setSubstanceHBondDonorCount, setSubstanceHBondAcceptorCount]
 
 

@@ -922,12 +922,12 @@ Project._setupApiNotifier(_upDateAssignmentsPeakDimContrib, Nmr.AbstractPeakDimC
 # #
 # Project._setupApiNotifier(_upDateAssignmentsNmrChain, ApiNmrChain, 'setCode')
 
-# Notifiers for peak positin change.
+# Notifiers for peak position change.
 # Needed for:
 # PeakDim.position, PeakDim.dataDimRef (will not be used but does not cost anything to add
 # PeakDim.numAliasing, DataDim.numPointsOrig
 # DataDimRef.refPopint, refValue, valuePerPint
-# Also changes in DimensinScaling, but that REALLY will nver be used in V3, so we skip it
+# Also changes in DimensionScaling, but that REALLY will never be used in V3, so we skip it
 
 
 # NB, This will be triggered whenever anything about the peak (assignment or position) changes
@@ -935,7 +935,10 @@ def _refreshPeakPosition(peak:Peak):
   for peakListView in peak.peakList.peakListViews:
     peakItem = peakListView.peakItems.get(peak)
     if peakItem:
-      peakItem.setPos(*peak.position)
+      dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
+      xPpm = peak.position[dataDims[0].dimensionIndex]
+      yPpm = peak.position[dataDims[1].dimensionIndex]
+      peakItem.setPos(xPpm, yPpm)
 Peak._refreshPeakPosition = _refreshPeakPosition
 Peak.setupCoreNotifier('change', _refreshPeakPosition)
 

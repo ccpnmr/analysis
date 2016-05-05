@@ -413,5 +413,5 @@ def _resetRemoveStripAction(strip:Strip):
   """
   spectrumDisplay = strip.spectrumDisplay
   spectrumDisplay.removeStripAction.setEnabled(len(spectrumDisplay.strips) > 1)
-NmrResidue.setupCoreNotifier('create', _resetRemoveStripAction)
-NmrResidue.setupCoreNotifier('delete', _resetRemoveStripAction)
+Strip.setupCoreNotifier('create', _resetRemoveStripAction)
+Strip.setupCoreNotifier('delete', _resetRemoveStripAction)

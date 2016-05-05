@@ -54,16 +54,19 @@ from application.core.modules.NotesEditor import NotesEditor
 from application.core.modules.PeakTable import PeakTable
 from application.core.modules.PickAndAssignModule import PickAndAssignModule
 from application.core.modules.SequenceModule import SequenceModule
-from application.core.modules.SampleAnalysis import SampleAnalysis
-from application.core.modules.ScreeningSetup import ScreeningSetup
+
 from application.core.popups.BackupPopup import BackupPopup
 from application.core.popups.ExperimentTypePopup import ExperimentTypePopup
 from application.core.popups.FeedbackPopup import FeedbackPopup
 from application.core.popups.PreferencesPopup import PreferencesPopup
-from application.core.popups.SampleSetupPopup import SamplePopup
 from application.core.popups.SetupNmrResiduesPopup import SetupNmrResiduesPopup
 from ccpn.lib.Version import revision
 from application.core.update.UpdatePopup import UpdatePopup
+
+from application.screening.screeningModules.ShowScreeningHits import ShowScreeningHits
+from application.screening.screeningModules.ScreeningSettings import ScreeningSettings
+from application.screening.screeningModules.MixtureAnalysis import MixtureAnalysis
+from application.screening.screeningPopups.SampleSetupPopup import SamplePopup
 
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
@@ -219,6 +222,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.screenMenu.addAction(Action(self, 'Mixtures Analysis', callback=self.showSampleAnalysis, shortcut="st"))
     self.screenMenu.addSeparator()
     self.screenMenu.addAction(Action(self, 'Screening Settings', callback=self.showScreeningSetup, shortcut="sc"))
+    self.screenMenu.addAction(Action(self, 'Hit Analysis', callback=self.showHitAnalysisModule, shortcut="ha"))
 
     self.metabolomicsMenu.addSeparator()
     self.metabolomicsMenu.addAction(Action(self, 'Analyse Metabolite', callback=self.showMetabolomicsModule, shortcut="mm"))
@@ -630,16 +634,33 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     Displays Sample Analysis Module
     """
-    showSa = SampleAnalysis(self._project)
+    showSa = MixtureAnalysis(self._project)
     self.dockArea.addDock(showSa, position='bottom')
     self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
     self.project._logger.info("application.showSampleAnalysis()")
 
   def showScreeningSetup(self):
-    showSc = ScreeningSetup(self.project)
+    showSc = ScreeningSettings(self.project)
     self.dockArea.addDock(showSc, position='bottom')
     self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
     self.project._logger.info("application.showScreeningSetup()")
+
+  def showHitAnalysisModule(self):
+
+    self.showScreeningHits = ShowScreeningHits(self.project)
+    self.dockArea.addDock(self.showScreeningHits, position='bottom')
+    print(self.createSpectrumDisplay)
+    spectrumDisplay = self.createSpectrumDisplay(
+      self._project.spectrumHits[0]._parent)  # spectrum only to create a display
+    # self._project.spectrumHits[0]._parent.peakLists[0].pickPeaks1dFiltered(ignoredRegions=None, noiseThreshold=0)
+    self.dockArea.moveDock(spectrumDisplay.dock, position='top', neighbor=self.showScreeningHits)
+    self.dockArea.guiWindow.deleteBlankDisplay()
+    self.project.strips[0].viewBox.autoRange()
+
+    self.showScreeningHits.clearDisplayView()  # returns a clean display
+
+    self.pythonConsole.writeConsoleCommand("application.showScreeningHits()")
+    self.project._logger.info("application.showScreeningHits()")
 
   def showMetabolomicsModule(self):
     self.showMm = MetabolomicsModule(self.project)

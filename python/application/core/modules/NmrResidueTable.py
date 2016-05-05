@@ -56,7 +56,7 @@ class NmrResidueTable(QtGui.QWidget, Base):
                             key=CcpnSorting.stringSortKey))
 
   def getNmrResiduePeaks(self, nmrResidue):
-    l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks()]
+    l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks]
     return len(set(l1))
 
   def setNmrResidue(self, nmrResidue, row, col):

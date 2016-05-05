@@ -62,18 +62,9 @@ class Assign(AppBase):
       for strip in spectrumDisplay.strips:
         for spectrumView in strip.spectrumViews:
           spectrumView._createdSpectrumView()
-    # for spectrumDisplay in project.spectrumDisplays:
-    #   apiSpectrumDisplay = spectrumDisplay._wrappedData
-    #   for apiSpectrumView in apiSpectrumDisplay.sortedSpectrumViews():
-    #     GuiStripDisplayNd._createdSpectrumView(project, apiSpectrumView)
-    #
-    #   for apiStrip in apiSpectrumDisplay.orderedStrips:
-    #     for apiStripSpectrumView in apiStrip.stripSpectrumViews:
-    #       # GuiStripNd._spectrumViewCreated(project, apiStripSpectrumView)
-    #       GuiStripDisplayNd._createdStripSpectrumView(project, apiStripSpectrumView)
-    #       for apiStripPeakListView in apiStripSpectrumView.stripPeakListViews:
-    #         #  NBNB TBD change to PeakListView._createdPeakListView()
-    #         GuiSpectrumDisplay._createdStripPeakListView(project, apiStripPeakListView)
+          for peakList in spectrumView.spectrum.peakLists:
+            strip.showPeaks(peakList)
+
     self.initLayout()
 
   def initLayout(self):

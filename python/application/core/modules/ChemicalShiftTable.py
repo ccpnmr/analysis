@@ -56,7 +56,7 @@ class ChemicalShiftTable(CcpnDock):
     """return number of peaks assigned to NmrAtom in Experiments and PakLists
     using ChemicalShiftList"""
     chemicalShiftList = chemicalShift.chemicalShiftList
-    peaks = chemicalShift.nmrAtom.assignedPeaks()
+    peaks = chemicalShift.nmrAtom.assignedPeaks
     return (len(set(x for x in peaks
                     if x.peakList.chemicalShiftList is chemicalShiftList)))
 
@@ -99,7 +99,7 @@ class NmrAtomShiftTable(ChemicalShiftTable):
                 lambda chemicalShift: '%3d ' % self.getShiftPeakCount(chemicalShift)),
                ('All peaks',
                   lambda chemicalShift: '%3d ' % len(set(x for x in
-                                                         chemicalShift.nmrAtom.assignedPeaks()))
+                                                         chemicalShift.nmrAtom.assignedPeaks))
                 )
               ]
 

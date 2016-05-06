@@ -70,14 +70,14 @@ def createSample(cluster):
   project = cluster.mixtures[0][0].project
   samplesData = []
   for sample in project.samples:
-    print(sample)
-    # text, space, serialMixture, = sample.name.partition('-')
-    #
-    # clusterNum, mixtureNum = serialMixture.split('-')
-    # clusterNum = int(clusterNum)
-    # clusterNum +=1
-    # cluster.name = text+space+str(clusterNum)
-    # cluster.name =
+
+    text, space, serialMixture, = sample.name.partition('-')
+    if '-' in serialMixture:
+
+      clusterNum, mixtureNum = serialMixture.split('-')
+      clusterNum = int(clusterNum)
+      clusterNum +=1
+      cluster.name = text+space+str(clusterNum)
 
 
   for i, mixture in enumerate(cluster.mixtures):
@@ -134,7 +134,7 @@ def scoring(spectrum, mixtureSpectra, minimalOverlap=None):
 
   mins = nanmin(mins, 1)
 
-  value = amin(mins)
+  value = amax(mins)
 
 
   if value > 0.020:
@@ -162,15 +162,16 @@ def scoring(spectrum, mixtureSpectra, minimalOverlap=None):
     return [3, 0.06]
 
   if value > 0.04:
-    print([posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.04],'value', value, spectrum)
+    # print([posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.04],'value', value, spectrum)
     return [2, 0.04]
 
   if value > 0.02:
-    print([posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.03],'value', value, spectrum)
+    # print([posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.03],'value', value, spectrum)
     return [1, 0.02]
 
   if value < 0.02:
-    print([posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.02],'value', value, spectrum)
+    print('Overlapped peaks in positions:', [posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.02],
+          'value', value, spectrum)
     return [0, 0.01]
 
   if value < 0.00:

@@ -322,7 +322,9 @@ class SamplePopup(QtGui.QDialog):
 
     currentDisplayed = self.project.strips[0]
     for spectrumView in currentDisplayed.spectrumViews:
-      spectrumView.delete()
+      if spectrumView is not None:
+        print(spectrumView)
+        # spectrumView.delete()
 
 
 class ExcludeRegions(QtGui.QWidget, Base):

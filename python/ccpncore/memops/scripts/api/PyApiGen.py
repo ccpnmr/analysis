@@ -282,18 +282,18 @@ if ll:
     elif notifyName == 'preDelete':
 
       self.write('''
-for obj in %s:
+for obj in reversed(objsToBeDeleted):
   for notify in obj.__class__._notifies.get('preDelete', ()):
     notify(obj)
-''' % self.varNames['objsToBeDeleted'])
+''')
 
     elif notifyName == 'delete':
 
       self.write('''
-for obj in %s:
+for obj in reversed(objsToBeDeleted):
   for notify in obj.__class__._notifies.get('delete', ()):
     notify(obj)
-''' % self.varNames['objsToBeDeleted'])
+''')
 
     elif notifyName == '_unDelete':
 

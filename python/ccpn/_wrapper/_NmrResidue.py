@@ -121,7 +121,7 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def mainNmrResidue(self) -> Optional['NmrResidue']:
     """Main NmrResidue (self, or the residue that self is offset relative to"""
-    return self._project._data2Obj.get(self._wrappedData.mainNmrResidue)
+    return self._project._data2Obj.get(self._wrappedData.mainResonanceGroup)
 
   @property
   def nextNmrResidue(self) -> Optional['NmrResidue']:
@@ -812,9 +812,9 @@ NmrChain.fetchNmrResidue = fetchNmrResidue
 def _renameNmrResidue(self:Project, apiResonanceGroup:ApiResonanceGroup):
   """Reset pid for NmrResidue and all offset NmrResidues"""
   nmrResidue =  self._data2Obj.get(apiResonanceGroup)
-  nmrResidue._finaliseRename()
+  nmrResidue._finaliseAction('rename')
   for xx in nmrResidue.offsetNmrResidues:
-    xx._finaliseRename()
+    xx._finaliseAction('rename')
 
 # Notifiers:
 #NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model

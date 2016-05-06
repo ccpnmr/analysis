@@ -146,7 +146,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
 
   def closeDock(self):
     """
-    Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
+    Re-implementation of closeDock function from CcpnDock.
     """
     self._appBase.project._logger.info('Cannot close blank display')
 

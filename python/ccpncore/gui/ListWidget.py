@@ -23,10 +23,11 @@ class ListWidget(QtGui.QListWidget, Base):
 
     self.contextMenuItem = 'Delete'
 
-  def contextCallback(self, remove=False):
+  def contextCallback(self, remove=True):
+    self.rightMouseCallback()
     if remove:
       self.removeItem()
-    self.rightMouseCallback()
+
 
   def removeItem(self):
     self.takeItem(self.currentRow())

@@ -29,6 +29,7 @@ from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
 
+from application.core.DropBase import DropBase
 from application.core.modules.GuiTableGenerator import GuiTableGenerator
 from application.core.popups.SelectObjectsPopup import SelectObjectsPopup
 
@@ -58,7 +59,7 @@ class PeakTable(CcpnDock):
 
 
 
-class PeakListSimple(QtGui.QWidget, Base):
+class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
   def __init__(self, parent=None, project=None,  callback=None, selectedList=None, **kw):
 

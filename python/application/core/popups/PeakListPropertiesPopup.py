@@ -15,7 +15,6 @@ class PeakListPropertiesPopup(QtGui.QDialog, Base):
     super(PeakListPropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.peakListViews = [peakListView for peakListView in peakList.project.peakListViews if peakListView.peakList == peakList]
-    print(self.peakListViews[0].symbolColour, self.peakListViews[0].textColour)
     self.peakListLabel = Label(self, "PeakList Name ", grid=(0, 0))
     self.peakListLabel = Label(self, peakList.id, grid=(0, 1))
     self.displayedLabel = Label(self, 'Is displayed', grid=(1, 0))

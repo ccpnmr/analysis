@@ -128,9 +128,7 @@ class BackboneAssignmentModule(CcpnDock):
 
     if '-1' in nmrResidue.sequenceCode:
       direction = '-1'
-      seqCode = nmrResidue.sequenceCode
-      newSeqCode = seqCode.replace('-1', '')
-      iNmrResidue = nmrResidue.nmrChain.fetchNmrResidue(sequenceCode=newSeqCode)
+      iNmrResidue = nmrResidue.mainNmrResidue
       self.current.nmrResidue = iNmrResidue
       navigateToNmrResidue(self.project, iNmrResidue, selectedDisplays=selectedDisplays,
                            strip=strip, markPositions=False)
@@ -219,9 +217,7 @@ class BackboneAssignmentModule(CcpnDock):
     for assignmentScore in assignmentScores[1:]:
       matchResidue = assignMatrix[0][assignmentScore]
       if '-1' in matchResidue.sequenceCode:
-        seqCode = matchResidue.sequenceCode
-        newSeqCode = seqCode.replace('-1', '')
-        iNmrResidue = matchResidue.nmrChain.fetchNmrResidue(sequenceCode=newSeqCode)
+        iNmrResidue = matchResidue.mainNmrResidue
 
       else:
         iNmrResidue = matchResidue
@@ -238,9 +234,9 @@ class BackboneAssignmentModule(CcpnDock):
 
     firstMatchResidue = assignMatrix[0][assignmentScores[0]]
     if '-1' in firstMatchResidue.sequenceCode:
-      seqCode = firstMatchResidue.sequenceCode
-      newSeqCode = seqCode.replace('-1', '')
-      iNmrResidue = matchResidue.nmrChain.fetchNmrResidue(sequenceCode=newSeqCode)
+      # seqCode = firstMatchResidue.sequenceCode
+      # newSeqCode = seqCode.replace('-1', '')
+      iNmrResidue = matchResidue.mainNmrResidue
 
     else:
       iNmrResidue = firstMatchResidue

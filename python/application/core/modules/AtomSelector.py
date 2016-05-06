@@ -112,6 +112,7 @@ class AtomSelector(CcpnDock):
       button3 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 2), callback=partial(self.pickAndAssign, '+1', atom))
       self.buttons[atom].append(button1)
       self.buttons[atom].append(button2)
+      self.buttons[atom].append(button3)
 
     for buttons in self.buttons.values():
       for button in buttons:

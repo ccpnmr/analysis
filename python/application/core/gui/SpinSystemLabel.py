@@ -1,11 +1,11 @@
 __author__ = 'simon1'
 
-# from ccpn import Project
+from ccpn import Project
 from ccpn import NmrResidue
 
 from ccpncore.util import Pid
 
-# from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 # from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpncore.gui.Label import Label
 from typing import Sequence
@@ -82,6 +82,7 @@ class SpinSystemLabel(DropBase, Label):
       else:
         self.strip.guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
         if direction == '-1':
+
           nr2 = project.getByPid('NR:%s' % nmrResidue)
           nr1.connectPrevious(nr2)
           current.strip = self.strip.guiSpectrumDisplay.strips[-1]
@@ -117,7 +118,7 @@ NmrResidue.setupCoreNotifier('rename', _renameNmrResidueForGraphics)
 #     if strip.planeToolbar.spinSystemLabel.text() == obj._old_id:
 #       strip.planeToolbar.spinSystemLabel.setText(obj._id)
 #
-
+#
 # Project._setupApiNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setSequenceCode')
 # Project._setupApiNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setDirectNmrChain')
 # Project._setupApiNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setResidueType')

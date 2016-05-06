@@ -113,6 +113,11 @@ class ObjectTable(QtGui.QTableView, Base):
     # self.header = header
     self.setupHeaderStretch()
 
+    self.setDragEnabled(True)
+    self.acceptDrops()
+    self.setDragDropMode(self.InternalMove)
+    self.setDropIndicatorShown(True)
+
   def sizeHint(self):
 
     return QtCore.QSize(max(10, 30*len(self.columns)),200)
@@ -649,6 +654,47 @@ class ObjectTable(QtGui.QTableView, Base):
   def getObject(self, row):
 
     return self.objects[row]
+
+  # def dragEnterEvent(self, event):
+  #     event.accept()
+  #
+  # def dragMoveEvent(self, event):
+  #     event.accept()
+  #
+  # def startDrag(self, event):
+  #     print("startDrag called")
+  #     index = self.indexAt(event.pos())
+  #     print(index)
+  #     if not index.isValid():
+  #         return
+  #
+  #     self.moved_data = self.getObject(index.row())
+  #
+  #     drag = QtGui.QDrag(self)
+  #
+  #     mimeData = QtCore.QMimeData()
+  #     mimeData.setData("application/blabla", "")
+  #     drag.setMimeData(mimeData)
+  #
+  #     pixmap = QtGui.QPixmap()
+  #     pixmap = pixmap.grabWidget(self, self.visualRect(index))
+  #     drag.setPixmap(pixmap)
+  #
+  #     result = drag.start(QtCore.Qt.MoveAction)
+  #
+  # # def dropEvent(self, event):
+  # #   print("dropEvent called")
+  # #   point = event.pos()
+  # #   print(point)
+  #
+  # def mousePressEvent(self, event):
+  #   if (event.button() == QtCore.Qt.LeftButton) and (
+  #       event.modifiers() & QtCore.Qt.ControlModifier):
+  #       print("mousePressEvent called")
+  #       self.startDrag(event)
+  #   else:
+  #     QtGui.QTableView.mousePressEvent(self, event)
+
 
 EDIT_ROLE = QtCore.Qt.EditRole
 

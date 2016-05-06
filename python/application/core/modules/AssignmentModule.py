@@ -495,11 +495,12 @@ class AssignmentModule(CcpnDock, Base):
 
 
   def assignNmrAtomToDim(self, dim:int, row:int=None, col:int=None, obj:object=None):
-    '''Assign the nmrAtom that is double clicked on to the
+    '''Assign the nmrAtom that is double clicked to the
        the corresponding dimension of the selected
        peaks.
 
     '''
+    #### Should be
     objectTable = self.objectTables[dim]
     nmrAtom = objectTable.getCurrentObject()
 
@@ -507,7 +508,7 @@ class AssignmentModule(CcpnDock, Base):
       return
 
     for peak in self.current.peaks:
-
+      #### Should be simplified with function in Peak class
       if nmrAtom not in peak.dimensionNmrAtoms[dim]:
         newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
         axisCode = peak.peakList.spectrum.axisCodes[dim]

@@ -30,7 +30,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpncore.gui.ColourDialog import inverseGrey
 
-ICON_FILE =  path.join(path.dirname(__file__), 'iconsNew', 'editable.png')
+ICON_FILE = path.join(path.dirname(__file__), 'iconsNew', 'editable.png')
 
 USER_ROLE = QtCore.Qt.UserRole
 EDIT_ROLE = QtCore.Qt.EditRole
@@ -61,6 +61,7 @@ QSize = QtCore.QSize
 HEAD_ADJUST = QSize(50, 0)
 
 class TableModel(QtCore.QAbstractTableModel):
+
 
   ############################################################
   # functions which need to be implemented in subclass
@@ -167,6 +168,7 @@ class ObjectTableModel(TableModel):
   def __init__(self, table):
     
     TableModel.__init__(self)
+    # self.setSupportedDragActions(QtCore.Qt.MoveAction)
     
     self.editIcon = ICON_FILE
     self.table = table
@@ -399,6 +401,10 @@ class ObjectTableModel(TableModel):
     index = self.index(row, col)
     
     return self.data(index, 32)
+
+  # def dragMoveEvent(self, event):
+  #   event.setDropAction(QtCore.Qt.MoveAction)
+  #   event.accept()
  
 # http://doc.qt.nokia.com/4.7-snapshot/qtableview.html
 # http://doc.qt.nokia.com/4.7-snapshot/qtableview.html

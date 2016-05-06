@@ -73,7 +73,7 @@ class SetupNmrResiduesPopup(QtGui.QDialog, Base):
           peak.assignDimension(axisCode=axisCodes[ndim], value=a)
           peak.assignDimension(axisCode=axisCodes[hdim], value=a2)
     else:
-      self.project._logger.warning('''Incompatible peaklist selected. Only experiments with one 1H dimension
+      self.project._logger.warning('''Incompatible peak list selected. Only experiments with one 1H dimension
       and one 15N dimension can be used.''')
       return
 

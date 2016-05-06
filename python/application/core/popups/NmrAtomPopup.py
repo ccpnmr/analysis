@@ -7,13 +7,13 @@ from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.PulldownList import PulldownList
 
 class NmrAtomPopup(QtGui.QDialog, Base):
-  def __init__(self, parent=None, peakList=None, **kw):
+  def __init__(self, parent=None, nmrAtom=None, **kw):
     super(NmrAtomPopup, self).__init__(parent)
     Base.__init__(self, **kw)
 
-    self.peakListLabel = Label(self, "PeakList Name ", grid=(0, 0))
-    self.peakListLabel = Label(self, peakList.id, grid=(0, 1))
-    self.displayedLabel = Label(self, 'Is displayed', grid=(1, 0))
+    self.peakListLabel = Label(self, "NmrAtom ", grid=(0, 0))
+    self.peakListLabel = Label(self, nmrAtom.id, grid=(0, 1))
+    self.nmrResidueLabel = Label(self, 'NmrResidue', grid=(1, 0))
     self.displayedCheckBox = CheckBox(self, grid=(1, 1), checked=False)
     self.symbolLabel = Label(self, 'Peak Symbol', grid=(2, 0))
     self.symbolPulldown = PulldownList(self, grid=(2, 1))

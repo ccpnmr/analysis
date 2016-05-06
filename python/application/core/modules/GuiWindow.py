@@ -115,7 +115,7 @@ class GuiWindow(DropBase):
       for axis in current.strip.orderedAxes[2:]:
         position.append(axis.position)
     current.position = tuple(position)
-    print(current.strip, current.position)
+    return current.strip, current.position
 
 
 

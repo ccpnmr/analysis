@@ -85,10 +85,10 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
 
 def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
                          selectedDisplays:typing.List[GuiSpectrumDisplay]=None,
-                         strip:GuiStrip=None,  markPositions:bool=False, direction:str=None):
+                         strip:GuiStrip=None,  markPositions:bool=False):
   """
-  Takes an NmrResidue and optional spectrum displays and strips and navigates the strips and spectrum displays
-  to the positions specified by the peak.
+  Takes an NmrResidue and optional spectrum displays and strips and navigates the strips
+  and spectrum displays to the positions specified by the peak.
   """
   if selectedDisplays is None:
     selectedDisplays = project.spectrumDisplays
@@ -101,8 +101,7 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
         for atom in nmrResidue.nmrAtoms:
           if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
             shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
-            if shift is not None:# and isPositionWithinfBounds(display.strips[0], shift, axis):
-              # NBNB TBD consider adding extra check back in. Function called has been fixed
+            if shift is not None and isPositionWithinfBounds(display.strips[0], shift, axis):
               shiftDict[axis.code].append(shift)
 
       if len(display.axisCodes) > 2:

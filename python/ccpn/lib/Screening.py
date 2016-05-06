@@ -3,8 +3,7 @@ __author__ = 'luca'
 
 import numpy as np
 import pandas as pd
-import matplotlib as mpl
-from matplotlib import pyplot as plt
+
 from collections import namedtuple
 from math import sin, cos, pi, log
 import os

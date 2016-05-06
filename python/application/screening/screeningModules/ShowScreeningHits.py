@@ -302,10 +302,8 @@ class ShowScreeningHits(CcpnDock, Base):
   def getPositionOnSpectrum(self):
     ''' Documentation '''
     peaks = self.getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
-
     positions = [peak.position for peak in peaks]
-
-    return positions
+    return set(list(positions))
 
 
   def getPullDownObj(self):
@@ -444,9 +442,9 @@ class ShowScreeningHits(CcpnDock, Base):
 
     objRow = self.hitTable.getCurrentObject()
     self.showHitOnPullDown(objRow)
-    # self.displaySampleAndHit()
+    self.displaySampleAndHit()
     self.showHitInfoOnDisplay()
-    # self.hidePeakList()
+    self.hidePeakList()
 
   def showHitInfoOnDisplay(self):
     ''' Documentation '''

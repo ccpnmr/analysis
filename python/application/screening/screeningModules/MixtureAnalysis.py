@@ -14,7 +14,7 @@ from ccpncore.gui.LineEdit import LineEdit
 from functools import partial
 from ccpncore.gui.CompoundView import CompoundView, Variant, importSmiles
 from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosition
-from ccpn.lib.Sample import setupSamples, scoring
+from application.screening.screeningLib.MixtureGeneration import setupSamples, scoring
 from numpy import array, amin, amax, average, empty, nan, nanmin, fabs, subtract, where, argmax, NAN
 import math
 
@@ -233,6 +233,8 @@ class MixtureAnalysis(CcpnDock):
         self.compoundView  = CompoundView(self, smiles=smiles, preferences=self.generalPreferences)
         self.tabPeaksMoleculeLayout.addWidget(self.compoundView, 1,1)
 
+        self.compoundView.resetView()
+
 
   ''' ######## ======== Second Tab properties (Multiple Compound View ====== ########   '''
   
@@ -246,6 +248,8 @@ class MixtureAnalysis(CcpnDock):
       self.compoundViewTab2 = CompoundView(self, smiles=smiles, preferences=self.generalPreferences)
       self.compoundViewTab2.setMaximumWidth(180)
       self.tabMoleculeViewLayout.addWidget(self.compoundViewTab2)
+
+      self.compoundViewTab2.resetView()
 
 
   def clearTabMoleculeView(self, sample):

@@ -68,7 +68,7 @@ class ChemicalShift(AbstractWrapperObject):
   
   @property
   def value(self) -> float:
-    """shift value of ChemicalShift"""
+    """shift value of ChemicalShift, in unit as defined in the ChemicalShiftList"""
     return self._wrappedData.value
     
   @value.setter
@@ -77,7 +77,7 @@ class ChemicalShift(AbstractWrapperObject):
 
   @property
   def valueError(self) -> float:
-    """shift valueError of ChemicalShift"""
+    """shift valueError of ChemicalShift, in unit as defined in the ChemicalShiftList"""
     return self._wrappedData.error
 
   @valueError.setter
@@ -86,7 +86,7 @@ class ChemicalShift(AbstractWrapperObject):
 
   @property
   def figureOfMerit(self) -> str:
-    """Figure of Merit for ChemicalShift"""
+    """Figure of Merit for ChemicalShift, between 0.0 and 1.0 inclusive."""
     return self._wrappedData.figOfMerit
 
   @figureOfMerit.setter

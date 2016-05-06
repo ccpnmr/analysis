@@ -30,7 +30,12 @@ from ccpn import Peak
 from ccpncore.api.ccp.nmr import NmrConstraint
 
 class Restraint(AbstractWrapperObject):
-  """Restraint, of type given in restraintType."""
+  """Restraint. The type is defined in the containing RestraintList.
+
+  Most of the values are the consensus of the values in the contained
+  RestraintContributions. In the normal case, where you have only one
+  RestraintContribution per Restraint, you can get and set the values
+   directly from the Restraint without reference to the RestraintContributions. """
   
   #: Short class name, for PID.
   shortClassName = 'RE'
@@ -54,7 +59,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def _parent(self) -> RestraintList:
-    """RestraintList containing restraint."""
+    """RestraintList object containing restraint."""
     return  self._project._data2Obj[self._wrappedData.parentList]
 
   restraintList = _parent
@@ -66,7 +71,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for Restraint"""
+    """serial number of Restraint, used in Pid and to identify the Restraint. """
     return self._wrappedData.serial
 
   @property
@@ -91,7 +96,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def targetValue(self) -> float:
-    """targetValue of constraint - consensus of all contributions or None"""
+    """target value of constraint - consensus of all contributions or None"""
     aSet = set(x.targetValue for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -105,7 +110,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def error(self) -> float:
-    """error of restraint - consensus of all contributions or None"""
+    """standard error of restraint - consensus of all contributions or None"""
     aSet = set(x.error for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -161,7 +166,10 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def additionalUpperLimit(self) -> float:
-    """additionalUpperLimit of restraint - consensus of all contributions or None"""
+    """additionalUpperLimit of restraint - consensus of all contributions or None.
+    Used for potential functions that require more than one parameter, typically for
+     parabolic-linear potentials where the additionalUpperLimit marks the transition from
+     parabolic to linear potential"""
     aSet = set(x.additionalUpperLimit for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -175,7 +183,10 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def additionalLowerLimit(self) -> float:
-    """additionalLowerLimit of restraint - consensus of all contributions or None"""
+    """additionalLowerLimit of restraint - consensus of all contributions or None
+    Used for potential functions that require more than one parameter, typically for
+     parabolic-linear potentials where the additionalLowerLimit marks the transition from
+     parabolic to linear potential"""
     aSet = set(x.additionalLowerLimit for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -198,7 +209,7 @@ class Restraint(AbstractWrapperObject):
 
   @property
   def figureOfMerit(self) -> str:
-    """Restraint figure of merit"""
+    """Restraint figure of merit, between 0.0 and 1.0 inclusive."""
     return self._wrappedData.figureOfMerit
 
   @figureOfMerit.setter
@@ -237,7 +248,11 @@ RestraintList._childClasses.append(Restraint)
 
 def _newRestraint(self:RestraintList,comment:str=None,
                          peaks:Sequence=()) -> Restraint:
-  """Create new ccpn.Restraint within ccpn.RestraintList"""
+  """Create new ccpn.Restraint within ccpn.RestraintList.
+
+  Note that you just create at least one RestraintCOntribution afterwards in order to have valid
+  data. Use the simpler createSimpleRestraint instead, unless you have specific reasons for
+  needing newRestraint"""
   apiConstraintList = self._wrappedData
   creator = apiConstraintList.getattr("new%sConstraint" % self.restraintType)
   result = self._project._data2Obj.get(creator(details=comment))
@@ -249,6 +264,12 @@ def createSimpleRestraint(self:RestraintList,comment:str=None,
                         weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                         additionalUpperLimit:float=None, additionalLowerLimit:float=None,
                         vectorLength=None, restraintItems:Sequence=()) -> Restraint:
+  """Create a Restraint with a single RestraintContribution within the RestraintList.
+  The function takes all the information needed and creates the RestraintContribution as
+   well as the Restraint proper.
+
+   This function should be used routinely, unless there is a need to crreate more complex
+   Restraints."""
 
   restraint = self.newRestraint(comment=comment, peaks=peaks)
   restraint.newRestraintContribution(targetValue=targetValue,error=error, weight=weight,

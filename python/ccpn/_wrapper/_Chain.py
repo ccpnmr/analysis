@@ -81,7 +81,8 @@ class Chain(AbstractWrapperObject):
   
   @property
   def role(self) -> str:
-    """role of chain in Molecule"""
+    """The role of the chain in a molecular complex or sample - free text. Could be 'free',
+    ''bound', 'open', 'closed', 'minor form B', ..."""
     return self._wrappedData.role
     
   @role.setter
@@ -161,7 +162,8 @@ class Chain(AbstractWrapperObject):
     elif Pid.altCharacter in value:
       raise ValueError("Character %s not allowed in Chain.shortName" % Pid.altCharacter)
     self._apiChain.renameChain(value)
-    self._finaliseRename()
+    self._finaliseAction('rename')
+    self._finaliseAction('change')
 
 
   @classmethod
@@ -180,7 +182,7 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
   """Create new chain from sequence of residue codes
 
-  Automatically creates the corresponding Substance if the compoundName is not already taken
+  Automatically creates the corresponding polymer Substance if the compoundName is not already taken
 
   :param Sequence sequence: string of one-letter codes or sequence of residue types
   :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n

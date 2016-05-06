@@ -104,7 +104,7 @@ class PseudoDimension(AbstractWrapperObject):
 
   @property
   def axisUnit(self) -> str:
-    """unit for transformed data using thei reference (most commonly 'ppm')"""
+    """unit for transformed data using the reference (most commonly 'ppm')"""
     expDimRef =  self._wrappedData.expDim.findFirstExpDimRef(serial=1)
     if expDimRef is not None:
       return expDimRef.unit

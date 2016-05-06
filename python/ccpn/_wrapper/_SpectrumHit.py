@@ -62,7 +62,7 @@ class SpectrumHit(AbstractWrapperObject):
 
   @property
   def _parent(self) -> Spectrum:
-    """Spectrum containing spectrumReference."""
+    """Spectrum containing spectrumHit."""
     return self._project._data2Obj[self._wrappedData.dataSource]
 
   spectrum = _parent
@@ -96,7 +96,7 @@ class SpectrumHit(AbstractWrapperObject):
 
   @property
   def figureOfMerit(self) -> float:
-    """Figure of merit (in range 0-1) describing quality of hit"""
+    """Figure of merit describing quality of hit, between 0.0 and 1.0 inclusive."""
     return self._wrappedData.figureOfMerit
 
   @figureOfMerit.setter
@@ -105,7 +105,7 @@ class SpectrumHit(AbstractWrapperObject):
 
   @property
   def meritCode(self) -> str:
-    """Merit code string describing quality of hit """
+    """User-defined merit code string describing quality of hit."""
     return self._wrappedData.meritCode
 
   @meritCode.setter
@@ -115,7 +115,8 @@ class SpectrumHit(AbstractWrapperObject):
   @property
   def normalisedChange(self) -> float:
     """Normalized size of effect (normally intensity change). in range -1 <= x <= 1.
-    Positive values are large changes, negative values changes in the 'wrong' direction,
+    Positive values denote expected changes,
+    while negative values denote changes in the 'wrong' direction,
     e.g. intensity increase where a decrease was expected."""
     return self._wrappedData.normalisedChange
 
@@ -134,7 +135,8 @@ class SpectrumHit(AbstractWrapperObject):
 
   @property
   def concentration(self) -> float:
-    """SpectrumHit.concentration"""
+    """Concentration determined for the spectrumHit -
+    used for e.g. Metabolomics where concentrations are not known a priori."""
     return self._wrappedData.concentration
 
   @concentration.setter
@@ -207,7 +209,7 @@ def getter(self:PseudoDimension) -> List[SpectrumHit]:
   dimensionNumber = self.dimension
   return list(x for x in self.spectrum.spectrumHits if x.dimensionNumber == dimensionNumber)
 PseudoDimension.spectrumHits = property(getter, None, None,
-  "SpectrumHits that r3fer to individual points in the PseudoDimension"
+  "SpectrumHits (for screening/metabolomics) that refer to individual points in the PseudoDimension"
 )
 del getter
 

@@ -65,7 +65,7 @@ class IntegralList(AbstractWrapperObject):
   # CCPN properties  
   @property
   def _apiPeakList(self) -> ApiPeakList:
-    """ API peakLists matching PeakList"""
+    """ API peakLists matching IntegralList"""
     return self._wrappedData
     
   @property
@@ -75,7 +75,7 @@ class IntegralList(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for PeakList"""
+    """serial number of IntegralList, used in Pid and to identify the IntegralList. """
     return self._wrappedData.serial
     
   @property
@@ -138,4 +138,4 @@ PeakList._factoryFunction = staticmethod(_factoryFunction)
 
 # Notifiers:
 
-# NB API level notifiers aer (and must be) in PeakList instead
+# NB API level notifiers are (and must be) in PeakList instead

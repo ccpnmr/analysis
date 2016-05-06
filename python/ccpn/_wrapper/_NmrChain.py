@@ -63,7 +63,7 @@ class NmrChain(AbstractWrapperObject):
 
   @property
   def shortName(self) -> str:
-    """short form of name, key attribute.
+    """short form of name, used in Pid and to identify the NmrChain
     Names of the form '\@ijk' and '#ijk' (where ijk is an integers)
     are reserved and cannot be set. They can be obtained by the deassign command.
     Connected NmrChains (isConnected == True) always have canonical names of the form '#ijk'"""

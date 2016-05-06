@@ -87,7 +87,7 @@ def sampleChainLabeling(sample:Sample, chainCode:str) -> str:
   """Get labeling string for chain chainCode in sample
   If chainCode does not match a SampleComponent, look for unambiguous global labeling:
   Heuristics: If there is only one SampleComponent, use that labeling
-  If all SAmpleComponents with explicit chainCodes have the same labeling, use that labeling"""
+  If all SampleComponents with explicit chainCodes have the same labeling, use that labeling"""
 
   labeling = Labeling.NULL_LABELING
 

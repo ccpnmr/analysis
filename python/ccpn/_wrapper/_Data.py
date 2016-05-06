@@ -64,7 +64,7 @@ class Data(AbstractWrapperObject):
 
   @property
   def name(self) -> str:
-    """name, key attribute for ccpn.Data"""
+    """name of Data object, used in Pid and to identify the Data object. """
     return self._wrappedData.name
     
   @property
@@ -154,7 +154,8 @@ class Data(AbstractWrapperObject):
         raise ValueError("Character %s not allowed in ccpn.Data.name" % Pid.altCharacter)
       else:
         commonUtil._resetParentLink(self._wrappedData, 'data', 'name', value)
-        self._finaliseRename()
+        self._finaliseAction('rename')
+        self._finaliseAction('change')
 
     finally:
       if undo is not None:

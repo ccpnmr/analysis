@@ -59,7 +59,7 @@ class CalculationStep(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for ccpn.CalculationStep"""
+    """serial number of CalculationStep, used in Pid and to identify the CalculationStep. """
     return self._wrappedData.serial
     
   @property

@@ -63,7 +63,7 @@ class Strip(GuiStrip, AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for Strip"""
+    """serial number of Strip, used in Pid and to identify the Strip. """
     return self._wrappedData.serial
     
   @property

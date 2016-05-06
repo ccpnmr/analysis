@@ -318,6 +318,21 @@ class Project(AbstractWrapperObject):
         del parentDict[oldName]
         parentDict[name] = apiNmrProject
         self._finaliseRename()
+
+        # Do notifications - NB project has special behaviour, so it is done here
+        if not self._notificationBlanking:
+          className = self.className
+          iterator = (self._context2Notifiers.setdefault((name, 'rename'), OrderedDict())
+                     for name in (className, 'AbstractWrapperObject'))
+          ll = self._pendingNotifications
+          if self._notificationSuspension:
+            for dd in iterator:
+              for notifier, onceOnly in dd.items():
+                ll.append((notifier, onceOnly, self, self.pid))
+          else:
+            for dd in iterator:
+              for notifier in dd:
+                notifier(self, self.pid)
       except:
         apiNmrProject.name = oldName
         parentDict[oldName] = apiNmrProject
@@ -545,7 +560,7 @@ class Project(AbstractWrapperObject):
     try:
       del od[notifier]
     except KeyError:
-      raise self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, action)))
+      self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, action)))
 
 
   def removeNotifier(self, notifier:typing.Callable):
@@ -556,7 +571,7 @@ class Project(AbstractWrapperObject):
         del od[notifier]
         found = True
     if not found:
-      raise self._logger.warning("Attempt to remove unknown notifier: %s" % notifier)
+      self._logger.warning("Attempt to remove unknown notifier: %s" % notifier)
 
   def blankNotification(self):
     """Disable notifiers temporarily

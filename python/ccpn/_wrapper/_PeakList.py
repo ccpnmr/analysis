@@ -67,7 +67,7 @@ class PeakList(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for PeakList"""
+    """serial number of PeakList, used in Pid and to identify the PeakList. """
     return self._wrappedData.serial
     
   @property
@@ -142,7 +142,7 @@ Spectrum._childClasses.append(PeakList)
 
 def _newPeakList(self:Spectrum,name:str=None, comment:str=None,
              isSimulated:bool=False) -> PeakList:
-  """Create new ccpn.PeakList within ccpn.Spectrum"""
+  """Create new empty ccpn.PeakList within ccpn.Spectrum"""
   apiDataSource = self._wrappedData
   obj = apiDataSource.newPeakList(name=name, details=comment, isSimulated=isSimulated)
   return self._project._data2Obj.get(obj)

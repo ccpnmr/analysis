@@ -85,25 +85,20 @@ class Residue(AbstractWrapperObject):
   @property
   def shortName(self) -> str:
     return self._wrappedData.chemCompVar.chemComp.code1Letter or '?'
-
-  # @name.setter
-  # def name(self, value:str):
-  #   self._wrappedData.code3Letter = value
-  #   molType, ccpCode = self._project._residueName2chemCompId.get(value, (None,None))
-  #   # NBNB TBD reorganise model so that code3Letter is used throughout, and change this
-  #   self._wrappedData.molType = molType
-  #   self._wrappedData.ccpCode = ccpCode
-
-  # @property
-  # def molType(self) -> str:
-  #   """Molecule type string ('protein', 'DNA', 'RNA', 'carbohydrate', or 'other')"""
-  #   return self._wrappedData.molType
   
   @property
   def linking(self) -> str:
     """linking (substitution pattern) code for residue
-    NB uses 'single' for unlinked protein, DNA or RNA residues (instead ot the API 'none'
-    and 'break' for residues with linking 'middle' that do not have """
+
+
+    Allowed values are:
+
+     For linear polymers: 'start', 'end', 'middle', 'single', 'break', 'cyclic'
+     For other molecules: 'nonlinear'
+
+     'cyclic' and 'break' are used at the end of linear polymer stretches to signify,
+     respectively, that the polymer is cyclic, or that the residue is bound to an
+     unknown residue or to a cap, so that the linear polymer chain does not continue."""
 
     molType = self._wrappedData.molType
     if molType in ('protein', 'DNA', 'RNA'):
@@ -166,7 +161,8 @@ class Residue(AbstractWrapperObject):
 
   @property
   def descriptor(self) -> str:
-    """variant descriptor (protonation state etc.) for residue"""
+    """variant descriptor (protonation state etc.) for residue, as defined in the CCPN V2 ChemComp
+    description."""
     return self._wrappedData.descriptor
     
   @descriptor.setter
@@ -184,7 +180,7 @@ class Residue(AbstractWrapperObject):
 
   @property
   def nextResidue(self) -> Optional['Residue']:
-    """Next residue in sequence, if any"""
+    """Next residue in sequence, if any, otherwise None"""
     apiResidue = self._wrappedData
 
     molResidue = apiResidue.molResidue.nextMolResidue
@@ -198,7 +194,7 @@ class Residue(AbstractWrapperObject):
 
   @property
   def previousResidue(self) -> Optional['Residue']:
-    """Previous residue in sequence, if any"""
+    """Previous residue in sequence, if any,otherwise None"""
     apiResidue = self._wrappedData
 
     molResidue = apiResidue.molResidue.previousMolResidue

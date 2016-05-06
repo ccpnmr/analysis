@@ -54,7 +54,7 @@ class Integral(AbstractWrapperObject):
   # CCPN properties  
   @property
   def _apiPeak(self) -> Nmr.Peak:
-    """ API peaks matching Peak"""
+    """ API peaks matching Integral"""
     return self._wrappedData
     
   @property
@@ -64,7 +64,7 @@ class Integral(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for Peak"""
+    """serial number of Integral, used in Pid and to identify the Integral. """
     return self._wrappedData.serial
     
   @property
@@ -103,7 +103,7 @@ class Integral(AbstractWrapperObject):
 
   @property
   def figureOfMerit(self) -> Optional[float]:
-    """figureOfMerit of Peak"""
+    """figureOfMerit of Integral, between 0.0 and 1.0 inclusive."""
     return self._wrappedData.figOfMerit
 
   @figureOfMerit.setter
@@ -134,7 +134,7 @@ class Integral(AbstractWrapperObject):
 
   @property
   def annotation(self) -> Optional[str]:
-    """Peak text annotation"""
+    """Integral text annotation"""
     return self._wrappedData.annotation
     
   @annotation.setter

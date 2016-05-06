@@ -50,7 +50,7 @@ from ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
 #   return spectrum
 
 def loadData(self:'Project', path:str) -> (list,None):
-  """Load data in url, determining type first."""
+  """Load data from path, determining type first."""
 
   dataType, subType, usePath = ioFormats.analyseUrl(path)
 
@@ -113,7 +113,7 @@ def loadProject(self:"Project", path:str, subType:str) -> "Project":
   if subType == ioFormats.CCPN:
     return self._appBase.loadProject(path)
   else:
-    raise ValueError("Sequence file type %s is not recognised" % subType)
+    raise ValueError("Project file type %s is not recognised" % subType)
 
 def loadSpectrum(self:"Project", path:str, subType:str) -> list:
   """Load spectrum from file into application"""

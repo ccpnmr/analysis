@@ -64,7 +64,7 @@ class Mark(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for Peak"""
+    """serial number of Mark, used in Pid and to identify the Mark. """
     return self._wrappedData.serial
 
   @property

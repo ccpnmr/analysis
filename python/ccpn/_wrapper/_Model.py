@@ -63,7 +63,7 @@ class Model(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """ID number, key attribute for ccpn.Model"""
+    """ID number of Model, used in Pid and to identify the Model. """
     return self._wrappedData.serial
     
   @property

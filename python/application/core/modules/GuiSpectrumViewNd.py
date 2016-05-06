@@ -533,7 +533,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           printer.writePolyline(contour, colour)
 
   def paint(self, painter, option, widget=None):
-    
+
     ##if not widget:
     ##  return
     dataStore = self._apiDataSource.dataStore

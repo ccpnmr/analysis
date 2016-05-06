@@ -21,11 +21,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks, fitExistingPeakList
-from ccpncore.lib.spectrum import Spectrum as spectrumLib
+# from ccpncore.lib.ccp.nmr.Nmr.PeakList import fitExistingPeakList
+# from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
-from ccpncore.util.CopyData import copySubTree
-from typing import Sequence
+# from ccpncore.util.CopyData import copySubTree
+from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
+from typing import Sequence, List, Optional
 import numpy
 from numpy import argwhere
 from scipy.ndimage import maximum_filter
@@ -34,9 +35,6 @@ def pickPeaksNd(self:'PeakList', positions:Sequence=None, dataDims:Sequence=None
                 doPos:bool=True, doNeg:bool=True,
                 fitMethod:str='gaussian', excludedRegions:Sequence=None,
                 excludedDiagonalDims:Sequence=None, excludedDiagonalTransform:Sequence=None):
-
-  # ordering = [dataDim.dim-1 for dataDim in dataDims]
-  # isoOrdering = [dataDim.getIsotopeCodes() for dataDim in dataDims]
 
   self._project.suspendNotification()
 
@@ -59,17 +57,6 @@ def pickPeaksNd(self:'PeakList', positions:Sequence=None, dataDims:Sequence=None
       position1 = int(position1+1)
       startPoint.append((dataDim.dim, position0))
       endPoint.append((dataDim.dim, position1))
-      #startPoint.append([dataDim.dim, int(dataDim.primaryDataDimRef.valueToPoint(positions[0][ii])-1)])
-      #endPoint.append([dataDim.dim, int(dataDim.primaryDataDimRef.valueToPoint(positions[1][ii])-1)])
-
-
-    # for position in positions[1]:
-    #   dimension = ordering[positions[1].index(position)]
-    #   endPoint.append([dimension, int(spectrum.getDimPointFromValue(dimension, position))])
-    #
-    # for position in positions[0]:
-    #   dimension = ordering[positions[0].index(position)]
-    #   startPoint.append([dimension, int(spectrum.getDimPointFromValue(dimension, position))])
 
     startPoints = [point[1] for point in sorted(startPoint)]
     endPoints = [point[1] for point in sorted(endPoint)]
@@ -90,9 +77,9 @@ def pickPeaksNd(self:'PeakList', positions:Sequence=None, dataDims:Sequence=None
   return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
   
 # def pickPeaks1d(self:'PeakList', spectrumView, size:int=3, mode:str='wrap'):
-def pickPeaks1d(self:'PeakList', data1d, dataRange, size:int=3, mode:str='wrap'):
+def pickPeaks1d(self:'PeakList', data1d, dataRange, size:int=3, mode:str='wrap') -> List['Peak']:
   """
-  NBNB refactored. Should not take a SpectrumView in ccpn/lib, should take 1d data array
+  Pick 1D peaks form data1d float array
   """
 
   self._project.suspendNotification()
@@ -113,15 +100,19 @@ def pickPeaks1d(self:'PeakList', data1d, dataRange, size:int=3, mode:str='wrap')
     for position in indices:
       peakPosition = [float(selectedData[0][position])]
       height = selectedData[1][position]
-      self.newPeak(height=float(height), position=peakPosition)
+      peaks.append(self.newPeak(height=float(height), position=peakPosition))
 
   finally:
     self._project.resumeNotification()
 
+  return peaks
 
 
-
-def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap', ignoredRegions=None, noiseThreshold=None):
+def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap', ignoredRegions=None,
+                        noiseThreshold=None):
+  """
+  Pick 1D peaks form data in  self.spectrum
+  """
 
 
   self._project.suspendNotification()
@@ -162,14 +153,16 @@ def pickPeaks1dFiltered(self:'PeakList', size:int=9, mode:str='wrap', ignoredReg
     for position in indices:
       peakPosition = [float(newArray2[0][position])]
       height = newArray2[1][position]
-      self.newPeak(height=float(height), position=peakPosition)
+      peaks.append(self.newPeak(height=float(height), position=peakPosition))
 
   finally:
     self._project.resumeNotification()
 
+  return peaks
 
 
-def _havePeakNearPosition(values, tolerances, peaks):
+
+def _havePeakNearPosition(values, tolerances, peaks) -> Optional['Peak']:
 
   for peak in peaks:
     for i, position in enumerate(peak.position):
@@ -178,7 +171,7 @@ def _havePeakNearPosition(values, tolerances, peaks):
     else:
       return peak
 
-def subtractPeakLists(self:'PeakList', peakList2:'PeakList'):
+def subtractPeakLists(self:'PeakList', peakList2:'PeakList') -> 'PeakList':
   """
   Subtracts peaks in peakList2 from peaks in peakList1, based on position,
   and puts those in a new peakList3.  Assumes a common spectrum for now.
@@ -208,18 +201,20 @@ def subtractPeakLists(self:'PeakList', peakList2:'PeakList'):
   finally:
     self._project.resumeNotification()
 
-def copyPeaks(self:'PeakList', sinkSpectrum:'Spectrum', fitPositions:bool=False):
-  refAxisCodes = self.spectrum.axisCodes
-  sinkAxisCodes = sinkSpectrum.axisCodes
+  return peakList3
 
-  if not spectrumLib.doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
-    print('axis codes of the source and sink peaklists do not match')
-    return
-
-  if not fitPositions:
-    copySubTree(self, sinkSpectrum)
-
-  # else:
-
-def refit(self:'PeakList', method:str='gaussian'):
-  fitExistingPeakList(self._apiPeakList, method)
+# def copyPeaks(self:'PeakList', sinkSpectrum:'Spectrum', fitPositions:bool=False):
+#   refAxisCodes = self.spectrum.axisCodes
+#   sinkAxisCodes = sinkSpectrum.axisCodes
+#
+#   if not spectrumLib.doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
+#     print('axis codes of the source and sink peaklists do not match')
+#     return
+#
+#   if not fitPositions:
+#     copySubTree(self, sinkSpectrum)
+#
+#   # else:
+#
+# def refit(self:'PeakList', method:str='gaussian'):
+#   fitExistingPeakList(self._apiPeakList, method)

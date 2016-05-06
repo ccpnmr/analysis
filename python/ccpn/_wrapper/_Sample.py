@@ -93,7 +93,8 @@ class Sample(AbstractWrapperObject):
 
   @property
   def amount(self) -> float:
-    """amount of sample"""
+    """amount of sample, in uint of amountUnit. In most cases this is the volume, but
+    there are other possibilities, e.g. for solid state NMR."""
     return self._wrappedData.amount
 
   @amount.setter
@@ -220,7 +221,8 @@ class Sample(AbstractWrapperObject):
         raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
       else:
         commonUtil._resetParentLink(self._wrappedData, 'samples', 'name', value)
-        self._finaliseRename()
+        self._finaliseAction('rename')
+        self._finaliseAction('change')
 
     finally:
       if undo is not None:
@@ -273,7 +275,8 @@ Spectrum.sample = property(getter, setter, None,
 def getter(self:SpectrumHit) -> Sample:
   return self._project._data2Obj.get(self._apiSpectrumHit.sample)
 SpectrumHit.sample = property(getter, None, None,
-                              "ccpn.Sample in which ccpn.SpectrumHit is found")
+  "ccpn.Sample in which ccpn.SpectrumHit (for screening/metabolomics) is found"
+)
 
 def getter(self:PseudoDimension) -> Tuple[Sample, ...]:
   ff = self._project._data2Obj.get

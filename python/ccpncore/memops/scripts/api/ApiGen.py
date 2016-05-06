@@ -1014,7 +1014,10 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     # set up
     self.writeNewline()
     self.writeComment('objects to be deleted')
-    self.newCollection(needDeclType=True, **self.stdCollectionParams['objsToBeDeleted'])
+    # self.newCollection(needDeclType=True, **self.stdCollectionParams['objsToBeDeleted'])
+    self.writeComment("This implementation could be greatly improve, but meanwhile this should work")
+    self.write("from ccpncore.util.OrderedSet import OrderedSet")
+    self.write("objsToBeDeleted = OrderedSet()")
 
     self.writeComment('objects still to be checked for cascading delete'
                       ' (each object to be deleted gets checked)')
@@ -1045,7 +1048,9 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
 
   def callDoDeletes(self, op, inClass):
 
-    self.startLoop('obj', **self.stdCollectionParams['objsToBeDeleted'])
+    # self.startLoop('obj', **self.stdCollectionParams['objsToBeDeleted'])
+    # Hacky. But we want reversed looping to delete children before parents (e.g.)
+    self.startLoop('obj', 'reversed(objsToBeDeleted)', True, True)
     self.stdCallFunc('obj', 'singleDelete')
     self.endLoop()
 

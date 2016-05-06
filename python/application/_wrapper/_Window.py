@@ -96,7 +96,7 @@ class Window(AbstractWrapperObject):
 def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:
   """Create new child Window
 
-  :param str title: window  title (optional, defaults to 'Wn' n positive integer
+  :param str title: window  title (optional, defaults to 'W1', 'W2', 'W3', ...
   :param tuple size: x,y size for new window in integer pixels
   :param tuple position: x,y position for new window in integer pixels"""
 

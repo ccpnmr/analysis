@@ -1,4 +1,4 @@
-"""Wrapper level utility functions
+"""Wrapper level I/O utility functions
 
 """
 #=========================================================================================
@@ -62,20 +62,3 @@ def newProject(projectName:str, path:str=None, useFileLogger:bool=True) -> Proje
                      % (projectName, path) )
   else:
     return Project(apiProject.newNmrProject(name=projectName))
-
-
-# def _wrapApiProject(apiProject:ApiProject, nmrProjectName:str=None) -> Project:
-#   """convert existing MemopsRoot to wrapped Project, using nmrProjectName to select NmrProject"""
-#
-#   nmrProjects = apiProject.sortedNmrProjects()
-#   if nmrProjects:
-#     if nmrProjectName:
-#       nmrProject = apiProject.findFirstNmrProject(name=nmrProjectName)
-#       if nmrProject is None:
-#         raise ValueError("No NmrProject found with name: %s" % nmrProjectName)
-#     else:
-#       nmrProject = nmrProjects[0]
-#   else:
-#     nmrProject = apiProject.newNmrProject(name=nmrProjectName or apiProject.name)
-#
-#   return Project(nmrProject)

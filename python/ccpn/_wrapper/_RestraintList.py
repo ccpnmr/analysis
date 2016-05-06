@@ -34,10 +34,11 @@ from ccpn import DataSet
 
 
 class RestraintList(AbstractWrapperObject):
-  """ RestraintList - All restraints lists, with type determined by the restraintType attribute.
-  NB This class (and descendants) is also used for Measurements like T1, T2,
-  Hydrogen exchange protection, ... and for Chemical Shifts (if used as restraints
-  or as calculation input)"""
+  """ RestraintList - A container for restraints, with type determined by the restraintType
+  attribute. Typical examples are Distance and Dihedral restraints, but can also be used to store
+  measurements or derived values (Rdc, J coupling, T1, T2, Chemical Shift, ...)
+  """
+
   
   #: Short class name, for PID.
   shortClassName = 'RL'
@@ -106,18 +107,18 @@ class RestraintList(AbstractWrapperObject):
   def restraintType(self) -> str:
     """Restraint type.
 
-    Recommended types are Distance, Rdc, JCoupling, ChemicalShift, Csa, Dihedral
+    Recommended types are Distance, Rdc, JCoupling, ChemicalShift, Csa, Dihedral, T1, T2, ...
     Freely settable for now - further enumerations will eventually be introduced."""
     return self._wrappedData.constraintType
 
   @property
   def restraintItemLength(self) -> int:
-    """Length of restraintItem - number of atom ID defining a restraint"""
+    """Length of restraintItem - number of atom ID identifying a restraint"""
     return self._wrappedData.itemLength
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for ccpn.RestraintList"""
+    """serial number of RestraintList, used in Pid and to identify the RestraintList. """
     return self._wrappedData.serial
     
   @property
@@ -162,7 +163,7 @@ class RestraintList(AbstractWrapperObject):
   @property
   def measurementType(self) -> str:
     """Type of measurements giving rise to Restraints.
-    Used for restraintTypes like T1 (types z, zz), T2 (types SQ, DQ),
+    Used for restraintTypes like T1 (types z, zz), T2 (types SQ, DQ), ...
     Freely settable for now - precise enumerations will eventually be introduced."""
     return self._wrappedData.measurementType
 
@@ -172,7 +173,9 @@ class RestraintList(AbstractWrapperObject):
 
   @property
   def origin(self) -> str:
-    """Data origin for restraints"""
+    """Data origin for restraints. Free text. Examples would be
+    'noe', 'hbond', 'mutation', or  'shift-perturbation' (for a distance restraint list),
+    'jcoupling' or 'talos' (for a dihedral restraint list), 'measured' (for any observed value)"""
     return self._wrappedData.origin
 
   @origin.setter
@@ -181,15 +184,11 @@ class RestraintList(AbstractWrapperObject):
 
   @property
   def tensor(self) -> Tensor:
-    """orientation tensor for restraints. Valid for RDC restraint lists only"""
-    if self.restraintType == 'Rdc':
-      apiRestraintList = self._wrappedData
-      return Tensor(axial=apiRestraintList.tensorMagnitude,
-                    rhombic=apiRestraintList.tensorRhombicity,
-                    isotropic=apiRestraintList.tensorIsotropicValue)
-    else:
-      self._project._logger.warning("%sRestraintList has no attribute tensorMagnitude"
-                                    % self.restraintType)
+    """orientation tensor for restraints. """
+    apiRestraintList = self._wrappedData
+    return Tensor(axial=apiRestraintList.tensorMagnitude,
+                  rhombic=apiRestraintList.tensorRhombicity,
+                  isotropic=apiRestraintList.tensorIsotropicValue)
 
   @tensor.setter
   def tensor(self, value:Tensor):
@@ -199,7 +198,7 @@ class RestraintList(AbstractWrapperObject):
 
   @property
   def tensorChainCode(self) -> float:
-    """tensorChainCode of orientation tensor """
+    """tensorChainCode of orientation tensor. Used to identify tensor in coordinate files"""
     return self._wrappedData.tensorChainCode
 
   @tensorChainCode.setter
@@ -208,7 +207,7 @@ class RestraintList(AbstractWrapperObject):
 
   @property
   def tensorSequenceCode(self) -> float:
-    """tensorSequenceCode of orientation tensor """
+    """tensorSequenceCode of orientation tensor. Used to identify tensor in coordinate files """
     return self._wrappedData.tensorSequenceCode
 
   @tensorSequenceCode.setter
@@ -217,7 +216,7 @@ class RestraintList(AbstractWrapperObject):
 
   @property
   def tensorResidueType(self) -> float:
-    """tensorResidueType of orientation tensor """
+    """tensorResidueType of orientation tensor. Used to identify tensor in coordinate files """
     return self._wrappedData.tensorResidueType
 
   @tensorResidueType.setter

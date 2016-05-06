@@ -172,7 +172,10 @@ class Substance(AbstractWrapperObject):
 
   @property
   def sequenceString(self) -> Optional[str]:
-    """Molecular sequence string - set by creation functions that create an associated APiMolecule
+    """Molecular sequence string - set by the createPolymerSubstance function. Substances
+    created by this function can be used to generate matching chains with the
+    createChainFromSubstance function
+
     For standard polymers defaults to a string of one-letter codes;
     for other molecules to a comma-separated tuple of three-letter codes"""
     apiRefComponent = self._wrappedData
@@ -373,8 +376,8 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
                   ringCount:int=None, hBondDonorCount:int=None, hBondAcceptorCount:int=None,
                   polarSurfaceArea:float=None, logPartitionCoefficient:float=None
                  ) -> Substance:
-  """Create new substance WITHOUT attached ApiMolecule (and so not suitable for making chains)
-  substanceType defaults to 'Molecule'.
+  """Create new substance WITHOUT storing the sequence internally
+  (and hence not suitable for making chains). SubstanceType defaults to 'Molecule'.
 
   ADVANCED alternatives are 'Cell', 'Material', and 'Composite'"""
 
@@ -449,7 +452,7 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 
   NB: For more complex substances, you must use advanced, API-level commands.
 
-  :param Sequence sequence: string of one-letter codes or sequence of str residueNames
+  :param Sequence sequence: string of one-letter codes or sequence of residueNames
   :param str name: name of new substance
   :param str labeling: labeling for new substance (mandatory, defaults to 'std')
   :param str userCode: user code for new substance (optional)

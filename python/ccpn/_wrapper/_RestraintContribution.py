@@ -32,7 +32,10 @@ from ccpncore.api.ccp.nmr import NmrConstraint
 
 
 class RestraintContribution(AbstractWrapperObject):
-  """Restraint contribution."""
+  """Restraint contribution, corresponding to a set of alternative Atom
+  tuples with associated limits, target value, weight, and other parameters.
+  Simple restraints will have only contribution, whereas more complex restraints
+  can have multiple contributions with different parameters and possibly logical relationships"""
   
   #: Short class name, for PID.
   shortClassName = 'RC'
@@ -56,7 +59,7 @@ class RestraintContribution(AbstractWrapperObject):
 
   @property
   def _parent(self) -> Restraint:
-    """Restraint containing restraintContribution."""
+    """Restraint object containing restraintContribution."""
     return  self._project._data2Obj[self._wrappedData.constraint]
 
   restraint = _parent
@@ -68,7 +71,8 @@ class RestraintContribution(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for Peak"""
+    """serial number of RestraintContribution, used in Pid and to identify the
+    RestraintContribution. """
     return self._wrappedData.serial
 
   @property
@@ -97,15 +101,17 @@ class RestraintContribution(AbstractWrapperObject):
   @weight.setter
   def weight(self, value:float):
     self._wrappedData.weight = value
-
   @property
-  def upperLimit(self) -> float:
-    """upperLimit of contribution """
-    return self._wrappedData.upperLimit
+  def additionalLowerLimit(self) -> float:
+    """additionalLowerLimit of contribution
+    Used for potential functions that require more than one parameter, typically for
+     parabolic-linear potentials where the additionalLowerLimit marks the transition from
+     parabolic to linear potential"""
+    return self._wrappedData.additionalLowerLimit
 
-  @upperLimit.setter
-  def upperLimit(self, value:float):
-    self._wrappedData.upperLimit = value
+  @additionalLowerLimit.setter
+  def additionalLowerLimit(self, value:float):
+    self._wrappedData.additionalLowerLimit = value
 
   @property
   def lowerLimit(self) -> float:
@@ -117,22 +123,26 @@ class RestraintContribution(AbstractWrapperObject):
     self._wrappedData.lowerLimit = value
 
   @property
+  def upperLimit(self) -> float:
+    """upperLimit of contribution """
+    return self._wrappedData.upperLimit
+
+  @upperLimit.setter
+  def upperLimit(self, value:float):
+    self._wrappedData.upperLimit = value
+
+  @property
   def additionalUpperLimit(self) -> float:
-    """additionalUpperLimit of contribution """
+    """additionalUpperLimit of contribution.
+    Used for potential functions that require more than one parameter, typically for
+     parabolic-linear potentials where the additionalUpperLimit marks the transition from
+     parabolic to linear potential"""
     return self._wrappedData.additionalUpperLimit
 
   @additionalUpperLimit.setter
   def additionalUpperLimit(self, value:float):
     self._wrappedData.additionalUpperLimit = value
 
-  @property
-  def additionalLowerLimit(self) -> float:
-    """additionalLowerLimit of contribution """
-    return self._wrappedData.additionalLowerLimit
-
-  @additionalLowerLimit.setter
-  def additionalLowerLimit(self, value:float):
-    self._wrappedData.additionalLowerLimit = value
 
   @property
   def scale(self) -> float:
@@ -154,7 +164,9 @@ class RestraintContribution(AbstractWrapperObject):
 
   @property
   def combinationId(self) -> int:
-    """combinationId of contribution, describing which contributions are AND'ed together"""
+    """combinationId of contribution. Contributions with the same combinationId
+    are AND'ed together, where contributions with different combinationId (or combinationId None)
+    are OR'ed"""
     return self._wrappedData.combinationId
 
   @combinationId.setter
@@ -162,8 +174,12 @@ class RestraintContribution(AbstractWrapperObject):
     self._wrappedData.combinationId = value
 
   @property
-  def restraintItems(self) -> Tuple[str, ...]:
-    """restraint items of contribution - given as a tuple of lists of AtomId """
+  def restraintItems(self) -> Tuple[Tuple[str, ...]]:
+    """restraint items of contribution - given as a tuple of tuples of AtomId (not Pid).
+
+    Example value:
+    (('A.127.ALA.HA','A.130.Ser.H'), ('A.93.Val.HA','A.93.TYR.H'))
+    """
 
     itemLength = self._wrappedData.constraint.parentList.itemLength
     result = []

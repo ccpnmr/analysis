@@ -491,6 +491,9 @@ class AbstractWrapperObject():
     Note that these notifiers are NOT cleared once set up.
     """
 
+
+    # NB _coreNotifiers is a class attribute of AbstractWrapperObject
+    # So all tuples are appended to the same list, living in AbstractWrapperObject
     cls._coreNotifiers.append((cls.className, target, func, parameterDict, onceOnly))
 
 

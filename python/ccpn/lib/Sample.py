@@ -1,5 +1,25 @@
-__author__ = 'simon'
+""" Ccpn-specific variant of functions for sorting and comparison."""
 
+#=========================================================================================
+#  Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-03-07 16:38:17 +0000 (Mon, 07 Mar 2016) $"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+               "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                 " or ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author: simon $"
+__date__ = "$Date: 2016-03-07 16:38:17 +0000 (Mon, 07 Mar 2016) $"
+__version__ = "$Revision: 9128 $"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
 from numpy import array, amin, amax, average, empty, nan, nanmin, fabs, subtract, where, argmax, NAN
 from ccpn import Sample
 

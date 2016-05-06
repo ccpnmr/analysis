@@ -1,6 +1,7 @@
+""" Ccpn-specific variant of functions for sorting and comparison."""
 
 #=========================================================================================
-# Ccpn-specific variant of functions for sorting and comparison.
+#  Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
@@ -29,8 +30,13 @@ _keyCache = {}
 def stringSortKey(key:str) -> tuple:
   """Sort key for strings.
 
-  Custom CCPN version of stringSortKey that splits on embedded dots before further processing
+  Usage: sorted(aList, key=stringSortKey) or aList.sort(key=stringSortKey)
 
+  Custom CCPN version of stringSortKey that sorts Pids on their individual components.
+
+  Advanced:
+
+  Splits on embedded dots before further processing, and
   Returns an alternating tuple of (possibly empty) strings interspersed with (float,string) tuples,
   where the float is the converted value of the substring.
   First and last element are always strings.
@@ -94,7 +100,11 @@ def _ccpnOrderedKey(key):
 
 
 def universalSortKey(key):
-  """Custom universalSortKey with local stringSortKey variant for strings and
+  """Custom universalSortKey, used to sort a list of mixed-type Python objects.
+
+  Usage: sorted(aList, key=universalSortKey) or aList.sort(key=universalSortKey)
+
+  Uses the local stringSortKey variant for strings and
   CCPN WrapperObjects sorted together"""
   return Sorting.universalSortKey(key, _stringOrderingHook=stringSortKey,
                                   _orderedKeyHook=_ccpnOrderedKey)

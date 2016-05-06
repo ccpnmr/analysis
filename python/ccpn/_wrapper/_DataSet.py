@@ -32,8 +32,10 @@ from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 
 
 class DataSet(AbstractWrapperObject):
-  """Restraint set."""
-  
+  """Data set. Used to store the input to (or output from) a calculation, including data
+  selection and parameters, to group Restraints that are used together, to track
+  data history and file loads. """
+
   #: Short class name, for PID.
   shortClassName = 'DS'
   # Attribute it necessary as subclasses must use superclass className
@@ -63,7 +65,7 @@ class DataSet(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for DataSet"""
+    """serial number of DataSet, used in Pid and to identify the DataSet. """
     return self._wrappedData.serial
 
   @property

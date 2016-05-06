@@ -83,7 +83,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def dimensionCount(self) -> str:
-    """short form of name, used for id"""
+    """Number of dimensions in spectrum"""
     return self._wrappedData.numDim
 
   @property
@@ -278,7 +278,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def numberType(self) -> str:
-    """Type of number stored ('int' or 'float')."""
+    """Data type of numbers stored in data matrix ('int' or 'float')."""
     xx = self._wrappedData.dataStore
     if xx:
       return xx.numberType
@@ -396,7 +396,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def spectralWidthsHz(self) -> Tuple[Optional[float], ...]:
-    """spectral width before correcting for spectrometer frequency (mostly in Hz), per dimension"""
+    """spectral width (in Hz) before dividing by spectrometer frequency, per dimension"""
     return tuple(x.spectralWidth if hasattr(x, 'spectralWidth') else None
                  for x in self._wrappedData.sortedDataDims())
 
@@ -526,7 +526,11 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def measurementTypes(self) -> Tuple[Optional[str], ...]:
-    """measurement type for main dimensions reference, per dimension"""
+    """Type of value being measured, per dimension.
+
+    In normal cases the measurementType will be 'Shift', but other values might be
+    'MQSHift' (for multiple quantum axes), JCoupling (for J-resolved experiments),
+    'T1', 'T2', ..."""
     return tuple(x and x.measurementType for x in self._mainExpDimRefs())
 
   @measurementTypes.setter
@@ -554,7 +558,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def isotopeCodes(self) -> Tuple[Optional[str], ...]:
-    """main reference isotopeCode, per dimension - None if no unique code"""
+    """isotopeCode of isotope being measured, per dimension - None if no unique code"""
     result = []
     for dataDim in self._wrappedData.sortedDataDims():
       expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
@@ -571,7 +575,6 @@ class Spectrum(AbstractWrapperObject):
 
   @isotopeCodes.setter
   def isotopeCodes(self, value:Sequence):
-    """Set main ExpDimRef (serial=1) isotopeCode for each dimension"""
     apiDataSource = self._wrappedData
     if len(value) == apiDataSource.numDim:
       for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
@@ -589,7 +592,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def foldingModes(self) -> Tuple[Optional[str], ...]:
-    """main folding mode (values: 'circular', 'mirror', None), per dimension"""
+    """folding mode (values: 'circular', 'mirror', None), per dimension"""
     dd = {True:'mirror', False:'circular', None:None}
     return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
 
@@ -600,7 +603,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def axisCodes(self) -> Tuple[Optional[str], ...]:
-    """Main axisCode, per dimension - None if no main ExpDimRef
+    """axisCode, per dimension - None if no main ExpDimRef
     """
 
     # See if axis codes are set
@@ -641,7 +644,6 @@ class Spectrum(AbstractWrapperObject):
 
   @acquisitionAxisCode.setter
   def acquisitionAxisCode(self, value):
-
     if value is None:
       index = None
     else:
@@ -729,7 +731,7 @@ class Spectrum(AbstractWrapperObject):
 
   @property
   def spectralWidths(self) -> Tuple[Optional[float], ...]:
-    """spectral width after processing (generally in ppm), per dimension """
+    """spectral width after processing in axis unit (ppm), per dimension """
     return tuple(x and x.spectralWidth for x in self._mainDataDimRefs())
 
   @spectralWidths.setter

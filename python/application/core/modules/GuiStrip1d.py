@@ -107,26 +107,26 @@ class GuiStrip1d(GuiStrip):
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
     self.viewBox.setXRange(x2, x1)
 
-  def showPeaks(self, peakList:PeakList, peaks=None):
-    """
-    Displays peaks in specified peaklist in the strip.
-    """
-    if not peaks:
-      peaks = peakList.peaks
+  # def showPeaks(self, peakList:PeakList, peaks=None):
+  #   """
+  #   Displays peaks in specified peaklist in the strip.
+  #   """
+  #   if not peaks:
+  #     peaks = peakList.peaks
+  #
+  #   peakListView = self._findPeakListView(peakList)
+  #   if not peakListView:
+  #     return
+  #
+  #   peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
+  #   self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
 
-    peakListView = self._findPeakListView(peakList)
-    if not peakListView:
-      return
-
-    peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
-    self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
-
-  def hidePeaks(self, peakList:PeakList):
-    """
-    Hides peaks in specified peaklist from strip.
-    """
-    peakListView = self._findPeakListView(peakList)
-    peakListView.setVisible(False)
+  # def hidePeaks(self, peakList:PeakList):
+  #   """
+  #   Hides peaks in specified peaklist from strip.
+  #   """
+  #   peakListView = self._findPeakListView(peakList)
+  #   peakListView.setVisible(False)
 
   def _findPeakListView(self, peakList:PeakList):
 
@@ -134,6 +134,7 @@ class GuiStrip1d(GuiStrip):
     #if peakListView:
     #  return peakListView
 
+    # NBNB TBD FIXME  - why is this different from nD version? is self.peakListViews: even set?
 
     for peakListView in self.peakListViews:
       if peakList is peakListView.peakList:

@@ -125,7 +125,8 @@ class NmrResidue(AbstractWrapperObject):
 
   @property
   def nextNmrResidue(self) -> Optional['NmrResidue']:
-    """Next sequentially connected NmrResidue. Either from a connected NmrChain,
+    """Next sequentially connected NmrResidue (or None, as appropriate).
+    Either from a connected NmrChain,
     or the NmrResidue assigned to the next Residue in the same Chain"""
     apiResonanceGroup = self._wrappedData
     apiResidue = apiResonanceGroup.assignedResidue
@@ -291,7 +292,8 @@ class NmrResidue(AbstractWrapperObject):
 
   @property
   def previousNmrResidue(self) -> Optional['NmrResidue']:
-    """Previous sequentially connected NmrResidue. Either from a connected NmrChain,
+    """Previous sequentially connected NmrResidue (or None, as appropriate).
+    Either from a connected NmrChain,
     or the NmrResidue assigned to the previous Residue in the same Chain"""
     apiResonanceGroup = self._wrappedData
     apiResidue = apiResonanceGroup.assignedResidue
@@ -589,22 +591,29 @@ class NmrResidue(AbstractWrapperObject):
   def assignTo(self, residueId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, mergeToExisting=True) -> 'NmrResidue':
 
-    """Assign NmrResidue to residueId (or other parameters) and get back the result
-    (either a modified self or another NmrResidue with the correct assignment, if one exists).
+    """Assign NmrResidue to new assignment, as defined by either residueId or the other parameters
+    and return the result.
+
+    Passing in a residueId deassigns empty fields,
+    while empty parameters (e.g. chainCode=None) cause no change. E.g.:
+    for NmrResidue NR:A.121.ALA calling with residueId='A.123' will reassign to 'A.123.' whereas
+    calling with sequenceCode=123 will reassign to 'A.123.ALA'. Calling with residueId='..ALA',
+    will assign to hew default NmrChain and NmrResidues (which might get you NR:'@2.@11.ALA'
+
+    If the no assignment with the same chainCode and sequenceCode exists, the current NmrResidue
+    will be reassigned.
+    If an NmrResidue with the same chainCode and sequenceCode already exists,  the function
+    will by default merge the two NmrResidues, delete the current one, and return the new one,
+    but will instead raise ValueError if mergeToExisting is set to False.
+    NB Merging is NOT undoable.
+    WARNING: Always use in the form "x = x.assignTo(...)",
+    as the call 'x.assignTo(...) may cause the source x object to become deleted.
 
     NB resetting the NmrChain for an NmrResidue in the middle of a connected NmrChain
     will cause an error. Use resetNmrChain(newNmrChainOrPid) instead
-
-    WARNING: If mergeToExisting, always use in the form "x = x.assignTo(...)",
-    as the call 'x.assignTo(...) may cause the source x object to become deleted.
-
-    Passing in a residueId deassigns empty residueType or name fields,
-    while empty parameters (e.g. chainCode=None) cause no change.
-    If the target ccpn.NmrResidue being reassigned to exists and mergeToExisting is True,
-    the source will be deleted, and its data merged into the target.
-    NB Merging is NOT undoable
     """
 
+    oldPid = self.longPid
     clearUndo = False
     undo = self._apiResonanceGroup.root._undo
     sequenceCode = str(sequenceCode) if sequenceCode else None
@@ -677,7 +686,10 @@ class NmrResidue(AbstractWrapperObject):
     else:
       #We are assigning to an existing NmrResidue
       result = self._project._data2Obj[newApiResonanceGroup]
-      if not mergeToExisting:
+      if mergeToExisting:
+        self._project._logger.warning("Merging %s into %s. Merging is NOT undoable."
+                                      % (oldPid, result.longPid))
+      else:
         raise ValueError("New assignment clash with existing assignment,"
                          " and merging is disallowed")
 

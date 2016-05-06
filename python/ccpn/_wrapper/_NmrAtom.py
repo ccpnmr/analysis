@@ -106,7 +106,8 @@ class NmrAtom(AbstractWrapperObject):
 
   @property
   def isotopeCode(self) -> str:
-    """isotopeCode of NmrAtom. Set automatically on creation (from NmrAtom name) and cannot be reset"""
+    """isotopeCode of NmrAtom. Set automatically on creation (from NmrAtom name)
+    and cannot be changed later"""
     return self._wrappedData.isotopeCode
 
   @property
@@ -159,6 +160,33 @@ class NmrAtom(AbstractWrapperObject):
     the source will be deleted, and its data merged into the target.
     NB Merging is NOT undoable
     """
+    """Assign NmrAtom to new assignment, as defined by either atomId or the other parameters
+    and return the result.
+
+    Passing in a atomId deassigns empty residueType or name fields,
+    while empty parameters (e.g. chainCode=None) cause no change. E.g.:
+    for NmrAtom NR:A.121.ALA.HA calling with atomId='A.124..' will assign to
+    (chainCode='A', sequenceCode=124, residueType=None, atomName=None)
+    whereas calling with sequenceCode=124 will assign to
+    (chainCode='A', sequenceCode=124, residueType='ALA', atomName='HA')
+
+    The function works as:
+
+    nmrChain = project.fetchNmrChain(shortName=chainCode)
+
+    nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
+
+    (or nmrChain.fetchNmrResidue(sequenceCode=sequenceCode) if residueType is None)
+
+    The NmrAtom is then renamed or moved to the new NmrResidue as appropriate.
+    If the new assignment clashes with an existing NmrAtom assignment, the function will
+    by default merge the two NmrAtoms, delete the current one, and return the new one,
+    but will instead raise ValueError if mergeToExisting is set to False.
+    NB Merging is NOT undoable.
+    WARNING: Always use in the form "x = x.assignTo(...)",
+    as the call 'x.assignTo(...) may cause the source x object to become deleted.
+    """
+    oldPid = self.longPid
     clearUndo = False
     undo = self._apiResonance.root._undo
     apiResonance = self._apiResonance
@@ -219,6 +247,7 @@ class NmrAtom(AbstractWrapperObject):
         elif mergeToExisting:
           clearUndo = True
           result._wrappedData.absorbResonance(self._apiResonance)
+          self._project._logger.warning()
 
         else:
           raise ValueError("New assignment clash with existing assignment,"
@@ -244,7 +273,8 @@ class NmrAtom(AbstractWrapperObject):
         # WARNING if we get here undo is no longer possible
         clearUndo = True
         result._wrappedData.absorbResonance(self._apiResonance)
-
+        self._project._logger.warning("Merging %s into %s. Merging is NOT undoable."
+                                      % (oldPid, result.longPid))
       else:
         raise ValueError("New assignment clash with existing assignment,"
                          " and merging is disallowed")
@@ -284,7 +314,8 @@ del getter
 del setter
     
 def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
-  """Create new ccpn.NmrAtom within ccpn.NmrResidue. If name is None, use nucleus@serial"""
+  """Create new ccpn.NmrAtom within ccpn.NmrResidue. If name is None, use default name
+  (of form e.g. 'H@211', 'N@45', ...)"""
   nmrProject = self._project._wrappedData
   resonanceGroup = self._wrappedData
 

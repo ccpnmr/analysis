@@ -219,7 +219,7 @@ def renameChain(self:'Chain', newCode:str):
   if newCode == oldCode:
     return
   if molSystem.findFirstChain(code=newCode) is not None:
-    raise ValueError ("Cannot rename to Chain '@, chain with that name already exists")
+    raise ValueError ("Cannot rename to Chain %s, chain with that name already exists" % newCode)
 
   root = self.root
   root.__dict__['override'] = True
@@ -235,6 +235,9 @@ def renameChain(self:'Chain', newCode:str):
     for structureEnsemble in molSystem.structureEnsembles:
 
       # reset chainCode
+
+      # NBNB TBD FIXME when we finish settling structures, this should NOT happen
+
       for coordChain in structureEnsemble.coordChains:
         if coordChain.code == oldCode:
           parentDict = structureEnsemble.__dict__['coordChains']
@@ -243,6 +246,7 @@ def renameChain(self:'Chain', newCode:str):
           parentDict[newCode] = coordChain
 
     # Fix NmrCalc instances
+    # Not wrapped, so no need for notifiers
     for nmrCalcStore in molSystem.root.sortedNmrCalcStores():
       for run in nmrCalcStore.sortedRuns():
         for obj in run.findAllData(molSystemCode=molSystem.code):
@@ -254,15 +258,6 @@ def renameChain(self:'Chain', newCode:str):
                 if code == oldCode:
                   chainCodes[ii] = newCode
             obj.chainCodes = chainCodes
-
-    # Fix NmrChains
-    for nmrProject in molSystem.nmrProjects:
-      nmrChain = nmrProject.findFirstNmrChain(code=oldCode)
-      if nmrChain:
-        # parentDict = nmrProject.__dict__['nmrChains']
-        # del parentDict[oldCode]
-        nmrChain.code = newCode
-        # parentDict[newCode] = nmrChain
 
     # Fix self
     parentDict = molSystem.__dict__['chains']
@@ -276,6 +271,16 @@ def renameChain(self:'Chain', newCode:str):
     self.__dict__['isModified'] = True
     if undo is not None:
       undo.decreaseBlocking()
+
+
+  # Fix NmrChains - DOne outside overr8ide to trigger rename notifiers for NmrChains
+  for nmrProject in molSystem.nmrProjects:
+    nmrChain = nmrProject.findFirstNmrChain(code=oldCode)
+    if nmrChain:
+      # parentDict = nmrProject.__dict__['nmrChains']
+      # del parentDict[oldCode]
+      nmrChain.code = newCode
+      # parentDict[newCode] = nmrChain
 
   if undo is not None:
     undo.newItem(renameChain, renameChain, undoArgs=(self, oldCode), redoArgs=(self, newCode))

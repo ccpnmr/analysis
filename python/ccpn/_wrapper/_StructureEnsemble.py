@@ -72,7 +72,7 @@ class StructureEnsemble(AbstractWrapperObject):
 
   @property
   def ensembleId(self) -> int:
-    """ID number, key attribute for ccpn.StructureEnsemble"""
+    """ID number of StructureEnsemble, used in Pid and to identify the StructureEnsemble. """
     return self._wrappedData.ensembleId
 
   @property

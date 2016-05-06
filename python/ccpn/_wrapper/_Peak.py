@@ -32,12 +32,12 @@ from ccpncore.api.ccp.nmr import Nmr
 from typing import Optional, Tuple, Union, Sequence
 
 class Peak(AbstractWrapperObject):
-  """Peak. Includes values for per-dimension values and for assignments.
-  Assignments are complete for normal shift dimensions, but only the main referencing is used
-  in each dimension. For assigning splittings, J-couplings, MQ dimensions, reduced-dimensionality
-  experiments etc. you must use the PeakAssignment object (NBNB still to be written).
-  Assignments are per dimension, and for now assume that each assignment can be combined with
-  all assignments for other dimensions """
+  """Peak. Includes per-dimension values and (multiple) assignments.
+  Measurements that require more htn one NmrAtom for an individual assignment
+  (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
+  experiments etc.) are not supported (yet). Assignments can be viewed and set
+  either as an assignment list for each dimension (dimensionNmrAtoms) or as a
+  list of all possible assignment combinations (assignedNmrAtoms)"""
   
   #: Short class name, for PID.
   shortClassName = 'PK'
@@ -67,7 +67,7 @@ class Peak(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number, key attribute for Peak"""
+    """serial number of Peak, used in Pid and to identify the Peak. """
     return self._wrappedData.serial
     
   @property
@@ -115,7 +115,7 @@ class Peak(AbstractWrapperObject):
 
   @property
   def figureOfMerit(self) -> Optional[float]:
-    """figureOfMerit of Peak"""
+    """figureOfMerit of Peak, between 0.0 and 1.0 inclusive."""
     return self._wrappedData.figOfMerit
 
   @figureOfMerit.setter
@@ -200,8 +200,14 @@ class Peak(AbstractWrapperObject):
   @property
   def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
     """Peak dimension assignment - a list of lists of NmrAtoms for each dimension.
+    One ofg two alternative views on the Peak assignment.
     Assignments as a list of individual combinations is given in 'assignedNmrAtoms'.
-    Setting dimensionAssignments implies that all combinations are possible"""
+    Setting dimensionAssignments implies that all combinations are possible
+
+    Example:
+      ((<NA:A.127.LEU.HA>, <NA:A.127.LEU.HBX>, <NA:A.127.LEU.HBY>,<NA:A.127.LEU.HG>),
+       (<NA:A.127.LEU.CA>, <NA:A.127.LEU.CB>)
+       )"""
     result = []
     for peakDim in self._wrappedData.sortedPeakDims():
 
@@ -239,9 +245,19 @@ class Peak(AbstractWrapperObject):
 
   @property
   def assignedNmrAtoms(self) -> Tuple[Tuple[Optional['NmrAtom'], ...], ...]:
-    """Peak assignment - a tuple of tuples of NmrAtom combinations
-    (e.g. a tuple of triplets for a 3D spectrum). Missing assignments are entered as None
-    Assignments per dimension are given in 'dimensionNmrAtoms'."""
+    """Peak assignment - a tuple of tuples of NmrAtom combinations.
+    (e.g. a tuple of triplets for a 3D spectrum).
+    One of two alternative views on the Peak assignment.
+    Missing assignments are entered as None.
+    Assignments for each dimension are given in 'dimensionNmrAtoms'.
+
+    Example:
+      ((<NA:A.127.LEU.HA>, <NA:A.127.LEU.CA>),
+      (<NA:A.127.LEU.HBX>, <NA:A.127.LEU.CB>),
+      (<NA:A.127.LEU.HBY>, <NA:A.127.LEU.CB>),
+      (<NA:A.127.LEU.HG>, None),)
+
+    """
     data2Obj = self._project._data2Obj
     apiPeak = self._wrappedData
     peakDims = apiPeak.sortedPeakDims()
@@ -296,8 +312,8 @@ class Peak(AbstractWrapperObject):
 
   def assignDimension(self, axisCode:str, value:Union[Union[str,'NmrAtom'],
                                                             Sequence[Union[str,'NmrAtom']]]):
-    """Assign dimension axisCode to value (NmrAtom, or Pid or sequence of either, or None)
-    NBNB TBD add integer axisCode? Should it be index or dim number?"""
+    """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None)
+    """
 
     axisCodes = self._parent._parent.axisCodes
     try:
@@ -316,30 +332,6 @@ class Peak(AbstractWrapperObject):
     dimensionNmrAtoms = list(self.dimensionNmrAtoms)
     dimensionNmrAtoms[index] = value
     self.dimensionNmrAtoms = dimensionNmrAtoms
-
-
-  # # NBNB TBD do we need this duplication, or it it enough to return the NmrAtom objects?
-  # @property
-  # def dimensionAssignments(self) -> tuple:
-  #   """Peak dimension assignments - a list of lists of NmrAtom.id for each dimension.
-  #   Assignments as a list of individual combinations is given in 'assignments'."""
-  #
-  #   result = []
-  #   for ll in self.dimensionNmrAtoms:
-  #     result.append(list(x._id for x in ll))
-  #   #
-  #   return tuple(result)
-  #
-  # @property
-  # def assignments(self) -> tuple:
-  #   """Peak dimension assignments a list of lists of NmrAtom.id combinations
-  #   (e.g. a list of triplets for a 3D spectrum). Missing assignments are entered as None"""
-  #
-  #   result = []
-  #   for ll in self.assignedNmrAtoms:
-  #     result.append(list(x and x._id for x in ll))
-  #   #
-  #   return tuple(result)
 
   # Implementation functions
   @classmethod

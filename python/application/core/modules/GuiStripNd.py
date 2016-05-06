@@ -33,7 +33,7 @@ from functools import partial
 
 # from ccpn import Project
 from ccpn import PeakList
-from ccpn import Peak
+# from ccpn import Peak
 # from ccpn.lib._wrapper import Spectrum as LibSpectrum
 
 # from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
@@ -311,12 +311,10 @@ class GuiStripNd(GuiStrip):
     """
     Sets the value of the z plane position box if the specified value is within the displayable limits.
     """
-    print(value)
     planeLabel = self.planeToolbar.planeLabels[n]
     if planeLabel.valueChanged:
       value = planeLabel.value()
-    print(value)
-    # 8/3/2016 RAsmus Fogh. Fixed untested (obvious bug)
+    # 8/3/2016 Rasmus Fogh. Fixed untested (obvious bug)
     # if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
     if planeLabel.minimum() <= value <= planeLabel.maximum():
       self.changeZPlane(n, position=value)
@@ -343,20 +341,20 @@ class GuiStripNd(GuiStrip):
             
     return None
         
-  def showPeaks(self, peakList:PeakList, peaks:typing.List[Peak]=None):
-    ###from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView
-    # NBNB TBD 1) we should not always display all peak lists together
-    # NBNB TBD 2) This should not be called for each strip
-    
-    if not peaks:
-      peaks = peakList.peaks
-         
-    peakListView = self._findPeakListView(peakList)
-    if not peakListView:
-      return
-      
-    peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
-    self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+  # def showPeaks(self, peakList:PeakList, peaks:typing.List[Peak]=None):
+  #   ###from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView
+  #   # NBNB TBD 1) we should not always display all peak lists together
+  #   # NBNB TBD 2) This should not be called for each strip
+  #
+  #   if not peaks:
+  #     peaks = peakList.peaks
+  #
+  #   peakListView = self._findPeakListView(peakList)
+  #   if not peakListView:
+  #     return
+  #
+  #   peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
+  #   self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
 
 # Notifiers
 

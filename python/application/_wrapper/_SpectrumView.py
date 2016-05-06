@@ -353,7 +353,7 @@ class SpectrumView(AbstractWrapperObject):
         widget.setFixedSize(75, 30)
       widget.spectrumView = self._wrappedData
       spectrumDisplay.spectrumActionDict[apiDataSource] = action
-      # The following call sets the ico colours:
+      # The following call sets the icon colours:
       self._spectrumViewHasChanged()
 
     if spectrumDisplay.is1D:

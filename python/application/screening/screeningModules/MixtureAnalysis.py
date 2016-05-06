@@ -341,17 +341,18 @@ class MixtureAnalysis(CcpnDock):
       self.leftListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         spectrum = sampleComponent.substance.referenceSpectra[0]
-        # item = QtGui.QListWidgetItem(str(spectrum.id)+ ' Single Score ' + str(sampleComponent.score[0]))
-        # self.leftListWidget.addItem(item)
+        item = QtGui.QListWidgetItem(str(spectrum.id)+ ' Single Score ' + str(sampleComponent.score[0]))
+        self.leftListWidget.addItem(item)
 
-        if len(sampleComponent.score[2]) > 0:
-          item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0])
-                                       + ' Overlapped at Ppm ' + str(sampleComponent.score[2]))
-          self.leftListWidget.addItem(item)
-        else:
-          item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
-          self.leftListWidget.addItem(item)
+        # if len(sampleComponent.score[2]) > 0:
+        #   item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
+        #                                # + ' Overlapped at Ppm ' + str(sampleComponent.score[2]))
+        #   self.leftListWidget.addItem(item)
+        # else:
+        #   item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
+        #   self.leftListWidget.addItem(item)
 
+    self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self.itemsDropped)
     self.connect(self.leftListWidget, QtCore.SIGNAL("dropped"), self.itemsDropped)
     self.leftListWidget.currentItemChanged.connect(self.itemClicked)
 
@@ -497,7 +498,7 @@ class MixtureAnalysis(CcpnDock):
     leftResults = []
     self.leftListWidget.clear()
     for spectrum in getLeftSpectra:
-      singleScore = scoring(spectrum,getLeftSpectra)
+      singleScore = scoring(spectrum,getLeftSpectra)[0]
       itemRight = QtGui.QListWidgetItem(str(spectrum.id)+ ' Single Score ' + str(singleScore))
       self.leftListWidget.addItem(itemRight)
       leftResults.append(singleScore)
@@ -532,7 +533,7 @@ class MixtureAnalysis(CcpnDock):
     rightResults = []
     self.rightListWidget.clear()
     for spectrum in getRightSpectra:
-      singleScore = scoring(spectrum,getRightSpectra)
+      singleScore = scoring(spectrum,getRightSpectra)[0]
       rightResults.append(singleScore)
       itemRight = QtGui.QListWidgetItem(str(spectrum.id)+ ' Single Score ' + str(singleScore))
       self.rightListWidget.addItem(itemRight)
@@ -596,10 +597,11 @@ class MixtureAnalysis(CcpnDock):
 
   def resetMixtureScore(self):
     ''' restore the first scores calculated  '''
-    self.populateLeftListWidget()
-    self.populateRightListWidget(self.getMixtureFromPullDown)
-    self.warningLabel.hide()
-    self.scoringTable.selectionCallback = self.tableSelection
+    self.resetInitialState()
+    # self.populateLeftListWidget()
+    # self.populateRightListWidget(self.getMixtureFromPullDown)
+    # self.warningLabel.hide()
+    # self.scoringTable.selectionCallback = self.tableSelection
 
   def getMixtureFromPullDown(self):
     ''' Documentation '''

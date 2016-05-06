@@ -103,7 +103,7 @@ class ShowScreeningHits(CcpnDock, Base):
     '''GroupBox creates the settingGroup'''
 
     self.settingButtons = ButtonList(self, texts = ['','',],
-                                callbacks=[ self.createExportButton,self.createViewSettingButton,],
+                                callbacks=[self.createExportButton,self.createViewSettingButton,],
                                 icons=[self.exportIcon,self.settingIcon,],
                                 tipTexts=['', ''], direction='H')
     self.settingButtons.setStyleSheet("background-color: transparent")
@@ -139,21 +139,23 @@ class ShowScreeningHits(CcpnDock, Base):
 
 
   def createViewSettingButton(self):
+    print('This function has not been implemented yet')
 
-    menuViewSettingButton = QtGui.QMenu(self)
-    menuViewSettingButton.addAction('Hit table')
-    menuViewSettingButton.addAction('Hit Details')
-    menuViewSettingButton.addAction('')
-    self.settingButtons.buttons[0].setMenu(menuViewSettingButton)
+    # menuViewSettingButton = QtGui.QMenu(self)
+    # menuViewSettingButton.addAction('Hit table')
+    # menuViewSettingButton.addAction('Hit Details')
+    # menuViewSettingButton.addAction('')
+    # self.settingButtons.buttons[0].setMenu(menuViewSettingButton)
 
   def createExportButton(self):
+    print('This function has not been implemented yet')
 
-    menuExportButton = QtGui.QMenu(self)
-    menuExportButton.addAction('Export Hit Table')
-    menuExportButton.addAction('Export Hit Detail')
-    menuExportButton.addAction('Export Hit Structure')
-    menuExportButton.addAction('Export All')
-    self.settingButtons.buttons[1].setMenu(menuExportButton)
+    # menuExportButton = QtGui.QMenu(self)
+    # menuExportButton.addAction('Export Hit Table')
+    # menuExportButton.addAction('Export Hit Detail')
+    # menuExportButton.addAction('Export Hit Structure')
+    # menuExportButton.addAction('Export All')
+    # self.settingButtons.buttons[1].setMenu(menuExportButton)
 
   def createWidgetsHitSelectionGroup(self):
     ''' Documentation '''
@@ -442,9 +444,9 @@ class ShowScreeningHits(CcpnDock, Base):
 
     objRow = self.hitTable.getCurrentObject()
     self.showHitOnPullDown(objRow)
-    self.displaySampleAndHit()
+    # self.displaySampleAndHit()
     self.showHitInfoOnDisplay()
-    self.hidePeakList()
+    # self.hidePeakList()
 
   def showHitInfoOnDisplay(self):
     ''' Documentation '''

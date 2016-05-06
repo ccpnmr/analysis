@@ -185,10 +185,10 @@ class MixtureAnalysis(CcpnDock):
     if len(selectedPeaks)>0:
       print(selectedPeaks, 'selected peaks')
       self.peakTable.setCurrentObjects(selectedPeaks)
-      #
-      # for atom, atomObject in self.compoundView.atomViews.items():
-      #   # if at.name == 'H1':
-      #   atomObject.select()
+
+      for atom, atomObject in self.compoundView.atomViews.items():
+        if atom.name == 'H1':
+          atomObject.select()
 
   def _getPeakHeight(self, peak):
     if peak.height:
@@ -341,8 +341,17 @@ class MixtureAnalysis(CcpnDock):
       self.leftListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         spectrum = sampleComponent.substance.referenceSpectra[0]
-        item = QtGui.QListWidgetItem(str(spectrum.id)+ ' Single Score ' + str(sampleComponent.score))
-        self.leftListWidget.addItem(item)
+        # item = QtGui.QListWidgetItem(str(spectrum.id)+ ' Single Score ' + str(sampleComponent.score[0]))
+        # self.leftListWidget.addItem(item)
+
+        if len(sampleComponent.score[2]) > 0:
+          item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0])
+                                       + ' Overlapped at Ppm ' + str(sampleComponent.score[2]))
+          self.leftListWidget.addItem(item)
+        else:
+          item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
+          self.leftListWidget.addItem(item)
+
     self.connect(self.leftListWidget, QtCore.SIGNAL("dropped"), self.itemsDropped)
     self.leftListWidget.currentItemChanged.connect(self.itemClicked)
 
@@ -390,7 +399,7 @@ class MixtureAnalysis(CcpnDock):
       self.rightListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         spectrum = sampleComponent.substance.referenceSpectra[0]
-        item = QtGui.QListWidgetItem(str(spectrum.id)+' Single Score '+str( sampleComponent.score))
+        item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
         self.rightListWidget.addItem(item)
       self.rightListWidget.currentItemChanged.connect(self.getListWidgetItems)
 

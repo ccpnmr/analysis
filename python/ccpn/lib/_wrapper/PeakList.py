@@ -89,7 +89,7 @@ def pickPeaks1d(self:'PeakList', data1d, dataRange, size:int=3, mode:str='wrap')
     spectrum = self.spectrum
     data1d = spectrum._apiDataSource.get1dSpectrumData()
     selectedData = data1d[:, (data1d[0] < dataRange[0]) * (data1d[0] > dataRange[1])]
-    threshold = spectrum.estimateNoise()
+    threshold = spectrum.estimateNoise()*10
     if (selectedData.size == 0) or (selectedData.max() < threshold):
      return peaks
     boolsVal = selectedData[1] > threshold

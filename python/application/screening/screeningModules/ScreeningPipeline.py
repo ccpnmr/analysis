@@ -187,7 +187,6 @@ class PickPeaksWidget(QtGui.QWidget):
       for substance in self.project.substances:
         substanceData.append(str(substance.referenceSpectra[0].id))
       self.referenceComponentPullDown.setData(substanceData)
-      # print(self.referenceComponentPullDown.text)
 
 class MatchPeaks(QtGui.QWidget):
   ''''''

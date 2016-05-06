@@ -25,6 +25,8 @@ class MixtureOptimisation(CcpnDock):
     self.generalPreferences = self.project._appBase.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
     # self.excludeRegions = ExcludeRegions
+    print('This module is under implementation, not active yet')
+    self.implementationLabel = Label(self, 'This module is under implementation, not active yet')
 
     ######## ======== Set Main Layout ====== ########
     self.mainFrame = QtGui.QFrame()
@@ -42,7 +44,7 @@ class MixtureOptimisation(CcpnDock):
     self.tabWidget = QtGui.QTabWidget()
     self.settingFrameLayout.addWidget(self.tabWidget)
     # self.tabWidget.setTabBar(VerticalTabWidget(width=130,height=25))
-    self.tabWidget.setTabPosition(QtGui.QTabWidget.West)
+    # self.tabWidget.setTabPosition(QtGui.QTabWidget.West)
 
     ######## ======== Set Buttons  ====== ########
     self.panelButtons = ButtonList(self, texts=['Show Status', 'Show Graph', 'Cancel', 'Perform'],
@@ -51,32 +53,36 @@ class MixtureOptimisation(CcpnDock):
                                    tipTexts=[None, None, None, None],
                                    direction='H')
     self.buttonsFrameLayout.addWidget(self.panelButtons)
+    self.disableButtons()
 
     ######## ======== Set 1 Tab  ====== ########
     self.tab1Frame = QtGui.QFrame()
-    self.tab1Layout = QtGui.QVBoxLayout()
+    self.tab1Layout = QtGui.QGridLayout()
     self.tab1Frame.setLayout(self.tab1Layout)
     self.tabWidget.addTab(self.tab1Frame, 'Iterations')
 
     self.selectNumberLabel = Label(self, 'Select Number of Iterations')
     self.iterationBox = Spinbox(self, value=1, min=1)
-    self.tab1Layout.addWidget(self.selectNumberLabel)
-    self.tab1Layout.addWidget(self.iterationBox)
+    # self.iterationBox.setFixedWidth(80)
+    self.tab1Layout.addWidget(self.selectNumberLabel, 0,0)
+    self.tab1Layout.addWidget(self.iterationBox, 0,1)
+    self.tab1Layout.addWidget(self.implementationLabel, 1, 0, 1, 1)
 
     ######## ======== Set 2 Tab  ====== ########
     self.tab2Frame = QtGui.QFrame()
-    self.tab2Layout = QtGui.QVBoxLayout()
+    self.tab2Layout = QtGui.QGridLayout()
     self.tab2Frame.setLayout(self.tab2Layout)
     self.tabWidget.addTab(self.tab2Frame, 'Minimal overlap')
 
     self.distanceLabel = Label(self, text="Minimal distance between peaks")
     self.ppmDistance = DoubleSpinbox(self)
-    self.tab2Layout.addWidget(self.distanceLabel)
-    self.tab2Layout.addWidget(self.ppmDistance)
+    # self.ppmDistance.setFixedWidth(80)
+    self.tab2Layout.addWidget(self.distanceLabel, 0,0)
+    self.tab2Layout.addWidget(self.ppmDistance, 0,1)
 
     ######## ======== Set 3 Tab  ====== ########
     self.tab3Frame = QtGui.QFrame()
-    self.tab3Layout = QtGui.QVBoxLayout()
+    self.tab3Layout = QtGui.QGridLayout()
     self.tab3Frame.setLayout(self.tab3Layout)
     self.tabWidget.addTab(self.tab3Frame, 'Exclude Regions')
 
@@ -86,7 +92,7 @@ class MixtureOptimisation(CcpnDock):
 
     ######## ======== Set 4 Tab  ====== ########
     self.tab4Frame = QtGui.QFrame()
-    self.tab4Layout = QtGui.QVBoxLayout()
+    self.tab4Layout = QtGui.QGridLayout()
     self.tab4Frame.setLayout(self.tab4Layout)
     self.tabWidget.addTab(self.tab4Frame, 'Others')
 
@@ -96,5 +102,10 @@ class MixtureOptimisation(CcpnDock):
                                             selectedInd=0,
                                             callback=None,
                                             tipTexts=None)
-    self.tab4Layout.addWidget(self.replaceMixtureLabel)
-    self.tab4Layout.addWidget(self.replaceRadioButtons)
+    self.tab4Layout.addWidget(self.replaceMixtureLabel, 0,0)
+    self.tab4Layout.addWidget(self.replaceRadioButtons, 0,1)
+
+  def disableButtons(self):
+    for button in self.panelButtons.buttons:
+      button.setEnabled(False)
+      button.setStyleSheet("background-color:#868D9D; color: #000000")

@@ -35,7 +35,7 @@ from application.core.popups.RestraintTypePopup import RestraintTypePopup
 from application.core.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from application.core.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from application.core.popups.SamplePropertiesPopup import EditSampleComponentPopup
-
+from application.core.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
 from ccpn import Project
 from ccpn import AbstractWrapperObject
@@ -170,7 +170,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """Reset spectra in sidebar - to be called from notifiers
     """
     for spectrum in self.project.spectra:
-      self._removeItem( self.project, spectrum)
+      # self._removeItem( self.project, spectrum)
+      self._removeItem(spectrum)
       self._createItem(spectrum)
 
 
@@ -357,9 +358,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       #     colourScheme=self.colourScheme)
 
     elif obj.shortClassName == 'SG':
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+      popup = SpectrumGroupEditor(project=self.project, spectrumGroup=obj)
+      popup.exec_()
+      popup.raise_()
 
     elif obj.shortClassName == 'SA':
       popup = SamplePropertiesPopup(obj, project=self.project)

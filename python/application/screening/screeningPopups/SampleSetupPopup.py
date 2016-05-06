@@ -140,6 +140,7 @@ class SamplePopup(QtGui.QDialog):
     self.spinBoxcomponent.setMaximumWidth(90)
     self.ppmDistance.setMaximumWidth(90)
 
+    self.ppmDistance.setValue(0.05)
     self.ppmDistance.setSingleStep(0.01)
     self.ppmDistance.setSuffix(" ppm")
     self.noiseLevelSpinbox.setValue(10000)
@@ -323,8 +324,7 @@ class SamplePopup(QtGui.QDialog):
     currentDisplayed = self.project.strips[0]
     for spectrumView in currentDisplayed.spectrumViews:
       if spectrumView is not None:
-        print(spectrumView)
-        # spectrumView.delete()
+        spectrumView.delete()
 
 
 class ExcludeRegions(QtGui.QWidget, Base):

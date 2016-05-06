@@ -138,47 +138,47 @@ def scoring(spectrum, mixtureSpectra, minimalOverlap=None):
 
 
   if value > 0.020:
-    return [10, 0.20, []]
+    return [10, 0.20]
 
   if value > 0.018:
-    return [9, 0.018, []]
+    return [9, 0.018]
 
   if value > 0.016:
-    return [8, 0.016, []]
+    return [8, 0.016]
 
   if value > 0.014:
-    return [7, 0.014, []]
+    return [7, 0.014]
 
   if value > 0.012:
-    return [6, 0.012, []]
+    return [6, 0.012]
 
   if value > 0.10:
-    return [5, 0.10, []]
+    return [5, 0.10]
 
   if value > 0.08:
-    return [4, 0.08, []]
+    return [4, 0.08]
 
   if value > 0.06:
-    return [3, 0.06, []]
+    return [3, 0.06]
 
   if value > 0.04:
-    overlappedPositions = [posA for posB in spectrumBpositions for posA in peakPos if abs(posA - posB) < 0.04]
+    # overlappedPositions = [posA for posB in spectrumBpositions for posA in peakPos if abs(posA - posB) < 0.04]
     # print([posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.04],'value', value, spectrum)
-    return [2, 0.04, overlappedPositions]
+    return [2, 0.04]
 
   if value > 0.02:
-    overlappedPositions = [posA for posB in spectrumBpositions for posA in peakPos if abs(posA - posB) < 0.03]
+    # overlappedPositions = [posA for posB in spectrumBpositions for posA in peakPos if abs(posA - posB) < 0.03]
     # print([posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.03],'value', value, spectrum)
-    return [1, 0.02, overlappedPositions]
+    return [1, 0.02]
 
   if value < 0.02:
-    overlappedPositions = [posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.02]
+    # overlappedPositions = [posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.02]
     # print('Overlapped peaks in positions:', [posA for posB in spectrumBpositions for posA in peakPos if abs(posA-posB)<0.02],
     #       'value', value, spectrum)
-    return [0, 0.01, overlappedPositions]
+    return [0, 0.01]
 
   if value < 0.00:
-    return [-1, 0.00, []]
+    return [-1, 0.00]
 
 
 class ObjectClustering:

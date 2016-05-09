@@ -302,6 +302,8 @@ class Peak(AbstractWrapperObject):
   def addAssignment(self, value:Union[str, 'NmrAtom']):
     """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""
 
+    # NBNB TBD FIXME check for duplicates
+
     if len(value) != self._wrappedData.peakList.numDim:
       raise ValueError("Length of assignment value %s does not match peak dimensionality %s "
       % (value, self._wrappedData.peakList.numDim))

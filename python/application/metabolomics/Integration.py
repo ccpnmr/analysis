@@ -26,12 +26,12 @@ from PyQt4 import QtGui
 
 import numpy
 
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Label import Label
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.RadioButton import RadioButton
+from application.core.widgets.Base import Base
+from application.core.widgets.Button import Button
+from application.core.widgets.Label import Label
+from application.core.widgets.LineEdit import LineEdit
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.RadioButton import RadioButton
 from application.metabolomics.IntegralAssignment import IntegralTable
 from application.core.modules.GuiTableGenerator import GuiTableGenerator
 

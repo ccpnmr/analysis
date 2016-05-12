@@ -37,11 +37,11 @@ from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 # from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 # from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
-# from ccpncore.gui.Frame import Frame as CoreFrame
-from ccpncore.gui.Icon import Icon
-from ccpncore.gui.Label import Label
-from ccpncore.gui.ScrollArea import ScrollArea
-from ccpncore.gui.ToolBar import ToolBar
+# from application.core.widgets.Frame import Frame as CoreFrame
+from application.core.widgets.Icon import Icon
+from application.core.widgets.Label import Label
+from application.core.widgets.ScrollArea import ScrollArea
+from application.core.widgets.ToolBar import ToolBar
 
 import typing
 

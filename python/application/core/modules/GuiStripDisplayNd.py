@@ -36,7 +36,7 @@ from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 # from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 # from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
-from ccpncore.gui.Icon import Icon
+from application.core.widgets.Icon import Icon
 
 import typing
 

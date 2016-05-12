@@ -4,9 +4,9 @@ __author__ = 'simon1'
 from ccpn import Chain
 from ccpn import Residue
 
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Font import Font
-from ccpncore.gui.MessageDialog import showYesNo
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.Font import Font
+from application.core.widgets.MessageDialog import showYesNo
 import typing
 
 from application.core.DropBase import DropBase

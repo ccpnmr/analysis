@@ -24,8 +24,8 @@ __version__ = "$Revision: 7686 $"
 
 from application.core.Base import Base as GuiBase
 from ccpn.lib import Util as ccpnUtil
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.MessageDialog import showWarning
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.MessageDialog import showWarning
 
 
 class DropBase(GuiBase):

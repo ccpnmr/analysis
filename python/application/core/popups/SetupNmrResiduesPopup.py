@@ -25,11 +25,11 @@ __version__ = ": 7686 $"
 
 from PyQt4 import QtGui, QtCore
 
-from ccpncore.gui.Base import Base
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.CheckBox import CheckBox
-from ccpncore.gui.Label import Label
-from ccpncore.gui.PulldownList import PulldownList
+from application.core.widgets.Base import Base
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.CheckBox import CheckBox
+from application.core.widgets.Label import Label
+from application.core.widgets.PulldownList import PulldownList
 
 class SetupNmrResiduesPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, **kw):

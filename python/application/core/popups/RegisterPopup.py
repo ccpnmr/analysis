@@ -3,12 +3,12 @@ Qt = QtCore.Qt
 
 from ccpncore.memops.metamodel import Util as metaUtil
 
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Entry import Entry
-from ccpncore.gui.Frame import Frame
-from ccpncore.gui.Label import Label
-from ccpncore.gui.MessageDialog import showError
-###from ccpncore.gui.WebView import WebViewPanel
+from application.core.widgets.Button import Button
+from application.core.widgets.Entry import Entry
+from application.core.widgets.Frame import Frame
+from application.core.widgets.Label import Label
+from application.core.widgets.MessageDialog import showError
+###from application.core.widgets.WebView import WebViewPanel
 
 from ccpn.util import Register
 

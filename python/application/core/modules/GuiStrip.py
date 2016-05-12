@@ -32,11 +32,11 @@ from ccpn import Project
 from ccpn import PeakList
 from ccpn import Peak
 
-from ccpncore.gui.Label import Label
-from ccpncore.gui.CcpnGridItem import CcpnGridItem
-# from ccpncore.gui.ToolBar import ToolBar
-from ccpncore.gui.Widget import Widget
-# from ccpncore.gui.Menu import Menu
+from application.core.widgets.Label import Label
+from application.core.widgets.CcpnGridItem import CcpnGridItem
+# from application.core.widgets.ToolBar import ToolBar
+from application.core.widgets.Widget import Widget
+# from application.core.widgets.Menu import Menu
 
 # from ccpncore.memops import Notifiers
 

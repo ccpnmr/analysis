@@ -1,17 +1,17 @@
 __author__ = 'luca'
 
 from PyQt4 import QtGui, QtCore
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Button import Button
-from ccpncore.gui.DateTime import DateTime
-from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Label import Label
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.ScrollArea import ScrollArea
-from ccpncore.gui.TextEditor import TextEditor
-from ccpncore.gui.CompoundView import CompoundView, Variant, importSmiles
+from application.core.widgets.Base import Base
+from application.core.widgets.Button import Button
+from application.core.widgets.DateTime import DateTime
+from application.core.widgets.DoubleSpinbox import DoubleSpinbox
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.Label import Label
+from application.core.widgets.LineEdit import LineEdit
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.ScrollArea import ScrollArea
+from application.core.widgets.TextEditor import TextEditor
+from application.core.widgets.CompoundView import CompoundView, Variant, importSmiles
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 OTHER_UNIT = ['µ','m', 'n', 'p']

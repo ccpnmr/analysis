@@ -4,11 +4,11 @@ from PyQt4 import QtCore, QtGui
 
 from functools import partial
 
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Label import Label
-from ccpncore.gui.ListWidget import ListWidget
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Table import ObjectTable, Column
+from application.core.widgets.Base import Base
+from application.core.widgets.Label import Label
+from application.core.widgets.ListWidget import ListWidget
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.Table import ObjectTable, Column
 
 from ccpn.lib.Assignment import CCP_CODES, ATOM_NAMES
 

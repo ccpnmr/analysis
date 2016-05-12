@@ -6,12 +6,12 @@ import random
 
 from ccpncore.memops.metamodel import Util as metaUtil
 
-from ccpncore.gui.Button import Button
-from ccpncore.gui.CheckBox import CheckBox
-from ccpncore.gui.Frame import Frame
-from ccpncore.gui.Label import Label
-from ccpncore.gui import MessageDialog
-from ccpncore.gui.TextEditor import TextEditor
+from application.core.widgets.Button import Button
+from application.core.widgets.CheckBox import CheckBox
+from application.core.widgets.Frame import Frame
+from application.core.widgets.Label import Label
+from application.core.widgets import MessageDialog
+from application.core.widgets.TextEditor import TextEditor
 
 from ccpn.util import Io
 from ccpn.util import Logging

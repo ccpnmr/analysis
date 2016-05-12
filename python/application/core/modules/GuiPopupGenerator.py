@@ -4,11 +4,11 @@ import json
 import os
 from functools import partial
 
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Label import Label
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.PulldownList import PulldownList
+from application.core.widgets.Base import Base
+from application.core.widgets.Button import Button
+from application.core.widgets.Label import Label
+from application.core.widgets.LineEdit import LineEdit
+from application.core.widgets.PulldownList import PulldownList
 import json
 from PyQt4 import QtGui
 
@@ -100,16 +100,16 @@ class PopupGenerator(QtGui.QDialog, Base):
     pythonFilePath = os.path.expanduser('~simon1/.ccpn/') + '%s.py' % self.popupNameBox.text()
     pythonFile = open(pythonFilePath, 'w')
     pythonFile.write('from PyQt4 import QtGui\n')
-    pythonFile.write('from ccpncore.gui.Base import Base\n')
-    pythonFile.write('from ccpncore.gui.Button import Button\n')
-    pythonFile.write('from ccpncore.gui.CheckBox import CheckBox\n')
-    pythonFile.write('from ccpncore.gui.ColourDialog import ColourDialog\n')
-    pythonFile.write('from ccpncore.gui.DoubleSpinbox import DoubleSpinbox\n')
-    pythonFile.write('from ccpncore.gui.Label import Label\n')
-    pythonFile.write('from ccpncore.gui.LineEdit import LineEdit\n')
-    pythonFile.write('from ccpncore.gui.ListWidget import ListWidget\n')
-    pythonFile.write('from ccpncore.gui.PulldownList import PulldownList\n')
-    pythonFile.write('from ccpncore.gui.Spinbox import Spinbox\n\n\n')
+    pythonFile.write('from application.core.widgets.Base import Base\n')
+    pythonFile.write('from application.core.widgets.Button import Button\n')
+    pythonFile.write('from application.core.widgets.CheckBox import CheckBox\n')
+    pythonFile.write('from application.core.widgets.ColourDialog import ColourDialog\n')
+    pythonFile.write('from application.core.widgets.DoubleSpinbox import DoubleSpinbox\n')
+    pythonFile.write('from application.core.widgets.Label import Label\n')
+    pythonFile.write('from application.core.widgets.LineEdit import LineEdit\n')
+    pythonFile.write('from application.core.widgets.ListWidget import ListWidget\n')
+    pythonFile.write('from application.core.widgets.PulldownList import PulldownList\n')
+    pythonFile.write('from application.core.widgets.Spinbox import Spinbox\n\n\n')
     pythonFile.write('class %s(QtGui.QDialog, Base):\n  def __init__(self, parent=None, **kw):\n' % self.popupNameBox.text())
     pythonFile.write('    super(%s, self).__init__(parent)\n' % self.popupNameBox.text())
     pythonFile.write('    Base.__init__(self, **kw)\n\n')

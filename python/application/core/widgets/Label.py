@@ -1,0 +1,80 @@
+"""Module Documentation here
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author$"
+__date__ = "$Date$"
+__version__ = "$Revision$"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
+from PyQt4 import QtGui, QtCore
+Qt = QtCore.Qt
+
+from application.core.widgets.Base import Base
+from ccpn.util.Translation import translator
+
+class Label(QtGui.QLabel, Base):
+
+  def __init__(self, parent, text='', textColor=None, textSize=None, **kw):
+
+    text = translator.translate(text)
+
+    QtGui.QLabel.__init__(self, text, parent)
+    Base.__init__(self, **kw)
+
+    if textColor:
+      self.setStyleSheet('QLabel {color: %s; font-size: 30pt;}' % textColor)
+    if textSize and textColor:
+      self.setStyleSheet('QLabel {font-size: %s;}' % textSize)
+    
+  def get(self):
+
+    return self.text()
+
+  def set(self, text=''):
+
+    text = translator.translate(text)
+
+    self.setText(text)
+
+
+if __name__ == '__main__':
+
+  from application.core.widgets.Application import TestApplication
+  from application.core.widgets.Button import Button
+
+  msg = 'Hello world'
+  count = 0
+
+  def func():
+
+    global count
+
+    count += 1
+    label.set(msg + ' ' + str(count))
+    print(label.get())
+
+  app = TestApplication()
+  
+  window = QtGui.QWidget()
+ 
+  label = Label(window, text=msg, textColor='red', grid=(0,0))
+  button = Button(window, text='Click me', callback=func, grid=(0,1))
+
+  window.show()
+
+  app.start()

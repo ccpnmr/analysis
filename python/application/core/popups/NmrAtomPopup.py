@@ -1,10 +1,10 @@
 from PyQt4 import QtGui
 
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Label import Label
-from ccpncore.gui.CheckBox import CheckBox
-from ccpncore.gui.PulldownList import PulldownList
+from application.core.widgets.Base import Base
+from application.core.widgets.Button import Button
+from application.core.widgets.Label import Label
+from application.core.widgets.CheckBox import CheckBox
+from application.core.widgets.PulldownList import PulldownList
 
 class NmrAtomPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, nmrAtom=None, **kw):

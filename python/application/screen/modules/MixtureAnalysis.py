@@ -1,18 +1,18 @@
 __author__ = 'luca'
 
 from PyQt4 import QtCore, QtGui
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Icon import Icon
-from ccpncore.gui.Table import ObjectTable, Column
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.ListWidget import ListWidget
-from ccpncore.gui.Label import Label
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.Icon import Icon
+from application.core.widgets.Table import ObjectTable, Column
+from application.core.widgets.Button import Button
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.ListWidget import ListWidget
+from application.core.widgets.Label import Label
 
-from ccpncore.gui.LineEdit import LineEdit
+from application.core.widgets.LineEdit import LineEdit
 from functools import partial
-from ccpncore.gui.CompoundView import CompoundView, Variant, importSmiles
+from application.core.widgets.CompoundView import CompoundView, Variant, importSmiles
 from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 from application.screen.lib.MixtureGeneration import setupSamples, scoring
 from numpy import array, amin, amax, average, empty, nan, nanmin, fabs, subtract, where, argmax, NAN

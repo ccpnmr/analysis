@@ -33,12 +33,12 @@ from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 # from ccpn.util.Pid import Pid
 from typing import Sequence
 
-from ccpncore.gui.Icon import Icon
+from application.core.widgets.Icon import Icon
 
 from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 # from application.core.modules.spectrumItems import GuiPeakListView
 # from application.core.modules.GuiStrip1d import GuiStrip1d
-# from ccpncore.gui.VerticalLabel import VerticalLabel
+# from application.core.widgets.VerticalLabel import VerticalLabel
 
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 # from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView

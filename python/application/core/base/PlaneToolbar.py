@@ -2,11 +2,11 @@ __author__ = 'simon1'
 
 from functools import partial
 
-from ccpncore.gui.Button import Button
-from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-from ccpncore.gui.Label import Label
-from ccpncore.gui.Spinbox import Spinbox
-from ccpncore.gui.ToolBar import ToolBar
+from application.core.widgets.Button import Button
+from application.core.widgets.DoubleSpinbox import DoubleSpinbox
+from application.core.widgets.Label import Label
+from application.core.widgets.Spinbox import Spinbox
+from application.core.widgets.ToolBar import ToolBar
 
 from application.core.base.SpinSystemLabel import SpinSystemLabel
 

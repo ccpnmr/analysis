@@ -23,14 +23,14 @@ __version__ = ": 7686 $"
 #=========================================================================================
 
 from PyQt4 import QtGui, QtCore
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Button import Button
-from ccpncore.gui.CheckBox import CheckBox
-from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-from ccpncore.gui.Label import Label
-from ccpncore.gui.ListWidget import ListWidget
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Spinbox import Spinbox
+from application.core.widgets.Base import Base
+from application.core.widgets.Button import Button
+from application.core.widgets.CheckBox import CheckBox
+from application.core.widgets.DoubleSpinbox import DoubleSpinbox
+from application.core.widgets.Label import Label
+from application.core.widgets.ListWidget import ListWidget
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.Spinbox import Spinbox
 import pyqtgraph as pg
 
 from functools import partial

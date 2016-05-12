@@ -1,9 +1,9 @@
 from PyQt4 import QtCore, QtGui
-from ccpncore.gui.Label import Label
-from ccpncore.gui.ListWidget import ListWidget
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.ButtonList import ButtonList
+from application.core.widgets.Label import Label
+from application.core.widgets.ListWidget import ListWidget
+from application.core.widgets.LineEdit import LineEdit
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.ButtonList import ButtonList
 
 
 

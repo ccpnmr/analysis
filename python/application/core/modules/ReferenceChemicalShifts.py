@@ -2,9 +2,9 @@ __author__ = 'simon'
 
 from ccpn.lib.Assignment import CCP_CODES
 
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Label import Label
-from ccpncore.gui.PulldownList import PulldownList
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.Label import Label
+from application.core.widgets.PulldownList import PulldownList
 from ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
 from ccpn.util.Colour import spectrumHexColours
 import pyqtgraph as pg

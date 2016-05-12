@@ -37,7 +37,7 @@ from ccpnc.contour import Contourer2d
 
 from application.core.modules import GuiStripDisplayNd
 from application.core.modules.GuiSpectrumView import GuiSpectrumView
-###from ccpncore.gui.ToolButton import ToolButton
+###from application.core.widgets.ToolButton import ToolButton
 ###from ccpnc.peak import Peak
 ###from application.core.modules.spectrumPane.PeakListNdItem import PeakListNdItem
 

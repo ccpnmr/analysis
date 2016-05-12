@@ -25,9 +25,9 @@ __author__ = 'simon'
 import os
 from ccpn.util import Path
 from PyQt4 import QtGui
-from ccpncore.gui.Base import Base
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Label import Label
+from application.core.widgets.Base import Base
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.Label import Label
 
 
 class AboutPopup(QtGui.QDialog, Base):

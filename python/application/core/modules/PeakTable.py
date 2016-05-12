@@ -23,11 +23,11 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpn import Peak
 
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Label import Label
-from ccpncore.gui.PulldownList import PulldownList
+from application.core.widgets.Base import Base
+from application.core.widgets.Button import Button
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.Label import Label
+from application.core.widgets.PulldownList import PulldownList
 
 from application.core.DropBase import DropBase
 from application.core.modules.GuiTableGenerator import GuiTableGenerator

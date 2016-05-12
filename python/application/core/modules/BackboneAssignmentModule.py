@@ -31,13 +31,13 @@ import math
 
 from ccpn import ChemicalShift, NmrResidue
 
-from ccpncore.gui.Base import Base
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Button import Button
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Label import Label
-from ccpncore.gui.ListWidget import ListWidget
+from application.core.widgets.Base import Base
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.Button import Button
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.Label import Label
+from application.core.widgets.ListWidget import ListWidget
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing
 

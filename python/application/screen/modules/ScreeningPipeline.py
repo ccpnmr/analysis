@@ -7,15 +7,15 @@ from PyQt4 import QtCore, QtGui
 from application.screen.lib.Screening import writeBruker, createStdDifferenceSpectrum, matchedPosition
 from application.screen.modules.ShowScreeningHits import ShowScreeningHits
 
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.Base import Base
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Label import Label
-from ccpncore.gui.ScrollArea import ScrollArea
-from ccpncore.gui.Button import Button
-from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-from ccpncore.gui.Spinbox import Spinbox
-from ccpncore.gui.CheckBox import CheckBox
+from application.core.widgets.LineEdit import LineEdit
+from application.core.widgets.Base import Base
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.Label import Label
+from application.core.widgets.ScrollArea import ScrollArea
+from application.core.widgets.Button import Button
+from application.core.widgets.DoubleSpinbox import DoubleSpinbox
+from application.core.widgets.Spinbox import Spinbox
+from application.core.widgets.CheckBox import CheckBox
 import pyqtgraph as pg
 
 Qt = QtCore.Qt

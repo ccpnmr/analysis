@@ -33,9 +33,9 @@ from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListVi
 
 from application.core.modules.GuiStrip import GuiStrip
 
-from ccpncore.gui.Icon import Icon
+from application.core.widgets.Icon import Icon
 from ccpn.util.Colour import spectrumColours
-from ccpncore.gui.Menu import Menu
+from application.core.widgets.Menu import Menu
 # from ccpn.util import Logging
 
 from application.core.modules.spectrumItems.GuiPeakListView import Peak1d, GuiPeakListView

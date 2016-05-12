@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from PyQt4 import QtGui
 
-from ccpncore.gui.Frame import Frame as CoreFrame
+from application.core.widgets.Frame import Frame as CoreFrame
 from application.core.Base import Base as GuiBase
 
 class Frame(CoreFrame, GuiBase):

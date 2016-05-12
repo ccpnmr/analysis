@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 import operator
 # import functools
-from ccpncore.gui import MessageDialog
+from application.core.widgets import MessageDialog
 from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
 from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiNmrAtom
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiNmrResidue

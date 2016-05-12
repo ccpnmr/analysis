@@ -4,10 +4,10 @@ from PyQt4 import QtGui, QtCore
 
 # from ccpn.lib.Experiment import EXPERIMENT_TYPES
 
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Label import Label
-from ccpncore.gui.PulldownList import PulldownList
+from application.core.widgets.Base import Base
+from application.core.widgets.Button import Button
+from application.core.widgets.Label import Label
+from application.core.widgets.PulldownList import PulldownList
 
 from functools import partial
 

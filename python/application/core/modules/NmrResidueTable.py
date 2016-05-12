@@ -2,9 +2,9 @@ __author__ = 'simon1'
 
 from PyQt4 import QtGui, QtCore
 
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Label import Label
-from ccpncore.gui.PulldownList import PulldownList
+from application.core.widgets.Base import Base
+from application.core.widgets.Label import Label
+from application.core.widgets.PulldownList import PulldownList
 
 from ccpn.lib import CcpnSorting
 

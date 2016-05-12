@@ -1,13 +1,13 @@
 from PyQt4 import QtCore, QtGui
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Icon import Icon
-# from ccpncore.gui.VerticalTab import VerticalTabWidget
-from ccpncore.gui.RadioButtons import RadioButtons
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-from ccpncore.gui.Spinbox import Spinbox
-from ccpncore.gui.Label import Label
-from ccpncore.gui.LineEdit import LineEdit
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.Icon import Icon
+# from application.core.widgets.VerticalTab import VerticalTabWidget
+from application.core.widgets.RadioButtons import RadioButtons
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.DoubleSpinbox import DoubleSpinbox
+from application.core.widgets.Spinbox import Spinbox
+from application.core.widgets.Label import Label
+from application.core.widgets.LineEdit import LineEdit
 # from application.core.popups.SampleSetupPopup import ExcludeRegions
 
 

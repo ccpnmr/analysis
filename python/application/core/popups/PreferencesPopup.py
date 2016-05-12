@@ -27,13 +27,13 @@ from PyQt4 import QtGui, QtCore
 import json, os
 from functools import partial
 from ccpncore.api.memops import Implementation
-from ccpncore.gui.Label import Label
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Button import Button
-from ccpncore.gui.FileDialog import FileDialog
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.CheckBox import CheckBox
+from application.core.widgets.Label import Label
+from application.core.widgets.Base import Base
+from application.core.widgets.Button import Button
+from application.core.widgets.FileDialog import FileDialog
+from application.core.widgets.LineEdit import LineEdit
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.CheckBox import CheckBox
 from ccpn.util.Translation import languages
 
 COLOUR_SCHEMES = ['light', 'dark']

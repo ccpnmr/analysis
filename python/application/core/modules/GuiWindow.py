@@ -31,7 +31,7 @@ from pyqtgraph.dockarea import DockArea
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
 from ccpn.lib.Assignment import propagateAssignments
-from ccpncore.gui.FileDialog import FileDialog
+from application.core.widgets.FileDialog import FileDialog
 import typing
 from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 

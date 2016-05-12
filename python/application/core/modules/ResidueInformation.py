@@ -3,10 +3,10 @@ __author__ = 'simon1'
 
 from PyQt4 import QtGui
 
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Label import Label
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Base import Base
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.Label import Label
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.Base import Base
 
 from ccpn.lib.Assignment import CCP_CODES
 from application.core.base.Frame import Frame

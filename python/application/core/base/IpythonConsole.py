@@ -1,8 +1,8 @@
 from PyQt4 import QtGui
-from ccpncore.gui.Base import Base
-from ccpncore.gui.TextEditor import TextEditor
+from application.core.widgets.Base import Base
+from application.core.widgets.TextEditor import TextEditor
 
-from ccpncore.gui.Widget import Widget
+from application.core.widgets.Widget import Widget
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 

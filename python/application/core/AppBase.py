@@ -31,10 +31,10 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn import Project
 from ccpn.util import Io as ioUtil
-from ccpncore.gui.Application import Application
+from application.core.widgets.Application import Application
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.api.memops import Implementation
-from ccpncore.gui import MessageDialog
+from application.core.widgets import MessageDialog
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util import Register
@@ -45,7 +45,7 @@ from application.core.Current import Current
 from application.core.popups.RegisterPopup import RegisterPopup
 
 # The following must be there even though the import is not used in this file.
-from ccpncore.gui import resources_rc
+from application.core.widgets import resources_rc
 
 componentNames = ('Assignment', 'Screening', 'Structure')
 
@@ -367,10 +367,10 @@ def getStyleSheet(preferences):
   colourScheme = preferences.general.colourScheme
   colourScheme = metaUtil.upperFirst(colourScheme)
   
-  styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui',
+  styleSheet = open(os.path.join(Path.getPythonDirectory(), 'application', 'core', 'widgets',
                                  '%sStyleSheet.qss' % colourScheme)).read()
   if platform.system() == 'Linux':
-    additions = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui',
+    additions = open(os.path.join(Path.getPythonDirectory(),  'application', 'core', 'widgets',
                                   '%sAdditionsLinux.qss' % colourScheme)).read()
     styleSheet += additions
   return styleSheet

@@ -7,7 +7,7 @@ from ccpn.util import Pid
 
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 # from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
-from ccpncore.gui.Label import Label
+from application.core.widgets.Label import Label
 from typing import Sequence
 from application.core.DropBase import DropBase
 import json

@@ -576,7 +576,7 @@ class PeakNd(QtGui.QGraphicsItem):
     ###self.setPos(xPpm, yPpm)
     # self.inPlane = self.isInPlane()
 
-    # from ccpncore.gui.Action import Action
+    # from application.core.widgets.Action import Action
     # self.deleteAction = QtGui.QAction(self, triggered=self.deletePeak, shortcut=QtCore.Qt.Key_Delete)
     #peakLayer.peakItems.append(self)
   #

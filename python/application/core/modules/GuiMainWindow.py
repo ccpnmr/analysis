@@ -29,12 +29,12 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 from ccpn import PeakList
-from ccpncore.gui import MessageDialog
-from ccpncore.gui.Action import Action
-from ccpncore.gui.CcpnWebView import CcpnWebView
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.FileDialog import FileDialog
-from ccpncore.gui.Menu import Menu, MenuBar
+from application.core.widgets import MessageDialog
+from application.core.widgets.Action import Action
+from application.core.widgets.CcpnWebView import CcpnWebView
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.FileDialog import FileDialog
+from application.core.widgets.Menu import Menu, MenuBar
 from application.core.base.SideBar import SideBar
 from ccpn.util import Io as ioUtil
 from ccpn.util import Path

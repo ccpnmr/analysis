@@ -26,8 +26,8 @@ __author__ = 'simon1'
 
 from PyQt4 import QtCore, QtGui
 
-from ccpncore.gui.Menu import Menu
-from ccpncore.gui.ToolBar import ToolBar
+from application.core.widgets.Menu import Menu
+from application.core.widgets.ToolBar import ToolBar
 
 from functools import partial
 

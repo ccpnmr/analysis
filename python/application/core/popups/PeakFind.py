@@ -24,15 +24,15 @@ __version__ = "$Revision: 7686 $"
 __author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
-from ccpncore.gui.Base import Base
-from ccpncore.gui.Button import Button
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.RadioButton import RadioButton
-from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-from ccpncore.gui.Label import Label
-from ccpncore.gui.Widget import Widget
+from application.core.widgets.Base import Base
+from application.core.widgets.Button import Button
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.RadioButton import RadioButton
+from application.core.widgets.DoubleSpinbox import DoubleSpinbox
+from application.core.widgets.Label import Label
+from application.core.widgets.Widget import Widget
 
-from ccpncore.gui.PulldownList import PulldownList
+from application.core.widgets.PulldownList import PulldownList
 
 
 class PeakFindPopup(QtGui.QDialog, Base):

@@ -27,7 +27,7 @@ from PyQt4 import QtGui, QtOpenGL, QtCore
 
 from ccpn import Spectrum
 
-from ccpncore.gui.Base import Base
+from application.core.widgets.Base import Base
 from ccpn.util.Pid import Pid
 from typing import Sequence, Union
 

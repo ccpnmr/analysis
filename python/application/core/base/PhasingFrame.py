@@ -23,11 +23,11 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from PyQt4 import QtGui
 
-from ccpncore.gui.Entry import FloatEntry
-from ccpncore.gui.Label import Label
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Slider import Slider
-from ccpncore.gui.Frame import Frame
+from application.core.widgets.Entry import FloatEntry
+from application.core.widgets.Label import Label
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.Slider import Slider
+from application.core.widgets.Frame import Frame
 
 directionTexts = ('Horizontal', 'Vertical')
 

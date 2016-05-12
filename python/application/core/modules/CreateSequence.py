@@ -1,11 +1,11 @@
 from PyQt4 import QtGui
-from ccpncore.gui.Base import Base
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Label import Label
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.Spinbox import Spinbox
-from ccpncore.gui.TextEditor import TextEditor
+from application.core.widgets.Base import Base
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.Label import Label
+from application.core.widgets.LineEdit import LineEdit
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.Spinbox import Spinbox
+from application.core.widgets.TextEditor import TextEditor
 
 class CreateSequence(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, **kw):

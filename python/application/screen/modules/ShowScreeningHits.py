@@ -3,18 +3,18 @@ __author__ = 'luca'
 
 from functools import partial
 from PyQt4 import QtCore, QtGui
-from ccpncore.gui.Base import Base
-from ccpncore.gui.GroupBox import GroupBox
-from ccpncore.gui.ListWidget import ListWidget
+from application.core.widgets.Base import Base
+from application.core.widgets.GroupBox import GroupBox
+from application.core.widgets.ListWidget import ListWidget
 
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Table import ObjectTable, Column, ObjectTableItemDelegate
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.Table import ObjectTable, Column, ObjectTableItemDelegate
 
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Button import Button
-from ccpncore.gui.Icon import Icon
-from ccpncore.gui.CompoundView import CompoundView, Variant, importSmiles
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.Button import Button
+from application.core.widgets.Icon import Icon
+from application.core.widgets.CompoundView import CompoundView, Variant, importSmiles
 from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 
 Qt = QtCore.Qt

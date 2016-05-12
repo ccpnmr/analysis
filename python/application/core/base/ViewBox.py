@@ -25,7 +25,7 @@ import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
 from pyqtgraph.Point import Point
 
-from ccpncore.gui.Menu import Menu
+from application.core.widgets.Menu import Menu
 
 from ccpncore.lib.spectrum.Spectrum import axisCodeMapping
 

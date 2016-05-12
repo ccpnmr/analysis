@@ -39,11 +39,11 @@ from ccpn import PeakList
 # from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 # from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 
-# from ccpncore.gui.Button import Button
-# from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
-from ccpncore.gui.Icon import Icon
-from ccpncore.gui.Menu import Menu
-# from ccpncore.gui.Spinbox import Spinbox
+# from application.core.widgets.Button import Button
+# from application.core.widgets.DoubleSpinbox import DoubleSpinbox
+from application.core.widgets.Icon import Icon
+from application.core.widgets.Menu import Menu
+# from application.core.widgets.Spinbox import Spinbox
 
 import typing
 

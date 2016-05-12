@@ -30,8 +30,8 @@ from ccpn import SpectrumGroup
 
 from ccpn.util.Pid import Pid
 from typing import Sequence
-from ccpncore.gui.Dock import CcpnDockLabel, CcpnDock
-from ccpncore.gui.Label import Label
+from application.core.widgets.Dock import CcpnDockLabel, CcpnDock
+from application.core.widgets.Label import Label
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
 from application.core.DropBase import DropBase

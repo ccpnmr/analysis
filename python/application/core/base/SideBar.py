@@ -40,7 +40,7 @@ from application.core.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn import Project
 from ccpn import AbstractWrapperObject
 
-from ccpncore.gui.MessageDialog import showInfo
+from application.core.widgets.MessageDialog import showInfo
 
 # NB RestraintList ('RL') is not in for the moment. Needs to be added later
 # NB the order matters!
@@ -210,7 +210,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """
     Creates and raises a context menu enabling items to be deleted from the sidebar.
     """
-    from ccpncore.gui.Menu import Menu
+    from application.core.widgets.Menu import Menu
     contextMenu = Menu('', self, isFloatWidget=True)
     from functools import partial
     # contextMenu.addAction('Delete', partial(self.removeItem, item))

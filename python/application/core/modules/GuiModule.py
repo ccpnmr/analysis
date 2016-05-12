@@ -25,7 +25,7 @@ __version__ = "$Revision: 7686 $"
 from PyQt4 import QtGui
 
 
-from ccpncore.gui.Dock import CcpnDock, CcpnDockLabel
+from application.core.widgets.Dock import CcpnDock, CcpnDockLabel
 
 from application.core.Base import Base as GuiBase
 

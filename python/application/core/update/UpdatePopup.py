@@ -2,11 +2,11 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.util import Path
 
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Entry import Entry
-from ccpncore.gui.Frame import Frame
-from ccpncore.gui.Label import Label
-#from ccpncore.gui.Table import ObjectTable, Column
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.Entry import Entry
+from application.core.widgets.Frame import Frame
+from application.core.widgets.Label import Label
+#from application.core.widgets.Table import ObjectTable, Column
 
 from application.core.update.UpdateAgent import UpdateAgent
 

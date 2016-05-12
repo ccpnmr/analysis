@@ -32,13 +32,13 @@ from ccpn import Peak
 
 from ccpn.lib.Assignment import isInterOnlyExpt, getNmrAtomPrediction, CCP_CODES
 
-from ccpncore.gui.Button import Button
-from ccpncore.gui.CheckBox import CheckBox
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Label import Label
-from ccpncore.gui.PulldownList import PulldownList
-from ccpncore.gui.RadioButton import RadioButton
-from ccpncore.gui.Widget import Widget
+from application.core.widgets.Button import Button
+from application.core.widgets.CheckBox import CheckBox
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.Label import Label
+from application.core.widgets.PulldownList import PulldownList
+from application.core.widgets.RadioButton import RadioButton
+from application.core.widgets.Widget import Widget
 
 from ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, ALL_ATOMS_SORTED
 
@@ -271,7 +271,7 @@ class AtomSelector(CcpnDock):
     Returns all buttons in Atom Selector to original colours and style.
     """
     if self.parent._appBase.preferences.general.colourScheme == 'dark':
-      styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'DarkStyleSheet.qss')).read()
+      styleSheet = open(os.path.join(Path.getPythonDirectory(),  'application', 'core', 'widgets', 'DarkStyleSheet.qss')).read()
       self.setStyleSheet('''DockLabel  {
                                         background-color: #BEC4F3;
                                         color: #122043;
@@ -283,7 +283,7 @@ class AtomSelector(CcpnDock):
       self.setStyleSheet(styleSheet)
 
     elif self.parent._appBase.preferences.general.colourScheme == 'light':
-      styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'LightStyleSheet.qss')).read()
+      styleSheet = open(os.path.join(Path.getPythonDirectory(),  'application', 'core', 'widgets', 'LightStyleSheet.qss')).read()
       for buttons in self.buttons.values():
         for button in buttons:
           button.setStyleSheet(styleSheet)

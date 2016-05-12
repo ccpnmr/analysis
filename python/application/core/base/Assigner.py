@@ -36,8 +36,8 @@ from ccpn.lib.Assignment import getNmrResiduePrediction
 
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Font import Font
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.Font import Font
 
 
 

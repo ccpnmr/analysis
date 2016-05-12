@@ -1,11 +1,11 @@
 __author__ = 'simon1'
 
-from ccpncore.gui.ButtonList import ButtonList
-from ccpncore.gui.Dock import CcpnDock
-from ccpncore.gui.Label import Label
-from ccpncore.gui.LineEdit import LineEdit
-from ccpncore.gui.Menu import MenuBar
-from ccpncore.gui.TextEditor import TextEditor
+from application.core.widgets.ButtonList import ButtonList
+from application.core.widgets.Dock import CcpnDock
+from application.core.widgets.Label import Label
+from application.core.widgets.LineEdit import LineEdit
+from application.core.widgets.Menu import MenuBar
+from application.core.widgets.TextEditor import TextEditor
 
 from application.core.DropBase import DropBase
 

@@ -4,11 +4,11 @@ import os
 
 from ccpncore.memops.metamodel import Util as metaUtil
 
-from ccpncore.gui.CheckBox import CheckBox
-from ccpncore.gui.Frame import Frame
-from ccpncore.gui.Label import Label
-from ccpncore.gui import MessageDialog
-from ccpncore.gui.Entry import Entry
+from application.core.widgets.CheckBox import CheckBox
+from application.core.widgets.Frame import Frame
+from application.core.widgets.Label import Label
+from application.core.widgets import MessageDialog
+from application.core.widgets.Entry import Entry
 
 class BackupPopup(QtGui.QDialog):
 

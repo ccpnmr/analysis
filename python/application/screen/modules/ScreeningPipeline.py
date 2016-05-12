@@ -5,6 +5,7 @@ import decimal
 from functools import partial
 from PyQt4 import QtCore, QtGui
 from application.screen.lib.Screening import writeBruker, createStdDifferenceSpectrum, matchedPosition
+from application.screen.modules.ShowScreeningHits import ShowScreeningHits
 
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.Base import Base
@@ -281,7 +282,6 @@ class MatchPeaks(QtGui.QWidget):
 
 
   def showHitsModule(self):
-    from application.screening.screeningModules.ShowScreeningHits import ShowScreeningHits
     self.screeningSettingDock.close()
     showScreeningHits = ShowScreeningHits(self.project)
     self.mainWindow = self.project._appBase.mainWindow

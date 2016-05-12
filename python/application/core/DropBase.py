@@ -22,9 +22,9 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 
+from application.core.Base import Base as GuiBase
 from ccpn.lib import Util as ccpnUtil
 from ccpncore.gui.Dock import CcpnDock
-from application.core.Base import Base as GuiBase
 from ccpncore.gui.MessageDialog import showWarning
 
 
@@ -40,8 +40,7 @@ class DropBase(GuiBase):
   def dropEvent(self, event):
     """Catch dropEvent and dispatch to processing"""
 
-
-    from application.core.util import Qt as qtUtil
+    from application.core.lib import Qt as qtUtil
 
     data, dataType = qtUtil.interpretEvent(event)
     if data and dataType:

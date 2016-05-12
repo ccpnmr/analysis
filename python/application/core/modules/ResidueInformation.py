@@ -9,7 +9,7 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Base import Base
 
 from ccpn.lib.Assignment import CCP_CODES
-from application.core.gui.Frame import Frame
+from application.core.base.Frame import Frame
 
 
 

@@ -31,7 +31,7 @@ from ccpncore.gui.Base import Base
 from ccpn.util.Pid import Pid
 from typing import Sequence, Union
 
-from application.core.gui import ViewBox
+from application.core.base import ViewBox
 from application.core.DropBase import DropBase
 from application.metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
 

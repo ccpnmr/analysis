@@ -12,7 +12,7 @@ from ccpncore.gui.Table import ObjectTable, Column
 
 from ccpn.lib.Assignment import CCP_CODES, ATOM_NAMES
 
-# from application.core.gui.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,
+# from application.core.base.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,
 #                                                       peaksAreOnLine, intersectionOfAll,
 #                                                       sameAxisCodes,
 #                                                       getAxisCodeForPeakDimension,

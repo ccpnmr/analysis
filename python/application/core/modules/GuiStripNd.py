@@ -47,7 +47,7 @@ from ccpncore.gui.Menu import Menu
 
 import typing
 
-from application.core.gui.PlaneToolbar import PlaneToolbar
+from application.core.base.PlaneToolbar import PlaneToolbar
 from application.core.modules.GuiStrip import GuiStrip
 
 # from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView

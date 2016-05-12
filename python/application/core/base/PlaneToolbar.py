@@ -8,7 +8,7 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.Spinbox import Spinbox
 from ccpncore.gui.ToolBar import ToolBar
 
-from application.core.gui.SpinSystemLabel import SpinSystemLabel
+from application.core.base.SpinSystemLabel import SpinSystemLabel
 
 from PyQt4 import QtGui, QtCore
 

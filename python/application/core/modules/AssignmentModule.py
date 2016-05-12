@@ -19,7 +19,7 @@ from ccpncore.gui.CheckBox import CheckBox
 from ccpn.lib import CcpnSorting
 import typing
 
-from application.core.gui.assignmentModuleLogic import (nmrAtomsForPeaks,
+from application.core.base.assignmentModuleLogic import (nmrAtomsForPeaks,
                                                       peaksAreOnLine,
                                                       sameAxisCodes)
 

@@ -46,9 +46,9 @@ from ccpncore.gui.ToolBar import ToolBar
 import typing
 
 from application.core.DropBase import DropBase
-from application.core.gui.Frame import Frame as GuiFrame
-from application.core.gui.PhasingFrame import PhasingFrame
-from application.core.gui.SpectrumToolBar import SpectrumToolBar
+from application.core.base.Frame import Frame as GuiFrame
+from application.core.base.PhasingFrame import PhasingFrame
+from application.core.base.SpectrumToolBar import SpectrumToolBar
 from application.core.modules.GuiModule import GuiModule
 # from application.core.util.Svg import Svg
 

@@ -32,7 +32,7 @@ from ccpncore.gui.DoubleSpinbox import DoubleSpinbox
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
 
-from application.core.gui.PlotWidget import PlotWidget
+from application.core.base.PlotWidget import PlotWidget
 
 from ccpncore.lib.metabolomics.persistence import MetabolomicsPersistenceDict
 from ccpncore.lib.metabolomics.decomposition import PCA

@@ -35,13 +35,13 @@ from ccpncore.gui.CcpnWebView import CcpnWebView
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui.Menu import Menu, MenuBar
-from application.core.gui.SideBar import SideBar
+from application.core.base.SideBar import SideBar
 from ccpn.util import Io as ioUtil
 from ccpn.util import Path
 from ccpn.util.Common import uniquify
 from ccpn.util.Translation import translator
-from application.core.gui.Assigner import Assigner
-from application.core.gui.IpythonConsole import IpythonConsole
+from application.core.base.Assigner import Assigner
+from application.core.base.IpythonConsole import IpythonConsole
 from application.metabolomics.Metabolomics import MetabolomicsModule
 from application.core.modules.AssignmentModule import AssignmentModule
 from application.core.modules.AtomSelector import AtomSelector

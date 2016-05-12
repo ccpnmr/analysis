@@ -48,7 +48,7 @@ import typing
 
 from ccpn.util import Path
 
-from application.core.gui.assignmentModuleLogic import peaksAreOnLine
+from application.core.base.assignmentModuleLogic import peaksAreOnLine
 
 class AtomSelector(CcpnDock):
   """

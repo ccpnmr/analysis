@@ -26,7 +26,7 @@ __version__ = "$Revision$"
 import re
 from ccpncore.lib.chemComp import ChemCompOverview
 from ccpncore.lib.chemComp import ObsoleteChemComps
-from ccpncore.util import Logging
+from ccpn.util import Logging
 
 
 ###from ccp.util.LabeledMolecule import getIsotopomerSingleAtomFractions, getIsotopomerAtomPairFractions
@@ -638,7 +638,7 @@ def fetchStdResNameMap(project:'MemopsRoot', reset:bool=False, debug:bool=False)
 
 
 if __name__ == '__main__':
-  from ccpncore.util import Io as ioUtil
+  from ccpn.util import Io as ioUtil
   project = ioUtil.newProject('ChemCompNameTest')
   # printCcpCodeStats(project)
   dd = fetchStdResNameMap(project, reset=True, debug=True)

@@ -25,7 +25,7 @@ import os
 import itertools
 
 from typing import Sequence
-from ccpncore.util import Path
+from ccpn.util import Path
 from ccpncore.lib import Constants
 from ccpncore.lib.spectrum.BlockData import determineBlockSizes
 from ccpncore.memops.ApiError import ApiError

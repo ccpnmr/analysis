@@ -30,8 +30,8 @@ from PyQt4 import QtCore, QtGui
 
 import pyqtgraph as pg
 
-from ccpncore.util import Colour
-from ccpncore.util import Phasing
+from ccpn.util import Colour
+from ccpn.util import Phasing
 
 from ccpnc.contour import Contourer2d
 

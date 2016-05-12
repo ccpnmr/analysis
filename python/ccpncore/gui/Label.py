@@ -25,7 +25,7 @@ from PyQt4 import QtGui, QtCore
 Qt = QtCore.Qt
 
 from ccpncore.gui.Base import Base
-from ccpncore.util.Translation import translator
+from ccpn.util.Translation import translator
 
 class Label(QtGui.QLabel, Base):
 

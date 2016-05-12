@@ -27,7 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Spectrum
 from ccpn import PseudoDimension
 from ccpncore.api.ccp.nmr.Nmr import SpectrumHit as ApiSpectrumHit
-from ccpncore.util import Pid
+from ccpn.util import Pid
 
 
 class SpectrumHit(AbstractWrapperObject):

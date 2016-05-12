@@ -5,7 +5,7 @@ import numpy as np
 from pyqtgraph.Point import Point
 from pyqtgraph import functions as fn
 
-# from ccpncore.util.Colour import hexToRgb
+# from ccpn.util.Colour import hexToRgb
 
 __all__ = ['CcpnGridItem']
 

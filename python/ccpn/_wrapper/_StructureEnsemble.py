@@ -4,7 +4,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpn._wrapper._Atom import Atom
 
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
@@ -24,16 +23,18 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import numpy
 from typing import Tuple, Sequence, Optional
-from ccpncore.util import Pid
-from ccpncore.util import Common as commonUtil
-from ccpncore.lib.spectrum import Spectrum as spectrumLib
+
+import numpy
+from ccpn.util import Pid
+
 from ccpn import AbstractWrapperObject
-from ccpn import Project
 from ccpn import Chain
-from ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
+from ccpn import Project
+from ccpn.util import Common as commonUtil
 from ccpncore.api.ccp.molecule.MolStructure import Atom as ApiCoordAtom
+from ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
+from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 NaN = float('NaN')
 

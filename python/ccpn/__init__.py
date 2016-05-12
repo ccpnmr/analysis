@@ -62,13 +62,13 @@ and inherit the following elements:
 
 The Project (root) containing the object.
 
-**pid** - *ccpncore.util.Pid.Pid*
+**pid** - *ccpn.util.Pid.Pid*
 
 Identifier for the object, unique within the project.
 Set automatically from the short class name and object.id
 E.g. 'NA:A.102.ALA.CA'
 
-**longPid** - *ccpncore.util.Pid.Pid*
+**longPid** - *ccpn.util.Pid.Pid*
 
 Identifier for the object, unique within the project.
 Set automatically from the full class name and object.id
@@ -171,7 +171,7 @@ ccpn.newProject
 
 import importlib
 
-from ccpncore.util import ApiFunc
+from ccpn.util import ApiFunc
 
 # Import classes and set to this module
 # All classes must be imported in correct order for subsequent code

@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from PyQt4 import QtGui, QtCore
 
-from ccpncore.util.Translation import Translation
+from ccpn.util.Translation import Translation
 
 from pyqtgraph.dockarea import Dock
 

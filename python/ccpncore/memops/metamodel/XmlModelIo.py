@@ -45,7 +45,7 @@ from ccpncore.memops.metamodel.ModelPortal import ModelPortal
 from ccpncore.memops.metamodel import ModelTraverse_py_2_1
 from ccpncore.memops.metamodel import Util as metaUtil
 
-#from ccpncore.util import Path
+#from ccpn.util import Path
 
 from ccpnmodel.util import Path as modelPath
 

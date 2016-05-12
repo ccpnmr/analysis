@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 import os
-from ccpncore.util import Path
+from ccpn.util import Path
 from ccpncore.memops import Version
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel import XmlModelIo
@@ -126,7 +126,7 @@ def makeCompatibility(fromModel, toModel, modelPortal=None,
   """
 
   try:
-    from ccpncore.util.Logging import getLogger
+    from ccpn.util.Logging import getLogger
     loggerfunc = getLogger().warning
   except:
     loggerfunc = print

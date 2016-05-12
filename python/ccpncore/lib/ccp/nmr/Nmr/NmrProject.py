@@ -23,14 +23,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 import os
 
-from ccpncore.util import Common as commonUtil
+from ccpn.util import Common as commonUtil
 from typing import Sequence
 from ccpncore.lib import Constants
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 from ccpncore.lib.spectrum.formats import Azara, Bruker, Felix, NmrPipe, NmrView, Ucsf, Varian, Xeasy
 from ccpncore.lib.Io.Formats import AZARA, BRUKER, FELIX, NMRPIPE, NMRVIEW, UCSF, VARIAN, XEASY
-from ccpncore.util.Path import checkFilePath
-# from ccpncore.util import Io as ioUtil
+from ccpn.util.Path import checkFilePath
+# from ccpn.util import Io as ioUtil
 
 # from ccpncore.api.memops.Implementation import Url
 # from ccpncore.lib.spectrum.Spectrum import createBlockedMatrix

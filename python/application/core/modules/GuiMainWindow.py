@@ -36,10 +36,10 @@ from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui.Menu import Menu, MenuBar
 from application.core.gui.SideBar import SideBar
-from ccpncore.util import Io as ioUtil
-from ccpncore.util import Path
-from ccpncore.util.Common import uniquify
-from ccpncore.util.Translation import translator
+from ccpn.util import Io as ioUtil
+from ccpn.util import Path
+from ccpn.util.Common import uniquify
+from ccpn.util.Translation import translator
 from application.core.gui.Assigner import Assigner
 from application.core.gui.IpythonConsole import IpythonConsole
 from application.metabolomics.Metabolomics import MetabolomicsModule

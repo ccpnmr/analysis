@@ -91,9 +91,9 @@ import importlib
 from ccpncore.memops import Version
 from ccpncore.memops.scripts import makePython
 from ccpncore.memops.scripts.xmlio import CompatibilityGen
-from ccpncore.util.recursive_import_test import importAllPyfiles
+from ccpn.util.recursive_import_test import importAllPyfiles
 
-from ccpncore.util import Path
+from ccpn.util import Path
 from ccpnmodel.util import Path as modelPath
 
 # Ignore for test import:

@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util.Undo import Undo
+from ccpn.util.Undo import Undo
 from ccpn.testing.WrapperTesting import WrapperTesting
 
 
@@ -58,7 +58,7 @@ class ComplexUndoTest(WrapperTesting):
 
 
   def test_copy_chain_undo(self):
-    from ccpncore.util import CopyData
+    from ccpn.util import CopyData
     project = self.project._wrappedData.root
     project._undo = Undo()
     project._undo.newWaypoint()
@@ -69,7 +69,7 @@ class ComplexUndoTest(WrapperTesting):
     project.checkAllValid()
 
   def test_copy_chain_undo_redo(self):
-    from ccpncore.util import CopyData
+    from ccpn.util import CopyData
     project = self.project._wrappedData.root
     project._undo = Undo()
     project._undo.newWaypoint()

@@ -31,10 +31,10 @@ import os
 import re
 from urllib.request import urlopen
 
-from ccpncore.util import Logging
-from ccpncore.util import Io as utilIo
-from ccpncore.util import Common as commonUtil
-from ccpncore.util import Path as corePath
+from ccpn.util import Logging
+from ccpn.util import Io as utilIo
+from ccpn.util import Common as commonUtil
+from ccpn.util import Path as corePath
 # from ccpncore.memops.ApiError import ApiError
 # from ccpncore.api.memops import Implementation
 from ccpncore.memops.format.xml import XmlIO

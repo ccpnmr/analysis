@@ -25,7 +25,7 @@ import numpy
 from ccpn.testing.WrapperTesting import WrapperTesting
 import ccpn
 
-from ccpncore.util import Path
+from ccpn.util import Path
 
 
 

@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from ccpncore.lib import Constants as coreConstants
 from ccpn import AbstractWrapperObject
 from ccpn import Project

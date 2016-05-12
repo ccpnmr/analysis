@@ -27,7 +27,7 @@ from ccpn import Project
 from ccpn import Atom
 from ccpn import NmrAtom
 from ccpn import Sample
-from ccpncore.util.Pid import Pid
+from ccpn.util.Pid import Pid
 from typing import Sequence
 
 

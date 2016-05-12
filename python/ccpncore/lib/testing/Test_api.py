@@ -25,8 +25,8 @@ __version__ = "$Revision$"
 
 from ccpncore.testing.CoreTesting import CoreTesting
 import os
-from ccpncore.util import Path
-from ccpncore.util import Io
+from ccpn.util import Path
+from ccpn.util import Io
 TEST_PROJECTS_PATH = os.path.join(Path.getTopDirectory(), 'data/testProjects')
 from ccpncore.memops.ApiError import ApiError
 

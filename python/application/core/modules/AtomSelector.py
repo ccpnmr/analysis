@@ -46,7 +46,7 @@ from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 import typing
 
-from ccpncore.util import Path
+from ccpn.util import Path
 
 from application.core.gui.assignmentModuleLogic import peaksAreOnLine
 

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpncore.util.Path import joinPath
+from ccpn.util.Path import joinPath
 
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from collections import namedtuple
-from ccpncore.util import Pid
+from ccpn.util import Pid
 
 def pid2PluralName(pid:str) -> str:
   """Get plural class name, (e.g. 'Peaks', 'Spectra' from short-form or long-form, Pid string

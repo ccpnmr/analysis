@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 import os
 import time
 from ccpn.lib.nef import GenericStarParser, StarIo
-from ccpncore.util import Path
+from ccpn.util import Path
 
 TEST_FILE_PATH = os.path.join(Path.getTopDirectory(), 'internalData/starExamples')
 

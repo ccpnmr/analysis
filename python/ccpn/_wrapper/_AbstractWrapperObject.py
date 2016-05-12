@@ -28,8 +28,8 @@ import typing
 import operator
 from collections import OrderedDict
 
-from ccpncore.util import Pid
-from ccpncore.util import Common as commonUtil
+from ccpn.util import Pid
+from ccpn.util import Common as commonUtil
 from ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.lib import CcpnSorting
 

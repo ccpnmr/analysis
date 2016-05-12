@@ -25,7 +25,7 @@ __version__ = "$Revision: 7686 $"
 
 __author__ = 'rhf22'
 
-from ccpncore.util import Path as corePath
+from ccpn.util import Path as corePath
 import subprocess
 import os
 import shutil

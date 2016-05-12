@@ -23,8 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Optional
-from ccpncore.util import Common as commonUtil
-from ccpncore.util import Pid
+from ccpn.util import Common as commonUtil
+from ccpn.util import Pid
 from ccpncore.api.ccp.nmr.NmrConstraint import Data as ApiData
 from ccpncore.api.ccp.nmr.NmrConstraint import Parameter as ApiParameter
 from ccpn import AbstractWrapperObject
@@ -108,7 +108,7 @@ class Data(AbstractWrapperObject):
     NB the value is a copy - modifying it will not modify the actual data.
 
     Values can be anything that can be exported to JSON,
-    including OrderedDict, numpy.ndarray, ccpncore.util.Tensor,
+    including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
     or pandas DataFrame, Series, or Panel"""
     return dict((x.name, x.value) for x in self._wrappedData.parameters)
 

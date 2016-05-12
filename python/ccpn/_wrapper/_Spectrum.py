@@ -31,7 +31,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpncore.api.ccp.nmr import Nmr
 from ccpncore.api.ccp.general import DataLocation
-from ccpncore.util import Pid
+from ccpn.util import Pid
 
 # MagnetisationTransferTuple
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',

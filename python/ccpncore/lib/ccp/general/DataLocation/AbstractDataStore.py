@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 __author__ = 'rhf22'
 
 import os
-from ccpncore.util import Path
+from ccpn.util import Path
 from ccpncore.api.memops import Implementation
 
 def changeDataStoreUrl(self:'AbstractDataStore', newPath:str):

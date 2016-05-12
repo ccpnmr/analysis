@@ -22,7 +22,7 @@ __version__ = "$Revision: 7686 $"
 # Start of code
 #=========================================================================================
 import os
-from ccpncore.util import Path
+from ccpn.util import Path
 
 def isProjectModified(self:'MemopsRoot') -> bool:
   """

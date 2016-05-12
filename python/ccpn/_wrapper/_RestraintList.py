@@ -23,10 +23,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
-# from ccpncore.util import Common as commonUtil
+# from ccpn.util import Common as commonUtil
 from ccpncore.lib import Constants as coreConstants
-from ccpncore.util.Tensor import Tensor
-from ccpncore.util import Pid
+from ccpn.util.Tensor import Tensor
+from ccpn.util import Pid
 from ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpn import AbstractWrapperObject
 from ccpn import Project

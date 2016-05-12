@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util import Pid
+from ccpn.util import Pid
 
 
 def dihedralName(project, restraintItem:tuple) -> str:

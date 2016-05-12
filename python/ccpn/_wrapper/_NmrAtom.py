@@ -32,7 +32,7 @@ from ccpn import Peak
 from ccpncore.lib import Constants
 from ccpncore.api.ccp.nmr import Nmr
 from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from typing import Union, Tuple, List
 
 

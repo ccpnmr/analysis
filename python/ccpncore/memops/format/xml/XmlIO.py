@@ -129,7 +129,7 @@ import os
 import gc
 
 from ccpncore.memops.ApiError import ApiError
-from ccpncore.util import ApiPath
+from ccpn.util import ApiPath
 
 implPrefix = 'IMPL'
 originatorString = "CCPN Python XmlIO"

@@ -80,7 +80,7 @@ import os
 import sys
 import re
 
-from ccpncore.util import Path
+from ccpn.util import Path
 
 from ccpncore.memops.license.data import licenses, references, formats, stdContacts
 from ccpncore.memops.metamodel.MetaModel import MemopsError

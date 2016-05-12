@@ -41,7 +41,7 @@ from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.Spinbox import Spinbox
 
 
-from ccpncore.util.Colour import spectrumColours
+from ccpn.util.Colour import spectrumColours
 
 from functools import partial
 

@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 import numpy
 
-from ccpncore.util import Undo
+from ccpn.util import Undo
 from ccpncore.api.ccp.nmr.Nmr import PeakList
 
 from typing import Sequence

@@ -1016,7 +1016,7 @@ class ApiGen(ApiInterface, PermissionInterface, PersistenceInterface,
     self.writeComment('objects to be deleted')
     # self.newCollection(needDeclType=True, **self.stdCollectionParams['objsToBeDeleted'])
     self.writeComment("This implementation could be greatly improve, but meanwhile this should work")
-    self.write("from ccpncore.util.OrderedSet import OrderedSet")
+    self.write("from ccpn.util.OrderedSet import OrderedSet")
     self.write("objsToBeDeleted = OrderedSet()")
 
     self.writeComment('objects still to be checked for cascading delete'

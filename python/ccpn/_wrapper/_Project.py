@@ -35,9 +35,9 @@ from ccpncore.memops.ApiError import ApiError
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.spectrum import NmrExpPrototype
 from ccpncore.lib import Constants
-from ccpncore.util import Pid
-from ccpncore.util import Undo
-from ccpncore.util import Io as ioUtil
+from ccpn.util import Pid
+from ccpn.util import Undo
+from ccpn.util import Io as ioUtil
 
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to API: NmrProject"""

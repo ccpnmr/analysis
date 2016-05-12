@@ -23,8 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 import os
 
-from ccpncore.util.Path import checkFilePath
-from ccpncore.util import Common as commonUtil
+from ccpn.util.Path import checkFilePath
+from ccpn.util import Common as commonUtil
 
 # Spectrum formats
 AZARA = 'Azara'

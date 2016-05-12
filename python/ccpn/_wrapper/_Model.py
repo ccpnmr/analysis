@@ -22,14 +22,18 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import numpy
-from ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
 from typing import Sequence
-from ccpncore.util import Common as commonUtil
+
+import numpy
+
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import StructureEnsemble
-# from ccpncore.util import Pid
+from ccpn.util import Common as commonUtil
+from ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
+
+
+# from ccpn.util import Pid
 
 
 class Model(AbstractWrapperObject):

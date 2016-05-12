@@ -8,7 +8,7 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.CheckBox import CheckBox
 from ccpncore.gui.PulldownList import PulldownList
 
-from ccpncore.util.Colour import spectrumColours
+from ccpn.util.Colour import spectrumColours
 
 class PeakListPropertiesPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, peakList=None, **kw):

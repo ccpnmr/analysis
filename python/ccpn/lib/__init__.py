@@ -1,1 +1,1 @@
-from ccpncore.util.Tensor import Tensor
+from ccpn.util.Tensor import Tensor

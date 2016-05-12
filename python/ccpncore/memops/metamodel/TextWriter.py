@@ -27,7 +27,7 @@ __version__ = "$Revision: 7686 $"
 from ccpncore.memops.metamodel import MetaModel
 MemopsError = MetaModel.MemopsError
 from ccpncore.memops.metamodel import Constants as metaConstants
-from ccpncore.util import Path
+from ccpn.util import Path
 
 from ccpncore.memops.metamodel import TextWriter_py_2_1
 

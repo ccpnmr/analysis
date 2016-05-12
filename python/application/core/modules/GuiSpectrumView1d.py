@@ -29,8 +29,8 @@ import pyqtgraph as pg
 
 from application.core.modules.GuiSpectrumView import GuiSpectrumView
 
-from ccpncore.util.Colour import spectrumColours
-from ccpncore.util import Phasing
+from ccpn.util.Colour import spectrumColours
+from ccpn.util import Phasing
 
 class GuiSpectrumView1d(GuiSpectrumView):
 

@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 from ccpncore.lib.ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
-from ccpncore.util.CopyData import copySubTree
+from ccpn.util.CopyData import copySubTree
 from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 from typing import Sequence, List, Optional
 import numpy

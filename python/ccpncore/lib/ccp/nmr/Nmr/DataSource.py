@@ -569,7 +569,7 @@ def getDefaultColours(self:'DataSource') -> Tuple[str,str]:
   """Get default positivecontourcolour, negativecontourcolour for Spectrum
   (calculated by hashing spectrum properties to avoid always getting the same colours"""
 
-  from ccpncore.util.Colour import spectrumHexColours
+  from ccpn.util.Colour import spectrumHexColours
 
   # The formula gives 0 for DataSource(1,1)    (22//2 -1)//2 *2
   # and puts DataSource 2 reasonably far away from dataSource 1 within an experiment

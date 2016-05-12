@@ -80,7 +80,7 @@ software development. Bioinformatics 21, 1678-1684.
 
 import time
 
-from ccpncore.util import Path
+from ccpn.util import Path
 from ccpncore.memops import Version
 from ccpncore.memops.metamodel import MetaModel
 from ccpncore.memops.metamodel.TextWriter import TextWriter

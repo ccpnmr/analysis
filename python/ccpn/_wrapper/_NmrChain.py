@@ -27,7 +27,7 @@ from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Chain
 from ccpn import Residue
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from ccpncore.lib import Constants
 from ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 

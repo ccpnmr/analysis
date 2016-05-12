@@ -23,7 +23,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 from ccpn.testing.WrapperTesting import WrapperTesting
 
-from ccpncore.util import Path
+from ccpn.util import Path
 
 class SimpleSpectrumTest(WrapperTesting):
 

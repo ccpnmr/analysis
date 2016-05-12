@@ -21,7 +21,7 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util import Path
+from ccpn.util import Path
 
 from ccpncore.memops.metamodel import MetaModel
 MemopsError = MetaModel.MemopsError

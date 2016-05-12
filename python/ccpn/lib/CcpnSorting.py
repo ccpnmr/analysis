@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 import re
-from ccpncore.util import  Sorting
+from ccpn.util import  Sorting
 SPLITONDOTS = re.compile("([.])")
 
 _keyCache = {}

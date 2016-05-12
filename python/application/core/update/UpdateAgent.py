@@ -12,7 +12,7 @@ from urllib.request import urlopen
 
 from datetime import datetime
 
-from ccpncore.util import Path
+from ccpn.util import Path
 from ccpncore.gui import InputDialog
 from ccpncore.gui import MessageDialog
 

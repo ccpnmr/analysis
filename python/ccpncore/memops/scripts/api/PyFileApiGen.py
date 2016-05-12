@@ -481,8 +481,8 @@ ll.sort()
       self.startIf(self.varNames['notOverride'])
       
       self.write("""
-from ccpncore.util import Path
-from ccpncore.util.Common import getConfigParameter
+from ccpn.util import Path
+from ccpn.util.Common import getConfigParameter
 import os, os.path
 rootDir = Path.normalisePath(os.getcwd())
 
@@ -522,12 +522,12 @@ for (targetName,repository) in inData:
     )
 
 # initialise DatLocationStore
-from ccpncore.util.Io import _initialiseStandardDataLocationStore
+from ccpn.util.Io import _initialiseStandardDataLocationStore
 _initialiseStandardDataLocationStore(self)
 
 # Add logger attribute
 try:
-  from ccpncore.util.Logging import getLogger
+  from ccpn.util.Logging import getLogger
   self._logger = getLogger()
 except ImportError:
   self._logger = None

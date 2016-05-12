@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 
-from ccpncore.util import Graph
+from ccpn.util import Graph
 import collections
 
 def magnetisationTransferDict(self) -> dict:

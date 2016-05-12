@@ -79,7 +79,8 @@ software development. Bioinformatics 21, 1678-1684.
 
 __author__ = 'rhf22'
 
-from ccpncore.util import Common as commonUtil
+from ccpn.util import Common as commonUtil
+
 
 # Operations that change the data contents will execute registered notifies.
 # These operations are delete, __init__, set, remove, and add.

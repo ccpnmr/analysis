@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Sequence, Tuple
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Restraint

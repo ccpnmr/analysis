@@ -76,7 +76,7 @@ software development. Bioinformatics 21, 1678-1684.
 ===========================REFERENCE END===============================
 """
 
-from ccpncore.util import jsonIo
+from ccpn.util import jsonIo
 
 # corresponding python type
 PythonType = object

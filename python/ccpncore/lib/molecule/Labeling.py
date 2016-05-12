@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util import Common as commonUtil
+from ccpn.util import Common as commonUtil
 from typing import Sequence
 
 # Default labeling - must be treated as 'not labeled'

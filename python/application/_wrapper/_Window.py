@@ -28,7 +28,7 @@ from ccpn import Project
 from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from application.core.modules.GuiWindow import GuiWindow
 from application.core.modules.GuiMainWindow import GuiMainWindow
-from ccpncore.util import Pid
+from ccpn.util import Pid
 
 class Window(AbstractWrapperObject):
   """GUI window, corresponds to OS window"""

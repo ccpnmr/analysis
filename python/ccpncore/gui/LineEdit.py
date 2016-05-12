@@ -25,7 +25,7 @@ __author__ = 'simon'
 from PyQt4 import QtGui, QtCore
 
 from ccpncore.gui.Base import Base
-from ccpncore.util.Translation import translator
+from ccpn.util.Translation import translator
 
 class LineEdit(QtGui.QLineEdit, Base):
 

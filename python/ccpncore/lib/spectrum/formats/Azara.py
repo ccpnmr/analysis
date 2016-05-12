@@ -24,7 +24,8 @@ __version__ = "$Revision: 7686 $"
 import os, sys
 
 from ccpncore.lib.spectrum.Spectrum import checkIsotope
-from ccpncore.util import Common as commonUtil
+from ccpn.util import Common as commonUtil
+
 # from memops.qtgui.MessageDialog import showError
 
 FILE_TYPE = 'Azara'

@@ -25,7 +25,7 @@ from PyQt4 import QtCore, QtGui
 
 import collections
 
-from ccpncore.util import Colour
+from ccpn.util import Colour
 from application.core.Base import Base as GuiBase
 
 import pyqtgraph as pg

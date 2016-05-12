@@ -10,7 +10,7 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui.MessageDialog import showError
 ###from ccpncore.gui.WebView import WebViewPanel
 
-from ccpncore.util import Register
+from ccpn.util import Register
 
 licenseUrl = 'http://www.ccpn.ac.uk/license'
 

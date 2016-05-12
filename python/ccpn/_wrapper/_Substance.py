@@ -31,7 +31,7 @@ from ccpncore.lib.molecule import MoleculeModify
 from ccpn import SampleComponent
 from ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
 from ccpncore.api.ccp.nmr import Nmr
-from ccpncore.util import Pid
+from ccpn.util import Pid
 
 
 _apiClassNameMap = {

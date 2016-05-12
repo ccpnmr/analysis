@@ -6,7 +6,7 @@ from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Label import Label
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
-from ccpncore.util.Colour import spectrumHexColours
+from ccpn.util.Colour import spectrumHexColours
 import pyqtgraph as pg
 
 class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the drop events are not processed

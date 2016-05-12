@@ -22,14 +22,16 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util import Pid
-from ccpncore.util import Common as commonUtil
+from typing import Tuple
+
+from ccpn.util import Pid
+
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum
+from ccpn.util import Common as commonUtil
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as ApiSpectrumGroup
-from typing import Tuple
 
 
 class SpectrumGroup(AbstractWrapperObject):

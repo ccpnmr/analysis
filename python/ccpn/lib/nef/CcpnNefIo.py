@@ -42,7 +42,7 @@ import random
 from operator import attrgetter
 from typing import List, Union, Optional, Sequence
 from collections import OrderedDict as OD
-from ccpncore.util import Common as commonUtil
+from ccpn.util import Common as commonUtil
 from ccpn.lib.nef import StarIo
 from ccpn.lib import Version
 from ccpn.lib.nef import Specification

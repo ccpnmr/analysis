@@ -28,7 +28,7 @@ from PyQt4 import QtCore
 from ccpn import Spectrum
 from ccpn import SpectrumGroup
 
-from ccpncore.util.Pid import Pid
+from ccpn.util.Pid import Pid
 from typing import Sequence
 from ccpncore.gui.Dock import CcpnDockLabel, CcpnDock
 from ccpncore.gui.Label import Label

@@ -26,7 +26,7 @@ from PyQt4 import QtCore, QtGui
 
 import operator
 from typing import Tuple
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Spectrum

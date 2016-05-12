@@ -28,9 +28,9 @@ import os
 import unittest
 import contextlib
 
-from ccpncore.util import Path
-from ccpncore.util import Io
-from ccpncore.util import Undo
+from ccpn.util import Path
+from ccpn.util import Io
+from ccpn.util import Undo
 
 TEST_PROJECTS_PATH = os.path.join(Path.getTopDirectory(), 'internalData/testProjects')
 

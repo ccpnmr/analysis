@@ -29,7 +29,7 @@ from ccpn import SpectrumHit
 from ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
 from ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpncore.api.ccp.nmr import Nmr
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from typing import Tuple
 
 

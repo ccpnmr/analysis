@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from typing import Tuple, Optional
 from ccpn.lib import CcpnSorting
 from ccpncore.lib import Constants

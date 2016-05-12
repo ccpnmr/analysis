@@ -66,7 +66,7 @@ class PyApiGen(PyLanguage, PyType, ApiGen):
     self.indent -= self.INDENT
 
     self.write("""
-from ccpncore.util.ApiFunc import _addModuleFunctionsToApiClass
+from ccpn.util.ApiFunc import _addModuleFunctionsToApiClass
 _addModuleFunctionsToApiClass('%s', %s)
 """ % (clazz.qualifiedName(), clazz.name))
   
@@ -757,7 +757,7 @@ containsNonAlphanumeric = re.compile('[^a-zA-Z0-9_]').search
 # Global NaN constant
 NaN = float('NaN')
 
-from ccpncore.util.Undo import deleteAllApiObjects, restoreOriginalLinks, no_op
+from ccpn.util.Undo import deleteAllApiObjects, restoreOriginalLinks, no_op
  
 from ccpncore.%s.ApiError import ApiError
 """ % metaConstants.modellingPackageName)

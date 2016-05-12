@@ -25,7 +25,7 @@ import sys
 import os
 import collections
 
-from ccpncore.util.Bmrb import bmrb
+from ccpn.util.Bmrb import bmrb
 from ccpn.lib import CcpnSorting
 
 

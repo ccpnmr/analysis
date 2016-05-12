@@ -34,7 +34,7 @@ from ccpncore.gui.FileDialog import FileDialog
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.PulldownList import PulldownList
 from ccpncore.gui.CheckBox import CheckBox
-from ccpncore.util.Translation import languages
+from ccpn.util.Translation import languages
 
 COLOUR_SCHEMES = ['light', 'dark']
 

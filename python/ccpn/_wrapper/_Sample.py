@@ -22,17 +22,18 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from datetime import datetime
+from typing import Sequence, Tuple, Optional
+
+from ccpn.util import Pid
 
 from ccpn import AbstractWrapperObject
 from ccpn import Project
+from ccpn import PseudoDimension
 from ccpn import Spectrum
 from ccpn import SpectrumHit
-from ccpn import PseudoDimension
+from ccpn.util import Common as commonUtil
 from ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpncore.api.ccp.nmr import Nmr
-from ccpncore.util import Common as commonUtil
-from ccpncore.util import Pid
-from typing import Sequence, Tuple, Optional
 
 
 class Sample(AbstractWrapperObject):

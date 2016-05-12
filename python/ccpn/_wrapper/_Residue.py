@@ -21,11 +21,11 @@ __version__ = "$Revision: 7686 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpncore.util import Pid
-from ccpncore.util import Common as commonUtil
 from typing import Optional
+
+from ccpn.util import Pid
+
 from ccpn import AbstractWrapperObject
-from ccpn import Project
 from ccpn import Chain
 from ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 

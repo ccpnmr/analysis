@@ -30,7 +30,7 @@ from ccpn import Project
 
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 
-# from ccpncore.util.Pid import Pid
+# from ccpn.util.Pid import Pid
 from typing import Sequence
 
 from ccpncore.gui.Icon import Icon

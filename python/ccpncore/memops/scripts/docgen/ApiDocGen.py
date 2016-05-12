@@ -85,7 +85,7 @@ from ccpncore.memops.metamodel import OpTypes
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.memops.metamodel import Constants as metaConstants
 from ccpncore.memops.license import data as licenseData
-from ccpncore.util import Path as Path
+from ccpn.util import Path as Path
 from ccpncore.memops.license import headers
 from ccpncore.memops.metamodel import TextWriter
 from ccpncore.memops.scripts.docgen.Documentation import Documentation

@@ -40,8 +40,8 @@ from ccpncore.gui.Widget import Widget
 
 # from ccpncore.memops import Notifiers
 
-from ccpncore.util.Colour import Colour
-from ccpncore.util import Ticks
+from ccpn.util.Colour import Colour
+from ccpn.util import Ticks
 import typing
 
 # from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource

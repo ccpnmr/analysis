@@ -25,9 +25,9 @@ __version__ = "$Revision$"
 import os
 import sys
 import collections
-# from ccpncore.util import Common as commonUtil
+# from ccpn.util import Common as commonUtil
 from ccpn.lib.nef import Export
-from ccpncore.util.Bmrb import bmrb
+from ccpn.util.Bmrb import bmrb
 
 def bmrbEntry2Data1(entry:bmrb.entry)-> dict:
   """Convert Bmrb entry to nested OrderedDict data structure:
@@ -278,7 +278,7 @@ if __name__ == '__main__':
 
   if len(sys.argv) >= 2:
 
-    from ccpncore.util import Io as coreIo
+    from ccpn.util import Io as coreIo
     from ccpn import Project
 
     # set up input

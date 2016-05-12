@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from typing import Sequence, Tuple
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import NmrAtom

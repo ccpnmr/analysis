@@ -3,7 +3,6 @@ Qt = QtCore.Qt
 
 import os
 import random
-import tarfile
 
 from ccpncore.memops.metamodel import Util as metaUtil
 
@@ -14,10 +13,10 @@ from ccpncore.gui.Label import Label
 from ccpncore.gui import MessageDialog
 from ccpncore.gui.TextEditor import TextEditor
 
-from ccpncore.util import Io
-from ccpncore.util import Logging
-from ccpncore.util import Register
-from ccpncore.util import Url
+from ccpn.util import Io
+from ccpn.util import Logging
+from ccpn.util import Register
+from ccpn.util import Url
 
 LOG_FILE_TEXT = 'Log file'
 PROJECT_DIR_TEXT = 'Project directory'

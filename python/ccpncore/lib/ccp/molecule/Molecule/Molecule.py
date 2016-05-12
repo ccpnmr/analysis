@@ -28,7 +28,7 @@ from ccpncore.lib.chemComp import Io as chemCompIo
 from ccpncore.lib.molecule import MoleculeQuery
 from ccpncore.lib.molecule.MoleculeModify import _getLinearChemCompData
 from ccpncore.memops.ApiError import ApiError
-from ccpncore.util import CopyData, Undo
+from ccpn.util import CopyData, Undo
 
 
 def clone(self:'Molecule', newName:str=None) -> "Molecule":

@@ -28,7 +28,7 @@ from ccpn import Project
 from ccpn import Spectrum
 from ccpn import PeakList
 from ccpncore.api.ccp.nmr import Nmr
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from typing import Tuple, Sequence, List
 
 

@@ -30,16 +30,16 @@ import platform
 from PyQt4 import QtGui, QtCore
 
 from ccpn import Project
-from ccpncore.util import Io as ioUtil
+from ccpn.util import Io as ioUtil
 from ccpncore.gui.Application import Application
 from ccpncore.memops.metamodel import Util as metaUtil
 from ccpncore.api.memops import Implementation
 from ccpncore.gui import MessageDialog
-from ccpncore.util import Path
-from ccpncore.util.AttrDict import AttrDict
-from ccpncore.util import Register
-from ccpncore.util.Translation import languages, defaultLanguage
-from ccpncore.util.Translation import translator
+from ccpn.util import Path
+from ccpn.util.AttrDict import AttrDict
+from ccpn.util import Register
+from ccpn.util.Translation import languages, defaultLanguage
+from ccpn.util.Translation import translator
 from application.core.Base import Base as GuiBase
 from application.core.Current import Current
 from application.core.popups.RegisterPopup import RegisterPopup

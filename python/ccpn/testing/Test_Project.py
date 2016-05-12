@@ -24,7 +24,7 @@ __version__ = "$Revision: 7686 $"
 
 import os
 import shutil
-from ccpncore.util import Io as ioUtil
+from ccpn.util import Io as ioUtil
 
 from ccpn.testing.WrapperTesting import WrapperTesting
 

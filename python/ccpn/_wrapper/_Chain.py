@@ -30,7 +30,7 @@ from ccpn import SampleComponent
 from ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpncore.api.ccp.molecule import Molecule
 from ccpncore.api.ccp.lims import Sample
-from ccpncore.util import Pid
+from ccpn.util import Pid
 from typing import Tuple, Optional, Union, Sequence
 
 

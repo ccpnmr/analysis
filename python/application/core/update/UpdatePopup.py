@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui
 
-from ccpncore.util import Path
+from ccpn.util import Path
 
 from ccpncore.gui.ButtonList import ButtonList
 from ccpncore.gui.Entry import Entry

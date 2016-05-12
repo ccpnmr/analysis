@@ -28,7 +28,7 @@ from collections import OrderedDict
 import numpy
 import ccpn
 import pandas
-from ccpncore.util import Sorting
+from ccpn.util import Sorting
 from ccpn.lib import CcpnSorting
 
 

@@ -39,7 +39,7 @@ import os
 import keyword
 from . import GenericStarParser
 from typing import Union, Sequence, Optional
-from ccpncore.util import Common as commonUtil
+from ccpn.util import Common as commonUtil
 
 
 def parseNmrStar(text:str, mode='standard'):

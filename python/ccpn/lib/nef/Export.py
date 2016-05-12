@@ -31,10 +31,10 @@ from typing import Sequence
 from ccpn.lib import Restraint as restraintLib
 from ccpn.lib import CcpnSorting
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
-from ccpncore.util.Bmrb import bmrb
+from ccpn.util.Bmrb import bmrb
 from ccpncore.memops import Version
-from ccpncore.util import Pid
-from ccpncore.util import Path
+from ccpn.util import Pid
+from ccpn.util import Path
 
 
 nefExtension = 'nef'
@@ -738,7 +738,7 @@ if __name__ == '__main__':
 
     from ccpn.lib import Io as ccpnIo
 
-    # from ccpncore.util.Io import loadProject
+    # from ccpn.util.Io import loadProject
     # from ccpn import Project
     #
     # # set up input

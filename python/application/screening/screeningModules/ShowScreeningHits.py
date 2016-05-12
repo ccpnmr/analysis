@@ -6,7 +6,7 @@ from PyQt4 import QtCore, QtGui
 from ccpncore.gui.Base import Base
 from ccpncore.gui.GroupBox import GroupBox
 from ccpncore.gui.ListWidget import ListWidget
-from ccpncore.gui.ScrollArea import ScrollArea
+
 from ccpncore.gui.Dock import CcpnDock
 from ccpncore.gui.Table import ObjectTable, Column, ObjectTableItemDelegate
 

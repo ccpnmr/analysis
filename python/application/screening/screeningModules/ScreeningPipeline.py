@@ -5,6 +5,7 @@ import decimal
 from functools import partial
 from PyQt4 import QtCore, QtGui
 from application.screening.screeningLib.Screening import writeBruker, createStdDifferenceSpectrum, matchedPosition
+
 from ccpncore.gui.LineEdit import LineEdit
 from ccpncore.gui.Base import Base
 from ccpncore.gui.PulldownList import PulldownList
@@ -18,8 +19,57 @@ import pyqtgraph as pg
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
-solvents = {' Click to Select':None,
-            'Acetic Acid-d4': [0,0, 2.14,2.0, 11.75,11.65],
+
+class StdSpectrumCreator(QtGui.QWidget, Base):
+
+  def __init__(self, parent=None, project=None, **kw):
+    QtGui.QWidget.__init__(self, parent)
+    Base.__init__(self, **kw)
+    self.project = project
+    self.path = '/Users/luca/Desktop/ScreeningData/demoSamples/'
+
+    self.createButton = Button(self, text = 'create new spectrum', callback=self.createSpectrumDifference,
+                          grid=(0, 0), hAlign='c')
+    self.lineEditPath = LineEdit(self, text=str(self.path),  hAlign='l', grid=(0, 1), gridSpan=(0,2))
+    self.lineEditPath.setFixedWidth = 300
+
+  def createSpectrumDifference(self):
+    for sample in self.project.samples:
+      if hasattr(sample, 'minScore'):
+        pass
+      else:
+        spectrumDiff = createStdDifferenceSpectrum(sample.spectra[0], sample.spectra[1])
+        self.newFilePath = self.lineEditPath.text()+sample.name + '_Std_diff'
+        writeBruker(self.newFilePath, spectrumDiff)
+        self.loadSpectrumDifference(self.newFilePath+'/pdata/1/1r')
+
+  def loadSpectrumDifference(self, path):
+    self.newSpectrumStd = self.project.loadData(path)
+    self.newSpectrumStd[0].scale = float(0.1)
+    # self.newSpectrumStd[0].dimensionCount = 1
+    spectrumName = str(self.newSpectrumStd[0].name)
+
+    for sample in self.project.samples:
+      if hasattr(sample, 'minScore'):
+        pass
+      else:
+        if sample.name == spectrumName.replace('_Std_diff-1',''):
+          sample.spectra += (self.newSpectrumStd[0],)
+          spectrumGroupSTD = self.project.getByPid('SG:STD')
+          spectrumGroupSTD.spectra += (self.newSpectrumStd[0],)
+          print(self.newSpectrumStd[0].id, 'created and loaded in the project')
+
+
+
+class ExcludeRegions(QtGui.QWidget):
+
+  '''This create a widget group to exclude Regions from the Spectrum when automatically peak picking '''
+
+  def __init__(self, parent=None,**kw):
+    super(ExcludeRegions, self).__init__(parent)
+
+
+    self.solvents = {'Acetic Acid-d4': [0,0, 2.14,2.0, 11.75,11.65],
             'Acetone-d6 & Water': [0,0, 2.15,2.0, 2.90, 2.80],
             'Acetonitrile-d3 & water': [0,0, 2.20,1.94],
             'Benzene-d6 & water': [0,0, 0.60,0.50, 7.25,7.15],
@@ -41,61 +91,10 @@ solvents = {' Click to Select':None,
             'Carbon Tetrachloride & water ': [0,0, 1.20, 1.10],
             'water': [0,0, 5, 4.5]}
 
-
-
-class StdSpectrum(QtGui.QWidget, Base):
-
-  def __init__(self, parent=None, project=None, **kw):
-    QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
-    self.project = project
-    self.path = '/Users/luca/Desktop/ScreeningData/demoSamples/'
-
-    self.createButton = Button(self, text = 'create new spectrum', callback=self.createSpectrumDifference,
-                          grid=(0, 0), hAlign='c')
-    self.lineEditPath = LineEdit(self, text=str(self.path),  hAlign='l', grid=(0, 1), gridSpan=(0,2))
-    self.lineEditPath.setFixedWidth = 300
-
-  def createSpectrumDifference(self):
-
-    for sample in self.project.samples:
-      if hasattr(sample, 'minScore'):
-        pass
-      else:
-        spectrumDiff = createStdDifferenceSpectrum(sample.spectra[0], sample.spectra[1])
-        self.newFilePath = self.lineEditPath.text()+sample.name + '_Std_diff'
-        writeBruker(self.newFilePath, spectrumDiff)
-        self.loadNewSpectrum(self.newFilePath+'/pdata/1/1r')
-
-
-  def loadNewSpectrum(self, path):
-    self.newSpectrumStd = self.project.loadData(path)
-    self.newSpectrumStd[0].scale = float(0.1)
-    # self.newSpectrumStd[0].dimensionCount = 1
-    spectrumName = str(self.newSpectrumStd[0].name)
-
-    for sample in self.project.samples:
-      if hasattr(sample, 'minScore'):
-        pass
-      else:
-        if sample.name == spectrumName.replace('_Std_diff-1',''):
-          sample.spectra += (self.newSpectrumStd[0],)
-          spectrumGroupSTD = self.project.getByPid('SG:STD')
-          spectrumGroupSTD.spectra += (self.newSpectrumStd[0],)
-
-
-
-class ExcludeRegions(QtGui.QWidget):
-  '''This create the second tab to exclude Regions from Spectrum when peak picking '''
-
-  def __init__(self, parent=None,**kw):
-    super(ExcludeRegions, self).__init__(parent)
-
-
     self.pulldownSolvents = PulldownList(self, grid=(0, 1), hAlign='c')
-    # self.pulldownSolvents.setFixedWidth(105)
+    self.pulldownSolvents.setFixedWidth(105)
     self.pulldownSolvents.activated[str].connect(self.addRegions)
-    for solvent in sorted(solvents):
+    for solvent in sorted(self.solvents):
       self.pulldownSolvents.addItem(solvent)
     self.SolventsLabel = Label(self, "Select Regions or \nsolvents to exclude", grid=(0, 0), hAlign='c')
     self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2,2))
@@ -106,14 +105,15 @@ class ExcludeRegions(QtGui.QWidget):
     self.excludedRegions = []
     self.comboBoxes = []
 
-  def addRegions(self, pressed):
 
+  def addRegions(self, pressed):
+    '''   '''
     widgetList = []
-    for solvent in sorted(solvents):
+    for solvent in sorted(self.solvents):
       if pressed == ('%s' %solvent):
         self.solventType = Label(self.scrollAreaWidgetContents, text=solvent, grid=(self.regioncount,0))
         self.closebutton = Button(self.scrollAreaWidgetContents,'Remove from selection', grid=(self.regioncount,1))
-        values = (solvents[solvent])
+        values = (self.solvents[solvent])
         self.selectedSolventValue = sorted(values)
         self.new_list = [values[i:i+2] for i in range(0, len(values), 2)]
         del self.new_list[0:1]  #delete [0,0] used only to set the layout
@@ -136,15 +136,41 @@ class ExcludeRegions(QtGui.QWidget):
     self.comboBoxes.append(widgetList)
     self.closebutton.clicked.connect(partial(self.deleteRegions, self.positions))
 
+
   def deleteRegions(self, positions):
-
+    '''   '''
     for position in positions:
-
       widget1 = self.scrollAreaWidgetContents.layout().itemAtPosition(*position).widget()
       if widget1 is self.solventType:
         widget1.hide()
       else:
         widget1.deleteLater()
+
+  def getExcludedRegions(self): # How to do better!?
+    '''   '''
+    excludedRegions = []
+
+    for comboboxPair in self.comboBoxes:
+      try:
+        if comboboxPair[0].value() is not None:
+          firstPair = (sorted([comboboxPair[0].value(), comboboxPair[1].value()],reverse=True))
+          excludedRegions.append(firstPair)
+        if comboboxPair[2].value() is not None:
+          secondPair = (sorted([comboboxPair[2].value(), comboboxPair[3].value()],reverse=True))
+          excludedRegions.append(secondPair)
+        if comboboxPair[4].value() is not None:
+          thirdPair = (sorted([comboboxPair[4].value(), comboboxPair[5].value()],reverse=True))
+          excludedRegions.append(thirdPair)
+        if comboboxPair[6].value() is not None:
+          fourthPair = (sorted([comboboxPair[6].value(), comboboxPair[7].value()],reverse=True))
+          excludedRegions.append(fourthPair)
+      except:
+        pass
+      for i in excludedRegions:
+          if len(i) == 0:
+            excludedRegions.remove(i)
+    return excludedRegions
+
 
 class PickPeaksWidget(QtGui.QWidget):
   ''''''
@@ -214,8 +240,6 @@ class MatchPeaks(QtGui.QWidget):
 
 
 
-
-
   def matchPosition(self):
     # print(self.sender().parent().parent().parent().parent().parent().parent().parent())
     for sample in self.project.samples:
@@ -224,17 +248,17 @@ class MatchPeaks(QtGui.QWidget):
       else:
         componentList = []
 
-        spectrumOffResonancePeaks = [peakList for peakList in sample.spectra[0].peakLists[0].peaks]
+        spectrumOffResonancePeaks = [peak for peak in sample.spectra[0].peakLists[0].peaks]
         spectrumOffPeaksPosition =[peak.position[0] for peak in spectrumOffResonancePeaks]
 
-        spectrumOnResonancePeaks = [peakList for peakList in sample.spectra[1].peakLists[0].peaks]
+        spectrumOnResonancePeaks = [peak for peak in sample.spectra[1].peakLists[0].peaks]
         spectrumOffPeaksPosition =[peak.position[0] for peak in spectrumOnResonancePeaks]
 
-        stdPeakList =  [peakList for peakList in sample.spectra[2].peakLists[0].peaks]
+        stdPeakList =  [peak for peak in sample.spectra[2].peakLists[0].peaks]
         stdPosition =[peak.position[0] for peak in stdPeakList]
 
         for sampleComponent in sample.sampleComponents:
-          componentPeakList = [peakList for peakList in sampleComponent.substance.referenceSpectra[0].peakLists[0].peaks]
+          componentPeakList = [peak for peak in sampleComponent.substance.referenceSpectra[0].peakLists[0].peaks]
           componentPosition = [peak.position[0] for peak in componentPeakList]
           componentDict = {sampleComponent:componentPosition}
           componentList.append(componentDict)
@@ -246,7 +270,6 @@ class MatchPeaks(QtGui.QWidget):
             if match is not None:
               newHit = sample.spectra[0].newSpectrumHit(substanceName=str(sampleComponent.name))
               for position in match:
-
 
                 newPeakListPosition = sampleComponent.substance.referenceSpectra[0].peakLists[1].newPeak(position=[position], height=0.00)
 

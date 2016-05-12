@@ -111,7 +111,7 @@ class PipelineWidgets(QtGui.QWidget):
       ('< Select Method >', None),
       ('Recent Settings', None),
       ('Select Experiment Type', None),
-      ('Create std difference spectrum', sp.StdSpectrum(self, self.project)),
+      ('Create std difference spectrum', sp.StdSpectrumCreator(self, self.project)),
       ('Noise Threshold', sp.ExcludeBaselinePoints(self, self.project)),
       ('Exclude Regions', sp.ExcludeRegions(self)),
       ('Peak Picking',sp.PickPeaksWidget(self, self.project)),

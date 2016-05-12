@@ -104,7 +104,7 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
     self.parent = parent
     self.nmrResidue = nmrResidue
 
-  def update(self):
+  def _update(self):
     self.setPlainText(self.nmrResidue.id)
 
 

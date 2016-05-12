@@ -867,7 +867,7 @@ def _refreshPeakAnnotation(peak:Peak):
 
 Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
-def _updateAssignmentsNmrAtom(nmrAtom, oldPid):
+def _updateAssignmentsNmrAtom(nmrAtom, oldPid:str):
   """Update Peak assignments when NmrAtom is reassigned"""
   for peak in nmrAtom.assignedPeaks:
     peak._refreshPeakAnnotation()

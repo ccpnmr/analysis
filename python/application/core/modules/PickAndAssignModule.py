@@ -155,9 +155,9 @@ class PickAndAssignModule(CcpnDock, Base):
 
     self.current.nmrResidue = nmrResidue
 
-  def showNmrResiduePopup(self):
-    from application.core.popups.NmrResiduePopup import NmrResiduePopup
-    NmrResiduePopup(self, self.project).exec_()
+  # def showNmrResiduePopup(self):
+  #   from application.core.popups.NmrResiduePopup import NmrResiduePopup
+  #   NmrResiduePopup(self, self.project).exec_()
 
 
 class SpectrumSelectionWidget(QtGui.QWidget, Base):

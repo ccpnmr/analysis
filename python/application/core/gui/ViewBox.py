@@ -87,7 +87,7 @@ class ViewBox(pg.ViewBox):
     #
       if (event.modifiers() & QtCore.Qt.ShiftModifier):
         if  (event.modifiers() & QtCore.Qt.ControlModifier):
-          # SHift Ctrl drag - pick oeaks
+          # Shift Ctrl drag - pick peaks
           mousePosition=self.mapSceneToView(event.pos())
           position = [mousePosition.x(), mousePosition.y()]
           for spectrumView in self.current.strip.spectrumViews:

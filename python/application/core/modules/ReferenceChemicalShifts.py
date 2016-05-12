@@ -34,7 +34,7 @@ class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the 
     self._updateModule()
 
 
-  def getDistributionForResidue(self, ccpCode:str, atomType:str):
+  def _getDistributionForResidue(self, ccpCode:str, atomType:str):
     """
     Takes a ccpCode and an atom type (Hydrogen or Heavy) and returns a dictionary of lists
     containing the chemical shift distribution for each atom of the specified type in the residue
@@ -69,6 +69,6 @@ class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the 
     self.plotWidget.showGrid(x=True, y=True)
     atomType = self.atomTypePulldown.currentText()
     ccpCode = self.residueTypePulldown.currentText()
-    dataSets = self.getDistributionForResidue(ccpCode, atomType)
+    dataSets = self._getDistributionForResidue(ccpCode, atomType)
     for atomName, dataSet in dataSets.items():
       self.plotWidget.plot(dataSet[0], dataSet[1], pen=dataSet[2], name=atomName, kargs={'clear':True})

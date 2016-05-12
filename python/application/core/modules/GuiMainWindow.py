@@ -81,7 +81,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setupWindow()
     self.setupMenus()
     self.initProject()
-    self.connect(self, QtCore.SIGNAL('triggered()'), self.closeEvent)
+    self.closeEvent = self._closeEvent
+    self.connect(self, QtCore.SIGNAL('triggered()'), self._closeEvent)
 
     self.feedbackPopup = None
     self.updatePopup = None
@@ -577,7 +578,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     PreferencesPopup(preferences=self._appBase.preferences, project=self._project).exec_()
 
-  def closeEvent(self, event=None):
+  def _closeEvent(self, event=None):
     """
     Saves application preferences. Displays message box asking user to save project or not.
     Closes Application.

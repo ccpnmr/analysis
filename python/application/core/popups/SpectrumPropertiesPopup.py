@@ -73,6 +73,7 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
         self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358; color: #f7ffff; padding:4px;}")
       elif spectrum.project._appBase.preferences.general.colourScheme == 'light':
         self.setStyleSheet("QTabWidget > QWidget { background-color: #fbf4cc;} QTabWidget { background-color: #fbf4cc;}")
+
   def keyPressEvent(self, event):
     if event.key() == QtCore.Qt.Key_Enter:
       pass

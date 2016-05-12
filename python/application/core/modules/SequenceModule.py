@@ -47,7 +47,7 @@ class SequenceModule(CcpnDock):
     self.scrollContents.setFixedHeight(2*self.widgetHeight)
 
 
-  def highlightPossibleStretches(self, residues:typing.List[Residue]):
+  def _highlightPossibleStretches(self, residues:typing.List[Residue]):
     """
     Highlights regions on the sequence specified by the list of residues passed in.
     """
@@ -184,7 +184,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     nmrChain = self.project.getByPid(data[0])
     residues = [guiRes.residue]
     toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
-    print(toAssign, residues)
     result = showYesNo('Assignment', 'Assign %s to residue %s?' % (toAssign[0].id, residues[0].id, ))
     if result:
       for ii in range(len(toAssign)-1):

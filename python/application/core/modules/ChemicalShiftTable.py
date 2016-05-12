@@ -53,7 +53,7 @@ class ChemicalShiftTable(CcpnDock):
     self.layout.addWidget(self.chemicalShiftTable, 3, 0, 1, 4)
 
   def getShiftPeakCount(self, chemicalShift):
-    """return number of peaks assigned to NmrAtom in Experiments and PakLists
+    """return number of peaks assigned to NmrAtom in Experiments and PeakLists
     using ChemicalShiftList"""
     chemicalShiftList = chemicalShift.chemicalShiftList
     peaks = chemicalShift.nmrAtom.assignedPeaks

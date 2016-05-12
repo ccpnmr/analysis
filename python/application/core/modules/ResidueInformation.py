@@ -57,7 +57,7 @@ class ResidueInformation(CcpnDock, Base):
     self.selectedResidueType = value
     self.getResidues()
 
-  def getResidues(self):
+  def _getResidues(self):
     """
     Finds all residues of the selected type along with one flanking residue either side and displays
     this information in the module.

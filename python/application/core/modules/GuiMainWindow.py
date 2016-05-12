@@ -63,10 +63,10 @@ from application.core.popups.SetupNmrResiduesPopup import SetupNmrResiduesPopup
 from ccpn.lib.Version import revision
 from application.core.update.UpdatePopup import UpdatePopup
 
-from application.screening.screeningModules.ShowScreeningHits import ShowScreeningHits
-from application.screening.screeningModules.ScreeningSettings import ScreeningSettings
-from application.screening.screeningModules.MixtureAnalysis import MixtureAnalysis
-from application.screening.screeningPopups.SampleSetupPopup import SamplePopup
+from application.screen.modules.ShowScreeningHits import ShowScreeningHits
+from application.screen.modules.ScreeningSettings import ScreeningSettings
+from application.screen.modules.MixtureAnalysis import MixtureAnalysis
+from application.screen.popups.SampleSetupPopup import SamplePopup
 
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):

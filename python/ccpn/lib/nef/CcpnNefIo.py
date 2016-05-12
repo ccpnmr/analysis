@@ -658,7 +658,7 @@ class CcpnNefIo:
 
     # Set up frame
     category = 'nef_nmr_spectrum'
-    print('@~@~ spec. PL, exp, ds', spectrum.name, peakList.name,
+    print('@~@~ spec. PL, exp, ds', spectrum.name, peakList.title,
           spectrum._wrappedData.experiment.name, spectrum._wrappedData.name)
     result = self._newNefSaveFrame(peakList, category, name)
 

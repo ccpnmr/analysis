@@ -854,11 +854,12 @@ def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Sp
 
   return self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name)]
 
-def _SpectrumMakeFirstPeakList(project:Project, dataSource:Nmr.DataSource):
+def _spectrumMakeFirstPeakList(project:Project, dataSource:Nmr.DataSource):
   """Add PeakList if none is present"""
   if not dataSource.findFirstPeakList(dataType='Peak'):
     dataSource.newPeakList()
-Project._setupApiNotifier(_SpectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')
+Project._setupApiNotifier(_spectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')
+del _spectrumMakeFirstPeakList
 
 # Connections to parents:
 

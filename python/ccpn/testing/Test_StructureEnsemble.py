@@ -122,7 +122,7 @@ class StructureEnsembleTesting2(WrapperTesting):
     self.assertTrue(numpy.isnan(ensemble.bFactorData.flat[2]))
     self.assertTrue(numpy.isnan(ensemble.bFactorData.flat[-3]))
     self.assertEqual([x for x in ensemble.bFactorData.flat][4:-4], [0,1,2,3])
-    self.assertEqual([x.name for x in ensemble.models], ['blah3','blah1','blah2' ])
+    self.assertEqual([x.title for x in ensemble.models], ['blah3','blah1','blah2' ])
 
     ensemble.replaceAtomIds(atomIds2)
     self.assertEqual(ensemble.atomIds, atomIds2)

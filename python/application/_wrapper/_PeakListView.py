@@ -199,12 +199,12 @@ def _peakListAddPeakListViews(project:Project, apiPeakList:Nmr.PeakList):
 Project._setupApiNotifier(_peakListAddPeakListViews, Nmr.PeakList, 'postInit')
 del _peakListAddPeakListViews
 
-def _SpectrumViewAddPeakListViews(project:Project, apiSpectrumView:ApiSpectrumView):
+def _spectrumViewAddPeakListViews(project:Project, apiSpectrumView:ApiSpectrumView):
   """Add ApiPeakListView when ApiSpectrumView is created"""
   for apiPeakList in apiSpectrumView.dataSource.peakLists:
     apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
-Project._setupApiNotifier(_SpectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')
-del _SpectrumViewAddPeakListViews
+Project._setupApiNotifier(_spectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')
+del _spectrumViewAddPeakListViews
 
 # Links to PeakListView and PeakList are fixed after creation - any notifiers should be put in
 # create/destroy

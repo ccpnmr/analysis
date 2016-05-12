@@ -78,12 +78,12 @@ class PeakList(AbstractWrapperObject):
   spectrum = _parent
   
   @property
-  def name(self) -> str:
-    """name of PeakList"""
+  def title(self) -> str:
+    """title of PeakList"""
     return self._wrappedData.name
     
-  @name.setter
-  def name(self, value:str):
+  @title.setter
+  def title(self, value:str):
     self._wrappedData.name = value
   
   @property

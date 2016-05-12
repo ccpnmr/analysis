@@ -74,13 +74,12 @@ class Model(AbstractWrapperObject):
   structureEnsemble = _parent
   
   @property
-  def name(self) -> str:
-    """name of Restraint List"""
+  def title(self) -> str:
+    """title of Model"""
     return self._wrappedData.name
 
-  @name.setter
-  def name(self, value):
-    """name of Model"""
+  @title.setter
+  def title(self, value):
     self._wrappedData.name = value
 
   @property

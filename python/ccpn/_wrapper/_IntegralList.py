@@ -86,12 +86,12 @@ class IntegralList(AbstractWrapperObject):
   spectrum = _parent
   
   @property
-  def name(self) -> str:
+  def title(self) -> str:
     """name of IntegralList"""
     return self._wrappedData.name
     
-  @name.setter
-  def name(self, value:str):
+  @title.setter
+  def title(self, value:str):
     self._wrappedData.name = value
   
   @property

@@ -533,10 +533,10 @@ def createPeakListFrame(peakList):
   spectrum = peakList.spectrum
   dimensionCount = spectrum.dimensionCount
   apiDataDims = spectrum._apiDataSource.sortedDataDims()
-  if peakList.name is None:
-    peakList.name = '%s-%s' % (spectrum.name.translate(Pid.unmapSeparators), peakList.serial)
+  if peakList.title is None:
+    peakList.title = '%s-%s' % (spectrum.name.translate(Pid.unmapSeparators), peakList.serial)
   category = 'nef_nmr_spectrum'
-  framecode = '%s_%s' % (category, peakList.name)
+  framecode = '%s_%s' % (category, peakList.title)
   saveframe = bmrb.saveframe.fromScratch(saveframe_name=framecode,
                                          tag_prefix=category)
   # Top tagged values
@@ -689,7 +689,7 @@ def createPeakRestraintLinksFrame(restraintLists, peakLists):
       restraint_id = restraint.serial
       for peak in restraint.peaks:
         if peak.peakList in peakLists:
-          data.append(['nef_nmr_spectrum_' + peak.peakList.name, peak.serial,
+          data.append(['nef_nmr_spectrum_' + peak.peakList.title, peak.serial,
                        restraint_list_id, restraint_id])
   for ll in sorted(data):
       loop.addData(ll)

@@ -21,10 +21,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-# from ccpncore.lib.ccp.nmr.Nmr.PeakList import fitExistingPeakList
-# from ccpncore.lib.spectrum import Spectrum as spectrumLib
+from ccpncore.lib.ccp.nmr.Nmr.PeakList import fitExistingPeakList
+from ccpncore.lib.spectrum import Spectrum as spectrumLib
 
-# from ccpncore.util.CopyData import copySubTree
+from ccpncore.util.CopyData import copySubTree
 from ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 from typing import Sequence, List, Optional
 import numpy
@@ -203,18 +203,18 @@ def subtractPeakLists(self:'PeakList', peakList2:'PeakList') -> 'PeakList':
 
   return peakList3
 
-# def copyPeaks(self:'PeakList', sinkSpectrum:'Spectrum', fitPositions:bool=False):
-#   refAxisCodes = self.spectrum.axisCodes
-#   sinkAxisCodes = sinkSpectrum.axisCodes
-#
-#   if not spectrumLib.doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
-#     print('axis codes of the source and sink peaklists do not match')
-#     return
-#
-#   if not fitPositions:
-#     copySubTree(self, sinkSpectrum)
-#
-#   # else:
-#
-# def refit(self:'PeakList', method:str='gaussian'):
-#   fitExistingPeakList(self._apiPeakList, method)
+def copyPeaks(self:'PeakList', sinkSpectrum:'Spectrum', fitPositions:bool=False):
+  refAxisCodes = self.spectrum.axisCodes
+  sinkAxisCodes = sinkSpectrum.axisCodes
+
+  if not spectrumLib.doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
+    print('axis codes of the source and sink peaklists do not match')
+    return
+
+  if not fitPositions:
+    copySubTree(self, sinkSpectrum)
+
+  # else:
+
+def refit(self:'PeakList', method:str='gaussian'):
+  fitExistingPeakList(self._apiPeakList, method)

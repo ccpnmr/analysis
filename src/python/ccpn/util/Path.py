@@ -112,7 +112,7 @@ def getTopDirectory():
   Returns the 'top' directory of the containing repository (ccpnv3).
   """
 
-  return os.path.dirname(getPythonDirectory())
+  return os.path.dirname(os.path.dirname(getPythonDirectory()))
 
 def setTopDirectory(newTopDirectory):
 

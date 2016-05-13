@@ -28,15 +28,15 @@ import sys
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
-from application.metabolomics.Metabolomics import MetabolomicsModule
+from ccpn.Metabolomics.Metabolomics import MetabolomicsModule
+from ccpn.Screen.popups.SampleSetupPopup import SamplePopup
 
-from application.screen.modules.MixtureAnalysis import MixtureAnalysis
-from application.screen.modules.ScreeningSettings import ScreeningSettings
-from application.screen.modules.ShowScreeningHits import ShowScreeningHits
-from application.screen.popups.SampleSetupPopup import SamplePopup
 from ccpn import PeakList
 from ccpn.framework.update.UpdatePopup import UpdatePopup
 from ccpn.lib.Version import revision
+from ccpn.Screen.modules import MixtureAnalysis
+from ccpn.Screen.modules import ScreeningSettings
+from ccpn.Screen.modules import ShowScreeningHits
 from ccpn.ui.gui.base.Assigner import Assigner
 from ccpn.ui.gui.base.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.base.SideBar import SideBar
@@ -669,13 +669,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def showPCAModule(self):
-    from ccpn.metabolomics.Pca import PcaModule
+    from ccpn.Metabolomics.Pca import PcaModule
     self.pcaModule = PcaModule(self.project)
     self.dockArea.addDock(self.pcaModule, position='bottom')
 
   def showPickandFitModule(self):
     spectrumDisplay = self.createSpectrumDisplay()
-    from ccpn.metabolomics.PickandFit import PickandFit, PickandFitTable
+    from ccpn.Metabolomics.PickandFit import PickandFit, PickandFitTable
     fitModule = PickandFit(spectrumDisplay.dock, strip=spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
     PickandFitTable(spectrumDisplay.dock, project=self._project, fitModule=fitModule, grid=(0, 4), gridSpan=(3, 1))
     if self.blankDisplay:
@@ -685,7 +685,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showIntegrationModule(self):
     spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-    from ccpn.metabolomics.Integration import IntegrationTable, IntegrationWidget
+    from ccpn.Metabolomics.Integration import IntegrationTable, IntegrationWidget
     spectrumDisplay.integrationWidget = IntegrationWidget(spectrumDisplay.dock, project=self._project, grid=(2, 0), gridSpan=(1, 4))
     spectrumDisplay.integrationTable = IntegrationTable(spectrumDisplay.dock, project=self._project, grid=(0, 4), gridSpan=(3, 1))
     self._appBase.current.strip = spectrumDisplay.strips[0]
@@ -695,7 +695,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showIntegralAssigmentModule(self):
     spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-    from ccpn.metabolomics.IntegralAssignment import IntegralAssignment
+    from ccpn.Metabolomics.IntegralAssignment import IntegralAssignment
     self.iaModule = IntegralAssignment(self)
     spectrumDisplay.dock.layout.addWidget(self.iaModule, 2, 0, 1, 4)
     if self.blankDisplay:
@@ -704,7 +704,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showPeakAssigmentModule(self):
     spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-    from ccpn.metabolomics.PeakAssignment import PeakAssignment
+    from ccpn.Metabolomics.PeakAssignment import PeakAssignment
     PeakAssignment(spectrumDisplay.dock, self._project, grid=(2, 0), gridSpan=(1, 4))
     if self.blankDisplay:
       self.blankDisplay.setParent(None)
@@ -715,7 +715,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     spectrumDisplay = self.createSpectrumDisplay(spectra[0])
     for spectrum in spectra[1:]:
       spectrumDisplay.displaySpectrum(spectrum)
-    from ccpn.metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
+    from ccpn.Metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
     SpectrumGroupsWidget(spectrumDisplay.dock, self._project, spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
     spectrumDisplay.spectrumToolBar.hide()
     if self.blankDisplay:

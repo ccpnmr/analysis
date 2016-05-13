@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.Label import Label
 # from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
 from ccpn.ui.gui.DropBase import DropBase
-from ccpn.metabolomics.SpectrumGroupsWidget import SpectrumGroupsToolBar
+from ccpn.Metabolomics.SpectrumGroupsWidget import SpectrumGroupsToolBar
 
 # def _findPpmRegion(spectrum, axisDim, spectrumDim):
 #

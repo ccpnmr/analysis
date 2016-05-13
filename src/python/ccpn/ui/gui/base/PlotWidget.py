@@ -28,7 +28,7 @@ from typing import Sequence
 import pyqtgraph as pg
 from PyQt4 import QtGui, QtOpenGL
 
-from ccpn.metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
+from ccpn.Metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
 from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.base import ViewBox
 from ccpn.ui.gui.widgets.Base import Base

@@ -1,0 +1,179 @@
+"""GUI Task class
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author$"
+__date__ = "$Date$"
+__version__ = "$Revision$"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
+from ccpn.util import Pid
+from typing import Sequence, Tuple
+from ccpn import AbstractWrapperObject
+from ccpn import Project
+from ccpn.ui.gui._implementation import Window
+from ccpncore.api.ccpnmr.gui.Task import GuiTask as ApiGuiTask
+
+
+class Task(AbstractWrapperObject):
+  """GUI task, corresponds to set of interacting modules"""
+  
+  #: Short class name, for PID.
+  shortClassName = 'GT'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Task'
+
+  #: Name of plural link to instances of class
+  _pluralLinkName = 'tasks'
+  
+  #: List of child classes.
+  _childClasses = []
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiGuiTask._metaclass.qualifiedName()
+  
+
+  # CCPN properties  
+  @property
+  def _apiGuiTask(self) -> ApiGuiTask:
+    """ CCPN GuiTask matching Task"""
+    return self._wrappedData
+    
+  @property
+  def _key(self) -> str:
+    """local id, of form nameSpace.name"""
+    return Pid.createId(self._wrappedData.nameSpace, self._wrappedData.name)
+
+  @property
+  def nameSpace(self) -> str:
+    """Task nameSpace"""
+    return self._wrappedData.nameSpace
+
+  @property
+  def name(self) -> str:
+    """Task name"""
+    return self._wrappedData.name
+    
+  @property
+  def _parent(self) -> Project:
+    """Parent (containing) object."""
+    return self._project
+
+  @property
+  def comment(self) -> str:
+    """Free-form text comment"""
+    return self._wrappedData.details
+
+  @property
+  def windows(self) -> Tuple[Window, ...]:
+    """Gui windows where Task is shown"""
+
+    ff = self._project._data2Obj.get
+    return tuple(ff(x) for x in self._wrappedData.sortedWindows())
+
+  @windows.setter
+  def windows(self, value:Sequence):
+    value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+    self._wrappedData.windows = tuple(x._wrappedData for x in value)
+
+  @property
+  def status(self) -> str:
+    """Status of task: connected to Project, disconnected form Project,
+    or unrelated (template only)"""
+    if self._wrappedData.nmrProject is self._project._wrappedData:
+      return 'active'
+    elif self._wrappedData.nmrProjectName is self._project._wrappedData.name:
+      return 'passive'
+    else:
+      return 'template'
+
+  # Implementation functions
+  @classmethod
+  def _getAllWrappedData(cls, parent:Project)-> list:
+    """get wrappedData (ccp.gui.guiTasks) for all GuiTasks connected to NmrProject"""
+    nmrProject = parent._wrappedData
+    return nmrProject.sortedGuiTasks()
+
+  # CCPN functions
+  def passivate(self):
+    """passivate active task"""
+    if self.status == 'active':
+      self._wrappedData.passivate()
+      self._unwrapAll()
+    else:
+      raise ValueError("Cannot passivate %s task: %s" % (self.status, self))
+
+  def activate(self, window:Window=None):
+    """activate passive task"""
+    if self.status == 'passive':
+      window=window and window._wrappedData
+      self._wrappedData.activate(window=window)
+      self._initializeAll()
+    else:
+      raise ValueError("Cannot activate %s task: %s" % (self.status, self))
+
+  def clone(self, name:str, nameSpace:str=None):
+    """copy task exactly, first passivating if active"""
+    return self._project._data2Obj.get(self._wrappedData.clone())
+
+  def loadAsTemplate(self, name:str, nameSpace:str=None, window:Window=None):
+    """copy and activate template task, adapting and pruning contents to fit"""
+
+    window = self.getByPid(window) if isinstance(window, str) else window
+    window=window and window._wrappedData
+    newObj = self._wrappedData.adaptedCopy(nmrProject=self._project._wrappedData,
+                                           window=window, name=name, nameSpace=nameSpace)
+    return self._project._data2Obj.get(newObj)
+
+  def pruneSpectrumViews(self, name:str, nameSpace:str=None):
+    """Remove spectrum views that do not match existing spectra, e.g. after loading a template"""
+    self._wrappedData.pruneSpectrumViews()
+
+def _getTask(window):
+  return window._project._data2Obj.get(window._wrappedData.guiTask)
+def _setTask(window, value):
+  value = window.getByPid(value) if isinstance(value, str) else value
+  window._wrappedData.guiTask = value and value._wrappedData
+Window.task = property(_getTask, _setTask, None, """Task shown in Window.""")
+
+
+def _newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
+  """Create new ccpn.Task"""
+
+  for ss in name, nameSpace:
+    if ss and Pid.altCharacter in ss:
+      raise ValueError("Character %s not allowed in _implementation.Task i %s.%sd"
+                       % (Pid.altCharacter, nameSpace, name))
+
+  nmrProject = self.nmrProject
+  dd = {'name':name, 'nmrProject':nmrProject, 'details':comment}
+  if nameSpace is not None:
+    dd['nameSpace'] = nameSpace
+
+  newApiTask = nmrProject.root.newGuiTask(**dd)
+
+  return self._data2Obj.get(newApiTask)
+
+# Connections to parents:
+Project._childClasses.append(Task)
+Project.newTask = _newTask
+del _newTask
+
+# Notifiers:
+
+# NBNB TBD Add notifiers, one way or the other, for activating and passivating tasks
+

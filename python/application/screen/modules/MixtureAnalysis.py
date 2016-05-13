@@ -1,19 +1,19 @@
 __author__ = 'luca'
 
 from PyQt4 import QtCore, QtGui
-from application.core.widgets.ButtonList import ButtonList
-from application.core.widgets.Icon import Icon
-from application.core.widgets.Table import ObjectTable, Column
-from application.core.widgets.Button import Button
-from application.core.widgets.Dock import CcpnDock
-from application.core.widgets.PulldownList import PulldownList
-from application.core.widgets.ListWidget import ListWidget
-from application.core.widgets.Label import Label
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
+from ccpn.ui.gui.widgets.Label import Label
 
-from application.core.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from functools import partial
-from application.core.widgets.CompoundView import CompoundView, Variant, importSmiles
-from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosition
+from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
+from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 from application.screen.lib.MixtureGeneration import setupSamples, scoring
 from numpy import array, amin, amax, average, empty, nan, nanmin, fabs, subtract, where, argmax, NAN
 import math

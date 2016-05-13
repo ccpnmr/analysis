@@ -37,9 +37,9 @@ from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpn.util import Common as commonUtil
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
-from application.core.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from application.core.modules.GuiStripDisplayNd import GuiStripDisplayNd
-from application.core.modules.GuiStripDisplay1d import GuiStripDisplay1d
+from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd
+from ccpn.ui.gui.modules.GuiStripDisplay1d import GuiStripDisplay1d
 
 
 # list1 = [GuiSpectrumDisplay,AbstractWrapperObject]

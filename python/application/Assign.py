@@ -22,13 +22,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from application.core.AppBase import AppBase, defineProgramArguments
+from ccpn.ui.gui.AppBase import AppBase, defineProgramArguments
 from ccpn.lib.Version import applicationVersion
-from application.core.lib.Window import MODULE_DICT
-from application.core.modules import GuiStrip
-# from application.core.modules import GuiStripNd
-# from application.core.modules import GuiSpectrumDisplay
-# from application.core.modules import GuiStripDisplayNd
+from ccpn.ui.gui.lib.Window import MODULE_DICT
+from ccpn.ui.gui.modules import GuiStrip
+# from ccpn.ui.gui.modules import GuiStripNd
+# from ccpn.ui.gui.modules import GuiSpectrumDisplay
+# from ccpn.ui.gui.modules import GuiStripDisplayNd
 
 
 applicationName = 'AnalysisAssign'

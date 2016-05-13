@@ -3,19 +3,19 @@ __author__ = 'luca'
 
 from functools import partial
 from PyQt4 import QtCore, QtGui
-from application.core.widgets.Base import Base
-from application.core.widgets.GroupBox import GroupBox
-from application.core.widgets.ListWidget import ListWidget
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.GroupBox import GroupBox
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
-from application.core.widgets.Dock import CcpnDock
-from application.core.widgets.Table import ObjectTable, Column, ObjectTableItemDelegate
+from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ObjectTableItemDelegate
 
-from application.core.widgets.PulldownList import PulldownList
-from application.core.widgets.ButtonList import ButtonList
-from application.core.widgets.Button import Button
-from application.core.widgets.Icon import Icon
-from application.core.widgets.CompoundView import CompoundView, Variant, importSmiles
-from application.core.lib.Window import navigateToNmrResidue, navigateToPeakPosition
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
+from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence

@@ -13,8 +13,8 @@ from urllib.request import urlopen
 from datetime import datetime
 
 from ccpn.util import Path
-from application.core.widgets import InputDialog
-from application.core.widgets import MessageDialog
+from ccpn.ui.gui.widgets import InputDialog
+from ccpn.ui.gui.widgets import MessageDialog
 
 SERVER = 'http://www2.ccpn.ac.uk/'
 SERVER_DB_ROOT = 'ccpNmrUpdate'

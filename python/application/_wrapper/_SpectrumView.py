@@ -33,8 +33,8 @@ from ccpn import Spectrum
 from application import Strip
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-from application.core.modules.GuiSpectrumView1d import GuiSpectrumView1d
-from application.core.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
+from ccpn.ui.gui.modules.GuiSpectrumView1d import GuiSpectrumView1d
+from ccpn.ui.gui.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
 
 
 class SpectrumView(AbstractWrapperObject):

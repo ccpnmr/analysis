@@ -2,10 +2,10 @@ import os
 
 from PyQt4 import QtCore, QtGui
 
-from application.core.widgets.ButtonList import ButtonList
-from application.core.widgets.Frame import Frame
-from application.core.widgets.Label import Label
-from application.core.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.framework.update.UpdateAgent import UpdateAgent
 
 SERVER_USER = 'ccpn'

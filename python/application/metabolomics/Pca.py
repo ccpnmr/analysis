@@ -25,14 +25,14 @@ __version__ = ": 7686 $"
 
 from PyQt4 import QtCore, QtGui
 
-from application.core.widgets.Base import Base
-from application.core.widgets.Button import Button
-from application.core.widgets.Dock import CcpnDock
-from application.core.widgets.DoubleSpinbox import DoubleSpinbox
-from application.core.widgets.Label import Label
-from application.core.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
-from application.core.base.PlotWidget import PlotWidget
+from ccpn.ui.gui.base.PlotWidget import PlotWidget
 
 from ccpncore.lib.metabolomics.persistence import MetabolomicsPersistenceDict
 from ccpncore.lib.metabolomics.decomposition import PCA

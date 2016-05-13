@@ -26,8 +26,8 @@ from typing import Sequence
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
-from application.core.modules.GuiWindow import GuiWindow
-from application.core.modules.GuiMainWindow import GuiMainWindow
+from ccpn.ui.gui.modules.GuiWindow import GuiWindow
+from ccpn.ui.gui.modules.GuiMainWindow import GuiMainWindow
 from ccpn.util import Pid
 
 class Window(AbstractWrapperObject):

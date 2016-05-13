@@ -8,16 +8,16 @@ from application.screen.lib.MixtureGeneration import setupSamples, allCombinatio
 from application.screen.modules.MixtureAnalysis import MixtureAnalysis
 from application.screen.modules.ScreeningPipeline import ExcludeRegions
 
-from application.core.widgets.Base import Base
-from application.core.widgets.DoubleSpinbox import DoubleSpinbox
-from application.core.widgets.Button import Button
-from application.core.widgets.Label import Label
-from application.core.widgets.PulldownList import PulldownList
-from application.core.widgets.Slider import Slider
-from application.core.widgets.Spinbox import Spinbox
-from application.core.widgets.ScrollArea import ScrollArea
-from application.core.widgets.RadioButtons import RadioButtons
-from application.core.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.Slider import Slider
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 
 
 class SamplePopup(QtGui.QDialog):

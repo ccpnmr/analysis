@@ -33,6 +33,8 @@ from ccpncore.api.ccp.nmr import Nmr
 from ccpncore.api.ccp.general import DataLocation
 from ccpn.util import Pid
 
+from ccpncore.lib.Io import Formats
+
 # MagnetisationTransferTuple
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
   ['dimension1', 'dimension2', 'transferType', 'isIndirect']
@@ -838,6 +840,46 @@ class Spectrum(AbstractWrapperObject):
     """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
     return sorted((x for y in parent._wrappedData.sortedExperiments()
                    for x in y.sortedDataSources()), key=operator.attrgetter('name'))
+
+  # Library functions
+
+  def resetAssignmentTolerances(self):
+    """Reset aassignment tolerances to default values"""
+
+    tolerances = [[]] * self.dimensionCount
+    for ii, isotopeCode in enumerate(self.isotopeCodes):
+      if isotopeCode == '1H':
+        tolerance = max([0.02, self.spectralWidths[ii]/self.pointCounts[ii]])
+        tolerances[ii] = tolerance
+      elif isotopeCode == '13C' or isotopeCode == '15N':
+        tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
+        tolerances[ii] = tolerance
+      else:
+        tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
+        tolerances[ii] = tolerance
+
+    self.assignmentTolerances = tolerances
+
+  def getPlaneData(self, position:Sequence=None, xDim:int=0, yDim:int=1):
+
+    return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
+  def getSliceData(self, position:Sequence=None, sliceDim:int=0):
+
+    return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
+
+  def automaticIntegration(self, spectralData):
+
+    return self._apiDataSource.automaticIntegration(spectralData)
+
+  def estimateNoise(self):
+    return self._apiDataSource.estimateNoise()
+
+  def projectedPlaneData(self, xDim:int=1, yDim:int=2, method:str='max'):
+    return self._apiDataSource.projectedPlaneData(xDim, yDim, method)
+
+  def projectedToFile(self, path:str, xDim:int=1, yDim:int=2, method:str='max', format:str=Formats.NMRPIPE):
+    return self._apiDataSource.projectedToFile(path, xDim, yDim, method, format)
 
 
 def _newSpectrum(self:Project, name:str) -> Spectrum:

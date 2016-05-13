@@ -273,11 +273,3 @@ AbstractWrapperObject.__init__.__annotations__['project'] = Project
 AbstractWrapperObject.project.fget.__annotations__['return'] = Project
 
 Project._linkWrapperClasses()
-
-# Load in additional utility functions int wrapper classes
-# NB this does NOT pick up utility functions in non-child classes
-# (e.g. AbstractWrapperObject or MainWindow) so these must be avoided
-libModule = 'ccpn.lib._wrapper'
-for cls in Project._allLinkedWrapperClasses:
-  ApiFunc._addModuleFunctionsToApiClass( cls.__name__, cls, rootModuleName=libModule)
-

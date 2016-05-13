@@ -32,7 +32,7 @@ from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListVi
 # from ccpncore.api.ccpnmr.gui.Task import PeakListView as ApiPeakListView
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpncore.api.ccp.nmr import Nmr
-from application.core.modules.spectrumItems.GuiPeakListView import GuiPeakListView
+from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 
 class PeakListView(AbstractWrapperObject, GuiPeakListView):
   """Peak List View for 1D or nD PeakList"""

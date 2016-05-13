@@ -1,6 +1,6 @@
 __author__ = 'simon1'
 from ccpn.lib.Assignment import propagateAssignments
-from application.core.lib.Window import navigateToNmrResidue
+from ccpn.ui.gui.lib.Window import navigateToNmrResidue
 from application.macros.restrictedPick import restrictedPick
 
 if len(project.nmrChains) == 0:

@@ -31,9 +31,9 @@ from ccpn import Peak
 from application._wrapper._SpectrumDisplay import SpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
-from application.core.modules.GuiStrip import GuiStrip
-from application.core.modules.GuiStrip1d import GuiStrip1d
-from application.core.modules.GuiStripNd import GuiStripNd
+from ccpn.ui.gui.modules.GuiStrip import GuiStrip
+from ccpn.ui.gui.modules.GuiStrip1d import GuiStrip1d
+from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 

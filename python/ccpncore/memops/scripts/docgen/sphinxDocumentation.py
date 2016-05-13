@@ -65,7 +65,7 @@ def refreshSphinxDocumentation():
   apidoc.main(ll)
   #
   #
-  # # then application.core
+  # # then ccpn.ui.gui
   ll = ['../doc/source/application', 'application']
   ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
   apidoc.main(ll)

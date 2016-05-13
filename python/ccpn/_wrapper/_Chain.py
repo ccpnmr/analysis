@@ -203,7 +203,7 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
 
   apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
   if compoundName is None:
-    name = self.uniqueSubstanceName()
+    name = self._uniqueSubstanceName()
   elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
     name = compoundName
   else:

@@ -26,14 +26,14 @@ from PyQt4 import QtGui
 
 import numpy
 
-from application.core.widgets.Base import Base
-from application.core.widgets.Button import Button
-from application.core.widgets.Label import Label
-from application.core.widgets.LineEdit import LineEdit
-from application.core.widgets.PulldownList import PulldownList
-from application.core.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.RadioButton import RadioButton
 from application.metabolomics.IntegralAssignment import IntegralTable
-from application.core.modules.GuiTableGenerator import GuiTableGenerator
+from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 
 import pyqtgraph as pg
 

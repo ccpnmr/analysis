@@ -23,8 +23,8 @@ __version__ = ": 7686 $"
 #=========================================================================================
 
 from PyQt4 import QtCore, QtGui
-from application.core.widgets.Base import Base
-from application.core.widgets.Button import Button
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Button import Button
 
 
 class SpectrumGroupsToolBar(QtGui.QToolBar, Base):

@@ -39,6 +39,12 @@ from ccpn.util import Pid
 from ccpn.util import Undo
 from ccpn.util import Io as ioUtil
 
+from ccpncore.lib.Io import Formats as ioFormats
+from ccpncore.lib.Io import Fasta as fastaIo
+from ccpncore.lib.Io import Pdb as pdbIo
+from ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
+
+
 class Project(AbstractWrapperObject):
   """Project (root) object. Corresponds to API: NmrProject"""
   
@@ -750,5 +756,124 @@ class Project(AbstractWrapperObject):
       for dd in iterator:
         for notifier in dd:
           notifier(self)
+
+  # Library functions
+
+  def loadData(self, path:str) -> (list,None):
+    """Load data from path, determining type first."""
+
+    dataType, subType, usePath = ioFormats.analyseUrl(path)
+
+    # urlInfo is list of triplets of (type, subType, modifiedUrl),
+
+    # e.g. ('Spectrum', 'Bruker', newUrl)
+    if dataType is None:
+      print("Skipping: file data type not recognised for %s" % usePath)
+    elif not os.path.exists(usePath):
+      print("Skipping: no file found at %s" % usePath)
+    elif dataType == 'Text':
+      # Special case - you return the text instead of a list of Pids
+      return open(usePath).read()
+    else:
+
+      funcname = '_load' + dataType
+      if funcname == '_loadProject':
+        return [self.loadProject(usePath, subType)]
+
+      elif funcname == '_loadSpectrum':
+        # NBNB TBD FIXME check if loadSpectrum should start with underscore
+        # (NB referred to elsewhere
+        return self.loadSpectrum(usePath, subType)
+
+      elif hasattr(self, funcname):
+        pids = getattr(self, funcname)(usePath, subType)
+        return pids
+      else:
+        print("Skipping: project has no function %s" % funcname)
+
+    return None
+
+  # Data loaders and dispatchers
+  def _loadSequence(self, path:str, subType:str) -> list:
+    """Load sequence(s) from file into Wrapper project"""
+
+    if subType == ioFormats.FASTA:
+      sequences = fastaIo.parseFastaFile(path)
+    else:
+      raise ValueError("Sequence file type %s is not recognised" % subType)
+
+    chains = []
+    for sequence in sequences:
+      chains.append(self.createSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+                                            molType='protein'))
+    #
+    return chains
+
+  def _loadStructure(self, path:str, subType:str) -> list:
+    """Load Structure ensemble(s) from file into Wrapper project"""
+
+    if subType == ioFormats.PDB:
+      apiEnsemble = pdbIo.loadStructureEnsemble(self._apiNmrProject.molSystem, path)
+    else:
+      raise ValueError("Structure file type %s is not recognised" % subType)
+    #
+    return [self._data2Obj[apiEnsemble]]
+
+  def loadProject(self, path:str, subType:str) -> "Project":
+    """Load project from file into application and return the new project"""
+
+    if subType == ioFormats.CCPN:
+      return self._appBase.loadProject(path)
+    else:
+      raise ValueError("Project file type %s is not recognised" % subType)
+
+  def loadSpectrum(self, path:str, subType:str) -> list:
+    """Load spectrum from file into application"""
+
+    # NBNB TBD FIXME check for rename
+
+    apiDataSource = self._wrappedData.loadDataSource(path, subType)
+    if apiDataSource is None:
+      return []
+    else:
+      spectrum = self._data2Obj[apiDataSource]
+      spectrum.resetAssignmentTolerances()
+      return [spectrum]
+
   #
-  # utility functions
+  #
+  def _loadLookupFile(self, path:str, subType:str, ):
+    """Load data from a look-up file, csv or xls ."""
+
+    if subType == ioFormats.CSV:
+      readCsv(self, path=path)
+
+    elif subType == ioFormats.XLS:
+      readXls(self, path=path)
+
+
+  def _uniqueSubstanceName(self, name:str=None, defaultName:str= 'Molecule') -> str:
+    """add integer suffixed to name till it is unique"""
+
+    apiComponentStore = self._wrappedData.sampleStore.refSampleComponentStore
+    apiProject =apiComponentStore.root
+
+    # ensure substance name is unique
+    if name:
+      i = 0
+      result = name
+      formstring = name + '_%d'
+    else:
+      formstring = defaultName + '_%d'
+      i = 1
+      result =  formstring % (name,i)
+    while (apiProject.findFirstMolecule(name=result) or
+           apiComponentStore.findFirstComponent(name=result)):
+      i += 1
+      result = '%s_%d' % (name,i)
+    if result != name and name != defaultName:
+      self._logger.warning(
+      "CCPN molecule named %s already exists. New molecule has been named %s" %
+      (name,result))
+    #
+    return result

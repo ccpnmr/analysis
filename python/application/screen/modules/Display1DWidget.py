@@ -3,19 +3,19 @@ __author__ = 'luca'
 
 from functools import partial
 from PyQt4 import QtCore, QtGui
-from application.core.widgets.Label import Label
-from application.core.widgets.GroupBox import GroupBox
-from application.core.widgets.LineEdit import LineEdit
-from application.core.widgets.ScrollArea import ScrollArea
-from application.core.widgets.Dock import CcpnDock
-from application.core.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.GroupBox import GroupBox
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from collections import OrderedDict
-from application.core.widgets.PulldownList import PulldownList
-from application.core.widgets.ButtonList import ButtonList
-from application.core.widgets.Button import Button
-from application.core.widgets.Icon import Icon
-from application.core.modules.GuiBlankDisplay import GuiBlankDisplay
-from application.core.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
+from ccpn.ui.gui.widgets.Dock import CcpnDock
 
 
 

@@ -1,6 +1,6 @@
 
 
-from application.core.AppBase import defineProgramArguments, AppBase
+from ccpn.ui.gui.AppBase import defineProgramArguments, AppBase
 from ccpn.lib.Version import applicationVersion
 
 applicationName = 'Screen'

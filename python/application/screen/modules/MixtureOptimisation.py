@@ -1,14 +1,14 @@
 from PyQt4 import QtCore, QtGui
-from application.core.widgets.ButtonList import ButtonList
-from application.core.widgets.Icon import Icon
-# from application.core.widgets.VerticalTab import VerticalTabWidget
-from application.core.widgets.RadioButtons import RadioButtons
-from application.core.widgets.Dock import CcpnDock
-from application.core.widgets.DoubleSpinbox import DoubleSpinbox
-from application.core.widgets.Spinbox import Spinbox
-from application.core.widgets.Label import Label
-from application.core.widgets.LineEdit import LineEdit
-# from application.core.popups.SampleSetupPopup import ExcludeRegions
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Icon import Icon
+# from ccpn.ui.gui.widgets.VerticalTab import VerticalTabWidget
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+# from ccpn.ui.gui.popups.SampleSetupPopup import ExcludeRegions
 
 
 class MixtureOptimisation(CcpnDock):

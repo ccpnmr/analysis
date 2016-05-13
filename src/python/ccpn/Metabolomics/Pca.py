@@ -34,8 +34,8 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 from ccpn.ui.gui.base.PlotWidget import PlotWidget
 
-from ccpncore.lib.metabolomics.persistence import MetabolomicsPersistenceDict
-from ccpncore.lib.metabolomics.decomposition import PCA
+from ccpn.Metabolomics.lib.persistence import MetabolomicsPersistenceDict
+from ccpn.Metabolomics.lib.decomposition import PCA
 
 import pyqtgraph as pg
 

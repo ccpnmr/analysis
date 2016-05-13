@@ -38,8 +38,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpncore.lib.metabolomics.persistence import MetabolomicsPersistenceDict
-from ccpncore.lib.metabolomics.pipeline import pipeline
+from ccpn.Metabolomics.lib.persistence import MetabolomicsPersistenceDict
+from ccpn.Metabolomics.lib.pipeline import pipeline
 
 
 

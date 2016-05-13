@@ -26,7 +26,7 @@ import numpy
 import pyqtgraph as pg
 from PyQt4 import QtGui
 
-from ccpn.metabolomics.IntegralAssignment import IntegralTable
+from ccpn.Metabolomics.IntegralAssignment import IntegralTable
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button

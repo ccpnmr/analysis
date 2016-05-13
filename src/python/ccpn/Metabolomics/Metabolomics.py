@@ -26,7 +26,7 @@ from collections import OrderedDict
 
 from PyQt4 import QtCore, QtGui
 
-from ccpn.metabolomics import GuiPipeLine as gp
+from ccpn.Metabolomics import GuiPipeLine as gp
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList

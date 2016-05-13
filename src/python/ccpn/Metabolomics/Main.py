@@ -1,8 +1,7 @@
 __author__ = 'TJ'
 
+from ccpn.core.lib.Version import applicationVersion
 from ccpn.ui.gui.AppBase import defineProgramArguments, AppBase
-from ccpn.lib.Version import applicationVersion
-
 
 applicationName = 'Metabolomics'
 

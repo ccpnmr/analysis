@@ -1,6 +1,6 @@
-
 import numpy
-from ccpn.lib.Assignment import isInterOnlyExpt
+
+from ccpn.core.lib.Assignment import isInterOnlyExpt
 
 # This should be imported, not duplicated. RHF 15/12/2015
 # def isInterOnlyExpt(peakList):

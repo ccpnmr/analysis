@@ -4,8 +4,8 @@ import unittest
 import numpy as np
 import numpy.testing as npt
 
-from ccpncore.lib.metabolomics.pipeline import pipeline
-from ccpncore.lib.metabolomics import normalisation
+from ccpn.Metabolomics.lib.pipeline import pipeline
+from ccpn.Metabolomics.lib import normalisation
 
 
 class TestPipeline(unittest.TestCase):

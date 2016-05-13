@@ -255,7 +255,8 @@ _sphinxWrappedClasses = _wrappedClasses[1:] + _wrappedClasses[:1]
 
 # set main starting functions in namespace. Must be done after setting Project
 # to avoid circular import problems
-from ccpn.lib import Io as ccpnIo
+from ccpn.core.lib import Io as ccpnIo
+
 loadProject = ccpnIo.loadProject
 newProject = ccpnIo.newProject
 

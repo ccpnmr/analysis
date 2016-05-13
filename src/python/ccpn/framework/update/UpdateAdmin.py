@@ -2,11 +2,11 @@ import os
 
 from PyQt4 import QtCore, QtGui
 
+from ccpn.framework.update.UpdateAgent import UpdateAgent
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from ccpn.framework.update.UpdateAgent import UpdateAgent
 
 SERVER_USER = 'ccpn'
 
@@ -117,7 +117,7 @@ class UpdateAdmin(QtGui.QDialog, UpdateAgent):
 if __name__ == '__main__':
 
   import sys
-  from ccpn.lib.Version import applicationVersion
+  from ccpn.core.lib.Version import applicationVersion
 
   qtApp = QtGui.QApplication(['UpdateAdmin',])
 

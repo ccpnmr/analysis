@@ -1,16 +1,12 @@
 __author__ = 'simon1'
 
-
 from PyQt4 import QtGui
 
+from ccpn.core.lib.Assignment import CCP_CODES
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Base import Base
-
-from ccpn.lib.Assignment import CCP_CODES
-from ccpn.ui.gui.base.Frame import Frame
-
 
 
 class ResidueInformation(CcpnDock, Base):

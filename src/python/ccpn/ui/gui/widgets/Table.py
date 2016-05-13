@@ -23,18 +23,17 @@ __version__ = "$Revision$"
 #=========================================================================================
 __author__ = 'simon'
 
+import re
+
 from PyQt4 import QtGui, QtCore
 
-from ccpn.lib.CcpnSorting import universalSortKey
-
+from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.BasePopup import BasePopup
-from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-
-import re
+from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
 

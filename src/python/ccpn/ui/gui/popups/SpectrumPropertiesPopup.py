@@ -23,12 +23,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import os, sys
+import os
+import sys
+from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn.lib import Util as ccpnUtil
-
+from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -39,11 +40,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
-
-
 from ccpn.util.Colour import spectrumColours
-
-from functools import partial
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 

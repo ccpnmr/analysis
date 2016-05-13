@@ -21,12 +21,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.testing.WrapperTesting import WrapperTesting
+from ccpn.core.testing import WrapperTesting
 
 # NBNB These two imports are NECESSARY,
 # as  ccpn.ui.gui._implementation MUST be imported to register the Gui classes
-import ccpn
-from  ccpn.ui.gui import _implementation
 
 class TaskTest(WrapperTesting):
 

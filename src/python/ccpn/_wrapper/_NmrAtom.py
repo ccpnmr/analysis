@@ -23,17 +23,18 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
-from ccpn.lib.Util import AtomIdTuple
+from typing import Union, Tuple
+
 from ccpn import AbstractWrapperObject
-from ccpn import Project
-from ccpn import NmrResidue
 from ccpn import Atom
+from ccpn import NmrResidue
 from ccpn import Peak
-from ccpncore.lib import Constants
-from ccpncore.api.ccp.nmr import Nmr
-from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
+from ccpn import Project
+from ccpn.core.lib.Util import AtomIdTuple
 from ccpn.util import Pid
-from typing import Union, Tuple, List
+from ccpncore.api.ccp.nmr import Nmr
+from ccpncore.lib import Constants
+from ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 
 
 class NmrAtom(AbstractWrapperObject):

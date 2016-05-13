@@ -4,9 +4,9 @@ import unittest
 import numpy as np
 import numpy.testing as npt
 
-from ccpncore.lib.metabolomics import normalisation
-from ccpncore.lib.metabolomics import centering
-from ccpncore.lib.metabolomics import scaling
+from ccpn.Metabolomics.lib import normalisation
+from ccpn.Metabolomics.lib import centering
+from ccpn.Metabolomics.lib import scaling
 
 
 class TestNormalisation(unittest.TestCase):

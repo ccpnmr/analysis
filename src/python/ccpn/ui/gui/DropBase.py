@@ -22,8 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.Base import Base as GuiBase
-from ccpn.lib import Util as ccpnUtil
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 

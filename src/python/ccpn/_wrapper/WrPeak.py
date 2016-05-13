@@ -23,10 +23,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
-from typing import Tuple, Optional, Union
-from ccpn.lib import _Implementation
 from typing import Union, List, Optional, Sequence
+
+from ccpn.core.lib import _Implementation
 from ccpncore.api.ccp.nmr.Nmr import PeakDim
+
 
 class WrAbstractWrapperObject:
   """These are functions that should be in the Implementation AbstractWrapperObject.

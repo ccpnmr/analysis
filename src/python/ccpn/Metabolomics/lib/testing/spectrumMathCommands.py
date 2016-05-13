@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import numpy.testing as npt
 
-from ccpncore.lib.metabolomics import commands
+from ccpn.Metabolomics.lib import commands
 
 
 class MyTestCase( unittest.TestCase ):

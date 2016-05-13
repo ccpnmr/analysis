@@ -23,7 +23,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import json
-import sys
 import typing
 
 from PyQt4 import QtGui, QtCore
@@ -31,15 +30,10 @@ from PyQt4 import QtGui, QtCore
 from ccpn import NmrAtom
 from ccpn import NmrResidue
 from ccpn import Project
-
-from ccpn.lib.Assignment import getNmrResiduePrediction
-
-from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
-
+from ccpn.core.lib.Assignment import getNmrResiduePrediction
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.Font import Font
-
-
+from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 
 EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
                   'H[N[CA]]': ['H', 'N', 'CA', 'CA-1'],
@@ -379,7 +373,7 @@ class Assigner(CcpnDock):
     Predicts sequence position for Nmr residues displayed in the Assigner and highlights appropriate
     positions in the Sequence Module if it is displayed.
     """
-    from ccpn.lib.Assignment import getSpinSystemsLocation
+    from ccpn.core.lib.Assignment import getSpinSystemsLocation
 
     possibleMatches = getSpinSystemsLocation(self.project, nmrResidues,
                       self.project.chains[0], self.project.chemicalShiftLists[0])

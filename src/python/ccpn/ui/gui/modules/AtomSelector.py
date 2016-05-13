@@ -29,7 +29,7 @@ from functools import partial
 from PyQt4 import QtCore
 
 from ccpn import Peak
-from ccpn.lib.Assignment import isInterOnlyExpt, getNmrAtomPrediction, CCP_CODES
+from ccpn.core.lib.Assignment import isInterOnlyExpt, getNmrAtomPrediction, CCP_CODES
 from ccpn.ui.gui.base.assignmentModuleLogic import peaksAreOnLine
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -41,6 +41,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util import Path
 from ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, ALL_ATOMS_SORTED
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
+
 
 class AtomSelector(CcpnDock):
   """

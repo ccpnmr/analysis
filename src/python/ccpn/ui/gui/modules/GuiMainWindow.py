@@ -28,15 +28,15 @@ import sys
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
-from ccpn.Metabolomics.Metabolomics import MetabolomicsModule
-from ccpn.Screen.popups.SampleSetupPopup import SamplePopup
 
 from ccpn import PeakList
-from ccpn.framework.update.UpdatePopup import UpdatePopup
-from ccpn.lib.Version import revision
+from ccpn.Metabolomics.Metabolomics import MetabolomicsModule
 from ccpn.Screen.modules import MixtureAnalysis
 from ccpn.Screen.modules import ScreeningSettings
 from ccpn.Screen.modules import ShowScreeningHits
+from ccpn.Screen.popups.SampleSetupPopup import SamplePopup
+from ccpn.core.lib.Version import revision
+from ccpn.framework.update.UpdatePopup import UpdatePopup
 from ccpn.ui.gui.base.Assigner import Assigner
 from ccpn.ui.gui.base.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.base.SideBar import SideBar

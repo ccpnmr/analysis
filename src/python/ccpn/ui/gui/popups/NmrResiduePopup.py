@@ -2,16 +2,13 @@ __author__ = 'simon1'
 
 from PyQt4 import QtGui
 
-from ccpn.lib.Assignment import CCP_CODES, ATOM_NAMES
 from ccpn import Chain
+from ccpn.core.lib.Assignment import CCP_CODES, ATOM_NAMES
+from ccpn.core.lib.Assignment import getNmrResiduePrediction, getNmrAtomPrediction
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-
-from ccpn.lib.Assignment import getNmrResiduePrediction, getNmrAtomPrediction
 
 
 

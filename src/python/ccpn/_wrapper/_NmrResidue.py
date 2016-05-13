@@ -22,17 +22,17 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn.util import Pid
 from typing import Tuple, Optional
-from ccpn.lib import CcpnSorting
-from ccpncore.lib import Constants
-from ccpn import AbstractWrapperObject
-from ccpn import Project
-from ccpn import NmrChain
-from ccpn import Residue
-from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
-
 from typing import Union
+
+from ccpn import AbstractWrapperObject
+from ccpn import NmrChain
+from ccpn import Project
+from ccpn import Residue
+from ccpn.core.lib import CcpnSorting
+from ccpn.util import Pid
+from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+from ccpncore.lib import Constants
 
 
 class NmrResidue(AbstractWrapperObject):

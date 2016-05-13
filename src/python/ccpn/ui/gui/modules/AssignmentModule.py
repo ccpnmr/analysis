@@ -1,29 +1,25 @@
 #from imp import reload
 
-from PyQt4 import QtGui, QtCore
+import typing
+from functools import partial
 
-from ccpn.lib.Assignment import CCP_CODES, ATOM_NAMES
-from ccpncore.lib.Constants import  defaultNmrChainCode
+from PyQt4 import QtGui, QtCore
+from ccpn.core.lib.Assignment import ATOM_NAMES
 
 from ccpn import NmrAtom, Peak, Project
-
+from ccpn.core.lib import CcpnSorting
+from ccpn.ui.gui.base.assignmentModuleLogic import (nmrAtomsForPeaks,
+                                                      peaksAreOnLine,
+                                                      sameAxisCodes)
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-
-from ccpn.lib import CcpnSorting
-import typing
-
-from ccpn.ui.gui.base.assignmentModuleLogic import (nmrAtomsForPeaks,
-                                                      peaksAreOnLine,
-                                                      sameAxisCodes)
-
-from functools import partial
+from ccpncore.lib.Constants import  defaultNmrChainCode
 
 class AssignmentModule(CcpnDock, Base):
   '''Module that can be used to assign nmrAtoms

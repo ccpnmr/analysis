@@ -1,13 +1,13 @@
 __author__ = 'simon'
 
-from ccpn.lib.Assignment import CCP_CODES
+import pyqtgraph as pg
 
+from ccpn.core.lib.Assignment import CCP_CODES
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
 from ccpn.util.Colour import spectrumHexColours
-import pyqtgraph as pg
+from ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
 
 class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the drop events are not processed
 

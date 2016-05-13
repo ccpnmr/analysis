@@ -2,7 +2,7 @@ __author__ = 'simon'
 
 
 
-from ccpn.lib.Sample import setupSamples
+from ccpn.core.lib import setupSamples
 
 
 refData = window.leftWidget.spectrumReference

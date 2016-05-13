@@ -1,16 +1,15 @@
 __author__ = 'simon1'
 
-from PyQt4 import QtCore, QtGui
-
 from functools import partial
 
+from PyQt4 import QtGui
+
+from ccpn.core.lib.Assignment import CCP_CODES, ATOM_NAMES
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-
-from ccpn.lib.Assignment import CCP_CODES, ATOM_NAMES
 
 # from ccpn.ui.gui.base.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,
 #                                                       peaksAreOnLine, intersectionOfAll,

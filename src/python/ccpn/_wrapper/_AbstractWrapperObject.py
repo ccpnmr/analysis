@@ -22,16 +22,16 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import itertools
 import functools
-import typing
+import itertools
 import operator
+import typing
 from collections import OrderedDict
 
-from ccpn.util import Pid
+from ccpn.core.lib import CcpnSorting
 from ccpn.util import Common as commonUtil
+from ccpn.util import Pid
 from ccpncore.api.memops import Implementation as ApiImplementation
-from ccpn.lib import CcpnSorting
 
 
 @functools.total_ordering
@@ -299,7 +299,6 @@ class AbstractWrapperObject():
     """Recursively set up links and functions involving children for wrapper classes
 
     NB classes that have already been linked are ignored, but their children are still processed"""
-    import ccpn
 
     if Project:
       assert ancestors, "Code errors, _linkWrapperClasses called with Project but no ancestors"

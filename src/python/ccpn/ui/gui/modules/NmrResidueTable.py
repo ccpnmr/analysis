@@ -2,13 +2,11 @@ __author__ = 'simon1'
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn.core.lib import CcpnSorting
+from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-
-from ccpn.lib import CcpnSorting
-
-from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 
 
 

@@ -23,11 +23,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Sequence, Tuple
-from ccpn.util import Pid
+
 from ccpn import AbstractWrapperObject
 from ccpn import Project
 from ccpn import Restraint
-from ccpn.lib import CcpnSorting
+from ccpn.core.lib import CcpnSorting
+from ccpn.util import Pid
 from ccpncore.api.ccp.nmr import NmrConstraint
 
 

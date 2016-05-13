@@ -9,16 +9,8 @@
         "editor": "default",
         "colourScheme": "dark",
         "license": "",
-        "dataPath": "",
-        "doubleCrossHair": true,
-        "useNative": false,
-        "toolbarHidden": false,
-        "autoBackupEnabled": false,
-        "autoBackupFrequency": 30
+        "toolbarHidden": false
     },
-    "recentMacros": [
-
-    ],
     "spectra": {
         "keepExternal": true,
         "brukerTemplates": "pdata/*",
@@ -29,5 +21,7 @@
         ]
     },
     "recentFiles": [
+    ],
+    "recentMacros": [
     ]
 }

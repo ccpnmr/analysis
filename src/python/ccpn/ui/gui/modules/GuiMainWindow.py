@@ -725,7 +725,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showParassignSetup(self):
     try:
-      from application.plugins.PARAssign.PARAssignSetup import ParassignSetup
+      from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
       self.ps = ParassignSetup(project=self.project)
       newDock = CcpnDock(name='PARAssign Setup')
       newDock.addWidget(self.ps)

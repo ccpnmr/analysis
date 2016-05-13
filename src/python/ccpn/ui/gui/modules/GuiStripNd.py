@@ -34,7 +34,6 @@ from functools import partial
 # from ccpn import Project
 from ccpn import PeakList
 # from ccpn import Peak
-# from ccpn.lib._wrapper import Spectrum as LibSpectrum
 
 # from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 # from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView

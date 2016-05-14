@@ -110,7 +110,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.testing import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 def notifyfunc(obj, value=None, ll=None):
   if not hasattr(obj, '_test_notifier_list'):

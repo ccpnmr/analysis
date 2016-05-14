@@ -2,7 +2,10 @@ __author__ = 'simon1'
 
 import pyqtgraph as pg
 
-from ccpn import ChemicalShift, NmrResidue, Peak, Project
+from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.Peak import Peak
+from ccpn.core.Project import Project
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip

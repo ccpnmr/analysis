@@ -29,7 +29,7 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn import PeakList
+from ccpn.core.PeakList import PeakList
 from ccpn.Metabolomics.Metabolomics import MetabolomicsModule
 from ccpn.Screen.modules import MixtureAnalysis
 from ccpn.Screen.modules import ScreeningSettings

@@ -37,8 +37,8 @@ from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import EditSampleComponentPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
-from ccpn import Project
-from ccpn import AbstractWrapperObject
+from ccpn.core.Project import Project
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 

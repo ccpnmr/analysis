@@ -1,6 +1,6 @@
 __author__ = 'simon1'
 
-from ccpn.core.testing import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 

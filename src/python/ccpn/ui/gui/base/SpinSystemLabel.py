@@ -1,7 +1,7 @@
 __author__ = 'simon1'
 
-from ccpn import Project
-from ccpn import NmrResidue
+from ccpn.core.Project import Project
+from ccpn.core.NmrResidue import NmrResidue
 
 from ccpn.util import Pid
 

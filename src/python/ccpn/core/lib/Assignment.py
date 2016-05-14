@@ -33,7 +33,12 @@ ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', '
               'NE2', 'NH1', 'NH2', 'NZ']}
 
 
-from ccpn import Chain, ChemicalShiftList, NmrResidue, Peak, PeakList, Project
+from ccpn.core.Chain import Chain
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.Peak import Peak
+from ccpn.core.PeakList import PeakList
+from ccpn.core.Project import Project
 
 from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, getSpinSystemScore
 from ccpncore.lib.spectrum import Spectrum as spectrumLib

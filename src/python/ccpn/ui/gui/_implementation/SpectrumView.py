@@ -27,10 +27,10 @@ from PyQt4 import QtCore, QtGui
 import operator
 from typing import Tuple
 from ccpn.util import Pid
-from ccpn import AbstractWrapperObject
-from ccpn import Project
-from ccpn import Spectrum
-from ccpn.ui.gui._implementation import Strip
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
+from ccpn.core.Spectrum import Spectrum
+from ccpn.ui.gui._implementation.Strip import Strip
 from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpn.ui.gui.modules.GuiSpectrumView1d import GuiSpectrumView1d

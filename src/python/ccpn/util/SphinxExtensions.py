@@ -97,6 +97,7 @@ def autodoc_process_docstring():
             lines[:0] = ['\- %s - ' % ', '.join(ll)]
 
     elif what_ == 'module' and hasattr(obj, '_sphinxWrappedClasses'):
+      # Probably obsolete, but will not be executed if attribute is missing
       lines.extend(classesHeader)
       for cls in obj._sphinxWrappedClasses:
         tag = cls.__name__

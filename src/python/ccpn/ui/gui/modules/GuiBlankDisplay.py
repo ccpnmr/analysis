@@ -25,7 +25,7 @@ from PyQt4 import QtCore
 
 # from pyqtgraph.dockarea import Dock
 
-from ccpn import Spectrum
+from ccpn.core.Spectrum import Spectrum
 
 from ccpn.util.Pid import Pid
 from typing import Sequence

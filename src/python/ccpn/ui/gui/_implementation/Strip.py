@@ -23,11 +23,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 from typing import Sequence, Tuple
 
-from ccpn import AbstractWrapperObject
-from ccpn import Peak
-from ccpn import Project
-from ccpn import Spectrum
-from ccpn.ui.gui._implementation import SpectrumDisplay
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Peak import Peak
+from ccpn.core.Project import Project
+from ccpn.core.Spectrum import Spectrum
+from ccpn.ui.gui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiStrip1d import GuiStrip1d
 from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd

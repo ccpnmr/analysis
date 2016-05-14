@@ -21,7 +21,7 @@ __version__ = "$Revisgion: 8885 $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.core.testing import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 from ccpncore.memops.ApiError import ApiError
 
 class NmrChainTest(WrapperTesting):

@@ -27,9 +27,9 @@ import typing
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn import NmrAtom
-from ccpn import NmrResidue
-from ccpn import Project
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.Project import Project
 from ccpn.core.lib.Assignment import getNmrResiduePrediction
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.Font import Font

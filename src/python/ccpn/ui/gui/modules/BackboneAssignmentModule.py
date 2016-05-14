@@ -29,7 +29,8 @@ from collections import OrderedDict
 
 import math
 
-from ccpn import ChemicalShift, NmrResidue
+from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core.NmrResidue import NmrResidue
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList

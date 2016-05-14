@@ -23,8 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 from typing import Sequence
 
-from ccpn import AbstractWrapperObject
-from ccpn import Project
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
 from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.GuiMainWindow import GuiMainWindow

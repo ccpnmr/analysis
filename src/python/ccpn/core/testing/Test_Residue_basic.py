@@ -1,6 +1,6 @@
 __author__ = 'TJ Ragan'
 
-from ccpn.core.testing import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
 class TestPhysicalResidueCreation(WrapperTesting):

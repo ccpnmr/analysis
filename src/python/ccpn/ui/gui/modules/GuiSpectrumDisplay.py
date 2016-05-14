@@ -27,8 +27,8 @@ import importlib, os
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn import Project
-from ccpn import Peak
+from ccpn.core.Project import Project
+from ccpn.core.Peak import Peak
 
 # from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 # from ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak

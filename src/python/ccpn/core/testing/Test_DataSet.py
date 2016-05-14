@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 import collections
 import datetime
 
-from ccpn.core.testing import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
 class DataSetTest(WrapperTesting):

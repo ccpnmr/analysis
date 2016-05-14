@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.core.testing import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 # NBNB These two imports are NECESSARY,
 # as  ccpn.ui.gui._implementation MUST be imported to register the Gui classes
@@ -59,7 +59,7 @@ class MarkTest(WrapperTesting):
     ll = list(zip(self.axisCodes, self.positions, self.units, self.labels))
     ll.append(('Hc', 1.27, 'ppm', None))
 
-    assert mark1.rulerData == tuple(_implementation.RulerData(*x) for x in ll)
+    assert mark1.rulerData == tuple(_implementation.Mark.RulerData(*x) for x in ll)
 
     mark1.delete()
     self.task.delete()
@@ -69,6 +69,6 @@ class MarkTest(WrapperTesting):
     data = ('Hc', 1.27, None, None)
     mark1 = self.task.newSimpleMark('red', data[0], data[1])
     print('mark1.rulerData', mark1.rulerData)
-    assert  mark1.rulerData == (_implementation.RulerData('Hc', 1.27, 'ppm', None),)
+    assert  mark1.rulerData == (_implementation.Mark.RulerData('Hc', 1.27, 'ppm', None),)
 
     self.task.delete()

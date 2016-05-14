@@ -53,7 +53,9 @@ __version__ = "$Revision$"
 import importlib
 
 # Following import statement to ensure wrapper classes correctly loaded
-import ccpn
+from ccpn import core
+from ccpn.core.Project import Project
+from ccpn.core import _pluralPidTypeMap
 
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
@@ -62,28 +64,24 @@ import ccpn
 # _previousChildClasses = list(ccpn.Project._childClasses)
 
 # Order in which classes are imported:
-localdir = locals()
 _importOrder = [
   'Window', 'Task', 'Mark', 'SpectrumDisplay', 'Strip', 'Axis', 'SpectrumView', 'PeakListView',
 ]
 _wrappedClasses = []
 for className in _importOrder:
-  cls = getattr(importlib.import_module('ccpn.ui.gui._implementation.%s' % className), className)
-  localdir[className] = cls
-  _wrappedClasses.append(cls)
-
-# Add class list for extended sphinx documentation to module
-_sphinxWrappedClasses = _wrappedClasses
+  _wrappedClasses.append(
+    getattr(importlib.import_module('ccpn.ui.gui._implementation.%s' % className), className)
+  )
+#
+# # Add class list for extended sphinx documentation to module
+# _sphinxWrappedClasses = _wrappedClasses
 
 # Make {shortClassName: className} map. NB may be added to by importing modules (ccpnmr wrapper)
 for cls in _wrappedClasses:
   tag = cls.className if hasattr(cls, 'className') else cls.__class__.__name__
-  ccpn._pluralPidTypeMap[cls.shortClassName] = tag + 's'
+  _pluralPidTypeMap[cls.shortClassName] = _pluralPidTypeMap[className] = tag + 's'
 del cls
 del tag
 
-# Additional data
-RulerData = importlib.import_module('ccpn.ui.gui._implementation.Mark').RulerData
-
 # # Set up interclass links and related functions
-ccpn.Project._linkWrapperClasses()
+Project._linkWrapperClasses()

@@ -25,9 +25,9 @@ from PyQt4 import QtCore, QtGui
 
 # import pyqtgraph as pg
 
-from ccpn import Project
-from ccpn import Peak
-from ccpn import NmrAtom
+from ccpn.core.Project import Project
+from ccpn.core.Peak import Peak
+from ccpn.core.NmrAtom import NmrAtom
 from ccpncore.api.ccp.nmr import Nmr
 # from ccpncore.api.ccp.nmr.Nmr import AbstractPeakDimContrib as ApiAbstractPeakDimContrib
 # from ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance

@@ -6,7 +6,9 @@ from functools import partial
 from PyQt4 import QtGui, QtCore
 from ccpn.core.lib.Assignment import ATOM_NAMES
 
-from ccpn import NmrAtom, Peak, Project
+from ccpn.core.Project import Project
+from ccpn.core.Peak import Peak
+from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.base.assignmentModuleLogic import (nmrAtomsForPeaks,
                                                       peaksAreOnLine,

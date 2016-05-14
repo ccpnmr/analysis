@@ -23,9 +23,9 @@ __version__ = "$Revision$"
 #=========================================================================================
 from ccpn.util import Pid
 from typing import Sequence, Tuple
-from ccpn import AbstractWrapperObject
-from ccpn import Project
-from ccpn.ui.gui._implementation import Window
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
+from ccpn.ui.gui._implementation.Window import Window
 from ccpncore.api.ccpnmr.gui.Task import GuiTask as ApiGuiTask
 
 

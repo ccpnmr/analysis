@@ -1,8 +1,8 @@
 __author__ = 'simon1'
 
 
-from ccpn import Chain
-from ccpn import Residue
+from ccpn.core.Chain import Chain
+from ccpn.core.Residue import Residue
 
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.Font import Font

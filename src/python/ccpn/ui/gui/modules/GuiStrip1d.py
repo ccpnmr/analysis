@@ -26,8 +26,8 @@ __author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn import Project
-from ccpn import PeakList
+from ccpn.core.Project import Project
+from ccpn.core.PeakList import PeakList
 
 from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 

@@ -739,7 +739,7 @@ if __name__ == '__main__':
     from ccpn.core.lib import Io as ccpnIo
 
     # from ccpn.util.Io import loadProject
-    # from ccpn import Project
+    # from ccpn.core.Project import Project
     #
     # # set up input
     # junk, projectDir, outputDir = sys.argv[:3]

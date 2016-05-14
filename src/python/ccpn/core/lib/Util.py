@@ -30,7 +30,7 @@ from ccpn.util import Pid
 def pid2PluralName(pid:str) -> str:
   """Get plural class name, (e.g. 'Peaks', 'Spectra' from short-form or long-form, Pid string
   Unrecognised strings are returned unchanged"""
-  from ccpn import _pluralPidTypeMap as pluralPidTypeMap
+  from ccpn.core import _pluralPidTypeMap as pluralPidTypeMap
   tag = pid.split(Pid.PREFIXSEP, 1)[0]
   return pluralPidTypeMap.get(tag, tag)
 

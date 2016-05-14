@@ -22,8 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import ccpn
-from ccpn.core.testing import WrapperTesting
+from ccpn import core
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
 class NoteTest(WrapperTesting):
@@ -34,7 +34,7 @@ class NoteTest(WrapperTesting):
   def test_make_and_save_note(self):
     self.project.newNote(text='Balaclava')
     self.project.save()
-    loadedProject = ccpn.loadProject(self.project.path)
+    loadedProject = core.loadProject(self.project.path)
     loadedProject.delete()
 
   def test_rename_note(self):

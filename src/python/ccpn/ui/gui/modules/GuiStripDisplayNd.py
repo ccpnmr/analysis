@@ -25,8 +25,8 @@ __version__ = "$Revision$"
 __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 
-from ccpn import Project
-from ccpn import Peak
+from ccpn.core.Project import Project
+from ccpn.core.Peak import Peak
 
 
 # from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView

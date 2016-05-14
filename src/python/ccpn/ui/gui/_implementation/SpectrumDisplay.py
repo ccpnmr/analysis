@@ -25,12 +25,12 @@ __version__ = "$Revision$"
 from typing import Sequence, Tuple
 from ccpn.util import Pid
 
-from ccpn import AbstractWrapperObject
-from ccpn import Project
-from ccpn import NmrResidue
-from ccpn import Spectrum
-from ccpn.ui.gui._implementation import Task
-from ccpn.ui.gui._implementation import Window
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.Spectrum import Spectrum
+from ccpn.ui.gui._implementation.Task import Task
+from ccpn.ui.gui._implementation.Window import Window
 from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
 from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay

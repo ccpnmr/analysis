@@ -899,7 +899,7 @@ class CcpnNefIo:
 
 if __name__ == '__main__':
   import sys
-  import ccpn
+  from ccpn import core
   path = sys.argv[1]
-  project = ccpn.loadProject(path)
+  project = core.loadProject(path)
   print(convert2NefString(project))

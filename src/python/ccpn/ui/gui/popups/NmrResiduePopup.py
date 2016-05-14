@@ -2,7 +2,7 @@ __author__ = 'simon1'
 
 from PyQt4 import QtGui
 
-from ccpn import Chain
+from ccpn.core.Chain import Chain
 from ccpn.core.lib.Assignment import CCP_CODES, ATOM_NAMES
 from ccpn.core.lib.Assignment import getNmrResiduePrediction, getNmrAtomPrediction
 from ccpn.ui.gui.widgets.Base import Base

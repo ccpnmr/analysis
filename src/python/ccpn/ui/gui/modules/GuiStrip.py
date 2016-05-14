@@ -28,9 +28,9 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn import Project
-from ccpn import PeakList
-from ccpn import Peak
+from ccpn.core.Project import Project
+from ccpn.core.PeakList import PeakList
+from ccpn.core.Peak import Peak
 
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem

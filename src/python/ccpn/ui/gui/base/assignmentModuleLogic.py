@@ -22,7 +22,9 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn import ChemicalShiftList, NmrAtom, Peak
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Peak import Peak
 
 from ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing

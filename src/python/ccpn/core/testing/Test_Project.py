@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 
 import os
 
-from ccpn.core.testing import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 from ccpn.util import Io as ioUtil
 
 

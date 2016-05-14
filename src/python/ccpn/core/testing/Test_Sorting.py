@@ -28,9 +28,9 @@ from collections import OrderedDict
 import numpy
 import pandas
 
-import ccpn
+from ccpn import core
 from ccpn.core.lib import CcpnSorting
-from ccpn.core.testing import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 from ccpn.util import Sorting
 
 
@@ -89,7 +89,7 @@ class SortingData(WrapperTesting):
 
   mixed = [pandas.DataFrame(), pandas.Series(), complex(1,2), complex(11,0), complex(1),
            frozenset(()), lambda: 1, Sorting.stringSortKey,  Sorting.universalSortKey,
-           ccpn, Sorting, math, numpy,
+           core, Sorting, math, numpy,
            numpy.array([1.,2.]), numpy.array([[1,2],[3,4]]), numpy.array(['a', 'b', 'c', 'd'],),
            set(), set((1,)), set((1,9,11)),  set((2,1)),
           ]

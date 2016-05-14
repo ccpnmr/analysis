@@ -23,10 +23,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpncore.lib.molecule import Labeling
-from ccpn import Project
-from ccpn import Atom
-from ccpn import NmrAtom
-from ccpn import Sample
+from ccpn.core.Project import Project
+from ccpn.core.Atom import Atom
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Sample import Sample
 from ccpn.util.Pid import Pid
 from typing import Sequence
 

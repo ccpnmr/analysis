@@ -23,10 +23,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Tuple
-from ccpn import AbstractWrapperObject
-# from ccpn import Project
-from ccpn import Peak
-from ccpn.ui.gui._implementation import PeakListView
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+# from ccpn.core.Project import Project
+from ccpn.core.Peak import Peak
+from ccpn.ui.gui._implementation.PeakListView import PeakListView
 from ccpncore.api.ccpnmr.gui.Task import PeakView as ApiPeakView
 
 

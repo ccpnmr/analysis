@@ -280,7 +280,7 @@ if __name__ == '__main__':
   if len(sys.argv) >= 2:
 
     from ccpn.util import Io as coreIo
-    from ccpn import Project
+    from ccpn.core.Project import Project
 
     # set up input
     junk, readPath = sys.argv[:2]

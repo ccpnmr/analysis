@@ -23,8 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 import numpy
 
-import ccpn
-from ccpn.core.testing import WrapperTesting
+from ccpn import core
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
 class StructureEnsembleTesting(WrapperTesting):
@@ -88,7 +88,7 @@ class StructureEnsembleTesting2(WrapperTesting):
                                             'A.10.ASN. O', 'A.10.ASN. CB', 'A.10.ASN. CG',
                                             'A.10.ASN. OD1', 'A.10.ASN. ND2'])
     self.project.save()
-    loadedProject = ccpn.loadProject(self.project.path)
+    loadedProject = core.loadProject(self.project.path)
     try:
       ensemble = loadedProject.structureEnsembles[0]
       self.assertEqual( len(ensemble.models), 1)
@@ -159,7 +159,7 @@ class StructureEnsembleTesting2(WrapperTesting):
     self.assertTrue(numpy.isnan(ensemble.occupancyData.flat[1]))
 
     self.project.save()
-    loadedProject = ccpn.loadProject(self.project.path)
+    loadedProject = core.loadProject(self.project.path)
     try:
       ensemble = loadedProject.structureEnsembles[0]
       self.assertEqual(ensemble.atomIds, ['A.1.ALA.H', 'B.2.TRP.CE2', 'B.5.GLX.CA', 'A.-1.VAL.HG2%'])

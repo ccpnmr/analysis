@@ -28,7 +28,7 @@ from functools import partial
 
 from PyQt4 import QtCore
 
-from ccpn import Peak
+from ccpn.core.Peak import Peak
 from ccpn.core.lib.Assignment import isInterOnlyExpt, getNmrAtomPrediction, CCP_CODES
 from ccpn.ui.gui.base.assignmentModuleLogic import peaksAreOnLine
 from ccpn.ui.gui.widgets.Button import Button

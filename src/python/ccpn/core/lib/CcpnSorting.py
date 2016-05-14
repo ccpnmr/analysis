@@ -88,7 +88,7 @@ def _ccpnOrderedKey(key):
   before sorting by class name"""
 
   # import here to avoid circular imports
-  from ccpn import AbstractWrapperObject
+  from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
   cls = key.__class__
 

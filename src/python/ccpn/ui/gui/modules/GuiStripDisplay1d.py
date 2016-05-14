@@ -25,8 +25,8 @@ __author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
 
-from ccpn import Project
-# from ccpn import Spectrum
+from ccpn.core.Project import Project
+# from ccpn.core.Spectrum import Spectrum
 
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 

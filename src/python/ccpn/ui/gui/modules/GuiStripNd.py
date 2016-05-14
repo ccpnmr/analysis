@@ -31,9 +31,9 @@ import numpy
 from functools import partial
 # import pyqtgraph as pg
 
-# from ccpn import Project
-from ccpn import PeakList
-# from ccpn import Peak
+# from ccpn.core.Project import Project
+from ccpn.core.PeakList import PeakList
+# from ccpn.core.Peak import Peak
 
 # from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 # from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView

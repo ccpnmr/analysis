@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 # NB this import cna cause circular imports, but ccpn.__init__ makes sure it does not happen
-from ccpn import Project
+from ccpn.core.Project import Project
 from ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
 from ccpn.util import Io as ioUtil
 from ccpncore.lib import V2Upgrade

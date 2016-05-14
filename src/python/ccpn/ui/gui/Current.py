@@ -31,7 +31,7 @@ from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiNmrResidue
 from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiSpectrum
 from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
-from ccpn import Project
+from ccpn.core.Project import Project
 
 # Fields that are coded automatically
 _autoFields = ['peaks','regions','positions', 'strips', 'nmrChains', 'nmrResidues', 'nmrAtoms',

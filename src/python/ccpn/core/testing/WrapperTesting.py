@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 import os
 import unittest
 import contextlib
-import ccpn
+from ccpn import core
 
 from ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 
@@ -37,9 +37,9 @@ class WrapperTesting(unittest.TestCase):
   @contextlib.contextmanager
   def initialSetup(self):
     if self.projectPath is None:
-      self.project = ccpn.newProject('default')
+      self.project = core.newProject('default')
     else:
-      self.project = ccpn.loadProject(os.path.join(TEST_PROJECTS_PATH, self.projectPath))
+      self.project = core.loadProject(os.path.join(TEST_PROJECTS_PATH, self.projectPath))
     self.project._resetUndo(debug=True)
     self.undo = self.project._undo
     self.undo.debug = True

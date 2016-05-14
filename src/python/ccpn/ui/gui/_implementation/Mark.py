@@ -24,9 +24,9 @@ __version__ = "$Revision$"
 from collections import namedtuple
 
 from typing import Sequence, Tuple
-from ccpn import AbstractWrapperObject
-from ccpn import Project
-from ccpn.ui.gui._implementation import Task
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
+from ccpn.ui.gui._implementation.Task import Task
 from ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 from ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 

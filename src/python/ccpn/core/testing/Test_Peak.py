@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.core.testing import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting
 from ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 class PeakTest(WrapperTesting):

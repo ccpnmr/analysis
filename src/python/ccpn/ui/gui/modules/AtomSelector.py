@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -39,8 +39,8 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util import Path
-from ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, ALL_ATOMS_SORTED
-from ccpncore.lib.spectrum import Spectrum as spectrumLib
+from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, ALL_ATOMS_SORTED
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 
 class AtomSelector(CcpnDock):
@@ -264,7 +264,7 @@ class AtomSelector(CcpnDock):
     Returns all buttons in Atom Selector to original colours and style.
     """
     if self.parent._appBase.preferences.general.colourScheme == 'dark':
-      styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpn', 'ui', 'gui', 'widgets',
+      styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
                                      'DarkStyleSheet.qss')).read()
       self.setStyleSheet('''DockLabel  {
                                         background-color: #BEC4F3;
@@ -277,7 +277,7 @@ class AtomSelector(CcpnDock):
       self.setStyleSheet(styleSheet)
 
     elif self.parent._appBase.preferences.general.colourScheme == 'light':
-      styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpn', 'ui', 'gui', 'widgets',
+      styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
                                      'LightStyleSheet.qss')).read()
       for buttons in self.buttons.values():
         for button in buttons:

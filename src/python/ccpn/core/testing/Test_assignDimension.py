@@ -2,7 +2,7 @@ __author__ = 'simon1'
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
-from ccpncore.lib.spectrum import Spectrum as libSpectrum
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 
 class Test_makeNmrAtom(WrapperTesting):

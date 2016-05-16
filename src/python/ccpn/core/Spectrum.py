@@ -9,9 +9,9 @@ all common cases).
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -29,11 +29,11 @@ import collections
 from typing import Sequence, Tuple, Optional
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpncore.api.ccp.nmr import Nmr
-from ccpncore.api.ccp.general import DataLocation
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 from ccpn.util import Pid
 
-from ccpncore.lib.Io import Formats
+from ccpnmodel.ccpncore.lib.Io import Formats
 
 # MagnetisationTransferTuple
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',

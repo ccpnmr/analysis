@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -27,8 +27,8 @@ from typing import Sequence, Tuple
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.ui.gui._implementation.Task import Task
-from ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
-from ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
 
 RulerData = namedtuple('RulerData', ['axisCode', 'position', 'unit', 'label'])

@@ -4,7 +4,7 @@ Qt = QtCore.Qt
 import os
 import random
 
-from ccpncore.memops.metamodel import Util as metaUtil
+from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox

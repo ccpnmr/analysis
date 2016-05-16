@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -26,22 +26,20 @@ __version__ = "$Revision$"
 
 import glob
 import os
-# import shutil
 import sys
 import tempfile
-# import time
 
-from ccpncore.api.memops import Implementation
-from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpnmodel.ccpncore.api.memops import Implementation
+from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
 from ccpn.util import Path
 from ccpn.util import ApiPath
 from ccpn.util import Logging
 from ccpn.util import Common as commonUtil
-from ccpncore.memops.ApiError import ApiError
+from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 # NBNB TBD this should be done by putting the function inside the class - later
 
-from ccpncore.api.ccp.general.DataLocation import AbstractDataStore
+from ccpnmodel.ccpncore.api.ccp.general.DataLocation import AbstractDataStore
 
 # Necessary because shutil fails in permission copying for windows file systems,
 # and the error is not properly caught on some VMs.
@@ -217,7 +215,7 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
   Throws an ApiError if there is an API exception.
   """
 
-  from ccpncore.memops.format.xml import XmlIO
+  from ccpnmodel.ccpncore.memops.format.xml import XmlIO
 
   def isGeneralDataWriteable(generalDataRep):
     ppath = generalDataRep.url.path
@@ -358,7 +356,7 @@ def loadProject(path:str, projectName:str=None, askFile:"function"=None,
   refDataRepository = project.findFirstRepository(name='refData')
   if refDataRepository:
     oldPath = refDataRepository.url.path
-    newPath = Path.normalisePath(Path.getDataDirectory())
+    newPath = Path.joinPath(Path.getPathToImport('ccpnmodel'), 'data')
     if newPath != oldPath:
       warningMessages.append('refData has been changed from\n"%s"\nto\n"%s"' % (oldPath, newPath))
       refDataRepository.url = Implementation.Url(path=newPath)
@@ -916,7 +914,7 @@ def _downlinkTagsByImport(root):
   in import order, so that imported packages come before importing packages
   """
 
-  from ccpncore.memops.metamodel import Util as metaUtil
+  from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
   leafPackages = []
   packages = [root.metaclass.container.topPackage()]
@@ -1198,7 +1196,7 @@ def getRepositoryPath(project, repositoryName):
 
 def setRepositoryPath(project, repositoryName, path):
 
-  from ccpncore.api.memops.Implementation import Url
+  from ccpnmodel.ccpncore.api.memops.Implementation import Url
 
   repository = project.findFirstRepository(name=repositoryName)
   if repository:

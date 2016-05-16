@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -29,20 +29,20 @@ import operator
 from collections import OrderedDict
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
-from ccpncore.memops import Notifiers
-from ccpncore.memops.ApiError import ApiError
-from ccpncore.lib.molecule import MoleculeQuery
-from ccpncore.lib.spectrum import NmrExpPrototype
-from ccpncore.lib import Constants
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
+from ccpnmodel.ccpncore.memops import Notifiers
+from ccpnmodel.ccpncore.memops.ApiError import ApiError
+from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery
+from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
+from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util import Pid
 from ccpn.util import Undo
 from ccpn.util import Io as ioUtil
 
-from ccpncore.lib.Io import Formats as ioFormats
-from ccpncore.lib.Io import Fasta as fastaIo
-from ccpncore.lib.Io import Pdb as pdbIo
-from ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
+from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
+from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
+from ccpnmodel.ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
 
 
 class Project(AbstractWrapperObject):

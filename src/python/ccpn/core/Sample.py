@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -32,8 +32,8 @@ from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.util import Common as commonUtil
-from ccpncore.api.ccp.lims.Sample import Sample as ApiSample
-from ccpncore.api.ccp.nmr import Nmr
+from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 
 
 class Sample(AbstractWrapperObject):

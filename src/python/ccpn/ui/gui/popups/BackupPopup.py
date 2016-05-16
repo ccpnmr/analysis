@@ -2,7 +2,7 @@ from PyQt4 import QtCore, QtGui
 
 import os
 
-from ccpncore.memops.metamodel import Util as metaUtil
+from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Frame import Frame

@@ -13,7 +13,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
-from ccpncore.lib.spectrum import Spectrum as spectrumLib
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 from ccpn.ui.gui.lib.Window import navigateToNmrResidue
 

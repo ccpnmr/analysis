@@ -27,7 +27,7 @@ def find_pyfiles(dirs):
     """
     for dn in dirs:
         dn = abspath(dn)
-        for root, dirs, files in os.walk(dn):
+        for root, dirs, files in os.walk(dn, followlinks=True):
             for r in '.svn', 'CVS':
                 try:
                     dirs.remove(r)
@@ -76,7 +76,7 @@ def find_all_pyfiles(topDirectory, ignoreDirs=(), ignoreFiles=()):
     Find all the files ending with .py inside topDirectory
     """
     dn = packroot = abspath(topDirectory)
-    for root, dirs, files in os.walk(dn):
+    for root, dirs, files in os.walk(dn, followlinks=True):
       for r in ignoreDirs:
         try:
           dirs.remove(r)
@@ -94,7 +94,6 @@ def find_all_pyfiles(topDirectory, ignoreDirs=(), ignoreFiles=()):
 def importAllPyfiles(topDirectory, ignoreDirs=(),ignoreFiles=()):
   """Test import all python files in a directory tree.
   topDirectory must be (intended to be) on the Python path"""
-  ignoreFiles
   for fn in find_all_pyfiles(topDirectory, ignoreDirs=ignoreDirs, ignoreFiles=ignoreFiles):
     modname = filename2module(fn)
     print("test import %s :" % modname)

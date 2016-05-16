@@ -3,7 +3,7 @@ __author__ = 'TJ Ragan'
 import unittest
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
-from ccpncore.memops.ApiError import ApiError
+from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 
 class TestSubstanceCreation(WrapperTesting):

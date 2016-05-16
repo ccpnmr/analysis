@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -40,8 +40,8 @@ from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 
-from ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, getSpinSystemScore
-from ccpncore.lib.spectrum import Spectrum as spectrumLib
+from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, getSpinSystemScore
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing
 
 
@@ -153,7 +153,7 @@ def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=
     finalPredictions.append([key, value])
   return finalPredictions
 
-# NBNB replaced by ccpncore.lib.spectrum.Spectrum.name2IsotopeCode
+# NBNB replaced by ccpnmodel.ccpncore.lib.spectrum.Spectrum.name2IsotopeCode
 # def getIsotopeCodeOfAxis(axisCode):
 #   """
 #

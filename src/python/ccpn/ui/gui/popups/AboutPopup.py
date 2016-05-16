@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -34,7 +34,8 @@ class AboutPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, **kw):
     super(AboutPopup, self).__init__(parent)
     Base.__init__(self, **kw)
-    splashPng = os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'ccpnmr-splash-screen.jpg')
+    splashPng = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+                             'ccpnmr-splash-screen.jpg')
     splashPix = QtGui.QPixmap(splashPng)
     self.setFixedSize(671, 659)
     self.label = Label(self, grid=(0, 0), gridSpan=(10, 12))

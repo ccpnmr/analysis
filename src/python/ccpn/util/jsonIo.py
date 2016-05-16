@@ -1,6 +1,6 @@
 """Local enhancements to json, adding support for reading and writing
 pandas.Series, pandas.DataFrame, pandas.Panel, numpy.ndarray, OrderedDict,
-and ccpncore.Tensor
+and ccpnmodel.ccpncore.Tensor
 
 
 """
@@ -10,9 +10,9 @@ and ccpncore.Tensor
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-               "or ccpncore.memops.Credits.CcpnLicense for license text")
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                 " or ccpncore.memops.Credits.CcpNmrReference")
+                 " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:

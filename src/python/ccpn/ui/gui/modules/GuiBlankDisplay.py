@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -31,7 +31,7 @@ from ccpn.util.Pid import Pid
 from typing import Sequence
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.Label import Label
-# from ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
+# from ccpnmodel.ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
 from ccpn.ui.gui.DropBase import DropBase
 from ccpn.Metabolomics.SpectrumGroupsWidget import SpectrumGroupsToolBar

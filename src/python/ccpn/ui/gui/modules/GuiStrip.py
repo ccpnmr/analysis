@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -38,18 +38,18 @@ from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 from ccpn.ui.gui.widgets.Widget import Widget
 # from ccpn.ui.gui.widgets.Menu import Menu
 
-# from ccpncore.memops import Notifiers
+# from ccpnmodel.ccpncore.memops import Notifiers
 
 from ccpn.util.Colour import Colour
 from ccpn.util import Ticks
 import typing
 
-# from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
-# from ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
-# from ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
-# from ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
-from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
+# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
+# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 
 from ccpn.ui.gui.base.AxisTextItem import AxisTextItem
 # from ccpn.ui.gui.DropBase import DropBase

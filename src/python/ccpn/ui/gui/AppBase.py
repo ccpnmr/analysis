@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Simon P Skinner & Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license "
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -33,8 +33,8 @@ from ccpn.core.Project import Project
 from ccpn.ui.gui import _implementation # NB Neccessary to force load of graphics classes
 from ccpn.util import Io as ioUtil
 from ccpn.ui.gui.widgets.Application import Application
-from ccpncore.memops.metamodel import Util as metaUtil
-from ccpncore.api.memops import Implementation
+from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
+from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
@@ -74,7 +74,8 @@ class SplashScreen(QtGui.QSplashScreen):
 
   def __init__(self, dummy=None, wait=1):
 
-      splashPng = os.path.join(Path.getPythonDirectory(), 'ccpncore', 'gui', 'ccpnmr-splash-screen.jpg')
+      splashPng = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+                               'ccpnmr-splash-screen.jpg')
       #print(splashPng)
       pixmap = QtGui.QPixmap(splashPng)
       #super(QtGui.QSplashScreen, self).__init__(pixmap, QtCore.Qt.WindowStaysOnTopHint)
@@ -324,8 +325,7 @@ class AppBase(GuiBase):
     with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
       yaml.dump(layout, stream)
       stream.close()
-    saveIconPath = os.path.join(Path.getPythonDirectory(),
-                      'ccpncore', 'gui', 'iconsNew', 'save.png')
+    saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'iconsNew', 'save.png')
     MessageDialog.showMessage('Project saved', 'Project successfully saved!',
                               colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 
@@ -352,8 +352,8 @@ def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userP
         d[k] = u[k]
     return d
       
-  preferencesPath = defaultPreferencesPath if defaultPreferencesPath else os.path.join(Path.getTopDirectory(),
-                      'config', 'defaultv3settings.json')
+  preferencesPath = (defaultPreferencesPath if defaultPreferencesPath else
+                     os.path.join(Path.getTopDirectory(), 'config', 'defaultv3settings.json'))
   preferences = _readPreferencesFile(preferencesPath)
 
   if not skipUserPreferences:
@@ -368,10 +368,10 @@ def getStyleSheet(preferences):
   colourScheme = preferences.general.colourScheme
   colourScheme = metaUtil.upperFirst(colourScheme)
   
-  styleSheet = open(os.path.join(Path.getPythonDirectory(), 'ccpn', 'ui', 'gui', 'widgets',
+  styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
                                  '%sStyleSheet.qss' % colourScheme)).read()
   if platform.system() == 'Linux':
-    additions = open(os.path.join(Path.getPythonDirectory(),  'ccpn', 'ui', 'gui', 'widgets',
+    additions = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
                                   '%sAdditionsLinux.qss' % colourScheme)).read()
     styleSheet += additions
   return styleSheet

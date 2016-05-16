@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -31,9 +31,9 @@ from ccpn.ui.gui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiStrip1d import GuiStrip1d
 from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd
-from ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
-from ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
-from ccpncore.lib.spectrum import Spectrum as libSpectrum
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 
 class Strip(GuiStrip, AbstractWrapperObject):

@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -70,7 +70,7 @@ def copySubTree(sourceObj, newParent, maySkipCrosslinks:bool=False,
   clean up after an error. 
   """
 
-  from ccpncore.memops.metamodel.MetaModel import MemopsError
+  from ccpnmodel.ccpncore.memops.metamodel.MetaModel import MemopsError
   if sourceObj.root is sourceObj:
     raise MemopsError("copySubTree cannot be used to copy entire projects")
 
@@ -138,9 +138,9 @@ def _transferData(newParent, sourceObj, oldToNew=None,
 
   logger = newParent.root._logger
 
-  from ccpncore.memops.metamodel import Constants as metaConstants
+  from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
   
-  from ccpncore.xml.memops import Implementation as xmlImplementation
+  from ccpnmodel.ccpncore.xml.memops import Implementation as xmlImplementation
   
   serialTag = metaConstants.serial_attribute
   # NB serialDictTag hardwired to avoid using the varNames dictionary
@@ -421,7 +421,7 @@ def _transferData(newParent, sourceObj, oldToNew=None,
       _delayedLoadLinksComp(localOldToNew, crossLinkData)
 
       # minor post-processing
-      from ccpncore.memops.format.compatibility.Converters1 import minorPostProcess
+      from ccpnmodel.ccpncore.memops.format.compatibility.Converters1 import minorPostProcess
       minorPostProcess(oldVersionStr, targetObj, delayDataDict, localOldToNew)
  
       # set TopObjects into TopObjects dictionary.

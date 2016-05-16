@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 Qt = QtCore.Qt
 
-from ccpncore.memops.metamodel import Util as metaUtil
+from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Entry import Entry

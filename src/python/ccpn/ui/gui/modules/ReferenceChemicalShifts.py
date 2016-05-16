@@ -7,7 +7,7 @@ from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.util.Colour import spectrumHexColours
-from ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
+from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
 
 class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the drop events are not processed
 

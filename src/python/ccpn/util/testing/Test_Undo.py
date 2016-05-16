@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 from ccpn.util.Undo import Undo
 from ccpn.util import Io as ioUtil
-from ccpncore.testing.CoreTesting import CoreTesting
+from ccpnmodel.ccpncore.testing.CoreTesting import CoreTesting
 
 
 def test_undo_create():
@@ -262,7 +262,7 @@ class Test_Undo(CoreTesting):
     project._undo.redo()
 
   def test_make_molecule_undo(self):
-    from ccpncore.lib.molecule import MoleculeModify
+    from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
     project = self.project
     project._undo = Undo(debug=True)
     sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']
@@ -271,7 +271,7 @@ class Test_Undo(CoreTesting):
     project.checkAllValid()
 
   def test_make_molecule_undo_redo(self):
-    from ccpncore.lib.molecule import MoleculeModify
+    from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
     project = self.project
     project._undo = Undo(debug=True)
     sequence = ['Gln', 'Trp', 'Glu', 'Arg', 'Thr', 'Tyr', 'Ile', 'Pro', 'Ala']

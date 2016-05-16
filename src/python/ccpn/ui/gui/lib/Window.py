@@ -6,7 +6,7 @@ from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project
-from ccpncore.lib.spectrum import Spectrum as spectrumLib
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay

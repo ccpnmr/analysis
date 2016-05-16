@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -34,8 +34,8 @@ from ccpn.core.lib import CcpnSorting
 from ccpn.util import Path
 from ccpn.util import Pid
 from ccpn.util.Bmrb import bmrb
-from ccpncore.lib.spectrum import Spectrum as libSpectrum
-from ccpncore.memops import Version
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
+from ccpnmodel.ccpncore.memops import Version
 
 nefExtension = 'nef'
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.

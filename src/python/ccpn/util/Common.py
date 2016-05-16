@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -34,8 +34,8 @@ from collections import abc as collectionClasses
 from functools import total_ordering
 
 from ccpn.util import Path
-from ccpncore.lib import Constants as coreLibConstants
-from ccpncore.memops.metamodel import Constants as metaConstants
+from ccpnmodel.ccpncore.lib import Constants as coreLibConstants
+from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
 
 WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
@@ -49,7 +49,7 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           + defaultFileNameChar)
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
-apiTopModule = 'ccpncore.api'
+apiTopModule = 'ccpnmodel.ccpncore.api'
 
 
 @total_ordering

@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -31,12 +31,12 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Spectrum import Spectrum
 from ccpn.ui.gui._implementation.Task import Task
 from ccpn.ui.gui._implementation.Window import Window
-from ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
-from ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
-from ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpn.util import Common as commonUtil
-from ccpncore.lib.spectrum import Spectrum as libSpectrum
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd
 from ccpn.ui.gui.modules.GuiStripDisplay1d import GuiStripDisplay1d

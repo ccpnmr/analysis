@@ -8,9 +8,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -32,9 +32,9 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
 from ccpn.util import Common as commonUtil
-from ccpncore.api.ccp.molecule.MolStructure import Atom as ApiCoordAtom
-from ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
-from ccpncore.lib.spectrum import Spectrum as spectrumLib
+from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Atom as ApiCoordAtom
+from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 NaN = float('NaN')
 

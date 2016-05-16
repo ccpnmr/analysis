@@ -7,9 +7,9 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpncore.memops.Credits.CcpnLicense for license text")
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpncore.memops.Credits.CcpNmrReference")
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification:
@@ -28,7 +28,7 @@ from PyQt4 import QtCore, QtGui
 from ccpn.core.Project import Project
 # from ccpn.core.Spectrum import Spectrum
 
-from ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 
 # from ccpn.util.Pid import Pid
 from typing import Sequence
@@ -40,9 +40,9 @@ from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 # from ccpn.ui.gui.modules.GuiStrip1d import GuiStrip1d
 # from ccpn.ui.gui.widgets.VerticalLabel import VerticalLabel
 
-from ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-# from ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-# from ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
+# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
 
 

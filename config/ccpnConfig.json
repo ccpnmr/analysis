@@ -1,0 +1,22 @@
+{"configuration":{
+  "repositories":[
+  ],
+  "packageLocators":[
+    ["ccp.molecule.ChemComp", "userData"],
+    ["ccp.molecule.ChemComp", "refData"],
+    ["ccp.molecule.ChemCompCharge","userData"],
+    ["ccp.molecule.ChemCompCharge","refData"],
+    ["ccp.molecule.ChemCompCoord", "userData"],
+    ["ccp.molecule.ChemCompCoord", "refData"],
+    ["ccp.molecule.ChemCompLabel", "userData"],
+    ["ccp.molecule.ChemCompLabel", "refData"],
+    ["ccp.molecule.ChemElement", "refData"],
+    ["ccp.molecule.StereoChemistry", "refData"],
+    ["ccp.nmr.NmrExpPrototype", "userData"],
+    ["ccp.nmr.NmrExpPrototype", "refData"],
+    ["ccp.nmr.NmrReference", "refData"],
+    ["ccpnmr.AnalysisProfile", "generalData"],
+    ["ccpnmr.AnalysisProfile", "refData"]
+  ]
+}
+}

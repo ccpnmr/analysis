@@ -62,7 +62,7 @@ from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
-from ccpn.util import Io as ioUtil
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.util import Path
 from ccpn.util.Common import uniquify
 from ccpn.util.Translation import translator
@@ -133,7 +133,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def backupProject(self):
     
-    ioUtil.backupProject(self._project._wrappedData.parent)
+    apiIo.backupProject(self._project._wrappedData.parent)
 
   def setupWindow(self):
     """
@@ -559,7 +559,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     now = datetime.datetime.now().strftime('%y%m%d%H%M%S')
     filePrefix = '%s_%s' % (os.path.basename(projectPath), now)
     filePrefix = os.path.join(os.path.dirname(projectPath), filePrefix)
-    fileName = ioUtil.packageProject(apiProject, filePrefix, includeBackups=True, includeLogs=True)
+    fileName = apiIo.packageProject(apiProject, filePrefix, includeBackups=True, includeLogs=True)
     
     MessageDialog.showInfo('Project Archived',
           'Project archived to %s' % fileName, colourScheme=self.colourScheme)
@@ -979,7 +979,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     apiProject = self._project._wrappedData.root
     newPath = AppBase.getSaveDirectory(apiProject, self._appBase.preferences)
     if newPath:
-      newProjectPath = ioUtil.ccpnProjectPath(newPath)
+      newProjectPath = apiIo.ccpnProjectPath(newPath)
       self._appBase.saveProject(newPath=newProjectPath, newProjectName=os.path.basename(newPath), createFallback=False)
 
   def printToFile(self, spectrumDisplay=None):

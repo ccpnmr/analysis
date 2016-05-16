@@ -31,7 +31,7 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.core.Project import Project
 from ccpn.ui.gui import _implementation # NB Neccessary to force load of graphics classes
-from ccpn.util import Io as ioUtil
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.ui.gui.widgets.Application import Application
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpnmodel.ccpncore.api.memops import Implementation
@@ -219,15 +219,15 @@ class AppBase(GuiBase):
     if self.args.projectPath:
       sys.stderr.write('==> Loading "%s" project\n' % self.args.projectPath)
       projectPath = os.path.normpath(self.args.projectPath)
-      apiProject = ioUtil.loadProject(projectPath, useFileLogger=self.useFileLogger)
-      if not projectPath.endswith(ioUtil.CCPN_DIRECTORY_SUFFIX):
+      apiProject = apiIo.loadProject(projectPath, useFileLogger=self.useFileLogger)
+      if not projectPath.endswith(apiIo.CCPN_DIRECTORY_SUFFIX):
         projectPath = saveV2ToV3(apiProject, projectPath, self.preferences)
         if not projectPath:
           return
-        apiProject = ioUtil.loadProject(projectPath, useFileLogger=self.useFileLogger)
+        apiProject = apiIo.loadProject(projectPath, useFileLogger=self.useFileLogger)
     else:
       sys.stderr.write('==> Loading default project\n')
-      apiProject = ioUtil.newProject('default', useFileLogger=self.useFileLogger)
+      apiProject = apiIo.newProject('default', useFileLogger=self.useFileLogger)
     self.initProject(apiProject)
 
     sys.stderr.write('==> Done, %s is starting\n' % self.applicationName )
@@ -306,17 +306,17 @@ class AppBase(GuiBase):
   def loadProject(self, path):
     """Open new project from path"""
     self._closeProject()
-    apiProject = ioUtil.loadProject(path)
+    apiProject = apiIo.loadProject(path)
     return self.initProject(apiProject)
 
   def newProject(self, name='default'):
     """Create new, empty project"""
     self._closeProject()
-    apiProject = ioUtil.newProject(name)
+    apiProject = apiIo.newProject(name)
     return self.initProject(apiProject)
 
   def saveProject(self, newPath=None, newProjectName=None, createFallback=True):
-    ioUtil.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName, createFallback=createFallback)
+    apiIo.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName, createFallback=createFallback)
     layout = self.mainWindow.dockArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
     if not os.path.exists(layoutPath):
@@ -416,7 +416,7 @@ def getSaveDirectory(apiProject, preferences):
     return ''
   newPath = fileNames[0]
   if newPath:
-    newPath = ioUtil.ccpnProjectPath(newPath)
+    newPath = apiIo.ccpnProjectPath(newPath)
     if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
       # should not really need to check the second and third condition above, only
       # the Qt dialog stupidly insists a directory exists before you can select it
@@ -430,7 +430,7 @@ def getSaveDirectory(apiProject, preferences):
     
 def saveV2ToV3(apiProject, projectPath, preferences):
     
-  projectPath = ioUtil.ccpnProjectPath(projectPath)
+  projectPath = apiIo.ccpnProjectPath(projectPath)
   
   needNewDirectory = False
   if os.path.exists(projectPath) and (os.path.isfile(projectPath) or os.listdir(projectPath)):
@@ -444,7 +444,7 @@ def saveV2ToV3(apiProject, projectPath, preferences):
 
   if not needNewDirectory:
     try:
-      ioUtil.saveProject(apiProject, newPath=projectPath)
+      apiIo.saveProject(apiProject, newPath=projectPath)
       MessageDialog.showMessage('Project save', 'Project saved in v3 format at %s' % projectPath,
                                 colourScheme=preferences.general.colourScheme)
     except IOError as e:
@@ -456,7 +456,7 @@ def saveV2ToV3(apiProject, projectPath, preferences):
     projectPath = getSaveDirectory(apiProject, preferences)
     if projectPath:
       try:
-        ioUtil.saveProject(apiProject, newPath=projectPath, overwriteExisting=True)
+        apiIo.saveProject(apiProject, newPath=projectPath, overwriteExisting=True)
       except IOError as e:
         MessageDialog.showMessage('Project save', 'Project could not be saved in V3 format at %s, quitting' % projectPath,
                                   colourScheme=preferences.general.colourScheme)

@@ -94,6 +94,12 @@ class NmrResidue(AbstractWrapperObject):
       return apiResidue.code3Letter
 
   @property
+  def relativeOffset(self) -> Optional[int]:
+    """Sequential offset of NmrResidue relative to mainNmrResidue
+    May be 0. Is None for residues that are not offset."""
+    return self._wrappedData.relativeOffset
+
+  @property
   def comment(self) -> str:
     """Free-form text comment"""
     return self._wrappedData.details
@@ -117,6 +123,15 @@ class NmrResidue(AbstractWrapperObject):
     """"All other NmrResidues with the same sequenceCode sorted by offSet suffix '-1', '+1', etc."""
     getObj = self._project._data2Obj.get
     return tuple(getObj(x) for x in self._wrappedData.offsetResonanceGroups)
+
+  def getOffsetNmrResidue(self, offset:int) -> Optional['NmrResidue']:
+    """Get offset NmrResidue with indicated offset
+    (or None, if no such offset NmrResidue exists"""
+    for result in self.offsetNmrResidues:
+      if result.relativeOffset == offset:
+        return result
+    #
+    return None
 
   @property
   def mainNmrResidue(self) -> Optional['NmrResidue']:
@@ -505,11 +520,12 @@ class NmrResidue(AbstractWrapperObject):
 
   @property
   def probableResidues(self) -> Tuple[Tuple[Residue,float], ...]:
-    """tuple of (residue, probability) tuples for probable residue assignments"""
+    """tuple of (residue, probability) tuples for probable residue assignments
+    sorted by decreasing probability. Probabilities are normalised to 1"""
     getObj = self._project._data2Obj.get
-    ll = [(x.weight, x.possibility) for x in self._wrappedData.residueProbs]
-    totalWeight = sum(tt[0] for tt in ll)
-    return tuple((getObj(tt[1]), tt[0]/totalWeight) for tt in ll)
+    ll = sorted((x.weight, x.possibility) for x in self._wrappedData.residueProbs)
+    totalWeight = sum(tt[0] for tt in ll) or 1.0  # If sum is zero give raw weights
+    return tuple((getObj(tt[1]), tt[0]/totalWeight) for tt in reversed(ll))
 
   @probableResidues.setter
   def probableResidues(self, value):
@@ -522,11 +538,10 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def probableResidueTypes(self) -> Tuple[Tuple[str,float]]:
     """tuple of (residueType, probability) tuples for probable residue types
-    sorted b descending probability"""
-    ll = reversed(sorted((x.weight, x.possibility)
-                         for x in self._wrappedData.residueTypeProbs))
-    totalWeight = sum(tt[0] for tt in ll)
-    return tuple((tt[1].code3Letter, tt[0]/totalWeight) for tt in ll)
+    sorted by decreasing probability"""
+    ll = sorted((x.weight, x.possibility) for x in self._wrappedData.residueTypeProbs)
+    totalWeight = sum(tt[0] for tt in ll) or 1.0  # If sum is zero give raw weights
+    return tuple((tt[1].code3Letter, tt[0]/totalWeight) for tt in reversed(ll))
 
   @probableResidueTypes.setter
   def probableResidueTypes(self, value):
@@ -569,7 +584,7 @@ class NmrResidue(AbstractWrapperObject):
     apiResonanceGroup.sequenceCode = sequenceCode
     apiResonanceGroup.resetResidueType(residueType)
 
-  def resetNmrChain(self, newNmrChain:Union[NmrChain, str]=None):
+  def moveToNmrChain(self, newNmrChain:Union[NmrChain, str]=None):
     """Reset NmrChain, breaking connected NmrChain if necessary.
 
     If set to None resets to NmrChain '@-'
@@ -586,31 +601,29 @@ class NmrResidue(AbstractWrapperObject):
     else:
       apiNmrChain = newNmrChain._wrappedData
 
-    apiResonanceGroup.resetNmrChain(apiNmrChain)
+    apiResonanceGroup.moveToNmrChain(apiNmrChain)
 
-  def assignTo(self, residueId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
-               residueType:str=None, mergeToExisting=True) -> 'NmrResidue':
+  def assignTo(self, chainCode:str=None, sequenceCode:Union[int,str]=None,
+               residueType:str=None, mergeToExisting=False) -> 'NmrResidue':
 
-    """Assign NmrResidue to new assignment, as defined by either residueId or the other parameters
+    """Assign NmrResidue to new assignment, as defined by the na ming parameters
     and return the result.
 
-    Passing in a residueId deassigns empty fields,
-    while empty parameters (e.g. chainCode=None) cause no change. E.g.:
-    for NmrResidue NR:A.121.ALA calling with residueId='A.123' will reassign to 'A.123.' whereas
-    calling with sequenceCode=123 will reassign to 'A.123.ALA'. Calling with residueId='..ALA',
-    will assign to hew default NmrChain and NmrResidues (which might get you NR:'@2.@11.ALA'
+    Empty parameters (e.g. chainCode=None) retain the previous value. E.g.:
+    for NmrResidue NR:A.121.ALA
+    calling with sequenceCode=123 will reassign to 'A.123.ALA'.
 
     If the no assignment with the same chainCode and sequenceCode exists, the current NmrResidue
     will be reassigned.
     If an NmrResidue with the same chainCode and sequenceCode already exists,  the function
-    will by default merge the two NmrResidues, delete the current one, and return the new one,
-    but will instead raise ValueError if mergeToExisting is set to False.
+    will either raise ValueError. If  mergeToExisting is set to False, it will instead merge the
+    two NmrResidues, delete the current one, and return the new one.
     NB Merging is NOT undoable.
-    WARNING: Always use in the form "x = x.assignTo(...)",
+    WARNING: When calling with mergeToExisting=True, always use in the form "x = x.assignTo(...)",
     as the call 'x.assignTo(...) may cause the source x object to become deleted.
 
     NB resetting the NmrChain for an NmrResidue in the middle of a connected NmrChain
-    will cause an error. Use resetNmrChain(newNmrChainOrPid) instead
+    will cause an error. Use moveToNmrChain(newNmrChainOrPid) instead
     """
 
     oldPid = self.longPid
@@ -624,26 +637,10 @@ class NmrResidue(AbstractWrapperObject):
     oldSequenceCode = apiResonanceGroup.sequenceCode
     oldResidueType = apiResonanceGroup.residueType
 
-    if residueId:
-      if any((chainCode, sequenceCode, residueType)):
-        raise ValueError("assignTo: assignment parameters only allowed if residueId is None")
-      else:
-        # Remove colon prefix, if any, and set parameters
-        residueId = residueId.split(Pid.PREFIXSEP,1)[-1]
-        # NB trick with setting ll first required
-        # because the passed-in Pid may not have all three components
-        ll = [None, None, None]
-        for ii,val in enumerate(Pid.splitId(residueId)):
-          ll[ii] = val
-        chainCode, sequenceCode, residueType = ll
-        if chainCode is None:
-          raise ValueError("chainCode part of residueId cannot be empty'")
-
-    else:
-      # set missing parameters to existing values
-      chainCode = chainCode or oldNmrChain.code
-      sequenceCode = sequenceCode or oldSequenceCode
-      residueType = residueType or oldResidueType
+    # set missing parameters to existing values
+    chainCode = chainCode or oldNmrChain.code
+    sequenceCode = sequenceCode or oldSequenceCode
+    residueType = residueType or oldResidueType
 
     for ss in (chainCode, sequenceCode, residueType):
       if ss and Pid.altCharacter in ss:

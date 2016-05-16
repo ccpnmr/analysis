@@ -37,7 +37,7 @@ from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util import Pid
 from ccpn.util import Undo
-from ccpn.util import Io as ioUtil
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
@@ -222,7 +222,7 @@ class Project(AbstractWrapperObject):
 
     self._resetUndo(maxWaypoints=0)
 
-    ioUtil.cleanupProject(self)
+    apiIo.cleanupProject(self)
     self._clearApiNotifiers()
     for tag in ('_data2Obj','_pid2Obj'):
       getattr(self,tag).clear()
@@ -258,7 +258,7 @@ class Project(AbstractWrapperObject):
     """Save project with all data, optionally to new location or with new name.
     Unlike lower-level functions, this function ensures that data in high level caches are also saved """
     self._flushCachedData()
-    ioUtil.saveProject(self._wrappedData.root, newPath=newPath, newProjectName=newProjectName,
+    apiIo.saveProject(self._wrappedData.root, newPath=newPath, newProjectName=newProjectName,
                        changeBackup=changeBackup, createFallback=createFallback,
                        overwriteExisting=overwriteExisting, checkValid=checkValid,
                        changeDataLocations=changeDataLocations)
@@ -276,7 +276,7 @@ class Project(AbstractWrapperObject):
   @property
   def path(self) -> str:
     """path of/to Project"""
-    return ioUtil.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
+    return apiIo.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
 
   @property
   def programName(self) -> str:

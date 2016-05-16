@@ -146,30 +146,22 @@ class NmrAtom(AbstractWrapperObject):
     """Reset NmrAtom back to its originalName, cutting all assignment links"""
     self._wrappedData.name = None
 
-  def assignTo(self, atomId:str=None, chainCode:str=None, sequenceCode:Union[int,str]=None,
-               residueType:str=None, name:str=None, mergeToExisting=True) -> 'NmrAtom':
-    """Assign NmrAtom to atomId (or other parameters) and get back the result
-    (either a modified self or another NmrAtom with the correct assignment, if one exists).
+  def assignTo(self, chainCode:str=None, sequenceCode:Union[int,str]=None,
+               residueType:str=None, name:str=None, mergeToExisting=False) -> 'NmrAtom':
+    """Assign NmrAtom to naming parameters) and return the reassigned result
+
+    If the assignedTo NmrAtom already exists the function raises ValueError.
+    If mergeToExisting is True it instead merges the current NmrAtom into the target
+     and returns the merged target.
+    NB Merging is NOT undoable
 
     WARNING: is mergeToExisting is True, always use in the form "x = x.assignTo(...)",
     as the call 'x.assignTo(...) may cause the source x object to be deleted.
 
-    Passing in an atomId with empty values gives you a new, empty NmrChain or NmrResidue,
-    and deassigns the NmrAtom, depending on which value(s) is empty.
-    Passing in empty parameters (e.g. chainCode=None) gets you the current value.
-    If the target nmrAtom being reassigned to exists and mergeToExisting is True,
-    the source will be deleted, and its data merged into the target.
-    NB Merging is NOT undoable
-    """
-    """Assign NmrAtom to new assignment, as defined by either atomId or the other parameters
-    and return the result.
-
-    Passing in a atomId deassigns empty residueType or name fields,
-    while empty parameters (e.g. chainCode=None) cause no change. E.g.:
-    for NmrAtom NR:A.121.ALA.HA calling with atomId='A.124..' will assign to
-    (chainCode='A', sequenceCode=124, residueType=None, atomName=None)
-    whereas calling with sequenceCode=124 will assign to
+    Passing in empty parameters (e.g. chainCode=None) leaves the current value unchanged. E.g.:
+    for NmrAtom NR:A.121.ALA.HA calling with sequenceCode=124 will assign to
     (chainCode='A', sequenceCode=124, residueType='ALA', atomName='HA')
+
 
     The function works as:
 
@@ -178,14 +170,6 @@ class NmrAtom(AbstractWrapperObject):
     nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
 
     (or nmrChain.fetchNmrResidue(sequenceCode=sequenceCode) if residueType is None)
-
-    The NmrAtom is then renamed or moved to the new NmrResidue as appropriate.
-    If the new assignment clashes with an existing NmrAtom assignment, the function will
-    by default merge the two NmrAtoms, delete the current one, and return the new one,
-    but will instead raise ValueError if mergeToExisting is set to False.
-    NB Merging is NOT undoable.
-    WARNING: Always use in the form "x = x.assignTo(...)",
-    as the call 'x.assignTo(...) may cause the source x object to become deleted.
     """
     oldPid = self.longPid
     clearUndo = False
@@ -195,29 +179,11 @@ class NmrAtom(AbstractWrapperObject):
     if sequenceCode is not None:
       sequenceCode = str(sequenceCode) or None
 
-    if atomId:
-      if any((chainCode, sequenceCode, residueType, name)):
-        raise ValueError("assignTo: assignment parameters only allowed if atomId is None")
-      else:
-        # Remove colon prefix, if any, and set parameters
-        atomId = atomId.split(Pid.PREFIXSEP,1)[-1]
-        # NB trick with setting ll first required
-        # because the passed-in Pid may not have all four components
-        ll = [None, None, None, None]
-        for ii,val in enumerate(Pid.splitId(atomId)):
-          ll[ii] = val
-        chainCode, sequenceCode, residueType, name = ll
-        if chainCode is None:
-          raise ValueError("chainCode part of atomId cannot be empty'")
-        # if sequenceCode is None:
-        #   raise ValueError("sequenceCode part of atomId cannot be empty'")
-
-    else:
-      # set missing parameters to existing values
-      chainCode = chainCode or apiResonanceGroup.nmrChain.code
-      sequenceCode = sequenceCode or apiResonanceGroup.sequenceCode
-      residueType = residueType or apiResonanceGroup.residueType
-      name = name or apiResonance.name
+    # set missing parameters to existing values
+    chainCode = chainCode or apiResonanceGroup.nmrChain.code
+    sequenceCode = sequenceCode or apiResonanceGroup.sequenceCode
+    residueType = residueType or apiResonanceGroup.residueType
+    name = name or apiResonance.name
 
     for ss in chainCode, sequenceCode, residueType, name:
       if ss and Pid.altCharacter in ss:
@@ -341,7 +307,7 @@ def fetchNmrAtom(self:NmrResidue, name:str):
   return (self._project._data2Obj.get(resonanceGroup.findFirstResonance(name=name)) or
           self.newNmrAtom(name=name))
 
-def produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
+def _produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
                    sequenceCode:Union[int,str]=None,
                    residueType:str=None, name:str=None) -> NmrAtom:
   """get chainCode, sequenceCode, residueType and atomName from dot-separated  atomId or Pid
@@ -354,7 +320,7 @@ def produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
   params = [chainCode, sequenceCode, residueType, name]
   if atomId:
     if any(params):
-      raise ValueError("produceNmrAtom: other parameters only allowed if atomId is None")
+      raise ValueError("_produceNmrAtom: other parameters only allowed if atomId is None")
     else:
       # Remove colon prefix, if any
       atomId = atomId.split(Pid.PREFIXSEP,1)[-1]
@@ -383,7 +349,7 @@ NmrResidue.newNmrAtom = _newNmrAtom
 del _newNmrAtom
 NmrResidue.fetchNmrAtom = fetchNmrAtom
 
-Project.produceNmrAtom = produceNmrAtom
+Project._produceNmrAtom = _produceNmrAtom
 
 # Notifiers:
 className = Nmr.Resonance._metaclass.qualifiedName()

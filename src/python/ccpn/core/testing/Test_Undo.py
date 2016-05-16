@@ -58,7 +58,7 @@ class ComplexUndoTest(WrapperTesting):
 
 
   def test_copy_chain_undo(self):
-    from ccpn.util import CopyData
+    from ccpnmodel.ccpncore.lib import CopyData
     project = self.project._wrappedData.root
     project._undo = Undo()
     project._undo.newWaypoint()
@@ -69,7 +69,7 @@ class ComplexUndoTest(WrapperTesting):
     project.checkAllValid()
 
   def test_copy_chain_undo_redo(self):
-    from ccpn.util import CopyData
+    from ccpnmodel.ccpncore.lib import CopyData
     project = self.project._wrappedData.root
     project._undo = Undo()
     project._undo.newWaypoint()

@@ -738,7 +738,7 @@ if __name__ == '__main__':
 
     from ccpn.core.lib import Io as ccpnIo
 
-    # from ccpn.util.Io import loadProject
+    # from ccpnmodel.ccpncore.lib.Io.Api import loadProject
     # from ccpn.core.Project import Project
     #
     # # set up input

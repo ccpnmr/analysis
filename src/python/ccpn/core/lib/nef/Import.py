@@ -279,7 +279,7 @@ if __name__ == '__main__':
 
   if len(sys.argv) >= 2:
 
-    from ccpn.util import Io as coreIo
+    from ccpnmodel.ccpncore.lib.Io import Api as apiIo
     from ccpn.core.Project import Project
 
     # set up input
@@ -293,7 +293,7 @@ if __name__ == '__main__':
 
     else:
       projectDir = sys.argv[3]
-      ccpnProject =coreIo.loadProject(projectDir)
+      ccpnProject = apiIo.loadProject(projectDir)
       nmrProj = ccpnProject.findFirstNmrProject()
       Export.prepareNmrProject(nmrProj)
 

@@ -322,7 +322,7 @@ class NmrStretchTest(WrapperTesting):
     self.assertEqual([x.id for x in nmrChain2.nmrResidues],
                      ['#2.@3.',  '#2.@2.THR', '#2.@1.TRP',])
 
-    nmrChain2.mainNmrResidues[1].resetNmrChain(nmrChain)
+    nmrChain2.mainNmrResidues[1].moveToNmrChain(nmrChain)
     self.undo.undo()
     self.undo.redo()
     self.assertEqual([x.id for x in nmrChain.nmrResidues],
@@ -334,8 +334,9 @@ class NmrStretchTest(WrapperTesting):
     nmrResidues = []
     for residueType in ('ALA', 'VAL', 'GLY', 'CYS', 'GLN'):
       nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
-
-    self.assertRaises(ValueError,  nmrResidues[1].assignTo, residues[2].id)
+    #
+    # self.assertRaises(ValueError,  nmrResidues[1].assignTo, chainCode=nmrChain.shortName,
+    #                   sequenceCode=nmrResidues[2])
 
     nmrResidues[0].residue = residues[5]
 
@@ -345,6 +346,11 @@ class NmrStretchTest(WrapperTesting):
 
     nmrChain.assignConnectedResidues(residues[1])
     assignedNmrChain = self.project.getByPid('NC:X')
+
+    mergedResidue = nmrResidues[1].assignTo(chainCode=residues[2].chain.shortName,
+                                            sequenceCode=residues[2].sequenceCode,
+                                            mergeToExisting=True)
+    self.assertIs(mergedResidue, nmrResidues[2])
     self.undo.undo()
     self.undo.redo()
     self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
@@ -372,7 +378,7 @@ class NmrResidueTest(WrapperTesting):
     self.assertEqual(target.longPid, "NmrResidue:A.@11.LYS")
     newNr = nchain0.newNmrResidue()
     self.assertEqual(newNr.longPid, "NmrResidue:@-.@89.")
-    nr3.resetNmrChain(nchain0)
+    nr3.moveToNmrChain(nchain0)
     self.assertEqual(nr3.longPid, "NmrResidue:@-.3.GLU")
     newNr.residue = res3
     self.assertEqual(newNr.longPid, "NmrResidue:A.3.GLU")
@@ -400,7 +406,7 @@ class NmrResidueTest(WrapperTesting):
     nr1.rename('.TYR')
     self.assertEqual(nr1.id, "A.@1.TYR")
     nr1.rename('997')
-    nr1.resetNmrChain()
+    nr1.moveToNmrChain()
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
@@ -410,11 +416,11 @@ class NmrResidueTest(WrapperTesting):
     nchain = self.project.getByPid('NC:A')
     nr1, nr2 = nchain.nmrResidues[8:10]
     self.assertEqual(nr1.id, "A.10.TYR")
-    nr1 = nr1.assignTo('A.999')
-    self.assertEqual(nr1.id, "A.999.")
+    nr1 = nr1.assignTo(chainCode='A', sequenceCode=999)
+    self.assertEqual(nr1.id, "A.999.TYR")
     nr1 = nr1.assignTo()
     # This is a no-op
-    self.assertEqual(nr1.id, "A.999.")
+    self.assertEqual(nr1.id, "A.999.TYR")
 
     with self.assertRaises(ValueError):
       nr2 = nr2.assignTo(sequenceCode=15)
@@ -425,7 +431,12 @@ class NmrResidueTest(WrapperTesting):
     self.assertEqual(obj.id, 'A.777.')
 
     self.assertTrue(len(nr1.nmrAtoms) == 2)
-    nrx = nr2.assignTo(nr1.id)
+
+    self.assertRaises(ValueError,  nr2.assignTo, chainCode=nr1.nmrChain.shortName,
+                      sequenceCode=nr1.sequenceCode, residueType=nr1.residueType,)
+
+    nrx = nr2.assignTo(chainCode=nr1.nmrChain.shortName, sequenceCode=nr1.sequenceCode,
+                       residueType=nr1.residueType, mergeToExisting=True)
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
@@ -463,7 +474,14 @@ class NmrResidueTest(WrapperTesting):
     self.assertIs(res2._wrappedData.mainResonanceGroup, res1._wrappedData)
     res3 = nmrChain.fetchNmrResidue(sequenceCode="127B-1", residueType="ALA")
     self.assertIs(res2, res3)
+
+    self.assertIs(res2.mainNmrResidue, res1)
+    self.assertEqual(res1.offsetNmrResidues, (res2,))
+    self.assertIs(res1.getOffsetNmrResidue(-1), res2)
+    self.assertIsNone(res2.getOffsetNmrResidue(1))
+
     res1.delete()
+
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()

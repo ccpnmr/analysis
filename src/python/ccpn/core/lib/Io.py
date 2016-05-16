@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 # NB this import cna cause circular imports, but ccpn.__init__ makes sure it does not happen
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
-from ccpn.util import Io as ioUtil
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib import V2Upgrade
 
 def _fixLoadedProject(apiProject:ApiProject):
@@ -42,7 +42,7 @@ def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> P
 
   If the API project contains several NmrProjects (rare),
   nmrProjectName lets you select which one to open"""
-  apiProject = ioUtil.loadProject(path, useFileLogger=useFileLogger)
+  apiProject = apiIo.loadProject(path, useFileLogger=useFileLogger)
 
   # Ad hoc fixes for temporary internal versions (etc.).
   _fixLoadedProject(apiProject)
@@ -56,7 +56,7 @@ def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> P
 
 def newProject(projectName:str, path:str=None, useFileLogger:bool=True) -> Project:
   """Make new project, putting underlying data storage (API project) at path"""
-  apiProject = ioUtil.newProject(projectName, path, overwriteExisting=True, useFileLogger=useFileLogger)
+  apiProject = apiIo.newProject(projectName, path, overwriteExisting=True, useFileLogger=useFileLogger)
   if apiProject is None:
     raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"
                      % (projectName, path) )

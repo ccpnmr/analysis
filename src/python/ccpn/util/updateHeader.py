@@ -1,3 +1,5 @@
+#  NBNB TBD FIXME. OBSOLETE. moved. remove
+
 import os
 
 moduleDoc = '''"""Module Documentation here

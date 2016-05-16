@@ -24,8 +24,8 @@ __version__ = "$Revision$"
 import os
 import shutil
 
-# from ccpn.util import ApiPath
-from ccpn.util import Io as ioUtil
+# from ccpnmodel.ccpncore.lib import ApiPath
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.testing.CoreTesting import CoreTesting
 
 class IoTest(CoreTesting):
@@ -35,16 +35,16 @@ class IoTest(CoreTesting):
     
   def test_project_save(self):
     
-    ioUtil.saveProject(self.project)
+    apiIo.saveProject(self.project)
 
   def test_project_save_as(self):
     
     newPath = os.environ.get('HOME') or os.getcwd()
     newPath = os.path.join(newPath, 'tmpCcpnTestProject')
-    newPath = ioUtil.ccpnProjectPath(newPath)
+    newPath = apiIo.ccpnProjectPath(newPath)
     if os.path.exists(newPath):
       shutil.rmtree(newPath)
-    ioUtil.saveProject(self.project, newPath)
+    apiIo.saveProject(self.project, newPath)
     # pathToCheck = os.path.join(ApiPath.getTopObjectPath(self.project), 'memops', 'Implementation')
     pathToCheck = os.path.join(newPath, 'memops', 'Implementation')
     assert os.path.exists(pathToCheck), 'path "%s" does not exist' % pathToCheck

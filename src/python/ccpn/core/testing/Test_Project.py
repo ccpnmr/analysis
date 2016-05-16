@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 import os
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
-from ccpn.util import Io as ioUtil
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 
 
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject
@@ -107,7 +107,7 @@ class ProjectTestRename(WrapperTesting):
     self.assertEqual(apiNmrProject.name, newName)
     self.assertEqual(self.project.name, newName)
     newLocation = apiNmrProject.root.findFirstRepository(name='userData').url.getDataLocation()
-    nn = len(ioUtil.CCPN_DIRECTORY_SUFFIX)
+    nn = len(apiIo.CCPN_DIRECTORY_SUFFIX)
     self.assertEqual(newName, newLocation[-len(newName)-nn:-nn])
 
 class ProjectTestExperimentTypeMap(WrapperTesting):

@@ -13,7 +13,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
-from ccpn.util import Io
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.util import Logging
 from ccpn.util import Register
 from ccpn.util import Url
@@ -77,7 +77,7 @@ class FeedbackPopup(QtGui.QDialog):
       projectPath = project.path
       directory = os.path.dirname(projectPath)
       filePrefix = os.path.join(directory, filePrefix)
-      fileName = Io.packageProject(project._wrappedData.parent, filePrefix, includeBackups=True, includeLogs=includeLog)
+      fileName = apiIo.packageProject(project._wrappedData.parent, filePrefix, includeBackups=True, includeLogs=includeLog)
     elif includeLog:
       logger = Logging.getLogger()
       if not hasattr(logger, 'logPath'):

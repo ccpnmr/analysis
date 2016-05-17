@@ -206,6 +206,6 @@ def _axisRegionChanged(axis:Axis):
       strip.beingUpdated = False
 
   if index == 1:  # ASSUMES that only do H phasing
-    strip.updatePhasing()
+    strip._updatePhasing()
 
 Axis.setupCoreNotifier('change', _axisRegionChanged)

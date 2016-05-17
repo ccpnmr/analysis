@@ -36,9 +36,9 @@ class BackupPopup(QtGui.QDialog):
     preferences = appBase.preferences
     preferences.general.autoBackupEnabled = not preferences.general.autoBackupEnabled
     if preferences.general.autoBackupEnabled:
-      appBase.mainWindow.startBackupTimer()
+      appBase.mainWindow._startBackupTimer()
     else:
-      appBase.mainWindow.stopBackupTimer()
+      appBase.mainWindow._stopBackupTimer()
 
   def setBackupFrequency(self, value):
     try:
@@ -50,5 +50,5 @@ class BackupPopup(QtGui.QDialog):
     preferences = appBase.preferences
     preferences.general.autoBackupFrequency = value
     if preferences.general.autoBackupEnabled:
-      appBase.mainWindow.startBackupTimer()
+      appBase.mainWindow._startBackupTimer()
 

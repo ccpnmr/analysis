@@ -67,7 +67,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     self.strip.viewBox.addItem(self.plot)
 
     self.plot.curve.setClickable(True)
-    self.plot.sigClicked.connect(self.clicked)
+    self.plot.sigClicked.connect(self._clicked)
     for peakList in self.spectrum.peakLists:
       self.strip.showPeaks(peakList)
       
@@ -84,14 +84,17 @@ class GuiSpectrumView1d(GuiSpectrumView):
       if self.hPhaseTrace:
         self.hPhaseTrace.setVisible(True)
       else:
-        self.newPhasingTrace()
+        self._newPhasingTrace()
         
   def turnOffPhasing(self):
 
     if self.hPhaseTrace:
       self.hPhaseTrace.setVisible(False)
       
-  def newPhasingTrace(self):
+  def _newPhasingTrace(self):
+    """
+    # CCPN INTERNAL - called in newPhasingTrace methods of GuiWindow and GuiStrip
+    """
     
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible() and not self.hPhaseTrace:
@@ -105,7 +108,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
       trace = pg.PlotDataItem()
       self.strip.plotWidget.scene().addItem(trace)
       self.hPhaseTrace = trace
-      self.updatePhasing()
+      self._updatePhasing()
             
   def removePhasingTraces(self):
     
@@ -114,7 +117,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
       self.strip.plotWidget.scene().removeItem(trace)
       self.hPhaseTrace = None
     
-  def updatePhasing(self):
+  def _updatePhasing(self):
     if not self.isVisible():
       return
       
@@ -202,7 +205,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     hTrace.setPen({'color':colour})
     hTrace.setData(x, v)
       
-  def clicked(self):
+  def _clicked(self):
     print(self.plot)
     
 

@@ -148,7 +148,7 @@ class GuiWindow(DropBase):
     for spectrumDisplay in window.spectrumDisplays:
       if not spectrumDisplay.is1D:
         for strip in spectrumDisplay.strips:
-          strip.toggleHTrace()
+          strip.toggleHorizontalTrace()
     
   def toggleVTrace(self, window:'GuiWindow'):
     """
@@ -157,7 +157,7 @@ class GuiWindow(DropBase):
     for spectrumDisplay in window.spectrumDisplays:
       if not spectrumDisplay.is1D:
         for strip in spectrumDisplay.strips:
-          strip.toggleVTrace()
+          strip.toggleVerticalTrace()
     
   def togglePhaseConsole(self, window:'GuiWindow'):
     """
@@ -169,7 +169,7 @@ class GuiWindow(DropBase):
   def newPhasingTrace(self):
     strip = self._appBase.current.strip
     if strip and (strip.spectrumDisplay.window is self):
-      strip.newPhasingTrace()
+      strip._newPhasingTrace()
     
   """  
   def newHPhasingTrace(self):
@@ -189,7 +189,7 @@ class GuiWindow(DropBase):
     
     strip = self._appBase.current.strip
     if strip and (strip.spectrumDisplay.window is self):
-      strip.setPhasingPivot()
+      strip._setPhasingPivot()
     
   def removePhasingTraces(self):
     """
@@ -234,7 +234,7 @@ class GuiWindow(DropBase):
     """
     strip = self._appBase.current.strip
     if strip and self.task:
-      strip.createMarkAtCursorPosition(self.task)
+      strip._createMarkAtCursorPosition(self.task)
     
   def clearMarks(self):
     """

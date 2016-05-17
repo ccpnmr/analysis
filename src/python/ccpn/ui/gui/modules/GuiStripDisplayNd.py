@@ -108,11 +108,11 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     downBy2Icon = Icon('iconsNew/contour-base-down')
     downBy2Action.setIcon(downBy2Icon)
     downBy2Action.setToolTip('Lower Contour Base Level')
-    storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self.storeZoom)
+    storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self._storeZoom)
     storeZoomIcon = Icon('iconsNew/zoom-store')
     storeZoomAction.setIcon(storeZoomIcon)
     storeZoomAction.setToolTip('Store Zoom')
-    restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self.restoreZoom)
+    restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self._restoreZoom)
     restoreZoomIcon = Icon('iconsNew/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
@@ -431,7 +431,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 def _changedFreeStripAxisOrdering(project:Project, apiStrip:ApiFreeStrip):
   """Used (and works) for either BoundDisplay of FreeStrip"""
 
-  project._data2Obj[apiStrip].setZWidgets()
+  project._data2Obj[apiStrip]._setZWidgets()
 
 Project._setupApiNotifier(_changedFreeStripAxisOrdering, ApiFreeStrip, 'axisOrder')
 
@@ -439,6 +439,6 @@ def _changedBoundDisplayAxisOrdering(project:Project, apiDisplay:ApiBoundDisplay
   """Used (and works) for either BoundDisplay of FreeStrip"""
 
   for strip in project._data2Obj[apiDisplay].strips:
-    strip.setZWidgets()
+    strip._setZWidgets()
 
 Project._setupApiNotifier(_changedBoundDisplayAxisOrdering, ApiBoundDisplay, 'axisOrder')

@@ -80,9 +80,10 @@ class Test_chemicalShift(WrapperTesting):
   def setUp(self):
 
     with self.initialSetup():
-      spectra = self.loadData('spectra/hsqc.spc')
+      spectra = self.loadData('spectra/115.spc')
       self.spectrum = spectra[0] if spectra else None
-
+      if len(self.project.chemicalShiftLists) < 1:
+        self.project.newChemicalShiftList()
       c = self.project.newNmrChain()
       r = c.newNmrResidue()
       self.atom = r.newNmrAtom(isotopeCode='15N')

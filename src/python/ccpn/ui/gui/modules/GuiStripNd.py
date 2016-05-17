@@ -61,17 +61,19 @@ class GuiStripNd(GuiStrip):
     ###self.peakListViewDict = {}  # peakList --> peakListView
     
     self.haveSetupZWidgets = False
-    self.viewBox.menu = self.get2dContextMenu()
+    self.viewBox.menu = self._get2dContextMenu()
     self.viewBox.invertX()
     self.viewBox.invertY()
     ###self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
-    self.addPlaneToolbar()
+    self._addPlaneToolbar()
     self.pythonConsole = self._appBase.mainWindow.pythonConsole
     self.logger = self._project._logger
+    self.mouseDragEvent = self._mouseDragEvent
+    self.updateRegion = self._updateRegion
 
-  def mouseDragEvent(self, event):
+  def _mouseDragEvent(self, event):
     """
     Re-implemented mouse event to enable smooth panning.
     """
@@ -80,12 +82,12 @@ class GuiStripNd(GuiStrip):
     else:
       self.viewBox.mouseDragEvent(self, event)
 
-  def get2dContextMenu(self) -> Menu:
+  def _get2dContextMenu(self) -> Menu:
     """
     Creates and returns the Nd context menu
     """
     self.contextMenu = Menu('', self, isFloatWidget=True)
-    self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self.toggleCrossHair, checkable=True)
+    self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self._toggleCrossHair, checkable=True)
     self.hTraceAction = self.contextMenu.addItem("H Trace", checked=False, checkable=True)
     self.vTraceAction = self.contextMenu.addItem("V Trace", checked=False, checkable=True)
     self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
@@ -153,47 +155,49 @@ class GuiStripNd(GuiStrip):
     xArray = numpy.array(x).flatten()
     yArray = numpy.array(y).flatten()
 
-    zoomArray = ([min(xArray), max(xArray), min(yArray), max(yArray)])
-    self.zoomToRegion(zoomArray)
+    zoomXArray = ([min(xArray), max(xArray)])
+    zoomYArray = ([min(yArray), max(yArray)])
+    self.zoomToRegion(zoomXArray, zoomYArray)
     self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
     self.logger.info("strip = project.getByPid('%s')\nstrip.resetZoom()" % self.pid)
-    return zoomArray
+    return zoomXArray, zoomYArray
 
 
-  def updateRegion(self, viewBox):
+  def _updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
 
-    GuiStrip.updateRegion(self, viewBox)
-    self.updateTraces()
+    GuiStrip._updateRegion(self, viewBox)
+    self._updateTraces()
 
-  def updateTraces(self):
+  def _updateTraces(self):
 
     updateHTrace = self.hTraceAction.isChecked()
     updateVTrace = self.vTraceAction.isChecked()
     for spectrumView in self.spectrumViews:
-      spectrumView.updateTrace(self.mousePosition, self.mousePixel, updateHTrace, updateVTrace)
+      spectrumView._updateTrace(self.mousePosition, self.mousePixel, updateHTrace, updateVTrace)
 
-  def toggleHTrace(self):
+  def toggleHorizontalTrace(self):
     """
     Toggles whether or not horizontal trace is displayed.
     """
     self.hTraceAction.setChecked(not self.hTraceAction.isChecked())
-    self.updateTraces()
+    self._updateTraces()
 
-  def toggleVTrace(self):
+  def toggleVerticalTrace(self):
     """
     Toggles whether or not vertical trace is displayed.
     """
     self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
-    self.updateTraces()
+    self._updateTraces()
 
-  def mouseMoved(self, positionPixel):
+  def _mouseMoved(self, positionPixel):
 
-    GuiStrip.mouseMoved(self, positionPixel)
-    self.updateTraces()
+    GuiStrip._mouseMoved(self, positionPixel)
+    self._updateTraces()
 
-  def setZWidgets(self):
+  def _setZWidgets(self):
     """
+    # CCPN INTERNAL - called in _changedBoundDisplayAxisOrdering function of GuiStripDisplayNd.py
     Sets values for the widgets in the plane toolbar.
     """
 
@@ -242,7 +246,7 @@ class GuiStripNd(GuiStrip):
 
       if not self.haveSetupZWidgets:
         # have to set this up here, otherwise the callback is called too soon and messes up the position
-        planeLabel.editingFinished.connect(partial(self.setZPlanePosition, n, planeLabel.value()))
+        planeLabel.editingFinished.connect(partial(self._setZPlanePosition, n, planeLabel.value()))
 
     self.haveSetupZWidgets = True
 
@@ -269,7 +273,7 @@ class GuiStripNd(GuiStrip):
       # else:
       #   print('position is outside spectrum bounds')
 
-  def changePlaneCount(self, n:int=0, value:int=1):
+  def _changePlaneCount(self, n:int=0, value:int=1):
     """
     Changes the number of planes displayed simultaneously.
     """
@@ -277,7 +281,7 @@ class GuiStripNd(GuiStrip):
     planeLabel = self.planeToolbar.planeLabels[n]
     zAxis.width = value * planeLabel.singleStep()
 
-  def nextZPlane(self, n:int=0):
+  def _nextZPlane(self, n:int=0):
     """
     Increases z ppm position by one plane
     """
@@ -285,7 +289,7 @@ class GuiStripNd(GuiStrip):
     self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
     self.logger.info("strip = project.getByPid('%s')\nstrip.nextZPlane()" % self.pid)
 
-  def prevZPlane(self, n:int=0):
+  def _prevZPlane(self, n:int=0):
     """
     Decreases z ppm position by one plane
     """
@@ -293,20 +297,17 @@ class GuiStripNd(GuiStrip):
     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
     self.logger.info("strip = project.getByPid('%s')\nstrip.prevZPlane()" % self.pid)
 
-  def addPlaneToolbar(self):
+  def _addPlaneToolbar(self):
     """
     Adds the plane toolbar to the strip.
     """
-    callbacks = [self.prevZPlane, self.nextZPlane, self.setZPlanePosition, self.changePlaneCount]
+    callbacks = [self._prevZPlane, self._nextZPlane, self._setZPlanePosition, self._changePlaneCount]
 
     self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                      hAlign='center', vAlign='c', callbacks=callbacks)
     self.planeToolbar.setMinimumWidth(250)
 
-  def blankCallback(self):
-    pass
-
-  def setZPlanePosition(self, n:int, value:float):
+  def _setZPlanePosition(self, n:int, value:float):
     """
     Sets the value of the z plane position box if the specified value is within the displayable limits.
     """

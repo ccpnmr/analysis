@@ -331,7 +331,7 @@ class SpectrumView(AbstractWrapperObject):
     if not spectrumDisplay.is1D:
       strip = self.strip
       if not strip.haveSetupZWidgets:
-        strip.setZWidgets()
+        strip._setZWidgets()
 
     # Handle action buttons
     apiDataSource = spectrum._wrappedData

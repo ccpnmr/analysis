@@ -61,15 +61,15 @@ class GuiStrip1d(GuiStrip):
     
     raise Exception('1D printing not enabled yet')
     
-  def get1dContextMenu(self) -> Menu:
+  def _get1dContextMenu(self) -> Menu:
     """
     Creates and returns the 1d context menu
     """
 
     self.contextMenu = Menu(self, isFloatWidget=True)
-    self.contextMenu.addItem("Auto Scale", callback=self.zoomYAll)
+    self.contextMenu.addItem("Auto Scale", callback=self.resetYZoom)
     self.contextMenu.addSeparator()
-    self.contextMenu.addItem("Full", callback=self.zoomXAll)
+    self.contextMenu.addItem("Full", callback=self.resetXZoom)
     self.contextMenu.addItem("Zoom", callback=self.raiseZoomPopup)
     self.contextMenu.addItem("Store Zoom", callback=self.storeZoom)
     self.contextMenu.addItem("Restore Zoom", callback=self.restoreZoom)
@@ -91,7 +91,7 @@ class GuiStrip1d(GuiStrip):
     # self.contextMenu.addItem("Print", callback=self.raisePrintMenu)
     return self.contextMenu
 
-  def zoomYAll(self):
+  def resetYZoom(self):
     """
     Zooms y axis to maximum of data.
     """
@@ -99,7 +99,7 @@ class GuiStrip1d(GuiStrip):
     y1 = y2 + self.viewBox.childrenBoundingRect().height()
     self.viewBox.setYRange(y2, y1)
 
-  def zoomXAll(self):
+  def resetXZoom(self):
     """
     Zooms x axis to maximum value of data.
     """

@@ -121,7 +121,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
 """        
     # for strip in self.strips:
-    self.addSpectrumItem(self.strip)
+    self._addSpectrumItem(self.strip)
 
     self._setupTrace()
     
@@ -148,12 +148,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       pix.fill(QtGui.QColor(self.spectrum.positiveContourColour))
     action.setIcon(QtGui.QIcon(pix))
 """      
-  def addSpectrumItem(self, strip):
+  def _addSpectrumItem(self, strip):
     if self not in strip.plotWidget.scene().items():
       strip.plotWidget.scene().addItem(self)
     ###self.visibilityAction.toggled.connect(self.setVisible) # does this ever get set twice??
         
-  def removeSpectrumItem(self, strip):
+  def _removeSpectrumItem(self, strip):
     if self in strip.plotWidget.scene().items():
       strip.plotWidget.scene().removeItem(self)
 
@@ -168,8 +168,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.hPhaseTraces = []
     self.vPhaseTraces = []
     
-  def turnOnPhasing(self):
-    
+  def _turnOnPhasing(self):
+    """
+    # CCPN INTERNAL - called by turnOnPhasing method of GuiStrip.
+    """
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible():
       direction = phasingFrame.getDirection()
@@ -178,14 +180,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         trace.setVisible(True)
         line.setVisible(True)
       
-  def turnOffPhasing(self):
-    
+  def _turnOffPhasing(self):
+    """
+    # CCPN INTERNAL - called by turnOffPhasing method of GuiStrip.
+    """
     for traces in self.hPhaseTraces, self.vPhaseTraces:
       for trace, line in traces:
         trace.setVisible(False)
         line.setVisible(False)
       
-  def newPhasingTrace(self):
+  def _newPhasingTrace(self):
     
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible():
@@ -215,13 +219,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           self.strip.haveSetVPhasingPivot = True
         
       line = pg.InfiniteLine(angle=angle, pos=position, movable=True)
-      line.sigPositionChanged.connect(lambda phasingLine: self.updatePhasing())
+      line.sigPositionChanged.connect(lambda phasingLine: self._updatePhasing())
       self.strip.plotWidget.scene().addItem(trace)
       self.strip.plotWidget.addItem(line)
       trace.setVisible(True)
       line.setVisible(True)
       phaseTraces.append((trace, line))
-      self.updatePhasing()
+      self._updatePhasing()
   
   def removePhasingTraces(self):
     
@@ -239,7 +243,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           self.strip.plotWidget.removeItem(line)
         self.vPhaseTraces = []
     
-  def changedPhasingDirection(self):
+  def _changedPhasingDirection(self):
     
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
@@ -258,9 +262,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         trace.setVisible(True)
         line.setVisible(True)
       
-    self.updatePhasing()
+    self._updatePhasing()
     
-  def updatePhasing(self):
+  def _updatePhasing(self):
+    """
+    # CCPN INTERNAL - called in _updatePhasing method of GuiStrip
+    """
     if not self.isVisible():
       return
       
@@ -396,7 +403,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     vTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
     vTrace.setData(v, y)
 
-  def updateTrace(self, position, positionPixel, updateHTrace=True, updateVTrace=True):
+  def _updateTrace(self, position, positionPixel, updateHTrace=True, updateVTrace=True):
         
     if not (updateHTrace or updateVTrace) or not self.isVisible():
       self.hTrace.setData([], [])
@@ -445,11 +452,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   #
   #   return size
 
-  def newPeakListView(self, peakListView):
+  def _newPeakListView(self, peakListView):
     pass
     
-  def printToFile(self, printer):
-  
+  def _printToFile(self, printer):
+    """
+    # CCPN INTERNAL - called in printToFile method of GuiStrip
+    """
     apiSpectrumView = self._wrappedData.spectrumView
     apiDataSource = apiSpectrumView.dataSource
   
@@ -475,15 +484,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     posColour = self._getColour('positiveContourColour')
     negColour = self._getColour('negativeContourColour')
   
-    xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self.getTranslateScale(0, pixelViewBox0=printer.x0, pixelViewBox1=printer.x1)
-    yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self.getTranslateScale(1, pixelViewBox0=printer.y0, pixelViewBox1=printer.y1)
+    xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0, pixelViewBox0=printer.x0, pixelViewBox1=printer.x1)
+    yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1, pixelViewBox0=printer.y0, pixelViewBox1=printer.y1)
     
     xTile0 = xClipPoint0 // xTotalPointCount
     xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
     yTile0 = yClipPoint0 // yTotalPointCount
     yTile1 = 1 + (yClipPoint1 // yTotalPointCount)
       
-    for position, dataArray in self.getPlaneData():
+    for position, dataArray in self._getPlaneData():
     
       if posLevels:
         posLevelsArray = numpy.array(posLevels, numpy.float32)
@@ -548,7 +557,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # NBNB this should NEVER be called if self.strip is None (i.e. self is deleted)
     # if self.isVisible() and self.strip is not None:
     if self.isVisible() and not self.isDeleted:
-      self.drawContours(painter)
+      self._drawContours(painter)
     
   def boundingRect(self):  # seems necessary to have
       
@@ -559,7 +568,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   # REFACTOR
 
   #def drawContours(self, painter, guiStrip):
-  def drawContours(self, painter):
+  def _drawContours(self, painter):
     
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
@@ -583,7 +592,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
     #contourDict = self.constructContours(guiStrip, posLevels, negLevels)
     try:
-      self.constructContours(posLevels, negLevels)
+      self._constructContours(posLevels, negLevels)
     except FileNotFoundError:
       self._project._logger.warning("No data file found for %s" % self)
 
@@ -594,8 +603,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     try:
 
-      xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self.getTranslateScale(0)
-      yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self.getTranslateScale(1)
+      xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0)
+      yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
       
       xTile0 = xClipPoint0 // xTotalPointCount
       xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
@@ -644,7 +653,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       painter.endNativePainting()
       
   #def constructContours(self, guiStrip, posLevels, negLevels):
-  def constructContours(self, posLevels, negLevels):
+  def _constructContours(self, posLevels, negLevels):
     """ Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level needs to call this function.
     """
@@ -653,19 +662,19 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     if xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev \
       or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]]):
-      self.releaseDisplayLists(self.posDisplayLists)
-      self.releaseDisplayLists(self.negDisplayLists)
+      self._releaseDisplayLists(self.posDisplayLists)
+      self._releaseDisplayLists(self.negDisplayLists)
       doPosLevels = doNegLevels = True
     else:
       if list(posLevels) == self.posLevelsPrev:
         doPosLevels = False
       else:
-        self.releaseDisplayLists(self.posDisplayLists)
+        self._releaseDisplayLists(self.posDisplayLists)
         doPosLevels = posLevels and True
       if list(negLevels) == self.negLevelsPrev:
         doNegLevels = False
       else:
-        self.releaseDisplayLists(self.negDisplayLists)
+        self._releaseDisplayLists(self.negDisplayLists)
         doNegLevels = negLevels and True
       
     ###self.previousRegion = self.guiSpectrumDisplay.region[:]  # TBD: not quite right, should be looking at the strip(s)
@@ -674,11 +683,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if doPosLevels:
       posLevelsArray = numpy.array(posLevels, numpy.float32)
       # print(posLevelsArray)
-      self.createDisplayLists(posLevelsArray, self.posDisplayLists)
+      self._createDisplayLists(posLevelsArray, self.posDisplayLists)
       
     if doNegLevels:
       negLevelsArray = numpy.array(negLevels, numpy.float32)
-      self.createDisplayLists(negLevelsArray, self.negDisplayLists)
+      self._createDisplayLists(negLevelsArray, self.negDisplayLists)
       
     if not doPosLevels and not doNegLevels:
       return
@@ -687,7 +696,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     #for position, dataArray in self.getPlaneData(guiStrip):
     posContoursAll = negContoursAll = None
-    for position, dataArray in self.getPlaneData():
+    for position, dataArray in self._getPlaneData():
 
       #print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray), dataArray)
       
@@ -719,11 +728,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         
     if posContoursAll:
       for n, contourData in enumerate(posContoursAll):
-        self.addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
+        self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
 
     if negContoursAll:
       for n, contourData in enumerate(negContoursAll):
-        self.addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
+        self._addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
       
     ###GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     
@@ -733,20 +742,20 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.yDataDimPrev = yDataDim
     self.zRegionPrev = tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])
     
-  def releaseDisplayLists(self, displayLists):
+  def _releaseDisplayLists(self, displayLists):
 
     for displayList in displayLists:
       GL.glDeleteLists(displayList, 1)
     displayLists[:] = []
 
-  def createDisplayLists(self, levels, displayLists):
+  def _createDisplayLists(self, levels, displayLists):
 
     # could create them in one go but more likely to get fragmentation that way
     for level in levels:
       displayLists.append(GL.glGenLists(1))
 
   #def getPlaneData(self, guiStrip):
-  def getPlaneData(self):
+  def _getPlaneData(self):
     
     apiSpectrumView = self._apiStripSpectrumView.spectrumView
     orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
@@ -904,7 +913,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
               planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
               yield position, planeData
           
-  def addContoursToDisplayList(self, displayList, contourData, level):
+  def _addContoursToDisplayList(self, displayList, contourData, level):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
     
     GL.glNewList(displayList, GL.GL_COMPILE)
@@ -927,7 +936,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     
   # def getTranslateScale(self, dim, ind:int):
-  def getTranslateScale(self, ind:int, pixelViewBox0:float=None, pixelViewBox1:float=None):
+  def _getTranslateScale(self, ind:int, pixelViewBox0:float=None, pixelViewBox1:float=None):
     """Get translation data for X (ind==0) or Y (ind==1) dimension"""
 
     dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[ind]

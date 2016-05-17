@@ -72,6 +72,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     GuiModule.__init__(self)
     # DropBase.__init__(self, self._appBase, self.dropCallback)
     self.setAcceptDrops(True)
+    self.closeDock = self._closeDock
     self.spectrumToolBar = SpectrumToolBar(self.dock, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
     self.dock.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
     self.dock.label.closeButton.clicked.connect(self.closeDock)
@@ -95,12 +96,11 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.dock.addWidget(self.positionBox, 0, 3)
     self.scrollArea = ScrollArea(self.dock, grid=(1, 0), gridSpan=(1, 4))
     self.scrollArea.setWidgetResizable(True)
-    self.scrollArea.setWidgetResizable(True)
     self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0), appBase=self._appBase)
     self.stripFrame.guiSpectrumDisplay = self
     self.stripFrame.setAcceptDrops(True)
     self.scrollArea.setWidget(self.stripFrame)
-    self.closeDock = self._closeDock
+
     
     self.setEnabled(True)
 
@@ -208,7 +208,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
 
   def removeStrip(self):
-    self.orderedStrips[-1].unregisterStrip()
+    self.orderedStrips[-1]._unregisterStrip()
     self.orderedStrips[-1].delete()
 
   def duplicateStrip(self):
@@ -228,12 +228,12 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
   def resetYZooms(self):
     """Zooms Y axis of current strip to show entire region"""
     for strip in self.strips:
-      strip.resetYZooms()
+      strip.resetYZoom()
 
   def resetXZooms(self):
     """Zooms X axis of current strip to show entire region"""
     for strip in self.strips:
-      strip.resetXZooms()
+      strip.resetXZoom()
 
   def _restoreZoom(self):
     """Restores last saved zoom of current strip."""
@@ -247,7 +247,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     """Toggles whether cross hair is displayed in all strips of spectrum display."""
     # toggle crosshairs for strips in this spectrumDisplay
     for strip in self.strips:
-      strip.toggleCrossHair()
+      strip._toggleCrossHair()
     
   def toggleGrid(self):
     """Toggles whether grid is displayed in all strips of spectrum display."""

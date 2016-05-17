@@ -162,7 +162,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                     """)
 
     self.namespace = {'loadProject': self._appBase.loadProject,
-                      'newProject': self._appBase._newProject, 'loadData': self.loadData, 'application': self,
+                      'newProject': self._appBase.newProject, 'loadData': self.loadData, 'application': self,
                       'preferences': self._appBase.preferences, 'project': self._project, 'current': self._appBase.current,
                       'undo': self.undo, 'redo': self.redo}
 
@@ -199,7 +199,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu = Menu("Help", self)
 
 
-    fileMenu.addAction(Action(self, "New", callback=self._newProject, shortcut='pn'))
+    fileMenu.addAction(Action(self, "New", callback=self.newProject, shortcut='pn'))
 
     fileMenu.addAction(Action(self, "Open ...", callback=self.loadAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
@@ -242,7 +242,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     spectrumMenu.addAction(Action(self, "Spectrum Groups ...", callback=self.showProjectionPopup, shortcut='ss'))
     spectrumMenu.addAction(Action(self, "Set Experiment Types ...", callback=self.showExperimentTypePopup, shortcut='et'))
     spectrumMenu.addSeparator()
-    spectrumMenu.addAction(Action(self, "Pick Peaks ...", callback=self.pickPeaks, shortcut='pp'))
+    spectrumMenu.addAction(Action(self, "Pick Peaks ...", callback=self.showPeakPickPopup, shortcut='pp'))
     spectrumMenu.addAction(Action(self, 'Integration', callback=self.showIntegrationModule, shortcut='it'))
     spectrumMenu.addSeparator()
     spectrumMenu.addAction(Action(self, "Make Projection ...", callback=self.showProjectionPopup, shortcut='pj'))
@@ -365,12 +365,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           
     return result
     
-  def _newProject(self):
+  def newProject(self):
     
     result = self._queryCloseProject(title='New Project', phrase='create a new')
     
     if result:
-      self._appBase._newProject()
+      self._appBase.newProject()
     
   def _showDocumentation(self, title, *args):
     

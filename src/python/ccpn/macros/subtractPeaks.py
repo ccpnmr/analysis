@@ -6,7 +6,7 @@ peakList2 = project.getByPid('PL:HSQC-115.2')
 
 peakList1.spectrum.assignmentTolerances = [0.05, 0.01]
 
-peakList1.subtractPeakLists(peakList2)
+peakList1._subtractPeakLists(peakList2)
 
 peakList3 = project.getByPid('PL:HSQC-115.3')
 

@@ -30,7 +30,7 @@ from PyQt4 import QtGui, QtOpenGL
 
 from ccpn.Metabolomics.SpectrumGroupsWidget import SpectrumGroupsWidget
 from ccpn.ui.gui.DropBase import DropBase
-from ccpn.ui.gui.base import ViewBox
+from ccpn.ui.gui import ViewBox
 from ccpn.ui.gui.widgets.Base import Base
 
 class PlotWidget(DropBase, pg.PlotWidget, Base):

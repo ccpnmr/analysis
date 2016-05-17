@@ -42,11 +42,12 @@ from ccpn.core.PeakList import PeakList
 # from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar
+
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
 import typing
 
-from ccpn.ui.gui.base.PlaneToolbar import PlaneToolbar
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 
 # from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView

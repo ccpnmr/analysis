@@ -51,9 +51,9 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 
-from ccpn.ui.gui.base.AxisTextItem import AxisTextItem
+from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
 # from ccpn.ui.gui.DropBase import DropBase
-from ccpn.ui.gui.base.PlotWidget import PlotWidget
+from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 
 def sufficientlyDifferentWidth(region1, region2):
   

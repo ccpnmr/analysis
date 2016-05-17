@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
@@ -14,9 +14,9 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: rhfogh $"
+__date__ = "$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $"
+__version__ = "$Revision: 9315 $"
 
 #=====================================================================8===================
 # Start of code
@@ -142,14 +142,14 @@ class AssignmentLine(QtGui.QGraphicsLineItem):
     self.setLine(x1, y1, x2, y2)
 
 
-class Assigner(CcpnDock):
+class SequenceGraph(CcpnDock):
   """
   A module for the display of stretches of sequentially linked and assigned stretches of
   Nmr Residues.
   """
   def __init__(self, project=None):
 
-    super(Assigner, self).__init__(name='Sequence Graph')
+    super(SequenceGraph, self).__init__(name='Sequence Graph')
     self.project = project
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)

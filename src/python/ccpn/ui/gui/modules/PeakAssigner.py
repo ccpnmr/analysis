@@ -10,7 +10,7 @@ from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib import CcpnSorting
-from ccpn.ui.gui.base.assignmentModuleLogic import (nmrAtomsForPeaks,
+from ccpn.ui.gui.lib.PeakAssignment import (nmrAtomsForPeaks,
                                                       peaksAreOnLine,
                                                       sameAxisCodes)
 from ccpn.ui.gui.widgets.Base import Base
@@ -23,7 +23,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpnmodel.ccpncore.lib.Constants import  defaultNmrChainCode
 
-class AssignmentModule(CcpnDock, Base):
+class PeakAssigner(CcpnDock, Base):
   '''Module that can be used to assign nmrAtoms
      to peaks.
 

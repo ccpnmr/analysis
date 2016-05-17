@@ -204,10 +204,10 @@ Dock ScrollArea QPushButton {
 				padding: 2px;
 				}
 
-Dock Assigner QWidget { background-color: #FBF4CC;
+Dock SequenceGraph QWidget { background-color: #FBF4CC;
               border: 1px solid #EDC151;
     }
-Assigner QWidget { background-color: #FBF4CC;
+SequenceGraph QWidget { background-color: #FBF4CC;
     }
 
 Dock ScrollArea QWidget { background-color: #FBF4CC;

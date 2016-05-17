@@ -30,7 +30,7 @@ from PyQt4 import QtCore
 
 from ccpn.core.Peak import Peak
 from ccpn.core.lib.Assignment import isInterOnlyExpt, getNmrAtomPrediction, CCP_CODES
-from ccpn.ui.gui.base.assignmentModuleLogic import peaksAreOnLine
+from ccpn.ui.gui.lib.PeakAssignment import peaksAreOnLine
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Dock import CcpnDock

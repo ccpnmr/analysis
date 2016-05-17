@@ -48,8 +48,9 @@ import typing
 from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.base.Frame import Frame as GuiFrame
 from ccpn.ui.gui.base.PhasingFrame import PhasingFrame
-from ccpn.ui.gui.base.SpectrumToolBar import SpectrumToolBar
 from ccpn.ui.gui.modules.GuiModule import GuiModule
+from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
+
 # from ccpn.ui.gui.util.Svg import Svg
 
 # def _findPpmRegion(spectrum, axisDim, spectrumDim):

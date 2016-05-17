@@ -29,6 +29,8 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn.Assign.modules.SequenceGraph import SequenceGraph
+
 from ccpn.core.PeakList import PeakList
 from ccpn.Metabolomics.Metabolomics import MetabolomicsModule
 from ccpn.Screen.modules.MixtureAnalysis import MixtureAnalysis
@@ -37,10 +39,6 @@ from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
 from ccpn.Screen.popups.SampleSetupPopup import SamplePopup
 from ccpn.core.lib.Version import revision
 from ccpn.framework.update.UpdatePopup import UpdatePopup
-from ccpn.ui.gui.base.Assigner import Assigner
-from ccpn.ui.gui.base.IpythonConsole import IpythonConsole
-from ccpn.ui.gui.base.SideBar import SideBar
-from ccpn.ui.gui.modules.AssignmentModule import AssignmentModule
 from ccpn.ui.gui.modules.AtomSelector import AtomSelector
 from ccpn.ui.gui.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpn.ui.gui.modules.DataPlottingModule import DataPlottingModule
@@ -48,6 +46,7 @@ from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.NotesEditor import NotesEditor
+from ccpn.ui.gui.modules.PeakAssigner import PeakAssigner
 from ccpn.ui.gui.modules.PeakTable import PeakTable
 from ccpn.ui.gui.modules.PickAndAssignModule import PickAndAssignModule
 from ccpn.ui.gui.modules.SequenceModule import SequenceModule
@@ -61,7 +60,9 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
 from ccpn.ui.gui.widgets.Dock import CcpnDock
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
+from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.util import Path
 from ccpn.util.Common import uniquify
@@ -410,7 +411,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showAssignmentModule(self):
     """Displays assignment module."""
-    self.assignmentModule = AssignmentModule(self, self._project, self._project._appBase.current.peaks)
+    self.assignmentModule = PeakAssigner(self, self._project, self._project._appBase.current.peaks)
     self.dockArea.addDock(self.assignmentModule)
     self.pythonConsole.writeConsoleCommand("application.showAssignmentModule()")
     self.project._logger.info("application.showAssignmentModule()")
@@ -498,7 +499,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
     """
-    self.assigner = Assigner(project=self._project)
+    self.assigner = SequenceGraph(project=self._project)
     if hasattr(self, 'bbModule'):
       self.bbModule._connectAssigner(self.assigner)
     if nextTo is not None:

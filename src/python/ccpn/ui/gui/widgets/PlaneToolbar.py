@@ -5,10 +5,10 @@ from functools import partial
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.SpinSystemLabel import SpinSystemLabel
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 
-from ccpn.ui.gui.base.SpinSystemLabel import SpinSystemLabel
 
 from PyQt4 import QtGui, QtCore
 

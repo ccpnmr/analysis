@@ -336,7 +336,7 @@ QTabWidget QWidget { background: #020F31;
     }
 
 
-Dock Assigner QWidget { background-color: #000021;
+Dock SequenceGraph QWidget { background-color: #000021;
               border: 1px solid #00092d;
     }
 

@@ -31,9 +31,9 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.core.PeakList import PeakList
 from ccpn.Metabolomics.Metabolomics import MetabolomicsModule
-from ccpn.Screen.modules import MixtureAnalysis
-from ccpn.Screen.modules import ScreeningSettings
-from ccpn.Screen.modules import ShowScreeningHits
+from ccpn.Screen.modules.MixtureAnalysis import MixtureAnalysis
+from ccpn.Screen.modules.ScreeningSettings import ScreeningSettings
+from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
 from ccpn.Screen.popups.SampleSetupPopup import SamplePopup
 from ccpn.core.lib.Version import revision
 from ccpn.framework.update.UpdatePopup import UpdatePopup
@@ -663,7 +663,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.dockArea.guiWindow.deleteBlankDisplay()
     self.project.strips[0].viewBox.autoRange()
 
-    self.showScreeningHits.clearDisplayView()  # returns a clean display
+    self.showScreeningHits._clearDisplayView()  # returns a clean display
 
     self.pythonConsole.writeConsoleCommand("application.showScreeningHits()")
     self.project._logger.info("application.showScreeningHits()")

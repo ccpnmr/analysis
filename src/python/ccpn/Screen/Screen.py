@@ -6,7 +6,6 @@ applicationName = 'Screen'
 
 class Screen(AppBase):
   """Root class for Screen application"""
-  #
 
   def __init__(self, applicationName, applicationVersion, commandLineArguments):
     AppBase.__init__(self, applicationName, applicationVersion, commandLineArguments)

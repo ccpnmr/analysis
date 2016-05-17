@@ -50,14 +50,14 @@ class SamplePopup(QtGui.QDialog):
     self.noiseLevelSpinbox.hide()
     self.spacer = QtGui.QSpacerItem(0,20)
     self.pickPeaksRadioButtons = RadioButtons(self,
-                                               texts=['Automatic','Already picked'],
-                                               selectedInd=0,
-                                               callback=self.pickPeakCallBack,
-                                               tipTexts=None)
+                                              texts=['Automatic','Already picked'],
+                                              selectedInd=0,
+                                              callback=self._pickPeakCallBack,
+                                              tipTexts=None)
     self.noiseLevelRadioButtons = RadioButtons(self,
                                                texts=['Estimated','Manual'],
                                                selectedInd=0,
-                                               callback=self.noiseLevelCallBack,
+                                               callback=self._noiseLevelCallBack,
                                                tipTexts=None)
 
     self.replaceRadioButtons = RadioButtons(self,
@@ -69,7 +69,7 @@ class SamplePopup(QtGui.QDialog):
     ######## ========  Set ApplyButtons  ====== ########
     self.calculateButtons = ButtonList(self,
                                        texts = ['Cancel','Perform'],
-                                       callbacks=[self.reject, self.perform],
+                                       callbacks=[self.reject, self.genereteMixture],
                                        tipTexts=[None,None],
                                        direction='h', hAlign='r')
 
@@ -87,20 +87,20 @@ class SamplePopup(QtGui.QDialog):
     self.mainLayout.addItem(self.spacer, 6,0)
     self.mainLayout.addWidget(self.calculateButtons, 7,1)
 
-    self.populatePullDownSelection()
-    self.createWidgetsGeneralTab()
-    self.setPerformButtonStatus()
+    self._populatePullDownSelection()
+    self._createWidgetsGeneralTab()
+    self._setPerformButtonStatus()
 
 
-  def createWidgetsGeneralTab(self):
+  def _createWidgetsGeneralTab(self):
     '''   '''
-    self.modeRadioButtons = RadioButtons(self,texts=['Select number of Mixtures',
+    self.modeRadioButtons = RadioButtons(self, texts=['Select number of Mixtures',
                                                     'Select number of Components',
                                                     'Best match'],
-                                             selectedInd=2,
-                                             callback=self.modeSelection,
-                                             direction='v',
-                                             tipTexts=None)
+                                         selectedInd=2,
+                                         callback=self._modeSelection,
+                                         direction='v',
+                                         tipTexts=None)
     self.spacerLabel = Label(self, text="")
     self.spinBoxSA = Spinbox(self)
     self.sliderSA = Slider(self,startVal= 2,endVal=100,direction='h',step=1,)
@@ -111,11 +111,11 @@ class SamplePopup(QtGui.QDialog):
     self.ppmDistance = DoubleSpinbox(self)
     self.distanceLabel = Label(self, text="Minimal distance between peaks")
 
-    self.addWidgetsToGeneralTab()
-    self.setWidgetsGeneralTab()
+    self._addWidgetsToGeneralTab()
+    self._setWidgetsGeneralTab()
 
 
-  def addWidgetsToGeneralTab(self):
+  def _addWidgetsToGeneralTab(self):
     '''   '''
     widgetsToAdd = (self.modeRadioButtons, self.spacerLabel, self.spinBoxSA,self.sliderSA,
                     self.spinBoxcomponent, self.sliderComponent, self.ppmDistance, self.distanceLabel)
@@ -125,7 +125,7 @@ class SamplePopup(QtGui.QDialog):
       i,j = position
       self.tabGeneralSetupLayout.addWidget(widget, i,j)
 
-  def setWidgetsGeneralTab(self):
+  def _setWidgetsGeneralTab(self):
     '''   '''
     self.spinBoxSA.setRange(2, 100)
     self.spinBoxcomponent.setRange(2, 20)
@@ -148,7 +148,7 @@ class SamplePopup(QtGui.QDialog):
 
     self.widgetsToHide =  [self.spinBoxSA, self.sliderSA, self.spinBoxcomponent,
                            self.sliderComponent]
-    self.hideWidgets(self.widgetsToHide)
+    self._hideWidgets(self.widgetsToHide)
 
     self.buttonsToStyle = [self.spacerLabel,self.noiseLevelRadioButtons,self.pickPeaksRadioButtons,
                            self.modeRadioButtons, self.distanceLabel]
@@ -158,69 +158,69 @@ class SamplePopup(QtGui.QDialog):
       else:
         button.setStyleSheet("background-color:transparent; color: #122043")
 
-  def modeSelection(self):
+  def _modeSelection(self):
     '''   '''
     selected = self.modeRadioButtons.get()
-    callbacks = (self.show_nSamples,self.show_nComponents,self.showBestMatch)
+    callbacks = (self._show_nSamples, self._showNComponents, self._showBestMatch)
     for selection, callback in zip(self.modeRadioButtons.texts, callbacks):
       if selected == str(selection):
         callback()
 
 
-  def pickPeakCallBack(self,):
+  def _pickPeakCallBack(self, ):
     '''   '''
     selected = self.pickPeaksRadioButtons.get()
     if selected == 'Automatic':
-      self.showWidgets([self.noiseLevelRadioButtons,self.noiseLabel])
+      self._showWidgets([self.noiseLevelRadioButtons, self.noiseLabel])
       self.noiseLevelRadioButtons.radioButtons[0].setChecked(True)
     else:
       self.noiseLevelRadioButtons.radioButtons[1].setChecked(True)
-      self.hideWidgets([self.noiseLevelRadioButtons,self.noiseLabel,self.noiseLevelSpinbox])
+      self._hideWidgets([self.noiseLevelRadioButtons, self.noiseLabel, self.noiseLevelSpinbox])
 
-  def noiseLevelCallBack(self):
+  def _noiseLevelCallBack(self):
     '''   '''
     selected = self.noiseLevelRadioButtons.get()
     if selected == 'Estimated':
-      self.hideWidgets([self.noiseLevelSpinbox])
+      self._hideWidgets([self.noiseLevelSpinbox])
     else:
-      self.showWidgets([self.noiseLevelSpinbox])
+      self._showWidgets([self.noiseLevelSpinbox])
 
 
-  def show_nSamples(self):
+  def _show_nSamples(self):
     '''   '''
     widgetsToHide = [self.sliderComponent,self.spinBoxcomponent,self.ppmDistance,self.distanceLabel]
     widgetsToShow = [self.sliderSA,self.spinBoxSA]
-    self.showWidgets(widgetsToShow)
-    self.hideWidgets(widgetsToHide)
+    self._showWidgets(widgetsToShow)
+    self._hideWidgets(widgetsToHide)
 
 
-  def show_nComponents(self):
+  def _showNComponents(self):
     '''   '''
     widgetsToHide = [self.sliderSA,self.spinBoxSA,self.ppmDistance,self.distanceLabel]
     widgetsToShow = [self.sliderComponent,self.spinBoxcomponent]
-    self.showWidgets(widgetsToShow)
-    self.hideWidgets(widgetsToHide)
+    self._showWidgets(widgetsToShow)
+    self._hideWidgets(widgetsToHide)
 
 
-  def showBestMatch(self):
+  def _showBestMatch(self):
     '''   '''
     widgetsToHide = [self.sliderComponent,self.spinBoxcomponent,self.sliderSA,self.spinBoxSA]
     widgetsToShow = [self.ppmDistance,self.distanceLabel]
-    self.showWidgets(widgetsToShow)
-    self.hideWidgets(widgetsToHide)
+    self._showWidgets(widgetsToShow)
+    self._hideWidgets(widgetsToHide)
 
 
-  def hideWidgets(self, widgets:[]):
+  def _hideWidgets(self, widgets:[]):
     for widget in widgets:
       widget.hide()
 
 
-  def showWidgets(self, widgets:[]):
+  def _showWidgets(self, widgets:[]):
     for widget in widgets:
       widget.show()
 
 
-  def populatePullDownSelection(self):
+  def _populatePullDownSelection(self):
     '''   '''
     self.dataPullDown = ['Select An Option']
     if len(self.project.spectrumGroups)>0:
@@ -231,9 +231,9 @@ class SamplePopup(QtGui.QDialog):
     if 'SG:H' in self.dataPullDown:
       self.selectSpectraPullDown.select('SG:H')
 
-    self.selectSpectraPullDown.activated[str].connect(self.setPerformButtonStatus)
+    self.selectSpectraPullDown.activated[str].connect(self._setPerformButtonStatus)
 
-  def getPullDownSelectionSpectra(self):
+  def _getPullDownSelectionSpectra(self):
     '''   '''
     selected = self.selectSpectraPullDown.getText()
     if selected == 'All':
@@ -245,8 +245,8 @@ class SamplePopup(QtGui.QDialog):
      spectra = self.project.getByPid(selected).spectra
      return spectra
 
-  def deleteMixtures(self):
-    mixtures = MixtureAnalysis.getMixture(self)
+  def _deleteMixtures(self):
+    mixtures = MixtureAnalysis._getMixture(self)
     if len(mixtures)>0:
       for mixture in mixtures:
         mixture.delete()
@@ -254,27 +254,27 @@ class SamplePopup(QtGui.QDialog):
       self.dockArea.docks['MIXTURE ANALYSIS'].close()
 
 
-  def perform(self):
+  def genereteMixture(self):
     '''This function gets all the setting given by the user and runs the mixture generation algorithm ('setupSamples')'''
-    mode, n, minOverlap, mixtureName = self.getSelectedSettings()
-    spectra = self.getPullDownSelectionSpectra()
+    mode, n, minOverlap, mixtureName = self._getSelectedSettings()
+    spectra = self._getPullDownSelectionSpectra()
 
     if self.replaceRadioButtons.get() == 'Yes':
-      self.deleteMixtures()
+      self._deleteMixtures()
 
     if self.pickPeaksRadioButtons.get() == 'Already picked':
       setupSamples(spectra, mode, n, minOverlap, mixtureName)
     else:
-      self.pickPeaks()
+      self._pickPeaks()
       setupSamples(spectra, mode, n, minOverlap, mixtureName)
 
-    self.openTheMixtureAnalysisModule()
+    self._openMixtureAnalysisModule()
     self.accept()
 
-  def pickPeaks(self):
+  def _pickPeaks(self):
     '''   '''
-    spectra = self.getPullDownSelectionSpectra()
-    regions = self.excludedRegionsTab.getExcludedRegions()
+    spectra = self._getPullDownSelectionSpectra()
+    regions = self.excludedRegionsTab._getExcludedRegions()
 
     if self.pickPeaksRadioButtons.radioButtons[0].isChecked:
       selected = self.noiseLevelRadioButtons.get()
@@ -285,7 +285,7 @@ class SamplePopup(QtGui.QDialog):
             spectrum.peakLists[0].pickPeaks1dFiltered(size=10, ignoredRegions=regions, noiseThreshold=value)
 
 
-  def setPerformButtonStatus(self):
+  def _setPerformButtonStatus(self):
     '''   '''
     selected = self.selectSpectraPullDown.getText()
     if selected == 'Select An Option':
@@ -294,7 +294,7 @@ class SamplePopup(QtGui.QDialog):
     else:
       self.calculateButtons.buttons[1].setEnabled(True)
 
-  def getSelectedSettings(self):
+  def _getSelectedSettings(self):
     '''   '''
     settings = {self.modeRadioButtons.radioButtons[0]:['nSamples',self.spinBoxSA.value(),None,None],
                 self.modeRadioButtons.radioButtons[1]:['nComponentsPerSample',self.spinBoxcomponent.value(),None,None],
@@ -304,7 +304,7 @@ class SamplePopup(QtGui.QDialog):
         return value
 
 
-  def openTheMixtureAnalysisModule(self):
+  def _openMixtureAnalysisModule(self):
     '''   '''
     mixtureAnalysis = MixtureAnalysis(self.project)
     mixtureAnalysisDock = self.dockArea.addDock(mixtureAnalysis, position='bottom')

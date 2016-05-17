@@ -72,9 +72,9 @@ class GoArea(QtGui.QWidget):
     self.lineEdit = LineEdit(self,)
     self.lineEdit.setText('ds1')
     self.pipelineName = self.lineEdit.text()
-    self.lineEdit.editingFinished.connect(self.renamePipeline)
+    self.lineEdit.editingFinished.connect(self._renamePipeline)
     self.spectrumGroupLabel = Label(self, 'Input Data ', )
-    self.spectrumGroupPulldown = PulldownList(self, callback=self.currentSpectrumGroup)
+    self.spectrumGroupPulldown = PulldownList(self, callback=self._currentSpectrumGroup)
     spectrumGroups = [spectrumGroup.pid for spectrumGroup in project.spectrumGroups]
     self.spectrumGroupPulldown.setData(spectrumGroups)
     self.current.spectrumGroup = self.project.getByPid(self.spectrumGroupPulldown.currentText())
@@ -91,11 +91,11 @@ class GoArea(QtGui.QWidget):
     self.goAreaLayout.addWidget(self.goButton)
 
 
-  def currentSpectrumGroup(self):
+  def _currentSpectrumGroup(self):
     self.current.spectrumGroup = self.project.getByPid(self.spectrumGroupPulldown.currentText())
 
 
-  def renamePipeline(self):
+  def _renamePipeline(self):
     self.pipelineName = self.lineEdit.text()
 
 
@@ -137,18 +137,18 @@ class PipelineWidgets(QtGui.QWidget):
     self.selectMethod = '< Select Method >'
 
     self.pulldownAction.setData(pdData)
-    self.pulldownAction.activated[str].connect(self.addMethod)
+    self.pulldownAction.activated[str].connect(self._addMethod)
 
     self.checkBox = CheckBox(self, text='active', checked=True)
 
-    self.moveUpDownButtons = ButtonList(self, texts = ['︎','︎︎'], callbacks=[self.moveRowUp, self.moveRowDown], icons=[self.moveUpRowIcon,self.moveDownRowIcon],
-                                       tipTexts=['Move row up', 'Move row down'], direction='h', hAlign='r')
+    self.moveUpDownButtons = ButtonList(self, texts = ['︎','︎︎'], callbacks=[self._moveRowUp, self._moveRowDown], icons=[self.moveUpRowIcon, self.moveDownRowIcon],
+                                        tipTexts=['Move row up', 'Move row down'], direction='h', hAlign='r')
     self.moveUpDownButtons.setFixedHeight(40)
     self.moveUpDownButtons.setFixedWidth(40)
     self.moveUpDownButtons.setStyleSheet('font-size: 15pt')
 
-    self.addRemoveButtons = ButtonList(self, texts = ['',''], callbacks=[self.addRow, self.removeRow],icons=[self.addRowIcon,self.removeRowIcon],
-                                       tipTexts=['Add new row', 'Remove row '],  direction='H', hAlign='l' )
+    self.addRemoveButtons = ButtonList(self, texts = ['',''], callbacks=[self._addRow, self._removeRow], icons=[self.addRowIcon, self.removeRowIcon],
+                                       tipTexts=['Add new row', 'Remove row '], direction='H', hAlign='l')
     self.addRemoveButtons.setStyleSheet('font-size: 15pt')
     self.addRemoveButtons.setFixedHeight(40)
     self.addRemoveButtons.setFixedWidth(40)
@@ -161,14 +161,14 @@ class PipelineWidgets(QtGui.QWidget):
     self.addRemoveButtons.buttons[0].setEnabled(False)
 
 
-  def addMethod(self, selected):
-    self.updateLayout()
+  def _addMethod(self, selected):
+    self._updateLayout()
     obj = self.pullDownData[selected]
     if obj is not None:
       self.mainWidgets_layout.insertWidget(2, obj, 1)
       mainVboxLayout = obj.parent().parent().parent().layout()
       items = [mainVboxLayout.itemAt(i) for i in range(mainVboxLayout.count())]
-      self.enableAddButton(items)
+      self._enableAddButton(items)
 
     if selected == 'Exclude Regions':
       self.mainWidgets.setFixedHeight(200)
@@ -176,7 +176,7 @@ class PipelineWidgets(QtGui.QWidget):
       self.mainWidgets.setFixedHeight(60)
 
 
-  def updateLayout(self):
+  def _updateLayout(self):
     layout = self.mainWidgets_layout
     item = layout.itemAt(2)
     if item.widget() is not self.moveUpDownButtons:
@@ -184,7 +184,7 @@ class PipelineWidgets(QtGui.QWidget):
       layout.removeItem(item)
 
 
-  def moveRowUp(self):
+  def _moveRowUp(self):
     '''
     obj => sender = button, parent1= buttonList, parent2= GroupBox1, parent3=PipelineWidgets obj
     objLayout is the main parent layout (VLayout)
@@ -195,7 +195,7 @@ class PipelineWidgets(QtGui.QWidget):
     newPosition = max(currentPosition-1, 0)
     objLayout.insertWidget(newPosition, obj)
 
-  def moveRowDown(self):
+  def _moveRowDown(self):
     '''
     obj as above
     objLayout is the main parent layout (VLayout)
@@ -207,7 +207,7 @@ class PipelineWidgets(QtGui.QWidget):
     newPosition = min(currentPosition+1, objLayout.count()-1)
     objLayout.insertWidget(newPosition, obj)
 
-  def addRow(self):
+  def _addRow(self):
     '''
     This function will add a new Pipelinewidgets obj in the next row below the clicked button.
     '''
@@ -220,10 +220,10 @@ class PipelineWidgets(QtGui.QWidget):
     objLayout.insertWidget(newPosition, newObj)
 
     items = [objLayout.itemAt(i) for i in range(objLayout.count())]
-    self.disableAddButton(items)
+    self._disableAddButton(items)
 
 
-  def disableAddButton(self, items):
+  def _disableAddButton(self, items):
     '''
     If there is empty row with no method selected, will disable all the addButtons in each other row
     '''
@@ -233,7 +233,7 @@ class PipelineWidgets(QtGui.QWidget):
           i.widget().addRemoveButtons.buttons[0].setEnabled(False)
 
 
-  def enableAddButton(self, items):
+  def _enableAddButton(self, items):
     '''
     If a method is selected, will enable all the addButtons in each other row
     '''
@@ -241,7 +241,7 @@ class PipelineWidgets(QtGui.QWidget):
       i.widget().addRemoveButtons.buttons[0].setEnabled(True)
 
 
-  def removeRow (self):
+  def _removeRow(self):
     '''
     This function will remove the Pipelinewidgets selected from the main parent layout (VLayout)
     '''

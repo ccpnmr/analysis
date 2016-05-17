@@ -29,12 +29,12 @@ class StdSpectrumCreator(QtGui.QWidget, Base):
     self.project = project
     self.path = '/Users/luca/Desktop/ScreeningData/demoSamples/'
 
-    self.createButton = Button(self, text = 'create new spectrum', callback=self.createSpectrumDifference,
-                          grid=(0, 0), hAlign='c')
+    self.createButton = Button(self, text = 'create new spectrum', callback=self._createSpectrumDifference,
+                               grid=(0, 0), hAlign='c')
     self.lineEditPath = LineEdit(self, text=str(self.path),  hAlign='l', grid=(0, 1), gridSpan=(0,2))
     self.lineEditPath.setFixedWidth = 300
 
-  def createSpectrumDifference(self):
+  def _createSpectrumDifference(self):
     for sample in self.project.samples:
       if hasattr(sample, 'minScore'):
         pass
@@ -42,9 +42,9 @@ class StdSpectrumCreator(QtGui.QWidget, Base):
         spectrumDiff = createStdDifferenceSpectrum(sample.spectra[0], sample.spectra[1])
         self.newFilePath = self.lineEditPath.text()+sample.name + '_Std_diff'
         writeBruker(self.newFilePath, spectrumDiff)
-        self.loadSpectrumDifference(self.newFilePath+'/pdata/1/1r')
+        self._loadSpectrumDifference(self.newFilePath + '/pdata/1/1r')
 
-  def loadSpectrumDifference(self, path):
+  def _loadSpectrumDifference(self, path):
     self.newSpectrumStd = self.project.loadData(path)
     self.newSpectrumStd[0].scale = float(0.1)
     # self.newSpectrumStd[0].dimensionCount = 1
@@ -94,7 +94,7 @@ class ExcludeRegions(QtGui.QWidget):
 
     self.pulldownSolvents = PulldownList(self, grid=(0, 1), hAlign='c')
     self.pulldownSolvents.setFixedWidth(105)
-    self.pulldownSolvents.activated[str].connect(self.addRegions)
+    self.pulldownSolvents.activated[str].connect(self._addRegions)
     for solvent in sorted(self.solvents):
       self.pulldownSolvents.addItem(solvent)
     self.SolventsLabel = Label(self, "Select Regions or \nsolvents to exclude", grid=(0, 0), hAlign='c')
@@ -107,7 +107,7 @@ class ExcludeRegions(QtGui.QWidget):
     self.comboBoxes = []
 
 
-  def addRegions(self, pressed):
+  def _addRegions(self, pressed):
     '''   '''
     widgetList = []
     for solvent in sorted(self.solvents):
@@ -135,10 +135,10 @@ class ExcludeRegions(QtGui.QWidget):
           self.spin.setValue(values)
           widgetList.append(self.spin)
     self.comboBoxes.append(widgetList)
-    self.closebutton.clicked.connect(partial(self.deleteRegions, self.positions))
+    self.closebutton.clicked.connect(partial(self._deleteRegions, self.positions))
 
 
-  def deleteRegions(self, positions):
+  def _deleteRegions(self, positions):
     '''   '''
     for position in positions:
       widget1 = self.scrollAreaWidgetContents.layout().itemAtPosition(*position).widget()
@@ -147,7 +147,7 @@ class ExcludeRegions(QtGui.QWidget):
       else:
         widget1.deleteLater()
 
-  def getExcludedRegions(self): # How to do better!?
+  def _getExcludedRegions(self): # How to do better!?
     '''   '''
     excludedRegions = []
 
@@ -181,15 +181,15 @@ class PickPeaksWidget(QtGui.QWidget):
 
     self.project = project
 
-    self.pickPeaksButton = Button(self, text = 'pick Peaks', callback=self.pickPeaks,
-                          grid=(0, 3), hAlign='c')
+    self.pickPeaksButton = Button(self, text = 'pick Peaks', callback=self._pickPeaks,
+                                  grid=(0, 3), hAlign='c')
     self.pickAll = CheckBox(self, text='Pick All', checked=True, grid=(0, 0), hAlign='c')
     # self.pickStD = CheckBox(self, text='Pick References Only', checked=True, grid=(0, 1),)
     self.samplePullDown = PulldownList(self, grid=(0, 1), hAlign='l')
     self.referenceComponentPullDown = PulldownList(self, grid=(0, 2), hAlign='l')
-    self.populatePullDowns()
+    self._populatePullDowns()
 
-  def pickPeaks(self):
+  def _pickPeaks(self):
     for sample in self.project.samples:
       if hasattr(sample, 'minScore'):
         pass
@@ -199,7 +199,7 @@ class PickPeaksWidget(QtGui.QWidget):
         for sampleComponent in sample.sampleComponents:
           sampleComponent.substance.referenceSpectra[0].peakLists[0].pickPeaks1dFiltered(ignoredRegions=None, noiseThreshold=0)
 
-  def populatePullDowns(self):
+  def _populatePullDowns(self):
     if len(self.project.samples)>0:
       samplesData = []
       for sample in self.project.samples:
@@ -227,8 +227,8 @@ class MatchPeaks(QtGui.QWidget):
     self.minimumDistanceValue = str(0.005)
 
 
-    self.matchPositionsButton = Button(self, text = 'Match', callback=self.matchPosition,
-                          grid=(0, 4), hAlign='c')
+    self.matchPositionsButton = Button(self, text = 'Match', callback=self._matchPosition,
+                                       grid=(0, 4), hAlign='c')
 
     # self.minimumPeaksLabel = Label(self, text='Minimum Peaks', hAlign='l', grid=(0, 2))
     self.minimumDistanceLabel = Label(self, text='Minimum Distance (ppm)', hAlign='c', grid=(0, 0))
@@ -241,7 +241,7 @@ class MatchPeaks(QtGui.QWidget):
 
 
 
-  def matchPosition(self):
+  def _matchPosition(self):
     # print(self.sender().parent().parent().parent().parent().parent().parent().parent())
     for sample in self.project.samples:
       if hasattr(sample, 'minScore'):
@@ -274,14 +274,14 @@ class MatchPeaks(QtGui.QWidget):
 
                 newPeakListPosition = sampleComponent.substance.referenceSpectra[0].peakLists[1].newPeak(position=[position], height=0.00)
 
-              merit = self.stdEfficency(spectrumOffResonancePeaks,spectrumOnResonancePeaks, stdPosition)
+              merit = self._stdEfficency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, stdPosition)
               if len(merit)>0:
                 newHit.meritCode =  str(merit[0])+'%'
-    self.showHitsModule()
+    self._showHitsModule()
 
 
 
-  def showHitsModule(self):
+  def _showHitsModule(self):
     self.screeningSettingDock.close()
     showScreeningHits = ShowScreeningHits(self.project)
     self.mainWindow = self.project._appBase.mainWindow
@@ -298,7 +298,7 @@ class MatchPeaks(QtGui.QWidget):
       spectrumView.delete()
 
 
-  def stdEfficency(self, spectrumOffResonancePeaks,spectrumOnResonancePeaks, matchedPositions):
+  def _stdEfficency(self, spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions):
 
     efficiency = []
     for position in matchedPositions:
@@ -326,7 +326,7 @@ class ExcludeBaselinePoints(QtGui.QWidget, Base):
     self.pickOnSpectrumButton.setChecked(False)
     self.multiplierLabel = Label(self, 'Baseline Multipler', grid=(0, 4))
     self.multiplierBox = DoubleSpinbox(self, grid=(0, 5))
-    self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
+    self.pickOnSpectrumButton.toggled.connect(self._togglePicking)
     self.linePoint1 = pg.InfiniteLine(angle=0, pos=self.pointBox1.value(), movable=True, pen=(255, 0, 100))
     self.linePoint2 = pg.InfiniteLine(angle=0, pos=self.pointBox2.value(), movable=True, pen=(255, 0, 100))
     if self.current.strip is not None:
@@ -335,36 +335,36 @@ class ExcludeBaselinePoints(QtGui.QWidget, Base):
       self.pointBox1.setValue(self.linePoint1.pos().y())
       self.pointBox2.setValue(self.linePoint2.pos().y())
       self.linePoint1.hide()
-      self.linePoint1.sigPositionChanged.connect(partial(self.lineMoved, self.pointBox1, self.linePoint1))
+      self.linePoint1.sigPositionChanged.connect(partial(self._lineMoved, self.pointBox1, self.linePoint1))
       self.linePoint2.hide()
-      self.linePoint2.sigPositionChanged.connect(partial(self.lineMoved, self.pointBox2, self.linePoint2))
-      self.pointBox1.valueChanged.connect(partial(self.setLinePosition, self.linePoint1, self.pointBox1))
-      self.pointBox2.valueChanged.connect(partial(self.setLinePosition, self.linePoint2, self.pointBox2))
+      self.linePoint2.sigPositionChanged.connect(partial(self._lineMoved, self.pointBox2, self.linePoint2))
+      self.pointBox1.valueChanged.connect(partial(self._setLinePosition, self.linePoint1, self.pointBox1))
+      self.pointBox2.valueChanged.connect(partial(self._setLinePosition, self.linePoint2, self.pointBox2))
 
-  def togglePicking(self):
+  def _togglePicking(self):
     if self.pickOnSpectrumButton.isChecked():
-      self.turnOnPositionPicking()
+      self._turnOnPositionPicking()
     elif not self.pickOnSpectrumButton.isChecked():
-      self.turnOffPositionPicking()
+      self._turnOffPositionPicking()
 
-  def turnOnPositionPicking(self):
+  def _turnOnPositionPicking(self):
     # print('picking on')
     self.linePoint1.show()
     self.linePoint2.show()
 
-  def turnOffPositionPicking(self):
+  def _turnOffPositionPicking(self):
     # print('picking off')
     # print(self.pointBox1.value(), self.pointBox2.value())
     self.linePoint1.hide()
     self.linePoint2.hide()
 
-  def lineMoved(self, box, linePoint):
+  def _lineMoved(self, box, linePoint):
     box.setValue(linePoint.pos().y())
 
-  def setLinePosition(self, linePoint, pointBox):
+  def _setLinePosition(self, linePoint, pointBox):
     linePoint.setPos(pointBox.value())
 
-  def getParams(self):
+  def _getParams(self):
 
     return {'function': 'excludeBaselinePoints',
             'baselineRegion': [self.pointBox1.value(), self.pointBox2.value()],

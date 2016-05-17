@@ -56,8 +56,8 @@ class MixtureAnalysis(CcpnDock):
     self.mainLayout.addLayout(self.analysisFrameLayout)
 
     ######## ======== Create widgets ====== ########
-    self.createSettingGroup()
-    self.scoringTable()
+    self._createSettingGroup()
+    self._scoringTable()
 
     ######## ======== Set Tabs  ====== ########
     self.tabWidget = QtGui.QTabWidget()
@@ -76,30 +76,30 @@ class MixtureAnalysis(CcpnDock):
     self.tabMoleculeViewLayout = QtGui.QHBoxLayout()
     self.tabMoleculeView.setLayout(self.tabMoleculeViewLayout)
     self.tabWidget.addTab(self.tabMoleculeView, 'Components structure')
-    self.tableComponentPeaks()
+    self._tableComponentPeaks()
 
     ######## ========  Create 3thTab with Components Info ====== ########
     self.tabMoleculeInfo = QtGui.QFrame()
     self.tabMoleculeInfoLayout = QtGui.QVBoxLayout()
     self.tabMoleculeInfo.setLayout(self.tabMoleculeInfoLayout)
     self.tabWidget.addTab(self.tabMoleculeInfo, 'Components Info')
-    self.widgetsTabComponentsInfo()
+    self._widgetsTabComponentsInfo()
 
     ######## ========  Create 4thTab Mixtures Management ====== ########
     self.tabMixturesManagement = QtGui.QFrame()
     self.tabMixturesManagementLayout = QtGui.QGridLayout()
     self.tabMixturesManagement.setLayout(self.tabMixturesManagementLayout)
     self.tabWidget.addTab(self.tabMixturesManagement, 'Mixtures Management')
-    self.mixtureManagementWidgets()
+    self._mixtureManagementWidgets()
 
     ######## ========  registerNotify ====== ########
     self.current = project._appBase.current
-    self.current.registerNotify(self.findSelectedPeaks, 'peaks')
-    self.findSelectedPeaks(peaks=None)
+    self.current.registerNotify(self._findSelectedPeaks, 'peaks')
+    self._findSelectedPeaks(peaks=None)
 
 
 
-  def getMixture(self):
+  def _getMixture(self):
     ''' Returns spectra mixtures (virtual samples) across all project sample '''
     self.mixtureList= []
     if len(self.project.samples)>0:
@@ -115,7 +115,7 @@ class MixtureAnalysis(CcpnDock):
 
   '''######## ======== Scoring and Selection Table ====== ########'''
 
-  def scoringTable(self):
+  def _scoringTable(self):
     ''' Fills the first table on the module with the virtual sample information '''
 
     columns = [Column('Mixture Name', lambda sample:str(sample.pid)),
@@ -123,28 +123,28 @@ class MixtureAnalysis(CcpnDock):
                Column('Min Score', lambda sample: int(sample.minScore)),
                Column('Average Score', lambda sample: int(sample.averageScore))]
 
-    self.scoringTable = ObjectTable(self, columns,  objects=[], selectionCallback=self.tableSelection)
+    self.scoringTable = ObjectTable(self, columns, objects=[], selectionCallback=self._tableSelection)
     self.scoringTable.setFixedWidth(400)
-    if len(self.getMixture())>0:
-      self.scoringTable.setObjects(self.getMixture())
+    if len(self._getMixture())>0:
+      self.scoringTable.setObjects(self._getMixture())
     self.analysisFrameLayout.addWidget(self.scoringTable)
 
-  def tableSelection(self, row:int=None, col:int=None, obj:object=None):
+  def _tableSelection(self, row:int=None, col:int=None, obj:object=None):
     ''' For each row of the scoring table all the module information are refreshed '''
     objRow = self.scoringTable.getCurrentObject()
-    self.createButtons(objRow)
-    self.displayMixture(objRow)
-    self.displayMolecules(objRow)
-    self.displayMixturesInfo(objRow)
-    self.populatePullDownSelection()
-    self.populateLeftListWidget()
+    self._createButtons(objRow)
+    self._displayMixture(objRow)
+    self._displayMolecules(objRow)
+    self._displayMixturesInfo(objRow)
+    self._populatePullDownSelection()
+    self._populateLeftListWidget()
     self.rightListWidget.clear()
-    self.selectAnOptionState()
+    self._selectAnOptionState()
 
 
   ''' ######## ======== First Tab properties ====== ########   '''
 
-  def tableComponentPeaks(self,):
+  def _tableComponentPeaks(self, ):
     ''' This creates the peak table in the first tab'''
     self.peakListObjects = []
 
@@ -152,11 +152,11 @@ class MixtureAnalysis(CcpnDock):
                Column('Position', lambda peak: '%.3f' % peak.position[0] ),
                Column('Height', lambda peak: self._getPeakHeight(peak))]
 
-    self.peakTable = ObjectTable(self, columns, objects=[],selectionCallback=self.selectPeak, multiSelect=True)
+    self.peakTable = ObjectTable(self, columns, objects=[], selectionCallback=self._selectPeak, multiSelect=True)
     self.tabPeaksMoleculeLayout.addWidget(self.peakTable, 1,0)
 
 
-  def selectPeak(self, row:int=None, col:int=None, obj:object=None):
+  def _selectPeak(self, row:int=None, col:int=None, obj:object=None):
     ''' this callback  '''
     self.selectedTablePeaks = self.peakTable.getSelectedObjects()
     for peak in self.selectedTablePeaks:
@@ -167,7 +167,7 @@ class MixtureAnalysis(CcpnDock):
         peak.isSelected = True
         self.project._appBase.current.peak = peak
 
-  def findSelectedPeaks(self,  peaks:None):
+  def _findSelectedPeaks(self, peaks:None):
     ''' this callback, registered with a notifier, allows to select a peak either on the table, compoundView or
     guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table , display '''
     # self.peakTable.clearSelection()
@@ -194,17 +194,17 @@ class MixtureAnalysis(CcpnDock):
     if peak.height:
       return peak.height*peak.peakList.spectrum.scale
 
-  def createButtons(self, sample):
+  def _createButtons(self, sample):
     ''' This creates buttons according with how many spectra are inside the mixture. '''
     self.toolBarComponents.clear()
     for spectrum in sample.spectra:
       self.componentButton = Button(self, text=spectrum.id)#,toggle=True)
-      self.componentButton.clicked.connect(partial(self.toggleComponentButton, spectrum, sample, self.componentButton))
+      self.componentButton.clicked.connect(partial(self._toggleComponentButton, spectrum, sample, self.componentButton))
       # self.componentButton.setChecked(False)
       self.componentButton.setFixedHeight(40)
       self.toolBarComponents.addWidget(self.componentButton)
 
-  def toggleComponentButton(self, spectrum, sample, componentButton):
+  def _toggleComponentButton(self, spectrum, sample, componentButton):
     '''  Toggling the component button will populate the peak table and display the molecule on compoundViewer '''
     self.project._appBase.mainWindow.clearMarks()
     pressedButton = self.sender()
@@ -238,9 +238,9 @@ class MixtureAnalysis(CcpnDock):
 
   ''' ######## ======== Second Tab properties (Multiple Compound View ====== ########   '''
   
-  def displayMolecules(self, sample):
+  def _displayMolecules(self, sample):
     '''  displays the molecules on compoundViewers '''
-    self.clearTabMoleculeView(sample)
+    self._clearTabMoleculeView(sample)
 
     for component in sample.sampleComponents:
       chemicalName = (''.join(str(x) for x in component.substance.synonyms))
@@ -252,7 +252,7 @@ class MixtureAnalysis(CcpnDock):
       self.compoundViewTab2.resetView()
 
 
-  def clearTabMoleculeView(self, sample):
+  def _clearTabMoleculeView(self, sample):
     ''' Delete all the buttons if a different mixture is selected on the scoring table '''
     layout = self.tabMoleculeViewLayout
     items = [layout.itemAt(i) for i in range(layout.count())]
@@ -262,7 +262,7 @@ class MixtureAnalysis(CcpnDock):
 
   ''' ######## ======== 3Th Tab properties ====== ########   '''
 
-  def widgetsTabComponentsInfo(self):
+  def _widgetsTabComponentsInfo(self):
     ''' creates a table with the relevant information about the substances/component in the mixture '''
     columns = [Column('Name', lambda substance:str(substance.pid)),
                Column('logP', lambda substance:str(substance.logPartitionCoefficient)),
@@ -275,7 +275,7 @@ class MixtureAnalysis(CcpnDock):
     self.tabMoleculeInfoLayout.addWidget(self.sampleInfoTable)
 
 
-  def displayMixturesInfo(self, sample):
+  def _displayMixturesInfo(self, sample):
     ''' fill the  sampleInfoTable  '''
     self.sampleComponents =  sample.sampleComponents
     substances = [sc.substance for sc in self.sampleComponents]
@@ -288,17 +288,17 @@ class MixtureAnalysis(CcpnDock):
     from the project.
     Moving spectra across by drag and drop allows the users to recreate manually the mixtures.'''
 
-  def mixtureManagementWidgets(self):
+  def _mixtureManagementWidgets(self):
     ''' creates all the widgets present in the mixture Management tab '''
     currentMixture = self.scoringTable.getCurrentObject()
-    self.leftListWidget = ListWidget(self, rightMouseCallback=self.rightClickListWidget)
+    self.leftListWidget = ListWidget(self, rightMouseCallback=self._rightClickListWidget)
     self.rightListWidget = ListWidget(self,rightMouseCallback=None)
     self.calculateButtons = ButtonList(self, texts = ['Reset','ReFresh'],
-                                   callbacks=[self.resetMixtureScore,self.predictScores],
-                                   tipTexts=[None,None], direction='h', hAlign='r')
+                                       callbacks=[self._resetMixtureScore, self._predictScores],
+                                       tipTexts=[None,None], direction='h', hAlign='r')
 
     self.applyButtons = ButtonList(self, texts = ['Cancel','Apply'],
-                                   callbacks=[self.resetInitialState,self.createNewMixture],
+                                   callbacks=[self._resetInitialState, self._createNewMixture],
                                    tipTexts=[None,None], direction='h', hAlign='r')
     self.warningLabel = Label(self,'Cancel or Apply to continue')
 
@@ -315,20 +315,20 @@ class MixtureAnalysis(CcpnDock):
     self.tabMixturesManagementLayout.addWidget(self.warningLabel, 3,0)
     self.tabMixturesManagementLayout.addWidget(self.applyButtons, 3,1)
 
-    self.leftMixtureLineEdit.editingFinished.connect(self.changeLeftMixtureName)
-    self.rightMixtureLineEdit.editingFinished.connect(self.changeRightMixtureName)
+    self.leftMixtureLineEdit.editingFinished.connect(self._changeLeftMixtureName)
+    self.rightMixtureLineEdit.editingFinished.connect(self._changeRightMixtureName)
 
-    self.disableRecalculateButtons()
+    self._disableRecalculateButtons()
     self.applyButtons.hide()
     self.warningLabel.hide()
     self.leftListWidget.contextMenuItem = 'Not Implemented Yet'
 
-  def rightClickListWidget(self):
+  def _rightClickListWidget(self):
       print('Not Implemented Yet')
 
 
 
-  def populateLeftListWidget(self):
+  def _populateLeftListWidget(self):
     ''' fills the left widget with spectra scores from the selected mixture on the scoring table '''
     sample = self.scoringTable.getCurrentObject()
     self.leftListWidget.clear()
@@ -352,21 +352,21 @@ class MixtureAnalysis(CcpnDock):
         #   item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
         #   self.leftListWidget.addItem(item)
 
-    self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self.itemsDropped)
-    self.connect(self.leftListWidget, QtCore.SIGNAL("dropped"), self.itemsDropped)
-    self.leftListWidget.currentItemChanged.connect(self.itemClicked)
+    self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
+    self.connect(self.leftListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
+    self.leftListWidget.currentItemChanged.connect(self._itemClicked)
 
-  def populatePullDownSelection(self):
+  def _populatePullDownSelection(self):
     ''' fills the pulldown with the mixtures on the project (excludes the one already selected on the left listWidget)  '''
     currentMixture = self.scoringTable.getCurrentObject()
     self.dataPullDown = ['Select An Option', 'New empty mixture']
-    for mixture in self.getMixture():
+    for mixture in self._getMixture():
       if mixture.name != currentMixture.name:
        self.dataPullDown.append(mixture.name)
     self.pullDownSelection.setData(self.dataPullDown)
-    self.pullDownSelection.activated[str].connect(self.pullDownSelectionAction)
+    self.pullDownSelection.activated[str].connect(self._pullDownSelectionAction)
 
-  def pullDownSelectionAction(self, selected):
+  def _pullDownSelectionAction(self, selected):
     ''' Each selection gives different behaviour on the right listWidget.
      '''
     if selected == 'New empty mixture':
@@ -376,19 +376,19 @@ class MixtureAnalysis(CcpnDock):
       self.rightMixtureLineEdit.setText('NewMixture')
 
     if selected == 'Select An Option':
-      self.selectAnOptionState()
-      self.populateLeftListWidget()
+      self._selectAnOptionState()
+      self._populateLeftListWidget()
       self.rightListWidget.setAcceptDrops(False)
       self.leftListWidget.setAcceptDrops(False)
 
     else:
       sample = self.project.getByPid('SA:'+selected)
       if sample is not None:
-        self.populateRightListWidget(sample)
+        self._populateRightListWidget(sample)
         self.rightListWidget.setAcceptDrops(True)
         self.leftListWidget.setAcceptDrops(True)
 
-  def populateRightListWidget(self, sample):
+  def _populateRightListWidget(self, sample):
     ''' fills the right widget with spectra scores from the selected mixture on the pulldown '''
     if sample is not None:
       self.rightMixtureLineEdit.setText(str(sample.name))
@@ -402,13 +402,13 @@ class MixtureAnalysis(CcpnDock):
         spectrum = sampleComponent.substance.referenceSpectra[0]
         item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
         self.rightListWidget.addItem(item)
-      self.rightListWidget.currentItemChanged.connect(self.getListWidgetItems)
+      self.rightListWidget.currentItemChanged.connect(self._getListWidgetItems)
 
-      self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self.itemsDropped)
-      self.rightListWidget.currentItemChanged.connect(self.itemClicked)
+      self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
+      self.rightListWidget.currentItemChanged.connect(self._itemClicked)
 
 
-  def getListWidgetItems(self): # to do shorter
+  def _getListWidgetItems(self): # to do shorter
     '''Get  Spectra from the right ListWidget '''
     itemsRightWidgetList= []
     rightSpectra = []
@@ -436,38 +436,38 @@ class MixtureAnalysis(CcpnDock):
 
     return {'leftSpectra':leftSpectra,'rightSpectra':rightSpectra}
 
-  def getListWidgetItemsTest(self, listWidget):
+  def _getListWidgetItemsTest(self, listWidget):
     items= []
     for index in range(listWidget.count()):
       items.append(listWidget.item(index))
     return(items)
 
 
-  def deleteComponent(self):
+  def _deleteComponent(self):
     selected = self.leftListWidget.currentRow()
     self.leftListWidget.takeItem(selected)
 
 
-  def deleteMixture(self):
+  def _deleteMixture(self):
     ''' delete the mixture from the project '''
     sample = self.scoringTable.getCurrentObject()
     if sample is not None:
       sample.delete()
-    self.upDateScoringTable()
+    self._upDateScoringTable()
 
 
-  def upDateScoringTable(self):
+  def _upDateScoringTable(self):
     ''' refresh the scoring table '''
-    self.scoringTable.setObjects(self.getMixture())
+    self.scoringTable.setObjects(self._getMixture())
 
 
-  def createNewMixture(self):
+  def _createNewMixture(self):
     ''' create new mixtures after the items have been moved across the list widgets or a new empty mixture has been selected '''
-    getLeftSpectra = self.getListWidgetItems()['leftSpectra']
-    getRightSpectra = self.getListWidgetItems()['rightSpectra']
+    getLeftSpectra = self._getListWidgetItems()['leftSpectra']
+    getRightSpectra = self._getListWidgetItems()['rightSpectra']
 
     oldLeftMixture = self.scoringTable.getCurrentObject()
-    oldRightMixture = self.getMixtureFromPullDown()
+    oldRightMixture = self._getMixtureFromPullDown()
 
     leftMixtureName = str(self.leftMixtureLineEdit.text())
     rightMixtureName = str(self.rightMixtureLineEdit.text())
@@ -480,21 +480,21 @@ class MixtureAnalysis(CcpnDock):
       pass
     else:
       oldRightMixture.delete()
-    self.confirmNewMixtures()
+    self._confirmNewMixtures()
 
 
-  def itemsDropped(self):
+  def _itemsDropped(self):
     ''' Returns the event of dropping data '''
-    self.changeButtonStatus()
+    self._changeButtonStatus()
 
-  def itemClicked(self,  item):
+  def _itemClicked(self, item):
     ''' mouse left click, return the item clicked'''
     pass
 
-  def predictScores(self):  # to do much shorter!!
+  def _predictScores(self):  # to do much shorter!!
     ''' Predict scores before to create a different mixture given the left spectra '''
 
-    getLeftSpectra = self.getListWidgetItems()['leftSpectra']
+    getLeftSpectra = self._getListWidgetItems()['leftSpectra']
     leftResults = []
     self.leftListWidget.clear()
     for spectrum in getLeftSpectra:
@@ -528,7 +528,7 @@ class MixtureAnalysis(CcpnDock):
       itemAverageScore.setTextColor(red)
 
     ''' Predict scores before to create a different mixture given the right spectra '''
-    getRightSpectra = self.getListWidgetItems()['rightSpectra']
+    getRightSpectra = self._getListWidgetItems()['rightSpectra']
 
     rightResults = []
     self.rightListWidget.clear()
@@ -562,9 +562,9 @@ class MixtureAnalysis(CcpnDock):
     else:
       itemAverageScore.setTextColor(red)
 
-    self.temporaryScoringStatus()
+    self._temporaryScoringStatus()
 
-  def temporaryScoringStatus(self): # to do shorter
+  def _temporaryScoringStatus(self): # to do shorter
     ''' Disable all the commands so user is forced to take a decision with the new scoring after a mixture has been recalculated '''
     self.pullDownSelection.setEnabled(False)
     for i in range(3):
@@ -573,64 +573,64 @@ class MixtureAnalysis(CcpnDock):
     self.applyButtons.show()
     self.rightListWidget.setAcceptDrops(False)
     self.leftListWidget.setAcceptDrops(False)
-    for item in self.getListWidgetItemsTest(self.leftListWidget):
+    for item in self._getListWidgetItemsTest(self.leftListWidget):
       item.setFlags(QtCore.Qt.NoItemFlags)
-    for item in self.getListWidgetItemsTest(self.rightListWidget):
+    for item in self._getListWidgetItemsTest(self.rightListWidget):
       item.setFlags(QtCore.Qt.NoItemFlags)
     self.warningLabel.show()
     self.scoringTable.selectionCallback = None
     print('Selection Table Disabled. Cancel or apply the new mixtures scores')
 
-  def confirmNewMixtures(self): # to do shorter
+  def _confirmNewMixtures(self): # to do shorter
     ''' restore the normal behavior if the buttons and tabs '''
     for i in range(3):
       self.tabWidget.setTabEnabled(i,True)
     self.pullDownSelection.setEnabled(True)
-    self.selectAnOptionState()
-    self.upDateScoringTable()
+    self._selectAnOptionState()
+    self._upDateScoringTable()
     self.calculateButtons.show()
-    self.disableRecalculateButtons()
+    self._disableRecalculateButtons()
     self.applyButtons.hide()
-    self.populateLeftListWidget()
+    self._populateLeftListWidget()
     self.warningLabel.hide()
-    self.scoringTable.selectionCallback = self.tableSelection
+    self.scoringTable.selectionCallback = self._tableSelection
 
-  def resetMixtureScore(self):
+  def _resetMixtureScore(self):
     ''' restore the first scores calculated  '''
-    self.resetInitialState()
+    self._resetInitialState()
     # self.populateLeftListWidget()
     # self.populateRightListWidget(self.getMixtureFromPullDown)
     # self.warningLabel.hide()
     # self.scoringTable.selectionCallback = self.tableSelection
 
-  def getMixtureFromPullDown(self):
+  def _getMixtureFromPullDown(self):
     ''' Documentation '''
     currentPullDownSelection = self.pullDownSelection.getText()
     mixturePullDown = self.project.getByPid('SA:'+currentPullDownSelection)
     if mixturePullDown is not None:
       return mixturePullDown
 
-  def resetInitialState(self):
+  def _resetInitialState(self):
     ''' clears up the right listWidget and restores the buttons  '''
     for i in range(3):
       self.tabWidget.setTabEnabled(i,True)
     self.pullDownSelection.setEnabled(True)
-    self.selectAnOptionState()
+    self._selectAnOptionState()
     self.calculateButtons.show()
-    self.disableRecalculateButtons()
+    self._disableRecalculateButtons()
     self.applyButtons.hide()
     self.warningLabel.hide()
-    self.populateLeftListWidget()
-    self.scoringTable.selectionCallback = self.tableSelection
+    self._populateLeftListWidget()
+    self.scoringTable.selectionCallback = self._tableSelection
 
 
-  def changeLeftMixtureName(self):
+  def _changeLeftMixtureName(self):
     ''' changes the mixture name '''
     currentMixture = self.scoringTable.getCurrentObject()
     if self.leftMixtureLineEdit.isModified():
       currentMixture.rename(self.leftMixtureLineEdit.text())
 
-  def changeRightMixtureName(self):
+  def _changeRightMixtureName(self):
     ''' changes the mixture name '''
     currentPullDownSelection = self.pullDownSelection.getText()
     mixturePullDown = self.project.getByPid(currentPullDownSelection)
@@ -639,28 +639,28 @@ class MixtureAnalysis(CcpnDock):
       if self.rightMixtureLineEdit.isModified():
         mixturePullDown.rename(self.rightMixtureLineEdit.text())
 
-  def initialLabelListWidgetRight(self):
+  def _initialLabelListWidgetRight(self):
     ''' Creates an initial message on the right ListWidget '''
     item = QtGui.QListWidgetItem(' Drag and drop items across to calculate the new scores')
     item.setFlags(QtCore.Qt.NoItemFlags)
     self.rightListWidget.addItem(item)
 
-  def selectAnOptionState(self):
+  def _selectAnOptionState(self):
     ''' Creates an initial status on the right ListWidget '''
     self.pullDownSelection.select('Select An Option')
     self.rightListWidget.clear()
     self.rightListWidget.setAcceptDrops(False)
-    self.initialLabelListWidgetRight()
-    self.disableRecalculateButtons()
+    self._initialLabelListWidgetRight()
+    self._disableRecalculateButtons()
     self.rightMixtureLineEdit.setText('')
 
-  def disableRecalculateButtons(self):
+  def _disableRecalculateButtons(self):
     ''' disables the buttons until a change occurs  '''
     for button in self.calculateButtons.buttons:
       button.setEnabled(False)
       button.setStyleSheet("background-color:#868D9D; color: #000000")
 
-  def changeButtonStatus(self):
+  def _changeButtonStatus(self):
     ''' enables the buttons when a change occurs '''
     for button in self.calculateButtons.buttons:
       button.setEnabled(True)
@@ -672,38 +672,38 @@ class MixtureAnalysis(CcpnDock):
 
   ''' ######## ==== Gui Spectrum View properties  ====  ########   '''
 
-  def displayMixture(self, sample):
+  def _displayMixture(self, sample):
     ''' displays all the spectra present in a mixture '''
-    currentDisplay = self.clearDisplayView()
+    currentDisplay = self._clearDisplayView()
     for spectrum in sample.spectra:
       currentDisplay.displaySpectrum(spectrum)
 
-  def navigateToPosition(self, peaks):
+  def _navigateToPosition(self, peaks):
     ''' for a given peak, it navigates to the peak position on the display  '''
     displayed = self.project.strips[0].spectrumDisplay
     self.project._appBase.mainWindow.clearMarks()
     for peak in peaks:
       navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)
 
-  def clearDisplayView(self):
+  def _clearDisplayView(self):
     ''' Deletes all the spectra from the display '''
     if len(self.project.strips)>0:
       self.currentDisplayed = self.project.strips[0]
     else:
-      self.currentDisplayed=self.openNewDisplay()
-      self.closeBlankDisplay()
+      self.currentDisplayed=self._openNewDisplay()
+      self._closeBlankDisplay()
 
     for spectrumView in self.currentDisplayed.spectrumViews:
       spectrumView.delete()
     return self.currentDisplayed
 
-  def openNewDisplay(self):
+  def _openNewDisplay(self):
     ''' opens a new spectrum display '''
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
     self.dockArea.moveDock(spectrumDisplay.dock, position='top', neighbor=self)
     return spectrumDisplay
 
-  def closeBlankDisplay(self):
+  def _closeBlankDisplay(self):
     ''' deletes a dock display if present one '''
     if 'BLANK DISPLAY' in self.dockArea.findAll()[1]:
       self.dockArea.guiWindow.deleteBlankDisplay()
@@ -711,11 +711,11 @@ class MixtureAnalysis(CcpnDock):
 
   ''' ######## ==== Settings  ====  ########   '''
 
-  def createSettingGroup(self):
+  def _createSettingGroup(self):
     '''GroupBox creates the settingGroup'''
     self.settingButtons = ButtonList(self, texts = ['','',],
-                                callbacks=[None,self.openOptimisationModule], icons=[ self.exportIcon, self.settingIcon,],
-                                tipTexts=['', ''], direction='H')
+                                     callbacks=[None, self._openOptimisationModule], icons=[self.exportIcon, self.settingIcon, ],
+                                     tipTexts=['', ''], direction='H')
     self.settingButtons.setStyleSheet("background-color: transparent")
     self.settingFrameLayout.addStretch(1)
     self.settingFrameLayout.addWidget(self.settingButtons)
@@ -739,7 +739,7 @@ class MixtureAnalysis(CcpnDock):
   #       dock.close()
   #   self.close()
 
-  def openOptimisationModule(self):
+  def _openOptimisationModule(self):
     mixtureOptimisation = MixtureOptimisation(self.project)
     mixtureOptimisationDock = self.dockArea.addDock(mixtureOptimisation, position='bottom')
 

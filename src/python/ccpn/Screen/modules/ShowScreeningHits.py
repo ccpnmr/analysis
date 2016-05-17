@@ -56,12 +56,12 @@ class ShowScreeningHits(CcpnDock, Base):
     self.mainLayout.addLayout(self.hitFrameLayout)
 
     ######## ======== Create widgets ====== ########
-    self.createHitTableGroup()
-    self.createHitSelectionGroup()
-    self.createHitDetailsGroup() #keep after hitSelectionGroup
-    self.createSettingGroup()
+    self._createHitTableGroup()
+    self._createHitSelectionGroup()
+    self._createHitDetailsGroup() #keep after hitSelectionGroup
+    self._createSettingGroup()
 
-  def createHitTableGroup(self):
+  def _createHitTableGroup(self):
     '''GroupBox: creates the hitTableGroup'''
 
     self.hitTableGroup = GroupBox()
@@ -71,10 +71,10 @@ class ShowScreeningHits(CcpnDock, Base):
     self.setLayout(self.hitTableGroupVLayout)
     self.hitTableGroup.setLayout(self.hitTableGroupVLayout)
     self.hitFrameLayout.addWidget(self.hitTableGroup, 0)
-    self.createHitTable()
+    self._createHitTable()
 
 
-  def createHitSelectionGroup(self):
+  def _createHitSelectionGroup(self):
     '''GroupBox creates the hitSelectionGroup'''
 
     self.hitSelectionGroup = GroupBox()
@@ -84,10 +84,10 @@ class ShowScreeningHits(CcpnDock, Base):
     self.setLayout(self.hitSelectionGroupLayout)
     self.hitSelectionGroup.setLayout(self.hitSelectionGroupLayout)
     self.hitFrameLayout.addWidget(self.hitSelectionGroup, 1)
-    self.createWidgetsHitSelectionGroup()
+    self._createWidgetsHitSelectionGroup()
 
 
-  def createHitDetailsGroup(self):
+  def _createHitDetailsGroup(self):
     '''GroupBox creates the hitDetailsGroup'''
 
     self.hitDetailsGroup = GroupBox()
@@ -97,31 +97,31 @@ class ShowScreeningHits(CcpnDock, Base):
     self.setLayout(self.hitDetailsGroupLayout)
     self.hitDetailsGroup.setLayout(self.hitDetailsGroupLayout)
     self.hitFrameLayout.addWidget(self.hitDetailsGroup, 2)
-    self.createHitDetailsWidgets()
+    self._createHitDetailsWidgets()
 
-  def createSettingGroup(self):
+  def _createSettingGroup(self):
     '''GroupBox creates the settingGroup'''
 
     self.settingButtons = ButtonList(self, texts = ['','',],
-                                callbacks=[self.createExportButton,self.createViewSettingButton,],
-                                icons=[self.exportIcon,self.settingIcon,],
-                                tipTexts=['', ''], direction='H')
+                                     callbacks=[self._createExportButton, self._createViewSettingButton, ],
+                                     icons=[self.exportIcon,self.settingIcon,],
+                                     tipTexts=['', ''], direction='H')
     self.settingButtons.setStyleSheet("background-color: transparent")
     self.settingFrameLayout.addStretch(1)
     self.settingFrameLayout.addWidget(self.settingButtons)
 
 
-  def createHitTable(self):
+  def _createHitTable(self):
     ''' Documentation '''
     # spacer = QtGui.QSpacerItem(20,40)
     # self.hitTableGroupVLayout.addItem(spacer)
 
     columns = [Column('Sample', lambda hit:str(hit.sample.name)),
                Column('Hit Name', lambda hit:str(hit.substanceName)),
-               Column('Confirmed', lambda hit:str(hit.comment), setEditValue=lambda hit, value: self.testEditor(hit, value)),
-               Column('Efficiency', lambda hit:str(hit.meritCode), setEditValue=lambda hit, value: self.scoreEdit(hit, value))]
+               Column('Confirmed', lambda hit:str(hit.comment), setEditValue=lambda hit, value: self._testEditor(hit, value)),
+               Column('Efficiency', lambda hit:str(hit.meritCode), setEditValue=lambda hit, value: self._scoreEdit(hit, value))]
 
-    self.hitTable = ObjectTable(self, columns, actionCallback=self.hitTableCallback, selectionCallback=self.showAllOnTableSelection, objects=[])
+    self.hitTable = ObjectTable(self, columns, actionCallback=self._hitTableCallback, selectionCallback=self._showAllOnTableSelection, objects=[])
     self.hitTableGroupVLayout.addWidget(self.hitTable)
     self.listOfHits = self.project.spectrumHits
     for hit in self.listOfHits:
@@ -129,7 +129,7 @@ class ShowScreeningHits(CcpnDock, Base):
     self.hitTable.setObjects(self.listOfHits)
 
 
-  def createHitDetailsWidgets(self):
+  def _createHitDetailsWidgets(self):
     ''' Documentation '''
 
     self.listWidgetsHitDetails = QtGui.QListWidget()
@@ -138,7 +138,7 @@ class ShowScreeningHits(CcpnDock, Base):
     self.hitDetailsGroupLayout.addWidget(self.listWidgetsHitDetails, 1,0)
 
 
-  def createViewSettingButton(self):
+  def _createViewSettingButton(self):
     print('This function has not been implemented yet')
 
     # menuViewSettingButton = QtGui.QMenu(self)
@@ -147,7 +147,7 @@ class ShowScreeningHits(CcpnDock, Base):
     # menuViewSettingButton.addAction('')
     # self.settingButtons.buttons[0].setMenu(menuViewSettingButton)
 
-  def createExportButton(self):
+  def _createExportButton(self):
     print('This function has not been implemented yet')
 
     # menuExportButton = QtGui.QMenu(self)
@@ -157,68 +157,68 @@ class ShowScreeningHits(CcpnDock, Base):
     # menuExportButton.addAction('Export All')
     # self.settingButtons.buttons[1].setMenu(menuExportButton)
 
-  def createWidgetsHitSelectionGroup(self):
+  def _createWidgetsHitSelectionGroup(self):
     ''' Documentation '''
 
     self.pullDownHit = PulldownList(self, hAlign='c' )
     self.hitSelectionGroupLayout.addWidget(self.pullDownHit)
 
-    self.showDeleteHitButtons = ButtonList(self, texts = ['Delete Hit',' Show all'], callbacks=[self.deleteHit, self.showAllSampleComponentsOnPullDownHit], icons=[None, None],
-                                       tipTexts=['Delete Hit from project', 'Show all Components '], direction='H', hAlign='c')
+    self.showDeleteHitButtons = ButtonList(self, texts = ['Delete Hit',' Show all'], callbacks=[self._deleteHit, self._showAllSampleComponentsOnPullDownHit], icons=[None, None],
+                                           tipTexts=['Delete Hit from project', 'Show all Components '], direction='H', hAlign='c')
     self.hitSelectionGroupLayout.addWidget(self.showDeleteHitButtons)
-    self.addHitButton = ButtonList(self, texts=['Cancel',' Add Hit'], callbacks=[self.cancelPullDownSelection, self.addHit], icons=[None, None],
-                                       tipTexts=['Delete Hit from project', 'Show all Components '], direction='H', hAlign='c')
+    self.addHitButton = ButtonList(self, texts=['Cancel',' Add Hit'], callbacks=[self._cancelPullDownSelection, self._addHit], icons=[None, None],
+                                   tipTexts=['Delete Hit from project', 'Show all Components '], direction='H', hAlign='c')
 
     self.hitSelectionGroupLayout.addWidget(self.addHitButton)
     self.addHitButton.hide()
-    self.acceptRejectButtons = ButtonList(self, texts = ['',''], callbacks=[self.rejectAssignment, self.acceptAssignment], icons=[self.rejectIcon, self.acceptIcon,],
-                                       tipTexts=['Reject Assignment', 'Accept Assignment'], direction='H', hAlign='c')
+    self.acceptRejectButtons = ButtonList(self, texts = ['',''], callbacks=[self._rejectAssignment, self._acceptAssignment], icons=[self.rejectIcon, self.acceptIcon, ],
+                                          tipTexts=['Reject Assignment', 'Accept Assignment'], direction='H', hAlign='c')
     self.acceptRejectButtons.setFixedHeight(80)
     self.hitSelectionGroupLayout.addWidget(self.acceptRejectButtons)
-    self.nextPrevCommitButtons = ButtonList(self, texts = ['',''], callbacks=[self.commitMovePreviousRow, self.commitMoveNextRow],
+    self.nextPrevCommitButtons = ButtonList(self, texts = ['',''], callbacks=[self._commitMovePreviousRow, self._commitMoveNextRow],
                                             icons=[self.previousAndCommitIcon, self.nextAndCommitIcon],
-                                       tipTexts=['Commit Changes and Move previous', 'Commit Changes and Move Next'], direction='h', hAlign='c')
+                                            tipTexts=['Commit Changes and Move previous', 'Commit Changes and Move Next'], direction='h', hAlign='c')
 
     self.hitSelectionGroupLayout.addWidget(self.nextPrevCommitButtons)
 
-    self.nextPrevButtons = ButtonList(self, texts = ['',''], callbacks=[self.movePreviousRow, self.moveNextRow],
+    self.nextPrevButtons = ButtonList(self, texts = ['',''], callbacks=[self._movePreviousRow, self._moveNextRow],
                                       icons=[self.previousIcon, self.nextIcon],
-                                       tipTexts=['Move previous', 'Move Next'], direction='h', hAlign='c')
+                                      tipTexts=['Move previous', 'Move Next'], direction='h', hAlign='c')
     self.hitSelectionGroupLayout.addWidget(self.nextPrevButtons)
 
 
-  def acceptAssignment(self):
+  def _acceptAssignment(self):
     ''' Documentation '''
 
     hit = self.pullDownHit.getObject()
     hit.comment = 'Yes'
-    self.updateHitTable()
+    self._updateHitTable()
 
-  def addHit(self):
+  def _addHit(self):
     ''' Documentation '''
 
     sampleComponent = self.pullDownHit.getObject()
-    self.addNewSpectrumHit(sampleComponent)
-    self.showDeleteButton()
+    self._addNewSpectrumHit(sampleComponent)
+    self._showDeleteButton()
 
-  def addNewSpectrumHit(self, sampleComponent):
+  def _addNewSpectrumHit(self, sampleComponent):
     ''' Documentation '''
 
     newHit = sampleComponent.sample.spectra[0].newSpectrumHit(substanceName=str(sampleComponent.substance.name))
     newHit.comment = 'NewUserHit'
     self.listOfHits.append(newHit)
     self.pullDownHit.setEnabled(False)
-    self.updateHitTable()
-    self.moveNextRow()
+    self._updateHitTable()
+    self._moveNextRow()
 
-  def cancelPullDownSelection(self):
+  def _cancelPullDownSelection(self):
     ''' Documentation '''
 
-    self.showDeleteButton()
-    self.showAllOnTableSelection()
+    self._showDeleteButton()
+    self._showAllOnTableSelection()
 
 
-  def clearDisplayView(self):
+  def _clearDisplayView(self):
     ''' Documentation '''
 
     # currentDisplayed = self.project.getByPid('GD:user.View.1D:H')
@@ -228,24 +228,24 @@ class ShowScreeningHits(CcpnDock, Base):
     self.project._appBase.mainWindow.clearMarks()
     return currentDisplayed
 
-  def clearListWidget(self):
+  def _clearListWidget(self):
     ''' Documentation '''
 
     self.listWidgetsHitDetails.clear()
 
-  def commitMoveNextRow(self):
+  def _commitMoveNextRow(self):
     ''' Documentation '''
 
-    self.acceptAssignment()
-    self.moveNextRow()
+    self._acceptAssignment()
+    self._moveNextRow()
 
-  def commitMovePreviousRow(self):
+  def _commitMovePreviousRow(self):
     ''' Documentation '''
 
-    self.acceptAssignment()
-    self.movePreviousRow()
+    self._acceptAssignment()
+    self._movePreviousRow()
 
-  def createDummyHits(self):
+  def _createDummyHits(self):
     ''' Testing only '''
 
 
@@ -256,20 +256,20 @@ class ShowScreeningHits(CcpnDock, Base):
       self.hit.comment = 'No'
     # return self.project.spectrumHits
 
-  def deleteHit(self):
+  def _deleteHit(self):
     ''' Deletes hit from project and from the table. If is last cleans all graphics
     '''
     hitToDelete = self.pullDownHit.getObject()
     hitToDelete.delete()
     if hitToDelete in self.listOfHits:
       self.listOfHits.remove(hitToDelete)
-    self.moveNextRow()
-    self.updateHitTable()
+    self._moveNextRow()
+    self._updateHitTable()
     if len(self.listOfHits)<=0:
-      self.clearDisplayView()
+      self._clearDisplayView()
       self.pullDownHit.setData([])
 
-  def displayAllSampleComponents(self):
+  def _displayAllSampleComponents(self):
     ''' Documentation '''
 
     sampleComponentSpectra = [sc.substance.referenceSpectra[0] for sc in self.pullDownHit.currentObject().sample.sampleComponents]
@@ -278,35 +278,35 @@ class ShowScreeningHits(CcpnDock, Base):
       # self.project.getByPid('GD:user.View.1D:H').displaySpectrum(spectrum)
       self.project.strips[0].displaySpectrum(spectrum)
 
-  def displaySampleAndHit(self):
+  def _displaySampleAndHit(self):
     ''' Documentation '''
 
-    currentDisplay = self.clearDisplayView()
-    for spectrum in self.spectraToDisplay():
+    currentDisplay = self._clearDisplayView()
+    for spectrum in self._spectraToDisplay():
       currentDisplay.displaySpectrum(spectrum)
       # currentDisplay.showPeaks(spectrum.peakList)
     # self.project.strips[0].viewBox.autoRange()
 
-  def displaySelectedComponent(self):
+  def _displaySelectedComponent(self):
     ''' Documentation '''
 
     currentDisplayed = self.project.strips[0]._parent
     for spectrumView in currentDisplayed.spectrumViews:
-      if spectrumView.spectrum in self.spectraToDisplay():
+      if spectrumView.spectrum in self._spectraToDisplay():
         currentDisplayed.spectrumActionDict[spectrumView.spectrum._apiDataSource].setChecked(True)
       else:
         currentDisplayed.spectrumActionDict[spectrumView.spectrum._apiDataSource].setChecked(False)
-    self.showHitInfoOnDisplay()
+    self._showHitInfoOnDisplay()
 
 
-  def getPositionOnSpectrum(self):
+  def _getPositionOnSpectrum(self):
     ''' Documentation '''
-    peaks = self.getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
+    peaks = self._getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
     positions = [peak.position for peak in peaks]
     return set(list(positions))
 
 
-  def getPullDownObj(self):
+  def _getPullDownObj(self):
     ''' Documentation '''
 
     currentObjPulldown = self.pullDownHit.currentObject()
@@ -318,10 +318,10 @@ class ShowScreeningHits(CcpnDock, Base):
       return sampleComponent
 
 
-  def getSampleInfoToDisplay(self):
+  def _getSampleInfoToDisplay(self):
     ''' Documentation '''
 
-    sample = self.getPullDownObj().sample
+    sample = self._getPullDownObj().sample
     sampleInfo = {'Name':sample.name,
                   'Amount':sample.amount,
                   'CreationDate':sample.creationDate,
@@ -332,10 +332,10 @@ class ShowScreeningHits(CcpnDock, Base):
     return sampleInfo
 
 
-  def getSubstanceInfoToDisplay(self):
+  def _getSubstanceInfoToDisplay(self):
     ''' Documentation '''
 
-    sampleComponent = self.getPullDownObj()
+    sampleComponent = self._getPullDownObj()
     substance = sampleComponent.substance
     substanceInfo = {'name  ':substance.name,
                   # 'synonyms ':substance.synonyms,
@@ -353,11 +353,11 @@ class ShowScreeningHits(CcpnDock, Base):
     return substanceInfo
 
 
-  def getSpectrumHitInfoToDisplay(self):
+  def _getSpectrumHitInfoToDisplay(self):
     ''' Documentation '''
 
-    if len(self.getPullDownObj().spectrumHits)>0:
-      hit = self.getPullDownObj().spectrumHits[0]
+    if len(self._getPullDownObj().spectrumHits)>0:
+      hit = self._getPullDownObj().spectrumHits[0]
       hitInfo = {'Score  ':hit.figureOfMerit,
                     'Std  ':hit.meritCode,
                     'NormalisedChange ':hit.normalisedChange,
@@ -370,30 +370,30 @@ class ShowScreeningHits(CcpnDock, Base):
       return {'Add new hit to display contents': ''}
 
 
-  def getSelectedSample(self):
+  def _getSelectedSample(self):
     ''' Documentation '''
 
-    return self.getPullDownObj().sample
+    return self._getPullDownObj().sample
 
 
-  def hideDeleteButton(self):
+  def _hideDeleteButton(self):
     ''' Documentation '''
 
     self.showDeleteHitButtons.hide()
     self.addHitButton.show()
 
 
-  def hitTableCallback(self, row:int=None, col:int=None, obj:object=None):
+  def _hitTableCallback(self, row:int=None, col:int=None, obj:object=None):
     ''' Documentation '''
 
-    peaks = self.getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
+    peaks = self._getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
     # displayed = self.project.getByPid('GD:user.View.1D:H')
     displayed = self.project.strips[0]._parent
     for peak in peaks:
       navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)
 
 
-  def moveNextRow(self):
+  def _moveNextRow(self):
     ''' Documentation '''
 
     self.currentRowPosition = self.hitTable.getSelectedRows()
@@ -404,7 +404,7 @@ class ShowScreeningHits(CcpnDock, Base):
      self.hitTable.selectRow(0)
 
 
-  def movePreviousRow(self):
+  def _movePreviousRow(self):
     ''' Documentation '''
 
     self.currentRowPosition = self.hitTable.getSelectedRows()
@@ -416,7 +416,7 @@ class ShowScreeningHits(CcpnDock, Base):
       self.hitTable.selectRow(newPosition)
 
 
-  def populateInfoList(self, name, value):
+  def _populateInfoList(self, name, value):
     ''' Documentation '''
 
     if value is not None:
@@ -430,40 +430,40 @@ class ShowScreeningHits(CcpnDock, Base):
       item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)# | QtCore.Qt.ItemIsEditable)
 
 
-  def rejectAssignment(self):
+  def _rejectAssignment(self):
     ''' Documentation '''
 
     rejectedHit = self.pullDownHit.getObject()
     rejectedHit.comment = 'No'
-    self.updateHitTable()
+    self._updateHitTable()
 
-  def showAllOnTableSelection(self, row:int=None, col:int=None, obj:object=None):
+  def _showAllOnTableSelection(self, row:int=None, col:int=None, obj:object=None):
     ''' Documentation '''
 
     objRow = self.hitTable.getCurrentObject()
-    self.showHitOnPullDown(objRow)
-    self.displaySampleAndHit()
-    self.showHitInfoOnDisplay()
-    self.hidePeakList()
+    self._showHitOnPullDown(objRow)
+    self._displaySampleAndHit()
+    self._showHitInfoOnDisplay()
+    self._hidePeakList()
 
-  def showHitInfoOnDisplay(self):
+  def _showHitInfoOnDisplay(self):
     ''' Documentation '''
-    self.clearListWidget()
-    self.showMolecule()
-    self.showTextHitDetails()
+    self._clearListWidget()
+    self._showMolecule()
+    self._showTextHitDetails()
 
-  def showAllSampleComponentsOnPullDownHit(self):
+  def _showAllSampleComponentsOnPullDownHit(self):
     ''' Documentation '''
 
     self.pullDownHit.setEnabled(True)
     self.sampleComponents = [x for x in self.pullDownHit.getObject().sample.sampleComponents]
     self.substances = [ substance.name for substance in self.sampleComponents]
     self.pullDownHit.setData(self.substances, self.sampleComponents)#Name,Obj
-    self.pullDownHit.activated[str].connect(self.displaySelectedComponent)
-    self.displayAllSampleComponents()
-    self.hideDeleteButton()
+    self.pullDownHit.activated[str].connect(self._displaySelectedComponent)
+    self._displayAllSampleComponents()
+    self._hideDeleteButton()
 
-  def showTextHitDetails(self):
+  def _showTextHitDetails(self):
     ''' Documentation '''
 
     color = QtGui.QColor('Red')
@@ -472,15 +472,15 @@ class ShowScreeningHits(CcpnDock, Base):
     headerHit.setFlags(QtCore.Qt.NoItemFlags)
     headerHit.setTextColor(color)
     self.listWidgetsHitDetails.addItem(headerHit)
-    for name, value in self.getSpectrumHitInfoToDisplay().items():
-      self.populateInfoList( name, value)
+    for name, value in self._getSpectrumHitInfoToDisplay().items():
+      self._populateInfoList(name, value)
 
     ''' setHitPositions '''
     headerHitPositions =  QtGui.QListWidgetItem('\nChanged Peak Position At Ppm ')
     headerHitPositions.setFlags(QtCore.Qt.NoItemFlags)
     headerHitPositions.setTextColor(color)
     self.listWidgetsHitDetails.addItem(headerHitPositions)
-    for item in self.getPositionOnSpectrum():
+    for item in self._getPositionOnSpectrum():
       self.listWidgetsHitDetails.addItem(str(item[0]))
 
     ''' setSubstance '''
@@ -488,20 +488,20 @@ class ShowScreeningHits(CcpnDock, Base):
     headerSubstance.setFlags(QtCore.Qt.NoItemFlags)
     headerSubstance.setTextColor(color)
     self.listWidgetsHitDetails.addItem(headerSubstance)
-    for name, value in self.getSubstanceInfoToDisplay().items():
-      self.populateInfoList( name, value)
+    for name, value in self._getSubstanceInfoToDisplay().items():
+      self._populateInfoList(name, value)
 
     ''' setSample '''
     headerSample =  QtGui.QListWidgetItem('\nSample Details')
     headerSample.setFlags(QtCore.Qt.NoItemFlags)
     headerSample.setTextColor(color)
     self.listWidgetsHitDetails.addItem(headerSample)
-    for name, value in self.getSampleInfoToDisplay().items():
-      self.populateInfoList( name, value)
+    for name, value in self._getSampleInfoToDisplay().items():
+      self._populateInfoList(name, value)
 
-  def showMolecule(self):
+  def _showMolecule(self):
     ''' Documentation '''
-    substance = self.getPullDownObj().substance
+    substance = self._getPullDownObj().substance
     self.smiles = substance.smiles
     if self.smiles is not None:
       self.compoundView  = CompoundView(self, smiles=self.smiles)
@@ -510,19 +510,19 @@ class ShowScreeningHits(CcpnDock, Base):
       self.compoundView.resetView()
       self.compoundView.updateAll()
 
-  def showDeleteButton(self):
+  def _showDeleteButton(self):
     ''' Documentation '''
 
     self.showDeleteHitButtons.show()
     self.addHitButton.hide()
 
-  def showHitOnPullDown(self, hit):
+  def _showHitOnPullDown(self, hit):
     ''' Documentation '''
 
     self.pullDownHit.setData([hit.substanceName], [hit])#Name,Obj
     self.pullDownHit.setEnabled(False)
 
-  def spectraToDisplay(self):
+  def _spectraToDisplay(self):
     ''' return sample spectra and spectrum from the hit pulldown'''
     spectraToDisplay = []
 
@@ -545,19 +545,19 @@ class ShowScreeningHits(CcpnDock, Base):
 
     return spectraToDisplay[0]
 
-  def testEditor(self,hit, value):
+  def _testEditor(self, hit, value):
     ''' Documentation '''
     hit.comment = value
 
-  def scoreEdit(self,hit, value):
+  def _scoreEdit(self, hit, value):
     ''' Documentation '''
     hit.meritCode = value
 
-  def updateHitTable(self):
+  def _updateHitTable(self):
     ''' Documentation '''
     self.hitTable.setObjects(self.listOfHits)
 
-  def hidePeakList(self):
+  def _hidePeakList(self):
     for peakListView in self.project.strips[0].spectrumDisplay.peakListViews:
         # if peakList == peakListView.peakList:
       peakListView.setVisible(False)

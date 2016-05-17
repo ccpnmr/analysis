@@ -53,7 +53,7 @@ class MixtureOptimisation(CcpnDock):
                                    tipTexts=[None, None, None, None],
                                    direction='H')
     self.buttonsFrameLayout.addWidget(self.panelButtons)
-    self.disableButtons()
+    self._disableButtons()
 
     ######## ======== Set 1 Tab  ====== ########
     self.tab1Frame = QtGui.QFrame()
@@ -105,7 +105,7 @@ class MixtureOptimisation(CcpnDock):
     self.tab4Layout.addWidget(self.replaceMixtureLabel, 0,0)
     self.tab4Layout.addWidget(self.replaceRadioButtons, 0,1)
 
-  def disableButtons(self):
+  def _disableButtons(self):
     for button in self.panelButtons.buttons:
       button.setEnabled(False)
       button.setStyleSheet("background-color:#868D9D; color: #000000")

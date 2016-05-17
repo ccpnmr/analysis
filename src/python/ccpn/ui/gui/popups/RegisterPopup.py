@@ -46,14 +46,14 @@ This needs to be done once on every computer you use the programme on.
 
     buttonFrame = Frame(frame, grid=(row,0), gridSpan=(1,2))
     ##self.licenseButton = Button(buttonFrame, 'Show License', callback=self.toggleLicense, grid=(0,0))
-    button = Button(buttonFrame, 'Register', callback=self.register, grid=(0,1))
+    button = Button(buttonFrame, 'Register', callback=self._register, grid=(0, 1))
     row += 1
 
     ##self.licensePanel = WebViewPanel(frame, url=licenseUrl, grid=(row,0), gridSpan=(1,2))
     ##self.licensePanel.hide()
     #self.resize(300,200)
  
-  def toggleLicense(self):
+  def _toggleLicense(self):
 
     if self.licensePanel.isVisible():
       self.licensePanel.hide()
@@ -64,7 +64,7 @@ This needs to be done once on every computer you use the programme on.
       self.resize(700,700)
       self.licenseButton.setText('Hide License')
 
-  def register(self):
+  def _register(self):
 
     registrationDict = {}
     for n, attr in enumerate(Register.userAttributes):

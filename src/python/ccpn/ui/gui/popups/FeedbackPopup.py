@@ -57,9 +57,9 @@ class FeedbackPopup(QtGui.QDialog):
     self.textEditor = TextEditor(frame, grid=(row,1))
 
     row += 1
-    button = Button(frame, 'Submit', callback=self.submitFeedback, grid=(row,1)) 
+    button = Button(frame, 'Submit', callback=self._submitFeedback, grid=(row, 1))
 
-  def submitFeedback(self):
+  def _submitFeedback(self):
     
     includeLog = self.includeLogBox.get()
     includeProject = self.includeProjectBox.get()

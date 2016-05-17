@@ -23,8 +23,8 @@ class RestraintTypePopup(QtGui.QDialog, Base):
     self.restraintTypeLabel = Label(self, "Restraint Type ", grid=(0, 0))
     self.restraintTypeList = PulldownList(self, grid=(0, 1))
     self.restraintTypeList.setData(restraintTypes)
-    buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self.setRestraintType], grid=(1, 1))
+    buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._setRestraintType], grid=(1, 1))
 
-  def setRestraintType(self):
+  def _setRestraintType(self):
     self.restraintType = self.restraintTypeList.currentText()
     self.accept()

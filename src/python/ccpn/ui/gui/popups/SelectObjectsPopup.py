@@ -24,17 +24,17 @@ class SelectObjectsPopup(QtGui.QDialog, Base):
 
     label1a = Label(self, text="Selected %s" % project.getByPid(objects[0])._pluralLinkName, grid=(0, 0))
     objects.insert(0, '  ')
-    self.objectPulldown = PulldownList(self, grid=(1, 0), callback=self.selectObject)
+    self.objectPulldown = PulldownList(self, grid=(1, 0), callback=self._selectObject)
     self.objectPulldown.setData(objects)
     self.objectListWidget = ListWidget(self, grid=(2, 0))
 
     self.buttonBox = ButtonList(self, grid=(3, 0), texts=['Cancel', 'Ok'],
-                           callbacks=[self.reject, self.setObjects])
+                                callbacks=[self.reject, self._setObjects])
 
-  def selectObject(self, item):
+  def _selectObject(self, item):
     self.objectListWidget.addItem(item)
 
-  def setObjects(self):
+  def _setObjects(self):
     self.parent.objects = [self.objectListWidget.item(i).text() for i in range(self.objectListWidget.count())]
     self.accept()
     # return [self.objectListWidget.item(i).text() for i in range(self.objectListWidget.count())]

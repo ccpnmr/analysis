@@ -41,7 +41,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
     Base.__init__(self, **kw)
     self.project = project
     self.peakListLabel = Label(self, text="PeakList: ", grid=(0, 0))
-    self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self.selectPeakList)
+    self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self._selectPeakList)
     self.peakListPulldown.setData([peakList.pid for peakList in project.peakLists])
     self.peakList = project.getByPid(self.peakListPulldown.currentText())
     self.checkBoxWidget = QtGui.QWidget()
@@ -64,12 +64,12 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.checkBox3Label = Label(self, 'Both')
     self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
     self.checkBox3.setChecked(True)
-    self.updateContents()
+    self._updateContents()
 
 
 
     self.buttonBox = ButtonList(self, grid=(7, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
-                           callbacks=[self.reject, self.pickPeaks])
+                                callbacks=[self.reject, self._pickPeaks])
 
   #
   # def controlCheckBoxes(self):
@@ -82,11 +82,11 @@ class PeakFindPopup(QtGui.QDialog, Base):
   #   if self.checkBox2.isChecked():
   #     self.checkBox1.setChecked(False)
   #     self.checkBox3.setChecked(False)
-  def selectPeakList(self, item):
+  def _selectPeakList(self, item):
     self.peakList = self.project.getByPid(item)
-    self.updateContents()
+    self._updateContents()
 
-  def pickPeaks(self):
+  def _pickPeaks(self):
     peakList = self.peakList
     apiSpectrumView = peakList.spectrum.spectrumViews[0]._wrappedData
     positions = [[spinBox.value() for spinBox in self.minPositionBoxes],
@@ -110,7 +110,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
 
     self.accept()
 
-  def updateContents(self):
+  def _updateContents(self):
 
     rowCount = self.layout().rowCount()
     colCount = self.layout().columnCount()
@@ -145,7 +145,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
     # self.excludedRegionsButton.toggled.connect(self.toggleExcludedRegionsPopup)
 
 
-  def toggleExcludedRegionsPopup(self):
+  def _toggleExcludedRegionsPopup(self):
 
     if not hasattr(self, 'excludedRegionsPopup'):
       self.raiseExcludedRegionsPopup()
@@ -164,11 +164,11 @@ class ExcludeRegions(QtGui.QWidget, Base):
     super(ExcludeRegions, self).__init__(parent)
     self.regionCount = 0
     self.peakList = peakList
-    self.addRegionButton = Button(self, text='Add Region', callback=self.addRegion, grid=(20, 0), gridSpan=(1, 3))
-    self.removeRegionButton = Button(self, text='Remove Region', callback=self.removeRegion, grid=(20, 3), gridSpan=(1, 3))
+    self.addRegionButton = Button(self, text='Add Region', callback=self._addRegion, grid=(20, 0), gridSpan=(1, 3))
+    self.removeRegionButton = Button(self, text='Remove Region', callback=self._removeRegion, grid=(20, 3), gridSpan=(1, 3))
     self.excludedRegions = []
 
-  def addRegion(self):
+  def _addRegion(self):
     self.regionCount+=1
     minRegion = []
     maxRegion = []
@@ -192,7 +192,7 @@ class ExcludeRegions(QtGui.QWidget, Base):
     self.excludedRegions.append([minRegion, maxRegion])
     self.regionCount+=1
 
-  def removeRegion(self):
+  def _removeRegion(self):
     for i in range(5):
       item = self.layout().itemAtPosition(self.regionCount, i)
       # print(item, i, self.regionCount)

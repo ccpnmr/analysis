@@ -53,10 +53,10 @@ class SetupNmrResiduesPopup(QtGui.QDialog, Base):
     self.layout().addWidget(newWidget, 1, 0, 1, 2)
 
     self.buttonBox = ButtonList(self, grid=(1, 3), texts=['Cancel', 'Ok'],
-                           callbacks=[self.reject, self.setupNmrResidues])
+                                callbacks=[self.reject, self._setupNmrResidues])
 
 
-  def setupNmrResidues(self):
+  def _setupNmrResidues(self):
     peakList = self.project.getByPid(self.peakListPulldown.currentText())
     nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
     keepAssignments = self.assignmentCheckBox.checkState()

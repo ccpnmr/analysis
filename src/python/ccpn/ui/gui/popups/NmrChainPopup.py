@@ -13,9 +13,9 @@ class NmrChainPopup(QtGui.QDialog, Base):
     self.nmrChain = nmrChain
     self.nmrChainLabel = Label(self, "NmrChain Name ", grid=(0, 0))
     self.nmrChainText = LineEdit(self, nmrChain.shortName, grid=(0, 1))
-    buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self.setNmrChainName], grid=(1, 1))
+    buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._setNmrChainName], grid=(1, 1))
 
-  def setNmrChainName(self):
+  def _setNmrChainName(self):
     newName = self.nmrChainText.text()
     self.nmrChain.rename(newName)
     self.accept()

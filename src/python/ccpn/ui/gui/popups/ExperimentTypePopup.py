@@ -27,7 +27,7 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
       pulldownItems = list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys())
       spLabel = Label(self, text=spectrum.pid, grid=(spectrumIndex, 0))
       spPulldown = PulldownList(self, grid=(spectrumIndex, 1),
-                                callback=partial(self.setExperimentType, spectrum, atomCodes),
+                                callback=partial(self._setExperimentType, spectrum, atomCodes),
                                 texts=pulldownItems)
 
       # Get the text that was used in the pulldown from the refExperiment
@@ -39,6 +39,6 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
                            callback=self.accept)
 
 
-  def setExperimentType(self, spectrum, atomCodes, item):
+  def _setExperimentType(self, spectrum, atomCodes, item):
     expType = self.experimentTypes[spectrum.dimensionCount].get(atomCodes).get(item)
     spectrum.experimentType = expType

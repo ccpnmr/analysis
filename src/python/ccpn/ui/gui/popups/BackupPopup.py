@@ -24,13 +24,13 @@ class BackupPopup(QtGui.QDialog):
 
     row = 0
     label = Label(frame, text='Auto backup on: ', grid=(row,0))
-    checkbox = CheckBox(frame, checked=preferences.general.autoBackupEnabled, callback=self.toggleBackup, grid=(row,1))
+    checkbox = CheckBox(frame, checked=preferences.general.autoBackupEnabled, callback=self._toggleBackup, grid=(row, 1))
 
     row += 1
     label = Label(frame, text='Auto backup frequency: ', grid=(row,0))
-    entry = Entry(frame, text=str(preferences.general.autoBackupFrequency), callback=self.setBackupFrequency, grid=(row,1))
+    entry = Entry(frame, text=str(preferences.general.autoBackupFrequency), callback=self._setBackupFrequency, grid=(row, 1))
 
-  def toggleBackup(self):
+  def _toggleBackup(self):
 
     appBase = self.parent()._appBase
     preferences = appBase.preferences
@@ -40,7 +40,7 @@ class BackupPopup(QtGui.QDialog):
     else:
       appBase.mainWindow._stopBackupTimer()
 
-  def setBackupFrequency(self, value):
+  def _setBackupFrequency(self, value):
     try:
       value = int(value)
     except:

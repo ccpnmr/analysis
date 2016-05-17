@@ -53,7 +53,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sampleName.setFixedWidth(203)
     self.sampleName.setFixedHeight(25)
     self.sampleName.setText(sample.name)
-    self.sampleName.editingFinished.connect(self.changeSampleName)
+    self.sampleName.editingFinished.connect(self._changeSampleName)
 
 #   # Sample Components
     SampleComponents = Label(self.areaContents, text="Sample Components ", grid=(2, 1), hAlign='l')
@@ -66,11 +66,11 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sc.setFixedHeight(25)
     self.sc.setData(self.scpid[0])
     self.sc.setEditable(True)
-    self.sc.activated[str].connect(self.editComponents)
+    self.sc.activated[str].connect(self._editComponents)
 
 #   # Add component
     self.sampleAddComponents = Button(self.areaContents, text="Add Sample Components ", grid=(13, 1),
-                                      hAlign='l', callback=self.addComponents)
+                                      hAlign='l', callback=self._addComponents)
     self.sampleAddComponents.setStyleSheet(""" background-color:  white""")
     self.sampleAddComponents.setFixedWidth(195)
     self.sampleAddComponents.setFixedHeight(25)
@@ -99,7 +99,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sampleState.setStyleSheet(""" background-color:  white""")
     self.sampleState.setFixedWidth(203)
     self.sampleState.setFixedHeight(25)
-    self.sampleState.activated[str].connect(self.sampleStateChanged)
+    self.sampleState.activated[str].connect(self._sampleStateChanged)
 
 #   #Sample Amount Unit
     sampleAmountUnitLabel = Label(self.areaContents, text="Sample Amount ", grid=(6, 1), hAlign='l')
@@ -108,7 +108,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sampleAmountUnit.setFixedWidth(75)
     self.sampleAmountUnit.setFixedHeight(25)
     self.sampleAmountUnit.setStyleSheet(""" background-color:  white""")
-    self.sampleAmountUnit.activated[str].connect(self.sampleAmountUnitChanged)
+    self.sampleAmountUnit.activated[str].connect(self._sampleAmountUnitChanged)
 
 #    # Sample Amount
     self.sampleAmount = DoubleSpinbox(self.areaContents, grid=(6, 2), hAlign='r' )
@@ -119,14 +119,14 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.sampleAmount.setFixedHeight(25)
     if self.sample.amount is not None:
       self.sampleAmount.setValue(self.sample.amount)
-    self.sampleAmount.valueChanged.connect(self.sampleAmountChanged)
+    self.sampleAmount.valueChanged.connect(self._sampleAmountChanged)
 
 #    # Sample pH
     samplepHLabel = Label(self.areaContents, text="Sample pH ", grid=(7, 1), hAlign='l')
     self.samplepH = DoubleSpinbox(self.areaContents, grid=(7, 2), hAlign='l' )
     self.samplepH.setRange(0.00, 14.00)
     self.samplepH.setSingleStep(0.01)
-    self.samplepH.valueChanged.connect(self.samplepHchanged)
+    self.samplepH.valueChanged.connect(self._samplepHchanged)
     self.samplepH.setStyleSheet(""" background-color:  white""")
     self.samplepH.setFixedWidth(203)
     self.samplepH.setFixedHeight(25)
@@ -142,7 +142,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     if sample.creationDate is None:
       setToday = QtCore.QDate.currentDate()
       self.sampleDate.setDate(setToday)
-      self.sampleDate.dateChanged.connect(self.sampleDateChanged)
+      self.sampleDate.dateChanged.connect(self._sampleDateChanged)
 
 #    # Sample Plate Identifier
     samplePlateIdentifierLabel = Label(self.areaContents, text="Sample Plate Identifier ", grid=(9, 1), hAlign='l')
@@ -151,7 +151,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.plateIdentifier.setFixedWidth(203)
     self.plateIdentifier.setFixedHeight(25)
     self.plateIdentifier.setText(str(sample.plateIdentifier))
-    self.plateIdentifier.editingFinished.connect(self.plateIdentifierChanged)
+    self.plateIdentifier.editingFinished.connect(self._plateIdentifierChanged)
 
     # Sample Row Number
     samplerowNumberLabel = Label(self.areaContents, text="Sample Row Number ", grid=(10, 1), hAlign='l')
@@ -161,7 +161,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.rowNumber.setFixedHeight(25)
     if sample.rowNumber is not None:
       self.rowNumber.setText(str(sample.rowNumber))
-    self.rowNumber.editingFinished.connect(self.rowNumberChanged)
+    self.rowNumber.editingFinished.connect(self._rowNumberChanged)
 
 #    # Sample Column Number
     sampleColumnNumberLabel = Label(self.areaContents, text="Sample Column Number ", grid=(11, 1), hAlign='l')
@@ -171,7 +171,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.columnNumber.setFixedHeight(25)
     if sample.columnNumber is not None:
       self.columnNumber.setText(str(sample.columnNumber))
-    self.columnNumber.editingFinished.connect(self.columnNumberChanged)
+    self.columnNumber.editingFinished.connect(self._columnNumberChanged)
 
 #    # Sample Comment
     sampleCommentLabel = Label(self.areaContents, text="Comment ", grid=(12, 1), hAlign='l')
@@ -180,13 +180,13 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     self.comment.setFixedWidth(207)
     self.comment.setFixedHeight(50)
     self.comment.setText(sample.comment)
-    self.comment.textChanged.connect(self.commentChanged)
+    self.comment.textChanged.connect(self._commentChanged)
 
     # Only to align and center all nicely
     labelAllignLeft = Label(self.areaContents, text="", grid=(1, 0), hAlign='l')
     labelAllignRight = Label(self.areaContents, text="", grid=(1, 3), hAlign='l')
 
-  def addComponents(self):
+  def _addComponents(self):
     ''' This adds components to the sample, to the sideBar and pulldown '''
 
     self.sampleComponent = self.sample.newSampleComponent(name=('NewSC'),labeling=str('H'))
@@ -194,10 +194,10 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     scPid = self.sampleComponent.pid
     self.scpid[0].append(scPid)
     self.sc.setData(self.scpid[0])
-    self.editComponents(self.sampleComponent.pid)
+    self._editComponents(self.sampleComponent.pid)
 
 
-  def editComponents(self, pressed):
+  def _editComponents(self, pressed):
     ''' This opens the sample component editor '''
 
     sampleComponent = self.project.getByPid(pressed)
@@ -205,7 +205,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     popup.exec_()
     popup.raise_()
 
-  def changeSampleName(self):
+  def _changeSampleName(self):
 
     if self.sampleName.isModified():
       self.sample.rename(self.sampleName.text())
@@ -215,50 +215,50 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
               + self.item.child(i).text(0).split('.')[1]
         self.item.child(i).setText(0, pid)
 
-  def samplepHchanged(self, value):
+  def _samplepHchanged(self, value):
     self.sample.pH = value
 
-  def sampleStateChanged(self, pressed):
+  def _sampleStateChanged(self, pressed):
 
     if pressed == 'Liquid':
-      self.sampleUnitChangedInVolume()
+      self._sampleUnitChangedInVolume()
     elif pressed == 'Other':
-      self.sampleUnitChangedInConcentration()
+      self._sampleUnitChangedInConcentration()
     else:
-      self.sampleUnitChangedInMass()
+      self._sampleUnitChangedInMass()
 
-  def sampleUnitChangedInVolume(self):
+  def _sampleUnitChangedInVolume(self):
     self.sampleAmountUnit.setData(VOLUME_UNIT)
 
-  def sampleUnitChangedInConcentration(self):
+  def _sampleUnitChangedInConcentration(self):
     self.sampleAmountUnit.setData(CONCENTRATION_UNIT)
 
-  def sampleUnitChangedInMass(self):
+  def _sampleUnitChangedInMass(self):
     self.sampleAmountUnit.setData(MASS_UNIT)
 
-  def sampleAmountChanged(self, value):
+  def _sampleAmountChanged(self, value):
     self.sample.amount = value
 
-  def sampleAmountUnitChanged(self, pressed):
+  def _sampleAmountUnitChanged(self, pressed):
     self.sample.amountUnit = str(pressed)
 
-  def sampleDateChanged(self, pressed):
+  def _sampleDateChanged(self, pressed):
     print(pressed)
 
-  def plateIdentifierChanged(self):
+  def _plateIdentifierChanged(self):
     self.sample.plateIdentifier = str(self.plateIdentifier.text())
 
-  def rowNumberChanged(self):
+  def _rowNumberChanged(self):
     self.sample.rowNumber = int(self.rowNumber.text())
 
-  def columnNumberChanged(self):
+  def _columnNumberChanged(self):
     self.sample.columnNumber = int(self.columnNumber.text())
 
-  def commentChanged(self):
+  def _commentChanged(self):
     newText = self.comment.toPlainText()
     self.sample.comment = newText
 
-  def keyPressEvent(self, event):
+  def _keyPressEvent(self, event):
     if event.key() == QtCore.Qt.Key_Enter:
       pass
 
@@ -297,26 +297,26 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.type = PulldownList(self.area, grid=(1, 2), hAlign='l' )
     self.type.setData(TYPECOMPONENT)
     self.type.setFixedWidth(129)
-    self.type.activated[str].connect(self.typeComponent)
+    self.type.activated[str].connect(self._typeComponent)
 
 #   #Component Name
     sampleComponentsLabel = Label(self.area, text="Component Name ", grid=(2, 1), hAlign='l')
     self.nameComponents = LineEdit(self.area, grid=(2, 2), hAlign='r' )
     self.nameComponents.setText(sampleComponent.name)
-    self.nameComponents.editingFinished.connect(self.changeNameComponents)
+    self.nameComponents.editingFinished.connect(self._changeNameComponents)
 
 #   #Labeling
     sampleComponentsLabelingLabel = Label(self.area, text="Labeling ", grid=(3, 1), hAlign='l')
     self.labeling = LineEdit(self.area, grid=(3, 2), hAlign='r' )
     self.labeling.setText(sampleComponent.labeling)
-    self.labeling.editingFinished.connect(self.labelingChanged)
+    self.labeling.editingFinished.connect(self._labelingChanged)
 
 #   #concentration unit
     concentrationUnitLabel = Label(self.area, text="Value Unit ", grid=(4, 1), hAlign='l')
     self.concentrationUnit = PulldownList(self.area, grid=(4, 2), hAlign='l' )
     self.concentrationUnit.setData(C_COMPONENT_UNIT)
     self.concentrationUnit.setFixedWidth(128)
-    self.concentrationUnit.activated[str].connect(self.setConcentrationUnit)
+    self.concentrationUnit.activated[str].connect(self._setConcentrationUnit)
 
 #   #concentration Value 1
     concentrationLabel = Label(self.area, text="Value 1 ", grid=(5, 1), hAlign='l')
@@ -327,7 +327,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.concentration.setSingleStep(0.01)
     self.concentration.setFixedWidth(65)
     self.concentration.setFixedHeight(20)
-    self.concentration.valueChanged.connect(self.concentrationChanged)
+    self.concentration.valueChanged.connect(self._concentrationChanged)
 
 #   #concentration Value 2
     self.concentrationLabel2 = Label(self.area, text="Value 2 ", grid=(6, 1), hAlign='l')
@@ -341,7 +341,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.concentrationUnit2.hide()
     self.concentrationLabel2.hide()
     self.concentration2.hide()
-    self.concentration2.valueChanged.connect(self.concentration2Changed)
+    self.concentration2.valueChanged.connect(self._concentration2Changed)
 
 #   # referenceSpectra
     referenceSpectraLabel = Label(self.area, text="Ref Spectra", grid=(7, 1), hAlign='l')
@@ -353,46 +353,46 @@ class EditSampleComponentPopup(QtGui.QDialog):
 #   # chemical Name
     chemicalNameLabel = Label(self.area, text="Chemical Name", grid=(8, 1), hAlign='l')
     self.chemicalName = LineEdit(self.area, grid=(8, 2), hAlign='l' )
-    self.chemicalName.editingFinished.connect(self.chemicalNameChanged)
+    self.chemicalName.editingFinished.connect(self._chemicalNameChanged)
     # To clearify on the wrapper first
 
 #   # smiles
     self.smileLabel = Label(self.area, text="Smiles", grid=(9, 1), hAlign='l')
     self.smile = LineEdit(self.area, grid=(9, 2), hAlign='r')
     self.smile.setText(sampleComponent.substance.smiles)
-    self.smile.editingFinished.connect(self.smileChanged)
+    self.smile.editingFinished.connect(self._smileChanged)
 
 #   # empirical Formula
     self.empiricalFormulaLabel = Label(self.area, text="Empirical Formula", grid=(10, 1), hAlign='l')
     self.empiricalFormula = LineEdit(self.area, grid=(10, 2), hAlign='r' )
     self.empiricalFormula.setText(str(sampleComponent.substance.empiricalFormula))
-    self.empiricalFormula.editingFinished.connect(self.empiricalFormulaChanged)
+    self.empiricalFormula.editingFinished.connect(self._empiricalFormulaChanged)
 
 #   # Molecular Mass
     self.molecularMassLabel = Label(self.area, text="Molecular Mass", grid=(11, 1), hAlign='l')
     self.molecularMass = LineEdit(self.area, grid=(11, 2), hAlign='r' )
     self.molecularMass.setText(str(sampleComponent.substance.molecularMass))
-    self.molecularMass.editingFinished.connect(self.molecularMassChanged)
+    self.molecularMass.editingFinished.connect(self._molecularMassChanged)
 
 #   # Comment
     self.labelcomment = Label(self.area, text="Comment", grid=(12, 1), hAlign='l')
     self.comment = LineEdit(self.area, grid=(12, 2), hAlign='r' )
     self.comment.setText(self.sampleComponent.substance.comment)
-    self.comment.editingFinished.connect(self.commentChanged)
+    self.comment.editingFinished.connect(self._commentChanged)
 
     self.moreInfo = Button(self.area, text="More... ", grid=(13, 1),
-                                      hAlign='c', callback=self.moreInfoComponents)
+                           hAlign='c', callback=self._moreInfoComponents)
     self.moreInfo.setFixedHeight(20)
     self.showSmiles = Button(self.area, text="Display Compound", grid=(13, 2),
-                                      hAlign='c', callback=self.showCompound)
+                             hAlign='c', callback=self._showCompound)
     self.hideSmiles = Button(self.area, text="Hide Compound", grid=(13, 2),
-                                      hAlign='c', callback=self.hideCompound)
+                                      hAlign='c', callback=None)
     self.hideSmiles.hide()
 #   # User Code
     self.labelUserCode = Label(self.area, text="User Code", grid=(13, 1), hAlign='l')
     self.userCode = LineEdit(self.area, grid=(13, 2), hAlign='r' )
     self.userCode.setText(str(sampleComponent.substance.userCode))
-    self.userCode.editingFinished.connect(self.userCodeChanged)
+    self.userCode.editingFinished.connect(self._userCodeChanged)
     self.labelUserCode.hide()
     self.userCode.hide()
 
@@ -400,7 +400,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.labelCasNumber = Label(self.area, text="Cas Number", grid=(14, 1), hAlign='l')
     self.casNumber = LineEdit(self.area, grid=(14, 2), hAlign='r' )
     self.casNumber.setText(str(sampleComponent.substance.casNumber))
-    self.casNumber.editingFinished.connect(self.casNumberChanged)
+    self.casNumber.editingFinished.connect(self._casNumberChanged)
     self.labelCasNumber.hide()
     self.casNumber.hide()
 
@@ -408,7 +408,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.labelAtomCount = Label(self.area, text="Atom Count", grid=(15, 1), hAlign='l')
     self.atomCount = LineEdit(self.area, grid=(15, 2), hAlign='r' )
     self.atomCount.setText(str(sampleComponent.substance.atomCount))
-    self.atomCount.editingFinished.connect(self.atomCountChanged)
+    self.atomCount.editingFinished.connect(self._atomCountChanged)
     self.labelAtomCount.hide()
     self.atomCount.hide()
 
@@ -423,7 +423,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.labelRingCount = Label(self.area, text="Ring Count", grid=(17, 1), hAlign='l')
     self.ringCount = LineEdit(self.area, grid=(17, 2), hAlign='r' )
     self.ringCount.setText(str(sampleComponent.substance.ringCount))
-    self.ringCount.editingFinished.connect(self.ringCountChanged)
+    self.ringCount.editingFinished.connect(self._ringCountChanged)
     self.labelRingCount.hide()
     self.ringCount.hide()
 
@@ -431,7 +431,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.labelHBondDonorCount = Label(self.area, text="H Bond Donors", grid=(18, 1), hAlign='l')
     self.hBondDonorCount = LineEdit(self.area, grid=(18, 2), hAlign='r' )
     self.hBondDonorCount.setText(str(sampleComponent.substance.hBondDonorCount))
-    self.hBondDonorCount.editingFinished.connect(self.hBondDonorCountChanged)
+    self.hBondDonorCount.editingFinished.connect(self._hBondDonorCountChanged)
     self.labelHBondDonorCount.hide()
     self.hBondDonorCount.hide()
 
@@ -439,7 +439,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.labelHBondAcceptorCount = Label(self.area, text="H Bond Acceptors", grid=(19, 1), hAlign='l')
     self.hBondAcceptorCount = LineEdit(self.area, grid=(19, 2), hAlign='r' )
     self.hBondAcceptorCount.setText(str(sampleComponent.substance.hBondAcceptorCount))
-    self.hBondAcceptorCount.editingFinished.connect(self.hBondAcceptorCountChanged)
+    self.hBondAcceptorCount.editingFinished.connect(self._hBondAcceptorCountChanged)
     self.labelHBondAcceptorCount.hide()
     self.hBondAcceptorCount.hide()
 
@@ -447,7 +447,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.labelpolarSurfaceArea = Label(self.area, text="Polar Surface Area", grid=(20, 1), hAlign='l')
     self.polarSurfaceArea = LineEdit(self.area, grid=(20, 2), hAlign='r' )
     self.polarSurfaceArea.setText(str(sampleComponent.substance.polarSurfaceArea))
-    self.polarSurfaceArea.editingFinished.connect(self.polarSurfaceAreaChanged)
+    self.polarSurfaceArea.editingFinished.connect(self._polarSurfaceAreaChanged)
     self.labelpolarSurfaceArea.hide()
     self.polarSurfaceArea.hide()
 
@@ -455,15 +455,15 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.labelLogP = Label(self.area, text="LogP", grid=(21, 1), hAlign='l')
     self.logP = LineEdit(self.area, grid=(21, 2), hAlign='r' )
     self.logP.setText(str(sampleComponent.substance.logPartitionCoefficient))
-    self.logP.editingFinished.connect(self.logPChanged)
+    self.logP.editingFinished.connect(self._logPChanged)
     self.labelLogP.hide()
     self.logP.hide()
 
-  def moreInfoComponents(self):
+  def _moreInfoComponents(self):
     self.moreInfo.hide()
     self.showSmiles.hide()
     self.lessInfo = Button(self.area, text="Less... ", grid=(22, 1),
-                                      hAlign='c', callback=self.hideInfo)
+                           hAlign='c', callback=self._hideInfo)
     self.lessInfo.setFixedHeight(20)
     self.labelUserCode.show()
     self.userCode.show()
@@ -484,7 +484,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.labelLogP.show()
     self.logP.show()
 
-  def setConcentrationUnit(self, pressed):
+  def _setConcentrationUnit(self, pressed):
     if pressed == 'Molar':
       self.concentrationUnit1.setData(CONCENTRATION_UNIT)
       self.concentrationUnit2.hide()
@@ -503,7 +503,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.concentrationLabel2.show()
       self.concentration2.show()
 
-  def typeComponent(self, pressed):
+  def _typeComponent(self, pressed):
 
     if pressed == 'Compound':
       self.moreInfo.show()
@@ -516,12 +516,12 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.showSmiles.show()
 
     else:
-      self.hideInfo()
+      self._hideInfo()
       if hasattr(self, 'moreInfo'):
         self.moreInfo.hide()
         self.showSmiles.hide()
 
-  def hideInfo(self):
+  def _hideInfo(self):
       self.showSmiles.show()
       self.moreInfo.show()
       if hasattr(self, 'lessInfo'):
@@ -551,130 +551,70 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.labelLogP.hide()
       self.logP.hide()
 
-  def changeNameComponents(self):
+  def _changeNameComponents(self):
     print('Not implemented Yet')
 
-  def labelingChanged(self):
+  def _labelingChanged(self):
     # self.sampleComponent.labeling = str(self.labeling.text())
     print('labeling not Changed', self.sampleComponent.labeling )
 
-  def concentrationChanged(self, value):
+  def _concentrationChanged(self, value):
     self.sampleComponent.concentration = float(value)
 
-  def concentration2Changed(self, value):
+  def _concentration2Changed(self, value):
     print(value, 'concentration2 Not implemented Yet')
 
-  def chemicalNameChanged(self):
+  def _chemicalNameChanged(self):
     print('Not implemented Yet')
 
-  def smileChanged(self):
+  def _smileChanged(self):
     self.sampleComponent.substance.smiles = str(self.smile.text())
 
-  def empiricalFormulaChanged(self):
+  def _empiricalFormulaChanged(self):
      self.sampleComponent.substance.empiricalFormula = str(self.empiricalFormula.text())
 
-  def molecularMassChanged(self):
+  def _molecularMassChanged(self):
     self.sampleComponent.substance.molecularMass = float(self.molecularMass.text())
 
-  def userCodeChanged(self):
+  def _userCodeChanged(self):
     self.sampleComponent.substance.userCode = str(self.userCode.text())
 
-  def casNumberChanged(self):
+  def _casNumberChanged(self):
     self.sampleComponent.substance.casNumber = str(self.casNumber.text())
 
-  def atomCountChanged(self):
+  def _atomCountChanged(self):
     self.sampleComponent.substance.atomCount = int(self.atomCount.text())
 
-  def ringCountChanged(self):
+  def _ringCountChanged(self):
     self.sampleComponent.substance.ringCount = int(self.ringCount.text())
 
-  def hBondDonorCountChanged(self):
+  def _hBondDonorCountChanged(self):
     self.sampleComponent.substance.hBondDonorCount = int(self.hBondDonorCount.text())
 
-  def hBondAcceptorCountChanged(self):
+  def _hBondAcceptorCountChanged(self):
     self.sampleComponent.substance.hBondAcceptorCount = int(self.hBondAcceptorCount.text())
 
-  def polarSurfaceAreaChanged(self):
+  def _polarSurfaceAreaChanged(self):
     self.sampleComponent.substance.polarSurfaceArea = float(self.polarSurfaceArea.text())
 
-  def logPChanged(self):
+  def _logPChanged(self):
     self.sampleComponent.substance.logPartitionCoefficient = float(self.logP.text())
 
-  def commentChanged(self):
+  def _commentChanged(self):
     self.sampleComponent.substance.comment = str(self.comment.text())
 
 
-  def showCompound(self):
+  def _showCompound(self):
     self.moreInfo.hide()
     self.showSmiles.hide()
     self.hideSmiles.show()
 
-
-    self.compoundView = CompoundView(self.area, grid=(14, 1) , gridSpan=(14,2),
+    smiles = self.sampleComponent.substance.smiles
+    self.compoundView = CompoundView(self.area, smiles=smiles, grid=(14, 1) , gridSpan=(14,2),
                                      preferences=self.project._appBase.preferences.general)
-    # self.compoundView = compoundView
 
-    smile = self.sampleComponent.substance.smiles
-    self.smiles = smile
-    compound = importSmiles(smile)
-    variant = list(compound.variants)[0]
-    self.setCompound(compound, replace = True)
-    x, y = self.getAddPoint()
-    variant.snapAtomsToGrid(ignoreHydrogens=False)
+
     self.compoundView.centerView()
     # self.compoundView.resetView()
     self.compoundView.updateAll()
 
-  def setCompound(self, compound, replace=True):
-    ''' Set the compound on the graphic scene. '''
-
-    if compound is not self.compound:
-      if replace or not self.compound:
-        self.compound = compound
-        variants = list(compound.variants)
-        if variants:
-          for variant2 in variants:
-            if (variant2.polyLink == 'none') and (variant2.descriptor == 'neutral'):
-              variant = variant2
-              break
-          else:
-            for variant2 in variants:
-              if variant2.polyLink == 'none':
-                variant = variant2
-                break
-            else:
-              variant = variants[0]
-        else:
-          variant =  Variant(compound)
-          print(variant)
-        self.variant = variant
-        self.compoundView.setVariant(variant)
-
-      else:
-        variant = list(compound.variants)[0]
-        x, y = self.getAddPoint()
-        self.compound.copyVarAtoms(variant.varAtoms, (x,y))
-        self.compoundView.centerView()
-        self.compoundView.updateAll()
-
-  def getAddPoint(self):
-    ''' Set the compound on the specific position on the graphic scene. '''
-
-    compoundView = self.compoundView
-    globalPos = QtGui.QCursor.pos()
-    pos = compoundView.mapFromGlobal(globalPos)
-    widget = compoundView.childAt(pos)
-    if widget:
-      x = pos.x()
-      y = pos.y()
-    else:
-      x = compoundView.width()/2.0
-      y = compoundView.height()/2.0
-    point = compoundView.mapToScene(x, y)
-    return point.x(), point.y()
-
-  def hideCompound(self):
-    self.compoundView.hide()
-    self.moreInfo.show()
-    self.showSmiles.show()
-    self.hideSmiles.hide()

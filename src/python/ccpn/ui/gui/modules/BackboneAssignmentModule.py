@@ -58,13 +58,13 @@ class BackboneAssignmentModule(CcpnDock):
     self.numberOfMatches = 5
     self.nmrChains = project.nmrChains
     self.matchModules = []
-    self.nmrResidueTable = NmrResidueTable(self.widget1, project, callback=self.startAssignment)
+    self.nmrResidueTable = NmrResidueTable(self.widget1, project, callback=self._startAssignment)
 
     self.settingsButton = Button(self.nmrResidueTable, icon='iconsNew/applications-system',
                                 grid=(0, 5), hPolicy='fixed', toggle=True)
 
     self.layout.addWidget(self.nmrResidueTable, 0, 0, 1, 3)
-    self.settingsButton.toggled.connect(self.toggleWidget2)
+    self.settingsButton.toggled.connect(self._toggleWidget2)
     modules = [display.pid for display in project.spectrumDisplays]
     modules.insert(0, '  ')
     modulesLabel = Label(self.widget2, text="Selected Modules", grid=(1, 0))
@@ -77,7 +77,7 @@ class BackboneAssignmentModule(CcpnDock):
     self.settingsButton.setChecked(False)
 
 
-  def toggleWidget2(self):
+  def _toggleWidget2(self):
     if self.settingsButton.isChecked():
       self.widget2.show()
     else:
@@ -89,7 +89,7 @@ class BackboneAssignmentModule(CcpnDock):
 
 
 
-  def startAssignment(self, nmrResidue:NmrResidue, row:int=None, col:int=None):
+  def _startAssignment(self, nmrResidue:NmrResidue, row:int=None, col:int=None):
     """
     Initiates assignment procedure when triggered by selection of an NmrResidue from the nmrResidueTable
     inside the module.
@@ -107,10 +107,10 @@ class BackboneAssignmentModule(CcpnDock):
       for nmrResidue in nmrResidues:
         if self.assigner:
           self.assigner.addResidue(nmrResidue, '+1')
-    self.navigateTo(nmrResidue, row, col)
+    self._navigateTo(nmrResidue, row, col)
 
 
-  def navigateTo(self, nmrResidue:NmrResidue, row:int=None, col:int=None, strip:GuiStrip=None):
+  def _navigateTo(self, nmrResidue:NmrResidue, row:int=None, col:int=None, strip:GuiStrip=None):
     """
     Takes an NmrResidue and an optional GuiStrip and changes z position(s) of all available displays
     to chemical shift value NmrAtoms in the NmrResidue. Creates assignMatrix for strip matching and
@@ -248,7 +248,7 @@ class BackboneAssignmentModule(CcpnDock):
       module.orderedStrips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue._id)
 
 
-  def connectAssigner(self, assigner:CcpnDock):
+  def _connectAssigner(self, assigner:CcpnDock):
     """
     Connects Assigner Widget to this module.
     """

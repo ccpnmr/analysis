@@ -30,17 +30,17 @@ class CreateSequence(QtGui.QDialog, Base):
     lineEdit2a = LineEdit(self, grid=(4, 3), text='A')
 
     buttonBox = ButtonList(self, grid=(6, 3), texts=['Cancel', 'Create Sequence'],
-                           callbacks=[self.reject, self.createSequence])
+                           callbacks=[self.reject, self._createSequence])
     self.sequenceStart = 1
     self.chainCode = 'A'
     # self.sequence = sequenceEditor.toPlainText()
     self.moleculeName = 'Molecule 1'
-    moleculeName.textChanged.connect(self.setMoleculeName)
-    lineEdit1a.valueChanged.connect(self.setSequenceStart)
-    lineEdit2a.textChanged.connect(self.setChainCode)
+    moleculeName.textChanged.connect(self._setMoleculeName)
+    lineEdit1a.valueChanged.connect(self._setSequenceStart)
+    lineEdit2a.textChanged.connect(self._setChainCode)
     self.sequenceEditor.textChanged.connect(self._setSequence)
 
-  def createSequence(self):
+  def _createSequence(self):
     """
     Creates a sequence using the values specified in the text widget.
     """
@@ -49,13 +49,13 @@ class CreateSequence(QtGui.QDialog, Base):
                                  molType=self.molTypePulldown.currentText())
     self.accept()
 
-  def setSequenceStart(self, value:int):
+  def _setSequenceStart(self, value:int):
     """
     Sets sequence start for sequence being created
     """
     self.sequenceStart = int(value)
 
-  def setChainCode(self, value:str):
+  def _setChainCode(self, value:str):
     """
     Sets chain code for sequence being created.
     """
@@ -69,7 +69,7 @@ class CreateSequence(QtGui.QDialog, Base):
     else:
       self.sequence = tuple(sequence.split())
 
-  def setMoleculeName(self, value:str):
+  def _setMoleculeName(self, value:str):
     """
     Sets name of molecule being created.
     """

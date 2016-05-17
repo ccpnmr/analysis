@@ -10,7 +10,7 @@ from PyQt4 import QtGui
 
 class GuiTableGenerator(QtGui.QWidget, Base):
 
-  # NBNB TBD FIXME  This should be cleaned up and made less ahcky:
+  # NBNB TBD FIXME  This should be cleaned up and made less hacky:
   # Special cases like extra columns for peak tabels should NOT be done in the general class
   # but e.g. by overriding a function in a subclass.
   # You should not do things like 'objectList._childClasses[0]', but pass in the #
@@ -41,13 +41,13 @@ class GuiTableGenerator(QtGui.QWidget, Base):
 
 
       if selector is not None:
-        self.updateContents()
+        self._updateContents()
         self.selector = selector
-        self.selector.setCallback(self.changeObjectList)
-        self.updateSelectorContents()
+        self.selector.setCallback(self._changeObjectList)
+        self._updateSelectorContents()
 
 
-  def changeObjectList(self, objectList:object):
+  def _changeObjectList(self, objectList:object):
     """
     Changes the objectList specified in the selector.
     """
@@ -57,10 +57,10 @@ class GuiTableGenerator(QtGui.QWidget, Base):
     elif objectList is not self.objectList:
 
       self.objectList = objectList
-      self.updateContents()
+      self._updateContents()
 
 
-  def updateContents(self):
+  def _updateContents(self):
     """
     Changes the contents of the objectTable based on the objectList specified in the selector.
     """
@@ -123,21 +123,21 @@ class GuiTableGenerator(QtGui.QWidget, Base):
           c = Column(column[0], column[1], tipText=tipTexts[columns.index(column)])
           tableColumns.append(c)
 
-      detailsColumn = Column('Details', lambda obj: self.getCommentText(obj), setEditValue=lambda obj, value: self.setObjectDetails(obj, value))
+      detailsColumn = Column('Details', lambda obj: self._getCommentText(obj), setEditValue=lambda obj, value: self._setObjectDetails(obj, value))
       tableColumns.append(detailsColumn)
     return tableColumns
 
-  def setObjectDetails(self, obj, value):
+  def _setObjectDetails(self, obj, value):
     obj.comment = value
 
 
-  def getCommentText(self, obj):
+  def _getCommentText(self, obj):
     if obj.comment == '' or not obj.comment:
       return ' '
     else:
       return obj.comment
 
-  def updateSelectorContents(self):
+  def _updateSelectorContents(self):
     """
     Sets the contents of the selector and object table if object list is specified on instatiation.
     """
@@ -153,8 +153,11 @@ class GuiTableGenerator(QtGui.QWidget, Base):
 
 
   def updateTable(self):
+    """
+    Update contents of the table, including addition/deletion of objects.
+    """
     # self.updateSelectorContents()
-    self.updateContents()
+    self._updateContents()
 
 
 

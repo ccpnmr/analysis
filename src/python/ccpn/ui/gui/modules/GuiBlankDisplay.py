@@ -63,8 +63,10 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     self.widget2.hide()
 
     DropBase.__init__(self, dockArea.guiWindow._appBase)
+    self.setOrientation = self._setOrientation
+    self.closeDock = self._closeDock
 
-  def setOrientation(self, o='vertical', force=True):
+  def _setOrientation(self, o='vertical', force=True):
     """
     Sets the orientation of the title bar for this Dock.
     Must be one of 'auto', 'horizontal', or 'vertical'.
@@ -143,7 +145,7 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     self.dockArea.guiWindow.deleteBlankDisplay()
 
 
-  def closeDock(self):
+  def _closeDock(self):
     """
     Re-implementation of closeDock function from CcpnDock.
     """

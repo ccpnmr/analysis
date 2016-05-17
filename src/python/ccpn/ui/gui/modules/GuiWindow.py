@@ -80,7 +80,7 @@ class GuiWindow(DropBase):
     self.processDropData(paths, dataType='urls')
 
 
-  def setShortcuts(self):
+  def _setShortcuts(self):
     """
     Sets shortcuts for functions not specified in the main window menubar
     """
@@ -94,7 +94,7 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current))
-    QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self.clearCurrentPeaks)
+    QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks)
     QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self))
     QtGui.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self))
     QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self))
@@ -207,7 +207,7 @@ class GuiWindow(DropBase):
       strip.togglePhasingPivot()
   """
    
-  def clearCurrentPeaks(self):
+  def _clearCurrentPeaks(self):
     """
     Sets current.peaks to an empty list.
     """
@@ -263,10 +263,11 @@ class GuiWindow(DropBase):
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.toggleGrid()
     
-  def setCrossHairPosition(self, axisPositionDict:typing.Dict[str, float]):
+  def _setCrossHairPosition(self, axisPositionDict:typing.Dict[str, float]):
     """
+    # CCPN INTERNAL - called in mouseMoved method of GuiStrip
     Sets crosshair position in all spectrum displays using positions specified in the axisPositionDict.
     """
     for spectrumDisplay in self.spectrumDisplays:
-      spectrumDisplay.setCrossHairPosition(axisPositionDict)
+      spectrumDisplay._setCrossHairPosition(axisPositionDict)
 

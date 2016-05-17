@@ -53,7 +53,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     #   apiSpectrumDisplay1d.newStrip1d()
 
     GuiSpectrumDisplay.__init__(self)
-    self.fillToolBar()
+    self._fillToolBar()
     # self.addSpinSystemSideLabel()
     self.setAcceptDrops(True)
     self.isGrouped = False
@@ -131,14 +131,14 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
       peakItemDict[apiPeak] = peakItem
 
 
-  def fillToolBar(self):
+  def _fillToolBar(self):
     """
     Adds specific icons for 1d spectra to the spectrum utility toolbar.
     """
     spectrumUtilToolBar = self.spectrumUtilToolBar
     spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64))
 
-    GuiSpectrumDisplay.fillToolBar(self)
+    GuiSpectrumDisplay._fillToolBar(self)
 
 
     # Disable add and remove strips, as they're broken

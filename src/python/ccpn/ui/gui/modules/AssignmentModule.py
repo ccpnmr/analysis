@@ -56,19 +56,19 @@ class AssignmentModule(CcpnDock, Base):
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
 
     self.doubleToleranceCheckbox = CheckBox(self.widget1, checked=False)
-    self.doubleToleranceCheckbox.stateChanged.connect(self.updateInterface)
+    self.doubleToleranceCheckbox.stateChanged.connect(self._updateInterface)
     doubleToleranceCheckboxLabel = Label(self.widget1, text="Double Tolerances ")
     self.filterLayout.addWidget(self.doubleToleranceCheckbox, 0, 1)
     self.filterLayout.addWidget(doubleToleranceCheckboxLabel, 0, 0)
 
     self.intraCheckbox = CheckBox(self.widget1, checked=False)
-    self.intraCheckbox.stateChanged.connect(self.updateInterface)
+    self.intraCheckbox.stateChanged.connect(self._updateInterface)
     intraCheckboxLabel = Label(self.widget1, text="Only Intra-residual ")
     self.filterLayout.addWidget(self.intraCheckbox, 0, 3)
     self.filterLayout.addWidget(intraCheckboxLabel, 0, 2)
 
     self.multiCheckbox = CheckBox(self.widget1, checked=True)
-    self.multiCheckbox.stateChanged.connect(self.updateInterface)
+    self.multiCheckbox.stateChanged.connect(self._updateInterface)
     multiCheckboxLabel = Label(self.widget1, text="Allow multiple peaks ")
     self.filterLayout.addWidget(self.multiCheckbox, 0, 5)
     self.filterLayout.addWidget(multiCheckboxLabel, 0, 4)
@@ -77,35 +77,37 @@ class AssignmentModule(CcpnDock, Base):
     self.filterLayout.addWidget(expCheckBoxLabel, 0, 6)
     self.filterLayout.addWidget(self.expCheckBox, 0, 7)
 
-    self.current.registerNotify(self.updateInterface, 'peaks')
-    self.updateInterface()
+    self.current.registerNotify(self._updateInterface, 'peaks')
+    self._updateInterface()
+
+    self.closeDock = self._closeDock
 
 
 
   # functions to create empty widgets
 
-  def createEmptyNmrAtomsTable(self, dim:int):
+  def _createEmptyNmrAtomsTable(self, dim:int):
     '''Create an empty table for the specified peak dimension to contain possible Nmr Atoms that
     can be assigned to that peak dimension.
 
     '''
 
     columns = [Column('NMR Atom', lambda nmrAtom: str(nmrAtom.id)),
-               Column('Shift', lambda nmrAtom: self.getShift(nmrAtom)),
+               Column('Shift', lambda nmrAtom: self._getShift(nmrAtom)),
                Column('Delta', lambda nmrAtom: self.getDeltaShift(nmrAtom, dim))]
 
     objectTable = ObjectTable(self, columns,
-                              actionCallback=partial(self.assignNmrAtomToDim, dim),
+                              actionCallback=partial(self._assignNmrAtomToDim, dim),
                               objects=[])
 
     self.objectTables.append(objectTable)
 
-  def createEmptyListWidget(self, dim:int):
+  def _createEmptyListWidget(self, dim:int):
     """
     Creates an empty ListWidget to contain the dimensionNmrAtoms assigned to a peak dimension.
     """
-    listWidget = ListWidget(self, callback=partial(self.updateAssigmentWidget, dim),
-                            rightMouseCallback=self.updateNmrAtomsFromListWidgets)
+    listWidget = ListWidget(self, callback=partial(self._updateAssigmentWidget, dim),
+                            rightMouseCallback=self._updateNmrAtomsFromListWidgets)
 
     self.listWidgets.append(listWidget)
 
@@ -125,7 +127,7 @@ class AssignmentModule(CcpnDock, Base):
     self.labels.append(label)
 
 
-  def createAssignmentWidget(self, dim:int):
+  def _createAssignmentWidget(self, dim:int):
     """
     Creates an assignment widget consisting of three PulldownLists.
     """
@@ -134,11 +136,11 @@ class AssignmentModule(CcpnDock, Base):
     chainLabel = Label(self, 'Chain', hAlign='c')
     seqCodeLabel = Label(self, 'Sequence', hAlign='c')
     atomTypeLabel = Label(self, 'Atom', hAlign='c')
-    chainPulldown = self.createChainPulldown(dim)
-    seqCodePulldown = self.createSeqCodePulldown(dim)
-    atomTypePulldown = self.createAtomTypePulldown(dim)
-    applyButton = Button(self, 'New', callback=partial(self.createNewNmrAtom, dim))
-    self.reassignButton = Button(self, 'Assign', callback=partial(self.setAssignment, dim))
+    chainPulldown = self._createChainPulldown(dim)
+    seqCodePulldown = self._createSeqCodePulldown(dim)
+    atomTypePulldown = self._createAtomTypePulldown(dim)
+    applyButton = Button(self, 'New', callback=partial(self._createNewNmrAtom, dim))
+    self.reassignButton = Button(self, 'Assign', callback=partial(self._setAssignment, dim))
     newLayout.addWidget(chainLabel, 0, 0)
     newLayout.addWidget(chainPulldown, 0, 1)
     newLayout.addWidget(seqCodeLabel, 1, 0)
@@ -151,7 +153,7 @@ class AssignmentModule(CcpnDock, Base):
     self.assignmentWidgets.append(newAssignmentWidget)
 
 
-  def setAssignment(self, dim:int):
+  def _setAssignment(self, dim:int):
     """
     Assigns dimensionNmrAtoms to peak dimension when called using Assign Button in assignment widget.
     """
@@ -173,20 +175,20 @@ class AssignmentModule(CcpnDock, Base):
       allAtoms[dim] = dimNmrAtoms
       peak.dimensionNmrAtoms = allAtoms
 
-    self.updateInterface()
+    self._updateInterface()
 
 
-  def createChainPulldown(self, dim:int) -> PulldownList:
+  def _createChainPulldown(self, dim:int) -> PulldownList:
     """
     Creates a PulldownList for selection of NmrChains.
     """
     pulldownList = PulldownList(self)
     pulldownList.setEditable(True)
-    pulldownList.lineEdit().editingFinished.connect(partial(self.addItemToPulldown, pulldownList))
+    pulldownList.lineEdit().editingFinished.connect(partial(self._addItemToPulldown, pulldownList))
     self.chainPulldowns.append(pulldownList)
     return pulldownList
 
-  def createSeqCodePulldown(self, dim:int) -> PulldownList:
+  def _createSeqCodePulldown(self, dim:int) -> PulldownList:
     """
     Creates a PulldownList for selection of NmrResidue Sequence codes.
     """
@@ -196,7 +198,7 @@ class AssignmentModule(CcpnDock, Base):
     return pulldownList
 
 
-  def createAtomTypePulldown(self, dim:int) -> PulldownList:
+  def _createAtomTypePulldown(self, dim:int) -> PulldownList:
     """
     Creates a PulldownList for selection of atom types.
     """
@@ -206,12 +208,12 @@ class AssignmentModule(CcpnDock, Base):
     return pulldownList
 
 
-  def createEnoughTablesAndLists(self):
+  def _createEnoughTablesAndLists(self):
     '''Makes sure there are enough tables for the amount
        of dimensions of the currently selected peak(s).
        This method only runs when all peaks have the same
        amount of dimensions as is guaranteed by running
-       peaksAreCompatible.py
+       _peaksAreCompatible.py
 
     '''
 
@@ -220,16 +222,16 @@ class AssignmentModule(CcpnDock, Base):
 
     # Create extra tables if needed.
     for dim in range(len(self.objectTables), Ndimensions):
-      self.createEmptyNmrAtomsTable(dim)
+      self._createEmptyNmrAtomsTable(dim)
 
     for dim in range(len(self.listWidgets), Ndimensions):
-      self.createEmptyListWidget(dim)
+      self._createEmptyListWidget(dim)
 
     for dim in range(len(self.labels), Ndimensions):
       self.createEmptyWidgetLabel(dim)
 
     for dim in range(len(self.assignmentWidgets), Ndimensions):
-      self.createAssignmentWidget(dim)
+      self._createAssignmentWidget(dim)
 
     self.widgetItems = list(zip(self.labels[:Ndimensions], self.listWidgets[:Ndimensions],
                     self.assignmentWidgets[:Ndimensions], self.objectTables[:Ndimensions]))
@@ -255,27 +257,27 @@ class AssignmentModule(CcpnDock, Base):
       self.widgets.append(widget)
       self.selectionLayout.addWidget(widget, 0, self.widgetItems.index(pair))
     #
-    self.updateLayout(self.selectionLayout, Ndimensions)
+    self._updateLayout(self.selectionLayout, Ndimensions)
 
   # Update functions
 
 
-  def updateInterface(self, peaks:typing.List[Peak]=None):
+  def _updateInterface(self, peaks:typing.List[Peak]=None):
     """Updates the whole module, including recalculation
        of which nmrAtoms fit to the peaks.
 
     """
-    self.emptyAllTablesAndLists()
-    if not self.current.peaks or not self.peaksAreCompatible():
+    self._emptyAllTablesAndLists()
+    if not self.current.peaks or not self._peaksAreCompatible():
       return
-    self.createEnoughTablesAndLists()
-    self.updateTables()
-    self.updateAssignedNmrAtomsListwidgets()
-    self.updateWidgetLabels()
+    self._createEnoughTablesAndLists()
+    self._updateTables()
+    self._updateAssignedNmrAtomsListwidgets()
+    self._updateWidgetLabels()
 
 
 
-  def updateWidgetLabels(self):
+  def _updateWidgetLabels(self):
 
     Ndimensions = len(self.current.peak.position)
 
@@ -291,7 +293,7 @@ class AssignmentModule(CcpnDock, Base):
         label.setStyleSheet("border: 0px solid; color: #555d85;")
 
 
-  def updateTables(self):
+  def _updateTables(self):
     '''Updates the tables indicating the different assignment
        possibilities of the peak dimensions.
 
@@ -314,7 +316,7 @@ class AssignmentModule(CcpnDock, Base):
 
 
 
-  def updateAssignedNmrAtomsListwidgets(self):
+  def _updateAssignedNmrAtomsListwidgets(self):
     '''Update the listWidget showing which nmrAtoms
        are assigned to which peak dimensions. If multiple
        peaks are selected, only the assignment that they
@@ -333,7 +335,7 @@ class AssignmentModule(CcpnDock, Base):
         self.nmrAtoms = list(sorted(set.intersection(*ll)))
         listWidget.addItems([str(a.pid) for a in self.nmrAtoms])
 
-  def updateNmrAtomsFromListWidgets(self):
+  def _updateNmrAtomsFromListWidgets(self):
 
     assignmentArray = [0] * len(self.listWidgets)
     for listWidget in self.listWidgets:
@@ -343,7 +345,7 @@ class AssignmentModule(CcpnDock, Base):
 
     self.current.peak.dimensionNmrAtoms = assignmentArray
 
-  def updateLayout(self, layout:QtGui.QLayout, ndim:int):
+  def _updateLayout(self, layout:QtGui.QLayout, ndim:int):
     """
     Remove excess assignment widgets if number of dimensions is less than number of assignment
     widgets displayed.
@@ -361,7 +363,7 @@ class AssignmentModule(CcpnDock, Base):
         layout.removeItem(item)
 
 
-  def updateAssigmentWidget(self, dim:int, item:object):
+  def _updateAssigmentWidget(self, dim:int, item:object):
     """
     Update all information in assignment widget when NmrAtom is selected in list widget of that
     assignment widget.
@@ -381,7 +383,7 @@ class AssignmentModule(CcpnDock, Base):
     self.atomTypePulldowns[dim].setIndex(self.atomTypePulldowns[dim].texts.index(nmrAtom.name))
 
 
-  def setResidueType(self, dim:int, index:int):
+  def _setResidueType(self, dim:int, index:int):
     """
     Set residue type in assignment widget based on chain and sequence code.
     """
@@ -392,7 +394,7 @@ class AssignmentModule(CcpnDock, Base):
 
 
 
-  def addItemToPulldown(self, pulldown:object):
+  def _addItemToPulldown(self, pulldown:object):
     """
     Generic function to add items to pulldown list if text in pulldown list widget is changed
     """
@@ -423,7 +425,7 @@ class AssignmentModule(CcpnDock, Base):
     average = sum(deltas)/len(deltas)
     return '%6.3f' % average
 
-  def getShift(self, nmrAtom:NmrAtom) -> float:
+  def _getShift(self, nmrAtom:NmrAtom) -> float:
     """
     Calculation of chemical shift value to add to the table.
     """
@@ -441,7 +443,7 @@ class AssignmentModule(CcpnDock, Base):
           return '%8.3f' % shift.value
 
 
-  def peaksAreCompatible(self) -> bool:
+  def _peaksAreCompatible(self) -> bool:
     """
     If multiple peaks are selected, a check is performed
     to determine whether assignment of corresponding
@@ -465,7 +467,7 @@ class AssignmentModule(CcpnDock, Base):
     return True
 
 
-  def emptyAllTablesAndLists(self):
+  def _emptyAllTablesAndLists(self):
     """
     Quick erase of all present information in ListWidgets and ObjectTables.
     """
@@ -476,7 +478,7 @@ class AssignmentModule(CcpnDock, Base):
       listWidget.clear()
 
 
-  def createNewNmrAtom(self, dim):
+  def _createNewNmrAtom(self, dim):
     isotopeCode = self.current.peak.peakList.spectrum.isotopeCodes[dim]
     nmrAtom = self.project.fetchNmrChain(shortName=defaultNmrChainCode
                                            ).newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)
@@ -488,11 +490,11 @@ class AssignmentModule(CcpnDock, Base):
         axisCode = peak.peakList.spectrum.axisCodes[dim]
         peak.assignDimension(axisCode, newAssignments)
     self.listWidgets[dim].addItem(nmrAtom.pid)
-    self.updateTables()
+    self._updateTables()
 
 
 
-  def assignNmrAtomToDim(self, dim:int, row:int=None, col:int=None, obj:object=None):
+  def _assignNmrAtomToDim(self, dim:int, row:int=None, col:int=None, obj:object=None):
     '''Assign the nmrAtom that is double clicked to the
        the corresponding dimension of the selected
        peaks.
@@ -514,11 +516,11 @@ class AssignmentModule(CcpnDock, Base):
 
     self.listWidgets[dim].addItem(nmrAtom.pid)
 
-  def closeDock(self):
+  def _closeDock(self):
     """
     Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
     """
-    self.project._appBase.current.unRegisterNotify(self.updateInterface, 'peaks')
+    self.project._appBase.current.unRegisterNotify(self._updateInterface, 'peaks')
     self.close()
 
 class NotOnLine(object):

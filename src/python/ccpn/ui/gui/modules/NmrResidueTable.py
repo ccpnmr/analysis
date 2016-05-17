@@ -35,8 +35,8 @@ class NmrResidueTable(QtGui.QWidget, Base):
                ('Sequence','sequenceCode'),
                # ('Sequence',lambda nmrResidue: '%-8s' % nmrResidue.sequenceCode),
                ('Type', 'residueType'),
-               ('NmrAtoms', lambda nmrResidue: self.getNmrAtoms(nmrResidue)),
-               ('Peak count', lambda nmrResidue: '%3d ' % self.getNmrResiduePeaks(nmrResidue))]
+               ('NmrAtoms', lambda nmrResidue: self._getNmrAtoms(nmrResidue)),
+               ('Peak count', lambda nmrResidue: '%3d ' % self._getNmrResiduePeaks(nmrResidue))]
 
     tipTexts = ['NmrResidue serial number', 'Nmr Residue key',
                 'Sequence code of NmrResidue',  'Type of NmrResidue',
@@ -44,20 +44,20 @@ class NmrResidueTable(QtGui.QWidget, Base):
 
     self.nmrResidueTable = GuiTableGenerator(self, self.project.nmrChains, actionCallback=callback, columns=columns,
                                              selector=self.nmrChainPulldown, tipTexts=tipTexts, objectType='nmrResidues',
-                                             selectionCallback=self.setNmrResidue)
+                                             selectionCallback=self._setNmrResidue)
 
     self.layout().addWidget(self.nmrResidueTable, 1, 0, 1, 6)
 
 
-  def getNmrAtoms(self, nmrResidue):
+  def _getNmrAtoms(self, nmrResidue):
     return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms]),
                             key=CcpnSorting.stringSortKey))
 
-  def getNmrResiduePeaks(self, nmrResidue):
+  def _getNmrResiduePeaks(self, nmrResidue):
     l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks]
     return len(set(l1))
 
-  def setNmrResidue(self, nmrResidue, row, col):
+  def _setNmrResidue(self, nmrResidue, row, col):
     self.project._appBase.current.nmrResidue = nmrResidue
 
 

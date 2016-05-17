@@ -36,6 +36,7 @@ class NotesEditor(DropBase, CcpnDock):
     self.buttonBox = ButtonList(self, texts=['Save', 'Cancel'],
                                 callbacks=[self._saveNote, self._reject])
     widget.layout().addWidget(self.buttonBox, 3, 3, 1, 2)
+    self.processText = self._processText
     self.layout.addWidget(widget)
 
   def _setNoteName(self):
@@ -61,7 +62,7 @@ class NotesEditor(DropBase, CcpnDock):
     """
     self.close()
 
-  def processText(self, text, event):
+  def _processText(self, text, event):
     if not self.note:
       self.note = self.project.newNote()
     self.textBox.setText(text)

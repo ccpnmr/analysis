@@ -44,7 +44,7 @@ class SequenceModule(CcpnDock):
       self._addChainLabel(chain)
 
     self.setFixedHeight(2*self.widgetHeight)
-    self.scrollContents.setFixedHeight(2*self.widgetHeight)
+    # self.scrollContents.setFixedHeight(2*self.widgetHeight)
 
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):

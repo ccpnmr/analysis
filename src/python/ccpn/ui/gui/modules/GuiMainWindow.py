@@ -77,9 +77,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     GuiWindow.__init__(self)
     self.recordingMacro = False
-    self.setupWindow()
-    self.setupMenus()
-    self.initProject()
+    self._setupWindow()
+    self._setupMenus()
+    self._initProject()
     self.closeEvent = self._closeEvent
     self.connect(self, QtCore.SIGNAL('triggered()'), self._closeEvent)
 
@@ -90,9 +90,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.backupTimer = QtCore.QTimer()
     self.connect(self.backupTimer, QtCore.SIGNAL('timeout()'), self.backupProject)
     if self._appBase.preferences.general.autoBackupEnabled:
-      self.startBackupTimer()
+      self._startBackupTimer()
 
-  def initProject(self):
+  def _initProject(self):
     """
     Puts relevant information from the project into the appropriate places in the main window.
 
@@ -122,12 +122,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                             self._appBase.applicationVersion, revision,
                                             project.name))
 
-  def startBackupTimer(self):
-
+  def _startBackupTimer(self):
+    """
+    #CCPN INTERNAL - called in setBackupFrequency and toggleBackup methods of BackupPopup
+    and __init__ of this class.
+    """
     self.backupTimer.start(60000 * self._appBase.preferences.general.autoBackupFrequency)
 
-  def stopBackupTimer(self):
-
+  def _stopBackupTimer(self):
+    """
+    #CCPN INTERNAL - called in toggleBackup method of BackupPopup
+    """
     if self.backupTimer.isActive():
       self.backupTimer.stop()
 
@@ -135,7 +140,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     
     apiIo.backupProject(self._project._wrappedData.parent)
 
-  def setupWindow(self):
+  def _setupWindow(self):
     """
     Sets up SideBar, python console and splitters to divide up main window properly.
 
@@ -157,8 +162,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                     """)
 
     self.namespace = {'loadProject': self._appBase.loadProject,
-                      'newProject': self._appBase.newProject, 'loadData': self.loadData, 'application': self,
-                      'preferences': self._appBase.preferences, 'project': self._project, 'current': self._appBase.current}
+                      'newProject': self._appBase._newProject, 'loadData': self.loadData, 'application': self,
+                      'preferences': self._appBase.preferences, 'project': self._project, 'current': self._appBase.current,
+                      'undo': self.undo, 'redo': self.redo}
 
     self.pythonConsole = IpythonConsole(self, self.namespace, mainWindow=self)
 
@@ -167,14 +173,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.sideBar.setDragDropMode(self.sideBar.DragDrop)
     self.splitter3.addWidget(self.sideBar)
     self.splitter1.addWidget(self.splitter3)
-    self.sideBar.itemDoubleClicked.connect(self.raiseProperties)
+    self.sideBar.itemDoubleClicked.connect(self._raiseObjectProperties)
     self.splitter1.addWidget(self.dockArea)
     self.setCentralWidget(self.splitter1)
     self.statusBar().showMessage('Ready')
-    self.setShortcuts()
+    self._setShortcuts()
 
 
-  def setupMenus(self):
+  def _setupMenus(self):
     """
     Creates menu bar for main window and creates the appropriate menus according to the arguments
     passed at startup.
@@ -193,7 +199,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu = Menu("Help", self)
 
 
-    fileMenu.addAction(Action(self, "New", callback=self.newProject, shortcut='pn'))
+    fileMenu.addAction(Action(self, "New", callback=self._newProject, shortcut='pn'))
 
     fileMenu.addAction(Action(self, "Open ...", callback=self.loadAProject, shortcut="po"))
     self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
@@ -253,7 +259,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     moleculeMenu.addSeparator()
     moleculeMenu.addAction(Action(self, "Reference Chemical Shifts", callback=self.showRefChemicalShifts, shortcut='rc'))
 
-    macroMenu.addAction(Action(self, "Edit ...", callback=self.editMacro))
+    macroMenu.addAction(Action(self, "Edit ...", callback=self.showMacroEditor))
     macroMenu.addAction(Action(self, "New from Console ...", callback=self.newMacroFromConsole))
     macroMenu.addAction(Action(self, "New from Log ...", callback=self.newMacroFromLog))
     macroMenu.addAction(Action(self, "Record Macro ...", callback=self.startMacroRecord))
@@ -296,7 +302,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     tutorialsMenu.addAction(Action(self, "Backbone Tutorial", callback=self.showBackboneTutorial))
     helpMenu.addAction(Action(self, "Show Shortcuts", callback=self.showShortcuts))
     helpMenu.addAction(Action(self, "Show CcpNmr V3 Documentation", callback=self.showWrapperDocumentation))
-    helpMenu.addAction(Action(self, "Show API Documentation", callback=self.showApiDocumentation))
+    helpMenu.addAction(Action(self, "Show API Documentation", callback=self._showApiDocumentation))
     helpMenu.addSeparator()
     helpMenu.addAction(Action(self, "About CcpNmr V3 ...", callback=self.showAboutPopup))
     helpMenu.addAction(Action(self, "About CCPN ...", callback=self.showAboutCcpnPopup))
@@ -359,12 +365,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           
     return result
     
-  def newProject(self):
+  def _newProject(self):
     
     result = self._queryCloseProject(title='New Project', phrase='create a new')
     
     if result:
-      self._appBase.newProject()
+      self._appBase._newProject()
     
   def _showDocumentation(self, title, *args):
     
@@ -374,11 +380,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     newDock.addWidget(view)
     self.dockArea.addDock(newDock)
     
-  def showApiDocumentation(self):
+  def _showApiDocumentation(self):
     """Displays API documentation in a module."""
     self._showDocumentation("API Documentation", 'apidoc', 'api.html')
 
-  def showExptTypePopup(self):
+  def showExperimentTypePopup(self):
     """
     Displays experiment type popup.
     """
@@ -480,7 +486,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if projectDir:
         self._appBase.loadProject(projectDir)
 
-  def pickPeaks(self):
+  def showPeakPickPopup(self):
     """
     Displays Peak Picking Popup.
     """
@@ -494,7 +500,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     self.assigner = Assigner(project=self._project)
     if hasattr(self, 'bbModule'):
-      self.bbModule.connectAssigner(self.assigner)
+      self.bbModule._connectAssigner(self.assigner)
     if nextTo is not None:
       self.dockArea.addDock(self.assigner, position=position, relativeTo=nextTo)
     else:
@@ -503,7 +509,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.project._logger.info("application.showSequenceGraph()")
     return self.assigner
 
-  def raiseProperties(self, item):
+  def _raiseObjectProperties(self, item):
     """get object from Pid and dispatch call depending on type
 
     NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
@@ -750,7 +756,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.dockArea.addDock(self.pythonConsoleDock, 'bottom')
 
 
-  def editMacro(self):
+  def showMacroEditor(self):
     """
     Displays macro editor.
     """

@@ -59,10 +59,10 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     
     self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button)
 
-    self.fillToolBar()
+    self._fillToolBar()
     self.setAcceptDrops(True)
     if self._appBase.preferences.general.toolbarHidden:
-      GuiSpectrumDisplay.hideUtilToolBar(self)
+      GuiSpectrumDisplay._hideUtilToolBar(self)
 
 
   def addStrip(self) -> 'GuiStripNd':
@@ -84,11 +84,11 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """NBNB do we still need this?"""
     self.hideSystemSideLabel.show()
 
-  def fillToolBar(self):
+  def _fillToolBar(self):
     """
     Adds specific icons for Nd spectra to the spectrum utility toolbar.
     """
-    GuiSpectrumDisplay.fillToolBar(self)
+    GuiSpectrumDisplay._fillToolBar(self)
     
     spectrumUtilToolBar = self.spectrumUtilToolBar
     

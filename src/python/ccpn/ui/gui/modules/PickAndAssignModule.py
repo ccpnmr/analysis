@@ -25,15 +25,15 @@ class PickAndAssignModule(CcpnDock, Base):
     Base.__init__(self, **kw)
     self.project = project
     self.current = project._appBase.current
-    self.nmrResidueTable = NmrResidueTable(self.widget1, project=project, callback=self.goToPositionInModules, grid=(0, 0), gridSpan=(1, 5), stretch=(1, 1))
-    self.restrictedPickButton = Button(self.nmrResidueTable, text='Restricted Pick', callback=self.restrictedPick, grid=(0, 2))
-    self.assignSelectedButton = Button(self.nmrResidueTable, text='Assign Selected', callback=self.assignSelected, grid=(0, 3))
-    self.refreshButton = Button(self.nmrResidueTable, text='Refresh', callback=self.refresh, grid=(0, 4))
+    self.nmrResidueTable = NmrResidueTable(self.widget1, project=project, callback=self._goToPositionInModules, grid=(0, 0), gridSpan=(1, 5), stretch=(1, 1))
+    self.restrictedPickButton = Button(self.nmrResidueTable, text='Restricted Pick', callback=self._restrictedPick, grid=(0, 2))
+    self.assignSelectedButton = Button(self.nmrResidueTable, text='Assign Selected', callback=self._assignSelected, grid=(0, 3))
+    self.refreshButton = Button(self.nmrResidueTable, text='Refresh', callback=self._refresh, grid=(0, 4))
     self.settingsButton = Button(self.nmrResidueTable, icon='iconsNew/applications-system', grid=(0, 5), hPolicy='fixed', toggle=True)
-    self.settingsButton.toggled.connect(self.toggleWidget2)
+    self.settingsButton.toggled.connect(self._toggleWidget2)
     self.settingsButton.setChecked(False)
     displaysLabel = Label(self.widget2, 'Selected Displays', grid=(0, 0))
-    self.displaysPulldown = PulldownList(self.widget2, grid=(1, 0), callback=self.updateListWidget)
+    self.displaysPulldown = PulldownList(self.widget2, grid=(1, 0), callback=self._updateListWidget)
     self.displaysPulldown.setData([sd.pid for sd in project.spectrumDisplays])
     self.displayList = ListWidget(self.widget2, grid=(0, 1), gridSpan=(4, 1))
     self.displayList.addItem('<All>')
@@ -41,16 +41,16 @@ class PickAndAssignModule(CcpnDock, Base):
     self.scrollArea = ScrollArea(self.widget2, grid=(0, 2), gridSpan=(4, 4))
     self.spectrumSelectionWidget = SpectrumSelectionWidget(self.scrollArea, project, self.displayList)
     self.scrollArea.setWidget(self.spectrumSelectionWidget)
-    self.displayList.removeItem = self.removeListWidgetItem
+    self.displayList.removeItem = self._removeListWidgetItem
     self.refreshButton.hide()
 
-  def updateListWidget(self, item):
+  def _updateListWidget(self, item):
     if self.displayList.count() == 1 and self.displayList.item(0).text() == '<All>':
       self.displayList.takeItem(0)
     self.displayList.addItem(self.project.getByPid(item).pid)
     self.spectrumSelectionWidget.update()
 
-  def removeListWidgetItem(self):
+  def _removeListWidgetItem(self):
     self.displayList.takeItem(self.displayList.currentRow())
     if self.displayList.count() == 0:
       self.displayList.addItem('<All>')
@@ -58,16 +58,16 @@ class PickAndAssignModule(CcpnDock, Base):
 
 
 
-  def toggleWidget2(self):
+  def _toggleWidget2(self):
     if self.settingsButton.isChecked():
       self.widget2.show()
     else:
       self.widget2.hide()
 
-  def refresh(self):
+  def _refresh(self):
     pass
 
-  def assignSelected(self):
+  def _assignSelected(self):
     shiftDict = {}
     for atom in self.current.nmrResidue.nmrAtoms:
       shiftDict[atom.isotopeCode] = []
@@ -87,7 +87,7 @@ class PickAndAssignModule(CcpnDock, Base):
               peak.assignDimension(spectrum.axisCodes[ii], [shift[0]])
 
 
-  def restrictedPick(self, nmrResidue=None):
+  def _restrictedPick(self, nmrResidue=None):
 
     if nmrResidue:
       self.current.nmrResidue = nmrResidue
@@ -149,7 +149,7 @@ class PickAndAssignModule(CcpnDock, Base):
 
 
 
-  def goToPositionInModules(self, nmrResidue=None, row=None, col=None):
+  def _goToPositionInModules(self, nmrResidue=None, row=None, col=None):
     self.project._appBase.mainWindow.clearMarks()
     navigateToNmrResidue(self.project, nmrResidue, markPositions=True)
 
@@ -172,9 +172,10 @@ class SpectrumSelectionWidget(QtGui.QWidget, Base):
     self.refreshBox = CheckBox(self, grid=(0, 4))
     self.checkBoxLabel = Label(self, 'Auto Refresh', grid=(0, 5))
     self.displayList = displayList
+    self.update = self._update
     self.update()
 
-  def update(self):
+  def _update(self):
     rowCount = self.layout().rowCount()
     colCount = self.layout().columnCount()
 

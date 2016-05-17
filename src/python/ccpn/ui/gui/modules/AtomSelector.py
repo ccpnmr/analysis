@@ -58,40 +58,40 @@ class AtomSelector(CcpnDock):
     self.parent = parent
     self.current = self.parent._appBase.current
     self.project = project
-    self.current.registerNotify(self.predictAssignments, 'peaks')
+    self.current.registerNotify(self._predictAssignments, 'peaks')
     # self.current.registerNotify(self.predictAssignments, 'peaks')
     nmrResidueLabel = Label(self, 'Current NmrResidue', grid=(0, 0))
     self.currentNmrResidueLabel = Label(self, grid=(0, 1))
-    self.radioButton1 = RadioButton(self, grid=(0, 2), hAlign='r', callback=self.createBackBoneButtons)
+    self.radioButton1 = RadioButton(self, grid=(0, 2), hAlign='r', callback=self._createBackBoneButtons)
     self.radioButton1.setChecked(True)
     self.label1 = Label(self, 'Backbone', grid=(0, 3), hAlign='l')
-    self.radioButton2 = RadioButton(self, grid=(0, 4), hAlign='r', callback=self.createSideChainButtons)
+    self.radioButton2 = RadioButton(self, grid=(0, 4), hAlign='r', callback=self._createSideChainButtons)
     self.label2 = Label(self, 'Side chain', grid=(0, 5), hAlign='l')
     self.molTypeLabel = Label(self, 'Molecule Type', grid=(0, 6))
     self.molTypePulldown = PulldownList(self, grid=(0, 7))
     self.molTypePulldown.setData(['protein', 'DNA', 'RNA', 'carbohydrate', 'other'])
     self.layout.addWidget(self.pickAndAssignWidget, 1, 0, 3, 8)
-    self.current.registerNotify(self.updateWidget, 'nmrResidues')
-
+    self.current.registerNotify(self._updateWidget, 'nmrResidues')
+    self.closeDock = self._closeDock
     self.buttons = {}
     
-  def closeDock(self):
-    self.current.unRegisterNotify(self.predictAssignments, 'peaks')
-    self.current.unRegisterNotify(self.updateWidget, 'nmrResidues')
+  def _closeDock(self):
+    self.current.unRegisterNotify(self._predictAssignments, 'peaks')
+    self.current.unRegisterNotify(self._updateWidget, 'nmrResidues')
     self.close()
 
-  def updateWidget(self, nmrResidues=None):
+  def _updateWidget(self, nmrResidues=None):
     self.currentNmrResidueLabel.setText(nmrResidues[0].id)
     if self.radioButton1.isChecked():
-      self.createBackBoneButtons()
+      self._createBackBoneButtons()
     elif self.radioButton2.isChecked():
-      self.createSideChainButtons()
+      self._createSideChainButtons()
     else:
       return
 
 
-  def createBackBoneButtons(self):
-    self.cleanupPickAndAssignWidget()
+  def _createBackBoneButtons(self):
+    self._cleanupPickAndAssignWidget()
     headerLabel = Label(self, text='i-1')
     self.pickAndAssignWidget.layout().addWidget(headerLabel, 0, 0)
     headerLabel2 = Label(self.pickAndAssignWidget, text='i', grid=(0, 1))
@@ -100,9 +100,9 @@ class AtomSelector(CcpnDock):
     atoms = ['H', 'N', 'CA', 'CB', 'CO', 'HA', 'HB']
     for ii, atom in enumerate(atoms):
       self.buttons[atom] = []
-      button1 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 0), callback=partial(self.pickAndAssign, '-1', atom))
-      button2 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 1), callback=partial(self.pickAndAssign, '', atom))
-      button3 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 2), callback=partial(self.pickAndAssign, '+1', atom))
+      button1 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 0), callback=partial(self._pickAndAssign, '-1', atom))
+      button2 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 1), callback=partial(self._pickAndAssign, '', atom))
+      button3 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 2), callback=partial(self._pickAndAssign, '+1', atom))
       self.buttons[atom].append(button1)
       self.buttons[atom].append(button2)
       self.buttons[atom].append(button3)
@@ -113,31 +113,31 @@ class AtomSelector(CcpnDock):
 
 
 
-  def createSideChainButtons(self):
-    self.cleanupPickAndAssignWidget()
-    self.hCheckBox = CheckBox(self.pickAndAssignWidget, hAlign='r', callback=self.toggleBox)
+  def _createSideChainButtons(self):
+    self._cleanupPickAndAssignWidget()
+    self.hCheckBox = CheckBox(self.pickAndAssignWidget, hAlign='r', callback=self._toggleBox)
     self.hCheckBox.setChecked(True)
     self.pickAndAssignWidget.layout().addWidget(self.hCheckBox, 0, 0, QtCore.Qt.AlignRight)
     self.hLabel = Label(self.pickAndAssignWidget, 'H', grid=(0, 1), hAlign='l')
-    self.cCheckBox = CheckBox(self.pickAndAssignWidget, grid=(0, 2), hAlign='r', callback=self.toggleBox)
+    self.cCheckBox = CheckBox(self.pickAndAssignWidget, grid=(0, 2), hAlign='r', callback=self._toggleBox)
     self.cCheckBox.setChecked(True)
     self.cLabel = Label(self.pickAndAssignWidget, 'C', grid=(0, 3), hAlign='l')
-    self.nCheckBox = CheckBox(self.pickAndAssignWidget, grid=(0, 4), hAlign='r', callback=self.toggleBox)
+    self.nCheckBox = CheckBox(self.pickAndAssignWidget, grid=(0, 4), hAlign='r', callback=self._toggleBox)
     self.nLabel = Label(self.pickAndAssignWidget, 'N', grid=(0, 5), hAlign='l')
     self.nCheckBox.setChecked(True)
-    self.otherCheckBox = CheckBox(self.pickAndAssignWidget, grid=(0, 6), hAlign='r', callback=self.toggleBox)
+    self.otherCheckBox = CheckBox(self.pickAndAssignWidget, grid=(0, 6), hAlign='r', callback=self._toggleBox)
     self.otherLabel = Label(self.pickAndAssignWidget, 'Other', grid=(0, 7), hAlign='l')
 
-    self.updateLayout()
+    self._updateLayout()
 
 
-  def toggleBox(self):
-    self.updateLayout()
+  def _toggleBox(self):
+    self._updateLayout()
 
-  def getAtomsForButtons(self, atomList, atomName):
+  def _getAtomsForButtons(self, atomList, atomName):
     [atomList.remove(atom) for atom in sorted(atomList) if atom[0] == atomName]
 
-  def updateLayout(self):
+  def _updateLayout(self):
 
     # group atoms in useful categories based on usage
 
@@ -156,13 +156,13 @@ class AtomSelector(CcpnDock):
                       epsilonAtoms, moreEpsilonAtoms, zetaAtoms, etaAtoms, moreEtaAtoms]
     # Activate button for Carbons
     if not self.cCheckBox.isChecked():
-      [self.getAtomsForButtons(atomList, 'C') for atomList in atomButtonList]
+      [self._getAtomsForButtons(atomList, 'C') for atomList in atomButtonList]
 
     if not self.hCheckBox.isChecked():
-      [self.getAtomsForButtons(atomList, 'H') for atomList in atomButtonList]
+      [self._getAtomsForButtons(atomList, 'H') for atomList in atomButtonList]
 
     if not self.nCheckBox.isChecked():
-      [self.getAtomsForButtons(atomList, 'N') for atomList in atomButtonList]
+      [self._getAtomsForButtons(atomList, 'N') for atomList in atomButtonList]
 
     rowCount = self.pickAndAssignWidget.layout().rowCount()
     colCount = self.pickAndAssignWidget.layout().columnCount()
@@ -181,7 +181,7 @@ class AtomSelector(CcpnDock):
         for ii, atomList in enumerate(atomButtonList):
 
           for jj, atom in enumerate(atomList):
-            button = Button(self.pickAndAssignWidget, text=atom, grid=(ii+1, jj), hAlign='t', callback=partial(self.pickAndAssign, '0', atom))
+            button = Button(self.pickAndAssignWidget, text=atom, grid=(ii+1, jj), hAlign='t', callback=partial(self._pickAndAssign, '0', atom))
             button.setMinimumSize(45, 20)
 
 
@@ -205,17 +205,17 @@ class AtomSelector(CcpnDock):
         for ii, atomList in enumerate(atomButtonList2):
           for jj, atom in enumerate(atomList):
             self.buttons[atom] = []
-            button = Button(self.pickAndAssignWidget, text=atom, grid=(ii+1, jj), hAlign='t', callback=partial(self.pickAndAssign, '0', atom))
+            button = Button(self.pickAndAssignWidget, text=atom, grid=(ii+1, jj), hAlign='t', callback=partial(self._pickAndAssign, '0', atom))
             button.setMinimumSize(45, 20)
             self.buttons[atom].append(button)
 
-  def showMoreAtomButtons(self, buttons, moreButton):
+  def _showMoreAtomButtons(self, buttons, moreButton):
     if moreButton.isChecked():
       [button.show() for button in buttons]
     else:
       [button.hide() for button in buttons]
 
-  def cleanupPickAndAssignWidget(self):
+  def _cleanupPickAndAssignWidget(self):
 
     layout = self.pickAndAssignWidget.layout()
     for r in range(layout.rowCount()):
@@ -227,7 +227,7 @@ class AtomSelector(CcpnDock):
         layout.removeItem(item)
 
 
-  def pickAndAssign(self, position:int, atomType:str):
+  def _pickAndAssign(self, position:int, atomType:str):
     """
     Takes a position either -1, 0 or +1 and an atom type, fetches an NmrAtom with name corresponding
     to the atom type and the position and assigns it to correct dimension of current.peaks
@@ -285,7 +285,7 @@ class AtomSelector(CcpnDock):
       self.setStyleSheet(styleSheet)
 
 
-  def predictAssignments(self, peaks:typing.List[Peak]):
+  def _predictAssignments(self, peaks:typing.List[Peak]):
     """
     Predicts atom type for selected peaks and highlights the relevant buttons with confidence of
     that assignment prediction, green is very confident, orange is less confident.

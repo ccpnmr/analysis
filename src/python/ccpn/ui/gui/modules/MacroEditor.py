@@ -27,14 +27,14 @@ class MacroEditor(DropBase, CcpnDock):
     widget.setLayout(widgetLayout)
     self.label1 = Label(self, 'Macro Name')
     self.lineEdit1 = LineEdit(self)
-    self.button = Button(self, '...', callback=self.openMacroFile)
+    self.button = Button(self, '...', callback=self._openMacroFile)
     widget.layout().addWidget(self.label1, 0, 0, 1, 1)
     widget.layout().addWidget(self.lineEdit1, 0, 1, 1, 3)
     widget.layout().addWidget(self.button, 0, 4, 1, 1)
     widget.layout().addWidget(self.textBox, 2, 0, 1, 5)
     # if self.note.text is not None:
     self.buttonBox = ButtonList(self, texts=['Start', 'Stop', 'Close', 'Save Macro'],
-            callbacks=[self.startMacroRecord, self.stopMacroRecord, self._reject, self.saveMacro])
+                                callbacks=[self._startMacroRecord, self._stopMacroRecord, self._reject, self._saveMacro])
     widget.layout().addWidget(self.buttonBox, 3, 3, 1, 2)
     self.layout.addWidget(widget)
     self.buttonBox.buttons[1].setDisabled(True)
@@ -45,13 +45,13 @@ class MacroEditor(DropBase, CcpnDock):
       self.buttonBox.buttons[1].hide()
 
 
-  def saveMacro(self):
+  def _saveMacro(self):
     """
     Saves the text inside the textbox to a file, if a file path is not specified, a save file dialog
     appears for specification of the file path.
     """
     if self.lineEdit1.text() == '':
-      self.saveMacroAs()
+      self._saveMacroAs()
     else:
       with open(self.lineEdit1.text(), 'w') as f:
         f.write(self.textBox.toPlainText())
@@ -60,7 +60,7 @@ class MacroEditor(DropBase, CcpnDock):
     # newText = self.textBox.toPlainText()
     # self.macroFile.write(newText)
 
-  def saveMacroAs(self):
+  def _saveMacroAs(self):
     """
     Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
     """
@@ -78,7 +78,7 @@ class MacroEditor(DropBase, CcpnDock):
       f.close()
 
 
-  def openMacroFile(self):
+  def _openMacroFile(self):
     """
     Opens a file dialog box at the macro path specified in the application preferences and loads the
     contents of the macro file into the textbox.
@@ -94,7 +94,7 @@ class MacroEditor(DropBase, CcpnDock):
 
     self.lineEdit1.setText(filePath)
 
-  def startMacroRecord(self):
+  def _startMacroRecord(self):
     """
     Starts recording of a macro from commands performed in the software and output to the console.
     """
@@ -103,7 +103,7 @@ class MacroEditor(DropBase, CcpnDock):
     self.buttonBox.buttons[0].setDisabled(True)
 
 
-  def stopMacroRecord(self):
+  def _stopMacroRecord(self):
     """
     Stops macro recording.
     """

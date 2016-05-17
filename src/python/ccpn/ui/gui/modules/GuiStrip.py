@@ -283,7 +283,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     direction = phasingFrame.getDirection()
     position = self.mousePosition[0] if direction == 0 else self.mousePosition[1]
     phasingFrame.pivotEntry.set(position)
-    self.updatePivot()
+    self._updatePivot()
       
   def removePhasingTraces(self):
     
@@ -297,7 +297,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
   """
   
-  def updatePivot(self): # this is called if pivot entry at bottom of display is updated and then "return" key used
+  def _updatePivot(self): # this is called if pivot entry at bottom of display is updated and then "return" key used
   
     phasingFrame = self.spectrumDisplay.phasingFrame
     position = phasingFrame.pivotEntry.get()
@@ -348,7 +348,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       self.vPhasingPivot.setVisible(True)
       
     for spectrumView in self.spectrumViews:
-      spectrumView.changedPhasingDirection()
+      spectrumView._changedPhasingDirection()
       
   def updatePhasing(self):
     #colour = '#ffffff' if self.background == 'k' else '#000000'
@@ -356,7 +356,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.hPhasingPivot.setPen({'color': colour})
     self.vPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:
-      spectrumView.updatePhasing()
+      spectrumView._updatePhasing()
       
   def updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
@@ -535,7 +535,11 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # TBD: the naive approach below should be improved
     return axisCode #if axisCode[0].isupper() else axisCode
       
-  def setCrossHairPosition(self, axisPositionDict):
+  def _setCrossHairPosition(self, axisPositionDict):
+    """
+    # CCPN INTERNAL
+    Called in _setCrossHairPosition method of GuiSpectrumDisplay
+    """
     axes = self.orderedAxes
     position = axisPositionDict.get(self._crosshairCode(axes[0].code))
     position2 = axisPositionDict.get(self._crosshairCode(axes[1].code))
@@ -630,7 +634,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
         position.append(pos)
       self.mousePosition = tuple(position) # position is in ppm
       for window in self._project.windows:
-        window.setCrossHairPosition(axisPositionDict)
+        window._setCrossHairPosition(axisPositionDict)
       ###self.vLine.setPos(mousePoint.x())
       ###self.hLine.setPos(mousePoint.y())
       ###for vLine in self.guiSpectrumDisplay._appBase.vLines:

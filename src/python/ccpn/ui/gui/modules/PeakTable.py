@@ -45,16 +45,17 @@ class PeakTable(CcpnDock):
     self.peakList = PeakListSimple(self, project, selectedList=selectedList)
     self.layout.addWidget(self.peakList)
     self.current = project._appBase.current
-    self.current.registerNotify(self.peakList.selectPeakInTable, 'peaks')
+    self.current.registerNotify(self.peakList._selectPeakInTable, 'peaks')
+    self.closeDock = self._closeDock
     if self.current.strip:
       peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
       self.peakList.peakListPulldown.setCurrentIndex(self.peakList.peakListPulldown.findText(peakList.pid))
 
-  def closeDock(self):
+  def _closeDock(self):
     """
     Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
     """
-    self.current.unRegisterNotify(self.peakList.selectPeakInTable, 'peaks')
+    self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peaks')
     self.close()
 
 
@@ -86,21 +87,21 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     widget1.layout().addWidget(self.peakListPulldown, 0, 1)
     self.layout().addWidget(widget1, 0, 0)
     if callback is None:
-      callback=self.selectPeak
+      callback=self._selectPeak
 
     widget2 = QtGui.QWidget(self)
     l2 = QtGui.QGridLayout()
     widget2.setLayout(l2)
     label = Label(self, ' Position Unit:')
     widget2.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
-    self.posUnitPulldown = PulldownList(self, texts=UNITS, callback=self.refreshTable)
+    self.posUnitPulldown = PulldownList(self, texts=UNITS, callback=self._refreshTable)
     widget2.layout().addWidget(self.posUnitPulldown , 0, 1, QtCore.Qt.AlignLeft)
     self.layout().addWidget(widget2, 0, 1)
 
     self.subtractPeakListsButton = Button(self, text='Subtract PeakLists',
-                                          callback=self.subtractPeakLists)
+                                          callback=self._subtractPeakLists)
 
-    self.deletePeakButton = Button(self, 'Delete Selected', callback=self.deleteSelectedPeaks)
+    self.deletePeakButton = Button(self, 'Delete Selected', callback=self._deleteSelectedPeaks)
     self.widget3 = QtGui.QWidget(self)
     l3 = QtGui.QGridLayout()
     self.widget3.setLayout(l3)
@@ -108,15 +109,15 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.widget3.layout().addWidget(self.deletePeakButton, 0, 1)
     self.layout().addWidget(self.widget3, 0, 6, 1, 2)
 
-    columns = [('#', 'serial'), ('Height', lambda pk: self.getPeakHeight(pk)),
-               ('Volume', lambda pk: self.getPeakVolume(pk))]
+    columns = [('#', 'serial'), ('Height', lambda pk: self._getPeakHeight(pk)),
+               ('Volume', lambda pk: self._getPeakVolume(pk))]
 
     tipTexts=['Peak serial number',
               'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
               'Integral of spectrum intensity around peak location, according to chosen volume method',
               'Textual notes about the peak']
 
-    self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, actionCallback=callback, selectionCallback=self.selectPeak,
+    self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, actionCallback=callback, selectionCallback=self._selectPeak,
                                        columns=columns, selector=self.peakListPulldown,
                                        tipTexts=tipTexts, multiSelect=True, unitPulldown=self.posUnitPulldown)
 
@@ -124,7 +125,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     if selectedList is not None:
       self.peakListPulldown.setCurrentIndex(self.peakListPulldown.findText(selectedList.pid))
 
-  def subtractPeakLists(self):
+  def _subtractPeakLists(self):
     """
     Subtracts a selected peak list from the peak list currently displayed in the peak table and
     produces a new peak list attached to the spectrum of the selected peak list.
@@ -138,40 +139,40 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     selectPeakListPopup = SelectObjectsPopup(self, project=self.project, objects=availablePeakLists)
     selectPeakListPopup.exec_()
     for peakList in self.objects:
-      peakList1.subtractPeakLists(self.project.getByPid(peakList))
-    self.peakTable.updateSelectorContents()
+      peakList1._subtractPeakLists(self.project.getByPid(peakList))
+    self.peakTable._updateSelectorContents()
 
-  def deleteSelectedPeaks(self):
+  def _deleteSelectedPeaks(self):
 
     for peakObject in self.peakTable.table.getSelectedObjects():
       peakObject.delete()
     self.peakTable.updateTable()
 
 
-  def selectPeak(self, peak:Peak, row:int, col:int):
+  def _selectPeak(self, peak:Peak, row:int, col:int):
     """
     Sets current.peak to selected peak.
     """
     if not peak:
       return
     else:
-      self.project._appBase.current.unRegisterNotify(self.selectPeakInTable, 'peaks')
+      self.project._appBase.current.unRegisterNotify(self._selectPeakInTable, 'peaks')
       self.project._appBase.current.peak = peak
-      self.project._appBase.current.registerNotify(self.selectPeakInTable, 'peaks')
+      self.project._appBase.current.registerNotify(self._selectPeakInTable, 'peaks')
 
-  def getPeakVolume(self, peak:Peak):
+  def _getPeakVolume(self, peak:Peak):
     """
     Returns the volume of the specified peak.
     """
     if peak.volume:
       return '%7.2E' % float(peak.volume*peak.peakList.spectrum.scale)
 
-  def selectPeakInTable(self, peaks=None):
+  def _selectPeakInTable(self, peaks=None):
     peakList = self.project.getByPid(self.peakListPulldown.currentText())
     if peaks and peaks[-1] in peakList.peaks:
       self.peakTable.table.selectObject(peaks[-1])
 
-  def getPeakHeight(self, peak:Peak):
+  def _getPeakHeight(self, peak:Peak):
     """
     Returns the height of the specified peak.
     """
@@ -179,8 +180,8 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
       return '%7.2E' % float(peak.height*peak.peakList.spectrum.scale)
 
 
-  def refreshTable(self, item):
-    self.peakTable.updateContents()
+  def _refreshTable(self, item):
+    self.peakTable._updateContents()
 
 
 

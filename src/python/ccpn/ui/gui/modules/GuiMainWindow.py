@@ -240,7 +240,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.metabolomicsMenu.addAction(Action(self, 'Spectrum Groups ...', callback=self.showSpectrumGroupModule))
 
     spectrumMenu.addAction(Action(self, "Spectrum Groups ...", callback=self.showProjectionPopup, shortcut='ss'))
-    spectrumMenu.addAction(Action(self, "Set Experiment Types ...", callback=self.showExptTypePopup, shortcut='et'))
+    spectrumMenu.addAction(Action(self, "Set Experiment Types ...", callback=self.showExperimentTypePopup, shortcut='et'))
     spectrumMenu.addSeparator()
     spectrumMenu.addAction(Action(self, "Pick Peaks ...", callback=self.pickPeaks, shortcut='pp'))
     spectrumMenu.addAction(Action(self, 'Integration', callback=self.showIntegrationModule, shortcut='it'))

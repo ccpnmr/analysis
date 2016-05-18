@@ -2,7 +2,10 @@
 from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.util.Translation import translator
+try:
+  from ccpn.util.Translation import translator
+except ImportError:
+  from ccpn.framework.Translation import translator
 
 
 

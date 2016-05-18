@@ -1,16 +1,15 @@
 __author__ = 'TJ'
 
 from ccpn.core.lib.Version import applicationVersion
-from ccpn.ui.gui.AppBase import defineProgramArguments, AppBase
+from ccpn.framework.Framework import defineProgramArguments, Framework
 
 applicationName = 'Metabolomics'
 
 
-class Metabolomics(AppBase):
-  """Root class for Assign application"""
-
+class Metabolomics(Framework):
+  """Root class for Metabolomics application"""
   def __init__(self, applicationName, applicationVersion, commandLineArguments):
-    AppBase.__init__(self, applicationName, applicationVersion, commandLineArguments)
+    Framework.__init__(self, applicationName, applicationVersion, commandLineArguments)
     self.components.add('Metabolomics')
 
 

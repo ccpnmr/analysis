@@ -24,7 +24,10 @@ __version__ = "$Revision$"
 from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.util.Translation import translator
+try:
+  from ccpn.util.Translation import translator
+except ImportError:
+  from ccpn.framework.Translation import translator
 
 class Action(QtGui.QAction, Base):
   def __init__(self, parent, text, callback=None, shortcut=None, checked=True, checkable=False, icon=None, **kw):

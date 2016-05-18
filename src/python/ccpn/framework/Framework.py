@@ -1,10 +1,7 @@
-"""Module Documentation here
-"""
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Simon P Skinner & Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license "
               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
@@ -14,9 +11,9 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: rhfogh $"
+__date__ = "$Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
+__version__ = "$Revision: 9320 $"
 
 #=========================================================================================
 # Start of code
@@ -53,11 +50,11 @@ from ccpn.ui.gui.Current import Current
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 
 # The following must be there even though the import is not used in this file.
-from ccpn.ui.gui.widgets import resources_rc
+# from ccpn.ui.gui.widgets import resources_rc
 
 componentNames = ('Assignment', 'Screening', 'Structure')
 
-def printProgramText(fp, programName, version):
+def printCreditsText(fp, programName, version):
   """Initial text to terminal """
 
   lines = []
@@ -75,38 +72,6 @@ def printProgramText(fp, programName, version):
   for line in lines:
   	fp.write('|   %s ' % line + ' ' * (maxlen-len(line)) + '  |\n')
   fp.write('%s\n' % ('=' * (maxlen+8)))
-
-
-class SplashScreen(QtGui.QSplashScreen):
-
-  def __init__(self, dummy=None, wait=1):
-
-      splashPng = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                               'ccpnmr-splash-screen.jpg')
-      #print(splashPng)
-      pixmap = QtGui.QPixmap(splashPng)
-      #super(QtGui.QSplashScreen, self).__init__(pixmap, QtCore.Qt.WindowStaysOnTopHint)
-      QtGui.QSplashScreen.__init__(self, pixmap, QtCore.Qt.WindowStaysOnTopHint)
-
-      self.show()
-
-      # dummy window; to have something going
-      if dummy:
-        self.w = QtGui.QWidget()
-        self.w.resize(dummy[0],dummy[1])
-        self.w.show()
-
-      self.wait = wait
-
-  def info(self, text):
-      self.showMessage(text, color=QtCore.Qt.white, alignment = QtCore.Qt.AlignBottom)
-
-  def close(self):
-      import time
-      time.sleep(self.wait)
-      if hasattr(self,'w'):
-          self.w.close()
-      super(QtGui.QSplashScreen, self).close()
 
 
 def defineProgramArguments():
@@ -129,41 +94,56 @@ def defineProgramArguments():
   return parser
 
 
-class AppBase(GuiBase):
-  """The AppBase class forms the basis class for all applications
+class Framework:#
+  """
+  The Framework class is the base class for all applications
+  It's currently broken, so don't use this if you want your application to actually work!
   """
 
   def __init__(self, applicationName, applicationVersion, args):
+
     GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
-    # print some output to the screen
-    printProgramText(sys.stderr, applicationName, applicationVersion)
+    self.args = args
     self.applicationName = applicationName
     self.applicationVersion = applicationVersion
 
-    # components
-    self.components = set()
-    for component in componentNames:
-      if getattr(args, 'include'+component):
-        self.components.add(component)
+    printCreditsText(sys.stderr, applicationName, applicationVersion)
 
-    # retain arguments
-    self.args = args
+    self.setupComponents(args)
 
     self.useFileLogger = not self.args.nologging
 
-    self.project = None
     self.current = None
 
     self.gui = None  # No gui app so far
     # Necessary as attribute is queried during initialisation:
     self.mainWindow = None
 
+    self._getUserPrefs()
+
+    self._setLanguage()
+
+    # Currently, we have to have a GUI running for the wrapper to create GuiMainWindow.
+    self.ui = self.gui = self._setupUI()
+
+
+
+  def setupComponents(self, args):
+    # components (for menus)
+    self.components = set()
+    for component in componentNames:
+      if getattr(args, 'include' + component):
+        self.components.add(component)
+
+
+  def _getUserPrefs(self):
     # user preferences
     if not self.args.skipUserPreferences:
       sys.stderr.write('==> Getting user preferences\n')
     self.preferences = getPreferences(self.args.skipUserPreferences)
 
+  def _setLanguage(self):
     # Language, check for command line override, or use preferences
     if self.args.language:
       language = self.args.language
@@ -171,13 +151,16 @@ class AppBase(GuiBase):
       language = self.preferences.general.language
     if not translator.setLanguage(language):
       self.preferences.general.language = language
-    #translator.setDebug(True)
+    # translator.setDebug(True)
     sys.stderr.write('==> Language set to "%s"\n' % translator._language)
+
 
   def isRegistered(self):
     """return True if registered"""
+    return True
     self.registrationDict = Register.loadDict()
     return not Register.isNewRegistration(self.registrationDict)
+
 
   def register(self):
     """
@@ -199,29 +182,26 @@ class AppBase(GuiBase):
     Register.updateServer(self.registrationDict, self.applicationVersion)
     return False
 
+
+  def _setupUI(self):
+    gui = Application(self.applicationName, self.applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk')
+    gui.setStyleSheet(getStyleSheet(self.preferences))
+    return gui
+
+
   def start(self):
     """Start the program execution"""
 
-    # On the Mac (at least) it does not matter what you set the applicationName to be,
-    # it will come out as the executable you are running (e.g. "python3")
-    self.gui = Application(self.applicationName, self.applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk')
-    self.gui.setStyleSheet(getStyleSheet(self.preferences))
+    project = self.initProject()
 
-    # checking the registration; need to have the app running, but before the splashscreen, as it will hang
-    # in case the popup is needed.
-    # We want to give some feedback; sometimes this takes a while (e.g. poor internet)
-    sys.stderr.write('==> Checking registration ... \n')
-    sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
-    if not self.isRegistered() and self.register():
-        sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
-        sys.exit(1)
-    sys.stderr.write('==> Registered to: %s (%s)\n' %
-                     (self.registrationDict['name'], self.registrationDict['organisation']))
+    sys.stderr.write('==> Done, %s is starting\n' % self.applicationName )
 
-    # show splash screen
-    splash = SplashScreen()
-    self.gui.processEvents()  # needed directly after splashScreen show to show something
+    # Need to add back in registration
 
+    self.gui.start()
+
+
+  def initProject(self):
     # load user-specified project or default if not specified
     if self.args.projectPath:
       sys.stderr.write('==> Loading "%s" project\n' % self.args.projectPath)
@@ -235,15 +215,6 @@ class AppBase(GuiBase):
     else:
       sys.stderr.write('==> Loading default project\n')
       apiProject = apiIo.newProject('default', useFileLogger=self.useFileLogger)
-    self.initProject(apiProject)
-
-    sys.stderr.write('==> Done, %s is starting\n' % self.applicationName )
-
-    splash.finish(self.mainWindow)
-    #self.gui.processEvents()
-    self.gui.start()
-
-  def initProject(self, apiProject):
 
     # Reset remoteData DataStores to match preferences setting
     dataPath = self.preferences.general.dataPath
@@ -272,16 +243,13 @@ class AppBase(GuiBase):
 
     self.current._project = project
 
-    # Set up mainWindow (link is set from mainWindow init
-    mainWindow = self.mainWindow
-    mainWindow.sideBar.setProject(project)
-    mainWindow.sideBar.fillSideBar(project)
-    mainWindow.raise_()
-    mainWindow.namespace['current'] = self.current
+    mainWindow = self._setupMainWindow(project)
 
-    if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
-      apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
-                                         windows=(mainWindow._wrappedData,))
+    # TODO: Don't know what this does, or if it's necessary.  Ask Rasmus,...
+    # if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
+    #   apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
+    #                                      windows=(mainWindow._wrappedData,))
+
 
     self.initGraphics()
     # Set up undo stack
@@ -291,11 +259,23 @@ class AppBase(GuiBase):
     #
     return project
 
+
+  def _setupMainWindow(self, project):
+    # Set up mainWindow (link is set from mainWindow init
+    mainWindow = self.mainWindow
+    mainWindow.sideBar.setProject(project)
+    mainWindow.sideBar.fillSideBar(project)
+    mainWindow.raise_()
+    mainWindow.namespace['current'] = self.current
+    return mainWindow
+
+
   def initGraphics(self):
     """Set up graphics system after loading - to be overridden in subclasses"""
     # for window in self.project.windows:
     #   window.initGraphics()
     pass
+
 
   def _closeProject(self):
     """Close project and clean up - should only be called when opening another"""
@@ -310,17 +290,20 @@ class AppBase(GuiBase):
     self.mainWindow = None
     self.current = None
 
+
   def loadProject(self, path):
     """Open new project from path"""
     self._closeProject()
     apiProject = apiIo.loadProject(path)
     return self.initProject(apiProject)
 
+
   def newProject(self, name='default'):
     """Create new, empty project"""
     self._closeProject()
     apiProject = apiIo.newProject(name)
     return self.initProject(apiProject)
+
 
   def saveProject(self, newPath=None, newProjectName=None, createFallback=True):
     apiIo.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName, createFallback=createFallback)
@@ -336,6 +319,8 @@ class AppBase(GuiBase):
     MessageDialog.showMessage('Project saved', 'Project successfully saved!',
                               colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 
+
+
 def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userPreferencesPath=None):
 
   def _readPreferencesFile(preferencesPath):
@@ -343,12 +328,12 @@ def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userP
     preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
     fp.close()
     return preferences
-    
+
   def _updateDict(d, u):
     import collections
     # recursive update of dictionary
     # this deletes every key in u that is not in d
-    # if we want every key regardless, then remove first if check below 
+    # if we want every key regardless, then remove first if check below
     for k, v in u.items():
       if k not in d:
         continue
@@ -358,7 +343,7 @@ def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userP
       else:
         d[k] = u[k]
     return d
-      
+
   preferencesPath = (defaultPreferencesPath if defaultPreferencesPath else
                      os.path.join(Path.getTopDirectory(), 'config', 'defaultv3settings.json'))
   preferences = _readPreferencesFile(preferencesPath)
@@ -369,12 +354,14 @@ def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userP
       _updateDict(preferences, _readPreferencesFile(preferencesPath))
 
   return preferences
-  
+
+
+
 def getStyleSheet(preferences):
-  
+
   colourScheme = preferences.general.colourScheme
   colourScheme = metaUtil.upperFirst(colourScheme)
-  
+
   styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
                                  '%sStyleSheet.qss' % colourScheme)).read()
   if platform.system() == 'Linux':
@@ -382,24 +369,10 @@ def getStyleSheet(preferences):
                                   '%sAdditionsLinux.qss' % colourScheme)).read()
     styleSheet += additions
   return styleSheet
-  
-# def checkRegistration(applicationVersion):
-#
-#   registrationDict = Register.loadDict()
-# #  if Register.isNewRegistration(registrationDict):
-#   if True:
-#     popup = RegisterPopup(version=applicationVersion, modal=True)
-#     popup.show()
-#     popup.raise_()
-#     popup.exec_()
-#     registrationDict = Register.loadDict()
-#     if Register.isNewRegistration(registrationDict):
-#       return False
-#
-#   Register.updateServer(registrationDict, applicationVersion)
-#
-#   return True
-  
+
+
+
+
 def getSaveDirectory(apiProject, preferences):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
   preferences = getPreferences()
@@ -432,13 +405,21 @@ def getSaveDirectory(apiProject, preferences):
       msg ='Path "%s" already exists, continue?' % newPath
       if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
         newPath = ''
-    
+
   return newPath
-    
+
+
+
+
+
+
+
+
+
 def saveV2ToV3(apiProject, projectPath, preferences):
-    
+
   projectPath = apiIo.ccpnProjectPath(projectPath)
-  
+
   needNewDirectory = False
   if os.path.exists(projectPath) and (os.path.isfile(projectPath) or os.listdir(projectPath)):
     # should not really need to check the second and third condition above, only
@@ -458,7 +439,7 @@ def saveV2ToV3(apiProject, projectPath, preferences):
       needNewDirectory = True
       MessageDialog.showMessage('Project save', 'Project could not be saved in V3 format at %s' % projectPath,
                                 colourScheme=preferences.general.colourScheme)
-    
+
   if needNewDirectory:
     projectPath = getSaveDirectory(apiProject, preferences)
     if projectPath:
@@ -468,11 +449,11 @@ def saveV2ToV3(apiProject, projectPath, preferences):
         MessageDialog.showMessage('Project save', 'Project could not be saved in V3 format at %s, quitting' % projectPath,
                                   colourScheme=preferences.general.colourScheme)
         projectPath = ''
-    
+
   return projectPath
 
 
-class TestApplication(AppBase):
+class TestApplication(Framework):
 
   def __init__(self,commandLineArguments):
 
@@ -497,3 +478,110 @@ if __name__ == '__main__':
   # print(splash)
   # splash.info('test')
   # app.processEvents()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# import sys
+# from ccpn.framework.Translation import Translation
+#
+# from ccpn.framework.Preferences import getDotfilePreferences, commandLineArguementParser
+# from ccpn.framework.Settings import setupSettings
+# from ccpn.util.Namespace import Namespace
+# from ccpn.framework import Register
+#
+#
+# class Framework:
+#   '''
+#   The parent class that all CCPN based applications should subclass.
+#   '''
+#
+#   commandLineArguementParser = commandLineArguementParser()
+#
+#
+#   def __init__(self, programName, programVersion, commandLineOptions):
+#     self._options = commandLineOptions
+#     self.settings = self._options
+#
+#     self.ui = self.getUI()  # We need to pass the UI on to the project for now
+#     self.project = self.setupProject()
+#     self.logger = self.getLogger()
+#
+#     self._preferences = self.loadPreferences()
+#     self.settings = setupSettings(options=self._options, preferences=self._preferences)
+#
+#     self.current = None
+#     self.translator = self.getTranslator()
+#
+#
+#   @property
+#   def registered(self):
+#     self.registrationDict = Register.loadDict()
+#     return not Register.isNewRegistration(self.registrationDict)
+#   # TODO: How do we do a registration (AppBase line 192)?
+#
+#
+#   def setupProject(self):
+#     if 'projectPath' in self.options:
+#       project = None
+#     else:
+#       project = None
+#     return project
+#
+#
+#   def loadPreferences(self):
+#     if hasattr(self._options, 'skipUserPreferences'):
+#       return Namespace()
+#     preferences = Namespace.fromNestedDict(getDotfilePreferences())
+#     preferences.flatten()
+#     return preferences
+#
+#
+#   def getTranslator(self):
+#     language = self.settings.language
+#     translator = Translation()
+#     if not translator.setLanguage(language):
+#       raise NotImplementedError('No translations available for {}.'.format(language))
+#     sys.stderr.write('==> Language set to "%s"\n' % translator._language)
+#     return translator
+#
+#
+#   def getLogger(self):
+#     if hasattr('noLogging', self.settings) and (not self.settings.noLogging):
+#       return None
+#     return self.project.logger
+#
+#
+#   def getUI(self):
+#     return None
+#
+#
+#   def start(self):
+#     pass
+#
+#
+#   def save(self):
+#     pass
+#
+#
+#   def load(self):
+#     pass

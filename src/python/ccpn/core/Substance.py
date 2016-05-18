@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from collections import OrderedDict
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
@@ -29,6 +30,7 @@ from ccpn.core.Spectrum import Spectrum
 from typing import Tuple, Optional, Sequence
 from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
 from ccpn.core.SampleComponent import SampleComponent
+from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpnmodel.ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util import Pid
@@ -40,7 +42,13 @@ _apiClassNameMap = {
 }
 
 class Substance(AbstractWrapperObject):
-  """Substance (molecule, material, buffer, cell, ..)."""
+  """Substance (molecule, material, buffer, cell, ..).
+
+  The default substanceType is 'Molecule', corresponding to one or more molecules.
+  It is possible (but not mandatory)to make a Substance associated to a single chain molecule,
+  using the Project.createPolymerSubstance function. There is currently no provision for
+  associating a Substance with several chains in a multi-chain - use Composite instead.
+   """
   
   #: Short class name, for PID.
   shortClassName = 'SU'
@@ -85,7 +93,17 @@ class Substance(AbstractWrapperObject):
 
   @property
   def substanceType(self) -> str:
-    """Category of substance: Molecule, Cell, Material, or Composite"""
+    """Category of substance: Molecule, Cell, Material, or Composite
+
+    - Molecule is a single molecule, including plasmids
+
+    - Cell is a cell,
+
+    - Material is a mixture, like fetal calf serum, growth medium, or standard buffer,
+
+    - Composite is multiple components in fixed ratio, like a protein-ligand or multiprotein complex,
+    or (technically) a Cell containing a particular plasmid.
+    """
     result = self._wrappedData.className
     return _apiClassNameMap.get(result, result)
 
@@ -355,8 +373,64 @@ class Substance(AbstractWrapperObject):
       spectrum._apiDataSource.experiment.refComponentName = name
 
 
-    
   # Implementation functions
+  def rename(self, name=None, labeling=None):
+    """Rename Substance, changing its Id and Pid, and rename SampleComponents and SpectrumHits
+    with matching names. If name or labeling is None, the existing value will be used"""
+
+    if name is None and labeling is None:
+      self._project._logger.warning("renaming to name=None, labeling=None has no effect")
+      return
+
+    oldName = self.name
+    if name is None:
+      name = oldName
+    elif Pid.altCharacter in name:
+      raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+
+    oldLabeling = self.labeling
+    if labeling is None:
+      labeling = oldLabeling
+    elif  Pid.altCharacter in labeling:
+        raise ValueError("Character %s not allowed in ccpn.Sample.labeling" % Pid.altCharacter)
+
+    undo = self._project._undo
+    if undo is not None:
+      undo.increaseBlocking()
+
+    try:
+      renamedObjects = [self]
+      for sampleComponent in self.sampleComponents:
+        for spectrumHit in sampleComponent.spectrumHits:
+          coreUtil._resetParentLink(spectrumHit._wrappedData, 'spectrumHits',
+            OrderedDict((('substanceName',name),
+                        ('sampledDimension',spectrumHit.sampledDimension),
+                        ('sampledPoint',spectrumHit.sampledPoint)))
+          )
+          renamedObjects.append(spectrumHit)
+
+        # NB this must be done AFTER the spectrumHit loop to avoid breaking links
+        coreUtil._resetParentLink(sampleComponent._wrappedData, 'sampleComponents',
+          OrderedDict((('name',name), ('labeling',labeling)))
+        )
+        renamedObjects.append(sampleComponent)
+
+      # NB this must be done AFTER the sampleComponent loop to avoid breaking links
+      coreUtil._resetParentLink(self._wrappedData, 'components',
+          OrderedDict((('name',name), ('labeling',labeling)))
+        )
+      for obj in renamedObjects:
+        obj._finaliseAction('rename')
+        obj._finaliseAction('change')
+
+    finally:
+      if undo is not None:
+        undo.decreaseBlocking()
+
+    undo.newItem(self.rename, self.rename, undoArgs=(oldName,oldLabeling),
+                 redoArgs=(name, labeling,))
+
+
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (SampleComponent) for all SampleComponent children of parent Sample"""
@@ -391,9 +465,6 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
 
   if apiComponentStore.findFirstComponent(name=name, labeling=labeling) is not None:
     raise ValueError("Substance %s.%s already exists" % (name, labeling))
-
-  elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
-    raise ValueError("Molecule name %s is already in use for API Molecule")
 
   else:
     oldSubstance = apiComponentStore.findFirstComponent(name=name)

@@ -29,13 +29,11 @@ NB Must conform to Python 2.1. Imported in ObjectDomain.
 import os
 import sys
 import datetime
-import json
 from collections import abc as collectionClasses
 from functools import total_ordering
 
 from ccpn.util import Path
 from ccpnmodel.ccpncore.lib import Constants as coreLibConstants
-from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
 
 WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
@@ -49,9 +47,6 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           + defaultFileNameChar)
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
-apiTopModule = 'ccpnmodel.ccpncore.api'
-
-
 @total_ordering
 class __MinType(object):
     def __le__(self, other):
@@ -61,15 +56,6 @@ class __MinType(object):
         return (self is other)
 
 __smallest = __MinType()
-
-
-
-def getClassFromFullName(qualifiedName):
-  """ Get Api class from fully qualified (dot-separated) name
-  """
-  pathList = qualifiedName.split('.')
-  mod = __import__('.'.join([apiTopModule] + pathList[:-1]),{},{},[pathList[-1]])
-  return getattr(mod,pathList[-1])
 
 
 def convertStringToFileName(fileNameString, validChars=validCcpnFileNameChars,
@@ -163,16 +149,6 @@ def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
       recursiveImport(newdirname, prefix + name,ignoreModules)
 
 
-def getConfigParameter(name):
-  """get configuration parameter, from reading configuration file
-  """
-
-  file = Path.joinPath(Path.getTopDirectory(),metaConstants.configFilePath)
-  dd = json.load(open(file))
-  return dd[
-    'configuration'].get(name)
-
-
 def isWindowsOS():
 
   return sys.platform[:3].lower() == 'win'
@@ -255,45 +231,6 @@ def flattenIfNumpy(data, shape=None):
                          % (len(data), elementCount))
   #
   return data
-
-def _resetParentLink(apiObject, downLink:str, tag:str, value):
-  """Change single-attribute key of apiObject with property name tag to value
-
-  downLink is the name of the link from parent to obj"""
-
-  parent = apiObject.parent
-  siblings = getattr(parent, downLink)
-  if any(x for x in siblings if x is not apiObject and getattr(x, tag) == value):
-    raise ValueError("Cannot rename %s - pre-existing object with key %s:%s"
-        % apiObject, tag, value)
-
-  oldKey = getattr(apiObject, tag)
-  root = apiObject.root
-  root.__dict__['override'] = True
-
-  # Set up for undo
-  undo = root._undo
-  if undo is not None:
-    undo.increaseBlocking()
-
-  try:
-    parentDict = parent.__dict__[downLink]
-    del parentDict[oldKey]
-    setattr(apiObject, tag, value)
-    parentDict[value] = apiObject
-
-  finally:
-    # reset override and set isModified
-    root.__dict__['override'] = False
-    apiObject.topObject.__dict__['isModified'] = True
-    if undo is not None:
-      undo.decreaseBlocking()
-
-  if undo is not None:
-    undo.newItem(_resetParentLink, _resetParentLink, undoArgs=(apiObject, downLink, tag, oldKey),
-                 redoArgs=(apiObject, downLink, tag, value))
-
-  # call notifiers:
 
 
 

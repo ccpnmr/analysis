@@ -264,32 +264,13 @@ def getter(self:Substance) -> Tuple[Chain, ...]:
   else:
     data2Obj = self._project._data2Obj
     return tuple(data2Obj[x]
-                 for x in self._wrappedData.molSystem.sortedChains()
+                 for x in self._project._wrappedData.molSystem.sortedChains()
                  if x.molecule is apiMolecule)
 Substance.chains = property(getter, None, None,
   "ccpn.Chains that correspond to the sequence of ccpn.Substance (if defined)"
 )
 
-def getter(self:SampleComponent) -> Tuple[Chain]:
-  tt = tuple(self._project.getChain(x) for x in self._wrappedData.chainCodes)
-  return tuple(x for x in tt if x is not None)
-
-def setter(self, value):
-
-  wrappedData = self._wrappedData
-  chainCodes = [x.shortName for x in value]
-  for sampleComponent in wrappedData.sample.sampleComponents:
-    if sampleComponent is not wrappedData:
-      for chainCode in chainCodes:
-        if chainCode in sampleComponent.chainCodes:
-          sampleComponent.removeChainCode(chainCode)
-
-  wrappedData.chainCodes = chainCodes
-SampleComponent.chains = property(getter, setter, None,
-                                 "ccpn.Chains that correspond to SampleComponent")
-
 del getter
-del setter
 
 # Clean-up
     

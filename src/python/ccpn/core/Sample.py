@@ -31,6 +31,7 @@ from ccpn.core.Project import Project
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumHit import SpectrumHit
+from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.util import Common as commonUtil
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -221,7 +222,7 @@ class Sample(AbstractWrapperObject):
       elif Pid.altCharacter in value:
         raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
       else:
-        commonUtil._resetParentLink(self._wrappedData, 'samples', 'name', value)
+        coreUtil._resetParentLink(self._wrappedData, 'samples', {'name':value})
         self._finaliseAction('rename')
         self._finaliseAction('change')
 

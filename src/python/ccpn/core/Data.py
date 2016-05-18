@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Optional
-from ccpn.util import Common as commonUtil
+from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.util import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Data as ApiData
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Parameter as ApiParameter
@@ -153,7 +153,7 @@ class Data(AbstractWrapperObject):
       elif Pid.altCharacter in value:
         raise ValueError("Character %s not allowed in ccpn.Data.name" % Pid.altCharacter)
       else:
-        commonUtil._resetParentLink(self._wrappedData, 'data', 'name', value)
+        coreUtil._resetParentLink(self._wrappedData, 'data', {'name':value})
         self._finaliseAction('rename')
         self._finaliseAction('change')
 

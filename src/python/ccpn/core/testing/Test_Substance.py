@@ -42,3 +42,41 @@ class SubstanceTest(WrapperTesting):
     self.assertEqual(substance2.id, 'Cell1.moxy')
     self.assertEqual(substance2.smiles, None)
     self.assertEqual(substance2.substanceType, 'Cell')
+
+  def test_substance_rename_1(self):
+
+    chain1 = self.project.createChain(sequence='ACDC', compoundName='hardrock', shortName='X',
+                                      molType='protein')
+    substance1 = chain1.substance
+    chain2 = substance1.createChain(shortName='Y')
+    self.assertEqual(len(substance1.chains), 2)
+    self.assertEqual(substance1._id, 'hardrock.std')
+    self.assertEqual(chain2.compoundName, 'hardrock')
+    self.assertEqual(substance1.chains, (chain1, chain2))
+
+    sample1 = self.project.newSample(name='S1')
+    sc1 = sample1.newSampleComponent(name='hardrock', labeling='std')
+    sample1 = self.project.newSample(name='S2')
+    sc2 = sample1.newSampleComponent(name='hardrock', labeling='adhesive')
+    self.assertEqual(sc1._id, 'S1.hardrock.std')
+    self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
+    self.assertEqual(substance1.sampleComponents, (sc1,))
+    self.project.newUndoPoint()
+    substance1.rename(name='electrical', labeling='cafe')
+    self.assertEqual(substance1._id, 'electrical.cafe')
+    self.assertEqual(sc1._id, 'S1.electrical.cafe')
+    self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
+    self.assertEqual(substance1.sampleComponents, (sc1,))
+    self.project._undo.undo()
+    self.assertEqual(substance1._id, 'hardrock.std')
+    self.assertEqual(sc1._id, 'S1.hardrock.std')
+    self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
+    self.assertEqual(substance1.sampleComponents, (sc1,))
+    self.project._undo.redo()
+    self.assertEqual(substance1._id, 'electrical.cafe')
+    self.assertEqual(sc1._id, 'S1.electrical.cafe')
+    self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
+    self.assertEqual(substance1.sampleComponents, (sc1,))
+
+
+

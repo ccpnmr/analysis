@@ -109,6 +109,11 @@ class Strip(GuiStrip, AbstractWrapperObject):
     """Axis units, in display order"""
     return self._wrappedData.units
 
+  @property
+  def spectra(self) -> Tuple[Spectrum]:
+    """The spectra attached to the strip (whether display is currently turned on  or not)"""
+    return tuple (x.spectrum for x in self.spectrumViews)
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:SpectrumDisplay)-> list:

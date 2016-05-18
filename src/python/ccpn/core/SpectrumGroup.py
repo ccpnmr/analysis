@@ -29,7 +29,7 @@ from ccpn.util import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpn.util import Common as commonUtil
+from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as ApiSpectrumGroup
 
@@ -98,7 +98,7 @@ class SpectrumGroup(AbstractWrapperObject):
       elif Pid.altCharacter in value:
         raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
       else:
-        commonUtil._resetParentLink(self._wrappedData, 'spectrumGroups', 'name', value)
+        coreUtil._resetParentLink(self._wrappedData, 'spectrumGroups', {'name':value})
         self._finaliseAction('rename')
         self._finaliseAction('change')
 

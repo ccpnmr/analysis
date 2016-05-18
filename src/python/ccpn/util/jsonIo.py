@@ -99,7 +99,7 @@ class _CcpnMultiEncoder(json.JSONEncoder):
 
     else:
       # NB we assume that this OrderedDict will not be further processed, but that its contents will
-      return OrderedDict(('__type__',typ),('__data__',data))
+      return OrderedDict((('__type__',typ),('__data__',data)))
 
 
 def _ccpnObjectPairHook(pairs):

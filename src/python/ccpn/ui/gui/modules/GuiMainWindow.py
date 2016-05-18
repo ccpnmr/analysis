@@ -412,14 +412,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       os.system('open %s' % path)
 
 
-  def showPeakAssigner(self, position='right', relativeTo=None):
+  def showPeakAssigner(self, position='bottom', relativeTo=None):
     """Displays assignment module."""
     self.assignmentModule = PeakAssigner(self, self._project, self._project._appBase.current.peaks)
     self.dockArea.addDock(self.assignmentModule, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showAssignmentModule()")
     self.project._logger.info("application.showAssignmentModule()")
 
-  def showNmrResidueModule(self, position='right', relativeTo=None):
+  def showNmrResidueModule(self, position='bottom', relativeTo=None):
     """Shows Nmr Residue Module."""
     from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
     newDock = CcpnDock("Nmr Residue")
@@ -641,18 +641,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
     self.project._logger.info("application.showSamplePopup()")
 
-  def showSampleAnalysis(self):
+  def showSampleAnalysis(self, position='bottom', relativeTo=None):
     """
     Displays Sample Analysis Module
     """
     showSa = MixtureAnalysis(self._project)
-    self.dockArea.addDock(showSa, position='bottom')
+    self.dockArea.addDock(showSa, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
     self.project._logger.info("application.showSampleAnalysis()")
 
-  def showScreeningSetup(self):
+  def showScreeningSetup(self, position='bottom', relativeTo=None):
     showSc = ScreeningSettings(self.project)
-    self.dockArea.addDock(showSc, position='bottom')
+    self.dockArea.addDock(showSc, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
     self.project._logger.info("application.showScreeningSetup()")
 
@@ -660,7 +660,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.showScreeningHits = ShowScreeningHits(self.project)
     self.dockArea.addDock(self.showScreeningHits, position='bottom')
-    print(self.createSpectrumDisplay)
     spectrumDisplay = self.createSpectrumDisplay(
       self._project.spectrumHits[0]._parent)  # spectrum only to create a display
     # self._project.spectrumHits[0]._parent.peakLists[0].pickPeaks1dFiltered(ignoredRegions=None, noiseThreshold=0)
@@ -776,7 +775,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def newMacroFromLog(self):
     """
-    Displays macro editor with contents of log.
+    Displays macro editor with contents of the log.
     """
     editor = MacroEditor(self.dockArea, self, "Macro Editor")
     l = open(self.project._logger.logPath, 'r').readlines()
@@ -910,65 +909,57 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Displays Peak table on left of main window with specified list selected.
     """
     peakList = PeakTable(self._project, selectedList=selectedList)
-    if relativeTo is not None:
-      self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
-    else:
-      self.dockArea.addDock(peakList, position='bottom')
-
+    self.dockArea.addDock(peakList, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
 
-  def showChemicalShiftTable(self, position='bottom'):
+  def showChemicalShiftTable(self, position:str='bottom', relativeTo:CcpnDock=None):
     """
     Displays Chemical Shift table.
     """
     from ccpn.ui.gui.modules.ChemicalShiftTable import NmrAtomShiftTable as Table
-    # from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTable as Table
     chemicalShiftTable = Table(chemicalShiftLists=self._project.chemicalShiftLists)
-    self.dockArea.addDock(chemicalShiftTable, position=position)
+    self.dockArea.addDock(chemicalShiftTable, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     self.project._logger.info("application.showChemicalShiftTable()")
 
 
-  def showBackboneAssignmentModule(self, position=None, relativeTo=None):
+  def showBackboneAssignmentModule(self, position:str='bottom', relativeTo:CcpnDock=None):
     """
     Displays Backbone Assignment module.
     """
     self.bbModule = BackboneAssignmentModule(self._project)
-    if position is not None and relativeTo is not None:
-      self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo)
-    else:
-      self.dockArea.addDock(self.bbModule, position='bottom')
+    self.dockArea.addDock(self.bbModule, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
     self.project._logger.info("application.showBackboneAssignmentModule()")
 
     return self.bbModule
 
-  def showPickAndAssignModule(self):
+  def showPickAndAssignModule(self, position:str='bottom', relativeTo:CcpnDock=None):
     """Displays Pick and Assign module."""
     self.paaModule = PickAndAssignModule(self.dockArea, self._project)
-    self.dockArea.addDock(self.paaModule)
+    self.dockArea.addDock(self.paaModule, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
     self.project._logger.info("application.showPickAndAssignModule()")
     return self.paaModule
 
-  def showAtomSelector(self):
+  def showAtomSelector(self, position:str='bottom', relativeTo:CcpnDock=None):
     """Displays Atom Selector."""
     self.atomSelector = AtomSelector(self, project=self._project)
-    self.dockArea.addDock(self.atomSelector)
+    self.dockArea.addDock(self.atomSelector, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
     self.project._logger.info("application.showAtomSelector()")
     return self.atomSelector
 
-  def showResidueInformation(self):
+  def showResidueInformation(self, position:str='bottom', relativeTo:CcpnDock=None):
     """Displays Residue Information module."""
     from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
-    self.dockArea.addDock(ResidueInformation(self, self._project))
+    self.dockArea.addDock(ResidueInformation(self, self._project), position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
     self.project._logger.info("application.showResidueInformation()")
 
-  def showDataPlottingModule(self):
-    dpModule = DataPlottingModule(self.dockArea)
+  def showDataPlottingModule(self, position:str='bottom', relativeTo:CcpnDock=None):
+    dpModule = DataPlottingModule(self.dockArea, position=position, relativeTo=relativeTo)
 
   def showRefChemicalShifts(self):
     """Displays Reference Chemical Shifts module."""

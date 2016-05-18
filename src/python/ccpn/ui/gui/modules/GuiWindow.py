@@ -102,11 +102,11 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot)
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace)
-    QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip)
+    QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.setCurrentPositionAndStrip)
 
 
 
-  def getCurrentPositionAndStrip(self):
+  def setCurrentPositionAndStrip(self):
     current = self._appBase.current
     current.strip = current.viewBox.parentObject().parent
     position = [current.viewBox.position.x(),

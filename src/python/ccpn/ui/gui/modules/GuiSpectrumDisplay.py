@@ -78,7 +78,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.dock.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
     self.dock.label.closeButton.clicked.connect(self.closeDock)
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-    screenWidth  = QtGui.QApplication.desktop().screenGeometry().width()
+    # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
     self.resize(self.sizeHint())
 

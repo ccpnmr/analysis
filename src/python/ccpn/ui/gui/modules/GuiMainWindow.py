@@ -29,6 +29,9 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn.Assign.modules.AtomSelector import AtomSelector
+from ccpn.Assign.modules.BackboneAssignmentModule import BackboneAssignmentModule
+from ccpn.Assign.modules.PickAndAssignModule import PickAndAssignModule
 from ccpn.Assign.modules.SequenceGraph import SequenceGraph
 
 from ccpn.core.PeakList import PeakList
@@ -39,8 +42,6 @@ from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
 from ccpn.Screen.popups.SampleSetupPopup import SamplePopup
 from ccpn.core.lib.Version import revision
 from ccpn.framework.update.UpdatePopup import UpdatePopup
-from ccpn.ui.gui.modules.AtomSelector import AtomSelector
-from ccpn.ui.gui.modules.BackboneAssignmentModule import BackboneAssignmentModule
 from ccpn.ui.gui.modules.DataPlottingModule import DataPlottingModule
 from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
@@ -48,7 +49,6 @@ from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.NotesEditor import NotesEditor
 from ccpn.ui.gui.modules.PeakAssigner import PeakAssigner
 from ccpn.ui.gui.modules.PeakTable import PeakTable
-from ccpn.ui.gui.modules.PickAndAssignModule import PickAndAssignModule
 from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 from ccpn.ui.gui.popups.BackupPopup import BackupPopup
 from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
@@ -228,7 +228,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
     self.screenMenu.addSeparator()
-    self.screenMenu.addAction(Action(self, 'Generate Mixtures', callback=self.createSample, shortcut="cs"))
+    self.screenMenu.addAction(Action(self, 'Generate Mixtures', callback=self.showSamplePopup, shortcut="cs"))
     self.screenMenu.addAction(Action(self, 'Mixtures Analysis', callback=self.showSampleAnalysis, shortcut="st"))
     self.screenMenu.addSeparator()
     self.screenMenu.addAction(Action(self, 'Screening Settings', callback=self.showScreeningSetup, shortcut="sc"))
@@ -253,9 +253,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     spectrumMenu.addAction(Action(self, "Phasing Console", partial(self.togglePhaseConsole, self), shortcut='pc'))
 
     moleculeMenu.addAction(Action(self, "Create Molecule ...", callback=self.showMoleculePopup, shortcut='cm'))
-    self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequence, shortcut='sq', checkable=True)
-    if hasattr(self, 'sequenceWidget'):
-      self.sequenceAction.setChecked(self.sequenceWidget.isVisible())
+    self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequenceModule, shortcut='sq', checkable=True)
+    if hasattr(self, 'sequenceModule'):
+      self.sequenceAction.setChecked(self.sequenceModule.isVisible())
     else:
       self.sequenceAction.setChecked(False)
     moleculeMenu.addAction(self.sequenceAction)
@@ -322,7 +322,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     assignMenu.addAction(Action(self, "Backbone Assignment", callback=self.showBackboneAssignmentModule, shortcut='bb'))
     # assignMenu.addAction(Action(self, "Sidechain Assignment", callback=self.showPickAndAssignModule, shortcut='sc'))
     assignMenu.addSeparator()
-    assignMenu.addAction(Action(self, "Peak Assigner", callback=self.showAssignmentModule, shortcut='aa'))
+    assignMenu.addAction(Action(self, "Peak Assigner", callback=self.showPeakAssigner, shortcut='aa'))
     assignMenu.addAction(Action(self, "Residue Information", callback=self.showResidueInformation, shortcut='ri'))
 
     pluginsMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
@@ -412,67 +412,68 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       os.system('open %s' % path)
 
 
-  def showAssignmentModule(self):
+  def showPeakAssigner(self, position='right', relativeTo=None):
     """Displays assignment module."""
     self.assignmentModule = PeakAssigner(self, self._project, self._project._appBase.current.peaks)
-    self.dockArea.addDock(self.assignmentModule)
+    self.dockArea.addDock(self.assignmentModule, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showAssignmentModule()")
     self.project._logger.info("application.showAssignmentModule()")
 
-  def showNmrResidueModule(self):
+  def showNmrResidueModule(self, position='right', relativeTo=None):
     """Shows Nmr Residue Module."""
     from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
     newDock = CcpnDock("Nmr Residue")
     nmrResidueModule = NmrResiduePopup(newDock, self._project)
     newDock.layout.addWidget(nmrResidueModule)
-    self.dockArea.addDock(newDock)
+    self.dockArea.addDock(newDock, position=position, relativeTo=relativeTo)
 
 
   def showProjectionPopup(self):
     pass
 
-  def addBlankDisplay(self):
+  def addBlankDisplay(self, position='right', relativeTo=None):
     """Adds a Blank Display to the main window if one does not already exist."""
     if not hasattr(self, 'blankDisplay') or self.blankDisplay is None:
       self.blankDisplay = GuiBlankDisplay(self.dockArea)
     else:
-      self.dockArea.addDock(self.blankDisplay, 'right')
+      self.dockArea.addDock(self.blankDisplay, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
     self._project._logger.info("application.addBlankDisplay()")
 
-  def showSequence(self):
+  def showSequenceModule(self, position='top', relativeTo=None):
     """
     Displays Sequence Module at the top of the screen.
     """
-    self.sequenceWidget = SequenceModule(self._project)
-    self.dockArea.addDock(self.sequenceWidget, position='top')
+    self.sequenceModule = SequenceModule(self._project)
+    self.dockArea.addDock(self.sequenceModule, position=position, relativeTo=relativeTo)
+    return self.sequenceModule
 
-  def hideSequence(self):
+  def hideSequenceModule(self):
     """Hides sequence module"""
-    self.sequenceWidget.close()
-    delattr(self, 'sequenceWidget')
+    self.sequenceModule.close()
+    delattr(self, 'sequenceModule')
 
 
-  def showNmrResidueTable(self):
+  def showNmrResidueTable(self, position='bottom', relativeTo=None):
     """Displays Nmr Residue Table"""
     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
     nmrResidueTable = NmrResidueTable(self, self._project)
     nmrResidueTableDock = CcpnDock(name='Nmr Residue Table')
     nmrResidueTableDock.layout.addWidget(nmrResidueTable)
-    self.dockArea.addDock(nmrResidueTableDock, 'bottom')
+    self.dockArea.addDock(nmrResidueTableDock, position=position, relativeTo=relativeTo)
     self.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
 
-  def toggleSequence(self):
+  def toggleSequenceModule(self):
     """Toggles whether Sequence Module is displayed or not"""
-    if hasattr(self, 'sequenceWidget'):
-      if self.sequenceWidget.isVisible():
-        self.hideSequence()
+    if hasattr(self, 'sequenceModule'):
+      if self.sequenceModule.isVisible():
+        self.hideSequenceModule()
 
     else:
-      self.showSequence()
-    self.pythonConsole.writeConsoleCommand("application.toggleSequence()")
-    self.project._logger.info("application.toggleSequence()")
+      self.showSequenceModule()
+    self.pythonConsole.writeConsoleCommand("application.toggleSequenceModule()")
+    self.project._logger.info("application.toggleSequenceModule()")
 
   def loadAProject(self, projectDir=None):
     """
@@ -630,15 +631,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if event:
         event.ignore()
 
-  def createSample(self):
+  def showSamplePopup(self):
     """
-    Displays Sample creation module.
+    Displays Sample creation popup.
     """
     popup = SamplePopup(parent=None, project=self.project)
     popup.exec_()
     popup.raise_()
-    self.pythonConsole.writeConsoleCommand("application.createSample()")
-    self.project._logger.info("application.createSample()")
+    self.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
+    self.project._logger.info("application.showSamplePopup()")
 
   def showSampleAnalysis(self):
     """

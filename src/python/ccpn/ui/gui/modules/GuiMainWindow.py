@@ -224,7 +224,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu.addSeparator()
     fileMenu.addAction(Action(self, "Preferences ...", callback=self.showApplicationPreferences))
     fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Close Program", callback=self.closeEvent, shortcut="qt"))
+    fileMenu.addAction(Action(self, "Close Program", callback=self._closeEvent, shortcut="qt"))
 
 
     self.screenMenu.addSeparator()

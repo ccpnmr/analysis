@@ -21,8 +21,6 @@ class CcpnDock(Dock):
     self.addWidget(self.widget1, 0, 0)
     self.addWidget(self.widget2, 1, 0)
 
-
-
   def resizeEvent(self, event):
     self.setOrientation('vertical', force=True)
     self.resizeOverlay(self.size())

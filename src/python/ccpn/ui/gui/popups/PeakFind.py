@@ -71,17 +71,6 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.buttonBox = ButtonList(self, grid=(7, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
                                 callbacks=[self.reject, self._pickPeaks])
 
-  #
-  # def controlCheckBoxes(self):
-  #   if self.checkBox3.isChecked():
-  #     self.checkBox1.setChecked(False)
-  #     self.checkBox2.setChecked(False)
-  #   if self.checkBox1.isChecked():
-  #     self.checkBox3.setChecked(False)
-  #     self.checkBox2.setChecked(False)
-  #   if self.checkBox2.isChecked():
-  #     self.checkBox1.setChecked(False)
-  #     self.checkBox3.setChecked(False)
   def _selectPeakList(self, item):
     self.peakList = self.project.getByPid(item)
     self._updateContents()
@@ -101,7 +90,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
     elif self.checkBox2.isChecked():
       # negative only
       doPos=False
-    # Checking the third box turns the others off and sete both. Hence default
+    # Checking the third box turns the others off and sets both. Hence default
     peakList.pickPeaksNd(positions, apiSpectrumView.spectrumView.orderedDataDims,
                         doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
 

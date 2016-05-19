@@ -26,9 +26,12 @@ import sys
 
 from ccpn.util import Register
 
+from ccpn.ui.gui.widgets.Application import Application
 from ccpn.ui.gui.widgets.SplashScreen import SplashScreen
-
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+
+from ccpn.util import Register
+
 
 class Gui:
   
@@ -38,23 +41,30 @@ class Gui:
     
     self.application = None
     self.mainWindow = None
-    
-  def start(self):
-    """Start the program execution"""
-    
+
+    self._initQtApp()
+
+
+  def _initQtApp(self):
     # On the Mac (at least) it does not matter what you set the applicationName to be,
     # it will come out as the executable you are running (e.g. "python3")
-    self.application = Application(framework.applicationName, framework.applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk')
-    self.application.setStyleSheet(getStyleSheet(framework.preferences))
+    self.application = Application(self.framework.applicationName,
+                                   self.framework.applicationVersion,
+                                   organizationName='CCPN', organizationDomain='ccpn.ac.uk')
+    self.application.setStyleSheet(self.framework.styleSheet)
+
+
+  def start(self):
+    """Start the program execution"""
 
     self._checkRegistered()
-    Register.updateServer(Register.loadDict(), framework.applicationVersion)
+    Register.updateServer(Register.loadDict(), self.framework.applicationVersion)
 
     # show splash screen
     splash = SplashScreen()
     self.application.processEvents()  # needed directly after splashScreen show to show something
 
-    sys.stderr.write('==> Done, %s is starting\n' % framework.applicationName )
+    sys.stderr.write('==> Done, %s is starting\n' % self.framework.applicationName )
 
     splash.finish(self.mainWindow)
     
@@ -68,23 +78,24 @@ class Gui:
     # We want to give some feedback; sometimes this takes a while (e.g. poor internet)
     sys.stderr.write('==> Checking registration ... \n')
     sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
-    if not self.isRegistered()
+    if not self._isRegistered:
       self._showRegisterPopup()
-      if not self._isRegistered():
+      if not self._isRegistered:
         sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
         sys.exit(1)
     sys.stderr.write('==> Registered to: %s (%s)\n' %
-                     (self.registrationDict['name'], self.registrationDict['organisation']))
+                     (self.framework.registrationDict['name'],
+                      self.framework.registrationDict['organisation']))
                      
-                     
+  @property
   def _isRegistered(self):
     """return True if registered"""
-    
+    return True
     return not Register.isNewRegistration(Register.loadDict())
 
   def _showRegisterPopup(self):
     """Display registration popup"""
-    
+
     popup = RegisterPopup(version=self.framework.applicationVersion, modal=True)
     popup.show()
     popup.raise_()

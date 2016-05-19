@@ -11,7 +11,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
+__author__ = "$Author: TJ Ragan $"
 __date__ = "$Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
 __version__ = "$Revision: 9320 $"
 
@@ -24,33 +24,22 @@ import sys
 import json
 import platform
 
-from PyQt4 import QtGui, QtCore
-
 from ccpn.core.Project import Project
-from ccpn.ui.gui import _implementation # NB Neccessary to force load of graphics classes
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-from ccpn.ui.gui.widgets.Application import Application
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpnmodel.ccpncore.api.memops import Implementation
-from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui import _implementation # NB Neccessary to force load of graphics classes
+
+from ccpn.ui.gui.Current import Current
+
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util import Register
 
-try:
-  from ccpn.util.Translation import translator
-  from ccpn.util.Translation import languages, defaultLanguage
-except ImportError:
-  from ccpn.framework.Translation import translator
-  from ccpn.framework.Translation import languages, defaultLanguage
+from ccpn.framework.Translation import translator
+from ccpn.framework.Translation import languages, defaultLanguage
 
 
-from ccpn.ui.gui.Base import Base as GuiBase
-from ccpn.ui.gui.Current import Current
-from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
-
-# The following must be there even though the import is not used in this file.
-# from ccpn.ui.gui.widgets import resources_rc
 
 componentNames = ('Assignment', 'Screening', 'Structure')
 
@@ -94,7 +83,7 @@ def defineProgramArguments():
   return parser
 
 
-class Framework:#
+class Framework:
   """
   The Framework class is the base class for all applications
   It's currently broken, so don't use this if you want your application to actually work!
@@ -102,7 +91,7 @@ class Framework:#
 
   def __init__(self, applicationName, applicationVersion, args):
 
-    GuiBase.__init__(self, self) # yuk, two selfs, but it is that
+    # GuiBase.__init__(self, self) # yuk, two selfs, but it is that
 
     self.args = args
     self.applicationName = applicationName
@@ -114,19 +103,37 @@ class Framework:#
 
     self.useFileLogger = not self.args.nologging
 
-    self.current = None
+    self.current = Current(project=None)
 
     self.gui = None  # No gui app so far
+
     # Necessary as attribute is queried during initialisation:
     self.mainWindow = None
 
     self._getUserPrefs()
-
+    self.registrationDict = Register.loadDict()
     self._setLanguage()
+
+    self.styleSheet = self.getStyleSheet(self.preferences)
 
     # Currently, we have to have a GUI running for the wrapper to create GuiMainWindow.
     self.ui = self.gui = self._setupUI()
 
+
+  def getStyleSheet(self, preferences=None):
+    if preferences is None:
+      preferences = self.preferences
+
+    colourScheme = preferences.general.colourScheme
+    colourScheme = metaUtil.upperFirst(colourScheme)
+
+    styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+                                   '%sStyleSheet.qss' % colourScheme)).read()
+    if platform.system() == 'Linux':
+      additions = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+                                    '%sAdditionsLinux.qss' % colourScheme)).read()
+      styleSheet += additions
+    return styleSheet
 
 
   def setupComponents(self, args):
@@ -184,23 +191,25 @@ class Framework:#
 
 
   def _setupUI(self):
-    gui = Application(self.applicationName, self.applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk')
-    gui.setStyleSheet(getStyleSheet(self.preferences))
+    from ccpn.ui.gui.Gui import Gui
+    gui = Gui(self)
     return gui
 
 
   def start(self):
     """Start the program execution"""
-
     project = self.initProject()
+    self.current._project = project
 
     sys.stderr.write('==> Done, %s is starting\n' % self.applicationName )
 
-    # Need to add back in registration
+    # TODO: Add back in registration
 
     self.gui.start()
 
 
+###################################
+  # TODO: RASMUS
   def initProject(self):
     # load user-specified project or default if not specified
     if self.args.projectPath:
@@ -225,8 +234,8 @@ class Framework:#
     dataUrl.url = Implementation.Url(path=dataPath)
 
     # ApiProject to appBase - Done this way to sneak the appBase in before creating the wrapper
+    # This is where we should hand the UI to the wrapper
     apiProject._appBase = self
-    self.current = Current(project=None)
 
     # Make sure we have a WindowStore attached to the NmrProject - that guarantees a mainWindow
     apiNmrProject = apiProject.fetchNmrProject()
@@ -238,17 +247,18 @@ class Framework:#
       else:
         apiNmrProject.windowStore = apiWindowStore
 
+    print('*********', self.mainWindow)
     # Wrap ApiNmrProject
     project = Project(apiNmrProject)
+    print('*********', self.mainWindow)
 
-    self.current._project = project
+    # self.current._project = project
 
     mainWindow = self._setupMainWindow(project)
 
-    # TODO: Don't know what this does, or if it's necessary.  Ask Rasmus,...
-    # if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
-    #   apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
-    #                                      windows=(mainWindow._wrappedData,))
+    if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
+      apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
+                                         windows=(mainWindow._wrappedData,))
 
 
     self.initGraphics()
@@ -259,7 +269,7 @@ class Framework:#
     #
     return project
 
-
+  # TODO: RASMUS/WAYNE
   def _setupMainWindow(self, project):
     # Set up mainWindow (link is set from mainWindow init
     mainWindow = self.mainWindow
@@ -279,7 +289,7 @@ class Framework:#
 
   def _closeProject(self):
     """Close project and clean up - should only be called when opening another"""
-
+    # TODO: convert this to  self.project.close()
     # NBNB TBD add code to save first, ask, etc. Somewhere
 
     if self.project is not None:
@@ -293,19 +303,25 @@ class Framework:#
 
   def loadProject(self, path):
     """Open new project from path"""
-    self._closeProject()
-    apiProject = apiIo.loadProject(path)
-    return self.initProject(apiProject)
+    # TODO: convert this to  self.project.load()
+    pass
+    # self._closeProject()
+    # apiProject = apiIo.loadProject(path)
+    # return self.initProject(apiProject)
 
 
   def newProject(self, name='default'):
-    """Create new, empty project"""
-    self._closeProject()
-    apiProject = apiIo.newProject(name)
-    return self.initProject(apiProject)
+    # """Create new, empty project"""
+    # TODO: convert this to  self.project.newProject()
+    pass
+    # self._closeProject()
+    # apiProject = apiIo.newProject(name)
+    # return self.initProject(apiProject)
 
 
   def saveProject(self, newPath=None, newProjectName=None, createFallback=True):
+    # TODO: convert this to a save and call self.project.save()
+    pass
     apiIo.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName, createFallback=createFallback)
     layout = self.mainWindow.moduleArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
@@ -318,7 +334,7 @@ class Framework:#
     saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
     MessageDialog.showMessage('Project saved', 'Project successfully saved!',
                               colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
-
+###################################
 
 
 def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userPreferencesPath=None):
@@ -357,127 +373,120 @@ def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userP
 
 
 
-def getStyleSheet(preferences):
-
-  colourScheme = preferences.general.colourScheme
-  colourScheme = metaUtil.upperFirst(colourScheme)
-
-  styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                 '%sStyleSheet.qss' % colourScheme)).read()
-  if platform.system() == 'Linux':
-    additions = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                  '%sAdditionsLinux.qss' % colourScheme)).read()
-    styleSheet += additions
-  return styleSheet
-
-
-
-
-def getSaveDirectory(apiProject, preferences):
-  """Opens save Project as dialog box and gets directory specified in the file dialog."""
-  preferences = getPreferences()
-  dialog = QtGui.QFileDialog(caption='Save Project As...')
-  dialog.setFileMode(QtGui.QFileDialog.AnyFile)
-  dialog.setAcceptMode(1)
-  if preferences.general.colourScheme == 'dark':
-    dialog.setStyleSheet("""
-                        QFileDialog QWidget {
-                                            background-color: #2a3358;
-                                            color: #f7ffff;
-                                            }
-                        """)
-  elif preferences.general.colourScheme == 'light':
-    dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
-
-  if not dialog.exec_():
-    return ''
-  fileNames = dialog.selectedFiles()
-  if not fileNames:
-    return ''
-  newPath = fileNames[0]
-  if newPath:
-    newPath = apiIo.ccpnProjectPath(newPath)
-    if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
-      # should not really need to check the second and third condition above, only
-      # the Qt dialog stupidly insists a directory exists before you can select it
-      # so if it exists but is empty then don't bother asking the question
-      title = 'Overwrite path'
-      msg ='Path "%s" already exists, continue?' % newPath
-      if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
-        newPath = ''
-
-  return newPath
-
-
-
-
-
-
-
-
-
-def saveV2ToV3(apiProject, projectPath, preferences):
-
-  projectPath = apiIo.ccpnProjectPath(projectPath)
-
-  needNewDirectory = False
-  if os.path.exists(projectPath) and (os.path.isfile(projectPath) or os.listdir(projectPath)):
-    # should not really need to check the second and third condition above, only
-    # the Qt dialog stupidly insists a directory exists before you can select it
-    # so if it exists but is empty then don't bother asking the question
-    title = 'Overwrite path'
-    msg ='Converting to V3 format, path "%s" already exists, overwrite?' % projectPath
-    if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
-      needNewDirectory = True
-
-  if not needNewDirectory:
-    try:
-      apiIo.saveProject(apiProject, newPath=projectPath)
-      MessageDialog.showMessage('Project save', 'Project saved in v3 format at %s' % projectPath,
-                                colourScheme=preferences.general.colourScheme)
-    except IOError as e:
-      needNewDirectory = True
-      MessageDialog.showMessage('Project save', 'Project could not be saved in V3 format at %s' % projectPath,
-                                colourScheme=preferences.general.colourScheme)
-
-  if needNewDirectory:
-    projectPath = getSaveDirectory(apiProject, preferences)
-    if projectPath:
-      try:
-        apiIo.saveProject(apiProject, newPath=projectPath, overwriteExisting=True)
-      except IOError as e:
-        MessageDialog.showMessage('Project save', 'Project could not be saved in V3 format at %s, quitting' % projectPath,
-                                  colourScheme=preferences.general.colourScheme)
-        projectPath = ''
-
-  return projectPath
-
-
-class TestApplication(Framework):
-
-  def __init__(self,commandLineArguments):
-
-    AppBase.__init__(self, 'testApplication', '1.0',commandLineArguments)
-
-if __name__ == '__main__':
-
-  parser = defineProgramArguments()
-  commandLineArguments = parser.parse_args()
-  program = TestApplication(commandLineArguments)
-  program.start()
-
-  # splash = SplashScreen()
-  #
-  # app.processEvents()
-  # w = QtGui.QWidget()
-  # w.resize(250, 150)
-  # w.move(300, 300)
-  # w.setWindowTitle('testApplication')
-  # w.show()
-  # #splash = showSplashScreen()
-  # print(splash)
-  # splash.info('test')
-  # app.processEvents()
+# def getStyleSheet(preferences):
+#
+#   colourScheme = preferences.general.colourScheme
+#   colourScheme = metaUtil.upperFirst(colourScheme)
+#
+#   styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+#                                  '%sStyleSheet.qss' % colourScheme)).read()
+#   if platform.system() == 'Linux':
+#     additions = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+#                                   '%sAdditionsLinux.qss' % colourScheme)).read()
+#     styleSheet += additions
+#   return styleSheet
+#
+#
+#
+#
+# def getSaveDirectory(apiProject, preferences):
+#   """Opens save Project as dialog box and gets directory specified in the file dialog."""
+#   preferences = getPreferences()
+#   dialog = QtGui.QFileDialog(caption='Save Project As...')
+#   dialog.setFileMode(QtGui.QFileDialog.AnyFile)
+#   dialog.setAcceptMode(1)
+#   if preferences.general.colourScheme == 'dark':
+#     dialog.setStyleSheet("""
+#                         QFileDialog QWidget {
+#                                             background-color: #2a3358;
+#                                             color: #f7ffff;
+#                                             }
+#                         """)
+#   elif preferences.general.colourScheme == 'light':
+#     dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+#
+#   if not dialog.exec_():
+#     return ''
+#   fileNames = dialog.selectedFiles()
+#   if not fileNames:
+#     return ''
+#   newPath = fileNames[0]
+#   if newPath:
+#     newPath = apiIo.ccpnProjectPath(newPath)
+#     if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
+#       # should not really need to check the second and third condition above, only
+#       # the Qt dialog stupidly insists a directory exists before you can select it
+#       # so if it exists but is empty then don't bother asking the question
+#       title = 'Overwrite path'
+#       msg ='Path "%s" already exists, continue?' % newPath
+#       if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
+#         newPath = ''
+#
+#   return newPath
+#
+#
+# def saveV2ToV3(apiProject, projectPath, preferences):
+#
+#   projectPath = apiIo.ccpnProjectPath(projectPath)
+#
+#   needNewDirectory = False
+#   if os.path.exists(projectPath) and (os.path.isfile(projectPath) or os.listdir(projectPath)):
+#     # should not really need to check the second and third condition above, only
+#     # the Qt dialog stupidly insists a directory exists before you can select it
+#     # so if it exists but is empty then don't bother asking the question
+#     title = 'Overwrite path'
+#     msg ='Converting to V3 format, path "%s" already exists, overwrite?' % projectPath
+#     if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
+#       needNewDirectory = True
+#
+#   if not needNewDirectory:
+#     try:
+#       apiIo.saveProject(apiProject, newPath=projectPath)
+#       MessageDialog.showMessage('Project save', 'Project saved in v3 format at %s' % projectPath,
+#                                 colourScheme=preferences.general.colourScheme)
+#     except IOError as e:
+#       needNewDirectory = True
+#       MessageDialog.showMessage('Project save', 'Project could not be saved in V3 format at %s' % projectPath,
+#                                 colourScheme=preferences.general.colourScheme)
+#
+#   if needNewDirectory:
+#     projectPath = getSaveDirectory(apiProject, preferences)
+#     if projectPath:
+#       try:
+#         apiIo.saveProject(apiProject, newPath=projectPath, overwriteExisting=True)
+#       except IOError as e:
+#         MessageDialog.showMessage('Project save', 'Project could not be saved in V3 format at %s, quitting' % projectPath,
+#                                   colourScheme=preferences.general.colourScheme)
+#         projectPath = ''
+#
+#   return projectPath
+#
+#
+# class TestApplication(Framework):
+#
+#   def __init__(self,commandLineArguments):
+#
+#     AppBase.__init__(self, 'testApplication', '1.0',commandLineArguments)
+#
+# if __name__ == '__main__':
+#
+#   parser = defineProgramArguments()
+#   commandLineArguments = parser.parse_args()
+#   program = TestApplication(commandLineArguments)
+#   program.start()
+#
+#   # splash = SplashScreen()
+#   #
+#   # app.processEvents()
+#   # w = QtGui.QWidget()
+#   # w.resize(250, 150)
+#   # w.move(300, 300)
+#   # w.setWindowTitle('testApplication')
+#   # w.show()
+#   # #splash = showSplashScreen()
+#   # print(splash)
+#   # splash.info('test')
+#   # app.processEvents()
 
 
 

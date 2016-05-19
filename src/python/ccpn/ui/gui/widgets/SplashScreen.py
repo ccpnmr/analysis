@@ -22,6 +22,8 @@ __version__ = "$Revision: 9353 $"
 # Start of code
 #=========================================================================================
 
+import os
+
 from PyQt4 import QtGui, QtCore
 
 from ccpn.util import Path

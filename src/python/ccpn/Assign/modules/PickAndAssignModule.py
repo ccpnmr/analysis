@@ -29,7 +29,7 @@ class PickAndAssignModule(CcpnDock, Base):
     self.restrictedPickButton = Button(self.nmrResidueTable, text='Restricted Pick', callback=self._restrictedPick, grid=(0, 2))
     self.assignSelectedButton = Button(self.nmrResidueTable, text='Assign Selected', callback=self._assignSelected, grid=(0, 3))
     self.refreshButton = Button(self.nmrResidueTable, text='Refresh', callback=self._refresh, grid=(0, 4))
-    self.settingsButton = Button(self.nmrResidueTable, icon='iconsNew/applications-system', grid=(0, 5), hPolicy='fixed', toggle=True)
+    self.settingsButton = Button(self.nmrResidueTable, icon='icons/applications-system', grid=(0, 5), hPolicy='fixed', toggle=True)
     self.settingsButton.toggled.connect(self._toggleWidget2)
     self.settingsButton.setChecked(False)
     displaysLabel = Label(self.widget2, 'Selected Displays', grid=(0, 0))

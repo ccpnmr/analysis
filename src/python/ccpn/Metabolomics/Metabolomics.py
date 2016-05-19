@@ -168,10 +168,10 @@ class PipelineWidgets(QtGui.QWidget):
 
 
 
-    self.moveUpRowIcon = Icon('iconsNew/sort-up')
-    self.moveDownRowIcon = Icon('iconsNew/sort-down')
-    self.addRowIcon = Icon('iconsNew/plus')
-    self.removeRowIcon = Icon('iconsNew/minus')
+    self.moveUpRowIcon = Icon('icons/sort-up')
+    self.moveDownRowIcon = Icon('icons/sort-down')
+    self.addRowIcon = Icon('icons/plus')
+    self.removeRowIcon = Icon('icons/minus')
 
     self.mainWidgets = GroupBox(self)
     self.mainWidgets.setFixedHeight(80)

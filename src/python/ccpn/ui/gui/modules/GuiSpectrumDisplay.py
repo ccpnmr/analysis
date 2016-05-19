@@ -200,10 +200,10 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     Puts icons for addition and removal of strips into the spectrum utility toolbar.
     """
     addStripAction = self.spectrumUtilToolBar.addAction('Add Strip', self.duplicateStrip) #self.orderedStrips[0].clone()) # clone first strip
-    addStripIcon = Icon('iconsNew/plus')
+    addStripIcon = Icon('icons/plus')
     addStripAction.setIcon(addStripIcon)
     removeStripAction = self.spectrumUtilToolBar.addAction('Remove Strip', self.removeStrip) # remove last strip
-    removeStripIcon = Icon('iconsNew/minus')
+    removeStripIcon = Icon('icons/minus')
     removeStripAction.setIcon(removeStripIcon)
     self.removeStripAction = removeStripAction
 

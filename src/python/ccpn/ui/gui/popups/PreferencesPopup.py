@@ -56,12 +56,12 @@ class PreferencesPopup(QtGui.QDialog):
     self.dataPathText = LineEdit(self, grid=(row, 1))
     self.dataPathText.editingFinished.connect(self._setDataPath)
     self.dataPathText.setText(self.preferences.general.dataPath)
-    self.dataPathButton = Button(self, grid=(row, 2), callback=self._getDataPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.dataPathButton = Button(self, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
     row += 1
 
     self.auxiliaryFilesLabel = Label(self, text="Auxiliary Files Path ", grid=(row, 0))
     self.auxiliaryFilesData = LineEdit(self, grid=(row, 1))
-    self.auxiliaryFilesDataButton = Button(self, grid=(row, 2), callback=self._getAuxiliaryFilesPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.auxiliaryFilesDataButton = Button(self, grid=(row, 2), callback=self._getAuxiliaryFilesPath, icon='icons/directory', hPolicy='fixed')
     self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
     self.auxiliaryFilesData.editingFinished.connect(self._setAuxiliaryFilesPath)
     row += 1
@@ -69,7 +69,7 @@ class PreferencesPopup(QtGui.QDialog):
     self.macroPathLabel = Label(self, text="Macro Path", grid=(row, 0))
     self.macroPathData = LineEdit(self, grid=(row, 1))
     self.macroPathData.setText(self.preferences.general.macroPath)
-    self.macroPathDataButton = Button(self, grid=(row, 2), callback=self._getMacroFilesPath, icon='iconsNew/directory', hPolicy='fixed')
+    self.macroPathDataButton = Button(self, grid=(row, 2), callback=self._getMacroFilesPath, icon='icons/directory', hPolicy='fixed')
     self.macroPathData.editingFinished.connect(self._setMacroFilesPath)
     row += 1
 

@@ -315,7 +315,7 @@ class Framework:#
     with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
       yaml.dump(layout, stream)
       stream.close()
-    saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'iconsNew', 'save.png')
+    saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
     MessageDialog.showMessage('Project saved', 'Project successfully saved!',
                               colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 

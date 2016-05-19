@@ -44,7 +44,7 @@ class IntegrationWidget(QtGui.QWidget, Base):
     self.current = project._appBase.current
     self.linePoints = []
     self.integrationRegions = []
-    self.pickOnSpectrumButton = Button(self, grid=(0, 1), toggle=True, icon='iconsNew/target3+',hPolicy='fixed', callback=self.togglePicking)
+    self.pickOnSpectrumButton = Button(self, grid=(0, 1), toggle=True, icon='icons/target3+',hPolicy='fixed', callback=self.togglePicking)
     self.pickOnSpectrumButton.setChecked(False)
     self.currentAreaLabel = Label(self, 'Current Area ID ', grid=(0, 2))
     self.idLineEdit = LineEdit(self, grid=(0, 3))

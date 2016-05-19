@@ -32,16 +32,16 @@ class ShowScreeningHits(CcpnDock, Base):
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
 
     ######## ======== Icons ====== ########
-    self.acceptIcon = Icon('iconsNew/dialog-apply')
-    self.rejectIcon = Icon('iconsNew/reject')
-    self.nextAndCommitIcon = Icon('iconsNew/commitNextCopy')
-    self.previousAndCommitIcon = Icon('iconsNew/commitPrevCopy')
-    self.nextIcon = Icon('iconsNew/next')
-    self.previousIcon = Icon('iconsNew/previous')
-    self.undoIcon = Icon('iconsNew/edit-undo')
-    self.removeIcon = Icon('iconsNew/list-remove')
-    self.settingIcon = Icon('iconsNew/applications-system')
-    self.exportIcon = Icon('iconsNew/export')
+    self.acceptIcon = Icon('icons/dialog-apply')
+    self.rejectIcon = Icon('icons/reject')
+    self.nextAndCommitIcon = Icon('icons/commitNextCopy')
+    self.previousAndCommitIcon = Icon('icons/commitPrevCopy')
+    self.nextIcon = Icon('icons/next')
+    self.previousIcon = Icon('icons/previous')
+    self.undoIcon = Icon('icons/edit-undo')
+    self.removeIcon = Icon('icons/list-remove')
+    self.settingIcon = Icon('icons/applications-system')
+    self.exportIcon = Icon('icons/export')
 
     ######## ======== Set Main Layout ====== ########
     self.mainFrame = QtGui.QFrame()

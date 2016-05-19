@@ -30,7 +30,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.widgets.ColourDialog import inverseGrey
 
-ICON_FILE = path.join(path.dirname(__file__), 'iconsNew', 'editable.png')
+ICON_FILE = path.join(path.dirname(__file__), 'icons', 'editable.png')
 
 USER_ROLE = QtCore.Qt.UserRole
 EDIT_ROLE = QtCore.Qt.EditRole

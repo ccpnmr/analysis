@@ -40,8 +40,8 @@ class MixtureAnalysis(CcpnDock):
     self.listOfSample = []
 
     ######## ======== Icons ====== ########
-    self.settingIcon = Icon('iconsNew/applications-system')
-    self.exportIcon = Icon('iconsNew/export')
+    self.settingIcon = Icon('icons/applications-system')
+    self.exportIcon = Icon('icons/export')
 
     ######## ======== Set Main Layout ====== ########
     self.mainFrame = QtGui.QFrame()

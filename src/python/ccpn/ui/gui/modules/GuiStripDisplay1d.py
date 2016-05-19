@@ -149,19 +149,19 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     # Why does asking for the icon size fix it?  I don't know, but it does!
 
     autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self.resetYZooms)
-    autoScaleActionIcon = Icon('iconsNew/zoom-best-fit-1d')
+    autoScaleActionIcon = Icon('icons/zoom-best-fit-1d')
     # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
     autoScaleAction.setIcon(autoScaleActionIcon)
     # autoScaleAction.setText("AutoScale")
     fullZoomAction = spectrumUtilToolBar.addAction("Full", self.resetXZooms)
-    fullZoomIcon = Icon('iconsNew/zoom-full-1d')
+    fullZoomIcon = Icon('icons/zoom-full-1d')
     fullZoomAction.setIcon(fullZoomIcon)
     storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self._storeZoom)
-    storeZoomIcon = Icon('iconsNew/zoom-store')
+    storeZoomIcon = Icon('icons/zoom-store')
     storeZoomAction.setIcon(storeZoomIcon)
     storeZoomAction.setToolTip('Store Zoom')
     restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self._restoreZoom)
-    restoreZoomIcon = Icon('iconsNew/zoom-restore')
+    restoreZoomIcon = Icon('icons/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
 

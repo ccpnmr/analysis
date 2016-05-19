@@ -322,7 +322,7 @@ class ExcludeBaselinePoints(QtGui.QWidget, Base):
     self.pointBox1 = Spinbox(self, grid=(0, 1), max=100000000000, min=-100000000000)
     self.pointBox2 = Spinbox(self, grid=(0, 2), max=100000000000, min=-100000000000)
     self.current = project._appBase.current
-    self.pickOnSpectrumButton = Button(self, grid=(0, 3), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
+    self.pickOnSpectrumButton = Button(self, grid=(0, 3), toggle=True, icon='icons/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.multiplierLabel = Label(self, 'Baseline Multipler', grid=(0, 4))
     self.multiplierBox = DoubleSpinbox(self, grid=(0, 5))

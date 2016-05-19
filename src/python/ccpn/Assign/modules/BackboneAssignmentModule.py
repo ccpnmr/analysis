@@ -60,7 +60,7 @@ class BackboneAssignmentModule(CcpnDock):
     self.matchModules = []
     self.nmrResidueTable = NmrResidueTable(self.widget1, project, callback=self._startAssignment)
 
-    self.settingsButton = Button(self.nmrResidueTable, icon='iconsNew/applications-system',
+    self.settingsButton = Button(self.nmrResidueTable, icon='icons/applications-system',
                                 grid=(0, 5), hPolicy='fixed', toggle=True)
 
     self.layout.addWidget(self.nmrResidueTable, 0, 0, 1, 3)

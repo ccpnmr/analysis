@@ -91,7 +91,7 @@ class GeneralTab(QtGui.QWidget, Base):
     self.nameData.editingFinished.connect(self._changeSpectrumName)
     pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(2, 0))
     self.pathData = LineEdit(self, vAlign='t', grid=(2, 1))
-    self.pathButton = Button(self, grid=(2, 2), callback=self._getSpectrumFile, icon='iconsNew/applications-system')
+    self.pathButton = Button(self, grid=(2, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
 
     self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
@@ -128,7 +128,7 @@ class GeneralTab(QtGui.QWidget, Base):
       self.colourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.sliceColour))
       self.colourBox.currentIndexChanged.connect(partial(self._changedColourComboIndex, spectrum))
       colourButton = Button(self, vAlign='t', hAlign='l', grid=(6, 2), hPolicy='fixed',
-                            callback=partial(self._changeSpectrumColour, spectrum), icon='iconsNew/colours')
+                            callback=partial(self._changeSpectrumColour, spectrum), icon='icons/colours')
       spectrumTypeLabel = Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
       spectrumType = PulldownList(self, vAlign='t', grid=(7, 1))
       spectrumType.addItems(SPECTRA)
@@ -412,7 +412,7 @@ class ContoursTab(QtGui.QWidget, Base):
     except ValueError:
       pass
     self.positiveColourButton = Button(self, grid=(5, 2), vAlign='t', hAlign='l',
-                                       icon='iconsNew/colours', hPolicy='fixed')
+                                       icon='icons/colours', hPolicy='fixed')
     self.positiveColourButton.clicked.connect(partial(self._changePosSpectrumColour, spectrum))
 
 
@@ -455,7 +455,7 @@ class ContoursTab(QtGui.QWidget, Base):
     except ValueError:
       pass
 
-    self.negativeColourButton = Button(self, grid=(10, 2), icon='iconsNew/colours', hPolicy='fixed',
+    self.negativeColourButton = Button(self, grid=(10, 2), icon='icons/colours', hPolicy='fixed',
                                        vAlign='t', hAlign='l')
     self.negativeColourButton.clicked.connect(partial(self._changeNegSpectrumColour, spectrum))
 

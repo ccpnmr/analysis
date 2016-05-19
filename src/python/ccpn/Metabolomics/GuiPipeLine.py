@@ -53,7 +53,7 @@ class PolyBaseline(QtGui.QWidget, Base):
     # self.orderBox.setValue(2)
     self.orderBox.valueChanged.connect(self.updateLayout)
     self.controlPointsLabel = Label(self, 'Control Points ', grid=(0, 2))
-    self.pickOnSpectrumButton = Button(self, grid=(0, 9), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
+    self.pickOnSpectrumButton = Button(self, grid=(0, 9), toggle=True, icon='icons/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
     # self.mySignal1.connect(self.setSpinBoxSelected)
@@ -167,7 +167,7 @@ class AlignToReference(QtGui.QWidget, Base):
     Base.__init__(self, **kw)
     self.windowBoxes = []
     self.current = project._appBase.current
-    self.pickOnSpectrumButton = Button(self, grid=(0, 0), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
+    self.pickOnSpectrumButton = Button(self, grid=(0, 0), toggle=True, icon='icons/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
     self.region1 = DoubleSpinbox(self, grid=(0, 1))
@@ -248,7 +248,7 @@ class WhittakerBaseline(QtGui.QWidget, Base):
     self.linePoints = []
     self.points = []
     self.current = project._appBase.current
-    self.pickOnSpectrumButton =  Button(self, grid=(0, 0), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
+    self.pickOnSpectrumButton =  Button(self, grid=(0, 0), toggle=True, icon='icons/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
     self.checkBoxLabel = Label(self, 'Auto', grid=(0, 1))
@@ -298,7 +298,7 @@ class SegmentalAlign(QtGui.QWidget, Base):
     self.linePoints = []
     # self.points = []
     self.current = project._appBase.current
-    self.pickOnSpectrumButton =  Button(self, grid=(0, 0), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
+    self.pickOnSpectrumButton =  Button(self, grid=(0, 0), toggle=True, icon='icons/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
 
@@ -342,7 +342,7 @@ class ExcludeBaselinePoints(QtGui.QWidget, Base):
     self.pointBox1 = Spinbox(self, grid=(0, 1), max=100000000000, min=-100000000000)
     self.pointBox2 = Spinbox(self, grid=(0, 2), max=100000000000, min=-100000000000)
     self.current = project._appBase.current
-    self.pickOnSpectrumButton = Button(self, grid=(0, 3), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
+    self.pickOnSpectrumButton = Button(self, grid=(0, 3), toggle=True, icon='icons/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.multiplierLabel = Label(self, 'Baseline Multipler', grid=(0, 4))
     self.multiplierBox = DoubleSpinbox(self, grid=(0, 5))
@@ -460,7 +460,7 @@ class WhittakerSmooth(QtGui.QWidget, Base):
     self.linePoints = []
     self.points = []
     self.current = project._appBase.current
-    self.pickOnSpectrumButton = Button(self, grid=(0, 0), toggle=True, icon='iconsNew/target3+',hPolicy='fixed')
+    self.pickOnSpectrumButton = Button(self, grid=(0, 0), toggle=True, icon='icons/target3+',hPolicy='fixed')
     self.pickOnSpectrumButton.setChecked(False)
     self.pickOnSpectrumButton.toggled.connect(self.togglePicking)
     self.checkBoxLabel = Label(self, 'Auto', grid=(0, 1))

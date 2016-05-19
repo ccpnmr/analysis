@@ -55,7 +55,7 @@ from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
 # from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 
-def sufficientlyDifferentWidth(region1, region2):
+def _sufficientlyDifferentWidth(region1, region2):
   
   w1 = abs(region1[1] - region1[0])
   w2 = abs(region2[1] - region2[0])
@@ -63,7 +63,7 @@ def sufficientlyDifferentWidth(region1, region2):
   
   return d > 1.0e-5 * max(w1, w2)
     
-def scaleRegion(otherPreviousRegion, region, previousRegion):
+def _scaleRegion(otherPreviousRegion, region, previousRegion):
 
   otherPreviousRegionWidth = abs(otherPreviousRegion[1] - otherPreviousRegion[0])
   regionWidth = abs(region[1] - region[0])
@@ -377,8 +377,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       yPreviousRegion = self.yPreviousRegion
       xRegion, yRegion = viewBox.viewRange()
     
-      xIsChanged = sufficientlyDifferentWidth(xRegion, xPreviousRegion) if xPreviousRegion else True
-      yIsChanged = sufficientlyDifferentWidth(yRegion, yPreviousRegion) if yPreviousRegion else True
+      xIsChanged = _sufficientlyDifferentWidth(xRegion, xPreviousRegion) if xPreviousRegion else True
+      yIsChanged = _sufficientlyDifferentWidth(yRegion, yPreviousRegion) if yPreviousRegion else True
       
       spectrumDisplay = self.guiSpectrumDisplay
       if xIsChanged and yIsChanged and spectrumDisplay.stripDirection is not None:
@@ -388,14 +388,14 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
           otherStrip.beingUpdated = True
           if spectrumDisplay.stripDirection == 'Y':
             # x axis needs updating, y axis happens automatically below
-            xOtherRegion = scaleRegion(otherStrip.xPreviousRegion, yRegion, yPreviousRegion)
+            xOtherRegion = _scaleRegion(otherStrip.xPreviousRegion, yRegion, yPreviousRegion)
             otherStrip.viewBox.setXRange(*xOtherRegion)
             otherStrip.viewBox.setYRange(*yRegion)
             otherStrip.orderedAxes[0].region = otherStrip.xPreviousRegion = xOtherRegion
             otherStrip.yPreviousRegion = yRegion
           else: # spectrumDisplay.stripDirection == 'X'
             # y axis needs updating, x axis happens automatically below
-            yOtherRegion = scaleRegion(otherStrip.yPreviousRegion, xRegion, xPreviousRegion)
+            yOtherRegion = _scaleRegion(otherStrip.yPreviousRegion, xRegion, xPreviousRegion)
             otherStrip.viewBox.setYRange(*yOtherRegion)
             otherStrip.viewBox.setXRange(*xRegion)
             otherStrip.orderedAxes[1].region = otherStrip.yPreviousRegion = yOtherRegion

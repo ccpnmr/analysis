@@ -37,7 +37,7 @@ class ViewBox(pg.ViewBox):
     pg.ViewBox.__init__(self, *args, **kwds)
     self.current = current
     self.menu = None # Override pyqtgraph ViewBoxMenu
-    self.menu = self.getMenu()
+    self.menu = self._getMenu()
     self.current = current
     self.parent = parent
     self.selectionBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
@@ -53,24 +53,28 @@ class ViewBox(pg.ViewBox):
     self.pickBox.hide()
     self.addItem(self.pickBox, ignoreBounds=True)
     self.project = current._project
+    self.mouseClickEvent = self._mouseClickEvent
+    self.mouseDragEvent = self._mouseDragEvent
+    self.hoverEvent = self._hoverEvent
+    # self.getMenu = self._getMenu
 
     self.peakWidthPixels = 20  # for ND peaks
 
-  def raiseContextMenu(self, event:QtGui.QMouseEvent):
+  def _raiseContextMenu(self, event:QtGui.QMouseEvent):
     """
     Raise the context menu
     """
     position = event.screenPos()
     self.menu.popup(QtCore.QPoint(position.x(), position.y()))
 
-  def getMenu(self):
+  def _getMenu(self):
     if self.menu is None:
       self.menu = Menu('', self.parent(), isFloatWidget=True)
       return self.menu
 
 
 
-  def mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
+  def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
     Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
     click events.
@@ -156,13 +160,13 @@ class ViewBox(pg.ViewBox):
       if not event.modifiers():
         event.accept()
         if axis is None:
-          self.raiseContextMenu(event)
+          self._raiseContextMenu(event)
 
       elif (event.modifiers() & QtCore.Qt.ShiftModifier):
         event.accept()
 
 
-  def hoverEvent(self, event):
+  def _hoverEvent(self, event):
     self.current.viewBox = self
     if hasattr(event, '_scenePos'):
       self.position = self.mapSceneToView(event.pos())
@@ -191,7 +195,7 @@ class ViewBox(pg.ViewBox):
 
 
 
-  def mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
+  def _mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
     Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
     drag events.

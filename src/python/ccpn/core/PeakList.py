@@ -36,7 +36,6 @@ from ccpnmodel.ccpncore.lib.ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 from ccpnmodel.ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
 
-
 class PeakList(AbstractWrapperObject):
   """Peak List."""
   

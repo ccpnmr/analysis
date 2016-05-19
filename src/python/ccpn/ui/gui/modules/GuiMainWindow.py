@@ -524,7 +524,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if obj is not None:
       self.sideBar.raisePopup(obj, item)
     elif item.data(0, QtCore.Qt.DisplayRole) == '<New>':
-      self.sideBar.createNewObject(item)
+      self.sideBar._createNewObject(item)
 
     else:
       project._logger.error("Double-click activation not implemented for object %s" % obj)
@@ -901,7 +901,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
     self._appBase.preferences.recentMacros.append(macroFile)
     self._fillRecentMacrosMenu()
-    self.pythonConsole.runMacro(macroFile)
+    self.pythonConsole._runMacro(macroFile)
 
 
   def showPeakTable(self, position:str='left', relativeTo:CcpnDock=None, selectedList:PeakList=None):

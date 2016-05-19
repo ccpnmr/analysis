@@ -25,13 +25,14 @@ class SpinSystemLabel(DropBase, Label):
     DropBase.__init__(self, appBase)
     self.strip = strip
     self.parent = parent
+    self.mousePressEvent = self._mousePressEvent
     # self.project = appBase.project
     # if dragDrop is True:
     #   DropBase.__init__(self, self.parent().dockArea.guiWindow._appBase)
 
     self.setAcceptDrops(True)
 
-  def mousePressEvent(self, event:QtGui.QMouseEvent):
+  def _mousePressEvent(self, event:QtGui.QMouseEvent):
     """
     Re-implementation of the mouse press event to enable a strip to be dragged as a json object
     containing its pid and a modifier key to encode the direction to drop the strip.

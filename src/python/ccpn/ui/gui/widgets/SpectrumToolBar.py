@@ -45,10 +45,10 @@ class SpectrumToolBar(ToolBar):
     """
     if event.button() == QtCore.Qt.RightButton:
       button = self.childAt(event.pos())
-      menu = self.createContextMenu(button)
+      menu = self._createContextMenu(button)
       menu.popup(event.globalPos())
 
-  def createContextMenu(self, button:QtGui.QToolButton):
+  def _createContextMenu(self, button:QtGui.QToolButton):
     """
     Creates a context menu containing a command to delete the spectrum from the display and its
     button from the toolbar.
@@ -63,10 +63,10 @@ class SpectrumToolBar(ToolBar):
         if peakListView.isVisible():
           action.setChecked(True)
         action.toggled.connect(peakListView.setVisible)
-    contextMenu.addAction('Remove', partial(self.removeSpectrum, button))
+    contextMenu.addAction('Remove', partial(self._removeSpectrum, button))
     return contextMenu
 
-  def removeSpectrum(self, button:QtGui.QToolButton):
+  def _removeSpectrum(self, button:QtGui.QToolButton):
     """
     Removes the spectrum from the display and its button from the toolbar.
     """

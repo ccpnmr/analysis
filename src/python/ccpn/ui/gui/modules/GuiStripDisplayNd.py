@@ -92,19 +92,19 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     
     spectrumUtilToolBar = self.spectrumUtilToolBar
     
-    plusOneAction = spectrumUtilToolBar.addAction("+1", self.addOne)
+    plusOneAction = spectrumUtilToolBar.addAction("+1", self.addContourLevel)
     plusOneIcon = Icon('iconsNew/contour-add')
     plusOneAction.setIcon(plusOneIcon)
     plusOneAction.setToolTip('Add One Level')
-    minusOneAction = spectrumUtilToolBar.addAction("+1", self.subtractOne)
+    minusOneAction = spectrumUtilToolBar.addAction("+1", self.removeContourLevel)
     minusOneIcon = Icon('iconsNew/contour-remove')
     minusOneAction.setIcon(minusOneIcon)
     minusOneAction.setToolTip('Remove One Level ')
-    upBy2Action = spectrumUtilToolBar.addAction("*1.4", self.upBy2)
+    upBy2Action = spectrumUtilToolBar.addAction("*1.4", self.raiseContourBase)
     upBy2Icon = Icon('iconsNew/contour-base-up')
     upBy2Action.setIcon(upBy2Icon)
     upBy2Action.setToolTip('Raise Contour Base Level')
-    downBy2Action = spectrumUtilToolBar.addAction("/1.4", self.downBy2)
+    downBy2Action = spectrumUtilToolBar.addAction("/1.4", self.lowerContourBase)
     downBy2Icon = Icon('iconsNew/contour-base-down')
     downBy2Action.setIcon(downBy2Icon)
     downBy2Action.setToolTip('Lower Contour Base Level')
@@ -118,7 +118,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     restoreZoomAction.setToolTip('Restore Zoom')
 
 
-  def upBy2(self):
+  def raiseContourBase(self):
     """
     Increases contour base level for all spectra visible in the display.
     """
@@ -137,7 +137,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         self.project._logger.info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
         self.project._logger.info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
-  def downBy2(self):
+  def lowerContourBase(self):
     """
     Decreases contour base level for all spectra visible in the display.
     """
@@ -157,7 +157,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         self.project._logger.info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
 
-  def addOne(self):
+  def addContourLevel(self):
     """
     Increases number of contours by 1 for all spectra visible in the display.
     """
@@ -176,7 +176,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         self.project._logger.info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
 
 
-  def subtractOne(self):
+  def removeContourLevel(self):
     """
     Decreases number of contours by 1 for all spectra visible in the display.
     """

@@ -48,10 +48,10 @@ class AxisTextItem(pg.TextItem):
     plotWidget.scene().addItem(self)
 
 
-  def setUnits(self, units):
+  def _setUnits(self, units):
     self.units = units
 
-  def setAxisCode(self, axisCode):
+  def _setAxisCode(self, axisCode):
     self.axisCode = str(axisCode)
 
 

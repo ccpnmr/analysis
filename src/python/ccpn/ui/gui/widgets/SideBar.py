@@ -146,6 +146,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
     self.newNoteItem.setFlags(self.newNoteItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newNoteItem.setText(0, '<New>')
+    self.mousePressEvent = self._mousePressEvent
+    self.dragMoveEvent = self._dragMoveEvent
+    self.dragEnterEvent = self._dragEnterEvent
 
 
 
@@ -160,13 +163,13 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     notifier = project.registerNotifier('AbstractWrapperObject', 'create', self._createItem)
     notifier = project.registerNotifier('AbstractWrapperObject', 'delete', self._removeItem)
     notifier = project.registerNotifier('AbstractWrapperObject', 'rename', self._renameItem)
-    notifier = project.registerNotifier('SpectrumGroup', 'Spectrum', self.refreshSidebarSpectra,
+    notifier = project.registerNotifier('SpectrumGroup', 'Spectrum', self._refreshSidebarSpectra,
                                         onceOnly=True)
     project.duplicateNotifier('SpectrumGroup', 'create', notifier)
     project.duplicateNotifier('SpectrumGroup', 'delete', notifier)
 
 
-  def refreshSidebarSpectra(self, dummy:Project):
+  def _refreshSidebarSpectra(self, dummy:Project):
     """Reset spectra in sidebar - to be called from notifiers
     """
     for spectrum in self.project.spectra:
@@ -176,7 +179,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
 
 
-  def addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
+  def _addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
     """
     Adds a QTreeWidgetItem as a child of the item specified, which corresponds to the data object
     passed in.
@@ -186,27 +189,27 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     newItem.setData(0, QtCore.Qt.DisplayRole, str(pid))
     newItem.mousePressEvent = self.mousePressEvent
     return newItem
-
-  def renameItem(self, pid):
-    # item = FindItem
-    pass
+  #
+  # def renameItem(self, pid):
+  #   # item = FindItem
+  #   pass
 
   def processText(self, text, event=None):
     newNote = self.project.newNote()
     newNote.text = text
 
 
-  def mousePressEvent(self, event):
+  def _mousePressEvent(self, event):
     """
     Re-implementation of the mouse press event so right click can be used to delete items from the
     sidebar.
     """
     if event.button() == QtCore.Qt.RightButton:
-      self.raiseContextMenu(event, self.itemAt(event.pos()))
+      self._raiseContextMenu(event, self.itemAt(event.pos()))
     else:
       QtGui.QTreeWidget.mousePressEvent(self, event)
 
-  def raiseContextMenu(self, event:QtGui.QMouseEvent, item:QtGui.QTreeWidgetItem):
+  def _raiseContextMenu(self, event:QtGui.QMouseEvent, item:QtGui.QTreeWidgetItem):
     """
     Creates and raises a context menu enabling items to be deleted from the sidebar.
     """
@@ -241,14 +244,14 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       if spectrumGroups:
         for sg in spectrumGroups:
           for sgitem in self._findItems(str(sg.pid)):
-            self.addItem(sgitem, str(obj.pid))
+            self._addItem(sgitem, str(obj.pid))
 
         return
 
 
     if shortClassName in classesInTopLevel:
       itemParent = self._typeToItem.get(shortClassName)
-      newItem = self.addItem(itemParent, obj.pid)
+      newItem = self._addItem(itemParent, obj.pid)
 
       if shortClassName in ['SP', 'SA', 'NC']:
         newObjectItem = QtGui.QTreeWidgetItem(newItem)
@@ -257,27 +260,27 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
     elif shortClassName == 'PL':
       for itemParent in self._findItems(obj.spectrum.pid):
-        self.addItem(itemParent, obj.pid)
+        self._addItem(itemParent, obj.pid)
 
     elif shortClassName == 'SC':
       for itemParent in self._findItems(obj.sample.pid):
-        self.addItem(itemParent, obj.pid)
+        self._addItem(itemParent, obj.pid)
 
     elif shortClassName == 'NR':
       for itemParent in self._findItems(obj.nmrChain.pid):
-        self.addItem(itemParent, obj.pid)
+        self._addItem(itemParent, obj.pid)
 
     elif shortClassName == 'NA':
       for itemParent in self._findItems(obj.nmrResidue.pid):
-        self.addItem(itemParent, obj.pid)
+        self._addItem(itemParent, obj.pid)
 
     elif shortClassName == 'RL':
       for itemParent in self._findItems(obj.dataSet.pid):
-        self.addItem(itemParent, obj.pid)
+        self._addItem(itemParent, obj.pid)
 
     elif shortClassName == 'MO':
       for itemParent in self._findItems(obj.structureEnsemble.pid):
-        self.addItem(itemParent, obj.pid)
+        self._addItem(itemParent, obj.pid)
 
     else:
       # Object type is not in sidebar
@@ -323,7 +326,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         for obj in sorted(dd.values()):
           self._createItem(obj)
 
-  def dragEnterEvent(self, event, enter=True):
+  def _dragEnterEvent(self, event, enter=True):
     if event.mimeData().hasUrls():
       event.accept()
     else:
@@ -337,7 +340,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           event.mimeData().setText(itemData)
 
 
-  def dragMoveEvent(self, event:QtGui.QMouseEvent):
+  def _dragMoveEvent(self, event:QtGui.QMouseEvent):
     """
     Required function to enable dragging and dropping within the sidebar.
     """
@@ -427,7 +430,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     elif obj.shortClassName == 'NO':
       self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, self.project, name='Notes Editor', note=obj)
 
-  def createNewObject(self, item):
+  def _createNewObject(self, item):
     """Create new object starting from the <New> item
     """
 

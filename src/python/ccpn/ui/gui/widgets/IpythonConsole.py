@@ -42,12 +42,12 @@ class IpythonConsole(Widget, Base):
         consoleLayout.addWidget(self.ipythonWidget)
 
         runMacroButton = QtGui.QPushButton()
-        runMacroButton.clicked.connect(self.runMacro)
+        runMacroButton.clicked.connect(self._runMacro)
         runMacroButton.setText('Run Macro')
         buttonLayout.addWidget(runMacroButton)
 
         historyButton = QtGui.QPushButton()
-        historyButton.clicked.connect(self.showHistory)
+        historyButton.clicked.connect(self._showHistory)
         historyButton.setText('Show History')
         buttonLayout.addWidget(historyButton, 0, 1)
         km.kernel.shell.push(namespace)
@@ -56,24 +56,25 @@ class IpythonConsole(Widget, Base):
     def setProject(self, project):
       self.project = project
 
-    def runMacro(self, macroFile:str):
+    def _runMacro(self, macroFile:str):
       """
+      # CCPN INTERNAL - called in runMacro method of GuiMainWindow.
       Executes the specified macro file in the python console.
       """
       if macroFile:
         self.ipythonWidget.execute('%run -i {}'.format(macroFile))
 
 
-    def showHistory(self):
+    def _showHistory(self):
       """
       Shows the history of commands executed inside the python console.
       """
       self.ipythonWidget.execute('%history')
 
 
-    def write(self, msg:str, html=False):
+    def _write(self, msg:str, html=False):
       """
-      Writes the specified string to the python console text box.
+      writes the specified string to the python console text box.
       """
       self.textEditor.moveCursor(QtGui.QTextCursor.End)
       if html:
@@ -86,7 +87,7 @@ class IpythonConsole(Widget, Base):
         self.mainWindow.macroEditor.textBox.insertPlainText(msg)
 
 
-    def setUndoWaypoint(self):
+    def _setUndoWaypoint(self):
       """Set Undo waypoint, if undo is present"""
       if hasattr(self, 'project'):
         undo = self.project._undo
@@ -113,13 +114,13 @@ class IpythonConsole(Widget, Base):
         value = objectParameters[parameter]
         if not isinstance(value, str):
           value = value.pid
-        self.write("%s = project.getByPid('%s')\n" % (parameter, value))
+        self._write("%s = project.getByPid('%s')\n" % (parameter, value))
 
       # execute command
-      self.write(command + '\n')
+      self._write(command + '\n')
 
       # set undo step
-      self.setUndoWaypoint()
+      self._setUndoWaypoint()
 
 
 

@@ -73,7 +73,7 @@ _wrappedClasses = []
 for className in _importOrder:
   _wrappedClasses.append(
     getattr(importlib.import_module('ccpn.ui.gui.core.%s'
-                                    % class2file.get(className, className), className)
+                                    % class2file.get(className, className)), className)
   )
 #
 # # Add class list for extended sphinx documentation to module

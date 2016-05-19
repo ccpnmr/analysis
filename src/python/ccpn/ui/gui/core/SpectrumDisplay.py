@@ -29,8 +29,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Spectrum import Spectrum
-from ccpn.ui.gui._implementation.Task import Task
-from ccpn.ui.gui._implementation.Window import Window
+from ccpn.ui.gui.core.Task import Task
+from ccpn.ui.gui.core.Window import Window
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
@@ -219,7 +219,7 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
     else:
       name = ''.join([str(x) for x in axisCodes])
   elif Pid.altCharacter in name:
-    raise ValueError("Character %s not allowed in _implementation.SpectrumDisplay.name" % Pid.altCharacter)
+    raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
   while apiTask.findFirstModule(name=name):
     name = commonUtil.incrementName(name)
   displayPars['name'] = name
@@ -280,7 +280,7 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
   """
 
   if name and Pid.altCharacter in name:
-    raise ValueError("Character %s not allowed in _implementation.SpectrumDisplay.name" % Pid.altCharacter)
+    raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
 
   spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 

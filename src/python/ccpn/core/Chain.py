@@ -148,7 +148,7 @@ class Chain(AbstractWrapperObject):
     return self._project._data2Obj[newCcpnChain]
                                   
 
-  def finalise(self):
+  def _lock(self):
     """Finalize chain so that it can no longer be modified, and add missing data."""
     self._wrappedData.molecule.isFinalised = True
 

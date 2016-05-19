@@ -218,7 +218,6 @@ loadProject = ccpnIo.loadProject
 newProject = ccpnIo.newProject
 
 # Make {shortClassName: className} map. NB may be added to by importing modules
-# (ccpn.ui.gui import _implementation)
 for cls in _wrappedClasses:
   className = cls.className if hasattr(cls, 'className') else cls.__class__.__name__
   _pluralPidTypeMap[cls.shortClassName] = _pluralPidTypeMap[className] = className + 's'

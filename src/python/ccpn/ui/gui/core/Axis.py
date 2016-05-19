@@ -26,7 +26,7 @@ from ccpn.util import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.ui.gui._implementation.Strip import Strip
+from ccpn.ui.gui.core.Strip import Strip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis

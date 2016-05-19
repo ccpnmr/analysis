@@ -25,7 +25,7 @@ from collections import namedtuple
 from typing import Sequence, Tuple
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.ui.gui._implementation.Task import Task
+from ccpn.ui.gui.core.Task import Task
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 

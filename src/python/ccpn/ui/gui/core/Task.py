@@ -25,7 +25,7 @@ from ccpn.util import Pid
 from typing import Sequence, Tuple
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.ui.gui._implementation.Window import Window
+from ccpn.ui.gui.core.Window import Window
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import GuiTask as ApiGuiTask
 
 
@@ -156,10 +156,10 @@ def _newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Ta
 
   for ss in name, nameSpace:
     if ss and Pid.altCharacter in ss:
-      raise ValueError("Character %s not allowed in _implementation.Task i %s.%sd"
+      raise ValueError("Character %s not allowed in gui.core.Task i %s.%sd"
                        % (Pid.altCharacter, nameSpace, name))
 
-  nmrProject = self.nmrProject
+  nmrProject = self._wrappedData
   dd = {'name':name, 'nmrProject':nmrProject, 'details':comment}
   if nameSpace is not None:
     dd['nameSpace'] = nameSpace

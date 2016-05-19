@@ -101,7 +101,7 @@ def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -
   :param tuple position: x,y position for new window in integer pixels"""
 
   if title and Pid.altCharacter in title:
-    raise ValueError("Character %s not allowed in _implementation.Window.title" % Pid.altCharacter)
+    raise ValueError("Character %s not allowed in gui.core.Window.title" % Pid.altCharacter)
 
   windowStore = self.nmrProject.windowStore
 

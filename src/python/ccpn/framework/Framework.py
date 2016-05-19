@@ -25,10 +25,10 @@ import json
 import platform
 
 from ccpn.core.Project import Project
+from ccpn.ui.gui import core # NB Neccessary to force load of graphics classes
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpnmodel.ccpncore.api.memops import Implementation
-from ccpn.ui.gui import _implementation # NB Neccessary to force load of graphics classes
 
 from ccpn.ui.gui.Current import Current
 

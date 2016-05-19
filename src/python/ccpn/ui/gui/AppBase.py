@@ -30,7 +30,7 @@ import platform
 from PyQt4 import QtGui, QtCore
 
 from ccpn.core.Project import Project
-from ccpn.ui.gui import _implementation # NB Neccessary to force load of graphics classes
+from ccpn.ui.gui import core # NB Neccessary to force load of graphics classes
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.ui.gui.widgets.Application import Application
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil

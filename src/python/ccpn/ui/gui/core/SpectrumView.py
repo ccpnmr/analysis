@@ -30,7 +30,7 @@ from ccpn.util import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpn.ui.gui._implementation.Strip import Strip
+from ccpn.ui.gui.core.Strip import Strip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpn.ui.gui.modules.GuiSpectrumView1d import GuiSpectrumView1d

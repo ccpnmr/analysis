@@ -22,7 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-# icons directory removed in revision
+# icons directory removed in revision 9360
+# iconsNew renamed to icons in revision 9361
 
 from PyQt4 import QtGui, QtCore
 

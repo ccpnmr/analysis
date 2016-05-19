@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
@@ -52,12 +52,12 @@ class MyThread(QtCore.QThread):
             self.updated.emit(str(i))
 
 
-class MetabolomicsModule(CcpnDock, Base):
+class MetabolomicsModule(CcpnModule, Base):
 
   def __init__(self, project, **kw):
 
     super(MetabolomicsModule, self)
-    CcpnDock.__init__(self, name='Metabolomics')
+    CcpnModule.__init__(self, name='Metabolomics')
     Base.__init__(self, **kw)
     self.project = project
     self.mDict = MetabolomicsPersistenceDict()

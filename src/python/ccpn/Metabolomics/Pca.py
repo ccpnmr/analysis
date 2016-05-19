@@ -27,7 +27,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -40,12 +40,12 @@ from ccpn.Metabolomics.lib.decomposition import PCA
 import pyqtgraph as pg
 
 
-class PcaModule(CcpnDock, Base):
+class PcaModule(CcpnModule, Base):
 
   def __init__(self, project, **kw):
 
     super(PcaModule, self)
-    CcpnDock.__init__(self, name='PCA')
+    CcpnModule.__init__(self, name='PCA')
     Base.__init__(self, **kw)
     self.project = project
     self.mDict = MetabolomicsPersistenceDict()
@@ -136,4 +136,4 @@ class PcaModule(CcpnDock, Base):
     if self.spectrum:
       spectrumDisplay = self.createSpectrumDisplay(spectrum=None)
       self.setSpectrumDisplay(spectrumDisplay)
-      self.project._appBase.mainWindow.dockArea.moveDock(spectrumDisplay.dock, position='bottom', neighbor=self)
+      self.project._appBase.mainWindow.moduleArea.moveModule(spectrumDisplay.module, position='bottom', neighbor=self)

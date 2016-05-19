@@ -61,6 +61,7 @@ classesInTopLevel =('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
 #
 # Try putting in e.g. <New PeakList>, <New SampleComponent> etc.
 NEW_ITEM_DICT = {
+
   'SP': 'newPeakList',
   'NC': 'newNmrResidue',
   'NR': 'newNmrAtom',
@@ -75,6 +76,7 @@ NEW_ITEM_DICT = {
   'Substances': 'newSubstance',
   'Chemical Shift Lists': 'newChemicalShiftList',
   'Data Sets': 'newDataSet',
+  'SpectrumGroups': 'newSpectrumGroup',
 }
 ### Flag example code removed in revision 7686
 
@@ -428,7 +430,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           'This function has not been implemented in the current version',
           colourScheme=self.colourScheme)
     elif obj.shortClassName == 'NO':
-      self.notesEditor = NotesEditor(self._appBase.mainWindow.dockArea, self.project, name='Notes Editor', note=obj)
+      self.notesEditor = NotesEditor(self._appBase.mainWindow.moduleArea, self.project, name='Notes Editor', note=obj)
 
   def _createNewObject(self, item):
     """Create new object starting from the <New> item
@@ -440,7 +442,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     # The assumes that each parent can have only ONE kind of new child.
     # This is true as of 16/2/2016, but may NOT remain true
     # (e.g. Spectrum has multiple children).
-
 
     itemParent = self.project.getByPid(item.parent().text(0))
 
@@ -474,9 +475,11 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         return
       else:
         funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
-
     if funcName is not None:
-      getattr(itemParent, funcName)()
+      if (item.parent().text(0)) == 'SpectrumGroups':
+        getattr(itemParent, funcName)('NewSpectrumGroup')
+      else:
+        getattr(itemParent, funcName)()
     else:
       info = showInfo('Not implemented yet!',
           'This function has not been implemented in the current version',

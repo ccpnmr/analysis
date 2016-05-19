@@ -27,7 +27,8 @@ __author__ = 'simon'
 
 from PyQt4 import QtGui
 
-from pyqtgraph.dockarea import DockArea
+# from pyqtgraph.modulearea import DockArea
+from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
 # from ccpnmodel.ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
 from ccpn.core.lib.Assignment import propagateAssignments
@@ -44,21 +45,26 @@ class GuiWindow(DropBase):
     
     DropBase.__init__(self, self._parent._appBase)
 
-    self.dockArea = DockArea()
-    self.dockArea.guiWindow = self
-    self.dockArea.setGeometry(0, 0, 12000, 8000)
+    self.moduleArea = CcpnModuleArea()
+    # self.moduleArea = DockArea()
+    self.moduleArea.guiWindow = self
+    self.moduleArea.setGeometry(0, 0, 12000, 8000)
     if not self._wrappedData.modules:
-      self.blankDisplay = GuiBlankDisplay(self.dockArea)
+      self.blankDisplay = GuiBlankDisplay(self.moduleArea)
+      self.moduleArea.addModule(self.blankDisplay, position=None)
 
             
   def deleteBlankDisplay(self):
     """
-    Removes blank display from main window dockarea if one is present.
+    Removes blank display from main window modulearea if one is present.
     """
-    if self.blankDisplay:
-      self.blankDisplay.setParent(None)
-      self.blankDisplay = None
-          
+    if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
+      blankDisplay = self.moduleArea.findAll()[1]['BLANK DISPLAY']
+      blankDisplay.close()
+    # if self.blankDisplay:
+    #   self.blankDisplay.setParent(None)
+    #   self.blankDisplay = None
+    #
   def loadData(self, paths=None, text=None):
     """
     Opens a file dialog box and loads data from selected file.
@@ -102,11 +108,11 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot)
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace)
-    QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.setCurrentPositionAndStrip)
+    QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip)
 
 
 
-  def setCurrentPositionAndStrip(self):
+  def getCurrentPositionAndStrip(self):
     current = self._appBase.current
     current.strip = current.viewBox.parentObject().parent
     position = [current.viewBox.position.x(),

@@ -31,7 +31,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.lib.Assignment import getNmrResiduePrediction
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Font import Font
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 
@@ -142,7 +142,7 @@ class AssignmentLine(QtGui.QGraphicsLineItem):
     self.setLine(x1, y1, x2, y2)
 
 
-class SequenceGraph(CcpnDock):
+class SequenceGraph(CcpnModule):
   """
   A module for the display of stretches of sequentially linked and assigned stretches of
   Nmr Residues.

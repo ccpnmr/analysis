@@ -7,7 +7,7 @@ import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
 from ccpn.Screen.lib.Screening import writeBruker, createStdDifferenceSpectrum, matchedPosition
 
-from ccpn.Screen.modules import ShowScreeningHits
+from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -222,7 +222,7 @@ class MatchPeaks(QtGui.QWidget):
     QtGui.QWidget.__init__(self, parent)
 
     self.project = project
-    self.screeningSettingDock = parent.parent()
+    self.screeningSettingModule = parent.parent()
 
     self.minimumDistanceValue = str(0.005)
 
@@ -282,14 +282,14 @@ class MatchPeaks(QtGui.QWidget):
 
 
   def _showHitsModule(self):
-    self.screeningSettingDock.close()
+    # self.screeningSettingModule.close()
     showScreeningHits = ShowScreeningHits(self.project)
     self.mainWindow = self.project._appBase.mainWindow
-    showScreeningHitsDock = self.mainWindow.dockArea.addDock(showScreeningHits, position='bottom')
+    showScreeningHitsModule = self.mainWindow.moduleArea.addModule(showScreeningHits, position='bottom')
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
 
-    self.mainWindow.dockArea.moveDock(spectrumDisplay.dock, position='top', neighbor=showScreeningHitsDock)
-    self.mainWindow.dockArea.guiWindow.deleteBlankDisplay()
+    self.mainWindow.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=showScreeningHitsModule)
+    self.mainWindow.moduleArea.guiWindow.deleteBlankDisplay()
 
     self.project.strips[0].viewBox.autoRange()
 

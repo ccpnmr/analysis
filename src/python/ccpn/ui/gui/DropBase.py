@@ -24,9 +24,8 @@ __version__ = "$Revision$"
 
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.Base import Base as GuiBase
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-
 
 class DropBase(GuiBase):
 
@@ -39,13 +38,15 @@ class DropBase(GuiBase):
 
   def dropEvent(self, event):
     """Catch dropEvent and dispatch to processing"""
-
     from ccpn.ui.gui.lib import Qt as qtUtil
 
     data, dataType = qtUtil.interpretEvent(event)
     if data and dataType:
       event.accept()
       self.processDropData(data, dataType, event)
+    else:
+      if isinstance(self, CcpnModule):# restore the native  module drop event.
+        CcpnModule.dropEvent(self, event)
 
 
 
@@ -53,7 +54,6 @@ class DropBase(GuiBase):
     """ Process dropped-in data
     Separate function so it can be called from command line as well.
     """
-
     project = self._appBase.project
 
     if dataType == 'text':
@@ -98,7 +98,7 @@ class DropBase(GuiBase):
                 pids.extend(newPids)
 
           else:
-            if isinstance(self, CcpnDock):
+            if isinstance(self, CcpnModule):
               self.overlay.hide()
 
         for pid in pids:

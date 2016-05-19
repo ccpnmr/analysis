@@ -4,15 +4,15 @@ from PyQt4 import QtGui
 
 from ccpn.core.lib.Assignment import CCP_CODES
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 
-class ResidueInformation(CcpnDock, Base):
+class ResidueInformation(CcpnModule, Base):
 
   def __init__(self, parent=None, project=None, **kw):
-    CcpnDock.__init__(self, name='Residue Information')
+    CcpnModule.__init__(self, name='Residue Information')
     Base.__init__(self, **kw)
 
     chainLabel = Label(self, text='Chain')

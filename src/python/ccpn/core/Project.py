@@ -769,6 +769,13 @@ class Project(AbstractWrapperObject):
     # e.g. ('Spectrum', 'Bruker', newUrl)
     if dataType is None:
       print("Skipping: file data type not recognised for %s" % usePath)
+
+    elif dataType == 'Dirs':
+      # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
+      paths = usePath
+      for path in paths:
+        self.loadData(path)
+
     elif not os.path.exists(usePath):
       print("Skipping: no file found at %s" % usePath)
     elif dataType == 'Text':
@@ -840,8 +847,6 @@ class Project(AbstractWrapperObject):
       spectrum.resetAssignmentTolerances()
       return [spectrum]
 
-  #
-  #
   def _loadLookupFile(self, path:str, subType:str, ):
     """Load data from a look-up file, csv or xls ."""
 

@@ -12,7 +12,7 @@ from ccpn.ui.gui.lib.Window import navigateToPeakPosition
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -24,17 +24,17 @@ green = QtGui.QColor('Green')
 red = QtGui.QColor('Red')
 yellow = QtGui.QColor('yellow')
 
-class MixtureAnalysis(CcpnDock):
+class MixtureAnalysis(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
   def __init__(self, project):
     super(MixtureAnalysis, self)
-    CcpnDock.__init__(self, name='Mixture Analysis')
+    CcpnModule.__init__(self, name='Mixture Analysis')
 
     self.project = project
     self.mainWindow = self.project._appBase.mainWindow
-    self.dockArea = self.mainWindow.dockArea
+    self.moduleArea = self.mainWindow.moduleArea
     self.generalPreferences = self.project._appBase.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
     self.listOfSample = []
@@ -700,13 +700,13 @@ class MixtureAnalysis(CcpnDock):
   def _openNewDisplay(self):
     ''' opens a new spectrum display '''
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
-    self.dockArea.moveDock(spectrumDisplay.dock, position='top', neighbor=self)
+    self.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=self)
     return spectrumDisplay
 
   def _closeBlankDisplay(self):
-    ''' deletes a dock display if present one '''
-    if 'BLANK DISPLAY' in self.dockArea.findAll()[1]:
-      self.dockArea.guiWindow.deleteBlankDisplay()
+    ''' deletes a module display if present one '''
+    if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
+      self.moduleArea.guiWindow.deleteBlankDisplay()
 
 
   ''' ######## ==== Settings  ====  ########   '''
@@ -714,7 +714,7 @@ class MixtureAnalysis(CcpnDock):
   def _createSettingGroup(self):
     '''GroupBox creates the settingGroup'''
     self.settingButtons = ButtonList(self, texts = ['','',],
-                                     callbacks=[None, self._openOptimisationModule], icons=[self.exportIcon, self.settingIcon, ],
+                                     callbacks=[self._exportMixturesToXlsx, self._openOptimisationModule], icons=[self.exportIcon, self.settingIcon, ],
                                      tipTexts=['', ''], direction='H')
     self.settingButtons.setStyleSheet("background-color: transparent")
     self.settingFrameLayout.addStretch(1)
@@ -732,15 +732,23 @@ class MixtureAnalysis(CcpnDock):
     # sampleComponents = [str(sample.spectra) for sample in self.project.samples]
     # df = DataFrame({'Mixture name': sampleColumn, 'Sample Components': sampleComponents})
     # df.to_excel(self.nameAndPath, sheet_name='sheet1', index=False)
-  # def closeDock(self):
+  # def closeModule(self):
   #
-  #   for dock in self.dockArea.findAll()[1].values():
-  #     if dock.label.isHidden():
-  #       dock.close()
+  #   for module in self.moduleArea.findAll()[1].values():
+  #     if module.label.isHidden():
+  #       module.close()
   #   self.close()
+  def _exportMixturesToXlsx(self):
+    ''' Export a simple xlxs file from the results '''
+    dataFrame = self.createDataFrame()
+
+    fType = 'XLSX (*.xlsx)'
+    dialog = QtGui.QFileDialog
+    filePath = dialog.getSaveFileName(self, filter=fType)
+    dataFrame.to_excel(filePath, sheet_name='Mixtures', index=False)
 
   def _openOptimisationModule(self):
     mixtureOptimisation = MixtureOptimisation(self.project)
-    mixtureOptimisationDock = self.dockArea.addDock(mixtureOptimisation, position='bottom')
+    mixtureOptimisationModule = self.moduleArea.addModule(mixtureOptimisation, position='bottom')
 
 

@@ -105,7 +105,7 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
 
     if hasattr(guiSpectrumDisplay, 'isGrouped'):
       if len(spectrumGroups)>0:
-        spectrumGroupToolBar = guiSpectrumDisplay.strips[0].spectrumDisplay.dock.children()[2].children()[-1]
+        spectrumGroupToolBar = guiSpectrumDisplay.strips[0].spectrumDisplay.module.children()[2].children()[-1]
         spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
         spectrumGroupToolBar.addWidget(spectrumGroupButton)
         for spectrum in spectrumGroups[0].spectra:

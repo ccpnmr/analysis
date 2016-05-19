@@ -21,7 +21,7 @@ class SamplePopup(QtGui.QDialog):
 
     self.project = project
     self.mainWindow = self.project._appBase.mainWindow
-    self.dockArea = self.mainWindow.dockArea
+    self.moduleArea = self.mainWindow.moduleArea
     self.generalPreferences = self.project._appBase.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
 
@@ -250,8 +250,8 @@ class SamplePopup(QtGui.QDialog):
     if len(mixtures)>0:
       for mixture in mixtures:
         mixture.delete()
-    if 'MIXTURE ANALYSIS' in self.dockArea.findAll()[1]:
-      self.dockArea.docks['MIXTURE ANALYSIS'].close()
+    if 'MIXTURE ANALYSIS' in self.moduleArea.findAll()[1]:
+      self.moduleArea.modules['MIXTURE ANALYSIS'].close()
 
 
   def genereteMixture(self):
@@ -307,13 +307,13 @@ class SamplePopup(QtGui.QDialog):
   def _openMixtureAnalysisModule(self):
     '''   '''
     mixtureAnalysis = MixtureAnalysis(self.project)
-    mixtureAnalysisDock = self.dockArea.addDock(mixtureAnalysis, position='bottom')
+    mixtureAnalysisModule = self.moduleArea.addModule(mixtureAnalysis, position='bottom')
 
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
     spectrumDisplay.setWhatsThis('MixtureDisplay')
 
-    self.dockArea.moveDock(spectrumDisplay.dock, position='top', neighbor=mixtureAnalysisDock)
-    self.dockArea.guiWindow.deleteBlankDisplay()
+    self.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=mixtureAnalysisModule)
+    self.moduleArea.guiWindow.deleteBlankDisplay()
     self.project.strips[0].viewBox.autoRange()
 
     currentDisplayed = self.project.strips[0]

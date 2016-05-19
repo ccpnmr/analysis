@@ -33,7 +33,7 @@ from ccpn.core.lib.Assignment import isInterOnlyExpt, getNmrAtomPrediction, CCP_
 from ccpn.ui.gui.lib.PeakAssignment import peaksAreOnLine
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
@@ -43,13 +43,13 @@ from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, 
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 
-class AtomSelector(CcpnDock):
+class AtomSelector(CcpnModule):
   """
   Module to be used with PickAndAssignModule for prediction of nmrAtom names and assignment of nmrAtoms
   to peak dimensions
   """
   def __init__(self, parent, project=None):
-    CcpnDock.__init__(self, name='Atom Selector')
+    CcpnModule.__init__(self, name='Atom Selector')
     self.orientation = 'vertical'
     self.moveLabel=False
     self.pickAndAssignWidget = Widget(self)
@@ -72,10 +72,10 @@ class AtomSelector(CcpnDock):
     self.molTypePulldown.setData(['protein', 'DNA', 'RNA', 'carbohydrate', 'other'])
     self.layout.addWidget(self.pickAndAssignWidget, 1, 0, 3, 8)
     self.current.registerNotify(self._updateWidget, 'nmrResidues')
-    self.closeDock = self._closeDock
+    self.closeModule = self._closeModule
     self.buttons = {}
     
-  def _closeDock(self):
+  def _closeModule(self):
     self.current.unRegisterNotify(self._predictAssignments, 'peaks')
     self.current.unRegisterNotify(self._updateWidget, 'nmrResidues')
     self.close()
@@ -266,7 +266,7 @@ class AtomSelector(CcpnDock):
     if self.parent._appBase.preferences.general.colourScheme == 'dark':
       styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
                                      'DarkStyleSheet.qss')).read()
-      self.setStyleSheet('''DockLabel  {
+      self.setStyleSheet('''ModuleLabel  {
                                         background-color: #BEC4F3;
                                         color: #122043;
                                         border: 1px solid #00092D;

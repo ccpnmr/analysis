@@ -5,7 +5,7 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
@@ -17,11 +17,11 @@ from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 from ccpn.ui.gui.lib.Window import navigateToNmrResidue
 
-class PickAndAssignModule(CcpnDock, Base):
+class PickAndAssignModule(CcpnModule, Base):
 
   def __init__(self, parent=None, project=None, **kw):
 
-    CcpnDock.__init__(self, parent=None, name='Pick And Assign')
+    CcpnModule.__init__(self, parent=None, name='Pick And Assign')
     Base.__init__(self, **kw)
     self.project = project
     self.current = project._appBase.current

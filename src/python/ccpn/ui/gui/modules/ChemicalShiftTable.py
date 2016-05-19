@@ -1,6 +1,6 @@
 __author__ = 'simon1'
 
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
@@ -8,13 +8,13 @@ from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from PyQt4 import QtGui, QtCore
 
 
-class ChemicalShiftTable(CcpnDock):
+class ChemicalShiftTable(CcpnModule):
   def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Table', **kw):
 
     if not chemicalShiftLists:
       chemicalShiftLists = []
 
-    CcpnDock.__init__(self, name=name)
+    CcpnModule.__init__(self, name=name)
 
     self.chemicalShiftLists = chemicalShiftLists
 
@@ -72,7 +72,7 @@ class NmrAtomShiftTable(ChemicalShiftTable):
     if not chemicalShiftLists:
       chemicalShiftLists = []
 
-    CcpnDock.__init__(self, name=name)
+    CcpnModule.__init__(self, name=name)
 
     self.chemicalShiftLists = chemicalShiftLists
 

@@ -7,7 +7,7 @@ from PyQt4 import QtCore, QtGui
 from ccpn.Screen.modules import ScreeningPipeline as sp
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
@@ -18,13 +18,13 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
-class ScreeningSettings(CcpnDock):
+class ScreeningSettings(CcpnModule):
   def __init__(self, project, **kw):
     super(ScreeningSettings, self)
-    CcpnDock.__init__(self, name='Screening Settings')
+    CcpnModule.__init__(self, name='Screening Settings')
     self.project = project
     # self.setFixedHeight(400)
-    self.dockArea = self.project._appBase.mainWindow.dockArea
+    self.moduleArea = self.project._appBase.mainWindow.moduleArea
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
 
     self.mainFrame = QtGui.QFrame()

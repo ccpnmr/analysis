@@ -16,14 +16,14 @@ from ccpn.ui.gui.lib.PeakAssignment import (nmrAtomsForPeaks,
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpnmodel.ccpncore.lib.Constants import  defaultNmrChainCode
 
-class PeakAssigner(CcpnDock, Base):
+class PeakAssigner(CcpnModule, Base):
   '''Module that can be used to assign nmrAtoms
      to peaks.
 
@@ -31,7 +31,7 @@ class PeakAssigner(CcpnDock, Base):
 
   def __init__(self, parent=None, project:Project=None, peaks:typing.List[Peak]=None, **kw):
 
-    CcpnDock.__init__(self, name="Peak Assigner")
+    CcpnModule.__init__(self, name="Peak Assigner")
     Base.__init__(self, **kw)
     self.project = project
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
@@ -80,7 +80,7 @@ class PeakAssigner(CcpnDock, Base):
     self.current.registerNotify(self._updateInterface, 'peaks')
     self._updateInterface()
 
-    self.closeDock = self._closeDock
+    self.closeModule = self._closeModule
 
 
 
@@ -516,9 +516,9 @@ class PeakAssigner(CcpnDock, Base):
 
     self.listWidgets[dim].addItem(nmrAtom.pid)
 
-  def _closeDock(self):
+  def _closeModule(self):
     """
-    Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
+    Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks
     """
     self.project._appBase.current.unRegisterNotify(self._updateInterface, 'peaks')
     self.close()

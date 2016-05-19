@@ -78,28 +78,28 @@ class Assign(AppBase):
         layout = yaml.load(f)
         typ, contents, state = layout['main']
 
-        containers, docks = self._appBase.mainWindow.dockArea.findAll()
+        containers, modules = self._appBase.mainWindow.moduleArea.findAll()
         flatten = lambda *n: (e for a in n
         for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
         flatContents = list(flatten(contents))
         for item in flatContents:
           if item in list(MODULE_DICT.keys()):
-            obj = docks.get(item)
+            obj = modules.get(item)
             if not obj:
              func = getattr(self._appBase.mainWindow, MODULE_DICT[item])
              func()
         for s in layout['float']:
           typ, contents, state = s[0]['main']
 
-          containers, docks = self._appBase.mainWindow.dockArea.findAll()
+          containers, modules = self._appBase.mainWindow.moduleArea.findAll()
           for item in contents:
-            if item[0] == 'dock':
+            if item[0] == 'module':
               print(obj)
-              obj = docks.get(item[1])
+              obj = modules.get(item[1])
               if not obj:
                 func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
                 func()
-        self._appBase.mainWindow.dockArea.restoreState(layout)
+        self._appBase.mainWindow.moduleArea.restoreState(layout)
 
 
 if __name__ == '__main__':

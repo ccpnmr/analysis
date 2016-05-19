@@ -73,29 +73,29 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     GuiModule.__init__(self)
     # DropBase.__init__(self, self._appBase, self.dropCallback)
     self.setAcceptDrops(True)
-    self.closeDock = self._closeDock
-    self.spectrumToolBar = SpectrumToolBar(self.dock, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
-    self.dock.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
-    self.dock.label.closeButton.clicked.connect(self.closeDock)
+    self.closeModule = self._closeModule
+    self.spectrumToolBar = SpectrumToolBar(self.module, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
+    self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
+    self.module.label.closeButton.clicked.connect(self.closeModule)
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
     self.resize(self.sizeHint())
 
 
-    self.spectrumUtilToolBar = ToolBar(self.dock)#, grid=(0, 2), gridSpan=(1, 2))
+    self.spectrumUtilToolBar = ToolBar(self.module)#, grid=(0, 2), gridSpan=(1, 2))
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     # grid=(0, 2), gridSpan=(1, 1))
-    self.dock.addWidget(self.spectrumUtilToolBar, 0, 2)
+    self.module.addWidget(self.spectrumUtilToolBar, 0, 2)
     if self._appBase.preferences.general.toolbarHidden is True:
       self.spectrumUtilToolBar.hide()
     else:
       self.spectrumUtilToolBar.show()
     # toolBarColour = QtGui.QColor(214,215,213)
-    self.positionBox = Label(self.dock)
-    self.dock.addWidget(self.positionBox, 0, 3)
-    self.scrollArea = ScrollArea(self.dock, grid=(1, 0), gridSpan=(1, 4))
+    self.positionBox = Label(self.module)
+    self.module.addWidget(self.positionBox, 0, 3)
+    self.scrollArea = ScrollArea(self.module, grid=(1, 0), gridSpan=(1, 4))
     self.scrollArea.setWidgetResizable(True)
     self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0), appBase=self._appBase)
     self.stripFrame.guiSpectrumDisplay = self
@@ -106,7 +106,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.setEnabled(True)
 
     includeDirection = not self._wrappedData.is1d
-    self.phasingFrame = PhasingFrame(self.dock, includeDirection=includeDirection, callback=self._updatePhasing, returnCallback=self._updatePivot,
+    self.phasingFrame = PhasingFrame(self.module, includeDirection=includeDirection, callback=self._updatePhasing, returnCallback=self._updatePivot,
                                      directionCallback=self._changedPhasingDirection, grid=(2, 0), gridSpan=(1, 3))
     self.phasingFrame.setVisible(False)
 
@@ -184,13 +184,13 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
          
     self._updatePhasing()
 
-  def _closeDock(self):
+  def _closeModule(self):
     """
     Closes spectrum display and deletes it from the project.
     """
     if len(self._appBase.project.spectrumDisplays) == 1:
       self._appBase.mainWindow.addBlankDisplay()
-    # self.dock.close()
+    # self.module.close()
     self.delete()
 
 

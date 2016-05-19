@@ -25,7 +25,7 @@ from ccpn.core.Peak import Peak
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
@@ -38,22 +38,22 @@ from PyQt4 import QtGui, QtCore
 
 UNITS = ['ppm', 'Hz', 'point']
 
-class PeakTable(CcpnDock):
+class PeakTable(CcpnModule):
   def __init__(self, project, selectedList=None):
-    CcpnDock.__init__(self, name='Peak List')
+    CcpnModule.__init__(self, name='Peak List')
 
     self.peakList = PeakListSimple(self, project, selectedList=selectedList)
     self.layout.addWidget(self.peakList)
     self.current = project._appBase.current
     self.current.registerNotify(self.peakList._selectPeakInTable, 'peaks')
-    self.closeDock = self._closeDock
+    self.closeModule = self._closeModule
     if self.current.strip:
       peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
       self.peakList.peakListPulldown.setCurrentIndex(self.peakList.peakListPulldown.findText(peakList.pid))
 
-  def _closeDock(self):
+  def _closeModule(self):
     """
-    Re-implementation of closeDock function from CcpnDock to unregister notification on current.peaks
+    Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks
     """
     self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peaks')
     self.close()

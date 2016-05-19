@@ -4,7 +4,7 @@ __author__ = 'simon1'
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 import typing
@@ -12,10 +12,10 @@ import typing
 from ccpn.ui.gui.DropBase import DropBase
 from PyQt4 import QtCore, QtGui
 
-class SequenceModule(CcpnDock):
+class SequenceModule(CcpnModule):
 
   def __init__(self, project):
-    CcpnDock.__init__(self, size=(10, 30), name='Sequence')
+    CcpnModule.__init__(self, size=(10, 30), name='Sequence')
 
     self.project = project
     self.colourScheme = project._appBase.preferences.general.colourScheme

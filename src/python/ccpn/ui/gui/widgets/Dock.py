@@ -13,7 +13,7 @@ class CcpnDock(Dock):
     self.label.hide()
     self.label = CcpnDockLabel(name.upper(), self)
     self.label.show()
-    self.label.closeButton.clicked.connect(self.closeDock)
+    self.label.closeButton.clicked.connect(self.closeModule)
     self.label.fixedWidth = True
     self.autoOrientation = False
     self.widget1 = QtGui.QWidget(self)

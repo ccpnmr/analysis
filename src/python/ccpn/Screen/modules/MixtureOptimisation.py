@@ -3,7 +3,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Icon import Icon
 # from ccpn.ui.gui.widgets.VerticalTab import VerticalTabWidget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
@@ -11,17 +11,17 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 # from ccpn.ui.gui.popups.SampleSetupPopup import ExcludeRegions
 
 
-class MixtureOptimisation(CcpnDock):
+class MixtureOptimisation(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
   def __init__(self, project):
     super(MixtureOptimisation, self)
-    CcpnDock.__init__(self, name='Mixture Optimisation')
+    CcpnModule.__init__(self, name='Mixture Optimisation')
 
     self.project = project
     self.mainWindow = self.project._appBase.mainWindow
-    self.dockArea = self.mainWindow.dockArea
+    self.moduleArea = self.mainWindow.moduleArea
     self.generalPreferences = self.project._appBase.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
     # self.excludeRegions = ExcludeRegions

@@ -7,13 +7,13 @@ import numpy as np
 
 class DataPlottingModule(Dock): # DropBase needs to be first, else the drop events are not processed
 
-  def __init__(self, dockArea):
+  def __init__(self, moduleArea):
 
 
     Dock.__init__(self, name='Data Plotting', size=(1100,1300))
 
     self.plotWidget = pg.PlotWidget()
-    dockArea.addDock(self)
+    moduleArea.addModule(self)
 
     self.addWidget(self.plotWidget)
     x = np.array([0, 2, 4, 6, 8, 10])

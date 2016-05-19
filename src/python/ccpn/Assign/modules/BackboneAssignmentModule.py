@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
@@ -47,7 +47,7 @@ from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 
 from ccpn.ui.gui.lib.Window import navigateToNmrResidue, markPositionsInStrips
 
-class BackboneAssignmentModule(CcpnDock):
+class BackboneAssignmentModule(CcpnModule):
 
   def __init__(self, project):
 
@@ -248,7 +248,7 @@ class BackboneAssignmentModule(CcpnDock):
       module.orderedStrips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue._id)
 
 
-  def _connectAssigner(self, assigner:CcpnDock):
+  def _connectAssigner(self, assigner:CcpnModule):
     """
     Connects Assigner Widget to this module.
     """

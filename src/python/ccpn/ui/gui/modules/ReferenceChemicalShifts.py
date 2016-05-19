@@ -3,21 +3,21 @@ __author__ = 'simon'
 import pyqtgraph as pg
 
 from ccpn.core.lib.Assignment import CCP_CODES
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.util.Colour import spectrumHexColours
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
 
-class ReferenceChemicalShifts(CcpnDock): # DropBase needs to be first, else the drop events are not processed
+class ReferenceChemicalShifts(CcpnModule): # DropBase needs to be first, else the drop events are not processed
 
-  def __init__(self, project, dockArea):
+  def __init__(self, project, moduleArea):
 
 
-    CcpnDock.__init__(self, name='Reference Chemical Shifts')
+    CcpnModule.__init__(self, name='Reference Chemical Shifts')
 
     self.plotWidget = pg.PlotWidget()
-    dockArea.addDock(self)
+    moduleArea.addModule(self)
     self.project = project
     self.addWidget(self.plotWidget, 1, 0, 1, 4)
     self.plotWidget.plotItem.addLegend(offset=[1, 10])

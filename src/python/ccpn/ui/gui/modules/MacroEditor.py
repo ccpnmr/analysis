@@ -2,7 +2,7 @@ __author__ = 'simon1'
 
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -13,13 +13,13 @@ from ccpn.ui.gui.DropBase import DropBase
 from PyQt4 import QtGui
 
 
-class MacroEditor(DropBase, CcpnDock):
+class MacroEditor(DropBase, CcpnModule):
 
   def __init__(self, parent, mainWindow, name, showRecordButtons=False):
-    CcpnDock.__init__(self, name=name)
+    CcpnModule.__init__(self, name=name)
     widget = QtGui.QWidget()
     self.parent = parent
-    self.parent.addDock(self)
+    self.parent.addModule(self)
     self.preferences = mainWindow._appBase.preferences.general
     self.textBox = TextEditor()
     self.mainWindow = mainWindow

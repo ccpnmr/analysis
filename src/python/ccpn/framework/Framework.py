@@ -307,7 +307,7 @@ class Framework:#
 
   def saveProject(self, newPath=None, newProjectName=None, createFallback=True):
     apiIo.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName, createFallback=createFallback)
-    layout = self.mainWindow.dockArea.saveState()
+    layout = self.mainWindow.moduleArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
     if not os.path.exists(layoutPath):
       os.makedirs(layoutPath)

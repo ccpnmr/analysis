@@ -29,7 +29,7 @@ from ccpn.core.Spectrum import Spectrum
 
 from ccpn.util.Pid import Pid
 from typing import Sequence
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 # from ccpnmodel.ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
@@ -49,22 +49,23 @@ from ccpn.Metabolomics.SpectrumGroupsWidget import SpectrumGroupsToolBar
 #
 #   return 0.5*(firstPpm+lastPpm), abs(lastPpm-firstPpm)
 
-class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else the drop events are not processed
+class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else the drop events are not processed
 
-  def __init__(self, dockArea):
+  def __init__(self, moduleArea):
     
-    self.dockArea = dockArea
+    self.moduleArea = moduleArea
 
-    CcpnDock.__init__(self, name='Blank Display')
-    dockArea.addDock(self, 'right')
+    CcpnModule.__init__(self, name='Blank Display')
+    # moduleArea.addModule(self, 'right')
 
     self.label2 = Label(self.widget1, text='Drag Spectrum Here', textColor='#bec4f3')
     self.label2.setAlignment(QtCore.Qt.AlignCenter)
     self.widget2.hide()
 
-    DropBase.__init__(self, dockArea.guiWindow._appBase)
+
+    DropBase.__init__(self, moduleArea.guiWindow._appBase)
     self.setOrientation = self._setOrientation
-    self.closeDock = self._closeDock
+    self.closeModule = self._closeModule
 
   def _setOrientation(self, o='vertical', force=True):
     """
@@ -90,17 +91,17 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     """Display spectra defined by list of Pid strings"""
     for ss in pids:
       try:
-        spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(ss)
+        spectrumDisplay = self.moduleArea.guiWindow.createSpectrumDisplay(ss)
         self._appBase.current.strip = spectrumDisplay.strips[0]
-        self.dockArea.guiWindow.deleteBlankDisplay()
-        self.dockArea.guiWindow.pythonConsole.writeConsoleCommand("application.createSpectrumDisplay(spectrum)",
+        self.moduleArea.guiWindow.deleteBlankDisplay()
+        self.moduleArea.guiWindow.pythonConsole.writeConsoleCommand("application.createSpectrumDisplay(spectrum)",
                                                spectrum=ss)
-        self.dockArea.guiWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
+        self.moduleArea.guiWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
 
         self._appBase.project._logger.info('spectrum = project.getByPid("%s")' % ss)
         self._appBase.project._logger.info('application.createSpectrumDisplay(spectrum)')
         self._appBase.project._logger.info('application.deleteBlankDisplay()')
-        self.dockArea.guiWindow.deleteBlankDisplay()
+        self.moduleArea.guiWindow.deleteBlankDisplay()
 
       except NotImplementedError:
         pass
@@ -110,44 +111,44 @@ class GuiBlankDisplay(DropBase, CcpnDock): # DropBase needs to be first, else th
     blankDisplay and display all in once its spectra"""
     for ss in pids:
       spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
-      spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
+      spectrumDisplay = self.moduleArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
       for sp in spectrumPids[1:]:
         spectrumDisplay.displaySpectrum(sp)
-      self.dockArea.guiWindow.deleteBlankDisplay()
-      self.dockArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay',
+      self.moduleArea.guiWindow.deleteBlankDisplay()
+      self.moduleArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay',
                                                         'sample', pid=ss)
-    self.dockArea.guiWindow.deleteBlankDisplay()
+    self.moduleArea.guiWindow.deleteBlankDisplay()
 
   def processSpectrum(self, spectrum:(Spectrum,Pid), event):
     """Process dropped spectrum"""
-    spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrum)
-    self.dockArea.guiWindow.deleteBlankDisplay()
-    self.dockArea.window().pythonConsole.writeConsoleCommand('spectrum', 'application.createSpectrumDisplay',
-                                                            spectrum=spectrum)
-    self.dockArea.guiWindow.deleteBlankDisplay()
+    spectrumDisplay = self.moduleArea.guiWindow.createSpectrumDisplay(spectrum)
+    self.moduleArea.guiWindow.deleteBlankDisplay()
+    msg = 'window.createSpectrumDisplay(project.getByPid("%s"))\n' % spectrum
+    self.moduleArea.window().pythonConsole.write(msg)
+    self.moduleArea.guiWindow.deleteBlankDisplay()
 
 
   def processSpectrumGroups(self, pids:Sequence[str], event):
 
     for ss in pids:
       spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
-      spectrumDisplay = self.dockArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
+      spectrumDisplay = self.moduleArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
 
       for spectrum in spectrumPids[1:]:
         spectrumDisplay.displaySpectrum(spectrum)
       spectrumDisplay.isGrouped = True
       spectrumDisplay.spectrumToolBar.hide()
-      SpectrumGroupsToolBar(spectrumDisplay.dock, self._appBase.project, spectrumDisplay.strips[0],ss, grid=(0, 0))
+      SpectrumGroupsToolBar(spectrumDisplay.module, self._appBase.project, spectrumDisplay.strips[0],ss, grid=(0, 0))
 
       self._appBase.current.strip = spectrumDisplay.strips[0]
       self._appBase.current.strip.viewBox.autoRange()
 
-    self.dockArea.guiWindow.deleteBlankDisplay()
+    self.moduleArea.guiWindow.deleteBlankDisplay()
 
 
-  def _closeDock(self):
+  def _closeModule(self):
     """
-    Re-implementation of closeDock function from CcpnDock.
+    Re-implementation of closeModule function from CcpnModule.
     """
     self._appBase.project._logger.info('Cannot close blank display')
 

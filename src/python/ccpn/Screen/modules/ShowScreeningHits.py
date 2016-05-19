@@ -7,7 +7,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ObjectTableItemDelegate
 
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -20,16 +20,22 @@ from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
-class ShowScreeningHits(CcpnDock, Base):
+class ShowScreeningHits(CcpnModule):
   def __init__(self, project, **kw):
     super(ShowScreeningHits, self)
-    CcpnDock.__init__(self, name='Hit Analysis')
+    CcpnModule.__init__(self, name='Hit Analysis')
     self.project = project
     self.setFixedHeight(300)
     # self.createDummyHits()
-    # self.dockArea = self.project._appBase.mainWindow.dockArea
-
+    self.moduleArea = self.project._appBase.mainWindow.moduleArea
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
+    self.mainWindow = self.project._appBase.mainWindow
+
+    ######## ======== Set modules on moduleArea ====== ########
+
+    if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
+      blankDisplay = self.moduleArea.findAll()[1]['BLANK DISPLAY']
+      blankDisplay.close()
 
     ######## ======== Icons ====== ########
     self.acceptIcon = Icon('icons/dialog-apply')

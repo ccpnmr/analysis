@@ -1,7 +1,7 @@
 __author__ = 'simon1'
 
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Dock import CcpnDock
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Menu import MenuBar
@@ -12,15 +12,15 @@ from ccpn.ui.gui.DropBase import DropBase
 from PyQt4 import QtGui
 
 
-class NotesEditor(DropBase, CcpnDock):
+class NotesEditor(DropBase, CcpnModule):
 
   def __init__(self, parent, project, name='Notes Editor', note=None):
-    CcpnDock.__init__(self, name=name)
+    CcpnModule.__init__(self, name=name)
     widget = QtGui.QWidget()
     self._appBase = project._appBase
     self.project = project
     self.parent = parent
-    self.parent.addDock(self)
+    self.parent.addModule(self)
     self.textBox = TextEditor()
     self.note = note
     widgetLayout = QtGui.QGridLayout()

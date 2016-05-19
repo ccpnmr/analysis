@@ -202,10 +202,10 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     print(self.parent())
 
   # def addSpinSystemSideLabel(self):
-  #   dock = self.dock
-  #   spinSystemSideLabel = VerticalLabel(dock, text=None)
+  #   module = self.module
+  #   spinSystemSideLabel = VerticalLabel(module, text=None)
   #   # spinSystemSideLabel.setText()
-  #   dock.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
+  #   module.addWidget(spinSystemSideLabel, 1, 0, 1, 1)
   #   # print(spinSystemSideLabel.paintEvent())
   #   spinSystemSideLabel.setFixedWidth(30)
 

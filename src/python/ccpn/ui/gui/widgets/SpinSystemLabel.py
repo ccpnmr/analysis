@@ -28,7 +28,7 @@ class SpinSystemLabel(DropBase, Label):
     self.mousePressEvent = self._mousePressEvent
     # self.project = appBase.project
     # if dragDrop is True:
-    #   DropBase.__init__(self, self.parent().dockArea.guiWindow._appBase)
+    #   DropBase.__init__(self, self.parent().moduleArea.guiWindow._appBase)
 
     self.setAcceptDrops(True)
 

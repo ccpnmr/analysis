@@ -26,7 +26,7 @@ from typing import Tuple
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 # from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
-from ccpn.ui.gui.core.PeakListView import PeakListView
+from ccpn.ui.gui.core._PeakListView import PeakListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakView as ApiPeakView
 
 

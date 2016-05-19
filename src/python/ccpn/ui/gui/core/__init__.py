@@ -67,10 +67,13 @@ from ccpn.core import _pluralPidTypeMap
 _importOrder = [
   'Window', 'Task', 'Mark', 'SpectrumDisplay', 'Strip', 'Axis', 'SpectrumView', 'PeakListView',
 ]
+class2file = {'SpectrumView':'_SpectrumView',
+              'PeakListView':'_PeakListView',}
 _wrappedClasses = []
 for className in _importOrder:
   _wrappedClasses.append(
-    getattr(importlib.import_module('ccpn.ui.gui.core.%s' % className), className)
+    getattr(importlib.import_module('ccpn.ui.gui.core.%s'
+                                    % class2file.get(className, className), className)
   )
 #
 # # Add class list for extended sphinx documentation to module

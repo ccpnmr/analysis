@@ -124,30 +124,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self._addSpectrumItem(self.strip)
 
     self._setupTrace()
-    
-    # Notifiers.registerNotify(self.newPeakListView, 'ccpnmr.gui.Task.PeakListView', '__init__')
-    #
-    # spectrum = self.spectrum
-    # strip = self.strip
-    # for peakList in spectrum.peakLists:
-    #   strip.showPeaks(peakList)
 
-  """
-  def changedSpectrumColour(self, apiDataSource):
-    
-    if apiDataSource is self.spectrum._wrappedData:
-      self.setActionIconColour()
-    
-  def setActionIconColour(self):
-    
-    action = self.visibilityAction
-    pix=QtGui.QPixmap(60, 10)
-    if self.spectrum.dimensionCount < 2:
-      pix.fill(QtGui.QColor(self.spectrum.sliceColour))
-    else:
-      pix.fill(QtGui.QColor(self.spectrum.positiveContourColour))
-    action.setIcon(QtGui.QIcon(pix))
-"""      
   def _addSpectrumItem(self, strip):
     if self not in strip.plotWidget.scene().items():
       strip.plotWidget.scene().addItem(self)

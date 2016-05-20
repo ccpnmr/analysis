@@ -336,6 +336,27 @@ class PeakList(AbstractWrapperObject):
   def refit(self, method:str='gaussian'):
     fitExistingPeakList(self._apiPeakList, method)
 
+  def restrictedPick(self, positionCodeDict, doPos, doNeg):
+
+    codes = list(positionCodeDict.keys())
+    positions = [positionCodeDict[code] for code in codes]
+    axisCodeMapping = spectrumLib._axisCodeMapIndices(codes, self.spectrum.axisCodes)
+    tolerances = self.spectrum.assignmentTolerances
+    limits = self.spectrum.spectrumLimits
+    selectedRegion = []
+
+    for ii, mapping in enumerate(axisCodeMapping):
+      if mapping is not None:
+        selectedRegion.insert(ii, [positions[mapping]-tolerances[ii], positions[mapping]+tolerances[ii]])
+      else:
+        selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
+
+    regionToPick = list(zip(*selectedRegion))
+    peaks = self.pickPeaksNd(regionToPick, self.spectrum._wrappedData.sortedDataDims(), doPos=doPos,
+                             doNeg=doNeg)
+    return peaks
+
+
 
 # Connections to parents:
 Spectrum._childClasses.append(PeakList)

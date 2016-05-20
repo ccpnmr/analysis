@@ -419,11 +419,11 @@ class ContoursTab(QtGui.QWidget, Base):
     negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6 ,0), vAlign='t', hAlign='l')
     negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True, vAlign='t', hAlign='l')
     for spectrumView in self.spectrum.spectrumViews:
-      if spectrumView._wrappedData.spectrumView._displayNegativeContours is True:
+      if spectrumView._wrappedData.spectrumView.displayNegativeContours is True:
         negativeContoursCheckBox.setChecked(True)
       else:
         negativeContoursCheckBox.setChecked(False)
-    negativeContoursCheckBox.stateChanged.connect(self._displayNegativeContours)
+    negativeContoursCheckBox.stateChanged.connect(self.displayNegativeContours)
     negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='t', hAlign='l')
     negativeBaseLevelData = DoubleSpinbox(self, grid=(7, 1), vAlign='t')
     negativeBaseLevelData.setMaximum(-0.1)
@@ -477,15 +477,15 @@ class ContoursTab(QtGui.QWidget, Base):
         self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayPositiveContours = False")
 
-  def _displayNegativeContours(self, state):
+  def displayNegativeContours(self, state):
     if state == QtCore.Qt.Checked:
       for spectrumView in self.spectrum.spectrumViews:
-        spectrumView._displayNegativeContours = True
+        spectrumView.displayNegativeContours = True
         self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayNegativeContours = True")
     else:
       for spectrumView in self.spectrum.spectrumViews:
-        spectrumView._displayNegativeContours = False
+        spectrumView.displayNegativeContours = False
         self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayNegativeContours = False")
 

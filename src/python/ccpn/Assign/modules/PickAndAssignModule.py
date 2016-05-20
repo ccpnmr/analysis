@@ -15,6 +15,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
+from ccpn.ui.gui.lib.PeakList import restrictedPick
 from ccpn.ui.gui.lib.Window import navigateToNmrResidue
 
 class PickAndAssignModule(CcpnModule, Base):
@@ -56,8 +57,6 @@ class PickAndAssignModule(CcpnModule, Base):
       self.displayList.addItem('<All>')
     self.spectrumSelectionWidget.update()
 
-
-
   def _toggleWidget2(self):
     if self.settingsButton.isChecked():
       self.widget2.show()
@@ -88,57 +87,30 @@ class PickAndAssignModule(CcpnModule, Base):
 
 
   def _restrictedPick(self, nmrResidue=None):
-
-    if nmrResidue:
-      self.current.nmrResidue = nmrResidue
+    """
+    Routine refactored in revision 9381.
+    Takes an NmrResidue feeds it into restricted pick lib functions and picks peaks for all
+    spectrum displays specified in the settings tab. Pick uses X and Z axes for each spectrumView as
+    centre points with tolerances and the y as the long axis to pick the whole region.
+    """
+    if not nmrResidue:
+      nmrResidue = self.current.nmrResidue
     elif not self.current.nmrResidue:
       print('No current nmrResidue')
       return
     else:
-      nmrResidueIsotopeCodes = [atom.isotopeCode for atom in self.current.nmrResidue.nmrAtoms]
-      for module in self.project.spectrumDisplays:
-        # if len(module.strips[0].orderedAxes) > 2:
+      print(nmrResidue)
+    for module in self.project.spectrumDisplays:
+      if len(module.axisCodes) > 2:
         for spectrumView in module.strips[0].spectrumViews:
-          if spectrumView.isVisible():
-            spectrum = spectrumView.spectrum
-            shiftList = spectrum.chemicalShiftList
-            nmrResidueShifts = [shiftList.getChemicalShift(nmrAtom.id).value for nmrAtom in self.current.nmrResidue.nmrAtoms]
+          visiblePeakListViews = [peakListView for peakListView in spectrumView.peakListViews
+                                  if peakListView.isVisible()]
+          if len(visiblePeakListViews) == 0:
+            return
+          else:
+            peakList, peaks = restrictedPick(peakListView=visiblePeakListViews[0],
+                                             axisCodes=module.axisCodes[0::2], nmrResidue=nmrResidue)
 
-            shiftDict = dict(zip(nmrResidueIsotopeCodes, nmrResidueShifts))
-            stripAxisCodes = module.strips[0].axisCodes
-            mappingArray = spectrumLib._axisCodeMapIndices(stripAxisCodes, spectrum.axisCodes)
-
-            selectedRegion = [['']*len(module.axisCodes), ['']*len(module.axisCodes)]
-            console = spectrum.project._appBase.mainWindow.pythonConsole
-            for ii, stripAxisCode in enumerate(stripAxisCodes):
-              if len(module.axisCodes) >= 3:
-                if ii != 1:
-                    isotopeCode = spectrumLib.name2IsotopeCode(stripAxisCodes[ii])
-                    tol = spectrum.assignmentTolerances[ii]
-                    selectedRegion[0][ii] = shiftDict[isotopeCode]-tol
-                    selectedRegion[1][ii] = shiftDict[isotopeCode]+tol
-                else:
-                    selectedRegion[0][ii] = spectrum.spectrumLimits[ii][0]
-                    selectedRegion[1][ii] = spectrum.spectrumLimits[ii][1]
-              else:
-                isotopeCode = spectrumLib.name2IsotopeCode(stripAxisCodes[ii])
-                tol = spectrum.assignmentTolerances[ii]
-                selectedRegion[0][ii] = shiftDict[isotopeCode]-tol
-                selectedRegion[1][ii] = shiftDict[isotopeCode]+tol
-            peakList = spectrumView.spectrum.peakLists[0]
-            if spectrumView.spectrum.dimensionCount > 1:
-              apiSpectrumView = spectrumView._wrappedData
-              peaks = peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
-                                           doPos=apiSpectrumView.spectrumView.displayPositiveContours,
-                                           doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
-                                           fitMethod='gaussian')
-
-              console.writeConsoleCommand(
-                "peakList.pickPeaksNd(selectedRegion={0}, doPos={1}, doNeg={2})".format(
-                  selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
-                  apiSpectrumView.spectrumView.displayNegativeContours
-                ), peakList=peakList
-              )
             if len(peaks) > 0:
               for strip in module.strips:
                 strip.showPeaks(peakList)

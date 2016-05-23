@@ -55,11 +55,17 @@ classesInTopLevel =('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
 # NBNB TBD FIXME
 # 1)This function (and the NEW_ITEM_DICT) it uses gets the create_new
 # function from the shortClassName of the PARENT!!!
+# This is the only way to do it if the create_new functions are attributes of the PARENT!!!
 #
 # 2) <New> in makes a new SampleComponent. This is counterintuitive!
 # Anyway, how do you make a new Sample?
+# You use the <New> under sample, this comment is completely inaccurate!
 #
 # Try putting in e.g. <New PeakList>, <New SampleComponent> etc.
+# This would 1) Clutter the SideBar with unnecessary words
+#            2) Break the convention that hitting new under a list of objects or parent creates
+#               a new object of that type or a new child.
+
 NEW_ITEM_DICT = {
 
   'SP': 'newPeakList',

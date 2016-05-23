@@ -49,6 +49,7 @@ class SequenceModule(CcpnModule):
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
     """
+    CCPN INTERNAL called in predictSequencePosition method of SequenceGraph
     Highlights regions on the sequence specified by the list of residues passed in.
     """
     for residue in residues:

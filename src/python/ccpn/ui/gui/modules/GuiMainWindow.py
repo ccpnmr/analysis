@@ -492,11 +492,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Loads the selected project.
     """
     result = self._queryCloseProject(title='Open Project', phrase='open another')
-    
     if result:
       if projectDir is None:
         dialog = FileDialog(self, fileMode=2, text="Open Project", acceptMode=0, preferences=self._appBase.preferences.general)
-        # dialog.exec_()
         projectDir = dialog.selectedFiles()[0]
 
       if projectDir:
@@ -516,7 +514,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     self.assigner = SequenceGraph(project=self._project)
     if hasattr(self, 'bbModule'):
-      self.bbModule._connectAssigner(self.assigner)
+      self.bbModule._connectSequenceGraph(self.assigner)
     if nextTo is not None:
       self.moduleArea.addModule(self.assigner, position=position, relativeTo=nextTo)
     else:
@@ -542,7 +540,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def _fillRecentProjectsMenu(self):
     """
-    Populates recent projects menu with 10 most recently loaded projects specified in the preferences file.
+    Populates recent projects menu with 10 most recently loaded projects
+    specified in the preferences file.
     """
     translator.setSilent()
     for recentFile in self._appBase.preferences.recentFiles:

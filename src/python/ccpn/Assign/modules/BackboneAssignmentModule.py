@@ -21,31 +21,28 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
-
-from PyQt4 import QtGui
 
 from collections import OrderedDict
+import typing
 
-import math
+from ccpn.Assign.lib.scoring import qScore
 
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrResidue import NmrResidue
 
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.lib.Window import navigateToNmrResidue, markPositionsInStrips
+
+from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
+from ccpn.ui.gui.modules.GuiStrip import GuiStrip
+
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
+
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
-import typing
 
-from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
-from ccpn.ui.gui.modules.GuiStrip import GuiStrip
-
-from ccpn.ui.gui.lib.Window import navigateToNmrResidue, markPositionsInStrips
 
 class BackboneAssignmentModule(CcpnModule):
 
@@ -95,15 +92,13 @@ class BackboneAssignmentModule(CcpnModule):
     inside the module.
     """
 
-    #  NBNB TBD FIXME you should check only for sequenceCodes that END in '-1' or '+1'
-
     self._setupShiftDicts()
     if hasattr(self, 'assigner'):
       self.assigner.clearAllItems()
     # self.navigateTo(nmrResidue, row, col)
     self.current.nmrChain = nmrResidue.nmrChain
     if self.current.nmrChain.isConnected:
-      nmrResidues = [nmrResidue for nmrResidue in self.current.nmrChain.nmrResidues if not '-1' in nmrResidue.sequenceCode]
+      nmrResidues = [nmrResidue for nmrResidue in self.current.nmrChain.nmrResidues if not nmrResidue.sequenceCode.endswith('-1')]
       for nmrResidue in nmrResidues:
         if self.assigner:
           self.assigner.addResidue(nmrResidue, '+1')
@@ -117,8 +112,6 @@ class BackboneAssignmentModule(CcpnModule):
     add strips to matchModule(s) corresponding to assignment matches.
     """
 
-    #  NBNB TBD FIXME you should check only for sequenceCodes that END in '-1' or '+1'
-
     self.project._appBase.mainWindow.clearMarks()
 
     self.nmrResidueTable.nmrResidueTable.updateTable()
@@ -127,7 +120,7 @@ class BackboneAssignmentModule(CcpnModule):
 
     chemicalShiftList = self.project.getByPid(self.chemicalShiftListPulldown.currentText())
 
-    if '-1' in nmrResidue.sequenceCode:
+    if nmrResidue.sequenceCode.endswith('-1'):
       direction = '-1'
       iNmrResidue = nmrResidue.mainNmrResidue
       self.current.nmrResidue = iNmrResidue
@@ -149,7 +142,8 @@ class BackboneAssignmentModule(CcpnModule):
               if shift is not None:
                 shiftDict[axis.code].append(shift)
           for atom in iNmrResidue.nmrAtoms:
-            if (atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code) and atom._apiResonance.isotopeCode != '13C'):
+            if (atom.isotopeCode == spectrumLib.name2IsotopeCode(axis.code)
+              and atom.isotopeCode != '13C'):
               shift = chemicalShiftList.getChemicalShift(atom.id)
               if shift is not None:
                 shiftDict[axis.code].append(shift)
@@ -203,7 +197,7 @@ class BackboneAssignmentModule(CcpnModule):
         interCb = nmrResidue.fetchNmrAtom(name='CB')
         shift2 = chemicalShiftList.getChemicalShift(interCb.id)
         shifts.append(shift2)
-      if '-1' in nmrResidue.sequenceCode:
+      if nmrResidue.sequenceCode.endswith('-1'):
         self.interShifts[nmrResidue] = shifts
       else:
         self.intraShifts[nmrResidue] = shifts
@@ -212,12 +206,13 @@ class BackboneAssignmentModule(CcpnModule):
 
   def _createMatchStrips(self, assignMatrix:typing.Tuple[typing.Dict[NmrResidue, typing.List[ChemicalShift]], typing.List[float]]):
     """
-    Creates strips in match module corresponding to the best assignment possibilities in the assignMatrix.
+    Creates strips in match module corresponding to the best assignment possibilities
+    in the assignMatrix.
     """
     assignmentScores = sorted(assignMatrix[1])[0:self.numberOfMatches]
     for assignmentScore in assignmentScores[1:]:
       matchResidue = assignMatrix[0][assignmentScore]
-      if '-1' in matchResidue.sequenceCode:
+      if matchResidue.sequenceCode.endswith('-1'):
         iNmrResidue = matchResidue.mainNmrResidue
 
       else:
@@ -234,11 +229,8 @@ class BackboneAssignmentModule(CcpnModule):
           navigateToNmrResidue(self.project, iNmrResidue, strip=strip)
 
     firstMatchResidue = assignMatrix[0][assignmentScores[0]]
-    if '-1' in firstMatchResidue.sequenceCode:
-      # seqCode = firstMatchResidue.sequenceCode
-      # newSeqCode = seqCode.replace('-1', '')
+    if firstMatchResidue.sequenceCode.endswith('-1'):
       iNmrResidue = matchResidue.mainNmrResidue
-
     else:
       iNmrResidue = firstMatchResidue
 
@@ -248,18 +240,13 @@ class BackboneAssignmentModule(CcpnModule):
       module.orderedStrips[0].planeToolbar.spinSystemLabel.setText(iNmrResidue._id)
 
 
-  def _connectAssigner(self, assigner:CcpnModule):
+  def _connectSequenceGraph(self, assigner:CcpnModule):
     """
-    Connects Assigner Widget to this module.
+    # CCPN INTERNAL - called in showSequenceGraph method of GuiMainWindow.
+    Connects Sequence Graph to this module.
     """
     self.assigner = assigner
     self.project._appBase.current.assigner = assigner
-
-  def qScore(self, query, match):
-    if query is not None and match is not None:
-      return math.sqrt(((query.value-match.value)**2)/((query.value+match.value)**2))
-    else:
-      return None
 
 
   def _buildAssignmentMatrix(self, queryShifts:typing.List[ChemicalShift],
@@ -273,17 +260,18 @@ class BackboneAssignmentModule(CcpnModule):
     for res, shift in matchShifts.items():
 
       if len(queryShifts) > 1 and len(shift) > 1:
-        if self.qScore(queryShifts[0], shift[0]) is not None and self.qScore(queryShifts[1], shift[1]) is not None:
 
-          score = (self.qScore(queryShifts[0], shift[0])+self.qScore(queryShifts[1], shift[1]))/2
+        if qScore(queryShifts[0].value, shift[0].value) is not None and qScore(queryShifts[1].value, shift[1].value) is not None:
+
+          score = (qScore(queryShifts[0].value, shift[0].value)+qScore(queryShifts[1].value, shift[1].value))/2
           scores.append(score)
           matrix[score] = res
       # elif len(queryShifts) == 1:
       # NBNB FIXME TBD needs refactoring to make sure the comparisons are the right ones.
       elif len(queryShifts) == 1 and shift:
-        if self.qScore(queryShifts[0], shift[0]) is not None:
+        if qScore(queryShifts[0].value, shift[0].value) is not None:
 
-          score = self.qScore(queryShifts[0], shift[0])
+          score = qScore(queryShifts[0].value, shift[0].value)
           scores.append(score)
           matrix[score] = res
 

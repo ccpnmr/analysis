@@ -12,11 +12,10 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
-from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
-
 from ccpn.ui.gui.lib.PeakList import restrictedPick
 from ccpn.ui.gui.lib.Window import navigateToNmrResidue
+
+from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 
 class PickAndAssignModule(CcpnModule, Base):
 
@@ -75,7 +74,7 @@ class PickAndAssignModule(CcpnModule, Base):
       shiftList = peak.peakList.spectrum.chemicalShiftList
       spectrum = peak.peakList.spectrum
       for nmrAtom in self.current.nmrResidue.nmrAtoms:
-        if atom.isotopeCode in shiftDict.keys():
+        if nmrAtom.isotopeCode in shiftDict.keys():
           shiftDict[nmrAtom.isotopeCode].append((nmrAtom, shiftList.getChemicalShift(nmrAtom.id).value))
       for ii, isotopeCode in enumerate(spectrum.isotopeCodes):
         if isotopeCode in shiftDict.keys():
@@ -98,8 +97,7 @@ class PickAndAssignModule(CcpnModule, Base):
     elif not self.current.nmrResidue:
       print('No current nmrResidue')
       return
-    else:
-      print(nmrResidue)
+
     for module in self.project.spectrumDisplays:
       if len(module.axisCodes) > 2:
         for spectrumView in module.strips[0].spectrumViews:
@@ -110,7 +108,7 @@ class PickAndAssignModule(CcpnModule, Base):
           else:
             peakList, peaks = restrictedPick(peakListView=visiblePeakListViews[0],
                                              axisCodes=module.axisCodes[0::2], nmrResidue=nmrResidue)
-
+            # Lines below here to be removed when a notifier handles display of newly picked peaks
             if len(peaks) > 0:
               for strip in module.strips:
                 strip.showPeaks(peakList)
@@ -119,18 +117,11 @@ class PickAndAssignModule(CcpnModule, Base):
                 for peakItem in peakItems:
                   peakItem.isSelected = True
 
-
-
   def _goToPositionInModules(self, nmrResidue=None, row=None, col=None):
     self.project._appBase.mainWindow.clearMarks()
     navigateToNmrResidue(self.project, nmrResidue, markPositions=True)
 
     self.current.nmrResidue = nmrResidue
-
-  # def showNmrResiduePopup(self):
-  #   from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
-  #   NmrResiduePopup(self, self.project).exec_()
-
 
 class SpectrumSelectionWidget(QtGui.QWidget, Base):
 

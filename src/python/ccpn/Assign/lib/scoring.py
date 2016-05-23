@@ -22,8 +22,7 @@ __version__ = ": 7686 $"
 # Start of code
 #=========================================================================================
 
-def qScore(self, query, match):
-    if query is not None and match is not None:
-      return math.sqrt(((query.value-match.value)**2)/((query.value+match.value)**2))
-    else:
-      return None
+import math
+
+def qScore(value1:float, value2:float):
+  return math.sqrt(((value1-value2)**2)/((value1+value2)**2))

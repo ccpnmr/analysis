@@ -167,20 +167,16 @@ class SequenceGraph(CcpnModule):
     self.direction = None
     self.selectedStretch = []
     self.scene.dragEnterEvent = self.dragEnterEvent
-    global guiNmrResidues
-    guiNmrResidues = []
+    self.guiNmrResidues = []
 
-    # self.project.registerNotifier('NmrResidue', 'rename', self._resetNmrResiduePidForAssigner,)
+    self.project.registerNotifier('NmrResidue', 'rename', self._resetNmrResiduePidForAssigner)
 
-  # def _resetNmrResiduePidForAssigner(self, nmrResidue):
-  #   """Reset pid for NmrResidue and all offset NmrResidues"""
-  #   # NB This does what it says in the comment. Up to Simon to see what it ought to do
-  #   for nr in [nmrResidue] + nmrResidue.offsetNmrResidues:
-  #     for guiNmrResidue in self.guiNmrResidues:
-  #       if guiNmrResidue.nmrResidue is nr:
-  #         guiNmrResidue.update()
-
-
+  def _resetNmrResiduePidForAssigner(self, nmrResidue, oldPid:str):
+    """Reset pid for NmrResidue and all offset NmrResidues"""
+    for nr in [nmrResidue] + list(nmrResidue.offsetNmrResidues):
+      for guiNmrResidue in self.guiNmrResidues:
+        if guiNmrResidue.nmrResidue is nr:
+          guiNmrResidue._update()
 
   def clearAllItems(self):
     """
@@ -191,7 +187,7 @@ class SequenceGraph(CcpnModule):
       self.residueCount = 0
       self.predictedStretch = []
       self.guiResiduesShown = []
-      guiNmrResidues = []
+      self.guiNmrResidues = []
 
 
   def _assembleResidue(self, nmrResidue:NmrResidue, atoms:typing.Dict[str, GuiNmrAtom]):
@@ -216,7 +212,7 @@ class SequenceGraph(CcpnModule):
     self._addConnectingLine(atoms['N'], atoms['CA'], lineColour, 1.0, 0)
     self._addConnectingLine(atoms['CO'], atoms['CA'], lineColour, 1.0, 0)
     self.nmrResidueLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
-    guiNmrResidues.append(self.nmrResidueLabel)
+    self.guiNmrResidues.append(self.nmrResidueLabel)
     self.scene.addItem(self.nmrResidueLabel)
     self._addResiduePredictions(nmrResidue, atoms['CA'])
 
@@ -347,7 +343,7 @@ class SequenceGraph(CcpnModule):
     if len(self.predictedStretch) > 2:
       self.predictSequencePosition(self.predictedStretch)
 
-    self.residueCount+=1
+    self.residueCount += 1
 
 
   def _addResiduePredictions(self, nmrResidue:NmrResidue, caAtom:GuiNmrAtom):
@@ -381,8 +377,8 @@ class SequenceGraph(CcpnModule):
     for possibleMatch in possibleMatches:
       if possibleMatch[0] > 1:
 
-        if hasattr(self.project._appBase.mainWindow, 'sequenceWidget'):
-          self.project._appBase.mainWindow.sequenceWidget.highlightPossibleStretches(possibleMatch[1])
+        if hasattr(self.project._appBase.mainWindow, 'sequenceModule'):
+          self.project._appBase.mainWindow.sequenceModule._highlightPossibleStretches(possibleMatch[1])
 
 
   def _addConnectingLine(self, atom1:GuiNmrAtom, atom2:GuiNmrAtom, colour:str, width:float, displacement:float, style:str=None):
@@ -471,19 +467,19 @@ class SequenceGraph(CcpnModule):
 # The below should be replaced. See commented-out code at the end fo Assigner.__init__
 # After refactoring, guiNmrResidues should not be global
 
-
-def _resetNmrResiduePidForAssigner(project:Project, apiResonanceGroup:ApiResonanceGroup):
-  """Reset pid for NmrResidue and all offset NmrResidues"""
-  if hasattr(project._appBase.mainWindow, 'assigner'):
-    getDataObj = project._data2Obj.get
-    obj = getDataObj(apiResonanceGroup)
-    for guiNmrResidue in guiNmrResidues:
-      guiNmrResidue.update()
-
-
-Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setSequenceCode')
-Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setDirectNmrChain')
-Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setResidueType')
-Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setAssignedResidue')
+#
+# def _resetNmrResiduePidForAssigner(project:Project, apiResonanceGroup:ApiResonanceGroup):
+#   """Reset pid for NmrResidue and all offset NmrResidues"""
+#   if hasattr(project._appBase.mainWindow, 'assigner'):
+#     getDataObj = project._data2Obj.get
+#     obj = getDataObj(apiResonanceGroup)
+#     for guiNmrResidue in guiNmrResidues:
+#       guiNmrResidue.update()
+#
+#
+# Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setSequenceCode')
+# Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setDirectNmrChain')
+# Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setResidueType')
+# Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setAssignedResidue')
 
 

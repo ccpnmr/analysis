@@ -1,4 +1,3 @@
-#from imp import reload
 
 import typing
 from functools import partial
@@ -111,7 +110,7 @@ class PeakAssigner(CcpnModule, Base):
 
     self.listWidgets.append(listWidget)
 
-  def createEmptyWidgetLabel(self, dim:int):
+  def _createEmptyWidgetLabel(self, dim:int):
     """
     Creates an empty Label to contain peak dimension position.
     """
@@ -228,7 +227,7 @@ class PeakAssigner(CcpnModule, Base):
       self._createEmptyListWidget(dim)
 
     for dim in range(len(self.labels), Ndimensions):
-      self.createEmptyWidgetLabel(dim)
+      self._createEmptyWidgetLabel(dim)
 
     for dim in range(len(self.assignmentWidgets), Ndimensions):
       self._createAssignmentWidget(dim)

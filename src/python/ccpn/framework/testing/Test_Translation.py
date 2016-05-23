@@ -21,45 +21,28 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.util.Translation import Translation
 
-def test_setLanguageDefault():
-  tr = Translation()
-  tr.setLanguage()
+import unittest
 
-def test_setLanguageEnglish():
-  tr = Translation()
-  tr.setLanguage('English-UK')
+from ccpn.framework import Translation
 
-def test_setLanguageFrench():
-  tr = Translation()
-  tr.setLanguage('French')
 
-def test_setLanguageGerman():
-  tr = Translation()
-  tr.setLanguage('German')
+class Test_Translation(unittest.TestCase):
 
-def test_translateDefaultText():
-  tr = Translation()
-  assert tr.translate('Help') == 'Help'
+  def test_getLanguages(self):
+    self.assertIn('Dutch', Translation._get_languages())
+    self.assertIn('Italian', Translation._get_languages())
+    self.assertIn('Chinese', Translation._get_languages())
 
-def test_translateEnglishText():
-  tr = Translation()
-  tr.setLanguage('English-UK')
-  assert tr.translate('Help') == 'Help'
+  def test_getDutch_translationDictionary(self):
+    tDict = Translation._get_translation_dictionary('Dutch')
+    self.assertEqual(tDict['New'], 'Nieuw')
 
-def test_translateFrenchText1():
-  tr = Translation()
-  tr.setLanguage('French')
-  assert tr.translate('Help') == 'Aidez'
+  def test_Dutch_translation(self):
+    t = Translation.getTranslator('Dutch')
+    self.assertEqual(t('New'), 'Nieuw')
 
-def test_translateChineseText1():
-  tr = Translation()
-  tr.setLanguage('Chinese')
-  assert tr.translate('New') == '新的'
 
-def test_translateChineseText2():
-  tr = Translation()
-  tr.setLanguage('Chinese')
-  assert tr.translate('Help Me') == 'Help Me'
-
+  def test_UnknownWord_translation(self):
+    t = Translation.getTranslator('Dutch')
+    self.assertEqual(t('TestUnknownWord'), 'TestUnknownWord')

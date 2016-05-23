@@ -133,8 +133,57 @@ class Translation:
 
 translator = Translation()
 
+
+######################################################################################
+
+import os
+import json
+from functools import partial
+
+from ccpn.util.Path import getTopDirectory
+from ccpn.util.Logging import getLogger
+
+logger = getLogger()
+
+
+__all__=['getTranslator']
+
+def _get_languages():
+  languagesPath = os.path.join(getTopDirectory(), 'config', 'languages')
+  languageFiles =  [f for f in os.listdir(languagesPath)
+                    if os.path.isfile(os.path.join(languagesPath, f))]
+  logger.debug('Found {} language files'.format(languageFiles))
+  languages = [l.split('.')[0] for l in languageFiles]
+  return languages
+
+
+def _get_translation_dictionary(language):
+  languagesPath = os.path.join(getTopDirectory(), 'config', 'languages')
+  try:
+    languageFilePath = os.path.join(languagesPath, language + '.json')
+    with open(languageFilePath, encoding='utf-8') as f:
+      tDict = json.load(f)
+    return tDict
+  except:
+    logger.error('Language file for {} failed to load'.format(language))
+    return dict()
+
+
+def _translator(translationDict, word):
+  t = translationDict.get(word, word)
+  logger.debug('Translating {} to {}'.format(word, t))  # The string interpolation can be costly.
+  return t
+
+
+def getTranslator(language):
+  tDict = _get_translation_dictionary(language)
+  tr = partial(_translator, tDict)
+  return tr
+
+######################################################################################
+
 if __name__ == '__main__':
 
   tr = Translation()
-  tr.setLanguage('Italiano')
+  tr.setLanguage('Italian')
   print(tr.translate("New"))

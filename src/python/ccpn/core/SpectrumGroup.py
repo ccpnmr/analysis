@@ -42,6 +42,8 @@ class SpectrumGroup(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'SpectrumGroup'
 
+  _parentClass = Spectrum
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumGroups'
   
@@ -127,7 +129,6 @@ def _newSpectrumGroup(self:Project, name:str, spectra=()) -> SpectrumGroup:
 
     
 # Connections to parents:
-Project._childClasses.append(SpectrumGroup)
 Project.newSpectrumGroup = _newSpectrumGroup
 del _newSpectrumGroup
 

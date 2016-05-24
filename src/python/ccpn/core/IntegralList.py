@@ -37,6 +37,8 @@ class IntegralList(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'IntegralList'
 
+  _parentClass = Spectrum
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'integralLists'
   
@@ -110,7 +112,6 @@ class IntegralList(AbstractWrapperObject):
     return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Integral']
 
 # Connections to parents:
-Spectrum._childClasses.append(IntegralList)
 
 def _newIntegralList(self:Spectrum,name:str=None, comment:str=None) -> IntegralList:
   """Create new ccpn.IntegralList within ccpn.Spectrum"""

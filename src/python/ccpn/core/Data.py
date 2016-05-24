@@ -41,6 +41,8 @@ class Data(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Data'
 
+  _parentClass = DataSet
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'data'
 
@@ -165,14 +167,12 @@ class Data(AbstractWrapperObject):
 
 
 
-
   @classmethod
   def _getAllWrappedData(cls, parent:DataSet)-> list:
     """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
     return parent._wrappedData.sortedData()
 
 # Connections to parents:
-DataSet._childClasses.append(Data)
 
 def _newData(self:DataSet, name:str, attachedObjectPid:str=None,
              attachedObject:AbstractWrapperObject=None) -> Data:

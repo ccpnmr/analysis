@@ -50,6 +50,8 @@ class StructureEnsemble(AbstractWrapperObject):
   # Attribute is necessary as subclasses must use superclass className
   className = 'StructureEnsemble'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'structureEnsembles'
   
@@ -624,7 +626,6 @@ def _newStructureEnsemble(self:Project, ensembleId:int=None, comment:str=None) -
     
     
 # Connections to parents:
-Project._childClasses.append(StructureEnsemble)
 Project.newStructureEnsemble = _newStructureEnsemble
 del _newStructureEnsemble
 

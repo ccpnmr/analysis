@@ -23,31 +23,21 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Sequence, Tuple
-from ccpn.util import Pid
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
 from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpn.ui.gui.core.Task import Task
-from ccpn.ui.gui.core.Window import Window
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
-from ccpn.util import Common as commonUtil
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.ui._implementation.Task import Task
+from ccpn.ui._implementation.Window import Window
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd
-from ccpn.ui.gui.modules.GuiStripDisplay1d import GuiStripDisplay1d
+from ccpn.util import Common as commonUtil
+from ccpn.util import Pid
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
-
-# list1 = [GuiSpectrumDisplay,AbstractWrapperObject]
-#
-# for item in list1:
-#   print(item, type(item))
-#   if hasattr(item, '__metaclass__'):
-#     print(item, item.__metaclass__)
 class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   """Spectrum display for 1D or nD spectrum"""
   
@@ -56,19 +46,26 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'SpectrumDisplay'
 
+  _parentClass = Task
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumDisplays'
   #: List of child classes.
   _childClasses = []
 
   # Qualified name of matching API class
-  _apiClassQualifiedName = ApiSpectrumDisplay._metaclass.qualifiedName()
+  _apiClassQualifiedName = ApiBoundDisplay._metaclass.qualifiedName()
 
   # CCPN properties  
   @property
-  def _apiSpectrumDisplay(self) -> ApiSpectrumDisplay:
+  def _apiSpectrumDisplay(self) -> ApiBoundDisplay:
     """ CCPN SpectrumDisplay matching SpectrumDisplay"""
     return self._wrappedData
+  
+  @property
+  def _key(self) -> str:
+    """short form of name, corrected to use for id"""
+    return self._wrappedData.name.translate(Pid.remapSeparators)
 
   @property
   def name(self) -> str:
@@ -169,7 +166,7 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
   def _getAllWrappedData(cls, parent:Task)-> list:
     """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of parent Task"""
     return [x for x in parent._wrappedData.sortedModules()
-            if isinstance(x, ApiSpectrumDisplay)]
+            if isinstance(x, ApiBoundDisplay)]
 
   # CCPN functions
   def resetAxisOrder(self):
@@ -186,14 +183,8 @@ class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
     self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
 
-# Window.spectrumDisplays property
-def _getSpectrumDisplays(window:Window):
-  ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiSpectrumDisplay)]
-  return tuple(window._project._data2Obj[x] for x in ll)
-Window.spectrumDisplays = property(_getSpectrumDisplays, None, None,
-                                   "SpectrumDisplays shown in Window")
-del _getSpectrumDisplays
 
+# newSpectrumDisplay functions
 def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
                        name:str=None, window:Window=None, comment:str=None,
                        independentStrips=False, nmrResidue=None):
@@ -259,9 +250,10 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
     apiStrip = apiSpectrumDisplay.newBoundStrip()
   #
   return self._project._data2Obj.get(apiSpectrumDisplay)
+Task.newSpectrumDisplay = _newSpectrumDisplay
+del _newSpectrumDisplay
 
 
-# CCPN functions
 def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Sequence=(),
                           axisOrder:Sequence=(), name:str=None, positions:Sequence=(),
                           widths:Sequence=(), units:Sequence=(),
@@ -383,74 +375,29 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
   display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
                                        stripSerial=stripSerial,dataSource=dataSource,
                                        dimensionOrdering=dimensionOrdering)
+  #
   return display
-
-# Connections to parents:
-Task._childClasses.append(SpectrumDisplay)
-Task.newSpectrumDisplay = _newSpectrumDisplay
-del _newSpectrumDisplay
-
 Window.createSpectrumDisplay = _createSpectrumDisplay
 del _createSpectrumDisplay
 
-
-# Define subtypes and factory function
-class StripDisplay1d(GuiStripDisplay1d, SpectrumDisplay):
-  """1D bound display"""
-
-  def __init__(self, project:Project, wrappedData:ApiBoundDisplay):
-    """Local override init for Qt subclass"""
-    AbstractWrapperObject. __init__(self, project, wrappedData)
-    GuiStripDisplay1d.__init__(self)
-
-  # put in subclass to make superclass abstract
-  @property
-  def _key(self) -> str:
-    """short form of name, corrected to use for id"""
-    return self._wrappedData.name.translate(Pid.remapSeparators)
-
-
-class StripDisplayNd(GuiStripDisplayNd, SpectrumDisplay):
-  """ND bound display"""
-
-  def __init__(self, project:Project, wrappedData:ApiBoundDisplay):
-    """Local override init for Qt subclass"""
-    AbstractWrapperObject. __init__(self, project, wrappedData)
-    GuiStripDisplayNd.__init__(self)
-
-  # put in subclass to make superclass abstract
-  @property
-  def _key(self) -> str:
-    """short form of name, corrected to use for id"""
-    return self._wrappedData.name.translate(Pid.remapSeparators)
-
-def _factoryFunction(project:Project, wrappedData:ApiSpectrumDisplay) -> SpectrumDisplay:
-  """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
-  # if wrappedData.stripType == 'Bound':
-  if wrappedData.is1d:
-    return StripDisplay1d(project, wrappedData)
-  else:
-    return StripDisplayNd(project, wrappedData)
-  # else:
-  #   raise ValueError("Attempt to make SpectrumDisplay from illegal object type: %s"
-  #   % wrappedData)
-
-
-SpectrumDisplay._factoryFunction = staticmethod(_factoryFunction)
-
-# Drag-n-drop functions:
-SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum
+# Window.spectrumDisplays property
+def getter(window:Window):
+  ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
+  return tuple(window._project._data2Obj[x] for x in ll)
+Window.spectrumDisplays = property(getter, None, None,
+                                   "SpectrumDisplays shown in Window")
+del getter
 
 # Notifiers:
 
 # crosslinks window, nmrResidue
 Project._apiNotifiers.append(
   ('_modifiedLink', {'classNames':('Spectrum','SpectrumDisplay')},
-  ApiSpectrumDisplay._metaclass.qualifiedName(), 'setWindow'),
+  ApiBoundDisplay._metaclass.qualifiedName(), 'setWindow'),
 )
 Project._apiNotifiers.append(
   ('_modifiedLink', {'classNames':('NmrResidue','SpectrumDisplay')},
-  ApiSpectrumDisplay._metaclass.qualifiedName(), 'setResonanceGroup'),
+  ApiBoundDisplay._metaclass.qualifiedName(), 'setResonanceGroup'),
 )
 className = ApiWindow._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
@@ -469,3 +416,6 @@ Project._apiNotifiers.extend(
      'setSpectrumDisplays'),
   )
 )
+
+# Drag-n-drop functions:
+SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum

@@ -22,19 +22,16 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
-
 import operator
 from typing import Tuple
-from ccpn.util import Pid
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpn.ui.gui.core.Strip import Strip
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.ui._implementation.Strip import Strip
+from ccpn.util import Pid
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-from ccpn.ui.gui.modules.GuiSpectrumView1d import GuiSpectrumView1d
-from ccpn.ui.gui.modules.GuiSpectrumViewNd import GuiSpectrumViewNd
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -44,6 +41,8 @@ class SpectrumView(AbstractWrapperObject):
   shortClassName = 'GV'
   # Attribute it necessary as subclasses must use superclass className
   className = 'SpectrumView'
+
+  _parentClass = Strip
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumViews'
@@ -60,6 +59,12 @@ class SpectrumView(AbstractWrapperObject):
   def _apiStripSpectrumView(self) -> ApiStripSpectrumView:
     """ CCPN SpectrumView matching SpectrumView"""
     return self._wrappedData
+
+  @property
+  def _key(self) -> str:
+    """id string - spectrumName"""
+    return self._wrappedData.spectrumView.spectrumName.translate(Pid.remapSeparators)
+
 
   @property
   def spectrumName(self) -> str:
@@ -298,76 +303,6 @@ class SpectrumView(AbstractWrapperObject):
     return tuple(None if x is None else x-1 for x in ll)
 
 
-
-  def _spectrumViewHasChanged(self):
-    """Change action icon colour and other changes when spectrumView changes
-
-    NB SpectrumView change notifiers are triggered when either DataSource or ApiSpectrumView change"""
-    spectrumDisplay = self.strip.spectrumDisplay
-    apiDataSource = self.spectrum._wrappedData
-
-    # Update action icol colour
-    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-    if action:
-      pix=QtGui.QPixmap(QtCore.QSize(60, 10))
-      if spectrumDisplay.is1D:
-        pix.fill(QtGui.QColor(self.sliceColour))
-      else:
-        pix.fill(QtGui.QColor(self.positiveContourColour))
-      action.setIcon(QtGui.QIcon(pix))
-
-    # Update strip
-    self.strip.update()
-
-  def _createdSpectrumView(self):
-    """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
-
-    # NBNB TBD FIXME get rid of API objects
-
-    spectrumDisplay = self.strip.spectrumDisplay
-    spectrum = self.spectrum
-
-    # Set Z widgets for nD strips
-    if not spectrumDisplay.is1D:
-      strip = self.strip
-      if not strip.haveSetupZWidgets:
-        strip._setZWidgets()
-
-    # Handle action buttons
-    apiDataSource = spectrum._wrappedData
-    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-    if not action:
-      # add toolbar action (button)
-      spectrumName = spectrum.name
-      if len(spectrumName) > 12:
-        spectrumName = spectrumName[:12]+'.....'
-      action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
-      action.setCheckable(True)
-      action.setChecked(True)
-      action.setToolTip(spectrum.name)
-      widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
-      widget.setIconSize(QtCore.QSize(120, 10))
-      if spectrumDisplay.is1D:
-        widget.setFixedSize(100, 30)
-      else:
-        widget.setFixedSize(75, 30)
-      widget.spectrumView = self._wrappedData
-      spectrumDisplay.spectrumActionDict[apiDataSource] = action
-      # The following call sets the icon colours:
-      self._spectrumViewHasChanged()
-
-    if spectrumDisplay.is1D:
-      action.toggled.connect(self.plot.setVisible)
-    action.toggled.connect(self.setVisible)
-
-
-  def _deletedSpectrumView(self):
-    """Update interface when a spectrumView is deleted"""
-    scene = self.strip.plotWidget.scene()
-    scene.removeItem(self)
-    if hasattr(self, 'plot'):  # 1d
-      scene.removeItem(self.plot)
-
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:Strip)-> list:
@@ -377,68 +312,27 @@ class SpectrumView(AbstractWrapperObject):
 
   #CCPN functions
 
+# newSpectrumView functions: None
+
 # Spectrum.spectrumViews property
-def _getSpectrumViews(spectrum:Spectrum):
+def getter(spectrum:Spectrum):
   return tuple(spectrum._project._data2Obj.get(y)
                for x in spectrum._wrappedData.sortedSpectrumViews()
                for y in x.sortedStripSpectrumViews())
-Spectrum.spectrumViews = property(_getSpectrumViews, None, None,
-                                   "SpectrumViews showing Spectrum")
+Spectrum.spectrumViews = property(getter, None, None,
+                                  "SpectrumViews showing Spectrum")
 
 # Strip.spectrumViews property
-def _getSpectrumViews(strip:Strip):
+def getter(strip:Strip):
   return tuple(strip._project._data2Obj.get(x)
                for x in strip._wrappedData.sortedStripSpectrumViews())
-Strip.spectrumViews = property(_getSpectrumViews, None, None,
-                                   "SpectrumViews shown in Strip")
-del _getSpectrumViews
+Strip.spectrumViews = property(getter, None, None,
+                               "SpectrumViews shown in Strip")
+del getter
 
-# Define subtypes and factory function
-class SpectrumView1d(SpectrumView, GuiSpectrumView1d):
-  """1D Spectrum View"""
-
-  def __init__(self, project:Project, wrappedData:ApiStripSpectrumView):
-    """Local override init for Qt subclass"""
-    AbstractWrapperObject. __init__(self, project, wrappedData)
-    GuiSpectrumView1d.__init__(self)
-
-  # put in subclass to make superclass abstract
-  @property
-  def _key(self) -> str:
-    """id string - combined spectrumName and stripSerial"""
-    return self._wrappedData.spectrumView.spectrumName.translate(Pid.remapSeparators)
-
-
-class SpectrumViewNd(SpectrumView, GuiSpectrumViewNd):
-  """ND Spectrum View"""
-
-  def __init__(self, project:Project, wrappedData:ApiStripSpectrumView):
-    """Local override init for Qt subclass"""
-    AbstractWrapperObject. __init__(self, project, wrappedData)
-    GuiSpectrumViewNd.__init__(self)
-
-  # put in subclass to make superclass abstract
-  @property
-  def _key(self) -> str:
-    """id string - spectrumName"""
-    return self._wrappedData.spectrumView.spectrumName.translate(Pid.remapSeparators)
-
-
-def _factoryFunction(project:Project, wrappedData:ApiStripSpectrumView) -> SpectrumView:
-  """create SpectrumView, dispatching to subtype depending on wrappedData"""
-  if 'intensity' in wrappedData.strip.spectrumDisplay.axisCodes:
-    # 1D display
-    return SpectrumView1d(project, wrappedData)
-  else:
-    # ND display
-    return  SpectrumViewNd(project, wrappedData)
-
-# Connections to parents:
-Strip._childClasses.append(SpectrumView)
-SpectrumView._factoryFunction = staticmethod(_factoryFunction)
 
 # Notifiers:
-# Notify SpectrumView change when SpiSpectrumView changes (underlying object is StripSpectrumView)
+# Notify SpectrumView change when ApiSpectrumView changes (underlying object is StripSpectrumView)
 Project._apiNotifiers.append(
   ('_notifyRelatedApiObject', {'pathToObject':'stripSpectrumViews', 'action':'change'},
    ApiSpectrumView._metaclass.qualifiedName(), '')
@@ -451,12 +345,4 @@ Spectrum.setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObjec
 # Links to SpectrumView and Spectrum are fixed after creation - any link notifiers should be put in
 # create/destroy instead
 
-# # Update Strip when SpectrumView changes
-# SpectrumView.setupCoreNotifier('change', Strip.update)
 
-SpectrumView.setupCoreNotifier('delete', SpectrumView._deletedSpectrumView)
-
-SpectrumView.setupCoreNotifier('create', SpectrumView._createdSpectrumView)
-
-
-SpectrumView.setupCoreNotifier('change', SpectrumView._spectrumViewHasChanged)

@@ -106,7 +106,7 @@ class DropBase(GuiBase):
 
           # NBNB Code to put other data types in side bar must go here
 
-          if pluralClassName == 'Spectra':
+          if pluralClassName == 'spectra':
             spectrum = self.getByPid(pid)
             # self._appBase.mainWindow.sideBar.addSpectrum(spectrum)
 
@@ -116,8 +116,8 @@ class DropBase(GuiBase):
       # process pids
       if pids:
 
-        tags = []
         tags = [ccpnUtil.pid2PluralName(x) for x in pids]
+        tags = [x[0].upper() + x[1:] for x in tags]
         if  len(set(tags)) == 1:
           # All pids of same type - process entire list with a single process call
           funcName = 'process' + tags[0]

@@ -46,6 +46,8 @@ class NmrAtom(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'NmrAtom'
 
+  _parentClass = NmrResidue
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'nmrAtoms'
   
@@ -339,12 +341,8 @@ def _produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
   nmrChain = self.fetchNmrChain(shortName=chainCode or Constants.defaultNmrChainCode)
   nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
   return nmrResidue.fetchNmrAtom(name)
-
     
 # Connections to parents:
-
-NmrResidue._childClasses.append(NmrAtom)
-
 NmrResidue.newNmrAtom = _newNmrAtom
 del _newNmrAtom
 NmrResidue.fetchNmrAtom = fetchNmrAtom

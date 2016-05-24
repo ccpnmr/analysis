@@ -30,7 +30,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Resonance as ApiNmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiNmrResidue
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiSpectrum
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumDisplay as ApiSpectrumDisplay
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.core.Project import Project
 
 # Fields that are coded automatically
@@ -48,7 +48,7 @@ _notifyDeleteFields = {
   'strips':ApiStrip,
   'nmrResidues':ApiNmrResidue,
   'nmrAtoms':ApiNmrAtom,
-  'spectrumDisplays':ApiSpectrumDisplay
+  'spectrumDisplays':ApiBoundDisplay
 }
 
 _fields = ['project', 'spectra'] + _autoFields

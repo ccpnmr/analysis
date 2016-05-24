@@ -26,17 +26,17 @@ from typing import Sequence
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
-from ccpn.ui.gui.modules.GuiWindow import GuiWindow
-from ccpn.ui.gui.modules.GuiMainWindow import GuiMainWindow
 from ccpn.util import Pid
 
 class Window(AbstractWrapperObject):
-  """GUI window, corresponds to OS window"""
+  """UI window, corresponds to OS window"""
 
   #: Short class name, for PID.
   shortClassName = 'GW'
   # Attribute it necessary as subclasses must use superclass className
   className = 'Window'
+
+  _parentClass = Project
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'windows'
@@ -52,6 +52,11 @@ class Window(AbstractWrapperObject):
   def _apiWindow(self) -> ApiWindow:
     """ CCPN Window matching Window"""
     return self._wrappedData
+
+  @property
+  def _key(self) -> str:
+    """short form of name, corrected to use for id"""
+    return self._wrappedData.title.translate(Pid.remapSeparators)
 
   @property
   def title(self) -> str:
@@ -92,7 +97,7 @@ class Window(AbstractWrapperObject):
     else:
       return windowStore.sortedWindows()
 
-
+# newWindow function
 def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:
   """Create new child Window
 
@@ -112,53 +117,8 @@ def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -
     newApiWindow.size = size
 
   return self._data2Obj.get(newApiWindow)
-
-# Connections to parents:
-Project._childClasses.append(Window)
 Project.newWindow = _newWindow
 del _newWindow
 
+# Notifiers: None
 
-# Define subtypes and factory function
-class MainWindow(Window, GuiMainWindow):
-  """GUI main window, corresponds to OS window"""
-
-  def __init__(self, project:Project, wrappedData:ApiWindow):
-    """Local override init for Qt subclass"""
-    AbstractWrapperObject. __init__(self, project, wrappedData)
-    appBase = self._project._appBase
-    if appBase is not None:
-      appBase.mainWindow = self
-    GuiMainWindow.__init__(self)
-  # put in subclass to make superclass abstract
-  @property
-  def _key(self) -> str:
-    """short form of name, corrected to use for id"""
-    return self._wrappedData.title.translate(Pid.remapSeparators)
-
-
-class SideWindow(Window, GuiWindow):
-  """GUI side window, corresponds to OS window"""
-
-  def __init__(self, project:Project, wrappedData:ApiWindow):
-    """Local override init for Qt subclass"""
-    AbstractWrapperObject. __init__(self, project, wrappedData)
-    GuiWindow.__init__(self)
-
-  # put in subclass to make superclass abstract
-  @property
-  def _key(self) -> str:
-    """short form of name, corrected to use for id"""
-    return self._wrappedData.title.translate(Pid.remapSeparators)
-
-def _factoryFunction(project:Project, wrappedData:ApiWindow) ->Window:
-  """create Window, dispatching to subtype depending on wrappedData"""
-  if wrappedData.title == 'Main':
-    return MainWindow(project, wrappedData)
-  else:
-    return SideWindow(project, wrappedData)
-
-
-Window._factoryFunction = staticmethod(_factoryFunction)
-
-# Notifiers:

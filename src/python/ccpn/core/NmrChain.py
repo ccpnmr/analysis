@@ -40,6 +40,8 @@ class NmrChain(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'NmrChain'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'nmrChains'
   
@@ -241,7 +243,6 @@ def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
 # Clean-up
     
 # Connections to parents:
-Project._childClasses.append(NmrChain)
 Project.newNmrChain = _newNmrChain
 del _newNmrChain
 Project.fetchNmrChain = fetchNmrChain

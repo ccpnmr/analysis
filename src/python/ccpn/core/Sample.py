@@ -45,6 +45,8 @@ class Sample(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Sample'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'samples'
   
@@ -292,7 +294,6 @@ del getter
 del setter
 
 # Connections to parents:
-Project._childClasses.append(Sample)
 Project.newSample = _newSample
 del _newSample
 

@@ -43,6 +43,8 @@ class RestraintContribution(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'RestraintContribution'
 
+  _parentClass = Restraint
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'restraintContributions'
 
@@ -237,8 +239,6 @@ class RestraintContribution(AbstractWrapperObject):
     return parent._wrappedData.sortedContributions()
 
 # Connections to parents:
-Restraint._childClasses.append(RestraintContribution)
-
 def _newRestraintContribution(self:Restraint, targetValue:float=None, error:float=None,
                     weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,

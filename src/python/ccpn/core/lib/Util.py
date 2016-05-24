@@ -28,11 +28,15 @@ from collections import namedtuple
 from ccpn.util import Pid
 
 def pid2PluralName(pid:str) -> str:
-  """Get plural class name, (e.g. 'Peaks', 'Spectra' from short-form or long-form, Pid string
+  """Get plural class name, (e.g. 'peaks', 'spectra' from short-form or long-form, Pid string
   Unrecognised strings are returned unchanged"""
-  from ccpn.core import _pluralPidTypeMap as pluralPidTypeMap
+  from ccpn.core.Project import Project
   tag = pid.split(Pid.PREFIXSEP, 1)[0]
-  return pluralPidTypeMap.get(tag, tag)
+  cls = Project._className2Class.get(tag)
+  if cls is None:
+    return tag
+  else:
+    return cls._pluralLinkName
 
 # Atom ID
 AtomIdTuple = namedtuple('AtomIdTuple', ['chainCode', 'sequenceCode', 'residueType', 'atomName', ])

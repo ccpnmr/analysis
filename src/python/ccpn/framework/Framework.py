@@ -19,13 +19,14 @@ __version__ = "$Revision: 9320 $"
 # Start of code
 #=========================================================================================
 
-import os
-import sys
 import json
+import os
 import platform
+import sys
 
+# from ccpn.core.Project import Project
+from ccpn import core as ccpnCore
 from ccpn.core.Project import Project
-from ccpn.ui.gui import core # NB Neccessary to force load of graphics classes
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpnmodel.ccpncore.api.memops import Implementation
@@ -39,7 +40,9 @@ from ccpn.util import Register
 from ccpn.framework.Translation import translator
 from ccpn.framework.Translation import languages, defaultLanguage
 
+from ccpn.ui import interfaces, defaultInterface
 
+_DEBUG = True
 
 componentNames = ('Assignment', 'Screening', 'Structure')
 
@@ -59,7 +62,7 @@ def printCreditsText(fp, programName, version):
   maxlen = max(map(len,lines))
   fp.write('%s\n' % ('=' * (maxlen+8)))
   for line in lines:
-  	fp.write('|   %s ' % line + ' ' * (maxlen-len(line)) + '  |\n')
+    fp.write('|   %s ' % line + ' ' * (maxlen-len(line)) + '  |\n')
   fp.write('%s\n' % ('=' * (maxlen+8)))
 
 
@@ -73,8 +76,13 @@ def defineProgramArguments():
     parser.add_argument('--'+component.lower(), dest='include'+component, action='store_true',
                                                 help='Show %s component' % component.lower())
   parser.add_argument('--language',
-                      help='Language for menus, etc.; valid options = (' + '|'.join(languages) + '); default='+defaultLanguage,
+                      help=('Language for menus, etc.; valid options = (%s); default=%s' %
+                            ('|'.join(languages) ,defaultLanguage)),
                       default=defaultLanguage)
+  parser.add_argument('--interface',
+                      help=('User interface, to use; one of  = (%s); default=%s' %
+                            ('|'.join(interfaces) ,defaultInterface)),
+                      default=defaultInterface)
   parser.add_argument('--skip-user-preferences', dest='skipUserPreferences', action='store_true',
                                                  help='Skip loading user preferences')
   parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
@@ -103,21 +111,25 @@ class Framework:
 
     self.useFileLogger = not self.args.nologging
 
-    self.current = Current(project=None)
+    self.current = None
 
-    self.gui = None  # No gui app so far
+    self.preferences = None
+    self.styleSheet = None
+
+    self.ui = None  # No gui app so far
 
     # Necessary as attribute is queried during initialisation:
     self.mainWindow = None
 
+
+    # NBNB TODO The following block should maybe be moved into _setupUI
     self._getUserPrefs()
     self.registrationDict = Register.loadDict()
     self._setLanguage()
-
     self.styleSheet = self.getStyleSheet(self.preferences)
 
     # Currently, we have to have a GUI running for the wrapper to create GuiMainWindow.
-    self.ui = self.gui = self._setupUI()
+    self.ui = self._setupUI()
 
 
   def getStyleSheet(self, preferences=None):
@@ -174,7 +186,7 @@ class Framework:
     Display registration popup if there is a gui
     return True on error
     """
-    if self.gui is None:
+    if self.ui is None:
         return True
 
     popup = RegisterPopup(version=self.applicationVersion, modal=True)
@@ -191,93 +203,81 @@ class Framework:
 
 
   def _setupUI(self):
-    from ccpn.ui.gui.Gui import Gui
-    gui = Gui(self)
-    return gui
+    if self.args.interface == 'Gui':
+      from ccpn.ui.gui.Gui import Gui
+      ui = Gui(self)
+    else:
+      from ccpn.ui.NoUi import NoUi
+      ui = NoUi(self)
+    return ui
 
 
   def start(self):
     """Start the program execution"""
-    project = self.initProject()
-    self.current._project = project
+
+    # L:oad / create uninitialised project
+    projectPath =  self.args.projectPath
+    if projectPath:
+      sys.stderr.write('==> Loading "%s" initial project\n' % projectPath)
+      projectPath = os.path.normpath(projectPath)
+      project = ccpnCore.loadProject(projectPath)
+
+    else:
+      sys.stderr.write('==> Creating new, empty project\n')
+      project = ccpnCore.newProject(name='default')
+
+    # Connect UI classes for chosen ui
+    self.ui.setUp()
+
+    # Initialise project, wrapping to underlying data using selected ui
+    self._initialiseProject(project)
 
     sys.stderr.write('==> Done, %s is starting\n' % self.applicationName )
 
-    # TODO: Add back in registration
+    # TODO: Add back in registration ???
 
-    self.gui.start()
+    self.ui.start()
+
+    project._resetUndo(debug=_DEBUG)
 
 
-###################################
-  # TODO: RASMUS
-  def initProject(self):
-    # load user-specified project or default if not specified
-    if self.args.projectPath:
-      sys.stderr.write('==> Loading "%s" project\n' % self.args.projectPath)
-      projectPath = os.path.normpath(self.args.projectPath)
-      apiProject = apiIo.loadProject(projectPath, useFileLogger=self.useFileLogger)
-      if not projectPath.endswith(apiIo.CCPN_DIRECTORY_SUFFIX):
-        projectPath = saveV2ToV3(apiProject, projectPath, self.preferences)
-        if not projectPath:
-          return
-        apiProject = apiIo.loadProject(projectPath, useFileLogger=self.useFileLogger)
-    else:
-      sys.stderr.write('==> Loading default project\n')
-      apiProject = apiIo.newProject('default', useFileLogger=self.useFileLogger)
+  def _initialiseProject(self, project:Project):
+    """Initialise project and set up links and objects that involve it"""
 
+    # Set up current
+    self.current = Current(project=project)
+
+    # Adapt API level project
+    project._wrappedData.initialiseGraphicsData()
+    self.applyPreferences(project)
+
+    # NBNB TODO THIS IS A BAD HACK - refactor!!!
+    project._appBase = self
+    self.project = project
+
+    # This wraps the underlying data, including the wrapped graphics data
+    #  - the project is now ready to use
+    project._initialiseProject()
+    #
+    # # Set up mainWindow
+    # self._setupMainWindow(project)
+    #
+    # self.initGraphics()
+
+  def applyPreferences(self, project):
+    """Apply user preferences
+
+    NBNB project should be impliclt rather than a parameter (once reorganisation is finished)
+    """
     # Reset remoteData DataStores to match preferences setting
     dataPath = self.preferences.general.dataPath
     if not dataPath or not os.path.isdir(dataPath):
       dataPath = os.path.expanduser('~')
-    dataUrl = apiProject.root.findFirstDataLocationStore(name='standard').findFirstDataUrl(
-      name='remoteData')
+    memopsRoot = project._wrappedData.root
+    dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
+      name='remoteData'
+    )
     dataUrl.url = Implementation.Url(path=dataPath)
-
-    # ApiProject to appBase - Done this way to sneak the appBase in before creating the wrapper
-    # This is where we should hand the UI to the wrapper
-    apiProject._appBase = self
-
-    # Make sure we have a WindowStore attached to the NmrProject - that guarantees a mainWindow
-    apiNmrProject = apiProject.fetchNmrProject()
-    apiWindowStore = apiNmrProject.windowStore
-    if apiWindowStore is None:
-      apiWindowStore = apiProject.findFirstWindowStore()
-      if apiWindowStore is None:
-        apiWindowStore = apiProject.newWindowStore(nmrProject=apiNmrProject)
-      else:
-        apiNmrProject.windowStore = apiWindowStore
-
-    print('*********', self.mainWindow)
-    # Wrap ApiNmrProject
-    project = Project(apiNmrProject)
-    print('*********', self.mainWindow)
-
-    # self.current._project = project
-
-    mainWindow = self._setupMainWindow(project)
-
-    if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
-      apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
-                                         windows=(mainWindow._wrappedData,))
-
-
-    self.initGraphics()
-    # Set up undo stack
-    # The default values are as below. They can be changed if desired
-    #project._resetUndo(maxWaypoints=20, maxOperations=10000)
-    project._resetUndo(debug=True)
-    #
-    return project
-
-  # TODO: RASMUS/WAYNE
-  def _setupMainWindow(self, project):
-    # Set up mainWindow (link is set from mainWindow init
-    mainWindow = self.mainWindow
-    mainWindow.sideBar.setProject(project)
-    mainWindow.sideBar.fillSideBar(project)
-    mainWindow.raise_()
-    mainWindow.namespace['current'] = self.current
-    return mainWindow
 
 
   def initGraphics(self):
@@ -288,14 +288,15 @@ class Framework:
 
 
   def _closeProject(self):
-    """Close project and clean up - should only be called when opening another"""
-    # TODO: convert this to  self.project.close()
-    # NBNB TBD add code to save first, ask, etc. Somewhere
+    """Close project and clean up - when opening another or quitting application"""
 
-    if self.project is not None:
-      self.project._close()
-      self.project = None
+    # NB: this function must clan up both wrapper and ui/gui
+
+    if self.current and self.current._project is not None:
+      # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
+      self.current._project._close()
     if self.mainWindow:
+      # ui/gui cleanup
       self.mainWindow.deleteLater()
     self.mainWindow = None
     self.current = None
@@ -303,20 +304,37 @@ class Framework:
 
   def loadProject(self, path):
     """Open new project from path"""
-    # TODO: convert this to  self.project.load()
-    pass
-    # self._closeProject()
-    # apiProject = apiIo.loadProject(path)
-    # return self.initProject(apiProject)
+    # TODO: convert this to  self.project.load() RHF: Reconsider?
+
+    # NB _closeProject includes a gui cleanup call
+
+    self._closeProject()
+
+    sys.stderr.write('==> Loading "%s" project\n' % path)
+    path = os.path.normpath(path)
+    project = ccpnCore.loadProject(path)
+
+    self._initialiseProject(project)
+
+    project._resetUndo(debug=_DEBUG)
+
+    return project
 
 
   def newProject(self, name='default'):
     # """Create new, empty project"""
-    # TODO: convert this to  self.project.newProject()
-    pass
-    # self._closeProject()
-    # apiProject = apiIo.newProject(name)
-    # return self.initProject(apiProject)
+
+    # NB _closeProject includes a gui cleanup call
+
+    self._closeProject()
+    sys.stderr.write('==> Creating new, empty project\n')
+    project = ccpnCore.newProject(name=name)
+
+    self._initialiseProject(project)
+
+    project._resetUndo(debug=_DEBUG)
+
+    return project
 
 
   def saveProject(self, newPath=None, newProjectName=None, createFallback=True):
@@ -332,12 +350,15 @@ class Framework:
       yaml.dump(layout, stream)
       stream.close()
     saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
-    MessageDialog.showMessage('Project saved', 'Project successfully saved!',
-                              colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
+
+    sys.stderr.write('==> Project successfully saved\n')
+    # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
+    #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 ###################################
 
 
-def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None, userPreferencesPath=None):
+def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None,
+                   userPreferencesPath=None):
 
   def _readPreferencesFile(preferencesPath):
     fp = open(preferencesPath)

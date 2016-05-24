@@ -40,6 +40,8 @@ class Bond(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Bond'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'bonds'
   
@@ -94,7 +96,6 @@ def _newBond(self:Project, atoms:Tuple[Atom,Atom]) -> Bond:
 
     
 # Connections to parents:
-Project._childClasses.append(Bond)
 Project.newBond = _newBond
 del _newBond
 

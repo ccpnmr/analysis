@@ -151,3 +151,72 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     colour = Colour.colourNameToHexDict.get(colour, colour)  # works even if None
       
     return colour
+
+  def _spectrumViewHasChanged(self):
+    """Change action icon colour and other changes when spectrumView changes
+
+    NB SpectrumView change notifiers are triggered when either DataSource or ApiSpectrumView change"""
+    spectrumDisplay = self.strip.spectrumDisplay
+    apiDataSource = self.spectrum._wrappedData
+
+    # Update action icol colour
+    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    if action:
+      pix=QtGui.QPixmap(QtCore.QSize(60, 10))
+      if spectrumDisplay.is1D:
+        pix.fill(QtGui.QColor(self.sliceColour))
+      else:
+        pix.fill(QtGui.QColor(self.positiveContourColour))
+      action.setIcon(QtGui.QIcon(pix))
+
+    # Update strip
+    self.strip.update()
+
+  def _createdSpectrumView(self):
+    """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
+
+    # NBNB TBD FIXME get rid of API objects
+
+    spectrumDisplay = self.strip.spectrumDisplay
+    spectrum = self.spectrum
+
+    # Set Z widgets for nD strips
+    if not spectrumDisplay.is1D:
+      strip = self.strip
+      if not strip.haveSetupZWidgets:
+        strip._setZWidgets()
+
+    # Handle action buttons
+    apiDataSource = spectrum._wrappedData
+    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    if not action:
+      # add toolbar action (button)
+      spectrumName = spectrum.name
+      if len(spectrumName) > 12:
+        spectrumName = spectrumName[:12]+'.....'
+      action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+      action.setCheckable(True)
+      action.setChecked(True)
+      action.setToolTip(spectrum.name)
+      widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
+      widget.setIconSize(QtCore.QSize(120, 10))
+      if spectrumDisplay.is1D:
+        widget.setFixedSize(100, 30)
+      else:
+        widget.setFixedSize(75, 30)
+      widget.spectrumView = self._wrappedData
+      spectrumDisplay.spectrumActionDict[apiDataSource] = action
+      # The following call sets the icon colours:
+      self._spectrumViewHasChanged()
+
+    if spectrumDisplay.is1D:
+      action.toggled.connect(self.plot.setVisible)
+    action.toggled.connect(self.setVisible)
+
+
+  def _deletedSpectrumView(self):
+    """Update interface when a spectrumView is deleted"""
+    scene = self.strip.plotWidget.scene()
+    scene.removeItem(self)
+    if hasattr(self, 'plot'):  # 1d
+      scene.removeItem(self.plot)

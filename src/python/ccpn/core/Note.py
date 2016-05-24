@@ -37,6 +37,8 @@ class Note(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Note'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'notes'
   
@@ -134,7 +136,6 @@ def _newNote(self:Project, name:str='Note', text:str=None) -> Note:
     
     
 # Connections to parents:
-Project._childClasses.append(Note)
 Project.newNote = _newNote
 del _newNote
 

@@ -80,6 +80,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setGeometry(540, 40, 900, 900)
 
     GuiWindow.__init__(self)
+    self._appBase.mainWindow = self
     self.recordingMacro = False
     self._setupWindow()
     self._setupMenus()
@@ -536,7 +537,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.sideBar._createNewObject(item)
 
     else:
-      project._logger.error("Double-click activation not implemented for object %s" % obj)
+      project._logger.error("Double-click activation not implemented for Pid %s, object %s"
+                            % (dataPid, obj))
 
   def _fillRecentProjectsMenu(self):
     """

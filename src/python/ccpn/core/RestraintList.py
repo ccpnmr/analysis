@@ -45,6 +45,8 @@ class RestraintList(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'RestraintList'
 
+  _parentClass = DataSet
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'restraintLists'
 
@@ -241,8 +243,6 @@ class RestraintList(AbstractWrapperObject):
     return sorted(parent._wrappedData.constraintLists, key=operator.attrgetter('name'))
 
 # Connections to parents:
-DataSet._childClasses.append(RestraintList)
-
 def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=None,
                       comment:str=None, unit:str=None, potentialType:str='unknown',
                       tensorMagnitude:float=0.0, tensorRhombicity:float=0.0,

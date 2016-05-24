@@ -38,6 +38,8 @@ class SpectrumHit(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'SpectrumHit'
 
+  _parentClass = Spectrum
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumHits'
 
@@ -175,6 +177,7 @@ class SpectrumHit(AbstractWrapperObject):
     """get wrappedData (Nmr.SpectrumHit) for all SpectrumHit children of parent Spectrum"""
     return parent._wrappedData.sortedSpectrumHits()
 
+# Connections to parents:
 def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
                      pseudoDimensionNumber:int=0, pseudoDimension:PseudoDimension=None,
                     figureOfMerit:float=None,  meritCode:str=None, normalisedChange:float=None,
@@ -201,9 +204,7 @@ def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
 
 Spectrum.newSpectrumHit = _newSpectrumHit
 del _newSpectrumHit
-# Connections to parents:
 
-Spectrum._childClasses.append(SpectrumHit)
 
 def getter(self:PseudoDimension) -> List[SpectrumHit]:
   dimensionNumber = self.dimension

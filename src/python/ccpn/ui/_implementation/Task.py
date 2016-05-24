@@ -21,11 +21,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.util import Pid
 from typing import Sequence, Tuple
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+
 from ccpn.core.Project import Project
-from ccpn.ui.gui.core.Window import Window
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.ui._implementation.Window import Window
+from ccpn.util import Pid
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import GuiTask as ApiGuiTask
 
 
@@ -36,6 +37,8 @@ class Task(AbstractWrapperObject):
   shortClassName = 'GT'
   # Attribute it necessary as subclasses must use superclass className
   className = 'Task'
+
+  _parentClass = Project
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'tasks'
@@ -143,14 +146,7 @@ class Task(AbstractWrapperObject):
     """Remove spectrum views that do not match existing spectra, e.g. after loading a template"""
     self._wrappedData.pruneSpectrumViews()
 
-def _getTask(window):
-  return window._project._data2Obj.get(window._wrappedData.guiTask)
-def _setTask(window, value):
-  value = window.getByPid(value) if isinstance(value, str) else value
-  window._wrappedData.guiTask = value and value._wrappedData
-Window.task = property(_getTask, _setTask, None, """Task shown in Window.""")
-
-
+# newTask function
 def _newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
   """Create new ccpn.Task"""
 
@@ -167,13 +163,19 @@ def _newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Ta
   newApiTask = nmrProject.root.newGuiTask(**dd)
 
   return self._data2Obj.get(newApiTask)
-
-# Connections to parents:
-Project._childClasses.append(Task)
 Project.newTask = _newTask
-del _newTask
 
-# Notifiers:
+# Window.task crosslink
+def getter(window):
+  return window._project._data2Obj.get(window._wrappedData.guiTask)
+def setter(window, value):
+  value = window.getByPid(value) if isinstance(value, str) else value
+  window._wrappedData.guiTask = value and value._wrappedData
+Window.task = property(getter, setter, None, """Task shown in Window.""")
+del getter
+del setter
+
+# Notifiers: None
 
 # NBNB TBD Add notifiers, one way or the other, for activating and passivating tasks
 

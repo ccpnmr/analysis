@@ -25,7 +25,8 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 # NBNB These two imports are NECESSARY,
 # as  ccpn.ui.gui.core MUST be imported to register the Gui classes
-from  ccpn.ui.gui import core as guiCore
+from ccpn.ui._implementation import Mark
+
 
 class MarkTest(WrapperTesting):
 
@@ -59,7 +60,7 @@ class MarkTest(WrapperTesting):
     ll = list(zip(self.axisCodes, self.positions, self.units, self.labels))
     ll.append(('Hc', 1.27, 'ppm', None))
 
-    assert mark1.rulerData == tuple(guiCore.Mark.RulerData(*x) for x in ll)
+    assert mark1.rulerData == tuple(Mark.RulerData(*x) for x in ll)
 
     mark1.delete()
     self.task.delete()
@@ -69,6 +70,6 @@ class MarkTest(WrapperTesting):
     data = ('Hc', 1.27, None, None)
     mark1 = self.task.newSimpleMark('red', data[0], data[1])
     print('mark1.rulerData', mark1.rulerData)
-    assert  mark1.rulerData == (guiCore.Mark.RulerData('Hc', 1.27, 'ppm', None),)
+    assert  mark1.rulerData == (Mark.RulerData('Hc', 1.27, 'ppm', None),)
 
     self.task.delete()

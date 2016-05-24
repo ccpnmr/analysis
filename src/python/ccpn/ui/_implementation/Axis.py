@@ -22,13 +22,16 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from typing import Sequence, Tuple
-from ccpn.util import Pid
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
+
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.ui.gui.core.Strip import Strip
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
+from ccpn.core.Project import Project
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.ui._implementation.Strip import Strip
+from ccpn.util import Pid
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
+
+
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 
 
@@ -39,6 +42,8 @@ class Axis(AbstractWrapperObject):
   shortClassName = 'GA'
   # Attribute it necessary as subclasses must use superclass className
   className = 'Axis'
+
+  _parentClass = Strip
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'axes'
@@ -139,6 +144,10 @@ class Axis(AbstractWrapperObject):
     """Overrides normal delete"""
     raise  ValueError("Axes cannot be deleted independently")
 
+
+# We should NOT have any newAxis functions
+
+# Strip.orderedAxes property
 def getter(self) -> Tuple[Axis, ...]:
   apiStrip = self._wrappedData
   ff = self._project._data2Obj.get
@@ -148,14 +157,8 @@ def setter(self, value:Sequence):
   self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
 Strip.orderedAxes = property(getter, setter, None,
                              "Axes in display order (X, Y, Z1, Z2, ...) ")
-
 del getter
 del setter
-
-# Connections to parents:
-Strip._childClasses.append(Axis)
-
-# We should NOT have any newAxis functions
 
 # Notifiers:
 Project._apiNotifiers.append(
@@ -163,49 +166,4 @@ Project._apiNotifiers.append(
    ApiAxis._metaclass.qualifiedName(), '')
 )
 
-def _axisRegionChanged(axis:Axis):
-  """Notifier function: Update strips etc. for when axis position or width changes"""
 
-  position = axis.position
-  width = axis.width
-  region = (position - width/2., position + width/2.)
-
-  strip = axis.strip
-
-  index = strip.axisOrder.index(axis.code)
-  if not strip.beingUpdated:
-
-    strip.beingUpdated = True
-
-    try:
-      if index == 0:
-        # X axis
-        strip.viewBox.setXRange(*region)
-      elif index == 1:
-        # Y axis
-        strip.viewBox.setYRange(*region)
-      else:
-        # One of the Z axes
-        for spectrumView in strip.spectrumViews:
-          if spectrumView.isVisible():
-            for peakListView in spectrumView.peakListViews:
-              if peakListView.isVisible():
-                peakList = peakListView.peakList
-                peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
-                strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
-
-        if len(strip.axisOrder) > 2:
-          n = index - 2
-          if n >= 0:
-            planeLabel = strip.planeToolbar.planeLabels[n]
-            planeSize = planeLabel.singleStep()
-            planeLabel.setValue(position)
-            strip.planeToolbar.planeCounts[n].setValue(width/planeSize)
-
-    finally:
-      strip.beingUpdated = False
-
-  if index == 1:  # ASSUMES that only do H phasing
-    strip._updatePhasing()
-
-Axis.setupCoreNotifier('change', _axisRegionChanged)

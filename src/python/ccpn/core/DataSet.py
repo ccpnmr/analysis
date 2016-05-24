@@ -41,6 +41,8 @@ class DataSet(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'DataSet'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'dataSets'
   
@@ -185,7 +187,6 @@ def _newDataSet(self:Project, title:str=None, programName:str=None, programVersi
     
     
 # Connections to parents:
-Project._childClasses.append(DataSet)
 Project.newDataSet = _newDataSet
 del _newDataSet
 

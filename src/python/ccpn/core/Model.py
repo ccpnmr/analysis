@@ -45,6 +45,8 @@ class Model(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Model'
 
+  _parentClass = StructureEnsemble
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'models'
 
@@ -184,7 +186,6 @@ def _newModel(self:StructureEnsemble, name:str=None, comment:str=None,
 
 
 # Connections to parents:
-StructureEnsemble._childClasses.append(Model)
 StructureEnsemble.newModel = _newModel
 del _newModel
 

@@ -37,6 +37,7 @@ from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util import Pid
 from ccpn.util import Undo
+from ccpn.util import Logging
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
@@ -62,6 +63,9 @@ class Project(AbstractWrapperObject):
   # All non-abstractWrapperClasses - filled in by
   _allLinkedWrapperClasses = []
 
+  # Utility map - class shortName and longName to class.
+  _className2Class = {}
+
   # List of CCPN api notifiers
   # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName
   # The function self.wrapperFuncName(**parameterDict) will be registered
@@ -80,6 +84,8 @@ class Project(AbstractWrapperObject):
   # Implementation methods
   def __init__(self, wrappedData: ApiNmrProject):
     """ Special init for root (Project) object
+
+    NB Project is NOT complete before the _initProject function is run.
     """
 
     if not isinstance(wrappedData, ApiNmrProject):
@@ -132,91 +138,118 @@ class Project(AbstractWrapperObject):
     # Special attributes:
     self._implExperimentTypeMap = None
 
-    # Set required objects in apiProject and ApiNmrProject
+    # Set for Pre-May-2016 version. NBNB TODO remove when no longer needed
+    self._appBase = None
+
+
     #
-    # NBNB TBD All this should probably be moved to either AppBase initiation or V2 upgrade
-    # preferably the latter.
+    # # Set required objects in apiProject and ApiNmrProject
+    # wrappedData.initialiseData()
 
-    # PeakLists and Spectrum contour colours
-    for experiment in wrappedData.experiments:
-      for dataSource in experiment.dataSources:
+    # #
+    # # NBNB TBD All this should probably be moved to either AppBase initiation or V2 upgrade
+    # # preferably the latter.
+    #
+    # # PeakLists and Spectrum contour colours
+    # for experiment in wrappedData.experiments:
+    #   for dataSource in experiment.dataSources:
+    #
+    #     if not dataSource.findFirstPeakList(dataType='Peak'):
+    #       # Set a peakList for every spectrum
+    #       dataSource.newPeakList()
+    #
+    #     if not dataSource.positiveContourColour or not dataSource.negativeContourColour:
+    #       # set contour colours for every spectrum
+    #       (dataSource.positiveContourColour,
+    #        dataSource.negativeContourColour) = dataSource.getDefaultColours()
+    #     if not dataSource.sliceColour:
+    #       dataSource.sliceColour = dataSource.positiveContourColour
+    #
+    # # MolSystem
+    # apiProject = wrappedData.root
+    # if wrappedData.molSystem is None:
+    #   apiProject.newMolSystem(name=wrappedData.name, code=wrappedData.name,
+    #                           nmrProjects = (wrappedData,))
+    # # SampleStore
+    # apiSampleStore = wrappedData.sampleStore
+    # if apiSampleStore is None:
+    #   apiSampleStore = (apiProject.findFirstSampleStore(name='default') or
+    #                     apiProject.newSampleStore(name='default'))
+    #   wrappedData.sampleStore = apiSampleStore
+    # # RefSampleComponentStore
+    # apiComponentStore = apiSampleStore.refSampleComponentStore
+    # if apiComponentStore is None:
+    #   apiComponentStore = (apiProject.findFirstRefSampleComponentStore(name='default') or
+    #                        apiProject.newRefSampleComponentStore(name='default'))
+    #   apiSampleStore.refSampleComponentStore = apiComponentStore
+    # # Make Substances that match finalised Molecules
+    # for apiMolecule in apiProject.sortedMolecules():
+    #   if apiMolecule.isFinalised:
+    #     # Create matchingMolComponent if none exists
+    #     apiComponentStore.fetchMolComponent(apiMolecule)
+    #
+    # # Fix alpha or semi-broken projects. None of this should eb necessary, but hey!
+    # # NB written to modify nothing for valid projects
+    #
+    # # Get or (re)make default NmrChain
+    # defaultChain = wrappedData.findFirstNmrChain(code=Constants.defaultNmrChainCode)
+    # if defaultChain is None:
+    #   # NO default chain - probably an alpha project or upgraded from V2
+    #   defaultChain = wrappedData.findFirstNmrChain(code='@-')
+    #   if defaultChain is None:
+    #     defaultChain = wrappedData.newNmrChain(code=Constants.defaultNmrChainCode)
+    #   else:
+    #     defaultChain.code = '@-'
+    # # Make sure all non-offset ResonanceGroups have directNmrChain set.
+    # for rg in wrappedData.sortedResonanceGroups():
+    #   if rg.mainGroupSerial == rg.serial:
+    #     rg.mainGroupSerial = None
+    #   if rg.mainGroupSerial is None and rg.directNmrChain is None:
+    #     if hasattr(rg, 'chainSerial') and rg.chainSerial is not None:
+    #       rg.directNmrChain = wrappedData.findFirstNmrChain(serial=rg.chainSerial)
+    #     if rg.directNmrChain is None:
+    #       rg.directNmrChain = defaultChain
+    # # End of API object fixing
 
-        if not dataSource.findFirstPeakList(dataType='Peak'):
-          # Set a peakList for every spectrum
-          dataSource.newPeakList()
+    # self._logger = wrappedData.root._logger
+    #
+    # self._registerApiNotifiers()
+    #
+    # for tt in self._coreNotifiers:
+    #   self.registerNotifier(*tt)
+    #
+    # # set appBase attribute - for gui applications
+    # if hasattr(wrappedData.root, '_appBase'):
+    #   appBase = wrappedData.root._appBase
+    #   self._appBase = appBase
+    #   appBase.project = self
+    # else:
+    #   self._appBase = None
 
-        if not dataSource.positiveContourColour or not dataSource.negativeContourColour:
-          # set contour colours for every spectrum
-          (dataSource.positiveContourColour,
-           dataSource.negativeContourColour) = dataSource.getDefaultColours()
-        if not dataSource.sliceColour:
-          dataSource.sliceColour = dataSource.positiveContourColour
+    # self._initializeAll()
 
-    # MolSystem
-    apiProject = wrappedData.root
-    if wrappedData.molSystem is None:
-      apiProject.newMolSystem(name=wrappedData.name, code=wrappedData.name,
-                              nmrProjects = (wrappedData,))
-    # SampleStore
-    apiSampleStore = wrappedData.sampleStore
-    if apiSampleStore is None:
-      apiSampleStore = (apiProject.findFirstSampleStore(name='default') or
-                        apiProject.newSampleStore(name='default'))
-      wrappedData.sampleStore = apiSampleStore
-    # RefSampleComponentStore
-    apiComponentStore = apiSampleStore.refSampleComponentStore
-    if apiComponentStore is None:
-      apiComponentStore = (apiProject.findFirstRefSampleComponentStore(name='default') or
-                           apiProject.newRefSampleComponentStore(name='default'))
-      apiSampleStore.refSampleComponentStore = apiComponentStore
-    # Make Substances that match finalised Molecules
-    for apiMolecule in apiProject.sortedMolecules():
-      if apiMolecule.isFinalised:
-        # Create matchingMolComponent if none exists
-        apiComponentStore.fetchMolComponent(apiMolecule)
+  def _initialiseProject(self):
+    """Complete initialisation of project,
 
-    # Fix alpha or semi-broken projects. None of this should eb necessary, but hey!
-    # NB written to modify nothing for valid projects
+    set up logger and notifiers, and wrap underlying data"""
 
-    # Get or (re)make default NmrChain
-    defaultChain = wrappedData.findFirstNmrChain(code=Constants.defaultNmrChainCode)
-    if defaultChain is None:
-      # NO default chain - probably an alpha project or upgraded from V2
-      defaultChain = wrappedData.findFirstNmrChain(code='@-')
-      if defaultChain is None:
-        defaultChain = wrappedData.newNmrChain(code=Constants.defaultNmrChainCode)
-      else:
-        defaultChain.code = '@-'
-    # Make sure all non-offset ResonanceGroups have directNmrChain set.
-    for rg in wrappedData.sortedResonanceGroups():
-      if rg.mainGroupSerial == rg.serial:
-        rg.mainGroupSerial = None
-      if rg.mainGroupSerial is None and rg.directNmrChain is None:
-        if hasattr(rg, 'chainSerial') and rg.chainSerial is not None:
-          rg.directNmrChain = wrappedData.findFirstNmrChain(serial=rg.chainSerial)
-        if rg.directNmrChain is None:
-          rg.directNmrChain = defaultChain
-    # End of API object fixing
+    # The logger has already been set up when creating/loading the API project
+    # so just get it
+    self._logger = Logging.getLogger()
 
-    self._logger = wrappedData.root._logger
-
+    # Set up notifiers
     self._registerApiNotifiers()
 
     for tt in self._coreNotifiers:
       self.registerNotifier(*tt)
 
-    # set appBase attribute - for gui applications
-    if hasattr(wrappedData.root, '_appBase'):
-      appBase = wrappedData.root._appBase
-      self._appBase = appBase
-      appBase.project = self
-    else:
-      self._appBase = None
-
+    # initialise, creating the wrapped objects
     self._initializeAll()
 
   def _close(self):
-    """Clean up the wrapper project previous to deleting or replacing"""
+    """Clean up the wrapper project previous to deleting or replacing
+
+    Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)"""
     # Remove undo stack:
     self._logger.info("project._close()")
 

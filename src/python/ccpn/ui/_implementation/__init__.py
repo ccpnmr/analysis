@@ -49,13 +49,12 @@ __version__ = "$Revision$"
 
 
 
-
-import importlib
-
-# Following import statement to ensure wrapper classes correctly loaded
-from ccpn import core
-from ccpn.core.Project import Project
-from ccpn.core import _pluralPidTypeMap
+#
+# import importlib
+#
+# # Following import statement to ensure wrapper classes correctly loaded
+# from ccpn import core
+# from ccpn.core.Project import Project
 
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
@@ -67,24 +66,31 @@ from ccpn.core import _pluralPidTypeMap
 _importOrder = [
   'Window', 'Task', 'Mark', 'SpectrumDisplay', 'Strip', 'Axis', 'SpectrumView', 'PeakListView',
 ]
-class2file = {'SpectrumView':'_SpectrumView',
+
+# File name map - to allow finding a file hiddej by prefixing underscore.
+_class2file = {'SpectrumView':'_SpectrumView',
               'PeakListView':'_PeakListView',}
-_wrappedClasses = []
-for className in _importOrder:
-  _wrappedClasses.append(
-    getattr(importlib.import_module('ccpn.ui.gui.core.%s'
-                                    % class2file.get(className, className)), className)
-  )
+
+# def _activateClasses(importOrder=_importOrder, class2file=_class2file):
+#   """Import classes in importOrder and connect them to other wrapper classes"""
 #
-# # Add class list for extended sphinx documentation to module
-# _sphinxWrappedClasses = _wrappedClasses
-
-# Make {shortClassName: className} map. NB may be added to by importing modules (ccpnmr wrapper)
-for cls in _wrappedClasses:
-  tag = cls.className if hasattr(cls, 'className') else cls.__class__.__name__
-  _pluralPidTypeMap[cls.shortClassName] = _pluralPidTypeMap[className] = tag + 's'
-del cls
-del tag
-
-# # Set up interclass links and related functions
-Project._linkWrapperClasses()
+#   wrappedClasses = []
+#   for className in importOrder:
+#     module = importlib.import_module('ccpn.ui.gui.core.%s'
+#                                       % class2file.get(className, className))
+#     module._connectWrapperClass()
+#     wrappedClasses.append(getattr(module, className))
+#
+#   # # Add class list for extended sphinx documentation to module
+#   # _sphinxWrappedClasses = _wrappedClasses
+#
+#   # Make {shortClassName: className} map. NB may be added to by importing modules (ccpnmr wrapper)
+#   for cls in wrappedClasses:
+#     tag = cls.className if hasattr(cls, 'className') else cls.__class__.__name__
+#     _pluralPidTypeMap[cls.shortClassName] = _pluralPidTypeMap[className] = tag + 's'
+#
+#   # # Set up interclass links and related functions.
+#   # NB classes already linked before are not linked again.
+#   Project._linkWrapperClasses()
+#
+#   return wrappedClasses

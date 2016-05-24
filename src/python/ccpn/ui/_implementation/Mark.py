@@ -21,11 +21,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code+++++++++++++++++++++==========
 from collections import namedtuple
-
 from typing import Sequence, Tuple
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+
 from ccpn.core.Project import Project
-from ccpn.ui.gui.core.Task import Task
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.ui._implementation.Task import Task
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
@@ -40,6 +40,8 @@ class Mark(AbstractWrapperObject):
   shortClassName = 'GM'
   # Attribute it necessary as subclasses must use superclass className
   className = 'Mark'
+
+  _parentClass = Task
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'marks'
@@ -151,6 +153,7 @@ class Mark(AbstractWrapperObject):
     return parent._wrappedData.sortedMarks()
 
 
+# newMark functions
 def _newMark(self:Task, colour:str, positions:Sequence, axisCodes:Sequence, style:str='simple',
             units:Sequence=(), labels:Sequence=()) -> Mark:
   """Create new ccpn.Mark
@@ -175,9 +178,9 @@ def _newMark(self:Task, colour:str, positions:Sequence, axisCodes:Sequence, styl
       if label is not None:
        dd['label'] = label
     apiRuler = apiMark.newRuler(**dd)
-
+  #
   return self._project._data2Obj.get(apiMark)
-
+Task.newMark = _newMark
 
 def _newSimpleMark(self:Task, colour:str, axisCode:str, position:float, style:str='simple',
             unit:str='ppm', label:str=None) -> Mark:
@@ -194,16 +197,9 @@ def _newSimpleMark(self:Task, colour:str, axisCode:str, position:float, style:st
   if unit is None:
     unit = 'ppm'
   apiMark.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
-
+  #
   return self._project._data2Obj.get(apiMark)
-
-# Connections to parents:
-Task._childClasses.append(Mark)
-Task.newMark = _newMark
 Task.newSimpleMark = _newSimpleMark
-del _newMark
-del _newSimpleMark
-
 
 # Notifiers:
 # Mark changes when rulers are created or deleted

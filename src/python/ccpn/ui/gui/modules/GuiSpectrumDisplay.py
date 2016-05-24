@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 __author__ = 'simon'
 
-import importlib, os
+# import importlib, os
 
 from PyQt4 import QtGui, QtCore
 

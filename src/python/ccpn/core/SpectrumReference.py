@@ -41,6 +41,8 @@ class SpectrumReference(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'SpectrumReference'
 
+  _parentClass = Spectrum
+
   # Type of dimension. Always 'Frequency' for frequency (Fourier transformed) dimension
   dimensionType = 'Frequency'
 
@@ -261,8 +263,6 @@ def _newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:fl
 
 
 # Connections to parents:
-
-Spectrum._childClasses.append(SpectrumReference)
 
 Spectrum.newSpectrumReference = _newSpectrumReference
 del _newSpectrumReference

@@ -41,6 +41,8 @@ class ChemicalShiftList(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'ChemicalShiftList'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'chemicalShiftLists'
   
@@ -151,7 +153,6 @@ class ChemicalShiftList(AbstractWrapperObject):
             if x.className == 'ShiftList'), key=operator.attrgetter('name'))
 
 # Connections to parents:
-Project._childClasses.append(ChemicalShiftList)
 
 def getter(self:Spectrum) -> ChemicalShiftList:
   return self._project._data2Obj.get(self._apiDataSource.experiment.shiftList)

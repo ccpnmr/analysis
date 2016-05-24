@@ -41,6 +41,8 @@ class SampleComponent(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'SampleComponent'
 
+  _parentClass = Sample
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'sampleComponents'
   
@@ -154,7 +156,6 @@ SpectrumHit.sampleComponent = property(getter, None, None,
 del getter
 
 # Connections to parents:
-Sample._childClasses.append(SampleComponent)
 
 def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
                        concentration:float=None, concentrationError:float=None,

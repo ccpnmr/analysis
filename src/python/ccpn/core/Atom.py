@@ -39,6 +39,8 @@ class Atom(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Atom'
 
+  _parentClass = Residue
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'atoms'
   
@@ -92,7 +94,5 @@ class Atom(AbstractWrapperObject):
 # No 'new' function - chains are made elsewhere
     
 # Connections to parents:
-
-Residue._childClasses.append(Atom)
 
 # Notifiers:

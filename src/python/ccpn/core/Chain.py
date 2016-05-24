@@ -43,6 +43,8 @@ class Chain(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Chain'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'chains'
   
@@ -276,11 +278,9 @@ del getter
     
 Chain.clone.__annotations__['return'] = Chain
 
-# No 'new' function - chains are made elsewhere
-    
 # Connections to parents:
-Project._childClasses.append(Chain)
-# Project._makeChains = _makeChains
+# No 'new' function - chains are made elsewhere
+
 
 # Notifiers:
 # Crosslinks: substance

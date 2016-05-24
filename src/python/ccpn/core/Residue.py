@@ -38,6 +38,8 @@ class Residue(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Residue'
 
+  _parentClass = Chain
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'residues'
   
@@ -237,7 +239,6 @@ Residue.previousResidue = property(getter, None, None, "Previous sequentially co
 del getter
     
 # Connections to parents:
-Chain._childClasses.append(Residue)
 
 # No 'new' function - chains are made elsewhere
 

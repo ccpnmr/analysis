@@ -38,6 +38,8 @@ class PseudoDimension(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'PseudoDimension'
 
+  _parentClass = Spectrum
+
   # Type of dimension. Always 'Freq' for frequency (Fourier transformed) dimension
   dimensionType = 'Sampled'
 
@@ -157,8 +159,6 @@ class PseudoDimension(AbstractWrapperObject):
 # No 'new' function - PseudoDimensions are mad eon spectrum load
 
 # Connections to parents:
-
-Spectrum._childClasses.append(PseudoDimension)
 
 # Notifiers:
 def _expDimRefHasChanged(project:Project, apiExpDimRef:ApiExpDimRef):

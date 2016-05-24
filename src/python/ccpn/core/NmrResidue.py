@@ -43,6 +43,8 @@ class NmrResidue(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'NmrResidue'
 
+  _parentClass = NmrChain
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'nmrResidues'
   
@@ -812,7 +814,6 @@ def fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType
 
 
 # Connections to parents:
-NmrChain._childClasses.append(NmrResidue)
 
 NmrChain.newNmrResidue = _newNmrResidue
 del _newNmrResidue

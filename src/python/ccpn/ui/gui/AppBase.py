@@ -22,15 +22,15 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import os
-import sys
 import json
+import os
 import platform
+import sys
 
 from PyQt4 import QtGui, QtCore
 
 from ccpn.core.Project import Project
-from ccpn.ui.gui import core # NB Neccessary to force load of graphics classes
+
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.ui.gui.widgets.Application import Application
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
@@ -53,7 +53,6 @@ from ccpn.ui.gui.Current import Current
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 
 # The following must be there even though the import is not used in this file.
-from ccpn.ui.gui.widgets import resources_rc
 
 componentNames = ('Assignment', 'Screening', 'Structure')
 
@@ -232,10 +231,19 @@ class AppBase(GuiBase):
         if not projectPath:
           return
         apiProject = apiIo.loadProject(projectPath, useFileLogger=self.useFileLogger)
+
+        if apiProject is None:
+          raise ValueError("No valid project loaded from %s" % projectPath)
+        else:
+          apiNmrProject = apiProject.fetchNmrProject()
     else:
       sys.stderr.write('==> Loading default project\n')
       apiProject = apiIo.newProject('default', useFileLogger=self.useFileLogger)
-    self.initProject(apiProject)
+      apiNmrProject = apiProject.newNmrProject(name='default')
+
+    # Set required objects in apiProject and ApiNmrProject
+    apiNmrProject.initialiseData()
+    self.initProject(apiNmrProject)
 
     sys.stderr.write('==> Done, %s is starting\n' % self.applicationName )
 
@@ -243,45 +251,79 @@ class AppBase(GuiBase):
     #self.gui.processEvents()
     self.gui.start()
 
-  def initProject(self, apiProject):
 
+  def applyPreferences(self, project):
+    """Apply user preferences
+
+    NBNB project should be impliclt rahter than a parameter (once reorganisation is finished)
+    """
     # Reset remoteData DataStores to match preferences setting
     dataPath = self.preferences.general.dataPath
     if not dataPath or not os.path.isdir(dataPath):
       dataPath = os.path.expanduser('~')
-    dataUrl = apiProject.root.findFirstDataLocationStore(name='standard').findFirstDataUrl(
-      name='remoteData')
+    memopsRoot = project._wrappedData.root
+    dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
+      name='remoteData'
+    )
     dataUrl.url = Implementation.Url(path=dataPath)
 
-    # ApiProject to appBase - Done this way to sneak the appBase in before creating the wrapper
-    apiProject._appBase = self
+  def initProject(self, apiNmrProject):
+    #
+    # # Reset remoteData DataStores to match preferences setting
+    # dataPath = self.preferences.general.dataPath
+    # if not dataPath or not os.path.isdir(dataPath):
+    #   dataPath = os.path.expanduser('~')
+    # dataUrl = apiProject.root.findFirstDataLocationStore(name='standard').findFirstDataUrl(
+    #   name='remoteData')
+    # dataUrl.url = Implementation.Url(path=dataPath)
+
+    # apiProject = apiNmrProject.root
+
+    # # ApiProject to appBase - Done this way to sneak the appBase in before creating the wrapper
+    # apiProject._appBase = self
     self.current = Current(project=None)
 
     # Make sure we have a WindowStore attached to the NmrProject - that guarantees a mainWindow
-    apiNmrProject = apiProject.fetchNmrProject()
-    apiWindowStore = apiNmrProject.windowStore
-    if apiWindowStore is None:
-      apiWindowStore = apiProject.findFirstWindowStore()
-      if apiWindowStore is None:
-        apiWindowStore = apiProject.newWindowStore(nmrProject=apiNmrProject)
-      else:
-        apiNmrProject.windowStore = apiWindowStore
+    apiNmrProject.initialiseGraphicsData()
+
+    # # Make sure we have a WindowStore attached to the NmrProject - that guarantees a mainWindow
+    # apiNmrProject = apiProject.fetchNmrProject()
+    # apiWindowStore = apiNmrProject.windowStore
+    # if apiWindowStore is None:
+    #   apiWindowStore = apiProject.findFirstWindowStore()
+    #   if apiWindowStore is None:
+    #     apiWindowStore = apiProject.newWindowStore(nmrProject=apiNmrProject)
+    #   else:
+    #     apiNmrProject.windowStore = apiWindowStore
 
     # Wrap ApiNmrProject
     project = Project(apiNmrProject)
 
+    # set appBase attribute - for gui applications
+    project._appBase = self
+    self.project = project
+
     self.current._project = project
 
+    self.applyPreferences(project)
+
+    # Temporary - bringing in Framework refactoring
+    from ccpn.ui.gui.Gui import _setUp
+    _setUp()
+
+    # This wraps the underlying data - the project is now ready to use
+    project._initialiseProject()
+
     # Set up mainWindow (link is set from mainWindow init
-    mainWindow = self.mainWindow
+    mainWindow = self.mainWindow #= project.getWindow('Main')
     mainWindow.sideBar.setProject(project)
     mainWindow.sideBar.fillSideBar(project)
     mainWindow.raise_()
     mainWindow.namespace['current'] = self.current
 
-    if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
-      apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
-                                         windows=(mainWindow._wrappedData,))
+    # if not apiProject.findAllGuiTasks(nmrProject=project._wrappedData):
+    #   apiGuiTask = apiProject.newGuiTask(name='View', nmrProject=project._wrappedData,
+    #                                      windows=(mainWindow._wrappedData,))
 
     self.initGraphics()
     # Set up undo stack
@@ -314,13 +356,22 @@ class AppBase(GuiBase):
     """Open new project from path"""
     self._closeProject()
     apiProject = apiIo.loadProject(path)
-    return self.initProject(apiProject)
+    # Set required objects in apiProject and ApiNmrProject
+
+    if apiProject is None:
+      raise ValueError("No valid project loaded from %s" % path )
+    else:
+      apiNmrProject = apiProject.fetchNmrProject()
+    apiNmrProject.initialiseData()
+    return self.initProject(apiNmrProject)
 
   def newProject(self, name='default'):
     """Create new, empty project"""
     self._closeProject()
-    apiProject = apiIo.newProject(name)
-    return self.initProject(apiProject)
+    apiNmrProject = apiIo.newProject(name).newNmrProject(name=name)
+    # Set required objects in apiProject and ApiNmrProject
+    apiNmrProject.initialiseData()
+    return self.initProject(apiNmrProject)
 
   def saveProject(self, newPath=None, newProjectName=None, createFallback=True):
     apiIo.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName, createFallback=createFallback)

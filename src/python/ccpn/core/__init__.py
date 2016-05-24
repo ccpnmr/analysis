@@ -191,8 +191,6 @@ __version__ = "$Revision$"
 
 import importlib
 
-_pluralPidTypeMap = {}
-
 # Import classes and set to this module
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
@@ -206,9 +204,11 @@ _importOrder = [
 ]
 _wrappedClasses = []
 for className in _importOrder:
-  _wrappedClasses.append(
-    getattr(importlib.import_module('ccpn.core.%s' % className), className)
-  )
+  cls = getattr(importlib.import_module('ccpn.core.%s' % className), className)
+  parentClass = cls._parentClass
+  if parentClass is not None:
+    parentClass._childClasses.append(cls)
+  _wrappedClasses.append(cls)
 
 # set main starting functions in namespace. Must be done after importing Project
 # to avoid circular import problems
@@ -216,13 +216,6 @@ from ccpn.core.lib import Io as ccpnIo
 
 loadProject = ccpnIo.loadProject
 newProject = ccpnIo.newProject
-
-# Make {shortClassName: className} map. NB may be added to by importing modules
-for cls in _wrappedClasses:
-  className = cls.className if hasattr(cls, 'className') else cls.__class__.__name__
-  _pluralPidTypeMap[cls.shortClassName] = _pluralPidTypeMap[className] = className + 's'
-#Special case, irregular plural
-_pluralPidTypeMap['SP'] = _pluralPidTypeMap['Spectrum'] = 'Spectra'
 
 # NB Project is _wrappedClasses[0]
 _wrappedClasses[0]._linkWrapperClasses()

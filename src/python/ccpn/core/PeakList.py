@@ -44,6 +44,8 @@ class PeakList(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'PeakList'
 
+  _parentClass = Spectrum
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'peakLists'
   
@@ -359,7 +361,6 @@ class PeakList(AbstractWrapperObject):
 
 
 # Connections to parents:
-Spectrum._childClasses.append(PeakList)
 
 def _newPeakList(self:Spectrum,name:str=None, comment:str=None,
              isSimulated:bool=False) -> PeakList:

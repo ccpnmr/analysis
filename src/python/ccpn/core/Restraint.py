@@ -42,6 +42,8 @@ class Restraint(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Restraint'
 
+  _parentClass = RestraintList
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'restraints'
 
@@ -244,8 +246,6 @@ del getter
 del setter
 
 # Connections to parents:
-RestraintList._childClasses.append(Restraint)
-
 def _newRestraint(self:RestraintList,comment:str=None,
                          peaks:Sequence=()) -> Restraint:
   """Create new ccpn.Restraint within ccpn.RestraintList.

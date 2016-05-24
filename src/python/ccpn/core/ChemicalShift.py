@@ -38,6 +38,8 @@ class ChemicalShift(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'ChemicalShift'
 
+  _parentClass = ChemicalShiftList
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'chemicalShifts'
   
@@ -115,7 +117,6 @@ class ChemicalShift(AbstractWrapperObject):
     return parent._wrappedData.sortedMeasurements()
 
 # Connections to parents:
-ChemicalShiftList._childClasses.append(ChemicalShift)
 
 def getter(self:NmrAtom) -> Tuple[ChemicalShift, ...]:
   getObj = self._project._data2Obj.get

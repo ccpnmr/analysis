@@ -38,6 +38,8 @@ class Integral(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Integral'
 
+  _parentClass = IntegralList
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'integrals'
   
@@ -224,7 +226,6 @@ class Integral(AbstractWrapperObject):
     return parent._wrappedData.sortedPeaks()
 
 # Connections to parents:
-IntegralList._childClasses.append(Integral)
 
 def _newIntegral(self:IntegralList, value:List[float]=None,
                  valueError:List[float]=None, bias:float=0, slopes:List[float]=None,

@@ -23,16 +23,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 from typing import Sequence, Tuple
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Peak import Peak
-from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpn.ui.gui.core.SpectrumDisplay import SpectrumDisplay
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
-from ccpn.ui.gui.modules.GuiStrip1d import GuiStrip1d
-from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 
@@ -44,6 +40,8 @@ class Strip(GuiStrip, AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Strip'
 
+  _parentClass = SpectrumDisplay
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'strips'
   
@@ -51,14 +49,19 @@ class Strip(GuiStrip, AbstractWrapperObject):
   _childClasses = []
 
   # Qualified name of matching API class
-  _apiClassQualifiedName = ApiStrip._metaclass.qualifiedName()
+  _apiClassQualifiedName = ApiBoundStrip._metaclass.qualifiedName()
   
 
   # CCPN properties  
   @property
-  def _apiStrip(self) -> ApiStrip:
+  def _apiStrip(self) -> ApiBoundStrip:
     """ CCPN Strip matching Strip"""
     return self._wrappedData
+
+  @property
+  def _key(self) -> str:
+    """id string - serial number converted to string"""
+    return str(self._wrappedData.serial)
 
   @property
   def serial(self) -> int:
@@ -313,6 +316,12 @@ class Strip(GuiStrip, AbstractWrapperObject):
     #
     return True
 
+
+def _connectWrapperClass():
+  """Connect class to network of active wrapper classes"""
+
+# newStrip functions
+# We should NOT have any newStrip function, except possibly for FreeStrips
 def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
   """Make copy of strip in SpectrumDisplay, at position newIndex - or rightmost"""
 
@@ -340,9 +349,10 @@ def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
           # Override if there is a mapping and axis is not shared for all strips
           axis.position = positions[ind]
           axis.widths = widths[ind]
-
 SpectrumDisplay.copyStrip = copyStrip
+del copyStrip
 
+# SpectrumDisplay.orderedStrips property
 def getter(self) -> Tuple[Strip, ...]:
   ff = self._project._data2Obj.get
   return tuple(ff(x) for x in self._wrappedData.orderedStrips)
@@ -354,68 +364,5 @@ SpectrumDisplay.orderedStrips = property(getter, setter, None,
 del getter
 del setter
 
-# Connections to parents:
-SpectrumDisplay._childClasses.append(Strip)
-
-# We should NOT have any newStrip functions, except possibly for FreeStrips
-
-# Define subtypes and factory function
-class Strip1d(GuiStrip1d, Strip):
-  """1D strip"""
-
-  def __init__(self, project:Project, wrappedData:ApiBoundStrip):
-    """Local override init for Qt subclass"""
-    AbstractWrapperObject. __init__(self, project, wrappedData)
-    GuiStrip1d.__init__(self)
-
-  # put in subclass to make superclass abstract
-  @property
-  def _key(self) -> str:
-    """id string - serial number converted to string"""
-    return str(self._wrappedData.serial)
-
-class StripNd(GuiStripNd, Strip):
-  """ND strip """
-
-  def __init__(self, project:Project, wrappedData:ApiBoundStrip):
-    """Local override init for Qt subclass"""
-    AbstractWrapperObject. __init__(self, project, wrappedData)
-    GuiStripNd.__init__(self)
-
-  # put in subclass to make superclass abstract
-  @property
-  def _key(self) -> str:
-    """id string - serial number converted to string"""
-    return str(self._wrappedData.serial)
-
-def _factoryFunction(project:Project, wrappedData:ApiStrip):
-  """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
-
-  apiSpectrumDisplay = wrappedData.spectrumDisplay
-  # if apiSpectrumDisplay.stripType == 'Bound':
-  if apiSpectrumDisplay.is1d:
-    return Strip1d(project, wrappedData)
-  else:
-    return StripNd(project, wrappedData)
-  # else:
-  #   raise ValueError("Attempt to make SpectrumDisplay from illegal object type: %s"
-  #   % wrappedData)
-
-Strip._factoryFunction = staticmethod(_factoryFunction)
-
-
 # Drag-n-drop functions:
 Strip.processSpectrum = Strip.displaySpectrum
-
-# Notifiers:
-
-def _resetRemoveStripAction(strip:Strip):
-  """Update interface when a strip is created or deleted.
-
-    NB notifier is executed after deletion is final but before the wrapper is updated.
-    len() > 1 check is correct also for delete
-  """
-  spectrumDisplay = strip.spectrumDisplay
-  spectrumDisplay.removeStripAction.setEnabled(len(spectrumDisplay.strips) > 1)
-Strip.setupCoreNotifier('create', _resetRemoveStripAction)
-Strip.setupCoreNotifier('delete', _resetRemoveStripAction)

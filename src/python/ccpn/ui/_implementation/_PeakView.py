@@ -23,10 +23,11 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Tuple
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 # from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
-from ccpn.ui.gui.core._PeakListView import PeakListView
+from ccpn.ui._implementation._PeakListView import PeakListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakView as ApiPeakView
 
 
@@ -37,6 +38,8 @@ class PeakView(AbstractWrapperObject):
   shortClassName = 'GP'
   # Attribute it necessary as subclasses must use superclass className
   className = 'PeakView'
+
+  _parentClass = PeakListView
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'peakViews'
@@ -84,24 +87,16 @@ class PeakView(AbstractWrapperObject):
     return parent._wrappedData.sortedPeakViews()
 
   #CCPN functions
+  
 
-# Peak.peakViews property
-def _getPeakViews(peak:Peak) -> Tuple[PeakView]:
-  return tuple(peak._project._data2Obj[x]
-               for x in peak._wrappedData.sortedPeakViews())
-Peak.peakViews = property(_getPeakViews, None, None,
-                                         "PeakListViews showing Spectrum")
-del _getPeakViews
+def _connectWrapperClass():
+  """Connect class to network of active wrapper classes"""
 
+  # newPeakView functions: None
 
-# Connections to parents:
-PeakListView._childClasses.append(PeakView)
-
-# # Notifiers:
-# className = ApiPeakView._metaclass.qualifiedName()
-# Project._apiNotifiers.extend(
-#   ( ('_newApiObject', {'cls':PeakView}, className, '__init__'),
-#     ('_finaliseApiDelete', {}, className, 'delete'),
-#     ('_finaliseApiUnDelete', {}, className, 'undelete'),
-#   )
-# )
+  # Peak.peakViews property
+  def getter(peak:Peak) -> Tuple[PeakView]:
+    return tuple(peak._project._data2Obj[x]
+                 for x in peak._wrappedData.sortedPeakViews())
+  Peak.peakViews = property(getter, None, None,
+                                           "PeakListViews showing Spectrum")

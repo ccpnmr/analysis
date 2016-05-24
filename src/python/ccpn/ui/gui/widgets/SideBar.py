@@ -192,6 +192,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     Adds a QTreeWidgetItem as a child of the item specified, which corresponds to the data object
     passed in.
     """
+
     newItem = QtGui.QTreeWidgetItem(item)
     newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
     newItem.setData(0, QtCore.Qt.DisplayRole, str(pid))
@@ -239,7 +240,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """Create a new sidebar item from a new object.
     Called by notifier when a new object is created or undeleted (so need to check for duplicates).
     NB Obj may be of a type that does not have an item"""
-
 
     if not isinstance(obj, AbstractWrapperObject):
       return

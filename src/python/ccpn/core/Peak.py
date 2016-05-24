@@ -44,6 +44,8 @@ class Peak(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Peak'
 
+  _parentClass = PeakList
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'peaks'
   
@@ -342,7 +344,6 @@ class Peak(AbstractWrapperObject):
     return parent._wrappedData.sortedPeaks()
 
 # Connections to parents:
-PeakList._childClasses.append(Peak)
 
 def _newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]=None,
              heightError:Optional[float]=None, volumeError:Union[float, None]=None,

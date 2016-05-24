@@ -97,6 +97,8 @@ class AbstractWrapperObject():
   # Class name - necessary since the actual objects may be of a subclass.
   className = 'AbstractWrapperObject'
 
+  _parentClass = None
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'abstractWrapperClasses'
 
@@ -345,6 +347,10 @@ class AbstractWrapperObject():
       newAncestors = [cls]
       Project = cls
       Project._allLinkedWrapperClasses.append(Project)
+
+    # Fill in Project._className2Class map
+    dd = Project._className2Class
+    dd[cls.className] = dd[cls.shortClassName] = cls
 
     # recursively call next level down the tree
     for cc in cls._childClasses:

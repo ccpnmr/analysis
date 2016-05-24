@@ -48,6 +48,8 @@ class Spectrum(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Spectrum'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectra'
 
@@ -904,8 +906,6 @@ Project._setupApiNotifier(_spectrumMakeFirstPeakList, Nmr.DataSource, 'postInit'
 del _spectrumMakeFirstPeakList
 
 # Connections to parents:
-
-Project._childClasses.append(Spectrum)
 
 Project.newSpectrum = _newSpectrum
 del _newSpectrum

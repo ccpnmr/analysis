@@ -55,6 +55,8 @@ class Substance(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Substance'
 
+  _parentClass = Project
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'substances'
   
@@ -441,7 +443,6 @@ class Substance(AbstractWrapperObject):
       return componentStore.sortedComponents()
 
 # Connections to parents:
-Project._childClasses.append(Substance)
 
 def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str='Molecule',
                   userCode:str=None, smiles:str=None, inChi:str=None, casNumber:str=None,

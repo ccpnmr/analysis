@@ -36,6 +36,8 @@ class CalculationStep(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'CalculationStep'
 
+  _parentClass = DataSet
+
   #: Name of plural link to instances of class
   _pluralLinkName = 'calculationSteps'
 
@@ -159,7 +161,6 @@ class CalculationStep(AbstractWrapperObject):
     return parent._wrappedData.sortedCalculationSteps()
 
 # Connections to parents:
-DataSet._childClasses.append(CalculationStep)
 
 def getter(self:DataSet) -> List[CalculationStep]:
   uuid = self.uuid

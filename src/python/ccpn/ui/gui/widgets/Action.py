@@ -28,11 +28,16 @@ try:
   from ccpn.util.Translation import translator
 except ImportError:
   from ccpn.framework.Translation import translator
+  from ccpn.framework.Translation import getTranslator
+
 
 class Action(QtGui.QAction, Base):
-  def __init__(self, parent, text, callback=None, shortcut=None, checked=True, checkable=False, icon=None, **kw):
-
-    text = translator.translate(text)
+  def __init__(self, parent, text, callback=None, shortcut=None, checked=True, checkable=False,
+               icon=None, translate=True, **kw):
+    # tr = getTranslator('Dutch')
+    # title = tr(title)
+    if translate:
+      text = translator.translate(text)
 
     if shortcut:
       if type(shortcut) == type(''):

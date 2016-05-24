@@ -543,11 +543,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Populates recent projects menu with 10 most recently loaded projects
     specified in the preferences file.
     """
-    translator.setSilent()
+    # translator.setSilent()
     for recentFile in self._appBase.preferences.recentFiles:
-      self.action = Action(self, text=recentFile, callback=partial(self.loadAProject, projectDir=recentFile))
+      self.action = Action(self, text=recentFile, translate=False,
+                           callback=partial(self.loadAProject, projectDir=recentFile))
       self.recentProjectsMenu.addAction(self.action)
-    translator.setLoud()
+    # translator.setLoud()
     self.recentProjectsMenu.addAction(Action(self, text='Clear', callback=self.clearRecentProjectsMenu))
 
   def saveBackup(self):

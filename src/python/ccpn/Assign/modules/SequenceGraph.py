@@ -33,16 +33,22 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Assignment import getNmrResiduePrediction
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Font import Font
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+from ccpnmodel.ccpncore.lib.assignment.Assignment import getConnectedAtoms
 
-EXPT_ATOM_DICT = {'H[N]' : ['H', 'N'],
+EXPT_ATOM_DICT = {'H[N]': ['H', 'N'],
                   'H[N[CA]]': ['H', 'N', 'CA', 'CA-1'],
                   'H[N[co[CA]]]': ['H', 'N', 'CA-1'],
                   'H[N[co[{CA|ca[C]}]]]': ['H', 'N', 'CA-1', 'CB-1'],
                   'h{CA|Cca}coNH': ['H', 'N', 'CA-1', 'CB-1'],
                   'H[N[{CA|ca[Cali]}]]': ['H', 'N', 'CA-1', 'CB-1', 'CA', 'CB']
                   }
-
+EXPT_DICT = {'H[N]': ['H', 'N'],
+             'H[N[CA]]': [['H', 'N'], ['N', 'CA'], ['N', 'CA-1']],
+             'H[N[co[CA]]]': [['H', 'N',], ['N', 'CA-1']],
+             'H[N[co[{CA|ca[C]}]]]': [['H', 'N'], ['N', 'CA-1'], ['N', 'CB-1'], ['CA-1', 'CB-1']],
+             'h{CA|Cca}coNH': [['H', 'N'], ['N', 'CA-1'], ['N', 'CB-1'], ['CA-1', 'CB-1']],
+             'H[N[{CA|ca[Cali]}]]': [['H', 'N'], ['N', 'CA-1'], ['N', 'CB-1'],['CA-1', 'CB-1'], ['CA', 'CB'], ['N', 'CA'], ['N', 'CB']]
+                  }
 
 class GuiNmrAtom(QtGui.QGraphicsTextItem):
   """
@@ -155,19 +161,21 @@ class SequenceGraph(CcpnModule):
     self.scrollArea.setWidgetResizable(True)
     self.scene = QtGui.QGraphicsScene(self)
     self.scrollContents = QtGui.QGraphicsView(self.scene, self)
+    self.scrollContents.setRenderHints(QtGui.QPainter.Antialiasing)
     self.scrollContents.setInteractive(True)
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
     self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
     self.residueCount = 0
     self.layout.addWidget(self.scrollArea)
-    self.atomSpacing = 66
+    self.atomSpacing = 44
     self.guiResiduesShown = []
     self.predictedStretch = []
     self.direction = None
     self.selectedStretch = []
     self.scene.dragEnterEvent = self.dragEnterEvent
     self.guiNmrResidues = []
+    self.guiNmrAtomDict = {}
 
     self.project.registerNotifier('NmrResidue', 'rename', self._resetNmrResiduePidForAssigner)
 
@@ -217,13 +225,16 @@ class SequenceGraph(CcpnModule):
     self._addResiduePredictions(nmrResidue, atoms['CA'])
 
 
-  def addResidue(self, nmrResidue:NmrResidue, direction:str):
+  def addResidue(self, nmrResidue:NmrResidue, direction:str, atomSpacing=None):
     """
     Takes an Nmr Residue and a direction, either '-1 or '+1', and adds a residue to the assigner
     corresponding to the Nmr Residue.
     Nmr Residue name displayed beneath CA of residue drawn and residue type predictions displayed
     beneath Nmr Residue name
     """
+    if atomSpacing:
+      self.atomSpacing = atomSpacing
+
     nmrAtoms = [nmrAtom.name for nmrAtom in nmrResidue.nmrAtoms]
     if self.residueCount == 0:
 
@@ -257,9 +268,8 @@ class SequenceGraph(CcpnModule):
 
     else:
         if self.residueCount == 1:
-          self.nmrResidueLabel.update()
-        if '-1' in nmrResidue.sequenceCode or direction == '-1':
-
+          self.nmrResidueLabel._update()
+        if nmrResidue.sequenceCode.endswith('-1') or direction == '-1':
 
           oldGuiResidue = self.guiResiduesShown[0]
           if 'CO' in nmrAtoms:
@@ -302,7 +312,7 @@ class SequenceGraph(CcpnModule):
           if 'N' in nmrAtoms:
             nAtom2 = self._createGuiNmrAtom("N", (oldGuiResidue["CO"].x()+self.atomSpacing +
             oldGuiResidue["CO"].boundingRect().width()/2, oldGuiResidue["CA"].y()),
-                                  nmrResidue.fetchNmrAtom(name='CA'))
+                                  nmrResidue.fetchNmrAtom(name='N'))
           else:
             nAtom2 = self._createGuiNmrAtom("N", (oldGuiResidue["CO"].x()+self.atomSpacing+
             oldGuiResidue["CO"].boundingRect().width()/2, oldGuiResidue["CA"].y()))
@@ -379,6 +389,14 @@ class SequenceGraph(CcpnModule):
 
         if hasattr(self.project._appBase.mainWindow, 'sequenceModule'):
           self.project._appBase.mainWindow.sequenceModule._highlightPossibleStretches(possibleMatch[1])
+
+
+  def showBackboneAssignments(self, nmrChain):
+    for nmrResidue in nmrChain.nmrResidues:
+      self.addResidue(nmrResidue, direction='+1')
+    for ii, res in enumerate(self.guiResiduesShown):
+      if ii+1 < len(self.guiResiduesShown)-1:
+        self._addConnectingLine(res['CO'], self.guiResiduesShown[ii+1]['N'], '#f7ffff', 1.0, 0)
 
 
   def _addConnectingLine(self, atom1:GuiNmrAtom, atom2:GuiNmrAtom, colour:str, width:float, displacement:float, style:str=None):
@@ -459,8 +477,23 @@ class SequenceGraph(CcpnModule):
     GuiNmrAtom can be linked to an NmrAtom by supplying it to the function.
     """
     atom = GuiNmrAtom(self.project, text=atomType, pos=position, nmrAtom=nmrAtom)
+    self.guiNmrAtomDict[nmrAtom] = atom
     return atom
 
+  def getAssignmentsFromSpectra(self):
+    for spectrum in self.project.spectra:
+      apiDataSource = spectrum._wrappedData
+      connections = getConnectedAtoms(apiDataSource)
+      for connection in connections:
+        nmrAtomPair = [self.project._data2Obj.get(connection[0]).nmrAtom,
+                       self.project._data2Obj.get(connection[1]).nmrAtom]
+        # sorting makes sure drawing is done properly
+        guiNmrAtomPair = [self.guiNmrAtomDict.get(a) for a in sorted(nmrAtomPair, reverse=True)]
+        if None not in guiNmrAtomPair:
+          displacement = min(guiNmrAtomPair[0].connectedAtoms, guiNmrAtomPair[1].connectedAtoms)
+          self._addConnectingLine(guiNmrAtomPair[0], guiNmrAtomPair[1], spectrum.positiveContourColour, 2.0, displacement)
+          guiNmrAtomPair[0].connectedAtoms += 1
+          guiNmrAtomPair[1].connectedAtoms += 1
 
 
 #NBNB TBD:

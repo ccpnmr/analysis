@@ -37,8 +37,8 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 #       if constraintList.className != 'GenericConstraintList':
 #         newConstraintList = V2Upgrade.upgradeConstraintList(constraintList)
 
-def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
-  """Open project matching the API Project stored at path.
+def _loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
+  """Open RAW project matching the API Project stored at path.
 
   If the API project contains several NmrProjects (rare),
   nmrProjectName lets you select which one to open"""
@@ -55,8 +55,8 @@ def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> P
     return Project(apiNmrProject)
 
 
-def newProject(name:str='default', path:str=None, useFileLogger:bool=True) -> Project:
-  """Make new project, putting underlying data storage (API project) at path"""
+def _newProject(name:str='default', path:str=None, useFileLogger:bool=True) -> Project:
+  """Make RAW new project, putting underlying data storage (API project) at path"""
   apiProject = apiIo.newProject(name, path, overwriteExisting=True,
                                  useFileLogger=useFileLogger)
   if apiProject is None:

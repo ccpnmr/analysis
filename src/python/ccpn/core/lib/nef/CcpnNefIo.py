@@ -899,7 +899,8 @@ class CcpnNefIo:
 
 if __name__ == '__main__':
   import sys
-  from ccpn import core
+  from ccpn.framework import Framework
   path = sys.argv[1]
-  project = core.loadProject(path)
+  # project = core.loadProject(path)
+  project = Framework.getFramework(projectPath=path).project
   print(convert2NefString(project))

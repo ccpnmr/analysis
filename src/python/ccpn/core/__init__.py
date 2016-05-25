@@ -214,8 +214,9 @@ for className in _importOrder:
 # to avoid circular import problems
 from ccpn.core.lib import Io as ccpnIo
 
-loadProject = ccpnIo.loadProject
-newProject = ccpnIo.newProject
+# NBNB TODO This is no longer useful. We must use e.g. Framework.gerFramework
+# loadProject = ccpnIo._loadProject
+# newProject = ccpnIo._newProject
 
 # NB Project is _wrappedClasses[0]
 _wrappedClasses[0]._linkWrapperClasses()

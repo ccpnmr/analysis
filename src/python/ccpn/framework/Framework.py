@@ -24,8 +24,6 @@ import os
 import platform
 import sys
 
-# from ccpn.core.Project import Project
-from ccpn import core as ccpnCore
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
@@ -36,6 +34,9 @@ from ccpn.ui.gui.Current import Current
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util import Register
+
+from ccpn.core.lib.Version import applicationVersion
+from ccpn.core.lib import Io as coreIo
 
 from ccpn.framework.Translation import translator
 from ccpn.framework.Translation import languages, defaultLanguage
@@ -90,6 +91,33 @@ def defineProgramArguments():
 
   return parser
 
+class Arguments:
+  """Class for setting FrameWork input arguments directly"""
+  language = defaultLanguage
+  interface = 'NoUi'
+  nologging = True
+  skipUserPreferences = True
+  projectPath = None
+
+  def __init__(self, projectPath=None, **kw):
+
+    # Dummy values
+    for component in componentNames:
+      setattr(self, 'include' + component, None)
+
+    self.projectPath = projectPath
+    for tag, val in kw.items():
+      setattr(self, tag, val)
+
+def getFramework(projectPath=None, **kw):
+
+  args = Arguments(projectPath=projectPath, **kw)
+  result = Framework('CcpNmr', applicationVersion, args)
+  result.start()
+  #
+  return result
+
+
 
 class Framework:
   """
@@ -120,6 +148,9 @@ class Framework:
 
     # Necessary as attribute is queried during initialisation:
     self.mainWindow = None
+
+    # This is needed to make project available in NoUi (if nothing else)
+    self.project = None
 
 
     # NBNB TODO The following block should maybe be moved into _setupUI
@@ -220,14 +251,16 @@ class Framework:
     if projectPath:
       sys.stderr.write('==> Loading "%s" initial project\n' % projectPath)
       projectPath = os.path.normpath(projectPath)
-      project = ccpnCore.loadProject(projectPath)
+      project = coreIo._loadProject(projectPath)
 
     else:
       sys.stderr.write('==> Creating new, empty project\n')
-      project = ccpnCore.newProject(name='default')
+      project = coreIo._newProject(name='default')
 
     # Connect UI classes for chosen ui
     self.ui.setUp()
+
+    self.project = project
 
     # Initialise project, wrapping to underlying data using selected ui
     self._initialiseProject(project)
@@ -253,7 +286,6 @@ class Framework:
 
     # NBNB TODO THIS IS A BAD HACK - refactor!!!
     project._appBase = self
-    self.project = project
 
     # This wraps the underlying data, including the wrapped graphics data
     #  - the project is now ready to use
@@ -312,7 +344,7 @@ class Framework:
 
     sys.stderr.write('==> Loading "%s" project\n' % path)
     path = os.path.normpath(path)
-    project = ccpnCore.loadProject(path)
+    project = coreIo._loadProject(path)
 
     self._initialiseProject(project)
 
@@ -328,7 +360,7 @@ class Framework:
 
     self._closeProject()
     sys.stderr.write('==> Creating new, empty project\n')
-    project = ccpnCore.newProject(name=name)
+    project = coreIo._newProject(name=name)
 
     self._initialiseProject(project)
 

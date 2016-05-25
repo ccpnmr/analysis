@@ -39,6 +39,10 @@ from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 
 from ccpn.util import Register
 
+# This import initializes relative paths for QT style-sheets.  Do not remove!
+from ccpn.ui.gui.widgets import resources_rc
+
+
 # Map of core classes to equivalent Gui classes
 _coreClass2UiClass = {}
 

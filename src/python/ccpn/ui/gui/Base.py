@@ -28,7 +28,12 @@ class Base(CoreBase):
   def __init__(self, appBase, *args, **kw):
     
     self._appBase = appBase
-    
+
+    # TODO: Change this to get the gui from somewhere else
+    self.gui = appBase.ui
+    self.framework = self.gui.framework
+    print('ui.gui.base:Base self.framework = ', self.framework)
+
     CoreBase.__init__(self, *args, **kw)
     
   def getByPid(self, pid):

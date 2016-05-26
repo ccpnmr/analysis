@@ -289,7 +289,9 @@ class Framework:
 
     # This wraps the underlying data, including the wrapped graphics data
     #  - the project is now ready to use
+    print(self.mainWindow)
     project._initialiseProject()
+    print(self.mainWindow)
     #
     # # Set up mainWindow
     # self._setupMainWindow(project)

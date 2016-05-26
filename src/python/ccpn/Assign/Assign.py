@@ -27,6 +27,7 @@ from ccpn.ui.gui.AppBase import AppBase, defineProgramArguments
 from ccpn.ui.gui.lib.Window import MODULE_DICT
 from ccpn.ui.gui.modules import GuiStrip
 
+from ccpn.framework.Framework import defineProgramArguments, Framework
 # from ccpn.ui.gui.modules import GuiStripNd
 # from ccpn.ui.gui.modules import GuiSpectrumDisplay
 # from ccpn.ui.gui.modules import GuiStripDisplayNd
@@ -34,11 +35,12 @@ from ccpn.ui.gui.modules import GuiStrip
 
 applicationName = 'AnalysisAssign'
 
-class Assign(AppBase):
+# class Assign(AppBase):
+class Assign(Framework):
   """Root class for Assign application"""
 
   def __init__(self, applicationName, applicationVersion, commandLineArguments):
-    AppBase.__init__(self, applicationName, applicationVersion, commandLineArguments)
+    Framework.__init__(self, applicationName, applicationVersion, commandLineArguments)
     self.components.add('Assignment')
 
   def initGraphics(self):
@@ -78,7 +80,8 @@ class Assign(AppBase):
         layout = yaml.load(f)
         typ, contents, state = layout['main']
 
-        containers, modules = self._appBase.mainWindow.moduleArea.findAll()
+        # TODO: When UI has a main window, change the call below (then move the whole function!)
+        containers, modules = self.mainWindow.moduleArea.findAll()
         flatten = lambda *n: (e for a in n
         for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
         flatContents = list(flatten(contents))
@@ -86,20 +89,27 @@ class Assign(AppBase):
           if item in list(MODULE_DICT.keys()):
             obj = modules.get(item)
             if not obj:
-             func = getattr(self._appBase.mainWindow, MODULE_DICT[item])
+             func = getattr(self.mainWindow, MODULE_DICT[item])
              func()
         for s in layout['float']:
           typ, contents, state = s[0]['main']
 
-          containers, modules = self._appBase.mainWindow.moduleArea.findAll()
+          containers, modules = self.mainWindow.moduleArea.findAll()
           for item in contents:
             if item[0] == 'module':
               print(obj)
               obj = modules.get(item[1])
               if not obj:
-                func = getattr(self._appBase.mainWindow, MODULE_DICT[item[1]])
+                func = getattr(self.mainWindow, MODULE_DICT[item[1]])
                 func()
-        self._appBase.mainWindow.moduleArea.restoreState(layout)
+        self.mainWindow.moduleArea.restoreState(layout)
+
+
+  def showSetupNmrResiduesPopup(self):
+    from ccpn.ui.gui.popups.SetupNmrResiduesPopup import SetupNmrResiduesPopup
+    popup = SetupNmrResiduesPopup(self.ui.mainWindow, self.project)
+    popup.exec_()
+
 
 
 if __name__ == '__main__':

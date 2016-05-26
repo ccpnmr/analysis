@@ -168,7 +168,7 @@ class SequenceGraph(CcpnModule):
     self.scrollArea.setWidget(self.scrollContents)
     self.residueCount = 0
     self.layout.addWidget(self.scrollArea)
-    self.atomSpacing = 44
+    self.atomSpacing = 66
     self.guiResiduesShown = []
     self.predictedStretch = []
     self.direction = None
@@ -196,6 +196,9 @@ class SequenceGraph(CcpnModule):
       self.predictedStretch = []
       self.guiResiduesShown = []
       self.guiNmrResidues = []
+      self.guiNmrAtomDict = {}
+
+    self.scene.clear()
 
 
   def _assembleResidue(self, nmrResidue:NmrResidue, atoms:typing.Dict[str, GuiNmrAtom]):
@@ -212,11 +215,16 @@ class SequenceGraph(CcpnModule):
     nmrAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
     if "CB" in list(atoms.keys()):
       self._addConnectingLine(atoms['CA'], atoms['CB'], lineColour, 1.0, 0)
+    if "H" in list(atoms.keys()) and nmrResidue.residueType != 'PRO':
+      self._addConnectingLine(atoms['H'], atoms['N'], lineColour, 1.0, 0)
+    if nmrResidue.residueType != 'PRO':
+        self._addConnectingLine(atoms['H'], atoms['N'], lineColour, 1.0, 0)
+    else:
+      self.scene.removeItem(atoms['H'])
     # if not 'CB' in nmrAtoms:
     #   self.scene.removeItem(atoms['CB'])
     #   self.scene.removeItem(cbLine)
 
-    self._addConnectingLine(atoms['H'], atoms['N'], lineColour, 1.0, 0)
     self._addConnectingLine(atoms['N'], atoms['CA'], lineColour, 1.0, 0)
     self._addConnectingLine(atoms['CO'], atoms['CA'], lineColour, 1.0, 0)
     self.nmrResidueLabel = GuiNmrResidue(self, nmrResidue, atoms['CA'])
@@ -236,6 +244,7 @@ class SequenceGraph(CcpnModule):
       self.atomSpacing = atomSpacing
 
     nmrAtoms = [nmrAtom.name for nmrAtom in nmrResidue.nmrAtoms]
+    print(nmrResidue.residueType, nmrAtoms)
     if self.residueCount == 0:
 
       if 'H' in nmrAtoms:
@@ -362,7 +371,9 @@ class SequenceGraph(CcpnModule):
     based on caAtom position.
     """
 
-    predictions = getNmrResiduePrediction(nmrResidue, self.project.chemicalShiftLists[0])
+    predictions = list(set(map(tuple, (getNmrResiduePrediction(nmrResidue, self.project.chemicalShiftLists[0])))))
+    print(predictions)
+    predictions.sort(key=lambda a: float(a[1][:-1]), reverse=True)
     for prediction in predictions:
       predictionLabel = QtGui.QGraphicsTextItem()
       predictionLabel.setPlainText(prediction[0]+' '+prediction[1])
@@ -371,7 +382,8 @@ class SequenceGraph(CcpnModule):
       elif self.project._appBase.preferences.general.colourScheme == 'light':
         predictionLabel.setDefaultTextColor(QtGui.QColor('#555D85'))
       predictionLabel.setFont(Font(size=12, bold=True))
-      predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width(), caAtom.y()+(30*(predictions.index(prediction)+2)))
+      # caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
+      predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+(30*(predictions.index(prediction)+2)))
       self.scene.addItem(predictionLabel)
 
   def predictSequencePosition(self, nmrResidues:list):
@@ -391,34 +403,64 @@ class SequenceGraph(CcpnModule):
           self.project._appBase.mainWindow.sequenceModule._highlightPossibleStretches(possibleMatch[1])
 
 
-  def showBackboneAssignments(self, nmrChain):
+  def _showBackboneAssignments(self, nmrChain):
     for nmrResidue in nmrChain.nmrResidues:
       self.addResidue(nmrResidue, direction='+1')
     for ii, res in enumerate(self.guiResiduesShown):
+      if ii % 10 == 0:
+        self.project._appBase.mainWindow.pythonConsole.writeConsoleCommand('%s residues added' % str(ii))
       if ii+1 < len(self.guiResiduesShown)-1:
         self._addConnectingLine(res['CO'], self.guiResiduesShown[ii+1]['N'], '#f7ffff', 1.0, 0)
+    self._getAssignmentsFromSpectra()
 
 
   def _addConnectingLine(self, atom1:GuiNmrAtom, atom2:GuiNmrAtom, colour:str, width:float, displacement:float, style:str=None):
     """
     Adds a line between two GuiNmrAtoms using the width, colour, displacement and style specified.
     """
-    
-    if atom1.y() > atom2.y() and atom1.x() - atom2.x() == 0:
-      x1 = atom1.x() + (atom1.boundingRect().width()/2)
-      y1 = atom1.y() + (atom1.boundingRect().height()*0.2)
-      x2 = atom2.x() + (atom1.boundingRect().width()/2)
-      y2 = atom2.y() + (atom2.boundingRect().height()*0.8)
-      newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width, style)
-      self.scene.addItem(newLine)
+    if atom1.y() > atom2.y():
+      if atom1.x() - atom2.x() == 0:
+        x1 = atom1.x() + (atom1.boundingRect().width()/2)
+        y1 = atom1.y() + (atom1.boundingRect().height()*0.2)
+        x2 = atom2.x() + (atom1.boundingRect().width()/2)
+        y2 = atom2.y() + (atom2.boundingRect().height()*0.8)
+        newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width, style)
 
-    elif atom1.y() < atom2.y() and atom1.x() - atom2.x() == 0:
-      x1 = atom1.x() + (atom1.boundingRect().width()/2)
-      y1 = atom1.y() + (atom1.boundingRect().height()*0.8)
-      x2 = atom2.x() + (atom1.boundingRect().width()/2)
-      y2 = atom2.y() + (atom2.boundingRect().height()*0.2)
-      newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width, style)
-      self.scene.addItem(newLine)
+      if atom1.x() > atom2.x():
+        x1 = atom1.x() + (atom1.boundingRect().width()*0.5)
+        x2 = atom2.x() + (atom1.boundingRect().width()*1.5)
+        y1 = atom1.y() + (atom1.boundingRect().height()/8)
+        y2 = atom2.y() + (atom2.boundingRect().height()/2)
+        newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
+
+      if atom1.y() > atom2.y() and atom1.x() < atom2.x():
+        x1 = atom1.x() + (atom1.boundingRect().width()*0.5)
+        x2 = atom2.x() - (atom1.boundingRect().width()/16)
+        y1 = atom1.y() + (atom1.boundingRect().height()/8)
+        y2 = atom2.y() + (atom2.boundingRect().height()/2)
+        newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
+
+    elif atom1.y() < atom2.y():
+      if atom1.x() - atom2.x() == 0:
+        x1 = atom1.x() + (atom1.boundingRect().width()/2)
+        y1 = atom1.y() + (atom1.boundingRect().height()*0.8)
+        x2 = atom2.x() + (atom1.boundingRect().width()/2)
+        y2 = atom2.y() + (atom2.boundingRect().height()*0.2)
+        newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width, style)
+
+      if atom1.x() < atom2.x():
+        x1 = atom1.x() + (atom1.boundingRect().width())
+        x2 = atom2.x() + (atom1.boundingRect().width()*0.5)
+        y1 = atom1.y() + (atom1.boundingRect().height()/2)
+        y2 = atom2.y() + (atom2.boundingRect().height()/8)
+        newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
+
+      if atom1.x() > atom2.x():
+        x1 = atom1.x() + (atom1.boundingRect().width())
+        x2 = atom2.x() + (atom1.boundingRect().width()*0.25)
+        y1 = atom1.y() + (atom1.boundingRect().height()/2)
+        y2 = atom2.y() + (atom2.boundingRect().height()/8)
+        newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
 
     elif atom1.x() > atom2.x() and atom1.y() - atom2.y() == 0:
       x1 = atom1.x()
@@ -426,7 +468,7 @@ class SequenceGraph(CcpnModule):
       y1 = atom1.y() + (atom1.boundingRect().height()*0.5)
       y2 = atom2.y() + (atom2.boundingRect().height()*0.5)
       newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
-      self.scene.addItem(newLine)
+
 
     elif atom1.x() < atom2.x() and atom1.y() - atom2.y() == 0:
       x1 = atom1.x() + atom1.boundingRect().width()
@@ -434,39 +476,9 @@ class SequenceGraph(CcpnModule):
       y1 = atom1.y() + (atom1.boundingRect().height()*0.5)
       y2 = atom2.y() + (atom2.boundingRect().height()*0.5)
       newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
-      self.scene.addItem(newLine)
+      # self.scene.addItem(newLine)
 
-    elif atom1.y() > atom2.y() and atom1.x() > atom2.x():
-      x1 = atom1.x() + (atom1.boundingRect().width()*0.5)
-      x2 = atom2.x() + (atom1.boundingRect().width()*1.5)
-      y1 = atom1.y() + (atom1.boundingRect().height()/8)
-      y2 = atom2.y() + (atom2.boundingRect().height()/2)
-      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
-      self.scene.addItem(newLine)
-
-    elif atom1.y() < atom2.y() and atom1.x() < atom2.x():
-      x1 = atom1.x() + (atom1.boundingRect().width())
-      x2 = atom2.x() + (atom1.boundingRect().width()*0.5)
-      y1 = atom1.y() + (atom1.boundingRect().height()/2)
-      y2 = atom2.y() + (atom2.boundingRect().height()/8)
-      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
-      self.scene.addItem(newLine)
-
-    elif atom1.y() > atom2.y() and atom1.x() < atom2.x():
-      x1 = atom1.x() + (atom1.boundingRect().width()*0.5)
-      x2 = atom2.x() - (atom1.boundingRect().width()/16)
-      y1 = atom1.y() + (atom1.boundingRect().height()/8)
-      y2 = atom2.y() + (atom2.boundingRect().height()/2)
-      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
-      self.scene.addItem(newLine)
-
-    elif atom1.y() < atom2.y() and atom1.x() > atom2.x():
-      x1 = atom1.x() + (atom1.boundingRect().width())
-      x2 = atom2.x() + (atom1.boundingRect().width()*0.25)
-      y1 = atom1.y() + (atom1.boundingRect().height()/2)
-      y2 = atom2.y() + (atom2.boundingRect().height()/8)
-      newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
-      self.scene.addItem(newLine)
+    self.scene.addItem(newLine)
 
     return newLine
 
@@ -480,11 +492,13 @@ class SequenceGraph(CcpnModule):
     self.guiNmrAtomDict[nmrAtom] = atom
     return atom
 
-  def getAssignmentsFromSpectra(self):
+  def _getAssignmentsFromSpectra(self):
     for spectrum in self.project.spectra:
       apiDataSource = spectrum._wrappedData
-      connections = getConnectedAtoms(apiDataSource)
-      for connection in connections:
+      connections = list(set(map(tuple, getConnectedAtoms(apiDataSource))))
+      for ii, connection in enumerate(connections):
+        # if ii % 10 == 0:
+        #   self.project._appBase.mainWindow.pythonConsole.writeConsoleCommand('%s residues coloured' % str(ii))
         nmrAtomPair = [self.project._data2Obj.get(connection[0]).nmrAtom,
                        self.project._data2Obj.get(connection[1]).nmrAtom]
         # sorting makes sure drawing is done properly
@@ -492,8 +506,8 @@ class SequenceGraph(CcpnModule):
         if None not in guiNmrAtomPair:
           displacement = min(guiNmrAtomPair[0].connectedAtoms, guiNmrAtomPair[1].connectedAtoms)
           self._addConnectingLine(guiNmrAtomPair[0], guiNmrAtomPair[1], spectrum.positiveContourColour, 2.0, displacement)
-          guiNmrAtomPair[0].connectedAtoms += 1
-          guiNmrAtomPair[1].connectedAtoms += 1
+          guiNmrAtomPair[0].connectedAtoms += 1.0
+          guiNmrAtomPair[1].connectedAtoms += 1.0
 
 
 #NBNB TBD:

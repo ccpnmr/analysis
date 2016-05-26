@@ -27,12 +27,11 @@ from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
-from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 
-class Strip(GuiStrip, AbstractWrapperObject):
+class Strip(AbstractWrapperObject):
   """Display Strip for 1D or nD spectrum"""
   
   #: Short class name, for PID.

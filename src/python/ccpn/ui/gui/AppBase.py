@@ -175,8 +175,8 @@ class AppBase(GuiBase):
 
   def isRegistered(self):
     """return True if registered"""
-    self.registrationDict = Register.loadDict()
-    return not Register.isNewRegistration(self.registrationDict)
+    self._registrationDict = Register.loadDict()
+    return not Register.isNewRegistration(self._registrationDict)
 
   def register(self):
     """
@@ -195,7 +195,7 @@ class AppBase(GuiBase):
     if not self.isRegistered():
       return True
 
-    Register.updateServer(self.registrationDict, self.applicationVersion)
+    Register.updateServer(self._registrationDict, self.applicationVersion)
     return False
 
   def start(self):
@@ -215,7 +215,7 @@ class AppBase(GuiBase):
         sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
         sys.exit(1)
     sys.stderr.write('==> Registered to: %s (%s)\n' %
-                     (self.registrationDict['name'], self.registrationDict['organisation']))
+                     (self._registrationDict['name'], self._registrationDict['organisation']))
 
     # show splash screen
     splash = SplashScreen()

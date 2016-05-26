@@ -27,6 +27,8 @@ from ccpn.ui.gui.Base import Base as GuiBase
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
+from ccpn.core import Project
+
 class DropBase(GuiBase):
 
   def __init__(self, appBase, *args, **kw):
@@ -72,9 +74,13 @@ class DropBase(GuiBase):
         for url in data:
           loaded = project.loadData(url)
 
-          if loaded and loaded[0] is self._appBase.project:
+          if loaded and isinstance(loaded[0], Project.Project):
             # We have loaded a new project
             return
+
+          # if loaded and loaded[0] is self._appBase.project:
+          #   # We have loaded a new project
+          #   return
 
           self._appBase.mainWindow.pythonConsole.writeConsoleCommand("project.loadData('%s')" % url)
           project._logger.info("project.loadData('%s')" % url)

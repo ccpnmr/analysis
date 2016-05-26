@@ -30,7 +30,6 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.Task import Task
 from ccpn.ui._implementation.Window import Window
-from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.util import Common as commonUtil
 from ccpn.util import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
@@ -38,7 +37,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
-class SpectrumDisplay(GuiSpectrumDisplay, AbstractWrapperObject):
+class SpectrumDisplay(AbstractWrapperObject):
   """Spectrum display for 1D or nD spectrum"""
   
   #: Short class name, for PID.

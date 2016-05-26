@@ -33,7 +33,7 @@ class FeedbackPopup(QtGui.QDialog):
     QtGui.QDialog.__init__(self, parent=parent)
     self.setWindowTitle(title)
 
-    self.registrationDict = Register.loadDict()
+    self._registrationDict = Register.loadDict()
 
     frame = Frame(self)
 
@@ -44,7 +44,7 @@ class FeedbackPopup(QtGui.QDialog):
     for key in ('name', 'organisation', 'email'):
       row += 1
       label = Label(frame, text='%s: ' % metaUtil.upperFirst(key), grid=(row,0))
-      label = Label(frame, text=self.registrationDict.get(key), grid=(row,1))
+      label = Label(frame, text=self._registrationDict.get(key), grid=(row,1))
 
     row += 1
     label = Label(frame, text='Include: ', grid=(row,0))
@@ -92,7 +92,7 @@ class FeedbackPopup(QtGui.QDialog):
     data['feedback'] = feedback
     
     for key in ('name', 'organisation', 'email'):
-      data[key] = self.registrationDict.get(key, 'None')
+      data[key] = self._registrationDict.get(key, 'None')
       
     if fileName:
       try:

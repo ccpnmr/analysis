@@ -155,7 +155,7 @@ class Framework:
 
     # NBNB TODO The following block should maybe be moved into _setupUI
     self._getUserPrefs()
-    self.registrationDict = Register.loadDict()
+    self._registrationDict = {}   # Default - overridden elsewhere
     self._setLanguage()
     self.styleSheet = self.getStyleSheet(self.preferences)
 
@@ -205,11 +205,10 @@ class Framework:
     sys.stderr.write('==> Language set to "%s"\n' % translator._language)
 
 
-  def isRegistered(self):
+  def _isRegistered(self):
     """return True if registered"""
-    return True
-    self.registrationDict = Register.loadDict()
-    return not Register.isNewRegistration(self.registrationDict)
+    self._registrationDict = Register.loadDict()
+    return not Register.isNewRegistration(self._registrationDict)
 
 
   def register(self):
@@ -226,10 +225,10 @@ class Framework:
     popup.exec_()
     self.gui.processEvents()
 
-    if not self.isRegistered():
+    if not self._isRegistered():
       return True
 
-    Register.updateServer(self.registrationDict, self.applicationVersion)
+    Register.updateServer(self._registrationDict, self.applicationVersion)
     return False
 
 
@@ -246,7 +245,7 @@ class Framework:
   def start(self):
     """Start the program execution"""
 
-    # L:oad / create uninitialised project
+    # Load / create uninitialised project
     projectPath =  self.args.projectPath
     if projectPath:
       sys.stderr.write('==> Loading "%s" initial project\n' % projectPath)
@@ -599,8 +598,8 @@ def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None,
 #
 #   @property
 #   def registered(self):
-#     self.registrationDict = Register.loadDict()
-#     return not Register.isNewRegistration(self.registrationDict)
+#     self._registrationDict = Register.loadDict()
+#     return not Register.isNewRegistration(self._registrationDict)
 #   # TODO: How do we do a registration (AppBase line 192)?
 #
 #

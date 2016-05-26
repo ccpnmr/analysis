@@ -59,8 +59,8 @@ class NoUi:
   def start(self):
     """Start the program execution"""
 
-    self._checkRegistered()
-    Register.updateServer(Register.loadDict(), self.framework.applicationVersion)
+    # self._checkRegistered()
+    # Register.updateServer(Register.loadDict(), self.framework.applicationVersion)
 
     sys.stderr.write('==> NoUi interface is ready\n' )
     
@@ -78,13 +78,12 @@ class NoUi:
         sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
         sys.exit(1)
     sys.stderr.write('==> Registered to: %s (%s)\n' %
-                     (self.framework.registrationDict['name'],
-                      self.framework.registrationDict['organisation']))
+                     (self.framework._registrationDict.get('name'),
+                      self.framework._registrationDict.get('organisation')))
                      
   @property
   def _isRegistered(self):
     """return True if registered"""
-    return True
     return not Register.isNewRegistration(Register.loadDict())
 
   def _showRegisterPopup(self):

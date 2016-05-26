@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $"
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-23 10:02:47 +0100 (Mon, 23 May 2016) $"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
@@ -14,11 +14,11 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
-__date__ = "$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $"
-__version__ = "$Revision: 9315 $"
+__author__ = "$Author: skinnersp $"
+__date__ = "$Date: 2016-05-23 10:02:47 +0100 (Thu, 26 May 2016) $"
+__version__ = "$Revision: 9395 $"
 
-#=====================================================================8===================
+#=========================================================================================
 # Start of code
 #=========================================================================================
 
@@ -34,21 +34,6 @@ from ccpn.core.lib.Assignment import getNmrResiduePrediction
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Font import Font
 from ccpnmodel.ccpncore.lib.assignment.Assignment import getConnectedAtoms
-
-EXPT_ATOM_DICT = {'H[N]': ['H', 'N'],
-                  'H[N[CA]]': ['H', 'N', 'CA', 'CA-1'],
-                  'H[N[co[CA]]]': ['H', 'N', 'CA-1'],
-                  'H[N[co[{CA|ca[C]}]]]': ['H', 'N', 'CA-1', 'CB-1'],
-                  'h{CA|Cca}coNH': ['H', 'N', 'CA-1', 'CB-1'],
-                  'H[N[{CA|ca[Cali]}]]': ['H', 'N', 'CA-1', 'CB-1', 'CA', 'CB']
-                  }
-EXPT_DICT = {'H[N]': ['H', 'N'],
-             'H[N[CA]]': [['H', 'N'], ['N', 'CA'], ['N', 'CA-1']],
-             'H[N[co[CA]]]': [['H', 'N',], ['N', 'CA-1']],
-             'H[N[co[{CA|ca[C]}]]]': [['H', 'N'], ['N', 'CA-1'], ['N', 'CB-1'], ['CA-1', 'CB-1']],
-             'h{CA|Cca}coNH': [['H', 'N'], ['N', 'CA-1'], ['N', 'CB-1'], ['CA-1', 'CB-1']],
-             'H[N[{CA|ca[Cali]}]]': [['H', 'N'], ['N', 'CA-1'], ['N', 'CB-1'],['CA-1', 'CB-1'], ['CA', 'CB'], ['N', 'CA'], ['N', 'CB']]
-                  }
 
 class GuiNmrAtom(QtGui.QGraphicsTextItem):
   """

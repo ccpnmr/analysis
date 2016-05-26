@@ -22,6 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import typing
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Residue import Residue
 from ccpn.core.lib.Util import AtomIdTuple
@@ -81,6 +83,13 @@ class Atom(AbstractWrapperObject):
   def name(self) -> str:
     """Atom name string (e.g. 'HA')"""
     return self._wrappedData.name
+
+  @property
+  def boundAtoms(self) -> typing.Tuple['Atom']:
+    """Atoms that are covalently bound to this Atom"""
+    getDataObj = self._data2Obj.get
+    boundAtoms = (getDataObj(x) for x in self._wrappedData.boundAtoms)
+    return tuple(x for x in boundAtoms if x is not None)
 
   # Utility functions
     

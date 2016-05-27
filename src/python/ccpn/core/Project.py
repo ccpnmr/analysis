@@ -391,6 +391,27 @@ class Project(AbstractWrapperObject):
                 changeDataLocations=True, changeBackup=True)
 
 
+  def deleteMultiple(self, *objects:typing.Sequence[typing.Union[Pid.Pid,AbstractWrapperObject]]):
+    """Delete one or more objects, given as either objects or Pids"""
+
+
+    # NBNB TODO This is not enough. How to do the undo?
+
+    undo = self._undo
+    if undo is not None:
+      undo.increaseBlocking()
+    try:
+      getDataObj = self._data2Obj.get
+      objs = [getDataObj(x) if isinstance(x, str) else x for x in objects]
+      for obj in objs:
+        if not obj.isDeleted:
+          # If statement in case deleting one obj triggers teh deletion of another
+          obj.delete()
+    finally:
+      if undo is not None:
+        undo.decreaseBlocking()
+
+
   @property
   def _apiNmrProject(self) -> ApiNmrProject:
     """API equivalent to object: NmrProject"""

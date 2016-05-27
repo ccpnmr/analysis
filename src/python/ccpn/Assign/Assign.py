@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from ccpn.core.lib.Version import applicationVersion
-from ccpn.ui.gui.AppBase import AppBase, defineProgramArguments
+# from ccpn.ui.gui.AppBase import AppBase, defineProgramArguments
 from ccpn.ui.gui.lib.Window import MODULE_DICT
 from ccpn.ui.gui.modules import GuiStrip
 

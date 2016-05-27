@@ -28,9 +28,8 @@ import random
 import sys
 from typing import Sequence
 
-from ccpn.core.lib import Restraint as restraintLib
-
 from ccpn.core.lib import CcpnSorting
+from ccpn.core.lib import Restraint as restraintLib
 from ccpn.util import Path
 from ccpn.util import Pid
 from ccpn.util.Bmrb import bmrb
@@ -736,7 +735,7 @@ if __name__ == '__main__':
 
   if len(sys.argv) >= 3:
 
-    from ccpn.core.lib import Io as ccpnIo
+    from ccpn.core._implementation import Io as ccpnIo
 
     # from ccpnmodel.ccpncore.lib.Io.Api import loadProject
     # from ccpn.core.Project import Project

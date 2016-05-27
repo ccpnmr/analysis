@@ -22,26 +22,21 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import os
+
 # NB this import cna cause circular imports, but ccpn.__init__ makes sure it does not happen
 from ccpn.core.Project import Project
-# from ccpnmodel.ccpncore.api.memops.Implementation import MemopsRoot as ApiProject
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-# from ccpnmodel.ccpncore.lib import V2Upgrade
 
-# def _fixLoadedProject(apiProject:ApiProject):
-#   """Ad hoc fixes, for reading temporary in-house data model versions etc.
-#
-#   No-op for regular projects"""
-#   for nmrConstraintStore in apiProject.sortedNmrConstraintStores():
-#     for constraintList in nmrConstraintStore.sortedConstraintLists():
-#       if constraintList.className != 'GenericConstraintList':
-#         newConstraintList = V2Upgrade.upgradeConstraintList(constraintList)
 
-def _loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
+def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
   """Open RAW project matching the API Project stored at path.
 
   If the API project contains several NmrProjects (rare),
   nmrProjectName lets you select which one to open"""
+
+  path = os.path.normpath(path)
+
   apiProject = apiIo.loadProject(path, useFileLogger=useFileLogger)
 
   # # Ad hoc fixes for temporary internal versions (etc.).
@@ -52,10 +47,11 @@ def _loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> 
   else:
     apiNmrProject = apiProject.fetchNmrProject(name=nmrProjectName)
     apiNmrProject.initialiseData()
+    apiNmrProject.initialiseGraphicsData()
     return Project(apiNmrProject)
 
 
-def _newProject(name:str='default', path:str=None, useFileLogger:bool=True) -> Project:
+def newProject(name:str= 'default', path:str=None, useFileLogger:bool=True) -> Project:
   """Make RAW new project, putting underlying data storage (API project) at path"""
   apiProject = apiIo.newProject(name, path, overwriteExisting=True,
                                  useFileLogger=useFileLogger)
@@ -65,5 +61,5 @@ def _newProject(name:str='default', path:str=None, useFileLogger:bool=True) -> P
   else:
     apiNmrProject = apiProject.fetchNmrProject()
     apiNmrProject.initialiseData()
+    apiNmrProject.initialiseGraphicsData()
     return Project(apiNmrProject)
-

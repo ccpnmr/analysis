@@ -190,6 +190,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import importlib
+import collections
 
 # Import classes and set to this module
 # All classes must be imported in correct order for subsequent code
@@ -202,21 +203,22 @@ _importOrder = [
   'ChemicalShiftList',  'ChemicalShift',  'DataSet',  'RestraintList',  'Restraint',
   'RestraintContribution',  'CalculationStep',  'Data',  'StructureEnsemble',  'Model', 'Note'
 ]
-_wrappedClasses = []
+
+_name2DataClass = collections.OrderedDict()
 for className in _importOrder:
   cls = getattr(importlib.import_module('ccpn.core.%s' % className), className)
   parentClass = cls._parentClass
   if parentClass is not None:
     parentClass._childClasses.append(cls)
-  _wrappedClasses.append(cls)
+  _name2DataClass[className] = cls
 
 # set main starting functions in namespace. Must be done after importing Project
 # to avoid circular import problems
-from ccpn.core.lib import Io as ccpnIo
+# from ccpn.core.lib import Io as ccpnIo
 
 # NBNB TODO This is no longer useful. We must use e.g. Framework.gerFramework
 # loadProject = ccpnIo._loadProject
 # newProject = ccpnIo._newProject
 
 # NB Project is _wrappedClasses[0]
-_wrappedClasses[0]._linkWrapperClasses()
+_name2DataClass['Project']._linkWrapperClasses()

@@ -308,8 +308,8 @@ class AppBase(GuiBase):
     self.applyPreferences(project)
 
     # Temporary - bringing in Framework refactoring
-    from ccpn.ui.gui.Gui import _setUp
-    _setUp()
+    from ccpn.ui.gui.Gui import Gui
+    Gui.setUp()
 
     # This wraps the underlying data - the project is now ready to use
     project._initialiseProject()

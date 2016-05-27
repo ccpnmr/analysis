@@ -275,7 +275,7 @@ def readAdditionalFrame(frame, project, nmrCalcRun):
 
 if __name__ == '__main__':
 
-  from ccpn.core.lib import Io as ccpnIo
+  from ccpn.core._implementation import Io as ccpnIo
 
   if len(sys.argv) >= 2:
 

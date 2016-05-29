@@ -25,31 +25,25 @@ __version__ = "$Revision$"
 import sys
 
 from ccpn.core.Project import Project
-from ccpn.ui._implementation import _name2DataClass as _graphicsDataClassMap
+from ccpn.ui._implementation import _importOrder as _uiClassOrder
+from ccpn.core import _coreClassMap
 
 from ccpn.util import Register
 
 class Ui:
   """Superclass for all user interface classes"""
 
-  # Remapping of core classes to equivalent Ui classes - used for set-up in subclasses
-  _coreClass2UiClass = {}
+  # Factory functions for UI-specific instantiation of wrapped graphics classes
+  _factoryFunctions = {}
 
   @classmethod
-  def _setUp(cls):
-    """Set up graphics data classes and link up all data wrapper classes"""
+  def setUp(cls):
+    """Set up graphics data classes, cleaning up previous settings"""
 
-    # NBNB TODO we could recode this in C as a gatekeeper
+    for className in _uiClassOrder:
+      # Remove ui-specific settings. Will be reset as necessary in subclasses
+      _coreClassMap[className]._factoryFunction = cls._factoryFunctions.get(className)
 
-    # link up graphics data classes
-    for cc in _graphicsDataClassMap.values():
-      cc = cls._coreClass2UiClass.get(cc, cc)
-      parentClass = cc._parentClass
-      if parentClass is not None:
-        parentClass._childClasses.append(cc)
-
-    # Link up classes
-    Project._linkWrapperClasses()
 
   def initialize(self):
     """UI operations done after every project load/create"""
@@ -93,8 +87,6 @@ class NoUi(Ui):
     
     self.application = None
     self.mainWindow = None
-
-  setUp = Ui._setUp
 
   def _showRegisterPopup(self):
     """Display registration popup"""

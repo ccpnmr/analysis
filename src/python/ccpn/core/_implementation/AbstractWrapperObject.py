@@ -114,6 +114,9 @@ class AbstractWrapperObject():
   # Set to False if multiple wrapper classes wrap the same API class (e.g. PeakList, IntegralList;
   # Peak, Integral) so that API level notifiers are only registered once.
   _registerClassNotifiers = True
+
+  # Function to generate custom subclass instances -= overridden in some subclasses
+  _factoryFunction = None
   
   # Implementation methods
   
@@ -344,9 +347,13 @@ class AbstractWrapperObject():
         ]
     else:
       # Project class. Start generation here
-      newAncestors = [cls]
       Project = cls
-      Project._allLinkedWrapperClasses.append(Project)
+      ll = Project._allLinkedWrapperClasses
+      if ll:
+        print("DEBUG initialisation attempted more than once")
+        return
+      newAncestors = [cls]
+      ll.append(Project)
 
     # Fill in Project._className2Class map
     dd = Project._className2Class
@@ -406,10 +413,11 @@ class AbstractWrapperObject():
       for apiObj in childClass._getAllWrappedData(self):
         obj = data2Obj.get(apiObj)
         if obj is None:
-          if hasattr(childClass, '_factoryFunction'):
-            obj = childClass._factoryFunction(project, apiObj)
-          else:
+          factoryFunction = childClass._factoryFunction
+          if factoryFunction is None:
             obj = childClass(project, apiObj)
+          else:
+            obj = factoryFunction(project, apiObj)
         obj._initializeAll()
 
 
@@ -485,7 +493,7 @@ class AbstractWrapperObject():
   # NOtifiers and related functions:
 
   @classmethod
-  def setupCoreNotifier(cls, target:str, func:typing.Callable,
+  def _setupCoreNotifier(cls, target:str, func:typing.Callable,
                        parameterDict:dict={}, onceOnly:bool=False):
     """Set up notifiers for class cls that do not depend on individual objects -
     These will be registered whenever a new project is initialised.
@@ -495,6 +503,8 @@ class AbstractWrapperObject():
 
     Note that these notifiers are NOT cleared once set up.
     """
+
+    # CCPNINTERNAL - used in top level class definitions (ONLY)
 
 
     # NB _coreNotifiers is a class attribute of AbstractWrapperObject

@@ -28,7 +28,7 @@ from typing import Tuple
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.ui._implementation._SpectrumView import SpectrumView
+from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakListView as ApiPeakListView
@@ -173,7 +173,7 @@ Project._apiNotifiers.append(
 )
 
 # Notify PeakListView change when PeakList changes
-PeakList.setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+PeakList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
                           {'pathToObject':'peakListViews', 'action':'change'})
 
 

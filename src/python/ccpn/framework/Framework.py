@@ -124,7 +124,6 @@ class Framework:
 
   def __init__(self, applicationName, applicationVersion, args):
 
-
     self.args = args
     self.applicationName = applicationName
     self.applicationVersion = applicationVersion
@@ -145,7 +144,6 @@ class Framework:
 
     # This is needed to make project available in NoUi (if nothing else)
     self.project = None
-
 
     # NBNB TODO The following block should maybe be moved into _getUi
     self._getUserPrefs()
@@ -309,11 +307,13 @@ class Framework:
     if self.project is not None:
       # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
       self.project._close()
+      self.project._appBase = None
     if self.mainWindow:
       # ui/gui cleanup
       self.mainWindow.deleteLater()
     self.mainWindow = None
     self.current = None
+    self.project = None
 
 
   def loadProject(self, path):

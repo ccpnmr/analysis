@@ -138,7 +138,7 @@ def getter(self:Spectrum) -> Tuple[SpectrumGroup, ...]:
   data2Obj = self._project._data2Obj
   return tuple(data2Obj[x] for x in self._wrappedData.sortedSpectrumGroups())
 def setter(self:Spectrum, value):
-    self._wrappedData.spectrumGroups = [x._wrappedData for x in value]
+  self._wrappedData.spectrumGroups = [x._wrappedData for x in value]
 #
 Spectrum.spectrumGroups = property(getter, setter, None,
                                    "SpectrumGroups that contain Spectrum")

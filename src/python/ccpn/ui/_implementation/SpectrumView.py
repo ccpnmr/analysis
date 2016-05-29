@@ -339,7 +339,7 @@ Project._apiNotifiers.append(
 )
 
 # Notify SpectrumView change when Spectrum changes
-Spectrum.setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+Spectrum._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
                           {'pathToObject':'spectrumViews', 'action':'change'})
 
 # Links to SpectrumView and Spectrum are fixed after creation - any link notifiers should be put in

@@ -9,24 +9,19 @@ from ccpnmodel.ccpncore.memops.ApiError import ApiError
 class TestNmrAtomCreation(WrapperTesting):
   def setUp(self):
     with self.initialSetup():
-      import time
-      print('setUpx:0 time:', time.time())
       self.nmrChain = self.project.newNmrChain()
-      print('setUpx:1 time:', time.time())
       self.nmrResidue = self.nmrChain.newNmrResidue()
-      print('setUpx:2 time:', time.time())
 
   def tearDown(self):
-    import time
-    print('tears:0 time:', time.time())
     super().tearDown()
     dd = self.nmrChain._wrappedData.__class__._notifies
-    print ('@~@~ nmrChain notifiers:', len(dd),
-           [tt for tt in dd.items() if tt[1]])
+    # print ('@~@~ nmrChain notifiers:', len(dd),
+    #        [tt for tt in dd.items() if tt[1]])
     dd = self.nmrResidue._wrappedData.__class__._notifies
-    print ('@~@~ nmrResidue notifiers:', len(dd),
-           [tt for tt in dd.items() if tt[1]])
-    print('tears:1 time:', time.time())
+    # print ('@~@~ nmrResidue notifiers:', len(dd),
+    #        [tt for tt in dd.items() if tt[1]])
+    del self.nmrResidue
+    del self.nmrChain
 
     # NBNB TODO this needs updating now tha notifiers have changed
 
@@ -39,13 +34,10 @@ class TestNmrAtomCreation(WrapperTesting):
     #                   'setResonances': [],'setResidueType': [],'setAssignedResidue': [], 'setSequenceCode': []})
 
   def test_deassign(self):
-    import time
-    print('testx:0 time:', time.time())
     nmrAtom = self.nmrResidue.fetchNmrAtom(name='churl')
     self.assertEquals(nmrAtom.pid, 'NA:@2.@1..churl')
     nmrAtom.deassign()
     self.assertEquals(nmrAtom.pid, 'NA:@2.@1..C@1')
-    print('testx:1 time:', time.time())
 
 
   def test_CreateAnonymousNmrAtomWithHIsotopeCode(self):
@@ -290,14 +282,15 @@ class TestNmrAtomCreation(WrapperTesting):
 class TestNmrAtomProperties(WrapperTesting):
   def setUp(self):
     with self.initialSetup():
-      import time
-      print('setUp:0 time:', time.time())
       self.nmrChain = self.project.newNmrChain()
-      print('setUp:1 time:', time.time())
       self.nmrResidue = self.nmrChain.newNmrResidue()
-      print('setUp:2 time:', time.time())
       self.nmrAtom = self.nmrResidue.newNmrAtom(isotopeCode='1H')
-      print('setUp:3 time:', time.time())
+
+  def tearDown(self):
+    super().tearDown()
+    del self.nmrResidue
+    del self.nmrChain
+    del self.nmrAtom
 
   def test_AnonoymousNmrAtom_id(self):
     self.assertEqual(self.nmrAtom.id,    '@2.@1..H@1')
@@ -306,10 +299,7 @@ class TestNmrAtomProperties(WrapperTesting):
     self.assertEqual(self.nmrAtom.pid,    'NA:@2.@1..H@1')
 
   def test_AnonoymousNmrAtom_longPid(self):
-    import time
-    print('test:0 time:', time.time())
     self.assertEqual(self.nmrAtom.longPid,    'NmrAtom:@2.@1..H@1')
-    print('test:1 time:', time.time())
 
   def test_AnonoymousNmrAtom_project(self):
     self.assertTrue(self.project is self.nmrAtom.project)
@@ -338,6 +328,12 @@ class TestNmrAtomMethods(WrapperTesting):
       self.nmrChain = self.project.newNmrChain()
       self.nmrResidue = self.nmrChain.newNmrResidue()
       self.nmrAtom = self.nmrResidue.newNmrAtom(name='H')
+
+  def tearDown(self):
+    super().tearDown()
+    del self.nmrResidue
+    del self.nmrChain
+    del self.nmrAtom
 
 
   def test_NmrAtom_Get(self):
@@ -435,6 +431,12 @@ class TestNmrAtomReceivedProperties(WrapperTesting):
       self.nmrResidue = self.nmrChain.newNmrResidue()
       self.nmrAtom = self.nmrResidue.newNmrAtom(name='H')
 
+  def tearDown(self):
+    super().tearDown()
+    del self.nmrResidue
+    del self.nmrChain
+    del self.nmrAtom
+
 
   def test_ProjectName(self):
     self.assertEqual(self.nmrAtom.project.name, 'default')
@@ -468,6 +470,11 @@ class TestAtomShifts(WrapperTesting):
     with self.initialSetup():
       self.nmrChain = self.project.newNmrChain()
       self.nmrResidue = self.nmrChain.newNmrResidue()
+
+  def tearDown(self):
+    super().tearDown()
+    del self.nmrResidue
+    del self.nmrChain
 
   @unittest.skip('ISSUE: Must be able to create an empty spectrum to create peaks.')
   def test_GetShiftsFromNmrAtom(self):

@@ -111,5 +111,5 @@ del getter
 # Notifiers:
 # NB The link to NmrAtom is immutable - does need a link notifier
 # rename bonds when atom is renamed
-Atom.setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
+Atom._setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
                           {'pathToObject':'bonds', 'action':'rename'})

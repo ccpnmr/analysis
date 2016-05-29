@@ -817,7 +817,6 @@ def _updateAssignmentsNmrAtom(nmrAtom, oldPid:str):
   """Update Peak assignments when NmrAtom is reassigned"""
   for peak in nmrAtom.assignedPeaks:
     peak._refreshPeakAnnotation()
-NmrAtom.setupCoreNotifier('rename', _updateAssignmentsNmrAtom)
 
 # NB We could replace this with something like the following line,
 # But that would trigger _refreshPeakAnnotation also when the position changes
@@ -844,4 +843,3 @@ def _refreshPeakPosition(peak:Peak):
       yPpm = peak.position[dataDims[1].dimensionIndex]
       peakItem.setPos(xPpm, yPpm)
 Peak._refreshPeakPosition = _refreshPeakPosition
-Peak.setupCoreNotifier('change', _refreshPeakPosition)

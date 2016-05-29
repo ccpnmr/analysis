@@ -192,6 +192,7 @@ __version__ = "$Revision$"
 import importlib
 import collections
 
+
 # Import classes and set to this module
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
@@ -204,21 +205,31 @@ _importOrder = [
   'RestraintContribution',  'CalculationStep',  'Data',  'StructureEnsemble',  'Model', 'Note'
 ]
 
-_name2DataClass = collections.OrderedDict()
+# {className:class} dictionary in import order for all wrapper classes
+_coreClassMap = collections.OrderedDict()
+
+# Main data classes
 for className in _importOrder:
   cls = getattr(importlib.import_module('ccpn.core.%s' % className), className)
   parentClass = cls._parentClass
   if parentClass is not None:
-    parentClass._childClasses.append(cls)
-  _name2DataClass[className] = cls
+    if cls not in parentClass._childClasses:
+      # Should not be necessary to check, but apparently this code can be executed twice
+      parentClass._childClasses.append(cls)
+  _coreClassMap[className] = cls
 
-# set main starting functions in namespace. Must be done after importing Project
-# to avoid circular import problems
-# from ccpn.core.lib import Io as ccpnIo
+# Wrapped graphics data classes
+from ccpn.ui._implementation import _importOrder as _uiImportOrder
+for className in _uiImportOrder:
+  cls = getattr(importlib.import_module('ccpn.ui._implementation.%s' % className), className)
+  parentClass = cls._parentClass
+  if parentClass is not None:
+    if cls not in parentClass._childClasses:
+      # Should not be necessary to check, but apparently this code can be executed twice
+      parentClass._childClasses.append(cls)
+  _coreClassMap[className] = cls
 
-# NBNB TODO This is no longer useful. We must use e.g. Framework.gerFramework
-# loadProject = ccpnIo._loadProject
-# newProject = ccpnIo._newProject
-
-# NB Project is _wrappedClasses[0]
-_name2DataClass['Project']._linkWrapperClasses()
+# connect classes to project
+# NB - customisation for different UIs is done by inserting _factoryFunctions
+# from the UI class setUp
+_coreClassMap['Project']._linkWrapperClasses()

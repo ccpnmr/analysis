@@ -45,7 +45,8 @@ class WrapperTesting(unittest.TestCase):
     projectPath = self.projectPath
     if projectPath is not None:
       projectPath = os.path.join(TEST_PROJECTS_PATH, projectPath)
-    self.project = Framework.getFramework(projectPath=projectPath).project
+    self.framework = Framework.getFramework(projectPath=projectPath)
+    self.project = self.framework.project
 
     self.project._resetUndo(debug=True)
     self.undo = self.project._undo
@@ -61,8 +62,9 @@ class WrapperTesting(unittest.TestCase):
       pass
 
   def tearDown(self):
-    if self.project:
-      self.project._close()
+    if self.framework:
+      self.framework._closeProject()
+    self.framework = self.project = self.undo = None
 
   def loadData(self, dataPath):
     """load data relative to TEST_PROJECTS_PATH (unless dataPath is absolute"""

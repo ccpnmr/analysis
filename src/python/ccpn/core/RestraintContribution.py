@@ -275,9 +275,9 @@ def _fixedResonance2AtomId(fixedResonance:NmrConstraint.FixedResonance) -> str:
   return Pid.createId(*(getattr(fixedResonance, tag) for tag in tags))
 
 # Change constraint when ConstraintContribution is creted, deleted, or changed
-RestraintContribution.setupCoreNotifier('create', AbstractWrapperObject._finaliseRelatedObject,
+RestraintContribution._setupCoreNotifier('create', AbstractWrapperObject._finaliseRelatedObject,
                           {'pathToObject':'restraint', 'action':'change'})
-RestraintContribution.setupCoreNotifier('delete', AbstractWrapperObject._finaliseRelatedObject,
+RestraintContribution._setupCoreNotifier('delete', AbstractWrapperObject._finaliseRelatedObject,
                           {'pathToObject':'restraint', 'action':'change'})
-RestraintContribution.setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+RestraintContribution._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
                           {'pathToObject':'restraint', 'action':'change'})

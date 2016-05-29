@@ -676,18 +676,19 @@ class Project(AbstractWrapperObject):
     """Create new wrapper object of class cls, associated with wrappedData.
     and call creation notifiers"""
 
-    if hasattr(cls, '_factoryFunction'):
+    factoryFunction = cls._factoryFunction
+    if factoryFunction is None:
+      result = cls(self, wrappedData)
+    else:
       # Necessary for classes where you need to instantiate a subclass instead
 
       result = self._data2Obj.get(wrappedData)
       # There are cases where _newApiObject is registered twice,
-      # when two wrapper classes share teh same API class
+      # when two wrapper classes share the same API class
       # (Peak,Integral; PeakList, IntegralList)
       # In those cases only the notifiers are done the second time
       if result is None:
-        result = cls._factoryFunction(self, wrappedData)
-    else:
-      result = cls(self, wrappedData)
+        result = factoryFunction(self, wrappedData)
     #
     result._finaliseAction('create')
 

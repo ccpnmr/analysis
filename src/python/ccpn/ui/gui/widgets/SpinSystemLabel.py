@@ -100,27 +100,13 @@ class SpinSystemLabel(DropBase, Label):
           current.strip.planeToolbar.spinSystemLabel.setText(current.nmrResidue._id)
 
 
-
 def _renameNmrResidueForGraphics(nmrResidue:NmrResidue, oldPid:str):
-  """Effect rename for NmrResidue"""
+  """Effect rename for NmrResidue
+
+  For notifiers
+  #CCONINTERNAL"""
   oldId = oldPid.split(Pid.PREFIXSEP, 1)[-1]
   for strip in nmrResidue.project.strips:
     if strip.planeToolbar.spinSystemLabel.text() == oldId:
       strip.planeToolbar.spinSystemLabel.setText(nmrResidue._id)
-# Notify PeakListView change when PeakList changes
-NmrResidue.setupCoreNotifier('rename', _renameNmrResidueForGraphics)
 
-
-# def _resetNmrResiduePidForGraphics(project:Project, apiResonanceGroup:ApiResonanceGroup):
-#   """Reset pid for NmrResidue and all offset NmrResidues"""
-#   getDataObj = project._data2Obj.get
-#   obj = getDataObj(apiResonanceGroup)
-#   for strip in project.strips:
-#     if strip.planeToolbar.spinSystemLabel.text() == obj._old_id:
-#       strip.planeToolbar.spinSystemLabel.setText(obj._id)
-#
-#
-# Project._setupApiNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setSequenceCode')
-# Project._setupApiNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setDirectNmrChain')
-# Project._setupApiNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setResidueType')
-# Project._setupApiNotifier(_resetNmrResiduePidForGraphics, ApiResonanceGroup, 'setAssignedResidue')

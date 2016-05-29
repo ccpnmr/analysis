@@ -848,17 +848,6 @@ Project._setupApiNotifier(_rulerCreated, ApiRuler, 'postInit')
 Project._setupApiNotifier(_rulerDeleted, ApiRuler, 'preDelete')
 
 
-# def _refreshAllStripContours(project:Project, apiDataSource:ApiDataSource):
-#   for apiSpectrumView in apiDataSource.spectrumViews:
-#     for apiStrip in apiSpectrumView.strips:
-#       project._data2Obj[apiStrip].update()
-#
-# # Add notifier function to Project
-# Project._setupApiNotifier(_refreshAllStripContours, ApiDataSource, '')
-# Notifier moved to SpectrumView
-
-
-
 # NB This notifier must be implemented as an API postInint notiier,
 # As it relies on Axs that are not yet created when 'created' notifiers are executed
 def _setupGuiStrip(project:Project, apiStrip:ApiStrip):

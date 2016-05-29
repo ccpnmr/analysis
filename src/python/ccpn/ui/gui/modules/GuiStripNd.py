@@ -341,31 +341,3 @@ class GuiStripNd(GuiStrip):
           return peakListView
             
     return None
-        
-  # def showPeaks(self, peakList:PeakList, peaks:typing.List[Peak]=None):
-  #   ###from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
-  #   # NBNB TBD 1) we should not always display all peak lists together
-  #   # NBNB TBD 2) This should not be called for each strip
-  #
-  #   if not peaks:
-  #     peaks = peakList.peaks
-  #
-  #   peakListView = self._findPeakListView(peakList)
-  #   if not peakListView:
-  #     return
-  #
-  #   peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
-  #   self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
-
-# Notifiers
-
-# Add notifier functions to Project
-# def _spectrumViewCreated(project:Project, apiStripSpectrumView:ApiStripSpectrumView):
-#   strip = project._data2Obj[apiStripSpectrumView.strip]
-#   if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
-#     strip.setZWidgets()
-#
-# # Add notifier functions to Project
-# Project._setupApiNotifier(_spectrumViewCreated, ApiStripSpectrumView, 'postInit')
-
-         

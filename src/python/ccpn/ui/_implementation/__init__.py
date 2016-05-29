@@ -46,25 +46,9 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import importlib
-import collections
+# CCPNINTERNAL used in ccpn.core.__init__
 
-_name2DataClass = collections.OrderedDict()
+# Order to import ui implementation classes -
+_importOrder = ['Window','Task','Mark','SpectrumDisplay','SpectrumDisplay','Strip',
+                'Axis','SpectrumView', 'PeakListView']
 
-# Contained classes in order in which they must be hooked up
-_name2DataClass['Window'] = importlib.import_module('ccpn.ui._implementation.Window').Window
-_name2DataClass['Task'] = importlib.import_module('ccpn.ui._implementation.Task').Task
-_name2DataClass['Mark'] = importlib.import_module('ccpn.ui._implementation.Mark').Mark
-_name2DataClass['SpectrumDisplay'] = (
-  importlib.import_module('ccpn.ui._implementation.SpectrumDisplay').SpectrumDisplay
-)
-_name2DataClass['Strip'] = importlib.import_module('ccpn.ui._implementation.Strip').Strip
-_name2DataClass['Axis'] = importlib.import_module('ccpn.ui._implementation.Axis').Axis
-_name2DataClass['SpectrumView'] = (
-  importlib.import_module('ccpn.ui._implementation._SpectrumView').SpectrumView
-)
-_name2DataClass['PeakListView'] = (
-  importlib.import_module('ccpn.ui._implementation._PeakListView').PeakListView
-)
-
-_importOrder = list(_name2DataClass.keys())

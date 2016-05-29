@@ -253,7 +253,7 @@ Project._apiNotifiers.extend(
   ( ('_finaliseApiRename', {}, className, 'setImplCode'),
   )
 )
-Chain.setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
+Chain._setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
                           {'pathToObject':'nmrChain', 'action':'rename'})
 
 # NB Chain<->NmrChain link depends solely on the NmrChain name.

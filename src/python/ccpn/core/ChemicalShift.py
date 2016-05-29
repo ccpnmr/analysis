@@ -143,6 +143,6 @@ del _newChemicalShift
 
 # Notifiers:
 # rename chemicalShifts when atom is renamed
-NmrAtom.setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
+NmrAtom._setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
                           {'pathToObject':'chemicalShifts', 'action':'rename'})
 # NB The link to NmrAtom is immutable - does need a link notifier

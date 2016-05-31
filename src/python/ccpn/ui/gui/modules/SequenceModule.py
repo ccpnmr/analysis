@@ -44,7 +44,7 @@ class SequenceModule(CcpnModule):
       self._addChainLabel(chain)
 
     self.setFixedHeight(2*self.widgetHeight)
-    # self.scrollContents.setFixedHeight(2*self.widgetHeight)
+    self.scrollContents.setFixedHeight(2*self.widgetHeight)
 
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
@@ -52,6 +52,9 @@ class SequenceModule(CcpnModule):
     CCPN INTERNAL called in predictSequencePosition method of SequenceGraph
     Highlights regions on the sequence specified by the list of residues passed in.
     """
+    for residue in residues:
+      guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
+      guiResidue._styleResidue()
     for residue in residues:
       guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
       guiResidue._styleResidue()

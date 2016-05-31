@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Font import Font
 from ccpnmodel.ccpncore.lib.assignment.Assignment import getConnectedAtoms
 
+
 class GuiNmrAtom(QtGui.QGraphicsTextItem):
   """
   A graphical object specifying the position and name of an atom when created by the Assigner.
@@ -218,6 +219,12 @@ class SequenceGraph(CcpnModule):
     self._addResiduePredictions(nmrResidue, atoms['CA'])
 
 
+  def addSideChainAtoms(self, nmrResidue, cbAtom):
+    for k, v in ATOM_POSITION_DICT[nmrResidue.residueType].items():
+      position = [cbAtom.x()+v[0], cbAtom.y()+v[1]]
+      self.scene.addItem(self._createGuiNmrAtom(k, position, nmrResidue.fetchNmrAtom(name=k)))
+
+
   def addResidue(self, nmrResidue:NmrResidue, direction:str, atomSpacing=None):
     """
     Takes an Nmr Residue and a direction, either '-1 or '+1', and adds a residue to the assigner
@@ -389,13 +396,17 @@ class SequenceGraph(CcpnModule):
 
 
   def _showBackboneAssignments(self, nmrChain):
+    if self.project._appBase.preferences.general.colourScheme == 'dark':
+      lineColour = '#f7ffff'
+    elif self.project._appBase.preferences.general.colourScheme == 'light':
+      lineColour = ''
     for nmrResidue in nmrChain.nmrResidues:
       self.addResidue(nmrResidue, direction='+1')
     for ii, res in enumerate(self.guiResiduesShown):
       if ii % 10 == 0:
         self.project._appBase.mainWindow.pythonConsole.writeConsoleCommand('%s residues added' % str(ii))
       if ii+1 < len(self.guiResiduesShown)-1:
-        self._addConnectingLine(res['CO'], self.guiResiduesShown[ii+1]['N'], '#f7ffff', 1.0, 0)
+        self._addConnectingLine(res['CO'], self.guiResiduesShown[ii+1]['N'], lineColour, 1.0, 0)
     self._getAssignmentsFromSpectra()
 
 
@@ -404,67 +415,33 @@ class SequenceGraph(CcpnModule):
     Adds a line between two GuiNmrAtoms using the width, colour, displacement and style specified.
     """
     if atom1.y() > atom2.y():
-      if atom1.x() - atom2.x() == 0:
-        x1 = atom1.x() + (atom1.boundingRect().width()/2)
-        y1 = atom1.y() + (atom1.boundingRect().height()*0.2)
-        x2 = atom2.x() + (atom1.boundingRect().width()/2)
-        y2 = atom2.y() + (atom2.boundingRect().height()*0.8)
-        newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width, style)
-
-      if atom1.x() > atom2.x():
-        x1 = atom1.x() + (atom1.boundingRect().width()*0.5)
-        x2 = atom2.x() + (atom1.boundingRect().width()*1.5)
-        y1 = atom1.y() + (atom1.boundingRect().height()/8)
-        y2 = atom2.y() + (atom2.boundingRect().height()/2)
-        newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
-
-      if atom1.y() > atom2.y() and atom1.x() < atom2.x():
-        x1 = atom1.x() + (atom1.boundingRect().width()*0.5)
-        x2 = atom2.x() - (atom1.boundingRect().width()/16)
-        y1 = atom1.y() + (atom1.boundingRect().height()/8)
-        y2 = atom2.y() + (atom2.boundingRect().height()/2)
-        newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
+      y1 = atom1.y() - (atom1.boundingRect().height()*.05)-displacement
+      y2 = atom2.y() + (atom2.boundingRect().height())-displacement
 
     elif atom1.y() < atom2.y():
-      if atom1.x() - atom2.x() == 0:
-        x1 = atom1.x() + (atom1.boundingRect().width()/2)
-        y1 = atom1.y() + (atom1.boundingRect().height()*0.8)
-        x2 = atom2.x() + (atom1.boundingRect().width()/2)
-        y2 = atom2.y() + (atom2.boundingRect().height()*0.2)
-        newLine = AssignmentLine(x1+displacement, y1, x2+displacement, y2, colour, width, style)
+      y1 = atom1.y() + (atom1.boundingRect().height())-displacement
+      y2 = atom2.y() - (atom2.boundingRect().height()*0.08)-displacement
 
-      if atom1.x() < atom2.x():
-        x1 = atom1.x() + (atom1.boundingRect().width())
-        x2 = atom2.x() + (atom1.boundingRect().width()*0.5)
-        y1 = atom1.y() + (atom1.boundingRect().height()/2)
-        y2 = atom2.y() + (atom2.boundingRect().height()/8)
-        newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
+    else:
+      y1 = atom1.y() + (atom1.boundingRect().height()*0.5)
+      y2 = atom2.y() + (atom2.boundingRect().height()*0.5)
 
-      if atom1.x() > atom2.x():
-        x1 = atom1.x() + (atom1.boundingRect().width())
-        x2 = atom2.x() + (atom1.boundingRect().width()*0.25)
-        y1 = atom1.y() + (atom1.boundingRect().height()/2)
-        y2 = atom2.y() + (atom2.boundingRect().height()/8)
-        newLine = AssignmentLine(x1+displacement, y1+displacement, x2+displacement, y2+displacement, colour, width, style)
-
-    elif atom1.x() > atom2.x() and atom1.y() - atom2.y() == 0:
+    if atom1.x() > atom2.x():
       x1 = atom1.x()
       x2 = atom2.x() + atom2.boundingRect().width()
-      y1 = atom1.y() + (atom1.boundingRect().height()*0.5)
-      y2 = atom2.y() + (atom2.boundingRect().height()*0.5)
-      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
 
-
-    elif atom1.x() < atom2.x() and atom1.y() - atom2.y() == 0:
+    elif atom1.x() < atom2.x():
       x1 = atom1.x() + atom1.boundingRect().width()
       x2 = atom2.x()
-      y1 = atom1.y() + (atom1.boundingRect().height()*0.5)
-      y2 = atom2.y() + (atom2.boundingRect().height()*0.5)
-      newLine = AssignmentLine(x1, y1+displacement, x2, y2+displacement, colour, width, style)
-      # self.scene.addItem(newLine)
 
+    else:
+      x1 = atom1.x() + (atom1.boundingRect().width()/2)+displacement
+      x2 = atom2.x() + (atom1.boundingRect().width()/2)+displacement
+      y1 += displacement
+      y2 += displacement
+
+    newLine = AssignmentLine(x1, y1, x2, y2, colour, width, style)
     self.scene.addItem(newLine)
-
     return newLine
 
 
@@ -482,8 +459,6 @@ class SequenceGraph(CcpnModule):
       apiDataSource = spectrum._wrappedData
       connections = list(set(map(tuple, getConnectedAtoms(apiDataSource))))
       for ii, connection in enumerate(connections):
-        # if ii % 10 == 0:
-        #   self.project._appBase.mainWindow.pythonConsole.writeConsoleCommand('%s residues coloured' % str(ii))
         nmrAtomPair = [self.project._data2Obj.get(connection[0]).nmrAtom,
                        self.project._data2Obj.get(connection[1]).nmrAtom]
         # sorting makes sure drawing is done properly
@@ -513,5 +488,152 @@ class SequenceGraph(CcpnModule):
 # Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setDirectNmrChain')
 # Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setResidueType')
 # Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setAssignedResidue')
+import math
+atomSpacing = 66
+cos36 = math.cos(math.degrees(60))
+sin36 = math.cos(math.degrees(60))
+cos54 = math.cos(math.degrees(60))
+cos60 = math.cos(math.degrees(60))
+sin60 = math.sin(math.degrees(60))
 
+ATOM_POSITION_DICT = {
 
+  'ALA': {'HB%': [0.0, -0.75*atomSpacing]},
+  'CYS': {'SG':  [0.0, -1*atomSpacing], 'HG': [0, -1.75*atomSpacing]},
+  'ASP': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'CG': [0, -1*atomSpacing]},
+  'ASN': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'CG': [0, -1*atomSpacing], 'ND2': [0, -2*atomSpacing],
+          'HD2x': [atomSpacing*-0.75, -2*atomSpacing-(0.75*atomSpacing*cos60)],
+          'HD2y': [atomSpacing*+0.75, -2*atomSpacing-(0.75*atomSpacing*cos60)],
+          },
+  'GLU': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'HGx': [atomSpacing*-0.75, -1*atomSpacing], 'HGy': [atomSpacing*0.75, -1*atomSpacing],
+          'CG':  [0, -1*atomSpacing], 'CD': [0, -2*atomSpacing]
+          },
+  'GLN': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'HGx': [atomSpacing*-0.75, -1*atomSpacing], 'HGy': [atomSpacing*0.75, -1*atomSpacing],
+          'CG':  [0, -1*atomSpacing], 'CD': [0, -2*atomSpacing], 'NE2': [0, -3*atomSpacing],
+          'HD2x': [atomSpacing*-0.75, -3*atomSpacing-(0.75*atomSpacing*cos60)],
+          'HD2y': [atomSpacing*+0.75, -3*atomSpacing-(0.75*atomSpacing*cos60)],
+          },
+  'PHE': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'CG':  [0, -1*atomSpacing], 'CD1': [-1*atomSpacing, (-1-cos60)*atomSpacing],
+          'CD2': [1*atomSpacing, (-1-cos60)*atomSpacing],
+          'CE1': [-1*atomSpacing, (-2-cos60)*atomSpacing],
+          'CE2': [1*atomSpacing, (-2-cos60)*atomSpacing],
+          'HD1': [-1.75*atomSpacing, (-1-cos60)*atomSpacing],
+          'HD2': [1.75*atomSpacing, (-1-cos60)*atomSpacing],
+          'HE1': [-1.75*atomSpacing, (-2-cos60)*atomSpacing],
+          'HE2': [1.75*atomSpacing, (-2-cos60)*atomSpacing],
+          'CZ': [0, (-2-cos60-sin60)*atomSpacing], 'HZ': [0, (-2-cos60-sin60-0.75)*atomSpacing]
+          },
+  'TYR': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'CG':  [0, -1*atomSpacing], 'CD1': [-1*atomSpacing, (-1-cos60)*atomSpacing],
+          'CD2': [1*atomSpacing, (-1-cos60)*atomSpacing],
+          'CE1': [-1*atomSpacing, (-2-cos60)*atomSpacing],
+          'CE2': [1*atomSpacing, (-2-cos60)*atomSpacing],
+          'HD1': [-1.75*atomSpacing, (-1-cos60)*atomSpacing],
+          'HD2': [1.75*atomSpacing, (-1-cos60)*atomSpacing],
+          'HE1': [-1.75*atomSpacing, (-2-cos60)*atomSpacing],
+          'HE2': [1.75*atomSpacing, (-2-cos60)*atomSpacing],
+          'CZ': [0, (-2-cos60-sin60)*atomSpacing], 'HH': [0, (-2-cos60-sin60-0.75)*atomSpacing]
+          },
+  'SER': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'HG': [0, -1*atomSpacing]
+          },
+  'THR': {'HG1': [atomSpacing*-0.75, 0.0], 'HB': [atomSpacing*0.75, 0.0],
+          'CG2': [0, -1*atomSpacing], 'HG2%': [0, -1.75*atomSpacing]
+          },
+  'MET': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'HGx': [atomSpacing*-0.75, -1*atomSpacing], 'HGy': [atomSpacing*0.75, -1*atomSpacing],
+          'CG':  [0, -1*atomSpacing], 'SD': [0, -2*atomSpacing], 'CE': [0, -3*atomSpacing],
+          'HE%': [0, -3.75*atomSpacing]
+          },
+  'ARG': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'HGx': [atomSpacing*-0.75, -1*atomSpacing], 'HGy': [atomSpacing*0.75, -1*atomSpacing],
+          'CG':  [0, -1*atomSpacing], 'CD': [0, -2*atomSpacing], 'NE': [0, -3*atomSpacing],
+          'CZ': [0, -4*atomSpacing], 'NH1': [atomSpacing*-1, -4*atomSpacing-(0.75*atomSpacing*cos60)],
+          'NH2': [atomSpacing*+1, -4*atomSpacing-(0.75*atomSpacing*cos60)],
+          },
+  'VAL': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'CGx': [-1*atomSpacing, -1*(cos60*atomSpacing)],
+          'CGy': [1*atomSpacing, -1*(cos60*atomSpacing)],
+          'HGx%': [atomSpacing*-1, -1*(cos60*atomSpacing)-(0.75*atomSpacing)],
+          'HGy%': [atomSpacing*+1, -1*(cos60*atomSpacing)-(0.75*atomSpacing)]
+          },
+  'LEU': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'HGx': [atomSpacing*-0.75, -1*atomSpacing], 'HGy': [atomSpacing*0.75, -1*atomSpacing],
+          'CG':  [0, -1*atomSpacing],
+          'CDx': [-1*atomSpacing, (-1-cos60)*atomSpacing],
+          'CDy': [1*atomSpacing, (-1-cos60)*atomSpacing],
+          'HDx%': [atomSpacing*-1, ((-1-cos60)*atomSpacing)-(0.75*atomSpacing)],
+          'HDy%': [atomSpacing*+1, ((-1-cos60)*atomSpacing)-(0.75*atomSpacing)]
+          },
+  'ILE': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'CG1': [-1*atomSpacing, -1*(cos60*atomSpacing)],
+          'CG2%': [1*atomSpacing, -1*(cos60*atomSpacing)],
+          'HG1x': [atomSpacing*-1.75, -1*(cos60*atomSpacing)],
+          'HG1y': [atomSpacing*-0.25, -1*(cos60*atomSpacing)],
+          'HG2%': [1*atomSpacing, -1*(cos60*atomSpacing)-(0.75*atomSpacing)],
+          'CD1%': [-1*atomSpacing, -1*(cos60*atomSpacing)-atomSpacing],
+          'HD1%': [-1*atomSpacing, -1*(cos60*atomSpacing)-(1.75*atomSpacing)],
+          },
+  'LYS': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+          'HGx': [atomSpacing*-0.75, -1*atomSpacing], 'HGy': [atomSpacing*0.75, -1*atomSpacing],
+          'CG':  [0, -1*atomSpacing], 'CD': [0, -2*atomSpacing],
+          'HDx': [atomSpacing*-0.75, -2*atomSpacing], 'HDy': [atomSpacing*0.75, -2*atomSpacing],
+          'HEx': [atomSpacing*-0.75, -3*atomSpacing], 'HEy': [atomSpacing*0.75, -3*atomSpacing],
+          'CE': [0, -3*atomSpacing],
+          'NZ': [0, -4*atomSpacing], 'HZ%': [0, -4.75*atomSpacing],
+          },
+  'HIS':  {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+           'CG':  [0, -1*atomSpacing], 'ND1': [-1*atomSpacing, -1*atomSpacing-(atomSpacing*cos54)],
+           'CD2': [atomSpacing, (-1*atomSpacing-atomSpacing*cos54)],
+           'NE2': [atomSpacing/2, -167.56],
+           'CD1': [-0.5*atomSpacing, -167.56],
+          }
+}
+
+# if residueType == 'ALA':
+#       hb = self._createGuiNmrAtom('HB%', (cbAtom.x(), cbAtom.y()-self.atomSpacing))
+#       self.scene.addItem(hb)
+#       self._addConnectingLine(hb, cbAtom, 'white', 1.0, 0.0)
+#
+#     if residueType == 'CYS':
+#       sg = self._createGuiNmrAtom('SG', (cbAtom.x(), cbAtom.y()-self.atomSpacing))
+#       hg = self._createGuiNmrAtom('HG', (cbAtom.x(), cbAtom.y()-(2*self.atomSpacing)))
+#       self.scene.addItem(sg)
+#       self.scene.addItem(hg)
+#       self._addConnectingLine(sg, cbAtom, 'white', 1.0, 0.0)
+#       self._addConnectingLine(sg, hg, 'white', 1.0, 0.0)
+#
+#     if residueType == 'ASP':
+#       hb2 = self._createGuiNmrAtom('HBx', (cbAtom.x()-(self.atomSpacing*0.75), cbAtom.y()))
+#       hb3 = self._createGuiNmrAtom('HBy', (cbAtom.x()+(self.atomSpacing*0.75), cbAtom.y()))
+#       cg = self._createGuiNmrAtom('CG', (cbAtom.x(), cbAtom.y()-self.atomSpacing))
+#       self.scene.addItem(hb2)
+#       self.scene.addItem(hb3)
+#       self.scene.addItem(cg)
+#       self._addConnectingLine(hb2, cbAtom, 'white', 1.0, 0.0)
+#       self._addConnectingLine(hb3, cbAtom, 'white', 1.0, 0.0)
+#       self._addConnectingLine(cg, cbAtom, 'white', 1.0, 0.0)
+#
+#     if residueType == 'GLU':
+#       hb2 = self._createGuiNmrAtom('HBx', (cbAtom.x()-(self.atomSpacing*0.75), cbAtom.y()))
+#       hb3 = self._createGuiNmrAtom('HBy', (cbAtom.x()+(self.atomSpacing*0.75), cbAtom.y()))
+#       cg = self._createGuiNmrAtom('CG', (cbAtom.x(), cbAtom.y()-self.atomSpacing))
+#       hg2 = self._createGuiNmrAtom('HBx', (cg.x()-(self.atomSpacing*0.75), cbAtom.y()))
+#       hg3 = self._createGuiNmrAtom('HBy', (cg.x()+(self.atomSpacing*0.75), cbAtom.y()))
+#       cd = self._createGuiNmrAtom('CD', (cbAtom.x(), cbAtom.y()-(2*self.atomSpacing)))
+#       self.scene.addItem(hb2)
+#       self.scene.addItem(hb3)
+#       self.scene.addItem(cg)
+#       self.scene.addItem(hg2)
+#       self.scene.addItem(hg3)
+#       self.scene.addItem(cd)
+#       self._addConnectingLine(hb2, cbAtom, 'white', 1.0, 0.0)
+#       self._addConnectingLine(hb3, cbAtom, 'white', 1.0, 0.0)
+#       self._addConnectingLine(cg, hg2, 'white', 1.0, 0.0)
+#       self._addConnectingLine(cg, hg3, 'white', 1.0, 0.0)
+#       self._addConnectingLine(cg, cd, 'white', 1.0, 0.0)
